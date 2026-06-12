@@ -1,0 +1,19 @@
+{
+  "name": "profile-graph",
+  "description": "claudecode: graph-mode (CUDA graphs ON) decode profiler on the official QAT W4A16 int4 base. Measures true single-stream TPS + GPU-busy-vs-wall overhead + per-category GPU busy time via vLLM's kineto/CUPTI profiler (captures kernels under graph replay). Decision-grade data for whether the weight-GEMM bandwidth floor is the real lever (sub-4-bit kernel) vs scheduler/engine overhead. Full multimodal retained.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": ["python", "serve.py"],
+  "env": {
+    "TPS_TOKENS": "256",
+    "PROFILE_TOKENS": "48",
+    "STATE_DIR": "/state",
+    "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

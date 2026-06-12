@@ -9,7 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from scripts.common import ROOT, agent_id, hf_bucket_uri, load_dotenv, run, submission_name, submission_prefix
+from scripts.common import ROOT, agent_id, hf, hf_bucket_uri, load_dotenv, run, submission_name, submission_prefix
 
 
 def upload_submission(path: Path, *, agent: str, name: str, delete: bool = True) -> str:
@@ -17,7 +17,7 @@ def upload_submission(path: Path, *, agent: str, name: str, delete: bool = True)
         raise SystemExit(f"submission must contain manifest.json and serve.py: {path}")
     prefix = submission_prefix(agent, name)
     dest = hf_bucket_uri(agent, prefix)
-    command = ["hf", "buckets", "sync", str(path), dest]
+    command = hf("buckets", "sync", str(path), dest)
     if delete:
         command.append("--delete")
     run(command)

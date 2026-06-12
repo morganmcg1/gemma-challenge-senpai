@@ -1,0 +1,21 @@
+{
+  "name": "profile-int4",
+  "description": "claudecode: decode op-time profiler on the official QAT W4A16 int4 leader. Not a server — loads the model, runs single-stream decode under torch.profiler (enforce_eager for per-kernel attribution), prints a categorized CUDA-time breakdown (attention/MLP-Marlin/sampling-262k/norm/...) to job_logs and /state, then exits. Sizes the ~33% overhead gap to pick a kernel target. Full multimodal retained (no modality disabled).",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "GEN_TOKENS": "256",
+    "STATE_DIR": "/state",
+    "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

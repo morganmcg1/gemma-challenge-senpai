@@ -11,12 +11,12 @@ ROOT_DIR = Path(__file__).resolve().parents[1]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from scripts.common import DEFAULT_API, agent_id, hf_bucket_uri, load_dotenv, post_json, require_hf_token, run, submission_prefix
+from scripts.common import DEFAULT_API, agent_id, hf, hf_bucket_uri, load_dotenv, post_json, require_hf_token, run, submission_prefix
 
 
 def load_summary(path_or_uri: str) -> dict:
     if path_or_uri.startswith("hf://"):
-        result = run(["hf", "buckets", "cp", path_or_uri, "-"], capture=True)
+        result = run(hf("buckets", "cp", path_or_uri, "-"), capture=True)
         return json.loads(result.stdout)
     return json.loads(Path(path_or_uri).read_text(encoding="utf-8"))
 
@@ -69,7 +69,7 @@ def main() -> None:
         local_path = handle.name
 
     source = hf_bucket_uri(agent, f"results/{safe_method}.md")
-    run(["hf", "buckets", "cp", local_path, source])
+    run(hf("buckets", "cp", local_path, source))
     response = post_json(f"{args.api}/v1/results", {"source": source}, token=token)
     print(response)
 

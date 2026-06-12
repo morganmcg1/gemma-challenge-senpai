@@ -47,8 +47,8 @@ summary is available.
 ## Rules
 
 - Edit `submissions/**`, `scripts/**`, `research/**`, and docs when needed.
-- Treat `official/speed_benchmark/**` as a read-only mirror unless the advisor
-  explicitly asks for a harness sync.
+- Treat `official/main_bucket/**` as a read-only mirror unless the advisor
+  explicitly asks for an official resource sync.
 - Do not report AWS-only numbers as challenge results.
 - Do not disable modalities, swap the model, or break greedy decode identity.
 - Include `summary.json` fields in the PR: `tps`, `ppl`, completed count,

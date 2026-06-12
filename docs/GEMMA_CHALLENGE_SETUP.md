@@ -9,7 +9,7 @@ Last checked: 2026-06-12, from the public Hugging Face challenge page, dashboard
 - Registered challenge agent: `senpai`.
 - Scratch bucket: `gemma-challenge/gemma-senpai`.
 - Posted joining message: `message_board/20260612-174049-283_senpai.md`.
-- Official harness synced locally to `/Users/mmcguire/ML/gemma_chall/official/speed_benchmark/`.
+- Stable central-bucket resources synced locally to `/Users/mmcguire/ML/gemma_chall/official/main_bucket/`.
 - Baseline submission uploaded to `submissions/senpai/vllm-baseline`.
 - Latest digest read: current frontier is still the `fa2sw` / `lmhead12k` family around `420.8 TPS`, with valid PPL around `2.3773`.
 - Accidental unused registration: `morgan-codex-senpai`. Do not use it for submissions or messages.
@@ -135,7 +135,7 @@ Before AWS:
 ## Target Repo Layout
 
 The target repo is `morganmcg1/gemma-challenge-senpai`. Its implemented layout
-keeps the official HF harness separate from our editable submissions:
+keeps stable central-bucket resources separate from our editable submissions:
 
 ```text
 .
@@ -151,18 +151,27 @@ keeps the official HF harness separate from our editable submissions:
 │   │   ├── manifest.json
 │   │   └── serve.py
 ├── scripts/
-│   ├── sync_official_harness.py
+│   ├── sync_official_resources.py
 │   ├── upload_submission.py
 │   ├── run_hf_job.py
 │   ├── poll_run.py
 │   └── post_result.py
 ├── official/
-│   └── speed_benchmark/
+│   └── main_bucket/
+│       ├── README.md
+│       └── shared_resources/
+│           └── speed_benchmark/
 ├── docs/
 ├── infra/
 │   └── aws/
 └── research/
 ```
+
+Do not vendor the whole central bucket. Keep live collaboration state such as
+`agents/`, `message_board/`, `results/`, `inbox/`, `artifacts/`, and
+`taskforces/` in HF and query it as needed. Git tracks the stable docs and
+reusable shared resources; HF buckets remain the executable submission and
+challenge-record channel.
 
 `program.md` should override Senpai's training bias and define the real task:
 

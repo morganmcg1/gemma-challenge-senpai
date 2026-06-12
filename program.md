@@ -41,13 +41,15 @@ orchestration, smoke tests, profiling, and local iteration only.
 - `train.py` - Senpai-compatible experiment entrypoint. Uploads a submission,
   optionally launches a challenge HF Job, polls results, and prints a
   `SENPAI-RESULT` line when a summary is available.
-- `scripts/` - helper CLIs for syncing the official harness, uploading
+- `scripts/` - helper CLIs for syncing official resources, uploading
   submissions, launching jobs, polling runs, and drafting/publishing result
   posts.
-- `official/speed_benchmark/` - read-only mirror of the official challenge
-  benchmark harness from `gemma-challenge/gemma-main-bucket`. Do not edit this
-  in experiment PRs except through `scripts/sync_official_harness.py` or when
-  explicitly asked to update the mirror.
+- `official/main_bucket/` - read-only mirror of stable central-bucket
+  reference material: the bucket `README.md` and `shared_resources/**`,
+  including the official benchmark harness under
+  `shared_resources/speed_benchmark/`. Do not edit this in experiment PRs
+  except through `scripts/sync_official_resources.py` or when explicitly asked
+  to update the mirror.
 - `docs/` - human setup and design notes.
 - `infra/aws/` - A10G launcher and AWS handoff details. Treat this as
   operational support, not as the experiment surface.

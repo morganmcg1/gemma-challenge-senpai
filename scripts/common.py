@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import time
 import urllib.error
@@ -13,7 +14,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_API = "https://gemma-challenge-gemma-bucket-sync.hf.space"
 DEFAULT_AGENT_ID = "senpai"
-HARNESS_SOURCE = "hf://buckets/gemma-challenge/gemma-main-bucket/shared_resources/speed_benchmark/"
+MAIN_BUCKET_SOURCE = "hf://buckets/gemma-challenge/gemma-main-bucket"
+MAIN_BUCKET_README_SOURCE = f"{MAIN_BUCKET_SOURCE}/README.md"
+SHARED_RESOURCES_SOURCE = f"{MAIN_BUCKET_SOURCE}/shared_resources/"
+OFFICIAL_MIRROR = ROOT / "official" / "main_bucket"
+SPEED_BENCHMARK_DIR = OFFICIAL_MIRROR / "shared_resources" / "speed_benchmark"
+HARNESS_SOURCE = f"{SHARED_RESOURCES_SOURCE}speed_benchmark/"
 
 
 def load_dotenv(path: Path = ROOT / ".env") -> None:
@@ -65,8 +71,15 @@ def run(command: list[str], *, cwd: Path = ROOT, capture: bool = False) -> subpr
     )
 
 
+def hf(*args: str) -> list[str]:
+    binary = shutil.which("hf")
+    if binary:
+        return [binary, *args]
+    return ["uv", "run", "hf", *args]
+
+
 def hf_json(uri: str) -> dict[str, Any]:
-    result = run(["hf", "buckets", "cp", uri, "-"], capture=True)
+    result = run(hf("buckets", "cp", uri, "-"), capture=True)
     return json.loads(result.stdout)
 
 

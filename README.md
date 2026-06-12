@@ -26,10 +26,10 @@ hf://buckets/gemma-challenge/gemma-senpai/submissions/senpai/<submission-name>
 - `instructions/` - advisor and student prompts loaded by Senpai.
 - `submissions/` - editable challenge submission packages. Each runnable
   package contains `manifest.json` and `serve.py`.
-- `scripts/` - helpers for syncing the official harness, uploading
+- `scripts/` - helpers for syncing official resources, uploading
   submissions, launching HF Jobs, polling runs, and posting results.
-- `official/speed_benchmark/` - exact synced mirror of the official challenge
-  benchmark harness from `gemma-challenge/gemma-main-bucket`.
+- `official/main_bucket/` - read-only mirror of stable central-bucket
+  reference material: the bucket `README.md` and `shared_resources/**`.
 - `docs/` - setup notes and Senpai infrastructure design notes.
 - `infra/aws/` - A10G launcher and AWS handoff docs.
 - `research/` - plans, postmortems, leaderboard notes, and human-readable
@@ -51,6 +51,24 @@ This split is intentional. GitHub gives us review history and Senpai PR routing;
 the HF bucket gives the challenge verifier an executable, stable submission
 directory.
 
+## Central Bucket Mirror Policy
+
+Do not clone the full central bucket into Git. The live directories
+`agents/`, `message_board/`, `results/`, `inbox/`, `artifacts/`, and
+`taskforces/` are collaborative workspace state and should be queried from HF
+when needed.
+
+This repo vendors only stable reference material from the central bucket:
+
+```text
+official/main_bucket/README.md
+official/main_bucket/shared_resources/**
+```
+
+Develop and review code in this GitHub repo. For leaderboard runs, sync only
+the selected `submissions/<name>/` package to the `senpai` HF scratch bucket,
+then launch the official HF Job from that bucket path.
+
 ## Common Commands
 
 Install project dependencies:
@@ -58,6 +76,9 @@ Install project dependencies:
 ```bash
 uv sync
 ```
+
+The helper scripts use `hf` if it is on `PATH`; otherwise they fall back to
+`uv run hf` from this project environment.
 
 Upload the baseline submission:
 
@@ -96,22 +117,22 @@ python scripts/poll_run.py \
   --wait
 ```
 
-Sync the official harness mirror:
+Sync the official central-bucket resources mirror:
 
 ```bash
-python scripts/sync_official_harness.py
+python scripts/sync_official_resources.py
 ```
 
-## Official Harness
+## Official Resources
 
 The mirrored harness defaults to the challenge benchmark image
-`vllm/vllm-openai`. Treat `official/speed_benchmark/` as read-only challenge
+`vllm/vllm-openai`. Treat `official/main_bucket/**` as read-only challenge
 source. Put experiment code in `submissions/**`.
 
 If you need to run the official launcher directly:
 
 ```bash
-cd official/speed_benchmark
+cd official/main_bucket/shared_resources/speed_benchmark
 uv run --with huggingface_hub python scripts/run_hf_bucket_benchmark.py \
   --submission-bucket gemma-challenge/gemma-senpai \
   --submission-prefix submissions/senpai/vllm-baseline \
