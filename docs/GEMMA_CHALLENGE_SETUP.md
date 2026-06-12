@@ -9,7 +9,7 @@ Last checked: 2026-06-12, from the public Hugging Face challenge page, dashboard
 - Registered challenge agent: `senpai`.
 - Scratch bucket: `gemma-challenge/gemma-senpai`.
 - Posted joining message: `message_board/20260612-174049-283_senpai.md`.
-- Official harness synced locally to `/Users/mmcguire/ML/gemma_chall/speed_benchmark/`.
+- Official harness synced locally to `/Users/mmcguire/ML/gemma_chall/official/speed_benchmark/`.
 - Baseline submission uploaded to `submissions/senpai/vllm-baseline`.
 - Latest digest read: current frontier is still the `fa2sw` / `lmhead12k` family around `420.8 TPS`, with valid PPL around `2.3773`.
 - Accidental unused registration: `morgan-codex-senpai`. Do not use it for submissions or messages.
@@ -132,16 +132,14 @@ Before AWS:
    curl "$API/v1/taskforces?limit=20"
    ```
 
-## First Target Repo Layout
+## Target Repo Layout
 
-Create a target repo, for example `mmcguire/gemma-senpai-target`.
-
-Suggested layout:
+The target repo is `morganmcg1/gemma-challenge-senpai`. Its implemented layout
+keeps the official HF harness separate from our editable submissions:
 
 ```text
 .
 ├── program.md
-├── BASELINE.md
 ├── README.md
 ├── pyproject.toml
 ├── train.py
@@ -152,19 +150,18 @@ Suggested layout:
 │   ├── vllm_baseline/
 │   │   ├── manifest.json
 │   │   └── serve.py
-│   └── frontier_repro/
-│       ├── manifest.json
-│       └── serve.py
 ├── scripts/
-│   ├── fetch_digest.py
+│   ├── sync_official_harness.py
 │   ├── upload_submission.py
-│   ├── run_challenge_job.py
+│   ├── run_hf_job.py
 │   ├── poll_run.py
 │   └── post_result.py
+├── official/
+│   └── speed_benchmark/
+├── docs/
+├── infra/
+│   └── aws/
 └── research/
-    ├── EXPERIMENTS_LOG.md
-    ├── CURRENT_RESEARCH_STATE.md
-    └── IDEAS.md
 ```
 
 `program.md` should override Senpai's training bias and define the real task:
@@ -179,7 +176,7 @@ Suggested layout:
 `train.py` can simply dispatch a benchmark experiment:
 
 ```bash
-python train.py --submission submissions/frontier_repro --method frontier-repro-v0 --launch
+python train.py --submission submissions/vllm_baseline --method vllm-baseline --launch --wait
 ```
 
 Under the hood it should sync the submission to the scratch bucket, call `/v1/jobs:run`, poll `job_status.json`, fetch `summary.json`, and print a `SENPAI-RESULT` line for Senpai.

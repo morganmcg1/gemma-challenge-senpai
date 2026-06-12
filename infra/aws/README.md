@@ -2,11 +2,11 @@
 
 Last verified: 2026-06-12
 
-This repo currently manages one AWS EC2 A10G node for `gemma-chall` work. The launcher code is in `src/a10g_node/cli.py` and is run through `uv`.
+This repo currently manages one AWS EC2 A10G node for `gemma-chall` work. The launcher code is in `infra/aws/src/a10g_node/cli.py` and is run through `uv`.
 
 ## Auth
 
-Use this local AWS profile:
+The currently working launcher path uses this local AWS credentials profile:
 
 ```text
 770934259321_SandboxPowerUsers
@@ -15,10 +15,44 @@ Use this local AWS profile:
 Expected local files:
 
 - `~/.aws/credentials` contains the profile above.
+- `~/.aws/config` contains SSO profile definitions from the WandB AWS config.
 - `.env` points `AWS_PROFILE` at that profile.
 - `.credentials` may exist as a local scratch copy, but it is ignored by git and should not be committed.
 
 The current credentials are temporary SSO/session credentials. If AWS calls start failing with expired-token errors, refresh them from the AWS console's "Command line or programmatic access" flow and update `~/.aws/credentials`.
+
+SSO config note: the WandB SSO start URL is `https://wandb.awsapps.com/start`, but the SSO region is `us-east-2`. Using `us-east-1` for the SSO region causes `Invalid start url provided`.
+
+These non-secret SSO profiles are configured in `~/.aws/config`:
+
+```text
+deployments
+sre
+AWSPowerUserAccess-830241207209
+sandbox-sso
+SandboxPowerUsers-770934259321
+```
+
+For this sandbox account, the useful SSO profile is:
+
+```text
+sandbox-sso
+```
+
+To refresh via SSO instead of console-copied temporary credentials:
+
+```bash
+aws sso login --profile sandbox-sso
+```
+
+Then switch `.env` to:
+
+```dotenv
+AWS_PROFILE=sandbox-sso
+AWS_REGION=us-east-1
+```
+
+Do not switch `.env` to `sandbox-sso` until `aws sso login --profile sandbox-sso` succeeds.
 
 Check auth:
 
