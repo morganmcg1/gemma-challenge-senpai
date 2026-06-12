@@ -129,6 +129,12 @@ The mirrored harness defaults to the challenge benchmark image
 `vllm/vllm-openai`. Treat `official/main_bucket/**` as read-only challenge
 source. Put experiment code in `submissions/**`.
 
+The submission manifest controls dependencies, environment variables, and the
+server command; it does not select the outer HF Job image for org-credit
+`/v1/jobs:run` submissions. Ship runtime changes as pinned Python packages,
+local wheels, patched files, kernels, model artifacts, or other files inside
+the uploaded submission prefix.
+
 If you need to run the official launcher directly:
 
 ```bash

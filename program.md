@@ -135,8 +135,14 @@ Your endpoint must support:
   - `add_special_tokens: false`
   - prompt token logprobs in the response.
 
-The benchmark image currently defaults to `vllm/vllm-openai`. If a submission
-depends on a different runtime, pin it deliberately and explain why.
+The benchmark job image currently defaults to `vllm/vllm-openai`. The
+org-credit `/v1/jobs:run` submission path does not let `manifest.json` choose a
+custom outer Docker image. If a submission depends on a different runtime, pin
+it deliberately through `manifest.json` dependencies, local wheels, patched
+packages, kernels, model artifacts, or files in the submission prefix, and
+explain why. The self-run harness launcher exposes `--image` for personal HF
+Jobs experiments, but official/org-credit runs should be treated as
+harness-image constrained unless the challenge docs change.
 
 ## Metrics
 

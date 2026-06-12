@@ -276,9 +276,16 @@ docker run --rm --gpus all vllm/vllm-openai python -c "import vllm; print(vllm._
 
 If Senpai itself runs in a container on AWS, do not use the raw
 `vllm/vllm-openai` image as the agent runner unless it also has the required
-agent tooling installed. Instead, build a small runner image `FROM
-vllm/vllm-openai` and add Senpai/Codex or Claude tooling, `git`, `gh`, `uv`,
-and the target repo's helper dependencies.
+agent tooling installed. Use the Senpai Gemma runner image
+`ghcr.io/wandb/senpai:gemma-vllm`, which is built `FROM vllm/vllm-openai` and
+adds Senpai/Codex or Claude tooling, `git`, `gh`, `uv`, and the target repo's
+helper dependencies.
+
+Do not design submissions around a custom Docker image unless using the
+personal self-run harness launcher with `--image`. The org-credit
+`POST /v1/jobs:run` path derives the job image from the challenge harness; your
+submission contributes `manifest.json`, `serve.py`, dependencies, environment
+variables, and uploaded artifacts.
 
 AWS should be used for:
 
