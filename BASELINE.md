@@ -161,3 +161,16 @@ _Last updated: 2026-06-13 (**PR #4 MERGED — new best merged rung: int4 g128 + 
 - **What this adds:** `scripts/local_validation/same_path_ppl.py` scores via the generation path with **no `prompt_logprobs` field** — indistinguishable from timed throughput. A gamed submission (e.g. LF29cap: prompt_logprobs PPL 2.38, generation PPL 2.55, gap ≈ 0.17 >> 0.05 threshold) cannot detect and neutralize the probe. Artifacts at `research/validity/vllm_baseline/`.
 - **Scope note:** gate catches request-field branching on `prompt_logprobs`; paired with `greedy_gate` (PR #8) closes the audit-vs-timed blind spot. Does not catch `echo`-branching or prefix-cache replay on prompt content (named residual attack surfaces in `research/validity/same_path_ppl.md`).
 - **Every HF-Job approval issue must now attach:** `greedy_gate` result + `--check-same-path` output side-by-side.
+
+### 2026-06-13 ~17:00 — PR #28: Extended verify-latency M-sweep (measured M=1..64, tree ceiling corrected)
+
+- **Primary metric (overhead):** `V_tree(M=25) / V_linear(M=7)` = **1.113×** (was 1.057× extrapolated from PR #26); tree K=6 still strongly net-positive but overhead higher than extrapolated.
+- **Test metric (tree ceiling):** K*=12, W=4 tree TPS @ p=0.78 = **452.4** (was 616 extrapolated); **`verdict_exceeds_500_at_full_scale = False`** — the >500 TPS claim from PR #26 extrapolation is refuted on measured data.
+- **W&B runs:** `2mk0z0c3` (latency M-sweep, group `spec-verify-msweep`) · `imoi4mx1` (tree acceptance model, group `spec-verify-msweep`)
+- **Key finding — latency curve structure:** The int4 verify forward is flat only through **M≈32** (+2.6% vs M=1), then the Marlin int4 weight-GEMM goes compute-bound and ramps super-linearly: M=40 +31%, M=64 +60%. Steps at M≈20, ≈40, ≈64 are tile-boundary quantization effects, not thermal drift. The ramp is GEMM (not lm_head): GEMM share rises 62%→68% through the ramp; attention falls 16%→13%. CUDA-graph mode reveals the ramp (eager hides it under fixed CPU-launch overhead).
+- **Tree model corrections (from extrapolated→measured):**
+  - K=6 (M=25): 346.8→**331.2 TPS** @ p=0.6792; overhead 1.057×→**1.113×** — still net-positive 1.46×.
+  - K*@ p=0.78: K=20 (M=81, extrapolated) → **K=12 (M=49, measured), 452.4 TPS** (vs 616 extrapolated — 27% overstatement).
+  - >500 TPS @ p=0.78: only achievable at **p≥0.85** (531 TPS @ K=12) — needs drafter top-1 acceptance ≥0.85, not deeper trees.
+- **Strategic implication:** The >500 TPS frontier requires **drafter quality (EAGLE-3 full-scale, fern #25)** at p≥0.85 acceptance, not deeper tree shapes. K*≈8–12 (M=33–49) is the real operating point; deep-K (K≈20, M≈81) is extrapolation territory and regresses on measured hardware.
+- **Artifacts:** `research/spec_cost_model/results_msweep.json` (full M=1..64 curve), `tree_results_measured.json` (120-row K×W×p matrix), `tree_plots_measured/`, `report_msweep.md`.
