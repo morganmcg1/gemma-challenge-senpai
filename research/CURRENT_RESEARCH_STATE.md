@@ -51,11 +51,11 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 
 | student | PR | track | target |
 |---|---|---|---|
-| fern | #13 (WIP) | **SAM-drafter overlap analysis** (Rank 5 step 2) — extend `analyze_suffix_budget.py` with `--drafter-trace`; synthetic mock-trace validation unblocked now; real net-headroom awaits kanna #5 acceptance trace | Triton kernel GO if net_frac > 3%; NO if < 1% |
+| fern | #15 (WIP) | **EAGLE-3 feature-export feasibility** — binary question: are multi-layer intermediate hidden states accessible from vLLM 0.22.0 Gemma-4 E4B forward pass? Source audit + optional minimal forward probe. Highest-projected drafter ceiling (480–550 TPS lit); feasibility gating the training run. Serving validity gated on kanna's linchpin outcome. | GO/CONDITIONAL-GO/NO-GO verdict; if accessible → staged training run |
 | stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11)** | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
 | lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, GREEDY_IDENTICAL 128/128 ✓; **awaiting HF Job approval (GitHub issue #12)** | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
 | kanna | #5 (WIP) | **int4+MTP spec-decode** — `{8,4}` engine blocker SOLVED (vLLM PR #43543 backport), but int4 batched-verify spec is **structurally greedy-DIVERGENT** vs M=1 AR (~0.33%/tok); acceptance caps ~2.2. v1: precision-localization (int4 vs bf16 vs fp8 greedy flip-rate) + confirm whether a10g-small honors manifest vLLM version | **resolve the linchpin**: is int4 spec greedy-valid at all? |
-| ubel | #14 (WIP) | **Empirical lmhead12k** — pruned-weights top-12k vocab on int4+g128+lm_head base (option A from PR #6); no cert, no adversarial-safety, but passes benchmark greedy-identity | ~3-8% TPS over int4+g128+lm_head base (est.); building block for ~420 stack |
+| ubel | #14 (WIP) | **Empirical lmhead12k** — CPU feasibility done (kept_ids.json, implementation complete); **GPU void + int4 base absent** (pod intermittent). Path unblocked: self-build int4+g128 via path-(a) (prune bf16→quantize), general-12,288 corpus cut (hard-include GT + STEM fill), regenerate 128-capture. PPL scorer requires hard-include of GT tokens or gate fails. **DRAFTER-INDEPENDENT** rung. | served TPS/PPL/greedy-identity 128/128; both 7,584 and 12,288 bandwidth numbers |
 | denken | #7 (WIP) | **fa2sw + onegraph** target-side runtime levers | per-step overhead erasure, greedy-identical |
 | wirbel | #8 (WIP) | **local validation + profiling infra** | greedy-identity gate, local PPL, decode profiler, one-cmd validate |
 | land | #9 (WIP) | **wide KL-distilled drafter** — tf-gate **PASS +10.3%** (private-proxy floor +10.9%) but native serving **−4.6%** (train↔serve schedule mismatch + undertrained). v1: free-running / EAGLE-3-style schedule + full ~82-min budget, log eval to W&B | native accept > stock 3.553 (v0 = 3.388) |
@@ -65,7 +65,8 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 | student | PR | result |
 |---|---|---|
 | fern | #2 ✓ **MERGED** | **Priority #1 resolved.** Local PPL=2.3012, root cause=40-min HF Job timeout. `scripts/local_prevalidate.py` merged — the team's local pre-validation gate before any HF Job. |
-| fern | #10 ✓ **MERGED** | **SAM-Decoding GO verdict.** Causal budget 8.93% K>8 (>3.6% threshold); `analyze_suffix_budget.py` merged; drafter-overlap analysis (PR #13) is next de-risking step. |
+| fern | #10 ✓ **MERGED** | **SAM-Decoding GO verdict.** Causal budget 8.93% K>8 (>3.6% threshold); `analyze_suffix_budget.py` merged; drafter-overlap analysis (#13) merged next. |
+| fern | #13 ✓ **MERGED** | **SAM drafter-overlap tooling.** `--drafter-trace` extension + 13/13 mock tests; canonical trace format (`output_start`); template JSON with thresholds. Net-headroom number awaits kanna's acceptance trace. |
 | ubel | #6 ✗ **CLOSED** (negative) | **Cert dead end.** Cauchy-Schwarz cert 0%-fire on Gemma4 (R_complement=1.630, geometry obstruction). Empirical lmhead12k authorized (PR #14). |
 
 ## Potential next research directions (round 2+)

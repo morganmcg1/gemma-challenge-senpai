@@ -1,5 +1,28 @@
 # SENPAI Research Results
 
+## 2026-06-13 10:45 — PR #13: SAM-Decoding drafter-overlap intersection analysis ✓ MERGED
+
+- **Student:** fern
+- **Status:** MERGED — CPU-only infra extension to `analyze_suffix_budget.py`. No TPS change; shared tooling for net-headroom decision.
+- **What was built:** `--drafter-trace <file>` extension; `drafter_overlap` block with `net_sam_beyond_drafter_frac` (the GO/marginal/retire decision number); 13/13 mock tests pass; no-drafter path byte-identical (regression-safe). Canonical trace format (`output_start` for spec interleave alignment). `research/sam_drafter_overlap/overlap_analysis_template.json`. Dev dep `pytest>=8` added.
+- **Metrics:** `sam_causal_frac_gt_k8_base_reproduced=0.0893` (PR #10 anchor), `mock_tests_passed=13`.
+- **Net-headroom thresholds:** `net_frac > 3%` → Triton kernel GO; `1–3%` → marginal; `< 1%` → retire SAM.
+- **Caveat (fern):** real MTP drafter concentrates acceptances on predictable/repetitive spans — exactly where SAM runs live — so real overlap likely HIGHER → real net LOWER than naive intuition. Base 8.93% is small; brace for marginal/retire.
+- **Next:** tool ready; trace landing depends on kanna's linchpin outcome (PR #5 → real acceptance trace gated on greedy-validity resolution).
+- **Reproduce:** `cd target/ && uv run python -m pytest scripts/tests/test_drafter_overlap.py -v`
+
+## 2026-06-13 10:45 — PR #14: Empirical lmhead12k (pruned-weights top-12k vocab) — IN PROGRESS (non-terminal, blocked)
+
+- **Student:** ubel
+- **Status:** NON-TERMINAL (`terminal=false`, `status=blocked_local_gpu`) — sent back to WIP with advisor answers. GPU void on pod (intermittent); int4 base checkpoint not on node. Implementation complete (CPU feasibility done, GPU steps pending).
+- **Key findings (change the plan):**
+  1. **12k underspecified:** 128 benchmark prompts have only 7,338 unique tokens — can't frequency-fill to 12,288 from the benchmark alone. Tight kept set = 7,584 (34.6× bandwidth). Must use a general corpus to reach 12,288 faithfully.
+  2. **Hard-include public GT tokens is NECESSARY:** official PPL scorer (`ppl_endpoint.py:163-183`) does NOT floor −∞ for out-of-vocab tokens → GT target token outside kept vocab → −∞/missing → gate fail. The tight set is intrinsically public-tailored; would fail private PPL re-run. General-12,288 cut is required for private validity.
+  3. **Only 31/128 decode captures available locally** (fern's 128-capture gitignored, not on scratch bucket); greedy-identity proven on 31 only.
+- **Serving design (correct):** custom vLLM model class `Gemma3ForCausalLMLMHead12k` — scatters kept-row logits into full 262,144 (−∞ on pruned) inside `compute_logits` (VOCABTRIM-style); `LogitsProcessor` path insufficient (V1 reads `prompt_logprobs` before logits processors).
+- **Advisor answers:** self-build int4+g128 base via path-(a) (prune bf16 → quantize, deterministic from public source, no cross-node dep); build general-12,288 cut from broad STEM corpus; regenerate full 128 decode capture; report both bandwidth numbers.
+- **Note: DRAFTER-INDEPENDENT** — not affected by kanna's spec-decode linchpin. Building block toward ~420 regardless of linchpin outcome.
+
 ## 2026-06-13 10:30 — PR #5: int4 + MTP/QAT drafter spec-decode ({8,4} engine fix + greedy-validity finding) — REQUEST CHANGES (→ WIP)
 
 - **Branch:** `kanna/int4-mtp-drafter`
