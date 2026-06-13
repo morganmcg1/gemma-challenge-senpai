@@ -1,0 +1,93 @@
+{
+  "n_prompts": 128,
+  "total_generated_tokens": 65536,
+  "max_check": 32,
+  "input_file": "research/local_validation/vllm_baseline/decode_outputs_128.jsonl",
+  "primary_metric_name": "frac_tokens_in_run_gt_K8",
+  "primary_metric_value": 0.012115478515625,
+  "frac_tokens_in_run_gt_K": {
+    "K4": 0.014678955078125,
+    "K6": 0.0136871337890625,
+    "K8": 0.012115478515625,
+    "K10": 0.0113677978515625
+  },
+  "frac_positions_m_gt_K": {
+    "K4": 0.0130767822265625,
+    "K6": 0.01190185546875,
+    "K8": 0.011322021484375,
+    "K10": 0.0105743408203125
+  },
+  "frac_prompt_sourced_of_gt_K8": 0.0,
+  "frac_output_sourced_of_gt_K8": 1.0,
+  "run_length_histogram": {
+    "2": 47,
+    "3": 8,
+    "4": 15,
+    "5": 1,
+    "6": 10,
+    "7": 1,
+    "8": 12,
+    "9": 1,
+    "10": 4,
+    "11": 1,
+    "12": 1,
+    "13": 1,
+    "16": 5,
+    "25": 1,
+    "28": 1,
+    "32": 18
+  },
+  "max_run_length": 32,
+  "per_distribution": {
+    "aime2026": {
+      "n_prompts": 14,
+      "total_tokens": 7168,
+      "frac_tokens_in_run_gt_K8": 0.006138392857142857
+    },
+    "gpqa_diamond": {
+      "n_prompts": 57,
+      "total_tokens": 29184,
+      "frac_tokens_in_run_gt_K8": 0.0010279605263157894
+    },
+    "mmlu_pro": {
+      "n_prompts": 57,
+      "total_tokens": 29184,
+      "frac_tokens_in_run_gt_K8": 0.024671052631578948
+    }
+  },
+  "verdict": "no-go",
+  "causal_sam_estimate": {
+    "description": "Realized, CAUSAL SAM-Decoding free-token budget: at each decode step the suffix automaton over only-already-generated tokens proposes the continuation of the best earlier suffix match; acceptance is the verbatim (greedy-safe) common-prefix length vs the actual output. This is the physically achievable budget, unlike the advisor-spec immediate m(t) which is non-causal (looks ahead) and adjacent-only.",
+    "available": true,
+    "frac_tokens_free_gt_K": {
+      "K4": 0.153717041015625,
+      "K6": 0.1159820556640625,
+      "K8": 0.089324951171875,
+      "K10": 0.0716094970703125
+    },
+    "frac_decode_steps_saved_gt_K": {
+      "K4": 0.13739013671875,
+      "K6": 0.1065826416015625,
+      "K8": 0.0835113525390625,
+      "K10": 0.0676727294921875
+    },
+    "primary_k_value": 0.089324951171875,
+    "causal_verdict": "go",
+    "per_distribution_frac_free_gt_K8": {
+      "aime2026": 0.107421875,
+      "gpqa_diamond": 0.0922765899122807,
+      "mmlu_pro": 0.08192845394736842
+    },
+    "lpf_forward_oracle_upper_frac_gt_K": {
+      "K4": 0.3055877685546875,
+      "K6": 0.21368408203125,
+      "K8": 0.1620941162109375,
+      "K10": 0.124237060546875
+    },
+    "bracket_note": "immediate m(t) (oracle, adjacent-only) and lpf (oracle, forward-only) bound the intuition; realized causal is the actionable number. ordering is not strict because the three measure different things (look-ahead vs causal vs context-free)."
+  },
+  "causal_value_gt_K8": 0.089324951171875,
+  "causal_verdict": "go",
+  "recommendation": "The advisor-spec primary metric (immediate m(t), K>8 = 0.0121) yields verdict 'no-go', but m(t) is the WRONG proxy: it is non-causal (looks ahead) and only detects adjacent period-s repetition, which is rare in these reasoning outputs. The realized CAUSAL SAM-Decoding budget (K>8 = 0.0893) yields verdict 'go'. Base the SAM-Decoding go/no-go on the causal estimate.",
+  "notes": "frac_tokens_in_run_gt_K is the fraction of generated tokens inside verbatim self-repetition runs longer than K, from a single greedy non-overlapping segmentation of m(t) (advisor spec, immediate period-s repetition). It equals the histogram tail mass and the realized free-token fraction at proposal threshold K; single-stream TPS would scale ~1/(1-f). WARNING: this advisor-spec m(t) is a poor proxy -- non-causal (looks ahead at whether the block after t repeats the block before t) and detects only ADJACENT period-s repetition, which is rare here. The physically achievable budget is causal_sam_estimate (realized causal SAM-Decoding); lpf_forward_oracle_upper_frac_gt_K inside it is a loose non-causal upper reference. frac_positions_m_gt_K (fraction of decode steps where a >K m(t) proposal is available) is a sensitivity sidecar, not the budget. Top-level 'verdict' applies the advisor table (>3.6% go, 2-3.6% borderline, <2% no-go) to the spec m(t) frac at K8; 'causal_verdict' applies it to the realized causal frac -- use causal_verdict for the SAM-Decoding go/no-go decision."
+}
