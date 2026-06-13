@@ -1,5 +1,34 @@
 # SENPAI Research Results
 
+## 2026-06-13 17:50 — PR #14: Empirical lmhead12k ✓ MERGED — validated lever + best-LOCAL rung (official a10g-small PENDING)
+
+- **Branch:** `ubel/empirical-lmhead12k` · **Student:** ubel
+- **Status:** MERGED as a **validated lever + best-LOCAL rung**, NOT a new official baseline. Official a10g-small TPS + private-PPL await a gated HF job (approval issue opened). Official baseline headline stays PR #4 126.378.
+- **Hypothesis:** Pruning the `lm_head` weight matrix to the top-12,288 most-frequent token rows (bf16, sliced from tied embeddings) cuts the lm_head GEMV bandwidth ~21× and yields a measurable single-stream TPS gain on the int4 base; it passes the official greedy-identity gate empirically (the pruned model is self-consistent) even though it is not adversarially safe.
+
+### Results
+
+| metric | unpruned control (bf16-262k head) | pruned (bf16-12k head) | delta | verdict |
+|---|---|---|---|---|
+| **tps_local_single_stream** (isolated, single-variable) | 97.65 | **131.60** | **+34.8%** | lm_head prune is real & standalone-positive |
+| implied lm_head decode fraction | — | **27.1%** | matches wirbel #8's 26.4% | two independent measurements agree |
+| local-to-local net vs PR #4 (int4-262k head, 128.13 local) | — | 131.60 | **+2.7%** | honest cross-config net (student's +3.6% mixed local-vs-official) |
+| served_ppl (token-wtd) | — | **1.9712** | better than int4-head ~2.02 | ≤ 2.42 cap ✓ |
+| greedy gate (served-vs-served, spec-off) | **GREEDY_IDENTICAL 128/128** | **GREEDY_IDENTICAL 128/128** | 0 divergent | valid (self-consistency) ✓ |
+| completed | 128/128 | 128/128 | — | ✓ |
+
+**W&B runs:** NONE (`wandb_run_ids: []`) — serve+validate experiment, no training run. Fully auditable via **38 committed evidence JSONs** under `research/local_validation/lmhead12k_empirical/` (`stage1_evidence/evidence.json`, `greedy_report.json`, `ppl_summary.json`, `control_int4_served/control_result.json`, `clip_floor_ksweep.json`, plus `vllm_baseline_128/` control). Advisor confirmed the marker progression (blocked_local_gpu → greedy_identity_divergent → running_corrected_gate → terminal) and the evidence-file backing; merge preflight passed.
+
+### Analysis & conclusions
+
+- **The lever is real and standalone-positive.** +34.8% isolated single-variable (only head row count differs) with an implied 27.1% lm_head decode-bandwidth fraction that independently matches wirbel #8's 26.4% profiler split. lmhead12k is **rung 5 of the BASELINE.md ladder** ("lmhead12k sparse-verify … the frontier"); this is the first in-repo standalone confirmation.
+- **Three keeper validity findings** (sharpen our instrument): (1) the greedy gate is **self-consistency** (served-pruned vs plain-greedy-pruned, *same* checkpoint) — clipping cannot fail it by construction; the PRUNE-EFFECT (pruned-vs-*unpruned*) A/B measures fidelity to a model the gate never tests, not the gate. (2) The earlier 107/128 unpruned "control failure" was an **offline-batched-reference (batch≈128) vs strictly-sequential-candidate (batch=1) FP-reduction artifact** — *every* future greedy-gate run must use a batch=1 served-vs-served reference (wirbel #8's warning, larger here). (3) The int4-argmax clip rate has an **irreducible frequency-selection floor** (~0.78% public / 1.15% held-out) because some argmax tokens appear in *no* selection corpus — "held-out clip ~0" is unreachable by selection, and per finding (1) it isn't the gate anyway.
+- **Honest framing:** per BASELINE.md, local A10G is exploratory-only; the official metric is a10g-small HF-Job TPS. So this merges as a validated lever/best-local rung, not a new official baseline. The +2.7% local net over PR #4 is plausible-but-unconfirmed officially (and the head dtypes differ: bf16-12k vs int4-262k).
+- **Standing residual risk — private PPL** (not closable locally): a private GT-*target* token outside `kept_ids` → −∞ → +∞ PPL on the private re-run. Greedy-identity passes private by self-consistency, so this is purely a PPL axis. Only a gated a10g-small HF job on the private set closes it.
+- **Next:** ubel → follow-up #3 (int4-pruned head, another ~4× head-byte cut, orthogonal to the kept-set). Also compounds in the spec-verify forward (gated on kanna #24). HF-approval issue opened for the official confirmation.
+
+---
+
 ## 2026-06-13 17:30 — PR #25: EAGLE-3 full-scale training ✓ MERGED — keeper (drafter asset, reasoning acceptance 0.7314; DATA-bottlenecked)
 
 - **Branch:** `fern/eagle3-full-scale-training` · **Student:** fern
