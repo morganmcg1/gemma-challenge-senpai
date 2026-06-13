@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 28, ~22:13Z)
+- **Date:** 2026-06-13 (cycle 29, ~22:35Z)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 - **Most recent human directive (Issue #31, lewtun, 2026-06-13 ~16:42Z):** "For everyone looking to contribute downstream evals of the baseline or most promising submissions, don't use greedy decoding: instead use the model's recommended sampling parameters from `generation_config.json`." **Standing requirement:** any downstream quality eval (MT-Bench, MMLU, or similar) must use `generation_config.json` params — NOT greedy (temp=0.0). This does NOT apply to the official TPS benchmark (greedy by protocol) or the greedy-identity validity gate (greedy by definition) — only to human-facing quality/downstream evals. Include in every future PR body that involves downstream eval. Acknowledged in Issue #31.
 - **Prior directive (Morgan, ~13:00Z):** Approved both int4 HF jobs (issues #11/#12). **Still operating under launch operator rules: no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch` without a human-approved GitHub issue. Advisor consumes no GPU.**
@@ -127,7 +127,35 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 ---
 
-## Active assignments (cycle 28, ~21:55Z)
+## Active assignments (cycle 29, ~22:50Z) — open2-* students
+
+**CYCLE 29 SUMMARY:** Merged #53 (post-split-KV decode re-profile: drafter-forward is new #2 at 18.1%, 1445 µs/step) + #54 (AdaEDL: entropy AUC 0.857 >> accepthist 0.60, top1p cheapest signal, +5.5% TPS projected). Closed #9 (land KL-distill NEGATIVE: 3.4899 < stock 3.5532) + #47 (old-stark W8A8 stub). **Board post done** (Morgan-approved 22:31Z): `results/20260613-224956-731_senpai.md` — 481.53 TPS officially on the public board. Verifier intel: cmpatino-verifier has ONLY invalidated `need-for-speed` (TPS-capping cap440/cap432 stacks, 5.9%/6.6% drift) — NOT spec-decode stacks. Our uncapped linear MTP K=7 is a different mechanism; private-gap risk still tracked but less acute than the 12.4% chat-proxy estimate suggests.
+
+**Revised decode lever ranking (post-#53 re-profile):**
+
+| lever | fraction | status |
+|---|---|---|
+| Verify-body int4 GEMM | 53.2% | FLOOR — cannot improve |
+| **Drafter-forward** | **18.1% (1445 µs/step)** | **NEW #2 — primary target** |
+| Verify-attention | 7.6% (was 19.6%) | #43 MERGED, largely spent |
+| lm_head | ~1% | Exhausted |
+
+**All 8 open2-* students assigned (8/8, zero idle GPUs):**
+
+| student | PR | track | status |
+|---|---|---|---|
+| open2-alphonse | **#55** | **Private-gap probe calibration** on split-KV `fa2sw_precache_kenyan`. Anchor on firfir-cast (7.2% known-invalid) → calibrated VALID/at-risk verdict. | Assigned |
+| open2-askeladd | **#57** | **W8A8 INT8 drafter quant** — A10G IMMA 2x INT8 throughput for drafter-forward (18.1% block); 15-min single-layer gate first. | Assigned |
+| open2-edward | **#62** | **HASS Top-K harmonized distillation** (arXiv 2408.15766) — replace CE with Top-K loss; 5k-step warmup gate tf_acc > 0.75. | Assigned |
+| open2-fern | **#63** | **Drafter acceptance profiling by category** (mmlu_pro/gpqa/aime) — locate private-gap root cause by disaggregating E_accept. Fast diagnostic. | Assigned |
+| open2-frieren | **#58** | **AdaEDL entropy-dynamic K in served stack** — deploy #54 entropy controller in production; measure real TPS vs static K=7. | Assigned |
+| open2-nezuko | **#60** | **Private-gap probe recalibration with reasoning-heavy proxy** — 60/40 reasoning/chat vs chat-only (12.4% baseline); go/no-go for second board post. | Assigned |
+| open2-tanjiro | **#61** | **EAGLE-3 multi-step hidden fidelity retraining** (j≥2 fix) — inject main-model hiddens at each draft step; gate native accept > 3.55 at 3k steps. | Assigned |
+| open2-thorfinn | **#59** | **KV-cache pre-warm prefix** — batch warming prefix to eliminate cold-start KV misses contributing to private-gap. | Assigned |
+
+**Orphaned old-student PRs still open:** #34 (fern/reasoning-corpus), #36 (ubel/int4-head awaiting terminal), #56 (lawine/max_num_batched_tokens). Monitor for terminal results; review on merit.
+
+## Old active assignments record (cycle 28, ~21:55Z)
 
 **Note:** Cycle 28 reviewed + **MERGED denken #51** (accepthist dynamic-K — decisive NEGATIVE + `--sim-K` argmax bugfix keeper; official bar UNCHANGED 126.378) and closed out **kanna #48** (logit bias, MERGED cycle-27) + **Issue #35** (lmhead12k bf16-launch retired, int4-head kept LOCAL). Reassigned the three freed students: **denken → #54** (drafter-entropy dynamic-K / AdaEDL — the *corrected* accepthist lever), **kanna → #55** (private-gap calibration on the split-KV frontier, pre-launch), **ubel → verify-GEMM M=8 roofline audit** (PR opens once #36 posts its final terminal marker + merges as the int4-head local keeper). Routed denken's split-KV small-M/short-ctx finding to wirbel #53. _(Cycle 27 recap: lawine #50 interlock MERGED → lawine #52 launch; wirbel #49 Sequoia MERGED, trees closed analytically → wirbel #53.)_
 
@@ -174,6 +202,8 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 10. **rock-ai method investigation** — 459.72 TPS, method "rockai", validity status unclear. If genuinely valid and novel, it's our next target.
 
 ---
+
+_Cycle 29 (transition + board post, ~22:50Z): Student transition complete — old pods (kanna/denken/wirbel/lawine/stark/ubel/fern/land) replaced by open2-alphonse/askeladd/edward/fern/frieren/nezuko/tanjiro/thorfinn. Merged **#53** (post-split-KV decode re-profile: drafter-forward is new #2 at 18.1%/1445µs; verify-attention dropped from 19.6%→7.6% after #43; ships `research/profiling/frontier_decode_postsplitkv/`) and **#54** (AdaEDL entropy-dynamic K characterization: entropy AUC 0.857 >> accepthist 0.60; top1p is cheapest adequate signal; frac_oracle_recovered=0.323 → +5.5% TPS projected; W&B `p8qmcez7`). Closed **#9** (land KL-distill NEGATIVE: native 3.4899 < stock 3.5532 even with step-0 fix; residual = multi-step j≥2 hidden infidelity → routed to tanjiro #61) and **#47** (old stark W8A8 stub → replaced by open2-askeladd #57). **Board post executed** (Morgan-approved Issue #46 22:31Z "post now"): `results/20260613-224956-731_senpai.md` — 481.53 TPS, PPL 2.3772, 128/128, mechanism shared openly (split-KV + LINEAR-MTP-K7); board message `20260613-225018-217_senpai.md`; W&B `91y8hd84`. **Verifier intel (cycle 29):** cmpatino-verifier invalidated only `need-for-speed` (cap440/cap432 TPS-capping stacks, 5.9%/6.6% drift) — NOT spec-decode or fa2sw stacks. Our uncapped linear MTP K=7 is a different mechanism. All 8 open2-* students assigned: #55 (alphonse/private-gap-calibrate), #57 (askeladd/W8A8-drafter), #62 (edward/HASS-topk), #63 (fern/acceptance-profile), #58 (frieren/AdaEDL-deploy), #60 (nezuko/private-gap-reasoning-recal), #61 (tanjiro/eagle3-multistep-hidden), #59 (thorfinn/kv-prewarm). Zero idle GPUs. Awaiting: private-gap verdicts (#55/#60), drafter acceptance profiling (#63), W8A8 drafter result (#57), AdaEDL deploy (#58), HASS warmup gate (#62), multi-step hidden (#61), KV-prewarm (#59)._
 
 _Cycle 28b (merge + record, ~22:13Z): Reviewed + **MERGED lawine #52** — the Issue-#46-approved one-shot official HF launch of the fa2sw split-KV frontier — as the **🏆 NEW PUBLIC #1 / NEW OFFICIAL FRONTIER: 481.53 official a10g-small TPS** (PPL 2.3772 ✓, 128/128, all modalities; job `6a2dce05871c005b5352c0b9`, run prefix `results/senpai/fa2sw-precache-kenyan-20260613T213911Z`, W&B `2x9fm2zx`/`fwo8rs05`). Beats prior public #1 rock-ai 459.72 by **+4.74%**; +13.4% over the ~424.5 frontier-repro baseline; landed mid-projection (#43 projected 471–493). **The official bar all submissions must beat moves 126.378 → 481.53** — first gated HF job to confirm a frontier-scale rung. Pre-launch `official_gate=PASS@128`, split-KV patch engaged (M=8→3D every step, zero fallback); greedy-DIVERGENT is internal-only (no official token-identity check, #38). No submission-file changes (the PR is the launch record; served stack = already-merged `submissions/fa2sw_precache_kenyan/`). Updated BASELINE.md (new OFFICIAL FRONTIER bullet + merge-history entry + running footer), EXPERIMENTS_LOG.md (top entry), this doc. **Standing open axis = the private re-run gate** (the programme's #1 risk; 481.53 is public-only; kanna #55 calibrating). Reported to Issue #46 — **answered Morgan's two questions**: (1) the HF job shows "initiated by `cmpatino`" because HF Jobs run under the challenge's shared runner/verifier service identity (`cmpatino-verifier`, the same identity that publishes private re-run numbers); the job labels (`agent_id=senpai`, our submission, run_prefix) confirm it is genuinely our job. (2) **Yes we need to post** — the job wrote `summary.json` correctly to the Senpai bucket but the result is **not yet promoted to `/v1/results`** (leaderboard still shows rock-ai #1); the missing step is `scripts/post_result.py --publish`. Recommended the exact command, flagged it as a public board post → **held for Morgan's explicit go** (advisor won't post to the board unilaterally; lawine to execute on his go). **lawine reassigned → #56** (max_num_batched_tokens served-config A/B). Awaiting: Morgan's #46 publish go, ubel #36 final marker (verify-GEMM PR staged behind it), denken #54 entropy, kanna #55 private-gap verdict, wirbel #53 reprofile, land #9 v2b native-accept, fern #34, stark #47._
 
