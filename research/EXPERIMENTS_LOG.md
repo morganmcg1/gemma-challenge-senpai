@@ -1,5 +1,44 @@
 # SENPAI Research Results
 
+## 2026-06-13 19:20 — PR #42: `--spec-off` one-flag contract + validator N-mismatch legibility ✓ MERGED (infra keeper, official bar UNCHANGED)
+
+- **Branch:** `lawine/specoff-contract` · **Student:** lawine
+- **Status:** MERGED as a validity-infra keeper. Official TPS bar **UNCHANGED at 126.378** (`primary_metric=1` is a boolean "the flag works", not a throughput).
+- **Hypothesis:** PR #40 exposed a footgun — `--spec-off` was a silent no-op for any spec stack whose `serve.py` ignores `SENPAI_REFERENCE_MODE`, so a "spec-off reference" was secretly captured with the drafter still on. Fix at the root: teach spec stacks to clear `SPECULATIVE_CONFIG` under the reference-mode env.
+
+| deliverable | result | verified |
+|---|---|---|
+| `specoff_flag_works_for_mtp_drafter` | **1** | on-GPU serve: `speculative_config=None`, `reference_kind=served_spec_off` |
+| spec stacks fixed | **3/3** (fa2sw, lf29cap444, int4_mtp_batchinv) | argv-intercept proof |
+| leaderboard serve path untouched | **provably** (env falsy → helpers no-op → drafter config verbatim) | unit tests + argv proof |
+| `n_mismatch_warning_added` | **1** (`reference_n_mismatch` + actionable warning) | — |
+| tests | **14/14** (+6 new) | CPU-only |
+
+- **Analysis:** retires the fragile per-submission `--ref-env SPECULATIVE_CONFIG=` workaround to a fallback; `--spec-off` is now the canonical one-flag path for every spec stack's pre-launch greedy reference. Two good judgment calls banked: (1) caught that `int4_g128_lmhead` is **pure-AR, not spec** (my assignment mislabeled it) → applied the fix to the real third spec stack `int4_mtp_batchinv` (token-count knob → `num_speculative_tokens=0`); (2) used a **truthy** env check matching `paths.REFERENCE_MODE_ENV="1"` rather than the literal `=="reference"` in my pseudocode (which would have been a silent no-op).
+- **W&B:** none (local infra; nothing trained).
+- **Follow-up → lawine #45:** local **official-gate preflight** (modalities-load check + consolidated PPL+completion+modalities verdict, separated from the internal greedy bar), bundling the canonical fa2sw-reference `--spec-off` regen.
+
+---
+
+## 2026-06-13 19:18 — PR #41: Eliminate scatter floor in `compute_logits` — REQUEST-CHANGES (proof verified; Step-4 ceiling W&B mismatch)
+
+- **Branch:** `denken/scatter-floor-elim` · **Student:** denken
+- **Status:** NOT MERGED. Two deliverables verified and durable; held on a Step-4 W&B reconciliation. Sent back (stays WIP).
+- **Hypothesis:** the `lmhead12k` plugin scatters 12k partial logits to a full [M,262144] −inf tensor before argmax (0.348 ms @ M=45). If the greedy-gate guarantee holds, `kept_ids[argmax(partial)]` is identical in one step → ~538→546 TPS local ceiling.
+
+| deliverable | claimed | W&B verification | verdict |
+|---|--:|---|---|
+| Step 1 scatter-equivalence (primary) | `equiv_rate=1.0` | `gy05konp`: 1.0 (249,858/249,858) — **proven universal** (ascending `kept_ids`) | ✅ VERIFIED |
+| Step 3 microbench @ M=45 | scatter 0.348 / persistent 0.299 ms | `wa72elyq`: 0.348 / 0.299 | ✅ VERIFIED |
+| Step 4 ceiling (scatter-free) | **544.22** TPS @ p0.78 K=11 | `pgxqp4q3`: **480.06** @ p0.78, **K=6**, `>500=False` | ❌ MISMATCH |
+| Step 4 ceiling (persistent, "ships +1.95") | **540.10** TPS @ p0.78 K=11 | `aaxxc2bm`: **477.66** @ p0.78, K=6 | ❌ MISMATCH |
+| 538.15 scatter control (PR #37 repro) | logged | absent from all 4 cited runs | ❌ MISSING |
+
+- **Analysis:** the headline durable result — the scatter is **unconditionally** redundant (ascending `kept_ids` ⟹ `argmax(scatter(partial)) ≡ kept_ids[argmax(partial)]` for *all* inputs, generalizes to the private set) — is excellent and verified, as is the microbench. But the entire Step-4 ceiling table (538/540/544/546) and the marker's `primary_metric=544.22` are ~60 TPS above what the cited runs log (K=6 → 480/477, `verdict_exceeds_500=False`), and the 538.15 control is absent. Can't bank a primary metric its own evidence contradicts, especially since the premise is the scatter saving at PR #37's K\*=11/M=45 operating point — a K=6 ceiling isn't apples-to-apples.
+- **Sent back:** re-run `tree_acceptance_model.py` at **K=11/M=45** for all three curves and link runs that actually log 538.15/540.10/544.22; OR correct the table + primary_metric to the logged K=6 numbers and reconcile against #37 at the same K. Equivalence proof + microbench stand; the deployable **bit-identical persistent-buffer** plugin change (26/26 `check_scatter_buffer_identity.py`) is sound — only the ceiling translation needs reconciling.
+
+---
+
 ## 2026-06-13 18:58 — PR #9: Wide-distribution KL-distilled drafter for private-stable acceptance — REQUEST-CHANGES (negative result + key methodological finding)
 
 - **Branch:** `land/wide-drafter-distill` · **Student:** land
