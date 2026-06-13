@@ -1,0 +1,12 @@
+=== [int4_off/ref] launch nspec=0 INV=0 model=google/gemma-4-E4B-it-qat-w4a16-ct quant=none maxlen=4096 13:19:56 ===
+[int4_off/ref] pid=2561 pgid=2561 log=/workspace/senpai/target/research/int4_mtp_batchinv/arms/int4_off_ref_server.log
+READY after 79s
+[int4_off/ref] decode wrote /workspace/senpai/target/research/int4_mtp_batchinv/arms/int4_off_ref_decode.jsonl
+=== [int4_off/cand] launch nspec=6 INV=0 model=google/gemma-4-E4B-it-qat-w4a16-ct quant=none maxlen=4096 13:33:38 ===
+[int4_off/cand] pid=8331 pgid=8331 log=/workspace/senpai/target/research/int4_mtp_batchinv/arms/int4_off_cand_server.log
+READY after 78s
+[int4_off/cand] decode wrote /workspace/senpai/target/research/int4_mtp_batchinv/arms/int4_off_cand_decode.jsonl
+=== [int4_off] verify 13:40:48 ===
+ARM int4_off: DIVERGENT  identical=6/32  flip_rate=0.3323%/tok (events=26, trials=7824, 95%CI=[0.2046,0.4600]%)  mean_first_div=181.76923076923077  cascade_frac=0.490
+FLIPRATE_JSON {"arm": "int4_off", "verdict": "DIVERGENT", "prompts": 32, "identical": 6, "divergent": 26, "length_only_divergences": 0, "flip_events": 26, "geom_trials": 7824, "flip_rate_per_token": 0.0033231083844580778, "flip_rate_ci95": [0.002045746645367861, 0.004600470123548295], "mean_first_divergence_index": 181.76923076923077, "median_first_divergence_index": 172, "raw_cascade_divergent_fraction": 0.49041748046875, "total_tokens_compared": 16384}
+=== ARM int4_off DONE 13:40:48 ===

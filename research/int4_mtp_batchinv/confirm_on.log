@@ -1,0 +1,17 @@
+/workspace/senpai/target/.venvs/vllm022/lib/python3.12/site-packages/torch/library.py:363: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+  Overriding a previously registered kernel for the same operator and the same dispatch key
+  operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+    registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+  dispatch key: CUDA
+  previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+       new kernel: registered at /workspace/senpai/target/.venvs/vllm022/lib/python3.12/site-packages/vllm/model_executor/layers/batch_invariant.py:913 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+  self.m.impl(
+[W613 12:33:30.614516532 Context.cpp:541] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+[confirm] VLLM_BATCH_INVARIANT(env) = 1
+[confirm] device = NVIDIA A10G  torch=2.11.0+cu130
+[confirm] vllm.envs.VLLM_BATCH_INVARIANT = True
+[confirm] batch_invariant._batch_invariant_MODE = True
+[confirm] triton import ok = True
+[confirm] M=1 vs full[:1]  max|diff|=0.000e+00  bitexact=True
+[confirm] M=7 vs full[:7]  max|diff|=0.000e+00  bitexact=True
+CONFIRM_JSON {"env_VLLM_BATCH_INVARIANT": "1", "vllm_envs_enabled": true, "mode_flag": true, "triton_ok": true, "rows_bitexact": true, "verdict": "INVARIANT_ACTIVE_AND_FUNCTIONAL", "M1_vs_full_maxabsdiff": 0.0, "M1_vs_full_bitexact": true, "M7_vs_full_maxabsdiff": 0.0, "M7_vs_full_bitexact": true}
