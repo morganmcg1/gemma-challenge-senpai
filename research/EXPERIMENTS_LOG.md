@@ -1,5 +1,34 @@
 # SENPAI Research Results
 
+## 2026-06-13 — PR #40: Greedy-ref infra: 128-prompt fa2sw reference + bare-tag assertion ✓ MERGED
+
+- **Branch:** `lawine/greedy-ref-128prompt` · **Student:** lawine
+- **Status:** MERGED — **validity-infrastructure closure.** LOCAL INFRA ONLY; no HF job, no submission. Delivers the two follow-up items from PR #32; unblocks kanna #38's full 128-prompt served-gate audit.
+- **Hypothesis:** PR #32 fixed reference keying but only had a 32-prompt reference. kanna #38's served-gate audit needs the full 128-prompt served spec-off reference and the bare-tag collision class needs a runtime assertion to prevent regression.
+
+### Results
+
+| metric | value | verdict |
+|---|--:|---|
+| `fa2sw_reference_128prompt_complete` | **128** | full reference ✓ |
+| `bare_tag_assertion_added` | **1** | assertion hardened ✓ |
+| `reference_self_consistent` | **1** | deterministic at batch=1 ✓ |
+| Tests (CPU-only) | **8/8 pass** | 6 prior + 2 new ✓ |
+| Wall-clock (cold-start + 128 decodes) | **514.75s** (~14 min) | within budget ✓ |
+| Reference key format | `…/submissions/fa2sw_precache_kenyan::google/gemma-4-E4B-it` | `<dir>::<model_id>` ✓ |
+
+### Analysis & conclusions
+
+1. **128-prompt reference is the primary deliverable for kanna #38.** `validate_submission --submission fa2sw_precache_kenyan --num-prompts 128` now auto-resolves without manual path threading. The reference at `research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/` supersedes #32's 32-prompt version.
+
+2. **Justified deviation on drafter disable: critical institutional knowledge.** `fa2sw_precache_kenyan` uses `SPECULATIVE_CONFIG={method:mtp,...}` and `serve.py` does NOT honor `SENPAI_REFERENCE_MODE`. The `--spec-off` flag would have been a silent no-op, producing an invalid reference with speculation ON. Correct method: `--ref-env SPECULATIVE_CONFIG=` (same as #32). `reference_kind=served_spec_off` confirmed via meta. **Every future spec submission that doesn't honor `SENPAI_REFERENCE_MODE` needs this `--ref-env` flag — should teach `serve.py` to honor it (follow-up item).**
+
+3. **Self-consistency (1/1):** bit-identical output from two separate processes on 16 prompts confirms the int4 + CUDA-graph stack is deterministic at batch=1 served. This is expected but now empirically confirmed.
+
+4. **Bare-tag assertion:** `harness.assert_submission_reference_tag(ref_tag)` placed at both generator and validator sites (lockstep). Smart adaptation: real function is 1-arg, takes already-resolved tag. Bare-baseline branch (pure model-id key) intentionally NOT guarded — correct design.
+
+5. **Wall-clock fast:** 514.75s total (~14 min) vs the feared 2+ hours. The reasoning decodes ran faster than worst-case; 128 × 512-token completions total.
+
 ## 2026-06-13 — PR #37: lmhead12k verify-forward cost model + tile-corrected canonical curve ✓ MERGED
 
 - **Branch:** `denken/lmhead12k-verify-cost` · **Student:** denken

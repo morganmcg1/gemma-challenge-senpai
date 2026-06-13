@@ -25,6 +25,7 @@
 | #33 `tree-causal-mask-verify-cost` | denken | **Tree-mask dead (SDPA saves 0 ms); Marlin tile-boundary fix; K=11/440 @ p=0.78; >500 FALSE (firmer).** | **KEEPER cost-model fix** |
 | #14 `empirical-lmhead12k` | ubel | **Best-LOCAL rung: 131.6 local TPS / PPL 1.9712 / GREEDY_IDENTICAL 128/128.** | **VALIDATED LEVER / best-local rung** |
 | #37 `lmhead12k-verify-cost` | denken | **538.1 TPS K\*=11/M=45 p=0.78 with drafter (+22% over #33's 440); scatter floor 0.348 ms; K=11/M=45 serving config LOCKED; tile-fold into canonical msweep.** | **KEEPER cost-model closure + infra** |
+| #40 `greedy-ref-128prompt` | lawine | **128/128 served spec-off reference generated (514.75s); bare-tag assertion wired at both sites; 8/8 tests; self-consistent at batch=1. Unblocks kanna #38 at full 128-prompt scale.** | **KEEPER infra closure** |
 
 **Official baseline UNCHANGED: `submissions/int4_g128_lmhead` (PR #4) — 126.378 a10g-small / PPL 2.019 / GREEDY_IDENTICAL.**
 
@@ -111,7 +112,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 |---|---|---|---|
 | kanna | **#38 (NEW)** | **Served-gate validity audit.** Does `fa2sw_precache_kenyan` pass the SERVED greedy gate (spec-on vs spec-off, batch=1)? Reconcile 27/32 M=1-offline divergence (#32) with leaderboard-valid ~424.5 TPS status. Is our strict M=1 bar over-conservative? LOCAL ONLY. | **Assigned (post-#24 merge)** |
 | wirbel | **#39 (NEW)** | **fa2sw attention deep-profile.** Kernel-level breakdown of the 19.6% second lever from #30: KV-load bytes, SWA masking overhead, bandwidth vs theoretical minimum. Estimate TPS uplift if 25/50% reduction achievable. LOCAL ONLY. | **Assigned (post-#30 merge)** |
-| lawine | **#40 (NEW)** | **Greedy-ref infra hardening (#32 follow-up).** Regenerate `fa2sw_precache_kenyan` served spec-off reference at full 128 prompts (kanna's audit needs this). Add runtime assert: resolved ref tag never bare `"model"`. Unit tests. LOCAL ONLY. | **Assigned (post-#32 merge)** |
+| lawine | **#42 (NEW)** | **`--spec-off` contract fix + validator N-mismatch legibility.** Teach spec `serve.py` to honor `SENPAI_REFERENCE_MODE`; clean up `--ref-env` workaround; surface `num_records` into `evidence.json` with N-mismatch warning. LOCAL ONLY. | **Assigned (post-#40 merge)** |
 | fern | **#34 (WIP)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from served target under EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME (57/57/14), hard-dedup vs 128 eval ids, early-stop on held-out reasoning tf_acc. Target: break 0.73 plateau toward 0.78–0.85. | Active |
 | denken | **#41 (NEW)** | **Scatter floor elimination in `compute_logits`.** Prove `kept_ids[argmax(partial_12k_logits)]` == scatter+full-argmax (empirical greedy-identity guarantee), then implement the skip to save ~0.155 ms/step @ M=45. Ceiling 538→~546 TPS. LOCAL ONLY. | **Assigned (post-#37 merge)** |
 | stark | **#23 (WIP)** | **Source-level batch-invariance probe** — fp32-logit, deterministic-reduction arms; measure which (if any) drives flip_rate → 0. The only remaining net-positive route to greedy-valid spec decode in vLLM 0.22.0. | Active — **#1 spec-decode priority** |
@@ -150,7 +151,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 ---
 
-_Last updated: 2026-06-13 **cycle 21 CLOSED** — PR #37 MERGED (denken lmhead12k verify-forward cost model: 538.1 TPS ceiling @ K*=11/M=45 p=0.78 with drafter, +22% over #33's 440; scatter floor 0.348 ms quantified; K=11/M=45 config LOCKED for kanna #24; msweep tile-folded in place). denken reassigned PR #41 (scatter floor elimination, ceiling 538→546). Issue #35 HF job in flight → ubel, awaiting official a10g-small tps/ppl. All 8 students busy; zero idle._
+_Last updated: 2026-06-13 **cycle 21/22** — PR #37 MERGED (denken: lmhead12k verify-cost, 538.1 TPS ceiling, K*=11/M=45 LOCKED, msweep tile-folded). PR #40 MERGED (lawine: 128-prompt served spec-off reference + bare-tag assert, unblocks kanna #38). denken→#41 (scatter floor elim, 538→546). lawine→#42 (--spec-off contract + N-mismatch legibility). Issue #35 HF job in flight → ubel, awaiting official a10g-small tps/ppl. All 8 students busy; zero idle._
 
 _Cycle 20: Issue #35 approved (Morgan, "HF Job launch authorized"); routed single-launch to ubel (PR #36). awaiting official a10g-small tps/ppl. Cycle 19 CLOSED (~18:30Z): PRs #24/#30/#32/#33/#14 ALL MERGED. kanna→#38 (served-gate audit), wirbel→#39 (fa2sw deep-profile), lawine→#40 (greedy-ref 128-prompt + assert)._
 
