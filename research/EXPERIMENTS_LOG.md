@@ -1,5 +1,62 @@
 # SENPAI Research Results
 
+## 2026-06-13 18:xx — PR #32: Greedy-gate reference-keying fix ✓ MERGED — validity-infrastructure correction
+
+- **Branch:** `lawine/greedy-gate-ref-keying-fix` · **Student:** lawine
+- **Status:** MERGED as a **validity-infrastructure fix**, NOT a TPS change. Served decode path byte-for-byte unchanged. CPU-only, no W&B.
+- **Hypothesis:** The greedy-reference cache is keyed on `model_id` alone — two submissions sharing the same base checkpoint collide on a single cached reference, potentially causing silent false-PASS / false-FAIL on the greedy-identity gate.
+
+### Results
+
+| metric | value | verdict |
+|---|--:|---|
+| `collision_free` | **1.0** | collision hole CLOSED ✓ |
+| `distinct_tags` | **2** | two submissions → two references ✓ |
+| test guards (CPU-only, 6 assertions) | **6/6 pass** | correctness confirmed ✓ |
+| fa2sw_precache_kenyan vs own M=1 AR (32 prompts, correct keying) | **DIVERGENT 27/32** | out-of-scope finding; routes to kanna |
+
+### Analysis & conclusions
+
+- **Root cause fixed:** reference cache keyed on `model_id` alone → submissions sharing a base model collide. Fixed by keying on `<submission_dir>::<model_id>` and threading a separate `reference_model_id` through `harness.py` / `gen_greedy_reference.py` / `validate_submission.py`. Audit trail: the resolved tag is now recorded.
+- **`distinct_tags=2` confirms the old collision was real** — previously both submissions resolved to the same reference, rendering the greedy-gate meaningless for same-base-model submissions.
+- **Keeper finding (routes to kanna):** under correct per-submission keying, `fa2sw_precache_kenyan` is **DIVERGENT 27/32** against its own M=1 AR reference. This is the data point kanna's served-gate validity audit must reconcile: the stack is leaderboard-valid at ~424.5 TPS but fails our strict M=1 bar — strong evidence our bar is over-conservative vs the leaderboard's served gate.
+- **Unit-tested at the boundary:** `scripts/tests/test_greedy_ref_keying.py` (6 CPU-only guards: collision-free keying, distinct tags, key format). Correct test strategy for a correctness-of-validation change.
+- **Next:** lawine reassigned — regenerate fa2sw_precache_kenyan reference at full 128 prompts + add runtime assert that resolved reference tag is never bare `"model"`. kanna → served-gate validity audit using the now-trustworthy keying.
+
+---
+
+## 2026-06-13 18:xx — PR #30: Frontier decode composition profile ✓ MERGED — authoritative component breakdown of ~420 TPS stack
+
+- **Branch:** `wirbel/frontier-decode-profile` · **Student:** wirbel
+- **Status:** MERGED as a **frontier decode characterization artifact**, NOT a TPS improvement. On-device component-resolved profile of `fa2sw_precache_kenyan` decode loop — the most strategically clarifying measurement of the cycle.
+- **Hypothesis:** Decompose the decode cycle of the ~420 frontier (`fa2sw_precache_kenyan`) into GPU-time fractions by component (int4 body GEMM, sliding-window attention, drafter, lm_head) to rank remaining addressable levers and set priorities.
+
+### Results
+
+| component | fraction of decode cycle | verdict / implication |
+|---|--:|---|
+| Total GPU-bound | **99.3%** | host/launch overhead already negligible |
+| **Verify-body int4 GEMM** | **53.2%** | dominant cost; walled at int4-Marlin floor |
+| **fa2sw sliding-window attention** | **19.6%** | **second lever — most addressable** |
+| Drafter | **15.5%** | third lever (drafter quality / steps) |
+| lm_head | **1.0%** | collapsed from ~26.4% — validates lmhead12k (#14) ✓ |
+| Verify bandwidth-bound / flat-in-M | M=1→8: **+25%** | tree widening nearly free on verify; K* set by acceptance geometry |
+| E_accept | **3.817 tok/cycle** | current drafter acceptance at frontier |
+
+W&B: `07kg6bn7` (authoritative, group `frontier-decode-profile`). `og7z6w0c` superseded.
+
+### Analysis & conclusions
+
+- **The decode loop is 99.3% GPU-bound.** Every remaining TPS gain must come from bytes-moved or FLOPs-cut inside kernels. This kills the "optimize launch/Python overhead" hypothesis for the frontier stack.
+- **Verify-body GEMM (53.2%) is walled at the int4-Marlin floor.** There is no cheaper exact int4 matmul in vLLM 0.22.0. This eliminates the "find a faster verify GEMM" direction without a major kernel rewrite.
+- **fa2sw attention (19.6%) is the live second lever.** It's large enough to matter (~100 TPS headroom if fully eliminated) and it's a kernel-addressable path (KV layout, SWA masking efficiency). This is where wirbel's next investigation goes.
+- **lm_head collapsed to 1.0%** — independent validation that lmhead12k's 21.3× row-cut lands on the decode path, corroborating ubel #14 and wirbel #8. The lm_head lever is fully exploited.
+- **Verify is bandwidth-bound / flat-in-M** — widening the tree is cheap on the verify side; the K* ceiling is set by acceptance geometry (acceptance rate p), not by verify cost per token. This corroborates PR #28/#33 cost-model findings and confirms the drafter quality (p) lever is the path to >500 TPS.
+- **Cross-path validation:** `fa2sw_precache_kenyan` is the same stack lawine #32 used as the "out-of-scope" divergence case — now feeding directly into kanna's served-gate audit.
+- **Next:** wirbel → fa2sw attention kernel-level deep-profile (19.6% second lever). kanna → served-gate validity audit using the #32-corrected keying. Artifacts: `research/profiling/frontier_decode/`, `scripts/local_validation/profile_decode.py`.
+
+---
+
 ## 2026-06-13 17:52 — PR #24: Verify-rollback gate ✓ MERGED — THE LINCHPIN's final closure (greedy-valid spec-decode-for-speed is DEAD in vLLM 0.22.0)
 
 - **Branch:** `kanna/verify-rollback-gate` · **Student:** kanna
