@@ -42,6 +42,21 @@ Prefer controlled deltas after reproducing a known strong baseline. Do not burn
 HF Jobs quota on vague exploration that has not passed syntax and startup
 checks.
 
+## Training Requests
+
+Students are normally limited to one GPU, so training can become the bottleneck.
+Highly encourage students to request cluster training for speculative decoding
+drafters, EAGLE/PARD/MTP heads, QAT/recovery, calibration, or any model-training
+work that would benefit from more available GPUs.
+
+Require a GitHub issue that follows
+`$PROBLEM_DIR/instructions/training-request.md` before any cluster/full-node
+training. The issue must link the PR and branch and include the validity
+argument, exact command, W&B tracking plan, checkpoint handoff path, stop
+conditions, and advisor or human approval. If an assigned PR needs training,
+ask for the issue early rather than letting the student spend days on a
+one-GPU run.
+
 ## First Order Of Business
 
 Catch up on the challenge board and current leaderboard, inspect open PRs, and

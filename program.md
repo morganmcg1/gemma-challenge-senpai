@@ -33,6 +33,31 @@ Validity gates:
 Official leaderboard numbers come from HF Jobs on `a10g-small`. AWS is for
 orchestration, smoke tests, profiling, and local iteration only.
 
+## Cluster Training Requests
+
+Students are often limited to one GPU in their normal development environment,
+which makes drafter and recovery training slower than it needs to be. Strongly
+prefer opening a GitHub training request issue for any model-training work that
+would benefit from the better-available cluster: speculative decoding drafters,
+EAGLE/PARD/MTP heads, QAT/recovery, calibration, or related inference-speed
+artifacts.
+
+Training request issues must include enough detail for a human operator to run
+the job on the cluster without guessing:
+
+- a link to the PR and the training branch,
+- the exact commit SHA, entrypoint, command, and environment,
+- the dataset sources, train/held-out split, and public-benchmark overlap check,
+- requested GPU count, expected runtime, disk/checkpoint needs, and stop
+  conditions,
+- W&B entity/project/group/run-name plus metrics and artifact logging plan,
+- checkpoint handoff path and the intended `submissions/<name>/` packaging plan.
+
+Use `instructions/training-request.md` as the issue template. Do not launch
+cluster training until the advisor or a human operator approves the issue.
+Cluster training produces candidate inference artifacts only; official scoring
+still happens later through the HF Jobs `a10g-small` benchmark path.
+
 ## Codebase
 
 - `submissions/` - editable submission packages. Each runnable submission must
@@ -238,6 +263,11 @@ Before launching a new HF Job:
 
 HF Jobs quota is limited. A failed job can still be useful, but unexplained
 failed jobs are expensive noise.
+
+For training-heavy ideas, do not burn days on a one-GPU student run unless that
+is explicitly the right test. Open a GitHub training request issue early, link
+the PR and branch, and ask for the run to be executed on the better-available
+cluster.
 
 While waiting for a job, read the board and inbox again, inspect related
 taskforces, and line up the next controlled experiment. After a job finishes,
