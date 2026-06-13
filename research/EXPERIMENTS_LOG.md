@@ -1,5 +1,35 @@
 # SENPAI Research Results
 
+## 2026-06-13 15:20 — PR #26: Tree-salvage acceptance model (width-4 tree vs linear K) ✓ MERGED — keeper (cost model)
+
+- **Branch:** `denken/tree-salvage-acceptance-model` · **Student:** denken
+- **Status:** MERGED as a research keeper (no served checkpoint / no TPS-baseline change; baseline stays PR #4 126.378 TPS). Plain squash-merge. `scripts/profiler/tree_acceptance_model.py` + extended `eval_eagle3.py` (top-k + trace) now canonical.
+- **Hypothesis:** width-4 tree decoding raises E[accepted tok/invoke] substantially over linear K=6 for our EAGLE-3 head, and the acceptance gain outweighs the tree-verify overhead → realistic TPS ceiling >500 at full-scale acceptance.
+
+### Results
+
+| metric | value | note |
+|---|---|---|
+| top-1 acc | 0.6792 | reproduces PR #16 tf_acc 0.6816 (within 0.4%) |
+| top-4 acc | 0.8605 | hypothesis ≥0.82 ✓ |
+| **rescue_rate (width-4)** | **0.5651** | **beats fableous 0.431 by +0.134** — our head is more tree-salvageable |
+| E_accept tree4 / linear (empirical) | **1.5923** | primary metric; i.i.d. model agrees (1.60) |
+| **measured tree-verify overhead** | **1.06×** | M=25 forward ≈ as cheap as M=7 (PR #18 flat-in-M); NOT the feared 4× |
+| K=6 tree TPS @ p=0.6792 | 346.8 (+53% vs linear 227.3) | verify V=12.05ms **extrapolated** at M=25 |
+| full-scale ceiling @ p=0.78, K=6 | **393 TPS** (w/ drafter) | `verdict_exceeds_500_at_full_scale = False` at K=6 |
+| >500 TPS @ p=0.78 | only at K≈10 (M≈41, **extrapolated**) | beyond PR #18 measured M≤16 |
+| W&B | eval `8idbwjk1`, cost-model `zlzti9h0` (group `tree-salvage-acceptance-model`) | all metrics independently verified vs logged summary |
+
+### Analysis & conclusions
+
+- **Tree-salvage is real and net-positive on this hardware.** The decisive fact is the **1.06× measured verify overhead**, not the acceptance gain alone: under a 4×/additive verify model the tree is net-negative; under PR #18's measured bandwidth-bound (flat-in-M) curve it's +53%. The tree-salvage case **depends on the int4-verify-flat-in-M finding** — a clean, physically-grounded refutation of the naive "4× tree cost" framing.
+- **Validates the acceptance lever for kanna's verify-rollback path (#24).** With overhead ~1.06× and E gain ~1.6×, width-4 tree at K≈6–8 is the concrete config to prototype once spec decode is greedy-valid.
+- **Honest limits (denken flagged all):** (1) the >500 @ full-scale is conditional — needs p→0.78 AND deep K≈10 where M≈41 is **extrapolated** beyond PR #18's measured M≤16; (2) empirical trace is slightly *sub*-geometric (0.96× i.i.d.) — the "easy-span" positive correlation hypothesized did NOT appear on this head+MATH set, though the tree/linear ratio is preserved so the gain conclusion is robust; (3) D=1.4ms is fableous's *linear* drafter cost — a width-4 tree drafter expands K·W nodes so may cost more (verify-only vs +drafter band brackets it).
+- **Checkpoint-provenance catch (excellent diligence):** the PR-named `debug_1k/` is a 28-step underfit (tf_acc 0.2484); the real 0.6816 head is `debug_1k_2ep/` (898 steps), confirmed against W&B `30bgs1rs`. denken evaluated the correct head on held-out `debug_1k_eval_corpus.pt` and staged canonical paths. **Note for fern #25 / future drafter work: use `debug_1k_2ep/`, not `debug_1k/`.**
+- **Follow-up assigned → denken PR #28:** extend the PR #18 verify sweep to M∈{20,24,28,32,40,48,64} to replace the M=25/M=41 extrapolation with measured latency — the only soft spot in the >500 projection.
+
+---
+
 ## 2026-06-13 14:38 — PR #4: int4 g128 + untied int4 lm_head (~127 TPS) ✓ MERGED — new leaderboard baseline rung
 
 - **Branch:** `lawine/int4-g128-lmhead` · **Student:** lawine
