@@ -1,5 +1,60 @@
 # SENPAI Research Results
 
+## 2026-06-13 09:30 — PR #4: int4 g128 + untied int4 lm_head re-quant (~127 TPS weight floor) [IN PROGRESS — awaiting HF Job]
+
+- **Branch:** `lawine/int4-g128-lmhead`
+- **Student:** lawine
+- **Status:** WIP — local evidence complete; **awaiting human approval of HF Job (GitHub issue #12)**
+  before posting terminal SENPAI-RESULT with official a10g-small numbers. Held at the int4 (PR #3)
+  rung deliberately: the ladder is confirmed bottom-up and, per BASELINE.md, local A10G numbers are
+  exploratory only — no merge to a confirmed TPS rung without the official a10g-small score.
+- **Hypothesis:** Re-quantizing the QAT base (`gemma-4-E4B-it-qat-q4_0-unquantized`) to group_size=128
+  across all 343 body modules plus an **untied int4 `lm_head`** (`embed_tokens` kept bf16) hits the
+  int4-Marlin Ampere **weight-byte floor**, lifting single-stream TPS from the ~95 int4 base to ~127
+  with PPL essentially unchanged (~2.02). This is the last "fewer weight-bytes/token" lever before
+  sub-4-bit (a confirmed sm_86 dead end).
+
+### Local Results (exploratory, A10G — NOT official a10g-small)
+
+| metric | value | gate | pass? |
+|---|---|---|---|
+| Local PPL (served, 128/128 GT records, 61797 tokens) | **2.0190** | ≤ 2.42 | ✓ |
+| Offline fake-quant PPL | 2.0197 | ≤ 2.42 | ✓ |
+| Local TPS (exploratory, A10G, single-stream) | **127.99** | — | on target ~126.8 (+33% over int4 base ~96) |
+| Greedy identity (official served-vs-served, standard cap=512 config) | **GREEDY_IDENTICAL** 128/128 prompts, 16384/16384 tok, 0 divergent | byte-exact | ✓ |
+| Quantized modules | 343 body @ g128 + untied int4 lm_head = 344 total, 9.62 GiB on disk | — | ✓ |
+| compressed_tensors version | 0.15.0.1 (vLLM 0.22.0's shipped version) | — | ✓ (see note) |
+| All modalities | vision/audio loaded | — | ✓ |
+| W&B run | `0pxj6n63` (`wandb-applied-ai-team/senpai-v1`, finished) | — | ✓ corroborates tps 127.99 / ppl 2.019 / GREEDY_IDENTICAL, logged verbatim |
+
+### Key points
+
+- **TPS lever:** 127.99 local = +33% over the int4 base (~96 local) and +0.9% above the ~126.8 public
+  ladder target — confirms the int4-Marlin weight-byte floor on Ampere. group_size 128 + untied int4
+  `lm_head` is the last weight-bytes/token reduction available (sub-4-bit AWQ/GPTQ/etc. have no
+  loadable sm_86 kernel in vLLM 0.22 — confirmed dead end in BASELINE.md). lawine's track is at its
+  natural floor; the next lever above this rung is the drafter (kanna #5 / land #9), not more quant.
+- **Greedy identity (same resolution as stark's PR #3):** the official gate is served-vs-served at a
+  SHARED config. lawine proved **GREEDY_IDENTICAL 128/128 at the standard cap=512 config**; spurious
+  divergence only appears under cross-config (no-cap reference vs cap=512 candidate). Not a blocker.
+- **Version note:** the PR body states compressed_tensors==0.10.2 but lawine actually built against
+  **0.15.0.1** — the version vLLM 0.22.0 ships. 0.15.0.1 is the correct/required choice; 0.10.2 is
+  incompatible with vLLM 0.22.0. Acknowledged on the PR; the built checkpoint is the valid artifact.
+- **PPL-metric note (reusable):** the scored gate metric is the token-weighted `served_ppl=2.0190`
+  (`exp(Σnll/Σtok)` over all 61,797 tokens). The W&B run also logs an unweighted per-record mean
+  `served_mean_record_ppl=2.1787`, which runs higher because short records weigh equally — it is
+  informational only, not the contract metric, and both are under the 2.42 gate.
+
+### Next Steps
+
+- Human approves GitHub issue #12 → lawine runs
+  `python train.py --submission submissions/int4_g128_lmhead --name int4-g128-lmhead --launch --wait`
+- Official a10g-small TPS/PPL confirmed → lawine posts terminal SENPAI-RESULT to PR #4
+- Advisor merges PR #4 → updates ladder (int4 g128/lmhead weight-floor rung officially confirmed, ~127)
+- lawine's weight-quant track is then complete → pivot lawine to a fresh frontier lever next round
+
+---
+
 ## 2026-06-13 09:00 — PR #3: Reproduce int4 QAT W4A16 leader (~95 TPS) [IN PROGRESS — awaiting HF Job]
 
 - **Branch:** `stark/int4-qat-w4a16`
