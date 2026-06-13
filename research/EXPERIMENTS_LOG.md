@@ -1,5 +1,25 @@
 # SENPAI Research Results
 
+## 2026-06-13 22:13 — PR #52: fa2sw split-KV — Issue-#46-approved one-shot HF launch ✓ MERGED ⭐ NEW PUBLIC #1 / NEW OFFICIAL FRONTIER (481.53 official TPS)
+
+- **Branch:** `lawine/fa2sw-splitkv-official-launch` · **Student:** lawine
+- **Status:** MERGED as the **new official frontier baseline.** First gated HF job to confirm a rung above the 126.378 AR floor on the spec-decode frontier → **the official bar all submissions must beat moves 126.378 → 481.53 TPS.** Human-approved launch (Issue #46, Morgan: "approved, lessgo!"); no submission-file changes (the PR is the launch record — served stack is the already-merged `submissions/fa2sw_precache_kenyan/` with #43 split-KV).
+- **Hypothesis:** the locally-validated fa2sw split-KV stack (linear MTP K=7 + #43 3D split-KV, 428.37 local steady-state) reproduces on official a10g-small hardware above the prior public #1 (rock-ai 459.72), gated on the #50 fail-closed `official_gate` PASS@128 preflight.
+
+| metric | value | gate |
+|---|--:|---|
+| **Official TPS (a10g-small)** | **481.53** | **NEW PUBLIC #1** (vs rock-ai 459.72, +4.74%; +13.4% over ~424.5 repro baseline) |
+| PPL | 2.3772 | ≤ 2.42 ✓ |
+| completed | 128/128 | ✓ |
+| modalities | text+image+audio | all loaded ✓ |
+| official_gate (preflight) | PASS@128 | split-KV patch engaged, zero 2D fallback ✓ |
+
+- **Analysis:** clean reproduction — landed mid-projection (PR #43 projected 471–493). Pre-launch `official_gate=PASS@128` with the split-KV patch **engaged** (M=8 verify → 3D FlashDecoding every step, zero fallback, backend TRITON_ATTN). Greedy-identity DIVERGENT is an internal signal only (the official gate has no token-identity check, kanna #38) → spec decode is leaderboard-legal. **Standing risk UNCHANGED (the programme's #1):** the private re-run gate — kanna #44 probe predicts ~12.4% public→private on a pure-chat proxy (WOULD-FAIL >5%); the 481.53 is the **public** number; private stability is a separate open axis (kanna #55 calibrating on this exact frontier).
+- **W&B:** `2x9fm2zx`, `fwo8rs05` (official launch; job `6a2dce05871c005b5352c0b9` COMPLETED, run prefix `results/senpai/fa2sw-precache-kenyan-20260613T213911Z`, `ppl_summary.json` 61,797 tokens). Leaderboard row pending organizer re-sync.
+- **Follow-ups:** (a) report the new #1 to Issue #46 (done); (b) `max_num_batched_tokens` warning A/B — separate PR, touches the timed path; (c) #50 audio functional-probe polish (local tooling); (d) the open frontier lever stays the **private-stable acceptance** axis (kanna #55) + the verify-GEMM/drafter-forward decode blocks (ubel verify-GEMM, denken #54 entropy-K, wirbel #53 reprofile).
+
+---
+
 ## 2026-06-13 21:55 — PR #51: accepthist dynamic-K on post-#43 split-KV cost curve ✓ MERGED (characterization + bugfix keeper — decisive negative, official bar UNCHANGED)
 
 - **Branch:** `denken/accepthist-dynamic-k` · **Student:** denken
