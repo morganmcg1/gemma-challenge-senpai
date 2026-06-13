@@ -1,5 +1,45 @@
 # SENPAI Research Results
 
+## 2026-06-13 — PR #39: fa2sw attention deep-profile ✓ MERGED — Triton verify occupancy-bound, 3D split-KV lever identified
+
+- **Branch:** `wirbel/fa2sw-attn-profile` · **Student:** wirbel
+- **Status:** MERGED — **high-value lever discovery.** LOCAL A10G op-microbench; no W&B (wandb_run_ids:[]). Rewrites the #30 lever map for verify attention.
+- **Hypothesis:** fa2sw sliding-window attention (19.6% of decode cycle from #30) might be near-optimal or might have exploitable inefficiency (KV layout, SWA masking, bandwidth ratio vs theoretical minimum).
+
+### Results
+
+| metric | value | verdict |
+|---|--:|---|
+| **`fa2sw_bandwidth_efficiency_fraction`** | **0.0473** (4.7%) | 21× below 80% near-optimal threshold ✓ |
+| **`verdict_attn_reduction_worth_pursuing`** | **1** | YES — implement 3D split-KV |
+| measured split-KV speedup (M=1, identical work) | **4.14×** (sliding 4.36×, full 3.91×) | direct measurement |
+| reachable attention saving | 50% (conservative 2×) … 82% (3D BW) | |
+| TPS projection @ 50% saving | **~471** | crosses 440, 460 |
+| TPS projection @ 82% saving | **~505** | crosses 460, 500 |
+| `kernel_unified_attention` share of attention | 98.1% | Triton, NOT fa2sw FA2 |
+| device time M=7→45 | ~53 µs flat | occupancy/launch-bound, not compute |
+| KV bandwidth floor | 41.84 MB/cycle, 0.087 ms | served = 1.836 ms (21× above) |
+
+### Key findings
+
+1. **Premise refuted: the fa2sw FA2 path is inert.** vLLM forces `TRITON_ATTN` for heterogeneous head dims (sliding 256, full 512); FA2 caps at head_dim 256. The 19.6% is 98.1% Triton `kernel_unified_attention`. The PR #30 naming "fa2sw kernel" was wrong at the kernel level.
+
+2. **Root cause: M=8 verify falls on 2D Triton path (occupancy-bound).** The `unified_attention` gates 3D split-KV (FlashDecoding) OFF for `max_seqlen_q > 1`. The spec-verify runs M=K+1=8 query rows → always lands on 2D (~6 CTAs / 80 SMs). The M=1 drafter uses 3D and runs 4.14× faster on identical work. Device time is FLAT M=7→45 → confirmed occupancy/launch bound.
+
+3. **4.14× is a direct measurement.** 2D vs 3D at M=1, identical bytes/softmax: sliding 4.36×, full 3.91×. The 3D kernel EXISTS in vLLM; only the dispatch guard needs patching.
+
+4. **The served Triton kernel is already optimal for M=1** (12.2 µs vs FA2 paged 58.2 µs vs SDPA 97.9 µs). The problem is purely the M>1 dispatch guard.
+
+5. **Fix is greedy-exact** (split-KV is bit-identical attention). Zero gate risk. Orthogonal to spec-decode validity question.
+
+6. **Implementation path:** patch `max_seqlen_q > 1` guard in `vllm/v1/attention/ops/triton_unified_attention.py` + extend per-segment softmax reduction to multiple query rows. ~90% already in vLLM.
+
+7. **Methodology correction:** physical KV-load byte model (what FlashAttention streams) is the correct BW model, NOT `window×seq×heads` (double-counts attention matrix as bytes). Noted for future profiling.
+
+### Conclusions
+
+This is the single highest-leverage greedy-safe lever in the programme. Unlike spec-decode velocity (gated on batch-invariance / served-gate), the 3D split-KV fix is valid on the EXISTING honest frontier (already leaderboard-valid at ~424.5 TPS) and projects ~471–505 TPS. wirbel reassigned to implement the fix.
+
 ## 2026-06-13 — PR #40: Greedy-ref infra: 128-prompt fa2sw reference + bare-tag assertion ✓ MERGED
 
 - **Branch:** `lawine/greedy-ref-128prompt` · **Student:** lawine

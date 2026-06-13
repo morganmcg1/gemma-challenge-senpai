@@ -280,3 +280,20 @@ _Last updated: 2026-06-13 (**PR #4 MERGED — new best merged rung: int4 g128 + 
   - Canonical path auto-resolved: `validate_submission --submission fa2sw_precache_kenyan --num-prompts 128` resolves without manual `--reference` threading.
 - **Justified deviation:** `--spec-off` would have been a silent no-op for this MTP-drafter submission (fa2sw_precache_kenyan's `serve.py` does not honor `SENPAI_REFERENCE_MODE`). Lawine correctly used `--ref-env SPECULATIVE_CONFIG=` (same mechanism as #32) to disable the drafter. `reference_kind=served_spec_off` confirmed via meta. **Key institutional knowledge for all future spec submissions.**
 - **Artifacts:** `scripts/local_validation/harness.py` (assertion), `gen_greedy_reference.py` (assertion + docstring), `validate_submission.py` (auto-resolve comment), `scripts/tests/test_greedy_ref_keying.py` (2 new tests), `research/greedy_reference/…/decode_outputs.jsonl` (128 records), `decode_summary.json`, `meta.json`.
+
+### 2026-06-13 — PR #39: fa2sw attention deep-profile: Triton verify occupancy-bound, 3D split-KV lever ✓ MERGED
+
+- **Status:** MERGED as a **characterization + lever-discovery artifact — NOT a direct TPS change.** Rewrites the #30 lever map: the "fa2sw 19.6%" is mislabeled and the actual lever (3D split-KV dispatch for M>1 verify) is greedy-exact and projects ~471–505 TPS. The single highest-leverage greedy-safe lever found in the programme.
+- **Primary metric:** `fa2sw_bandwidth_efficiency_fraction` = **0.0473** (4.7% of KV-BW floor — 21× below the 80% near-optimal threshold). `verdict_attn_reduction_worth_pursuing` = **1**. No W&B (local A10G op-microbench; no training/serving run).
+- **Key findings:**
+  - **Premise refuted:** the `fa2sw` FlashAttention-2 path is **inert**. vLLM forces `TRITON_ATTN` for this model's heterogeneous head dims (sliding=256, full=512; FA2 caps at 256, can't serve the 7 full layers). The 19.6% is **98.1% Triton `kernel_unified_attention`**.
+  - **Root cause:** M=8 spec-verify (M=1+K=7 query rows) falls onto the **2D Triton path** (~6 CTAs / 80 SMs) because `unified_attention` gates **3D split-KV (FlashDecoding) OFF for `max_seqlen_q > 1`**. Device time is **flat M=7→45** (6.4× more query rows, same ~53 µs) — occupancy/launch-bound, not compute- or bandwidth-bound.
+  - **Lever measured directly:** M=1 3D split-KV vs M=1 forced 2D on identical bytes: sliding **4.36×**, full **3.91×**, combined **4.14×**. This is a **direct measurement**, not a model.
+  - **Kernel bake-off (M=1):** Triton 3D wins (12.2 µs); FA2 paged (58.2 µs, 4.8× slower); SDPA dense (97.9 µs, 8.0× slower). The served kernel is already optimal for M=1 — the problem is purely the dispatch guard at M>1.
+  - **KV floor:** 41.84 MB/cycle at mean ctx 527.7; bandwidth efficiency 4.7% (served 1.836 ms vs floor 0.087 ms). Cross-check: per-op device-time sum (2.06 ms) matches served 1.836 ms within 12%.
+- **TPS projections** (`TPS = 424.5 / (1 − 0.196 × saving)`):
+  - Conservative 2× → 50% saving → **~471 TPS** (crosses 440, 460)
+  - Verify-at-3D-BW → 82% saving → **~505 TPS** (crosses 460, 500)
+- **Implementation path:** patch the `max_seqlen_q > 1` guard in `vllm/v1/attention/ops/triton_unified_attention.py` + extend the per-segment softmax reduction to multiple query rows. ~90% already in vLLM (the 3D kernel exists). Fix is **greedy-exact** (bit-identical attention), zero gate risk.
+- **Methodology correction:** used physical KV-load byte model (what FlashAttention streams) rather than the `window×seq×heads` assignment formula (which double-counts the attention matrix as bytes). Correct model; noted for future profiling PRs.
+- **Artifacts:** `research/profiling/fa2sw_attention/{FINDING.md, attention_detail.json, breakdown.md}`, `scripts/local_validation/profile_attention.py`, `scripts/local_validation/profile_decode.py` (--profile-mode attention-detail flag).

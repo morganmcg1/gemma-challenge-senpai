@@ -26,6 +26,7 @@
 | #14 `empirical-lmhead12k` | ubel | **Best-LOCAL rung: 131.6 local TPS / PPL 1.9712 / GREEDY_IDENTICAL 128/128.** | **VALIDATED LEVER / best-local rung** |
 | #37 `lmhead12k-verify-cost` | denken | **538.1 TPS K\*=11/M=45 p=0.78 with drafter (+22% over #33's 440); scatter floor 0.348 ms; K=11/M=45 serving config LOCKED; tile-fold into canonical msweep.** | **KEEPER cost-model closure + infra** |
 | #40 `greedy-ref-128prompt` | lawine | **128/128 served spec-off reference generated (514.75s); bare-tag assertion wired at both sites; 8/8 tests; self-consistent at batch=1. Unblocks kanna #38 at full 128-prompt scale.** | **KEEPER infra closure** |
+| #39 `fa2sw-attn-profile` | wirbel | **Premise refuted: fa2sw FA2 inert, 19.6% is Triton unified (2D, 4.7% BW floor). Root cause: `max_seqlen_q>1` gates 3D split-KV off. 4.14× measured. Projects ~471–505 TPS. HIGHEST-LEVERAGE GREEDY-SAFE LEVER.** | **KEEPER lever discovery** |
 
 **Official baseline UNCHANGED: `submissions/int4_g128_lmhead` (PR #4) — 126.378 a10g-small / PPL 2.019 / GREEDY_IDENTICAL.**
 
@@ -86,9 +87,11 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 | lever | fraction | addressable? | who |
 |---|---|---|---|
 | Verify-body int4 GEMM | 53.2% | **NO** — walled at int4-Marlin floor in vLLM 0.22.0 | (closed) |
-| **fa2sw sliding-window attention** | **19.6%** | **YES** — kernel-addressable (KV layout, SWA masking) | **wirbel #39** |
+| **Triton verify-attention (2D path, occupancy-bound)** | **19.6%** | **YES — GREEDY-EXACT** — patch `max_seqlen_q > 1` guard → 3D split-KV; measured **4.14×** at M=1; projects ~471–505 TPS | **wirbel #43 (IMPLEMENTATION)** |
 | Drafter (quality / acceptance rate) | 15.5% | YES — better drafter acceptance (p toward 0.85) | fern #34 |
 | lm_head | 1.0% | NO — already exploited by lmhead12k (#14) | (exhausted) |
+
+**KEY UPDATE (PR #39):** The "fa2sw attention" label was wrong. The `fa2sw` FA2 path is INERT (vLLM forces Triton for heterogeneous head dims). The 19.6% is 98.1% Triton `kernel_unified_attention` running at 4.7% BW efficiency (occupancy-bound, not BW-bound). Root cause: M=8 verify falls on 2D path because `max_seqlen_q > 1` gates 3D split-KV off. **This is the single highest-leverage greedy-safe lever in the programme** — the fix is already ~90% in vLLM.
 
 **The k* drafter ladder (spec-decode angle):** requires either (a) batch-invariance fix (stark #23) or (b) leaderboard's served gate being more permissive than our strict M=1 bar (kanna #38 reconciliation). If (b) is true, the drafter ladder is already unlocked for the frontier — stark's fix becomes a hardening step, not a gate.
 
@@ -101,7 +104,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 | + lmhead12k on verify path (K*=11/M=45, p=0.78) | −19.8% verify step (PR #37 measured) | **~538 TPS ceiling** (measured, scatter floor included) | above + PR #37 |
 | + EAGLE-3 drafter, reasoning tf_acc 0.7314 (**#25 MERGED asset**) | best drafter to date | unlocks ~285→ladder | asset banked |
 | + reasoning-matched corpus → p≥0.85 | benchmark-matched CoT | ~500–530 | fern #34 + gate |
-| + fa2sw attn optimization | 19.6% of cycle | +X TPS | wirbel #39 quantifies headroom |
+| + **3D split-KV verify dispatch (wirbel #43, ACTIVE)** | 50–82% attn saving, greedy-exact | **~471–505 TPS** | wirbel #43 (patch `max_seqlen_q>1` guard) |
 | + int4-pruned 12k head | ~4× head-byte cut (ubel #36) | ~133 local | ubel #36 |
 
 ---
@@ -111,7 +114,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 | student | PR | track | status |
 |---|---|---|---|
 | kanna | **#38 (NEW)** | **Served-gate validity audit.** Does `fa2sw_precache_kenyan` pass the SERVED greedy gate (spec-on vs spec-off, batch=1)? Reconcile 27/32 M=1-offline divergence (#32) with leaderboard-valid ~424.5 TPS status. Is our strict M=1 bar over-conservative? LOCAL ONLY. | **Assigned (post-#24 merge)** |
-| wirbel | **#39 (NEW)** | **fa2sw attention deep-profile.** Kernel-level breakdown of the 19.6% second lever from #30: KV-load bytes, SWA masking overhead, bandwidth vs theoretical minimum. Estimate TPS uplift if 25/50% reduction achievable. LOCAL ONLY. | **Assigned (post-#30 merge)** |
+| wirbel | **#43 (NEW)** | **3D split-KV dispatch for M>1 verify.** Patch `max_seqlen_q > 1` guard in Triton `unified_attention`; extend per-segment softmax reduction to multiple query rows; measure served TPS. Greedy-exact (bit-identical). Projects ~471–505 TPS. LOCAL ONLY. | **Assigned (post-#39 merge)** |
 | lawine | **#42 (NEW)** | **`--spec-off` contract fix + validator N-mismatch legibility.** Teach spec `serve.py` to honor `SENPAI_REFERENCE_MODE`; clean up `--ref-env` workaround; surface `num_records` into `evidence.json` with N-mismatch warning. LOCAL ONLY. | **Assigned (post-#40 merge)** |
 | fern | **#34 (WIP)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from served target under EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME (57/57/14), hard-dedup vs 128 eval ids, early-stop on held-out reasoning tf_acc. Target: break 0.73 plateau toward 0.78–0.85. | Active |
 | denken | **#41 (NEW)** | **Scatter floor elimination in `compute_logits`.** Prove `kept_ids[argmax(partial_12k_logits)]` == scatter+full-argmax (empirical greedy-identity guarantee), then implement the skip to save ~0.155 ms/step @ M=45. Ceiling 538→~546 TPS. LOCAL ONLY. | **Assigned (post-#37 merge)** |
@@ -138,9 +141,9 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 ## Potential next directions (priority order)
 
-1. **Source-level batch-invariance (stark #23)** — THE unlock. Only net-positive route to greedy-valid spec decode in vLLM 0.22.0.
-2. **Served-gate reconciliation (kanna #38)** — if leaderboard gate is weaker than our strict M=1 bar, the drafter ladder is already unlocked for frontier submissions; stark #23 becomes a hardening step, not a gate.
-3. **fa2sw attention optimization (wirbel #39)** — 19.6% of the decode cycle; if kernel BW efficiency < 80%, there's real TPS headroom. The only addressable non-drafter non-floor lever on the decode path.
+1. **3D split-KV for M>1 verify (wirbel #43)** — **THE SINGLE HIGHEST-LEVERAGE GREEDY-SAFE LEVER.** Patch `max_seqlen_q > 1` guard; ~90% already in vLLM; 4.14× measured speedup; projects 471–505 TPS on the already-valid frontier. Zero gate risk (bit-identical attention). Active.
+2. **Source-level batch-invariance (stark #23)** — THE unlock for strict M=1-greedy-valid spec decode. Only net-positive route in vLLM 0.22.0.
+3. **Served-gate reconciliation (kanna #38)** — if leaderboard gate is weaker than our strict M=1 bar, the drafter ladder is already unlocked for frontier submissions; stark #23 becomes a hardening step, not a gate.
 4. **Benchmark-matched corpus → drafter p≥0.85 (fern #34)** — PR #25 proved reasoning acceptance is DATA-bottlenecked at 0.73; MCQ-template CoT on the actual 128-prompt distribution is the lever toward p≥0.85 (needed for >500 TPS).
 5. **lmhead12k int4-pruned head (ubel #36)** — another ~4× head-byte cut; compounds with spec if batch-invariance unlocks.
 6. **Greedy-ref infra 128-prompt (lawine #40)** — feeds kanna's served-gate audit with full 128-prompt data.
@@ -151,7 +154,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 ---
 
-_Last updated: 2026-06-13 **cycle 21/22** — PR #37 MERGED (denken: lmhead12k verify-cost, 538.1 TPS ceiling, K*=11/M=45 LOCKED, msweep tile-folded). PR #40 MERGED (lawine: 128-prompt served spec-off reference + bare-tag assert, unblocks kanna #38). denken→#41 (scatter floor elim, 538→546). lawine→#42 (--spec-off contract + N-mismatch legibility). Issue #35 HF job in flight → ubel, awaiting official a10g-small tps/ppl. All 8 students busy; zero idle._
+_Last updated: 2026-06-13 **cycle 22/23** — PR #39 MERGED (wirbel: fa2sw attention premise refuted; Triton 2D occupancy-bound at 4.7% BW floor; 3D split-KV fix greedy-exact; projects 471–505 TPS; HIGHEST-LEVERAGE LEVER). wirbel→#43 (implement 3D split-KV for M>1 verify). Awaiting: ubel HF result (Issue #35), land v1 verdict (PR #9, training ~done). All 8 students busy; zero idle._
 
 _Cycle 20: Issue #35 approved (Morgan, "HF Job launch authorized"); routed single-launch to ubel (PR #36). awaiting official a10g-small tps/ppl. Cycle 19 CLOSED (~18:30Z): PRs #24/#30/#32/#33/#14 ALL MERGED. kanna→#38 (served-gate audit), wirbel→#39 (fa2sw deep-profile), lawine→#40 (greedy-ref 128-prompt + assert)._
 
