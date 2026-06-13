@@ -1,0 +1,24 @@
+[decompress] dequantized 344 quantized tensors (343 body + lm_head expected) -> all finite
+[untie] lm_head identical to embed_tokens? False (expect False -- head is int4, embed is bf16)
+[load] text model loaded strict-ish | unexpected=0 | missing(buffers only)=0 []
+  [0] checked 96 tokens (running agree=96/96)
+  [1] checked 96 tokens (running agree=191/192)
+  [2] checked 96 tokens (running agree=284/288)
+  [3] checked 96 tokens (running agree=378/384)
+  [4] checked 96 tokens (running agree=472/480)
+  [5] checked 96 tokens (running agree=568/576)
+  [6] checked 96 tokens (running agree=663/672)
+  [7] checked 96 tokens (running agree=759/768)
+{
+  "total_tokens": 768,
+  "agree": 759,
+  "agreement": 0.98828125,
+  "first_mismatch": {
+    "prompt_i": 1,
+    "pos": 66,
+    "expected": 107,
+    "argmax": 108
+  },
+  "verdict": "DIVERGENT(first={'prompt_i': 1, 'pos': 66, 'expected': 107, 'argmax': 108})"
+}
+[verdict] greedy agreement 759/768 (98.8281%) -> DIVERGENT(first={'prompt_i': 1, 'pos': 66, 'expected': 107, 'argmax': 108})
