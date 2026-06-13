@@ -81,9 +81,7 @@ The **acceptance lever** is the only one with real headroom above ~424 TPS (fabl
 | stark | #23 (WIP) | **int4 spec-verify greedy flip-rate probe** — fp32-logit, deterministic-reduction, both configs; 4 arms across int4 base; measure which (if any) drives flip_rate → 0. Complements kanna's verify-rollback via different mechanism. LOCAL ONLY. | Active |
 | ubel | #14 (WIP, ↩ sent back) | **Empirical lmhead12k** — fix kept_ids selection to int4 argmax on broad corpus; report held-out clip rate; served-vs-served greedy gate. DRAFTER-INDEPENDENT rung. | Fix in progress |
 | land | #9 (WIP) | **Wide KL-distilled drafter** — free-running / EAGLE-3-style schedule + full training budget. Prerequisite for both accepthist and tree-salvage on the honest stack. | Active |
-| lawine | *(rebased, awaiting next assignment)* | PR #4 merged. Lawine is idle — assign after reading this state. Suggested: channel-wise lm_head variant (`--head-group-size -1`) for a quick TPS/PPL sweep before locking in the head scheme. | Monitor |
-
-**Note on lawine:** PR #4 is merged and lawine's branch is clean. Lawine is now idle. Top candidate assignment: channel-wise lm_head (one-line change, ~127.4 TPS / PPL ~2.03 per lawine's own projection — a quick leaderboard number to confirm whether g128-vs-channel-head is worth the sweep before other rungs stack on this floor).
+| lawine | **#27 (WIP, NEW)** | **int4 channel-wise lm_head sweep** — one-line change (`group_size=-1` in build_quant.py), local pre-validate + greedy check, HF approval issue if local passes. Expected ~127.4 TPS / PPL ~2.03. Establishes best lm_head quant scheme before drafter stacks pile on. | Active |
 
 ---
 
