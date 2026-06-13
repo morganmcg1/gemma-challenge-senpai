@@ -11,6 +11,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from scripts.common import agent_id, hf_bucket_uri, hf_json, load_dotenv
+from scripts.wandb_logging import finish_wandb, init_wandb_run, log_json_artifact, log_status, log_summary
 
 
 TERMINAL = {"completed", "error", "timed_out", "cancelled", "failed"}
@@ -24,8 +25,19 @@ def read_summary(agent: str, run_prefix: str) -> dict:
     return hf_json(hf_bucket_uri(agent, f"{run_prefix}/summary.json"))
 
 
-def poll_run(agent: str, run_prefix: str, *, wait: bool, interval_s: int, timeout_s: int) -> dict | None:
+def poll_run(
+    agent: str,
+    run_prefix: str,
+    *,
+    wait: bool,
+    interval_s: int,
+    timeout_s: int,
+    wandb_run=None,
+    initial_step: int = 0,
+) -> dict | None:
     deadline = time.monotonic() + timeout_s
+    started = time.monotonic()
+    attempt = 0
     while True:
         try:
             status = read_status(agent, run_prefix)
@@ -36,16 +48,31 @@ def poll_run(agent: str, run_prefix: str, *, wait: bool, interval_s: int, timeou
             status = {"status": "missing"}
         state = str(status.get("status") or status.get("stage") or "unknown")
         print(f"{run_prefix}: {state}")
+        log_status(
+            wandb_run,
+            status,
+            step=initial_step + attempt,
+            elapsed_s=time.monotonic() - started,
+            attempt=attempt,
+        )
 
         if state in TERMINAL or not wait:
             break
         if time.monotonic() >= deadline:
             raise SystemExit(f"timed out waiting for {run_prefix}")
+        attempt += 1
         time.sleep(interval_s)
 
     if state == "completed":
         summary = read_summary(agent, run_prefix)
         print(summary)
+        log_summary(wandb_run, summary, step=initial_step + attempt + 1, run_prefix=run_prefix)
+        log_json_artifact(
+            wandb_run,
+            name=f"{agent}-{run_prefix}-summary",
+            artifact_type="hf-job-summary",
+            data=summary,
+        )
         return summary
     return None
 
@@ -57,10 +84,41 @@ def main() -> None:
     parser.add_argument("--wait", action="store_true")
     parser.add_argument("--interval-s", type=int, default=30)
     parser.add_argument("--timeout-s", type=int, default=1800)
+    parser.add_argument("--wandb-project", default=None)
+    parser.add_argument("--wandb-entity", default=None)
+    parser.add_argument("--wandb-mode", default=None)
+    parser.add_argument("--wandb-notes", default="")
     args = parser.parse_args()
 
     load_dotenv()
-    poll_run(agent_id(args.agent_id), args.run_prefix, wait=args.wait, interval_s=args.interval_s, timeout_s=args.timeout_s)
+    agent = agent_id(args.agent_id)
+    wandb_run = init_wandb_run(
+        job_type="poll",
+        agent=agent,
+        name=f"{agent}-poll",
+        notes=args.wandb_notes,
+        project=args.wandb_project,
+        entity=args.wandb_entity,
+        mode=args.wandb_mode,
+        tags=["hf-job"],
+        config={
+            "run_prefix": args.run_prefix,
+            "wait": args.wait,
+            "interval_s": args.interval_s,
+            "timeout_s": args.timeout_s,
+        },
+    )
+    try:
+        poll_run(
+            agent,
+            args.run_prefix,
+            wait=args.wait,
+            interval_s=args.interval_s,
+            timeout_s=args.timeout_s,
+            wandb_run=wandb_run,
+        )
+    finally:
+        finish_wandb(wandb_run)
 
 
 if __name__ == "__main__":

@@ -12,6 +12,14 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from scripts.common import DEFAULT_API, agent_id, hf, hf_bucket_uri, load_dotenv, post_json, require_hf_token, run, submission_prefix
+from scripts.wandb_logging import (
+    finish_wandb,
+    init_wandb_run,
+    log_event,
+    log_file_artifact,
+    log_json_artifact,
+    log_summary,
+)
 
 
 def load_summary(path_or_uri: str) -> dict:
@@ -51,6 +59,10 @@ def main() -> None:
     parser.add_argument("--body", default="")
     parser.add_argument("--publish", action="store_true")
     parser.add_argument("--api", default=DEFAULT_API)
+    parser.add_argument("--wandb-project", default=None)
+    parser.add_argument("--wandb-entity", default=None)
+    parser.add_argument("--wandb-mode", default=None)
+    parser.add_argument("--wandb-notes", default="")
     args = parser.parse_args()
 
     load_dotenv()
@@ -58,20 +70,68 @@ def main() -> None:
     summary = load_summary(args.summary)
     text = result_markdown(args, summary, agent)
     safe_method = "".join(char if char.isalnum() or char in "._-" else "-" for char in args.method.lower())
+    wandb_run = init_wandb_run(
+        job_type="result",
+        agent=agent,
+        name=f"{agent}-{safe_method}-result",
+        notes=args.wandb_notes,
+        project=args.wandb_project,
+        entity=args.wandb_entity,
+        mode=args.wandb_mode,
+        tags=["result", args.status],
+        config={
+            "summary": args.summary,
+            "method": args.method,
+            "submission_name": args.submission_name,
+            "status": args.status,
+            "publish": args.publish,
+            "api": args.api,
+        },
+    )
 
-    if not args.publish:
-        print(text)
-        return
+    try:
+        log_summary(wandb_run, summary, step=0)
+        log_event(
+            wandb_run,
+            "result_markdown_created",
+            step=1,
+            data={"method": args.method, "status": args.status},
+        )
 
-    token = require_hf_token()
-    with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".md", delete=False) as handle:
-        handle.write(text)
-        local_path = handle.name
+        if not args.publish:
+            print(text)
+            return
 
-    source = hf_bucket_uri(agent, f"results/{safe_method}.md")
-    run(hf("buckets", "cp", local_path, source))
-    response = post_json(f"{args.api}/v1/results", {"source": source}, token=token)
-    print(response)
+        token = require_hf_token()
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".md", delete=False) as handle:
+            handle.write(text)
+            local_path = Path(handle.name)
+
+        source = hf_bucket_uri(agent, f"results/{safe_method}.md")
+        run(hf("buckets", "cp", str(local_path), source))
+        response = post_json(f"{args.api}/v1/results", {"source": source}, token=token)
+        log_file_artifact(
+            wandb_run,
+            path=local_path,
+            name=f"{agent}-{safe_method}-result-md",
+            artifact_type="result-markdown",
+        )
+        log_event(
+            wandb_run,
+            "result_published",
+            step=2,
+            metrics={"result/published": 1},
+            data={"source": source},
+        )
+        log_json_artifact(
+            wandb_run,
+            name=f"{agent}-{safe_method}-publish-response",
+            artifact_type="result-response",
+            data=response,
+        )
+        print(response)
+    finally:
+        finish_wandb(wandb_run)
 
 
 if __name__ == "__main__":
