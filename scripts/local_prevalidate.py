@@ -74,7 +74,49 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--no-ppl", action="store_true")
     parser.add_argument("--no-decode", action="store_true")
     parser.add_argument("--request-timeout-s", type=int, default=180)
+    parser.add_argument("--wandb-name", default=None,
+                        help="log the local pre-validation summary to W&B under this run name")
+    parser.add_argument("--wandb-group", default=None,
+                        help="experiment group tag (e.g. int4-channel-lmhead-sweep)")
+    parser.add_argument("--wandb-project", default=None,
+                        help="W&B project (default: canonical wandb-applied-ai-team/gemma-challenge-senpai)")
     return parser.parse_args()
+
+
+def _maybe_log_wandb(args: argparse.Namespace, summary: dict[str, Any]) -> str | None:
+    """Best-effort W&B log of the local pre-validation summary; no-op without creds."""
+    if not getattr(args, "wandb_name", None):
+        return None
+    try:
+        if str(ROOT) not in sys.path:
+            sys.path.insert(0, str(ROOT))
+        from scripts.wandb_logging import finish_wandb, init_wandb_run, log_summary
+    except Exception as exc:  # pragma: no cover - logging must never break validation
+        print(f"[prevalidate] wandb logging unavailable: {exc}", flush=True)
+        return None
+    run = init_wandb_run(
+        job_type="local-prevalidate",
+        agent="senpai",
+        name=args.wandb_name,
+        project=args.wandb_project,
+        tags=["local-prevalidate", *([args.wandb_group] if args.wandb_group else [])],
+        config={
+            "submission": summary.get("submission"),
+            "served_model_name": summary.get("served_model_name"),
+            "decode_num_prompts": args.decode_num_prompts,
+            "decode_output_len": args.decode_output_len,
+            "ppl_records": args.ppl_records,
+            "wandb_group": args.wandb_group,
+            "local_exploratory": True,
+        },
+    )
+    if run is None:
+        return None
+    log_summary(run, summary, step=0)
+    run_id = getattr(run, "id", None)
+    print(f"[prevalidate] wandb run id={run_id}", flush=True)
+    finish_wandb(run)
+    return run_id
 
 
 def load_manifest(submission_dir: Path) -> dict[str, Any]:
@@ -260,6 +302,10 @@ def main() -> int:
         )
 
         (out_dir / "local_summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
+        run_id = _maybe_log_wandb(args, summary)
+        if run_id:
+            summary["wandb_run_id"] = run_id
+            (out_dir / "local_summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True))
         tps = summary.get("tps", 0.0)
         ppl = summary.get("ppl", 0.0)
         print("\n[prevalidate] LOCAL pre-validation summary", flush=True)

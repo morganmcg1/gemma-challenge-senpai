@@ -67,6 +67,12 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--same-path-threshold", type=float, default=DEFAULT_SAME_PATH_THRESHOLD,
                     help="max allowed |same_path_ppl - prompt_logprobs_ppl| before the gate fails")
+    ap.add_argument("--wandb-name", default=None,
+                    help="log the validation evidence (greedy verdict, ppl, same-path, tps) to W&B under this run name")
+    ap.add_argument("--wandb-group", default=None,
+                    help="experiment group tag (e.g. int4-channel-lmhead-sweep)")
+    ap.add_argument("--wandb-project", default=None,
+                    help="W&B project (default: canonical wandb-applied-ai-team/gemma-challenge-senpai)")
     args = ap.parse_args(argv)
 
     # The same-path gate compares against the prompt_logprobs PPL, so it needs
@@ -234,6 +240,9 @@ def main(argv: list[str] | None = None) -> int:
                 evidence["failures"].append(f"tps stage error: {exc}")
                 print(f"[validate] ERROR tps stage: {exc}", flush=True)
 
+    run_id = _maybe_log_wandb(args, evidence)
+    if run_id:
+        evidence["wandb_run_id"] = run_id
     (out_dir / "evidence.json").write_text(json.dumps(evidence, indent=2, sort_keys=True))
     _print_block(evidence, out_dir)
 
@@ -248,6 +257,39 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
     return 0
+
+
+def _maybe_log_wandb(args: argparse.Namespace, evidence: dict) -> str | None:
+    """Best-effort W&B log of the validation evidence; no-op without creds."""
+    if not getattr(args, "wandb_name", None):
+        return None
+    try:
+        from scripts.wandb_logging import finish_wandb, init_wandb_run, log_summary
+    except Exception as exc:  # pragma: no cover - logging must never break validation
+        print(f"[validate] wandb logging unavailable: {exc}", flush=True)
+        return None
+    run = init_wandb_run(
+        job_type="local-validation",
+        agent="senpai",
+        name=args.wandb_name,
+        project=args.wandb_project,
+        tags=["local-validation", *([args.wandb_group] if args.wandb_group else [])],
+        config={
+            "submission": evidence.get("submission"),
+            "submission_name": evidence.get("submission_name"),
+            "num_prompts": evidence.get("num_prompts"),
+            "output_len": evidence.get("output_len"),
+            "model_id": evidence.get("model_id"),
+            "wandb_group": args.wandb_group,
+        },
+    )
+    if run is None:
+        return None
+    log_summary(run, evidence, step=0)
+    run_id = getattr(run, "id", None)
+    print(f"[validate] wandb run id={run_id}", flush=True)
+    finish_wandb(run)
+    return run_id
 
 
 def _fmt(v, spec="") -> str:
