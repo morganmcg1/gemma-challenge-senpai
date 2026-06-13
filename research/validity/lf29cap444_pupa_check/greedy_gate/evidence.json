@@ -1,0 +1,44 @@
+{
+  "experiment": "greedy-gate on pupa-lf29cap444 (advisor-authorized follow-up, PR #22)",
+  "date": "2026-06-13",
+  "hardware": "local A10G (23 GiB), single GPU",
+  "submission": "submissions/lf29cap444_pupa_check",
+  "deployed_weights": "pupa-lf29-v0",
+  "lffn_weight_sha256": "b80356993ea7906ebfc60c08cb9dea6553d227af4280c1e5875dc8b840930577",
+  "design": "served-vs-served, same osoi5 stack, spec-off (M=1 AR), toggle only LFFN_LINEAR to isolate the LF29 fold's marginal argmax effect (fold-on vs exact-FFN)",
+  "reference_stage": {
+    "dir": "reference_m1ar_exactffn",
+    "LFFN_LINEAR": "0",
+    "layer29_ffn": "exact (patch inert, no [lffn] patched line)",
+    "spec": "off (SPECULATIVE_CONFIG='')",
+    "tokens": 65536
+  },
+  "candidate_stage": {
+    "dir": "candidate_m1ar_foldon",
+    "LFFN_LINEAR": "1",
+    "LFFN_PPL_EXACT": "1",
+    "layer29_ffn": "LF29 affine fold",
+    "fold_active_proof": "[lffn] patched ... ppl_exact=1 present (x2); zero path=original_forward markers => exact-FFN exemption never fired => fold ran on every layer-26 decode forward",
+    "spec": "off (SPECULATIVE_CONFIG='')",
+    "tokens": 65536
+  },
+  "result": {
+    "verdict": "GREEDY_IDENTICAL",
+    "num_prompts_compared": 128,
+    "num_identical": 128,
+    "num_divergent": 0,
+    "total_tokens_compared": 65536,
+    "total_divergent_tokens": 0,
+    "flip_rate_per_token": 0.0,
+    "flip_rate_per_prompt": 0.0,
+    "integrity_failures": 0,
+    "missing": 0
+  },
+  "interpretation": "The deployed LF29 fold is argmax-identical to the exact FFN under free-running greedy decode (0/65536 flips), consistent with its -0.0013 teacher-forced PPL footprint. Neither output gate (same-path PPL gap 0.0000, greedy 0 flips) condemns this lane; only the grader-conditional num_prompt_logprobs branch in serve.py flags it. The community 2.55 is not a free-running greedy PPL on these weights (identical text => identical PPL).",
+  "ci_note": "0/65536 flips => rule-of-three 95% CI upper bound on per-token flip rate ~= 4.6e-5 on the official sharegpt eval distribution.",
+  "wandb_run": "gz5b064e",
+  "wandb_run_name": "wirbel/lf29cap444-greedy-gate",
+  "wandb_group": "fa2sw-precache-validate-and-lf29-check",
+  "report_file": "greedy_report.json",
+  "primary_metric": {"name": "pupa_lf29_greedy_flip_rate_per_token", "value": 0.0}
+}

@@ -1,0 +1,21 @@
+# Fold-provenance excerpt for the greedy-gate run (source .log files are research/**/*.log gitignored)
+# Extracted 2026-06-13. Proves: candidate ran the LF29 affine fold on every decode token; reference ran exact FFN.
+
+## candidate_m1ar_foldon (LFFN_LINEAR=1 default => fold)
+### [lffn] patched markers (patch installed in APIServer + EngineCore):
+(APIServer pid=35870) [lffn] patched Gemma4DecoderLayer.forward for original layer 29 -> local layer 26 alpha=1.0 ppl_exact=1 (pid 35870)
+(EngineCore pid=36315) [lffn] patched Gemma4DecoderLayer.forward for original layer 29 -> local layer 26 alpha=1.0 ppl_exact=1 (pid 36315)
+### count of 'path=original_forward' (exact-FFN exemption) markers => MUST be 0 (fold ran every token):
+count = 0
+### serve env LFFN flags:
+'LFFN_LINEAR': '1'
+'LFFN_PPL_EXACT': '1'
+'SPECULATIVE_CONFIG': ''
+
+## reference_m1ar_exactffn (LFFN_LINEAR=0 => patch inert => exact FFN)
+### [lffn] patched markers => MUST be absent (patch inert):
+count = 0
+### serve env LFFN flags:
+'LFFN_LINEAR': '0'
+'LFFN_PPL_EXACT': '1'
+'SPECULATIVE_CONFIG': ''
