@@ -125,6 +125,13 @@ def main(argv: list[str] | None = None) -> int:
                 evidence["stages"]["decode"] = {"num_records": decode_summary["num_records"]}
                 evidence["completed"] = decode_summary["num_records"]
 
+                # Canonical auto-resolution (no manual --reference threading): the
+                # reference dir is keyed by the submission's collision-free identity,
+                # NOT by prompt count, so the same path holds whatever N was last
+                # generated. It must hold >= args.num_prompts prompts or the gate reads
+                # INCOMPARABLE — e.g. running --num-prompts 128 needs the 128-prompt
+                # reference (regenerate: gen_greedy_reference --mode served --submission
+                # <dir> --num-prompts 128 [--ref-env <drafter-off>]).
                 reference = args.reference or greedy_gate.reference_for(srv.reference_model_id)
                 if not Path(reference).exists():
                     msg = (f"greedy reference missing: {reference} — generate it for THIS submission with "

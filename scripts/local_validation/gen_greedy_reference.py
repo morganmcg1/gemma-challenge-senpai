@@ -26,6 +26,23 @@ pick is the whole game:
       yields false DIVERGENT verdicts; use it only as a diagnostic second source,
       never as the hard gate.
 
+Canonical reference location (what ``validate_submission`` auto-resolves, no manual
+path threading needed):
+    research/greedy_reference/<model_tag>/decode_outputs.jsonl
+where ``<model_tag>`` is the filesystem-safe form of a submission's collision-free
+``<submission_dir>::<model_id>`` key (see ``harness.reference_identity``), or a bare
+``<model_id>`` for the plain-baseline anchor. The path is keyed by *identity only*,
+NOT by prompt count, so regenerating at a new ``--num-prompts`` overwrites the same
+dir. Because the gate compares prompt-for-prompt, a reference must hold at least as
+many prompts as the candidate decode: validating at ``--num-prompts 128`` needs a
+128-prompt reference (a shorter one reads INCOMPARABLE). For
+``submissions/fa2sw_precache_kenyan`` the canonical reference is
+research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/
+generated at 128 prompts with the drafter OFF via ``--ref-env SPECULATIVE_CONFIG=``
+(this submission's serve.py maps SPECULATIVE_CONFIG -> --speculative-config and does
+NOT honor ``--spec-off``/SENPAI_REFERENCE_MODE, so the empty-string override is how
+its MTP drafter is disabled for the M=1 AR anchor).
+
 Tokenization and record IDs come from the official ``decode_outputs.py`` so the
 reference lines up prompt-for-prompt with a live endpoint capture.
 
@@ -123,6 +140,11 @@ def generate_served(args: argparse.Namespace) -> int:
         submission = args.submission
         manifest = harness.load_manifest(submission)
         key_id = reference_key_for_submission(submission)
+        # Defend the keying fix: a submission's reference tag must carry the
+        # <submission_dir>::<model_id> anchor before we serve+write under it, so a
+        # bare 'model' literal can never alias this onto another submission's
+        # reference (the collision class PR #32 closed).
+        harness.assert_submission_reference_tag(key_id)
         extra_env = {**spec_off_env, **ref_env}
         served_via = f"submission:{submission}" + (" [spec-off]" if args.spec_off else "")
     else:
