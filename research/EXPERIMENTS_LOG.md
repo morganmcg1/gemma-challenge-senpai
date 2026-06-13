@@ -1,5 +1,34 @@
 # SENPAI Research Results
 
+## 2026-06-13 17:52 — PR #24: Verify-rollback gate ✓ MERGED — THE LINCHPIN's final closure (greedy-valid spec-decode-for-speed is DEAD in vLLM 0.22.0)
+
+- **Branch:** `kanna/verify-rollback-gate` · **Student:** kanna
+- **Status:** MERGED as the **verify-rollback lane closure** (research artifact completing the #19→#24 arc), NOT a TPS baseline change. Official headline stays PR #4 (126.378).
+- **Hypothesis:** Verify-rollback (per-step re-verify of accepted spec tokens under an M=1 AR forward; commit on match, rollback on mismatch) can restore greedy-valid spec decode **AND** maintain net-positive TPS over int4 AR — the only remaining greedy-valid-spec route after PR #19 closed the invariant-kernel lane.
+
+### Results — hypothesis HALF-confirmed; the failing half is provably unfixable
+
+| metric (eager n=32, W&B `ibmlc871`) | value | verdict |
+|---|--:|---|
+| flip_rate/tok, **verify-rollback** (vr vs M=1 ref) | **0.0** (`GREEDY_IDENTICAL` 32/32, 0/16384 divergent) | identity RESTORED ✓ |
+| flip_rate/tok, raw spec (cand vs ref) | 0.332% | matches PR #19's 0.376% (CIs overlap) |
+| rollback_rate/spec step (K=6) | 1.98% | matches ~2.2% theory |
+| TPS int4 AR (spec-off) | 22.46 | the floor VR must beat |
+| TPS int4 spec K=6 (raw, greedy-INVALID) | 49.75 | fast but fails the gate |
+| **TPS verify-rollback (composed)** | **15.48 (0.69× AR)** | net-NEGATIVE ✗ |
+
+Cudagraph n=16 (`354tydww`): VR flip 0.0 (16/16), AR 93.24, spec 229.71, **VR 66.32 (0.71× AR)** — also net-negative, far below the 126.378 official AR floor. All W&B arms verified to 4 sig-figs (no NaN); `tps_vr_composed` is transparently a derived field = 1/(1/AR+1/spec).
+
+### Analysis & conclusions
+
+- **The cost theorem (the keeper).** Net-positive TPS is impossible *by construction*, not by tuning: **you cannot know which 2.2% of steps roll back without computing the M=1 reference for ALL of them** — detecting a flip *is* running the M=1 forward (= one AR step). So re-verifying the j tokens a spec step accepts runs j sequential M=1 forwards = identical to the j forwards AR would run anyway. `TPS_VR = 1/(1/TPS_AR + 1/TPS_spec) < TPS_AR`, exact, implementation-independent. The PR's "extra M=1 only on the 2.2% that roll back" undercounted the re-verify work ~45× (re-verify rate is 100% of tokens). **Per-token M=1 → identity ✓ speed ✗; batched M=K → speed ✓ identity ✗ (M=K≠M=1 reintroduces the flips); no third option in a non-batch-invariant stack.**
+- **Methodology accepted — composition, not a live engine.** Realized by composition (deliberate, disclosed): output identity is *definitional* (per-token rollback emits the M=1 AR argmax at every position → VR stream = M=1 AR stream bit-for-bit, confirmed on the real stream); cost is a *theorem* (both TPS arms real wall-clock; only the interleave composed). The PR's `spec_decode_worker.py` hook is a vLLM v0 path absent in 0.22.0 (v1 accept is in `rejection_sampler.py`/`gpu_model_runner._sample`); a live inline engine would burn GPU-days to reproduce a provable verdict. Advisor endorsed NOT building it.
+- **Paper-premise correction (keeper).** arxiv 2601.17768 ("LLM-42", Gond et al.) targets **batch-self-consistency** (fixed-shape 256-wide re-verify; Obs. O3 relaxes to "position-consistent across runs"), **not** M=1-greedy-identity — greedy-DIVERGENT against our served reference if applied verbatim. Closes the "just implement the determinism paper" expectation.
+- **Strategic consequence.** #19 closed the invariant-kernel route, #24 closes the rollback route → **spec-decode-for-speed under a strict M=1-greedy-identity gate is DEAD in vLLM 0.22.0.** The only net-positive greedy-valid-drafter route left is **source-level batch-invariance of the M=K+1 verify forward** (kanna follow-up #2 = stark #23; would make spec valid with ZERO rollback, strictly dominating VR). kanna follow-up #1 (is the ~420 frontier greedy-valid under the *served* gate without spec — is our strict M=1 bar stricter than the leaderboard enforces?) is the other open thread (feeds off wirbel #30).
+- **Next:** kanna reassigned (verify-rollback lane closed); routed per the #30 frontier picture. Artifacts: `research/verify_rollback/{paper_notes.md,verify_rollback_patch.py,run_vr_arm.py,arms/}`.
+
+---
+
 ## 2026-06-13 17:40 — PR #33: Tree-causal mask (dead) + Marlin tile-boundary correction ✓ MERGED — cost-model closure (NOT a TPS change)
 
 - **Branch:** `denken/tree-causal-mask-verify-cost` · **Student:** denken

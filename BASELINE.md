@@ -137,8 +137,19 @@ isolating TWO independent un-coverable causes: (a) int4 Marlin is a `_C` op the 
 (contributes ~0.265%/tok excess above bf16 floor), (b) the spec verify path has an irreducible non-aten
 batch-variant component (~0.111%/tok; corroborated by vLLM issue #27433: "does not currently integrate with
 speculative decoding"). Batch-invariance coverage is real (bit-exact kernel probe) but aten-scoped;
-both flip sources sit outside aten. This closes the invariant-kernel lane; the next lane is
-**verify-rollback** (arxiv 2601.17768, kanna assigned);
+both flip sources sit outside aten. This closes the invariant-kernel lane.
+**Verify-rollback** (arxiv 2601.17768, kanna #24, MERGED 2026-06-13) — the only remaining
+greedy-valid-spec route — is now **CLOSED by a cost theorem**: per-token M=1 re-verify restores
+bit-exact identity (flip→0, `GREEDY_IDENTICAL` 32/32, W&B-verified) but is **net-NEGATIVE by
+construction** — `TPS_VR = 1/(1/TPS_AR + 1/TPS_spec) < TPS_AR` *always* (0.69× eager / 0.71×
+cudagraph) — because **detecting which ~2.2% of steps roll back *is* running the M=1 forward for
+100% of tokens** (re-verify rate ≠ rollback rate; the PR's overhead estimate undercounted ~45×).
+Batched M=K re-verify regains speed but reintroduces the flips: per-token M=1 → identity ✓ speed ✗;
+batched M=K → speed ✓ identity ✗; no third option in a non-batch-invariant stack. **Spec-decode-for-speed
+under a strict M=1-greedy-identity gate is DEAD in vLLM 0.22.0**; the only net-positive route left is
+**source-level batch-invariance of the M=K+1 verify forward** (stark #23). (Paper note: arxiv 2601.17768
+"LLM-42" targets batch-self-consistency, *not* M=1 identity — greedy-DIVERGENT against our served ref if
+applied verbatim.) Also closed:
 **tree-causal attention mask for sparse-tree spec verify (this model/hardware)** — production
 dense-SDPA + topology-mask path (SpecInfer/EAGLE/Medusa/vLLM) saves **exactly 0** wall-time
 (changes *which* scores are masked, not *how many* are computed); FLOP-ideal ceiling ≤0.18 ms
