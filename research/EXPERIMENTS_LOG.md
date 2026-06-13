@@ -1,5 +1,32 @@
 # SENPAI Research Results
 
+## 2026-06-13 18:58 — PR #9: Wide-distribution KL-distilled drafter for private-stable acceptance — REQUEST-CHANGES (negative result + key methodological finding)
+
+- **Branch:** `land/wide-drafter-distill` · **Student:** land
+- **Status:** NOT MERGED (native regressed). Request-changes → rebase (`heldout.jsonl` conflict) + pivot to HASS serve-faithful objective. **High-value negative result.**
+- **Hypothesis:** Above ~286 TPS the binding constraint is drafter acceptance, and the binding *risk* is the private-set re-run (drafters fit to the 128 public prompts lose 4–9% TPS and die on the 5% repro rule). A drafter KL-distilled on a wide, distribution-matched corpus should lift acceptance AND make it private-stable.
+
+### Results (W&B run `land-freerun-v1b-171224`, project gemma-challenge-senpai, group wide-drafter-freerun)
+
+| metric | stock | v0 (teacher-forced) | v1b (free-running) | Δ v1b vs stock |
+|---|--:|--:|--:|--:|
+| offline tf gate (accepted tok/step, K=7) | 3.455 | 3.811 (+10%) | **4.004** | **+15.9%** |
+| **native accept/step (HF assisted-gen)** | **3.553** | 3.388 (−5%) | **3.341** | **−6.0%** |
+| greedy identity (bf16 harness artifact) | 14/24 | — | 13/24 | — |
+| peak mem train / eval-load | — | — | 17.4 / ~16 GB | A10G 23 GB fits |
+
+- Full budget: 1030 steps, 220,746 positions, 3.4 epochs, 82 min (whole cap), LR cosine-decay-by-time, free_run_frac 0.895, diverge_frac 0.285.
+
+### Analysis / conclusion
+
+- **Problem #1 (v1a native collapse to 1.49) FIXED** by greedy-trajectory corpus + rejection-aware break (v1b native healthy 3.34, diverge_frac 0.285).
+- **Problem #2 (the real one):** tf and native are **anti-correlated** under our training. Two independent schedules (v0 tf, v1b free-run) move tf +10/+16% while native lands at ~3.34–3.39. Signature of optimizing a divergent proxy, and **rules out exposure bias** (free-run directly targets it).
+- **Mechanism (evidence-backed):** our objective + tf proxy condition the draft's step-0 hidden on the target's ground-truth hidden (fresh target prefill per position). HF native assisted-generation does NOT — the assistant runs its own forward over accumulated KV across verify rounds. Fine-tuning the draft to excel on the target's *true* hidden drifts it off the joint optimum the serving path feeds it; the un-fine-tuned stock draft sits ON that optimum (3.553).
+- **Programme conclusion:** the offline tf gate (incl. `offline_acceptance.py`) is NOT a faithful proxy for native acceptance for this EAGLE drafter. Drafter work must be gated on native (or an interface-faithful objective). Propagated to fern #34 (native cross-check requested) and CURRENT_RESEARCH_STATE.
+- **Next:** HASS-style serve-faithful training (feed the draft its own running hidden over accumulated KV), gate/select on `heldout_native_accept_per_step`. land sent back to implement on the same PR.
+
+---
+
 ## 2026-06-13 — PR #39: fa2sw attention deep-profile ✓ MERGED — Triton verify occupancy-bound, 3D split-KV lever identified
 
 - **Branch:** `wirbel/fa2sw-attn-profile` · **Student:** wirbel

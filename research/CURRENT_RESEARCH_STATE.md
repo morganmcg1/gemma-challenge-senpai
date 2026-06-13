@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 19, ~18:30Z)
+- **Date:** 2026-06-13 (cycle 20, ~18:58Z)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 - **Most recent human directive (Issue #31, lewtun, 2026-06-13 ~16:42Z):** "For everyone looking to contribute downstream evals of the baseline or most promising submissions, don't use greedy decoding: instead use the model's recommended sampling parameters from `generation_config.json`." **Standing requirement:** any downstream quality eval (MT-Bench, MMLU, or similar) must use `generation_config.json` params — NOT greedy (temp=0.0). This does NOT apply to the official TPS benchmark (greedy by protocol) or the greedy-identity validity gate (greedy by definition) — only to human-facing quality/downstream evals. Include in every future PR body that involves downstream eval. Acknowledged in Issue #31.
 - **Prior directive (Morgan, ~13:00Z):** Approved both int4 HF jobs (issues #11/#12). **Still operating under launch operator rules: no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch` without a human-approved GitHub issue. Advisor consumes no GPU.**
@@ -51,6 +51,8 @@
 
 **Note on rock-ai (rank 1, 459.72 TPS):** method is "rockai" — unclear if it uses the LF29 construction. Treat as unknown validity until organizer comments.
 
+**Cap-tier characterization (firfir-cast, 3 INVALID runs, 2026-06-13):** cap=445/448/475 all show ~7.2–7.3% private-set TPS drop → INVALID by the 5% repro rule (verifier post `20260613-185613-207_cmpatino-verifier.md`). Confirms the 445–459 `DECODE_TPS_CAP` tier dies on private re-run. **Our target stays the legitimate ~420 VALID frontier (kenyan-duma 421.12).**
+
 ---
 
 ## THE LINCHPIN — FULLY CLOSED (cycle 19, 2026-06-13)
@@ -77,6 +79,17 @@ Two closed routes:
 | **Served-gate reconciliation (kanna #38, ACTIVE)** | whether leaderboard's served gate matches our strict M=1 bar | TBD |
 
 **→ Every HF-approval issue must attach BOTH `greedy_gate` AND `--check-same-path`. Neither catches an argmax-safe grader-conditional fold.**
+
+---
+
+## DRAFTER TRAIN↔SERVE GAP — NEW FINDING (land #9 v1b, 2026-06-13 ~18:58Z)
+
+**The offline teacher-forced (tf) acceptance gate is NOT a faithful proxy for native HF assisted-generation acceptance.** Two independent drafter training schedules (v0 teacher-forced, v1b free-running) each lifted the tf gate +10–16% while native serving acceptance *regressed* −5–6% (stock 3.553 → v1b 3.341 native). tf and native are **anti-correlated** under our training → rules out exposure bias, points at **interface fidelity**: our objective conditions the draft's step-0 hidden on the target's ground-truth hidden, but HF native assisted-generation feeds the draft its *own* running hidden over accumulated KV. Fine-tuning to excel on the former drifts off the serving optimum (the un-fine-tuned stock draft sits ON it at 3.553).
+
+**Programme implications:**
+- Drafter-quality work must be gated on **native** accepted-tok/step (`heldout_native_accept_per_step`), NOT the tf proxy. Propagated to fern #34 (native cross-check requested alongside `tf_acc`).
+- The lever is **serve-faithful (HASS-style) training** — feed the draft its own running hidden, matching the serve path. land #9 pivoted to this (the only thing that should convert tf→native).
+- Directly serves the #1 programme risk (**private-stable acceptance**): the verifier just invalidated `firfir-cast` for a 7.2% private TPS drop; the legitimate ~420 frontier is won on acceptance, not on `DECODE_TPS_CAP` gaming.
 
 ---
 
@@ -116,11 +129,11 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 | kanna | **#38 (NEW)** | **Served-gate validity audit.** Does `fa2sw_precache_kenyan` pass the SERVED greedy gate (spec-on vs spec-off, batch=1)? Reconcile 27/32 M=1-offline divergence (#32) with leaderboard-valid ~424.5 TPS status. Is our strict M=1 bar over-conservative? LOCAL ONLY. | **Assigned (post-#24 merge)** |
 | wirbel | **#43 (NEW)** | **3D split-KV dispatch for M>1 verify.** Patch `max_seqlen_q > 1` guard in Triton `unified_attention`; extend per-segment softmax reduction to multiple query rows; measure served TPS. Greedy-exact (bit-identical). Projects ~471–505 TPS. LOCAL ONLY. | **Assigned (post-#39 merge)** |
 | lawine | **#42 (NEW)** | **`--spec-off` contract fix + validator N-mismatch legibility.** Teach spec `serve.py` to honor `SENPAI_REFERENCE_MODE`; clean up `--ref-env` workaround; surface `num_records` into `evidence.json` with N-mismatch warning. LOCAL ONLY. | **Assigned (post-#40 merge)** |
-| fern | **#34 (WIP)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from served target under EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME (57/57/14), hard-dedup vs 128 eval ids, early-stop on held-out reasoning tf_acc. Target: break 0.73 plateau toward 0.78–0.85. | Active |
+| fern | **#34 (WIP)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from served target under EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME (57/57/14), hard-dedup vs 128 eval ids, early-stop on held-out reasoning tf_acc. Target: break 0.73 plateau toward 0.78–0.85. | Active — **native accept/step cross-check requested** (land #9: tf_acc may not convert to native) |
 | denken | **#41 (NEW)** | **Scatter floor elimination in `compute_logits`.** Prove `kept_ids[argmax(partial_12k_logits)]` == scatter+full-argmax (empirical greedy-identity guarantee), then implement the skip to save ~0.155 ms/step @ M=45. Ceiling 538→~546 TPS. LOCAL ONLY. | **Assigned (post-#37 merge)** |
 | stark | **#23 (WIP)** | **Source-level batch-invariance probe** — fp32-logit, deterministic-reduction arms; measure which (if any) drives flip_rate → 0. The only remaining net-positive route to greedy-valid spec decode in vLLM 0.22.0. | Active — **#1 spec-decode priority** |
-| ubel | **#36 (WIP)** | **lmhead12k int4-pruned head.** Slice the 12k head in int4 (≈16 MB vs 62.9 MB bf16) for another ~4× head-byte cut. Bandwidth-model ~133 local (+1.3%). Same `kept_ids`, orthogonal to private-PPL question. **PLUS high-priority operational interrupt: launch the human-approved (Issue #35) HF benchmark for the merged `lmhead12k_empirical` — official TPS + private-PPL test; run in parallel with #36.** | Active + HF launch in flight |
-| land | **#9 (WIP)** | **Wide KL-distilled drafter** — v0 regressed −4.6% native (schedule mismatch). v1 = free-running / EAGLE-3-style schedule + full ~82-min budget. | Active |
+| ubel | **#36 (WIP)** | **lmhead12k int4-pruned head.** Slice the 12k head in int4 (≈16 MB vs 62.9 MB bf16) for another ~4× head-byte cut. Bandwidth-model ~133 local (+1.3%). Same `kept_ids`, orthogonal to private-PPL question. **PLUS high-priority operational interrupt: launch the human-approved (Issue #35) HF benchmark for the merged `lmhead12k_empirical` — official TPS + private-PPL test; run in parallel with #36.** | Active + HF launch (**Option A approved**, Issue #35: host ckpt→repoint MODEL_ID→smoke greedy 128/128→launch-once) |
+| land | **#9 (WIP)** | **Wide KL-distilled drafter** — v1b free-running: tf +15.9% but native −6.0% → **tf gate is not serve-faithful** (interface fidelity, not exposure bias). **Sent back: rebase (heldout.jsonl conflict) + pivot to HASS-style serve-faithful objective**, gate on native accept/step. | Active — request-changes pivot |
 
 **All 8 students busy. Zero idle GPUs.**
 
@@ -147,12 +160,14 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 4. **Benchmark-matched corpus → drafter p≥0.85 (fern #34)** — PR #25 proved reasoning acceptance is DATA-bottlenecked at 0.73; MCQ-template CoT on the actual 128-prompt distribution is the lever toward p≥0.85 (needed for >500 TPS).
 5. **lmhead12k int4-pruned head (ubel #36)** — another ~4× head-byte cut; compounds with spec if batch-invariance unlocks.
 6. **Greedy-ref infra 128-prompt (lawine #40)** — feeds kanna's served-gate audit with full 128-prompt data.
-7. **Wide drafter (land #9)** — prerequisite for accepthist + tree-salvage on honest stack.
+7. **Serve-faithful (HASS) drafter (land #9)** — tf-acc gains do NOT convert to native (land #9 v1b finding: tf +16% / native −6%). Interface-fidelity training (draft's own running hidden, matching the serve path) is the real acceptance lever and the path to **private-stable acceptance** (the #1 programme risk). Gate on native accept/step, not tf.
 8. **Eliminate the scatter floor (denken follow-up from #37)** — kernel argmax over 12k partial + remap to full-vocab id; needs correctness proof that top-1 never falls outside kept_ids; ceiling ~546 vs 538 measured. Local profiling only.
 9. **accepthist (dynamic K)** — clean implementation on honest frontier once spec is unlocked. Potential +~20 TPS on top of static K.
 10. **rock-ai method investigation** — 459.72 TPS, method "rockai", validity status unclear. If genuinely valid and novel, it's our next target.
 
 ---
+
+_Cycle 20 (review pass, ~18:58Z): land #9 reviewed → **request-changes pivot** (tf gate not serve-faithful; rebase + HASS serve-faithful objective, gate on native). ubel #36 → back to wip (Option A approved on Issue #35: host lmhead12k ckpt → repoint → smoke → launch-once). fern #34 → native accept/step cross-check requested. Public intake: frontier #1 rock-ai 459.72 but 445–459 cap-tier confirmed INVALID on private re-run (firfir-cast −7.2%); legitimate frontier ~420 unchanged. All 8 students busy; zero idle._
 
 _Last updated: 2026-06-13 **cycle 22/23** — PR #39 MERGED (wirbel: fa2sw attention premise refuted; Triton 2D occupancy-bound at 4.7% BW floor; 3D split-KV fix greedy-exact; projects 471–505 TPS; HIGHEST-LEVERAGE LEVER). wirbel→#43 (implement 3D split-KV for M>1 verify). Awaiting: ubel HF result (Issue #35), land v1 verdict (PR #9, training ~done). All 8 students busy; zero idle._
 
