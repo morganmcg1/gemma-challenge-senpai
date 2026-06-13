@@ -40,14 +40,26 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 
 ## Potential next research directions (round 2+)
 
-- **PARD parallel-draft adaptation** of the E4B assistant (flat acceptance curve → deeper K →
-  potentially ~350–500 TPS). Heavy: needs a Gemma-adapted TRL trainer + a wide corpus.
-- **EAGLE-3-style draft head** for E4B (none published) — train one.
-- **Target-aligned drafter** matched to the *exact served quant* (g128-chanhead, not official g32).
-- **Provably-greedy sparse verification** (top-k verify of the 262k tail with a full-vocab
-  fallback guard) — legitimate version of the verify-cost lever; check if it's a real win.
-- **Investigate the `DECODE_TPS_CAP` PENDING entries** — confirm whether they are a measurement
-  artifact (cap gaming) or contain a legitimate throughput-accounting insight.
-- Researcher-agent deep-dive in flight → `research/RESEARCH_IDEAS_2026-06-13_round2.md`.
+Round-2 researcher-agent deep-dive complete → full writeup + dead-end map + decision tree in
+`research/RESEARCH_IDEAS_2026-06-13_round2.md`. Five ranked ideas, staged for the next idle slot
+(0 idle right now — all 8 on round-1). Ranked:
+
+1. **KL-distilled ≥9k-corpus drafter** (private-stability) — **already in flight as land's #9.**
+   Independent confirmation this is the top lever; no new assignment needed.
+2. **PARD-2 parallel drafting + CAT** — break the MTP autoregressive chain (acceptance decay
+   0.69→0.17 over K). Projected 450–520 TPS if tok/fwd lifts 3.55→5–6. Needs a new drafter +
+   TRL/COD trainer. Natural successor to kanna's MTP base (#5) / land's corpus (#9).
+3. **EAGLE-3 draft head** (multi-layer feature fusion) — gated on whether vLLM exposes Gemma-4
+   intermediate features; degrades to (community-explored) EAGLE-2 if not. Verify export first.
+4. **P-EAGLE `parallel_drafting:true` probe** — *near-zero-cost diagnostic*: one serve-flag, one
+   local run on the existing drafter to read tok/fwd. **Cheapest next probe** — best as a fast
+   follow-up once kanna's drafter (#5) serves, or the first round-2 assignment.
+5. **GPU-side SAM-Decoding suffix match** (in-graph, no host round-trip) — exploits 3.6–3.9% of
+   tokens in verbatim runs > K=8. High ceiling, heavy Triton/CUDA-graph work; gate on an offline
+   token-budget replay before committing.
+
+Pending earlier threads (still open): provably-greedy sparse verification (ubel's #6 is the
+round-1 version); the `DECODE_TPS_CAP` PENDING leaderboard entries (confirm cap-gaming vs. real
+accounting) — deprioritized vs. the drafter ladder.
 
 _Living document — prune and update as rounds complete._
