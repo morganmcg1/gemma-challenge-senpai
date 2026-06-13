@@ -31,3 +31,10 @@ submissions/*/model/
 
 # Live advisor frontier polling state.
 research/frontier_watch/
+
+# Drafter v0 (PR #9): trained checkpoints (100s of MB) and local W&B run dirs
+# are reproducible from scripts/drafter/ + the committed corpus, so keep them
+# out of git. The large train shard is regenerable from build_corpus.py (fixed
+# seed); the held-out shard + composition.json are committed as the gate proof.
+research/wide_drafter/ckpt/
+research/wide_drafter/corpus/train.jsonl
