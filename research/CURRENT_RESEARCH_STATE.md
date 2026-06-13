@@ -65,7 +65,7 @@ Two closed routes:
 
 **ONE NET-POSITIVE ROUTE REMAINS:** source-level batch-invariance of the M=K+1 verify forward (stark #23) — would make spec valid with zero rollback, strictly dominating VR.
 
-**OPEN QUESTION (kanna #38):** Is our strict M=1 bar over-conservative vs the leaderboard's served gate? fa2sw_precache_kenyan is leaderboard-valid at ~424.5 TPS but DIVERGENT 27/32 vs M=1 AR under correct keying (#32). The leaderboard likely enforces a served-spec-on vs served-spec-off gate (not strict M=1) — if so, spec submissions through the weaker gate are already valid and stark #23's batch-invariance work becomes even higher priority.
+**ANSWERED (kanna #38, MERGED 2026-06-13 ~19:14Z):** The strict M=1 bar is **NOT over-conservative** — and the leaderboard gate is **weaker than any token-identity bar**: the official HF-Jobs harness (`hf_bucket_single_job.py`) runs **no greedy-identity check** (validity = PPL + completion + modalities). So **spec-decode stacks are leaderboard-legal** (this is why the entire ~420 VALID frontier ships MTP spec). fa2sw_precache_kenyan's divergence is **run-to-run FP nondeterminism**, not spec (same-GPU spec-OFF control diverges 28/32; plain int4 baseline 29/32; `FA_SLIDING=0` → 0/32). **Consequence: stark #23's batch-invariance is a HARDENING step, NOT a gate — the drafter ladder is already unlocked for official submission.** The binding constraint is now the **private-set TPS re-run** (kanna reassigned → #44 local private-gap probe). Full audit: `research/validity/served_gate_reconciliation.md`.
 
 ---
 
@@ -76,7 +76,7 @@ Two closed routes:
 | same-path PPL gate (PR #21) | Logit-level path splits on `prompt_logprobs` branching | Argmax-preserving grader-conditional folds (LF29-class) |
 | greedy_gate (PR #8) — **SELF-CONSISTENCY** (served vs plain-greedy of the *same* checkpoint) | serving-vs-reference numerical nondeterminism on the *submitted* model | **argmax-preserving folds AND prune-clipping** |
 | reference keying fix (**lawine #32, MERGED**) | infra correctness (resolves silent cross-submission collision) | n/a |
-| **Served-gate reconciliation (kanna #38, ACTIVE)** | whether leaderboard's served gate matches our strict M=1 bar | TBD |
+| **Served-gate reconciliation (kanna #38, MERGED)** | official gate = PPL + completion + modalities, **no token-identity** → spec leaderboard-legal; M=1 bar not over-conservative; fa2sw non-reproducible run-to-run | private-set TPS gap (→ kanna #44 probe) |
 
 **→ Every HF-approval issue must attach BOTH `greedy_gate` AND `--check-same-path`. Neither catches an argmax-safe grader-conditional fold.**
 
@@ -126,7 +126,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 | student | PR | track | status |
 |---|---|---|---|
-| kanna | **#38 (NEW)** | **Served-gate validity audit.** Does `fa2sw_precache_kenyan` pass the SERVED greedy gate (spec-on vs spec-off, batch=1)? Reconcile 27/32 M=1-offline divergence (#32) with leaderboard-valid ~424.5 TPS status. Is our strict M=1 bar over-conservative? LOCAL ONLY. | **Assigned (post-#24 merge)** |
+| kanna | **#44 (NEW)** | **Local private-gap probe.** #38 MERGED (served-gate keeper: official gate = PPL+completion+modalities, NO token-identity → spec leaderboard-legal; binding constraint = private TPS re-run). Reassigned: predict public→private TPS gap LOCALLY (chat/ShareGPT proxy vs 128 reasoning prompts), measure Δ%-acceptance-PPL on `fa2sw_precache_kenyan`, ship reusable `private_gap_probe.py`. Attacks the #1 private-re-run constraint. LOCAL ONLY. | **Assigned (post-#38 merge)** |
 | wirbel | **#43 (NEW)** | **3D split-KV dispatch for M>1 verify.** Patch `max_seqlen_q > 1` guard in Triton `unified_attention`; extend per-segment softmax reduction to multiple query rows; measure served TPS. Greedy-exact (bit-identical). Projects ~471–505 TPS. LOCAL ONLY. | **Assigned (post-#39 merge)** |
 | lawine | **#42 (NEW)** | **`--spec-off` contract fix + validator N-mismatch legibility.** Teach spec `serve.py` to honor `SENPAI_REFERENCE_MODE`; clean up `--ref-env` workaround; surface `num_records` into `evidence.json` with N-mismatch warning. LOCAL ONLY. | **Assigned (post-#40 merge)** |
 | fern | **#34 (WIP)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from served target under EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME (57/57/14), hard-dedup vs 128 eval ids, early-stop on held-out reasoning tf_acc. Target: break 0.73 plateau toward 0.78–0.85. | Active — **native accept/step cross-check requested** (land #9: tf_acc may not convert to native) |
@@ -156,7 +156,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 1. **3D split-KV for M>1 verify (wirbel #43)** — **THE SINGLE HIGHEST-LEVERAGE GREEDY-SAFE LEVER.** Patch `max_seqlen_q > 1` guard; ~90% already in vLLM; 4.14× measured speedup; projects 471–505 TPS on the already-valid frontier. Zero gate risk (bit-identical attention). Active.
 2. **Source-level batch-invariance (stark #23)** — THE unlock for strict M=1-greedy-valid spec decode. Only net-positive route in vLLM 0.22.0.
-3. **Served-gate reconciliation (kanna #38)** — if leaderboard gate is weaker than our strict M=1 bar, the drafter ladder is already unlocked for frontier submissions; stark #23 becomes a hardening step, not a gate.
+3. **Private-gap probe (kanna #44)** — #38 ANSWERED the served-gate question: leaderboard gate = PPL+completion+modalities, NO token-identity → drafter ladder already unlocked for frontier submissions; stark #23 is a hardening step, not a gate. The binding constraint is now the **private TPS re-run** (honest stacks lose 4–9%, >5%=INVALID). #44 builds a LOCAL early-warning probe (chat-proxy vs reasoning prompts) to predict the public→private gap before spending HF quota.
 4. **Benchmark-matched corpus → drafter p≥0.85 (fern #34)** — PR #25 proved reasoning acceptance is DATA-bottlenecked at 0.73; MCQ-template CoT on the actual 128-prompt distribution is the lever toward p≥0.85 (needed for >500 TPS).
 5. **lmhead12k int4-pruned head (ubel #36)** — another ~4× head-byte cut; compounds with spec if batch-invariance unlocks.
 6. **Greedy-ref infra 128-prompt (lawine #40)** — feeds kanna's served-gate audit with full 128-prompt data.
@@ -169,7 +169,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 _Cycle 20 (review pass, ~18:58Z): land #9 reviewed → **request-changes pivot** (tf gate not serve-faithful; rebase + HASS serve-faithful objective, gate on native). ubel #36 → back to wip (Option A approved on Issue #35: host lmhead12k ckpt → repoint → smoke → launch-once). fern #34 → native accept/step cross-check requested. Public intake: frontier #1 rock-ai 459.72 but 445–459 cap-tier confirmed INVALID on private re-run (firfir-cast −7.2%); legitimate frontier ~420 unchanged. All 8 students busy; zero idle._
 
-_Last updated: 2026-06-13 **cycle 22/23** — PR #39 MERGED (wirbel: fa2sw attention premise refuted; Triton 2D occupancy-bound at 4.7% BW floor; 3D split-KV fix greedy-exact; projects 471–505 TPS; HIGHEST-LEVERAGE LEVER). wirbel→#43 (implement 3D split-KV for M>1 verify). Awaiting: ubel HF result (Issue #35), land v1 verdict (PR #9, training ~done). All 8 students busy; zero idle._
+_Last updated: 2026-06-13 **cycle 22/23** — PR #38 MERGED (kanna served-gate keeper: official gate = PPL+completion+modalities, **NO token-identity** → spec-decode leaderboard-legal; `fa2sw_precache_kenyan` FA_SLIDING=1 non-reproducible run-to-run, FA_SLIDING=0 byte-identical; official TPS bar **UNCHANGED 126.378**; onset-signature diagnostic banked). kanna→#44 (local private-gap probe — predict public→private TPS gap, attacks #1 private-re-run constraint). int4_g128_lmhead direct determinism check deferred (gitignored/unrebuildable weights — separate operational item). PR #39 MERGED (wirbel: fa2sw attention premise refuted; Triton 2D occupancy-bound at 4.7% BW floor; 3D split-KV fix greedy-exact; projects 471–505 TPS; HIGHEST-LEVERAGE LEVER). wirbel→#43 (implement 3D split-KV for M>1 verify). Awaiting: ubel HF result (Issue #35), land v1 verdict (PR #9, training ~done). All 8 students busy; zero idle._
 
 _Cycle 20: Issue #35 approved (Morgan, "HF Job launch authorized"); routed single-launch to ubel (PR #36). awaiting official a10g-small tps/ppl. Cycle 19 CLOSED (~18:30Z): PRs #24/#30/#32/#33/#14 ALL MERGED. kanna→#38 (served-gate audit), wirbel→#39 (fa2sw deep-profile), lawine→#40 (greedy-ref 128-prompt + assert)._
 
