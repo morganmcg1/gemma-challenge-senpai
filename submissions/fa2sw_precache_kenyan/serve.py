@@ -1012,6 +1012,12 @@ def main() -> None:
     append_env_arg(args, "OVERRIDE_GENERATION_CONFIG", "--override-generation-config")
     append_env_arg(args, "UVICORN_LOG_LEVEL", "--uvicorn-log-level")
     append_env_arg(args, "PREFIX_CACHING_HASH_ALGO", "--prefix-caching-hash-algo")
+    # Profiling-only, default-off. PROFILER_CONFIG is never set in the manifest,
+    # so this is inert on the leaderboard path (byte-identical served compute).
+    # When a local profiler sets it (a ProfilerConfig JSON), forward it so vLLM's
+    # built-in torch profiler + /start_profile capture the real serving decode
+    # loop. Same env-gated, default-off pattern as the inert steptime_patch.
+    append_env_arg(args, "PROFILER_CONFIG", "--profiler-config")
 
     if os.environ.get("DISABLE_LOG_STATS") == "1":
         args.append("--disable-log-stats")
