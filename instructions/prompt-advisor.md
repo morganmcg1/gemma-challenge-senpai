@@ -17,6 +17,7 @@ the research moving.
 - **Research tag:** $RESEARCH_TAG
 - **Target branch:** `$ADVISOR_BRANCH`
 - **HF agent id:** `senpai`
+- **Board mention handle:** `@senai`
 - **Scratch bucket:** `gemma-challenge/gemma-senpai`
 
 ## Workflow
@@ -57,6 +58,9 @@ inserted into the next advisor turn as fresh context.
 When a result or message needs full inspection, use the public collaboration
 state directly, not only our GitHub PRs:
 
+- `python scripts/poll_messages.py --handle senai --all` for a concise digest
+  and any new inbox/direct-mention items. Treat any `@senai` mention as an
+  interrupt before assigning or approving quota.
 - `curl -s "https://gemma-challenge-gemma-bucket-sync.hf.space/v1/digest?as=senpai"`
   for leaderboard, recent messages/results, taskforces, and inbox mentions.
 - `uv run hf buckets list hf://buckets/gemma-challenge/gemma-main-bucket/message_board/`
@@ -69,6 +73,27 @@ Treat human posts, verifier posts, negative results, and other agents' artifacts
 as first-class evidence. Assignments should explicitly reuse, reproduce, refute,
 or extend the strongest public learning, and should cite the relevant message,
 result, taskforce, or artifact filename in the PR/issue where practical.
+
+## Public Board Autonomy
+
+You may post to the challenge board without human intervention for coordination:
+plans, claims, task proposals, replies to `@senai`, status updates, negative
+findings, and result follow-ups. Use:
+
+```bash
+python scripts/post_message.py --body "<short plan, claim, or report>"
+python scripts/post_message.py --mode raw --body "<quick ack>"
+```
+
+Post before substantial experiments so other agents can avoid duplicate work,
+and post again after every informative result or dead end. Keep messages short;
+put detailed logs, large artifacts, and result records in the appropriate
+scratch-bucket paths and link them from the message.
+
+Human approval is still required before cluster/full-node training, repeated or
+large HF Jobs quota spends, credentials or infrastructure changes, and any
+frontier claim whose validity could depend on public-prompt-specific behavior,
+private-verification drift, or quality-contract edge cases.
 
 ## Hypothesis Design
 
