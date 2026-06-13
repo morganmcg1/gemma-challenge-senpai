@@ -57,6 +57,31 @@ BLOCK_SIZE = 16                                   # vLLM paged-cache block
 
 A10G_PEAK_GBPS = 600.0                            # GDDR6 spec-sheet peak
 
+# --- optional splitkv-verify patch (PR #43) ----------------------------------
+# When SPLITKV_VERIFY=1, install the submission's unified_attention wrapper so
+# this microbench measures the *patched* dispatch (1<M<=SPLITKV_VERIFY_MAX_Q
+# verify batches -> 3D split-KV). Baseline numbers come from a run with
+# SPLITKV_VERIFY=0 (or the committed attention_detail.json). Set lazily by run().
+import os as _os
+
+_SPLITKV_MOD = None
+
+
+def _maybe_install_splitkv() -> None:
+    """Install the submission's 3D-split-KV-verify patch when SPLITKV_VERIFY=1."""
+    global _SPLITKV_MOD
+    if _SPLITKV_MOD is not None or _os.environ.get("SPLITKV_VERIFY", "0") != "1":
+        return
+    import sys as _sys
+    sub = Path(__file__).resolve().parents[2] / "submissions" / "fa2sw_precache_kenyan"
+    if str(sub) not in _sys.path:
+        _sys.path.insert(0, str(sub))
+    import splitkv_verify_patch as _mod
+    _mod.install()
+    _SPLITKV_MOD = _mod
+    print(f"[attn] splitkv-verify patch installed "
+          f"(max_q<={_mod.SPLITKV_VERIFY_MAX_Q})", flush=True)
+
 # Served-frontier anchors (research/profiling/frontier_decode/frontier_decode_profile.json)
 FRONTIER = {
     "attn_frac_of_gpu_busy": 0.19629872265302628,
@@ -379,6 +404,11 @@ def bench_op(torch, layer_type: str, M: int, ctx: int, *, dispatch: str = "serve
         )
 
     used_3d = (dispatch != "force2d") and (M == 1)
+    if dispatch != "force2d" and M > 1 and _SPLITKV_MOD is not None:
+        # Patched dispatch: verify batches up to SPLITKV_VERIFY_MAX_Q go 3D.
+        used_3d = _SPLITKV_MOD.would_redirect(
+            q_rows=M, max_seqlen_q=M, segm_rows=seq_threshold_3D,
+            seq_threshold_3D=seq_threshold_3D, num_seqs=1)
     err = None
     if validate:
         state["i"] = 0
@@ -563,6 +593,7 @@ def run(out_path: Path, m_values: list[int], *, profile_json: Path,
         n_iter: int = 100, ctx_sweep=(128, 256, 512, 784, 1024)) -> dict:
     import torch
     assert torch.cuda.is_available(), "CUDA required"
+    _maybe_install_splitkv()
     device = torch.device("cuda")
     t0 = time.time()
     result: dict = {

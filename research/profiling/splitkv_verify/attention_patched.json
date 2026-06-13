@@ -1,0 +1,609 @@
+{
+  "utc": "2026-06-13T19:14:34Z",
+  "gpu": "NVIDIA A10G",
+  "sm_count": 80,
+  "l2_bytes": 6291456,
+  "m_values": [
+    1,
+    7,
+    17,
+    25,
+    45
+  ],
+  "frontier_anchors": {
+    "attn_frac_of_gpu_busy": 0.19629872265302628,
+    "attn_ms_per_cycle": 1.8357856542511017,
+    "kernel_unified_attention_ms_total": 88.57348199999979,
+    "attention_category_ms_total": 90.26759699999967,
+    "reduce_segments_ms_total": 3.9473849999999784,
+    "gpu_busy_ms_per_cycle": 9.352,
+    "cycle_wall_ms": 9.416,
+    "e_accept": 3.817303602892035,
+    "measured_steady_tps": 391.3125,
+    "public_a10g_small_tps": 424.5
+  },
+  "trace_attribution": {
+    "kernel_unified_attention_ms": 88.57348199999979,
+    "reduce_segments_ms": 3.9473849999999784,
+    "reshape_and_cache_ms": 1.6941149999998828,
+    "attention_category_ms": 90.26759699999967,
+    "fraction_unified_attention": 0.9812323019964752,
+    "trace_scanned": true,
+    "fa2_fmha_sdpa_kernels_found": [
+      "reshape_and_cache_kernel_flash"
+    ],
+    "served_attention_kernel": "kernel_unified_attention (vLLM Triton)",
+    "note": "fa2sw FA2 router is inert: vLLM forces TRITON_ATTN for the heterogeneous head_dims (sliding=256, full=512); FA2 caps at 256. Zero FlashAttention/FMHA kernels in the served decode trace."
+  },
+  "swa_floor": {
+    "plens_source": "decode_jsonl:decode_frontier.jsonl",
+    "n_prompts": 128,
+    "mean_prompt_len": 272.15625,
+    "mean_ctx": 527.65625,
+    "mean_min_ctx_window": 434.6872100830078,
+    "full_layers": 7,
+    "sliding_layers": 30,
+    "kv_bytes_per_cycle_full": 15128960.0,
+    "kv_bytes_per_cycle_sliding": 26707182.1875,
+    "kv_bytes_per_cycle_total": 41836142.1875,
+    "kv_MB_per_cycle_total": 41.8361421875,
+    "floor_time_us_at_peak": 69.72690364583333,
+    "floor_time_ms_at_peak": 0.06972690364583334,
+    "peak_gbps_assumed": 600.0,
+    "shared_kv_unique_fraction": 0.5675675675675675,
+    "kv_MB_per_cycle_if_shared_coalesced": 23.74483745777027
+  },
+  "peak_bw": {
+    "measured_peak_gbps_copy": 481.9532390696061,
+    "spec_peak_gbps": 600.0
+  },
+  "per_M": [
+    {
+      "layer_type": "sliding",
+      "M": 1,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 12.216129999999957,
+      "wall_us": 109.48224067687988,
+      "achieved_gbps_total": 86.50595565043952,
+      "achieved_gbps_kv_floor": 85.83536684694774,
+      "arithmetic_intensity_flops_per_byte": 3.9689922480620154,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 4096,
+        "out_bytes": 4096,
+        "total_raw_bytes": 1056768,
+        "total_floor_bytes": 1056768
+      },
+      "validation": {
+        "max_abs_err": 6.103515625e-05,
+        "mean_abs_err": 3.904104232788086e-06,
+        "ref_abs_mean": 0.0032501220703125
+      },
+      "peak_eff_total": 0.17949035017886017
+    },
+    {
+      "layer_type": "sliding",
+      "M": 7,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 12.618909999999978,
+      "wall_us": 112.20447540283203,
+      "achieved_gbps_total": 87.63989916720237,
+      "achieved_gbps_kv_floor": 83.09560809927338,
+      "arithmetic_intensity_flops_per_byte": 26.548148148148147,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 28672,
+        "out_bytes": 28672,
+        "total_raw_bytes": 1105920,
+        "total_floor_bytes": 1105920
+      },
+      "validation": null,
+      "peak_eff_total": 0.18184315834537834
+    },
+    {
+      "layer_type": "sliding",
+      "M": 17,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 14.393340000000054,
+      "wall_us": 112.2383975982666,
+      "achieved_gbps_total": 82.52705765305312,
+      "achieved_gbps_kv_floor": 72.85147158338482,
+      "arithmetic_intensity_flops_per_byte": 60.02758620689655,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 69632,
+        "out_bytes": 69632,
+        "total_raw_bytes": 1187840,
+        "total_floor_bytes": 1187840
+      },
+      "validation": null,
+      "peak_eff_total": 0.17123457415156856
+    },
+    {
+      "layer_type": "sliding",
+      "M": 25,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 16.098029999999973,
+      "wall_us": 111.6096019744873,
+      "achieved_gbps_total": 77.85896783643726,
+      "achieved_gbps_kv_floor": 65.13691426839196,
+      "arithmetic_intensity_flops_per_byte": 83.66013071895425,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 102400,
+        "out_bytes": 102400,
+        "total_raw_bytes": 1253376,
+        "total_floor_bytes": 1253376
+      },
+      "validation": null,
+      "peak_eff_total": 0.16154880084786083
+    },
+    {
+      "layer_type": "sliding",
+      "M": 45,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 27.538279999999872,
+      "wall_us": 111.76799774169922,
+      "achieved_gbps_total": 51.46349009451595,
+      "achieved_gbps_kv_floor": 38.07703313351469,
+      "arithmetic_intensity_flops_per_byte": 133.17919075144508,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 184320,
+        "out_bytes": 184320,
+        "total_raw_bytes": 1417216,
+        "total_floor_bytes": 1417216
+      },
+      "validation": null,
+      "peak_eff_total": 0.10678108563781917
+    },
+    {
+      "layer_type": "full",
+      "M": 1,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 45,
+      "device_us": 16.402919999999924,
+      "wall_us": 109.30496215820312,
+      "achieved_gbps_total": 132.8465907289684,
+      "achieved_gbps_kv_floor": 131.84774418213405,
+      "arithmetic_intensity_flops_per_byte": 3.969924812030075,
+      "bytes": {
+        "kv_floor_bytes": 2162688,
+        "kv_raw_bytes": 2162688,
+        "q_bytes": 8192,
+        "out_bytes": 8192,
+        "total_raw_bytes": 2179072,
+        "total_floor_bytes": 2179072
+      },
+      "validation": {
+        "max_abs_err": 6.103515625e-05,
+        "mean_abs_err": 3.769993782043457e-06,
+        "ref_abs_mean": 0.003387451171875
+      },
+      "peak_eff_total": 0.27564207470713153
+    },
+    {
+      "layer_type": "full",
+      "M": 7,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 45,
+      "device_us": 17.585580000000014,
+      "wall_us": 111.40352249145508,
+      "achieved_gbps_total": 129.5024673624639,
+      "achieved_gbps_kv_floor": 122.9807603729873,
+      "arithmetic_intensity_flops_per_byte": 26.58992805755396,
+      "bytes": {
+        "kv_floor_bytes": 2162688,
+        "kv_raw_bytes": 2162688,
+        "q_bytes": 57344,
+        "out_bytes": 57344,
+        "total_raw_bytes": 2277376,
+        "total_floor_bytes": 2277376
+      },
+      "validation": null,
+      "peak_eff_total": 0.26870338627138163
+    },
+    {
+      "layer_type": "full",
+      "M": 17,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 45,
+      "device_us": 20.22727999999988,
+      "wall_us": 111.28064155578613,
+      "achieved_gbps_total": 120.68928694317844,
+      "achieved_gbps_kv_floor": 106.91936829865475,
+      "arithmetic_intensity_flops_per_byte": 60.241610738255034,
+      "bytes": {
+        "kv_floor_bytes": 2162688,
+        "kv_raw_bytes": 2162688,
+        "q_bytes": 139264,
+        "out_bytes": 139264,
+        "total_raw_bytes": 2441216,
+        "total_floor_bytes": 2441216
+      },
+      "validation": null,
+      "peak_eff_total": 0.2504170055505071
+    },
+    {
+      "layer_type": "full",
+      "M": 25,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 45,
+      "device_us": 25.030139999999943,
+      "wall_us": 114.63071823120117,
+      "achieved_gbps_total": 102.76762335328553,
+      "achieved_gbps_kv_floor": 86.40335211868592,
+      "arithmetic_intensity_flops_per_byte": 84.07643312101911,
+      "bytes": {
+        "kv_floor_bytes": 2162688,
+        "kv_raw_bytes": 2162688,
+        "q_bytes": 204800,
+        "out_bytes": 204800,
+        "total_raw_bytes": 2572288,
+        "total_floor_bytes": 2572288
+      },
+      "validation": null,
+      "peak_eff_total": 0.21323152335623852
+    },
+    {
+      "layer_type": "full",
+      "M": 45,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 45,
+      "device_us": 54.26259000000004,
+      "wall_us": 112.79487609863281,
+      "achieved_gbps_total": 53.44322856686343,
+      "achieved_gbps_kv_floor": 39.855967066813406,
+      "arithmetic_intensity_flops_per_byte": 134.23728813559322,
+      "bytes": {
+        "kv_floor_bytes": 2162688,
+        "kv_raw_bytes": 2162688,
+        "q_bytes": 368640,
+        "out_bytes": 368640,
+        "total_raw_bytes": 2899968,
+        "total_floor_bytes": 2899968
+      },
+      "validation": null,
+      "peak_eff_total": 0.11088882537657328
+    }
+  ],
+  "served_verify_aggregate": {
+    "rep_ctx": 528,
+    "sliding_op_us": 12.91244999999984,
+    "full_op_us": 17.85531999999997,
+    "attn_us_per_cycle_microbench": 512.360739999995,
+    "attn_ms_per_cycle_microbench": 0.512360739999995,
+    "attn_ms_per_cycle_served": 1.8357856542511017,
+    "microbench_vs_served_ratio": 0.2790961672532568,
+    "bytes_per_cycle_total": 49479680,
+    "kv_floor_bytes_per_cycle": 46596096,
+    "achieved_gbps_aggregate": 96.5719582651873,
+    "bandwidth_efficiency_vs_measured_peak": 0.20037619925870007,
+    "bandwidth_efficiency_vs_spec_peak": 0.1609532637753122
+  },
+  "split_kv_headroom": {
+    "sliding": {
+      "force2d_us": 53.23765999999994,
+      "split3d_us": 12.153580000000138,
+      "force2d_gbps": 19.850008433879346,
+      "split3d_gbps": 86.9511699433408,
+      "split_kv_speedup": 4.380409722896409
+    },
+    "full": {
+      "force2d_us": 64.61386999999999,
+      "split3d_us": 16.467969999999916,
+      "force2d_gbps": 33.724523852231734,
+      "split3d_gbps": 132.3218344458978,
+      "split_kv_speedup": 3.9236086779366444
+    }
+  },
+  "m1_bakeoff": {
+    "triton_sliding": {
+      "layer_type": "sliding",
+      "M": 1,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 12.171579999999958,
+      "wall_us": 106.53247833251953,
+      "achieved_gbps_total": 86.82258178478091,
+      "achieved_gbps_kv_floor": 86.14953851513144,
+      "arithmetic_intensity_flops_per_byte": 3.9689922480620154,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 4096,
+        "out_bytes": 4096,
+        "total_raw_bytes": 1056768,
+        "total_floor_bytes": 1056768
+      },
+      "validation": {
+        "max_abs_err": 6.103515625e-05,
+        "mean_abs_err": 3.7848949432373047e-06,
+        "ref_abs_mean": 0.003509521484375
+      }
+    },
+    "triton_full": {
+      "layer_type": "full",
+      "M": 1,
+      "ctx": 528,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 45,
+      "device_us": 16.494510000000083,
+      "wall_us": 110.42688369750977,
+      "achieved_gbps_total": 132.10892593959983,
+      "achieved_gbps_kv_floor": 131.11562574456525,
+      "arithmetic_intensity_flops_per_byte": 3.969924812030075,
+      "bytes": {
+        "kv_floor_bytes": 2162688,
+        "kv_raw_bytes": 2162688,
+        "q_bytes": 8192,
+        "out_bytes": 8192,
+        "total_raw_bytes": 2179072,
+        "total_floor_bytes": 2179072
+      },
+      "validation": {
+        "max_abs_err": 6.103515625e-05,
+        "mean_abs_err": 3.933906555175781e-06,
+        "ref_abs_mean": 0.0033111572265625
+      }
+    },
+    "fa2_sliding": {
+      "available": true,
+      "ran": true,
+      "M": 1,
+      "ctx": 528,
+      "device_us": 58.3191,
+      "achieved_gbps_total": 18.120444245538767,
+      "achieved_gbps_kv_floor": 17.97997568549583,
+      "validation": {
+        "max_abs_err": 6.103515625e-05,
+        "mean_abs_err": 3.993511199951172e-06
+      }
+    },
+    "sdpa_sliding": {
+      "M": 1,
+      "ctx": 528,
+      "layer_type": "sliding",
+      "device_us": 97.87147000000054,
+      "achieved_gbps_kv_floor": 10.713806587353742
+    },
+    "sdpa_full": {
+      "M": 1,
+      "ctx": 528,
+      "layer_type": "full",
+      "device_us": 169.00962000000015,
+      "achieved_gbps_kv_floor": 12.796242012732757
+    },
+    "fa2_full_note": "FA2 unsupported for full layers (head_dim=512 > FA2 max 256)"
+  },
+  "ctx_sweep_sliding_M8": [
+    {
+      "layer_type": "sliding",
+      "M": 8,
+      "ctx": 128,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 367,
+      "device_us": 8.377839999999994,
+      "wall_us": 111.45119667053223,
+      "achieved_gbps_total": 39.11270685522763,
+      "achieved_gbps_kv_floor": 31.2901654841821,
+      "arithmetic_intensity_flops_per_byte": 25.6,
+      "bytes": {
+        "kv_floor_bytes": 262144,
+        "kv_raw_bytes": 262144,
+        "q_bytes": 32768,
+        "out_bytes": 32768,
+        "total_raw_bytes": 327680,
+        "total_floor_bytes": 327680
+      },
+      "validation": null,
+      "peak_eff_total": 0.08115456788034736
+    },
+    {
+      "layer_type": "sliding",
+      "M": 8,
+      "ctx": 256,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 184,
+      "device_us": 9.696349999999864,
+      "wall_us": 113.62624168395996,
+      "achieved_gbps_total": 60.829487384429015,
+      "achieved_gbps_kv_floor": 54.07065545282579,
+      "arithmetic_intensity_flops_per_byte": 28.444444444444443,
+      "bytes": {
+        "kv_floor_bytes": 524288,
+        "kv_raw_bytes": 524288,
+        "q_bytes": 32768,
+        "out_bytes": 32768,
+        "total_raw_bytes": 589824,
+        "total_floor_bytes": 589824
+      },
+      "validation": null,
+      "peak_eff_total": 0.1262145006056152
+    },
+    {
+      "layer_type": "sliding",
+      "M": 8,
+      "ctx": 512,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 12.223740000000026,
+      "wall_us": 114.28607940673828,
+      "achieved_gbps_total": 91.14329984112864,
+      "achieved_gbps_kv_floor": 85.7819292622387,
+      "arithmetic_intensity_flops_per_byte": 30.11764705882353,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 32768,
+        "out_bytes": 32768,
+        "total_raw_bytes": 1114112,
+        "total_floor_bytes": 1114112
+      },
+      "validation": null,
+      "peak_eff_total": 0.18911232968799543
+    },
+    {
+      "layer_type": "sliding",
+      "M": 8,
+      "ctx": 784,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 14.505860000000007,
+      "wall_us": 111.43712043762207,
+      "achieved_gbps_total": 76.80427082572143,
+      "achieved_gbps_kv_floor": 72.28637254185547,
+      "arithmetic_intensity_flops_per_byte": 30.11764705882353,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 32768,
+        "out_bytes": 32768,
+        "total_raw_bytes": 1114112,
+        "total_floor_bytes": 1114112
+      },
+      "validation": null,
+      "peak_eff_total": 0.15936042047147436
+    },
+    {
+      "layer_type": "sliding",
+      "M": 8,
+      "ctx": 1024,
+      "dispatch": "served",
+      "used_3d_split_kv": true,
+      "rot_buffers": 92,
+      "device_us": 14.474620000000119,
+      "wall_us": 113.01024436950684,
+      "achieved_gbps_total": 76.97003444649951,
+      "achieved_gbps_kv_floor": 72.44238536141131,
+      "arithmetic_intensity_flops_per_byte": 30.11764705882353,
+      "bytes": {
+        "kv_floor_bytes": 1048576,
+        "kv_raw_bytes": 1048576,
+        "q_bytes": 32768,
+        "out_bytes": 32768,
+        "total_raw_bytes": 1114112,
+        "total_floor_bytes": 1114112
+      },
+      "validation": null,
+      "peak_eff_total": 0.1597043617656507
+    }
+  ],
+  "bandwidth_efficiency": {
+    "floor_kv_bytes_per_cycle": 41836142.1875,
+    "floor_ms_at_measured_peak": 0.08680539686435806,
+    "floor_ms_at_spec_peak": 0.06972690364583334,
+    "served_attention_ms_per_cycle": 1.8357856542511017,
+    "efficiency_vs_measured_peak": 0.047285148276076834,
+    "efficiency_vs_spec_peak": 0.03798205061923639,
+    "interpretation": "served attention runs at 4.7% of the SWA bandwidth floor \u2014 it is occupancy/launch-bound at conc=1, not bandwidth-bound. The M=8 spec-verify uses the 2D Triton path (~6 CTAs / 80 SMs); split-KV (3D FlashDecoding) is gated off for max_seqlen_q>1.",
+    "best_3d_gbps_M1": 132.8465907289684,
+    "served_verify_gbps": 96.5719582651873,
+    "reachable_saving_if_verify_hits_3d_bw": 0.2730565554202897,
+    "measured_splitkv_speedup_M1": 4.1520092004165265
+  },
+  "tps_projection": {
+    "attn_frac": 0.19629872265302628,
+    "frontier_tps": 424.5,
+    "thresholds": [
+      440,
+      460,
+      500
+    ],
+    "projection": [
+      {
+        "attn_saving_frac": 0.1,
+        "tps_new": 432.9997293786128,
+        "delta_tps": 8.499729378612813,
+        "crosses": {
+          "440": false,
+          "460": false,
+          "500": false
+        }
+      },
+      {
+        "attn_saving_frac": 0.25,
+        "tps_new": 446.4072954709867,
+        "delta_tps": 21.907295470986696,
+        "crosses": {
+          "440": true,
+          "460": false,
+          "500": false
+        }
+      },
+      {
+        "attn_saving_frac": 0.5,
+        "tps_new": 470.69878513851046,
+        "delta_tps": 46.19878513851046,
+        "crosses": {
+          "440": true,
+          "460": true,
+          "500": false
+        }
+      },
+      {
+        "attn_saving_frac": 1.0,
+        "tps_new": 528.181318065437,
+        "delta_tps": 103.68131806543704,
+        "crosses": {
+          "440": true,
+          "460": true,
+          "500": true
+        }
+      }
+    ]
+  },
+  "verdict": {
+    "verdict_attn_reduction_worth_pursuing": 1,
+    "kernel_efficiency_gap_frac": 0.9527148517239231,
+    "max_realistic_saving_frac": 0.2730565554202897,
+    "bandwidth_efficiency_fraction": 0.047285148276076834,
+    "rule": "1 if kernel_gap>=10% AND reachable_saving>=25%, else 0"
+  },
+  "primary_metric": {
+    "name": "fa2sw_bandwidth_efficiency_fraction",
+    "value": 0.047285148276076834
+  },
+  "test_metric": {
+    "name": "verdict_attn_reduction_worth_pursuing",
+    "value": 1
+  },
+  "elapsed_s": 4.2592926025390625
+}
