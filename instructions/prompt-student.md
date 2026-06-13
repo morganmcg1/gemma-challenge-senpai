@@ -80,6 +80,14 @@ pass before complex runtime changes: new kernels, custom vLLM patches, drafter
 changes, quantization, attention backends, CUDA graph changes, or anything that
 could affect PPL/greedy identity. Summarize the research in the PR body.
 
+## Training Requests
+
+For any long-running training job on a full node outside HF Jobs, open a GitHub
+issue using `$PROBLEM_DIR/instructions/training-request.md` before launch. The
+issue must include the validity argument, exact command, W&B tracking plan,
+checkpoint handoff path, stop conditions, and the intended submission packaging
+plan. Wait for advisor or human approval before starting the run.
+
 ## First Order Of Business
 
 Check for assigned PRs, read the PR body and comments, inspect the current

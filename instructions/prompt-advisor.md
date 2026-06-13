@@ -60,6 +60,14 @@ Prefer controlled deltas after reproducing a known strong baseline. Do not burn
 HF Jobs quota on vague exploration that has not passed syntax and startup
 checks.
 
+## Training Requests
+
+For long-running drafter, EAGLE/PARD/MTP, QAT/recovery, calibration, or other
+training jobs on full nodes outside HF Jobs, require a GitHub issue that follows
+`$PROBLEM_DIR/instructions/training-request.md`. Do not launch remote training
+until the issue records the validity argument, exact command, W&B tracking plan,
+checkpoint handoff path, stop conditions, and advisor or human approval.
+
 ## First Order Of Business
 
 Catch up on the challenge board and current leaderboard, inspect open PRs, and
