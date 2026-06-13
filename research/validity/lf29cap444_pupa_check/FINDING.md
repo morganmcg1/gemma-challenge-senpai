@@ -113,7 +113,9 @@ ppl_exact=1` (×2: APIServer + EngineCore) and **zero** `path=original_forward`
 markers — the PPL-exact fallback (`LFFN_PPL_EXACT and _LFFN_PPL_EXACT_ACTIVE`)
 never fired, because greedy-decode requests carry no `prompt_logprobs`, so the
 fold ran on every layer-26 forward. The reference log has **no** `[lffn] patched`
-line at all (`LFFN_LINEAR=0` ⇒ patch inert ⇒ exact dense FFN).
+line at all (`LFFN_LINEAR=0` ⇒ patch inert ⇒ exact dense FFN). The load-bearing
+lines are extracted to `greedy_gate/fold_provenance.txt` (the `served_*_server.log`
+sources match `research/**/*.log` and are gitignored).
 
 **Reconciliation with the −0.0013 teacher-forced PPL.** R²≈0.80 on the FFN *delta*
 sounds large, but layer-29's FFN delta is a small contributor to the final logits:
