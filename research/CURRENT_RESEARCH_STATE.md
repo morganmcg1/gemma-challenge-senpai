@@ -24,14 +24,20 @@
   now the #1 strategic question**, ahead of further drafter-quality spend. kanna's v1
   precision-localization experiment (int4 vs bf16 vs fp8 greedy flip-rate) + a manifest-vLLM-version
   check decide whether the ladder is salvageable or the team pivots to a non-vLLM-spec mechanism.
-  **NEW reconciliation thread (cycle 6):** stark's PR #3 found plain int4 greedy (M=1, no spec) is
-  **run-to-run nondeterministic** (eager-Marlin run#1 vs run#2 → 1/8 identical, near-tie hotspots
-  idx 83/104) — in direct tension with kanna's "K0-vs-K0 control IDENTICAL." Resolving it decides
-  whether the int4 *base* can self-certify greedy identity against a separately-generated reference
-  at all. stark is running a bounded reconciliation on the int4 stack (reproduce kanna's K0 config;
-  isolate cudagraph / batch-composition / FlashInfer-off as the divergence source) while blocked on
-  HF approval #11; kanna folds a per-precision run-to-run determinism control into the linchpin
-  arms so *intrinsic nondeterminism* and *batch-shape (M=1 vs M=K+1) divergence* are cleanly separated.
+  **NEW three-way reconciliation thread (cycle 6/7) — three int4 stacks, three greedy verdicts:**
+  (a) **stark #3** (int4 QAT base, tied bf16 lm_head): endpoint-vs-AR DIVERGENT *and* eager-Marlin
+  run#1-vs-run#2 DIVERGENT (run-to-run nondeterministic, hotspots idx 83/104) — but his AR ref used a
+  **bf16-dense** path (different arithmetic than the int4-Marlin endpoint → near-tie divergence
+  partly expected). (b) **lawine #4** (int4 g128 + **untied int4 lm_head**): **GREEDY_IDENTICAL
+  128/128** (W&B `0pxj6n63`) — the **existence proof that an int4 stack passes the strict gate**.
+  (c) **kanna #5** (int4 + MTP spec): spec path DIVERGENT, K0-vs-K0 IDENTICAL. **Leading hypothesis:**
+  int4 greedy is gate-valid when reference and candidate share the **same int4-Marlin path** (lawine),
+  and stark's divergence is dominated by cross-path (Marlin-vs-bf16-dense) reference choice + possibly
+  the tied-bf16 vs untied-int4 lm_head (the last GEMM before argmax controls near-tie stability).
+  If confirmed, the linchpin narrows to *specifically the spec M=K+1 batched-verify path* (kanna),
+  not int4 greedy in general — a **favorable** reframing. stark + lawine run bounded same-path /
+  run-to-run reconciliation on their stacks while blocked on HF approval #11/#12; kanna folds a
+  per-precision run-to-run determinism control into the linchpin arms.
 
 ## Current focus — reproduce the public frontier, locally validated
 
@@ -61,7 +67,7 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 |---|---|---|---|
 | fern | #16 (WIP) | **EAGLE-3 draft-head training pipeline** — build distillation harness (`gen_eagle3_corpus.py` + `train_eagle3.py` + `eval_eagle3.py`), run debug-viability 1k-step training on 200 MATH samples, report offline teacher-forced acceptance rate. Full-scale run + HF Job gated on (a) debug viability and (b) kanna #5 linchpin. Aux layers `(2,21,39)`, `[T,7680]` fused input. | tf_acceptance_rate_debug_1k ≥ 3.5 tok/step (vs. QAT-MTP baseline ~2.2–3.3) |
 | stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11, 0 human comments)**. While blocked: bounded **run-to-run determinism reconciliation** vs kanna's K0 control (linchpin-relevant, interruptible). | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
-| lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, GREEDY_IDENTICAL 128/128 ✓; **awaiting HF Job approval (GitHub issue #12)** | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
+| lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, **GREEDY_IDENTICAL 128/128 ✓ (the int4-passes existence proof)**; **awaiting HF Job approval (GitHub issue #12, advisor-endorsed, no human approval)**. While blocked: document GREEDY_IDENTICAL methodology (same-path vs bf16-dense ref; run-to-run) for the linchpin reconciliation. | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
 | kanna | #5 (WIP) | **int4+MTP spec-decode** — `{8,4}` engine blocker SOLVED (vLLM PR #43543 backport), but int4 batched-verify spec is **structurally greedy-DIVERGENT** vs M=1 AR (~0.33%/tok); acceptance caps ~2.2. v1: precision-localization (int4 vs bf16 vs fp8 greedy flip-rate) **+ per-precision run-to-run determinism control** (reconcile stark #3's run-to-run divergence vs the K0-IDENTICAL claim) + confirm whether a10g-small honors manifest vLLM version | **resolve the linchpin**: is int4 spec greedy-valid at all? Separate intrinsic nondeterminism from batch-shape divergence. |
 | ubel | #14 (WIP) | **Empirical lmhead12k** — CPU feasibility done (kept_ids.json, implementation complete); **GPU void + int4 base absent** (pod intermittent). Path unblocked: self-build int4+g128 via path-(a) (prune bf16→quantize), general-12,288 corpus cut (hard-include GT + STEM fill), regenerate 128-capture. PPL scorer requires hard-include of GT tokens or gate fails. **DRAFTER-INDEPENDENT** rung. | served TPS/PPL/greedy-identity 128/128; both 7,584 and 12,288 bandwidth numbers |
 | denken | #7 (WIP) | **fa2sw + onegraph** target-side runtime levers | per-step overhead erasure, greedy-identical |
