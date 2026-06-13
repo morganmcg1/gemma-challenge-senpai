@@ -29,6 +29,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT))
 
 from scripts.local_validation import modalities_probe as mp  # noqa: E402
+from scripts.local_validation import validate_submission as vs  # noqa: E402
 
 PASS, FAIL, INCOMPLETE = "PASS", "FAIL", "INCOMPLETE"
 
@@ -395,6 +396,261 @@ def test_presence_on_real_baked_fa2sw_when_present():
         return  # baked weights not staged in this environment; nothing to check
     out = mp.presence_probe(baked)
     assert out["loaded"] == {"text": True, "image": True, "audio": True, "video": True}
+
+
+# --------------------------------------------------------------------------- #
+# functional audio/video probe classification (mocked endpoint) — PR #50
+# --------------------------------------------------------------------------- #
+def _tmp_media(suffix: str, data: bytes = b"\x00\x01\x02\x03") -> Path:
+    f = tempfile.NamedTemporaryFile(suffix=suffix, delete=False)
+    f.write(data)
+    f.close()
+    return Path(f.name)
+
+
+def test_functional_audio_accepted_is_true():
+    audio = _tmp_media(".wav")
+    try:
+        with _patched_post(200, {"choices": [{"message": {"content": "a steady tone"}}]}):
+            val, info = mp.functional_audio_probe("http://x", "m", audio)
+        assert val is True and info["method"] == "functional_probe"
+    finally:
+        audio.unlink()
+
+
+def test_functional_audio_rejected_modality_is_false():
+    audio = _tmp_media(".wav")
+    try:
+        with _patched_post(400, "This model does not support audio input."):
+            val, _ = mp.functional_audio_probe("http://x", "m", audio)
+        assert val is False
+    finally:
+        audio.unlink()
+
+
+def test_functional_audio_missing_dep_is_none():
+    """A missing-librosa decode error is a runner infra gap, NOT a modality
+    violation — it must read None (fall back to presence), even though the message
+    also contains the unsupported-marker substring 'audio input is not'."""
+    audio = _tmp_media(".wav")
+    try:
+        with _patched_post(400, "Audio input is not available: librosa is required to load audio."):
+            val, _ = mp.functional_audio_probe("http://x", "m", audio)
+        assert val is None
+    finally:
+        audio.unlink()
+
+
+def test_functional_video_accepted_is_true():
+    video = _tmp_media(".mp4")
+    try:
+        with _patched_post(200, {"choices": [{"message": {"content": "a shifting gradient"}}]}):
+            val, info = mp.functional_video_probe("http://x", "m", video)
+        assert val is True and info["method"] == "functional_probe"
+    finally:
+        video.unlink()
+
+
+def test_functional_video_decode_error_is_none():
+    video = _tmp_media(".mp4")
+    try:
+        with _patched_post(500, "could not decode video stream"):
+            val, _ = mp.functional_video_probe("http://x", "m", video)
+        assert val is None
+    finally:
+        video.unlink()
+
+
+def test_functional_media_empty_completion_is_none():
+    audio = _tmp_media(".wav")
+    try:
+        with _patched_post(200, {"choices": [{"message": {"content": "   "}}]}):
+            val, _ = mp.functional_audio_probe("http://x", "m", audio)
+        assert val is None
+    finally:
+        audio.unlink()
+
+
+def test_functional_media_unreadable_sample_is_none():
+    val, info = mp.functional_audio_probe("http://x", "m", Path("/nonexistent/probe.wav"))
+    assert val is None and "unreadable" in info.get("error", "")
+
+
+# --------------------------------------------------------------------------- #
+# staged probe inputs + probe_modalities wiring (PR #50)
+# --------------------------------------------------------------------------- #
+_FA2SW = REPO_ROOT / "submissions" / "fa2sw_precache_kenyan"
+
+
+def test_staged_probe_inputs_exist():
+    audio = mp.staged_probe_input(_FA2SW, mp.PROBE_AUDIO_FILE)
+    video = mp.staged_probe_input(_FA2SW, mp.PROBE_VIDEO_FILE)
+    assert audio is not None and audio.is_file(), "probe_audio.wav not staged"
+    assert video is not None and video.is_file(), "probe_video.mp4 not staged"
+
+
+def test_audio_functional_probe_smoke():
+    """The staged audio sample drives the probe end-to-end against a mocked
+    endpoint without crashing (no GPU, no live server)."""
+    audio = mp.staged_probe_input(_FA2SW, mp.PROBE_AUDIO_FILE)
+    assert audio is not None
+    with _patched_post(200, {"choices": [{"message": {"content": "tone"}}]}):
+        val, _ = mp.functional_audio_probe("http://x", "m", audio)
+    assert val is True
+
+
+def test_video_functional_probe_smoke():
+    video = mp.staged_probe_input(_FA2SW, mp.PROBE_VIDEO_FILE)
+    assert video is not None
+    with _patched_post(200, {"choices": [{"message": {"content": "gradient"}}]}):
+        val, _ = mp.functional_video_probe("http://x", "m", video)
+    assert val is True
+
+
+def test_probe_modalities_records_functional_probe_for_audio_video():
+    """When functional audio/video return a definite verdict, the method label is
+    'functional_probe' (the PR #50 success-criteria string) — independent of GPU/
+    live media-decode deps."""
+
+    def fake_post(url, payload, timeout_s):
+        if url.endswith("/chat/completions"):
+            return 200, {"choices": [{"message": {"content": "ok"}}]}
+        return 200, {"choices": [{"text": " Paris"}]}
+
+    saved = mp._post_json
+    mp._post_json = fake_post
+    try:
+        out = mp.probe_modalities(base_url="http://x", model="m", submission_dir=_FA2SW)
+    finally:
+        mp._post_json = saved
+    assert out["modalities_method"]["audio"] == "functional_probe"
+    assert out["modalities_method"]["video"] == "functional_probe"
+    assert out["modalities_loaded"]["audio"] is True
+    assert out["modalities_loaded"]["video"] is True
+
+
+def test_probe_modalities_audio_falls_back_to_presence_on_dep_error():
+    """A runner that can't decode audio (no librosa) yields None -> the audio
+    method honestly falls back to 'presence', annotated with the reason."""
+
+    def fake_post(url, payload, timeout_s):
+        if url.endswith("/chat/completions"):
+            kinds = {p.get("type") for p in payload["messages"][0]["content"]}
+            if "input_audio" in kinds:
+                return 400, "librosa is required to load audio"
+            return 200, {"choices": [{"message": {"content": "an image"}}]}
+        return 200, {"choices": [{"text": " Paris"}]}
+
+    saved = mp._post_json
+    mp._post_json = fake_post
+    try:
+        out = mp.probe_modalities(base_url="http://x", model="m", submission_dir=_FA2SW)
+    finally:
+        mp._post_json = saved
+    assert out["modalities_method"]["audio"] == "presence"
+    assert "functional_probe_fallback" in out["detail"]["audio"]
+    assert out["modalities_method"]["video"] == "functional_probe"  # video still functional
+
+
+# --------------------------------------------------------------------------- #
+# launch eligibility + official-gate preflight (PR #50)
+# --------------------------------------------------------------------------- #
+def _write_evidence(root: Path, name: str, *, ppl, completed, num_prompts, all_mod, created_at) -> Path:
+    d = root / f"validate-{name}-{created_at}"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "evidence.json").write_text(
+        json.dumps(
+            {
+                "submission_name": name,
+                "submission": f"submissions/{name}",
+                "num_prompts": num_prompts,
+                "ppl": ppl,
+                "completed": completed,
+                "all_modalities_loaded": all_mod,
+                "created_at": created_at,
+            }
+        )
+    )
+    return d
+
+
+def test_check_launch_eligibility_truth_table():
+    assert vs.check_launch_eligibility(PASS) is True
+    assert vs.check_launch_eligibility(FAIL) is False
+    assert vs.check_launch_eligibility(INCOMPLETE) is False
+    assert vs.check_launch_eligibility("MYSTERY") is False  # fail-closed on unknown
+    assert vs.GATE_BLOCK_VALUES == {"FAIL", "INCOMPLETE"}
+
+
+def test_launch_allowed_on_pass():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_evidence(root, "subx", ppl=2.0, completed=128, num_prompts=128, all_mod=True, created_at="20260613T120000Z")
+        gate = vs.run_official_gate_preflight("subx", localrun_root=root)
+        assert gate["official_gate"] == PASS and gate["eligible"] is True
+        # enforce must NOT raise on PASS
+        ret = vs.enforce_launch_gate("subx", localrun_root=root)
+        assert ret["official_gate"] == PASS
+
+
+def test_launch_blocked_on_fail():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_evidence(root, "subx", ppl=2.50, completed=128, num_prompts=128, all_mod=True, created_at="20260613T120000Z")
+        gate = vs.run_official_gate_preflight("subx", localrun_root=root)
+        assert gate["official_gate"] == FAIL and gate["eligible"] is False
+        try:
+            vs.enforce_launch_gate("subx", localrun_root=root)
+            raise AssertionError("enforce_launch_gate should raise on FAIL")
+        except RuntimeError:
+            pass
+
+
+def test_launch_blocked_on_incomplete():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        # all_modalities unknown with no known failure -> INCOMPLETE
+        _write_evidence(root, "subx", ppl=2.0, completed=128, num_prompts=128, all_mod=None, created_at="20260613T120000Z")
+        gate = vs.run_official_gate_preflight("subx", localrun_root=root)
+        assert gate["official_gate"] == INCOMPLETE
+        try:
+            vs.enforce_launch_gate("subx", localrun_root=root)
+            raise AssertionError("enforce_launch_gate should raise on INCOMPLETE")
+        except RuntimeError:
+            pass
+
+
+def test_launch_blocked_when_no_evidence():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        gate = vs.run_official_gate_preflight("never-validated", localrun_root=root)
+        assert gate["official_gate"] == INCOMPLETE and gate["evidence_path"] is None
+        try:
+            vs.enforce_launch_gate("never-validated", localrun_root=root)
+            raise AssertionError("no evidence must block launch")
+        except RuntimeError:
+            pass
+
+
+def test_smoke_evidence_does_not_authorize_launch():
+    """An 8-prompt smoke reads PASS for its own 8 prompts but must NOT authorize a
+    128-prompt launch — the preflight downgrades under-prompted evidence."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_evidence(root, "subx", ppl=2.0, completed=8, num_prompts=8, all_mod=True, created_at="20260613T120000Z")
+        gate = vs.run_official_gate_preflight("subx", localrun_root=root)
+        assert gate["official_gate"] == INCOMPLETE
+        assert "prompts" in gate["reason"]
+
+
+def test_preflight_picks_latest_and_folds_hyphen_underscore():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_evidence(root, "sub_x", ppl=2.0, completed=128, num_prompts=128, all_mod=True, created_at="20260613T100000Z")  # older PASS
+        _write_evidence(root, "sub_x", ppl=2.50, completed=128, num_prompts=128, all_mod=True, created_at="20260613T200000Z")  # newer FAIL
+        gate = vs.run_official_gate_preflight("sub-x", localrun_root=root)  # hyphenated query
+        assert gate["official_gate"] == FAIL  # newest wins
+        assert gate["evidence_created_at"] == "20260613T200000Z"
 
 
 # --------------------------------------------------------------------------- #

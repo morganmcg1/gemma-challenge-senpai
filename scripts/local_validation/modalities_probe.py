@@ -13,14 +13,17 @@ criterion locally so it can be caught before launch.
 
 Two fidelity tiers, applied in ``program.md`` priority order:
 
-1. **functional** (preferred for image; trivial for text): drive the *served*
-   OpenAI-compatible endpoint with a real multimodal request. A non-degenerate
-   completion proves the tower is loaded AND wired into inference — it catches
-   skip-load / disable, not merely on-disk presence. If the server *rejects* the
-   modality (e.g. "this model does not support image input"), that is a genuine
-   ``False``.
-2. **presence + non-zero** (fallback, and for audio/video where sample inputs are
-   not staged): introspect the served checkpoint's ``config.json`` sub-configs and
+1. **functional** (preferred for all four pathways): drive the *served*
+   OpenAI-compatible endpoint with a real multimodal request — a trivial text
+   completion, a synthesized image, and the staged ``probe_inputs/probe_audio.wav``
+   / ``probe_video.mp4`` samples for audio/video. A non-degenerate completion
+   proves the tower is loaded AND wired into inference — it catches skip-load /
+   disable, not merely on-disk presence. If the server *rejects* the modality
+   (e.g. "this model does not support image input"), that is a genuine ``False``.
+   A *decode/dependency* failure (e.g. the runner lacks ``librosa`` to load audio)
+   is NOT a modality violation — it resolves to ``None`` and falls back to tier 2.
+2. **presence + non-zero** (fallback when functional is inconclusive, or no sample
+   is staged): introspect the served checkpoint's ``config.json`` sub-configs and
    ``safetensors`` tensor names for each tower, and assert the tower's parameters
    are present and not all-zero / zero-capped. Catches *remove* and *zero-cap*.
    It CANNOT catch a tower that loads but is silently bypassed at inference — the
@@ -133,6 +136,7 @@ _UNSUPPORTED_MARKERS = (
     "multimodal is not",
     "image input is not",
     "audio input is not",
+    "video input is not",
     "not a multimodal",
     "unsupported",
     "no image",
@@ -140,6 +144,94 @@ _UNSUPPORTED_MARKERS = (
     "mm_processor",
     "limit_mm_per_prompt",
 )
+
+# Substrings that mark a *runtime / dependency* failure to DECODE the staged
+# media (missing librosa/soundfile for audio, opencv/decord/av for video, a
+# transport hiccup, or a corrupt sample) rather than a genuine "this model has no
+# such pathway" rejection. These resolve to ``None`` (unknown — fall back to the
+# presence check), never ``False``: a missing audio backend on the *runner* is an
+# infra gap, not the submission disabling a tower. Checked BEFORE
+# ``_UNSUPPORTED_MARKERS`` because a vLLM dep error can read "audio input is not
+# available: librosa not installed", which would otherwise mis-trip an
+# unsupported-marker into a false modality violation.
+_DECODE_DEP_MARKERS = (
+    "librosa",
+    "soundfile",
+    "decord",
+    "opencv",
+    "ffmpeg",
+    "pyav",
+    "no module named",
+    "modulenotfound",
+    "not installed",
+    "importerror",
+    "import error",
+    "could not load",
+    "failed to load",
+    "unable to load",
+    "could not decode",
+    "failed to decode",
+    "unable to decode",
+    "no audio backend",
+    "no video backend",
+)
+
+
+def _classify_media_response(
+    status: int,
+    resp: dict[str, Any] | str,
+    *,
+    modality: str,
+) -> tuple[bool | None, dict[str, Any]]:
+    """Shared True/False/None classifier for a multimodal chat completion.
+
+    Mirrors ``functional_image_probe`` semantics so audio and video are graded on
+    the same honesty contract:
+
+      * ``True``  — 200 with a non-empty completion (tower loaded AND wired into
+                    inference for this modality).
+      * ``False`` — server explicitly rejected this modality as unsupported (a
+                    genuine "the model cannot do <modality>" — the costly
+                    weights-loaded-but-broken case the probe exists to catch).
+      * ``None``  — a *decode/dependency/transport* failure or an empty-but-200
+                    completion: inconclusive, so the caller falls back to the
+                    presence + non-zero check rather than asserting a violation.
+    """
+    if status == 200 and isinstance(resp, dict):
+        msg = (resp.get("choices") or [{}])[0].get("message") or {}
+        content = msg.get("content") or ""
+        if isinstance(content, list):  # some servers return content parts
+            content = " ".join(p.get("text", "") for p in content if isinstance(p, dict))
+        if content.strip():
+            return True, {"method": "functional_probe", "status": status, "sample": content.strip()[:80]}
+        return None, {
+            "method": "functional_probe",
+            "status": status,
+            "note": f"accepted {modality} but empty completion (inconclusive)",
+        }
+    text = str(resp).lower()
+    # Runtime/dependency decode failure dominates: a missing backend on the runner
+    # is unknown, never a modality violation.
+    if any(m in text for m in _DECODE_DEP_MARKERS):
+        return None, {
+            "method": "functional_probe",
+            "status": status,
+            "error": str(resp)[:200],
+            "note": f"{modality} decode/dependency failure on runner — falling back to presence",
+        }
+    if status in (400, 415, 422) and any(m in text for m in _UNSUPPORTED_MARKERS):
+        return False, {
+            "method": "functional_probe",
+            "status": status,
+            "error": str(resp)[:200],
+            "reason": f"server rejected {modality} modality",
+        }
+    return None, {
+        "method": "functional_probe",
+        "status": status,
+        "error": str(resp)[:200],
+        "note": "ambiguous — falling back to presence",
+    }
 
 
 def functional_text_probe(base_url: str, model: str, *, timeout_s: float = 60.0) -> tuple[bool | None, dict[str, Any]]:
@@ -195,6 +287,100 @@ def functional_image_probe(base_url: str, model: str, *, timeout_s: float = 180.
     if status in (400, 415, 422) and any(m in text for m in _UNSUPPORTED_MARKERS):
         return False, {"method": "functional", "status": status, "error": str(resp)[:200], "reason": "server rejected image modality"}
     return None, {"method": "functional", "status": status, "error": str(resp)[:200], "note": "ambiguous — falling back to presence"}
+
+
+# Staged sample-media filenames the functional audio/video probes look for, under
+# ``<submission_dir>/probe_inputs/`` (see scripts/local_validation/... staging).
+PROBE_INPUT_DIR = "probe_inputs"
+PROBE_AUDIO_FILE = "probe_audio.wav"
+PROBE_VIDEO_FILE = "probe_video.mp4"
+
+
+def staged_probe_input(submission_dir: Path | None, filename: str) -> Path | None:
+    """Path to a staged probe-input file under ``<submission>/probe_inputs/``, or None."""
+    if submission_dir is None:
+        return None
+    cand = Path(submission_dir) / PROBE_INPUT_DIR / filename
+    return cand if cand.is_file() else None
+
+
+def functional_audio_probe(
+    base_url: str,
+    model: str,
+    audio_path: Path,
+    *,
+    timeout_s: float = 180.0,
+) -> tuple[bool | None, dict[str, Any]]:
+    """Send one staged audio clip through ``/v1/chat/completions`` (OpenAI
+    ``input_audio`` content) and grade the response.
+
+    Returns ``True`` (audio tower loaded AND wired into inference), ``False``
+    (server explicitly rejected the audio modality), or ``None`` (a decode/
+    dependency/transport failure — e.g. the runner lacks ``librosa`` — or an
+    empty completion: inconclusive, caller falls back to presence). Sending the
+    real clip through the *served* endpoint is what upgrades the audio check from
+    weight-presence to a true functional verification.
+    """
+    try:
+        raw = Path(audio_path).read_bytes()
+    except OSError as exc:
+        return None, {"method": "functional_probe", "status": 0, "error": f"audio sample unreadable: {exc}"}
+    b64 = base64.b64encode(raw).decode()
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Describe what you hear in one short phrase."},
+                    {"type": "input_audio", "input_audio": {"data": b64, "format": "wav"}},
+                ],
+            }
+        ],
+        "max_tokens": 16,
+        "temperature": 0.0,
+    }
+    status, resp = _post_json(f"{base_url.rstrip('/')}/v1/chat/completions", payload, timeout_s)
+    return _classify_media_response(status, resp, modality="audio")
+
+
+def functional_video_probe(
+    base_url: str,
+    model: str,
+    video_path: Path,
+    *,
+    timeout_s: float = 180.0,
+) -> tuple[bool | None, dict[str, Any]]:
+    """Send one staged video clip through ``/v1/chat/completions`` (vLLM
+    ``video_url`` content as a data URI) and grade the response.
+
+    Same True/False/None contract as ``functional_audio_probe``. gemma-4 routes
+    video frames through the *vision* tower (no separate video weights), so a
+    non-empty completion proves the shared vision pathway accepts and consumes
+    decoded video frames — the functional analogue of the presence check's
+    ``vision_tower + video_token_id`` inference.
+    """
+    try:
+        raw = Path(video_path).read_bytes()
+    except OSError as exc:
+        return None, {"method": "functional_probe", "status": 0, "error": f"video sample unreadable: {exc}"}
+    data_uri = "data:video/mp4;base64," + base64.b64encode(raw).decode()
+    payload = {
+        "model": model,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Describe this video in one short phrase."},
+                    {"type": "video_url", "video_url": {"url": data_uri}},
+                ],
+            }
+        ],
+        "max_tokens": 16,
+        "temperature": 0.0,
+    }
+    status, resp = _post_json(f"{base_url.rstrip('/')}/v1/chat/completions", payload, timeout_s)
+    return _classify_media_response(status, resp, modality="video")
 
 
 # --------------------------------------------------------------------------- #
@@ -541,6 +727,7 @@ def probe_modalities(
     model_id: str | None = None,
     model_dir: Path | None = None,
     image_timeout_s: float = 180.0,
+    media_timeout_s: float = 180.0,
 ) -> dict[str, Any]:
     """Run the functional (text, image) + presence (audio, video; image fallback)
     probes and return the consolidated modality result.
@@ -583,11 +770,32 @@ def probe_modalities(
         info.setdefault("note", "functional image probe inconclusive — presence fallback")
         detail["image"] = info
 
-    # audio, video — presence + non-zero (functional sample inputs not staged).
+    # audio, video — functional probe preferred (a real staged sample driven
+    # through the served endpoint), presence + non-zero fallback when functional
+    # is inconclusive or no sample is staged. A definite functional verdict
+    # (True/False) records method="functional_probe"; otherwise the honest
+    # presence signal is reported, annotated with WHY functional was skipped.
+    functional_media = {
+        "audio": (functional_audio_probe, staged_probe_input(submission_dir, PROBE_AUDIO_FILE)),
+        "video": (functional_video_probe, staged_probe_input(submission_dir, PROBE_VIDEO_FILE)),
+    }
     for m in ("audio", "video"):
+        probe_fn, sample = functional_media[m]
+        fallback_note: str | None = None
+        if base_url and model and sample is not None:
+            val, info = probe_fn(base_url, model, sample, timeout_s=media_timeout_s)
+            if val is not None:
+                loaded[m], method[m], detail[m] = val, "functional_probe", info
+                continue
+            fallback_note = info.get("note") or info.get("error")
+        elif sample is None:
+            fallback_note = f"functional {m} probe skipped — no staged sample at {PROBE_INPUT_DIR}/"
         loaded[m] = presence["loaded"].get(m)
         method[m] = "presence"
-        detail[m] = presence["detail"].get(m, {})
+        pdetail = dict(presence["detail"].get(m, {}))
+        if fallback_note:
+            pdetail["functional_probe_fallback"] = fallback_note
+        detail[m] = pdetail
 
     return {
         "modalities_loaded": loaded,

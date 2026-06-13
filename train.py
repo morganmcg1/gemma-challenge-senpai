@@ -94,7 +94,7 @@ def main() -> None:
 
         step += 1
         submission = submission_prefix(agent, name)
-        response = launch_job(agent=agent, submission=submission, run=run)
+        response = launch_job(agent=agent, submission=submission, run=run, gate_submission=name)
         log_event(
             wandb_run,
             "launch_complete",
