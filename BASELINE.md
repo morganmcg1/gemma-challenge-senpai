@@ -66,10 +66,19 @@ verify paths) is a first-class objective, not an afterthought.
 - **Reproduce:** `cd target/ && VLLM_USE_FLASHINFER_SAMPLER=0 python scripts/local_prevalidate.py --submission submissions/vllm_baseline --decode-num-prompts 16`
   (Env-var is a local-box workaround for broken FlashInfer JIT; not needed on official a10g-small image.)
 
+### 2026-06-13 09:45 — PR #10: Offline suffix-run token-budget analysis for SAM-Decoding feasibility
+
+- **Finding (GO on causal budget):** causal SAM-Decoding realized budget = **8.93%** free tokens at K>8 (K>4: 15.4%, K>6: 11.6%); clear **GO** for the Triton-kernel follow-up (threshold >3.6%). Robust across datasets (aime 10.74%, gpqa 9.23%, mmlu_pro 8.19%); greedy-safe by construction (zero PPL risk).
+- **PR-spec proxy (`m(t)`):** 1.21% — *not* the decision metric. `m(t)` fires only on adjacent-period repetition; the exploitable structure is non-adjacent. Causal estimate cross-validated against brute-force O(n²) reference: 0 mismatches / 600 positions.
+- **Caveat:** gain is *incremental* over the existing MTP/QAT drafter (~3.3 tok/step). Net headroom requires per-step acceptance trace from kanna's #5 — measuring SAM-drafter overlap de-risks the Triton build before GPU spend.
+- **New shared infra:** `scripts/analyze_suffix_budget.py` — offline CPU-only suffix-budget analyzer; designed for extension to ingest a drafter acceptance trace for overlap quantification.
+- **W&B run:** none (CPU-only offline analysis). 128/128 prompts captured (bf16, 43.94 TPS local).
+- **Reproduce:** `cd target/ && python scripts/analyze_suffix_budget.py --input research/local_validation/vllm_baseline/decode_outputs_128.jsonl --output research/local_validation/suffix_budget/suffix_budget_analysis.json`
+
 ## Confirmed dead ends (do not re-spend on these)
 sub-4-bit weight kernels (AWQ/GPTQ/AQLM/QuIP#/2:4-Sparse-Marlin/NVFP4) — no loadable Ampere
 sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gram/prompt-lookup
 spec decode — loses at conc=1; runtime knobs (attn-backend swap, max_num_seqs, MARLIN_USE_ATOMIC_ADD) —
 parity/noise; body channel-wise quant — trades PPL for no TPS; widening draft centroid top_k — no gain.
 
-_Last updated: 2026-06-13 (frontier reproduction track; bf16 PPL-artifact resolution PR #2 — local PPL 2.3012 confirmed, missing-artifact root-caused to 40-min job timeout)._
+_Last updated: 2026-06-13 (PR #10 merged — SAM-Decoding offline budget analysis: causal realized budget 8.93% at K>8, GO verdict, drafter-overlap quantification staged as next de-risking step)._
