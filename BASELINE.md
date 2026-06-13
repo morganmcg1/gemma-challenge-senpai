@@ -38,10 +38,11 @@ Private-stable acceptance (drafter trained on a wide distribution; prompt-conten
 verify paths) is a first-class objective, not an afterthought.
 
 ## Current local baseline in this repo
-- **BEST MERGED RUNG — `submissions/int4_qat` (PR #3, stark) — official a10g-small tps=95.463, ppl=2.0057, 128/128 VALID** (job
-  `6a2d55c7234ca64b60121a6f`, run `results/senpai/int4-qat-20260613T130614Z`). int4 QAT W4A16 (Marlin), Google's
-  `google/gemma-4-E4B-it-qat-w4a16-ct` checkpoint, all modalities loaded, greedy-valid (same serve/job stack). **2.17× over bf16.**
-  This is the new official base rung of the reproduction ladder; all future submissions beat **95.46 TPS**.
+- **BEST MERGED RUNG — `submissions/int4_g128_lmhead` (PR #4, lawine) — official a10g-small tps=126.378, ppl=2.019, 128/128 VALID** (job
+  `6a2d5a96234ca64b60121aa5`, W&B `905tbujn`). int4 g128 + untied int4 lm_head re-quant, all modalities loaded, greedy-valid (GREEDY_IDENTICAL
+  128/128 served-vs-served), same-path OK (gap 0.0000). **2.87× over bf16. 1.32× over PR #3 int4 base.**
+  All future submissions beat **126.38 TPS**.
+- Prior rung: `submissions/int4_qat` (PR #3, stark) — 95.463 TPS / PPL 2.0057 (int4 QAT W4A16 floor).
 - `submissions/vllm_baseline` — bf16 stock vLLM 0.22.0 endpoint (**reference floor**). Prior HF smoke job
   `6a2c5fb77c68f455eff14260` (run prefix `results/senpai/vllm-baseline-20260612T193622Z`)
   reported **tps=44.018, completed=128** on a10g-small.
@@ -124,18 +125,32 @@ sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gr
 spec decode — loses at conc=1; runtime knobs (attn-backend swap, max_num_seqs, MARLIN_USE_ATOMIC_ADD) —
 parity/noise; body channel-wise quant — trades PPL for no TPS; widening draft centroid top_k — no gain;
 **provable greedy-safe cert (Cauchy-Schwarz) for sparse lm_head verify on gemma-4-E4B** — model-intrinsic
-geometry obstruction (flat row norms, near-full-rank embedding: R_complement_max_norm=1.630 >> z_max/||h||≈0.59),
-0%-fire on 16,384 real decode steps, nets −8% TPS (cert + full fallback > full alone); harness on
-`ubel/vocab-prune-sparse-verify` branch; empirical pruned-weights lmhead12k (no cert) is the viable lever;
+geometry obstruction, nets −8% TPS; empirical pruned-weights lmhead12k (no cert) is the viable lever;
 **fa2sw + onegraph runtime levers (standalone, int4 base, conc=1)** — both greedy-DIVERGENT, no TPS win
-(denken PR #7, CLOSED): fa2sw −4.9% TPS + DIVERGENT 82/128 (FA2 numerics ≠ Triton → near-tie argmax flips;
-mixed backend blocks full-graph capture); onegraph TPS-parity + DIVERGENT 1/128 (graph-capture knob perturbs
-the numeric path, one near-tie flip); mechanism: ~92% weight-GEMM/BW-bound at conc=1, existing CUDA graph
-already collapses the step — no per-step overhead to reclaim standalone; int4 base is cross-process
-**bit-exact** (sha256 run#1==run#2, eager too); fa2sw also requires a **vLLM worker-plugin** (V1 spawns
-a separate EngineCore process that a serve-process monkeypatch can't reach).
+(denken PR #7, CLOSED): fa2sw −4.9% TPS + DIVERGENT 82/128; onegraph TPS-parity + DIVERGENT 1/128;
+int4 base cross-process **bit-exact** at M=1; fa2sw also requires a vLLM worker-plugin;
+**`VLLM_BATCH_INVARIANT=1` kernel override — definitive negative for greedy-valid spec decode at ANY precision
+in vLLM 0.22.0** (kanna PR #19, MERGED, 2026-06-13). int4 spec stays DIVERGENT at 0.376%/tok ON vs 0.332%
+OFF (CIs overlap; the flag does nothing for int4). bf16 control drops to 0.111%/tok but remains DIVERGENT —
+isolating TWO independent un-coverable causes: (a) int4 Marlin is a `_C` op the aten override can't reach
+(contributes ~0.265%/tok excess above bf16 floor), (b) the spec verify path has an irreducible non-aten
+batch-variant component (~0.111%/tok; corroborated by vLLM issue #27433: "does not currently integrate with
+speculative decoding"). Batch-invariance coverage is real (bit-exact kernel probe) but aten-scoped;
+both flip sources sit outside aten. This closes the invariant-kernel lane; the next lane is
+**verify-rollback** (arxiv 2601.17768, kanna assigned).
 
-_Last updated: 2026-06-13 (**PR #3 MERGED — first official a10g-small int4 base rung: 95.463 TPS / PPL 2.0057 / 128/128 VALID, 2.17× over bf16; `submissions/int4_qat` is now the best merged submission**; PR #8 MERGED — local validation + profiling infra: served-vs-served greedy gate, validate_submission harness, lm_head=26% profiler confirmed; PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #19 resolving via batch-invariant vLLM, gates rungs 4–5. PR #21 MERGED — same-path PPL gate: closes `prompt_logprobs` blind spot; gate PASS on honest baseline, gap 8.88e-16 ≈ 0, both paths PPL 2.3012; every future HF-approval issue must attach `--check-same-path` output)._
+_Last updated: 2026-06-13 (**PR #4 MERGED — new best merged rung: int4 g128 + untied int4 lm_head, 126.378 TPS / PPL 2.019 / 128/128 VALID / GREEDY_IDENTICAL, 1.32× over int4 base, 2.87× over bf16. `submissions/int4_g128_lmhead` is now the best merged submission; all future submissions beat 126.38 TPS.** PR #19 MERGED — LINCHPIN DEFINITIVE NEGATIVE: `VLLM_BATCH_INVARIANT=1` cannot rescue greedy-valid spec decode at any precision in vLLM 0.22.0; two independent un-coverable root causes quantified (Marlin _C op + non-aten spec-verify residual); next lane: verify-rollback arxiv 2601.17768, kanna assigned. **Same-path PPL gate (PR #21) scope limit confirmed (wirbel #22, 2026-06-13):** the gate is teacher-forced-blind — it misses argmax-preserving decode-compounding folds (e.g. LF29 affine fold: gate returns gap 0.0000 even when fold-forced-ON, because teacher-forced PPL is fold-neutral). `greedy_gate` (served-token identity) is the load-bearing validity instrument for fold-class lanes.)_
+
+### 2026-06-13 14:38 — PR #4: int4 g128 + untied int4 lm_head (~127 TPS weight-byte floor) ⭐ NEW BEST MERGED RUNG
+
+- **Primary metric (tps):** **126.378** (official a10g-small, job `6a2d5a96234ca64b60121aa5`) — **1.32× over PR #3 int4 base (95.463), 2.87× over bf16 (44.018)**.
+- **PPL (gate):** **2.0190** ≤ 2.42 ✓ (1.28 PPL cost over QAT base at 2.006 — negligible).
+- **completed:** 128/128 ✓ · **greedy identity:** GREEDY_IDENTICAL 128/128 (served-vs-served cap=512) ✓ · **same-path gate:** SAME_PATH_OK (gap 0.0000) ✓.
+- **W&B:** `905tbujn` (official a10g-small) · `0pxj6n63` (local proxy + greedy verdict).
+- **Submission:** `submissions/int4_g128_lmhead/` — int4 Marlin W4A16 full-body g128 (vs per-layer in base) + untied int4 lm_head. Checkpoint `google/gemma-4-E4B-it-qat-w4a16-ct` re-quant'd with `build_quant.py`; vLLM 0.22.0; CUDA graphs FULL_AND_PIECEWISE; all modalities loaded.
+- **What moved the TPS:** untied int4 lm_head eliminates the bf16 GEMV for 262k-vocab verify (profiler: this was 26.4% of decode GPU time); full-body g128 vs per-layer gives ~1% additional weight-byte reduction. Together: the **int4 Marlin weight-byte floor on Ampere**.
+- **Prove-out artifacts:** `research/_probe/` — greedy verdict JSONLs, ppl_served records, tps probe, config comparisons, quantized-modules inventory. `check_greedy_identity.py` + `validate_offline.py` shipped as first-class tools.
+- **Significance:** this is the weight-byte floor on Ampere with vLLM 0.22.0. Sub-4-bit and fp8 KV are dead ends (no sm_86 kernel). The next TPS lever is the drafter ladder (spec decode) — gated on the verify-rollback gate (kanna, arxiv 2601.17768).
 
 ### 2026-06-13 11:00 — PR #21: Same-path PPL gate: timed-model PPL vs prompt_logprobs path
 
