@@ -67,6 +67,14 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-13 21:32 — PR #49 (wirbel): Sequoia DP-optimal draft tree (cost-model study) — ⭐ CHARACTERIZATION KEEPER (official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary_metric `dp_vs_linear_tps_gain_own_opt_costmodel`=1.1677 is a cost-model ratio; the lane has no servable path). Closes the **Sequoia tree lane** analytically and corrects a shared cost-model tool.
+- **Premise correction (wirbel):** the deployed `fa2sw_precache_kenyan` drafter is **linear MTP K=7 (M=8 verify), not a width-4 tree**; vLLM 0.22 has no tree-attention verify path; tree-causal mask is a merged 0 ms dead-end (#33). No served tree to replace → pivoted to a CPU cost-model study (brute-force n≤7 + 200k-MC validated).
+- **Finding:** the Sequoia DP tree IS the better topology on our distribution (+43% E[T] vs balanced-W4, +16% TPS vs the deployed linear chain, decay-robust 13–17%, optimum at the M=33 Marlin cliff) — **but deployable gain = 0** (no tree-verify path; #33 predicts ~0-saving on the dense path). Lane closed (like the tree-mask).
+- **Secondary (load-bearing):** the salvage-spine E in `tree_acceptance_model.py` (#26) is an **upper bound** (scores 0.86-rate compounding to depth K with only K·W+1 nodes; true compounding needs ~W^K). Over-count **+45% at M=45** (5.99 → achievable 4.13 → ~248 TPS, below the linear frontier) ⇒ **strengthens "ship linear; trees don't reach 500"** (#33/#37). Tightening QUEUED (held until denken #51 lands — same tool).
+- **Reusable infra:** `scripts/profiler/sequoia_dp_tree.py` (DP-optimal topology per budget) + `research/spec_cost_model/{sequoia_dp_results.json,report_sequoia_dp.md}`. **W&B:** `bvbg81v4` (CPU-only; no training).
+
 ### 2026-06-13 21:22 — PR #50 (lawine): official_gate wired into HF-launch preflight (fail-closed) — ⭐ LAUNCH-SAFETY INFRA KEEPER (official bar UNCHANGED 126.378)
 
 - **Not a TPS rung** (primary_metric `official_gate_wired=1`). Makes the #45 `official_gate` verdict the **fail-closed interlock** on the HF-launch path — a quota-spending submission cannot launch on a FAIL/INCOMPLETE gate, and an 8-prompt smoke cannot authorize a 128-prompt run (gate carries `n_prompts` and refuses to certify a full run from a partial sample). Directly protects the Issue #46 approval-gated launch flow.

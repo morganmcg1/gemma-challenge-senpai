@@ -1,5 +1,23 @@
 # SENPAI Research Results
 
+## 2026-06-13 21:32 — PR #49: Sequoia DP-optimal draft tree (cost-model study) ✓ MERGED (characterization keeper, official bar UNCHANGED)
+
+- **Branch:** `wirbel/sequoia-dp-tree` · **Student:** wirbel
+- **Status:** MERGED as a characterization keeper. Official TPS bar **UNCHANGED at 126.378** (primary_metric `dp_vs_linear_tps_gain_own_opt_costmodel`=1.1677 is a cost-model ratio, not throughput; the lane has no servable path).
+- **Hypothesis:** a Sequoia (arXiv 2402.12374) DP-optimal draft tree beats the fixed/balanced tree by +3–15% E[T] on our measured acceptance, composing with the merged split-KV verify (#43). **Premise corrected by wirbel:** the deployed `fa2sw_precache_kenyan` drafter is **linear MTP K=7 (M=8 verify), not a width-4 tree**; vLLM 0.22 has no tree-attention verify path; tree-causal mask is a merged 0 ms dead-end (#33); the PR's `--local-only/--profile-tree-acceptance/--sequoia-tree` flags don't exist → pivoted to the CPU cost-model form the Notes anticipated.
+
+| topology (matched budget) | E[T] @ M=8 | E[T] @ M=45 | max E[T] gain | TPS-opt budget n\* | TPS @ n\* (cm scale) |
+|---|--:|--:|--:|--:|--:|
+| linear (deployed family) | 2.976 | 3.117 | — | 16 | 235.7 |
+| balanced-W4 (prior model) | 2.430 | 3.178 | DP/bal **1.433** | 31 | 216.7 |
+| **Sequoia DP** | **3.019** | **4.132** | DP/lin **1.341** | **32** (M=33 Marlin cliff) | **275.2** |
+
+- **Analysis:** DP tree is genuinely the better topology on our distribution (+43% E[T] vs balanced-W4, +16% TPS vs linear, decay-robust 13–17%; brute-force-validated n≤7, 200k-MC `F==E[committed]`). **But deployable gain = 0** — no tree-verify path exists in vLLM 0.22 and #33 predicts ~0-saving on the dense path. The PR's ≥432-local-TPS target is unmeetable by this route. **Lane closed analytically** (like the tree-mask). **Secondary (load-bearing):** the salvage-spine E in `tree_acceptance_model.py` (#26) is an **upper bound** — it scores 0.86-rate compounding to depth K with only K·W+1 nodes (true 0.86-compounding needs ~W^K branching). Over-count **+45% at M=45** (5.99 → achievable 4.13 → ~248 TPS, *below* the linear frontier) ⇒ **strengthens "ship linear; trees don't reach 500"** (#33/#37). wirbel did NOT auto-edit #26 (flagged + offered a 1-line tightening).
+- **W&B:** `bvbg81v4` (group `sequoia-dp-tree`; CPU-only, <0.2 GB, ~30 s, no GPU/vLLM/HF-Job). Ships `scripts/profiler/sequoia_dp_tree.py` + `research/spec_cost_model/{sequoia_dp_results.json,report_sequoia_dp.md}`.
+- **Follow-ups:** (a) **tree-ceiling tightening QUEUED** — replace salvage-spine E with achievable path-product DP in `tree_acceptance_model.py`, held until denken #51 lands (concurrent-edit on the same tool). (b) premise correction (linear MTP, not M=45 tree) **propagated to denken #51**. (c) wirbel → next slot (post-split-KV decode re-profile).
+
+---
+
 ## 2026-06-13 21:22 — PR #50: official_gate wired into HF-launch preflight (fail-closed) ✓ MERGED (launch-safety infra keeper, official bar UNCHANGED)
 
 - **Branch:** `lawine/official-gate-hf-launch-wire` · **Student:** lawine
