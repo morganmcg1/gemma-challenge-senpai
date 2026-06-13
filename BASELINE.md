@@ -352,3 +352,13 @@ _Last updated: 2026-06-13 (**PR #4 MERGED — new best merged rung: int4 g128 + 
 - **No W&B** (local profiling only; no training/serving run). Profiling artifacts in `research/profiling/splitkv_verify/`.
 - **Implementation:** `submissions/fa2sw_precache_kenyan/splitkv_verify_patch.py` monkey-patches the dispatch guard at Python startup via `submissions/fa2sw_precache_kenyan/sitecustomize.py`. `manifest.json` updated.
 - **Next step:** HF-job approval issue to be opened to get official TPS measurement on HF hardware. Local result is local-only pending that gate.
+
+### 2026-06-13 — PR #45: Local official-gate preflight: modalities check + PASS/FAIL verdict ✓ MERGED — INFRA
+
+- **Status:** MERGED. Validation infrastructure only — no TPS change. Official bar unchanged (**PR #4, 126.378 TPS a10g-small**).
+- **Primary metric:** `official_gate_emitted = 1`, `all_modalities_loaded_on_fa2sw = 1`.
+- **What was built:** `scripts/local_validation/modalities_probe.py` (new) + updated `validate_submission.py` — consolidated `official_gate = (PPL ≤ 2.42) AND (completed == 128) AND (all_modalities_loaded)` verdict (PASS/FAIL/INCOMPLETE), clearly separated from internal `greedy_verdict` (relabeled "internal hardening signal, not an official gate"). Canonical fa2sw greedy reference regenerated via one-flag `--spec-off` path for self-describing provenance; `decode_outputs.jsonl` byte-identical — no behavior change.
+- **Modalities check:** image+text = functional probe (served endpoint); audio/video = presence + non-zero. 5-tier weight selector bug fixed (was sampling norm/calibration scalars → fixed to sample real compute weights). `modalities_method{}` records how each tower was verified — honesty caveat documented.
+- **Tests:** 32 new CPU-only/mocked tests in `test_official_gate.py` (truth table PASS/FAIL/INCOMPLETE, three-valued aggregation, weight-tier selection); 46 total passing.
+- **Smoke (fa2sw, 8 prompts):** `official_gate = PASS`, PPL 2.3767 ✓, 8/8 complete, all modalities loaded.
+- **Follow-ups queued:** (a) stage audio/video sample inputs for functional probe; (b) wire `official_gate` into HF-launch preflight; (c) make INCOMPLETE blocking in launch path.
