@@ -101,6 +101,13 @@ parity/noise; body channel-wise quant — trades PPL for no TPS; widening draft 
 **provable greedy-safe cert (Cauchy-Schwarz) for sparse lm_head verify on gemma-4-E4B** — model-intrinsic
 geometry obstruction (flat row norms, near-full-rank embedding: R_complement_max_norm=1.630 >> z_max/||h||≈0.59),
 0%-fire on 16,384 real decode steps, nets −8% TPS (cert + full fallback > full alone); harness on
-`ubel/vocab-prune-sparse-verify` branch; empirical pruned-weights lmhead12k (no cert) is the viable lever.
+`ubel/vocab-prune-sparse-verify` branch; empirical pruned-weights lmhead12k (no cert) is the viable lever;
+**fa2sw + onegraph runtime levers (standalone, int4 base, conc=1)** — both greedy-DIVERGENT, no TPS win
+(denken PR #7, CLOSED): fa2sw −4.9% TPS + DIVERGENT 82/128 (FA2 numerics ≠ Triton → near-tie argmax flips;
+mixed backend blocks full-graph capture); onegraph TPS-parity + DIVERGENT 1/128 (graph-capture knob perturbs
+the numeric path, one near-tie flip); mechanism: ~92% weight-GEMM/BW-bound at conc=1, existing CUDA graph
+already collapses the step — no per-step overhead to reclaim standalone; int4 base is cross-process
+**bit-exact** (sha256 run#1==run#2, eager too); fa2sw also requires a **vLLM worker-plugin** (V1 spawns
+a separate EngineCore process that a serve-process monkeypatch can't reach).
 
-_Last updated: 2026-06-13 (PR #15 merged — EAGLE-3 feature-export ACCESSIBLE/GO: vLLM 0.22.0 + Gemma-4 E4B implement SupportsEagle3 natively; aux layers (2,21,39), zero patching, CUDA-graph safe. Serving validity gated on kanna #5 linchpin. Program linchpin: int4 batched-verify spec-decode is structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #5 resolving via precision-localization experiment, gates rungs 4–5)._
+_Last updated: 2026-06-13 (PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #5 resolving via precision-localization experiment, gates rungs 4–5)._

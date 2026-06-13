@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 6)
+- **Date:** 2026-06-13 (cycle 8)
 - **Advisor branch:** `approval-gated-8gpu-20260613` · **Research tag:** `gemma-8gpu-progress-20260613`
 - **Most recent human directive:** none yet. Operating under the launch operator rules:
   **no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch`** without a
@@ -24,19 +24,21 @@
   now the #1 strategic question**, ahead of further drafter-quality spend. kanna's v1
   precision-localization experiment (int4 vs bf16 vs fp8 greedy flip-rate) + a manifest-vLLM-version
   check decide whether the ladder is salvageable or the team pivots to a non-vLLM-spec mechanism.
-  **NEW three-way reconciliation thread (cycle 6/7) — three int4 stacks, three greedy verdicts:**
+  **Four-point reconciliation thread (cycles 6–8) — four int4 stacks, converging verdict:**
   (a) **stark #3** (int4 QAT base, tied bf16 lm_head): endpoint-vs-AR DIVERGENT *and* eager-Marlin
-  run#1-vs-run#2 DIVERGENT (run-to-run nondeterministic, hotspots idx 83/104) — but his AR ref used a
-  **bf16-dense** path (different arithmetic than the int4-Marlin endpoint → near-tie divergence
-  partly expected). (b) **lawine #4** (int4 g128 + **untied int4 lm_head**): **GREEDY_IDENTICAL
-  128/128** (W&B `0pxj6n63`) — the **existence proof that an int4 stack passes the strict gate**.
-  (c) **kanna #5** (int4 + MTP spec): spec path DIVERGENT, K0-vs-K0 IDENTICAL. **Leading hypothesis:**
-  int4 greedy is gate-valid when reference and candidate share the **same int4-Marlin path** (lawine),
-  and stark's divergence is dominated by cross-path (Marlin-vs-bf16-dense) reference choice + possibly
-  the tied-bf16 vs untied-int4 lm_head (the last GEMM before argmax controls near-tie stability).
-  If confirmed, the linchpin narrows to *specifically the spec M=K+1 batched-verify path* (kanna),
-  not int4 greedy in general — a **favorable** reframing. stark + lawine run bounded same-path /
-  run-to-run reconciliation on their stacks while blocked on HF approval #11/#12; kanna folds a
+  run#1-vs-run#2 DIVERGENT (hotspots idx 83/104) — but his AR ref used a **bf16-dense** path
+  (different arithmetic → near-tie divergence partly expected from cross-path mismatch, not int4
+  nondeterminism). (b) **lawine #4** (int4 g128 + **untied int4 lm_head**): **GREEDY_IDENTICAL
+  128/128** (W&B `0pxj6n63`) — the **existence proof that an int4 stack passes the strict gate**
+  when reference and candidate share the same int4-Marlin path + untied int4 lm_head.
+  (c) **kanna #5** (int4 + MTP spec): spec path DIVERGENT, K0-vs-K0 IDENTICAL.
+  (d) **denken #7** (int4 QAT base, standalone, M=1 AR sequential prefix-cache-OFF): **cross-process
+  bit-exact** — sha256(`base_clean`)==sha256(`base_clean2`), deterministic in eager — the cleanest
+  control yet. **Converged verdict:** int4 base greedy IS gate-valid in M=1 sequential
+  prefix-cache-OFF; stark's divergence is the outlier (cross-path Marlin-vs-bf16-dense reference
+  + possibly tied lm_head). The **linchpin narrows to the spec M=K+1 batched-verify path
+  specifically** (kanna #5), not int4 greedy in general — a **favorable** reframing. stark + lawine
+  continue bounded same-path reconciliation while blocked on HF approval #11/#12; kanna folds a
   per-precision run-to-run determinism control into the linchpin arms.
 
 ## Current focus — reproduce the public frontier, locally validated
@@ -70,7 +72,7 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 | lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, **GREEDY_IDENTICAL 128/128 ✓ (the int4-passes existence proof)**; **awaiting HF Job approval (GitHub issue #12, advisor-endorsed, no human approval)**. While blocked: document GREEDY_IDENTICAL methodology (same-path vs bf16-dense ref; run-to-run) for the linchpin reconciliation. | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
 | kanna | #5 (WIP) | **int4+MTP spec-decode** — `{8,4}` engine blocker SOLVED (vLLM PR #43543 backport), but int4 batched-verify spec is **structurally greedy-DIVERGENT** vs M=1 AR (~0.33%/tok); acceptance caps ~2.2. v1: precision-localization (int4 vs bf16 vs fp8 greedy flip-rate) **+ per-precision run-to-run determinism control** (reconcile stark #3's run-to-run divergence vs the K0-IDENTICAL claim) + confirm whether a10g-small honors manifest vLLM version | **resolve the linchpin**: is int4 spec greedy-valid at all? Separate intrinsic nondeterminism from batch-shape divergence. |
 | ubel | #14 (WIP) | **Empirical lmhead12k** — CPU feasibility done (kept_ids.json, implementation complete); **GPU void + int4 base absent** (pod intermittent). Path unblocked: self-build int4+g128 via path-(a) (prune bf16→quantize), general-12,288 corpus cut (hard-include GT + STEM fill), regenerate 128-capture. PPL scorer requires hard-include of GT tokens or gate fails. **DRAFTER-INDEPENDENT** rung. | served TPS/PPL/greedy-identity 128/128; both 7,584 and 12,288 bandwidth numbers |
-| denken | #7 (WIP) | **fa2sw + onegraph** target-side runtime levers | per-step overhead erasure, greedy-identical |
+| denken | #18 (WIP) | **int4 decode-step cost model vs K** — measure batched M=K+1 verify-forward latency + component shares (weight-GEMM/attn/overhead) across M ∈ {1,2,4,6,8,10,12,16} at ctx 256 & 512, on the public int4 QAT base + synthetic K-token batched forwards. Derive TPS_ideal(K) ceiling curve + realistic TPS under flat and geometric acceptance models. Identify knee M\* and optimal K\* per drafter acceptance model. LOCAL ONLY, not linchpin-gated, not drafter-dependent. | hardware-grounded TPS ceiling curve; M\* knee; attention-share-vs-M (bounds when fa2sw/attn levers matter) |
 | wirbel | #8 (WIP) | **local validation + profiling infra** | greedy-identity gate, local PPL, decode profiler, one-cmd validate |
 | land | #9 (WIP) | **wide KL-distilled drafter** — tf-gate **PASS +10.3%** (private-proxy floor +10.9%) but native serving **−4.6%** (train↔serve schedule mismatch + undertrained). v1: free-running / EAGLE-3-style schedule + full ~82-min budget, log eval to W&B | native accept > stock 3.553 (v0 = 3.388) |
 
@@ -82,6 +84,7 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 | fern | #10 ✓ **MERGED** | **SAM-Decoding GO verdict.** Causal budget 8.93% K>8 (>3.6% threshold); `analyze_suffix_budget.py` merged; drafter-overlap analysis (#13) merged next. |
 | fern | #13 ✓ **MERGED** | **SAM drafter-overlap tooling.** `--drafter-trace` extension + 13/13 mock tests; canonical trace format (`output_start`); template JSON with thresholds. Net-headroom number awaits kanna's acceptance trace. |
 | fern | #15 ✓ **MERGED** | **EAGLE-3 feasibility ACCESSIBLE → GO.** `SupportsEagle3` natively in vLLM 0.22.0 + Gemma-4 E4B; aux layers `(2,21,39)`, `[T,2560]` bf16, CUDA-graph safe; drafter head arch exists (`llama_eagle3.py`). Zero patching. Empirical probe confirmed. Report at `research/eagle3_feasibility/`. |
+| denken | #7 ✗ **CLOSED** (negative) | **fa2sw + onegraph both dead ends standalone** on int4 base at conc=1 (rigorous isolation). fa2sw: −4.9% TPS + DIVERGENT 82/128. onegraph: parity + DIVERGENT 1/128. Mechanism: ~92% weight-GEMM/BW-bound, CUDA graph already collapses the step. **Bonus finding:** int4 base cross-process bit-exact (sha256 run#1==run#2) — 4th reconciliation data point confirming base is gate-valid in M=1 sequential prefix-cache-OFF. fa2sw needs vLLM worker-plugin (V1 EngineCore separate process). |
 | ubel | #6 ✗ **CLOSED** (negative) | **Cert dead end.** Cauchy-Schwarz cert 0%-fire on Gemma4 (R_complement=1.630, geometry obstruction). Empirical lmhead12k authorized (PR #14). |
 
 ## Potential next research directions (round 2+)

@@ -1,5 +1,42 @@
 # SENPAI Research Results
 
+## 2026-06-13 (cycle 8) — PR #7: fa2sw + onegraph runtime levers ✗ CLOSED (negative)
+
+- **Branch:** `denken/fa2sw-onegraph`
+- **Student:** denken
+- **Status:** CLOSED — rigorous, well-isolated NEGATIVE. Both runtime levers are dead ends standalone on the int4 base at conc=1. Knowledge preserved here and in BASELINE.md "Confirmed dead ends."
+- **Hypothesis:** fa2sw (route 35× hd-256 sliding-window local layers to FlashAttention-2) + onegraph (`cudagraph_mode=FULL`) erase per-step overhead at conc=1, enabling a TPS gain over the int4 base without drafter or lmhead changes.
+
+### Results
+
+| variant | TPS (local, conc=1) | Δ vs base | greedy (official verifier, 128-prompt) |
+|---|---|---|---|
+| base (int4 QAT W4A16) | **96.89 ±0.01** | — | REFERENCE |
+| fa2sw only | 92.11 ±0.02 | **−4.9%** | **DIVERGENT** 82/128 (12,075 tok) |
+| onegraph only | 96.82 ±0.00 | ~0% (parity) | **DIVERGENT** 1/128 (59 tok, @idx 197) |
+| both | 92.12 ±0.00 | **−4.9%** | **DIVERGENT** 82/128 (11,767 tok) |
+
+**W&B run:** `57bb3a6s` — ablation matrix table + per-variant metrics.
+
+### Analysis
+
+Both levers **fail the strict zero-tolerance greedy gate**, so neither can ship standalone regardless of TPS:
+- **fa2sw:** FA2 sliding-window numerics ≠ Triton → near-tie argmax flips on 82/128 prompts. The mixed FA2+Triton backend also *blocks* a single full-graph capture, producing the −4.9% TPS regression.
+- **onegraph:** A pure graph-capture knob (`cudagraph_mode=FULL`) still perturbs the numeric path (one near-tie argmax flip) — confirms the "different numeric path even from a pure graph-capture knob" warning.
+- **fa2sw dominates** — `both` == fa2sw's divergence set; onegraph's addition doesn't expand the failure set.
+
+**Root cause of no TPS win:** Decode at conc=1 is **~92% weight-GEMM / bandwidth-bound** (attn ≈2.6%, sampling ≈0.2%). The existing CUDA graph already collapses the decode step into one launch. There is **no per-step overhead left to reclaim** standalone at conc=1. This closes the "per-step overhead gap" hypothesis for these two levers.
+
+**Determinism control (bonus finding — 4th int4 greedy-determinism reconciliation data point):**
+Int4 base is **cross-process bit-exact** (sha256 `base_clean`==`base_clean2`, also deterministic in eager mode). The divergences above are a real mechanism, not run noise. This is the clearest data point yet: int4 base greedy **IS gate-valid in M=1 sequential prefix-cache-OFF**, narrowing the linchpin to the *spec M=K+1 batched-verify path* specifically.
+
+**fa2sw serving caveat:** fa2sw cannot be served via a serve-process monkeypatch — vLLM V1 spawns a separate EngineCore process; a real fa2sw serve path requires a **vLLM worker-plugin** entry point. Moot since it's invalid, but prevents wasted re-discovery.
+
+### Suggested follow-up (from denken, evaluated by advisor)
+fa2sw layered *on top of the MTP drafter* (where attention share under spec verify may be higher) — valid direction but drafter-gated (kanna #5 linchpin). Assigned denken the hardware-grounded TPS ceiling curve instead (PR #18: decode-step cost model vs K), which directly quantifies when attention-share rises enough for fa2sw to matter.
+
+---
+
 ## 2026-06-13 11:15 — PR #15: EAGLE-3 feature-export feasibility ✓ MERGED
 
 - **Branch:** `fern/eagle3-feature-export-feasibility`
