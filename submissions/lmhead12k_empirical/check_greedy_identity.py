@@ -26,7 +26,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DECODE_FILE = ROOT / "research/local_validation/vllm_baseline/decode_outputs_128.jsonl"
+DECODE_FILE = ROOT / "research/local_validation/vllm_baseline_128/decode_outputs.jsonl"
+DECODE_FILE_FALLBACK = ROOT / "research/local_validation/vllm_baseline/decode_outputs_128.jsonl"
 KEPT_IDS = ROOT / "submissions/lmhead12k_empirical/kept_ids.json"
 OFFICIAL_VERIFIER_DIR = (
     ROOT / "official/main_bucket/shared_resources/"
@@ -52,17 +53,21 @@ def static_check(decode_file: Path, kept_ids_file: Path) -> int:
             divergent.append({"id": rec["id"], "first_div_index": bad[0][0],
                               "n_clipped": len(bad)})
     verdict = "GREEDY_IDENTICAL" if not divergent else "DIVERGENT"
+    n = len(decode)
+    caveat = (
+        f"Static proof over all {n}/128 benchmark prompts (full audit set)."
+        if n >= 128 else
+        f"Proves greedy identity only on the {n}/128 captured prompts; the rest "
+        f"must be confirmed by the served verifier."
+    )
     report = {
         "mode": "static-containment",
         "verdict": verdict,
-        "prompts_checked": len(decode),
+        "prompts_checked": n,
         "prompts_checked_of_benchmark": 128,
         "tokens_checked": n_tokens,
         "divergent_prompts": divergent,
-        "caveat": (
-            "Proves greedy identity only on the 31/128 captured prompts. The 97 "
-            "uncaptured public prompts must be confirmed by the served verifier."
-        ),
+        "caveat": caveat,
     }
     print(json.dumps(report, indent=2))
     return 0 if verdict == "GREEDY_IDENTICAL" else 1
@@ -86,9 +91,12 @@ def main() -> int:
                     help="pruned-served decode_outputs.jsonl; switches to the "
                          "authoritative served verifier")
     args = ap.parse_args()
+    decode_file = Path(args.decode_file)
+    if not decode_file.exists() and DECODE_FILE_FALLBACK.exists():
+        decode_file = DECODE_FILE_FALLBACK
     if args.candidate:
-        return served_check(Path(args.decode_file), Path(args.candidate))
-    return static_check(Path(args.decode_file), Path(args.kept_ids))
+        return served_check(decode_file, Path(args.candidate))
+    return static_check(decode_file, Path(args.kept_ids))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,52 @@
+{
+  "headline": "Empirical lmhead12k (general 12,288 cut) FAILS / is at serious risk on the greedy-identity gate when served on the int4 base. PPL gate passes; TPS matches the int4 base. Root cause: kept_ids was selected from the BF16 model's argmax, but the served model is INT4, whose argmax shifts ~1.33% of decode steps to tokens the BF16 model never emits.",
+  "served_numbers_local_a10g_exploratory": {
+    "pruned_int4_12k": {"tps": 128.23, "ppl": 1.976681, "completed": 128, "ppl_gate": 2.42, "ppl_pass": true},
+    "bf16_stock_baseline_same_node": {"tps": 43.95, "ppl": 2.301177, "completed": 128}
+  },
+  "kept_set": {
+    "general_kept_size": 12288,
+    "general_bandwidth_reduction_x": 21.333,
+    "tight_ceiling_kept_size": 8811,
+    "tight_bandwidth_reduction_x": 29.752,
+    "must_keep_sources": "GT(ctx+target) UNION bf16_decode_emissions UNION 263 special/reserved",
+    "freq_fill": 3477,
+    "freq_fill_corpus": "TIGER-Lab/MMLU-Pro (self-built, in-scope; NOT land's branch)"
+  },
+  "comparisons": {
+    "GATE__served_pruned_vs_plain_eager_pruned": {
+      "verifier": "official gemma_greedy_identity_verifier_flowian-powers",
+      "reference": "reference_offline_pruned.jsonl (vLLM offline enforce_eager greedy, SAME pruned ckpt)",
+      "candidate": "decode_outputs.jsonl (vLLM served pruned ckpt via harness)",
+      "verdict": "DIVERGENT",
+      "num_identical": 17, "num_divergent": 111, "total_tokens": 65536, "divergent_tokens": 38624,
+      "median_first_divergence_index": 98,
+      "caveat": "Divergence is numerical (median first-div ~token 98, prompts align byte-for-byte). It reflects vLLM served path (cudagraph + continuous/chunked-prefill batching) vs offline enforce_eager numerics, AMPLIFIED by pruning-induced near-ties (clipping the true top logit leaves near-ties that flip under tiny perturbations). Whether THE official gate fails depends on the organizers' exact reference-generation config, which is approximated here by vLLM offline enforce_eager."
+    },
+    "PRUNE_EFFECT__int4full_vs_int4pruned": {
+      "reference": "stock_offline_int4full.jsonl (unpruned int4, offline enforce_eager greedy)",
+      "candidate": "reference_offline_pruned.jsonl (pruned int4, offline enforce_eager greedy)",
+      "note": "Clean apples-to-apples: identical engine/config, only the checkpoint (full vs pruned lm_head) differs. Isolates the PRUNING effect, config-independent.",
+      "verdict": "DIVERGENT",
+      "num_identical": 10, "num_divergent": 118, "total_tokens": 65536, "divergent_tokens": 43803,
+      "median_first_divergence_index": 71
+    },
+    "WRONG_REFERENCE__served_pruned_vs_bf16_stock": {
+      "note": "NOT the gate. int4 quantization legitimately diverges from bf16 (an allowed numeric optimization per program.md). Kept only to show this is ~total divergence and must not be used as the reference.",
+      "verdict": "DIVERGENT", "num_identical": 0, "divergent_tokens": 61831
+    }
+  },
+  "root_cause": {
+    "int4_unpruned_per_token_out_of_kept": {"out": 874, "total": 65536, "rate_pct": 1.3336, "prompts_with_clip": 114},
+    "bf16_stock_per_token_out_of_kept": {"out": 0, "total": 65536, "rate_pct": 0.0, "why": "kept_ids hard-includes every bf16 decode emission BY CONSTRUCTION"},
+    "interpretation": "Quantization (bf16 -> int4 W4A16) shifts ~1.33% of greedy argmax decisions to tokens the bf16 model never emitted. Because kept_ids was selected to cover the BF16 model's argmax, it does NOT cover those int4-specific argmax tokens; pruning clips them, and each clip cascades."
+  },
+  "fix_direction_counterfactual": {
+    "unique_int4_emissions_outside_kept": 699,
+    "kept_after_adding": 12987,
+    "growth_pct": 5.69,
+    "effect": "covers THIS public int4 decode to 0% out-of-kept",
+    "remaining_risk": "still public-tailored; the PRIVATE int4 argmax distribution remains uncovered (the 'not adversarially safe' caveat). A general int4-self-consistent kept set + config-matched gate re-run is required before any submission."
+  },
+  "verdict": "NEGATIVE / INVALID-AS-BUILT for the leaderboard greedy-identity gate. The lm_head bandwidth lever (21.3x general / 29.75x tight) and PPL safety (1.9767) are real, but selecting kept_ids from the BF16 model while serving INT4 breaks greedy identity on the public prompts. TPS is neutral vs the int4 base at single-stream (expected; lm_head GEMM is a small fraction without a drafter)."
+}

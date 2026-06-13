@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 """Serve the lmhead12k empirical pruned checkpoint on vLLM.
 
-Mirrors submissions/vllm_baseline/serve.py, with two additions:
-  1. Register the custom Gemma3ForCausalLMLMHead12k class (pruned lm_head +
-     scatter-to-full-vocab logits) BEFORE vLLM resolves the architecture.
-  2. Point --model at the pruned checkpoint (MODEL_ID), which ships kept_ids.json.
+Identical to submissions/vllm_baseline/serve.py except:
+  * ``--model`` points at the pruned checkpoint (``MODEL_ID``), which ships
+    ``kept_ids.json`` alongside the weights, and
+  * ``MODEL_ID`` is exported so the custom model class can locate ``kept_ids.json``.
 
-Registration uses the string form so CUDA is not initialized in this launcher
-process. The server is started in-process via runpy so the registration is live
-when vLLM builds the model.
-
-!!! NEEDS GPU VALIDATION: for tensor-parallel/multi-process workers, vLLM may
-require the model to be registered through a vllm general-plugins entrypoint so
-worker processes see it. On a single A10G (TP=1) the in-process registration
-below is the first thing to try; if workers don't pick it up, switch to a plugin
-entrypoint. Validate against vLLM 0.22.0 on a live GPU before any benchmark.
+The custom architecture (``Gemma4ForCausalLMLMHead12k``) is registered through the
+``vllm_lmhead12k`` general-plugin entry point, NOT in-process here: vLLM's V1
+async server builds the model in a separate ``EngineCore`` process, which an
+in-process ``ModelRegistry.register_model()`` in this launcher would not reach.
+The plugin's ``register()`` runs in every vLLM process via
+``load_general_plugins()``. The package must be importable in the serving venv
+(``pip install -e submissions/lmhead12k_empirical/vllm_plugin``). The project dir
+is named ``vllm_plugin`` (not ``vllm_lmhead12k``) on purpose: this submission dir
+goes on ``sys.path`` when ``serve.py`` launches, and a project dir sharing the
+import name would shadow the installed package as an empty namespace package.
 """
 from __future__ import annotations
 
 import os
-import runpy
 import sys
 
 
@@ -31,30 +31,34 @@ def main() -> None:
     max_model_len = os.environ.get("MAX_MODEL_LEN", "4096")
     gpu_memory_utilization = os.environ.get("GPU_MEMORY_UTILIZATION", "0.90")
     max_num_batched_tokens = os.environ.get("MAX_NUM_BATCHED_TOKENS")
-    os.environ.setdefault("MODEL_ID", model_id)  # model __init__ reads kept_ids here
+    # The custom model class reads kept_ids.json from MODEL_ID; make sure it is set
+    # in the environment the EngineCore subprocess inherits.
+    os.environ["MODEL_ID"] = model_id
 
-    from vllm import ModelRegistry
-
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    ModelRegistry.register_model(
-        "Gemma3ForCausalLM", "lmhead12k_model:Gemma3ForCausalLMLMHead12k"
-    )
-
-    argv = [
+    args = [
+        sys.executable,
+        "-m",
         "vllm.entrypoints.openai.api_server",
-        "--model", model_id,
-        "--served-model-name", served_model_name,
-        "--host", host,
-        "--port", port,
-        "--max-model-len", max_model_len,
-        "--gpu-memory-utilization", gpu_memory_utilization,
+        "--model",
+        model_id,
+        "--served-model-name",
+        served_model_name,
+        "--host",
+        host,
+        "--port",
+        port,
+        "--dtype",
+        "bfloat16",
+        "--max-model-len",
+        max_model_len,
+        "--gpu-memory-utilization",
+        gpu_memory_utilization,
         "--trust-remote-code",
         "--no-enable-log-requests",
     ]
     if max_num_batched_tokens:
-        argv += ["--max-num-batched-tokens", max_num_batched_tokens]
-    sys.argv = argv
-    runpy.run_module("vllm.entrypoints.openai.api_server", run_name="__main__")
+        args += ["--max-num-batched-tokens", max_num_batched_tokens]
+    os.execvpe(args[0], args, os.environ)
 
 
 if __name__ == "__main__":

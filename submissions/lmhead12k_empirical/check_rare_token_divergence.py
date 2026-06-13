@@ -22,7 +22,8 @@ from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-DECODE_FILE = ROOT / "research/local_validation/vllm_baseline/decode_outputs_128.jsonl"
+DECODE_FILE = ROOT / "research/local_validation/vllm_baseline_128/decode_outputs.jsonl"
+DECODE_FILE_FALLBACK = ROOT / "research/local_validation/vllm_baseline/decode_outputs_128.jsonl"
 GT_FILE = ROOT / "official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl"
 KEPT_IDS = ROOT / "submissions/lmhead12k_empirical/kept_ids.json"
 
@@ -39,7 +40,10 @@ def main() -> None:
     ap.add_argument("--kept-ids", default=str(KEPT_IDS))
     args = ap.parse_args()
 
-    decode = _read_jsonl(Path(args.decode_file))
+    decode_file = Path(args.decode_file)
+    if not decode_file.exists() and DECODE_FILE_FALLBACK.exists():
+        decode_file = DECODE_FILE_FALLBACK
+    decode = _read_jsonl(decode_file)
     gt = _read_jsonl(Path(args.gt_file))
     meta = json.loads(Path(args.kept_ids).read_text())
     kept = set(meta["kept_ids"])
