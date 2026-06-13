@@ -34,6 +34,12 @@ def main() -> None:
     gpu_memory_utilization = os.environ.get("GPU_MEMORY_UTILIZATION", "0.90")
     max_num_batched_tokens = os.environ.get("MAX_NUM_BATCHED_TOKENS", "512")
     max_num_seqs = os.environ.get("MAX_NUM_SEQS", "1")
+    # Optional online target quantization. Unset for the shipped int4 submission
+    # (its checkpoint is already compressed-tensors W4A16). Set e.g.
+    # QUANTIZATION=fp8 only for the local precision-localization diagnostic, to
+    # dynamically quantize a bf16 target (Marlin fp8 on Ampere) without a
+    # separate checkpoint.
+    quantization = os.environ.get("QUANTIZATION") or None
 
     drafter_model = os.environ.get(
         "DRAFTER_MODEL", "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant"
@@ -66,6 +72,8 @@ def main() -> None:
     ]
     if max_num_batched_tokens:
         args += ["--max-num-batched-tokens", max_num_batched_tokens]
+    if quantization:
+        args += ["--quantization", quantization]
 
     # Speculative decoding with the gemma4_assistant MTP drafter. vLLM's
     # speculative config rewrites model_type gemma4_assistant -> gemma4_mtp
