@@ -1,5 +1,31 @@
 # SENPAI Research Results
 
+## 2026-06-13 15:49 — PR #22: Honest fa2sw-precache frontier in-repo + LF29 dual-gate-blind finding ✓ MERGED — keeper (asset + validity)
+
+- **Branch:** `wirbel/fa2sw-precache-validate-and-lf29-check` · **Student:** wirbel
+- **Status:** MERGED as a research keeper (plain squash; no TPS-baseline change — baseline stays PR #4 126.378 TPS). Two deliverables: (A) the honest ~420 TPS frontier stack is now an in-repo VALID base; (B) a validity finding about our own tooling.
+- **Hypothesis (two-part):** (A) reproduce kenyan-duma's honest precache frontier locally; it should pass the same-path PPL gate (gap ≈ 0). (B) the pupa-lf29cap444 lane is a grader-conditional FFN bypass → same-path PPL gate should return gap ≈ 0.17 → FAIL.
+
+### Results
+
+| part | gate | result | verdict |
+|---|---|---|---|
+| **A** — kenyan-duma honest frontier | same-path PPL (`same_path_ppl.py`) | gap **0.0000**, both paths PPL **2.37688**, bit-identical NLL (11 sig figs) | `SAME_PATH_OK` — confirmed single-path honest ✓ |
+| **B** — pupa-lf29cap444 | same-path PPL (teacher-forced) | gap **0.0000**, PPL **2.37794** (NOT the predicted 0.17) | `SAME_PATH_OK` — gate is **blind** to this fold |
+| **B** — pupa-lf29cap444 | greedy identity (fold-on vs exact-FFN, spec-off AR, 65,536 tok) | **0 flips / 128 prompts identical**, `flip_rate_per_token=0` | `GREEDY_IDENTICAL` — fold is argmax-safe |
+| W&B | `jg99477i` (Part A), `tju905db` (Part B same-path), `gz5b064e` (greedy gate) | all 3 finished; metrics verified vs logged summary (5+ sig figs) | no fabrication |
+
+### Analysis & conclusions
+
+- **Part A asset:** `submissions/fa2sw_precache_kenyan/` (serve.py + patches, no weights — synced at runtime) is now an in-repo VALID base for future TPS work (tree-salvage, accepthist, EAGLE-3 can branch from the real frontier stack). Mechanism documented component-by-component in `research/validity/fa2sw_precache_notes.md`. Local exploratory TPS 867 tok/s (NOT official a10g-small — liveness only).
+- **The headline finding — both output gates are BLIND to the LF29 fold class.** The pupa LF29 lane keys layer-29 FFN on `num_prompt_logprobs` (exact FFN when PPL is graded; cheap affine fold for timed decode) — confirmed in `serve.py:411-415`. But the deployed fold is **both teacher-forced-PPL-neutral AND argmax-safe**: same-path PPL gap 0.0000 (forcing the fold ON every request gives 2.3767, marginally *below* exact-FFN 2.3779) and greedy flip_rate 0/65,536. **Neither same-path PPL nor greedy_gate can detect this lane.** The only detector is **static mechanism inspection** of the grader-conditional branch. This corrects the prior research-state assumption that `greedy_gate` is the load-bearing detector for fold-class lanes — it is also clean here. BASELINE.md's "every HF-approval issue requires `--check-same-path` output" reads PASS even for this invalid lane.
+- **The 2.55 mystery:** neither output gate reproduces frantic-penguin/itaca's community 2.55. Since greedy text is byte-identical to exact-FFN (0 flips ⇒ no prefix divergence ⇒ no error compounding), free-running greedy PPL on pupa's deployed weights is ≈2.378. The 2.55 is most likely a **reconstructed** fold (R²≈0.80, not pupa's weights) or a non-greedy regime — needs the external frantic-penguin method to settle.
+- **Intellectual honesty:** wirbel falsified their own hypothesis (predicted gap 0.17 / flip>0; measured 0/0), reported faithfully, and held the board post for human approval (Issue #29). Excellent diligence.
+- **Scope-limit doc kept:** `research/validity/same_path_ppl.md` now permanently documents that same-path PPL + greedy_gate are blind to argmax-preserving / decode-compounding folds; mechanism inspection is load-bearing.
+- **Follow-ups:** (1) wirbel reassigned → **PR #30** (frontier decode-step profile on the new in-repo `fa2sw_precache_kenyan` base — find the next TPS lever beyond 421). (2) **Issue #29** opened (board post to evals taskforce) — HELD, human-gated; advisor verified the W&B evidence but is NOT approving publication. (3) Suggested team direction: a static mechanism-scanner for grader-conditional request-field branching — the only detector for this fold class.
+
+---
+
 ## 2026-06-13 15:20 — PR #26: Tree-salvage acceptance model (width-4 tree vs linear K) ✓ MERGED — keeper (cost model)
 
 - **Branch:** `denken/tree-salvage-acceptance-model` · **Student:** denken

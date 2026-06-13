@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 14, ~15:20Z)
+- **Date:** 2026-06-13 (cycle 15, ~15:50Z)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 - **Most recent human directive:** Morgan (human) approved both int4 HF jobs ~13:00Z (issues #11 int4-qat, #12 int4-g128-lmhead). **Still operating under launch operator rules: no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch` without a human-approved GitHub issue. Advisor consumes no GPU.**
 
@@ -39,18 +39,20 @@ Re-verify accepted tokens after each spec step under a **fixed-shape M=1 sequent
 
 ---
 
-## VALIDITY INSTRUMENT FINDING (wirbel #22, 2026-06-13)
+## VALIDITY INSTRUMENT FINDING (wirbel #22 MERGED, 2026-06-13) — TWO fold classes, two detectors
 
-**The same-path PPL gate (PR #21) is teacher-forced-blind — it cannot detect argmax-preserving / decode-compounding folds.**
+**PR #22 terminal (MERGED): both OUTPUT gates are blind to the argmax-safe LF29 fold. Mechanism inspection is the only detector for that class.** This refines the earlier "greedy_gate is the load-bearing detector for fold-class lanes" — it depends on which class:
 
-- Part A (kenyan-duma precache reproduction): PASS — gap 0.0000 / SAME_PATH_OK. Honest single-path confirmed at full precision.
-- Part B (pupa-lf29cap444 LF29 fold check): gate returns gap 0.0000 even when fold FORCED ON. The gate is structurally blind: teacher-forced PPL is fold-neutral; fold cost is in free-running decode only. `echo+logprobs` also trips the same bypass exemption in vLLM.
+| fold class | example | does it change argmax? | same-path PPL | greedy_gate | the detector |
+|---|---|---|---|---|---|
+| **argmax-CHANGING** | lmhead12k clip (ubel #14): int4 argmax falls outside kept_ids ~1.33%/tok | **yes** → DIVERGENT | blind (PPL *improved* to 1.9767 via −inf denominator inflation) | **CATCHES it** ✓ | **greedy_gate** |
+| **argmax-PRESERVING grader-conditional fold** | LF29 affine fold (pupa, wirbel #22): exact FFN when `num_prompt_logprobs`, cheap fold for decode | **no** → 0 flips / 65,536 | blind (gap 0.0000 even fold-forced-ON; teacher-forced-neutral) | **blind** (GREEDY_IDENTICAL, 0 flips) | **static mechanism inspection** of the `serve.py` branch |
 
-**→ `greedy_gate` (served-token identity, spec-off, served-vs-served) is the LOAD-BEARING validity instrument for fold-class lanes.** Same-path gate remains valid for logit-level path splits (request-field branching on `prompt_logprobs`).
+- **Part A (kenyan-duma precache):** PASS — gap 0.0000 / SAME_PATH_OK, bit-identical NLL. Honest single-path confirmed. `submissions/fa2sw_precache_kenyan/` now an **in-repo VALID base** for future TPS work.
+- **Part B (pupa-lf29cap444):** same-path gap 0.0000 **and** greedy flip_rate 0/65,536. The deployed fold is teacher-forced-PPL-neutral AND argmax-safe, so NO output gate flags it; only static inspection of the `num_prompt_logprobs` branch (`serve.py:411-415`) does. The community 2.55 is reproduced by neither gate (likely a reconstructed R²≈0.80 fold or non-greedy regime, not pupa's deployed weights). W&B `jg99477i`/`tju905db`/`gz5b064e` — all verified.
+- **Net rule:** `greedy_gate` catches argmax-changing optimizations (the lmhead12k class — non-negotiable on every HF-approval issue); `--check-same-path` catches `prompt_logprobs` logit-path splits; **neither catches argmax-preserving grader-conditional folds** → a static mechanism-scanner is the missing instrument (candidate next direction).
 
-**Second independent corroboration (ubel #14, 2026-06-13):** lmhead12k pruning with bf16-selected kept_ids served **greedy DIVERGENT**, yet teacher-forced PPL *improved* to 1.9767 (≤2.42) — because the −inf scatter on pruned rows inflates the restricted-softmax denominator. A DIFFERENT mechanism from the LF29 fold, same lesson: PPL cannot see a greedy clip. Two independent confirmations now → greedy_gate is non-negotiable on every HF-approval issue.
-
-wirbel authorized to run greedy_gate on pupa-lf29cap444 locally (PR #22 WIP). Board post held for human approval.
+Board post (Issue #29) HELD for human approval — advisor verified the W&B evidence but is NOT approving publication.
 
 ---
 
@@ -79,29 +81,30 @@ The **acceptance lever** is the only one with real headroom above ~424 TPS (fabl
 | kanna | **#24 (WIP, NEW)** | **Verify-rollback gate (arxiv 2601.17768)** — intercept spec-decode accepted tokens, re-verify under M=1 fixed-shape AR forward, commit matches / rollback mismatches. Goal: flip_rate → 0 (greedy-identical) + net-positive TPS over int4 AR. LOCAL ONLY. | **THE LINCHPIN NEXT LANE — #1 priority** |
 | fern | **#25 (WIP, NEW)** | **EAGLE-3 full-scale training** — extend PR #16 harness: 2000 MATH + 500 ShareGPT samples corpus, 20k steps, warmup 500, lr=1e-4. Target: tf_acceptance_rate ≥ 0.78 (held-out). Offline training, no serving, no HF Job. Readies highest-ceiling drafter for verify-rollback unlock. | Ready to train |
 | denken | **#28 (WIP, NEW)** | **Extended verify-latency M-sweep** — measure int4 verify latency at M∈{20,24,28,32,40,48,64} (tree K=6→M=25, K=10→M=41), re-run tree_acceptance_model on MEASURED (not extrapolated) curve, settle >500@p=0.78 question. LOCAL ONLY. (#26 MERGED: tree-salvage characterized — rescue 0.565, E ratio 1.59×, overhead 1.06×.) | Active |
-| wirbel | #22 (WIP, ↩ sent back) | **Greedy_gate on pupa-lf29cap444** (local, spec-off) + terminal marker covering Part A (kenyan-duma PPL) + Part B (pupa greedy_gate result) + same_path scope-limit doc. Board post HELD for human approval. | Pending greedy_gate run |
+| wirbel | **#30 (WIP, NEW)** | **Frontier decode-step profile** on the in-repo `fa2sw_precache_kenyan` honest base — decompose the ~420 TPS decode cycle (drafter / verify-body int4-GEMM / lmhead12k / fa2sw attn / sampling / host overhead), validate fableous's ~1.4ms drafter / ~7ms verify split, name the single next TPS lever for the team. LOCAL ONLY. (#22 MERGED — honest frontier in-repo + LF29 dual-gate-blind finding.) | Active |
 | stark | #23 (WIP) | **int4 spec-verify greedy flip-rate probe** — fp32-logit, deterministic-reduction, both configs; 4 arms across int4 base; measure which (if any) drives flip_rate → 0. Complements kanna's verify-rollback via different mechanism. LOCAL ONLY. | Active |
-| ubel | #14 (WIP, ↩ sent back) | **Empirical lmhead12k** — bf16-selected kept_ids gave **greedy DIVERGENT** (PPL passed 1.9767 but ~1.33% of int4 argmax steps fall outside kept_ids; PPL blind via restricted-softmax denominator inflation). Fix = re-select kept_ids from int4's OWN argmax over broad corpus + report held-out clip rate + served-vs-served gate. DRAFTER-INDEPENDENT. | ⚠️ dark since 12:44Z; nudged 15:09Z — **escalate next cycle if still silent** |
-| land | #9 (WIP) | **Wide KL-distilled drafter** — v0 regressed −4.6% native (train↔serve schedule mismatch). v1 = free-running / EAGLE-3-style schedule + full ~82-min budget. Prerequisite for accepthist + tree-salvage on the honest stack. | Active — rebased + v1 committed 14:54Z, running (stale conflict flag) |
+| ubel | #14 (WIP, ↩ sent back) | **Empirical lmhead12k** (DRAFTER-INDEPENDENT). bf16-selected kept_ids → greedy DIVERGENT (PPL-blind). ubel's 15:32Z correction: the gate is SELF-CONSISTENCY (pruned-vs-pruned), so the clip floor (0.56% public / 1.05% held-out, irreducible by selection) is a **private-PPL** risk, NOT a greedy-gate criterion. Advisor 15:46Z: RETRACTED prior PRUNE-EFFECT/clip~0 criteria; instructed rebase onto advisor branch for canonical `validate_submission` (served-vs-served); approved adjusted terminal criteria. | Alive (responded 15:32Z); rebase + served-vs-served gate pending |
+| land | #9 (WIP) | **Wide KL-distilled drafter** — v0 regressed −4.6% native (train↔serve schedule mismatch). v1 = free-running / EAGLE-3-style schedule + full ~82-min budget. Prerequisite for accepthist + tree-salvage on the honest stack. | Active — v1 running (CLEAN/MERGEABLE; prior conflict flag was stale) |
 | lawine | **#27 (WIP, NEW)** | **int4 channel-wise lm_head sweep** — one-line change (`group_size=-1` in build_quant.py), local pre-validate + greedy check, HF approval issue if local passes. Expected ~127.4 TPS / PPL ~2.03. Establishes best lm_head quant scheme before drafter stacks pile on. | Active |
 
 ---
 
-## Same-path PPL gate scope — updated (wirbel #22 finding)
+## Validity-instrument scope — updated (wirbel #22 terminal, MERGED)
 
-| scope | catches | misses |
+| instrument | catches | misses |
 |---|---|---|
-| same-path PPL gate (PR #21) | Logit-level path splits: `prompt_logprobs` field branching to a different FFN | Argmax-preserving / decode-compounding folds (LF29-class): teacher-forced-neutral, gate returns 0.0000 |
-| greedy_gate (PR #8) | Free-running decode divergence including fold effects | — |
+| same-path PPL gate (PR #21) | Logit-level path splits: `prompt_logprobs` field branching to a different FFN | Argmax-preserving / decode-compounding folds (LF29-class): teacher-forced-neutral, gap 0.0000 even fold-forced-ON |
+| greedy_gate (PR #8) | Free-running **argmax-CHANGING** divergence (lmhead12k clip, quant argmax shift) | **Argmax-PRESERVING grader-conditional folds (LF29): 0 flips / 65,536 — BLIND** |
+| static mechanism scan (**not yet built — candidate direction**) | grader-conditional request-field branching in `serve.py` (`num_prompt_logprobs` etc.) | pure runtime/precache behavior |
 
-**→ Every HF-approval issue must attach BOTH `greedy_gate` output AND `--check-same-path` output.** Same-path alone is insufficient for fold-class submissions.
+**→ Every HF-approval issue must attach BOTH `greedy_gate` AND `--check-same-path` output.** They are complementary but **neither catches an argmax-safe grader-conditional fold** — that gap is closable only by static mechanism inspection.
 
 ---
 
 ## Confirmed dead ends (cycle 13 additions)
 
 - **`VLLM_BATCH_INVARIANT=1` + greedy-valid spec decode** — CLOSED (kanna #19). Aten-override cannot reach int4 Marlin `_C` op (~0.265%/tok) OR the non-aten spec-verify residual (~0.111%/tok). Both sources are additive and independent. No lane via invariant kernels at any precision in 0.22.0.
-- **Teacher-forced PPL gate for fold-class lanes** — CLOSED (wirbel #22). The gate is structurally blind to argmax-preserving / decode-compounding folds. greedy_gate is required.
+- **Output gates (PPL + greedy) for argmax-safe grader-conditional folds** — CLOSED (wirbel #22 terminal, MERGED). Teacher-forced PPL is fold-neutral AND the deployed LF29 fold is argmax-safe (0 flips / 65,536), so BOTH same-path PPL and greedy_gate are blind. Only static mechanism inspection of the `num_prompt_logprobs` branch detects this lane. (greedy_gate IS still load-bearing for argmax-CHANGING optimizations like the lmhead12k clip — different class.)
 - See BASELINE.md for the complete dead-end list (sub-4-bit, fp8 KV, n-gram, fa2sw/onegraph standalone, etc.).
 
 ---
@@ -113,12 +116,14 @@ The **acceptance lever** is the only one with real headroom above ~424 TPS (fabl
 3. **Verify-latency M-sweep (denken #28)** — measures int4 verify latency to M=64, replacing the tree-salvage extrapolation (M=25/M=41) with real data; settles whether >500@p=0.78 holds. (Tree-salvage itself now characterized + MERGED via #26.)
 4. **Channel-wise lm_head sweep (lawine #27, active)** — `group_size=-1`, quick leaderboard data point. Low risk. Expected ~127.4 TPS / PPL ~2.03.
 5. **accepthist (dynamic K)** — pupa/need-for-speed technique; separable from LF29 base. Worth a clean implementation on the honest frontier once verify-rollback unlocks serving.
-6. **lmhead12k fix (ubel #14)** — drafter-independent rung. bf16-selected kept_ids gave **greedy DIVERGENT**; fix = re-select from int4's own argmax over a broad corpus + held-out clip rate. PPL passed (1.9767) but is blind to the clip — greedy_gate is load-bearing here too. ⚠️ ubel dark since 12:44Z.
+6. **lmhead12k fix (ubel #14, alive)** — drafter-independent rung. The gate is SELF-CONSISTENCY (pruned-vs-pruned), so the clip floor (irreducible 0.56% public / 1.05% held-out) is a **private-PPL** risk, NOT a greedy criterion. Re-select kept_ids from int4's own argmax + served-vs-served gate via canonical `validate_submission` (ubel rebasing onto advisor branch). greedy_gate load-bearing for the argmax-changing clip; PPL blind to it.
 7. **Wide drafter (land #9)** — v1 free-running schedule running; prerequisite for both accepthist and tree-salvage on the honest stack.
+8. **Frontier decode profile (wirbel #30, NEW)** — decompose the ~420 TPS decode cycle on the in-repo honest `fa2sw_precache_kenyan` base to find the next TPS lever (expect verify-body int4-GEMM to dominate now that lmhead12k has cut the lm_head share). Directs the team's next round.
+9. **Static mechanism-scanner for grader-conditional branching (candidate, unassigned)** — the missing validity instrument: static-scan a submission's `serve.py`/patches for model-behavior branching on grader-only request fields (`prompt_logprobs`/`num_prompt_logprobs`). The ONLY detector for argmax-safe folds (wirbel #22). Also protects our own submissions + could contribute to the human evals taskforce.
 
 ---
 
-_Last updated: 2026-06-13 **cycle 14** — PR #26 MERGED (tree-salvage cost-model keeper: rescue 0.565 > fableous 0.431, E ratio 1.59×, tree-verify overhead 1.06× measured, K=6 tree ~347 TPS / 393 @ full-scale; >500 only at deep-K extrapolated). W&B independently verified. denken reassigned #28 (verify-latency M-sweep to kill the extrapolation). ubel #14 PPL-blindness corroboration added to validity section (2nd independent confirmation greedy_gate is load-bearing) — ubel dark since 12:44Z, nudged 15:09Z, escalate next cycle if silent. land #9 rebased + v1 running. All 8 students busy: kanna #24 (verify-rollback, #1 priority), fern #25, stark #23, wirbel #22, ubel #14, land #9, lawine #27, denken #28. Honest frontier: kenyan-duma 421.12 TPS / frantic-penguin 424.52 pending._
+_Last updated: 2026-06-13 **cycle 15** — PR #22 MERGED (wirbel, validity+asset keeper): (1) honest kenyan-duma ~420 TPS frontier reproduced in-repo as VALID base `submissions/fa2sw_precache_kenyan`; (2) LF29 fold is **argmax-safe AND PPL-neutral** → BOTH output gates blind (same-path gap 0.0000, greedy 0 flips/65,536) → only static mechanism inspection detects the grader-conditional `num_prompt_logprobs` branch. W&B `jg99477i`/`tju905db`/`gz5b064e` independently verified. wirbel reassigned → #30 (frontier decode profile, next-lever finder). ubel #14 ALIVE (responded 15:32Z): advisor RETRACTED prior PRUNE-EFFECT/clip~0 criteria, instructed rebase for served-vs-served `validate_submission`, approved self-consistency terminal criteria. Issue #29 (board post) HELD, human-gated, evidence advisor-verified. All 8 students busy: kanna #24 (verify-rollback, #1 priority), fern #25, stark #23, wirbel #30, ubel #14, land #9, lawine #27, denken #28. Baseline unchanged: PR #4 126.378 TPS. Honest frontier target: kenyan-duma 421.12 / frantic-penguin 424.52 pending._
 
-### Prior cycle 13 (for reference)
-_PR #4 MERGED (126.378 TPS baseline); PR #19 MERGED (LINCHPIN DEFINITIVE NEGATIVE: invariant-kernel lane closed); PR #16 MERGED (EAGLE-3 harness, tf_acc=0.6816); PR #18 MERGED (cost model, ideal ceiling 1269.5 TPS at K*=15); wirbel #22 finding: same-path PPL gate teacher-forced-blind for fold-class lanes._
+### Prior cycles (for reference)
+_Cycle 14: PR #26 MERGED (denken tree-salvage cost-model: rescue 0.565 > fableous 0.431, E ratio 1.59×, verify overhead 1.06× measured, K=6 ~347 TPS / 393 @ full-scale; >500 only deep-K extrapolated → denken #28 M-sweep). Cycle 13: PR #4 MERGED (126.378 TPS baseline); PR #19 MERGED (LINCHPIN DEFINITIVE NEGATIVE: invariant-kernel lane closed, 2 un-coverable causes); PR #16 MERGED (EAGLE-3 harness, tf_acc=0.6816, use `debug_1k_2ep/`); PR #18 MERGED (cost model, ideal ceiling 1269.5 TPS at K*=15)._
