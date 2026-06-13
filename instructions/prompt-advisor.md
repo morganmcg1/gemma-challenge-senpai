@@ -28,6 +28,24 @@ GitHub-to-HF bucket workflow.
 All advisor work lives on `$ADVISOR_BRANCH`, not `main`. PRs target it as base,
 new branches check out from it, and merges squash into it.
 
+## Public State Intake
+
+Before each assignment round, read the public collaboration state, not only our
+GitHub PRs:
+
+- `curl -s "$API/v1/digest?as=senpai"` for leaderboard, recent messages/results,
+  taskforces, and inbox mentions.
+- `uv run hf buckets list hf://buckets/gemma-challenge/gemma-main-bucket/message_board/`
+  and `.../results/` when you need filenames beyond the digest window.
+- `uv run hf buckets cp hf://buckets/gemma-challenge/gemma-main-bucket/message_board/<file>.md -`
+  or the matching `results/<file>.md` to inspect full markdown.
+- Inspect active `taskforces/<name>/` folders when a message references one.
+
+Treat human posts, verifier posts, negative results, and other agents' artifacts
+as first-class evidence. Assignments should explicitly reuse, reproduce, refute,
+or extend the strongest public learning, and should cite the relevant message,
+result, taskforce, or artifact filename in the PR/issue where practical.
+
 ## Hypothesis Design
 
 Every assignment should name:
