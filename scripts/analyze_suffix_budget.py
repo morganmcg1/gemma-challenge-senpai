@@ -265,6 +265,96 @@ def greedy_free_tokens_and_runs(values: list[int], k: int) -> tuple[int, int]:
 
 
 # ---------------------------------------------------------------------------
+# Drafter-overlap intersection (PR #13)
+# ---------------------------------------------------------------------------
+# Drafter trace format (JSONL, one record per accepted draft segment), designed
+# for kanna's MTP drafter (#5):
+#     {"prompt_idx": 0, "step": 0, "accepted_token_ids": [1234, 5678], "acceptance_len": 2}
+#     {"prompt_idx": 0, "step": 1, "accepted_token_ids": [9012],       "acceptance_len": 1}
+# Fields:
+#   prompt_idx          0-based index into the decode_outputs file (file order); maps
+#                       the segment to records[prompt_idx]. Out-of-range idx is ignored.
+#   step                decode step; used ONLY to order segments within a prompt.
+#   accepted_token_ids  the draft tokens the target VERIFIED and accepted this step,
+#                       in output order. Their count is authoritative for how many
+#                       output positions the segment covers.
+#   acceptance_len      convenience copy of len(accepted_token_ids). Used to size a
+#                       segment only when accepted_token_ids is absent.
+#   output_start (opt)  absolute index in the completion where this accepted segment
+#                       begins. RECOMMENDED for real traces: speculative decoding
+#                       interleaves target/bonus tokens between accepted draft
+#                       segments, so contiguously packing accepted-only segments
+#                       misaligns with true output positions. If omitted, segments
+#                       are packed contiguously (cursor += count) -- correct only when
+#                       every output token is drafter-accepted. The token-id check
+#                       below flags misalignment when output_start is missing/wrong.
+def greedy_run_positions(values: list[int], k: int) -> set[int]:
+    """Set of output positions covered by accepted runs (length > k) in the greedy
+    walk. Mirrors greedy_free_tokens_and_runs exactly, so ``len(positions)`` equals
+    its ``free`` count -- the realized causal SAM free-token mass at threshold k."""
+    positions: set[int] = set()
+    t = 0
+    n = len(values)
+    while t < n:
+        s = values[t]
+        if s > k:
+            positions.update(range(t, t + s))
+            t += s
+        else:
+            t += 1
+    return positions
+
+
+def load_drafter_trace(path: Path) -> dict[int, list[dict[str, Any]]]:
+    """Read a drafter acceptance trace JSONL into {prompt_idx: [segments by step]}."""
+    by_prompt: dict[int, list[dict[str, Any]]] = defaultdict(list)
+    with path.open() as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            rec = json.loads(line)
+            by_prompt[int(rec["prompt_idx"])].append(rec)
+    for recs in by_prompt.values():
+        recs.sort(key=lambda r: r.get("step", 0))
+    return by_prompt
+
+
+def drafter_accepted_positions(
+    trace_recs: list[dict[str, Any]], generated_ids: list[int]
+) -> tuple[set[int], int]:
+    """Output positions a prompt's drafter segments accepted, plus a token-id
+    mismatch count.
+
+    Walks the prompt's segments in step order. Each segment covers ``count`` output
+    positions starting at ``output_start`` (if present) else the running cursor,
+    where ``count = len(accepted_token_ids)`` or, if those ids are absent,
+    ``acceptance_len``. Positions are clamped to ``[0, len(generated_ids))``. A
+    mismatch is counted whenever a recorded accepted token id disagrees with the
+    actual decoded token at the mapped position -- a signal that the trace is
+    misaligned with this decode capture (wrong/missing output_start, or a trace
+    produced from a different run).
+    """
+    positions: set[int] = set()
+    mismatches = 0
+    n = len(generated_ids)
+    cursor = 0
+    for rec in trace_recs:
+        ids = rec.get("accepted_token_ids") or []
+        count = len(ids) if ids else int(rec.get("acceptance_len") or 0)
+        start = rec.get("output_start")
+        start = cursor if start is None else int(start)
+        for j in range(count):
+            p = start + j
+            if 0 <= p < n:
+                positions.add(p)
+                if j < len(ids) and generated_ids[p] != ids[j]:
+                    mismatches += 1
+        cursor = start + count
+    return positions, mismatches
+
+
+# ---------------------------------------------------------------------------
 # driver
 # ---------------------------------------------------------------------------
 def distribution_of(rec_id: str) -> str:
@@ -281,18 +371,21 @@ def load_records(path: Path) -> list[dict[str, Any]]:
     return records
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--input", default=str(DEFAULT_INPUT), help="decode_outputs jsonl capture")
-    ap.add_argument("--output", default=str(DEFAULT_OUTPUT), help="analysis json output path")
-    ap.add_argument("--max-check", type=int, default=DEFAULT_MAX_CHECK)
-    ap.add_argument("--expect-prompts", type=int, default=128)
-    args = ap.parse_args()
-
-    in_path = Path(args.input)
-    records = load_records(in_path)
+def compute_analysis(
+    records: list[dict[str, Any]],
+    max_check: int,
+    *,
+    input_file: str = "",
+    drafter_by_prompt: dict[int, list[dict[str, Any]]] | None = None,
+    drafter_trace_file: str = "",
+) -> dict[str, Any]:
+    """Core analysis -> result dict. Pure (no IO/printing) so tests can call it
+    directly. When ``drafter_by_prompt`` (from ``load_drafter_trace``) is given, the
+    PR #13 drafter-overlap intersection block is appended as
+    ``result['drafter_overlap']``.
+    """
     if not records:
-        raise SystemExit(f"no records in {in_path}")
+        raise SystemExit("no records to analyze")
 
     n_prompts = len(records)
     total_tokens = 0
@@ -317,7 +410,16 @@ def main() -> int:
     dist_realized_gt: dict[str, int] = defaultdict(int)  # realized causal >K8 per distribution
     secondary_error: str | None = None
 
-    for rec in records:
+    # PR #13 drafter-overlap accumulators (used only when drafter_by_prompt is given)
+    sam_positions_total = 0                               # |S| at K>PRIMARY_K
+    dist_sam_positions: dict[str, int] = defaultdict(int)
+    drafter_pos_total = 0                                 # |D|
+    overlap_total = 0                                     # |S intersect D|
+    drafter_mismatches = 0
+    dist_drafter_pos: dict[str, int] = defaultdict(int)
+    dist_overlap: dict[str, int] = defaultdict(int)
+
+    for i, rec in enumerate(records):
         prompt_ids = rec["prompt_token_ids"]
         generated_ids = rec.get("completion_token_ids") or rec.get("token_ids")
         if generated_ids is None:
@@ -328,7 +430,7 @@ def main() -> int:
         dist_prompts[dist] += 1
         dist_tokens[dist] += n
 
-        m_values = compute_m_values(prompt_ids, generated_ids, args.max_check)
+        m_values = compute_m_values(prompt_ids, generated_ids, max_check)
 
         # sensitivity: per-position density of m(t) > K
         for k in K_LEVELS:
@@ -355,8 +457,8 @@ def main() -> int:
         # causal SAM-Decoding estimate + LPF oracle bracket (defensive; never breaks primary)
         if secondary_error is None:
             try:
-                r_values = realized_sam_lengths(prompt_ids, generated_ids, args.max_check)
-                l_values = full_match_lengths(prompt_ids, generated_ids, args.max_check)
+                r_values = realized_sam_lengths(prompt_ids, generated_ids, max_check)
+                l_values = full_match_lengths(prompt_ids, generated_ids, max_check)
                 for k in K_LEVELS:
                     free_r, runs_r = greedy_free_tokens_and_runs(r_values, k)
                     realized_free_gt[k] += free_r
@@ -364,6 +466,20 @@ def main() -> int:
                     lpf_free_gt[k] += greedy_free_tokens(l_values, k)
                 free_r8, _ = greedy_free_tokens_and_runs(r_values, PRIMARY_K)
                 dist_realized_gt[dist] += free_r8
+
+                # PR #13: causal SAM run positions S_p (|S_p| == free_r8) and their
+                # intersection with the drafter-accepted positions D_p.
+                S_p = greedy_run_positions(r_values, PRIMARY_K)
+                sam_positions_total += len(S_p)
+                dist_sam_positions[dist] += len(S_p)
+                if drafter_by_prompt is not None:
+                    D_p, mm = drafter_accepted_positions(drafter_by_prompt.get(i, []), generated_ids)
+                    drafter_mismatches += mm
+                    drafter_pos_total += len(D_p)
+                    dist_drafter_pos[dist] += len(D_p)
+                    ov = len(S_p & D_p)
+                    overlap_total += ov
+                    dist_overlap[dist] += ov
             except Exception as exc:  # pragma: no cover - guard only
                 secondary_error = repr(exc)
 
@@ -430,11 +546,81 @@ def main() -> int:
     else:
         causal_sam_estimate["error"] = secondary_error
 
+    # ---- PR #13 drafter-overlap intersection block ----------------------------
+    drafter_block: dict[str, Any] | None = None
+    if drafter_by_prompt is not None:
+        out_of_range = sorted(p for p in drafter_by_prompt if p < 0 or p >= n_prompts)
+        if not causal_available:
+            drafter_block = {
+                "available": False,
+                "error": f"causal SAM estimate unavailable ({secondary_error}); cannot intersect",
+                "drafter_trace_file": drafter_trace_file,
+            }
+        else:
+            sam_causal = realized_free_gt[PRIMARY_K] / total_tokens if total_tokens else 0.0
+            drafter_acc = drafter_pos_total / total_tokens if total_tokens else 0.0
+            overlap = overlap_total / total_tokens if total_tokens else 0.0
+            net = sam_causal - overlap
+            per_dataset = {}
+            for d in sorted(dist_tokens):
+                dt = dist_tokens[d]
+                d_sam = (dist_sam_positions[d] / dt) if dt else 0.0
+                d_ov = (dist_overlap[d] / dt) if dt else 0.0
+                per_dataset[d] = {
+                    "total_tokens": dt,
+                    "drafter_accepted_frac": (dist_drafter_pos[d] / dt) if dt else 0.0,
+                    "sam_causal_frac_gt_k8": d_sam,
+                    "overlap_frac": d_ov,
+                    "net_sam_beyond_drafter_frac": d_sam - d_ov,
+                }
+            if net > 0.03:
+                band, go = "go", True
+            elif net >= 0.01:
+                band, go = "marginal", False
+            else:
+                band, go = "retire", False
+            note = (
+                f"Net headroom SAM-Decoding adds BEYOND the MTP drafter = {net:.4f} "
+                f"(causal SAM K>{PRIMARY_K} budget {sam_causal:.4f} minus drafter overlap "
+                f"{overlap:.4f}). UPPER BOUND on the realized incremental single-stream TPS gain. "
+                "Thresholds: >0.03 GO (build Triton in-graph suffix kernel); 0.01-0.03 marginal "
+                "(advisor call vs CUDA-graph/kernel complexity); <0.01 retire SAM direction. "
+                f"Band={band}."
+            )
+            if drafter_mismatches:
+                note += (
+                    f" WARNING: {drafter_mismatches} token-id mismatches between trace and decode "
+                    "output -- trace may be misaligned with this capture (supply output_start, or "
+                    "confirm the trace came from the same greedy run)."
+                )
+            if out_of_range:
+                note += f" {len(out_of_range)} trace prompt_idx out of range, ignored."
+            drafter_block = {
+                "available": True,
+                "drafter_trace_file": drafter_trace_file,
+                "K": PRIMARY_K,
+                "n_trace_prompts": len(drafter_by_prompt),
+                "token_id_mismatches": drafter_mismatches,
+                "trace_prompt_idx_out_of_range": out_of_range,
+                "drafter_accepted_frac": drafter_acc,
+                "sam_causal_frac_gt_k8": sam_causal,
+                "overlap_frac": overlap,
+                "net_sam_beyond_drafter_frac": net,
+                "per_dataset": per_dataset,
+                "verdict": {
+                    "net_frac": net,
+                    "go": go,
+                    "band": band,
+                    "threshold": 0.03,
+                    "note": note,
+                },
+            }
+
     result = {
         "n_prompts": n_prompts,
         "total_generated_tokens": total_tokens,
-        "max_check": args.max_check,
-        "input_file": str(in_path),
+        "max_check": max_check,
+        "input_file": input_file,
         "primary_metric_name": f"frac_tokens_in_run_gt_K{PRIMARY_K}",
         "primary_metric_value": primary_value,
         "frac_tokens_in_run_gt_K": frac_gt,
@@ -474,23 +660,78 @@ def main() -> int:
         ),
     }
 
+    if drafter_by_prompt is not None:
+        result["drafter_overlap"] = drafter_block
+    return result
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--input", default=str(DEFAULT_INPUT), help="decode_outputs jsonl capture")
+    ap.add_argument("--output", default=str(DEFAULT_OUTPUT), help="analysis json output path")
+    ap.add_argument("--max-check", type=int, default=DEFAULT_MAX_CHECK)
+    ap.add_argument("--expect-prompts", type=int, default=128)
+    ap.add_argument(
+        "--drafter-trace",
+        default=None,
+        help="optional drafter acceptance trace (JSONL); enables the drafter-overlap "
+             "intersection block (PR #13). See load_drafter_trace for the format.",
+    )
+    args = ap.parse_args()
+
+    in_path = Path(args.input)
+    records = load_records(in_path)
+    if not records:
+        raise SystemExit(f"no records in {in_path}")
+
+    drafter_by_prompt = None
+    drafter_trace_file = ""
+    if args.drafter_trace:
+        drafter_trace_file = args.drafter_trace
+        drafter_by_prompt = load_drafter_trace(Path(args.drafter_trace))
+
+    result = compute_analysis(
+        records,
+        args.max_check,
+        input_file=str(in_path),
+        drafter_by_prompt=drafter_by_prompt,
+        drafter_trace_file=drafter_trace_file,
+    )
+
     out_path = Path(args.output)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(json.dumps(result, indent=2, sort_keys=False) + "\n")
 
-    print(f"n_prompts={n_prompts} total_generated_tokens={total_tokens}")
+    frac_gt = result["frac_tokens_in_run_gt_K"]
+    frac_pos = result["frac_positions_m_gt_K"]
+    ce = result["causal_sam_estimate"]
+    causal_available = ce.get("available", False)
+    print(f"n_prompts={result['n_prompts']} total_generated_tokens={result['total_generated_tokens']}")
     print(f"frac_tokens_in_run_gt_K (m(t) advisor-spec, primary): {frac_gt}")
     print(f"frac_positions_m_gt_K (sensitivity):                  {frac_pos}")
     if causal_available:
-        print(f"CAUSAL SAM realized free_gt_K:                        {realized_frac}")
-        print(f"  causal decode-steps-saved_gt_K:                    {realized_step_frac}")
-        print(f"  lpf forward-oracle upper_gt_K:                     {lpf_frac}")
-        print(f"  causal per-distribution free_gt_K8:                {causal_sam_estimate['per_distribution_frac_free_gt_K8']}")
-    print(f"prompt_sourced/output_sourced of m(t)>K8: {frac_prompt_sourced:.4f} / {frac_output_sourced:.4f}")
-    print(f"max_run_length={max_run}")
-    print(f"PRIMARY (m(t)) frac_tokens_gt_k8={primary_value:.5f}  VERDICT={verdict}")
+        print(f"CAUSAL SAM realized free_gt_K:                        {ce['frac_tokens_free_gt_K']}")
+        print(f"  causal decode-steps-saved_gt_K:                    {ce['frac_decode_steps_saved_gt_K']}")
+        print(f"  lpf forward-oracle upper_gt_K:                     {ce['lpf_forward_oracle_upper_frac_gt_K']}")
+        print(f"  causal per-distribution free_gt_K8:                {ce['per_distribution_frac_free_gt_K8']}")
+    print(f"prompt_sourced/output_sourced of m(t)>K8: {result['frac_prompt_sourced_of_gt_K8']:.4f} / {result['frac_output_sourced_of_gt_K8']:.4f}")
+    print(f"max_run_length={result['max_run_length']}")
+    print(f"PRIMARY (m(t)) frac_tokens_gt_k8={result['primary_metric_value']:.5f}  VERDICT={result['verdict']}")
     if causal_available:
-        print(f"CAUSAL  (realized) frac_tokens_gt_k8={causal_value:.5f}  VERDICT={causal_verdict}")
+        print(f"CAUSAL  (realized) frac_tokens_gt_k8={result['causal_value_gt_K8']:.5f}  VERDICT={result['causal_verdict']}")
+    do = result.get("drafter_overlap")
+    if do is not None:
+        if do.get("available"):
+            v = do["verdict"]
+            print(
+                f"DRAFTER-OVERLAP drafter_acc={do['drafter_accepted_frac']:.5f} "
+                f"sam_causal={do['sam_causal_frac_gt_k8']:.5f} overlap={do['overlap_frac']:.5f} "
+                f"NET={do['net_sam_beyond_drafter_frac']:.5f} band={v['band']} go={v['go']}"
+            )
+            if do.get("token_id_mismatches"):
+                print(f"  WARNING token_id_mismatches={do['token_id_mismatches']}")
+        else:
+            print(f"DRAFTER-OVERLAP unavailable: {do.get('error')}")
     print(f"wrote {out_path}")
     return 0
 

@@ -1,0 +1,99 @@
+{
+  "_README": [
+    "ANNOTATED TEMPLATE for the SAM-Decoding drafter-overlap analysis (PR #13).",
+    "This file is documentation, not a result. When kanna's MTP drafter (#5) emits a",
+    "real acceptance trace, run the command in '_command' to produce the real",
+    "research/sam_drafter_overlap/overlap_analysis.json; its 'drafter_overlap' block",
+    "will have exactly the schema shown under 'example_output' below.",
+    "",
+    "The decision-relevant number is net_sam_beyond_drafter_frac: the fraction of",
+    "generated tokens that sit in a causal SAM-Decoding suffix run (length > K=8) but",
+    "were NOT already accepted by the drafter. It is an UPPER BOUND on the incremental",
+    "single-stream TPS that a SAM source could add on top of the existing MTP drafter,",
+    "and is what justifies (or kills) building the Triton in-graph suffix-match kernel."
+  ],
+  "_command": [
+    "python scripts/analyze_suffix_budget.py \\",
+    "  --input research/local_validation/vllm_baseline/decode_outputs_128.jsonl \\",
+    "  --drafter-trace <kanna_trace.jsonl> \\",
+    "  --output research/sam_drafter_overlap/overlap_analysis.json"
+  ],
+  "_decision_thresholds": {
+    "go": "net_frac > 0.03  -> confirmed GO: open fern/sam-triton-kernel (drafter-only vs drafter+SAM A/B)",
+    "marginal": "0.01 <= net_frac <= 0.03  -> advisor judgment call vs Triton kernel complexity + CUDA-graph risk",
+    "retire": "net_frac < 0.01  -> SAM adds near-nothing beyond the drafter; retire the SAM/Triton direction",
+    "threshold_field": 0.03,
+    "base_reference_pr10": {
+      "causal_sam_frac_gt_k8": 0.0893,
+      "causal_decode_steps_saved_frac": 0.0835,
+      "note": "Base causal SAM budget with NO drafter (PR #10, merged). net == base when the drafter accepts nothing."
+    }
+  },
+  "_fields": {
+    "available": "false only if the causal SAM estimate could not be computed (then 'error' is set).",
+    "drafter_trace_file": "path of the --drafter-trace file used.",
+    "K": "suffix-run threshold; a SAM run counts only if its realized length > K (K=8, matches PR #10).",
+    "n_trace_prompts": "number of distinct prompt_idx values seen in the trace.",
+    "token_id_mismatches": "count of accepted token ids that disagreed with the actual decoded token at the mapped position. >0 means the trace is misaligned with this decode capture (wrong/missing output_start, or a trace from a different run) -- treat the numbers as unreliable until 0.",
+    "trace_prompt_idx_out_of_range": "prompt_idx values in the trace with no matching decode record; ignored.",
+    "drafter_accepted_frac": "|D| / total_generated_tokens -- fraction of all output positions the drafter accepted.",
+    "sam_causal_frac_gt_k8": "|S| / total -- base causal SAM free-token budget at K>8 (== top-level causal_value_gt_K8).",
+    "overlap_frac": "|S intersect D| / total -- 'double-covered' positions: in a SAM run AND drafter-accepted.",
+    "net_sam_beyond_drafter_frac": "sam_causal_frac_gt_k8 - overlap_frac == |S \\ D| / total. THE decision number (upper bound on net TPS gain).",
+    "per_dataset": "the same four fractions computed within each distribution (aime2026 / gpqa_diamond / mmlu_pro).",
+    "verdict.net_frac": "copy of net_sam_beyond_drafter_frac.",
+    "verdict.go": "true iff net_frac > threshold (0.03).",
+    "verdict.band": "'go' (>0.03) | 'marginal' (0.01-0.03) | 'retire' (<0.01).",
+    "verdict.threshold": "the GO threshold (0.03).",
+    "verdict.note": "human-readable summary + any misalignment / out-of-range warnings."
+  },
+  "_caveats": [
+    "net is an UPPER BOUND: it assumes every non-overlapping SAM position converts to a saved forward pass. Real net TPS will be <= this.",
+    "The 'example_output' numbers below come from a SYNTHETIC uniform-random 70%-acceptance drafter, NOT a real MTP trace -- they illustrate the schema only.",
+    "A real MTP drafter at ~3.3 tok/step concentrates its acceptances on high-confidence / predictable (often repetitive) spans, which is exactly where SAM runs live. So real overlap is likely HIGHER than uniform-random, and real net likely LOWER than a uniform proxy would suggest. Use kanna's actual trace, not this example.",
+    "Trace format and the recommended output_start field are documented at the top of scripts/analyze_suffix_budget.py (see load_drafter_trace / drafter_accepted_positions)."
+  ],
+  "example_output": {
+    "_note": "ILLUSTRATIVE ONLY (synthetic uniform-random 70% drafter on the real 128-prompt decode capture). Real run will differ.",
+    "available": true,
+    "drafter_trace_file": "<kanna_trace.jsonl>",
+    "K": 8,
+    "n_trace_prompts": 128,
+    "token_id_mismatches": 0,
+    "trace_prompt_idx_out_of_range": [],
+    "drafter_accepted_frac": 0.6990,
+    "sam_causal_frac_gt_k8": 0.0893,
+    "overlap_frac": 0.0628,
+    "net_sam_beyond_drafter_frac": 0.0265,
+    "per_dataset": {
+      "aime2026": {
+        "total_tokens": 7168,
+        "drafter_accepted_frac": 0.6920,
+        "sam_causal_frac_gt_k8": 0.1074,
+        "overlap_frac": 0.0731,
+        "net_sam_beyond_drafter_frac": 0.0343
+      },
+      "gpqa_diamond": {
+        "total_tokens": 29184,
+        "drafter_accepted_frac": 0.7002,
+        "sam_causal_frac_gt_k8": 0.0923,
+        "overlap_frac": 0.0654,
+        "net_sam_beyond_drafter_frac": 0.0269
+      },
+      "mmlu_pro": {
+        "total_tokens": 29184,
+        "drafter_accepted_frac": 0.6995,
+        "sam_causal_frac_gt_k8": 0.0819,
+        "overlap_frac": 0.0577,
+        "net_sam_beyond_drafter_frac": 0.0243
+      }
+    },
+    "verdict": {
+      "net_frac": 0.0265,
+      "go": false,
+      "band": "marginal",
+      "threshold": 0.03,
+      "note": "Net headroom SAM-Decoding adds BEYOND the MTP drafter = 0.0265 (causal SAM K>8 budget 0.0893 minus drafter overlap 0.0628). UPPER BOUND on the realized incremental single-stream TPS gain. Thresholds: >0.03 GO (build Triton in-graph suffix kernel); 0.01-0.03 marginal (advisor call vs CUDA-graph/kernel complexity); <0.01 retire SAM direction. Band=marginal."
+    }
+  }
+}
