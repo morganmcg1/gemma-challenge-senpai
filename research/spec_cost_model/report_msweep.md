@@ -41,6 +41,25 @@ on (K≈10–20, M≈41–81) sits in the ramp: the measured ceiling at p=0.78 i
 PR's stated "equally-valuable alternative outcome": a real knee at M\*≈32 caps the
 realistic tree depth at K\*≈8–12.
 
+> **Update — PR #37 (denken, 2026-06-13): tile boundaries folded into this canonical curve.**
+> The `graph|ctx256` node of `results_msweep.json` now carries the PR #33
+> directly-measured Marlin tile-boundary fine sweep (M=17/33/49), folded in by
+> `scripts/profiler/fold_tile_into_msweep.py`. The coarse sweep above interpolated
+> the verify step **linearly across each `ceil(M/16)` tile cliff**, undershooting
+> the boundary M: **M=49 was 15.45 ms interpolated vs 18.13 ms measured (−14.8%)**
+> and M=33 was 13.10 vs 14.99 ms (−12.6%). Consumers that read `results_msweep.json`
+> directly (no `--cost-model-json` override) now inherit the measured cliffs.
+> Consequence: the verdict-table row **"tree K\* @ p=0.78 = K\*=12: 452/493"** is
+> superseded by the tile-corrected **K\*=11 (M=45): 440/481** (the M=49 step is no
+> longer undershot, so K=12/M=49 is correctly priced out of the optimum). The
+> **>500 @ p=0.78 = NO** verdict is unchanged on the full (unpruned) head. The
+> pre-fold curve is preserved at `results_msweep_prefold.json`. **Scope:** only
+> `graph|ctx256` is tile-corrected (the PR #33 sweep measured that config only);
+> `eager|*` and `*|ctx512` keep their coarse interpolation and are flagged in
+> `config.tile_boundary_folded`. See `report_lmhead12k_verify_cost.md` for the
+> full PR #37 cost-model closure (lmhead12k verify-head pruning raises the ceiling
+> to 538/600 and flips >500 to YES at the K\*=11 optimum).
+
 ## 1. Continuity — the new curve reproduces PR #18 (M≤16)
 
 Re-measuring M≤16 in the *same* run as the new points (one process, one thermal
