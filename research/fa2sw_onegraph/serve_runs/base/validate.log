@@ -1,0 +1,30 @@
+=== [base] FA2SW=0 ONEGRAPH=0 OUTLEN=512 start 09:17:53 ===
+server pid=34825
+STARTUP ready
+--- [base] modality smoke ---
+[modality] /v1/models -> ['gemma-4-e4b-it']; ready=True
+[modality] text -> 'Paris'
+[modality] image -> 'Blue'
+[modality] audio FAILED: HTTP Error 400: Bad Request
+[modality] SUMMARY {"models_ready": true, "text": true, "image": true, "audio": false} ALL_OK=False
+[base] modality rc=1
+--- [base] decode_outputs (official ShareGPT, outlen=512) ---
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/fa2sw_onegraph/serve_runs/base/decode_summary.json
+[base] decode rc=0
+--- [base] served PPL ---
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.158764369103847,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43003.44520504814,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/fa2sw_onegraph/serve_runs/base/ppl.jsonl",
+  "ppl": 2.005477944404151,
+  "prompt_logprobs": 1
+}
+[base] ppl rc=0
+=== [base] DONE 09:32:49 ===

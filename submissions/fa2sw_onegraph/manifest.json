@@ -1,0 +1,26 @@
+{
+  "name": "fa2sw-onegraph",
+  "description": "int4 QAT Gemma endpoint. fa2sw (FA2 sliding-window on hd=256 local layers) + onegraph (single full decode CUDA graph) are implemented and env-gated, but DEFAULT OFF: the conc=1 ablation found fa2sw -4.9% TPS, onegraph parity, and both DIVERGENT (greedy-invalid) vs the int4 base. With levers off this serves the verified int4 base. See research/fa2sw_onegraph/ and the submission README.",
+  "dependencies": [
+    "vllm[audio]==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "QUANTIZATION": "compressed-tensors",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+    "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+    "VLLM_USE_FLASHINFER_SAMPLER": "0",
+    "FA2SW": "0",
+    "ONEGRAPH": "0"
+  }
+}

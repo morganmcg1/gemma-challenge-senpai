@@ -49,4 +49,18 @@ sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gr
 spec decode — loses at conc=1; runtime knobs (attn-backend swap, max_num_seqs, MARLIN_USE_ATOMIC_ADD) —
 parity/noise; body channel-wise quant — trades PPL for no TPS; widening draft centroid top_k — no gain.
 
+**fa2sw + onegraph as target-side levers on the int4 base, conc=1 (PR #7, denken):**
+isolated offline ablation (M=1 AR, sequential, prefix-cache off — the only int4-deterministic
+regime; base proven cross-process bit-exact). fa2sw (FA2 sliding-window on the 35 hd=256 local
+layers) = **−4.9% TPS** (mixed FA2+Triton blocks single full-graph capture; attention is only ~2.6%
+of conc=1 GPU time) **and greedy-DIVERGENT** (82/128 prompts — FA2 changes attention numerics).
+onegraph (`cudagraph_mode=FULL` vs default `FULL_AND_PIECEWISE`) = **TPS parity** (decode step is
+already graph-collapsed) **but still greedy-DIVERGENT** (1/128, a single int4 near-tie argmax flip —
+FULL vs piecewise is a different numeric path). Both DIVERGENT = leaderboard-invalid regardless of
+speed. fa2sw also can't even be served through the OpenAI API path: vLLM spawns a separate EngineCore
+process the in-process monkeypatch can't reach, so hd=512 layers pick FLASHINFER and crash at
+CUDA-graph warmup — it would need a vLLM worker-plugin entry point. _These are the `fa2sw`/`onegraph`
+components of the public ~420 stack: on the int4 base in isolation they are negative; any benefit they
+show in the frontier stack must come from interaction with the drafter/lmhead12k levers, not standalone._
+
 _Last updated: 2026-06-13 (initial frontier reproduction track)._
