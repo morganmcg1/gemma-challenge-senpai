@@ -75,6 +75,16 @@ verify paths) is a first-class objective, not an afterthought.
 - **W&B run:** none (CPU-only offline analysis). 128/128 prompts captured (bf16, 43.94 TPS local).
 - **Reproduce:** `cd target/ && python scripts/analyze_suffix_budget.py --input research/local_validation/vllm_baseline/decode_outputs_128.jsonl --output research/local_validation/suffix_budget/suffix_budget_analysis.json`
 
+### 2026-06-13 10:30 — PR #13: SAM-Decoding drafter-overlap intersection analysis (de-risk Triton build)
+
+- **New shared infra:** `scripts/analyze_suffix_budget.py --drafter-trace <file>` — extends PR #10 tooling with intersection logic. Computes `net_sam_beyond_drafter_frac` (SAM causal budget ∩ drafter acceptance = the decision metric for the Triton kernel GO/retire); 13/13 mock tests pass; no-drafter path byte-identical (regression-safe). Plus `research/sam_drafter_overlap/overlap_analysis_template.json` and `scripts/tests/test_drafter_overlap.py`.
+- **Trace format (canonical):** `{"prompt_idx":0,"step":0,"accepted_token_ids":[...],"acceptance_len":N,"output_start":K}` — `output_start` is required for correct interleave alignment when spec tokens are interspersed with bonus tokens.
+- **Net-headroom thresholds:** `net_frac > 0.03` → GO (open Triton kernel PR); `0.01–0.03` → marginal; `< 0.01` → retire SAM direction.
+- **Caveat (fern):** real MTP drafter concentrates acceptances on predictable/repetitive spans — exactly where SAM runs live — so real overlap is likely higher than a uniform-random drafter, pushing real `net` lower than naive intuition. The base 8.93% budget is small. Brace for marginal/retire.
+- **W&B run:** none (CPU-only tooling). Dev dep added: `pytest>=8` + `iniconfig` + `pluggy` (dev-only, no existing dep bumps).
+- **Reproduce (smoke):** `cd target/ && uv run python -m pytest scripts/tests/test_drafter_overlap.py -v`
+- **Reproduce (full analysis when trace lands):** `cd target/ && python scripts/analyze_suffix_budget.py --input research/local_validation/vllm_baseline/decode_outputs_128.jsonl --drafter-trace <trace.jsonl> --output research/sam_drafter_overlap/overlap_analysis.json`
+
 ## Confirmed dead ends (do not re-spend on these)
 sub-4-bit weight kernels (AWQ/GPTQ/AQLM/QuIP#/2:4-Sparse-Marlin/NVFP4) — no loadable Ampere
 sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gram/prompt-lookup
@@ -85,4 +95,4 @@ geometry obstruction (flat row norms, near-full-rank embedding: R_complement_max
 0%-fire on 16,384 real decode steps, nets −8% TPS (cert + full fallback > full alone); harness on
 `ubel/vocab-prune-sparse-verify` branch; empirical pruned-weights lmhead12k (no cert) is the viable lever.
 
-_Last updated: 2026-06-13 (PR #10 merged — SAM-Decoding offline budget analysis: causal realized budget 8.93% at K>8, GO verdict, drafter-overlap quantification staged as next de-risking step)._
+_Last updated: 2026-06-13 (PR #13 merged — SAM-Decoding drafter-overlap tooling: net-headroom intersection analysis ready; trace format documented; 13/13 mock tests pass. Program linchpin: int4 batched-verify spec-decode is structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #5 resolving this via precision-localization experiment, gates rungs 4–5)._
