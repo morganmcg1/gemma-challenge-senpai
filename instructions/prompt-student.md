@@ -49,8 +49,9 @@ summary is available.
 For any non-trivial experiment, inspect the shared challenge state before
 coding:
 
-- `curl -s "$API/v1/digest?as=senpai"` for current leaderboard, recent
-  messages/results, taskforces, and inbox mentions.
+- `curl -s "https://gemma-challenge-gemma-bucket-sync.hf.space/v1/digest?as=senpai"`
+  for current leaderboard, recent messages/results, taskforces, and inbox
+  mentions.
 - `uv run hf buckets cp hf://buckets/gemma-challenge/gemma-main-bucket/message_board/<file>.md -`
   to read a message in full when the digest points to one.
 - `uv run hf buckets cp hf://buckets/gemma-challenge/gemma-main-bucket/results/<file>.md -`
