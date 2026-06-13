@@ -1,5 +1,33 @@
 # SENPAI Research Results
 
+## 2026-06-13 16:20 — PR #27: int4 channel-wise lm_head sweep ✗ CLOSED — confirmed NEGATIVE (g128 stays the floor)
+
+- **Branch:** `lawine/int4-channel-lmhead-sweep` · **Student:** lawine
+- **Status:** CLOSED as a clean, fully-characterized NEGATIVE. No TPS-baseline change — baseline stays PR #4 126.378 TPS. The channel submission dir stays on the student branch (dead-end; not merged).
+- **Hypothesis:** channel-wise (`group_size=-1`) int4 lm_head gives +~1 TPS over g128 (PR #4) because per-output-channel dequantization requires a simpler scale lookup in the Marlin GEMV kernel; PPL cost small (lm_head error affects low-confidence vocab tail). Single-variable change: one line in `submissions/int4_g128_lmhead/build_quant.py`.
+
+### Results
+
+| metric | g128 control (PR #4) | channel-wise (g=-1) | delta | verdict |
+|---|---|---|---|---|
+| local TPS (A10G, 128 prompts) | **128.13** | 127.74 | **−0.39** | NO GAIN — within noise |
+| local PPL (128 prompts / 61,797 tok) | **2.0188** | **2.0212** | +0.0024 | ≤ 2.42 cap ✓ |
+| greedy identity (self spec-off) | GREEDY_IDENTICAL 128/128 | **GREEDY_IDENTICAL 128/128** | — | valid ✓ (0 divergent / 65,536 tok) |
+| same-path PPL gate | SAME_PATH_OK (gap 0.0) | **SAME_PATH_OK (gap 0.0)** | — | honest ✓ |
+| completed | 128/128 | **128/128** | — | ✓ |
+| Marlin g=-1 support | — | confirmed (no g=32 fallback needed) | — | — |
+
+**W&B runs:** `gtlruguu` (channel prevalidate, TPS 127.74/PPL 2.0213) · `a0xtk79t` (g128-ctrl prevalidate, TPS 128.13/PPL 2.0188) · `c9qy6rcq` (channel validation, same_path_gap 0/SAME_PATH_OK/128/128). All three in `gemma-challenge-senpai` or `wandb-applied-ai-team/senpai`; all finished; independently verified by advisor to >3 sig figs, no NaN.
+
+### Analysis & conclusions
+
+- **The TPS gain did not materialize.** The lm_head is a single GEMV per decode step over a tiny fraction of total decode traffic; the scale-lookup simplification for g=-1 vs g128 is sub-noise at the whole-model level. The PPL moved +0.0024 (well under +0.011 projection and far under the 2.42 cap), and the greedy self-gate is byte-exact 128/128 — the coarser head did NOT flip any near-tie argmax.
+- **Net verdict:** channel-wise is SAFE but POINTLESS as a speed lever. **lm_head quant granularity is not a TPS knob.** A head-side TPS lever must come from a smaller effective vocab at decode (the lmhead12k direction), not from g128→channel.
+- **HF approval issue:** correctly NOT opened by lawine (no improvement to confirm). Correct protocol.
+- **The real deliverable:** lawine's **bug flag** — a **silent-correctness hazard on the greedy-gate auto-reference resolution** (`harness.py:84-92` manifest `env.MODEL_ID="model"` copied into serve env before `setdefault` → `srv.model_id` stays the relative literal `"model"` → `reference_for("model")` keys shared `greedy_reference/model/` tag → NO_REFERENCE AND every `env.MODEL_ID="model"` submission collides on the same tag → silent wrong-reference verdict risk). The actual GREEDY_IDENTICAL was confirmed offline via `--reference` flag (sound). **lawine reassigned to harness fix → PR #32**.
+
+---
+
 ## 2026-06-13 15:49 — PR #22: Honest fa2sw-precache frontier in-repo + LF29 dual-gate-blind finding ✓ MERGED — keeper (asset + validity)
 
 - **Branch:** `wirbel/fa2sw-precache-validate-and-lf29-check` · **Student:** wirbel
