@@ -1,6 +1,35 @@
 # SENPAI Research Results
 
-## 2026-06-13 17:50 — PR #14: Empirical lmhead12k ✓ MERGED — validated lever + best-LOCAL rung (official a10g-small PENDING)
+## 2026-06-13 17:40 — PR #33: Tree-causal mask (dead) + Marlin tile-boundary correction ✓ MERGED — cost-model closure (NOT a TPS change)
+
+- **Branch:** `denken/tree-causal-mask-verify-cost` · **Student:** denken
+- **Status:** MERGED as a **LOCAL cost-model closure / profiler-infrastructure landing**, NOT a leaderboard/baseline change. Official headline stays PR #4 (126.378 a10g-small); best-LOCAL rung stays PR #14 (131.60 local). Directly refines PR #28's verify-latency curve.
+- **Hypothesis:** A sparse tree-causal attention mask (each node attends only to its ancestors) cuts the attention term of the int4 verify forward at tree shapes K=6/8/12, potentially shifting the K=12 ceiling from PR #28's 452 toward 470–490 (or across 500) @ p=0.78. Secondary: the GEMM ramp steps at M≈20/40 are Marlin tile-boundary effects; a fine M-sweep finds the "free" plateau tree shapes.
+
+### Results
+
+| quantity (graph, ctx256, p=0.78, W=4) | PR #28 dense baseline | this PR (tree-masked + tile-corrected) |
+|---|--:|--:|
+| tree-mask saving M=25/33/49 — **production SDPA** | — | **0.000 / 0.000 / 0.000 ms** |
+| tree-mask saving M=25/33/49 — FLOP-ideal ceiling | — | 0.076 / 0.104 / 0.175 ms (≤1.1% of step) |
+| Marlin cliff Δ at M=17 / 33 / 49 | (interpolated, hidden) | **+0.772 / +2.176 / +2.869 ms** |
+| **V_tree(M=49)** direct | 15.28 ms (interp) | **18.13 ms** (interp under-stated 2.68 ms / 17%) |
+| tree K\* @ p=0.78 (drafter / verify-only) | K=12 (M=49): 452.4 / 493.4 (artifact) | **K=11 (M=45): 440.4 / 480.8** |
+| **K12 tree TPS @ p=0.78** (primary metric, variant B) | 452.4 (artifact) | **393.9** |
+| **verdict_exceeds_500 @ p=0.78** (test metric) | FALSE | **FALSE** (max 440 / 481) |
+
+**W&B runs:** `k56d6cxe` (tree-mask), `36hkaj14` (tile boundary), `aid45far` (tree model), group `spec-verify-tree-mask` — all finished. Advisor sub-agent verified the tile deltas, M=49=18.134 ms, and `verdict_exceeds_500_at_full_scale_withdrafter=False` to logged precision.
+
+### Analysis & conclusions
+
+- **Finding 1 — tree-causal mask is DEAD for this model/hardware.** On the production dense-SDPA + topology-mask path (SpecInfer Eq.4 / EAGLE / Medusa / vLLM) the saving is **exactly 0 by construction** — a tree mask changes *which* scores are masked, not *how many* are computed. Even the unrealizable FLOP-ideal kernel saves ≤0.18 ms (≤1.1% of the step); FlexAttention is *negative* (the whole M≤49 tree fits one 128×128 block → partial-block overhead, pytorch #133562). Attention is only ~2.6% of the int4 verify step; the GEMM ramp dominates and is sparsity-invariant. Added to BASELINE.md dead-ends.
+- **Finding 2 (the keeper) — Marlin tile-boundary cost-model bug-fix.** Step jumps at M=17/33/49 land *exactly* where `thread_m_blocks = ceil(M/16)` predicts (Marlin arXiv:2408.11743), and they are large (+2.18, +2.87 ms). PR #28's `LatencyCurve` linearly interpolated across them, **under-stating M=49 by 2.68 ms (17%)**. The corrected curve carries directly-measured boundaries — protects every future drafter-ladder TPS projection.
+- **Net on the programme:** >500 TPS @ p=0.78 stays **FALSE — now firmer**; the only reading that approached 500 (variant-C 499.1) *was* the interpolation artifact this PR removes. **Serving guidance for kanna #24: target the M=45 (K=11) tmb=3 plateau, avoid M=17/33/49** — same accepted length, ~12% cheaper verify, no code change beyond tree shape.
+- **One open reconciliation (non-blocking, flagged on PR):** report optimum K\*=11 (M=45) vs W&B-logged `optimal_k_*=15` (range-cap; likely the optimistic-accept scenarios — p=0.85 pushes K deeper to 511/558); `tps_tree_meas_p0_780=377.1` matches the K=6 sim exactly. denken to confirm scenario keying before the M=45 guidance is locked.
+- **Suggested follow-ups (from denken):** (1) tell kanna #24 to target M=45 not M=49; (2) don't pursue tree-mask kernels here; (3) re-measure the M=45 plateau with a real per-position accept trace once a drafter lands; (4) fold the tile curve back into canonical `results_msweep.json`.
+- **Next:** denken → fresh local profiling/cost-model assignment (incl. folding the tile correction into the canonical curve + the highest-value next decode-cost question).
+
+---
 
 - **Branch:** `ubel/empirical-lmhead12k` · **Student:** ubel
 - **Status:** MERGED as a **validated lever + best-LOCAL rung**, NOT a new official baseline. Official a10g-small TPS + private-PPL await a gated HF job (approval issue opened). Official baseline headline stays PR #4 126.378.

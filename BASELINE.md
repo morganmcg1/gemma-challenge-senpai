@@ -138,7 +138,14 @@ isolating TWO independent un-coverable causes: (a) int4 Marlin is a `_C` op the 
 batch-variant component (~0.111%/tok; corroborated by vLLM issue #27433: "does not currently integrate with
 speculative decoding"). Batch-invariance coverage is real (bit-exact kernel probe) but aten-scoped;
 both flip sources sit outside aten. This closes the invariant-kernel lane; the next lane is
-**verify-rollback** (arxiv 2601.17768, kanna assigned).
+**verify-rollback** (arxiv 2601.17768, kanna assigned);
+**tree-causal attention mask for sparse-tree spec verify (this model/hardware)** — production
+dense-SDPA + topology-mask path (SpecInfer/EAGLE/Medusa/vLLM) saves **exactly 0** wall-time
+(changes *which* scores are masked, not *how many* are computed); FLOP-ideal ceiling ≤0.18 ms
+(≤1.1% of the int4 step), FlexAttention *negative* (whole M≤49 tree fits one 128×128 block →
+partial-block overhead). Attention is only ~2.6% of the verify step and the GEMM ramp dominates
+and is sparsity-invariant (denken PR #33, MERGED 2026-06-13). The keeper from #33 is the **Marlin
+`ceil(M/16)` tile-boundary correction** (see dated entry), not the mask.
 
 _Last updated: 2026-06-13 (**PR #4 MERGED — new best merged rung: int4 g128 + untied int4 lm_head, 126.378 TPS / PPL 2.019 / 128/128 VALID / GREEDY_IDENTICAL, 1.32× over int4 base, 2.87× over bf16. `submissions/int4_g128_lmhead` is now the best merged submission; all future submissions beat 126.38 TPS.** PR #19 MERGED — LINCHPIN DEFINITIVE NEGATIVE: `VLLM_BATCH_INVARIANT=1` cannot rescue greedy-valid spec decode at any precision in vLLM 0.22.0; two independent un-coverable root causes quantified (Marlin _C op + non-aten spec-verify residual); next lane: verify-rollback arxiv 2601.17768, kanna assigned. **Same-path PPL gate (PR #21) scope limit confirmed (wirbel #22, 2026-06-13):** the gate is teacher-forced-blind — it misses argmax-preserving decode-compounding folds (e.g. LF29 affine fold: gate returns gap 0.0000 even when fold-forced-ON, because teacher-forced PPL is fold-neutral). `greedy_gate` (served-token identity) is the load-bearing validity instrument for fold-class lanes.)_
 
@@ -194,3 +201,14 @@ _Last updated: 2026-06-13 (**PR #4 MERGED — new best merged rung: int4 g128 + 
 - **Keeper findings (validity instrument):** (1) the greedy gate is **self-consistency** (served-pruned vs plain-greedy-pruned, same checkpoint), not fidelity-vs-unpruned; (2) earlier 107/128 "control failure" was an **offline-batched-reference vs sequential-candidate FP artifact**, not the prune — *every* future greedy-gate run must use a batch=1 served-vs-served reference; (3) the int4-argmax clip rate has an **irreducible frequency-selection floor** (~0.78% public / 1.15% held-out, uncapturable at any K).
 - **Standing risk — private PPL (NOT closable locally):** a private GT-*target* token outside `kept_ids` → −∞ logit → +∞ PPL on a private re-run. Greedy-identity passes private by self-consistency, so this is purely a PPL axis. Mitigated by hard-including all public GT-targets + specials + broad-corpus frequency fill. **Only a gated a10g-small HF job on the private set closes it** → approval issue opened.
 - **Next:** ubel → follow-up #3 (int4-pruned head: slice 12k head in int4 ≈ 15.7 MB vs 62.9 MB bf16, another ~4× head-byte cut, orthogonal to kept-set/private-PPL). lmhead12k also compounds in the spec-verify forward (K+1 tok × vocab — larger head fraction), gated on kanna #24.
+
+### 2026-06-13 17:40 — PR #33: Tree-causal mask (dead) + Marlin tile-boundary correction (cost-model closure) ✓ MERGED
+
+- **Status:** MERGED as a **LOCAL cost-model closure / profiler-infrastructure landing — NOT a TPS/baseline change.** Official headline stays **PR #4 (126.378 a10g-small)**; best-LOCAL rung stays **PR #14 (131.60 local)**. Directly refines PR #28's verify-latency curve.
+- **Finding 1 — tree-causal mask is DEAD (this model/hardware):** production dense-SDPA + topology-mask path saves **exactly 0** wall-time by construction; FLOP-ideal ceiling ≤0.18 ms (≤1.1% of step); FlexAttention *negative* (M≤49 tree in one 128×128 block). Moves K=6 tree TPS +0.5%, verdict by nothing. Now in the dead-ends list.
+- **Finding 2 (the keeper) — Marlin tile-boundary correction:** int4 verify step jumps **+0.772 ms (M16→17), +2.176 ms (M32→33), +2.869 ms (M48→49)** — `thread_m_blocks = ceil(M/16)` cliffs, confirmed exactly. PR #28's `LatencyCurve` linearly interpolated these → **under-stated M=49 by 2.68 ms (17%)**. Direct M=49 = **18.13 ms** (was 15.28 interp). W&B-verified to logged precision.
+- **Net on the ladder:** >500 TPS @ p=0.78 stays **FALSE — now firmer** (the only ~500 reading, variant-C 499.1, *was* the interpolation artifact this removes). Honest tile-corrected ceiling ≤481 verify-only / ≤440 with-drafter at realistic p=0.6792/0.78. Primary metric `K12_tree_tps_p078_tree_masked = 393.9` (variant B, directly-measured M=49).
+- **Serving guidance for kanna #24:** target the **M=45 (K=11) tmb=3 plateau**; avoid **M=17/33/49** cliffs — ~12% cheaper verify, same accepted length, no code change beyond tree shape. *(Provisional pending the K\* reconciliation below.)*
+- **W&B (verified):** `k56d6cxe` (tree-mask) · `36hkaj14` (tile boundary) · `aid45far` (tree model), group `spec-verify-tree-mask`, all finished. Tile deltas + M=49=18.134 ms + `verdict_exceeds_500_at_full_scale_withdrafter=False` confirmed.
+- **Open reconciliation (non-blocking):** report optimum **K\*=11 (M=45)** vs logged `optimal_k_*=15` (range-cap; likely the optimistic-accept scenarios — p=0.85 pushes K deeper, 511/558); `tps_tree_meas_p0_780=377.1` matches the K=6 sim exactly. denken to confirm scenario keying before the M=45 guidance is locked.
+- **Artifacts:** `research/spec_cost_model/results_tile_boundary.json`, `results_tree_mask.json`, `tree_results_tree_masked.json`, `scripts/profiler/merge_tree_mask_curve.py`, `report_tree_mask.md`.
