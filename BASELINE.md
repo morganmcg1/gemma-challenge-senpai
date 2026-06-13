@@ -120,4 +120,14 @@ already collapses the step — no per-step overhead to reclaim standalone; int4 
 **bit-exact** (sha256 run#1==run#2, eager too); fa2sw also requires a **vLLM worker-plugin** (V1 spawns
 a separate EngineCore process that a serve-process monkeypatch can't reach).
 
-_Last updated: 2026-06-13 (PR #8 MERGED — local validation + profiling infra: served-vs-served greedy gate, validate_submission harness, lm_head=26% profiler confirmed; PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #19 resolving via batch-invariant vLLM, gates rungs 4–5)._
+_Last updated: 2026-06-13 (PR #8 MERGED — local validation + profiling infra: served-vs-served greedy gate, validate_submission harness, lm_head=26% profiler confirmed; PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #19 resolving via batch-invariant vLLM, gates rungs 4–5. PR #21 MERGED — same-path PPL gate: closes `prompt_logprobs` blind spot; gate PASS on honest baseline, gap 8.88e-16 ≈ 0, both paths PPL 2.3012; every future HF-approval issue must attach `--check-same-path` output)._
+
+### 2026-06-13 11:00 — PR #21: Same-path PPL gate: timed-model PPL vs prompt_logprobs path
+
+- **Primary metric (gap):** `|same_path_ppl − prompt_logprobs_ppl|` = **8.88e-16 ≈ 0.0000** (gate: < 0.05; calibration band: < 0.02)
+- **Calibrated same-path PPL:** **2.3012128792** (both paths, 61,797 tokens, 128/128 records) — exactly reproduces PR #2 honest baseline
+- **Gate verdict:** `SAME_PATH_OK` — `validate_submission --check-same-path` exits 0
+- **W&B run:** `b9igh00q` (wandb-applied-ai-team/gemma-challenge-senpai, group `same-path-ppl-gate`)
+- **What this adds:** `scripts/local_validation/same_path_ppl.py` scores via the generation path with **no `prompt_logprobs` field** — indistinguishable from timed throughput. A gamed submission (e.g. LF29cap: prompt_logprobs PPL 2.38, generation PPL 2.55, gap ≈ 0.17 >> 0.05 threshold) cannot detect and neutralize the probe. Artifacts at `research/validity/vllm_baseline/`.
+- **Scope note:** gate catches request-field branching on `prompt_logprobs`; paired with `greedy_gate` (PR #8) closes the audit-vs-timed blind spot. Does not catch `echo`-branching or prefix-cache replay on prompt content (named residual attack surfaces in `research/validity/same_path_ppl.md`).
+- **Every HF-Job approval issue must now attach:** `greedy_gate` result + `--check-same-path` output side-by-side.
