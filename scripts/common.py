@@ -6,7 +6,9 @@ import shutil
 import subprocess
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -40,6 +42,10 @@ def agent_id(value: str | None = None) -> str:
     return value or os.environ.get("AGENT_ID") or DEFAULT_AGENT_ID
 
 
+def board_agent_id(value: str | None = None) -> str:
+    return value or os.environ.get("BOARD_AGENT_ID") or agent_id()
+
+
 def scratch_bucket(agent: str) -> str:
     return f"gemma-challenge/gemma-{agent}"
 
@@ -59,6 +65,16 @@ def submission_prefix(agent: str, name: str) -> str:
 def run_prefix(agent: str, name: str) -> str:
     stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime())
     return f"results/{agent}/{name}-{stamp}"
+
+
+def utc_slug_stamp() -> str:
+    return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+
+
+def safe_slug(value: str, *, default: str = "item", limit: int = 80) -> str:
+    slug = "".join(char.lower() if char.isalnum() else "-" for char in value)
+    slug = "-".join(part for part in slug.split("-") if part)
+    return (slug or default)[:limit].strip("-") or default
 
 
 def run(command: list[str], *, cwd: Path = ROOT, capture: bool = False) -> subprocess.CompletedProcess[str]:
@@ -81,6 +97,20 @@ def hf(*args: str) -> list[str]:
 def hf_json(uri: str) -> dict[str, Any]:
     result = run(hf("buckets", "cp", uri, "-"), capture=True)
     return json.loads(result.stdout)
+
+
+def get_json(url: str, params: dict[str, str] | None = None) -> dict[str, Any]:
+    if params:
+        separator = "&" if "?" in url else "?"
+        url = f"{url}{separator}{urllib.parse.urlencode(params)}"
+    request = urllib.request.Request(url, headers={"accept": "application/json"})
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            body = response.read().decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"{url} returned HTTP {exc.code}: {body}") from exc
+    return json.loads(body) if body else {}
 
 
 def post_json(url: str, payload: dict[str, Any], *, token: str | None = None) -> dict[str, Any]:
