@@ -1,5 +1,44 @@
 # SENPAI Research Results
 
+## 2026-06-13 21:55 — PR #51: accepthist dynamic-K on post-#43 split-KV cost curve ✓ MERGED (characterization + bugfix keeper — decisive negative, official bar UNCHANGED)
+
+- **Branch:** `denken/accepthist-dynamic-k` · **Student:** denken
+- **Status:** MERGED as a characterization + bugfix keeper. Official TPS bar **UNCHANGED at 126.378** (primary `projected_dynamic_k_tps_costmodel_post43_ctx512`=343.1 is a cost-model projection, **+0.12% vs static K=11**=342.7 = noise; not a served number, not comparable to the 428 served baseline).
+- **Hypothesis:** dynamic draft length via acceptance history (`accepthist`) beats static K\*; #43 split-KV flattened cost(K) so argmax K\* should shift up; the public top-3 VALID (459) all use accepthist. **Premise corrected (wirbel #49, propagated to #51):** the deployed stack is **LINEAR MTP K=7 (M=8 verify), not an M=45 tree** → K varies on the linear chain; tree cost-model (540) is not the baseline.
+
+| post-#43 ctx512 policy | TPS | vs K=11 | mean_K (sd) |
+|---|--:|--:|---|
+| static K=11 (= best static) | 342.7 | — | 11 (0) |
+| **clairvoyant ORACLE** | 400.6 | **+16.9%** | — |
+| best AIMD | 300.5 | −12.3% | 6.6 (3.6) |
+| best window-mean linear | 328.5 | −4.1% | 10.1 (3.5) |
+| **best realizable (LUT)** | **343.1** | **+0.12%** | captures **0.7%** of oracle |
+
+- **Analysis:** decisive NEGATIVE on the headline. Two premises fail under measurement: (1) **#43 does NOT push K\* up — stays 11 on every curve/ctx** because the operating point is pinned by **Marlin int4 GEMM tile cliffs (M=33 +2.0ms, M=49 +2.9ms)**, and split-KV only accelerates *attention*, leaving the cliffs (hence argmax) put; (2) **acceptance history is too weak a predictor** (window-mean→next r≈0.32; lag-1 autocorr +0.16) → realizable control captures **<8%** of the real +16.1% oracle ceiling → net ≈0. **Split-KV *shrinks* the dynamic-K headroom** (oracle 25.2%→16.1%): flattening attention makes the unchanged GEMM staircase relatively more dominant — opposite of the hypothesis. **Reconciliation:** static optimum drops 11→**≈7** at the real e_accept≈3.82 → **the deployed linear K=7 is already near-optimal statically** (no static re-tune win either). **Keepers:** the `--sim-K` argmax-default fix (closes the PR#41/BASELINE.md:90 residual — every run now prints its `ARGMAX OPERATING POINT`); the re-grounded post-#43 cost curves (**#43 helps *more* at long ctx: verify −2.6%@256 → −7.1%@1024**); tooling `accepthist_controller.py` + `spec_cost_model.py --splitkv-patch` (redirect counter `total_redirected=106260` proves the patch fired) + `compare_splitkv_curves.py`. Tooling-only diff — no served-submission change. PPL 2.377 preserved by construction (greedy-exact; valid per #38).
+- **W&B:** `wfi3jtkq` (sim; `splitkv_ctx512_static11_tps`=342.700, `splitkv_ctx512_oracle_gain_vs11_pct`=16.901, `realizable_frac_of_oracle`=0.007 — all confirmed), `6o8xaofq` (cost curve), group `accepthist-dynamic-k`. CPU sim + GPU cost curve (~21.6 GB A10G).
+- **Follow-ups:** (a) **drafter-ENTROPY dynamic-K (AdaEDL, denken's suggestion 1) → denken #54** — entropy at draft time is a strictly stronger predictor than acceptance history; the *correct* read of the public top-3. (b) split-KV **net-negative at M=8/short-ctx** (+15.5%@ctx256) → **context-gate** the redirect (NOT M≥33) → routed to **wirbel #53**. (c) spine-E→DP tightening of `tree_acceptance_model.py` now **unblocked** (#51 landed) → queued to wirbel, rebased on #51.
+
+---
+
+## 2026-06-13 21:42 — PR #48: Token-frequency logit bias on the drafter ✓ MERGED (characterization keeper — decisive negative, official bar UNCHANGED)
+
+- **Branch:** `kanna/token-freq-logit-bias` · **Student:** kanna
+- **Status:** MERGED as a characterization keeper. Official TPS bar **UNCHANGED at 126.378** (decisive negative; primary `tps`=463.49 is the best biased arm, *below* the in-screen bias=0 baseline 471.35).
+- **Hypothesis:** a static unigram logit bias on the drafter (boost top-K frequent output tokens) raises drafter acceptance without touching the verifier → +1–3% acceptance → +5–15 TPS, greedy-exact. **Forced deviations (both more favorable to the claim):** no `train.py --local-only --env` → reused the #44 LocalServer + `sglang.bench_serving` harness (fresh server/arm, one changed var); drafter is the centroid-sparse MTP head (not dense [B,262144]) → sparse-candidate bias table + drafter-only re-rank, bias=0 bypasses the hook (byte-identical to leaderboard, stays on the fused kernel).
+
+| bias (K=500, n=32) | E_accept | ΔE_acc | TPS | ΔTPS% | per-step lat |
+|---|--:|--:|--:|--:|--:|
+| **0.0** (fused, =leaderboard) | 3.95587 | — | **471.35** | — | **8.29 ms** |
+| 0.5 (grid optimum) | 3.97793 | **+0.56%** | 463.49 | **−1.67%** | 8.48 ms |
+| 1.0 | 3.95160 | −0.11% | 461.15 | −2.16% | 8.47 ms |
+| 2.0 | 3.87126 | −2.14% | 451.94 | −4.12% | 8.47 ms |
+
+- **Analysis:** decisive NEGATIVE for TPS. TPS ≈ E_accept / latency moves in opposite directions: acceptance best-case +0.56% (b=0.5; *reverses* at higher bias — the FT'd MTP head already encodes the unigram marginal, so an external prior pulls it off the verifier's conditional argmax, consistent with #25's plateau ~0.73), while leaving the fused Triton sparse-argmax kernel costs a constant **+2.2%/step** (bias-independent = implementation cost), ~4× the gain. Full (K×bias) grid bounded: optimum K=500/b=0.5 = +0.56%. Even a zero-cost *fused* version ceilings at **~474 TPS (+2.6)** → "don't pursue." PPL 2.3767 unchanged by construction. Strategic read (with #49): cheap inference-time tricks are exhausted; the real acceptance lever is drafter DATA quality (land #9 / fern #34), not re-ranking.
+- **W&B:** `96pn3c43` / `rrp0xc6e` (K=500 ×2, bit-identical E_accept) / `rggrg6r6` (K=100) / `l32wjlig` (K=1000). Ships `scripts/validity/drafter_bias_screen.py` (reusable drafter-tweak A/B harness) + `build_freq_bias_tokens.py`.
+- **Cleanup queued → kanna:** relocate/inert the bias hook out of the about-to-launch frontier submission `fa2sw_precache_kenyan/sitecustomize.py` (Step 0 of kanna's next PR). **Reassigned → kanna:** private-gap calibration (#44 follow-up) — quantify the split-KV stack's private-re-run risk before the launch lands.
+
+---
+
 ## 2026-06-13 21:32 — PR #49: Sequoia DP-optimal draft tree (cost-model study) ✓ MERGED (characterization keeper, official bar UNCHANGED)
 
 - **Branch:** `wirbel/sequoia-dp-tree` · **Student:** wirbel

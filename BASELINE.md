@@ -67,6 +67,22 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-13 21:55 — PR #51 (denken): accepthist dynamic-K on the post-#43 split-KV cost curve — ⭐ CHARACTERIZATION + BUGFIX KEEPER (decisive negative, official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary `projected_dynamic_k_tps_costmodel_post43_ctx512`=343.1 is a cost-model projection, **+0.12% vs static K=11** = noise). Closes the **acceptance-history dynamic-K lane** + fixes the `--sim-K` argmax logging residual. Tooling-only diff — no served-submission change.
+- **Decisive negative:** a realizable accepthist controller nets **+0.12%** over static K. Two premises fail: (1) **#43 does NOT push K\* up — stays 11** (operating point pinned by Marlin int4 GEMM tile cliffs at M=33/M=49; split-KV only accelerates *attention*); (2) **acceptance history is a weak predictor** (window-mean→next r≈0.32) → realizable captures **<8%** of the +16.1% oracle ceiling. **Split-KV *shrinks* the dynamic-K headroom** (oracle 25.2%→16.1%) — opposite of the hypothesis.
+- **Reconciliation (load-bearing):** static optimum drops 11→**≈7** at the real e_accept≈3.82 → **the deployed linear K=7 is already near-optimal statically** — no easy static re-tune win, no dynamic win. The acceptance lever is **drafter DATA** (land #9 / fern #34), or **drafter-entropy** dynamic-K (denken #54), not acceptance history.
+- **Keepers:** `--sim-K` argmax-default fix (every cost-model run now prints its `ARGMAX OPERATING POINT` — closes the PR#41/BASELINE.md:90 residual); re-grounded post-#43 cost curves (**#43 helps more at long ctx**: verify −2.6%@ctx256 → −7.1%@ctx1024); `scripts/profiler/accepthist_controller.py` + `spec_cost_model.py --splitkv-patch` + `compare_splitkv_curves.py`. PPL 2.377 preserved by construction (greedy-exact; valid per #38).
+- **W&B:** `wfi3jtkq` (sim; static11_tps=342.700, oracle_gain=16.9%, realizable_frac_of_oracle=0.007 — confirmed), `6o8xaofq` (cost curve), group `accepthist-dynamic-k`.
+- **Follow-ups:** drafter-entropy dynamic-K → **denken #54**; split-KV context-gate (M=8 short-ctx net-negative) → **wirbel #53**; spine-E→DP tightening of `tree_acceptance_model.py` now **unblocked** → wirbel (rebased on #51).
+
+### 2026-06-13 21:42 — PR #48 (kanna): Token-frequency logit bias on the drafter — ⭐ CHARACTERIZATION KEEPER (decisive negative, official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (decisive negative; best biased arm 463.49 < in-screen bias=0 baseline 471.35). Closes the inference-time logit-bias lane + ships a reusable drafter-A/B harness.
+- **Finding:** a static unigram bias on the drafter regresses TPS at every arm (−1.67% to −4.12%). Acceptance gain is real but tiny (+0.56% E_accept at b=0.5, bit-reproducible) and *reverses* at higher bias (the FT'd MTP head already encodes the unigram marginal → double-counting pulls it off the verifier's conditional argmax). The bias forces an exit from the fused Triton sparse-argmax kernel → constant **+2.2%/step** (bias-independent), ~4× the acceptance gain. Even a zero-cost fused version ceilings at **~474 TPS (+2.6)** → don't pursue.
+- **Greedy-exact / PPL 2.3767 unchanged** by construction (drafter-only; verifier argmax untouched; bias=0 byte-identical to leaderboard).
+- **Reusable infra:** `scripts/validity/drafter_bias_screen.py` (fresh-server-per-arm, one-changed-var drafter A/B) + `build_freq_bias_tokens.py`. **W&B:** `96pn3c43`/`rrp0xc6e`/`rggrg6r6`/`l32wjlig`. Strategic read (with #49): cheap inference-time tricks exhausted; the acceptance lever is drafter DATA quality (land #9 / fern #34).
+
 ### 2026-06-13 21:32 — PR #49 (wirbel): Sequoia DP-optimal draft tree (cost-model study) — ⭐ CHARACTERIZATION KEEPER (official bar UNCHANGED 126.378)
 
 - **Not a TPS rung** (primary_metric `dp_vs_linear_tps_gain_own_opt_costmodel`=1.1677 is a cost-model ratio; the lane has no servable path). Closes the **Sequoia tree lane** analytically and corrects a shared cost-model tool.
