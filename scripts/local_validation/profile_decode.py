@@ -111,12 +111,49 @@ def _run_serving_profile(args) -> int:
     return 0
 
 
+def _run_attention_detail(args) -> int:
+    """PR #39 path: op-level deep-profile of the decode-attention kernel.
+
+    No server, no submission — drives the *real* vLLM Triton attention kernel
+    (plus FA2 / SDPA bake-off) on a paged KV cache with L2-defeating rotation,
+    and quantifies the 19.6% attention lever vs the HBM-bandwidth floor."""
+    from . import profile_attention
+    out_path = (Path(args.output) if args.output else
+                paths.ROOT / "research" / "profiling" / "fa2sw_attention" / "attention_detail.json")
+    fd = paths.ROOT / "research" / "profiling" / "frontier_decode"
+    profile_json = fd / "frontier_decode_profile.json"
+    traces = sorted(fd.glob("trace_frontier/*.pt.trace.json.gz"))
+    trace_path = traces[0] if traces else None
+    decode_jsonl = fd / "decode_frontier.jsonl"
+    baked = Path("/tmp/osoi5-v0-baked")
+    m_values = [int(x) for x in args.m_values.split(",") if x.strip()]
+    print(f"[profile] attention-detail: M={m_values} -> {out_path}", flush=True)
+    profile_attention.run(
+        out_path, m_values, profile_json=profile_json, trace_path=trace_path,
+        decode_jsonl=decode_jsonl if decode_jsonl.exists() else None,
+        eval_prompts=paths.EVAL_PROMPTS if paths.EVAL_PROMPTS.exists() else None,
+        baked_model=baked if baked.exists() else None,
+        n_iter=args.attn_iters,
+    )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     # No-server op-profiler (PR #8): bare in-process LLM, vanilla model.
     ap.add_argument("--model-id", default=paths.INT4_MODEL)
     ap.add_argument("--mode", choices=["graph", "eager", "both"], default="both")
     ap.add_argument("--out-dir", type=Path, default=None)
+    # Attention deep-profile (PR #39): op-level kernel bandwidth bake-off.
+    ap.add_argument("--profile-mode", choices=["op", "attention-detail"], default="op",
+                    help="'op' = legacy graph/eager profilers; "
+                         "'attention-detail' = PR #39 attention kernel microbench")
+    ap.add_argument("--M-values", dest="m_values", default="1,7,17,25,45",
+                    help="comma list of query widths M for the attention sweep")
+    ap.add_argument("--output", default=None,
+                    help="output JSON path for --profile-mode attention-detail")
+    ap.add_argument("--attn-iters", type=int, default=100,
+                    help="profiled iterations per attention op measurement")
     ap.add_argument("--runner-python", type=Path, default=Path(sys.executable),
                     help="python with vLLM (default: current interpreter)")
     # Serving-stack profiler (PR #30): real serve.py + spec-decode + isolation.
@@ -143,6 +180,9 @@ def main(argv: list[str] | None = None) -> int:
 
     for note in paths.prepare_local_gpu_env():
         print(f"[profile] {note}", flush=True)
+
+    if args.profile_mode == "attention-detail":
+        return _run_attention_detail(args)
 
     if args.submission:
         return _run_serving_profile(args)
