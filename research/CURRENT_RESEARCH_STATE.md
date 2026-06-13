@@ -24,6 +24,14 @@
   now the #1 strategic question**, ahead of further drafter-quality spend. kanna's v1
   precision-localization experiment (int4 vs bf16 vs fp8 greedy flip-rate) + a manifest-vLLM-version
   check decide whether the ladder is salvageable or the team pivots to a non-vLLM-spec mechanism.
+  **NEW reconciliation thread (cycle 6):** stark's PR #3 found plain int4 greedy (M=1, no spec) is
+  **run-to-run nondeterministic** (eager-Marlin run#1 vs run#2 → 1/8 identical, near-tie hotspots
+  idx 83/104) — in direct tension with kanna's "K0-vs-K0 control IDENTICAL." Resolving it decides
+  whether the int4 *base* can self-certify greedy identity against a separately-generated reference
+  at all. stark is running a bounded reconciliation on the int4 stack (reproduce kanna's K0 config;
+  isolate cudagraph / batch-composition / FlashInfer-off as the divergence source) while blocked on
+  HF approval #11; kanna folds a per-precision run-to-run determinism control into the linchpin
+  arms so *intrinsic nondeterminism* and *batch-shape (M=1 vs M=K+1) divergence* are cleanly separated.
 
 ## Current focus — reproduce the public frontier, locally validated
 
@@ -52,9 +60,9 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 | student | PR | track | target |
 |---|---|---|---|
 | fern | #16 (WIP) | **EAGLE-3 draft-head training pipeline** — build distillation harness (`gen_eagle3_corpus.py` + `train_eagle3.py` + `eval_eagle3.py`), run debug-viability 1k-step training on 200 MATH samples, report offline teacher-forced acceptance rate. Full-scale run + HF Job gated on (a) debug viability and (b) kanna #5 linchpin. Aux layers `(2,21,39)`, `[T,7680]` fused input. | tf_acceptance_rate_debug_1k ≥ 3.5 tok/step (vs. QAT-MTP baseline ~2.2–3.3) |
-| stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11)** | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
+| stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11, 0 human comments)**. While blocked: bounded **run-to-run determinism reconciliation** vs kanna's K0 control (linchpin-relevant, interruptible). | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
 | lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, GREEDY_IDENTICAL 128/128 ✓; **awaiting HF Job approval (GitHub issue #12)** | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
-| kanna | #5 (WIP) | **int4+MTP spec-decode** — `{8,4}` engine blocker SOLVED (vLLM PR #43543 backport), but int4 batched-verify spec is **structurally greedy-DIVERGENT** vs M=1 AR (~0.33%/tok); acceptance caps ~2.2. v1: precision-localization (int4 vs bf16 vs fp8 greedy flip-rate) + confirm whether a10g-small honors manifest vLLM version | **resolve the linchpin**: is int4 spec greedy-valid at all? |
+| kanna | #5 (WIP) | **int4+MTP spec-decode** — `{8,4}` engine blocker SOLVED (vLLM PR #43543 backport), but int4 batched-verify spec is **structurally greedy-DIVERGENT** vs M=1 AR (~0.33%/tok); acceptance caps ~2.2. v1: precision-localization (int4 vs bf16 vs fp8 greedy flip-rate) **+ per-precision run-to-run determinism control** (reconcile stark #3's run-to-run divergence vs the K0-IDENTICAL claim) + confirm whether a10g-small honors manifest vLLM version | **resolve the linchpin**: is int4 spec greedy-valid at all? Separate intrinsic nondeterminism from batch-shape divergence. |
 | ubel | #14 (WIP) | **Empirical lmhead12k** — CPU feasibility done (kept_ids.json, implementation complete); **GPU void + int4 base absent** (pod intermittent). Path unblocked: self-build int4+g128 via path-(a) (prune bf16→quantize), general-12,288 corpus cut (hard-include GT + STEM fill), regenerate 128-capture. PPL scorer requires hard-include of GT tokens or gate fails. **DRAFTER-INDEPENDENT** rung. | served TPS/PPL/greedy-identity 128/128; both 7,584 and 12,288 bandwidth numbers |
 | denken | #7 (WIP) | **fa2sw + onegraph** target-side runtime levers | per-step overhead erasure, greedy-identical |
 | wirbel | #8 (WIP) | **local validation + profiling infra** | greedy-identity gate, local PPL, decode profiler, one-cmd validate |
