@@ -319,6 +319,16 @@ def lr_at(step, warmup, total, base):
     return base * 0.5 * (1.0 + math.cos(math.pi * min(1.0, prog)))
 
 
+def save_checkpoint(head, cfg, out_dir):
+    """Write a self-contained checkpoint dir (config.json + model_last.pt) so
+    eval_eagle3.py can score it directly. Snapshots include the frozen embed/
+    lm_head tables so eval needs no target weights."""
+    os.makedirs(out_dir, exist_ok=True)
+    with open(os.path.join(out_dir, "config.json"), "w") as f:
+        json.dump(cfg, f, indent=2)
+    torch.save(head.state_dict(), os.path.join(out_dir, "model_last.pt"))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--corpus", required=True)
@@ -343,6 +353,9 @@ def main():
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--log_every", type=int, default=10)
     ap.add_argument("--eval_every", type=int, default=0)
+    ap.add_argument("--save_every", type=int, default=0,
+                    help="save an intermediate checkpoint dir step_<n>/ every N "
+                         "steps (0=off); lets eval_eagle3.py score the curve")
     ap.add_argument("--wandb_project", default=os.environ.get("WANDB_PROJECT", "senpai-v1"))
     ap.add_argument("--wandb_entity", default=os.environ.get("WANDB_ENTITY"))
     ap.add_argument("--wandb_group", default="eagle3-drafter-training")
@@ -538,6 +551,11 @@ def main():
                     best_val = ev["tf_acceptance_rate"]
                     torch.save(head.state_dict(),
                                os.path.join(args.output, "model_best.pt"))
+
+            if args.save_every and step % args.save_every == 0 and step < total_steps:
+                ckpt_dir = os.path.join(args.output, f"step_{step}")
+                save_checkpoint(head, cfg, ckpt_dir)
+                print(f"  [ckpt] saved snapshot -> {ckpt_dir}", flush=True)
         epoch += 1
 
     # ---- final eval + save ----
