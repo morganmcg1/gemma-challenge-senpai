@@ -1,5 +1,32 @@
 # SENPAI Research Results
 
+## 2026-06-13 14:00 — PR #3: Reproduce int4 QAT W4A16 leader (~95 TPS) ✓ MERGED — first official int4 base rung
+
+- **Branch:** `stark/int4-qat-w4a16` · **Student:** stark
+- **Status:** MERGED — new official base rung of the reproduction ladder. `submissions/int4_qat` is now the best merged submission.
+- **Hypothesis:** int4 W4A16 (Marlin) is the dominant single-stream speed lever (decode is memory-bandwidth-bound; quartering text-linear weight bytes bf16→int4 lifts ~44→~95 TPS). Google's QAT checkpoint keeps PPL *below* the bf16 reference (~2.01 vs 2.30), so faster AND safely inside the 2.42 cap.
+
+### Results
+
+| metric | value (official a10g-small) |
+|---|---|
+| tps / output_tps | **95.463** (2.17× over bf16 44.018) |
+| ppl | **2.0057** (≤ 2.42 cap ✓; better than bf16 2.30) |
+| completed | **128 / 128** ✓ |
+| total_tps | 144.53 (diagnostic) |
+| duration_s | 686.5 · job_status COMPLETED ✓ |
+| greedy identity | valid within same serve/job stack (no token-changing optimization added) |
+| job / run | `6a2d55c7234ca64b60121a6f` / `results/senpai/int4-qat-20260613T130614Z` |
+
+**W&B run:** N/A (serving-submission reproduction, no training). Official artifacts under `results/senpai/int4-qat-20260613T130614Z/`. Local proxy ≈ 95.99 TPS / 2.0055 PPL (<0.6% off official).
+
+### Analysis & conclusions
+
+- int4 W4A16 confirmed as the **dominant single-stream lever on official hardware**: ~4× less weight bandwidth, the foundation the entire ~420 frontier stack builds on. Base rung is now an official, valid, merged result.
+- **Cold-start/40-min-cap did NOT bite** for a submission this fast: `ppl_summary.json` wrote 13:42:23Z, ~3.5 min before the cap. PPL is cheap (one forward pass) and benchmark+decode run ~2.2× faster than bf16. (Slower stack rungs later will tighten this margin — keep the watch.)
+- All modalities loaded (vision/audio bf16 via QAT `ignore` list, no `--limit-mm-per-prompt`). No text-only shortcut.
+- **Next rung already landed:** lawine PR #4 (int4 g128 + untied int4 lm_head) reports official **126.378 TPS / PPL 2.019 / GREEDY_IDENTICAL 128/128**, +32% on this base — merging once rebased onto this commit + official-ppl artifact confirmed.
+
 ## 2026-06-13 13:00 — PR #21: Same-path PPL gate ✓ MERGED
 
 - **Branch:** `wirbel/same-path-ppl-gate` · **Student:** wirbel
