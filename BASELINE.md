@@ -38,7 +38,11 @@ Private-stable acceptance (drafter trained on a wide distribution; prompt-conten
 verify paths) is a first-class objective, not an afterthought.
 
 ## Current local baseline in this repo
-- `submissions/vllm_baseline` — bf16 stock vLLM 0.22.0 endpoint. Prior HF smoke job
+- **BEST MERGED RUNG — `submissions/int4_qat` (PR #3, stark) — official a10g-small tps=95.463, ppl=2.0057, 128/128 VALID** (job
+  `6a2d55c7234ca64b60121a6f`, run `results/senpai/int4-qat-20260613T130614Z`). int4 QAT W4A16 (Marlin), Google's
+  `google/gemma-4-E4B-it-qat-w4a16-ct` checkpoint, all modalities loaded, greedy-valid (same serve/job stack). **2.17× over bf16.**
+  This is the new official base rung of the reproduction ladder; all future submissions beat **95.46 TPS**.
+- `submissions/vllm_baseline` — bf16 stock vLLM 0.22.0 endpoint (**reference floor**). Prior HF smoke job
   `6a2c5fb77c68f455eff14260` (run prefix `results/senpai/vllm-baseline-20260612T193622Z`)
   reported **tps=44.018, completed=128** on a10g-small.
 - **PPL-artifact resolution (priority #1, fern, PR #2) — RESOLVED 2026-06-13.**
@@ -55,6 +59,17 @@ verify paths) is a first-class objective, not an afterthought.
     artifacts under `research/local_validation/`.
 
 ## Merge history
+
+### 2026-06-13 14:00 — PR #3: Reproduce int4 QAT W4A16 leader (~95 TPS) — base of the stack ⭐ NEW OFFICIAL BASE RUNG
+
+- **Primary metric (tps):** **95.463** (official a10g-small, job `6a2d55c7234ca64b60121a6f`, run `results/senpai/int4-qat-20260613T130614Z`) — **2.17× over bf16 44.018**.
+- **PPL (gate):** **2.0057** ≤ 2.42 ✓ (better than bf16's 2.30 same-path — Google's quality-matched QAT checkpoint).
+- **completed:** 128/128 ✓ · **total_tps** 144.53 (diagnostic) · **duration_s** 686.5 · **job_status** COMPLETED ✓.
+- **Validity:** all modalities loaded (vision/audio bf16 via QAT `ignore` list, no `--limit-mm-per-prompt`); greedy-valid within the same serve/job stack (no token-changing optimization added); cold-start fit the 40-min cap with ~3.5 min to spare (`ppl_summary.json` wrote 13:42:23Z).
+- **W&B run:** N/A (serving-submission reproduction, no training). Official artifacts: `results/senpai/int4-qat-20260613T130614Z/{summary.json,ppl_summary.json,decode_outputs.jsonl,benchmark.jsonl,job_logs.txt}`.
+- **Submission:** `submissions/int4_qat/` (`manifest.json` + `serve.py`), checkpoint `google/gemma-4-E4B-it-qat-w4a16-ct`, vLLM 0.22.0 / transformers 5.9.0 / `--dtype bfloat16`, Marlin int4 W4A16, CUDA graphs FULL_AND_PIECEWISE.
+- **Reproduce (local exploratory):** `cd target/ && VLLM_USE_FLASHINFER_SAMPLER=0 python scripts/local_prevalidate.py --submission submissions/int4_qat --decode-num-prompts 16` (local ≈ 95.99 TPS / 2.0055 PPL, <0.6% off official). **Official run is HF-Job + human approval only** (issue #11 approved).
+- **Significance:** the foundation the entire ~420 frontier stack builds on. int4 W4A16 is confirmed the dominant single-stream lever on official hardware (memory-bandwidth-bound decode, ~4× less weight bandwidth). Next rung: int4 g128 + untied int4 lm_head (~127 TPS, lawine PR #4 in flight).
 
 ### 2026-06-13 08:40 — PR #2: Resolve PPL artifact path + validate bf16 baseline locally
 
@@ -120,7 +135,7 @@ already collapses the step — no per-step overhead to reclaim standalone; int4 
 **bit-exact** (sha256 run#1==run#2, eager too); fa2sw also requires a **vLLM worker-plugin** (V1 spawns
 a separate EngineCore process that a serve-process monkeypatch can't reach).
 
-_Last updated: 2026-06-13 (PR #8 MERGED — local validation + profiling infra: served-vs-served greedy gate, validate_submission harness, lm_head=26% profiler confirmed; PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #19 resolving via batch-invariant vLLM, gates rungs 4–5. PR #21 MERGED — same-path PPL gate: closes `prompt_logprobs` blind spot; gate PASS on honest baseline, gap 8.88e-16 ≈ 0, both paths PPL 2.3012; every future HF-approval issue must attach `--check-same-path` output)._
+_Last updated: 2026-06-13 (**PR #3 MERGED — first official a10g-small int4 base rung: 95.463 TPS / PPL 2.0057 / 128/128 VALID, 2.17× over bf16; `submissions/int4_qat` is now the best merged submission**; PR #8 MERGED — local validation + profiling infra: served-vs-served greedy gate, validate_submission harness, lm_head=26% profiler confirmed; PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #19 resolving via batch-invariant vLLM, gates rungs 4–5. PR #21 MERGED — same-path PPL gate: closes `prompt_logprobs` blind spot; gate PASS on honest baseline, gap 8.88e-16 ≈ 0, both paths PPL 2.3012; every future HF-approval issue must attach `--check-same-path` output)._
 
 ### 2026-06-13 11:00 — PR #21: Same-path PPL gate: timed-model PPL vs prompt_logprobs path
 
