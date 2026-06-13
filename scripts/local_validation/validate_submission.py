@@ -26,8 +26,16 @@ import json
 import time
 from pathlib import Path
 
-from . import greedy_gate, harness, paths
+from . import greedy_gate, harness, paths, same_path_ppl
 from .ppl_runner import _headroom_overrides
+
+# Default same-path-vs-prompt_logprobs PPL gap (nats of mean log-likelihood,
+# expressed as a PPL delta) above which a submission is treated as a
+# timed-vs-scored path split. Justified in research/validity/same_path_ppl.md:
+# the honest baseline agrees to < 0.02 (FP noise), so 0.05 is a ~2.5x margin —
+# wide enough to never flag honest FP/quantization jitter, tight enough that the
+# 2.378 (prompt_logprobs) vs 2.55 (same-path) LF29 lane gap of ~0.17 trips it.
+DEFAULT_SAME_PATH_THRESHOLD = 0.05
 
 
 def _greedy_summary(report) -> str:
@@ -51,7 +59,20 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--skip-ppl", action="store_true")
     ap.add_argument("--skip-tps", action="store_true")
     ap.add_argument("--tps-tokens", type=int, default=256)
+    ap.add_argument(
+        "--check-same-path",
+        action="store_true",
+        help="also score PPL through the timed generation path (echo+logprobs) and FAIL "
+        "(non-zero exit) if it diverges from the prompt_logprobs PPL by more than the threshold",
+    )
+    ap.add_argument("--same-path-threshold", type=float, default=DEFAULT_SAME_PATH_THRESHOLD,
+                    help="max allowed |same_path_ppl - prompt_logprobs_ppl| before the gate fails")
     args = ap.parse_args(argv)
+
+    # The same-path gate compares against the prompt_logprobs PPL, so it needs
+    # the PPL stage to run.
+    if args.check_same_path and args.skip_ppl:
+        ap.error("--check-same-path requires the PPL stage; do not pass --skip-ppl")
 
     for note in paths.prepare_local_gpu_env():
         print(f"[validate] {note}", flush=True)
@@ -154,6 +175,54 @@ def main(argv: list[str] | None = None) -> int:
                 evidence["failures"].append(f"ppl stage error: {exc}")
                 print(f"[validate] ERROR ppl stage: {exc}", flush=True)
 
+        # 2b) Same-path PPL gate: score the SAME GT span through the timed
+        # generation path (echo+logprobs, no prompt_logprobs) and require it to
+        # agree with the prompt_logprobs PPL above. A gap is the signature of a
+        # submission whose timed-throughput model differs from the scored model.
+        if args.check_same_path:
+            try:
+                sp_summary = same_path_ppl.score_endpoint(
+                    srv.base_url,
+                    srv.served_model_name,
+                    out_dir=out_dir,
+                )
+                evidence["same_path_ppl"] = sp_summary["ppl"]
+                stage = {
+                    "same_path_ppl": sp_summary["ppl"],
+                    "num_tokens": sp_summary["num_tokens"],
+                    "num_records": sp_summary["num_records"],
+                    "threshold": args.same_path_threshold,
+                }
+                ppl_pl = evidence.get("ppl")
+                if isinstance(ppl_pl, (int, float)):
+                    gap = abs(sp_summary["ppl"] - ppl_pl)
+                    verdict = "SAME_PATH_OK" if gap <= args.same_path_threshold else "PATH_SPLIT"
+                    evidence["prompt_logprobs_ppl"] = ppl_pl
+                    evidence["same_path_gap"] = gap
+                    evidence["same_path_verdict"] = verdict
+                    stage.update({"prompt_logprobs_ppl": ppl_pl, "gap": gap, "verdict": verdict})
+                    if verdict != "SAME_PATH_OK":
+                        evidence["failures"].append(
+                            f"same-path PPL gate FAILED: |{sp_summary['ppl']:.4f} - {ppl_pl:.4f}| "
+                            f"= {gap:.4f} > {args.same_path_threshold} threshold (timed-vs-scored path split)"
+                        )
+                    print(
+                        f"[validate] same-path PPL={sp_summary['ppl']:.4f} "
+                        f"prompt_logprobs PPL={ppl_pl:.4f} gap={gap:.4f} -> {verdict}",
+                        flush=True,
+                    )
+                else:
+                    evidence["same_path_verdict"] = "NO_PROMPT_LOGPROBS_PPL"
+                    evidence["failures"].append(
+                        "same-path gate could not compare: prompt_logprobs PPL stage did not produce a number"
+                    )
+                    print("[validate] same-path gate: WARN no prompt_logprobs PPL to compare against", flush=True)
+                evidence["stages"]["same_path"] = stage
+            except Exception as exc:
+                evidence["failures"].append(f"same-path stage error: {exc}")
+                evidence["same_path_verdict"] = "ERROR"
+                print(f"[validate] ERROR same-path stage: {exc}", flush=True)
+
         # 3) Exploratory TPS probe.
         if not args.skip_tps:
             try:
@@ -167,6 +236,17 @@ def main(argv: list[str] | None = None) -> int:
 
     (out_dir / "evidence.json").write_text(json.dumps(evidence, indent=2, sort_keys=True))
     _print_block(evidence, out_dir)
+
+    # The same-path gate is the only stage that can fail the whole command: a
+    # PATH_SPLIT (or an inability to measure it when requested) must be a loud,
+    # non-zero exit so an approval issue cannot attach a green block over it.
+    if args.check_same_path and evidence.get("same_path_verdict") != "SAME_PATH_OK":
+        print(
+            f"[validate] FAIL same-path gate verdict={evidence.get('same_path_verdict')} "
+            "(see failures above)",
+            flush=True,
+        )
+        return 1
     return 0
 
 
@@ -189,6 +269,12 @@ def _print_block(ev: dict, out_dir: Path) -> None:
     ppl = ev.get("ppl")
     cap_note = "<= 2.42 cap" if isinstance(ppl, (int, float)) and ppl <= 2.42 else "OVER 2.42 CAP" if isinstance(ppl, (int, float)) else ""
     print(f"ppl:            {_fmt(ppl, '.4f')}   {cap_note}", flush=True)
+    sp_verdict = ev.get("same_path_verdict")
+    if sp_verdict:
+        sp_ppl = ev.get("same_path_ppl")
+        gap = ev.get("same_path_gap")
+        gap_note = f"(same_path={_fmt(sp_ppl, '.4f')} gap={_fmt(gap, '.4f')})" if gap is not None else ""
+        print(f"same_path:      {sp_verdict}  {gap_note}", flush=True)
     comp = ev.get("completed")
     print(f"completed:      {comp}/{ev.get('num_prompts')}" if comp is not None else "completed:      n/a", flush=True)
     tps = ev.get("tps_single_stream_a10g")

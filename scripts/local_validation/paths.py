@@ -79,6 +79,26 @@ def import_greedy_identity():
     return greedy_identity
 
 
+def import_ppl_endpoint():
+    """Import the official ``ppl_endpoint`` scorer module by path.
+
+    Lets [[same_path_ppl]] reuse the official ``read_records`` /
+    ``normalized_record`` so the same-path probe scores the *identical*
+    61,797-token ground-truth span (BOS handling, ``score_start``/``score_end``)
+    as the ``prompt_logprobs`` scorer. Reusing the official normalization rather
+    than reimplementing it guarantees any PPL gap is the request shape, not a
+    span mismatch. The module is stdlib-only, so importing it pulls no heavy
+    deps (its ``transformers`` import lives inside ``main`` of a sibling script,
+    not here).
+    """
+    p = str(PPL_SCRIPT.parent)
+    if p not in sys.path:
+        sys.path.insert(0, p)
+    import ppl_endpoint  # noqa: E402
+
+    return ppl_endpoint
+
+
 def model_tag(model_id: str) -> str:
     """Filesystem-safe tag for a model id, used to key reference artifacts."""
     return model_id.strip("/").replace("/", "__").replace(":", "_")
