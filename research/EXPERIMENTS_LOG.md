@@ -1,5 +1,44 @@
 # SENPAI Research Results
 
+## 2026-06-13 11:15 — PR #15: EAGLE-3 feature-export feasibility ✓ MERGED
+
+- **Branch:** `fern/eagle3-feature-export-feasibility`
+- **Student:** fern
+- **Status:** MERGED — binary feasibility verdict: ACCESSIBLE → GO. Research report + reusable probe script. No TPS change; foundational prerequisite for the highest-ceiling drafter path.
+- **Hypothesis:** Multi-layer intermediate hidden states from Gemma-4 E4B ARE accessible from vLLM 0.22.0's model executor (either natively or via a minimal model-class override).
+
+### Results
+
+| field | value |
+|---|---|
+| `eagle3_hiddens_accessible` | **1 (yes, natively)** |
+| Access mechanism | Built-in `SupportsEagle3` interface — zero patching |
+| Model-class override effort | **0 hours** (already implemented) |
+| Aux layers (default) | `(2, 21, 39)` over the 42-layer E4B body |
+| Aux shape/dtype | `[num_tokens, 2560]` bf16 per layer |
+| CUDA-graph compatible | **Yes** (persistent buffers pre-allocated at capture) |
+| Drafter head arch | Already exists: `llama_eagle3.py`, `v1/spec_decode/eagle.py` |
+| W&B run | None (source audit + single model-load probe) |
+
+**Empirical probe (PR #15 `probe_result.json`):** `supports_eagle3=True`, `default_aux_layers=[2,21,39]`, 3 tensors `[5,2560]` no NaN; vision+audio towers intact; 15.3 GiB peak bf16 on A10G.
+
+**Key vLLM source refs (vLLM 0.22.0):**
+- `model_executor/models/interfaces.py:1285-1392` — `EagleModelMixin` + `SupportsEagle3` Protocol
+- `gemma4_mm.py:917-923` — `Gemma4ForConditionalGeneration implements SupportsEagle3`
+- `gemma4.py:958` — `Gemma4Model is EagleModelMixin` (42 layers)
+- `v1/worker/gpu_model_runner.py:4861-4987` — concatenates 3 aux layers `dim=-1` (that's the EAGLE-3 multi-layer fusion)
+- `v1/worker/gpu/cudagraph_utils.py:382-395` — persistent aux buffers for CUDA-graph safe capture
+
+**Serving-validity gate:** greedy-identity of EAGLE-3 spec decode on int4 is gated on kanna #5 linchpin (int4 batched-verify greedy-validity).
+
+### New shared infra
+`research/eagle3_feasibility/{feasibility_report.md, probe_eagle3_export.py, probe_result.json, probe.log}`
+
+### Recommendation → GO
+Full EAGLE-3 drafter head training assigned to fern (PR #16). Literature projects **480–550 TPS** at ~4–5+ accepted tok/step. Serving run gated on kanna #5 linchpin.
+
+---
+
 ## 2026-06-13 10:45 — PR #13: SAM-Decoding drafter-overlap intersection analysis ✓ MERGED
 
 - **Student:** fern

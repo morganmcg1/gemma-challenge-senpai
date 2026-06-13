@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13
+- **Date:** 2026-06-13 (cycle 6)
 - **Advisor branch:** `approval-gated-8gpu-20260613` · **Research tag:** `gemma-8gpu-progress-20260613`
 - **Most recent human directive:** none yet. Operating under the launch operator rules:
   **no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch`** without a
@@ -51,7 +51,7 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 
 | student | PR | track | target |
 |---|---|---|---|
-| fern | #15 (WIP) | **EAGLE-3 feature-export feasibility** — binary question: are multi-layer intermediate hidden states accessible from vLLM 0.22.0 Gemma-4 E4B forward pass? Source audit + optional minimal forward probe. Highest-projected drafter ceiling (480–550 TPS lit); feasibility gating the training run. Serving validity gated on kanna's linchpin outcome. | GO/CONDITIONAL-GO/NO-GO verdict; if accessible → staged training run |
+| fern | #16 (WIP) | **EAGLE-3 draft-head training pipeline** — build distillation harness (`gen_eagle3_corpus.py` + `train_eagle3.py` + `eval_eagle3.py`), run debug-viability 1k-step training on 200 MATH samples, report offline teacher-forced acceptance rate. Full-scale run + HF Job gated on (a) debug viability and (b) kanna #5 linchpin. Aux layers `(2,21,39)`, `[T,7680]` fused input. | tf_acceptance_rate_debug_1k ≥ 3.5 tok/step (vs. QAT-MTP baseline ~2.2–3.3) |
 | stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11)** | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
 | lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, GREEDY_IDENTICAL 128/128 ✓; **awaiting HF Job approval (GitHub issue #12)** | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
 | kanna | #5 (WIP) | **int4+MTP spec-decode** — `{8,4}` engine blocker SOLVED (vLLM PR #43543 backport), but int4 batched-verify spec is **structurally greedy-DIVERGENT** vs M=1 AR (~0.33%/tok); acceptance caps ~2.2. v1: precision-localization (int4 vs bf16 vs fp8 greedy flip-rate) + confirm whether a10g-small honors manifest vLLM version | **resolve the linchpin**: is int4 spec greedy-valid at all? |
@@ -67,6 +67,7 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 | fern | #2 ✓ **MERGED** | **Priority #1 resolved.** Local PPL=2.3012, root cause=40-min HF Job timeout. `scripts/local_prevalidate.py` merged — the team's local pre-validation gate before any HF Job. |
 | fern | #10 ✓ **MERGED** | **SAM-Decoding GO verdict.** Causal budget 8.93% K>8 (>3.6% threshold); `analyze_suffix_budget.py` merged; drafter-overlap analysis (#13) merged next. |
 | fern | #13 ✓ **MERGED** | **SAM drafter-overlap tooling.** `--drafter-trace` extension + 13/13 mock tests; canonical trace format (`output_start`); template JSON with thresholds. Net-headroom number awaits kanna's acceptance trace. |
+| fern | #15 ✓ **MERGED** | **EAGLE-3 feasibility ACCESSIBLE → GO.** `SupportsEagle3` natively in vLLM 0.22.0 + Gemma-4 E4B; aux layers `(2,21,39)`, `[T,2560]` bf16, CUDA-graph safe; drafter head arch exists (`llama_eagle3.py`). Zero patching. Empirical probe confirmed. Report at `research/eagle3_feasibility/`. |
 | ubel | #6 ✗ **CLOSED** (negative) | **Cert dead end.** Cauchy-Schwarz cert 0%-fire on Gemma4 (R_complement=1.630, geometry obstruction). Empirical lmhead12k authorized (PR #14). |
 
 ## Potential next research directions (round 2+)
@@ -89,10 +90,9 @@ Round-2 researcher-agent deep-dive complete → full writeup + dead-end map + de
    (GO verdict, causal 8.93% K>8). PR #13 in flight (drafter-overlap analysis, step 2).** Triton
    kernel follow-up gated on net_frac > 3% from PR #13 (requires kanna's #5 drafter trace).
 
-**Staged for stark (after PR #3 merges):** EAGLE-3 feature-export feasibility check — branch
-`stark/eagle3-feature-export-feasibility` exists (pushed); PR to be created when stark is idle.
-Binary question: are multi-layer hiddens accessible from vLLM Gemma 4 E4B forward pass? Gates the
-full EAGLE-3 training run (Rank 3; projected 480-550 TPS if tok/fwd reaches 5-6).
+**EAGLE-3 training in flight (fern PR #16):** `fern/eagle3-training-pipeline` — debug-viability
+1k-step run, then full-scale once debug confirms + kanna linchpin clears. Rank 3 projected ceiling
+480-550 TPS; highest-ceiling drafter in the pipeline. Serving validity gated on kanna #5.
 
 Pending earlier threads (still open): provably-greedy sparse verification (ubel's #6 is the
 round-1 version); the `DECODE_TPS_CAP` PENDING leaderboard entries (confirm cap-gaming vs. real
