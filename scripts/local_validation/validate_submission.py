@@ -26,7 +26,7 @@ import json
 import time
 from pathlib import Path
 
-from . import greedy_gate, harness, paths, same_path_ppl
+from . import greedy_gate, harness, modalities_probe, paths, same_path_ppl
 from .ppl_runner import _headroom_overrides
 
 # Default same-path-vs-prompt_logprobs PPL gap (nats of mean log-likelihood,
@@ -58,6 +58,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--skip-greedy", action="store_true")
     ap.add_argument("--skip-ppl", action="store_true")
     ap.add_argument("--skip-tps", action="store_true")
+    ap.add_argument("--skip-modalities", action="store_true",
+                    help="skip the official-gate modalities-load probe (text/image/audio/video)")
+    ap.add_argument("--model-dir", type=Path, default=None,
+                    help="served checkpoint dir for the modalities presence tier (default: resolve from manifest)")
     ap.add_argument("--tps-tokens", type=int, default=256)
     ap.add_argument(
         "--check-same-path",
@@ -263,6 +267,49 @@ def main(argv: list[str] | None = None) -> int:
                 evidence["failures"].append(f"tps stage error: {exc}")
                 print(f"[validate] ERROR tps stage: {exc}", flush=True)
 
+        # 4) Modalities-load probe — the official-gate criterion the harness never
+        # checks (program.md:29-31; #38). Runs LAST so a stray multimodal request
+        # can never destabilize the decode/ppl/tps evidence already captured.
+        if not args.skip_modalities:
+            try:
+                mod = modalities_probe.probe_modalities(
+                    base_url=srv.base_url,
+                    model=srv.served_model_name,
+                    manifest=manifest,
+                    submission_dir=submission,
+                    model_id=srv.model_id,
+                    model_dir=args.model_dir,
+                )
+                evidence["modalities_loaded"] = mod["modalities_loaded"]
+                evidence["all_modalities_loaded"] = mod["all_modalities_loaded"]
+                evidence["modalities_method"] = mod["modalities_method"]
+                evidence["stages"]["modalities"] = mod
+                if mod["all_modalities_loaded"] is False:
+                    missing = [m for m, v in mod["modalities_loaded"].items() if v is False]
+                    evidence["failures"].append(
+                        f"modalities gate: {', '.join(missing)} not loaded/non-zero (program.md:29-31)"
+                    )
+                print(
+                    f"[validate] modalities: {mod['modalities_loaded']} "
+                    f"-> all_modalities_loaded={mod['all_modalities_loaded']}",
+                    flush=True,
+                )
+            except Exception as exc:
+                evidence["failures"].append(f"modalities stage error: {exc}")
+                evidence["all_modalities_loaded"] = None
+                print(f"[validate] ERROR modalities stage: {exc}", flush=True)
+
+    # Consolidated official leaderboard gate (#38: PPL + completion + modalities,
+    # NOT token-identity). Computed from whatever the stages produced; an unknown
+    # input yields INCOMPLETE rather than a false PASS.
+    gate = modalities_probe.official_gate_verdict(
+        ppl=evidence.get("ppl"),
+        completed=evidence.get("completed"),
+        num_prompts=args.num_prompts,
+        all_modalities_loaded=evidence.get("all_modalities_loaded"),
+    )
+    evidence.update(gate)
+
     (out_dir / "evidence.json").write_text(json.dumps(evidence, indent=2, sort_keys=True))
     _print_block(evidence, out_dir)
     _maybe_log_wandb(args, evidence)
@@ -316,9 +363,20 @@ def _maybe_log_wandb(args, evidence: dict) -> None:
             "completed",
             "same_path_verdict",
             "greedy_verdict",
+            # Official leaderboard gate (#38: PPL + completion + modalities).
+            "official_gate",
+            "official_gate_pass",
+            "official_gate_ppl_ok",
+            "official_gate_completion_ok",
+            "official_gate_modalities_ok",
+            "all_modalities_loaded",
         )
         if key in evidence
     }
+    # Per-modality status as numeric metrics (1 loaded / 0 missing; unknown omitted).
+    for mod, value in (evidence.get("modalities_loaded") or {}).items():
+        if value is not None:
+            summary[f"modality_{mod}"] = int(bool(value))
     log_summary(run, summary, step=0)
     finish_wandb(run)
 
@@ -327,29 +385,55 @@ def _fmt(v, spec="") -> str:
     return format(v, spec) if isinstance(v, (int, float)) else "n/a"
 
 
+def _ok_mark(value) -> str:
+    return {True: "[ok]", False: "[FAIL]", None: "[unknown]"}.get(value, "")
+
+
+def _modalities_line(ev: dict) -> str:
+    loaded = ev.get("modalities_loaded") or {}
+    method = ev.get("modalities_method") or {}
+    flag = {True: "LOADED", False: "MISSING", None: "UNKNOWN"}
+    parts = [f"{m}={flag.get(loaded.get(m), 'UNKNOWN')}({method.get(m, '?')})" for m in modalities_probe.MODALITIES]
+    return " ".join(parts)
+
+
 def _print_block(ev: dict, out_dir: Path) -> None:
     name = ev.get("submission_name", "?")
     line = "=" * 16 + f" LOCAL VALIDATION — {name} " + "=" * 16
     print("\n" + line, flush=True)
     print(f"submission:     {ev.get('submission')}", flush=True)
     print(f"model_id:       {ev.get('model_id')}", flush=True)
+
+    # --- OFFICIAL LEADERBOARD GATE: PPL + completion + modalities (#38) -------
+    print("\n-- OFFICIAL LEADERBOARD GATE (PPL + completion + modalities; NOT token-identity, #38) --", flush=True)
+    print(f"official_gate:  {ev.get('official_gate', 'n/a')}  (leaderboard verdict)", flush=True)
+    ppl = ev.get("ppl")
+    cap_note = "<= 2.42 cap" if isinstance(ppl, (int, float)) and ppl <= 2.42 else "OVER 2.42 CAP" if isinstance(ppl, (int, float)) else ""
+    print(f"  ppl:          {_fmt(ppl, '.4f')}   {cap_note} {_ok_mark(ev.get('official_gate_ppl_ok'))}", flush=True)
+    comp = ev.get("completed")
+    comp_str = f"{comp}/{ev.get('num_prompts')}" if comp is not None else "n/a"
+    print(f"  completed:    {comp_str} {_ok_mark(ev.get('official_gate_completion_ok'))}", flush=True)
+    print(f"  modalities:   {_modalities_line(ev)}  -> all={ev.get('all_modalities_loaded')} "
+          f"{_ok_mark(ev.get('official_gate_modalities_ok'))}", flush=True)
+
+    # --- INTERNAL HARDENING SIGNALS (reproducibility, NOT official gates) -----
+    print("\n-- INTERNAL HARDENING SIGNALS (reproducibility; NOT official leaderboard gates) --", flush=True)
     rk = ev.get("greedy_reference_kind")
     rk_note = f"  [ref: {rk}]" if rk else ""
     print(f"greedy_verdict: {ev.get('greedy_verdict', 'skipped')}{rk_note}", flush=True)
     onset = ev.get("greedy_onset")
     if onset and onset.get("num_divergent"):
         print(f"                {greedy_gate.onset_line(onset, ev.get('output_len'))}", flush=True)
-    ppl = ev.get("ppl")
-    cap_note = "<= 2.42 cap" if isinstance(ppl, (int, float)) and ppl <= 2.42 else "OVER 2.42 CAP" if isinstance(ppl, (int, float)) else ""
-    print(f"ppl:            {_fmt(ppl, '.4f')}   {cap_note}", flush=True)
+    print("  note: greedy-identity is NOT an official leaderboard gate (kanna #38); "
+          "it is an internal reproducibility signal.", flush=True)
     sp_verdict = ev.get("same_path_verdict")
     if sp_verdict:
         sp_ppl = ev.get("same_path_ppl")
         gap = ev.get("same_path_gap")
         gap_note = f"(same_path={_fmt(sp_ppl, '.4f')} gap={_fmt(gap, '.4f')})" if gap is not None else ""
         print(f"same_path:      {sp_verdict}  {gap_note}", flush=True)
-    comp = ev.get("completed")
-    print(f"completed:      {comp}/{ev.get('num_prompts')}" if comp is not None else "completed:      n/a", flush=True)
+
+    print("", flush=True)
     tps = ev.get("tps_single_stream_a10g")
     print(f"tps:            {_fmt(tps, '.2f')} tok/s  [LOCAL a10g single-stream — exploratory, NOT official a10g-small]", flush=True)
     if ev.get("failures"):
