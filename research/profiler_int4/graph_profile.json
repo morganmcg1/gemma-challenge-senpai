@@ -1,0 +1,205 @@
+{
+  "model": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "mode": "graphs_on",
+  "graph_tps": 96.91458824096449,
+  "tps_tokens": 256,
+  "tps_wall_s": 2.6415011882781982,
+  "profile_tokens": 64,
+  "profile_wall_s": 1.250847339630127,
+  "gpu_busy_ms": 850.4060669999981,
+  "gpu_busy_share_of_wall_pct": 67.98639930364816,
+  "gpu_busy_per_token_ms": 13.28759479687497,
+  "category_ms": {
+    "matmul_gemm": 616.3501359999947,
+    "other": 189.5143270000013,
+    "attention": 17.95941000000124,
+    "norm": 11.496454999998994,
+    "elementwise_copy": 13.903912000001462,
+    "sampling_lmhead": 1.1818270000002522
+  },
+  "category_pct": {
+    "matmul_gemm": 72.47715649234615,
+    "other": 22.285156980189058,
+    "attention": 2.1118628731515483,
+    "norm": 1.3518782903978295,
+    "elementwise_copy": 1.634973283886684,
+    "sampling_lmhead": 0.13897208002871114
+  },
+  "top_kernels": [
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 207.61038000000013,
+      "count": 5355,
+      "pct": 24.413087824313532,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 186.6535379999974,
+      "count": 10584,
+      "pct": 21.948754276702243,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "aten::mm",
+      "ms": 177.66710499999962,
+      "count": 64,
+      "pct": 20.892031688668567,
+      "category": "other"
+    },
+    {
+      "kernel": "void gemv2T_kernel_val<int, int, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, 128, 16, 4, 4, false, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float>, float, float)",
+      "ms": 177.66710499999962,
+      "count": 64,
+      "pct": 20.892031688668567,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "kernel_unified_attention",
+      "ms": 15.128923000000603,
+      "count": 2688,
+      "pct": 1.7790234085901269,
+      "category": "attention"
+    },
+    {
+      "kernel": "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+      "ms": 9.366902000001332,
+      "count": 2624,
+      "pct": 1.1014622735518833,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_red_fused_add_marlin_gemm_rms_norm_0",
+      "ms": 9.020200999997764,
+      "count": 2688,
+      "pct": 1.0606933969578305,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "_C::marlin_gemm",
+      "ms": 7.381015999999967,
+      "count": 253,
+      "pct": 0.8679401860382052,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_red_fused_add_rms_norm_2",
+      "ms": 7.046260000000713,
+      "count": 2688,
+      "pct": 0.8285759325375003,
+      "category": "norm"
+    },
+    {
+      "kernel": "reduce_segments",
+      "ms": 6.592895000001423,
+      "count": 2646,
+      "pct": 0.775264342040664,
+      "category": "other"
+    },
+    {
+      "kernel": "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+      "ms": 5.859875999999958,
+      "count": 2688,
+      "pct": 0.6890679908566517,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_poi_fused_gelu_marlin_gemm_mul_3",
+      "ms": 4.691189999999206,
+      "count": 2688,
+      "pct": 0.5516411726163304,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 2, 4, 8, false, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 4.326443999999952,
+      "count": 203,
+      "pct": 0.5087503685459904,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 2, 16, 4, false, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 3.0545720000000145,
+      "count": 50,
+      "pct": 0.3591898174922148,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_poi_fused_6",
+      "ms": 2.859173000000841,
+      "count": 1472,
+      "pct": 0.33621267662015014,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "cudaGraphLaunch",
+      "ms": 2.778243999999948,
+      "count": 63,
+      "pct": 0.3266961640808654,
+      "category": "other"
+    },
+    {
+      "kernel": "reshape_and_cache_kernel_flash",
+      "ms": 2.500665000000641,
+      "count": 1536,
+      "pct": 0.2940554044754536,
+      "category": "attention"
+    },
+    {
+      "kernel": "triton_per_fused_5",
+      "ms": 2.4495989999998273,
+      "count": 1472,
+      "pct": 0.2880505084637211,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "triton_poi_fused_add_index_select_mul_rms_norm_split_split_with_sizes_sub_unsqueeze_view_6",
+      "ms": 2.182941999999006,
+      "count": 1152,
+      "pct": 0.2566940764780563,
+      "category": "norm"
+    },
+    {
+      "kernel": "aten::copy_",
+      "ms": 1.8571290000000873,
+      "count": 1664,
+      "pct": 0.21838143824062012,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "triton_per_fused_rms_norm_split_with_sizes_view_5",
+      "ms": 1.6906709999988963,
+      "count": 1152,
+      "pct": 0.19880749510208987,
+      "category": "norm"
+    },
+    {
+      "kernel": "_compute_slot_mapping_kernel",
+      "ms": 0.9898580000000593,
+      "count": 384,
+      "pct": 0.11639827588389742,
+      "category": "other"
+    },
+    {
+      "kernel": "aten::argmax",
+      "ms": 0.6254720000002125,
+      "count": 64,
+      "pct": 0.0735498045312292,
+      "category": "sampling_lmhead"
+    },
+    {
+      "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+      "ms": 0.5563550000000396,
+      "count": 64,
+      "pct": 0.06542227549748195,
+      "category": "sampling_lmhead"
+    },
+    {
+      "kernel": "aten::index",
+      "ms": 0.535806999999987,
+      "count": 128,
+      "pct": 0.06300601804149503,
+      "category": "elementwise_copy"
+    }
+  ]
+}
