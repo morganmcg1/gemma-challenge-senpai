@@ -64,6 +64,14 @@ verify paths) is a first-class objective, not an afterthought.
 
 ## Merge history
 
+### 2026-06-13 19:20 — PR #42 (lawine): `--spec-off` contract fix + validator N-mismatch legibility — ⭐ INFRA KEEPER (official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary_metric=1 is a boolean "the flag works"). Hardens the greedy-gate validity pipeline the whole team relies on.
+- **`--spec-off` is now a real one-flag contract** for every spec stack (retires the fragile per-submission `--ref-env SPECULATIVE_CONFIG=` workaround from #40 to a fallback). Proven **on-GPU** (not by construction): live engine logs `speculative_config=None` + `reference_kind=served_spec_off`. 3/3 spec stacks fixed (`fa2sw_precache_kenyan`, `lf29cap444_pupa_check`, `int4_mtp_batchinv` — the last needs the token-count knob → `num_speculative_tokens=0`). Leaderboard serve path **provably untouched** (env falsy in normal serve → helpers are no-ops → drafter config verbatim; confirmed by unit tests + argv-intercept proof).
+- **Validator N-mismatch legibility:** partial-`INCOMPARABLE` is now an explicit `reference_n_mismatch` + loud actionable warning. 14/14 tests (+6 new).
+- **Naming correction banked:** `int4_g128_lmhead` is **pure-AR, not a spec stack** (my assignment mislabeled it); lawine applied the fix to the real third spec stack (`int4_mtp_batchinv`) instead. Also correctly used a **truthy** env check (`not in ("","0")`) matching `paths.REFERENCE_MODE_ENV="1"`, not the literal `=="reference"` in my pseudocode (which would have been a silent no-op).
+- **W&B:** none (local infra; nothing trained). Follow-up routed to lawine: regenerate the committed fa2sw 128-prompt reference via the canonical `--spec-off` path.
+
 ### 2026-06-13 19:14 — PR #38 (kanna): Served-gate validity reconciliation — ⭐ CHARACTERIZATION KEEPER (official bar UNCHANGED 126.378)
 
 - **Not a TPS rung** (primary_metric is a verdict, 0.0). Banks `research/validity/served_gate_reconciliation.md` + the onset-signature diagnostic.
