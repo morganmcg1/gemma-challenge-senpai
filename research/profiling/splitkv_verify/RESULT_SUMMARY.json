@@ -1,0 +1,109 @@
+{
+  "pr": 43,
+  "title": "3D split-KV dispatch for M>1 spec-verify",
+  "submission": "submissions/fa2sw_precache_kenyan",
+  "patch": "submissions/fa2sw_precache_kenyan/splitkv_verify_patch.py",
+  "env_added": {"SPLITKV_VERIFY": "1", "SPLITKV_VERIFY_MAX_Q": "64"},
+  "hardware": "local AWS A10G (single in-container GPU) — EXPLORATORY, NOT official a10g-small",
+  "workload": "128 public bench prompts x 512 output tokens, seed 1, no precache (eval_prompts_sharegpt absent locally -> ungates without warming; identical for both arms)",
+
+  "mechanism_confirmed": {
+    "redirect_active": true,
+    "redirect_log": "[splitkv-verify] verify batch M=8 q_rows=8 -> 3D split-KV",
+    "guard": "1 < max_seqlen_q <= 64 (so prefill/PPL path, max_seqlen_q>64, never redirects)"
+  },
+
+  "tps_128prompt": {
+    "metric": "steady_gen_tps_mean = unweighted mean of vLLM's per-interval 'Avg generation throughput' readings (serve_profile.parse_spec_log); this is the meter PR #22/#39 used and the one comparable to the official 424.5 baseline",
+    "baseline_steady_gen_tps": 386.42,
+    "patched_steady_gen_tps": 428.37,
+    "tps_delta": 41.95,
+    "fraction_improvement": 0.1086,
+    "note": "local relative gain robust to no-precache; absolute depressed vs official 424.5 (no precache locally)",
+    "wall_clock_cross_check": {
+      "metric": "token-weighted aggregate = num_completion_tokens / served duration_s (decode_*.summary.json); includes prefill+ramp+drain, robust at any batch size",
+      "baseline_tok_per_s": 391.21,
+      "patched_tok_per_s": 454.25,
+      "baseline_duration_s": 167.521,
+      "patched_duration_s": 144.273,
+      "completion_tokens_each_arm": 65536,
+      "fraction_improvement": 0.1611,
+      "interpretation": "patched serve finished the IDENTICAL 65,536-token workload in 144.3s vs 167.5s (+16.1%). Wall-clock CORROBORATES the steady-meter +10.86% and brackets it from above, so the headline is conservative."
+    }
+  },
+  "tps_16prompt_pilot": {
+    "note": "16-prompt pilot's steady_gen_tps_mean was INVERTED (baseline 325.85, patched 221.25, -32%) — an unweighted-per-interval artifact: at 16 prompts the patched arm finishes in ~3-4 log intervals so the low-throughput batch-DRAIN interval dominates the unweighted mean. The SAME pilot's wall-clock (baseline 23.380s, patched 19.022s) shows patched +22.9% FASTER, agreeing with the 128-prompt result. The pilot corroborates, it does not contradict; steady_gen_tps_mean is simply unreliable at tiny batch.",
+    "baseline_steady_gen_tps": 325.85,
+    "patched_steady_gen_tps": 221.25,
+    "baseline_wall_clock_tok_per_s": 350.38,
+    "patched_wall_clock_tok_per_s": 430.67,
+    "wall_clock_fraction_improvement": 0.2292,
+    "verify_gpu_ms_p50_baseline": 7.906,
+    "verify_gpu_ms_p50_patched": 6.52
+  },
+  "verify_attention_speedup": {
+    "verify_gpu_ms_p50_baseline": 7.905,
+    "verify_gpu_ms_p50_patched": 6.518,
+    "verify_gpu_ms_reduction": 0.1754,
+    "drafter_gpu_ms_p50": 1.446,
+    "microbench_op_us": {
+      "sliding_force2d": 53.24, "sliding_split3d": 12.15, "sliding_speedup": 4.38,
+      "full_force2d": 64.61, "full_split3d": 16.47, "full_speedup": 3.92
+    },
+    "op_level_max_abs_err_vs_sdpa": 6.103515625e-05,
+    "op_level_mean_abs_err": 3.78e-06,
+    "tolerance": "<= 1e-4 (bf16 SWA), PASS"
+  },
+  "e_accept": {"baseline": 3.821, "patched": 3.846},
+
+  "ppl_128prompt": {
+    "patched_ppl": 2.3767,
+    "baseline_ppl_documented": 2.37688,
+    "delta": -0.0002,
+    "cap": 2.42,
+    "verdict": "UNAFFECTED (prefill chunks >64 tok never redirect; well under cap)",
+    "num_tokens": 61797
+  },
+
+  "greedy": {
+    "validity_anchor": "M=1 AR (spec-off) reference for the submitted checkpoint (program.md gate)",
+    "baseline_vs_M1AR_reference_identical": "11/128 (DIVERGENT)",
+    "patched_vs_M1AR_reference_identical": "10/128 (DIVERGENT)",
+    "interpretation_equidistant": "patch is greedy-EQUIVALENT to baseline against the validity anchor (10 ~= 11); patch is INERT at M=1 so the reference itself is unchanged with/without the patch",
+    "direct_patched_vs_baseline_identical": "19/128 (109 divergent, onset median 121)",
+    "determinism_clincher": "baseline run1 vs run2 = 32/32 IDENTICAL -> stack is deterministic run-to-run; therefore patched-vs-baseline divergence is a DETERMINISTIC 3D-reduction-order shift (6.1e-5 op-level cascading over 512 int4 tokens), NOT FP noise",
+    "known_context": "local M=1-AR gate is OVER-CONSERVATIVE: PR #32 found this same (leaderboard-VALID) submission DIVERGENT 27/32 against its own M1-AR ref; vLLM 0.22.x spec decode is greedy-DIVERGENT vs M1-AR at every precision (PR #5/#19/#24, vLLM #27433) yet the spec-decode frontier is leaderboard-valid. The official 'served gate' tolerates this.",
+    "refines_pr39_claim": "PR #39 said 'split-KV is bit-identical attention, zero greedy risk'. Empirically the 3D path is within bf16 tolerance (6.1e-5) but NOT bit-identical, and DOES shift the served stream vs the 2D baseline (109/128). But it is greedy-EQUIVALENT to baseline against the validity anchor, so 'no added gate risk' holds in the validity-relevant sense."
+  },
+
+  "projection_to_official": {
+    "formula": "TPS = 424.5 / (1 - 0.196 * attention_saving)   [PR #39]",
+    "measured_attention_saving": 0.50,
+    "derivation": "local +10.86% (steady meter) solves to ~50% saving of the 19.6% attention slice = PR #39 'conservative 2x' scenario",
+    "projected_official_tps_from_steady": 471,
+    "projected_official_tps_from_wall_clock": 493,
+    "projection_range": "471 (steady +10.86%) to 493 (wall-clock +16.1%); both cross 440 and 460",
+    "crosses_440_conservative": true,
+    "crosses_460_ideal": true,
+    "caveat": "projection only; local absolute steady-meter 428 < 440 gate due to no-precache depression (local wall-clock 454 does cross 440, see decision.tps_gate_metric_ambiguity)"
+  },
+
+  "peak_memory_gib": 21.0,
+  "model_load_gib": 8.85,
+
+  "decision": {
+    "pr_gate": "open HF approval issue IFF local TPS > 440 AND greedy gate passes",
+    "tps_gate_metric_ambiguity": "steady_gen_tps_mean = 428 < 440 (the meter comparable to the 424.5 baseline) BUT token-weighted wall-clock = 454 > 440. Both are no-precache-depressed local numbers (~9% below the official a10g-small), so neither cleanly satisfies a 440 gate that was framed against the OFFICIAL 424.5 baseline. The robust quantity is the RELATIVE +10.86%/+16.1%.",
+    "greedy_gate_16of16": false,
+    "hf_issue_opened": false,
+    "reason": "Both AND-conditions are at best unmet/ambiguous: (1) the greedy gate is clearly NOT 16/16 (10/128 vs M1-AR, a KNOWN over-conservative gate that fails the baseline too); (2) the TPS gate is metric-ambiguous (steady 428<440, wall-clock 454>440) and confounded by no-precache. Per my hard rule, escalating to an HF job is the advisor's call and requires human approval; I do NOT unilaterally open the approval issue on an ambiguous gate. Reporting the full picture (relative +10.86%/+16.1% -> ~471-493 projected official, greedy equivalent-to-baseline, PPL unaffected) and deferring the launch decision."
+  },
+
+  "artifacts": {
+    "ab_128": "research/profiling/splitkv_verify/ab_verify_n128/ab_result.json",
+    "patched_vs_baseline": "research/profiling/splitkv_verify/ab_verify_n128/compare_arms.json",
+    "determinism": "research/profiling/splitkv_verify/determinism/baseline_vs_baseline.json",
+    "ppl_patched": "research/profiling/splitkv_verify/ppl_patched/evidence.json",
+    "attention_microbench": "research/profiling/splitkv_verify/attention_patched.json"
+  }
+}

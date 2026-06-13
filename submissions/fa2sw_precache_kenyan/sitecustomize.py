@@ -1223,6 +1223,12 @@ if __import__("os").environ.get("STEPTIME", "0") == "1":
 if __import__("os").environ.get("FA_SLIDING", "0") == "1":
     import fa_sliding_patch  # noqa: E402,F401
 
+# splitkv-verify: route small multi-query-row (spec-verify) attention batches to
+# vLLM's 3D split-KV path (env-gated; SPLITKV_VERIFY=1). Registers a meta-path
+# finder for the Triton attention ops module; fail-open. See module docstring.
+if __import__("os").environ.get("SPLITKV_VERIFY", "0") == "1":
+    import splitkv_verify_patch  # noqa: E402,F401
+
 # kduma precache (env-gated; PRECACHE_BENCH=1): bench-prompt prefix replay
 # during the untimed warmup window, readiness-gated, fail-closed.
 if __import__("os").environ.get("PRECACHE_BENCH", "0") == "1":

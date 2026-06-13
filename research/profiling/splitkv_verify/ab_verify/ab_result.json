@@ -1,0 +1,55 @@
+{
+  "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan",
+  "num_prompts": 16,
+  "output_len": 512,
+  "reference": "/workspace/senpai/target/research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/decode_outputs.jsonl",
+  "arms": {
+    "baseline": {
+      "extra_env": {
+        "SPLITKV_VERIFY": "0"
+      },
+      "greedy": {
+        "verdict": "INCOMPARABLE",
+        "num_prompts_compared": 16,
+        "num_identical": 1,
+        "num_divergent": 15,
+        "total_divergent_tokens": 4839,
+        "onset_min": 1,
+        "onset_median": 142,
+        "onset_max": 477,
+        "identical_frac_overlap": 0.0625
+      },
+      "steady_gen_tps_mean": 325.85,
+      "e_accept_exact": 3.3810754912099275,
+      "e_accept_interval_mean": 3.37,
+      "verify_gpu_ms_p50": 7.906,
+      "drafter_gpu_ms_p50": 1.446,
+      "decode_records": 16
+    },
+    "patched": {
+      "extra_env": {
+        "SPLITKV_VERIFY": "1"
+      },
+      "greedy": {
+        "verdict": "INCOMPARABLE",
+        "num_prompts_compared": 16,
+        "num_identical": 1,
+        "num_divergent": 15,
+        "total_divergent_tokens": 4851,
+        "onset_min": 1,
+        "onset_median": 129,
+        "onset_max": 470,
+        "identical_frac_overlap": 0.0625
+      },
+      "steady_gen_tps_mean": 221.25,
+      "e_accept_exact": 3.6576797385620914,
+      "e_accept_interval_mean": 4.12,
+      "verify_gpu_ms_p50": 6.52,
+      "drafter_gpu_ms_p50": 1.446,
+      "decode_records": 16
+    }
+  },
+  "tps_delta": -104.60000000000002,
+  "frac_improvement": -0.32100659812797305,
+  "greedy_identical_match": true
+}
