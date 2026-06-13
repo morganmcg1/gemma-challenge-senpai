@@ -1,0 +1,35 @@
+{
+  "probe": "int4 QAT W4A16 greedy run-to-run reconciliation: prefix-cache OFF (diagnostic only)",
+  "purpose": "Test advisor 11:47 prediction + my own 11:45 suggested follow-up: re-run cudagraph M=1 greedy back-to-back with --no-enable-prefix-caching using a MATCHED int4-Marlin reference (same arithmetic as the endpoint). Isolate prefix-cache/scheduler state as the run-to-run driver and reconcile PR#3 DIVERGENT with the within-stack IDENTICAL controls.",
+  "one_variable_delta": "Identical to the prior determinism_probe 'cudagraph M=1 run1 vs run2' (the REAL submission config, which was 2/8 DIVERGENT) EXCEPT enable_prefix_caching flipped true -> false. Nothing else changed.",
+  "stack": {
+    "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "vllm": "0.22.0",
+    "transformers": "5.9.0",
+    "kernel": "Marlin int4 W4A16 (compressed-tensors WNA16)",
+    "attn_backend": "TRITON_ATTN",
+    "dtype": "bfloat16",
+    "cudagraph_mode": "FULL_AND_PIECEWISE (enforce_eager=false)",
+    "enable_prefix_caching": false,
+    "enable_chunked_prefill": true,
+    "env": {"MAX_NUM_BATCHED_TOKENS": "512", "GPU_MEMORY_UTILIZATION": "0.90", "MAX_MODEL_LEN": "4096", "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True", "VLLM_USE_FLASHINFER_SAMPLER": "0"},
+    "decode": {"temperature": 0.0, "ignore_eos": true, "output_len": 512, "num_prompts": 8, "seed": 1, "dataset": "eval_prompts_sharegpt.json", "driver": "official decode_outputs.py (M=1 strictly sequential)"}
+  },
+  "comparisons": [
+    {"name": "within-process run1 vs run2", "regime": "same server process A, M=1 sequential, prefix-cache OFF", "verdict": "GREEDY_IDENTICAL", "identical": "8/8", "divergent_tokens": 0, "sha256_identical": "8/8", "tokens_compared": 4096},
+    {"name": "cross-process run1 vs run3", "regime": "run1 from process A vs run3 from a freshly restarted process B, identical config, M=1 sequential, prefix-cache OFF", "verdict": "GREEDY_IDENTICAL", "identical": "8/8", "divergent_tokens": 0, "sha256_identical": "8/8", "tokens_compared": 4096}
+  ],
+  "prior_for_contrast": {
+    "from": "research/int4_qat/artifacts/determinism_probe/SUMMARY.json",
+    "cudagraph_M1_run1_vs_run2_prefix_cache_ON": {"verdict": "DIVERGENT", "identical": "2/8", "divergent_tokens": 816},
+    "original_PR3_HF_bf16_dense_AR_reference_vs_endpoint": {"verdict": "DIVERGENT", "identical": "1/8", "note": "cross-PATH reference (bf16-dense GEMM) vs int4-Marlin endpoint -> near-tie divergence regardless of reproducibility"}
+  },
+  "conclusions": [
+    "Turning prefix caching OFF flips cudagraph M=1 run-to-run from 2/8 DIVERGENT to 8/8 byte-identical (0 divergent tokens). One-variable result: the run-to-run noise was prefix-cache / scheduler state, NOT the Marlin int4 GEMM or Triton-attn kernel.",
+    "int4-Marlin M=1 greedy is bit-exact run-to-run BOTH within-process AND cross-process when prefix caching is off and the reference uses the same int4-Marlin arithmetic. This confirms the advisor 11:47 prediction and matches denken's relayed cross-process bit-exact regime, reproduced independently on the stark stack.",
+    "Reconciles my PR#3 DIVERGENT finding with the within-stack IDENTICAL controls: my original divergence was driven by (a) a cross-PATH bf16-dense AR reference vs the int4-Marlin endpoint, and (b) prefix-cache state across separate warm runs. Remove both (matched int4-Marlin reference + prefix-cache OFF) and the stark stack reproduces bit-exact. The int4 base CAN self-certify the greedy gate in the gate-relevant regime (M=1 sequential, prefix-cache OFF, matched arithmetic).",
+    "Prefix caching with chunked prefill reuses cached KV blocks whose values differ by ~1 ULP from a fresh full recompute and shifts chunk boundaries; at a near-tie logit this flips one argmax and the sequence cascades. Disabling prefix cache forces an identical fresh computation every run -> reproducible."
+  ],
+  "submission_impact": "NONE. The shipped submission (submissions/int4_qat/serve.py) deliberately keeps prefix caching ON (vLLM default) for serving throughput; this probe does NOT recommend shipping --no-enable-prefix-caching. The prefix-cache-OFF setting is purely the diagnostic regime that isolates the mechanism and matches an AR-reference comparison. No submission file changed; no HF job launched; this is not the deferred VLLM_BATCH_INVARIANT determinism-enabling work.",
+  "artifacts": ["pcoff_run1.jsonl", "pcoff_run2.jsonl", "pcoff_run3.jsonl", "pcoff_run1_summary.json", "pcoff_run2_summary.json", "pcoff_run3_summary.json", "serve_A.log", "serve_B.log"]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "int4-qat",
+  "description": "Gemma-4-E4B-it served from Google's int4 QAT W4A16 checkpoint (google/gemma-4-E4B-it-qat-w4a16-ct, compressed-tensors pack-quantized, group_size 32, Marlin int4). Vision/audio towers stay bf16 via the checkpoint's quant ignore list, so all modalities load. Reproduces the ~95 TPS / PPL ~2.01 leader; quartering text-linear weight bytes is the dominant single-stream decode lever.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

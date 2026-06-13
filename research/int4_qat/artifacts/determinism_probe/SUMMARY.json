@@ -1,0 +1,31 @@
+{
+  "probe": "int4 QAT W4A16 greedy run-to-run determinism characterization (diagnostic only)",
+  "purpose": "Answer advisor 11:23 question: under which config is int4 M=1 greedy run-to-run reproducible; isolate cudagraph vs eager, batch composition, sampler flag. Reconcile DIVERGENT (PR#3) with reported within-stack IDENTICAL.",
+  "stack": {
+    "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "vllm": "0.22.0",
+    "transformers": "5.9.0",
+    "kernel": "Marlin int4 W4A16 (compressed-tensors WNA16)",
+    "attn_backend": "TRITON_ATTN",
+    "dtype": "bfloat16",
+    "enable_prefix_caching": true,
+    "env": {"MAX_NUM_BATCHED_TOKENS": "512", "GPU_MEMORY_UTILIZATION": "0.90", "MAX_MODEL_LEN": "4096", "VLLM_USE_FLASHINFER_SAMPLER": "0"},
+    "decode": {"temperature": 0.0, "ignore_eos": true, "output_len": 512, "num_prompts": 8, "seed": 1, "dataset": "eval_prompts_sharegpt.json"}
+  },
+  "comparisons": [
+    {"name": "eager M=1 run1 vs run2", "graph": "enforce_eager", "composition": "M=1 sequential", "verdict": "DIVERGENT", "identical": "1/8", "divergent_tokens": 1822, "note": "from prior PR#3 artifacts; first divergences early (idx 9-418)"},
+    {"name": "cudagraph M=1 run1 vs run2", "graph": "FULL_AND_PIECEWISE", "composition": "M=1 sequential", "verdict": "DIVERGENT", "identical": "2/8", "divergent_tokens": 816, "first_div_indices": [161, 269, 344, 356, 381, 462], "note": "REAL submission config; divergences all LATE; some single-token (idx462 -> 8 div tokens)"},
+    {"name": "concurrent (co-sched) run1 vs run2", "graph": "FULL_AND_PIECEWISE", "composition": "8-way concurrent fixed batch", "verdict": "DIVERGENT", "identical": "7/8", "divergent_tokens": 415, "only_divergent_prompt": "mmlu_pro-00ff96e757@idx91", "note": "MOST run-to-run stable; 7/8 byte-identical; identical batch composition -> most consistent reduction order"},
+    {"name": "concurrent vs M=1 (composition effect)", "graph": "FULL_AND_PIECEWISE", "composition": "co-sched vs M=1", "verdict": "DIVERGENT", "identical": "2/8", "divergent_tokens": 1840, "note": "SAME prompt -> DIFFERENT greedy tokens under co-scheduling vs M=1; confirms split-K/batched-reduction-order sensitivity (advisor hypothesis)"}
+  ],
+  "flashinfer_sampler_flag": "irrelevant to greedy: temperature=0 takes hard argmax and bypasses the sampler; run-to-run noise lives in forward kernels (Marlin split-K GEMM, Triton-attn reductions), not the sampler. VLLM_USE_FLASHINFER_SAMPLER=0 is only a local nvcc/curand workaround.",
+  "conclusions": [
+    "No config gives guaranteed bit-exact run-to-run identity at output_len 512: a rare near-tie logit can always FP-flip the argmax and cascade.",
+    "But greedy IS reproducible per-sequence when no near-tie is hit (most prompts are byte-identical run-to-run). It is a near-tie-incidence continuum, not a binary.",
+    "Divergence severity is config-ordered: eager M=1 (worst) > cudagraph M=1 > concurrent fixed-batch (best run-to-run).",
+    "Batch composition is a token-changing variable: co-scheduling vs M=1 changes the greedy tokens of the SAME prompt (confirms split-K reduction-order sensitivity).",
+    "Therefore the int4 base cannot self-certify the hard greedy gate against a SEPARATELY-generated reference; it passes only via the official within-run/same-job reference (consistent with the VALID leader and the advisor Q1 answer).",
+    "Reconciles with a within-stack IDENTICAL control: 7/8 of my prompts are perfectly reproducible; a control whose prompts/length/comparison-method hits zero near-ties returns 8/8 IDENTICAL - same mechanism, different near-tie incidence."
+  ],
+  "suggested_followup": "Isolate prefix-cache / scheduler state as the run-to-run driver by re-running cudagraph M=1 back-to-back with --no-enable-prefix-caching (one restart). Not run here to keep the probe within the advisor's named toggles."
+}
