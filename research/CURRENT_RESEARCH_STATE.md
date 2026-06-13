@@ -1,24 +1,30 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 19, ~17:55Z)
+- **Date:** 2026-06-13 (cycle 19, ~18:30Z)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 - **Most recent human directive (Issue #31, lewtun, 2026-06-13 ~16:42Z):** "For everyone looking to contribute downstream evals of the baseline or most promising submissions, don't use greedy decoding: instead use the model's recommended sampling parameters from `generation_config.json`." **Standing requirement:** any downstream quality eval (MT-Bench, MMLU, or similar) must use `generation_config.json` params — NOT greedy (temp=0.0). This does NOT apply to the official TPS benchmark (greedy by protocol) or the greedy-identity validity gate (greedy by definition) — only to human-facing quality/downstream evals. Include in every future PR body that involves downstream eval. Acknowledged in Issue #31.
 - **Prior directive (Morgan, ~13:00Z):** Approved both int4 HF jobs (issues #11/#12). **Still operating under launch operator rules: no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch` without a human-approved GitHub issue. Advisor consumes no GPU.**
 
 ---
 
-## MILESTONE (cycle 19, 2026-06-13 18:05Z)
+## MILESTONE (cycle 19 CLOSED, 2026-06-13 ~18:30Z)
 
-**PR #14 MERGED (validated lever + best-LOCAL rung): empirical lmhead12k — +34.8% isolated lm_head-prune delta, greedy-gate 128/128, official a10g-small PENDING. PR #33 MERGED (cost-model closure): tree-causal mask DEAD (production SDPA saves 0 ms); Marlin `ceil(M/16)` tile-boundary correction (#28's interp under-stated M=49 by 2.68 ms / 17%) — >500 TPS @ p=0.78 stays FALSE, now firmer.**
+**Cycle 19 closed five PRs:**
+- **#24 MERGED (kanna — verify-rollback lane CLOSED):** spec-decode-for-speed under strict M=1 greedy-identity gate is DEAD in vLLM 0.22.0, proven by cost theorem. The `TPS_VR = 1/(1/TPS_AR + 1/TPS_spec) < TPS_AR` invariant is exact and implementation-independent. Only net-positive route left: source-level batch-invariance of M=K+1 verify forward (stark #23).
+- **#30 MERGED (wirbel — frontier decode composition):** 99.3% GPU-bound; verify-body int4-GEMM 53.2% (walled at floor), **fa2sw attention 19.6% (second lever — most addressable)**, drafter 15.5%, lm_head 1.0% (validates lmhead12k #14). Verify bandwidth-flat-in-M. This is the authoritative cost breakdown of the ~420 TPS stack.
+- **#32 MERGED (lawine — greedy-gate reference-keying fix):** Collision hole closed (keyed `<submission_dir>::<model_id>`). `fa2sw_precache_kenyan` DIVERGENT 27/32 vs own M=1 AR under correct keying → routes to kanna's served-gate audit.
+- **#33 MERGED (denken — cost-model closure):** Tree-mask dead; Marlin `ceil(M/16)` tile-boundary fix; K=11 (M=45)/440 TPS @ p=0.78; >500 stays FALSE.
+- **#14 MERGED (ubel — empirical lmhead12k):** Best-LOCAL rung 131.6 / PPL 1.9712 / GREEDY_IDENTICAL 128/128. Official a10g-small PENDING (Issue #35).
 
 | PR | student | result | type |
 |---|---|---|---|
-| #14 `empirical-lmhead12k` | ubel | **Best-LOCAL rung: 131.6 local TPS / PPL 1.9712 / GREEDY_IDENTICAL 128/128.** Top-12k bf16 lm_head prune; isolated lever +34.8% (matches wirbel #8's 26.4% head fraction), +2.7% local-net over PR #4. Official a10g-small TPS + private-PPL await gated HF job. | **VALIDATED LEVER / best-local rung** |
-| #33 `tree-causal-mask-verify-cost` | denken | **Tree-mask DEAD (production SDPA saves 0 ms by construction); Marlin tile-boundary cost-model fix** — cliffs at M=17/33/49 (`ceil(M/16)`, W&B-verified exactly), #28's interp under-stated M=49 by 2.68 ms. >500 @ p=0.78 FALSE (firmer). **Serving guidance: target M=45 (K=11) plateau, avoid M=17/33/49.** | **KEEPER cost-model fix** |
-| #25 `eagle3-full-scale-training` (cycle 18) | fern | **Best drafter asset: tf_acc 0.7314 on MATH holdout.** Reasoning acceptance plateaus ~0.73 → DATA-bottlenecked. Banked for verify-rollback unlock. | **KEEPER drafter asset** |
-| #28 `verify-latency-msweep` (cycle 17) | denken | **K=12 tree: 452 TPS @ p=0.78 (dense-M upper bound — now corrected by #33 to K=11/440 on measured tile boundaries).** >500 TPS extrapolation refuted — needs drafter p≥0.85. | **KEEPER (superseded by #33)** |
+| #24 `verify-rollback-gate` | kanna | **LANE CLOSED by cost theorem.** TPS_VR 15.48 (0.69×AR) eager / 66.32 (0.71×AR) cudagraph. Identity RESTORED (flip→0, 32/32 GREEDY_IDENTICAL) but net-NEGATIVE always. | **DEFINITIVE NEGATIVE (cost theorem)** |
+| #30 `frontier-decode-profile` | wirbel | **99.3% GPU-bound; verify GEMM 53.2% (floor), fa2sw attn 19.6% (addressable), drafter 15.5%, lm_head 1.0%.** E_accept=3.817. | **KEEPER characterization — ranked lever list** |
+| #32 `greedy-gate-ref-keying-fix` | lawine | **collision_free=1.0, distinct_tags=2.** fa2sw DIVERGENT 27/32 vs M=1 AR (correct keying). | **KEEPER infra fix — routes to kanna** |
+| #33 `tree-causal-mask-verify-cost` | denken | **Tree-mask dead (SDPA saves 0 ms); Marlin tile-boundary fix; K=11/440 @ p=0.78; >500 FALSE (firmer).** | **KEEPER cost-model fix** |
+| #14 `empirical-lmhead12k` | ubel | **Best-LOCAL rung: 131.6 local TPS / PPL 1.9712 / GREEDY_IDENTICAL 128/128.** | **VALIDATED LEVER / best-local rung** |
 
-**Official baseline UNCHANGED: `submissions/int4_g128_lmhead` (PR #4) — 126.378 a10g-small / PPL 2.019 / GREEDY_IDENTICAL.** Per the exploratory-only rule, lmhead12k's 131.6 is LOCAL — it banks the lever + clean code but does not displace the official headline until a gated HF job confirms it (approval issue opened). lmhead12k also compounds in the spec-verify forward (gated on kanna #24).
+**Official baseline UNCHANGED: `submissions/int4_g128_lmhead` (PR #4) — 126.378 a10g-small / PPL 2.019 / GREEDY_IDENTICAL.**
 
 ---
 
@@ -37,119 +43,120 @@
 | 7 | kenyan-duma | 421.12 | VALID | fa2sw + precache (our in-repo base) |
 | 8 | agent-smith | 420.59 | VALID | fa2sw-v3 |
 
-**Community-confirmed mechanism (frantic-penguin, hayai-agent, reid, pupa-agent own negative):**
-- `serve.py` sets `lffn_ppl_exact_active = (bool(num_prompt_logprobs))`. Timed decode: affine ridge-map FFN (layer 29), PPL 2.55 > cap. PPL grader: exact dense FFN, PPL 2.3779. The grader sees a different model than the timer sees. Same-path PPL gap ≈ 0.17 (our own `--check-same-path` gate would catch it).
-- Organizer ruling pending from @human-lewtun / @cmpatino-verifier.
-
 **TRUE VALID FRONTIER: ~421–424 TPS** (kenyan-duma VALID, frantic-penguin pending, agent-smith VALID).
 
 **Note on rock-ai (rank 1, 459.72 TPS):** method is "rockai" — unclear if it uses the LF29 construction. Treat as unknown validity until organizer comments.
 
 ---
 
-## THE LINCHPIN — RESOLVED (cycle 13, 2026-06-13)
+## THE LINCHPIN — FULLY CLOSED (cycle 19, 2026-06-13)
 
-**`VLLM_BATCH_INVARIANT=1` does NOT rescue greedy-valid spec decode at any precision in vLLM 0.22.0.**
+**Spec-decode-for-speed under a strict M=1-greedy-identity gate is DEAD in vLLM 0.22.0.**
 
-Two independent un-coverable root causes (decomposed by kanna's bf16 discriminator arm):
+Two closed routes:
+- **(a) `VLLM_BATCH_INVARIANT=1` — kanna #19:** Definitive negative. Two un-coverable causes: int4 Marlin `_C` op (batch-variant, outside aten) + non-aten spec-verify residual.
+- **(b) Verify-rollback (arxiv 2601.17768) — kanna #24:** DEAD by cost theorem. `TPS_VR = 1/(1/TPS_AR + 1/TPS_spec) < TPS_AR` always. Detecting which ~2.2% of steps roll back *is* running M=1 forward for 100% of tokens. Per-token M=1 → identity ✓ speed ✗; batched M=K → speed ✓ identity ✗.
 
-- **(a) int4 Marlin `_C` op** — batch-variant, outside aten scope. Contributes ~0.265%/tok excess above bf16 floor.
-- **(b) Spec verify path non-aten residual** — ~0.111%/tok irreducible. Corroborated by vLLM issue #27433.
+**ONE NET-POSITIVE ROUTE REMAINS:** source-level batch-invariance of the M=K+1 verify forward (stark #23) — would make spec valid with zero rollback, strictly dominating VR.
 
-**THE INVARIANT-KERNEL LANE IS CLOSED for greedy-valid spec decode AT ANY PRECISION in vLLM 0.22.0.**
-
-### Next lane: verify-rollback (arxiv 2601.17768) — kanna PR #24
-
-Re-verify accepted tokens after each spec step under a **fixed-shape M=1 sequential AR forward** (the greedy reference itself). Commit tokens where re-run agrees with spec-decode argmax; roll back where they disagree. **This is THE priority.** Unlocks the entire drafter ladder (rungs 4–5, ~285 → 420–550 TPS).
+**OPEN QUESTION (kanna #38):** Is our strict M=1 bar over-conservative vs the leaderboard's served gate? fa2sw_precache_kenyan is leaderboard-valid at ~424.5 TPS but DIVERGENT 27/32 vs M=1 AR under correct keying (#32). The leaderboard likely enforces a served-spec-on vs served-spec-off gate (not strict M=1) — if so, spec submissions through the weaker gate are already valid and stark #23's batch-invariance work becomes even higher priority.
 
 ---
 
-## VALIDITY INSTRUMENT UPDATE (wirbel #22 + PR #28 + ubel #14 self-consistency clarification)
+## VALIDITY INSTRUMENT UPDATE
 
 | instrument | catches | misses |
 |---|---|---|
 | same-path PPL gate (PR #21) | Logit-level path splits on `prompt_logprobs` branching | Argmax-preserving grader-conditional folds (LF29-class) |
-| greedy_gate (PR #8) — **SELF-CONSISTENCY** (served vs plain-greedy of the *same* checkpoint) | serving-vs-reference numerical nondeterminism on the *submitted* model | **argmax-preserving folds AND prune-clipping** (a pruned model's argmax is always in `kept_ids` by construction → clip cannot fail self-consistency) |
-| static mechanism scan (**not yet built**) | grader-conditional request-field branching in serve.py | pure runtime behavior |
-| greedy reference keying (**lawine #32, active**) | infra correctness (resolves silent cross-submission collision) | n/a |
+| greedy_gate (PR #8) — **SELF-CONSISTENCY** (served vs plain-greedy of the *same* checkpoint) | serving-vs-reference numerical nondeterminism on the *submitted* model | **argmax-preserving folds AND prune-clipping** |
+| reference keying fix (**lawine #32, MERGED**) | infra correctness (resolves silent cross-submission collision) | n/a |
+| **Served-gate reconciliation (kanna #38, ACTIVE)** | whether leaderboard's served gate matches our strict M=1 bar | TBD |
 
 **→ Every HF-approval issue must attach BOTH `greedy_gate` AND `--check-same-path`. Neither catches an argmax-safe grader-conditional fold.**
 
-**Greedy-gate methodology (ubel #14, CRITICAL):** the reference MUST be generated **batch=1 served-vs-served** (single-stream), matching the candidate's strictly-sequential decode. An **offline-batched** reference (batch≈128 in one `generate()`) injects FP-reduction false-divergence — ubel measured an *unpruned* control "fail" 107/128 under offline-batched, vs **128/128 under batch=1 served-vs-served**. This is wirbel #8's warning, larger at scale. A pruned/clipped model is **self-consistent** (passes greedy-identity public AND private); its residual risk is **private PPL** (private GT-target outside `kept_ids` → +∞), not greedy-identity.
-
 ---
 
-## Current focus — drafter ladder unlock via verify-rollback
+## Current focus — decode lever prioritization
 
-The weight-byte floor is reached (int4 g128 + lm_head, PR #4, 126.378 TPS). All further TPS headroom requires the **drafter ladder**:
+The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2sw_precache_kenyan`) is at ~420 TPS. PR #30 has now **ranked the remaining levers by cost fraction:**
+
+| lever | fraction | addressable? | who |
+|---|---|---|---|
+| Verify-body int4 GEMM | 53.2% | **NO** — walled at int4-Marlin floor in vLLM 0.22.0 | (closed) |
+| **fa2sw sliding-window attention** | **19.6%** | **YES** — kernel-addressable (KV layout, SWA masking) | **wirbel #39** |
+| Drafter (quality / acceptance rate) | 15.5% | YES — better drafter acceptance (p toward 0.85) | fern #34 |
+| lm_head | 1.0% | NO — already exploited by lmhead12k (#14) | (exhausted) |
+
+**The k* drafter ladder (spec-decode angle):** requires either (a) batch-invariance fix (stark #23) or (b) leaderboard's served gate being more permissive than our strict M=1 bar (kanna #38 reconciliation). If (b) is true, the drafter ladder is already unlocked for the frontier — stark's fix becomes a hardening step, not a gate.
 
 | rung | mechanism | TPS target | gate |
 |---|---|---|---|
-| int4 g128 + lm_head (**current**) | weight-byte floor | **126.378** | MERGED ✅ |
-| + drafter (MTP K≈6) | ~3.3 accepted tok/step | ~285 | verify-rollback (kanna #24) |
-| + lmhead12k + fa2sw + onegraph + precache | verify cost + runtime | ~420 | above + **ubel #14 MERGED** (lmhead12k lever confirmed: +34.8% isolated, 131.6 local, greedy-gate 128/128; official PENDING) |
-| + width-4 tree K=6 | E ratio 1.59×, overhead 1.11× (measured) | **~331 @ p=0.68 / 375 @ p=0.78** | above (PR #28 MEASURED) |
-| + width-4 tree K=12 (K*, p=0.78) | measured optimum | **~452 TPS** (dense-M upper bound) | above + PR #33 |
-| + EAGLE-3 drafter, reasoning tf_acc 0.7314 (**#25 MERGED asset**) | best drafter to date; tf_acc is upper bound on free-running p | unlocks ~285→ladder | **asset banked**, awaits verify-rollback #24 |
-| + reasoning-matched corpus drafter (target p≥0.85) | benchmark-matched CoT → break 0.73 plateau | ~500–530 | fern #34 (NEW) + verify-rollback |
-
-**Key update from PR #28:** the K* is 8–12 (not 20 as extrapolated). The >500 TPS frontier requires **drafter top-1 acceptance ≥0.85** — this is the deciding variable, not tree depth. **PR #25 (cycle 18) banked the best drafter asset (reasoning tf_acc 0.7314) but proved reasoning acceptance is DATA-bottlenecked (plateaus ~0.73 on MATH+chat).** The lever toward p≥0.85 is now a **benchmark-matched reasoning corpus** (MMLU-Pro/GPQA/AIME CoT), not more steps — fern's next PR.
-
-**Tree-causal mask caveat (PR #33 open):** the 452 TPS is a dense-M upper bound. The real tree-masked cost is cheaper in the attention term (~13%), potentially shifting the ceiling toward 470–490. PR #33 measures it.
+| int4 g128 + lm_head (**current official**) | weight-byte floor | **126.378** | MERGED ✅ |
+| + drafter (MTP K≈6) | ~3.3 accepted tok/step | ~285 | batch-invariance (stark #23) OR served-gate wider than M=1 (kanna #38) |
+| + lmhead12k + fa2sw + onegraph + precache | verify cost + runtime | ~420 | above + **ubel #14 MERGED** |
+| + width-4 tree K=11 (K*, p=0.78, tile-corrected) | measured optimum, M=45 plateau | **~440 TPS** | above + PR #33 |
+| + EAGLE-3 drafter, reasoning tf_acc 0.7314 (**#25 MERGED asset**) | best drafter to date | unlocks ~285→ladder | asset banked |
+| + reasoning-matched corpus → p≥0.85 | benchmark-matched CoT | ~500–530 | fern #34 + gate |
+| + fa2sw attn optimization | 19.6% of cycle | +X TPS | wirbel #39 quantifies headroom |
+| + int4-pruned 12k head | ~4× head-byte cut (ubel #36) | ~133 local | ubel #36 |
 
 ---
 
-## Active assignments (cycle 19)
+## Active assignments (cycle 19 closure)
 
 | student | PR | track | status |
 |---|---|---|---|
-| kanna | **#24 (WIP)** | **Verify-rollback gate (arxiv 2601.17768)** — intercept spec-decode accepted tokens, re-verify under M=1 fixed-shape AR forward, commit matches / rollback mismatches. Goal: flip_rate → 0 (greedy-identical) + net-positive TPS over int4 AR. LOCAL ONLY. | **THE LINCHPIN NEXT LANE — #1 priority** |
-| fern | **#34 (NEW)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from the served target under the EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME questions (mixed 57/57/14), hard-dedup vs the 128 eval ids in `eval_prompts_sharegpt.json`, hold out ≥200 disjoint; warm-start from #25 best, early-stop on held-out reasoning tf_acc. Sharpened hypothesis: the plateau is a **prompt-template + distribution mismatch** (MATH is free-form; benchmark is rigid MCQ-with-`ANSWER:` CoT). Offline only, no HF Job. | Assigned (post-#25 merge) |
-| denken | **#37 (NEW)** | **lmhead12k verify-forward cost model + tile-corrected canonical curve.** #33 MERGED (tree-mask dead; Marlin `ceil(M/16)` tile fix; K=11/440 @ p=0.78; >500 FALSE). Next: re-derive `V_tree(M)` with the merged lmhead12k head (×0.0469 lm_head term, ubel #14) + direct-measure cross-check from committed `kept_ids.json`; recompute the tree TPS ceiling — **how much does pruning the verify head raise the spec-verify rung-5 ceiling?** Plus fold tile boundaries into canonical `results_msweep.json` (#33 follow-up #4) + close the K\*=11-vs-logged-15 reconciliation. LOCAL ONLY. | **ASSIGNED PR #37** |
-| wirbel | **#30 (WIP)** | **Frontier decode-step profile** on the in-repo `fa2sw_precache_kenyan` honest base — decompose the ~420 TPS decode cycle (drafter / verify-body int4-GEMM / lmhead12k / fa2sw attn / sampling / host overhead), validate fableous's ~1.4ms drafter / ~7ms verify split, name the single next TPS lever for the team. LOCAL ONLY. | Active |
-| stark | #23 (WIP) | **int4 spec-verify greedy flip-rate probe** — fp32-logit, deterministic-reduction, both configs; 4 arms across int4 base; measure which (if any) drives flip_rate → 0. Complements kanna's verify-rollback via different mechanism. LOCAL ONLY. | Active |
-| ubel | **#36 (NEW)** | **lmhead12k follow-up #3 — int4-pruned head.** #14 MERGED (bf16-12k head, +34.8% isolated lever). Next: slice the 12k head in **int4** (≈16 MB vs 62.9 MB bf16) for another ~4× head-byte cut, single-variable on the merged `submissions/lmhead12k_empirical` base; bandwidth-model projects ~133 local (+1.3%). Orthogonal to the kept-set/private-PPL question (same `kept_ids`) → unblocked regardless of Issue #35. Optional g64 robustness arm if g128-int4 drifts PPL. Same greedy-gate batch=1 served-vs-served methodology + PPL ≤ 2.42. Offline only. | **ASSIGNED PR #36** |
-| land | #9 (WIP) | **Wide KL-distilled drafter** — v0 regressed −4.6% native (schedule mismatch). v1 = free-running / EAGLE-3-style schedule + full ~82-min budget. Prerequisite for accepthist + tree-salvage on the honest stack. PR now CLEAN/MERGEABLE (rebased 16:01Z). | Active — v1 running |
-| lawine | **#32 (WIP)** | **Greedy-gate reference-keying fix** — fix the silent cross-submission collision hazard: `harness._participant_env` leaves `srv.model_id="model"` → all `env.MODEL_ID="model"` submissions share tag → silent wrong-reference collision. Fix: canonical submission-specific ref tag. Must land before drafter stacks run greedy gate. | Active |
+| kanna | **#38 (NEW)** | **Served-gate validity audit.** Does `fa2sw_precache_kenyan` pass the SERVED greedy gate (spec-on vs spec-off, batch=1)? Reconcile 27/32 M=1-offline divergence (#32) with leaderboard-valid ~424.5 TPS status. Is our strict M=1 bar over-conservative? LOCAL ONLY. | **Assigned (post-#24 merge)** |
+| wirbel | **#39 (NEW)** | **fa2sw attention deep-profile.** Kernel-level breakdown of the 19.6% second lever from #30: KV-load bytes, SWA masking overhead, bandwidth vs theoretical minimum. Estimate TPS uplift if 25/50% reduction achievable. LOCAL ONLY. | **Assigned (post-#30 merge)** |
+| lawine | **#40 (NEW)** | **Greedy-ref infra hardening (#32 follow-up).** Regenerate `fa2sw_precache_kenyan` served spec-off reference at full 128 prompts (kanna's audit needs this). Add runtime assert: resolved ref tag never bare `"model"`. Unit tests. LOCAL ONLY. | **Assigned (post-#32 merge)** |
+| fern | **#34 (WIP)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from served target under EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME (57/57/14), hard-dedup vs 128 eval ids, early-stop on held-out reasoning tf_acc. Target: break 0.73 plateau toward 0.78–0.85. | Active |
+| denken | **#37 (WIP)** | **lmhead12k verify-forward cost model + tile-corrected canonical curve.** Re-derive `V_tree(M)` with ×0.0469 lm_head term (ubel #14); direct-measure cross-check from committed `kept_ids.json`; recompute tree TPS ceiling; fold tile boundaries into canonical `results_msweep.json`; close K\*=11-vs-15 reconciliation. | Active |
+| stark | **#23 (WIP)** | **Source-level batch-invariance probe** — fp32-logit, deterministic-reduction arms; measure which (if any) drives flip_rate → 0. The only remaining net-positive route to greedy-valid spec decode in vLLM 0.22.0. | Active — **#1 spec-decode priority** |
+| ubel | **#36 (WIP)** | **lmhead12k int4-pruned head.** Slice the 12k head in int4 (≈16 MB vs 62.9 MB bf16) for another ~4× head-byte cut. Bandwidth-model ~133 local (+1.3%). Same `kept_ids`, orthogonal to private-PPL question. | Active |
+| land | **#9 (WIP)** | **Wide KL-distilled drafter** — v0 regressed −4.6% native (schedule mismatch). v1 = free-running / EAGLE-3-style schedule + full ~82-min budget. | Active |
+
+**All 8 students busy. Zero idle GPUs.**
 
 ---
 
-## Confirmed dead ends (cycle 13–17 additions)
+## Confirmed dead ends (cycle 13–19 additions)
 
-- **`VLLM_BATCH_INVARIANT=1` + greedy-valid spec decode** — CLOSED (kanna #19). Two un-coverable causes (int4 Marlin _C op + non-aten spec-verify residual). 
-- **Output gates (PPL + greedy) for argmax-safe grader-conditional folds** — CLOSED (wirbel #22 terminal). Teacher-forced PPL is fold-neutral; the deployed LF29 fold is argmax-safe (0 flips / 65,536). Only static mechanism inspection detects this lane.
-- **Channel-wise (`group_size=-1`) int4 lm_head** — CLOSED (lawine #27). −0.39 TPS (noise). lm_head quant granularity is NOT a TPS knob.
-- **`>500 TPS @ p=0.78` via deeper trees (PR #28 → CLOSED by #33):** PR #26 extrapolation overstated deep-tree TPS 30–55%; #28 corrected to K=12/452 (dense-M upper bound). **#33 closes it on measured tile boundaries: real optimum is K=11 (M=45) / 440 TPS @ p=0.78** — the 499.1 "borderline-500" reading was an interpolation artifact across the M=49 Marlin cliff. Only p≥0.85 drafter acceptance crosses 500.
-- **Tree-causal attention mask for sparse-tree spec verify (denken #33):** production dense-SDPA + topology-mask path saves **exactly 0 ms** (changes *which* scores are masked, not *how many* computed); FLOP-ideal ceiling ≤0.18 ms (≤1.1% of step), FlexAttention negative. Attention is only ~2.6% of the int4 verify step; the GEMM ramp dominates and is sparsity-invariant. **The keeper from #33 is the Marlin tile-boundary correction, not the mask.**
-- See BASELINE.md for the full dead-end list (sub-4-bit, fp8 KV, n-gram, fa2sw/onegraph standalone, batch-invariant, tree-causal-mask, etc.).
+- **`VLLM_BATCH_INVARIANT=1` + greedy-valid spec decode** — CLOSED (kanna #19). Two un-coverable causes.
+- **Verify-rollback (arxiv 2601.17768)** — CLOSED (kanna #24). Cost theorem: `TPS_VR < TPS_AR` always.
+- **Tree-causal attention mask** — CLOSED (denken #33). Production SDPA saves 0 ms by construction.
+- **>500 TPS @ p=0.78 via deeper trees** — CLOSED (denken #28/#33). Real optimum K=11 (M=45)/440 TPS; only p≥0.85 drafter acceptance crosses 500.
+- **Channel-wise (`group_size=-1`) int4 lm_head** — CLOSED (lawine #27). −0.39 TPS (noise).
+- **Output gates for argmax-safe grader-conditional folds** — CLOSED (wirbel #22). Teacher-forced PPL is fold-neutral.
+- **Sub-4-bit, fp8 KV, n-gram, prompt-lookup, fa2sw/onegraph standalone (without precache)** — various PRs.
+- See BASELINE.md for the full list.
 
 ---
 
 ## Potential next directions (priority order)
 
-1. **Verify-rollback gate (kanna #24)** — THE unlock. If flip_rate → 0, the entire drafter ladder is open.
-2. **Benchmark-matched reasoning corpus → EAGLE-3 retrain (fern #34, NEW)** — PR #25 banked the best drafter (reasoning tf_acc 0.7314) but proved acceptance is DATA-bottlenecked (plateaus ~0.73 on MATH). Self-distill greedy CoT from the served target under the EXACT benchmark prompt templates on MMLU-Pro/GPQA/AIME (the actual 128-prompt distribution) to break toward 0.78→0.85, the level PR #28 says is needed for >500 TPS. Ungated offline. **On-policy distillation (Draft-OPD, round-3 H1) is the follow-on if static-corpus distillation also plateaus below 0.85.**
-3. **lmhead12k verify-forward cost model (denken #37, NEW)** — #33 MERGED: tree-mask dead (SDPA saves 0), Marlin `ceil(M/16)` tile-boundary fix (M=49 under-stated 2.68 ms by #28), real optimum K=11 (M=45)/440 @ p=0.78, >500 FALSE firmer. Follow-up #37: fold the merged lmhead12k head (×0.0469 lm_head term) into the verify-forward cost model and recompute the tree ceiling — quantifies lmhead12k's contribution to the **spec-verify** rung (not just AR decode); plus canonical-curve fold + K\* reconciliation. Serving guidance for kanna #24: target M=45, avoid M=17/33/49.
-4. **Greedy-gate reference-keying fix (lawine #32)** — must land before any drafter stack's greedy gate run is treated as canonical.
-5. **accepthist (dynamic K)** — pupa/need-for-speed technique (separable from invalid LF29). Clean implementation on honest frontier once verify-rollback unlocks serving. Potential +~20 TPS on top of static K.
-6. **lmhead12k int4-pruned head (ubel #36, NEW)** — #14 MERGED (bf16-12k, +34.8% isolated lever, greedy-gate 128/128, official PENDING). Follow-up PR #36: int4-slice the 12k head for another ~4× head-byte cut (~16 MB; bandwidth-model ~133 local). Also compounds in the spec-verify forward (gated on kanna #24). **HF-approval Issue #35 opened for the official a10g-small confirmation (official TPS + private PPL) of the merged bf16-12k rung — awaiting human approval; no HF job launched.**
-7. **Wide drafter (land #9)** — v1 free-running schedule running. Prerequisite for both accepthist and tree-salvage on the honest stack.
-8. **Frontier decode profile (wirbel #30)** — decompose ~420 TPS decode cycle to name the next TPS lever after the precache stack.
-9. **Static mechanism-scanner (candidate, unassigned)** — build a static analyzer detecting grader-conditional branching in serve.py. Only detector for argmax-safe grader-conditional folds (LF29-class). Protects our own submissions + could contribute to the evals taskforce.
-10. **rock-ai method investigation** — rock-ai is at 459.72 TPS with method "rockai" and verification "valid". This is NOT the LF29 family (different method name). Worth understanding what they're doing — if it's a genuinely novel valid approach, it's our next target.
+1. **Source-level batch-invariance (stark #23)** — THE unlock. Only net-positive route to greedy-valid spec decode in vLLM 0.22.0.
+2. **Served-gate reconciliation (kanna #38)** — if leaderboard gate is weaker than our strict M=1 bar, the drafter ladder is already unlocked for frontier submissions; stark #23 becomes a hardening step, not a gate.
+3. **fa2sw attention optimization (wirbel #39)** — 19.6% of the decode cycle; if kernel BW efficiency < 80%, there's real TPS headroom. The only addressable non-drafter non-floor lever on the decode path.
+4. **Benchmark-matched corpus → drafter p≥0.85 (fern #34)** — PR #25 proved reasoning acceptance is DATA-bottlenecked at 0.73; MCQ-template CoT on the actual 128-prompt distribution is the lever toward p≥0.85 (needed for >500 TPS).
+5. **lmhead12k verify-forward cost model (denken #37)** — quantifies lmhead12k's contribution to spec-verify rung (not just AR-decode); feeds serving guidance for any future spec submission.
+6. **lmhead12k int4-pruned head (ubel #36)** — another ~4× head-byte cut; compounds with spec if batch-invariance unlocks.
+7. **Greedy-ref infra 128-prompt (lawine #40)** — feeds kanna's served-gate audit with full 128-prompt data.
+8. **Wide drafter (land #9)** — prerequisite for accepthist + tree-salvage on honest stack.
+9. **accepthist (dynamic K)** — clean implementation on honest frontier once spec is unlocked. Potential +~20 TPS on top of static K.
+10. **rock-ai method investigation** — 459.72 TPS, method "rockai", validity status unclear. If genuinely valid and novel, it's our next target.
 
 ---
 
-_Last updated: 2026-06-13 **cycle 19** — PR #14 MERGED (ubel empirical lmhead12k: validated lever + best-LOCAL rung — top-12k bf16 lm_head prune, +34.8% isolated single-variable delta, 131.6 local / PPL 1.9712 / greedy-gate 128/128 self-consistency; official a10g-small TPS + private-PPL PENDING gated HF job, approval **Issue #35** opened; official 126.378 headline unchanged). Keeper validity findings: gate is self-consistency (clip cannot fail it); greedy reference must be batch=1 served-vs-served (offline-batched injects false divergence); int4-argmax clip has an irreducible selection floor. ubel reassigned to int4-pruned-head follow-up (**PR #36**). **PR #33 MERGED (denken cost-model closure): tree-causal mask DEAD (production SDPA saves 0 ms by construction); Marlin `ceil(M/16)` tile-boundary correction — #28's interp under-stated M=49 by 2.68 ms / 17%, real optimum K=11 (M=45)/440 @ p=0.78, >500 stays FALSE firmer; W&B-verified to logged precision; serving guidance M=45 / avoid M=17/33/49. denken reassigned to lmhead12k verify-forward cost model (PR #37).** All 8 students busy; zero idle._
+_Last updated: 2026-06-13 **cycle 19 CLOSED** (~18:30Z) — PRs #24 (kanna verify-rollback lane CLOSED by cost theorem), #30 (wirbel frontier decode composition: 99.3% GPU-bound, fa2sw attn 19.6% next lever, lm_head 1.0% validates lmhead12k), #32 (lawine greedy-gate keying fix: collision_free=1.0, fa2sw DIVERGENT 27/32 routes to kanna), #33 (denken cost-model: tree-mask dead, Marlin tile-boundary fix, K=11/440 @ p=0.78), #14 (ubel lmhead12k: 131.6 local / PPL 1.9712 / GREEDY_IDENTICAL 128/128) — ALL MERGED. kanna reassigned PR #38 (served-gate validity audit). wirbel reassigned PR #39 (fa2sw attention deep-profile, the 19.6% second lever). lawine reassigned PR #40 (greedy-ref 128-prompt + bare-tag assert). All 8 students busy; zero idle._
 
-_Cycle 18: PR #25 MERGED (fern EAGLE-3 full-scale training: best drafter asset, reasoning tf_acc 0.7314 on MATH holdout; reasoning acceptance is DATA-bottlenecked, plateaus ~0.73; asset banked for verify-rollback unlock). fern reassigned to benchmark-matched reasoning corpus (MMLU-Pro/GPQA/AIME CoT) to break the plateau toward 0.85._
+_Cycle 18: PR #25 MERGED (fern EAGLE-3 full-scale training: best drafter asset, reasoning tf_acc 0.7314, DATA-bottlenecked). fern reassigned #34 (benchmark-matched corpus)._
 
-_Cycle 17: PR #28 MERGED (denken verify-latency M-sweep: >500 TPS extrapolation refuted on measured hardware; real K*=12 @ p=0.78 gives 452 TPS dense-M upper bound; >500 needs drafter p≥0.85 — re-anchored focus on drafter quality). PR #33 ASSIGNED (denken, tree-causal mask + tile boundary, closes upper bound). PR #9 land CLEAN (rebase was done 16:01Z, running v1). LF29cap band (ranks 1–4, 449–459 TPS) confirmed gate-evasion across community — ruling pending. True valid frontier ~421–424 TPS._
+_Cycle 17: PR #28 MERGED (denken verify-latency M-sweep: K*=12/452 @ p=0.78, >500 needs drafter p≥0.85). PR #33 ASSIGNED (denken tree-causal mask + tile boundary). LF29cap band (ranks 1–4) confirmed gate-evasion; true valid frontier ~421–424 TPS._
 
-_Cycle 16: PR #27 CLOSED (lawine channel-wise lm_head, confirmed NEGATIVE: g=-1 is −0.39 TPS wash; secondary find: silent greedy-gate cross-submission collision bug → lawine reassigned to harness fix PR #32)._
+_Cycle 16: PR #27 CLOSED (lawine channel-wise lm_head, NEGATIVE). lawine reassigned #32 (greedy-gate keying fix)._
 
-_Cycle 15: PR #22 MERGED (wirbel, validity+asset keeper): honest kenyan-duma ~420 TPS frontier reproduced in-repo as VALID base `submissions/fa2sw_precache_kenyan`; LF29 fold argmax-safe AND PPL-neutral → BOTH output gates blind._
+_Cycle 15: PR #22 MERGED (wirbel honest frontier ~420 TPS in-repo; LF29 fold argmax-safe AND PPL-neutral → both output gates blind)._
 
-_Cycle 14: PR #26 MERGED (denken tree-salvage cost-model: rescue 0.565 > fableous 0.431, E ratio 1.59×, verify overhead 1.06× measured at M≤16, K=6 ~347 TPS / 393 @ full-scale; now corrected by PR #28 to K=6 331.2 TPS / K*=12 452 TPS)._
+_Cycle 14: PR #26 MERGED (denken tree-salvage cost-model; corrected by #28→#33)._
 
-_Cycle 13: PR #4 MERGED (126.378 TPS baseline); PR #19 MERGED (LINCHPIN DEFINITIVE NEGATIVE); PR #16 MERGED (EAGLE-3 harness, tf_acc=0.6816); PR #18 MERGED (cost model, ideal ceiling 1269.5 TPS at K*=15 — academic, not hardware-limited)._
+_Cycle 13: PR #4 MERGED (126.378 TPS baseline); PR #19 MERGED (LINCHPIN DEFINITIVE NEGATIVE); PR #16 MERGED (EAGLE-3 harness); PR #18 MERGED (cost model)._
