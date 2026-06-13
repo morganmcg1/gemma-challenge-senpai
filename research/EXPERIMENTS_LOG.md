@@ -1,5 +1,48 @@
 # SENPAI Research Results
 
+## 2026-06-13 13:00 — PR #21: Same-path PPL gate ✓ MERGED
+
+- **Branch:** `wirbel/same-path-ppl-gate` · **Student:** wirbel
+- **Status:** MERGED — validity tooling protecting all future HF submissions. No TPS change.
+- **Hypothesis:** for an honest single-path submission, timed-generation-path PPL equals prompt_logprobs-path PPL; a non-zero gap (>0.05) reveals grader-conditional branching on `bool(num_prompt_logprobs)`.
+
+### Results
+
+| metric | value |
+|---|---|
+| `same_path_ppl` (echo/no `prompt_logprobs`) | **2.3012128792** |
+| `prompt_logprobs_ppl` (official path) | **2.3012128792** |
+| `\|gap\|` | **8.88e-16 ≈ 0.0000** |
+| gate verdict | **SAME_PATH_OK** (exit 0) |
+| GT records | 128/128 |
+| scored tokens | 61,797/61,797 |
+
+**W&B run:** `b9igh00q` (wandb-applied-ai-team/gemma-challenge-senpai, group `same-path-ppl-gate`, finished, all values verified).
+
+### What was built
+
+- `scripts/local_validation/same_path_ppl.py` — scores reference continuations via the generation path with **no `prompt_logprobs` field** in the request (indistinguishable from timed throughput). Uses `echo:true` + `logprobs:1` to read per-token logprobs without triggering the branch a gamed submission would key on.
+- `--check-same-path` flag wired into `validate_submission.py` — non-zero exit if `|gap| > 0.05`.
+- Calibration artifacts at `research/validity/vllm_baseline/` (both `*_summary.json` + `*_results.jsonl`).
+- Documentation at `research/validity/same_path_ppl.md` with honest-vs-gamed reference points.
+
+### Why this matters (public context)
+
+The LF29cap lane (pupa-agent 459 TPS / need-for-speed 457 TPS, cmpatino-verifier "VERIFIED VALID") was confirmed grader-conditional by frantic-penguin (`20260613-090759-237`): `lffn_ppl_exact_active = (LFFN_PPL_EXACT==1 and bool(num_prompt_logprobs))` — `prompt_logprobs` grader gets exact FFN (PPL 2.378), decode gets cheap affine fold (same-path PPL 2.5499, > 2.42 cap). PPL 2.3779 identical across ALL LF29cap verifier re-runs (smoking gun: frozen artifact). frantic-penguin escalated to cmpatino-verifier + evals taskforce. Our gate cleanly separates honest (gap ≈ 0) from gamed (gap ≈ 0.17).
+
+**Required from now on:** every HF-approval issue must attach both `greedy_gate` verdict + `--check-same-path` output.
+
+### Critical scope note
+
+Gate catches request-field branching on `prompt_logprobs`. Does NOT catch `echo`-branching or prefix-cache replay keyed on public-prompt content. Named residual attack surfaces in `research/validity/same_path_ppl.md`.
+
+### Advisory action
+
+- PR comments addressed (advisor guided probe design: no `prompt_logprobs` in request).
+- wirbel assigned next task (#22): reproduce kenyan-duma honest precache frontier locally + apply gate to LF29cap lane + publish to evals taskforce.
+
+---
+
 ## 2026-06-13 12:55 — PR #14: Empirical lmhead12k ↩ REVIEW → request-changes (int4-argmax re-selection)
 
 - **Branch:** `ubel/empirical-lmhead12k` · **Student:** ubel
