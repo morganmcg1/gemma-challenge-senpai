@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import sys
 
@@ -13,9 +14,76 @@ from scripts.common import ROOT, agent_id, hf, hf_bucket_uri, load_dotenv, run, 
 from scripts.wandb_logging import finish_wandb, init_wandb_run, log_event, log_file_artifact
 
 
+REMOTE_SUBMISSION_DIR = Path("/submission")
+
+
+def _is_relative_to(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+    except ValueError:
+        return False
+    return True
+
+
+def _model_reference_errors(label: str, value: object) -> list[str]:
+    if value is None:
+        return []
+    if not isinstance(value, str) or not value.strip():
+        return [f"{label} must be a non-empty string when set."]
+
+    model_id = value.strip()
+    model_path = Path(model_id)
+    if model_path.is_absolute() and not _is_relative_to(model_path, REMOTE_SUBMISSION_DIR):
+        return [
+            (
+                f"{label} points at local absolute path {model_id!r}. "
+                "HF Jobs upload only the submission directory; use a Hub model id, "
+                "or package the artifact inside the submission and reference it with a relative path."
+            )
+        ]
+    if not model_path.is_absolute() and ".." in model_path.parts:
+        return [
+            (
+                f"{label} escapes the submission directory with {model_id!r}. "
+                "Package model artifacts inside the submission directory or publish them as a Hub model id."
+            )
+        ]
+    return []
+
+
+def validate_submission_package(path: Path) -> dict:
+    manifest_path = path / "manifest.json"
+    serve_path = path / "serve.py"
+    errors = []
+
+    if not manifest_path.exists():
+        errors.append(f"missing manifest.json: {manifest_path}")
+    if not serve_path.exists():
+        errors.append(f"missing serve.py: {serve_path}")
+    if errors:
+        raise SystemExit("invalid submission package:\n- " + "\n- ".join(errors))
+
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"invalid manifest JSON: {manifest_path}: {exc}") from exc
+    if not isinstance(manifest, dict):
+        raise SystemExit(f"manifest must be a JSON object: {manifest_path}")
+
+    errors.extend(_model_reference_errors("manifest.model_id", manifest.get("model_id")))
+    env = manifest.get("env") or {}
+    if not isinstance(env, dict):
+        errors.append("manifest.env must be an object when set.")
+    else:
+        errors.extend(_model_reference_errors("manifest.env.MODEL_ID", env.get("MODEL_ID")))
+
+    if errors:
+        raise SystemExit("submission is not remote-loadable:\n- " + "\n- ".join(errors))
+    return manifest
+
+
 def upload_submission(path: Path, *, agent: str, name: str, delete: bool = True) -> str:
-    if not (path / "manifest.json").exists() or not (path / "serve.py").exists():
-        raise SystemExit(f"submission must contain manifest.json and serve.py: {path}")
+    validate_submission_package(path)
     prefix = submission_prefix(agent, name)
     dest = hf_bucket_uri(agent, prefix)
     command = hf("buckets", "sync", str(path), dest)

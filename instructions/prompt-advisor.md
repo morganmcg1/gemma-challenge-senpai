@@ -60,6 +60,20 @@ Prefer controlled deltas after reproducing a known strong baseline. Do not burn
 HF Jobs quota on vague exploration that has not passed syntax and startup
 checks.
 
+Before approving an HF `a10g-small` launch, require a remote-loadability
+preflight: the uploaded submission must contain `manifest.json`, the serve
+entrypoint, and every referenced wheel, patch, config, kernel, plugin, or model
+artifact. `manifest.model_id` / `MODEL_ID` must be either a Hub model id or a
+path inside the uploaded submission. A local A10G path such as `/workspace/...`
+is not launchable on the HF runner and should block approval until the artifact
+is packaged or hosted.
+
+For locally validated checkpoints, prefer preserving the exact artifact:
+publish the unified checkpoint to a private Hub model repo, repoint the
+submission, smoke-test load + greedy identity, then launch exactly once. Avoid
+changing the checkpoint loading mechanics as a shortcut unless the student
+reruns the full local validity gates.
+
 ## Training Requests
 
 Students are normally limited to one GPU, so training can become the bottleneck.
