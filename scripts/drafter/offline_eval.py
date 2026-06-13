@@ -90,6 +90,13 @@ def main():
     ap.add_argument("--max-prompt-tokens", type=int, default=768)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--out", default="")
+    ap.add_argument("--wandb-name", default="")
+    ap.add_argument("--wandb-group", default="")
+    ap.add_argument("--wandb-run-id", default="",
+                    help="resume this W&B run and log the heldout eval into it")
+    ap.add_argument("--set-primary", action="store_true",
+                    help="also write the advisor primary keys heldout_native/tf_accept_per_step "
+                         "(pass for the candidate drafter only)")
     args = ap.parse_args()
 
     from transformers import AutoTokenizer
@@ -192,6 +199,40 @@ def main():
         with open(args.out, "w") as fh:
             json.dump(summary, fh, indent=2)
         print(f"[saved] {args.out}", flush=True)
+
+    # Log the heldout eval to W&B so the verdict is verifiable from the run, not
+    # just the committed JSON. Metrics are namespaced by --label so stock and the
+    # candidate can co-exist in the same (resumed) training run.
+    wb_on = (bool(args.wandb_name) or bool(args.wandb_run_id)) and \
+        os.environ.get("WANDB_MODE", "online") != "disabled"
+    if wb_on:
+        import wandb
+        init_kw = dict(name=args.wandb_name or f"{args.label}-eval",
+                       group=args.wandb_group or None)
+        if args.wandb_run_id:
+            init_kw.update(id=args.wandb_run_id, resume="allow")
+        run = wandb.init(**init_kw)
+        lab = args.label
+        s = run.summary
+        s[f"heldout/{lab}/native_accept_per_step"] = summary["overall_native_accept_per_step"]
+        s[f"heldout/{lab}/tf_accept_per_step"] = summary["overall_tf_accept_per_step"]
+        s[f"heldout/{lab}/greedy_identity"] = summary["overall_greedy_identity"]
+        for dist, d in results.items():
+            s[f"heldout/{lab}/{dist}/native_accept_per_step"] = d["native_accept_per_step"]
+            s[f"heldout/{lab}/{dist}/tf_accept_per_step"] = d["tf_accept_per_step"]
+        if args.set_primary:
+            s["heldout_native_accept_per_step"] = summary["overall_native_accept_per_step"]
+            s["heldout_tf_accept_per_step"] = summary["overall_tf_accept_per_step"]
+            # exact key the advisor named (== tf metric measured at this K); keeps the
+            # SENPAI-RESULT schema (heldout_accepted_tok_per_step_tf_K7) verifiable from the run.
+            s[f"heldout_accepted_tok_per_step_tf_K{args.K}"] = summary["overall_tf_accept_per_step"]
+        tbl = wandb.Table(columns=["label", "dist", "depth", "chain_p"])
+        for dist, d in results.items():
+            for depth, p in enumerate(d["depth_chain_p"], start=1):
+                tbl.add_data(lab, dist, depth, p)
+        run.log({f"heldout_curve_{lab}": tbl})
+        run.finish()
+        print(f"[wandb] logged heldout/{lab}/* (run {run.id})", flush=True)
     print("EVAL_OK", flush=True)
 
 
