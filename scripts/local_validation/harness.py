@@ -123,6 +123,26 @@ def reference_identity(model_id: str, submission_dir: Path | None) -> str:
     return f"{Path(submission_dir).resolve()}::{model_id}"
 
 
+def assert_submission_reference_tag(ref_tag: str) -> str:
+    """Fail loudly if a SUBMISSION's resolved reference tag collapses to a bare model id.
+
+    PR #32 anchored a submission's greedy reference to ``<submission_dir>::<model_id>``
+    precisely so several int4 submissions that all set ``env.MODEL_ID="model"`` (a
+    relative literal) could not silently alias onto one ``research/greedy_reference/model/``
+    reference — a confident *wrong* GREEDY_IDENTICAL/DIVERGENT. This guard pins that
+    fix at runtime: a submission tag must carry the ``::`` directory anchor and never be
+    the bare literal ``"model"``. It catches a regression to bare-``model_id`` keying or
+    an empty ``submission_dir`` collapsing the anchor. Baseline references
+    (``submission_dir is None``, keyed purely by model id via [[reference_identity]]) are
+    intentionally bare and must NOT be passed through this guard.
+    """
+    assert ref_tag != "model" and "::" in ref_tag, (
+        f"Reference tag {ref_tag!r} looks like a bare model_id — "
+        "collision risk; check submission_dir and model_id are both non-empty"
+    )
+    return ref_tag
+
+
 def _participant_env(
     manifest: dict[str, Any], submission_dir: Path, server_venv: Path, port: int
 ) -> dict[str, str]:
@@ -202,6 +222,10 @@ class LocalServer:
         # submission-anchored identity for reference lookup; the served path is
         # untouched.
         self.reference_model_id = reference_identity(self.model_id, self.submission_dir)
+        # A LocalServer always serves a concrete submission, so its reference tag
+        # must be the collision-free <submission_dir>::<model_id> form — never the
+        # bare 'model' literal that pre-#32 keying produced (see [[reference_identity]]).
+        assert_submission_reference_tag(self.reference_model_id)
 
     def _wait_ready(self) -> None:
         deadline = time.time() + self.startup_timeout_s

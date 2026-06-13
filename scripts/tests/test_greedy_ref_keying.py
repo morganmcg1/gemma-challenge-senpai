@@ -169,6 +169,54 @@ def test_bare_model_id_preserves_baseline_tag():
 
 
 # --------------------------------------------------------------------------- #
+# runtime guard against bare-'model' submission tags (PR #40)
+# --------------------------------------------------------------------------- #
+def _raises_assertion(fn, *args) -> bool:
+    """True iff calling fn(*args) raises AssertionError (pytest-free)."""
+    try:
+        fn(*args)
+    except AssertionError:
+        return True
+    return False
+
+
+def test_bare_model_tag_assertion_guards_submission_refs():
+    """harness.assert_submission_reference_tag must REJECT the bare 'model'
+    collision tag (what an empty/None submission_dir collapses to) and any tag
+    missing the '::' anchor, while ACCEPTing a real <submission_dir>::<model_id>
+    tag. This pins the PR #40 runtime guard that defends the #32 keying fix
+    against a silent regression to bare-model_id keying."""
+    # An empty/None submission_dir collapses reference_identity to the bare model
+    # id — exactly the pre-#32 collision key the guard must reject.
+    bare = harness.reference_identity("model", None)
+    assert bare == "model"
+    assert _raises_assertion(harness.assert_submission_reference_tag, bare), (
+        "guard did not reject the bare 'model' collision tag"
+    )
+    # A plausible hub id with no '::' anchor must also be rejected.
+    assert _raises_assertion(harness.assert_submission_reference_tag, "google/gemma-4-E4B-it"), (
+        "guard did not reject an unanchored model-id tag"
+    )
+    # A real submission-anchored tag passes and round-trips unchanged.
+    with tempfile.TemporaryDirectory() as tmp:
+        sub = _write_submission(Path(tmp) / "sub", env_model_id="model", bundle=True)
+        good = gen.reference_key_for_submission(sub)
+        assert "::" in good and good != "model"
+        assert harness.assert_submission_reference_tag(good) == good
+
+
+def test_localserver_init_runs_bare_tag_guard():
+    """Constructing LocalServer for a real submission resolves a '::'-anchored
+    reference tag and passes the in-__init__ guard (no GPU; __init__ does no IO
+    beyond reading the manifest). Guards against the guard ever rejecting a
+    legitimate submission."""
+    with tempfile.TemporaryDirectory() as tmp:
+        sub = _write_submission(Path(tmp) / "sub", env_model_id="model", bundle=True)
+        srv = harness.LocalServer(sub, server_python=Path("/usr/bin/python3"), port=8000)
+        assert "::" in srv.reference_model_id and srv.reference_model_id != "model"
+
+
+# --------------------------------------------------------------------------- #
 # no-pytest fallback runner
 # --------------------------------------------------------------------------- #
 def _main() -> int:
