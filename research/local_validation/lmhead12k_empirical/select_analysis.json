@@ -2,23 +2,24 @@
   "K": 12288,
   "full_vocab": 262144,
   "hidden": 2560,
-  "tight_kept_size": 8811,
-  "tight_bandwidth_reduction_x": 29.752,
-  "tight_note": "public-tailored CEILING (must-keep only); overfit to public GT",
-  "general_kept_size": 12288,
-  "general_bandwidth_reduction_x": 21.333,
-  "general_note": "frontier-faithful general cut (must-keep + broad-corpus fill)",
+  "kept_size": 12288,
+  "bandwidth_reduction_x": 21.333,
+  "frozen_source_of_truth": true,
+  "methodology": "hard-include GT-target + tokenizer specials; fill by broad-corpus (MMLU-Pro) frequency. No decode/context hard-include -- those are public-prompt-specific.",
+  "tight_ceiling_size": 8811,
+  "tight_ceiling_bandwidth_reduction_x": 29.752,
+  "tight_ceiling_note": "must-keep \u222a public-128 decode \u222a GT-context; public-overfit, NOT shipped",
   "decode_file": "/workspace/senpai/target/research/local_validation/vllm_baseline_128/decode_outputs.jsonl",
   "decode_records": 128,
   "decode_token_total": 65536,
   "gt_records": 128,
   "n_gt_target_unique": 5892,
-  "n_gt_all_unique": 6849,
+  "n_gt_context_unique": 3442,
   "n_decode_unique": 5971,
   "n_special": 263,
   "special_source": "tokenizer.all_special_ids+added+reserved",
-  "n_must_keep": 8811,
-  "n_freq_fill": 3477,
+  "n_hard_include": 6146,
+  "n_freq_fill": 6142,
   "broad_corpus": {
     "corpus": "TIGER-Lab/MMLU-Pro (test+validation)",
     "n_examples": 12102,
@@ -28,17 +29,13 @@
   },
   "broad_unique": 41012,
   "finite_ppl_guaranteed": true,
-  "greedy_identity_captured_prompts": true,
-  "decode_new_tokens_beyond_gt": 1716,
-  "rare_token_divergence_vs_shipped": {
-    "tokens_outside": 0,
+  "gt_context_outside_kept": 538,
+  "decode_outside_kept": {
+    "unique_outside": 1068,
+    "tokens_outside": 1448,
     "tokens_total": 65536,
-    "rate": 0.0
+    "rate": 0.022095,
+    "note": "public greedy emissions the shipped cut would clip vs the unpruned model; fidelity risk only, see clip_floor_ksweep.json"
   },
-  "rare_token_divergence_general_leaveout": {
-    "desc": "decode emissions outside a general top-K built WITHOUT the 128 decode (GT-target+special hard-include + broad fill)",
-    "tokens_outside": 2023,
-    "tokens_total": 65536,
-    "rate": 0.030869
-  }
+  "residual_risk_private_ppl": "a PRIVATE GT-target token outside kept -> -inf logit -> +inf PPL on a private re-run; not closable locally (only by widening K toward full vocab)."
 }

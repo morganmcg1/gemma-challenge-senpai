@@ -162,11 +162,28 @@ def select_kept_ids(
     decode_file: Path,
     gt_file: Path = GT_FILE,
     k: int = DEFAULT_K,
+    kept_override: list[int] | None = None,
 ) -> tuple[list[int], dict]:
+    """Choose (or analyse) the GENERAL top-K output-vocab cut.
+
+    Methodology (advisor directive, binding): hard-include ONLY the public
+    GT-target tokens -- which guarantees a finite teacher-forced PPL on the public
+    set -- plus tokenizer specials; fill the remaining budget by broad-corpus
+    (MMLU-Pro) frequency. We deliberately do NOT hard-include the public-128 decode
+    argmax or the GT-context: those are public-prompt-specific and would not
+    generalise to a private re-run, so baking them in would overfit the cut.
+
+    When ``kept_override`` is supplied (the frozen, gated ``kept_ids.json``) we
+    ANALYSE that exact set rather than rebuilding. The frozen artifact is the
+    source of truth: ``build`` reproduces the served checkpoint from it
+    byte-for-byte. A from-scratch rebuild will NOT reproduce the frozen set
+    bit-for-bit because the broad-corpus fill depends on the corpus snapshot at
+    gate time; only the hard-include invariants (GT-target + specials) and K are
+    guaranteed stable across snapshots.
+    """
     decode = _read_jsonl(decode_file)
     gt = _read_jsonl(gt_file)
 
-    # --- hard-include (must-keep) sets ---
     s_gt_target: set[int] = set()
     s_gt_context: set[int] = set()
     for rec in gt:
@@ -182,82 +199,70 @@ def select_kept_ids(
         decode_token_total += len(toks)
 
     s_special, special_source = special_token_ids()
-    must_keep = s_gt_all | s_decode | s_special  # the TIGHT set (bandwidth ceiling)
 
-    # --- broad-corpus frequency for the GENERAL fill ---
+    # hard-include = GT-target (finite PPL) + specials ONLY.
+    must_keep = s_gt_target | s_special
     broad, broad_meta = broad_corpus_freq()
-    # Combined frequency for ranking the fill: broad corpus dominates (it is far
-    # larger), with the benchmark corpus folded in so benchmark-relevant tokens
-    # also rank high. Hard-includes are already guaranteed; fill is the rest.
-    combined: Counter = Counter()
-    combined.update(broad)
-    for rec in gt:
-        combined.update(rec["target_token_ids"])
-        combined.update(rec["context_token_ids"])
-    for rec in decode:
-        combined.update(_decode_completion_ids(rec))
 
-    if len(must_keep) > k:
-        log(f"[select] WARNING: |must_keep|={len(must_keep)} exceeds K={k}; "
-            f"the tight set already exceeds the general budget -- widen K.")
-    remaining = max(0, k - len(must_keep))
-    fill = [tok for tok, _ in combined.most_common() if tok not in must_keep][:remaining]
-    kept = sorted(must_keep | set(fill))
+    if kept_override is not None:
+        kept = sorted(set(kept_override))
+    else:
+        remaining = max(0, k - len(must_keep))
+        fill = [t for t, _ in broad.most_common() if t not in must_keep][:remaining]
+        kept = sorted(must_keep | set(fill))
+    kept_set = set(kept)
 
-    # --- private-set proxy: a GENERAL top-K that did NOT peek at the 128 decode.
-    # Build (GT-target ∪ special) hard-includes + broad-corpus fill to K, then
-    # measure how many real decode emissions fall outside it. This estimates the
-    # private divergence (unseen prompts) the frontier's <0.5% target speaks to.
-    general_mk = s_gt_target | s_special
-    general_fill = [t for t, _ in broad.most_common() if t not in general_mk][
-        : max(0, k - len(general_mk))]
-    general_topk = general_mk | set(general_fill)
+    # public-tailored CEILING (must-keep ∪ public decode ∪ GT-context): reported for
+    # context only, NEVER shipped -- it overfits the public GT and will not generalise.
+    tight = s_gt_all | s_decode | s_special
+
     dec_tokens = [t for rec in decode for t in _decode_completion_ids(rec)]
-    out_general = sum(1 for t in dec_tokens if t not in general_topk)
+    out_kept = sum(1 for t in dec_tokens if t not in kept_set)
 
-    tight_size = len(must_keep)
     stats = {
         "K": k,
         "full_vocab": FULL_VOCAB,
         "hidden": HIDDEN,
-        # two headline kept-set sizes + bandwidth
-        "tight_kept_size": tight_size,
-        "tight_bandwidth_reduction_x": round(FULL_VOCAB / max(1, tight_size), 3),
-        "tight_note": "public-tailored CEILING (must-keep only); overfit to public GT",
-        "general_kept_size": len(kept),
-        "general_bandwidth_reduction_x": round(FULL_VOCAB / max(1, len(kept)), 3),
-        "general_note": "frontier-faithful general cut (must-keep + broad-corpus fill)",
+        "kept_size": len(kept),
+        "bandwidth_reduction_x": round(FULL_VOCAB / max(1, len(kept)), 3),
+        "frozen_source_of_truth": kept_override is not None,
+        "methodology": "hard-include GT-target + tokenizer specials; fill by "
+                       "broad-corpus (MMLU-Pro) frequency. No decode/context "
+                       "hard-include -- those are public-prompt-specific.",
+        # public-overfit ceiling, reported for context only (NOT shipped)
+        "tight_ceiling_size": len(tight),
+        "tight_ceiling_bandwidth_reduction_x": round(FULL_VOCAB / max(1, len(tight)), 3),
+        "tight_ceiling_note": "must-keep ∪ public-128 decode ∪ GT-context; public-overfit, NOT shipped",
         # provenance
         "decode_file": str(decode_file),
         "decode_records": len(decode),
         "decode_token_total": decode_token_total,
         "gt_records": len(gt),
         "n_gt_target_unique": len(s_gt_target),
-        "n_gt_all_unique": len(s_gt_all),
+        "n_gt_context_unique": len(s_gt_context),
         "n_decode_unique": len(s_decode),
         "n_special": len(s_special),
         "special_source": special_source,
-        "n_must_keep": tight_size,
-        "n_freq_fill": len(fill),
+        "n_hard_include": len(must_keep),
+        "n_freq_fill": len(kept_set - must_keep),
         "broad_corpus": broad_meta,
         "broad_unique": len(broad),
-        # correctness guarantees on the public set
-        "finite_ppl_guaranteed": s_gt_target.issubset(set(kept)),
-        "greedy_identity_captured_prompts": s_decode.issubset(set(kept)),
-        "decode_new_tokens_beyond_gt": len(s_decode - s_gt_all),
-        # private-set risk
-        "rare_token_divergence_vs_shipped": {
-            "tokens_outside": sum(1 for t in dec_tokens if t not in set(kept)),
+        # correctness guarantee on the public set
+        "finite_ppl_guaranteed": s_gt_target.issubset(kept_set),
+        # fidelity / private-PPL risk (NOT a gate criterion: the served-vs-served
+        # greedy gate passes by construction -- a pruned argmax is always in kept).
+        "gt_context_outside_kept": len(s_gt_context - kept_set),
+        "decode_outside_kept": {
+            "unique_outside": len(s_decode - kept_set),
+            "tokens_outside": out_kept,
             "tokens_total": len(dec_tokens),
-            "rate": 0.0,  # 0 by construction (decode hard-included)
+            "rate": round(out_kept / max(1, len(dec_tokens)), 6),
+            "note": "public greedy emissions the shipped cut would clip vs the "
+                    "unpruned model; fidelity risk only, see clip_floor_ksweep.json",
         },
-        "rare_token_divergence_general_leaveout": {
-            "desc": "decode emissions outside a general top-K built WITHOUT the "
-                    "128 decode (GT-target+special hard-include + broad fill)",
-            "tokens_outside": out_general,
-            "tokens_total": len(dec_tokens),
-            "rate": round(out_general / max(1, len(dec_tokens)), 6),
-        },
+        "residual_risk_private_ppl": "a PRIVATE GT-target token outside kept -> -inf "
+                                     "logit -> +inf PPL on a private re-run; not closable "
+                                     "locally (only by widening K toward full vocab).",
     }
     return kept, stats
 
@@ -267,18 +272,29 @@ def run_select(args: argparse.Namespace) -> None:
     if not decode_file.exists() and DECODE_FILE_FALLBACK.exists():
         log(f"[select] {decode_file} absent; falling back to {DECODE_FILE_FALLBACK}")
         decode_file = DECODE_FILE_FALLBACK
-    kept, stats = select_kept_ids(decode_file, Path(args.gt_file), args.k)
-    KEPT_IDS_OUT.parent.mkdir(parents=True, exist_ok=True)
+
+    # The frozen kept_ids.json is the gated source of truth -- never clobber it.
+    # If present (and not --force-rebuild), run in analysis-only mode against it.
+    frozen = None
+    if KEPT_IDS_OUT.exists() and not args.force_rebuild:
+        frozen = json.loads(KEPT_IDS_OUT.read_text()).get("kept_ids")
+        log(f"[select] frozen {KEPT_IDS_OUT} present ({len(frozen)} ids) -> "
+            f"analysis-only (pass --force-rebuild to regenerate the set)")
+
+    kept, stats = select_kept_ids(
+        decode_file, Path(args.gt_file), args.k, kept_override=frozen)
     ANALYSIS_OUT.parent.mkdir(parents=True, exist_ok=True)
-    KEPT_IDS_OUT.write_text(json.dumps({
-        "model_id": MODEL_ID,
-        "full_vocab": FULL_VOCAB,
-        "K": args.k,
-        "kept_size": len(kept),
-        "kept_ids": kept,
-    }))
+    if frozen is None:
+        KEPT_IDS_OUT.parent.mkdir(parents=True, exist_ok=True)
+        KEPT_IDS_OUT.write_text(json.dumps({
+            "model_id": MODEL_ID,
+            "full_vocab": FULL_VOCAB,
+            "K": args.k,
+            "kept_size": len(kept),
+            "kept_ids": kept,
+        }))
+        log(f"[select] wrote {KEPT_IDS_OUT} ({len(kept)} ids)")
     ANALYSIS_OUT.write_text(json.dumps(stats, indent=2))
-    log(f"[select] wrote {KEPT_IDS_OUT} ({len(kept)} ids)")
     print(json.dumps(stats, indent=2))
 
 
@@ -394,6 +410,8 @@ def main() -> None:
     sel.add_argument("--k", type=int, default=DEFAULT_K)
     sel.add_argument("--decode-file", default=str(DECODE_FILE))
     sel.add_argument("--gt-file", default=str(GT_FILE))
+    sel.add_argument("--force-rebuild", action="store_true",
+                     help="regenerate kept_ids.json even if a frozen one exists")
     sel.set_defaults(func=run_select)
 
     bd = sub.add_parser("build", help="torch: untie + slice lm_head rows + save ckpt")

@@ -1,0 +1,74 @@
+{
+  "method": "Token-weighted fraction of greedy emissions (unpruned int4 argmax) that fall OUTSIDE a vocab subset. NOT a gate criterion: the served-vs-served greedy gate passes 128/128 by construction (a pruned model's argmax is always in kept). This quantifies (a) fidelity drift vs the unpruned model and (b) the private-PPL clip risk.",
+  "shipped_K": 12288,
+  "shipped_kept_size": 12288,
+  "shipped_bandwidth_reduction_x": 21.333,
+  "public_decode": {
+    "records": 128,
+    "tokens": 65536,
+    "source": "research/local_validation/vllm_baseline_128 (unpruned int4 greedy)"
+  },
+  "heldout_decode": {
+    "records": 600,
+    "tokens": 307200,
+    "source": "heldout_int4_argmax.jsonl (unpruned int4 greedy, prompts disjoint from public 128)"
+  },
+  "public_decode_vs_shipped_set": {
+    "clipped": 1448,
+    "tokens": 65536,
+    "clip_rate": 0.022095,
+    "note": "authoritative: measured public greedy emissions outside the ACTUAL shipped kept set"
+  },
+  "irreducible_floor": {
+    "desc": "emissions outside the ENTIRE available corpus union (broad MMLU-Pro + all public GT target/context + specials). These argmax tokens never appear in any source corpus, so NO frequency selection at ANY K can capture them -- the hard floor on greedy fidelity.",
+    "corpus_union_size": 42206,
+    "public": {
+      "unique_outside": 346,
+      "tokens_outside": 514,
+      "tokens_total": 65536,
+      "clip_rate": 0.007843
+    },
+    "heldout": {
+      "unique_outside": 1885,
+      "tokens_outside": 3525,
+      "tokens_total": 307200,
+      "clip_rate": 0.011475
+    }
+  },
+  "sweep": [
+    {
+      "K": 12288,
+      "kept_size": 12288,
+      "bandwidth_reduction_x": 21.333,
+      "public_clipped": 2023,
+      "public_tokens": 65536,
+      "public_clip_rate": 0.030869,
+      "heldout_clipped": 17964,
+      "heldout_tokens": 307200,
+      "heldout_clip_rate": 0.058477
+    },
+    {
+      "K": 24576,
+      "kept_size": 24576,
+      "bandwidth_reduction_x": 10.667,
+      "public_clipped": 1091,
+      "public_tokens": 65536,
+      "public_clip_rate": 0.016647,
+      "heldout_clipped": 8216,
+      "heldout_tokens": 307200,
+      "heldout_clip_rate": 0.026745
+    },
+    {
+      "K": 37501,
+      "kept_size": 37501,
+      "bandwidth_reduction_x": 6.99,
+      "public_clipped": 714,
+      "public_tokens": 65536,
+      "public_clip_rate": 0.010895,
+      "heldout_clipped": 4642,
+      "heldout_tokens": 307200,
+      "heldout_clip_rate": 0.015111
+    }
+  ],
+  "residual_risk": "Private PPL: a private GT-target token outside kept -> -inf logit -> +inf PPL on a private re-run. The shipped set hard-includes only the PUBLIC GT-target; the private set is unseen. Not closable locally; only a gated HF job on the private set confirms it."
+}
