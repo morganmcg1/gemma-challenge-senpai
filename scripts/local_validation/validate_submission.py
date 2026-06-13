@@ -18,6 +18,14 @@ reference — an offline reference diverges from a served candidate on a stochas
 
     python -m scripts.local_validation.validate_submission \\
         --submission submissions/vllm_baseline --server-python /tmp/server-venv/bin/python
+
+It also computes the consolidated *official leaderboard gate* (PPL ≤ 2.42 AND
+completion AND all-modalities-loaded; #38). Pass ``--official-gate`` to turn that
+verdict into a hard exit code (PASS -> 0, FAIL/INCOMPLETE -> 1). The HF-launch
+path consumes the same verdict through ``run_official_gate_preflight`` /
+``enforce_launch_gate``: a job is launched ONLY when the gate is PASS, and both
+FAIL and INCOMPLETE block (an unmeasured component is exactly when a submission
+must not spend HF-Jobs quota).
 """
 from __future__ import annotations
 
@@ -36,6 +44,178 @@ from .ppl_runner import _headroom_overrides
 # wide enough to never flag honest FP/quantization jitter, tight enough that the
 # 2.378 (prompt_logprobs) vs 2.55 (same-path) LF29 lane gap of ~0.17 trips it.
 DEFAULT_SAME_PATH_THRESHOLD = 0.05
+
+# --------------------------------------------------------------------------- #
+# OFFICIAL-GATE LAUNCH PREFLIGHT (PR #45 verdict -> PR #50 hard launch block)
+# --------------------------------------------------------------------------- #
+# The official leaderboard gate is three-valued (modalities_probe.official_gate_verdict):
+#   * PASS       — every check ran and passed                 -> launch eligible
+#   * FAIL       — at least one check ran and failed          -> blocked, fix required
+#   * INCOMPLETE — at least one check has not been run yet     -> blocked, run all checks
+# An HF job may be launched ONLY when the verdict is PASS. INCOMPLETE blocks just as
+# hard as FAIL: an unmeasured component is exactly the state where a submission must
+# NOT spend HF-Jobs quota, because the preflight has not been fully executed.
+GATE_BLOCK_VALUES = {"FAIL", "INCOMPLETE"}
+
+# A launch authorizes the *official* 128-prompt protocol, so the authorizing
+# evidence must itself be a full-protocol validation. An 8-prompt smoke can read
+# official_gate=PASS for its own 8 prompts, but it does NOT authorize a real
+# launch — the preflight downgrades under-prompted evidence to INCOMPLETE.
+OFFICIAL_NUM_PROMPTS = paths.NUM_PROMPTS  # 128
+
+
+def check_launch_eligibility(gate_verdict: str) -> bool:
+    """Return True only if ``gate_verdict == "PASS"``. FAIL and INCOMPLETE block.
+
+    Fail-closed: any value in ``GATE_BLOCK_VALUES`` blocks, and an unrecognized
+    verdict is also ineligible (only an explicit PASS authorizes a launch).
+    """
+    if gate_verdict in GATE_BLOCK_VALUES:
+        return False
+    return gate_verdict == "PASS"
+
+
+def _normalize_submission_key(value) -> str:
+    """Collapse a submission name / dir / prefix to a comparison key.
+
+    Evidence records the local dir name (``fa2sw_precache_kenyan``); a launch
+    prefix uses the hyphenated form (``fa2sw-precache-kenyan``). Normalizing the
+    basename and folding ``-``/``_`` lets the preflight match either spelling.
+    """
+    return Path(str(value)).name.strip().lower().replace("-", "_")
+
+
+def _iter_evidence(localrun_root: Path):
+    """Yield (created_at, path, evidence-dict) for every readable evidence.json."""
+    if not localrun_root.is_dir():
+        return
+    for ev_path in localrun_root.glob("*/evidence.json"):
+        try:
+            data = json.loads(ev_path.read_text())
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict):
+            created = str(data.get("created_at") or "")
+            yield created, ev_path, data
+
+
+def run_official_gate_preflight(
+    submission,
+    *,
+    num_prompts: int = OFFICIAL_NUM_PROMPTS,
+    localrun_root: Path | None = None,
+) -> dict:
+    """Resolve the launch-eligibility gate for ``submission`` from local evidence.
+
+    Reads the most recent ``validate_submission`` ``evidence.json`` for this
+    submission (under ``paths.LOCALRUN_ROOT`` by default) and returns the
+    consolidated gate verdict, recomputed from its raw PPL / completion /
+    modalities components so a stale or absent stored verdict can never authorize
+    a launch. The launch is the dangerous, quota-spending action, so the preflight
+    is deliberately a cheap read of the evidence the student already produced — it
+    does not re-serve on GPU.
+
+    Returns a dict with ``official_gate`` (PASS/FAIL/INCOMPLETE), the components,
+    and provenance (``evidence_path``, ``reason``). Two safety downgrades to
+    INCOMPLETE (blocking):
+
+      * no evidence found for this submission — validation has not been run;
+      * the latest evidence ran fewer than ``num_prompts`` prompts — a smoke does
+        not authorize the official 128-prompt protocol.
+    """
+    root = Path(localrun_root) if localrun_root is not None else paths.LOCALRUN_ROOT
+    key = _normalize_submission_key(submission)
+
+    matches = [
+        (created, path, data)
+        for created, path, data in _iter_evidence(root)
+        if _normalize_submission_key(data.get("submission_name") or data.get("submission") or "") == key
+    ]
+    base = {
+        "submission": str(submission),
+        "required_num_prompts": num_prompts,
+        "official_gate": "INCOMPLETE",
+        "official_gate_pass": False,
+        "ppl": None,
+        "completed": None,
+        "num_prompts": None,
+        "all_modalities_loaded": None,
+        "modalities_method": None,
+        "evidence_path": None,
+        "eligible": False,
+    }
+    if not matches:
+        base["reason"] = (
+            f"no official-gate validation evidence found for submission '{key}' under {root} — "
+            f"run validate_submission --submission <dir> --num-prompts {num_prompts} --official-gate first"
+        )
+        return base
+
+    created, path, ev = max(matches, key=lambda m: (m[0], m[1].stat().st_mtime))
+    ev_n = ev.get("num_prompts")
+    gate = modalities_probe.official_gate_verdict(
+        ppl=ev.get("ppl"),
+        completed=ev.get("completed"),
+        num_prompts=ev_n if isinstance(ev_n, int) else num_prompts,
+        all_modalities_loaded=ev.get("all_modalities_loaded"),
+    )
+    verdict = gate["official_gate"]
+    result = {
+        **base,
+        "official_gate": verdict,
+        "official_gate_pass": verdict == "PASS",
+        "official_gate_ppl_ok": gate["official_gate_ppl_ok"],
+        "official_gate_completion_ok": gate["official_gate_completion_ok"],
+        "official_gate_modalities_ok": gate["official_gate_modalities_ok"],
+        "ppl": ev.get("ppl"),
+        "completed": ev.get("completed"),
+        "num_prompts": ev_n,
+        "all_modalities_loaded": ev.get("all_modalities_loaded"),
+        "modalities_method": ev.get("modalities_method"),
+        "evidence_path": str(path),
+        "evidence_created_at": created or None,
+    }
+    # Launch-sufficiency: a sub-128 smoke (even a PASS) cannot authorize the
+    # official 128-prompt run — downgrade to INCOMPLETE.
+    if not isinstance(ev_n, int) or ev_n < num_prompts:
+        result["official_gate"] = "INCOMPLETE"
+        result["official_gate_pass"] = False
+        result["eligible"] = False
+        result["reason"] = (
+            f"latest validation evidence ran {ev_n} prompts (< required {num_prompts}); "
+            f"a smoke does not authorize the official {num_prompts}-prompt launch — "
+            f"re-run full-protocol validation"
+        )
+        return result
+
+    result["eligible"] = check_launch_eligibility(verdict)
+    if not result["eligible"]:
+        result["reason"] = f"official_gate = {verdict} (not PASS) in {path}"
+    return result
+
+
+def enforce_launch_gate(
+    submission,
+    *,
+    num_prompts: int = OFFICIAL_NUM_PROMPTS,
+    localrun_root: Path | None = None,
+) -> dict:
+    """Run the preflight and raise RuntimeError unless the gate is PASS.
+
+    The single chokepoint the HF-launch path calls before submitting a job: FAIL
+    and INCOMPLETE both raise (blocking the launch); PASS returns the gate dict.
+    """
+    gate = run_official_gate_preflight(submission, num_prompts=num_prompts, localrun_root=localrun_root)
+    if not check_launch_eligibility(gate["official_gate"]):
+        raise RuntimeError(
+            f"HF launch blocked: official_gate = {gate['official_gate']} for submission "
+            f"'{submission}'. ppl={gate.get('ppl')} "
+            f"completed={gate.get('completed')}/{gate.get('num_prompts')} "
+            f"all_modalities_loaded={gate.get('all_modalities_loaded')} "
+            f"evidence={gate.get('evidence_path')}. "
+            f"{gate.get('reason') or 'Fix the gate failures and re-run full-protocol local validation before launching.'}"
+        )
+    return gate
 
 
 def _greedy_summary(report) -> str:
@@ -71,6 +251,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--same-path-threshold", type=float, default=DEFAULT_SAME_PATH_THRESHOLD,
                     help="max allowed |same_path_ppl - prompt_logprobs_ppl| before the gate fails")
+    ap.add_argument(
+        "--official-gate",
+        action="store_true",
+        help="make the process exit code reflect the official leaderboard gate: 0 only if "
+        "official_gate == PASS, else non-zero (FAIL/INCOMPLETE both block). The gate is always "
+        "computed and printed; this flag turns it into a hard CI/launch gate.",
+    )
     ap.add_argument("--wandb-name", default=None, help="log the validation evidence to W&B under this run name")
     ap.add_argument("--wandb-group", default=None, help="W&B group (e.g. fa2sw-precache-validate-and-lf29-check)")
     args = ap.parse_args(argv)
@@ -324,6 +511,21 @@ def main(argv: list[str] | None = None) -> int:
             flush=True,
         )
         return 1
+
+    # --official-gate turns the official leaderboard verdict into a hard exit
+    # gate: PASS -> 0, FAIL/INCOMPLETE -> 1. Mirrors check_launch_eligibility so a
+    # CI step or a launch-preflight wrapper can treat a non-zero exit as "do not
+    # launch" without re-parsing evidence.json.
+    if args.official_gate:
+        verdict = evidence.get("official_gate")
+        if not check_launch_eligibility(verdict):
+            print(
+                f"[validate] FAIL official_gate = {verdict} (not PASS) — launch ineligible "
+                "(FAIL and INCOMPLETE both block)",
+                flush=True,
+            )
+            return 1
+        print("[validate] official_gate = PASS — launch eligible", flush=True)
     return 0
 
 

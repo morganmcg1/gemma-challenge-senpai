@@ -10,6 +10,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from scripts.common import DEFAULT_API, agent_id, load_dotenv, post_json, require_hf_token, run_prefix, submission_prefix
+from scripts.local_validation.validate_submission import enforce_launch_gate
 from scripts.wandb_logging import finish_wandb, init_wandb_run, log_event, log_json_artifact
 
 
@@ -20,7 +21,24 @@ def launch_job(
     run: str,
     api: str = DEFAULT_API,
     token: str | None = None,
+    gate_submission: str | None = None,
 ) -> dict:
+    # --- OFFICIAL-GATE PREFLIGHT (PR #50) --------------------------------------
+    # A job must never be submitted for a submission whose local official_gate is
+    # not PASS. enforce_launch_gate raises RuntimeError on FAIL *or* INCOMPLETE
+    # (an unmeasured component is exactly when a launch must be blocked), so a bad
+    # submission is caught here — before any HF-Jobs quota is spent — rather than
+    # discovered after the run. The gate name defaults to the submission prefix's
+    # basename, which the preflight folds against the validation evidence keyed by
+    # the local submission dir name.
+    gate_name = gate_submission or submission.rstrip("/").split("/")[-1]
+    gate = enforce_launch_gate(gate_name)
+    print(
+        f"official_gate = PASS for '{gate_name}' "
+        f"(ppl={gate.get('ppl')} completed={gate.get('completed')}/{gate.get('num_prompts')} "
+        f"all_modalities_loaded={gate.get('all_modalities_loaded')}); launching HF job."
+    )
+
     token = token or require_hf_token()
     payload = {
         "agent_id": agent,
@@ -74,7 +92,9 @@ def main() -> None:
             step=0,
             data={"submission_prefix": submission, "run_prefix": run},
         )
-        response = launch_job(agent=agent, submission=submission, run=run, api=args.api)
+        response = launch_job(
+            agent=agent, submission=submission, run=run, api=args.api, gate_submission=args.submission_name
+        )
         log_event(
             wandb_run,
             "launch_complete",
