@@ -37,6 +37,8 @@ The verifier re-runs on a **private** prompt set; top drafter stacks lose **4–
 Private-stable acceptance (drafter trained on a wide distribution; prompt-content-invariant
 verify paths) is a first-class objective, not an afterthought.
 
+**Official validity gate = PPL + completion + modalities, NOT token-identity (kanna #38, 2026-06-13).** The official HF-Jobs harness (`hf_bucket_single_job.py`) runs benchmark + decode-capture + PPL + summary — it never compares served tokens to a greedy AR reference. So **speculative-decode stacks are leaderboard-legal** (this is why the entire ~420 VALID frontier ships MTP spec decode), and our strict M=1 greedy-identity bar is an *internal* pre-flight, not the leaderboard gate. Corollary: `fa2sw_precache_kenyan` (FA_SLIDING=1) is **non-reproducible run-to-run** (kernel FP-reduction noise on argmax near-ties; same-GPU spec-OFF control diverges 28/32, plain int4 baseline 29/32) — so no reference at any strictness certifies it; `FA_SLIDING=0` restores byte-identity (0/32) at an unmeasured TPS cost. The binding constraint above ~286 TPS stays the **private-set TPS re-run**, not token identity. Full audit: `research/validity/served_gate_reconciliation.md`.
+
 ## Current local baseline in this repo
 - **OFFICIAL BASELINE (a10g-small HF-Job confirmed) — `submissions/int4_g128_lmhead` (PR #4, lawine) — official a10g-small tps=126.378, ppl=2.019, 128/128 VALID** (job
   `6a2d5a96234ca64b60121aa5`, W&B `905tbujn`). int4 g128 + untied int4 lm_head re-quant, all modalities loaded, greedy-valid (GREEDY_IDENTICAL
@@ -61,6 +63,14 @@ verify paths) is a first-class objective, not an afterthought.
     artifacts under `research/local_validation/`.
 
 ## Merge history
+
+### 2026-06-13 19:14 — PR #38 (kanna): Served-gate validity reconciliation — ⭐ CHARACTERIZATION KEEPER (official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary_metric is a verdict, 0.0). Banks `research/validity/served_gate_reconciliation.md` + the onset-signature diagnostic.
+- **Finding:** the official HF-Jobs gate has **no token-identity check** (validity = PPL + completion + modalities) → spec decode is leaderboard-legal. Our strict M=1 bar is **not over-conservative**; `fa2sw_precache_kenyan` is simply **non-reproducible run-to-run** (same-GPU spec-OFF control DIVERGENT 28/32; plain int4 baseline 29/32; FP-reduction argmax noise). `FA_SLIDING=0` → GREEDY_IDENTICAL 0/32 (same decode, per onset signature).
+- **Onset-signature diagnostic** (reusable): late+stochastic ⇒ nondeterminism (re-run/tolerate); early+systematic ⇒ real divergence (reject).
+- **Open loop → kanna follow-up:** int4 control used the `w4a16-ct` proxy (our `int4_g128_lmhead` not locally rebuildable), so it does **not** prove our official baseline diverges. Verify `int4_g128_lmhead` run-to-run determinism directly.
+- **W&B:** none (local validity profiling; no training).
 
 ### 2026-06-13 14:00 — PR #3: Reproduce int4 QAT W4A16 leader (~95 TPS) — base of the stack ⭐ NEW OFFICIAL BASE RUNG
 
