@@ -11,6 +11,9 @@ from typing import Any
 from scripts.common import ROOT
 
 
+DEFAULT_WANDB_ENTITY = "wandb-applied-ai-team"
+DEFAULT_WANDB_PROJECT = "gemma-challenge-senpai"
+
 STATUS_VALUE = {
     "missing": 0,
     "queued": 1,
@@ -115,8 +118,8 @@ def init_wandb_run(
     }
 
     run = wandb.init(
-        project=project or os.environ.get("WANDB_PROJECT") or "gemma-challenge-senpai",
-        entity=entity or os.environ.get("WANDB_ENTITY") or None,
+        project=project or os.environ.get("WANDB_PROJECT") or DEFAULT_WANDB_PROJECT,
+        entity=entity or os.environ.get("WANDB_ENTITY") or DEFAULT_WANDB_ENTITY,
         name=name,
         group=agent,
         job_type=job_type,
