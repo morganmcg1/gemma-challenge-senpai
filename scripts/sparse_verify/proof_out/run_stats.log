@@ -1,0 +1,68 @@
+loading model...
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]Loading weights:  22%|██▏       | 447/2076 [00:00<00:00, 4438.28it/s]Loading weights:  43%|████▎     | 891/2076 [00:01<00:02, 526.70it/s] Loading weights:  53%|█████▎    | 1093/2076 [00:01<00:01, 576.78it/s]Loading weights:  60%|█████▉    | 1238/2076 [00:01<00:01, 607.11it/s]Loading weights:  65%|██████▌   | 1356/2076 [00:02<00:01, 635.19it/s]Loading weights:  73%|███████▎  | 1509/2076 [00:02<00:00, 756.02it/s]Loading weights:  94%|█████████▍| 1954/2076 [00:02<00:00, 1354.75it/s]Loading weights: 100%|██████████| 2076/2076 [00:02<00:00, 900.00it/s] 
+kept_set=freq_topk K=12000 R=1.6301 kept_min_norm=0.9404 kept_max_norm=1.7348
+decoding 64 prompts x 256 tokens (batch=4)...
+  decoded prompts 0..3  running fallback_rate=100.00%
+  decoded prompts 4..7  running fallback_rate=100.00%
+  decoded prompts 8..11  running fallback_rate=100.00%
+  decoded prompts 12..15  running fallback_rate=100.00%
+  decoded prompts 16..19  running fallback_rate=100.00%
+  decoded prompts 20..23  running fallback_rate=100.00%
+  decoded prompts 24..27  running fallback_rate=100.00%
+  decoded prompts 28..31  running fallback_rate=100.00%
+  decoded prompts 32..35  running fallback_rate=100.00%
+  decoded prompts 36..39  running fallback_rate=100.00%
+  decoded prompts 40..43  running fallback_rate=100.00%
+  decoded prompts 44..47  running fallback_rate=100.00%
+  decoded prompts 48..51  running fallback_rate=100.00%
+  decoded prompts 52..55  running fallback_rate=100.00%
+  decoded prompts 56..59  running fallback_rate=100.00%
+  decoded prompts 60..63  running fallback_rate=100.00%
+computing PPL...
+{
+  "R_complement_max_norm": 1.6300745010375977,
+  "adversarial": {
+    "certified": false,
+    "emitted": 258090,
+    "fell_back": true,
+    "identity_ok": true,
+    "kept_only_would_diverge": true,
+    "kept_only_wrong_token": 188798,
+    "probe_row": 262143,
+    "true_argmax": 258090,
+    "true_argmax_pruned": true
+  },
+  "candidate_jsonl": "proof_out/stats_run/decode_outputs_sparse.jsonl",
+  "certified_rate": 0.0,
+  "compute_dtype": "bfloat16",
+  "decode_seconds": 370.1628096103668,
+  "decode_tps": 44.261604825308595,
+  "fallback_rate": 1.0,
+  "greedy_divergences": 0,
+  "greedy_identical_by_decode": true,
+  "kept_set": "freq_topk",
+  "kept_size": 12000,
+  "microbench": {
+    "effective_speedup_with_cert": 0.9206520538384741,
+    "kept_vs_full_speedup": 20.101992741371923,
+    "rows": 2048,
+    "t_full_ms": 42.52169132232666,
+    "t_kept_ms": 2.115297317504883,
+    "t_kept_plus_cert_ms": 46.18649482727051
+  },
+  "model": "google/gemma-4-E4B-it",
+  "n_certified": 0,
+  "n_fallback": 16384,
+  "n_steps": 16384,
+  "num_prompts": 64,
+  "output_len": 256,
+  "peak_gpu_mem_gb": 20.488132096,
+  "ppl": 2.303699404196776,
+  "ppl_cap": 2.42,
+  "ppl_scored_tokens": 61797,
+  "ppl_within_cap": true,
+  "reference_jsonl": "proof_out/stats_run/decode_outputs_reference.jsonl",
+  "total_completion_tokens": 16384,
+  "vocab_size": 262144
+}

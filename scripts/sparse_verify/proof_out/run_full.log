@@ -1,0 +1,57 @@
+loading model...
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]Loading weights:  21%|██        | 437/2076 [00:00<00:00, 4359.89it/s]Loading weights:  42%|████▏     | 873/2076 [00:01<00:02, 516.01it/s] Loading weights:  52%|█████▏    | 1072/2076 [00:01<00:01, 556.42it/s]Loading weights:  58%|█████▊    | 1212/2076 [00:01<00:01, 581.25it/s]Loading weights:  64%|██████▍   | 1324/2076 [00:02<00:01, 598.46it/s]Loading weights:  68%|██████▊   | 1421/2076 [00:02<00:01, 616.91it/s]Loading weights:  88%|████████▊ | 1834/2076 [00:02<00:00, 1151.88it/s]Loading weights: 100%|██████████| 2076/2076 [00:02<00:00, 857.82it/s] 
+kept_set=freq_topk K=12000 R=1.6301 kept_min_norm=0.9404 kept_max_norm=1.7348
+decoding 128 prompts x 512 tokens (batch=16)...
+  decoded prompts 0..15  running fallback_rate=100.00%
+  decoded prompts 16..31  running fallback_rate=100.00%
+  decoded prompts 32..47  running fallback_rate=100.00%
+  decoded prompts 48..63  running fallback_rate=100.00%
+Traceback (most recent call last):
+  File "/workspace/senpai/target/scripts/sparse_verify/run_proof.py", line 338, in <module>
+    main()
+  File "/workspace/senpai/target/scripts/sparse_verify/run_proof.py", line 272, in main
+    completions, stats, psf, pst, divergences = decode_and_capture(
+  File "/usr/local/lib/python3.10/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "/workspace/senpai/target/scripts/sparse_verify/run_proof.py", line 88, in decode_and_capture
+    out = model(
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/utils/generic.py", line 903, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/gemma4/modeling_gemma4.py", line 2482, in forward
+    outputs = self.model(
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/utils/generic.py", line 1032, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/utils/generic.py", line 903, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/gemma4/modeling_gemma4.py", line 2336, in forward
+    outputs = self.language_model(
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/utils/generic.py", line 1032, in wrapper
+    output = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/utils/output_capturing.py", line 252, in wrapper
+    outputs = func(self, *args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/gemma4/modeling_gemma4.py", line 1656, in forward
+    per_layer_inputs = self.project_per_layer_inputs(inputs_embeds, per_layer_inputs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/gemma4/modeling_gemma4.py", line 1788, in project_per_layer_inputs
+    per_layer_projection = self.per_layer_projection_norm(per_layer_projection)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1778, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/torch/nn/modules/module.py", line 1789, in _call_impl
+    return forward_call(*args, **kwargs)
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/gemma4/modeling_gemma4.py", line 208, in forward
+    normed_output = self._norm(hidden_states.float())
+  File "/usr/local/lib/python3.10/dist-packages/transformers/models/gemma4/modeling_gemma4.py", line 203, in _norm
+    mean_squared = hidden_states.pow(2).mean(-1, keepdim=True) + self.eps
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 1.56 GiB. GPU 0 has a total capacity of 22.06 GiB of which 999.44 MiB is free. Including non-PyTorch memory, this process has 21.07 GiB memory in use. Of the allocated memory 19.17 GiB is allocated by PyTorch, and 1.60 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
