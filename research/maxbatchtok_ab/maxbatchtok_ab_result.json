@@ -1,0 +1,228 @@
+{
+  "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan",
+  "control_arm": "512",
+  "num_prompts": 128,
+  "output_len": 512,
+  "reference": "/workspace/senpai/target/research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/decode_outputs.jsonl",
+  "manifest_max_num_batched_tokens": "512",
+  "manifest_max_model_len": "4096",
+  "utc": "2026-06-13T23:17:59Z",
+  "arms": {
+    "512": {
+      "arm": "512",
+      "label": "mbt512",
+      "decode_wall_s": 152.40549516677856,
+      "completed": 128,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 144.24149084091187,
+      "wallclock_tps": 454.3491586084725,
+      "steady_gen_tps_mean": 448.0142857142857,
+      "steady_gen_tps_n": 14,
+      "e_accept_exact": 3.857668260389849,
+      "ppl": 2.376682786480556,
+      "ppl_num_tokens": 61797,
+      "arm_wall_s": 264.353901386261,
+      "splitkv_wrapped": true,
+      "splitkv_redirect_count": 5,
+      "splitkv_redirect_M_values": [
+        8
+      ],
+      "splitkv_fallback_count": 0,
+      "splitkv_engaged": true,
+      "served_max_num_batched_tokens": 512,
+      "maxbatchtok_warning_lines": [
+        "(APIServer pid=62536) INFO 06-13 23:18:08 [api_utils.py:273] non-default args: {'host': '127.0.0.1', 'uvicorn_log_level': 'warning', 'disable_uvicorn_access_log': True, 'model': '/tmp/osoi5-12k-baked', 'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 4096, 'served_model_name': ['gemma-4-e4b-it'], 'generation_config': 'vllm', 'override_generation_config': {'temperature': 0.0, 'top_p",
+        "(APIServer pid=62536) INFO 06-13 23:18:10 [scheduler.py:239] Chunked prefill is enabled with max_num_batched_tokens=512.",
+        "(APIServer pid=62536) WARNING 06-13 23:18:10 [vllm.py:1597] max_num_scheduled_tokens is set to 512 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens or max_num_seqs."
+      ],
+      "maxbatchtok_warned": true,
+      "engine_oom": false,
+      "engine_dead": false,
+      "launch_cmd": "/tmp/senpai-venvs/5f4c623f772358a2/bin/python -m vllm.entrypoints.openai.api_server --model /tmp/osoi5-12k-baked --served-model-name gemma-4-e4b-it --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 1 --performance-mode interactivity --trust-remote-code --no-enable-log-requests --disable-uvicorn-access-log --max-num-batched-tokens 512 --speculative-config {\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7} --generation-config vllm --override-generation-config {\"temperature\":0.0,\"top_p\":1.0,\"top_k\":0} --uvicorn-log-level warning",
+      "greedy_vs_reference": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 10,
+        "num_divergent": 118,
+        "total_divergent_tokens": 39894,
+        "onset_median": 120,
+        "identical_frac": 0.078125
+      },
+      "server_log": "research/maxbatchtok_ab/server_mbt512.log",
+      "decode_jsonl": "research/maxbatchtok_ab/decode_mbt512.jsonl",
+      "wandb_run_id": "3756geng",
+      "steady_tps_delta_vs_control": 0.0,
+      "steady_tps_frac_vs_control": 0.0
+    },
+    "2048": {
+      "arm": "2048",
+      "label": "mbt2048",
+      "decode_wall_s": 153.71495461463928,
+      "completed": 128,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 145.36607003211975,
+      "wallclock_tps": 450.83422827293407,
+      "steady_gen_tps_mean": 445.9214285714285,
+      "steady_gen_tps_n": 14,
+      "e_accept_exact": 3.869272570087687,
+      "ppl": null,
+      "ppl_error": "CalledProcessError(1, ['/tmp/senpai-venvs/5f4c623f772358a2/bin/python', '/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py', '--base-url', 'http://127.0.0.1:8000', '--model', 'gemma-4-e4b-it', '--dataset-path', '/workspace/senpai/target/official/m",
+      "arm_wall_s": 252.49518752098083,
+      "splitkv_wrapped": true,
+      "splitkv_redirect_count": 5,
+      "splitkv_redirect_M_values": [
+        8
+      ],
+      "splitkv_fallback_count": 0,
+      "splitkv_engaged": true,
+      "served_max_num_batched_tokens": 2048,
+      "maxbatchtok_warning_lines": [
+        "(APIServer pid=64917) INFO 06-13 23:22:36 [api_utils.py:273] non-default args: {'host': '127.0.0.1', 'uvicorn_log_level': 'warning', 'disable_uvicorn_access_log': True, 'model': '/tmp/osoi5-12k-baked', 'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 4096, 'served_model_name': ['gemma-4-e4b-it'], 'generation_config': 'vllm', 'override_generation_config': {'temperature': 0.0, 'top_p",
+        "(APIServer pid=64917) WARNING 06-13 23:22:37 [vllm.py:1597] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens or max_num_seqs."
+      ],
+      "maxbatchtok_warned": true,
+      "engine_oom": true,
+      "engine_dead": true,
+      "launch_cmd": "/tmp/senpai-venvs/5f4c623f772358a2/bin/python -m vllm.entrypoints.openai.api_server --model /tmp/osoi5-12k-baked --served-model-name gemma-4-e4b-it --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 1 --performance-mode interactivity --trust-remote-code --no-enable-log-requests --disable-uvicorn-access-log --max-num-batched-tokens 2048 --speculative-config {\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7} --generation-config vllm --override-generation-config {\"temperature\":0.0,\"top_p\":1.0,\"top_k\":0} --uvicorn-log-level warning",
+      "greedy_vs_reference": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 10,
+        "num_divergent": 118,
+        "total_divergent_tokens": 40454,
+        "onset_median": 117,
+        "identical_frac": 0.078125
+      },
+      "greedy_vs_control": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 15,
+        "num_divergent": 113,
+        "total_divergent_tokens": 36704,
+        "onset_median": 114,
+        "identical_frac": 0.1171875
+      },
+      "server_log": "research/maxbatchtok_ab/server_mbt2048.log",
+      "decode_jsonl": "research/maxbatchtok_ab/decode_mbt2048.jsonl",
+      "wandb_run_id": "3vvsjm10",
+      "steady_tps_delta_vs_control": -2.092857142857156,
+      "steady_tps_frac_vs_control": -0.004671407161761453
+    },
+    "4096": {
+      "arm": "4096",
+      "label": "mbt4096",
+      "decode_wall_s": 152.95718216896057,
+      "completed": 128,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 144.76186633110046,
+      "wallclock_tps": 452.71590965887077,
+      "steady_gen_tps_mean": 453.40000000000003,
+      "steady_gen_tps_n": 14,
+      "e_accept_exact": 3.8785775179637074,
+      "ppl": null,
+      "ppl_error": "CalledProcessError(1, ['/tmp/senpai-venvs/5f4c623f772358a2/bin/python', '/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py', '--base-url', 'http://127.0.0.1:8000', '--model', 'gemma-4-e4b-it', '--dataset-path', '/workspace/senpai/target/official/m",
+      "arm_wall_s": 251.99056196212769,
+      "splitkv_wrapped": true,
+      "splitkv_redirect_count": 5,
+      "splitkv_redirect_M_values": [
+        8
+      ],
+      "splitkv_fallback_count": 0,
+      "splitkv_engaged": true,
+      "served_max_num_batched_tokens": 4096,
+      "maxbatchtok_warning_lines": [
+        "(APIServer pid=67127) INFO 06-13 23:26:51 [api_utils.py:273] non-default args: {'host': '127.0.0.1', 'uvicorn_log_level': 'warning', 'disable_uvicorn_access_log': True, 'model': '/tmp/osoi5-12k-baked', 'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 4096, 'served_model_name': ['gemma-4-e4b-it'], 'generation_config': 'vllm', 'override_generation_config': {'temperature': 0.0, 'top_p",
+        "(APIServer pid=67127) INFO 06-13 23:26:53 [scheduler.py:239] Chunked prefill is enabled with max_num_batched_tokens=4096.",
+        "(APIServer pid=67127) WARNING 06-13 23:26:53 [vllm.py:1597] max_num_scheduled_tokens is set to 4096 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens or max_num_seqs."
+      ],
+      "maxbatchtok_warned": true,
+      "engine_oom": true,
+      "engine_dead": true,
+      "launch_cmd": "/tmp/senpai-venvs/5f4c623f772358a2/bin/python -m vllm.entrypoints.openai.api_server --model /tmp/osoi5-12k-baked --served-model-name gemma-4-e4b-it --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 1 --performance-mode interactivity --trust-remote-code --no-enable-log-requests --disable-uvicorn-access-log --max-num-batched-tokens 4096 --speculative-config {\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7} --generation-config vllm --override-generation-config {\"temperature\":0.0,\"top_p\":1.0,\"top_k\":0} --uvicorn-log-level warning",
+      "greedy_vs_reference": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 12,
+        "num_divergent": 116,
+        "total_divergent_tokens": 39736,
+        "onset_median": 117,
+        "identical_frac": 0.09375
+      },
+      "greedy_vs_control": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 13,
+        "num_divergent": 115,
+        "total_divergent_tokens": 36963,
+        "onset_median": 117,
+        "identical_frac": 0.1015625
+      },
+      "server_log": "research/maxbatchtok_ab/server_mbt4096.log",
+      "decode_jsonl": "research/maxbatchtok_ab/decode_mbt4096.jsonl",
+      "wandb_run_id": "q28zoru2",
+      "steady_tps_delta_vs_control": 5.385714285714357,
+      "steady_tps_frac_vs_control": 0.01202130034118826
+    },
+    "8192": {
+      "arm": "8192",
+      "label": "mbt8192",
+      "decode_wall_s": 152.80666065216064,
+      "completed": 128,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 144.64234232902527,
+      "wallclock_tps": 453.0900077027371,
+      "steady_gen_tps_mean": 449.5642857142857,
+      "steady_gen_tps_n": 14,
+      "e_accept_exact": 3.8758438689088006,
+      "ppl": null,
+      "ppl_error": "CalledProcessError(1, ['/tmp/senpai-venvs/5f4c623f772358a2/bin/python', '/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py', '--base-url', 'http://127.0.0.1:8000', '--model', 'gemma-4-e4b-it', '--dataset-path', '/workspace/senpai/target/official/m",
+      "arm_wall_s": 253.59702110290527,
+      "splitkv_wrapped": true,
+      "splitkv_redirect_count": 5,
+      "splitkv_redirect_M_values": [
+        8
+      ],
+      "splitkv_fallback_count": 0,
+      "splitkv_engaged": true,
+      "served_max_num_batched_tokens": 8192,
+      "maxbatchtok_warning_lines": [
+        "(APIServer pid=69338) INFO 06-13 23:31:05 [api_utils.py:273] non-default args: {'host': '127.0.0.1', 'uvicorn_log_level': 'warning', 'disable_uvicorn_access_log': True, 'model': '/tmp/osoi5-12k-baked', 'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 4096, 'served_model_name': ['gemma-4-e4b-it'], 'generation_config': 'vllm', 'override_generation_config': {'temperature': 0.0, 'top_p",
+        "(APIServer pid=69338) INFO 06-13 23:31:06 [scheduler.py:239] Chunked prefill is enabled with max_num_batched_tokens=8192.",
+        "(APIServer pid=69338) WARNING 06-13 23:31:06 [scheduler.py:281] max_num_batched_tokens (8192) exceeds max_num_seqs * max_model_len (4096). This may lead to unexpected behavior."
+      ],
+      "maxbatchtok_warned": true,
+      "engine_oom": true,
+      "engine_dead": true,
+      "launch_cmd": "/tmp/senpai-venvs/5f4c623f772358a2/bin/python -m vllm.entrypoints.openai.api_server --model /tmp/osoi5-12k-baked --served-model-name gemma-4-e4b-it --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 1 --performance-mode interactivity --trust-remote-code --no-enable-log-requests --disable-uvicorn-access-log --max-num-batched-tokens 8192 --speculative-config {\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7} --generation-config vllm --override-generation-config {\"temperature\":0.0,\"top_p\":1.0,\"top_k\":0} --uvicorn-log-level warning",
+      "greedy_vs_reference": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 12,
+        "num_divergent": 116,
+        "total_divergent_tokens": 39054,
+        "onset_median": 117,
+        "identical_frac": 0.09375
+      },
+      "greedy_vs_control": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 14,
+        "num_divergent": 114,
+        "total_divergent_tokens": 37258,
+        "onset_median": 114,
+        "identical_frac": 0.109375
+      },
+      "server_log": "research/maxbatchtok_ab/server_mbt8192.log",
+      "decode_jsonl": "research/maxbatchtok_ab/decode_mbt8192.jsonl",
+      "wandb_run_id": "k76d5d0a",
+      "steady_tps_delta_vs_control": 1.5500000000000114,
+      "steady_tps_frac_vs_control": 0.0034597111061509776
+    }
+  },
+  "wandb_runs": {
+    "512": "3756geng",
+    "2048": "3vvsjm10",
+    "4096": "q28zoru2",
+    "8192": "k76d5d0a"
+  }
+}
