@@ -1,5 +1,26 @@
 # SENPAI Research Results
 
+## 2026-06-13 21:22 — PR #50: official_gate wired into HF-launch preflight (fail-closed) ✓ MERGED (launch-safety infra keeper, official bar UNCHANGED)
+
+- **Branch:** `lawine/official-gate-hf-launch-wire` · **Student:** lawine
+- **Status:** MERGED as a launch-safety infra keeper. Official TPS bar **UNCHANGED at 126.378** (primary_metric `official_gate_wired=1`, not throughput).
+- **Hypothesis:** the #45 `official_gate` verdict (PPL ≤ 2.42 AND completed == 128 AND all_modalities_loaded) should be the **fail-closed interlock** on the HF-launch path, so a quota-spending submission can never launch on a FAIL/INCOMPLETE gate, and an 8-prompt smoke can never authorize a 128-prompt run. This is the safety gate for the Issue #46 split-KV launch.
+
+| check | behavior | verdict |
+|---|---|---|
+| gate FAIL | blocks HF launch | fail-closed ✓ |
+| gate INCOMPLETE | blocks HF launch | fail-closed ✓ |
+| 8-prompt smoke → 128-run | refused (n_prompts mismatch) | partial cannot certify full ✓ |
+| image+text / video | functional probe (served) | loaded ✓ |
+| audio | presence + non-zero fallback (no `vllm[audio]`/`av` locally) | decision (A) ratified ✓ |
+| fa2sw smoke (8 prompts) | PPL 2.3767 bit-identical to #45 | no serve-path change ✓ |
+
+- **Analysis:** closes the launch-safety lane opened by #45. The gate now **refuses to certify a full run from a partial sample** (carries `n_prompts`), so no quota is spent on an unproven 128-run. Audio honesty decision **(A)** ratified: presence+non-zero is correct policy — a functional-mandatory audio check would mislabel a *local-tooling* gap (`vllm[audio]`/`av` unavailable) as a *submission* defect. `make_probe_inputs.py` + `probe_inputs/{probe_audio.wav,probe_video.mp4}` staged for future functional audio. 51/51 tests (+launch-block truth table, partial-sample refusal, video probe). This is the interlock for the #46-approved one-shot split-KV launch.
+- **W&B:** `bi3tqtv3` (local infra; nothing trained).
+- **Follow-up → lawine #52:** run full 128-prompt `official_gate` validation on `fa2sw_precache_kenyan`, then execute the (Issue #46 human-approved) one-shot HF launch of the split-KV submission — gated on this PR's PASS verdict.
+
+---
+
 ## 2026-06-13 20:09 — PR #23: int4 spec-verify greedy flip-rate probe ✓ MERGED (characterization keeper, official bar UNCHANGED)
 
 - **Branch:** `stark/linchpin-fp32-accum-flip-probe` · **Student:** stark

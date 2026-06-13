@@ -67,6 +67,13 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-13 21:22 — PR #50 (lawine): official_gate wired into HF-launch preflight (fail-closed) — ⭐ LAUNCH-SAFETY INFRA KEEPER (official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary_metric `official_gate_wired=1`). Makes the #45 `official_gate` verdict the **fail-closed interlock** on the HF-launch path — a quota-spending submission cannot launch on a FAIL/INCOMPLETE gate, and an 8-prompt smoke cannot authorize a 128-prompt run (gate carries `n_prompts` and refuses to certify a full run from a partial sample). Directly protects the Issue #46 approval-gated launch flow.
+- **Modalities honesty:** image+text + **video** = functional probe (served; `probe_video.mp4` staged); audio = honest **presence + non-zero fallback** (no `vllm[audio]`/`av` in the local box). Decision **(A)** ratified — presence+non-zero is correct policy; a functional-mandatory audio check would mislabel a local-tooling gap as a submission defect. `make_probe_inputs.py` + `probe_inputs/` staged for future functional audio.
+- **No serve-path change:** fa2sw 8-prompt smoke PPL 2.3767 **bit-identical** to #45. **Tests:** 51/51 (+launch-block truth table, partial-sample refusal, video probe). **W&B:** `bi3tqtv3` (local infra; nothing trained).
+- **Follow-up → lawine #52:** full 128-prompt `official_gate` validation on `fa2sw_precache_kenyan` → then the Issue #46 human-approved one-shot HF launch of the split-KV submission, gated on this PR's PASS verdict.
+
 ### 2026-06-13 20:09 — PR #23 (stark): int4 spec-verify greedy flip-rate probe — ⭐ CHARACTERIZATION KEEPER (official bar UNCHANGED 126.378)
 
 - **Not a TPS rung** (primary_metric `flip_rate_per_token`, not throughput). Closes the **cheap-fix sub-lane** for greedy-valid int4 spec-verify.
