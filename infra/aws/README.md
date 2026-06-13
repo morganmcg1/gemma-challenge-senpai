@@ -87,6 +87,11 @@ EC2 key pair:    gemma-a10g
 Local key file:  /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem
 ```
 
+Operational rule: try SSH before reaching for AWS APIs. SSH uses the local key
+and can still work even when SSO or temporary AWS credentials are expired. Use
+AWS only when SSH cannot connect, when the node address may have changed, or
+when the SSH ingress rule needs to be updated.
+
 SSH:
 
 ```bash
@@ -136,13 +141,21 @@ Name:            gemma-a10g-ssh
 Ingress:         TCP 22 from 79.97.210.242/32
 ```
 
-If SSH times out and the instance is running, check your current public IP:
+If SSH times out at TCP connect and the instance is running, check your current
+public IP:
 
 ```bash
 curl https://checkip.amazonaws.com
 ```
 
 If it differs from `79.97.210.242`, add a new SSH ingress rule for the current `/32` or update `ALLOWED_SSH_CIDR` in `.env` before launching a replacement node.
+If AWS credentials are expired, refresh with:
+
+```bash
+aws sso login --profile sandbox-sso
+```
+
+Then discover the current node address and retry SSH.
 
 ## Launcher Commands
 
