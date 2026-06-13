@@ -1,0 +1,47 @@
+{
+  "purpose": "chat-heavy private-proxy prompt set, length-matched to the public 128, for the public->private TPS gap probe (PR #44)",
+  "source": {
+    "repo": "anon8231489123/ShareGPT_Vicuna_unfiltered",
+    "file": "ShareGPT_V3_unfiltered_cleaned_split.json",
+    "path": "/tmp/sharegpt_src/ShareGPT_V3_unfiltered_cleaned_split.json"
+  },
+  "seed": 44,
+  "num": 128,
+  "tokenizer": "/tmp/osoi5-v0-baked",
+  "candidate_cap": 8000,
+  "candidates_in_band": 6418,
+  "public_token_len_dist": {
+    "n": 128,
+    "min": 110,
+    "p10": 148,
+    "p25": 183,
+    "p50": 230,
+    "p75": 289,
+    "p90": 388,
+    "max": 2427,
+    "mean": 272.2
+  },
+  "proxy_token_len_dist": {
+    "n": 128,
+    "min": 110,
+    "p10": 148,
+    "p25": 183,
+    "p50": 230,
+    "p75": 289,
+    "p90": 388,
+    "max": 2427,
+    "mean": 272.2
+  },
+  "length_match_residual_tokens": {
+    "max": 1,
+    "mean": 0.04,
+    "p90": 0
+  },
+  "dedup": "hard text-hash + 80-char prefix guard vs public; unique within proxy",
+  "reasoning_markers_excluded": [
+    "the last line of your response should be",
+    "answer the following multiple choice question",
+    "$letter",
+    "answer: $"
+  ]
+}
