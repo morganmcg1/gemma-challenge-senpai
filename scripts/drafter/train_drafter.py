@@ -215,6 +215,12 @@ def main():
     run_loss = defaultdict(float)
     run_n = 0
     dist_loss = defaultdict(lambda: [0.0, 0])
+    # Per-unroll-depth loss + sample count. With the rejection-aware break, deep
+    # steps (d>=2) are only scored on chains that stayed on-trajectory through the
+    # earlier steps, so a high d2/d3 loss or a collapsing d>=2 count is the
+    # "deep-step starvation" signature (EAGLE-3 avoids it via tree masks; we watch
+    # for it instead). Reset every log interval alongside run_loss.
+    depth_run = [[0.0, 0] for _ in range(args.draft_steps)]
     opt.zero_grad(set_to_none=True)
     t_train = time.time()
     stop = False
@@ -280,6 +286,7 @@ def main():
                                                     alpha=args.alpha, temperature=args.temperature)
                     ex_loss = ex_loss + loss
                     kl_acc += kl.item(); ce_acc += ce.item(); fr_acc += fr.item(); nterms += 1
+                    depth_run[d][0] += loss.item(); depth_run[d][1] += 1
                     cur_h = d_hidden                                # draft's own hidden (free-run)
                     if d < D - 1:
                         # next input token: draft's OWN argmax (EAGLE-3, detached index) w.p. fr_p,
@@ -331,9 +338,12 @@ def main():
                     toks_s = seen_pos / (time.time() - t_train)
                     fr_frac = seen_freerun / max(1, seen_decision)
                     dv_frac = seen_diverge / max(1, seen_freerun)
+                    depth_avg = [depth_run[d][0] / max(1, depth_run[d][1]) for d in range(args.draft_steps)]
+                    depth_reach = [depth_run[d][1] / max(1, depth_run[0][1]) for d in range(args.draft_steps)]
                     msg = (f"[e{epoch} s{gstep}/{total_steps}] loss={avg['loss']:.4f} "
                            f"kl={avg['kl']:.4f} ce={avg['ce']:.4f} frac={avg['frac']:.3f} "
                            f"frun_p={fr_p:.2f} frun={fr_frac:.2f} div={dv_frac:.2f} "
+                           f"d_loss={[round(x,2) for x in depth_avg]} d_reach={[round(x,2) for x in depth_reach]} "
                            f"gn={float(gnorm):.2f} lr={lr_now:.2e} pos/s={toks_s:.0f} "
                            f"mem={torch.cuda.max_memory_allocated()/1e9:.1f}GB")
                     print(msg, flush=True)
@@ -345,11 +355,15 @@ def main():
                                     "train/free_run_prob": fr_p, "train/free_run_frac": fr_frac,
                                     "train/diverge_frac": dv_frac,
                                     "mem_gb": torch.cuda.max_memory_allocated() / 1e9})
+                        for d in range(args.draft_steps):
+                            log[f"train/loss_depth{d}"] = depth_avg[d]
+                            log[f"train/reach_depth{d}"] = depth_reach[d]
                         for d, (s, n) in dist_loss.items():
                             if n:
                                 log[f"train/loss_{d}"] = s / n
                         wandb.log(log)
                     run_loss = defaultdict(float); run_n = 0
+                    depth_run = [[0.0, 0] for _ in range(args.draft_steps)]
 
     # save
     drafter.save_pretrained(args.out)
