@@ -30,7 +30,7 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 | student | PR | track | target |
 |---|---|---|---|
 | fern | #10 (WIP) | **SAM-Decoding offline suffix-run token-budget analysis** (Rank 5 step 1) | confirm 3.6–3.9% verbatim-run budget on 128 bench prompts; go/no-go for Triton work |
-| stark | #3 (WIP) | **int4 QAT W4A16** reproduction | ~95 TPS / PPL ~2.01, base of the stack |
+| stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11)** | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
 | lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant | ~127 TPS / PPL ~2.02, weight-byte floor |
 | kanna | #5 (WIP) | **MTP / QAT-drafter** spec-decode stand-up | ~285 TPS, greedy-identical, acceptance ~3.3 |
 | ubel | #6 (WIP) | **vocab-prune / top-k sparse-verify** w/ greedy-identity guard | private-stable verify-cost lever |
@@ -62,6 +62,11 @@ Round-2 researcher-agent deep-dive complete → full writeup + dead-end map + de
    follow-up once kanna's drafter (#5) serves, or the first round-2 assignment.
 5. **GPU-side SAM-Decoding suffix match** (in-graph, no host round-trip) — **fern PR #10 in
    flight (offline token-budget analysis, step 1).** Go/no-go for the Triton-kernel follow-up.
+
+**Staged for stark (after PR #3 merges):** EAGLE-3 feature-export feasibility check — branch
+`stark/eagle3-feature-export-feasibility` exists (pushed); PR to be created when stark is idle.
+Binary question: are multi-layer hiddens accessible from vLLM Gemma 4 E4B forward pass? Gates the
+full EAGLE-3 training run (Rank 3; projected 480-550 TPS if tok/fwd reaches 5-6).
 
 Pending earlier threads (still open): provably-greedy sparse verification (ubel's #6 is the
 round-1 version); the `DECODE_TPS_CAP` PENDING leaderboard entries (confirm cap-gaming vs. real

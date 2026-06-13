@@ -1,5 +1,48 @@
 # SENPAI Research Results
 
+## 2026-06-13 09:00 — PR #3: Reproduce int4 QAT W4A16 leader (~95 TPS) [IN PROGRESS — awaiting HF Job]
+
+- **Branch:** `stark/int4-qat-w4a16`
+- **Student:** stark
+- **Status:** WIP — local evidence complete; awaiting human approval of HF Job (GitHub issue #11)
+  before posting terminal SENPAI-RESULT with official a10g-small numbers.
+- **Hypothesis:** Stock vLLM 0.22.0 Marlin int4 W4A16 endpoint on `google/gemma-4-E4B-it-qat-w4a16-ct`
+  reproduces the ~95.4 TPS / PPL ~2.01 VALID leader. The dominant lever: int4 weight quantization
+  reduces bandwidth by ~4×, lifting TPS from 44 → ~95 with better PPL (QAT-trained).
+
+### Local Results (exploratory, A10G — NOT official a10g-small)
+
+| metric | value | gate | pass? |
+|---|---|---|---|
+| Local PPL (128/128 GT records) | **2.0055** | ≤ 2.42 | ✓ |
+| Local TPS (exploratory, A10G, 32 prompts) | **95.99** | — | on target ~95.4 |
+| Marlin kernel | `MarlinLinearKernel for CompressedTensorsWNA16` | — | ✓ confirmed |
+| All modalities | vision/audio encoder cache initialized | — | ✓ |
+| CUDA graphs | `FULL_AND_PIECEWISE`, no eager fallback | — | ✓ |
+| Peak GPU memory | ~21.1 GiB / 23 GiB | — | no OOM |
+| W&B run | none (serving task, no training) | — | — |
+
+### Key Finding — Greedy-Identity Nondeterminism
+
+stark discovered that the int4+vLLM endpoint is **run-to-run nondeterministic** for greedy decode
+at output_len=512: Marlin split-K GEMM / Triton-attn FP non-associativity introduces ~1 ULP noise
+at near-tie logit positions, cascading to token-flip divergences at a handful of hotspots (idx 83,
+104 consistently). Cross-path comparison (HF bf16 dense GEMM vs vLLM Marlin int4) always diverges
+— different arithmetic paths.
+
+**Advisor ruling:** NOT a blocker. The as-is stock int4 Marlin leader (~95.4 TPS, same stack) is
+VALID on the official leaderboard. This submission IS that stack. Within-stack greedy identity
+(same vLLM endpoint, same job run) is consistent; the official harness compares decode_outputs.jsonl
+generated from the same serving instance. Determinism study deferred — not needed for this rung.
+
+### Next Steps
+
+- Human approves GitHub issue #11 → stark runs `python train.py --submission submissions/int4_qat --name int4-qat --launch --wait`
+- Official a10g-small TPS/PPL confirmed → stark posts terminal SENPAI-RESULT to PR #3
+- Advisor merges PR #3 → updates ladder (int4 rung officially confirmed)
+
+---
+
 ## 2026-06-13 08:40 — PR #2: Resolve PPL artifact path + validate bf16 baseline locally
 
 - **Branch:** `fern/vllm-baseline-ppl-resolution`
