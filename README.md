@@ -151,12 +151,21 @@ This spends HF Jobs quota/credits, so do it deliberately.
 
 ## A10G EC2 Node
 
-The AWS helper starts and terminates EC2 G5 instances with NVIDIA A10G GPUs:
+The AWS helper starts and terminates EC2 G5 instances with NVIDIA A10G GPUs.
+Current live AWS capacity for this repo is **8 A10G GPUs total**:
+
+- primary node: `i-0554325ee1d640aaf` (`g5.48xlarge`)
 
 ```bash
 uv run a10g check-auth
 uv run a10g plan
 uv run a10g launch
+```
+
+SSH to the 8-GPU node:
+
+```bash
+ssh -i /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem ubuntu@ec2-107-22-25-10.compute-1.amazonaws.com
 ```
 
 For current infrastructure handoff details, see
