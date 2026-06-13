@@ -38,10 +38,14 @@ many prompts as the candidate decode: validating at ``--num-prompts 128`` needs 
 128-prompt reference (a shorter one reads INCOMPARABLE). For
 ``submissions/fa2sw_precache_kenyan`` the canonical reference is
 research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/
-generated at 128 prompts with the drafter OFF via ``--ref-env SPECULATIVE_CONFIG=``
-(this submission's serve.py maps SPECULATIVE_CONFIG -> --speculative-config and does
-NOT honor ``--spec-off``/SENPAI_REFERENCE_MODE, so the empty-string override is how
-its MTP drafter is disabled for the M=1 AR anchor).
+generated at 128 prompts with the drafter OFF. ``fa2sw_precache_kenyan`` (and the
+other spec stacks, ``lf29cap444_pupa_check`` + ``int4_mtp_batchinv``) now honor
+``--spec-off``/SENPAI_REFERENCE_MODE directly — their serve.py clears the drafter
+when the reference-mode env is set — so the one-flag ``--spec-off`` is the
+canonical way to disable the MTP drafter for the M=1 AR anchor. (The committed
+128-prompt reference predates that fix and was generated with the equivalent
+``--ref-env SPECULATIVE_CONFIG=`` override, which empties the env string serve.py
+maps to --speculative-config; that path still works and stays as a fallback.)
 
 Tokenization and record IDs come from the official ``decode_outputs.py`` so the
 reference lines up prompt-for-prompt with a live endpoint capture.
@@ -53,8 +57,11 @@ reference cannot be borrowed from the bf16 base or a verify-path capture. Pass
 ``--submission <dir> --spec-off`` to serve the submission's own engine with
 ``SENPAI_REFERENCE_MODE=1`` injected; a drafter ``serve.py`` honoring that
 contract (see ``paths.REFERENCE_MODE_ENV``) then serves plain M=1 AR, isolating
-speculation as the only removed variable. Submissions with a non-standard knob
-can add ``--ref-env KEY=VALUE`` (which wins over ``--spec-off``).
+speculation as the only removed variable. The repo's spec stacks
+(``fa2sw_precache_kenyan``, ``lf29cap444_pupa_check``, ``int4_mtp_batchinv``) all
+honor it, so ``--spec-off`` alone is the canonical path. ``--ref-env KEY=VALUE``
+(which wins over ``--spec-off``) remains as a fallback for any future submission
+whose serve.py does not yet honor the contract.
 
 Run with a python that has vLLM (the server venv), from the repo root:
     # plain base checkpoint (baseline can't speculate -> already M=1 AR):

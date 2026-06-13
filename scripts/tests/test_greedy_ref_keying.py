@@ -25,6 +25,8 @@ Run: ``python -m pytest scripts/tests/test_greedy_ref_keying.py -v``
 """
 from __future__ import annotations
 
+import contextlib
+import importlib.util
 import json
 import os
 import sys
@@ -214,6 +216,135 @@ def test_localserver_init_runs_bare_tag_guard():
         sub = _write_submission(Path(tmp) / "sub", env_model_id="model", bundle=True)
         srv = harness.LocalServer(sub, server_python=Path("/usr/bin/python3"), port=8000)
         assert "::" in srv.reference_model_id and srv.reference_model_id != "model"
+
+
+# --------------------------------------------------------------------------- #
+# reference-mode contract: spec submissions honor SENPAI_REFERENCE_MODE (PR #42)
+# --------------------------------------------------------------------------- #
+def _load_serve_module(submission_name: str):
+    """Import a submission's serve.py by path. Module-level code in every spec
+    serve.py is stdlib-only (no torch/vLLM, no model load, no network), so this is
+    CPU-only — it exercises the reference-mode arg-gating logic in isolation."""
+    path = SUBMISSIONS / submission_name / "serve.py"
+    spec = importlib.util.spec_from_file_location(f"_serve_{submission_name}", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+@contextlib.contextmanager
+def _env(**overrides):
+    """Temporarily set (str) or clear (None) env vars, restoring prior state."""
+    saved = {k: os.environ.get(k) for k in overrides}
+    try:
+        for k, v in overrides.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        yield
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
+SPEC_JSON = '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}'
+
+
+def test_fa2sw_spec_off_clears_speculative_config():
+    """fa2sw serve.py honors the contract: SENPAI_REFERENCE_MODE truthy clears
+    SPECULATIVE_CONFIG so vLLM serves M=1 AR (speculative_config=None); unset
+    leaves the drafter config intact so the leaderboard serving path is untouched.
+    This is the silent-no-op footgun PR #40 documented, now fixed at the root."""
+    mod = _load_serve_module("fa2sw_precache_kenyan")
+    with _env(SENPAI_REFERENCE_MODE="1", SPECULATIVE_CONFIG=SPEC_JSON):
+        assert mod.reference_mode_active() is True
+        assert mod.disable_speculation_for_reference_mode() is True
+        assert os.environ.get("SPECULATIVE_CONFIG") == ""
+        args: list[str] = []
+        mod.append_env_arg(args, "SPECULATIVE_CONFIG", "--speculative-config")
+        assert "--speculative-config" not in args, "drafter not actually disabled"
+    with _env(SENPAI_REFERENCE_MODE=None, SPECULATIVE_CONFIG=SPEC_JSON):
+        assert mod.reference_mode_active() is False
+        assert mod.disable_speculation_for_reference_mode() is False
+        assert os.environ.get("SPECULATIVE_CONFIG") == SPEC_JSON
+        args = []
+        mod.append_env_arg(args, "SPECULATIVE_CONFIG", "--speculative-config")
+        assert args == ["--speculative-config", SPEC_JSON], "leaderboard path changed"
+
+
+def test_lf29_spec_off_clears_speculative_config():
+    """lf29cap444_pupa_check (same append_env_arg drafter knob as fa2sw) honors the
+    contract identically."""
+    mod = _load_serve_module("lf29cap444_pupa_check")
+    with _env(SENPAI_REFERENCE_MODE="1", SPECULATIVE_CONFIG=SPEC_JSON):
+        assert mod.disable_speculation_for_reference_mode() is True
+        assert os.environ.get("SPECULATIVE_CONFIG") == ""
+    with _env(SENPAI_REFERENCE_MODE=None, SPECULATIVE_CONFIG=SPEC_JSON):
+        assert mod.disable_speculation_for_reference_mode() is False
+        assert os.environ.get("SPECULATIVE_CONFIG") == SPEC_JSON
+
+
+def test_int4_mtp_batchinv_spec_off_forces_zero_tokens():
+    """int4_mtp_batchinv uses a different knob (NUM_SPECULATIVE_TOKENS -> a JSON
+    --speculative-config dict), so the contract forces num_speculative_tokens=0
+    under reference mode (skipping the spec-config block -> speculative_config=None)
+    and leaves the served default intact otherwise."""
+    mod = _load_serve_module("int4_mtp_batchinv")
+    with _env(SENPAI_REFERENCE_MODE="1"):
+        assert mod.reference_mode_active() is True
+        assert mod.reference_mode_num_spec(6) == 0
+        assert mod.reference_mode_num_spec(0) == 0
+    with _env(SENPAI_REFERENCE_MODE=None):
+        assert mod.reference_mode_active() is False
+        assert mod.reference_mode_num_spec(6) == 6
+
+
+def test_reference_mode_active_truthiness():
+    """The predicate matches the documented 'truthy' contract (paths.py): '1' (what
+    gen_greedy_reference --spec-off injects) and other non-empty non-'0' values are
+    active; unset / '' / '0' are not — so a stray falsy value never disables the
+    leaderboard drafter."""
+    mod = _load_serve_module("fa2sw_precache_kenyan")
+    for val, expected in [("1", True), ("reference", True), ("0", False), ("", False), (None, False)]:
+        with _env(SENPAI_REFERENCE_MODE=val):
+            assert mod.reference_mode_active() is expected, f"value {val!r}"
+
+
+# --------------------------------------------------------------------------- #
+# validator N-mismatch legibility (PR #42)
+# --------------------------------------------------------------------------- #
+def test_reference_num_records_reads_meta_then_summary():
+    """greedy_gate.reference_num_records reads num_records from a reference's
+    sibling meta.json, falling back to decode_summary.json, and returns None when
+    neither is present."""
+    with tempfile.TemporaryDirectory() as tmp:
+        ref = Path(tmp) / "decode_outputs.jsonl"
+        ref.write_text("")  # content irrelevant; only the sibling metas are read
+        assert greedy_gate.reference_num_records(ref) is None
+        (ref.parent / "decode_summary.json").write_text(json.dumps({"num_records": 32}))
+        assert greedy_gate.reference_num_records(ref) == 32
+        # meta.json (the canonical reference metadata) wins over decode_summary.json
+        (ref.parent / "meta.json").write_text(json.dumps({"num_records": 128}))
+        assert greedy_gate.reference_num_records(ref) == 128
+
+
+def test_reference_n_mismatch_trip_condition():
+    """A reference holding fewer records than the requested --num-prompts is the
+    INCOMPARABLE footgun the validator now warns about. ref_n < num_prompts is the
+    exact trip condition that writes reference_n_mismatch=true; an equal/greater
+    count does not trip."""
+    with tempfile.TemporaryDirectory() as tmp:
+        ref = Path(tmp) / "decode_outputs.jsonl"
+        ref.write_text("")
+        (ref.parent / "meta.json").write_text(json.dumps({"num_records": 32}))
+        ref_n = greedy_gate.reference_num_records(ref)
+        assert ref_n == 32
+        assert ref_n < 128, "32-record reference must trip the mismatch at --num-prompts 128"
+        assert not ref_n < 32, "a matched record count must NOT trip the mismatch"
 
 
 # --------------------------------------------------------------------------- #
