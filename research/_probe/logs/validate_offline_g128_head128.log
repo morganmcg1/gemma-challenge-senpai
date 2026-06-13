@@ -1,0 +1,17 @@
+[init] ckpt=/workspace/gemma_build/int4_g128_lmhead device=cuda torch=2.11.0+cu130
+[config] ok | body gs=128 | head gs=128 strategy=group | ignore=249 | version=0.15.0.1
+[decompress] dequantized 344 quantized tensors (343 body + lm_head expected) -> all finite
+[untie] lm_head identical to embed_tokens? False (expect False -- head is int4, embed is bf16)
+[load] text model loaded strict-ish | unexpected=0 | missing(buffers only)=0 []
+  scored 32/128 (running ppl=1.9823)
+  scored 64/128 (running ppl=2.0665)
+  scored 96/128 (running ppl=2.0632)
+  scored 128/128 (running ppl=2.0197)
+[ppl] {
+  "ppl": 2.019671567035295,
+  "mean_record_ppl": 2.1793741262714406,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "neg_log_likelihood": 43439.26848602295
+}
+[verdict] token-weighted PPL=2.0197 (cap 2.42) -> PASS
