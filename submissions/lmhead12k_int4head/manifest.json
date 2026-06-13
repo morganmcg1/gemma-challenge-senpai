@@ -1,0 +1,24 @@
+{
+  "name": "lmhead12k-int4head",
+  "description": "lmhead12k with an int4-quantized pruned head: public W4A16 (int4) Gemma-4-E4B with lm_head weight rows pruned to the same frozen 12,288 kept ids as lmhead12k_empirical, but the pruned head is quantized to int4 W4A16 (group_size 128, pack-quantized) and served through the same compressed-tensors Marlin GEMV as the body. Untied embed_tokens stay full bf16; the lm_head per-token read drops ~62.9 MB bf16 -> ~16 MB int4 (~4x head-byte cut) on top of the row prune.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "compressed-tensors==0.15.0.1",
+    "transformers==5.9.0",
+    "./vllm_plugin"
+  ],
+  "model_id": "/workspace/gemma_build/lmhead12k_int4head",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MODEL_ID": "/workspace/gemma_build/lmhead12k_int4head",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

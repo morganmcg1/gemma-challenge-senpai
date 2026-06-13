@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vllm-lmhead12k"
+version = "0.1.0"
+description = "vLLM general plugin: register a row-pruned (lmhead12k) Gemma4 text model."
+requires-python = ">=3.10"
+
+# vLLM calls load_general_plugins() in EVERY process (API server launcher AND the
+# V1 EngineCore subprocess). The async OpenAI server requires multiprocessing, so
+# an in-process ModelRegistry.register_model() in serve.py would NOT reach the
+# worker that builds the model. Registering through this entry point is the
+# documented cross-process mechanism: the entry-point function runs in each
+# process and (lazily) registers the custom architecture.
+[project.entry-points."vllm.general_plugins"]
+lmhead12k = "vllm_lmhead12k:register"
+
+[tool.setuptools.packages.find]
+include = ["vllm_lmhead12k*"]

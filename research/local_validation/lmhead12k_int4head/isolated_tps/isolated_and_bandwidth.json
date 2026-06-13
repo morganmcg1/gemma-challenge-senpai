@@ -1,0 +1,51 @@
+{
+  "bandwidth_model": {
+    "fit": {
+      "body_gb": 3.612133535218212,
+      "bw_gb_s": 483.77524647567947,
+      "intercept_b_over_bw": 0.0074665530358006904,
+      "slope_inv_bw": 0.00206707558372413
+    },
+    "note": "TPS = BW/(B+head_GB); least-squares on 1/TPS vs head_GB over same-session points. PR projection used BW~483 GB/s, B~3.61 GB.",
+    "points": [
+      {
+        "head_gb": 1.34217728,
+        "name": "unpruned_int4",
+        "tps_measured": 97.64669771623697,
+        "tps_pred_from_fit": 97.64733471902117
+      },
+      {
+        "head_gb": 0.06291456,
+        "name": "bf16_head_12k",
+        "tps_measured": 131.67068206445532,
+        "tps_pred_from_fit": 131.6378000889685
+      },
+      {
+        "head_gb": 0.016220176,
+        "name": "int4_head_12k",
+        "tps_measured": 133.29935711311472,
+        "tps_pred_from_fit": 133.33188684993254
+      }
+    ]
+  },
+  "created_at": "2026-06-13T18:50:30Z",
+  "head_gb_by_checkpoint": {
+    "bf16_head_12k": 0.06291456,
+    "int4_head_12k": 0.016220176,
+    "unpruned_int4": 1.34217728
+  },
+  "isolated_head_dtype_delta": {
+    "abs_delta_tps": 1.628675048659403,
+    "bf16_head_bytes": 62914559,
+    "bf16_head_tps_same_session": 131.67068206445532,
+    "int4_head_bytes": 16220176,
+    "int4_head_tps_same_session": 133.29935711311472,
+    "note": "single variable: identical int4 body + kept_ids + plugin/stack; ONLY lm_head dtype changes (bf16 62.9 MB -> int4 16.2 MB).",
+    "pct_delta": 1.2369306690931665
+  },
+  "tps_same_session": {
+    "bf16_head_12k": 131.67068206445532,
+    "int4_head_12k": 133.29935711311472,
+    "unpruned_int4": 97.64669771623697
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "summary": "Pruned 12,288-row lm_head quantized bf16 -> int4 W4A16 (g128). Per-token decode head read drops 62.9 MB -> 16.22 MB (3.879x). Served as a real Marlin int4 GEMV (CompressedTensorsWNA16 / MarlinLinearKernel), NOT dequant-to-bf16.",
+  "kept_size": 12288,
+  "hidden": 2560,
+  "head_group_size": 128,
+  "scheme": "int4 W4A16 symmetric group pack-quantized (compressed-tensors)",
+  "bf16_head_bytes": 62914560,
+  "bf16_head_MB": 62.915,
+  "int4_head_bytes": 16220176,
+  "int4_head_MB": 16.22,
+  "byte_cut_x_vs_bf16": 3.879,
+  "quant_rel_err": 0.09344,
+  "on_disk": {
+    "weight_packed_shape": [12288, 320],
+    "weight_packed_dtype": "int32",
+    "weight_scale_shape": [12288, 20],
+    "weight_scale_dtype": "bfloat16",
+    "int4_packed_bytes": 15728640,
+    "int4_scale_bytes": 491520,
+    "note": "compressed-tensors pack-quantized layout on disk"
+  },
+  "served": {
+    "served_head_dtype": "int4-W4A16-marlin",
+    "served_head_bytes": 16220176,
+    "served_head_MB": 16.22,
+    "quant_method": "CompressedTensorsLinearMethod",
+    "scheme": "CompressedTensorsWNA16",
+    "kernel": "MarlinLinearKernel",
+    "weight_packed_shape_marlin": [160, 24576],
+    "weight_packed_dtype": "int32",
+    "weight_scale_shape": [20, 12288],
+    "weight_scale_dtype": "bfloat16",
+    "evidence_log": "research/local_validation/lmhead12k_int4head/smoke/serve.log (line: 'Using MarlinLinearKernel for CompressedTensorsWNA16' + '[lmhead12k_int4head] served head: ...')",
+    "note": "vLLM 0.22.0 repacks the on-disk pack-quantized head to the Marlin int4 kernel at load; this is the AUTHORITATIVE proof the head runs as int4 (~16 MB) at serve time."
+  }
+}
