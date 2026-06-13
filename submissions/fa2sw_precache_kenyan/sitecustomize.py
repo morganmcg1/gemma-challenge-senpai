@@ -44,6 +44,53 @@ _FUSED_ACCEPT_PREP_CACHE: dict[int, tuple[Any, Any]] = {}
 _LOOPGRAPH_SLOT_EVENTS_BY_PTR: dict[int, Any] = {}
 _LOOPGRAPH_SLOT_EVENT_RECORDED_BY_PTR: dict[int, bool] = {}
 
+# --- drafter token-frequency logit bias (PR #48, experiment-only) -------------
+# Additive bias on the DRAFTER's candidate scores, applied to the top-K most
+# frequent corpus tokens before the drafter argmax. Verifier output is untouched
+# (greedy spec decode emits the target argmax regardless of drafter proposals),
+# so PPL / greedy-identity cannot change — only acceptance rate / TPS can move.
+# DEFAULT-OFF: with DRAFTER_FREQ_BIAS unset/0 the drafter path is byte-identical
+# to the merged leaderboard stack (the fused sparse-argmax kernel runs unchanged).
+# When active, the fused kernel is bypassed for the exact-equivalent PyTorch
+# sparse path so the bias can be added by candidate token id, then argmax.
+DRAFTER_FREQ_BIAS = float(os.environ.get("DRAFTER_FREQ_BIAS", "0") or "0")
+DRAFTER_FREQ_BIAS_TOPK = int(os.environ.get("DRAFTER_FREQ_BIAS_TOPK", "500"))
+DRAFTER_FREQ_BIAS_TOKENS = os.environ.get("DRAFTER_FREQ_BIAS_TOKENS", "")
+_FREQ_BIAS_TABLE: Any | None = None  # lazy persistent [vocab] device tensor
+
+
+def _freq_bias_active() -> bool:
+    return DRAFTER_FREQ_BIAS != 0.0 and bool(DRAFTER_FREQ_BIAS_TOKENS)
+
+
+def _get_freq_bias_table(vocab_size: int, device: Any, dtype: Any) -> Any:
+    """Build (once) a persistent [vocab] bias vector: +DRAFTER_FREQ_BIAS at the
+    top-K frequent token ids, 0 elsewhere. Persistent + static-shape => safe to
+    gather inside the onegraph CUDA-graph capture (built during warmup)."""
+    global _FREQ_BIAS_TABLE
+    if _FREQ_BIAS_TABLE is not None:
+        return _FREQ_BIAS_TABLE
+    import json as _json
+
+    import torch
+
+    with open(DRAFTER_FREQ_BIAS_TOKENS) as fh:
+        spec = _json.load(fh)
+    ids = [int(t) for t in spec.get("top_k_token_ids", [])][:DRAFTER_FREQ_BIAS_TOPK]
+    table = torch.zeros(int(vocab_size), dtype=dtype, device=device)
+    if ids:
+        idx = torch.tensor(ids, dtype=torch.long, device=device)
+        table.index_fill_(0, idx, float(DRAFTER_FREQ_BIAS))
+    _FREQ_BIAS_TABLE = table
+    print(
+        f"[drafter-freq-bias] built bias table: +{DRAFTER_FREQ_BIAS} on "
+        f"{len(ids)}/{DRAFTER_FREQ_BIAS_TOPK} top tokens (vocab={vocab_size}, "
+        f"dtype={dtype}, src={DRAFTER_FREQ_BIAS_TOKENS!r}) in pid {os.getpid()}",
+        file=sys.stderr,
+        flush=True,
+    )
+    return _FREQ_BIAS_TABLE
+
 
 def _call_base_propose(base_propose: Any, self: Any, kwargs: dict[str, Any]) -> Any:
     return base_propose(self, **kwargs)
@@ -745,7 +792,20 @@ def _apply_fused_top_token_patch(module: Any) -> None:
         logits = torch.einsum("td,tsd->ts", hidden_states, embeddings)
         return logits, selected.view(num_tokens, -1)
 
+    def _biased_top_tokens(self: Any, hidden_states: Any, lm_head_weight: Any) -> Any:
+        """Frequency-biased drafter argmax (PR #48). Adds a static per-token bias
+        to the sparse candidate scores, then argmaxes — exact-equivalent to the
+        fused kernel at bias=0 (so bias=0 stays on the fused path; only b!=0 lands
+        here). Verifier argmax is unaffected => greedy identity / PPL unchanged."""
+        logits, selected = self._select_and_score(hidden_states, lm_head_weight)
+        table = _get_freq_bias_table(int(lm_head_weight.shape[0]), logits.device, logits.dtype)
+        logits = logits + table[selected]
+        best = logits.argmax(dim=-1)
+        return selected.gather(1, best.unsqueeze(1)).squeeze(1)
+
     def get_top_tokens_fused(self: Any, hidden_states: Any, lm_head_weight: Any) -> Any:
+        if _freq_bias_active():
+            return _biased_top_tokens(self, hidden_states, lm_head_weight)
         if not FUSED_SPARSE_ARGMAX:
             return original_get_top_tokens(self, hidden_states, lm_head_weight)
         try:
