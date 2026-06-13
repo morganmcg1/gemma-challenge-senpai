@@ -54,6 +54,18 @@ verify paths) is a first-class objective, not an afterthought.
     bf16, runs PPL + decode capture, prints `tps`/`ppl`/`completed`, no HF Jobs quota). Evidence
     artifacts under `research/local_validation/`.
 
+## Merge history
+
+### 2026-06-13 08:40 — PR #2: Resolve PPL artifact path + validate bf16 baseline locally
+
+- **Priority #1 resolved.** Root cause: 40-min HF Job wall-clock timeout (not OOM / disabled / unfetched).
+- **Local PPL:** 2.3012 (128/128 GT records; within ≤2.42 gate) ✓
+- **Local TPS (exploratory, A10G):** ~44.01 (16-prompt sample — not official a10g-small)
+- **W&B run:** none (local validation + infra, no training)
+- **New shared infra:** `scripts/local_prevalidate.py` — one-command local pre-validation for all future submissions.
+- **Reproduce:** `cd target/ && VLLM_USE_FLASHINFER_SAMPLER=0 python scripts/local_prevalidate.py --submission submissions/vllm_baseline --decode-num-prompts 16`
+  (Env-var is a local-box workaround for broken FlashInfer JIT; not needed on official a10g-small image.)
+
 ## Confirmed dead ends (do not re-spend on these)
 sub-4-bit weight kernels (AWQ/GPTQ/AQLM/QuIP#/2:4-Sparse-Marlin/NVFP4) — no loadable Ampere
 sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gram/prompt-lookup
