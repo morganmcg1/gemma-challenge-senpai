@@ -22,12 +22,21 @@ serving path and cannot affect greedy identity or TPS.
 > vLLM couples `echo`+`logprobs` → `SamplingParams.prompt_logprobs`
 > (`completion/protocol.py:276-277`), so the echo probe trips the same
 > `num_prompt_logprobs` exemption a real `prompt_logprobs` request does. **Net: the
-> gate is sound for *logit-level* path splits but blind to *argmax-preserving-on-
-> prefix, compounding-on-decode* folds like LF29 — those need `greedy_gate` (served
-> token identity), not teacher-forced PPL.** Full evidence + reproduction:
-> `research/validity/lf29cap444_pupa_check/FINDING.md`. The §1 / §5 / §7 claims
-> below that this gate "measures" or "condemns" the 2.55 split are **superseded** by
-> this note — see §8.
+> gate is sound for *logit-level* path splits but blind to *argmax-preserving*
+> grader-conditional folds like LF29.**
+>
+> **Second correction (greedy-gate follow-up, advisor-authorized — see §9).** The
+> note above predicted `greedy_gate` would be the load-bearing detector for the LF29
+> class (the fold "compounding-on-decode" via argmax flips). PR #22 then *ran*
+> `greedy_gate` against the deployed fold (fold-on vs exact-FFN, spec-off, 65,536
+> tokens): **`GREEDY_IDENTICAL`, 0 flips.** The deployed LF29 fold does **not** flip
+> the greedy argmax, so it does **not** compound on decode and the 2.55 is **not** a
+> free-running greedy PPL on these weights (identical text ⇒ identical PPL). **Both
+> output gates (same-path PPL *and* greedy identity) are clean on this lane; only
+> *mechanism inspection* of `serve.py`'s `num_prompt_logprobs` branch flags it.**
+> Full evidence: `research/validity/lf29cap444_pupa_check/FINDING.md`. The §1 / §5 /
+> §7 claims below that this gate, or `greedy_gate`, "measures" or "condemns" the 2.55
+> split are **superseded** by this note — see §8 and §9.
 
 ---
 
@@ -264,14 +273,18 @@ magnitude tells them apart:
   higher PPL on the same-path probe than on the scored path, even teacher-forced.
   A gap far above 0.05 condemns the lane. This gate catches *that* class.
 
-- **Argmax-preserving, decode-compounding folds (the actual LF29 `2.378 → 2.55`
-  lane).** ⚠️ **This gate does NOT catch this class** — see §8. The LF29 fold
-  perturbs a single layer's FFN so little that, *teacher-forced*, every target
-  token still scores essentially the exact-FFN logprob (gap `0.0000`). Its cost
-  shows up only under **free-running decode**, where an occasional argmax flip
-  changes the prefix and errors compound — the 2.55 is that free-running PPL. The
-  detector for this class is **`greedy_gate`** (served-token identity vs a spec-off
-  AR reference), not teacher-forced PPL.
+- **Argmax-preserving grader-conditional folds (the actual LF29 lane).** ⚠️ **No
+  output gate catches this class** — see §8 and §9. The LF29 fold perturbs a single
+  layer's FFN so little that, *teacher-forced*, every target token still scores
+  essentially the exact-FFN logprob (gap `0.0000`, §8) — **and** under free-running
+  greedy decode it never flips the argmax (0 / 65,536 tokens, §9). So it neither
+  degrades teacher-forced PPL **nor** compounds on decode. *(The earlier hypothesis
+  here — "the cost shows up under free-running decode as argmax flips; the 2.55 is
+  that free-running PPL; the detector is `greedy_gate`" — was tested in §9 and
+  **falsified**: greedy is identical, so the 2.55 is not a free-running greedy PPL on
+  these weights.)* The only thing that flags this lane is the **grader-conditional
+  branch itself** (`serve.py` keys layer-29's FFN on `num_prompt_logprobs`) —
+  caught by code inspection, not by any PPL or greedy-token measurement.
 
 **Limitation — be honest about scope.** This probe defeats *logit-level
 request-field branching on `prompt_logprobs`* (serving genuinely different logits
@@ -279,9 +292,12 @@ to the scored path). It is blind to four other classes:
 
 1. **Teacher-forced-neutral folds (the big one — see §8).** Both this probe and
    the official `ppl_endpoint` score *teacher-forced* PPL (each token conditioned
-   on the GT prefix). A fold that preserves the argmax on the GT prefix but
-   compounds error only under free-running decode (LF29) is invisible to both.
-   Use `greedy_gate`.
+   on the GT prefix). A fold that preserves the argmax on the GT prefix is invisible
+   to both. `greedy_gate` is the natural next test — but note (§9) that the *deployed*
+   LF29 fold also preserves the **free-running** argmax (0 flips), so greedy_gate is
+   clean too; for that specific lane only mechanism inspection (the
+   `num_prompt_logprobs` branch) flags it. `greedy_gate` remains the right detector
+   for folds that *do* flip under free-running decode.
 2. **`echo` → `prompt_logprobs` coupling.** vLLM's completion protocol sets
    `SamplingParams.prompt_logprobs = logprobs` for any `echo=True` request
    (`completion/protocol.py:276-277`), so this probe *does* populate
@@ -297,8 +313,10 @@ to the scored path). It is blind to four other classes:
 
 The honest framing for an approval issue: same-path PPL + `greedy_gate` close the
 **audit-vs-timed** gap for the *logit-level* field-branching attack class; they
-are necessary, not a universal anti-cheat — and for decode-compounding folds,
-`greedy_gate` is the load-bearing one.
+are necessary, not a universal anti-cheat. For *argmax-preserving* grader-conditional
+folds (the deployed LF29 lane) **both output gates are blind** (§9) — the
+load-bearing check there is **static inspection** of whether the server branches
+model behavior on a grader-only request field (`num_prompt_logprobs`).
 
 ---
 
@@ -333,3 +351,47 @@ Full write-up, evidence JSON, and the `confirm_fold_ppl.py` probe:
 documented in `research/validity/fa2sw_precache_notes.md` §4 (scope limit: a
 `gap 0` there proves no `prompt_logprobs` field-branch; it does not validate the
 precache replay, which is content-keyed and out of the GT span).
+
+---
+
+## 9. Greedy-gate follow-up against the live LF29 lane (PR #22, advisor-authorized)
+
+§7/§8 predicted `greedy_gate` would catch what teacher-forced PPL could not (the
+fold "compounding under free-running decode"). The advisor authorized the run; it
+**falsified** that prediction.
+
+**Design.** Isolate the fold, not the whole stack. Two served captures from the
+*same* `lf29cap444_pupa_check` submission, both spec-off (M=1 AR,
+`SPECULATIVE_CONFIG=""`), differing **only** in `LFFN_LINEAR`:
+
+| Stage | `LFFN_LINEAR` | layer-29 FFN on decode | tokens |
+|---|---|---|---|
+| reference | `0` (patch inert) | exact FFN | 65,536 |
+| candidate | `1` (default) | LF29 affine fold | 65,536 |
+
+`validate_submission --check-greedy` could not do this — its reference is keyed by
+*model id* (bf16 stock), which would conflate the fold with int4 quant + every other
+osoi5 optimization. Toggling only `LFFN_LINEAR` on an otherwise-identical served
+stack isolates the fold's marginal argmax effect.
+
+**Result: `GREEDY_IDENTICAL` — 0 / 65,536 divergent tokens, 128 / 128 prompts
+identical, 0 integrity failures.** flip_rate_per_token = **0.0**. W&B `gz5b064e`.
+
+**Fold provenance verified (candidate really ran the fold):**
+`candidate/served_reference_server.log` shows `[lffn] patched … ppl_exact=1` and
+**zero** `path=original_forward` markers — the exact-FFN exemption never fired
+(greedy requests carry no `prompt_logprobs`), so the fold ran on every layer-26
+forward. The reference log has no `[lffn] patched` line (`LFFN_LINEAR=0` ⇒ inert).
+
+**Implications (supersede §7/§8 where they name `greedy_gate` as the detector):**
+- The deployed LF29 fold is **argmax-safe**: it perturbs the logits too little
+  (teacher-forced footprint −0.0013 PPL, §8) to flip the top-1 anywhere in 65,536
+  tokens. PPL-neutral and argmax-identical are the same fact at two resolutions.
+- Because greedy text is identical, the community **2.55 cannot be a free-running
+  greedy PPL on these weights** — it is most likely a reconstructed fold (R²≈0.80,
+  not pupa's deployed weights) or a non-greedy regime.
+- **No output gate (teacher-forced PPL, free-running PPL, or greedy identity)
+  condemns this lane.** It is flaggable only by the *mechanism*: `serve.py` keys
+  layer-29's FFN on `num_prompt_logprobs`. The verifier needs a **static inspection
+  check** for grader-conditional request-field branching; output gates are
+  structurally insufficient for argmax-preserving folds.
