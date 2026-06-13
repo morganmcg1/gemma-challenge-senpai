@@ -2,12 +2,20 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 
 from scripts.common import ROOT, agent_id, load_dotenv, run_prefix, submission_name, submission_prefix
 from scripts.poll_run import poll_run
 from scripts.run_hf_job import launch_job
 from scripts.upload_submission import upload_submission
+from scripts.wandb_logging import (
+    finish_wandb,
+    log_event,
+    log_file_artifact,
+    log_json_artifact,
+    init_wandb_run,
+)
 
 
 def print_result(summary: dict, run: str) -> None:
@@ -28,28 +36,95 @@ def main() -> None:
     parser.add_argument("--run-prefix", default=None)
     parser.add_argument("--interval-s", type=int, default=30)
     parser.add_argument("--timeout-s", type=int, default=1800)
+    parser.add_argument("--wandb-project", default=None)
+    parser.add_argument("--wandb-entity", default=None)
+    parser.add_argument("--wandb-mode", default=None)
+    parser.add_argument("--wandb-notes", default=os.environ.get("WANDB_NOTES", ""))
     args = parser.parse_args()
 
     load_dotenv()
     agent = agent_id(args.agent_id)
     path = (ROOT / args.submission).resolve()
     name = submission_name(path, args.name)
-    dest = upload_submission(path, agent=agent, name=name)
-    print(f"uploaded_submission={dest}")
-
-    if not args.launch:
-        print("upload complete; pass --launch to run the HF benchmark")
-        return
-
     run = args.run_prefix or run_prefix(agent, name)
-    launch_job(agent=agent, submission=submission_prefix(agent, name), run=run)
+    wandb_run = init_wandb_run(
+        job_type="experiment",
+        agent=agent,
+        name=f"{agent}-{name}",
+        notes=args.wandb_notes,
+        project=args.wandb_project,
+        entity=args.wandb_entity,
+        mode=args.wandb_mode,
+        tags=["submission", "hf-job" if args.launch else "upload-only"],
+        config={
+            "submission_path": str(path),
+            "submission_name": name,
+            "method": args.method,
+            "launch": args.launch,
+            "wait": args.wait,
+            "run_prefix": run,
+            "interval_s": args.interval_s,
+            "timeout_s": args.timeout_s,
+        },
+    )
 
-    if args.wait:
-        summary = poll_run(agent, run, wait=True, interval_s=args.interval_s, timeout_s=args.timeout_s)
-        if summary:
-            print_result(summary, run)
-    else:
-        print(f"launched run_prefix={run}")
+    try:
+        step = 0
+        log_event(wandb_run, "upload_start", step=step, data={"submission_path": str(path)})
+        dest = upload_submission(path, agent=agent, name=name)
+        print(f"uploaded_submission={dest}")
+        step += 1
+        log_event(
+            wandb_run,
+            "upload_complete",
+            step=step,
+            metrics={"submission/uploaded": 1},
+            data={"submission_uri": dest},
+        )
+        log_file_artifact(
+            wandb_run,
+            path=path / "manifest.json",
+            name=f"{agent}-{name}-manifest",
+            artifact_type="submission-manifest",
+        )
+
+        if not args.launch:
+            print("upload complete; pass --launch to run the HF benchmark")
+            return
+
+        step += 1
+        submission = submission_prefix(agent, name)
+        response = launch_job(agent=agent, submission=submission, run=run)
+        log_event(
+            wandb_run,
+            "launch_complete",
+            step=step,
+            metrics={"job/launched": 1},
+            data={"submission_prefix": submission, "run_prefix": run},
+        )
+        log_json_artifact(
+            wandb_run,
+            name=f"{agent}-{name}-launch-response",
+            artifact_type="hf-job-response",
+            data=response,
+        )
+
+        if args.wait:
+            summary = poll_run(
+                agent,
+                run,
+                wait=True,
+                interval_s=args.interval_s,
+                timeout_s=args.timeout_s,
+                wandb_run=wandb_run,
+                initial_step=step + 1,
+            )
+            if summary:
+                print_result(summary, run)
+        else:
+            print(f"launched run_prefix={run}")
+    finally:
+        finish_wandb(wandb_run)
 
 
 if __name__ == "__main__":

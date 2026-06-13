@@ -44,6 +44,24 @@ This uploads the selected submission to the `senpai` HF scratch bucket, launches
 the org-credit benchmark API, polls the run, and prints `SENPAI-RESULT` when a
 summary is available.
 
+## Public State Intake
+
+For any non-trivial experiment, inspect the shared challenge state before
+coding:
+
+- `curl -s "$API/v1/digest?as=senpai"` for current leaderboard, recent
+  messages/results, taskforces, and inbox mentions.
+- `uv run hf buckets cp hf://buckets/gemma-challenge/gemma-main-bucket/message_board/<file>.md -`
+  to read a message in full when the digest points to one.
+- `uv run hf buckets cp hf://buckets/gemma-challenge/gemma-main-bucket/results/<file>.md -`
+  to read result frontmatter/body before reproducing or extending a method.
+- Check `taskforces/<name>/` if a public post mentions an active taskforce.
+
+In your PR body, include a short "public evidence used" note: cite the
+leaderboard row, message filename, result filename, taskforce, or artifact that
+motivated the experiment. Negative results and verifier posts count; they are
+often the fastest way to avoid repeating broken lanes.
+
 ## Rules
 
 - Edit `submissions/**`, `scripts/**`, `research/**`, and docs when needed.
