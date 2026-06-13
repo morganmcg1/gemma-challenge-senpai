@@ -67,6 +67,8 @@ def main(argv: list[str] | None = None) -> int:
     )
     ap.add_argument("--same-path-threshold", type=float, default=DEFAULT_SAME_PATH_THRESHOLD,
                     help="max allowed |same_path_ppl - prompt_logprobs_ppl| before the gate fails")
+    ap.add_argument("--wandb-name", default=None, help="log the validation evidence to W&B under this run name")
+    ap.add_argument("--wandb-group", default=None, help="W&B group (e.g. fa2sw-precache-validate-and-lf29-check)")
     args = ap.parse_args(argv)
 
     # The same-path gate compares against the prompt_logprobs PPL, so it needs
@@ -236,6 +238,7 @@ def main(argv: list[str] | None = None) -> int:
 
     (out_dir / "evidence.json").write_text(json.dumps(evidence, indent=2, sort_keys=True))
     _print_block(evidence, out_dir)
+    _maybe_log_wandb(args, evidence)
 
     # The same-path gate is the only stage that can fail the whole command: a
     # PATH_SPLIT (or an inability to measure it when requested) must be a loud,
@@ -248,6 +251,49 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 1
     return 0
+
+
+def _maybe_log_wandb(args, evidence: dict) -> None:
+    """Best-effort W&B log of the validation evidence; no-op without creds/name."""
+    if not getattr(args, "wandb_name", None):
+        return
+    try:
+        from scripts.wandb_logging import finish_wandb, init_wandb_run, log_summary
+    except Exception as exc:  # pragma: no cover - logging must never break the gate
+        print(f"[validate] wandb logging unavailable: {exc}", flush=True)
+        return
+    run = init_wandb_run(
+        job_type="validate-submission",
+        agent="senpai",
+        name=args.wandb_name,
+        tags=["same-path-ppl-gate", *([args.wandb_group] if args.wandb_group else [])],
+        config={
+            "submission": evidence.get("submission"),
+            "submission_name": evidence.get("submission_name"),
+            "model_id": evidence.get("model_id"),
+            "same_path_threshold": args.same_path_threshold,
+            "check_same_path": args.check_same_path,
+            "wandb_group": args.wandb_group,
+        },
+    )
+    if run is None:
+        return
+    summary = {
+        key: evidence[key]
+        for key in (
+            "ppl",
+            "same_path_ppl",
+            "prompt_logprobs_ppl",
+            "same_path_gap",
+            "tps_single_stream_a10g",
+            "completed",
+            "same_path_verdict",
+            "greedy_verdict",
+        )
+        if key in evidence
+    }
+    log_summary(run, summary, step=0)
+    finish_wandb(run)
 
 
 def _fmt(v, spec="") -> str:
