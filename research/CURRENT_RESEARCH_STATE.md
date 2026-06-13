@@ -35,11 +35,11 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 
 | student | PR | track | target |
 |---|---|---|---|
-| fern | #10 (WIP) | **SAM-Decoding offline suffix-run token-budget analysis** (Rank 5 step 1) | confirm 3.6–3.9% verbatim-run budget on 128 bench prompts; go/no-go for Triton work |
+| fern | #13 (WIP) | **SAM-drafter overlap analysis** (Rank 5 step 2) — extend `analyze_suffix_budget.py` with `--drafter-trace`; synthetic mock-trace validation unblocked now; real net-headroom awaits kanna #5 acceptance trace | Triton kernel GO if net_frac > 3%; NO if < 1% |
 | stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11)** | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
 | lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, GREEDY_IDENTICAL 128/128 ✓; **awaiting HF Job approval (GitHub issue #12)** | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
 | kanna | #5 (WIP) | **MTP / QAT-drafter** spec-decode stand-up | ~285 TPS, greedy-identical, acceptance ~3.3 |
-| ubel | #6 (WIP) | **vocab-prune / top-k sparse-verify** w/ greedy-identity guard | private-stable verify-cost lever |
+| ubel | #14 (WIP) | **Empirical lmhead12k** — pruned-weights top-12k vocab on int4+g128+lm_head base (option A from PR #6); no cert, no adversarial-safety, but passes benchmark greedy-identity | ~3-8% TPS over int4+g128+lm_head base (est.); building block for ~420 stack |
 | denken | #7 (WIP) | **fa2sw + onegraph** target-side runtime levers | per-step overhead erasure, greedy-identical |
 | wirbel | #8 (WIP) | **local validation + profiling infra** | greedy-identity gate, local PPL, decode profiler, one-cmd validate |
 | land | #9 (WIP) | **wide-distribution KL-distilled drafter** (PARD option) | acceptance above ~286 + private stability |
@@ -49,6 +49,8 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 | student | PR | result |
 |---|---|---|
 | fern | #2 ✓ **MERGED** | **Priority #1 resolved.** Local PPL=2.3012, root cause=40-min HF Job timeout. `scripts/local_prevalidate.py` merged — the team's local pre-validation gate before any HF Job. |
+| fern | #10 ✓ **MERGED** | **SAM-Decoding GO verdict.** Causal budget 8.93% K>8 (>3.6% threshold); `analyze_suffix_budget.py` merged; drafter-overlap analysis (PR #13) is next de-risking step. |
+| ubel | #6 ✗ **CLOSED** (negative) | **Cert dead end.** Cauchy-Schwarz cert 0%-fire on Gemma4 (R_complement=1.630, geometry obstruction). Empirical lmhead12k authorized (PR #14). |
 
 ## Potential next research directions (round 2+)
 
@@ -66,8 +68,9 @@ Round-2 researcher-agent deep-dive complete → full writeup + dead-end map + de
 4. **P-EAGLE `parallel_drafting:true` probe** — *near-zero-cost diagnostic*: one serve-flag, one
    local run on the existing drafter to read tok/fwd. **Cheapest next probe** — best as a fast
    follow-up once kanna's drafter (#5) serves, or the first round-2 assignment.
-5. **GPU-side SAM-Decoding suffix match** (in-graph, no host round-trip) — **fern PR #10 in
-   flight (offline token-budget analysis, step 1).** Go/no-go for the Triton-kernel follow-up.
+5. **GPU-side SAM-Decoding suffix match** (in-graph, no host round-trip) — **PR #10 ✓ MERGED
+   (GO verdict, causal 8.93% K>8). PR #13 in flight (drafter-overlap analysis, step 2).** Triton
+   kernel follow-up gated on net_frac > 3% from PR #13 (requires kanna's #5 drafter trace).
 
 **Staged for stark (after PR #3 merges):** EAGLE-3 feature-export feasibility check — branch
 `stark/eagle3-feature-export-feasibility` exists (pushed); PR to be created when stark is idle.

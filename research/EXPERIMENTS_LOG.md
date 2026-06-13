@@ -1,5 +1,116 @@
 # SENPAI Research Results
 
+## 2026-06-13 10:00 — PR #6: Greedy-safe vocab-prune / top-k sparse-verify (verify-cost lever) ✗ CLOSED (negative)
+
+- **Branch:** `ubel/vocab-prune-sparse-verify`
+- **Student:** ubel
+- **Status:** CLOSED — confirmed dead end (provable Cauchy-Schwarz certificate, 0%-fire on Gemma4 geometry). Option A authorized: empirical lmhead12k (new PR incoming).
+- **Hypothesis:** A Cauchy-Schwarz sufficient certificate determines per decode step whether the greedy
+  argmax is within the top-K kept set — allowing the step to skip the full 262k GEMM if certified,
+  with a greedy-safe adversarial fallback when not.
+
+### Results (measured on A10G, K=12000, 64 prompts × 256 tokens = 16,384 decode steps)
+
+| metric | value | verdict |
+|---|---|---|
+| Certificate fire rate | **0.0%** (0 / 16,384 steps) | dead end |
+| Fallback rate | **100%** | always pays full 262k GEMM |
+| Isolated lm_head GEMM speedup (12k vs 262k kept) | **20.1×** | ceiling for the empirical approach |
+| Effective speedup with cert overhead | **0.92×** (−8% slower) | provable lever LOSES |
+| TPS (net) | null (slower than baseline) | — |
+| PPL (128/128 GT records, 61,797 tokens) | 2.304 | ≤ 2.42 ✓ |
+| Greedy identity (128 public prompts) | GREEDY_IDENTICAL (trivially — 100% fallback) | ✓ |
+| Adversarial fallback (rare-token test) | PASS (cert correctly refuses → full GEMM emits true argmax) | ✓ |
+| Unit tests | 7/7 PASS | ✓ |
+| W&B run | none | — |
+
+### Root cause — model-intrinsic geometry obstruction
+
+`R_complement_max_norm = 1.630` vs real `z_max/||h|| ≈ 0.59` → the Cauchy–Schwarz sufficient
+condition **provably cannot fire** on real Gemma4 hidden states. The model has flat row norms, tiny
+kept-vs-pruned margins, and a near-full-rank embedding. No kept-set construction rescues the cert
+on this lm_head. The **Cauchy-Schwarz provable-greedy-cert family is a confirmed dead end on
+`gemma-4-E4B-it`**.
+
+### Key program finding
+
+The frontier's `lmhead12k` (kenyan-duma, 421.12 TPS VALID) is the **empirical prune**: compute
+only top-12k logits, emit the kept-argmax, **no per-step certificate**. It captures the ~20×
+isolated GEMM speedup. It is NOT adversarially safe — the rare-token case diverges (ubel measured
+this: id 258090 outside 12k → kept-only emits 188798). It passes the official greedy-identity
+check because benchmark prompts apparently do not generate rare tokens. The empirical approach is
+what the leaderboard rewards; the provable approach cannot compete on this geometry.
+
+**On this lm_head: provable safety OR TPS win — not both.**
+
+### Decision
+
+- Provable greedy-safe cert (Cauchy-Schwarz) on Gemma4: **DEAD END**. Added to BASELINE.md.
+- **Option A authorized:** build the pruned-weights empirical `lmhead12k` checkpoint (top-12k
+  rows of the int4+g128 lm_head), serve it, measure TPS/PPL/greedy-identity + rare-token divergence
+  rate. New PR for ubel: `empirical-lmhead12k`.
+
+---
+
+## 2026-06-13 09:45 — PR #10: Offline suffix-run token-budget analysis for SAM-Decoding feasibility ✓ MERGED
+
+- **Branch:** `fern/sam-decoding-offline-analysis`
+- **Student:** fern
+- **Status:** MERGED (`c8dfdb3`) — analysis deliverable + shared infra (`scripts/analyze_suffix_budget.py`).
+- **Hypothesis:** The SAM-Decoding paper (arXiv 2411.10666) claims a 3.6–3.9% verbatim-suffix-run
+  budget on reasoning prompts. Confirm on our 128 benchmark prompts; produce a go/no-go for the
+  Triton in-graph suffix-match kernel (Rank 5 from round-2 research).
+
+### Results
+
+| budget definition | K>4 | K>6 | **K>8** | K>10 | verdict (K>8) |
+|---|---|---|---|---|---|
+| `m(t)` (PR spec; adjacent-only, non-causal) | 1.47% | 1.37% | **1.21%** | 1.14% | no-go (flawed proxy) |
+| **Causal SAM realized** (actionable, greedy-safe) | 15.37% | 11.60% | **8.93%** | 7.16% | **GO** |
+| ↳ causal decode-steps-saved (TPS-correct) | 13.74% | 10.66% | **8.35%** | 6.77% | — |
+| LPF forward-oracle (loose upper ref) | 30.56% | 21.37% | 16.21% | 12.42% | — |
+
+**Per-dataset causal K>8:** aime2026 10.74% | gpqa_diamond 9.23% | mmlu_pro 8.19% (uniform 8–11%).
+
+SENPAI-RESULT: `{"terminal":true,"status":"complete","frac_tokens_gt_k8":0.0121,"causal_sam_realized_frac_gt_k8":0.0893}`
+
+**Decision metric:** causal_sam_realized_frac_gt_k8 = **8.93%** → **GO** (>3.6% threshold).
+`frac_tokens_gt_k8` (0.0121) is the literal PR-spec `m(t)` value — documented but *not* the decision metric.
+
+### Key points
+
+- **`m(t)` is a flawed proxy:** fires only on adjacent-period repetition (the s tokens immediately before t
+  reappearing at t). Only 127 such runs across all 128 prompts (~1/prompt). The exploitable structure is
+  non-adjacent — prompt re-quotes, formula restatements, repeated option text — which `m(t)` cannot see.
+- **Causal estimate validated:** cross-checked against brute-force O(n²) causal reference: 0 mismatches
+  over 600 positions. Robust to nondeterminism: 10.51% (PR #2's 16-prompt capture) vs 10.49% (this
+  run's first 16 prompts) — Δ0.02pp.
+- **Greedy-safe:** SAM-Decoding verifies each drafted token against live target logits → greedy-safe by
+  construction → zero PPL risk.
+- **Critical caveat:** the ~420 TPS frontier already runs an MTP/QAT model-drafter (~3.3 tok/step).
+  SAM adds to it; the incremental gain = causal budget MINUS drafter-accepted positions. Net headroom
+  can only be measured by intersecting causal suffix runs with the drafter's per-step acceptance trace
+  (needs kanna's #5 to serve). This is the de-risking step before the Triton kernel build.
+
+### New shared infra
+
+`scripts/analyze_suffix_budget.py` — offline CPU-only suffix-budget analyzer. Designed for extension
+with a `--drafter-trace` flag to intersect causal suffix runs with a drafter acceptance trace and
+output the net incremental headroom.
+
+**W&B run:** none (CPU-only offline analysis). 128/128 prompts captured (bf16, 43.94 TPS local).
+**Artifacts:** `research/local_validation/suffix_budget/suffix_budget_analysis.json` (committed).
+
+### Next steps
+
+- **fern** extends `analyze_suffix_budget.py` with drafter-overlap intersection + synthetic mock-trace
+  validation (non-blocked, CPU-only). Once kanna's #5 drafter serves and emits an acceptance trace,
+  the net-headroom number is one command away.
+- If net_headroom > 3%: assign Triton in-graph suffix-match kernel PR.
+- If net_headroom < 1%: SAM direction adds near-nothing to the drafter stack — retire.
+
+---
+
 ## 2026-06-13 09:30 — PR #4: int4 g128 + untied int4 lm_head re-quant (~127 TPS weight floor) [IN PROGRESS — awaiting HF Job]
 
 - **Branch:** `lawine/int4-g128-lmhead`

@@ -79,6 +79,10 @@ verify paths) is a first-class objective, not an afterthought.
 sub-4-bit weight kernels (AWQ/GPTQ/AQLM/QuIP#/2:4-Sparse-Marlin/NVFP4) — no loadable Ampere
 sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gram/prompt-lookup
 spec decode — loses at conc=1; runtime knobs (attn-backend swap, max_num_seqs, MARLIN_USE_ATOMIC_ADD) —
-parity/noise; body channel-wise quant — trades PPL for no TPS; widening draft centroid top_k — no gain.
+parity/noise; body channel-wise quant — trades PPL for no TPS; widening draft centroid top_k — no gain;
+**provable greedy-safe cert (Cauchy-Schwarz) for sparse lm_head verify on gemma-4-E4B** — model-intrinsic
+geometry obstruction (flat row norms, near-full-rank embedding: R_complement_max_norm=1.630 >> z_max/||h||≈0.59),
+0%-fire on 16,384 real decode steps, nets −8% TPS (cert + full fallback > full alone); harness on
+`ubel/vocab-prune-sparse-verify` branch; empirical pruned-weights lmhead12k (no cert) is the viable lever.
 
 _Last updated: 2026-06-13 (PR #10 merged — SAM-Decoding offline budget analysis: causal realized budget 8.93% at K>8, GO verdict, drafter-overlap quantification staged as next de-risking step)._
