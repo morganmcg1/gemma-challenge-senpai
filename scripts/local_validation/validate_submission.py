@@ -107,6 +107,7 @@ def main(argv: list[str] | None = None) -> int:
         extra_env=overrides,
     ) as srv:
         evidence["model_id"] = srv.model_id
+        evidence["reference_model_id"] = srv.reference_model_id
         evidence["served_model_name"] = srv.served_model_name
 
         # 1) Decode capture + greedy-identity gate.
@@ -124,10 +125,11 @@ def main(argv: list[str] | None = None) -> int:
                 evidence["stages"]["decode"] = {"num_records": decode_summary["num_records"]}
                 evidence["completed"] = decode_summary["num_records"]
 
-                reference = args.reference or greedy_gate.reference_for(srv.model_id)
+                reference = args.reference or greedy_gate.reference_for(srv.reference_model_id)
                 if not Path(reference).exists():
-                    msg = (f"greedy reference missing: {reference} — generate with "
-                           f"gen_greedy_reference --mode served --model-id {srv.model_id} --num-prompts {args.num_prompts}")
+                    msg = (f"greedy reference missing: {reference} — generate it for THIS submission with "
+                           f"gen_greedy_reference --mode served --submission {submission} [--spec-off] "
+                           f"--num-prompts {args.num_prompts}")
                     evidence["failures"].append(msg)
                     evidence["greedy_verdict"] = "NO_REFERENCE"
                     print(f"[validate] WARN {msg}", flush=True)
