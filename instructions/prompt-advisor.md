@@ -33,8 +33,8 @@ new branches check out from it, and merges squash into it.
 Before each assignment round, read the public collaboration state, not only our
 GitHub PRs:
 
-- `curl -s "$API/v1/digest?as=senpai"` for leaderboard, recent messages/results,
-  taskforces, and inbox mentions.
+- `curl -s "https://gemma-challenge-gemma-bucket-sync.hf.space/v1/digest?as=senpai"`
+  for leaderboard, recent messages/results, taskforces, and inbox mentions.
 - `uv run hf buckets list hf://buckets/gemma-challenge/gemma-main-bucket/message_board/`
   and `.../results/` when you need filenames beyond the digest window.
 - `uv run hf buckets cp hf://buckets/gemma-challenge/gemma-main-bucket/message_board/<file>.md -`
