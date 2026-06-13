@@ -1,18 +1,13 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 9)
+- **Date:** 2026-06-13 (cycle 10)
 - **Advisor branch:** `approval-gated-8gpu-20260613` · **Research tag:** `gemma-8gpu-progress-20260613`
-- **Most recent human directive:** none yet. Operating under the launch operator rules:
-  **no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch`** without a
-  human-approved GitHub issue titled `Approval request: HF job for <submission-name>`.
-  All student GPU work is LOCAL on the assigned AWS A10G (build, model-load, serve,
-  greedy-identity, local PPL, exploratory profiling/TPS). Advisor consumes no GPU.
-- **Current bottleneck (2026-06-13):** two locally-validated ladder rungs are queued behind human
-  HF-Job approval — PR #3 int4 (~96 TPS local, issue #11) and PR #4 int4+g128+lmhead (~128 TPS local,
-  issue #12). Both are GREEDY_IDENTICAL 128/128 with PPL well under the 2.42 gate locally, and the
-  W&B serving runs corroborate. Nothing merges to an official a10g-small number until a human approves
-  a job. stark and lawine hold their slots on these approval-blocked PRs (not idle-by-neglect); the
-  program's current rate limiter is human approval, not research throughput.
+- **Most recent human directive:** Morgan (human) **APPROVED both int4 HF jobs ~13:00Z** (issues #11 int4-qat, #12 int4-g128-lmhead). Still operating under launch operator rules: **no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch`** without a human-approved GitHub issue. Advisor consumes no GPU.
+- **MILESTONE IN FLIGHT (2026-06-13 ~13:30Z): first official a10g-small validation runs launched.**
+  - **PR #4 / lawine — int4-g128-lmhead:** job `6a2d5a96234ca64b60121aa5` launched 13:26:46Z (run_prefix `results/senpai/int4-g128-lmhead-20260613T132645Z`), 40-min cap (~14:07Z). Expected ~127 TPS / PPL ~2.02 / 128/128. Clean single launch.
+  - **PR #3 / stark — int4-qat:** job `6a2d55c7234ca64b60121a6f` launched 13:06:15Z (kept), 40-min cap (13:46Z). Expected ~96 TPS / PPL ~2.01. **Op issue:** 3 byte-identical jobs launched concurrently (invisible-launch root cause: `train.py --launch --wait` block-buffers stdout ~36 min); stark requested Morgan cancel the 2 redundant (`6a2d57aa`, `6a2d58b5`). **Approved a `train.py` guard PR** (pre-launch in-flight check + unbuffered run_prefix echo) — team-wide quota protection.
+  - **Cold-start/40-min cap RISK (both):** a10g-small cold start ~12.6 min (vs ~1.5 min estimate). At ~96–128 TPS the benchmark+decode+PPL stages should fit the remaining ~27 min (faster than bf16's 44 TPS which timed out in PR #2), but PPL completion is not guaranteed. Rule: a TPS-only run with PPL cut off is NOT valid; fix is longer-timeout approval or pre-warmed cache, never a submission change.
+  - Rungs merge to official numbers once terminal `SENPAI-RESULT` (tps + ppl + 128/128) lands on PR #3 / #4.
 - **LINCHPIN question (2026-06-13, from kanna PR #5) — gates rungs 4–5 / the path to 420:** int4
   batched-verify spec-decode is **structurally greedy-DIVERGENT** in vLLM 0.22.0 — the M=K+1 verify
   forward and the M=1 AR reference flip ~0.33%/token on int4 Marlin near-ties, compounding to
