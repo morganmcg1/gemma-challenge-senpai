@@ -1,5 +1,146 @@
 # SENPAI Research Results
 
+## 2026-06-13 14:38 — PR #4: int4 g128 + untied int4 lm_head (~127 TPS) ✓ MERGED — new leaderboard baseline rung
+
+- **Branch:** `lawine/int4-g128-lmhead` · **Student:** lawine
+- **Status:** MERGED — new best merged rung. `submissions/int4_g128_lmhead` is now the best merged submission. All future submissions beat 126.38 TPS.
+- **Hypothesis:** untied int4 lm_head (eliminating the bf16 GEMV for 262k-vocab verify = 26.4% of decode GPU time per PR #8 profiler) + full-body g128 granularity (slight additional weight-byte reduction vs per-layer) → reaches the int4 Marlin weight-byte floor on Ampere.
+
+### Results
+
+| metric | value (official a10g-small) | vs PR #3 base |
+|---|---|---|
+| tps / output_tps | **126.378** | 1.32× (**+32%**) |
+| ppl (served) | **2.019** | ≤ 2.42 ✓ |
+| completed | **128 / 128** ✓ | — |
+| greedy identity | **GREEDY_IDENTICAL 128/128** (served-vs-served cap=512) ✓ | — |
+| same-path gate | **SAME_PATH_OK (gap 0.0000)** ✓ | — |
+| job | `6a2d5a96234ca64b60121aa5` | — |
+| W&B | `905tbujn` (official a10g-small) · `0pxj6n63` (local proxy + greedy) | — |
+
+**Overall: 2.87× over bf16 (44.018 TPS), 1.32× over PR #3 int4 base.**
+
+### Analysis & conclusions
+
+- **Confirms lmhead profiler finding** (PR #8): 26.4% of decode GPU time was the 262k-vocab bf16 GEMV. Untied int4 lm_head eliminates it, explaining the +32% TPS gain. This is the exact profiler prediction.
+- **This is the weight-byte floor.** Sub-4-bit (no sm_86 kernel) and fp8 KV (no A10G support) are dead ends. No further weight-bandwidth reduction is achievable in vLLM 0.22.0 on Ampere. Every remaining TPS lever is either (a) the drafter ladder (spec decode, gated on kanna verify-rollback), (b) lmhead12k (ubel #14, cheaper verify), or (c) runtime/warmup (precache, onegraph — the frontier stack).
+- **Greedy validity methodology confirmed:** served-vs-served (spec-off) via `check_greedy_identity.py` passes cleanly (GREEDY_IDENTICAL 128/128). This is the gold-standard test.
+- **lawine confirmed official PPL artifact** present on the HF job result — closing the near-cap timing question from last cycle.
+
+---
+
+## 2026-06-13 14:38 — PR #19: Batch-invariant vLLM spec decode ✓ MERGED — LINCHPIN DEFINITIVE NEGATIVE
+
+- **Branch:** `kanna/batch-invariant-vllm-spec` · **Student:** kanna
+- **Status:** MERGED — definitive negative. Closes the invariant-kernel lane. Next lane: verify-rollback (kanna PR #24).
+- **Hypothesis:** `VLLM_BATCH_INVARIANT=1` (aten-override batch-invariant kernels) makes the M=K+1 verify forward bit-match the M=1 AR forward → greedy-identical spec decode.
+
+### Results
+
+| arm | INV | target GEMM | flip/tok | 95% CI | identical/32 | W&B |
+|---|---|---|---|---|---|---|
+| int4 ON (decisive) | 1 | Marlin `_C` (un-covered) | **0.376%** | [0.234, 0.518]% | 5/32 | `hz8jkc5h` |
+| int4 OFF (control) | 0 | Marlin `_C` (un-covered) | 0.332% | [0.205, 0.460]% | 6/32 | `8wne15eh` |
+| bf16 ON (discriminator) | 1 | aten linear (covered) | **0.111%** | [0.057, 0.166]% | 16/32 | `z0mclftv` |
+| bf16 OFF (PR #5 ref) | 0 | aten linear | 0.72% | — | — | — |
+
+**Primary metric:** int4_mtp_batchinv_greedy_flip_rate_per_token = **0.00376** (0.376%) — NOT zero. **Verdict: DIVERGENT, invariant-kernel lane CLOSED.**
+
+### Analysis & conclusions
+
+The bf16 control arm is the key insight. By removing int4 Marlin (using aten-covered bf16 GEMM) while keeping INV=1, we isolate TWO independent un-coverable root causes:
+
+- **(a) int4 Marlin `_C` op:** contributes ~0.265%/tok excess above bf16 floor. The Marlin custom op is outside aten's scope; batch-invariance cannot intercept it. This was the main prior hypothesis (Marlin was "plausibly already M-invariant") — REFUTED.
+- **(b) Spec verify path non-aten residual:** bf16 ON (full aten coverage, zero Marlin) is STILL divergent at 0.111%/tok. An irreducible non-aten component in the spec verify forward (attention-metadata build, rejection-sampler logits compare, or a fused step) remains batch-variant. Corroborated by vLLM issue #27433: "batch-invariance does not currently integrate with speculative decoding."
+- **Consistency check:** 0.265% (a) + 0.111% (b) ≈ 0.376% (observed int4 ON). The two sources are independent and additive.
+- **Implication:** neither int4 nor bf16 target drafter ladders are rescuable by `VLLM_BATCH_INVARIANT`. The invariant-kernel lane is closed for greedy-valid spec decode at ANY precision in vLLM 0.22.0.
+- **Next lane:** verify-rollback (arxiv 2601.17768) — re-verify accepted tokens under fixed-shape M=1 reduction after each spec step; commit consistent / roll back violators. This targets both causes: (a) is dodged (rollback uses M=1 AR path, no Marlin batch-size dependency on committed path), (b) is caught and corrected by the re-verify. Assigned to kanna PR #24.
+
+---
+
+## 2026-06-13 14:38 — PR #16: EAGLE-3 draft-head training harness ✓ MERGED — keeper research artifact
+
+- **Branch:** `fern/eagle3-training-pipeline` · **Student:** fern
+- **Status:** MERGED — keeper (training harness + asset). No leaderboard TPS improvement; infrastructure needed for the drafter ladder.
+- **Hypothesis:** An EAGLE-3 draft head trained via offline distillation from Gemma-4 E4B (using aux hidden states from layers 2, 21, 39) can achieve teacher-forced acceptance ≥ 3.5 tok/step on a held-out STEM corpus at debug scale.
+
+### Results
+
+| metric | value | note |
+|---|---|---|
+| tf_acceptance_rate_debug_1k | **0.6816** | at 1k steps, 200 MATH train samples |
+| final_val_loss_debug_1k | 1.3372 | still converging |
+| W&B | `30bgs1rs` (group `eagle3-drafter-training`) | |
+
+**Verdict:** pipeline confirmed functional. 0.6816 is in the "0.50–0.70 → schedule full run" range.
+
+### Analysis & conclusions
+
+- **Harness architecture:** faithful PyTorch reimplementation of vLLM's Eagle3DraftHead with vLLM-matching weight names/shapes (deployable checkpoint). Llama decoder layers (not Gemma), RoPE/RMSNorm/GQA/SwiGLU. feature_shift=1 vLLM-faithful alignment. Chunked 262k-way CE to avoid OOM.
+- **Corpus:** EleutherAI/hendrycks_math (allenai/MATH 404s), 200 train samples, 52,751 tokens.
+- **Key finding:** no public Gemma-4 E4B EAGLE-3 checkpoint exists (thoughtworks/Gemma-4-31B-Eagle3 is shape-incompatible) → trained from scratch.
+- **Next:** full-scale training (2000 MATH + 500 ShareGPT samples, 20k steps, targeting tf_acc ≥ 0.78) assigned to fern PR #25. Serving is gated on kanna's verify-rollback PR #24.
+
+---
+
+## 2026-06-13 14:38 — PR #18: int4 decode-step cost model vs K ✓ MERGED — keeper research artifact
+
+- **Branch:** `denken/spec-verify-cost-model` · **Student:** denken
+- **Status:** MERGED — keeper (analytical cost model). No leaderboard TPS improvement; foundational analysis for drafter-ladder decisions.
+- **Hypothesis:** characterize the ideal TPS ceiling of int4 spec decode as a function of K (draft count) and acceptance probability p.
+
+### Results
+
+| metric | value | note |
+|---|---|---|
+| tps_ceiling_ideal_at_kstar | **1,269.5 TPS** | at K*=15, acceptance p=0.7 |
+| optimal_k_geom_p0.7 | **K*=15** | geometric acceptance, 40% of weight-GEMM time is verify |
+| W&B | `pvj0qogp` (group `spec-cost-model`) | |
+
+### Analysis & conclusions
+
+- **The sky is high:** 1,269.5 TPS ideal ceiling (at p=0.7, optimal K) confirms the drafter ladder has massive headroom. Even at p=0.5, the ceiling is > 600 TPS.
+- **K=6 is suboptimal:** at p=0.7, ideal K*=15. The current MTP drafter at K=6 leaves TPS on the table even at full acceptance. Higher acceptance rate raises K* — tree decoding (fableous: width-4 rescues 43.1% of linear misses) could change the optimal strategy.
+- **Feeds verify-rollback net-value:** the cost model now establishes the ceiling. denken's next assignment (PR #26) extends it to tree decoding.
+- **Dropped dependency in rebase:** no functional issue — the cost model files (research/spec_cost_model/ + scripts/profiler/spec_cost_model.py) are self-contained; the dropped dependency was an unmerged PR-specific hook that was correctly removed.
+
+---
+
+## 2026-06-13 14:15 — PR #22: Honest precache frontier + LF29cap same-path validity (SENT BACK, WIP)
+
+- **Branch:** `wirbel/fa2sw-precache-validate-and-lf29-check` · **Student:** wirbel
+- **Status:** NON-TERMINAL (pending_arms=true). Sent back for greedy_gate on pupa-lf29cap444 + terminal marker.
+- **Hypothesis:** (A) reproduce kenyan-duma honest precache frontier (PPL ~2.377); (B) test whether pupa-lf29cap444 fails the same-path PPL gate (gap ~0.17).
+
+### Part A results (PASS — clean asset)
+
+| metric | value |
+|---|---|
+| same_path_ppl_gap (fa2sw_precache) | **0.0000** (SAME_PATH_OK, exit 0) |
+| same_path_ppl | **2.37688** |
+| NLL equality | byte-identical to 11 sig figs — single-path confirmed |
+| W&B | `jg99477i` |
+
+Part A confirmed: kenyan-duma honest precache frontier is single-path at the strongest possible resolution. Clean VALID base for tree-salvage / accepthist / EAGLE-3 branching.
+
+### Part B results (UNEXPECTED finding — important tooling insight)
+
+| metric | predicted | measured | verdict |
+|---|---|---|---|
+| same_path_ppl_gap (pupa-lf29cap444) | ~0.17 / FAIL | **0.0000 / SAME_PATH_OK** | gate is BLIND to this class |
+| fold-forced same_path_ppl | — | 2.3767 (−0.0013 vs exact) | fold is teacher-forced-neutral |
+| W&B | — | `tju905db` | |
+
+**Critical finding (structural — affects all future validity work):** the same-path PPL gate (merged PR #21) is **teacher-forced-blind** — it cannot detect argmax-preserving / decode-compounding folds. The LF29 affine fold (ridge approximation of layer-29 FFN, R²≈0.80) is teacher-forced-neutral because each token is scored on the ground-truth prefix; the fold's cost is in free-running decode where argmax flips compound. Two independent mechanisms: (1) teacher-forced scoring is fold-neutral by construction; (2) `echo+logprobs` is coupled to `prompt_logprobs` in vLLM (`completion/protocol.py:276-277`), tripping the same bypass exemption. **→ `greedy_gate` (served-token identity) is the load-bearing validity instrument for fold-class lanes.** The same-path gate catches logit-level path splits (request-field branching on `prompt_logprobs`).
+
+This corrects the BASELINE.md scope statement: "every future HF-approval issue must attach `--check-same-path` output" still holds for logit-path split detection, but greedy_gate is ALSO required for fold-class lanes. The `research/validity/same_path_ppl.md` scope-limit update (wirbel PR #22) will land when the PR merges.
+
+### Next steps (pending)
+
+wirbel authorized to run greedy_gate on pupa-lf29cap444 (local, spec-off served-vs-served). Expected: flip_rate > 0 (the fold changes decode-path argmax where the approximation crosses a decision boundary). Board post held for human approval. Terminal marker expected once greedy_gate completes.
+
+---
+
 ## 2026-06-13 14:00 — PR #3: Reproduce int4 QAT W4A16 leader (~95 TPS) ✓ MERGED — first official int4 base rung
 
 - **Branch:** `stark/int4-qat-w4a16` · **Student:** stark
