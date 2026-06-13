@@ -1,5 +1,24 @@
 # SENPAI Research Results
 
+## 2026-06-13 12:55 — PR #14: Empirical lmhead12k ↩ REVIEW → request-changes (int4-argmax re-selection)
+
+- **Branch:** `ubel/empirical-lmhead12k` · **Student:** ubel
+- **Status:** WIP (non-terminal; `greedy_identity_divergent_pending_decision`). Reviewed, requested changes, sent back. NOT merged (greedy-invalid), NOT closed (alive + crisp fix).
+- **Hypothesis:** pruning the 262k lm_head to a ~12,288 kept-vocab set cuts lm_head GEMV bandwidth (~5–8% TPS over the int4 base) while preserving PPL ≤ 2.42 and greedy identity.
+- **Results (local A10G, exploratory):**
+
+| metric | pruned lmhead12k (12,288) | bf16 stock | gate | verdict |
+|---|---|---|---|---|
+| TPS (single-stream) | 128.23 | 43.95 | higher | ≈ int4 base (prune delta unmeasured — no unpruned-int4 control) |
+| served PPL | 1.9767 | 2.3012 | ≤ 2.42 | ✓ (but blind — see below) |
+| completed | 128/128 | 128/128 | =128 | ✓ |
+| greedy-identity | **DIVERGENT** | (ref) | required | ✗ **invalid** |
+
+- W&B: none logged (local serve/validate, no training). Artifacts: `research/local_validation/lmhead12k_empirical/{greedy_identity_summary,greedy_prune_effect_int4full_vs_pruned,select_analysis,*_summary}.json`.
+- **Root-cause finding (valuable, non-obvious):** `kept_ids` was selected from the **bf16** model's argmax, but the served model is **int4**. int4 quantization moves ~1.33% of greedy-argmax decisions (874/65,536; 114/128 prompts) to tokens bf16 never emits → pruning clips them → near-tied survivors flip across numeric paths → DIVERGENT. Clean offline-eager A/B (int4full vs pruned) confirms the prune itself diverges (10/128), independent of serving config. **The kept set covers the wrong model.**
+- **PPL is blind to greedy clips:** the −inf scatter on 250k pruned rows shrinks the softmax denominator, *inflating* every kept token's logprob (PPL 1.98 < bf16 2.30). Teacher-forced PPL cannot see a greedy argmax clip. Reinforces why same-path/greedy gates (not PPL) are the validity backstop.
+- **Decision & rationale (request changes):** fix = re-select `kept_ids` from the **int4** model's argmax over a **broad corpus** (not public-128-specific), sized so the int4-argmax-outside-kept clip rate is ~0 on public AND a held-out split. Report the **held-out clip rate** = private greedy-identity failure rate (the lmhead12k analog of private TPS drift). Re-run the gate **served-vs-served** (wirbel #8), not offline-eager (avoids ~20% false divergence). Cheap add: serve an unpruned-int4 control to isolate the prune's conc=1 TPS delta — if ~neutral, lmhead12k's value lives in the spec-decode verify forward (gated kanna #19), not standalone. Drafter-independent rung; GPU now available.
+
 ## 2026-06-13 (cycle 9) — PR #16: EAGLE-3 draft-head training pipeline ↩ INTERIM REVIEW → sent back (option c)
 
 - **Branch:** `fern/eagle3-training-pipeline` · **Student:** fern
