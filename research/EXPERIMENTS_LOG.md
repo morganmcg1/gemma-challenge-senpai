@@ -1,5 +1,50 @@
 # SENPAI Research Results
 
+## 2026-06-13 — PR #37: lmhead12k verify-forward cost model + tile-corrected canonical curve ✓ MERGED
+
+- **Branch:** `denken/lmhead12k-verify-cost` · **Student:** denken
+- **Status:** MERGED — **cost-model closure + infra (tile-fold).** LOCAL profiling only; no HF job, no submission. Establishes the lmhead12k ceiling on the spec-verify path via directly-measured pod latencies.
+- **Hypothesis:** Ubel #14's lmhead12k prune removes ~3 ms from the AR lm_head (PR #30: 1% of decode). Does it also remove a comparable fraction from the *verify* lm_head? The verify head runs on M=K+1=45 tokens simultaneously — if the head is memory-bandwidth-bound there too, the savings may be larger and flip PR #33's ">500 @ p=0.78 = NO" verdict.
+
+### Results
+
+| quantity (canonical = graph, ctx256) | full head (#33) | lmhead12k (measured) | analytic ceiling |
+|---|--:|--:|--:|
+| lm_head verify cost @ M=45 | 3.367 ms | **0.348 ms** (scatter floor) | 0.158 ms (×0.0469) |
+| V_tree step @ M=45 | 15.235 ms | **12.212 ms** (−3.02 ms, −19.8%) | 12.022 ms |
+| tree K* @ p=0.78 w/ drafter | K11/M45: 440.4 | **K11/M45: 538.1** | K11/M45: 545.8 |
+| tree K* @ p=0.78 verify-only | K11/M45: 480.8 | **K11/M45: 599.8** | K11/M45: 609.4 |
+| tree K* @ p=0.6792 w/ drafter | K11/M45: 359.9 | K7/M29: 446.6 (<500) | K7/M29: 451.7 |
+| >500 @ p=0.78, K*-optimum, w/ drafter? | **NO** (440.4) | **YES (538.1)** | YES (545.8) |
+| `primary_metric` `tree_tps_ceiling_p078_lmhead12k` | — | **538.1** | — |
+| `test_metric` `verdict_exceeds_500_at_p078_lmhead12k` | — | **1** | — |
+
+**W&B (verified by direct query):**
+
+| run | name | key scalar | value | W&B |
+|---|---|---|---|---|
+| `klvpfk7g` | lmhead12k-verify-derive-measure | `V_full_M45`, `meas_k12_scatter_M45`, `lmhead_fixed_share_at_M45` | 15.235 ms, 0.348 ms, 0.860 | finished ✓ |
+| `ruch259z` | lmhead12k-tree-ceiling-measured | `kstar_p078_W4_tps_withdrafter`, `verdict_exceeds_500` | **538.150, True** | finished ✓ |
+| `6c9r3lih` | lmhead12k-tree-ceiling-analytic | `kstar_p078_W4_tps_withdrafter` | 545.816 | finished ✓ |
+
+Group `spec-verify-lmhead12k` in `gemma-challenge-senpai`. Minor cosmetic gap: `V_lmhead12k_M45` logged 12.022 (analytic) vs PR table's 12.212 (measured) — label swap; does not touch the verified 538.1 headline (logged independently in `ruch259z`).
+
+### Analysis & conclusions
+
+1. **The verify-head prune is real and bounded.** Pruning to 12k rows removes ~3.0 ms from V_tree @ M=45 (−19.8%), because the verify forward streams the full bf16 head for each of the M=45 tokens in the speculative proposal. The saving is ~flat in absolute ms across M (it's a fixed head-weight bandwidth term), so its *fractional* contribution falls with M.
+
+2. **The scatter floor is the correct honest ceiling.** The production `compute_logits` path scatters 12k partial logits back to a full [M,262144] −inf tensor + argmaxes over the full vocab for greedy-identity correctness (cannot be removed without a kernel rewrite). This costs 0.348 ms @ M=45 = ~2.2× the bare GEMM. Measured ceiling 538.1, not over-claimed analytic 546.
+
+3. **Two-lens honest >500 reporting:** K*-optimum (538.1, >500 ✓ — matches #33's baseline frame, the headline lens) vs conservative fixed-K=6 with-drafter (476.5, <500 ✗). The flip needs p≥0.78 AND the K*-optimum lens. At realistic p=0.6792 with-drafter optimum stays <500 (446.6). Both lenses W&B-logged.
+
+4. **Pipeline validated:** baseline column reproduces #33's K=11/M=45 440/481 @ p=0.78 exactly. Reduced curve trustworthy.
+
+5. **K\*=11/M=45 serving guidance LOCKED for kanna #24 / any future spec submission.** PR #33's `optimal_k=15` scalars were the linear-W=1 lens artifact in run `36hkaj14` — corrected here (Step 5). Realistic W=4 tree optimum is K=11 (M=45) at both p=0.6792 and p=0.78.
+
+6. **Infra: tile-fold into canonical msweep.** `fold_tile_into_msweep.py` folds #33's measured Marlin cliffs into `results_msweep.json` in place (pre-fold provenance at `results_msweep_prefold.json`). #26/#28 consumers now inherit the correct non-linear curve automatically.
+
+7. **Suggested follow-ups from denken:** (a) eliminate the scatter floor (kernel argmax over 12k partial + remap full-vocab id — correctness proof needed, ~546 vs 538 ceiling); (b) tile-correct `eager/*` and `*/ctx512` keys (only `graph|ctx256` carries measured cliffs now); (c) validate ceiling against a real end-to-end spec-decode serving run.
+
 ## 2026-06-13 18:xx — PR #32: Greedy-gate reference-keying fix ✓ MERGED — validity-infrastructure correction
 
 - **Branch:** `lawine/greedy-gate-ref-keying-fix` · **Student:** lawine
