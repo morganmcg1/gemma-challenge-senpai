@@ -1,21 +1,22 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 17, ~17:10Z)
+- **Date:** 2026-06-13 (cycle 18, ~17:45Z)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 - **Most recent human directive (Issue #31, lewtun, 2026-06-13 ~16:42Z):** "For everyone looking to contribute downstream evals of the baseline or most promising submissions, don't use greedy decoding: instead use the model's recommended sampling parameters from `generation_config.json`." **Standing requirement:** any downstream quality eval (MT-Bench, MMLU, or similar) must use `generation_config.json` params — NOT greedy (temp=0.0). This does NOT apply to the official TPS benchmark (greedy by protocol) or the greedy-identity validity gate (greedy by definition) — only to human-facing quality/downstream evals. Include in every future PR body that involves downstream eval. Acknowledged in Issue #31.
 - **Prior directive (Morgan, ~13:00Z):** Approved both int4 HF jobs (issues #11/#12). **Still operating under launch operator rules: no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch` without a human-approved GitHub issue. Advisor consumes no GPU.**
 
 ---
 
-## MILESTONE (cycle 17, 2026-06-13 17:10Z)
+## MILESTONE (cycle 18, 2026-06-13 17:45Z)
 
-**PR #28 MERGED (keeper): verify-latency M-sweep result corrects the drafter-ladder ceiling downward.**
+**PR #25 MERGED (keeper): EAGLE-3 full-scale drafter asset — best drafter to date, reasoning acceptance 0.7314, DATA-bottlenecked.**
 
 | PR | student | result | type |
 |---|---|---|---|
-| #28 `verify-latency-msweep` | denken | **K=12 tree: 452 TPS @ p=0.78 (dense-M upper bound).** >500 TPS extrapolation refuted — real ceiling needs drafter p≥0.85. | **KEEPER research artifact** |
+| #25 `eagle3-full-scale-training` | fern | **Best drafter asset: tf_acc 0.7314 on MATH holdout** (the benchmark-relevant 100%-reasoning number). Reasoning acceptance plateaus ~0.73 → DATA-bottlenecked; ShareGPT safe but low-acceptance. Banked for verify-rollback unlock. | **KEEPER drafter asset** |
+| #28 `verify-latency-msweep` (cycle 17) | denken | **K=12 tree: 452 TPS @ p=0.78 (dense-M upper bound).** >500 TPS extrapolation refuted — real ceiling needs drafter p≥0.85. | **KEEPER research artifact** |
 
-**Current official baseline: `submissions/int4_g128_lmhead` (PR #4) — 126.378 TPS / PPL 2.019 / GREEDY_IDENTICAL. Unchanged.**
+**Current official baseline: `submissions/int4_g128_lmhead` (PR #4) — 126.378 TPS / PPL 2.019 / GREEDY_IDENTICAL. Unchanged.** (The #25 drafter raises the *ceiling*, not the deployable baseline — it can only land once verify-rollback #24 makes spec decode greedy-valid.)
 
 ---
 
@@ -85,20 +86,21 @@ The weight-byte floor is reached (int4 g128 + lm_head, PR #4, 126.378 TPS). All 
 | + lmhead12k + fa2sw + onegraph + precache | verify cost + runtime | ~420 | above + ubel #14 |
 | + width-4 tree K=6 | E ratio 1.59×, overhead 1.11× (measured) | **~331 @ p=0.68 / 375 @ p=0.78** | above (PR #28 MEASURED) |
 | + width-4 tree K=12 (K*, p=0.78) | measured optimum | **~452 TPS** (dense-M upper bound) | above + PR #33 |
-| + EAGLE-3 full-scale drafter (p≥0.85) | high acceptance → >500 TPS | ~500–530 | fern #25 + verify-rollback |
+| + EAGLE-3 drafter, reasoning tf_acc 0.7314 (**#25 MERGED asset**) | best drafter to date; tf_acc is upper bound on free-running p | unlocks ~285→ladder | **asset banked**, awaits verify-rollback #24 |
+| + reasoning-matched corpus drafter (target p≥0.85) | benchmark-matched CoT → break 0.73 plateau | ~500–530 | fern reasoning-corpus PR (NEW) + verify-rollback |
 
-**Key update from PR #28:** the K* is 8–12 (not 20 as extrapolated). The >500 TPS frontier requires **drafter top-1 acceptance ≥0.85** — this is the deciding variable, not tree depth. fern's EAGLE-3 training (#25) is the ceiling-setter.
+**Key update from PR #28:** the K* is 8–12 (not 20 as extrapolated). The >500 TPS frontier requires **drafter top-1 acceptance ≥0.85** — this is the deciding variable, not tree depth. **PR #25 (cycle 18) banked the best drafter asset (reasoning tf_acc 0.7314) but proved reasoning acceptance is DATA-bottlenecked (plateaus ~0.73 on MATH+chat).** The lever toward p≥0.85 is now a **benchmark-matched reasoning corpus** (MMLU-Pro/GPQA/AIME CoT), not more steps — fern's next PR.
 
 **Tree-causal mask caveat (PR #33 open):** the 452 TPS is a dense-M upper bound. The real tree-masked cost is cheaper in the attention term (~13%), potentially shifting the ceiling toward 470–490. PR #33 measures it.
 
 ---
 
-## Active assignments (cycle 17)
+## Active assignments (cycle 18)
 
 | student | PR | track | status |
 |---|---|---|---|
 | kanna | **#24 (WIP)** | **Verify-rollback gate (arxiv 2601.17768)** — intercept spec-decode accepted tokens, re-verify under M=1 fixed-shape AR forward, commit matches / rollback mismatches. Goal: flip_rate → 0 (greedy-identical) + net-positive TPS over int4 AR. LOCAL ONLY. | **THE LINCHPIN NEXT LANE — #1 priority** |
-| fern | **#25 (WIP)** | **EAGLE-3 full-scale training.** Reframed plan: full MATH + ShareGPT as measured negative-control arm + per-source breakdown. 0.78 target moved to reasoning-matched corpus. THE ceiling-setter (need p≥0.85 for >500 TPS per PR #28). Offline only, no HF Job. | Active — adapted plan running |
+| fern | **reasoning-corpus PR (NEW)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Distill CoT completions from the served target on MMLU-Pro/GPQA/AIME train splits (mixed near 57/57/14 benchmark ratio), dedup hard vs the 128 eval ids, hold out ≥200 disjoint; retrain the drafter to break the 0.73 MATH plateau toward 0.78. Builds on #25 asset. Offline only, no HF Job. | Assigning (post-#25 merge) |
 | denken | **#33 (NEW)** | **Tree-causal mask verify-cost + Marlin tile boundary.** Add sparse tree-causal attention mask to profiler for K=6 (M=25) and K=12 (M=49) tree shapes; fine M sweep around M≈20 and M≈40 Marlin tile steps. Settles dense-M upper bound → real tree cost. LOCAL ONLY. | Assigned |
 | wirbel | **#30 (WIP)** | **Frontier decode-step profile** on the in-repo `fa2sw_precache_kenyan` honest base — decompose the ~420 TPS decode cycle (drafter / verify-body int4-GEMM / lmhead12k / fa2sw attn / sampling / host overhead), validate fableous's ~1.4ms drafter / ~7ms verify split, name the single next TPS lever for the team. LOCAL ONLY. | Active |
 | stark | #23 (WIP) | **int4 spec-verify greedy flip-rate probe** — fp32-logit, deterministic-reduction, both configs; 4 arms across int4 base; measure which (if any) drives flip_rate → 0. Complements kanna's verify-rollback via different mechanism. LOCAL ONLY. | Active |
@@ -121,7 +123,7 @@ The weight-byte floor is reached (int4 g128 + lm_head, PR #4, 126.378 TPS). All 
 ## Potential next directions (priority order)
 
 1. **Verify-rollback gate (kanna #24)** — THE unlock. If flip_rate → 0, the entire drafter ladder is open.
-2. **EAGLE-3 full-scale training (fern #25)** — produces highest-ceiling drafter (~480–550 TPS if p≥0.85). Ungated offline.
+2. **Benchmark-matched reasoning corpus → EAGLE-3 retrain (fern, NEW)** — PR #25 banked the best drafter (reasoning tf_acc 0.7314) but proved acceptance is DATA-bottlenecked (plateaus ~0.73 on MATH). Distill CoT from the served target on MMLU-Pro/GPQA/AIME (the actual 128-prompt distribution) to break toward 0.78→0.85, the level PR #28 says is needed for >500 TPS. Ungated offline. **On-policy distillation (Draft-OPD, round-3 H1) is the follow-on if static-corpus distillation also plateaus below 0.85.**
 3. **Tree-causal mask + tile boundary (denken #33, NEW)** — closes the dense-M upper bound on tree verify cost; identifies "free" tree M shapes that land on Marlin bandwidth plateaus.
 4. **Greedy-gate reference-keying fix (lawine #32)** — must land before any drafter stack's greedy gate run is treated as canonical.
 5. **accepthist (dynamic K)** — pupa/need-for-speed technique (separable from invalid LF29). Clean implementation on honest frontier once verify-rollback unlocks serving. Potential +~20 TPS on top of static K.
@@ -133,7 +135,9 @@ The weight-byte floor is reached (int4 g128 + lm_head, PR #4, 126.378 TPS). All 
 
 ---
 
-_Last updated: 2026-06-13 **cycle 17** — PR #28 MERGED (denken verify-latency M-sweep: >500 TPS extrapolation refuted on measured hardware; real K*=12 @ p=0.78 gives 452 TPS dense-M upper bound; >500 needs drafter p≥0.85 — re-anchors focus on fern #25 EAGLE-3 quality). PR #33 ASSIGNED (denken, tree-causal mask + tile boundary, closes upper bound). PR #9 land CLEAN (rebase was done 16:01Z, running v1). LF29cap band (ranks 1–4, 449–459 TPS) confirmed gate-evasion across community — ruling pending. True valid frontier ~421–424 TPS. Baseline unchanged: PR #4 126.378 TPS._
+_Last updated: 2026-06-13 **cycle 18** — PR #25 MERGED (fern EAGLE-3 full-scale training: best drafter asset, reasoning tf_acc 0.7314 on MATH holdout; reasoning acceptance is DATA-bottlenecked, plateaus ~0.73; ShareGPT safe but low-acceptance; asset banked for verify-rollback unlock). fern reassigned to benchmark-matched reasoning corpus (MMLU-Pro/GPQA/AIME CoT) to break the plateau toward 0.85. Baseline unchanged: PR #4 126.378 TPS._
+
+_Cycle 17: PR #28 MERGED (denken verify-latency M-sweep: >500 TPS extrapolation refuted on measured hardware; real K*=12 @ p=0.78 gives 452 TPS dense-M upper bound; >500 needs drafter p≥0.85 — re-anchored focus on drafter quality). PR #33 ASSIGNED (denken, tree-causal mask + tile boundary, closes upper bound). PR #9 land CLEAN (rebase was done 16:01Z, running v1). LF29cap band (ranks 1–4, 449–459 TPS) confirmed gate-evasion across community — ruling pending. True valid frontier ~421–424 TPS._
 
 _Cycle 16: PR #27 CLOSED (lawine channel-wise lm_head, confirmed NEGATIVE: g=-1 is −0.39 TPS wash; secondary find: silent greedy-gate cross-submission collision bug → lawine reassigned to harness fix PR #32)._
 

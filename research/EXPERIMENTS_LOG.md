@@ -1,5 +1,33 @@
 # SENPAI Research Results
 
+## 2026-06-13 17:30 — PR #25: EAGLE-3 full-scale training ✓ MERGED — keeper (drafter asset, reasoning acceptance 0.7314; DATA-bottlenecked)
+
+- **Branch:** `fern/eagle3-full-scale-training` · **Student:** fern
+- **Status:** MERGED as a research keeper (drafter asset). No TPS-baseline change — baseline stays PR #4 126.378 TPS (the drafter cannot deploy until kanna's verify-rollback #24 unlocks greedy-valid serving). The asset is the current-best drafter checkpoint, banked for the moment serving is unlocked.
+- **Hypothesis:** Training the EAGLE-3 drafter at full scale (20k-step budget, benchmark-distribution data) past the PR #16 harness debug head (tf_acc 0.6816) pushes teacher-forced top-1 acceptance toward 0.78 — the level PR #28 says is needed to approach >500 TPS. Reframed mid-run: full MATH+ShareGPT as a per-source-decomposed arm to isolate whether chat data helps or hurts reasoning acceptance.
+
+### Results
+
+| metric | debug (MATH-only, 898 steps) | full (MATH+SG, 3500 steps) | delta | verdict |
+|---|---|---|---|---|
+| **tf_acceptance_rate, MATH holdout (n=48,142)** | 0.7051 | **0.7314** | **+0.026** | the benchmark-relevant number (128 public prompts are 100% reasoning) |
+| tf_acceptance_rate, ShareGPT holdout | 0.1529 | **0.3444** | +0.19 | chat doubled but intrinsically hard to draft (high-entropy/multilingual/code) |
+| tf_acceptance_rate, combined holdout | 0.5839 | 0.6464 | +0.063 | combined understates benchmark-relevant quality |
+| val_loss, MATH holdout (final) | — | **1.2876** | — | reasoning fit |
+| val_loss, combined (overfit signature) | — | 1.8516@2000 → 1.9519@3500 | +0.10 | overfits after ~2000 steps |
+
+**W&B runs:** `7domtiin` (training — "crashed" = external interruption @ step 3670, `model_best.pt` step 3500 checkpoint intact) · evals `egv59ku0` (full·MATH 0.73136) · `xqtvcj58` (full·SG 0.3444) · `udb18hnh` (full·combined 0.6464) · `y0yupavk` (debug·MATH 0.7051) · `yxkh2739` (debug·SG 0.1529) · `1j8afmzk` (debug·combined 0.5839). All six eval runs finished clean; advisor independently verified headline 0.73136 and all per-source numbers to 4 s.f., no NaN. Training "crashed" status is an external interruption, not a divergence — checkpoint and eval lineage are intact.
+
+### Analysis & conclusions
+
+- **Reasoning acceptance is DATA-bottlenecked, not step-bottlenecked.** MATH-holdout tf_acc plateaus ~0.72–0.73 by step ~2000 (gains <0.004 per 500 steps thereafter), and combined val/loss *overfits* after step 2000 (1.8516→1.9519). More steps on this corpus will not break 0.73. The lever is **benchmark-matched reasoning CoT** (MMLU-Pro / GPQA / AIME-math), not more MATH and not more chat.
+- **ShareGPT did not hurt reasoning** — it slightly *helped* MATH acceptance (0.7051→0.7314, via more total steps) while doubling its own acceptance (0.15→0.34). So mixing chat is safe, but chat is intrinsically low-acceptance (the combined 0.6464 is dragged down by the hard SG tail and understates the benchmark-relevant figure, since the 128 public prompts are 100% reasoning: mmlu_pro 57 / gpqa_diamond 57 / aime2026 14).
+- **Ceiling caveat (PR #28 linkage):** tf_acc is a *teacher-forced UPPER BOUND* on free-running acceptance. PR #28 established >500 TPS needs free-running top-1 p≥0.85; 0.73 tf_acc maps to something lower free-running. So this asset, while the best drafter we have, is not yet the >500 TPS key — it sets up the next two levers.
+- **Asset banked:** `research/eagle3_drafter/checkpoints/full_20k/model_best.pt` (step 3500, 0.7314 reasoning tf_acc). Corpus 2.21M tok (1.76M MATH + 0.45M SG), de-contaminated vs the 128 eval ids. Deploys the moment verify-rollback (#24) unlocks greedy-valid serving.
+- **Student's flagged next step (correct):** a benchmark-matched reasoning corpus distilled from the served target on MMLU-Pro/GPQA/AIME. That is fern's next assignment — the corpus that should break the 0.73 plateau toward 0.78. On-policy distillation (Draft-OPD, round-3 H1) is the follow-on lever if static-corpus distillation plateaus below 0.85.
+
+---
+
 ## 2026-06-13 17:00 — PR #28: Extended verify-latency M-sweep ✓ MERGED — keeper (ceiling corrected, extrapolation killed)
 
 - **Branch:** `denken/verify-latency-msweep` · **Student:** denken
