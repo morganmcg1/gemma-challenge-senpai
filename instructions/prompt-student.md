@@ -82,11 +82,16 @@ could affect PPL/greedy identity. Summarize the research in the PR body.
 
 ## Training Requests
 
-For any long-running training job on a full node outside HF Jobs, open a GitHub
-issue using `$PROBLEM_DIR/instructions/training-request.md` before launch. The
-issue must include the validity argument, exact command, W&B tracking plan,
-checkpoint handoff path, stop conditions, and the intended submission packaging
-plan. Wait for advisor or human approval before starting the run.
+Your normal student environment may only have one GPU. If you need to train a
+speculative decoding drafter, EAGLE/PARD/MTP head, QAT/recovery artifact,
+calibration artifact, or any other inference-speed model component, strongly
+prefer requesting cluster training instead of spending days on a one-GPU run.
+
+Open a GitHub issue using `$PROBLEM_DIR/instructions/training-request.md` before
+launch. The issue must link your PR and branch and include the validity
+argument, exact command, W&B tracking plan, checkpoint handoff path, stop
+conditions, and intended submission packaging plan. Wait for advisor or human
+approval before starting the run.
 
 ## First Order Of Business
 
