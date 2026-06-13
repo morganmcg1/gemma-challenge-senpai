@@ -7,7 +7,7 @@ on **a10g-small** via HF Jobs. Local AWS A10G numbers are **exploratory only**.
 Validity gates (a submission is invalid if any fail):
 - **PPL ≤ ~2.42** (reference 2.30 + 5%).
 - **128/128** prompts completed.
-- **Greedy decode token-identical** to plain greedy AR decode of the *submitted* checkpoint.
+- **Greedy decode token-identical** to plain greedy AR decode of the *submitted* checkpoint. **Reference must be served (spec-off API), not offline** — offline AR diverges on ~20% of prompts due to FP-reduction non-determinism (wirbel PR #8); an offline reference would falsely fail ~20% of valid served submissions.
 - **All modalities loaded** (text/image/audio) — no text-only shortcut.
 
 ## Public frontier target (what we are reproducing, then beating)
@@ -93,6 +93,16 @@ verify paths) is a first-class objective, not an afterthought.
 - **New shared infra:** `research/eagle3_feasibility/{feasibility_report.md, probe_eagle3_export.py, probe_result.json, probe.log}`
 - **W&B run:** none (source audit + single model-load probe; no training).
 
+### 2026-06-13 12:25 — PR #8: Local validation + profiling infra (greedy gate, PPL, profiler)
+
+- **Infra shipped:** `scripts/local_validation/` — one-command `validate_submission`, served spec-off greedy reference generator (`gen_greedy_reference --spec-off`), local PPL runner, decode op-profiler. All future HF-Job approval issues should attach `validate_submission` output.
+- **Critical methodological finding (greedy gate):** Offline AR reference diverges on 26/128 prompts (20.3%) from FP-reduction non-determinism. Greedy gate must compare **served-vs-served (spec-off)** — offline reference falsely fails ~20% of valid served submissions. `validate_submission` defaults to served anchor.
+- **Profiler finding (int4 base, graph mode, 96.91 tok/s local):** lm_head vocab GEMV = **26.4% of de-duped decode GPU time** (262k-vocab bf16 GEMV). This is the largest addressable non-block, non-int4 target — directly confirms lmhead12k (ubel #14) as the top non-block, lowest-PPL-risk frontier lever. Weight-GEMM total 91.6%, attn 2.7%, norm/elementwise 3.8%, sampling 0.2%.
+- **One-flag spec-off reference mode:** `gen_greedy_reference --mode served --spec-off` injects `SENPAI_REFERENCE_MODE=1` so drafter students get a canonical spec-off greedy reference on their own engine/kernels/quant before spending an HF-job slot.
+- **Canonical greedy reference committed:** `research/greedy_reference/google__gemma-4-E4B-it/` (bf16 base, 128 prompts, served spec-off).
+- **W&B run:** none (local infra + profiler, no training).
+- **One-command validation:** `python -m scripts.local_validation.validate_submission --submission submissions/<dir> --server-python /tmp/server-venv/bin/python`
+
 ## Confirmed dead ends (do not re-spend on these)
 sub-4-bit weight kernels (AWQ/GPTQ/AQLM/QuIP#/2:4-Sparse-Marlin/NVFP4) — no loadable Ampere
 sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gram/prompt-lookup
@@ -110,4 +120,4 @@ already collapses the step — no per-step overhead to reclaim standalone; int4 
 **bit-exact** (sha256 run#1==run#2, eager too); fa2sw also requires a **vLLM worker-plugin** (V1 spawns
 a separate EngineCore process that a serve-process monkeypatch can't reach).
 
-_Last updated: 2026-06-13 (PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #5 resolving via precision-localization experiment, gates rungs 4–5)._
+_Last updated: 2026-06-13 (PR #8 MERGED — local validation + profiling infra: served-vs-served greedy gate, validate_submission harness, lm_head=26% profiler confirmed; PR #15 EAGLE-3 ACCESSIBLE/GO; PR #7 CLOSED fa2sw/onegraph NEGATIVE — both greedy-DIVERGENT standalone on int4 base at conc=1; int4 base cross-process bit-exact in M=1 sequential regime. Linchpin: int4 batched-verify spec-decode structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #19 resolving via batch-invariant vLLM, gates rungs 4–5)._
