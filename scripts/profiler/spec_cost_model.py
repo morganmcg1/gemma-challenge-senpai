@@ -283,12 +283,35 @@ def profile_config(runner, M, ctx, mode, profile_steps):
     }
 
 
-def run_mode(model, mode, m_sweep, ctx_sweep, steps, warmup, profile_steps):
+def _install_splitkv(patch_path: str):
+    """Import + install the #43 split-KV verify patch (PR #51 re-grounding).
+
+    Returns the patch module so the caller can read its redirect counter after the
+    sweep. Must run AFTER build_llm so the vLLM ops module is already imported and
+    the patch swaps unified_attention in place (rather than only arming the
+    import-time finder)."""
+    import importlib.util as _ilu
+    patch_path = os.path.abspath(patch_path)
+    spec = _ilu.spec_from_file_location("splitkv_verify_patch", patch_path)
+    mod = _ilu.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    active = mod.install()
+    print(f"[cost] splitkv patch {patch_path} install()={active} "
+          f"SPLITKV_VERIFY={os.environ.get('SPLITKV_VERIFY', '1')} "
+          f"max_q<={getattr(mod, 'SPLITKV_VERIFY_MAX_Q', '?')}", flush=True)
+    return mod
+
+
+def run_mode(model, mode, m_sweep, ctx_sweep, steps, warmup, profile_steps,
+             splitkv_patch=None):
     print(f"\n[cost] ===== MODE={mode} =====", flush=True)
     t0 = time.time()
     llm = build_llm(model, enforce_eager=(mode == "eager"), m_sweep=m_sweep,
                     max_ctx=max(ctx_sweep))
     print(f"[cost] {mode} LLM ready in {time.time()-t0:.1f}s", flush=True)
+    splitkv_mod = None
+    if splitkv_patch:
+        splitkv_mod = _install_splitkv(splitkv_patch)
     runner = find_runner(llm)
     if runner is None:
         raise RuntimeError("could not locate GPUModelRunner")
@@ -302,23 +325,37 @@ def run_mode(model, mode, m_sweep, ctx_sweep, steps, warmup, profile_steps):
     except Exception:
         pass
 
+    def _redirected():
+        return int(splitkv_mod._stats["redirected"]) if splitkv_mod else 0
+
     rows = []
     for ctx in ctx_sweep:
         for M in m_sweep:
+            r0 = _redirected()
             t = time_config(runner, M, ctx, mode, steps, warmup)
             p = profile_config(runner, M, ctx, mode, profile_steps)
-            row = {"mode": mode, "ctx": ctx, "M": M, **t, **p}
+            redir = _redirected() - r0
+            row = {"mode": mode, "ctx": ctx, "M": M, **t, **p,
+                   "splitkv_redirected": redir}
             rows.append(row)
             attn = p["step_category_pct"].get("attention", 0.0)
+            sk = f" splitkv_redir={redir}" if splitkv_mod else ""
             print(f"[cost] {mode} ctx={ctx:4d} M={M:2d}: step={t['t_step_ms']:7.3f}ms "
                   f"(fwd={t['t_forward_ms']:7.3f} lmhead={t['t_lmhead_ms']:6.3f}) "
                   f"attn={attn:4.1f}% | TPS_ideal(K={M-1 if M>1 else 1})="
-                  f"{(M-1 if M>1 else 1)/(t['t_step_ms']/1000):6.1f}", flush=True)
+                  f"{(M-1 if M>1 else 1)/(t['t_step_ms']/1000):6.1f}{sk}", flush=True)
 
+    splitkv_info = None
+    if splitkv_mod:
+        splitkv_info = {"active": True, "patch_path": os.path.abspath(splitkv_patch),
+                        "total_redirected": _redirected(),
+                        "max_q": getattr(splitkv_mod, "SPLITKV_VERIFY_MAX_Q", None)}
+        print(f"[cost] {mode} splitkv TOTAL redirected={splitkv_info['total_redirected']} "
+              f"(verify batches routed to 3D split-KV)", flush=True)
     del llm
     gc.collect()
     torch.cuda.empty_cache()
-    return rows, hidden
+    return rows, hidden, splitkv_info
 
 
 # ---------------------------------------------------------------------------
@@ -465,6 +502,14 @@ def _build_argparser():
     # subprocess lets process exit free the GPU between modes.
     ap.add_argument("--single-mode", default=None, help=argparse.SUPPRESS)
     ap.add_argument("--partial-out", default=None, help=argparse.SUPPRESS)
+    # PR #51: re-ground the verify cost curve on the MERGED #43 split-KV patch.
+    # Installs splitkv_verify_patch.install() after the engine is built so the
+    # verify-attention op (1<M<=64 query rows) routes through vLLM's 3D split-KV
+    # (FlashDecoding) path -- the only thing #43 changes. The patch's redirect
+    # counter is recorded in the output so "patch active" is provable, not assumed.
+    ap.add_argument("--splitkv-patch", default=None,
+                    help="path to splitkv_verify_patch.py; install it before the "
+                         "M-sweep so the verify forward uses the #43 3D split-KV path")
     # Tree-causal mask attention microbenchmark (PR #33). Independent of the
     # M-sweep orchestrator: isolates the only mask-addressable term (core
     # QK^T-softmax-V) at the real Gemma-4-E4B decoder geometry and measures the
@@ -494,10 +539,13 @@ def _run_worker(args):
     device = torch.cuda.get_device_name(0)
     print(f"[cost] WORKER mode={mode} device={device} torch={torch.__version__} "
           f"M={m_sweep} ctx={ctx_sweep} steps={args.steps} warmup={args.warmup}", flush=True)
-    rows, hidden = run_mode(args.int4_base, mode, m_sweep, ctx_sweep,
-                            args.steps, args.warmup, args.profile_steps)
+    rows, hidden, splitkv_info = run_mode(
+        args.int4_base, mode, m_sweep, ctx_sweep,
+        args.steps, args.warmup, args.profile_steps,
+        splitkv_patch=args.splitkv_patch)
     with open(args.partial_out, "w") as f:
-        json.dump({"mode": mode, "rows": rows, "hidden": hidden, "device": device}, f)
+        json.dump({"mode": mode, "rows": rows, "hidden": hidden, "device": device,
+                   "splitkv_info": splitkv_info}, f)
     print(f"[cost] WORKER mode={mode} wrote {args.partial_out} ({len(rows)} rows)", flush=True)
 
 
@@ -833,6 +881,7 @@ def main():
     os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
 
     all_rows, hidden, device = [], None, None
+    splitkv_info: dict = {}
     for mode in modes:
         fd, partial_path = tempfile.mkstemp(prefix=f"spec_cost_{mode}_", suffix=".json")
         os.close(fd)
@@ -842,6 +891,8 @@ def main():
                "--m-sweep", args.m_sweep, "--ctx-sweep", args.ctx_sweep,
                "--steps", str(args.steps), "--warmup", str(args.warmup),
                "--profile-steps", str(args.profile_steps), "--no-wandb"]
+        if args.splitkv_patch:
+            cmd += ["--splitkv-patch", args.splitkv_patch]
         print(f"[cost] launching worker for mode={mode}", flush=True)
         rc = subprocess.call(cmd)
         if rc != 0:
@@ -852,12 +903,16 @@ def main():
         all_rows.extend(part["rows"])
         hidden = hidden or part.get("hidden")
         device = device or part.get("device")
+        if part.get("splitkv_info"):
+            splitkv_info[mode] = part["splitkv_info"]
         # incremental save so a later-mode crash can't lose earlier data
-        _save(args, m_sweep, ctx_sweep, accept_models, all_rows, hidden, device=device)
+        _save(args, m_sweep, ctx_sweep, accept_models, all_rows, hidden, device=device,
+              splitkv_info=splitkv_info or None)
 
     cost_model = build_cost_model(all_rows, accept_models)
     payload = _save(args, m_sweep, ctx_sweep, accept_models, all_rows, hidden,
-                    device=device, cost_model=cost_model)
+                    device=device, cost_model=cost_model,
+                    splitkv_info=splitkv_info or None)
 
     # Calibration line: graph M=1 ctx=256 should reproduce ~96.89 TPS (~10.3 ms).
     for r in all_rows:
@@ -877,7 +932,7 @@ def main():
 
 
 def _save(args, m_sweep, ctx_sweep, accept_models, rows, hidden, device=None,
-          cost_model=None):
+          cost_model=None, splitkv_info=None):
     payload = {
         "config": {
             "model": args.int4_base, "m_sweep": m_sweep, "ctx_sweep": ctx_sweep,
@@ -886,7 +941,8 @@ def _save(args, m_sweep, ctx_sweep, accept_models, rows, hidden, device=None,
             "device": device or "unknown", "hidden_size": hidden,
             "env": {k: os.environ.get(k) for k in
                     ("VLLM_USE_FLASHINFER_SAMPLER", "VLLM_ENABLE_V1_MULTIPROCESSING",
-                     "CUDA_VISIBLE_DEVICES")},
+                     "CUDA_VISIBLE_DEVICES", "SPLITKV_VERIFY", "SPLITKV_VERIFY_MAX_Q")},
+            "splitkv_info": splitkv_info,
         },
         "rows": rows,
     }

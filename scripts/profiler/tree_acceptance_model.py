@@ -284,8 +284,11 @@ def build_argparser():
                                        "[measured, 0.78, 0.85]")
     ap.add_argument("--tree-mults", "--tree_mults", dest="tree_mults", type=float,
                     nargs="+", default=[1.5, 4.0])
-    ap.add_argument("--sim-K", "--sim_K", dest="sim_K", type=int, default=6,
-                    help="headline depth for the empirical simulation")
+    ap.add_argument("--sim-K", "--sim_K", dest="sim_K", type=int, default=-1,
+                    help="headline/empirical draft depth. DEFAULT -1 = argmax: every "
+                         "scenario reports its own cost-optimal K* (operating point), "
+                         "not a fixed headline depth (PR #51, residual of #41 logging "
+                         "bug). Pass an explicit K>=1 to force a fixed-depth diagnostic.")
     ap.add_argument("--trace", default=None, help="Step-1 hit-rank JSONL (Step 3)")
     ap.add_argument("--output", default="research/spec_cost_model/tree_results.json")
     ap.add_argument("--plot-dir", "--plot_dir", dest="plot_dir",
@@ -331,15 +334,52 @@ def main():
             all_rows.extend(rows)
             summary_by_pw[f"p{p:.4f}|W{W}"] = summ
 
-    # Headline at fixed K = sim_K (default 6): linear vs tree, every p.
-    K0 = args.sim_K
+    # ---- ARGMAX OPERATING POINT (PR #51: the default headline) ----
+    # PR #41 / BASELINE.md:90 root-caused a logging bug where the headline reported
+    # a fixed --sim-K depth (then 6) instead of the cost-optimal argmax K*, so the
+    # reported TPS was NOT the operating point. The fix: by default (--sim-K -1)
+    # every scenario reports its own argmax K* (the K that maximizes measured-verify
+    # TPS), printed FIRST and unambiguously. summary_by_pw already holds the argmax.
+    argmax_mode = (args.sim_K is None) or (args.sim_K < 1)
+
+    def argmax_K(p, W):
+        return summary_by_pw[f"p{p:.4f}|W{W}"]["meas"]["K_star"]
+
+    def k0_for(p, W):
+        return argmax_K(p, W) if argmax_mode else args.sim_K
+
+    headline_K_source = "argmax-K*" if argmax_mode else f"fixed-K={args.sim_K}"
+    print(f"\n[tree] ===== ARGMAX OPERATING POINT (measured verify + "
+          f"{args.drafter_ms}ms drafter) =====", flush=True)
+    print(f"  headline_K_source = {headline_K_source}"
+          f"{'  (pass --sim-K N to force a fixed depth)' if argmax_mode else ''}",
+          flush=True)
+    print(f"{'p':>8} {'W':>2} {'K*':>3} {'M*':>4} {'TPS@K*':>8} {'E@K*':>6} "
+          f"{'verify-only':>12} {'in_range':>8}", flush=True)
+    argmax_table = {}
+    for p in p_list:
+        for W in args.widths:
+            s = summary_by_pw[f"p{p:.4f}|W{W}"]["meas"]
+            vo = summary_by_pw[f"p{p:.4f}|W{W}"]["meas_verifyonly"]
+            argmax_table[f"p{p:.4f}|W{W}"] = {
+                "K_star": s["K_star"], "M": s["M"], "tps": s["tps"], "E": s["E"],
+                "tps_verifyonly": vo["tps"], "K_star_verifyonly": vo["K_star"],
+                "M_in_range": s["M_in_range"]}
+            print(f"{p:8.4f} {W:2d} {s['K_star']:3d} {s['M']:4d} {s['tps']:8.1f} "
+                  f"{s['E']:6.3f}   K*={vo['K_star']:2d}/{vo['tps']:6.1f} "
+                  f"{str(s['M_in_range']):>8}", flush=True)
+
+    # Headline: linear (W=1) vs width-Wmax tree, EACH at its own operating-point K
+    # (argmax by default, or the forced --sim-K depth).
     headline = {}
     for p in p_list:
+        Kl, Kt = k0_for(p, 1), k0_for(p, Wmax)
         ql, qt = q_rescue(p, 1, rescue), q_rescue(p, Wmax, rescue)
-        El, Et = E_iid(ql, K0), E_iid(qt, K0)
-        Ml, Mt = 1 * K0 + 1, Wmax * K0 + 1
+        El, Et = E_iid(ql, Kl), E_iid(qt, Kt)
+        Ml, Mt = 1 * Kl + 1, Wmax * Kt + 1
         Vl, Vt = curve.at(Ml), curve.at(Mt)
         headline[f"p{p:.4f}"] = {
+            "K_lin": Kl, "K_tree": Kt,
             "q_lin": ql, "q_tree": qt, "q_tree_indep": q_indep(p, Wmax),
             "E_lin": El, "E_tree": Et, "E_ratio": Et / El,
             "M_lin": Ml, "M_tree": Mt, "M_tree_in_range": curve.in_range(Mt),
@@ -352,19 +392,20 @@ def main():
         h = headline[f"p{p:.4f}"]
         h["tps_gain_meas"] = h["tps_tree_meas"] / h["tps_lin_meas"]
 
-    print(f"\n[tree] ===== i.i.d. headline at K={K0} (linear vs width-{Wmax} tree) =====",
-          flush=True)
-    print(f"{'p(top1)':>8} {'q_tree':>7} {'E_lin':>6} {'E_tree':>7} {'Erat':>5} "
-          f"{'Vlin':>6} {'Vtree':>6} {'TPSlin':>7} {'TPStree':>8} {'gain':>5} {'tree M':>8}",
-          flush=True)
+    print(f"\n[tree] ===== i.i.d. headline ({headline_K_source}: linear vs "
+          f"width-{Wmax} tree) =====", flush=True)
+    print(f"{'p(top1)':>8} {'Klin':>4} {'Ktree':>5} {'q_tree':>7} {'E_lin':>6} "
+          f"{'E_tree':>7} {'Erat':>5} {'Vlin':>6} {'Vtree':>6} {'TPSlin':>7} "
+          f"{'TPStree':>8} {'gain':>5} {'tree M':>8}", flush=True)
     for p in p_list:
         h = headline[f"p{p:.4f}"]
         flag = "" if h["M_tree_in_range"] else "*"
-        print(f"{p:8.4f} {h['q_tree']:7.4f} {h['E_lin']:6.3f} {h['E_tree']:7.3f} "
-              f"{h['E_ratio']:5.2f} {h['V_lin_ms']:6.2f} {h['V_tree_ms']:6.2f} "
-              f"{h['tps_lin_meas']:7.1f} {h['tps_tree_meas']:8.1f} {h['tps_gain_meas']:5.2f} "
+        print(f"{p:8.4f} {h['K_lin']:4d} {h['K_tree']:5d} {h['q_tree']:7.4f} "
+              f"{h['E_lin']:6.3f} {h['E_tree']:7.3f} {h['E_ratio']:5.2f} "
+              f"{h['V_lin_ms']:6.2f} {h['V_tree_ms']:6.2f} {h['tps_lin_meas']:7.1f} "
+              f"{h['tps_tree_meas']:8.1f} {h['tps_gain_meas']:5.2f} "
               f"{h['M_tree']:6d}{flag:>2}", flush=True)
-    print("  (* tree M beyond PR#18 measured M<=16 -> verify latency extrapolated)",
+    print("  (* tree M beyond measured range -> verify latency extrapolated)",
           flush=True)
 
     # ---- optimal K* table (measured verify, with drafter) ----
@@ -379,21 +420,23 @@ def main():
             print(f"{p:8.4f} {W:2d} {s['meas']['K_star']:3d} {s['meas']['tps']:8.1f} "
                   f"{s['meas']['E']:6.3f}   K*={vo['K_star']:2d}/{vo['tps']:7.1f}", flush=True)
 
-    # ---- verify-overhead sensitivity at K = sim_K (the verdict hinges on this) ----
-    # The naive fear is V_tree = W x V_linear (4x). PR #18 measured that the verify
-    # forward is bandwidth-bound and ~flat in M, and a width-W tree verifies all K*W
-    # candidates in ONE M=K*W+1 forward -> the MEASURED overhead is curve.at(K*W+1) /
-    # curve.at(K+1), far below 4x. This table makes the dependence explicit.
-    print(f"\n[tree] ===== verify-overhead sensitivity at K={K0} (width-{Wmax} tree) =====",
-          flush=True)
-    print(f"{'p':>8} {'TPSlin':>7} | {'measured':>9} {'1.5x':>7} {'4.0x':>7} {'additive':>9} "
-          f"| {'meas ovh':>9}", flush=True)
+    # ---- verify-overhead sensitivity at the operating-point K (argmax by default) ----
+    # The naive fear is V_tree = W x V_linear (4x). The verify forward verifies all
+    # K*W candidates in ONE M=K*W+1 forward -> the MEASURED overhead is
+    # curve.at(K*W+1)/curve.at(K+1), far below 4x. Reported at each scenario's
+    # operating-point K (its argmax K*, or the forced --sim-K depth).
+    print(f"\n[tree] ===== verify-overhead sensitivity at operating K "
+          f"({headline_K_source}, width-{Wmax} tree) =====", flush=True)
+    print(f"{'p':>8} {'Klin':>4} {'Ktree':>5} {'TPSlin':>7} | {'measured':>9} {'1.5x':>7} "
+          f"{'4.0x':>7} {'additive':>9} | {'meas ovh':>9}", flush=True)
     overhead = {}
     for p in p_list:
-        lin = next(r for r in all_rows if r["p"] == p and r["W"] == 1 and r["K"] == K0)
-        tr = next(r for r in all_rows if r["p"] == p and r["W"] == Wmax and r["K"] == K0)
+        Kl, Kt = k0_for(p, 1), k0_for(p, Wmax)
+        lin = next(r for r in all_rows if r["p"] == p and r["W"] == 1 and r["K"] == Kl)
+        tr = next(r for r in all_rows if r["p"] == p and r["W"] == Wmax and r["K"] == Kt)
         meas_ovh = tr["V_meas_ms"] / lin["V_meas_ms"]
         overhead[f"p{p:.4f}"] = {
+            "K_lin": Kl, "K_tree": Kt,
             "tps_lin_meas": lin["tps_meas"], "tps_tree_meas": tr["tps_meas"],
             "tps_tree_1.5x": tr.get("tps_mult1.5x"), "tps_tree_4x": tr.get("tps_mult4x"),
             "tps_tree_additive": tr["tps_add"], "measured_overhead_x": meas_ovh,
@@ -401,30 +444,45 @@ def main():
             "tree_beats_linear_4x": tr.get("tps_mult4x", 0) > lin["tps_meas"],
         }
         o = overhead[f"p{p:.4f}"]
-        print(f"{p:8.4f} {lin['tps_meas']:7.1f} | {tr['tps_meas']:9.1f} "
+        print(f"{p:8.4f} {Kl:4d} {Kt:5d} {lin['tps_meas']:7.1f} | {tr['tps_meas']:9.1f} "
               f"{o['tps_tree_1.5x']:7.1f} {o['tps_tree_4x']:7.1f} {tr['tps_add']:9.1f} "
               f"| {meas_ovh:8.3f}x", flush=True)
     print("  measured overhead << 4x: the tree verifies K*W candidates in ONE flat-cost "
-          "forward (PR #18).", flush=True)
+          "forward.", flush=True)
 
     # ---- Step 3: empirical simulation from the trace ----
     empirical = None
     if args.trace and os.path.exists(args.trace):
         traces, tmeta = load_trace(args.trace)
+
+        def emp_argmax_K(W):
+            best_K, best_tps = args.K_range[0], -1.0
+            for K in range(args.K_range[0], args.K_range[1] + 1):
+                e = empirical_E(traces, K, W)
+                t = tps(e["E"], curve.at(W * K + 1), args.drafter_ms)
+                if t > best_tps:
+                    best_K, best_tps = K, t
+            return best_K
+
+        emp_K = {W: (emp_argmax_K(W) if argmax_mode else args.sim_K)
+                 for W in args.widths}
         emp = {}
         for W in args.widths:
-            e = empirical_E(traces, K0, W)
+            Kw = emp_K[W]
+            e = empirical_E(traces, Kw, W)
             agg = trace_aggregate_accept(traces, W)
-            e_iid = E_iid(agg, K0)
-            emp[f"W{W}"] = {**e, "agg_accept": agg, "E_iid_same_q": e_iid,
+            e_iid = E_iid(agg, Kw)
+            emp[f"W{W}"] = {**e, "K": Kw, "agg_accept": agg, "E_iid_same_q": e_iid,
                             "emp_over_iid": e["E"] / e_iid if e_iid else None}
+        Kl_emp, Kt_emp = emp_K[1], emp_K[Wmax]
         El_emp = emp["W1"]["E"]
         Et_emp = emp[f"W{Wmax}"]["E"]
         rescue_emp = ((emp[f"W{Wmax}"]["agg_accept"] - emp["W1"]["agg_accept"]) /
                       (1.0 - emp["W1"]["agg_accept"]))
-        Ml, Mt = 1 * K0 + 1, Wmax * K0 + 1
+        Ml, Mt = 1 * Kl_emp + 1, Wmax * Kt_emp + 1
         empirical = {
-            "n_sequences": len(traces), "sim_K": K0,
+            "n_sequences": len(traces), "sim_K_source": headline_K_source,
+            "K_linear": Kl_emp, "K_tree": Kt_emp,
             "by_width": emp,
             "E_linear": El_emp, "E_tree": Et_emp, "E_ratio": Et_emp / El_emp,
             "rescue_rate_empirical": rescue_emp,
@@ -435,11 +493,12 @@ def main():
         }
         empirical["tps_gain_meas"] = (empirical["tps_tree_meas"] /
                                       empirical["tps_linear_meas"])
-        print(f"\n[tree] ===== empirical simulation (trace, {len(traces)} seqs, K={K0}) =====",
+        print(f"\n[tree] ===== empirical simulation (trace, {len(traces)} seqs, "
+              f"{headline_K_source}: Klin={Kl_emp} Ktree={Kt_emp}) =====", flush=True)
+        print(f"  linear (top-1) K={Kl_emp}: E_emp={El_emp:.3f}  vs i.i.d."
+              f"={emp['W1']['E_iid_same_q']:.3f} (emp/iid={emp['W1']['emp_over_iid']:.3f})",
               flush=True)
-        print(f"  linear (top-1): E_emp={El_emp:.3f}  vs i.i.d.={emp['W1']['E_iid_same_q']:.3f} "
-              f"(emp/iid={emp['W1']['emp_over_iid']:.3f})", flush=True)
-        print(f"  tree-{Wmax} (top-{Wmax}): E_emp={Et_emp:.3f}  vs i.i.d."
+        print(f"  tree-{Wmax} (top-{Wmax}) K={Kt_emp}: E_emp={Et_emp:.3f}  vs i.i.d."
               f"={emp[f'W{Wmax}']['E_iid_same_q']:.3f} "
               f"(emp/iid={emp[f'W{Wmax}']['emp_over_iid']:.3f})", flush=True)
         print(f"  E_tree/E_linear (empirical) = {empirical['E_ratio']:.3f}", flush=True)
@@ -480,7 +539,8 @@ def main():
             "fableous_rescue": FABLEOUS_RESCUE, "drafter_ms": args.drafter_ms,
             "verify_base_ms": args.verify_base_ms, "cost_model_json": args.cost_model_json,
             "cost_key": args.cost_key, "p_list": p_list, "widths": args.widths,
-            "K_range": args.K_range, "sim_K": K0, "tree_mults": args.tree_mults,
+            "K_range": args.K_range, "sim_K_arg": args.sim_K,
+            "sim_K_source": headline_K_source, "tree_mults": args.tree_mults,
             "latency_curve": {str(k): v for k, v in curve.lat.items()},
         },
         "headline_iid": headline,
@@ -519,9 +579,11 @@ def log_wandb(args, payload, plot_paths, p_list, headline, empirical):
     for p in p_list:
         h = headline[f"p{p:.4f}"]
         tag = f"p{p:.3f}".replace(".", "_")
-        summary[f"E_lin_K{cfg['sim_K']}_{tag}"] = h["E_lin"]
-        summary[f"E_tree_K{cfg['sim_K']}_{tag}"] = h["E_tree"]
-        summary[f"E_ratio_K{cfg['sim_K']}_{tag}"] = h["E_ratio"]
+        summary[f"E_lin_{tag}"] = h["E_lin"]
+        summary[f"E_tree_{tag}"] = h["E_tree"]
+        summary[f"E_ratio_{tag}"] = h["E_ratio"]
+        summary[f"K_lin_op_{tag}"] = h["K_lin"]
+        summary[f"K_tree_op_{tag}"] = h["K_tree"]
         summary[f"tps_lin_meas_{tag}"] = h["tps_lin_meas"]
         summary[f"tps_tree_meas_{tag}"] = h["tps_tree_meas"]
         summary[f"tps_gain_meas_{tag}"] = h["tps_gain_meas"]
