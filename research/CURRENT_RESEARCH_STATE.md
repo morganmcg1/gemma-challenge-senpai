@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-13 (cycle 8)
+- **Date:** 2026-06-13 (cycle 9)
 - **Advisor branch:** `approval-gated-8gpu-20260613` · **Research tag:** `gemma-8gpu-progress-20260613`
 - **Most recent human directive:** none yet. Operating under the launch operator rules:
   **no automatic HF Jobs / no `/v1/jobs:run` / no `train.py --launch`** without a
@@ -49,6 +49,8 @@ strongest public **VALID** frontier package — kenyan-duma's
 reproduction ladder (bf16 ~44 → int4 QAT ~95 → +g128/lm_head ~127 → +drafter ~285 → ~420).
 We push past it only after the base is reproduced and the local validation gates are green.
 
+> **Cycle-9 public-board risk (NEW, `taskforces/evals` via @itaca `20260613-103155-471`, citing @frantic-penguin `20260613-090759-237` + @pupa-agent confirm):** the ~420 "VALID" frontier's PPL=2.378 is the **`prompt_logprobs` path**, but the **same-path (timed-model) PPL on the LF29 fold is ~2.55** — *above* the 2.42 cap. If organizers tighten to a same-path PPL check, the entire precache/lmhead12k frontier (and any repro of it) is at validity risk. **Implication for us:** prefer reproducing the cleanest **verified-valid, non-precache** package (e.g. agent-smith `osoi5-…-fa2sw-v3`, 420.59 valid) and *measure our own same-path PPL locally* before any HF Job. A drafter/quant stack whose timed-model PPL is genuinely ≤2.42 is a durable asset; a precache-replay number is not. Open question for next round: is our int4 ladder's served same-path PPL safely under 2.42 at the drafter rungs?
+
 Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live levers are:
 0. **Is int4 spec-decode greedy-valid at all?** (NEW linchpin — see bottleneck above). A drafter is
    worthless if the served int4+spec stack can't pass the strict greedy gate. Must resolve before (1)
@@ -67,7 +69,7 @@ Single-stream decode is **memory-bandwidth-bound** (~92% weight-GEMM). The live 
 
 | student | PR | track | target |
 |---|---|---|---|
-| fern | #16 (WIP) | **EAGLE-3 draft-head training pipeline** — build distillation harness (`gen_eagle3_corpus.py` + `train_eagle3.py` + `eval_eagle3.py`), run debug-viability 1k-step training on 200 MATH samples, report offline teacher-forced acceptance rate. Full-scale run + HF Job gated on (a) debug viability and (b) kanna #5 linchpin. Aux layers `(2,21,39)`, `[T,7680]` fused input. | tf_acceptance_rate_debug_1k ≥ 3.5 tok/step (vs. QAT-MTP baseline ~2.2–3.3) |
+| fern | #16 (WIP) | **EAGLE-3 draft-head training pipeline** — harness built + validated Steps 1–4 (faithful plain-PyTorch `Eagle3DraftHead` reimpl with vLLM-matching weights, from-scratch, frozen tied embed/lm_head init, chunked 262k CE, peak 11.2 GB). **Cycle-9 steer (option c):** the 1k-step spec over 200 MATH samples = ~71 epochs, violating `SENPAI_MAX_EPOCHS=2`; fern correctly refused to override. 2-epoch run already showed viability (held-out tf 4e-6→0.248, monotone, still climbing). Steered to **enlarge corpus to ~8k MATH samples so 1000 steps = 2 epochs** — cap-compliant AND a cleaner, less-overfit held-out signal — then terminalize. Serving/full-scale still gated on (a) defensible debug number and (b) kanna linchpin (#19). | held-out `tf_acceptance_rate_debug_1k`: <0.50 underfit / 0.50–0.70 schedule full / ≥0.70 strong |
 | stark | #3 (WIP) | **int4 QAT W4A16** reproduction — local PPL 2.0055 ✓, local TPS ~96 ✓; **awaiting HF Job approval (GitHub issue #11, 0 human comments)**. While blocked: bounded **run-to-run determinism reconciliation** vs kanna's K0 control (linchpin-relevant, interruptible). | ~95 TPS / PPL ~2.01; after approval: run job, post terminal result, merge |
 | lawine | #4 (WIP) | **int4 g128 + untied int4 lm_head** re-quant — local PPL 2.0190 ✓, local TPS ~128 ✓, **GREEDY_IDENTICAL 128/128 ✓ (the int4-passes existence proof)**; **awaiting HF Job approval (GitHub issue #12, advisor-endorsed, no human approval)**. While blocked: document GREEDY_IDENTICAL methodology (same-path vs bf16-dense ref; run-to-run) for the linchpin reconciliation. | ~127 TPS / PPL ~2.02, weight-byte floor; after approval: run job, post terminal result, merge |
 | kanna | #5 (WIP) | **int4+MTP spec-decode** — `{8,4}` engine blocker SOLVED (vLLM PR #43543 backport), but int4 batched-verify spec is **structurally greedy-DIVERGENT** vs M=1 AR (~0.33%/tok); acceptance caps ~2.2. v1: precision-localization (int4 vs bf16 vs fp8 greedy flip-rate) **+ per-precision run-to-run determinism control** (reconcile stark #3's run-to-run divergence vs the K0-IDENTICAL claim) + confirm whether a10g-small honors manifest vLLM version | **resolve the linchpin**: is int4 spec greedy-valid at all? Separate intrinsic nondeterminism from batch-shape divergence. |

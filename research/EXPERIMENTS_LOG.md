@@ -1,5 +1,29 @@
 # SENPAI Research Results
 
+## 2026-06-13 (cycle 9) — PR #16: EAGLE-3 draft-head training pipeline ↩ INTERIM REVIEW → sent back (option c)
+
+- **Branch:** `fern/eagle3-training-pipeline` · **Student:** fern
+- **Status:** WIP (not terminal). Reviewed an interim/blocking-question update; steered, did not merge or close.
+- **Hypothesis:** an EAGLE-3 head distilled from Gemma-4 E4B aux states `(2,21,39)` can reach offline teacher-forced acceptance well above the QAT-MTP baseline, and the training pipeline is functional + CUDA-graph-compatible.
+- **What landed (Steps 1–4, validated):** faithful plain-PyTorch `Eagle3DraftHead` (vLLM-matching weight names/shapes; the vLLM head is inference-only/no-autograd), from-scratch (no compatible public Gemma-4 EAGLE-3 ckpt), frozen tied embed/lm_head init, chunked 262k-way CE (avoids `[N,262144]` fp32 OOM), `feature_shift=1` vLLM-faithful alignment. Corpus: `EleutherAI/hendrycks_math` (allenai/MATH 404s), 200 train + 20 held-out, 52,751 tokens. Peak GPU **11.2 GB**.
+
+### Interim result (cap-constrained 2-epoch run)
+
+| epoch | step | held-out tf_acceptance | held-out loss |
+|---|---|---|---|
+| ~0.5 | 7 | 0.066 | 5.68 |
+| ~1.0 | 14 | 0.192 | 4.64 |
+| ~1.5 | 21 | 0.236 | 4.19 |
+| **~2.0** | **28** | **0.248** | **4.10** |
+
+Train loss 12.97→3.72, train acc 0→0.295. W&B `rxxd8yen` (group `eagle3-drafter-training`).
+
+### Decision & rationale
+
+fern flagged a **binding conflict**: the PR's "1000 steps" over the 200-sample corpus = ~71 epochs, violating the hard `SENPAI_MAX_EPOCHS=2` bound. fern correctly **refused to override** the bound and ran the max-compliant 2-epoch run. The held-out acceptance is monotone and **still climbing steeply at the cap** (chance ≈ 4e-6) — viability is demonstrated, but 0.248@28-steps is too weak to anchor the full-scale go/no-go.
+
+**Steered to option (c):** enlarge the corpus to ~8k MATH samples so 1000 steps = 2 epochs. This is **cap-compliant** (I will not raise `SENPAI_MAX_EPOCHS`) AND **better science** — the original 71-epoch-on-200 plan would have memorized a tiny corpus; 2 passes over a larger corpus gives the same ~4.1M token-steps of gradient with a cleaner, less-overfit held-out signal. Then terminalize with a defensible `tf_acceptance_rate_debug_1k`. Serving/full-scale remain gated on (a) this number and (b) the int4 spec greedy-identity linchpin (#19). EAGLE-3 is the highest-ceiling drafter (lit. ~480–550 TPS) and is deployable on the public VALID frontier's drafter (`e1`) spec path independent of the int4 linchpin.
+
 ## 2026-06-13 (cycle 8) — PR #7: fa2sw + onegraph runtime levers ✗ CLOSED (negative)
 
 - **Branch:** `denken/fa2sw-onegraph`
