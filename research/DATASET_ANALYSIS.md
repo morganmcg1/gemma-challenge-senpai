@@ -31,11 +31,21 @@ eval prompts (TPS) + the 128 PPL ground-truth records (quality guardrail). Sourc
 
 ## Implications for hypotheses
 
-1. **Drafter acceptance is workload-specific.** Public acceptance is measured on
-   reasoning/math continuation. A drafter tuned to MMLU-Pro/GPQA/AIME will look great on the
-   public 128 — but the **private** set differs enough to cost 4–9% TPS (the 5% repro gap that
-   invalidates submissions). The corpus_spec fix: train the drafter on a **wide** distribution
-   (ShareGPT 50% + MMLU-Pro/GPQA/MATH-AIME + misc), **dedup against these 128**, hold out ≥900.
+1. **Drafter acceptance is workload-specific — and the benchmark workload is REASONING, not chat.**
+   Public acceptance is measured on MMLU-Pro/GPQA/AIME continuation. Two distinct corpus goals,
+   do not conflate them:
+   - **Benchmark-match (maximize public acceptance — fern #25):** train on **reasoning CoT** matching
+     the 57/57/14 mix (MMLU-Pro + GPQA + competition-math, distilled from the served target).
+     **ShareGPT is a poor match and a measured negative control, NOT a lever.** Empirical (fern #25,
+     2026-06-13): MATH-only EAGLE-3 acceptance **plateaus ~0.68** (0.6603@500 → 0.6816@898, +0.02 for
+     a 2nd epoch on 1.76M tokens) → the bottleneck is **data distribution, not training steps**.
+     Breaking 0.68→0.78 needs benchmark-matched reasoning data, not more epochs or ShareGPT.
+   - **Private-robustness (avoid the 5% repro gap that invalidates — land #9):** the **private** set
+     differs from these public 128 enough to cost 4–9% TPS if the drafter overfits public. Hedge with
+     a **wider** distribution (reasoning core + ShareGPT/misc breadth), **dedup against these 128**
+     (ids `mmlu_pro*`/`gpqa_diamond*`/`aime2026*`), hold out ≥200 disjoint.
+   These can tension: narrow-reasoning maximizes public, wide hedges private. The per-source
+   acceptance breakdown (fern #25) is the evidence that tells us how much breadth costs on public.
 2. **Prefill is cheap, decode is everything** (512 forced output tokens). Optimize steady-state
    decode bandwidth + accepted-tokens/step, not prompt handling.
 3. **The PPL memory headroom recipe matters:** `prompt_logprobs` materializes a full-vocab
@@ -48,4 +58,4 @@ eval prompts (TPS) + the 128 PPL ground-truth records (quality guardrail). Sourc
    per-step token mass; restricting verify/logits to the top-k is a real lever — but it must
    provably preserve greedy identity (top accepted token always in the kept set, else fall back).
 
-_Last updated: 2026-06-13._
+_Last updated: 2026-06-13 (cycle 16 — fern #25 confirmed MATH-only acceptance plateaus ~0.68; data-distribution is the drafter bottleneck; benchmark-matched reasoning CoT, not ShareGPT, is the path to 0.78)._

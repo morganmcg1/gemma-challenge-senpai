@@ -36,6 +36,9 @@ The verifier re-runs on a **private** prompt set; top drafter stacks lose **4–
 (prompt-distribution shift). Submissions die on the **5% TPS-reproduction gap, not on PPL**.
 Private-stable acceptance (drafter trained on a wide distribution; prompt-content-invariant
 verify paths) is a first-class objective, not an afterthought.
+**Now measurable locally (kanna #44, MERGED):** `scripts/validity/private_gap_probe.py` predicts
+the gap pre-submission — the honest fa2sw repro reads **12.4%** on a pure-chat proxy (pessimistic
+early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-stack approval issue.
 
 **Official validity gate = PPL + completion + modalities, NOT token-identity (kanna #38, 2026-06-13).** The official HF-Jobs harness (`hf_bucket_single_job.py`) runs benchmark + decode-capture + PPL + summary — it never compares served tokens to a greedy AR reference. So **speculative-decode stacks are leaderboard-legal** (this is why the entire ~420 VALID frontier ships MTP spec decode), and our strict M=1 greedy-identity bar is an *internal* pre-flight, not the leaderboard gate. Corollary: `fa2sw_precache_kenyan` (FA_SLIDING=1) is **non-reproducible run-to-run** (kernel FP-reduction noise on argmax near-ties; same-GPU spec-OFF control diverges 28/32, plain int4 baseline 29/32) — so no reference at any strictness certifies it; `FA_SLIDING=0` restores byte-identity (0/32) at an unmeasured TPS cost. The binding constraint above ~286 TPS stays the **private-set TPS re-run**, not token identity. Full audit: `research/validity/served_gate_reconciliation.md`.
 
@@ -63,6 +66,29 @@ verify paths) is a first-class objective, not an afterthought.
     artifacts under `research/local_validation/`.
 
 ## Merge history
+
+### 2026-06-13 20:09 — PR #23 (stark): int4 spec-verify greedy flip-rate probe — ⭐ CHARACTERIZATION KEEPER (official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary_metric `flip_rate_per_token`, not throughput). Closes the **cheap-fix sub-lane** for greedy-valid int4 spec-verify.
+- **No config zeros the M=K+1 verify flip rate.** `deterministic` (`use_deterministic_algorithms` + `CUBLAS_WORKSPACE_CONFIG=:4096:8`) is a **proven no-op AND +14% latency** — never ship; it cannot reach the custom Marlin `_C` / Triton kernels (aten-scoped only). `fp32-logit` is a near-tie **reshuffle** (+0.2% latency): it fixed 3 baseline flips but **exposed a new one at 7:268** — the faithful fp32 logits disagree M=1 vs M≥2, proving the hidden state feeding lm_head is batch-variant ⇒ the irreducible source is the **decoder Marlin int4 GEMM**, not the logit-accumulation step (answers the hypothesis split decisively).
+- **Keeper findings:** (1) deterministic mode is strictly bad (pure latency loss, zero greedy gain); (2) the flip is **binary M=1-vs-M≥2, flat in K** — a longer draft (bigger K) is no worse for greedy-identity than a short one (drafter-sizing insight); (3) cross-process M=1 noise floor = 0/576 (flips are the genuine batch-shape effect, not process noise). Confirms kanna #19's source-level batch-invariant Marlin is the only route — and per #38 (official gate has no token-identity check) this matters most as a **run-to-run reproducibility** diagnostic for the private re-run gate, not a leaderboard blocker.
+- **Reusable infra:** `scripts/profiler/verify_greedy_flip_probe.py` — drop-in batch-invariance validator. **W&B:** `zd121euo` (flip rates verified to 7 sig figs; group `verify-greedy-flip-probe`).
+
+### 2026-06-13 20:08 — PR #44 (kanna): Local private-stability probe (public→private TPS-gap predictor) — ⭐ VALIDITY KEEPER (official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary_metric `public_to_private_gap_pct`). Ships a reusable **pre-submission gate** that predicts the private re-run TPS drop locally with **zero HF-Jobs quota** — directly de-risks the programme's #1 failure mode (the 5% private-repro rule).
+- **Reproduces the published VALID frontier:** local `leaderboard` scenario = **423.63 TPS / PPL 2.377** vs kenyan-duma `osoi5-…-fa2sw-precache` **421.12 / 2.377** (+0.6%, within #38 nondeterminism noise; PPL exact) ⇒ the measured *ratio* is trustworthy.
+- **Headline:** the honest fa2sw stack reads **12.43% public→private** ⇒ `WOULD-FAIL (>5% → INVALID)`. Decomposition: distribution gap **11.33%** (drafter-acceptance collapse on chat: E_accept 4.06→3.57, accept-rate 43.7%→36.7%) + precache **1.24%**. The acceptance ratio (0.872) fully accounts for the TPS ratio (0.887) ⇒ the gap **is the drafter on chat**, not the precache.
+- **Honest caveat (kanna):** the proxy is *pure* ShareGPT chat, plausibly harder than the real private set, so 12.4% is an **upper-ish** estimate — a calibrated *pessimistic* early-warning (the safe direction). Both a known-invalid stack (firfir-cast 7.2%) and this honest stack read >5%, so no dangerous false-negative; kenyan-duma's real stack is leaderboard-VALID, so the true gap is smaller. Calibrating the proxy against firfir-cast's known 7.2% (→ quantitative predictor) is the next step (kanna follow-up).
+- **Reusable infra:** `scripts/validity/private_gap_probe.py` + `build_private_proxy.py`. **W&B:** `jgxdnmwz` (values match exactly; group tag `private-gap-probe`, artifact `private_gap_report`).
+
+### 2026-06-13 19:57 — PR #41 (denken): Eliminate scatter floor in `compute_logits` — ⭐ CHARACTERIZATION + DEPLOYABLE-INFRA KEEPER (official bar UNCHANGED 126.378)
+
+- **Not a TPS rung** (primary_metric 544.22 is a LOCAL cost-model ceiling at K\*=11/M=45, not an HF-validated throughput). Official bar stays **126.378**.
+- **Characterization:** the `lmhead12k` plugin's scatter of 12k partial logits into a full [M,262144] −inf tensor before argmax is **unconditionally redundant** — ascending `kept_ids` ⟹ `argmax(scatter(partial)) ≡ kept_ids[argmax(partial)]` for *all* inputs (`equiv_rate=1.0`, 249,858/249,858, `gy05konp`). No acceptance dependence ⇒ **generalizes to the private set**.
+- **Deployable:** a **bit-identical persistent −inf buffer** replaces the per-step 0.348 ms scatter alloc (microbench 0.348→0.299 ms @ M=45, `wa72elyq`; 26/26 `check_scatter_buffer_identity.py`). Cost-model delta at the operating point: **+1.95 TPS** (`m316ma9u` 540.10 persistent vs `x0gjax5p` 538.15 scatter control, both sim_K=11/K\*=11/M=45, `>500=True`). Ceiling ladder 538→540→544→546 (scatter / persistent / scatter-free remap `g9h5rqv9` / analytic gemm-floor `z2k86aiu`), all independently W&B-verified this cycle.
+- **First-submission mismatch → root-caused + fixed:** the first marker claimed 538/540/544 but cited runs logging K=6→480/477. denken correctly diagnosed a **logging bug in `tree_acceptance_model.py`** (it wrote the `--sim-K` headline default 6→M=25, not the argmax K\*=11/M=45 field PR #37 surfaced via `kstar_p078_W4_tps_withdrafter`, which was never committed). Fixed **additively** (restored the field) + re-ran all curves at `--sim-K 11`. Every future cost-model run now reports its argmax operating point, not just the headline.
+- **W&B:** `gy05konp`, `wa72elyq`, `x0gjax5p`, `m316ma9u`, `g9h5rqv9`, `z2k86aiu` (all local cost-model/microbench; nothing trained). Follow-up routed to denken: dynamic-K (`accepthist`) projection + `--sim-K` argmax-default cleanup.
 
 ### 2026-06-13 19:20 — PR #42 (lawine): `--spec-off` contract fix + validator N-mismatch legibility — ⭐ INFRA KEEPER (official bar UNCHANGED 126.378)
 

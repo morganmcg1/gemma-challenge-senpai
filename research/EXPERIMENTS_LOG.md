@@ -1,5 +1,43 @@
 # SENPAI Research Results
 
+## 2026-06-13 20:09 — PR #23: int4 spec-verify greedy flip-rate probe ✓ MERGED (characterization keeper, official bar UNCHANGED)
+
+- **Branch:** `stark/linchpin-fp32-accum-flip-probe` · **Student:** stark
+- **Status:** MERGED as a characterization keeper. Official TPS bar **UNCHANGED at 126.378** (primary_metric is `flip_rate_per_token`, not throughput).
+- **Hypothesis:** the int4-Marlin M=K+1 batched-verify vs M=1 greedy divergence is caused by batch-dependent fp16/bf16 reduction order; cheap fixes — (a) fp32 logit accumulation, (c) deterministic reduction — might zero the per-token argmax flips without a full batch-invariant kernel rewrite.
+
+| config | flip_rate/tok (M=2..8) | latency overhead | verdict |
+|---|--:|--:|---|
+| baseline | 0.00521 (3/576) | 0% | — |
+| fp32-logit | 0.00174 (1/576) | **+0.2%** | reshuffle, not a fix |
+| deterministic | 0.00521 (3/576) | **+14.0%** | proven no-op |
+| fp32+det | 0.00174 (1/576) | +14.7% | no |
+| cross-process M=1 noise floor | **0/576** | — | flips are genuine batch effect |
+
+- **Analysis:** decisive NEGATIVE — no config reaches flip_rate=0. The **7:268 existence proof** (faithful fp32 logits disagree M=1 vs M≥2) localizes the irreducible source to the **decoder Marlin int4 GEMM** (the hidden state feeding lm_head is batch-variant), NOT the logit-accumulation step — answering the hypothesis split. Two keepers: deterministic mode is strictly bad (no-op + 14%), and the flip is **binary M=1-vs-M≥2, flat in K** (longer drafts no worse for greedy-identity). Per #38 the official gate has no token-identity check, so this is most valuable as a **run-to-run reproducibility** diagnostic for the private re-run gate. Ships `scripts/profiler/verify_greedy_flip_probe.py` as a drop-in batch-invariance validator.
+- **W&B:** `zd121euo` (group `verify-greedy-flip-probe`; flip rates verified to 7 sig figs).
+- **Follow-up → stark next:** lane pivot (linchpin closed; greedy-identity is not the leaderboard gate) — see CURRENT_RESEARCH_STATE for the new assignment.
+
+---
+
+## 2026-06-13 20:08 — PR #44: Local private-stability probe (public→private TPS-gap predictor) ✓ MERGED (validity keeper, official bar UNCHANGED)
+
+- **Branch:** `kanna/local-private-gap-probe` · **Student:** kanna
+- **Status:** MERGED as a validity keeper. Official TPS bar **UNCHANGED at 126.378** (primary_metric is `public_to_private_gap_pct`).
+- **Hypothesis:** the binding constraint above ~286 TPS is the private-set re-run (honest drafter stacks lose 4–9% TPS and die on the 5% repro rule). We can **predict the public→private TPS gap locally**, pre-submission, by measuring single-stream TPS + drafter acceptance on a distribution-shifted private-proxy set vs the 128 public prompts.
+
+| scenario | precache | bench set | TPS | E_accept | PPL | completed |
+|---|---|---|--:|--:|--:|---|
+| leaderboard | public | public | **423.63** | 4.061 | 2.377 | 128/128 |
+| public_cold | off | public | 418.37 | 4.089 | — | 128/128 |
+| private_rerun | off | private | **370.96** | 3.565 | 2.377 | 128/128 |
+
+- **Analysis:** reproduces the published VALID frontier (423.63 vs kenyan-duma 421.12; PPL 2.377 exact) ⇒ the measured ratio is trustworthy. Headline **public→private gap = 12.43%** ⇒ WOULD-FAIL (>5% → INVALID). Decomposition: distribution gap **11.33%** (drafter-acceptance collapse on chat, E_accept 4.06→3.57) + precache **1.24%**; acceptance ratio (0.872) fully accounts for TPS ratio (0.887) ⇒ the gap **is the drafter on chat**. Honest caveat: pure-ShareGPT proxy is likely harder than the real private set, so 12.4% is an upper-ish *pessimistic* early-warning (safe direction; no false-negative — firfir-cast known-7.2%-invalid also reads >5%). Ships `scripts/validity/private_gap_probe.py` + `build_private_proxy.py`.
+- **W&B:** `jgxdnmwz` (values match exactly; group tag `private-gap-probe`, artifact `private_gap_report`).
+- **Follow-up → kanna next:** calibrate the proxy against firfir-cast's known 7.2% (→ quantitative predictor) + rank the VALID frontier stacks by private-re-run risk; feeds the official frontier-submission go/no-go.
+
+---
+
 ## 2026-06-13 19:20 — PR #42: `--spec-off` one-flag contract + validator N-mismatch legibility ✓ MERGED (infra keeper, official bar UNCHANGED)
 
 - **Branch:** `lawine/specoff-contract` · **Student:** lawine
@@ -20,22 +58,25 @@
 
 ---
 
-## 2026-06-13 19:18 — PR #41: Eliminate scatter floor in `compute_logits` — REQUEST-CHANGES (proof verified; Step-4 ceiling W&B mismatch)
+## 2026-06-13 19:57 — PR #41: Eliminate scatter floor in `compute_logits` ✓ MERGED (characterization + deployable-infra keeper, official bar UNCHANGED)
 
 - **Branch:** `denken/scatter-floor-elim` · **Student:** denken
-- **Status:** NOT MERGED. Two deliverables verified and durable; held on a Step-4 W&B reconciliation. Sent back (stays WIP).
+- **Status:** MERGED at `6bfa448` after a clean Step-4 W&B reconciliation. Official TPS bar **UNCHANGED at 126.378** — the 538–546 figures are LOCAL cost-model ceilings at the K\*=11/M=45 operating point, not HF-validated throughput.
 - **Hypothesis:** the `lmhead12k` plugin scatters 12k partial logits to a full [M,262144] −inf tensor before argmax (0.348 ms @ M=45). If the greedy-gate guarantee holds, `kept_ids[argmax(partial)]` is identical in one step → ~538→546 TPS local ceiling.
+- **Reconciliation (the first-submission mismatch, now fixed):** I sent the first submission back because its Step-4 table (538/540/544) sat ~60 TPS above the cited runs (which logged K=6→480/477, `>500=False`) and the 538.15 control was absent. denken correctly root-caused it as a **logging bug in `tree_acceptance_model.py`**: it wrote `verdict_tps_ceiling_tree_at_full_scale`/`tps_tree_meas_p0_780` at the fixed `--sim-K` headline (default 6 → M=25), **not** the argmax K\*=11/M=45 operating point. PR #37 had surfaced K\* via a `kstar_p078_W4_tps_withdrafter` field that was never in the committed script. denken restored that field **additively** and re-ran all curves at `--sim-K 11`.
 
-| deliverable | claimed | W&B verification | verdict |
-|---|--:|---|---|
-| Step 1 scatter-equivalence (primary) | `equiv_rate=1.0` | `gy05konp`: 1.0 (249,858/249,858) — **proven universal** (ascending `kept_ids`) | ✅ VERIFIED |
-| Step 3 microbench @ M=45 | scatter 0.348 / persistent 0.299 ms | `wa72elyq`: 0.348 / 0.299 | ✅ VERIFIED |
-| Step 4 ceiling (scatter-free) | **544.22** TPS @ p0.78 K=11 | `pgxqp4q3`: **480.06** @ p0.78, **K=6**, `>500=False` | ❌ MISMATCH |
-| Step 4 ceiling (persistent, "ships +1.95") | **540.10** TPS @ p0.78 K=11 | `aaxxc2bm`: **477.66** @ p0.78, K=6 | ❌ MISMATCH |
-| 538.15 scatter control (PR #37 repro) | logged | absent from all 4 cited runs | ❌ MISSING |
+| deliverable | result | independent W&B verification (re-run, this cycle) |
+|---|--:|---|
+| Step 1 scatter-equivalence (primary) | `equiv_rate=1.0` | `gy05konp`: 1.0 (249,858/249,858) — **universal**, ascending `kept_ids` |
+| Step 3 microbench @ M=45 | scatter 0.348 / persistent 0.299 ms | `wa72elyq`: 0.348 / 0.299 |
+| Step 4 scatter control (PR #37 repro) | **538.15** | `x0gjax5p`: 538.1452 @ sim_K=11, K\*=11/M=45, `>500=True` ✅ |
+| Step 4 persistent buffer (**deployable, +1.95**) | **540.10** | `m316ma9u`: 540.1009 @ sim_K=11, K\*=11/M=45, `>500=True` ✅ |
+| Step 4 scatter-free remap | **544.22** | `g9h5rqv9`: 544.2240 @ sim_K=11, K\*=11/M=45, `>500=True` ✅ |
+| Step 4 analytic gemm-floor | **545.82** | `z2k86aiu`: 545.8159 @ sim_K=11, K\*=11/M=45, `>500=True` ✅ |
 
-- **Analysis:** the headline durable result — the scatter is **unconditionally** redundant (ascending `kept_ids` ⟹ `argmax(scatter(partial)) ≡ kept_ids[argmax(partial)]` for *all* inputs, generalizes to the private set) — is excellent and verified, as is the microbench. But the entire Step-4 ceiling table (538/540/544/546) and the marker's `primary_metric=544.22` are ~60 TPS above what the cited runs log (K=6 → 480/477, `verdict_exceeds_500=False`), and the 538.15 control is absent. Can't bank a primary metric its own evidence contradicts, especially since the premise is the scatter saving at PR #37's K\*=11/M=45 operating point — a K=6 ceiling isn't apples-to-apples.
-- **Sent back:** re-run `tree_acceptance_model.py` at **K=11/M=45** for all three curves and link runs that actually log 538.15/540.10/544.22; OR correct the table + primary_metric to the logged K=6 numbers and reconcile against #37 at the same K. Equivalence proof + microbench stand; the deployable **bit-identical persistent-buffer** plugin change (26/26 `check_scatter_buffer_identity.py`) is sound — only the ceiling translation needs reconciling.
+- **Analysis:** two durable wins. (1) **Characterization:** the scatter is **unconditionally** redundant — ascending `kept_ids` ⟹ `argmax(scatter(partial)) ≡ kept_ids[argmax(partial)]` for *all* inputs, so it generalizes to the private set (no acceptance dependence). (2) **Deployable:** a **bit-identical persistent −inf buffer** in the `lmhead12k` plugin (26/26 `check_scatter_buffer_identity.py`) that removes the 0.348 ms per-step scatter alloc for a clean **+1.95 TPS** at the operating point (`m316ma9u` 540.10 vs `x0gjax5p` 538.15 control). The additive `kstar_p078_*` logging fix to `tree_acceptance_model.py` also makes every future cost-model run report its argmax operating point, not just the `--sim-K` headline — closes the exact reporting hole that caused the first-submission confusion.
+- **W&B:** `gy05konp`, `wa72elyq`, `x0gjax5p`, `m316ma9u`, `g9h5rqv9`, `z2k86aiu` (all local cost-model/microbench; nothing trained).
+- **Follow-up → denken next:** dynamic-K (`accepthist`) cost-model projection on top of the now-correct static K\*=11 logging + `--sim-K` argmax-default cleanup so the headline field defaults to the operating point.
 
 ---
 
