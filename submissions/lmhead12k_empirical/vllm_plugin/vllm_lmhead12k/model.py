@@ -16,6 +16,19 @@ unchanged and audit-correct:
   * ``prompt_logprobs`` for any kept ground-truth token id is finite,
   * ``/v1/completions`` ``return_token_ids`` reports original ids.
 
+PR #41 (scatter floor): ``argmax(scatter(partial)) == kept_ids[argmax(partial)]``
+is PROVEN token-identical (``kept_ids`` is strictly ascending, so first-occurrence
+argmax tie-breaks identically; see ``scripts/profiler/lmhead12k_scatter_equiv.py``
+-- 249,858/249,858 incl. 8,911 real bf16 ties). The pure scatter-free path
+(``kept_ids[argmax(partial)]``, no [M,262144] tensor) is the verify-cost FLOOR
+(+~6 TPS at the K*=11 ceiling) but is NOT deployable in this plugin: vLLM V1
+reads ``prompt_logprobs`` from the model output BEFORE logits processors and the
+sampler/detokenizer index by original id, so ``compute_logits`` must return
+full-vocab logits (returning 12k partial breaks the logprobs gather/log_softmax
+and the argmax->id map -- confirmed in v1/worker/gpu_model_runner.py). The
+deployable in-plugin win is the persistent -inf scatter buffer below: it drops
+the per-step -inf fill of the 250k dead columns while staying BIT-IDENTICAL.
+
 ARCHITECTURE NOTE: ``google/gemma-4-E4B-it`` is a multimodal
 ``Gemma4ForConditionalGeneration``. Its ``compute_logits`` delegates to
 ``self.language_model.compute_logits`` (gemma4_mm.py), and the language model is
@@ -65,6 +78,45 @@ def _load_kept_ids(vllm_config: VllmConfig) -> list[int]:
     )
 
 
+def scatter_kept_to_full(
+    partial: torch.Tensor,
+    kept_ids: torch.Tensor,
+    full_vocab: int,
+    buf: torch.Tensor | None,
+    max_persist_M: int,
+) -> tuple[torch.Tensor, torch.Tensor | None]:
+    """Scatter ``partial`` [M, kept] into a full-vocab ``-inf``-padded logits
+    tensor [M, full_vocab] so kept row ``j`` lands at original id ``kept_ids[j]``.
+
+    Returns ``(logits, buf)``. For ``M <= max_persist_M`` (the TPS-critical
+    decode/verify path) it reuses a PERSISTENT ``-inf`` buffer whose dead columns
+    are filled once and never rewritten -- only the kept columns are scattered
+    each call -- dropping the per-step 262k-wide ``-inf`` fill (PR #41). For
+    larger M it fresh-allocates (one-shot prefill / prompt-logprobs path). The
+    returned rows ``[:M]`` are BIT-IDENTICAL to a naive
+    ``torch.full((M, full_vocab), -inf).scatter_(1, kept_ids, partial)`` in both
+    branches (dead columns ``-inf``; kept columns carry ``partial``), so the
+    downstream greedy argmax and prompt_logprobs are unchanged by construction.
+    Validated by ``check_scatter_buffer_identity.py``.
+    """
+    M = partial.shape[0]
+    idx = kept_ids.unsqueeze(0).expand(M, -1)
+    if M <= max_persist_M:
+        if buf is None or buf.dtype != partial.dtype or buf.device != partial.device:
+            buf = torch.full(
+                (max_persist_M, full_vocab), float("-inf"),
+                dtype=partial.dtype, device=partial.device,
+            )
+        out = buf[:M]
+        out.scatter_(1, idx, partial)
+        return out, buf
+    full = torch.full(
+        (M, full_vocab), float("-inf"), dtype=partial.dtype, device=partial.device
+    )
+    full.scatter_(1, idx, partial)
+    return full, buf
+
+
 class Gemma4ForCausalLMLMHead12k(Gemma4ForCausalLM):
     """Gemma4 text model with a row-pruned lm_head + scatter-to-full-vocab logits."""
 
@@ -97,6 +149,16 @@ class Gemma4ForCausalLMLMHead12k(Gemma4ForCausalLM):
         )
         self._full_vocab = full_vocab
         self._kept_size = kept_size
+        # PR #41: persistent scatter target for the TPS-critical small-M
+        # decode/verify path. Its non-kept columns are filled with -inf ONCE and
+        # never rewritten, so each decode step only scatters the kept columns
+        # (no per-step 262k-wide -inf fill -- the dominant residual scatter cost
+        # measured in PR #37). Capped at _max_persist_M to stay tiny
+        # (64 x 262144 fp32 ~ 67 MB) and to leave the large-M prefill/prompt-
+        # logprobs path on the original fresh-alloc path (one-shot, not TPS-bound,
+        # and avoids holding a multi-GB buffer for long prompt chunks).
+        self._max_persist_M = 64  # verify tree M <= W*K+1 = 4*15+1 well under this
+        self._logit_buf: torch.Tensor | None = None
 
     def compute_logits(self, hidden_states: torch.Tensor) -> torch.Tensor | None:
         partial = self.logits_processor(self.lm_head, hidden_states)
@@ -104,12 +166,8 @@ class Gemma4ForCausalLMLMHead12k(Gemma4ForCausalLM):
             return None
         if self.kept_ids.device != partial.device:
             self.kept_ids = self.kept_ids.to(partial.device)
-        full = torch.full(
-            (partial.shape[0], self._full_vocab),
-            float("-inf"),
-            dtype=partial.dtype,
-            device=partial.device,
+        logits, self._logit_buf = scatter_kept_to_full(
+            partial, self.kept_ids, self._full_vocab, self._logit_buf,
+            self._max_persist_M,
         )
-        idx = self.kept_ids.unsqueeze(0).expand(partial.shape[0], -1)
-        full.scatter_(1, idx, partial)
-        return full
+        return logits

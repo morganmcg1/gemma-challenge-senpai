@@ -525,6 +525,20 @@ def log_wandb(args, payload, plot_paths, p_list, headline, empirical):
         summary[f"tps_lin_meas_{tag}"] = h["tps_lin_meas"]
         summary[f"tps_tree_meas_{tag}"] = h["tps_tree_meas"]
         summary[f"tps_gain_meas_{tag}"] = h["tps_gain_meas"]
+    # K* optimum (argmax over K) per (p, W). The headline above is at a fixed
+    # sim_K; this surfaces the argmax-K ceiling so the operating-point TPS is
+    # logged directly and can't be misread as the sim_K headline value.
+    for p in p_list:
+        ptag = f"{round(p * 100):03d}"
+        for W in cfg["widths"]:
+            s = payload["optimal_kstar"].get(f"p{p:.4f}|W{W}")
+            if not s:
+                continue
+            summary[f"kstar_p{ptag}_W{W}_Kstar"] = s["meas"]["K_star"]
+            summary[f"kstar_p{ptag}_W{W}_M"] = s["meas"]["M"]
+            summary[f"kstar_p{ptag}_W{W}_tps_withdrafter"] = s["meas"]["tps"]
+            summary[f"kstar_p{ptag}_W{W}_tps_verifyonly"] = \
+                s["meas_verifyonly"]["tps"]
     if empirical:
         summary["E_accept_linear_emp"] = empirical["E_linear"]
         summary["E_accept_tree4_emp"] = empirical["E_tree"]
