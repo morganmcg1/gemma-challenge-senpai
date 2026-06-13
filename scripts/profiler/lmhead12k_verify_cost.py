@@ -181,8 +181,51 @@ def measure(kept_ids_path, softcap, logits_fp32, steps, warmup, Ms):
         _ = partial.argmax(dim=-1)
         return partial
 
+    def k12_remap(hs):
+        # PR #41 scatter-free FLOOR: kept GEMM -> [M,12288] + softcap + argmax
+        # + kept_ids gather -> [M] ORIGINAL token ids (token-identical to the
+        # full-vocab argmax because kept_ids is strictly ascending; proven by
+        # scripts/profiler/lmhead12k_scatter_equiv.py). No [M,262144] tensor at
+        # all. This is the analytic ceiling; deploying it needs a vLLM sampler
+        # hook (the served path must return full-vocab logits for argmax->id and
+        # for prompt_logprobs gather/log_softmax -- see model.py docstring).
+        partial = torch.nn.functional.linear(hs, W_12k)  # [M, KEPT_SIZE]
+        if logits_fp32:
+            partial = partial.float()
+        partial = _softcap(partial)
+        idx = partial.argmax(dim=-1)  # [M] kept-row indices
+        tok = idx_rows[idx]           # [M] original vocab ids (cheap gather)
+        return tok
+
+    # PR #41 DEPLOYABLE partial fix: a persistent [maxM,262144] -inf buffer whose
+    # non-kept columns stay -inf forever; each step scatters only the kept columns
+    # then argmaxes full-vocab. Eliminates the per-step alloc + -inf fill of the
+    # 250k dead positions while returning a BIT-IDENTICAL full-vocab tensor (so
+    # greedy/PPL identity is preserved by construction). Keeps the full-vocab
+    # argmax read (unavoidable in-plugin). Buffer is keyed by (M, dtype) and
+    # allocated during warmup so timed iters measure the reuse (fill-free) cost.
+    _persist: dict = {}
+
+    def k12_scatter_persistent(hs):
+        partial = torch.nn.functional.linear(hs, W_12k)  # [M, KEPT_SIZE]
+        if logits_fp32:
+            partial = partial.float()
+        partial = _softcap(partial)
+        M = hs.shape[0]
+        key = (M, partial.dtype)
+        buf = _persist.get(key)
+        if buf is None:
+            buf = torch.full((M, FULL_VOCAB), float("-inf"),
+                             dtype=partial.dtype, device=dev)
+            _persist[key] = buf
+        idx = idx_rows.unsqueeze(0).expand(M, -1)
+        buf.scatter_(1, idx, partial)  # only kept cols written; dead cols stay -inf
+        _ = buf.argmax(dim=-1)
+        return buf
+
     fns = {"full": full_head, "k12_scatter": k12_scatter,
-           "k12_gemm_only": k12_gemm_only}
+           "k12_scatter_persistent": k12_scatter_persistent,
+           "k12_remap": k12_remap, "k12_gemm_only": k12_gemm_only}
 
     def time_fn(fn, M):
         hs = torch.randn(M, HIDDEN, generator=g, dtype=torch.float32).to(
@@ -313,17 +356,29 @@ def main():
               "=====", flush=True)
         measured = measure(args.kept_ids, args.softcap, args.logits_fp32,
                            args.steps, args.warmup, MEASURE_M)
-        print(f"{'M':>3} {'full':>7} {'k12_scat':>9} {'k12_gemm':>9} "
-              f"{'meas_full vs #33':>16} {'scat/full':>9} {'scat_save_ms':>12}",
+        print(f"{'M':>3} {'full':>7} {'scatter':>8} {'persist':>8} {'remap':>7} "
+              f"{'gemm':>7} | {'floor':>7} {'fill':>6} {'argmax':>7}", flush=True)
+        print("    (ms; floor=scatter-remap total scatter cost; "
+              "fill=scatter-persist alloc+fill; argmax=persist-remap full-vocab read)",
               flush=True)
         for M in MEASURE_M:
             mf = measured[M]["full"]["median_ms"]
             ms = measured[M]["k12_scatter"]["median_ms"]
+            mp = measured[M]["k12_scatter_persistent"]["median_ms"]
+            mr = measured[M]["k12_remap"]["median_ms"]
             mg = measured[M]["k12_gemm_only"]["median_ms"]
-            prof = interp(lm, M)
-            tag = f"{mf:.3f}/{prof:.3f}"
-            print(f"{M:>3} {mf:7.3f} {ms:9.3f} {mg:9.3f} {tag:>16} "
-                  f"{ms/mf:9.3f} {mf-ms:12.3f}", flush=True)
+            floor = ms - mr      # total scatter floor (the PR #41 saving target)
+            fill = ms - mp       # alloc + -inf fill (the deployable persistent win)
+            argmax = mp - mr     # residual full-vocab argmax read
+            print(f"{M:>3} {mf:7.3f} {ms:8.3f} {mp:8.3f} {mr:7.3f} {mg:7.3f} | "
+                  f"{floor:7.3f} {fill:6.3f} {argmax:7.3f}", flush=True)
+        # calibration anchor M=45 highlight
+        m45 = measured.get(45)
+        if m45:
+            s45, r45 = m45["k12_scatter"]["median_ms"], m45["k12_remap"]["median_ms"]
+            print(f"[lmhead12k] M=45 scatter floor (scatter-remap) = "
+                  f"{s45 - r45:.4f} ms  (scatter {s45:.4f} -> remap {r45:.4f})",
+                  flush=True)
         # calibration: measured full vs profiler t_lmhead at shared M
         calib = {str(M): {"measured_full_ms": measured[M]["full"]["median_ms"],
                           "profiler_lmhead_ms": interp(lm, M),
@@ -354,25 +409,42 @@ def main():
     if measured is not None:
         meas_tab = {M: measured[M]["k12_scatter"]["median_ms"] for M in MEASURE_M}
         full_tab = {M: measured[M]["full"]["median_ms"] for M in MEASURE_M}
+        remap_tab = {M: measured[M]["k12_remap"]["median_ms"] for M in MEASURE_M}
+        persist_tab = {M: measured[M]["k12_scatter_persistent"]["median_ms"]
+                       for M in MEASURE_M}
 
-        def measured_reduce(M, lf):
-            # scale measured k12 by (profiler_full / measured_full) so it sits on
-            # the profiler's absolute t_lmhead scale (removes microbench/vLLM-kernel
-            # offset); lf == profiler full lmhead at M.
-            mfull = interp(full_tab, M)
-            mk12 = interp(meas_tab, M)
-            return mk12 * (lf / mfull) if mfull > 0 else mk12
+        def _anchored(tab):
+            # scale a measured microbench curve by (profiler_full / measured_full)
+            # so it sits on the profiler's absolute t_lmhead scale (removes
+            # microbench/vLLM-kernel offset); lf == profiler full lmhead at M.
+            def reduce(M, lf):
+                mfull = interp(full_tab, M)
+                mv = interp(tab, M)
+                return mv * (lf / mfull) if mfull > 0 else mv
+            return reduce
 
+        # (a) measured WITH scatter (current served path, PR #37 basis)
+        # (b) scatter-free REMAP floor (PR #41 ceiling) -> *_scatter_free.json
+        # (c) persistent-buffer DEPLOYABLE partial fix -> *_lmhead12k_persistent.json
+        variants = [
+            ("_lmhead12k_measured.json", _anchored(meas_tab), "measured(scatter)",
+             "measured"),
+            ("_scatter_free.json", _anchored(remap_tab), "scatter-free(remap floor)",
+             "scatter_free"),
+            ("_lmhead12k_persistent.json", _anchored(persist_tab),
+             "persistent-buffer(deployable)", "persistent"),
+        ]
         for base_json, base_tag in [(args.flopideal_curve, "flopideal"),
                                     (args.dense_curve, "dense")]:
             if not os.path.exists(base_json):
                 continue
-            out_path = base_json.replace(".json", "_lmhead12k_measured.json")
-            p, _ = build_reduced_curve(base_json, args.key, lm, measured_reduce,
-                                       out_path, f"{base_tag}+lmhead12k(measured)")
-            curves[f"{base_tag}_measured"] = p
-            print(f"[lmhead12k] wrote reduced curve ({base_tag}, measured): {p}",
-                  flush=True)
+            for suffix, reduce_fn, label, ckey in variants:
+                out_path = base_json.replace(".json", suffix)
+                p, _ = build_reduced_curve(base_json, args.key, lm, reduce_fn,
+                                           out_path, f"{base_tag}+lmhead12k({label})")
+                curves[f"{base_tag}_{ckey}"] = p
+                print(f"[lmhead12k] wrote reduced curve ({base_tag}, {label}): {p}",
+                      flush=True)
 
     payload = {
         "config": {
@@ -421,7 +493,19 @@ def _log_wandb(args, payload):
         for M, d in payload["step2_measured"].items():
             summary[f"meas_full_M{M}"] = d["full"]["median_ms"]
             summary[f"meas_k12_scatter_M{M}"] = d["k12_scatter"]["median_ms"]
+            summary[f"meas_k12_persistent_M{M}"] = \
+                d["k12_scatter_persistent"]["median_ms"]
+            summary[f"meas_k12_remap_M{M}"] = d["k12_remap"]["median_ms"]
             summary[f"meas_k12_gemm_only_M{M}"] = d["k12_gemm_only"]["median_ms"]
+            # scatter floor decomposition (ms)
+            summary[f"scatter_floor_M{M}"] = (
+                d["k12_scatter"]["median_ms"] - d["k12_remap"]["median_ms"])
+            summary[f"alloc_fill_M{M}"] = (
+                d["k12_scatter"]["median_ms"]
+                - d["k12_scatter_persistent"]["median_ms"])
+            summary[f"fullvocab_argmax_M{M}"] = (
+                d["k12_scatter_persistent"]["median_ms"]
+                - d["k12_remap"]["median_ms"])
         cr = payload["step2_calibration"]
         summary["calib_ratio_mean"] = statistics.mean(c["ratio"] for c in cr.values())
     cols = ["M", "t_forward_ms", "lm_head_ms_full", "lm_head_ms_12k",
