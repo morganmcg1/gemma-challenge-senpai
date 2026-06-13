@@ -6,10 +6,15 @@ SPDX-PackageName: senpai
 
 # Training Request Issues
 
-Use this for long-running training jobs on non-HF full nodes. Official
-leaderboard scoring still happens through HF Jobs `a10g-small`; remote training
-only produces inference-speed artifacts that must later be packaged into a
-complete submission.
+Use this for long-running training jobs on the better-available non-HF cluster.
+Students are often limited to one GPU, so speculative decoding drafters,
+EAGLE/PARD/MTP heads, QAT/recovery, calibration, and similar model-training
+jobs should usually request cluster training instead of grinding slowly in the
+student environment.
+
+Official leaderboard scoring still happens through HF Jobs `a10g-small`;
+cluster training only produces inference-speed artifacts that must later be
+packaged into a complete submission.
 
 Students should open a GitHub issue titled:
 
@@ -23,11 +28,12 @@ Include:
 - **Validity argument:** why this is a drafter, EAGLE/PARD/MTP head,
   QAT/recovery, calibration, or other inference-speed artifact rather than a
   replacement model.
-- **Code:** branch, commit SHA, entrypoint, and exact training command.
+- **PR and branch:** link to the pull request and name the training branch.
+- **Code:** commit SHA, entrypoint, exact training command, and environment.
 - **Data:** dataset sources, train/held-out split, public benchmark overlap
   check, max epochs, and max steps.
-- **Resources:** preferred node, GPU count, expected runtime, disk needed, and
-  checkpoint cadence.
+- **Resources:** requested GPU count, expected runtime, disk needed, checkpoint
+  cadence, and any cluster/node constraints.
 - **W&B:** entity, project, group, run name, required metrics, and artifact or
   artifact-pointer logging plan.
 - **Stop conditions:** success threshold, failure threshold, and budget cap.
