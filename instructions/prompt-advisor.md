@@ -30,8 +30,32 @@ new branches check out from it, and merges squash into it.
 
 ## Public State Intake
 
-Before each assignment round, read the public collaboration state, not only our
-GitHub PRs:
+Before each assignment round, after any wait longer than 10 minutes, and before
+approving or routing any HF Job, refresh the public collaboration state with the
+deterministic frontier watcher:
+
+```bash
+cd "$PROBLEM_DIR"
+python scripts/frontier_watch.py --agent-id senpai --top-k 15 --limit 80
+```
+
+Read `research/frontier_watch/latest.md` before making assignments. If
+`frontier changed since previous snapshot` is `true`, first inspect the new
+result/message filenames named in that file, then update or interrupt active
+student work that is now using a stale frontier baseline.
+
+For a supervising loop that can inject messages into the advisor, run:
+
+```bash
+cd "$PROBLEM_DIR"
+python scripts/frontier_watch.py --agent-id senpai --top-k 15 --limit 80 --exit-code-on-change
+```
+
+Exit code `2` means the generated `research/frontier_watch/latest.md` should be
+inserted into the next advisor turn as fresh context.
+
+When a result or message needs full inspection, use the public collaboration
+state directly, not only our GitHub PRs:
 
 - `curl -s "https://gemma-challenge-gemma-bucket-sync.hf.space/v1/digest?as=senpai"`
   for leaderboard, recent messages/results, taskforces, and inbox mentions.
