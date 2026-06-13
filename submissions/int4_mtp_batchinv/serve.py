@@ -25,6 +25,44 @@ import os
 import sys
 
 
+# Reference-mode contract env var. Mirrors
+# scripts/local_validation/paths.REFERENCE_MODE_ENV; hardcoded here because a
+# submission's serve.py runs in its own venv and cannot import the harness.
+REFERENCE_MODE_ENV = "SENPAI_REFERENCE_MODE"
+
+
+def reference_mode_active() -> bool:
+    """True when the harness asked for the M=1 AR greedy-reference contract.
+
+    When SENPAI_REFERENCE_MODE is truthy, this speculative submission MUST serve
+    plain M=1 autoregressive decode (drafter OFF) so the served capture is the
+    canonical greedy reference the challenge gate compares against — generated on
+    this submission's OWN engine/kernels/quant, so the only removed variable is
+    speculation. ``gen_greedy_reference --spec-off`` sets it to "1"; unset/""/"0"
+    leave speculation on, so the leaderboard serving path is untouched.
+    """
+    return os.environ.get(REFERENCE_MODE_ENV, "") not in ("", "0")
+
+
+def reference_mode_num_spec(num_spec: int) -> int:
+    """Force ``num_speculative_tokens=0`` under the reference-mode contract.
+
+    Returns 0 (speculation off -> plain int4 M=1 AR, the exact-greedy reference
+    this file documents) when SENPAI_REFERENCE_MODE is truthy, else ``num_spec``
+    unchanged. With 0 returned, the ``--speculative-config`` block below is
+    skipped, so vLLM starts with ``speculative_config=None``.
+    """
+    if not reference_mode_active():
+        return num_spec
+    if num_spec > 0:
+        print(
+            "[serve] SENPAI_REFERENCE_MODE active: forcing num_speculative_tokens=0 "
+            "(M=1 AR greedy reference, drafter OFF)",
+            flush=True,
+        )
+    return 0
+
+
 def main() -> None:
     model_id = os.environ.get("MODEL_ID", "google/gemma-4-E4B-it-qat-w4a16-ct")
     served_model_name = os.environ.get("SERVED_MODEL_NAME", "gemma-4-e4b-it")
@@ -45,6 +83,7 @@ def main() -> None:
         "DRAFTER_MODEL", "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant"
     )
     num_spec = int(os.environ.get("NUM_SPECULATIVE_TOKENS", "6") or "0")
+    num_spec = reference_mode_num_spec(num_spec)
     spec_method = os.environ.get("SPECULATIVE_METHOD")  # optional override
 
     args = [

@@ -141,6 +141,24 @@ def main(argv: list[str] | None = None) -> int:
                     evidence["greedy_verdict"] = "NO_REFERENCE"
                     print(f"[validate] WARN {msg}", flush=True)
                 else:
+                    # N-mismatch legibility: the gate compares prompt-for-prompt,
+                    # so a reference with fewer records than --num-prompts silently
+                    # yields INCOMPARABLE for the unmatched prompts. Surface the
+                    # record count and warn loudly with the exact fix.
+                    ref_n = greedy_gate.reference_num_records(Path(reference))
+                    if ref_n is not None:
+                        evidence["reference_num_records"] = ref_n
+                        if ref_n < args.num_prompts:
+                            evidence["reference_n_mismatch"] = True
+                            print(
+                                f"[validate] WARNING: resolved reference has {ref_n} records but "
+                                f"--num-prompts={args.num_prompts}.\n"
+                                f"[validate]          Gate will return INCOMPARABLE for the "
+                                f"{args.num_prompts - ref_n} prompts with no reference.\n"
+                                f"[validate]          Regenerate the reference with --num-prompts >= "
+                                f"{args.num_prompts} to get a complete verdict.",
+                                flush=True,
+                            )
                     report = greedy_gate.compare(Path(reference), out_dir / "decode_outputs.jsonl")
                     onset = greedy_gate.onset_summary(report)
                     ref_kind = greedy_gate.reference_kind(Path(reference))

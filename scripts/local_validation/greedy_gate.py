@@ -94,6 +94,29 @@ def reference_kind(reference: Path) -> str:
         return "unknown"
 
 
+def reference_num_records(reference: Path) -> int | None:
+    """Best-effort count of how many prompt records a reference holds.
+
+    The gate compares prompt-for-prompt, so a reference must hold at least as many
+    records as the candidate decode or the gate reads INCOMPARABLE for the
+    unmatched prompts (a confusing verdict if the record count is invisible). The
+    count lives in the reference's sibling ``meta.json`` (written by
+    gen_greedy_reference), falling back to ``decode_summary.json`` (written by the
+    decode capture) — both carry ``num_records``. Returns ``None`` when neither
+    file/field is available so callers can degrade quietly.
+    """
+    reference = Path(reference)
+    for sibling in ("meta.json", "decode_summary.json"):
+        try:
+            data = json.loads((reference.parent / sibling).read_text())
+        except (OSError, ValueError):
+            continue
+        value = data.get("num_records")
+        if isinstance(value, int):
+            return value
+    return None
+
+
 def _print_human(report: Any) -> None:
     suffix = {"GREEDY_IDENTICAL": " (valid)", "DIVERGENT": " (invalid)", "INCOMPARABLE": ""}
     print(f"VERDICT: {report.verdict}{suffix.get(report.verdict, '')}")

@@ -968,6 +968,47 @@ def append_env_arg(args: list[str], env_name: str, flag: str) -> None:
         args.extend([flag, value])
 
 
+# Reference-mode contract env var. Mirrors
+# scripts/local_validation/paths.REFERENCE_MODE_ENV; hardcoded here because a
+# submission's serve.py runs in its own venv and cannot import the harness.
+REFERENCE_MODE_ENV = "SENPAI_REFERENCE_MODE"
+
+
+def reference_mode_active() -> bool:
+    """True when the harness asked for the M=1 AR greedy-reference contract.
+
+    When SENPAI_REFERENCE_MODE is truthy, a speculative/drafter submission MUST
+    serve plain M=1 autoregressive decode (drafter OFF) so the served capture is
+    the canonical greedy reference the challenge gate compares against — generated
+    on this submission's OWN engine/kernels/quant, so the only removed variable is
+    speculation. ``gen_greedy_reference --spec-off`` sets it to "1"; unset/""/"0"
+    leave the full speculative stack on, so the leaderboard serving path is
+    untouched.
+    """
+    return os.environ.get(REFERENCE_MODE_ENV, "") not in ("", "0")
+
+
+def disable_speculation_for_reference_mode() -> bool:
+    """Honor the reference-mode contract by disabling the MTP drafter.
+
+    Clears ``SPECULATIVE_CONFIG`` (consumed just below by
+    ``append_env_arg(..., "--speculative-config")``) so vLLM starts with
+    ``speculative_config=None`` — byte-for-byte the proven ``--ref-env
+    SPECULATIVE_CONFIG=`` reference path, now reachable via the one-flag
+    ``--spec-off``. No-op (returns False) outside reference mode.
+    """
+    if not reference_mode_active():
+        return False
+    if os.environ.get("SPECULATIVE_CONFIG"):
+        print(
+            "[serve] SENPAI_REFERENCE_MODE active: clearing SPECULATIVE_CONFIG "
+            "(M=1 AR greedy reference, drafter OFF)",
+            flush=True,
+        )
+    os.environ["SPECULATIVE_CONFIG"] = ""
+    return True
+
+
 def main() -> None:
     ensure_benchmark_jinja2()
     ensure_weights()
@@ -1007,6 +1048,7 @@ def main() -> None:
     ]
 
     append_env_arg(args, "MAX_NUM_BATCHED_TOKENS", "--max-num-batched-tokens")
+    disable_speculation_for_reference_mode()
     append_env_arg(args, "SPECULATIVE_CONFIG", "--speculative-config")
     append_env_arg(args, "GENERATION_CONFIG", "--generation-config")
     append_env_arg(args, "OVERRIDE_GENERATION_CONFIG", "--override-generation-config")
