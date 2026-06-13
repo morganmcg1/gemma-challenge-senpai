@@ -465,6 +465,24 @@ def _build_argparser():
     # subprocess lets process exit free the GPU between modes.
     ap.add_argument("--single-mode", default=None, help=argparse.SUPPRESS)
     ap.add_argument("--partial-out", default=None, help=argparse.SUPPRESS)
+    # Tree-causal mask attention microbenchmark (PR #33). Independent of the
+    # M-sweep orchestrator: isolates the only mask-addressable term (core
+    # QK^T-softmax-V) at the real Gemma-4-E4B decoder geometry and measures the
+    # dense-causal vs sparse tree-causal saving, then folds it into the merged
+    # PR #28 dense t_step curve.
+    ap.add_argument("--tree-mask", action="store_true",
+                    help="run the tree-causal mask attention microbenchmark and exit")
+    ap.add_argument("--tree-M", default="25,33,49",
+                    help="verify-position counts M=K*W+1 to profile (tree shapes)")
+    ap.add_argument("--tree-W", type=int, default=4, help="tree width W")
+    ap.add_argument("--tree-ctx", type=int, default=256, help="shared KV context length")
+    ap.add_argument("--tree-iters", type=int, default=300, help="timed attn iters")
+    ap.add_argument("--tree-warmup", type=int, default=50, help="warmup attn iters")
+    ap.add_argument("--dense-curve-json",
+                    default="research/spec_cost_model/results_msweep.json",
+                    help="PR #28 merged curve for dense t_step(M) + attention share")
+    ap.add_argument("--tree-output",
+                    default="research/spec_cost_model/results_tree_mask.json")
     return ap
 
 
@@ -483,8 +501,320 @@ def _run_worker(args):
     print(f"[cost] WORKER mode={mode} wrote {args.partial_out} ({len(rows)} rows)", flush=True)
 
 
+# ---------------------------------------------------------------------------
+# Tree-causal mask attention microbenchmark (PR #33)
+# ---------------------------------------------------------------------------
+# The verify-step latency t_step(M) = QKV/O/MLP GEMM (mask-INDEPENDENT, processes
+# all M tokens through the int4 weights) + core attention softmax(QK^T+mask)V
+# (the ONLY mask-addressable term) + RoPE/KV-write (O(M), mask-independent) +
+# lm_head (O(M), mask-independent). A width-W tree-causal mask shrinks ONLY the
+# among-token block of core attention (M*(M+1)/2 dense-causal pairs -> sum of
+# root-to-node path lengths), leaving the M*ctx cross-context block and every
+# GEMM untouched.
+#
+# vLLM's paged-FlashAttention `_dummy_run` path cannot consume an arbitrary mask
+# (PR #28 report sec.5), and injecting one would be fragile enough to invalidate
+# the measurement. So we ISOLATE the mask-addressable term in a standalone
+# attention microbenchmark at the real Gemma-4-E4B text-decoder geometry and
+# fold the measured saving into PR #28's dense t_step curve. Three lenses:
+#   - SDPA + boolean mask: the PRODUCTION-realistic path (SpecInfer/EAGLE/vLLM
+#     tree verify is dense attention + topology mask; saving is ~0 by
+#     construction because the dense score matrix is materialised regardless).
+#   - FlexAttention block-sparse (best-effort): the only kernel that *could*
+#     skip masked work, but its 128-token block granularity is coarser than the
+#     M<=49 tree sparsity, so realised saving is also ~0.
+#   - analytic FLOP-ideal: the unrealisable theoretical ceiling (perfect
+#     element-sparse kernel) = dense_core_attn * (1 - tree_pairs/dense_pairs).
+DEFAULT_ATTN_GEOM = dict(layers=42, hq=8, hkv=2, head_dim=256)  # gemma-4-E4B text
+
+
+def _load_attn_geometry(model: str) -> dict:
+    """(layers, q-heads, kv-heads, head_dim) of the TEXT decoder (the only stack
+    the verify forward runs). Falls back to known gemma-4-E4B values."""
+    try:
+        from transformers import AutoConfig
+        cfg = AutoConfig.from_pretrained(model, trust_remote_code=True)
+        tc = getattr(cfg, "text_config", cfg)
+        g = dict(
+            layers=int(tc.num_hidden_layers),
+            hq=int(tc.num_attention_heads),
+            hkv=int(getattr(tc, "num_key_value_heads", tc.num_attention_heads)),
+            head_dim=int(getattr(tc, "head_dim",
+                                 tc.hidden_size // tc.num_attention_heads)),
+            sliding_window=int(getattr(tc, "sliding_window", 0) or 0),
+        )
+        return g
+    except Exception as e:  # noqa: BLE001
+        print(f"[tree-mask] AutoConfig failed ({e!r}); using gemma-4-E4B defaults",
+              flush=True)
+        return dict(**DEFAULT_ATTN_GEOM, sliding_window=512)
+
+
+def _tree_among(M: int, W: int):
+    """Among-token tree-causal structure for a balanced W-ary tree (parent of
+    node i is (i-1)//W). Returns (adj[M,M] bool, parent list, depth list,
+    pair_count) where adj[i,j]=True iff j is an ancestor of i (incl. self+root),
+    exactly the PR #33 mask construction."""
+    parent = [-1] * M
+    for i in range(1, M):
+        parent[i] = (i - 1) // W
+    adj = np.zeros((M, M), dtype=bool)
+    for i in range(M):
+        cur = i
+        while cur > 0:
+            adj[i, cur] = True
+            cur = parent[cur]
+        adj[i, 0] = True
+    depth = [0] * M
+    for i in range(1, M):
+        depth[i] = depth[parent[i]] + 1
+    return adj, parent, depth, int(adj.sum())
+
+
+def _curve_interp(path: str, key: str = "graph|ctx256"):
+    """Return (lat_at, attn_pct_at) piecewise-linear interpolators over the
+    merged PR #28 dense curve, plus the raw dicts."""
+    d = json.load(open(path))
+    node = d["cost_model"][key]
+    lat = {int(k): float(v) for k, v in node["latency_ms_by_M"].items()}
+    apc = {int(k): float(v) for k, v in node["attention_pct_step_by_M"].items()}
+
+    def mk(table):
+        xs = sorted(table)
+
+        def at(M):
+            if M <= xs[0]:
+                return table[xs[0]]
+            if M >= xs[-1]:
+                return table[xs[-1]]
+            lo = max(x for x in xs if x <= M)
+            hi = min(x for x in xs if x >= M)
+            if lo == hi:
+                return table[lo]
+            t = (M - lo) / (hi - lo)
+            return table[lo] * (1 - t) + table[hi] * t
+        return at
+    return mk(lat), mk(apc), lat, apc
+
+
+def _time_gpu(fn, iters: int, warmup: int) -> float:
+    """Median per-call ms, pipelined (CPU runs ahead, single final sync) — the
+    same throughput basis as the main profiler's _pipelined()."""
+    import torch as T
+    for _ in range(warmup):
+        fn()
+    T.cuda.synchronize()
+    e0 = [T.cuda.Event(enable_timing=True) for _ in range(iters)]
+    e1 = [T.cuda.Event(enable_timing=True) for _ in range(iters)]
+    for i in range(iters):
+        e0[i].record()
+        fn()
+        e1[i].record()
+    T.cuda.synchronize()
+    return statistics.median([e0[i].elapsed_time(e1[i]) for i in range(iters)])
+
+
+def _tree_mask_main(args):
+    import torch as T
+    import torch.nn.functional as Fn
+    dev = "cuda"
+    geom = _load_attn_geometry(args.int4_base)
+    L, Hq, Hkv, D = geom["layers"], geom["hq"], geom["hkv"], geom["head_dim"]
+    ctx, W = args.tree_ctx, args.tree_W
+    Ms = [int(x) for x in args.tree_M.split(",")]
+    lat_at, apc_at, lat_raw, apc_raw = _curve_interp(args.dense_curve_json)
+    sw = geom.get("sliding_window", 0)
+
+    print(f"[tree-mask] geom: L={L} Hq={Hq} Hkv={Hkv} D={D} sliding_window={sw}",
+          flush=True)
+    print(f"[tree-mask] ctx={ctx} W={W} M={Ms} | iters={args.tree_iters} "
+          f"warmup={args.tree_warmup}", flush=True)
+    if sw and ctx + max(Ms) >= sw:
+        print(f"[tree-mask] WARNING ctx+maxM={ctx+max(Ms)} >= sliding_window={sw}: "
+              f"local layers truncate ctx (delta still valid; ctx is common-mode)",
+              flush=True)
+    else:
+        print(f"[tree-mask] ctx+maxM={ctx+max(Ms)} < sliding_window={sw}: all {L} "
+              f"layers attend full ctx+M (uniform geometry)", flush=True)
+
+    # FlexAttention (best-effort): the only kernel that could skip masked blocks.
+    flex = None
+    try:
+        from torch.nn.attention.flex_attention import (
+            flex_attention, create_block_mask)
+        flex = torch.compile(flex_attention, dynamic=False)
+        _flex_create = create_block_mask
+    except Exception as e:  # noqa: BLE001
+        print(f"[tree-mask] FlexAttention unavailable ({e!r}); SDPA + analytic only",
+              flush=True)
+
+    rows = []
+    for M in Ms:
+        K = (M - 1) // W
+        adj_np, parent, depth, tree_pairs = _tree_among(M, W)
+        dense_pairs = M * (M + 1) // 2
+        ctx_pairs = M * ctx
+        dense_total = ctx_pairs + dense_pairs
+        tree_total = ctx_pairs + tree_pairs
+        flop_ratio = tree_total / dense_total           # tree / dense core-attn FLOPs
+        ideal_save_frac = 1.0 - flop_ratio              # fraction of core attn removed
+
+        # Random bf16 Q/K/V; batch dim = #layers so one kernel call ~ one verify
+        # step's total core attention (graph-mode amortises per-layer launches).
+        g = T.Generator(device=dev).manual_seed(0)
+        q = T.randn(L, Hq, M, D, dtype=T.bfloat16, device=dev, generator=g)
+        k = T.randn(L, Hkv, ctx + M, D, dtype=T.bfloat16, device=dev, generator=g)
+        v = T.randn(L, Hkv, ctx + M, D, dtype=T.bfloat16, device=dev, generator=g)
+        # Manual GQA replication (avoids the enable_gqa flex gotcha; identical
+        # math for both paths so the delta is clean).
+        rep = Hq // Hkv
+        kr = k.repeat_interleave(rep, dim=1)
+        vr = v.repeat_interleave(rep, dim=1)
+
+        # Boolean masks [M, ctx+M] (True = attend): ctx fully visible; among-M is
+        # causal (dense) vs ancestor-only (tree).
+        among_idx = T.arange(ctx + M, device=dev) - ctx          # key's among-index
+        in_ctx = (T.arange(ctx + M, device=dev) < ctx)           # [ctx+M]
+        qi = T.arange(M, device=dev)
+        dense_among = (among_idx[None, :] <= qi[:, None]) & (~in_ctx)[None, :]
+        dense_mask = in_ctx[None, :] | dense_among               # [M, ctx+M]
+        adj_t = T.from_numpy(adj_np).to(dev)
+        amax = adj_t[:, T.clamp(among_idx, 0, M - 1)]            # [M, ctx+M]
+        tree_among = amax & (~in_ctx)[None, :]
+        tree_mask = in_ctx[None, :] | tree_among                 # [M, ctx+M]
+        dm = dense_mask[None, None]
+        tm = tree_mask[None, None]
+
+        def sdpa(mask):
+            return Fn.scaled_dot_product_attention(q, kr, vr, attn_mask=mask)
+
+        sdpa_dense = _time_gpu(lambda: sdpa(dm), args.tree_iters, args.tree_warmup)
+        sdpa_tree = _time_gpu(lambda: sdpa(tm), args.tree_iters, args.tree_warmup)
+
+        flex_dense = flex_tree = None
+        if flex is not None:
+            try:
+                def dense_mod(b, h, qd, kv):
+                    return (kv < ctx) | ((kv >= ctx) & ((kv - ctx) <= qd))
+
+                def tree_mod(b, h, qd, kv):
+                    j = T.clamp(kv - ctx, 0, M - 1)
+                    return (kv < ctx) | ((kv >= ctx) & adj_t[qd, j])
+                bm_d = _flex_create(dense_mod, None, None, M, ctx + M, device=dev)
+                bm_t = _flex_create(tree_mod, None, None, M, ctx + M, device=dev)
+                flex_dense = _time_gpu(
+                    lambda: flex(q, kr, vr, block_mask=bm_d),
+                    args.tree_iters, args.tree_warmup)
+                flex_tree = _time_gpu(
+                    lambda: flex(q, kr, vr, block_mask=bm_t),
+                    args.tree_iters, args.tree_warmup)
+            except Exception as e:  # noqa: BLE001
+                print(f"[tree-mask] M={M} FlexAttention failed ({e!r}); skipping",
+                      flush=True)
+                flex_dense = flex_tree = None
+
+        # Fold into PR #28 dense t_step. delta_sdpa is the production-realistic
+        # saving; delta_flex the best-effort block-sparse saving; delta_flopideal
+        # the unrealisable ceiling (calibrated against the vLLM attention bucket
+        # so it never under-states the saving the GEMM-bound ramp could hide).
+        t_step_dense = lat_at(M)
+        attn_bucket_ms = (apc_at(M) / 100.0) * t_step_dense     # incl RoPE/KV-write
+        delta_sdpa = sdpa_dense - sdpa_tree
+        delta_flex = (flex_dense - flex_tree) if flex_dense is not None else None
+        delta_flopideal_vllm = ideal_save_frac * attn_bucket_ms  # bucket >= core
+        delta_flopideal_sdpa = ideal_save_frac * sdpa_dense      # measured dense core
+        row = {
+            "M": M, "K": K, "W": W, "ctx": ctx, "depth_max": max(depth),
+            "dense_pairs_amongM": dense_pairs, "tree_pairs_amongM": tree_pairs,
+            "ctx_pairs": ctx_pairs, "flop_ratio_tree_over_dense": flop_ratio,
+            "ideal_save_frac_of_core_attn": ideal_save_frac,
+            "t_step_dense_ms": t_step_dense,
+            "attn_bucket_pct": apc_at(M), "attn_bucket_ms": attn_bucket_ms,
+            "sdpa_dense_core_ms": sdpa_dense, "sdpa_tree_core_ms": sdpa_tree,
+            "delta_sdpa_ms": delta_sdpa,
+            "flex_dense_core_ms": flex_dense, "flex_tree_core_ms": flex_tree,
+            "delta_flex_ms": delta_flex,
+            "delta_flopideal_vllmcal_ms": delta_flopideal_vllm,
+            "delta_flopideal_sdpacal_ms": delta_flopideal_sdpa,
+            # tree-masked t_step under each lens (saving subtracted from dense)
+            "t_step_tree_sdpa_ms": t_step_dense - max(0.0, delta_sdpa),
+            "t_step_tree_flex_ms": (t_step_dense - max(0.0, delta_flex))
+                                   if delta_flex is not None else None,
+            "t_step_tree_flopideal_ms": t_step_dense - delta_flopideal_vllm,
+        }
+        rows.append(row)
+        fx = f"{delta_flex:+.4f}" if delta_flex is not None else "n/a"
+        print(f"[tree-mask] M={M:2d} K={K:2d}: dense_pairs={dense_pairs} "
+              f"tree_pairs={tree_pairs} ideal_save={ideal_save_frac*100:4.1f}%core | "
+              f"t_step_dense={t_step_dense:6.3f}ms attn_bucket={attn_bucket_ms:5.3f}ms | "
+              f"sdpa d/t={sdpa_dense:.4f}/{sdpa_tree:.4f} (Δ{delta_sdpa:+.4f}) "
+              f"flexΔ={fx} | FLOP-ideal Δ={delta_flopideal_vllm:.4f}ms "
+              f"-> tree_masked t_step(ideal)={row['t_step_tree_flopideal_ms']:.3f}ms",
+              flush=True)
+        del q, k, v, kr, vr
+        gc.collect()
+        T.cuda.empty_cache()
+
+    payload = {
+        "config": {
+            "model": args.int4_base, "geometry": geom, "ctx": ctx, "W": W,
+            "tree_M": Ms, "iters": args.tree_iters, "warmup": args.tree_warmup,
+            "dense_curve_json": args.dense_curve_json,
+            "device": T.cuda.get_device_name(0),
+            "note": ("component microbench of the mask-addressable core-attention "
+                     "term; GEMM/RoPE/KV-write/lm_head are mask-independent and "
+                     "taken from the PR #28 dense curve"),
+        },
+        "rows": rows,
+    }
+    os.makedirs(os.path.dirname(args.tree_output) or ".", exist_ok=True)
+    with open(args.tree_output, "w") as f:
+        json.dump(payload, f, indent=2)
+    print(f"\n[tree-mask] wrote {args.tree_output}", flush=True)
+
+    if not args.no_wandb:
+        try:
+            _log_wandb_treemask(args, payload)
+        except Exception as e:  # noqa: BLE001
+            print(f"[tree-mask] W&B logging failed (non-fatal): {e!r}", flush=True)
+    print("[tree-mask] DONE", flush=True)
+
+
+def _log_wandb_treemask(args, payload):
+    import wandb
+    run = wandb.init(entity=args.wandb_entity, project=args.wandb_project,
+                     group=args.wandb_group, name=args.wandb_name or "tree-mask-attn",
+                     job_type="profiling", config=payload["config"])
+    cols = ["M", "K", "dense_pairs_amongM", "tree_pairs_amongM",
+            "ideal_save_frac_of_core_attn", "t_step_dense_ms", "attn_bucket_ms",
+            "sdpa_dense_core_ms", "sdpa_tree_core_ms", "delta_sdpa_ms",
+            "flex_dense_core_ms", "flex_tree_core_ms", "delta_flex_ms",
+            "delta_flopideal_vllmcal_ms", "t_step_tree_flopideal_ms"]
+    tbl = wandb.Table(columns=cols)
+    for r in payload["rows"]:
+        tbl.add_data(*[r.get(c) for c in cols])
+    run.log({"tree_mask_table": tbl})
+    summary = {}
+    for r in payload["rows"]:
+        tag = f"M{r['M']}"
+        summary[f"delta_sdpa_ms_{tag}"] = r["delta_sdpa_ms"]
+        summary[f"delta_flopideal_ms_{tag}"] = r["delta_flopideal_vllmcal_ms"]
+        summary[f"ideal_save_frac_core_{tag}"] = r["ideal_save_frac_of_core_attn"]
+        summary[f"t_step_tree_flopideal_ms_{tag}"] = r["t_step_tree_flopideal_ms"]
+        if r["delta_flex_ms"] is not None:
+            summary[f"delta_flex_ms_{tag}"] = r["delta_flex_ms"]
+    run.summary.update({k: v for k, v in summary.items() if v is not None})
+    run.finish()
+    print(f"[tree-mask] W&B run: {run.url}", flush=True)
+
+
 def main():
     args = _build_argparser().parse_args()
+
+    # Tree-causal mask attention microbenchmark (PR #33), independent path.
+    if args.tree_mask:
+        _tree_mask_main(args)
+        return
 
     # Worker path: a single isolated mode (spawned by the orchestrator below).
     if args.single_mode:
