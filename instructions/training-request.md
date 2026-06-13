@@ -38,7 +38,9 @@ Include:
   artifact-pointer logging plan.
 - **Stop conditions:** success threshold, failure threshold, and budget cap.
 - **Handoff:** checkpoint output path, validation command, intended
-  `submissions/<name>/` packaging plan, and expected HF scratch-bucket pointer.
+  `submissions/<name>/` packaging plan, expected HF scratch-bucket pointer, and
+  whether the final `MODEL_ID` will be a Hub model id or a path inside the
+  uploaded submission.
 
 Approval and handoff rules:
 
@@ -52,3 +54,6 @@ Approval and handoff rules:
   commands.
 - After training, package the artifact into a complete runnable submission and
   run the local validity gates before requesting any HF `a10g-small` benchmark.
+  Do not request or launch an HF job while the submission still points at a
+  training-node path such as `/workspace/...`; host the exact validated
+  checkpoint or upload it inside the submission first.

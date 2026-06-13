@@ -72,6 +72,16 @@ often the fastest way to avoid repeating broken lanes.
 - Do not disable modalities, swap the model, or break greedy decode identity.
 - Include `summary.json` fields in the PR: `tps`, `ppl`, completed count,
   `run_prefix`, and any failure logs.
+- Before any HF `--launch`, prove the submission is remote-loadable from the
+  uploaded package: `manifest.model_id` / `MODEL_ID` must be a Hub model id or a
+  path inside the submission, and every referenced checkpoint, wheel, kernel,
+  config, or plugin must be uploaded with the submission or hosted on the Hub.
+  Local paths such as `/workspace/...` are not available on the HF runner.
+- If a validated local checkpoint is required, prefer publishing that exact
+  unified artifact to a private Hub model repo, repointing `MODEL_ID`, and
+  smoke-testing load + greedy identity before the one allowed launch. Do not
+  rewrite the loading path just to avoid hosting unless you re-run the full
+  local validity gates.
 
 ## Research
 
@@ -96,4 +106,7 @@ approval before starting the run.
 ## First Order Of Business
 
 Check for assigned PRs, read the PR body and comments, inspect the current
-submission directory, and run cheap local checks before launching any HF Job.
+submission directory, verify the remote package is complete, and run cheap
+local checks before launching any HF Job. Launch exactly once; if a pre-launch
+check or transient error raises doubt, report back instead of retrying
+speculatively.
