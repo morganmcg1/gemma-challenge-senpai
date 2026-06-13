@@ -54,7 +54,7 @@ def band(acc: float) -> str:
 
 @torch.no_grad()
 def evaluate_topk(head, records, shift, batch_tokens, device, dtype, rope_theta,
-                  top_k=4, chunk=256):
+                  top_k=4, chunk=256, record_conf=False, conf_top_k=64):
     """Teacher-forced top-1..top-K acceptance + per-position hit-rank traces.
 
     Extends `train_eagle3.evaluate` (which scores only top-1) to the draft top-K
@@ -72,6 +72,21 @@ def evaluate_topk(head, records, shift, batch_tokens, device, dtype, rope_theta,
     (linear top-1 vs width-K top-K) WITHOUT the i.i.d. assumption. top-1 here is
     bit-identical to `evaluate`'s tf_acceptance_rate (argmax == ref), so it
     self-calibrates against the PR #16 figure.
+
+    `record_conf` (PR #54): additionally capture, per position, the drafter's
+    DRAFT-TIME CONFIDENCE statistics over its own emitted next-token distribution
+    -- the signals AdaEDL (arXiv:2410.18351) keys early-draft-stop on:
+      entropy   = full-vocab Shannon entropy H = -sum p log p   (nats)
+      entropy64 = entropy over the renormalised top-`conf_top_k` mass; this is the
+                  ONLY entropy a centroid-sparse served head (CENTROID_TOP_K=64,
+                  #48) can actually compute, so it is the realistic controller
+                  input -- entropy64 <= entropy always (truncation underestimates).
+      top1p     = max softmax probability (the Max-Confidence-SPD signal)
+      margin    = p1 - p2 (top-1 minus top-2 probability)
+    These are pure reductions of the SAME `lcf` already materialised for hit_rank,
+    so they add no extra model passes. All four are aligned 1:1 with `hit_rank`,
+    letting the entropy_controller measure corr(signal, acceptance / run-length)
+    head-to-head vs the acceptance-history r~0.32 baseline (#51).
     """
     head.eval()
     order = list(range(len(records)))
@@ -88,12 +103,16 @@ def evaluate_topk(head, records, shift, batch_tokens, device, dtype, rope_theta,
         for bi, rec_idx in enumerate(idxs):
             L = int(records[rec_idx]["input_ids"].shape[0])
             if L <= shift:
-                traces.append({"seq": int(rec_idx), "n": 0, "hit_rank": []})
+                rec = {"seq": int(rec_idx), "n": 0, "hit_rank": []}
+                if record_conf:
+                    rec.update(entropy=[], entropy64=[], top1p=[], margin=[])
+                traces.append(rec)
                 continue
             h = hidden[bi, shift:L, :]      # [n, H] — predictions for positions shift..L-1
             ref = labels[bi, shift:L]       # [n]   == next_token_ids[shift:L]
             n = int(h.shape[0])
             ranks = []
+            ent, ent64, t1p, marg = [], [], [], []
             for c0 in range(0, n, chunk):
                 hc = h[c0:c0 + chunk]
                 rc = ref[c0:c0 + chunk]
@@ -107,17 +126,33 @@ def evaluate_topk(head, records, shift, batch_tokens, device, dtype, rope_theta,
                 rank = eqs.float().argmax(-1) + 1            # first match (1-indexed)
                 rank = torch.where(has, rank, torch.zeros_like(rank))
                 ranks.extend(int(x) for x in rank.tolist())
+                if record_conf:
+                    logp = F.log_softmax(lcf, dim=-1)        # [c, V] numerically stable
+                    p = logp.exp()
+                    H = -(p * logp).sum(-1)                  # [c] full-vocab entropy (nats)
+                    tv = p.topk(2, dim=-1).values            # [c, 2] top-1/2 probs
+                    # top-conf_top_k renormalised entropy (sparse-head realistic):
+                    tlv = lcf.topk(conf_top_k, dim=-1).values
+                    tlp = F.log_softmax(tlv, dim=-1)
+                    H64 = -(tlp.exp() * tlp).sum(-1)         # [c]
+                    ent.extend(round(float(x), 5) for x in H.tolist())
+                    ent64.extend(round(float(x), 5) for x in H64.tolist())
+                    t1p.extend(round(float(x), 5) for x in tv[:, 0].tolist())
+                    marg.extend(round(float(x), 5) for x in (tv[:, 0] - tv[:, 1]).tolist())
             rt = torch.tensor(ranks)
             for k in range(1, K + 1):
                 hit_at[k] += int(((rt >= 1) & (rt <= k)).sum().item())
             total += n
-            traces.append({"seq": int(rec_idx), "n": n, "hit_rank": ranks})
+            rec = {"seq": int(rec_idx), "n": n, "hit_rank": ranks}
+            if record_conf:
+                rec.update(entropy=ent, entropy64=ent64, top1p=t1p, margin=marg)
+            traces.append(rec)
     head.train()
     accs = {k: hit_at[k] / max(1, total) for k in range(1, K + 1)}
     top1, topk_ = accs[1], accs[K]
     rescue = (topk_ - top1) / (1.0 - top1) if top1 < 1.0 else 0.0
     return {"top_acc": accs, "rescue_rate": rescue, "loss": loss_sum / max(1, total),
-            "n": total, "traces": traces, "top_k": K}
+            "n": total, "traces": traces, "top_k": K, "conf_top_k": conf_top_k}
 
 
 def main():
@@ -133,6 +168,13 @@ def main():
     ap.add_argument("--trace_out", "--trace-out", dest="trace_out", default=None,
                     help="write per-position hit-rank JSONL (one record/sequence) for "
                          "the spec-decode acceptance simulation (Step 3)")
+    ap.add_argument("--confidence", action="store_true",
+                    help="(PR #54) also record per-position drafter draft-time "
+                         "confidence (entropy, entropy64, top1p, margin) into the "
+                         "trace, for the AdaEDL entropy-keyed dynamic-K analysis")
+    ap.add_argument("--conf_top_k", "--conf-top-k", dest="conf_top_k", type=int,
+                    default=64, help="top-k for the renormalised sparse-head entropy "
+                                     "proxy (default 64 == served CENTROID_TOP_K)")
     ap.add_argument("--feature_shift", type=int, default=None,
                     help="override; default reads checkpoint config")
     ap.add_argument("--batch_tokens", type=int, default=4096)
@@ -179,7 +221,8 @@ def main():
     records, _ = load_corpus(args.eval_corpus)
     torch.cuda.reset_peak_memory_stats()
     res = evaluate_topk(head, records, shift, args.batch_tokens, device, dtype,
-                        rope_theta, top_k=args.top_k)
+                        rope_theta, top_k=args.top_k, record_conf=args.confidence,
+                        conf_top_k=args.conf_top_k)
     peak_gb = torch.cuda.max_memory_allocated() / 1e9
     accs = res["top_acc"]
     acc = accs[1]                      # top-1 == evaluate()'s tf_acceptance_rate
@@ -202,7 +245,9 @@ def main():
                 "checkpoint": wpath, "eval_corpus": args.eval_corpus,
                 "feature_shift": shift, "top_k": args.top_k, "n": res["n"],
                 "top_acc": {str(k): v for k, v in accs.items()},
-                "rescue_rate": rescue}}) + "\n")
+                "rescue_rate": rescue,
+                "confidence": bool(args.confidence),
+                "conf_top_k": args.conf_top_k}}) + "\n")
             for tr in res["traces"]:
                 tf.write(json.dumps(tr) + "\n")
         print(f"[eval] wrote per-position trace -> {args.trace_out} "
