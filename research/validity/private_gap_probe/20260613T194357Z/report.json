@@ -1,0 +1,181 @@
+{
+  "timestamp": "20260613T194357Z",
+  "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan",
+  "num_prompts": 128,
+  "smoke": false,
+  "tps": {
+    "leaderboard_public": 423.63342412817775,
+    "private_rerun": 370.95983385077477,
+    "public_cold": 418.3749876107036
+  },
+  "headline_public_to_private_gap_pct": 12.43376638323648,
+  "e_accept": {
+    "public": 4.060508965432251,
+    "private": 3.5652267935340864,
+    "delta": 0.4952821718981646
+  },
+  "ppl": {
+    "public": 2.376982607605333,
+    "private": 2.376982607605333
+  },
+  "ppl_cap": 2.42,
+  "verdict_5pct_rule": "WOULD-FAIL (>5% private TPS drop -> INVALID)",
+  "public_evidence_band": "honest stacks 4-9%; firfir-cast cap 7.2%; kenyan-duma claimed precache ~1% to private",
+  "scenarios": {
+    "leaderboard": {
+      "label": "leaderboard",
+      "precache_mode": "public",
+      "dataset": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+      "num_prompts": 128,
+      "serve_ready_s": 100.1,
+      "bench": {
+        "tps": 423.63342412817775,
+        "total_tps": 641.3971386061753,
+        "completed": 128,
+        "duration_s": 154.6997858699906,
+        "total_input_tokens": 33688,
+        "total_output_tokens": 65536,
+        "mean_e2e_latency_ms": 1208.4251388589564,
+        "request_throughput_req_s": 0.8274090315003472
+      },
+      "acceptance": {
+        "delta_num_drafts": 16229.0,
+        "delta_num_accepted_tokens": 49669.0,
+        "delta_num_draft_tokens": 113603.0,
+        "e_accept": 4.060508965432251,
+        "accepted_per_step": 3.060508965432251,
+        "accept_rate": 0.43721556649032156
+      },
+      "counters_before": {
+        "num_drafts": 190.0,
+        "num_accepted_tokens": 506.0,
+        "num_draft_tokens": 1330.0,
+        "e_accept_mean_acceptance_length": 3.663157894736842,
+        "draft_acceptance_rate": 0.3804511278195489
+      },
+      "counters_after": {
+        "num_drafts": 16419.0,
+        "num_accepted_tokens": 50175.0,
+        "num_draft_tokens": 114933.0,
+        "e_accept_mean_acceptance_length": 4.055910835008222,
+        "draft_acceptance_rate": 0.43655869071546033
+      },
+      "ppl": 2.376982607605333,
+      "ppl_num_tokens": 61797,
+      "spec_log_xcheck": {
+        "intervals": 18,
+        "num_speculative_tokens": 7,
+        "total_accepted_tokens": 50175,
+        "total_drafted_tokens": 114933,
+        "e_accept_interval_mean": 3.973333333333333,
+        "steady_gen_tps_mean": 348.05263157894734,
+        "steady_gen_tps_n": 19,
+        "e_accept_exact": 4.055910835008222,
+        "draft_acceptance_rate": 0.43655869071546033
+      }
+    },
+    "private_rerun": {
+      "label": "private_rerun",
+      "precache_mode": "off",
+      "dataset": "/workspace/senpai/target/data/private_proxy_sharegpt.json",
+      "num_prompts": 128,
+      "serve_ready_s": 90.1,
+      "bench": {
+        "tps": 370.95983385077477,
+        "total_tps": 561.6416564052646,
+        "completed": 128,
+        "duration_s": 176.66602693800814,
+        "total_input_tokens": 33687,
+        "total_output_tokens": 65536,
+        "mean_e2e_latency_ms": 1379.9939363047997,
+        "request_throughput_req_s": 0.7245309254897945
+      },
+      "acceptance": {
+        "delta_num_drafts": 18497.0,
+        "delta_num_accepted_tokens": 47449.0,
+        "delta_num_draft_tokens": 129479.0,
+        "e_accept": 3.5652267935340864,
+        "accepted_per_step": 2.5652267935340864,
+        "accept_rate": 0.36646097050486953
+      },
+      "counters_before": {
+        "num_drafts": 0.0,
+        "num_accepted_tokens": 0.0,
+        "num_draft_tokens": 0.0
+      },
+      "counters_after": {
+        "num_drafts": 18497.0,
+        "num_accepted_tokens": 47449.0,
+        "num_draft_tokens": 129479.0,
+        "e_accept_mean_acceptance_length": 3.5652267935340864,
+        "draft_acceptance_rate": 0.36646097050486953
+      },
+      "ppl": 2.376982607605333,
+      "ppl_num_tokens": 61797,
+      "spec_log_xcheck": {
+        "intervals": 19,
+        "num_speculative_tokens": 7,
+        "total_accepted_tokens": 47449,
+        "total_drafted_tokens": 129479,
+        "e_accept_interval_mean": 3.460526315789474,
+        "steady_gen_tps_mean": 328.505,
+        "steady_gen_tps_n": 20,
+        "e_accept_exact": 3.5652267935340864,
+        "draft_acceptance_rate": 0.36646097050486953
+      }
+    },
+    "public_cold": {
+      "label": "public_cold",
+      "precache_mode": "off",
+      "dataset": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+      "num_prompts": 128,
+      "serve_ready_s": 90.1,
+      "bench": {
+        "tps": 418.3749876107036,
+        "total_tps": 633.4356654462349,
+        "completed": 128,
+        "duration_s": 156.64416358699964,
+        "total_input_tokens": 33688,
+        "total_output_tokens": 65536,
+        "mean_e2e_latency_ms": 1223.556040484823,
+        "request_throughput_req_s": 0.8171386476771555
+      },
+      "acceptance": {
+        "delta_num_drafts": 16184.0,
+        "delta_num_accepted_tokens": 49699.0,
+        "delta_num_draft_tokens": 113288.0,
+        "e_accept": 4.070872466633713,
+        "accepted_per_step": 3.070872466633712,
+        "accept_rate": 0.4386960666619589
+      },
+      "counters_before": {
+        "num_drafts": 0.0,
+        "num_accepted_tokens": 0.0,
+        "num_draft_tokens": 0.0
+      },
+      "counters_after": {
+        "num_drafts": 16184.0,
+        "num_accepted_tokens": 49699.0,
+        "num_draft_tokens": 113288.0,
+        "e_accept_mean_acceptance_length": 4.070872466633713,
+        "draft_acceptance_rate": 0.4386960666619589
+      },
+      "spec_log_xcheck": {
+        "intervals": 16,
+        "num_speculative_tokens": 7,
+        "total_accepted_tokens": 48254,
+        "total_drafted_tokens": 109333,
+        "e_accept_interval_mean": 4.05375,
+        "steady_gen_tps_mean": 396.95,
+        "steady_gen_tps_n": 16,
+        "e_accept_exact": 4.08944234586081,
+        "draft_acceptance_rate": 0.44134890655154435
+      }
+    }
+  },
+  "decomposition": {
+    "precache_benefit_on_public_pct": 1.2412704517580995,
+    "distribution_gap_precache_neutral_pct": 11.333171237294058,
+    "note": "headline = precache_benefit + distribution_gap (approx); distribution_gap is the pure drafter/length effect both-cold"
+  }
+}
