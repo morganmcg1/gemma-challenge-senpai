@@ -85,6 +85,14 @@ verify paths) is a first-class objective, not an afterthought.
 - **Reproduce (smoke):** `cd target/ && uv run python -m pytest scripts/tests/test_drafter_overlap.py -v`
 - **Reproduce (full analysis when trace lands):** `cd target/ && python scripts/analyze_suffix_budget.py --input research/local_validation/vllm_baseline/decode_outputs_128.jsonl --drafter-trace <trace.jsonl> --output research/sam_drafter_overlap/overlap_analysis.json`
 
+### 2026-06-13 11:15 — PR #15: EAGLE-3 feature-export feasibility
+
+- **Verdict: ACCESSIBLE → GO.** vLLM 0.22.0 + Gemma-4 E4B ship a complete EAGLE-3 feature-export path with **zero patching** — `Gemma4ForConditionalGeneration` implements `SupportsEagle3`; `Gemma4Model` is `EagleModelMixin`; aux layers `(2, 21, 39)` over the 42-layer E4B body; each `[T, 2560]` bf16, CUDA-graph safe (persistent buffers pre-allocated at capture). The drafter head arch also already exists (`models/llama_eagle3.py`, `v1/spec_decode/eagle.py`). Wire: `speculative_config{method:"eagle3", model:<draft>, eagle_aux_hidden_state_layer_ids:[2,21,39]}`.
+- **Empirical probe:** `probe_result.json` confirms `supports_eagle3=True`, default_aux_layers=[2,21,39], 3 aux tensors shape [5,2560], no NaN, vision+audio towers intact; 15.3 GiB peak bf16 on A10G (fits).
+- **Ceiling (literature):** ~480–550 TPS at accepted tok/step ~4–5+, vs current QAT-MTP ~2.2–3.3 tok/step. Serving validity still gated on kanna #5 linchpin (is int4 batched-verify spec greedy-valid?).
+- **New shared infra:** `research/eagle3_feasibility/{feasibility_report.md, probe_eagle3_export.py, probe_result.json, probe.log}`
+- **W&B run:** none (source audit + single model-load probe; no training).
+
 ## Confirmed dead ends (do not re-spend on these)
 sub-4-bit weight kernels (AWQ/GPTQ/AQLM/QuIP#/2:4-Sparse-Marlin/NVFP4) — no loadable Ampere
 sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gram/prompt-lookup
@@ -95,4 +103,4 @@ geometry obstruction (flat row norms, near-full-rank embedding: R_complement_max
 0%-fire on 16,384 real decode steps, nets −8% TPS (cert + full fallback > full alone); harness on
 `ubel/vocab-prune-sparse-verify` branch; empirical pruned-weights lmhead12k (no cert) is the viable lever.
 
-_Last updated: 2026-06-13 (PR #13 merged — SAM-Decoding drafter-overlap tooling: net-headroom intersection analysis ready; trace format documented; 13/13 mock tests pass. Program linchpin: int4 batched-verify spec-decode is structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #5 resolving this via precision-localization experiment, gates rungs 4–5)._
+_Last updated: 2026-06-13 (PR #15 merged — EAGLE-3 feature-export ACCESSIBLE/GO: vLLM 0.22.0 + Gemma-4 E4B implement SupportsEagle3 natively; aux layers (2,21,39), zero patching, CUDA-graph safe. Serving validity gated on kanna #5 linchpin. Program linchpin: int4 batched-verify spec-decode is structurally greedy-DIVERGENT in vLLM 0.22.0 — kanna #5 resolving via precision-localization experiment, gates rungs 4–5)._
