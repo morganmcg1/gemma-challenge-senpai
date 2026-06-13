@@ -1,5 +1,34 @@
 # SENPAI Research Results
 
+## 2026-06-13 17:00 — PR #28: Extended verify-latency M-sweep ✓ MERGED — keeper (ceiling corrected, extrapolation killed)
+
+- **Branch:** `denken/verify-latency-msweep` · **Student:** denken
+- **Status:** MERGED as a research keeper. Replaces the only extrapolated input in the PR #26 tree-salvage cost model with measured data. No TPS-baseline change — baseline stays PR #4 126.378 TPS.
+- **Hypothesis:** The int4 verify forward stays bandwidth-bound and ~flat in M well beyond M=16, so extrapolating the PR #18 curve to M=25 (K=6 tree) and M=41 (K=10 tree) is safe, and the >500 TPS @ p=0.78 claim from PR #26 holds on measured data.
+
+### Results
+
+| metric | PR #26 extrapolated | PR #28 measured | verdict |
+|---|---|---|---|
+| V_tree(M=25) / V_lin(M=7) — K=6 tree overhead | 1.057× | **1.113×** | higher than extrapolated but ≪ 4× naive fear |
+| K=6 tree TPS @ p=0.6792 | 346.8 | **331.2** (−4.5%) | net-positive 1.46×, holds |
+| Tree K* @ p=0.78 | K=20 (M=81): **616 TPS** (extrapolated) | **K=12 (M=49): 452.4 TPS** | **30% overstatement** — interior optimum found |
+| >500 TPS @ p=0.78? | YES (extrapolated K≈10) | **NO — max 452/493 TPS** | ceiling refuted at debug-head acceptance |
+| Knee M* | ≥16 (edge of old sweep) | **M≈24** (ramp starts M≈20) | step-structure from tile quantization |
+
+**W&B runs:** `2mk0z0c3` (latency M-sweep, group `spec-verify-msweep`) · `imoi4mx1` (tree acceptance model, group `spec-verify-msweep`). Both finished; all cited numbers verified vs W&B artifacts (60-row cost table, 120-row tree table).
+
+### Analysis & conclusions
+
+- **The hypothesis is partially refuted — and that's the finding.** The verify forward IS flat through M≈32 (+2.6%), so the K=6 moderate tree (M=25) extrapolation was essentially sound (1.057→1.113×). But beyond M≈32 the int4 Marlin W4A16 GEMM goes compute-bound and ramps: M=40 +31%, M=64 +60% over M=1. Discrete steps at M≈20, 32, 64 are Marlin tile-boundary quantization effects.
+- **The ramp is GEMM, not lm_head.** The forward GEMM share rises 62%→68% through the ramp; lm_head grows smoothly (2.86→3.57 ms). CUDA-graph mode exposes the ramp (eager masks it with fixed CPU-launch overhead).
+- **The REAL interior optimum is K*≈8–12** (not K=20). At p=0.78: K=8 (M=33) gives 429.3 TPS → peaks at K=12 (M=49): 452.4 TPS → then declines as ramp outpaces saturating acceptance.
+- **>500 TPS requires drafter quality, not deeper trees.** Only at p≥0.85 (top-1 acceptance ≥0.85) does the K=12 tree clear 500 (531 TPS). The debug-head acceptance regime (p≈0.68) caps at ~366–406 TPS (K*=8). **This re-anchors the entire team's focus on fern #25 (EAGLE-3 full-scale training) as the ceiling-setter.**
+- **Dense-M upper-bound caveat** (reported by student): the profiler times a dense/full-causal M-token forward (upper bound). The true tree-causal-masked cost is cheaper only in the attention term (16%→13% of the ramp), so the GEMM-dominated correction is sub-2 ms at M≈49 — tight upper bound.
+- **Strategic re-anchor:** K*≈8–12, not K≈20. The next steps are (a) tree-causal mask measurement to tighten the dense-M upper bound, (b) EAGLE-3 training to push p toward 0.85, (c) kanna's verify-rollback to unlock serving.
+
+---
+
 ## 2026-06-13 16:20 — PR #27: int4 channel-wise lm_head sweep ✗ CLOSED — confirmed NEGATIVE (g128 stays the floor)
 
 - **Branch:** `lawine/int4-channel-lmhead-sweep` · **Student:** lawine
