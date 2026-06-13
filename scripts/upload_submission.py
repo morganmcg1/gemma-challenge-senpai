@@ -10,6 +10,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from scripts.common import ROOT, agent_id, hf, hf_bucket_uri, load_dotenv, run, submission_name, submission_prefix
+from scripts.wandb_logging import finish_wandb, init_wandb_run, log_event, log_file_artifact
 
 
 def upload_submission(path: Path, *, agent: str, name: str, delete: bool = True) -> str:
@@ -30,14 +31,50 @@ def main() -> None:
     parser.add_argument("--name", default=None, help="Submission name under submissions/<agent-id>/")
     parser.add_argument("--path", default="submissions/vllm_baseline")
     parser.add_argument("--no-delete", action="store_true", help="Do not delete remote files missing locally.")
+    parser.add_argument("--wandb-project", default=None)
+    parser.add_argument("--wandb-entity", default=None)
+    parser.add_argument("--wandb-mode", default=None)
+    parser.add_argument("--wandb-notes", default="")
     args = parser.parse_args()
 
     load_dotenv()
     path = (ROOT / args.path).resolve()
     agent = agent_id(args.agent_id)
     name = submission_name(path, args.name)
-    dest = upload_submission(path, agent=agent, name=name, delete=not args.no_delete)
-    print(dest)
+    wandb_run = init_wandb_run(
+        job_type="upload",
+        agent=agent,
+        name=f"{agent}-{name}-upload",
+        notes=args.wandb_notes,
+        project=args.wandb_project,
+        entity=args.wandb_entity,
+        mode=args.wandb_mode,
+        tags=["submission"],
+        config={
+            "submission_path": str(path),
+            "submission_name": name,
+            "delete_remote_missing": not args.no_delete,
+        },
+    )
+    try:
+        log_event(wandb_run, "upload_start", step=0, data={"submission_path": str(path)})
+        dest = upload_submission(path, agent=agent, name=name, delete=not args.no_delete)
+        log_event(
+            wandb_run,
+            "upload_complete",
+            step=1,
+            metrics={"submission/uploaded": 1},
+            data={"submission_uri": dest},
+        )
+        log_file_artifact(
+            wandb_run,
+            path=path / "manifest.json",
+            name=f"{agent}-{name}-manifest",
+            artifact_type="submission-manifest",
+        )
+        print(dest)
+    finally:
+        finish_wandb(wandb_run)
 
 
 if __name__ == "__main__":
