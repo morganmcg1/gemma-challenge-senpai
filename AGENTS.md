@@ -8,7 +8,7 @@
 
   ```bash
   ssh -i /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem \
-    ubuntu@ec2-3-87-184-234.compute-1.amazonaws.com
+    ubuntu@ec2-107-22-25-10.compute-1.amazonaws.com
   ```
 
 - If SSH times out at TCP connect, the public IP/DNS may be stale or the

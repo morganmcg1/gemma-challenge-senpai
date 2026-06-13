@@ -1,25 +1,27 @@
 # AWS Infra Handoff
 
-Last verified: 2026-06-12
+Last verified: 2026-06-13
 
 This repo currently manages one AWS EC2 A10G node for `gemma-chall` work. The launcher code is in `infra/aws/src/a10g_node/cli.py` and is run through `uv`.
 
 ## Auth
 
-The currently working launcher path uses this local AWS credentials profile:
+The currently working launcher path uses this local AWS SSO profile:
 
 ```text
-770934259321_SandboxPowerUsers
+sandbox-sso
 ```
 
 Expected local files:
 
-- `~/.aws/credentials` contains the profile above.
-- `~/.aws/config` contains SSO profile definitions from the WandB AWS config.
+- `~/.aws/config` contains SSO profile definitions from the WandB AWS config,
+  including `sandbox-sso`.
 - `.env` points `AWS_PROFILE` at that profile.
 - `.credentials` may exist as a local scratch copy, but it is ignored by git and should not be committed.
 
-The current credentials are temporary SSO/session credentials. If AWS calls start failing with expired-token errors, refresh them from the AWS console's "Command line or programmatic access" flow and update `~/.aws/credentials`.
+If AWS calls start failing with expired-token errors, refresh SSO with `aws sso
+login --profile sandbox-sso`. Console-copied temporary credentials remain a
+fallback, but SSO is preferred.
 
 SSO config note: the WandB SSO start URL is `https://wandb.awsapps.com/start`, but the SSO region is `us-east-2`. Using `us-east-1` for the SSO region causes `Invalid start url provided`.
 
@@ -70,18 +72,18 @@ Expected account:
 ## Current Running Node
 
 ```text
-Instance ID:     i-031a9640edf2921c5
-Name tag:        gemma-a10g
+Instance ID:     i-0554325ee1d640aaf
+Name tag:        gemma-a10g-8gpu
 Project tag:     gemma-chall
-Instance type:   g5.xlarge
-GPU:             NVIDIA A10G
+Instance type:   g5.48xlarge
+GPU:             8 x NVIDIA A10G
 Region:          us-east-1
-AZ:              us-east-1a
+AZ:              us-east-1c
 AMI:             ami-097fdc6a0158e9c8b
 State:           running
-Public IP:       3.87.184.234
-Public DNS:      ec2-3-87-184-234.compute-1.amazonaws.com
-Private IP:      10.10.0.157
+Public IP:       107.22.25.10
+Public DNS:      ec2-107-22-25-10.compute-1.amazonaws.com
+Private IP:      10.10.2.220
 SSH user:        ubuntu
 EC2 key pair:    gemma-a10g
 Local key file:  /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem
@@ -95,13 +97,13 @@ when the SSH ingress rule needs to be updated.
 SSH:
 
 ```bash
-ssh -i /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem ubuntu@ec2-3-87-184-234.compute-1.amazonaws.com
+ssh -i /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem ubuntu@ec2-107-22-25-10.compute-1.amazonaws.com
 ```
 
 Verify GPU:
 
 ```bash
-ssh -i /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem ubuntu@ec2-3-87-184-234.compute-1.amazonaws.com \
+ssh -i /Users/mmcguire/ML/gemma_chall/gemma-a10g.pem ubuntu@ec2-107-22-25-10.compute-1.amazonaws.com \
   'nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader'
 ```
 
@@ -117,9 +119,9 @@ The account did not have a default VPC in `us-east-1`, so the launcher is pinned
 
 ```text
 VPC:             vpc-039a5ded9effa16d4
-Subnet:          subnet-0cf052db6f6880fe3
-Subnet CIDR:     10.10.0.0/16 VPC, instance private IP 10.10.0.157
-Subnet AZ:       us-east-1a
+Subnet:          subnet-07906ec4a58796a70
+Subnet CIDR:     10.10.2.0/24, instance private IP 10.10.2.220
+Subnet AZ:       us-east-1c
 Public IPs:      MapPublicIpOnLaunch=true
 Route table:     rtb-0ba8e9d1ad219b340
 Internet GW:     igw-0120229c8791d3e44
@@ -177,7 +179,7 @@ Terminate the current node:
 
 ```bash
 cd /Users/mmcguire/ML/gemma_chall
-uv run a10g terminate i-031a9640edf2921c5
+uv run a10g terminate i-0554325ee1d640aaf
 ```
 
 ## Local Config
@@ -185,16 +187,20 @@ uv run a10g terminate i-031a9640edf2921c5
 The relevant `.env` values are:
 
 ```dotenv
-AWS_PROFILE=770934259321_SandboxPowerUsers
+AWS_PROFILE=sandbox-sso
 AWS_REGION=us-east-1
-INSTANCE_NAME=gemma-a10g
-INSTANCE_TYPE=g5.xlarge
-VOLUME_GB=200
-SUBNET_ID=subnet-0cf052db6f6880fe3
+INSTANCE_NAME=gemma-a10g-8gpu
+INSTANCE_TYPE=g5.48xlarge
+VOLUME_GB=1000
+SUBNET_ID=subnet-07906ec4a58796a70
 SECURITY_GROUP_NAME=gemma-a10g-ssh
 KEY_NAME=gemma-a10g
 KEY_PATH=./gemma-a10g.pem
 SSH_USER=ubuntu
+INSTANCE_ID=i-0554325ee1d640aaf
+SSH_HOST=ec2-107-22-25-10.compute-1.amazonaws.com
+SSH_PUBLIC_IP=107.22.25.10
+SSH_PRIVATE_IP=10.10.2.220
 MARKET_TYPE=on-demand
 ```
 
@@ -215,5 +221,5 @@ ami-097fdc6a0158e9c8b
 - The node is on-demand, so it accrues cost while `running`.
 - Public IP and DNS can change if the instance is stopped and started; the current launcher terminates, it does not stop.
 - The AWS key pair private key exists only locally at `gemma-a10g.pem`; preserve it if this exact instance must remain accessible.
-- G5 instances are the AWS A10G family. `g5.xlarge` gives one A10G GPU.
+- G5 instances are the AWS A10G family. `g5.xlarge` gives one A10G GPU; `g5.48xlarge` gives eight A10G GPUs.
 - If this work moves to CoreWeave, verify and use the latest supported CoreWeave GPU image at launch time instead of reusing an old tag.
