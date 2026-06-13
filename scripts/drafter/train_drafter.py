@@ -14,8 +14,25 @@ example we:
      top-`topk` target next-token distribution (the "Option B" on-trajectory
      teacher, reused at every unroll step; no per-step target re-run),
   3. at sampled continuation positions j, unroll the draft `--draft-steps` (K)
-     steps from (token_j, hidden_j | shared_kv[:j+1], pos=j) and minimise
+     steps from (token_j, hidden_{j-1} | shared_kv[:j+1], pos=j) and minimise
      alpha*CE(target_argmax) + (1-alpha)*KL(target_top-k || draft) at each step.
+
+Step-0 hidden (`--serve-faithful-hidden`, the v2 fix): the EAGLE/MTP draft step
+takes inputs_embeds = cat(embed(token@j), feature). EAGLE's convention pairs the
+token with the PREVIOUS position's target feature -- cat(e_j, f_{j-1}) -- and HF's
+`SinglePositionMultiTokenCandidateGenerator` feeds exactly f_{j-1} at serve time
+(empirically confirmed by scripts/drafter/probe_serve_hidden.py: the served step-0
+hidden matches a clean target prefill at position j-1, offset -1, in 40/43 rounds;
+L2 ~= 3 at j-1 vs ~= 350 at j). v0/v1b instead fed f_j (offset 0) -- so every
+offline fine-tune drifted the draft off the serving optimum: native acceptance
+REGRESSED -4.6%/-6.0% while the (same-offset-0) tf gate rose +10/+16%. That is the
+entire tf<->native anti-correlation. `--serve-faithful-hidden` pairs e_j with f_{j-1}
+so the step-0 input distribution matches serving. The probe shows f_{j-1} from a
+clean prefill is within L2 ~= 3 of the verify-forward hidden serving actually uses,
+so this cheap index fix closes ~99% of the gap (no simulate-verify needed).
+Steps >= 1 already use the draft's OWN hidden (HASS multi-step alignment), and the
+shared-KV / constant-position wiring is already serve-identical, so step 0 was the
+sole residual mismatch.
 
 Train-time unroll schedule (`--free-run-prob`, on the greedy-trajectory corpus):
   * Corpus trajectory: build_greedy_corpus.py re-decodes each prompt along the
@@ -134,6 +151,17 @@ def main():
     ap.add_argument("--free-run-ramp-frac", type=float, default=0.1,
                     help="linearly ramp free-run prob 0->target over this fraction of total "
                          "opt steps, then hold (0 = constant free_run_prob from step 0)")
+    ap.add_argument("--serve-faithful-hidden", action="store_true",
+                    help="v2 fix: feed the draft's STEP-0 hidden as the target feature at "
+                         "position j-1 (EAGLE cat(e_j, f_{j-1})), matching what HF assisted "
+                         "generation feeds at serve time (probe_serve_hidden.py: offset -1). v0/v1b "
+                         "fed f_j (offset 0), the off-by-one that drifted the draft off the serve "
+                         "optimum (native -6% while tf +16%). Steps >=1 are unchanged (draft's own "
+                         "hidden).")
+    ap.add_argument("--save-mid-frac", type=float, default=0.0,
+                    help="if >0, also dump a checkpoint to {out}_mid once elapsed/max_minutes "
+                         "crosses this fraction, so the final eval can SELECT on native acceptance "
+                         "(advisor ask) across >1 checkpoint rather than trusting train-loss.")
     ap.add_argument("--positions-per-example", type=int, default=10)
     ap.add_argument("--max-prompt-tokens", type=int, default=768)
     ap.add_argument("--max-cont-tokens", type=int, default=256)
@@ -224,6 +252,7 @@ def main():
     opt.zero_grad(set_to_none=True)
     t_train = time.time()
     stop = False
+    saved_mid = False
 
     for epoch in range(args.epochs):
         if stop:
@@ -248,8 +277,9 @@ def main():
                 last_hidden, shared_kv, logits = M.target_prefill(target, seq)
 
             # positions j to draft from; need D continuation tokens ahead of j.
+            # serve-faithful step 0 reads f_{j-1}, so require j >= 1.
             D = args.draft_steps
-            lo, hi = cont_start - 1, L - 1 - D
+            lo, hi = max(cont_start - 1, 1), L - 1 - D
             if hi < lo:
                 continue
             cand = list(range(lo, hi + 1))
@@ -273,7 +303,10 @@ def main():
                 # with prob fr_p, its own argmax token (EAGLE-3) so we train serving drift.
                 kv_c = M.crop_shared_kv(shared_kv, j + 1)
                 cur_tok = seq[:, j:j + 1]                  # step-0 input: the verified token (always)
-                cur_h = last_hidden[:, j:j + 1, :]         # step-0 input: target's true hidden
+                # step-0 feature: EAGLE cat(e_j, f_{j-1}) when serve-faithful (matches HF serve,
+                # probe offset -1); else the v0/v1b f_j (offset 0, the train<->serve mismatch).
+                h_idx = j - 1 if args.serve_faithful_hidden else j
+                cur_h = last_hidden[:, h_idx:h_idx + 1, :]
                 for d in range(D):
                     d_logits, d_hidden = M.draft_logits_at(drafter, tgt_embed, cur_tok, cur_h,
                                                            kv_c, position_index=j)
@@ -333,6 +366,17 @@ def main():
                 opt.step()
                 opt.zero_grad(set_to_none=True)
                 gstep += 1
+                elapsed_min = (time.time() - t_train) / 60.0
+                if (args.save_mid_frac > 0.0 and not saved_mid
+                        and elapsed_min / max(1e-6, args.max_minutes) >= args.save_mid_frac):
+                    mid_dir = args.out + "_mid"
+                    drafter.save_pretrained(mid_dir)
+                    tok.save_pretrained(mid_dir)
+                    with open(os.path.join(mid_dir, "train_meta.json"), "w") as fh:
+                        json.dump({"mid_checkpoint": True, "opt_steps": gstep,
+                                   "minutes": elapsed_min, "args": vars(args)}, fh, indent=2)
+                    saved_mid = True
+                    print(f"[mid-ckpt] saved -> {mid_dir} at {elapsed_min:.1f}min step{gstep}", flush=True)
                 if gstep % args.log_every == 0:
                     avg = {k: v / max(1, run_n) for k, v in run_loss.items()}
                     toks_s = seen_pos / (time.time() - t_train)

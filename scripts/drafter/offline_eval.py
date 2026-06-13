@@ -46,32 +46,49 @@ def plain_greedy(target, ids, max_new_tokens):
 
 
 @torch.no_grad()
+def _chain_counts(drafted, truth, K, depth_match, depth_chain):
+    chain_ok = True
+    for d in range(K):
+        m = bool(drafted[0, d].item() == truth[d].item())
+        if m:
+            depth_match[d] += 1
+        chain_ok = chain_ok and m
+        if chain_ok:
+            depth_chain[d] += 1
+
+
+@torch.no_grad()
 def position_curve(target, drafter, tgt_embed, full_ids, prompt_len, K, stride, max_pos):
     """Teacher-forced per-depth acceptance along full_ids (== target greedy).
-    Returns (depth_match_counts[K], depth_chain_counts[K], n_positions)."""
+
+    Computes the chain at TWO step-0 hidden conventions:
+      * offset 0 (legacy `tf`):  step-0 feature = f_p  (what v0/v1b reported; the
+        SAME off-by-one that diverged from native serving).
+      * offset -1 (`tf_sf`, serve-faithful): step-0 feature = f_{p-1}, the EAGLE
+        cat(e_p, f_{p-1}) pairing HF assisted generation actually feeds (probe).
+    tf_sf should track the native metric; tf should not -- that contrast is the
+    v1b finding made measurable from the offline gate.
+    Returns (match0, chain0, match_sf, chain_sf, n_positions)."""
     last_hidden, shared_kv, _ = M.target_prefill(target, full_ids)
     L = full_ids.shape[1]
-    depth_match = [0] * K     # P(draft[d] == truth[d])  (marginal)
-    depth_chain = [0] * K     # P(draft[0..d] all match) (chain)
+    match0 = [0] * K; chain0 = [0] * K
+    match_sf = [0] * K; chain_sf = [0] * K
     npos = 0
-    positions = list(range(prompt_len - 1, L - 1 - K, max(1, stride)))[:max_pos]
+    positions = list(range(max(prompt_len - 1, 1), L - 1 - K, max(1, stride)))[:max_pos]
     for p in positions:
         last_tok = full_ids[:, p:p + 1]
-        last_h = last_hidden[:, p:p + 1, :]
         kv_c = M.crop_shared_kv(shared_kv, p + 1)
-        drafted, _ = M.propose_k(drafter, tgt_embed, last_tok, last_h, kv_c,
-                                 position_index=p, K=K)
         truth = full_ids[0, p + 1:p + 1 + K]
-        chain_ok = True
-        for d in range(K):
-            m = bool(drafted[0, d].item() == truth[d].item())
-            if m:
-                depth_match[d] += 1
-            chain_ok = chain_ok and m
-            if chain_ok:
-                depth_chain[d] += 1
+        # legacy offset-0 step-0 hidden
+        drafted0, _ = M.propose_k(drafter, tgt_embed, last_tok, last_hidden[:, p:p + 1, :],
+                                  kv_c, position_index=p, K=K)
+        _chain_counts(drafted0, truth, K, match0, chain0)
+        # serve-faithful offset-(-1) step-0 hidden
+        drafted_sf, _ = M.propose_k(drafter, tgt_embed, last_tok, last_hidden[:, p - 1:p, :],
+                                    kv_c, position_index=p, K=K)
+        _chain_counts(drafted_sf, truth, K, match_sf, chain_sf)
         npos += 1
-    return depth_match, depth_chain, npos
+    return match0, chain0, match_sf, chain_sf, npos
 
 
 def main():
@@ -120,13 +137,15 @@ def main():
 
     results = {}
     overall = {"accept_sum": 0.0, "accept_n": 0, "depth_match": [0] * args.K,
-               "depth_chain": [0] * args.K, "npos": 0, "id_ok": 0, "id_n": 0}
+               "depth_chain": [0] * args.K, "depth_chain_sf": [0] * args.K,
+               "npos": 0, "id_ok": 0, "id_n": 0}
 
     for dist, items in by_dist.items():
         items = items[:args.max_prompts_per_dist]
         acc_sum, acc_n = 0.0, 0
         dmatch = [0] * args.K
         dchain = [0] * args.K
+        dchain_sf = [0] * args.K
         npos = 0
         id_ok = id_n = 0
         t_d = time.time()
@@ -150,43 +169,51 @@ def main():
                 id_ok += int(same); id_n += 1
 
             if out.shape[1] - ids.shape[1] >= args.K + 1:
-                dm, dc, np_ = position_curve(target, drafter, tgt_embed, out,
-                                             ids.shape[1], args.K, args.curve_stride,
-                                             args.curve_max_pos)
+                dm, dc, dm_sf, dc_sf, np_ = position_curve(
+                    target, drafter, tgt_embed, out, ids.shape[1], args.K,
+                    args.curve_stride, args.curve_max_pos)
                 for d in range(args.K):
-                    dmatch[d] += dm[d]; dchain[d] += dc[d]
+                    dmatch[d] += dm[d]; dchain[d] += dc[d]; dchain_sf[d] += dc_sf[d]
                 npos += np_
 
         mean_accept = acc_sum / max(1, acc_n)
         chain_p = [dchain[d] / max(1, npos) for d in range(args.K)]
+        chain_p_sf = [dchain_sf[d] / max(1, npos) for d in range(args.K)]
         # teacher-forced expected accepted tokens/step = 1 bonus + sum_d P(chain accepts d)
-        tf_accept = 1.0 + sum(chain_p)
+        tf_accept = 1.0 + sum(chain_p)            # legacy offset-0 (diverges from native)
+        tf_accept_sf = 1.0 + sum(chain_p_sf)      # serve-faithful offset-(-1) (tracks native)
         results[dist] = {
             "n_prompts": len(items),
             "native_accept_per_step": round(mean_accept, 4),
             "tf_accept_per_step": round(tf_accept, 4),
+            "tf_accept_per_step_sf": round(tf_accept_sf, 4),
             "depth_chain_p": [round(x, 4) for x in chain_p],
+            "depth_chain_p_sf": [round(x, 4) for x in chain_p_sf],
             "depth_match_p": [round(dmatch[d] / max(1, npos), 4) for d in range(args.K)],
             "greedy_identity": f"{id_ok}/{id_n}",
             "npos": npos,
             "sec": round(time.time() - t_d, 1),
         }
-        print(f"[{args.label}/{dist}] native_accept={mean_accept:.3f} tf_accept={tf_accept:.3f} "
-              f"chain_p={[round(x,3) for x in chain_p]} id={id_ok}/{id_n} "
-              f"({len(items)} prompts, {time.time()-t_d:.0f}s)", flush=True)
+        print(f"[{args.label}/{dist}] native={mean_accept:.3f} tf={tf_accept:.3f} "
+              f"tf_sf={tf_accept_sf:.3f} chain_sf={[round(x,3) for x in chain_p_sf]} "
+              f"id={id_ok}/{id_n} ({len(items)} prompts, {time.time()-t_d:.0f}s)", flush=True)
         overall["accept_sum"] += acc_sum; overall["accept_n"] += acc_n
         for d in range(args.K):
             overall["depth_match"][d] += dmatch[d]; overall["depth_chain"][d] += dchain[d]
+            overall["depth_chain_sf"][d] += dchain_sf[d]
         overall["npos"] += npos; overall["id_ok"] += id_ok; overall["id_n"] += id_n
 
     ov_accept = overall["accept_sum"] / max(1, overall["accept_n"])
     ov_chain = [overall["depth_chain"][d] / max(1, overall["npos"]) for d in range(args.K)]
+    ov_chain_sf = [overall["depth_chain_sf"][d] / max(1, overall["npos"]) for d in range(args.K)]
     summary = {
         "label": args.label,
         "drafter": args.drafter,
         "overall_native_accept_per_step": round(ov_accept, 4),
         "overall_tf_accept_per_step": round(1.0 + sum(ov_chain), 4),
+        "overall_tf_accept_per_step_sf": round(1.0 + sum(ov_chain_sf), 4),
         "overall_depth_chain_p": [round(x, 4) for x in ov_chain],
+        "overall_depth_chain_p_sf": [round(x, 4) for x in ov_chain_sf],
         "overall_greedy_identity": f"{overall['id_ok']}/{overall['id_n']}",
         "per_dist": results,
         "config": {"new_tokens": args.new_tokens, "K": args.K,
@@ -216,13 +243,16 @@ def main():
         s = run.summary
         s[f"heldout/{lab}/native_accept_per_step"] = summary["overall_native_accept_per_step"]
         s[f"heldout/{lab}/tf_accept_per_step"] = summary["overall_tf_accept_per_step"]
+        s[f"heldout/{lab}/tf_accept_per_step_sf"] = summary["overall_tf_accept_per_step_sf"]
         s[f"heldout/{lab}/greedy_identity"] = summary["overall_greedy_identity"]
         for dist, d in results.items():
             s[f"heldout/{lab}/{dist}/native_accept_per_step"] = d["native_accept_per_step"]
             s[f"heldout/{lab}/{dist}/tf_accept_per_step"] = d["tf_accept_per_step"]
+            s[f"heldout/{lab}/{dist}/tf_accept_per_step_sf"] = d["tf_accept_per_step_sf"]
         if args.set_primary:
             s["heldout_native_accept_per_step"] = summary["overall_native_accept_per_step"]
             s["heldout_tf_accept_per_step"] = summary["overall_tf_accept_per_step"]
+            s["heldout_tf_accept_per_step_sf"] = summary["overall_tf_accept_per_step_sf"]
             # exact key the advisor named (== tf metric measured at this K); keeps the
             # SENPAI-RESULT schema (heldout_accepted_tok_per_step_tf_K7) verifiable from the run.
             s[f"heldout_accepted_tok_per_step_tf_K{args.K}"] = summary["overall_tf_accept_per_step"]
