@@ -1,0 +1,187 @@
+{
+  "configs": {
+    "baseline": {
+      "k_sweep": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "ref_positions": 576,
+      "per_M": {
+        "2": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        },
+        "4": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        },
+        "6": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        },
+        "8": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        }
+      }
+    },
+    "fp32-logit": {
+      "k_sweep": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "ref_positions": 576,
+      "per_M": {
+        "2": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        },
+        "4": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        },
+        "6": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        },
+        "8": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        }
+      }
+    },
+    "deterministic": {
+      "k_sweep": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "ref_positions": 576,
+      "per_M": {
+        "2": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        },
+        "4": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        },
+        "6": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        },
+        "8": {
+          "flips": 3,
+          "total": 576,
+          "flip_rate_per_token": 0.005208333333333333
+        }
+      }
+    },
+    "fp32-plus-det": {
+      "k_sweep": [
+        1,
+        3,
+        5,
+        7
+      ],
+      "ref_positions": 576,
+      "per_M": {
+        "2": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        },
+        "4": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        },
+        "6": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        },
+        "8": {
+          "flips": 1,
+          "total": 576,
+          "flip_rate_per_token": 0.001736111111111111
+        }
+      }
+    }
+  },
+  "latency_overhead_pct": {
+    "baseline": 0.0,
+    "fp32-logit": 0.24607598279513196,
+    "deterministic": 13.973066424251073,
+    "fp32-plus-det": 14.71200570339071
+  },
+  "latency_ms_per_token": {
+    "A": {
+      "1": {
+        "plain": 178.73300790786743,
+        "fp32": 179.03306245803833
+      },
+      "8": {
+        "plain": 64.35313940048218,
+        "fp32": 64.51149702072144
+      }
+    },
+    "B": {
+      "1": {
+        "plain": 203.36410522460938,
+        "fp32": 203.38533639907837
+      },
+      "8": {
+        "plain": 73.34524631500244,
+        "fp32": 73.82077693939209
+      }
+    }
+  },
+  "noise_floor_M1_vs_M1": {
+    "flips": 0,
+    "total": 576,
+    "flip_rate_per_token": 0.0
+  },
+  "meta": {
+    "int4_base": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "contexts_file": "/workspace/senpai/target/research/greedy_reference/google__gemma-4-E4B-it/decode_outputs.jsonl",
+    "num_contexts": 12,
+    "num_steps": 48,
+    "k_sweep": [
+      1,
+      3,
+      5,
+      7
+    ],
+    "M_values": [
+      2,
+      4,
+      6,
+      8
+    ],
+    "configs": [
+      "baseline",
+      "fp32-logit",
+      "deterministic",
+      "fp32-plus-det"
+    ],
+    "enforce_eager": true,
+    "max_model_len": 2048
+  }
+}
