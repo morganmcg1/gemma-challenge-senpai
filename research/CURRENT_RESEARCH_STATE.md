@@ -113,12 +113,12 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 | wirbel | **#39 (NEW)** | **fa2sw attention deep-profile.** Kernel-level breakdown of the 19.6% second lever from #30: KV-load bytes, SWA masking overhead, bandwidth vs theoretical minimum. Estimate TPS uplift if 25/50% reduction achievable. LOCAL ONLY. | **Assigned (post-#30 merge)** |
 | lawine | **#40 (NEW)** | **Greedy-ref infra hardening (#32 follow-up).** Regenerate `fa2sw_precache_kenyan` served spec-off reference at full 128 prompts (kanna's audit needs this). Add runtime assert: resolved ref tag never bare `"model"`. Unit tests. LOCAL ONLY. | **Assigned (post-#32 merge)** |
 | fern | **#34 (WIP)** | **Benchmark-matched reasoning corpus → EAGLE-3 retrain.** Self-distill greedy CoT from served target under EXACT benchmark prompt templates (MCQ `ANSWER: $LETTER` for mmlu_pro/gpqa, step-by-step `ANSWER: $ANSWER` for aime) on MMLU-Pro/GPQA/AIME (57/57/14), hard-dedup vs 128 eval ids, early-stop on held-out reasoning tf_acc. Target: break 0.73 plateau toward 0.78–0.85. | Active |
-| denken | **#37 ✓ MERGED** | **lmhead12k verify-forward cost model — COMPLETE.** 538.1 TPS K*=11/M=45 ceiling verified; scatter floor 0.348 ms; K=11/M=45 config locked; msweep tile-folded. | **Idle — reassigning** |
+| denken | **#41 (NEW)** | **Scatter floor elimination in `compute_logits`.** Prove `kept_ids[argmax(partial_12k_logits)]` == scatter+full-argmax (empirical greedy-identity guarantee), then implement the skip to save ~0.155 ms/step @ M=45. Ceiling 538→~546 TPS. LOCAL ONLY. | **Assigned (post-#37 merge)** |
 | stark | **#23 (WIP)** | **Source-level batch-invariance probe** — fp32-logit, deterministic-reduction arms; measure which (if any) drives flip_rate → 0. The only remaining net-positive route to greedy-valid spec decode in vLLM 0.22.0. | Active — **#1 spec-decode priority** |
 | ubel | **#36 (WIP)** | **lmhead12k int4-pruned head.** Slice the 12k head in int4 (≈16 MB vs 62.9 MB bf16) for another ~4× head-byte cut. Bandwidth-model ~133 local (+1.3%). Same `kept_ids`, orthogonal to private-PPL question. **PLUS high-priority operational interrupt: launch the human-approved (Issue #35) HF benchmark for the merged `lmhead12k_empirical` — official TPS + private-PPL test; run in parallel with #36.** | Active + HF launch in flight |
 | land | **#9 (WIP)** | **Wide KL-distilled drafter** — v0 regressed −4.6% native (schedule mismatch). v1 = free-running / EAGLE-3-style schedule + full ~82-min budget. | Active |
 
-**7 students active. denken idle pending reassignment (cycle 21).**
+**All 8 students busy. Zero idle GPUs.**
 
 ---
 
@@ -150,7 +150,7 @@ The weight-byte floor is reached (PR #4, 126.378 TPS). The frontier stack (`fa2s
 
 ---
 
-_Last updated: 2026-06-13 **cycle 21** — PR #37 MERGED (denken lmhead12k verify-forward cost model: 538.1 TPS ceiling @ K*=11/M=45 p=0.78 with drafter, +22% over #33's 440; scatter floor 0.348 ms; K=11/M=45 config LOCKED for kanna #24; msweep tile-folded). denken idle — reassigning. Issue #35 approved (lmhead12k_empirical HF launch → ubel, awaiting official tps/ppl). All other 7 students busy._
+_Last updated: 2026-06-13 **cycle 21 CLOSED** — PR #37 MERGED (denken lmhead12k verify-forward cost model: 538.1 TPS ceiling @ K*=11/M=45 p=0.78 with drafter, +22% over #33's 440; scatter floor 0.348 ms quantified; K=11/M=45 config LOCKED for kanna #24; msweep tile-folded in place). denken reassigned PR #41 (scatter floor elimination, ceiling 538→546). Issue #35 HF job in flight → ubel, awaiting official a10g-small tps/ppl. All 8 students busy; zero idle._
 
 _Cycle 20: Issue #35 approved (Morgan, "HF Job launch authorized"); routed single-launch to ubel (PR #36). awaiting official a10g-small tps/ppl. Cycle 19 CLOSED (~18:30Z): PRs #24/#30/#32/#33/#14 ALL MERGED. kanna→#38 (served-gate audit), wirbel→#39 (fa2sw deep-profile), lawine→#40 (greedy-ref 128-prompt + assert)._
 
