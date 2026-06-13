@@ -1,0 +1,24 @@
+{
+  "name": "lmhead12k-empirical",
+  "description": "Empirical lmhead12k: public W4A16 (int4) Gemma-4-E4B with lm_head weight rows pruned to a kept set of frequent/required token ids, served on vLLM. Untied embed_tokens stay full bf16; pruned lm_head stays bf16 (in the int4 base's quant ignore list); lm_head GEMM bandwidth drops ~vocab/kept_size x.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "compressed-tensors==0.15.0.1",
+    "transformers==5.9.0",
+    "./vllm_plugin"
+  ],
+  "model_id": "/workspace/gemma_build/lmhead12k_empirical",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MODEL_ID": "/workspace/gemma_build/lmhead12k_empirical",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

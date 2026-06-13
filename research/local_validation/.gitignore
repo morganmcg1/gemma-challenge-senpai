@@ -8,3 +8,20 @@ _capture_*/
 *.direct.json
 *.direct.jsonl
 */ppl_subset.jsonl
+# bulky per-prompt greedy reference decodes (offline plain-greedy + unpruned-int4
+# captures) and the regenerable broad-corpus frequency cache. The greedy-identity
+# verdict + first-divergence indices are fully evidenced by the committed
+# greedy_identity_*.json verifier outputs and greedy_identity_summary.json; the
+# raw generations belong in the HF scratch bucket. Regenerate with
+# gen_greedy_reference.py / build_lmhead12k.py select.
+*/reference_offline_*.jsonl
+*/stock_offline_*.jsonl
+*/broad_corpus_freq.json
+# control served-vs-served int4 captures + held-out argmax probe (bulky, regenerable).
+# The control verdict + unpruned single-stream TPS live in control_result.json /
+# control_v2.log; the clip-floor sweep numbers live in clip_floor_ksweep.json.
+int4_A.jsonl
+int4_B.jsonl
+heldout_int4_argmax.jsonl
+# gate-campaign per-prompt eager reference decodes (superseded by stage1_evidence/).
+*_eager.jsonl
