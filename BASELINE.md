@@ -40,8 +40,19 @@ verify paths) is a first-class objective, not an afterthought.
 ## Current local baseline in this repo
 - `submissions/vllm_baseline` — bf16 stock vLLM 0.22.0 endpoint. Prior HF smoke job
   `6a2c5fb77c68f455eff14260` (run prefix `results/senpai/vllm-baseline-20260612T193622Z`)
-  reported **tps=44.018, completed=128**, but **`ppl_summary.json` was not confirmed** —
-  PPL-artifact resolution is research priority #1 (assigned to fern).
+  reported **tps=44.018, completed=128** on a10g-small.
+- **PPL-artifact resolution (priority #1, fern, PR #2) — RESOLVED 2026-06-13.**
+  - Local PPL **confirmed 2.3012** over all 128 GT records (61,797 scored tokens) via the
+    official `ppl_endpoint.py` against a local bf16 `serve.py` endpoint — within the ≤2.42 gate.
+  - The prior job's missing `ppl_summary.json` was **not** disabled / OOM / unfetched: it was the
+    **40-min HF Job wall-clock timeout**. Evidence (`job_status.json` timed_out@40m stage=RUNNING,
+    `run_environment.json` ppl.enabled=true, `summary.json` duration_s=1488.8s) shows 11.9-min cold
+    startup + 24.8-min benchmark left only ~6.5 min, so decode-capture (another ~24.8-min workload)
+    and the PPL stage that runs *after* it never completed. At 44 TPS the bf16 baseline cannot fit
+    startup+benchmark+decode+PPL inside 40 min; faster submissions will.
+  - Reusable one-command local pre-validation harness: **`scripts/local_prevalidate.py`** (serves
+    bf16, runs PPL + decode capture, prints `tps`/`ppl`/`completed`, no HF Jobs quota). Evidence
+    artifacts under `research/local_validation/`.
 
 ## Confirmed dead ends (do not re-spend on these)
 sub-4-bit weight kernels (AWQ/GPTQ/AQLM/QuIP#/2:4-Sparse-Marlin/NVFP4) — no loadable Ampere
@@ -49,4 +60,4 @@ sm_86 kernel in vLLM 0.22; fp8 KV cache — rejected by A10G + Gemma4 attn; n-gr
 spec decode — loses at conc=1; runtime knobs (attn-backend swap, max_num_seqs, MARLIN_USE_ATOMIC_ADD) —
 parity/noise; body channel-wise quant — trades PPL for no TPS; widening draft centroid top_k — no gain.
 
-_Last updated: 2026-06-13 (initial frontier reproduction track)._
+_Last updated: 2026-06-13 (frontier reproduction track; bf16 PPL-artifact resolution PR #2 — local PPL 2.3012 confirmed, missing-artifact root-caused to 40-min job timeout)._
