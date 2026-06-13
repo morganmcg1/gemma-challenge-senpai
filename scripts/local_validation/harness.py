@@ -77,6 +77,52 @@ def resolve_model_id(value: str, submission_dir: Path) -> str:
     return str(candidate) if candidate.exists() else value
 
 
+def serve_model_id(manifest: dict[str, Any], submission_dir: Path) -> str:
+    """The ``MODEL_ID`` value serve.py will actually receive for this submission.
+
+    Mirrors [[_participant_env]] exactly so callers (e.g. the reference
+    generator) can recover the served identity without standing up a server: an
+    explicit manifest ``env.MODEL_ID`` wins, then an ambient ``MODEL_ID`` already
+    in the process env, else the manifest ``model_id`` resolved against the
+    submission dir.
+    """
+    env_block = manifest.get("env") or {}
+    if "MODEL_ID" in env_block:
+        return str(env_block["MODEL_ID"])
+    if "MODEL_ID" in os.environ:
+        return os.environ["MODEL_ID"]
+    return resolve_model_id(str(manifest.get("model_id", paths.BF16_MODEL)), submission_dir)
+
+
+def reference_identity(model_id: str, submission_dir: Path | None) -> str:
+    """Canonical, collision-free identity used to KEY a greedy reference artifact.
+
+    Two invariants must hold or the gate silently mis-resolves: (1) the generator
+    must write a submission's reference to the same tag ``validate_submission``
+    reads it from, and (2) two *distinct* submissions must never share a tag —
+    even when their manifests declare the same ``model_id``. The served
+    ``MODEL_ID`` is not safe to key on: several int4 submissions all set
+    ``env.MODEL_ID="model"`` (a relative literal), a bucket-weights submission can
+    nominally report the bf16 hub id while serving entirely different baked
+    weights, and two submissions could point at one shared external checkpoint.
+    Keying on the model id alone would alias any of these onto one reference.
+
+    So a *submission's* reference is anchored to its (absolute) directory:
+    ``<submission_dir>::<model_id>``. The dir is unique per submission, so two
+    submissions can never collide regardless of what ``model_id`` they declare;
+    and because a bundled checkpoint lives at ``<submission_dir>/model``, anchoring
+    to the dir yields the same tag as keying by that absolute checkpoint path
+    (``::`` and ``/`` both normalize to ``__`` in [[paths.model_tag]]) while also
+    covering hub-id and shared-external-checkpoint submissions. Only a bare
+    baseline reference (``submission_dir is None``, e.g. ``gen_greedy_reference
+    --model-id``) keys purely by model id — the shared plain-checkpoint anchor,
+    intentionally not tied to any one submission.
+    """
+    if submission_dir is None:
+        return model_id
+    return f"{Path(submission_dir).resolve()}::{model_id}"
+
+
 def _participant_env(
     manifest: dict[str, Any], submission_dir: Path, server_venv: Path, port: int
 ) -> dict[str, str]:
@@ -86,10 +132,7 @@ def _participant_env(
     env["VIRTUAL_ENV"] = str(server_venv)
     env["PATH"] = f"{server_venv / 'bin'}{os.pathsep}{env.get('PATH', '')}"
     env["PYTHONDONTWRITEBYTECODE"] = "1"
-    env.setdefault(
-        "MODEL_ID",
-        resolve_model_id(str(manifest.get("model_id", paths.BF16_MODEL)), submission_dir),
-    )
+    env.setdefault("MODEL_ID", serve_model_id(manifest, submission_dir))
     env.setdefault(
         "SERVED_MODEL_NAME", str(manifest.get("served_model_name", paths.DEFAULT_SERVED_NAME))
     )
@@ -154,6 +197,11 @@ class LocalServer:
         self.env = env
         self.served_model_name = env["SERVED_MODEL_NAME"]
         self.model_id = env["MODEL_ID"]
+        # The identity serve.py consumes (``model_id``) is NOT safe to key the
+        # greedy reference on — see [[reference_identity]]. Resolve a separate,
+        # submission-anchored identity for reference lookup; the served path is
+        # untouched.
+        self.reference_model_id = reference_identity(self.model_id, self.submission_dir)
 
     def _wait_ready(self) -> None:
         deadline = time.time() + self.startup_timeout_s

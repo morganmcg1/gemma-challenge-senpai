@@ -87,6 +87,19 @@ def offline_reference_path(model_id: str) -> Path:
     return paths.REFERENCE_ROOT / paths.model_tag(model_id) / "decode_outputs.offline.jsonl"
 
 
+def reference_key_for_submission(submission: Path) -> str:
+    """Reference tag key for a submission — must equal ``LocalServer.reference_model_id``.
+
+    Single source of truth the GENERATOR keys a submission's reference off of,
+    computed identically to how ``validate_submission`` resolves it (the served
+    ``MODEL_ID``, anchored to the submission dir via
+    [[harness.reference_identity]]). If generation and resolution ever diverge
+    the gate emits a spurious ``NO_REFERENCE``, so they must stay in lockstep.
+    """
+    manifest = harness.load_manifest(submission)
+    return harness.reference_identity(harness.serve_model_id(manifest, submission), submission)
+
+
 # --------------------------------------------------------------------------- #
 # served mode (canonical)
 # --------------------------------------------------------------------------- #
@@ -104,24 +117,27 @@ def generate_served(args: argparse.Namespace) -> int:
     if args.submission:
         # Serve the submission's OWN stack with speculation disabled so the
         # reference is M=1 AR on the same engine/kernels/quant — the only removed
-        # variable is speculation.
+        # variable is speculation. Key the reference off the submission-anchored
+        # canonical identity so it lands exactly where validate_submission looks
+        # and never collides with another submission (harness.reference_identity).
         submission = args.submission
         manifest = harness.load_manifest(submission)
-        model_id = harness.resolve_model_id(str(manifest.get("model_id", paths.BF16_MODEL)), submission)
+        key_id = reference_key_for_submission(submission)
         extra_env = {**spec_off_env, **ref_env}
         served_via = f"submission:{submission}" + (" [spec-off]" if args.spec_off else "")
     else:
         # Serve the canonical plain baseline pointed at the checkpoint. The
         # baseline serve.py is inherently spec-off, so this is the M=1 AR anchor
-        # for any submission that shares this base checkpoint.
+        # for any submission that shares this base checkpoint. This bare path is
+        # the only one keyed purely by model id (the shared plain-checkpoint anchor).
         submission = args.baseline_submission
         manifest = harness.load_manifest(submission)
-        model_id = args.model_id
-        extra_env = {"MODEL_ID": model_id, "SERVED_MODEL_NAME": paths.DEFAULT_SERVED_NAME, **spec_off_env, **ref_env}
-        served_via = f"plain-baseline:{submission} (MODEL_ID={model_id})"
+        key_id = harness.reference_identity(args.model_id, None)  # == args.model_id
+        extra_env = {"MODEL_ID": args.model_id, "SERVED_MODEL_NAME": paths.DEFAULT_SERVED_NAME, **spec_off_env, **ref_env}
+        served_via = f"plain-baseline:{submission} (MODEL_ID={args.model_id})"
 
     server_python = args.server_python or harness.ensure_server_venv(manifest["dependencies"])
-    out = args.out or served_reference_path(model_id)
+    out = args.out or served_reference_path(key_id)
     out.parent.mkdir(parents=True, exist_ok=True)
     summary_file = out.parent / "decode_summary.json"
     log_path = out.parent / "served_reference_server.log"
@@ -166,6 +182,7 @@ def generate_served(args: argparse.Namespace) -> int:
 
     meta = {
         "model_id": resolved_model_id,
+        "reference_key": key_id,
         "reference_kind": ref_kind,
         "served_via": served_via,
         "served_model_name": served_model_name,
