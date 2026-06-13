@@ -1,5 +1,67 @@
 # SENPAI Research Results
 
+## 2026-06-13 10:30 — PR #5: int4 + MTP/QAT drafter spec-decode ({8,4} engine fix + greedy-validity finding) — REQUEST CHANGES (→ WIP)
+
+- **Branch:** `kanna/int4-mtp-drafter`
+- **Student:** kanna
+- **Status:** REQUEST CHANGES — terminal SENPAI-RESULT but submission **INVALID** (greedy DIVERGENT). Sent back to WIP for a decisive precision-localization experiment. The `{8,4}` backport + wandb-scraper fix are keepers on the branch.
+- **Hypothesis:** int4 W4A16 target + QAT-MTP drafter spec-decode reaches ~285 TPS greedy-identical once the vLLM 0.22.0 `{8,4}` attention-group blocker is fixed.
+
+### Results (local A10G, exploratory; W&B group `int4-mtp-drafter`)
+
+| K | mean accepted tok/step | exploratory TPS (A10G) | PPL | greedy | W&B run |
+|---|---|---|---|---|---|
+| 5 | 2.151 | 164.45 | 2.0064 | DIVERGENT | zbt1fras |
+| 6 | 2.197 | 163.87 | 2.0064 | DIVERGENT | 7vnkis8z |
+| 7 | 2.188 | 160.28 | 2.0064 | DIVERGENT | 0fa5c8fx |
+
+W&B cross-check (advisor): tps/ppl/accept match the PR verbatim; `greedy_identical=0` boolean = DIVERGENT confirmed; the malformed `spec/accept_rate_posN` values are the pre-fix scraper bug kanna disclosed and fixed.
+
+### Engineering win — `{8,4}` blocker SOLVED
+Backported upstream vLLM PR #43543 / commit `dede691c9536` ("split attention groups by `num_heads_q` for spec-decode drafts") as a fork/spawn-safe runtime monkeypatch (`vllm_attn_group_patch.py` + `sitecustomize.py`). Serves cleanly eager + cudagraph. (The PR-cited commit `3e8afdf7` is WRONG — that's a Cohere2MoE fix; the real fix is #43543.)
+
+### CRITICAL FINDING — int4 spec-decode is structurally greedy-DIVERGENT in vLLM 0.22.0
+At temp=0 vLLM's rejection sampler emits `argmax(target_logits)` from the **batched M=K+1 verify forward**; plain AR (the reference) emits `argmax` from the **M=1 decode forward**. int4 Marlin accumulation is batch-shape-dependent → logits differ in the last bits → ~0.33%/token argmax flips on near-ties → compounds to DIVERGENT over 512 tokens (6/32 prompts identical). Structural for any K≥1; no batch-invariant/deterministic knob exists in 0.22.0 (kanna grep-confirmed). K0-vs-K0 control is IDENTICAL → divergence is 100% the spec verify path.
+
+### Advisor verification of the gate mechanics (this cycle)
+- Read the official verifier (`gemma_greedy_identity_verifier_flowian-powers/greedy_identity.py`): **strict bit-exact**, full `completion_token_ids`, zero tolerance — any 1 flipped token → DIVERGENT.
+- Traced the harness (`speed_benchmark/scripts/{hf_bucket_single_job,decode_outputs}.py`): it generates ONLY the candidate decode (128×512, seed 1, temp 0, ignore_eos); the **reference is organizer-held** = "plain greedy decode of the submitted checkpoint" = int4 M=1 AR — exactly what kanna compared against. **kanna's DIVERGENT is very likely the official verdict.** Refutes her hypothesis (c) "audit is lenient."
+
+### LINCHPIN question (gates rungs 4–5 / the path to 420)
+If int4+vLLM-spec cannot be greedy-valid in 0.22.0, how is the ~420 frontier VALID? Remaining hypotheses: **(a)** higher-precision target (fewer near-tie flips, but can't hit 420 at int4 bandwidth) or **(b)** batch-invariant kernels in a newer vLLM (only if the harness honors manifest `python_packages`). **Next experiment (assigned to kanna):** hold the spec stack fixed, vary target precision (int4 vs bf16 vs fp8), measure greedy flip-rate per arm — localizes the divergence and decides whether the drafter ladder is salvageable. Plus: definitively confirm whether a10g-small honors the manifest vLLM version.
+
+### Secondary
+Acceptance underdelivers: 2.20 tok/step (vs ~3.3 target) — strong pos0 (87%) but steep decay caps speedup ~2.2× (~270 effective TPS). Real-prompt corroboration: K6 340.9s vs K0 730.2s = 2.14×.
+
+## 2026-06-13 10:30 — PR #9: Wide-distribution KL-distilled drafter (private-stable acceptance) — REQUEST CHANGES (→ WIP)
+
+- **Branch:** `land/wide-drafter-distill`
+- **Student:** land
+- **Status:** REQUEST CHANGES — tf-gate PASSES but native serving regressed; sent back for v1 (free-running schedule). Drafter infra + deduped corpus are keepers on the branch.
+- **Hypothesis:** A wide, distribution-matched (4-dist) KL-distilled drafter lifts acceptance uniformly — including the chat/private-proxy floor — improving private-set stability over the reasoning-skewed stock drafter.
+
+### Results (offline acceptance, held-out shard; committed JSONs `research/wide_drafter/eval/{stock,wide}.json`)
+
+| metric | stock | wide (v0) | Δ |
+|---|---|---|---|
+| tf accepted-tok/step (the gate), overall | 3.455 | 3.811 | **+0.356 (+10.3%)** |
+| tf — chat (private proxy) | 2.753 | 3.052 | **+0.299 (+10.9%)** |
+| native `generate(assistant_model=)` overall | 3.553 | 3.388 | **−0.165 (−4.6%)** |
+
+W&B run `eqqdeodf` (group `wide-drafter-distill`). **Reporting gap (advisor W&B check):** the cited run logged only `train/*` loss curves — the acceptance numbers live in committed JSONs + reproduce commands, NOT in W&B. v1 must log the heldout eval to W&B.
+
+### Analysis
+- Width corpus works on the metric it optimizes: +10.3% tf, **uniform incl. chat/private-proxy floor (+10.9%)** — the target signal. Dedup proof: zero overlap with the 128 public prompts.
+- **Native regressed −4.6%, uniformly** — train↔serve schedule mismatch (teacher-forced training vs free-running serving) + undertraining (0.87 epoch, 40 of 90 budget-min unused, losses still falling). Correctly diagnosed by land.
+
+### Next (v1, assigned to land)
+Change ONE variable: **free-running / scheduled-sampling (EAGLE-3-style) unroll** to close the exposure-bias gap; same ~5k corpus + recipe; full ~82-min budget; primary = `heldout_native_accept_per_step` (beat stock 3.553); log eval to W&B. Optional 2nd arm: narrow-corpus contrast to isolate the width variable.
+
+### Infra/methodology notes
+- `scripts/drafter/offline_eval.py` is the correct EAGLE-aware acceptance tool (the reference `shared_resources/.../offline_acceptance.py` mis-measures EAGLE drafters as standalone CausalLM — flagged to wirbel #8).
+- `google/gemma-4-E4B-it-assistant` is the correct control; `Tonykip/...` baseline didn't resolve (fine). hf_xet wedge → `HF_HUB_DISABLE_XET=1`.
+- Coupling: converting acceptance → served TPS depends on int4 spec being greedy-valid (kanna #5's linchpin question).
+
 ## 2026-06-13 10:00 — PR #6: Greedy-safe vocab-prune / top-k sparse-verify (verify-cost lever) ✗ CLOSED (negative)
 
 - **Branch:** `ubel/vocab-prune-sparse-verify`
