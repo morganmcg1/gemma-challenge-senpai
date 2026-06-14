@@ -1,6 +1,7 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-14 ~06:30Z (cycle 40)
+- **Date:** 2026-06-14 ~07:05Z (cycle 40→41)
+- **★ STRATEGIC SHIFT this cycle:** denken #105 (GREEN) proved 500 is reachable **TREE-FREE** (SplitK+LK+palette, no tree); fern #106 (AMBER) places the tree as **UPSIDE/insurance** (recovery gate E[T]≥~4.7). **Critical path = ubel #108 SplitK + pin τ (denken #109).** The tree (land #71) is no longer a single point of failure for 500.
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## Frontier
@@ -21,16 +22,16 @@
 
 | student | PR | lever | status |
 |---|---|---|---|
-| **land** | **#71** | **Tree-verify build (THE #1 lever, ~576 TPS projected)** | WIP |
+| **land** | **#71** | **Tree-verify build — UPSIDE/insurance now (500→556-581), recovery gate E[T] ≥ ~4.7 (fern #106)** | WIP (external build chiku-inu/byteshark/openevolve; eager 2.097 → fix depth-1==0.7287 + descend salvage walk, denken #101) |
 | stark | **#103** | **QuantSpec drafter-KV premise-check:** does the MTP drafter expose a SEPARATE KV to quantize (lever live) or share verify's KV (moot)? CPU | WIP (#78 drafter-fusion CLOSED — 5h silent/zero-commit, repointed) |
-| ubel | #84 | SplitK W4A16 verify-GEMM (~+5–12%) | WIP — ⚠️ DEADLINE: 3h20m silent, repoint at next review if no Phase-1 signal |
+| ubel | **#108** | **SplitK W4A16 verify-GEMM (RESTART) — CRITICAL-PATH for the tree-free 500-path (threshold 4.44%, denken #105)** | WIP (#84 CLOSED dark — zero git+W&B ~4h — repointed to fresh branch + tightened liveness gate) |
 | kanna | **#96** | **Network-wide greedy-compounding gate:** do per-layer ≤1-ULP perturbations compound to flip argmax on the composed land#71×ubel#84 frontier? (closes #87's named upstream residual) | WIP |
 | lawine | **#107** | **Tree-step denominator measurement:** pin the REAL M=8→M=32 verify-step wall-time ratio (the load-bearing 1.16× under fern #102's break-even + the 569 projection); GEMM+attn floor measurable NOW without land's star-attn kernel. LOCAL rig | WIP (#99 ✅ MERGED 🟢 GREEN: multiplier 1.06019 config-stable, harness armed, tree proj 569 [552,587]) |
-| fern | **#106** | **Tree-vs-tree-free crossover + build-milestone ladder:** at what realized E[T] does the tree overtake denken #105's tree-free ceiling? + partial-recovery curve official(E[T]) for build ship-gates. CPU | WIP (#102 ✅ MERGED 🟡 AMBER: break-even E[T]*=4.624; tree needs ≥4.45 to TIE linear, ≥4.62 to clear 500) |
-| wirbel | **#104** | **Double-quant verify-GEMM scales:** INT8 scale-of-scales (QLoRA) + FP16 sparse exceptions, greedy-lossless ~0.4–1.1% byte lever on the #1 decode block. CPU round-trip bit-exact build-or-kill first (>98%→viable), then standalone scale-stream microbench. Scoped OFF ubel #84's kernel | WIP (#98 ✅ MERGED 🟢 GREEN: fp32 star-attn ~free, #93 constraint NOT load-bearing, tree +18.2% stands) |
-| denken | **#105** | **Tree-free 500-path ceiling:** can the build-COMPLETE stack (SplitK #84 + LK #95 + double-quant #104, NO tree) clear 500, and at what SplitK threshold? go/no-go: tree critical-path vs insurance? CPU | WIP (#101 ✅ MERGED 🟢 GREEN: 2.10 = FIXABLE BUILD DEFECT not ceiling; ~568 survives) |
+| fern | **#111** | **Settle crossover at landed C=518.1 + post-500 lever-ROI climb:** rank the 500→556 levers (SplitK/τ/LK/palette/tree-recovery) by official-TPS-per-build-effort. CPU | WIP (#106 ✅ MERGED 🟡 AMBER: corner-matched crossover 4.727 → tree is UPSIDE, recovery gate E[T] ≥ ~4.7) |
+| wirbel | **#110** | **Lossless scale-palette/LUT byte-lever:** bit-exact 10-bit index into 1,009 distinct FP16 scales (~37.5% scale-byte saving ~20 MB, ~0.3% TPS); build-or-kill — scale bytes on the BW-critical path or hidden by Marlin? Composes w/ ubel SplitK | WIP (#104 ✅ MERGED 🔴 KILL: double-quant info-theoretically dead 13.1% « 98%; palette is the survivor) |
+| denken | **#109** | **Tree-free-500 ship-readiness:** min SplitK for a *confident* (conservative-corner) ship + does pinning τ need an approval-gated official re-anchor, or ship on lawine #99 local cal (1.06019)? CPU | WIP (#105 ✅ MERGED 🟢 GREEN: tree-free clears 500, C=518.1, threshold 4.44%; tree now INSURANCE; binding gate → τ) |
 
-## Land #71 de-risking status (THE #1 lever, ~576 TPS projected)
+## Tree (land #71) de-risking status — now UPSIDE/insurance, NOT critical-path (denken #105 + fern #106)
 
 Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branch-3 topology:
 - **Topology:** max-branch-3 CONFIRMED empirically +0.9614% E[T] over max-branch-4 (fern #91, three independent estimators). **Build array:** `[-1,0,0,0,1,1,1,2,3,4,4,5,7,9,9,10,11,12,13,15,16,17,18,19,20,21,22,24,25,26,28,29]`
@@ -51,6 +52,9 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 
 | PR | student | verdict | significance |
 |---|---|---|---|
+| #106 | fern | Crossover/milestone-ladder AMBER: crossover@C=500=4.624 (=#102); corner-matched 4.727; with denken #105's landed C=518.1 the tree is UPSIDE not critical-path (recovery gate E[T]≥~4.7 to overtake tree-free) | settles the tree decision as bounded upside on a hard gate → fern #111 post-500 climb-ROI |
+| #105 | denken | Tree-free 500-ceiling GREEN: linear stack (SplitK+LK+dq, NO tree) clears 500 at SplitK≥4.44% (<ubel's +5% floor); C=518.1 [496.8,540.8]; ceiling 556; binding gate moves SplitK→τ (τ→1.0 ~3× cheaper) | TREE-FREE is the PRIMARY 500-path; tree=insurance; #101 defect no longer blocks 500 → denken #109 ship-readiness + ubel #108 SplitK CRITICAL |
+| #104 | wirbel | Double-quant scales KILL (banked): bit-exact 13.1% « 98%, info-theoretic (FP16 10-mantissa vs 1.4-1.9-octave spread); corrected bytes 53.70MB=3.06% int4 body (g=128) | scale-double-quant lane CLOSED; lossless palette/LUT survivor (1,009 distinct FP16 vals, ~20MB) → wirbel #110 |
 | #102 | fern | Break-even AMBER: tree-alone E[T]*=4.624 to clear 500; the ~1.16× heavier M=32 step means the tree needs E[T]≥4.45 just to TIE linear 481.53 (not 3.844) — a 'merely correct' tree at 3.844 is still a regression; no lever stack pulls break-even <4.0; 2.097 is a regression (~227 official) | the honest ship-bar: 4.45 abort line, 4.62 clears 500 alone; binding variable = realized E[T] not analytics → fern #106 crossover |
 | #99 | lawine | Projection calibration GREEN: multiplier 1.06019 config-stable 0.056% across 5 sessions; closed-loop self-check reproduces 454.338 + maps back to 481.53 within 0.014%; build-agnostic harness armed; tree projects 569 [552,587] | zero-lag ≥500 decision instrument calibrated + armed; 569 conditional on E[T]=5.207 (contested) → lawine #107 pins the M=8→M=32 step denominator |
 | #101 | denken | Accept-length reconciliation GREEN: as-built 2.10 is a FIXABLE BUILD DEFECT (≥56.1% provable, 100% fixable, (D)-ceiling 0%) — sits below the linear floor 3.844 the same drafter+verifier already hit; depth-1 spine 0.598 vs q[1]=0.7287 + non-descending salvage walk (reach 1.10% vs 60.8%) | tree 2.10 is build-blocked NOT ceiling-capped → ~568 survives; corrected band [3.844,5.207] to fern #102; tree no longer SPOF (denken #105 prices tree-free path) |
@@ -88,9 +92,9 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 
 ## Next directions (priority order)
 
-1. **Land #71 completes tree-verify build (with fp32 star-attn per wirbel #93)** → openevolve oracle bench → lawine #99 served A/B → approval-gated HF submission. ~568 TPS projected (fern #92 band 558-581). Pre-quota: GEMM ✅ (kanna #87); attention needs the **fp32 star-attn implementation + 0-flip re-verify** (wirbel #93 RED, cost sized by #98); kanna #96 network-wide in flight.
+1. **★ PRIMARY 500-PATH = TREE-FREE (denken #105 GREEN):** ubel #108 SplitK (→ ~8.5% = 509.9) + pin τ (denken #109 ship-readiness sets the conservative-corner ship gate + the τ-official-re-anchor question) clears 500 (ceiling 556); approval-gated submit once the corner clears 500. **The tree (land #71) is now UPSIDE/insurance (fern #106 AMBER, recovery gate E[T] ≥ ~4.7), not the primary path** — tree build path (if it lands): → openevolve oracle bench → lawine #99 served A/B → approval-gated HF submission. ~568 TPS projected (fern #92 band 558-581). Pre-quota: GEMM ✅ (kanna #87); attention needs the **fp32 star-attn implementation + 0-flip re-verify** (wirbel #93 RED, cost sized by #98); kanna #96 network-wide in flight.
 2. ~~Persistent-kernel overhead-reclamation~~ **CLOSED (denken #97 MERGED):** the ~32% "other" is only **2.17% reclaimable GPU-idle**; the other ~30pp is GPU-BUSY small-kernel tail a megakernel reorders but cannot remove (the bus is the wall). LEVER 1 refuted; #65's 99.41%-GPU-bound finding extends to the megakernel objective. _[Also closed: draft-verify overlap #94, norm/elementwise fusion #67 (<0.5%).]_
-3. **SplitK W4A16 verify-GEMM (ubel #84):** close 23% HBM gap at M=8; ~+5–12% wall_tps.
+3. **SplitK W4A16 verify-GEMM (ubel #108, RESTART — CRITICAL-PATH for the tree-free 500-path):** close 23% HBM gap at M=8; ~+5–12% wall_tps.
 4. **Projection calibration (lawine #99):** K=7 confirmed (#90, 454.338 locked); now pin the local→official multiplier so land #71's ~568 is a measured band that clears 500 with margin.
 5. **Tree reconciliation RESOLVED (denken #101 MERGED 🟢 GREEN):** the as-built tok/step=2.10 is a **FIXABLE BUILD DEFECT, not acceptance collapse** (≥56.1% provably build-defect, (D)-ceiling 0%) — it sits below the linear floor 3.844 the same drafter+verifier already hits, so a correct tree cannot accept less. Mechanism: depth-1 spine collapses (0.598 vs q[1]=0.7287) + salvage walk doesn't descend its sub-path. **~568 projection survives.** Build hand-off to land #71: assert depth-1==0.7287, make the walk descend, re-measure accept_length on the fp32 path. Corrected band for fern #102 = **[3.844 floor, 5.207 ceiling], re-measure-pending**. _(stark #78 drafter-fusion CLOSED → #103.)_
 6. **Lever-composition economics — fern #100 MERGED (🟢 GREEN, conditional):** tree alone clears 500 (cons 518 / centr 563), composition ORDER-INDEPENDENT (min_levers=1). The E[T]=5.207 condition is now backed by denken #101 (2.10 fixable, not a ceiling). **fern #102** inverts the model for the break-even E[T]*; **denken #105** prices the tree-FREE 500-path (SplitK #84 + LK #95 + double-quant #104, no tree) as the build-slip backup — so the tree is no longer a single point of failure.

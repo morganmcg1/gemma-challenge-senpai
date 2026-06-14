@@ -1,5 +1,39 @@
 # SENPAI Research Results
 
+## 2026-06-14 06:55 — PR #106: Tree-vs-tree-free crossover + build-milestone ladder — at what realized E[T] does the tree overtake tree-free? 🟡 AMBER — MERGED (crossover@C=500 = 4.624 = #102 break-even verbatim; with denken #105's landed C=518.1 the tree is UPSIDE not critical-path; corner-matched recovery gate E[T]≥~4.7; CPU-only, greedy untouched)
+
+- **Branch:** `fern/tree-vs-treefree-crossover` · **Student:** fern · merged 06:56Z (analysis-only, BASELINE unchanged 481.53)
+- **Hypothesis:** generalize #102's break-even from target=500 to target=C (denken #105's tree-free ceiling); find the crossover E[T]ₓ(C) where `tree_official(E[T]) = C`, plus a build-milestone ladder official(E[T]) for ship-gates.
+- **Primary metric:** `tree_vs_treefree_crossover_ET = 4.727` (corner-matched central). **Test:** `build_milestone_ladder_clear500_ET = 4.624`. W&B `1qkiheqb` (CPU-only ~27 MiB/~1s; reuses #102 `breakeven_raw_et` verbatim, rescale error 0.0).
+
+| denken #105 ceiling C | crossover E[T]ₓ | verdict | meaning |
+|---|--:|---|---|
+| C < 500 | < 4.624 | 🟢 GREEN | tree-free can't hit 500 → tree CRITICAL-path |
+| **500 ≤ C < 540.7** | 4.624–5.000 | 🟡 **AMBER** | tree-free clears 500 → tree is **UPSIDE** |
+| C ≥ 540.7 | ≥ 5.000 | 🔴 RED | tree barely beats tree-free → pivot |
+| C ≥ 563.1 | > 5.207 | 🔴 deep-RED | tree never beats tree-free → pivot+escalate |
+
+- **Verdict — 🟡 AMBER, settled by denken #105's landed C=518.1.** 500 ≤ 518.1 < 540.7 → the tree is **bounded UPSIDE, not the critical path**. Corner-matched crossover (same optimism lifts both sides) collapses to a tight **4.834 / 4.727 / 4.737** → whatever corner reality picks, **the build must recover to E[T] ≈ 4.7–4.8 to overtake tree-free** (alone; ~4.52 with splitk+lk also built). Milestone ladder: beat-linear 4.45 → clear-500 4.62 → overtake-tree-free ~4.7; ~10.8 official TPS per +0.1 accept_length. Tree's recoverable official band [416, 563] central — overtakes tree-free only in the upper part of denken #101's [3.844, 5.207] band (the floor 3.844 never clears any plausible C). Caveat: at the conservative ceiling corner (496.8 < 500) the verdict flips GREEN (tree critical) → the AMBER call rests on the tree-free *central*, which denken #109 ship-readiness pins.
+- **Jointly with denken #101 + #105:** converts the tree from a single point of failure into bounded upside on a hard recovery gate (E[T] ≥ ~4.7).
+- **Banks:** `scripts/profiler/tree_vs_treefree_crossover.py` + `tree_vs_treefree_crossover_results.json` + report. **Next:** fern → **#111 (settle headline at C=518.1 + post-500 lever-ROI climb)** — rank the 500→556 levers by official-TPS-per-build-effort.
+
+## 2026-06-14 06:52 — PR #105: Tree-free 500-path ceiling — does the build-complete stack clear 500 with NO tree, at what SplitK threshold? 🟢 GREEN — MERGED (tree-free C=518.1 central [496.8,540.8]; SplitK-for-500 = 4.44% < ubel's +5% floor; ceiling 556; the tree is now INSURANCE; binding gate moves SplitK→τ)
+
+- **Branch:** `denken/tree-free-500-ceiling` · **Student:** denken · merged 06:53Z (analysis-only, BASELINE unchanged 481.53)
+- **Hypothesis:** can SplitK #84 + LK #95 + double-quant #104 clear 500 with NO tree (which is build-blocked per #101), and at what SplitK threshold? — the go/no-go deciding whether the tree is critical-path or insurance.
+- **Primary metric:** `tree_free_max_official_tps = 518.1` [496.8, 540.8] (ubel-high SplitK 12%). **Test:** `splitk_threshold_for_500 = 0.0444` (4.44% central, below ubel's +5% floor). W&B `0kiktnqt` (CPU-only; composes merged levers via fern #100 model, K_cal=125.268).
+- **Verdict — 🟢 GREEN, 500 is reachable TREE-FREE.** The build-complete linear stack clears 500 at SplitK ≥ **4.44%** (central) — below the +5% floor ubel #84 already targeted; SplitK 8.5%→509.9, 12%→518.1; full ceiling **556.0 [533.2, 581.1]** at 29.7% gap-close. **Strategic consequence: the tree (land #71) is now INSURANCE/UPSIDE (500→556-581), not critical-path** — the #101 build defect no longer blocks 500. **The binding gate moves from SplitK to τ** (realization factor [0.96,1.00]): τ→1.00 is ~3× cheaper than any other margin lever. SplitK × double-quant netting is orthogonal (multiply, no double-count).
+- **Critical-path handoff:** land ubel #84 SplitK to ~8.5% (→ 509.9 central) + pin lawine #99's τ. **Next:** denken → **#109 (tree-free-500 ship-readiness)** — min SplitK for a *confident* (conservative-corner) ship + whether pinning τ needs an approval-gated official re-anchor or ships on lawine #99 local calibration.
+- **Banks:** `scripts/profiler/tree_free_500_ceiling.py` + `tree_free_500_ceiling_results.json` + report.
+
+## 2026-06-14 06:52 — PR #104: Double-quant verify-GEMM scales 🔴 KILL (banked) — MERGED (bit-exact frac 13.1% « 98% gate; info-theoretic dead: FP16 10 mantissa bits vs ~1.4-1.9-octave scale spread; corrected byte estimate 53.70 MB = 3.06% of int4 body; successor = lossless scale-palette/LUT)
+
+- **Branch:** `wirbel/double-quant-verify-gemm-scales` · **Student:** wirbel · merged 06:52Z (analysis-only, BASELINE unchanged 481.53)
+- **Hypothesis:** double-quantize the verify-GEMM int4 scales (quant-the-scales) for a greedy-lossless byte-saving → wall_tps lift.
+- **Primary metric:** `dq_scale_roundtrip_bitexact_frac = 0.1309` (gate >0.98 → **FAILED**). **Test:** `dq_tps_lift_est_pct = -0.02%`. W&B `6or2w3ee` (CPU-only byte/precision analysis).
+- **Verdict — 🔴 KILL, info-theoretic (not tunable).** FP16 carries 10 mantissa bits; the per-group scale spread is ~1.4–1.9 octaves, so any 8-bit re-code of the scales loses ≥2 bits → only 13.1% of scales round-trip bit-exact « the 98% greedy-safety gate. Not fixable by a better codebook — it is an information bound. **Banked value outlives the negative:** (1) corrected byte accounting — core-7 verify-GEMM scales = **53.70 MB = 3.06%** of the 1754.7 MB int4 body (**g=128** confirmed for the folded osoi5-v0-baked weights; the earlier g=32 was the *unfolded* base); (2) the **successor that survives** — a lossless **scale-palette/LUT**: the scales take only **1,009 distinct FP16 values globally** (per-tensor median 427) → a 10-bit global / 9-bit per-tensor index into a palette of the *exact* values is **bit-exact by construction**, ~37.5% scale-byte saving (~20 MB), ~0.3% TPS.
+- **Banks:** `scripts/profiler/dq_scale_roundtrip.py` + `dq_scale_roundtrip.json` + report. **Next:** wirbel → **#110 (lossless scale-palette/LUT)** — build-or-kill: are scale bytes on the BW-critical path or already hidden by Marlin?
+
 ## 2026-06-14 06:33 — PR #102: Tree E[T] break-even / margin-of-safety — what MIN accept_length clears 500? 🟡 AMBER — MERGED (break-even E[T]*=4.624 tree-alone; the M=32 step is ~1.16× heavier so the tree needs E[T]≥4.45 just to TIE linear 481.53, not 3.844; byteshark's 2.10 is a regression; no lever stack pulls break-even <4.0)
 
 - **Branch:** `fern/tree-et-breakeven` · **Student:** fern · merged ~06:33Z (analysis-only, BASELINE unchanged — official bar UNCHANGED 481.53)
