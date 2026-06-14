@@ -125,11 +125,13 @@ must be fused **before** any benchmark/quota spend, not after.
    real generation on the untouched linear chain. → real-stack salvage number,
    zero quota, **no KV-compaction needed.** This is the GO/NO-GO the fleet waits
    on (advisor 11:35Z; fern #134 target E[T]≈5.0 with spine left at 0.679).
-2. **Continued-gen integration (add 3c KV compaction — fused-GPU per ubel #157).**
-   Only after the probe shows salvage ≈ ρ₂ = 0.4165. The relocate MUST be the
-   single fused/vectorized GPU launch (ubel #157), NOT a host loop, or the
-   measured E[T] gain never reaches wall_tps. Gives the wall_tps number (lawine
-   #72, median N=3) for the eventual human-approved launch issue.
+2. **Continued-gen integration (add 3c KV compaction — fused GPU COPY).**
+   Only after the probe shows salvage ≈ ρ₂ = 0.4165. Variant DECIDED (leg-2 gate,
+   below): the paged re-point is infeasible on this vLLM, so the relocate is the
+   single fused/vectorized GPU **copy** (`index_select`+`index_copy_`, ubel #157/
+   #163), NOT a host loop, or the measured E[T] gain never reaches wall_tps. Gives
+   the wall_tps number (lawine #72, median N=3) for the eventual human-approved
+   launch issue.
 
 ## STAGE-2b scratch-forward seam (mapped; the M=16 direct-E[T] forward)
 
@@ -178,13 +180,36 @@ M=16). Seam for 2b, mapped against installed vLLM (`gpu_model_runner.py`):
   the DFS layout when building the Triton descent kernel. Greedy cert for that
   kernel: wirbel #160 §5 assertion + `greedy_exact_harness.py --audit-kernel-symbol`
   (denken #158) for the GREEDY_EXACT rate-1.0 certificate before any launch.
-- **Leg 2 (ubel #163, MERGED) — 3c relocate PREFERRED variant.** Two banked
-  greedy-safe designs: fused `index_select`+`index_copy_` (35.3 µs → clear-500 bar
-  4.880) and the **PREFERRED paged slot-map / block-table re-point** (zero-copy,
-  20.26 µs → bar **4.817**). Build the paged re-point **if block-table plumbing
-  allows the re-point with an on-device commit-index (no host readout)**. Same
-  block-table machinery as the STAGE-2b scratch block above → mapping it serves
-  both. Host-loop relocate still the landmine (8.15 units / 77 TPS, breaks capture).
+- **Leg 2 (ubel #163, MERGED) — 3c relocate variant: GATE ANSWERED → build the
+  FUSED COPY, not the paged re-point.** ubel banked two greedy-safe designs: fused
+  `index_select`+`index_copy_` (35.3 µs → clear-500 bar **4.880**) and a paged
+  slot-map / block-table re-point (zero-copy, 20.26 µs → bar 4.817) gated on
+  *"build the paged variant **if** block-table plumbing allows the re-point with an
+  on-device commit-index (no host readout)."* **I mapped the installed vLLM
+  (server-venv ~0.22.1rc1) and the plumbing does NOT allow it** — the paged
+  re-point is infeasible on this stack for two independent, verified reasons:
+  1. **Block-table is CPU source-of-truth.** `MultiGroupBlockTable` /
+     `BlockTable` (`v1/worker/block_table.py`) holds the table in a `CpuGpuBuffer`;
+     every mutation writes `self.block_table.np` (CPU numpy: `append_row:118`,
+     `move_row:133`, `swap_row:139`) and `commit_block_table:166-167` H2D-copies it
+     (`copy_to_gpu`) **before every forward**. `slot_mapping` is then derived
+     on-device FROM `block_table.gpu` by a Triton kernel (`:150-164`). So a re-point
+     driven by an on-device commit-index would be **clobbered** by the next
+     per-step `commit_block_table` unless we also write `block_table.np` on the
+     host → a host sync that breaks CUDA-graph capture. (`gpu_input_batch.py:30,171`
+     confirms the runner uses this legacy CPU-source table; the submission's
+     `static_block_table` is a drafter-graph copy, `sitecustomize.py:203,222`, not
+     a GPU-source verify table.)
+  2. **Whole-block granularity.** `slot_ids = block_numbers*block_size +
+     local_block_offsets` (`block_table.py:378`): the table maps logical→physical
+     **blocks**, so a *scattered* per-token accepted path (spine + one salvaged
+     branch, not block-aligned) is not expressible as a block-table edit anyway.
+  **→ Build ubel's banked FUSED COPY** (`index_select`+`index_copy_` / Triton
+  scatter over the GPU-resident KV `[num_blocks,2,block_size,n_kv,head_dim]`,
+  `flash_attn.py:140-149`); pure bf16 permute/copy → greedy-safe by construction.
+  Cost delta vs the paged ideal is **+15 µs / −0.063 bar (4.817→4.880, ~516 TPS)**
+  — negligible vs the 0.178-E[T] descent cushion. Host-loop relocate remains the
+  landmine (8.15 units / 77 TPS, breaks capture).
 - **Leg 3 (openevolve) — RESOLVED draft-side** (see Component-1 detail: recurrent
   drafter, deep candidates faithful). Verify-side deep ladder: openevolve offers a
   **free A10G per-position-ladder measurement** (hand them the built descent
