@@ -1,0 +1,292 @@
+{
+ "pr": 238,
+ "agent": "fern",
+ "kind": "launch_decision_card",
+ "primary_metric_name": "launch_decision_card_self_test_passes",
+ "launch_decision_card_self_test_passes": true,
+ "test_metric_name": "n_green_gates",
+ "n_green_gates": 2,
+ "readiness_verdict": "NOT-READY",
+ "launch_decision": "NO-GO (NOT-READY)",
+ "decision_card": {
+  "rows": [
+   {
+    "idx": "i",
+    "gate": "READINESS / measured >=500 artifact",
+    "status": "RED",
+    "value": "NONE -- served=linear MTP K=7; treeverify_served_gain_MEASURED_realized=0.0 (projection-only)",
+    "value_num": 0.0,
+    "source_pr": "land #71",
+    "source_run": "land#71",
+    "what_flips_it": "a BUILT, MEASURED, end-to-end >=500 tree-decode artifact (the live tree-decode build -- the long pole)",
+    "note": "the projection (E[T]_both=4.512, +18.3%, ~520 TPS, min lambda q[2..9]=0.983) is UNMEASURED; the served stack is the 481.53 frontier. THIS is the top-line RED."
+   },
+   {
+    "idx": "ii",
+    "gate": "public speed >=500",
+    "status": "PENDING",
+    "value": "served 481.53 < 500 (build-pending); projected ~520 @ E[T]_both=4.512 UNMEASURED",
+    "value_num": 481.53,
+    "source_pr": "land #71 proj / ubel #229",
+    "source_run": "land#71 / bz2b3fw8",
+    "what_flips_it": "the measured build's served tps >= 500 on the a10g-small benchmark",
+    "note": "gated on the readiness build; the ~520 projection is observational, not an end-to-end measured speed."
+   },
+   {
+    "idx": "iii",
+    "gate": "lambda_hat build bar >=0.9780",
+    "status": "PENDING",
+    "value": "bar=0.9780 (stark #191); projection min lambda q[2..9]=0.983 UNMEASURED",
+    "value_num": 0.978,
+    "source_pr": "stark #191 / land #71",
+    "source_run": "stark#191 / land#71",
+    "what_flips_it": "the build's MEASURED deep-tail q[2..9] lambda_hat >= 0.9780",
+    "note": "needs the build's measured acceptance on q[2..9]; the 0.983 projection clears the bar but is not measured."
+   },
+   {
+    "idx": "iv",
+    "gate": "PPL <= 2.42",
+    "status": "GREEN",
+    "value": "served 2.3772, headroom 0.0428, NOT binding (lambda-invariant)",
+    "value_num": 0.04279999999999973,
+    "source_pr": "denken #236",
+    "source_run": "hodnu1w1",
+    "what_flips_it": "only a coarser VERIFY MODEL (not lambda / not the tree build) -- the served stream is the int4 greedy stream",
+    "note": "ppl_is_binding_public_gate=False; the int4 verify pins served PPL at 2.3772, 0.0428 under cap."
+   },
+   {
+    "idx": "v",
+    "gate": "128/128 completion",
+    "status": "GREEN",
+    "value": "128/128 (frontier #52; program.md public-run contract)",
+    "value_num": 128.0,
+    "source_pr": "PR #52 / program.md",
+    "source_run": "frontier-52",
+    "what_flips_it": "a completion failure / timeout / OOM on the measured run",
+    "note": "the 481.53 frontier completes all 128 public prompts; carried forward as banked GREEN."
+   },
+   {
+    "idx": "vi",
+    "gate": "private bar (post-hoc defence, NOT a launch gate)",
+    "status": "ACCEPTED-RISK",
+    "value": "accepted_risk_at_speed_gate=0.0583 (assumed f_priv) / 0.2394 (grounded) @ lambda=0.9675; lambda_risk5=0.9700; f_priv_breakeven=0.9598 straddles [0.957,0.969]; int4 M1-vs-M8 identity=0.9927 (0.73% divergence)",
+    "value_num": 0.05831773945416474,
+    "source_pr": "kanna #237 / stark #233 / lawine #232",
+    "source_run": "8x7i38jh / pszvrf2a / nxwv6pam",
+    "what_flips_it": "a second hard public/private paired draw grounding f_priv (collapses the [0.957,0.969] straddle to a measured band)",
+    "note": "under #124 publish-first this is NOT a launch gate -- it is the accepted single-draw risk (5.8%-23.9%) the publish-first posture takes on; the analytic packet defends it POST-HOC, it does not trigger the launch."
+   },
+   {
+    "idx": "vii",
+    "gate": "compliant-PRIVATE-500 lane",
+    "status": "INFEASIBLE",
+    "value": "operative ceiling 520.95 < private bar 528.48 -> INFEASIBLE; shortfall 7.53; topology/coverage gap 15.71 (reach-DP 536.66)",
+    "value_num": 7.530823284827079,
+    "source_pr": "wirbel #235",
+    "source_run": "w6a34f51",
+    "what_flips_it": "raising the OPERATIVE ceiling above 528.48 -- needs topology/coverage beyond the int4-spec served stack (the 15.71 gap is 100%% topology)",
+    "note": "DEAD at the operative ceiling: the int4-spec deployed bound 520.95 cannot reach the worst-case private bar 528.48; the gain is locked in unrealized reach-DP topology."
+   }
+  ],
+  "n_gates": 7,
+  "n_green_gates": 2,
+  "n_red_gates": 1,
+  "n_pending_gates": 2,
+  "n_infeasible_gates": 1,
+  "n_accepted_risk_gates": 1,
+  "readiness_verdict": "NOT-READY",
+  "launch_decision": "NO-GO (NOT-READY)",
+  "treeverify_served_gain_MEASURED_realized": 0.0,
+  "operative_compliant_ceiling": 520.9527323111674,
+  "private_bar_worstcase": 528.4835555959945,
+  "reach_dp_central_tps": 536.6590426143789,
+  "compliant_private_500_infeasible": true,
+  "private_500_shortfall_tps": 7.530823284827079,
+  "topology_coverage_gap_tps": 15.706310303211467,
+  "ppl_headroom_at_build_bar": 0.04279999999999973,
+  "ppl_is_binding_public_gate": false,
+  "baseline_tps_unchanged": 481.53
+ },
+ "readiness_truth": {
+  "readiness_verdict": "NOT-READY",
+  "launch_decision": "NO-GO (NOT-READY)",
+  "statement": "Under #124 publish-first the launch is gated on a MEASURED >=500 build (land #71, the long pole) AND a human-approved HF-job issue -- NEITHER exists. The served stack is still linear MTP K=7 (the 481.53 frontier); treeverify_served_gain_MEASURED_realized=0.0, so the +18.3% / E[T]_both=4.512 / ~520 TPS tree gain is an UNMEASURED analytic projection, never realized end-to-end. The banked analytic packet (PPL not-binding, accepted private-draw risk, the INFEASIBLE compliant-private lane) is the POST-HOC DEFENCE, NOT a launch trigger. readiness_verdict=NOT-READY; the sole launch blocker is the live tree-decode build delivering a MEASURED >=500.",
+  "do_not_let_projection_read_as_delivered": true,
+  "measured_artifact_exists": false,
+  "human_hf_job_issue_approved": false
+ },
+ "self_test": {
+  "launch_decision_card_self_test_passes": true,
+  "n_green_gates": 2,
+  "conditions": {
+   "a_rows_roundtrip_source_pr": {
+    "pass": true,
+    "all_files_present": true,
+    "all_values_match": true,
+    "n_sources": 6,
+    "n_values_checked": 13,
+    "failures": []
+   },
+   "b_readiness_not_ready_while_no_measured_gain": {
+    "pass": true,
+    "treeverify_served_gain_MEASURED_realized": 0.0,
+    "readiness_verdict": "NOT-READY"
+   },
+   "c_infeasible_flip_520p95_lt_528p48": {
+    "pass": true,
+    "operative_compliant_ceiling": 520.9527323111674,
+    "private_bar_worstcase": 528.4835555959945,
+    "infeasible": true,
+    "shortfall_tps": 7.530823284827079,
+    "topology_coverage_gap_tps": 15.706310303211467
+   },
+   "d_ppl_headroom_0p0428_not_binding": {
+    "pass": true,
+    "ppl_headroom_at_build_bar": 0.04279999999999973,
+    "ppl_is_binding_public_gate": false
+   },
+   "e_nan_clean": {
+    "pass": true,
+    "nan_paths": []
+   },
+   "f_status_histogram_consistent": {
+    "pass": true,
+    "n_green": 2,
+    "n_red": 1,
+    "n_pending": 2,
+    "n_infeasible": 1,
+    "n_accepted_risk": 1
+   }
+  }
+ },
+ "handoff_line": "the #124 decision card reads NOT-READY: no measured >=500 artifact exists (land #71 projection-only), the compliant-PRIVATE-500 lane is INFEASIBLE at the operative ceiling 520.95<528.48, but the public packet is otherwise clean (PPL not binding, accepted private-draw risk 5.8-23.9% at the 0.9675 speed gate) -- so the sole launch blocker is the live tree-decode build delivering a MEASURED >=500.",
+ "roundtrip": {
+  "lawine_232.int4_token_identity_M1_vs_M8": {
+   "source_pr": "lawine_232",
+   "file": "research/validity/int4_tokenident_deployed_m8/int4_tokenident_result.json",
+   "file_present": true,
+   "expected": 0.9927083333333333,
+   "loaded": 0.9927083333333333,
+   "round_trips": true
+  },
+  "denken_236.ppl_headroom_at_build_bar": {
+   "source_pr": "denken_236",
+   "file": "research/validity/ppl_public_gate/ppl_public_gate_results.json",
+   "file_present": true,
+   "expected": 0.04279999999999973,
+   "loaded": 0.04279999999999973,
+   "round_trips": true
+  },
+  "denken_236.ppl_is_binding_public_gate": {
+   "source_pr": "denken_236",
+   "file": "research/validity/ppl_public_gate/ppl_public_gate_results.json",
+   "file_present": true,
+   "expected": false,
+   "loaded": false,
+   "round_trips": true
+  },
+  "denken_236.ppl_served_at_build_bar": {
+   "source_pr": "denken_236",
+   "file": "research/validity/ppl_public_gate/ppl_public_gate_results.json",
+   "file_present": true,
+   "expected": 2.3772,
+   "loaded": 2.3772,
+   "round_trips": true
+  },
+  "kanna_237.accepted_risk_at_speed_gate": {
+   "source_pr": "kanna_237",
+   "file": "research/validity/publishfirst_accepted_risk/publishfirst_accepted_risk_results.json",
+   "file_present": true,
+   "expected": 0.05831773945416474,
+   "loaded": 0.05831773945416474,
+   "round_trips": true
+  },
+  "kanna_237.accepted_risk_at_speed_gate_grounded": {
+   "source_pr": "kanna_237",
+   "file": "research/validity/publishfirst_accepted_risk/publishfirst_accepted_risk_results.json",
+   "file_present": true,
+   "expected": 0.2394311004235805,
+   "loaded": 0.2394311004235805,
+   "round_trips": true
+  },
+  "kanna_237.lambda_risk5": {
+   "source_pr": "kanna_237",
+   "file": "research/validity/publishfirst_accepted_risk/publishfirst_accepted_risk_results.json",
+   "file_present": true,
+   "expected": 0.9699990336265527,
+   "loaded": 0.9699990336265527,
+   "round_trips": true
+  },
+  "stark_233.f_priv_breakeven_publish_first": {
+   "source_pr": "stark_233",
+   "file": "research/validity/publish_first_fpriv_breakeven/results.json",
+   "file_present": true,
+   "expected": 0.9597799742440889,
+   "loaded": 0.9597799742440889,
+   "round_trips": true
+  },
+  "ubel_234.public_go_margin_at_floor": {
+   "source_pr": "ubel_234",
+   "file": "research/validity/publishfirst_public_margin/publishfirst_public_margin_results.json",
+   "file_present": true,
+   "expected": 0.0,
+   "loaded": 0.0,
+   "round_trips": true
+  },
+  "ubel_234.public_go_margin_at_validity_bar_0p9780": {
+   "source_pr": "ubel_234",
+   "file": "research/validity/publishfirst_public_margin/publishfirst_public_margin_results.json",
+   "file_present": true,
+   "expected": 2.3666088372732474,
+   "loaded": 2.3666088372732474,
+   "round_trips": true
+  },
+  "wirbel_235.operative_compliant_ceiling": {
+   "source_pr": "wirbel_235",
+   "file": "research/validity/twoceiling_reconcile/results.json",
+   "file_present": true,
+   "expected": 520.9527323111674,
+   "loaded": 520.9527323111674,
+   "round_trips": true
+  },
+  "wirbel_235.private_bar_worstcase": {
+   "source_pr": "wirbel_235",
+   "file": "research/validity/twoceiling_reconcile/results.json",
+   "file_present": true,
+   "expected": 528.4835555959945,
+   "loaded": 528.4835555959945,
+   "round_trips": true
+  },
+  "wirbel_235.reach_dp_central_tps": {
+   "source_pr": "wirbel_235",
+   "file": "research/validity/twoceiling_reconcile/results.json",
+   "file_present": true,
+   "expected": 536.6590426143789,
+   "loaded": 536.6590426143789,
+   "round_trips": true
+  }
+ },
+ "land71_projection": {
+  "wandb_run": "land#71",
+  "served_topology": "linear MTP K=7 (identical to the 481.53 frontier)",
+  "treeverify_served_gain_MEASURED_realized": 0.0,
+  "projection_E_T_both": 4.512,
+  "projection_tree_gain_pct": 18.3,
+  "projection_served_tps_approx": 520.0,
+  "projection_min_lambda_q2q9": 0.983
+ },
+ "constants": {
+  "target_tps": 500.0,
+  "baseline_tps": 481.53,
+  "ppl_cap": 2.42,
+  "build_bar_lambda": 0.978,
+  "speed_gate_lambda": 0.9675,
+  "operative_compliant_ceiling": 520.9527323111674,
+  "private_bar_worstcase": 528.4835555959945,
+  "reach_dp_central_tps": 536.6590426143789
+ },
+ "provenance": "land#71 (served=linear MTP K=7, measured tree gain 0.0, projection E[T]_both 4.512) x wirbel#235 w6a34f51 (operative ceiling 520.95 < private bar 528.48 INFEASIBLE; via twoceiling_reconcile, stark#226 tzcc5xuq bar, wirbel#199 reach-DP 536.66) x denken#236 hodnu1w1 (ppl headroom 0.0428, not binding) x kanna#237 8x7i38jh (accepted risk 0.0583/0.2394, lambda_risk5 0.9700) x lawine#232 nxwv6pam (int4 identity 0.9927) x stark#233 pszvrf2a (f_priv breakeven 0.9598) x stark#191 (build bar 0.9780) x ubel#229 bz2b3fw8 (speed gate 0.9675) x ubel#234 (public margin 0.0/+2.367). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai.",
+ "scope": "LOCAL CPU-only integration of the banked launch-validity packet into one human-facing #124 GO/NO-GO card, headlining land #71's no-measured-artifact readiness truth and carrying wirbel #235's INFEASIBLE flip. All values imported (NOT re-derived) and round-tripped against their source-PR artifacts. CPU-only, 0 TPS, BASELINE stays 481.53, greedy/PPL untouched, authorizes NOTHING. NOT a launch. NOT open2.",
+ "elapsed_sec": 0.002051115036010742,
+ "peak_mem_mib": 12.1171875
+}
