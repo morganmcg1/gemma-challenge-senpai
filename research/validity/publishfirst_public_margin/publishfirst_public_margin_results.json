@@ -1,0 +1,1962 @@
+{
+  "pr": 234,
+  "metric_primary": "publishfirst_public_margin_self_test_passes",
+  "metric_test": "public_go_margin_at_floor",
+  "publishfirst_public_margin_self_test_passes": true,
+  "public_go_margin_at_floor": 0.0,
+  "lambda_public_gate_law": "lambda_public_gate = max(lambda_speed_clears=0.9675, lambda_floor_publish_first)",
+  "lambda_speed_clears_worstcase": 0.9674684694454245,
+  "lambda_speed_clears_nominal": 0.9675,
+  "lambda_floor_publish_first_band": [
+    0.9675,
+    0.978
+  ],
+  "binding_subgate_over_floor_band": "the SPEED sub-gate binds for lambda_floor_publish_first <= lambda_speed_clears=0.96747 (pinning lambda_public_gate at the speed floor, worst-case margin 0 -- the P95 LCB sits exactly at 500); for lambda_floor_publish_first > 0.96747 the FLOOR sub-gate binds with strictly positive margin. The PR-nominal 0.9675 sits a hair ABOVE the precise speed floor (margin +0.007 ~ breakeven).",
+  "public_go_margin_at_floor_0p9675": 0.0,
+  "public_go_margin_at_floor_central": 0.8221370087173909,
+  "public_go_margin_at_floor_tight": 1.03800579253857,
+  "public_go_margin_at_validity_bar_0p9780": 2.3666088372732474,
+  "public_go_margin_at_validity_bar_central": 3.1887458459906384,
+  "mu_pub_speed_at_floor": 513.5574577506176,
+  "mu_pub_speed_at_validity_bar": 515.9240665878908,
+  "subgate_table": {
+    "rows": [
+      {
+        "lambda_floor_publish_first": 0.965,
+        "pr_required": false,
+        "label": "below-floor demo",
+        "lambda_public_gate": 0.9674684694454245,
+        "binding_subgate": "speed",
+        "mu_pub_speed_at_gate": 513.5574577506176,
+        "worstcase_public_margin": 0.0,
+        "central_public_margin": 0.8221370087173909,
+        "worstcase_lcb_p95": 500.00000000000006,
+        "clears_500": true
+      },
+      {
+        "lambda_floor_publish_first": 0.9674684694454245,
+        "pr_required": false,
+        "label": "precise speed floor (breakeven)",
+        "lambda_public_gate": 0.9674684694454245,
+        "binding_subgate": "speed",
+        "mu_pub_speed_at_gate": 513.5574577506176,
+        "worstcase_public_margin": 0.0,
+        "central_public_margin": 0.8221370087173909,
+        "worstcase_lcb_p95": 500.00000000000006,
+        "clears_500": true
+      },
+      {
+        "lambda_floor_publish_first": 0.9675,
+        "pr_required": true,
+        "label": "PR-required",
+        "lambda_public_gate": 0.9675,
+        "binding_subgate": "floor",
+        "mu_pub_speed_at_gate": 513.5645259389044,
+        "worstcase_public_margin": 0.0070681882867802415,
+        "central_public_margin": 0.8292051970041712,
+        "worstcase_lcb_p95": 500.00706818828684,
+        "clears_500": true
+      },
+      {
+        "lambda_floor_publish_first": 0.97,
+        "pr_required": true,
+        "label": "PR-required",
+        "lambda_public_gate": 0.97,
+        "binding_subgate": "floor",
+        "mu_pub_speed_at_gate": 514.1255582517657,
+        "worstcase_public_margin": 0.5681005011481375,
+        "central_public_margin": 1.3902375098655284,
+        "worstcase_lcb_p95": 500.5681005011482,
+        "clears_500": true
+      },
+      {
+        "lambda_floor_publish_first": 0.975,
+        "pr_required": true,
+        "label": "PR-required",
+        "lambda_public_gate": 0.975,
+        "binding_subgate": "floor",
+        "mu_pub_speed_at_gate": 515.2512380513588,
+        "worstcase_public_margin": 1.6937803007411958,
+        "central_public_margin": 2.5159173094585867,
+        "worstcase_lcb_p95": 501.69378030074125,
+        "clears_500": true
+      },
+      {
+        "lambda_floor_publish_first": 0.978,
+        "pr_required": true,
+        "label": "PR-required",
+        "lambda_public_gate": 0.978,
+        "binding_subgate": "floor",
+        "mu_pub_speed_at_gate": 515.9289677848699,
+        "worstcase_public_margin": 2.37151003425231,
+        "central_public_margin": 3.193647042969701,
+        "worstcase_lcb_p95": 502.37151003425237,
+        "clears_500": true
+      }
+    ],
+    "speed_subgate_binds_iff_floor_le": 0.9674684694454245,
+    "order_stat_note": "N=1 single-shot (kanna #217 n_star_launch=1; T(1)=T_base, NO winner's curse; best-of-N HARMFUL -- it LIFTS the seen public trigger for zero private gain). The #218 triggers ARE the T(1)=T_base triggers, so the public margin is the N=1 margin."
+  },
+  "lambda_public_clears": {
+    "tight": {
+      "lambda_public_clears": 0.9628287436920242,
+      "roundtrip_mu": 512.519451958079,
+      "roundtrip_trigger": 512.519451958079
+    },
+    "central": {
+      "lambda_public_clears": 0.9637951641834936,
+      "roundtrip_mu": 512.7353207419001,
+      "roundtrip_trigger": 512.7353207419002
+    },
+    "worstcase": {
+      "lambda_public_clears": 0.9674684694454245,
+      "roundtrip_mu": 513.5574577506176,
+      "roundtrip_trigger": 513.5574577506176
+    }
+  },
+  "public_go_margin_at_floor_descent_only": 0.0,
+  "public_go_margin_at_validity_bar_descent_only": 2.3778334344316363,
+  "lambda_speed_clears_descent_only": 0.9673950658214243,
+  "regime_robust": true,
+  "order_stat": {
+    "n_star_launch": 1,
+    "law": "T(N) = T_base + sigma_sel * E[Z_(N:N)]; T(1) = T_base (no winner's curse)",
+    "best_of_n_is_harmful": true
+  },
+  "reconcile_229": {
+    "pr229_lambda_speed_clears_worstcase": 0.9674684694454245,
+    "recomputed_lambda_speed_clears_worstcase": 0.9674684694454245,
+    "lambda_speed_clears_roundtrip_resid": 0.0,
+    "roundtrips_229_lambda_speed_clears_0p9675": true,
+    "pr229_speed_margin_at_validity_bar_worstcase": 2.3666088372732474,
+    "recomputed_public_margin_at_validity_bar_worstcase": 2.3666088372732474,
+    "margin_at_validity_bar_roundtrip_resid": 0.0,
+    "roundtrips_229_margin_2p367": true,
+    "note": "the publish-first PUBLIC margin curve is the SAME mu_pub_speed map and the SAME #218 triggers as #229; the speed-floor endpoint IS #229's lambda_speed_clears=0.9675 (where the worst-case margin is 0 by construction) and the validity-bar endpoint IS #229's +2.367. This leg only RE-PARAMETERIZES #229 by lambda_floor_publish_first; no new map."
+  },
+  "per_regime": {
+    "both_bugs": {
+      "lambda_speed_clears_worstcase": 0.9674684694454245,
+      "curve": {
+        "grid": [
+          0.9675,
+          0.968025,
+          0.96855,
+          0.969075,
+          0.9696,
+          0.97,
+          0.970125,
+          0.97065,
+          0.971175,
+          0.9717,
+          0.972225,
+          0.97275,
+          0.973275,
+          0.9738,
+          0.974325,
+          0.97485,
+          0.975,
+          0.975375,
+          0.9759,
+          0.976425,
+          0.97695,
+          0.977475,
+          0.978,
+          0.99,
+          1.0
+        ],
+        "rows": [
+          {
+            "lambda": 0.9675,
+            "E_T": 5.144862514058158,
+            "mu_pub_speed": 513.5645259389044,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.0450739808253502,
+              "lcb_p95": 501.0450739808253,
+              "lcb_minus_500": 1.0450739808252933,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 0.8292051970041712,
+              "lcb_p95": 500.8292051970042,
+              "lcb_minus_500": 0.829205197004228,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.0070681882867802415,
+              "lcb_p95": 500.00706818828684,
+              "lcb_minus_500": 0.007068188286837085,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.968025,
+            "E_T": 5.146041797390413,
+            "mu_pub_speed": 513.6822429981693,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.1627910400902692,
+              "lcb_p95": 501.1627910400902,
+              "lcb_minus_500": 1.1627910400902124,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 0.9469222562690902,
+              "lcb_p95": 500.94692225626915,
+              "lcb_minus_500": 0.9469222562691471,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.12478524755169929,
+              "lcb_p95": 500.12478524755176,
+              "lcb_minus_500": 0.12478524755175613,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.96855,
+            "E_T": 5.147221611607701,
+            "mu_pub_speed": 513.800013050827,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.2805610927480302,
+              "lcb_p95": 501.280561092748,
+              "lcb_minus_500": 1.2805610927479734,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.0646923089268512,
+              "lcb_p95": 501.0646923089269,
+              "lcb_minus_500": 1.064692308926908,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.24255530020946026,
+              "lcb_p95": 500.2425553002095,
+              "lcb_minus_500": 0.2425553002095171,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.969075,
+            "E_T": 5.148401956989891,
+            "mu_pub_speed": 513.9178361248144,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.3983841667353545,
+              "lcb_p95": 501.3983841667353,
+              "lcb_minus_500": 1.3983841667352976,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.1825153829141755,
+              "lcb_p95": 501.18251538291423,
+              "lcb_minus_500": 1.1825153829142323,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.36037837419678453,
+              "lcb_p95": 500.36037837419684,
+              "lcb_minus_500": 0.3603783741968414,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9696,
+            "E_T": 5.149582833816984,
+            "mu_pub_speed": 514.0357122480813,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.5162602900022648,
+              "lcb_p95": 501.5162602900022,
+              "lcb_minus_500": 1.516260290002208,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.3003915061810858,
+              "lcb_p95": 501.30039150618114,
+              "lcb_minus_500": 1.3003915061811426,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.47825449746369486,
+              "lcb_p95": 500.47825449746375,
+              "lcb_minus_500": 0.4782544974637517,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97,
+            "E_T": 5.150482906374661,
+            "mu_pub_speed": 514.1255582517657,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.6061062936867074,
+              "lcb_p95": 501.60610629368665,
+              "lcb_minus_500": 1.6061062936866506,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.3902375098655284,
+              "lcb_p95": 501.3902375098656,
+              "lcb_minus_500": 1.3902375098655853,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.5681005011481375,
+              "lcb_p95": 500.5681005011482,
+              "lcb_minus_500": 0.5681005011481943,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.970125,
+            "E_T": 5.15076424236913,
+            "mu_pub_speed": 514.1536414485925,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.6341894905134495,
+              "lcb_p95": 501.6341894905134,
+              "lcb_minus_500": 1.6341894905133927,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.4183207066922705,
+              "lcb_p95": 501.4183207066923,
+              "lcb_minus_500": 1.4183207066923273,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.5961836979748796,
+              "lcb_p95": 500.59618369797494,
+              "lcb_minus_500": 0.5961836979749364,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97065,
+            "E_T": 5.151946182926617,
+            "mu_pub_speed": 514.2716237543267,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.7521717962476941,
+              "lcb_p95": 501.75217179624764,
+              "lcb_minus_500": 1.7521717962476373,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.5363030124265151,
+              "lcb_p95": 501.5363030124266,
+              "lcb_minus_500": 1.536303012426572,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.7141660037091242,
+              "lcb_p95": 500.7141660037092,
+              "lcb_minus_500": 0.714166003709181,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.971175,
+            "E_T": 5.15312865576988,
+            "mu_pub_speed": 514.389659193277,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.870207235197995,
+              "lcb_p95": 501.87020723519794,
+              "lcb_minus_500": 1.8702072351979382,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.654338451376816,
+              "lcb_p95": 501.6543384513769,
+              "lcb_minus_500": 1.6543384513768729,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.8322014426594251,
+              "lcb_p95": 500.8322014426595,
+              "lcb_minus_500": 0.8322014426594819,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9717,
+            "E_T": 5.154311661179486,
+            "mu_pub_speed": 514.50774779345,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.988295835370991,
+              "lcb_p95": 501.98829583537093,
+              "lcb_minus_500": 1.9882958353709341,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.772427051549812,
+              "lcb_p95": 501.77242705154987,
+              "lcb_minus_500": 1.7724270515498688,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.950290042832421,
+              "lcb_p95": 500.9502900428325,
+              "lcb_minus_500": 0.9502900428324779,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.972225,
+            "E_T": 5.155495199436157,
+            "mu_pub_speed": 514.6258895828674,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.106437624788441,
+              "lcb_p95": 502.1064376247884,
+              "lcb_minus_500": 2.1064376247883843,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.890568840967262,
+              "lcb_p95": 501.8905688409673,
+              "lcb_minus_500": 1.890568840967319,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.0684318322498711,
+              "lcb_p95": 501.0684318322499,
+              "lcb_minus_500": 1.068431832249928,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97275,
+            "E_T": 5.156679270820748,
+            "mu_pub_speed": 514.7440845895646,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.2246326314856333,
+              "lcb_p95": 502.2246326314856,
+              "lcb_minus_500": 2.2246326314855764,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.0087638476644543,
+              "lcb_p95": 502.0087638476645,
+              "lcb_minus_500": 2.008763847664511,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.1866268389470633,
+              "lcb_p95": 501.1866268389471,
+              "lcb_minus_500": 1.1866268389471202,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.973275,
+            "E_T": 5.157863875614259,
+            "mu_pub_speed": 514.8623328415913,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.3428808835122936,
+              "lcb_p95": 502.34288088351224,
+              "lcb_minus_500": 2.342880883512237,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.1270120996911146,
+              "lcb_p95": 502.12701209969117,
+              "lcb_minus_500": 2.1270120996911714,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.3048750909737237,
+              "lcb_p95": 501.3048750909738,
+              "lcb_minus_500": 1.3048750909737805,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9738,
+            "E_T": 5.159049014097829,
+            "mu_pub_speed": 514.9806343670107,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.461182408931677,
+              "lcb_p95": 502.4611824089316,
+              "lcb_minus_500": 2.46118240893162,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.245313625110498,
+              "lcb_p95": 502.24531362511055,
+              "lcb_minus_500": 2.2453136251105548,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.423176616393107,
+              "lcb_p95": 501.42317661639316,
+              "lcb_minus_500": 1.4231766163931638,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.974325,
+            "E_T": 5.160234686552748,
+            "mu_pub_speed": 515.0989891939017,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.579537235822727,
+              "lcb_p95": 502.57953723582267,
+              "lcb_minus_500": 2.57953723582267,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.363668452001548,
+              "lcb_p95": 502.3636684520016,
+              "lcb_minus_500": 2.3636684520016047,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.541531443284157,
+              "lcb_p95": 501.5415314432842,
+              "lcb_minus_500": 1.5415314432842138,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97485,
+            "E_T": 5.161420893260437,
+            "mu_pub_speed": 515.2173973503559,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.6979453922768926,
+              "lcb_p95": 502.69794539227684,
+              "lcb_minus_500": 2.6979453922768357,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.4820766084557135,
+              "lcb_p95": 502.48207660845577,
+              "lcb_minus_500": 2.4820766084557704,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.6599395997383226,
+              "lcb_p95": 501.6599395997384,
+              "lcb_minus_500": 1.6599395997383795,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.975,
+            "E_T": 5.161759907630094,
+            "mu_pub_speed": 515.2512380513588,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.7317860932797657,
+              "lcb_p95": 502.7317860932797,
+              "lcb_minus_500": 2.731786093279709,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.5159173094585867,
+              "lcb_p95": 502.51591730945864,
+              "lcb_minus_500": 2.5159173094586436,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.6937803007411958,
+              "lcb_p95": 501.69378030074125,
+              "lcb_minus_500": 1.6937803007412526,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.975375,
+            "E_T": 5.162607634502468,
+            "mu_pub_speed": 515.33585886448,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.816406906400971,
+              "lcb_p95": 502.8164069064009,
+              "lcb_minus_500": 2.816406906400914,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.600538122579792,
+              "lcb_p95": 502.60053812257985,
+              "lcb_minus_500": 2.6005381225798487,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.778401113862401,
+              "lcb_p95": 501.77840111386246,
+              "lcb_minus_500": 1.7784011138624578,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9759,
+            "E_T": 5.163794910560551,
+            "mu_pub_speed": 515.4543737643946,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.9349218063156286,
+              "lcb_p95": 502.9349218063156,
+              "lcb_minus_500": 2.9349218063155718,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.7190530224944496,
+              "lcb_p95": 502.7190530224945,
+              "lcb_minus_500": 2.7190530224945064,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.8969160137770587,
+              "lcb_p95": 501.8969160137771,
+              "lcb_minus_500": 1.8969160137771155,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.976425,
+            "E_T": 5.164982721716542,
+            "mu_pub_speed": 515.5729420782347,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.053490120155743,
+              "lcb_p95": 503.0534901201557,
+              "lcb_minus_500": 3.0534901201556863,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.837621336334564,
+              "lcb_p95": 502.8376213363346,
+              "lcb_minus_500": 2.837621336334621,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.015484327617173,
+              "lcb_p95": 502.01548432761723,
+              "lcb_minus_500": 2.01548432761723,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97695,
+            "E_T": 5.166171068252433,
+            "mu_pub_speed": 515.6915638341493,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.1721118760702893,
+              "lcb_p95": 503.17211187607023,
+              "lcb_minus_500": 3.1721118760702325,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.9562430922491103,
+              "lcb_p95": 502.95624309224917,
+              "lcb_minus_500": 2.956243092249167,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.1341060835317194,
+              "lcb_p95": 502.1341060835318,
+              "lcb_minus_500": 2.134106083531776,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.977475,
+            "E_T": 5.167359950450367,
+            "mu_pub_speed": 515.8102390603017,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.29078710222268,
+              "lcb_p95": 503.2907871022226,
+              "lcb_minus_500": 3.290787102222623,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 3.074918318401501,
+              "lcb_p95": 503.07491831840156,
+              "lcb_minus_500": 3.074918318401558,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.25278130968411,
+              "lcb_p95": 502.25278130968417,
+              "lcb_minus_500": 2.252781309684167,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.978,
+            "E_T": 5.168549368592627,
+            "mu_pub_speed": 515.9289677848699,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.40951582679088,
+              "lcb_p95": 503.4095158267908,
+              "lcb_minus_500": 3.409515826790823,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 3.193647042969701,
+              "lcb_p95": 503.19364704296976,
+              "lcb_minus_500": 3.193647042969758,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.37151003425231,
+              "lcb_p95": 502.37151003425237,
+              "lcb_minus_500": 2.371510034252367,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.99,
+            "E_T": 5.195882835646434,
+            "mu_pub_speed": 518.6574175755879,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 6.137965617508939,
+              "lcb_p95": 506.1379656175089,
+              "lcb_minus_500": 6.137965617508883,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 5.92209683368776,
+              "lcb_p95": 505.9220968336878,
+              "lcb_minus_500": 5.922096833687817,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 5.0999598249703695,
+              "lcb_p95": 505.0999598249704,
+              "lcb_minus_500": 5.099959824970426,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 1.0,
+            "E_T": 5.21887717841078,
+            "mu_pub_speed": 520.9527323111674,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 8.433280353088435,
+              "lcb_p95": 508.4332803530884,
+              "lcb_minus_500": 8.433280353088378,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 8.217411569267256,
+              "lcb_p95": 508.2174115692673,
+              "lcb_minus_500": 8.217411569267313,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 7.395274560549865,
+              "lcb_p95": 507.3952745605499,
+              "lcb_minus_500": 7.395274560549922,
+              "clears_500": true
+            }
+          }
+        ],
+        "lambda_public_clears": {
+          "tight": {
+            "lambda_public_clears": 0.9628287436920242,
+            "roundtrip_mu": 512.519451958079,
+            "roundtrip_trigger": 512.519451958079
+          },
+          "central": {
+            "lambda_public_clears": 0.9637951641834936,
+            "roundtrip_mu": 512.7353207419001,
+            "roundtrip_trigger": 512.7353207419002
+          },
+          "worstcase": {
+            "lambda_public_clears": 0.9674684694454245,
+            "roundtrip_mu": 513.5574577506176,
+            "roundtrip_trigger": 513.5574577506176
+          }
+        }
+      },
+      "subgate_table": {
+        "rows": [
+          {
+            "lambda_floor_publish_first": 0.965,
+            "pr_required": false,
+            "label": "below-floor demo",
+            "lambda_public_gate": 0.9674684694454245,
+            "binding_subgate": "speed",
+            "mu_pub_speed_at_gate": 513.5574577506176,
+            "worstcase_public_margin": 0.0,
+            "central_public_margin": 0.8221370087173909,
+            "worstcase_lcb_p95": 500.00000000000006,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.9674684694454245,
+            "pr_required": false,
+            "label": "precise speed floor (breakeven)",
+            "lambda_public_gate": 0.9674684694454245,
+            "binding_subgate": "speed",
+            "mu_pub_speed_at_gate": 513.5574577506176,
+            "worstcase_public_margin": 0.0,
+            "central_public_margin": 0.8221370087173909,
+            "worstcase_lcb_p95": 500.00000000000006,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.9675,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.9675,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 513.5645259389044,
+            "worstcase_public_margin": 0.0070681882867802415,
+            "central_public_margin": 0.8292051970041712,
+            "worstcase_lcb_p95": 500.00706818828684,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.97,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.97,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 514.1255582517657,
+            "worstcase_public_margin": 0.5681005011481375,
+            "central_public_margin": 1.3902375098655284,
+            "worstcase_lcb_p95": 500.5681005011482,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.975,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.975,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 515.2512380513588,
+            "worstcase_public_margin": 1.6937803007411958,
+            "central_public_margin": 2.5159173094585867,
+            "worstcase_lcb_p95": 501.69378030074125,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.978,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.978,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 515.9289677848699,
+            "worstcase_public_margin": 2.37151003425231,
+            "central_public_margin": 3.193647042969701,
+            "worstcase_lcb_p95": 502.37151003425237,
+            "clears_500": true
+          }
+        ],
+        "speed_subgate_binds_iff_floor_le": 0.9674684694454245,
+        "order_stat_note": "N=1 single-shot (kanna #217 n_star_launch=1; T(1)=T_base, NO winner's curse; best-of-N HARMFUL -- it LIFTS the seen public trigger for zero private gain). The #218 triggers ARE the T(1)=T_base triggers, so the public margin is the N=1 margin."
+      },
+      "headline": {
+        "public_go_margin_at_floor": 0.0,
+        "public_go_margin_at_floor_nominal_0p9675": 0.0070681882867802415,
+        "public_go_margin_at_floor_central": 0.8221370087173909,
+        "public_go_margin_at_floor_tight": 1.03800579253857,
+        "lambda_speed_clears_used": 0.9674684694454245,
+        "mu_pub_speed_at_floor": 513.5574577506176,
+        "public_go_margin_at_validity_bar": 2.3666088372732474,
+        "public_go_margin_at_validity_bar_central": 3.1887458459906384,
+        "public_go_margin_at_validity_bar_tight": 3.4046146298118174,
+        "mu_pub_speed_at_validity_bar": 515.9240665878908
+      },
+      "tau_anchor": 0.970733167512287
+    },
+    "descent_only": {
+      "lambda_speed_clears_worstcase": 0.9673950658214243,
+      "curve": {
+        "grid": [
+          0.9675,
+          0.968025,
+          0.96855,
+          0.969075,
+          0.9696,
+          0.97,
+          0.970125,
+          0.97065,
+          0.971175,
+          0.9717,
+          0.972225,
+          0.97275,
+          0.973275,
+          0.9738,
+          0.974325,
+          0.97485,
+          0.975,
+          0.975375,
+          0.9759,
+          0.976425,
+          0.97695,
+          0.977475,
+          0.978,
+          0.99,
+          1.0
+        ],
+        "rows": [
+          {
+            "lambda": 0.9675,
+            "E_T": 4.991231914400455,
+            "mu_pub_speed": 513.5809287147786,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.0614767566995624,
+              "lcb_p95": 501.0614767566995,
+              "lcb_minus_500": 1.0614767566995056,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 0.8456079728783834,
+              "lcb_p95": 500.84560797287844,
+              "lcb_minus_500": 0.8456079728784403,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.02347096416099248,
+              "lcb_p95": 500.02347096416105,
+              "lcb_minus_500": 0.023470964161049324,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.968025,
+            "E_T": 4.992373449000686,
+            "mu_pub_speed": 513.6983887747801,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.178936816701139,
+              "lcb_p95": 501.1789368167011,
+              "lcb_minus_500": 1.178936816701082,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 0.9630680328799599,
+              "lcb_p95": 500.96306803288,
+              "lcb_minus_500": 0.9630680328800167,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.14093102416256897,
+              "lcb_p95": 500.1409310241626,
+              "lcb_minus_500": 0.14093102416262582,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.96855,
+            "E_T": 4.993515496125436,
+            "mu_pub_speed": 513.8159015718259,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.2964496137468586,
+              "lcb_p95": 501.2964496137468,
+              "lcb_minus_500": 1.2964496137468018,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.0805808299256796,
+              "lcb_p95": 501.08058082992574,
+              "lcb_minus_500": 1.0805808299257365,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.2584438212082887,
+              "lcb_p95": 500.25844382120835,
+              "lcb_minus_500": 0.2584438212083455,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.969075,
+            "E_T": 4.994658056043637,
+            "mu_pub_speed": 513.933467133588,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.4140151755090073,
+              "lcb_p95": 501.41401517550895,
+              "lcb_minus_500": 1.4140151755089505,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.1981463916878283,
+              "lcb_p95": 501.1981463916879,
+              "lcb_minus_500": 1.1981463916878852,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.3760093829704374,
+              "lcb_p95": 500.3760093829705,
+              "lcb_minus_500": 0.37600938297049424,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9696,
+            "E_T": 4.995801129024352,
+            "mu_pub_speed": 514.0510854877524,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.5316335296733996,
+              "lcb_p95": 501.53163352967334,
+              "lcb_minus_500": 1.5316335296733428,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.3157647458522206,
+              "lcb_p95": 501.3157647458523,
+              "lcb_minus_500": 1.3157647458522774,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.49362773713482966,
+              "lcb_p95": 500.4936277371349,
+              "lcb_minus_500": 0.4936277371348865,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97,
+            "E_T": 4.9966723863064,
+            "mu_pub_speed": 514.1407349233502,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.6212829652712344,
+              "lcb_p95": 501.6212829652712,
+              "lcb_minus_500": 1.6212829652711775,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.4054141814500554,
+              "lcb_p95": 501.4054141814501,
+              "lcb_minus_500": 1.4054141814501122,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.5832771727326644,
+              "lcb_p95": 500.5832771727327,
+              "lcb_minus_500": 0.5832771727327213,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.970125,
+            "E_T": 4.996944715336788,
+            "mu_pub_speed": 514.1687566620194,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.6493047039404019,
+              "lcb_p95": 501.64930470394035,
+              "lcb_minus_500": 1.649304703940345,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.4334359201192228,
+              "lcb_p95": 501.4334359201193,
+              "lcb_minus_500": 1.4334359201192797,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.6112989114018319,
+              "lcb_p95": 500.6112989114019,
+              "lcb_minus_500": 0.6112989114018887,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97065,
+            "E_T": 4.998088815250279,
+            "mu_pub_speed": 514.2864806841026,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.7670287260235682,
+              "lcb_p95": 501.7670287260235,
+              "lcb_minus_500": 1.7670287260235114,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.5511599422023892,
+              "lcb_p95": 501.55115994220245,
+              "lcb_minus_500": 1.551159942202446,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.7290229334849982,
+              "lcb_p95": 500.72902293348506,
+              "lcb_minus_500": 0.7290229334850551,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.971175,
+            "E_T": 4.999233429034301,
+            "mu_pub_speed": 514.40425758173,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 1.8848056236510047,
+              "lcb_p95": 501.88480562365095,
+              "lcb_minus_500": 1.8848056236509478,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.6689368398298257,
+              "lcb_p95": 501.6689368398299,
+              "lcb_minus_500": 1.6689368398298825,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.8467998311124347,
+              "lcb_p95": 500.8467998311125,
+              "lcb_minus_500": 0.8467998311124916,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9717,
+            "E_T": 5.000378556958465,
+            "mu_pub_speed": 514.5220873826441,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.002635424565142,
+              "lcb_p95": 502.0026354245651,
+              "lcb_minus_500": 2.002635424565085,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.7867666407439629,
+              "lcb_p95": 501.786766640744,
+              "lcb_minus_500": 1.7867666407440197,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 0.9646296320265719,
+              "lcb_p95": 500.96462963202663,
+              "lcb_minus_500": 0.9646296320266288,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.972225,
+            "E_T": 5.001524199292516,
+            "mu_pub_speed": 514.6399701146004,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.1205181565213707,
+              "lcb_p95": 502.1205181565213,
+              "lcb_minus_500": 2.120518156521314,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 1.9046493727001916,
+              "lcb_p95": 501.90464937270025,
+              "lcb_minus_500": 1.9046493727002485,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.0825123639828007,
+              "lcb_p95": 501.08251236398286,
+              "lcb_minus_500": 1.0825123639828576,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97275,
+            "E_T": 5.0026703563063375,
+            "mu_pub_speed": 514.757905805369,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.238453847289975,
+              "lcb_p95": 502.2384538472899,
+              "lcb_minus_500": 2.238453847289918,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.022585063468796,
+              "lcb_p95": 502.02258506346885,
+              "lcb_minus_500": 2.0225850634688527,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.200448054751405,
+              "lcb_p95": 501.20044805475146,
+              "lcb_minus_500": 1.2004480547514618,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.973275,
+            "E_T": 5.003817028269948,
+            "mu_pub_speed": 514.8758944827341,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.356442524655108,
+              "lcb_p95": 502.35644252465505,
+              "lcb_minus_500": 2.3564425246550513,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.140573740833929,
+              "lcb_p95": 502.140573740834,
+              "lcb_minus_500": 2.140573740833986,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.3184367321165382,
+              "lcb_p95": 501.3184367321166,
+              "lcb_minus_500": 1.318436732116595,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9738,
+            "E_T": 5.004964215453503,
+            "mu_pub_speed": 514.9939361744937,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.4744842164146803,
+              "lcb_p95": 502.4744842164146,
+              "lcb_minus_500": 2.4744842164146235,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.2586154325935013,
+              "lcb_p95": 502.25861543259356,
+              "lcb_minus_500": 2.258615432593558,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.4364784238761104,
+              "lcb_p95": 501.43647842387617,
+              "lcb_minus_500": 1.4364784238761672,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.974325,
+            "E_T": 5.006111918127294,
+            "mu_pub_speed": 515.1120309084596,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.5925789503805845,
+              "lcb_p95": 502.5925789503805,
+              "lcb_minus_500": 2.5925789503805277,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.3767101665594055,
+              "lcb_p95": 502.37671016655946,
+              "lcb_minus_500": 2.3767101665594623,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.5545731578420146,
+              "lcb_p95": 501.55457315784207,
+              "lcb_minus_500": 1.5545731578420714,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97485,
+            "E_T": 5.007260136561747,
+            "mu_pub_speed": 515.2301787124582,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.7107267543791522,
+              "lcb_p95": 502.7107267543791,
+              "lcb_minus_500": 2.7107267543790954,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.494857970557973,
+              "lcb_p95": 502.49485797055803,
+              "lcb_minus_500": 2.49485797055803,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.6727209618405823,
+              "lcb_p95": 501.67272096184064,
+              "lcb_minus_500": 1.6727209618406391,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.975,
+            "E_T": 5.0075882937410015,
+            "mu_pub_speed": 515.263944979339,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.744493021260041,
+              "lcb_p95": 502.74449302126,
+              "lcb_minus_500": 2.7444930212599843,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.528624237438862,
+              "lcb_p95": 502.5286242374389,
+              "lcb_minus_500": 2.528624237438919,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.7064872287214712,
+              "lcb_p95": 501.7064872287215,
+              "lcb_minus_500": 1.706487228721528,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.975375,
+            "E_T": 5.008408871027429,
+            "mu_pub_speed": 515.3483796143297,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.8289276562506984,
+              "lcb_p95": 502.82892765625064,
+              "lcb_minus_500": 2.8289276562506416,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.6130588724295194,
+              "lcb_p95": 502.6130588724296,
+              "lcb_minus_500": 2.6130588724295762,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.7909218637121285,
+              "lcb_p95": 501.7909218637122,
+              "lcb_minus_500": 1.7909218637121853,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.9759,
+            "E_T": 5.009558121795038,
+            "mu_pub_speed": 515.466633641928,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 2.947181683848953,
+              "lcb_p95": 502.9471816838489,
+              "lcb_minus_500": 2.9471816838488962,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.731312900027774,
+              "lcb_p95": 502.73131290002783,
+              "lcb_minus_500": 2.731312900027831,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 1.9091758913103831,
+              "lcb_p95": 501.90917589131044,
+              "lcb_minus_500": 1.90917589131044,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.976425,
+            "E_T": 5.010707889135415,
+            "mu_pub_speed": 515.5849408231217,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.065488865042653,
+              "lcb_p95": 503.0654888650426,
+              "lcb_minus_500": 3.065488865042596,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.849620081221474,
+              "lcb_p95": 502.84962008122153,
+              "lcb_minus_500": 2.8496200812215307,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.027483072504083,
+              "lcb_p95": 502.02748307250414,
+              "lcb_minus_500": 2.0274830725041397,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.97695,
+            "E_T": 5.0118581733195295,
+            "mu_pub_speed": 515.7033011857926,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.1838492277136083,
+              "lcb_p95": 503.18384922771355,
+              "lcb_minus_500": 3.1838492277135515,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 2.9679804438924293,
+              "lcb_p95": 502.9679804438925,
+              "lcb_minus_500": 2.967980443892486,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.1458434351750384,
+              "lcb_p95": 502.1458434351751,
+              "lcb_minus_500": 2.1458434351750952,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.977475,
+            "E_T": 5.013008974618497,
+            "mu_pub_speed": 515.8217147578376,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.302262799758637,
+              "lcb_p95": 503.3022627997586,
+              "lcb_minus_500": 3.30226279975858,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 3.086394015937458,
+              "lcb_p95": 503.0863940159375,
+              "lcb_minus_500": 3.0863940159375147,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.264257007220067,
+              "lcb_p95": 502.2642570072201,
+              "lcb_minus_500": 2.264257007220124,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.978,
+            "E_T": 5.01416029330356,
+            "mu_pub_speed": 515.940181567167,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 3.420729609087971,
+              "lcb_p95": 503.4207296090879,
+              "lcb_minus_500": 3.420729609087914,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 3.204860825266792,
+              "lcb_p95": 503.20486082526685,
+              "lcb_minus_500": 3.2048608252668487,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 2.382723816549401,
+              "lcb_p95": 502.38272381654946,
+              "lcb_minus_500": 2.3827238165494578,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 0.99,
+            "E_T": 5.040617830648747,
+            "mu_pub_speed": 518.662572919499,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 6.1431209614199815,
+              "lcb_p95": 506.1431209614199,
+              "lcb_minus_500": 6.143120961419925,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 5.9272521775988025,
+              "lcb_p95": 505.92725217759886,
+              "lcb_minus_500": 5.927252177598859,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 5.105115168881412,
+              "lcb_p95": 505.10511516888147,
+              "lcb_minus_500": 5.105115168881468,
+              "clears_500": true
+            }
+          },
+          {
+            "lambda": 1.0,
+            "E_T": 5.062874725337895,
+            "mu_pub_speed": 520.9527323111674,
+            "tight": {
+              "trigger": 512.519451958079,
+              "public_go_margin": 8.433280353088435,
+              "lcb_p95": 508.4332803530884,
+              "lcb_minus_500": 8.433280353088378,
+              "clears_500": true
+            },
+            "central": {
+              "trigger": 512.7353207419002,
+              "public_go_margin": 8.217411569267256,
+              "lcb_p95": 508.2174115692673,
+              "lcb_minus_500": 8.217411569267313,
+              "clears_500": true
+            },
+            "worstcase": {
+              "trigger": 513.5574577506176,
+              "public_go_margin": 7.395274560549865,
+              "lcb_p95": 507.3952745605499,
+              "lcb_minus_500": 7.395274560549922,
+              "clears_500": true
+            }
+          }
+        ],
+        "lambda_public_clears": {
+          "tight": {
+            "lambda_public_clears": 0.9627449036837781,
+            "roundtrip_mu": 512.519451958079,
+            "roundtrip_trigger": 512.519451958079
+          },
+          "central": {
+            "lambda_public_clears": 0.9637134973568919,
+            "roundtrip_mu": 512.7353207419002,
+            "roundtrip_trigger": 512.7353207419002
+          },
+          "worstcase": {
+            "lambda_public_clears": 0.9673950658214243,
+            "roundtrip_mu": 513.5574577506176,
+            "roundtrip_trigger": 513.5574577506176
+          }
+        }
+      },
+      "subgate_table": {
+        "rows": [
+          {
+            "lambda_floor_publish_first": 0.965,
+            "pr_required": false,
+            "label": "below-floor demo",
+            "lambda_public_gate": 0.9673950658214243,
+            "binding_subgate": "speed",
+            "mu_pub_speed_at_gate": 513.5574577506176,
+            "worstcase_public_margin": 0.0,
+            "central_public_margin": 0.8221370087173909,
+            "worstcase_lcb_p95": 500.00000000000006,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.9673950658214243,
+            "pr_required": false,
+            "label": "precise speed floor (breakeven)",
+            "lambda_public_gate": 0.9673950658214243,
+            "binding_subgate": "speed",
+            "mu_pub_speed_at_gate": 513.5574577506176,
+            "worstcase_public_margin": 0.0,
+            "central_public_margin": 0.8221370087173909,
+            "worstcase_lcb_p95": 500.00000000000006,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.9675,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.9675,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 513.5809287147786,
+            "worstcase_public_margin": 0.02347096416099248,
+            "central_public_margin": 0.8456079728783834,
+            "worstcase_lcb_p95": 500.02347096416105,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.97,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.97,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 514.1407349233502,
+            "worstcase_public_margin": 0.5832771727326644,
+            "central_public_margin": 1.4054141814500554,
+            "worstcase_lcb_p95": 500.5832771727327,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.975,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.975,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 515.263944979339,
+            "worstcase_public_margin": 1.7064872287214712,
+            "central_public_margin": 2.528624237438862,
+            "worstcase_lcb_p95": 501.7064872287215,
+            "clears_500": true
+          },
+          {
+            "lambda_floor_publish_first": 0.978,
+            "pr_required": true,
+            "label": "PR-required",
+            "lambda_public_gate": 0.978,
+            "binding_subgate": "floor",
+            "mu_pub_speed_at_gate": 515.940181567167,
+            "worstcase_public_margin": 2.382723816549401,
+            "central_public_margin": 3.204860825266792,
+            "worstcase_lcb_p95": 502.38272381654946,
+            "clears_500": true
+          }
+        ],
+        "speed_subgate_binds_iff_floor_le": 0.9673950658214243,
+        "order_stat_note": "N=1 single-shot (kanna #217 n_star_launch=1; T(1)=T_base, NO winner's curse; best-of-N HARMFUL -- it LIFTS the seen public trigger for zero private gain). The #218 triggers ARE the T(1)=T_base triggers, so the public margin is the N=1 margin."
+      },
+      "headline": {
+        "public_go_margin_at_floor": 0.0,
+        "public_go_margin_at_floor_nominal_0p9675": 0.02347096416099248,
+        "public_go_margin_at_floor_central": 0.8221370087173909,
+        "public_go_margin_at_floor_tight": 1.03800579253857,
+        "lambda_speed_clears_used": 0.9673950658214243,
+        "mu_pub_speed_at_floor": 513.5574577506176,
+        "public_go_margin_at_validity_bar": 2.3778334344316363,
+        "public_go_margin_at_validity_bar_central": 3.1999704431490272,
+        "public_go_margin_at_validity_bar_tight": 3.4158392269702063,
+        "mu_pub_speed_at_validity_bar": 515.9352911850492
+      },
+      "tau_anchor": 1.0006443866568653
+    }
+  },
+  "law": "mu_pub_speed(lambda) = K_cal*(E[T](lambda)/step)*tau_anchor = 520.953 * E[T](lambda)/E[T](1) (imported #229/#222 map). public_go_margin(lambda)[corner] = mu_pub_speed(lambda) - GO_trigger[corner], GO_trigger = 500 + z1*combined_sigma[corner] = T(1) (kanna #217 N=1 order-stat, no winner's curse), z1=1.64485. Under #124 publish-first the launch gate is lambda_public_gate = max(lambda_speed_clears=0.9675, lambda_floor_publish_first); the build clears the public milestone iff public_go_margin(lambda_public_gate) >= 0.",
+  "imported": {
+    "speed_floor_nominal": 0.9675,
+    "validity_bar_nominal": 0.978,
+    "validity_bar_precise": 0.9779783323491393,
+    "lambda_floor": 0.3418647166361965,
+    "trigger_tight": 512.519451958079,
+    "trigger_central": 512.7353207419002,
+    "trigger_worstcase": 513.5574577506176,
+    "combined_sigma_tight": 7.6112863497053365,
+    "combined_sigma_central": 7.74252525162585,
+    "combined_sigma_worstcase": 8.242349062843092,
+    "lambda1_ceiling_mu": 520.9527323111674,
+    "z1_one_sided_p95": 1.6448536269514722,
+    "K_cal": 125.26795005202914,
+    "step": 1.2182,
+    "tau_anchor_both_bugs": 0.970733167512287,
+    "tau_anchor_descent_only": 1.0006443866568653,
+    "pr229_lambda_speed_clears": 0.9674684694454245,
+    "pr229_speed_margin_at_validity_bar_worstcase": 2.3666088372732474,
+    "pr217_n_star_launch": 1
+  },
+  "honest_band": "(a) the mu_pub_speed map, the #218 sigma band [7.6113,7.7425,8.2423], the [512.519,512.735,513.557] triggers, the 520.953 ceiling, #229's lambda_speed_clears=0.9675 and +2.367, and #217's n_star=1 are ALL imported UNCHANGED -- this leg only RE-PARAMETERIZES #229 by lambda_floor_publish_first. (b) under #124 (advisor-ruling RESOLVED, no dissent) the PUBLIC milestone (TPS>=500/PPL<=2.42/128/128 by the official scorer) is the launch-relevant gate; the PRIVATE 0.9780 bar and the #226/#227 compliant-lane analytics are the POST-HOC-DEFENCE packet, NOT a pre-launch gate -- this is the load-bearing framing. (c) kanna #228 DERIVES lambda_floor_publish_first; we carry it as a PARAMETER over [0.9675, 0.9780] and do NOT block on it. (d) evaluating the speed map at the PRIVATE lambda UNDERSTATES true public mu_pub (public acceptance >= private) -> the margins are CONSERVATIVE; the true public margin is higher. (e) best-of-N is HARMFUL (kanna #217): N=1 is optimal, so the margin is the single-shot margin against the un-inflated T_base trigger.",
+  "handoff": "fern #231 + kanna #228: under #124 publish-first the operative launch gate is the PUBLIC speed trigger lambda_public_gate = max(lambda_speed_clears=0.9675, lambda_floor_publish_first); at the speed-floor endpoint 0.9675 the worst-case public margin is +0.000 TPS (BREAKEVEN -- the P95 LCB sits exactly at 500) and at the validity bar 0.9780 it is +2.367 TPS (#229), rising monotonically between. Over the floor band [0.9675, 0.9780] the SPEED sub-gate binds for lambda_floor_publish_first <= lambda_speed_clears=0.96747 (pinning lambda_public_gate at the speed floor, worst-case margin 0 -- the P95 LCB sits exactly at 500); for lambda_floor_publish_first > 0.96747 the FLOOR sub-gate binds with strictly positive margin. The PR-nominal 0.9675 sits a hair ABOVE the precise speed floor (margin +0.007 ~ breakeven). So fern reads the public-milestone margin at the #124 floor (the private 0.9780 bar + #226/#227 compliant analytics are POST-HOC defence, NOT a pre-launch gate). n_star_launch=1 (best-of-N HARMFUL) -> the margin is the single-shot N=1 public margin.",
+  "scope": "LOCAL CPU-only analytic re-score of the PUBLIC GO margin across the publish-first lambda-floor regime [0.9675, 0.9780], completing the cross #229 flagged. Imports #229/#222's mu_pub_speed map DIRECTLY (round-trips its 0.9675 and +2.367 bit-exactly) and folds kanna #217's N=1 order-stat. No GPU/vLLM/HF Job/submission/served-file change/official draw. BASELINE stays 481.53; adds 0 TPS (PRIMARY = self-test); greedy/PPL untouched. Authorizes nothing. NOT a launch. NOT open2.",
+  "public_evidence_used": [
+    "ubel #229 (bz2b3fw8, speed_margin_at_validity_bar, MERGED) -- the cross this leg completes: VALIDITY_BINDS_SPEED_ALWAYS_CLEARS, lambda_speed_clears=0.9675 < 0.9780, speed_margin_at_validity_bar_worstcase=+2.367; its mu_pub_speed map (via #222's binding_gate) is imported DIRECTLY and re-parameterized by lambda_floor_publish_first.",
+    "ubel #222 (yw7i2ece, binding_gate, MERGED) -- the ceiling-anchored E[T](lambda)->mu_pub reach-DP map imported directly (round-trips the 520.953 ceiling and 515.924 bar).",
+    "ubel #218 (0ug7vd7d, interleg_rho, MERGED) -- the grounded combined-sigma band [7.6113,7.7425,8.2423] and GO-trigger band [512.519,512.735,513.557] the margin is scored against; imported unchanged (= T(1) at N=1).",
+    "ubel #204 (launch_sigma_unit_rebase, MERGED) -- the int4-spec lambda=1 ceiling mu_pub(1)=520.953 the map's top endpoint is anchored to (round-trip self-test).",
+    "kanna #217 (vgovdrjc, trigger_reconcile, MERGED) -- the order-stat T(N)=T_base+sigma_sel*E[Z_(N:N)] with n_star_launch=1 (T(1)=T_base, no winner's curse; best-of-N HARMFUL): the public margin is the single-shot N=1 margin, folded here.",
+    "human Issue #124 (publish-first green-light, advisor-ruling RESOLVED, no dissent) -- retires the PRIVATE validity bar 0.9780 as a self-blocker; the official scorer checks TPS>=500/PPL<=2.42/128/128 only -> the PUBLIC milestone is the operative launch gate."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis: imports #229/#222's mu_pub_speed map directly and re-scores the PUBLIC GO margin as a curve over lambda in [0.9675, 0.9780] at the three #218 sigma corners, identifies which sub-gate binds lambda_public_gate = max(0.9675, lambda_floor_publish_first), and folds kanna #217's N=1 order-stat. Round-trips #229's 0.9675 and +2.367 bit-exactly. No GPU/vLLM/HF Job/submission/served-file change. BASELINE stays 481.53; adds 0 TPS. Greedy/PPL untouched. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "self_test": {
+    "publishfirst_public_margin_self_test_passes": true,
+    "public_go_margin_at_floor": 0.0,
+    "checks": {
+      "a_mu_pub_speed_lambda1_roundtrips_ceiling_520p953": true,
+      "b_margin_at_validity_bar_roundtrips_229_2p367": true,
+      "c_lambda_public_clears_worstcase_roundtrips_229_0p9675": true,
+      "d_mu_pub_speed_monotone_increasing_in_lambda": true,
+      "e_public_go_margin_monotone_decreasing_in_sigma": true,
+      "f_margin_nonneg_iff_lcb_clears_500": true,
+      "g_nan_clean": true
+    },
+    "evidence": {
+      "a_ceiling_roundtrip_errs": {
+        "both_bugs": 0.0,
+        "descent_only": 0.0
+      },
+      "b_margin_resid": 0.0,
+      "c_lambda_speed_clears_resid": 0.0,
+      "d_monotonicity": {
+        "both_bugs": {
+          "monotone_increasing": true,
+          "strictly_increasing": true
+        },
+        "descent_only": {
+          "monotone_increasing": true,
+          "strictly_increasing": true
+        }
+      },
+      "e_sigma_margin": {
+        "validity_bar": {
+          "sigma_ascending": true,
+          "margin_descending": true,
+          "margin_seq": [
+            3.4046146298118174,
+            3.1887458459906384,
+            2.3666088372732474
+          ]
+        },
+        "floor": {
+          "sigma_ascending": true,
+          "margin_descending": true,
+          "margin_seq": [
+            1.0450739808253502,
+            0.8292051970041712,
+            0.0070681882867802415
+          ]
+        }
+      },
+      "f_iff_rows": [
+        {
+          "lambda": 0.95,
+          "corner": "tight",
+          "margin": -2.848691410999777,
+          "lcb_clears_500": false,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.95,
+          "corner": "central",
+          "margin": -3.064560194820956,
+          "lcb_clears_500": false,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.95,
+          "corner": "worstcase",
+          "margin": -3.886697203538347,
+          "lcb_clears_500": false,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.96,
+          "corner": "tight",
+          "margin": -0.630828803039492,
+          "lcb_clears_500": false,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.96,
+          "corner": "central",
+          "margin": -0.846697586860671,
+          "lcb_clears_500": false,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.96,
+          "corner": "worstcase",
+          "margin": -1.668834595578062,
+          "lcb_clears_500": false,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.9675,
+          "corner": "tight",
+          "margin": 1.0450739808253502,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.9675,
+          "corner": "central",
+          "margin": 0.8292051970041712,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.9675,
+          "corner": "worstcase",
+          "margin": 0.0070681882867802415,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.97,
+          "corner": "tight",
+          "margin": 1.6061062936867074,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.97,
+          "corner": "central",
+          "margin": 1.3902375098655284,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.97,
+          "corner": "worstcase",
+          "margin": 0.5681005011481375,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.9779783323491393,
+          "corner": "tight",
+          "margin": 3.4046146298118174,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.9779783323491393,
+          "corner": "central",
+          "margin": 3.1887458459906384,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.9779783323491393,
+          "corner": "worstcase",
+          "margin": 2.3666088372732474,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.99,
+          "corner": "tight",
+          "margin": 6.137965617508939,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.99,
+          "corner": "central",
+          "margin": 5.92209683368776,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 0.99,
+          "corner": "worstcase",
+          "margin": 5.0999598249703695,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 1.0,
+          "corner": "tight",
+          "margin": 8.433280353088435,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 1.0,
+          "corner": "central",
+          "margin": 8.217411569267256,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        },
+        {
+          "lambda": 1.0,
+          "corner": "worstcase",
+          "margin": 7.395274560549865,
+          "lcb_clears_500": true,
+          "iff_holds": true
+        }
+      ],
+      "f_saw_clear_and_fail": true,
+      "n_scalars_checked": 73
+    }
+  },
+  "elapsed_s": 0.3972,
+  "peak_mem_mib": 27.168
+}
