@@ -1,5 +1,20 @@
 # SENPAI Research Results
 
+## 2026-06-14 05:43 — PR #95: Drafter loss-objective gate — is the MTP draft head acceptance-optimal or only likelihood-optimal? (LK-Loss headroom) 🟡 AMBER — MERGED (LK headroom is +1.0–2.4% E[T] under greedy, NOT the +8% headline; re-rank channel rigorously CLOSED; prediction channel untested; banks the measured acceptance profile)
+
+- **Branch:** `fern/drafter-accept-objective` · **Student:** fern · merged ~05:43Z (analysis-only, BASELINE unchanged)
+- **Hypothesis:** the MTP draft head is trained likelihood-optimal; an acceptance-aware (LK-Loss / rank-calibrated) objective claims +8–10% E[T]. Does that headroom survive our GREEDY (T=0) verify, and is it a re-ranking win (free, re-order existing draft logits) or a prediction win (needs a trained head)?
+- **Primary metric:** `lk_implied_ET_headroom_pct = +2.4%` (greedy ceiling). **Test:** `measured_drafter_top1_accept = 0.7287`.
+
+| channel | headroom under greedy | status |
+|---|---|---|
+| LK paper headline (T=1 / sampling) | +8–10% E[T] | NOT our regime |
+| re-ranking (re-order existing draft logits) | **0.0%** | rigorously CLOSED — drafter argmax already acceptance-ordered (rank-1 best by +0.6 margin) |
+| prediction-improvement (trained head) | **+1.0–2.4%** | only surviving channel (EAGLE-3 +2.4 / Medusa +1.0 / MLP-spec +1.2); #80 likelihood-only never tested it |
+
+- **Verdict — AMBER → SIZE, DON'T TRANSFER.** The +8–10% is the paper's sampling-regime figure; under our greedy verify it collapses 3–8× to **+1.0–2.4% E[T]** (~486–493 official). The **re-ranking channel is rigorously CLOSED**: the drafter's argmax is already acceptance-ordered (rank-1 is the best candidate by +0.6 acceptance margin → 0.0% from re-weighting existing logits). Only the **prediction-improvement channel** (a head trained on the acceptance objective — which #80's likelihood-only EAGLE training never isolated) remains live. Positive selection confirmed: P(accept | position k) rises 0.7287→0.8473 across the chain; measured top-1 accept 0.7287 reconciles E[T]=3.8445 to 3e-4. **Banks the measured per-position acceptance profile.** Student rec: do NOT transfer the +8% headline; do NOT full-launch unsized; size the prediction channel with a cheap LoRA/projection probe first; do NOT close the lane. **LK LoRA/projection probe QUEUED** (a separate, approval-gated run if it needs real quota).
+- **W&B:** `8kzjyzxb`. **Next:** fern → #100 (lever-composition economics — compose tree #71 × SplitK #84 × persistent-kernel #97 × LK #95 into the official-TPS landscape + minimal lever ordering to clear 500).
+
 ## 2026-06-14 05:30 — PR #90: MTP draft-length K sweep — empirical wall_tps confirmation of K=7 optimality ✅ MERGED — GREEN / CONFIRM (clean inverted-U, K=7 wins outright; locks 454.338 linear-chain reference; retires the ±4.4% fragile-estimator caveat)
 
 - **Branch:** `lawine/mtp-k-sweep` · **Student:** lawine · merged ~05:30Z (confirms deployed config; BASELINE unchanged)
