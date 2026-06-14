@@ -1,0 +1,29 @@
+{
+  "device": "NVIDIA A10G",
+  "config": {
+    "M": 8,
+    "Kv": 33536,
+    "Nv": 33536,
+    "Kd": 8896,
+    "Nd": 8896,
+    "verify_bytes_gb": 2.2504,
+    "drafter_bytes_gb": 0.1586,
+    "iters": 50,
+    "warmup": 15
+  },
+  "t_verify_solo_ms": 4.5833,
+  "t_verify2_solo_ms": 4.5562,
+  "t_drafter_solo_ms": 0.3214,
+  "t_two_verify_ms": 9.0354,
+  "t_both_ms": 4.817,
+  "verify_solo_gbs": 491.0,
+  "two_verify_combined_gbs": 498.1,
+  "drafter_overlap_efficiency": 0.273,
+  "symmetric_overlap_speedup": 1.0115,
+  "bus_contention_factor": 0.5058,
+  "interpretation": {
+    "drafter_overlap_efficiency": "1.0=drafter fully hidden behind verify; 0.0=serialized (bus contention)",
+    "symmetric_overlap_speedup": "2.0=perfect dual-stream overlap; 1.0=full serialization",
+    "bus_contention_factor": "1.0=no HBM contention (additive BW); 0.5=full serialization on the bus"
+  }
+}
