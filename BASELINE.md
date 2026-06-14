@@ -74,6 +74,17 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 03:53 — PR #82 (lawine): Operationalized wall_tps: paired-A/B runner + re-baseline + #56 re-screen — RESEARCH INFRASTRUCTURE (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (no served-file change, no HF launch; official bar stays 481.53). Banks `scripts/profiler/paired_tps_ab.py` as the canonical one-command paired-`wall_tps` A/B entrypoint for all lever-builders.
+- **Re-baseline locked: deployed local wall_tps = 454.09** (median N=3, CV 0.007%, range 454.08–454.14). Confirms #72's N=12 454.12 (Δ 0.007%). **Retires the fragile 428.37 steady-meter** as the local A/B reference.
+- **Runner validation:** self-null A=B Δ=+0.030% (`NULL`, unbiased ✓); MAX_NUM_BATCHED_TOKENS 512→2048 Δ=−0.716% (`REAL`, ~9× MDE, sensitive ✓). Runner is unbiased AND resolves real effects at the 0.1% MDE bar.
+- **#56 MAX_NUM_BATCHED_TOKENS re-screen (robust wall_tps):** all increases above deployed 512 are small REAL regressions: 2048→−0.716%, 4096→−0.120%, 8192→−0.226%. No hidden win. **Deployed MBT=512 confirmed at/near optimum** (E[accept] drifts 3.853→3.879 but scheduling overhead outweighs marginal acceptance gain at conc=1).
+- **Primary metric:** `deployed_local_wall_tps` = **454.085**. **Test metric:** `paired_ab_self_null_gain_pct` = **0.030** (NULL ✓ = unbiased).
+- **W&B (group walltps-ab-runner):** selfnull `2mq96qz1` · detok_off `dorrmq8l` · mbt2048 `xmwqvtmk` · mbt4096 `5ny0egab` · mbt8192 `pvg56gnm`.
+- **PPL/greedy-identity:** unchanged from #52/#72 (PPL 2.3767 local / 2.3772 official, 128/128); timing runner is decode-only, zero served-file change.
+- **Next:** first real lever job = topology A/B (re-opt max-branch-3 vs #74 max-branch-4, ~+1.13pp / ~+5.1 wall_tps, right at the N=3 MDE boundary) queued behind land #71's tree-verify build. Runner is ready; lawine reassigned to non-blocked A/B job in the meantime.
+
 ### 2026-06-14 03:29 — PR #85 (denken): M=32 tree-verify non-GEMM overhead audit — RESEARCH MILESTONE (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (GPU-measured cost audit, peak 0.38 GiB, no served-file change; official bar stays 481.53). Banks `scripts/profiler/tree_nongemm_overhead.py` + `research/spec_cost_model/report_tree_nongemm_overhead.md` + `tree_nongemm_overhead.json`.
