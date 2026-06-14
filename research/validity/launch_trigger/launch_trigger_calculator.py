@@ -130,29 +130,53 @@ DEP_FLAGS = {
         "FIX: de-dup A1+A2 into ONE acceptance axis (overlap-corrected 5.32 TPS) -- this sets the "
         "acceptance-axis IDENTITY that #201 then rescales by realistic ICC. The #195 stand-alone "
         "single-shot sigma 7.26/17.04 is now the ICC=0 corner of #201's combined LAUNCH sigma.",
-    "launch_sigma_closure_ubel_201": "LANDED -- CONSUMED (advisor 18:23Z, W&B spau6tch). SUPERSEDES "
-        "#195's 7.26/17.04 in the combined-sigma row: de-dup (#195, IDENTITY 5.32 iid) x realistic "
-        "ICC (#190, MAGNITUDE sqrt(D)=2.100 -> 11.17) are ORTHOGONAL corrections to the SAME "
-        "acceptance axis -> combined LAUNCH sigma 12.215 central / 13.796 worst-case. P95 GO trigger "
-        "mu >= 500 + z_p95*sigma = 520.09 central / 522.69 worst-case vs the lambda=1 ceiling 520.95 "
-        "-> central P95-reachable (+0.86), worst-case UNREACHABLE (-1.74). ICC erodes ~8 TPS of "
-        "launch headroom (lifts #194's iid break-even 512.16 by +7.94). WIRE the mechanism, HOLD the "
-        "verdict: this row is PROVISIONAL + NON-GATING (NOT hard-wired vs the ceiling). Two open "
-        "levers finalize it: ubel #204 (clean-1-sigma unit rebase, IN FLIGHT, ~3 TPS, direction OPEN "
-        "-> can FLIP the central verdict) + land #71 co-log (n=385 cross-device allocations retires "
-        "the rho(*,hw) [-0.3,+0.3] band). NO change to the binding BUILD bar (private 0.9780, #191) "
-        "-- purely the launch sigma->LCB row.",
+    "launch_sigma_closure_ubel_201": "LANDED -- CONSUMED (advisor 18:23Z, W&B spau6tch). The de-dup x "
+        "realistic-ICC MECHANISM is retained as provenance: de-dup (#195, IDENTITY 5.32 iid) x realistic "
+        "ICC (#190, MAGNITUDE sqrt(D)=2.100 -> 11.17) are ORTHOGONAL corrections to the SAME acceptance "
+        "axis. BUT #201's sigma->LCB TRIGGER (12.215/13.796 -> 520.09/522.69, worst-case UNREACHABLE) is "
+        "RETIRED by ubel #204: the 11.17 acceptance leg was a z=1.96 two-sided HALF-WIDTH double-counted "
+        "with the z=1.645 P95 LCB (a units bug). The PROVISIONAL knife-edge verdict (central +0.86, "
+        "worst-case -1.74) is SUPERSEDED -- see launch_sigma_unit_rebase_ubel_204. The de-dup IDENTITY "
+        "(5.32), ICC=0 corner (7.2617 = #195), and headroom-erosion provenance (lifts #194's 512.16) "
+        "stay banked. NO change to the binding BUILD bar (private 0.9780, #191) -- purely the launch "
+        "sigma->LCB row.",
+    "launch_sigma_unit_rebase_ubel_204": "LANDED -- CONSUMED (advisor 18:46Z, W&B m7vwuus2). RETIRES "
+        "#201's sigma->LCB trigger on a UNITS bug: the acceptance leg 11.17 was a z=1.96 two-sided "
+        "HALF-WIDTH; clean 1-sigma = 11.17/1.95996 = 5.699. Re-footed onto #194's clean convention "
+        "(every leg 1-sigma; LCB(mu)=mu-z1*sigma) -> combined LAUNCH sigma 7.545 central / 8.897 "
+        "worst-case (was 12.215/13.796); P95 GO trigger mu >= 500 + z_p95*sigma = 512.41 central / "
+        "514.63 worst-case (was 520.09/522.69) vs the lambda=1 ceiling 520.95 -> BOTH BELOW -> lambda=1 "
+        "clears 500 at P95 CENTRALLY (+8.54) AND worst-case (+6.32). Verdict FLIPS PROVISIONAL "
+        "knife-edge -> RESOLVED-YES. Direction came out SIGN-BACKWARDS (the dominant acceptance leg is "
+        "DIVIDED down by z2, so the trigger DROPS 7.68 TPS, not up ~3). Anchors reproduce #195's de-dup "
+        "central 7.2617 and #194's break-even 512.16 EXACTLY (err 0.0). Still NON-GATING ('it does not "
+        "authorize a launch'). ubel #207 (advisor 19:40Z) RESOLVED the #175 two-readings caveat in "
+        "FAVOR of the YES (the larger 10.906 reading is the B=16384 128-tok SUB-bench, RETIRED -> the "
+        "launch-correct 512.41/514.63 trigger STANDS); only land #71 co-log (n=385) remains open, and "
+        "it now TIGHTENS a YES (retires rho(*,hw) [-0.3,+0.3]) rather than rescuing a NO. private-footing "
+        "sensitivity -0.063 TPS (negligible). NO change to the binding BUILD bar (private 0.9780).",
     "liveprobe_depth_budget_denken_197": "LANDED -- CONSUMED (advisor 18:39Z, W&B wqr94io4). The GO "
         "leg GATES on land #71's MEASURED full-ladder q[2..9] >= 0.9780 -- NEVER a depth-1-only or "
         "spine-inferred read. liveprobe is a beta~1 CONFIRMATION, not a discovery: at the grounded "
         "beta=0.765 the mechanism CANNOT clear the private bar (even PERFECT depth-1 -> private LCB "
         "419.6 << 500), so a real GO needs beta~1 across the MEASURED ladder, not a point lambda_hat. "
         "A depth-1-only read FALSELY declares GO (overstatement 85.2 TPS) -> false_go_risk_depth1_only="
-        "True. min_depths_for_decisive=full-ladder (depth-1+2 does NOT suffice). Decisive certification "
-        "cost = ~30,455 fixed-N Neyman trials @lambda=1 (shallow-heavy N_d[1..9]; 1.43x efficient over "
-        "equal-allocation), being made SEQUENTIAL by denken #205 (SPRT) -> carry 30k as the worst-case "
-        "cap. GATES the GO leg (the worked tuple's 8-entry ladder SATISFIES the guard); REINFORCES the "
-        "HOLD, does NOT flip it.",
+        "True. min_depths_for_decisive=full-ladder (depth-1+2 does NOT suffice). The decisive "
+        "certification cost ROW is now REPLACED by denken #205's realistic SPRT (see "
+        "liveprobe_sprt_budget_denken_205): the ~30,455 fixed-N Neyman trials @lambda=1 (shallow-heavy "
+        "N_d[1..9]; 1.43x efficient over equal-allocation) survives only as the worst-case CAP. GATES "
+        "the GO leg (the worked tuple's 8-entry ladder SATISFIES the guard); REINFORCES the HOLD, does "
+        "NOT flip it.",
+    "liveprobe_sprt_budget_denken_205": "LANDED -- CONSUMED (advisor 19:09Z, W&B oracle_readout/"
+        "sprt_liveprobe_budget). REPLACES #197's fixed-N liveprobe-cost row with the realistic "
+        "SPRT (expected-N, operating-characteristic): the measurement-cost row is no longer '30k "
+        "draws' -- it is E[N]~405 on a clear-NO-GO build (1788 under realistic ICC), ~14,915 "
+        "near-bar, and <=24,398 worst-case (ASN peak; 107,610 realistic-ICC). A 75.12x collapse vs "
+        "#197's 30,455 fixed-N on the NO-GO build. (alpha,power)=(0.05,0.95) realized EXACTLY; "
+        "Wald boundaries A/B=+-2.9444; Deff=4.41 (#190). The full-ladder GO guard is UNCHANGED -- "
+        "this is a cost-row swap, NOT a verdict change: a real GO STILL needs beta~1 across the "
+        "MEASURED q[2..9] ladder (at beta=0.765 the NO-GO private LCB 419.6 << 500). Carry #197's "
+        "30,455 as the fixed-N worst-case cap. REINFORCES the HOLD.",
     "frozen_budget_kanna_202": "LANDED -- CONSUMED (advisor 18:39Z, W&B 533jd6l1; annotation only). "
         "Multi-shot budget under the conservative FROZEN regime (the DEFAULT until the human pins the "
         "harness): under fixed prompts + deterministic greedy the official harness re-benchmarks "
@@ -164,6 +188,41 @@ DEP_FLAGS = {
         "recommendation is UNTOUCHED. Only build-at-bar+best-of-N is frozen-fragile (E[shots]=2.34 vs "
         "fresh 1.94; exhausts WITHOUT clearing 19%%; breakeven f*=0.846). kanna -> #206 frozen-cost "
         "crossover. Does NOT touch the binding bar or single-shot sigma; REINFORCES the HOLD.",
+    "launch_sigma_175_reconcile_ubel_207": "LANDED -- CONSUMED (advisor 19:40Z). RESOLVES the #204 "
+        "open caveat in FAVOR of the YES: the two #175 readings (h_out 5.178 @ B=65536 full-gen vs "
+        "#175-sampling 10.906 @ B=16384 128-tok window) are the SAME finite-sample TPS CI at DIFFERENT "
+        "bench sizes, NOT sqrt(D)-apart (the 2.106 ratio = bench-sqrtN 2.04 x op-point 1.03, only "
+        "COINCIDENTALLY ~= #190's sqrt(D) 2.100; reading 10.906 as h_out*sqrt(D) double-counts the ICC). "
+        "The launch-correct full-generation h_out -> trigger 512.41/514.63 STANDS, both < the 520.95 "
+        "ceiling -> #204's robust-YES SURVIVES; the 10.906 sub-bench reading is RETIRED. Only land #71 "
+        "co-log (n=385) remains open and now merely TIGHTENS the YES. NO change to the binding bar.",
+    "winners_curse_budget_kanna_210": "LANDED -- CONSUMED (advisor 19:40Z, W&B hwvv7nn1; build-target "
+        "row). CORRECTS the #202 hedge against the binding PRIVATE bar: best-of-N does NOT relax it -- "
+        "the conditional private clear is EXACTLY FLAT in N (n_star_private=1) because selection is on "
+        "non-replicating public noise and the private grade is one fresh draw (Capen 1971 winner's "
+        "curse / Smith-Winkler 2006 optimizer's curse). The freeze-robust mu=512.2/N=1 does NOT survive "
+        "privately (p=0.3120<0.95); to clear 500-PRIVATE at P>=0.95 under best-of-5 the PUBLIC build "
+        "must reach mu_bar_private_corrected=528.48 (+23.61 winner's-curse tax over #202's 504.87 = "
+        "7.28 evaporating public discount + 16.33 private-drop gross-up). REGIME-INVARIANT. N=1 STANDS "
+        "(build higher, do NOT re-draw). Does NOT touch the sigma->LCB PUBLIC trigger 512.41; "
+        "REINFORCES the HOLD.",
+    "kernel_budget_lambda_wirbel_213": "LANDED -- CONSUMED (advisor 19:40Z; lane-a #192 capstone). "
+        "Grades the compliant-spec batch-invariant verify kernel's overhead budget vs lambda: "
+        "max_kernel_overhead_pct(lambda) opens from <=0 at lambda_hat=0.342 (the realistic floor "
+        "already misses 500 -- even a FREE kernel fails) to 7.33% both / 4.12% descent at lambda=1; the "
+        "zero-overhead path first clears 500 at lambda_crit=0.8345 both / 0.9067 descent. So the ONLY "
+        "compliant 500-lane (lane-a) is a DOUBLE gate: self-KV-recovery lambda >= lambda_crit AND kernel "
+        "under max_overhead(lambda). Off-shelf #122 (+51.78%) clears at NO physical lambda<=1 (~7.1x "
+        "over the lambda=1 budget). EXTENDS the #192 compliance bracket ABOVE the sigma math; does NOT "
+        "change the #204/#207 trigger; REINFORCES the HOLD.",
+    "sprt_ar_asn_denken_212": "LANDED -- CONSUMED (advisor 19:54Z; cost-band sharpening). CONFIRMS "
+        "#205's flat xDeff=4.41 is CONSERVATIVE and SHARPENS it: folding #190's DECAYING within-prompt "
+        "ACF (rho(1)=0.2583) into the SPRT partial-sum variance tightens the realism band 1.59-2.66x. "
+        "The E[N]_nogo band becomes [405 IID -> 672 AR(1)-optimistic -> 1,125 measured-ACF-realistic -> "
+        "1,788 flat-loose]; the data-grounded point is 1,125 (the measured ACF decays slower than pure "
+        "AR(1): rho(2)=0.168 >> rho(1)^2=0.067). The 75.12x collapse vs #197's fixed-N is Deff-INVARIANT, "
+        "and realized (alpha,power)=(0.05,0.95) + the bar 0.9780 are UNCHANGED -- the AR correction only "
+        "sharpens the absolute band, never flips the verdict. Orthogonal to #192. REINFORCES the HOLD.",
     "ubel_181_tau_pin": "LANDED (advisor branch) -- the tau band [tau_low, 1.0] floor (stark #164) "
         "with the conservative tau=0.9924 corner; referenced as the floor, not a banked ledger axis.",
     "wirbel_184_lambda_robust_topology": "LANDED (advisor branch) -- named as the gap-fallback "
@@ -312,10 +371,9 @@ _AXIS_PATHS = {
     # (E[shots]=1.94 at the bar, NOT fixed-5) + the build-higher-vs-stay cost toggle. Annotates the
     # budget row ONLY; the binding bar and single-shot sigma are UNCHANGED.
     "cost_budget_200": "research/validity/cost_budget/cost_budget_results.json",
-    # ubel #201 launch-sigma closure -- MERGED (advisor 18:23Z): the de-dup (#195) acceptance axis
-    # evaluated under REALISTIC ICC (#190) -> combined launch sigma 12.215 central / 13.796 worst-case,
-    # REPLACING #195's 7.26 / 17.04 in the combined-sigma row. Wire the MECHANISM; HOLD the verdict
-    # PROVISIONAL (do NOT hard-wire GO/NO-GO vs the lambda=1 ceiling) pending #204 + land #71.
+    # ubel #201 launch-sigma closure -- MERGED (advisor 18:23Z): the de-dup (#195) x realistic-ICC
+    # (#190) MECHANISM (banked as provenance + the leg vector). Its sigma->LCB TRIGGER (12.215/13.796
+    # -> 520.09/522.69) is RETIRED by ubel #204 (a z=1.96 half-width units bug); see unit_rebase_204.
     "sigma_closure_201": "research/validity/launch_sigma_closure/launch_sigma_closure_results.json",
     # denken #197 liveprobe depth-budget -- MERGED (advisor 18:39Z): the certification COST row + the
     # FULL-LADDER GO requirement + the depth-1-only FALSE-GO guard. At the grounded beta=0.765 the
@@ -327,6 +385,47 @@ _AXIS_PATHS = {
     # 504.87 (not fresh 499.08); the build-to-512.2/N=1 hedge is freeze-robust (n_shots_frozen_at_512
     # =1). Only build-at-bar+best-of-N is frozen-fragile. REINFORCES the HOLD; budget-row annotation.
     "frozen_budget_202": "research/validity/frozen_budget/frozen_budget_results.json",
+    # ubel #204 clean-1-sigma unit rebase -- MERGED (advisor 18:46Z): RETIRES #201's σ→LCB trigger.
+    # #201's 520.09/522.69 was a UNITS BUG (the acceptance leg 11.17 was a z=1.96 two-sided HALF-WIDTH
+    # double-counted with the z=1.645 P95 LCB). Clean 1-sigma = 11.17/1.95996 = 5.699 -> combined LAUNCH
+    # sigma 7.545/8.897; P95 trigger mu 512.41/514.63 vs the lambda=1 ceiling 520.95 -> BOTH BELOW ->
+    # lambda=1 clears 500 at P95 CENTRALLY (+8.54) AND worst-case (+6.32). Verdict FLIPS to RESOLVED-YES.
+    "unit_rebase_204": "research/validity/launch_sigma_unit_rebase/launch_sigma_unit_rebase_results.json",
+    # denken #205 SPRT liveprobe budget -- MERGED (advisor 19:09Z): REPLACES #197's fixed-N 30k cost
+    # row with the realistic sequential expected-N. E[N]≈405 on a clear-NO-GO build (75.12x cheaper),
+    # 14,915 near-bar, 24,398 worst-case (ASN peak); (α,power)=(0.05,0.95), boundaries ±2.9444, Deff=4.41.
+    "sprt_liveprobe_205": "research/oracle_readout/sprt_liveprobe_budget/sprt_liveprobe_budget_results.json",
+    # lawine #196 compliant non-spec floor -- MERGED (advisor 18:58Z): lane-b. Under strict #192 the
+    # compliant non-spec int4 path floors at ≈165.44 official TPS (66.9% below 500); NO compliant
+    # non-spec 500-lane. token-identity 1.0, PPL 2.3766<2.42, 128/128. Adds the #192 compliance precond.
+    "compliant_nonspec_196": "research/validity/compliant_nonspec_floor/floor_report.json",
+    # wirbel #199 compliant-spec E[T] ceiling -- MERGED (advisor 19:09Z): lane-a, the ONLY compliant
+    # 500 route under strict #192. Ceiling 536.66 (lower-CI 525.73>500 -> clears), floor 416.31; clears
+    # ONLY if kernel overhead < 7.33% both / 4.12% descent (UNMEASURED; off-shelf #122 +51.78% ~7x over).
+    "compliant_spec_199": "research/validity/compliant_spec_et/compliant_spec_et_results.json",
+    # ubel #207 launch-sigma #175-reading reconcile -- MERGED (advisor 19:40Z): RESOLVES the #204
+    # open caveat. The larger 10.906 #175-sampling HW is the B=16384 128-tok sub-bench, NOT launch-
+    # correct; the ratio 2.106 vs h_out 5.178 = bench-sqrtN(2.04) x op-point(1.03), only COINCIDENTALLY
+    # ~= #190's sqrt(D)=2.100 (reading it as h_out*sqrt(D) double-counts the ICC). Launch-correct = the
+    # B=65536 full-generation h_out -> trigger 512.41/514.63, both < 520.95 ceiling -> robust-YES SURVIVES.
+    "launch_sigma_175_reconcile_207": "research/validity/launch_sigma_175_reconcile/launch_sigma_175_reconcile_results.json",
+    # kanna #210 winner's-curse re-draw -- MERGED (advisor 19:40Z): best-of-N does NOT relax the binding
+    # PRIVATE bar. The conditional private clear is FLAT in N (n_star_private=1): selection is on non-
+    # replicating public noise, the private grade is one fresh draw. To clear 500-private at P>=0.95 under
+    # best-of-5 the PUBLIC build must reach mu_bar_private_corrected=528.48 (+23.61 winner's-curse tax over
+    # #202's 504.87). The #202 freeze-robust mu=512.2/N=1 does NOT survive privately (p=0.3120). Build-higher/N=1.
+    "winners_curse_210": "research/validity/winners_curse_budget/winners_curse_budget_results.json",
+    # wirbel #213 compliant-kernel overhead budget vs lambda -- MERGED (advisor 19:40Z): the lane-a capstone.
+    # max_kernel_overhead_pct(lambda): 7.33% both / 4.12% descent at lambda=1 (<->#199); lambda_crit=0.8345
+    # both / 0.9067 descent (below it even a FREE batch-invariant kernel misses 500); lambda_hat=0.342 budget
+    # -16.74%. Off-shelf #122 (+51.78%) clears at NO physical lambda<=1. Strict-#192 500-path is a DOUBLE gate.
+    "kernel_budget_lambda_213": "research/validity/kernel_budget_lambda/kernel_budget_lambda_results.json",
+    # denken #212 AR(1)-corrected SPRT ASN -- MERGED (advisor 19:54Z): sharpens #205's flat-Deff cost row.
+    # #205's flat xDeff=4.41 is CONFIRMED CONSERVATIVE; folding #190's DECAYING within-prompt ACF tightens
+    # the realism band 1.59-2.66x. E[N]_nogo band = [405 IID-floor -> 672 AR(1)-opt -> 1,125 measured-ACF-
+    # realistic -> 1,788 flat-loose]; data-grounded point 1,125 (rho(2)=0.168 >> rho(1)^2=0.067). UNCHANGED:
+    # (alpha,power)=(0.05,0.95), bar 0.9780, 75.12x collapse is Deff-INVARIANT. Orthogonal to #192.
+    "sprt_ar_asn_212": "research/validity/sprt_ar_asn/sprt_ar_asn_results.json",
 }
 
 
@@ -347,6 +446,14 @@ class _BankedAxes:
         self.sigma_closure = _load_axis_json(_AXIS_PATHS["sigma_closure_201"])
         self.liveprobe = _load_axis_json(_AXIS_PATHS["liveprobe_197"])
         self.frozen_budget = _load_axis_json(_AXIS_PATHS["frozen_budget_202"])
+        self.unit_rebase = _load_axis_json(_AXIS_PATHS["unit_rebase_204"])
+        self.sprt = _load_axis_json(_AXIS_PATHS["sprt_liveprobe_205"])
+        self.nonspec_floor = _load_axis_json(_AXIS_PATHS["compliant_nonspec_196"])
+        self.compliant_spec = _load_axis_json(_AXIS_PATHS["compliant_spec_199"])
+        self.sigma_reconcile = _load_axis_json(_AXIS_PATHS["launch_sigma_175_reconcile_207"])
+        self.winners_curse = _load_axis_json(_AXIS_PATHS["winners_curse_210"])
+        self.kernel_budget = _load_axis_json(_AXIS_PATHS["kernel_budget_lambda_213"])
+        self.sprt_ar = _load_axis_json(_AXIS_PATHS["sprt_ar_asn_212"])
 
     # ---- wirbel #190 realistic within-prompt ICC / N_eff ---- #
     def icc_landed(self) -> bool:
@@ -615,8 +722,8 @@ class _BankedAxes:
     # ---- denken #197 liveprobe depth-budget (MERGED 18:39Z: full-ladder GO gate + cost row) ---- #
     # The GO must gate on land #71's MEASURED full-ladder q[2..9] >= 0.9780, never a depth-1-only /
     # spine-inferred read (a FALSE GO worth 85.2 TPS). At beta=0.765 the mechanism CANNOT clear the
-    # private bar (perfect depth-1 -> private_LCB 419.6 << 500). Cost = ~30,455 Neyman trials @lambda=1
-    # (shallow-heavy), being made SEQUENTIAL by denken #205 (SPRT; carry 30k as the worst-case cap).
+    # private bar (perfect depth-1 -> private_LCB 419.6 << 500). The cost ROW is REPLACED by denken #205's
+    # realistic SPRT (E[N]~405 NO-GO / 14,915 near-bar / <=24,398 worst-case); ~30,455 fixed-N -> worst-case cap.
     def liveprobe_landed(self) -> bool:
         return self.liveprobe is not None
 
@@ -732,6 +839,490 @@ class _BankedAxes:
     def frozen_sigma_fraction_beatable(self) -> float | None:
         v = _dig(self.frozen_budget, "import_194", "sigma_fraction_beatable_frozen")
         return float(v) if v is not None else None
+
+    # ---- ubel #204 clean-1-sigma unit rebase (MERGED 18:46Z: RETIRES #201's sigma->LCB trigger) ---- #
+    # #201's 520.09/522.69 was a UNITS BUG: the acceptance leg (11.17) was a z=1.96 two-sided HALF-
+    # WIDTH double-counted with the z=1.645 P95 LCB. Clean 1-sigma = 11.17/1.95996 = 5.699 -> combined
+    # LAUNCH sigma 7.545 central / 8.897 worst-case; P95 GO trigger mu 512.41 / 514.63 vs the lambda=1
+    # ceiling 520.95 -> BOTH BELOW -> lambda=1 clears 500 at P95 CENTRALLY (+8.54) AND worst-case
+    # (+6.32). Verdict FLIPS from PROVISIONAL knife-edge to RESOLVED-YES. Still NON-GATING.
+    def unit_rebase_landed(self) -> bool:
+        return self.unit_rebase is not None
+
+    def rebase_mu_clears_500(self, kind: str) -> float | None:
+        v = _dig(self.unit_rebase, "clean_trigger", "mu_clears_500_clean_%s" % kind)
+        return float(v) if v is not None else None
+
+    def rebase_combined_sigma(self, kind: str) -> float | None:
+        v = _dig(self.unit_rebase, "clean_trigger", "combined_sigma_launch_clean_%s" % kind)
+        return float(v) if v is not None else None
+
+    def rebase_lambda1_ceiling(self) -> float | None:
+        v = _dig(self.unit_rebase, "clean_trigger", "lambda1_ceiling_mu")
+        return float(v) if v is not None else None
+
+    def rebase_headroom_below_ceiling(self, kind: str) -> float | None:
+        v = _dig(self.unit_rebase, "clean_trigger", "%s_headroom_below_ceiling_tps" % kind)
+        return float(v) if v is not None else None
+
+    def rebase_lambda1_clears_500(self, kind: str) -> bool:
+        return bool(_dig(self.unit_rebase, "clean_trigger", "lambda1_clears_500_clean_%s" % kind,
+                         default=False))
+
+    def rebase_does_lambda1_clear_p95_centrally(self):
+        return _dig(self.unit_rebase, "clean_trigger", "does_lambda1_clear_500_at_p95_centrally")
+
+    def rebase_acceptance_1sigma_clean(self) -> float | None:
+        v = _dig(self.unit_rebase, "clean_trigger", "acceptance_1sigma_clean")
+        return float(v) if v is not None else None
+
+    def rebase_delta_mu(self, kind: str) -> float | None:
+        v = _dig(self.unit_rebase, "clean_trigger", "delta_mu_rebase_%s" % kind)
+        return float(v) if v is not None else None
+
+    def rebase_clean_vs_ceiling(self, kind: str):
+        return _dig(self.unit_rebase, "clean_trigger", "clean_%s_vs_ceiling" % kind)
+
+    def rebase_private_footing_shift(self) -> float | None:
+        v = _dig(self.unit_rebase, "clean_trigger", "private_footing_sensitivity",
+                 "shift_vs_primary_tps")
+        return float(v) if v is not None else None
+
+    def rebase_direction_matches_prediction(self) -> bool:
+        return bool(_dig(self.unit_rebase, "direction_reconciliation",
+                         "rebase_direction_matches_prediction", default=False))
+
+    def rebase_mu_201_imported(self, kind: str) -> float | None:
+        v = _dig(self.unit_rebase, "imported_legs_201", "mu_201_%s" % kind)
+        return float(v) if v is not None else None
+
+    def rebase_combined_201_central(self) -> float | None:
+        v = _dig(self.unit_rebase, "imported_legs_201", "combined_201_central")
+        return float(v) if v is not None else None
+
+    def rebase_anchor_err_195(self) -> float | None:
+        v = _dig(self.unit_rebase, "anchors", "anchor_err_195_dedup")
+        return float(v) if v is not None else None
+
+    def rebase_anchor_err_194(self) -> float | None:
+        v = _dig(self.unit_rebase, "anchors", "anchor_err_194_breakeven")
+        return float(v) if v is not None else None
+
+    def rebase_self_test_passes(self) -> bool:
+        return bool(_dig(self.unit_rebase, "unit_rebase_self_test_passes", default=False))
+
+    # ---- denken #205 SPRT liveprobe budget (MERGED 19:09Z: REPLACES #197's fixed-N 30k cost row) ---- #
+    # Sequential probability ratio test: the EXPECTED measurement cost is E[N]≈405 on a clear-NO-GO
+    # build (75.12x cheaper than #197's 30,455 fixed-N), 14,915 near-bar, 24,398 worst-case (ASN peak);
+    # (alpha,power)=(0.05,0.95), boundaries A/B=+-2.9444, Deff=4.41. Keep 30k as the fixed-N cap.
+    def sprt_landed(self) -> bool:
+        return self.sprt is not None
+
+    def sprt_expected_n_nogo(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "headline", "expected_n_sprt_nogo")
+        return float(v) if v is not None else None
+
+    def sprt_expected_n_nogo_realistic_icc(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "headline", "expected_n_sprt_nogo_realistic_icc")
+        return float(v) if v is not None else None
+
+    def sprt_expected_n_nearbar(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "headline", "expected_n_sprt_nearbar")
+        return float(v) if v is not None else None
+
+    def sprt_worst_case_expected_n(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "operating_characteristic", "worst_case_expected_n")
+        return float(v) if v is not None else None
+
+    def sprt_worst_case_expected_n_realistic_icc(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "operating_characteristic",
+                 "worst_case_expected_n_realistic_icc")
+        return float(v) if v is not None else None
+
+    def sprt_savings_vs_fixed_n(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "headline", "savings_vs_fixed_n_nogo")
+        return float(v) if v is not None else None
+
+    def sprt_n_fixed_197(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "headline", "n_fixed_z95_197")
+        return float(v) if v is not None else None
+
+    def sprt_boundary(self, which: str) -> float | None:
+        v = _dig(self.sprt, "synthesis", "sprt_setup", "sprt_boundaries", which)
+        return float(v) if v is not None else None
+
+    def sprt_realized_alpha(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "operating_characteristic", "realized_alpha_false_nogo_at_mu1")
+        return float(v) if v is not None else None
+
+    def sprt_realized_power(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "operating_characteristic", "realized_power_decide_nogo_at_bar")
+        return float(v) if v is not None else None
+
+    def sprt_target_alpha(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "operating_characteristic", "target_alpha")
+        return float(v) if v is not None else None
+
+    def sprt_target_power(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "operating_characteristic", "target_power")
+        return float(v) if v is not None else None
+
+    def sprt_deff_190(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "imports", "deff_190")
+        return float(v) if v is not None else None
+
+    def sprt_beta_nogo(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "headline", "beta_nogo")
+        return float(v) if v is not None else None
+
+    def sprt_private_lcb_nogo(self) -> float | None:
+        v = _dig(self.sprt, "synthesis", "headline", "private_lcb_nogo_tps")
+        return float(v) if v is not None else None
+
+    def sprt_self_test_passes(self) -> bool:
+        return bool(_dig(self.sprt, "synthesis", "self_test", "sprt_budget_self_test_passes",
+                         default=False))
+
+    # ---- lawine #196 compliant non-spec floor (MERGED 18:58Z: lane-b; the #192 compliance precond) ---- #
+    # Under strict #192 the compliant non-spec int4 path floors at ~165.44 official TPS (66.9% below
+    # 500) -- token-identity 1.0, PPL 2.3766<2.42, 128/128. There is NO compliant non-spec 500-lane;
+    # the speculation premium (316.1 TPS, 191%) is existential. Gates the launch on the #192 ruling.
+    def nonspec_floor_landed(self) -> bool:
+        return self.nonspec_floor is not None
+
+    def nonspec_official_tps(self) -> float | None:
+        v = _dig(self.nonspec_floor, "nonspec_official_tps_est")
+        return float(v) if v is not None else None
+
+    def nonspec_floor_band(self, which: str):
+        return _dig(self.nonspec_floor, "nonspec_official_tps_est_%s_band" % which, default=[])
+
+    def nonspec_token_identity(self) -> float | None:
+        v = _dig(self.nonspec_floor, "nonspec_token_identity_rate")
+        return float(v) if v is not None else None
+
+    def nonspec_ppl(self) -> float | None:
+        v = _dig(self.nonspec_floor, "ppl_nonspec")
+        return float(v) if v is not None else None
+
+    def nonspec_completes_128(self) -> bool:
+        return bool(_dig(self.nonspec_floor, "nonspec_completes_128", default=False))
+
+    def nonspec_clears_500(self) -> bool:
+        return bool(_dig(self.nonspec_floor, "nonspec_clears_500", default=False))
+
+    def nonspec_margin_pct(self) -> float | None:
+        v = _dig(self.nonspec_floor, "margin_to_500_pct")
+        return float(v) if v is not None else None
+
+    def nonspec_spec_premium_tps(self) -> float | None:
+        v = _dig(self.nonspec_floor, "spec_premium_tps")
+        return float(v) if v is not None else None
+
+    def nonspec_spec_premium_pct(self) -> float | None:
+        v = _dig(self.nonspec_floor, "spec_premium_pct")
+        return float(v) if v is not None else None
+
+    def nonspec_verdict_label(self):
+        return _dig(self.nonspec_floor, "verdict_label")
+
+    def nonspec_floor_self_test_passes(self) -> bool:
+        return bool(_dig(self.nonspec_floor, "nonspec_floor_self_test_passes", default=False))
+
+    # ---- wirbel #199 compliant-spec E[T] ceiling (MERGED 19:09Z: lane-a, the ONLY compliant 500 route) ---- #
+    # Under strict #192 the batch-invariant int4 VERIFY kernel (lane a) ceiling = 536.66 official TPS
+    # (lower-CI 525.73 > 500 -> clears), floor = 416.31 (misses). It clears 500 ONLY if kernel overhead
+    # < 7.33% (both-bugs) / 4.12% (descent) -- UNMEASURED; kanna #122 off-the-shelf int4 is +51.78%
+    # (~7x over). So lane-a is the single compliant route, conditioned on a <7.3% overhead feasibility.
+    def compliant_spec_landed(self) -> bool:
+        return self.compliant_spec is not None
+
+    def compliant_spec_ceiling(self) -> float | None:
+        v = _dig(self.compliant_spec, "synthesis", "headline", "compliant_spec_tps_ceiling")
+        return float(v) if v is not None else None
+
+    def compliant_spec_floor(self) -> float | None:
+        v = _dig(self.compliant_spec, "synthesis", "headline", "compliant_spec_tps_floor")
+        return float(v) if v is not None else None
+
+    def compliant_spec_clears_500(self) -> bool:
+        return bool(_dig(self.compliant_spec, "synthesis", "headline", "compliant_spec_clears_500",
+                         default=False))
+
+    def compliant_spec_floor_clears_500(self) -> bool:
+        return bool(_dig(self.compliant_spec, "synthesis", "headline",
+                         "compliant_spec_floor_clears_500", default=False))
+
+    def compliant_spec_max_overhead(self, topo: str) -> float | None:
+        if topo == "both_bugs":
+            v = _dig(self.compliant_spec, "synthesis", "headline",
+                     "max_kernel_overhead_pct_to_clear_500")
+        else:
+            v = _dig(self.compliant_spec, "synthesis", "brackets", "descent_only", "ceiling_propagate",
+                     "tau_central_1p0", "max_kernel_overhead_pct_to_clear_500")
+        return float(v) if v is not None else None
+
+    def compliant_spec_ceiling_ci_lower(self, topo: str) -> float | None:
+        v = _dig(self.compliant_spec, "synthesis", "brackets", topo, "ceiling_finite_sample_ci_tau1",
+                 "ci_lower_tps")
+        return float(v) if v is not None else None
+
+    def compliant_spec_lower_clears_500(self, topo: str) -> bool:
+        return bool(_dig(self.compliant_spec, "synthesis", "brackets", topo,
+                         "ceiling_finite_sample_ci_tau1", "lower_clears_500", default=False))
+
+    def compliant_spec_descent_ceiling(self) -> float | None:
+        v = _dig(self.compliant_spec, "synthesis", "brackets", "descent_only",
+                 "ceiling_finite_sample_ci_tau1", "central_tps")
+        return float(v) if v is not None else None
+
+    def compliant_spec_offshelf_overhead_ref(self) -> float | None:
+        v = _dig(self.compliant_spec, "synthesis", "composition",
+                 "kanna122_offshelf_overhead_nonworking_ref")
+        return float(v) if v is not None else None
+
+    def compliant_spec_self_test_passes(self) -> bool:
+        return bool(_dig(self.compliant_spec, "synthesis", "self_test",
+                         "compliant_spec_et_self_test_passes", default=False))
+
+    # ---- ubel #207 launch-sigma #175-reading reconcile (MERGED 19:40Z: RESOLVES the #204 caveat) ---- #
+    # The two #175 readings (h_out 5.178 @ B=65536 full-gen vs #175-sampling 10.906 @ B=16384 128-tok
+    # window) are the SAME finite-sample TPS CI at DIFFERENT bench sizes, NOT sqrt(D)-apart (ratio 2.106
+    # = bench-sqrtN 2.04 x op-point 1.03, COINCIDENTALLY ~= #190's sqrt(D) 2.100). Launch-correct = the
+    # full-generation h_out -> trigger 512.41/514.63, both < 520.95 ceiling -> the robust-YES SURVIVES.
+    def sigma_reconcile_landed(self) -> bool:
+        return self.sigma_reconcile is not None
+
+    def sigma_reconcile_self_test_passes(self) -> bool:
+        return bool(_dig(self.sigma_reconcile, "reconcile_175_self_test_passes", default=False))
+
+    def sigma_reconcile_robust_yes_survives(self) -> bool:
+        return bool(_dig(self.sigma_reconcile, "robust_yes_survives", default=False))
+
+    def sigma_reconcile_lambda1_clears_conservative(self) -> bool:
+        return bool(_dig(self.sigma_reconcile, "lambda1_clears_under_conservative_reading",
+                         default=False))
+
+    def sigma_reconcile_conservative_is_launch_correct(self) -> bool:
+        return bool(_dig(self.sigma_reconcile, "verdict", "conservative_reading_is_launch_correct",
+                         default=False))
+
+    def sigma_reconcile_launch_correct_reading(self):
+        return _dig(self.sigma_reconcile, "launch_correct_reading")
+
+    def sigma_reconcile_ratio_175(self) -> float | None:
+        v = _dig(self.sigma_reconcile, "ratio_175_readings")
+        return float(v) if v is not None else None
+
+    def sigma_reconcile_ratio_equals_sqrtd(self) -> bool:
+        return bool(_dig(self.sigma_reconcile, "ratio_equals_sqrtD", default=False))
+
+    def sigma_reconcile_trigger_hout(self, kind: str) -> float | None:
+        v = _dig(self.sigma_reconcile, "trigger_%s_hout" % kind)
+        return float(v) if v is not None else None
+
+    def sigma_reconcile_trigger_175sampling(self, kind: str) -> float | None:
+        v = _dig(self.sigma_reconcile, "trigger_%s_175sampling" % kind)
+        return float(v) if v is not None else None
+
+    def sigma_reconcile_lambda1_ceiling(self) -> float | None:
+        v = _dig(self.sigma_reconcile, "lambda1_ceiling")
+        return float(v) if v is not None else None
+
+    def sigma_reconcile_delta_trigger(self) -> float | None:
+        v = _dig(self.sigma_reconcile, "delta_trigger_reading")
+        return float(v) if v is not None else None
+
+    def sigma_reconcile_acceptance_1sigma_hout(self) -> float | None:
+        v = _dig(self.sigma_reconcile, "acceptance_1sigma_hout")
+        return float(v) if v is not None else None
+
+    def sigma_reconcile_headroom(self, kind: str) -> float | None:
+        v = _dig(self.sigma_reconcile, "readings", "A_hout_launch_correct", "trigger",
+                 "%s_headroom_below_ceiling_tps" % kind)
+        return float(v) if v is not None else None
+
+    # ---- kanna #210 winner's-curse re-draw (MERGED 19:40Z: best-of-N does NOT relax the PRIVATE bar) ---- #
+    # The conditional private clear is FLAT in N (n_star_private=1): selection is on non-replicating
+    # public noise, the private grade is one fresh draw. To clear 500-private at P>=0.95 under best-of-5
+    # the PUBLIC build must reach mu_bar_private_corrected=528.48 (+23.61 winner's-curse tax over #202's
+    # 504.87 = 7.28 evaporating public discount + 16.33 private-drop grossup). REGIME-INVARIANT. Build-higher/N=1.
+    def winners_curse_landed(self) -> bool:
+        return self.winners_curse is not None
+
+    def winners_curse_self_test_passes(self) -> bool:
+        return bool(_dig(self.winners_curse, "winners_curse_self_test_passes", default=False))
+
+    def winners_curse_mu_bar_private_corrected(self) -> float | None:
+        v = _dig(self.winners_curse, "mu_bar_private_corrected")
+        return float(v) if v is not None else None
+
+    def winners_curse_delta_mu(self) -> float | None:
+        v = _dig(self.winners_curse, "delta_mu_winners_curse")
+        return float(v) if v is not None else None
+
+    def winners_curse_n_star_private(self) -> int | None:
+        v = _dig(self.winners_curse, "n_star_private")
+        return int(v) if v is not None else None
+
+    def winners_curse_private_clear_flat_in_n(self) -> bool:
+        return bool(_dig(self.winners_curse, "private_clear_flat_in_n", default=False))
+
+    def winners_curse_mu_bar_frozen_202(self) -> float | None:
+        v = _dig(self.winners_curse, "private_corrected_bar", "mu_bar_frozen_public_202")
+        return float(v) if v is not None else None
+
+    def winners_curse_mu_safe_fresh_194(self) -> float | None:
+        v = _dig(self.winners_curse, "private_corrected_bar", "mu_safe_fresh_194")
+        return float(v) if v is not None else None
+
+    def winners_curse_freeze_robust_512_survives(self) -> bool:
+        return bool(_dig(self.winners_curse, "private_corrected_bar",
+                         "freeze_robust_512_survives_private", default=False))
+
+    def winners_curse_regime_invariant(self) -> bool:
+        return bool(_dig(self.winners_curse, "private_corrected_bar", "regime_invariant",
+                         default=False))
+
+    def winners_curse_p_private_at_512(self) -> float | None:
+        v = _dig(self.winners_curse, "private_corrected_bar", "p_private_clear_at_mu512p2_n1")
+        return float(v) if v is not None else None
+
+    def winners_curse_tax_decomposition(self) -> dict:
+        return _dig(self.winners_curse, "private_corrected_bar", "tax_decomposition", default={}) or {}
+
+    def winners_curse_tps_n5(self, regime: str) -> float | None:
+        v = _dig(self.winners_curse, "winners_curse_tps_n5_%s" % regime)
+        return float(v) if v is not None else None
+
+    def winners_curse_lambda_star_191(self) -> float | None:
+        v = _dig(self.winners_curse, "import_banked", "lambda_star_191")
+        return float(v) if v is not None else None
+
+    # ---- wirbel #213 compliant-kernel overhead budget vs lambda (MERGED 19:40Z: lane-a capstone) ---- #
+    # max_kernel_overhead_pct(lambda): the batch-invariant verify kernel's budget opens from <=0 at
+    # lambda_hat=0.342 (the realistic floor already misses 500 -- even a FREE kernel fails) to 7.33%
+    # (both) / 4.12% (descent) at lambda=1; the zero-overhead path first clears 500 at lambda_crit=0.8345
+    # both / 0.9067 descent. Off-shelf #122 (+51.78%) clears at NO physical lambda<=1. DOUBLE gate.
+    def kernel_budget_landed(self) -> bool:
+        return self.kernel_budget is not None
+
+    def kernel_budget_self_test_passes(self) -> bool:
+        return bool(_dig(self.kernel_budget, "synthesis", "self_test",
+                         "kernel_budget_lambda_self_test_passes", default=False))
+
+    def kernel_budget_lambda_crit(self, topo: str) -> float | None:
+        v = _dig(self.kernel_budget, "synthesis", "headline",
+                 "lambda_crit_clears_500_zero_overhead_%s_tau1" % topo)
+        return float(v) if v is not None else None
+
+    def kernel_budget_overhead_at_lambda1(self, topo: str) -> float | None:
+        v = _dig(self.kernel_budget, "synthesis", "headline",
+                 "overhead_budget_at_lambda_1_%s_tau1" % topo)
+        return float(v) if v is not None else None
+
+    def kernel_budget_overhead_at_lambda_hat(self) -> float | None:
+        v = _dig(self.kernel_budget, "synthesis", "headline",
+                 "overhead_budget_at_lambda_hat_both_bugs_tau1")
+        return float(v) if v is not None else None
+
+    def kernel_budget_lambda_hat(self) -> float | None:
+        v = _dig(self.kernel_budget, "synthesis", "lambda_hat")
+        return float(v) if v is not None else None
+
+    def kernel_budget_offshelf_clears_at_physical_lambda(self) -> bool:
+        return bool(_dig(self.kernel_budget, "synthesis", "headline",
+                         "off_the_shelf_122_clears_at_physical_lambda_both_bugs_tau1", default=False))
+
+    def kernel_budget_offshelf_overhead_ref(self) -> float | None:
+        v = _dig(self.kernel_budget, "synthesis", "composition",
+                 "kanna122_offshelf_overhead_nonworking_ref")
+        return float(v) if v is not None else None
+
+    def kernel_budget_max_at_saturation(self) -> float | None:
+        v = _dig(self.kernel_budget, "synthesis", "headline",
+                 "max_budget_pct_at_prob_saturation_both_bugs_tau1")
+        return float(v) if v is not None else None
+
+    def kernel_budget_verdict(self):
+        return _dig(self.kernel_budget, "synthesis", "verdict")
+
+    def kernel_budget_curve(self, topo: str) -> list[dict]:
+        rows = _dig(self.kernel_budget, "synthesis", "regimes", topo, "overhead_budget_vs_lambda",
+                    default=[]) or []
+        out = []
+        for r in rows:
+            tc = r.get("tau_central_1p0", {}) or {}
+            out.append({"lambda": _finite(r.get("lambda")),
+                        "max_kernel_overhead_pct": _finite(tc.get("max_kernel_overhead_pct")),
+                        "clears_500_zero_overhead": bool(tc.get("clears_500_zero_overhead", False))})
+        return out
+
+    # ---- denken #212 AR(1)-corrected SPRT ASN (MERGED 19:54Z: sharpens #205's flat-Deff cost row) ---- #
+    # Folding #190's DECAYING within-prompt ACF into the SPRT partial-sum variance tightens #205's flat
+    # xDeff=4.41 by 1.59-2.66x. E[N]_nogo band = [405 IID -> 672 AR(1)-opt -> 1,125 measured-ACF-realistic
+    # -> 1,788 flat-loose]; data-grounded point 1,125 (rho(2)=0.168 >> rho(1)^2=0.067). UNCHANGED:
+    # (alpha,power)=(0.05,0.95), bar 0.9780, the 75.12x collapse vs #197's fixed-N is Deff-INVARIANT.
+    def sprt_ar_landed(self) -> bool:
+        return self.sprt_ar is not None
+
+    def sprt_ar_self_test_passes(self) -> bool:
+        return bool(_dig(self.sprt_ar, "synthesis", "self_test", "sprt_ar_self_test_passes",
+                         default=False))
+
+    def sprt_ar_expected_n_nogo(self, model: str) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "expected_n_corrected", "rows", "nogo", model)
+        return float(v) if v is not None else None
+
+    def sprt_ar_realistic_nogo(self) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "expected_n_corrected", "expected_n_nogo_empirical_acf")
+        return float(v) if v is not None else None
+
+    def sprt_ar_band(self) -> list:
+        # [IID-floor, AR(1)-optimistic, measured-ACF-realistic, flat-loose]
+        return [self.sprt_ar_expected_n_nogo("iid"), self.sprt_ar_expected_n_nogo("ar1"),
+                self.sprt_ar_expected_n_nogo("empirical_acf"), self.sprt_ar_expected_n_nogo("flat_441")]
+
+    def sprt_ar_deff(self, which: str) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "deff_comparison", which)
+        return float(v) if v is not None else None
+
+    def sprt_ar_savings_invariant(self) -> bool:
+        return bool(_dig(self.sprt_ar, "synthesis", "expected_n_corrected", "savings_invariance",
+                         "deff_invariant", default=False))
+
+    def sprt_ar_savings_ratio(self) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "expected_n_corrected", "savings_invariance",
+                 "savings_ratio_iid")
+        return float(v) if v is not None else None
+
+    def sprt_ar_n_fss_197(self) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "expected_n_corrected", "savings_invariance", "n_fss_197")
+        return float(v) if v is not None else None
+
+    def sprt_ar_realized_alpha(self) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "operating_characteristic_invariance", "realized_alpha")
+        return float(v) if v is not None else None
+
+    def sprt_ar_realized_power(self) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "operating_characteristic_invariance", "realized_power")
+        return float(v) if v is not None else None
+
+    def sprt_ar_private_bar(self) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "imports", "private_bar_both")
+        return float(v) if v is not None else None
+
+    def sprt_ar_rho_lag1(self) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "imports", "rho_lag1_190")
+        return float(v) if v is not None else None
+
+    def sprt_ar_tightening(self, which: str) -> float | None:
+        v = _dig(self.sprt_ar, "synthesis", "deff_comparison", "tightening_%s_vs_flat" % which)
+        return float(v) if v is not None else None
+
+    def sprt_ar_flat_is_conservative(self) -> bool:
+        return bool(_dig(self.sprt_ar, "synthesis", "realism_band", "flat_441_is_conservative",
+                         default=False))
 
     # ---- ubel #189 executable submission gate (packaging precondition) ---- #
     def packaging_landed(self) -> bool:
@@ -938,13 +1529,15 @@ def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
     #           guard. Distinct from #187 (input-side CI precision): #197 sizes how many liveprobe
     #           trials DECISIVELY certify the measured ladder clears the PRIVATE bar 0.9780. A
     #           depth-1-only / spine-inferred read is a FALSE GO worth 85.2 TPS; at beta=0.765 the
-    #           mechanism CANNOT clear the private bar (perfect depth-1 -> 419.6 << 500). Sequential
-    #           via denken #205 (SPRT); 30k worst-case cap. REINFORCES the HOLD (does NOT flip it).
+    #           mechanism CANNOT clear the private bar (perfect depth-1 -> 419.6 << 500). The COST row
+    #           is REPLACED by denken #205 (SPRT): realistic E[N]~405 NO-GO, ~24,398 worst-case; #197's
+    #           ~30,455 fixed-N is the worst-case CAP. REINFORCES the HOLD (does NOT flip it).
     lp = liveprobe_measurement_cost(None)
     lp_ok = bool(lp.get("landed"))
     rows.append({
         "axis": "liveprobe_measurement_cost", "pr": 197, "slug": "liveprobe-depth-budget",
         "kind": "measurement-cost",
+        "cost_row_source_pr": (lp.get("cost_row_source_pr") if lp_ok else None),   # 205 (SPRT replaces #197)
         "status": "LANDED" if lp_ok else "IN-FLIGHT",
         "flag": "consumed" if lp_ok else "pending-liveprobe",
         "reinforces_hold": True,
@@ -956,11 +1549,22 @@ def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
         "mechanism_can_clear_private_bar": (lp.get("mechanism_can_clear_private_bar") if lp_ok else None),
         "private_lcb_perfect_depth1_tps": (lp.get("private_lcb_perfect_depth1_tps") if lp_ok else None),
         "beta_primary": (lp.get("beta_primary") if lp_ok else None),
+        # cost row: denken #205 SPRT expected-N (the realistic measurement cost); 30k fixed-N = cap.
+        "expected_n_sprt_nogo": (lp.get("expected_n_sprt_nogo") if lp_ok else None),
+        "expected_n_sprt_nearbar": (lp.get("expected_n_sprt_nearbar") if lp_ok else None),
+        "worst_case_expected_n_sprt": (lp.get("worst_case_expected_n_sprt") if lp_ok else None),
+        "sprt_savings_vs_fixed_n": (lp.get("sprt_savings_vs_fixed_n") if lp_ok else None),
+        "sprt_boundary_A_upper_decide_go": (lp.get("sprt_boundary_A_upper_decide_go") if lp_ok else None),
+        "sprt_boundary_B_lower_decide_nogo": (lp.get("sprt_boundary_B_lower_decide_nogo") if lp_ok else None),
+        "sprt_realized_alpha": (lp.get("sprt_realized_alpha") if lp_ok else None),
+        "sprt_realized_power": (lp.get("sprt_realized_power") if lp_ok else None),
+        "sprt_deff_190": (lp.get("sprt_deff_190") if lp_ok else None),
         "decisive_total_trials_lambda1": (lp.get("decisive_total_trials_lambda1") if lp_ok else None),
         "neyman_efficiency_gain_vs_equal": (lp.get("neyman_efficiency_gain_vs_equal") if lp_ok else None),
         "decisive_margin_at_lambda1": (lp.get("decisive_margin_at_lambda1") if lp_ok else None),
         "sequential_via_205_pending": (lp.get("sequential_via_205_pending") if lp_ok else None),
-        "worst_case_cap_trials": (lp.get("worst_case_cap_trials") if lp_ok else None),
+        "sequential_sprt_205_landed": (lp.get("sequential_sprt_205_landed") if lp_ok else None),
+        "fixed_n_worst_case_cap_trials": (lp.get("fixed_n_worst_case_cap_trials") if lp_ok else None),
         "note": (lp.get("note") if lp_ok else "liveprobe #197 not landed -> no explicit full-ladder "
                  "/ false-GO guard; the GO leg uses the measured ladder as-is."),
     })
@@ -1029,66 +1633,121 @@ def realistic_launch_lcb(topo: str) -> dict:
 
 
 def combined_sigma_corner() -> dict:
-    """The combined-sigma row. ubel #201 (MERGED 18:23Z, W&B spau6tch) SUPERSEDES ubel #195's
-    7.26 / 17.04: the de-dup (#195) and realistic-ICC (#190) corrections are ORTHOGONAL on the SAME
-    acceptance axis -- de-dup sets its IDENTITY (overlap-corrected 5.32 TPS iid, removing the
-    rho(sampling#175,input#187)=0.945 double-count), realistic ICC sets its MAGNITUDE
-    (design-effect D=1+(m_bar-1)*ICC=4.4106 -> sqrt(D)=2.100 -> 5.32 -> 11.17 TPS). Folding that with
-    sigma_hw (#188 4.86) and sigma_private (#176/#191 0.88) gives the combined LAUNCH sigma
-    **12.215 central / 13.796 worst-case** (rho(*,hw) bounded [-0.3,+0.3]), REPLACING the #195 numbers.
+    """The combined-sigma row. ubel #204 (MERGED 18:46Z, W&B m7vwuus2) RETIRES ubel #201's sigma->LCB
+    trigger: #201's 520.09/522.69 was a UNITS BUG. The acceptance leg carried into #201 was wirbel
+    #175's **z=1.96 two-sided HALF-WIDTH** (11.17 TPS), then double-counted against the z=1.645 P95
+    LCB -- a 1-sigma quantity was inflated by z=1.96. #204 rebases every leg onto a clean 1-sigma
+    footing: acceptance 11.17/1.95996 = **5.699 TPS**, folded with sigma_hw (#188 4.86) and
+    sigma_private (#176/#191 0.88) -> combined LAUNCH sigma **7.545 central / 8.897 worst-case**
+    (rho(*,hw) bounded [-0.3,+0.3]), REPLACING #201's 12.215/13.796.
 
-    P95 framing: the GO trigger is mu >= 500 + z_p95(1.6449)*sigma = **520.09 central / 522.69
-    worst-case**, against the lambda=1 ceiling **520.95** TPS. Central is P95-reachable (+0.86 TPS),
-    worst-case is P95-UNREACHABLE (-1.74 TPS), even at lambda=1. ICC erodes ~8 TPS of launch headroom,
-    lifting the trigger off #194's iid break-even (512.16) onto/over the ceiling.
+    P95 framing (clean): the GO trigger is mu >= 500 + z_p95(1.6449)*sigma = **512.41 central /
+    514.63 worst-case**, against the lambda=1 ceiling **520.95** TPS. BOTH are BELOW the ceiling ->
+    lambda=1 clears 500 at P95 **CENTRALLY (+8.54 TPS) AND worst-case (+6.32 TPS)**. The verdict FLIPS
+    from #201's PROVISIONAL knife-edge (worst-case NOT clearing) to a robust **RESOLVED-YES**. The
+    de-dup x ICC mechanism is unchanged; only the unit footing is corrected (and the rebase direction
+    came out SIGN-BACKWARDS vs the naive prediction -- the trigger went DOWN, not up).
 
-    HOLD PROVISIONAL (advisor 18:23Z: do NOT hard-wire GO/NO-GO vs the ceiling). Two open levers
-    finalize it: (a) ubel #204 clean-1-sigma unit rebase (IN FLIGHT) may shift the central trigger
-    ~3 TPS, direction OPEN -> can FLIP the central verdict (central sits only +0.86 under the ceiling);
-    (b) land #71 co-log of per-allocation acceptance x wall-TPS (n=385 cross-device) retires the
-    rho(*,hw) [-0.3,+0.3] band -> collapses [central, worst-case] onto a single trigger. ICC=0 here
-    reproduces #195's de-dup central 7.2617 -> #201 is the strict superset (it applies ICC).
-    (both-bugs only; descent is already NO-GO via #191.) NON-GATING: this row does NOT gate the
-    analytic go -- it is the PROVISIONAL launch sigma->LCB readout the human reads."""
-    if not _BANKED.sigma_closure_landed():
-        return {"landed": False, "note": "launch_sigma_closure #201 not landed -> fall back to the "
-                                         "#195 de-dup row (7.26/17.04) if present; else quadrature."}
-    sc, wc = _BANKED.combined_sigma_launch("central"), _BANKED.combined_sigma_launch("worstcase")
-    mu_c, mu_w = _BANKED.mu_clears_500("central"), _BANKED.mu_clears_500("worstcase")
-    ceiling = _BANKED.lambda1_ceiling_mu()
-    central_reach = _BANKED.lambda1_clears_500("central")     # True: 520.09 <= 520.95
-    worst_reach = _BANKED.lambda1_clears_500("worstcase")     # False: 522.69 > 520.95
+    Still NON-GATING (advisor 18:46Z: "it does not authorize a launch"). ubel #207 (MERGED 19:40Z)
+    RESOLVES the first caveat in FAVOR of the YES: the #175 two-readings tension is settled -- the
+    larger 10.906 reading is the B=16384 128-tok-window SUB-bench, NOT launch-correct (the 2.106 ratio
+    vs h_out 5.178 is bench-sqrtN x op-point, only COINCIDENTALLY ~= #190's sqrt(D) 2.100; reading it
+    as h_out*sqrt(D) double-counts the ICC). The launch-correct full-generation h_out -> trigger
+    512.41/514.63 STANDS, both < the 520.95 ceiling -> the robust-YES SURVIVES (under the conservative
+    10.906 reading the worst-case 523.60 would sit ABOVE the ceiling, but that reading is mis-selected).
+    Now ONE caveat remains OPEN, and it only TIGHTENS the YES: land #71 co-log (n=385 cross-device)
+    retires the rho(*,hw) band. private-footing sensitivity is -0.063 TPS (negligible). (both-bugs only;
+    descent is already NO-GO via #191.) NON-GATING: this row does NOT gate the analytic go -- it is the
+    launch sigma->LCB readout the human reads. Falls back to #201's PROVISIONAL row if #204 is absent."""
+    rebased = _BANKED.unit_rebase_landed()
+    if not _BANKED.sigma_closure_landed() and not rebased:
+        return {"landed": False, "note": "neither ubel #204 (clean rebase) nor #201 (launch-sigma "
+                                         "closure) landed -> fall back to the #195 de-dup row "
+                                         "(7.26/17.04) if present; else quadrature."}
+    # #201 legs (the de-dup x ICC mechanism is SOLID; #201 supplies the leg vector + RETIRED trigger).
+    sc201, wc201 = _BANKED.combined_sigma_launch("central"), _BANKED.combined_sigma_launch("worstcase")
+    mu201_c, mu201_w = _BANKED.mu_clears_500("central"), _BANKED.mu_clears_500("worstcase")
+    ceiling = _BANKED.rebase_lambda1_ceiling() if rebased else _BANKED.lambda1_ceiling_mu()
+    if rebased:
+        # ---- ubel #204 CLEAN-1-sigma trigger (RETIRES #201's 520.09/522.69) ----
+        sc, wc = _BANKED.rebase_combined_sigma("central"), _BANKED.rebase_combined_sigma("worstcase")
+        mu_c, mu_w = _BANKED.rebase_mu_clears_500("central"), _BANKED.rebase_mu_clears_500("worstcase")
+        central_reach = _BANKED.rebase_lambda1_clears_500("central")    # True
+        worst_reach = _BANKED.rebase_lambda1_clears_500("worstcase")    # True (NOW reachable)
+        central_margin = _BANKED.rebase_headroom_below_ceiling("central")   # +8.54
+        worst_margin = _BANKED.rebase_headroom_below_ceiling("worstcase")   # +6.32
+    else:
+        sc, wc = sc201, wc201
+        mu_c, mu_w = mu201_c, mu201_w
+        central_reach = _BANKED.lambda1_clears_500("central")
+        worst_reach = _BANKED.lambda1_clears_500("worstcase")
+        central_margin = _BANKED.margin_at_lambda1("central")
+        worst_margin = _BANKED.margin_at_lambda1("worstcase")
+    resolved_yes = bool(rebased and central_reach and worst_reach)
     return {
         "landed": True,
-        "source_pr": 201,
+        "source_pr": 201,                                     # the de-dup x ICC mechanism/provenance
+        "source_pr_trigger": 204 if rebased else 201,         # the trigger NUMBERS source
         "supersedes_195_726_1704": True,
-        "provisional": True,                                  # advisor 18:23Z: HOLD the verdict
+        "supersedes_201_trigger": bool(rebased),              # #204 RETIRES #201's 520.09/522.69
+        "provisional": (not rebased),                         # #204 RESOLVES it -> False
+        "resolved": bool(rebased),                            # #204 -> RESOLVED-YES
+        "resolved_yes": resolved_yes,                         # lambda=1 clears 500 at P95 both ends
         "gates_analytic_go": False,                           # NON-gating: not wired into `go`
-        # ---- #201 headline combined LAUNCH sigma (1-sigma), REPLACES #195's 7.26 / 17.04 ----
-        "combined_sigma_launch_central_tps": _finite(sc),     # 12.215
-        "combined_sigma_launch_worstcase_tps": _finite(wc),   # 13.796
+        # ---- headline combined LAUNCH sigma (1-sigma): clean #204 (or #201 fallback) ----
+        "combined_sigma_launch_central_tps": _finite(sc),     # 7.545 clean (was 12.215)
+        "combined_sigma_launch_worstcase_tps": _finite(wc),   # 8.897 clean (was 13.796)
         # ---- P95 GO-trigger vs the lambda=1 ceiling ----
         "z_p95": _finite(_BANKED.sigma_closure_z_p95()),      # 1.6449
-        "go_trigger_mu_central_tps": _finite(mu_c),           # 520.09
-        "go_trigger_mu_worstcase_tps": _finite(mu_w),         # 522.69
+        "go_trigger_mu_central_tps": _finite(mu_c),           # 512.41 clean (was 520.09)
+        "go_trigger_mu_worstcase_tps": _finite(mu_w),         # 514.63 clean (was 522.69)
         "lambda1_ceiling_mu_tps": _finite(ceiling),           # 520.95
-        "central_p95_reachable": bool(central_reach),         # True  (+0.86)
-        "worstcase_p95_reachable": bool(worst_reach),         # False (-1.74)
-        "central_margin_at_lambda1_tps": _finite(_BANKED.margin_at_lambda1("central")),     # +0.86
-        "worstcase_margin_at_lambda1_tps": _finite(_BANKED.margin_at_lambda1("worstcase")),  # -1.74
-        # ---- the de-dup x ICC mechanism (SOLID -- banked) ----
-        "acceptance_axis_dedup_iid_tps": _finite(_BANKED.acceptance_sigma_dedup_iid()),       # 5.32 (IDENTITY)
+        "central_p95_reachable": bool(central_reach),         # True  (+8.54)
+        "worstcase_p95_reachable": bool(worst_reach),         # True  (+6.32) -- was False under #201
+        "central_margin_at_lambda1_tps": _finite(central_margin),    # +8.54 (was +0.86)
+        "worstcase_margin_at_lambda1_tps": _finite(worst_margin),    # +6.32 (was -1.74)
+        # ---- ubel #204 clean-rebase specifics ----
+        "unit_rebase_204_landed": bool(rebased),
+        "clean_acceptance_1sigma_tps": (_finite(_BANKED.rebase_acceptance_1sigma_clean())
+                                        if rebased else None),                # 5.699 (= 11.17/1.95996)
+        "delta_mu_rebase_central_tps": (_finite(_BANKED.rebase_delta_mu("central"))
+                                        if rebased else None),                # -7.68 (trigger went DOWN)
+        "delta_mu_rebase_worstcase_tps": (_finite(_BANKED.rebase_delta_mu("worstcase"))
+                                          if rebased else None),              # -8.06
+        "clean_central_vs_ceiling": (_BANKED.rebase_clean_vs_ceiling("central") if rebased else None),    # BELOW
+        "clean_worstcase_vs_ceiling": (_BANKED.rebase_clean_vs_ceiling("worstcase") if rebased else None),  # BELOW
+        "does_lambda1_clear_500_at_p95_centrally": (
+            _BANKED.rebase_does_lambda1_clear_p95_centrally() if rebased else None),   # "YES"
+        "private_footing_shift_tps": (_finite(_BANKED.rebase_private_footing_shift())
+                                      if rebased else None),                  # -0.063 (negligible)
+        "rebase_direction_matches_prediction": (_BANKED.rebase_direction_matches_prediction()
+                                                if rebased else None),        # False (sign-backwards)
+        "anchor_err_195_dedup": (_finite(_BANKED.rebase_anchor_err_195()) if rebased else None),  # 0.0
+        "anchor_err_194_breakeven": (_finite(_BANKED.rebase_anchor_err_194()) if rebased else None),  # 0.0
+        # ---- #201 RETIRED trigger provenance (the units-bug numbers #204 supersedes) ----
+        "superseded_201_trigger": ({
+            "mu_201_central_tps": _finite(mu201_c),           # 520.09 RETIRED
+            "mu_201_worstcase_tps": _finite(mu201_w),         # 522.69 RETIRED
+            "combined_201_central_tps": _finite(sc201),       # 12.215 RETIRED (z=1.96 halfwidth)
+            "note": "#201's trigger 520.09/522.69 RETIRED -- the acceptance leg 11.17 was a z=1.96 "
+                    "two-sided HALF-WIDTH double-counted with the z=1.645 P95 LCB. #204 rebases to a "
+                    "clean 1-sigma (5.699) -> trigger drops to 512.41/514.63, both clearing.",
+        } if rebased else None),
+        # ---- the de-dup x ICC mechanism (SOLID -- banked; sets the acceptance-axis identity) ----
+        "acceptance_axis_dedup_iid_tps": _finite(_BANKED.acceptance_sigma_dedup_iid()),       # 5.32 (#195 IDENTITY)
         "design_effect": _finite(_BANKED.design_effect_201()),                                # 4.4106
         "sqrt_design_effect": _finite(_BANKED.sqrt_design_effect()),                          # 2.100
-        "acceptance_axis_realistic_icc_tps": _finite(_BANKED.acceptance_sigma_dedup_realistic_icc()),  # 11.17 (MAGNITUDE)
+        "acceptance_axis_realistic_icc_halfwidth_tps": _finite(
+            _BANKED.acceptance_sigma_dedup_realistic_icc()),   # 11.17 z=1.96 HALF-WIDTH (#204 rebases -> 5.699)
+        "acceptance_axis_realistic_icc_tps": _finite(_BANKED.acceptance_sigma_dedup_realistic_icc()),  # 11.17 (legacy key)
         "sigma_vector_tps": {
-            "acceptance": _finite(_BANKED.sigma_vector_leg("acceptance")),                    # 11.17
+            "acceptance": _finite(_BANKED.sigma_vector_leg("acceptance")),                    # 11.17 (#201 footing)
             "hardware": _finite(_BANKED.sigma_vector_leg("hardware")),                        # 4.86
             "private": _finite(_BANKED.sigma_vector_leg("private")),                          # 0.88
         },
-        # ---- headroom erosion vs #194's iid break-even ----
+        # ---- headroom vs #194's iid break-even (#201's erosion; #204 removes the double-count) ----
         "iid_break_even_194_tps": _finite(_BANKED.iid_break_even_194()),                      # 512.16
-        "headroom_shift_tps": _finite(_BANKED.headroom_shift_from_iid()),                     # 7.94
+        "headroom_shift_tps": _finite(_BANKED.headroom_shift_from_iid()),                     # 7.94 (#201 erosion)
         # ---- ICC=0 corner reproduces #195's de-dup central 7.2617 (proves the superset) ----
         "icc0_combined_sigma_central_tps": _finite(_BANKED.icc0_combined_sigma_central()),    # 7.2617 (= #195)
         # ---- #195 de-dup PROVENANCE (the mechanism that sets the acceptance-axis identity) ----
@@ -1102,35 +1761,66 @@ def combined_sigma_corner() -> dict:
             "sigma_worstcase_195_tps": _finite(_BANKED.combined_sigma("worstcase"))
                                        if _BANKED.covariance_landed() else None,  # 17.04 (superseded)
         },
-        # ---- two open levers that FINALIZE the PROVISIONAL trigger (advisor 18:23Z) ----
-        "open_levers": {
-            "ubel_204_unit_rebase": "clean-1-sigma unit rebase IN FLIGHT; may shift the central "
-                "trigger ~3 TPS (direction OPEN) -> can FLIP the central verdict (central 520.09 "
-                "sits only +0.86 under the 520.95 ceiling).",
+        # ---- ubel #207 (MERGED 19:40Z): the #175 two-readings tension RESOLVED in favor of the YES ----
+        "sigma_reconcile_207": ({
+            "landed": True,
+            "robust_yes_survives": _BANKED.sigma_reconcile_robust_yes_survives(),          # True
+            "launch_correct_reading": _BANKED.sigma_reconcile_launch_correct_reading(),    # h_out 5.178 (B=65536)
+            "conservative_reading_is_launch_correct": _BANKED.sigma_reconcile_conservative_is_launch_correct(),  # False
+            "lambda1_clears_under_conservative_reading": _BANKED.sigma_reconcile_lambda1_clears_conservative(),  # False
+            "ratio_175_readings": _finite(_BANKED.sigma_reconcile_ratio_175()),            # 2.106
+            "ratio_equals_sqrtD": _BANKED.sigma_reconcile_ratio_equals_sqrtd(),            # False (coincidence)
+            "trigger_central_launch_correct_tps": _finite(_BANKED.sigma_reconcile_trigger_hout("central")),    # 512.41
+            "trigger_worstcase_launch_correct_tps": _finite(_BANKED.sigma_reconcile_trigger_hout("worstcase")),  # 514.63
+            "trigger_central_175sampling_subbench_tps": _finite(_BANKED.sigma_reconcile_trigger_175sampling("central")),    # 520.98 (RETIRED reading)
+            "trigger_worstcase_175sampling_subbench_tps": _finite(_BANKED.sigma_reconcile_trigger_175sampling("worstcase")),  # 523.60 (RETIRED reading)
+            "delta_trigger_reading_tps": _finite(_BANKED.sigma_reconcile_delta_trigger()),  # 8.57
+            "note": "the 10.906 #175-sampling HW is the B=16384 128-tok-window SUB-bench, NOT the "
+                    "official full-generation (B=65536) CI; the 2.106 ratio vs h_out 5.178 = bench-"
+                    "sqrtN(2.04) x op-point(1.03), only COINCIDENTALLY ~= #190's sqrt(D) 2.100 (reading "
+                    "10.906 as h_out*sqrt(D) double-counts the ICC). Launch-correct trigger 512.41/514.63 "
+                    "STANDS; #204's robust-YES SURVIVES. The 10.906 reading is RETIRED.",
+        } if _BANKED.sigma_reconcile_landed() else {"landed": False}),
+        # ---- caveats: #207 RESOLVES the #175 tension; only land #71 remains open (and it TIGHTENS) ----
+        "resolved_caveats": {
+            "issue_207_175_two_readings": "RESOLVED by ubel #207 (19:40Z): the larger 10.906 reading is "
+                "the B=16384 sub-bench, NOT launch-correct; the launch-correct h_out 5.178 -> 512.41/"
+                "514.63 STANDS and the robust-YES SURVIVES. The 10.906 reading is retired.",
+        },
+        "open_caveats": {
             "land_71_colog": "co-log per-allocation acceptance x wall-TPS across n=%s cross-device "
-                "allocations -> measures rho(*,hw) directly and RETIRES the [-0.3,+0.3] band, "
-                "collapsing the [central, worst-case] interval onto a single trigger." % (
-                    _BANKED.colog_n_allocations()),
+                "allocations now TIGHTENS a YES (retires the rho(*,hw) [-0.3,+0.3] band), rather than "
+                "rescuing a NO as it would have under #201." % (_BANKED.colog_n_allocations()),
         },
         "colog_n_allocations": _BANKED.colog_n_allocations(),  # 385
         "unit_convention_note": _BANKED.sigma_closure_unit_convention_note(),
-        "verdict_line": "launch is on a knife-edge vs the lambda=1 ceiling -- P95-reachable at "
-                        "central ICC (+%.2f TPS margin) but P95-UNREACHABLE at worst-case rho(*,hw) "
-                        "(%.2f TPS), even at lambda=1; central verdict PENDING ubel #204's "
-                        "unit-direction." % (
-                            _BANKED.margin_at_lambda1("central") or float("nan"),
-                            _BANKED.margin_at_lambda1("worstcase") or float("nan")),
-        "note": "#201 REPLACES #195's 7.26/17.04 -> combined launch sigma %.2f central / %.2f "
-                "worst-case (de-dup IDENTITY 5.32 * sqrt(D)=2.100 ICC MAGNITUDE -> acceptance 11.17, "
-                "(+) sigma_hw 4.86 (+) sigma_priv 0.88). P95 GO trigger mu>=%.2f central / %.2f "
-                "worst-case vs the lambda=1 ceiling %.2f -> central reachable (+%.2f), worst-case "
-                "UNREACHABLE (%.2f). PROVISIONAL: HOLD the verdict (not hard-wired vs the ceiling) "
-                "pending #204 unit-rebase (~3 TPS, direction open) + land #71 co-log (n=%s) retiring "
-                "the rho(*,hw) band." % (
-                    _finite(sc), _finite(wc), _finite(mu_c), _finite(mu_w), _finite(ceiling),
-                    _BANKED.margin_at_lambda1("central") or float("nan"),
-                    _BANKED.margin_at_lambda1("worstcase") or float("nan"),
-                    _BANKED.colog_n_allocations()),
+        "verdict_line": (
+            "RESOLVED-YES: after #204's clean-1-sigma rebase the launch sigma is %.2f central / %.2f "
+            "worst-case; lambda=1 clears 500 at P95 CENTRALLY (+%.2f TPS) AND worst-case (+%.2f TPS) "
+            "-- trigger %.2f/%.2f both BELOW the lambda=1 ceiling %.2f. NON-GATING: it does not "
+            "authorize a launch." % (
+                _finite(sc), _finite(wc), _finite(central_margin), _finite(worst_margin),
+                _finite(mu_c), _finite(mu_w), _finite(ceiling)) if resolved_yes
+            else "launch sigma->LCB row PROVISIONAL (ubel #204 clean rebase absent): central reachable "
+                 "(+%.2f), worst-case %s." % (
+                     _finite(central_margin) if central_margin is not None else float("nan"),
+                     "reachable" if worst_reach else "UNREACHABLE")),
+        "note": (
+            "ubel #204 RETIRES #201's 520.09/522.69 (a z=1.96 two-sided HALF-WIDTH double-counted with "
+            "the z=1.645 LCB). Clean 1-sigma acceptance 5.699 -> combined launch sigma %.2f central / "
+            "%.2f worst-case ((+) sigma_hw 4.86 (+) sigma_priv 0.88). P95 GO trigger mu>=%.2f central / "
+            "%.2f worst-case vs the lambda=1 ceiling %.2f -> BOTH BELOW -> RESOLVED-YES (central +%.2f, "
+            "worst-case +%.2f). Direction came out sign-backwards (trigger DOWN by %.2f, not up). "
+            "NON-GATING; ubel #207 RESOLVED the #175 two-readings tension (10.906 is the B=16384 "
+            "sub-bench, retired) so the robust-YES SURVIVES; only land #71 co-log (n=%s) remains open "
+            "and it merely TIGHTENS the YES." % (
+                _finite(sc), _finite(wc), _finite(mu_c), _finite(mu_w), _finite(ceiling),
+                _finite(central_margin), _finite(worst_margin),
+                _finite(_BANKED.rebase_delta_mu("central")) if rebased else float("nan"),
+                _BANKED.colog_n_allocations()) if rebased
+            else "#201 PROVISIONAL fallback (ubel #204 absent): launch sigma %.2f/%.2f, trigger "
+                 "%.2f/%.2f vs ceiling %.2f." % (
+                     _finite(sc), _finite(wc), _finite(mu_c), _finite(mu_w), _finite(ceiling))),
     }
 
 
@@ -1198,20 +1888,38 @@ def liveprobe_measurement_cost(ladder: list | None = None) -> dict:
     MEASURED full-ladder q[2..9] clearing 0.9780 -- never a depth-1-only / spine-inferred read (which
     is a FALSE GO worth 85.2 TPS of overstatement). At the grounded beta=0.765 the mechanism CANNOT
     clear the private bar (even PERFECT depth-1 -> private_LCB 419.6 << 500), so a GO requires beta~1
-    across the MEASURED ladder, not a point lambda_hat. The decisive certification is ~30,455 fixed-N
-    Neyman trials @lambda=1 (shallow-heavy), being made SEQUENTIAL by denken #205 (SPRT) -> carry 30k
-    as the worst-case cap. REINFORCES the HOLD (sharpens the measurement spec); does NOT flip it."""
+    across the MEASURED ladder, not a point lambda_hat.
+
+    COST ROW REPLACED by denken #205 (MERGED 19:09Z, SPRT): the measurement-cost row is no longer
+    #197's truth-INDEPENDENT fixed-N ~30,455 draws; it is the REALISTIC sequential expected-N --
+    E[N]~405 trials on a clear-NO-GO build (grounded beta=0.765, private_LCB 419.6<<500), a ~75.12x
+    collapse, rising to ~14,915 only if the build is genuinely near the bar and PEAKING at the
+    indifference point (worst-case ASN ~24,398). Boundaries A/B=+-2.9444 deliver realized
+    (alpha,power)=(0.05,0.95); the ICC band (Deff=4.41) scales absolute counts but NOT the saving
+    ratio. The SPRT KEEPS #197's shallow-heavy order (depths {2,3,4} carry 65% of the decisive info).
+    #197's 30,455 fixed-N is retained as the worst-case-CAP reference. The FULL-LADDER GO guard is
+    UNCHANGED. REINFORCES the HOLD (sharpens the measurement spec); does NOT flip it.
+
+    COST-BAND SHARPENED by denken #212 (MERGED 19:54Z, AR(1)-corrected ASN): #205's flat xDeff=4.41
+    is CONFIRMED CONSERVATIVE; folding #190's DECAYING within-prompt ACF (rho(1)=0.2583) into the SPRT
+    partial-sum variance tightens the realism band 1.59-2.66x. The E[N]_nogo band becomes [405 IID ->
+    672 AR(1)-optimistic -> 1,125 measured-ACF-realistic -> 1,788 flat-loose]; the data-grounded point
+    is 1,125 (the measured ACF decays slower than pure AR(1): rho(2)=0.168 >> rho(1)^2=0.067). The
+    75.12x collapse vs #197's fixed-N is Deff-INVARIANT, and realized (alpha,power)=(0.05,0.95) + the
+    bar 0.9780 are UNCHANGED -- the AR correction only sharpens the absolute band. Orthogonal to #192."""
     if not _BANKED.liveprobe_landed():
         return {"landed": False, "note": "liveprobe #197 not landed -> GO leg uses the measured "
                                          "ladder as-is; no explicit full-ladder / false-GO guard."}
     n_meas = (len([q for q in ladder if q is not None]) if ladder is not None else None)
     full_ladder_measured = bool(n_meas is not None and n_meas >= 8)
+    sprt = _BANKED.sprt_landed()
     return {
         "landed": True,
         "source_pr": 197,
+        "cost_row_source_pr": 205 if sprt else 197,            # #205 SPRT replaces the #197 cost row
         "reinforces_hold": True,
         "flips_verdict": False,
-        # ---- the FULL-LADDER GO requirement (measurement spec) ----
+        # ---- the FULL-LADDER GO requirement (measurement spec; UNCHANGED by #205) ----
         "full_ladder_required": True,
         "min_depths_for_decisive": _BANKED.liveprobe_min_depths_for_decisive(),     # "full-ladder"
         "min_depths_int": _BANKED.liveprobe_min_depths_int(),                       # 9
@@ -1227,23 +1935,103 @@ def liveprobe_measurement_cost(ladder: list | None = None) -> dict:
         "private_lcb_perfect_depth1_tps": _finite(_BANKED.liveprobe_private_lcb_perfect_depth1()),  # 419.6
         "beta_primary": _finite(_BANKED.liveprobe_beta_primary()),                  # 0.765
         "private_bar_both": _finite(_BANKED.liveprobe_private_bar()),               # 0.9780
-        # ---- the certification COST row (sequential via #205; 30k worst-case cap) ----
+        # ---- the certification COST row: REALISTIC SPRT expected-N (#205), 30k fixed-N as the CAP ----
+        "sequential_via_205_pending": False,                                       # #205 has LANDED
+        "sequential_sprt_205_landed": sprt,                                         # denken #205 SPRT
+        # the REALISTIC measurement-cost the human reads now (NO-GO build is the realistic case):
+        "expected_n_sprt_nogo": (_finite(_BANKED.sprt_expected_n_nogo()) if sprt else None),       # ~405
+        "expected_n_sprt_nogo_realistic_icc": (_finite(_BANKED.sprt_expected_n_nogo_realistic_icc())
+                                               if sprt else None),                  # ~1788 (Deff band)
+        "expected_n_sprt_nearbar": (_finite(_BANKED.sprt_expected_n_nearbar()) if sprt else None),  # ~14,915
+        "worst_case_expected_n_sprt": (_finite(_BANKED.sprt_worst_case_expected_n()) if sprt else None),  # ~24,398
+        "worst_case_expected_n_sprt_realistic_icc": (
+            _finite(_BANKED.sprt_worst_case_expected_n_realistic_icc()) if sprt else None),  # ~107,610
+        "sprt_savings_vs_fixed_n": (_finite(_BANKED.sprt_savings_vs_fixed_n()) if sprt else None),  # ~75.12x
+        "sprt_boundary_A_upper_decide_go": (_finite(_BANKED.sprt_boundary("A_upper_decide_go"))
+                                            if sprt else None),                     # +2.9444
+        "sprt_boundary_B_lower_decide_nogo": (_finite(_BANKED.sprt_boundary("B_lower_decide_nogo"))
+                                              if sprt else None),                   # -2.9444
+        "sprt_realized_alpha": (_finite(_BANKED.sprt_realized_alpha()) if sprt else None),  # 0.05
+        "sprt_realized_power": (_finite(_BANKED.sprt_realized_power()) if sprt else None),  # 0.95
+        "sprt_target_alpha": (_finite(_BANKED.sprt_target_alpha()) if sprt else None),      # 0.05
+        "sprt_target_power": (_finite(_BANKED.sprt_target_power()) if sprt else None),      # 0.95
+        "sprt_deff_190": (_finite(_BANKED.sprt_deff_190()) if sprt else None),              # 4.4106
+        "sprt_beta_nogo": (_finite(_BANKED.sprt_beta_nogo()) if sprt else None),            # 0.765
+        "sprt_private_lcb_nogo_tps": (_finite(_BANKED.sprt_private_lcb_nogo()) if sprt else None),  # 419.6
+        # #197's fixed-N Neyman trials retained as the worst-case CAP reference:
         "decisive_total_trials_lambda1": _finite(_BANKED.liveprobe_decisive_total_trials()),  # 30455.40
         "decisive_N_d_budget_1to9": _BANKED.liveprobe_N_d_budget(),
         "neyman_efficiency_gain_vs_equal": _finite(_BANKED.liveprobe_neyman_efficiency_gain()),  # 1.43
         "decisive_margin_at_lambda1": _finite(_BANKED.liveprobe_decisive_margin_at_lambda1()),  # 0.022
-        "sequential_via_205_pending": True,                                        # denken #205 SPRT
-        "worst_case_cap_trials": _finite(_BANKED.liveprobe_decisive_total_trials()),  # 30k cap
-        "note": "the GO must gate on land #71's MEASURED full-ladder q[2..9] >= 0.9780 (min_depths="
-                "full-ladder; depth-1+2 does NOT suffice) -- a depth-1-only read is a FALSE GO worth "
-                "%.1f TPS (true private LCB 419.6 << 500). At beta=0.765 NO build clears the private "
-                "bar (mech_can_clear=False) -> a GO needs beta~1 across the ladder. Cost: ~%.0f Neyman "
-                "trials @lambda=1 (shallow-heavy; eff %.2fx over equal-allocation), being made "
-                "SEQUENTIAL by denken #205 (SPRT) -> carry 30k as the worst-case cap. REINFORCES the "
-                "HOLD." % (
-                    _BANKED.liveprobe_depth1_overstatement() or float("nan"),
-                    _BANKED.liveprobe_decisive_total_trials() or float("nan"),
-                    _BANKED.liveprobe_neyman_efficiency_gain() or float("nan")),
+        "fixed_n_worst_case_cap_trials": _finite(_BANKED.liveprobe_decisive_total_trials()),  # 30k fixed-N cap
+        # ---- denken #212 (MERGED 19:54Z): AR(1)-corrected realism band for the SPRT cost ----
+        # #205's flat xDeff=4.41 is CONFIRMED CONSERVATIVE; folding #190's DECAYING within-prompt ACF
+        # tightens the realism band 1.59-2.66x. The data-grounded realistic E[N]_nogo is 1,125 (measured-
+        # ACF), NOT the flat-loose 1,788; 405 (IID) and 1,788 (flat) are the envelope ends. The 75.12x
+        # collapse vs #197's fixed-N is Deff-INVARIANT; realized (alpha,power)=(0.05,0.95) + bar 0.9780 UNCHANGED.
+        "ar_corrected_cost_band_212": ({
+            "landed": True,
+            "source_pr": 212,
+            "expected_n_nogo_band": _BANKED.sprt_ar_band(),    # [405 IID, 672 AR(1), 1125 measured-ACF, 1788 flat]
+            "expected_n_nogo_iid_floor": _finite(_BANKED.sprt_ar_expected_n_nogo("iid")),          # 405
+            "expected_n_nogo_ar_optimistic": _finite(_BANKED.sprt_ar_expected_n_nogo("ar1")),      # 672
+            "expected_n_nogo_realistic_measured_acf": _finite(_BANKED.sprt_ar_realistic_nogo()),   # 1125 (data-grounded)
+            "expected_n_nogo_flat_loose": _finite(_BANKED.sprt_ar_expected_n_nogo("flat_441")),    # 1788 (= #205 conservative end)
+            "deff_ar": _finite(_BANKED.sprt_ar_deff("deff_ar_at_mbar")),                # 1.658 (optimistic)
+            "deff_empirical_acf": _finite(_BANKED.sprt_ar_deff("deff_empirical_acf_measured")),  # 2.774 (realistic)
+            "deff_flat_441": _finite(_BANKED.sprt_ar_deff("deff_flat_441")),            # 4.411 (conservative)
+            "rho_lag1": _finite(_BANKED.sprt_ar_rho_lag1()),                            # 0.2583
+            "tightening_empirical_vs_flat": _finite(_BANKED.sprt_ar_tightening("empirical")),  # 1.59x
+            "tightening_ar_vs_flat": _finite(_BANKED.sprt_ar_tightening("ar")),         # 2.66x
+            "flat_441_is_conservative": _BANKED.sprt_ar_flat_is_conservative(),         # True
+            "savings_ratio_deff_invariant": _BANKED.sprt_ar_savings_invariant(),        # True
+            "savings_ratio_unchanged": _finite(_BANKED.sprt_ar_savings_ratio()),        # 75.12 (UNCHANGED)
+            "n_fss_197": _finite(_BANKED.sprt_ar_n_fss_197()),                          # 30455
+            "realized_alpha_unchanged": _finite(_BANKED.sprt_ar_realized_alpha()),      # 0.05 (UNCHANGED)
+            "realized_power_unchanged": _finite(_BANKED.sprt_ar_realized_power()),      # 0.95 (UNCHANGED)
+            "private_bar_both_unchanged": _finite(_BANKED.sprt_ar_private_bar()),       # 0.9780 (UNCHANGED)
+            "orthogonal_to_192": True,
+            "self_test_passes": _BANKED.sprt_ar_self_test_passes(),
+            "note": "folding #190's DECAYING ACF (rho(1)=0.2583) into the SPRT partial-sum variance "
+                    "tightens #205's flat xDeff=4.41 by 1.59-2.66x. E[N]_nogo band = [%.0f IID -> %.0f "
+                    "AR(1)-opt -> %.0f measured-ACF-realistic -> %.0f flat-loose]; the data-grounded "
+                    "realistic point is %.0f (rho(2)=0.168 >> rho(1)^2=0.067, slower than pure AR(1)). "
+                    "flat x4.41 is the CONSERVATIVE (loose) end. The 75.12x collapse is Deff-INVARIANT; "
+                    "(alpha,power)=(0.05,0.95) + bar 0.9780 UNCHANGED. Orthogonal to #192." % (
+                        _BANKED.sprt_ar_expected_n_nogo("iid") or float("nan"),
+                        _BANKED.sprt_ar_expected_n_nogo("ar1") or float("nan"),
+                        _BANKED.sprt_ar_realistic_nogo() or float("nan"),
+                        _BANKED.sprt_ar_expected_n_nogo("flat_441") or float("nan"),
+                        _BANKED.sprt_ar_realistic_nogo() or float("nan")),
+        } if _BANKED.sprt_ar_landed() else {"landed": False}),
+        # the data-grounded realistic measurement-cost the human reads now (denken #212, supersedes
+        # #205's flat-loose 1,788 as the realistic point; 405/1,788 are the tight/loose envelope ends):
+        "expected_n_nogo_realistic_measured_acf": (_finite(_BANKED.sprt_ar_realistic_nogo())
+                                                   if _BANKED.sprt_ar_landed() else None),   # 1125
+        "note": ("the GO must gate on land #71's MEASURED full-ladder q[2..9] >= 0.9780 (min_depths="
+                 "full-ladder; depth-1+2 does NOT suffice) -- a depth-1-only read is a FALSE GO worth "
+                 "%.1f TPS (true private LCB 419.6 << 500). At beta=0.765 NO build clears the private "
+                 "bar (mech_can_clear=False) -> a GO needs beta~1 across the ladder. COST (denken #205 "
+                 "SPRT, REPLACES #197's fixed-N): realistic E[N]~%.0f trials on a clear-NO-GO build "
+                 "(%.1fx collapse vs #197's %.0f fixed-N), ~%.0f near-bar, worst-case ASN ~%.0f at the "
+                 "indifference point; realized (alpha,power)=(%.2f,%.2f), boundaries +-%.4f; Deff=%.2f "
+                 "scales counts not the ratio. Carry #197's %.0f fixed-N as the worst-case CAP. "
+                 "REINFORCES the HOLD." % (
+                     _BANKED.liveprobe_depth1_overstatement() or float("nan"),
+                     _BANKED.sprt_expected_n_nogo() or float("nan"),
+                     _BANKED.sprt_savings_vs_fixed_n() or float("nan"),
+                     _BANKED.sprt_n_fixed_197() or float("nan"),
+                     _BANKED.sprt_expected_n_nearbar() or float("nan"),
+                     _BANKED.sprt_worst_case_expected_n() or float("nan"),
+                     _BANKED.sprt_realized_alpha() or float("nan"),
+                     _BANKED.sprt_realized_power() or float("nan"),
+                     _BANKED.sprt_boundary("A_upper_decide_go") or float("nan"),
+                     _BANKED.sprt_deff_190() or float("nan"),
+                     _BANKED.liveprobe_decisive_total_trials() or float("nan"))
+                 if sprt else
+                 "the GO must gate on land #71's MEASURED full-ladder q[2..9] >= 0.9780; cost ~%.0f "
+                 "fixed-N Neyman trials @lambda=1 (denken #205 SPRT not yet landed). REINFORCES the "
+                 "HOLD." % (_BANKED.liveprobe_decisive_total_trials() or float("nan"))),
     }
 
 
@@ -1307,6 +2095,212 @@ def frozen_budget_annotation() -> dict:
     }
 
 
+def winners_curse_annotation() -> dict:
+    """kanna #210 (MERGED 19:40Z, W&B hwvv7nn1): best-of-N does NOT relax the binding PRIVATE bar.
+    The conditional private clear is EXACTLY FLAT in N (n_star_private=1): best-of-N selects the MAX
+    public shot, inflating it by sigma_sel*E[Z_(N:N)] of NON-replicating noise that never appears in
+    the private re-benchmark (Capen 1971 winner's curse / Smith-Winkler 2006 optimizer's curse). The
+    private grade is one fresh draw whose distribution is unchanged by the public selection. So to
+    clear 500-PRIVATE at P>=0.95 under a best-of-5 launch trigger the PUBLIC build must reach
+    mu_bar_private_corrected=**528.48** (+23.61 winner's-curse tax over #202's public-only frozen bar
+    504.87 = 7.28 evaporating public best-of-N discount + 16.33 private-drop gross-up). REGIME-INVARIANT.
+
+    This CORRECTS the #202 hedge: build-to-512.2 / N=1 is freeze-robust for the PUBLIC number but does
+    NOT survive the PRIVATE winner's curse (p_private=0.3120, NOT >=0.95) -- the 2.35% adverse drop x
+    tau_low sinks its private mean to 496.38 < 500. The N=1 prescription STANDS (against the private
+    bar, BUILDING HIGHER strictly dominates RE-DRAWING MORE; best-of-N is self-defeating), but the
+    BUILD TARGET rises to 528.48. This is the multi-shot BUILD-target row; it does NOT touch the
+    sigma->LCB PUBLIC trigger (512.41, ubel #204/#207 -- a different quantity). REINFORCES the HOLD."""
+    if not _BANKED.winners_curse_landed():
+        return {"landed": False, "note": "winners_curse #210 not landed -> the multi-shot budget row "
+                                         "may UNDER-state the private build target (best-of-N looks "
+                                         "like it relaxes the bar; it does not -- the private clear is "
+                                         "flat in N). Use #202's 504.87 public bar as a LOWER bound."}
+    tax = _BANKED.winners_curse_tax_decomposition()
+    return {
+        "landed": True,
+        "source_pr": 210,
+        "reinforces_hold": True,
+        "regime_invariant": _BANKED.winners_curse_regime_invariant(),       # True (FRESH/FROZEN same answer)
+        # ---- the headline: best-of-N does NOT relax the PRIVATE bar (flat in N) ----
+        "private_clear_flat_in_n": _BANKED.winners_curse_private_clear_flat_in_n(),   # True
+        "n_star_private": _BANKED.winners_curse_n_star_private(),            # 1 (build higher, not re-draw)
+        "recommendation": "build higher (mu_pub >= 528.48), N=1",
+        # ---- the winner's-curse-corrected PRIVATE build target ----
+        "mu_bar_private_corrected_tps": _finite(_BANKED.winners_curse_mu_bar_private_corrected()),  # 528.48
+        "mu_bar_frozen_public_202_tps": _finite(_BANKED.winners_curse_mu_bar_frozen_202()),         # 504.87
+        "mu_safe_fresh_194_tps": _finite(_BANKED.winners_curse_mu_safe_fresh_194()),                # 512.16
+        "delta_mu_winners_curse_tps": _finite(_BANKED.winners_curse_delta_mu()),                    # +23.61 tax
+        "tax_decomposition_tps": {
+            "public_bestofN_discount_evaporates": _finite(tax.get("public_bestofN_discount_evaporates_tps")),  # 7.28
+            "private_drop_grossup": _finite(tax.get("private_drop_grossup_tps")),                   # 16.33
+            "sum": _finite(tax.get("sum_tps")),                                                     # 23.61
+        },
+        # ---- the #202 hedge (build-to-512.2/N=1) does NOT survive the PRIVATE winner's curse ----
+        "freeze_robust_512_survives_private": _BANKED.winners_curse_freeze_robust_512_survives(),   # False
+        "p_private_clear_at_mu512p2_n1": _finite(_BANKED.winners_curse_p_private_at_512()),         # 0.3120 (< 0.95)
+        # ---- the winner's-curse inflation that EVAPORATES privately (best-of-5) ----
+        "winners_curse_tps_n5_frozen": _finite(_BANKED.winners_curse_tps_n5("frozen")),             # 5.66
+        "winners_curse_tps_n5_fresh": _finite(_BANKED.winners_curse_tps_n5("fresh")),               # 8.60
+        "private_bar_lambda_star_191": _finite(_BANKED.winners_curse_lambda_star_191()),            # 0.9780
+        # ---- explicit: this is the BUILD-target row, NOT the sigma->LCB PUBLIC trigger ----
+        "does_not_change_sigma_lcb_trigger": True,   # 512.41 (public-bar P95 trigger) is a different quantity
+        "note": "best-of-N does NOT relax the binding PRIVATE bar (stark #191 lambda*_LCB 0.9780): the "
+                "conditional private clear is FLAT in N (n_star_private=1) because selection is on non-"
+                "replicating public noise and the private grade is one fresh draw. To clear 500-private "
+                "at P>=0.95 under best-of-5 the PUBLIC build must reach mu_bar_private_corrected=%.2f "
+                "(+%.2f winner's-curse tax over #202's 504.87 = %.2f evaporating public discount + %.2f "
+                "private-drop gross-up). The #202 freeze-robust mu=512.2/N=1 does NOT survive privately "
+                "(p=%.4f < 0.95). N=1 STANDS (building higher dominates re-drawing more); the BUILD "
+                "TARGET rises to %.2f. Does NOT touch the sigma->LCB public trigger 512.41. REINFORCES "
+                "the HOLD." % (
+                    _BANKED.winners_curse_mu_bar_private_corrected() or float("nan"),
+                    _BANKED.winners_curse_delta_mu() or float("nan"),
+                    (tax.get("public_bestofN_discount_evaporates_tps") or float("nan")),
+                    (tax.get("private_drop_grossup_tps") or float("nan")),
+                    _BANKED.winners_curse_p_private_at_512() or float("nan"),
+                    _BANKED.winners_curse_mu_bar_private_corrected() or float("nan")),
+    }
+
+
+def compliant_lane_bracket() -> dict:
+    """lawine #196 (lane-b non-spec floor, MERGED 18:58Z) + wirbel #199 (lane-a compliant-spec E[T]
+    ceiling, MERGED 19:09Z): the ISSUE #192 COMPLIANCE bracket that sits ABOVE the sigma->LCB trigger.
+
+    Issue #192 -- the human ruling on whether the speculative int4 verify token must be IDENTICAL to
+    the AR greedy argmax -- decides WHICH lane is admissible at 500 TPS:
+
+      * lane-b (non-spec, lawine #196, EMPIRICAL): a compliant non-spec int4 path IS token-identical
+        (rate 1.0), PPL 2.3766 < 2.42, 128/128 complete -- but it FLOORS at ~165.44 official TPS,
+        66.9% BELOW 500. There is NO compliant non-spec 500-lane; the speculation premium (316.1 TPS,
+        191%) is EXISTENTIAL.
+
+      * lane-a (compliant-spec, wirbel #199, BRACKET): the batch-invariant int4 VERIFY kernel ceiling
+        = 536.66 official TPS (finite-sample lower-CI 525.73 > 500 -> CLEARS), floor = 416.31 (MISSES).
+        Clears 500 ONLY IF the batch-invariant kernel costs < 7.33% (both-bugs) / 4.12% (descent)
+        verify-step overhead -- UNMEASURED; kanna #122's off-the-shelf int4 is +51.78% (~7x over budget).
+
+    wirbel #213 (lane-a capstone, MERGED 19:40Z) grades lane-a's overhead budget vs lambda:
+    max_kernel_overhead_pct(lambda) opens from <=0 at lambda_hat=0.342 (the realistic floor already
+    misses 500 -- even a FREE kernel fails) to 7.33% (both) / 4.12% (descent) at lambda=1; the zero-
+    overhead path first clears 500 at lambda_crit=**0.8345** both / **0.9067** descent. So lane-a is a
+    DOUBLE gate: build self-KV-recovery lambda >= 0.8345 AND hold the batch-invariant verify kernel
+    under the lambda-graded budget. Off-shelf #122 (+51.78%) clears at NO physical lambda<=1.
+
+    NET: under strict #192, lane-a is the SINGLE compliant route to 500, a DOUBLE gate (lambda>=0.8345
+    AND kernel-overhead < max_overhead(lambda), the latter UNMEASURED). This does NOT change the
+    sigma->LCB GO trigger (ubel #204/#207's 512.41/514.63 stands); it adds a COMPLIANCE PRECONDITION
+    that gates the launch ABOVE the sigma math. The launch stays HELD on the three hard gates (land #71
+    build, measured lambda_hat >= 0.9780 q[2..9] direct, issue #192 human ruling)."""
+    nl = _BANKED.nonspec_floor_landed()
+    cl = _BANKED.compliant_spec_landed()
+    if not (nl and cl):
+        return {"landed": False, "source_prs": [196, 199],
+                "nonspec_floor_landed": bool(nl), "compliant_spec_landed": bool(cl),
+                "note": "compliant-lane modules not both present -> #192 bracket unresolved."}
+    ceiling = _BANKED.compliant_spec_ceiling()
+    floor = _BANKED.compliant_spec_floor()
+    ci_lower_bb = _BANKED.compliant_spec_ceiling_ci_lower("both_bugs")
+    lower_clears = _BANKED.compliant_spec_lower_clears_500("both_bugs")
+    oh_bb = _BANKED.compliant_spec_max_overhead("both_bugs")
+    oh_desc = _BANKED.compliant_spec_max_overhead("descent_only")
+    offshelf = _BANKED.compliant_spec_offshelf_overhead_ref()
+    nonspec = _BANKED.nonspec_official_tps()
+    margin = _BANKED.nonspec_margin_pct()
+    kb = _BANKED   # wirbel #213 kernel-budget accessors (lane-a capstone)
+    return {
+        "landed": True,
+        "source_prs": [196, 199, 213] if kb.kernel_budget_landed() else [196, 199],
+        "reinforces_hold": True,
+        # CRUX: this row sits ABOVE the sigma math -- it does NOT gate or change #204's sigma->LCB trigger.
+        "gates_sigma_lcb_trigger": False,
+        "sits_above_sigma_math": True,
+        "does_not_change_204_trigger": True,
+        "issue_192_human_ruling_pending": True,
+        "binding_compliance_gate": "issue_192_human_ruling",
+        # ---- lane-b: non-spec compliant floor (lawine #196, EMPIRICAL) ----
+        "lane_b_nonspec": {
+            "official_tps_floor": _finite(nonspec),                          # 165.44
+            "hw_band_tps": _BANKED.nonspec_floor_band("hw"),                 # [160.58, 170.30]
+            "token_identity_rate": _finite(_BANKED.nonspec_token_identity()),  # 1.0
+            "ppl": _finite(_BANKED.nonspec_ppl()),                           # 2.3766
+            "completes_128": _BANKED.nonspec_completes_128(),               # True
+            "clears_500": _BANKED.nonspec_clears_500(),                      # False
+            "margin_to_500_pct": _finite(margin),                           # -66.9
+            "spec_premium_tps": _finite(_BANKED.nonspec_spec_premium_tps()),   # 316.1
+            "spec_premium_pct": _finite(_BANKED.nonspec_spec_premium_pct()),   # 191.1
+            "verdict_label": _BANKED.nonspec_verdict_label(),               # STRUCTURAL_GAP_SPEC_EXISTENTIAL
+            "self_test_passes": _BANKED.nonspec_floor_self_test_passes(),
+        },
+        # ---- lane-a: compliant-spec E[T] ceiling (wirbel #199, BRACKET) ----
+        "lane_a_compliant_spec": {
+            "tps_ceiling": _finite(ceiling),                  # 536.66
+            "tps_floor": _finite(floor),                      # 416.31
+            "ceiling_ci_lower_tps": _finite(ci_lower_bb),     # 525.73
+            "ceiling_lower_clears_500": bool(lower_clears),   # True
+            "ceiling_clears_500": _BANKED.compliant_spec_clears_500(),      # True
+            "floor_clears_500": _BANKED.compliant_spec_floor_clears_500(),  # False
+            "max_kernel_overhead_pct_both_bugs": _finite(oh_bb),    # 7.33
+            "max_kernel_overhead_pct_descent": _finite(oh_desc),    # 4.12
+            "offshelf_overhead_ref_122": _finite(offshelf),         # 0.5178 (+51.78%)
+            "overhead_is_measured": False,                          # UNMEASURED feasibility
+            "self_test_passes": _BANKED.compliant_spec_self_test_passes(),
+        },
+        # ---- lane-a capstone: the kernel-overhead budget vs lambda (wirbel #213, MERGED 19:40Z) ----
+        # max_kernel_overhead_pct(lambda) -- the lane-a 500-route is a DOUBLE gate: self-KV-recovery
+        # lambda >= lambda_crit AND batch-invariant verify kernel under the lambda-graded overhead budget.
+        "lane_a_kernel_budget_213": ({
+            "landed": True,
+            "source_pr": 213,
+            "lambda_crit_clears_500_both_bugs": _finite(kb.kernel_budget_lambda_crit("both_bugs")),   # 0.8345
+            "lambda_crit_clears_500_descent": _finite(kb.kernel_budget_lambda_crit("descent")),       # 0.9067
+            "overhead_budget_pct_at_lambda1_both_bugs": _finite(kb.kernel_budget_overhead_at_lambda1("both_bugs")),  # 7.33
+            "overhead_budget_pct_at_lambda1_descent": _finite(kb.kernel_budget_overhead_at_lambda1("descent")),      # 4.12
+            "overhead_budget_pct_at_lambda_hat_both_bugs": _finite(kb.kernel_budget_overhead_at_lambda_hat()),       # -16.74
+            "lambda_hat": _finite(kb.kernel_budget_lambda_hat()),                  # 0.342 (realistic floor)
+            "offshelf_122_clears_at_physical_lambda": kb.kernel_budget_offshelf_clears_at_physical_lambda(),  # False
+            "max_budget_pct_at_prob_saturation_both_bugs": _finite(kb.kernel_budget_max_at_saturation()),     # 50.10
+            "budget_curve_both_bugs": kb.kernel_budget_curve("both_bugs"),         # [(lambda, pct, clears)...]
+            "verdict": kb.kernel_budget_verdict(),                                  # BUDGET-OPENS-ONLY-ABOVE-LAMBDA-CRIT
+            "self_test_passes": kb.kernel_budget_self_test_passes(),
+            "note": "the budget opens from <=0 at lambda_hat=0.342 (the realistic floor already misses "
+                    "500 -- even a FREE batch-invariant kernel fails) to 7.33%% (both) / 4.12%% (descent) "
+                    "at lambda=1; the zero-overhead path first clears 500 at lambda_crit=0.8345 both / "
+                    "0.9067 descent. Off-shelf #122 (+51.78%%) clears at NO physical lambda<=1 (the "
+                    "lambda=1 budget is only 7.33%%, ~7.1x over). So lane-a is a DOUBLE gate: build "
+                    "self-KV-recovery lambda >= 0.8345 AND hold the kernel under max_overhead(lambda).",
+        } if kb.kernel_budget_landed() else {"landed": False}),
+        # ---- NET: the #192 compliance precondition ----
+        "compliant_500_lane_exists": bool(lower_clears),     # lane-a lower-CI clears -> a compliant 500-path CAN exist...
+        "compliant_500_lane_is_spec_only": True,             # ...but ONLY via lane-a (the batch-invariant verify kernel)
+        "compliant_500_conditioned_on_unmeasured_overhead": True,
+        "compliant_500_lane_is_double_gate": bool(kb.kernel_budget_landed()),   # #213: lambda>=lambda_crit AND kernel-under-budget
+        "lane_a_lambda_crit_both_bugs": _finite(kb.kernel_budget_lambda_crit("both_bugs")) if kb.kernel_budget_landed() else None,  # 0.8345
+        "lane_a_lambda_crit_descent": _finite(kb.kernel_budget_lambda_crit("descent")) if kb.kernel_budget_landed() else None,      # 0.9067
+        "note": "ISSUE #192 compliance bracket (ABOVE the sigma->LCB trigger; does NOT change ubel "
+                "#204's 512.41/514.63). lane-b (non-spec, EMPIRICAL): token-identical (1.0), PPL "
+                "%.4f<2.42, 128/128 -- but FLOORS at %.2f official TPS (%.1f%% below 500); NO compliant "
+                "non-spec 500-lane, the spec premium (%.1f TPS, %.1f%%) is EXISTENTIAL. lane-a "
+                "(compliant-spec, BRACKET): ceiling %.2f (lower-CI %.2f > 500 -> CLEARS), floor %.2f "
+                "(misses); clears 500 ONLY if the batch-invariant verify-kernel overhead < %.2f%% both "
+                "/ %.2f%% descent -- UNMEASURED (off-shelf #122 is +%.1f%%, ~7x over). NET: lane-a is "
+                "the SINGLE compliant route to 500, conditioned on an unmeasured feasibility; the launch "
+                "stays HELD on the three hard gates (land #71 build, measured lambda_hat>=0.9780 "
+                "q[2..9] direct, issue #192 human ruling). REINFORCES the HOLD." % (
+                    _BANKED.nonspec_ppl() or float("nan"),
+                    nonspec or float("nan"),
+                    abs(margin) if margin is not None else float("nan"),
+                    _BANKED.nonspec_spec_premium_tps() or float("nan"),
+                    _BANKED.nonspec_spec_premium_pct() or float("nan"),
+                    ceiling or float("nan"),
+                    ci_lower_bb or float("nan"),
+                    floor or float("nan"),
+                    oh_bb or float("nan"),
+                    oh_desc or float("nan"),
+                    (offshelf * 100.0) if offshelf is not None else float("nan")),
+    }
+
+
 def precondition_ledger(build_lambda_ok: bool, build_topo: str) -> list[dict]:
     """Hard precondition rows (kind=precondition). Any NO-GO blocks an ACTUAL launch even if the
     composed-LCB clears. RE-RUN (advisor 17:27Z): ubel #189's executable packaging gate has MERGED
@@ -1341,6 +2335,19 @@ def precondition_ledger(build_lambda_ok: bool, build_topo: str) -> list[dict]:
          "status": "GO" if build_lambda_ok else "NO-GO", "flag": "measured",
          "note": "land #71's measured lambda_hat_built >= binding_bar (%s) for topology %s." % (
              "0.9780 private" if build_topo == "both_bugs" else "UNREACHABLE", build_topo)},
+        # ISSUE #192 human ruling (lawine #196 lane-b + wirbel #199 lane-a compliance bracket): a HARD
+        # gate ABOVE the sigma->LCB trigger. Under strict enforcement lane-a (batch-invariant verify
+        # kernel ceiling 536.66, lower-CI 525.73>500) is the ONLY compliant 500-route; lane-b non-spec
+        # floors at 165.44 (66.9% below 500). PENDING -> keeps launch_authorized=False.
+        {"row": "issue_192_human_ruling", "pr": 192, "kind": "precondition", "status": "PENDING",
+         "flag": "human-ruling",
+         "note": "issue #192 (the human ruling on whether the speculative int4 verify token must be "
+                 "IDENTICAL to the AR greedy argmax) must resolve in favor of an admissible compliant "
+                 "lane. Under strict enforcement lane-a (batch-invariant verify kernel, wirbel #199 "
+                 "ceiling 536.66, lower-CI 525.73>500) is the ONLY compliant 500-route -- conditioned "
+                 "on an UNMEASURED <7.33%% kernel overhead; lane-b non-spec floors at 165.44 (lawine "
+                 "#196, 66.9%% below 500). Sits ABOVE the sigma->LCB trigger (does NOT change #204's "
+                 "512.41/514.63)."},
         {"row": "human_approval", "kind": "precondition", "status": "PENDING", "flag": "human-gate",
          "note": "a human must approve the filed `Approval request: HF job` issue before any spend."},
     ]
@@ -1517,14 +2524,15 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
         private_launch_pass = bool(private_launch_lcb is not None
                                    and private_launch_lcb >= TARGET_OFFICIAL - 1e-9)  # False
 
-    # ---- combined-sigma row (#201 ubel, advisor 18:23Z): SUPERSEDES #195's 7.26/17.04. The de-dup
-    #      (#195) acceptance axis (5.32 iid IDENTITY) evaluated under realistic ICC (#190 sqrt(D)=2.100
-    #      MAGNITUDE -> 11.17) (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma 12.215 central /
-    #      13.796 worst-case. P95 GO trigger mu>=520.09 central / 522.69 worst-case vs the lambda=1
-    #      ceiling 520.95 -> central P95-reachable (+0.86), worst-case UNREACHABLE (-1.74).
-    #      "Wire the MECHANISM, HOLD the verdict": this row is PROVISIONAL and NON-GATING -- it does
-    #      NOT enter `go` (do NOT hard-wire GO/NO-GO vs the ceiling). Two open levers finalize it
-    #      (#204 unit-rebase ~3 TPS direction-open; land #71 co-log n=385 retires the rho(*,hw) band).
+    # ---- combined-sigma row (ubel #204, advisor 18:46Z): RESOLVES the #201 row. #201's TRIGGER was a
+    #      UNITS bug (acceptance leg 11.17 = z=1.96 two-sided HALF-WIDTH double-counted with the z=1.645
+    #      P95 LCB). #204 re-foots every leg onto a clean 1-sigma: acceptance 11.17/1.95996 = 5.699 ->
+    #      combined LAUNCH sigma 7.545 central / 8.897 worst-case (was 12.215/13.796). P95 GO trigger
+    #      mu>=512.41 central / 514.63 worst-case (was 520.09/522.69) vs the lambda=1 ceiling 520.95 ->
+    #      BOTH BELOW -> lambda=1 clears 500 at P95 CENTRALLY (+8.54) AND worst-case (+6.32). The verdict
+    #      FLIPS from #201's PROVISIONAL knife-edge (worst-case UNREACHABLE) to a robust RESOLVED-YES.
+    #      Still NON-GATING -- it does NOT enter `go` (advisor 18:46Z: "it does not authorize a launch").
+    #      The de-dup x ICC MECHANISM (#195/#190) is unchanged; only the unit footing is corrected.
     #      both-bugs only; descent is already NO-GO via #191 so the row is non-binding there. ----
     if topo == "both_bugs":
         csc = combined_sigma_corner()
@@ -1532,11 +2540,13 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
         lsc_central_p95_reachable = bool(csc.get("central_p95_reachable")) if lsc_landed else None
         lsc_worstcase_p95_reachable = bool(csc.get("worstcase_p95_reachable")) if lsc_landed else None
         lsc_provisional = bool(csc.get("provisional", True)) if lsc_landed else None
+        lsc_resolved = bool(csc.get("resolved", False)) if lsc_landed else None
     else:
         csc = None
         lsc_central_p95_reachable = None
         lsc_worstcase_p95_reachable = None
         lsc_provisional = None
+        lsc_resolved = None
 
     # ---- FULL-LADDER GO requirement + depth-1-only FALSE-GO guard (#197 denken, advisor 18:39Z) ----
     # The GO leg must gate on land #71's MEASURED full-ladder q[2..9] (>=8 depths) clearing the private
@@ -1617,13 +2627,16 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
                             lpc.get("depth1_overstatement_tps") or float("nan"),
                             lpc.get("true_private_lcb_at_lambda1_tps") or float("nan"),
                             lpc.get("beta_primary") or float("nan")))
-        restoration = ("measure land #71's full q[2..9] ladder before emitting GO (the decisive "
-                       "certification is ~%.0f fixed-N Neyman trials @lambda=1, shallow-heavy, being "
-                       "made SEQUENTIAL by denken #205 (SPRT) -> carry 30k as the worst-case cap); a "
+        restoration = ("measure land #71's full q[2..9] ladder before emitting GO (the REALISTIC cost "
+                       "is denken #205's sequential E[N]~%.0f trials on a clear-NO-GO build, ~%.0f "
+                       "worst-case at the bar; #197's ~%.0f fixed-N is the worst-case CAP); a "
                        "depth-1-only read is not certifiable." % (
+                           lpc.get("expected_n_sprt_nogo") or float("nan"),
+                           lpc.get("worst_case_expected_n_sprt") or float("nan"),
                            lpc.get("decisive_total_trials_lambda1") or float("nan")))
-    # NOTE: the #201 combined-sigma row is PROVISIONAL/NON-GATING (advisor 18:23Z) -> it is NOT a
-    # failing-gate candidate. A worst-case-P95-unreachable corner does NOT flip the analytic verdict.
+    # NOTE: the #204 combined-sigma row is RESOLVED-YES/NON-GATING (advisor 18:46Z) -> it is NOT a
+    # gating candidate either way. lambda=1 now clears 500 at P95 both ends, but the row still does NOT
+    # authorize a launch; the analytic verdict is held on the three hard gates, not this sigma row.
 
     return {
         "topo": topo,
@@ -1655,14 +2668,16 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
                                        if private_launch_lcb is not None else None),
             "private_launch_clears_500": private_launch_pass,
             "clear500_launch_lcb_pass": bool(realistic_launch_pass and private_launch_pass),
-            # combined-sigma row (#201, SUPERSEDES #195): the de-dup x realistic-ICC launch sigma
-            # 12.215/13.796 -> P95 GO trigger 520.09/522.69 vs the lambda=1 ceiling 520.95.
-            # PROVISIONAL + NON-GATING (advisor 18:23Z: HOLD the verdict). both-bugs only (None on descent).
+            # combined-sigma row (ubel #204, RESOLVES #201): the clean-1-sigma launch sigma 7.545/8.897
+            # -> P95 GO trigger 512.41/514.63 vs the lambda=1 ceiling 520.95 -> BOTH BELOW -> lambda=1
+            # clears 500 at P95 centrally (+8.54) AND worst-case (+6.32). RESOLVED-YES + NON-GATING
+            # (advisor 18:46Z: "it does not authorize a launch"). both-bugs only (None on descent).
             "combined_sigma_corner": csc,
-            "launch_sigma_central_p95_reachable": lsc_central_p95_reachable,     # True  (+0.86)
-            "launch_sigma_worstcase_p95_reachable": lsc_worstcase_p95_reachable,  # False (-1.74)
-            "launch_sigma_provisional": lsc_provisional,                         # HOLD pending #204 + land #71
-            "launch_sigma_gates_go": False,                                      # advisor 18:23Z: NOT hard-wired
+            "launch_sigma_central_p95_reachable": lsc_central_p95_reachable,     # True  (+8.54)
+            "launch_sigma_worstcase_p95_reachable": lsc_worstcase_p95_reachable,  # True  (+6.32) -- was False under #201
+            "launch_sigma_provisional": lsc_provisional,                         # False -- #204 RESOLVES it
+            "launch_sigma_resolved": lsc_resolved,                               # True  -- RESOLVED-YES
+            "launch_sigma_gates_go": False,                                      # advisor 18:46Z: NOT hard-wired
             # full-ladder GO requirement + depth-1-only FALSE-GO guard (#197, advisor 18:39Z). UNLIKE
             # the #201 row, this measurement-spec guard DOES gate `go` (it BLOCKS a depth-1-only false
             # GO) -- but is SATISFIED by the worked example's 8-entry measured ladder -> both-bugs GO HELD.
@@ -1675,10 +2690,22 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
             "depth1_overstatement_tps": (lpc.get("depth1_overstatement_tps") if lp_landed else None),
             "mechanism_can_clear_private_bar": (lpc.get("mechanism_can_clear_private_bar")
                                                 if lp_landed else None),
+            # cost row: denken #205 SPRT expected-N (REPLACES #197's fixed-N); 30k retained as the cap.
             "decisive_total_trials_lambda1": (lpc.get("decisive_total_trials_lambda1")
+                                              if lp_landed else None),
+            "fixed_n_worst_case_cap_trials": (lpc.get("fixed_n_worst_case_cap_trials")
                                               if lp_landed else None),
             "liveprobe_sequential_via_205_pending": (lpc.get("sequential_via_205_pending")
                                                      if lp_landed else None),
+            "liveprobe_sequential_sprt_205_landed": (lpc.get("sequential_sprt_205_landed")
+                                                     if lp_landed else None),
+            "liveprobe_expected_n_sprt_nogo": (lpc.get("expected_n_sprt_nogo") if lp_landed else None),
+            "liveprobe_expected_n_sprt_nearbar": (lpc.get("expected_n_sprt_nearbar")
+                                                  if lp_landed else None),
+            "liveprobe_worst_case_expected_n_sprt": (lpc.get("worst_case_expected_n_sprt")
+                                                     if lp_landed else None),
+            "liveprobe_sprt_savings_vs_fixed_n": (lpc.get("sprt_savings_vs_fixed_n")
+                                                  if lp_landed else None),
             "numerical_ci_ledger": numerical_ci_ledger(topo, TAU_HEADLINE),
             "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190 0.9513, "
                             "private#191 0.9780) = 0.9780 (private, both-bugs); descent private bar "
@@ -1788,19 +2815,29 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
     ledger_closed = bool(len(pending_axes) == 0)
     binding_on_iid_fallback = bool(bb_binding["binding_is_iid_fallback"])
     any_iid_fallback = binding_on_iid_fallback                       # binding bar no longer iid -> False
-    # combined-sigma row (#201, SUPERSEDES #195): the de-dup x realistic-ICC launch sigma -> P95
-    # GO-trigger-vs-ceiling readout. PROVISIONAL + NON-GATING (advisor 18:23Z: HOLD the verdict).
+    # combined-sigma row (ubel #204, RESOLVES #201): the clean-1-sigma launch sigma -> P95
+    # GO-trigger-vs-ceiling readout. RESOLVED-YES + NON-GATING (advisor 18:46Z: does not authorize a launch).
     csc_ledger = combined_sigma_corner()
     # cost-aware re-draw budget (#200): sequential early-stop spend + build-higher-vs-stay toggle.
     # ANNOTATION ONLY -- single-shot GO/NO-GO + binding bar + sigma are unchanged.
     cba_ledger = cost_budget_annotation()
-    # liveprobe certification cost + FULL-LADDER GO requirement (#197 denken, advisor 18:39Z): the GO
-    # leg GATES on land #71's MEASURED full-ladder q[2..9] (a depth-1-only read is a FALSE GO worth
-    # 85.2 TPS); cost ~30,455 Neyman trials @lambda=1 (sequential via #205). REINFORCES the HOLD.
+    # liveprobe certification cost + FULL-LADDER GO requirement (#197 denken; cost row REPLACED by #205
+    # SPRT, advisor 19:09Z): the GO leg GATES on land #71's MEASURED full-ladder q[2..9] (a depth-1-only
+    # read is a FALSE GO worth 85.2 TPS); REALISTIC cost = E[N]~405 SPRT (30k fixed-N = cap). REINFORCES HOLD.
     lpc_ledger = liveprobe_measurement_cost(t.get("q_ladder"))
     # multi-shot budget under the conservative FROZEN regime (#202 kanna, advisor 18:39Z): default
     # build-bar input mu_bar_frozen_p95=504.87; build-to-512.2/N=1 hedge is freeze-robust. REINFORCES HOLD.
     fba_ledger = frozen_budget_annotation()
+    # ISSUE #192 compliance bracket (lawine #196 lane-b + wirbel #199 lane-a, advisor 18:58Z/19:09Z):
+    # sits ABOVE the sigma->LCB trigger. lane-b non-spec floors at 165.44 (66.9% below 500); lane-a
+    # compliant-spec ceiling 536.66 (lower-CI 525.73>500) is the ONLY compliant 500-route, conditioned
+    # on an UNMEASURED <7.33% kernel overhead. Does NOT change #204's trigger; REINFORCES the HOLD.
+    # wirbel #213 (advisor 19:40Z) extends clb with the kernel-overhead-vs-lambda budget (DOUBLE gate).
+    clb_ledger = compliant_lane_bracket()
+    # winner's-curse correction to the multi-shot budget (kanna #210, advisor 19:40Z): best-of-N does
+    # NOT relax the PRIVATE bar (flat in N, n_star_private=1); the private build target is 528.48 (+23.61
+    # tax over #202's 504.87). Build-higher/N=1. Does NOT touch the sigma->LCB public trigger (512.41).
+    wca_ledger = winners_curse_annotation()
 
     out = {
         "verdict": verdict,
@@ -1827,21 +2864,29 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
         "launch_ci_ledger": {
             "net_rule": "launch_authorized = (analytic GO: lambda_hat_built >= binding_bar AND the "
                         "realistic-ICC launch-LCB >= 500 AND the private-axis launch-LCB >= 500 AND "
-                        "validity AND over-accept) AND (all precondition rows GO). The #201 "
-                        "combined-sigma row is PROVISIONAL + NON-GATING (advisor 18:23Z: HOLD the "
-                        "verdict -- it is surfaced, NOT folded into the analytic GO). RECOMPOSED "
+                        "validity AND over-accept) AND (all precondition rows GO). The combined-sigma "
+                        "row is RESOLVED-YES + NON-GATING (ubel #204, advisor 18:46Z: surfaced, NOT "
+                        "folded into the analytic GO -- 'it does not authorize a launch'). RECOMPOSED "
                         "post-merge: binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 "
                         "0.9780) = 0.9780 (private#191 dominates, both-bugs); descent private is "
                         "UNREACHABLE. Sampling half-width is the REALISTIC ICC#190 +/-22.9 TPS "
                         "(design-effect %.4f over iid +/-10.9), NOT the iid placeholder. CLOSED "
                         "post-#195 (the 4-axis quadrature was INVALID: rho(sampling,input)=0.945 "
-                        "double-count). #201 SUPERSEDES #195's 7.26/17.04: the de-dup acceptance axis "
-                        "(5.32 iid IDENTITY) under realistic ICC (sqrt(D)=2.100 MAGNITUDE -> 11.17), "
-                        "(+) sigma_hw (+) sigma_private -> combined LAUNCH sigma 12.215 central / "
-                        "13.796 worst-case; P95 GO trigger mu>=520.09 central / 522.69 worst-case vs "
-                        "the lambda=1 ceiling 520.95 -> central P95-reachable (+0.86), worst-case "
-                        "UNREACHABLE (-1.74). PROVISIONAL pending ubel #204 (unit-rebase ~3 TPS, "
-                        "direction open) + land #71 co-log (n=385) retiring the rho(*,hw) band. iid "
+                        "double-count). The de-dup x ICC mechanism (#195/#190): the de-dup acceptance "
+                        "axis (5.32 iid IDENTITY) under realistic ICC (sqrt(D)=2.100 MAGNITUDE -> 11.17 "
+                        "z=1.96 HALF-WIDTH). ubel #204 RETIRES #201's trigger (a UNITS bug -- that 11.17 "
+                        "half-width was double-counted with the z=1.645 P95 LCB): clean 1-sigma = "
+                        "11.17/1.95996 = 5.699 -> combined LAUNCH sigma 7.545 central / 8.897 worst-case "
+                        "(was 12.215/13.796); P95 GO trigger mu>=512.41 central / 514.63 worst-case (was "
+                        "520.09/522.69) vs the lambda=1 ceiling 520.95 -> BOTH BELOW -> lambda=1 clears "
+                        "500 at P95 CENTRALLY (+8.54) AND worst-case (+6.32) -> RESOLVED-YES (was a "
+                        "PROVISIONAL knife-edge; direction came out sign-backwards, trigger DROPPED 7.68 "
+                        "not up). ubel #207 (advisor 19:40Z) RESOLVED the #175 two-readings tension in "
+                        "FAVOR of the YES: the larger 10.906 reading is the B=16384 128-tok SUB-bench "
+                        "(the 2.106 ratio vs h_out 5.178 = bench-sqrtN x op-point, only COINCIDENTALLY "
+                        "~= sqrt(D) 2.100), NOT launch-correct -> the 512.41/514.63 trigger STANDS and "
+                        "the robust-YES SURVIVES (10.906 retired); only land #71 co-log (n=385, now "
+                        "TIGHTENS the YES) remains open. iid "
                         "#175 leg kept as a visible fallback row only. NO pending numerical axes "
                         "(ledger CLOSED). #200 cost annotation (budget row only, single-shot logic "
                         "UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=1.94 (not "
@@ -1850,16 +2895,49 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
                         "advisor 18:39Z): the GO leg GATES on land #71's MEASURED full-ladder q[2..9] "
                         ">= 0.9780 -- NEVER depth-1-only/spine-inferred (a depth-1-only read is a FALSE "
                         "GO worth 85.2 TPS; at beta=0.765 the mechanism CANNOT clear the private bar, "
-                        "so a real GO needs beta~1 across the MEASURED ladder); decisive cert ~30,455 "
-                        "Neyman trials @lambda=1 (shallow-heavy, made SEQUENTIAL by #205 SPRT -> carry "
-                        "30k worst-case cap). #202 (kanna, advisor 18:39Z): the multi-shot budget "
+                        "so a real GO needs beta~1 across the MEASURED ladder). #205 (denken, advisor "
+                        "19:09Z) REPLACES #197's fixed-N cost row with the realistic SPRT: the "
+                        "measurement-cost row is E[N]~405 on a clear-NO-GO build (75.1x collapse vs "
+                        "#197's 30,455 fixed-N), ~14,915 near-bar, <=24,398 worst-case ASN; realized "
+                        "(alpha,power)=(0.05,0.95), boundaries +-2.9444. The full-ladder GO guard is "
+                        "UNCHANGED (cost-row swap, not a verdict change); carry 30,455 as the fixed-N "
+                        "worst-case cap. #212 (denken, advisor 19:54Z) SHARPENS the SPRT cost band: "
+                        "#205's flat xDeff=4.41 is CONFIRMED CONSERVATIVE; folding #190's DECAYING ACF "
+                        "tightens it 1.59-2.66x -> E[N]_nogo band [405 IID -> 672 AR(1) -> 1,125 "
+                        "measured-ACF-realistic -> 1,788 flat-loose], data-grounded point 1,125. The "
+                        "75.1x collapse is Deff-INVARIANT; (alpha,power)=(0.05,0.95) + bar 0.9780 "
+                        "UNCHANGED. #202 (kanna, advisor 18:39Z): the multi-shot budget "
                         "DEFAULTS to the conservative FROZEN regime (best-of-N beats ONLY sigma_hw -> "
                         "N=5@bar P=0.810 not fresh 0.969; default build-bar input mu_bar_frozen_p95="
                         "504.87 not fresh 499.08); THE HEDGE -- build-to-mu=512.2/N=1 is fully freeze-"
                         "robust (n_shots_frozen=1), so the SAFE recommendation is untouched; only "
                         "build-at-bar+best-of-N is frozen-fragile (E[shots]=2.34, exhausts 19%%, "
-                        "breakeven f*=0.846). BOTH #197 + #202 REINFORCE the HOLD -- they sharpen the "
-                        "measurement spec + budget robustness, they do NOT flip the verdict."
+                        "breakeven f*=0.846). #210 (kanna, advisor 19:40Z) CORRECTS the #202 hedge "
+                        "against the PRIVATE bar: best-of-N does NOT relax it (the conditional private "
+                        "clear is FLAT in N, n_star_private=1 -- selection is on non-replicating public "
+                        "noise, the private grade is one fresh draw), and the freeze-robust mu=512.2/N=1 "
+                        "does NOT survive privately (p=0.3120<0.95). To clear 500-PRIVATE at P>=0.95 the "
+                        "PUBLIC build must reach mu_bar_private_corrected=528.48 (+23.61 winner's-curse "
+                        "tax over #202's 504.87 = 7.28 evaporating public discount + 16.33 private-drop "
+                        "gross-up); N=1 STANDS (build higher, do NOT re-draw). This is the BUILD-target "
+                        "row; it does NOT touch the sigma->LCB PUBLIC trigger 512.41. BOTH #197 + #202 "
+                        "REINFORCE the HOLD -- they sharpen the measurement spec + budget robustness, "
+                        "they do NOT flip the verdict. ISSUE #192 "
+                        "COMPLIANCE BRACKET (lawine #196 lane-b + wirbel #199 lane-a, advisor 18:58Z/"
+                        "19:09Z) sits ABOVE this sigma math and does NOT change the #204 trigger: lane-b "
+                        "(non-spec, EMPIRICAL) is token-identical but FLOORS at 165.44 official TPS "
+                        "(66.9%% below 500) -> NO compliant non-spec 500-lane (spec premium 316.1 TPS / "
+                        "191%% existential); lane-a (compliant-spec int4 VERIFY kernel) ceiling 536.66 "
+                        "(lower-CI 525.73>500 -> CLEARS), floor 416.31, clears 500 ONLY at <7.33%% both "
+                        "/ 4.12%% descent kernel overhead (UNMEASURED; off-shelf #122 +51.78%%, ~7x "
+                        "over). wirbel #213 (advisor 19:40Z) grades lane-a's overhead budget vs lambda: "
+                        "max_overhead(lambda) opens from <=0 at lambda_hat=0.342 (the realistic floor "
+                        "misses 500 even with a FREE kernel) to 7.33%% both / 4.12%% descent at lambda=1; "
+                        "the zero-overhead path first clears 500 at lambda_crit=0.8345 both / 0.9067 "
+                        "descent. So lane-a is a DOUBLE gate (lambda>=0.8345 AND kernel-under-budget), "
+                        "the SINGLE compliant 500-route, and a NEW hard precondition "
+                        "row (issue_192_human_ruling, PENDING) gates the launch on the #192 ruling -- "
+                        "keeping launch_authorized=False independent of the analytic/sigma logic."
                         % _BANKED.design_effect(),
             "numerical_axes": {"both_bugs": bb_ledger,
                                "descent_only": numerical_ci_ledger("descent_only", TAU_HEADLINE)},
@@ -1867,6 +2945,8 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
             "cost_budget_annotation": cba_ledger,
             "liveprobe_measurement_cost": lpc_ledger,
             "frozen_budget_annotation": fba_ledger,
+            "winners_curse_annotation": wca_ledger,
+            "compliant_lane_bracket": clb_ledger,
             "preconditions": preconds,
             "preconditions_all_go": preconds_all_go,
             "any_iid_fallback_active": any_iid_fallback,
@@ -1964,32 +3044,38 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
     for r in led["preconditions"]:
         pre_md.append("| %s | %s | %s |" % (r["row"], r["status"], r["flag"]))
     pre_table = "\n".join(pre_md)
-    # combined-sigma worst-case corner (#195) + cost-aware budget (#200) annotation lines.
+    # combined-sigma row: ubel #204 clean-1-sigma trigger (RESOLVED-YES) + cost-aware budget (#200).
     csc = led.get("combined_sigma_corner") or {}
     cba = led.get("cost_budget_annotation") or {}
     if csc.get("landed"):
         sigma_line = (
-            "**Combined-sigma row (#201, SUPERSEDES #195's 7.26/17.04 -- PROVISIONAL, does NOT gate "
-            "the verdict):** de-dup (#195) sets the acceptance-axis IDENTITY (5.32 TPS iid, removing "
-            "the rho(sampling,input)=%.3f double-count); realistic ICC (#190) sets its MAGNITUDE "
-            "(sqrt(D)=%.3f -> %.2f TPS). (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma "
-            "**%.2f central / %.2f worst-case** (1-sigma). P95 GO trigger mu >= 500 + z_p95*sigma = "
-            "**%.2f central / %.2f worst-case** vs the lambda=1 ceiling **%.2f** -> central is "
-            "P95-reachable (**+%.2f TPS**) but worst-case is P95-UNREACHABLE (**%.2f TPS**), even at "
-            "lambda=1. ICC erodes ~%.1f TPS of launch headroom (lifts #194's iid break-even %.2f). "
-            "**Knife-edge** -- HELD PROVISIONAL pending two open levers: ubel #204 (clean-1-sigma "
-            "unit rebase, IN FLIGHT, ~3 TPS, direction OPEN -> can FLIP the central verdict) + land "
-            "#71 co-log (n=%s cross-device allocations retire the rho(*,hw) [-0.3,+0.3] band). NO "
-            "change to the binding BUILD bar (private 0.9780, #191) -- purely the launch sigma->LCB row." % (
+            "**Combined-sigma row (ubel #204 -- RESOLVED-YES, NON-GATING, does NOT authorize a "
+            "launch):** de-dup (#195) sets the acceptance-axis IDENTITY (5.32 TPS iid, removing the "
+            "rho(sampling,input)=%.3f double-count); realistic ICC (#190) sets its MAGNITUDE "
+            "(sqrt(D)=%.3f -> %.2f TPS). ubel #204 caught a UNITS bug: that %.2f TPS was a z=1.96 "
+            "two-sided HALF-WIDTH double-counted with the z=1.645 P95 LCB -> clean 1-sigma = **%.3f "
+            "TPS**. (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma **%.2f central / %.2f "
+            "worst-case** (1-sigma). P95 GO trigger mu >= 500 + z_p95*sigma = **%.2f central / %.2f "
+            "worst-case** vs the lambda=1 ceiling **%.2f** -> **BOTH BELOW** -> lambda=1 clears 500 at "
+            "P95 **CENTRALLY (+%.2f TPS) AND worst-case (+%.2f TPS)**. The verdict FLIPS from #201's "
+            "PROVISIONAL knife-edge to a robust **RESOLVED-YES** (direction came out sign-backwards: "
+            "the dominant acceptance leg is DIVIDED down by z2, so the trigger SHIFTED %.2f TPS -- DOWN, "
+            "not up). ubel #207 RESOLVED the #175 two-readings caveat in FAVOR of the YES (the larger "
+            "10.906 reading is the B=16384 SUB-bench, RETIRED -> 512.41/514.63 STANDS); only land #71 "
+            "co-log (n=%s) remains open, and it now TIGHTENS the YES (retiring the rho(*,hw) [-0.3,+0.3] "
+            "band). NO change to the binding BUILD bar (private 0.9780, #191) -- purely the launch "
+            "sigma->LCB row." % (
                 csc["dedup_provenance_195"]["rho_sampling_input"], csc["sqrt_design_effect"],
-                csc["acceptance_axis_realistic_icc_tps"],
+                csc["acceptance_axis_realistic_icc_halfwidth_tps"],
+                csc["acceptance_axis_realistic_icc_halfwidth_tps"], csc["clean_acceptance_1sigma_tps"],
                 csc["combined_sigma_launch_central_tps"], csc["combined_sigma_launch_worstcase_tps"],
                 csc["go_trigger_mu_central_tps"], csc["go_trigger_mu_worstcase_tps"],
                 csc["lambda1_ceiling_mu_tps"], csc["central_margin_at_lambda1_tps"],
-                csc["worstcase_margin_at_lambda1_tps"], csc["headroom_shift_tps"],
-                csc["iid_break_even_194_tps"], csc["colog_n_allocations"]))
+                csc["worstcase_margin_at_lambda1_tps"], csc["delta_mu_rebase_central_tps"],
+                csc["colog_n_allocations"]))
     else:
-        sigma_line = "**Combined-sigma row (#201):** not landed -> #195 de-dup fallback (7.26/17.04)."
+        sigma_line = ("**Combined-sigma row:** ubel #204 clean rebase not landed -> #201 PROVISIONAL "
+                      "fallback (12.215/13.796, trigger 520.09/522.69).")
     if cba.get("landed"):
         budget_line = (
             "**Multi-shot budget (#200, cost-aware -- prices the spend, single-shot GO/NO-GO "
@@ -2018,9 +3104,11 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
             "CANNOT clear the private bar** (mechanism_can_clear=%s; perfect depth-1 -> %.1f << 500), "
             "so a real GO needs beta~1 ACROSS the measured ladder, not a point lambda_hat. The worked "
             "tuple carries the full 8-entry q[2..9] spine (full_ladder_measured=%s) -> guard SATISFIED, "
-            "verdict HELD. Decisive certification cost: **~%.0f fixed-N Neyman trials @lambda=1** "
-            "(shallow-heavy; %.2fx efficient over equal-allocation), being made SEQUENTIAL by denken "
-            "#205 (SPRT) -> carry 30k as the worst-case cap. REINFORCES the HOLD." % (
+            "verdict HELD. Decisive certification cost (denken #205 SPRT REPLACES #197's fixed-N row): "
+            "**E[N]~%.0f trials on a clear-NO-GO build** (%.1fx collapse vs #197's %.0f fixed-N "
+            "shallow-heavy @lambda=1), ~%.0f near-bar, **<=%.0f worst-case ASN**; realized "
+            "(alpha,power)=(%.2f,%.2f), Wald boundaries +-%.4f. Full-ladder GO guard UNCHANGED (cost-row "
+            "swap, not a verdict change); carry %.0f fixed-N as the worst-case cap. REINFORCES the HOLD." % (
                 lpc.get("min_depths_for_decisive"), lpc.get("private_bar_both") or float("nan"),
                 lpc.get("depth1_overstatement_tps") or float("nan"),
                 lpc.get("true_private_lcb_at_lambda1_tps") or float("nan"),
@@ -2028,8 +3116,15 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
                 lpc.get("mechanism_can_clear_private_bar"),
                 lpc.get("private_lcb_perfect_depth1_tps") or float("nan"),
                 lpc.get("full_ladder_measured"),
+                lpc.get("expected_n_sprt_nogo") or float("nan"),
+                lpc.get("sprt_savings_vs_fixed_n") or float("nan"),
                 lpc.get("decisive_total_trials_lambda1") or float("nan"),
-                lpc.get("neyman_efficiency_gain_vs_equal") or float("nan")))
+                lpc.get("expected_n_sprt_nearbar") or float("nan"),
+                lpc.get("worst_case_expected_n_sprt") or float("nan"),
+                lpc.get("sprt_realized_alpha") or float("nan"),
+                lpc.get("sprt_realized_power") or float("nan"),
+                lpc.get("sprt_boundary_A_upper_decide_go") or float("nan"),
+                lpc.get("fixed_n_worst_case_cap_trials") or float("nan")))
     else:
         liveprobe_line = ("**Full-ladder GO requirement (#197):** not landed -> the GO leg uses the "
                           "measured ladder as-is; no explicit full-ladder / depth-1 false-GO guard.")
@@ -2063,6 +3158,38 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
         frozen_line = ("**Frozen-budget regime (#202):** not landed -> the multi-shot budget assumes "
                        "the FRESH regime (#194 N=5@bar P=0.969); optimistic if the harness re-benches "
                        "frozen tokens.")
+    # ISSUE #192 compliance bracket (lawine #196 lane-b + wirbel #199 lane-a) -- ABOVE the sigma math.
+    clb = led.get("compliant_lane_bracket") or {}
+    if clb.get("landed"):
+        lb = clb["lane_b_nonspec"]
+        lna = clb["lane_a_compliant_spec"]
+        compliant_line = (
+            "**Issue #192 compliance bracket (lawine #196 lane-b + wirbel #199 lane-a -- sits ABOVE "
+            "the sigma->LCB trigger; does NOT change ubel #204's 512.41/514.63):** issue #192 (whether "
+            "the speculative int4 verify token must be IDENTICAL to the AR greedy argmax) decides which "
+            "lane is admissible at 500. **lane-b (non-spec, EMPIRICAL):** token-identical (%.3f), PPL "
+            "%.4f<2.42, 128/128 -- but **FLOORS at %.2f official TPS (%.1f%% below 500)**; there is NO "
+            "compliant non-spec 500-lane (spec premium %.1f TPS / %.1f%% is EXISTENTIAL; %s). **lane-a "
+            "(compliant-spec batch-invariant VERIFY kernel, BRACKET):** ceiling **%.2f** official TPS "
+            "(finite-sample lower-CI **%.2f > 500 -> CLEARS**), floor %.2f (misses); clears 500 **ONLY "
+            "IF** kernel overhead < **%.2f%% (both-bugs) / %.2f%% (descent)** -- **UNMEASURED** "
+            "(off-shelf #122 is +%.1f%%, ~7x over budget). **NET:** lane-a is the SINGLE compliant "
+            "500-route, conditioned on an unmeasured feasibility -> a NEW hard precondition "
+            "(issue_192_human_ruling, PENDING) gates the launch ABOVE the sigma math. REINFORCES the "
+            "HOLD." % (
+                lb.get("token_identity_rate") or float("nan"), lb.get("ppl") or float("nan"),
+                lb.get("official_tps_floor") or float("nan"),
+                abs(lb.get("margin_to_500_pct")) if lb.get("margin_to_500_pct") is not None else float("nan"),
+                lb.get("spec_premium_tps") or float("nan"), lb.get("spec_premium_pct") or float("nan"),
+                lb.get("verdict_label"),
+                lna.get("tps_ceiling") or float("nan"), lna.get("ceiling_ci_lower_tps") or float("nan"),
+                lna.get("tps_floor") or float("nan"),
+                lna.get("max_kernel_overhead_pct_both_bugs") or float("nan"),
+                lna.get("max_kernel_overhead_pct_descent") or float("nan"),
+                (lna.get("offshelf_overhead_ref_122") or 0.0) * 100.0))
+    else:
+        compliant_line = ("**Issue #192 compliance bracket (#196/#199):** not landed -> no compliant-"
+                          "lane row; the #192 ruling precondition is carried abstractly.")
     la = out["launch_authorized"]
     return f"""### Approval request: HF job for {name}
 
@@ -2101,6 +3228,8 @@ draws (P={out['hardware_axis_sigma_hw']['best_of_2_p']:.4f}>=0.90).
 
 {frozen_line}
 
+{compliant_line}
+
 **Submission command (named hard deps -- the human runs this AFTER approval):**
 ```
 PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _IncludedRouter boot-fix>
@@ -2120,13 +3249,23 @@ PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _Include
   - [LANDED-CONSUMED] kanna #200 cost-aware budget: sequential E[shots]=1.94 at the bar (not fixed-5) + build-higher-vs-stay toggle (c*=3.04*b fixed / 12.97*b sequential). Annotation only; single-shot GO/NO-GO unchanged.
   - [LANDED-CONSUMED] ubel #189 executable-submission-gate: faithful build -> GO; re-verify vs land #71 at launch.
   - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup acceptance axis 5.32 iid (sets the IDENTITY; the 7.26/17.04 single-shot numbers are now #201's ICC=0 corner).
-  - [LANDED-CONSUMED] ubel #201 launch-sigma closure (PROVISIONAL, NON-GATING) -- de-dup x realistic-ICC combined LAUNCH sigma 12.215 central / 13.796 worst-case; P95 GO trigger 520.09/522.69 vs the lambda=1 ceiling 520.95 (central reachable +0.86, worst-case UNREACHABLE -1.74). HOLD the verdict pending ubel #204 (unit-rebase) + land #71 co-log (n=385).
-  - [LANDED-CONSUMED] denken #197 liveprobe depth-budget -- the GO leg GATES on land #71's MEASURED full-ladder q[2..9] >= 0.9780 (depth-1-only/spine-inferred is a FALSE GO worth 85.2 TPS; at beta=0.765 mechanism CANNOT clear the private bar -> needs beta~1 across the ladder). Decisive cert ~30,455 Neyman trials @lambda=1 (sequential via #205; 30k cap). REINFORCES the HOLD; the worked tuple's 8-entry ladder SATISFIES the guard.
+  - [LANDED-CONSUMED] ubel #201 launch-sigma closure -- de-dup x realistic-ICC MECHANISM retained as provenance (acceptance axis 5.32 iid IDENTITY x sqrt(D)=2.100 -> 11.17 z=1.96 half-width). Its sigma->LCB TRIGGER (12.215/13.796 -> 520.09/522.69, worst-case UNREACHABLE) is RETIRED by ubel #204 (a units bug); see below.
+  - [LANDED-CONSUMED] ubel #204 launch-sigma UNIT-REBASE (RESOLVED-YES, NON-GATING) -- RETIRES #201's trigger: the 11.17 acceptance leg was a z=1.96 two-sided HALF-WIDTH double-counted with the z=1.645 P95 LCB; clean 1-sigma = 11.17/1.95996 = 5.699 -> combined LAUNCH sigma 7.545 central / 8.897 worst-case; P95 GO trigger 512.41/514.63 vs the lambda=1 ceiling 520.95 -> BOTH BELOW -> lambda=1 clears 500 at P95 CENTRALLY (+8.54) AND worst-case (+6.32). Verdict FLIPS PROVISIONAL knife-edge -> RESOLVED-YES (direction sign-backwards: trigger DROPPED 7.68, not up). Caveats #207 (#175 two-readings) + land #71 co-log (n=385, now TIGHTENS the YES) remain open but neither flips it. "It does not authorize a launch."
+  - [LANDED-CONSUMED] denken #197 liveprobe depth-budget -- the GO leg GATES on land #71's MEASURED full-ladder q[2..9] >= 0.9780 (depth-1-only/spine-inferred is a FALSE GO worth 85.2 TPS; at beta=0.765 mechanism CANNOT clear the private bar -> needs beta~1 across the ladder). Cost row REPLACED by #205 SPRT (below); ~30,455 fixed-N -> worst-case cap. REINFORCES the HOLD; the worked tuple's 8-entry ladder SATISFIES the guard.
+  - [LANDED-CONSUMED] denken #205 SPRT liveprobe-budget -- REPLACES #197's fixed-N cost row with the realistic expected-N: the measurement-cost row is E[N]~405 on a clear-NO-GO build (75.1x collapse vs #197's 30,455 fixed-N), ~14,915 near-bar, <=24,398 worst-case ASN (107,610 realistic-ICC); realized (alpha,power)=(0.05,0.95), Wald boundaries +-2.9444, Deff=4.41. Full-ladder GO guard UNCHANGED (cost-row swap, not a verdict change); carry 30,455 as the fixed-N worst-case cap. REINFORCES the HOLD.
+  - [LANDED-CONSUMED] denken #212 AR(1)-corrected SPRT cost band -- SHARPENS #205's flat-Deff cost row: folding #190's DECAYING within-prompt ACF (rho(1)=0.2583) into the SPRT partial-sum variance tightens the realism band 1.59-2.66x. Certification-cost band E[N]_nogo = [405 IID-floor -> 672 AR(1)-optimistic -> 1,125 measured-ACF-REALISTIC -> 1,788 flat-loose]; the data-grounded point is 1,125 (rho(2)=0.168 >> rho(1)^2=0.067, decays slower than pure AR(1)), confirming #205's flat x4.41 as the CONSERVATIVE loose end. The 75.12x collapse vs #197's 30,455 fixed-N is Deff-INVARIANT (both scale by the same cluster Deff); realized (alpha,power)=(0.05,0.95) and the binding bar 0.9780 are UNTOUCHED. Orthogonal to #192 (liveprobe cost, not the greedy-identity reading). REINFORCES the HOLD.
   - [LANDED-CONSUMED] kanna #202 frozen-budget regime (conservative DEFAULT) -- best-of-N beats only sigma_hw, so N=5@bar clears P=0.810 (not fresh 0.969); default build-bar input mu_bar_frozen_p95=504.87 (not fresh 499.08). HEDGE: build-to-512.2/N=1 is fully freeze-robust (n_shots_frozen=1) -> SAFE recommendation untouched; only build-at-bar+best-of-N is frozen-fragile (E[shots]=2.34, exhausts 19%, f*=0.846). kanna -> #206 crossover. REINFORCES the HOLD.
+  - [LANDED-CONSUMED] kanna #210 winner's-curse private-bar correction -- best-of-N does NOT relax the PRIVATE bar (selection on non-replicating public noise; the private grade is one fresh draw -> conditional clear is FLAT in N, n_star_private=1). To clear 500-private at P>=0.95 under a best-of-5 trigger, public must build to mu_pub=528.48 (+23.61 winner's-curse tax over #202's frozen 504.87 = 7.28 evaporating public best-of-N discount + 16.33 private-drop gross-up); #202's freeze-robust 512.2/N=1 hedge does NOT survive privately (p=0.312). Budget DEFAULT: BUILD HIGHER, N=1 (the #206 hedge, now winner's-curse-justified). Does NOT change #204's 512.41/514.63 sigma->LCB trigger (a different quantity). REINFORCES the HOLD.
+  - [LANDED-CONSUMED] lawine #196 compliant non-spec floor (lane-b, EMPIRICAL) -- under strict #192 the compliant non-spec int4 path is token-identical (1.0), PPL 2.3766<2.42, 128/128, but FLOORS at 165.44 official TPS (66.9% below 500). NO compliant non-spec 500-lane; spec premium 316.1 TPS / 191% is existential. Adds the #192 compliance precondition ABOVE the sigma->LCB trigger (does NOT change #204's 512.41/514.63).
+  - [LANDED-CONSUMED] wirbel #199 compliant-spec E[T] ceiling (lane-a, BRACKET) -- the batch-invariant int4 VERIFY kernel ceiling 536.66 official TPS (lower-CI 525.73>500 -> CLEARS), floor 416.31 (misses); clears 500 ONLY if kernel overhead < 7.33% both / 4.12% descent (UNMEASURED; off-shelf #122 +51.78%, ~7x over). lane-a is the SINGLE compliant 500-route -> gated on the issue_192_human_ruling precondition (PENDING). REINFORCES the HOLD.
+  - [LANDED-CONSUMED] wirbel #213 compliant-kernel lambda-budget curve max_kernel_overhead_pct(lambda) -- prices #199's lane-a feasibility as a function of the build: lambda=1 budget 7.33% both / 4.12% descent (<->#199); lambda_crit=0.834 both / 0.907 descent (below it even a FREE batch-invariant kernel misses 500); lambda_hat=0.342 budget -16.74% (negative -> infeasible); off-the-shelf #122 (+51.78%) clears at NO physical lambda<=1. So the strict-#192 compliant 500-path is a DOUBLE gate (lambda >= 0.834 AND kernel-under-budget). Does NOT change #204's 512.41/514.63 trigger (sits ABOVE the sigma math). REINFORCES the HOLD.
+  - [PENDING-RULING] issue #192 human ruling (compliance gate, ABOVE the sigma math) -- decides whether the speculative int4 verify lane is admissible; keeps launch_authorized=False until resolved.
   - [PENDING-BUILD] land #71 measured tuple (THIS tuple).
 
 **Launch gates (ALL required):** (1) land #71 builds the {h} kernel; (2) darwin _IncludedRouter
-boot-fix folded; (3) PRECACHE_BENCH=1; (4) a human-approved `Approval request: HF job` issue.
+boot-fix folded; (3) PRECACHE_BENCH=1; (4) a human-approved `Approval request: HF job` issue;
+(5) the issue #192 human ruling resolving in favor of an admissible compliant lane (lane-a
+batch-invariant verify kernel, the only compliant 500-route per wirbel #199).
 """
 
 
@@ -2365,63 +3504,86 @@ def self_test() -> dict:
         "launch_authorized": d_full["launch_authorized"]["authorized"],
         "analytic_verdict": d_full["launch_authorized"]["analytic_verdict"]}
 
-    # (i) combined-sigma row CLOSURE (advisor 18:23Z, ubel #201): SUPERSEDES #195's 7.26/17.04. The
-    #     de-dup acceptance axis (#195, IDENTITY 5.32 iid) x realistic ICC (#190, MAGNITUDE
-    #     sqrt(D)=2.100 -> 11.17) (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma 12.215
-    #     central / 13.796 worst-case. P95 GO trigger mu>=520.09 central / 522.69 worst-case vs the
-    #     lambda=1 ceiling 520.95 -> central P95-reachable (+0.86), worst-case UNREACHABLE (-1.74).
-    #     ICC=0 here reproduces #195's de-dup central 7.2617 (proves the superset). The row is
-    #     PROVISIONAL + NON-GATING: "wire the mechanism, HOLD the verdict" -- the worst-case
-    #     P95-unreachable corner does NOT flip both-bugs GO (the verdict is held, not hard-wired vs the
-    #     ceiling), pending ubel #204 (unit-rebase) + land #71 co-log (n=385) retiring the rho(*,hw) band.
+    # (i) combined-sigma row RESOLUTION (advisor 18:46Z, ubel #204): RETIRES #201's sigma->LCB trigger
+    #     on a UNITS bug. #201's acceptance leg 11.17 was a z=1.96 two-sided HALF-WIDTH double-counted
+    #     with the z=1.645 P95 LCB; the clean 1-sigma = 11.17/1.95996 = 5.699. Re-footed onto #194's
+    #     clean convention -> combined LAUNCH sigma 7.545 central / 8.897 worst-case (was 12.215/13.796);
+    #     P95 GO trigger mu>=512.41 central / 514.63 worst-case (was 520.09/522.69) vs the lambda=1
+    #     ceiling 520.95 -> BOTH BELOW -> lambda=1 clears 500 at P95 CENTRALLY (+8.54) AND worst-case
+    #     (+6.32). The verdict FLIPS PROVISIONAL knife-edge -> RESOLVED-YES. The de-dup x ICC MECHANISM
+    #     is unchanged (anchors reproduce #195's de-dup central 7.2617 and #194's break-even 512.16 with
+    #     err 0.0; ICC=0 corner still 7.2617). Direction came out SIGN-BACKWARDS (the dominant acceptance
+    #     leg is DIVIDED down by z2 -> trigger DROPS 7.68 TPS, not up). Still NON-GATING: "it does not
+    #     authorize a launch" -- the RESOLVED-YES does NOT enter `go`; the verdict is held on the three
+    #     hard gates. #201's 520.09/522.69/12.215 are carried as superseded_201_trigger provenance.
     csc = led["combined_sigma_corner"]
     bb_full_g = d_full["_full_per_topology"]["both_bugs"]["lambda_gate"]
     do_full_g = d_full["_full_per_topology"]["descent_only"]["lambda_gate"]
     prov = csc["dedup_provenance_195"]
+    sup201 = csc["superseded_201_trigger"]
     i_ok = (bool(csc["landed"]) and csc["source_pr"] == 201
+            and csc["source_pr_trigger"] == 204
             and csc["supersedes_195_726_1704"] is True
-            and csc["provisional"] is True and csc["gates_analytic_go"] is False
-            # #201 headline launch sigma REPLACES #195's 7.26/17.04:
-            and abs(csc["combined_sigma_launch_central_tps"] - 12.215) <= 5e-2
-            and abs(csc["combined_sigma_launch_worstcase_tps"] - 13.796) <= 5e-2
-            # P95 GO trigger vs the lambda=1 ceiling:
+            and csc["supersedes_201_trigger"] is True
+            and csc["provisional"] is False and csc["resolved"] is True
+            and csc["resolved_yes"] is True and csc["gates_analytic_go"] is False
+            # #204 clean-1-sigma launch sigma REPLACES #201's 12.215/13.796:
+            and abs(csc["combined_sigma_launch_central_tps"] - 7.545) <= 5e-2
+            and abs(csc["combined_sigma_launch_worstcase_tps"] - 8.897) <= 5e-2
+            # clean P95 GO trigger vs the lambda=1 ceiling (RETIRES 520.09/522.69):
             and abs(csc["z_p95"] - 1.6449) <= 5e-3
-            and abs(csc["go_trigger_mu_central_tps"] - 520.092) <= 5e-2
-            and abs(csc["go_trigger_mu_worstcase_tps"] - 522.692) <= 5e-2
+            and abs(csc["go_trigger_mu_central_tps"] - 512.410) <= 5e-2
+            and abs(csc["go_trigger_mu_worstcase_tps"] - 514.635) <= 5e-2
             and abs(csc["lambda1_ceiling_mu_tps"] - 520.953) <= 5e-2
             and csc["central_p95_reachable"] is True
-            and csc["worstcase_p95_reachable"] is False
-            and abs(csc["central_margin_at_lambda1_tps"] - 0.860) <= 5e-2
-            and abs(csc["worstcase_margin_at_lambda1_tps"] - (-1.739)) <= 5e-2
-            # de-dup x ICC mechanism (de-dup IDENTITY * sqrt(D) MAGNITUDE):
+            and csc["worstcase_p95_reachable"] is True
+            and abs(csc["central_margin_at_lambda1_tps"] - 8.543) <= 5e-2
+            and abs(csc["worstcase_margin_at_lambda1_tps"] - 6.318) <= 5e-2
+            # clean-rebase specifics: acceptance 1-sigma + signed direction (sign-backwards):
+            and abs(csc["clean_acceptance_1sigma_tps"] - 5.699) <= 5e-2
+            and abs(csc["delta_mu_rebase_central_tps"] - (-7.682)) <= 5e-2
+            and csc["rebase_direction_matches_prediction"] is False
+            and csc["does_lambda1_clear_500_at_p95_centrally"] == "YES"
+            # de-dup x ICC mechanism (UNCHANGED -- the half-width footing #204 rebases):
             and abs(csc["acceptance_axis_dedup_iid_tps"] - 5.319) <= 5e-2
             and abs(csc["design_effect"] - 4.4106) <= 5e-3
             and abs(csc["sqrt_design_effect"] - 2.1001) <= 5e-3
-            and abs(csc["acceptance_axis_realistic_icc_tps"] - 11.170) <= 5e-2
+            and abs(csc["acceptance_axis_realistic_icc_halfwidth_tps"] - 11.170) <= 5e-2
             and abs(csc["headroom_shift_tps"] - 7.935) <= 5e-2
-            # ICC=0 corner reproduces #195's de-dup central 7.2617 (the superset proof):
+            # ICC=0 corner reproduces #195's de-dup central 7.2617 (the superset proof, unchanged):
             and abs(csc["icc0_combined_sigma_central_tps"] - 7.2617) <= 5e-3
+            # clean anchors reproduce #195 de-dup + #194 break-even EXACTLY (the rebase preserves them):
+            and abs(csc["anchor_err_195_dedup"]) <= 1e-6
+            and abs(csc["anchor_err_194_breakeven"]) <= 1e-6
             # #195 de-dup provenance retained (rho double-count that sets the acceptance IDENTITY):
             and abs(prov["rho_sampling_input"] - 0.9449) <= 5e-3
             and abs(prov["overlap_fraction"] - 0.893) <= 5e-3
             and prov["quadrature_valid"] is False
             and csc["colog_n_allocations"] == 385
-            # lambda_gate surfaces the PROVISIONAL/NON-GATING readout (both-bugs only):
+            # #201's RETIRED trigger carried as provenance (the units-bug numbers #204 supersedes):
+            and abs(sup201["mu_201_central_tps"] - 520.092) <= 5e-2
+            and abs(sup201["mu_201_worstcase_tps"] - 522.692) <= 5e-2
+            and abs(sup201["combined_201_central_tps"] - 12.215) <= 5e-2
+            # lambda_gate surfaces the RESOLVED-YES/NON-GATING readout (both-bugs only):
             and bb_full_g["combined_sigma_corner"] is not None
             and bb_full_g["launch_sigma_central_p95_reachable"] is True
-            and bb_full_g["launch_sigma_worstcase_p95_reachable"] is False
-            and bb_full_g["launch_sigma_provisional"] is True
+            and bb_full_g["launch_sigma_worstcase_p95_reachable"] is True
+            and bb_full_g["launch_sigma_provisional"] is False
+            and bb_full_g["launch_sigma_resolved"] is True
             and bb_full_g["launch_sigma_gates_go"] is False
             and do_full_g["combined_sigma_corner"] is None
             and do_full_g["launch_sigma_central_p95_reachable"] is None
-            # THE HELD-VERDICT INVARIANT: worst-case P95-UNREACHABLE, yet both-bugs is STILL GO
-            # (the row is non-gating -> the analytic verdict is not hard-wired vs the ceiling):
+            # THE NON-GATING INVARIANT: lambda=1 now clears 500 at P95 BOTH ends, yet the row STILL does
+            # NOT authorize a launch -- both-bugs GO is held on the three hard gates, not hard-wired here:
             and d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
             and d_full["verdict"] == "GO")
-    results["i_combined_sigma_closure_201_provisional"] = {
+    results["i_combined_sigma_closure_204_resolved_yes"] = {
         "pass": bool(i_ok),
-        "source_pr": csc["source_pr"], "supersedes_195": csc["supersedes_195_726_1704"],
-        "provisional": csc["provisional"], "gates_analytic_go": csc["gates_analytic_go"],
+        "source_pr_mechanism": csc["source_pr"], "source_pr_trigger": csc["source_pr_trigger"],
+        "supersedes_195": csc["supersedes_195_726_1704"],
+        "supersedes_201_trigger": csc["supersedes_201_trigger"],
+        "provisional": csc["provisional"], "resolved": csc["resolved"],
+        "resolved_yes": csc["resolved_yes"], "gates_analytic_go": csc["gates_analytic_go"],
         "combined_sigma_launch_central_tps": csc["combined_sigma_launch_central_tps"],
         "combined_sigma_launch_worstcase_tps": csc["combined_sigma_launch_worstcase_tps"],
         "go_trigger_mu_central_tps": csc["go_trigger_mu_central_tps"],
@@ -2431,13 +3593,19 @@ def self_test() -> dict:
         "worstcase_p95_reachable": csc["worstcase_p95_reachable"],
         "central_margin_at_lambda1_tps": csc["central_margin_at_lambda1_tps"],
         "worstcase_margin_at_lambda1_tps": csc["worstcase_margin_at_lambda1_tps"],
-        "acceptance_axis_realistic_icc_tps": csc["acceptance_axis_realistic_icc_tps"],
+        "clean_acceptance_1sigma_tps": csc["clean_acceptance_1sigma_tps"],
+        "delta_mu_rebase_central_tps": csc["delta_mu_rebase_central_tps"],
+        "rebase_direction_matches_prediction": csc["rebase_direction_matches_prediction"],
         "icc0_reproduces_195_dedup_726": abs(csc["icc0_combined_sigma_central_tps"] - 7.2617) <= 5e-3,
+        "anchor_err_195_dedup": csc["anchor_err_195_dedup"],
+        "anchor_err_194_breakeven": csc["anchor_err_194_breakeven"],
         "headroom_shift_tps": csc["headroom_shift_tps"],
         "colog_n_allocations": csc["colog_n_allocations"],
-        "verdict_held_go_despite_worstcase_unreachable": (
+        "retired_201_trigger": sup201,
+        "resolved_yes_but_nongating_verdict_held_go": (
             d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
-            and csc["worstcase_p95_reachable"] is False)}
+            and csc["resolved_yes"] is True
+            and csc["gates_analytic_go"] is False)}
 
     # (j) cost-aware re-draw budget ANNOTATION (advisor 18:03Z, kanna #200): the budget ROW the human
     #     reads is priced -- the REALISTIC spend at the bar is SEQUENTIAL early-stop E[shots]=1.9375
@@ -2478,14 +3646,17 @@ def self_test() -> dict:
         "single_shot_go_unchanged": cba["single_shot_go_unchanged"],
         "verdict_unchanged_go": d_full["verdict"] == "GO"}
 
-    # (k) FULL-LADDER GO requirement + depth-1-only FALSE-GO guard (advisor 18:39Z, denken #197): the
-    #     GO leg GATES on land #71's MEASURED full-ladder q[2..9] >= 0.9780. TWO assertions: (1) the
-    #     HELD-VERDICT INVARIANT -- the worked tuple carries the full 8-entry ladder, so the guard is
+    # (k) FULL-LADDER GO requirement + depth-1-only FALSE-GO guard (denken #197) + the COST row now
+    #     REPLACED by denken #205 (SPRT, advisor 19:09Z). THREE assertions: (1) the HELD-VERDICT
+    #     INVARIANT -- the worked tuple carries the full 8-entry ladder, so the full-ladder guard is
     #     SATISFIED and both-bugs stays GO (#197 REINFORCES, does NOT flip); (2) the guard BITES -- a
     #     depth-1-only tuple (1-entry ladder) is BLOCKED to NO-GO with a full-ladder failing_gate, even
-    #     though every OTHER gate (validity, trustworthy, build, both launch LCBs) WOULD pass. At the
-    #     grounded beta=0.765 the mechanism CANNOT clear the private bar (perfect depth-1 -> 419.6<<500),
-    #     so a real GO needs beta~1 across the MEASURED ladder, not a depth-1 point read.
+    #     though every OTHER gate (validity, trustworthy, build, both launch LCBs) WOULD pass; (3) the
+    #     COST row is the REALISTIC SPRT expected-N (E[N]~405 NO-GO, ~14,915 near-bar, ~24,398 worst-case
+    #     ASN; realized (alpha,power)=(0.05,0.95), boundaries +-2.9444, Deff=4.41, ~75.12x collapse) --
+    #     NOT #197's truth-independent fixed-N, which is retained only as the 30,455 worst-case CAP. The
+    #     full-ladder GUARD is UNCHANGED; #205 only re-prices the cost row. At beta=0.765 the mechanism
+    #     CANNOT clear the private bar -> a real GO needs beta~1 across the MEASURED ladder.
     lpc = d_full["launch_ci_ledger"]["liveprobe_measurement_cost"]
     lp_row = next(r for r in d_full["launch_ci_ledger"]["numerical_axes"]["both_bugs"]
                   if r["axis"] == "liveprobe_measurement_cost")
@@ -2505,13 +3676,30 @@ def self_test() -> dict:
             and abs(lpc["private_lcb_perfect_depth1_tps"] - 419.6445574528826) <= 5e-2
             and abs(lpc["beta_primary"] - 0.765124365433998) <= 5e-3
             and abs(lpc["private_bar_both"] - 0.9780112973731208) <= 1e-3
+            # COST row REPLACED by denken #205 SPRT (the realistic expected-N):
+            and lpc["cost_row_source_pr"] == 205
+            and lpc["sequential_via_205_pending"] is False     # #205 LANDED (no longer pending)
+            and lpc["sequential_sprt_205_landed"] is True
+            and abs(lpc["expected_n_sprt_nogo"] - 405.42403511311863) <= 1.0
+            and abs(lpc["expected_n_sprt_nearbar"] - 14915.057585591705) <= 1.0
+            and abs(lpc["worst_case_expected_n_sprt"] - 24398.04273973794) <= 1.0
+            and abs(lpc["sprt_savings_vs_fixed_n"] - 75.11987975965602) <= 5e-2
+            and abs(lpc["sprt_boundary_A_upper_decide_go"] - 2.9444389791664403) <= 5e-3
+            and abs(lpc["sprt_boundary_B_lower_decide_nogo"] - (-2.9444389791664394)) <= 5e-3
+            and abs(lpc["sprt_realized_alpha"] - 0.05) <= 5e-3
+            and abs(lpc["sprt_realized_power"] - 0.95) <= 5e-3
+            and abs(lpc["sprt_deff_190"] - 4.410614351127293) <= 5e-3
+            # #197's fixed-N retained as the worst-case CAP (and still emitted for the cap row):
             and abs(lpc["decisive_total_trials_lambda1"] - 30455.404769372028) <= 1.0
+            and abs(lpc["fixed_n_worst_case_cap_trials"] - 30455.404769372028) <= 1.0
             and abs(lpc["neyman_efficiency_gain_vs_equal"] - 1.4336929857369356) <= 5e-3
-            and lpc["sequential_via_205_pending"] is True
             and lp_row["status"] == "LANDED" and lp_row["flag"] == "consumed"
+            and lp_row["cost_row_source_pr"] == 205
             # lambda_gate surfacing on the worked (full-ladder) both-bugs cell:
             and bb_g["full_ladder_ok"] is True and bb_g["full_ladder_measured"] is True
             and bb_g["full_ladder_gates_go"] is True
+            and bb_g["liveprobe_sequential_sprt_205_landed"] is True
+            and abs(bb_g["liveprobe_expected_n_sprt_nogo"] - 405.42403511311863) <= 1.0
             # HELD-VERDICT INVARIANT: guard present + satisfied -> verdict stays GO.
             and d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
             and d_full["verdict"] == "GO"
@@ -2523,13 +3711,23 @@ def self_test() -> dict:
             and v_d1["lambda_gate"]["realistic_launch_clears_500"] is True
             and v_d1["lambda_gate"]["private_launch_clears_500"] is True
             and v_d1["failing_gate"] is not None and "full-ladder" in v_d1["failing_gate"])
-    results["k_full_ladder_go_guard_197"] = {
+    results["k_full_ladder_guard_197_sprt_cost_205"] = {
         "pass": bool(k_ok),
+        "cost_row_source_pr": lpc["cost_row_source_pr"],
         "full_ladder_required": lpc["full_ladder_required"],
         "full_ladder_measured_worked": lpc["full_ladder_measured"],
         "false_go_risk_depth1_only": lpc["false_go_risk_depth1_only"],
         "mechanism_can_clear_private_bar": lpc["mechanism_can_clear_private_bar"],
         "depth1_overstatement_tps": lpc["depth1_overstatement_tps"],
+        "expected_n_sprt_nogo": lpc["expected_n_sprt_nogo"],
+        "expected_n_sprt_nearbar": lpc["expected_n_sprt_nearbar"],
+        "worst_case_expected_n_sprt": lpc["worst_case_expected_n_sprt"],
+        "sprt_savings_vs_fixed_n": lpc["sprt_savings_vs_fixed_n"],
+        "sprt_boundary_A_upper_decide_go": lpc["sprt_boundary_A_upper_decide_go"],
+        "sprt_realized_alpha": lpc["sprt_realized_alpha"],
+        "sprt_realized_power": lpc["sprt_realized_power"],
+        "sprt_deff_190": lpc["sprt_deff_190"],
+        "fixed_n_worst_case_cap_trials": lpc["fixed_n_worst_case_cap_trials"],
         "decisive_total_trials_lambda1": lpc["decisive_total_trials_lambda1"],
         "beta_primary": lpc["beta_primary"],
         "worked_verdict_held_go": d_full["per_topology"]["both_bugs"]["verdict"] == "GO",
@@ -2579,6 +3777,197 @@ def self_test() -> dict:
         "frozen_fraction_breakeven": fragile["frozen_fraction_breakeven"],
         "verdict_unchanged_go": d_full["verdict"] == "GO"}
 
+    # (m) ISSUE #192 compliance bracket (lawine #196 lane-b + wirbel #199 lane-a, advisor 18:58Z/
+    #     19:09Z): lane-b non-spec FLOORS at 165.44 (66.9% below 500, token-identical) -> NO compliant
+    #     non-spec 500-lane; lane-a compliant-spec ceiling 536.66 (lower-CI 525.73>500) is the ONLY
+    #     compliant 500-route, conditioned on an UNMEASURED <7.33%/4.12% kernel overhead. This sits
+    #     ABOVE the sigma->LCB trigger (does NOT change #204's 512.41/514.63) and adds a NEW hard
+    #     precondition (issue_192_human_ruling, PENDING) -> launch_authorized stays False.
+    clb = d_full["launch_ci_ledger"]["compliant_lane_bracket"]
+    lb = clb["lane_b_nonspec"]
+    lna = clb["lane_a_compliant_spec"]
+    p192 = next((r for r in d_full["launch_ci_ledger"]["preconditions"]
+                 if r["row"] == "issue_192_human_ruling"), None)
+    m_ok = (bool(clb["landed"]) and clb["reinforces_hold"] is True
+            # CRUX: sits ABOVE the sigma math; does NOT gate or change the #204 trigger.
+            and clb["gates_sigma_lcb_trigger"] is False
+            and clb["sits_above_sigma_math"] is True
+            and clb["does_not_change_204_trigger"] is True
+            # lane-b non-spec floor (lawine #196):
+            and abs(lb["official_tps_floor"] - 165.43791973106974) <= 5e-2
+            and abs(lb["token_identity_rate"] - 1.0) <= 1e-9
+            and abs(lb["ppl"] - 2.376564864651504) <= 5e-3
+            and lb["completes_128"] is True and lb["clears_500"] is False
+            and abs(lb["margin_to_500_pct"] - (-66.91241605378605)) <= 5e-2
+            and abs(lb["spec_premium_tps"] - 316.0920802689302) <= 5e-2
+            and lb["verdict_label"] == "STRUCTURAL_GAP_SPEC_EXISTENTIAL"
+            and bool(lb["self_test_passes"])
+            # lane-a compliant-spec ceiling (wirbel #199):
+            and abs(lna["tps_ceiling"] - 536.6590426143789) <= 5e-2
+            and abs(lna["tps_floor"] - 416.307156176311) <= 5e-2
+            and abs(lna["ceiling_ci_lower_tps"] - 525.7290377676009) <= 5e-2
+            and lna["ceiling_lower_clears_500"] is True
+            and lna["ceiling_clears_500"] is True and lna["floor_clears_500"] is False
+            and abs(lna["max_kernel_overhead_pct_both_bugs"] - 7.331808522875782) <= 5e-3
+            and abs(lna["max_kernel_overhead_pct_descent"] - 4.123450699935671) <= 5e-3
+            and abs(lna["offshelf_overhead_ref_122"] - 0.5178) <= 5e-4
+            and lna["overhead_is_measured"] is False
+            and bool(lna["self_test_passes"])
+            # the NET compliance-precondition framing:
+            and clb["compliant_500_lane_exists"] is True
+            and clb["compliant_500_lane_is_spec_only"] is True
+            and clb["compliant_500_conditioned_on_unmeasured_overhead"] is True
+            # NEW hard precondition row, PENDING -> launch stays un-authorized:
+            and p192 is not None and p192["status"] == "PENDING"
+            and p192["pr"] == 192 and p192["flag"] == "human-ruling"
+            and d_full["launch_authorized"]["authorized"] is False
+            # the sigma->LCB trigger is UNCHANGED by this row (#204 still 512.41/514.63):
+            and abs(d_full["launch_ci_ledger"]["combined_sigma_corner"]["go_trigger_mu_central_tps"]
+                    - 512.4101095400661) <= 5e-2)
+    results["m_compliant_lane_bracket_192_196_199"] = {
+        "pass": bool(m_ok),
+        "sits_above_sigma_math": clb["sits_above_sigma_math"],
+        "does_not_change_204_trigger": clb["does_not_change_204_trigger"],
+        "lane_b_nonspec_floor_tps": lb["official_tps_floor"],
+        "lane_b_clears_500": lb["clears_500"],
+        "lane_a_ceiling_tps": lna["tps_ceiling"],
+        "lane_a_ceiling_ci_lower_tps": lna["ceiling_ci_lower_tps"],
+        "lane_a_lower_clears_500": lna["ceiling_lower_clears_500"],
+        "lane_a_max_overhead_both_pct": lna["max_kernel_overhead_pct_both_bugs"],
+        "lane_a_overhead_unmeasured": (not lna["overhead_is_measured"]),
+        "issue_192_precondition_pending": (p192 is not None and p192["status"] == "PENDING"),
+        "launch_authorized": d_full["launch_authorized"]["authorized"]}
+
+    # (n) ubel #207 (MERGED 19:40Z): the #175 two-readings tension RESOLVED in FAVOR of the YES. The
+    #     larger 10.906 reading is the B=16384 128-tok-window SUB-bench, NOT launch-correct (the 2.106
+    #     ratio vs h_out 5.178 = bench-sqrtN x op-point, only COINCIDENTALLY ~= sqrt(D) 2.100). The
+    #     launch-correct trigger 512.41/514.63 STANDS -> #204's robust-YES SURVIVES; issue_207 moves
+    #     from open_caveats to resolved_caveats; the go_trigger_mu_central is UNCHANGED (512.41).
+    csc = d_full["launch_ci_ledger"]["combined_sigma_corner"]
+    sr = csc["sigma_reconcile_207"]
+    n_ok = (bool(sr["landed"]) and sr["robust_yes_survives"] is True
+            and sr["lambda1_clears_under_conservative_reading"] is False
+            and sr["ratio_equals_sqrtD"] is False
+            and sr["conservative_reading_is_launch_correct"] is False
+            and abs(sr["trigger_central_launch_correct_tps"] - 512.4101095400661) <= tol
+            and abs(sr["trigger_worstcase_launch_correct_tps"] - 514.6346173476741) <= tol
+            and abs(sr["ratio_175_readings"] - 2.106153062206173) <= 5e-3
+            and abs(sr["delta_trigger_reading_tps"] - 8.570958365039814) <= 5e-2
+            # issue_207 RESOLVED (now in resolved_caveats), and NO LONGER open; only land #71 remains open:
+            and "issue_207_175_two_readings" in csc["resolved_caveats"]
+            and "issue_207_175_two_readings" not in csc["open_caveats"]
+            and "land_71_colog" in csc["open_caveats"]
+            and bool(_BANKED.sigma_reconcile_self_test_passes())
+            # CRUX: the sigma->LCB trigger is UNCHANGED by #207 (still 512.41):
+            and abs(csc["go_trigger_mu_central_tps"] - 512.4101095400661) <= tol)
+    results["n_sigma_reconcile_207"] = {
+        "pass": bool(n_ok),
+        "robust_yes_survives": sr["robust_yes_survives"],
+        "lambda1_clears_under_conservative_reading": sr["lambda1_clears_under_conservative_reading"],
+        "ratio_equals_sqrtD": sr["ratio_equals_sqrtD"],
+        "ratio_175_readings": sr["ratio_175_readings"],
+        "trigger_central_launch_correct_tps": sr["trigger_central_launch_correct_tps"],
+        "trigger_worstcase_launch_correct_tps": sr["trigger_worstcase_launch_correct_tps"],
+        "issue_207_resolved": ("issue_207_175_two_readings" in csc["resolved_caveats"]),
+        "issue_207_no_longer_open": ("issue_207_175_two_readings" not in csc["open_caveats"]),
+        "go_trigger_mu_central_unchanged": abs(csc["go_trigger_mu_central_tps"] - 512.4101095400661) <= tol}
+
+    # (o) kanna #210 (MERGED 19:40Z): best-of-N does NOT relax the binding PRIVATE bar -- the conditional
+    #     private clear is FLAT in N (n_star_private=1; selection is on non-replicating public noise, the
+    #     private grade is one fresh draw). To clear 500-PRIVATE at P>=0.95 under best-of-5 the PUBLIC build
+    #     must reach mu_bar_private_corrected=528.48 (+23.61 winner's-curse tax over #202's 504.87). The
+    #     #202 freeze-robust mu=512.2/N=1 does NOT survive privately (p=0.3120). BUILD-target row only --
+    #     it does NOT touch the sigma->LCB PUBLIC trigger (512.41 STANDS).
+    wca = d_full["launch_ci_ledger"]["winners_curse_annotation"]
+    o_ok = (bool(wca["landed"]) and wca["reinforces_hold"] is True
+            and abs(wca["mu_bar_private_corrected_tps"] - 528.4835555959944) <= tol
+            and abs(wca["delta_mu_winners_curse_tps"] - 23.610130939305236) <= 5e-2
+            and wca["n_star_private"] == 1
+            and wca["private_clear_flat_in_n"] is True
+            and wca["regime_invariant"] is True
+            and wca["freeze_robust_512_survives_private"] is False
+            and abs(wca["p_private_clear_at_mu512p2_n1"] - 0.31197802246730244) <= 1e-3
+            and abs(wca["mu_bar_frozen_public_202_tps"] - 504.87342465668917) <= tol
+            and abs(wca["tax_decomposition_tps"]["sum"] - 23.610130939305236) <= 5e-2
+            and bool(_BANKED.winners_curse_self_test_passes())
+            # CRUX: the BUILD target does NOT change the sigma->LCB PUBLIC trigger (still 512.41):
+            and wca["does_not_change_sigma_lcb_trigger"] is True
+            and abs(csc["go_trigger_mu_central_tps"] - 512.4101095400661) <= tol)
+    results["o_winners_curse_210"] = {
+        "pass": bool(o_ok),
+        "mu_bar_private_corrected_tps": wca["mu_bar_private_corrected_tps"],
+        "delta_mu_winners_curse_tps": wca["delta_mu_winners_curse_tps"],
+        "n_star_private": wca["n_star_private"],
+        "private_clear_flat_in_n": wca["private_clear_flat_in_n"],
+        "freeze_robust_512_survives_private": wca["freeze_robust_512_survives_private"],
+        "p_private_clear_at_mu512p2_n1": wca["p_private_clear_at_mu512p2_n1"],
+        "does_not_change_sigma_lcb_trigger": wca["does_not_change_sigma_lcb_trigger"]}
+
+    # (p) wirbel #213 (MERGED 19:40Z): the compliant-spec verify-kernel overhead budget vs lambda. lane-a
+    #     is a DOUBLE gate -- self-KV-recovery lambda >= lambda_crit AND the batch-invariant kernel under
+    #     max_kernel_overhead_pct(lambda). lambda_crit=0.8345 both / 0.9067 descent; budget@lambda=1 is
+    #     7.33% both / 4.12% descent; off-shelf #122 (+51.78%) clears at NO physical lambda<=1. This
+    #     EXTENDS the #192 compliance bracket; it does NOT change the #204/#207 sigma->LCB trigger.
+    clb = d_full["launch_ci_ledger"]["compliant_lane_bracket"]
+    kb213 = clb["lane_a_kernel_budget_213"]
+    p_ok = (bool(kb213["landed"])
+            and abs(kb213["lambda_crit_clears_500_both_bugs"] - 0.8344533978886615) <= 5e-3
+            and abs(kb213["lambda_crit_clears_500_descent"] - 0.9066754940814947) <= 5e-3
+            and abs(kb213["overhead_budget_pct_at_lambda1_both_bugs"] - 7.331808522875782) <= 5e-3
+            and abs(kb213["overhead_budget_pct_at_lambda1_descent"] - 4.123450699935671) <= 5e-3
+            and abs(kb213["overhead_budget_pct_at_lambda_hat_both_bugs"] - (-16.738568764737806)) <= 5e-2
+            and kb213["offshelf_122_clears_at_physical_lambda"] is False
+            and bool(kb213["self_test_passes"])
+            # the NET double-gate framing on the bracket:
+            and clb["compliant_500_lane_is_double_gate"] is True
+            and abs(clb["lane_a_lambda_crit_both_bugs"] - 0.8344533978886615) <= 5e-3
+            and abs(clb["lane_a_lambda_crit_descent"] - 0.9066754940814947) <= 5e-3
+            # CRUX: still sits ABOVE the sigma math -> the #204/#207 trigger is UNCHANGED:
+            and clb["does_not_change_204_trigger"] is True
+            and abs(csc["go_trigger_mu_central_tps"] - 512.4101095400661) <= tol)
+    results["p_kernel_budget_213"] = {
+        "pass": bool(p_ok),
+        "lambda_crit_both_bugs": kb213["lambda_crit_clears_500_both_bugs"],
+        "lambda_crit_descent": kb213["lambda_crit_clears_500_descent"],
+        "overhead_budget_pct_at_lambda1_both_bugs": kb213["overhead_budget_pct_at_lambda1_both_bugs"],
+        "overhead_budget_pct_at_lambda1_descent": kb213["overhead_budget_pct_at_lambda1_descent"],
+        "offshelf_122_clears_at_physical_lambda": kb213["offshelf_122_clears_at_physical_lambda"],
+        "compliant_500_lane_is_double_gate": clb["compliant_500_lane_is_double_gate"]}
+
+    # (q) denken #212 (MERGED 19:54Z): the AR(1)-corrected SPRT cost band. Folding #190's DECAYING ACF
+    #     (rho(1)=0.2583) into the SPRT partial-sum variance tightens #205's flat xDeff=4.41 by 1.59-2.66x
+    #     -> E[N]_nogo band [405 IID -> 672 AR(1) -> 1,125 measured-ACF-realistic -> 1,788 flat-loose]; the
+    #     data-grounded realistic point is 1,125. The 75.12x collapse is Deff-INVARIANT; realized
+    #     (alpha,power)=(0.05,0.95) + bar 0.9780 are UNCHANGED -- the band only SHARPENS, never flips.
+    lpc = d_full["launch_ci_ledger"]["liveprobe_measurement_cost"]
+    ar = lpc["ar_corrected_cost_band_212"]
+    band = ar["expected_n_nogo_band"]
+    q_ok = (bool(ar["landed"]) and isinstance(band, list) and len(band) == 4
+            and abs(ar["expected_n_nogo_iid_floor"] - 405.42403511311863) <= 1.0
+            and abs(ar["expected_n_nogo_ar_optimistic"] - 672.3420962564048) <= 1.0
+            and abs(ar["expected_n_nogo_realistic_measured_acf"] - 1124.7628546877863) <= 1.0
+            and abs(ar["expected_n_nogo_flat_loose"] - 1788.1690675618568) <= 1.0
+            and ar["flat_441_is_conservative"] is True
+            and ar["savings_ratio_deff_invariant"] is True
+            and abs(ar["savings_ratio_unchanged"] - 75.11987975965602) <= 5e-2
+            and abs(ar["realized_alpha_unchanged"] - 0.04999999999999993) <= 1e-3
+            and abs(ar["realized_power_unchanged"] - 0.95) <= 1e-3
+            and abs(ar["private_bar_both_unchanged"] - 0.9780112973731208) <= 1e-3
+            and abs(ar["rho_lag1"] - 0.2583178258286258) <= 5e-3
+            and bool(ar["self_test_passes"])
+            # the headline realistic measurement-cost the human reads (1,125, data-grounded):
+            and abs(lpc["expected_n_nogo_realistic_measured_acf"] - 1124.7628546877863) <= 1.0)
+    results["q_sprt_ar_212"] = {
+        "pass": bool(q_ok),
+        "expected_n_nogo_band": band,
+        "expected_n_nogo_realistic_measured_acf": ar["expected_n_nogo_realistic_measured_acf"],
+        "flat_441_is_conservative": ar["flat_441_is_conservative"],
+        "savings_ratio_deff_invariant": ar["savings_ratio_deff_invariant"],
+        "savings_ratio_unchanged": ar["savings_ratio_unchanged"],
+        "realized_alpha_unchanged": ar["realized_alpha_unchanged"],
+        "realized_power_unchanged": ar["realized_power_unchanged"],
+        "private_bar_both_unchanged": ar["private_bar_both_unchanged"]}
+
     passes = bool(all(v["pass"] for v in results.values()))
     test_metric = bool(d_full["both_bugs_go_at_lambda_star"])
     return {
@@ -2613,19 +4002,31 @@ def _maybe_log_wandb(args, payload: dict) -> None:
                              "halfwidth_iid_tps": _BANKED.halfwidth_iid(),
                              "halfwidth_realistic_tps": _BANKED.halfwidth_realistic(),
                              "icc_hat": _BANKED.icc_hat(), "design_effect": _BANKED.design_effect(),
-                             # combined-sigma row (#201, SUPERSEDES #195's 7.26/17.04): de-dup x
-                             # realistic-ICC launch sigma -> P95 GO-trigger-vs-ceiling. PROVISIONAL.
-                             "combined_sigma_launch_central_tps_201": _BANKED.combined_sigma_launch("central"),
-                             "combined_sigma_launch_worstcase_tps_201": _BANKED.combined_sigma_launch("worstcase"),
-                             "go_trigger_mu_central_tps_201": _BANKED.mu_clears_500("central"),
-                             "go_trigger_mu_worstcase_tps_201": _BANKED.mu_clears_500("worstcase"),
+                             # combined-sigma row -- ubel #204 CLEAN-1-sigma trigger (RESOLVED-YES,
+                             # NON-GATING; RETIRES #201's trigger). The de-dup x ICC mechanism is solid;
+                             # #201's 12.215/520.09 was a z=1.96 half-width units bug -> rebased to 5.699.
+                             "combined_sigma_launch_central_tps_204": _BANKED.rebase_combined_sigma("central"),
+                             "combined_sigma_launch_worstcase_tps_204": _BANKED.rebase_combined_sigma("worstcase"),
+                             "go_trigger_mu_central_tps_204": _BANKED.rebase_mu_clears_500("central"),
+                             "go_trigger_mu_worstcase_tps_204": _BANKED.rebase_mu_clears_500("worstcase"),
+                             "lambda1_ceiling_mu_tps_204": _BANKED.rebase_lambda1_ceiling(),
+                             "central_p95_reachable_204": _BANKED.rebase_lambda1_clears_500("central"),
+                             "worstcase_p95_reachable_204": _BANKED.rebase_lambda1_clears_500("worstcase"),
+                             "central_margin_at_lambda1_tps_204": _BANKED.rebase_headroom_below_ceiling("central"),
+                             "worstcase_margin_at_lambda1_tps_204": _BANKED.rebase_headroom_below_ceiling("worstcase"),
+                             "clean_acceptance_1sigma_tps_204": _BANKED.rebase_acceptance_1sigma_clean(),
+                             "delta_mu_rebase_central_tps_204": _BANKED.rebase_delta_mu("central"),
+                             "rebase_direction_matches_prediction_204": _BANKED.rebase_direction_matches_prediction(),
+                             "anchor_err_195_dedup_204": _BANKED.rebase_anchor_err_195(),
+                             "anchor_err_194_breakeven_204": _BANKED.rebase_anchor_err_194(),
+                             # #201 RETIRED trigger provenance (the units-bug numbers #204 supersedes):
+                             "retired_combined_sigma_launch_central_tps_201": _BANKED.combined_sigma_launch("central"),
+                             "retired_combined_sigma_launch_worstcase_tps_201": _BANKED.combined_sigma_launch("worstcase"),
+                             "retired_go_trigger_mu_central_tps_201": _BANKED.mu_clears_500("central"),
+                             "retired_go_trigger_mu_worstcase_tps_201": _BANKED.mu_clears_500("worstcase"),
                              "lambda1_ceiling_mu_tps_201": _BANKED.lambda1_ceiling_mu(),
-                             "central_p95_reachable_201": _BANKED.lambda1_clears_500("central"),
-                             "worstcase_p95_reachable_201": _BANKED.lambda1_clears_500("worstcase"),
-                             "central_margin_at_lambda1_tps_201": _BANKED.margin_at_lambda1("central"),
-                             "worstcase_margin_at_lambda1_tps_201": _BANKED.margin_at_lambda1("worstcase"),
                              "acceptance_axis_dedup_iid_tps_201": _BANKED.acceptance_sigma_dedup_iid(),
-                             "acceptance_axis_realistic_icc_tps_201": _BANKED.acceptance_sigma_dedup_realistic_icc(),
+                             "acceptance_axis_realistic_icc_halfwidth_tps_201": _BANKED.acceptance_sigma_dedup_realistic_icc(),
                              "sqrt_design_effect_201": _BANKED.sqrt_design_effect(),
                              "headroom_shift_tps_201": _BANKED.headroom_shift_from_iid(),
                              "icc0_combined_sigma_central_tps_201": _BANKED.icc0_combined_sigma_central(),
@@ -2655,6 +4056,25 @@ def _maybe_log_wandb(args, payload: dict) -> None:
                              "liveprobe_decisive_total_trials_lambda1_197": _BANKED.liveprobe_decisive_total_trials(),
                              "liveprobe_neyman_efficiency_gain_197": _BANKED.liveprobe_neyman_efficiency_gain(),
                              "liveprobe_private_bar_both_197": _BANKED.liveprobe_private_bar(),
+                             # denken #205 SPRT liveprobe-budget: REPLACES #197's fixed-N cost row with
+                             # the realistic expected-N / operating-characteristic (cost-row swap only).
+                             "sprt_landed_205": _BANKED.sprt_landed(),
+                             "sprt_expected_n_nogo_205": _BANKED.sprt_expected_n_nogo(),
+                             "sprt_expected_n_nogo_realistic_icc_205": _BANKED.sprt_expected_n_nogo_realistic_icc(),
+                             "sprt_expected_n_nearbar_205": _BANKED.sprt_expected_n_nearbar(),
+                             "sprt_worst_case_expected_n_205": _BANKED.sprt_worst_case_expected_n(),
+                             "sprt_worst_case_expected_n_realistic_icc_205": _BANKED.sprt_worst_case_expected_n_realistic_icc(),
+                             "sprt_savings_vs_fixed_n_205": _BANKED.sprt_savings_vs_fixed_n(),
+                             "sprt_n_fixed_197_cap_205": _BANKED.sprt_n_fixed_197(),
+                             "sprt_boundary_A_upper_decide_go_205": _BANKED.sprt_boundary("A_upper_decide_go"),
+                             "sprt_boundary_B_lower_decide_nogo_205": _BANKED.sprt_boundary("B_lower_decide_nogo"),
+                             "sprt_realized_alpha_205": _BANKED.sprt_realized_alpha(),
+                             "sprt_realized_power_205": _BANKED.sprt_realized_power(),
+                             "sprt_target_alpha_205": _BANKED.sprt_target_alpha(),
+                             "sprt_target_power_205": _BANKED.sprt_target_power(),
+                             "sprt_deff_190_205": _BANKED.sprt_deff_190(),
+                             "sprt_beta_nogo_205": _BANKED.sprt_beta_nogo(),
+                             "sprt_private_lcb_nogo_tps_205": _BANKED.sprt_private_lcb_nogo(),
                              # kanna #202 frozen-budget regime (conservative DEFAULT; annotation only).
                              "frozen_budget_landed_202": _BANKED.frozen_budget_landed(),
                              "mu_bar_frozen_p95_tps_202": _BANKED.mu_bar_frozen_p95(),
@@ -2665,7 +4085,94 @@ def _maybe_log_wandb(args, payload: dict) -> None:
                              "n_shots_frozen_at_512_202": _BANKED.frozen_n_shots_at_512(),
                              "frozen_e_shots_at_bar_202": _BANKED.frozen_e_shots_at_bar(),
                              "frozen_fraction_breakeven_202": _BANKED.frozen_fraction_breakeven(),
-                             "sigma_fraction_beatable_frozen_202": _BANKED.frozen_sigma_fraction_beatable()})
+                             "sigma_fraction_beatable_frozen_202": _BANKED.frozen_sigma_fraction_beatable(),
+                             # ISSUE #192 compliance bracket -- lawine #196 lane-b (non-spec floor) +
+                             # wirbel #199 lane-a (compliant-spec ceiling). Sits ABOVE the sigma->LCB
+                             # trigger (does NOT change #204's 512.41/514.63); adds the #192 precondition.
+                             "compliant_nonspec_floor_landed_196": _BANKED.nonspec_floor_landed(),
+                             "compliant_nonspec_floor_tps_196": _BANKED.nonspec_official_tps(),
+                             "compliant_nonspec_token_identity_196": _BANKED.nonspec_token_identity(),
+                             "compliant_nonspec_ppl_196": _BANKED.nonspec_ppl(),
+                             "compliant_nonspec_clears_500_196": _BANKED.nonspec_clears_500(),
+                             "compliant_nonspec_margin_to_500_pct_196": _BANKED.nonspec_margin_pct(),
+                             "compliant_nonspec_spec_premium_tps_196": _BANKED.nonspec_spec_premium_tps(),
+                             "compliant_nonspec_spec_premium_pct_196": _BANKED.nonspec_spec_premium_pct(),
+                             "compliant_spec_landed_199": _BANKED.compliant_spec_landed(),
+                             "compliant_spec_tps_ceiling_199": _BANKED.compliant_spec_ceiling(),
+                             "compliant_spec_tps_floor_199": _BANKED.compliant_spec_floor(),
+                             "compliant_spec_ceiling_ci_lower_both_199": _BANKED.compliant_spec_ceiling_ci_lower("both_bugs"),
+                             "compliant_spec_lower_clears_500_both_199": _BANKED.compliant_spec_lower_clears_500("both_bugs"),
+                             "compliant_spec_clears_500_199": _BANKED.compliant_spec_clears_500(),
+                             "compliant_spec_floor_clears_500_199": _BANKED.compliant_spec_floor_clears_500(),
+                             "compliant_spec_max_overhead_both_pct_199": _BANKED.compliant_spec_max_overhead("both_bugs"),
+                             "compliant_spec_max_overhead_descent_pct_199": _BANKED.compliant_spec_max_overhead("descent_only"),
+                             "compliant_spec_offshelf_overhead_ref_122_199": _BANKED.compliant_spec_offshelf_overhead_ref(),
+                             # ubel #207 launch-sigma #175-reading reconcile -- RESOLVES the #204 caveat in
+                             # FAVOR of the YES (the 10.906 reading is the B=16384 sub-bench, RETIRED). The
+                             # launch-correct trigger 512.41/514.63 STANDS; robust-YES SURVIVES.
+                             "sigma_reconcile_landed_207": _BANKED.sigma_reconcile_landed(),
+                             "sigma_reconcile_self_test_passes_207": _BANKED.sigma_reconcile_self_test_passes(),
+                             "sigma_reconcile_robust_yes_survives_207": _BANKED.sigma_reconcile_robust_yes_survives(),
+                             "sigma_reconcile_lambda1_clears_conservative_207": _BANKED.sigma_reconcile_lambda1_clears_conservative(),
+                             "sigma_reconcile_conservative_is_launch_correct_207": _BANKED.sigma_reconcile_conservative_is_launch_correct(),
+                             "sigma_reconcile_ratio_175_207": _BANKED.sigma_reconcile_ratio_175(),
+                             "sigma_reconcile_ratio_equals_sqrtd_207": _BANKED.sigma_reconcile_ratio_equals_sqrtd(),
+                             "sigma_reconcile_trigger_central_hout_tps_207": _BANKED.sigma_reconcile_trigger_hout("central"),
+                             "sigma_reconcile_trigger_worstcase_hout_tps_207": _BANKED.sigma_reconcile_trigger_hout("worstcase"),
+                             "sigma_reconcile_trigger_central_175sampling_tps_207": _BANKED.sigma_reconcile_trigger_175sampling("central"),
+                             "sigma_reconcile_delta_trigger_tps_207": _BANKED.sigma_reconcile_delta_trigger(),
+                             "sigma_reconcile_lambda1_ceiling_tps_207": _BANKED.sigma_reconcile_lambda1_ceiling(),
+                             # kanna #210 winner's-curse: best-of-N does NOT relax the PRIVATE bar (flat in N,
+                             # n_star_private=1); the build target rises to 528.48 (+23.61 tax). N=1 STANDS;
+                             # does NOT touch the sigma->LCB PUBLIC trigger (512.41).
+                             "winners_curse_landed_210": _BANKED.winners_curse_landed(),
+                             "winners_curse_self_test_passes_210": _BANKED.winners_curse_self_test_passes(),
+                             "winners_curse_mu_bar_private_corrected_tps_210": _BANKED.winners_curse_mu_bar_private_corrected(),
+                             "winners_curse_delta_mu_tps_210": _BANKED.winners_curse_delta_mu(),
+                             "winners_curse_n_star_private_210": _BANKED.winners_curse_n_star_private(),
+                             "winners_curse_private_clear_flat_in_n_210": _BANKED.winners_curse_private_clear_flat_in_n(),
+                             "winners_curse_regime_invariant_210": _BANKED.winners_curse_regime_invariant(),
+                             "winners_curse_freeze_robust_512_survives_private_210": _BANKED.winners_curse_freeze_robust_512_survives(),
+                             "winners_curse_p_private_at_512_210": _BANKED.winners_curse_p_private_at_512(),
+                             "winners_curse_mu_bar_frozen_public_202_tps_210": _BANKED.winners_curse_mu_bar_frozen_202(),
+                             "winners_curse_mu_safe_fresh_194_tps_210": _BANKED.winners_curse_mu_safe_fresh_194(),
+                             "winners_curse_tps_n5_frozen_210": _BANKED.winners_curse_tps_n5("frozen"),
+                             "winners_curse_tps_n5_fresh_210": _BANKED.winners_curse_tps_n5("fresh"),
+                             # wirbel #213 compliant-kernel overhead budget vs lambda -- lane-a DOUBLE gate
+                             # (lambda >= lambda_crit AND kernel under max_overhead(lambda)). Extends the #192
+                             # bracket; off-shelf #122 (+51.78%) clears at NO physical lambda<=1.
+                             "kernel_budget_landed_213": _BANKED.kernel_budget_landed(),
+                             "kernel_budget_self_test_passes_213": _BANKED.kernel_budget_self_test_passes(),
+                             "kernel_budget_lambda_crit_both_bugs_213": _BANKED.kernel_budget_lambda_crit("both_bugs"),
+                             "kernel_budget_lambda_crit_descent_213": _BANKED.kernel_budget_lambda_crit("descent"),
+                             "kernel_budget_overhead_at_lambda1_both_pct_213": _BANKED.kernel_budget_overhead_at_lambda1("both_bugs"),
+                             "kernel_budget_overhead_at_lambda1_descent_pct_213": _BANKED.kernel_budget_overhead_at_lambda1("descent"),
+                             "kernel_budget_overhead_at_lambda_hat_both_pct_213": _BANKED.kernel_budget_overhead_at_lambda_hat(),
+                             "kernel_budget_lambda_hat_213": _BANKED.kernel_budget_lambda_hat(),
+                             "kernel_budget_offshelf_clears_at_physical_lambda_213": _BANKED.kernel_budget_offshelf_clears_at_physical_lambda(),
+                             "kernel_budget_offshelf_overhead_ref_122_213": _BANKED.kernel_budget_offshelf_overhead_ref(),
+                             "kernel_budget_max_at_saturation_pct_213": _BANKED.kernel_budget_max_at_saturation(),
+                             # denken #212 AR(1)-corrected SPRT cost band -- sharpens #205's flat xDeff=4.41
+                             # by 1.59-2.66x. E[N]_nogo band [405 IID -> 672 AR(1) -> 1,125 measured-ACF-
+                             # realistic -> 1,788 flat-loose]; the 75.12x collapse is Deff-INVARIANT.
+                             "sprt_ar_landed_212": _BANKED.sprt_ar_landed(),
+                             "sprt_ar_self_test_passes_212": _BANKED.sprt_ar_self_test_passes(),
+                             "sprt_ar_expected_n_nogo_iid_212": _BANKED.sprt_ar_expected_n_nogo("iid"),
+                             "sprt_ar_expected_n_nogo_ar1_212": _BANKED.sprt_ar_expected_n_nogo("ar1"),
+                             "sprt_ar_expected_n_nogo_realistic_measured_acf_212": _BANKED.sprt_ar_realistic_nogo(),
+                             "sprt_ar_expected_n_nogo_flat_441_212": _BANKED.sprt_ar_expected_n_nogo("flat_441"),
+                             "sprt_ar_deff_ar_212": _BANKED.sprt_ar_deff("deff_ar_at_mbar"),
+                             "sprt_ar_deff_empirical_acf_212": _BANKED.sprt_ar_deff("deff_empirical_acf_measured"),
+                             "sprt_ar_deff_flat_441_212": _BANKED.sprt_ar_deff("deff_flat_441"),
+                             "sprt_ar_rho_lag1_212": _BANKED.sprt_ar_rho_lag1(),
+                             "sprt_ar_tightening_empirical_vs_flat_212": _BANKED.sprt_ar_tightening("empirical"),
+                             "sprt_ar_tightening_ar_vs_flat_212": _BANKED.sprt_ar_tightening("ar"),
+                             "sprt_ar_flat_441_is_conservative_212": _BANKED.sprt_ar_flat_is_conservative(),
+                             "sprt_ar_savings_ratio_deff_invariant_212": _BANKED.sprt_ar_savings_invariant(),
+                             "sprt_ar_savings_ratio_unchanged_212": _BANKED.sprt_ar_savings_ratio(),
+                             "sprt_ar_realized_alpha_unchanged_212": _BANKED.sprt_ar_realized_alpha(),
+                             "sprt_ar_realized_power_unchanged_212": _BANKED.sprt_ar_realized_power(),
+                             "sprt_ar_private_bar_both_unchanged_212": _BANKED.sprt_ar_private_bar()})
     st = payload["self_test"]
     flat = {
         "launch_trigger_calculator_self_test_passes": st["launch_trigger_calculator_self_test_passes"],
@@ -2685,7 +4192,8 @@ def _maybe_log_wandb(args, payload: dict) -> None:
     flat["worked_example/sole_pending_axis"] = str(led["sole_pending_axis"])
     flat["worked_example/n_pending_numerical_axes"] = len(led["pending_numerical_axes"])
     flat["worked_example/ledger_closed"] = bool(led["ledger_closed"])
-    # combined-sigma row (#201, SUPERSEDES #195): launch sigma -> P95 GO-trigger-vs-ceiling. PROVISIONAL.
+    # combined-sigma row (ubel #204, RESOLVES #201): clean-1-sigma launch sigma -> P95 GO-trigger-vs-
+    # ceiling. RESOLVED-YES (lambda=1 clears 500 at P95 both ends), NON-GATING.
     csc = led["combined_sigma_corner"]
     if csc.get("landed"):
         flat["worked_example/combined_sigma_launch_central_tps"] = csc["combined_sigma_launch_central_tps"]
@@ -2697,12 +4205,20 @@ def _maybe_log_wandb(args, payload: dict) -> None:
         flat["worked_example/worstcase_p95_reachable"] = bool(csc["worstcase_p95_reachable"])
         flat["worked_example/central_margin_at_lambda1_tps"] = csc["central_margin_at_lambda1_tps"]
         flat["worked_example/worstcase_margin_at_lambda1_tps"] = csc["worstcase_margin_at_lambda1_tps"]
-        flat["worked_example/acceptance_axis_realistic_icc_tps"] = csc["acceptance_axis_realistic_icc_tps"]
+        flat["worked_example/clean_acceptance_1sigma_tps"] = csc["clean_acceptance_1sigma_tps"]
+        flat["worked_example/delta_mu_rebase_central_tps"] = csc["delta_mu_rebase_central_tps"]
+        flat["worked_example/rebase_direction_matches_prediction"] = bool(csc["rebase_direction_matches_prediction"])
+        flat["worked_example/acceptance_axis_realistic_icc_halfwidth_tps"] = csc["acceptance_axis_realistic_icc_halfwidth_tps"]
         flat["worked_example/sqrt_design_effect"] = csc["sqrt_design_effect"]
         flat["worked_example/headroom_shift_tps"] = csc["headroom_shift_tps"]
         flat["worked_example/icc0_combined_sigma_central_tps"] = csc["icc0_combined_sigma_central_tps"]
+        flat["worked_example/anchor_err_195_dedup"] = csc["anchor_err_195_dedup"]
+        flat["worked_example/anchor_err_194_breakeven"] = csc["anchor_err_194_breakeven"]
         flat["worked_example/combined_sigma_provisional"] = bool(csc["provisional"])
+        flat["worked_example/combined_sigma_resolved"] = bool(csc["resolved"])
+        flat["worked_example/combined_sigma_resolved_yes"] = bool(csc["resolved_yes"])
         flat["worked_example/combined_sigma_gates_analytic_go"] = bool(csc["gates_analytic_go"])
+        flat["worked_example/combined_sigma_source_pr_trigger"] = int(csc["source_pr_trigger"])
         flat["worked_example/rho_sampling_input_195_provenance"] = csc["dedup_provenance_195"]["rho_sampling_input"]
     # cost-aware re-draw budget annotation (#200): sequential spend + build-vs-stay cost toggle.
     cba = led["cost_budget_annotation"]
@@ -2729,6 +4245,20 @@ def _maybe_log_wandb(args, payload: dict) -> None:
         flat["worked_example/liveprobe_neyman_efficiency_gain"] = lpc["neyman_efficiency_gain_vs_equal"]
         flat["worked_example/liveprobe_reinforces_hold"] = bool(lpc["reinforces_hold"])
         flat["worked_example/liveprobe_flips_verdict"] = bool(lpc["flips_verdict"])
+        # denken #205 SPRT cost row (REPLACES #197's fixed-N; cost-row swap only, guard unchanged).
+        flat["worked_example/liveprobe_cost_row_source_pr"] = int(lpc["cost_row_source_pr"])
+        flat["worked_example/liveprobe_sequential_sprt_205_landed"] = bool(lpc["sequential_sprt_205_landed"])
+        flat["worked_example/liveprobe_expected_n_sprt_nogo"] = lpc["expected_n_sprt_nogo"]
+        flat["worked_example/liveprobe_expected_n_sprt_nogo_realistic_icc"] = lpc["expected_n_sprt_nogo_realistic_icc"]
+        flat["worked_example/liveprobe_expected_n_sprt_nearbar"] = lpc["expected_n_sprt_nearbar"]
+        flat["worked_example/liveprobe_worst_case_expected_n_sprt"] = lpc["worst_case_expected_n_sprt"]
+        flat["worked_example/liveprobe_sprt_savings_vs_fixed_n"] = lpc["sprt_savings_vs_fixed_n"]
+        flat["worked_example/liveprobe_fixed_n_worst_case_cap_trials"] = lpc["fixed_n_worst_case_cap_trials"]
+        flat["worked_example/liveprobe_sprt_realized_alpha"] = lpc["sprt_realized_alpha"]
+        flat["worked_example/liveprobe_sprt_realized_power"] = lpc["sprt_realized_power"]
+        flat["worked_example/liveprobe_sprt_boundary_A_upper_decide_go"] = lpc["sprt_boundary_A_upper_decide_go"]
+        flat["worked_example/liveprobe_sprt_deff_190"] = lpc["sprt_deff_190"]
+        flat["worked_example/liveprobe_sprt_beta_nogo"] = lpc["sprt_beta_nogo"]
     # kanna #202 frozen-budget regime (conservative DEFAULT; annotation only).
     fba = led.get("frozen_budget_annotation") or {}
     if fba.get("landed"):
@@ -2742,6 +4272,33 @@ def _maybe_log_wandb(args, payload: dict) -> None:
         flat["worked_example/frozen_fragile_e_shots_at_bar"] = fba["build_at_bar_best_of_n_fragile"]["e_shots_frozen"]
         flat["worked_example/frozen_fraction_breakeven"] = fba["build_at_bar_best_of_n_fragile"]["frozen_fraction_breakeven"]
         flat["worked_example/frozen_reinforces_hold"] = bool(fba["reinforces_hold"])
+    # ISSUE #192 compliance bracket (lawine #196 lane-b + wirbel #199 lane-a) -- ABOVE the sigma math.
+    clb = led.get("compliant_lane_bracket") or {}
+    if clb.get("landed"):
+        lb = clb["lane_b_nonspec"]
+        lna = clb["lane_a_compliant_spec"]
+        flat["worked_example/compliant_sits_above_sigma_math"] = bool(clb["sits_above_sigma_math"])
+        flat["worked_example/compliant_does_not_change_204_trigger"] = bool(clb["does_not_change_204_trigger"])
+        flat["worked_example/compliant_500_lane_exists"] = bool(clb["compliant_500_lane_exists"])
+        flat["worked_example/compliant_500_lane_is_spec_only"] = bool(clb["compliant_500_lane_is_spec_only"])
+        flat["worked_example/compliant_500_conditioned_on_unmeasured_overhead"] = bool(
+            clb["compliant_500_conditioned_on_unmeasured_overhead"])
+        flat["worked_example/lane_b_nonspec_floor_tps"] = lb["official_tps_floor"]
+        flat["worked_example/lane_b_nonspec_token_identity_rate"] = lb["token_identity_rate"]
+        flat["worked_example/lane_b_nonspec_ppl"] = lb["ppl"]
+        flat["worked_example/lane_b_nonspec_clears_500"] = bool(lb["clears_500"])
+        flat["worked_example/lane_b_nonspec_margin_to_500_pct"] = lb["margin_to_500_pct"]
+        flat["worked_example/lane_b_nonspec_spec_premium_tps"] = lb["spec_premium_tps"]
+        flat["worked_example/lane_b_nonspec_spec_premium_pct"] = lb["spec_premium_pct"]
+        flat["worked_example/lane_a_compliant_spec_ceiling_tps"] = lna["tps_ceiling"]
+        flat["worked_example/lane_a_compliant_spec_floor_tps"] = lna["tps_floor"]
+        flat["worked_example/lane_a_compliant_spec_ceiling_ci_lower_tps"] = lna["ceiling_ci_lower_tps"]
+        flat["worked_example/lane_a_compliant_spec_lower_clears_500"] = bool(lna["ceiling_lower_clears_500"])
+        flat["worked_example/lane_a_compliant_spec_floor_clears_500"] = bool(lna["floor_clears_500"])
+        flat["worked_example/lane_a_max_kernel_overhead_pct_both"] = lna["max_kernel_overhead_pct_both_bugs"]
+        flat["worked_example/lane_a_max_kernel_overhead_pct_descent"] = lna["max_kernel_overhead_pct_descent"]
+        flat["worked_example/lane_a_offshelf_overhead_ref_122"] = lna["offshelf_overhead_ref_122"]
+        flat["worked_example/lane_a_overhead_is_measured"] = bool(lna["overhead_is_measured"])
     for topo in ("both_bugs", "descent_only"):
         c = wp["per_topology"][topo]
         lgc = wp["_full_per_topology"][topo]["lambda_gate"]
@@ -2797,15 +4354,20 @@ def run(args) -> dict:
     bb_bind = binding_bar("both_bugs", TAU_HEADLINE)
     csc = combined_sigma_corner()
     cba = cost_budget_annotation()
-    lpc = liveprobe_measurement_cost(_M.canonical_ladder(1.0, "both_bugs"))   # #197, worked full ladder
+    lpc = liveprobe_measurement_cost(_M.canonical_ladder(1.0, "both_bugs"))   # #197/#205/#212, worked full ladder
     fba = frozen_budget_annotation()                                         # #202
+    clb = compliant_lane_bracket()                                           # #196/#199/#213 (#192 bracket)
+    wca = winners_curse_annotation()                                         # #210 winner's-curse private bar
+    ar212 = lpc.get("ar_corrected_cost_band_212") or {}                      # #212 AR(1) cost band
+    kb213 = clb.get("lane_a_kernel_budget_213") or {}                        # #213 kernel-overhead-vs-lambda
     handoff = (
         "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified "
         "GO/NO-GO + filled (un-filed) Approval request. Self-test %s. RECOMPOSED post-merge "
-        "(advisor 17:27Z + 17:52Z + 18:03Z + 18:23Z + 18:39Z): the TYPED launch-CI ledger reads REAL "
-        "banked scalars -- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw "
-        "budget, #195 cross-axis covariance, #200 cost, #201 launch-sigma closure, #197 liveprobe "
-        "depth-budget AND #202 frozen-budget have ALL LANDED (flag=consumed); the ledger is CLOSED. "
+        "(advisor 17:27Z + 17:52Z + 18:03Z + 18:23Z + 18:39Z + 18:46Z + 19:09Z): the TYPED launch-CI "
+        "ledger reads REAL banked scalars -- #190 ICC, #191 private, #188 sigma-oneshot, #187 "
+        "input-side, #194 re-draw budget, #195 cross-axis covariance, #200 cost, #201->#204 "
+        "launch-sigma closure+UNIT-REBASE, #197->#205 liveprobe depth-budget+SPRT, #202 frozen-budget "
+        "AND #196/#199 #192-compliant lanes have ALL LANDED (flag=consumed); the ledger is CLOSED. "
         "binding_bar = max(public#183 %.4f, ICC#190 %.4f, "
         "private#191 %.4f) = %.4f (private DOMINATES, both-bugs); descent private bar is UNREACHABLE. "
         "land #71 must show lambda_hat_built >= %.4f AND the #179 launch-projection cell-LCB(P>=0.9) "
@@ -2815,47 +4377,103 @@ def run(args) -> dict:
         "-> launch_authorized=False (authorizes nothing). both-bugs SURVIVES at lambda=1: realistic "
         "launch-LCB 510.63>=500 + private valid -> robust GO (HELD). descent is DOUBLY-HARDENED NO-GO: "
         "private build bar UNREACHABLE AND misses realistic 495.04 + private 490.16 launch LCBs. "
-        "COMBINED-SIGMA ROW (#201, advisor 18:23Z -- SUPERSEDES #195's 7.26/17.04; PROVISIONAL + "
-        "NON-GATING): de-dup (#195, rho=%.3f double-count -> IDENTITY 5.32 iid) x realistic ICC (#190, "
-        "MAGNITUDE -> %.2f) (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma %.2f central / "
-        "%.2f worst-case; P95 GO trigger mu>=%.2f central / %.2f worst-case vs the lambda=1 ceiling "
-        "%.2f -> central P95-reachable (+%.2f) but worst-case UNREACHABLE (%.2f), even at lambda=1 "
-        "(ICC erodes ~%.1f TPS of launch headroom). KNIFE-EDGE: WIRE the mechanism, HOLD the verdict "
-        "-- this row does NOT gate `go` (not hard-wired vs the ceiling); two open levers finalize it "
-        "(ubel #204 unit-rebase ~3 TPS direction-OPEN -> can FLIP central; land #71 co-log n=%s "
-        "retires the rho(*,hw) band). #200 cost annotation (budget row ONLY, single-shot logic "
+        "COMBINED-SIGMA ROW (ubel #204, advisor 18:46Z -- RETIRES #201's trigger on a UNITS bug; "
+        "RESOLVED-YES + NON-GATING): de-dup (#195, rho=%.3f double-count -> IDENTITY 5.32 iid) x "
+        "realistic ICC (#190, MAGNITUDE -> %.2f z=1.96 HALF-WIDTH); #204 rebases to a clean 1-sigma "
+        "%.3f (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma %.2f central / %.2f worst-case; "
+        "P95 GO trigger mu>=%.2f central / %.2f worst-case vs the lambda=1 ceiling %.2f -> BOTH BELOW "
+        "-> lambda=1 clears 500 at P95 CENTRALLY (+%.2f) AND worst-case (+%.2f). RESOLVED-YES (was a "
+        "PROVISIONAL knife-edge; direction sign-backwards -> trigger SHIFTED %.2f, DOWN not up). "
+        "NON-GATING -- this row does NOT gate `go` (it does not authorize a launch). ubel #207 "
+        "(advisor 19:40Z) RESOLVED the #175 two-readings caveat in FAVOR of the YES: the larger "
+        "10.906 reading is the B=16384 128-tok SUB-bench (RETIRED), so the launch-correct trigger "
+        "512.41/514.63 STANDS and the robust-YES SURVIVES; only land #71 co-log n=%s remains open "
+        "(it now merely TIGHTENS the YES, never flips it). #200 cost annotation (budget row ONLY, "
+        "single-shot logic "
         "UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=%.2f (not fixed-5); "
         "build-higher (mu>=%.1f/N=1) beats stay-at-bar iff reaching mu costs < %.0f shots' GPU-$ "
         "(c*=%.2f*b fixed / %.2f*b sequential). #197 (denken, advisor 18:39Z): the GO leg now GATES on "
         "land #71's MEASURED full-ladder q[2..9] >= 0.9780 -- a depth-1-only/spine-inferred read is a "
         "FALSE GO worth %.1f TPS (true private LCB %.1f<<500; at beta=%.3f the mechanism CANNOT clear "
-        "the private bar, mech_can_clear=%s -> a real GO needs beta~1 across the MEASURED ladder); "
-        "decisive cert ~%.0f Neyman trials @lambda=1 (sequential via #205, 30k cap). The worked tuple's "
-        "8-entry ladder SATISFIES the guard -> verdict HELD. #202 (kanna, advisor 18:39Z): the "
+        "the private bar, mech_can_clear=%s -> a real GO needs beta~1 across the MEASURED ladder). "
+        "#205 (denken, advisor 19:09Z) REPLACES #197's fixed-N cost row with the realistic SPRT: "
+        "E[N]~%.0f trials on a clear-NO-GO build (%.1fx collapse vs #197's %.0f fixed-N), ~%.0f "
+        "near-bar, <=%.0f worst-case ASN; realized (alpha,power)=(%.2f,%.2f). Full-ladder GO guard "
+        "UNCHANGED (cost-row swap, not a verdict change). The worked tuple's 8-entry ladder SATISFIES "
+        "the guard -> verdict HELD. #202 (kanna, advisor 18:39Z): the "
         "multi-shot budget DEFAULTS to the conservative FROZEN regime (best-of-N beats only sigma_hw -> "
         "N=5@bar P=%.3f not fresh 0.969; default build-bar input mu_bar_frozen_p95=%.2f not fresh "
         "%.2f); THE HEDGE -- build-to-mu=%.1f/N=1 is fully freeze-robust (n_shots_frozen=%s) so the "
         "SAFE recommendation is untouched; only build-at-bar+best-of-N is frozen-fragile (E[shots]="
         "%.2f, exhausts 19%%, breakeven f*=%.3f). BOTH #197 + #202 REINFORCE the HOLD -- they sharpen "
-        "the measurement spec + budget robustness, not flip it. both_bugs_go_at_lambda_star=%s. Human "
+        "the measurement spec + budget robustness, not flip it. ISSUE #192 COMPLIANCE BRACKET (lawine "
+        "#196 lane-b + wirbel #199 lane-a, advisor 18:58Z/19:09Z) sits ABOVE the sigma math and does "
+        "NOT change the #204 trigger: lane-b (non-spec, EMPIRICAL) is token-identical but FLOORS at "
+        "%.2f official TPS (%.1f%% below 500) -> NO compliant non-spec 500-lane (spec premium %.1f TPS "
+        "existential); lane-a (compliant-spec int4 VERIFY kernel) ceiling %.2f (lower-CI %.2f>500 -> "
+        "CLEARS), floor %.2f, clears 500 ONLY at <%.2f%% both / %.2f%% descent kernel overhead "
+        "(UNMEASURED; off-shelf #122 +%.1f%%). So lane-a is the SINGLE compliant 500-route, and a NEW "
+        "hard precondition (issue_192_human_ruling, PENDING) gates the launch on the #192 ruling -- "
+        "keeping launch_authorized=False. wirbel #213 (advisor 19:40Z) grades lane-a's overhead "
+        "budget vs lambda: max_overhead(lambda) opens to %.2f%% both / %.2f%% descent at lambda=1, "
+        "the zero-overhead path first clears 500 at lambda_crit=%.4f both / %.4f descent -> lane-a is "
+        "a DOUBLE gate (lambda>=lambda_crit AND kernel-under-budget); off-shelf #122 (+51.78%%) clears "
+        "at NO physical lambda<=1. kanna #210 (advisor 19:40Z) CORRECTS the #202 hedge against the "
+        "PRIVATE bar: best-of-N does NOT relax it (private clear FLAT in N, n_star_private=%s), the "
+        "freeze-robust mu=512.2/N=1 does NOT survive privately (p=%.4f<0.95), so the PUBLIC build must "
+        "reach mu_bar_private_corrected=%.2f (+%.2f winner's-curse tax over #202's 504.87) -- build "
+        "higher, N=1; this BUILD target does NOT touch the %.2f sigma->LCB PUBLIC trigger. denken #212 "
+        "(advisor 19:54Z) SHARPENS #205's flat xDeff=4.41 cost: folding #190's DECAYING ACF gives the "
+        "E[N]_nogo band [%.0f IID -> %.0f AR(1) -> %.0f measured-ACF-realistic -> %.0f flat-loose] "
+        "(data-grounded point %.0f); the 75.12x collapse is Deff-INVARIANT, (alpha,power)=(0.05,0.95) "
+        "+ bar 0.9780 UNCHANGED. both_bugs_go_at_lambda_star=%s. Human "
         "approval still required before any HF spend." % (
             "PASSES" if st["launch_trigger_calculator_self_test_passes"] else "FAILS",
             bb_bind["public_183"], bb_bind["icc_190"], bb_bind["private_191"], bb_bind["binding_bar"],
             bb_bind["binding_bar"], _BANKED.halfwidth_realistic(), _BANKED.halfwidth_iid(),
-            csc["dedup_provenance_195"]["rho_sampling_input"], csc["acceptance_axis_realistic_icc_tps"],
+            csc["dedup_provenance_195"]["rho_sampling_input"],
+            csc["acceptance_axis_realistic_icc_halfwidth_tps"], csc["clean_acceptance_1sigma_tps"],
             csc["combined_sigma_launch_central_tps"], csc["combined_sigma_launch_worstcase_tps"],
             csc["go_trigger_mu_central_tps"], csc["go_trigger_mu_worstcase_tps"],
             csc["lambda1_ceiling_mu_tps"], csc["central_margin_at_lambda1_tps"],
-            csc["worstcase_margin_at_lambda1_tps"], csc["headroom_shift_tps"], csc["colog_n_allocations"],
+            csc["worstcase_margin_at_lambda1_tps"], csc["delta_mu_rebase_central_tps"],
+            csc["colog_n_allocations"],
             cba["stay_at_bar"]["expected_shots_sequential"], cba["build_higher"]["mu_safe_n1_tps"],
             cba["crossover_total_shots"], cba["c_star_fixedN_per_b"], cba["c_star_sequential_per_b"],
             lpc["depth1_overstatement_tps"], lpc["true_private_lcb_at_lambda1_tps"],
             lpc["beta_primary"], lpc["mechanism_can_clear_private_bar"],
-            lpc["decisive_total_trials_lambda1"],
+            lpc["expected_n_sprt_nogo"], lpc["sprt_savings_vs_fixed_n"],
+            lpc["decisive_total_trials_lambda1"], lpc["expected_n_sprt_nearbar"],
+            lpc["worst_case_expected_n_sprt"], lpc["sprt_realized_alpha"],
+            lpc["sprt_realized_power"],
             fba["p_bar_n5_frozen"], fba["mu_bar_frozen_p95_tps"], fba["mu_bar_fresh_p95_n5_tps"],
             fba["freeze_robust_hedge"]["build_to_mu_tps"], fba["freeze_robust_hedge"]["n_shots_frozen"],
             fba["build_at_bar_best_of_n_fragile"]["e_shots_frozen"],
             fba["build_at_bar_best_of_n_fragile"]["frozen_fraction_breakeven"],
+            clb["lane_b_nonspec"]["official_tps_floor"],
+            abs(clb["lane_b_nonspec"]["margin_to_500_pct"]),
+            clb["lane_b_nonspec"]["spec_premium_tps"],
+            clb["lane_a_compliant_spec"]["tps_ceiling"],
+            clb["lane_a_compliant_spec"]["ceiling_ci_lower_tps"],
+            clb["lane_a_compliant_spec"]["tps_floor"],
+            clb["lane_a_compliant_spec"]["max_kernel_overhead_pct_both_bugs"],
+            clb["lane_a_compliant_spec"]["max_kernel_overhead_pct_descent"],
+            clb["lane_a_compliant_spec"]["offshelf_overhead_ref_122"] * 100.0,
+            # wirbel #213 lane-a kernel-overhead-vs-lambda DOUBLE gate:
+            kb213.get("overhead_budget_pct_at_lambda1_both_bugs", float("nan")),
+            kb213.get("overhead_budget_pct_at_lambda1_descent", float("nan")),
+            kb213.get("lambda_crit_clears_500_both_bugs", float("nan")),
+            kb213.get("lambda_crit_clears_500_descent", float("nan")),
+            # kanna #210 winner's-curse private build target:
+            wca["n_star_private"], wca["p_private_clear_at_mu512p2_n1"],
+            wca["mu_bar_private_corrected_tps"], wca["delta_mu_winners_curse_tps"],
+            csc["go_trigger_mu_central_tps"],
+            # denken #212 AR(1)-corrected E[N]_nogo cost band:
+            ar212.get("expected_n_nogo_iid_floor", float("nan")),
+            ar212.get("expected_n_nogo_ar_optimistic", float("nan")),
+            ar212.get("expected_n_nogo_realistic_measured_acf", float("nan")),
+            ar212.get("expected_n_nogo_flat_loose", float("nan")),
+            ar212.get("expected_n_nogo_realistic_measured_acf", float("nan")),
             st["both_bugs_go_at_lambda_star"]))
     payload = {
         "pr": 185,
