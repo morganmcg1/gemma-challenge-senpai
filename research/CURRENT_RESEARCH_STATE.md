@@ -26,7 +26,7 @@
 | ubel | #84 | SplitK W4A16 verify-GEMM (~+5–12%) | WIP |
 | kanna | **#96** | **Network-wide greedy-compounding gate:** do per-layer ≤1-ULP perturbations compound to flip argmax on the composed land#71×ubel#84 frontier? (closes #87's named upstream residual) | WIP |
 | lawine | **#99** | **Local→official projection calibration:** pin the local-wall_tps→official multiplier + ready the tree-A/B harness so land #71's build is a zero-lag ≥500 decision | WIP (#90 ✅ MERGED: K=7 confirmed, 454.338 locked) |
-| fern | **#95** | **Drafter loss-objective gate:** is the MTP draft head acceptance-optimal or only likelihood-optimal? (LK-Loss headroom) (Morgan assigned) | WIP |
+| fern | **#100** | **Lever-composition economics:** compose tree #71 × SplitK #84 × persistent-kernel #97 × LK #95 into the official-TPS landscape + minimal lever ordering to clear 500 (anti-compounding map) | WIP (#95 ✅ MERGED 🟡 AMBER: LK greedy headroom +1.0–2.4% E[T]) |
 | wirbel | **#98** | **fp32 star-attn COST gate:** does the #93-mandated fp32 accumulation erode the tree's +18.2%, or recompute fp32 only on the 0.537% near-tie tail? | WIP (#93 ✅ MERGED 🔴 RED: fp32 star-attn REQUIRED) |
 | denken | **#97** | **Persistent-kernel overhead gate:** is the ~32% "other" bucket GPU-idle (megakernel-reclaimable, +8-15%) or GPU-busy (#65 extended)? CPU-first | WIP (#94 ✅ MERGED, overlap CLOSED) |
 
@@ -50,6 +50,7 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 
 | PR | student | verdict | significance |
 |---|---|---|---|
+| #95 | fern | LK-Loss AMBER: greedy headroom +1.0–2.4% E[T] (NOT +8% headline); re-rank channel CLOSED (drafter argmax already acceptance-ordered, rank-1 best by +0.6 margin); prediction channel untested | LK lane SIZED (don't transfer headline); LoRA/projection probe queued |
 | #90 | lawine | K=7 CONFIRMED optimal (inverted-U; every non-K7 a REAL regression 7-35x MDE); locks 454.338 linear-chain ref; retires ±4.4% caveat | draft-length lane CLOSED (confirm) |
 | #93 | wirbel | Star-attn relerr-1e-3 RED: flips 0.59% greedy tokens (noise floor 0) -> fp32 star-attn REQUIRED pre-quota | attention gate -> HARD fp32 constraint on land #71 |
 | #94 | denken | Draft-verify overlap AMBER: naive +18% → +4.22% BW-limited → +1.2-2.9% realized; A10G bus serializes 2 streams (contention 0.506) | overlap lane CLOSED (single-GPU conc=1); banks bus_contention_factor=0.506 |
@@ -85,5 +86,5 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 3. **SplitK W4A16 verify-GEMM (ubel #84):** close 23% HBM gap at M=8; ~+5–12% wall_tps.
 4. **Projection calibration (lawine #99):** K=7 confirmed (#90, 454.338 locked); now pin the local→official multiplier so land #71's ~568 is a measured band that clears 500 with margin.
 5. **Drafter GEMM fusion (stark #78):** ~+2.6% ceiling once stark responds to check-in.
-6. **Composition:** tree-verify × SplitK × draft-verify-overlap — orthogonal levers that multiply.
-7. **Next-wave levers (queued for freed seats):** double-quant verify-GEMM scales (+0.4–2%, compounds with ubel SplitK), QuantSpec INT4 drafter-KV (+10–15% claim — premise-check first: MTP may lack a separate drafter KV to quantize), Token Recycling (+4–10%; likely #89-redundant). _[Now in-flight: LK-loss draft head → fern #95; persistent-kernel scheduling → denken #97.]_
+6. **Lever-composition economics (fern #100):** compose tree #71 × SplitK #84 × persistent-kernel #97 × LK #95 into the official-TPS landscape + the minimal lever ordering that clears 500 with most margin. Models anti-compounding (the tree amortizes fixed per-step overhead → shrinks the persistent-kernel bucket) vs compounding (tree × LK on the E[T] numerator; SplitK on the verify-GEMM denominator). Consumes the #98/#97/#99 bands.
+7. **Next-wave levers (queued for freed seats):** double-quant verify-GEMM scales (+0.4–2%, compounds with ubel SplitK), QuantSpec INT4 drafter-KV (+10–15% claim — premise-check first: MTP may lack a separate drafter KV to quantize), Token Recycling (+4–10%; likely #89-redundant), **LK prediction-channel LoRA/projection probe** (fern #95 sized the channel at +1.0–2.4% greedy; a trained-head probe is the only way to realize it — approval-gated if it needs quota). _[Now in-flight: lever-composition → fern #100; persistent-kernel scheduling → denken #97.]_
