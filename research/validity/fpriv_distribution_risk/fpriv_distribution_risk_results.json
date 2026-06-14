@@ -1,0 +1,231 @@
+{
+  "pr": 239,
+  "metric_primary": "fpriv_distribution_risk_self_test_passes",
+  "metric_test": "integrated_risk_at_speed_gate",
+  "fpriv_distribution_risk_self_test_passes": true,
+  "integrated_risk_at_speed_gate": 0.13465808503358756,
+  "integrated_risk_at_speed_gate_divinformed": 0.10456747508890826,
+  "credible_band_speed_uniform": [
+    0.0635039995239689,
+    0.226272246007706
+  ],
+  "credible_band_speed_divinformed": [
+    0.060900944067256546,
+    0.18388954598615337
+  ],
+  "bookend_assumed_0p969": 0.05831773945416474,
+  "bookend_grounded_0p957": 0.2394311004235805,
+  "integrated_between_bookends": true,
+  "lambda_integrated_risk5_uniform": 0.9860579957087814,
+  "lambda_integrated_risk5_divinformed": 0.9807516141069097,
+  "lambda_risk5_point_237": 0.9699990336265527,
+  "lambda_integrated_risk5_uniform_minus_237": 0.01605896208222868,
+  "f_priv_support": [
+    0.9570535584491102,
+    0.969106920637722
+  ],
+  "f_priv_support_rounded": [
+    0.957,
+    0.969
+  ],
+  "prior_uniform_k": 1,
+  "prior_divinformed_k": 2,
+  "divergence_int4": 0.0073,
+  "identity_int4": 0.9927,
+  "lambda_floor_publish_first": 0.9138270633254324,
+  "lambda_speed_gate": 0.9674684694454245,
+  "p95_private_bar": 0.9780112973731208,
+  "sigma_draw": 7.390974474817942,
+  "draw_model": {
+    "law": "private_draw(lambda; f_priv) ~ Normal(mu=public_central(lambda)*f_priv, sigma=sigma_draw)",
+    "clear_event": "private_draw >= 500",
+    "risk": "1 - Phi((public_central(lambda)*f_priv - 500)/sigma_draw)",
+    "integrated_risk": "E_{f_priv~prior}[ risk(lambda; f_priv) ]",
+    "sigma_draw": 7.390974474817942,
+    "f_priv_lo_grounded": 0.9570535584491102,
+    "f_priv_hi_assumed": 0.969106920637722,
+    "prior_family": "Beta(k,1) on u=(f_priv-f_lo)/(f_hi-f_lo): density k*u^{k-1}, quantile p^{1/k}"
+  },
+  "stark233_crosslink": {
+    "f_priv_breakeven_233": 0.9598,
+    "u_breakeven_in_support": 0.22785688407211874,
+    "risk_at_breakeven_speed_gate": 0.1829181101730677,
+    "note": "stark #233's f_priv_breakeven=0.9598 sits at u=0.228 of my realizable support; the draw-risk there at the speed gate is 0.1829. This is a CONTEXT cross-link to the bar's LOCATION (stark's worst-case BLEND), NOT my object -- I own the draw-risk DISTRIBUTION around the f_priv point."
+  },
+  "lambda_map": {
+    "prior_uniform_k": 1,
+    "prior_divinformed_k": 2,
+    "rows": [
+      {
+        "name": "floor",
+        "lambda": 0.9138270633254324,
+        "regime": "publish_first_go_p95_hold",
+        "integrated_risk_uniform": 0.658593152168776,
+        "band_uniform": [
+          0.516778641277972,
+          0.7879516862575691
+        ],
+        "integrated_risk_divinformed": 0.6081207592694368,
+        "band_divinformed": [
+          0.5084987573068734,
+          0.7432058909923394
+        ],
+        "f_priv_q05": 0.9576562265585408,
+        "f_priv_q95": 0.9685042525282914
+      },
+      {
+        "name": "0.9500",
+        "lambda": 0.95,
+        "regime": "publish_first_go_p95_hold",
+        "integrated_risk_uniform": 0.2727246814965941,
+        "band_uniform": [
+          0.15684550921342144,
+          0.40575160725796666
+        ],
+        "integrated_risk_divinformed": 0.22645048130117956,
+        "band_divinformed": [
+          0.15183498450416755,
+          0.34944159467362257
+        ],
+        "f_priv_q05": 0.9576562265585408,
+        "f_priv_q95": 0.9685042525282914
+      },
+      {
+        "name": "speed_gate",
+        "lambda": 0.9674684694454245,
+        "regime": "publish_first_go_p95_hold",
+        "integrated_risk_uniform": 0.13465808503358756,
+        "band_uniform": [
+          0.0635039995239689,
+          0.226272246007706
+        ],
+        "integrated_risk_divinformed": 0.10456747508890826,
+        "band_divinformed": [
+          0.060900944067256546,
+          0.18388954598615337
+        ],
+        "f_priv_q05": 0.9576562265585408,
+        "f_priv_q95": 0.9685042525282914
+      },
+      {
+        "name": "p95_bar",
+        "lambda": 0.9780112973731208,
+        "regime": "both_clear",
+        "integrated_risk_uniform": 0.07927391349436388,
+        "band_uniform": [
+          0.032687232786036025,
+          0.14359325548565027
+        ],
+        "integrated_risk_divinformed": 0.05887458132955578,
+        "band_divinformed": [
+          0.03115853218700204,
+          0.11228612198337096
+        ],
+        "f_priv_q05": 0.9576562265585408,
+        "f_priv_q95": 0.9685042525282914
+      },
+      {
+        "name": "1.0000",
+        "lambda": 1.0,
+        "regime": "both_clear",
+        "integrated_risk_uniform": 0.01990704061029248,
+        "band_uniform": [
+          0.005995510499996248,
+          0.04212585360825716
+        ],
+        "integrated_risk_divinformed": 0.013357730339188906,
+        "band_divinformed": [
+          0.0056391053790267875,
+          0.030182036698238157
+        ],
+        "f_priv_q05": 0.9576562265585408,
+        "f_priv_q95": 0.9685042525282914
+      }
+    ]
+  },
+  "lean_sweep": {
+    "rows": [
+      {
+        "k": 1,
+        "prior": "uniform (agnostic)",
+        "E_f_priv": 0.9630802395434162,
+        "integrated_risk_at_speed_gate": 0.13465808503358756
+      },
+      {
+        "k": 2,
+        "prior": "divergence-informed Beta(2,1)",
+        "E_f_priv": 0.965089133241518,
+        "integrated_risk_at_speed_gate": 0.10456747508890826
+      },
+      {
+        "k": 3,
+        "prior": "divergence-informed Beta(3,1)",
+        "E_f_priv": 0.966093580090569,
+        "integrated_risk_at_speed_gate": 0.09095674142255253
+      },
+      {
+        "k": 5,
+        "prior": "divergence-informed Beta(5,1)",
+        "E_f_priv": 0.96709802693962,
+        "integrated_risk_at_speed_gate": 0.07855357834139304
+      }
+    ],
+    "limit_k_to_inf": 0.05831773945416474,
+    "note": "Monotone DOWN in k: stronger near-greedy belief pushes f_priv mass toward the clean ceiling f_hi, so integrated_risk_at_speed_gate falls from the uniform/agnostic value toward risk(f_hi)=0.0583 (#237's assumed bookend). k is a modeling choice the 0.73% MOTIVATES but does NOT pin; the headline divergence-informed prior uses the minimal tilt k=2."
+  },
+  "self_test": {
+    "fpriv_distribution_risk_self_test_passes": true,
+    "checks": {
+      "g_bookends_match_237": true,
+      "a_uniform_between_bookends": true,
+      "b_divinformed_below_uniform": true,
+      "c_floor_coinflip_or_worse": true,
+      "d_monotone_decreasing_in_lambda": true,
+      "e_band_brackets_point": true,
+      "f_nan_clean": true
+    },
+    "evidence": {
+      "bookend_assumed": 0.05831773945416474,
+      "bookend_grounded": 0.2394311004235805,
+      "a_integrated_risk_speed_uniform": 0.13465808503358756,
+      "a_bookend_lo": 0.05831773945416474,
+      "a_bookend_hi": 0.2394311004235805,
+      "b_integrated_risk_speed_divinformed": 0.10456747508890826,
+      "b_gap_uniform_minus_divinformed": 0.030090609944679297,
+      "c_integrated_risk_floor_uniform": 0.658593152168776,
+      "d_monotone_uniform": true,
+      "d_monotone_divinformed": true
+    },
+    "n_checks": 7
+  },
+  "import_banked": {
+    "model_src": "kanna #237 publishfirst_accepted_risk (8x7i38jh, module import: build_composition + make_risk)",
+    "private_mean_curve_src": "kanna #228 publish_first_lambda_floor (via #237)",
+    "sigma_draw_src": "kanna #217 trigger_reconcile (vgovdrjc, via #237)",
+    "p95_lcb_bar_src": "stark #191 private_build_bar (via #237)",
+    "f_priv_grounded_src": "kanna #224 private_bar_reachability (1081oc84, via #237)",
+    "speed_gate_src": "ubel #229 speed_margin_at_validity_bar (bz2b3fw8, via #237)",
+    "divergence_src": "lawine #232 int4 token-identity (nxwv6pam): 0.73% divergence / 0.9927 identity",
+    "fpriv_breakeven_src": "stark #233 private_fpriv_worstcase (pszvrf2a): 0.9598 (context only)",
+    "k_cal": 125.26795005202914,
+    "step_int4": 1.2182,
+    "sigma_draw": 7.390974474817942,
+    "f_priv_assumed": 0.969106920637722,
+    "f_priv_grounded": 0.9570535584491102
+  },
+  "handoff": "fern decision card + Issue #124: integrating over f_priv in [0.957054 grounded #224, 0.969107 assumed] gives ONE accepted private-draw risk at the operative gate lambda=0.9675 of integrated_risk_at_speed_gate=0.1347 (uniform) / 0.1046 (divergence-informed, lower), with a 5-95% band of [0.0635,0.2263] (uniform) -- replacing #237's 4x two-point spread (0.0583/0.2394) with a single decision-grade number, and lawine #232's 0.73% near-greedy verify pulls it toward the optimistic end. The 5%-integrated-risk build lambda is lambda_integrated_risk5=0.9861 (uniform) / 0.9808 (divergence-informed) vs #237's point lambda_risk5=0.9700 -- the f_priv uncertainty RAISES the lambda needed to hold 5% draw risk above the point estimate.",
+  "scope": "LOCAL CPU-only analytic propagation of a DISTRIBUTION on f_priv through kanna #237's banked draw model into ONE integrated private-draw risk band. Takes NO official draws, authorizes none. BASELINE stays 481.53; adds 0 TPS; greedy/PPL untouched. Imports #237 VERBATIM (which imports #228/#217/#191/#224/#229); does NOT re-derive private_mean, sigma_draw, the f_priv worst-case BLEND (stark #233 = the bar's LOCATION), or the integration card (fern). The EXPECTATION of #237's risk(lambda;.) over a prior on f_priv is the only new object. NOT a launch. NOT open2.",
+  "public_evidence_used": [
+    "kanna #237 (publishfirst_accepted_risk, `8x7i38jh`): the risk(lambda; f_priv) draw model, sigma_draw=7.391, the 0.0583/0.2394 two-point bookends this leg integrates over, and lambda_risk5=0.9700 -- imported as a module (bit-exact, the bookends reproduce to <1e-9).",
+    "kanna #228 (publish_first_lambda_floor, MERGED `352ifoi8`): private_mean(lambda)=public_central(lambda)*f_priv central curve and the publish-first band [0.913827, 0.978011) (via #237).",
+    "kanna #224 (private_bar_reachability, MERGED `1081oc84`): grounded f_priv=0.957054 -- the support's LOW endpoint.",
+    "lawine #232 (int4 token-identity, `nxwv6pam`): 0.73% int4 token-divergence / 0.9927 identity -- the near-greedy shape prior that leans the f_priv mass toward the clean ceiling f_hi.",
+    "stark #233 (private_fpriv_worstcase, `pszvrf2a`): realizable f_priv worst-case [0.957,0.969] and break-even 0.9598 -- the support endpoints (context cross-link; stark owns the BLEND).",
+    "ubel #229 (speed_margin_at_validity_bar, `bz2b3fw8`): the operative public gate lambda=0.9675 (via #237) -- where the headline integrated risk is reported.",
+    "Issue #124 (publish-first green-light): the decision this leg supplies a single integrated risk number for (replacing #237's 4x two-point spread)."
+  ],
+  "method": "LOCAL CPU-only analytic propagation over EXISTING MERGED legs (the #237 module, which imports the #228 private-mean curve + #217/#191/#224/#229 scalars). Beta(k,1) prior on f_priv; E[risk] by normalised trapezoid (N=8001) over u; closed-form quantile bands. No GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "peak_mem_mib": 28.70703125,
+  "elapsed_s": 1.5131
+}
