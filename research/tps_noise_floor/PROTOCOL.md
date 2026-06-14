@@ -20,6 +20,63 @@ The "±4.4% same-config TPS swing" that #56 surfaced (429.04 vs 448.01) is **not
 
 ---
 
+## ONE-COMMAND PAIRED A/B RUNNER (PR #82 — use this)
+
+The protocol above is now operationalized as a single copy-paste runner so every
+lever-builder decides on the same robust number without re-implementing the
+measurement. It reuses this harness verbatim (`run_noise_floor.timed_decode` /
+`build_serve_env` / `preflight_gpu` / `aggregate` + the `analyze_noise_floor` MDE
+stats) and prints a verdict against the MDE table below.
+
+```bash
+# A=B self-null (proves the runner is unbiased -> Δ≈0%, verdict NULL):
+.venv/bin/python scripts/profiler/paired_tps_ab.py \
+    --baseline fa2sw_precache_kenyan --candidate fa2sw_precache_kenyan \
+    --n 3 --wandb-name lawine/ab-selfnull --wandb-group walltps-ab-runner
+
+# a real candidate (different submission dir):
+.venv/bin/python scripts/profiler/paired_tps_ab.py \
+    --baseline fa2sw_precache_kenyan --candidate <new_submission_dir> \
+    --n 3 --wandb-name <you>/ab-<lever> --wandb-group walltps-ab-runner
+
+# a serve-time config-override candidate (same served files, env change only):
+.venv/bin/python scripts/profiler/paired_tps_ab.py \
+    --baseline fa2sw_precache_kenyan --candidate fa2sw_precache_kenyan \
+    --candidate-env MAX_NUM_BATCHED_TOKENS=2048 \
+    --n 3 --wandb-name <you>/ab-mbt2048 --wandb-group walltps-ab-runner
+```
+
+It runs **N=3 fresh decode-only runs per arm**, takes the **median `wall_tps`**,
+and emits a structured `paired_ab.json` + a single-line human verdict:
+
+```
+A=454.12 B=454.10 Δ=-0.004% [NULL] (op@N3=0.10%, raw-powered-MDE=0.057%)
+```
+
+`[REAL]` iff `|Δ| ≥ operative_threshold` (the **0.20% @N=1 / 0.10% @N≥3** bar from
+this protocol); otherwise `[NULL] / within noise`. For a multi-candidate re-screen
+that shares one baseline, run the self-null first and reuse its baseline records
+(valid here — server restart adds **0** measurable `wall_tps` variance, §"Variance
+decomposition"):
+
+```bash
+... --candidate-env MAX_NUM_BATCHED_TOKENS=4096 \
+    --reuse-baseline-from research/walltps_ab/selfnull/paired_ab.json
+```
+
+**Canonical local A/B reference (re-baselined on `wall_tps`, PR #82):** the
+deployed frontier `fa2sw_precache_kenyan` is **454.12 `wall_tps`** (#72 N=12;
+windowed-steady cross-check 459.83) — this **replaces the fragile "428.37 steady"
+low point-estimate** as the number every local lever A/Bs against. The **OFFICIAL
+bar is unchanged at 481.53** (official-stack a10g-small). Local↔official anchors
+for projecting a local gain to an official figure (with caveat — different stack):
+local `wall_tps` **454** · official **481.53** · organizer-private **460.85** ·
+byteshark external **480.6–484.6**. A local `wall_tps` delta is the trustworthy
+*ratio*; map it onto 481.53 to project the official move, but only an HF job
+confirms the absolute.
+
+---
+
 ## RECOMMENDED PROTOCOL (copy-paste)
 
 For every local TPS A/B on this programme:
