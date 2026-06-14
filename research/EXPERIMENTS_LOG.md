@@ -1,5 +1,25 @@
 # SENPAI Research Results
 
+## 2026-06-14 00:40 — PR #74: TPS-optimal tree-shape under denken #68's measured M≤32 verify-cost curve ✅ MERGED (the concrete build target for land #71)
+
+- **Branch:** `wirbel/tree-shape-cost-model` · **Student:** wirbel
+- **Status:** MERGED as the **canonical TPS-optimal tree-shape verdict** — same artifact class as #68 (a decisive, MC-validated research deliverable; audit-only, zero served-file change → no BASELINE.md change). Frontier bar **UNCHANGED 481.53.** Converts #68's real cost curve + wirbel's own #49 acceptance model into a concrete build target for **land #71**.
+- **Hypothesis:** #49's DP-optimal tree (+16% TPS) assumed a simple verify cost; re-solving the DP against #68's *measured* non-uniform V(M) curve (cheap tile-tops M=16/32, expensive M=24, hard M=33 cliff) yields the actual TPS-optimal (shape, M) — the exact topology land #71 should build.
+
+| operating point (real #68 cost, g=0.532, measured p, geom) | E[T] | step mult vs M=8 | proj local TPS | vs deployed linear (428.37) |
+|---|--:|--:|--:|--:|
+| deployed **linear K=7 / M=8** (anchor) | 2.976 | 1.000 | **428.37** | — |
+| linear own-optimum (M=16, saturated) | 3.111 | 1.034 | 433.1 | +1.1% |
+| **DP tree M=16** (Marlin tile-1 top — Step-1 build) | **3.481** | **1.034** | **484.7** | **+13.1%** |
+| **DP tree M=32** (tile-2 top — PRIMARY) | — | **1.098** | **514.32** | **+20.1%** |
+
+- **Headline:** the TPS-optimal tree is the **M=32 DP tree → ~514 local TPS, +20.1%** over the deployed linear K=7 chain; cheaper secondary at the M=16 tile-1 top → **~485 TPS, +13.1%.** Primary metric `treeshape_opt_proj_tps_gain_real_costcurve = +0.2007` (M=32).
+- **Three canonical takeaways:** (1) **The optimum did NOT shift from #49** — the deep-spine DP tree at M=32 survives the real-cost refinement (projection even ticks *up* +19.0%→+20.1%, because measured M=32 mult 1.098 < modeled 1.108). Reassurance, not a pivot. (2) **"Build to a tile-top, never mid-tile"** — M=16/M=32 sit at the cheap Marlin tile tops (9 µs/row marginal); **M=24 is strictly dominated.** (3) **Shape/budget separation:** verify cost depends only on node budget M, not tree shape (the GEMM processes all M rows regardless) → the tree designer optimizes acceptance freely under a hard M≤32 row budget.
+- **Build targets handed to land #71** (advisor comment, 00:40:49Z): **(1) Step-1 = M=16 DP tree** `parent=[-1,0,0,0,1,1,2,4,4,5,6,7,11,12,13,14]` (16 nodes, depth 8, 4 rank-2+ branches) — build FIRST to validate measured acceptance + greedy identity on the real tree-verify path; **(2) Primary = M=32 DP tree** (32 nodes, depth 9, 9 rank-2+ branch points, max branch 4, bushy crown).
+- **Validation:** brute-force n≤7 == DP; MC 400k max rel-err 0.11%; robust **+16.5–21.7%** across pricing / GEMM-share / rank-decay / base-acceptance variants. W&B `p1yyrwpr`. Local cost-model study, **no HF Job**, lossless by construction.
+- **One open number (→ wirbel #76):** the projection brackets +18% (if rank-1=0.6792, #49) vs +20% (if top-1≈0.775, implied by deployed E[accept]≈3.8). These disagree materially → **wirbel reassigned to #76** to pin the deployed chain's real per-rank served acceptance, turning "+18–20% modeled" into one defensible number before land #71 spends any submission quota.
+- **Artifacts:** `research/spec_cost_model/report_treeshape_real_cost.md`, `treeshape_real_cost_results.json`, `scripts/profiler/treeshape_real_cost.py`.
+
 ## 2026-06-14 00:15 — PR #68: Verify-GEMM M=8 roofline audit — is the 53% block free to widen? ✅ MERGED (GREEN — greenlights the 500-path)
 
 - **Branch:** `denken/verify-gemm-m8-roofline` · **Student:** denken · merged to advisor branch (commit `f2ec624`).
