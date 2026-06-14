@@ -1,0 +1,577 @@
+{
+  "agent": "denken",
+  "anchor_paths": {
+    "accept": "/workspace/senpai/target/research/accept_calibration/accept_calibration_results.json",
+    "bug2": "/workspace/senpai/target/research/spec_cost_model/bug2_salvage_descent_results.json",
+    "decomp": "/workspace/senpai/target/research/oracle_readout/deep_spine_width_spread_decomp_results.json",
+    "rankcov": "/workspace/senpai/target/research/rank_coverage/rank_coverage_results.json",
+    "topo": "/workspace/senpai/target/research/spec_cost_model/rho_optimal_topology_results.json"
+  },
+  "anchors": {
+    "K_cal": 125.26795005202914,
+    "decomp_lattice": {
+      "a0b0c0": 2.580886944444444,
+      "a0b0c1": 3.9386090609823374,
+      "a0b1c0": 3.534580633373862,
+      "a0b1c1": 5.041270826829537,
+      "a1b0c0": 2.7092806724612593,
+      "a1b0c1": 4.1772719039196,
+      "a1b1c0": 3.6426749012617394,
+      "a1b1c1": 5.206954309441963
+    },
+    "decomp_spread_map": {
+      "axis": "deep_spine_spread_recovery_fraction",
+      "note": "lambda = how far land's re-benched deeper spine q[2:] recovers from the measured declining ladder toward the rho-optimal rising ladder, with depth-1 and branch-width at rho-opt. lambda below 0.90 => sub-500 even with width fully restored => a SPREAD failure.",
+      "rows": [
+        {
+          "E_T": 3.6426749012617394,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.0,
+          "official_tps": 374.57758790595614
+        },
+        {
+          "E_T": 3.75129424160567,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.1,
+          "official_tps": 385.7469542668885
+        },
+        {
+          "E_T": 3.867859978740951,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.2,
+          "official_tps": 397.73345150645537
+        },
+        {
+          "E_T": 3.9931943491228763,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.3,
+          "official_tps": 410.621630499072
+        },
+        {
+          "E_T": 4.128212038414121,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.4,
+          "official_tps": 424.5055487048478
+        },
+        {
+          "E_T": 4.273929189566339,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.5,
+          "official_tps": 439.48969647390055
+        },
+        {
+          "E_T": 4.4314730841183385,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.6,
+          "official_tps": 455.6899925777767
+        },
+        {
+          "E_T": 4.602092529982146,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.7,
+          "official_tps": 473.2348523892791
+        },
+        {
+          "E_T": 4.787168989795908,
+          "clears_500": false,
+          "lambda_spread_recovery": 0.8,
+          "official_tps": 492.26633221505216
+        },
+        {
+          "E_T": 4.988228484730201,
+          "clears_500": true,
+          "lambda_spread_recovery": 0.9,
+          "official_tps": 512.9413533683237
+        },
+        {
+          "E_T": 5.206954309441963,
+          "clears_500": true,
+          "lambda_spread_recovery": 1.0,
+          "official_tps": 535.4330096522523
+        }
+      ],
+      "spread_recovery_to_clear_500": 0.9,
+      "step_time": 1.2182
+    },
+    "imported_135": {
+      "both_bugs": 5.206954309441963,
+      "config_C_mb3_declining": 3.534580633373862,
+      "descent_only_0674": 5.041270826829537,
+      "descent_only_0679": 5.056404568844709,
+      "oracle_E_T": 2.621
+    },
+    "n_nodes": 32,
+    "oracle_E_T": 2.621,
+    "oracle_cum_ladder": [
+      0.674,
+      0.35,
+      0.203,
+      0.131,
+      0.089,
+      0.06,
+      0.037
+    ],
+    "oracle_depth1": 0.674,
+    "oracle_depth1_alt": 0.679,
+    "parent": [
+      -1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4,
+      4,
+      5,
+      7,
+      9,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      24,
+      25,
+      26,
+      28,
+      29
+    ],
+    "q_deployed": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "rho_cond": [
+      0.4165047789261015,
+      0.2655480090557997,
+      0.19075249320036264
+    ]
+  },
+  "created_at": "20260614T164543Z",
+  "kind": "lambda-built-ci",
+  "nan_clean": true,
+  "peak_mem_mib": 27.164,
+  "pr": 187,
+  "synthesis": {
+    "handoff_lines": {
+      "fern_185_integrator": "fern #185 integrator note (denken #187): the INPUT-side \u03bb\u0302_built CI (half-width \u00b10.0171 at N=128) and wirbel #175's OUTPUT-side \u00b110.9 TPS CI are NOT independent on a shared bench \u2014 they share overlap_fraction=0.893 of variance (both are functions of the same accept draw). Compose in quadrature ONLY if the ladder and official-TPS benches are independent; on a shared bench subtract the overlap.",
+      "land_71_protocol": "land #71 measurement protocol (denken #187): measure your q[2..9] ladder over N\u226562 prompts at output_len 512 so your implied \u03bb\u0302_built resolves the 0.9052 bar DECISIVELY at 95% \u2014 otherwise a point \u03bb\u0302 near the bar (half-width \u00b10.0171 at the default 128) is an indecisive GO, not a decision. Pool the per-depth \u03bb\u0302_d by inverse-variance (wls); the deep depths thin out and dominate the raw variance. Report q\u0302[2..9] WITH their per-depth trial counts n_d so the CI is auditable."
+    },
+    "input_output_compose": {
+      "forward_map_slope_tps_per_lambda": 216.48237731470778,
+      "h_in_tps_lambda_route": 3.710490448740057,
+      "h_out_tps_lbar_route_175": 5.178247584457735,
+      "overlap_corrected_same_bench_tps": 5.318696881534334,
+      "overlap_fraction": 0.8929171716532718,
+      "quadrature_sum_tps": 6.370399313711312,
+      "regime_note": "INDEPENDENT BENCHES (ladder bench != official TPS bench): the \u03bb\u0302-rate uncertainty and #175's conditional L\u0304-scatter decompose by law of total variance -> add in quadrature (6.37 TPS). SAME BENCH (one run yields both q\u0302[2..9] and L\u0304): the realized \u03bb\u0302 and L\u0304 are the SAME draw, sharing overlap_fraction=0.893 of variance; quadrature double-counts -> use the overlap-corrected 5.32 TPS (the integrator fern #185 must not stack independent CIs on a shared bench).",
+      "rho_input_output": 0.9449429462424024,
+      "sigma_L": 2.9417279646263266,
+      "var_qhat": [
+        1.6760914703686362e-05,
+        1.763554417305257e-05,
+        2.025019519207626e-05,
+        2.2129266314289253e-05,
+        2.885965287043127e-05,
+        3.4361483387429685e-05,
+        4.554795974376253e-05,
+        6.231032589022075e-05
+      ],
+      "verdict": "partial-overlap",
+      "w_L_dEt_dq": [
+        2.5666210996533323,
+        2.1793665552216623,
+        1.976437031814271,
+        1.5299259885637184,
+        1.053384156790571,
+        0.6588807899277072,
+        0.36648158463492564,
+        0.1527419346558645
+      ],
+      "w_lambda": [
+        1.093631414981716,
+        0.9214869596404106,
+        0.6661119112988092,
+        0.5352496046934757,
+        0.42690537778903975,
+        0.5132160108872783,
+        0.38717131418122663,
+        0.2830167099965984
+      ]
+    },
+    "lambda_built_ci": {
+      "dominant_variance_depth": 9,
+      "estimator_primary": "wls",
+      "halfwidth_ols_simple_mean_183": 0.019043967412475625,
+      "halfwidth_wls_mle": 0.017139919169244854,
+      "lambda_built_ci": [
+        0.8880890808307551,
+        0.9223689191692448
+      ],
+      "lambda_built_halfwidth": 0.017139919169244854,
+      "note": "OLS simple-mean is the literal denken #183 inverse map (what land's code does today); WLS/MLE is the optimal inverse-variance pooling the PR names \u2014 it down-weights the noisy deep depths and needs fewer prompts. PRIMARY estimator = wls.",
+      "ols_var_contribution_share": [
+        0.04828412800881879,
+        0.06463634794494125,
+        0.10772597896946431,
+        0.1526737373129665,
+        0.18403045852461594,
+        0.10694777783002186,
+        0.14176492395170354,
+        0.1939366474574678
+      ],
+      "per_depth_var_lambda": [
+        0.0002917447461707159,
+        0.00039054893817601496,
+        0.0006509072377717587,
+        0.0009224928061488592,
+        0.0011119579378163031,
+        0.0006462051523606909,
+        0.0008565790345565857,
+        0.0011718136025019358
+      ],
+      "wls_weights": [
+        0.2621309570029516,
+        0.19581497230917214,
+        0.11749036587165605,
+        0.08290073267191682,
+        0.06877537981742145,
+        0.11834527972260253,
+        0.08927994549142912,
+        0.06526236711285027
+      ]
+    },
+    "measurement_model": {
+      "formula_n_d": "n_d = N_steps \u00b7 S(d) ; S(d)=P(L>=d)=sum_{k>=d} pmf[k] ; N_steps=n_prompts\u00b7output_len/E[T]",
+      "formula_var_lambda": "Var[\u03bb\u0302_d] = Var[q\u0302_d]/span_d\u00b2 ; span_d = q_full[d]-q_floor[d]",
+      "formula_var_qhat": "Var[q\u0302_d] = q_d(1-q_d)/n_d  (binomial)",
+      "n_ladder": [
+        11585.333977065151,
+        9969.63485144218,
+        7752.181064154646,
+        6681.6539761161885,
+        5114.591724740132,
+        4193.922524870412,
+        3163.904595885584,
+        2312.769145524867
+      ],
+      "per_depth": [
+        {
+          "depth": 2,
+          "flat_extrapolated": false,
+          "n_trials": 11585.333977065151,
+          "q_floor": 0.5192878338278931,
+          "q_full": 0.7589764102641635,
+          "q_true": 0.7362608841867216,
+          "span": 0.2396885764362704,
+          "survival_reach": 0.8837516340851594,
+          "var_lambda_hat_d": 0.0002917447461707159,
+          "var_qhat": 1.6760914703686362e-05
+        },
+        {
+          "depth": 3,
+          "flat_extrapolated": false,
+          "n_trials": 9969.63485144218,
+          "q_floor": 0.5800000000000001,
+          "q_full": 0.7924989076194682,
+          "q_true": 0.7723601736454635,
+          "span": 0.2124989076194681,
+          "survival_reach": 0.7605029866757751,
+          "var_lambda_hat_d": 0.00039054893817601496,
+          "var_qhat": 1.763554417305257e-05
+        },
+        {
+          "depth": 4,
+          "flat_extrapolated": false,
+          "n_trials": 7752.181064154646,
+          "q_floor": 0.645320197044335,
+          "q_full": 0.821702519412012,
+          "q_true": 0.8049865903389049,
+          "span": 0.17638232236767704,
+          "survival_reach": 0.5913513323597966,
+          "var_lambda_hat_d": 0.0006509072377717587,
+          "var_qhat": 2.025019519207626e-05
+        },
+        {
+          "depth": 5,
+          "flat_extrapolated": false,
+          "n_trials": 6681.6539761161885,
+          "q_floor": 0.6793893129770991,
+          "q_full": 0.8342716929825772,
+          "q_true": 0.819593334947078,
+          "span": 0.15488238000547805,
+          "survival_reach": 0.5096894600944553,
+          "var_lambda_hat_d": 0.0009224928061488592,
+          "var_qhat": 2.2129266314289253e-05
+        },
+        {
+          "depth": 6,
+          "flat_extrapolated": false,
+          "n_trials": 5114.591724740132,
+          "q_floor": 0.6741573033707865,
+          "q_full": 0.8352594665096346,
+          "q_true": 0.8199916534068028,
+          "span": 0.16110216313884806,
+          "survival_reach": 0.3901509273159996,
+          "var_lambda_hat_d": 0.0011119579378163031,
+          "var_qhat": 2.885965287043127e-05
+        },
+        {
+          "depth": 7,
+          "flat_extrapolated": false,
+          "n_trials": 4193.922524870412,
+          "q_floor": 0.6166666666666667,
+          "q_full": 0.8472621220149911,
+          "q_true": 0.8254083601161749,
+          "span": 0.23059545534832437,
+          "survival_reach": 0.31992050396804383,
+          "var_lambda_hat_d": 0.0006462051523606909,
+          "var_qhat": 3.4361483387429685e-05
+        },
+        {
+          "depth": 8,
+          "flat_extrapolated": true,
+          "n_trials": 3163.904595885584,
+          "q_floor": 0.6166666666666667,
+          "q_full": 0.8472621220149911,
+          "q_true": 0.8254083601161749,
+          "span": 0.23059545534832437,
+          "survival_reach": 0.24134874853316512,
+          "var_lambda_hat_d": 0.0008565790345565857,
+          "var_qhat": 4.554795974376253e-05
+        },
+        {
+          "depth": 9,
+          "flat_extrapolated": true,
+          "n_trials": 2312.769145524867,
+          "q_floor": 0.6166666666666667,
+          "q_full": 0.8472621220149911,
+          "q_true": 0.8254083601161749,
+          "span": 0.23059545534832437,
+          "survival_reach": 0.17642249378961042,
+          "var_lambda_hat_d": 0.0011718136025019358,
+          "var_qhat": 6.231032589022075e-05
+        }
+      ],
+      "survival_ladder": [
+        0.8837516340851594,
+        0.7605029866757751,
+        0.5913513323597966,
+        0.5096894600944553,
+        0.3901509273159996,
+        0.31992050396804383,
+        0.24134874853316512,
+        0.17642249378961042
+      ]
+    },
+    "operating_point": {
+      "E_T": 4.999212556673911,
+      "N_steps": 13109.26456057763,
+      "bar_lambda_star_lcb": 0.905229,
+      "estimator": "wls",
+      "lambda": 0.905229,
+      "n_prompts": 128,
+      "output_len": 512,
+      "topology": "both_bugs"
+    },
+    "resolvability": {
+      "bar": 0.905229,
+      "punchline": "to make a true-\u03bb=0.93 build read as a DECISIVE GO vs the 0.9052 bar, measure q[2..9] over N\u226562 prompts at output_len 512 (decisive at the default 128: True).",
+      "resolve_monotone_in_margin": true,
+      "resolve_table": [
+        {
+          "bar": 0.905229,
+          "decisive_at_n0": true,
+          "estimator": "wls",
+          "halfwidth_at_n0": 0.017139919169244854,
+          "halfwidth_at_true_lambda": 0.017460171543385528,
+          "margin": 0.045228999999999964,
+          "n0": 128,
+          "n_prompts_to_resolve": 19,
+          "n_prompts_to_resolve_raw": 18.38203281966387,
+          "on_bar_unresolvable": false,
+          "side": "NO-GO",
+          "true_lambda": 0.86
+        },
+        {
+          "bar": 0.905229,
+          "decisive_at_n0": true,
+          "estimator": "wls",
+          "halfwidth_at_n0": 0.017139919169244854,
+          "halfwidth_at_true_lambda": 0.017320634533469884,
+          "margin": 0.025228999999999946,
+          "n0": 128,
+          "n_prompts_to_resolve": 60,
+          "n_prompts_to_resolve_raw": 59.078224538051394,
+          "on_bar_unresolvable": false,
+          "side": "NO-GO",
+          "true_lambda": 0.88
+        },
+        {
+          "bar": 0.905229,
+          "decisive_at_n0": false,
+          "estimator": "wls",
+          "halfwidth_at_n0": 0.017139919169244854,
+          "halfwidth_at_true_lambda": 0.01714158358631138,
+          "margin": 0.0002289999999999237,
+          "n0": 128,
+          "n_prompts_to_resolve": 717062,
+          "n_prompts_to_resolve_raw": 717061.7289609408,
+          "on_bar_unresolvable": false,
+          "side": "NO-GO",
+          "true_lambda": 0.905
+        },
+        {
+          "bar": 0.905229,
+          "decisive_at_n0": true,
+          "estimator": "wls",
+          "halfwidth_at_n0": 0.017139919169244854,
+          "halfwidth_at_true_lambda": 0.01695720505623293,
+          "margin": 0.0247710000000001,
+          "n0": 128,
+          "n_prompts_to_resolve": 62,
+          "n_prompts_to_resolve_raw": 61.28305824066196,
+          "on_bar_unresolvable": false,
+          "side": "GO",
+          "true_lambda": 0.93
+        },
+        {
+          "bar": 0.905229,
+          "decisive_at_n0": true,
+          "estimator": "wls",
+          "halfwidth_at_n0": 0.017139919169244854,
+          "halfwidth_at_true_lambda": 0.016805722035961725,
+          "margin": 0.044771000000000005,
+          "n0": 128,
+          "n_prompts_to_resolve": 19,
+          "n_prompts_to_resolve_raw": 18.760046863533578,
+          "on_bar_unresolvable": false,
+          "side": "GO",
+          "true_lambda": 0.95
+        }
+      ]
+    },
+    "self_test": {
+      "conditions": {
+        "a_liveprobe_0p342_recovers": true,
+        "b_endpoints_recover_1_and_0": true,
+        "c_halfwidth_scales_1_over_sqrt_N": true,
+        "d_resolve_table_monotone_in_margin": true,
+        "e_deep_depth_dominates_variance": true,
+        "f_key_scalars_finite": true
+      },
+      "evidence": {
+        "dominant_variance_depth": 9,
+        "per_depth_var_lambda": [
+          0.0002917447461707159,
+          0.00039054893817601496,
+          0.0006509072377717587,
+          0.0009224928061488592,
+          0.0011119579378163031,
+          0.0006462051523606909,
+          0.0008565790345565857,
+          0.0011718136025019358
+        ],
+        "recover_liveprobe": {
+          "both_bugs": {
+            "ols": 0.34199999999999997,
+            "wls": 0.34199999999999997
+          },
+          "descent_only": {
+            "ols": 0.34199999999999997,
+            "wls": 0.34199999999999997
+          }
+        },
+        "recover_one": {
+          "both_bugs": {
+            "ols": 1.0,
+            "wls": 1.0
+          },
+          "descent_only": {
+            "ols": 1.0,
+            "wls": 1.0
+          }
+        },
+        "recover_zero": {
+          "both_bugs": {
+            "ols": 0.0,
+            "wls": 0.0
+          },
+          "descent_only": {
+            "ols": 0.0,
+            "wls": 0.0
+          }
+        },
+        "scaling_1_over_sqrt_N": [
+          {
+            "halfwidth": 0.03427983833848971,
+            "hw_times_sqrt_n": 0.19391604917699734,
+            "n_prompts": 32
+          },
+          {
+            "halfwidth": 0.024239506147124668,
+            "hw_times_sqrt_n": 0.19391604917699734,
+            "n_prompts": 64
+          },
+          {
+            "halfwidth": 0.017139919169244854,
+            "hw_times_sqrt_n": 0.19391604917699734,
+            "n_prompts": 128
+          },
+          {
+            "halfwidth": 0.012119753073562334,
+            "hw_times_sqrt_n": 0.19391604917699734,
+            "n_prompts": 256
+          },
+          {
+            "halfwidth": 0.008569959584622427,
+            "hw_times_sqrt_n": 0.19391604917699734,
+            "n_prompts": 512
+          },
+          {
+            "halfwidth": 0.006059876536781167,
+            "hw_times_sqrt_n": 0.19391604917699734,
+            "n_prompts": 1024
+          }
+        ]
+      },
+      "lambda_built_ci_self_test_passes": true
+    },
+    "serial_correlation_sensitivity": [
+      {
+        "halfwidth": 0.017139919169244854,
+        "implied_lag1_rho": 0.0,
+        "vif": 1.0
+      },
+      {
+        "halfwidth": 0.020992028098599024,
+        "implied_lag1_rho": 0.2,
+        "vif": 1.5
+      },
+      {
+        "halfwidth": 0.024239506147124668,
+        "implied_lag1_rho": 0.3333333333333333,
+        "vif": 2.0
+      }
+    ],
+    "test_metric": {
+      "lambda_built_halfwidth": 0.017139919169244854
+    },
+    "verdict": "INPUT-CI-STAMPED. At the both-bugs 0.9052 bar the measured \u03bb\u0302_built half-width is \u00b10.0171 over the default 128-prompt \u00d7 512-token bench. RESOLVABILITY: a true-\u03bb=0.93 build resolves decisively at N\u226562 (already at the default 128); a build at \u03bb\u22480.905 (ON the bar) needs N\u2248717062 prompts \u2014 effectively unresolvable. The gate INPUT is decisive only with margin from the bar \u2014 a point \u03bb\u0302 within ~\u00b10.017 of 0.9052 is an indecisive GO. Input/output CIs are partial-overlap (overlap_fraction=0.893 on a shared bench \u2014 quadrature would double-count). This prices the GATE INPUT noise; it does NOT move the bar (#183 owns it) or authorize a launch. NOT open2. NOT a launch."
+  }
+}
