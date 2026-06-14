@@ -1,0 +1,356 @@
+{
+  "agent": "stark",
+  "created_at": "20260614T211025Z",
+  "kind": "private-fpriv-worstcase",
+  "nan_clean": true,
+  "peak_mem_mib": 46.867,
+  "pr": 226,
+  "synthesis": {
+    "beta": 0.765124365433998,
+    "constants": {
+      "compliant_ceiling_central_536": 536.6590426143789,
+      "compliant_ceiling_lcb_526": 525.7290377676009,
+      "drop_both_176_pct": 2.3502816766841543,
+      "f_priv_217_imported": 0.969106920637722,
+      "frozen_bar_202": 504.87342465668917,
+      "gt_decode_drop_pct": 4.294644155088989,
+      "lambda1_ceiling": 520.9527323111674,
+      "mu_safe_fresh": 512.1570711713085,
+      "nls_axis": "native_multilingual",
+      "private_bar_217_imported": 528.4835555959944,
+      "tau_low": 0.9924318649123313
+    },
+    "f_priv_model": {
+      "anchor_52_f_priv_observed": 0.9570535584491102,
+      "anchor_52_f_priv_stated": 0.95705,
+      "anchor_central_f_priv_derived": 0.969106920637722,
+      "anchor_central_f_priv_imported_217": 0.969106920637722,
+      "anchor_central_resid": 0.0,
+      "blend_linearity": "delta_d(blend) = Sum_axis p_axis * delta_d^(axis) (linear in p)",
+      "drop_formula": "drop(blend) = #198 tree-DP E[T] drop (NLS-anchored scale) at lambda=1",
+      "formula": "f_priv(blend) = (1 - drop_shape(1.0, r(blend))) * tau_low",
+      "nls_reconstruction_resid_vs_198": 0.0
+    },
+    "handoff_line": "the private build target is private_bar_worstcase = 528.4836 under the worst realizable domain blend (f_priv_worstcase = 0.969107, binding vertex non-Latin-script), == kanna #224's central 528.48 (the realizable-blend LP adds no spread because #217's central IS the NLS worst vertex); it STAYS BELOW wirbel #199's compliant-spec ceiling 536.66, so the compliant-verify lane is private-FEASIBLE at the worst realizable blend (f_priv break-even = 0.95434); the binding risk is the decode-drop calibration not the blend (the #52 empirical f_priv=0.95705 -> bar 535.14 sits OUTSIDE the realizable simplex, +0.00271 above break-even); fern carries the private bar as the interval [central 528.48, empirical-floor 535.14], FEASIBLE vs 536.66 central / INFEASIBLE vs 525.73 LCB.",
+    "headline": {
+      "compliant_lane_private_feasible": true,
+      "compliant_lane_private_feasible_vs_lcb": false,
+      "f52_minus_breakeven_central": 0.0027100544688306583,
+      "f_priv_breakeven_central_536": 0.9543435039802796,
+      "f_priv_breakeven_lcb_526": 0.9741844836002918,
+      "f_priv_min_is_nls": true,
+      "f_priv_observed_52": 0.9570535584491102,
+      "f_priv_worstcase": 0.969106920637722,
+      "gap_vs_physical_ceiling_520p95": 7.530823284827079,
+      "margin_to_runner_drop_pp": 0.01636079460860529,
+      "private_bar_at_52": 535.1394043205385,
+      "private_bar_worstcase": 528.4835555959945,
+      "private_bar_worstcase_crosses_536": false,
+      "private_bar_worstcase_minus_536": -8.175487018384388,
+      "private_bar_worstcase_minus_central": 1.1368683772161603e-13
+    },
+    "imports": {
+      "mechanism": "shape_robustness.Mechanism (#198 forward map) + multivertex_realizability (#208 LP)",
+      "provenance": "kanna#217 vgovdrjc (f_priv, private_bar, lambda1_ceiling) x wirbel#199 wdyqnx3g (compliant ceiling 536.66/LCB 525.73) x kanna#202 533jd6l1 (frozen bar 504.87) x stark#198 llo1bzn3 (tree-DP drops) x stark#208 wi4gxxx8 (six-axis realizable LP) x stark#176 (decode-drop axes) x PR#52 (481.53/460.85 paired draw). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "robustness": {
+      "aggregate_drop_ci_pct": [
+        1.87,
+        2.21
+      ],
+      "beta_sweep": [
+        {
+          "beta": 0.616486595380561,
+          "f_priv_worstcase": 0.969106920637722,
+          "feasible_vs_central_536": true,
+          "is_nls": true,
+          "private_bar_worstcase": 528.4835555959945,
+          "vertex": "native_multilingual"
+        },
+        {
+          "beta": 0.765124365433998,
+          "f_priv_worstcase": 0.969106920637722,
+          "feasible_vs_central_536": true,
+          "is_nls": true,
+          "private_bar_worstcase": 528.4835555959945,
+          "vertex": "native_multilingual"
+        },
+        {
+          "beta": 0.9495993894553337,
+          "f_priv_worstcase": 0.969106920637722,
+          "feasible_vs_central_536": true,
+          "is_nls": true,
+          "private_bar_worstcase": 528.4835555959945,
+          "vertex": "native_multilingual"
+        }
+      ],
+      "decode_drop_scale_sweep": [
+        {
+          "drop_full_recovery_pct": 1.8802377845187523,
+          "f_priv": 0.9737717860026455,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 525.9518488143146,
+          "scale": 0.8
+        },
+        {
+          "drop_full_recovery_pct": 2.115261008552658,
+          "f_priv": 0.9714393406373887,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 527.2146697654512,
+          "scale": 0.9
+        },
+        {
+          "drop_full_recovery_pct": 2.3502816766841543,
+          "f_priv": 0.969106920637722,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 528.4835555959945,
+          "scale": 1.0
+        },
+        {
+          "drop_full_recovery_pct": 2.585299446169118,
+          "f_priv": 0.9667745294051469,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 529.7585482381679,
+          "scale": 1.1
+        },
+        {
+          "drop_full_recovery_pct": 2.8203139708783485,
+          "f_priv": 0.9644421703747602,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 531.0396899922947,
+          "scale": 1.2
+        },
+        {
+          "drop_full_recovery_pct": 3.0553249012872468,
+          "f_priv": 0.9621098470153554,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 532.3270235307491,
+          "scale": 1.3
+        },
+        {
+          "drop_full_recovery_pct": 3.290331884465953,
+          "f_priv": 0.9597775628295208,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 533.6205919019591,
+          "scale": 1.4
+        },
+        {
+          "drop_full_recovery_pct": 3.525334564069023,
+          "f_priv": 0.957445321353742,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 534.9204385344577,
+          "scale": 1.5
+        },
+        {
+          "drop_full_recovery_pct": 3.760332580325518,
+          "f_priv": 0.9551131261585007,
+          "feasible_vs_central_536": true,
+          "feasible_vs_lcb_526": false,
+          "private_bar": 536.22660724099,
+          "scale": 1.6
+        }
+      ],
+      "f_priv_worstcase_band_over_beta": [
+        0.969106920637722,
+        0.969106920637722
+      ],
+      "feasible_vs_central_stable_over_beta": true,
+      "negative_coupling_caveat": {
+        "drop_at_floor_pct": 2.2934646675451646,
+        "drop_at_full_recovery_pct": 2.3502816766841543,
+        "f_priv_at_floor": 0.9696707907411074,
+        "f_priv_at_full_recovery": 0.969106920637722,
+        "floor_fpriv_higher_than_ceiling": true,
+        "note": "#198 NEGATIVE coupling: the shallow-concentrated deficit COMPOUNDS along the accepted chain, so the drop is SMALLEST at the realistic floor lambda_hat_1 and LARGEST at full recovery. f_priv at lambda=1 (used here, == kanna #217's 0.969107) is therefore the CONSERVATIVE worst point; the operating lambda<1 carries a SMALLER private-TPS drop, making the realistic-floor private bar SLIGHTLY easier, not harder. The negative coupling does NOT widen the bar.",
+        "private_bar_at_ceiling": 528.4835555959945,
+        "private_bar_at_floor": 528.1762388448076
+      },
+      "nls_worst_drop_above_aggregate_ci": true,
+      "private_bar_worstcase_band_over_beta": [
+        528.4835555959945,
+        528.4835555959945
+      ],
+      "row_at_scale_emulates_52": {
+        "drop_full_recovery_pct": 3.564809606989593,
+        "f_priv": 0.9570535584491104,
+        "feasible_vs_central_536": true,
+        "feasible_vs_lcb_526": false,
+        "private_bar": 535.1394043205383,
+        "scale": 1.5167978895445202
+      },
+      "scale_breakeven_central_536": 1.633000365903873,
+      "scale_emulates_52": 1.5167978895445202,
+      "vertex_identity_stable_over_beta": true
+    },
+    "self_test": {
+      "a_detail": {
+        "bar_at_central": 528.4835555959945,
+        "f_priv_central_derived": 0.969106920637722,
+        "f_priv_central_resid": 0.0,
+        "private_bar_217": 528.4835555959944
+      },
+      "c_detail": {
+        "f_priv_worstcase": 0.969106920637722,
+        "lp_linear_vertex_optimal": true,
+        "treedp_sweep_min_fpriv": 0.9692224488124784,
+        "treedp_vertex_optimal": true
+      },
+      "conditions": {
+        "a_f_priv_0969107_roundtrips_528p48_and_mechanism_reproduces_217": true,
+        "b_f_priv_worstcase_le_f_priv_central": true,
+        "c_worst_blend_is_pure_vertex_both_sweeps": true,
+        "d_private_bar_monotone_decreasing_in_f_priv": true,
+        "e_roundtrips_52_observed_0p95705": true,
+        "f_nan_clean": true
+      },
+      "e_detail": {
+        "f52": 0.9570535584491102,
+        "stated": 0.95705
+      },
+      "private_fpriv_worstcase_self_test_passes": true
+    },
+    "table": {
+      "f_priv_breakeven_central_536": 0.9543435039802796,
+      "f_priv_breakeven_lcb_526": 0.9741844836002918,
+      "f_priv_observed_52": 0.9570535584491102,
+      "rows": [
+        {
+          "clears_central_536": true,
+          "clears_lcb_526": false,
+          "f_priv": 0.969106920637722,
+          "gap_vs_physical_ceiling_520p95": 7.530823284827079,
+          "label": "central_217 (f_priv=0.969107)",
+          "private_bar": 528.4835555959945
+        },
+        {
+          "clears_central_536": true,
+          "clears_lcb_526": false,
+          "f_priv": 0.969106920637722,
+          "gap_vs_physical_ceiling_520p95": 7.530823284827079,
+          "label": "worstcase_blend (NLS vertex)",
+          "private_bar": 528.4835555959945
+        },
+        {
+          "clears_central_536": true,
+          "clears_lcb_526": false,
+          "f_priv": 0.9570535584491102,
+          "gap_vs_physical_ceiling_520p95": 14.186672009371023,
+          "label": "observed_52 (460.85/481.53)",
+          "private_bar": 535.1394043205385
+        },
+        {
+          "clears_central_536": true,
+          "clears_lcb_526": false,
+          "f_priv": 0.9543435039802796,
+          "gap_vs_physical_ceiling_520p95": 15.706310303211467,
+          "label": "breakeven_central_536.66",
+          "private_bar": 536.6590426143789
+        },
+        {
+          "clears_central_536": true,
+          "clears_lcb_526": true,
+          "f_priv": 0.9741844836002918,
+          "gap_vs_physical_ceiling_520p95": 4.77630545643342,
+          "label": "breakeven_lcb_525.73",
+          "private_bar": 525.7290377676009
+        }
+      ]
+    },
+    "verdict": "REALIZABLE-BLEND WORST-CASE == CENTRAL: NLS is BOTH the lambda-deficit-maximizing AND the f_priv-minimizing vertex; the realizable-blend LP adds ZERO spread to the private bar (worst-case 528.4836 == kanna #217 central 528.48, because #217's 'central' f_priv=0.969107 IS the NLS worst-vertex drop at 4.3% decode drop). The bar STAYS -8.18 vs wirbel #199's compliant-spec ceiling 536.66 -> compliant lane is private-FEASIBLE vs the CENTRAL ceiling (break-even f_priv 0.95434; worst-case 0.969107 clears it by +0.01476). BUT the binding risk is the decode-drop CALIBRATION, not the blend: the one hard paired draw (#52) gives f_priv=0.95705 -> bar 535.14 (within 1.52 of 536.66, clearing the break-even by only +0.00271), a private drop ~1.5x the realizable-blend worst vertex and OUTSIDE the realizable simplex. And vs the conservative LCB ceiling 525.73 the worst-case bar already MISSES (+2.75) -> private-INFEASIBLE at P95.",
+    "worstcase": {
+      "f_priv_min_is_nls": true,
+      "f_priv_min_vertex": "native_multilingual",
+      "f_priv_worstcase": 0.969106920637722,
+      "lambda_star": 0.9779783323491393,
+      "lp_linear_argmax_axis": "native_multilingual",
+      "lp_linear_dirichlet_sweep_max_pct": 2.3337717267026594,
+      "lp_linear_max_weighted_deficit_pct": 2.348985683941248,
+      "lp_linear_per_axis_weighted_deficit_pct": {
+        "native_casual": 2.2417460733253316,
+        "native_code": 2.330607645306472,
+        "native_longctx": 1.584433485916175,
+        "native_math": 2.0828980543539157,
+        "native_multilingual": 2.348985683941248,
+        "native_sharegpt": 2.17741586125699
+      },
+      "lp_linear_vertex_optimal": true,
+      "margin_to_runner_drop_pp": 0.01636079460860529,
+      "margin_to_runner_fpriv": 0.00016236973904859564,
+      "names": [
+        "native_code",
+        "native_casual",
+        "native_sharegpt",
+        "native_multilingual",
+        "native_math",
+        "native_longctx"
+      ],
+      "per_axis": {
+        "native_casual": {
+          "axis": "register-casual-short",
+          "drop_full_recovery_pct": 2.2476473875848497,
+          "f_priv": 0.9701254960270697,
+          "is_nls": false
+        },
+        "native_code": {
+          "axis": "domain-code",
+          "drop_full_recovery_pct": 2.333920882075549,
+          "f_priv": 0.9692692903767706,
+          "is_nls": false
+        },
+        "native_longctx": {
+          "axis": "long-context-tail",
+          "drop_full_recovery_pct": 1.5840055207156394,
+          "f_priv": 0.9767116893827787,
+          "is_nls": false
+        },
+        "native_math": {
+          "axis": "math-notation-chain",
+          "drop_full_recovery_pct": 2.0932181816053985,
+          "f_priv": 0.9716581006759408,
+          "is_nls": false
+        },
+        "native_multilingual": {
+          "axis": "non-latin-script",
+          "drop_full_recovery_pct": 2.3502816766841543,
+          "f_priv": 0.969106920637722,
+          "is_nls": true
+        },
+        "native_sharegpt": {
+          "axis": "generic-hard-chat-tail",
+          "drop_full_recovery_pct": 2.1878744482888335,
+          "f_priv": 0.970718701723238,
+          "is_nls": false
+        }
+      },
+      "reach_weights_at_lambda_star": [
+        0.41283481201592775,
+        0.33588764826371537,
+        0.2709809076904709,
+        0.23949671644779763,
+        0.1717253507375035,
+        0.10331745222435465,
+        0.08953437874562994
+      ],
+      "runner_up_vertex": "native_code",
+      "treedp_sweep_argmin_p": {
+        "native_casual": 0.03773217942173483,
+        "native_code": 0.03863786866191652,
+        "native_longctx": 0.001196888576481951,
+        "native_math": 0.021185196874787697,
+        "native_multilingual": 0.896248585830098,
+        "native_sharegpt": 0.004999280634980878
+      },
+      "treedp_sweep_min_fpriv": 0.9692224488124784,
+      "treedp_sweep_n": 20000,
+      "treedp_vertex_optimal": true
+    }
+  }
+}
