@@ -1,0 +1,386 @@
+{
+  "gate": {
+    "primary_metric_name": "splitk_realization_ceiling_pct",
+    "splitk_realization_ceiling_pct": 3.1986119756735487,
+    "splitk_realization_ceiling_net_pct": 1.5586924621061815,
+    "splitk_realization_ceiling_band_high_pct": 7.805537614549518,
+    "binding_constraint": "HBM-practical-roofline",
+    "binding_constraint_detail": "HBM PRACTICAL roofline: the verify-GEMM is already at 77.1% of datasheet and the in-situ DRAM-efficiency wall (gate_up, CTA-saturated, measured) is 79.2% -> only 3.2% BW-headroom realizable. The dominant gate_up GEMM (54% of verify time) is already AT the wall and CTA-saturated -> SplitK adds ~0 there. Compute floor does NOT bind (compute util rises only 20.2% -> 22.5% even at 100% BW). The 29.7% gap ceiling assumes UNREACHABLE 100%-datasheet BW.",
+    "test_metric_name": "splitk_headroom_to_corner",
+    "splitk_headroom_to_corner": -11.14631987579291,
+    "splitk_headroom_to_corner_band_high": -6.539394236916941,
+    "corner_reachable_on_splitk_alone": false,
+    "verdict": "RED",
+    "verdict_label": "540-margin (and the 500 corner) is genuinely tau/tree-gated. The physical SplitK realization ceiling is ~3.2% (band to ~7.8%), BELOW ubel #108's realistic central 8.5% and far below #109's 14.3% corner -- even below the 5.5% corner at PERFECT tau=1.0. SplitK CANNOT close the corner alone. Tell ubel to stop tuning SplitK past ~8%; confirm the lawine #116 tau-anchor / land #71 tree as the only paths to the corner.",
+    "ubel_target_pct": 7.8
+  },
+  "units_note": "SplitK s = fractional INCREASE in achieved aggregate verify-GEMM bandwidth (vg->vg/(1+s)); ALL of corner 14.34%, ubel 8.5/12%, gap ceiling 29.7% and this ceiling are in these s units. s=29.7% <-> BW 462->600 GB/s <-> 22.9% verify-GEMM wall-time cut.",
+  "wall_scenarios": {
+    "measured": {
+      "wall_pct_datasheet": 79.17243850464045,
+      "measured_wall_pct": 79.17243850464045,
+      "t_us_old": 4868.111248612404,
+      "t_us_new_gross": 4717.225508575578,
+      "t_us_new_net": 4793.396931955189,
+      "s_gross": 0.03198611975673549,
+      "s_net": 0.015586924621061815,
+      "agg_util_old_pct": 77.05767476868124,
+      "agg_util_new_pct": 78.25876693677498,
+      "compute_util_old_pct": 20.153307906403988,
+      "per_gemm": [
+        {
+          "role": "mlp.down_proj",
+          "in": 10240,
+          "out": 2560,
+          "count": 42,
+          "pct_hbm": 74.24358161332874,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 33.561599254608154,
+          "t_us_lifted": 31.472231756349,
+          "t_us_net": 32.075808803731036
+        },
+        {
+          "role": "mlp.gate_up_proj",
+          "in": 2560,
+          "out": 20480,
+          "count": 42,
+          "pct_hbm": 79.17243850464045,
+          "n_tiles_ctas": 160,
+          "cta_saturated": true,
+          "liftable": false,
+          "split_factor": 1,
+          "t_us_old": 62.858238220214844,
+          "t_us_lifted": 62.858238220214844,
+          "t_us_net": 62.858238220214844
+        },
+        {
+          "role": "self_attn.o_proj",
+          "in": 2048,
+          "out": 2560,
+          "count": 35,
+          "pct_hbm": 68.76310496942936,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 7.326719760894775,
+          "t_us_lifted": 6.363426585256315,
+          "t_us_net": 6.96700363263835
+        },
+        {
+          "role": "self_attn.o_proj",
+          "in": 4096,
+          "out": 2560,
+          "count": 7,
+          "pct_hbm": 103.58593616473239,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": false,
+          "split_factor": 1,
+          "t_us_old": 9.661440253257751,
+          "t_us_lifted": 9.661440253257751,
+          "t_us_net": 9.661440253257751
+        },
+        {
+          "role": "self_attn.qkv_proj",
+          "in": 2560,
+          "out": 3072,
+          "count": 35,
+          "pct_hbm": 78.53197748485833,
+          "n_tiles_ctas": 24,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 9.579520225524902,
+          "t_us_lifted": 9.502027231642902,
+          "t_us_net": 10.226319688501345
+        },
+        {
+          "role": "self_attn.qkv_proj",
+          "in": 2560,
+          "out": 6144,
+          "count": 7,
+          "pct_hbm": 65.88588862999472,
+          "n_tiles_ctas": 48,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 2,
+          "t_us_old": 22.73279905319214,
+          "t_us_lifted": 18.91782917080266,
+          "t_us_net": 19.53865127668132
+        }
+      ],
+      "compute_util_new_pct": 20.467435997606156,
+      "compute_floor_binds": false
+    },
+    "practical": {
+      "wall_pct_datasheet": 88.0,
+      "measured_wall_pct": 79.17243850464045,
+      "t_us_old": 4868.111248612404,
+      "t_us_new_gross": 4515.641177930919,
+      "t_us_new_net": 4584.171602173344,
+      "s_gross": 0.07805537614549518,
+      "s_net": 0.06193913995375855,
+      "agg_util_old_pct": 77.05767476868124,
+      "agg_util_new_pct": 81.8305608706898,
+      "compute_util_old_pct": 20.153307906403988,
+      "per_gemm": [
+        {
+          "role": "mlp.down_proj",
+          "in": 10240,
+          "out": 2560,
+          "count": 42,
+          "pct_hbm": 74.24358161332874,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 33.561599254608154,
+          "t_us_lifted": 28.315151515151516,
+          "t_us_net": 28.85818181818182
+        },
+        {
+          "role": "mlp.gate_up_proj",
+          "in": 2560,
+          "out": 20480,
+          "count": 42,
+          "pct_hbm": 79.17243850464045,
+          "n_tiles_ctas": 160,
+          "cta_saturated": true,
+          "liftable": false,
+          "split_factor": 1,
+          "t_us_old": 62.858238220214844,
+          "t_us_lifted": 62.858238220214844,
+          "t_us_net": 62.858238220214844
+        },
+        {
+          "role": "self_attn.o_proj",
+          "in": 2048,
+          "out": 2560,
+          "count": 35,
+          "pct_hbm": 68.76310496942936,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 7.326719760894775,
+          "t_us_lifted": 5.725090909090907,
+          "t_us_net": 6.26812121212121
+        },
+        {
+          "role": "self_attn.o_proj",
+          "in": 4096,
+          "out": 2560,
+          "count": 7,
+          "pct_hbm": 103.58593616473239,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": false,
+          "split_factor": 1,
+          "t_us_old": 9.661440253257751,
+          "t_us_lifted": 9.661440253257751,
+          "t_us_net": 9.661440253257751
+        },
+        {
+          "role": "self_attn.qkv_proj",
+          "in": 2560,
+          "out": 3072,
+          "count": 35,
+          "pct_hbm": 78.53197748485833,
+          "n_tiles_ctas": 24,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 9.579520225524902,
+          "t_us_lifted": 8.548848484848484,
+          "t_us_net": 9.200484848484848
+        },
+        {
+          "role": "self_attn.qkv_proj",
+          "in": 2560,
+          "out": 6144,
+          "count": 7,
+          "pct_hbm": 65.88588862999472,
+          "n_tiles_ctas": 48,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 2,
+          "t_us_old": 22.73279905319214,
+          "t_us_lifted": 17.020121212121214,
+          "t_us_net": 17.578666666666667
+        }
+      ],
+      "compute_util_new_pct": 21.401586465349933,
+      "compute_floor_binds": false
+    },
+    "datasheet": {
+      "wall_pct_datasheet": 100.0,
+      "measured_wall_pct": 79.17243850464045,
+      "t_us_old": 4868.111248612404,
+      "t_us_new_gross": 4298.685367021828,
+      "t_us_new_net": 4358.992140355162,
+      "s_gross": 0.13246512200195748,
+      "s_net": 0.11679743662390729,
+      "agg_util_old_pct": 77.05767476868124,
+      "agg_util_new_pct": 86.05781365386194,
+      "compute_util_old_pct": 20.153307906403988,
+      "per_gemm": [
+        {
+          "role": "mlp.down_proj",
+          "in": 10240,
+          "out": 2560,
+          "count": 42,
+          "pct_hbm": 74.24358161332874,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 33.561599254608154,
+          "t_us_lifted": 24.91733333333334,
+          "t_us_net": 25.395200000000006
+        },
+        {
+          "role": "mlp.gate_up_proj",
+          "in": 2560,
+          "out": 20480,
+          "count": 42,
+          "pct_hbm": 79.17243850464045,
+          "n_tiles_ctas": 160,
+          "cta_saturated": true,
+          "liftable": false,
+          "split_factor": 1,
+          "t_us_old": 62.858238220214844,
+          "t_us_lifted": 62.858238220214844,
+          "t_us_net": 62.858238220214844
+        },
+        {
+          "role": "self_attn.o_proj",
+          "in": 2048,
+          "out": 2560,
+          "count": 35,
+          "pct_hbm": 68.76310496942936,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 7.326719760894775,
+          "t_us_lifted": 5.038079999999999,
+          "t_us_net": 5.515946666666665
+        },
+        {
+          "role": "self_attn.o_proj",
+          "in": 4096,
+          "out": 2560,
+          "count": 7,
+          "pct_hbm": 103.58593616473239,
+          "n_tiles_ctas": 20,
+          "cta_saturated": false,
+          "liftable": false,
+          "split_factor": 1,
+          "t_us_old": 9.661440253257751,
+          "t_us_lifted": 9.661440253257751,
+          "t_us_net": 9.661440253257751
+        },
+        {
+          "role": "self_attn.qkv_proj",
+          "in": 2560,
+          "out": 3072,
+          "count": 35,
+          "pct_hbm": 78.53197748485833,
+          "n_tiles_ctas": 24,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 4,
+          "t_us_old": 9.579520225524902,
+          "t_us_lifted": 7.522986666666666,
+          "t_us_net": 8.096426666666666
+        },
+        {
+          "role": "self_attn.qkv_proj",
+          "in": 2560,
+          "out": 6144,
+          "count": 7,
+          "pct_hbm": 65.88588862999472,
+          "n_tiles_ctas": 48,
+          "cta_saturated": false,
+          "liftable": true,
+          "split_factor": 2,
+          "t_us_old": 22.73279905319214,
+          "t_us_lifted": 14.977706666666668,
+          "t_us_net": 15.469226666666668
+        }
+      ],
+      "compute_util_new_pct": 22.507162609364297,
+      "compute_floor_binds": false
+    }
+  },
+  "ceiling_summary": {
+    "measured_wall_net_pct": 3.1986119756735487,
+    "practical88_wall_net_pct": 7.805537614549518,
+    "datasheet100_net_pct": 13.246512200195749,
+    "gap_ceiling_109_pct": 29.70168612191959,
+    "note": "primary = measured-wall (SplitK lifts occupancy-limited laggards to gate_up's MEASURED 79.2% DRAM wall, gate_up frozen). band-high = laggards granted 88% GDDR6 practical, gate_up still frozen. datasheet100 ~ #109's 29.7% gap ceiling, shown UNREACHABLE."
+  },
+  "corner_ladder": {
+    "definition": "min SplitK s (conservative corner, #109 ship model) to clear 500 at each tau",
+    "by_tau_pct": {
+      "tau_0.96": 14.344931851466459,
+      "tau_0.97": 11.995108482524518,
+      "tau_0.98": 9.739919527182295,
+      "tau_0.99": 7.573761013569413,
+      "tau_1.00": 5.491462872659203
+    },
+    "corner_tau096_primary_pct": 14.344931851466459,
+    "corner_tau099_mechanism_floor_pct": 7.573761013569413,
+    "corner_tau100_perfect_pct": 5.491462872659203,
+    "gap_ceiling_pct": 29.70168612191959,
+    "ubel_band_pct": {
+      "low": 5.0,
+      "central": 8.5,
+      "high": 12.0
+    }
+  },
+  "compute_floor_check": {
+    "compute_util_m8_pct": 20.153307906403988,
+    "hbm_util_m8_pct": 77.05767476868124,
+    "compute_util_at_100pct_bw_pct": 22.507162609364297,
+    "binds_before_corner": false,
+    "note": "AI=28 is 3.8x below the ridge (107); even at 100% BW the compute util reaches only ~26% -> compute floor NEVER binds; the cap is HBM."
+  },
+  "tps_crosscheck": {
+    "corner_tps_at_ceiling": {
+      "tau_0.96": 474.5530899356153,
+      "tau_0.99": 489.3828739961033,
+      "tau_1.00": 494.3261353495993
+    },
+    "corner_tps_at_band_high": {
+      "tau_0.96": 485.3824978625622,
+      "tau_0.99": 500.5507009207673,
+      "tau_1.00": 505.60676860683566
+    },
+    "field_realized_tps_uplift_pct": [
+      0.6,
+      1.7
+    ],
+    "field_implied_s_pct": [
+      1.1381311885883312,
+      3.256642593053761
+    ],
+    "note": "public SplitK-class submissions realize ~+0.6-1.7% TPS over 481.53 -> implied s ~1.1-3.3% -- straddles our measured-wall ceiling, an independent corroboration that SplitK is already near its physical wall."
+  },
+  "config": {
+    "roofline_source": "research/spec_cost_model/verify_gemm_roofline.json",
+    "tile_n": 128,
+    "max_split": 8,
+    "sm_count": 80,
+    "a10g_hbm_gbs": 600.0,
+    "operating_M": 8,
+    "model_device": "NVIDIA A10G",
+    "frontier_tps": 481.53
+  },
+  "provenance": "extends denken #68 verify_gemm_roofline.json (MEASURED Marlin W4A16) + denken #105/#109 compose ship model + lawine #99 multiplier; researcher pass arxiv:2402.00025 (W4A16 SplitK), arxiv:2301.03598 (Stream-K CTA quantization), GPU-STREAM (~80% practical BW).",
+  "method": "LOCAL CPU-only analytic roofline; no GPU/vLLM/HF Job/submission/kernel build. Greedy identity untouched (SplitK 0-flip kanna #87). ubel #108 owns the BUILD; this bounds the CEILING."
+}
