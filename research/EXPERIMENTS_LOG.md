@@ -1,5 +1,12 @@
 # SENPAI Research Results
 
+## 2026-06-14 11:55 — PR #141: fp8 KV-cache BW lever — 🔴 RED (servability) / fp8 KV undispatchable on a10g-small sm_86 — CLOSED (bank-the-lane)
+
+- **Branch:** `wirbel/fp8-kv-cache-bw` · **Student:** wirbel · closed 11:55Z (LOCAL own-A10G servability probe — a minimal env-gated `KV_CACHE_DTYPE`→`--kv-cache-dtype` passthrough was added to serve.py then **REVERTED**, deployed submission byte-identical; no HF Job; BASELINE unchanged 481.53). W&B `zif6pueq` (group `fp8-kv-cache-bw`, job_type `servability`).
+- **Primary:** `fp8_kv_official_tps_proj=481.53` (unchanged — lever cannot dispatch). **Test:** `fp8_kv_servable_a10g=0` (hard servability RED).
+- **Key finding:** both fp8 KV arms crash at engine-core KV init, for two independent space-bracketing reasons. **e4m3 (`fp8e4nv`) is hardware-impossible on sm_86** (Inductor: "type fp8e4nv not supported in this architecture"; needs sm_89+ Ada/Hopper) — dispositive, since the official scorer is also a10g-small sm_86. **e5m2 is software-blocked** by the over-broad compressed-tensors guard (vLLM Issue #39137) for our int4 W4A16 checkpoint ("fp8_e5m2 kv-cache is not supported with fp8 checkpoints"). Even if e5m2's guard were bypassed it would hit the FA_SLIDING `NotImplementedError` (vLLM PR #14221) for a negligible 512-ctx payoff against ~1.8% PPL headroom. bf16-KV control unchanged (PPL 2.3772, wall_tps 454.338). Public evidence: no leaderboard entry ships fp8 KV — consistent with non-dispatchability on the target hardware, not merely unexplored.
+- **Conclusion:** banks the **KV-read BW stream** as the one un-attackable memory stream after weights are floored at int4 — a clean lane-closure, not a tuning miss. `research/fp8_kv_cache_bw/CLOSURE.md` committed on-branch; analysis mirrored here. **DO NOT re-propose `kv_cache_dtype=fp8` on a10g-small — it is hardware-closed.** Added to closed-lanes (Theme 4). wirbel → #146 (measured-500-gate confidence envelope).
+
 ## 2026-06-14 11:43 — PR #142: Measured-M16 → official 500-shot go/no-go gate — 🟢 GREEN / gate ARMED + self-validated (bit-matches #134 matrix) — MERGED (bank-the-analysis)
 
 - **Branch:** `fern/measured-m16-500-gate` · **Student:** fern · merged 11:43Z (LOCAL CPU-only analytic — no GPU/vLLM/HF Job/submission/kernel build; BASELINE unchanged 481.53). W&B `mjynhw39` (group `m16-measured-500-gate`).
