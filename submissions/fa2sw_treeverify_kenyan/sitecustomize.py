@@ -118,6 +118,54 @@ _SALVAGE_PROBE_STATE: dict[str, Any] = {
     "skipped_read_err": 0,
 }
 
+# --- PR #71 STAGE-2b LIVE: scratch-KV tree-verify forward (branch-interior λ) --
+# LOCAL-ONLY, env-gated. The advisor [38] decisive ask: MEASURE the live deep /
+# branch-interior q[2..9] ladder DIRECTLY (denken #193 geometric staleness law —
+# the deep ladder canNOT be inferred from the spine). The deployed M=8 linear
+# verify never scores branch interiors, so we run a SEPARATE scratch-KV tree
+# verify forward at a decode step: draft the M=16 tree (emit-probe), run ONE
+# tree-masked verifier forward (qq_bias [M,M] + base+depth positions) over the M
+# rows into a SCRATCH KV block (prefix READ-ONLY, scratch written-then-freed ->
+# real generation untouched), compute per-row verifier argmax `node_argmax`, run
+# the validated CPU descend_accept, and record the per-depth acceptance ladder on
+# both the spine AND the salvaged branch interiors. Purely observational: never
+# touches the real accept/KV -> PPL + greedy-identity unmoved. Deployed path is
+# byte-identical when TREE_VERIFY_PROBE is unset.
+#   ""      -> off (default; deployed stack untouched).
+#   "diag"  -> capture the runner + DUMP the cad/runner KV layout (context_len L,
+#              per-group block_table, block_size, num_blocks); NO forward. Pins
+#              the scratch-block construction empirically before any forward.
+#   "anchor"-> LINEAR-M scratch forward; cross-step compare node_argmax(spine) vs
+#              the deployed target_argmax (HARD correctness gate: linear depth==
+#              row-index => qq_bias is a no-op => MUST reproduce deployed argmax).
+#   "m16"   -> M=16 tree scratch forward; measure the branch-interior q ladder.
+TREE_VERIFY_PROBE = os.environ.get("TREE_VERIFY_PROBE", "") or ""
+TREE_VERIFY_PROBE_M = int(os.environ.get("TREE_VERIFY_PROBE_M", "16") or "16")
+TREE_VERIFY_PROBE_STEPS = int(os.environ.get("TREE_VERIFY_PROBE_STEPS", "6") or "6")
+# Clean-room plumbing proof: run the SAME scratch machinery on a synthetic M=8
+# LINEAR chain ([-1,0,1,..,6], the deployed chain) so qq_bias is a causal no-op
+# (mq=8 != TREE_QQ_BIAS_M) and M matches the deployed verify -> ~100% anchor means
+# the KV-redirect/slot/RoPE/metadata are correct and ALL M=16 anchor divergence is
+# int4-Marlin batch-variance (Issue #192), not a plumbing bug.
+TREE_VERIFY_ANCHOR8 = os.environ.get("TREE_VERIFY_ANCHOR8") == "1"
+TREE_VERIFY_PROBE_VERDICT = os.environ.get(
+    "TREE_VERIFY_PROBE_VERDICT",
+    "research/tree_verify_path/comp_verify_probe_stage2b.json",
+)
+# The captured GPUModelRunner singleton (target model + verify attn_groups + KV).
+# The Gemma4 proposer does NOT store a back-ref to the runner (verified: base
+# SpecDecodeBaseProposer.__init__ takes runner= but never assigns self.runner),
+# so we capture it from a patched runner method where `self` IS the runner.
+_VERIFIER_RUNNER: Any = None
+_VERIFY_PROBE_STATE: dict[str, Any] = {
+    "registered": False,
+    "diag_dumped": 0,
+    "steps": 0,
+    "anchor_rows": 0,
+    "anchor_match": 0,
+    "anchor_pending": None,   # stash: scratch spine argmax awaiting next deployed verify
+}
+
 # --- drafter token-frequency logit bias (PR #48, experiment-only) -------------
 # Additive bias on the DRAFTER's candidate scores, applied to the top-K most
 # frequent corpus tokens before the drafter argmax. Verifier output is untouched
@@ -523,6 +571,18 @@ def _run_tree_emit_probe(
             "ready": True,
         }
 
+    if TREE_VERIFY_PROBE:
+        # STAGE-2b: stash the FULL drafted tree + per-node tokens so the
+        # scratch-KV verifier forward (run from propose_onegraph, where cad is
+        # in scope) can score every node — the spine AND the branch interiors
+        # the deployed linear verify never sees.
+        _VERIFY_PROBE_STATE["tree_stash"] = {
+            "tree": tree,
+            "draft_token": list(draft_token),
+            "spine_chain": spine_tok,
+            "ready": True,
+        }
+
     st["steps"] += 1
     st["forwards"] = forwards
     st["spine_ok" if spine_ok else "spine_mismatch"] += 1
@@ -547,6 +607,689 @@ def _run_tree_emit_probe(
             f"branch_bad={st['branch_distinct_bad']}",
             file=sys.stderr,
             flush=True,
+        )
+
+
+def _run_tree_verify_diag(
+    self: Any,
+    *,
+    tree: Any,
+    draft_token: list,
+    cad: Any,
+    sample_index: Any,
+    positions_1d: Any,
+    next_token_ids: Any,
+    target_positions: Any,
+) -> None:
+    """STAGE-2b DIAG: dump the runner KV layout so the scratch-block + context_len
+    construction can be pinned EMPIRICALLY before any forward runs. No forward, no
+    KV touch. Prints once-per-step for the first TREE_VERIFY_PROBE_STEPS steps."""
+    st = _VERIFY_PROBE_STATE
+    if st["diag_dumped"] >= TREE_VERIFY_PROBE_STEPS:
+        return
+    runner = _VERIFIER_RUNNER
+
+    def _as_int(t: Any) -> int:
+        return int(t.reshape(-1)[0].item()) if hasattr(t, "reshape") else int(t)
+
+    lines = [f"[tree-verify-diag] ===== step {st['diag_dumped']} ====="]
+    if runner is None:
+        lines.append("  runner=None (NOT captured yet — capture hook may run AFTER "
+                     "propose on early steps; should populate after warmup)")
+        print("\n".join(lines), file=sys.stderr, flush=True)
+        st["diag_dumped"] += 1
+        return
+
+    # --- proposer-side context (root token + position) ---
+    try:
+        si = sample_index
+        if hasattr(si, "reshape"):
+            si_val = int(si.reshape(-1)[0].item())
+        else:
+            si_val = int(si)
+        root_tok = _as_int(next_token_ids)
+        root_pos = int(positions_1d.reshape(-1)[si_val].item())
+        tp = target_positions
+        tp_flat = tp[0] if (hasattr(tp, "dim") and tp.dim() > 1) else tp
+        tp_list = [int(x) for x in tp_flat.reshape(-1)[:12].tolist()]
+        lines.append(
+            f"  proposer: root_token={root_tok} sample_index={si_val} "
+            f"root_position={root_pos} | target_positions[:12]={tp_list}"
+        )
+        lines.append(
+            f"  cad: seq_lens={_tolist_safe(cad.seq_lens)[:4]} "
+            f"num_actual_tokens={getattr(cad, 'num_actual_tokens', '?')} "
+            f"max_query_len={getattr(cad, 'max_query_len', '?')} "
+            f"block_table_tensor.shape={tuple(cad.block_table_tensor.shape)}"
+        )
+    except Exception as exc:
+        lines.append(f"  proposer-context dump error: {exc!r}")
+
+    # --- runner-side KV layout (the scratch-block construction inputs) ---
+    try:
+        ib = runner.input_batch
+        num_reqs = int(ib.num_reqs)
+        nct = ib.num_computed_tokens_cpu_tensor[:num_reqs]
+        lines.append(
+            f"  runner.input_batch: num_reqs={num_reqs} "
+            f"num_computed_tokens={[int(x) for x in nct.tolist()]} "
+            f"req_ids={list(ib.req_ids)[:num_reqs]}"
+        )
+    except Exception as exc:
+        num_reqs = 1
+        lines.append(f"  input_batch dump error: {exc!r}")
+
+    try:
+        groups = runner.kv_cache_config.kv_cache_groups
+        lines.append(f"  kv_cache_config: n_groups={len(groups)} "
+                     f"n_kv_caches={len(runner.kv_caches)} "
+                     f"kv_caches[0].shape={tuple(runner.kv_caches[0].shape)}")
+        for gid, grp in enumerate(groups):
+            spec = grp.kv_cache_spec
+            bs = getattr(spec, "block_size", "?")
+            sw = getattr(spec, "sliding_window", None)
+            nlyr = len(getattr(grp, "layer_names", []) or [])
+            try:
+                bt = runner.input_batch.block_table[gid].get_device_tensor(num_reqs)
+                bt0 = [int(x) for x in bt[0][:14].tolist()]
+                btshape = tuple(bt.shape)
+            except Exception as bexc:
+                bt0, btshape = f"err:{bexc!r}", "?"
+            lines.append(
+                f"    group {gid}: spec={type(spec).__name__} block_size={bs} "
+                f"sliding_window={sw} n_layers={nlyr} bt.shape={btshape} "
+                f"block_ids[req0][:14]={bt0}"
+            )
+    except Exception as exc:
+        lines.append(f"  kv_cache_groups dump error: {exc!r}")
+
+    # --- attn_groups (the per-layer metadata builders) ---
+    try:
+        ag = runner.attn_groups
+        shape = [len(g) for g in ag]
+        lines.append(f"  runner.attn_groups: outer={len(ag)} inner={shape}")
+        for gid, grp_list in enumerate(ag):
+            for agid, grp in enumerate(grp_list):
+                b = grp.get_metadata_builder()
+                lines.append(
+                    f"    attn_group[{gid}][{agid}]: builder={type(b).__name__} "
+                    f"supports_update_block_table="
+                    f"{getattr(b, 'supports_update_block_table', '?')} "
+                    f"n_layer_names={len(getattr(grp, 'layer_names', []) or [])}"
+                )
+    except Exception as exc:
+        lines.append(f"  attn_groups dump error: {exc!r}")
+
+    # --- the drafted tree ---
+    try:
+        depths = [tree.depth[i] for i in range(tree.num_nodes)]
+        lines.append(
+            f"  tree: M={tree.num_nodes} max_depth={tree.max_depth} "
+            f"spine={tree.spine} depths={depths}"
+        )
+        lines.append(f"  draft_token={[int(t) for t in draft_token]}")
+    except Exception as exc:
+        lines.append(f"  tree dump error: {exc!r}")
+
+    print("\n".join(lines), file=sys.stderr, flush=True)
+    st["diag_dumped"] += 1
+
+
+def _tolist_safe(t: Any) -> list:
+    try:
+        return [int(x) for x in t.reshape(-1).tolist()]
+    except Exception:
+        try:
+            return list(t)
+        except Exception:
+            return []
+
+
+# --- STAGE-2b LIVE scratch-KV M=16 tree-verify forward ------------------------
+# Accumulators + raw dump for the live branch-interior / deep q[2..9] ladder.
+# The forward writes the M tree rows into RESERVED top-of-pool scratch KV blocks
+# (prefix blocks stay READ-ONLY), so real generation / PPL / greedy-identity are
+# untouched. node_argmax[i] = verifier argmax at node i's verify row (the token
+# node i's CHILDREN are checked against -- descend_accept's g[] convention).
+_VERIFY_SCRATCH: dict[str, Any] = {
+    "registered": False,
+    "steps": 0,
+    "forward_ok": 0,
+    "forward_err": 0,
+    "dump_fp": None,
+    "dump_path": os.environ.get(
+        "TREE_VERIFY_PROBE_DUMP",
+        "research/tree_verify_path/treeverify_scratch_nodeargmax.jsonl",
+    ),
+    "reserve": int(os.environ.get("TREE_VERIFY_SCRATCH_RESERVE", "8") or "8"),
+    # spine rank-1 ladder (depth d -> P(rank-1 child accepted | reached d)).
+    "spine_reached": {},
+    "spine_accept": {},
+    # full descend committed-path-length histogram (E[T] from the tree forward).
+    "path_len_hist": {},
+    "salvage_steps": 0,
+    # cross-step anchor (filled in _salvage_probe_observe vs deployed argmax).
+    "anchor_rows": 0,
+    "anchor_match": 0,
+    "anchor_steps": 0,
+    "anchor_mismatch_steps": 0,
+    "anchor_skipped": 0,
+    # per-depth anchor breakdown (localizes forward error: depth-0-only mismatch =>
+    # benign tgt[0] source diff; uniform degrade => genuine forward bug).
+    "anchor_pos_rows": {},
+    "anchor_pos_match": {},
+    "anchor_dbg_logged": 0,
+    "md_dbg": 0,
+    # top-2 logit gap diagnosis (Issue #192 int4-Marlin batch-variance test):
+    # near-tie gaps on mismatching rows + tgt==scratch-top2 => numerical flip,
+    # NOT a masking bug (which would give large gaps + random wrong tokens).
+    "anchor_gap_match_sum": 0.0,
+    "anchor_gap_match_n": 0,
+    "anchor_gap_mismatch_sum": 0.0,
+    "anchor_gap_mismatch_n": 0,
+    "anchor_gap_mismatch_hist": {},
+    "anchor_mismatch_tgt_is_top2": 0,
+    # M=8-linear clean-room anchor (plumbing proof; gated by TREE_VERIFY_ANCHOR8).
+    "anchor8_rows": 0,
+    "anchor8_match": 0,
+    "anchor8_pos_rows": {},
+    "anchor8_pos_match": {},
+    "anchor8_dbg_logged": 0,
+    "linear_tree": None,
+}
+
+
+def _verify_group_layout(runner: Any, gid: int, root_position: int, m: int) -> dict:
+    """PURE per-KV-group scratch layout (no GPU writes). Returns the redirected
+    block_table + the M slot ids for the tree rows. Raises on any unsafe layout
+    (e.g. a scratch block that collides with a real prefix block) so the caller
+    aborts the forward fail-closed rather than risk touching real KV."""
+    grp = runner.kv_cache_config.kv_cache_groups[gid]
+    bs = int(grp.kv_cache_spec.block_size)
+    layer_names = list(grp.layer_names)
+    sfc = runner.vllm_config.compilation_config.static_forward_context
+    rep = sfc[layer_names[0]].kv_cache  # (num_blocks, 2, bs, n_kv, hd)
+    num_blocks = int(rep.shape[0])
+    real_bt = runner.input_batch.block_table[gid].get_device_tensor(1)[0]
+    real_bt_cpu = [int(x) for x in real_bt.tolist()]
+    blk_lo = root_position // bs
+    blk_hi = (root_position + m - 1) // bs
+    n_redir = blk_hi - blk_lo + 1
+    scratch_blocks = [num_blocks - 1 - k for k in range(n_redir)]
+    used = set(x for x in real_bt_cpu if x >= 0)
+    for sb in scratch_blocks:
+        if sb < 0 or sb >= num_blocks or sb in used:
+            raise RuntimeError(
+                f"scratch block {sb} unsafe (gid={gid} num_blocks={num_blocks} "
+                f"collides={sb in used})"
+            )
+    modified_bt = real_bt.clone()
+    for k in range(n_redir):
+        modified_bt[blk_lo + k] = scratch_blocks[k]
+    # Only the (partial) first redirected block carries real prefix tail; copy it
+    # so prefix reads survive while new writes land in its tail / fresh blocks.
+    copy_pairs = []
+    if root_position % bs != 0:
+        copy_pairs.append((scratch_blocks[0], int(real_bt_cpu[blk_lo])))
+    slots = []
+    for i in range(m):
+        off = root_position + i
+        phys = int(modified_bt[off // bs].item())
+        slots.append(phys * bs + (off % bs))
+    return {
+        "bs": bs,
+        "layer_names": layer_names,
+        "modified_bt": modified_bt,
+        "slots": slots,
+        "scratch_blocks": scratch_blocks,
+        "copy_pairs": copy_pairs,
+    }
+
+
+def _run_tree_verify_scratch(
+    runner: Any, tree: Any, draft_token: list, root_position: int
+) -> list | None:
+    """Run the M=tree.num_nodes tree-verify forward against the live prefix KV
+    (read-only) + reserved scratch KV blocks; return node_argmax[0..M-1] (verifier
+    argmax per tree row) or None on any failure. Observational: never mutates the
+    real accept path or real KV blocks."""
+    import torch
+    from vllm.forward_context import set_forward_context
+    from vllm.v1.attention.backend import CommonAttentionMetadata
+
+    m = tree.num_nodes
+    device = runner.device
+    groups = runner.kv_cache_config.kv_cache_groups
+    sfc = runner.vllm_config.compilation_config.static_forward_context
+
+    # 1) per-group layout (fail-closed before any GPU write).
+    layouts = {
+        gid: _verify_group_layout(runner, gid, root_position, m)
+        for gid in range(len(groups))
+    }
+    # 2) redirect writes off real KV: copy each partial prefix block to scratch.
+    for gid, lay in layouts.items():
+        for (dst, src) in lay["copy_pairs"]:
+            for ln in lay["layer_names"]:
+                t = sfc[ln].kv_cache
+                t[dst].copy_(t[src])
+    # 3) per-group CommonAttentionMetadata -> per-layer attn metadata + slot map.
+    attn_md: dict = {}
+    slot_map_by_layer: dict = {}
+    qsl = torch.tensor([0, m], dtype=torch.int32, device=device)
+    qsl_cpu = torch.tensor([0, m], dtype=torch.int32)
+    seq_len = root_position + m
+    for gid, lay in layouts.items():
+        seq_lens = torch.tensor([seq_len], dtype=torch.int32, device=device)
+        seq_lens_cpu = torch.tensor([seq_len], dtype=torch.int32)
+        nct_cpu = torch.tensor([root_position], dtype=torch.int32)
+        bt2d = lay["modified_bt"].view(1, -1).contiguous()
+        slot_t = torch.tensor(lay["slots"], dtype=torch.int64, device=device)
+        cm = CommonAttentionMetadata(
+            query_start_loc=qsl,
+            query_start_loc_cpu=qsl_cpu,
+            seq_lens=seq_lens,
+            num_reqs=1,
+            num_actual_tokens=m,
+            max_query_len=m,
+            max_seq_len=seq_len,
+            block_table_tensor=bt2d,
+            slot_mapping=slot_t,
+            causal=True,
+            _seq_lens_cpu=seq_lens_cpu,
+            _num_computed_tokens_cpu=nct_cpu,
+        )
+        for attn_group in runner.attn_groups[gid]:
+            builder = attn_group.get_metadata_builder()
+            md = builder.build(common_prefix_len=0, common_attn_metadata=cm)
+            if _VERIFY_SCRATCH["md_dbg"] < 2:
+                _VERIFY_SCRATCH["md_dbg"] += 1
+
+                def _fv(o: Any, *names: str) -> Any:
+                    for nm in names:
+                        v = getattr(o, nm, None)
+                        if v is not None:
+                            try:
+                                return v.tolist() if hasattr(v, "tolist") else v
+                            except Exception:
+                                return v
+                    return None
+
+                print(
+                    f"[md-dbg] gid={gid} root_pos={root_position} m={m} "
+                    f"builder={type(builder).__name__} md={type(md).__name__}\n"
+                    f"  query_start_loc={_fv(md, 'query_start_loc')}\n"
+                    f"  seq_lens={_fv(md, 'seq_lens')}\n"
+                    f"  max_query_len={_fv(md, 'max_query_len')} "
+                    f"max_seq_len={_fv(md, 'max_seq_len')} "
+                    f"num_actual_tokens={_fv(md, 'num_actual_tokens')} "
+                    f"num_decodes={_fv(md, 'num_decodes')} "
+                    f"num_prefills={_fv(md, 'num_prefills')} "
+                    f"num_decode_tokens={_fv(md, 'num_decode_tokens')} "
+                    f"num_prefill_tokens={_fv(md, 'num_prefill_tokens')}\n"
+                    f"  md_fields={sorted(getattr(md, '__dict__', {}).keys())}",
+                    flush=True,
+                )
+            for ln in attn_group.layer_names:
+                attn_md[ln] = md
+        for ln in lay["layer_names"]:
+            slot_map_by_layer[ln] = slot_t
+    # 4) inputs: RoPE position carries DEPTH; the KV slot / qq_bias carry node
+    #    index (sequence offset). depth != index for a tree -> this is the crux.
+    #    The deployed Gemma4 (PLE) decodes from inputs_embeds with input_ids=None
+    #    (its AOT graph is frozen on that signature -> a raw input_ids call hits
+    #    None.size()). embed_input_ids BOTH returns the token embeds AND populates
+    #    the per-layer (PLE) scratch buffer for these m rows, exactly as the served
+    #    execute_model does before its forward; the next served step re-populates
+    #    rows [:8], so this additive [:m] write never corrupts the deployed path.
+    input_ids_t = torch.tensor(list(draft_token), dtype=torch.long, device=device)
+    inputs_embeds = runner.model.embed_input_ids(input_ids_t)
+    positions = torch.tensor(
+        [root_position + int(tree.depth[i]) for i in range(m)],
+        dtype=torch.long,
+        device=device,
+    )
+    # 5) forward (eager; default cudagraph_runtime_mode == NONE). The splitkv
+    #    wrapper auto-injects the [M,M] m16 tree-causal qq_bias at max_seqlen_q==M.
+    with set_forward_context(
+        attn_md,
+        runner.vllm_config,
+        num_tokens=m,
+        slot_mapping=slot_map_by_layer,
+    ):
+        out = runner.model(
+            input_ids=None,
+            positions=positions,
+            intermediate_tensors=None,
+            inputs_embeds=inputs_embeds,
+        )
+    hidden = out[0] if isinstance(out, tuple) else out
+    logits = runner.model.compute_logits(hidden[:m])
+    # top-2 per node: argmax (node_argmax), 2nd-best token, and the top1-top2
+    # logit gap. A tiny gap on a row that disagrees with the deployed verifier is
+    # the signature of int4-Marlin batch-variance (Issue #192), not a masking bug.
+    top2 = torch.topk(logits, 2, dim=-1)
+    node_argmax = [int(x) for x in top2.indices[:, 0].tolist()]
+    node_top2 = [int(x) for x in top2.indices[:, 1].tolist()]
+    node_gap = [float(g) for g in (top2.values[:, 0] - top2.values[:, 1]).tolist()]
+    return node_argmax, node_gap, node_top2
+
+
+def _verify_scratch_dump() -> None:
+    """Write the STAGE-2b verdict (spine ladder + E[T] + cross-step anchor)."""
+    vs = _VERIFY_SCRATCH
+    try:
+        if vs["dump_fp"] is not None:
+            vs["dump_fp"].flush()
+    except Exception:
+        pass
+
+    def _ladder(reached: dict, accept: dict) -> dict:
+        out = {}
+        for d in sorted(reached):
+            r = reached[d]
+            a = accept.get(d, 0)
+            q = (a / r) if r else 0.0
+            out[str(d)] = {
+                "reached": r,
+                "accept": a,
+                "q": round(q, 4),
+                "lambda": round(q / 0.729, 4),  # vs TOP1_MEASURED reference
+            }
+        return out
+
+    n_steps = max(vs["steps"], 1)
+    path_lens = vs["path_len_hist"]
+    e_t = sum(int(k) * v for k, v in path_lens.items()) / max(
+        sum(path_lens.values()), 1
+    )
+    anchor_rows = max(vs["anchor_rows"], 1)
+    verdict = {
+        "probe": "stage2b_scratch_tree_verify",
+        "mode": TREE_VERIFY_PROBE,
+        "M": TREE_VERIFY_PROBE_M,
+        "steps": vs["steps"],
+        "forward_ok": vs["forward_ok"],
+        "forward_err": vs["forward_err"],
+        "spine_ladder": _ladder(vs["spine_reached"], vs["spine_accept"]),
+        "E_T_tree_committed": round(e_t, 4),
+        "path_len_hist": {str(k): v for k, v in sorted(path_lens.items())},
+        "salvage_steps": vs["salvage_steps"],
+        "anchor": {
+            "rows_compared": vs["anchor_rows"],
+            "rows_match": vs["anchor_match"],
+            "row_match_rate": round(vs["anchor_match"] / anchor_rows, 5),
+            "steps_compared": vs["anchor_steps"],
+            "steps_mismatch": vs["anchor_mismatch_steps"],
+            "steps_skipped_unaligned": vs["anchor_skipped"],
+            # Issue #192 int4-Marlin batch-variance test: if mismatching rows have
+            # near-tie gaps (mean << matching-row gap) AND the deployed token is the
+            # scratch's 2nd-best most of the time, the anchor miss is a numerical
+            # rank-1/2 flip (M=16 scratch vs M=8 deployed), not a masking/plumbing bug.
+            "gap_match_mean": round(
+                vs["anchor_gap_match_sum"] / max(vs["anchor_gap_match_n"], 1), 4
+            ),
+            "gap_mismatch_mean": round(
+                vs["anchor_gap_mismatch_sum"] / max(vs["anchor_gap_mismatch_n"], 1), 4
+            ),
+            "gap_mismatch_hist": dict(vs["anchor_gap_mismatch_hist"]),
+            "mismatch_tgt_is_top2": vs["anchor_mismatch_tgt_is_top2"],
+            "mismatch_tgt_is_top2_rate": round(
+                vs["anchor_mismatch_tgt_is_top2"]
+                / max(vs["anchor_rows"] - vs["anchor_match"], 1),
+                4,
+            ),
+            "per_pos": {
+                str(d): {
+                    "rows": vs["anchor_pos_rows"][d],
+                    "match": vs["anchor_pos_match"].get(d, 0),
+                    "rate": round(
+                        vs["anchor_pos_match"].get(d, 0) / vs["anchor_pos_rows"][d], 4
+                    ),
+                }
+                for d in sorted(vs["anchor_pos_rows"])
+            },
+        },
+        # clean-room plumbing proof (M matched, qq_bias off): ~1.0 => scratch
+        # machinery is correct and the M=16 anchor gap is pure Issue #192.
+        "anchor_m8_linear": (
+            {
+                "rows_compared": vs["anchor8_rows"],
+                "rows_match": vs["anchor8_match"],
+                "row_match_rate": round(
+                    vs["anchor8_match"] / max(vs["anchor8_rows"], 1), 5
+                ),
+                "per_pos": {
+                    str(d): {
+                        "rows": vs["anchor8_pos_rows"][d],
+                        "match": vs["anchor8_pos_match"].get(d, 0),
+                        "rate": round(
+                            vs["anchor8_pos_match"].get(d, 0)
+                            / vs["anchor8_pos_rows"][d],
+                            4,
+                        ),
+                    }
+                    for d in sorted(vs["anchor8_pos_rows"])
+                },
+            }
+            if vs["anchor8_rows"]
+            else None
+        ),
+        "dump_path": vs["dump_path"],
+    }
+    try:
+        import json
+
+        path = TREE_VERIFY_PROBE_VERDICT
+        d = os.path.dirname(path)
+        if d:
+            os.makedirs(d, exist_ok=True)
+        with open(path, "w") as f:
+            json.dump(verdict, f, indent=2)
+        print(
+            f"[tree-verify-scratch] verdict -> {path} | steps={vs['steps']} "
+            f"ok={vs['forward_ok']} err={vs['forward_err']} "
+            f"E[T]_tree={e_t:.3f} anchor_rows={vs['anchor_rows']} "
+            f"anchor_match={vs['anchor_match']}",
+            file=sys.stderr,
+            flush=True,
+        )
+    except Exception as exc:
+        print(
+            f"[tree-verify-scratch] verdict dump error: {exc!r}",
+            file=sys.stderr,
+            flush=True,
+        )
+
+
+def _run_tree_verify_measure(
+    self: Any,
+    *,
+    tree: Any,
+    draft_token: list,
+    sample_index: Any,
+    positions_1d: Any,
+) -> None:
+    """STAGE-2b measure: run the scratch tree-verify forward, accumulate the spine
+    rank-1 ladder + descend-committed E[T], dump the raw per-node verifier argmax
+    (offline branch-interior q[2..9]), and stash the spine argmax for the cross-
+    step anchor against the deployed verifier (validated in _salvage_probe_observe)."""
+    vs = _VERIFY_SCRATCH
+    runner = _VERIFIER_RUNNER
+    if runner is None:
+        return
+    if not vs["registered"]:
+        import atexit
+
+        atexit.register(_verify_scratch_dump)
+        vs["registered"] = True
+
+    def _as_int(t: Any) -> int:
+        return int(t.reshape(-1)[0].item()) if hasattr(t, "reshape") else int(t)
+
+    try:
+        si = _as_int(sample_index)
+        root_position = int(positions_1d.reshape(-1)[si].item())
+    except Exception as exc:
+        vs["forward_err"] += 1
+        print(
+            f"[tree-verify-scratch] root_position read error: {exc!r}",
+            file=sys.stderr,
+            flush=True,
+        )
+        return
+
+    try:
+        scratch_out = _run_tree_verify_scratch(runner, tree, draft_token, root_position)
+    except Exception as exc:
+        vs["forward_err"] += 1
+        if vs["forward_err"] <= 5:
+            import traceback
+
+            print(
+                f"[tree-verify-scratch] forward error (non-fatal): {exc!r}",
+                file=sys.stderr,
+                flush=True,
+            )
+            traceback.print_exc()
+        return
+    if scratch_out is None:
+        vs["forward_err"] += 1
+        return
+    node_argmax, node_gap, node_top2 = scratch_out
+
+    vs["forward_ok"] += 1
+    vs["steps"] += 1
+
+    # spine rank-1 ladder: walk the rank-1 spine while the verifier accepts it.
+    cur = 0
+    while tree.children[cur]:
+        d = int(tree.depth[cur])
+        rank1 = tree.children[cur][0]
+        vs["spine_reached"][d] = vs["spine_reached"].get(d, 0) + 1
+        if draft_token[rank1] == node_argmax[cur]:
+            vs["spine_accept"][d] = vs["spine_accept"].get(d, 0) + 1
+            cur = rank1
+        else:
+            break
+
+    # full descend-committed path (E[T]; salvages into rank>=2 branch interiors).
+    ts = vs.get("ts_mod")
+    if ts is None:
+        ts = _load_tree_spec_module()
+        vs["ts_mod"] = ts
+    committed_path = None
+    salvage_events = None
+    if ts is not None:
+        try:
+            committed_path = ts.descend_accept_path(tree, node_argmax, draft_token)
+            _, _, salvage_events = ts.descend_accept(tree, node_argmax, draft_token)
+            plen = len(committed_path) - 1  # emitted edges == accepted tokens
+            vs["path_len_hist"][plen] = vs["path_len_hist"].get(plen, 0) + 1
+            if salvage_events:
+                vs["salvage_steps"] += 1
+        except Exception:
+            pass
+
+    # raw dump: full tree + per-node verifier argmax -> offline q[2..9] (spine AND
+    # branch interior, any definition) without re-running the forward.
+    try:
+        import json
+
+        if vs["dump_fp"] is None:
+            dp = vs["dump_path"]
+            dd = os.path.dirname(dp)
+            if dd:
+                os.makedirs(dd, exist_ok=True)
+            vs["dump_fp"] = open(dp, "w")
+        rec = {
+            "step": vs["steps"],
+            "root_position": root_position,
+            "M": tree.num_nodes,
+            "parent": [int(x) for x in tree.parent],
+            "depth": [int(tree.depth[i]) for i in range(tree.num_nodes)],
+            "spine": [int(x) for x in tree.spine],
+            "draft_token": [int(x) for x in draft_token],
+            "node_argmax": [int(x) for x in node_argmax],
+            "committed_path": committed_path,
+            "salvage_events": [list(e) for e in (salvage_events or [])],
+        }
+        vs["dump_fp"].write(json.dumps(rec) + "\n")
+        if vs["steps"] % 50 == 0:
+            vs["dump_fp"].flush()
+            _verify_scratch_dump()
+    except Exception:
+        pass
+
+    # stash spine argmax for the cross-step anchor (consumed next step in
+    # _salvage_probe_observe, where the deployed verifier argmax is available).
+    sstash = _SALVAGE_PROBE_STATE.get("stash")
+    if sstash is not None:
+        sstash["scratch_spine_argmax"] = [int(node_argmax[s]) for s in tree.spine]
+        sstash["scratch_spine_gap"] = [float(node_gap[s]) for s in tree.spine]
+        sstash["scratch_spine_top2"] = [int(node_top2[s]) for s in tree.spine]
+        sstash["scratch_root_position"] = root_position
+
+    # M=8-linear clean-room anchor: feed the SAME machinery a synthetic linear
+    # chain built from the spine tokens. qq_bias self-disables (m=8 != QQ_BIAS_M),
+    # M matches the deployed verify -> isolates plumbing from int4-Marlin variance.
+    if TREE_VERIFY_ANCHOR8 and sstash is not None and ts is not None:
+        try:
+            ml = min(8, len(tree.spine))
+            lt = vs.get("linear_tree")
+            if lt is None or lt.num_nodes != ml:
+                lt = ts.TreeSpec(list(range(-1, ml - 1)))
+                vs["linear_tree"] = lt
+            linear_draft = [int(draft_token[tree.spine[d]]) for d in range(ml)]
+            lin_out = _run_tree_verify_scratch(runner, lt, linear_draft, root_position)
+            if lin_out is not None:
+                sstash["scratch_linear_argmax"] = [int(x) for x in lin_out[0]]
+        except Exception as exc:
+            if vs["forward_err"] <= 5:
+                print(
+                    f"[anchor8] linear forward error (non-fatal): {exc!r}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+
+def _run_tree_verify_dispatch(
+    self: Any,
+    *,
+    cad: Any,
+    sample_index: Any,
+    positions_1d: Any,
+    next_token_ids: Any,
+    target_positions: Any,
+) -> None:
+    """STAGE-2b entry: consume the emit-probe's stashed tree and route to the
+    requested phase (diag / anchor / m16). Runs from propose_onegraph after the
+    real draft is finalized; one tree per step (the stash is consumed)."""
+    stash = _VERIFY_PROBE_STATE.get("tree_stash")
+    if not stash or not stash.get("ready"):
+        return
+    stash["ready"] = False  # consume: one emit-probe tree per verify step
+    tree = stash["tree"]
+    draft_token = stash["draft_token"]
+    kwargs = dict(
+        tree=tree,
+        draft_token=draft_token,
+        cad=cad,
+        sample_index=sample_index,
+        positions_1d=positions_1d,
+        next_token_ids=next_token_ids,
+        target_positions=target_positions,
+    )
+    if TREE_VERIFY_PROBE == "diag":
+        _run_tree_verify_diag(self, **kwargs)
+        return
+    if TREE_VERIFY_PROBE in ("anchor", "m16"):
+        _run_tree_verify_measure(
+            self,
+            tree=tree,
+            draft_token=draft_token,
+            sample_index=sample_index,
+            positions_1d=positions_1d,
         )
 
 
@@ -868,6 +1611,28 @@ def _apply_loopgraph_patch(module: Any) -> None:
                     flush=True,
                 )
                 traceback.print_exc()
+        if TREE_VERIFY_PROBE:
+            # STAGE-2b LIVE: scratch-KV tree-verify forward (branch-interior λ).
+            # Additive, after the real draft is finalized; wrapped so a probe
+            # bug can never crash the served run.
+            try:
+                _run_tree_verify_dispatch(
+                    self,
+                    cad=cad,
+                    sample_index=sample_index,
+                    positions_1d=positions_1d,
+                    next_token_ids=next_token_ids,
+                    target_positions=target_positions,
+                )
+            except Exception as exc:
+                import traceback
+
+                print(
+                    f"[tree-verify-probe] probe error (non-fatal): {exc!r}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+                traceback.print_exc()
         return torch.stack(draft_tokens, dim=1)
 
     proposer_cls.propose = propose_onegraph if ONEGRAPH else propose
@@ -891,6 +1656,14 @@ def _apply_loopgraph_copy_event_patch(module: Any) -> None:
         scheduler_output: Any,
         zeros_only: bool = False,
     ) -> Any:
+        # PR #71 STAGE-2b: capture the runner singleton (self IS the
+        # GPUModelRunner here) for the scratch-KV tree-verify forward. The
+        # Gemma4 proposer has no runner back-ref, so this is how the probe
+        # reaches the target model + verify attn_groups + real KV.
+        if TREE_VERIFY_PROBE:
+            global _VERIFIER_RUNNER
+            if _VERIFIER_RUNNER is None:
+                _VERIFIER_RUNNER = self
         draft_token_ids = getattr(self, "_draft_token_ids", None)
         result = original_copy_draft_token_ids_to_cpu(
             self, scheduler_output, zeros_only=zeros_only
@@ -1428,6 +2201,103 @@ def _salvage_probe_observe(draft_token_ids: Any, target_argmax: Any) -> None:
     if sps["steps"] % 50 == 0:
         # periodic checkpoint: robust to a SIGKILL teardown that skips atexit.
         _salvage_probe_dump()
+
+    # STAGE-2b cross-step ANCHOR (hard correctness gate for the scratch forward):
+    # the scratch M=16 tree-verify forward's per-spine-node argmax MUST reproduce
+    # the deployed linear verifier's per-row argmax. The spine carries the same
+    # context as the linear chain, so qq_bias correctly masks the branches and
+    # RoPE-by-depth matches the linear relative positions -- ANY anchor mismatch
+    # means the scratch KV redirect / slot map / mask is wrong and the branch-
+    # interior q[2..9] cannot be trusted. scratch_spine_argmax[d] == node_argmax
+    # [spine[d]] aligns index-for-index with tgt[d] (spine[0]=root predicts the
+    # first draft pos; spine[d] predicts draft pos d). Stash is fresh per step
+    # (emit-probe rebuilds it), so a missing key => measure did not run this step.
+    ssa = stash.get("scratch_spine_argmax")
+    sgap = stash.get("scratch_spine_gap")
+    stop2 = stash.get("scratch_spine_top2")
+    if ssa is None:
+        _VERIFY_SCRATCH["anchor_skipped"] += 1
+    else:
+        n = min(len(ssa), K)
+        if n > 0:
+            vsc = _VERIFY_SCRATCH
+            vsc["anchor_steps"] += 1
+            step_has_mismatch = False
+            for d in range(n):
+                vsc["anchor_rows"] += 1
+                vsc["anchor_pos_rows"][d] = vsc["anchor_pos_rows"].get(d, 0) + 1
+                g = float(sgap[d]) if sgap is not None and d < len(sgap) else None
+                if ssa[d] == tgt[d]:
+                    vsc["anchor_match"] += 1
+                    vsc["anchor_pos_match"][d] = vsc["anchor_pos_match"].get(d, 0) + 1
+                    if g is not None:
+                        vsc["anchor_gap_match_sum"] += g
+                        vsc["anchor_gap_match_n"] += 1
+                else:
+                    step_has_mismatch = True
+                    if g is not None:
+                        vsc["anchor_gap_mismatch_sum"] += g
+                        vsc["anchor_gap_mismatch_n"] += 1
+                        bkt = (
+                            "lt0.05" if g < 0.05
+                            else "lt0.2" if g < 0.2
+                            else "lt1.0" if g < 1.0
+                            else "ge1.0"
+                        )
+                        h = vsc["anchor_gap_mismatch_hist"]
+                        h[bkt] = h.get(bkt, 0) + 1
+                    # is the deployed verifier's token the scratch's 2nd-best?
+                    # (the two near-tied candidates simply swapped rank-1/2.)
+                    if stop2 is not None and d < len(stop2) and tgt[d] == stop2[d]:
+                        vsc["anchor_mismatch_tgt_is_top2"] += 1
+            if step_has_mismatch:
+                vsc["anchor_mismatch_steps"] += 1
+                if vsc["anchor_dbg_logged"] < 12:
+                    vsc["anchor_dbg_logged"] += 1
+                    rp = stash.get("scratch_root_position")
+                    gaps_str = [round(float(x), 4) for x in (sgap[:n] if sgap else [])]
+                    top2_str = stop2[:n] if stop2 else []
+                    print(
+                        f"[anchor-dbg] root_pos={rp} K={K} n={n}\n"
+                        f"  scratch_spine_argmax={ssa[:n]}\n"
+                        f"  scratch_spine_top2  ={top2_str}\n"
+                        f"  scratch_spine_gap   ={gaps_str}\n"
+                        f"  deployed_tgt       ={tgt[:n]}\n"
+                        f"  deployed_draft     ={dti[:n]}",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+
+    # M=8-linear clean-room anchor: SAME machinery, M matched, no qq_bias. A high
+    # match rate here proves the plumbing and pins the M=16 gap to Issue #192.
+    sla = stash.get("scratch_linear_argmax")
+    if sla is not None:
+        n8 = min(len(sla), K)
+        if n8 > 0:
+            vsc = _VERIFY_SCRATCH
+            mm8 = False
+            for d in range(n8):
+                vsc["anchor8_rows"] += 1
+                vsc["anchor8_pos_rows"][d] = vsc["anchor8_pos_rows"].get(d, 0) + 1
+                if sla[d] == tgt[d]:
+                    vsc["anchor8_match"] += 1
+                    vsc["anchor8_pos_match"][d] = (
+                        vsc["anchor8_pos_match"].get(d, 0) + 1
+                    )
+                else:
+                    mm8 = True
+            if mm8 and vsc["anchor8_dbg_logged"] < 12:
+                vsc["anchor8_dbg_logged"] += 1
+                rp = stash.get("scratch_root_position")
+                print(
+                    f"[anchor8-dbg] root_pos={rp} K={K} n={n8}\n"
+                    f"  scratch_linear_argmax={sla[:n8]}\n"
+                    f"  deployed_tgt         ={tgt[:n8]}\n"
+                    f"  deployed_draft       ={dti[:n8]}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
     first_div = None
     for pos in range(K):
         if dti[pos] != tgt[pos]:

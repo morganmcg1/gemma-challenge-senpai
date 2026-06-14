@@ -59,6 +59,11 @@ BACKEND_TARGET = "vllm.v1.attention.backends.triton_attn"
 SPLITKV_VERIFY = os.environ.get("SPLITKV_VERIFY", "1") == "1"
 SPLITKV_VERIFY_MAX_Q = int(os.environ.get("SPLITKV_VERIFY_MAX_Q", "64"))
 _LOG_LIMIT = int(os.environ.get("SPLITKV_VERIFY_LOG", "5"))
+# LOCAL probe only: one-shot dump of the exact kernel inputs for wide (tree)
+# verify batches, to confirm the causal boundary (context_len = seqused_k -
+# cur_batch_query_len) the kernel computes. Byte-identical deployed path when unset.
+_KERNEL_DBG = os.environ.get("TREE_VERIFY_KERNEL_DBG") == "1"
+_kernel_dbg_stats = {"logged": 0}
 
 _stats = {"redirected": 0}
 
@@ -224,7 +229,32 @@ def _make_wrapper(orig: Any) -> Any:
                 if _should_redirect(kwargs):
                     kwargs = dict(kwargs)
                     mq = kwargs["max_seqlen_q"]
-                    kwargs["max_seqlen_q"] = 1
+                    if (
+                        _KERNEL_DBG
+                        and int(mq) >= 9
+                        and _kernel_dbg_stats["logged"] < 4
+                    ):
+                        _kernel_dbg_stats["logged"] += 1
+
+                        def _tl(x: Any) -> Any:
+                            try:
+                                return x.tolist() if hasattr(x, "tolist") else x
+                            except Exception:
+                                return x
+
+                        cu = kwargs.get("cu_seqlens_q")
+                        sk = kwargs.get("seqused_k")
+                        bt = kwargs.get("block_table")
+                        qb = kwargs.get("qq_bias")
+                        print(
+                            f"[kernel-dbg] mq={int(mq)} q.shape={tuple(kwargs['q'].shape)} "
+                            f"cu_seqlens_q={_tl(cu)} seqused_k={_tl(sk)} "
+                            f"max_seqlen_k={_tl(kwargs.get('max_seqlen_k'))} "
+                            f"causal={kwargs.get('causal')} "
+                            f"qq_bias={'None' if qb is None else tuple(qb.shape)} "
+                            f"bt.shape={None if bt is None else tuple(bt.shape)}",
+                            flush=True,
+                        )
                     _stats["redirected"] += 1
                     if _stats["redirected"] <= _LOG_LIMIT:
                         print(
