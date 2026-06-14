@@ -1,0 +1,255 @@
+{
+  "pr": 201,
+  "metric_primary": "launch_sigma_closure_self_test_passes",
+  "metric_test": "combined_sigma_launch_central",
+  "launch_sigma_closure_self_test_passes": true,
+  "combined_sigma_launch_central": 12.215326172514054,
+  "combined_sigma_launch_worstcase": 13.795647948283404,
+  "mu_clears_500_central": 520.0924235592549,
+  "mu_clears_500_worstcase": 522.6918215638796,
+  "law": "sigma^2_launch = acc_realistic^2 + sigma_hw^2 + sigma_private^2 + 2*sum_{i<j} rho_ij*sigma_i*sigma_j; acc_realistic = acc_dedup_iid * sqrt(design_effect); LCB(mu) = mu - z_p95*sigma_launch.",
+  "legs": {
+    "acceptance_sigma_dedup_iid": 5.318696881534334,
+    "sigma_hw": 4.864468814937121,
+    "sigma_private": 0.8839182724133238,
+    "sigma_within": 0.056157935896891956,
+    "sigma_between": 4.864144646053565,
+    "combined_dedup_195": 7.261742551305779,
+    "combined_worstcase_195": 17.037470082142843,
+    "combined_quadrature_195": 12.536224060733394,
+    "rho_in_out_195": 0.9449429462424024,
+    "overlap_fraction": 0.8929171716532718,
+    "forward_map_slope_tps_per_lambda": 216.48237731470778,
+    "icc_hat": 0.1446247464062406,
+    "m_bar": 24.582508774446666,
+    "design_effect": 4.410614351127293,
+    "n_eff": 713.406539913188,
+    "halfwidth_iid_190": 10.906182006867379,
+    "halfwidth_realistic_190": 22.90457745058264,
+    "design_effect_ci": [
+      3.4594111975425594,
+      5.379447950245826
+    ],
+    "icc_ci": [
+      0.10428963351886918,
+      0.18570746616200864
+    ],
+    "mu_break_even_194": 512.15707117161,
+    "mu_lambda1_194": 520.9527323111674,
+    "mu_bar_194": 500.0001445053368,
+    "sigma_draw_iid_194": 7.390974474817942,
+    "K_cal_183": 125.26795005202914,
+    "step_183": 1.2182
+  },
+  "dedup_x_icc": {
+    "design_effect_algebra_1_plus_mbarm1_icc": 4.410614351127293,
+    "design_effect_imported_190": 4.410614351127293,
+    "design_effect_algebra_matches_190": true,
+    "sqrt_design_effect_inflation": 2.1001462689839707,
+    "acceptance_sigma_dedup_iid": 5.318696881534334,
+    "acceptance_sigma_dedup_realistic_icc": 11.170041411611011,
+    "algebra": "D = 1 + (m_bar-1)*ICC = 1 + (24.58251-1)*0.144625 = 4.410614 (== #190 design_effect 4.410614); sqrt(D) = 2.100146; acceptance_sigma_dedup_realistic_icc = 5.318697 (iid) * 2.100146 = 11.170041 TPS.",
+    "icc_inflation_sanity": {
+      "raw_iid_175_halfwidth": 10.906182006867379,
+      "raw_realistic_computed": 22.90457745058264,
+      "raw_realistic_190": 22.90457745058264,
+      "abs_err_tps": 0.0,
+      "ok": true,
+      "note": "10.906182 * sqrt(D) reproduces #190 halfwidth_realistic 22.905 -> inflation law verified."
+    },
+    "orthogonality_note": "DE-DUP (removes the rho=0.945 A1xA2 double-count -> ONE acceptance axis, iid magnitude 5.32) and ICC-INFLATION (rescales that axis 5.32 -> 11.170 via sqrt(D)) are ORTHOGONAL corrections to the SAME acceptance axis: de-dup sets the axis IDENTITY, ICC sets its MAGNITUDE."
+  },
+  "combined": {
+    "axes": [
+      "acceptance",
+      "hardware",
+      "private"
+    ],
+    "sigma_vector_tps": {
+      "acceptance": 11.170041411611011,
+      "hardware": 4.864468814937121,
+      "private": 0.8839182724133238
+    },
+    "combined_sigma_launch_central": 12.215326172514054,
+    "combined_sigma_launch_worstcase": 13.795647948283404,
+    "combined_sigma_launch_worstcase_rho_hw_only": 13.579243722997766,
+    "worstcase_psd_scale": 1.0,
+    "rho_worstcase_matrix": [
+      [
+        1.0,
+        0.3,
+        0.3
+      ],
+      [
+        0.3,
+        1.0,
+        0.3
+      ],
+      [
+        0.3,
+        0.3,
+        1.0
+      ]
+    ],
+    "covariance_central": [
+      [
+        124.76982513710492,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        23.663056851495757,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.7813115123061548
+      ]
+    ],
+    "covariance_central_min_eig": 0.7813115123061548,
+    "covariance_worstcase_min_eig": 0.6716898142458742,
+    "cross_covariance_sum_worstcase": 20.552854406034626
+  },
+  "lcb": {
+    "z_one_sided_p95": 1.6448536269514722,
+    "launch_lcb_at_mu500_central": 479.907576440745,
+    "launch_lcb_at_mu500_worstcase": 477.3081784361204,
+    "lcb_curve": {
+      "mu500": {
+        "mu": 500.0,
+        "lcb_central": 479.907576440745,
+        "lcb_worstcase": 477.3081784361204
+      },
+      "mu_break_even_512": {
+        "mu": 512.15707117161,
+        "lcb_central": 492.06464761235503,
+        "lcb_worstcase": 489.4652496077304
+      },
+      "mu_lambda1_521": {
+        "mu": 520.9527323111674,
+        "lcb_central": 500.86030875191244,
+        "lcb_worstcase": 498.2609107472878
+      }
+    },
+    "mu_clears_500_central": 520.0924235592549,
+    "mu_clears_500_worstcase": 522.6918215638796,
+    "lambda1_ceiling_mu": 520.9527323111674,
+    "lambda1_clears_500_central": true,
+    "lambda1_clears_500_worstcase": false,
+    "central_margin_at_lambda1_tps": 0.8603087519124415,
+    "worstcase_margin_at_lambda1_tps": -1.7390892527121764,
+    "go_trigger_gap_above_lambda1_central_tps": -0.8603087519124983,
+    "go_trigger_gap_above_lambda1_worstcase_tps": 1.7390892527121196,
+    "revises_194_break_even": {
+      "iid_break_even_194": 512.15707117161,
+      "realistic_icc_trigger_central": 520.0924235592549,
+      "shift_tps": 7.935352387644912,
+      "note": "#194's break-even used IID sampling; the de-duped REALISTIC-ICC law lifts the P95 trigger from 512.16 (iid) to the central value -> ICC erodes the launch headroom."
+    }
+  },
+  "icc_band_envelope": {
+    "icc_lo": {
+      "design_effect": 3.4594111975425594,
+      "acceptance_sigma_tps": 9.892506254292991,
+      "combined_sigma_central": 11.059206497530818,
+      "combined_sigma_worstcase": 12.609738189428013,
+      "mu_clears_500_central": 518.1907759186688,
+      "mu_clears_500_worstcase": 520.7411735957892
+    },
+    "icc_hat": {
+      "design_effect": 4.410614351127293,
+      "acceptance_sigma_tps": 11.170041411611011,
+      "combined_sigma_central": 12.215326172514054,
+      "combined_sigma_worstcase": 13.795647948283404,
+      "mu_clears_500_central": 520.0924235592549,
+      "mu_clears_500_worstcase": 522.6918215638796
+    },
+    "icc_hi": {
+      "design_effect": 5.379447950245826,
+      "acceptance_sigma_tps": 12.335992452384568,
+      "combined_sigma_central": 13.289886310615714,
+      "combined_sigma_worstcase": 14.891211827971542,
+      "mu_clears_500_central": 521.859917699789,
+      "mu_clears_500_worstcase": 524.4938637849416
+    },
+    "icc0_iid": {
+      "design_effect": 1.0,
+      "acceptance_sigma_tps": 5.318696881534334,
+      "combined_sigma_central": 7.261742551305779,
+      "combined_sigma_worstcase": 8.582373662881116,
+      "mu_clears_500_central": 511.94450357350314,
+      "mu_clears_500_worstcase": 514.1167484472428
+    }
+  },
+  "colog_spec": {
+    "what": "land #71's served draw must CO-LOG, per fresh device allocation, the accepted-length / acceptance estimate ALONGSIDE that allocation's wall-clock output TPS, so the BETWEEN-device rho(acceptance, hardware) can be measured directly and REPLACE the [-0.3,+0.3] bounded assumption.",
+    "fields_per_allocation": {
+      "allocation_id": "distinct fresh A10G allocation id (BETWEEN-device draw, not a within-process re-run)",
+      "wall_tps": "served output TPS for the allocation (the hardware draw)",
+      "accept_length_or_e_accept": "mean accepted speculative length (or e_accept_exact) measured ON THE SAME allocation/draw as wall_tps",
+      "clock_mhz": "SM clock for provenance (the n=12 within-device trace was clock-locked 1710 MHz -> sigma_within 0.056; the launch-relevant signal is the cross-allocation spread sigma_between 4.864)"
+    },
+    "estimator": "rho_between = pearson(accept_length, wall_tps) across >= n distinct allocations.",
+    "why_between_not_within": "kanna #188 sigma_hw is 87x between-device dominated; the only co-logged acceptance x TPS trace (n=12) is WITHIN one pinned A10G (sigma_within 0.056) and speaks only to a negligible share of sigma_hw. The frantic-penguin n=3 cross-device draws carry TPS but NO acceptance, so rho(*,hw) stays bounded until land #71 co-logs both per allocation.",
+    "colog_n_allocations_for_rho_ci": 385,
+    "rho_ci_target_halfwidth": 0.1,
+    "retires": "the [-0.3,+0.3] rho(*,hw) band -> a measured rho +- 0.1; collapses combined_sigma_launch from the [central, worstcase] interval onto a single value."
+  },
+  "self_test": {
+    "launch_sigma_closure_self_test_passes": true,
+    "checks": {
+      "a_icc0_dedup_reproduces_195_726": true,
+      "b_rho_hw0_iid_reproduces_195_legs": true,
+      "c_realistic_ge_iid_monotone_in_icc": true,
+      "d_worstcase_ge_central": true,
+      "e_sigma_lcb_map_reproduces_194_break_even": true,
+      "f_launch_covariance_psd": true,
+      "g_nan_clean": true
+    },
+    "evidence": {
+      "a_icc0_central_tps": 7.261742551305779,
+      "a_target_195_dedup_tps": 7.261742551305779,
+      "a_abs_err": 0.0,
+      "c_sigma_grid": {
+        "0.0": 7.261742551305779,
+        "0.05": 9.27839630074204,
+        "0.1": 10.929060844638125,
+        "0.1446": 12.215326172514054,
+        "0.25": 14.815922854899656,
+        "0.5": 19.65426760790722,
+        "1.0": 26.829975130905677
+      },
+      "e_map_break_even_tps": 512.15707117161,
+      "e_target_194_break_even_tps": 512.15707117161,
+      "e_abs_err_tps": 0.0,
+      "e_fwd_implied_et_tau": 5.0661371742562835,
+      "e_fwd_finite_ok": true,
+      "f_central_min_eig": 0.7813115123061548,
+      "f_worstcase_min_eig": 0.6716898142458742,
+      "n_scalars_checked": 22
+    }
+  },
+  "handoff": "fern #185: import combined launch sigma = 12.215 TPS (worst-case 13.796); the GO trigger is mu >= 522.69 to clear 500 at P>=0.95 under the de-duped realistic-ICC covariance (vs 520.09 central); the lambda=1 ceiling is 520.95 TPS, so the launch is P95-reachable=False at worst-case and =True at central; retire the rho(*,hw) [-0.3,+0.3] band with land #71's co-log (n=385 cross-device allocations).",
+  "scope": "Closes the ADDITIVE CI-composition law for fern #185's launch trigger: the de-duped (ubel #195) acceptance axis evaluated under realistic ICC (wirbel #190), combined with sigma_hw (#188) and sigma_private (#176/#191), carrying the bounded rho(*,hw), propagated to LCB(mu). The additive twin of ubel #148/#169/#181's multiplicative official=K_cal*(E[T]/step)*tau pin. Orthogonal to the #192 greedy-identity gate (a CI law, not a token-identity question). CPU-only; adds 0 TPS; greedy untouched. NOT a launch.",
+  "imported_legs": {
+    "dedup_195": "research/validity/ci_axis_covariance/ci_axis_covariance_results.json (dedup 7.2617, worstcase 17.0375, rho matrix, [-0.3,+0.3] band)",
+    "icc_190": "research/validity/icc_neff/icc_neff_results.json (icc 0.1446, deff 4.4106, n_eff 713, halfwidth_realistic 22.905)",
+    "overlap_187": "research/validity/lambda_built_ci/lambda_built_ci_results.json (overlap-corrected 5.32 iid, overlap_fraction 0.893)",
+    "hardware_188": "research/validity/oneshot_hw_bound/oneshot_hw_bound_results.json (sigma_hw 4.864 within/between)",
+    "private_176_191": "research/validity/private_adverse_skew/results.json (sigma_private 0.884)",
+    "break_even_194": "research/validity/redraw_budget/redraw_budget_results.json (break-even 512.16, mu_lambda1 520.95)",
+    "forward_map_183": "research/oracle_readout/lambda_acceptance_card/lambda_acceptance_card_results.json (K_cal, step)"
+  },
+  "public_evidence_used": [
+    "denken #187 fern-integrator note: input/output sampling CIs share overlap_fraction=0.893 on a shared bench (quadrature double-counts) -> the de-duped acceptance axis (5.32 iid) this leg inflates.",
+    "wirbel #190 realistic within-prompt ICC=0.1446 (design-effect 4.411, N_eff 713): the acceptance scatter is NOT iid -> 2.1x inflation of the de-duped axis.",
+    "kanna #188 within/between sigma_hw decomposition: between-device dominated 87x -> rho(*,hw) is the UNMEASURED cross-allocation coupling carried as the bounded band.",
+    "leaderboard frontier ~489.6 TPS (osoi5 lmhead12k-fa2sw-precache) -> between-device hardware spread context for sigma_hw."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis over EXISTING MERGED results; no GPU/vLLM/HF Job/submission/served-file change. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT a launch.",
+  "convention_note": "The combined launch sigma is treated as a 1-sigma multiplied by z_p95 in LCB(mu)=mu-z*sigma, consistent with #194's break-even (512.16 = 500 + 1.64485*7.391) and fern #185's packet (z_p90 * combined relative-sigma). Self-test (a) anchors the number to #195's de-dup 7.2617 at ICC=0.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0033
+}
