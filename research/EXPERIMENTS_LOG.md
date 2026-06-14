@@ -1,5 +1,46 @@
 # SENPAI Research Results
 
+## 2026-06-14 05:31 — PR #93: Star-attention greedy-equivalence gate — does the tree-mask numerical path preserve greedy argmax? 🔴 MERGED — RED (relerr-1e-3 star-attention is NOT greedy-safe; land #71 MUST run fp32 accumulation before quota; banks the reusable attention-side flip-gate)
+
+- **Branch:** `wirbel/star-attn-greedy-gate` · **Student:** wirbel · merged ~05:31Z (analysis-only, BASELINE unchanged; official bar 481.53)
+- **Hypothesis:** land #71 / chiku-inu implement the tree mask via a triton star-attention path (per-row prefix + rank-1 self, no dense mask; vLLM force-overrides FlexAttention→TRITON_ATTN on gemma-4-E4B), validated externally only to relerr ~1e-3. But the greedy-identity contract (program.md 27-28) is bit-for-bit. Does a ~1e-3 relative attention-output perturbation flip the top1-vs-top2 decision at close-margin positions? Attention-side twin of kanna #87's now-GREEN GEMM gate — the LAST un-audited half of land #71's pre-quota numerical surface.
+- **Primary metric:** `greedy_flip_rate_at_1e3 = 0.005927` (0.59%, RED). **Test:** `min_greedy_margin_p1 = 0.001965` (1st-pct relative final-logit top1−top2 margin).
+
+| metric | value | read |
+|---|---|---|
+| `greedy_flip_rate_at_1e3` (primary, bf16/deployed argmax) | **0.59%** | RED (>0 = bit-for-bit contract violation) |
+| noise floor (clean-vs-clean, bf16 & fp32) | **0.0** | control — every flip is perturbation-attributable, not nondeterminism |
+| fp32-propagation share of flips | **82%** | TRUE top-1 changes → needs fp32 ACCUM, not just fp32 readout |
+| bf16-tie-readout share | 18% | a higher-precision argmax removes only these |
+| eps sweep 1e-4 / 1e-3 / 1e-2 (bf16) | 0.597 / 0.593 / 0.734% | FLAT 1e-4→1e-3 — near-tie tail governs, not eps magnitude |
+| near-tie population (rel-margin <1e-2 / <1e-3) | 4.77% / 0.537% | the flip-risk set |
+| eps_first_flip | 1e-4 (smallest tested) | even realized relerr 3.3e-5 flips 0.485% |
+
+- **Verdict — RED.** A star-attention-magnitude (relerr 1e-3) perturbation flips 0.59% of greedy tokens; noise floor provably 0/65,536, so it's a real effect. Decisive decomposition: 82% are genuine fp32-propagation flips (the TRUE top-1 token changes) → a higher-precision argmax readout removes only ~18%; **land #71 needs fp32 accumulation on the star-attention reduction (softmax·V / o_proj), not merely a higher-precision readout.** Flip rate is FLAT across eps=1e-4→1e-3 because the margin distribution has a thin near-tie tail (~0.5% of positions <1e-3 rel-margin) that any surviving perturbation tips → land needs ~bit-exactness (≲1e-6) at near-tie positions; fp32 accum typically reaches ~1e-6. Flipped positions: median fp32 margin 0.075, with a rare large-margin tail (max 3.74) from cross-position residual-stream propagation (the reason a purely local margin-gated salvage may under-recall).
+- **Routing to land #71 (Morgan, 05:30Z — HARD PRE-QUOTA CONSTRAINT):** star-attention path MUST accumulate in fp32 (or be proven bit-exact) before ANY quota spend; re-verify with this gate's script against the kernel's *measured* relerr to confirm flip_rate→0. Discovering this post-launch would have burned the approved HF Job. Salvage option (wirbel follow-up #3): margin-gated fallback recomputing only the ~4.8% near-tie positions in fp32 — folded into wirbel #98's cost-erosion gate.
+- **Banks:** `scripts/profiler/star_attn_greedy_gate.py` (reusable attention-side flip-gate). CPU/eager teacher-forcing of the deployed int4 checkpoint (bf16 argmax reproduced exactly per serve.py:410; cross-kernel caveat quantified: eager-vs-vLLM disagrees at 1.48% of positions — itself near-tie fragility, which reinforces the finding); 15.54 GB single-GPU, no HF launch.
+- **W&B:** `ut6a94qa` (group `star-attn-greedy-gate`, 428s, 5 seeds). Advisor-verified independently (wandb-query): all substantive metrics (primary/test/noise-floor/full eps-sweep/margin-distribution) match to 6+ sig figs; `verdict_red=1`; `step1/n_positions=65536`; run `finished` (`peak_gpu_mem_gb` unlogged + `_runtime=0` are cosmetic W&B artifacts).
+- **Pre-quota numerics surface:** GEMM ✅ GREEN (kanna #87) · attention 🔴 RED→needs-fp32 (this) · network-wide compounding 🔄 (kanna #96). **wirbel → #98** (fp32 star-attn cost-erosion gate: does the #93-mandated fp32 accum erode the tree's +18.2%?).
+
+## 2026-06-14 05:31 — PR #90: MTP draft-length K sweep — empirical wall_tps confirmation of K=7 optimality ✅ MERGED — GREEN/CONFIRM (clean inverted-U, K=7 optimal; locks 454.338 linear-chain reference for land #71; retires the ±4.4% fragile-estimator caveat)
+
+- **Branch:** `lawine/mtp-k-sweep-wall-tps` · **Student:** lawine · merged ~05:31Z (config A/B, BASELINE unchanged; official bar 481.53)
+- **Hypothesis:** the deployed linear MTP K=7 was confirmed "near-optimal static" only on the OLD fragile estimator (±4.4% floor); never directly verified with the new robust `wall_tps` runner (lawine #82, CV 0.007%, MDE ≥0.1% N=3). A direct K sweep closes it empirically — confirm K=7 or find a free serve-config win. First "real lever" test of the #82 paired-A/B runner.
+- **Primary metric:** `mtp_k_optimal_wall_tps = 454.338` (best K=7). **Test:** `mtp_k7_confirmed_optimal_bool = 1`.
+
+| K | median wall_tps | Δ% vs K=7 | verdict | E[accept] tok/step |
+|---|---|---|---|---|
+| 5 | 438.412 | −3.505% | REAL | 3.4902 |
+| 6 | 451.047 | −0.724% | REAL | 3.7160 |
+| **7 (ref)** | **454.338** | — | REF | **3.8555** |
+| 8 | 440.282 | −3.094% | REAL | 3.9720 |
+| 9 | 440.784 | −2.983% | REAL | 4.0794 |
+
+- **Verdict — K=7 CONFIRMED OPTIMAL.** Clean inverted-U; every non-K7 arm clears the REAL bar (|Δ|≥0.10% N=3) by 7–35×. E[accept] rises monotonically with K (3.49→4.08) with shrinking increments — wall_tps peaks at K=7 because past it the marginal acceptance gain no longer repays the per-step drafter+verify cost (exactly denken #51's analytic K*≈7, now on the robust meter → the ±4.4% caveat is retired). Asymmetric curve: the K7→K8 step-cost jump (+0.54ms) is anomalously large vs ~0.23–0.25ms/K elsewhere → hypothesis: LOOPGRAPH/ONEGRAPH capture sized for M=8 (K=7); K≥8 (M≥9) falls outside the captured bucket and pays a re-pad penalty → K=7 is the *engineered* sweet spot the whole capture+precache stack is tuned around. No free config win.
+- **Locks:** **454.338 wall_tps = the linear-chain reference** for land #71's tree-verify gain measurement (paired, CV 0.001%; E[T]=3.8555 matches deployed 3.844 +0.3%). Don't re-derive it.
+- **Banks:** `research/walltps_ab/{run_k_sweep.sh,analyze_k_sweep.py,mtp_k{5,6,8,9}/...}`. Single-variable (only num_speculative_tokens via SPECULATIVE_CONFIG env; no served-file change to fa2sw_precache_kenyan); shared fresh K=7 baseline byte-identical across reuse arms; completed 128/128 every run; PPL/greedy untouched (serve-config knob, verifier argmax unchanged). Local-only, no quota.
+- **W&B:** K6 `vz5whvxs` (holds shared K7 baseline) · K5 `7ven5w5b` · K8 `bvms4yto` · K9 `ela8jaqt`. Advisor-verified independently (wandb-query): all per-K wall_tps Δ + E[accept] match (3 sig figs); K7 baseline byte-identical CV 0.001%; all 4 runs `finished`, no NaN. **lawine → #99** (local→official projection calibration + tree-A/B harness readiness for land #71).
+
 ## 2026-06-14 05:22 — PR #94: Draft-verify overlap gate — can the drafter be hidden behind verify on a BW-bound A10G? ✅ MERGED — AMBER / OVERLAP LANE CLOSED (single-GPU conc=1; banks the reusable A10G dual-stream contention probe + `bus_contention_factor=0.506`)
 
 - **Branch:** `denken/draft-verify-overlap-gate` · **Student:** denken · merged ~05:22Z (analysis-only, BASELINE unchanged)

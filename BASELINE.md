@@ -74,6 +74,30 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 05:31 — PR #93 (wirbel): Star-attention greedy-equivalence gate — RED / land #71 NEEDS fp32 ACCUM (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU/eager perturbation analysis, 15.54 GB single-GPU, no served-file change; official bar stays 481.53). Banks `scripts/profiler/star_attn_greedy_gate.py` (reusable attention-side flip-gate). W&B `ut6a94qa` independently advisor-verified — all substantive metrics match to 6+ sig figs, `verdict_red=1`, run finished.
+- **Verdict: RED — the relerr-1e-3 star-attention path is NOT greedy-safe.** Primary `greedy_flip_rate_at_1e3 = 0.005927` (0.59% of greedy tokens flip; noise floor provably 0/65,536 → every flip real). **82% are genuine fp32-propagation flips** (true top-1 changes) → a higher-precision argmax readout removes only ~18%; the fix is **fp32 accumulation on the star-attention reduction (softmax·V / o_proj)**. Flip rate is FLAT eps=1e-4→1e-3 (the thin near-tie tail governs, not eps magnitude) → land needs ~bit-exactness (≲1e-6) at the ~4.8% near-tie positions. Flipped positions have a rare large-margin tail (max 3.74) from residual-stream cross-position propagation.
+- **HARD PRE-QUOTA CONSTRAINT on land #71 (routed by Morgan 05:30Z):** star-attention MUST accumulate in fp32 (or be proven bit-exact) before ANY quota spend; re-verify with this gate's script against the kernel's measured relerr. Pre-quota numerics surface: GEMM ✅ (kanna #87) · attention 🔴→needs-fp32 (this) · network-wide compounding 🔄 (kanna #96).
+- **Primary metric:** `greedy_flip_rate_at_1e3` = **0.005927**. **Test:** `min_greedy_margin_p1` = **0.001965**.
+- **W&B:** `ut6a94qa`. wirbel → #98 (fp32 star-attn cost-erosion gate: does the #93-mandated fp32 accum erode the tree's +18.2%?).
+
+### 2026-06-14 05:31 — PR #90 (lawine): MTP draft-length K sweep — K=7 CONFIRMED OPTIMAL (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (local decode-only wall_tps A/B, no served-file change, no quota; official bar stays 481.53). Banks `research/walltps_ab/{run_k_sweep.sh,analyze_k_sweep.py,mtp_k{5,6,8,9}/...}`. W&B (4 runs) independently advisor-verified — all per-K Δ + E[accept] match, K7 baseline byte-identical CV 0.001%, all finished.
+- **Verdict: K=7 CONFIRMED OPTIMAL — empirically, on the robust runner.** Clean inverted-U: K5 −3.51%, K6 −0.72%, **K7 ref**, K8 −3.09%, K9 −2.98% (all REAL by 7–35×). E[accept] monotone 3.49→4.08 with diminishing increments → wall_tps peaks at K=7 (denken #51's analytic K*≈7 confirmed; ±4.4% fragile-estimator caveat retired). K7→K8 +0.54ms step cliff → K=7 is the engineered sweet spot the LOOPGRAPH/precache stack (M=8 bucket) is tuned around. No free config win.
+- **Locks 454.338 wall_tps as the linear-chain reference** for land #71's tree-verify gain measurement (paired, CV 0.001%; E[T]=3.8555). Don't re-derive.
+- **Primary metric:** `mtp_k_optimal_wall_tps` = **454.338** (K=7). **Test:** `mtp_k7_confirmed_optimal_bool` = **1**.
+- **W&B:** K6 `vz5whvxs` · K5 `7ven5w5b` · K8 `bvms4yto` · K9 `ela8jaqt`. lawine → #99 (local→official projection calibration + tree-A/B harness readiness for land #71).
+
+### 2026-06-14 05:22 — PR #94 (denken): Draft-verify overlap gate — AMBER / OVERLAP LANE CLOSED single-GPU conc=1 (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU gate + ~4.7 GB GPU dual-stream probe, no served-file change; official bar stays 481.53). Banks `scripts/profiler/dual_stream_hbm_contention.py` + `draft_verify_overlap_gate.py` + the reusable **`bus_contention_factor=0.506`** A10G constant. Merged by morganmcg1; W&B `1127zef4` independently advisor-verified (derived metrics match; raw probe scalars un-logged = minor auditability gap, not fabrication).
+- **Verdict: AMBER → CLOSE for single-GPU conc=1.** Primary `bandwidth_limited_overlap_ceiling_pct = 4.22%` (wall) — the naive +18.29% (drafter 15.5% fully hidden) collapses ~4× because the A10G's single HBM bus serializes two memory-bound streams (verify alone = 82% HBM peak; two-verify = 1.97× one; symmetric overlap speedup 1.01×; `drafter_overlap_efficiency=0.273`). Realized +1.2–2.9% after the serial accept-boundary haircut — below any build bar. Saguaro/AMUSD "free drafter" needs a SEPARATE device; premise doesn't transfer to one A10G at conc=1.
+- **Reusable finding:** any future "overlap two memory-bound kernels at conc=1" idea should assume ~full serialization (`bus_contention_factor=0.506`). Re-run regime = compute-bound decode (higher concurrency / larger M).
+- **Primary metric:** `bandwidth_limited_overlap_ceiling_pct` = **4.22**. **Test:** `drafter_verify_step_time_ratio` = **0.183**.
+- **W&B:** `1127zef4`. denken → #97 (persistent-kernel overhead-reclamation gate).
+
 ### 2026-06-14 05:17 — PR #87 (kanna): Verify-GEMM argmax-margin greedy-safety gate — GREEN (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (GPU numerics audit, ~45min decode capture + CPU analysis, no served-file change; official bar stays 481.53). Banks `scripts/validity/verify_argmax_margin.py` + `analyze_argmax_margin.py` + the reusable 65,536-position margin map (`research/validity/verify_argmax_margin/20260614T041541Z/`). W&B `875cujdk` independently advisor-verified — all 7 metrics + artifact match to exact; run finished GREEN.
