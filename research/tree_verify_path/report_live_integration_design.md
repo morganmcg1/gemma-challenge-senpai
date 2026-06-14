@@ -124,6 +124,39 @@ must be fused **before** any benchmark/quota spend, not after.
    measured E[T] gain never reaches wall_tps. Gives the wall_tps number (lawine
    #72, median N=3) for the eventual human-approved launch issue.
 
+## STAGE-2b scratch-forward seam (mapped; the M=16 direct-E[T] forward)
+
+The single-step probe splits into **2a** (E[T] PROJECTION from the STAGE-1 measured
+rates via the validated closed form — DONE, `report_salvage_probe_stage2_etp.md`:
+matched-spine **+15% M16 / +28% M32**, ~5.0 at M32@t1=0.773) and **2b** (the LIVE
+M=16 tree forward that MEASURES E[T] directly + fires the both-halves assert at
+M=16). Seam for 2b, mapped against installed vLLM (`gpu_model_runner.py`):
+
+- **Forward hook:** `_run_model` (`gpu_model_runner.py:3719`) calls `self.model(...)`
+  directly with **no graph dispatch** → the eager path a one-off M=16 forward needs
+  (the target model is otherwise CUDA-graph-captured at `cudagraph_capture_sizes`;
+  M=16 is not a capture size). Logits via `compute_logits(hidden[logits_indices])`
+  (`:4315`), `logits_indices = arange(16)`.
+- **positions:** `base + depth(node)` (Component 3b) into `self.model(positions=…)`.
+- **qq_bias:** auto-injects through the `splitkv_verify_patch` wrapper when
+  `TREE_QQ_BIAS_PROBE=1`, `TREE_QQ_BIAS_M=16`, `TREE_QQ_BIAS_PARENT=m16` and the
+  verify batch presents M=16 rows (no call-site change).
+- **KV — the real obstacle (corrects the naive "slot_mapping=-1" idea).** Filling
+  `slot_mapping` with −1 (the `_dummy_run` pattern, `:5766`) skips the K/V write —
+  but that is **WRONG for the tree verify**: the `[M,M]` qq_bias masks
+  query×query attention *between* the 16 draft rows, so the deeper branch nodes
+  (5,8,10 / 7) **must attend their tree-ancestors' K/V**, which therefore must be
+  *written and readable*. So 2b needs a **separate scratch KV block** (1 block =
+  16 slots): `block_table = [request prefix blocks (READ-ONLY) … + 1 scratch
+  block]`, `slot_mapping → the scratch block's 16 slots`, `seq_lens = prefix_len+16`.
+  The request's real blocks are only **read**; the scratch block is written then
+  freed → real generation untouched. `compute_slot_mapping` (`:2101`) is the normal
+  (mutating) path to bypass; `_build_attention_metadata` accepts a `slot_mappings`
+  override (`:2205`, consumed `:2421`). This is genuine KV-cache-manager surgery
+  (scratch-block alloc + combined block_table) — the one real-risk piece; it is
+  the SAME machinery the continued-gen widened verify needs, so 2b's direct E[T]
+  also arrives for free once the real verify widens to 16 rows.
+
 ## Gates (unchanged)
 
 branch-hit per first-divergence ≈ ρ₂ = 0.4165 (wirbel #83 per-position oracle) ·
