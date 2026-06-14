@@ -1,5 +1,54 @@
 # SENPAI Research Results
 
+## 2026-06-14 03:29 — PR #85: Tree-verify non-GEMM overhead audit at M=32 ✅ MERGED (decisive GO: non-GEMM tree machinery 2.597% decode, ~8× smaller than the +21.8% GEMM gain → net +19.82% survives; no O(M²); attention amortizes 1.06×; hands land #71 a per-op cost-budget oracle)
+
+- **Branch:** `denken/tree-overhead-audit` · **Student:** denken · merged by morganmcg1 ~03:28Z
+- **Status:** MERGED as research artifact (local profiling, no GPU-train, no served-file change → BASELINE official bar UNCHANGED 481.53; net +19.82% is a PROJECTION off the frontier, not a measured submission). Banks `scripts/profiler/tree_nongemm_overhead.py` + `research/spec_cost_model/report_tree_nongemm_overhead.md` + `tree_nongemm_overhead.json`.
+- **Hypothesis:** the +21.8% M=32 tree-verify re-price (wirbel #79/#83) prices the GEMM SAVINGS but not the tree's NON-GEMM systems OVERHEAD (mask construct, scatter/gather, M-row sampler-prep, valid_counts scheduling). Auditing it in isolation either confirms the net gain holds or reveals erosion before land #71 spends an approval-gated launch.
+- **Primary metric:** `tree_overhead_nongemm_pct_decode = 2.597` (% decode at M=32 static, W&B `f0c8mb39`). **Test:** `net_tree_gain_after_overhead_pct = 19.82`.
+
+| quantity (M=32 DP-tree vs M=8 linear, 11.6ms step) | value |
+|---|--:|
+| non-GEMM overhead (static, mask precomputed) | 2.597% (301µs) vs +21.8% GEMM → ~8× smaller |
+| Δ vs M=8 linear (the slice eroding the gross) | +1.65pp (192µs) |
+| verify-side ONLY (excl. drafter M-row sampler) | 0.512% (59µs) |
+| net tree gain after overhead (static) | +19.82% (gross 21.8 − 1.98pp) |
+| attention M=32/M=8 (split-KV 3D FlashDecoding) | 1.06× (≪4×, KV read shared) |
+| only [M,M] op (ancestor mask) scaling exp | 0.16 (≈flat); 0/step precomputed static |
+
+- **Conclusions:** (1) Tree non-GEMM machinery is ~8× smaller than the GEMM gain it unlocks → net **+19.82%** (≈576 official projected, 3-base). (2) **NO O(M²)** anywhere — ancestor mask exp 0.16 ≈flat, refutes the byteshark O(M²)-mask risk; the two M-growing ops (drafter M-row sampler, full-vocab verify-argmax) are ≈O(M) linear. (3) **Attention amortizes 1.06×** — #43 split-KV routes all M≤64 verify rows to 3D FlashDecoding, shared-prefix KV read once → attention stays at floor (closes the #69-at-M=32 question). (4) Hands land #71 a **per-op cost-budget oracle** (expected µs + 1.5× ceiling) — PERFORMANCE half of its debug gate, pairs with wirbel #83's ≈0.41 salvage (correctness half): op over budget = byteshark layout bug, caught pre-launch. (5) **Side-finding:** denken's roofline (weight-bandwidth-bound, free-to-M≤32) + this audit (KV shared, mask ~0) RULE OUT the tile-scheduler / KV-layout / fused-mask kernel levers at M≤32 → **SplitK (ubel #84) is the only live verify-GEMM kernel lever** (a useful cohort negative). (6) Methodology: eager 327µs → graph-basis 37µs (8.8× launch artifact) — the #77 lesson. (7) denken → #89 (prompt-lookup × first-reject overlap build-or-kill).
+
+## 2026-06-14 03:25 — PR #80: Multi-step (HASS) drafter training — break the K=1 chain-collapse ceiling ✅ MERGED (thesis CONFIRMED +57.8% native accept/step, but E[T]=2.23 ≪ MTP 3.844 → bank-and-close; EAGLE-3 single-layer drafter-training lane CLOSED)
+
+- **Branch:** `fern/eagle3-multistep-hass` · **Student:** fern · merged by advisor ~03:13Z
+- **Status:** MERGED as research artifact (offline training/eval, no served-file change → BASELINE official bar UNCHANGED 481.53; confirmed BELOW frontier). Banks the serve-faithful HASS unroll machinery (`train_eagle3.py --unroll_steps`, detached depth unroll, native-acceptance sim).
+- **Hypothesis:** the K=1 teacher-forced regime (not the corpus) was the binding native-acceptance ceiling on the EAGLE-3 drafter; HASS multi-step (J=3) unroll — feeding the draft its own rolled-forward hidden — lets per-step acceptance sustain past step-1 instead of collapsing.
+- **Primary metric:** `native_accept_per_step_bench_holdout = 1.2294` (HASS J=3, K=8, W&B `at46onde`). **Test:** `..._34ckpt = 0.7792` (#34 K=1 baseline, W&B `bsu901oj`; training `pkcmx1zl`).
+
+| metric (240-rec holdout, K=8, shared harness) | #34 (K=1) | HASS J=3 | Δ |
+|---|--:|--:|--:|
+| native accept/step (primary) | 0.7792 | 1.2294 | +57.8% |
+| E[T] = tok/target-forward | 1.7792 | 2.2294 | +0.4502 |
+| step-2 conditional accept | 0.8% | 32.4% | 38.6× |
+| tf top-1 (secondary) | 0.7617 | 0.7475 | −1.9% |
+
+- **Conclusions:** (1) Thesis CONFIRMED decisively — HASS unroll lifts step-2 conditional accept 0.8%→32.4% (the own-hidden hand-off the chain died at) and native accept/step +57.8%; the draft genuinely learned to condition on its own rolled-forward hidden. (2) **NOT a frontier candidate** — E[T]=2.23 = 58% of MTP's 3.844, ~1.6 tok short; the ceiling is architectural (single-layer head capacity), not a training schedule. (3) openevolve independently found every retrained MTP head lands at parity too → the parity finding generalizes across head families. (4) Measurement handled right — gated on a serve-faithful sim with a large margin to the 3.844 bar, not a fragile HF proxy (the openevolve over-report caveat). (5) **EAGLE-3 single-layer drafter-training lane CLOSED** per fern's own recommendation; HASS machinery banked as a drop-in if head capacity is ever raised. (6) fern → #88 (Traversal Verification E[T] gate).
+
+## 2026-06-14 03:24 — PR #73: Greedy-identity — is the frontier stack bit-exact or distributional? ✅ MERGED (refutes the premise: deployed stack is BIT-EXACT run-to-run AND satisfies the contract at ~489 local TPS; determinism is ENGINEERED — atomic-add-off is load-bearing; + analyze_determinism.py bugfix)
+
+- **Branch:** `kanna/greedy-determinism` · **Student:** kanna · merged by advisor ~03:13Z
+- **Status:** MERGED as research artifact (local measurement, served stack UNCHANGED → BASELINE official bar UNCHANGED 481.53). Banks `scripts/validity/greedy_determinism.py` + `analyze_determinism.py` (with bugfix) + captures.
+- **Hypothesis:** the deployed stack is run-to-run token-nondeterministic, so greedy-identity can only be a distributional property (the #66 contract-foundation question).
+- **Primary metric:** `greedy_identity_verdict = 0` (bit-exact, W&B `lr1ornnl` N=10 / `45y7ui1o` N=7). **Test:** `fa_sliding0_tps_cost_pct = 0.03` (FA_SLIDING=0 is a no-op, +0.03% within noise).
+
+| config | N | mean byte-id | official greedy_gate | verdict |
+|---|--:|--:|---|---|
+| **default (deployed)** | 10 | **1.0** | GREEDY_IDENTICAL (0/65536 div) | bit-exact |
+| splitkv_off | 3 | 1.0 | GREEDY_IDENTICAL | stable |
+| **atomic_on (positive control)** | 7 | **0.8214** | DIVERGENT (35.7% tok) | breaks bit-exactness |
+
+- **Conclusions:** (1) Premise REFUTED — the deployed spec-ON M=1 greedy frontier is BIT-EXACT run-to-run (N=10 fresh reloads, official GREEDY_IDENTICAL, 0/65,536 divergent tokens, flip hazard 0.0) AND satisfies the contract at ~489 local TPS — a third option the PR's dichotomy excluded. (2) **Determinism is ENGINEERED, not luck** — the atomic-add positive control (forcing VLLM_MARLIN_USE_ATOMIC_ADD=1 flips ~36% tokens) proves keeping it OFF is load-bearing; FA2 sliding is inert (flips 0 layers), #43 split-KV is frozen inside the captured graph. (3) The prior "non-reproducible" numbers (BASELINE line 49, lawine #56) were PROXY configs (spec-OFF, plain int4), not the deployed stack. (4) Churn cannot move the gates — PPL invariant to 12 digits (teacher-forced), private TPS gate stable (~0.2% spread). (5) **Bugfix:** analyze_determinism.py had a false hardcoded "atomic-add hardware-gated OFF" prior contradicted by its own data → replaced with data-driven branching + cluster_signatures() + atomic_add_breaks_determinism field. (6) The atomic-add control PROVES the kernel-swap→argmax-flip mechanism → kanna's own follow-up #3 (margin map) = the **argmax-margin gate**, reassigned to her as **#87**.
+
 ## 2026-06-14 03:15 — PR #83: Re-optimize M=32 tree topology with measured rho ladder + salvage oracle ✅ MERGED (decisive positive: max-branch-3 optimal, +1.13pp over #74; salvage oracle delivered; headline corrected to +18.2% / ~569 official; wirbel acceptance-cost-model axis CLOSED)
 
 - **Branch:** `wirbel/rho-optimal-topology` · **Student:** wirbel · merged by advisor ~03:15Z
