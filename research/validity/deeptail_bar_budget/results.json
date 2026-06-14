@@ -1,0 +1,260 @@
+{
+  "agent": "stark",
+  "created_at": "20260614T194844Z",
+  "kind": "deeptail-bar-budget",
+  "nan_clean": true,
+  "peak_mem_mib": 12.035,
+  "pr": 215,
+  "self_test_passes": true,
+  "synthesis": {
+    "constants": {
+      "bar_band_208": [
+        0.9779783323491393,
+        0.9780154812594635
+      ],
+      "bar_certified_208": 0.9779783323491393,
+      "beta_primary_193": 0.765124365433998,
+      "dp_clamped_lambda_d1_d9": [
+        0.3418647166361965,
+        0.26156902438054336,
+        0.20013283379635322,
+        0.15312650746094253,
+        0.117160821852178,
+        0.08964259947337339,
+        0.06858773703791884,
+        0.06858773703791884,
+        0.06858773703791884
+      ],
+      "lambda_floor_liveprobe": 0.3418647166361965,
+      "lambda_hat_1_193": 0.3418647166361965,
+      "lambda_spine_sweep": [
+        0.99,
+        0.995,
+        0.997,
+        0.999,
+        1.0
+      ],
+      "lambda_star_191_fixed_drop": 0.9780112973731208,
+      "pure_mechanism_lambda_d1_d9": [
+        0.3418647166361965,
+        0.26156902438054336,
+        0.20013283379635322,
+        0.15312650746094253,
+        0.117160821852178,
+        0.08964259947337339,
+        0.06858773703791884,
+        0.05247814877769158,
+        0.04015231028268221
+      ],
+      "w_d_at_bar_imported_d1_d7": [
+        0.41283481201592775,
+        0.33588764826371537,
+        0.2709809076904709,
+        0.23949671644779763,
+        0.1717253507375035,
+        0.10331745222435465,
+        0.08953437874562994
+      ]
+    },
+    "deeptail_budget": {
+      "d_lambdahat_d_deeptail": 0.09078997130869798,
+      "deeptail_lambda_mechanism_proj": 0.04713529614837149,
+      "deeptail_lambda_mechanism_proj_relative_from_spine": 0.6851646123554961,
+      "mechanism_clears_bar": false,
+      "mechanism_clears_bar_relative": false,
+      "mechanism_margin_lambda": -0.7403518317064837,
+      "mechanism_margin_lambda_relative": -0.10232251549935911,
+      "mechanism_proj_beta_band": [
+        {
+          "beta": 0.616486595380561,
+          "clears_bar": false,
+          "deeptail_proj_relative_from_spine": 0.512459448733533,
+          "margin_lambda": -0.2750276791213222
+        },
+        {
+          "beta": 0.765124365433998,
+          "clears_bar": false,
+          "deeptail_proj_relative_from_spine": 0.6851646123554961,
+          "margin_lambda": -0.10232251549935911
+        },
+        {
+          "beta": 0.9495993894553337,
+          "clears_bar": true,
+          "deeptail_proj_relative_from_spine": 0.9260668972483074,
+          "margin_lambda": 0.13857976939345218
+        }
+      ],
+      "mechanism_proj_beta_crit_meets_budget": 0.8462542950303199,
+      "mechanism_proj_beta_crit_note": "the coherent projection's GO/NO-GO FLIPS at \u03b2\u22480.846: for deep-tail per-step retention \u03b2 \u2265 0.846 the build CLEARS, below it MISSES. #193's primary \u03b2=0.765 (range [0.616, 0.950]) straddles this \u2014 so the verdict genuinely hinges on land #71's measured deep-tail decay, not on this analysis.",
+      "mechanism_proj_note": "the #193 ABSOLUTE proj (0.0471) is anchored at the pessimistic floor \u03bb\u0302\u2081=0.342 and is REGIME-INCOHERENT with land #71's measured spine 0.997 (a build that accepts 0.997 shallow is NOT in the floor regime); the COHERENT reading continues #193's \u03b2 per-step decay from the measured spine \u2192 0.6852. Both miss the budget, but the coherent reading misses by only 0.102 vs 0.740 \u2014 the call is genuinely close.",
+      "min_deeptail_lambda_q8q9_clears_bar": 0.7874871278548552
+    },
+    "depth_decomposed_aggregate": {
+      "aggregate_form": "\u03bb\u0302 = W_shallow\u00b7\u03bb_spine + W_deep\u00b7\u03bb_deeptail  (normalized, \u03a3\u0175=1)",
+      "deeptail_carries_build_risk": true,
+      "lambda_hat_shallow_only": 0.9064823986052281,
+      "lambda_hat_shallow_only_clears_bar": false,
+      "lambda_hat_uniform_spine": 0.9969999999999999
+    },
+    "handoff_line": "DEEP-TAIL BUILD-BAR BUDGET (stark #215): given land #71's measured shallow-mid spine \u03bb(q[2..7])=0.997, the depth-aggregate clears the #208-certified 0.977978 bar iff the deep tail q[8..9] holds reach-weighted acceptance \u2265 0.7875 (deep tail carries only 9.1% of the q[2..9] reach mass, so each unit of deep-tail acceptance buys 0.0908 in \u03bb\u0302; the shallow spine alone leaves \u03bb\u0302=0.9065, BELOW the bar, so the deep tail is NOT a free pass). #193's mechanism, read coherently as per-step \u03b2-decay from the measured spine, projects deep tail \u22480.685 \u21d2 MISSES by 0.102 in \u03bb \u2014 a CLOSE call; the literal #193 absolute floor proj (0.047, regime-incoherent with the 0.997 spine) would say miss by 0.740. fern #185 carries 0.7875 as the deep-tail GO threshold so the instant land #71 posts the measured q[8..9] the GO/NO-GO reads off directly; a perfect spine (1.0) still needs deep tail \u2265 0.7574 (budget hits zero only at spine 1.0756 > 1, so the deep tail is never irrelevant).",
+    "imports": {
+      "d193_path": "research/oracle_readout/lambda_depth_profile/lambda_depth_profile_results.json",
+      "d208_path": "research/validity/multivertex_realizability/results.json",
+      "provenance": "stark#208 w_d_at_bar + certified bar (wi4gxxx8) \u00d7 stark#203 reach-weights/forward map (hexhagf6) \u00d7 stark#191 fixed-drop bar (jeclr39w) \u00d7 denken#193 \u03bb_d=\u03bb\u0302\u2081\u00b7\u03b2^(d\u22121) (2clxvlr8). land #71 interim spine \u03bb(q[2..7])=0.997 (PARAMETER, swept)."
+    },
+    "lambda_spine_interim": 0.997,
+    "reach_weight_profile": {
+      "axis": "q[2..9] (depth-1 head excluded; bands q[2..7] \u222a q[8..9] partition it)",
+      "deeptail_extension_rule": "w_8 = w_7\u00b7\u03b2, w_9 = w_8\u00b7\u03b2 (\u03b2=#193 salvage-staleness decay)",
+      "w8_beta_extended": 0.06850493472227735,
+      "w9_beta_extended": 0.052414794708479914,
+      "w_full_raw_d1_d9": [
+        0.41283481201592775,
+        0.33588764826371537,
+        0.2709809076904709,
+        0.23949671644779763,
+        0.1717253507375035,
+        0.10331745222435465,
+        0.08953437874562994,
+        0.06850493472227735,
+        0.052414794708479914
+      ],
+      "w_mass_deeptail_q8q9": 0.09078997130869798,
+      "w_mass_shallow_over_deeptail_ratio": 10.014432382623703,
+      "w_mass_shallow_q2q7": 0.909210028691302,
+      "weights_sum_to_one": true,
+      "wh_q2q9_normalized": [
+        0.252193997558284,
+        0.20346017105927225,
+        0.1798209449953675,
+        0.12893627648548403,
+        0.07757368104688281,
+        0.06722495754601139,
+        0.05143545298371942,
+        0.03935451832497856
+      ]
+    },
+    "robustness_vs_spine": {
+      "budget_vs_spine": [
+        {
+          "budget_gt_one_infeasible": false,
+          "budget_le_zero_deeptail_free": false,
+          "lambda_hat_shallow_only": 0.900117928404389,
+          "lambda_spine": 0.99,
+          "min_deeptail_lambda_q8q9_clears_bar": 0.8575881545332207
+        },
+        {
+          "budget_gt_one_infeasible": false,
+          "budget_le_zero_deeptail_free": false,
+          "lambda_hat_shallow_only": 0.9046639785478454,
+          "lambda_spine": 0.995,
+          "min_deeptail_lambda_q8q9_clears_bar": 0.807515992620103
+        },
+        {
+          "budget_gt_one_infeasible": false,
+          "budget_le_zero_deeptail_free": false,
+          "lambda_hat_shallow_only": 0.9064823986052281,
+          "lambda_spine": 0.997,
+          "min_deeptail_lambda_q8q9_clears_bar": 0.7874871278548552
+        },
+        {
+          "budget_gt_one_infeasible": false,
+          "budget_le_zero_deeptail_free": false,
+          "lambda_hat_shallow_only": 0.9083008186626107,
+          "lambda_spine": 0.999,
+          "min_deeptail_lambda_q8q9_clears_bar": 0.7674582630896073
+        },
+        {
+          "budget_gt_one_infeasible": false,
+          "budget_le_zero_deeptail_free": false,
+          "lambda_hat_shallow_only": 0.909210028691302,
+          "lambda_spine": 1.0,
+          "min_deeptail_lambda_q8q9_clears_bar": 0.7574438307069841
+        }
+      ],
+      "budget_vs_spine_slope_d_per_d": -10.014432382623703,
+      "interpretation": "a higher measured spine BUYS DOWN the required deep tail roughly linearly: slope = \u2212W_shallow/W_deep = \u221210.01 (each +0.001 spine lowers the deep-tail budget by \u22480.0100). budget hits zero (deep tail irrelevant) only at spine=1.0756; since that exceeds \u2264 1, even a PERFECT spine still requires deep tail \u2265 0.7574.",
+      "spine_value_where_deeptail_budget_hits_zero": 1.0756352234222724,
+      "spine_zero_exists_le_1": false,
+      "weight_ratio_shallow_over_deeptail": 10.014432382623703
+    },
+    "self_test": {
+      "a_detail": {
+        "agg_uniform": 0.9969999999999999,
+        "bar": 0.9779783323491393,
+        "lambda_spine": 0.997
+      },
+      "b_detail": {
+        "agg_deeptail_zero": 0.9064823986052281,
+        "lambda_hat_shallow_only": 0.9064823986052281
+      },
+      "c_detail": {
+        "agg_at_budget": 0.9779783323491393,
+        "bar": 0.9779783323491393,
+        "roundtrip_resid": 0.0
+      },
+      "conditions": {
+        "a_uniform_spine_aggregate_eq_spine_and_clears": true,
+        "b_deeptail_zero_eq_shallow_only_exact": true,
+        "c_budget_roundtrips_208_bar_exact": true,
+        "d_aggregate_up_in_deeptail_and_budget_down_in_spine": true,
+        "e_nan_clean": true
+      },
+      "d_detail": {
+        "aggregate_increasing_in_deeptail": true,
+        "budget_decreasing_in_spine": true,
+        "budget_sweep_seq": [
+          0.8575881545332207,
+          0.807515992620103,
+          0.7874871278548552,
+          0.7674582630896073,
+          0.7574438307069841
+        ]
+      },
+      "deeptail_bar_budget_self_test_passes": true,
+      "partial_passes_a_to_d": true
+    },
+    "sensitivity": {
+      "bar_band_arm": {
+        "bar_hi": 0.9780154812594635,
+        "bar_lo": 0.9779783323491393,
+        "budget_at_bar_hi": 0.7878963020157085,
+        "budget_at_bar_lo": 0.7874871278548552
+      },
+      "depth1_inclusive_arm": {
+        "axis": "q[1..9] (depth-1 head INCLUDED in the held/shallow band at \u03bb_spine)",
+        "lambda_hat_shallow_only": 0.9279009125656027,
+        "min_deeptail_lambda_q8q9_clears_bar": 0.7225448175648774,
+        "note": "including the depth-1 head (largest reach mass) DILUTES the deep-tail mass \u2192 LOWER required deep tail; primary axis excludes it (it is the separately anchored liveprobe head \u03bb\u0302\u2081, and the PR's bands partition q[2..9]).",
+        "spine_value_where_budget_hits_zero": 1.0508065938378481,
+        "w_mass_deeptail_q8q9": 0.06930700845977651,
+        "w_mass_head_q1": 0.23662264167786243,
+        "w_mass_held_q1q7": 0.9306929915402233,
+        "w_mass_shallow_q2q7": 0.6940703498623609
+      },
+      "weight_extension_arm": {
+        "beta_hi_0p9496": {
+          "min_deeptail_lambda_q8q9_clears_bar": 0.8390162020569429,
+          "w_mass_deeptail_q8q9": 0.12040264823685802
+        },
+        "beta_lo_0p6165": {
+          "min_deeptail_lambda_q8q9_clears_bar": 0.7198197755138894,
+          "w_mass_deeptail_q8q9": 0.06862563044000212
+        },
+        "beta_primary": {
+          "min_deeptail_lambda_q8q9_clears_bar": 0.787487127854854,
+          "w_mass_deeptail_q8q9": 0.09078997130869798
+        },
+        "beta_squared": {
+          "min_deeptail_lambda_q8q9_clears_bar": 0.7007898619348765,
+          "w_mass_deeptail_q8q9": 0.06421680154201401
+        },
+        "flat_w7": {
+          "min_deeptail_lambda_q8q9_clears_bar": 0.8493453690723808,
+          "w_mass_deeptail_q8q9": 0.12882540514550592
+        }
+      }
+    },
+    "verdict": "DEEP-TAIL BUDGET = 0.7875. Holding land #71's measured shallow-mid spine \u03bb(q[2..7])=0.997, the build clears the #208-certified 0.977978 both-bugs private bar iff the reach-weighted deep-tail acceptance over q[8..9] is \u2265 0.7875. The deep tail carries only 9.1% of the q[2..9] reach mass (reach decays \u2248\u03b2=0.765/rung), so the budget is FAR below the spine (0.997): there is large slack. But the deep tail is NOT free \u2014 with it collapsed to 0 the aggregate is 0.9065, BELOW the bar. The launch hinges on the unmeasured q[8..9]: #193's coherent (\u03b2-from-spine) projection \u22480.685 sits JUST below the budget (margin 0.102 in \u03bb), so land #71's actual q[8..9] measurement is decisive."
+  }
+}

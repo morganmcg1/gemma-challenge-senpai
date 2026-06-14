@@ -1,0 +1,481 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260614T192855Z",
+  "kind": "kernel-budget-lambda",
+  "nan_clean": true,
+  "peak_mem_mib": 28.695,
+  "pr": 213,
+  "synthesis": {
+    "composition": {
+      "K_cal": 125.26795005202914,
+      "bench_tokens": 16384,
+      "clear500_bar_et_tau1": 4.862377006624717,
+      "clear500_bar_et_tau_cons": 4.8996140735839555,
+      "kanna122_offshelf_overhead_nonworking_ref": 0.5178,
+      "step": 1.2182,
+      "target_official": 500.0,
+      "tau_central": 1.0,
+      "tau_conservative": 0.9924
+    },
+    "handoff_line": "COMPLIANT-SPEC KERNEL-OVERHEAD BUDGET vs \u03bb (Issue #192 lane-a capstone): the batch-invariant verify kernel's overhead budget opens from \u22640 at \u03bb\u0302=0.342 (the realistic FLOOR already misses 500 \u2014 even a free kernel fails) to 7.33% at \u03bb=1 (full self-KV recovery, both-bugs). The zero-overhead compliant path first clears 500 at \u03bb_crit=0.8345 (both-bugs) / 0.9067 (descent), \u03c4=1. So land #71 must BOTH build self-KV recovery \u03bb above 0.8345 AND hold the batch-invariant verify kernel below max_kernel_overhead_pct(\u03bb_achieved) \u2014 kanna #122's off-the-shelf +51.78% clears at NO physical \u03bb\u22641 (the \u03bb=1 budget is only 7.33%, ~7.1\u00d7 over). This is the kernel-dev target for the only compliant 500-lane. HONEST SCOPE: the rank-1-coverage \u03bb=1 end is an UPPER bound (#199's three optimisms, noted band); the curve adds 0 TPS and authorizes nothing. NOT a launch. NOT open2.",
+    "headline": {
+      "lambda_crit_clears_500_zero_overhead_both_bugs_tau1": 0.8344533978886615,
+      "lambda_crit_clears_500_zero_overhead_descent_tau1": 0.9066754940814947,
+      "max_budget_pct_at_prob_saturation_both_bugs_tau1": 50.09522632330761,
+      "off_the_shelf_122_clears_at_physical_lambda_both_bugs_tau1": false,
+      "overhead_budget_at_lambda_1_both_bugs_tau1": 7.331808522875782,
+      "overhead_budget_at_lambda_1_descent_tau1": 4.123450699935671,
+      "overhead_budget_at_lambda_hat_both_bugs_tau1": -16.738568764737806
+    },
+    "lambda_grid": [
+      0.3418647166361965,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "lambda_hat": 0.3418647166361965,
+    "optimism_band_note": "Three #199 optimisms carried as a NOTED band (not re-derived): (i) rank-1 coverage 0.7304 over-counts the true compliant accept (the rankprobe's true token is the batch-VARIANT int4 argmax, not a clean batch-invariant/AR greedy argmax), so the \u03bb=1 ceiling is an UPPER bound; (ii) \u03bb=1 is full self-KV recovery vs the realistic \u03bb\u0302=0.342; (iii) zero kernel overhead. The budget CURVE inherits all three \u2014 read max_kernel_overhead_pct(\u03bb) at the ACHIEVED \u03bb, and treat the ceiling end as optimistic.",
+    "provenance": {
+      "both_bugs": {
+        "banked_json_et_ceiling": 5.21887717841078,
+        "banked_json_et_floor": 4.048484687770039,
+        "ceiling_ge_floor_all_depths": true,
+        "et_ceiling_banked_199": 5.21887717841078,
+        "et_ceiling_reachdp": 5.21887717841078,
+        "et_ceiling_resid": 0.0,
+        "et_floor_banked_199": 4.048484687770039,
+        "et_floor_reachdp": 4.048484687770039,
+        "et_floor_resid": 0.0
+      },
+      "descent_only": {
+        "banked_json_et_ceiling": 5.062874725337895,
+        "banked_json_et_floor": 3.9294296647453835,
+        "ceiling_ge_floor_all_depths": true,
+        "et_ceiling_banked_199": 5.062874725337895,
+        "et_ceiling_reachdp": 5.062874725337895,
+        "et_ceiling_resid": 0.0,
+        "et_floor_banked_199": 3.9294296647453835,
+        "et_floor_reachdp": 3.9294296647453835,
+        "et_floor_resid": 0.0
+      }
+    },
+    "regimes": {
+      "both_bugs": {
+        "ceiling_lambda1_finite_sample_ci_tau1": {
+          "E_T": 5.21887717841078,
+          "N_steps": 3139.3725968061876,
+          "SE_Lbar": 0.05423244910240829,
+          "SE_tps": 5.5767447333446745,
+          "central_tps": 536.6592565959298,
+          "ci_halfwidth_tps": 10.93021882832899,
+          "ci_lower_tps": 525.7290377676009,
+          "ci_upper_tps": 547.5894754242588,
+          "lower_clears_500": true,
+          "n_tokens": 16384,
+          "sigma_L": 3.0386497839776614,
+          "step": 1.2182,
+          "tau": 1.0,
+          "tps_slope_per_Lbar": 102.83040551633559
+        },
+        "ceiling_spine": [
+          0.7304444056147708,
+          0.759030380352444,
+          0.7923101166088875,
+          0.8221957040572793,
+          0.8371230446702145,
+          0.8362550568291274,
+          0.8472702142363511
+        ],
+        "endpoint_anchors": {
+          "overhead_budget_at_lambda_1": {
+            "E_T": 5.21887717841078,
+            "lambda": 1.0,
+            "official_tps_tau1": 536.6590426143789,
+            "roundtrips_199_ceiling_budget": 0.0,
+            "roundtrips_199_ceiling_tps": 0.0,
+            "tau_central_1p0": 7.331808522875782,
+            "tau_conservative_0p9924": 6.516086778101915
+          },
+          "overhead_budget_at_lambda_hat_0342": {
+            "E_T": 4.048484687770039,
+            "budget_le_zero_tau1": true,
+            "lambda": 0.3418647166361965,
+            "official_tps_tau1": 416.307156176311,
+            "roundtrips_199_floor_budget": 0.0,
+            "roundtrips_199_floor_tps": 0.0,
+            "tau_central_1p0": -16.738568764737806,
+            "tau_conservative_0p9924": -17.371355642125796
+          }
+        },
+        "floor_spine_at_lambda_hat": [
+          0.728739760479042,
+          0.601228901092212,
+          0.6526458788388307,
+          0.705619089700195,
+          0.7323381339296116,
+          0.729232448721727,
+          0.6954991166669162
+        ],
+        "lambda_crit_clears_500_zero_overhead": {
+          "tau_central_1p0": 0.8344533978886615,
+          "tau_conservative_0p9924": 0.8528728360500535
+        },
+        "lambda_for_122_kernel_to_clear": {
+          "tau_central_1p0": {
+            "et_at_prob_saturation_wall": 7.298195772785839,
+            "et_target": 7.3801158206549955,
+            "is_physical_lambda_le_1": false,
+            "lambda_for_target": null,
+            "lambda_prob_saturation_wall": 1.6622925078713746,
+            "max_budget_pct_at_prob_saturation": 50.09522632330761,
+            "reachable_within_prob_saturation": false,
+            "target_budget_pct": 51.78
+          },
+          "tau_conservative_0p9924": {
+            "et_at_prob_saturation_wall": 7.298195772785839,
+            "et_target": 7.436634240885728,
+            "is_physical_lambda_le_1": false,
+            "lambda_for_target": null,
+            "lambda_prob_saturation_wall": 1.6622925078713746,
+            "max_budget_pct_at_prob_saturation": 48.95450260325045,
+            "reachable_within_prob_saturation": false,
+            "target_budget_pct": 51.78
+          }
+        },
+        "monotone_E_T_in_lambda": true,
+        "monotone_budget_in_lambda": true,
+        "overhead_budget_vs_lambda": [
+          {
+            "E_T": 4.048484687770039,
+            "is_lambda_hat": true,
+            "lambda": 0.3418647166361965,
+            "sigma_L": 2.3869221777469574,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -16.738568764737806,
+              "official_tps": 416.307156176311
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -17.371355642125796,
+              "official_tps": 413.14322178937107
+            }
+          },
+          {
+            "E_T": 4.275875510035937,
+            "is_lambda_hat": false,
+            "lambda": 0.5,
+            "sigma_L": 2.538351464273867,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -12.062032536549605,
+              "official_tps": 439.68983731725206
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -12.730361089271835,
+              "official_tps": 436.3481945536409
+            }
+          },
+          {
+            "E_T": 4.434896152428525,
+            "is_lambda_hat": false,
+            "lambda": 0.6,
+            "sigma_L": 2.6370566254689924,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -8.791602412025501,
+              "official_tps": 456.0419879398725
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -9.48478623369411,
+              "official_tps": 452.5760688315295
+            }
+          },
+          {
+            "E_T": 4.607216569845519,
+            "is_lambda_hat": false,
+            "lambda": 0.7,
+            "sigma_L": 2.7373781160285375,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -5.247648144756278,
+              "official_tps": 473.76175927621864
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -5.9677660188561354,
+              "official_tps": 470.16116990571936
+            }
+          },
+          {
+            "E_T": 4.79425097076923,
+            "is_lambda_hat": false,
+            "lambda": 0.8,
+            "sigma_L": 2.8385165978035367,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -1.40108501999473,
+              "official_tps": 492.9945749000264
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -2.1504367738427677,
+              "official_tps": 489.2478161307862
+            }
+          },
+          {
+            "E_T": 4.997562637230457,
+            "is_lambda_hat": false,
+            "lambda": 0.9,
+            "sigma_L": 2.9394061407799734,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": true,
+              "max_kernel_overhead_pct": 2.780237534472474,
+              "official_tps": 513.9011876723624
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": true,
+              "max_kernel_overhead_pct": 1.9991077292104809,
+              "official_tps": 509.99553864605247
+            }
+          },
+          {
+            "E_T": 5.21887717841078,
+            "is_lambda_hat": false,
+            "lambda": 1.0,
+            "sigma_L": 3.0386497839776614,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": true,
+              "max_kernel_overhead_pct": 7.331808522875782,
+              "official_tps": 536.6590426143789
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": true,
+              "max_kernel_overhead_pct": 6.516086778101915,
+              "official_tps": 532.5804338905097
+            }
+          }
+        ]
+      },
+      "descent_only": {
+        "ceiling_lambda1_finite_sample_ci_tau1": {
+          "E_T": 5.062874725337895,
+          "N_steps": 3236.1061430186846,
+          "SE_Lbar": 0.053853297674262196,
+          "SE_tps": 5.537756438236314,
+          "central_tps": 520.617461084902,
+          "ci_halfwidth_tps": 10.853803174097983,
+          "ci_lower_tps": 509.76365791080394,
+          "ci_upper_tps": 531.4712642589999,
+          "lower_clears_500": true,
+          "n_tokens": 16384,
+          "sigma_L": 3.063540888417097,
+          "step": 1.2182,
+          "tau": 1.0,
+          "tps_slope_per_Lbar": 102.83040551633559
+        },
+        "ceiling_spine": [
+          0.679,
+          0.759030380352444,
+          0.7923101166088875,
+          0.8221957040572793,
+          0.8371230446702145,
+          0.8362550568291274,
+          0.8472702142363511
+        ],
+        "endpoint_anchors": {
+          "overhead_budget_at_lambda_1": {
+            "E_T": 5.062874725337895,
+            "lambda": 1.0,
+            "official_tps_tau1": 520.6172534996784,
+            "roundtrips_199_ceiling_budget": 0.0,
+            "roundtrips_199_ceiling_tps": 0.0,
+            "tau_central_1p0": 4.123450699935671,
+            "tau_conservative_0p9924": 3.3321124746161557
+          },
+          "overhead_budget_at_lambda_hat_0342": {
+            "E_T": 3.9294296647453835,
+            "budget_le_zero_tau1": true,
+            "lambda": 0.3418647166361965,
+            "official_tps_tau1": 404.06468476135797,
+            "roundtrips_199_floor_budget": 0.0,
+            "roundtrips_199_floor_tps": 0.0,
+            "tau_central_1p0": -19.187063047728405,
+            "tau_conservative_0p9924": -19.80124136856567
+          }
+        },
+        "floor_spine_at_lambda_hat": [
+          0.675709323583181,
+          0.601228901092212,
+          0.6526458788388307,
+          0.705619089700195,
+          0.7323381339296116,
+          0.729232448721727,
+          0.6954991166669162
+        ],
+        "lambda_crit_clears_500_zero_overhead": {
+          "tau_central_1p0": 0.9066754940814947,
+          "tau_conservative_0p9924": 0.9245784686249501
+        },
+        "lambda_for_122_kernel_to_clear": {
+          "tau_central_1p0": {
+            "et_at_prob_saturation_wall": 7.073484580111932,
+            "et_target": 7.3801158206549955,
+            "is_physical_lambda_le_1": false,
+            "lambda_for_target": null,
+            "lambda_prob_saturation_wall": 1.6622925078713746,
+            "max_budget_pct_at_prob_saturation": 45.47379955266126,
+            "reachable_within_prob_saturation": false,
+            "target_budget_pct": 51.78
+          },
+          "tau_conservative_0p9924": {
+            "et_at_prob_saturation_wall": 7.073484580111932,
+            "et_target": 7.436634240885728,
+            "is_physical_lambda_le_1": false,
+            "lambda_for_target": null,
+            "lambda_prob_saturation_wall": 1.6622925078713746,
+            "max_budget_pct_at_prob_saturation": 44.368198676061034,
+            "reachable_within_prob_saturation": false,
+            "target_budget_pct": 51.78
+          }
+        },
+        "monotone_E_T_in_lambda": true,
+        "monotone_budget_in_lambda": true,
+        "overhead_budget_vs_lambda": [
+          {
+            "E_T": 3.9294296647453835,
+            "is_lambda_hat": true,
+            "lambda": 0.3418647166361965,
+            "sigma_L": 2.3938825378083455,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -19.187063047728405,
+              "official_tps": 404.06468476135797
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -19.80124136856567,
+              "official_tps": 400.99379315717164
+            }
+          },
+          {
+            "E_T": 4.149717675948561,
+            "is_lambda_hat": false,
+            "lambda": 0.5,
+            "sigma_L": 2.5479002768798473,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -14.65660374967218,
+              "official_tps": 426.71698125163914
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -15.30521356117468,
+              "official_tps": 423.47393219412663
+            }
+          },
+          {
+            "E_T": 4.303756276371505,
+            "is_lambda_hat": false,
+            "lambda": 0.6,
+            "sigma_L": 2.648649212316772,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -11.488634663501463,
+              "official_tps": 442.5568266824927
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -12.161321040058859,
+              "official_tps": 439.19339479970574
+            }
+          },
+          {
+            "E_T": 4.470658186156475,
+            "is_lambda_hat": false,
+            "lambda": 0.7,
+            "sigma_L": 2.751416691449927,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -8.056117819217778,
+              "official_tps": 459.7194109039111
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -8.754891323791725,
+              "official_tps": 456.2255433810414
+            }
+          },
+          {
+            "E_T": 4.651783815159143,
+            "is_lambda_hat": false,
+            "lambda": 0.8,
+            "sigma_L": 2.8554994363060735,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -4.331074928551459,
+              "official_tps": 478.3446253572427
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -5.058158759094478,
+              "official_tps": 474.7092062045276
+            }
+          },
+          {
+            "E_T": 4.848636404266925,
+            "is_lambda_hat": false,
+            "lambda": 0.9,
+            "sigma_L": 2.959954150817593,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -0.2825902298211669,
+              "official_tps": 498.5870488508942
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": false,
+              "max_kernel_overhead_pct": -1.0404425440745269,
+              "official_tps": 494.79778727962736
+            }
+          },
+          {
+            "E_T": 5.062874725337895,
+            "is_lambda_hat": false,
+            "lambda": 1.0,
+            "sigma_L": 3.063540888417097,
+            "tau_central_1p0": {
+              "clears_500_zero_overhead": true,
+              "max_kernel_overhead_pct": 4.123450699935671,
+              "official_tps": 520.6172534996784
+            },
+            "tau_conservative_0p9924": {
+              "clears_500_zero_overhead": true,
+              "max_kernel_overhead_pct": 3.3321124746161557,
+              "official_tps": 516.6605623730809
+            }
+          }
+        ]
+      }
+    },
+    "self_test": {
+      "conditions": {
+        "a_lambda1_bothbugs_reproduces_199_ceiling_7p332_536p66": true,
+        "b_lambda1_descent_reproduces_199_4p12": true,
+        "c_lambda_hat_budget_le_zero_roundtrips_199_floor": true,
+        "d_max_kernel_overhead_pct_monotone_increasing_in_lambda": true,
+        "e_nan_clean": true,
+        "provenance_reachdp_on_banked_spines_reproduces_199_ET": true
+      },
+      "kernel_budget_lambda_self_test_passes": true
+    },
+    "test_metric": {
+      "lambda_crit_clears_500_zero_overhead": 0.8344533978886615
+    },
+    "verdict": "BUDGET-OPENS-ONLY-ABOVE-LAMBDA-CRIT"
+  }
+}

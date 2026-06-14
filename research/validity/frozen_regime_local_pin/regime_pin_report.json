@@ -1,0 +1,176 @@
+{
+  "pr": 209,
+  "lane": "lawine runner / local-measurement (#72/#107/#168/#173/#180/#196)",
+  "submission": "submissions/fa2sw_precache_kenyan",
+  "kind": "LOCAL fresh-reload re-benchmark variance / frozen-vs-fresh regime pin",
+  "no_official_draw": true,
+  "no_launch": true,
+  "served_files_unchanged": true,
+  "adds_tps": 0.0,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "reloads": 8
+  },
+  "elapsed_s": 1967.0664315223694,
+  "bridge": {
+    "bridge": 1.0601865051833779,
+    "bridge_calibrated": 1.0601865051833779,
+    "bridge_nominal_pr180": 1.0602
+  },
+  "variance": {
+    "n_reloads": 8,
+    "reload_walltps": [
+      454.19607390638026,
+      454.2632627658703,
+      454.2056549080892,
+      454.1644825803422,
+      454.1923139652335,
+      454.15997278680743,
+      454.26399546540335,
+      454.33578520384947
+    ],
+    "mean_reload_walltps": 454.222692697747,
+    "sigma_reload_walltps": 0.06022064512638304,
+    "sigma_reload_walltps_ci95": [
+      0.02373428289521437,
+      0.07835872390122742
+    ],
+    "cv_reload_pct": 0.013257956085090537,
+    "bridge_wall_to_official": 1.0601865051833779,
+    "mean_reload_official": 481.5607691462078,
+    "sigma_reload_official": 0.06384511529642845,
+    "sigma_reload_official_ci95": [
+      0.025162766435710946,
+      0.08307486164347151
+    ],
+    "sigma_hw": 4.864,
+    "sigma_sample": 5.564,
+    "sigma_draw": 7.391,
+    "frozen_threshold_official": 5.3504000000000005,
+    "fresh_threshold_official": 6.6519,
+    "f_resample_local": 0.0,
+    "f_resample_local_raw": -0.764078637176291,
+    "frozen_fraction_breakeven_kanna202": 0.846,
+    "local_harness_is_frozen": true,
+    "local_harness_is_frozen_ci": true,
+    "regime_local": "FROZEN",
+    "sigma_reload_over_sigma_hw": 0.01312605166456177,
+    "sigma_reload_reproduces_sigma_hw_twosided": false
+  },
+  "token_identity": {
+    "n_reloads": 8,
+    "n_prompts": 128,
+    "token_identity_rate_across_reloads": 1.0,
+    "prompt_all_equal_rate": 1.0,
+    "n_prompts_all_equal": 128,
+    "n_divergent_reloads": 0,
+    "pairwise_token_rate_vs_run0": {
+      "run0_vs_run1": 1.0,
+      "run0_vs_run2": 1.0,
+      "run0_vs_run3": 1.0,
+      "run0_vs_run4": 1.0,
+      "run0_vs_run5": 1.0,
+      "run0_vs_run6": 1.0,
+      "run0_vs_run7": 1.0
+    },
+    "all_reloads_token_identical": true,
+    "per_run_record_count": [
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128,
+      128
+    ],
+    "per_run_total_tokens": [
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536,
+      65536
+    ],
+    "per_run_output_len_uniform_512": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "completes_128": true,
+    "decode_files": [
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run00.jsonl",
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run01.jsonl",
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run02.jsonl",
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run03.jsonl",
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run04.jsonl",
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run05.jsonl",
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run06.jsonl",
+      "/workspace/senpai/target/research/validity/frozen_regime_local_pin/decode/run07.jsonl"
+    ],
+    "divergences": []
+  },
+  "reload_walltps": [
+    454.19607390638026,
+    454.2632627658703,
+    454.2056549080892,
+    454.1644825803422,
+    454.1923139652335,
+    454.15997278680743,
+    454.26399546540335,
+    454.33578520384947
+  ],
+  "sigma_reload_walltps": 0.06022064512638304,
+  "cv_reload_pct": 0.013257956085090537,
+  "sigma_reload_official": 0.06384511529642845,
+  "f_resample_local": 0.0,
+  "regime_local": "FROZEN",
+  "local_harness_is_frozen": true,
+  "token_identity_rate_across_reloads": 1.0,
+  "n_divergent_reloads": 0,
+  "budget_implication": {
+    "regime_local": "FROZEN",
+    "local_harness_is_frozen": true,
+    "f_resample_local": 0.0,
+    "mu_build_n1": 512.2,
+    "mu_bar_frozen_p95": 504.87,
+    "mu_bar_fresh_p95": 499.08,
+    "conservative_frozen_default_empirically_confirmed": true,
+    "fresh_bar_admissible_locally": false,
+    "official_baseline_tps": 481.53,
+    "official_target_tps": 500.0,
+    "caveat": "LOCAL LocalServer harness MAY differ from the OFFICIAL scorer's re-benchmark behavior; the official pin remains kanna #202's human-gated test. A frozen LOCAL result is strong corroboration under the shared token-identity contract.",
+    "verdict_text": "LOCAL re-benchmark harness is FROZEN (sigma_reload=0.064 official-TPS, f_resample=0.000, well below sigma_hw=4.864 and sigma_draw=7.391). fern #185's conservative mu_bar_frozen_p95=504.87 default is the empirically correct one under the shared token-identity contract; the looser FRESH bar 499.08 is NOT admissible from the local evidence. The OFFICIAL-scorer regime remains kanna #202's human-gated pin, but the local result corroborates FROZEN."
+  },
+  "self_test": {
+    "a_token_identity_1p0": true,
+    "b_sigma_reload_finite_positive": true,
+    "c_sigma_reload_consistent_with_frozen": true,
+    "d_f_resample_in_unit_interval": true,
+    "e_nan_clean": true
+  },
+  "frozen_regime_pin_self_test_passes": true,
+  "server_ready_s_mean": 89.39287504553795,
+  "e_accept_exact_mean": 3.854172493107993,
+  "imported_sources": {
+    "kanna_202": "533jd6l1 (FROZEN beats sigma_hw, sigma_draw decomposition, budget bars)",
+    "pr_188": "pp1r5orx (sigma_hw=4.864 one-shot hardware std)",
+    "pr_196": "y4tavh9p/ekds1cy5 (reload harness, token-identity 1.0)",
+    "pr_180": "kbn064b0 (wall->official bridge 1.0602)"
+  },
+  "git": {
+    "git_commit": "0b56f90fb15c51037d020e22bf93a51e339a6eb0",
+    "git_branch": "lawine/frozen-regime-local-pin",
+    "git_dirty": true
+  },
+  "handoff_sentence": "the LOCAL re-benchmark harness is FROZEN (sigma_reload=0.064 official-TPS vs sigma_hw 4.864 / sigma_draw 7.391, token-identity 1.0000), so fern's conservative mu_bar_frozen_p95=504.87 default is empirically-confirmed; the OFFICIAL-scorer regime remains kanna #202's human-gated pin, but the local result corroborates it under the shared token-identity contract."
+}
