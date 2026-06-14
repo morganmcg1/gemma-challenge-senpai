@@ -1,0 +1,102 @@
+{
+  "config": {
+    "trace": "research/profiling/frontier_decode_postsplitkv/trace_frontier/rank0.1781387527954919185.pt.trace.json.gz",
+    "local_walltps": 454.09,
+    "official_tps": 481.53,
+    "pr65_gpu_bound": 0.9941,
+    "pr65_implied_idle_pct": 0.5900000000000016,
+    "verify_ms_m32": 9.0053,
+    "drafter_ms_m32": 1.6028,
+    "sources": "frontier_decode_postsplitkv trace (#43) + #65 GPU-bound + #94 tree M=32 projection + #67 fusion ceiling"
+  },
+  "steady_window": {
+    "cycles": 39,
+    "cycle_idx": [
+      13,
+      52
+    ],
+    "wall_ms": 318.1427822265625,
+    "median_cycle_wall_ms": 8.185013671875,
+    "per_cycle_wall_ms": 8.157507236578525,
+    "gpu_kernels_per_cycle": 1049.0
+  },
+  "step1_gpu_idle_decomposition_pct_of_decode": {
+    "a_launch_api": 0.5295323481872294,
+    "b_host_sync_roundtrip": 0.33418717701895156,
+    "c_inter_kernel_bubble": 1.3082584661149022,
+    "total_gpu_idle_a_b_c": 2.172631810373787
+  },
+  "step1_gpu_idle_by_location_pct_of_decode": {
+    "intra_cuda_graph_bubble": 1.5079117830130866,
+    "inter_step_host_window": 0.6640662083079965,
+    "note": "intra-graph = inter-kernel gaps INSIDE the CUDA-graph replay that graph/CUDA-event timing counts as busy; inter-step = sampling + dispatch + HtoD input copies between replays (what #65 measured)."
+  },
+  "step1_busy_vs_idle": {
+    "gpu_busy_ms": 311.2307109375,
+    "gpu_idle_ms": 6.9120712890625,
+    "idle_ms_per_cycle": 0.17723259715544873,
+    "gpu_busy_share_of_wall": 0.9782736818962622,
+    "decode_gpu_idle_fraction": 0.02172631810373787
+  },
+  "step1_gpu_busy_composition_pct_of_busy": {
+    "verify_body_gemm": 70.8934816435034,
+    "attention": 9.71284495271301,
+    "drafter_gemv": 5.201497245656926,
+    "norm": 4.307672290091259,
+    "other_gemm": 3.408687238541999,
+    "elementwise_copy": 2.8958630428615364,
+    "sampling": 2.6481633738816135,
+    "activation": 0.6243927645866011,
+    "kv_cache_write": 0.1993033396136713,
+    "other_small": 0.10809410854997956
+  },
+  "step1_small_kernel_tail_d": {
+    "pct_of_busy": 14.192176158126662,
+    "pct_of_decode_wall": 13.920311719805621,
+    "note": "norm/elementwise/sampling/kv-write/activation/other = GPU-BUSY real kernels a megakernel reorders but cannot remove (bus is the wall, #94)"
+  },
+  "step2_coarse_budget_reconciliation": {
+    "coarse_other_pct": 32.0,
+    "of_which_gpu_idle_reclaimable_pct": 2.172631810373787,
+    "of_which_gpu_busy_real_kernels_pct": 29.827368189626213,
+    "gpu_busy_share_of_the_32pct_other": 93.21052559258192,
+    "verdict": "the coarse '~32% other/overhead' is ~93% GPU-BUSY real kernels (under-counted attn+drafter + norm/sampling/lmhead/elementwise), only ~2.2pp is GPU-idle."
+  },
+  "step2_pr65_reconciliation": {
+    "pr65_implied_idle_pct": 0.5900000000000016,
+    "my_inter_step_host_window_pct": 0.6640662083079965,
+    "reconciles": "inter-step host window (0.66%) ~ #65's implied idle (0.59%)",
+    "additional_intra_graph_idle_pct": 1.5079117830130866,
+    "why_gap": "#65 measured at CUDA-graph-step granularity (intra-graph inter-kernel time counted as busy); a persistent kernel operates at finer sub-kernel granularity and targets the intra-graph boundaries #65's measurement was blind to."
+  },
+  "step2_tree_anticompounding": {
+    "idle_frac_m8_now": 0.02172631810373787,
+    "gpu_busy_ms_m32_tree": 10.6081,
+    "idle_frac_m32_tree": 0.016432742853214607,
+    "delta_pp": 0.5293575250523264,
+    "note": "M=32 tree amortizes the ~fixed per-step kernel-boundary idle over more GPU-busy work -> the persistent-kernel prize shrinks (levers partially anti-compound)."
+  },
+  "step2_projections": {
+    "reclaim_ceiling_pct_wall": 2.172631810373787,
+    "tps_reclaim_pct_now": 2.2208834302507348,
+    "tps_reclaim_pct_m32_tree": 1.6707289444429136,
+    "realizable_reclaim_pct_after_floor_haircut": 1.7575506408410515,
+    "ceiling_local_walltps": 464.17480956842553,
+    "ceiling_official_tps": 492.2242199816863,
+    "realizable_official_tps": 489.9931336008419
+  },
+  "primary_metric": {
+    "name": "persistent_kernel_reclaimable_pct",
+    "value": 2.172631810373787
+  },
+  "test_metric": {
+    "name": "decode_gpu_idle_fraction",
+    "value": 0.02172631810373787
+  },
+  "gate": {
+    "band_ceiling": "AMBER",
+    "band_realizable": "AMBER",
+    "recommendation": "CLOSE",
+    "rationale": "AMBER, not the clean RED the #65-extension predicted, but below the 3%% build-worth bar. The coarse '32%% overhead' is 93%% GPU-BUSY real kernels (LEVER 1's reclaimable-idle premise refuted); the residual true GPU-idle is a 2.17%% CEILING = ~1000 sub-us intra-CUDA-graph kernel-boundary gaps/step, an upper bound assuming a perfect megakernel fuses all of them. Realizable ~1.76%% optimistic (floor haircut), empirically pulled lower by #67 (norm/elementwise fusion measured <0.5%%) and #94 (bus is the wall). Anti-compounds with the M=32 tree (2.17->1.64%%). A full int4-Marlin+fa2sw+sampling megakernel is a disproportionate build for a sub-2%% shrinking prize."
+  }
+}
