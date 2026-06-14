@@ -1,0 +1,60 @@
+{
+  "config": {
+    "proxies_json": null,
+    "public_banked": "research/accept_calibration/accept_calibration_results.json",
+    "rankcov_json": "research/rank_coverage/rank_coverage_results.json",
+    "rho_opt_json": "research/spec_cost_model/rho_optimal_topology_results.json",
+    "banked_sglang_run": "research/validity/tree_private_drop_reconcile/sglang_ladder_run",
+    "step": 1.2182,
+    "gt_drop": 0.04294644155088978,
+    "safe_margin": 2.0,
+    "output": "research/validity/descent_vs_bothbugs_private/results.json",
+    "wandb_group": "descent-vs-bothbugs-private-decision",
+    "wandb_name": "stark/descent-vs-bothbugs-native",
+    "no_wandb": false
+  },
+  "constants": {
+    "K_cal": 125.26795005202914,
+    "step": 1.2182,
+    "bug1_mult": 0.9317455102952731,
+    "gt_drop": 0.04294644155088978,
+    "gt_drop_pct": 4.294644155088978,
+    "frontier_official": 481.53,
+    "target_500": 500.0,
+    "clear_500_bar_et": 4.862377006624717,
+    "calib_tol_pp": 0.5
+  },
+  "self_test_passes": true,
+  "public_ladder_banked": {
+    "conditional_p": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "linear_E_T": 3.8444537125748504
+  },
+  "machinery_faithfulness_xcheck": {
+    "descent_tps": 510.5849335058248,
+    "descent_tps_expected": 510.5849335058248,
+    "both_bugs_tps": 525.4600047477221,
+    "both_bugs_tps_expected": 525.4600047477221,
+    "descent_drop_pct": 1.801511061644668,
+    "descent_drop_pct_expected": 1.801511061644668,
+    "both_bugs_drop_pct": 1.8626055407019635,
+    "both_bugs_drop_pct_expected": 1.8626055407019635,
+    "reproduces_156": true
+  },
+  "native_pending": true,
+  "note": "no native-proxy manifest yet; CPU cross-check + liveness only. Measure native proxies via private_gap_probe.py, then re-run with --proxies-json.",
+  "verdict": {
+    "self_test_passes": 1,
+    "xcheck_reproduces_156_4p3": 1,
+    "xcheck_descent_tps": 510.5849335058248,
+    "xcheck_both_bugs_tps": 525.4600047477221,
+    "gt_drop_pct": 4.294644155088978
+  }
+}
