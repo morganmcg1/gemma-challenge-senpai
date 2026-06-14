@@ -1,0 +1,624 @@
+{
+  "primary_metric_name": "gate_ci_self_test_passes",
+  "gate_ci_self_test_passes": 1,
+  "test_metric_name": "required_n_for_robust_500_verdict",
+  "required_n_for_robust_500_verdict": 5,
+  "gate_state": "PENDING",
+  "gate_verdict": "ARMED",
+  "gate_label": "ENVELOPE ARMED + VALIDATED (CI self-test PASS); awaiting land #71's per-step a[1..N]. At N=1024, a robust-GREEN needs measured E[T] >= 5.139 (99%) / 5.081 (95%); the 5.207 ceiling clears it, anything in [4.895, 5.081] is INDETERMINATE at 1024 steps.",
+  "land_measured_pending": true,
+  "decision_input_line": "M16-MEASURED-500-GATE CONFIDENCE ENVELOPE (decision input ONLY; does NOT authorize a launch): wraps fern #142's point gate with the sampling CI. robust-GREEN iff the WHOLE TPS CI clears 500 (E[T] CI lower bound > effective bar 4.895). At the measured step 1.2182+-0.50%, oracle E[T]=2.621 is robustly RED (required-N 5, MOOT), the 5.207 ceiling robustly GREEN (required-N 629 @99%). Boundary 4.862 is INDETERMINATE at any finite N. PRESCRIPTION for land #71: measure N >= 629 steps AND E[T] >= 5.139 for a 99%-robust GREEN at N=1024.",
+  "map": {
+    "figure_of_merit": "official_TPS = K_cal * E[T] / step * tau",
+    "K_cal": 125.26795005202914,
+    "measured_step": 1.2182,
+    "step_rel_half_width": 0.005,
+    "step_band_is_assumed_pending_lawine136": true,
+    "tau_band": {
+      "low": 0.9983,
+      "central": 1.0,
+      "high": 1.0
+    },
+    "target_official": 500.0,
+    "frontier_official": 481.53,
+    "clear500_bar_central": 4.862377006624717,
+    "clear500_bar_effective_worst": 4.895010409353741
+  },
+  "self_test": {
+    "passes": true,
+    "red_anchor_robust_RED": true,
+    "green_anchor_robust_GREEN": true,
+    "borderline_INDETERMINATE": true,
+    "fern142_point_anchors_reproduced": true,
+    "fern142_anchor_red_tps": 270.72994195715137,
+    "fern142_anchor_green_tps": 537.8446424154472,
+    "note": "CI self-test at the measured step 1.2182; fern #142's 271/538 point anchors are reproduced at the 1.2127 roofline step (fern_self_test). borderline = the exact clear-500 E[T] (official=500), which no finite N can resolve -> INDETERMINATE by construction."
+  },
+  "anchors": {
+    "as_built_RED": {
+      "name": "as_built_oracle_E2.621",
+      "n_steps": 1024,
+      "point_et": 2.621,
+      "sample_mean_et": 2.6210000000000004,
+      "per_step_sd": 1.7969669719120376,
+      "per_step_cv": 0.6856035757008917,
+      "official_tps_point": 269.5183853935055,
+      "clear500_bars": {
+        "bar_central": 4.862377006624717,
+        "bar_worst": 4.895010409353741,
+        "bar_best": 4.838065121591593,
+        "step_central": 1.2182,
+        "step_hi": 1.2242909999999998,
+        "step_lo": 1.2121089999999999,
+        "step_rel_half_width": 0.005,
+        "systematic_et_margin": 0.03263340272902404
+      },
+      "et_ci_clt": {
+        "95": {
+          "lo": 2.510937795426388,
+          "hi": 2.731062204573613,
+          "half_width": 0.11006220457361227
+        },
+        "99": {
+          "lo": 2.476353744257483,
+          "hi": 2.765646255742518,
+          "half_width": 0.1446462557425175
+        }
+      },
+      "et_ci_bootstrap": {
+        "95": {
+          "lo": 2.5126015625000004,
+          "hi": 2.7323281250000004,
+          "half_width": 0.10986328125,
+          "boot_mean": 2.6209810058593765,
+          "boot_sd": 0.055937501036775736
+        },
+        "99": {
+          "lo": 2.4774453125000004,
+          "hi": 2.7684658203125014,
+          "half_width": 0.1455102539062505,
+          "boot_mean": 2.6211371582031266,
+          "boot_sd": 0.05662778972612479
+        }
+      },
+      "et_ci_lo_95": 2.5126015625000004,
+      "et_ci_hi_95": 2.7323281250000004,
+      "et_ci_lo_99": 2.4774453125000004,
+      "et_ci_hi_99": 2.7684658203125014,
+      "tps_ci_bootstrap": {
+        "95": {
+          "tps_lo": 256.64925632218666,
+          "tps_hi": 282.37818800805417,
+          "tps_mid": 269.66901581027537,
+          "et_lo": 2.5126015625000004,
+          "et_hi": 2.7323281250000004
+        },
+        "99": {
+          "tps_lo": 253.05822718639354,
+          "tps_hi": 286.11291401982527,
+          "tps_mid": 269.7194769998933,
+          "et_lo": 2.4774453125000004,
+          "et_hi": 2.7684658203125014
+        }
+      },
+      "tps_ci_clt": {
+        "95": {
+          "tps_lo": 256.4793111193702,
+          "tps_hi": 282.24735880313733,
+          "tps_mid": 269.5183853935055,
+          "et_lo": 2.510937795426388,
+          "et_hi": 2.731062204573613
+        },
+        "99": {
+          "tps_lo": 252.94672913519102,
+          "tps_hi": 285.8215201982125,
+          "tps_mid": 269.5183853935055,
+          "et_lo": 2.476353744257483,
+          "et_hi": 2.765646255742518
+        }
+      },
+      "robust_verdict_95": "robust-RED",
+      "robust_verdict_99": "robust-RED",
+      "required_n_for_verdict": {
+        "95": {
+          "required_n": 3,
+          "unbounded": false,
+          "margin_et": 2.217065121591593,
+          "side": "RED",
+          "feasible": true
+        },
+        "99": {
+          "required_n": 5,
+          "unbounded": false,
+          "margin_et": 2.217065121591593,
+          "side": "RED",
+          "feasible": true
+        }
+      },
+      "branch_hit": {
+        "k": 427,
+        "n": 1024,
+        "p_hat": 0.4169921875,
+        "rho2_target": 0.4165047789261015,
+        "chain_reject_floor": 0.033,
+        "wilson_ci": {
+          "95": {
+            "p_hat": 0.4169921875,
+            "lo": 0.38715784574551504,
+            "hi": 0.4474469967220661,
+            "center": 0.4173024212337906
+          },
+          "99": {
+            "p_hat": 0.4169921875,
+            "lo": 0.37796208887764904,
+            "hi": 0.4570910414203343,
+            "center": 0.41752656514899167
+          }
+        },
+        "excludes_chain_reject_floor_99": true,
+        "consistent_with_rho2_99": true,
+        "required_n_to_separate_from_floor": {
+          "95": 2,
+          "99": 2
+        }
+      }
+    },
+    "rho_optimal_GREEN": {
+      "name": "rho_optimal_ceiling_E5.207",
+      "n_steps": 1024,
+      "point_et": 5.206954309441963,
+      "sample_mean_et": 5.206954309441963,
+      "per_step_sd": 3.0355814882145578,
+      "per_step_cv": 0.5829860044498615,
+      "official_tps_point": 535.4330096522523,
+      "clear500_bars": {
+        "bar_central": 4.862377006624717,
+        "bar_worst": 4.895010409353741,
+        "bar_best": 4.838065121591593,
+        "step_central": 1.2182,
+        "step_hi": 1.2242909999999998,
+        "step_lo": 1.2121089999999999,
+        "step_rel_half_width": 0.005,
+        "systematic_et_margin": 0.03263340272902404
+      },
+      "et_ci_clt": {
+        "95": {
+          "lo": 5.021028359784556,
+          "hi": 5.39288025909937,
+          "half_width": 0.18592594965740725
+        },
+        "99": {
+          "lo": 4.962606192234037,
+          "hi": 5.45130242664989,
+          "half_width": 0.2443481172079262
+        }
+      },
+      "et_ci_bootstrap": {
+        "95": {
+          "lo": 5.024337121941963,
+          "hi": 5.395430871941963,
+          "half_width": 0.185546875,
+          "boot_mean": 5.207724866082588,
+          "boot_sd": 0.094726097350447
+        },
+        "99": {
+          "lo": 4.961837121941963,
+          "hi": 5.453048059441963,
+          "half_width": 0.24560546875,
+          "boot_mean": 5.206520715691963,
+          "boot_sd": 0.09577427789001615
+        }
+      },
+      "et_ci_lo_95": 5.024337121941963,
+      "et_ci_hi_95": 5.395430871941963,
+      "et_ci_lo_99": 4.961837121941963,
+      "et_ci_hi_99": 5.453048059441963,
+      "tps_ci_bootstrap": {
+        "95": {
+          "tps_lo": 513.2100549103119,
+          "tps_hi": 557.602133946371,
+          "tps_mid": 535.734270485792,
+          "et_lo": 5.024337121941963,
+          "et_hi": 5.395430871941963
+        },
+        "99": {
+          "tps_lo": 506.82600311334625,
+          "tps_hi": 563.556703185514,
+          "tps_mid": 535.4832197911755,
+          "et_lo": 4.961837121941963,
+          "et_hi": 5.453048059441963
+        }
+      },
+      "tps_ci_clt": {
+        "95": {
+          "tps_lo": 512.8720819663642,
+          "tps_hi": 557.3385355058282,
+          "tps_mid": 535.4330096522523,
+          "et_lo": 5.021028359784556,
+          "et_hi": 5.39288025909937
+        },
+        "99": {
+          "tps_lo": 506.90455966662796,
+          "tps_hi": 563.3762970987623,
+          "tps_mid": 535.4330096522523,
+          "et_lo": 4.962606192234037,
+          "et_hi": 5.45130242664989
+        }
+      },
+      "robust_verdict_95": "robust-GREEN",
+      "robust_verdict_99": "robust-GREEN",
+      "required_n_for_verdict": {
+        "95": {
+          "required_n": 364,
+          "unbounded": false,
+          "margin_et": 0.31194390008822204,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "99": {
+          "required_n": 629,
+          "unbounded": false,
+          "margin_et": 0.31194390008822204,
+          "side": "GREEN",
+          "feasible": true
+        }
+      },
+      "branch_hit": {
+        "k": 427,
+        "n": 1024,
+        "p_hat": 0.4169921875,
+        "rho2_target": 0.4165047789261015,
+        "chain_reject_floor": 0.033,
+        "wilson_ci": {
+          "95": {
+            "p_hat": 0.4169921875,
+            "lo": 0.38715784574551504,
+            "hi": 0.4474469967220661,
+            "center": 0.4173024212337906
+          },
+          "99": {
+            "p_hat": 0.4169921875,
+            "lo": 0.37796208887764904,
+            "hi": 0.4570910414203343,
+            "center": 0.41752656514899167
+          }
+        },
+        "excludes_chain_reject_floor_99": true,
+        "consistent_with_rho2_99": true,
+        "required_n_to_separate_from_floor": {
+          "95": 2,
+          "99": 2
+        }
+      }
+    },
+    "boundary_INDETERMINATE": {
+      "name": "clear500_boundary_E4.862",
+      "n_steps": 1024,
+      "point_et": 4.862377006624717,
+      "sample_mean_et": 4.862377006624717,
+      "per_step_sd": 3.08004319056056,
+      "per_step_cv": 0.6334439280138445,
+      "official_tps_point": 500.00000000000006,
+      "clear500_bars": {
+        "bar_central": 4.862377006624717,
+        "bar_worst": 4.895010409353741,
+        "bar_best": 4.838065121591593,
+        "step_central": 1.2182,
+        "step_hi": 1.2242909999999998,
+        "step_lo": 1.2121089999999999,
+        "step_rel_half_width": 0.005,
+        "systematic_et_margin": 0.03263340272902404
+      },
+      "et_ci_clt": {
+        "95": {
+          "lo": 4.673727827739513,
+          "hi": 5.051026185509921,
+          "half_width": 0.18864917888520427
+        },
+        "99": {
+          "lo": 4.6144499595484,
+          "hi": 5.110304053701034,
+          "half_width": 0.24792704707631688
+        }
+      },
+      "et_ci_bootstrap": {
+        "95": {
+          "lo": 4.674877006624717,
+          "hi": 5.049877006624717,
+          "half_width": 0.1875,
+          "boot_mean": 4.862026127718468,
+          "boot_sd": 0.09612590298045123
+        },
+        "99": {
+          "lo": 4.618236381624717,
+          "hi": 5.110423881624717,
+          "half_width": 0.24609375,
+          "boot_mean": 4.863612651155967,
+          "boot_sd": 0.09581080665323687
+        }
+      },
+      "et_ci_lo_95": 4.674877006624717,
+      "et_ci_hi_95": 5.049877006624717,
+      "et_ci_lo_99": 4.618236381624717,
+      "et_ci_hi_99": 5.110423881624717,
+      "tps_ci_bootstrap": {
+        "95": {
+          "tps_lo": 477.51451127576996,
+          "tps_hi": 521.8901440668748,
+          "tps_mid": 500.00000000000006,
+          "et_lo": 4.674877006624717,
+          "et_hi": 5.049877006624717
+        },
+        "99": {
+          "tps_lo": 471.72896433476996,
+          "tps_hi": 528.1474880130929,
+          "tps_mid": 500.2008405556932,
+          "et_lo": 4.618236381624717,
+          "et_hi": 5.110423881624717
+        }
+      },
+      "tps_ci_clt": {
+        "95": {
+          "tps_lo": 477.3971285953361,
+          "tps_hi": 522.0089083720591,
+          "tps_mid": 500.00000000000006,
+          "et_lo": 4.673727827739513,
+          "et_hi": 5.051026185509921
+        },
+        "99": {
+          "tps_lo": 471.34220090020386,
+          "tps_hi": 528.1351041446794,
+          "tps_mid": 500.00000000000006,
+          "et_lo": 4.6144499595484,
+          "et_hi": 5.110304053701034
+        }
+      },
+      "robust_verdict_95": "INDETERMINATE",
+      "robust_verdict_99": "INDETERMINATE",
+      "required_n_for_verdict": {
+        "95": {
+          "required_n": null,
+          "unbounded": true,
+          "margin_et": 0.0,
+          "side": "INDETERMINATE",
+          "feasible": false,
+          "in_systematic_dead_band": true
+        },
+        "99": {
+          "required_n": null,
+          "unbounded": true,
+          "margin_et": 0.0,
+          "side": "INDETERMINATE",
+          "feasible": false,
+          "in_systematic_dead_band": true
+        }
+      },
+      "branch_hit": {
+        "k": 427,
+        "n": 1024,
+        "p_hat": 0.4169921875,
+        "rho2_target": 0.4165047789261015,
+        "chain_reject_floor": 0.033,
+        "wilson_ci": {
+          "95": {
+            "p_hat": 0.4169921875,
+            "lo": 0.38715784574551504,
+            "hi": 0.4474469967220661,
+            "center": 0.4173024212337906
+          },
+          "99": {
+            "p_hat": 0.4169921875,
+            "lo": 0.37796208887764904,
+            "hi": 0.4570910414203343,
+            "center": 0.41752656514899167
+          }
+        },
+        "excludes_chain_reject_floor_99": true,
+        "consistent_with_rho2_99": true,
+        "required_n_to_separate_from_floor": {
+          "95": 2,
+          "99": 2
+        }
+      }
+    }
+  },
+  "required_n_test": {
+    "oracle_point_E_T": 2.621,
+    "required_n_oracle_99": {
+      "required_n": 5,
+      "unbounded": false,
+      "margin_et": 2.217065121591593,
+      "side": "RED",
+      "feasible": true
+    },
+    "required_n_oracle_95": {
+      "required_n": 3,
+      "unbounded": false,
+      "margin_et": 2.217065121591593,
+      "side": "RED",
+      "feasible": true
+    },
+    "interpretation": "the oracle point is so far below the bar that ~a-few steps already confirm RED -> the uncertainty lever is MOOT for the oracle point; the live prescription is the deliverable."
+  },
+  "handoff_land71": {
+    "descending_regime_per_step_sd": 3.0355814882145578,
+    "effective_clear500_bar_et": 4.895010409353741,
+    "min_robust_green_et_at_N1024_99": 5.139358526561668,
+    "min_robust_green_et_at_N1024_95": 5.080936359011148,
+    "required_n_at_ceiling_5207_99": 629,
+    "required_n_at_ceiling_5207_95": 364,
+    "required_n_curve": [
+      {
+        "measured_et": 4.862,
+        "official_tps_point": 499.9612322713558,
+        "required_n_95": {
+          "required_n": null,
+          "unbounded": true,
+          "margin_et": 0.0,
+          "side": "INDETERMINATE",
+          "feasible": false,
+          "in_systematic_dead_band": true
+        },
+        "required_n_99": {
+          "required_n": null,
+          "unbounded": true,
+          "margin_et": 0.0,
+          "side": "INDETERMINATE",
+          "feasible": false,
+          "in_systematic_dead_band": true
+        }
+      },
+      {
+        "measured_et": 4.9,
+        "official_tps_point": 503.8687861229214,
+        "required_n_95": {
+          "required_n": 1421839,
+          "unbounded": false,
+          "margin_et": 0.0049895906462591455,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "required_n_99": {
+          "required_n": 2455773,
+          "unbounded": false,
+          "margin_et": 0.0049895906462591455,
+          "side": "GREEN",
+          "feasible": true
+        }
+      },
+      {
+        "measured_et": 4.95,
+        "official_tps_point": 509.01030434866544,
+        "required_n_95": {
+          "required_n": 11707,
+          "unbounded": false,
+          "margin_et": 0.05498959064625897,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "required_n_99": {
+          "required_n": 20219,
+          "unbounded": false,
+          "margin_et": 0.05498959064625897,
+          "side": "GREEN",
+          "feasible": true
+        }
+      },
+      {
+        "measured_et": 5.0,
+        "official_tps_point": 514.1518225744096,
+        "required_n_95": {
+          "required_n": 3212,
+          "unbounded": false,
+          "margin_et": 0.10498959064625879,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "required_n_99": {
+          "required_n": 5547,
+          "unbounded": false,
+          "margin_et": 0.10498959064625879,
+          "side": "GREEN",
+          "feasible": true
+        }
+      },
+      {
+        "measured_et": 5.05,
+        "official_tps_point": 519.2933408001536,
+        "required_n_95": {
+          "required_n": 1474,
+          "unbounded": false,
+          "margin_et": 0.1549895906462586,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "required_n_99": {
+          "required_n": 2546,
+          "unbounded": false,
+          "margin_et": 0.1549895906462586,
+          "side": "GREEN",
+          "feasible": true
+        }
+      },
+      {
+        "measured_et": 5.1,
+        "official_tps_point": 524.4348590258977,
+        "required_n_95": {
+          "required_n": 843,
+          "unbounded": false,
+          "margin_et": 0.20498959064625843,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "required_n_99": {
+          "required_n": 1455,
+          "unbounded": false,
+          "margin_et": 0.20498959064625843,
+          "side": "GREEN",
+          "feasible": true
+        }
+      },
+      {
+        "measured_et": 5.131,
+        "official_tps_point": 527.6226003258591,
+        "required_n_95": {
+          "required_n": 636,
+          "unbounded": false,
+          "margin_et": 0.23598959064625902,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "required_n_99": {
+          "required_n": 1098,
+          "unbounded": false,
+          "margin_et": 0.23598959064625902,
+          "side": "GREEN",
+          "feasible": true
+        }
+      },
+      {
+        "measured_et": 5.207,
+        "official_tps_point": 535.4377080289901,
+        "required_n_95": {
+          "required_n": 364,
+          "unbounded": false,
+          "margin_et": 0.31198959064625864,
+          "side": "GREEN",
+          "feasible": true
+        },
+        "required_n_99": {
+          "required_n": 629,
+          "unbounded": false,
+          "margin_et": 0.31198959064625864,
+          "side": "GREEN",
+          "feasible": true
+        }
+      }
+    ],
+    "prescription": "on the live re-bench, measure a PER-STEP accept-length vector a[1..N] (not just the mean). For a 99%-robust GREEN at N=1024, the measured E[T] must clear 5.139; nearer the 4.862 boundary the required-N grows without bound, so a point estimate that clears 4.862 by a hair is NOT a launch-safe GREEN."
+  },
+  "live_gate": null,
+  "banked_oracle": {
+    "board": "20260614-100550-487",
+    "package": "tree-488-pw-fp32-v0",
+    "cumulative_ladder": [
+      0.674,
+      0.35,
+      0.203,
+      0.131,
+      0.089,
+      0.06,
+      0.037
+    ],
+    "E_T": 2.621,
+    "salvages": 391,
+    "full": 37,
+    "steps": 1024,
+    "spine_only_E_T_1_plus_sumC": 2.544,
+    "salvage_residual": 0.07699999999999996,
+    "branch_hit_rho2": 0.4165047789261015,
+    "chain_reject_floor": 0.033
+  },
+  "method": "LOCAL CPU-only analytic + statistics; wraps fern #142's point gate (does NOT duplicate it). Per-step law reconstructed EXACTLY from committed-path ladders; CLT + nonparametric bootstrap E[T] CI, Wilson branch-hit CI, step+tau propagation. Produces a launch-READINESS decision input only; does NOT authorize a launch. Greedy identity untouched.",
+  "provenance": "extends fern #142 m16_measured_500_gate (point core, K_cal, tau, 271/538 anchors) + fern #100 lever_composition (K_cal=125.268) + wirbel #135 bug2_salvage_descent DP (descending-regime committed-path ladder) + lawine #136 measured step 1.2182. Oracle samples: board 20260614-100550-487 (tree-488-pw-fp32-v0)."
+}
