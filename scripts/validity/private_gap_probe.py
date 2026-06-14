@@ -411,8 +411,13 @@ def main() -> int:
 
     if args.wandb_group:
         wandb_name = args.wandb_name or f"kanna/private-gap-{submission.name}"
-        log_report_to_wandb(report, submission=str(submission), wandb_name=wandb_name,
-                            wandb_group=args.wandb_group, report_path=report_path)
+        try:
+            log_report_to_wandb(report, submission=str(submission), wandb_name=wandb_name,
+                                wandb_group=args.wandb_group, report_path=report_path)
+        except Exception as e:  # noqa: BLE001
+            # report.json is already written above; optional telemetry must not fail a
+            # completed probe (e.g. a broken/partial wandb in the submission venv).
+            print(f"[probe] W&B logging failed (non-fatal): {e!r}", flush=True)
     return 0
 
 
