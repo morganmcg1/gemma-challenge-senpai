@@ -1,0 +1,56 @@
+{
+  "pr": 221,
+  "leg": "fp16-verify cost + validity (local)",
+  "imported_anchors": {
+    "K_cal": 125.26795005202914,
+    "step_int4_M32": 1.2182,
+    "lambda1_ceiling": 520.95,
+    "official_baseline": 481.53,
+    "wall_to_official": 1.06019,
+    "f_verify_153": 0.6238709391335172,
+    "f_verify_fern100": 0.53,
+    "gemm_us_M8_153": 4980.291757583619,
+    "step_us_M8_153": 7982.887878221502
+  },
+  "tier1_m_gemm_at_M8": 2.2278487656041754,
+  "tier1_m_gemm_at_M8_ci95": 0.005648609007859254,
+  "gemm_cost_ratio_fp16_int4_curve": {
+    "1": 2.2159973689320895,
+    "2": 2.214809309110826,
+    "4": 2.2101601710549237,
+    "8": 2.2278487656041754,
+    "16": 2.199392195948692
+  },
+  "m_step_fp16_int4": 1.7660191625114068,
+  "m_step_fp16_int4_153": 1.7660191625114068,
+  "m_step_fp16_int4_fern100": 1.650759845770213,
+  "fp16verify_tps_at_lambda1": 294.9854741435373,
+  "fp16verify_tps_at_current_build": 272.66408554436606,
+  "fp16verify_clears_500_at_lambda1": false,
+  "fp16_validity_premise": "RESIDUAL_BF16_BATCHVAR",
+  "bf16_cublas_batch_invariant": false,
+  "int4_marlin_M_dependent": false,
+  "tier2_status": "ran",
+  "fp16_token_identity_M1_vs_M8": 0.98944091796875,
+  "fp16_token_divergence_M1_vs_M8": 0.01055908203125,
+  "tier2_determinism_M1_vs_M1": 1.0,
+  "tier2_within_batch_row0_vs_row1": 1.0,
+  "self_test": {
+    "finite_all_M": true,
+    "ratio_gt1_deployed_M<=8": true,
+    "ratio_gt1_all_M": true,
+    "m8_repeat_stable_cv<2pct": true,
+    "ceiling_reconstructs_lambda1": true,
+    "m_step_two_estimates_reconcile<10pct": true,
+    "tokenident_in_range": true,
+    "nan_clean": true,
+    "_diag_bf16_kernel_bitexact": false,
+    "_diag_int4_kernel_M_dependent": false
+  },
+  "fp16_verify_cost_self_test_passes": true,
+  "sm_clock_mhz": {
+    "after_warmup": 1710,
+    "after_timing": 1710
+  },
+  "peak_gpu_gb": 18.902408704
+}
