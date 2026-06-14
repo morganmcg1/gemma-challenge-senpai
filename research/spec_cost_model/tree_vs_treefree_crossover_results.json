@@ -1,0 +1,803 @@
+{
+  "gate": {
+    "primary_metric_name": "tree_vs_treefree_crossover_ET",
+    "test_metric_name": "build_milestone_ladder",
+    "headline_verdict": "AMBER",
+    "headline_verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.727 (alone) / 4.522 (with splitk+lk), i.e. 65% of the way up denken #101's band -> continue only if recovery clears that",
+    "headline_ceiling": 511.2190830124044,
+    "headline_ceiling_source": "fern's own #100 bracket (PENDING denken #105)",
+    "primary_metric": {
+      "name": "tree_vs_treefree_crossover_ET",
+      "definition": "realized tree E[T] at which tree_official(E[T]) = tree_free_ceiling",
+      "at_C_500_tree_alone_central": 4.623541199954488,
+      "at_likely_ceiling_tree_alone_central": 4.72728498502161,
+      "likely_ceiling": 511.2190830124044,
+      "slope_dE_T_per_TPS_central": 0.009247082399908972,
+      "thresholds": {
+        "C_treefree_just_clears_500": 500.0,
+        "C_crossover_equals_5p0_central": 540.7110895918067,
+        "C_crossover_equals_ceiling_5p207_central": 563.0965287009075,
+        "interpretation": {
+          "below_500": "tree-free CANNOT hit 500 -> tree on the critical path (GREEN region)",
+          "500_to_C5p0": "tree-free clears 500; tree is upside, overtakes only if E[T]>=crossover in [4.624,5.0] (AMBER region)",
+          "C5p0_to_C5p207": "crossover in [5.0,5.207] -> tree barely beats tree-free even near its ceiling (RED region)",
+          "above_C5p207": "crossover > 5.207 -> tree can NEVER beat tree-free, even at its analytical ceiling (deep-RED)"
+        }
+      },
+      "corner_matched_robust_band": {
+        "conservative": 4.834435348440992,
+        "central": 4.72728498502161,
+        "optimistic": 4.736696266203363
+      }
+    },
+    "rule": "GREEN=C<500 (tree critical path) / AMBER=C>=500 & crossover<5.0 (tree upside, name recovery threshold) / RED=crossover>=5.0 (tree barely beats tree-free; pivot)"
+  },
+  "step1_build_milestone_ladder": {
+    "curve_tree_alone": [
+      {
+        "E_T": 2.097,
+        "conservative_official": 208.5949522964531,
+        "central_official": 226.77423097480371,
+        "optimistic_official": 233.98444401766852
+      },
+      {
+        "E_T": 2.197,
+        "conservative_official": 218.54225569637936,
+        "central_official": 237.58845276663988,
+        "optimistic_official": 245.14250048012292
+      },
+      {
+        "E_T": 2.297,
+        "conservative_official": 228.4895590963056,
+        "central_official": 248.40267455847604,
+        "optimistic_official": 256.3005569425773
+      },
+      {
+        "E_T": 2.397,
+        "conservative_official": 238.43686249623178,
+        "central_official": 259.21689635031214,
+        "optimistic_official": 267.45861340503166
+      },
+      {
+        "E_T": 2.497,
+        "conservative_official": 248.384165896158,
+        "central_official": 270.0311181421482,
+        "optimistic_official": 278.61666986748605
+      },
+      {
+        "E_T": 2.597,
+        "conservative_official": 258.33146929608426,
+        "central_official": 280.8453399339844,
+        "optimistic_official": 289.77472632994045
+      },
+      {
+        "E_T": 2.697,
+        "conservative_official": 268.2787726960105,
+        "central_official": 291.65956172582054,
+        "optimistic_official": 300.9327827923949
+      },
+      {
+        "E_T": 2.797,
+        "conservative_official": 278.2260760959368,
+        "central_official": 302.47378351765667,
+        "optimistic_official": 312.0908392548493
+      },
+      {
+        "E_T": 2.897,
+        "conservative_official": 288.17337949586295,
+        "central_official": 313.2880053094928,
+        "optimistic_official": 323.24889571730364
+      },
+      {
+        "E_T": 2.997,
+        "conservative_official": 298.12068289578923,
+        "central_official": 324.10222710132894,
+        "optimistic_official": 334.40695217975804
+      },
+      {
+        "E_T": 3.097,
+        "conservative_official": 308.0679862957154,
+        "central_official": 334.916448893165,
+        "optimistic_official": 345.5650086422124
+      },
+      {
+        "E_T": 3.197,
+        "conservative_official": 318.0152896956417,
+        "central_official": 345.7306706850012,
+        "optimistic_official": 356.7230651046668
+      },
+      {
+        "E_T": 3.297,
+        "conservative_official": 327.9625930955679,
+        "central_official": 356.54489247683733,
+        "optimistic_official": 367.8811215671212
+      },
+      {
+        "E_T": 3.397,
+        "conservative_official": 337.9098964954941,
+        "central_official": 367.3591142686734,
+        "optimistic_official": 379.03917802957557
+      },
+      {
+        "E_T": 3.497,
+        "conservative_official": 347.85719989542037,
+        "central_official": 378.1733360605096,
+        "optimistic_official": 390.19723449202996
+      },
+      {
+        "E_T": 3.597,
+        "conservative_official": 357.8045032953466,
+        "central_official": 388.98755785234573,
+        "optimistic_official": 401.35529095448436
+      },
+      {
+        "E_T": 3.697,
+        "conservative_official": 367.7518066952729,
+        "central_official": 399.8017796441819,
+        "optimistic_official": 412.51334741693876
+      },
+      {
+        "E_T": 3.797,
+        "conservative_official": 377.69911009519905,
+        "central_official": 410.616001436018,
+        "optimistic_official": 423.6714038793931
+      },
+      {
+        "E_T": 3.844,
+        "conservative_official": 382.37434269316435,
+        "central_official": 415.69868567818094,
+        "optimistic_official": 428.91569041674666
+      },
+      {
+        "E_T": 3.897,
+        "conservative_official": 387.64641349512533,
+        "central_official": 421.4302232278541,
+        "optimistic_official": 434.82946034184755
+      },
+      {
+        "E_T": 3.997,
+        "conservative_official": 397.5937168950515,
+        "central_official": 432.24444501969026,
+        "optimistic_official": 445.9875168043019
+      },
+      {
+        "E_T": 4.097,
+        "conservative_official": 407.5410202949778,
+        "central_official": 443.05866681152645,
+        "optimistic_official": 457.14557326675634
+      },
+      {
+        "E_T": 4.197,
+        "conservative_official": 417.488323694904,
+        "central_official": 453.8728886033625,
+        "optimistic_official": 468.3036297292107
+      },
+      {
+        "E_T": 4.297,
+        "conservative_official": 427.4356270948302,
+        "central_official": 464.68711039519866,
+        "optimistic_official": 479.461686191665
+      },
+      {
+        "E_T": 4.397,
+        "conservative_official": 437.3829304947565,
+        "central_official": 475.50133218703485,
+        "optimistic_official": 490.61974265411953
+      },
+      {
+        "E_T": 4.497,
+        "conservative_official": 447.3302338946827,
+        "central_official": 486.3155539788709,
+        "optimistic_official": 501.7777991165739
+      },
+      {
+        "E_T": 4.597,
+        "conservative_official": 457.277537294609,
+        "central_official": 497.1297757707071,
+        "optimistic_official": 512.9358555790283
+      },
+      {
+        "E_T": 4.697,
+        "conservative_official": 467.22484069453515,
+        "central_official": 507.9439975625432,
+        "optimistic_official": 524.0939120414827
+      },
+      {
+        "E_T": 4.797,
+        "conservative_official": 477.1721440944613,
+        "central_official": 518.7582193543793,
+        "optimistic_official": 535.251968503937
+      },
+      {
+        "E_T": 4.897,
+        "conservative_official": 487.11944749438766,
+        "central_official": 529.5724411462155,
+        "optimistic_official": 546.4100249663915
+      },
+      {
+        "E_T": 4.997,
+        "conservative_official": 497.0667508943138,
+        "central_official": 540.3866629380516,
+        "optimistic_official": 557.5680814288457
+      },
+      {
+        "E_T": 5.097,
+        "conservative_official": 507.01405429424017,
+        "central_official": 551.2008847298878,
+        "optimistic_official": 568.7261378913003
+      },
+      {
+        "E_T": 5.197,
+        "conservative_official": 516.9613576941664,
+        "central_official": 562.0151065217239,
+        "optimistic_official": 579.8841943537547
+      },
+      {
+        "E_T": 5.207,
+        "conservative_official": 517.9560880341589,
+        "central_official": 563.0965287009075,
+        "optimistic_official": 581.0
+      }
+    ],
+    "gates": {
+      "asbuilt": {
+        "kind": "fixed_E_T",
+        "E_T": 2.097,
+        "desc": "byteshark as-built tok/step -- accept-collapse REGRESSION",
+        "official": {
+          "conservative": 208.5949522964531,
+          "central": 226.77423097480371,
+          "optimistic": 233.98444401766852
+        }
+      },
+      "linear_floor": {
+        "kind": "fixed_E_T",
+        "E_T": 3.844,
+        "desc": "denken #101 structural floor (linear-chain accept_length) -- still a TPS LOSS",
+        "official": {
+          "conservative": 382.37434269316435,
+          "central": 415.69868567818094,
+          "optimistic": 428.91569041674666
+        }
+      },
+      "analytical_ceiling": {
+        "kind": "fixed_E_T",
+        "E_T": 5.207,
+        "desc": "analytical ceiling (de-risked, fern #92)",
+        "official": {
+          "conservative": 517.9560880341589,
+          "central": 563.0965287009075,
+          "optimistic": 581.0
+        }
+      },
+      "beat_linear": {
+        "kind": "threshold_official",
+        "target_official": 481.53,
+        "desc": "ties linear 481.53 official -- the ABORT line (below it the tree is a regression)",
+        "E_T": {
+          "conservative": 4.840809419802867,
+          "central": 4.452747588028169,
+          "optimistic": 4.315536506024095
+        }
+      },
+      "breakeven_500": {
+        "kind": "threshold_official",
+        "target_official": 500.0,
+        "desc": "clears the 500 target ALONE (fern #102 break-even)",
+        "E_T": {
+          "conservative": 5.026487882170236,
+          "central": 4.623541199954488,
+          "optimistic": 4.481067125645438
+        }
+      }
+    },
+    "ship_gates": [
+      {
+        "order": 1,
+        "gate": "beat-linear",
+        "E_T_central": 4.452747588028169,
+        "rule": "first ship-gate: realized E[T] >= ~4.45 or the tree is a NET REGRESSION vs linear 481.53"
+      },
+      {
+        "order": 2,
+        "gate": "clear-500",
+        "E_T_central": 4.623541199954488,
+        "rule": "target ship-gate: realized E[T] >= ~4.62 clears 500 with the bare tree (fern #102)"
+      },
+      {
+        "order": 3,
+        "gate": "analytical-ceiling",
+        "E_T_central": 5.207,
+        "rule": "stretch: realized E[T] -> 5.207 gives ~563 central (the de-risked ceiling)"
+      }
+    ]
+  },
+  "step2_crossover": {
+    "rows": [
+      {
+        "treefree_ceiling": 470.0,
+        "treefree_clears_500": false,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 4.724898609240022,
+            "central": 4.346128727957218,
+            "optimistic": 4.212203098106713
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 93.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 4.603244619749164,
+            "central": 4.157087990403097,
+            "optimistic": 3.905415549511474
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 118.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 480.0,
+        "treefree_clears_500": false,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 4.825428366883427,
+            "central": 4.438599551956308,
+            "optimistic": 4.301824440619621
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 83.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 4.701185994637445,
+            "central": 4.245536671049972,
+            "optimistic": 3.9885094973734203
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 108.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 490.0,
+        "treefree_clears_500": false,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 4.925958124526831,
+            "central": 4.531070375955397,
+            "optimistic": 4.3914457831325295
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 73.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 4.799127369525725,
+            "central": 4.333985351696846,
+            "optimistic": 4.071603445235367
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 98.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 500.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.026487882170236,
+            "central": 4.623541199954488,
+            "optimistic": 4.481067125645438
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 63.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 4.897068744414005,
+            "central": 4.42243403234372,
+            "optimistic": 4.154697393097313
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": false,
+          "margin_at_band_ceiling_central": 88.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 507.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.096858712520619,
+            "central": 4.68827077675385,
+            "optimistic": 4.543802065404475
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 56.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 4.965627706835801,
+            "central": 4.4843481087965325,
+            "optimistic": 4.212863156600675
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 81.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 510.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.127017639813641,
+            "central": 4.716012023953577,
+            "optimistic": 4.570688468158347
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 53.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 4.995010119302284,
+            "central": 4.510882712990595,
+            "optimistic": 4.237791340959259
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 78.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 511.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.137070615577981,
+            "central": 4.725259106353486,
+            "optimistic": 4.579650602409639
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 52.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.004804256791113,
+            "central": 4.519727581055283,
+            "optimistic": 4.246100735745454
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 77.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 520.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.227547397457045,
+            "central": 4.808482847952667,
+            "optimistic": 4.660309810671256
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 43.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.092951494190564,
+            "central": 4.599331393637469,
+            "optimistic": 4.320885288821206
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 68.702958813892
+        }
+      },
+      {
+        "treefree_ceiling": 530.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.32807715510045,
+            "central": 4.900953671951757,
+            "optimistic": 4.749931153184165
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 33.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.190892869078844,
+            "central": 4.687780074284343,
+            "optimistic": 4.403979236683152
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 58.702958813891996
+        }
+      },
+      {
+        "treefree_ceiling": 540.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.428606912743855,
+            "central": 4.993424495950847,
+            "optimistic": 4.839552495697074
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 23.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.288834243967125,
+            "central": 4.776228754931218,
+            "optimistic": 4.487073184545098
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 48.702958813891996
+        }
+      },
+      {
+        "treefree_ceiling": 550.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.52913667038726,
+            "central": 5.085895319949937,
+            "optimistic": 4.929173838209983
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 13.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.386775618855405,
+            "central": 4.864677435578092,
+            "optimistic": 4.570167132407044
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 38.702958813891996
+        }
+      },
+      {
+        "treefree_ceiling": 560.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.6296664280306645,
+            "central": 5.178366143949026,
+            "optimistic": 5.018795180722892
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 3.09652870090747
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.484716993743685,
+            "central": 4.953126116224967,
+            "optimistic": 4.653261080268991
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 28.702958813891996
+        }
+      },
+      {
+        "treefree_ceiling": 563.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.659825355323686,
+            "central": 5.206107391148754,
+            "optimistic": 5.045681583476764
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 0.09652870090747001
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.514099406210169,
+            "central": 4.979660720419029,
+            "optimistic": 4.678189264627575
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 25.702958813891996
+        }
+      },
+      {
+        "treefree_ceiling": 565.0,
+        "treefree_clears_500": true,
+        "tree_alone": {
+          "crossover_E_T": {
+            "conservative": 5.679931306852367,
+            "central": 5.224601555948571,
+            "optimistic": 5.063605851979346
+          },
+          "reachable_within_rec_band_central": false,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": -1.90347129909253
+        },
+        "tree_full_stack": {
+          "crossover_E_T": {
+            "conservative": 5.533687681187825,
+            "central": 4.9973504565484035,
+            "optimistic": 4.694808054199964
+          },
+          "reachable_within_rec_band_central": true,
+          "above_500_breakeven_central": true,
+          "margin_at_band_ceiling_central": 23.702958813891996
+        }
+      }
+    ],
+    "be500_by_path": {
+      "tree_alone": 4.623541199954488,
+      "tree_full_stack": 4.42243403234372
+    },
+    "slope_dcrossover_dC_central": 0.009247082399908972,
+    "thresholds_central": {
+      "C_treefree_just_clears_500": 500.0,
+      "C_crossover_equals_5p0_central": 540.7110895918067,
+      "C_crossover_equals_ceiling_5p207_central": 563.0965287009075,
+      "interpretation": {
+        "below_500": "tree-free CANNOT hit 500 -> tree on the critical path (GREEN region)",
+        "500_to_C5p0": "tree-free clears 500; tree is upside, overtakes only if E[T]>=crossover in [4.624,5.0] (AMBER region)",
+        "C5p0_to_C5p207": "crossover in [5.0,5.207] -> tree barely beats tree-free even near its ceiling (RED region)",
+        "above_C5p207": "crossover > 5.207 -> tree can NEVER beat tree-free, even at its analytical ceiling (deep-RED)"
+      }
+    },
+    "corner_matched_crossover_tree_alone": {
+      "conservative": 4.834435348440992,
+      "central": 4.72728498502161,
+      "optimistic": 4.736696266203363
+    }
+  },
+  "step3_gate_surface": [
+    {
+      "treefree_ceiling": 470.0,
+      "crossover_tree_alone": 4.346128727957218,
+      "crossover_tree_full_stack": 4.157087990403097,
+      "verdict": "GREEN",
+      "verdict_label": "tree on the CRITICAL PATH for 500 (tree-free central 470 < 500); crossover 4.346 < 4.624 -> keep the tree build the #1 priority"
+    },
+    {
+      "treefree_ceiling": 480.0,
+      "crossover_tree_alone": 4.438599551956308,
+      "crossover_tree_full_stack": 4.245536671049972,
+      "verdict": "GREEN",
+      "verdict_label": "tree on the CRITICAL PATH for 500 (tree-free central 480 < 500); crossover 4.439 < 4.624 -> keep the tree build the #1 priority"
+    },
+    {
+      "treefree_ceiling": 490.0,
+      "crossover_tree_alone": 4.531070375955397,
+      "crossover_tree_full_stack": 4.333985351696846,
+      "verdict": "GREEN",
+      "verdict_label": "tree on the CRITICAL PATH for 500 (tree-free central 490 < 500); crossover 4.531 < 4.624 -> keep the tree build the #1 priority"
+    },
+    {
+      "treefree_ceiling": 500.0,
+      "crossover_tree_alone": 4.623541199954488,
+      "crossover_tree_full_stack": 4.42243403234372,
+      "verdict": "AMBER",
+      "verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.624 (alone) / 4.422 (with splitk+lk), i.e. 57% of the way up denken #101's band -> continue only if recovery clears that"
+    },
+    {
+      "treefree_ceiling": 507.0,
+      "crossover_tree_alone": 4.68827077675385,
+      "crossover_tree_full_stack": 4.4843481087965325,
+      "verdict": "AMBER",
+      "verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.688 (alone) / 4.484 (with splitk+lk), i.e. 62% of the way up denken #101's band -> continue only if recovery clears that"
+    },
+    {
+      "treefree_ceiling": 510.0,
+      "crossover_tree_alone": 4.716012023953577,
+      "crossover_tree_full_stack": 4.510882712990595,
+      "verdict": "AMBER",
+      "verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.716 (alone) / 4.511 (with splitk+lk), i.e. 64% of the way up denken #101's band -> continue only if recovery clears that"
+    },
+    {
+      "treefree_ceiling": 511.0,
+      "crossover_tree_alone": 4.725259106353486,
+      "crossover_tree_full_stack": 4.519727581055283,
+      "verdict": "AMBER",
+      "verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.725 (alone) / 4.520 (with splitk+lk), i.e. 65% of the way up denken #101's band -> continue only if recovery clears that"
+    },
+    {
+      "treefree_ceiling": 520.0,
+      "crossover_tree_alone": 4.808482847952667,
+      "crossover_tree_full_stack": 4.599331393637469,
+      "verdict": "AMBER",
+      "verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.808 (alone) / 4.599 (with splitk+lk), i.e. 71% of the way up denken #101's band -> continue only if recovery clears that"
+    },
+    {
+      "treefree_ceiling": 530.0,
+      "crossover_tree_alone": 4.900953671951757,
+      "crossover_tree_full_stack": 4.687780074284343,
+      "verdict": "AMBER",
+      "verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.901 (alone) / 4.688 (with splitk+lk), i.e. 78% of the way up denken #101's band -> continue only if recovery clears that"
+    },
+    {
+      "treefree_ceiling": 540.0,
+      "crossover_tree_alone": 4.993424495950847,
+      "crossover_tree_full_stack": 4.776228754931218,
+      "verdict": "AMBER",
+      "verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.993 (alone) / 4.776 (with splitk+lk), i.e. 84% of the way up denken #101's band -> continue only if recovery clears that"
+    },
+    {
+      "treefree_ceiling": 550.0,
+      "crossover_tree_alone": 5.085895319949937,
+      "crossover_tree_full_stack": 4.864677435578092,
+      "verdict": "RED",
+      "verdict_label": "crossover 5.086 >= 5.0: the tree barely beats tree-free even near its own ceiling -> deprioritize the build-blocked tree, pivot to the tree-free levers"
+    },
+    {
+      "treefree_ceiling": 560.0,
+      "crossover_tree_alone": 5.178366143949026,
+      "crossover_tree_full_stack": 4.953126116224967,
+      "verdict": "RED",
+      "verdict_label": "crossover 5.178 >= 5.0: the tree barely beats tree-free even near its own ceiling -> deprioritize the build-blocked tree, pivot to the tree-free levers"
+    },
+    {
+      "treefree_ceiling": 563.0,
+      "crossover_tree_alone": 5.206107391148754,
+      "crossover_tree_full_stack": 4.979660720419029,
+      "verdict": "RED",
+      "verdict_label": "crossover 5.206 >= 5.0: the tree barely beats tree-free even near its own ceiling -> deprioritize the build-blocked tree, pivot to the tree-free levers"
+    },
+    {
+      "treefree_ceiling": 565.0,
+      "crossover_tree_alone": 5.224601555948571,
+      "crossover_tree_full_stack": 4.9973504565484035,
+      "verdict": "RED",
+      "verdict_label": "crossover 5.225 > 5.207: the tree can NEVER beat tree-free, even at its analytical ceiling -> pivot to tree-free + escalate for a fresh accept-length lever class"
+    }
+  ],
+  "treefree_bracket_own_model": {
+    "splitk_lk": {
+      "conservative": 478.9800316560821,
+      "central": 507.4134818981681,
+      "optimistic": 522.7727436577054
+    },
+    "splitk_lk_double_quant": {
+      "conservative": 480.8959517827064,
+      "central": 511.2190830124044,
+      "optimistic": 528.5232438379401
+    },
+    "note": "fern's OWN #100 linear-chain levers; rough bracket only -- denken #105 is the authoritative tree-free ceiling lane"
+  },
+  "anchors": {
+    "frontier_official": 481.53,
+    "target_official": 500.0,
+    "E_T_linear": 3.844,
+    "E_T_tree": 5.207,
+    "K_cal": 125.26795005202914,
+    "byteshark_asbuilt_et": 2.097,
+    "rec_band": [
+      3.844,
+      5.207
+    ],
+    "fern_102_breakeven_500_central": 4.623541199954488
+  },
+  "method": "CPU-only analytic synthesis of fern #100 (forward) + fern #102 (inverse, REUSED verbatim) + denken #101 (recoverable band) + denken #105 (tree-free ceiling, PARAMETERIZED). The crossover is #102's break-even generalized from target=500 to target=C; at C=500 it collapses to 4.624 by construction. No GPU, no served change -> greedy identity untouched."
+}
