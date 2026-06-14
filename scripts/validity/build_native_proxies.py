@@ -73,19 +73,70 @@ CODE_MARKERS = (
     "$ ", "npm ", "pip install", "std::", "printf(",
 )
 
+# A turn is "math-ish" if it carries explicit symbolic-math notation. Kept to STRONG
+# markers (LaTeX / specific math vocabulary) so the slice is genuinely the rare-token
+# math-notation tail, not generic prose with a stray "$" (currency).
+MATH_MARKERS = (
+    "\\frac", "\\sum", "\\int", "\\sqrt", "\\begin{", "\\alpha", "\\beta", "\\gamma",
+    "\\theta", "\\lambda", "\\partial", "\\cdot", "\\times", "\\pi", "\\infty", "$$",
+    "\\[", "\\(", "integral", "derivative", "theorem", "polynomial", "eigenvalue",
+    "factorial", "logarithm", "summation", "binomial", "differential equation",
+    "prove that", "solve for", "matrix multiplication",
+)
+
+# Non-Latin SCRIPT unicode blocks (dense scripts). Robustly distinguishes genuine
+# script change (CJK / Cyrillic / Arabic / ...) from accented Latin like "café".
+_NONLATIN_BLOCKS = (
+    (0x0400, 0x04FF),  # Cyrillic
+    (0x0590, 0x05FF),  # Hebrew
+    (0x0600, 0x06FF),  # Arabic
+    (0x0900, 0x097F),  # Devanagari
+    (0x0E00, 0x0E7F),  # Thai
+    (0x3040, 0x30FF),  # Hiragana / Katakana
+    (0x3400, 0x9FFF),  # CJK (ext-A + unified)
+    (0xAC00, 0xD7AF),  # Hangul
+)
+
 
 def has_marker(low: str, markers: tuple[str, ...]) -> bool:
     return any(m in low for m in markers)
 
 
+def nonlatin_ratio(text: str) -> float:
+    """Fraction of alphabetic characters that live in a non-Latin script block."""
+    letters = [c for c in text if c.isalpha()]
+    if not letters:
+        return 0.0
+    nl = 0
+    for c in letters:
+        o = ord(c)
+        if any(lo <= o <= hi for lo, hi in _NONLATIN_BLOCKS):
+            nl += 1
+    return nl / len(letters)
+
+
+def keep_for_domain(prompt: str, low: str, domain: str) -> bool:
+    """Axis membership predicate. `domain` selects the distinct hard slice.
+    `None` keeps everything (generic; e.g. the length-only long-context axis)."""
+    if domain is None or domain == "generic":
+        return True
+    if domain == "multilingual":
+        return nonlatin_ratio(prompt) >= 0.15
+    if domain == "math":
+        # math-notation slice, code-excluded so it stays distinct from the code axis.
+        return has_marker(low, MATH_MARKERS) and not has_marker(low, CODE_MARKERS)
+    raise ValueError(f"unknown domain {domain!r}")
+
+
 def collect_axis_candidates(
     path: Path, public_hashes: set[str], public_prefixes: set[str], *,
     min_char: int, max_char: int, seed: int, cap: int,
-    require_code: bool, exclude_code: bool,
+    require_code: bool, exclude_code: bool, domain: str | None = None,
 ) -> list[str]:
     """Stream ShareGPT first-human chat prompts, drop public-template / reasoning /
-    dup turns, then keep only the requested DOMAIN slice (code-required or
-    code-excluded). Returns a shuffled, capped candidate text list."""
+    dup turns, then keep only the requested DOMAIN slice (code-required/excluded,
+    or a `domain` predicate: multilingual / math / generic). Returns a shuffled,
+    capped candidate text list."""
     data = json.loads(path.read_text())
     seen: set[str] = set()
     out: list[str] = []
@@ -106,6 +157,8 @@ def collect_axis_candidates(
             continue
         if exclude_code and is_code:
             continue
+        if not keep_for_domain(prompt, low, domain):
+            continue
         h = text_hash(prompt)
         if h in public_hashes or h in seen:
             continue
@@ -122,15 +175,21 @@ def build_axis(
     *, name: str, axis: str, sharegpt_path: Path, public, public_hashes, public_prefixes,
     tok, length_scale: float, require_code: bool, exclude_code: bool,
     seed: int, candidate_cap: int, out_path: Path,
+    domain: str | None = None, min_char: int = 80, max_char: int = 40000,
+    max_target_tok: int | None = None,
 ) -> dict[str, Any]:
     public_lens = [r["tok_len"] for r in public]
     pmin, pmax = min(public_lens), max(public_lens)
+    # clamp targets so prompt+output fits the deployed MAX_MODEL_LEN (4096; output_len 512).
+    # the official public set maxes at ~2427 tok, so a servable long-context tail stays <=cap.
     targets = [max(8, round(l * length_scale)) for l in public_lens]
+    if max_target_tok is not None:
+        targets = [min(t, max_target_tok) for t in targets]
 
     cands = collect_axis_candidates(
         sharegpt_path, public_hashes, public_prefixes,
-        min_char=80, max_char=40000, seed=seed, cap=candidate_cap,
-        require_code=require_code, exclude_code=exclude_code)
+        min_char=min_char, max_char=max_char, seed=seed, cap=candidate_cap,
+        require_code=require_code, exclude_code=exclude_code, domain=domain)
     print(f"[{name}] {len(cands)} candidates after axis filter; tokenizing", flush=True)
 
     tmin = max(8, min(targets) // 3)
@@ -172,8 +231,11 @@ def build_axis(
         "axis": axis,
         "construction": {
             "require_code": require_code, "exclude_code": exclude_code,
-            "length_scale": length_scale, "seed": seed,
+            "domain": domain, "length_scale": length_scale, "seed": seed,
+            "min_char": min_char, "max_char": max_char, "max_target_tok": max_target_tok,
             "code_markers": list(CODE_MARKERS) if (require_code or exclude_code) else [],
+            "math_markers": list(MATH_MARKERS) if domain == "math" else [],
+            "nonlatin_threshold": 0.15 if domain == "multilingual" else None,
         },
         "source": {"repo": SHAREGPT_REPO, "file": SHAREGPT_FILE, "path": str(sharegpt_path)},
         "num": len(records), "tokenizer": "(shared with public)",
@@ -194,12 +256,24 @@ def build_axis(
 
 
 AXES = [
+    # --- #164 axes (built + measured; do NOT rebuild -- ladders imported byte-identical) ---
     {"name": "code", "axis": "domain-code", "length_scale": 1.0,
      "require_code": True, "exclude_code": False, "seed": 1640,
      "out": "data/private_proxy_native_code.json"},
     {"name": "casual", "axis": "register-casual-short", "length_scale": 0.6,
      "require_code": False, "exclude_code": True, "seed": 16400,
      "out": "data/private_proxy_native_casual.json"},
+    # --- #176 NEW axes: genuinely distinct hard tails (script / notation / length) ---
+    {"name": "multilingual", "axis": "non-latin-script", "length_scale": 1.0,
+     "require_code": False, "exclude_code": True, "domain": "multilingual", "seed": 17601,
+     "candidate_cap": 40000, "min_char": 40, "out": "data/private_proxy_native_multilingual.json"},
+    {"name": "math", "axis": "math-notation-chain", "length_scale": 1.0,
+     "require_code": False, "exclude_code": False, "domain": "math", "seed": 17602,
+     "candidate_cap": 40000, "out": "data/private_proxy_native_math.json"},
+    {"name": "longctx", "axis": "long-context-tail", "length_scale": 2.5,
+     "require_code": False, "exclude_code": True, "domain": "generic", "seed": 17603,
+     "candidate_cap": 20000, "min_char": 600, "max_char": 80000, "max_target_tok": 3000,
+     "out": "data/private_proxy_native_longctx.json"},
 ]
 
 
@@ -239,7 +313,10 @@ def main() -> int:
             public=public, public_hashes=public_hashes, public_prefixes=public_prefixes,
             tok=tok, length_scale=spec["length_scale"], require_code=spec["require_code"],
             exclude_code=spec["exclude_code"], seed=spec["seed"],
-            candidate_cap=args.candidate_cap, out_path=REPO / spec["out"])
+            candidate_cap=spec.get("candidate_cap", args.candidate_cap),
+            domain=spec.get("domain"), min_char=spec.get("min_char", 80),
+            max_char=spec.get("max_char", 40000),
+            max_target_tok=spec.get("max_target_tok"), out_path=REPO / spec["out"])
     print(f"[build] DONE: built {list(built)}", flush=True)
     return 0
 
