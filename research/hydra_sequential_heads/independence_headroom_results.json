@@ -1,0 +1,98 @@
+{
+  "pr": 115,
+  "hypothesis": "Hydra sequential MTP head-conditioning to break E[T]=3.844.",
+  "method": "CPU-only architectural + definitional analysis of the deployed vLLM Gemma4MTP proposer, anchored to the server-log per-position acceptance ladder (accept_calibration). No GPU, no served change, greedy identity untouched.",
+  "inputs": {
+    "num_speculative_tokens_K": 7,
+    "conditional_acceptance_p": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "cumulative_acceptance_C": [
+      0.728739760479042,
+      0.5530962874251496,
+      0.43832820359281444,
+      0.36017538922155695,
+      0.300484131736527,
+      0.2509822155688623,
+      0.2126477245508982
+    ],
+    "E_T_recomputed_from_C": 3.8444537125748504,
+    "E_T_reported": 3.844131736526946
+  },
+  "architecture_evidence": {
+    "drafter_model": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "vllm_class": "Gemma4MTP (model_executor/models/gemma4_mtp.py) served by Gemma4Proposer (v1/spec_decode/gemma4.py)",
+    "single_recurrent_module": "Gemma4MultiTokenPredictor: num_mtp_layers == text_config.num_hidden_layers == 4 decoder layers, run ONCE PER DRAFT STEP (proposer docstring: 'runs all decoder layers per draft step (producing one token)'). Not K independent heads.",
+    "conditions_on_prev_token_embed": "gemma4_mtp.py:463  combined = torch.cat([inputs_embeds, hidden_states], dim=-1)  -- input is cat(embed(input_token), prev_hidden).",
+    "feeds_back_prev_drafted_token": "llm_base_proposer.py:574  input_ids = draft_token_ids_list[-1].int()  -- the token DRAFTED at step k-1 is the input_ids for step k.",
+    "feeds_back_recurrent_hidden": "llm_base_proposer.py:597,613-614  model_kwargs['hidden_states'] = prev step's backbone_hidden (gemma4_mtp.py:476-477 returns it).",
+    "greedy_verify_accept_rule": "serve.py:7-10  temperature=0 -> vLLM rejection sampler short-circuits to target-argmax; accept iff draft_token == target argmax, so every ACCEPTED prefix token is target-correct.",
+    "medusa_is_the_independent_lane": "medusa.py:propose  draft_tokens = stack([logit.argmax(-1) for logit in self.model.compute_logits(self.model(target_hidden_states))]) -- K heads from the SAME target_hidden_states, NO drafted-token feedback. THIS is the independent-heads arch Hydra fixes; the deployed submission does NOT use it."
+  },
+  "public_evidence": {
+    "openevolve_2026-06-14T02:38Z": "message_board/20260614-023846-928_openevolve.md -- A10G-oracle: EVERY retrained drafter (CE, recipe sweeps, faithful vLLM-hidden capture, and itaca's DeepSeek-MTP KL-distillation a in {0.5,0.9}) lands at PARITY ~3.83 accept_length; 'e1 appears to be at the architecture's acceptance ceiling for this workload'. Offline/HF accept screens OVER-report for trained drafters (anti-correlated with oracle off-baseline).",
+    "leaderboard_2026-06-14": "top public ~489 TPS (frantic-penguin lmhead12k-fa2sw-precache-skv64); frontier-to-beat PR#52 fa2sw_precache_kenyan = 481.53 official.",
+    "crossover_106": "tree_vs_treefree_crossover -> AMBER: tree overtakes tree-free only if realized E[T] >= 4.791 (alone)/4.583 (with splitk+lk); headroom is in the tree-verify build, not drafter conditioning."
+  },
+  "reject_decomposition": {
+    "first_reject_prob_by_position": [
+      0.271260239520958,
+      0.17564347305389236,
+      0.11476808383233515,
+      0.07815281437125748,
+      0.059691257485029944,
+      0.04950191616766471,
+      0.0383344910179641
+    ],
+    "total_reject_prob": 0.7873522754491018,
+    "full_window_accept_prob": 0.2126477245508982,
+    "sanity_sum": 1.0,
+    "pos1_oracle_conditioned_reject_share": 0.34452207478060887,
+    "q0_first_position_acceptance": 0.728739760479042,
+    "pos1_miss_is_genuine_uncertainty": 0.271260239520958,
+    "independence_attributable_reject_frac": 0.0,
+    "rationale": "Every accepted prefix token == target argmax (greedy verify), and the deployed recurrent MTP feeds that accepted token (embed + recurrent hidden) into the next step. A Hydra head conditioning on 'head-(k-1)'s accepted token' sees the identical correct token, so it recovers no rejection the deployed head misses."
+  },
+  "milestones": {
+    "beat_linear_481p53": 4.45,
+    "clear_500": 4.62,
+    "tree_overtakes_treefree": 4.7,
+    "stretch_563": 5.207
+  },
+  "verdict": {
+    "primary_metric_name": "independence_attributable_reject_frac",
+    "independence_attributable_reject_frac": 0.0,
+    "test_metric_name": "et_ceiling_sequential_conditioning",
+    "et_ceiling_sequential_conditioning": 3.844131736526946,
+    "milestone_reach": {
+      "beat_linear_481p53": {
+        "target": 4.45,
+        "reached": false
+      },
+      "clear_500": {
+        "target": 4.62,
+        "reached": false
+      },
+      "tree_overtakes_treefree": {
+        "target": 4.7,
+        "reached": false
+      },
+      "stretch_563": {
+        "target": 5.207,
+        "reached": false
+      }
+    },
+    "reaches_4p7_tree_overtakes": false,
+    "gate": "KILL",
+    "gate_reason": "independence_attributable_reject_frac=0.0 < 0.10. The deployed Gemma4MTP drafter is ALREADY a recurrent sequential proposer (conditions each draft token on the previously-drafted token); the Hydra lever is already implemented, so it has zero headroom. No light-GPU prototype is warranted.",
+    "tree_lane_status_on_this_lever": "AMBER (unchanged) -- upper bound 3.844 < 4.7; sequential conditioning cannot move E[T].",
+    "true_binding_constraint": "Drafter capacity + genuine model uncertainty. Even at draft position 1 (oracle conditioning: real verified token + real target hidden) the drafter accepts only q0=0.7287; the 0.2713 miss is immune to sequential conditioning. Headroom is in tree-verify (#106), not Hydra."
+  },
+  "wandb_run_id": "ucp8iotk"
+}
