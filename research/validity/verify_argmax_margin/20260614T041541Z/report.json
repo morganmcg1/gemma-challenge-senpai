@@ -1,0 +1,306 @@
+{
+  "capture_dir": "research/validity/verify_argmax_margin/20260614T041541Z",
+  "capture_summary": {
+    "ts": "20260614T050112Z",
+    "num_prompts": 128,
+    "output_len": 512,
+    "num_positions": 65536,
+    "completion_tokens": 65536,
+    "decode_s": 2675.0,
+    "native_dtype": "torch.bfloat16",
+    "softcap": 30.0,
+    "splits": [
+      2,
+      4,
+      8
+    ],
+    "mwidths": [
+      16,
+      32
+    ],
+    "min_margin": 0.0,
+    "median_margin": 4.875,
+    "max_abs_logit": 29.875,
+    "fidelity_emuS1_vs_realM8_disagreements": 186,
+    "splitk_flip_count_vs_emuS1": {
+      "2": 0,
+      "4": 0,
+      "8": 0
+    },
+    "splitk_flip_count_vs_refM8": {
+      "2": 186,
+      "4": 186,
+      "8": 186
+    },
+    "splitk_max_abs_dlogit": {
+      "2": 0.125,
+      "4": 0.125,
+      "8": 0.125
+    },
+    "mwiden_flip_count_vs_refM8": {
+      "16": 0,
+      "32": 0
+    },
+    "mwiden_max_abs_dlogit": {
+      "16": 0.0,
+      "32": 0.25
+    },
+    "npz": "/workspace/senpai/target/research/validity/verify_argmax_margin/20260614T041541Z/margin_perturb.npz"
+  },
+  "phase1_margin_map": {
+    "num_positions": 65536,
+    "native_dtype": "torch.bfloat16",
+    "native_mantissa_bits": 7,
+    "min_margin": 0.0,
+    "min_positive_margin": 0.03125,
+    "median_margin": 4.875,
+    "p01_margin": 0.0,
+    "p10_margin": 0.5,
+    "max_abs_logit_softcapped": 29.875,
+    "min_margin_in_native_ulp": 0.0,
+    "min_positive_margin_in_native_ulp": 0.5,
+    "min_margin_in_fp32_ulp": 0.0,
+    "median_margin_in_native_ulp": 39.0,
+    "frac_below_native_ulp": {
+      "1": 0.01385498046875,
+      "2": 0.036651611328125,
+      "4": 0.080841064453125,
+      "8": 0.1577301025390625,
+      "16": 0.28375244140625
+    },
+    "frac_below_fp32_ulp": {
+      "1": 0.0138397216796875,
+      "2": 0.0138397216796875,
+      "4": 0.0138397216796875,
+      "8": 0.0138397216796875,
+      "16": 0.0138397216796875
+    },
+    "n_exact_ties_margin_zero": 907,
+    "frac_exact_ties": 0.0138397216796875
+  },
+  "phase2_splitk": {
+    "2": {
+      "flip_count_vs_emuS1": 0,
+      "flip_count_vs_refM8": 186,
+      "max_abs_dlogit": 0.125,
+      "max_abs_dlogit_in_native_ulp": 32.0,
+      "mean_abs_dlogit": 0.013833881906066381
+    },
+    "4": {
+      "flip_count_vs_emuS1": 0,
+      "flip_count_vs_refM8": 186,
+      "max_abs_dlogit": 0.125,
+      "max_abs_dlogit_in_native_ulp": 32.0,
+      "mean_abs_dlogit": 0.014469228040525195
+    },
+    "8": {
+      "flip_count_vs_emuS1": 0,
+      "flip_count_vs_refM8": 186,
+      "max_abs_dlogit": 0.125,
+      "max_abs_dlogit_in_native_ulp": 32.0,
+      "mean_abs_dlogit": 0.014530479385257422
+    }
+  },
+  "phase2_mwiden": {
+    "16": {
+      "flip_count_vs_refM8": 0,
+      "max_abs_dlogit": 0.0,
+      "max_abs_dlogit_in_native_ulp": 0.0,
+      "mean_abs_dlogit": 0.0
+    },
+    "32": {
+      "flip_count_vs_refM8": 0,
+      "max_abs_dlogit": 0.25,
+      "max_abs_dlogit_in_native_ulp": 4.0,
+      "mean_abs_dlogit": 0.0013484263890006787
+    }
+  },
+  "fidelity_emuS1_vs_realM8_disagreements": 186,
+  "numerics_regime": {
+    "deployed_reduction": "deterministic 20-slice (128-wide) FP32 split-K (global_reduce_fp32)",
+    "use_atomic_add": "False (forced for vocab n=12288 >= 2048)",
+    "use_fp32_reduce": "True (default)",
+    "only_lossy_step": "single FP32->bf16 cast at final output write",
+    "splitk_bound_valid_iff": "use_fp32_reduce=True AND use_atomic_add=False",
+    "counterexample": "#73 atomic-add control flips ~36% of tokens (out-of-regime)"
+  },
+  "at_risk_audit": {
+    "n_flip_proof_margin_gt_2dmax": 64310,
+    "frac_flip_proof": 0.981292724609375,
+    "n_residual_relies_on_measurement": 1226,
+    "residual_flips_measured": 0,
+    "residual_max_abs_dlogit": 0.125,
+    "total_flips_any_swap": 0,
+    "margin_buckets": {
+      "exact_tie": {
+        "n_positions": 907,
+        "n_flipped_measured": 0,
+        "max_abs_dlogit_here": 0.125
+      },
+      "below_1ulp": {
+        "n_positions": 908,
+        "n_flipped_measured": 0,
+        "max_abs_dlogit_here": 0.125
+      },
+      "below_2ulp": {
+        "n_positions": 2402,
+        "n_flipped_measured": 0,
+        "max_abs_dlogit_here": 0.125
+      },
+      "below_4ulp": {
+        "n_positions": 5298,
+        "n_flipped_measured": 0,
+        "max_abs_dlogit_here": 0.125
+      }
+    },
+    "thinnest_positions": [
+      {
+        "pos": 43995,
+        "argmax": 6976,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 7.62939453125e-06,
+        "flipped": false
+      },
+      {
+        "pos": 14205,
+        "argmax": 563,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.00390625,
+        "flipped": false
+      },
+      {
+        "pos": 50662,
+        "argmax": 2953,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.015625,
+        "flipped": false
+      },
+      {
+        "pos": 36623,
+        "argmax": 10184,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 9.5367431640625e-07,
+        "flipped": false
+      },
+      {
+        "pos": 27845,
+        "argmax": 5049,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.0078125,
+        "flipped": false
+      },
+      {
+        "pos": 14275,
+        "argmax": 4750,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 3.0517578125e-05,
+        "flipped": false
+      },
+      {
+        "pos": 14238,
+        "argmax": 837,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.03125,
+        "flipped": false
+      },
+      {
+        "pos": 1997,
+        "argmax": 9607,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 1.9073486328125e-06,
+        "flipped": false
+      },
+      {
+        "pos": 27753,
+        "argmax": 4612,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.03125,
+        "flipped": false
+      },
+      {
+        "pos": 14376,
+        "argmax": 12204,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.0,
+        "flipped": false
+      },
+      {
+        "pos": 27776,
+        "argmax": 3586,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.00048828125,
+        "flipped": false
+      },
+      {
+        "pos": 14324,
+        "argmax": 9284,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 1.0728836059570312e-06,
+        "flipped": false
+      },
+      {
+        "pos": 50548,
+        "argmax": 2939,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.03125,
+        "flipped": false
+      },
+      {
+        "pos": 43966,
+        "argmax": 1093,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.001953125,
+        "flipped": false
+      },
+      {
+        "pos": 43988,
+        "argmax": 614,
+        "margin": 0.0,
+        "margin_native_ulp": 0.0,
+        "max_abs_dlogit": 0.0,
+        "flipped": false
+      }
+    ]
+  },
+  "gate": {
+    "verdict": "GREEN",
+    "comfortable_headroom": false,
+    "tie_bounded": true,
+    "n_exact_ties": 907,
+    "min_margin": 0.0,
+    "min_positive_margin": 0.03125,
+    "max_abs_dlogit_all_swaps": 0.25,
+    "headroom_ratio_minposmargin_over_maxdlogit": 0.125,
+    "n_flip_proof_margin_gt_2dmax": 64310,
+    "frac_flip_proof": 0.981292724609375,
+    "n_residual_relies_on_measurement": 1226,
+    "residual_flips_measured": 0,
+    "splitk_flip_count_vs_emuS1_worst": 0,
+    "splitk_flip_count_vs_refM8_worst": 186,
+    "mwiden_flip_count_worst": 0,
+    "total_flips": 0,
+    "flip_examples": []
+  },
+  "primary_metric": {
+    "name": "verify_gemm_argmax_flip_count_splitk",
+    "value": 0
+  },
+  "test_metric": {
+    "name": "verify_gemm_min_top2_margin_ulp",
+    "value": 0.0
+  }
+}
