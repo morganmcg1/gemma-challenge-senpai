@@ -1,5 +1,27 @@
 # SENPAI Research Results
 
+## 2026-06-14 07:21 — PR #109: Tree-free-500 ship-readiness — min SplitK for a CONFIDENT (conservative-corner) ship + does pinning τ need an official re-anchor? 🟡 AMBER — MERGED (corner SplitK 14.34% vs #105 central 4.44%; at ubel ~8.5% the projection STRADDLES 500: 487→507 across τ band; τ-reanchor=YES — the official shot should BE the τ-anchor)
+
+- **Branch:** `denken/tree-free-ship-readiness` · **Student:** denken · merged 07:21Z (LOCAL CPU-analytic decision doc — no HF Job, no served change, greedy untouched; BASELINE unchanged 481.53)
+- **Hypothesis:** turn #105's central GREEN (tree-free clears 500 at SplitK 4.44%) into a SHIP gate — the minimum SplitK at the CONSERVATIVE CORNER (τ-floor 0.96 × multiplier-CI-low × levers-low), and whether pinning τ forces a scarce approval-gated official re-anchor.
+- **Primary metric:** `min_splitk_for_confident_ship_pct = 14.34%` (corner, margin 0; +1%→16.67%, +2%→19.05%) vs #105 central 4.44%. **Test:** `tau_official_reanchor_required = YES` (τ_required @ ubel-central 8.5% = 0.986, above floor 0.96). W&B `pyjib2k8`.
+
+| SplitK % | τ=0.96 | τ=0.98 | τ=1.00 |
+|---|--:|--:|--:|
+| 4.44 (#105 central) | 477.5 HOLD | 487.5 HOLD | 497.4 HOLD |
+| 8.50 (ubel central) | 487.0 HOLD | 497.1 HOLD | 507.3 GO |
+| 14.00 | 499.3 HOLD | 509.7 GO | 520.1 GO |
+
+- **Commentary:** two honest corrections moved the bar UP vs #105: (1) byte-lever = wirbel PALETTE not INT8 double-quant (wirbel #104 KILL) → corner contribution 0, central SplitK-for-500 4.44%→4.84%; (2) multiplier CI factored with no double-count (official-side risk carried ONCE, in τ). At ubel's plausible SplitK ~8.5% the projection STRADDLES 500 (487→507 across the τ band) → cannot ship on the projection alone. Decision: the one approval-gated official run should BE the τ-anchor of the SplitK-built submission (converts τ from assumed-[0.96,1.0] to measured), NOT a blind ship. NOT RED (reaches 500 at τ≈1.0 for SplitK≥6.5%); simply lacks conservative-corner margin until SplitK→~14% OR palette/LK realize. Converges with kanna #96 (the same official run also validates greedy self-consistency). → denken reassigned to LUT-GEMM feasibility (#113), the fresh kernel margin the corner needs.
+
+## 2026-06-14 07:21 — PR #96: Network-wide greedy-compounding gate — do per-layer ≤1-ULP perturbations compound to flip argmax on the composed frontier? 🔴 RED (cross-kernel) → REFRAMED GREEN-for-official-gate — MERGED (971/65,536 near-tie flips Marlin-AR vs SplitK-AR; but the OFFICIAL gate is SELF-REFERENTIAL per checkpoint → SplitK/tree greedy-safe by the acceptance rule)
+
+- **Branch:** `kanna/greedy-compounding-gate` · **Student:** kanna · merged 07:21Z (LOCAL single-A10G measurement — no HF Job, no served change, greedy untouched; BASELINE unchanged 481.53)
+- **Hypothesis:** close #87's named residual — do the network-wide ≤1-ULP reduction-order perturbations of the composed land#71×ubel#84 frontier compound across ~37 layers to flip the greedy argmax vs the deployed stack?
+- **Primary metric:** `compounded_argmax_flip_count_realistic = 971/65,536 (1.482%)` (RED vs ~0.1% threshold). **Test:** `compounded_argmax_flip_count_adversarial = 2783 (4.247%)`. W&B `bre5n6ip`.
+- **Mechanism:** every flip is a near-tie — 866 (68%) EXACT bf16 ties, 100% within 8 ULP of a tie; upstream-only==full-frontier (971==971) so cleanly attributed to network-wide-h compounding (lm_head adds 0). The DEPLOYED baseline is already this fragile: 964 decode/prefill-wobble positions; **bs=1 vs bs=32 decode alone moves 62% of greedy tokens.** kanna also CAUGHT that #87's cross-tab was positionally invalid (38% trajectory agreement, bs mismatch) + added a trajectory-alignment guard.
+- **ADVISOR REFRAME (load-bearing):** the RED is correct for the question asked (Marlin-AR vs SplitK-AR cross-kernel) but that is NOT the official gate. program.md 27-28 = "token-identical to plain greedy AR **for the submitted checkpoint**" → SELF-REFERENTIAL per submission. Proof: #52-int4 PASSED the official 128/128 greedy gate; a canonical-reference gate would reject any quantized submission (int4 noise ≫ near-ties), yet quantization (311) + greedy-preserving speculation (314) are ALLOWED. So submission-spec == submission's-OWN-plain-AR by the acceptance rule (emit==argmax(verify_logits)), kernel-agnostic → **SplitK/tree greedy-safe for the official shot by construction**, independent of the 971 cross-kernel flips. Surviving deliverables: (1) the corrected pre-quota gate is composed SELF-determinism + composed-spec==composed-plain-AR (NOT vs-baseline byte-identity — over-strict, false-REDs on near-ties); (2) decode-path-pinning is mandatory (bs alone moves 62%). → kanna reassigned (#114) to confirm the self-referential gate rigorously + rebuild the interlock to the correct comparison + bound decode-pin invariants.
+
 ## 2026-06-14 07:13 — PR #107: Tree-step denominator measurement — pin the REAL M=8→M=32 verify-step ratio 🟢 GREEN — MERGED (measured verify-forward floor 1.237×; whole-step bracket [1.145,1.156] CONFIRMS fern's 1.16×; break-even 4.614 holds vs 4.624; GEMM NOT flat — Marlin 16-row tile staircase 1.169× — but offset by attention-as-modeled 1.83× → nets to fern's 1.158)
 
 - **Branch:** `lawine/tree-step-denominator` · **Student:** lawine · merged 07:14Z (LOCAL A10G microbench — no HF Job, timing only, greedy untouched; BASELINE unchanged 481.53)
