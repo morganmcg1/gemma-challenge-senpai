@@ -1,0 +1,197 @@
+{
+  "gate": {
+    "primary_metric_name": "tree_free_500_ceiling_at_splitk_wall",
+    "tree_free_500_ceiling_at_splitk_wall": {
+      "definition": "central tree-free official TPS at the denken #117 SplitK wall (net 1.56%)",
+      "central": 491.7974073734057,
+      "conservative_corner": 489.46489848848125,
+      "optimistic_band_high": 527.298084968795,
+      "band": [
+        489.46489848848125,
+        527.298084968795
+      ],
+      "central_at_gross_3.20_wall": 495.9328678257051,
+      "clears_500_central": false,
+      "clears_500_conservative": false,
+      "clears_500_optimistic_band_high": true
+    },
+    "test_metric_name": "tree_required_et_to_clear_500",
+    "tree_required_et_to_clear_500": 4.623541199954488,
+    "tree_required_et_to_clear_500_with_cheap_levers": 4.554609973486243,
+    "tree_required_et_note": "tree-free MISSES 500 -> bare tree must hit this E[T] to clear 500",
+    "tree_required_et_frac_up_rec_band": 0.5719304475087954,
+    "splitk_needed_for_treefree_500": {
+      "central_levers_tau1": 0.048376422954313325,
+      "conservative_corner": 0.058397474751992196,
+      "lawine116_corner_at_tau_floor": 0.0584,
+      "lawine116_corner_at_tau_1": 0.05491,
+      "splitk_117_ceiling_net_central": 0.0156,
+      "splitk_117_band_high_gross": 0.0781,
+      "note": "tree-free needs SplitK >= central-levers 4.84% / corner 5.84%; #117 delivers net 1.56% central (MISS), 7.81% optimistic band-high (clears) -> straddle, central wall misses"
+    },
+    "reprice_106_crossover": {
+      "old_treefree_C_518p1_xover_tree_alone": 4.79091339139284,
+      "new_treefree_C_xover_tree_alone": 4.547691150043485,
+      "new_treefree_C_xover_tree_full_stack": 4.479890753115181,
+      "new_treefree_C": 491.7974073734057,
+      "interpretation": "fern #106's recovery gate to OVERTAKE tree-free DROPS from 4.791 (vs 518.1) to 4.548 (vs the lower 491.8) -- but that is no longer the binding gate: since tree-free MISSES 500, the tree must clear the ABSOLUTE 500 (E[T] >= 4.624), which is higher than the overtake-floor crossover. The tree's status flips from bounded-UPSIDE (#106 AMBER, optional) to REQUIRED-for-500."
+    },
+    "verdict": "RED",
+    "verdict_label": "tree-free CAPS BELOW 500 at the central #117 wall (491.8 < 500, gap 8.2); it clears 500 ONLY at the optimistic 7.81% band-high (527.3, the 88%-GDDR6 corner #117 prices as optimistic-not-expected) -> the tree (land #71) is now REQUIRED for 500, not insurance. It must recover realized E[T] >= 4.624 (bare) / 4.555 (with the surviving cheap levers), ~57% up #101's recoverable band -- and it is build-blocked at E[T]=2.10 (#101 fixable defect) -> that build is now the critical path.",
+    "validity_caveat": "SEPARATE GATE: even a tree-free OR tree 500 needs the greedy-identity VALIDITY ruling (kanna #114 + the human contract) which sits on top of ALL TPS math here. This re-price is a TPS-ceiling result only.",
+    "rule": "GREEN=tree-free clears 500 at the central #117 wall / AMBER=clears only at the optimistic 7.81% band-high or tau=1 corner / RED=caps below 500 at the central wall -> tree required for 500"
+  },
+  "model_self_check_vs_117": {
+    "definition": "s=3.20% gross, corner-conservative levers, tau in {0.96,0.99,1.00}",
+    "reproduced": {
+      "tau_0.96": 474.55642232470456,
+      "tau_0.99": 489.3863105223516,
+      "tau_1.00": 494.32960658823396
+    },
+    "published_117": {
+      "tau_0.96": 474.6,
+      "tau_0.99": 489.4,
+      "tau_1.00": 494.3
+    }
+  },
+  "step1_treefree_at_splitk_wall": {
+    "central_tps": 491.7974073734057,
+    "conservative_tps": 489.46489848848125,
+    "optimistic_band_high_tps": 527.298084968795,
+    "central_at_gross_wall_tps": 495.9328678257051,
+    "band_curve_central_levers": [
+      {
+        "splitk_label": "net_measured_1.56",
+        "splitk_pct": 1.5599999999999998,
+        "central_levers_tps": 491.7974073734057,
+        "clears_500_central_levers": false
+      },
+      {
+        "splitk_label": "gross_measured_3.20",
+        "splitk_pct": 3.2,
+        "central_levers_tps": 495.9328678257051,
+        "clears_500_central_levers": false
+      },
+      {
+        "splitk_label": "net_88_6.19",
+        "splitk_pct": 6.1899999999999995,
+        "central_levers_tps": 503.3126215705596,
+        "clears_500_central_levers": true
+      },
+      {
+        "splitk_label": "gross_88_7.81",
+        "splitk_pct": 7.8100000000000005,
+        "central_levers_tps": 507.2272090053478,
+        "clears_500_central_levers": true
+      }
+    ]
+  },
+  "step2_lever_table": [
+    {
+      "lever": "frontier (481.53, #52)",
+      "cumulative_tps": 481.53,
+      "delta_tps": 0.0,
+      "note": "tau=1.0 (lawine #116 central), E[T]=3.844 linear"
+    },
+    {
+      "lever": "+ SplitK #117 net 1.56%",
+      "cumulative_tps": 485.48231169068396,
+      "delta_tps": 3.9523116906839846,
+      "note": "bandwidth-util lever vg/(1+s); #117 PHYSICAL ceiling (was assumed 8.5%)"
+    },
+    {
+      "lever": "+ palette #110 (0.3%)",
+      "cumulative_tps": 486.9281261122828,
+      "delta_tps": 1.4458144215988682,
+      "note": "lossless byte lever (bit-exact); double-quant #104 DEAD/excluded"
+    },
+    {
+      "lever": "+ LK-loss #95 (1.010)",
+      "cumulative_tps": 491.7974073734057,
+      "delta_tps": 4.869281261122865,
+      "note": "E[T] numerator (+1.0% central, linear in TPS); prediction-only"
+    }
+  ],
+  "step2_lk_upside_total": 499.6013745317032,
+  "step2_composed_central_total": 491.7974073734057,
+  "step3_tree_reprice": {
+    "tree_required_et_to_clear_500_alone": 4.623541199954488,
+    "tree_required_et_to_clear_500_with_cheap_levers": 4.554609973486243,
+    "tree_beat_linear_et": 4.452747588028169,
+    "byteshark_asbuilt_et": 2.097,
+    "rec_band": [
+      3.844,
+      5.207
+    ],
+    "frac_up_rec_band": 0.5719304475087954,
+    "reprice_106_crossover": {
+      "old_treefree_C_518p1_xover_tree_alone": 4.79091339139284,
+      "new_treefree_C_xover_tree_alone": 4.547691150043485,
+      "new_treefree_C_xover_tree_full_stack": 4.479890753115181,
+      "new_treefree_C": 491.7974073734057,
+      "interpretation": "fern #106's recovery gate to OVERTAKE tree-free DROPS from 4.791 (vs 518.1) to 4.548 (vs the lower 491.8) -- but that is no longer the binding gate: since tree-free MISSES 500, the tree must clear the ABSOLUTE 500 (E[T] >= 4.624), which is higher than the overtake-floor crossover. The tree's status flips from bounded-UPSIDE (#106 AMBER, optional) to REQUIRED-for-500."
+    }
+  },
+  "inputs": {
+    "splitk_117_ceiling": {
+      "net_measured_central": 0.0156,
+      "gross_measured_central": 0.032,
+      "net_88_gddr6": 0.0619,
+      "gross_88_gddr6_high": 0.0781,
+      "gross_datasheet_unreachable": 0.1325
+    },
+    "splitk_central_net": 0.0156,
+    "splitk_band": [
+      0.016,
+      0.0781
+    ],
+    "tau_116_band": {
+      "low": 0.9983,
+      "central": 1.0,
+      "high": 1.0
+    },
+    "palette_110_tps": {
+      "low": 0.0,
+      "central": 0.003,
+      "high": 0.005
+    },
+    "lk_95_mult": {
+      "low": 1.01,
+      "central": 1.01,
+      "high": 1.024
+    },
+    "double_quant_104": "DEAD (KILL) -- excluded",
+    "fp32_m8": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.000102
+    },
+    "persist_97": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.0217
+    },
+    "multiplier_99_central": 1.0601865051833779,
+    "multiplier_99_local_ci": [
+      1.0599921923954079,
+      1.0603808179713479
+    ],
+    "K_cal": 125.26795005202914,
+    "E_T_linear": 3.844,
+    "E_T_tree": 5.207,
+    "budget": {
+      "verify_gemm": 0.53,
+      "drafter": 0.07,
+      "attention": 0.08,
+      "other": 0.32
+    },
+    "frontier_official": 481.53,
+    "target_official": 500.0
+  },
+  "public_evidence": {
+    "leaderboard_frontier_tps": 489.63,
+    "leaderboard_note": "public #1 frantic-penguin skv64 489.63 (valid); the SplitK/argmax-block class (byteshark 484.62, need-for-speed 488.07) realizes only +0.6-1.7% over 481.53 and NONE clears 500 -> field-side corroboration that SplitK alone is at its physical wall, consistent with #117's 3.20% ceiling.",
+    "digest": "GET /v1/digest?as=senpai 2026-06-14"
+  },
+  "method": "CPU-only analytic. REUSES denken #105 compose + lawine #99 multiplier CI + fern #102 break-even (over fern #100), swapping exactly two inputs: SplitK -> denken #117 physical ceiling (net 1.56% / band-high 7.81%), tau -> lawine #116 derived [0.9983,1.00]. No GPU, no served change, greedy identity untouched (TPS-ceiling only; validity is a separate gate)."
+}
