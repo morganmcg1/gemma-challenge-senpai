@@ -62,6 +62,99 @@ _LOG_LIMIT = int(os.environ.get("SPLITKV_VERIFY_LOG", "5"))
 
 _stats = {"redirected": 0}
 
+# --- PR #71 Component 2: tree-causal qq_bias mask DISPATCH (LOCAL probe) -------
+# Env-gated. When TREE_QQ_BIAS_PROBE=1, thread an [M,M] fp32 tree-causal qq_bias
+# into the redirected verify attention so star-attention is DISPATCHED for the
+# tree rows (chiku-inu missing-half #1). The bias = where(ancestor-or-self,0,-inf),
+# added to the score AFTER the kernel's causal mask
+# (triton_unified_attention.py:525) and UPSTREAM of the IS_3D split (:548), so it
+# reaches the 3D split-KV verify path. Indexed [query_pos, key_rel_pos] with
+# qq_bias_stride_0 = stride(0) doubling as the column bound -> tensor MUST be a
+# contiguous [M,M] fp32 (verified against the installed kernel).
+#
+#   parent=linear  -> the degenerate tree's mask IS the standard lower-triangular
+#                     causal mask, so the bias is a mathematical NO-OP on the
+#                     already-causal M=8 verify (ancestor -> +0; non-ancestor was
+#                     already -inf -> +(-inf) still -inf). PPL/decode MUST be
+#                     IDENTICAL; a transposed/mis-indexed tensor would mask real
+#                     ancestors and break PPL -> the identity run validates the
+#                     [query_pos, key_rel_pos] convention + no-corruption plumbing.
+#   parent=canary  -> diagonal-only (each row attends prefix+self, NO ancestor
+#                     draft rows). This is deliberately NOT a no-op: it must CHANGE
+#                     PPL/decode -> empirical positive proof that qq_bias actually
+#                     reaches and affects the kernel (DISPATCH confirmed).
+#   parent=m16/m32 -> the real tree mask (for the later salvage probe, once the
+#                     verify is widened to M=16/32 with node-order rows).
+#
+# Deployed path is byte-identical when TREE_QQ_BIAS_PROBE is unset (all logic is
+# inside `if TREE_QQ_BIAS:` guards; kwargs untouched otherwise).
+TREE_QQ_BIAS = os.environ.get("TREE_QQ_BIAS_PROBE") == "1"
+# Only width-TREE_QQ_BIAS_M verify batches get the bias (8 = deployed K=7+1
+# verify; isolates the canary's PPL delta to the verify, leaving prefill correct).
+TREE_QQ_BIAS_M = int(os.environ.get("TREE_QQ_BIAS_M", "8") or "8")
+TREE_QQ_BIAS_PARENT = os.environ.get("TREE_QQ_BIAS_PARENT", "linear")
+_qq_stats = {"dispatched": 0}
+_qq_cache: dict = {}
+
+
+def _linear_parent(m: int) -> list:
+    """Degenerate (chain) tree: node i's parent is i-1; ancestors-or-self={0..i}."""
+    return [-1] + list(range(m - 1))
+
+
+def _load_tree_spec_for_qq():
+    """Load the validated CPU tree-spec reference (single source of truth for the
+    tree-causal mask). Same module scripts/profiler/tree_spec.py the Component-1
+    probe uses -> no structural drift."""
+    import importlib.util
+    from pathlib import Path
+
+    repo_root = Path(__file__).resolve().parents[2]
+    ts_path = repo_root / "scripts" / "profiler" / "tree_spec.py"
+    spec = importlib.util.spec_from_file_location("_pr71_tree_spec_qq", ts_path)
+    mod = importlib.util.module_from_spec(spec)
+    # Register before exec: tree_spec uses @dataclass (resolves annotations via
+    # sys.modules[cls.__module__].__dict__).
+    sys.modules[spec.name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _build_qq_bias(m: int, device: Any) -> Any:
+    """Contiguous [M,M] fp32 tree-causal qq_bias = where(ancestor-or-self,0,-inf),
+    in node order, on ``device``. Cached per (M, device, parent)."""
+    import torch
+
+    key = (int(m), str(device), TREE_QQ_BIAS_PARENT)
+    cached = _qq_cache.get(key)
+    if cached is not None:
+        return cached
+    if TREE_QQ_BIAS_PARENT == "canary":
+        # diagonal-only: each row attends prefix(other=0) + itself only. NOT a
+        # no-op -> proves qq_bias is applied if PPL/decode changes vs control.
+        mask_t = torch.eye(m, dtype=torch.bool, device=device)
+    else:
+        ts = _load_tree_spec_for_qq()
+        if TREE_QQ_BIAS_PARENT == "m16":
+            parent = ts.PARENT_M16
+        elif TREE_QQ_BIAS_PARENT == "m32":
+            parent = ts.PARENT_M32
+        else:
+            parent = _linear_parent(m)
+        tree = ts.TreeSpec(parent)
+        if tree.num_nodes != m:
+            raise ValueError(
+                f"qq_bias parent M={tree.num_nodes} != verify M={m} "
+                f"(parent={TREE_QQ_BIAS_PARENT})"
+            )
+        mask_rows = ts.tree_causal_mask(tree)  # list[list[bool]], ancestor-or-self
+        mask_t = torch.tensor(mask_rows, dtype=torch.bool, device=device)
+    zero = torch.zeros((), dtype=torch.float32, device=device)
+    neg = torch.full((), float("-inf"), dtype=torch.float32, device=device)
+    qq = torch.where(mask_t, zero, neg).contiguous()
+    _qq_cache[key] = qq
+    return qq
+
 
 def _batch_invariant() -> bool:
     try:
@@ -140,6 +233,27 @@ def _make_wrapper(orig: Any) -> Any:
                             f"(n={_stats['redirected']})",
                             flush=True,
                         )
+                    # Component 2: DISPATCH the tree-causal qq_bias for the
+                    # width-TREE_QQ_BIAS_M verify batch (LOCAL probe, env-gated).
+                    if (
+                        TREE_QQ_BIAS
+                        and int(mq) == TREE_QQ_BIAS_M
+                        and kwargs.get("qq_bias") is None
+                    ):
+                        q = kwargs["q"]
+                        q_rows = int(q.shape[0])
+                        kwargs["qq_bias"] = _build_qq_bias(q_rows, q.device)
+                        _qq_stats["dispatched"] += 1
+                        if (
+                            _qq_stats["dispatched"] <= _LOG_LIMIT
+                            or _qq_stats["dispatched"] % 50 == 0
+                        ):
+                            print(
+                                f"[tree-qq-bias] DISPATCHED [{q_rows}x{q_rows}] fp32 "
+                                f"parent={TREE_QQ_BIAS_PARENT} -> 3D split-KV verify "
+                                f"(n={_qq_stats['dispatched']})",
+                                flush=True,
+                            )
             except Exception as exc:  # noqa: BLE001 - fail-open
                 print(
                     f"[splitkv-verify] redirect skipped, baseline kept: {exc!r}",
