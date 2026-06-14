@@ -1,5 +1,22 @@
 # SENPAI Research Results
 
+## 2026-06-14 05:48 — PR #97: Persistent-kernel overhead gate — is the ~32% "other" GPU-idle (megakernel-reclaimable) or GPU-busy? 🟡 AMBER — MERGED → persistent-kernel/megakernel LANE CLOSED (only 2.17% reclaimable GPU-idle; #65's GPU-bound finding EXTENDS to the megakernel objective)
+
+- **Branch:** `denken/persistent-kernel-overhead-gate` · **Student:** denken · merged ~05:59Z (analysis-only, BASELINE unchanged)
+- **Hypothesis:** the parallel-advisor LEVER 1 prices a persistent-kernel/megakernel at +8–15% by assuming the ~32% "other/overhead" is reclaimable GPU-idle (launch latency, host round-trips, inter-kernel bubbles). Tested against denken's own #65 (decode 99.41% GPU-bound). Is the 32% GPU-idle (reclaimable, GREEN) or GPU-busy small-kernel-tail/bus-spillover (#65 extended, CLOSE)?
+- **Primary metric:** `persistent_kernel_reclaimable_pct = 2.17%` (GPU-idle ceiling). **Test:** `decode_gpu_idle_fraction = 0.0217` (2.173% ± 0.024% across 39 cycles).
+
+| idle bucket (a+b+c = reclaimable) | % of decode wall |
+|---|---|
+| (a) kernel-launch / API overhead | 0.53% |
+| (b) host-device sync / Python round-trip | 0.33% |
+| (c) inter-kernel GPU-idle bubble | 1.31% |
+| **total GPU-idle (reclaimable ceiling)** | **2.17%** |
+| (d) GPU-BUSY real kernels (the other ~29.8pp of "32%") | **93% of the bucket — NOT reclaimable** |
+
+- **Verdict — AMBER (2.17% < 3% GREEN) → CLOSE the persistent-kernel/megakernel lane.** A trace-direct timeline of the deployed frontier decode step (CUDA graphs ON, conc=1, committed #43 post-split-KV trace) shows the GPU is **97.83% busy / 2.17% idle** in steady decode (1049 kernels per 8.16 ms cycle). Of the coarse "~32% other", only **2.17pp is GPU-idle**; **29.8pp (93%) is GPU-busy** under-counted attention + drafter + norm/sampling/lm_head/elementwise — all real kernels a megakernel *reorders* but **cannot remove** (the bus is the wall, #94). LEVER 1's "+8–15% reclaimable scheduling idle" premise is **refuted**; **#65's 99.41%-GPU-bound finding EXTENDS** from launch-overhead to the full megakernel objective (a sharper closure: not just CUDA-graph-immune but megakernel-immune). Even the 2.17% is mostly intra-graph bubble CUDA-graphs already minimized. Re-labels the 32% bucket correctly: it is the GPU-busy small-kernel tail + bus-bound spillover, not idle slack.
+- **W&B:** `gro3qa0d`. **Next:** denken → #101 (tree accept-length reconciliation — why the as-built tree gives `tok/step=2.10` vs analytical E[T]=5.207; the #1 lever's first empirical number).
+
 ## 2026-06-14 05:43 — PR #95: Drafter loss-objective gate — is the MTP draft head acceptance-optimal or only likelihood-optimal? (LK-Loss headroom) 🟡 AMBER — MERGED (LK headroom is +1.0–2.4% E[T] under greedy, NOT the +8% headline; re-rank channel rigorously CLOSED; prediction channel untested; banks the measured acceptance profile)
 
 - **Branch:** `fern/drafter-accept-objective` · **Student:** fern · merged ~05:43Z (analysis-only, BASELINE unchanged)
