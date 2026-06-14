@@ -142,6 +142,28 @@ DEP_FLAGS = {
         "-> can FLIP the central verdict) + land #71 co-log (n=385 cross-device allocations retires "
         "the rho(*,hw) [-0.3,+0.3] band). NO change to the binding BUILD bar (private 0.9780, #191) "
         "-- purely the launch sigma->LCB row.",
+    "liveprobe_depth_budget_denken_197": "LANDED -- CONSUMED (advisor 18:39Z, W&B wqr94io4). The GO "
+        "leg GATES on land #71's MEASURED full-ladder q[2..9] >= 0.9780 -- NEVER a depth-1-only or "
+        "spine-inferred read. liveprobe is a beta~1 CONFIRMATION, not a discovery: at the grounded "
+        "beta=0.765 the mechanism CANNOT clear the private bar (even PERFECT depth-1 -> private LCB "
+        "419.6 << 500), so a real GO needs beta~1 across the MEASURED ladder, not a point lambda_hat. "
+        "A depth-1-only read FALSELY declares GO (overstatement 85.2 TPS) -> false_go_risk_depth1_only="
+        "True. min_depths_for_decisive=full-ladder (depth-1+2 does NOT suffice). Decisive certification "
+        "cost = ~30,455 fixed-N Neyman trials @lambda=1 (shallow-heavy N_d[1..9]; 1.43x efficient over "
+        "equal-allocation), being made SEQUENTIAL by denken #205 (SPRT) -> carry 30k as the worst-case "
+        "cap. GATES the GO leg (the worked tuple's 8-entry ladder SATISFIES the guard); REINFORCES the "
+        "HOLD, does NOT flip it.",
+    "frozen_budget_kanna_202": "LANDED -- CONSUMED (advisor 18:39Z, W&B 533jd6l1; annotation only). "
+        "Multi-shot budget under the conservative FROZEN regime (the DEFAULT until the human pins the "
+        "harness): under fixed prompts + deterministic greedy the official harness re-benchmarks "
+        "IDENTICAL tokens, so per-checkpoint sampling deviation is a COMMON bias and best-of-N beats "
+        "down ONLY sigma_hw (66%% of one-sigma). So #194's N=5-at-the-bar does NOT reach P>=0.95 under "
+        "freeze (frozen P=0.810, not fresh 0.969); the default build-bar input is mu_bar_frozen_p95="
+        "504.87 (not fresh 499.08). THE HEDGE: build-to-mu=512.2 / N=1 is fully freeze-robust "
+        "(n_shots_frozen=1; a single draw has the same sigma_draw in both regimes) -> the SAFE "
+        "recommendation is UNTOUCHED. Only build-at-bar+best-of-N is frozen-fragile (E[shots]=2.34 vs "
+        "fresh 1.94; exhausts WITHOUT clearing 19%%; breakeven f*=0.846). kanna -> #206 frozen-cost "
+        "crossover. Does NOT touch the binding bar or single-shot sigma; REINFORCES the HOLD.",
     "ubel_181_tau_pin": "LANDED (advisor branch) -- the tau band [tau_low, 1.0] floor (stark #164) "
         "with the conservative tau=0.9924 corner; referenced as the floor, not a banked ledger axis.",
     "wirbel_184_lambda_robust_topology": "LANDED (advisor branch) -- named as the gap-fallback "
@@ -295,6 +317,16 @@ _AXIS_PATHS = {
     # REPLACING #195's 7.26 / 17.04 in the combined-sigma row. Wire the MECHANISM; HOLD the verdict
     # PROVISIONAL (do NOT hard-wire GO/NO-GO vs the lambda=1 ceiling) pending #204 + land #71.
     "sigma_closure_201": "research/validity/launch_sigma_closure/launch_sigma_closure_results.json",
+    # denken #197 liveprobe depth-budget -- MERGED (advisor 18:39Z): the certification COST row + the
+    # FULL-LADDER GO requirement + the depth-1-only FALSE-GO guard. At the grounded beta=0.765 the
+    # mechanism CANNOT clear the private bar (even PERFECT depth-1 -> private_LCB 419.6 << 500), so a
+    # GO requires beta~1 across the MEASURED full ladder, not a point lambda_hat. REINFORCES the HOLD.
+    "liveprobe_197": "research/oracle_readout/liveprobe_depth_budget/liveprobe_depth_budget_results.json",
+    # kanna #202 frozen-sampling re-draw budget -- MERGED (advisor 18:39Z): the multi-shot budget
+    # under the conservative FROZEN regime. Conservative default build-bar input mu_bar_frozen_p95=
+    # 504.87 (not fresh 499.08); the build-to-512.2/N=1 hedge is freeze-robust (n_shots_frozen_at_512
+    # =1). Only build-at-bar+best-of-N is frozen-fragile. REINFORCES the HOLD; budget-row annotation.
+    "frozen_budget_202": "research/validity/frozen_budget/frozen_budget_results.json",
 }
 
 
@@ -313,6 +345,8 @@ class _BankedAxes:
         self.covariance = _load_axis_json(_AXIS_PATHS["covariance_195"])
         self.cost_budget = _load_axis_json(_AXIS_PATHS["cost_budget_200"])
         self.sigma_closure = _load_axis_json(_AXIS_PATHS["sigma_closure_201"])
+        self.liveprobe = _load_axis_json(_AXIS_PATHS["liveprobe_197"])
+        self.frozen_budget = _load_axis_json(_AXIS_PATHS["frozen_budget_202"])
 
     # ---- wirbel #190 realistic within-prompt ICC / N_eff ---- #
     def icc_landed(self) -> bool:
@@ -578,6 +612,127 @@ class _BankedAxes:
     def sigma_closure_unit_convention_note(self):
         return _dig(self.sigma_closure, "convention_note")
 
+    # ---- denken #197 liveprobe depth-budget (MERGED 18:39Z: full-ladder GO gate + cost row) ---- #
+    # The GO must gate on land #71's MEASURED full-ladder q[2..9] >= 0.9780, never a depth-1-only /
+    # spine-inferred read (a FALSE GO worth 85.2 TPS). At beta=0.765 the mechanism CANNOT clear the
+    # private bar (perfect depth-1 -> private_LCB 419.6 << 500). Cost = ~30,455 Neyman trials @lambda=1
+    # (shallow-heavy), being made SEQUENTIAL by denken #205 (SPRT; carry 30k as the worst-case cap).
+    def liveprobe_landed(self) -> bool:
+        return self.liveprobe is not None
+
+    def liveprobe_mech_can_clear_private(self) -> bool:
+        return bool(_dig(self.liveprobe, "synthesis", "mechanism_feasibility",
+                         "mechanism_can_clear_private_bar", default=False))
+
+    def liveprobe_private_lcb_perfect_depth1(self) -> float | None:
+        v = _dig(self.liveprobe, "synthesis", "mechanism_feasibility",
+                 "private_lcb_at_perfect_depth1_mech")
+        return float(v) if v is not None else None
+
+    def liveprobe_false_go_risk_depth1(self) -> bool:
+        return bool(_dig(self.liveprobe, "synthesis", "depth1_false_go",
+                         "false_go_risk_depth1_only", default=False))
+
+    def liveprobe_depth1_overstatement(self) -> float | None:
+        v = _dig(self.liveprobe, "synthesis", "depth1_false_go", "overstatement_tps")
+        return float(v) if v is not None else None
+
+    def liveprobe_true_private_lcb_at_lambda1(self) -> float | None:
+        v = _dig(self.liveprobe, "synthesis", "depth1_false_go", "true_private_lcb_at_lambda1_eq_1")
+        return float(v) if v is not None else None
+
+    def liveprobe_min_depths_for_decisive(self):
+        return _dig(self.liveprobe, "synthesis", "beta_depth_count", "min_depths_for_decisive")
+
+    def liveprobe_min_depths_int(self):
+        return _dig(self.liveprobe, "synthesis", "beta_depth_count", "min_depths_for_decisive_int")
+
+    def liveprobe_depth1_plus_2_suffices(self) -> bool:
+        return bool(_dig(self.liveprobe, "synthesis", "beta_depth_count",
+                         "depth1_plus_2_suffices", default=False))
+
+    def liveprobe_beta_primary(self) -> float | None:
+        v = _dig(self.liveprobe, "synthesis", "imports", "beta_primary")
+        return float(v) if v is not None else None
+
+    def liveprobe_private_bar(self) -> float | None:
+        v = _dig(self.liveprobe, "synthesis", "imports", "private_bar_both_0p9780")
+        return float(v) if v is not None else None
+
+    def liveprobe_decisive_total_trials(self) -> float | None:
+        v = _dig(self.liveprobe, "synthesis", "decisive_budget", "total_trials_for_decisive_private")
+        return float(v) if v is not None else None
+
+    def liveprobe_N_d_budget(self):
+        return _dig(self.liveprobe, "synthesis", "decisive_budget", "N_d_budget_1to9", default=[])
+
+    def liveprobe_neyman_efficiency_gain(self) -> float | None:
+        v = _dig(self.liveprobe, "synthesis", "decisive_budget", "efficiency_gain_neyman_vs_equal")
+        return float(v) if v is not None else None
+
+    def liveprobe_decisive_margin_at_lambda1(self) -> float | None:
+        # the per_lam_true_table row at lam_true=1.0 -> structural margin 0.022 (private bar so tight).
+        rows = _dig(self.liveprobe, "synthesis", "decisive_budget", "per_lam_true_table", default=[])
+        for r in (rows or []):
+            if isinstance(r, dict) and abs(float(r.get("lam_true", 0.0)) - 1.0) < 1e-9:
+                v = r.get("margin")
+                return float(v) if v is not None else None
+        return None
+
+    # ---- kanna #202 frozen-sampling re-draw budget (MERGED 18:39Z: conservative FROZEN regime) ---- #
+    # Multi-shot budget under the FROZEN regime (fixed prompts + deterministic greedy => the harness
+    # re-benchmarks IDENTICAL tokens => best-of-N beats ONLY sigma_hw, not the per-checkpoint
+    # sigma_sample bias). Conservative DEFAULT build-bar input mu_bar_frozen_p95=504.87 (not fresh
+    # 499.08). THE HEDGE: build-to-512.2/N=1 is freeze-robust (n_shots_frozen_at_512=1). REINFORCES HOLD.
+    def frozen_budget_landed(self) -> bool:
+        return self.frozen_budget is not None
+
+    def mu_bar_frozen_p95(self) -> float | None:
+        v = _dig(self.frozen_budget, "mu_bar_frozen_p95")
+        return float(v) if v is not None else None
+
+    def mu_bar_fresh_p95_n5(self) -> float | None:
+        v = _dig(self.frozen_budget, "build_bar", "mu_bar_fresh_p95_n5")
+        return float(v) if v is not None else None
+
+    def p_bar_n5_frozen(self) -> float | None:
+        v = _dig(self.frozen_budget, "p_bar_n5_frozen")
+        return float(v) if v is not None else None
+
+    def frozen_n_shots_at_512(self):
+        return _dig(self.frozen_budget, "build_bar", "n_shots_frozen_at_512")
+
+    def frozen_mu_safe_tps(self) -> float | None:
+        v = _dig(self.frozen_budget, "build_bar", "mu_safe_fresh_tps")
+        return float(v) if v is not None else None
+
+    def frozen_delta_mu(self) -> float | None:
+        v = _dig(self.frozen_budget, "delta_mu_frozen")
+        return float(v) if v is not None else None
+
+    def frozen_fraction_breakeven(self) -> float | None:
+        v = _dig(self.frozen_budget, "frozen_fraction_breakeven")
+        return float(v) if v is not None else None
+
+    def frozen_e_shots_at_bar(self) -> float | None:
+        v = _dig(self.frozen_budget, "harness_sensitivity", "p95_shots_at_bar",
+                 "e_shots_frozen_at_bar")
+        return float(v) if v is not None else None
+
+    def fresh_e_shots_at_bar(self) -> float | None:
+        v = _dig(self.frozen_budget, "harness_sensitivity", "p95_shots_at_bar",
+                 "e_shots_fresh_at_bar")
+        return float(v) if v is not None else None
+
+    def frozen_p_exhaust_without_clear(self) -> float | None:
+        v = _dig(self.frozen_budget, "harness_sensitivity", "p95_shots_at_bar",
+                 "p_exhaust_without_clear_frozen")
+        return float(v) if v is not None else None
+
+    def frozen_sigma_fraction_beatable(self) -> float | None:
+        v = _dig(self.frozen_budget, "import_194", "sigma_fraction_beatable_frozen")
+        return float(v) if v is not None else None
+
     # ---- ubel #189 executable submission gate (packaging precondition) ---- #
     def packaging_landed(self) -> bool:
         return self.packaging is not None
@@ -692,6 +847,11 @@ def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
     r194 = _BANKED.redraw_landed()
     cba = cost_budget_annotation()
     c200 = bool(cba.get("landed"))
+    # kanna #202 frozen-regime annotation (advisor 18:39Z): the conservative default build-bar input
+    # is mu_bar_frozen_p95=504.87 (not fresh 499.08); the build-to-512.2/N=1 hedge is freeze-robust.
+    # ANNOTATION ONLY -- single-shot GO/NO-GO + binding bar + sigma UNCHANGED. REINFORCES the HOLD.
+    fba = frozen_budget_annotation()
+    c202 = bool(fba.get("landed"))
     rows.append({
         "axis": "redraw_budget", "pr": 194, "slug": "redraw-budget", "kind": "numerical-budget",
         "status": "LANDED" if r194 else "IN-FLIGHT",
@@ -707,6 +867,22 @@ def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
         "build_vs_stay_crossover_total_shots": (cba["crossover_total_shots"] if c200 else None),
         "c_star_fixedN_per_b": (cba["c_star_fixedN_per_b"] if c200 else None),
         "c_star_sequential_per_b": (cba["c_star_sequential_per_b"] if c200 else None),
+        # kanna #202 frozen-regime annotation (conservative default + freeze-robust hedge).
+        "frozen_budget_202_landed": c202,
+        "frozen_regime_default": (fba.get("regime_default") if c202 else None),
+        "mu_bar_frozen_p95_tps": (fba["mu_bar_frozen_p95_tps"] if c202 else None),
+        "mu_bar_fresh_p95_n5_tps": (fba["mu_bar_fresh_p95_n5_tps"] if c202 else None),
+        "p_bar_n5_frozen": (fba["p_bar_n5_frozen"] if c202 else None),
+        "freeze_robust_build_to_mu_tps": (fba["freeze_robust_hedge"]["build_to_mu_tps"]
+                                          if c202 else None),
+        "n_shots_frozen_at_512": (fba["freeze_robust_hedge"]["n_shots_frozen"] if c202 else None),
+        "frozen_fragile_e_shots_at_bar": (fba["build_at_bar_best_of_n_fragile"]["e_shots_frozen"]
+                                          if c202 else None),
+        "frozen_fraction_breakeven": (fba["build_at_bar_best_of_n_fragile"]["frozen_fraction_breakeven"]
+                                      if c202 else None),
+        "frozen_cost_crossover_206_pending": (fba.get("frozen_cost_crossover_206_pending")
+                                              if c202 else None),
+        "frozen_note": (fba["note"] if c202 else None),
         "note": ("best-of-N official re-draw budget for P(clear-500)>=0.95: N*=%s at the build bar, "
                  "%s at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the "
                  "SEQUENTIAL early-stop E[shots]=%.2f (NOT fixed-%s); build-higher (mu>=%.1f/N=1) beats "
@@ -756,6 +932,37 @@ def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
                  "(sqrt(D)=2.100 -> 11.17) -> the combined LAUNCH sigma row (12.22/13.80). CLOSES the "
                  "ledger (no pending numerical axes).") if c195
                 else "not landed -> assume independence (quadrature); conservative until it lands.",
+    })
+    # Axis 7 -- denken #197 liveprobe measurement-cost (MERGED 18:39Z, CONSUMED): the INPUT-side
+    #           CERTIFICATION budget + the FULL-LADDER GO requirement + the depth-1-only FALSE-GO
+    #           guard. Distinct from #187 (input-side CI precision): #197 sizes how many liveprobe
+    #           trials DECISIVELY certify the measured ladder clears the PRIVATE bar 0.9780. A
+    #           depth-1-only / spine-inferred read is a FALSE GO worth 85.2 TPS; at beta=0.765 the
+    #           mechanism CANNOT clear the private bar (perfect depth-1 -> 419.6 << 500). Sequential
+    #           via denken #205 (SPRT); 30k worst-case cap. REINFORCES the HOLD (does NOT flip it).
+    lp = liveprobe_measurement_cost(None)
+    lp_ok = bool(lp.get("landed"))
+    rows.append({
+        "axis": "liveprobe_measurement_cost", "pr": 197, "slug": "liveprobe-depth-budget",
+        "kind": "measurement-cost",
+        "status": "LANDED" if lp_ok else "IN-FLIGHT",
+        "flag": "consumed" if lp_ok else "pending-liveprobe",
+        "reinforces_hold": True,
+        "full_ladder_required": (lp.get("full_ladder_required") if lp_ok else None),
+        "min_depths_for_decisive": (lp.get("min_depths_for_decisive") if lp_ok else None),
+        "depth1_plus_2_suffices": (lp.get("depth1_plus_2_suffices") if lp_ok else None),
+        "false_go_risk_depth1_only": (lp.get("false_go_risk_depth1_only") if lp_ok else None),
+        "depth1_overstatement_tps": (lp.get("depth1_overstatement_tps") if lp_ok else None),
+        "mechanism_can_clear_private_bar": (lp.get("mechanism_can_clear_private_bar") if lp_ok else None),
+        "private_lcb_perfect_depth1_tps": (lp.get("private_lcb_perfect_depth1_tps") if lp_ok else None),
+        "beta_primary": (lp.get("beta_primary") if lp_ok else None),
+        "decisive_total_trials_lambda1": (lp.get("decisive_total_trials_lambda1") if lp_ok else None),
+        "neyman_efficiency_gain_vs_equal": (lp.get("neyman_efficiency_gain_vs_equal") if lp_ok else None),
+        "decisive_margin_at_lambda1": (lp.get("decisive_margin_at_lambda1") if lp_ok else None),
+        "sequential_via_205_pending": (lp.get("sequential_via_205_pending") if lp_ok else None),
+        "worst_case_cap_trials": (lp.get("worst_case_cap_trials") if lp_ok else None),
+        "note": (lp.get("note") if lp_ok else "liveprobe #197 not landed -> no explicit full-ladder "
+                 "/ false-GO guard; the GO leg uses the measured ladder as-is."),
     })
     return rows
 
@@ -982,6 +1189,121 @@ def cost_budget_annotation() -> dict:
                     _BANKED.cost_crossover_total_shots() or float("nan"),
                     _BANKED.cost_crossover_fixedn_per_b() or float("nan"),
                     _BANKED.cost_crossover_sequential_per_b() or float("nan")),
+    }
+
+
+def liveprobe_measurement_cost(ladder: list | None = None) -> dict:
+    """denken #197 (MERGED 18:39Z, W&B wqr94io4): the liveprobe certification COST row + the
+    FULL-LADDER GO requirement + the depth-1-only FALSE-GO guard. The GO must gate on land #71's
+    MEASURED full-ladder q[2..9] clearing 0.9780 -- never a depth-1-only / spine-inferred read (which
+    is a FALSE GO worth 85.2 TPS of overstatement). At the grounded beta=0.765 the mechanism CANNOT
+    clear the private bar (even PERFECT depth-1 -> private_LCB 419.6 << 500), so a GO requires beta~1
+    across the MEASURED ladder, not a point lambda_hat. The decisive certification is ~30,455 fixed-N
+    Neyman trials @lambda=1 (shallow-heavy), being made SEQUENTIAL by denken #205 (SPRT) -> carry 30k
+    as the worst-case cap. REINFORCES the HOLD (sharpens the measurement spec); does NOT flip it."""
+    if not _BANKED.liveprobe_landed():
+        return {"landed": False, "note": "liveprobe #197 not landed -> GO leg uses the measured "
+                                         "ladder as-is; no explicit full-ladder / false-GO guard."}
+    n_meas = (len([q for q in ladder if q is not None]) if ladder is not None else None)
+    full_ladder_measured = bool(n_meas is not None and n_meas >= 8)
+    return {
+        "landed": True,
+        "source_pr": 197,
+        "reinforces_hold": True,
+        "flips_verdict": False,
+        # ---- the FULL-LADDER GO requirement (measurement spec) ----
+        "full_ladder_required": True,
+        "min_depths_for_decisive": _BANKED.liveprobe_min_depths_for_decisive(),     # "full-ladder"
+        "min_depths_int": _BANKED.liveprobe_min_depths_int(),                       # 9
+        "depth1_plus_2_suffices": _BANKED.liveprobe_depth1_plus_2_suffices(),       # False
+        "measured_depths_in_tuple": n_meas,                                        # 8 (worked example)
+        "full_ladder_measured": full_ladder_measured,                              # True (worked example)
+        # ---- the depth-1-only FALSE-GO guard ----
+        "false_go_risk_depth1_only": _BANKED.liveprobe_false_go_risk_depth1(),      # True
+        "depth1_overstatement_tps": _finite(_BANKED.liveprobe_depth1_overstatement()),  # 85.21
+        "true_private_lcb_at_lambda1_tps": _finite(_BANKED.liveprobe_true_private_lcb_at_lambda1()),  # 419.6
+        # ---- the beta~1 confirmation (mechanism feasibility) ----
+        "mechanism_can_clear_private_bar": _BANKED.liveprobe_mech_can_clear_private(),  # False
+        "private_lcb_perfect_depth1_tps": _finite(_BANKED.liveprobe_private_lcb_perfect_depth1()),  # 419.6
+        "beta_primary": _finite(_BANKED.liveprobe_beta_primary()),                  # 0.765
+        "private_bar_both": _finite(_BANKED.liveprobe_private_bar()),               # 0.9780
+        # ---- the certification COST row (sequential via #205; 30k worst-case cap) ----
+        "decisive_total_trials_lambda1": _finite(_BANKED.liveprobe_decisive_total_trials()),  # 30455.40
+        "decisive_N_d_budget_1to9": _BANKED.liveprobe_N_d_budget(),
+        "neyman_efficiency_gain_vs_equal": _finite(_BANKED.liveprobe_neyman_efficiency_gain()),  # 1.43
+        "decisive_margin_at_lambda1": _finite(_BANKED.liveprobe_decisive_margin_at_lambda1()),  # 0.022
+        "sequential_via_205_pending": True,                                        # denken #205 SPRT
+        "worst_case_cap_trials": _finite(_BANKED.liveprobe_decisive_total_trials()),  # 30k cap
+        "note": "the GO must gate on land #71's MEASURED full-ladder q[2..9] >= 0.9780 (min_depths="
+                "full-ladder; depth-1+2 does NOT suffice) -- a depth-1-only read is a FALSE GO worth "
+                "%.1f TPS (true private LCB 419.6 << 500). At beta=0.765 NO build clears the private "
+                "bar (mech_can_clear=False) -> a GO needs beta~1 across the ladder. Cost: ~%.0f Neyman "
+                "trials @lambda=1 (shallow-heavy; eff %.2fx over equal-allocation), being made "
+                "SEQUENTIAL by denken #205 (SPRT) -> carry 30k as the worst-case cap. REINFORCES the "
+                "HOLD." % (
+                    _BANKED.liveprobe_depth1_overstatement() or float("nan"),
+                    _BANKED.liveprobe_decisive_total_trials() or float("nan"),
+                    _BANKED.liveprobe_neyman_efficiency_gain() or float("nan")),
+    }
+
+
+def frozen_budget_annotation() -> dict:
+    """kanna #202 (MERGED 18:39Z, W&B 533jd6l1): the multi-shot budget under the conservative FROZEN
+    regime. Under fixed prompts + deterministic greedy the official harness re-benchmarks IDENTICAL
+    tokens, so the per-checkpoint sampling deviation is a COMMON bias and best-of-N beats down ONLY
+    sigma_hw (66% of one-sigma), NOT sigma_sample. So #194's N=5-at-the-bar does NOT reach P>=0.95
+    under freeze (frozen P=0.810, not fresh 0.969). Carry the conservative default build-bar input
+    mu_bar_frozen_p95=504.87 (not fresh 499.08). THE HEDGE: build-to-mu=512.2 / N=1 is fully
+    freeze-robust (a single draw has the same sigma_draw in both regimes; n_shots_frozen_at_512=1),
+    so the SAFE recommendation survives untouched. Only build-at-bar+best-of-N is frozen-fragile
+    (E[shots]=2.34, exhausts-without-clearing 19%, breakeven f*=0.846). REINFORCES the HOLD."""
+    if not _BANKED.frozen_budget_landed():
+        return {"landed": False, "note": "frozen_budget #202 not landed -> multi-shot budget assumes "
+                                         "the FRESH regime (#194 N=5@bar P=0.969); optimistic if the "
+                                         "harness re-benchmarks frozen tokens."}
+    return {
+        "landed": True,
+        "source_pr": 202,
+        "reinforces_hold": True,
+        "regime_default": "FROZEN",          # conservative default until the human pins the harness
+        "regime_is_open": True,              # WHICH regime applies is the harness-owner's open question
+        # ---- conservative default build-bar input under freeze ----
+        "mu_bar_frozen_p95_tps": _finite(_BANKED.mu_bar_frozen_p95()),           # 504.87
+        "mu_bar_fresh_p95_n5_tps": _finite(_BANKED.mu_bar_fresh_p95_n5()),       # 499.08
+        "p_bar_n5_frozen": _finite(_BANKED.p_bar_n5_frozen()),                   # 0.810 (NOT 0.969)
+        "delta_mu_frozen_tps": _finite(_BANKED.frozen_delta_mu()),               # -7.28
+        "sigma_fraction_beatable_frozen": _finite(_BANKED.frozen_sigma_fraction_beatable()),  # 0.658
+        # ---- THE HEDGE: build-to-512.2 / N=1 is freeze-robust (the SAFE recommendation, untouched) ----
+        "freeze_robust_hedge": {
+            "build_to_mu_tps": _finite(_BANKED.frozen_mu_safe_tps()),            # 512.16
+            "n_shots_frozen": _BANKED.frozen_n_shots_at_512(),                   # 1
+            "regime_invariant": True,
+            "note": "build clear of the bar (mu>=512.2) and take ONE shot -- a single draw has the "
+                    "same sigma_draw in both regimes, so this path is fully freeze-robust.",
+        },
+        # ---- the frozen-FRAGILE shortcut (build-at-bar + best-of-N) ----
+        "build_at_bar_best_of_n_fragile": {
+            "e_shots_frozen": _finite(_BANKED.frozen_e_shots_at_bar()),          # 2.34
+            "e_shots_fresh": _finite(_BANKED.fresh_e_shots_at_bar()),            # 1.94
+            "exhaust_without_clear_frac_frozen": _finite(_BANKED.frozen_p_exhaust_without_clear()),  # 0.19
+            "frozen_fraction_breakeven": _finite(_BANKED.frozen_fraction_breakeven()),  # 0.846
+            "note": "build-at-bar mu=500 + best-of-N is frozen-fragile: pays E[shots]=2.34 (vs fresh "
+                    "1.94) and exhausts WITHOUT clearing 19% of the time; f*=0.846 of sigma_sample "
+                    "must re-randomize for N=5 to hold P>=0.95.",
+        },
+        "frozen_cost_crossover_206_pending": True,   # kanna -> #206 (build_higher_dominates_below_b)
+        "note": "multi-shot budget under the conservative FROZEN default: best-of-N beats ONLY "
+                "sigma_hw -> N=5@bar clears P=%.3f (NOT fresh 0.969); the default build-bar input is "
+                "mu_bar_frozen_p95=%.2f (not fresh %.2f). THE HEDGE (carry prominently): build-to-"
+                "mu=512.2 / N=1 is fully freeze-robust (n_shots_frozen=1) -> the SAFE recommendation "
+                "is untouched. Only build-at-bar+best-of-N is frozen-fragile (E[shots]=%.2f, exhausts "
+                "19%%, breakeven f*=%.3f). kanna -> #206 frozen-cost crossover (carry "
+                "build_higher_dominates_below_b when it lands). REINFORCES the HOLD." % (
+                    _BANKED.p_bar_n5_frozen() or float("nan"),
+                    _BANKED.mu_bar_frozen_p95() or float("nan"),
+                    _BANKED.mu_bar_fresh_p95_n5() or float("nan"),
+                    _BANKED.frozen_e_shots_at_bar() or float("nan"),
+                    _BANKED.frozen_fraction_breakeven() or float("nan")),
     }
 
 
@@ -1216,12 +1538,28 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
         lsc_worstcase_p95_reachable = None
         lsc_provisional = None
 
+    # ---- FULL-LADDER GO requirement + depth-1-only FALSE-GO guard (#197 denken, advisor 18:39Z) ----
+    # The GO leg must gate on land #71's MEASURED full-ladder q[2..9] (>=8 depths) clearing the private
+    # bar 0.9780 -- NEVER a depth-1-only or spine-inferred read. A depth-1-only GO is a FALSE GO worth
+    # 85.2 TPS (true private LCB 419.6 << 500; at the grounded beta=0.765 the mechanism CANNOT clear
+    # the private bar, so a real GO needs beta~1 across the MEASURED ladder, not a point lambda_hat).
+    # full_ladder_ok GATES `go` (it BLOCKS a depth-1-only false GO) but is NON-FLIPPING for a properly
+    # measured tuple: it passes when #197 is not landed OR the measured ladder carries >=8 depths. The
+    # worked example carries the 8-entry q[2..9] spine -> full_ladder_ok=True -> both-bugs GO HELD.
+    lpc = liveprobe_measurement_cost(t.get("q_ladder"))
+    lp_landed = bool(lpc.get("landed"))
+    full_ladder_measured = bool(lpc.get("full_ladder_measured")) if lp_landed else None
+    full_ladder_ok = bool((not lp_landed) or lpc.get("full_ladder_measured"))
+
     # ---- overall per-topology GO: validity AND trustworthy AND binding-build AND BOTH launch LCBs
-    #      (realistic ICC #190 + private #191). The #201 combined-sigma row is PROVISIONAL/NON-GATING
-    #      (advisor 18:23Z: HOLD the verdict -- do NOT hard-wire the GO/NO-GO vs the lambda=1 ceiling
-    #      while #204 + land #71 are open) -> it is surfaced in lambda_gate but NOT folded into `go`. ----
+    #      (realistic ICC #190 + private #191) AND the #197 full-ladder measurement guard. The #201
+    #      combined-sigma row is PROVISIONAL/NON-GATING (advisor 18:23Z: HOLD the verdict -- do NOT
+    #      hard-wire the GO/NO-GO vs the lambda=1 ceiling while #204 + land #71 are open) -> it is
+    #      surfaced in lambda_gate but NOT folded into `go`. The #197 full-ladder guard, by contrast,
+    #      DOES gate `go` (advisor 18:39Z: "require the full-ladder measurement before emitting GO") --
+    #      but is SATISFIED by the worked example, so the analytic verdict is unchanged. ----
     go = bool(validity_ok and oa["trustworthy"] and binding_build_gate_pass
-              and realistic_launch_pass and private_launch_pass)
+              and realistic_launch_pass and private_launch_pass and full_ladder_ok)
 
     # Failing-gate diagnosis + restoration lever (PR step 4).
     failing_gate, restoration = None, None
@@ -1268,6 +1606,22 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
                         "<500 even at lambda=1." % (
                             private_launch_lcb if private_launch_lcb is not None else float("nan")))
         restoration = "land the both-bugs kernel (the robust GO path); this path is private-unreachable."
+    elif not full_ladder_ok:
+        failing_gate = ("full-ladder measurement guard (#197): GO requires land #71's MEASURED "
+                        "full-ladder q[2..9] (>=8 depths) clearing %.4f -- the tuple carries only %s "
+                        "depth(s). A depth-1-only / spine-inferred read is a FALSE GO worth %.1f TPS "
+                        "(true private LCB %.1f<<500; at beta=%.3f the mechanism CANNOT clear the "
+                        "private bar, so a real GO needs beta~1 across the MEASURED ladder)." % (
+                            lpc.get("private_bar_both") or float("nan"),
+                            lpc.get("measured_depths_in_tuple"),
+                            lpc.get("depth1_overstatement_tps") or float("nan"),
+                            lpc.get("true_private_lcb_at_lambda1_tps") or float("nan"),
+                            lpc.get("beta_primary") or float("nan")))
+        restoration = ("measure land #71's full q[2..9] ladder before emitting GO (the decisive "
+                       "certification is ~%.0f fixed-N Neyman trials @lambda=1, shallow-heavy, being "
+                       "made SEQUENTIAL by denken #205 (SPRT) -> carry 30k as the worst-case cap); a "
+                       "depth-1-only read is not certifiable." % (
+                           lpc.get("decisive_total_trials_lambda1") or float("nan")))
     # NOTE: the #201 combined-sigma row is PROVISIONAL/NON-GATING (advisor 18:23Z) -> it is NOT a
     # failing-gate candidate. A worst-case-P95-unreachable corner does NOT flip the analytic verdict.
 
@@ -1309,6 +1663,22 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
             "launch_sigma_worstcase_p95_reachable": lsc_worstcase_p95_reachable,  # False (-1.74)
             "launch_sigma_provisional": lsc_provisional,                         # HOLD pending #204 + land #71
             "launch_sigma_gates_go": False,                                      # advisor 18:23Z: NOT hard-wired
+            # full-ladder GO requirement + depth-1-only FALSE-GO guard (#197, advisor 18:39Z). UNLIKE
+            # the #201 row, this measurement-spec guard DOES gate `go` (it BLOCKS a depth-1-only false
+            # GO) -- but is SATISFIED by the worked example's 8-entry measured ladder -> both-bugs GO HELD.
+            "liveprobe_measurement_cost": lpc,
+            "full_ladder_required": (lpc.get("full_ladder_required") if lp_landed else None),
+            "full_ladder_measured": full_ladder_measured,
+            "full_ladder_ok": full_ladder_ok,
+            "full_ladder_gates_go": True,                                        # advisor 18:39Z: REQUIRED before GO
+            "false_go_risk_depth1_only": (lpc.get("false_go_risk_depth1_only") if lp_landed else None),
+            "depth1_overstatement_tps": (lpc.get("depth1_overstatement_tps") if lp_landed else None),
+            "mechanism_can_clear_private_bar": (lpc.get("mechanism_can_clear_private_bar")
+                                                if lp_landed else None),
+            "decisive_total_trials_lambda1": (lpc.get("decisive_total_trials_lambda1")
+                                              if lp_landed else None),
+            "liveprobe_sequential_via_205_pending": (lpc.get("sequential_via_205_pending")
+                                                     if lp_landed else None),
             "numerical_ci_ledger": numerical_ci_ledger(topo, TAU_HEADLINE),
             "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190 0.9513, "
                             "private#191 0.9780) = 0.9780 (private, both-bugs); descent private bar "
@@ -1424,6 +1794,13 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
     # cost-aware re-draw budget (#200): sequential early-stop spend + build-higher-vs-stay toggle.
     # ANNOTATION ONLY -- single-shot GO/NO-GO + binding bar + sigma are unchanged.
     cba_ledger = cost_budget_annotation()
+    # liveprobe certification cost + FULL-LADDER GO requirement (#197 denken, advisor 18:39Z): the GO
+    # leg GATES on land #71's MEASURED full-ladder q[2..9] (a depth-1-only read is a FALSE GO worth
+    # 85.2 TPS); cost ~30,455 Neyman trials @lambda=1 (sequential via #205). REINFORCES the HOLD.
+    lpc_ledger = liveprobe_measurement_cost(t.get("q_ladder"))
+    # multi-shot budget under the conservative FROZEN regime (#202 kanna, advisor 18:39Z): default
+    # build-bar input mu_bar_frozen_p95=504.87; build-to-512.2/N=1 hedge is freeze-robust. REINFORCES HOLD.
+    fba_ledger = frozen_budget_annotation()
 
     out = {
         "verdict": verdict,
@@ -1469,12 +1846,27 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
                         "(ledger CLOSED). #200 cost annotation (budget row only, single-shot logic "
                         "UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=1.94 (not "
                         "fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu "
-                        "costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential)."
+                        "costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). #197 (denken, "
+                        "advisor 18:39Z): the GO leg GATES on land #71's MEASURED full-ladder q[2..9] "
+                        ">= 0.9780 -- NEVER depth-1-only/spine-inferred (a depth-1-only read is a FALSE "
+                        "GO worth 85.2 TPS; at beta=0.765 the mechanism CANNOT clear the private bar, "
+                        "so a real GO needs beta~1 across the MEASURED ladder); decisive cert ~30,455 "
+                        "Neyman trials @lambda=1 (shallow-heavy, made SEQUENTIAL by #205 SPRT -> carry "
+                        "30k worst-case cap). #202 (kanna, advisor 18:39Z): the multi-shot budget "
+                        "DEFAULTS to the conservative FROZEN regime (best-of-N beats ONLY sigma_hw -> "
+                        "N=5@bar P=0.810 not fresh 0.969; default build-bar input mu_bar_frozen_p95="
+                        "504.87 not fresh 499.08); THE HEDGE -- build-to-mu=512.2/N=1 is fully freeze-"
+                        "robust (n_shots_frozen=1), so the SAFE recommendation is untouched; only "
+                        "build-at-bar+best-of-N is frozen-fragile (E[shots]=2.34, exhausts 19%%, "
+                        "breakeven f*=0.846). BOTH #197 + #202 REINFORCE the HOLD -- they sharpen the "
+                        "measurement spec + budget robustness, they do NOT flip the verdict."
                         % _BANKED.design_effect(),
             "numerical_axes": {"both_bugs": bb_ledger,
                                "descent_only": numerical_ci_ledger("descent_only", TAU_HEADLINE)},
             "combined_sigma_corner": csc_ledger,
             "cost_budget_annotation": cba_ledger,
+            "liveprobe_measurement_cost": lpc_ledger,
+            "frozen_budget_annotation": fba_ledger,
             "preconditions": preconds,
             "preconditions_all_go": preconds_all_go,
             "any_iid_fallback_active": any_iid_fallback,
@@ -1561,7 +1953,8 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
     num_md = ["| axis | PR | status | flag | bar/value |", "|---|---|---|---|---|"]
     for r in led["numerical_axes"][h]:
         val = r.get("lambda_bar", r.get("sigma_tps", r.get("lambda_built_halfwidth",
-                    r.get("halfwidth_tps_iid", r.get("n_shots_for_p95_at_bar")))))
+                    r.get("halfwidth_tps_iid", r.get("n_shots_for_p95_at_bar",
+                    r.get("decisive_total_trials_lambda1"))))))
         val_s = ("%.4f" % val) if isinstance(val, (int, float)) else (
             str(val) if val is not None else "pending")
         num_md.append("| %s | #%s | %s | %s | %s |" % (
@@ -1612,6 +2005,64 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
                 cba["c_star_sequential_per_b"]))
     else:
         budget_line = "**Multi-shot budget (#200):** not landed -> naive fixed-N=5 spend (over-stated)."
+    # liveprobe certification cost + FULL-LADDER GO requirement (#197) + frozen-budget regime (#202).
+    lpc = led.get("liveprobe_measurement_cost") or {}
+    fba = led.get("frozen_budget_annotation") or {}
+    if lpc.get("landed"):
+        liveprobe_line = (
+            "**Full-ladder GO requirement + depth-1-only FALSE-GO guard (#197 denken -- GATES the GO "
+            "leg; the worked tuple SATISFIES it):** GO requires land #71's **MEASURED full-ladder "
+            "q[2..9]** (>=8 depths; min_depths=%s, depth1+2 does NOT suffice) clearing the private bar "
+            "%.4f -- NEVER a depth-1-only/spine-inferred read. A depth-1-only GO is a **FALSE GO worth "
+            "%.1f TPS** (true private LCB %.1f << 500). At the grounded **beta=%.3f the mechanism "
+            "CANNOT clear the private bar** (mechanism_can_clear=%s; perfect depth-1 -> %.1f << 500), "
+            "so a real GO needs beta~1 ACROSS the measured ladder, not a point lambda_hat. The worked "
+            "tuple carries the full 8-entry q[2..9] spine (full_ladder_measured=%s) -> guard SATISFIED, "
+            "verdict HELD. Decisive certification cost: **~%.0f fixed-N Neyman trials @lambda=1** "
+            "(shallow-heavy; %.2fx efficient over equal-allocation), being made SEQUENTIAL by denken "
+            "#205 (SPRT) -> carry 30k as the worst-case cap. REINFORCES the HOLD." % (
+                lpc.get("min_depths_for_decisive"), lpc.get("private_bar_both") or float("nan"),
+                lpc.get("depth1_overstatement_tps") or float("nan"),
+                lpc.get("true_private_lcb_at_lambda1_tps") or float("nan"),
+                lpc.get("beta_primary") or float("nan"),
+                lpc.get("mechanism_can_clear_private_bar"),
+                lpc.get("private_lcb_perfect_depth1_tps") or float("nan"),
+                lpc.get("full_ladder_measured"),
+                lpc.get("decisive_total_trials_lambda1") or float("nan"),
+                lpc.get("neyman_efficiency_gain_vs_equal") or float("nan")))
+    else:
+        liveprobe_line = ("**Full-ladder GO requirement (#197):** not landed -> the GO leg uses the "
+                          "measured ladder as-is; no explicit full-ladder / depth-1 false-GO guard.")
+    if fba.get("landed"):
+        hedge = fba.get("freeze_robust_hedge", {})
+        fragile = fba.get("build_at_bar_best_of_n_fragile", {})
+        frozen_line = (
+            "**Multi-shot budget under the conservative FROZEN regime (#202 kanna -- the DEFAULT; "
+            "REINFORCES the HOLD):** under fixed prompts + deterministic greedy the official harness "
+            "re-benchmarks IDENTICAL tokens, so per-checkpoint sampling deviation is a COMMON bias and "
+            "best-of-N beats down ONLY sigma_hw (%.0f%% of one-sigma). So #194's N=5-at-the-bar does "
+            "**NOT** reach P>=0.95 under freeze (**frozen P=%.3f, not fresh 0.969**); the default "
+            "build-bar input is **mu_bar_frozen_p95=%.2f** (not fresh %.2f; delta %.2f TPS). **THE "
+            "HEDGE (carry prominently):** build-to-**mu=%.1f / N=1** is fully freeze-robust "
+            "(n_shots_frozen=%s; a single draw has the same sigma_draw in both regimes), so the SAFE "
+            "recommendation is **untouched**. Only build-at-bar+best-of-N is frozen-fragile "
+            "(E[shots]=%.2f vs fresh %.2f; exhausts WITHOUT clearing %.0f%% of the time; breakeven "
+            "f*=%.3f of sigma_sample must re-randomize). kanna -> #206 frozen-cost crossover (carry "
+            "build_higher_dominates_below_b when it lands). REINFORCES the HOLD." % (
+                (fba.get("sigma_fraction_beatable_frozen") or 0.0) * 100.0,
+                fba.get("p_bar_n5_frozen") or float("nan"),
+                fba.get("mu_bar_frozen_p95_tps") or float("nan"),
+                fba.get("mu_bar_fresh_p95_n5_tps") or float("nan"),
+                fba.get("delta_mu_frozen_tps") or float("nan"),
+                hedge.get("build_to_mu_tps") or float("nan"), hedge.get("n_shots_frozen"),
+                fragile.get("e_shots_frozen") or float("nan"),
+                fragile.get("e_shots_fresh") or float("nan"),
+                (fragile.get("exhaust_without_clear_frac_frozen") or 0.0) * 100.0,
+                fragile.get("frozen_fraction_breakeven") or float("nan")))
+    else:
+        frozen_line = ("**Frozen-budget regime (#202):** not landed -> the multi-shot budget assumes "
+                       "the FRESH regime (#194 N=5@bar P=0.969); optimistic if the harness re-benches "
+                       "frozen tokens.")
     la = out["launch_authorized"]
     return f"""### Approval request: HF job for {name}
 
@@ -1646,6 +2097,10 @@ draws (P={out['hardware_axis_sigma_hw']['best_of_2_p']:.4f}>=0.90).
 
 {budget_line}
 
+{liveprobe_line}
+
+{frozen_line}
+
 **Submission command (named hard deps -- the human runs this AFTER approval):**
 ```
 PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _IncludedRouter boot-fix>
@@ -1666,6 +2121,8 @@ PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _Include
   - [LANDED-CONSUMED] ubel #189 executable-submission-gate: faithful build -> GO; re-verify vs land #71 at launch.
   - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup acceptance axis 5.32 iid (sets the IDENTITY; the 7.26/17.04 single-shot numbers are now #201's ICC=0 corner).
   - [LANDED-CONSUMED] ubel #201 launch-sigma closure (PROVISIONAL, NON-GATING) -- de-dup x realistic-ICC combined LAUNCH sigma 12.215 central / 13.796 worst-case; P95 GO trigger 520.09/522.69 vs the lambda=1 ceiling 520.95 (central reachable +0.86, worst-case UNREACHABLE -1.74). HOLD the verdict pending ubel #204 (unit-rebase) + land #71 co-log (n=385).
+  - [LANDED-CONSUMED] denken #197 liveprobe depth-budget -- the GO leg GATES on land #71's MEASURED full-ladder q[2..9] >= 0.9780 (depth-1-only/spine-inferred is a FALSE GO worth 85.2 TPS; at beta=0.765 mechanism CANNOT clear the private bar -> needs beta~1 across the ladder). Decisive cert ~30,455 Neyman trials @lambda=1 (sequential via #205; 30k cap). REINFORCES the HOLD; the worked tuple's 8-entry ladder SATISFIES the guard.
+  - [LANDED-CONSUMED] kanna #202 frozen-budget regime (conservative DEFAULT) -- best-of-N beats only sigma_hw, so N=5@bar clears P=0.810 (not fresh 0.969); default build-bar input mu_bar_frozen_p95=504.87 (not fresh 499.08). HEDGE: build-to-512.2/N=1 is fully freeze-robust (n_shots_frozen=1) -> SAFE recommendation untouched; only build-at-bar+best-of-N is frozen-fragile (E[shots]=2.34, exhausts 19%, f*=0.846). kanna -> #206 crossover. REINFORCES the HOLD.
   - [PENDING-BUILD] land #71 measured tuple (THIS tuple).
 
 **Launch gates (ALL required):** (1) land #71 builds the {h} kernel; (2) darwin _IncludedRouter
@@ -2021,6 +2478,107 @@ def self_test() -> dict:
         "single_shot_go_unchanged": cba["single_shot_go_unchanged"],
         "verdict_unchanged_go": d_full["verdict"] == "GO"}
 
+    # (k) FULL-LADDER GO requirement + depth-1-only FALSE-GO guard (advisor 18:39Z, denken #197): the
+    #     GO leg GATES on land #71's MEASURED full-ladder q[2..9] >= 0.9780. TWO assertions: (1) the
+    #     HELD-VERDICT INVARIANT -- the worked tuple carries the full 8-entry ladder, so the guard is
+    #     SATISFIED and both-bugs stays GO (#197 REINFORCES, does NOT flip); (2) the guard BITES -- a
+    #     depth-1-only tuple (1-entry ladder) is BLOCKED to NO-GO with a full-ladder failing_gate, even
+    #     though every OTHER gate (validity, trustworthy, build, both launch LCBs) WOULD pass. At the
+    #     grounded beta=0.765 the mechanism CANNOT clear the private bar (perfect depth-1 -> 419.6<<500),
+    #     so a real GO needs beta~1 across the MEASURED ladder, not a depth-1 point read.
+    lpc = d_full["launch_ci_ledger"]["liveprobe_measurement_cost"]
+    lp_row = next(r for r in d_full["launch_ci_ledger"]["numerical_axes"]["both_bugs"]
+                  if r["axis"] == "liveprobe_measurement_cost")
+    t_d1 = make_measured_tuple("self-test-depth1-falsego", _M.et_of_lambda(1.0, "descent_only"),
+                               E_T_STAR_BOTH, 0.0, _M.shipped_step, [0.99], 2.39, 128)
+    v_d1 = _topology_verdict("both_bugs", E_T_STAR_BOTH, 1.0, t_d1, _M.shipped_step, _M.tau_low,
+                             {"ppl": 2.39, "boots": True, "completed": 128}, True)
+    k_ok = (bool(lpc["landed"]) and lpc["reinforces_hold"] is True and lpc["flips_verdict"] is False
+            and lpc["full_ladder_required"] is True
+            and lpc["min_depths_for_decisive"] == "full-ladder" and lpc["min_depths_int"] == 9
+            and lpc["depth1_plus_2_suffices"] is False
+            and lpc["full_ladder_measured"] is True          # worked tuple carries q[2..9]
+            and lpc["false_go_risk_depth1_only"] is True
+            and lpc["mechanism_can_clear_private_bar"] is False
+            and abs(lpc["depth1_overstatement_tps"] - 85.21434075500031) <= 5e-2
+            and abs(lpc["true_private_lcb_at_lambda1_tps"] - 419.6445574528826) <= 5e-2
+            and abs(lpc["private_lcb_perfect_depth1_tps"] - 419.6445574528826) <= 5e-2
+            and abs(lpc["beta_primary"] - 0.765124365433998) <= 5e-3
+            and abs(lpc["private_bar_both"] - 0.9780112973731208) <= 1e-3
+            and abs(lpc["decisive_total_trials_lambda1"] - 30455.404769372028) <= 1.0
+            and abs(lpc["neyman_efficiency_gain_vs_equal"] - 1.4336929857369356) <= 5e-3
+            and lpc["sequential_via_205_pending"] is True
+            and lp_row["status"] == "LANDED" and lp_row["flag"] == "consumed"
+            # lambda_gate surfacing on the worked (full-ladder) both-bugs cell:
+            and bb_g["full_ladder_ok"] is True and bb_g["full_ladder_measured"] is True
+            and bb_g["full_ladder_gates_go"] is True
+            # HELD-VERDICT INVARIANT: guard present + satisfied -> verdict stays GO.
+            and d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
+            and d_full["verdict"] == "GO"
+            # the guard BITES on a depth-1-only read (otherwise-GO cell -> NO-GO):
+            and v_d1["GO"] is False and v_d1["verdict"] == "NO-GO"
+            and v_d1["lambda_gate"]["full_ladder_ok"] is False
+            and v_d1["lambda_gate"]["full_ladder_measured"] is False
+            and v_d1["lambda_gate"]["build_gate_pass"] is True          # build gate WOULD pass
+            and v_d1["lambda_gate"]["realistic_launch_clears_500"] is True
+            and v_d1["lambda_gate"]["private_launch_clears_500"] is True
+            and v_d1["failing_gate"] is not None and "full-ladder" in v_d1["failing_gate"])
+    results["k_full_ladder_go_guard_197"] = {
+        "pass": bool(k_ok),
+        "full_ladder_required": lpc["full_ladder_required"],
+        "full_ladder_measured_worked": lpc["full_ladder_measured"],
+        "false_go_risk_depth1_only": lpc["false_go_risk_depth1_only"],
+        "mechanism_can_clear_private_bar": lpc["mechanism_can_clear_private_bar"],
+        "depth1_overstatement_tps": lpc["depth1_overstatement_tps"],
+        "decisive_total_trials_lambda1": lpc["decisive_total_trials_lambda1"],
+        "beta_primary": lpc["beta_primary"],
+        "worked_verdict_held_go": d_full["per_topology"]["both_bugs"]["verdict"] == "GO",
+        "depth1_guard_bites_nogo": v_d1["verdict"] == "NO-GO",
+        "depth1_failing_gate": v_d1["failing_gate"]}
+
+    # (l) multi-shot budget under the conservative FROZEN regime (advisor 18:39Z, kanna #202): the
+    #     budget DEFAULTS to FROZEN (best-of-N beats only sigma_hw -> N=5@bar P=0.810, NOT fresh 0.969);
+    #     the default build-bar input is mu_bar_frozen_p95=504.87 (not fresh 499.08). THE HEDGE: build-
+    #     to-512.2 / N=1 is fully freeze-robust (n_shots_frozen=1) -> the SAFE recommendation is
+    #     untouched; only build-at-bar+best-of-N is frozen-fragile (E[shots]=2.34, exhausts 19%,
+    #     f*=0.846). ANNOTATION only -- single-shot GO/NO-GO UNCHANGED (both GO, descent NO-GO, GO).
+    fba = d_full["launch_ci_ledger"]["frozen_budget_annotation"]
+    hedge = fba["freeze_robust_hedge"]
+    fragile = fba["build_at_bar_best_of_n_fragile"]
+    l_ok = (bool(fba["landed"]) and fba["reinforces_hold"] is True
+            and fba["regime_default"] == "FROZEN" and fba["regime_is_open"] is True
+            and abs(fba["mu_bar_frozen_p95_tps"] - 504.87342465668917) <= 5e-2
+            and abs(fba["mu_bar_fresh_p95_n5_tps"] - 499.08467835746706) <= 5e-2
+            and abs(fba["p_bar_n5_frozen"] - 0.8097690471233381) <= 5e-3
+            and abs(fba["delta_mu_frozen_tps"] - (-7.283646514920861)) <= 5e-2
+            and abs(fba["sigma_fraction_beatable_frozen"] - 0.6581633898900652) <= 5e-3
+            and hedge["n_shots_frozen"] == 1 and hedge["regime_invariant"] is True
+            and abs(hedge["build_to_mu_tps"] - 512.15707117161) <= 5e-2
+            and abs(fragile["e_shots_frozen"] - 2.3367894101342586) <= 5e-2
+            and abs(fragile["e_shots_fresh"] - 1.9375) <= 5e-3
+            and abs(fragile["exhaust_without_clear_frac_frozen"] - 0.19023095287666192) <= 5e-3
+            and abs(fragile["frozen_fraction_breakeven"] - 0.8455321793444455) <= 5e-3
+            and fba["frozen_cost_crossover_206_pending"] is True
+            # redraw_budget row carries the #202 annotation:
+            and bool(redraw_row["frozen_budget_202_landed"])
+            and abs(redraw_row["mu_bar_frozen_p95_tps"] - 504.87342465668917) <= 5e-2
+            and redraw_row["n_shots_frozen_at_512"] == 1
+            # single-shot verdict UNCHANGED by the annotation:
+            and d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
+            and d_full["per_topology"]["descent_only"]["verdict"] == "NO-GO"
+            and d_full["verdict"] == "GO")
+    results["l_frozen_budget_annotation_202"] = {
+        "pass": bool(l_ok),
+        "regime_default": fba["regime_default"],
+        "mu_bar_frozen_p95_tps": fba["mu_bar_frozen_p95_tps"],
+        "mu_bar_fresh_p95_n5_tps": fba["mu_bar_fresh_p95_n5_tps"],
+        "p_bar_n5_frozen": fba["p_bar_n5_frozen"],
+        "freeze_robust_build_to_mu_tps": hedge["build_to_mu_tps"],
+        "n_shots_frozen": hedge["n_shots_frozen"],
+        "frozen_fragile_e_shots": fragile["e_shots_frozen"],
+        "frozen_fraction_breakeven": fragile["frozen_fraction_breakeven"],
+        "verdict_unchanged_go": d_full["verdict"] == "GO"}
+
     passes = bool(all(v["pass"] for v in results.values()))
     test_metric = bool(d_full["both_bugs_go_at_lambda_star"])
     return {
@@ -2084,7 +2642,30 @@ def _maybe_log_wandb(args, payload: dict) -> None:
                              "cost_optimal_n_at_bar_200": _BANKED.cost_optimal_n_at_bar(),
                              "build_vs_stay_crossover_total_shots_200": _BANKED.cost_crossover_total_shots(),
                              "c_star_fixedN_per_b_200": _BANKED.cost_crossover_fixedn_per_b(),
-                             "c_star_sequential_per_b_200": _BANKED.cost_crossover_sequential_per_b()})
+                             "c_star_sequential_per_b_200": _BANKED.cost_crossover_sequential_per_b(),
+                             # denken #197 liveprobe depth-budget: full-ladder GO requirement + depth-1
+                             # FALSE-GO guard + decisive certification cost (GATES the GO leg).
+                             "liveprobe_landed_197": _BANKED.liveprobe_landed(),
+                             "liveprobe_false_go_risk_depth1_197": _BANKED.liveprobe_false_go_risk_depth1(),
+                             "liveprobe_depth1_overstatement_tps_197": _BANKED.liveprobe_depth1_overstatement(),
+                             "liveprobe_mech_can_clear_private_197": _BANKED.liveprobe_mech_can_clear_private(),
+                             "liveprobe_private_lcb_perfect_depth1_tps_197": _BANKED.liveprobe_private_lcb_perfect_depth1(),
+                             "liveprobe_beta_primary_197": _BANKED.liveprobe_beta_primary(),
+                             "liveprobe_min_depths_int_197": _BANKED.liveprobe_min_depths_int(),
+                             "liveprobe_decisive_total_trials_lambda1_197": _BANKED.liveprobe_decisive_total_trials(),
+                             "liveprobe_neyman_efficiency_gain_197": _BANKED.liveprobe_neyman_efficiency_gain(),
+                             "liveprobe_private_bar_both_197": _BANKED.liveprobe_private_bar(),
+                             # kanna #202 frozen-budget regime (conservative DEFAULT; annotation only).
+                             "frozen_budget_landed_202": _BANKED.frozen_budget_landed(),
+                             "mu_bar_frozen_p95_tps_202": _BANKED.mu_bar_frozen_p95(),
+                             "mu_bar_fresh_p95_n5_tps_202": _BANKED.mu_bar_fresh_p95_n5(),
+                             "p_bar_n5_frozen_202": _BANKED.p_bar_n5_frozen(),
+                             "delta_mu_frozen_tps_202": _BANKED.frozen_delta_mu(),
+                             "freeze_robust_build_to_mu_tps_202": _BANKED.frozen_mu_safe_tps(),
+                             "n_shots_frozen_at_512_202": _BANKED.frozen_n_shots_at_512(),
+                             "frozen_e_shots_at_bar_202": _BANKED.frozen_e_shots_at_bar(),
+                             "frozen_fraction_breakeven_202": _BANKED.frozen_fraction_breakeven(),
+                             "sigma_fraction_beatable_frozen_202": _BANKED.frozen_sigma_fraction_beatable()})
     st = payload["self_test"]
     flat = {
         "launch_trigger_calculator_self_test_passes": st["launch_trigger_calculator_self_test_passes"],
@@ -2133,6 +2714,34 @@ def _maybe_log_wandb(args, payload: dict) -> None:
         flat["worked_example/cost_c_star_fixedN_per_b"] = cba["c_star_fixedN_per_b"]
         flat["worked_example/cost_c_star_sequential_per_b"] = cba["c_star_sequential_per_b"]
         flat["worked_example/cost_single_shot_go_unchanged"] = bool(cba["single_shot_go_unchanged"])
+    # denken #197 liveprobe: full-ladder GO requirement + depth-1 FALSE-GO guard (GATES the GO leg).
+    lpc = led.get("liveprobe_measurement_cost") or {}
+    if lpc.get("landed"):
+        flat["worked_example/liveprobe_full_ladder_required"] = bool(lpc["full_ladder_required"])
+        flat["worked_example/liveprobe_full_ladder_measured_worked"] = bool(lpc["full_ladder_measured"])
+        flat["worked_example/liveprobe_false_go_risk_depth1_only"] = bool(lpc["false_go_risk_depth1_only"])
+        flat["worked_example/liveprobe_mechanism_can_clear_private_bar"] = bool(
+            lpc["mechanism_can_clear_private_bar"])
+        flat["worked_example/liveprobe_depth1_overstatement_tps"] = lpc["depth1_overstatement_tps"]
+        flat["worked_example/liveprobe_true_private_lcb_at_lambda1_tps"] = lpc["true_private_lcb_at_lambda1_tps"]
+        flat["worked_example/liveprobe_beta_primary"] = lpc["beta_primary"]
+        flat["worked_example/liveprobe_decisive_total_trials_lambda1"] = lpc["decisive_total_trials_lambda1"]
+        flat["worked_example/liveprobe_neyman_efficiency_gain"] = lpc["neyman_efficiency_gain_vs_equal"]
+        flat["worked_example/liveprobe_reinforces_hold"] = bool(lpc["reinforces_hold"])
+        flat["worked_example/liveprobe_flips_verdict"] = bool(lpc["flips_verdict"])
+    # kanna #202 frozen-budget regime (conservative DEFAULT; annotation only).
+    fba = led.get("frozen_budget_annotation") or {}
+    if fba.get("landed"):
+        flat["worked_example/frozen_regime_default"] = str(fba["regime_default"])
+        flat["worked_example/frozen_mu_bar_frozen_p95_tps"] = fba["mu_bar_frozen_p95_tps"]
+        flat["worked_example/frozen_mu_bar_fresh_p95_n5_tps"] = fba["mu_bar_fresh_p95_n5_tps"]
+        flat["worked_example/frozen_p_bar_n5_frozen"] = fba["p_bar_n5_frozen"]
+        flat["worked_example/frozen_delta_mu_tps"] = fba["delta_mu_frozen_tps"]
+        flat["worked_example/frozen_freeze_robust_build_to_mu_tps"] = fba["freeze_robust_hedge"]["build_to_mu_tps"]
+        flat["worked_example/frozen_n_shots_at_512"] = fba["freeze_robust_hedge"]["n_shots_frozen"]
+        flat["worked_example/frozen_fragile_e_shots_at_bar"] = fba["build_at_bar_best_of_n_fragile"]["e_shots_frozen"]
+        flat["worked_example/frozen_fraction_breakeven"] = fba["build_at_bar_best_of_n_fragile"]["frozen_fraction_breakeven"]
+        flat["worked_example/frozen_reinforces_hold"] = bool(fba["reinforces_hold"])
     for topo in ("both_bugs", "descent_only"):
         c = wp["per_topology"][topo]
         lgc = wp["_full_per_topology"][topo]["lambda_gate"]
@@ -2169,6 +2778,11 @@ def _maybe_log_wandb(args, payload: dict) -> None:
             flat[f"worked_example/{topo}/launch_sigma_provisional"] = bool(
                 lgc["launch_sigma_provisional"])
             flat[f"worked_example/{topo}/launch_sigma_gates_go"] = bool(lgc["launch_sigma_gates_go"])
+        # #197 full-ladder GO guard: GATES `go` (None on a non-landed read -> skip).
+        if lgc.get("full_ladder_ok") is not None:
+            flat[f"worked_example/{topo}/full_ladder_ok"] = bool(lgc["full_ladder_ok"])
+            flat[f"worked_example/{topo}/full_ladder_measured"] = bool(lgc["full_ladder_measured"])
+            flat[f"worked_example/{topo}/full_ladder_gates_go"] = bool(lgc["full_ladder_gates_go"])
     wandb.log(flat)
     wandb.summary.update(flat)
     run.finish()
@@ -2183,13 +2797,16 @@ def run(args) -> dict:
     bb_bind = binding_bar("both_bugs", TAU_HEADLINE)
     csc = combined_sigma_corner()
     cba = cost_budget_annotation()
+    lpc = liveprobe_measurement_cost(_M.canonical_ladder(1.0, "both_bugs"))   # #197, worked full ladder
+    fba = frozen_budget_annotation()                                         # #202
     handoff = (
         "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified "
         "GO/NO-GO + filled (un-filed) Approval request. Self-test %s. RECOMPOSED post-merge "
-        "(advisor 17:27Z + 17:52Z + 18:03Z + 18:23Z): the TYPED launch-CI ledger reads REAL banked "
-        "scalars -- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget, "
-        "#195 cross-axis covariance, #200 cost AND #201 launch-sigma closure have ALL LANDED "
-        "(flag=consumed); the ledger is CLOSED. binding_bar = max(public#183 %.4f, ICC#190 %.4f, "
+        "(advisor 17:27Z + 17:52Z + 18:03Z + 18:23Z + 18:39Z): the TYPED launch-CI ledger reads REAL "
+        "banked scalars -- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw "
+        "budget, #195 cross-axis covariance, #200 cost, #201 launch-sigma closure, #197 liveprobe "
+        "depth-budget AND #202 frozen-budget have ALL LANDED (flag=consumed); the ledger is CLOSED. "
+        "binding_bar = max(public#183 %.4f, ICC#190 %.4f, "
         "private#191 %.4f) = %.4f (private DOMINATES, both-bugs); descent private bar is UNREACHABLE. "
         "land #71 must show lambda_hat_built >= %.4f AND the #179 launch-projection cell-LCB(P>=0.9) "
         ">= 500 under the REALISTIC #190 +-%.2f ICC half-width (NOT iid +-%.2f) AND on the #191 "
@@ -2209,8 +2826,19 @@ def run(args) -> dict:
         "retires the rho(*,hw) band). #200 cost annotation (budget row ONLY, single-shot logic "
         "UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=%.2f (not fixed-5); "
         "build-higher (mu>=%.1f/N=1) beats stay-at-bar iff reaching mu costs < %.0f shots' GPU-$ "
-        "(c*=%.2f*b fixed / %.2f*b sequential). both_bugs_go_at_lambda_star=%s. Human approval still "
-        "required before any HF spend." % (
+        "(c*=%.2f*b fixed / %.2f*b sequential). #197 (denken, advisor 18:39Z): the GO leg now GATES on "
+        "land #71's MEASURED full-ladder q[2..9] >= 0.9780 -- a depth-1-only/spine-inferred read is a "
+        "FALSE GO worth %.1f TPS (true private LCB %.1f<<500; at beta=%.3f the mechanism CANNOT clear "
+        "the private bar, mech_can_clear=%s -> a real GO needs beta~1 across the MEASURED ladder); "
+        "decisive cert ~%.0f Neyman trials @lambda=1 (sequential via #205, 30k cap). The worked tuple's "
+        "8-entry ladder SATISFIES the guard -> verdict HELD. #202 (kanna, advisor 18:39Z): the "
+        "multi-shot budget DEFAULTS to the conservative FROZEN regime (best-of-N beats only sigma_hw -> "
+        "N=5@bar P=%.3f not fresh 0.969; default build-bar input mu_bar_frozen_p95=%.2f not fresh "
+        "%.2f); THE HEDGE -- build-to-mu=%.1f/N=1 is fully freeze-robust (n_shots_frozen=%s) so the "
+        "SAFE recommendation is untouched; only build-at-bar+best-of-N is frozen-fragile (E[shots]="
+        "%.2f, exhausts 19%%, breakeven f*=%.3f). BOTH #197 + #202 REINFORCE the HOLD -- they sharpen "
+        "the measurement spec + budget robustness, not flip it. both_bugs_go_at_lambda_star=%s. Human "
+        "approval still required before any HF spend." % (
             "PASSES" if st["launch_trigger_calculator_self_test_passes"] else "FAILS",
             bb_bind["public_183"], bb_bind["icc_190"], bb_bind["private_191"], bb_bind["binding_bar"],
             bb_bind["binding_bar"], _BANKED.halfwidth_realistic(), _BANKED.halfwidth_iid(),
@@ -2221,6 +2849,13 @@ def run(args) -> dict:
             csc["worstcase_margin_at_lambda1_tps"], csc["headroom_shift_tps"], csc["colog_n_allocations"],
             cba["stay_at_bar"]["expected_shots_sequential"], cba["build_higher"]["mu_safe_n1_tps"],
             cba["crossover_total_shots"], cba["c_star_fixedN_per_b"], cba["c_star_sequential_per_b"],
+            lpc["depth1_overstatement_tps"], lpc["true_private_lcb_at_lambda1_tps"],
+            lpc["beta_primary"], lpc["mechanism_can_clear_private_bar"],
+            lpc["decisive_total_trials_lambda1"],
+            fba["p_bar_n5_frozen"], fba["mu_bar_frozen_p95_tps"], fba["mu_bar_fresh_p95_n5_tps"],
+            fba["freeze_robust_hedge"]["build_to_mu_tps"], fba["freeze_robust_hedge"]["n_shots_frozen"],
+            fba["build_at_bar_best_of_n_fragile"]["e_shots_frozen"],
+            fba["build_at_bar_best_of_n_fragile"]["frozen_fraction_breakeven"],
             st["both_bugs_go_at_lambda_star"]))
     payload = {
         "pr": 185,
