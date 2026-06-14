@@ -1,0 +1,229 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260614T212100Z",
+  "kind": "valid-verify-cluster-capstone",
+  "nan_clean": true,
+  "peak_mem_mib": 12.145,
+  "pr": 227,
+  "synthesis": {
+    "cluster_leverage": {
+      "cluster_helps_gate": {
+        "gate_a_kernel": false,
+        "gate_b_lambda": true
+      },
+      "cluster_necessary_but_not_sufficient": true,
+      "cluster_offer": "Issue #211 Blackwell node \u2014 TRAIN A DRAFT",
+      "gate_a_kernel": {
+        "binding_diagnostic": "the cheap split-K microbench (#216's decisive diagnostic, ~1\u20132 days)",
+        "cluster_draft_training_helps": false,
+        "reason": "the batch-invariant fix is a split-K reduction-order change in the verify GEMM \u2014 draft-INDEPENDENT; a stronger draft changes E[T](\u03bb), not the GEMM's reduction geometry",
+        "what": "build the batch-invariant int4 verify kernel near its 0.9455%-of-step split-K floor (band [0.95%, 31.41%]); the cheap split-K microbench settles it"
+      },
+      "gate_b_lambda": {
+        "cluster_draft_training_helps": true,
+        "reason": "a stronger Blackwell draft raises E[T](\u03bb) at fixed \u03bb and lifts the achievable \u03bb, moving land #71 toward the 0.8572 threshold",
+        "what": "land #71 self-KV recovery \u03bb \u2265 0.8572"
+      },
+      "survivor_double_gated": true,
+      "survivor_route": "lane_a_int4_kernel"
+    },
+    "composition": {
+      "baseline_tps": 481.53,
+      "lambda_band_floor_spine_ceiling": [
+        0.8572,
+        0.997,
+        1.0
+      ],
+      "lambda_crit_both_bugs_tau1": 0.8344533978886615,
+      "lambda_crit_descent_tau1": 0.9066754940814947,
+      "sources": {
+        "compliant_nonspec_floor_196": "research/validity/compliant_nonspec_floor/floor_report.json",
+        "divergence_114": "kanna #114 (9q5yy9l1)",
+        "fp16_verify_ceiling_220": "research/validity/fp16_verify_ceiling/results.json",
+        "int4_ceiling_204": "research/validity/launch_sigma_unit_rebase",
+        "kernel_budget_lambda_213": "research/validity/kernel_budget_lambda/kernel_budget_lambda_results.json",
+        "kernel_feasibility_216": "research/validity/kernel_feasibility/kernel_feasibility_results.json",
+        "margingate_budget_223": "research/validity/margingate_budget/margingate_budget_results.json"
+      },
+      "spine_0997": 0.997,
+      "target_official": 500.0,
+      "tps_at_overhead_transform_calibration_tps": 500.0
+    },
+    "handoff_line": "HAND-OFF (Issue #211 + fern #185): the valid-verify menu has collapsed to ONE survivor (lane-a int4 kernel, DOUBLE-gated on a near-floor kernel BUILD and land #71 \u03bb \u2265 0.8572); the Blackwell cluster's draft-training helps only the \u03bb gate, not the kernel build, so it unlocks 500 only if the kernel is also built near floor \u2014 authorize the cheap split-K microbench first (gate-a's decisive diagnostic), draft-training is conditional on it. Adds 0 TPS; imports ceilings/budget/divergence unchanged; authorizes nothing. NOT a launch.",
+    "headline": {
+      "binding_next_action": "split_k_microbench_gate_a",
+      "budget_at_lambda1_both_bugs_tau1": 7.331808522875782,
+      "cluster_helps_gate": {
+        "gate_a_kernel": false,
+        "gate_b_lambda": true
+      },
+      "cluster_necessary_but_not_sufficient": true,
+      "draft_training_conditional_on_gate_a": true,
+      "fp16_ceiling_central_mstep17": 306.44278371245144,
+      "int4_spec_lambda1_ceiling": 520.9527323111674,
+      "kernel_floor_pct": 0.9455349322572293,
+      "lambda_min_kernel_feasible": 0.8571542761568587,
+      "n_surviving_valid_500_paths": 1,
+      "nonspec_official_tps": 165.43791973106974,
+      "skip_rate_min_at_lambda1": 0.970608446587865,
+      "skip_upper_bound_from_flip": 0.43920000000000003,
+      "surviving_route": "lane_a_int4_kernel",
+      "verdict": "CLUSTER_UNLOCKS_500_VIA_LANE_A_ONLY_IF_KERNEL_BUILT"
+    },
+    "honest_band": {
+      "a_lane_a_floor_is_buildability_prior": "lane-a's 0.9455%-of-step split-K floor is a buildability PRIOR (#216 scope-proportionality + split-K-penalty estimates), proven ONLY by the GPU split-K microbench \u2014 this leg does not certify it",
+      "b_margingate_out_rests_on_demand_and_supply": "the MarginGate-out verdict rests on #223's VERIFIED demand (sound skip \u2265 0.9706, needing < 3% full-verify) AND #114's model-free supply cap (\u2264 0.4392 from the 56.08% flip). The supply cap's tightening leg is still open, but the DEMAND alone is already implausible",
+      "c_ceilings_budget_et_imported_unchanged": "the int4-spec \u03bb=1 ceiling 520.953 (#204), the budget curve / \u03bb_crit (#213), the fp16 ceiling (#220), the no-spec floor (#196), and E[T](\u03bb) reach-DP (#175/#184) are IMPORTED unchanged; the two-ceiling note (reach-DP 536.66 vs #204 520.95 \u2014 both > 500) is carried",
+      "d_lambda1_is_an_upper_bound": "#199's rank-1 coverage 0.7304 over-counts the true compliant accept, so every \u03bb=1 ceiling here is an UPPER bound; the verdict structure (1 survivor, double-gated) is robust to it"
+    },
+    "imported_anchors": {
+      "bb_lambda1_official_tps": 536.6590426143789,
+      "budget_at_lambda1_bb": 7.331808522875782,
+      "budget_at_lambda1_descent": 4.123450699935671,
+      "buildable_at_lambda1_floor": true,
+      "buildable_at_lambda_hat_floor": false,
+      "fp16_all_mstep_below_500": true,
+      "fp16_ceiling_central_mstep17": 306.44278371245144,
+      "fp16_mstep_central": 1.7,
+      "fp16_mstep_crossover_500": 1.041905464622335,
+      "fp16_mstep_sweep": [
+        1.3,
+        1.5,
+        1.7,
+        2.0,
+        2.3
+      ],
+      "fp16_verdict": "FP16VERIFY_CEILING_BELOW_500_AT_ALL_MSTEP",
+      "int4_spec_lambda1_ceiling": 520.9527323111674,
+      "kanna114_flip_rate": 0.5608,
+      "kernel_floor_pct": 0.9455349322572293,
+      "kernel_overhead_band_pct": [
+        0.9455349322572293,
+        31.410813860049373
+      ],
+      "kf_verdict": "COMPLIANT_KERNEL_PLAUSIBLE_ABOVE_LAMBDA_0.8572",
+      "lambda_crit_bb": 0.8344533978886615,
+      "lambda_crit_descent": 0.9066754940814947,
+      "lambda_min_kernel_feasible": 0.8571542761568587,
+      "lambda_min_kernel_feasible_is_physical": true,
+      "margingate_overhead_at_cap_pct": 136.27712949181682,
+      "max_budget_at_prob_saturation_bb": 50.09522632330761,
+      "mg_verdict": "MARGINGATE-MISSES-COMPLIANT-500-skip_min_0.9706-GT-empirical_cap_0.4392-AND-researcher_0p85",
+      "nonspec_clears_500": false,
+      "nonspec_hw_band": [
+        160.57791973106973,
+        170.29791973106975
+      ],
+      "nonspec_official_tps": 165.43791973106974,
+      "nonspec_token_identity_rate": 1.0,
+      "ns_verdict_label": "STRUCTURAL_GAP_SPEC_EXISTENTIAL",
+      "offtheshelf_122_clears": false,
+      "offtheshelf_122_overhead_pct": 51.78,
+      "skip_rate_min_at_lambda1": 0.970608446587865,
+      "skip_rate_min_at_spine_0997": 0.9711948865810449,
+      "skip_upper_bound_from_flip": 0.43920000000000003,
+      "verify_gemm_share": 0.606620584396473
+    },
+    "issue_211_verdict": {
+      "binding_next_action": "split_k_microbench_gate_a",
+      "binding_next_action_detail": "authorize the cheap split-K microbench FIRST (#216's decisive gate-a diagnostic, ~1\u20132 days); it settles whether lane-a is buildable near floor. If gate-a fails, no draft-training \u2014 however strong \u2014 unlocks 500, since every other valid path NEVER clears.",
+      "cluster_pays_off_iff": "the int4 batch-invariant kernel is ALSO built near its 0.9455%-of-step floor (gate-a) \u2014 the cluster's draft-training lifts only the \u03bb gate (gate-b)",
+      "draft_training_conditional_on_gate_a": true,
+      "headline": "CLUSTER_UNLOCKS_500_VIA_LANE_A_ONLY_IF_KERNEL_BUILT"
+    },
+    "nonworking_reference": {
+      "clears_500": false,
+      "note": "whole-model determinism (#122, +51.78% step) \u2014 the WRONG kernel for the localized #192 bug; clears at NO physical \u03bb\u22641 (max budget at prob-saturation 50.10% < 51.78%). It is lane-a's whole-model foil, ~55\u00d7 the verify-GEMM-only cost \u2014 NOT a 5th survivor.",
+      "overhead_pct": 51.78,
+      "route": "off_the_shelf_VLLM_BATCH_INVARIANT_122"
+    },
+    "self_test": {
+      "conditions": {
+        "a_menu_roundtrips_banked_ceilings_and_verdicts": true,
+        "b_exactly_one_surviving_valid_500_path": true,
+        "c_lane_a_clears_at_floor_above_0p8572_and_empty_below": true,
+        "d_three_out_paths_lambda1_ceilings_below_500": true,
+        "e_cluster_necessary_but_not_sufficient_gate_a_unaffected": true,
+        "f_nan_clean": true
+      },
+      "pin_roundtrips": {
+        "budget_at_lambda1_bb_213": true,
+        "fp16_ceiling_central_mstep17_220": true,
+        "fp16_mstep_crossover_500_220": true,
+        "int4_spec_lambda1_ceiling_204": true,
+        "kanna114_flip_rate": true,
+        "kernel_floor_pct_216": true,
+        "lambda_crit_bb_213": true,
+        "lambda_min_kernel_feasible_216": true,
+        "nonspec_official_tps_196": true,
+        "offtheshelf_122_overhead_pct": true,
+        "skip_rate_min_at_lambda1_223": true,
+        "skip_upper_bound_from_flip_223": true,
+        "verify_gemm_share_216": true
+      },
+      "valid_verify_cluster_capstone_self_test_passes": true
+    },
+    "test_metric": {
+      "n_surviving_valid_500_paths": 1
+    },
+    "valid_verify_menu": [
+      {
+        "clears_500": true,
+        "clears_500_basis": "CLEARS at the 0.9455%-of-step split-K floor for \u03bb \u2265 0.8572 (#216 over #213's budget; \u2205 below \u2014 budget \u2264 0 under \u03bb_crit=0.8345)",
+        "double_gated": true,
+        "family": "speculative \u00b7 int4 batch-invariant verify kernel",
+        "gate_a_kernel_build": "build the batch-invariant int4 verify kernel near its 0.9455%-of-step split-K floor (band [0.95%, 31.41%]); the cheap split-K microbench settles it",
+        "gate_b_lambda": "land #71 self-KV recovery \u03bb \u2265 0.8572",
+        "lambda1_ceiling_floor_adjusted_tps": 516.0730810538274,
+        "lambda1_ceiling_tps": 520.9527323111674,
+        "route": "lane_a_int4_kernel",
+        "src": "#216 / #213 / #204",
+        "valid": true,
+        "validity_basis": "split-K reduction-order fix makes the verify-M argmax identical to the AR-M=1 argmax \u21d2 greedy-valid by construction (#192 strict-A)",
+        "what_it_needs": "DOUBLE-gated: (a) kernel BUILD near floor AND (b) land #71 \u03bb \u2265 0.8572"
+      },
+      {
+        "clears_500": false,
+        "clears_500_basis": "NEVER \u2014 draft-INDEPENDENT \u03bb=1 cap 520.953/M_step is below 500 for all M_step \u2265 1.3 \u226b break-even 1.0419 (#220)",
+        "double_gated": false,
+        "family": "speculative \u00b7 fp16/bf16 verify",
+        "lambda1_ceiling_note": "= int4_ceiling/M_step = 520.953/1.7 at central M_step; < 500 for every physical M_step \u2265 1.3 (crossover 1.0419)",
+        "lambda1_ceiling_tps": 306.44278371245144,
+        "route": "lane_b_fp16_verify",
+        "src": "#220",
+        "valid": true,
+        "validity_basis": "batch-invariant cuBLAS GEMM (no M-dependent split-K) \u21d2 AR-M=1 and verify-M argmax identical \u21d2 greedy-valid by construction (imported #211 premise; lawine #221 confirms)",
+        "what_it_needs": "nothing buildable lifts it \u2014 at \u03bb=1 E[T] saturates at the tree max regardless of draft quality, so no draft, however strong, raises the \u03bb=1 ceiling above 500"
+      },
+      {
+        "clears_500": false,
+        "clears_500_basis": "NEVER \u2014 needs SOUND skip \u2265 0.9706 to fit the \u03bb=1 budget, but #114's 56.08% flip caps the sound skip at \u2264 0.4392 (provably-stable \u2286 non-flip); demand \u226b supply (#223)",
+        "double_gated": false,
+        "family": "speculative \u00b7 provable-argmax-stability skip",
+        "lambda1_ceiling_note": "best case at the SOUND skip cap 0.4392: overhead 136.28% of step \u21d2 227.1 TPS",
+        "lambda1_ceiling_tps": 227.13118437176772,
+        "route": "margingate_provable_skip",
+        "skip_demand_at_lambda1": 0.970608446587865,
+        "skip_supply_cap": 0.43920000000000003,
+        "src": "#223 / #114",
+        "valid": true,
+        "validity_basis": "a SOUND gate (margin > 2\u00b7\u03b5_max) skips only provably-stable positions; the low-margin residual falls back to AR M=1 \u21d2 greedy-valid (#192 strict-A)",
+        "what_it_needs": "a sound provable-stable skip \u2265 0.9706; the 0.5314-wide demand\u2013supply gap is unclosable (needs < 3% full-verify vs \u2265 56.08% flips)"
+      },
+      {
+        "clears_500": false,
+        "clears_500_basis": "NEVER \u2014 no-verify floor \u2248 165.4 official TPS, 66.9% below 500; structural (#196)",
+        "double_gated": false,
+        "family": "non-speculative \u00b7 int4 AR greedy",
+        "lambda1_ceiling_note": "\u03c3_hw band [160.6, 170.3]",
+        "lambda1_ceiling_tps": 165.43791973106974,
+        "route": "lane_c_no_spec",
+        "src": "#196",
+        "valid": true,
+        "validity_basis": "plain int4 autoregressive greedy \u2014 no verify GEMM, no batch-width mismatch (token-identity rate 1.0, #196)",
+        "what_it_needs": "nothing \u2014 it is the compliant floor; the spec premium (\u2248316 TPS) is existential"
+      }
+    ],
+    "verdict": "CLUSTER_UNLOCKS_500_VIA_LANE_A_ONLY_IF_KERNEL_BUILT"
+  }
+}
