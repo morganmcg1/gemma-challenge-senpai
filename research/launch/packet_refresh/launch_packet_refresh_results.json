@@ -1,0 +1,384 @@
+{
+  "primary_metric_name": "launch_packet_refresh_self_test_passes",
+  "launch_packet_refresh_self_test_passes": 1,
+  "test_metric_name": "both_bugs_launch_lcb_tps",
+  "both_bugs_launch_lcb_tps": 514.877540689496,
+  "gate_state": "ARMED",
+  "headline": "both-bugs is the robust GO",
+  "operating_point": {
+    "private_drop_descent_only_pct": 1.801511061644668,
+    "private_drop_both_bugs_pct": 1.8626055407019635,
+    "step_roofline": 1.2127483746822987,
+    "step_shipped_launch_realized": 1.2181727676912677,
+    "step_scatter_lp_conditional": 1.2046765466054148,
+    "k_cal": 125.26795005202914,
+    "tau_low": 0.9924318649123313,
+    "tau_high": 1.0,
+    "clear_500_bar_et_shipped": 4.862268310391079,
+    "source": "stark #156 pinned drop + lawine #168 step anchors (roofline/overlap/scatter-LP)"
+  },
+  "step1_three_framing_geometry": {
+    "roofline": {
+      "step": 1.2127483746822987,
+      "descent_only": {
+        "topo": "descent_only",
+        "E_T_input": 5.056404568844709,
+        "r_tree": 0.9883258628050743,
+        "proj_private_tps": 516.1919703161842,
+        "p_clear_500": 0.9309903058319173,
+        "lcb_p90": 502.2014463789929,
+        "combined_rel_1sigma": 0.021148844836120288,
+        "geom_tps_public": 522.2892466368573,
+        "consolidator_conf99_verdict": "INDETERMINATE",
+        "launch_go_p90": "GO",
+        "official_tps": 522.2892466368573
+      },
+      "both_bugs": {
+        "topo": "both_bugs",
+        "E_T_input": 5.206954309441963,
+        "r_tree": 0.9877498097314477,
+        "proj_private_tps": 531.2512815284887,
+        "p_clear_500": 0.9977886894742121,
+        "lcb_p90": 517.1804900815517,
+        "combined_rel_1sigma": 0.020667238533949674,
+        "geom_tps_public": 537.8399229182609,
+        "consolidator_conf99_verdict": "robust-GREEN",
+        "launch_go_p90": "GO",
+        "official_tps": 537.8399229182609
+      }
+    },
+    "shipped": {
+      "step": 1.2181727676912677,
+      "descent_only": {
+        "topo": "descent_only",
+        "E_T_input": 5.056404568844709,
+        "r_tree": 0.9883258628050743,
+        "proj_private_tps": 513.8934226968873,
+        "p_clear_500": 0.8994368544296176,
+        "lcb_p90": 499.96519706601964,
+        "combined_rel_1sigma": 0.021148844836120288,
+        "geom_tps_public": 519.9635484984183,
+        "consolidator_conf99_verdict": "INDETERMINATE",
+        "launch_go_p90": "HOLD",
+        "official_tps": 519.9635484984183
+      },
+      "both_bugs": {
+        "topo": "both_bugs",
+        "E_T_input": 5.206954309441963,
+        "r_tree": 0.9877498097314477,
+        "proj_private_tps": 528.8856764074758,
+        "p_clear_500": 0.9958868982631068,
+        "lcb_p90": 514.877540689496,
+        "combined_rel_1sigma": 0.020667238533949674,
+        "geom_tps_public": 535.4449792820216,
+        "consolidator_conf99_verdict": "robust-GREEN",
+        "launch_go_p90": "GO",
+        "official_tps": 535.4449792820216
+      }
+    },
+    "scatter_lp": {
+      "step": 1.2046765466054148,
+      "descent_only": {
+        "topo": "descent_only",
+        "E_T_input": 5.056404568844709,
+        "r_tree": 0.9883258628050743,
+        "proj_private_tps": 519.6506687118665,
+        "p_clear_500": 0.9631158744302245,
+        "lcb_p90": 505.56640251311563,
+        "combined_rel_1sigma": 0.021148844836120288,
+        "geom_tps_public": 525.7887992903371,
+        "consolidator_conf99_verdict": "INDETERMINATE",
+        "launch_go_p90": "GO",
+        "official_tps": 525.7887992903371
+      },
+      "both_bugs": {
+        "topo": "both_bugs",
+        "E_T_input": 5.206954309441963,
+        "r_tree": 0.9877498097314477,
+        "proj_private_tps": 534.8108834998275,
+        "p_clear_500": 0.999182061590878,
+        "lcb_p90": 520.6458119660196,
+        "combined_rel_1sigma": 0.020667238533949674,
+        "geom_tps_public": 541.443671495349,
+        "consolidator_conf99_verdict": "robust-GREEN",
+        "launch_go_p90": "GO",
+        "official_tps": 541.443671495349
+      }
+    }
+  },
+  "step1b_sigma_hw_two_axis": {
+    "hardware_axis": {
+      "sigma_hw_tps": 4.864468814937121,
+      "sigma_hw_pct": 0.9623777540506017,
+      "central_tps": 505.4635557048992,
+      "cross_allocation_dominated": true,
+      "p_single_draw": 0.8693143058105263,
+      "best_of_2": 0.9829212493342153,
+      "n_for_p90": 2,
+      "redraw_caveat": "Re-draws cure sigma_hw ONLY; a projection bias (sigma_proj mean error) is COMMON across hardware re-draws and is NOT reduced. Orthogonal to wirbel #146's required_n=5 SAMPLING re-draws."
+    },
+    "naive_fold_sensitivity": {
+      "descent_only": {
+        "combined_rel_4term": 0.023235548886381827,
+        "lcb_p90_4term": 498.5909335985773,
+        "p_clear_500_4term": 0.8776958119352409,
+        "go_4term": "HOLD"
+      },
+      "both_bugs": {
+        "combined_rel_4term": 0.022798066645404874,
+        "lcb_p90_4term": 513.4332776193272,
+        "p_clear_500_4term": 0.9917044565974428,
+        "go_4term": "GO"
+      }
+    },
+    "interpretation": "Headline RETIRES sigma_hw via best-of-2 official draws (P>=0.9 on a separate hardware axis); the naive-fold columns show the verdict is INVARIANT to composition -- descent-only misses the shipped step either way, both-bugs is GO either way."
+  },
+  "step2_dependency_ledger": {
+    "legs": [
+      {
+        "axis": "Numerator E[T]",
+        "leg": "descent 5.0564 / both-bugs 5.2070",
+        "owner_pr": "#160/#165/#172",
+        "status": "LANDED",
+        "value": "descent 5.0564 / both 5.2070",
+        "note": "denken #172 caveat: central is OPTIMISTIC; adversarial self-KV floor 3.5346 -> 363.5 TPS FAILS 500 (BOUNDED-NOT-ROBUST); clearing needs >= 91% deep-spine spread recovery"
+      },
+      {
+        "axis": "Numerator E[T] de-risk",
+        "leg": "realistic-floor refinement",
+        "owner_pr": "denken (in-flight)",
+        "status": "IN-FLIGHT",
+        "value": "central +- realistic floor (replaces the adversarial 3.5346 worst case)",
+        "note": "the de-risk for the #172 floor caveat -- turns the modeled floor measured"
+      },
+      {
+        "axis": "Denominator step",
+        "leg": "reconciled shipped 1.2182",
+        "owner_pr": "#168",
+        "status": "LANDED",
+        "value": "roofline 1.2127 <-> shipped 1.2182 (+-0.22%); scatter-LP 1.2047 if #154 ships",
+        "note": "lawine #168 collapses #136/#154/#161 to one launch-realized step"
+      },
+      {
+        "axis": "Denominator step confirm",
+        "leg": "descent-walk step-neutrality",
+        "owner_pr": "#173",
+        "status": "IN-FLIGHT",
+        "value": "confirms the built descent kernel realizes 1.2182",
+        "note": "#168 reconciles analytically; #173 confirms the descent walk realizes it"
+      },
+      {
+        "axis": "Hardware sigma_hw",
+        "leg": "4.86 TPS envelope",
+        "owner_pr": "#159",
+        "status": "LANDED",
+        "value": "sigma_hw 4.86 TPS (0.96%), cross-allocation-dominated; best-of-2 official draws -> P=0.9829 >= 0.90 on the hardware axis",
+        "note": "RETIRED by a best-of-2 launch protocol -- a SEPARATE axis, NOT folded into the projection LCB (single-draw hardware-axis P=0.869)"
+      },
+      {
+        "axis": "Finite-sample CI",
+        "leg": "numerator 2nd-moment sampling term",
+        "owner_pr": "#175 (wirbel)",
+        "status": "PENDING",
+        "value": "composes in quadrature with the input-band sampling term",
+        "note": "arms the finite-sample slot of the projection-axis CI"
+      },
+      {
+        "axis": "Validity",
+        "leg": "PPL <= 2.42 / 128 / greedy-exact",
+        "owner_pr": "#166/#150/#158, Issue #124",
+        "status": "LANDED",
+        "value": "official PPL 2.377 <= 2.42; M=32 worst-case PPL 2.4134 <= 2.42 (margin 0.0066); 128/128; greedy-exact (Issue #124 RESOLVED)",
+        "note": "the quality contract -- official 2.3772 (BASELINE) under cap; denken #166 bounds the M=32 batched-verify worst case at the loaded 2.4134"
+      },
+      {
+        "axis": "Private drop",
+        "leg": "native CI mid 2.04%",
+        "owner_pr": "#164",
+        "status": "LANDED",
+        "value": "descent native drop 2.04% [1.87,2.21]; descent worst tau-low 504.6 TPS (clears 500)",
+        "note": "descent-only is private-SAFE at the native worst case (margin +8.5 TPS)"
+      },
+      {
+        "axis": "Private drop stress",
+        "leg": "adverse-skew private stress",
+        "owner_pr": "#176 (stark)",
+        "status": "IN-FLIGHT",
+        "value": "stresses the private drop under an adverse domain skew",
+        "note": "hardens the #164 native CI against worst-case private-mix"
+      },
+      {
+        "axis": "Launch-boot",
+        "leg": "darwin _IncludedRouter startup-500 fix",
+        "owner_pr": "kanna boot-validation (in-flight)",
+        "status": "IN-FLIGHT",
+        "value": "fixes a startup-500 in _IncludedRouter; a NEW hard serve dependency",
+        "note": "a hard serve gate alongside PRECACHE_BENCH=1 -- must be folded into the harness"
+      },
+      {
+        "axis": "Build",
+        "leg": "both-bugs descending accept-prep kernel",
+        "owner_pr": "#71 (land)",
+        "status": "PENDING-BUILD",
+        "value": "the GO-path gating build (measured tuple: E[T], rho2, lambda, mu, step, ppl, boots, completed)",
+        "note": "the kernel this packet gates -- WIP; the GO is conditional on it building"
+      }
+    ],
+    "n_landed": 5,
+    "n_in_flight": 4,
+    "n_pending": 1,
+    "n_pending_build": 1,
+    "by_status": {
+      "LANDED": [
+        "Numerator E[T] :: descent 5.0564 / both-bugs 5.2070",
+        "Denominator step :: reconciled shipped 1.2182",
+        "Hardware sigma_hw :: 4.86 TPS envelope",
+        "Validity :: PPL <= 2.42 / 128 / greedy-exact",
+        "Private drop :: native CI mid 2.04%"
+      ],
+      "IN-FLIGHT": [
+        "Numerator E[T] de-risk :: realistic-floor refinement",
+        "Denominator step confirm :: descent-walk step-neutrality",
+        "Private drop stress :: adverse-skew private stress",
+        "Launch-boot :: darwin _IncludedRouter startup-500 fix"
+      ],
+      "PENDING": [
+        "Finite-sample CI :: numerator 2nd-moment sampling term"
+      ],
+      "PENDING-BUILD": [
+        "Build :: both-bugs descending accept-prep kernel"
+      ]
+    }
+  },
+  "step3_recommendation": {
+    "headline": "both-bugs is the robust GO",
+    "both_bugs_launch_lcb_tps": 514.877540689496,
+    "both_bugs_p_clear_500": 0.9958868982631068,
+    "recommended_first_shot": "both-bugs",
+    "launch_go": "GO",
+    "gates": [
+      "land #71 builds the both-bugs descending accept-prep kernel (the GO-path gating build)",
+      "kanna's darwin _IncludedRouter boot-validation startup-500 fix folded into the serve harness",
+      "PRECACHE_BENCH=1 set on the served path",
+      "a human-approved `Approval request: HF job` issue"
+    ],
+    "human_approval_deferral": "This packet INFORMS but does NOT authorize a launch; a human must approve the filed `Approval request: HF job` issue before any spend.",
+    "descent_only_restoration": {
+      "path": "ship #154's argmax-only decode (then descent-only is the simpler build)",
+      "restoration_lcb_tps": 3.9566734582135723,
+      "descent_restored_lcb_at_realizable": 503.9218705242332,
+      "descent_lcb_at_scatter_lp_1p2047": 505.56640251311563,
+      "note": "Shipping #154's argmax-only decode adds +3.96 TPS LCB (shipped->realizable), restoring descent-only to GO (LCB 503.92); the full scatter-LP framing 1.2047 lifts descent-only to LCB 505.6. So +3.96 is the CONSERVATIVE restoration."
+    },
+    "build_recommendation": {
+      "changes_build_rec": false,
+      "primary": "land #71's both-bugs kernel -- robust GO at ALL three framings (LCB 514.9 shipped), no #154 dependency",
+      "alternative": "descent-only (simpler build, no BUG-1 spine) + #154 argmax-only serve patch -- restores GO at +3.96 TPS (LCB 503.9) BUT thinner margin, conditional on #154 shipping, and carries the #172 BOUNDED-NOT-ROBUST E[T] floor caveat",
+      "verdict": "build recommendation UNCHANGED: land #71's both-bugs kernel is the gating build for the robust GO; the descent-only+#154 path is a viable simpler-build fallback only once #154 ships and the descent E[T] realistic-floor is confirmed"
+    }
+  },
+  "step4_self_test": {
+    "passes": true,
+    "launch_packet_refresh_self_test_passes": 1,
+    "assert_a_reproduces_174_shipped_verdict": {
+      "ok": true,
+      "repro_within_tol": true,
+      "xcheck_vs_174_json": true,
+      "knife_edge_descent_miss_both_go": true,
+      "desc_lcb": 499.96519706601964,
+      "desc_p": 0.8994368544296176,
+      "both_lcb": 514.877540689496,
+      "both_p": 0.9958868982631068,
+      "ref_desc_lcb": 499.96519706601964,
+      "ref_both_lcb": 514.877540689496,
+      "expect": "shipped descent LCB 499.97/P 0.8994, both LCB 514.88/P 0.9959; descent miss + both GO"
+    },
+    "assert_b_landed_legs_match_sources": {
+      "ok": true,
+      "checks": {
+        "e_t_descent_5p0564": true,
+        "e_t_both_5p2070": true,
+        "e_t_floor_3p5346": true,
+        "e_t_consistent_lawine168": true,
+        "step_shipped_1p2182": true,
+        "step_roofline_1p2127": true,
+        "step_scatter_lp_1p2047": true,
+        "sigma_hw_4p86": true,
+        "sigma_hw_best_of_2_ge_p90": true,
+        "sigma_hw_cross_dominated": true,
+        "private_drop_mid_2p04": true,
+        "private_descent_taulow_504p6": true,
+        "private_descent_safe": true,
+        "k_cal_125p268": true,
+        "frontier_481p53": true
+      },
+      "expect": "every LANDED ledger value matches its merged source PR artifact"
+    },
+    "assert_c_both_bugs_go_with_four_gates": {
+      "ok": true,
+      "headline": "both-bugs is the robust GO",
+      "n_gates": 4,
+      "gates": [
+        "land #71 builds the both-bugs descending accept-prep kernel (the GO-path gating build)",
+        "kanna's darwin _IncludedRouter boot-validation startup-500 fix folded into the serve harness",
+        "PRECACHE_BENCH=1 set on the served path",
+        "a human-approved `Approval request: HF job` issue"
+      ],
+      "human_deferral_present": true,
+      "expect": "headline both-bugs-GO, 4 named gates, explicit human-approval deferral"
+    },
+    "assert_d_154_restoration_reported": {
+      "ok": true,
+      "restoration_lcb_tps": 3.9566734582135723,
+      "descent_restored_lcb": 503.9218705242332,
+      "expect": "+3.96 TPS LCB (imported from #174), restoring descent-only to GO"
+    },
+    "assert_e_nan_clean": {
+      "ok": true,
+      "n_numbers_checked": 31
+    }
+  },
+  "step5_packet_markdown": "### Approval request: HF job for tree submission -- REFRESHED go/no-go packet (PRE-FILLED DRAFT, NOT FILED)\n\n**HEADLINE: both-bugs is the robust GO** -- LCB(P>=0.9) 514.88 TPS, P(clear-500) 99.59%\nat the shipped launch-realized step 1.2182. descent-only-first is a knife-edge MISS at the\nshipped step (LCB 499.97, P 89.94%, -0.035 TPS).\n\n**This packet INFORMS but does NOT authorize a launch; a human must approve the filed `Approval request: HF job` issue before any spend.**\n\n**Composition:** `official = K_cal * (E[T]/step) * tau` (K_cal=125.268, tau in [0.9924, 1.0]);\nclear-500 bar E[T] >= 4.862 (shipped). TWO independent launch axes:\n- PROJECTION axis = 3-term input-band quadrature sqrt(sampling^2 + calibration^2 + step_anchor^2).\n- HARDWARE axis = kanna #159 sigma_hw 4.86 TPS (cross-allocation-dominated),\n  RETIRED by best-of-2 official draws -> P=0.9829 >= 0.90 (does NOT subtract from the LCB).\n\n**Projection geometry at the three step framings (full-recovery corner lambda=mu=1, pinned 1.80% drop):**\n\n| framing / topology | official | proj_private | P(clear 500) | LCB(P>=0.9) | launch |\n|---|---|---|---|---|---|\n| roofline 1.2127 -- descent-only | 522.3 | 516.2 | 93.10% | 502.20 | GO |\n| roofline 1.2127 -- both-bugs | 537.8 | 531.3 | 99.78% | 517.18 | GO |\n| shipped 1.2182 -- descent-only (MISS) | 520.0 | 513.9 | 89.94% | 499.97 | HOLD |\n| shipped 1.2182 -- both-bugs (GO) | 535.4 | 528.9 | 99.59% | 514.88 | GO |\n| scatter-LP 1.2047 -- descent-only | 525.8 | 519.7 | 96.31% | 505.57 | GO |\n| scatter-LP 1.2047 -- both-bugs | 541.4 | 534.8 | 99.92% | 520.65 | GO |\n\nboth-bugs is GO at all three framings (LCB 514.9 ->\n520.6); descent-only is the knife-edge miss at the shipped\nstep ONLY (GO at roofline 502.2 and scatter-LP 505.6).\n\n**MATERIAL CAVEAT -- numerator E[T] floor (denken #172):** the central numerator (descent 5.0564 /\nboth 5.2070) is the OPTIMISTIC full-recovery value used above. denken #172's adversarial self-KV\nfloor 3.5346 projects to 363.5 TPS (BOUNDED-NOT-ROBUST) -- it FAILS 500.\nThe 515-class GO REQUIRES the deep-spine spread to recover to >= 91% of the\nrho-optimal rising ladder (i.e. openevolve cause #2, depth>0 self-KV starvation, must be a FIXABLE build defect, not intrinsic).\nThe denken realistic-floor refinement (IN-FLIGHT) converts this modeled floor to measured -- it is the highest-leverage open de-risk.\n\n**sigma_hw composition is verdict-INVARIANT.** Whether sigma_hw is RETIRED by best-of-2 (headline, P>=0.9 on a\nseparate axis) or naively FOLDED as a 4th quadrature term:\n- both-bugs: LCB 514.9/P 99.6% (best-of-2) vs LCB\n  513.4/P 99.2%\n  (naive-fold) -> GO either way.\n- descent-only: LCB 500.0/P 89.9% (best-of-2) vs LCB\n  498.6/P 87.8%\n  (naive-fold) -> MISS either way.\n\n**Descent-only restoration path:** Shipping #154's argmax-only decode adds +3.96 TPS LCB (shipped->realizable), restoring descent-only to GO (LCB 503.92); the full scatter-LP framing 1.2047 lifts descent-only to LCB 505.6. So +3.96 is the CONSERVATIVE restoration.\n**Build recommendation:** build recommendation UNCHANGED: land #71's both-bugs kernel is the gating build for the robust GO; the descent-only+#154 path is a viable simpler-build fallback only once #154 ships and the descent E[T] realistic-floor is confirmed.\n\n**Launch gates (ALL required before the filed issue is approved):**\n  1. land #71 builds the both-bugs descending accept-prep kernel (the GO-path gating build)\n  2. kanna's darwin _IncludedRouter boot-validation startup-500 fix folded into the serve harness\n  3. PRECACHE_BENCH=1 set on the served path\n  4. a human-approved `Approval request: HF job` issue\n\n**Dependency ledger (5 LANDED / 4 IN-FLIGHT / 1 PENDING / 1 PENDING-BUILD):**\n- [LANDED]  Numerator E[T] (#160/#165/#172) -- descent 5.0564 / both 5.2070\n- [LANDED]  Denominator step (#168) -- roofline 1.2127 <-> shipped 1.2182 (+-0.22%); scatter-LP 1.2047 if #154 ships\n- [LANDED]  Hardware sigma_hw (#159) -- sigma_hw 4.86 TPS (0.96%), cross-allocation-dominated; best-of-2 official draws -> P=0.9829 >= 0.90 on the hardware axis\n- [LANDED]  Validity (#166/#150/#158, Issue #124) -- official PPL 2.377 <= 2.42; M=32 worst-case PPL 2.4134 <= 2.42 (margin 0.0066); 128/128; greedy-exact (Issue #124 RESOLVED)\n- [LANDED]  Private drop (#164) -- descent native drop 2.04% [1.87,2.21]; descent worst tau-low 504.6 TPS (clears 500)\n- [IN-FLIGHT] Numerator E[T] de-risk (denken (in-flight)) -- central +- realistic floor (replaces the adversarial 3.5346 worst case)\n- [IN-FLIGHT] Denominator step confirm (#173) -- confirms the built descent kernel realizes 1.2182\n- [IN-FLIGHT] Private drop stress (#176 (stark)) -- stresses the private drop under an adverse domain skew\n- [IN-FLIGHT] Launch-boot (kanna boot-validation (in-flight)) -- fixes a startup-500 in _IncludedRouter; a NEW hard serve dependency\n- [PENDING] Finite-sample CI (#175 (wirbel)) -- composes in quadrature with the input-band sampling term\n- [PENDING-BUILD] Build (#71 (land)) -- the GO-path gating build (measured tuple: E[T], rho2, lambda, mu, step, ppl, boots, completed)\n\n**Truly-unmeasurable residual:** an organizer tree re-run on the REAL private set (no proxy reproduces it).\n**Gating build:** land #71 (the both-bugs descending accept-prep kernel).\n",
+  "handoff": "REFRESHED go/no-go packet: both-bugs is the robust GO (LCB(P>=0.9)=514.88, P=99.59%) at the shipped step 1.2182; descent-only-first is a knife-edge MISS (LCB 499.97). Gated on land #71's kernel, kanna's darwin boot-fix, PRECACHE_BENCH=1, and a human-approved Approval request. Shipping #154's argmax-only decode (+3.96 TPS LCB) restores the simpler descent-only build to GO. This packet INFORMS but does NOT authorize a launch; a human must approve the filed `Approval request: HF job` issue before any spend. Truly-unmeasurable residual: an organizer tree re-run on the real private set. Gating build: land #71.",
+  "imported_legs": {
+    "fern_174_verdict": {
+      "wandb": "s2vihqh1",
+      "descent_shipped_lcb": 499.96519706601964,
+      "both_shipped_lcb": 514.877540689496,
+      "restoration_154_lcb_tps": 3.9566734582135723
+    },
+    "lawine_168_step_anchors": [
+      1.2127483746822987,
+      1.2181727676912677,
+      1.2046765466054148
+    ],
+    "kanna_159_sigma_hw_tps": 4.864468814937121,
+    "kanna_159_best_of_2": 0.9829212493342153,
+    "denken_172_et": [
+      5.056404568844709,
+      5.206954309441966,
+      3.5345806333738627
+    ],
+    "stark_164_private": [
+      2.040947456110656,
+      504.6105118808893
+    ],
+    "denken_166_ppl_banked": true
+  },
+  "uncertainty_model": {
+    "projection_quadrature": "combined = sqrt(sampling^2 + calibration^2 + step_anchor^2)",
+    "hardware_axis": "kanna #159 sigma_hw retired by best-of-2 official draws (separate axis)",
+    "finite_sample_pending": "wirbel #175 numerator 2nd-moment sampling term -- PENDING",
+    "launch_bar": "P(clear 500) >= 0.9 on the projection axis AND best-of-2 hardware clearance",
+    "z_p90_one_sided": 1.2815515594457412,
+    "combined_rel_descent": 0.021148844836120288,
+    "combined_rel_both": 0.020667238533949674
+  },
+  "provenance": "REFRESHES my #167/#174 launch packet with both-bugs as the PRIMARY GO. Imports VERBATIM: my #174 verdict engine (-> #167 packet -> #155 consolidator + #162 frontier), lawine #168 step anchors (roofline/overlap/scatter-LP), kanna #159 sigma_hw + best-of-2, denken #172 E[T]+floor, stark #164 native private drop, denken #166 PPL stamp. One source of truth per constant -- imports, does not re-derive.",
+  "method": "LOCAL CPU-only analytic consolidation; no GPU/vLLM/HF Job/submission/kernel build/served-file change. BASELINE stays 481.53; adds 0 TPS (banks the analysis: PRIMARY = self-test). Greedy identity untouched. Does NOT file the issue or authorize a launch. NOT open2.",
+  "metrics_nan_clean": 1,
+  "wandb_run_id": "d71gvk5i",
+  "wandb_url": "https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/d71gvk5i",
+  "elapsed_s": 4.6468,
+  "_realizable_restoration_lcb_recomputed": 503.9218705242332
+}
