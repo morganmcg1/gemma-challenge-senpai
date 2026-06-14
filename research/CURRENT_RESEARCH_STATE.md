@@ -28,7 +28,7 @@
 | lawine | #90 | MTP K sweep (confirm K=7 optimal, empirical A/B) | WIP |
 | fern | **#95** | **Drafter loss-objective gate:** is the MTP draft head acceptance-optimal or only likelihood-optimal? (LK-Loss headroom) (Morgan assigned) | WIP |
 | wirbel | **#93** | **Star-attention greedy-equivalence gate:** does the tree-mask numerical path preserve greedy argmax? attention-side twin of kanna #87's GEMM gate | WIP (Morgan assigned) |
-| denken | **#94** | **Draft-verify overlap gate:** can the 15.5% drafter be hidden behind verify on BW-bound A10G? (Morgan assigned) | WIP |
+| denken | **#97** | **Persistent-kernel overhead gate:** is the ~32% "other" bucket GPU-idle (megakernel-reclaimable, +8-15%) or GPU-busy (#65 extended)? CPU-first | WIP (#94 ✅ MERGED, overlap CLOSED) |
 
 ## Land #71 de-risking status (THE #1 lever, ~576 TPS projected)
 
@@ -50,6 +50,7 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 
 | PR | student | verdict | significance |
 |---|---|---|---|
+| #94 | denken | Draft-verify overlap AMBER: naive +18% → +4.22% BW-limited → +1.2-2.9% realized; A10G bus serializes 2 streams (contention 0.506) | overlap lane CLOSED (single-GPU conc=1); banks bus_contention_factor=0.506 |
 | #87 | kanna | Argmax-margin GREEN: verify-GEMM SplitK + M-widen 0/65,536 flips; 98.13% provably flip-proof; M=16 bit-identical | pre-quota GEMM numerics gate CLEARED (1 of 2) |
 | #92 | fern | E[T] independence GREEN: realized 5.20824 = independent +0.025%; corr strong but E[T]-neutral | tree-economics-analytics CLOSED (de-risk) |
 | #91 | fern | Topology CONFIRMED: mb3 +0.9614% E[T] > mb4; acceptance model validated to ~1e-3 tok | topology-analytics CLOSED |
@@ -73,13 +74,14 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 - **int4 drafter GEMM refitted:** ~+5% realistic ceiling (#75).
 - **Drafter non-GEMM subtasks:** no addressable headroom (#77).
 - **Verify-rollback, strict M=1 greedy-valid spec:** cost theorem / official gate has no identity check (#24/#38).
+- **Draft-verify stream overlap (single-GPU conc=1):** A10G bus serializes the two memory-bound streams (contention 0.506); +1.2-2.9% realized, sub-build-bar (#94). Re-opens only on a 2nd GPU or a compute-bound regime.
 
 ## Next directions (priority order)
 
 1. **Land #71 completes tree-verify build** → openevolve oracle bench → lawine served A/B → approval-gated HF submission. ~576 TPS projected. Both pre-quota gates (kanna #87 GEMM, wirbel #93 attention) must clear first.
-2. **Draft-verify overlap (denken #94):** Saguaro-style secondary-stream drafter(N+1) overlapped with verify(N); 15.5% drafter block is the ceiling; +18% TPS if fully hidden. Key gate: A10G single-HBM-bus contention may cap realized gain — denken profiling this. Orthogonal to and COMPOUNDS with land #71 (tokens/step × step/wall-time).
+2. **Persistent-kernel overhead-reclamation (denken #97):** the ~32% "other/overhead" is the biggest un-mined bucket; a megakernel could reclaim GPU-idle/launch/host slack (+8-15% IF idle). Crux: tested against denken's own #65 (decode 99.41% GPU-bound) — is the 32% GPU-idle (reclaimable, GREEN) or GPU-busy small-kernel-tail/bus-spillover (#65 extended, CLOSE)? CPU-first gate. _[Draft-verify overlap CLOSED: denken #94 AMBER — the A10G bus serializes the two streams → +1.2-2.9% realized, sub-build-bar.]_
 3. **SplitK W4A16 verify-GEMM (ubel #84):** close 23% HBM gap at M=8; ~+5–12% wall_tps.
 4. **MTP K sweep (lawine #90):** confirm K=7 optimal empirically or find a free config win.
 5. **Drafter GEMM fusion (stark #78):** ~+2.6% ceiling once stark responds to check-in.
 6. **Composition:** tree-verify × SplitK × draft-verify-overlap — orthogonal levers that multiply.
-7. **Next-wave levers (queued for freed seats):** LK-loss draft head (+8% E[T], `RESEARCH_IDEAS_2026-06-14_04:40.md`), double-quant verify-GEMM scales (+0.4–2%), persistent-kernel scheduling (+8–15%, targets ~32% overhead), QuantSpec INT4 drafter-KV (+10–15%), Token Recycling (+4–10%).
+7. **Next-wave levers (queued for freed seats):** double-quant verify-GEMM scales (+0.4–2%, compounds with ubel SplitK), QuantSpec INT4 drafter-KV (+10–15% claim — premise-check first: MTP may lack a separate drafter KV to quantize), Token Recycling (+4–10%; likely #89-redundant). _[Now in-flight: LK-loss draft head → fern #95; persistent-kernel scheduling → denken #97.]_

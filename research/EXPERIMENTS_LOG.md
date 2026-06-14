@@ -1,5 +1,26 @@
 # SENPAI Research Results
 
+## 2026-06-14 05:22 — PR #94: Draft-verify overlap gate — can the drafter be hidden behind verify on a BW-bound A10G? ✅ MERGED — AMBER / OVERLAP LANE CLOSED (single-GPU conc=1; banks the reusable A10G dual-stream contention probe + `bus_contention_factor=0.506`)
+
+- **Branch:** `denken/draft-verify-overlap-gate` · **Student:** denken · merged ~05:22Z (analysis-only, BASELINE unchanged)
+- **Hypothesis:** at conc=1 the decode loop is serial drafter(N)→verify(N)→drafter(N+1)…; Saguaro/AMUSD-style secondary-stream overlap runs drafter(N+1) concurrently with verify(N). #75 priced the drafter block at 15.5% → naive fully-hidden ceiling ~+18% TPS. Gate: does it survive the A10G single-HBM-bus contention?
+- **Primary metric:** `bandwidth_limited_overlap_ceiling_pct = 4.22%` wall / 4.41% TPS (AMBER). **Test:** `drafter_verify_step_time_ratio r = 0.183` (M=8), 0.178 (M=32).
+
+| metric | value | read |
+|---|---|---|
+| `drafter_verify_step_time_ratio` (r, M=8) | **0.183** | drafter cheap → timing gate stays OPEN (CLOSE iff r>0.85) |
+| naive compute-limited ceiling | +15.46% wall / **+18.29% TPS** | reproduces the PR's +18% projection exactly |
+| verify solo HBM | **491 GB/s (82% peak)** | one stream nearly saturates the bus |
+| two concurrent verify | **1.97× one verify** | fully serialized (symmetric speedup 1.01×) |
+| `bus_contention_factor` | **0.506** | ~full serialization on the shared bus |
+| `drafter_overlap_efficiency` | **0.273** | only 27% of the drafter hides |
+| **bandwidth-limited ceiling** | **+4.22%** wall / +4.41% TPS | 0.273 × 15.46% — AMBER |
+| realized after accept-boundary haircut | **+1.16 / +2.09 / +2.86%** (1/2/3-path) | official 487.1 / 491.6 / 495.3 |
+
+- **Verdict — AMBER → LANE CLOSED.** The timing gate does NOT close it (r=0.183 ≪ 0.85: the drafter is ~5.5× cheaper than verify, so a *compute-limited* world would hide it almost fully). **The A10G's single HBM bus is the wall:** verify alone pulls 82% of HBM peak, two memory-bound streams serialize (1.01× symmetric speedup, contention 0.506), combined bandwidth ≈ single-stream (498 GB/s, not the ~982 GB/s additive overlap needs). So the naive +18% collapses ~4× to **+4.22% bandwidth-limited**, then to **+1.2-2.9% realized** after the serial accept-boundary haircut (zero-accept P=0.271). Saguaro/AMUSD's "free drafter" relies on a **separate device with its own HBM**; the premise does not transfer to one A10G at conc=1. Not worth a dual-stream scheduler + speculative continuation tree + rollback for sub-3%, and it **fights the tree** for the same non-GEMM slack (#85).
+- **Banks:** `scripts/profiler/dual_stream_hbm_contention.py` (reusable A10G dual-stream probe), `scripts/profiler/draft_verify_overlap_gate.py`, and the reusable **`bus_contention_factor=0.506`** A10G constant — any future "overlap two memory-bound kernels at conc=1" idea should assume ~full serialization. CPU gate + ~4.7 GB GPU probe; greedy token-identity preserved by construction (overlap reorders the GPU timeline only). Re-run regime: a compute-bound decode (much higher concurrency / larger M) returns the bus headroom.
+- **W&B:** `1127zef4`. **Next:** denken → #97 (persistent-kernel overhead-reclamation gate — is the ~32% "other" GPU-idle or GPU-busy?).
+
 ## 2026-06-14 05:17 — PR #87: Verify-GEMM argmax-margin greedy-safety gate ✅ MERGED — GREEN (both verify-GEMM levers clear the FP-numerics gate; lm_head-isolated; banks the 65,536-position margin map)
 
 - **Branch:** `kanna/verify-gemm-argmax-margin` · **Student:** kanna · merged ~05:17Z
