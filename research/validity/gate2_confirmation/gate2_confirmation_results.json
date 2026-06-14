@@ -1,0 +1,368 @@
+{
+  "agent": "denken",
+  "created_at": "20260614T205427Z",
+  "kind": "gate2-confirmation",
+  "nan_clean": true,
+  "peak_mem_mib": 30.129,
+  "pr": 225,
+  "synthesis": {
+    "confirmation_budget": {
+      "deff_band": {
+        "ar1": 1.658367630002036,
+        "flat": 4.410614351127293,
+        "measured_acf": 2.7742875539531413
+      },
+      "fixed_n_worstcase_truth_independent": 30455.404769372028,
+      "n_confirm_arcorrected": 672.3420962564048,
+      "n_confirm_flat": 1788.1690675618568,
+      "n_confirm_iid": 405.42403511311863,
+      "n_confirm_measured_acf": 1124.7628546877863,
+      "note": "HEADLINE n_confirm = the drift-dominated band (build clearly off the bar): IID 405 \u2192 AR(1) 672 \u2192 measured-ACF 1,125 \u2192 flat 1,788. The GO-side confirm of a build genuinely in the thin [0.978,1.0] sliver is the variance-dominated case (14,915 IID / 41,379 measured-ACF at \u03bb=1.0); the build-exactly-at-bar knife-edge peaks at 24,398 IID / 67,687 measured-ACF. The SPRT collapses the fixed-n 30,455 ~75\u00d7 when drift-dominated (Deff-invariant).",
+      "rows": {
+        "confirm_go_at_anchor": {
+          "ar1": 24734.648699561607,
+          "flat": 65784.56703490077,
+          "iid": 14915.057585591705,
+          "measured_acf": 41378.65862620145,
+          "regime": "variance-dominated (dear; GO region is a thin sliver)",
+          "truth": "build at full-recovery anchor \u03bb=1.0 (only m=0.022 above the bar)"
+        },
+        "knife_edge_at_bar": {
+          "ar1": 40460.92431498759,
+          "flat": 107610.35744730521,
+          "iid": 24398.04273973794,
+          "measured_acf": 67687.18631367176,
+          "regime": "peak (worst case)",
+          "truth": "build exactly at the bar \u03bb=\u03bc_mid (indifference point)"
+        },
+        "reject_clear_nogo": {
+          "ar1": 672.3420962564048,
+          "flat": 1788.1690675618568,
+          "iid": 405.42403511311863,
+          "measured_acf": 1124.7628546877863,
+          "regime": "drift-dominated (cheap)",
+          "truth": "build clearly below bar (\u03b2=0.765, \u03bb_eq=0.540)"
+        }
+      },
+      "sprt_collapse_vs_fixed_n": 75.11987975965602,
+      "sprt_peak_at_bar_iid": 24398.04273973794
+    },
+    "feasibility": {
+      "decode_steps_available_per_run": 65536,
+      "fits_one_run": {
+        "confirm_go_at_anchor_measured_acf": true,
+        "fixed_n_worstcase_iid": true,
+        "headline_drift_dominated_measured_acf": true,
+        "headline_flat_loose_end": true,
+        "knife_edge_at_bar_measured_acf": false
+      },
+      "gate2_confirmable_in_one_run": true,
+      "headline_headroom_x": 58.266504558591244,
+      "knife_edge_fits": false,
+      "knife_edge_overflow_ratio": 1.0328244981944543,
+      "n_confirm_vs_available": {
+        "confirm_go_at_anchor_measured_acf": 41378.65862620145,
+        "fixed_n_worstcase_iid": 30455.404769372028,
+        "headline_drift_dominated_measured_acf": 1124.7628546877863,
+        "headline_flat_loose_end": 1788.1690675618568,
+        "knife_edge_at_bar_measured_acf": 67687.18631367176
+      },
+      "note": "one served run = 65,536 q[2..9] positions. The HEADLINE drift-dominated budget 1,125 (measured-ACF) fits with 58\u00d7 headroom; even the GO-confirm-at-anchor 41,379 fits. Only the measure-zero knife-edge (build EXACTLY at the bar, 67,687 measured-ACF) marginally exceeds one run (\u00d71.03) \u2014 and #215's shallow-only \u03bb\u0302\u22480.9065 puts the build firmly in the drift-dominated regime, so gate-2 is measurable from the SAME launch-candidate run, no extra draw."
+    },
+    "gate2_decision_rule": {
+      "decode_steps_available_per_run": 65536,
+      "decode_steps_basis": "128 prompts \u00d7 output_len 512 (q[2..9] subset)",
+      "lcb_three_way_mapping": {
+        "HOLD_kernel_feasible_below_bar": "\u03bb\u0302 \u2208 [0.85715, 0.97798)  (a compliant int4 kernel is buildable per #216, but below the private-grade bar \u2014 HOLD, not GO)",
+        "NOGO_no_buildable_kernel": "\u03bb\u0302 < 0.85715  (no buildable kernel clears 500; deeper still, \u03bb\u0302 < 0.83445 misses even with a FREE zero-overhead kernel, #213/#216) \u2014 NO-GO",
+        "PASS_go_eligible": "\u03bb\u0302_LCB \u2265 0.97798  (clears the binding private bar \u2014 gate-2 PASS)"
+      },
+      "note": "the LCB read-out is coherent with the SPRT GO event: a build whose always-valid \u03bb\u0302 lower-confidence-bound clears the bar is exactly the \u03a3Z\u2265A decision. The q[2..9] reads are dominated by the shallow rungs (depths 2\u20134 carry the bulk of the Neyman info, #205), which nearly every decode position reaches, so the effective read count \u2248 the full 65,536.",
+      "stopping_boundaries": {
+        "A_upper_decide_go": 2.9444389791664403,
+        "B_lower_decide_nogo": -2.9444389791664394,
+        "rule": "accumulate \u03a3Z over q[2..9] reads; \u03a3Z\u2265A \u21d2 GO-eligible, \u03a3Z\u2264B \u21d2 NO-GO, else continue"
+      },
+      "thresholds": {
+        "free_kernel_floor_lambda_crit": 0.8344533978886615,
+        "kernel_feasible_floor": 0.8571542761568587,
+        "private_bar_go": 0.9779783323491393
+      }
+    },
+    "gate2_test_definition": {
+      "composite_null_caveat": "The Wald boundaries A,B control type-I error POINTWISE at the null boundary \u03bc0=bar (where the SPRT is calibrated). The null H0: \u03bb_built<bar is COMPOSITE; in the Gaussian known-\u03c3\u00b2 MLR construction here the OC is monotone in \u03bb, so sup_{\u03bb<bar} P(decide GO)=P_{\u03bc0}(decide GO)\u2264\u03b1 \u2014 the worst-case false-GO is at \u03bb\u2192bar\u207b and the boundary value bounds the whole composite null (the test is STRICTLY more conservative further below the bar, where |drift| is larger). The residual approximations are (i) the Wald overshoot (boundaries ignore excess over A,B \u2192 realized \u03b1\u22480.05, asymptotically exact), and (ii) the per-step read is treated as exactly Gaussian. For an EXACTLY-uniform, assumption-agnostic always-valid guarantee, the one-sided mSPRT / confidence sequence (mixture-LLR; Robbins; Johari et al. 2016; Waudby-Smith & Ramdas 2022; Fischer & Ramdas 2024) is the textbook-correct instrument and yields the SAME \u03bb\u0302_LCB read-out; the Wald SPRT is its drift-dominated practical approximation, which is what prices the E[N] band here. This caveat changes the INSTRUMENT, not the bar, the (\u03b1,power) target, or the AR(1)-corrected budget.",
+      "hypotheses": {
+        "H0_nogo": "\u03bb_built < 0.97798 (below the binding private bar \u2014 NO-GO; null boundary \u03bc0)",
+        "H1_go_eligible": "\u03bb_built \u2265 0.97798 + margin (GO-eligible; full-recovery anchor \u03bc1=1.0)",
+        "indifference_zone_lambda": [
+          0.9779783323491393,
+          1.0
+        ],
+        "kind": "one-sided composite confirmation of an upper-bounded parameter (\u03bb \u2264 1.0)",
+        "margin_m": 0.021988702626879242,
+        "mu_mid": 0.9890056486865604
+      },
+      "regime_rationale": "Recommend the Wald SPRT over a truth-independent fixed-n test: the deployed build is expected to sit CLEARLY on one side of the bar (#215's shallow-only \u03bb\u0302\u22480.9065 misses; a passing build clears with margin), so the sequential test stops ~75\u00d7 earlier than the fixed-n worst case. The LCB decision rule (below) is the natural read-out: a build whose always-valid \u03bb\u0302 lower-confidence-bound clears the bar is exactly the SPRT GO event. Fall back to the fixed-n n_fss only as the truth-independent ceiling (build genuinely at the bar).",
+      "regime_recommendation": "SPRT (sequential)",
+      "test_statistic": {
+        "alpha": 0.05,
+        "boundaries": {
+          "A_upper_decide_go": 2.9444389791664403,
+          "B_lower_decide_nogo": -2.9444389791664394,
+          "form": "A=ln((1\u2212\u03b2)/\u03b1)=ln(0.95/0.05); B=ln(\u03b2/(1\u2212\u03b1))=ln(0.05/0.95)"
+        },
+        "per_step_read": "x_i = \u03bc_ref + \u03a3_{d=2..9}(a_d/\u2202E[T]\u2202\u03bb)(\u00e2_{d,i}\u2212q_d): the both-bugs q[2..9] Neyman-weighted \u03bb-equivalent accept read on full-ladder decode step i (the #205 construction), x_i ~ N(\u03bb_built, \u03c3\u00b2)",
+        "power": 0.95,
+        "wald_llr_increment": "z_i = (m/\u03c3\u00b2)(x_i \u2212 \u03bc_mid); accumulate \u03a3Z, stop at A (GO) or B (NO-GO)",
+        "within_prompt_correlation": {
+          "icc_190": 0.1446247464062406,
+          "mbar_190": 24.582508774446666,
+          "note": "prompts independent; within-prompt reads autocorrelated (decaying ACF) \u2192 design-effect inflation on E[N] (#212)",
+          "rho_lag1_190": 0.2583178258286258
+        }
+      }
+    },
+    "handoff_lines": {
+      "land_71_and_fern_185": "gate-2 (measured \u03bb\u0302_built \u2265 0.97798 both-bugs, q[2..9] direct) is confirmed by a Wald SPRT over the deployed tree's q[2..9] Neyman-weighted accept stream (boundaries A=+2.944/B=-2.944, (\u03b1,power)=(0.05,0.95)): AR(1)-corrected confirmation budget n_confirm = 1,125 decode steps (measured-ACF; AR(1) 672; IID floor 405; flat 1,788), which DOES fit one served run's ~65,536 q[2..9] positions \u2014 so gate-2 is measurable from the SAME launch-candidate run with the decision rule \u03bb\u0302_LCB \u2265 0.97798 \u21d2 PASS, [0.857,0.978) \u21d2 HOLD (kernel-feasible, below private bar), < 0.857 \u21d2 NO-GO; fern #185 reads gate-2 as a single PASS/HOLD/NO-GO flag. CAVEAT: confirming a build genuinely in the thin [0.978,1.0] GO sliver is the variance-dominated case (41,379 measured-ACF), still inside one run."
+    },
+    "imports": {
+      "beta_nogo": 0.765124365433998,
+      "deff_ar1": 1.658367630002036,
+      "deff_ar1_asymptote": 1.6965728308550085,
+      "deff_flat": 4.410614351127293,
+      "deff_measured_acf": 2.7742875539531413,
+      "icc_190": 0.1446247464062406,
+      "lambda_crit_free_kernel_213": 0.8344533978886615,
+      "lambda_eq_nogo": 0.5395958435497274,
+      "lambda_min_kernel_feasible_216": 0.8571542761568587,
+      "margin_m_205": 0.021988702626879242,
+      "mbar_190": 24.582508774446666,
+      "mu1_go_anchor": 1.0,
+      "mu_mid_205": 0.9890056486865604,
+      "n_confirm_ar1": 672.3420962564048,
+      "n_confirm_flat": 1788.1690675618568,
+      "n_confirm_iid": 405.42403511311863,
+      "n_confirm_measured_acf": 1124.7628546877863,
+      "n_fss_205": 30455.404769372028,
+      "n_go_anchor_ar1": 24734.648699561607,
+      "n_go_anchor_flat": 65784.56703490077,
+      "n_go_anchor_iid": 14915.057585591705,
+      "n_go_anchor_measured_acf": 41378.65862620145,
+      "n_peak_ar1": 40460.92431498759,
+      "n_peak_flat": 107610.35744730521,
+      "n_peak_iid": 24398.04273973794,
+      "n_peak_measured_acf": 67687.18631367176,
+      "private_bar_205": 0.9780112973731208,
+      "private_bar_208": 0.9779783323491393,
+      "private_bar_208_band": [
+        0.9779783323491393,
+        0.9780154812594635
+      ],
+      "realized_alpha_205": 0.04999999999999993,
+      "realized_power_205": 0.95,
+      "rho_lag1_190": 0.2583178258286258,
+      "savings_75x": 75.11987975965602,
+      "source_runs": {
+        "d190": "fva6o4ug",
+        "d205": "eijqklu2",
+        "d208": "wi4gxxx8",
+        "d212": "b70053sw",
+        "d213": "5o7zcj8s",
+        "d216": "kernel-feasibility"
+      },
+      "sprt_A_upper": 2.9444389791664403,
+      "sprt_B_lower": -2.9444389791664394
+    },
+    "operating_characteristic": {
+      "A_upper": 2.9444389791664403,
+      "B_lower": -2.9444389791664394,
+      "asn_nogo_iid_reproduced": 405.42403511311863,
+      "margin_m": 0.021988702626879242,
+      "mu_mid": 0.9890056486865604,
+      "note": "the (\u03b1,power) live on the Wald boundaries A,B (unchanged by the within-prompt correlation, which only rescales E[N] via Deff); realized (0.05,0.95) at the indifference edges, reproduced from #205/#212.",
+      "realized_alpha": 0.04999999999999993,
+      "realized_alpha_205_import": 0.04999999999999993,
+      "realized_power": 0.95,
+      "realized_power_205_import": 0.95,
+      "reproduces_212_nogo_floor": true
+    },
+    "self_test": {
+      "conditions": {
+        "a_iid_limit_reproduces_212_405_floor": true,
+        "b_ar1_measured_acf_roundtrip_212_672_1125": true,
+        "c_n_confirm_monotone_as_alt_to_bar_and_fss_roundtrip": true,
+        "d_realized_alpha_power_0p05_0p95": true,
+        "e_bar_0p97798_roundtrips_stark_208": true,
+        "f_key_scalars_finite": true
+      },
+      "evidence": {
+        "a_asn_reproduced": 405.42403511311863,
+        "a_n_confirm_iid_import": 405.42403511311863,
+        "b_deff_ar_import": 1.658367630002036,
+        "b_deff_ar_rederive": 1.658367630002036,
+        "b_n_ar_computed": 672.3420962564048,
+        "b_n_ar_import": 672.3420962564048,
+        "b_n_emp_computed": 1124.7628546877863,
+        "b_n_emp_import": 1124.7628546877863,
+        "c_grid_alt_nfixed": [
+          [
+            0.84,
+            773.4670273092953
+          ],
+          [
+            0.857,
+            1006.1167994884205
+          ],
+          [
+            0.88,
+            1533.9227949632955
+          ],
+          [
+            0.9,
+            2421.6741258539814
+          ],
+          [
+            0.92,
+            4380.585375450801
+          ],
+          [
+            0.94,
+            10209.202224257442
+          ],
+          [
+            0.95,
+            18811.348890354613
+          ],
+          [
+            0.96,
+            45558.013469311496
+          ],
+          [
+            0.965,
+            87423.02001569445
+          ],
+          [
+            0.97,
+            231333.9325957588
+          ],
+          [
+            0.973,
+            594149.6082164148
+          ],
+          [
+            0.976,
+            3762401.0139600188
+          ]
+        ],
+        "c_n_fixed_at_margin": 30455.404769372028,
+        "c_n_fss_205": 30455.404769372028,
+        "d_realized_alpha": 0.04999999999999993,
+        "d_realized_power": 0.95,
+        "e_bar_208": 0.9779783323491393,
+        "e_bar_208_band": [
+          0.9779783323491393,
+          0.9780154812594635
+        ]
+      },
+      "gate2_confirmation_self_test_passes": true
+    },
+    "separation_cost": {
+      "formula": "n_fixed(\u03b4) = z_sum\u00b2\u00b7\u03c3\u00b2_\u03bb/\u03b4\u00b2 = n_fss\u00b7(m/\u03b4)\u00b2,  \u03b4 = |bar \u2212 alternative|",
+      "monotone_grid_alt_to_nfixed": [
+        {
+          "alternative": 0.84,
+          "delta": 0.13797833234913937,
+          "n_fixed_iid": 773.4670273092953
+        },
+        {
+          "alternative": 0.857,
+          "delta": 0.12097833234913935,
+          "n_fixed_iid": 1006.1167994884205
+        },
+        {
+          "alternative": 0.88,
+          "delta": 0.09797833234913933,
+          "n_fixed_iid": 1533.9227949632955
+        },
+        {
+          "alternative": 0.9,
+          "delta": 0.07797833234913931,
+          "n_fixed_iid": 2421.6741258539814
+        },
+        {
+          "alternative": 0.92,
+          "delta": 0.057978332349139294,
+          "n_fixed_iid": 4380.585375450801
+        },
+        {
+          "alternative": 0.94,
+          "delta": 0.03797833234913939,
+          "n_fixed_iid": 10209.202224257442
+        },
+        {
+          "alternative": 0.95,
+          "delta": 0.02797833234913938,
+          "n_fixed_iid": 18811.348890354613
+        },
+        {
+          "alternative": 0.96,
+          "delta": 0.01797833234913937,
+          "n_fixed_iid": 45558.013469311496
+        },
+        {
+          "alternative": 0.965,
+          "delta": 0.012978332349139365,
+          "n_fixed_iid": 87423.02001569445
+        },
+        {
+          "alternative": 0.97,
+          "delta": 0.007978332349139361,
+          "n_fixed_iid": 231333.9325957588
+        },
+        {
+          "alternative": 0.973,
+          "delta": 0.004978332349139358,
+          "n_fixed_iid": 594149.6082164148
+        },
+        {
+          "alternative": 0.976,
+          "delta": 0.0019783323491393556,
+          "n_fixed_iid": 3762401.0139600188
+        }
+      ],
+      "named_separations": {
+        "go_anchor_1p0": {
+          "alternative": 1.0,
+          "cost": "the standard zone",
+          "delta": 0.022021667650860666,
+          "n_fixed_iid": 30364.293439360834,
+          "n_fixed_measured_acf": 84239.28137339979,
+          "width": "gate-2 zone margin"
+        },
+        "kernel_floor_0p857": {
+          "alternative": 0.8571542761568587,
+          "cost": "cheap",
+          "delta": 0.12082405619228065,
+          "n_fixed_iid": 1008.6877929735308,
+          "n_fixed_measured_acf": 2798.389989870929,
+          "width": "WIDE"
+        },
+        "near_bar_0p97": {
+          "alternative": 0.97,
+          "cost": "expensive",
+          "delta": 0.007978332349139361,
+          "n_fixed_iid": 231333.9325957588,
+          "n_fixed_measured_acf": 641786.8500074485,
+          "width": "NARROW"
+        }
+      },
+      "note": "distinguishing the bar 0.97798 from the kernel floor 0.857 (\u03b4=0.1208, WIDE) costs only 1,009 fixed-n IID trials; from the near-bar 0.97 (\u03b4=0.0080, NARROW) it costs 231,334 \u2014 a 229\u00d7 blow-up. The SPRT collapses each ~75\u00d7 when drift-dominated; the gate-2 zone anchors \u03bc1 at the full-recovery 1.0 (\u03b4=m=0.022 \u2192 fixed-n 30,455), never a near-bar point.",
+      "separation_cost_ratio_near_vs_wide": 229.34146145836155,
+      "sigma_sq_lambda_per_step": 1.360658324115549
+    },
+    "test_metric": {
+      "n_confirm_measured_acf": 1124.7628546877863
+    },
+    "verdict": "GATE-2 RUNBOOK BANKED. The confirmation procedure is a Wald SPRT (boundaries A=+2.944/B=-2.944, indifference zone [0.97798, 1.0]) on the deployed tree's both-bugs q[2..9] Neyman-weighted accept stream, realized (\u03b1,power)=(0.05,0.95). The AR(1)-corrected confirmation budget is n_confirm = 405 IID \u2192 672 AR(1) \u2192 1,125 measured-ACF (HEADLINE, data-grounded) \u2192 1,788 flat, vs the truth-independent fixed-n ceiling 30,455 (~75\u00d7 SPRT collapse). HONEST: that headline is the drift-dominated cost (build clearly off the bar); a GO-confirm of a build genuinely in the thin [0.978,1.0] sliver costs 41,379 measured-ACF, and the build-exactly-at-bar knife-edge peaks at 67,687. Separation cost: distinguishing the bar from the kernel floor 0.857 (wide) is 1,009 IID, from 0.97 (narrow) 231,334 \u2014 a 229\u00d7 swing. Decision rule: \u03bb\u0302_LCB \u2265 0.97798 \u21d2 PASS; [0.857,0.978) \u21d2 HOLD; < 0.857 \u21d2 NO-GO. gate2_confirmable_in_one_run = True (headline fits with 58\u00d7 headroom in one served run's 65,536 q[2..9] positions). NOT a launch."
+  }
+}
