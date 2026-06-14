@@ -1,0 +1,298 @@
+{
+  "primary_metric_name": "decomp_self_test_passes",
+  "decomp_self_test_passes": 1,
+  "test_metric_name": "width_vs_spread_band_armed",
+  "width_vs_spread_band_armed": 1,
+  "gate_state": "ARMED",
+  "gate_go_no_go": "PENDING",
+  "gate_label": "DECOMP ARMED + VALIDATED (self-test PASS); awaiting land #71's measured per-depth ladder. Width-vs-spread band [374.6 (width-only, spread=0) .. 535.4 (full)] @ measured step 1.2182; the 160.9-TPS swing is ALL deep-spine-spread. Spread recovery >= 0.9 clears 500.",
+  "land_measured_pending": true,
+  "self_test": {
+    "passes": true,
+    "anchor_full": {
+      "reconstructed_tps": 537.8399229182609,
+      "expected_tps": 537.8,
+      "rel_err": 7.423376396599725e-05,
+      "within_2pct": true,
+      "et": 5.206954309441963
+    },
+    "anchor_widthonly": {
+      "reconstructed_tps": 376.261413425167,
+      "expected_tps": 376.3,
+      "rel_err": 0.00010254205376828264,
+      "within_2pct": true,
+      "et": 3.6426749012617394
+    },
+    "additive_ok": true,
+    "nan_clean": true,
+    "tolerance": 0.02,
+    "step_time_anchor": 1.2127483746822987,
+    "note": "anchors 537.8/376.3 are roofline-step numbers (fern #134/#125); the self-test reproduces them at the 1.2127 roofline. The live band/map re-price at lawine #136's measured 1.2182 (+0.45%, within +-2%)."
+  },
+  "decomposition_nested": {
+    "order": [
+      "depth1_spine",
+      "branch_width",
+      "deep_spine_spread"
+    ],
+    "baseline_et": 2.580886944444444,
+    "full_et": 5.206954309441963,
+    "total_recovery_et": 2.6260673649975192,
+    "facets": {
+      "depth1_spine": {
+        "d_et": 0.12839372801681526,
+        "d_tps": 13.202773853393719
+      },
+      "branch_width": {
+        "d_et": 0.9333942288004802,
+        "d_tps": 95.98126878364046
+      },
+      "deep_spine_spread": {
+        "d_et": 1.5642794081802238,
+        "d_tps": 160.85542174629617
+      }
+    },
+    "sum_check_et": 2.6260673649975192,
+    "additive": true
+  },
+  "decomposition_shapley": {
+    "baseline_et": 2.580886944444444,
+    "full_et": 5.206954309441963,
+    "total_recovery_et": 2.6260673649975192,
+    "facets": {
+      "depth1_spine": {
+        "d_et": 0.15581858868060378,
+        "d_tps": 16.022882272220937
+      },
+      "branch_width": {
+        "d_et": 1.0004680305918738,
+        "d_tps": 102.8784922712484
+      },
+      "deep_spine_spread": {
+        "d_et": 1.4697807457250418,
+        "d_tps": 151.138089839861
+      }
+    },
+    "sum_check_et": 2.6260673649975192,
+    "additive": true
+  },
+  "width_vs_spread_band_measured_step": {
+    "full_endpoint_et": 5.206954309441963,
+    "widthonly_endpoint_et": 3.6426749012617394,
+    "full_endpoint_tps": 535.4330096522523,
+    "widthonly_endpoint_tps": 374.57758790595614,
+    "band_tps": [
+      374.57758790595614,
+      535.4330096522523
+    ],
+    "swing_tps": 160.85542174629614,
+    "binding_facet": "deep_spine_spread",
+    "step_time": 1.2182
+  },
+  "width_vs_spread_band_roofline_anchors": {
+    "full_endpoint_et": 5.206954309441963,
+    "widthonly_endpoint_et": 3.6426749012617394,
+    "full_endpoint_tps": 537.8399229182609,
+    "widthonly_endpoint_tps": 376.261413425167,
+    "band_tps": [
+      376.261413425167,
+      537.8399229182609
+    ],
+    "swing_tps": 161.57850949309386,
+    "binding_facet": "deep_spine_spread",
+    "step_time": 1.2127483746822987
+  },
+  "spread_recovery_map": {
+    "axis": "deep_spine_spread_recovery_fraction",
+    "step_time": 1.2182,
+    "rows": [
+      {
+        "lambda_spread_recovery": 0.0,
+        "E_T": 3.6426749012617394,
+        "official_tps": 374.57758790595614,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.1,
+        "E_T": 3.75129424160567,
+        "official_tps": 385.7469542668885,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.2,
+        "E_T": 3.867859978740951,
+        "official_tps": 397.73345150645537,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.3,
+        "E_T": 3.9931943491228763,
+        "official_tps": 410.621630499072,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.4,
+        "E_T": 4.128212038414121,
+        "official_tps": 424.5055487048478,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.5,
+        "E_T": 4.273929189566339,
+        "official_tps": 439.48969647390055,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.6,
+        "E_T": 4.4314730841183385,
+        "official_tps": 455.6899925777767,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.7,
+        "E_T": 4.602092529982146,
+        "official_tps": 473.2348523892791,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.8,
+        "E_T": 4.787168989795908,
+        "official_tps": 492.26633221505216,
+        "clears_500": false
+      },
+      {
+        "lambda_spread_recovery": 0.9,
+        "E_T": 4.988228484730201,
+        "official_tps": 512.9413533683237,
+        "clears_500": true
+      },
+      {
+        "lambda_spread_recovery": 1.0,
+        "E_T": 5.206954309441963,
+        "official_tps": 535.4330096522523,
+        "clears_500": true
+      }
+    ],
+    "spread_recovery_to_clear_500": 0.9,
+    "note": "lambda = how far land's re-benched deeper spine q[2:] recovers from the measured declining ladder toward the rho-optimal rising ladder, with depth-1 and branch-width at rho-opt. lambda below 0.90 => sub-500 even with width fully restored => a SPREAD failure."
+  },
+  "width_recovery_map": {
+    "axis": "branch_width_recovery_fraction",
+    "step_time": 1.2182,
+    "rows": [
+      {
+        "mu_width_recovery": 0.0,
+        "E_T": 4.1772719039196,
+        "official_tps": 429.5503925578272,
+        "clears_500": false
+      },
+      {
+        "mu_width_recovery": 0.1,
+        "E_T": 4.2867380731405005,
+        "official_tps": 440.8068386408601,
+        "clears_500": false
+      },
+      {
+        "mu_width_recovery": 0.2,
+        "E_T": 4.394760258212808,
+        "official_tps": 451.9147993075396,
+        "clears_500": false
+      },
+      {
+        "mu_width_recovery": 0.3,
+        "E_T": 4.501338459136526,
+        "official_tps": 462.8742745578658,
+        "clears_500": false
+      },
+      {
+        "mu_width_recovery": 0.4,
+        "E_T": 4.6064726759116486,
+        "official_tps": 473.6852643918383,
+        "clears_500": false
+      },
+      {
+        "mu_width_recovery": 0.5,
+        "E_T": 4.710162908538181,
+        "official_tps": 484.3477688094576,
+        "clears_500": false
+      },
+      {
+        "mu_width_recovery": 0.6,
+        "E_T": 4.8124091570161225,
+        "official_tps": 494.86178781072346,
+        "clears_500": false
+      },
+      {
+        "mu_width_recovery": 0.7,
+        "E_T": 4.913211421345471,
+        "official_tps": 505.22732139563584,
+        "clears_500": true
+      },
+      {
+        "mu_width_recovery": 0.8,
+        "E_T": 5.012569701526227,
+        "official_tps": 515.4443695641947,
+        "clears_500": true
+      },
+      {
+        "mu_width_recovery": 0.9,
+        "E_T": 5.11048399755839,
+        "official_tps": 525.5129323164001,
+        "clears_500": true
+      },
+      {
+        "mu_width_recovery": 1.0,
+        "E_T": 5.206954309441963,
+        "official_tps": 535.4330096522523,
+        "clears_500": true
+      }
+    ],
+    "width_recovery_to_clear_500": 0.7
+  },
+  "lattice_et": {
+    "a0b0c0": 2.580886944444444,
+    "a0b0c1": 3.9386090609823374,
+    "a0b1c0": 3.534580633373862,
+    "a0b1c1": 5.041270826829537,
+    "a1b0c0": 2.7092806724612593,
+    "a1b0c1": 4.1772719039196,
+    "a1b1c0": 3.6426749012617394,
+    "a1b1c1": 5.206954309441963
+  },
+  "live_gate": null,
+  "handoff_land71": "HAND-OFF to land #71 (on the re-bench): feed your measured per-depth conditional ladder q[1..9] (+ branch-hit rho2). A sub-GREEN E[T] is decomposed to a BINDING facet: a WIDTH failure (descent not re-seeding rescued nodes -> branch-hit/rho2 below rho-opt) vs a SPREAD failure (deep-spine decaying faster than rho-opt -> q[2:] short). The 537.8-vs-376.3 swing is ENTIRELY deep-spine-spread (facet c): width restored alone lands 376.3 (RED); only full deep-spine recovery reaches 537.8. Pairs with my #134 per-position harness and #142 scalar gate.",
+  "map": {
+    "figure_of_merit": "official_TPS = K_cal * E[T] / step_time * tau",
+    "K_cal": 125.26795005202914,
+    "tau_band": {
+      "low": 0.9983,
+      "central": 1.0,
+      "high": 1.0
+    },
+    "step_measured_depth9_lawine136": 1.2182,
+    "step_roofline_depth9_125": 1.2127483746822987,
+    "operative_step": 1.2182,
+    "operative_step_is_lawine136_merged": true,
+    "frontier_official": 481.53,
+    "target_official": 500.0,
+    "target_530": 530.0,
+    "linear_floor_et": 3.844,
+    "supply_ceiling_et": 5.207
+  },
+  "facets_spec": {
+    "depth1_spine": "q1: 0.674 measured -> 0.7287 fp32 target (denken #133; BUG-1 plumbing).",
+    "branch_width": "rank>=2 branch RESCUE at depths 2..9 (rho_cond [0.4165,0.2655,0.1908]); the salvage the DESCENT fix re-seeds. == wirbel #135 width facet.",
+    "deep_spine_spread": "deeper rank-1 SPINE at depths 2..9 (measured declining -> rho-opt rising); the easy run the descending walk must keep. == wirbel #135 spread facet. THIS facet IS the 161.6-TPS band.",
+    "naming_note": "WIDTH = branch rescue (rank>=2 re-seeding); SPREAD = deep rank-1 spine (depths 2..9). Aligned to wirbel #135 and this PR's hand-off semantics; the width-only collapse (376.3) keeps width, loses spread."
+  },
+  "measured_input_schema": {
+    "q_ladder": "list[float] -- land's MEASURED per-depth CONDITIONAL accept q[1..9]",
+    "per_position_cumulative_accept": "list[float] -- alt: cumulative ladder (converted)",
+    "rho_cond": "list[float] -- optional measured rank-2..W rescue ratios",
+    "per_position_branch_hit": "float -- measured rank-2 branch-hit rho2 (~0.4165)",
+    "ppl": "float -- captured PPL (<= 2.42)",
+    "greedy_token_ids_captured": "bool -- decode-audit IDs captured"
+  },
+  "provenance": "Three-facet decomposition layer on fern #134's recovery matrix + #142 scalar gate. Reuses the #100 K_cal (125.268), the #142 gate compose verbatim, and wirbel's E[T] DP (build_depth_pvecs_measured / score_tree_depthrank) on the rho-optimal M=32/depth-9/max-branch-3 topology. Anchors: FULL E[T]=5.207->537.8 and WIDTH-ONLY E[T]=3.643->376.3 (fern #134 Fb sensitivity), reproduced within +-2% at the 1.2127 roofline. Live band re-prices at lawine #136's merged 1.2182. depth-1 target 0.7287 (denken #133); rho_cond [0.4165,0.2655,0.1908] (#79/#86).",
+  "method": "LOCAL CPU-only analytic decomposition; no GPU/vLLM/HF Job/submission/kernel build. Decision diagnostic only -- does NOT authorize a launch; BASELINE stays 481.53. Greedy identity untouched by construction."
+}
