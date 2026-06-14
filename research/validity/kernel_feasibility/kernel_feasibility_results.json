@@ -1,0 +1,175 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260614T201923Z",
+  "kind": "kernel-feasibility",
+  "nan_clean": true,
+  "peak_mem_mib": 27.238,
+  "pr": 216,
+  "synthesis": {
+    "composition": {
+      "K_cal": 125.26795005202914,
+      "bench_tokens": 16384,
+      "clear500_bar_et_tau1": 4.862377006624717,
+      "clear500_bar_et_tau_cons": 4.8996140735839555,
+      "kanna122_offshelf_overhead_nonworking_ref": 0.5178,
+      "step": 1.2182,
+      "target_official": 500.0,
+      "tau_central": 1.0,
+      "tau_conservative": 0.9924
+    },
+    "cost_decomposition": {
+      "anchors": {
+        "attn_us_m32": 1058.4877566666764,
+        "gemm_us_m32": 5899.235962629318,
+        "gemm_us_m8": 4980.291757583619,
+        "s_gross": 0.03198611975673549,
+        "s_net": 0.015586924621061815,
+        "splitk_band_high_pct": 7.805537614549518,
+        "splitk_operating_m": 8,
+        "step_m8_us": 7982.887878221502,
+        "step_normalized": 1.2182,
+        "step_us_m32_deployed": 9724.754013249434,
+        "verify_m": 32
+      },
+      "assumptions": {
+        "scope_proportionality": "off-the-shelf VLLM_BATCH_INVARIANT=1 overhead is \u2248 proportional to the fraction of step WALL-TIME forced deterministic; the verify-GEMM share is its time share of the deployed M=32 step (#153 gemm_us[32] / #168 step). FLOP/op share is proxied by time share (both are weight-traffic-dominated for these BW-bound GEMMs).",
+        "splitk_penalty": "the fixed-(M-invariant)-split-K penalty is bounded by the measured adaptive split-K realization headroom s_net=1.56% (#150, operating M=8). The verify GEMM is BW-bound (AI\u224828 << ridge 107) so this fraction is \u2248 M-stable from M=8 to the deployed M=32; the theoretical minimum is ~0 (a fixed schedule matched at M)."
+      },
+      "custom_kernel_overhead_floor_band_high_pct": 4.734999789266681,
+      "custom_kernel_overhead_floor_gross_pct": 1.9403438659406453,
+      "custom_kernel_overhead_floor_pct": 0.9455349322572293,
+      "custom_kernel_overhead_floor_theoretical_min_pct": 0.0,
+      "offtheshelf_overhead_attributable_to_verify_gemm_pct": 31.410813860049373,
+      "offtheshelf_to_custom_floor_ratio": 54.76265152508765,
+      "offtheshelf_whole_model_overhead_pct": 51.78,
+      "plausible_custom_overhead_band_pct": [
+        0.9455349322572293,
+        31.410813860049373
+      ],
+      "verify_gemm_cost_share_of_step": 0.606620584396473,
+      "verify_gemm_cost_share_of_step_at_operating_m8": 0.6238709391335172
+    },
+    "handoff_line": "COMPLIANT-KERNEL FEASIBILITY (Issue #192 lane-a, capstone of #199\u2192#213\u2192#216): the compliant batch-invariant int4 verify kernel is plausibly buildable for \u03bb \u2265 0.8572 (custom-overhead band [0.95%, 31.41%] vs the #213 budget at that \u03bb; budget \u22640 below \u03bb_crit=0.8345), so #192 lane-a is a REAL 500-path CONDITIONAL on land #71 building self-KV recovery \u03bb above that threshold AND the custom kernel landing near its split-K floor \u2014 kanna #122's off-the-shelf +51.78% is a WHOLE-MODEL ceiling ~55\u00d7 the verify-GEMM-only cost and never the right kernel (its scoped-to-GEMM share 31.4% already clears at NO physical \u03bb\u22641, budget only 7.33% at \u03bb=1). HONEST SCOPE: scope-proportionality + split-K-penalty are explicit estimates and #199's three optimisms carry; ONLY an actual kernel build converts this PRIOR to a proof. Adds 0 TPS; authorizes nothing. NOT a launch. NOT open2.",
+    "headline": {
+      "budget_at_lambda_1_both_bugs_tau1": 7.331808522875782,
+      "compliant_kernel_buildable_at_lambda_hat": false,
+      "compliant_kernel_buildable_at_lambda_hat_attributable": false,
+      "compliant_kernel_buildable_at_spine_0997": true,
+      "compliant_kernel_buildable_at_spine_0997_attributable": false,
+      "custom_kernel_overhead_floor_pct": 0.9455349322572293,
+      "lambda_crit_clears_500_zero_overhead_both_bugs_tau1": 0.8344533978886615,
+      "lambda_min_kernel_feasible": 0.8571542761568587,
+      "lambda_min_kernel_feasible_attributable_end": 1.419457571736475,
+      "lambda_min_kernel_feasible_attributable_is_physical": false,
+      "lambda_min_kernel_feasible_is_physical": true,
+      "max_budget_pct_at_prob_saturation_both_bugs_tau1": 50.09522632330761,
+      "offtheshelf_attributable_clears_at_physical_lambda": false,
+      "offtheshelf_overhead_attributable_to_verify_gemm_pct": 31.410813860049373,
+      "plausible_custom_overhead_band_pct": [
+        0.9455349322572293,
+        31.410813860049373
+      ],
+      "verify_gemm_cost_share_of_step": 0.606620584396473
+    },
+    "lambda_hat": 0.3418647166361965,
+    "optimism_band_note": "Carries #199's THREE optimisms (rank-1 coverage 0.7304 over-counts the true compliant accept; \u03bb-realism vs \u03bb\u0302=0.342; zero OTHER overhead) PLUS the new scope-proportionality assumption (the off-the-shelf determinism tax splits \u2248 by wall-time share) PLUS the split-K-penalty estimate (fixed-schedule cost bounded by the measured s_net=1.56% adaptive headroom). The band's OPTIMISTIC end is the split-K floor; the CONSERVATIVE end is #122's whole-model tax scoped to the GEMM. ONLY an actual batch-invariant kernel build settles buildability \u2014 this is a PRIOR.",
+    "regimes": {
+      "both_bugs": {
+        "tau_central_1p0": {
+          "attributable_reachable_within_prob_saturation": true,
+          "budget_at_lambda_1": 7.331808522875782,
+          "budget_at_lambda_crit": 0.0,
+          "budget_at_lambda_hat": -16.738568764737806,
+          "budget_at_spine_0997": 7.189509894325297,
+          "buildable_at_lambda_1_attributable": false,
+          "buildable_at_lambda_1_floor": true,
+          "buildable_at_lambda_hat_attributable": false,
+          "buildable_at_lambda_hat_floor": false,
+          "buildable_at_spine_0997_attributable": false,
+          "buildable_at_spine_0997_floor": true,
+          "lambda_crit_clears_500_zero_overhead": 0.8344533978886615,
+          "lambda_min_kernel_feasible_attributable": 1.419457571736475,
+          "lambda_min_kernel_feasible_attributable_is_physical": false,
+          "lambda_min_kernel_feasible_floor": 0.8571542761568587,
+          "lambda_min_kernel_feasible_floor_is_physical": true,
+          "max_budget_pct_at_prob_saturation": 50.09522632330761
+        },
+        "tau_conservative_0p9924": {
+          "attributable_reachable_within_prob_saturation": true,
+          "budget_at_lambda_1": 6.516086778101915,
+          "budget_at_lambda_crit": 0.0,
+          "budget_at_lambda_hat": -17.371355642125796,
+          "budget_at_spine_0997": 6.374869619128409,
+          "buildable_at_lambda_1_attributable": false,
+          "buildable_at_lambda_1_floor": true,
+          "buildable_at_lambda_hat_attributable": false,
+          "buildable_at_lambda_hat_floor": false,
+          "buildable_at_spine_0997_attributable": false,
+          "buildable_at_spine_0997_floor": true,
+          "lambda_crit_clears_500_zero_overhead": 0.8528728360500535,
+          "lambda_min_kernel_feasible_attributable": 1.4339921876612585,
+          "lambda_min_kernel_feasible_attributable_is_physical": false,
+          "lambda_min_kernel_feasible_floor": 0.8753970876600741,
+          "lambda_min_kernel_feasible_floor_is_physical": true,
+          "max_budget_pct_at_prob_saturation": 48.95450260325045
+        }
+      },
+      "descent_only": {
+        "tau_central_1p0": {
+          "attributable_reachable_within_prob_saturation": true,
+          "budget_at_lambda_1": 4.123450699935671,
+          "budget_at_lambda_crit": 0.0,
+          "budget_at_lambda_hat": -19.187063047728405,
+          "budget_at_spine_0997": 3.985716836951747,
+          "buildable_at_lambda_1_attributable": false,
+          "buildable_at_lambda_1_floor": true,
+          "buildable_at_lambda_hat_attributable": false,
+          "buildable_at_lambda_hat_floor": false,
+          "buildable_at_spine_0997_attributable": false,
+          "buildable_at_spine_0997_floor": true,
+          "lambda_crit_clears_500_zero_overhead": 0.9066754940814947,
+          "lambda_min_kernel_feasible_attributable": 1.477954718649654,
+          "lambda_min_kernel_feasible_attributable_is_physical": false,
+          "lambda_min_kernel_feasible_floor": 0.9287406239539773,
+          "lambda_min_kernel_feasible_floor_is_physical": true,
+          "max_budget_pct_at_prob_saturation": 45.47379955266126
+        },
+        "tau_conservative_0p9924": {
+          "attributable_reachable_within_prob_saturation": true,
+          "budget_at_lambda_1": 3.3321124746161557,
+          "budget_at_lambda_crit": 0.0,
+          "budget_at_lambda_hat": -19.80124136856567,
+          "budget_at_spine_0997": 3.1954253889908912,
+          "buildable_at_lambda_1_attributable": false,
+          "buildable_at_lambda_1_floor": true,
+          "buildable_at_lambda_hat_attributable": false,
+          "buildable_at_lambda_hat_floor": false,
+          "buildable_at_spine_0997_attributable": false,
+          "buildable_at_spine_0997_floor": true,
+          "lambda_crit_clears_500_zero_overhead": 0.9245784686249501,
+          "lambda_min_kernel_feasible_attributable": 1.492218812701287,
+          "lambda_min_kernel_feasible_attributable_is_physical": false,
+          "lambda_min_kernel_feasible_floor": 0.9464784127003916,
+          "lambda_min_kernel_feasible_floor_is_physical": true,
+          "max_budget_pct_at_prob_saturation": 44.368198676061034
+        }
+      }
+    },
+    "self_test": {
+      "conditions": {
+        "a_offshelf_scope_decomposition_roundtrips_122_5178": true,
+        "b_floor_ge_0_and_le_attributable_band_well_ordered": true,
+        "c_at_lambda_crit_budget_zero_feasible_iff_floor_zero": true,
+        "d_lambda_min_kernel_feasible_ge_lambda_crit": true,
+        "e_nan_clean": true
+      },
+      "kernel_feasibility_self_test_passes": true
+    },
+    "spine_0997": 0.997,
+    "test_metric": {
+      "lambda_min_kernel_feasible": 0.8571542761568587
+    },
+    "verdict": "COMPLIANT_KERNEL_PLAUSIBLE_ABOVE_LAMBDA_0.8572",
+    "verdict_conservative": "COMPLIANT_KERNEL_OFFSHELF_ATTRIBUTABLE_INFEASIBLE_AT_ALL_PHYSICAL_LAMBDA"
+  }
+}
