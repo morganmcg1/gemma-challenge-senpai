@@ -1,5 +1,49 @@
 # SENPAI Research Results
 
+## 2026-06-14 10:50 — PR #132: Q-Palette sub-4-bit weights — 🔴 CLOSED (sub-4-bit architecturally impossible on sm_86/vLLM-0.22; Step-1 gate kill; kanna → #138 K-sweep block64)
+
+- **Branch:** `kanna/qpalette-sub4bit` · **Student:** kanna · CLOSED terminal, ~10:50Z (LOCAL CPU code-inspection + literature scan — no GPU, no HF launch; BASELINE unchanged 481.53). W&B `g8dgvmkd` (state=finished, primary `qpalette_projected_official_tps=481.53`, test `qpalette_servable_and_clears_500=0`).
+- **Hypothesis:** Sub-4-bit weight quantization (Q-Palette, 3.0–3.5 avg bits, 15–25% fewer weight bytes) would translate bandwidth savings to TPS uplift on the BW-bound path, independent of Issue #124 greedy-identity ruling.
+- **Primary:** `qpalette_projected_official_tps=481.53` (unchanged — Step-1 kill before any PTQ). **Test:** `qpalette_servable_and_clears_500=0`.
+- **Key finding:** All 10 W-only GEMM kernels in the pinned vLLM-0.22 wheel have minimum 4 bits. Q-Palette targets sm_89 (Ada), Machete is sm_90a (Hopper), FLUTE/QTIP/AQLM/QuIP# have no vLLM-0.22 serving path. `n_subbit_servable_in_wheel=0`. The int4-Marlin 4-bit floor is hardware-hard for sm_86 decode.
+- **Conclusion:** Sub-4-bit weight lane definitively closed for sm_86/vLLM-0.22. Staged-gate Step-1 kill was correct. kanna → #138 (K-sweep re-characterization with block64).
+
+## 2026-06-14 10:50 — PR #108: SplitK W4A16 verify-GEMM kernel — 🔴 CLOSED (gate_up M=8=0.0% speedup; triple-confirmed CTA-saturation wall; ubel → #139 cudagraph fix)
+
+- **Branch:** `ubel/splitk-restart` · **Student:** ubel · CLOSED (non-terminal marker, ~10:50Z; LOCAL micro-bench only — no kernel integrated, no HF launch; BASELINE unchanged 481.53). W&B `l9m0o6wc` (state=finished, primary `splitk_verify_gemm_m8_speedup_pct=54.07` [Triton-vs-Triton artifact], test `gate_up_m8_best_speedup_pct=0.0`).
+- **Hypothesis:** SplitK decomposition of the M=8 W4A16 Marlin verify-GEMM could recover the ~23% HBM bandwidth gap for a lossless TPS gain.
+- **Primary:** `splitk_verify_gemm_m8_speedup_pct=54.07` (Triton-vs-Triton, not decision-relevant). **Test:** `gate_up_m8_best_speedup_pct=0.0` (the binding metric).
+- **Key finding:** gate_up (54% of verify time) gets 0.0% speedup from SplitK. Marlin's software pipelining already extracts the pipeline headroom. The CTA-saturation wall (83.6% achievable HBM, Marlin at 79.4% = 95%) leaves zero occupancy headroom. Three independent probes: denken #117 (roofline cap 3.20%/1.56% net), wirbel #130 (re-tiling 0%), ubel #108 (direct SplitK 0%). Note: `splitk_greedy_identical=1` — 0 argmax flips, numerics clean; the lever is dead but not unsafe.
+- **Conclusion:** GEMM-bandwidth lane permanently closed. Student asked for direction (a) bank negative or (b) re-home. Advisor: bank as triple-confirmation + close + redirect. ubel → #139 (tree cudagraph crash fix — kernel expertise needed there most).
+
+## 2026-06-14 10:32 — PR #121: QuantSpec drafter-KV premise-check — 🔴 CLOSED/BANKED (drafter Q-only; zero KV bytes; QuantSpec moot for entire MTP frontier; stark → #137 block64 reclaim)
+
+- **Branch:** `stark/quantspec-drafter-kv-2` · **Student:** stark · MERGED terminal, 10:32Z (LOCAL CPU code-inspection — no GPU, no HF launch; BASELINE unchanged 481.53). W&B `zglt88kf` (state=finished, primary `quantspec_drafter_kv_net_wall_tps_pct=0.0`, test `drafter_kv_separate_bool=0`).
+- **Hypothesis:** Does the deployed Gemma4 MTP drafter maintain SEPARATE KV cache (lever live) or share the verify path's KV (moot)?
+- **Key finding:** `Gemma4MTPAttention` builds only `q_proj/o_proj/q_norm` — no `k_proj`, no `v_proj`. The drafter allocates zero KV-cache bytes and reads K/V from the verify model's shared page pool. Covers `int4_mtp_batchinv`, `fa2sw_precache_kenyan`, `lf29cap444_pupa_check`. `drafter_kv_separate_bool=0`. QuantSpec drafter-KV permanently retired.
+- **Conclusion:** Lever moot. Banked with 5 code-citation evidence fields in W&B. stark → #137 (FUSED_SPARSE_ARGMAX_BLOCK 16→64 reclaim — the highest-value single-line fix available).
+
+## 2026-06-14 10:25 — PR #131: fp32 star-attn step-time tax — 🟡 AMBER / full fp32 clears 500 (514 TPS central), misses 530; selective root-row-only fp32 = 563 TPS 🟢 — MERGED
+
+- **Branch:** `lawine/fp32-star-attn-tax` · **Student:** lawine · merged ~10:25Z (LOCAL A10G step-cost bench; BASELINE unchanged 481.53). W&B `tksrxyk5` (state=finished, primary `fp32_tree_official_tps_central=514.4`, test `fp32_tree_clears_500=1`).
+- **Primary:** `fp32_tree_official_tps_central=514.4`. **Test:** `fp32_tree_clears_500=1`.
+- **Key results table:** full-fp32 M=32 step tax = +9.7% central (compute-exposed, AI=128 > bf16 ridge 117); tree-free with full fp32 → 514 TPS (clears 500, misses 530; 530 break-even E[T]=5.365 > ceiling 5.207 = physically unreachable). **Selective root-row-only fp32 (1/32 rows, depth-1 fix):** 563 TPS central, 554 conservative floor — GREEN for 530.
+- **Conclusion:** Binding constraint is E[T] numerator (oracle measured 2.621, far below needed 4.841), not the step-time denominator priced here. Selective fp32 (root-row only) is the right build target: 2× cheaper than full fp32 AND clears 530. lawine → #136 (step-cost anchor to oracle measured wall_tps).
+
+## 2026-06-14 10:25 — PR #130: gate_up tile-shape re-tiling — 🔴 RED / ALL verify-GEMM-bandwidth levers PERMANENTLY CLOSED — MERGED
+
+- **Branch:** `wirbel/gate-up-retile` · **Student:** wirbel · merged ~10:25Z (LOCAL A10G 192-config Triton sweep; BASELINE unchanged 481.53). W&B `ryftxgom` (state=finished, primary `gate_up_retile_per_step_speedup_pct=0.0`, test `gate_up_retile_projected_official_tps=492.77`).
+- **Primary:** `gate_up_retile_per_step_speedup_pct=0.0`. **Test:** `gate_up_retile_projected_official_tps=492.77`.
+- **Key finding:** A10G HBM saturates at ONE wave (83.6% of datasheet); Marlin at 79.4% = 95% of achievable. 192-config Triton sweep: every smaller-N/higher-CTA/SplitK shape slower than Marlin. Zero occupancy headroom at gate_up (160 CTAs = 2 full waves on 80 SMs). Even the streaming ceiling lifts tree-free-alone only to 488.9 (< 500). Cold-vs-warm artifact (+7.6% phantom) identified and suppressed. **This closes ALL three verify-GEMM-bandwidth probes** (denken #117 roofline + denken #113 LUT + wirbel #130 re-tile = triple convergence on the same 1-wave wall).
+- **Conclusion:** The GEMM-bandwidth lane is permanently closed. wirbel → #135 (BUG-2 salvage-descent root-cause, Morgan assignment).
+
+## 2026-06-14 10:25 — PR #129: Oracle-readout harness — 🟡 AMBER / harness armed; operative bar=E[T]=4.841; placeholder TPS=216.9 (awaiting live oracle) — MERGED
+
+- **Branch:** `fern/oracle-readout-harness` · **Student:** fern · merged ~10:25Z (LOCAL CPU analytic; BASELINE unchanged 481.53). W&B `09ge5wmp` (state=finished, primary `oracle_accept_length_to_clear_500=4.841`, test `measured_official_tps=216.91`).
+- **Primary:** `oracle_accept_length_to_clear_500=4.841`. **Test:** `measured_official_tps=216.91` (placeholder: bf16-bug tree at E[T]=2.10).
+- **Key finding:** Harness maps oracle numbers → measured official TPS + 500 go/no-go, bit-exact self-test (reproduces 481.53). **Key correction:** operative clear-500 bar = **E[T]=4.841** (not 4.624 topology-floor; deeper trees are more expensive per step — bar rises with depth). The test TPS=216.91 is the as-built bf16-bug placeholder; the live oracle number (openevolve E[T]=2.621) gives ~271 TPS, far below 500.
+- **Conclusion:** Harness armed and ready. AMBER because live oracle run was not yet available at submission. fern → #134 (live oracle readout with actual E[T]=2.621, Morgan assignment).
+
 ## 2026-06-14 10:09 — PR #128: fp32 star-verify cross-check — does QK+PV upcast recover the 13pp depth-1 deficit? 🔴 RED (terminal) — MERGED (pre-run numeric cross-check: fp32 closes only ~0.7–1.4pp of the 13.1pp deficit → fp32 is NOT the depth-1 silver bullet; SAVES the scarce quota run + redirects the build to the real cause; BASELINE unchanged 481.53)
 
 - **Branch:** `denken/fp32-star-verify-crosscheck` · **Student:** denken · merged 10:09Z (LOCAL CPU analytic — no HF Job, no submission, no kernel build; ~57MB peak). W&B `nswm8p6c`.
