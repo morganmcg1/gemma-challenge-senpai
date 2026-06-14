@@ -363,6 +363,539 @@ def simulate(
 
 
 # ---------------------------------------------------------------------------
+# PR #89 OVERLAP: prompt-lookup HIT x MTP first-reject, position-aligned.
+#
+# #81 (above) drew the MTP accept length m from the measured MARGINAL acceptance
+# INDEPENDENTLY of q_pld[pos] (its stated limitation). PR #89 removes that
+# assumption: it consumes a SERVE-FAITHFUL per-step first-reject capture (the MTP
+# chain accept length fd == m at every decode step, position-aligned to the greedy
+# completion via the emit-stream) and reads q_pld AT THE ACTUAL step-start positions
+# the deployed MTP walk lands on. The realized augment extra/step = mean_s max(0,
+# q[P_s] - m_s) is then the TRUE-JOINT value (overlap-aware), not the independence UB.
+# ---------------------------------------------------------------------------
+def load_fr_records(records_path: Path) -> list[dict[str, Any]]:
+    """Read all per-process first-reject shards ({records_path}.{pid}) in decode order.
+
+    Only the engine-core worker emits real records; other processes write empty/short
+    shards. We take the single richest shard (most records) and order it by the
+    monotonic per-process global step ``s``. Mixing shards would interleave unrelated
+    step streams, so we never concatenate across processes.
+    """
+    import glob
+
+    shards = [
+        Path(p)
+        for p in glob.glob(f"{records_path}.[0-9]*")
+        if not p.endswith(".meta.json")
+    ]
+    if records_path.exists():
+        shards.append(records_path)
+    best: list[dict[str, Any]] = []
+    best_name = None
+    for sh in sorted(set(shards), key=str):
+        recs = []
+        try:
+            with sh.open() as fh:
+                for line in fh:
+                    line = line.strip()
+                    if line:
+                        recs.append(json.loads(line))
+        except OSError:
+            continue
+        if len(recs) > len(best):
+            best, best_name = recs, sh.name
+    best.sort(key=lambda r: r["s"])
+    if best_name is not None:
+        print(f"[overlap] using shard {best_name} ({len(best)} step records)")
+    return best
+
+
+def align_steps_to_prompts(
+    decode_records: list[dict[str, Any]],
+    fr_records: list[dict[str, Any]],
+    warmup_window: int = 200,
+    inter_window: int = 16,
+) -> tuple[list[list[tuple[int, int, int]]], dict[str, Any]]:
+    """Pin every captured MTP step to an absolute generation position.
+
+    Builds the concatenated emit-stream from the per-step ``emit`` blocks and matches
+    each greedy completion C_i (token-identical contract) against it, allowing a small
+    per-prompt prefill OFFSET o in {0,1,...} (the prefill/bonus first token is emitted
+    BEFORE any verify call, so it is not in a step's emit) and skipping any leading
+    warmup verify steps before prompt 0. Validates BOTH token-identity and exact step
+    tiling (sum of step emit lengths == L_i - o), so a misalignment fails LOUDLY.
+
+    Returns (per_prompt_steps, diag) where per_prompt_steps[i] is the ordered list of
+    (P_s, fd_s, n_s): step-start generation position, accept length m, chain length n.
+    """
+    def _flat(seq: list[Any]) -> list[int]:
+        out: list[int] = []
+        for x in seq:
+            while isinstance(x, list):
+                x = x[0] if x else None
+            if x is not None:
+                out.append(int(x))
+        return out
+
+    steps = []
+    stream: list[int] = []
+    for rec in fr_records:
+        emit = _flat(rec["emit"])
+        steps.append({"fd": int(rec["fd"]), "n": int(rec["n"]), "start": len(stream),
+                      "len": len(emit)})
+        stream.extend(emit)
+
+    prompts = sorted(decode_records, key=lambda r: r.get("index", 0))
+    per_prompt: list[list[tuple[int, int, int]]] = []
+    diag: dict[str, Any] = {"offsets": [], "skipped_steps": [], "n_steps_total": len(steps),
+                            "n_stream_tokens": len(stream)}
+    cursor = 0
+    for pi, rec in enumerate(prompts):
+        C = rec.get("completion_token_ids") or rec.get("token_ids")
+        L = len(C)
+        window = warmup_window if pi == 0 else inter_window
+        aligned = None
+        for cand in range(cursor, min(len(steps), cursor + window + 1)):
+            sstart = steps[cand]["start"]
+            for off in (0, 1):
+                need = L - off
+                if need <= 0 or sstart + need > len(stream):
+                    continue
+                if stream[sstart:sstart + need] != C[off:]:
+                    continue
+                # steps must tile [sstart, sstart+need); the LAST step may overshoot
+                # the max_tokens boundary (excess tokens are discarded by the engine),
+                # so acc >= need ends the prompt with that step included.
+                acc = 0
+                end = cand
+                ok = False
+                while end < len(steps) and steps[end]["start"] == sstart + acc:
+                    acc += steps[end]["len"]
+                    end += 1
+                    if acc >= need:
+                        ok = True
+                        break
+                if ok:
+                    aligned = (cand, end, off, acc)
+                    break
+            if aligned:
+                break
+        if aligned is None:
+            raise RuntimeError(
+                f"alignment failed at prompt {pi} (id={rec.get('id')}, L={L}); "
+                f"cursor={cursor}, n_steps={len(steps)}"
+            )
+        cand, end, off, _acc = aligned
+        diag["skipped_steps"].append(cand - cursor)
+        diag["offsets"].append(off)
+        plist: list[tuple[int, int, int]] = []
+        pos = off
+        for si in range(cand, end):
+            if pos >= L:  # every step must START within the completion window
+                raise RuntimeError(f"step start {pos} >= L={L} at prompt {pi}")
+            plist.append((pos, steps[si]["fd"], steps[si]["n"]))
+            pos += steps[si]["len"]
+        # the final step may overshoot L (excess discarded by the engine at max_tokens)
+        if pos < L:
+            raise RuntimeError(f"tiling check failed at prompt {pi}: pos={pos} < L={L}")
+        if pos > L:
+            diag["truncated_last_step"] = diag.get("truncated_last_step", 0) + 1
+        per_prompt.append(plist)
+        cursor = end
+    diag["warmup_steps_skipped"] = diag["skipped_steps"][0] if diag["skipped_steps"] else 0
+    diag["inter_prompt_skips"] = sum(diag["skipped_steps"][1:])
+    diag["truncated_last_step"] = diag.get("truncated_last_step", 0)
+    return per_prompt, diag
+
+
+def _pearson_from_sums(n: float, sx: float, sy: float, sxx: float, syy: float,
+                       sxy: float) -> float | None:
+    vx = n * sxx - sx * sx
+    vy = n * syy - sy * sy
+    if vx <= 0 or vy <= 0:
+        return None
+    import math
+    return (n * sxy - sx * sy) / math.sqrt(vx * vy)
+
+
+def _prompt_suff_stats(
+    per_prompt_steps: list[list[tuple[int, int, int]]],
+    q_by_prompt: list[list[int]],
+) -> list[dict[str, float]]:
+    """Per-prompt additive sufficient statistics for the augment + overlap metrics.
+
+    Keeping per-prompt sums lets the cluster bootstrap resample whole prompts and
+    re-aggregate in O(B * n_prompts) rather than O(B * n_steps).
+    """
+    out = []
+    for plist, q in zip(per_prompt_steps, q_by_prompt):
+        st = {
+            "n_steps": 0.0, "sum_tok": 0.0, "sum_extra": 0.0,
+            "n_m0": 0.0, "n_m0_qpos": 0.0, "sum_q_m0": 0.0,
+            "sum_extra_m0": 0.0, "n_hit": 0.0,
+            # covariance sums over (q_indicator, m_indicator) and (q, m)
+            "Sqi": 0.0, "Smi": 0.0, "Sqimi": 0.0, "Sqi2": 0.0, "Smi2": 0.0,
+            "Sq": 0.0, "Sm": 0.0, "Sqm": 0.0, "Sq2": 0.0, "Sm2": 0.0,
+        }
+        for (P, fd, _n) in plist:
+            m = fd
+            qq = q[P] if P < len(q) else 0
+            extra = qq - m if qq > m else 0
+            st["n_steps"] += 1
+            st["sum_tok"] += m + 1
+            st["sum_extra"] += extra
+            if qq > 0:
+                st["n_hit"] += 1
+            if m == 0:
+                st["n_m0"] += 1
+                st["sum_q_m0"] += qq
+                if qq > 0:
+                    st["n_m0_qpos"] += 1
+                st["sum_extra_m0"] += extra
+            qi = 1.0 if qq > 0 else 0.0
+            mi = 1.0 if m > 0 else 0.0
+            st["Sqi"] += qi; st["Smi"] += mi; st["Sqimi"] += qi * mi
+            st["Sqi2"] += qi * qi; st["Smi2"] += mi * mi
+            st["Sq"] += qq; st["Sm"] += m; st["Sqm"] += qq * m
+            st["Sq2"] += qq * qq; st["Sm2"] += m * m
+        out.append(st)
+    return out
+
+
+def _aggregate(stats: list[dict[str, float]], baseline_et: float,
+               baseline_tps: float) -> dict[str, float]:
+    acc: dict[str, float] = {}
+    for st in stats:
+        for k, v in st.items():
+            acc[k] = acc.get(k, 0.0) + v
+    n_steps = acc["n_steps"] or 1.0
+    et_mtp = acc["sum_tok"] / n_steps
+    extra_per_step = acc["sum_extra"] / n_steps
+    et_aug = et_mtp + extra_per_step
+    tps_pct = (extra_per_step / et_mtp) * 100.0 if et_mtp else 0.0
+    overlap_frac = (acc["n_m0_qpos"] / acc["n_m0"]) if acc["n_m0"] else 0.0
+    corr_ind = _pearson_from_sums(n_steps, acc["Sqi"], acc["Smi"], acc["Sqi2"],
+                                  acc["Smi2"], acc["Sqimi"])
+    corr_cont = _pearson_from_sums(n_steps, acc["Sq"], acc["Sm"], acc["Sq2"],
+                                   acc["Sm2"], acc["Sqm"])
+    return {
+        "n_steps": n_steps,
+        "ET_mtp": et_mtp,
+        "ET_augment": et_aug,
+        "realized_extra_per_step": extra_per_step,
+        "realized_augment_tps_pct": tps_pct,
+        "realized_augment_tps_abs": (extra_per_step / et_mtp) * baseline_tps if et_mtp else 0.0,
+        "overlap_frac_firstreject": overlap_frac,
+        "n_firstreject_steps": acc["n_m0"],
+        "frac_firstreject_steps": acc["n_m0"] / n_steps,
+        "mean_q_given_firstreject": (acc["sum_q_m0"] / acc["n_m0"]) if acc["n_m0"] else 0.0,
+        "mean_q_given_firstreject_and_hit": (
+            acc["sum_q_m0"] / acc["n_m0_qpos"] if acc["n_m0_qpos"] else 0.0),
+        "rescue_from_m0_step_frac": acc["n_m0_qpos"] / n_steps,
+        "share_extra_from_m0": (acc["sum_extra_m0"] / acc["sum_extra"]) if acc["sum_extra"] else 0.0,
+        "hit_rate_at_steps": acc["n_hit"] / n_steps,
+        "corr_hit_indicator_vs_mtp_accept": corr_ind if corr_ind is not None else 0.0,
+        "corr_q_vs_m": corr_cont if corr_cont is not None else 0.0,
+    }
+
+
+def _permutation_independence(
+    per_prompt_steps: list[list[tuple[int, int, int]]],
+    q_by_prompt: list[list[int]],
+    reps: int,
+    seed: int,
+) -> dict[str, float]:
+    """Independence baseline on the SAME steps: shuffle m against q (destroys the
+    joint, preserves both marginals). realized < independence => POSITIVE q-m
+    correlation (PLD redundant where MTP already wins); realized > independence =>
+    anti-correlation (complementary). The gap is the measured correlation effect."""
+    m_all: list[int] = []
+    q_all: list[int] = []
+    for plist, q in zip(per_prompt_steps, q_by_prompt):
+        for (P, fd, _n) in plist:
+            m_all.append(fd)
+            q_all.append(q[P] if P < len(q) else 0)
+    n = len(m_all)
+    rng = random.Random(seed)
+    perm = list(range(n))
+    vals = []
+    for _ in range(reps):
+        rng.shuffle(perm)
+        extra = 0
+        for i in range(n):
+            mi = m_all[perm[i]]
+            if q_all[i] > mi:
+                extra += q_all[i] - mi
+        vals.append(extra / n)
+    mean = sum(vals) / len(vals)
+    et_mtp = (sum(m_all) + n) / n
+    return {
+        "independence_extra_per_step": mean,
+        "independence_augment_tps_pct": (mean / et_mtp) * 100.0 if et_mtp else 0.0,
+        "reps": reps,
+    }
+
+
+def _bootstrap_overlap(stats: list[dict[str, float]], baseline_et: float,
+                       baseline_tps: float, reps: int, seed: int) -> dict[str, Any]:
+    """Cluster bootstrap over PROMPTS (steps within a prompt are correlated)."""
+    rng = random.Random(seed)
+    P = len(stats)
+    keys = ["realized_augment_tps_pct", "realized_extra_per_step", "overlap_frac_firstreject",
+            "ET_mtp", "corr_hit_indicator_vs_mtp_accept", "corr_q_vs_m", "share_extra_from_m0"]
+    samples: dict[str, list[float]] = {k: [] for k in keys}
+    for _ in range(reps):
+        pick = [stats[rng.randrange(P)] for _ in range(P)]
+        agg = _aggregate(pick, baseline_et, baseline_tps)
+        for k in keys:
+            samples[k].append(agg[k])
+
+    def ci(vals: list[float]) -> dict[str, float]:
+        s = sorted(vals)
+        lo = s[max(0, int(0.025 * len(s)))]
+        hi = s[min(len(s) - 1, int(0.975 * len(s)))]
+        return {"lo": lo, "hi": hi, "mean": sum(s) / len(s)}
+
+    return {f"{k}_ci95": ci(v) for k, v in samples.items()} | {"reps": reps}
+
+
+def _conditional_acceptance_from_capture(
+    per_prompt_steps: list[list[tuple[int, int, int]]], max_depth: int = 7,
+) -> list[float | None]:
+    """Reconstruct per-depth conditional rank-1 acceptance p[d] from the capture
+    (cross-check vs accept_calibration cond_p). p[d] = P(fd>d | fd>=d, d<n)."""
+    reached = [0] * max_depth
+    accept = [0] * max_depth
+    for plist in per_prompt_steps:
+        for (_P, fd, n) in plist:
+            for d in range(min(n, max_depth)):
+                if fd >= d:
+                    reached[d] += 1
+                if fd > d:
+                    accept[d] += 1
+    return [accept[d] / reached[d] if reached[d] else None for d in range(max_depth)]
+
+
+def compute_overlap(
+    decode_records: list[dict[str, Any]],
+    fr_records: list[dict[str, Any]],
+    accept_path: Path,
+    ngrams: tuple[int, ...],
+    max_draft: int,
+    bootstrap_reps: int = 2000,
+    perm_reps: int = 200,
+) -> dict[str, Any]:
+    per_prompt_steps, diag = align_steps_to_prompts(decode_records, fr_records)
+
+    # q_pld at every position (earliest = vLLM-faithful primary; oracle = upper bound)
+    # has_match = an earlier occurrence EXISTS (the #81 "hit" definition; may yield q=0).
+    q_earliest: list[list[int]] = []
+    q_oracle: list[list[int]] = []
+    has_match: list[list[int]] = []
+    for rec in decode_records:
+        prompt_ids = rec["prompt_token_ids"]
+        gen = rec.get("completion_token_ids") or rec.get("token_ids")
+        per_n_rec = {n: pld_per_position(prompt_ids, gen, n, max_draft) for n in ngrams}
+        N = len(gen)
+        q_earliest.append(combined_best_n_q(per_n_rec, ngrams, N, "q_earliest"))
+        q_oracle.append(combined_best_n_q(per_n_rec, ngrams, N, "q_oracle"))
+        has_match.append([
+            1 if any(per_n_rec[n]["region_earliest"][t] >= 0 for n in ngrams) else 0
+            for t in range(N)
+        ])
+    # align q ordering to the prompt ordering used by align_steps (sorted by index)
+    order = sorted(range(len(decode_records)),
+                   key=lambda i: decode_records[i].get("index", 0))
+    q_earliest = [q_earliest[i] for i in order]
+    q_oracle = [q_oracle[i] for i in order]
+    has_match = [has_match[i] for i in order]
+
+    accept = json.loads(accept_path.read_text())
+    cond76 = accept["headline"]["conditional_acceptance_p"]
+    et76 = accept["headline"]["deployed_chain_mean_tokens_per_step"]
+
+    out: dict[str, Any] = {
+        "n_prompts": len(decode_records),
+        "max_draft": max_draft,
+        "ngrams": list(ngrams),
+        "alignment_diag": diag,
+        "baseline_ET_measured": et76,
+        "baseline_tps_local": BASELINE_TPS_LOCAL,
+    }
+    for tag, qbp in (("earliest", q_earliest), ("oracle", q_oracle)):
+        stats = _prompt_suff_stats(per_prompt_steps, qbp)
+        agg = _aggregate(stats, et76, BASELINE_TPS_LOCAL)
+        boot = _bootstrap_overlap(stats, et76, BASELINE_TPS_LOCAL, bootstrap_reps, seed=17)
+        indep = _permutation_independence(per_prompt_steps, qbp, perm_reps, seed=23)
+        agg["correlation_effect_extra_per_step"] = (
+            agg["realized_extra_per_step"] - indep["independence_extra_per_step"])
+        out[f"augment_{tag}"] = {**agg, **indep, "bootstrap_ci95": boot}
+
+    # match-exists overlap (the #81 "hit"=earlier-occurrence-exists definition): of the
+    # MTP first-reject (m=0) steps, what fraction have ANY n-gram match (regardless of
+    # whether that match yields a correct token). Decomposes the headline q>0 overlap.
+    n_m0 = n_m0_match = 0
+    for plist, hm in zip(per_prompt_steps, has_match):
+        for (P, fd, _n) in plist:
+            if fd == 0:
+                n_m0 += 1
+                if P < len(hm) and hm[P]:
+                    n_m0_match += 1
+    out["overlap_frac_firstreject_match_exists"] = (n_m0_match / n_m0) if n_m0 else 0.0
+
+    # capture self-consistency cross-check vs accept_calibration
+    cap_cond = _conditional_acceptance_from_capture(per_prompt_steps)
+    out["capture_cross_check"] = {
+        "conditional_acceptance_capture": cap_cond,
+        "conditional_acceptance_accept_calibration": cond76,
+        "top1_capture": cap_cond[0],
+        "top1_accept_calibration": cond76[0],
+        "top1_abs_diff": (abs(cap_cond[0] - cond76[0]) if cap_cond[0] is not None else None),
+        "ET_mtp_capture": out["augment_earliest"]["ET_mtp"],
+        "ET_accept_calibration": et76,
+        "ET_abs_diff": abs(out["augment_earliest"]["ET_mtp"] - et76),
+    }
+
+    # gate (build-or-kill) on the vLLM-faithful EARLIEST realized number
+    primary = out["augment_earliest"]["realized_augment_tps_pct"]
+    primary_ci = out["augment_earliest"]["bootstrap_ci95"]["realized_augment_tps_pct_ci95"]
+    overlap_frac = out["augment_earliest"]["overlap_frac_firstreject"]
+    if primary >= 2.0:
+        gate = "BUILD-WORTH (queue behind land #71)"
+    elif primary < 1.0:
+        gate = "KILL (drop prompt-lookup augment)"
+    else:
+        gate = "MARGINAL (1-2%: advisor call)"
+    out["primary_metric_name"] = "promptlookup_realized_augment_tps_pct"
+    out["primary_metric_value"] = primary
+    out["primary_metric_ci95"] = primary_ci
+    out["test_metric_name"] = "promptlookup_mtp_firstreject_overlap_frac"
+    out["test_metric_value"] = overlap_frac
+    out["gate"] = gate
+    return out
+
+
+def _log_wandb_overlap(result: dict[str, Any], args: argparse.Namespace) -> None:
+    import os as _os
+
+    import wandb
+
+    ae = result["augment_earliest"]
+    ao = result["augment_oracle"]
+    run = wandb.init(
+        project=_os.environ.get("WANDB_PROJECT", "gemma-challenge-senpai"),
+        entity=_os.environ.get("WANDB_ENTITY", "wandb-applied-ai-team"),
+        name=args.wandb_name,
+        group=args.wandb_group,
+        job_type="offline-analysis",
+        tags=["prompt-lookup", "augment-overlap", "pr89", "build-or-kill", "measurement-only"],
+        config={
+            "ngrams": list(NGRAMS), "max_draft": args.max_draft,
+            "n_prompts": result["n_prompts"],
+            "baseline_ET_measured": result["baseline_ET_measured"],
+            "baseline_tps_local": result["baseline_tps_local"],
+            "bootstrap_reps": ae["bootstrap_ci95"]["reps"],
+        },
+    )
+    ci = ae["bootstrap_ci95"]
+    summary = {
+        # PR #89 headline metrics
+        "promptlookup_realized_augment_tps_pct": result["primary_metric_value"],
+        "promptlookup_realized_augment_tps_pct_lo": result["primary_metric_ci95"]["lo"],
+        "promptlookup_realized_augment_tps_pct_hi": result["primary_metric_ci95"]["hi"],
+        "promptlookup_mtp_firstreject_overlap_frac": result["test_metric_value"],
+        "promptlookup_mtp_firstreject_overlap_frac_lo": ci["overlap_frac_firstreject_ci95"]["lo"],
+        "promptlookup_mtp_firstreject_overlap_frac_hi": ci["overlap_frac_firstreject_ci95"]["hi"],
+        "promptlookup_mtp_firstreject_overlap_frac_match_exists":
+            result["overlap_frac_firstreject_match_exists"],
+        # realized vs independence (the correlation effect)
+        "realized_extra_per_step_earliest": ae["realized_extra_per_step"],
+        "independence_extra_per_step_earliest": ae["independence_extra_per_step"],
+        "correlation_effect_extra_per_step_earliest": ae["correlation_effect_extra_per_step"],
+        "independence_augment_tps_pct_earliest": ae["independence_augment_tps_pct"],
+        "corr_hit_indicator_vs_mtp_accept": ae["corr_hit_indicator_vs_mtp_accept"],
+        "corr_q_vs_m": ae["corr_q_vs_m"],
+        "share_extra_from_m0_earliest": ae["share_extra_from_m0"],
+        "rescue_from_m0_step_frac_earliest": ae["rescue_from_m0_step_frac"],
+        "frac_firstreject_steps": ae["frac_firstreject_steps"],
+        "mean_q_given_firstreject_and_hit_earliest": ae["mean_q_given_firstreject_and_hit"],
+        "ET_mtp_capture": ae["ET_mtp"],
+        "ET_augment_earliest": ae["ET_augment"],
+        # oracle upper bound
+        "realized_augment_tps_pct_oracle_ub": ao["realized_augment_tps_pct"],
+        "overlap_frac_firstreject_oracle": ao["overlap_frac_firstreject"],
+        # capture self-consistency
+        "xcheck_top1_capture": result["capture_cross_check"]["top1_capture"],
+        "xcheck_top1_accept_calibration": result["capture_cross_check"]["top1_accept_calibration"],
+        "xcheck_top1_abs_diff": result["capture_cross_check"]["top1_abs_diff"],
+        "xcheck_ET_abs_diff": result["capture_cross_check"]["ET_abs_diff"],
+        "warmup_steps_skipped": result["alignment_diag"]["warmup_steps_skipped"],
+        "gate": result["gate"],
+    }
+    run.summary.update(summary)
+
+    tbl = wandb.Table(columns=["pick", "realized_tps_pct", "indep_tps_pct",
+                               "overlap_frac", "corr_qm", "share_from_m0"])
+    for tag in ("earliest", "oracle"):
+        a = result[f"augment_{tag}"]
+        tbl.add_data(tag, a["realized_augment_tps_pct"], a["independence_augment_tps_pct"],
+                     a["overlap_frac_firstreject"], a["corr_q_vs_m"], a["share_extra_from_m0"])
+    run.log({"augment_overlap_table": tbl, "gate": result["gate"]})
+    print(f"wandb run: {run.url} (id={run.id})")
+    run.finish()
+
+
+def main_overlap(args: argparse.Namespace) -> int:
+    decode_records = load_records(Path(args.overlap_decode))
+    if not decode_records:
+        raise SystemExit(f"no decode records in {args.overlap_decode}")
+    fr_records = load_fr_records(Path(args.overlap_records))
+    if not fr_records:
+        raise SystemExit(f"no first-reject records matching {args.overlap_records}.*")
+    result = compute_overlap(
+        decode_records, fr_records, Path(args.accept), NGRAMS, args.max_draft,
+        bootstrap_reps=args.bootstrap_reps, perm_reps=args.perm_reps,
+    )
+    out = Path(args.overlap_output)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(result, indent=2) + "\n")
+
+    ae = result["augment_earliest"]
+    ao = result["augment_oracle"]
+    xc = result["capture_cross_check"]
+    dg = result["alignment_diag"]
+    ci = result["primary_metric_ci95"]
+    print(f"\n=== PR #89 PROMPT-LOOKUP x MTP FIRST-REJECT OVERLAP ===")
+    print(f"prompts={result['n_prompts']} steps={int(ae['n_steps'])} "
+          f"warmup_skipped={dg['warmup_steps_skipped']} inter_skips={dg['inter_prompt_skips']} "
+          f"offsets={set(dg['offsets'])}")
+    print(f"xcheck: ET capture={xc['ET_mtp_capture']:.4f} vs accept_calib={xc['ET_accept_calibration']:.4f} "
+          f"(|d|={xc['ET_abs_diff']:.4f}); top1 capture={xc['top1_capture']:.4f} vs "
+          f"{xc['top1_accept_calibration']:.4f} (|d|={xc['top1_abs_diff']:.4f})")
+    print(f"frac_firstreject(m=0)={ae['frac_firstreject_steps']:.4f} | "
+          f"overlap(match-exists|m=0)={result['overlap_frac_firstreject_match_exists']:.4f}")
+    for tag, a in (("EARLIEST(vLLM)", ae), ("ORACLE(UB)", ao)):
+        print(
+            f"[{tag}] overlap_frac(P[hit|m=0])={a['overlap_frac_firstreject']:.4f} "
+            f"mean_q|m0,hit={a['mean_q_given_firstreject_and_hit']:.3f} | "
+            f"realized extra/step={a['realized_extra_per_step']:.4f} "
+            f"(indep={a['independence_extra_per_step']:.4f}, corr_effect="
+            f"{a['correlation_effect_extra_per_step']:+.4f}) | "
+            f"realized TPS={a['realized_augment_tps_pct']:+.2f}% (indep "
+            f"{a['independence_augment_tps_pct']:+.2f}%) | corr(q,m)={a['corr_q_vs_m']:+.3f} "
+            f"share_from_m0={a['share_extra_from_m0']:.3f}"
+        )
+    print(f"PRIMARY promptlookup_realized_augment_tps_pct={result['primary_metric_value']:+.2f}% "
+          f"[95% CI {ci['lo']:+.2f}, {ci['hi']:+.2f}]")
+    print(f"TEST promptlookup_mtp_firstreject_overlap_frac={result['test_metric_value']:.4f}")
+    print(f"GATE: {result['gate']}")
+    print(f"wrote {out}")
+    if args.wandb:
+        _log_wandb_overlap(result, args)
+    return 0
+
+
+# ---------------------------------------------------------------------------
 # driver
 # ---------------------------------------------------------------------------
 def compute(
@@ -651,10 +1184,25 @@ def main() -> int:
     ap.add_argument("--output", default=str(DEFAULT_OUTPUT))
     ap.add_argument("--max-draft", type=int, default=DEFAULT_MAX_DRAFT)
     ap.add_argument("--trials", type=int, default=400)
-    ap.add_argument("--wandb", action="store_true", help="log the Step-1 measurement to W&B")
+    ap.add_argument("--wandb", action="store_true", help="log the measurement to W&B")
     ap.add_argument("--wandb_name", default="denken/prompt-lookup-step1")
     ap.add_argument("--wandb_group", default="prompt-lookup-drafter")
+    # PR #89 overlap mode: intersect prompt-lookup HIT x MTP first-reject (position-aligned)
+    ap.add_argument("--overlap-records", default=None,
+                    help="first-reject capture JSONL prefix (firstreject_records.jsonl); "
+                         "enables PR #89 overlap build-or-kill analysis")
+    ap.add_argument("--overlap-decode", default=None,
+                    help="decode_outputs.jsonl from the SAME capture run (greedy completions)")
+    ap.add_argument("--overlap-output", default=str(
+        ROOT / "research/local_validation/prompt_lookup/prompt_lookup_overlap.json"))
+    ap.add_argument("--bootstrap-reps", type=int, default=2000)
+    ap.add_argument("--perm-reps", type=int, default=200)
     args = ap.parse_args()
+
+    if args.overlap_records is not None:
+        if args.overlap_decode is None:
+            raise SystemExit("--overlap-records requires --overlap-decode")
+        return main_overlap(args)
 
     records = load_records(Path(args.input))
     if not records:
