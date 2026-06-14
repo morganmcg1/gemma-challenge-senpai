@@ -1,5 +1,23 @@
 # SENPAI Research Results
 
+## 2026-06-14 06:05 — PR #100: Lever-composition economics — composed official-TPS landscape + minimal lever ordering to clear 500 🟢 GREEN — MERGED (tree-sufficient: tree alone clears 500 at the conservative corner; composition is order-independent; min_levers=1) — verdict conditional on E[T]≈5.207, which byteshark's empirical 2.10 now contests
+
+- **Branch:** `fern/lever-composition-economics` · **Student:** fern · merged ~06:08Z (analysis-only, BASELINE unchanged)
+- **Hypothesis:** the in-flight 500-path levers are priced in isolation. Compose tree #71 × SplitK #84 × persistent-kernel #97 × LK #95 into one official-TPS landscape + the minimal lever ordering that clears 500, accounting for compounding vs anti-compounding.
+- **Primary metric:** `composed_official_tps = 600.0` (full stack, band [531.6, 713.7]). **Test:** `min_levers_to_clear_500 = 1` (`['tree']`).
+
+| lever stack | conservative | central | optimistic | clears 500? |
+|---|--:|--:|--:|---|
+| frontier | 462.3 | 481.5 | 481.5 | no |
+| + LK #95 | 466.9 | 486.3 | 493.1 | no |
+| + persist #97 | 462.3 | 496.4 | 553.5 | no |
+| + SplitK #84 | 474.2 | 502.4 | 510.5 | central only |
+| **+ tree #71** | **518.0** | **563.1** | **581.0** | **YES (even conservative)** |
+| full stack | 531.6 | 600.0 | 713.7 | yes |
+
+- **Verdict — GREEN (tree-sufficient), with a load-bearing caveat.** Model: `official_TPS = K_cal·(E[T]/step_time)·τ`, `K_cal = 481.53/3.844 = 125.268` (frontier reproduces exactly); step decomposed into ABS slices (verify-GEMM 0.53 / drafter 0.07 / attn 0.08 / other 0.32). Numerator levers (tree, LK) multiply E[T]; denominator levers (SplitK, persist) subtract an **absolute** saving from their slice. **Key structural finding: the final step is ORDER-INDEPENDENT** — the "lever ordering" is purely a relative-attribution artefact, which collapses the sequencing question. `min_levers_to_clear_500 = 1 (['tree'])` at BOTH conservative (518.0) and central (563.1) → the tree alone is sufficient, every other lever is insurance/upside. **CAVEAT (the reason this is not an operational green-light):** the entire result assumes the tree realizes E[T]≈5.207 (+18.2%). byteshark's first empirical build delivers **tok/step=2.097** — outside the conservative [558,581] band. So GREEN holds *conditional on the build working as analyzed*, a condition now empirically open. **denken #101** diagnoses the recoverable E[T]; **fern #102** (break-even inverse) computes the required E[T]* — their intersection is the real go/no-go.
+- **W&B:** `ncseu3ar`. **Next:** fern → #102 (tree E[T] break-even / margin-of-safety — invert this model for the minimum accept_length that clears 500, alone + per lever stack; place byteshark's 2.10 + denken #101's recoverable band on that axis).
+
 ## 2026-06-14 05:48 — PR #97: Persistent-kernel overhead gate — is the ~32% "other" GPU-idle (megakernel-reclaimable) or GPU-busy? 🟡 AMBER — MERGED → persistent-kernel/megakernel LANE CLOSED (only 2.17% reclaimable GPU-idle; #65's GPU-bound finding EXTENDS to the megakernel objective)
 
 - **Branch:** `denken/persistent-kernel-overhead-gate` · **Student:** denken · merged ~05:59Z (analysis-only, BASELINE unchanged)

@@ -26,7 +26,7 @@
 | ubel | #84 | SplitK W4A16 verify-GEMM (~+5–12%) | WIP |
 | kanna | **#96** | **Network-wide greedy-compounding gate:** do per-layer ≤1-ULP perturbations compound to flip argmax on the composed land#71×ubel#84 frontier? (closes #87's named upstream residual) | WIP |
 | lawine | **#99** | **Local→official projection calibration:** pin the local-wall_tps→official multiplier + ready the tree-A/B harness so land #71's build is a zero-lag ≥500 decision | WIP (#90 ✅ MERGED: K=7 confirmed, 454.338 locked) |
-| fern | **#100** | **Lever-composition economics:** compose tree #71 × SplitK #84 × persistent-kernel #97 × LK #95 into the official-TPS landscape + minimal lever ordering to clear 500 (anti-compounding map) | WIP (#95 ✅ MERGED 🟡 AMBER: LK greedy headroom +1.0–2.4% E[T]) |
+| fern | **#102** | **Tree E[T] break-even / margin-of-safety:** invert the #100 model for the MIN accept_length that clears 500 (alone + per lever stack); place byteshark's 2.10 + denken #101's recoverable band on that axis | WIP (#100 ✅ MERGED 🟢 GREEN: tree-sufficient @ E[T]=5.207, but build gives 2.10 — caveat) |
 | wirbel | **#98** | **fp32 star-attn COST gate:** does the #93-mandated fp32 accumulation erode the tree's +18.2%, or recompute fp32 only on the 0.537% near-tie tail? | WIP (#93 ✅ MERGED 🔴 RED: fp32 star-attn REQUIRED) |
 | denken | **#101** | **Tree accept-length reconciliation:** why does the as-built tree give tok/step=2.10 vs analytical E[T]=5.207? back out implied ρ̂, classify defect (shallow-walk/eager/draft-collapse vs ceiling), hand fern #100 the corrected E[T] band | WIP (#97 ✅ MERGED 🟡 AMBER: persistent-kernel CLOSED, 2.17% GPU-idle) |
 
@@ -51,6 +51,7 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 
 | PR | student | verdict | significance |
 |---|---|---|---|
+| #100 | fern | Composition GREEN: tree alone clears 500 (cons 518/centr 563); composition ORDER-INDEPENDENT; min_levers=1. CAVEAT: assumes E[T]=5.207, build gives 2.10 | composition framework banked; conditional GREEN → denken #101 + fern #102 close the E[T] loop |
 | #97 | denken | Persistent-kernel AMBER→CLOSE: decode 97.83% GPU-busy, only 2.17% reclaimable idle; the ~32% "other" is 93% GPU-busy small-kernel tail (megakernel reorders but can't remove — bus is the wall, #94) | persistent-kernel/megakernel lane CLOSED; #65 extended to megakernel |
 | #95 | fern | LK-Loss AMBER: greedy headroom +1.0–2.4% E[T] (NOT +8% headline); re-rank channel CLOSED (drafter argmax already acceptance-ordered, rank-1 best by +0.6 margin); prediction channel untested | LK lane SIZED (don't transfer headline); LoRA/projection probe queued |
 | #90 | lawine | K=7 CONFIRMED optimal (inverted-U; every non-K7 a REAL regression 7-35x MDE); locks 454.338 linear-chain ref; retires ±4.4% caveat | draft-length lane CLOSED (confirm) |
