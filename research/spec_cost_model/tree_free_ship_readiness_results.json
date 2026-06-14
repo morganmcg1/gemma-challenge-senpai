@@ -1,0 +1,443 @@
+{
+  "gate": {
+    "primary_metric_name": "min_splitk_for_confident_ship_pct",
+    "min_splitk_for_confident_ship_pct": 14.344931851466459,
+    "test_metric_name": "tau_official_reanchor_required",
+    "tau_official_reanchor_required": "yes-one-official-anchor",
+    "verdict": "AMBER",
+    "verdict_label": "HOLD the official shot until: corner clears 500 only at SplitK 14.3% (> ubel-plausible 8.5%) AND one official tau-anchor of the SplitK-built submission is the gating measurement",
+    "ubel_must_beat_pct": 14.344931851466459,
+    "reference_105_central_splitk_pct": 4.443
+  },
+  "step1_min_splitk_for_confident_ship": {
+    "definition": "min SplitK verify-GEMM speedup s s.t. the CONSERVATIVE CORNER clears 500*(1+margin); corner = tau=0.96, multiplier local-CI-low, LK floor 1.010, byte-lever(palette)=0, fp32 worst, persist 0",
+    "reference_105_central_splitk_for_500_pct": 4.443,
+    "by_margin": [
+      {
+        "margin_pct": 0.0,
+        "target_tps": 500.0,
+        "conservative_corner_splitk_pct": 0.14344931851466458,
+        "conservative_corner_within_ubel_plausible": false,
+        "conservative_corner_within_gap_ceiling": true,
+        "central_splitk_pct": 0.048376422954313325,
+        "double_stress_envelope_splitk_pct": 0.1899994268393197
+      },
+      {
+        "margin_pct": 1.0,
+        "target_tps": 505.0,
+        "conservative_corner_splitk_pct": 0.1667169146617946,
+        "conservative_corner_within_ubel_plausible": false,
+        "conservative_corner_within_gap_ceiling": true,
+        "central_splitk_pct": 0.06885363460990068,
+        "double_stress_envelope_splitk_pct": 0.21472094068609549
+      },
+      {
+        "margin_pct": 2.0,
+        "target_tps": 510.0,
+        "conservative_corner_splitk_pct": 0.1904662529727359,
+        "conservative_corner_within_ubel_plausible": false,
+        "conservative_corner_within_gap_ceiling": true,
+        "central_splitk_pct": 0.08972105396367325,
+        "double_stress_envelope_splitk_pct": 0.23997558591709045
+      }
+    ],
+    "primary_min_splitk_for_confident_ship_pct": 14.344931851466459
+  },
+  "step2_tau_reanchor_decision": {
+    "splitk_plausible_central_pct": 8.5,
+    "splitk_plausible_high_pct": 12.0,
+    "tau_band": [
+      0.96,
+      1.0
+    ],
+    "mix_shift_estimate_pct": 0.3,
+    "tau_required": {
+      "ubel_central_8.5pct|corner_levers|clear_500": 0.9856751831318804,
+      "ubel_central_8.5pct|corner_levers|clear_505": 0.9955319349631992,
+      "ubel_central_8.5pct|central_levers|clear_500": 0.9825555586070223,
+      "ubel_central_8.5pct|central_levers|clear_505": 0.9923811141930925,
+      "ubel_high_12pct|corner_levers|clear_500": 0.9699787476339189,
+      "ubel_high_12pct|corner_levers|clear_505": 0.979678535110258,
+      "ubel_high_12pct|central_levers|clear_500": 0.9669505657451222,
+      "ubel_high_12pct|central_levers|clear_505": 0.9766200714025735
+    },
+    "tau_required_headline_ubel_central_corner_clear500": 0.9856751831318804,
+    "tau_required_central_levers_clear500": 0.9825555586070223,
+    "tau_official_reanchor_required": "yes-one-official-anchor",
+    "decision": "YES, ONE official anchor: clearing 500 at the plausible SplitK needs tau >= 0.986 (> floor 0.96), i.e. we rely on tau near its ceiling. SplitK is a NEW verify-GEMM kernel -> a new kernel mix the deployed multiplier was never measured on; the ~0.1-0.3% mix-shift is no longer immaterial against this thin tau margin. Spend ONE approval-gated official anchor of the SplitK-built submission to convert tau from assumed-[0.96,1.0] to measured BEFORE trusting 500.",
+    "rule": "tau_required(plausible SplitK) <= 0.96 -> NO reanchor (floor already clears, mix-shift immaterial) ; in (0.96,1.0] -> YES one official anchor (relying on tau above floor; SplitK changes the kernel mix the multiplier was measured on) ; >1.0 -> moot, SplitK/levers insufficient (a margin problem, not a tau problem)."
+  },
+  "step3_go_hold_table": {
+    "rows": [
+      {
+        "splitk_pct": 0.0,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 466.75830598583957,
+            "central_levers_tps": 468.292162464,
+            "optimistic_tps": 486.42546993389624,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 476.48243736054457,
+            "central_levers_tps": 478.048249182,
+            "optimistic_tps": 496.55933389085243,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 486.20656873524956,
+            "central_levers_tps": 487.8043359,
+            "optimistic_tps": 506.6931978478086,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          }
+        }
+      },
+      {
+        "splitk_pct": 4.44,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 477.5164161508096,
+            "central_levers_tps": 479.05737428300415,
+            "optimistic_tps": 497.841880886072,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 487.46467482061814,
+            "central_levers_tps": 489.03773624723345,
+            "optimistic_tps": 508.21358673786517,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 497.4129334904267,
+            "central_levers_tps": 499.0180982114627,
+            "optimistic_tps": 518.5852925896584,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          }
+        }
+      },
+      {
+        "splitk_pct": 5.0,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 478.8421368899285,
+            "central_levers_tps": 480.38388228969086,
+            "optimistic_tps": 499.2493749568754,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 488.818014741802,
+            "central_levers_tps": 490.39187983739276,
+            "optimistic_tps": 509.6504036018103,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 498.7938925936755,
+            "central_levers_tps": 500.39987738509467,
+            "optimistic_tps": 520.0514322467452,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          }
+        }
+      },
+      {
+        "splitk_pct": 6.5,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 482.35980892111525,
+            "central_levers_tps": 483.9035498169125,
+            "optimistic_tps": 502.9847173984664,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 492.40897160697176,
+            "central_levers_tps": 493.9848737714315,
+            "optimistic_tps": 513.463565677601,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 502.45813429282833,
+            "central_levers_tps": 504.06619772595053,
+            "optimistic_tps": 523.9424139567358,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "HOLD"
+          }
+        }
+      },
+      {
+        "splitk_pct": 8.5,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 486.9758397232341,
+            "central_levers_tps": 488.52199328097055,
+            "optimistic_tps": 507.88791127497086,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 497.12116971746815,
+            "central_levers_tps": 498.6995348076574,
+            "optimistic_tps": 518.4689094265328,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 507.2664997117022,
+            "central_levers_tps": 508.87707633434434,
+            "optimistic_tps": 529.0499075780947,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          }
+        }
+      },
+      {
+        "splitk_pct": 10.0,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 490.383463077171,
+            "central_levers_tps": 491.93124775975724,
+            "optimistic_tps": 511.5086353703309,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 500.59978522461205,
+            "central_levers_tps": 502.1798154214188,
+            "optimistic_tps": 522.1650652738795,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 510.81610737205307,
+            "central_levers_tps": 512.4283830830805,
+            "optimistic_tps": 532.821495177428,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          }
+        }
+      },
+      {
+        "splitk_pct": 12.0,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 494.85620295379664,
+            "central_levers_tps": 496.405935323195,
+            "optimistic_tps": 516.2625196420022,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 505.1657071820007,
+            "central_levers_tps": 506.7477256424283,
+            "optimistic_tps": 527.0179888012107,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 515.4752114102048,
+            "central_levers_tps": 517.0895159616615,
+            "optimistic_tps": 537.7734579604189,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          }
+        }
+      },
+      {
+        "splitk_pct": 14.000000000000002,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 499.2500381734269,
+            "central_levers_tps": 500.80147025589366,
+            "optimistic_tps": 520.9341263993401,
+            "verdict_corner_vs_500": "HOLD",
+            "verdict_corner_vs_505": "HOLD"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 509.6510806353733,
+            "central_levers_tps": 511.2348342195581,
+            "optimistic_tps": 531.7869206993264,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 520.0521230973197,
+            "central_levers_tps": 521.6681981832226,
+            "optimistic_tps": 542.6397149993127,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          }
+        }
+      },
+      {
+        "splitk_pct": 17.0,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 505.69735254895403,
+            "central_levers_tps": 507.2508954933145,
+            "optimistic_tps": 527.7918788610864,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 516.2327140603905,
+            "central_levers_tps": 517.8186224827585,
+            "optimistic_tps": 538.7875430040258,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 526.7680755718271,
+            "central_levers_tps": 528.3863494722026,
+            "optimistic_tps": 549.7832071469651,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          }
+        }
+      },
+      {
+        "splitk_pct": 20.0,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 511.9784572545633,
+            "central_levers_tps": 513.5336183513939,
+            "optimistic_tps": 534.4761012661535,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 522.6446751140334,
+            "central_levers_tps": 524.2322354003813,
+            "optimistic_tps": 545.6110200425317,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 533.3108929735034,
+            "central_levers_tps": 534.9308524493687,
+            "optimistic_tps": 556.74593881891,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          }
+        }
+      },
+      {
+        "splitk_pct": 29.7,
+        "by_tau": {
+          "tau_0.96": {
+            "corner_conservative_tps": 531.2235053875029,
+            "central_levers_tps": 532.780931778102,
+            "optimistic_tps": 554.9763450692327,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_0.98": {
+            "corner_conservative_tps": 542.2906617497425,
+            "central_levers_tps": 543.880534523479,
+            "optimistic_tps": 566.5383522581751,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          },
+          "tau_1.00": {
+            "corner_conservative_tps": 553.3578181119822,
+            "central_levers_tps": 554.9801372688562,
+            "optimistic_tps": 578.1003594471175,
+            "verdict_corner_vs_500": "GO",
+            "verdict_corner_vs_505": "GO"
+          }
+        }
+      }
+    ],
+    "tau_cols": [
+      0.96,
+      0.98,
+      1.0
+    ],
+    "expected_cell": {
+      "splitk_pct": 8.5,
+      "tau_band": [
+        0.96,
+        1.0
+      ],
+      "corner_conservative_at_tau0.96": 486.9758397232341,
+      "corner_conservative_at_tau1.00": 507.2664997117022,
+      "central_levers_at_tau0.96": 488.52199328097055,
+      "central_levers_at_tau1.00": 508.87707633434434,
+      "optimistic_at_tau1.00": 529.0499075780947
+    },
+    "cell_lever_bundle": "main verdict uses corner-conservative non-tau levers"
+  },
+  "model": {
+    "formula": "official = K_cal*(E[T]/step)*tau*(mult/mult_central); E[T]=3.844*lk_mult",
+    "K_cal": 125.26795005202914,
+    "E_T_linear": 3.844,
+    "budget": {
+      "verify_gemm": 0.53,
+      "drafter": 0.07,
+      "attention": 0.08,
+      "other": 0.32
+    },
+    "frontier_official": 481.53,
+    "target_official": 500.0,
+    "reused_from": "denken #105 tree_free_500_ceiling.compose + lawine #99 calibrate"
+  },
+  "inputs": {
+    "multiplier_central": 1.0601865051833779,
+    "multiplier_local_ci95": [
+      1.0599921923954079,
+      1.0603808179713479
+    ],
+    "multiplier_envelope_ci95": [
+      1.0394063229912567,
+      1.080966687375499
+    ],
+    "tau_band": {
+      "low": 0.96,
+      "central": 1.0,
+      "high": 1.0
+    },
+    "lk_mult_band": {
+      "low": 1.01,
+      "central": 1.01,
+      "high": 1.024
+    },
+    "palette_byte_tps_band": {
+      "low": 0.0,
+      "central": 0.003,
+      "high": 0.005
+    },
+    "palette_note": "byte lever = wirbel #104 PALETTE/LUT (lossless, ~0.3% TPS, BUILD-OR-KILL PENDING); INT8 double-quant KILLED (#104, greedy-lossy, net-negative bytes) -> conservative corner byte=0",
+    "fp32_m8_abs": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.000102
+    },
+    "persist_reclaim_abs": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.0217
+    },
+    "splitk_ubel_band": {
+      "low": 0.05,
+      "central": 0.085,
+      "high": 0.12
+    },
+    "splitk_gap_ceiling": 0.2970168612191959,
+    "ubel_plausible_max_pct": 8.5,
+    "no_double_count_note": "multiplier official-CV envelope (+/-1.96%) and tau[0.96,1.0] are the same official-side risk; carried ONCE in tau. corner uses multiplier LOCAL-side CI only. envelope-low reported as worst-of-worst stress."
+  },
+  "public_evidence": {
+    "leaderboard_frontier_tps": 489.63,
+    "leaderboard_note": "public #1 now frantic-penguin skv64 489.63; a cluster of SplitK/argmax-block-class submissions (byteshark splitkv-k7-argmaxblock64 484.62, need-for-speed mao-gemma-fast-skv64 488.07) sits at ~484-490 -- realized SplitK-class gains in the field are ~+0.6-1.7% over 481.53, BELOW the 4.44% central, and NONE clear 500. Corroborates the conservative corner.",
+    "digest": "GET /v1/digest?as=senpai 2026-06-14"
+  },
+  "method": "CPU-only analytic; reuses denken #105 composition model + lawine #99 multiplier CI; two documented band corrections (palette byte-lever, explicit multiplier CI). No GPU, no served-file change, greedy identity untouched."
+}
