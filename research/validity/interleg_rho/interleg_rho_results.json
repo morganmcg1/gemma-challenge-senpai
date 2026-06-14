@@ -1,0 +1,204 @@
+{
+  "pr": 218,
+  "metric_primary": "interleg_rho_self_test_passes",
+  "metric_test": "go_trigger_grounded_worstcase",
+  "interleg_rho_self_test_passes": true,
+  "go_trigger_grounded_worstcase": 513.5574577506176,
+  "combined_sigma_grounded_central": 7.74252525162585,
+  "combined_sigma_grounded_band": [
+    7.6112863497053365,
+    8.242349062843092
+  ],
+  "go_trigger_grounded_central": 512.7353207419002,
+  "go_trigger_grounded_band": [
+    512.519451958079,
+    513.5574577506176
+  ],
+  "lambda1_margin_grounded_central": 8.217411569267256,
+  "lambda1_margin_grounded_band": [
+    8.433280353088435,
+    7.395274560549865
+  ],
+  "lambda1_margin_grounded_worstcase": 7.395274560549865,
+  "flat_03_is_conservative": true,
+  "lambda1_margin_recovered_vs_flat03_tps": 1.0771595970564931,
+  "trigger_recovered_vs_flat03_tps": 1.0771595970564931,
+  "law": "combined_sigma = sqrt(w^T Sigma w), w = unit leg weights [1,1,1], Sigma = D R D, D = diag(sigma_accept, sigma_hw, sigma_private), R = grounded 3x3 correlation matrix; GO trigger = 500 + z1 * combined_sigma, z1 = 1.64485 (one-sided P95); lambda=1 margin = 520.953 - GO trigger. R has rho approx 0 on (accept,hw) and (hw,private), mild positive on (accept,private).",
+  "imported_legs_204": {
+    "sigma_accept": 5.6991054426095955,
+    "sigma_hw": 4.864468814937121,
+    "sigma_private": 0.8839182724133238,
+    "combined_204_central": 7.544810879656575,
+    "combined_204_worstcase": 8.897215598932974,
+    "trigger_204_central": 512.4101095400661,
+    "trigger_204_worstcase": 514.6346173476741,
+    "lambda1_ceiling": 520.9527323111674,
+    "lambda1_margin_204_central": 8.542622771101378,
+    "lambda1_margin_204_worstcase": 6.318114963493372,
+    "h_out_207": 5.178,
+    "z1_one_sided_p95": 1.6448536269514722
+  },
+  "pairwise_rho_bands": {
+    "accept_hw": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.1,
+      "sign": "approx_zero",
+      "reasoning": "sigma_accept is a MODEL/CONTENT property: which draft tokens the target accepts under self-KV-recovery is fixed by the checkpoint + prompt set and is greedy-IDENTICAL across pods (#207 h_out 5.178 is the same on any allocation). sigma_hw is an ALLOCATION/THERMAL draw: which physical A10G, its clock/thermal state, neighbour noise. A single re-benchmark draw fixes both, but they are mechanistically ORTHOGONAL -- the same tokens are produced regardless of pod, and timing jitter does not flip accept/reject decisions. central rho=0. The only coupling is 2nd-order: a higher-acceptance draw runs FEWER target forward steps, so per-step timing noise averages over fewer steps (slightly less CLT smoothing) -- a weak, sign-ambiguous VARIANCE effect, bounded |rho| <= 0.10. We take the conservative (margin-shrinking) upper end 0.10 as the high corner."
+    },
+    "accept_private": {
+      "low": 0.1,
+      "central": 0.3,
+      "high": 0.5,
+      "sign": "mild_positive",
+      "reasoning": "THE ONE REAL COUPLING. sigma_private is the adverse-domain private re-grade: when the private grading set skews adverse, the drafter is less aligned with that content and acceptance DROPS, which lowers TPS through the SAME acceptance channel sigma_accept measures. So a single re-grade draw that lands adverse SIMULTANEOUSLY lowers acceptance and lowers TPS -> POSITIVE correlation in TPS-noise terms. NOT +1: sigma_accept also carries domain-independent KV-recovery variance (#190 ICC across identical-domain repeats), and sigma_private carries re-grade components beyond acceptance (the PPL/quality-margin part of the drop, #176/#191). The acceptance channel is the dominant-but-PARTIAL shared path -> mild-to-moderate positive. central rho=0.30, band [0.10, 0.50]."
+    },
+    "hw_private": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.05,
+      "sign": "approx_zero",
+      "reasoning": "Hardware timing (allocation/thermal) is orthogonal to which DOMAIN the private grading set draws: the pod does not know the grading domain, and the domain does not pick the pod. central rho=0. Tiny upper bound 0.05 for any incidental coupling (e.g. adverse domains tend to longer sequences -> marginally different memory-bandwidth regime); given sigma_private=0.884 is the smallest leg it contributes < 0.05 TPS to combined sigma even at its high end."
+    },
+    "_summary": "rho_accept_hw=[0.00,0.00,0.10] (approx 0, orthogonal sources, weak 2nd-order step-count coupling); rho_accept_private=[0.10,0.30,0.50] (MILD POSITIVE -- the only real coupling, shared acceptance channel); rho_hw_private=[0.00,0.00,0.05] (approx 0, allocation orthogonal to domain)."
+  },
+  "grounded_trigger": {
+    "combined_sigma_grounded_central": 7.74252525162585,
+    "combined_sigma_grounded_band": [
+      7.6112863497053365,
+      8.242349062843092
+    ],
+    "go_trigger_grounded_central": 512.7353207419002,
+    "go_trigger_grounded_band": [
+      512.519451958079,
+      513.5574577506176
+    ],
+    "go_trigger_grounded_worstcase": 513.5574577506176,
+    "lambda1_margin_grounded_central": 8.217411569267256,
+    "lambda1_margin_grounded_band": [
+      8.433280353088435,
+      7.395274560549865
+    ],
+    "lambda1_margin_grounded_worstcase": 7.395274560549865,
+    "lambda1_ceiling_mu": 520.9527323111674,
+    "trigger_vs_rho": {
+      "tight": {
+        "rho_accept_hw": 0.0,
+        "rho_accept_private": 0.1,
+        "rho_hw_private": 0.0,
+        "combined_sigma": 7.6112863497053365,
+        "go_trigger": 512.519451958079,
+        "lambda1_margin": 8.433280353088435,
+        "min_eigenvalue": 0.9,
+        "psd": true
+      },
+      "central": {
+        "rho_accept_hw": 0.0,
+        "rho_accept_private": 0.3,
+        "rho_hw_private": 0.0,
+        "combined_sigma": 7.74252525162585,
+        "go_trigger": 512.7353207419002,
+        "lambda1_margin": 8.217411569267256,
+        "min_eigenvalue": 0.7,
+        "psd": true
+      },
+      "loose": {
+        "rho_accept_hw": 0.1,
+        "rho_accept_private": 0.5,
+        "rho_hw_private": 0.05,
+        "combined_sigma": 8.242349062843092,
+        "go_trigger": 513.5574577506176,
+        "lambda1_margin": 7.395274560549865,
+        "min_eigenvalue": 0.49745584725609726,
+        "psd": true
+      }
+    },
+    "independent_floor_combined_sigma": 7.544810879656575,
+    "accept_private_keeps_above_floor_tps": 0.06647547004876131
+  },
+  "conservatism_check": {
+    "flat_03_is_conservative": true,
+    "flat_03_combined_sigma": 8.897215598932974,
+    "flat_03_go_trigger": 514.6346173476741,
+    "flat_03_lambda1_margin": 6.318114963493372,
+    "grounded_loose_combined_sigma": 8.242349062843092,
+    "grounded_loose_go_trigger": 513.5574577506176,
+    "grounded_loose_lambda1_margin": 7.395274560549865,
+    "trigger_recovered_vs_flat03_tps": 1.0771595970564931,
+    "lambda1_margin_recovered_vs_flat03_tps": 1.0771595970564931,
+    "residual_coupling_note": "The grounded matrix puts rho approx 0 on TWO of three pairs (accept-hw, hw-private) and a mild positive on ONE (accept-private), whereas #204's flat +0.3 puts 0.3 on ALL three -> the grounded matrix is STRICTLY less correlated -> combined sigma 8.2423 < flat 8.8972, trigger 513.56 < 514.63, RECOVERING +1.08 TPS of lambda=1 margin. The accept<->private coupling is the ONLY leg-pair that keeps grounded combined sigma above the pure-independent 7.5448 floor (+0.0665 TPS at the tight corner) -- carried honestly, not assumed away."
+  },
+  "self_test": {
+    "interleg_rho_self_test_passes": true,
+    "go_trigger_grounded_worstcase": 513.5574577506176,
+    "checks": {
+      "a_allzero_reproduces_204_central": true,
+      "b_flat03_reproduces_204_worstcase": true,
+      "c_psd_at_every_corner": true,
+      "d_monotone_increasing_in_each_rho": true,
+      "e_grounded_sigma_between_204_corners": true,
+      "f_nan_clean": true
+    },
+    "evidence": {
+      "a_allzero_sigma_err": 0.0,
+      "a_allzero_trigger_err": 0.0,
+      "a_helper_agreement_err": 0.0,
+      "a_allzero_combined_sigma": 7.544810879656575,
+      "a_allzero_trigger": 512.4101095400661,
+      "b_flat03_sigma_err": 0.0,
+      "b_flat03_trigger_err": 0.0,
+      "b_helper_agreement_err": 0.0,
+      "b_flat03_combined_sigma": 8.897215598932974,
+      "b_flat03_trigger": 514.6346173476741,
+      "c_corner_min_eigenvalues": {
+        "tight": 0.9,
+        "central": 0.7,
+        "loose": 0.49745584725609726,
+        "anchor_zero": 1.0,
+        "anchor_flat03": 0.7
+      },
+      "d_monotonicity": {
+        "accept_hw": {
+          "monotone_increasing": true,
+          "strictly_increasing": true,
+          "analytic_dvar_drho": 55.44624139722559,
+          "analytic_positive": true
+        },
+        "accept_private": {
+          "monotone_increasing": true,
+          "strictly_increasing": true,
+          "analytic_dvar_drho": 10.07508687426569,
+          "analytic_positive": true
+        },
+        "hw_private": {
+          "monotone_increasing": true,
+          "strictly_increasing": true,
+          "analytic_dvar_drho": 8.599585742215417,
+          "analytic_positive": true
+        }
+      },
+      "e_grounded_combined_sigmas": [
+        7.6112863497053365,
+        7.74252525162585,
+        8.242349062843092
+      ],
+      "e_204_corner_bounds": [
+        7.544810879656575,
+        8.897215598932974
+      ],
+      "n_scalars_checked": 23
+    }
+  },
+  "handoff": "fern #185: the three launch-noise legs are near-independent except a mild accept<->private coupling (rho band [0.10,0.50]), so the grounded worst-case GO trigger is 513.56 (vs #204's flat-rho=+0.3 514.63), recovering +1.08 TPS of lambda=1 margin (now +7.40 vs +6.32) -- #204's flat +0.3 is conservative, and fern carries the grounded [tight,loose] trigger band [512.52, 513.56] with the accept<->private pair as the only real correlation.",
+  "scope": "Pure CPU-only analytic synthesis over ubel's banked #204 combined-sigma + the three legs' physical sources: grounds the inter-leg correlation rho from first principles, builds the 3x3 correlation matrix, re-solves the GO trigger and lambda=1 margin across the defensible rho band, and confirms #204's flat rho=+0.3 worst-case is conservative. Takes NO official draws, authorizes none. The rho's are FIRST-PRINCIPLES BOUNDS (no joint re-measurement of the legs -- that needs paired official draws), so the band is an ARGUED ENVELOPE, not a measured rho. The sigma magnitudes, bar 0.9780, and ceiling 520.95 are imported unchanged. BASELINE stays 481.53; adds 0 TPS (PRIMARY = self-test); greedy/PPL untouched. Orthogonal to Issue #192. NOT a launch.",
+  "public_evidence_used": [
+    "ubel #204 (launch_sigma_unit_rebase, MERGED) -- the clean-1-sigma legs sigma_accept 5.6991 / sigma_hw 4.8645 / sigma_private 0.8839, combined 7.5448 central (rho=0) / 8.8972 worst-case (flat rho=+0.3), GO trigger 512.41 / 514.63, lambda=1 ceiling 520.95 -- the curve grounded here.",
+    "ubel #207 (17vi7fda, launch_sigma_175_reconcile, MERGED) -- h_out 5.178 launch-correct acceptance source confirming the robust-YES survives; the central<->worst-case spread this PR grounds.",
+    "kanna #188 (pp1r5orx) -- sigma_hw = 4.864 = hypot(within, between) hardware-timing leg (physical source: between-instance allocation/thermal draw -> orthogonal to accept/domain).",
+    "wirbel #190 (fva6o4ug) -- sigma_accept ICC/design-effect structure (acceptance variance is a model/content property with domain-independent KV-recovery components -> partial accept<->private channel).",
+    "stark #176/#191 (jeclr39w) -- sigma_private adverse-domain re-grade (lowers acceptance via the shared channel -> the one mild-positive accept<->private coupling)."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis over EXISTING MERGED #204 results + the legs' physical sources; no GPU/vLLM/HF Job/submission/served-file change. BASELINE stays 481.53; adds 0 TPS. Greedy/PPL identity untouched. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0026
+}
