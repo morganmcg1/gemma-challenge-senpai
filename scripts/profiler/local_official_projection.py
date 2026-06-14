@@ -776,6 +776,257 @@ def bound_tau_local(calib: Calibration | None = None) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Step 1 + 2 (PR #116): DERIVE tau for a bandwidth lever from a first-principles
+# roofline -- replace the ASSERTED 0.99 floor (bound_tau_local) with a derived one
+# ---------------------------------------------------------------------------
+# WHY this supersedes the asserted floor
+# --------------------------------------
+# bound_tau_local proved the *data* path to tau is blocked (one matched (official,
+# local) pair; 7.1% meter confound) and fell back to an ungrounded round number
+# (0.99). This block DERIVES tau from the decode-step roofline instead.
+#
+# The key identity. tau enters denken #105's model as a multiplier on the official
+# TPS: official = K_cal * (E[T]/step_local) * tau, where K_cal folds the DEPLOYED
+# local->official multiplier (m=1.0602) into the 481.53 anchor. At the null point
+# (s=0) tau == 1.0 by construction (the bit-exact self-check). So tau is the
+# *residual realization factor* of a LEVER: how much of the locally-measured
+# step-time improvement actually shows up officially. Because tau->1 as s->0, any
+# deviation is necessarily SECOND-ORDER in the lever size s -- there is no
+# first-order-in-s-free epsilon. This is the structural reason the band is tight.
+#
+# tau DECOMPOSES into two independent factors, tau = tau_eff * tau_mix:
+#
+#   tau_mix  (slice-mix realization).  The lever removes LOCAL verify-GEMM time.
+#     Officially that time is re-weighted by the per-component local->official
+#     speed ratios m_c. If every slice transfers at the SAME ratio (the deployed
+#     m), the local improvement transfers 1:1 -> tau_mix = 1.0 EXACTLY. Deviation
+#     requires the verify-GEMM's transfer m_vg to differ from the step average m,
+#     and even then |tau_mix - 1| = s * phi_vg * |m/m_vg - 1| (second order). The
+#     ABSOLUTE per-component transfers (incl. any ECC/thermal/clock difference
+#     between the boxes) are ALREADY absorbed into the deployed m=K_cal; only their
+#     SPREAD feeds tau_mix, and only at second order. denken #97 (MERGED) measured
+#     the ~32% "other" tail as 97.83% GPU-busy, "bus is the wall" -> bus(BW)-bound
+#     like the verify-GEMM -> uniform transfer -> tau_mix_central = 1.0 (eps=0).
+#
+#   tau_eff  (lever-efficacy realization).  Does the SplitK *fractional* speedup s
+#     itself realize officially? s closes the verify-GEMM's achieved-HBM-util gap
+#     (77.1%->100%). util is dimensionless (achieved = util * peak_BW), so closing
+#     it multiplies achieved BW by (1+s) on BOTH boxes regardless of peak_BW --
+#     i.e. the peak-BW difference CANCELS in the ratio. tau_eff = 1.0 IFF (a) the
+#     verify-GEMM is BW-bound officially too and (b) the util gap is architecture-
+#     invariant. (a): int4 W4A16 at M=8 sits at arithmetic intensity ~32 FLOP/byte
+#     vs the sm_86 FP16/TC ridge ~117-208 (>=3.6x margin) -- BW-bound with margin
+#     on identical silicon (Marlin/Machete/IBM-SplitK literature + repo #68). (b):
+#     the util gap is wave-quantization, set by SM count -- identical on two A10G.
+#     The ONE un-pinnable residual: the split-K reduction's SYNC OVERHEAD is mildly
+#     absolute-BW-sensitive (the IBM A100 PCIe-vs-SXM caution), so s could under-
+#     realize by a small relative haircut local data cannot measure -> the named
+#     job of the ONE pre-registered official anchor (Step 3).
+ROOFLINE_BUDGET = dict(tf.BUDGET)  # denken #97/#105: vg .53, draft .07, attn .08, other .32
+
+# denken #97 (MERGED) tail characterization -- the load-bearing central input.
+TAIL_GPU_BUSY_FRAC = 0.9783        # decode 97.83% GPU-busy
+TAIL_RECLAIMABLE_IDLE = 0.0217     # only 2.17pp reclaimable GPU-idle ("bus is the wall")
+
+# verify-GEMM roofline (researcher cross-check + repo #68). int4 W4A16, M=8.
+VERIFY_GEMM_INTENSITY_M8 = 32.0    # FLOP/byte (2*M FLOP per 0.5-byte int4 weight elt, M=8)
+SM86_RIDGE_FLOP_PER_BYTE = {       # peak-compute / peak-BW on sm_86 (A10G ~600 GB/s)
+    "fp16_tc": 208.0,              # ~125 TFLOP/s FP16-accum tensor core
+    "fp32_accum_tc": 117.0,        # ~70 TFLOP/s FP32-accum tensor core
+    "conservative_non_tc": 52.0,   # ~31 TFLOP/s non-TC (researcher's lower bound)
+}
+
+
+def _transfer_profile(name: str, m: float) -> dict[str, float]:
+    """Per-component local->official speed ratios m_c consistent with the deployed
+    overall multiplier m (= 1/sum(phi_c/m_c)). Three bounding hypotheses for WHERE
+    the deployed +6% officially-faster lives:
+
+      * uniform      -- every slice bus(BW)-bound, transfers at the SAME bus ratio m
+                        (denken #97 "bus is the wall"). The CENTRAL hypothesis.
+      * bw_carries   -- ADVERSARIAL floor: the whole ~32% tail is launch/SM-clock-
+                        bound and transfers at 1.0 (no speedup); the verify-GEMM and
+                        the other BW-bound slices carry ALL the +6% (m_vg = m_bw > m)
+                        -> removing verify-GEMM time UNDER-realizes -> tau_mix < 1.
+      * tail_carries -- the verify-GEMM is BW-identical (m_vg=1.0) and the tail carries
+                        all +6% (m_tail > m) -> removing verify-GEMM time OVER-realizes
+                        -> tau_mix > 1 (banked only as a ceiling; we do not credit it)."""
+    b = ROOFLINE_BUDGET
+    rest = b["verify_gemm"] + b["drafter"] + b["attention"]  # 0.68 BW-bound slices
+    tail = b["other"]                                         # 0.32 tail
+    if name == "uniform":
+        return {c: m for c in b}
+    if name == "bw_carries":
+        m_bw = rest / (1.0 / m - tail)        # tail @1.0 forces the rest to carry +6%
+        return {"verify_gemm": m_bw, "drafter": m_bw, "attention": m_bw, "other": 1.0}
+    if name == "tail_carries":
+        m_tail = tail / (1.0 / m - rest)       # rest @1.0 forces the tail to carry +6%
+        return {"verify_gemm": 1.0, "drafter": 1.0, "attention": 1.0, "other": m_tail}
+    raise ValueError(name)
+
+
+def tau_mix(splitk_s: float, m_c: dict[str, float],
+            budget: dict[str, float] | None = None) -> float:
+    """EXACT slice-mix realization factor of a SplitK speedup ``splitk_s`` under the
+    per-component transfer profile ``m_c``.
+
+    tau_mix = (official step speedup) / (local step speedup), where the lever scales
+    the verify-GEMM local time by 1/(1+s) and leaves the other slices unchanged:
+
+        tau_mix = [ (sum phi_c/m_c) * (sum phi_c g_c) ] / (sum phi_c g_c/m_c)
+
+    with g_vg = 1/(1+s), g_else = 1, and the local step normalised to sum phi_c = 1.
+    Returns 1.0 EXACTLY when all m_c are equal (uniform transfer)."""
+    b = ROOFLINE_BUDGET if budget is None else budget
+    g = {c: (1.0 / (1.0 + splitk_s) if c == "verify_gemm" else 1.0) for c in b}
+    t_off = sum(b[c] / m_c[c] for c in b)
+    tp_loc = sum(b[c] * g[c] for c in b)
+    tp_off = sum(b[c] * g[c] / m_c[c] for c in b)
+    return (t_off * tp_loc) / tp_off
+
+
+def derive_tau_roofline(calib: Calibration | None = None, *,
+                        s_central: float | None = None,
+                        s_lo: float | None = None,
+                        s_hi: float | None = None) -> dict[str, Any]:
+    """Step 1+2: DERIVE tau for the SplitK bandwidth lever from the decode-step
+    roofline. Returns tau_roofline_central (primary metric), the derived band
+    [tau_roofline_lo, 1.00], the epsilon decomposition, and the tau_eff robustness
+    argument + un-pinnable residual.
+
+    The floor is the ADVERSARIAL slice-mix bound: the worst tau_mix over ubel's
+    SplitK range under the most hostile physically-admissible tail transfer (entire
+    ~32% tail launch-bound at 1.0, contradicting #97 but bounding the unknown)."""
+    if calib is None:
+        calib = calibrate()
+    m = calib.multiplier
+    s_c = float(tf.SPLITK_UBEL["central"]) if s_central is None else s_central
+    s_l = float(tf.SPLITK_UBEL["low"]) if s_lo is None else s_lo
+    s_h = float(tf.SPLITK_UBEL["high"]) if s_hi is None else s_hi
+    grid = sorted({s_l, s_c, s_h})
+
+    profiles = {n: _transfer_profile(n, m) for n in ("uniform", "bw_carries", "tail_carries")}
+    # tau_mix(s) per hypothesis across ubel's SplitK range.
+    sweep = []
+    for s in grid:
+        row = {"splitk_s": s}
+        for n, p in profiles.items():
+            row[n] = tau_mix(s, p)
+        sweep.append(row)
+
+    # CENTRAL: uniform / #97 bus-bound -> tau_mix == 1.0 exactly (eps = 0).
+    tau_central = tau_mix(s_c, profiles["uniform"])           # == 1.0 by construction
+    # FLOOR: worst (lowest) tau_mix over the range under the adversarial tail.
+    floor_by_s = {s: tau_mix(s, profiles["bw_carries"]) for s in grid}
+    tau_floor = min(floor_by_s.values())
+    s_at_floor = min(floor_by_s, key=floor_by_s.get)
+    # CEILING side (over-realization we deliberately do NOT bank): cap at 1.00.
+    over_by_s = {s: tau_mix(s, profiles["tail_carries"]) for s in grid}
+    tau_over_max = max(over_by_s.values())
+
+    # ---- epsilon decomposition: which component drives the deviation, how big ----
+    # Sweep the ONLY free transfer (the tail), holding the BW-bound slices at the
+    # value that keeps the overall multiplier fixed, and attribute eps = 1 - tau_mix.
+    # The tail's admissible range is [1.0 (fully launch-bound) .. m_tail_max (carries
+    # all +6%)]. attention/drafter are BW-bound at small M (researcher) -> ~no spread.
+    m_tail_max = profiles["tail_carries"]["other"]
+    eps_floor = 1.0 - tau_floor                                 # tail-slow -> under-realize
+    eps_over = tau_over_max - 1.0                               # tail-fast -> over-realize (capped)
+    eps_decomposition = {
+        "driver_component": "other (small-kernel tail, 32% of step)",
+        "tail_transfer_admissible_range": [1.0, m_tail_max],
+        "attention_drafter_contribution": "~0 (BW-bound at small M; transfer ~ verify-GEMM)",
+        "verify_gemm_role": "lever target (its transfer sets the reference, not eps)",
+        "eps_at_floor_under_realize": eps_floor,               # |1 - tau_floor|
+        "eps_at_ceiling_over_realize_capped": eps_over,
+        "order": "second-order in s (eps -> 0 as s -> 0; |eps| = s*phi_vg*|m/m_vg - 1|)",
+        "eps_max_over_ubel_range_pct": 100.0 * max(eps_floor, eps_over),
+    }
+
+    # ---- tau_eff robustness (Step 2a) + the un-pinnable residual ----
+    ridge = SM86_RIDGE_FLOP_PER_BYTE
+    roofline_margin = {k: v / VERIFY_GEMM_INTENSITY_M8 for k, v in ridge.items()}
+    tau_eff = {
+        "value_central": 1.0,
+        "bw_bound_official_robust": True,
+        "verify_gemm_intensity_m8_flop_per_byte": VERIFY_GEMM_INTENSITY_M8,
+        "sm86_ridge_flop_per_byte": ridge,
+        "roofline_margin_x": roofline_margin,                  # >=3.6x even at FP32-accum
+        "util_gap_architecture_invariant": True,
+        "util_gap_reason": ("achieved-HBM-util gap (77.1%) is wave-quantization set by SM "
+                            "count -> identical on two sm_86 A10G boxes; util is dimensionless "
+                            "so closing it multiplies achieved BW by (1+s) regardless of peak_BW"),
+        "m8_far_from_tile_cliff": True,
+        "tile_cliff_note": ("tree-free path stays at M=8 (E[T]=3.844, NOT widened); the M=33 "
+                            "Marlin tile cliff is irrelevant to this path"),
+        "unpinnable_residual": ("split-K reduction SYNC OVERHEAD is mildly absolute-BW-sensitive "
+                                "(IBM A100 PCIe-vs-SXM caution); could under-realize s by a small "
+                                "relative haircut local data cannot measure -> the named job of "
+                                "the ONE official anchor"),
+    }
+
+    # ---- how much tau_eff haircut can the ubel-central ship absorb? (de-risk margin) ----
+    # ubel-central clears the conservative corner iff the threshold(tau) <= s_c. Find the
+    # tau where threshold == s_c, then the haircut margin from the tau_mix floor.
+    tau_flip = _tau_for_conservative_threshold(calib, s_c)
+    haircut_margin_rel = (tau_floor - tau_flip) / tau_floor if tau_flip else float("nan")
+
+    return {
+        "primary_metric_name": "tau_roofline_central",
+        "tau_roofline_central": tau_central,                   # == 1.00 (eps=0, #97 bus-bound)
+        "tau_roofline_band": [tau_floor, 1.00],                # DERIVED floor, physical ceiling
+        "tau_roofline_lo": tau_floor,
+        "tau_roofline_lo_at_splitk": s_at_floor,
+        "tau_over_realize_max_capped_at_1": tau_over_max,
+        "deployed_multiplier": m,
+        "decode_budget": ROOFLINE_BUDGET,
+        "tail_finding_97": {"gpu_busy_frac": TAIL_GPU_BUSY_FRAC,
+                            "reclaimable_idle": TAIL_RECLAIMABLE_IDLE,
+                            "characterization": "bus is the wall (BW-bound tail)"},
+        "transfer_profiles": profiles,
+        "tau_mix_sweep": sweep,
+        "eps_decomposition": eps_decomposition,
+        "tau_eff": tau_eff,
+        "tau_eff_haircut_flip_tau": tau_flip,
+        "tau_eff_haircut_margin_rel_pct": 100.0 * haircut_margin_rel,
+        "vs_asserted_floor": {
+            "asserted_112_mechanism_floor": 0.99,
+            "asserted_112_generic_floor": float(tf.TAU["low"]),
+            "derived_roofline_floor": tau_floor,
+            "tightening_pp": 100.0 * (tau_floor - 0.99),
+        },
+        "method": ("tau = tau_eff * tau_mix; tau_mix from EXACT slice-mix over denken #97/#105 "
+                   "decode budget under bounding tail-transfer hypotheses; tau_eff from the "
+                   "BW-utilisation roofline (peak_BW cancels in the local/official ratio). "
+                   "Replaces bound_tau_local's asserted 0.99 with a derived second-order floor."),
+    }
+
+
+def _tau_for_conservative_threshold(calib: Calibration, target_s: float) -> float | None:
+    """Invert the conservative-corner SplitK threshold(tau) for the tau at which the
+    threshold equals ``target_s`` (e.g. ubel-central). Below this tau the conservative
+    corner no longer clears 500 at target_s. Monotone in tau -> bisection."""
+    mc = calib.multiplier
+
+    def thr(tau: float) -> float | None:
+        return tree_free_threshold(
+            mult=calib.mult_ci_local_lo, tau=tau, lk_mult=tf.LK_MULT["low"],
+            palette_tps_pct=PALETTE_TPS["low"], fp32_m8=tf.FP32_M8["high"],
+            persist_reclaim=tf.PERSIST_RECLAIM["low"], mult_central=mc)
+
+    lo, hi = 0.90, 1.05
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        s = thr(mid)
+        s = float("inf") if s is None else s     # None == clears at s=0 -> threshold below target
+        if s is None or s <= target_s:
+            hi = mid
+        else:
+            lo = mid
+    return 0.5 * (lo + hi)
+
+
+# ---------------------------------------------------------------------------
 # Step 3: tree-free 500-path gate
 # ---------------------------------------------------------------------------
 def tree_free_gate(calib: Calibration | None = None, *,
@@ -856,6 +1107,211 @@ def tree_free_gate(calib: Calibration | None = None, *,
         "decides_at_generic_floor": decides_at_generic,
         "recommendation": tau_bound["recommendation"],
         "reasons": reasons,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Step 3 (PR #116): re-gate the ship on the DERIVED tau + pre-register the anchor
+# ---------------------------------------------------------------------------
+def tree_free_ship_gate_roofline(calib: Calibration | None = None, *,
+                                 roofline: dict[str, Any] | None = None,
+                                 eps_green_pct: float = 0.5) -> dict[str, Any]:
+    """Re-gate the tree-free 500 ship on the DERIVED roofline tau (PR #116), folding
+    derive_tau_roofline into the #112 conservative-corner instrument.
+
+    PRIMARY metric  tau_roofline_central.
+    TEST    metric  tree_free_ship_gate_without_official_anchor -- does the
+                    conservative corner clear 500 at ubel-CENTRAL SplitK on the
+                    DERIVED tau floor ALONE (no official anchor)?
+
+    Verdict (PR rubric):
+      * GREEN  -- armed + eps WELL-BOUNDED (slice-mix second-order, |eps| < eps_green)
+                  + conservative corner clears 500 at ubel-EXPECTED SplitK on the
+                  derived floor -> tree-free 500 shippable on theory + ubel's number;
+                  the official shot becomes OPTIONAL confirmation, not a gate.
+      * AMBER  -- armed + tighter floor, but eps has an UN-PINNED tail (|eps| >=
+                  eps_green) leaving residual risk -> bank the band, name the one-shot.
+      * RED    -- eps un-boundable OR the corner cannot clear at ubel-central even at
+                  tau=1.00 -> tau genuinely needs the official anchor."""
+    if calib is None:
+        calib = calibrate()
+    if roofline is None:
+        roofline = derive_tau_roofline(calib)
+
+    sc = tree_free_self_check(calib)
+    armed = bool(sc["reproduces_anchor_bit_exact"])
+
+    s_c = float(tf.SPLITK_UBEL["central"])
+    s_l = float(tf.SPLITK_UBEL["low"])
+    tau_lo = roofline["tau_roofline_lo"]
+    mc = calib.multiplier
+
+    def cons_threshold(tau: float) -> float | None:
+        return tree_free_threshold(
+            mult=calib.mult_ci_local_lo, tau=tau, lk_mult=tf.LK_MULT["low"],
+            palette_tps_pct=PALETTE_TPS["low"], fp32_m8=tf.FP32_M8["high"],
+            persist_reclaim=tf.PERSIST_RECLAIM["low"], mult_central=mc)
+
+    thr_at_floor = cons_threshold(tau_lo)
+    thr_at_1 = cons_threshold(1.00)
+
+    def clears(thr, s):  # threshold None == clears at s=0
+        return thr is None or (thr != float("inf") and thr <= s)
+
+    clears_central_on_floor = clears(thr_at_floor, s_c)
+    clears_low_on_floor = clears(thr_at_floor, s_l)
+    clears_central_at_tau1 = clears(thr_at_1, s_c)
+
+    eps_max_pct = roofline["eps_decomposition"]["eps_max_over_ubel_range_pct"]
+    eps_well_bounded = eps_max_pct < eps_green_pct
+
+    # the PR's named TEST metric.
+    ship_without_anchor = bool(armed and clears_central_on_floor)
+
+    reasons: list[str] = []
+    if not armed:
+        reasons.append("NOT ARMED: null-lever self-check is not bit-exact on 481.53")
+    if not clears_central_at_tau1:
+        reasons.append("conservative corner cannot clear 500 at ubel-central even at tau=1.00 "
+                       "-> tau cannot save the ship (a SplitK-delivery / lever-stack problem)")
+    if not eps_well_bounded:
+        reasons.append(f"eps NOT well-bounded ({eps_max_pct:.3f}% >= {eps_green_pct:.2f}%): the "
+                       "slice-mix deviation is dominated by an un-pinned tail transfer")
+
+    if (not armed) or (not clears_central_at_tau1) or (not eps_well_bounded and not clears_central_on_floor):
+        verdict = "RED"
+        verdict_label = ("the derived tau cannot ship tree-free 500 without the official anchor "
+                         "(unarmed / unreachable / eps un-boundable)")
+        recommendation = "OFFICIAL_ANCHOR_REQUIRED_GATE"
+    elif eps_well_bounded and ship_without_anchor:
+        verdict = "GREEN"
+        verdict_label = ("roofline derives tau = [%.4f, 1.00] (eps well-bounded, second-order); "
+                         "the conservative corner clears 500 at ubel-central SplitK on the derived "
+                         "floor ALONE -> tree-free 500 shippable on theory + ubel's number; the "
+                         "official shot is OPTIONAL confirmation, not a gate" % tau_lo)
+        recommendation = "OFFICIAL_ANCHOR_OPTIONAL_CONFIRMATION"
+        reasons.append(f"derived floor {tau_lo:.4f} vs asserted 0.99 -> conservative threshold "
+                       f"{_pct(thr_at_floor)} <= ubel-central {s_c*100:.1f}% (margin "
+                       f"{(s_c - (thr_at_floor or 0))*100:+.2f}pp)")
+        if not clears_low_on_floor:
+            reasons.append(f"residual (NOT a tau problem): ubel-LOW {s_l*100:.0f}% does not clear "
+                           f"even at tau=1.00 (thr {_pct(thr_at_1)}) -> a SplitK-delivery question "
+                           "for ubel #108, not the transfer factor")
+        reasons.append(f"residual (anchor-confirmed, not a gate): tau_eff sync-overhead haircut up "
+                       f"to {roofline['tau_eff_haircut_margin_rel_pct']:.2f}% relative still clears "
+                       "ubel-central -> the one official shot confirms it + banks the 2nd pair")
+    else:
+        verdict = "AMBER"
+        verdict_label = ("roofline tightens the floor to %.4f but eps is not tight enough to ship "
+                         "without confirmation -> bank the band, name the one official anchor" % tau_lo)
+        recommendation = "ONE_OFFICIAL_SPLITK_ANCHOR"
+        reasons.append(roofline["tau_eff"]["unpinnable_residual"])
+
+    return {
+        "primary_metric_name": "tau_roofline_central",
+        "tau_roofline_central": roofline["tau_roofline_central"],
+        "tau_roofline_band": roofline["tau_roofline_band"],
+        "test_metric_name": "tree_free_ship_gate_without_official_anchor",
+        "tree_free_ship_gate_without_official_anchor": ship_without_anchor,
+        "verdict": verdict,
+        "verdict_label": verdict_label,
+        "recommendation": recommendation,
+        "armed": armed,
+        "eps_max_over_ubel_range_pct": eps_max_pct,
+        "eps_well_bounded": eps_well_bounded,
+        "conservative_threshold_at_derived_floor": thr_at_floor,
+        "conservative_threshold_at_tau_1": thr_at_1,
+        "ubel_central": s_c, "ubel_low": s_l, "ubel_high": float(tf.SPLITK_UBEL["high"]),
+        "clears_500_central_on_derived_floor": clears_central_on_floor,
+        "clears_500_low_on_derived_floor": clears_low_on_floor,
+        "tau_eff_haircut_margin_rel_pct": roofline["tau_eff_haircut_margin_rel_pct"],
+        "reasons": reasons,
+    }
+
+
+def consolidate_fleet_tau() -> dict[str, Any]:
+    """Consolidate the fleet's three scattered tau lines into ONE verdict surface so
+    the single official shot is maximally informative (PR #116 Step 3)."""
+    return {
+        "lawine_112_instrument": {
+            "tau_band": [0.99, 1.00], "basis": "MECHANISM assertion (ungrounded 0.99 floor)",
+            "finding": "data-path blocked: 1 matched (official,local) pair, 7.1% meter confound",
+            "gate": "AMBER -- ONE official SplitK anchor to confirm tau>=0.99"},
+        "denken_109_corner": {
+            "conservative_corner_splitk_pct": 14.34, "fallback_tau": float(tf.TAU["low"]),
+            "finding": "corner falls back to GENERIC tau=0.96 -> straddles 500 at ubel ~8.5%",
+            "reanchor_required": True},
+        "lawine_116_roofline": {
+            "tau_band": "DERIVED [~0.9983, 1.00]", "basis": "first-principles slice-mix roofline",
+            "finding": "eps second-order in s, |eps|<0.4% even with adversarial tail; tau_eff=1.0 "
+                       "robust (BW-bound official + arch-invariant util gap); split-K sync-overhead "
+                       "the only un-pinnable residual",
+            "gate": "GREEN at ubel-central -> the official shot is CONFIRMATION, not a gate"},
+        "consolidated": ("the roofline REPLACES #112's asserted 0.99 with a derived ~0.998 and "
+                         "REMOVES #109's generic-0.96 fallback (the bandwidth lever's transfer is "
+                         "NOT a generic config change). tau is no longer the binding ship "
+                         "constraint; the residual is ubel's SplitK delivery + a small tau_eff "
+                         "haircut the one anchor confirms."),
+    }
+
+
+def preregister_official_anchor(calib: Calibration | None = None, *,
+                                roofline: dict[str, Any] | None = None,
+                                ship_gate: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Pre-register the ONE official-anchor run so the single scarce shot is maximally
+    informative: SplitK tau + the 2nd matched (official,local) pair + greedy self-
+    consistency, banking a bandwidth-lever transfer constant that prices denken #113's
+    LUT-GEMM (and any future verify-GEMM byte/util lever) to official WITHOUT another
+    shot. SPEC ONLY -- launch is a SEPARATE human-approved request (no HF Job here)."""
+    if calib is None:
+        calib = calibrate()
+    if roofline is None:
+        roofline = derive_tau_roofline(calib)
+    if ship_gate is None:
+        ship_gate = tree_free_ship_gate_roofline(calib, roofline=roofline)
+
+    s_c = float(tf.SPLITK_UBEL["central"])
+    # the local wall_tps the SplitK submission must read in lockstep (projected).
+    local_wall_tps_pred = LINEAR_REFERENCE_WALL_TPS * (1.0 + s_c * ROOFLINE_BUDGET["verify_gemm"]
+                                                       / (1.0 + s_c))
+    # GO/HOLD pre-commit: the official run is the frontier iff it clears 500 + PPL gate.
+    return {
+        "purpose": "ONE pre-registered official anchor; one shot, three deliverables",
+        "launch_policy": "SEPARATE human-approved request (program.md); this is the SPEC only",
+        "run_config": {
+            "submission": "ubel #108 SplitK W4A16 verify-GEMM tree-free stack (M=8 linear, E[T]=3.844)",
+            "hardware": "HF Jobs a10g-small (official)",
+            "decode": "greedy, 128 prompts, output_len 512; metric = summary.json:tps",
+            "ppl_gate": "ppl_summary.json <= 2.42 (kanna #96 self-referential greedy gate; #52 @ 2.3777)",
+            "preconditions": ["ubel #108 SplitK BUILT + local 0-flip greedy self-consistency (kanna #114)",
+                              "remote package complete (MODEL_ID Hub-resolvable, kernels uploaded)"],
+        },
+        "lockstep_local_meter": {
+            "what": "the SAME SplitK submission's local wall_tps, #72/#82 median-of-N=3 protocol",
+            "why": "banks the long-missing SECOND matched (official, local) pair -> unblocks the "
+                   "data-path tau that #112 found blocked (1 pair, 7.1% meter confound)",
+            "predicted_local_wall_tps_at_ubel_central": local_wall_tps_pred,
+        },
+        "go_hold_threshold": {
+            "GO": "official tps >= 500 AND ppl <= 2.42 -> ship as the new frontier (>481.53)",
+            "HOLD": "official tps < 500 -> do NOT ship; the run STILL banks the pair + transfer "
+                    "constant (a valuable negative that prices the next lever)",
+            "pre_committed_before_launch": True,
+        },
+        "banked_transfer_constant": {
+            "definition": "tau_eff_measured = (official SplitK speedup) / (local SplitK speedup)",
+            "roofline_prediction": 1.00,
+            "prices_future_levers_without_a_shot": [
+                "denken #113 LUT-GEMM (same verify-GEMM HBM-traffic class -> same tau_eff)",
+                "wirbel #110 palette byte-lever", "any future verify-GEMM util/byte lever"],
+            "mechanism": "all are bandwidth levers on the same BW-bound verify-GEMM; tau_eff is a "
+                         "property of the roofline class, not the specific kernel",
+        },
+        "three_deliverables": ["SplitK tau_eff (confirms the roofline 1.00)",
+                               "the 2nd matched (official, local) pair (unblocks the data path)",
+                               "greedy self-consistency on the official gate (kanna #114)"],
+        "fleet_consolidation": consolidate_fleet_tau(),
+        "why_optional_not_gate": ship_gate["verdict_label"],
     }
 
 
@@ -967,6 +1423,76 @@ def _log_tree_free_wandb(args, calib: Calibration, tau_bound: dict[str, Any],
     wandb.finish()
 
 
+def _log_roofline_wandb(args, calib: Calibration, roof: dict[str, Any],
+                        ship: dict[str, Any], prereg: dict[str, Any]) -> None:
+    """Rich W&B log of the PR#116 roofline tau derivation (group tau-endgame)."""
+    import wandb
+
+    def jnum(x):
+        if x is None:
+            return -1.0
+        return 9.99 if x == float("inf") else float(x)
+
+    run = wandb.init(
+        project=args.wandb_project, entity=args.wandb_entity,
+        name=args.wandb_name, group=args.wandb_group, job_type="analysis",
+        config={
+            "instrument": "tau-roofline-derivation (PR#116)",
+            "method": roof["method"],
+            "official_anchor_tps": calib.official_tps,
+            "deployed_multiplier": roof["deployed_multiplier"],
+            "decode_budget": roof["decode_budget"],
+            "tail_finding_97": roof["tail_finding_97"],
+            "verify_gemm_intensity_m8": VERIFY_GEMM_INTENSITY_M8,
+            "sm86_ridge_flop_per_byte": SM86_RIDGE_FLOP_PER_BYTE,
+            "splitk_ubel": dict(tf.SPLITK_UBEL), "target_official": OFFICIAL_TARGET_TPS,
+        })
+    s = wandb.summary
+    s["tau_roofline_central"] = roof["tau_roofline_central"]          # PRIMARY metric
+    s["tau_roofline_lo"] = roof["tau_roofline_lo"]
+    s["tau_roofline_hi"] = 1.00
+    s["tau_over_realize_max_capped"] = roof["tau_over_realize_max_capped_at_1"]
+    s["eps_max_over_ubel_range_pct"] = roof["eps_decomposition"]["eps_max_over_ubel_range_pct"]
+    s["eps_well_bounded"] = ship["eps_well_bounded"]
+    s["derived_floor_vs_asserted_99_pp"] = roof["vs_asserted_floor"]["tightening_pp"]
+    s["tau_eff_central"] = roof["tau_eff"]["value_central"]
+    s["tau_eff_haircut_margin_rel_pct"] = roof["tau_eff_haircut_margin_rel_pct"]
+    s["roofline_margin_x_fp16_tc"] = roof["tau_eff"]["roofline_margin_x"]["fp16_tc"]
+    s["conservative_threshold_at_derived_floor"] = jnum(ship["conservative_threshold_at_derived_floor"])
+    s["conservative_threshold_at_tau_1"] = jnum(ship["conservative_threshold_at_tau_1"])
+    s["clears_500_central_on_derived_floor"] = ship["clears_500_central_on_derived_floor"]
+    s["clears_500_low_on_derived_floor"] = ship["clears_500_low_on_derived_floor"]
+    s["tree_free_ship_gate_without_official_anchor"] = (              # TEST metric
+        ship["tree_free_ship_gate_without_official_anchor"])
+    s["verdict"] = ship["verdict"]
+    s["verdict_label"] = ship["verdict_label"]
+    s["recommendation"] = ship["recommendation"]
+
+    # tau_mix(s) under the three transfer hypotheses
+    mt = wandb.Table(columns=["splitk_pct", "uniform", "bw_carries_floor", "tail_carries_ceiling"])
+    for r in roof["tau_mix_sweep"]:
+        mt.add_data(r["splitk_s"] * 100.0, r["uniform"], r["bw_carries"], r["tail_carries"])
+        wandb.log({"tau_mix/splitk_pct": r["splitk_s"] * 100.0,
+                   "tau_mix/uniform": r["uniform"],
+                   "tau_mix/bw_carries_floor": r["bw_carries"],
+                   "tau_mix/tail_carries_ceiling": r["tail_carries"]})
+    wandb.log({"tau_mix_vs_splitk": mt})
+
+    # fleet consolidation table
+    fc = prereg["fleet_consolidation"]
+    ft = wandb.Table(columns=["line", "tau_basis", "gate"])
+    ft.add_data("lawine #112", str(fc["lawine_112_instrument"]["tau_band"]),
+                fc["lawine_112_instrument"]["gate"])
+    ft.add_data("denken #109", f"corner {fc['denken_109_corner']['conservative_corner_splitk_pct']}%",
+                f"reanchor={fc['denken_109_corner']['reanchor_required']}")
+    ft.add_data("lawine #116 roofline", str(fc["lawine_116_roofline"]["tau_band"]),
+                fc["lawine_116_roofline"]["gate"])
+    wandb.log({"fleet_tau_consolidation": ft})
+
+    print(f"\nW&B run: {run.id}  ({run.url})")
+    wandb.finish()
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -977,6 +1503,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="Step-3 analytical projection of land #71's tree + 500-gate")
     ap.add_argument("--tree-free", action="store_true",
                     help="PR#112: tree-free 500-path instrument (tau bound + Step-3 gate)")
+    ap.add_argument("--roofline", action="store_true",
+                    help="PR#116: DERIVE tau from the roofline + re-gate ship + pre-register anchor")
     ap.add_argument("--splitk-frac", type=float, default=None,
                     help="project a measured SplitK speedup s (fraction, e.g. 0.085) -> official band")
     ap.add_argument("--splitk-lo", type=float, default=None, help="SplitK CI low edge (fraction)")
@@ -1002,7 +1530,7 @@ def main(argv: list[str] | None = None) -> int:
     report: dict[str, Any] = {"calibration": calib.as_dict(),
                               "official_anchor": OFFICIAL_ANCHOR}
 
-    explicit = bool(args.self_check or args.tree or args.tree_free
+    explicit = bool(args.self_check or args.tree or args.tree_free or args.roofline
                     or args.project_wall_tps is not None or args.splitk_frac is not None)
 
     if args.calibrate or not explicit:
@@ -1106,6 +1634,72 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.wandb:
             _log_tree_free_wandb(args, calib, tau_bound, gate, report.get("tree_free_projection"))
+
+    if args.roofline:
+        roof = derive_tau_roofline(calib)
+        ship = tree_free_ship_gate_roofline(calib, roofline=roof)
+        prereg = preregister_official_anchor(calib, roofline=roof, ship_gate=ship)
+        report["tau_roofline"] = roof
+        report["roofline_ship_gate"] = ship
+        report["preregistered_anchor"] = prereg
+        eps = roof["eps_decomposition"]
+        te = roof["tau_eff"]
+        print("\n===== TAU ENDGAME: ROOFLINE DERIVATION (PR #116) =====")
+        print(f"  deployed multiplier m = {roof['deployed_multiplier']:.5f}  "
+              f"(absorbs all box differences incl. ECC/thermal at the s=0 anchor)")
+        print(f"\n  [Step 1] tau = tau_eff * tau_mix  (tau -> 1 as s -> 0; deviation 2nd-order in s)")
+        print(f"    decode budget: vg {ROOFLINE_BUDGET['verify_gemm']:.2f} / draft "
+              f"{ROOFLINE_BUDGET['drafter']:.2f} / attn {ROOFLINE_BUDGET['attention']:.2f} / "
+              f"tail {ROOFLINE_BUDGET['other']:.2f}  (denken #97/#105)")
+        print(f"    tau_mix(s) under the 3 transfer hypotheses:")
+        print(f"       {'splitk_s':>9s} {'uniform(#97)':>13s} {'bw_carries(floor)':>18s} "
+              f"{'tail_carries(ceil)':>19s}")
+        for r in roof["tau_mix_sweep"]:
+            print(f"       {r['splitk_s']*100:8.1f}% {r['uniform']:13.6f} "
+                  f"{r['bw_carries']:18.6f} {r['tail_carries']:19.6f}")
+        print(f"    >>> tau_roofline_central = {roof['tau_roofline_central']:.4f}  "
+              f"(uniform / #97 'bus is the wall' -> eps = 0)")
+        print(f"    >>> tau_roofline band    = [{roof['tau_roofline_lo']:.4f}, 1.00]  "
+              f"(DERIVED floor at s={roof['tau_roofline_lo_at_splitk']*100:.0f}%; ceiling caps "
+              f"over-realize {roof['tau_over_realize_max_capped_at_1']:.4f})")
+        vsa = roof["vs_asserted_floor"]
+        print(f"    >>> replaces #112's ASSERTED 0.99 -> DERIVED {vsa['derived_roofline_floor']:.4f} "
+              f"(+{vsa['tightening_pp']:.2f}pp tighter)")
+        print(f"\n  [Step 1] eps decomposition:")
+        print(f"    driver = {eps['driver_component']}; attn/draft {eps['attention_drafter_contribution']}")
+        print(f"    tail transfer admissible [{eps['tail_transfer_admissible_range'][0]:.2f}, "
+              f"{eps['tail_transfer_admissible_range'][1]:.3f}] -> |eps| <= "
+              f"{eps['eps_max_over_ubel_range_pct']:.3f}% ({eps['order']})")
+        print(f"\n  [Step 2] stress the load-bearing assumptions:")
+        print(f"    (a) verify-GEMM BW-bound officially? intensity {te['verify_gemm_intensity_m8_flop_per_byte']:.0f} "
+              f"FLOP/byte vs sm_86 ridge {te['sm86_ridge_flop_per_byte']} -> margin "
+              f"{ {k: round(v,1) for k,v in te['roofline_margin_x'].items()} } x -> YES (robust)")
+        print(f"    (b) util gap arch-invariant? {te['util_gap_architecture_invariant']} "
+              f"({te['util_gap_reason'][:72]}...)")
+        print(f"    residual (un-pinnable from local): {te['unpinnable_residual'][:96]}...")
+        print(f"    tau_eff haircut margin: ubel-central still clears up to "
+              f"{roof['tau_eff_haircut_margin_rel_pct']:.2f}% relative under-realization of s")
+        print(f"\n  [Step 3] SHIP GATE (re-gated on derived tau):")
+        print(f"    conservative-corner threshold @ derived floor {roof['tau_roofline_lo']:.4f}: "
+              f"{_pct(ship['conservative_threshold_at_derived_floor'])}  (vs @tau=1.00 "
+              f"{_pct(ship['conservative_threshold_at_tau_1'])})")
+        print(f"    ubel: central {ship['ubel_central']*100:.1f}% / low {ship['ubel_low']*100:.0f}% / "
+              f"high {ship['ubel_high']*100:.0f}%")
+        print(f"    clears 500 at ubel-CENTRAL on derived floor: {ship['clears_500_central_on_derived_floor']}  "
+              f"| at ubel-LOW: {ship['clears_500_low_on_derived_floor']}")
+        print(f"    >>> TEST tree_free_ship_gate_without_official_anchor = "
+              f"{ship['tree_free_ship_gate_without_official_anchor']}")
+        print(f"    >>> GATE = {ship['verdict']} -- {ship['verdict_label']}")
+        for r in ship["reasons"]:
+            print(f"         - {r}")
+        print(f"    recommendation: {ship['recommendation']}")
+        print(f"\n  [Step 3] PRE-REGISTERED OFFICIAL ANCHOR (spec only; human-approved launch):")
+        print(f"    one shot, three deliverables: {prereg['three_deliverables']}")
+        print(f"    GO/HOLD: GO = {prereg['go_hold_threshold']['GO']}")
+        print(f"    banks transfer constant tau_eff_measured -> prices "
+              f"{prereg['banked_transfer_constant']['prices_future_levers_without_a_shot'][0]}")
+        if args.wandb:
+            _log_roofline_wandb(args, calib, roof, ship, prereg)
 
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)

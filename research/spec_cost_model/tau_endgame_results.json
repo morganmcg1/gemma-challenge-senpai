@@ -1,0 +1,273 @@
+{
+  "calibration": {
+    "local_to_official_multiplier": 1.0601865051833779,
+    "local_wall_tps_deployed": 454.19367030776425,
+    "local_cv_pct_across_runs": 0.02999465119565554,
+    "official_tps_anchor": 481.53,
+    "multiplier_se_local": 9.914099925161552e-05,
+    "multiplier_ci95_local": [
+      1.0599921923954079,
+      1.0603808179713479
+    ],
+    "official_cv_assumed_pct": 1.0,
+    "multiplier_ci95_envelope": [
+      1.0394063229912567,
+      1.080966687375499
+    ],
+    "n_sessions": 3,
+    "n_runs_total": 9,
+    "per_session_multiplier": [
+      {
+        "label": "pr82_selfnull_baseline",
+        "local_median_wall_tps": 454.08539709184896,
+        "multiplier": 1.0604392986075255,
+        "source": "research/walltps_ab/selfnull/paired_ab.json arms.baseline (PR #82, N=3)",
+        "primary_fit": true
+      },
+      {
+        "label": "pr82_selfnull_candidate",
+        "local_median_wall_tps": 454.22098715299325,
+        "multiplier": 1.0601227455784827,
+        "source": "research/walltps_ab/selfnull/paired_ab.json arms.candidate (PR #82, N=3)",
+        "primary_fit": true
+      },
+      {
+        "label": "pr90_ksweep_baseline",
+        "local_median_wall_tps": 454.33835724012107,
+        "multiplier": 1.0598488820645797,
+        "source": "research/walltps_ab/mtp_k*/paired_ab.json arms.baseline (PR #90 K=7, N=3) -- LOCKED reference 454.338",
+        "primary_fit": true
+      },
+      {
+        "label": "pr72_fresh_n12",
+        "local_median_wall_tps": 454.12,
+        "multiplier": 1.0603584955518364,
+        "source": "BASELINE.md PR #82 entry: '#72's N=12 454.12'",
+        "primary_fit": false
+      },
+      {
+        "label": "pr43_wallclock",
+        "local_median_wall_tps": 454.25,
+        "multiplier": 1.0600550357732526,
+        "source": "BASELINE.md PR #43 entry: tps_local_splitkv_wallclock=454.25",
+        "primary_fit": false
+      }
+    ],
+    "notes": [
+      "Multiplier = 481.53 (official, single anchor PR#52) / 454.194 (local mean wall_tps, n_runs=9 over 3 committed sessions) = 1.06019.",
+      "Per-session multiplier spans [1.05985, 1.06044] (incl. corroborating sessions) -- denominator is config-stable to +/-0.028%.",
+      "Local-side CI is tight (many sessions). DOMINANT honest uncertainty is the single official anchor: its run-to-run variance is UNMEASURED; the envelope assumes official per-run CV=1.00% as a sensitivity knob.",
+      "Config-stability holds within the spec-frontier family (K/MBT sweeps); cross-precision invariance is untested (older rungs used a different local meter) but is not the binding axis for the tree (same precision as anchor)."
+    ]
+  },
+  "official_anchor": {
+    "tps": 481.53,
+    "config": "fa2sw_precache_kenyan (linear MTP K=7 + 3D split-KV)",
+    "job": "6a2dce05871c005b5352c0b9",
+    "run_prefix": "results/senpai/fa2sw-precache-kenyan-20260613T213911Z",
+    "date": "2026-06-13",
+    "private_verified_tps": 460.85,
+    "private_gap_pct": 4.3,
+    "ppl": 2.3772,
+    "completed": 128,
+    "source": "BASELINE.md PR #52; private-VERIFIED cmpatino-verifier 2026-06-13 23:04Z"
+  },
+  "tau_roofline": {
+    "primary_metric_name": "tau_roofline_central",
+    "tau_roofline_central": 1.0000000000000002,
+    "tau_roofline_band": [
+      0.9982977278360723,
+      1.0
+    ],
+    "tau_roofline_lo": 0.9982977278360723,
+    "tau_roofline_lo_at_splitk": 0.12,
+    "tau_over_realize_max_capped_at_1": 1.0036366740012264,
+    "deployed_multiplier": 1.0601865051833779,
+    "decode_budget": {
+      "verify_gemm": 0.53,
+      "drafter": 0.07,
+      "attention": 0.08,
+      "other": 0.32
+    },
+    "tail_finding_97": {
+      "gpu_busy_frac": 0.9783,
+      "reclaimable_idle": 0.0217,
+      "characterization": "bus is the wall (BW-bound tail)"
+    },
+    "transfer_profiles": {
+      "uniform": {
+        "verify_gemm": 1.0601865051833779,
+        "drafter": 1.0601865051833779,
+        "attention": 1.0601865051833779,
+        "other": 1.0601865051833779
+      },
+      "bw_carries": {
+        "verify_gemm": 1.091089499933145,
+        "drafter": 1.091089499933145,
+        "attention": 1.091089499933145,
+        "other": 1.0
+      },
+      "tail_carries": {
+        "verify_gemm": 1.0,
+        "drafter": 1.0,
+        "attention": 1.0,
+        "other": 1.215665675732559
+      }
+    },
+    "tau_mix_sweep": [
+      {
+        "splitk_s": 0.05,
+        "uniform": 1.0,
+        "bw_carries": 0.9992672094583575,
+        "tail_carries": 1.0015607539814761
+      },
+      {
+        "splitk_s": 0.085,
+        "uniform": 1.0000000000000002,
+        "bw_carries": 0.9987745657845963,
+        "tail_carries": 1.002614058196342
+      },
+      {
+        "splitk_s": 0.12,
+        "uniform": 1.0,
+        "bw_carries": 0.9982977278360723,
+        "tail_carries": 1.0036366740012264
+      }
+    ],
+    "eps_decomposition": {
+      "driver_component": "other (small-kernel tail, 32% of step)",
+      "tail_transfer_admissible_range": [
+        1.0,
+        1.215665675732559
+      ],
+      "attention_drafter_contribution": "~0 (BW-bound at small M; transfer ~ verify-GEMM)",
+      "verify_gemm_role": "lever target (its transfer sets the reference, not eps)",
+      "eps_at_floor_under_realize": 0.0017022721639277094,
+      "eps_at_ceiling_over_realize_capped": 0.0036366740012263588,
+      "order": "second-order in s (eps -> 0 as s -> 0; |eps| = s*phi_vg*|m/m_vg - 1|)",
+      "eps_max_over_ubel_range_pct": 0.3636674001226359
+    },
+    "tau_eff": {
+      "value_central": 1.0,
+      "bw_bound_official_robust": true,
+      "verify_gemm_intensity_m8_flop_per_byte": 32.0,
+      "sm86_ridge_flop_per_byte": {
+        "fp16_tc": 208.0,
+        "fp32_accum_tc": 117.0,
+        "conservative_non_tc": 52.0
+      },
+      "roofline_margin_x": {
+        "fp16_tc": 6.5,
+        "fp32_accum_tc": 3.65625,
+        "conservative_non_tc": 1.625
+      },
+      "util_gap_architecture_invariant": true,
+      "util_gap_reason": "achieved-HBM-util gap (77.1%) is wave-quantization set by SM count -> identical on two sm_86 A10G boxes; util is dimensionless so closing it multiplies achieved BW by (1+s) regardless of peak_BW",
+      "m8_far_from_tile_cliff": true,
+      "tile_cliff_note": "tree-free path stays at M=8 (E[T]=3.844, NOT widened); the M=33 Marlin tile cliff is irrelevant to this path",
+      "unpinnable_residual": "split-K reduction SYNC OVERHEAD is mildly absolute-BW-sensitive (IBM A100 PCIe-vs-SXM caution); could under-realize s by a small relative haircut local data cannot measure -> the named job of the ONE official anchor"
+    },
+    "tau_eff_haircut_flip_tau": 0.9856751831318804,
+    "tau_eff_haircut_margin_rel_pct": 1.2644068349782518,
+    "vs_asserted_floor": {
+      "asserted_112_mechanism_floor": 0.99,
+      "asserted_112_generic_floor": 0.96,
+      "derived_roofline_floor": 0.9982977278360723,
+      "tightening_pp": 0.82977278360723
+    },
+    "method": "tau = tau_eff * tau_mix; tau_mix from EXACT slice-mix over denken #97/#105 decode budget under bounding tail-transfer hypotheses; tau_eff from the BW-utilisation roofline (peak_BW cancels in the local/official ratio). Replaces bound_tau_local's asserted 0.99 with a derived second-order floor."
+  },
+  "roofline_ship_gate": {
+    "primary_metric_name": "tau_roofline_central",
+    "tau_roofline_central": 1.0000000000000002,
+    "tau_roofline_band": [
+      0.9982977278360723,
+      1.0
+    ],
+    "test_metric_name": "tree_free_ship_gate_without_official_anchor",
+    "tree_free_ship_gate_without_official_anchor": true,
+    "verdict": "GREEN",
+    "verdict_label": "roofline derives tau = [0.9983, 1.00] (eps well-bounded, second-order); the conservative corner clears 500 at ubel-central SplitK on the derived floor ALONE -> tree-free 500 shippable on theory + ubel's number; the official shot is OPTIONAL confirmation, not a gate",
+    "recommendation": "OFFICIAL_ANCHOR_OPTIONAL_CONFIRMATION",
+    "armed": true,
+    "eps_max_over_ubel_range_pct": 0.3636674001226359,
+    "eps_well_bounded": true,
+    "conservative_threshold_at_derived_floor": 0.05840214519859299,
+    "conservative_threshold_at_tau_1": 0.05491462872659203,
+    "ubel_central": 0.085,
+    "ubel_low": 0.05,
+    "ubel_high": 0.12,
+    "clears_500_central_on_derived_floor": true,
+    "clears_500_low_on_derived_floor": false,
+    "tau_eff_haircut_margin_rel_pct": 1.2644068349782518,
+    "reasons": [
+      "derived floor 0.9983 vs asserted 0.99 -> conservative threshold 5.84% <= ubel-central 8.5% (margin +2.66pp)",
+      "residual (NOT a tau problem): ubel-LOW 5% does not clear even at tau=1.00 (thr 5.49%) -> a SplitK-delivery question for ubel #108, not the transfer factor",
+      "residual (anchor-confirmed, not a gate): tau_eff sync-overhead haircut up to 1.26% relative still clears ubel-central -> the one official shot confirms it + banks the 2nd pair"
+    ]
+  },
+  "preregistered_anchor": {
+    "purpose": "ONE pre-registered official anchor; one shot, three deliverables",
+    "launch_policy": "SEPARATE human-approved request (program.md); this is the SPEC only",
+    "run_config": {
+      "submission": "ubel #108 SplitK W4A16 verify-GEMM tree-free stack (M=8 linear, E[T]=3.844)",
+      "hardware": "HF Jobs a10g-small (official)",
+      "decode": "greedy, 128 prompts, output_len 512; metric = summary.json:tps",
+      "ppl_gate": "ppl_summary.json <= 2.42 (kanna #96 self-referential greedy gate; #52 @ 2.3777)",
+      "preconditions": [
+        "ubel #108 SplitK BUILT + local 0-flip greedy self-consistency (kanna #114)",
+        "remote package complete (MODEL_ID Hub-resolvable, kernels uploaded)"
+      ]
+    },
+    "lockstep_local_meter": {
+      "what": "the SAME SplitK submission's local wall_tps, #72/#82 median-of-N=3 protocol",
+      "why": "banks the long-missing SECOND matched (official, local) pair -> unblocks the data-path tau that #112 found blocked (1 pair, 7.1% meter confound)",
+      "predicted_local_wall_tps_at_ubel_central": 473.2028208287546
+    },
+    "go_hold_threshold": {
+      "GO": "official tps >= 500 AND ppl <= 2.42 -> ship as the new frontier (>481.53)",
+      "HOLD": "official tps < 500 -> do NOT ship; the run STILL banks the pair + transfer constant (a valuable negative that prices the next lever)",
+      "pre_committed_before_launch": true
+    },
+    "banked_transfer_constant": {
+      "definition": "tau_eff_measured = (official SplitK speedup) / (local SplitK speedup)",
+      "roofline_prediction": 1.0,
+      "prices_future_levers_without_a_shot": [
+        "denken #113 LUT-GEMM (same verify-GEMM HBM-traffic class -> same tau_eff)",
+        "wirbel #110 palette byte-lever",
+        "any future verify-GEMM util/byte lever"
+      ],
+      "mechanism": "all are bandwidth levers on the same BW-bound verify-GEMM; tau_eff is a property of the roofline class, not the specific kernel"
+    },
+    "three_deliverables": [
+      "SplitK tau_eff (confirms the roofline 1.00)",
+      "the 2nd matched (official, local) pair (unblocks the data path)",
+      "greedy self-consistency on the official gate (kanna #114)"
+    ],
+    "fleet_consolidation": {
+      "lawine_112_instrument": {
+        "tau_band": [
+          0.99,
+          1.0
+        ],
+        "basis": "MECHANISM assertion (ungrounded 0.99 floor)",
+        "finding": "data-path blocked: 1 matched (official,local) pair, 7.1% meter confound",
+        "gate": "AMBER -- ONE official SplitK anchor to confirm tau>=0.99"
+      },
+      "denken_109_corner": {
+        "conservative_corner_splitk_pct": 14.34,
+        "fallback_tau": 0.96,
+        "finding": "corner falls back to GENERIC tau=0.96 -> straddles 500 at ubel ~8.5%",
+        "reanchor_required": true
+      },
+      "lawine_116_roofline": {
+        "tau_band": "DERIVED [~0.9983, 1.00]",
+        "basis": "first-principles slice-mix roofline",
+        "finding": "eps second-order in s, |eps|<0.4% even with adversarial tail; tau_eff=1.0 robust (BW-bound official + arch-invariant util gap); split-K sync-overhead the only un-pinnable residual",
+        "gate": "GREEN at ubel-central -> the official shot is CONFIRMATION, not a gate"
+      },
+      "consolidated": "the roofline REPLACES #112's asserted 0.99 with a derived ~0.998 and REMOVES #109's generic-0.96 fallback (the bandwidth lever's transfer is NOT a generic config change). tau is no longer the binding ship constraint; the residual is ubel's SplitK delivery + a small tau_eff haircut the one anchor confirms."
+    },
+    "why_optional_not_gate": "roofline derives tau = [0.9983, 1.00] (eps well-bounded, second-order); the conservative corner clears 500 at ubel-central SplitK on the derived floor ALONE -> tree-free 500 shippable on theory + ubel's number; the official shot is OPTIONAL confirmation, not a gate"
+  }
+}
