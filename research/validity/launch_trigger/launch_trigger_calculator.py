@@ -123,14 +123,25 @@ DEP_FLAGS = {
         "stay-at-bar iff reaching mu costs < 4 official shots' GPU-$ (crossover c*=3.04*b fixed-N; "
         "early-stop raises it to c*=12.97*b). Prices the budget ROW the human reads; does NOT touch "
         "the binding bar or the single-shot sigma -- single-shot GO/NO-GO is UNCHANGED.",
-    "cross_axis_covariance_ubel_195": "LANDED -- CONSUMED (advisor 17:52Z). The 4-axis quadrature is "
+    "cross_axis_covariance_ubel_195": "LANDED -- CONSUMED (advisor 17:52Z); de-dup MECHANISM retained "
+        "as provenance, the 7.26/17.04 NUMBERS SUPERSEDED by ubel #201. The 4-axis quadrature is "
         "INVALID: rho(sampling#175, input-lambda#187) = +0.945 -> a DOUBLE-COUNT (overlap=rho^2=0.893; "
         "OUTPUT accept-length scatter and INPUT lambda_hat CI are two views of the SAME accept draw). "
-        "FIX: de-dup A1+A2 into ONE acceptance axis (overlap-corrected 5.32 TPS) -> 3 independent axes "
-        "-> combined single-shot sigma = 7.26 TPS central / 17.04 TPS PSD-clamped worst-case (NOT the "
-        "invalid quadrature 12.54). Carry the 17.04 worst-case as the conservative GO/NO-GO corner "
-        "until land #71 co-logs per-allocation acceptance. de-dup LCB 519.58 AND worst-case LCB 507.05 "
-        "BOTH clear 500 -> both-bugs robust on the sigma axis. Ledger CLOSED.",
+        "FIX: de-dup A1+A2 into ONE acceptance axis (overlap-corrected 5.32 TPS) -- this sets the "
+        "acceptance-axis IDENTITY that #201 then rescales by realistic ICC. The #195 stand-alone "
+        "single-shot sigma 7.26/17.04 is now the ICC=0 corner of #201's combined LAUNCH sigma.",
+    "launch_sigma_closure_ubel_201": "LANDED -- CONSUMED (advisor 18:23Z, W&B spau6tch). SUPERSEDES "
+        "#195's 7.26/17.04 in the combined-sigma row: de-dup (#195, IDENTITY 5.32 iid) x realistic "
+        "ICC (#190, MAGNITUDE sqrt(D)=2.100 -> 11.17) are ORTHOGONAL corrections to the SAME "
+        "acceptance axis -> combined LAUNCH sigma 12.215 central / 13.796 worst-case. P95 GO trigger "
+        "mu >= 500 + z_p95*sigma = 520.09 central / 522.69 worst-case vs the lambda=1 ceiling 520.95 "
+        "-> central P95-reachable (+0.86), worst-case UNREACHABLE (-1.74). ICC erodes ~8 TPS of "
+        "launch headroom (lifts #194's iid break-even 512.16 by +7.94). WIRE the mechanism, HOLD the "
+        "verdict: this row is PROVISIONAL + NON-GATING (NOT hard-wired vs the ceiling). Two open "
+        "levers finalize it: ubel #204 (clean-1-sigma unit rebase, IN FLIGHT, ~3 TPS, direction OPEN "
+        "-> can FLIP the central verdict) + land #71 co-log (n=385 cross-device allocations retires "
+        "the rho(*,hw) [-0.3,+0.3] band). NO change to the binding BUILD bar (private 0.9780, #191) "
+        "-- purely the launch sigma->LCB row.",
     "ubel_181_tau_pin": "LANDED (advisor branch) -- the tau band [tau_low, 1.0] floor (stark #164) "
         "with the conservative tau=0.9924 corner; referenced as the floor, not a banked ledger axis.",
     "wirbel_184_lambda_robust_topology": "LANDED (advisor branch) -- named as the gap-fallback "
@@ -279,6 +290,11 @@ _AXIS_PATHS = {
     # (E[shots]=1.94 at the bar, NOT fixed-5) + the build-higher-vs-stay cost toggle. Annotates the
     # budget row ONLY; the binding bar and single-shot sigma are UNCHANGED.
     "cost_budget_200": "research/validity/cost_budget/cost_budget_results.json",
+    # ubel #201 launch-sigma closure -- MERGED (advisor 18:23Z): the de-dup (#195) acceptance axis
+    # evaluated under REALISTIC ICC (#190) -> combined launch sigma 12.215 central / 13.796 worst-case,
+    # REPLACING #195's 7.26 / 17.04 in the combined-sigma row. Wire the MECHANISM; HOLD the verdict
+    # PROVISIONAL (do NOT hard-wire GO/NO-GO vs the lambda=1 ceiling) pending #204 + land #71.
+    "sigma_closure_201": "research/validity/launch_sigma_closure/launch_sigma_closure_results.json",
 }
 
 
@@ -296,6 +312,7 @@ class _BankedAxes:
         self.packaging = _load_axis_json(_AXIS_PATHS["packaging_189"])
         self.covariance = _load_axis_json(_AXIS_PATHS["covariance_195"])
         self.cost_budget = _load_axis_json(_AXIS_PATHS["cost_budget_200"])
+        self.sigma_closure = _load_axis_json(_AXIS_PATHS["sigma_closure_201"])
 
     # ---- wirbel #190 realistic within-prompt ICC / N_eff ---- #
     def icc_landed(self) -> bool:
@@ -481,6 +498,86 @@ class _BankedAxes:
     def cost_per_mu_sequential_frontier(self):
         return _dig(self.cost_budget, "sequential_savings", "per_mu_sequential", default=[])
 
+    # ---- ubel #201 launch-sigma closure (MERGED 18:23Z: de-dup x realistic-ICC -> launch sigma) ---- #
+    # SUPERSEDES #195's 7.26/17.04 in the combined-sigma row. de-dup (#195) sets the acceptance-axis
+    # IDENTITY (5.32 iid); realistic ICC (#190) sets its MAGNITUDE (5.32 * sqrt(D)=2.100 -> 11.17).
+    # The trigger is held PROVISIONAL (advisor: do NOT hard-wire vs the lambda=1 ceiling) -- two open
+    # levers (#204 unit-rebase, land #71 co-log n=385) finalize it.
+    def sigma_closure_landed(self) -> bool:
+        return self.sigma_closure is not None
+
+    def combined_sigma_launch(self, kind: str) -> float | None:
+        """The combined LAUNCH sigma (1-sigma TPS). kind: 'central' (rho(*,hw)=0) / 'worstcase'
+        (rho(*,hw)=+0.3 PSD-clamped). These REPLACE #195's de-dup 7.26 / worst-case 17.04."""
+        v = _dig(self.sigma_closure, "combined", "combined_sigma_launch_%s" % kind)
+        return float(v) if v is not None else None
+
+    def mu_clears_500(self, kind: str) -> float | None:
+        """The P95 GO-trigger mu: the mu at which LCB(mu)=mu-z_p95*sigma_launch = 500."""
+        v = _dig(self.sigma_closure, "lcb", "mu_clears_500_%s" % kind)
+        return float(v) if v is not None else None
+
+    def lambda1_ceiling_mu(self) -> float | None:
+        v = _dig(self.sigma_closure, "lcb", "lambda1_ceiling_mu")
+        return float(v) if v is not None else None
+
+    def lambda1_clears_500(self, kind: str) -> bool:
+        return bool(_dig(self.sigma_closure, "lcb", "lambda1_clears_500_%s" % kind, default=False))
+
+    def margin_at_lambda1(self, kind: str) -> float | None:
+        v = _dig(self.sigma_closure, "lcb", "%s_margin_at_lambda1_tps" % kind)
+        return float(v) if v is not None else None
+
+    def sigma_closure_z_p95(self) -> float:
+        return float(_dig(self.sigma_closure, "lcb", "z_one_sided_p95", default=1.6448536269514722))
+
+    def acceptance_sigma_dedup_iid(self) -> float | None:
+        v = _dig(self.sigma_closure, "dedup_x_icc", "acceptance_sigma_dedup_iid")
+        return float(v) if v is not None else None
+
+    def acceptance_sigma_dedup_realistic_icc(self) -> float | None:
+        v = _dig(self.sigma_closure, "dedup_x_icc", "acceptance_sigma_dedup_realistic_icc")
+        return float(v) if v is not None else None
+
+    def sqrt_design_effect(self) -> float | None:
+        v = _dig(self.sigma_closure, "dedup_x_icc", "sqrt_design_effect_inflation")
+        return float(v) if v is not None else None
+
+    def design_effect_201(self) -> float | None:
+        v = _dig(self.sigma_closure, "dedup_x_icc", "design_effect_algebra_1_plus_mbarm1_icc")
+        return float(v) if v is not None else None
+
+    def sigma_vector_leg(self, leg: str) -> float | None:
+        v = _dig(self.sigma_closure, "combined", "sigma_vector_tps", leg)
+        return float(v) if v is not None else None
+
+    def headroom_shift_from_iid(self) -> float | None:
+        v = _dig(self.sigma_closure, "lcb", "revises_194_break_even", "shift_tps")
+        return float(v) if v is not None else None
+
+    def iid_break_even_194(self) -> float | None:
+        v = _dig(self.sigma_closure, "lcb", "revises_194_break_even", "iid_break_even_194")
+        return float(v) if v is not None else None
+
+    def icc0_combined_sigma_central(self) -> float | None:
+        # ICC=0 corner reproduces #195's de-dup central 7.2617 -> proves #201 superset (applies ICC).
+        v = _dig(self.sigma_closure, "icc_band_envelope", "icc0_iid", "combined_sigma_central")
+        return float(v) if v is not None else None
+
+    def colog_n_allocations(self):
+        return _dig(self.sigma_closure, "colog_spec", "colog_n_allocations_for_rho_ci")
+
+    def sigma_closure_rho_in_out(self) -> float | None:
+        v = _dig(self.sigma_closure, "legs", "rho_in_out_195")
+        return float(v) if v is not None else None
+
+    def sigma_closure_overlap_fraction(self) -> float | None:
+        v = _dig(self.sigma_closure, "legs", "overlap_fraction")
+        return float(v) if v is not None else None
+
+    def sigma_closure_unit_convention_note(self):
+        return _dig(self.sigma_closure, "convention_note")
+
     # ---- ubel #189 executable submission gate (packaging precondition) ---- #
     def packaging_landed(self) -> bool:
         return self.packaging is not None
@@ -628,31 +725,36 @@ def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
                 else "single-shot fallback (N=1).",
     })
     # Axis 6 -- ubel #195 cross-axis CI covariance (MERGED 17:52Z, CONSUMED): the quadrature is
-    #           INVALID -- rho(sampling,input-lambda)=0.945 is a DOUBLE-COUNT. De-dup -> combined
-    #           sigma 7.26 central / 17.04 worst-case. This row CLOSES the ledger (no pending axes).
+    #           INVALID -- rho(sampling,input-lambda)=0.945 is a DOUBLE-COUNT. De-dup -> ONE acceptance
+    #           axis (5.32 iid IDENTITY). This row reads #195's banked scalars DIRECTLY (decoupled
+    #           from the #201 combined-sigma row, which supersedes the 7.26/17.04 single-shot numbers).
+    #           CLOSES the ledger (no pending axes). The 7.26/17.04 here are #195's stand-alone reading;
+    #           #201 rescales the acceptance axis by realistic ICC -> the launch-sigma row below.
     c195 = _BANKED.covariance_landed()
-    csc = combined_sigma_corner()
+    cov_lcb_dedup = _BANKED.combined_launch_lcb("dedup") if c195 else None
+    cov_lcb_worst = _BANKED.combined_launch_lcb("worstcase") if c195 else None
     rows.append({
         "axis": "cross_axis_covariance", "pr": 195, "slug": "ci-axis-covariance",
         "kind": "numerical-covariance",
         "status": "LANDED" if c195 else "IN-FLIGHT",
         "flag": "consumed" if c195 else "pending-covariance",
-        "quadrature_valid": (csc.get("quadrature_valid") if c195 else None),
-        "rho_sampling_input": (csc.get("rho_sampling_input") if c195 else None),
-        "sigma_quadrature_invalid_tps": (csc.get("sigma_quadrature_invalid_tps") if c195 else None),
-        "sigma_dedup_central_tps": (csc.get("sigma_dedup_central_tps") if c195 else None),
-        "sigma_worstcase_tps": (csc.get("sigma_worstcase_tps") if c195 else None),
-        "acceptance_dedup_block_tps": (csc.get("acceptance_dedup_block_tps") if c195 else None),
-        "launch_lcb_dedup_central_tps": (csc.get("launch_lcb_dedup_central_tps") if c195 else None),
-        "launch_lcb_worstcase_tps": (csc.get("launch_lcb_worstcase_tps") if c195 else None),
-        "worstcase_corner_clears_500": (csc.get("worstcase_corner_clears_500") if c195 else None),
+        "quadrature_valid": (_BANKED.quadrature_valid() if c195 else None),
+        "rho_sampling_input": (_finite(_BANKED.rho_sampling_input()) if c195 else None),
+        "sigma_quadrature_invalid_tps": (_finite(_BANKED.combined_sigma("quadrature")) if c195 else None),
+        "sigma_dedup_central_tps": (_finite(_BANKED.combined_sigma("dedup")) if c195 else None),
+        "sigma_worstcase_tps": (_finite(_BANKED.combined_sigma("worstcase")) if c195 else None),
+        "acceptance_dedup_block_tps": (_finite(_BANKED.dedup_acceptance_block()) if c195 else None),
+        "launch_lcb_dedup_central_tps": (_finite(cov_lcb_dedup) if cov_lcb_dedup is not None else None),
+        "launch_lcb_worstcase_tps": (_finite(cov_lcb_worst) if cov_lcb_worst is not None else None),
+        "worstcase_corner_clears_500": (bool(cov_lcb_worst is not None
+                                             and cov_lcb_worst >= TARGET_OFFICIAL - 1e-9) if c195 else None),
+        "superseded_by": "launch_sigma_closure_201" if c195 else None,
         "note": ("quadrature INVALID: rho(sampling#175,input#187)=0.945 double-count -> collapse to "
-                 "ONE acceptance axis (5.32 TPS) -> 3 independent axes -> de-dup combined sigma 7.26 "
-                 "(NOT quadrature 12.54 / inflate 15.26). PSD-clamped worst-case 17.04 (hw-coupling "
-                 "UNMEASURED, bounded). de-dup launch-LCB %.2f AND worst-case %.2f BOTH clear 500 -> "
-                 "both-bugs robust on the sigma-axis. CLOSES the ledger." % (
-                     csc.get("launch_lcb_dedup_central_tps") or float("nan"),
-                     csc.get("launch_lcb_worstcase_tps") or float("nan"))) if c195
+                 "ONE acceptance axis (5.32 TPS iid, the IDENTITY). #195's stand-alone de-dup combined "
+                 "sigma 7.26 / worst-case 17.04 (NOT quadrature 12.54). ubel #201 SUPERSEDES these "
+                 "single-shot numbers: it rescales the 5.32 acceptance axis by realistic ICC "
+                 "(sqrt(D)=2.100 -> 11.17) -> the combined LAUNCH sigma row (12.22/13.80). CLOSES the "
+                 "ledger (no pending numerical axes).") if c195
                 else "not landed -> assume independence (quadrature); conservative until it lands.",
     })
     return rows
@@ -720,48 +822,108 @@ def realistic_launch_lcb(topo: str) -> dict:
 
 
 def combined_sigma_corner() -> dict:
-    """ubel #195 (MERGED 17:52Z): the 4-axis quadrature is INVALID because rho(sampling#175,
-    input-lambda#187)=0.945 -- the OUTPUT accepted-length scatter and the INPUT lambda_hat CI are
-    two views of the SAME accept draw (overlap_fraction=0.893=rho^2). Quadrature-summing both
-    DOUBLE-COUNTS. PHYSICALLY-CORRECT fix: collapse them into ONE acceptance axis at the
-    overlap-corrected 5.32 TPS -> 3 independent axes -> de-dup central combined sigma 7.26 TPS
-    (NOT the quadrature 12.54, NOT the +rho-inflated 15.26). The hardware<->acceptance coupling is
-    UNMEASURED (only within-device co-log, sigma_within=0.056 << sigma_between=4.86) -> bounded
-    [-0.3,+0.3] -> PSD-clamped worst-case 17.04 TPS, carried as the CONSERVATIVE GO/NO-GO corner.
-    Both the de-dup central AND the worst-case launch LCBs clear 500 -> both-bugs robust on the
-    sigma-axis. (both-bugs only: #195 banked proj_private_both; descent is already NO-GO via #191.)"""
-    if not _BANKED.covariance_landed():
-        return {"landed": False, "note": "ci_axis_covariance #195 not landed -> assume independence "
-                                         "(quadrature); conservative until it lands."}
-    lcb_dedup = _BANKED.combined_launch_lcb("dedup")
-    lcb_worst = _BANKED.combined_launch_lcb("worstcase")
+    """The combined-sigma row. ubel #201 (MERGED 18:23Z, W&B spau6tch) SUPERSEDES ubel #195's
+    7.26 / 17.04: the de-dup (#195) and realistic-ICC (#190) corrections are ORTHOGONAL on the SAME
+    acceptance axis -- de-dup sets its IDENTITY (overlap-corrected 5.32 TPS iid, removing the
+    rho(sampling#175,input#187)=0.945 double-count), realistic ICC sets its MAGNITUDE
+    (design-effect D=1+(m_bar-1)*ICC=4.4106 -> sqrt(D)=2.100 -> 5.32 -> 11.17 TPS). Folding that with
+    sigma_hw (#188 4.86) and sigma_private (#176/#191 0.88) gives the combined LAUNCH sigma
+    **12.215 central / 13.796 worst-case** (rho(*,hw) bounded [-0.3,+0.3]), REPLACING the #195 numbers.
+
+    P95 framing: the GO trigger is mu >= 500 + z_p95(1.6449)*sigma = **520.09 central / 522.69
+    worst-case**, against the lambda=1 ceiling **520.95** TPS. Central is P95-reachable (+0.86 TPS),
+    worst-case is P95-UNREACHABLE (-1.74 TPS), even at lambda=1. ICC erodes ~8 TPS of launch headroom,
+    lifting the trigger off #194's iid break-even (512.16) onto/over the ceiling.
+
+    HOLD PROVISIONAL (advisor 18:23Z: do NOT hard-wire GO/NO-GO vs the ceiling). Two open levers
+    finalize it: (a) ubel #204 clean-1-sigma unit rebase (IN FLIGHT) may shift the central trigger
+    ~3 TPS, direction OPEN -> can FLIP the central verdict (central sits only +0.86 under the ceiling);
+    (b) land #71 co-log of per-allocation acceptance x wall-TPS (n=385 cross-device) retires the
+    rho(*,hw) [-0.3,+0.3] band -> collapses [central, worst-case] onto a single trigger. ICC=0 here
+    reproduces #195's de-dup central 7.2617 -> #201 is the strict superset (it applies ICC).
+    (both-bugs only; descent is already NO-GO via #191.) NON-GATING: this row does NOT gate the
+    analytic go -- it is the PROVISIONAL launch sigma->LCB readout the human reads."""
+    if not _BANKED.sigma_closure_landed():
+        return {"landed": False, "note": "launch_sigma_closure #201 not landed -> fall back to the "
+                                         "#195 de-dup row (7.26/17.04) if present; else quadrature."}
+    sc, wc = _BANKED.combined_sigma_launch("central"), _BANKED.combined_sigma_launch("worstcase")
+    mu_c, mu_w = _BANKED.mu_clears_500("central"), _BANKED.mu_clears_500("worstcase")
+    ceiling = _BANKED.lambda1_ceiling_mu()
+    central_reach = _BANKED.lambda1_clears_500("central")     # True: 520.09 <= 520.95
+    worst_reach = _BANKED.lambda1_clears_500("worstcase")     # False: 522.69 > 520.95
     return {
         "landed": True,
-        "quadrature_valid": _BANKED.quadrature_valid(),                       # False
-        "rho_sampling_input": _finite(_BANKED.rho_sampling_input()),          # 0.945 double-count
-        "overlap_fraction": _finite(_BANKED.overlap_fraction_input_output()),  # 0.893 = rho^2
-        "sigma_quadrature_invalid_tps": _finite(_BANKED.combined_sigma("quadrature")),   # 12.54
-        "sigma_corrected_inflate_artifact_tps": _finite(_BANKED.combined_sigma("corrected")),  # 15.26
-        "sigma_dedup_central_tps": _finite(_BANKED.combined_sigma("dedup")),  # 7.26 (BEST)
-        "sigma_worstcase_tps": _finite(_BANKED.combined_sigma("worstcase")),  # 17.04 (corner)
-        "acceptance_dedup_block_tps": _finite(_BANKED.dedup_acceptance_block()),  # 5.32
-        "proj_private_central_both_tps": _finite(_BANKED.combined_proj_private_both()),  # 528.89
-        "z_p90": _finite(_BANKED.combined_z_p90()),
-        "launch_lcb_dedup_central_tps": _finite(lcb_dedup) if lcb_dedup is not None else None,
-        "launch_lcb_worstcase_tps": _finite(lcb_worst) if lcb_worst is not None else None,
-        "dedup_central_clears_500": bool(lcb_dedup is not None and lcb_dedup >= TARGET_OFFICIAL - 1e-9),
-        "worstcase_corner_clears_500": bool(lcb_worst is not None and lcb_worst >= TARGET_OFFICIAL - 1e-9),
-        "sampling_spread_basis": "iid +-10.9 centrally (ubel); the ICC-inflated +-22.9 (#190) feeds "
-                                 "the SEPARATE #190 launch-projection gate; ICC=1 corner (sigma "
-                                 "57.8/59.7) reported as the extreme scenario, not the central.",
-        "icc1_corner_sigma_worstcase_tps": _finite(_BANKED.icc1_corner_sigma("worstcase")),  # 59.7 scenario
-        "note": "quadrature INVALID (rho=0.945 double-count); de-dup central sigma 7.26 -> launch LCB "
-                "%.2f; PSD-clamped worst-case sigma 17.04 -> launch LCB %.2f. BOTH clear 500 -> "
-                "both-bugs GO robust on the sigma-axis. Worst-case is the conservative corner until "
-                "land #71's served draw co-logs per-allocation acceptance alongside TPS (pins "
-                "rho(*,hw))." % (
-                    lcb_dedup if lcb_dedup is not None else float("nan"),
-                    lcb_worst if lcb_worst is not None else float("nan")),
+        "source_pr": 201,
+        "supersedes_195_726_1704": True,
+        "provisional": True,                                  # advisor 18:23Z: HOLD the verdict
+        "gates_analytic_go": False,                           # NON-gating: not wired into `go`
+        # ---- #201 headline combined LAUNCH sigma (1-sigma), REPLACES #195's 7.26 / 17.04 ----
+        "combined_sigma_launch_central_tps": _finite(sc),     # 12.215
+        "combined_sigma_launch_worstcase_tps": _finite(wc),   # 13.796
+        # ---- P95 GO-trigger vs the lambda=1 ceiling ----
+        "z_p95": _finite(_BANKED.sigma_closure_z_p95()),      # 1.6449
+        "go_trigger_mu_central_tps": _finite(mu_c),           # 520.09
+        "go_trigger_mu_worstcase_tps": _finite(mu_w),         # 522.69
+        "lambda1_ceiling_mu_tps": _finite(ceiling),           # 520.95
+        "central_p95_reachable": bool(central_reach),         # True  (+0.86)
+        "worstcase_p95_reachable": bool(worst_reach),         # False (-1.74)
+        "central_margin_at_lambda1_tps": _finite(_BANKED.margin_at_lambda1("central")),     # +0.86
+        "worstcase_margin_at_lambda1_tps": _finite(_BANKED.margin_at_lambda1("worstcase")),  # -1.74
+        # ---- the de-dup x ICC mechanism (SOLID -- banked) ----
+        "acceptance_axis_dedup_iid_tps": _finite(_BANKED.acceptance_sigma_dedup_iid()),       # 5.32 (IDENTITY)
+        "design_effect": _finite(_BANKED.design_effect_201()),                                # 4.4106
+        "sqrt_design_effect": _finite(_BANKED.sqrt_design_effect()),                          # 2.100
+        "acceptance_axis_realistic_icc_tps": _finite(_BANKED.acceptance_sigma_dedup_realistic_icc()),  # 11.17 (MAGNITUDE)
+        "sigma_vector_tps": {
+            "acceptance": _finite(_BANKED.sigma_vector_leg("acceptance")),                    # 11.17
+            "hardware": _finite(_BANKED.sigma_vector_leg("hardware")),                        # 4.86
+            "private": _finite(_BANKED.sigma_vector_leg("private")),                          # 0.88
+        },
+        # ---- headroom erosion vs #194's iid break-even ----
+        "iid_break_even_194_tps": _finite(_BANKED.iid_break_even_194()),                      # 512.16
+        "headroom_shift_tps": _finite(_BANKED.headroom_shift_from_iid()),                     # 7.94
+        # ---- ICC=0 corner reproduces #195's de-dup central 7.2617 (proves the superset) ----
+        "icc0_combined_sigma_central_tps": _finite(_BANKED.icc0_combined_sigma_central()),    # 7.2617 (= #195)
+        # ---- #195 de-dup PROVENANCE (the mechanism that sets the acceptance-axis identity) ----
+        "dedup_provenance_195": {
+            "quadrature_valid": _BANKED.quadrature_valid() if _BANKED.covariance_landed() else False,
+            "rho_sampling_input": _finite(_BANKED.sigma_closure_rho_in_out()),   # 0.945 double-count
+            "overlap_fraction": _finite(_BANKED.sigma_closure_overlap_fraction()),  # 0.893 = rho^2
+            "sigma_dedup_iid_195_tps": _finite(_BANKED.combined_sigma("dedup"))
+                                       if _BANKED.covariance_landed() else _finite(
+                                           _BANKED.icc0_combined_sigma_central()),  # 7.26
+            "sigma_worstcase_195_tps": _finite(_BANKED.combined_sigma("worstcase"))
+                                       if _BANKED.covariance_landed() else None,  # 17.04 (superseded)
+        },
+        # ---- two open levers that FINALIZE the PROVISIONAL trigger (advisor 18:23Z) ----
+        "open_levers": {
+            "ubel_204_unit_rebase": "clean-1-sigma unit rebase IN FLIGHT; may shift the central "
+                "trigger ~3 TPS (direction OPEN) -> can FLIP the central verdict (central 520.09 "
+                "sits only +0.86 under the 520.95 ceiling).",
+            "land_71_colog": "co-log per-allocation acceptance x wall-TPS across n=%s cross-device "
+                "allocations -> measures rho(*,hw) directly and RETIRES the [-0.3,+0.3] band, "
+                "collapsing the [central, worst-case] interval onto a single trigger." % (
+                    _BANKED.colog_n_allocations()),
+        },
+        "colog_n_allocations": _BANKED.colog_n_allocations(),  # 385
+        "unit_convention_note": _BANKED.sigma_closure_unit_convention_note(),
+        "verdict_line": "launch is on a knife-edge vs the lambda=1 ceiling -- P95-reachable at "
+                        "central ICC (+%.2f TPS margin) but P95-UNREACHABLE at worst-case rho(*,hw) "
+                        "(%.2f TPS), even at lambda=1; central verdict PENDING ubel #204's "
+                        "unit-direction." % (
+                            _BANKED.margin_at_lambda1("central") or float("nan"),
+                            _BANKED.margin_at_lambda1("worstcase") or float("nan")),
+        "note": "#201 REPLACES #195's 7.26/17.04 -> combined launch sigma %.2f central / %.2f "
+                "worst-case (de-dup IDENTITY 5.32 * sqrt(D)=2.100 ICC MAGNITUDE -> acceptance 11.17, "
+                "(+) sigma_hw 4.86 (+) sigma_priv 0.88). P95 GO trigger mu>=%.2f central / %.2f "
+                "worst-case vs the lambda=1 ceiling %.2f -> central reachable (+%.2f), worst-case "
+                "UNREACHABLE (%.2f). PROVISIONAL: HOLD the verdict (not hard-wired vs the ceiling) "
+                "pending #204 unit-rebase (~3 TPS, direction open) + land #71 co-log (n=%s) retiring "
+                "the rho(*,hw) band." % (
+                    _finite(sc), _finite(wc), _finite(mu_c), _finite(mu_w), _finite(ceiling),
+                    _BANKED.margin_at_lambda1("central") or float("nan"),
+                    _BANKED.margin_at_lambda1("worstcase") or float("nan"),
+                    _BANKED.colog_n_allocations()),
     }
 
 
@@ -1033,25 +1195,33 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
         private_launch_pass = bool(private_launch_lcb is not None
                                    and private_launch_lcb >= TARGET_OFFICIAL - 1e-9)  # False
 
-    # ---- combined single-shot sigma corner (#195 ubel, advisor 17:52Z): the 4-axis quadrature is
-    #      INVALID (rho(sampling#175, input-lambda#187)=+0.945 double-count). De-dup A1+A2 into ONE
-    #      acceptance axis -> 3 independent axes -> combined sigma 7.26 central / 17.04 PSD-clamped
-    #      worst-case. Carry the 17.04 worst-case as the conservative GO/NO-GO corner. both-bugs only
-    #      (#195 banks proj_private_both=528.886); descent is already NO-GO via #191 so the corner is
-    #      non-binding there. ----
+    # ---- combined-sigma row (#201 ubel, advisor 18:23Z): SUPERSEDES #195's 7.26/17.04. The de-dup
+    #      (#195) acceptance axis (5.32 iid IDENTITY) evaluated under realistic ICC (#190 sqrt(D)=2.100
+    #      MAGNITUDE -> 11.17) (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma 12.215 central /
+    #      13.796 worst-case. P95 GO trigger mu>=520.09 central / 522.69 worst-case vs the lambda=1
+    #      ceiling 520.95 -> central P95-reachable (+0.86), worst-case UNREACHABLE (-1.74).
+    #      "Wire the MECHANISM, HOLD the verdict": this row is PROVISIONAL and NON-GATING -- it does
+    #      NOT enter `go` (do NOT hard-wire GO/NO-GO vs the ceiling). Two open levers finalize it
+    #      (#204 unit-rebase ~3 TPS direction-open; land #71 co-log n=385 retires the rho(*,hw) band).
+    #      both-bugs only; descent is already NO-GO via #191 so the row is non-binding there. ----
     if topo == "both_bugs":
         csc = combined_sigma_corner()
-        combined_sigma_worstcase_clears = (
-            bool(csc.get("worstcase_corner_clears_500", True)) if csc.get("landed") else True)
+        lsc_landed = bool(csc.get("landed"))
+        lsc_central_p95_reachable = bool(csc.get("central_p95_reachable")) if lsc_landed else None
+        lsc_worstcase_p95_reachable = bool(csc.get("worstcase_p95_reachable")) if lsc_landed else None
+        lsc_provisional = bool(csc.get("provisional", True)) if lsc_landed else None
     else:
         csc = None
-        combined_sigma_worstcase_clears = True
+        lsc_central_p95_reachable = None
+        lsc_worstcase_p95_reachable = None
+        lsc_provisional = None
 
     # ---- overall per-topology GO: validity AND trustworthy AND binding-build AND BOTH launch LCBs
-    #      AND the conservative combined-sigma worst-case corner (#195). ----
+    #      (realistic ICC #190 + private #191). The #201 combined-sigma row is PROVISIONAL/NON-GATING
+    #      (advisor 18:23Z: HOLD the verdict -- do NOT hard-wire the GO/NO-GO vs the lambda=1 ceiling
+    #      while #204 + land #71 are open) -> it is surfaced in lambda_gate but NOT folded into `go`. ----
     go = bool(validity_ok and oa["trustworthy"] and binding_build_gate_pass
-              and realistic_launch_pass and private_launch_pass
-              and combined_sigma_worstcase_clears)
+              and realistic_launch_pass and private_launch_pass)
 
     # Failing-gate diagnosis + restoration lever (PR step 4).
     failing_gate, restoration = None, None
@@ -1098,16 +1268,8 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
                         "<500 even at lambda=1." % (
                             private_launch_lcb if private_launch_lcb is not None else float("nan")))
         restoration = "land the both-bugs kernel (the robust GO path); this path is private-unreachable."
-    elif not combined_sigma_worstcase_clears:
-        _wc = (csc or {}).get("launch_lcb_worstcase_tps")
-        failing_gate = ("combined-sigma worst-case corner (#195): de-dup'd launch LCB=%.2f<500 at the "
-                        "PSD-clamped worst-case sigma %.2f TPS (hardware<->acceptance coupling "
-                        "unmeasured, bounded [-0.3,+0.3]). The de-dup central corner (sigma 7.26) "
-                        "clears, but the conservative worst-case does not." % (
-                            _wc if _wc is not None else float("nan"),
-                            (csc or {}).get("sigma_worstcase_tps", float("nan"))))
-        restoration = ("land #71's per-allocation co-logged acceptance to measure the hardware<->"
-                       "acceptance coupling and lift the worst-case clamp off [-0.3,+0.3].")
+    # NOTE: the #201 combined-sigma row is PROVISIONAL/NON-GATING (advisor 18:23Z) -> it is NOT a
+    # failing-gate candidate. A worst-case-P95-unreachable corner does NOT flip the analytic verdict.
 
     return {
         "topo": topo,
@@ -1139,10 +1301,14 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
                                        if private_launch_lcb is not None else None),
             "private_launch_clears_500": private_launch_pass,
             "clear500_launch_lcb_pass": bool(realistic_launch_pass and private_launch_pass),
-            # combined single-shot sigma corner (#195): de-dup'd 3-axis sigma; worst-case is the
-            # conservative GO/NO-GO corner. both-bugs only (csc is None on descent).
+            # combined-sigma row (#201, SUPERSEDES #195): the de-dup x realistic-ICC launch sigma
+            # 12.215/13.796 -> P95 GO trigger 520.09/522.69 vs the lambda=1 ceiling 520.95.
+            # PROVISIONAL + NON-GATING (advisor 18:23Z: HOLD the verdict). both-bugs only (None on descent).
             "combined_sigma_corner": csc,
-            "combined_sigma_worstcase_clears_500": combined_sigma_worstcase_clears,
+            "launch_sigma_central_p95_reachable": lsc_central_p95_reachable,     # True  (+0.86)
+            "launch_sigma_worstcase_p95_reachable": lsc_worstcase_p95_reachable,  # False (-1.74)
+            "launch_sigma_provisional": lsc_provisional,                         # HOLD pending #204 + land #71
+            "launch_sigma_gates_go": False,                                      # advisor 18:23Z: NOT hard-wired
             "numerical_ci_ledger": numerical_ci_ledger(topo, TAU_HEADLINE),
             "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190 0.9513, "
                             "private#191 0.9780) = 0.9780 (private, both-bugs); descent private bar "
@@ -1252,7 +1418,8 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
     ledger_closed = bool(len(pending_axes) == 0)
     binding_on_iid_fallback = bool(bb_binding["binding_is_iid_fallback"])
     any_iid_fallback = binding_on_iid_fallback                       # binding bar no longer iid -> False
-    # combined single-shot sigma corner (#195 de-dup): the conservative GO/NO-GO sigma reconciliation.
+    # combined-sigma row (#201, SUPERSEDES #195): the de-dup x realistic-ICC launch sigma -> P95
+    # GO-trigger-vs-ceiling readout. PROVISIONAL + NON-GATING (advisor 18:23Z: HOLD the verdict).
     csc_ledger = combined_sigma_corner()
     # cost-aware re-draw budget (#200): sequential early-stop spend + build-higher-vs-stay toggle.
     # ANNOTATION ONLY -- single-shot GO/NO-GO + binding bar + sigma are unchanged.
@@ -1281,21 +1448,28 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
         "both_bugs_go_at_lambda_star": both_bugs_go_at_lambda_star,
         "binding_bar": {"both_bugs": bb_binding, "descent_only": do_binding},
         "launch_ci_ledger": {
-            "net_rule": "launch_authorized = (analytic GO: realistic launch-LCB >= 500 at "
-                        "binding_bar AND validity AND over-accept AND combined-sigma worst-case "
-                        "corner >= 500) AND (all precondition rows GO). RECOMPOSED post-merge: "
-                        "binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780) = "
-                        "0.9780 (private#191 dominates, both-bugs); descent private is UNREACHABLE. "
-                        "Sampling half-width is the REALISTIC ICC#190 +/-22.9 TPS (design-effect "
-                        "%.4f over iid +/-10.9), NOT the iid placeholder. CLOSED post-#195: the "
-                        "4-axis quadrature was INVALID (rho(sampling,input)=0.945 double-count) -> "
-                        "de-dup'd combined single-shot sigma 7.26 central / 17.04 worst-case (the "
-                        "conservative corner), NOT quadrature 12.54. iid #175 leg kept as a visible "
-                        "fallback row only. NO pending numerical axes (ledger CLOSED). #200 cost "
-                        "annotation (budget row only, single-shot logic UNCHANGED): realistic spend "
-                        "at the bar is SEQUENTIAL E[shots]=1.94 (not fixed-5); build-higher (mu>=512.2"
-                        "/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b "
-                        "fixed / 12.97*b sequential)."
+            "net_rule": "launch_authorized = (analytic GO: lambda_hat_built >= binding_bar AND the "
+                        "realistic-ICC launch-LCB >= 500 AND the private-axis launch-LCB >= 500 AND "
+                        "validity AND over-accept) AND (all precondition rows GO). The #201 "
+                        "combined-sigma row is PROVISIONAL + NON-GATING (advisor 18:23Z: HOLD the "
+                        "verdict -- it is surfaced, NOT folded into the analytic GO). RECOMPOSED "
+                        "post-merge: binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 "
+                        "0.9780) = 0.9780 (private#191 dominates, both-bugs); descent private is "
+                        "UNREACHABLE. Sampling half-width is the REALISTIC ICC#190 +/-22.9 TPS "
+                        "(design-effect %.4f over iid +/-10.9), NOT the iid placeholder. CLOSED "
+                        "post-#195 (the 4-axis quadrature was INVALID: rho(sampling,input)=0.945 "
+                        "double-count). #201 SUPERSEDES #195's 7.26/17.04: the de-dup acceptance axis "
+                        "(5.32 iid IDENTITY) under realistic ICC (sqrt(D)=2.100 MAGNITUDE -> 11.17), "
+                        "(+) sigma_hw (+) sigma_private -> combined LAUNCH sigma 12.215 central / "
+                        "13.796 worst-case; P95 GO trigger mu>=520.09 central / 522.69 worst-case vs "
+                        "the lambda=1 ceiling 520.95 -> central P95-reachable (+0.86), worst-case "
+                        "UNREACHABLE (-1.74). PROVISIONAL pending ubel #204 (unit-rebase ~3 TPS, "
+                        "direction open) + land #71 co-log (n=385) retiring the rho(*,hw) band. iid "
+                        "#175 leg kept as a visible fallback row only. NO pending numerical axes "
+                        "(ledger CLOSED). #200 cost annotation (budget row only, single-shot logic "
+                        "UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=1.94 (not "
+                        "fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu "
+                        "costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential)."
                         % _BANKED.design_effect(),
             "numerical_axes": {"both_bugs": bb_ledger,
                                "descent_only": numerical_ci_ledger("descent_only", TAU_HEADLINE)},
@@ -1402,16 +1576,27 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
     cba = led.get("cost_budget_annotation") or {}
     if csc.get("landed"):
         sigma_line = (
-            "**Combined single-shot sigma corner (#195, de-dup):** the 4-axis quadrature is INVALID "
-            "(rho(sampling,input)=%.3f double-count) -> de-dup'd combined sigma **%.2f central / %.2f "
-            "worst-case** (NOT quadrature %.2f). Launch-LCB %.2f central / %.2f worst-case -- BOTH "
-            ">=500, so the both-bugs GO is robust on the sigma-axis (worst-case is the conservative "
-            "corner until land #71 co-logs per-allocation acceptance)." % (
-                csc["rho_sampling_input"], csc["sigma_dedup_central_tps"], csc["sigma_worstcase_tps"],
-                csc["sigma_quadrature_invalid_tps"], csc["launch_lcb_dedup_central_tps"],
-                csc["launch_lcb_worstcase_tps"]))
+            "**Combined-sigma row (#201, SUPERSEDES #195's 7.26/17.04 -- PROVISIONAL, does NOT gate "
+            "the verdict):** de-dup (#195) sets the acceptance-axis IDENTITY (5.32 TPS iid, removing "
+            "the rho(sampling,input)=%.3f double-count); realistic ICC (#190) sets its MAGNITUDE "
+            "(sqrt(D)=%.3f -> %.2f TPS). (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma "
+            "**%.2f central / %.2f worst-case** (1-sigma). P95 GO trigger mu >= 500 + z_p95*sigma = "
+            "**%.2f central / %.2f worst-case** vs the lambda=1 ceiling **%.2f** -> central is "
+            "P95-reachable (**+%.2f TPS**) but worst-case is P95-UNREACHABLE (**%.2f TPS**), even at "
+            "lambda=1. ICC erodes ~%.1f TPS of launch headroom (lifts #194's iid break-even %.2f). "
+            "**Knife-edge** -- HELD PROVISIONAL pending two open levers: ubel #204 (clean-1-sigma "
+            "unit rebase, IN FLIGHT, ~3 TPS, direction OPEN -> can FLIP the central verdict) + land "
+            "#71 co-log (n=%s cross-device allocations retire the rho(*,hw) [-0.3,+0.3] band). NO "
+            "change to the binding BUILD bar (private 0.9780, #191) -- purely the launch sigma->LCB row." % (
+                csc["dedup_provenance_195"]["rho_sampling_input"], csc["sqrt_design_effect"],
+                csc["acceptance_axis_realistic_icc_tps"],
+                csc["combined_sigma_launch_central_tps"], csc["combined_sigma_launch_worstcase_tps"],
+                csc["go_trigger_mu_central_tps"], csc["go_trigger_mu_worstcase_tps"],
+                csc["lambda1_ceiling_mu_tps"], csc["central_margin_at_lambda1_tps"],
+                csc["worstcase_margin_at_lambda1_tps"], csc["headroom_shift_tps"],
+                csc["iid_break_even_194_tps"], csc["colog_n_allocations"]))
     else:
-        sigma_line = "**Combined single-shot sigma corner (#195):** not landed -> quadrature fallback."
+        sigma_line = "**Combined-sigma row (#201):** not landed -> #195 de-dup fallback (7.26/17.04)."
     if cba.get("landed"):
         budget_line = (
             "**Multi-shot budget (#200, cost-aware -- prices the spend, single-shot GO/NO-GO "
@@ -1451,7 +1636,7 @@ draws (P={out['hardware_axis_sigma_hw']['best_of_2_p']:.4f}>=0.90).
 **Measured-tuple GO table:**
 {table_md}
 
-**Launch-CI ledger -- numerical axes (binding_bar = max; #190/#191/#188/#187/#194/#195 ALL CONSUMED; iid #175 leg visible; ledger CLOSED):**
+**Launch-CI ledger -- numerical axes (binding_bar = max; #190/#191/#188/#187/#194/#195 ALL CONSUMED; iid #175 leg visible; ledger CLOSED; #201 combined-sigma row below):**
 {num_table}
 
 **Launch-CI ledger -- hard precondition rows (any non-GO blocks the launch):**
@@ -1479,7 +1664,8 @@ PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _Include
   - [LANDED-CONSUMED] kanna #194 re-draw budget N* (informational; sizes the launch, not the bar).
   - [LANDED-CONSUMED] kanna #200 cost-aware budget: sequential E[shots]=1.94 at the bar (not fixed-5) + build-higher-vs-stay toggle (c*=3.04*b fixed / 12.97*b sequential). Annotation only; single-shot GO/NO-GO unchanged.
   - [LANDED-CONSUMED] ubel #189 executable-submission-gate: faithful build -> GO; re-verify vs land #71 at launch.
-  - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined sigma 7.26 central / 17.04 worst-case (conservative corner); ledger CLOSED.
+  - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup acceptance axis 5.32 iid (sets the IDENTITY; the 7.26/17.04 single-shot numbers are now #201's ICC=0 corner).
+  - [LANDED-CONSUMED] ubel #201 launch-sigma closure (PROVISIONAL, NON-GATING) -- de-dup x realistic-ICC combined LAUNCH sigma 12.215 central / 13.796 worst-case; P95 GO trigger 520.09/522.69 vs the lambda=1 ceiling 520.95 (central reachable +0.86, worst-case UNREACHABLE -1.74). HOLD the verdict pending ubel #204 (unit-rebase) + land #71 co-log (n=385).
   - [PENDING-BUILD] land #71 measured tuple (THIS tuple).
 
 **Launch gates (ALL required):** (1) land #71 builds the {h} kernel; (2) darwin _IncludedRouter
@@ -1722,43 +1908,79 @@ def self_test() -> dict:
         "launch_authorized": d_full["launch_authorized"]["authorized"],
         "analytic_verdict": d_full["launch_authorized"]["analytic_verdict"]}
 
-    # (i) combined single-shot sigma DE-DUP (advisor 17:52Z, ubel #195): the 4-axis quadrature is
-    #     INVALID because rho(sampling#175, input-lambda#187) = +0.945 (a DOUBLE-COUNT; overlap=rho^2=
-    #     0.893). De-dup A1+A2 into ONE acceptance axis (overlap-corrected 5.32 TPS) -> 3 independent
-    #     axes -> combined sigma = 7.26 central / 17.04 PSD-clamped worst-case (NOT quadrature 12.54).
-    #     BOTH the de-dup central launch-LCB (519.58) AND the worst-case corner (507.05) clear 500 ->
-    #     both-bugs is robust on the sigma axis; the worst-case corner is folded into the both-bugs GO.
+    # (i) combined-sigma row CLOSURE (advisor 18:23Z, ubel #201): SUPERSEDES #195's 7.26/17.04. The
+    #     de-dup acceptance axis (#195, IDENTITY 5.32 iid) x realistic ICC (#190, MAGNITUDE
+    #     sqrt(D)=2.100 -> 11.17) (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma 12.215
+    #     central / 13.796 worst-case. P95 GO trigger mu>=520.09 central / 522.69 worst-case vs the
+    #     lambda=1 ceiling 520.95 -> central P95-reachable (+0.86), worst-case UNREACHABLE (-1.74).
+    #     ICC=0 here reproduces #195's de-dup central 7.2617 (proves the superset). The row is
+    #     PROVISIONAL + NON-GATING: "wire the mechanism, HOLD the verdict" -- the worst-case
+    #     P95-unreachable corner does NOT flip both-bugs GO (the verdict is held, not hard-wired vs the
+    #     ceiling), pending ubel #204 (unit-rebase) + land #71 co-log (n=385) retiring the rho(*,hw) band.
     csc = led["combined_sigma_corner"]
     bb_full_g = d_full["_full_per_topology"]["both_bugs"]["lambda_gate"]
     do_full_g = d_full["_full_per_topology"]["descent_only"]["lambda_gate"]
-    i_ok = (bool(csc["landed"]) and csc["quadrature_valid"] is False
-            and abs(csc["rho_sampling_input"] - 0.9449) <= 5e-3
-            and abs(csc["overlap_fraction"] - 0.893) <= 5e-3
-            and abs(csc["sigma_quadrature_invalid_tps"] - 12.536) <= 5e-2
-            and abs(csc["sigma_dedup_central_tps"] - 7.262) <= 5e-2
-            and abs(csc["sigma_worstcase_tps"] - 17.037) <= 5e-2
-            and abs(csc["acceptance_dedup_block_tps"] - 5.319) <= 5e-2
-            and abs(csc["launch_lcb_dedup_central_tps"] - 519.58) <= 0.5
-            and abs(csc["launch_lcb_worstcase_tps"] - 507.05) <= 0.5
-            and bool(csc["dedup_central_clears_500"]) and bool(csc["worstcase_corner_clears_500"])
-            and bool(bb_full_g["combined_sigma_worstcase_clears_500"])
+    prov = csc["dedup_provenance_195"]
+    i_ok = (bool(csc["landed"]) and csc["source_pr"] == 201
+            and csc["supersedes_195_726_1704"] is True
+            and csc["provisional"] is True and csc["gates_analytic_go"] is False
+            # #201 headline launch sigma REPLACES #195's 7.26/17.04:
+            and abs(csc["combined_sigma_launch_central_tps"] - 12.215) <= 5e-2
+            and abs(csc["combined_sigma_launch_worstcase_tps"] - 13.796) <= 5e-2
+            # P95 GO trigger vs the lambda=1 ceiling:
+            and abs(csc["z_p95"] - 1.6449) <= 5e-3
+            and abs(csc["go_trigger_mu_central_tps"] - 520.092) <= 5e-2
+            and abs(csc["go_trigger_mu_worstcase_tps"] - 522.692) <= 5e-2
+            and abs(csc["lambda1_ceiling_mu_tps"] - 520.953) <= 5e-2
+            and csc["central_p95_reachable"] is True
+            and csc["worstcase_p95_reachable"] is False
+            and abs(csc["central_margin_at_lambda1_tps"] - 0.860) <= 5e-2
+            and abs(csc["worstcase_margin_at_lambda1_tps"] - (-1.739)) <= 5e-2
+            # de-dup x ICC mechanism (de-dup IDENTITY * sqrt(D) MAGNITUDE):
+            and abs(csc["acceptance_axis_dedup_iid_tps"] - 5.319) <= 5e-2
+            and abs(csc["design_effect"] - 4.4106) <= 5e-3
+            and abs(csc["sqrt_design_effect"] - 2.1001) <= 5e-3
+            and abs(csc["acceptance_axis_realistic_icc_tps"] - 11.170) <= 5e-2
+            and abs(csc["headroom_shift_tps"] - 7.935) <= 5e-2
+            # ICC=0 corner reproduces #195's de-dup central 7.2617 (the superset proof):
+            and abs(csc["icc0_combined_sigma_central_tps"] - 7.2617) <= 5e-3
+            # #195 de-dup provenance retained (rho double-count that sets the acceptance IDENTITY):
+            and abs(prov["rho_sampling_input"] - 0.9449) <= 5e-3
+            and abs(prov["overlap_fraction"] - 0.893) <= 5e-3
+            and prov["quadrature_valid"] is False
+            and csc["colog_n_allocations"] == 385
+            # lambda_gate surfaces the PROVISIONAL/NON-GATING readout (both-bugs only):
             and bb_full_g["combined_sigma_corner"] is not None
+            and bb_full_g["launch_sigma_central_p95_reachable"] is True
+            and bb_full_g["launch_sigma_worstcase_p95_reachable"] is False
+            and bb_full_g["launch_sigma_provisional"] is True
+            and bb_full_g["launch_sigma_gates_go"] is False
             and do_full_g["combined_sigma_corner"] is None
-            and bool(do_full_g["combined_sigma_worstcase_clears_500"]))
-    results["i_combined_sigma_dedup_corner"] = {
+            and do_full_g["launch_sigma_central_p95_reachable"] is None
+            # THE HELD-VERDICT INVARIANT: worst-case P95-UNREACHABLE, yet both-bugs is STILL GO
+            # (the row is non-gating -> the analytic verdict is not hard-wired vs the ceiling):
+            and d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
+            and d_full["verdict"] == "GO")
+    results["i_combined_sigma_closure_201_provisional"] = {
         "pass": bool(i_ok),
-        "quadrature_valid": csc["quadrature_valid"],
-        "rho_sampling_input": csc["rho_sampling_input"],
-        "overlap_fraction": csc["overlap_fraction"],
-        "sigma_quadrature_invalid_tps": csc["sigma_quadrature_invalid_tps"],
-        "sigma_dedup_central_tps": csc["sigma_dedup_central_tps"],
-        "sigma_worstcase_tps": csc["sigma_worstcase_tps"],
-        "acceptance_dedup_block_tps": csc["acceptance_dedup_block_tps"],
-        "launch_lcb_dedup_central_tps": csc["launch_lcb_dedup_central_tps"],
-        "launch_lcb_worstcase_tps": csc["launch_lcb_worstcase_tps"],
-        "dedup_central_clears_500": csc["dedup_central_clears_500"],
-        "worstcase_corner_clears_500": csc["worstcase_corner_clears_500"],
-        "both_bugs_worstcase_folded_into_go": bool(bb_full_g["combined_sigma_worstcase_clears_500"])}
+        "source_pr": csc["source_pr"], "supersedes_195": csc["supersedes_195_726_1704"],
+        "provisional": csc["provisional"], "gates_analytic_go": csc["gates_analytic_go"],
+        "combined_sigma_launch_central_tps": csc["combined_sigma_launch_central_tps"],
+        "combined_sigma_launch_worstcase_tps": csc["combined_sigma_launch_worstcase_tps"],
+        "go_trigger_mu_central_tps": csc["go_trigger_mu_central_tps"],
+        "go_trigger_mu_worstcase_tps": csc["go_trigger_mu_worstcase_tps"],
+        "lambda1_ceiling_mu_tps": csc["lambda1_ceiling_mu_tps"],
+        "central_p95_reachable": csc["central_p95_reachable"],
+        "worstcase_p95_reachable": csc["worstcase_p95_reachable"],
+        "central_margin_at_lambda1_tps": csc["central_margin_at_lambda1_tps"],
+        "worstcase_margin_at_lambda1_tps": csc["worstcase_margin_at_lambda1_tps"],
+        "acceptance_axis_realistic_icc_tps": csc["acceptance_axis_realistic_icc_tps"],
+        "icc0_reproduces_195_dedup_726": abs(csc["icc0_combined_sigma_central_tps"] - 7.2617) <= 5e-3,
+        "headroom_shift_tps": csc["headroom_shift_tps"],
+        "colog_n_allocations": csc["colog_n_allocations"],
+        "verdict_held_go_despite_worstcase_unreachable": (
+            d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
+            and csc["worstcase_p95_reachable"] is False)}
 
     # (j) cost-aware re-draw budget ANNOTATION (advisor 18:03Z, kanna #200): the budget ROW the human
     #     reads is priced -- the REALISTIC spend at the bar is SEQUENTIAL early-stop E[shots]=1.9375
@@ -1833,10 +2055,27 @@ def _maybe_log_wandb(args, payload: dict) -> None:
                              "halfwidth_iid_tps": _BANKED.halfwidth_iid(),
                              "halfwidth_realistic_tps": _BANKED.halfwidth_realistic(),
                              "icc_hat": _BANKED.icc_hat(), "design_effect": _BANKED.design_effect(),
-                             # combined single-shot sigma corner (#195 de-dup): quadrature INVALID.
-                             "combined_sigma_quadrature_invalid_tps": _BANKED.combined_sigma("quadrature"),
-                             "combined_sigma_dedup_central_tps": _BANKED.combined_sigma("dedup"),
-                             "combined_sigma_worstcase_tps": _BANKED.combined_sigma("worstcase"),
+                             # combined-sigma row (#201, SUPERSEDES #195's 7.26/17.04): de-dup x
+                             # realistic-ICC launch sigma -> P95 GO-trigger-vs-ceiling. PROVISIONAL.
+                             "combined_sigma_launch_central_tps_201": _BANKED.combined_sigma_launch("central"),
+                             "combined_sigma_launch_worstcase_tps_201": _BANKED.combined_sigma_launch("worstcase"),
+                             "go_trigger_mu_central_tps_201": _BANKED.mu_clears_500("central"),
+                             "go_trigger_mu_worstcase_tps_201": _BANKED.mu_clears_500("worstcase"),
+                             "lambda1_ceiling_mu_tps_201": _BANKED.lambda1_ceiling_mu(),
+                             "central_p95_reachable_201": _BANKED.lambda1_clears_500("central"),
+                             "worstcase_p95_reachable_201": _BANKED.lambda1_clears_500("worstcase"),
+                             "central_margin_at_lambda1_tps_201": _BANKED.margin_at_lambda1("central"),
+                             "worstcase_margin_at_lambda1_tps_201": _BANKED.margin_at_lambda1("worstcase"),
+                             "acceptance_axis_dedup_iid_tps_201": _BANKED.acceptance_sigma_dedup_iid(),
+                             "acceptance_axis_realistic_icc_tps_201": _BANKED.acceptance_sigma_dedup_realistic_icc(),
+                             "sqrt_design_effect_201": _BANKED.sqrt_design_effect(),
+                             "headroom_shift_tps_201": _BANKED.headroom_shift_from_iid(),
+                             "icc0_combined_sigma_central_tps_201": _BANKED.icc0_combined_sigma_central(),
+                             "colog_n_allocations_201": _BANKED.colog_n_allocations(),
+                             # #195 de-dup provenance (sets the acceptance-axis IDENTITY; sigma SUPERSEDED by #201).
+                             "combined_sigma_quadrature_invalid_tps_195": _BANKED.combined_sigma("quadrature"),
+                             "combined_sigma_dedup_central_tps_195": _BANKED.combined_sigma("dedup"),
+                             "combined_sigma_worstcase_tps_195_superseded": _BANKED.combined_sigma("worstcase"),
                              "combined_sigma_quadrature_valid": _BANKED.quadrature_valid(),
                              "rho_sampling_input_195": _BANKED.rho_sampling_input(),
                              "acceptance_dedup_block_tps_195": _BANKED.dedup_acceptance_block(),
@@ -1865,18 +2104,25 @@ def _maybe_log_wandb(args, payload: dict) -> None:
     flat["worked_example/sole_pending_axis"] = str(led["sole_pending_axis"])
     flat["worked_example/n_pending_numerical_axes"] = len(led["pending_numerical_axes"])
     flat["worked_example/ledger_closed"] = bool(led["ledger_closed"])
-    # combined single-shot sigma corner (#195 de-dup): central/worst-case + clear-500 robustness.
+    # combined-sigma row (#201, SUPERSEDES #195): launch sigma -> P95 GO-trigger-vs-ceiling. PROVISIONAL.
     csc = led["combined_sigma_corner"]
     if csc.get("landed"):
-        flat["worked_example/combined_sigma_quadrature_valid"] = bool(csc["quadrature_valid"])
-        flat["worked_example/combined_sigma_dedup_central_tps"] = csc["sigma_dedup_central_tps"]
-        flat["worked_example/combined_sigma_worstcase_tps"] = csc["sigma_worstcase_tps"]
-        flat["worked_example/combined_sigma_quadrature_invalid_tps"] = csc["sigma_quadrature_invalid_tps"]
-        flat["worked_example/rho_sampling_input_195"] = csc["rho_sampling_input"]
-        flat["worked_example/launch_lcb_dedup_central_tps"] = csc["launch_lcb_dedup_central_tps"]
-        flat["worked_example/launch_lcb_worstcase_tps"] = csc["launch_lcb_worstcase_tps"]
-        flat["worked_example/worstcase_corner_clears_500"] = bool(csc["worstcase_corner_clears_500"])
-        flat["worked_example/dedup_central_clears_500"] = bool(csc["dedup_central_clears_500"])
+        flat["worked_example/combined_sigma_launch_central_tps"] = csc["combined_sigma_launch_central_tps"]
+        flat["worked_example/combined_sigma_launch_worstcase_tps"] = csc["combined_sigma_launch_worstcase_tps"]
+        flat["worked_example/go_trigger_mu_central_tps"] = csc["go_trigger_mu_central_tps"]
+        flat["worked_example/go_trigger_mu_worstcase_tps"] = csc["go_trigger_mu_worstcase_tps"]
+        flat["worked_example/lambda1_ceiling_mu_tps"] = csc["lambda1_ceiling_mu_tps"]
+        flat["worked_example/central_p95_reachable"] = bool(csc["central_p95_reachable"])
+        flat["worked_example/worstcase_p95_reachable"] = bool(csc["worstcase_p95_reachable"])
+        flat["worked_example/central_margin_at_lambda1_tps"] = csc["central_margin_at_lambda1_tps"]
+        flat["worked_example/worstcase_margin_at_lambda1_tps"] = csc["worstcase_margin_at_lambda1_tps"]
+        flat["worked_example/acceptance_axis_realistic_icc_tps"] = csc["acceptance_axis_realistic_icc_tps"]
+        flat["worked_example/sqrt_design_effect"] = csc["sqrt_design_effect"]
+        flat["worked_example/headroom_shift_tps"] = csc["headroom_shift_tps"]
+        flat["worked_example/icc0_combined_sigma_central_tps"] = csc["icc0_combined_sigma_central_tps"]
+        flat["worked_example/combined_sigma_provisional"] = bool(csc["provisional"])
+        flat["worked_example/combined_sigma_gates_analytic_go"] = bool(csc["gates_analytic_go"])
+        flat["worked_example/rho_sampling_input_195_provenance"] = csc["dedup_provenance_195"]["rho_sampling_input"]
     # cost-aware re-draw budget annotation (#200): sequential spend + build-vs-stay cost toggle.
     cba = led["cost_budget_annotation"]
     if cba.get("landed"):
@@ -1914,8 +2160,15 @@ def _maybe_log_wandb(args, payload: dict) -> None:
             flat[f"worked_example/{topo}/private_launch_lcb_tps"] = lgc["private_launch_lcb_tps"]
         flat[f"worked_example/{topo}/clear500_launch_lcb_pass"] = bool(
             lgc["clear500_launch_lcb_pass"])
-        flat[f"worked_example/{topo}/combined_sigma_worstcase_clears_500"] = bool(
-            lgc["combined_sigma_worstcase_clears_500"])
+        # #201 combined-sigma row: PROVISIONAL + NON-GATING readout (None on descent -> skip).
+        if lgc.get("launch_sigma_central_p95_reachable") is not None:
+            flat[f"worked_example/{topo}/launch_sigma_central_p95_reachable"] = bool(
+                lgc["launch_sigma_central_p95_reachable"])
+            flat[f"worked_example/{topo}/launch_sigma_worstcase_p95_reachable"] = bool(
+                lgc["launch_sigma_worstcase_p95_reachable"])
+            flat[f"worked_example/{topo}/launch_sigma_provisional"] = bool(
+                lgc["launch_sigma_provisional"])
+            flat[f"worked_example/{topo}/launch_sigma_gates_go"] = bool(lgc["launch_sigma_gates_go"])
     wandb.log(flat)
     wandb.summary.update(flat)
     run.finish()
@@ -1933,32 +2186,39 @@ def run(args) -> dict:
     handoff = (
         "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified "
         "GO/NO-GO + filled (un-filed) Approval request. Self-test %s. RECOMPOSED post-merge "
-        "(advisor 17:27Z + 17:52Z + 18:03Z): the TYPED launch-CI ledger now reads REAL banked scalars "
-        "-- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget AND #195 "
-        "cross-axis covariance have ALL LANDED (flag=consumed); the ledger is CLOSED (no pending "
-        "axes). binding_bar = max(public#183 %.4f, ICC#190 %.4f, private#191 %.4f) = %.4f (private "
-        "DOMINATES, both-bugs); descent private bar is UNREACHABLE. #195 proved the 4-axis quadrature "
-        "INVALID (rho(sampling,input)=%.3f double-count) -> de-dup'd combined single-shot sigma %.2f "
-        "central / %.2f worst-case (the conservative GO/NO-GO corner), NOT quadrature %.2f. land #71 "
-        "must show lambda_hat_built >= %.4f AND the #179 launch-projection cell-LCB(P>=0.9) >= 500 "
-        "under the REALISTIC #190 +-%.2f ICC half-width (NOT iid +-%.2f) AND on the #191 private axis "
-        "AND the combined-sigma worst-case corner. launch_authorized = (analytic-GO AND all "
-        "precondition rows GO); preconditions (PRECACHE_BENCH, ubel #189 packaging-gate=GO but "
-        "re-verify-pending, human approval) PENDING -> launch_authorized=False (authorizes nothing). "
-        "both-bugs SURVIVES at lambda=1: realistic launch-LCB 510.63>=500 + private valid + de-dup "
-        "sigma corner (LCB %.2f central / %.2f worst-case both >=500) -> robust GO. descent is "
-        "DOUBLY-HARDENED NO-GO: private build bar UNREACHABLE AND misses realistic 495.04 + private "
-        "490.16 launch LCBs. #200 cost annotation (budget row ONLY, single-shot logic UNCHANGED): "
-        "realistic spend at the bar is SEQUENTIAL E[shots]=%.2f (not fixed-5); build-higher "
-        "(mu>=%.1f/N=1) beats stay-at-bar iff reaching mu costs < %.0f shots' GPU-$ (c*=%.2f*b fixed "
-        "/ %.2f*b sequential). both_bugs_go_at_lambda_star=%s. Human approval still required before "
-        "any HF spend." % (
+        "(advisor 17:27Z + 17:52Z + 18:03Z + 18:23Z): the TYPED launch-CI ledger reads REAL banked "
+        "scalars -- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget, "
+        "#195 cross-axis covariance, #200 cost AND #201 launch-sigma closure have ALL LANDED "
+        "(flag=consumed); the ledger is CLOSED. binding_bar = max(public#183 %.4f, ICC#190 %.4f, "
+        "private#191 %.4f) = %.4f (private DOMINATES, both-bugs); descent private bar is UNREACHABLE. "
+        "land #71 must show lambda_hat_built >= %.4f AND the #179 launch-projection cell-LCB(P>=0.9) "
+        ">= 500 under the REALISTIC #190 +-%.2f ICC half-width (NOT iid +-%.2f) AND on the #191 "
+        "private axis. launch_authorized = (analytic-GO AND all precondition rows GO); preconditions "
+        "(PRECACHE_BENCH, ubel #189 packaging-gate=GO but re-verify-pending, human approval) PENDING "
+        "-> launch_authorized=False (authorizes nothing). both-bugs SURVIVES at lambda=1: realistic "
+        "launch-LCB 510.63>=500 + private valid -> robust GO (HELD). descent is DOUBLY-HARDENED NO-GO: "
+        "private build bar UNREACHABLE AND misses realistic 495.04 + private 490.16 launch LCBs. "
+        "COMBINED-SIGMA ROW (#201, advisor 18:23Z -- SUPERSEDES #195's 7.26/17.04; PROVISIONAL + "
+        "NON-GATING): de-dup (#195, rho=%.3f double-count -> IDENTITY 5.32 iid) x realistic ICC (#190, "
+        "MAGNITUDE -> %.2f) (+) sigma_hw (+) sigma_private -> combined LAUNCH sigma %.2f central / "
+        "%.2f worst-case; P95 GO trigger mu>=%.2f central / %.2f worst-case vs the lambda=1 ceiling "
+        "%.2f -> central P95-reachable (+%.2f) but worst-case UNREACHABLE (%.2f), even at lambda=1 "
+        "(ICC erodes ~%.1f TPS of launch headroom). KNIFE-EDGE: WIRE the mechanism, HOLD the verdict "
+        "-- this row does NOT gate `go` (not hard-wired vs the ceiling); two open levers finalize it "
+        "(ubel #204 unit-rebase ~3 TPS direction-OPEN -> can FLIP central; land #71 co-log n=%s "
+        "retires the rho(*,hw) band). #200 cost annotation (budget row ONLY, single-shot logic "
+        "UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=%.2f (not fixed-5); "
+        "build-higher (mu>=%.1f/N=1) beats stay-at-bar iff reaching mu costs < %.0f shots' GPU-$ "
+        "(c*=%.2f*b fixed / %.2f*b sequential). both_bugs_go_at_lambda_star=%s. Human approval still "
+        "required before any HF spend." % (
             "PASSES" if st["launch_trigger_calculator_self_test_passes"] else "FAILS",
             bb_bind["public_183"], bb_bind["icc_190"], bb_bind["private_191"], bb_bind["binding_bar"],
-            csc["rho_sampling_input"], csc["sigma_dedup_central_tps"], csc["sigma_worstcase_tps"],
-            csc["sigma_quadrature_invalid_tps"],
             bb_bind["binding_bar"], _BANKED.halfwidth_realistic(), _BANKED.halfwidth_iid(),
-            csc["launch_lcb_dedup_central_tps"], csc["launch_lcb_worstcase_tps"],
+            csc["dedup_provenance_195"]["rho_sampling_input"], csc["acceptance_axis_realistic_icc_tps"],
+            csc["combined_sigma_launch_central_tps"], csc["combined_sigma_launch_worstcase_tps"],
+            csc["go_trigger_mu_central_tps"], csc["go_trigger_mu_worstcase_tps"],
+            csc["lambda1_ceiling_mu_tps"], csc["central_margin_at_lambda1_tps"],
+            csc["worstcase_margin_at_lambda1_tps"], csc["headroom_shift_tps"], csc["colog_n_allocations"],
             cba["stay_at_bar"]["expected_shots_sequential"], cba["build_higher"]["mu_safe_n1_tps"],
             cba["crossover_total_shots"], cba["c_star_fixedN_per_b"], cba["c_star_sequential_per_b"],
             st["both_bugs_go_at_lambda_star"]))
