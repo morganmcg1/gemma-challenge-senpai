@@ -1,0 +1,105 @@
+{
+  "pr": 177,
+  "metric_primary": "included_router_fix_self_test_passes",
+  "metric_test": "token_identity_rate",
+  "included_router_fix_self_test_passes": true,
+  "token_identity_rate": 1.0,
+  "startup_500_reproduced": false,
+  "server_boots_with_fix": true,
+  "output_neutral": true,
+  "ppl_patched": 2.376976138392039,
+  "ppl_unpatched": 2.376976138392039,
+  "ppl_cap": 2.42,
+  "ppl_reference": 2.3777,
+  "tps_patched_local_proxy": 460.0660674565125,
+  "tps_unpatched_local_proxy": 459.96893948402055,
+  "tps_patched_vs_unpatched_delta_pct": 0.02111620245508055,
+  "completed_patched": 128,
+  "completed_unpatched": 128,
+  "nan_clean": true,
+  "checks": {
+    "guard_unit_neutralizes_attributeerror": true,
+    "unpatched_boot_definitive": true,
+    "server_boots_with_fix": true,
+    "completion_token_ids_byte_identical": true,
+    "ppl_patched_within_cap": true,
+    "patched_128_of_128": true,
+    "nan_clean": true
+  },
+  "guard_unit_proof": {
+    "available": true,
+    "unpatched_raises_attributeerror": true,
+    "patched_returns_none_on_pathless": true,
+    "patched_noop_on_normal_route": true,
+    "normal_route_value": "/v1/models",
+    "all_pass": true
+  },
+  "unpatched_boot": {
+    "outcome": "clean_boot",
+    "darwin_500_signature_hits": [],
+    "not_ready_signal": false,
+    "served": true
+  },
+  "patched_boot": {
+    "outcome": "clean_boot",
+    "darwin_500_signature_hits": [],
+    "not_ready_signal": false,
+    "served": true
+  },
+  "token_diff": {
+    "n_unpatched": 128,
+    "n_patched": 128,
+    "n_common": 128,
+    "n_token_id_match": 128,
+    "n_prompt_input_match": 128,
+    "token_identity_rate": 1.0,
+    "all_identical": true,
+    "mismatches_sample": []
+  },
+  "handoff_recommendation": "no_op_insurance",
+  "handoff_note": "startup-500 did NOT reproduce on THIS local image (the local web stack lacks the pathless route); the guard is a verified output-neutral no-op here. darwin reproduced it 3x on the HF runner image, so land #71 should still BANK the guard as cheap launch-boot insurance for the runner image.",
+  "artifacts": {
+    "unpatched_local_summary": {
+      "base_url": "http://127.0.0.1:8000",
+      "completed": 128,
+      "decode_duration_s": 142.47918581962585,
+      "decode_num_completion_tokens": 65536,
+      "decode_num_records": 128,
+      "decode_summary_file": "research/validity/included_router_boot/unpatched/decode_summary.json",
+      "decode_token_id_sources": {
+        "choices[0].token_ids": 128
+      },
+      "local_exploratory": true,
+      "note": "Local A10G numbers are exploratory; only a10g-small HF Jobs runs are official.",
+      "ppl": 2.376976138392039,
+      "ppl_num_records": 128,
+      "ppl_num_tokens": 61797,
+      "ppl_summary_file": "research/validity/included_router_boot/unpatched/ppl_summary.json",
+      "served_model_name": "gemma-4-e4b-it",
+      "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan",
+      "tps": 459.96893948402055
+    },
+    "patched_local_summary": {
+      "base_url": "http://127.0.0.1:8000",
+      "completed": 128,
+      "decode_duration_s": 142.44910597801208,
+      "decode_num_completion_tokens": 65536,
+      "decode_num_records": 128,
+      "decode_summary_file": "research/validity/included_router_boot/patched/decode_summary.json",
+      "decode_token_id_sources": {
+        "choices[0].token_ids": 128
+      },
+      "local_exploratory": true,
+      "note": "Local A10G numbers are exploratory; only a10g-small HF Jobs runs are official.",
+      "ppl": 2.376976138392039,
+      "ppl_num_records": 128,
+      "ppl_num_tokens": 61797,
+      "ppl_summary_file": "research/validity/included_router_boot/patched/ppl_summary.json",
+      "served_model_name": "gemma-4-e4b-it",
+      "submission": "/tmp/fa2sw_patched_ir",
+      "tps": 460.0660674565125
+    },
+    "unpatched_dir": "research/validity/included_router_boot/unpatched",
+    "patched_dir": "research/validity/included_router_boot/patched"
+  }
+}
