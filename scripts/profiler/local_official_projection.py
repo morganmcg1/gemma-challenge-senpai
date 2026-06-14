@@ -72,6 +72,15 @@ from research.tps_noise_floor.analyze_noise_floor import (  # noqa: E402
     bootstrap_stat_cv,
 )
 
+# denken #105's tree-free slice model is the SINGLE SOURCE OF TRUTH for the decode
+# budget + lever composition. We consume it (not re-derive it) so the two harnesses
+# cannot drift. It lives beside this file in scripts/profiler/.
+PROFILER_DIR = Path(__file__).resolve().parent
+if str(PROFILER_DIR) not in sys.path:
+    sys.path.insert(0, str(PROFILER_DIR))
+
+import tree_free_500_ceiling as tf  # noqa: E402  (denken #105 slice model)
+
 # ---------------------------------------------------------------------------
 # Committed anchors
 # ---------------------------------------------------------------------------
@@ -149,6 +158,43 @@ TREE_SPEC = {
     "sources": "wirbel #83 (+18.2%), denken #85 (+19.82% gross/overhead audit), "
                "fern #92 (E[T]=5.208, independence-gap +0.025%, band 558-581)",
 }
+
+
+# ---------------------------------------------------------------------------
+# Tree-free 500-path instrument (PR #112)
+# ---------------------------------------------------------------------------
+# This is the PRIMARY 500-path after Cycle 40->41 (tree demoted to UPSIDE/insurance,
+# denken #105 GREEN). It maps a MEASURED SplitK% (ubel #108) + the small additive
+# levers (LK #95, wirbel #110 palette) -> projected-official band vs 500, through
+# denken #105's slice composition `official = K_cal*(E[T]/step)*tau`, K_cal=125.268.
+#
+# How the two harnesses share ONE anchor (no double-count of the transfer factor):
+# denken's K_cal = 481.53/3.844 FOLDS the deployed local->official multiplier (1.0599)
+# into the 481.53 official anchor. So tf.compose(...) already returns a number on the
+# OFFICIAL scale. We carry THIS module's measured multiplier CI [1.05999, 1.06038] as
+# a RELATIVE rescale `mult/multiplier_central` (=1.0 at the central anchor, +/-0.018%
+# at the CI edges) so the central stays bit-exact on 481.53 while the band honestly
+# widens. tau is denken's residual realization factor (Step 2 bounds it from local data).
+
+# tau (local->official realization factor) band carried through the projection. Central
+# 1.00 == the deployed multiplier folded into K_cal; the [0.96, 1.00] denken default is
+# the GENERIC config-change floor. Step 2 (bound_tau_local) tightens it for the SplitK
+# kernel-swap axis specifically.
+TAU_BAND_DEFAULT = dict(tf.TAU)  # {"low":0.96,"central":1.00,"high":1.00}
+
+# wirbel #110 palette (LUT scale-of-scales) -- the byte lever that replaces the
+# info-theoretically-KILLed #104 double-quant (BASELINE merge-history). It is the SAME
+# verify-GEMM byte-count factor denken modelled as double-quant, so it converts to an
+# f_dq through tf.dq_tps_to_fdq identically. UNREALIZED today (wirbel #110 WIP) -> we
+# bank central=0 (do NOT credit the unbuilt lever) and carry denken's old byte-lever
+# magnitude as UPSIDE only. This is the one place this instrument deviates from denken's
+# literal central (which still carried the now-KILLed double-quant central +0.5%).
+PALETTE_TPS = {"low": 0.0, "central": 0.0, "high": tf.DQ_TPS["high"]}
+
+# ubel #108 SplitK prior window (verify-GEMM bandwidth-utilisation speedup s, closing
+# the 77.1%->100% HBM gap). The MEASURED central + CI are supplied at call time; these
+# committed defaults (denken #105 SPLITK_UBEL) seed the band before ubel reports.
+SPLITK_PRIOR = dict(tf.SPLITK_UBEL)  # {"low":0.05,"central":0.085,"high":0.12}
 
 
 # ---------------------------------------------------------------------------
@@ -431,8 +477,401 @@ def self_check(calib: Calibration | None = None) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Tree-free 500-path map (PR #112): SplitK% + levers -> projected official
+# ---------------------------------------------------------------------------
+def tree_free_official(splitk_s: float, *, mult: float, tau: float,
+                       lk_mult: float = 1.0, palette_tps_pct: float = 0.0,
+                       fp32_m8: float = 0.0, persist_reclaim: float = 0.0,
+                       mult_central: float | None = None) -> dict[str, Any]:
+    """Map a SplitK speedup ``splitk_s`` + additive levers to projected-official TPS.
+
+    Runs denken #105's slice composition (the single source of truth for the decode
+    budget) then applies THIS module's multiplier CI as a relative rescale
+    ``mult/mult_central``. At ``mult == mult_central`` the rescale is 1.0, so the map
+    is bit-exact on denken's anchor; at the CI edges it widens by +/-0.018%. ``tau`` is
+    denken's residual realization factor; ``palette_tps_pct`` (wirbel #110 byte lever)
+    converts to a verify-GEMM byte reduction exactly like denken's double-quant."""
+    if mult_central is None:
+        mult_central = calibrate().multiplier
+    f_dq = tf.dq_tps_to_fdq(palette_tps_pct / 100.0) if palette_tps_pct else 0.0
+    p = {"lk_mult": lk_mult, "f_dq": f_dq, "fp32_m8": fp32_m8,
+         "persist_reclaim": persist_reclaim, "tau": tau}
+    comp = tf.compose(splitk_s, p)
+    scale = mult / mult_central
+    official = comp["official_tps"] * scale
+    return {
+        "splitk_s": splitk_s,
+        "lk_mult": lk_mult,
+        "palette_tps_pct": palette_tps_pct,
+        "f_dq": f_dq,
+        "tau": tau,
+        "multiplier": mult,
+        "multiplier_central": mult_central,
+        "multiplier_rel_scale": scale,
+        "E_T": comp["E_T"],
+        "step_time": comp["step_time"],
+        "verify_gemm_slice": comp["verify_gemm_slice"],
+        "official_tps": official,
+        "clears_500": official >= OFFICIAL_TARGET_TPS,
+        "margin_to_500_pct": 100.0 * (official - OFFICIAL_TARGET_TPS) / OFFICIAL_TARGET_TPS,
+    }
+
+
+def tree_free_threshold(*, mult: float, tau: float, lk_mult: float = 1.0,
+                        palette_tps_pct: float = 0.0, fp32_m8: float = 0.0,
+                        persist_reclaim: float = 0.0,
+                        mult_central: float | None = None) -> float | None:
+    """Minimum SplitK speedup ``s`` that clears 500 under ``(mult, tau, levers)``.
+
+    The #99 multiplier rescale ``scale = mult/mult_central`` multiplies the composed
+    official TPS, so clearing ``official*scale >= 500`` is exactly denken's inverter
+    with an effective ``tau*scale``. We therefore REUSE ``tf.splitk_threshold_for_500``
+    (single source of truth for the inversion algebra) with that scaled tau. Returns
+    0.0 if ``s=0`` already clears, ``float('inf')`` if the gap ceiling cannot reach 500."""
+    if mult_central is None:
+        mult_central = calibrate().multiplier
+    scale = mult / mult_central
+    p = {
+        "lk_mult": lk_mult,
+        "f_dq": tf.dq_tps_to_fdq(palette_tps_pct / 100.0) if palette_tps_pct else 0.0,
+        "fp32_m8": fp32_m8,
+        "persist_reclaim": persist_reclaim,
+        "tau": tau * scale,  # multiplier rescale folds into tau in the linear inverter
+    }
+    return tf.splitk_threshold_for_500(p)
+
+
+def project_tree_free(splitk_s: float, *,
+                      splitk_lo: float | None = None,
+                      splitk_hi: float | None = None,
+                      lk_mult_central: float | None = None,
+                      palette_tps_pct_central: float | None = None,
+                      tau_band: dict[str, float] | None = None,
+                      calib: Calibration | None = None) -> dict[str, Any]:
+    """SINGLE-command tree-free projection: a measured SplitK% (ubel #108) + the small
+    additive levers (LK #95, wirbel #110 palette) -> projected-official band vs 500.
+
+    Three corners, all on denken #105's slice model x the #99 multiplier CI:
+      * central      -- multiplier-central x tau-central(1.00) x measured SplitK,
+                        LK central (projected 1.010), palette central (0, unrealized).
+      * conservative -- multiplier-LOW x tau-LOW(0.96) x SplitK-LOW, LK off (1.0),
+                        palette off (0), fp32 M=8 haircut high. THIS is the >=500
+                        decision corner the PR names (multiplier-low x tau-low).
+      * optimistic   -- multiplier-HIGH x tau-high(1.00) x SplitK-HIGH, LK high,
+                        palette high, no haircut.
+
+    The gate reads >=500 off the conservative corner so the decision is robust to all
+    three CIs (multiplier, tau, SplitK) simultaneously."""
+    if calib is None:
+        calib = calibrate()
+    tb = TAU_BAND_DEFAULT if tau_band is None else tau_band
+    mc = calib.multiplier
+    lk_c = tf.LK_MULT["central"] if lk_mult_central is None else lk_mult_central
+    pal_c = PALETTE_TPS["central"] if palette_tps_pct_central is None else palette_tps_pct_central
+    # SplitK CI: explicit edges from ubel #108 when supplied, else collapse to the point.
+    s_lo = splitk_s if splitk_lo is None else splitk_lo
+    s_hi = splitk_s if splitk_hi is None else splitk_hi
+
+    central = tree_free_official(
+        splitk_s, mult=mc, tau=tb["central"], lk_mult=lk_c,
+        palette_tps_pct=pal_c, fp32_m8=tf.FP32_M8["central"],
+        persist_reclaim=tf.PERSIST_RECLAIM["central"], mult_central=mc)
+    conservative = tree_free_official(
+        s_lo, mult=calib.mult_ci_local_lo, tau=tb["low"], lk_mult=tf.LK_MULT["low"],
+        palette_tps_pct=PALETTE_TPS["low"], fp32_m8=tf.FP32_M8["high"],
+        persist_reclaim=tf.PERSIST_RECLAIM["low"], mult_central=mc)
+    optimistic = tree_free_official(
+        s_hi, mult=calib.mult_ci_local_hi, tau=tb["high"], lk_mult=tf.LK_MULT["high"],
+        palette_tps_pct=PALETTE_TPS["high"], fp32_m8=tf.FP32_M8["low"],
+        persist_reclaim=tf.PERSIST_RECLAIM["high"], mult_central=mc)
+
+    cen, lo, hi = central["official_tps"], conservative["official_tps"], optimistic["official_tps"]
+    return {
+        "splitk_s_central": splitk_s,
+        "splitk_s_lo": s_lo,
+        "splitk_s_hi": s_hi,
+        "central": central,
+        "conservative_corner": conservative,
+        "optimistic_corner": optimistic,
+        "projected_official": cen,
+        "projected_official_lo": lo,
+        "projected_official_hi": hi,
+        "band_rel_pct": 100.0 * (hi - lo) / (2.0 * cen) if cen else float("nan"),
+        "clears_500_central": cen >= OFFICIAL_TARGET_TPS,
+        "clears_500_conservative": lo >= OFFICIAL_TARGET_TPS,
+        "margin_to_500_pct_at_conservative": 100.0 * (lo - OFFICIAL_TARGET_TPS) / OFFICIAL_TARGET_TPS,
+        "margin_to_500_pct_at_central": 100.0 * (cen - OFFICIAL_TARGET_TPS) / OFFICIAL_TARGET_TPS,
+        "tau_band": tb,
+        "multiplier_ci": [calib.mult_ci_local_lo, calib.mult_ci_local_hi],
+    }
+
+
+def tree_free_self_check(calib: Calibration | None = None) -> dict[str, Any]:
+    """Closed loop: the NULL-lever tree-free point (s=0, LK=1, palette=0, tau=1,
+    mult=central) must reproduce the 481.53 official anchor BIT-EXACT.
+
+    Unlike the linear-reference self-check (a noisy-meter recovery), this one is an
+    EXACT identity: ``tree_free_official(0, mult=central, tau=1, ...) ==
+    K_cal*E_T_linear*1.0*1.0 == 481.53``. It pins that denken #105's K_cal and this
+    module's multiplier agree on the same anchor with no double-count."""
+    if calib is None:
+        calib = calibrate()
+    mc = calib.multiplier
+    null = tree_free_official(0.0, mult=mc, tau=1.0, lk_mult=1.0,
+                              palette_tps_pct=0.0, fp32_m8=0.0,
+                              persist_reclaim=0.0, mult_central=mc)
+    recovered = null["official_tps"]
+    target = float(OFFICIAL_ANCHOR["tps"])
+    abs_err = abs(recovered - target)
+    rel_err_pct = 100.0 * abs_err / target
+    return {
+        "recovered_official": recovered,
+        "official_anchor": target,
+        "abs_err_vs_anchor_tps": abs_err,
+        "rel_err_vs_anchor_pct": rel_err_pct,
+        "self_check_mde_pct": SELF_CHECK_MDE_PCT,
+        "reproduces_anchor_bit_exact": abs_err < 1e-9,
+        "reproduces_official_anchor": rel_err_pct <= SELF_CHECK_MDE_PCT,
+        "k_cal": tf.K_CAL,
+        "e_t_linear": tf.E_T_LINEAR,
+        "note": "NULL-lever tree-free point == K_cal*E_T_linear == 481.53 by construction; "
+                "the bit-exact consistency anchor tying denken #105's K_cal to #99's multiplier.",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Step 2: bound tau from committed local data
+# ---------------------------------------------------------------------------
+# The three committed local meters of the IDENTICAL deployed K=7 stack -- their ratio
+# to the single official anchor is the "multiplier" each meter would imply. The spread
+# across meters is the METER CONFOUND that swamps any cross-precision config signal.
+METER_WITNESS = [
+    {"meter": "steady (16-prompt local_prevalidate, FRAGILE/retired)", "local_tps": 428.37,
+     "source": "BASELINE.md PR#43 tps_local_splitkv_steady; retired by #72 (BASELINE.md:178)"},
+    {"meter": "wall_tps (128-prompt #72/#82 protocol, CANONICAL)", "local_tps": 454.09,
+     "source": "BASELINE.md re-baseline (median N=3, CV 0.007%)"},
+    {"meter": "windowed-steady (drop W=3 cold intervals)", "local_tps": 459.83,
+     "source": "research/EXPERIMENTS_LOG.md:498 (robust interval-meter variant)"},
+]
+
+
+def bound_tau_local(calib: Calibration | None = None) -> dict[str, Any]:
+    """Step 2: bound ``tau`` (the local->official realization factor for a config that
+    DIFFERS from the deployed anchor) from COMMITTED cross-config local data, as the
+    empirical proxy for whether a SplitK kernel swap moves the transfer.
+
+    The honest finding -- there is exactly ONE matched (official, local) pair on the
+    frontier (the deployed anchor, which DEFINES tau=1.00). No committed config gives a
+    second matched pair in the SAME meter:
+      * config CHANGES that have a committed LOCAL wall_tps (K-sweep 5..9, MBT-sweep
+        512..8192) all read the same ~454.x denominator -> the wall_tps meter is
+        config-stable to <0.1% (the per-session spread below), but those configs have
+        NO official counterpart, so they bound LOCAL stability, not tau.
+      * configs with BOTH an official and a local number (older precision rungs) were
+        metered with the 16-prompt steady meter, not the 128-prompt wall_tps protocol,
+        so their official/local ratio conflates config-drift with the ~7% METER spread
+        (steady 428 / wall_tps 454 / windowed 460 for the IDENTICAL deployed stack).
+    So tau for a kernel swap is NOT directly measurable from committed data. The band is
+    a MECHANISM inference + a physical ceiling, with an explicit re-anchor recommendation
+    for denken #109."""
+    if calib is None:
+        calib = calibrate()
+    official = float(OFFICIAL_ANCHOR["tps"])
+
+    # (a) meter-confound witness: the multiplier each committed meter would imply.
+    meter_rows = []
+    for m in METER_WITNESS:
+        meter_rows.append({**m, "implied_multiplier": official / m["local_tps"]})
+    meter_mults = [r["implied_multiplier"] for r in meter_rows]
+    meter_spread_pct = 100.0 * (max(meter_mults) - min(meter_mults)) / statistics.fmean(meter_mults)
+
+    # (b) within-meter config-stability witness: per-session wall_tps multiplier spread
+    # (committed K-sweep / MBT sessions). This is the meter-MATCHED signal -- tiny.
+    sess_mults = [p["multiplier"] for p in calib.per_session]
+    sess_spread_pct = 100.0 * (max(sess_mults) - min(sess_mults)) / calib.multiplier
+
+    # (c) the band. Upper bound tau<=1.00 is a physical CEILING: a bandwidth-utilisation
+    # lever (SplitK) realized locally cannot OVER-realize officially (both A10G boxes
+    # share GDDR6 ~600 GB/s sm_86 bandwidth; the verify-GEMM is BW-bound so the speedup
+    # is SM-clock-insensitive). Lower bound: the mechanism says the fractional speedup
+    # transfers ~1:1 -> 0.99; denken's GENERIC config floor is 0.96.
+    tau_mechanism_low = 0.99
+    tau_generic_low = float(tf.TAU["low"])  # 0.96
+    tau_high = float(tf.TAU["high"])        # 1.00
+    tau_band_local = [tau_mechanism_low, tau_high]
+
+    # (d) does the choice of floor change the >=500 decision? Threshold at the
+    # CONSERVATIVE corner (mult-low, LK off, palette off, fp32 high) across tau.
+    mc = calib.multiplier
+    def cons_threshold(tau: float) -> float | None:
+        return tree_free_threshold(
+            mult=calib.mult_ci_local_lo, tau=tau, lk_mult=tf.LK_MULT["low"],
+            palette_tps_pct=PALETTE_TPS["low"], fp32_m8=tf.FP32_M8["high"],
+            persist_reclaim=tf.PERSIST_RECLAIM["low"], mult_central=mc)
+    thr_at_tau = {f"{t:.2f}": cons_threshold(t)
+                  for t in (0.96, 0.97, 0.98, 0.99, 1.00)}
+    ubel_high = float(tf.SPLITK_UBEL["high"])
+    ceiling = float(tf.SPLITK_CEILING)
+    thr_mech = cons_threshold(tau_mechanism_low)
+    thr_generic = cons_threshold(tau_generic_low)
+
+    def reachable(s):  # within ubel's nominal-high deliverable
+        return s is not None and s != float("inf") and s <= ubel_high
+    decides_at_mech = reachable(thr_mech)
+    decides_at_generic = reachable(thr_generic)
+
+    # (e) recommendation to denken #109.
+    if decides_at_generic:
+        recommendation = "SHIP_ON_LOCAL_CAL"
+        rec_detail = ("No official re-anchor needed: even at denken's GENERIC tau floor "
+                      f"0.96 the conservative-corner SplitK threshold ({_pct(thr_generic)}) "
+                      f"is within ubel's nominal-high deliverable ({ubel_high*100:.0f}%) -> "
+                      "ubel #108's SplitK number alone decides 500.")
+    elif decides_at_mech:
+        recommendation = "ONE_OFFICIAL_SPLITK_ANCHOR"
+        rec_detail = ("Config-sensitive at the floor: at the MECHANISM tau floor 0.99 the "
+                      f"conservative threshold ({_pct(thr_mech)}) is within ubel's "
+                      f"deliverable ({ubel_high*100:.0f}%), but at the generic 0.96 floor "
+                      f"it rises to {_pct(thr_generic)} (> deliverable). denken #109 should "
+                      "take ONE official SplitK anchor to confirm tau>=0.99 (the mechanism "
+                      "predicts it: SplitK is a bandwidth lever, bandwidth is identical "
+                      "across both A10G boxes) -> converts AMBER to GREEN.")
+    else:
+        recommendation = "TRANSFER_UNTRUSTWORTHY"
+        rec_detail = ("Even at the mechanism floor 0.99 the conservative threshold "
+                      f"({_pct(thr_mech)}) exceeds ubel's deliverable -> the tree-free "
+                      "local projection cannot decide 500 on its own.")
+
+    return {
+        "test_metric_name": "tau_band_local",
+        "tau_band_local": tau_band_local,
+        "tau_mechanism_low": tau_mechanism_low,
+        "tau_generic_low": tau_generic_low,
+        "tau_high_physical_ceiling": tau_high,
+        "meter_confound": {
+            "meters": meter_rows,
+            "implied_multiplier_spread_pct": meter_spread_pct,
+            "interpretation": ("meter choice alone swings the implied multiplier by "
+                               f"{meter_spread_pct:.1f}% -- this swamps any cross-precision "
+                               "config signal, so precision rungs cannot bound tau."),
+        },
+        "within_meter_config_stability": {
+            "per_session_multiplier_spread_pct": sess_spread_pct,
+            "interpretation": ("meter-MATCHED config changes (K-sweep, MBT) move the local "
+                               f"wall_tps denominator by only {sess_spread_pct:.3f}% -- the "
+                               "transfer is NOT config-sensitive within a matched meter."),
+        },
+        "conservative_threshold_at_tau": thr_at_tau,
+        "ubel_nominal_high": ubel_high,
+        "splitk_ceiling": ceiling,
+        "decides_at_mechanism_floor": decides_at_mech,
+        "decides_at_generic_floor": decides_at_generic,
+        "recommendation": recommendation,
+        "recommendation_detail": rec_detail,
+        "mechanism": ("SplitK closes the verify-GEMM HBM-bandwidth gap; both the local AWS "
+                      "A10G and the HF-Jobs a10g-small are sm_86 / GDDR6 ~600 GB/s and the "
+                      "verify-GEMM is bandwidth-bound (SM-clock-insensitive), so the "
+                      "fractional speedup transfers ~1:1 -> tau in [0.99, 1.00]."),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Step 3: tree-free 500-path gate
+# ---------------------------------------------------------------------------
+def tree_free_gate(calib: Calibration | None = None, *,
+                   tau_bound: dict[str, Any] | None = None,
+                   spread_red_pct: float = 2.0) -> dict[str, Any]:
+    """Step-3 gate: is the tree-free->official instrument ARMED, and is tau tight enough
+    that ubel #108's SplitK number ALONE decides 500 at the conservative corner?
+
+    * GREEN -- armed (self-check reproduces the anchor) AND the conservative-corner
+               SplitK threshold is within ubel's deliverable even at denken's GENERIC
+               tau floor (0.96) -> SplitK alone decides, tau is irrelevant to the call.
+    * AMBER -- armed, but the decision turns on the tau floor: it clears at the
+               MECHANISM floor (0.99) yet not at the generic 0.96 -> name ONE official
+               SplitK anchor for denken #109 to confirm tau>=0.99 (OR an aggressive
+               SplitK above ubel's nominal, still within the bandwidth-gap ceiling).
+    * RED   -- transfer config-UNSTABLE (per-session multiplier spread > spread_red_pct)
+               OR the threshold is unreachable within the bandwidth-gap ceiling even at
+               the mechanism floor -> the local projection can't be trusted.
+
+    PRIMARY metric ``tree_free_projection_armed`` (bool). TEST metric ``tau_band_local``."""
+    if calib is None:
+        calib = calibrate()
+    if tau_bound is None:
+        tau_bound = bound_tau_local(calib)
+
+    sc = tree_free_self_check(calib)
+    armed = bool(sc["reproduces_anchor_bit_exact"])
+
+    sess_mults = [p["multiplier"] for p in calib.per_session]
+    spread_pct = 100.0 * (max(sess_mults) - min(sess_mults)) / calib.multiplier
+    unstable = spread_pct > spread_red_pct
+
+    thr_mech = tau_bound["conservative_threshold_at_tau"]["0.99"]
+    ceiling = tau_bound["splitk_ceiling"]
+    unreachable = (thr_mech is None) or (thr_mech == float("inf")) or (thr_mech > ceiling)
+    decides_at_generic = bool(tau_bound["decides_at_generic_floor"])
+    decides_at_mech = bool(tau_bound["decides_at_mechanism_floor"])
+
+    reasons: list[str] = []
+    if not armed:
+        reasons.append(f"NOT ARMED: self-check residual {sc['rel_err_vs_anchor_pct']:.4f}% "
+                       "(null-lever point must reproduce 481.53 bit-exact)")
+    if unstable:
+        reasons.append(f"transfer UNSTABLE: per-session multiplier spread {spread_pct:.3f}% "
+                       f"> {spread_red_pct:.1f}%")
+    if unreachable:
+        reasons.append("threshold unreachable within the bandwidth-gap ceiling even at the "
+                       "mechanism tau floor 0.99")
+
+    if (not armed) or unstable or unreachable:
+        verdict = "RED"
+        verdict_label = ("tree-free local projection cannot be trusted "
+                         "(unarmed / config-unstable / unreachable)")
+    elif decides_at_generic:
+        verdict = "GREEN"
+        verdict_label = ("instrument ARMED + tau tight enough that ubel #108's SplitK number "
+                         "ALONE decides 500 at the conservative corner (clears even at the "
+                         "generic 0.96 floor)")
+        reasons.append("conservative-corner threshold within ubel's deliverable at every tau "
+                       "in [0.96, 1.00] -> SplitK alone decides 500")
+    else:
+        verdict = "AMBER"
+        verdict_label = ("instrument ARMED; the >=500 call turns on the tau floor -> denken "
+                         "#109 needs ONE official SplitK anchor to confirm tau>=0.99")
+        reasons.append(tau_bound["recommendation_detail"])
+
+    return {
+        "primary_metric_name": "tree_free_projection_armed",
+        "tree_free_projection_armed": armed,
+        "test_metric_name": "tau_band_local",
+        "tau_band_local": tau_bound["tau_band_local"],
+        "verdict": verdict,
+        "verdict_label": verdict_label,
+        "self_check": sc,
+        "per_session_spread_pct": spread_pct,
+        "transfer_stable": not unstable,
+        "decides_at_mechanism_floor": decides_at_mech,
+        "decides_at_generic_floor": decides_at_generic,
+        "recommendation": tau_bound["recommendation"],
+        "reasons": reasons,
+    }
+
+
+# ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+def _pct(s) -> str:
+    if s is None:
+        return "clears@s=0"
+    if s == float("inf"):
+        return ">ceiling"
+    if s == 0.0:
+        return "clears@s=0"
+    return f"{s*100:.2f}%"
+
+
 def _fmt(v, p=4):
     return f"{v:.{p}f}" if isinstance(v, (int, float)) and v == v else "—"
 
@@ -456,6 +895,78 @@ def _print_calibration(c: Calibration) -> None:
         print(f"  - {n}")
 
 
+def _log_tree_free_wandb(args, calib: Calibration, tau_bound: dict[str, Any],
+                         gate: dict[str, Any], projection: dict[str, Any] | None) -> None:
+    """Rich W&B log of the PR#112 tree-free instrument (group tree-free-projection-harden)."""
+    import wandb
+
+    def jnum(x):  # inf/None -> finite sentinels for numeric panels
+        if x is None:
+            return -1.0
+        return 9.99 if x == float("inf") else float(x)
+
+    run = wandb.init(
+        project=args.wandb_project, entity=args.wandb_entity,
+        name=args.wandb_name, group=args.wandb_group, job_type="analysis",
+        config={
+            "instrument": "tree-free-500-projection (PR#112)",
+            "method": "denken#105 slice-compose x #99 multiplier-CI rescale, CPU-analytic",
+            "official_anchor_tps": calib.official_tps,
+            "multiplier_central": calib.multiplier,
+            "multiplier_ci_local": [calib.mult_ci_local_lo, calib.mult_ci_local_hi],
+            "k_cal": tf.K_CAL, "e_t_linear": tf.E_T_LINEAR, "budget": tf.BUDGET,
+            "tau_band_default": TAU_BAND_DEFAULT, "palette_tps": PALETTE_TPS,
+            "splitk_prior": SPLITK_PRIOR, "splitk_ceiling": tf.SPLITK_CEILING,
+            "target_official": OFFICIAL_TARGET_TPS,
+        })
+    s = wandb.summary
+    sc = gate["self_check"]
+    s["tree_free_projection_armed"] = gate["tree_free_projection_armed"]
+    s["self_check_recovered_official"] = sc["recovered_official"]
+    s["self_check_residual_pct"] = sc["rel_err_vs_anchor_pct"]
+    s["tau_band_local_low"] = tau_bound["tau_band_local"][0]
+    s["tau_band_local_high"] = tau_bound["tau_band_local"][1]
+    s["tau_mechanism_low"] = tau_bound["tau_mechanism_low"]
+    s["tau_generic_low"] = tau_bound["tau_generic_low"]
+    s["meter_confound_spread_pct"] = tau_bound["meter_confound"]["implied_multiplier_spread_pct"]
+    s["within_meter_config_spread_pct"] = (
+        tau_bound["within_meter_config_stability"]["per_session_multiplier_spread_pct"])
+    s["decides_at_mechanism_floor"] = tau_bound["decides_at_mechanism_floor"]
+    s["decides_at_generic_floor"] = tau_bound["decides_at_generic_floor"]
+    s["recommendation"] = tau_bound["recommendation"]
+    s["verdict"] = gate["verdict"]
+    s["verdict_label"] = gate["verdict_label"]
+    s["per_session_spread_pct"] = gate["per_session_spread_pct"]
+
+    # tau -> conservative-corner SplitK threshold sweep
+    tt = wandb.Table(columns=["tau", "conservative_splitk_threshold",
+                              "within_ubel_deliverable"])
+    ubel_high = tau_bound["ubel_nominal_high"]
+    for t, thr in tau_bound["conservative_threshold_at_tau"].items():
+        within = (thr is not None and thr != float("inf") and thr <= ubel_high)
+        tt.add_data(float(t), jnum(thr), within)
+        wandb.log({"tau_threshold/tau": float(t),
+                   "tau_threshold/conservative_splitk": jnum(thr),
+                   "tau_threshold/ubel_nominal_high": ubel_high,
+                   "tau_threshold/splitk_ceiling": tau_bound["splitk_ceiling"]})
+    wandb.log({"tau_vs_conservative_splitk_threshold": tt})
+
+    # meter-confound witness
+    mt = wandb.Table(columns=["meter", "local_tps", "implied_multiplier"])
+    for r in tau_bound["meter_confound"]["meters"]:
+        mt.add_data(r["meter"], r["local_tps"], r["implied_multiplier"])
+    wandb.log({"meter_confound": mt})
+
+    if projection is not None:
+        s["projection_central_official"] = projection["projected_official"]
+        s["projection_conservative_official"] = projection["projected_official_lo"]
+        s["projection_optimistic_official"] = projection["projected_official_hi"]
+        s["projection_clears_500_conservative"] = projection["clears_500_conservative"]
+
+    print(f"\nW&B run: {run.id}  ({run.url})")
+    wandb.finish()
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -464,22 +975,40 @@ def main(argv: list[str] | None = None) -> int:
                     help="closed-loop: project the locked linear reference -> official anchor")
     ap.add_argument("--tree", action="store_true",
                     help="Step-3 analytical projection of land #71's tree + 500-gate")
+    ap.add_argument("--tree-free", action="store_true",
+                    help="PR#112: tree-free 500-path instrument (tau bound + Step-3 gate)")
+    ap.add_argument("--splitk-frac", type=float, default=None,
+                    help="project a measured SplitK speedup s (fraction, e.g. 0.085) -> official band")
+    ap.add_argument("--splitk-lo", type=float, default=None, help="SplitK CI low edge (fraction)")
+    ap.add_argument("--splitk-hi", type=float, default=None, help="SplitK CI high edge (fraction)")
+    ap.add_argument("--lk-mult", type=float, default=None,
+                    help="LK #95 E[T] multiplier central override (default denken 1.010)")
+    ap.add_argument("--palette-tps-pct", type=float, default=None,
+                    help="wirbel #110 palette central TPS%% gain (default 0, unrealized)")
     ap.add_argument("--project-wall-tps", type=float, default=None,
                     help="project a measured local wall_tps to an official band")
     ap.add_argument("--modeling-band-pct", type=float, default=0.0)
     ap.add_argument("--official-cv-assumed-pct", type=float, default=1.0,
                     help="conservative official per-run CV for the envelope (sensitivity knob)")
     ap.add_argument("--out", type=Path, default=None, help="write the full report JSON")
+    ap.add_argument("--wandb", action="store_true", help="log the tree-free gate to W&B")
+    ap.add_argument("--wandb-project", default="gemma-challenge-senpai")
+    ap.add_argument("--wandb-entity", default="wandb-applied-ai-team")
+    ap.add_argument("--wandb-name", default="lawine/tree-free-projection-harden")
+    ap.add_argument("--wandb-group", default="tree-free-projection-harden")
     args = ap.parse_args(argv)
 
     calib = calibrate(official_cv_assumed_pct=args.official_cv_assumed_pct)
     report: dict[str, Any] = {"calibration": calib.as_dict(),
                               "official_anchor": OFFICIAL_ANCHOR}
 
-    if args.calibrate or not (args.self_check or args.tree or args.project_wall_tps):
+    explicit = bool(args.self_check or args.tree or args.tree_free
+                    or args.project_wall_tps is not None or args.splitk_frac is not None)
+
+    if args.calibrate or not explicit:
         _print_calibration(calib)
 
-    if args.self_check or not (args.tree or args.project_wall_tps):
+    if args.self_check or not explicit:
         sc = self_check(calib)
         report["self_check"] = sc
         ok = "PASS" if sc["recovers_official_anchor"] else "FAIL"
@@ -521,6 +1050,62 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  >>> GATE = {gate['verdict']}")
         for r in gate["reasons"]:
             print(f"        - {r}")
+
+    if args.splitk_frac is not None:
+        pj = project_tree_free(
+            args.splitk_frac, splitk_lo=args.splitk_lo, splitk_hi=args.splitk_hi,
+            lk_mult_central=args.lk_mult, palette_tps_pct_central=args.palette_tps_pct,
+            calib=calib)
+        report["tree_free_projection"] = pj
+        print(f"\n----- tree-free projection of SplitK s={args.splitk_frac:.4f} "
+              f"(LK={pj['central']['lk_mult']:.3f}, palette={pj['central']['palette_tps_pct']:.2f}%) -----")
+        print(f"  central      = {pj['projected_official']:.1f} official "
+              f"(margin@central {pj['margin_to_500_pct_at_central']:+.1f}%)")
+        print(f"  conservative = {pj['projected_official_lo']:.1f}  (mult-low x tau-low x SplitK-low; "
+              f"margin {pj['margin_to_500_pct_at_conservative']:+.1f}%)")
+        print(f"  optimistic   = {pj['projected_official_hi']:.1f}")
+        print(f"  >>> clears 500 at conservative corner: {pj['clears_500_conservative']} "
+              f"(central: {pj['clears_500_central']})")
+
+    if args.tree_free:
+        tau_bound = bound_tau_local(calib)
+        gate = tree_free_gate(calib, tau_bound=tau_bound)
+        report["tree_free_tau_bound"] = tau_bound
+        report["tree_free_gate"] = gate
+        sc = gate["self_check"]
+        print(f"\n===== TREE-FREE 500-PATH INSTRUMENT (PR #112) =====")
+        print(f"  [arm] null-lever self-check: {sc['recovered_official']:.6f} official "
+              f"(anchor {sc['official_anchor']:.2f}, residual {sc['rel_err_vs_anchor_pct']:.2e}%) "
+              f"-> {'BIT-EXACT' if sc['reproduces_anchor_bit_exact'] else 'FAIL'}")
+        print(f"\n  [Step 2] bound tau from committed local data:")
+        mc = tau_bound["meter_confound"]
+        print(f"    meter confound (same deployed stack, 3 committed meters):")
+        for r in mc["meters"]:
+            print(f"       {r['local_tps']:7.2f} tok/s -> implied mult {r['implied_multiplier']:.4f}  "
+                  f"[{r['meter'].split('(')[0].strip()}]")
+        print(f"       -> meter choice alone swings the multiplier by "
+              f"{mc['implied_multiplier_spread_pct']:.1f}% (swamps cross-precision config signal)")
+        wm = tau_bound["within_meter_config_stability"]
+        print(f"    within-meter (matched wall_tps) config spread: "
+              f"{wm['per_session_multiplier_spread_pct']:.3f}% (K/MBT sweeps stable)")
+        print(f"    >>> tau_band_local = [{tau_bound['tau_band_local'][0]:.2f}, "
+              f"{tau_bound['tau_band_local'][1]:.2f}]  "
+              f"(mechanism floor 0.99; physical ceiling 1.00; generic floor 0.96)")
+        print(f"    conservative-corner SplitK threshold vs tau:")
+        for t, s in tau_bound["conservative_threshold_at_tau"].items():
+            flag = "<= ubel-high" if (s is not None and s != float("inf")
+                                      and s <= tau_bound["ubel_nominal_high"]) else "> ubel-high"
+            print(f"       tau={t} -> SplitK {_pct(s):>10s}  ({flag})")
+        print(f"    re-anchor recommendation: {tau_bound['recommendation']}")
+        print(f"       {tau_bound['recommendation_detail']}")
+        print(f"\n  [Step 3] GATE = {gate['verdict']} -- {gate['verdict_label']}")
+        print(f"    primary  tree_free_projection_armed = {gate['tree_free_projection_armed']}")
+        print(f"    test     tau_band_local             = {gate['tau_band_local']}")
+        for r in gate["reasons"]:
+            print(f"       - {r}")
+
+        if args.wandb:
+            _log_tree_free_wandb(args, calib, tau_bound, gate, report.get("tree_free_projection"))
 
     if args.out:
         args.out.parent.mkdir(parents=True, exist_ok=True)
