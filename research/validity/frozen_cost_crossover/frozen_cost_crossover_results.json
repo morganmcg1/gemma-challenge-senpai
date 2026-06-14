@@ -1,0 +1,575 @@
+{
+  "pr": 206,
+  "metric_primary": "frozen_cost_self_test_passes",
+  "metric_test": "build_higher_dominates_below_b",
+  "frozen_cost_self_test_passes": true,
+  "build_higher_dominates_below_b": 2.3854429731169677,
+  "crossover_fixed_frozen": 0.41920935074517335,
+  "crossover_sequential_frozen": 3.393953630859287,
+  "regime_robust_strategy": "build-to-512.2-N1",
+  "f_where_redraw_competitive": 0.8455321793444455,
+  "approval_spend_recommendation": {
+    "regime_unpinned_default": "build clear of mu >= 512.2 TPS and take N=1 (one official draw)",
+    "build_target_tps": 512.157,
+    "frozen_bar_minimum_tps": 504.87,
+    "shots_if_build_to_512": 1,
+    "rationale": "N=1 at mu=512.2 is REGIME-INVARIANT (cost b*Delta_mu+c identical fresh/frozen) and clears at P>=0.95 in BOTH regimes; under the more-plausible FROZEN regime best-of-N at the mu=500 bar tops out at P=0.810 and needs ~30 shots to force 0.95, so redrawing is a poor substitute and the build-vs-redraw crossover shifts hard toward build-higher.",
+    "build_higher_dominates_below_b": 2.3854,
+    "regime_robust_strategy": "build-to-512.2-N1",
+    "budget_best_of_n_at_bar_only_if": "the regime is EMPIRICALLY CONFIRMED FRESH (#202 follow-up #1: two official re-draws agreeing within sigma_hw=4.86 TPS => frozen; disagreeing beyond it => fresh). Until confirmed, do NOT budget best-of-N at the bar.",
+    "fresh_confirmed_fallback": "N=5 at the bar (fresh sequential pays E[shots]=1.94 on average)",
+    "frozen_redraw_quota_if_forced": 30,
+    "authorizes": "NOTHING -- prices a plan; a human approves the spend AND confirms the harness regime."
+  },
+  "c0_per_shot_job_units": 1.0,
+  "frozen_crossover": {
+    "delta_mu_tps": 12.157071171610028,
+    "fresh": {
+      "n_redraw_fixedN": 5,
+      "e_redraw_sequential": 1.9375,
+      "crossover_fixed": 3.039267792902507,
+      "crossover_sequential": 12.967542583050696,
+      "build_higher_dominates_below_b_fixedN": 0.3290266169816507,
+      "build_higher_dominates_below_b_sequential": 0.07711561335507439
+    },
+    "frozen": {
+      "n_redraw_fixedN": 30,
+      "e_redraw_sequential": 4.581979158781872,
+      "crossover_fixed_frozen": 0.41920935074517335,
+      "crossover_sequential_frozen": 3.393953630859287,
+      "build_higher_dominates_below_b_fixedN": 2.3854429731169677,
+      "build_higher_dominates_below_b_sequential": 0.2946416211781946
+    },
+    "shift_vs_fresh": {
+      "crossover_fixed_ratio_frozen_over_fresh": 0.13793103448275862,
+      "crossover_sequential_ratio_frozen_over_fresh": 0.2617268159423956,
+      "below_b_widen_factor_fixedN": 7.250000000000001,
+      "interpretation": "FROZEN redraw needs N=30 shots (vs fresh 5) to force P>=0.95 at the bar, so the build-vs-redraw crossover slope drops from c*=3.039*b (fresh) to c*=0.419*b (frozen) fixed-N -- build-higher now dominates for build costs below b=2.385 (vs fresh b=0.329), a 7.25x wider range. The shift is HARD toward build-higher because re-drawing at the bar is a poor substitute under freeze (it can only beat down sigma_hw)."
+    }
+  },
+  "regime_robust": {
+    "table_2x2_note": "rows = build cost b (job-units/TPS, at per-shot c0=1.0); build-to-512.2-N1 cost = b*12.157 + c0 is IDENTICAL fresh vs frozen (N=1 regime-invariance); build-at-bar-best-of-N costs 5 (fresh) vs 30 (frozen) fixed-N (the frozen 19%-exhaust tail forces ~30 shots).",
+    "cost_redraw_corners": {
+      "fresh_fixedN": 5.0,
+      "frozen_fixedN": 30.0,
+      "fresh_sequential": 1.9375,
+      "frozen_sequential": 4.581979158781872
+    },
+    "fixedN_rows": [
+      {
+        "b_per_mu": 0.0,
+        "cost_buildN1_fresh": 1.0,
+        "cost_buildN1_frozen": 1.0,
+        "cost_redraw_fresh": 5.0,
+        "cost_redraw_frozen": 30.0,
+        "regret_buildN1": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 4.0,
+          "frozen": 29.0
+        },
+        "worstcase_regret_buildN1": 0.0,
+        "worstcase_regret_redraw": 29.0,
+        "expected_cost_buildN1_50_50": 1.0,
+        "expected_cost_redraw_50_50": 17.5,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 0.03162277660168379,
+        "cost_buildN1_fresh": 1.384440345790594,
+        "cost_buildN1_frozen": 1.384440345790594,
+        "cost_redraw_fresh": 5.0,
+        "cost_redraw_frozen": 30.0,
+        "regret_buildN1": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 3.615559654209406,
+          "frozen": 28.615559654209406
+        },
+        "worstcase_regret_buildN1": 0.0,
+        "worstcase_regret_redraw": 28.615559654209406,
+        "expected_cost_buildN1_50_50": 1.384440345790594,
+        "expected_cost_redraw_50_50": 17.5,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 0.1,
+        "cost_buildN1_fresh": 2.2157071171610028,
+        "cost_buildN1_frozen": 2.2157071171610028,
+        "cost_redraw_fresh": 5.0,
+        "cost_redraw_frozen": 30.0,
+        "regret_buildN1": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 2.7842928828389972,
+          "frozen": 27.784292882838997
+        },
+        "worstcase_regret_buildN1": 0.0,
+        "worstcase_regret_redraw": 27.784292882838997,
+        "expected_cost_buildN1_50_50": 2.2157071171610028,
+        "expected_cost_redraw_50_50": 17.5,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 0.31622776601683794,
+        "cost_buildN1_fresh": 4.844403457905942,
+        "cost_buildN1_frozen": 4.844403457905942,
+        "cost_redraw_fresh": 5.0,
+        "cost_redraw_frozen": 30.0,
+        "regret_buildN1": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 0.1555965420940577,
+          "frozen": 25.15559654209406
+        },
+        "worstcase_regret_buildN1": 0.0,
+        "worstcase_regret_redraw": 25.15559654209406,
+        "expected_cost_buildN1_50_50": 4.844403457905942,
+        "expected_cost_redraw_50_50": 17.5,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 1.0,
+        "cost_buildN1_fresh": 13.157071171610028,
+        "cost_buildN1_frozen": 13.157071171610028,
+        "cost_redraw_fresh": 5.0,
+        "cost_redraw_frozen": 30.0,
+        "regret_buildN1": {
+          "fresh": 8.157071171610028,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 16.842928828389972
+        },
+        "worstcase_regret_buildN1": 8.157071171610028,
+        "worstcase_regret_redraw": 16.842928828389972,
+        "expected_cost_buildN1_50_50": 13.157071171610028,
+        "expected_cost_redraw_50_50": 17.5,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 3.1622776601683795,
+        "cost_buildN1_fresh": 39.44403457905942,
+        "cost_buildN1_frozen": 39.44403457905942,
+        "cost_redraw_fresh": 5.0,
+        "cost_redraw_frozen": 30.0,
+        "regret_buildN1": {
+          "fresh": 34.44403457905942,
+          "frozen": 9.44403457905942
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "worstcase_regret_buildN1": 34.44403457905942,
+        "worstcase_regret_redraw": 0.0,
+        "expected_cost_buildN1_50_50": 39.44403457905942,
+        "expected_cost_redraw_50_50": 17.5,
+        "minimax_regret_strategy": "build-at-bar-best-of-N",
+        "prior50_50_strategy": "build-at-bar-best-of-N"
+      },
+      {
+        "b_per_mu": 10.0,
+        "cost_buildN1_fresh": 122.57071171610028,
+        "cost_buildN1_frozen": 122.57071171610028,
+        "cost_redraw_fresh": 5.0,
+        "cost_redraw_frozen": 30.0,
+        "regret_buildN1": {
+          "fresh": 117.57071171610028,
+          "frozen": 92.57071171610028
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "worstcase_regret_buildN1": 117.57071171610028,
+        "worstcase_regret_redraw": 0.0,
+        "expected_cost_buildN1_50_50": 122.57071171610028,
+        "expected_cost_redraw_50_50": 17.5,
+        "minimax_regret_strategy": "build-at-bar-best-of-N",
+        "prior50_50_strategy": "build-at-bar-best-of-N"
+      }
+    ],
+    "sequential_rows": [
+      {
+        "b_per_mu": 0.0,
+        "cost_buildN1_fresh": 1.0,
+        "cost_buildN1_frozen": 1.0,
+        "cost_redraw_fresh": 1.9375,
+        "cost_redraw_frozen": 4.581979158781872,
+        "regret_buildN1": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 0.9375,
+          "frozen": 3.5819791587818717
+        },
+        "worstcase_regret_buildN1": 0.0,
+        "worstcase_regret_redraw": 3.5819791587818717,
+        "expected_cost_buildN1_50_50": 1.0,
+        "expected_cost_redraw_50_50": 3.259739579390936,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 0.03162277660168379,
+        "cost_buildN1_fresh": 1.384440345790594,
+        "cost_buildN1_frozen": 1.384440345790594,
+        "cost_redraw_fresh": 1.9375,
+        "cost_redraw_frozen": 4.581979158781872,
+        "regret_buildN1": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 0.553059654209406,
+          "frozen": 3.1975388129912776
+        },
+        "worstcase_regret_buildN1": 0.0,
+        "worstcase_regret_redraw": 3.1975388129912776,
+        "expected_cost_buildN1_50_50": 1.384440345790594,
+        "expected_cost_redraw_50_50": 3.259739579390936,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 0.1,
+        "cost_buildN1_fresh": 2.2157071171610028,
+        "cost_buildN1_frozen": 2.2157071171610028,
+        "cost_redraw_fresh": 1.9375,
+        "cost_redraw_frozen": 4.581979158781872,
+        "regret_buildN1": {
+          "fresh": 0.27820711716100277,
+          "frozen": 0.0
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 2.366272041620869
+        },
+        "worstcase_regret_buildN1": 0.27820711716100277,
+        "worstcase_regret_redraw": 2.366272041620869,
+        "expected_cost_buildN1_50_50": 2.2157071171610028,
+        "expected_cost_redraw_50_50": 3.259739579390936,
+        "minimax_regret_strategy": "build-to-512.2-N1",
+        "prior50_50_strategy": "build-to-512.2-N1"
+      },
+      {
+        "b_per_mu": 0.31622776601683794,
+        "cost_buildN1_fresh": 4.844403457905942,
+        "cost_buildN1_frozen": 4.844403457905942,
+        "cost_redraw_fresh": 1.9375,
+        "cost_redraw_frozen": 4.581979158781872,
+        "regret_buildN1": {
+          "fresh": 2.9069034579059423,
+          "frozen": 0.2624242991240706
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "worstcase_regret_buildN1": 2.9069034579059423,
+        "worstcase_regret_redraw": 0.0,
+        "expected_cost_buildN1_50_50": 4.844403457905942,
+        "expected_cost_redraw_50_50": 3.259739579390936,
+        "minimax_regret_strategy": "build-at-bar-best-of-N",
+        "prior50_50_strategy": "build-at-bar-best-of-N"
+      },
+      {
+        "b_per_mu": 1.0,
+        "cost_buildN1_fresh": 13.157071171610028,
+        "cost_buildN1_frozen": 13.157071171610028,
+        "cost_redraw_fresh": 1.9375,
+        "cost_redraw_frozen": 4.581979158781872,
+        "regret_buildN1": {
+          "fresh": 11.219571171610028,
+          "frozen": 8.575092012828156
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "worstcase_regret_buildN1": 11.219571171610028,
+        "worstcase_regret_redraw": 0.0,
+        "expected_cost_buildN1_50_50": 13.157071171610028,
+        "expected_cost_redraw_50_50": 3.259739579390936,
+        "minimax_regret_strategy": "build-at-bar-best-of-N",
+        "prior50_50_strategy": "build-at-bar-best-of-N"
+      },
+      {
+        "b_per_mu": 3.1622776601683795,
+        "cost_buildN1_fresh": 39.44403457905942,
+        "cost_buildN1_frozen": 39.44403457905942,
+        "cost_redraw_fresh": 1.9375,
+        "cost_redraw_frozen": 4.581979158781872,
+        "regret_buildN1": {
+          "fresh": 37.50653457905942,
+          "frozen": 34.86205542027755
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "worstcase_regret_buildN1": 37.50653457905942,
+        "worstcase_regret_redraw": 0.0,
+        "expected_cost_buildN1_50_50": 39.44403457905942,
+        "expected_cost_redraw_50_50": 3.259739579390936,
+        "minimax_regret_strategy": "build-at-bar-best-of-N",
+        "prior50_50_strategy": "build-at-bar-best-of-N"
+      },
+      {
+        "b_per_mu": 10.0,
+        "cost_buildN1_fresh": 122.57071171610028,
+        "cost_buildN1_frozen": 122.57071171610028,
+        "cost_redraw_fresh": 1.9375,
+        "cost_redraw_frozen": 4.581979158781872,
+        "regret_buildN1": {
+          "fresh": 120.63321171610028,
+          "frozen": 117.9887325573184
+        },
+        "regret_redraw": {
+          "fresh": 0.0,
+          "frozen": 0.0
+        },
+        "worstcase_regret_buildN1": 120.63321171610028,
+        "worstcase_regret_redraw": 0.0,
+        "expected_cost_buildN1_50_50": 122.57071171610028,
+        "expected_cost_redraw_50_50": 3.259739579390936,
+        "minimax_regret_strategy": "build-at-bar-best-of-N",
+        "prior50_50_strategy": "build-at-bar-best-of-N"
+      }
+    ],
+    "b_robust_crossover_fixedN": 1.357234795049309,
+    "b_robust_crossover_sequential": 0.18587861726663446,
+    "regime_robust_strategy": "build-to-512.2-N1",
+    "regime_robust_rationale": "build-to-512.2/N=1 is the minimax-regret (== 50/50-prior) optimum for build costs b below b_robust=1.357 (fixed-N): its cost is regime-INVARIANT (N=1 => frozen==fresh), so its worst-case regret is bounded, while best-of-N-at-bar is cheap under fresh (5 shots) but blows up under frozen (30 shots, 19%-exhaust) -- worst-case regret up to 29.0 shots' GPU-$ at b->0. Absent a pinned regime the human should HEDGE with build-higher."
+  },
+  "partial_freeze": {
+    "partial_curve": [
+      {
+        "f": 0.0,
+        "p_partial_n5_at_500": 0.8097690471233381,
+        "n_redraw_at_bar": 30,
+        "e_redraw_at_bar": 4.581979158781872,
+        "c_star_fixed": 0.41920935074517335,
+        "c_star_sequential": 3.393953630859287,
+        "build_higher_dominates_below_b_fixedN": 2.3854429731169677
+      },
+      {
+        "f": 0.1,
+        "p_partial_n5_at_500": 0.8298626036845682,
+        "n_redraw_at_bar": 21,
+        "e_redraw_at_bar": 3.7051577068754953,
+        "c_star_fixed": 0.6078535585805014,
+        "c_star_sequential": 4.49403417061834,
+        "build_higher_dominates_below_b_fixedN": 1.6451330849082535
+      },
+      {
+        "f": 0.2,
+        "p_partial_n5_at_500": 0.8488295147112854,
+        "n_redraw_at_bar": 15,
+        "e_redraw_at_bar": 3.133598969427721,
+        "c_star_fixed": 0.8683622265435734,
+        "c_star_sequential": 5.697917624543486,
+        "build_higher_dominates_below_b_fixedN": 1.1515931594357773
+      },
+      {
+        "f": 0.3,
+        "p_partial_n5_at_500": 0.8668079570656453,
+        "n_redraw_at_bar": 12,
+        "e_redraw_at_bar": 2.7977726079302268,
+        "c_star_fixed": 1.1051882883281843,
+        "c_star_sequential": 6.762296364948205,
+        "build_higher_dominates_below_b_fixedN": 0.9048231966995395
+      },
+      {
+        "f": 0.4,
+        "p_partial_n5_at_500": 0.8838920060493884,
+        "n_redraw_at_bar": 10,
+        "e_redraw_at_bar": 2.5630696383599383,
+        "c_star_fixed": 1.3507856857344476,
+        "c_star_sequential": 7.777690048644231,
+        "build_higher_dominates_below_b_fixedN": 0.740309888208714
+      },
+      {
+        "f": 0.5,
+        "p_partial_n5_at_500": 0.9001408636689727,
+        "n_redraw_at_bar": 8,
+        "e_redraw_at_bar": 2.361088169114661,
+        "c_star_fixed": 1.7367244530871468,
+        "c_star_sequential": 8.931876308584599,
+        "build_higher_dominates_below_b_fixedN": 0.5757965797178887
+      },
+      {
+        "f": 0.6,
+        "p_partial_n5_at_500": 0.915583342038769,
+        "n_redraw_at_bar": 7,
+        "e_redraw_at_bar": 2.2321876134532137,
+        "c_star_fixed": 2.026178528601671,
+        "c_star_sequential": 9.866250105809584,
+        "build_higher_dominates_below_b_fixedN": 0.49353992547247605
+      },
+      {
+        "f": 0.7,
+        "p_partial_n5_at_500": 0.9302187556149133,
+        "n_redraw_at_bar": 6,
+        "e_redraw_at_bar": 2.1178792580976293,
+        "c_star_fixed": 2.4314142343220055,
+        "c_star_sequential": 10.87512008434483,
+        "build_higher_dominates_below_b_fixedN": 0.4112832712270634
+      },
+      {
+        "f": 0.8,
+        "p_partial_n5_at_500": 0.9440144091337407,
+        "n_redraw_at_bar": 6,
+        "e_redraw_at_bar": 2.0666645234535665,
+        "c_star_fixed": 2.4314142343220055,
+        "c_star_sequential": 11.397277123503436,
+        "build_higher_dominates_below_b_fixedN": 0.4112832712270634
+      },
+      {
+        "f": 0.9,
+        "p_partial_n5_at_500": 0.9568989938455664,
+        "n_redraw_at_bar": 5,
+        "e_redraw_at_bar": 1.9738316590039358,
+        "c_star_fixed": 3.039267792902507,
+        "c_star_sequential": 12.48375020385417,
+        "build_higher_dominates_below_b_fixedN": 0.3290266169816507
+      },
+      {
+        "f": 1.0,
+        "p_partial_n5_at_500": 0.96875,
+        "n_redraw_at_bar": 5,
+        "e_redraw_at_bar": 1.9375,
+        "c_star_fixed": 3.039267792902507,
+        "c_star_sequential": 12.967542583050696,
+        "build_higher_dominates_below_b_fixedN": 0.3290266169816507
+      }
+    ],
+    "f_where_redraw_competitive": 0.8455321793444455,
+    "frozen_fraction_breakeven_202": 0.8455321793444455,
+    "aligns_with_202_breakeven": true,
+    "note": "c*(f) bridges continuously from the fully-frozen f=0 (redraw needs ~30 shots -> c*=0.419*b, build-higher strongly favoured) to the fully-fresh f=1 (redraw needs 5 -> c*=3.039*b == #200). redraw-at-bar with the budgeted N=5 stays cost-competitive only above f_where_redraw_competitive=0.846 -- the freeze fraction at which best-of-5 still clears the bar at P>=0.95, reproducing #202's frozen_fraction_breakeven=0.846."
+  },
+  "approval_request": {
+    "approval_spend_recommendation": {
+      "regime_unpinned_default": "build clear of mu >= 512.2 TPS and take N=1 (one official draw)",
+      "build_target_tps": 512.157,
+      "frozen_bar_minimum_tps": 504.87,
+      "shots_if_build_to_512": 1,
+      "rationale": "N=1 at mu=512.2 is REGIME-INVARIANT (cost b*Delta_mu+c identical fresh/frozen) and clears at P>=0.95 in BOTH regimes; under the more-plausible FROZEN regime best-of-N at the mu=500 bar tops out at P=0.810 and needs ~30 shots to force 0.95, so redrawing is a poor substitute and the build-vs-redraw crossover shifts hard toward build-higher.",
+      "build_higher_dominates_below_b": 2.3854,
+      "regime_robust_strategy": "build-to-512.2-N1",
+      "budget_best_of_n_at_bar_only_if": "the regime is EMPIRICALLY CONFIRMED FRESH (#202 follow-up #1: two official re-draws agreeing within sigma_hw=4.86 TPS => frozen; disagreeing beyond it => fresh). Until confirmed, do NOT budget best-of-N at the bar.",
+      "fresh_confirmed_fallback": "N=5 at the bar (fresh sequential pays E[shots]=1.94 on average)",
+      "frozen_redraw_quota_if_forced": 30,
+      "authorizes": "NOTHING -- prices a plan; a human approves the spend AND confirms the harness regime."
+    },
+    "approval_paragraph": "Approval request (regime-unpinned default): build land #71 clear of mu>=512.2 TPS (>=504.9 frozen bar at minimum) and take N=1 -- this single draw clears 500 at P>=0.95 in BOTH regimes and its cost (build + 1 shot) is identical whether the official harness re-draw is fresh or frozen, so it is the cost-robust hedge. Only budget best-of-N re-draws at the mu=500 bar if the regime is empirically confirmed FRESH (two re-draws agreeing within sigma_hw=4.86 TPS); under the conservative frozen default, forcing a 95% clear by re-drawing needs ~30 shots (vs 5 fresh), so building higher is unambiguously cheaper for any build cost below b=2.39 job-units/TPS (vs b=0.33 under fresh)."
+  },
+  "self_test": {
+    "frozen_cost_self_test_passes": true,
+    "checks": {
+      "a_f1_reproduces_200_crossover_verbatim": true,
+      "b_f0_genuine_redraw_unbounded_build_dominates_all_b": true,
+      "c_monotone_cstar_frozen_le_fresh": true,
+      "d_buildN1_regime_invariant": true,
+      "e_nan_clean": true
+    },
+    "a_detail": {
+      "n_redraw_f1": 5,
+      "e_redraw_f1": 1.9375,
+      "c_star_fixed_f1": 3.039267792902507,
+      "c_star_fixed_200": 3.039267792902507,
+      "c_star_seq_f1": 12.967542583050696,
+      "c_star_seq_200": 12.967542583050696
+    },
+    "b_detail": {
+      "genuine_ceiling_at_bar_f0": 0.5,
+      "genuine_redraw_reaches_p95": false,
+      "build_higher_dominates_below_b_genuine_f0": "inf (all finite b)"
+    },
+    "d_probe": [
+      {
+        "b": 0.0,
+        "diff": 0.0
+      },
+      {
+        "b": 0.03162277660168379,
+        "diff": 0.0
+      },
+      {
+        "b": 0.1,
+        "diff": 0.0
+      },
+      {
+        "b": 0.31622776601683794,
+        "diff": 0.0
+      },
+      {
+        "b": 1.0,
+        "diff": 0.0
+      },
+      {
+        "b": 3.1622776601683795,
+        "diff": 0.0
+      },
+      {
+        "b": 10.0,
+        "diff": 0.0
+      }
+    ],
+    "n_numbers_checked": 324
+  },
+  "import_banked": {
+    "c_star_slope_fresh_fixedN": 3.039267792902507,
+    "c_star_slope_fresh_sequential": 12.967542583050696,
+    "e_shots_fresh_bar": 1.9375,
+    "n_bar_fresh": 5,
+    "delta_mu_tps": 12.157071171610028,
+    "mu_safe_tps": 512.15707117161,
+    "sigma_sample_tps": 5.564480823573265,
+    "sigma_hw_tps": 4.864468814937121,
+    "sigma_draw_tps": 7.390974474817942,
+    "p_bar_n5_frozen": 0.8097690471233381,
+    "mu_bar_frozen_p95": 504.87342465668917,
+    "delta_mu_frozen": -7.283646514920861,
+    "n_shots_frozen_at_512": 1,
+    "frozen_fraction_breakeven_202": 0.8455321793444455,
+    "e_shots_frozen_bar_nmax5": 2.3367894101342586,
+    "p_exhaust_frozen_nmax5": 0.19023095287666192,
+    "frozen_uncapped_quota_202": 30,
+    "fresh_uncapped_quota_202": 5,
+    "source_cost_200": "/workspace/senpai/target/research/validity/cost_budget/cost_budget_results.json",
+    "source_frozen_202": "/workspace/senpai/target/research/validity/frozen_budget/frozen_budget_results.json"
+  },
+  "handoff": "under the conservative frozen regime the build-vs-redraw crossover shifts hard toward build-higher (c*_frozen=0.419*b fixed-N / 3.394*b sequential vs #200's fresh 3.039*b / 12.97*b) because best-of-N at the bar tops out at P=0.810 and needs ~30 shots to force 0.95; the regime-robust (minimax-regret) spend is build-to-mu=512.2/N=1 (cost-invariant across both regimes, hedge for build cost b<1.36), with best-of-N-at-bar budgeted ONLY if the regime is empirically confirmed FRESH; fern #185's budget row should default to the build-higher recommendation.",
+  "scope": "Re-prices kanna's OWN banked #200 fresh build-vs-redraw crossover under kanna's OWN banked #202 frozen redraw curve. Takes NO official draws, authorizes NO shot count or spend (a human still approves AND confirms the harness regime), CPU-only. BANK-THE-ANALYSIS: adds 0 TPS, greedy/PPL untouched. WHICH regime the official harness is in stays the harness-owner's open question (#202); this leg BOUNDS the spend under BOTH so the human is ready either way. Draw-budget/cost lane (#159/#188/#194/#200/#202). NOT denken #197. NOT ubel #204. NOT fern #185. NOT stark #203. NOT open2. NOT a launch.",
+  "imported_legs": {
+    "kanna_200_fresh_crossover": "research/validity/cost_budget/cost_budget_results.json",
+    "kanna_202_frozen_redraw_curve": "research/validity/frozen_budget/frozen_budget_results.json"
+  },
+  "public_evidence_used": [
+    "Leaderboard frontier tops at ~489.6 TPS (osoi5-...-precache-skv64-v1), BELOW the 500 bar -- builds (land #71 descent) aim past 500; this leg prices the regime-robust path to clear it.",
+    "kanna #200 (n3alx7ca) fresh build-vs-redraw crossover c*=3.039*b/12.97*b; kanna #202 (533jd6l1) frozen redraw P_bar_n5=0.810, ~30-shot uncapped quota, frozen_fraction_breakeven=0.846.",
+    "Max order-statistics P(max of N>=t)=1-F(t)^N; minimax-regret / 50-50-prior decision over the unpinned fresh/frozen regime.",
+    "fern #185 carries this regime-robust spend as the multi-shot budget row."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.3928
+}
