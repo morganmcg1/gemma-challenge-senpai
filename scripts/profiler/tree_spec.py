@@ -354,6 +354,36 @@ def descend_accept(
     return emitted, len(emitted), salvage_events
 
 
+def descend_accept_path(
+    tree: TreeSpec,
+    node_argmax: list[int],
+    draft_token: list[int],
+) -> list[int]:
+    """The committed NODE path of ``descend_accept`` -- the ordered tree node ids
+    visited (``[0, matched_1, matched_2, ...]``), NOT the emitted tokens.
+
+    This is the ``commit_map`` the Triton descent kernel emits on-device sync-free
+    (lawine #147): the verify rows at these node positions hold the accepted path's
+    K/V, scattered across the M tree rows. PR #71 Component 3c (ubel #157) relocates
+    those rows into the first ``len(path)`` contiguous KV slots before the next
+    decode step so vLLM's count-based contiguous-prefix retention keeps the RIGHT
+    slots. ``len(path) == descend_accept(...)[1]`` by construction (same walk)."""
+    current = 0
+    path = [0]
+    while True:
+        g = node_argmax[current]
+        matched = -1
+        for child in tree.children[current]:
+            if draft_token[child] == g:
+                matched = child
+                break
+        if matched < 0:
+            break
+        path.append(matched)
+        current = matched
+    return path
+
+
 def emit_tree(
     tree: TreeSpec,
     forward_fn,

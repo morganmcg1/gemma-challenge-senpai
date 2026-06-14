@@ -204,12 +204,20 @@ M=16). Seam for 2b, mapped against installed vLLM (`gpu_model_runner.py`):
      local_block_offsets` (`block_table.py:378`): the table maps logical→physical
      **blocks**, so a *scattered* per-token accepted path (spine + one salvaged
      branch, not block-aligned) is not expressible as a block-table edit anyway.
-  **→ Build ubel's banked FUSED COPY** (`index_select`+`index_copy_` / Triton
-  scatter over the GPU-resident KV `[num_blocks,2,block_size,n_kv,head_dim]`,
-  `flash_attn.py:140-149`); pure bf16 permute/copy → greedy-safe by construction.
-  Cost delta vs the paged ideal is **+15 µs / −0.063 bar (4.817→4.880, ~516 TPS)**
-  — negligible vs the 0.178-E[T] descent cushion. Host-loop relocate remains the
-  landmine (8.15 units / 77 TPS, breaks capture).
+  **→ FUSED COPY BUILT + validated** (`scripts/profiler/tree_kv_relocate.py`,
+  `report_comp3c_relocate.md`). Two corrections vs the banked spec, both forced by
+  the *served* layout: (1) the 37 KV layers are **separate allocations** (one
+  `torch.zeros` per `KVCacheTensor`, `gpu_model_runner.py:7012-7018`), so ubel's
+  `[L,…]`-stack `index_select`/`index_copy_` has no zero-copy stack — the fused op
+  reaches all layers via a **layer `data_ptr()` array Triton kernel** (gather→
+  staging→scatter, 2 launches, aliasing-safe); (2) relocate width = `max_depth+1`
+  (spine length, =10), not M — trailing verify rows are discarded anyway. On-device
+  `commit_map`, no host readout. **Measured local (37-layer, bf16): equivalence
+  1.0; SERVED cost = 8.3 µs/step (CUDA-graph replay) — UNDER the banked 35.3 µs →
+  clear-500 bar ≥ 4.880.** Host-loop landmine = 12.5 ms/step (~1500×), confirming
+  the 522→77 collapse. A naive *device* per-layer torch loop is 1.4 ms (74
+  launches) → confirms ubel's "ONE launch" mandate is about launch count, not just
+  host-residency. CPU twin for the commit-index: `tree_spec.descend_accept_path`.
 - **Leg 3 (openevolve) — RESOLVED draft-side** (see Component-1 detail: recurrent
   drafter, deep candidates faithful). Verify-side deep ladder: openevolve offers a
   **free A10G per-position-ladder measurement** (hand them the built descent
