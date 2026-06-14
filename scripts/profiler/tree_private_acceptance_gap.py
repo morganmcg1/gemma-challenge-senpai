@@ -252,6 +252,35 @@ def project_one(model: DescentModel, spine_private, q_public, rho_pub, h, step):
     return out
 
 
+def breakeven_drop(model: DescentModel, q_public, q_private_raw, rho_pub, step,
+                   topo: str, bar_et: float) -> float:
+    """Largest LINEAR private aggregate-drop the topology can absorb while its central
+    (rho-coupled) tree E[T] still meets the clear-500 bar (bar_et). This IS 'the
+    private margin at the 4.862 bar' (PR #151 step 4) expressed as a drop tolerance:
+    descent-only/both-bugs clear 500 on the private re-run iff the real private drop
+    is <= this. Tree E[T] is monotone-decreasing in the drop, so bisection is exact;
+    the calibrated ladder plateaus at the raw proxy for drops > proxy_drop, so a 0.5
+    upper bound brackets cleanly (proxy_drop ~0.20)."""
+    def et_at(drop: float) -> float:
+        frac, _ = frac_for_target_drop(q_public, q_private_raw, drop)
+        spine = build_calibrated_ladder(q_public, q_private_raw, frac)
+        h = float(np.mean(spine)) / float(np.mean(q_public[:len(spine)]))
+        rho_central = [r * h for r in rho_pub]
+        q1 = spine[0] * BUG1_MULT if topo == "descent_only" else spine[0]
+        return model.et_tree(q1, spine, rho_cond=rho_central)
+
+    if et_at(0.0) < bar_et:           # already under the bar at zero private drop
+        return 0.0
+    lo, hi = 0.0, 0.5
+    for _ in range(60):
+        mid = 0.5 * (lo + hi)
+        if et_at(mid) >= bar_et:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
 def run_self_test(model: DescentModel, q_public, rho_pub):
     """The model is valid iff it reproduces the banked descent-walk anchors."""
     et_0598 = model.et_tree(0.598, q_public, rho_cond=rho_pub)
@@ -420,6 +449,13 @@ def main() -> None:
         raw = next(a for a in anchors if a["label"] == "raw_proxy")
         raw_descent = raw["projection"]["descent_only"]
 
+        # break-even: the largest private drop each topology can absorb at the 500 bar.
+        bar_500 = accept_length_for_official(TARGET_500, args.step, 1.0)
+        be_descent = breakeven_drop(model, q_public, q_private_raw, rho_pub,
+                                    args.step, "descent_only", bar_500)
+        be_both = breakeven_drop(model, q_public, q_private_raw, rho_pub,
+                                 args.step, "both_bugs", bar_500)
+
         # PR #151 headline metrics.
         tree_private_tps_proj = gt_descent["official_central"]        # PRIMARY
         tree_private_clears_500 = gt_descent["clears_500_central"]    # TEST
@@ -439,12 +475,17 @@ def main() -> None:
             "tree_private_tps_proj": tree_private_tps_proj,
             "tree_private_clears_500": tree_private_clears_500,
             "tree_private_et": tree_private_et,
+            "tree_private_et_both_bugs": gt["projection"]["both_bugs"]["et_central_rho_coupled"],
+            "tree_private_tps_proj_both_bugs": gt["projection"]["both_bugs"]["official_central"],
             "descent_only_et_drop_pct_vs_public": gt_descent["et_drop_pct_vs_public"],
             "both_bugs_et_drop_pct_vs_public":
                 gt["projection"]["both_bugs"]["et_drop_pct_vs_public"],
             "tps_band_descent_only": [band_lo, band_hi],
             "raw_proxy_descent_tps": raw_descent["official_central"],
             "raw_proxy_clears_500": raw_descent["clears_500_central"],
+            "breakeven_private_drop_descent_only": be_descent,
+            "breakeven_private_drop_both_bugs": be_both,
+            "clear_500_bar_et": bar_500,
             "ground_truth_drop": args.ground_truth_drop,
             "proxy_drop": proxy_drop,
         }
@@ -457,6 +498,8 @@ def main() -> None:
             "raw_proxy_clears_500": int(raw_descent["clears_500_central"]),
             "tps_band_low": band_lo, "tps_band_high": band_hi,
             "proxy_aggregate_drop": proxy_drop,
+            "breakeven_private_drop_descent_only": be_descent,
+            "breakeven_private_drop_both_bugs": be_both,
         })
         print(f"\n[private-gap] ===== PR #151 HEADLINE =====", flush=True)
         print(f"  tree_private_tps_proj (PRIMARY, descent-only, GT-{args.ground_truth_drop*100:.1f}%): "
@@ -469,6 +512,9 @@ def main() -> None:
               f"[{band_lo:.1f}, {band_hi:.1f}]", flush=True)
         print(f"  raw-proxy (pessimistic) descent-only: {raw_descent['official_central']:.1f} "
               f"TPS (clears500={raw_descent['clears_500_central']})", flush=True)
+        print(f"  BREAK-EVEN private drop @500 bar: descent-only {be_descent*100:.2f}%, "
+              f"both-bugs {be_both*100:.2f}%  (measured flagship drop 4.3%; "
+              f"documented band 4-9%)", flush=True)
 
     results["verdict"] = verdict
 
