@@ -268,6 +268,83 @@ def descend_accept(
     return emitted, len(emitted), salvage_events
 
 
+def emit_tree(
+    tree: TreeSpec,
+    forward_fn,
+    root_token: int,
+    root_hidden,
+    base_position: int = 0,
+) -> tuple[list[int], list, int]:
+    """Draft-side reference -- the topological tree-emit the live drafter
+    (sitecustomize ``propose_onegraph``) realizes. The DRAFT twin of
+    ``descend_accept``: ``descend_accept`` walks the verifier DOWN the tree,
+    ``emit_tree`` builds the tree UP from the root.
+
+    Processes nodes in topological (node-index) order. Node 0 (root) is the
+    last-accepted token; its forward predicts node 0's children. Each internal
+    node ``n`` is forwarded with (its own drafted token, its PARENT's hidden
+    context) and its top-w prediction supplies its children's drafted tokens.
+    A node's drafted token is the ``rank_in_parent``-th of its parent's top-w
+    candidates (rank 1 == the deployed greedy argmax -> the rank-1 spine is
+    token-IDENTICAL to the deployed linear width-1 chain: the BUG-1 guard).
+    Leaf nodes are not forwarded (no children to predict).
+
+    ``forward_fn(node, token, parent_hidden, position) -> (hidden, topw_tokens)``
+    is one width-1 drafter forward. The LIVE realization owns the drafter-side
+    ancestor-only attention -- a branch node must attend only its own root->node
+    path's KV, never a sibling's -- which is the draft-side analogue of the
+    verify star-attention mask (Component 2). ``topw_tokens`` are rank-ordered and
+    ``topw_tokens[0]`` MUST equal the deployed greedy argmax (sparse-argmax
+    ``get_top_tokens``) so the rank-1 path stays chain-identical.
+
+    Returns ``(draft_token[M], hidden[M], forwards)``: ``draft_token[0]`` ==
+    ``root_token``; ``draft_token[n>=1]`` is node n's drafted token; ``hidden[n]``
+    is the forward output for internal nodes (``None`` for leaves); ``forwards``
+    == number of ``forward_fn`` calls (the internal-node count = drafter cost).
+    """
+    m = tree.num_nodes
+    draft_token: list = [None] * m
+    hidden: list = [None] * m
+    topw: list = [None] * m
+    draft_token[0] = root_token
+    forwards = 0
+    for node in range(m):
+        if node == 0:
+            tok = root_token
+            ctx = root_hidden
+        else:
+            par = tree.parent[node]
+            rank = tree.rank_in_parent[node]  # 1-based; 1 == rank-1 spine
+            cand = topw[par]
+            if cand is None:
+                raise AssertionError(
+                    f"node {node}'s parent {par} was not forwarded (leaf parent?)"
+                )
+            if rank - 1 >= len(cand):
+                raise ValueError(
+                    f"node {node} is rank {rank} but parent {par} produced only "
+                    f"{len(cand)} candidates (drafter top-w must be >= max_branch "
+                    f"{tree.max_branch})"
+                )
+            tok = cand[rank - 1]
+            draft_token[node] = tok
+            ctx = hidden[par]
+        if tree.children[node]:  # internal node -> forward to predict children
+            h, cand_out = forward_fn(node, tok, ctx, base_position + tree.depth[node])
+            hidden[node] = h
+            topw[node] = list(cand_out)
+            forwards += 1
+    if any(t is None for t in draft_token):
+        raise AssertionError(f"unassigned draft tokens: {draft_token}")
+    return draft_token, hidden, forwards
+
+
+def spine_tokens(tree: TreeSpec, draft_token: list[int]) -> list[int]:
+    """The drafted tokens along the rank-1 spine (the BUG-1 guard reference: this
+    sequence must be byte-identical to the deployed linear chain's draft tokens)."""
+    return [draft_token[n] for n in tree.spine]
+
+
 def simulate_tree_decode(
     tree: TreeSpec,
     p_vector: list[float],
@@ -515,6 +592,64 @@ def _selfcheck() -> None:
         for node in range(tree.num_nodes):
             assert idx[ptr[node]:ptr[node + 1]] == tree.children[node]
     print(f"  [ok] children CSR round-trips (M16/M32/lin8)")
+
+    # 11. DRAFT-side emit_tree (the propose_onegraph reference). A deterministic
+    #     MOCK drafter forward (pure fn of token+hidden, ignores node/pos) lets us
+    #     validate the topology of the emit + the BUG-1 spine-identity guard with
+    #     no GPU. rank-1 of the mock top-w == the mock's greedy => spine identity
+    #     is a genuine property (the spine path replays the chain's (token,hidden)).
+    MOCK_W = 3
+
+    def _mock_forward(node, token, ctx, pos):
+        # deterministic, pure in (token, ctx); rank-ordered distinct candidates.
+        h = (token * 31 + ctx * 7 + 13) % 100003
+        base = (token * 13 + ctx * 17 + 5) % 90000
+        topw = [base + r * 1000 + 1 for r in range(MOCK_W)]  # topw[0] == greedy
+        return h, topw
+
+    def _linear_chain_emit(k, root_token, root_hidden):
+        """The deployed width-1 chain under the same mock (rank-1/greedy each step)."""
+        toks, tok, ctx = [], root_token, root_hidden
+        for i in range(k):
+            h, topw = _mock_forward(i, tok, ctx, i)
+            tok = topw[0]
+            toks.append(tok)
+            ctx = h
+        return toks
+
+    ROOT_TOK, ROOT_H = 42, 7
+    # (a) degenerate linear tree reproduces the chain exactly.
+    for k in (7, 15, 31):
+        lin = TreeSpec(linear_parent(k + 1))
+        dt, _, fwds = emit_tree(lin, _mock_forward, ROOT_TOK, ROOT_H)
+        chain = _linear_chain_emit(k, ROOT_TOK, ROOT_H)
+        assert dt[1:] == chain, f"linear-tree emit {dt[1:]} != chain {chain} (k={k})"
+        assert fwds == k, f"linear k={k}: {fwds} forwards != {k} internal nodes"
+    print(f"  [ok] emit_tree reproduces the deployed linear chain (k=7/15/31)")
+
+    # (b) spine identity on the real trees: the rank-1 spine drafts the SAME
+    #     tokens as a pure chain of the spine's length (the BUG-1 guard).
+    for name, tree in [("M16", t16), ("M32", t32)]:
+        dt, hid, fwds = emit_tree(tree, _mock_forward, ROOT_TOK, ROOT_H)
+        sp = spine_tokens(tree, dt)
+        chain = _linear_chain_emit(len(tree.spine) - 1, ROOT_TOK, ROOT_H)
+        assert sp[1:] == chain, f"{name} spine {sp[1:]} != chain {chain}"
+        n_internal = sum(1 for n in range(tree.num_nodes) if tree.children[n])
+        assert fwds == n_internal, f"{name}: {fwds} forwards != {n_internal} internal"
+        # structural: every node's drafted token == its parent's rank-th candidate;
+        # rank-2 branch tokens differ from the rank-1 sibling (real branching).
+        for node in range(1, tree.num_nodes):
+            par, rank = tree.parent[node], tree.rank_in_parent[node]
+            assert hid[par] is not None, f"{name}: parent {par} not forwarded"
+            if rank >= 2:
+                sib1 = tree.children[par][0]
+                assert dt[node] != dt[sib1], (
+                    f"{name}: rank-{rank} node {node} token == rank-1 sibling (no branch)"
+                )
+        print(
+            f"  [ok] {name} emit_tree: {fwds} forwards (internal nodes), "
+            f"spine-identity holds, {tree.max_branch}-way branches distinct"
+        )
 
     print("=== all tree_spec selfchecks passed ===")
 

@@ -34,6 +34,40 @@ quota, fastest and lowest-risk. Add KV-compaction (3c) only once salvage clears.
 
 Prewarm `serve.py:487-492` hardcodes M=8; widen to the tree M (minor).
 
+## Component 1 detail — draft-side reference validated + live shape located
+
+`tree_spec.emit_tree` (the **draft-side twin of `descend_accept`**) is built and
+CPU-validated: it reproduces the deployed linear chain on the degenerate tree
+(k=7/15/31), holds **spine-identity** on M16/M32 (the rank-1 path drafts the same
+tokens as a pure width-1 chain — the BUG-1 guard), and assigns rank-2/3 branch
+tokens distinctly. It takes an injected `forward_fn(node, token, parent_hidden,
+position)` so the topological emit order + token assignment are testable without
+a GPU; the live realization supplies the real drafter forward.
+
+Located live seams (refines the Comp-1 row):
+- **top-w hook = `get_top_tokens`** (`sitecustomize.py:190`, the captured-body
+  call `self.model.get_top_tokens(last_hidden[:1])`). Extend to a `top_w` variant
+  via the existing `_select_and_score(hidden, lm_head_weight)` → `(logits,
+  selected)` then `topk(w)` over `logits` → gather `selected`. `topk[0]` ==
+  the deployed sparse argmax → rank-1 = greedy → spine identity holds.
+- **parent-hidden threading.** The deployed loop carries one `self.hidden_states`
+  forward (chain). A tree must store each internal node's output hidden and
+  **restore the parent's hidden** before forwarding a node (node n consumes
+  `hidden[parent[n]]`, not `hidden[n-1]`). A small per-node hidden cache.
+- **drafter cost.** `emit_tree` forwards only internal nodes: **M16 = 13, M32 =
+  25** width-1 drafter forwards (vs 7 for the chain). Verify stays one forward
+  over M rows. The extra drafter latency is the tree's draft-side price; the gain
+  is on E[T] (denken #85 gates the verify side, not the drafter).
+- **OPEN (confirm live): does the drafter attend its own draft KV?** The loopgraph
+  body advances no per-step seq_len/position and requires `constant_draft_positions`
+  (`sitecustomize.py:259`) → strong evidence the drafter is **pure
+  hidden-recurrent** (fixed prefix context, no draft self-attention). If so,
+  Component 1 needs **no draft-side tree mask** — only the parent-hidden threading
+  above. If instead seq_len grows, a branch forward would attend a sibling's KV
+  and Component 1 would need ancestor-only attention on the draft side too (a
+  symmetric analogue of Component 2's verify star-mask). Resolve empirically at
+  first live emit; the `emit_tree` ordering reference is correct either way.
+
 ## Finding A detail — qq_bias makes the mask free
 
 The verify is redirected to the **3D split-KV** path (`splitkv_verify_patch.py`
