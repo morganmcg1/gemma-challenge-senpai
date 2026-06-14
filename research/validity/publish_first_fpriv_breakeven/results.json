@@ -1,0 +1,554 @@
+{
+  "agent": "stark",
+  "created_at": "20260614T214550Z",
+  "kind": "publish-first-fpriv-breakeven",
+  "nan_clean": true,
+  "peak_mem_mib": 28.613,
+  "pr": 233,
+  "synthesis": {
+    "composition": {
+      "K_cal": 125.26795005202914,
+      "ceil_int4_lambda1": 520.9527323111674,
+      "f_priv_central_217": 0.969106920637722,
+      "f_priv_empirical_floor_52": 0.9570535584491102,
+      "kanna224_private_mean_central_anchor": 504.858898207883,
+      "kanna224_private_mean_empirical_floor_anchor": 498.57966624218955,
+      "lambda_hat": 0.3418647166361965,
+      "p95_private_bar_191": 0.9780112973731208,
+      "step": 1.2182,
+      "target_publish_first": 500.0,
+      "tau_central": 1.0,
+      "tau_conservative": 0.9924,
+      "tau_low_181": 0.9924318649123313
+    },
+    "handoff_line": "the publish-first POINT-estimate gate (the human's #124 launch) is reachable at the physical ceiling iff f_priv \u2265 f_priv_breakeven_publish_first = 0.959780 (\u22480.9598), which the [empirical-floor 0.957054, central 0.969107] interval STRADDLES \u2014 so the realizable-worst-case f_priv (==central, my #226) clears publish-first at the ceiling (504.86 \u2265 500) but the lone #52 empirical calibration tail (0.957054) does NOT (498.58 < 500); fern #185 carries publish-first as GO-at-realizable / NO-GO-at-calibration-tail, and the d\u03bb_floor/df_priv sensitivity is -2.3535 (\u03bb_floor_central=0.97804 round-trips kanna #228; \u2205 at the empirical floor).",
+    "headline": {
+      "central_clears_publish_first_at_ceiling": true,
+      "dlambda_floor_dfpriv": -2.353508688669459,
+      "dlambda_floor_dfpriv_analytic": -2.3535086826400904,
+      "dlambda_floor_dfpriv_num_vs_analytic_resid": 6.0293685599788205e-09,
+      "empirical_floor_clears_publish_first_at_ceiling": false,
+      "f_priv_breakeven_publish_first": 0.9597799742440889,
+      "lambda_floor_central": 0.9780440967672128,
+      "lambda_floor_central_descent_shape_corner": 0.9779945110444623,
+      "lambda_floor_empirical_floor": null,
+      "lambda_floor_empirical_floor_unreachable": true,
+      "private_mean_at_ceiling_breakeven": 500.0,
+      "private_mean_at_ceiling_central": 504.858898207883,
+      "private_mean_at_ceiling_empirical_floor": 498.57966624218955,
+      "publish_first_at_ceiling_verdict_flips": true
+    },
+    "honest_band": {
+      "calibration_tail_f_priv": 0.9570535584491102,
+      "calibration_tail_is_one_paired_draw_outside_realizable_simplex": true,
+      "calibration_tail_private_mean_at_ceiling": 498.57966624218955,
+      "calibration_tail_publish_first_GO_at_ceiling": false,
+      "gate_axis": "POINT-estimate (publish-first, Issue #124). The P95-private bar is the DISTINCT 0.9780 (#191) gate \u2014 UNCHANGED by this leg.",
+      "imports_unchanged": "E[T](\u03bb), K_cal, step, \u03c4, CEIL_INT4 520.9527, kanna #224 anchors",
+      "p95_private_bar_unchanged_191": 0.9780112973731208,
+      "realizable_worstcase_f_priv": 0.969106920637722,
+      "realizable_worstcase_private_mean_at_ceiling": 504.858898207883,
+      "realizable_worstcase_publish_first_GO_at_ceiling": true,
+      "second_hard_paired_draw_collapses_interval_to_measured_band": "TIGHTENING FOLLOW-UP: a SECOND hard public/private paired draw would collapse the [504.86 realizable, 498.58 calibration-tail] interval to a measured band and pin whether the lone #52 f_priv=0.957 is a tail or the center."
+    },
+    "imports": {
+      "mechanism": "compliant_spec_et reach-DP (#199) + fp16_verify_ceiling g(\u03bb)/ceiling model (#220)",
+      "provenance": "kanna#217 vgovdrjc (f_priv central) x kanna#224 1081oc84 (private_mean@ceiling 504.86/498.58, via trigger_reconcile + private_bar_reachability) x #204 launch_sigma_unit_rebase (ceiling 520.9527) x #199 wdyqnx3g (reach-DP spines E[T](\u03bb)) x #175/#184 (reach-DP) x #181 (\u03c4) x #168 (step) x #148/#169 (K_cal) x #191 (P95 0.9780) x stark#226 tzcc5xuq (f_priv model, realizable worst-case) x PR#52 (481.53/460.85 paired draw). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "kanna228_dependency_note": "kanna #228 (publish-first-lambda-floor) was IN-FLIGHT / not banked at run time, so lambda_floor_central is computed HERE on the same imported reach-DP + ceiling; it should round-trip kanna #228's central \u03bb-floor once banked. The empirical-floor \u03bb-floor is \u2205 (private_mean(1, 0.957054) < 500) and the d\u03bb_floor/df_priv is the sensitivity #228 explicitly deferred to this leg.",
+    "lambda_curve": [
+      {
+        "g": 0.7757386405868356,
+        "lambda": 0.3418647166361965,
+        "private_mean_central": 391.63855538395075,
+        "private_mean_empirical_floor": 386.7675125149543
+      },
+      {
+        "g": 0.7785931174286669,
+        "lambda": 0.3528336380255932,
+        "private_mean_central": 393.07966341727763,
+        "private_mean_empirical_floor": 388.1906966260507
+      },
+      {
+        "g": 0.7814714728242889,
+        "lambda": 0.36380255941498996,
+        "private_mean_central": 394.532826750962,
+        "private_mean_empirical_floor": 389.62578609852625
+      },
+      {
+        "g": 0.7843739712834712,
+        "lambda": 0.37477148080438666,
+        "private_mean_central": 395.9981789251149,
+        "private_mean_empirical_floor": 391.0729128115739
+      },
+      {
+        "g": 0.7873008803800746,
+        "lambda": 0.3857404021937834,
+        "private_mean_central": 397.4758550267807,
+        "private_mean_empirical_floor": 392.5322101720796
+      },
+      {
+        "g": 0.7902524707830331,
+        "lambda": 0.3967093235831801,
+        "private_mean_central": 398.9659917055793,
+        "private_mean_empirical_floor": 394.0038131300703
+      },
+      {
+        "g": 0.7932290162875867,
+        "lambda": 0.4076782449725769,
+        "private_mean_central": 400.4687271894739,
+        "private_mean_empirical_floor": 395.4878581942853
+      },
+      {
+        "g": 0.7962307938467545,
+        "lambda": 0.4186471663619736,
+        "private_mean_central": 401.9842013006605,
+        "private_mean_empirical_floor": 396.9844834478685
+      },
+      {
+        "g": 0.7992580836030615,
+        "lambda": 0.4296160877513703,
+        "private_mean_central": 403.51255547158564,
+        "private_mean_empirical_floor": 398.49382856418646
+      },
+      {
+        "g": 0.8023111689205105,
+        "lambda": 0.44058500914076704,
+        "private_mean_central": 405.0539327610876,
+        "private_mean_empirical_floor": 400.0160348227691
+      },
+      {
+        "g": 0.8053903364168075,
+        "lambda": 0.45155393053016374,
+        "private_mean_central": 406.6084778706656,
+        "private_mean_empirical_floor": 401.5512451253766
+      },
+      {
+        "g": 0.8084958759958375,
+        "lambda": 0.46252285191956044,
+        "private_mean_central": 408.1763371608757,
+        "private_mean_empirical_floor": 403.0996040121913
+      },
+      {
+        "g": 0.8116280808803954,
+        "lambda": 0.4734917733089572,
+        "private_mean_central": 409.7576586678549,
+        "private_mean_empirical_floor": 404.66125767813634
+      },
+      {
+        "g": 0.8147872476451681,
+        "lambda": 0.48446069469835396,
+        "private_mean_central": 411.352592119973,
+        "private_mean_empirical_floor": 406.23635398932015
+      },
+      {
+        "g": 0.8179736762499785,
+        "lambda": 0.4954296160877506,
+        "private_mean_central": 412.9612889546157,
+        "private_mean_empirical_floor": 407.8250424996111
+      },
+      {
+        "g": 0.8211876700732808,
+        "lambda": 0.5063985374771474,
+        "private_mean_central": 414.583902335095,
+        "private_mean_empirical_floor": 409.42747446733756
+      },
+      {
+        "g": 0.8244295359459177,
+        "lambda": 0.5173674588665441,
+        "private_mean_central": 416.22058716769226,
+        "private_mean_empirical_floor": 411.0438028721189
+      },
+      {
+        "g": 0.8276995841851393,
+        "lambda": 0.5283363802559408,
+        "private_mean_central": 417.87150011883233,
+        "private_mean_empirical_floor": 412.67418243182584
+      },
+      {
+        "g": 0.8309981286288791,
+        "lambda": 0.5393053016453375,
+        "private_mean_central": 419.5367996323885,
+        "private_mean_empirical_floor": 414.31876961967066
+      },
+      {
+        "g": 0.8343254866702975,
+        "lambda": 0.5502742230347343,
+        "private_mean_central": 421.2166459471221,
+        "private_mean_empirical_floor": 415.97772268142927
+      },
+      {
+        "g": 0.8376819792925866,
+        "lambda": 0.5612431444241309,
+        "private_mean_central": 422.9112011142539,
+        "private_mean_empirical_floor": 417.6512016527946
+      },
+      {
+        "g": 0.8410679311040415,
+        "lambda": 0.5722120658135277,
+        "private_mean_central": 424.62062901517004,
+        "private_mean_empirical_floor": 419.3393683768619
+      },
+      {
+        "g": 0.8444836703733984,
+        "lambda": 0.5831809872029244,
+        "private_mean_central": 426.34509537926294,
+        "private_mean_empirical_floor": 421.04238652174826
+      },
+      {
+        "g": 0.8479295290654433,
+        "lambda": 0.5941499085923212,
+        "private_mean_central": 428.0847678019088,
+        "private_mean_empirical_floor": 422.7604215983457
+      },
+      {
+        "g": 0.8514058428768859,
+        "lambda": 0.6051188299817178,
+        "private_mean_central": 429.83981576257855,
+        "private_mean_empirical_floor": 424.49364097820785
+      },
+      {
+        "g": 0.8549129512725093,
+        "lambda": 0.6160877513711146,
+        "private_mean_central": 431.6104106430886,
+        "private_mean_empirical_floor": 426.24221391157295
+      },
+      {
+        "g": 0.8584511975215909,
+        "lambda": 0.6270566727605114,
+        "private_mean_central": 433.3967257459881,
+        "private_mean_empirical_floor": 428.00631154552275
+      },
+      {
+        "g": 0.8620209287345948,
+        "lambda": 0.638025594149908,
+        "private_mean_central": 435.19893631308355,
+        "private_mean_empirical_floor": 429.78610694227655
+      },
+      {
+        "g": 0.865622495900144,
+        "lambda": 0.6489945155393048,
+        "private_mean_central": 437.01721954410436,
+        "private_mean_empirical_floor": 431.58177509762487
+      },
+      {
+        "g": 0.8692562539222654,
+        "lambda": 0.6599634369287015,
+        "private_mean_central": 438.85175461550665,
+        "private_mean_empirical_floor": 433.39349295949904
+      },
+      {
+        "g": 0.8729225616579154,
+        "lambda": 0.6709323583180982,
+        "private_mean_central": 440.70272269941796,
+        "private_mean_empirical_floor": 435.22143944668056
+      },
+      {
+        "g": 0.876621781954785,
+        "lambda": 0.6819012797074949,
+        "private_mean_central": 442.57030698272376,
+        "private_mean_empirical_floor": 437.06579546765016
+      },
+      {
+        "g": 0.880354281689385,
+        "lambda": 0.6928702010968917,
+        "private_mean_central": 444.4546926862952,
+        "private_mean_empirical_floor": 438.9267439395761
+      },
+      {
+        "g": 0.884120431805414,
+        "lambda": 0.7038391224862884,
+        "private_mean_central": 446.35606708435904,
+        "private_mean_empirical_floor": 440.8044698074438
+      },
+      {
+        "g": 0.8879206073524099,
+        "lambda": 0.7148080438756851,
+        "private_mean_central": 448.2746195240119,
+        "private_mean_empirical_floor": 442.69916006332676
+      },
+      {
+        "g": 0.8917551875246897,
+        "lambda": 0.7257769652650818,
+        "private_mean_central": 450.2105414448789,
+        "private_mean_empirical_floor": 444.61100376580094
+      },
+      {
+        "g": 0.895624555700571,
+        "lambda": 0.7367458866544785,
+        "private_mean_central": 452.164026398915,
+        "private_mean_empirical_floor": 446.5401920595
+      },
+      {
+        "g": 0.8995290994818862,
+        "lambda": 0.7477148080438754,
+        "private_mean_central": 454.1352700703542,
+        "private_mean_empirical_floor": 448.4869181948161
+      },
+      {
+        "g": 0.9034692107337836,
+        "lambda": 0.758683729433272,
+        "private_mean_central": 456.12447029580363,
+        "private_mean_empirical_floor": 450.45137754774424
+      },
+      {
+        "g": 0.9074452856248214,
+        "lambda": 0.7696526508226688,
+        "private_mean_central": 458.131827084485,
+        "private_mean_empirical_floor": 452.43376763987186
+      },
+      {
+        "g": 0.9114577246673534,
+        "lambda": 0.7806215722120654,
+        "private_mean_central": 460.15754263862397,
+        "private_mean_empirical_floor": 454.43428815851456
+      },
+      {
+        "g": 0.9155069327582083,
+        "lambda": 0.7915904936014622,
+        "private_mean_central": 462.20182137398746,
+        "private_mean_empirical_floor": 456.45314097699816
+      },
+      {
+        "g": 0.9195933192196655,
+        "lambda": 0.8025594149908589,
+        "private_mean_central": 464.26486994057035,
+        "private_mean_empirical_floor": 458.4905301750881
+      },
+      {
+        "g": 0.9237172978407276,
+        "lambda": 0.8135283363802557,
+        "private_mean_central": 466.34689724343264,
+        "private_mean_empirical_floor": 460.5466620595672
+      },
+      {
+        "g": 0.9278792869186904,
+        "lambda": 0.8244972577696523,
+        "private_mean_central": 468.4481144636861,
+        "private_mean_empirical_floor": 462.62174518496147
+      },
+      {
+        "g": 0.9320797093010145,
+        "lambda": 0.8354661791590491,
+        "private_mean_central": 470.56873507963405,
+        "private_mean_empirical_floor": 464.7159903744169
+      },
+      {
+        "g": 0.9363189924274946,
+        "lambda": 0.8464351005484458,
+        "private_mean_central": 472.70897488806,
+        "private_mean_empirical_floor": 466.82961074072347
+      },
+      {
+        "g": 0.9405975683727381,
+        "lambda": 0.8574040219378425,
+        "private_mean_central": 474.8690520256744,
+        "private_mean_empirical_floor": 468.9628217074948
+      },
+      {
+        "g": 0.9449158738889415,
+        "lambda": 0.8683729433272394,
+        "private_mean_central": 477.04918699070987,
+        "private_mean_empirical_floor": 471.11584103049535
+      },
+      {
+        "g": 0.9492743504489756,
+        "lambda": 0.879341864716636,
+        "private_mean_central": 479.2496026646736,
+        "private_mean_empirical_floor": 473.28888881912155
+      },
+      {
+        "g": 0.9536734442897776,
+        "lambda": 0.8903107861060326,
+        "private_mean_central": 481.470524334254,
+        "private_mean_empirical_floor": 475.4821875580367
+      },
+      {
+        "g": 0.9581136064560536,
+        "lambda": 0.9012797074954295,
+        "private_mean_central": 483.7121797133844,
+        "private_mean_empirical_floor": 477.6959621289597
+      },
+      {
+        "g": 0.9625952928442862,
+        "lambda": 0.9122486288848262,
+        "private_mean_central": 485.9747989654608,
+        "private_mean_empirical_floor": 479.93043983260696
+      },
+      {
+        "g": 0.9671189642470615,
+        "lambda": 0.9232175502742228,
+        "private_mean_central": 488.2586147257204,
+        "private_mean_empirical_floor": 482.18585041079194
+      },
+      {
+        "g": 0.971685086397702,
+        "lambda": 0.9341864716636197,
+        "private_mean_central": 490.56386212377544,
+        "private_mean_empirical_floor": 484.4624260686794
+      },
+      {
+        "g": 0.9762941300152195,
+        "lambda": 0.9451553930530163,
+        "private_mean_central": 492.89077880630737,
+        "private_mean_empirical_floor": 486.76040149719694
+      },
+      {
+        "g": 0.9809465708495817,
+        "lambda": 0.956124314442413,
+        "private_mean_central": 495.2396049599208,
+        "private_mean_empirical_floor": 489.0800138956048
+      },
+      {
+        "g": 0.9856428897272969,
+        "lambda": 0.9670932358318098,
+        "private_mean_central": 497.610583334157,
+        "private_mean_empirical_floor": 491.421502994223
+      },
+      {
+        "g": 0.9903835725973194,
+        "lambda": 0.9780621572212065,
+        "private_mean_central": 500.0039592646695,
+        "private_mean_empirical_floor": 493.7851110773188
+      },
+      {
+        "g": 0.9951691105772728,
+        "lambda": 0.9890310786106031,
+        "private_mean_central": 502.4199806965608,
+        "private_mean_empirical_floor": 496.1710830061533
+      },
+      {
+        "g": 1.0,
+        "lambda": 1.0,
+        "private_mean_central": 504.858898207883,
+        "private_mean_empirical_floor": 498.57966624218955
+      }
+    ],
+    "lambda_floor_vs_fpriv": [
+      {
+        "f_priv": 0.96,
+        "lambda_floor": 0.9994819313534262,
+        "private_mean_at_lambda_floor": 499.9999999999999
+      },
+      {
+        "f_priv": 0.962,
+        "lambda_floor": 0.9947730542168534,
+        "private_mean_at_lambda_floor": 500.0
+      },
+      {
+        "f_priv": 0.965,
+        "lambda_floor": 0.9877106640838043,
+        "private_mean_at_lambda_floor": 499.9999999999999
+      },
+      {
+        "f_priv": 0.969106920637722,
+        "lambda_floor": 0.9780440967672128,
+        "private_mean_at_lambda_floor": 499.9999999999998
+      },
+      {
+        "f_priv": 0.972,
+        "lambda_floor": 0.9712356218056641,
+        "private_mean_at_lambda_floor": 499.99999999999994
+      },
+      {
+        "f_priv": 0.975,
+        "lambda_floor": 0.9641763395345537,
+        "private_mean_at_lambda_floor": 499.9999999999999
+      },
+      {
+        "f_priv": 0.98,
+        "lambda_floor": 0.9524124867529988,
+        "private_mean_at_lambda_floor": 499.9999999999999
+      },
+      {
+        "f_priv": 0.99,
+        "lambda_floor": 0.9288894478730456,
+        "private_mean_at_lambda_floor": 500.0
+      }
+    ],
+    "model_note": "private_mean(\u03bb, f_priv) = CEIL_INT4 \u00b7 g(\u03bb) \u00b7 f_priv, g(\u03bb)=E[T](\u03bb)/E[T](1) the #175/#184 both-bugs reach-DP shape (g(1)=1), CEIL_INT4=520.9527 the #204 int4-spec \u03bb=1 physical ceiling. The private MEAN (achieved private TPS), DISTINCT from my #226 private BAR (mu_safe_fresh/f_priv). Round-trips kanna #224's \u03bb=1 anchors exactly.",
+    "monotone": {
+      "lambda_floor_decreasing_in_fpriv": true,
+      "private_mean_increasing_in_fpriv": true,
+      "private_mean_increasing_in_lambda": true
+    },
+    "private_mean_vs_fpriv_at_ceiling": [
+      {
+        "clears_500_publish_first": false,
+        "f_priv": 0.9570535584491102,
+        "gap_vs_500": -1.4203337578104538,
+        "label": "empirical_floor_0p957054",
+        "private_mean_at_ceiling": 498.57966624218955
+      },
+      {
+        "clears_500_publish_first": true,
+        "f_priv": 0.9597799742440889,
+        "gap_vs_500": 0.0,
+        "label": "breakeven_0p95978",
+        "private_mean_at_ceiling": 500.0
+      },
+      {
+        "clears_500_publish_first": true,
+        "f_priv": 0.969106920637722,
+        "gap_vs_500": 4.858898207882987,
+        "label": "central_0p969107",
+        "private_mean_at_ceiling": 504.858898207883
+      }
+    ],
+    "provenance": {
+      "ceil_ge_floor_all_depths_both_bugs": true,
+      "et1_both_bugs": 5.21887717841078,
+      "et_ceiling_banked_199": 5.21887717841078,
+      "et_ceiling_reachdp": 5.21887717841078,
+      "et_ceiling_resid": 0.0,
+      "et_floor_banked_199": 4.048484687770039,
+      "et_floor_reachdp": 4.048484687770039,
+      "et_floor_resid": 0.0,
+      "g_at_floor_both_bugs": 0.7757386405868356,
+      "g_at_floor_descent": 0.7761261887599114,
+      "g_at_one": 1.0,
+      "g_at_one_resid": 0.0,
+      "g_shape_floor_band_width": 0.00038754817307573575,
+      "int4_ceiling_resid_vs_literal": 0.0,
+      "int4_ceiling_source": "research/validity/launch_sigma_unit_rebase/launch_sigma_unit_rebase_results.json",
+      "int4_ceiling_value": 520.9527323111674
+    },
+    "self_test": {
+      "a_detail": {
+        "anchor_central": 504.858898207883,
+        "anchor_emp": 498.57966624218955,
+        "pm_central": 504.858898207883,
+        "pm_emp": 498.57966624218955
+      },
+      "b_detail": {
+        "f_be": 0.9597799742440889,
+        "pm_be": 500.0,
+        "target_over_ceiling": 0.9597799742440889
+      },
+      "c_detail": {
+        "f_be": 0.9597799742440889,
+        "f_priv_central": 0.969106920637722,
+        "f_priv_emp": 0.9570535584491102
+      },
+      "conditions": {
+        "a_kanna224_lambda1_anchors_roundtrip_504p86_498p58": true,
+        "b_breakeven_is_500_over_ceiling_and_pm_at_breakeven_is_500": true,
+        "c_verdict_flips_empfloor_lt_breakeven_lt_central": true,
+        "d_private_mean_monotone_increasing_in_fpriv_and_lambda": true,
+        "dlambda_floor_numeric_matches_analytic": true,
+        "e_lambda_floor_decreasing_in_fpriv_and_empty_at_empirical_floor": true,
+        "f_nan_clean": true,
+        "provenance_reachdp_reproduces_199_ET_and_g1_is_1_and_ceiling_204": true
+      },
+      "e_detail": {
+        "lam_floor_central": 0.9780440967672128,
+        "lam_floor_emp": null
+      },
+      "publish_first_fpriv_breakeven_self_test_passes": true
+    },
+    "test_metric": {
+      "f_priv_breakeven_publish_first": 0.9597799742440889
+    },
+    "verdict": "PUBLISH-FIRST POINT-ESTIMATE GATE STRADDLES THE f_priv BREAK-EVEN: at the int4-spec \u03bb=1 physical ceiling 520.9527 the publish-first private mean = ceiling\u00b7f_priv FLIPS across the [empirical-floor 0.957054, central 0.969107] interval \u2014 GO at the central / realizable-worst-case f_priv (504.86 \u2265 500) but NO-GO at the lone #52 empirical calibration tail (498.58 < 500). The single calibration point DECIDES reachability: f_priv_breakeven_publish_first = 500/520.9527 = 0.959780, and [0.957054, 0.969107] STRADDLES it (0.957054 < 0.959780 < 0.969107). The publish-first \u03bb-floor is 0.97804 at the realizable worst-case f_priv (round-trips kanna #228) and \u2205/UNREACHABLE at the empirical floor (private_mean(1, 0.957054)=498.58 < 500, even at full self-KV recovery \u03bb=1). The d\u03bb_floor/df_priv sensitivity kanna #228 deferred is -2.3535 (\u03bb-target RISES as f_priv falls). Realizable verdict GO; calibration-tail caveat NO-GO. Adds 0 TPS; the realizable worst-case f_priv stays my #226 central 0.969107 \u2014 this leg prices the calibration-tail consequence, it does NOT re-open the blend axis. NOT a launch."
+  }
+}
