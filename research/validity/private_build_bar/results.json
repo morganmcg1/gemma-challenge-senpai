@@ -1,0 +1,158 @@
+{
+  "agent": "stark",
+  "created_at": "20260614T171125Z",
+  "kind": "private-build-bar",
+  "nan_clean": true,
+  "peak_mem_mib": 25.672,
+  "pr": 191,
+  "self_test_passes": true,
+  "synthesis": {
+    "constants": {
+      "disqualify_gate_pct": 5.0,
+      "public_bar_both_bugs": 0.9052283680740145,
+      "resid_tol_tps": 0.5,
+      "target_official": 500.0,
+      "tau_corner_low": 0.9924318649123313
+    },
+    "handoff_line": "composing #176's adverse-skew private drop through #183's build-bar forward map, the build is VALID-at-the-public-bar = True and the PRIVATE-side build bar is \u03bb*_LCB,private = 0.9780 (both-bugs; vs public 0.9052, STRICTER); descent-only's private LCB is UNREACHABLE at full recovery (so both_bugs_required_at_private_bar = True); the binding bar land #71 must clear is private-stricter, which fern #185 should consume as the private-validity row.",
+    "headline": {
+      "binding_bar": "private-stricter",
+      "both_bugs_required_at_private_bar": true,
+      "both_bugs_required_private_176_central": false,
+      "descent_176_central_margin_at_lambda1": 4.148583848458713,
+      "descent_private_lcb_margin_at_lambda1": -9.837314462481743,
+      "lambda_star_lcb_private": 0.9780112973731208,
+      "lambda_star_lcb_private_both": 0.9780112973731208,
+      "lambda_star_lcb_private_descent": null,
+      "private_bar_shift_from_public": 0.07278292929910624,
+      "private_decode_drop_at_bar_pct": 4.294644155088989,
+      "private_drop_at_bar_pct": 2.299978091216866,
+      "private_lcb_at_public_bar": 484.5532646216964,
+      "seam_tps_lost_to_finite_sample_descent": 13.985898310940456,
+      "valid_at_bar": true
+    },
+    "imports": {
+      "K_cal": 125.26795005202914,
+      "W_hard": 0.2904229086120552,
+      "adverse_axis": "single:native_multilingual",
+      "both_bugs_required_private_adverse_176": false,
+      "decode_drop_pct": 4.294644155088989,
+      "drop_both": 0.023502816766841544,
+      "drop_descent": 0.022999780912168657,
+      "gt_drop_pct": 4.294644155088978,
+      "ref_both_central_adverse": 522.8488257354769,
+      "ref_both_taulow_adverse": 518.8918351918818,
+      "ref_descent_central_adverse": 507.993144590328,
+      "ref_descent_taulow_adverse": 504.1485838484587,
+      "step": 1.2182,
+      "target_500": 500.0,
+      "tau_central": 1.0,
+      "tau_low": 0.9924318649123313
+    },
+    "per_topology": {
+      "both_bugs": {
+        "drop_tree_pct": 2.3502816766841543,
+        "lambda_star_central_private": 0.9138270633254315,
+        "lambda_star_lcb_private": 0.9780112973731208,
+        "lambda_star_lcb_private_proper": 0.9782246990288563,
+        "margin_at_public_bar_lcb": -15.446735378303572,
+        "private_bar_shift_from_public": 0.07278292929910624,
+        "private_central_at_public_bar": 498.1894853644148,
+        "private_central_lambda1_taulow": 518.891835191882,
+        "private_lcb_at_public_bar": 484.5532646216964,
+        "private_lcb_lambda1_taulow": 504.85889820788293,
+        "private_lcb_lambda1_taulow_proper": 504.81249083603706,
+        "private_lcb_margin_at_lambda1": 4.85889820788293,
+        "private_lcb_reachable_at_full_recovery": true,
+        "public_central_lambda1": 535.4330096522525,
+        "public_lcb_at_public_bar": 499.99979806442366,
+        "public_lcb_lambda1": 520.9527323111674,
+        "ref_176_taulow_lambda1": 518.8918351918818,
+        "resid_private_central_vs_176": 2.2737367544323206e-13
+      },
+      "descent_only": {
+        "drop_tree_pct": 2.299978091216866,
+        "lambda_star_central_private": 0.9810954134496017,
+        "lambda_star_lcb_private": null,
+        "lambda_star_lcb_private_proper": null,
+        "margin_at_public_bar_lcb": -29.580312602643687,
+        "private_bar_shift_from_public": null,
+        "private_central_at_public_bar": 484.0047129278004,
+        "private_central_lambda1_taulow": 504.1485838484587,
+        "private_lcb_at_public_bar": 470.4196873973563,
+        "private_lcb_lambda1_taulow": 490.16268553751826,
+        "private_lcb_lambda1_taulow_proper": 490.11607469532,
+        "private_lcb_margin_at_lambda1": -9.837314462481743,
+        "private_lcb_reachable_at_full_recovery": false,
+        "public_central_lambda1": 519.9519249490157,
+        "public_lcb_at_public_bar": 485.16574246629693,
+        "public_lcb_lambda1": 505.5276163584742,
+        "ref_176_taulow_lambda1": 504.1485838484587,
+        "resid_private_central_vs_176": 0.0
+      }
+    },
+    "private_forward_map_spec": {
+      "drop_both_pct": 2.3502816766841543,
+      "drop_descent_pct": 2.299978091216866,
+      "drop_leg": "stark #176 adverse_vertex tree drop (worst-corner ceiling over cap-0.5 domain simplex; NOT a fresh sampling CI)",
+      "formula_central": "private_central(lam) = public_central(lam) * (1 - drop) * tau_corner",
+      "formula_lcb": "private_LCB(lam) = public_LCB(lam) * (1 - drop) * tau_corner",
+      "note": "public_LCB is #183's tau=1 map; tau_corner multiplies it to the conservative tau-low corner. private_lcb_proper recomputes the LCB at tau_low (sigma_hw not tau-scaled) as a ~0.05 TPS tightening cross-check; conclusion is identical.",
+      "public_leg": "denken #183 lambda_acceptance_card.metrics_at(...)[lcb_full_tps|central_tps] @ tau=1 (executed verbatim)",
+      "tau_corner": "tau_low = 0.9924318649123313 (#181/#176 tree-class floor)"
+    },
+    "self_test": {
+      "c_violation_private_looser_than_public": false,
+      "conditions": {
+        "a_private_central_reproduces_176_taulow": true,
+        "b_private_lcb_monotone_increasing": true,
+        "c_lambda_star_ge_public_0p9052": true,
+        "d_drop_at_bar_reproduces_176_and_valid": true,
+        "e_public_leg_reproduces_183_import_points": true,
+        "f_nan_clean": true
+      },
+      "import_point_detail": {
+        "both_bugs": [
+          {
+            "got": 404.16324966660545,
+            "lambda": 0.342,
+            "ref": 404.1,
+            "resid": 0.06324966660542941
+          },
+          {
+            "got": 486.12485971796895,
+            "lambda": 0.838,
+            "ref": 486.2,
+            "resid": 0.07514028203104317
+          },
+          {
+            "got": 499.9937758938408,
+            "lambda": 0.9052,
+            "ref": 500.0,
+            "resid": 0.006224106159208986
+          },
+          {
+            "got": 520.9527323111674,
+            "lambda": 1.0,
+            "ref": 520.95,
+            "resid": 0.002732311167392254
+          }
+        ],
+        "descent_only": [
+          {
+            "got": 505.5276163584742,
+            "lambda": 1.0,
+            "ref": 505.53,
+            "resid": 0.0023836415257960653
+          }
+        ]
+      },
+      "monotone_detail": {
+        "both_bugs": true,
+        "descent_only": true
+      },
+      "partial_passes_a_to_e": true,
+      "private_build_bar_self_test_passes": true
+    }
+  }
+}
