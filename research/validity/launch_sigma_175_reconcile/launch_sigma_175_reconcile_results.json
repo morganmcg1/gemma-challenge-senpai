@@ -1,0 +1,164 @@
+{
+  "pr": 207,
+  "metric_primary": "reconcile_175_self_test_passes",
+  "metric_test": "lambda1_clears_under_conservative_reading",
+  "reconcile_175_self_test_passes": true,
+  "lambda1_clears_under_conservative_reading": false,
+  "ratio_175_readings": 2.106153062206173,
+  "ratio_equals_sqrtD": false,
+  "acceptance_1sigma_hout": 2.713670722262009,
+  "acceptance_1sigma_175sampling": 5.598859734410491,
+  "acceptance_1sigma_hout_realistic": 5.6991054426095955,
+  "acceptance_1sigma_175sampling_realistic": 11.758424381786776,
+  "trigger_central_hout": 512.4101095400661,
+  "trigger_worstcase_hout": 514.6346173476741,
+  "trigger_central_175sampling": 520.9810679051059,
+  "trigger_worstcase_175sampling": 523.5989192852201,
+  "delta_trigger_reading": 8.570958365039814,
+  "delta_trigger_reading_worstcase": 8.964301937545997,
+  "robust_yes_survives": true,
+  "launch_correct_reading": "h_out 5.178 (B=65536 full-generation; lambda=1 refinement 5.4531)",
+  "lambda1_ceiling": 520.9527323111674,
+  "law": "both readings are HW = z2*slope*sigma_L/sqrt(N_steps) at different bench budgets; acceptance_1sigma = dedup(h_in (+) out_route) * sqrt(D) / z2; combined = hypot(acc, sigma_hw, sigma_priv)[+rho]; trigger = 500 + z1*combined. Launch-correct bench = official full generation B=65536 (NOT 128-tok window 16384).",
+  "trace_readings": {
+    "ratio_175_readings": 2.106153062206173,
+    "sqrt_design_effect": 2.1001462689839707,
+    "abs_gap_ratio_vs_sqrtD": 0.006006793222202322,
+    "rel_gap_ratio_vs_sqrtD": 0.002860178507999039,
+    "ratio_equals_sqrtD": false,
+    "decomposition": {
+      "sigma_L_operating_point_factor": 1.031855014042559,
+      "bench_size_sqrtN_factor": 2.041131935940011,
+      "product_reproduces_ratio": 2.1061522224220957,
+      "decomp_err_vs_ratio": 8.397840773888277e-07,
+      "note": "ratio = sigma_L-operating-point factor x bench-size sqrt(N) factor; NEITHER is sqrt(D). The product reproduces the ratio to < 1e-6, proving the gap is bench-size x op-point, not the ICC design effect."
+    },
+    "pure_bench_size_demo": {
+      "reading_16384_lambda1_tps": 10.906182006867379,
+      "reading_65536_lambda1_tps": 5.4530910034336895,
+      "same_op_bench_ratio": 2.0,
+      "pure_sqrt_bench_token_ratio": 2.0,
+      "same_op_bench_err": 0.0,
+      "note": "#175's OWN two readings at FIXED lambda=1 (10.906 @ 16384, 5.4531 @ 65536) are EXACTLY a factor 2 = sqrt(4) apart -> the cleanest proof the readings differ by BENCH SIZE, not sqrt(D)."
+    },
+    "axis_interpretation": "SAME finite-sample TPS CI formula (HW = z2*slope*sigma_L/sqrt(N_steps)) at DIFFERENT bench budgets; h_out is the B=65536 FULL-generation read (de-duped with the input route), #175-sampling is the B=16384 128-tok-window sub-budget. NOT genuinely-different axes (h_out is already input/output de-duped via #187), and NOT sqrt(D)-apart (the ~2.1 ~= 2.100 is coincidence).",
+    "provenance": {
+      "h_out": "denken #187 OUTPUT route: #175 sigma_L/sqrt(N_steps) x slope, recomputed on the 128x512 (B=65536) bench at the lambda=0.905 build op point (E[T]=4.999, sigma_L=2.9417) -> 5.178; then #187 de-dups it with the INPUT route h_in=3.710 (overlap_fraction=0.893) -> 5.31870.",
+      "sampling_175": "wirbel #175 tps_finite_sample_ci_HALFWIDTH (both-bugs, B=16384 nominal, z=1.96) at lambda=1 (E[T]=5.207, sigma_L=3.0354) -> 10.906; B=16384 with 128 prompts = a 128-tok-per-prompt TPS WINDOW, a sub-budget of the official 512-tok-per-prompt (B=65536) full generation.",
+      "sqrt_D": "wirbel #190 design effect sqrt(D)=sqrt(4.4106)=2.100 = halfwidth_realistic 22.905 / halfwidth_iid 10.906 -- the ICC inflation applied ON TOP of the iid 10.906, NOT the factor between the two readings (reading 10.906 as 5.178*sqrt(D) would DOUBLE-COUNT the design effect)."
+    }
+  },
+  "readings": {
+    "A_hout_launch_correct": {
+      "acceptance": {
+        "out_route_halfwidth": 5.178247584457735,
+        "dedup_halfwidth_iid": 5.318696881534334,
+        "dedup_halfwidth_realistic": 11.170041411611011,
+        "acceptance_1sigma_iid": 2.713670722262009,
+        "acceptance_1sigma_realistic": 5.6991054426095955
+      },
+      "trigger": {
+        "combined_central": 7.544810879656575,
+        "combined_worstcase": 8.897215598932974,
+        "trigger_central": 512.4101095400661,
+        "trigger_worstcase": 514.6346173476741,
+        "central_below_ceiling": true,
+        "worstcase_below_ceiling": true,
+        "central_headroom_below_ceiling_tps": 8.542622771101378,
+        "worstcase_headroom_below_ceiling_tps": 6.318114963493372
+      }
+    },
+    "B_175sampling_conservative": {
+      "acceptance": {
+        "out_route_halfwidth": 10.906182006867379,
+        "dedup_halfwidth_iid": 10.973563433936054,
+        "dedup_halfwidth_realistic": 23.04608830323973,
+        "acceptance_1sigma_iid": 5.598859734410491,
+        "acceptance_1sigma_realistic": 11.758424381786776
+      },
+      "trigger": {
+        "combined_central": 12.75558357371389,
+        "combined_worstcase": 14.347124205183912,
+        "trigger_central": 520.9810679051059,
+        "trigger_worstcase": 523.5989192852201,
+        "central_below_ceiling": false,
+        "worstcase_below_ceiling": false,
+        "central_headroom_below_ceiling_tps": -0.028335593938436432,
+        "worstcase_headroom_below_ceiling_tps": -2.6461869740526254
+      }
+    },
+    "C_lambda1_full_bench_refinement": {
+      "acceptance": {
+        "out_route_halfwidth": 5.4530910034336895,
+        "dedup_halfwidth_iid": 5.5866349409488105,
+        "dedup_halfwidth_realistic": 11.73275052740913,
+        "acceptance_1sigma_iid": 2.8503763257975527,
+        "acceptance_1sigma_realistic": 5.98620720582397
+      },
+      "trigger": {
+        "combined_central": 7.7639580804420065,
+        "combined_worstcase": 9.138136709418553,
+        "trigger_central": 512.7705746081142,
+        "trigger_worstcase": 515.0308973100655,
+        "central_below_ceiling": true,
+        "worstcase_below_ceiling": true,
+        "central_headroom_below_ceiling_tps": 8.182157703053235,
+        "worstcase_headroom_below_ceiling_tps": 5.921835001101954
+      }
+    }
+  },
+  "verdict": {
+    "lambda1_clears_under_conservative_reading": false,
+    "launch_correct_reading": "h_out 5.178 (B=65536 full-generation; lambda=1 refinement 5.4531)",
+    "conservative_reading_is_launch_correct": false,
+    "robust_yes_survives": true,
+    "verdict_changing": true,
+    "delta_trigger_reading_central": 8.570958365039814,
+    "delta_trigger_reading_worstcase": 8.964301937545997,
+    "explanation": "lambda1_clears_under_conservative_reading = False: under the LARGER 10.906 reading the worst-case trigger 523.60 (central 520.98) sits ABOVE the 520.95 ceiling. BUT 10.906 is the B=16384 128-tok-window sub-bench, NOT the official full-generation (B=65536) CI -- so it is NOT launch-correct. The launch-correct reading (h_out 5.178 -> 512.41/514.63; lambda=1 refinement 5.4531 -> 512.77/515.03) clears 500 at P95 central AND worst-case, both well below the ceiling. #204's robust-YES SURVIVES; the reading choice is verdict-changing ONLY if one mis-selects the sub-bench reading."
+  },
+  "self_test": {
+    "reconcile_175_self_test_passes": true,
+    "checks": {
+      "a_hout_reproduces_204_anchor": true,
+      "b_interpretation_self_consistent": true,
+      "c_collapse_at_D1_consistent_with_ratio": true,
+      "d_monotone_trigger_in_acceptance": true,
+      "e_nan_clean": true
+    },
+    "evidence": {
+      "a_central_err_tps": 0.0,
+      "a_worstcase_err_tps": 0.0,
+      "a_acc_realistic_err_tps": 0.0,
+      "a_dedup_iid_err_tps": 0.0,
+      "b_detail": "branch bench: decomp 2.1061522224 reproduces ratio 2.1061530622 (err 8.40e-07)",
+      "c_trigA_at_D1": 509.27679613825745,
+      "c_trigB_at_D1": 512.2860325014888,
+      "c_readings_collapse_at_D1": false,
+      "c_ratio_equals_sqrtD": false,
+      "d_acceptance_1sigma_ACB": [
+        5.6991054426095955,
+        5.98620720582397,
+        11.758424381786776
+      ],
+      "d_trigger_central_ACB": [
+        512.4101095400661,
+        512.7705746081142,
+        520.9810679051059
+      ],
+      "n_scalars_checked": 18
+    }
+  },
+  "handoff": "fern #185 + land #71: the two #175 readings (h_out 5.178 vs #175-sampling 10.906) are the SAME finite-sample TPS CI at DIFFERENT bench sizes (B=65536 full-generation vs B=16384 128-tok-window), NOT sqrt(D)-apart (the 2.106 ratio = bench-sqrt(N) 2.04 x op-point 1.03, only COINCIDENTALLY ~= #190's sqrt(D) 2.100); the launch-correct acceptance magnitude is the FULL-bench h_out -> de-duped 1sigma 2.7137 (lambda=1 refinement 2.8504), giving a clean trigger of 512.41 central / 514.63 worst-case (lambda=1 refinement 512.77 / 515.03); the robust-YES at lambda=1 DOES survive the conservative reading because 10.906 is the 128-tok-window sub-bench, not the official full-generation CI; fern wires the launch-correct ~512.4 central trigger and land #71's co-log (n=385) remains the lever that retires rho(*,hw).",
+  "scope": "Pure CPU-only analytic reconciliation of two banked #175 finite-sample-CI readings (h_out 5.178 vs #175-sampling 10.906) and re-solution of ubel's OWN #204 GO trigger under each. Takes NO official draws, authorizes none. BASELINE stays 481.53; adds 0 TPS; greedy/PPL untouched. The launch-correctness judgment rests on the banked provenance (#175/#187/#195/#190), not a new measurement. The rho(*,hw) [-0.3,+0.3] band still needs land #71's co-log (separate lever). NOT a launch.",
+  "public_evidence_used": [
+    "ubel #204 (m7vwuus2, MERGED) launch_sigma_unit_rebase: clean trigger 512.41 central / 514.63 worst-case, combined sigma 7.5448/8.8972, acceptance 1-sigma 5.6991 (realistic) / 2.7137 (iid), lambda1 ceiling 520.95 -- the trigger re-solved here under each #175 reading.",
+    "denken #187 (lambda_built_ci) input_output_compose: h_in 3.710 (+) h_out 5.178 overlap-corrected (overlap_fraction 0.893) -> 5.31870; h_out is the OUTPUT route on the B=65536 (128x512) bench at the lambda=0.905 build op point (E[T]=4.999, sigma_L=2.9417).",
+    "wirbel #175 (et_second_moment) finite_sample_tps_ci: 10.906 HW @ B=16384 lambda=1 (E[T]=5.207, sigma_L=3.0354, slope 102.830) and 5.4531 HW @ B=65536 SAME lambda=1 -- EXACTLY factor 2 apart (= sqrt(65536/16384)) -> the bench-size proof.",
+    "wirbel #190 (icc_neff) realistic_ci: design_effect 4.4106, sqrt(D)=2.100 = halfwidth_realistic 22.905 / halfwidth_iid 10.906 -- the ICC inflation applied ON TOP of 10.906, NOT the factor between the two readings."
+  ],
+  "method": "LOCAL CPU-only analytic reconciliation over EXISTING MERGED results; no GPU/vLLM/HF Job/submission/served-file change. BASELINE stays 481.53; adds 0 TPS. Greedy/PPL untouched. NOT a launch.",
+  "convention_note": "Identical to #204: 95%-two-sided HW = z2*sigma so 1-sigma = HW/z2; trigger = 500 + z1*hypot(acc_1sigma, sigma_hw, sigma_priv)[+rho]; z1=1.64485 (one-sided P95), z2=1.95996 (two-sided 95%).",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0014
+}
