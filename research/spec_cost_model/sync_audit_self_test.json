@@ -1,0 +1,352 @@
+{
+  "pr": 147,
+  "mode": "self_test",
+  "utc": "2026-06-14T12:22:33Z",
+  "gpu": "NVIDIA A10G",
+  "l2_bytes": 6291456,
+  "config": {
+    "seed": 143,
+    "n_iter": 80,
+    "warmup": 30,
+    "n_passes": 300,
+    "rounds": 9,
+    "gemm_filler_n": 2048,
+    "filler_scale": 1.0
+  },
+  "anchors": {
+    "k_cal": 125.26795005202914,
+    "step_m8_us": 7982.887878221502,
+    "measured_step_136": 1.2182,
+    "clear500_bar_measured_136": 4.862377006624717,
+    "ref_143_sync_free": {
+      "inflation_pct": 0.392,
+      "bar": 4.881,
+      "audit_pass": true
+    },
+    "ref_143_sync_bound": {
+      "inflation_pct": 2.202,
+      "bar": 4.97,
+      "audit_pass": false
+    },
+    "e_t_tree_ceiling": 5.207
+  },
+  "filler": {
+    "gemm_n": 2048,
+    "filler_us_each": 284.2713125000002,
+    "step_gpu_us_target": 9149.573677586994,
+    "n_op_groups": 10,
+    "gemm_per_op": 3,
+    "realized_filler_us_per_step": 8528.139375000006
+  },
+  "schedule_stats": {
+    "n_steps": 1024,
+    "mean_accepted_spine": 1.5302734375,
+    "mean_descend_len": 2.9248046875,
+    "salvage_rate": 0.35546875,
+    "salvage_count": 364,
+    "full_rate": 0.0390625,
+    "full_count": 40,
+    "e_t_reconstructed": 2.601956301950128,
+    "e_t_oracle": 2.621,
+    "e_t_recon_err_pct": -0.7265813830550191
+  },
+  "topology": {
+    "n_nodes": 32,
+    "max_depth": 9,
+    "spine_len": 10,
+    "n_expand": 9
+  },
+  "trace_schema_version": "sync-audit-trace/1.0",
+  "trace_schema_doc": "sync-audit-trace schema (sync-audit-trace/1.0) -- the drop-in `--trace <file>` input.\n\nThe build-team captures land #71's descent/verify step (torch.profiler or nsys),\nreduces it to this schema, and feeds it to:\n\n    python scripts/profiler/salvage_walk_overhead.py --trace land_trace.json \\\n        --wandb-group live-rebench-sync-audit\n\nTOP-LEVEL (JSON object):\n  schema_version : \"sync-audit-trace/1.0\"\n  source         : str   -- who/what produced the trace (kernel build id, capture run)\n  capture_tool   : str   -- \"torch.profiler\" | \"nsys\" | \"synthetic\"\n  topology       : {n_nodes,max_depth,spine_len}  -- the verify tree (depth-9/32-node)\n  n_steps        : int   -- decode steps captured (>= ~256 for a stable mean)\n  anchor_step    : float -- the measured step the overhead is priced against (1.2182, #136)\n  terminal_sync_callsite : str -- the ONE structurally-unavoidable host-sync per step\n                                  (output_token_ids.cpu()); already in anchor_step, EXCLUDED\n                                  from live_syncs_per_step.\n  steps          : [ {step:int, events:[Event,...]}, ... ]\n\nEvent (one per CUDA launch OR host-sync inside the audited accept-walk region):\n  COMPACT form (what the reducer/synthetic emitter writes):\n    launch : {\"t\":\"launch\",\"op\":<OP>,\"node\":<int?>,\"group\":<int>}\n    sync   : {\"t\":\"sync\",\"kind\":<KIND>,\"callsite\":<str>,\"terminal\":<bool>,\"group\":<int>}\n  OP     (launch kernel class; unknown ops -> generic tiny launch, still replayed):\n    expand_topk | expand_gather                     -- static tree expansion (sync-free)\n    descent_eq | descent_cumprod | descent_gather   -- vectorized sync-free accept-walk\n    descent_argmax | salvage_argmax                 -- device argmax (no .item())\n    descent_node_compare | spine_compare | salvage_branch_compare -- per-node (naive walk)\n  KIND   (host-sync class; each is ONE logical host-sync):\n    item | local_scalar_dense | implicit_d2h        -- .item()/_local_scalar_dense  (D2H)\n    bool                                            -- bool(tensor)                 (D2H)\n    cpu | memcpy_dtoh | d2h                          -- .cpu()/Memcpy DtoH           (D2H)\n    stream_synchronize | device_synchronize         -- cudaStream/DeviceSynchronize (barrier)\n  group  : int -- launches sharing a group overlap one GEMM-filler burst (the #136\n                  interleave unit); default = expansion depth index, descent = last group.\n\nREDUCING A RAW torch.profiler CHROME TRACE -> this schema (documented, ~Kineto fields):\n  Kineto event: {name, cat, ph, ts, dur, tid, args:{correlation_id, stream, bytes}}.\n  * launch  <- cat==\"cuda_runtime\" and name==\"cudaLaunchKernel\"   (op <- mapped kernel name)\n  * sync    <- name in {cudaStreamSynchronize, cudaDeviceSynchronize}  (kind=stream/device_synchronize)\n             OR cat==\"gpu_memcpy\" and name startswith \"Memcpy DtoH\"   (kind=memcpy_dtoh)\n  Collapse each .item() chain (aten::item -> aten::_local_scalar_dense -> cudaStreamSynchronize\n  -> Memcpy DtoH) to ONE sync event keyed on the Memcpy DtoH (1 logical D2H = 1 sync); do NOT\n  double-count the aten:: markers. The sync-free RejectionSampler path (vLLM PR #14930) emits\n  exactly ONE Memcpy DtoH per step (the terminal one); ANY non-terminal D2H in the walk region\n  is a regression the audit flags by call-site.\n  nsys: CUPTI_ACTIVITY_KIND_RUNTIME (api_name via StringIds) for the sync names;\n        CUPTI_ACTIVITY_KIND_MEMCPY copyKind==2 for DtoH.\n",
+  "runbook": "python scripts/profiler/salvage_walk_overhead.py --trace <land_descent_trace.json> --wandb-group live-rebench-sync-audit   # -> live_syncs_per_step, live_measured_clear500_bar, live_sync_free_audit_pass (PASS => bar holds ~4.88; FAIL => offending .item() sites named)",
+  "naive_sync_sites": {
+    "spine_compare": "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept",
+    "branch_compare": "submissions/<drafter>/naive_descent.py:57  bool(branch_argmax.eq(draft_tok[c]).item())  # salvage-branch accept",
+    "salvage_select": "submissions/<drafter>/naive_descent.py:63  int(branch_scores.argmax().item())  # which branch to rescue",
+    "accept_readout": "submissions/<drafter>/naive_descent.py:88  n_accept = accept_len.item()  # accept-length to host"
+  },
+  "reference_traces": {
+    "sync_free": "/workspace/senpai/target/research/spec_cost_model/sync_audit_traces/sync_free_reference_trace.json",
+    "sync_bound": "/workspace/senpai/target/research/spec_cost_model/sync_audit_traces/sync_bound_reference_trace.json"
+  },
+  "audit_sync_free": {
+    "label": "sync_free",
+    "live_syncs_per_step": 0.0,
+    "live_syncs_per_step_summary": {
+      "n": 1024,
+      "mean": 0.0,
+      "median": 0.0,
+      "std": 0.0,
+      "se": 0.0,
+      "cv_pct": 0.0,
+      "ci95_abs": 0.0,
+      "min": 0.0,
+      "max": 0.0
+    },
+    "live_measured_clear500_bar": 4.87973582719763,
+    "live_measured_clear500_bar_taulow": 4.888045504555374,
+    "live_sync_free_audit_pass": true,
+    "step_inflation_pct": 0.3570027694122133,
+    "inflated_step": 1.2225490077369796,
+    "clear500_under_ceiling": true,
+    "clear530_bar_central": 5.172519976829488,
+    "descent_overhead_us": 34.71764114582584,
+    "descent_overhead_isolation_us": 791.1052207682246,
+    "collapse_factor": 22.786836739435007,
+    "terminal_sync_marginal_us": 57.64677708334784,
+    "terminal_sync_inflation_pct": 0.9497866794710934,
+    "terminal_sync_clear500_bar": 4.908559215739304,
+    "offending_sync_sites": [],
+    "offending_sync_site_counts": {},
+    "n_op_groups": 10,
+    "measure_overhead": {
+      "variant": "sync_free/overhead",
+      "include_terminal": false,
+      "idle_isolation_us": 791.1052207682246,
+      "idle_interleaved_us": 34.71764114582584,
+      "idle_isolation_rounds": [
+        809.8795600911469,
+        785.9753294596334,
+        790.0500088867198,
+        791.1052207682246,
+        787.917867708331,
+        786.2957178710949,
+        817.5726117187554,
+        815.9947397786434,
+        799.340536816408
+      ],
+      "idle_interleaved_rounds": [
+        36.827289322962315,
+        38.672824218811,
+        34.555776302071536,
+        39.72493072919315,
+        37.41899348961488,
+        25.33091223957308,
+        34.71764114582584,
+        25.57504088540736,
+        21.150969791642638
+      ],
+      "idle_interleaved_summary": {
+        "n": 9,
+        "mean": 32.66381979167798,
+        "median": 34.71764114582584,
+        "std": 6.41421419433846,
+        "se": 2.13807139811282,
+        "cv_pct": 19.637060929330318,
+        "ci95_abs": 4.190542936676327,
+        "min": 21.150969791642638,
+        "max": 39.72493072919315
+      },
+      "collapse_factor_iso_over_inter": 22.786836739435007
+    },
+    "measure_with_terminal": {
+      "variant": "sync_free/with_terminal",
+      "include_terminal": true,
+      "idle_isolation_us": 870.6264861979107,
+      "idle_interleaved_us": 92.36441822917368,
+      "idle_isolation_rounds": [
+        877.2525237630226,
+        876.9322182617133,
+        870.6264861979107,
+        870.5412431966133,
+        866.2388330403614,
+        867.3925113606743,
+        870.0619436848924,
+        876.2042869466175,
+        872.4341908854135
+      ],
+      "idle_interleaved_rounds": [
+        96.70750781251081,
+        77.56693333334624,
+        136.4149851562779,
+        110.70631770829459,
+        92.36441822917368,
+        84.26197786461489,
+        88.73242994792054,
+        89.37218932293399,
+        93.33323958334768
+      ],
+      "idle_interleaved_summary": {
+        "n": 9,
+        "mean": 96.60666655093559,
+        "median": 92.36441822917368,
+        "std": 16.470406456028957,
+        "se": 5.490135485342986,
+        "cv_pct": 17.048933623379895,
+        "ci95_abs": 10.760467821517581,
+        "min": 77.56693333334624,
+        "max": 136.4149851562779
+      },
+      "collapse_factor_iso_over_inter": 9.42599436979856
+    },
+    "pricing": {
+      "overhead_us": 34.71764114582584,
+      "dstep_units": 0.004349007736979583,
+      "step_inflation_pct": 0.3570027694122133,
+      "inflated_step": 1.2225490077369796,
+      "clear500_bar_central": 4.87973582719763,
+      "clear500_bar_taulow": 4.888045504555374,
+      "clear530_bar_central": 5.172519976829488,
+      "clear500_bar_shift_vs_measured": 0.017358820572912492,
+      "clear500_under_ceiling": true,
+      "clear500_taulow_under_ceiling": true,
+      "clear500_holds_4p86": false
+    },
+    "anchor_step": 1.2182
+  },
+  "audit_sync_bound": {
+    "label": "sync_bound",
+    "live_syncs_per_step": 4.2412109375,
+    "live_syncs_per_step_summary": {
+      "n": 1024,
+      "mean": 4.2412109375,
+      "median": 4.0,
+      "std": 2.012514775381878,
+      "se": 0.06289108673068369,
+      "cv_pct": 47.4514190649561,
+      "ci95_abs": 0.12326426494072493,
+      "min": 2.0,
+      "max": 10.0
+    },
+    "live_measured_clear500_bar": 4.955826734879928,
+    "live_measured_clear500_bar_taulow": 4.964265987057926,
+    "live_sync_free_audit_pass": false,
+    "step_inflation_pct": 1.9218939240599844,
+    "inflated_step": 1.2416125117828987,
+    "clear500_under_ceiling": true,
+    "clear530_bar_central": 5.253176338972723,
+    "descent_overhead_us": 186.89945651042035,
+    "descent_overhead_isolation_us": 789.5495077799483,
+    "collapse_factor": 4.224461229163221,
+    "terminal_sync_marginal_us": 24.328388541644017,
+    "terminal_sync_inflation_pct": 2.1720636302396774,
+    "terminal_sync_clear500_bar": 4.96799092915075,
+    "offending_sync_sites": [
+      "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept",
+      "submissions/<drafter>/naive_descent.py:57  bool(branch_argmax.eq(draft_tok[c]).item())  # salvage-branch accept",
+      "submissions/<drafter>/naive_descent.py:63  int(branch_scores.argmax().item())  # which branch to rescue",
+      "submissions/<drafter>/naive_descent.py:88  n_accept = accept_len.item()  # accept-length to host"
+    ],
+    "offending_sync_site_counts": {
+      "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept": 2591,
+      "submissions/<drafter>/naive_descent.py:88  n_accept = accept_len.item()  # accept-length to host": 1024,
+      "submissions/<drafter>/naive_descent.py:57  bool(branch_argmax.eq(draft_tok[c]).item())  # salvage-branch accept": 364,
+      "submissions/<drafter>/naive_descent.py:63  int(branch_scores.argmax().item())  # which branch to rescue": 364
+    },
+    "n_op_groups": 10,
+    "measure_overhead": {
+      "variant": "sync_bound/overhead",
+      "include_terminal": false,
+      "idle_isolation_us": 789.5495077799483,
+      "idle_interleaved_us": 186.89945651042035,
+      "idle_isolation_rounds": [
+        785.3657924804727,
+        790.2720113606802,
+        803.6607935221367,
+        788.6361055013012,
+        782.9231241862028,
+        782.6382459960923,
+        789.5495077799483,
+        802.4598074218788,
+        795.6849301757811
+      ],
+      "idle_interleaved_rounds": [
+        192.14516666664167,
+        186.89945651042035,
+        182.63084244792117,
+        175.08356406251187,
+        196.5563333333248,
+        176.25978333332023,
+        194.5414416666681,
+        177.50437630209308,
+        188.46198411460682
+      ],
+      "idle_interleaved_summary": {
+        "n": 9,
+        "mean": 185.564772048612,
+        "median": 186.89945651042035,
+        "std": 7.636813536607238,
+        "se": 2.5456045122024125,
+        "cv_pct": 4.115443600796512,
+        "ci95_abs": 4.989293162799381,
+        "min": 175.08356406251187,
+        "max": 196.5563333333248
+      },
+      "collapse_factor_iso_over_inter": 4.224461229163221
+    },
+    "measure_with_terminal": {
+      "variant": "sync_bound/with_terminal",
+      "include_terminal": true,
+      "idle_isolation_us": 783.1964718749987,
+      "idle_interleaved_us": 211.22784505206437,
+      "idle_isolation_rounds": [
+        775.4276383463564,
+        784.0055619140658,
+        784.8790855143209,
+        783.1964718749987,
+        782.7180740885394,
+        767.128568424482,
+        783.2521901041696,
+        775.4625962239606,
+        786.4978204101548
+      ],
+      "idle_interleaved_rounds": [
+        208.79696197919293,
+        210.27828203120953,
+        214.7816328125009,
+        201.86982916663874,
+        211.22784505206437,
+        207.0017244791452,
+        215.78304427079274,
+        217.83856093745635,
+        218.6639786458345
+      ],
+      "idle_interleaved_summary": {
+        "n": 9,
+        "mean": 211.80465104164836,
+        "median": 211.22784505206437,
+        "std": 5.181440889441641,
+        "se": 1.7271469631472136,
+        "cv_pct": 2.446330080080623,
+        "ci95_abs": 3.3851458437762667,
+        "min": 201.86982916663874,
+        "max": 218.6639786458345
+      },
+      "collapse_factor_iso_over_inter": 3.7078277803854554
+    },
+    "pricing": {
+      "overhead_us": 186.89945651042035,
+      "dstep_units": 0.02341251178289873,
+      "step_inflation_pct": 1.9218939240599844,
+      "inflated_step": 1.2416125117828987,
+      "clear500_bar_central": 4.955826734879928,
+      "clear500_bar_taulow": 4.964265987057926,
+      "clear530_bar_central": 5.253176338972723,
+      "clear500_bar_shift_vs_measured": 0.09344972825521047,
+      "clear500_under_ceiling": true,
+      "clear500_taulow_under_ceiling": true,
+      "clear500_holds_4p86": false
+    },
+    "anchor_step": 1.2182
+  },
+  "classification": {
+    "sync_free_classified_ok": true,
+    "sync_bound_classified_ok": true,
+    "reproduces_143_sync_free_bar": true,
+    "reproduces_143_sync_bound_bar": true
+  },
+  "harness_self_test_passes": true,
+  "live_audit_ready": true,
+  "primary_metric": {
+    "name": "harness_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "live_audit_ready",
+    "value": 1
+  },
+  "verdict": "PASS",
+  "elapsed_s": 168.45278668403625,
+  "peak_gpu_gb": 0.033701888,
+  "wandb_run_id": "25wdfi8x"
+}
