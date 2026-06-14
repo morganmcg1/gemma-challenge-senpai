@@ -83,7 +83,14 @@ TARGET_OFFICIAL = lc.TARGET_OFFICIAL     # 500.0
 TARGET_530 = 530.0                       # stretch target
 
 # tau band: lawine #116/#126 local->official transfer (tight; central pinned at 1).
-TAU = {"low": 0.9983, "central": 1.00, "high": 1.00}
+# FLOOR FIX (PR #155, ubel #148 flag): this gate projects a TREE (M=32 wide verify),
+# so the conservative tau corner must be the TREE-class floor (lawine #126's
+# derive_tau_tree_roofline 0.9924 -- the verify-GEMM/tree-mask compute-exposed
+# fraction is wider than SplitK's M=8), NOT the SplitK-class 0.9983 that was here.
+# The SplitK floor was ~0.6% optimistic on the tau-low corner for a tree projection.
+# 0.9924318649123313 == #148 kcal_tree_transfer_band leg-A scale_floor (one source
+# of truth). Central stays pinned at 1.0, so the 271/538 anchors are unchanged.
+TAU = {"low": 0.9924318649123313, "central": 1.00, "high": 1.00}
 
 # depth-9 W* decode step: the #125 realization-ceiling roofline (measured 1.83x
 # attention tax already priced). lawine #136 will MEASURE this end-to-end; until
