@@ -1,0 +1,234 @@
+{
+  "agent": "denken",
+  "created_at": "20260614T230028Z",
+  "kind": "measured-et-shortfall",
+  "nan_clean": true,
+  "peak_mem_mib": 12.141,
+  "pr": 241,
+  "synthesis": {
+    "binding_tolerance": {
+      "binding_gate": "TPS500",
+      "binding_gate_conservative": "lambda_hat",
+      "delta_max": 0.040220025755911104,
+      "delta_max_conservative": 0.00510851236099763,
+      "delta_max_lambda_uniform_adverse": 0.00510851236099763,
+      "delta_max_tps500": 0.040220025755911104,
+      "e_t_meas_floor": 4.330527243789328,
+      "e_t_meas_floor_conservative": 4.488950392227178,
+      "framing": "OPERATIVE (lambda measured independently from q[2..9], deep-tail-protected): the E[T]-shortfall channel binds on TPS500 \u2014 delta_max=0.04022, E_T_meas_floor=4.3305; the acceptance gate is a SEPARATE check (min-lambda_q[2..9] >= 0.9780, projected 0.983). CONSERVATIVE (uniform-adverse coupling): binding=min(delta_max_tps500=0.04022, delta_max_lambda=0.00511)=0.00511 -> lambda_hat binds, single E[T] floor 4.4890."
+    },
+    "handoff_lines": {
+      "land_71_and_fern_185": "land #71 + fern #185: PRE-REGISTERED shortfall pass/fail for the ONE build run. PASS iff (measured E[T] >= E_T_meas_floor = 4.3305, i.e. within delta_max_tps500 = 4.02% below the 4.512 projection) AND (measured min-lambda q[2..9] >= 0.9780, projected 0.983) \u2014 the two live hard gates checked INDEPENDENTLY. The binding gate through the E[T]-shortfall channel is TPS500 (the acceptance gate is deep-tail-protected, #230). If you want a SINGLE conservative E[T] floor that self-insures against worst-case lambda coupling, use E[T] >= 4.4890 (delta 0.51%). A stricter read that keeps the build above the P95 GO trigger 512.41 (not just the 500 milestone) tightens the E[T] floor to 4.4380 (delta 1.64%). Stamp this against land's measured E[T]; the value remains land #71's to measure."
+    },
+    "honest_band": {
+      "a_anchor_is_land_go_read_not_banked_step": "TPS_0 is anchored on land #71's GO read = the lambda=1 ceiling 520.95 (+8.54 over the 512.41 trigger; self-test a). The BANKED composition (step 1.2182) instead maps E[T]=4.512 -> 464.0 TPS (clear500 bar E[T]=4.862), which MISSES 500 at delta=0 \u2014 land's reset re-anchors the effective step to 1.0850. This is THE load-bearing modeling choice. It is DIRECTIONALLY transparent: delta_max_tps500=1-500/TPS_0 is slope-invariant (linear through origin), so it depends ONLY on the anchor TPS_0, not the step. If one instead anchors on the banked step (TPS_0=463.9), the build misses even at delta=0 and the shortfall frame is vacuous (negative tolerance) \u2014 the headline takes the PR premise that 4.512 CLEARS with +8.54 headroom.",
+      "b_lambda_is_land71_to_measure": "the live build's lambda_hat is what land #71 will MEASURE (q[2..9] direct, both-bugs). This leg prices the TOLERANCE, not the value. The operative framing treats lambda as measured INDEPENDENTLY of E[T] (separate gate); the deep-tail-protected map (#230) shows the aggregate lambda_hat is slack under a deep-tail-localized shortfall (deep tail may fall to the 0.7875 budget); the uniform-adverse coupling is the conservative worst case. The TRUE binding gate depends on whether the E[T] shortfall co-erodes the acceptance rate \u2014 reported as a bracket.",
+      "c_coupling_bracket": {
+        "bracket_note": "binding delta_max in [0.00511 (uniform-adverse lambda) ... 0.04022 (independent / deep-tail-protected TPS500)]; the OPERATIVE value under independent measurement is 0.04022 (E[T] floor 4.3305), with the conservative coupled floor 4.4890 as the single-number self-insurance.",
+        "conservative_uniform_adverse_lambda": {
+          "binding_gate": "lambda_hat",
+          "delta_max": 0.00510851236099763,
+          "e_t_meas_floor": 4.488950392227178
+        },
+        "operative_independent_tps500": {
+          "binding_gate": "TPS500",
+          "delta_max": 0.040220025755911104,
+          "e_t_meas_floor": 4.330527243789328
+        }
+      },
+      "d_imports_unchanged": "the 4.512 projection, the 512.41/520.95 trigger/ceiling (#217), the K_cal composition (#199), the 0.9779783 bar (#225), and the 0.7875 deep-tail budget + reach weights (#230) are imported UNCHANGED; this leg only PRICES the shortfall tolerance against them. No GPU/draw/served-file change. BASELINE stays 481.53."
+    },
+    "imports": {
+      "K_cal": 125.26795005202914,
+      "budget_deeptail": 0.7874871278548552,
+      "central_headroom_204": 8.542622771101378,
+      "clear500_bar_et_tau1": 4.862377006624717,
+      "deeptail_power_ratio": 1.2720159410524827,
+      "lambda1_ceiling": 520.9527323111674,
+      "lambda_spine_interim": 0.997,
+      "lambda_star_191": 0.9780112973731208,
+      "private_bar_205": 0.9780112973731208,
+      "private_bar_208": 0.9779783323491393,
+      "provenance": "#217 trigger_reconcile (lambda=1 ceiling 520.95, N=1 GO trigger 512.41, central headroom 8.54) x wirbel#199 official composition (official=K_cal*(E[T]/step)*tau, K_cal=125.268, step=1.2182, clear500 bar E[T]=4.862) x denken#225 binding both-bugs bar 0.9779783 (851z7itj) x denken#230 deep-tail protection (budget 0.7875, spine 0.997, q8q9 reach mass 9.08%). land #71 projection E[T]_both=4.512 (+18.3%), min-lambda q[2..9]=0.983 (PARAMETERS). Measured E[T] and lambda_hat stay land #71's to MEASURE; this leg prices the shortfall TOLERANCE.",
+      "source_runs": {
+        "d199": "compliant-spec-et",
+        "d217": "trigger-reconcile",
+        "d225": "851z7itj",
+        "d230": "gate2-depth-resolved-power"
+      },
+      "step_banked": 1.2182,
+      "t_base_central": 512.4101095400661,
+      "target_official": 500.0,
+      "tau_central": 1.0,
+      "tau_conservative": 0.9924,
+      "w_mass_deeptail_q8q9": 0.09078997130869798,
+      "w_mass_shallow_q2q7": 0.909210028691302
+    },
+    "lambda_gate": {
+      "bar": 0.9779783323491393,
+      "bar_basis": "binding both-bugs build bar (stark #191 / denken #208; lambda_hat_LCB >= bar)",
+      "deeptail_protected": {
+        "aggregate_lambda_at_proj": 0.9957289404016781,
+        "budget_deeptail_import": 0.7874871278548552,
+        "budget_roundtrip_resid": 0.0,
+        "deeptail_room_abs": 0.1955128721451448,
+        "lambda_deep_floor_for_aggregate_at_bar": 0.7874871278548552,
+        "note": "the reach-weighted aggregate lambda_hat = w_sh*0.997 + w_dt*lambda_deep tolerates the deep-tail lambda falling to 0.7875 (== the 0.7875 budget, resid 0.00e+00) before the aggregate hits the bar \u2014 a room of 0.1955, 39x the binding min-lambda headroom 0.0050. So a DEEP-TAIL-LOCALIZED E[T] shortfall keeps the acceptance gate SLACK and TPS500 binds (#230's shallow-dominance)."
+      },
+      "headroom_abs": 0.005021667650860651,
+      "independent": {
+        "clears_at_proj": true,
+        "lambda_axis_rel_headroom": 0.00510851236099761,
+        "note": "lambda_hat is MEASURED INDEPENDENTLY from the build's q[2..9] accept stream, so the E[T]-shortfall delta does NOT move it; the gate is a separate pre-registered check min-lambda_q[2..9] >= 0.9780 (projected 0.983)."
+      },
+      "min_lambda_proj": 0.983,
+      "uniform_adverse": {
+        "delta_max_lambda_uniform": 0.00510851236099763,
+        "e_t_meas_floor_lambda_uniform": 4.488950392227178,
+        "map": "lambda_hat(delta) = 0.983*(1-delta)  (proportional erosion of the binding min-lambda)",
+        "note": "CONSERVATIVE coupling: if the E[T] shortfall proportionally erodes the binding min-lambda, the gate binds at delta=0.00511 (E[T] floor 4.4890) \u2014 the worst-case coupled floor, a single E[T] number that self-insures against the acceptance gate."
+      }
+    },
+    "self_test": {
+      "conditions": {
+        "a_delta0_clears_both_matches_go_read_headroom": true,
+        "b_tps_monotone_decreasing_in_delta": true,
+        "c_delta_max_in_0_0p30_and_floor_below_4p512": true,
+        "d_binding_gate_identified_and_floor_identity": true,
+        "e_deeptail_floor_roundtrips_0p7875_budget": true,
+        "f_key_scalars_finite": true
+      },
+      "evidence": {
+        "a_ceiling": 520.9527323111674,
+        "a_central_headroom_204": 8.542622771101378,
+        "a_headroom_over_trigger": 8.542622771101378,
+        "a_lambda_proj_minus_bar": 0.005021667650860651,
+        "a_tps0": 520.9527323111674,
+        "b_tps_grid": [
+          [
+            0.0,
+            520.9527323111674
+          ],
+          [
+            0.05,
+            494.905095695609
+          ],
+          [
+            0.1,
+            468.8574590800507
+          ],
+          [
+            0.15,
+            442.8098224644923
+          ],
+          [
+            0.2,
+            416.762185848934
+          ],
+          [
+            0.25,
+            390.7145492333756
+          ],
+          [
+            0.3,
+            364.66691261781716
+          ]
+        ],
+        "c_delta_max": 0.040220025755911104,
+        "c_e_t_floor": 4.330527243789328,
+        "d_binding_gate": "TPS500",
+        "d_binding_gate_conservative": "lambda_hat",
+        "e_budget_import": 0.7874871278548552,
+        "e_lambda_deep_floor": 0.7874871278548552,
+        "e_roundtrip_resid": 0.0
+      },
+      "measured_et_shortfall_self_test_passes": true
+    },
+    "shortfall_table": {
+      "columns": [
+        "delta",
+        "e_t_meas",
+        "tps_proj",
+        "clears_500",
+        "lambda_hat_uniform_adverse",
+        "clears_0p9780_uniform_adverse",
+        "clears_0p9780_independent"
+      ],
+      "note": "clears_0p9780_independent uses the INDEPENDENT measurement (lambda stays at its 0.983 projection, clears every row); clears_0p9780_uniform_adverse uses the conservative coupling lambda_hat(delta)=0.983*(1-delta) (informative \u2014 flips False past delta=0.00511). TPS crosses 500 between delta=0 and 0.05 (delta_max_tps500=0.04022).",
+      "rows": [
+        {
+          "clears_0p9780_independent": true,
+          "clears_0p9780_uniform_adverse": true,
+          "clears_500": true,
+          "delta": 0.0,
+          "e_t_meas": 4.512,
+          "lambda_hat_uniform_adverse": 0.983,
+          "tps_proj": 520.9527323111674
+        },
+        {
+          "clears_0p9780_independent": true,
+          "clears_0p9780_uniform_adverse": false,
+          "clears_500": false,
+          "delta": 0.05,
+          "e_t_meas": 4.2863999999999995,
+          "lambda_hat_uniform_adverse": 0.93385,
+          "tps_proj": 494.905095695609
+        },
+        {
+          "clears_0p9780_independent": true,
+          "clears_0p9780_uniform_adverse": false,
+          "clears_500": false,
+          "delta": 0.1,
+          "e_t_meas": 4.0607999999999995,
+          "lambda_hat_uniform_adverse": 0.8847,
+          "tps_proj": 468.8574590800507
+        },
+        {
+          "clears_0p9780_independent": true,
+          "clears_0p9780_uniform_adverse": false,
+          "clears_500": false,
+          "delta": 0.15,
+          "e_t_meas": 3.8351999999999995,
+          "lambda_hat_uniform_adverse": 0.83555,
+          "tps_proj": 442.8098224644923
+        },
+        {
+          "clears_0p9780_independent": true,
+          "clears_0p9780_uniform_adverse": false,
+          "clears_500": false,
+          "delta": 0.2,
+          "e_t_meas": 3.6096,
+          "lambda_hat_uniform_adverse": 0.7864,
+          "tps_proj": 416.762185848934
+        }
+      ]
+    },
+    "test_metric": {
+      "E_T_meas_floor": 4.330527243789328
+    },
+    "tps_gate": {
+      "delta_max_tps500": 0.040220025755911104,
+      "delta_max_trigger512": 0.016398076526449312,
+      "e_t_meas_floor_tps500": 4.330527243789328,
+      "e_t_meas_floor_trigger512": 4.43801187871266,
+      "headroom_over_trigger_at_delta0": 8.542622771101378,
+      "law": "official_tps = K_cal*(E[T]/step)*tau  (LINEAR in E[T] through origin)  ->  TPS(delta) = TPS_0*(1-delta)",
+      "milestone_500": 500.0,
+      "slope_invariance": {
+        "banked_clear500_bar_et": 4.862377006624717,
+        "delta_max_invariant_to_slope": true,
+        "delta_max_via_ratio_check": 0.040220025755911104,
+        "note": "the BANKED composition (step 1.2182) maps E[T]=4.512 -> 464.0 TPS (the #199 clear500 bar is E[T]=4.862, ABOVE 4.512), which MISSES 500 at delta=0 and contradicts land's GO read. land's reset re-anchors the effective step to 1.0850. Because the law is linear THROUGH THE ORIGIN, delta_max_tps500 = 1-500/TPS_0 depends ONLY on the anchor TPS_0 (step/tau cancel in the ratio), so the headline is robust to which step is used; we anchor TPS_0 on land's GO read 520.95 per the PR premise + self-test (a).",
+        "slope_banked_tps_per_et": 102.83036451488191,
+        "step_banked": 1.2182,
+        "step_eff_landread": 1.084952540947906,
+        "tps_banked_at_4p512": 463.9706046911471
+      },
+      "tps0_anchor": 520.9527323111674,
+      "tps0_anchor_basis": "land #71 GO read = lambda=1 ceiling 520.95 (the +8.54 headroom over the N=1 GO trigger 512.41; self-test a)",
+      "tps_at_delta0": 520.9527323111674,
+      "trigger_512": 512.4101095400661
+    },
+    "verdict": "MEASURED-E[T] SHORTFALL TOLERANCE BANKED. land #71's live build PROJECTS E[T]_both=4.512 (GO: lambda=1 ceiling 520.95 clears the 512.41 trigger by +8.54). Pricing the shortfall E_T_meas=4.512*(1-delta): because the official composition is LINEAR through the origin, TPS(delta)=520.95*(1-delta), so the measured E[T] may fall delta_max_tps500=0.0402 (4.02%) below 4.512 and still clear the 500 milestone -> E_T_meas_floor=4.3305. The acceptance gate (lambda_hat>=0.9780, projected min-lambda 0.983, headroom 0.0050) is measured INDEPENDENTLY and is deep-tail-protected (#230: aggregate tolerates the deep tail -> 0.7875 budget), so under independent measurement TPS500 BINDS (delta_max=0.0402). CONSERVATIVE: if the shortfall uniformly erodes the min-lambda, the acceptance gate binds first at delta=0.00511 (floor 4.4890). HONEST: the BANKED step 1.2182 maps 4.512 -> 464.0 (misses 500); the headline anchors on land's GO read (slope-invariant). NOT a launch."
+  }
+}
