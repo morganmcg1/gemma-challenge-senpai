@@ -1,0 +1,11 @@
+[prevalidate] starting server: /tmp/server-venv/bin/python serve.py (log: /tmp/local_prevalidate_serve.log)
+[prevalidate] waiting for http://127.0.0.1:8000/v1/models ...
+[prevalidate] endpoint ready
+[prevalidate] running: /tmp/server-venv/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/local_validation/treeverify_m16_dbg/decode_outputs.jsonl --summary-file research/local_validation/treeverify_m16_dbg/decode_summary.json --num-prompts 3 --output-len 96 --request-timeout-s 180
+decode_records=3
+decode_completion_tokens=288
+decode_summary_file=research/local_validation/treeverify_m16_dbg/decode_summary.json
+
+[prevalidate] LOCAL pre-validation summary
+SENPAI-LOCAL tps=42.9073 ppl=0.0000 completed=3 decode_sample=3 submission=fa2sw_treeverify_kenyan (exploratory; not official a10g-small)
+[prevalidate] artifacts in research/local_validation/treeverify_m16_dbg
