@@ -1,0 +1,273 @@
+{
+  "primary_metric_name": "launch_packet_self_test_passes",
+  "launch_packet_self_test_passes": 1,
+  "test_metric_name": "descent_only_p_clear500_at_pinned_drop",
+  "descent_only_p_clear500_at_pinned_drop": 0.9630337622697593,
+  "gate_state": "ARMED",
+  "operating_point": {
+    "private_drop_descent_only_pct": 1.801511061644668,
+    "private_drop_both_bugs_pct": 1.8626055407019635,
+    "bar_et_realistic": 4.808506392517534,
+    "step_realistic": 1.2047034772054985,
+    "anchored_to_flagship_gt_pct": 4.294644155088989,
+    "source": "stark #156 pinned drop + ubel #154 realistic bar"
+  },
+  "step1_pinned_instantiation": {
+    "descent_only": {
+      "topo": "descent_only",
+      "E_T_input": 5.056404568844709,
+      "lambda": 1.0,
+      "mu": 1.0,
+      "private_drop": 0.01801511061644668,
+      "private_drop_pct": 1.801511061644668,
+      "r_tree": 0.9883258628050743,
+      "et_private": 4.997375408194967,
+      "proj_private_tps": 519.6390521567497,
+      "ci99_lo": 491.3312916665725,
+      "ci99_hi": 547.9468126469269,
+      "combined_rel_1sigma": 0.021148844836120288,
+      "lcb_p90": 505.55510080538465,
+      "p_clear_500": 0.9630337622697593,
+      "clears_p50": true,
+      "clears_p90": true,
+      "geom_tps_public": 525.777045520094,
+      "p_geom_membership": 0.9897798978948937,
+      "binding_leg": "sampling",
+      "consolidator_conf99_verdict": "INDETERMINATE",
+      "consolidator_conf99_go": "HOLD",
+      "validity_gate": "READY",
+      "launch_go_p90": "GO"
+    },
+    "both_bugs": {
+      "topo": "both_bugs",
+      "E_T_input": 5.206954309441963,
+      "lambda": 1.0,
+      "mu": 1.0,
+      "private_drop": 0.018626055407019636,
+      "private_drop_pct": 1.8626055407019635,
+      "r_tree": 0.9877498097314477,
+      "et_private": 5.143168128431641,
+      "proj_private_tps": 534.798928044982,
+      "ci99_lo": 506.3287580945712,
+      "ci99_hi": 563.2690979953927,
+      "combined_rel_1sigma": 0.020667238533949674,
+      "lcb_p90": 520.6341731649264,
+      "p_clear_500": 0.9991792263045378,
+      "clears_p50": true,
+      "clears_p90": true,
+      "geom_tps_public": 541.4315677675348,
+      "p_geom_membership": 0.9998932941801958,
+      "binding_leg": "sampling",
+      "consolidator_conf99_verdict": "robust-GREEN",
+      "consolidator_conf99_go": "GO",
+      "validity_gate": "READY",
+      "launch_go_p90": "GO"
+    },
+    "cross_check_stark156_proj_descent": 510.5849335058248,
+    "cross_check_stark156_proj_both": 525.4600047477221,
+    "note": "realistic-bar PRIVATE projection of the full-recovery corner. stark #156's own descent 510.6 / both 525.5 sit at his measured step 1.2182; the realistic bar (1.2047) lifts them. Both-bugs PUBLIC official is lawine #161's 537.84 (roofline 1.2127, no private haircut)."
+  },
+  "step2_bug1_resolution": {
+    "pinned_drop_pct": 1.801511061644668,
+    "bug1_binds_above_drop_pct": 6.0,
+    "bug1_binding": false,
+    "recommended_first_shot": "descent-ONLY (BUG-1 deferred)",
+    "descent_only_proj_at_pinned": 519.6390521567497,
+    "descent_only_p_clear500_at_pinned_drop": 0.9630337622697593,
+    "exceeds_162_gt_511": true,
+    "f162_descent_proj_at_gt_4p3": 511.1263603123746,
+    "margin_vs_162_gt": 8.512691844375126,
+    "note": "pinned drop 1.80% << the ~6% BUG-1 threshold (#162 Step-5): BUG-1 (wirbel #160 depth-1 spine) is DEFERRED. The descent-only pinned margin EXCEEDS #162's 511.1 (which sat at the harsher GT-4.3%; 1.80% < 4.3% -> less haircut). The spine is no longer mandatory for private-safety at the pinned drop -- it buys the conf-99 margin + the 9%-band-ceiling insurance."
+  },
+  "step3_readiness_packet": {
+    "packet_markdown": "### Approval request: HF job for tree-descent submission (PRE-FILLED DRAFT -- NOT YET FILED)\n\n**This block is the pre-filled projection+validity body of the eventual `Approval\nrequest: HF job` issue. It awaits ONLY land #71's measured tuple and the PENDING legs\nbelow. It does NOT authorize a launch; a human must approve the filed issue.**\n\n**Operating point (PINNED):** private drop 1.80% (descent-only) /\n1.86% (both-bugs), anchored to flagship GT-4.3% (stark #156).\nRealistic bar E[T]>=4.809, step 1.2047\n(ubel #154 scatter+LP avoidance, greedy-token-identical).\n\n**Projection formula (parameterized on land #71's PENDING tuple):**\n```\nproj_private = K_cal * E[T]_land * r_tree(d_pinned, topo) / step          (K_cal=125.268)\nP(clear 500) = min( Phi((proj-500)/sigma), Phi((geom_tps(lambda,mu)-500)/sigma) )\nsigma        = proj * sqrt(samp^2 + calib^2 + step^2)   [+ sigma_hw PENDING kanna #159]\nGO  iff  P(clear 500) >= 0.9  AND  (lambda,mu) >= (0.8809, 0.7353)  AND  validity READY\n```\n\n**Instantiated projection at the pinned point (full-recovery corner lambda=mu=1):**\n\n| topology | E[T] | r_tree | proj_private | P(clear 500) | LCB(P>=0.9) | CI99 | conf-99 | launch (P>=0.9) | binding leg |\n|---|---|---|---|---|---|---|---|---|---|\n| **descent-only (BUG-1 deferred)** | 5.0564 | 0.9883 | **519.6** | 96.3% | 505.6 | [491.3, 547.9] | INDETERMINATE | **GO** | sampling |\n| both-bugs (BUG-1 fixed) | 5.2070 | 0.9877 | 534.8 | 99.9% | 520.6 | [506.3, 563.3] | robust-GREEN | GO | sampling |\n\n**Recommended first shot:** descent-ONLY (BUG-1 deferred) -- pinned drop 1.80% << 6%, so BUG-1 is not mandatory; descent-only clears the conservative P>=0.9 launch bar (proj 519.6, LCB 505.6 >= 500). The both-bugs spine upgrades it to conf-99 robust-GREEN (534.8) and covers the 9% band-ceiling, but is deferrable for the first shot.\n\n**Validity stamps (must ALL be READY before the filed issue is approved):**\n- denken #150 (does-it-score): PPL<=2.42 & boots & 128/128 -- BANKED contract, ARMED/PENDING land #71's run.\n- denken #158 (greedy-exact): per-token committed==argmax -- BANKED, `--audit-kernel-symbol` pre-merge gate.\n- denken #166 (PPL-margin bound): M=32 aggregate-PPL worst-case vs 2.42 -- **PENDING** (the last unbounded validity dim).\n- kanna #159 (sigma_hw): A10G clock/thermal/cold-start 4th quadrature term -- **PENDING** (widens the CI above).\n\n**Leg ledger (6 BANKED / 4 PENDING):**\n- [BANKED]  fern #155 consolidator -- GO/NO-GO + CI + binding-leg union\n- [BANKED]  fern #162 build gate -- (lambda_min,mu_min)=(0.8809,0.7353) @ P>=0.5\n- [BANKED]  stark #156 pinned drop -- private drop 1.80% desc / 1.86% both (anchored GT-4.3%)\n- [BANKED]  lawine #161 both-bugs step -- measured step-NEUTRAL -> both-bugs official 537.8\n- [BANKED]  denken #150 validity (does-it-score) -- PPL<=2.42 & boots & 128/128 contract\n- [BANKED]  denken #158 greedy-exactness -- per-token committed==argmax (BUG-2 catcher)\n- [PENDING] lawine step-reconciliation -- final depth-9 step reconcile (overlap vs roofline)\n- [PENDING] denken #166 PPL-margin bound -- M=32 batched-verify aggregate-PPL worst-case vs 2.42\n- [PENDING] kanna #159 sigma_hw -- 4th quadrature term (A10G clock/thermal/cold-start)\n- [PENDING] land #71 measured tuple -- (E[T], rho2, lambda, mu, step, ppl, boots, completed)\n",
+    "leg_ledger": {
+      "legs": [
+        {
+          "leg": "fern #155 consolidator",
+          "role": "GO/NO-GO + CI + binding-leg union",
+          "status": "BANKED",
+          "evidence": "approval_projection_consolidator_results.json (self-test PASS)"
+        },
+        {
+          "leg": "fern #162 build gate",
+          "role": "(lambda_min,mu_min)=(0.8809,0.7353) @ P>=0.5",
+          "status": "BANKED",
+          "evidence": "tightened_private_500_frontier_results.json (self-test 1)"
+        },
+        {
+          "leg": "stark #156 pinned drop",
+          "role": "private drop 1.80% desc / 1.86% both (anchored GT-4.3%)",
+          "status": "BANKED",
+          "evidence": "tree_private_drop_reconcile/results.json"
+        },
+        {
+          "leg": "lawine #161 both-bugs step",
+          "role": "measured step-NEUTRAL -> both-bugs official 537.8",
+          "status": "BANKED",
+          "evidence": "both_bugs_step_cost.json (step_delta 0.0%)"
+        },
+        {
+          "leg": "denken #150 validity (does-it-score)",
+          "role": "PPL<=2.42 & boots & 128/128 contract",
+          "status": "BANKED",
+          "evidence": "imported inline by #155 (ARMED/PENDING land #71's run)"
+        },
+        {
+          "leg": "denken #158 greedy-exactness",
+          "role": "per-token committed==argmax (BUG-2 catcher)",
+          "status": "BANKED",
+          "evidence": "--audit-kernel-symbol pre-merge contract gate"
+        },
+        {
+          "leg": "lawine step-reconciliation",
+          "role": "final depth-9 step reconcile (overlap vs roofline)",
+          "status": "PENDING",
+          "evidence": "in flight -- both-bugs step locked NEUTRAL by #161; final reconcile pending"
+        },
+        {
+          "leg": "denken #166 PPL-margin bound",
+          "role": "M=32 batched-verify aggregate-PPL worst-case vs 2.42",
+          "status": "PENDING",
+          "evidence": "in flight -- #150/#158 ASSUME it, neither BOUNDS it"
+        },
+        {
+          "leg": "kanna #159 sigma_hw",
+          "role": "4th quadrature term (A10G clock/thermal/cold-start)",
+          "status": "PENDING",
+          "evidence": "in flight -- CI here is the 3-term quadrature; sigma_hw widens it"
+        },
+        {
+          "leg": "land #71 measured tuple",
+          "role": "(E[T], rho2, lambda, mu, step, ppl, boots, completed)",
+          "status": "PENDING",
+          "evidence": "the kernel this packet gates -- not yet built"
+        }
+      ],
+      "banked": [
+        "fern #155 consolidator",
+        "fern #162 build gate",
+        "stark #156 pinned drop",
+        "lawine #161 both-bugs step",
+        "denken #150 validity (does-it-score)",
+        "denken #158 greedy-exactness"
+      ],
+      "pending": [
+        "lawine step-reconciliation",
+        "denken #166 PPL-margin bound",
+        "kanna #159 sigma_hw",
+        "land #71 measured tuple"
+      ],
+      "n_banked": 6,
+      "n_pending": 4
+    },
+    "recommended_first_shot": {
+      "topology": "descent-ONLY (BUG-1 deferred)",
+      "rationale": "pinned drop 1.80% << 6%, so BUG-1 is not mandatory; descent-only clears the conservative P>=0.9 launch bar (proj 519.6, LCB 505.6 >= 500). The both-bugs spine upgrades it to conf-99 robust-GREEN (534.8) and covers the 9% band-ceiling, but is deferrable for the first shot."
+    },
+    "build_gate_lambda_mu_min": [
+      0.8809,
+      0.7353
+    ]
+  },
+  "step4_self_test": {
+    "passes": true,
+    "assert_a_oracle_no_go": {
+      "ok": true,
+      "E_T": 2.621,
+      "launch_go": "NO-GO",
+      "proj": 269.199210729414,
+      "expect": "NO-GO"
+    },
+    "assert_b_both_bugs_go": {
+      "ok": true,
+      "E_T": 5.206954309441963,
+      "launch_go": "GO",
+      "proj": 534.798928044982,
+      "p_clear_500": 0.9991792263045378,
+      "expect": "GO"
+    },
+    "assert_c_descent_operating_point": {
+      "ok": true,
+      "E_T": 5.056404568844709,
+      "pinned_drop_pct": 1.801511061644668,
+      "pinned_go": "GO",
+      "pinned_proj": 519.6390521567497,
+      "pinned_p_clear": 0.9630337622697593,
+      "ceiling_drop_pct": 9.0,
+      "ceiling_go": "NO-GO",
+      "ceiling_proj": 494.80934097761485,
+      "ceiling_p_clear": 0.31680252306399104,
+      "expect": "GO at pinned, NOT-GO at 9% ceiling (operating-point-specific)"
+    },
+    "assert_d_packet_pending_correct": {
+      "ok": true,
+      "expected_pending": [
+        "denken #166 PPL-margin bound",
+        "kanna #159 sigma_hw",
+        "land #71 measured tuple",
+        "lawine step-reconciliation"
+      ],
+      "got_pending": [
+        "denken #166 PPL-margin bound",
+        "kanna #159 sigma_hw",
+        "land #71 measured tuple",
+        "lawine step-reconciliation"
+      ],
+      "expected_banked": [
+        "denken #150 validity (does-it-score)",
+        "denken #158 greedy-exactness",
+        "fern #155 consolidator",
+        "fern #162 build gate",
+        "lawine #161 both-bugs step",
+        "stark #156 pinned drop"
+      ],
+      "got_banked": [
+        "denken #150 validity (does-it-score)",
+        "denken #158 greedy-exactness",
+        "fern #155 consolidator",
+        "fern #162 build gate",
+        "lawine #161 both-bugs step",
+        "stark #156 pinned drop"
+      ],
+      "expect": "exactly the 4 in-flight legs PENDING, the 6 evidence legs BANKED"
+    }
+  },
+  "step5_handoff": "At the pinned operating point, the recommended first shot is descent-only, P(clear-500)=96.3% (proj 519.6, LCB(P>=0.9) 505.6), pending land #71's measured (lambda,mu) reaching (0.881, 0.735) and the PENDING legs (lawine step-reconcile, denken #166 PPL, kanna #159 sigma_hw). The packet is the pre-filled issue body awaiting only land's tuple -- it does NOT authorize a launch.",
+  "imported_legs": {
+    "fern_155_consolidator": "consolidate() / SamplingModel / validity_gate (verbatim)",
+    "fern_162_frontier": "r_tree / private retention / (lambda_min,mu_min)=(0.8809,0.7353)",
+    "stark_156_pinned_drop": [
+      1.801511061644668,
+      1.8626055407019635
+    ],
+    "lawine_161_both_bugs_step": 537.8399229182609,
+    "ubel_154_realistic_bar": [
+      4.808506392517534,
+      1.2047034772054985
+    ]
+  },
+  "surface_corner_consistency": {
+    "joint_et_1_1_both": 5.206954309441963,
+    "lawine_e_t_both": 5.206954309441963,
+    "joint_et_1_1_descent": 5.056404568844709,
+    "lawine_e_t_descent": 5.056404568844709,
+    "both_within_0p5pct": true,
+    "descent_within_0p5pct": true
+  },
+  "uncertainty_model": {
+    "quadrature_formula": "combined = sqrt(sampling^2 + calibration^2 + step_anchor^2)",
+    "fourth_term_pending": "kanna #159 sigma_hw (A10G clock/thermal/cold-start) -- NOT yet folded",
+    "launch_bar": "P(clear 500) >= 0.9 (conservative one-shot LCB gate); conf-99 reported alongside",
+    "z_p90_one_sided": 1.2815515594457412,
+    "sigma_descend_146": 3.0355814882145578,
+    "calib_downside_rel_148": 0.007870456397926598,
+    "step_anchor_rel_136": 0.005
+  },
+  "provenance": "INSTANTIATES the decision-geometry arc at stark #156's pinned operating point. Imports VERBATIM: fern #155 consolidator (GO/NO-GO + CI + binding-leg), fern #162 frontier (private retention + build gate), stark #156 pinned drop, lawine #161 both-bugs step, ubel #154 realistic bar. One source of truth per constant -- imports, does not re-derive. Capstone of #142/#145/#149/#155/#162.",
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/kernel build. BASELINE stays 481.53; adds 0 TPS -- the launch-decision instantiation + readiness packet. Does NOT file the issue or authorize a launch. Greedy identity untouched.",
+  "metrics_nan_clean": 1,
+  "wandb_run_id": "l3pdlh22",
+  "wandb_url": "https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/l3pdlh22",
+  "elapsed_s": 4.3873
+}
