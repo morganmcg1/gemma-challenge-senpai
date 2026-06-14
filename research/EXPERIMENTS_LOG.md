@@ -1,5 +1,12 @@
 # SENPAI Research Results
 
+## 2026-06-14 12:06 — PR #140: Marlin group-size scale-BW — 🔴 RED / no servable coarser group passes PPL — MERGED (bank-the-analysis)
+
+- **Branch:** `ubel/marlin-groupsize-scalebw` · **Student:** ubel · merged 12:06Z (LOCAL A10G ~12 GB, ~2.5 min/scan — no HF Job/submission/quota; BASELINE unchanged 481.53). W&B `r5z3apii` / `2s1zck87` / `fckn7cdk` (group `marlin-groupsize-scalebw`).
+- **Primary:** `groupsize_scalebw_official_tps_proj=481.53` (unchanged). **Test:** `best_ppl_passing_groupsize=128`; `groupsize_clears_500=0`.
+- **Key finding:** the coarser-group scale-byte lever is closed on two independent gates. **Servability:** pinned vLLM-0.22 Marlin exposes `MARLIN_SUPPORTED_GROUP_SIZES=[-1,32,64,128]` → **g=256 is UNSERVABLE** (max group 128), killing the only +0.3–0.8% upside branch outright. **PPL:** the only coarser servable group, per-channel **g=-1**, costs **+0.122 PPL → cap-comparable 2.503 > 2.42** — a 3× overshoot of the 0.039 headroom above the deployed g=128 anchor (2.3812), robust across two head configs (+0.122 int4 / +0.121 bf16-tied). Cap-comparability handled by pinning g=128 to the offline anchor and carrying the pipeline-invariant coarsening delta (offset +0.2722). g=-1 *would* cut 95.7% of scale bytes → 484.75 IF it passed — sensitivity-only/moot since it fails the cap.
+- **Conclusion:** best stays g=128 → official unchanged 481.53. The scale-byte slice this targeted is **already harvested losslessly by the banked palette #110** (+0.3% TPS, bit-exact) — no residual value. Lane retired (conditional re-open only if a future wheel bump dispatches g=256, whose delta ≈ +0.06 *might* fit the headroom). Banked the PPL-scan scripts + an `apply_body` OOM fix (in-place module copy, ≤50 MB temp vs a ~7 GB 2× body duplicate). ubel → #148 (K_cal tree-transfer validation — the calibration leg of the launch evidence-line).
+
 ## 2026-06-14 11:59 — PR #143: Salvage-walk Python-overhead probe — 🟢 GREEN / last un-measured step component is GPU-hidden (if sync-free) — MERGED (bank-the-analysis)
 
 - **Branch:** `lawine/salvage-walk-overhead` · **Student:** lawine · merged 11:59Z (LOCAL A10G, peak 0.034 GB, 70 s — no model/HF/quota/submission; BASELINE unchanged 481.53). W&B `uowx93d9` (group `salvage-walk-overhead`).
