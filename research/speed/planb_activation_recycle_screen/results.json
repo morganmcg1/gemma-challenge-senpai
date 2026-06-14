@@ -1,0 +1,138 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260614T232453Z",
+  "kind": "planb-activation-recycle-screen",
+  "nan_clean": true,
+  "peak_mem_mib": 12.07,
+  "pr": 251,
+  "synthesis": {
+    "accounting": {
+      "drafter_us": 658.3654411764707,
+      "gain_A_pct": 11.032656663724637,
+      "gain_B_min_pct": -0.005603582440294463,
+      "gain_B_offchip_pct": -0.2728810784260127,
+      "gain_B_pct": 0.0,
+      "l2_resident": true,
+      "m_verify_rows": 8,
+      "min_recycle_mb": 0.04096,
+      "tps_A": 534.6555516328332,
+      "tps_B": 481.53,
+      "us_cost_HBM_min": 0.06826666666666667,
+      "us_cost_per_step_HBM": 3.3333333333333335,
+      "us_saved_per_step_FLOP": 121.04531001589825,
+      "verify_share": 0.45955882352941174,
+      "verify_us": 559.8345588235294
+    },
+    "audit": {
+      "drafter_produces_target_L1_8": false,
+      "layers": {
+        "config_consistent_with_audit": true,
+        "drafter_cfg_path": "/tmp/qat-assistant/config.json",
+        "drafter_has_target_L1_8_activations": false,
+        "hidden_drafter": 256,
+        "hidden_target": 2560,
+        "n_layers_drafter": 4,
+        "n_layers_target": 37,
+        "num_kv_shared_target": 16,
+        "recycle_fraction": 0.21621621621621623,
+        "target_cfg_path": "/tmp/osoi5-v0-baked/config.json"
+      },
+      "served_spec_config": {
+        "drafter_kv_shared_with_target": true,
+        "drafter_model": "/tmp/qat-assistant (gemma4_assistant)",
+        "drafter_model_class": "Gemma4MTP",
+        "method": "mtp",
+        "num_speculative_tokens": 7,
+        "proposer_class": "Gemma4Proposer",
+        "vllm_version": "0.22.1rc1.dev307+g3e8afdf78"
+      },
+      "verifier_recomputes_L1_8": false
+    },
+    "composition": {
+      "K_cal": 125.268,
+      "K_spec": 7,
+      "g_drafter": 0.168,
+      "served_tps": 481.53,
+      "step_us": 1218.2
+    },
+    "handoff_line": "the drafter->verifier L1-8 activation-recycle is NULL -- already shared (the Gemma4 MTP drafter is a 4-layer/256-dim assistant that shares the target KV cache and never computes the target's 2560-dim L1-8; verify computes them once), projecting projected_tps_gain_pct=0.00 on the linear MTP path (the researcher's +4-8% collapses to the ~0.27% HBM-floor because there is no verify-recompute to eliminate), so it is NOT an independent lever toward 500 and does not need the tree build.",
+    "headline": {
+      "activation_recycle_screen_self_test_passes": true,
+      "actual_tps": 481.53,
+      "clears_500_alone": false,
+      "counterfactual_recompute_ceiling_pct": 11.0327,
+      "drafter_produces_target_L1_8": false,
+      "hbm_floor_magnitude_pct": 0.2729,
+      "lever_class": "NULL (already shared / structurally void)",
+      "n_layers_target": 37,
+      "needs_nsys_probe": false,
+      "plus_4_8_pct_supported": false,
+      "projected_tps_gain_pct": 0.0,
+      "recycle_fraction": 0.21622,
+      "screen_verdict": "NO-GO",
+      "verifier_recomputes_L1_8": false
+    },
+    "nonoverlap": {
+      "kanna_248_is_int3_draft_quant": true,
+      "land_245_is_tree_build_not_linear_recompute": true,
+      "lawine_246_is_launch_overhead_not_recompute": true,
+      "stark_247_is_opt_tree_et": true,
+      "ubel_250_is_ngram_draft_source": true
+    },
+    "reconciliation": {
+      "claim_supported_only_under_recompute": true,
+      "greedy_ppl_identity_breaks_if_built": true,
+      "plus_4_8_supported": false,
+      "realizable_bound_pct": 0.2728810784260127,
+      "researcher_claim_pct": [
+        4.0,
+        8.0
+      ]
+    },
+    "self_test": {
+      "activation_recycle_screen_self_test_passes": true,
+      "conditions": {
+        "a_us_to_tps_roundtrip": true,
+        "b_projected_gain_with_assumption_and_bound": true,
+        "c_recompute_verdict_stated": true,
+        "d_flop_and_hbm_both_priced_and_reconciled": true,
+        "e_nonoverlap_246_245": true,
+        "f_nan_clean": true
+      },
+      "detail": {
+        "claim_supported_only_under_recompute": true,
+        "exact_gain_pct_at_p0p01": 1.0101010101010166,
+        "rt_base_ok": true,
+        "rt_known_ok": true,
+        "scenarioA_internal_consistent": true
+      }
+    },
+    "verdict": "ACTIVATION-RECYCLE-NULL-LEVER-NO-GO",
+    "verdict_table": [
+      {
+        "clears_500_alone": true,
+        "note": "PREMISE FALSE per audit: drafter never computes target L1-8",
+        "projected_tps_gain_pct": 11.0327,
+        "scenario": "A: recomputed (FLOP saving 8/37 of verify)",
+        "tps": 534.656,
+        "us_net_per_step": 121.0453
+      },
+      {
+        "clears_500_alone": false,
+        "note": "~2MB/step=3.33us; L2-resident=True (~free); a COST not a saving",
+        "projected_tps_gain_pct": 0.0,
+        "scenario": "B: HBM-floor (recycle bytes, no FLOP elim)",
+        "tps": 481.53,
+        "us_net_per_step": 0.0
+      },
+      {
+        "clears_500_alone": false,
+        "note": "NULL lever: nothing to recycle; greedy/PPL-invalid to feed drafter vec into L9",
+        "projected_tps_gain_pct": 0.0,
+        "scenario": "ACTUAL: drafter 4x256-dim, verify computes L1-8 once",
+        "tps": 481.53,
+        "us_net_per_step": 0.0
+      }
+    ]
+  }
+}
