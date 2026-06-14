@@ -1,5 +1,20 @@
 # SENPAI Research Results
 
+## 2026-06-14 06:12 — PR #98: fp32 star-attn cost gate — does the #93-mandated fp32 accumulation erode the tree's +18.2%? 🟢 GREEN — MERGED (fp32 star-attn is ~free: conservative +0.34% M=32 / +0.01% M=8, realized NEGATIVE; haircut 0.404pp → tree net +19.41%; the #93 fp32 constraint is NOT load-bearing)
+
+- **Branch:** `wirbel/fp32-starattn-cost-gate` · **Student:** wirbel · merged ~06:12Z (analysis-only, BASELINE unchanged — official bar UNCHANGED 481.53)
+- **Hypothesis:** #93 (RED) mandated fp32 star-attn accumulation (bf16-relerr-1e-3 flips 0.59% greedy tokens). This gate PRICES that mandate: does fp32 erode the tree's +18.2%, or is a tail-only-fp32 hybrid needed?
+- **Primary metric:** `fp32_starattn_tree_gain_haircut_pp = 0.404`. **Test:** `fp32_starattn_cost_pct_M32_conservative = 0.339`. W&B `r8xckc7s` (primary) + `jbooswq1` (bit-identical replicate); advisor-verified (both finished, no NaN, verdict_green=1, Δ<0.001pp).
+
+| layout | realized cost% | conservative cost% | attn % of decode |
+|---|--:|--:|--:|
+| M=8 frontier | −0.305 | +0.010 | 6.43% |
+| M=32 tree-verify | −0.572 | +0.339 | 8.12% |
+
+- **Verdict — GREEN. fp32 star-attn is ~free; the #93 constraint is NOT load-bearing.** Priced the only BW-relevant channel (per-segment softmax partial buffer) on the real deployed 3D split-KV `unified_attention` kernel: fp32 vs bf16 partials, everything else identical (KV stays bf16 → read bytes flat in M). Conservative worst-case **+0.339% M=32 / +0.010% M=8** (≤1% → GREEN); realized NEGATIVE. **Mechanism = A10G 6MB L2-residency:** fp32 partials fit L2 for every layer-type except full-M=32 (spills by 2.4MB = the ONLY place fp32 costs wall-time, +5.6µs/op × 7 full layers). Haircut on denken #85's net = **0.404pp → +19.82%→+19.41%** (576.96→575.02 official-projected, −1.94 TPS). The bf16 reduction that would "save" 0.34% is exactly the #93-unsafe path (flips 0.59% greedy tokens) → **fp32 is both SAFE and FREE.** Tail-only-fp32 hybrid NOT needed (#93's 0.537% margin map stays banked if #71's real kernel ever measures >3%).
+- **Secondary finding (orthogonal, routed to denken #101 / land #71):** real-kernel M=32 split-KV attention = **1.83× M=8** (8.12% of step) vs denken #85's SDPA-proxy 1.06× — a small attention-BASELINE haircut (NOT fp32) for denken #101 to fold in with the real paged kernel. denken #85's KV-bytes-flat-in-M claim still holds; the wall-time doesn't at the conc=1 floor (the 32-row Q·K·softmax·V compute becomes visible above the tiny KV-read). Caveat: measured on vLLM `unified_attention` (causal), not #71's custom star-attention tree-mask kernel — worth re-confirming with the real paged kernel.
+- **Banks:** `scripts/profiler/star_attn_fp32_cost.py` + `research/star_attn_gate/fp32_cost_results.json`. **Next:** wirbel → **#104** (double-quant verify-GEMM scales — INT8 scale-of-scales, greedy-lossless ~0.4–1.1% byte lever; CPU round-trip build-or-kill first).
+
 ## 2026-06-14 06:05 — PR #100: Lever-composition economics — composed official-TPS landscape + minimal lever ordering to clear 500 🟢 GREEN — MERGED (tree-sufficient: tree alone clears 500 at the conservative corner; composition is order-independent; min_levers=1) — verdict conditional on E[T]≈5.207, which byteshark's empirical 2.10 now contests
 
 - **Branch:** `fern/lever-composition-economics` · **Student:** fern · merged ~06:08Z (analysis-only, BASELINE unchanged)

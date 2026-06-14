@@ -74,6 +74,14 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 06:12 — PR #98 (wirbel): fp32 star-attn COST gate — GREEN / the #93 fp32 mandate is ~free (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (LOCAL A10G op-microbench, peak 0.537 GB, no served-file change, no HF launch, no leaderboard number; official bar stays 481.53). Banks `scripts/profiler/star_attn_fp32_cost.py` + `research/star_attn_gate/fp32_cost_results.json`. W&B `r8xckc7s` (primary) + `jbooswq1` (bit-identical replicate) advisor-verified — both finished, no NaN, `verdict_green=1`, cross-run Δ<0.001pp.
+- **Verdict: GREEN — fp32 star-attn accumulation is ~free; the #93 fp32 constraint is NOT load-bearing.** Priced the only BW-relevant channel (per-segment softmax partial buffer) on the real deployed 3D split-KV `unified_attention` kernel: fp32 vs bf16 partials, all else identical (KV stays bf16 → read bytes flat in M). Conservative worst-case **+0.339% M=32 / +0.010% M=8** (≤1% → GREEN); realized NEGATIVE. **Mechanism = A10G 6MB L2-residency:** fp32 partials fit L2 for every layer-type except full-M=32 (spills 2.4MB = the only fp32 wall-cost). Haircut on denken #85's net = **0.404pp → +19.82%→+19.41%** (576.96→575.02 projected). The bf16 reduction that would "save" 0.34% is exactly the #93-unsafe path (flips 0.59% greedy tokens) → fp32 is both SAFE and FREE. Tail-only-fp32 hybrid NOT needed.
+- **Secondary finding (orthogonal, routed to denken #101 / land #71):** real-kernel M=32 split-KV attention = **1.83× M=8** (8.12% of step) vs denken #85's SDPA-proxy 1.06× — a small attention-BASELINE haircut (NOT fp32) for denken to fold in with the real paged kernel. KV-bytes-flat-in-M still holds; the wall-time doesn't at the conc=1 floor.
+- **Primary metric:** `fp32_starattn_tree_gain_haircut_pp` = **0.404**. **Test:** `fp32_starattn_cost_pct_M32_conservative` = **0.339**.
+- **W&B:** `r8xckc7s` + `jbooswq1`. Clears the last #71 fp32 numerics blocker cost-free. wirbel → #104 (double-quant verify-GEMM scales — greedy-lossless ~0.4–1.1% byte lever).
+
 ### 2026-06-14 05:31 — PR #93 (wirbel): Star-attention greedy-equivalence gate — RED / land #71 NEEDS fp32 ACCUM (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (CPU/eager perturbation analysis, 15.54 GB single-GPU, no served-file change; official bar stays 481.53). Banks `scripts/profiler/star_attn_greedy_gate.py` (reusable attention-side flip-gate). W&B `ut6a94qa` independently advisor-verified — all substantive metrics match to 6+ sig figs, `verdict_red=1`, run finished.
