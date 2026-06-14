@@ -28,7 +28,7 @@
 | lawine | #90 | MTP K sweep (confirm K=7 optimal, empirical A/B) | WIP |
 | fern | **#92** | **Tree E[T] independence-gap:** realized E[T] under real correlated drafter draws vs the independent DP model — the last untested assumption behind +18.2% | WIP (Morgan assigned) |
 | wirbel | **#93** | **Star-attention greedy-equivalence gate:** does the tree-mask numerical path preserve greedy argmax? attention-side twin of kanna #87's GEMM gate | WIP (Morgan assigned) |
-| denken | — | **Persistent-kernel scheduling** (target ~32% overhead, +8–15%; nsys profile first) | **being assigned** |
+| denken | **#94** | **Draft-verify overlap gate:** can the 15.5% drafter be hidden behind verify on BW-bound A10G? (Morgan assigned) | WIP |
 
 ## Land #71 de-risking status (THE #1 lever, ~576 TPS projected)
 
@@ -73,9 +73,9 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 ## Next directions (priority order)
 
 1. **Land #71 completes tree-verify build** → openevolve oracle bench → lawine served A/B → approval-gated HF submission. ~576 TPS projected. Both pre-quota gates (kanna #87 GEMM, wirbel #93 attention) must clear first.
-2. **Persistent-kernel scheduling (denken, cycle 39):** nsys profile gate — if inter-kernel gap ≥5% of step, persistent GPU loop eliminates host–device round-trips; +8–15% TPS ceiling. Targets the ~32% uncharacterized overhead budget.
+2. **Draft-verify overlap (denken #94):** Saguaro-style secondary-stream drafter(N+1) overlapped with verify(N); 15.5% drafter block is the ceiling; +18% TPS if fully hidden. Key gate: A10G single-HBM-bus contention may cap realized gain — denken profiling this. Orthogonal to and COMPOUNDS with land #71 (tokens/step × step/wall-time).
 3. **SplitK W4A16 verify-GEMM (ubel #84):** close 23% HBM gap at M=8; ~+5–12% wall_tps.
 4. **MTP K sweep (lawine #90):** confirm K=7 optimal empirically or find a free config win.
 5. **Drafter GEMM fusion (stark #78):** ~+2.6% ceiling once stark responds to check-in.
-6. **Composition:** tree-verify × SplitK × persistent-kernel — orthogonal levers that compound.
-7. **Next-wave levers (researcher-agent, cycle 39 — `research/RESEARCH_IDEAS_2026-06-14_04:40.md`):** LK-loss draft head (+8% E[T]), double-quant verify-GEMM scales (+0.4–2%) — reserved for next freed seats after fern/wirbel complete #92/#93.
+6. **Composition:** tree-verify × SplitK × draft-verify-overlap — orthogonal levers that multiply.
+7. **Next-wave levers (queued for freed seats):** LK-loss draft head (+8% E[T], `RESEARCH_IDEAS_2026-06-14_04:40.md`), double-quant verify-GEMM scales (+0.4–2%), persistent-kernel scheduling (+8–15%, targets ~32% overhead), QuantSpec INT4 drafter-KV (+10–15%), Token Recycling (+4–10%).
