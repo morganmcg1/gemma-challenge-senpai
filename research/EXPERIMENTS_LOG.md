@@ -1,5 +1,25 @@
 # SENPAI Research Results
 
+## 2026-06-14 02:46 — PR #36: int4-quantize the pruned 12k lm_head 🔒 CLOSED-BANKED (clean terminal LOCAL rung; lm_head lever exhausted; ubel → #84 SplitK verify-GEMM)
+
+- **Branch:** `ubel/...` (int4 lm_head) · **Student:** ubel
+- **Status:** CLOSED-BANKED (terminal local rung, NOT a frontier advance → no BASELINE change; 481.53 official stays). Result preserved here + on branch (recoverable). PR was never un-drafted and carried only a `terminal:false, pending_arms:true` marker (the `terminal:true` text in-thread was the advisor's template with `[...]` placeholder run-ids).
+- **Hypothesis:** int4-quantize the pruned-12k lm_head (4× head-byte cut) on the PR #14 bf16-12k rung (131.60 local) for a cross-session-deterministic, contract-safe TPS bump.
+- **Result:** **133.299 local TPS (+1.3% over 131.60), PPL 1.9713** (drift +0.0001), **GREEDY_IDENTICAL 128/128**, head 62.9MB→16.22MB, cross-session deterministic (real int4 Marlin GEMV bit-exact). 4th datapoint on the lm_head-bytes↔TPS bandwidth model, landed on projection (133.3 predicted).
+
+| metric | value | notes |
+|---|--:|---|
+| local TPS (lmhead12k rung) | **133.299** | +1.3% over 131.60 bf16-12k rung |
+| PPL (128rec) | **1.9713** | drift +0.0001 vs bf16-12k |
+| greedy identity | **128/128** | int4 Marlin GEMV bit-exact, cross-session deterministic |
+| head bytes | 62.9MB → 16.22MB | 4× cut |
+
+**Conclusions:**
+1. **Clean, validated work — but the lm_head lever is EXHAUSTED.** lm_head is only ~1% of decode (wirbel #30), so even a 4× byte cut is a negligible full-stack lever; the 133.3 rung is sub-frontier vs the 481.53 fa2sw split-KV frontier (PR #52).
+2. **Cannot compose into the frontier:** the pruned-12k vocab would break full-vocab greedy-identity if dropped into the 481.53 stack. Issue #35 (Morgan-closed: "close this and move on") retired the lmhead12k LAUNCH lane → no official-benchmark path remains for this rung.
+3. **Banked, not merged:** no valid terminal marker + sub-frontier + lever exhausted → closed with the record preserved rather than adding a sub-frontier submission to the tree.
+4. **ubel reassigned → #84 (SplitK W4A16 verify-GEMM):** promote ubel's int4-Marlin-kernel experience to the #1 decode block — close denken #68's 23% HBM gap on the verify-GEMM (53% of decode, 77.1% HBM at M=8) via SplitK K-decomposition (arXiv:2402.00025). Lossless/greedy-safe, composes with land #71, ~+5-12% wall_tps ceiling.
+
 ## 2026-06-14 02:50 — PR #79: Pin rank-2+ drafter coverage (ρ) — the last borrowed input to the +18.7% tree gain ✅ MERGED (decisive measurement positive: ρ₂=0.4165/ρ₃=0.2655/ρ₄=0.1908; cov₂₋₄=0.6532 > borrowed 0.565 — gain was CONSERVATIVE; byteshark cross-val PASS; full max-branch-4 justified; ~586 official)
 
 - **Branch:** `wirbel/rank-coverage` · **Student:** wirbel
