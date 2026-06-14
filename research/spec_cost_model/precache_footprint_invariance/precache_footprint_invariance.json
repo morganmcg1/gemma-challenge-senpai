@@ -1,0 +1,568 @@
+{
+  "pr": 169,
+  "utc": "2026-06-14T15:17:18Z",
+  "lane": "PRECACHE_BENCH tree-footprint calibration-invariance (warmed HBM transfer proxy)",
+  "device": "NVIDIA A10G",
+  "scope_honest": "LOCAL single-A10G footprint-sensitivity proxy. The TRUE local->official multiplier needs the official a10g-small env + a human-approved HF launch; this measures whether the warmed-bus invariance #148 ASSERTED survives the M=32 tree footprint LOCALLY. Necessary-not-sufficient de-risk. NOT a launch.",
+  "anchors_consumed": {
+    "k_cal": 125.26795005202914,
+    "official_best": 481.53,
+    "e_t_linear": 3.844,
+    "multiplier_pooled": 1.0601865051833779,
+    "gap_pct": 6.018650518337787,
+    "pooled_local_wall_tps": 454.19367030776425,
+    "kcal_band_width_pct": 0.7870456397926597,
+    "k_cal_lo": 124.282034113087,
+    "measured_step_136": 1.2182,
+    "step_wstar_roofline": 1.2127483746822987,
+    "e_t_both_bugs": 5.207,
+    "e_t_descent": 5.0564,
+    "proj_538_ceiling": 537.8446424154472,
+    "proj_522_descent": 522.2887747089433,
+    "proj_538_overlap": 535.43,
+    "tree_descent_pinned_156": 510.6,
+    "tree_footprint_gb_153": 20.47235584,
+    "l2_bytes": 6291456,
+    "hbm_roofline_gbs": 600.0
+  },
+  "config": {
+    "linear_gb": 4.0,
+    "tree_gb_target": 20.47235584,
+    "tree_gb_used": 20.47235584,
+    "sweep_gb": [
+      6.0,
+      10.0,
+      14.0,
+      18.0
+    ],
+    "chunk_gb": 2.0,
+    "repeats": 7,
+    "warmup_iters": 200,
+    "ramp_iters": 96,
+    "timed_iters": 64,
+    "quiesce_s": 2.0,
+    "window_steps": 512,
+    "device_index": "0"
+  },
+  "measured_footprints": [
+    {
+      "footprint_gb_target": 4.0,
+      "footprint_gb_actual": 4.0,
+      "footprint_gib_actual": 3.725290298461914,
+      "n_full_chunks": 2,
+      "chunk_bytes": 2000000000,
+      "chunk_gb": 2.0,
+      "free_after_alloc_gb": 19.366608896,
+      "total_gb": 23.684841472,
+      "repeats": 7,
+      "warmed_step_s_median": 0.0038942720890045167,
+      "warmed_step_s_ci95": 4.054864001536162e-07,
+      "warmed_bw_gbs_median": 513.5747976231561,
+      "warmed_bw_gbs_ci95": 0.05346130068749266,
+      "warmed_bw_pct_of_roofline": 85.59579960385935,
+      "cold_first_s_median": 0.004037631988525391,
+      "cold_window_s_median": 0.3740938303470614,
+      "bus_ratio_median": 1.0368130156918545,
+      "bus_ratio_ci95": 0.003098569042834896,
+      "bus_ratio_all": [
+        1.042323884800003,
+        1.0446897721491468,
+        1.0368130156918545,
+        1.0362776330305146,
+        1.0444385711288418,
+        1.036024220018892,
+        1.0354983154216593
+      ],
+      "amortized_window_divergence_pct_median": 0.009500112173780854,
+      "warmed_bw_all": [
+        513.4397874508447,
+        513.4397874508447,
+        513.5747976231561,
+        513.4397874508447,
+        513.5747976231561,
+        513.5747976231561,
+        513.5747976231561
+      ],
+      "cold_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 0.0,
+        "temp_c": 36.0
+      },
+      "warm_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 100.0,
+        "temp_c": 41.0
+      },
+      "window_steps": 512
+    },
+    {
+      "footprint_gb_target": 6.0,
+      "footprint_gb_actual": 6.0,
+      "footprint_gib_actual": 5.587935447692871,
+      "n_full_chunks": 3,
+      "chunk_bytes": 2000000000,
+      "chunk_gb": 2.0,
+      "free_after_alloc_gb": 17.365925888,
+      "total_gb": 23.684841472,
+      "repeats": 7,
+      "warmed_step_s_median": 0.0038942720890045167,
+      "warmed_step_s_ci95": 4.3008327484134964e-07,
+      "warmed_bw_gbs_median": 513.5747976231561,
+      "warmed_bw_gbs_ci95": 0.056729958146025376,
+      "warmed_bw_pct_of_roofline": 85.59579960385935,
+      "cold_first_s_median": 0.004036608219146728,
+      "cold_window_s_median": 0.37405491709709177,
+      "bus_ratio_median": 1.0368227595440045,
+      "bus_ratio_ci95": 0.001970062466021168,
+      "bus_ratio_all": [
+        1.0383907294835526,
+        1.0414092365906678,
+        1.0352353019001563,
+        1.0347093973029236,
+        1.0410309804374496,
+        1.0368227595440045,
+        1.0365501246161248
+      ],
+      "amortized_window_divergence_pct_median": 0.010270268162786242,
+      "warmed_bw_all": [
+        513.5747976231561,
+        513.5072836628584,
+        513.5747976231561,
+        513.5747976231561,
+        513.7098788166129,
+        513.7098788166129,
+        513.5747976231561
+      ],
+      "cold_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 0.0,
+        "temp_c": 40.0
+      },
+      "warm_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 100.0,
+        "temp_c": 44.0
+      },
+      "window_steps": 512
+    },
+    {
+      "footprint_gb_target": 10.0,
+      "footprint_gb_actual": 10.0,
+      "footprint_gib_actual": 9.313225746154785,
+      "n_full_chunks": 5,
+      "chunk_bytes": 2000000000,
+      "chunk_gb": 2.0,
+      "free_after_alloc_gb": 13.364559872,
+      "total_gb": 23.684841472,
+      "repeats": 7,
+      "warmed_step_s_median": 0.0038942720890045167,
+      "warmed_step_s_ci95": 5.793869538417088e-07,
+      "warmed_bw_gbs_median": 513.5747976231561,
+      "warmed_bw_gbs_ci95": 0.07637198880089337,
+      "warmed_bw_pct_of_roofline": 85.59579960385935,
+      "cold_first_s_median": 0.004039680004119873,
+      "cold_window_s_median": 0.3740733497142793,
+      "bus_ratio_median": 1.0369396963750133,
+      "bus_ratio_ci95": 0.0020550878109487367,
+      "bus_ratio_all": [
+        1.042597966261414,
+        1.0378648248863198,
+        1.0415351740745655,
+        1.0354983154216593,
+        1.0367936657338959,
+        1.036024220018892,
+        1.0369396963750133
+      ],
+      "amortized_window_divergence_pct_median": 0.011194535328704907,
+      "warmed_bw_all": [
+        513.5747976231561,
+        513.5747976231561,
+        513.4397874508447,
+        513.5747976231561,
+        513.304848243683,
+        513.5747976231561,
+        513.5072836628584
+      ],
+      "cold_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 0.0,
+        "temp_c": 42.0
+      },
+      "warm_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 100.0,
+        "temp_c": 46.0
+      },
+      "window_steps": 512
+    },
+    {
+      "footprint_gb_target": 14.0,
+      "footprint_gb_actual": 14.0,
+      "footprint_gib_actual": 13.0385160446167,
+      "n_full_chunks": 7,
+      "chunk_bytes": 2000000000,
+      "chunk_gb": 2.0,
+      "free_after_alloc_gb": 9.363193856,
+      "total_gb": 23.684841472,
+      "repeats": 7,
+      "warmed_step_s_median": 0.0038942720890045167,
+      "warmed_step_s_ci95": 5.23480691636184e-07,
+      "warmed_bw_gbs_median": 513.5747976231561,
+      "warmed_bw_gbs_ci95": 0.06904002768096294,
+      "warmed_bw_pct_of_roofline": 85.59579960385935,
+      "cold_first_s_median": 0.004033535957336426,
+      "cold_window_s_median": 0.3740446786880496,
+      "bus_ratio_median": 1.0357706737011485,
+      "bus_ratio_ci95": 0.0014438818280783047,
+      "bus_ratio_all": [
+        1.0376018113648167,
+        1.0349631559593135,
+        1.036559676844301,
+        1.034446506227194,
+        1.0357706737011485,
+        1.0402313343509801,
+        1.0357612064973891
+      ],
+      "amortized_window_divergence_pct_median": 0.011094843252941793,
+      "warmed_bw_all": [
+        513.5747976231561,
+        513.4397874508447,
+        513.7098788166129,
+        513.5747976231561,
+        513.7098788166129,
+        513.5747976231561,
+        513.5747976231561
+      ],
+      "cold_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 0.0,
+        "temp_c": 43.0
+      },
+      "warm_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 100.0,
+        "temp_c": 47.0
+      },
+      "window_steps": 512
+    },
+    {
+      "footprint_gb_target": 18.0,
+      "footprint_gb_actual": 18.0,
+      "footprint_gib_actual": 16.763806343078613,
+      "n_full_chunks": 9,
+      "chunk_bytes": 2000000000,
+      "chunk_gb": 2.0,
+      "free_after_alloc_gb": 5.36182784,
+      "total_gb": 23.684841472,
+      "repeats": 7,
+      "warmed_step_s_median": 0.0038942720890045167,
+      "warmed_step_s_ci95": 4.3008327484134964e-07,
+      "warmed_bw_gbs_median": 513.5747976231561,
+      "warmed_bw_gbs_ci95": 0.05670841506505403,
+      "warmed_bw_pct_of_roofline": 85.59579960385935,
+      "cold_first_s_median": 0.004033535957336426,
+      "cold_window_s_median": 0.3740098624229434,
+      "bus_ratio_median": 1.0357612064973891,
+      "bus_ratio_ci95": 0.0007075036288222975,
+      "bus_ratio_all": [
+        1.0354889223050772,
+        1.0354983154216593,
+        1.0362871110946217,
+        1.0357612064973891,
+        1.0364233760491577,
+        1.0362871110946217,
+        1.0336488013016971
+      ],
+      "amortized_window_divergence_pct_median": 0.007190362887805463,
+      "warmed_bw_all": [
+        513.4397874508447,
+        513.5747976231561,
+        513.5747976231561,
+        513.5747976231561,
+        513.6423293387393,
+        513.5747976231561,
+        513.4397874508447
+      ],
+      "cold_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 0.0,
+        "temp_c": 43.0
+      },
+      "warm_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 100.0,
+        "temp_c": 47.0
+      },
+      "window_steps": 512
+    },
+    {
+      "footprint_gb_target": 20.47235584,
+      "footprint_gb_actual": 20.47235584,
+      "footprint_gib_actual": 19.066367149353027,
+      "n_full_chunks": 10,
+      "chunk_bytes": 2000000000,
+      "chunk_gb": 2.0,
+      "free_after_alloc_gb": 2.88718848,
+      "total_gb": 23.684841472,
+      "repeats": 7,
+      "warmed_step_s_median": 0.0038942720890045167,
+      "warmed_step_s_ci95": 3.701567468761697e-07,
+      "warmed_bw_gbs_median": 513.5747976231561,
+      "warmed_bw_gbs_ci95": 0.048803267233510285,
+      "warmed_bw_pct_of_roofline": 85.59579960385935,
+      "cold_first_s_median": 0.004037631988525391,
+      "cold_window_s_median": 0.3740313656330111,
+      "bus_ratio_median": 1.0365501246161248,
+      "bus_ratio_ci95": 0.0008906039340041873,
+      "bus_ratio_all": [
+        1.0365404549966042,
+        1.0370760292133574,
+        1.0339116232677865,
+        1.0365501246161248,
+        1.0376018113648167,
+        1.0368130156918545,
+        1.0357612064973891
+      ],
+      "amortized_window_divergence_pct_median": 0.007444140324462823,
+      "warmed_bw_all": [
+        513.4397874508447,
+        513.5747976231561,
+        513.4397874508447,
+        513.5747976231561,
+        513.5747976231561,
+        513.5747976231561,
+        513.5747976231561
+      ],
+      "cold_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 0.0,
+        "temp_c": 43.0
+      },
+      "warm_clocks_first_repeat": {
+        "sm_mhz": 1710.0,
+        "mem_mhz": 6251.0,
+        "util_pct": 100.0,
+        "temp_c": 48.0
+      },
+      "window_steps": 512
+    }
+  ],
+  "linear_anchor": {
+    "footprint_gb_target": 4.0,
+    "footprint_gb_actual": 4.0,
+    "footprint_gib_actual": 3.725290298461914,
+    "n_full_chunks": 2,
+    "chunk_bytes": 2000000000,
+    "chunk_gb": 2.0,
+    "free_after_alloc_gb": 19.366608896,
+    "total_gb": 23.684841472,
+    "repeats": 7,
+    "warmed_step_s_median": 0.0038942720890045167,
+    "warmed_step_s_ci95": 4.054864001536162e-07,
+    "warmed_bw_gbs_median": 513.5747976231561,
+    "warmed_bw_gbs_ci95": 0.05346130068749266,
+    "warmed_bw_pct_of_roofline": 85.59579960385935,
+    "cold_first_s_median": 0.004037631988525391,
+    "cold_window_s_median": 0.3740938303470614,
+    "bus_ratio_median": 1.0368130156918545,
+    "bus_ratio_ci95": 0.003098569042834896,
+    "bus_ratio_all": [
+      1.042323884800003,
+      1.0446897721491468,
+      1.0368130156918545,
+      1.0362776330305146,
+      1.0444385711288418,
+      1.036024220018892,
+      1.0354983154216593
+    ],
+    "amortized_window_divergence_pct_median": 0.009500112173780854,
+    "warmed_bw_all": [
+      513.4397874508447,
+      513.4397874508447,
+      513.5747976231561,
+      513.4397874508447,
+      513.5747976231561,
+      513.5747976231561,
+      513.5747976231561
+    ],
+    "cold_clocks_first_repeat": {
+      "sm_mhz": 1710.0,
+      "mem_mhz": 6251.0,
+      "util_pct": 0.0,
+      "temp_c": 36.0
+    },
+    "warm_clocks_first_repeat": {
+      "sm_mhz": 1710.0,
+      "mem_mhz": 6251.0,
+      "util_pct": 100.0,
+      "temp_c": 41.0
+    },
+    "window_steps": 512
+  },
+  "tree_anchor": {
+    "footprint_gb_target": 20.47235584,
+    "footprint_gb_actual": 20.47235584,
+    "footprint_gib_actual": 19.066367149353027,
+    "n_full_chunks": 10,
+    "chunk_bytes": 2000000000,
+    "chunk_gb": 2.0,
+    "free_after_alloc_gb": 2.88718848,
+    "total_gb": 23.684841472,
+    "repeats": 7,
+    "warmed_step_s_median": 0.0038942720890045167,
+    "warmed_step_s_ci95": 3.701567468761697e-07,
+    "warmed_bw_gbs_median": 513.5747976231561,
+    "warmed_bw_gbs_ci95": 0.048803267233510285,
+    "warmed_bw_pct_of_roofline": 85.59579960385935,
+    "cold_first_s_median": 0.004037631988525391,
+    "cold_window_s_median": 0.3740313656330111,
+    "bus_ratio_median": 1.0365501246161248,
+    "bus_ratio_ci95": 0.0008906039340041873,
+    "bus_ratio_all": [
+      1.0365404549966042,
+      1.0370760292133574,
+      1.0339116232677865,
+      1.0365501246161248,
+      1.0376018113648167,
+      1.0368130156918545,
+      1.0357612064973891
+    ],
+    "amortized_window_divergence_pct_median": 0.007444140324462823,
+    "warmed_bw_all": [
+      513.4397874508447,
+      513.5747976231561,
+      513.4397874508447,
+      513.5747976231561,
+      513.5747976231561,
+      513.5747976231561,
+      513.5747976231561
+    ],
+    "cold_clocks_first_repeat": {
+      "sm_mhz": 1710.0,
+      "mem_mhz": 6251.0,
+      "util_pct": 0.0,
+      "temp_c": 43.0
+    },
+    "warm_clocks_first_repeat": {
+      "sm_mhz": 1710.0,
+      "mem_mhz": 6251.0,
+      "util_pct": 100.0,
+      "temp_c": 48.0
+    },
+    "window_steps": 512
+  },
+  "propagation": {
+    "d_bw_pct": 0.0,
+    "d_ratio_pct": -0.025355688224482087,
+    "bw_within_band": true,
+    "ratio_within_band": true,
+    "band_width_pct": 0.7870456397926597,
+    "bus_ratio_tree_invariant": true,
+    "warmcold_transient_invariant": true,
+    "warmed_bw_gbs_linear": 513.5747976231561,
+    "warmed_bw_gbs_tree": 513.5747976231561,
+    "bus_ratio_linear": 1.0368130156918545,
+    "bus_ratio_tree_m32": 1.0365501246161248,
+    "k_cal_factor": 1.0,
+    "k_cal_tree_corrected": 125.26795005202914,
+    "k_cal_unchanged": 125.26795005202914,
+    "both_bugs_official_central": 537.8446424154472,
+    "descent_official_central": 522.2887747089432,
+    "both_bugs_official_corrected": 537.8446424154472,
+    "descent_official_corrected": 522.2887747089432,
+    "official_shift_tps_both_bugs": 0.0,
+    "official_shift_tps_descent": 0.0,
+    "both_bugs_clears_500_corrected": true,
+    "descent_clears_500_corrected": true,
+    "precache_off_divergence_pct": 3.52613190121035,
+    "precache_off_amortized_divergence_pct": 0.007444140324462823,
+    "precache_confirms_mechanism": true,
+    "amortized_consistent_with_148_legB": true
+  },
+  "self_test": {
+    "checks": [
+      {
+        "name": "K_cal == 481.53/3.844",
+        "passes": true,
+        "detail": "125.267950052 vs 125.267950052"
+      },
+      {
+        "name": "multiplier == 481.53/454.1937 (+6.019%)",
+        "passes": true,
+        "detail": "1.0601865052 gap 6.018651%"
+      },
+      {
+        "name": "K_cal == (local wall/E[T]_lin) * multiplier",
+        "passes": true,
+        "detail": "125.267950052"
+      },
+      {
+        "name": "both-bugs 537.84 @ roofline reproduced",
+        "passes": true,
+        "detail": "537.8446 vs 537.8446"
+      },
+      {
+        "name": "descent 522.29 reproduced",
+        "passes": true,
+        "detail": "522.2888 vs 522.2888"
+      },
+      {
+        "name": "both-bugs 535.43 @ overlap step reproduced",
+        "passes": true,
+        "detail": "535.4377 vs 535.4300"
+      },
+      {
+        "name": "band ordering K_lo < K_cal",
+        "passes": true,
+        "detail": "[124.2820, 125.2680]"
+      },
+      {
+        "name": "band width reproduces 0.787%",
+        "passes": true,
+        "detail": "0.787046% vs 0.787046%"
+      },
+      {
+        "name": "invariant => corrected both-bugs reproduces 537.84",
+        "passes": true,
+        "detail": "537.8446"
+      },
+      {
+        "name": "invariant => k_cal_tree_corrected reproduces 125.268 within band",
+        "passes": true,
+        "detail": "125.267950"
+      },
+      {
+        "name": "metrics NaN-clean (all finite)",
+        "passes": true,
+        "detail": "all measured+propagated finite"
+      }
+    ],
+    "n_total": 11,
+    "n_pass": 11,
+    "all_pass": true,
+    "nan_clean": true
+  },
+  "verdict": "K_cal TRANSFERS: warmed HBM transfer is footprint-INVARIANT linear->M=32-tree (d_bw=+0.0000%, d_ratio=-0.0254%, both inside #148's 0.787% band). K_cal=125.268 stands; 537.8/510.6 stand. LOCAL proxy only -- true multiplier still needs a launch.",
+  "primary_metric": {
+    "name": "precache_footprint_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "bus_ratio_tree_invariant",
+    "value": 1
+  },
+  "metrics_nan_clean": 1,
+  "elapsed_s": 148.68455576896667,
+  "wandb_run_id": "0czdgugp"
+}
