@@ -58,15 +58,25 @@ Located live seams (refines the Comp-1 row):
   25** width-1 drafter forwards (vs 7 for the chain). Verify stays one forward
   over M rows. The extra drafter latency is the tree's draft-side price; the gain
   is on E[T] (denken #85 gates the verify side, not the drafter).
-- **OPEN (confirm live): does the drafter attend its own draft KV?** The loopgraph
-  body advances no per-step seq_len/position and requires `constant_draft_positions`
-  (`sitecustomize.py:259`) → strong evidence the drafter is **pure
-  hidden-recurrent** (fixed prefix context, no draft self-attention). If so,
-  Component 1 needs **no draft-side tree mask** — only the parent-hidden threading
-  above. If instead seq_len grows, a branch forward would attend a sibling's KV
-  and Component 1 would need ancestor-only attention on the draft side too (a
-  symmetric analogue of Component 2's verify star-mask). Resolve empirically at
-  first live emit; the `emit_tree` ordering reference is correct either way.
+- **OPEN (confirm live): do draft tokens attend EACH OTHER, or only the fixed
+  prefix?** The drafter (`/tmp/qat-assistant/config.json`,
+  `Gemma4AssistantForCausalLM`) is a **4-layer attention transformer** (3
+  sliding + 1 full, `use_cache:true`, sliding_window 512) — it definitely
+  attends a KV cache, so "pure-recurrent" is imprecise. The crux is the *scope*
+  of that attention. Evidence it is the **fixed prefix only** (→ simple case):
+  the loopgraph body advances no per-step seq_len/position, sets `seq_lens` once
+  before the K-loop (`sitecustomize.py:479-480`), requires
+  `constant_draft_positions` (`:259`), and captures a single body replayed K
+  times. If draft tokens attend only the fixed prefix and recurse via
+  `hidden_states`, branches don't pollute each other → Component 1 needs **no
+  draft-side tree mask**, only the parent-hidden threading above. If instead
+  seq_len grows per draft step (draft self-attention), a branch forward would
+  attend a sibling's KV → Component 1 needs ancestor-only attention on the draft
+  side too (symmetric to Component 2's verify star-mask). The static signals
+  conflict (attention layers + `use_cache` vs fixed-seq_len loop), so resolve
+  empirically at first live emit (run `emit_tree` in node order; spine-identity
+  holding ⇒ fixed-prefix, breaking ⇒ self-attention). The `emit_tree` ordering
+  reference is correct either way.
 
 ## Finding A detail — qq_bias makes the mask free
 
