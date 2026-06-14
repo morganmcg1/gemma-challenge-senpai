@@ -1,0 +1,391 @@
+{
+  "config": {
+    "drafter_dir": "/tmp/qat-assistant",
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "k": 7,
+    "top_k": 64,
+    "fused_block": 16,
+    "iters": 200,
+    "warmup": 50,
+    "decode_step_ms": 11.6,
+    "gemm_chain_us": 566.0,
+    "l_sweep": [
+      128,
+      256,
+      512,
+      1024,
+      2048
+    ],
+    "l_headline": 512,
+    "frontier_tps": 481.53,
+    "A10G_HBM_GBS": 600.0,
+    "drafter_info": {
+      "hidden": 256,
+      "head_dim": 256,
+      "global_head_dim": 512,
+      "inter": 2048,
+      "vocab": 262144,
+      "num_centroids": 2048,
+      "num_heads": 4,
+      "num_kv": 2,
+      "vocab_per_centroid": 128,
+      "num_selected": 8192,
+      "top_k": 64,
+      "sliding_window": 512
+    },
+    "peak_gpu_mem_gib": 0.38839197158813477,
+    "note": "isolated launch-free (reps-in-graph) per-op timing, real served vLLM modules + real drafter weights + VERBATIM deployed fused sparse-argmax triton kernel; attention = roofline + SDPA proxy (memory-bound decode). Value-independent, no serve change."
+  },
+  "blocks": [
+    {
+      "name": "embed_gather",
+      "count": 1,
+      "us_graph": 1.7106400430202484,
+      "us_eager": 24.57600086927414,
+      "captured": true,
+      "bytes": 512,
+      "note": "1 row [262144,D]; served D=2560"
+    },
+    {
+      "name": "rmsnorm_hidden",
+      "count": 17,
+      "us_graph": 10.869640111923218,
+      "us_eager": 155.64799308776855,
+      "captured": true,
+      "bytes": 512,
+      "note": "input/post_attn/pre_ff/post_ff x4 + final"
+    },
+    {
+      "name": "qnorm_sliding",
+      "count": 3,
+      "us_graph": 12.42311954498291,
+      "us_eager": 156.67200088500977,
+      "captured": true,
+      "bytes": 0.0,
+      "note": ""
+    },
+    {
+      "name": "qnorm_full",
+      "count": 1,
+      "us_graph": 12.817039489746094,
+      "us_eager": 157.69599378108978,
+      "captured": true,
+      "bytes": 0.0,
+      "note": ""
+    },
+    {
+      "name": "rotary_sliding",
+      "count": 3,
+      "us_graph": 15.310159921646118,
+      "us_eager": 193.53599846363068,
+      "captured": true,
+      "bytes": 0.0,
+      "note": ""
+    },
+    {
+      "name": "rotary_full",
+      "count": 1,
+      "us_graph": 14.264320135116577,
+      "us_eager": 200.70399343967438,
+      "captured": true,
+      "bytes": 0.0,
+      "note": ""
+    },
+    {
+      "name": "residual_add",
+      "count": 8,
+      "us_graph": 1.1647800356149673,
+      "us_eager": 23.552000522613525,
+      "captured": true,
+      "bytes": 1536,
+      "note": ""
+    },
+    {
+      "name": "layer_scalar_mul",
+      "count": 4,
+      "us_graph": 1.3622599840164185,
+      "us_eager": 24.57600086927414,
+      "captured": true,
+      "bytes": 0.0,
+      "note": ""
+    },
+    {
+      "name": "embed_concat",
+      "count": 1,
+      "us_graph": 1.267399936914444,
+      "us_eager": 26.623999699950218,
+      "captured": true,
+      "bytes": 0.0,
+      "note": ""
+    },
+    {
+      "name": "activation_gelu",
+      "count": 4,
+      "us_graph": 1.3726000487804413,
+      "us_eager": 35.840000957250595,
+      "captured": true,
+      "bytes": 0.0,
+      "note": "gelu_tanh(gate)*up over [1,2048]"
+    },
+    {
+      "name": "centroid_sampler_fused",
+      "count": 1,
+      "us_graph": 25.47679901123047,
+      "us_eager": 153.60000729560852,
+      "captured": true,
+      "bytes": 4194304,
+      "note": "top-64 centroids -> 8192 cand rows, FUSED block=16"
+    }
+  ],
+  "table": [
+    {
+      "name": "embed_gather",
+      "count": 1,
+      "us_per_pass": 1.7106400430202484,
+      "us_per_step": 11.974480301141739,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 0.6144540384411811,
+      "pct_of_decode": 0.10322827845811844,
+      "note": "1 row [262144,D]; served D=2560; isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "rmsnorm_hidden",
+      "count": 17,
+      "us_per_pass": 184.7838819026947,
+      "us_per_step": 1293.487173318863,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 66.3735207983817,
+      "pct_of_decode": 11.150751494128128,
+      "note": "input/post_attn/pre_ff/post_ff x4 + final; isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "qnorm_sliding",
+      "count": 3,
+      "us_per_pass": 37.26935863494873,
+      "us_per_step": 260.8855104446411,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 13.386982268300548,
+      "pct_of_decode": 2.2490130210744925,
+      "note": "isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "qnorm_full",
+      "count": 1,
+      "us_per_pass": 12.817039489746094,
+      "us_per_step": 89.71927642822266,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 4.603821655799602,
+      "pct_of_decode": 0.7734420381743332,
+      "note": "isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "rotary_sliding",
+      "count": 3,
+      "us_per_pass": 45.930479764938354,
+      "us_per_step": 321.5133583545685,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 16.498017156946247,
+      "pct_of_decode": 2.7716668823669695,
+      "note": "isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "rotary_full",
+      "count": 1,
+      "us_per_pass": 14.264320135116577,
+      "us_per_step": 99.85024094581604,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 5.123678209452793,
+      "pct_of_decode": 0.8607779391880693,
+      "note": "isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "residual_add",
+      "count": 8,
+      "us_per_pass": 9.318240284919739,
+      "us_per_step": 65.22768199443817,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 3.3470690678591013,
+      "pct_of_decode": 0.562307603400329,
+      "note": "isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "layer_scalar_mul",
+      "count": 4,
+      "us_per_pass": 5.449039936065674,
+      "us_per_step": 38.14327955245972,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 1.9572700919776125,
+      "pct_of_decode": 0.32882137545223894,
+      "note": "isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "embed_concat",
+      "count": 1,
+      "us_per_pass": 1.267399936914444,
+      "us_per_step": 8.871799558401108,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 0.4552442302135215,
+      "pct_of_decode": 0.07648103067587161,
+      "note": "isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "activation_gelu",
+      "count": 4,
+      "us_per_pass": 5.490400195121765,
+      "us_per_step": 38.432801365852356,
+      "cls": "fusible_glue_upperbound",
+      "pct_of_drafter": 1.97212650686845,
+      "pct_of_decode": 0.3313172531538996,
+      "note": "gelu_tanh(gate)*up over [1,2048]; isolated-unfused UB (fused in deployed graph)"
+    },
+    {
+      "name": "centroid_sampler_fused",
+      "count": 1,
+      "us_per_pass": 25.47679901123047,
+      "us_per_step": 178.33759307861328,
+      "cls": "standalone_deployed",
+      "pct_of_drafter": 9.151149070125886,
+      "pct_of_decode": 1.537393043781149,
+      "note": "top-64 centroids -> 8192 cand rows, FUSED block=16"
+    },
+    {
+      "name": "attention_sdpa_roofline",
+      "count": 4,
+      "us_per_pass": 8.738133333333334,
+      "us_per_step": 61.16693333333333,
+      "cls": "standalone_deployed",
+      "pct_of_drafter": 3.1386973180076625,
+      "pct_of_decode": 0.5273011494252874,
+      "note": "3 sliding(KV512)+1 full(KV512); memory-bound floor"
+    },
+    {
+      "name": "attention_sdpa_proxy",
+      "count": 4,
+      "us_per_pass": 130.30176520347595,
+      "us_per_step": 912.1123564243317,
+      "cls": "standalone_upperbound",
+      "pct_of_drafter": 46.80379497251291,
+      "pct_of_decode": 7.86303755538217,
+      "note": "SDPA proxy; launch-overhead-dominated UB for paged TRITON_ATTN"
+    }
+  ],
+  "attn_sweep": [
+    {
+      "L": 128,
+      "L_sliding": 128,
+      "roof_sliding_us": 0.4369066666666667,
+      "roof_full_us": 0.8738133333333334,
+      "proxy_sliding_us": 12.136000394821167,
+      "proxy_full_us": 30.55936098098755,
+      "per_pass_roofline_us": 2.1845333333333334,
+      "per_pass_proxy_us": 66.96736216545105,
+      "bytes_sliding": 262144.0,
+      "bytes_full": 524288.0
+    },
+    {
+      "L": 256,
+      "L_sliding": 256,
+      "roof_sliding_us": 0.8738133333333334,
+      "roof_full_us": 1.7476266666666669,
+      "proxy_sliding_us": 12.524960041046143,
+      "proxy_full_us": 42.98367977142334,
+      "per_pass_roofline_us": 4.369066666666667,
+      "per_pass_proxy_us": 80.55855989456177,
+      "bytes_sliding": 524288.0,
+      "bytes_full": 1048576.0
+    },
+    {
+      "L": 512,
+      "L_sliding": 512,
+      "roof_sliding_us": 1.7476266666666669,
+      "roof_full_us": 3.4952533333333338,
+      "proxy_sliding_us": 13.270560503005981,
+      "proxy_full_us": 90.49008369445801,
+      "per_pass_roofline_us": 8.738133333333334,
+      "per_pass_proxy_us": 130.30176520347595,
+      "bytes_sliding": 1048576.0,
+      "bytes_full": 2097152.0
+    },
+    {
+      "L": 1024,
+      "L_sliding": 512,
+      "roof_sliding_us": 1.7476266666666669,
+      "roof_full_us": 6.9905066666666675,
+      "proxy_sliding_us": 13.283679485321045,
+      "proxy_full_us": 179.44095611572266,
+      "per_pass_roofline_us": 12.233386666666668,
+      "per_pass_proxy_us": 219.2919945716858,
+      "bytes_sliding": 1048576.0,
+      "bytes_full": 4194304.0
+    },
+    {
+      "L": 2048,
+      "L_sliding": 512,
+      "roof_sliding_us": 1.7476266666666669,
+      "roof_full_us": 13.981013333333335,
+      "proxy_sliding_us": 13.253920078277588,
+      "proxy_full_us": 365.32318115234375,
+      "per_pass_roofline_us": 19.223893333333336,
+      "per_pass_proxy_us": 405.0849413871765,
+      "bytes_sliding": 1048576.0,
+      "bytes_full": 8388608.0
+    }
+  ],
+  "centroid_decomp": {
+    "centroids_gemm": 3.7248799204826355,
+    "centroids_topk": 19.038959741592407,
+    "masked_embed_gather8192": 17.772159576416016,
+    "full_vocab_gather262k": 543.2396697998047,
+    "score_argmax_8192": 9.637119770050049
+  },
+  "verdict": {
+    "primary_metric_name": "drafter_nongemm_binding_subblock_pct_of_decode",
+    "drafter_nongemm_binding_subblock_pct_of_decode": 1.537393043781149,
+    "binding_subblock": "centroid_sampler_fused",
+    "binding_subblock_us_per_step": 178.33759307861328,
+    "binding_subblock_pct_of_drafter": 9.151149070125886,
+    "nongemm_anchor_step_us_lo": 1232.0,
+    "nongemm_anchor_step_us_hi": 1533.6000000000004,
+    "nongemm_anchor_pct_decode_lo": 10.620689655172415,
+    "nongemm_anchor_pct_decode_hi": 13.220689655172416,
+    "sampler_step_us": 178.33759307861328,
+    "sampler_pct_decode": 1.537393043781149,
+    "attn_roofline_step_us": 61.16693333333333,
+    "attn_roofline_pct_decode": 0.5273011494252874,
+    "attn_proxy_step_us": 912.1123564243317,
+    "standalone_floor_step_us": 239.50452641194664,
+    "standalone_floor_pct_decode": 2.0646941932064364,
+    "nongemm_unattributed_step_us_lo": 992.4954735880533,
+    "nongemm_unattributed_step_us_hi": 1294.0954735880537,
+    "nongemm_unattributed_pct_decode_lo": 8.555995461965976,
+    "nongemm_unattributed_pct_decode_hi": 11.155995461965981,
+    "nongemm_isolated_unfused_step_us_ub": 3318.5555517673492,
+    "isolated_exceeds_wirbel69_drafter": true,
+    "gemm_step_us": 566.0,
+    "gemm_pct_decode": 4.879310344827586,
+    "drafter_step_us_lo": 1798.0,
+    "drafter_step_us_hi": 2099.6000000000004,
+    "drafter_pct_decode_lo": 15.5,
+    "drafter_pct_decode_hi": 18.1,
+    "wirbel69_drafter_budget_us": [
+      1798.0,
+      2099.6000000000004
+    ],
+    "wirbel69_drafter_budget_pct": [
+      15.5,
+      18.1
+    ],
+    "masked_embed_gather_already_candidate_restricted": true,
+    "masked_embed_gather_candidate_rows": 8192,
+    "masked_embed_gather_full_vocab_rows": 262144,
+    "masked_embed_gather_restriction_ratio": 0.03125,
+    "masked_embed_gather8192_us": 17.772159576416016,
+    "full_vocab_gather262k_us": 543.2396697998047,
+    "centroids_topk_us": 19.038959741592407,
+    "contract_safe_nongemm_lever_exists": false,
+    "k": 7,
+    "decode_step_ms": 11.6,
+    "peak_gpu_mem_gib": 0.38839197158813477
+  }
+}
