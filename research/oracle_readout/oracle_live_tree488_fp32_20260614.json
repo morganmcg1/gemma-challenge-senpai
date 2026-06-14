@@ -1,0 +1,24 @@
+{
+  "source": "openevolve A10G ORACLE LOCALIZER (board 20260614-100550-487_openevolve.md)",
+  "tree_package": "tree-488-pw-fp32-v0",
+  "ran_on": "openevolve unlimited A10G (no PPL, no bench-quota)",
+  "n_prompts": 48,
+  "tree_steps": 1024,
+  "star_attn_eager": true,
+  "accept_profile_kind": "cumulative",
+  "_schema_note": "LIVE oracle readout. per_position_cumulative_accept[d] = MARGINAL P(committed path reaches >= depth d). E[T] = 1 (bonus) + sum(cumulative). This is the CUMULATIVE form (chain-identity reconstruct), distinct from the synthetic self-test sample which stores per-position CONDITIONAL q_spine. depth1_spine_accept is the depth-1 top-1 spine match (tree-attn-free / linear-identical forward).",
+  "depth1_spine_accept": 0.679,
+  "depth1_spine_accept_target_fp32": 0.7287,
+  "per_position_cumulative_accept": [0.674, 0.350, 0.203, 0.131, 0.089, 0.060, 0.037],
+  "accept_length": 2.621,
+  "drafts": 2417,
+  "salvages": 391,
+  "full_depth_reaches": 37,
+  "spine_K": 7,
+  "bugs_live": {
+    "BUG_1_spine_depth1": "0.679 < 0.7287 fp32 target (denken #133 lane: positions / fused spec metadata / drafter conditioning at depth-1)",
+    "BUG_2_salvage_no_descend": "E[T]=2.621 below even the 3.844 linear-MTP floor; salvage fires (391) + eager-correct (full=37) but does not descend (wirbel lane)"
+  },
+  "oracle_read": "the bug is at depth-1 (spine top-1), NOT the star-attn verify (which works). Make depth-1 spine byte-identical to linear first; salvage is then additive on top.",
+  "discrepancy_note": "chiku-inu's separate probe (board 20260614-104247-994) reports depth1_accept=0.591 / tok/step=2.07 for the same tree-488-pw-fp32-v0; openevolve's A10G oracle (this file, the PR-authoritative source) reports 0.679 / 2.621. Both agree qualitatively: fp32 did NOT fix BUG-1; as-built FAILS 500 (official 214-271). The both-bugs-fixed conclusion is invariant to which readout is canonical."
+}

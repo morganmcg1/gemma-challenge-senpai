@@ -356,6 +356,267 @@ def evaluate_oracle(oracle: dict, banked: dict, step_override_depth: int | None,
     }
 
 
+# ============================================================================
+# PR #134 -- the LIVE oracle FIRED. Fold openevolve's 4 measured numbers (board
+# 20260614-100550-487, tree-488-pw-fp32-v0) into OFFICIAL TPS: the measured
+# verdict (Step 1), the bug-fix recovery matrix (Step 2), greedy-exactness from
+# the histogram (Step 3), and the existential both-bugs-fixed number (Step 4).
+# This OWNS the official-TPS fold; it INGESTS the fleet's E[T] scenarios
+# (denken #133 BUG-1 depth-1, wirbel BUG-2 descent), it does NOT re-derive them.
+# ============================================================================
+TARGET_530 = 530.0
+
+
+def _cumulative_to_conditional(cum: list[float]) -> list[float]:
+    """q[d] = C[d]/C[d-1]: the measured conditional spine ladder behind a cumulative profile."""
+    q = [cum[0]] if cum else []
+    for i in range(1, len(cum)):
+        prev = cum[i - 1]
+        q.append(cum[i] / prev if prev > 1e-12 else 0.0)
+    return q
+
+
+def ingest_live_oracle(oracle: dict) -> dict:
+    """Normalize openevolve's live cumulative-profile readout to the PR #134 internal shape.
+
+    The LIVE oracle returns per-position CUMULATIVE accept (marginal P(committed path reaches
+    >= depth d)), distinct from the synthetic self-test sample (per-position CONDITIONAL q_spine).
+    Tolerates both schemas so the same harness ingests the live readout and the self-test."""
+    cum = oracle.get("per_position_cumulative_accept")
+    if cum is None:  # conditional schema (self-test sample): telescope q_spine -> cumulative
+        q = [p["q_spine"] for p in oracle.get("per_position", [])]
+        cum, c = [], 1.0
+        for qi in q:
+            c *= qi
+            cum.append(c)
+    return {
+        "tree_package": oracle.get("tree_package"),
+        "source": oracle.get("source"),
+        "depth1_spine_accept": oracle.get("depth1_spine_accept", (cum[0] if cum else None)),
+        "accept_length": float(oracle["accept_length"]),
+        "cumulative": [float(x) for x in cum],
+        "salvages": oracle.get("salvages"),
+        "full_depth_reaches": oracle.get("full_depth_reaches", oracle.get("full")),
+        "drafts": oracle.get("drafts"),
+        "steps": oracle.get("tree_steps", oracle.get("steps")),
+        "spine_K": oracle.get("spine_K", len(cum)),
+    }
+
+
+def step1_measured_verdict(norm: dict, banked: dict, step_time: float) -> dict:
+    """Step 1: the MEASURED official TPS as built = official(oracle E[T]) at the depth-9 step,
+    plus the #129 consistency cross-check (does the per-position ladder reconstruct E[T]?)."""
+    al = norm["accept_length"]
+    official_central = measured_official_tps(al, step_time, TAU["central"])
+    official_taulow = measured_official_tps(al, step_time, TAU["low"])
+    cum = norm["cumulative"]
+    # chain identity: E[T] = 1 bonus + sum(marginal cumulative accepts). For a cumulative profile
+    # this IS the DP cross-check (score_tree_depthrank on the linear spine telescopes to 1+sum(C)).
+    et_recon_chain = 1.0 + sum(cum)
+    q_cond = _cumulative_to_conditional(cum)
+    W, max_depth = banked["W"], banked["max_depth"]
+    pv = tma.build_depth_pvecs_measured(q_cond, [0.0] * max(1, W - 1), W, max_depth, "flat")
+    linear_parent = [-1] + list(range(len(cum)))   # spine: node i's parent is i-1 (no branching)
+    et_recon_dp, _ = tma.score_tree_depthrank(linear_parent, pv)
+    residual = al - et_recon_chain
+    rel = abs(residual) / max(et_recon_chain, 1e-9)
+    return {
+        "accept_length_measured": al,
+        "measured_official_tps_as_built": official_central,
+        "measured_official_tps_as_built_taulow": official_taulow,
+        "clears_500": bool(official_central >= TARGET_OFFICIAL),
+        "margin_to_500": official_central - TARGET_OFFICIAL,
+        "et_reconstructed_chain_identity": et_recon_chain,
+        "et_reconstructed_dp_linear_xcheck": et_recon_dp,
+        "reconstruction_residual_vs_accept_length": residual,
+        "reconstruction_rel_residual": rel,
+        "consistent": bool(abs(residual) <= 0.25),
+        "measured_conditional_spine_ladder": [round(x, 4) for x in q_cond],
+        "note": (
+            f"E[T]=1+sum(cumulative)={et_recon_chain:.4f} reconstructs the oracle accept_length="
+            f"{al:.3f} within residual {residual:+.4f} ({rel * 100:.2f}%); the DP linear cross-check "
+            f"agrees ({et_recon_dp:.4f}). The small positive residual is the weak as-built salvage "
+            f"the bare-spine cumulative omits -- itself BUG-2 evidence (salvage adds only ~{residual:.3f} "
+            f"tok/step, not the ~2.6 the rho-optimal descent must)."),
+    }
+
+
+def _cell(label: str, F: float, official: float) -> dict:
+    return {
+        "label": label, "E_T": F, "official_tps": official,
+        "clears_500": bool(official >= TARGET_OFFICIAL),
+        "clears_530": bool(official >= TARGET_530),
+    }
+
+
+def compute_recovery_matrix(norm: dict, banked: dict, step_time: float) -> dict:
+    """Step 2: the decisive 2x2 over {spine depth-1: 0.679 measured vs 0.7287 fp32-fixed} x
+    {salvage: as-measured 2.621-realizing vs rho-optimal descent}. Folds BUG-1 (depth-1, denken
+    #133's lane) x BUG-2 (descent, wirbel's lane) into realized E[T] -> official at the depth-9 step.
+
+    rho-optimal descent column = the banked rho-optimal ladder (wirbel #79/#86 deeper spine q76[1:]
+    + rho_cond branch-hit [0.4165, 0.2655, 0.1908]), with depth-1 swapped to the row's value and
+    re-propagated through the E[T] DP (score_tree_depthrank). as-measured column is anchored to the
+    oracle's measured E[T]=2.621 (cell 1); the depth-1 fix scales the committed-draft mass (cell 2)."""
+    parent = banked["parent"]; q76 = banked["q_target_ladder"]
+    rho_cond = banked["rho_cond"]; W = banked["W"]; max_depth = banked["max_depth"]
+    d1_meas = norm["depth1_spine_accept"]; d1_fix = DEPTH1_ACCEPT_FP32_TARGET
+    al = norm["accept_length"]
+    tau = TAU["central"]
+    clear500_bar = accept_length_for_official(TARGET_OFFICIAL, step_time, tau)
+    clear530_bar = accept_length_for_official(TARGET_530, step_time, tau)
+
+    def dp_et(d1, rho_c, deeper_spine):
+        q = [d1] + list(deeper_spine[1:])
+        return tma.score_tree_depthrank(
+            parent, tma.build_depth_pvecs_measured(q, rho_c, W, max_depth, "flat"))
+
+    def off(F):
+        return measured_official_tps(F, step_time, tau)
+
+    # rho-optimal descent column (banked rho-opt deeper spine + measured rho_cond)
+    F3, d3 = dp_et(d1_meas, rho_cond, q76)   # cell 3: depth-1 measured, descent rho-opt
+    F4, d4 = dp_et(d1_fix, rho_cond, q76)    # cell 4: BOTH fixed == banked ceiling 5.207
+    # as-measured salvage column (anchored to measured E[T]; depth-1 fix scales committed mass)
+    F1 = al                                   # cell 1: both bugs live (measured anchor)
+    F2 = 1.0 + (al - 1.0) * (d1_fix / d1_meas)  # cell 2: only depth-1 fixed, salvage still broken
+
+    matrix = {
+        "cell1_spineMeas_salvageAsMeasured": _cell(
+            "both bugs live (measured)", F1, off(F1)),
+        "cell2_spineFixed_salvageAsMeasured": _cell(
+            "only BUG-1 fixed (depth-1->0.7287, salvage still broken)", F2, off(F2)),
+        "cell3_spineMeas_salvageRhoOpt": _cell(
+            "only BUG-2 fixed (rho-opt descent, depth-1 still 0.679)", F3, off(F3)),
+        "cell4_spineFixed_salvageRhoOpt": _cell(
+            "BOTH bugs fixed (rho-optimal ceiling)", F4, off(F4)),
+    }
+    for c, d in (("cell3_spineMeas_salvageRhoOpt", d3), ("cell4_spineFixed_salvageRhoOpt", d4)):
+        matrix[c]["realized_depth"] = d
+
+    # --- LOAD-BEARING sensitivity: the rho-opt column also restores the DEEPER spine (q76[1:]),
+    #     not only depth-1. The measured deeper spine sits far below rho-opt. If the build/descent
+    #     fix recovers depth-1 but NOT the deeper spine, the both-bugs-fixed cell collapses. ---
+    q_meas = _cumulative_to_conditional(norm["cumulative"])
+    Fb, _ = dp_et(d1_fix, rho_cond, [d1_fix] + q_meas[1:])   # descent fixed, deeper spine MEASURED
+    Fc, _ = dp_et(d1_meas, rho_cond, q_meas)                  # descent fixed, FULL spine measured
+    sensitivity = {
+        "both_bugs_fixed_REQUIRES_deeper_spine_recovery": True,
+        "deeper_spine_measured_conditional": [round(x, 4) for x in q_meas],
+        "deeper_spine_rho_optimal_conditional": [round(x, 4) for x in q76],
+        "ceiling_official_full_rhoopt_spine": off(F4),
+        "official_if_descent_fixed_deeper_spine_stays_measured": off(Fb),
+        "official_if_descent_fixed_full_measured_spine": off(Fc),
+        "deeper_spine_recovery_worth_tps": off(F4) - off(Fb),
+        "note": (
+            f"The both-bugs-fixed {off(F4):.0f} ASSUMES the deeper spine (depths 2-9) recovers to "
+            f"the deployed/rho-optimal ladder, per openevolve's read ('make depth-1 byte-identical "
+            f"to linear; salvage additive on top'). If the depth-1+descent fix does NOT also restore "
+            f"the deeper spine (measured conditional ~[0.52,0.58,..] << rho-opt [0.76,0.79,..]), the "
+            f"cell lands at {off(Fb):.0f} (RED). This deeper-ladder recovery (worth {off(F4) - off(Fb):.0f} "
+            f"TPS) is the single most decision-relevant input -- wirbel's re-bench after the fix must "
+            f"confirm the FULL cumulative ladder recovers, not just depth-1."),
+    }
+    return {
+        "matrix": matrix, "clear500_bar": clear500_bar, "clear530_bar": clear530_bar,
+        "predicted_official_at_both_bugs_fixed": off(F4),
+        "predicted_et_at_both_bugs_fixed": F4,
+        "predicted_official_at_both_bugs_fixed_taulow": measured_official_tps(F4, step_time, TAU["low"]),
+        "both_bugs_fixed_load_bearing_sensitivity": sensitivity,
+    }
+
+
+def greedy_exact_live(norm: dict) -> dict:
+    """Step 3: greedy-exactness from the per-position histogram, with the M=32-verify caveat.
+
+    The fp32 star-verify (QK+PV -> fp32/IEEE, relerr 1e-3 -> 1e-6) makes the accepted token ==
+    the M=32-verify true argmax BY CONSTRUCTION -- a VERIFY-exactness property, independent of the
+    drafter's accept RATE. The low depth-1 (0.679<0.7287) and fast-decaying ladder are DRAFTER
+    match-rate degradation from the build (BUG-1/BUG-2), NOT verify non-exactness; orthogonal axes."""
+    d1 = norm["depth1_spine_accept"]
+    profile_matches_ideal = int(d1 is not None and d1 >= DEPTH1_ACCEPT_FP32_TARGET - 0.03)
+    return {
+        "tree_greedy_exact_from_oracle": 1,            # w.r.t. its OWN M=32 verify (by fp32 construction)
+        "semantics": "greedy-EXACT w.r.t. its OWN M=32 verify (fp32 ta[0]==M=32 argmax by construction)",
+        "accept_profile_matches_ideal_greedy_rejection": profile_matches_ideal,
+        "depth1_spine_accept": d1, "depth1_fp32_target": DEPTH1_ACCEPT_FP32_TARGET,
+        "profile_degradation_is_drafter_match_rate_not_verify": True,
+        "CAVEAT_not_spec_eq_AR": (
+            "NOT spec==M=1-AR identity. kanna #122 (MERGED) localized the M-variance to the int4 "
+            "Marlin GEMM (no batch-invariant Marlin in the wheel), so M=32-verify argmax != M=1-AR "
+            "argmax. The tree's greedy-exactness is w.r.t. its OWN M=32 verify; PPL validity rides on "
+            "the Issue #124 ruling, NOT on spec==AR. Do not claim spec==AR identity."),
+        "interpretation": (
+            "openevolve localized the defect to depth-1 spine (the tree-attn-free / linear-identical "
+            "forward), NOT the star-attn verify ('which works'). So accepted tokens are the true M=32 "
+            "argmax (verify exact); the profile is degraded only in match RATE. The Step-2 ideal-profile "
+            "match returns 0 (depth-1 0.679<0.7287) -- that flags the DRAFTER/build degradation, it does "
+            "NOT impugn the fp32 verify's exactness."),
+    }
+
+
+def evaluate_live_oracle_pr134(oracle: dict, banked: dict) -> dict:
+    """Orchestrate Steps 1-4 for the live cumulative oracle and emit the go/no-go gate."""
+    norm = ingest_live_oracle(oracle)
+    step_time = banked["step_wstar"]            # depth-9 W* operative step 1.2127
+    step1 = step1_measured_verdict(norm, banked, step_time)
+    recov = compute_recovery_matrix(norm, banked, step_time)
+    greedy = greedy_exact_live(norm)
+
+    pred = recov["predicted_official_at_both_bugs_fixed"]
+    pred_taulow = recov["predicted_official_at_both_bugs_fixed_taulow"]
+    clears = int(pred >= TARGET_OFFICIAL)
+    sens = recov["both_bugs_fixed_load_bearing_sensitivity"]
+
+    if pred >= TARGET_OFFICIAL + 1.0 and pred_taulow >= TARGET_OFFICIAL:
+        verdict = "GREEN"
+        verdict_label = (
+            f"the tree LIVES, conditional on fixing BOTH bugs. As-built E[T]={norm['accept_length']:.3f} "
+            f"-> official {step1['measured_official_tps_as_built']:.0f} (RED, fails 500 by "
+            f"{TARGET_OFFICIAL - step1['measured_official_tps_as_built']:.0f}). The both-bugs-fixed cell "
+            f"(depth-1->0.7287 + rho-optimal descent) realizes E[T]={recov['predicted_et_at_both_bugs_fixed']:.3f} "
+            f"-> official {pred:.1f} (>= 500 by +{pred - TARGET_OFFICIAL:.1f}, conservative corner "
+            f"{pred_taulow:.1f}). BUILD TARGET: the banked M=32/depth-9/max-branch-3 rho-optimal tree "
+            f"(parent array banked, #125). DECISIVE LEVER = BUG-2/descent: fixing it alone reaches "
+            f"{recov['matrix']['cell3_spineMeas_salvageRhoOpt']['official_tps']:.0f}; fixing only BUG-1 "
+            f"reaches just {recov['matrix']['cell2_spineFixed_salvageAsMeasured']['official_tps']:.0f}. "
+            f"CONDITIONAL on the deeper-spine ladder recovering ({sens['deeper_spine_recovery_worth_tps']:.0f} "
+            f"TPS of the cell); if the fix restores depth-1 but not the deeper spine it lands "
+            f"{sens['official_if_descent_fixed_deeper_spine_stays_measured']:.0f} (RED).")
+    elif abs(pred - TARGET_OFFICIAL) <= 1.0:
+        verdict = "AMBER"
+        verdict_label = (
+            f"the both-bugs-fixed cell straddles 500 (official {pred:.1f}, taulow {pred_taulow:.1f}); "
+            f"the knife-edge depends on tau / the measured step anchor (lawine). Flag the deciding inputs.")
+    else:
+        verdict = "RED"
+        verdict_label = (
+            f"the tree is DEAD even with both bugs fixed: the both-bugs-fixed cell official {pred:.1f} "
+            f"< 500 at the depth-9 W* topology. ESCALATE -- re-examine the depth-9 W* topology or the "
+            f"reference; the fleet should stop pouring seats into a build that cannot reach the bar.")
+
+    return {
+        "norm_oracle": norm,
+        "step1_measured_verdict": step1,
+        "step2_recovery_matrix": recov,
+        "step3_greedy_exact": greedy,
+        "step4_existential": {
+            "predicted_official_at_both_bugs_fixed": pred,
+            "predicted_official_at_both_bugs_fixed_taulow": pred_taulow,
+            "predicted_et_at_both_bugs_fixed": recov["predicted_et_at_both_bugs_fixed"],
+            "tree_clears_500_at_both_bugs_fixed": clears,
+            "slack_to_500": pred - TARGET_OFFICIAL,
+            "build_target": "M=32 / depth-9 / max-branch-3 rho-optimal tree (parent array banked, #125)",
+        },
+        "primary_metric_name": "measured_official_tps_as_built",
+        "measured_official_tps_as_built": step1["measured_official_tps_as_built"],
+        "test_metric_name": "tree_clears_500_at_both_bugs_fixed",
+        "tree_clears_500_at_both_bugs_fixed": clears,
+        "verdict": verdict,
+        "verdict_label": verdict_label,
+    }
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -411,11 +672,19 @@ def main() -> None:
 
     # ---- live oracle (if provided) ----
     live_eval = None
+    pr134 = None
     oracle_in = None
     if args.oracle_json and os.path.exists(args.oracle_json):
         with open(args.oracle_json) as f:
             oracle_in = json.load(f)
-        live_eval = evaluate_oracle(oracle_in, banked, step_override_depth=None)
+        # PR #134: the live oracle FIRED (cumulative per-position profile) -> measured verdict +
+        # bug-fix recovery matrix. The synthetic self-test sample (conditional q_spine) still
+        # routes through the #129 evaluate_oracle path.
+        if (oracle_in.get("accept_profile_kind") == "cumulative"
+                or "per_position_cumulative_accept" in oracle_in):
+            pr134 = evaluate_live_oracle_pr134(oracle_in, banked)
+        else:
+            live_eval = evaluate_oracle(oracle_in, banked, step_override_depth=None)
 
     # ---- primary / test metrics ----
     # PRIMARY: oracle_accept_length_to_clear_500 = the accept_length the MEASURED build
@@ -498,6 +767,29 @@ def main() -> None:
                  "RED = supply ceiling can't reach 500 (model inconsistency) or live < 500"),
     }
 
+    # ---- PR #134 override: the live oracle FIRED. The measured verdict + bug-fix recovery
+    #      matrix supersede the #129 pending/bands gate as the SENPAI-facing result. ----
+    if pr134 is not None:
+        oracle_pending = False
+        verdict = pr134["verdict"]
+        verdict_label = pr134["verdict_label"]
+        ex = pr134["step4_existential"]
+        gate.update({
+            "verdict": verdict,
+            "verdict_label": verdict_label,
+            "oracle_run_pending": False,
+            "pr134_primary_metric_name": pr134["primary_metric_name"],
+            "measured_official_tps_as_built": pr134["measured_official_tps_as_built"],
+            "pr134_test_metric_name": pr134["test_metric_name"],
+            "tree_clears_500_at_both_bugs_fixed": pr134["tree_clears_500_at_both_bugs_fixed"],
+            "predicted_official_at_both_bugs_fixed": ex["predicted_official_at_both_bugs_fixed"],
+            "predicted_official_at_both_bugs_fixed_taulow": ex["predicted_official_at_both_bugs_fixed_taulow"],
+            "slack_to_500_at_both_bugs_fixed": ex["slack_to_500"],
+            "rule": ("PR #134 LIVE: GREEN = both-bugs-fixed cell clears 500 (tree has a named, "
+                     "quantified path) / AMBER = straddles 499-501 (tau/step knife-edge) / "
+                     "RED = both-bugs-fixed < 500 even at the rho-optimal ceiling (tree dead)."),
+        })
+
     finding = {
         "title": "depth-9 operative clear-500 bar is HIGHER than the demand floor",
         "operative_depth9_clear_500_bar": clear500_bar,
@@ -536,6 +828,7 @@ def main() -> None:
         "lookup_table_depth9": table,
         "self_test": {"pass": selftest_pass, "synthetic_oracle": synth, "evaluation": synth_eval},
         "live_oracle": {"input": oracle_in, "evaluation": live_eval},
+        "pr134_live_readout": pr134,
         "oracle_input_schema": {
             "depth1_spine_accept": "float -- depth-1 spine accept q_1 (fp32 target 0.7287) [#1]",
             "per_position": "[{depth, q_spine, branch_hit_rho2, branch_width}] -- rho-ladder [#2]",
@@ -608,14 +901,58 @@ def main() -> None:
               f"(cons={live_eval['clears_500_conservative']})  greedy_exact="
               f"{live_eval['greedy_exact']['tree_greedy_exact_from_oracle']}  consistency="
               f"{live_eval['consistency']['consistent']}")
-    else:
+    elif pr134 is None:
         print(f"\n[LIVE ORACLE] PENDING -- no tree-488 oracle number on the board yet. "
               f"Test metric = measured_official_tps(as-built 2.10) = {test_metric:.1f}.")
 
-    print(f"\n[PRIMARY] oracle_accept_length_to_clear_500 = {primary_metric:.3f} "
-          f"(operative depth-9 W* bar; denken #123 demand-floor x-check = "
-          f"{primary_demand_floor_xcheck})")
-    print(f"[TEST]    measured_official_tps = {test_metric:.1f}  ({test_metric_label})")
+    if pr134 is not None:
+        s1 = pr134["step1_measured_verdict"]
+        rm = pr134["step2_recovery_matrix"]
+        g3 = pr134["step3_greedy_exact"]
+        ex = pr134["step4_existential"]
+        sens = rm["both_bugs_fixed_load_bearing_sensitivity"]
+        print("\n" + "=" * 96)
+        print("PR #134 -- LIVE ORACLE FIRED (tree-488-pw-fp32-v0, board 20260614-100550-487)")
+        print("=" * 96)
+        print(f"\n[STEP 1] MEASURED VERDICT (as built, both bugs live):")
+        print(f"  accept_length E[T] = {s1['accept_length_measured']:.3f}  ->  "
+              f"measured_official_tps_as_built = {s1['measured_official_tps_as_built']:.2f} "
+              f"({'CLEARS 500' if s1['clears_500'] else 'RED, fails 500 by %.0f' % (-s1['margin_to_500'])})")
+        print(f"  consistency: E[T]_recon(1+sum cumulative) = {s1['et_reconstructed_chain_identity']:.4f} "
+              f"(DP xcheck {s1['et_reconstructed_dp_linear_xcheck']:.4f}); residual "
+              f"{s1['reconstruction_residual_vs_accept_length']:+.4f} "
+              f"({s1['reconstruction_rel_residual'] * 100:.2f}%) -> "
+              f"{'CONSISTENT' if s1['consistent'] else 'FLAG mis-measured'}")
+        print(f"\n[STEP 2] BUG-FIX RECOVERY MATRIX (official at depth-9 step {step_wstar:.4f}; "
+              f"clear-500 E[T]>={rm['clear500_bar']:.3f}, clear-530 E[T]>={rm['clear530_bar']:.3f}):")
+        print(f"  {'cell':<46s} {'E[T]':>7s} {'official':>9s} {'>=500':>6s} {'>=530':>6s}")
+        for key in ("cell1_spineMeas_salvageAsMeasured", "cell2_spineFixed_salvageAsMeasured",
+                    "cell3_spineMeas_salvageRhoOpt", "cell4_spineFixed_salvageRhoOpt"):
+            c = rm["matrix"][key]
+            print(f"  {c['label']:<46s} {c['E_T']:7.3f} {c['official_tps']:9.1f} "
+                  f"{'YES' if c['clears_500'] else 'no':>6s} {'YES' if c['clears_530'] else 'no':>6s}")
+        print(f"  LOAD-BEARING: deeper-spine recovery worth {sens['deeper_spine_recovery_worth_tps']:.0f} "
+              f"TPS; if descent fixed but deeper spine stays measured -> "
+              f"{sens['official_if_descent_fixed_deeper_spine_stays_measured']:.0f} (RED)")
+        print(f"\n[STEP 3] greedy-exact (own M=32 verify) = "
+              f"{g3['tree_greedy_exact_from_oracle']}  | ideal-profile match = "
+              f"{g3['accept_profile_matches_ideal_greedy_rejection']} (depth-1 "
+              f"{g3['depth1_spine_accept']} vs target {g3['depth1_fp32_target']})  "
+              f"[NOT spec==M=1-AR; rides on Issue #124]")
+        print(f"\n[STEP 4] EXISTENTIAL: predicted_official_at_both_bugs_fixed = "
+              f"{ex['predicted_official_at_both_bugs_fixed']:.1f} "
+              f"(taulow {ex['predicted_official_at_both_bugs_fixed_taulow']:.1f}, E[T]="
+              f"{ex['predicted_et_at_both_bugs_fixed']:.3f}); clears_500="
+              f"{ex['tree_clears_500_at_both_bugs_fixed']} (slack {ex['slack_to_500']:+.1f})")
+        print(f"\n[PRIMARY] measured_official_tps_as_built = "
+              f"{pr134['measured_official_tps_as_built']:.2f}")
+        print(f"[TEST]    tree_clears_500_at_both_bugs_fixed = "
+              f"{pr134['tree_clears_500_at_both_bugs_fixed']}")
+    else:
+        print(f"\n[PRIMARY] oracle_accept_length_to_clear_500 = {primary_metric:.3f} "
+              f"(operative depth-9 W* bar; denken #123 demand-floor x-check = "
+              f"{primary_demand_floor_xcheck})")
+        print(f"[TEST]    measured_official_tps = {test_metric:.1f}  ({test_metric_label})")
     print(f"\n[VERDICT] {verdict} -- {verdict_label}")
     print(f"\nwrote {args.out}")
     print(f"wrote {args.sample_out} (oracle-input schema template)")
@@ -650,6 +987,35 @@ def main() -> None:
             s["live_clears_500"] = int(live_eval["clears_500_central"])
             s["live_greedy_exact"] = live_eval["greedy_exact"]["tree_greedy_exact_from_oracle"]
             s["live_consistency_ok"] = int(live_eval["consistency"]["consistent"])
+
+        if pr134 is not None:
+            s1 = pr134["step1_measured_verdict"]; rm = pr134["step2_recovery_matrix"]
+            ex = pr134["step4_existential"]; g3 = pr134["step3_greedy_exact"]
+            sens = rm["both_bugs_fixed_load_bearing_sensitivity"]
+            # PR #134 PRIMARY + TEST (the SENPAI-facing metrics)
+            s["measured_official_tps_as_built"] = pr134["measured_official_tps_as_built"]
+            s["tree_clears_500_at_both_bugs_fixed"] = pr134["tree_clears_500_at_both_bugs_fixed"]
+            s["predicted_official_at_both_bugs_fixed"] = ex["predicted_official_at_both_bugs_fixed"]
+            s["predicted_official_at_both_bugs_fixed_taulow"] = ex["predicted_official_at_both_bugs_fixed_taulow"]
+            s["predicted_et_at_both_bugs_fixed"] = ex["predicted_et_at_both_bugs_fixed"]
+            s["both_bugs_fixed_slack_to_500"] = ex["slack_to_500"]
+            s["oracle_accept_length_measured"] = s1["accept_length_measured"]
+            s["reconstruction_residual"] = s1["reconstruction_residual_vs_accept_length"]
+            s["reconstruction_consistent"] = int(s1["consistent"])
+            s["tree_greedy_exact_own_M32_verify"] = g3["tree_greedy_exact_from_oracle"]
+            s["accept_profile_matches_ideal_greedy_rejection"] = g3["accept_profile_matches_ideal_greedy_rejection"]
+            s["deeper_spine_recovery_worth_tps"] = sens["deeper_spine_recovery_worth_tps"]
+            s["official_if_descent_fixed_deeper_spine_measured"] = sens["official_if_descent_fixed_deeper_spine_stays_measured"]
+            # per-cell official
+            for key in rm["matrix"]:
+                s[f"cell_official__{key}"] = rm["matrix"][key]["official_tps"]
+            mt = wandb.Table(columns=["cell", "label", "E_T", "official_tps", "clears_500", "clears_530"])
+            for key in ("cell1_spineMeas_salvageAsMeasured", "cell2_spineFixed_salvageAsMeasured",
+                        "cell3_spineMeas_salvageRhoOpt", "cell4_spineFixed_salvageRhoOpt"):
+                c = rm["matrix"][key]
+                mt.add_data(key, c["label"], c["E_T"], c["official_tps"],
+                            int(c["clears_500"]), int(c["clears_530"]))
+            wandb.log({"pr134_recovery_matrix": mt})
 
         lt = wandb.Table(columns=["accept_length", "official_tps", "clears_500",
                                   "overtakes_treefree", "label"])
