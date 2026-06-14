@@ -745,6 +745,567 @@ def run(args) -> dict:
     return res
 
 
+# ===========================================================================
+# PR #136: MEASURED STEP-ANCHOR for the depth-9 verify step (the DENOMINATOR)
+# ===========================================================================
+# fern #129's whole-fleet go/no-go denominator is the depth-9 W* step = 1.2127
+# (my #125 roofline: gemm_mult 1.098 + drafter_add 0.048 + attn_add 0.0666, ALL
+# device-time). But the live oracle run `tree-488-pw-fp32-v0` (openevolve, board
+# 20260614-100550-487) ran EAGER star-attn with attn_py_calls/step=37 -- a KNOWN
+# flagged build blocker ("eager-dispatch overhead, graph path needed", byteshark
+# board ~05:53Z). Eager dispatch of 37 attention kernels/step exposes GPU-idle
+# launch gaps that the GRAPHED M=8 linear baseline (step=1.0; decode 99.41%
+# GPU-bound, ~0 launch headroom, #65) does NOT pay. So the realized EAGER step
+# >= the 1.2127 fused roofline. This section MEASURES that gap locally on the
+# deployed unified_attention kernel (same path as Part A) and brackets
+# measured_depth9_step_time, then re-prices the #131 root-row recipe + fern's
+# operative clear-500/clear-530 bars at the MEASURED (not roofline) step.
+#
+# NOTE (chiku-inu board 20260614-104247-994): the fp32 build is a NUMERATOR
+# failure -- E[T] stuck ~2.07-2.62 (BUG-1 depth-1 deficit is STRUCTURAL, not
+# bf16 precision; denken #133/kanna #134 own that). The step-anchor here is
+# still load-bearing: it pins the DENOMINATOR every 500-verdict divides by, for
+# ANY future build that fixes the numerator. The step is no longer the binding
+# lever, but it IS the denominator. (lawine owns the denominator; not the E[T].)
+
+# fern #125/#129 depth-9 composition constants (the denominator we anchor).
+STEP_WSTAR_DEPTH9 = 1.2127483746822987      # roofline depth-9 W* step (M=8-norm)
+STEP_WSTAR_GEMM = 1.098148338441328         # Marlin staircase M=32 (denken #68)
+STEP_WSTAR_DRAFTER_ADD = 0.048              # drafter expansion depth-9 (wirbel)
+STEP_WSTAR_ATTN_ADD = 0.06660003624097069   # bf16 tree-mask attn tax (#107 1.83x)
+CLEAR500_BAR_ROOFLINE = 4.840617149792076   # fern #129 operative clear-500 bar
+TAU_FERN_CENTRAL = 1.0
+TAU_FERN_LOW = 0.9983                        # fern #129 tau band low (lawine #116)
+# oracle-measured E[T] numerators (NOT my lane -- only for the realized cross).
+E_T_OPENEVOLVE_ORACLE = 2.621               # openevolve A10G readout (board 100550)
+E_T_CHIKU_RUN = 2.07                        # chiku-inu's own run (board 104247)
+# M=8 linear-baseline step wall time: K_cal == steps/sec at step=1.0, so 1 step
+# unit == 1/K_cal seconds. Converts a measured us idle into normalized step units.
+STEP_M8_US = 1.0e6 / K_CAL                   # ~7982.86 us
+PR131_TAX_JSON = ROOT / "research/spec_cost_model/fp32_star_steptime_tax.json"
+TARGET_530_F = 530.0
+# filler bf16 NxN GEMM ~ per-layer non-attention GPU work, used to give the GPU
+# something to overlap the eager attention-launch CPU dispatch with (Part D2).
+GEMM_FILLER_N = 2048
+
+
+def _load_pr131_fp32_tax() -> dict:
+    """The fp32 QK+PV upcast device-compute tax from my merged #131, in M=8-step
+    units -- the SAME normalization as fern's 1.2127 (both are fractions of the
+    M=8 linear step). The tax is a kernel-COMPUTE property, invariant to eager-vs-
+    graphed dispatch, so we reuse it verbatim and add it onto the MEASURED step."""
+    d = json.loads(PR131_TAX_JSON.read_text())
+    delta = d["step1_delta_step_time_fp32"]
+    return {
+        "delta_full_central": delta["delta_attn_steprat_central"],
+        "delta_full_conservative": delta["delta_attn_steprat_conservative"],
+        "r_fp32_central": delta["r_fp32_central"],
+        "r_fp32_conservative": delta["r_fp32_conservative"],
+        "source_utc": d.get("utc"), "source_wandb": d.get("wandb_run_id"),
+    }
+
+
+def measure_eager_dispatch_overhead(M, ctx, n_passes, warmup, counts, n_iter):
+    """Part D: the eager-dispatch GPU-idle gap for ONE depth-9 verify step's worth
+    of attention = counts['sliding']+counts['full'] = 37 calls (the oracle's
+    attn_py_calls/step). Three timings of the SAME 37-call sequence on the deployed
+    split-KV unified_attention (cold-KV rotation defeats L2, as Part A):
+      device_busy_us  -- profiler self_device_time (NO gaps; GPU saturated across
+                         reps) = the GRAPHED/fused floor.
+      eager_steady_us -- CUDA-event span over N back-to-back steps / N (CPU
+                         pipelines launches across steps; realistic continuous-
+                         decode lower bound on the idle).
+      eager_cold_us   -- CUDA-event span over ONE step, sync before each (cold
+                         launch queue per step; pessimistic per-step upper bound).
+    exposed_idle = max(0, eager - device_busy). This captures ONLY the 37
+    attention launches' idle; the full eager step ALSO pays the tree's Python
+    control flow (drafter + salvage walk) which we do NOT measure -> this idle is
+    a LOWER bound on the total eager step inflation. openevolve's wall_tps would
+    capture the full step; we request it on the board."""
+    dev = torch.device("cuda")
+    inp_s = _build_op_inputs(torch, "sliding", M, ctx)
+    inp_f = _build_op_inputs(torch, "full", M, ctx)
+    out_s = torch.empty(M, N_Q_HEADS, inp_s["hd"], dtype=torch.bfloat16, device=dev)
+    out_f = torch.empty(M, N_Q_HEADS, inp_f["hd"], dtype=torch.bfloat16, device=dev)
+    call_s, _ = _make_call(torch, inp_s, M, ctx, torch.float32, out_s)
+    call_f, _ = _make_call(torch, inp_f, M, ctx, torch.float32, out_f)
+    ns, nf = counts["sliding"], counts["full"]
+
+    def one_step():
+        for _ in range(ns):
+            call_s()
+        for _ in range(nf):
+            call_f()
+
+    # (1) device-busy floor (no gaps) -- profiler self-device-time of 37 calls.
+    device_busy_us = _profiled_device_us(torch, one_step, n_iter, warmup)
+
+    # (2) eager steady-state: events around N back-to-back steps (CPU pipelines).
+    for _ in range(warmup):
+        one_step()
+    torch.cuda.synchronize()
+    ev0, ev1 = torch.cuda.Event(True), torch.cuda.Event(True)
+    ev0.record()
+    for _ in range(n_passes):
+        one_step()
+    ev1.record()
+    torch.cuda.synchronize()
+    eager_steady_us = ev0.elapsed_time(ev1) * 1e3 / n_passes
+
+    # (3) eager cold: sync before each single step (empty launch queue per step).
+    cold = []
+    for _ in range(max(3, warmup // 4)):
+        one_step()
+        torch.cuda.synchronize()
+    for _ in range(n_passes):
+        torch.cuda.synchronize()
+        e0, e1 = torch.cuda.Event(True), torch.cuda.Event(True)
+        e0.record()
+        one_step()
+        e1.record()
+        torch.cuda.synchronize()
+        cold.append(e0.elapsed_time(e1) * 1e3)
+    eager_cold_us = statistics.median(cold)
+
+    idle_steady = max(0.0, eager_steady_us - device_busy_us)
+    idle_cold = max(0.0, eager_cold_us - device_busy_us)
+    n_calls = ns + nf
+    del inp_s, inp_f, out_s, out_f
+    torch.cuda.empty_cache()
+    return {
+        "M": M, "n_attn_calls_per_step": n_calls,
+        "device_busy_us": device_busy_us,
+        "eager_steady_us": eager_steady_us, "eager_cold_us": eager_cold_us,
+        "exposed_idle_steady_us": idle_steady, "exposed_idle_cold_us": idle_cold,
+        "per_call_idle_steady_us": idle_steady / n_calls,
+        "per_call_idle_cold_us": idle_cold / n_calls,
+        "cold_samples": cold,
+        "method": ("device_busy = profiler self-time (graphed floor); eager_* = "
+                   "CUDA-event GPU-timeline span incl. launch idle; idle = eager - "
+                   "busy (attention-launch component only, LOWER bound on full step)"),
+    }
+
+
+def measure_overlap_hidden_idle(M, ctx, n_passes, warmup, counts, n_iter, gemm_n):
+    """Part D2: the eager attention-launch idle that SURVIVES realistic GEMM overlap
+    -- the credible eager penalty. Part D times 37 back-to-back attention launches
+    with NO other GPU work, so the Triton CPU launch starves the GPU and OVER-states
+    the exposed idle (a no-overlap UPPER bound). The real depth-9 step interleaves
+    each layer's attention with that layer's GEMM GPU work (gemm_mult + drafter ~=
+    1.146 step-units ~= 9150us/step ~= 247us/layer). Issuing a filler bf16 NxN GEMM
+    before each attention call gives the GPU work that hides the attention CPU
+    dispatch; the idle that REMAINS is what an eager (un-graphed) verify step pays
+    on the ATTENTION path. NOTE: the tree's drafter + salvage Python control flow is
+    NOT modeled here -> attention-path penalty only; openevolve's full-step wall_tps
+    still anchors the total. A graphed build (blocker #2) drives this idle to ~0."""
+    dev = torch.device("cuda")
+    inp_s = _build_op_inputs(torch, "sliding", M, ctx)
+    inp_f = _build_op_inputs(torch, "full", M, ctx)
+    out_s = torch.empty(M, N_Q_HEADS, inp_s["hd"], dtype=torch.bfloat16, device=dev)
+    out_f = torch.empty(M, N_Q_HEADS, inp_f["hd"], dtype=torch.bfloat16, device=dev)
+    call_s, _ = _make_call(torch, inp_s, M, ctx, torch.float32, out_s)
+    call_f, _ = _make_call(torch, inp_f, M, ctx, torch.float32, out_f)
+    ns, nf = counts["sliding"], counts["full"]
+    n_calls = ns + nf
+    a = torch.randn(gemm_n, gemm_n, dtype=torch.bfloat16, device=dev)
+    b = torch.randn(gemm_n, gemm_n, dtype=torch.bfloat16, device=dev)
+    c = torch.empty(gemm_n, gemm_n, dtype=torch.bfloat16, device=dev)
+
+    # size the per-layer filler to ~= the step's non-attention GPU work / 37 layers.
+    filler_us = _profiled_device_us(torch, lambda: torch.mm(a, b, out=c), n_iter, warmup)
+    target_per_layer_us = ((STEP_WSTAR_GEMM + STEP_WSTAR_DRAFTER_ADD)
+                           * STEP_M8_US / n_calls)
+    gemm_per_call = max(1, round(target_per_layer_us / filler_us))
+
+    def one_step():
+        for _ in range(ns):
+            for _ in range(gemm_per_call):
+                torch.mm(a, b, out=c)
+            call_s()
+        for _ in range(nf):
+            for _ in range(gemm_per_call):
+                torch.mm(a, b, out=c)
+            call_f()
+
+    device_busy_us = _profiled_device_us(torch, one_step, n_iter, warmup)
+    for _ in range(warmup):
+        one_step()
+    torch.cuda.synchronize()
+    ev0, ev1 = torch.cuda.Event(True), torch.cuda.Event(True)
+    ev0.record()
+    for _ in range(n_passes):
+        one_step()
+    ev1.record()
+    torch.cuda.synchronize()
+    eager_span_us = ev0.elapsed_time(ev1) * 1e3 / n_passes
+    idle = max(0.0, eager_span_us - device_busy_us)
+    gpu_nonattn_us = filler_us * gemm_per_call * n_calls
+    del inp_s, inp_f, out_s, out_f, a, b, c
+    torch.cuda.empty_cache()
+    return {
+        "M": M, "gemm_n": gemm_n, "gemm_per_call": gemm_per_call,
+        "filler_us_each": filler_us,
+        "target_per_layer_us": target_per_layer_us,
+        "gpu_nonattn_us_per_step": gpu_nonattn_us,
+        "device_busy_us": device_busy_us, "eager_span_us": eager_span_us,
+        "exposed_idle_overlap_us": idle,
+        "per_call_idle_overlap_us": idle / n_calls,
+        "method": ("interleave a per-layer filler GEMM before each of the 37 "
+                   "attention calls; idle = eager span - device-busy floor = the "
+                   "attention-path eager penalty that survives realistic GEMM "
+                   "overlap (drafter/salvage Python NOT modeled)"),
+    }
+
+
+def fern_official(e_t: float, step: float, tau: float) -> float:
+    """fern #129 compose: official = K_cal * E[T] / step * tau."""
+    return K_CAL * e_t / step * tau
+
+
+def fern_clear_bar(target: float, step: float, tau: float) -> float:
+    """E[T] needed to clear `target` official at (step, tau). Rises with step."""
+    return target * step / (K_CAL * tau)
+
+
+def _price_recipe_at_step(step_bf16: float, tax: float) -> dict:
+    """Price one recipe (bf16 tax=0 / root-row tax=full/32 / full tax=full) at a
+    given bf16 measured step. Reports its own step + the clear-500/530 E[T] bars
+    (central + tau-low) and whether each bar sits under the 5.207 supply ceiling."""
+    step = step_bf16 + tax
+    out = {"recipe_step": step, "fp32_tax_step_units": tax}
+    for tname, tau in (("central", TAU_FERN_CENTRAL), ("taulow", TAU_FERN_LOW)):
+        bar500 = fern_clear_bar(TARGET_500, step, tau)
+        bar530 = fern_clear_bar(TARGET_530_F, step, tau)
+        out[tname] = {
+            "tau": tau,
+            "clear500_bar_et": bar500, "clear530_bar_et": bar530,
+            "clears500_under_ceiling": bar500 <= E_T_TREE_CEILING,
+            "clears530_under_ceiling": bar530 <= E_T_TREE_CEILING,
+            "official_at_ceiling": fern_official(E_T_TREE_CEILING, step, tau),
+        }
+    return out
+
+
+def run_measured_anchor(args) -> dict:
+    """PR #136 Steps 1-4: measure the eager step, bracket it, re-price the root-row
+    recipe + fern's operative bars at the MEASURED step, gate."""
+    assert torch.cuda.is_available(), "CUDA required"
+    _maybe_install_splitkv()
+    dev = torch.device("cuda")
+    torch.cuda.reset_peak_memory_stats()
+    t0 = time.time()
+    ctx = args.ctx
+    counts = {"sliding": N_SLIDING, "full": N_FULL}
+    tax131 = _load_pr131_fp32_tax()
+
+    res: dict = {
+        "pr": 136, "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "gpu": torch.cuda.get_device_name(0),
+        "l2_bytes": torch.cuda.get_device_properties(0).L2_cache_size,
+        "ctx": ctx, "counts": counts,
+        "anchors": {
+            "step_wstar_depth9_roofline": STEP_WSTAR_DEPTH9,
+            "step_decomp": {"gemm_mult": STEP_WSTAR_GEMM,
+                            "drafter_add": STEP_WSTAR_DRAFTER_ADD,
+                            "attn_add_bf16_treemask": STEP_WSTAR_ATTN_ADD},
+            "k_cal": K_CAL, "step_m8_us": STEP_M8_US,
+            "clear500_bar_roofline": CLEAR500_BAR_ROOFLINE,
+            "e_t_tree_ceiling": E_T_TREE_CEILING,
+            "tau_central": TAU_FERN_CENTRAL, "tau_low": TAU_FERN_LOW,
+            "pr131_fp32_tax": tax131,
+            "oracle_e_t_openevolve": E_T_OPENEVOLVE_ORACLE,
+            "oracle_e_t_chiku": E_T_CHIKU_RUN,
+        },
+        "config": {"n_iter": args.n_iter, "warmup": args.warmup,
+                   "eager_passes": args.eager_passes,
+                   "openevolve_wall_tps": args.openevolve_wall_tps,
+                   "openevolve_e_t": args.openevolve_e_t},
+    }
+    print(f"[anchor] GPU {res['gpu']} ctx={ctx} step_M8={STEP_M8_US:.1f}us "
+          f"roofline_step={STEP_WSTAR_DEPTH9:.4f}", flush=True)
+
+    # ---- Part A: real attn fit (device-busy; cross-checks #131, used for the floor)
+    m_values = [1, 8, 16, 32]
+    attn_us = {}
+    for M in m_values:
+        total, _ = measure_attn_us(M, ctx, args.n_iter, args.warmup, counts)
+        attn_us[M] = total
+    fit = fit_mem_compute(m_values, [attn_us[m] for m in m_values])
+    res["partA_attn_fit"] = {
+        "attn_us": {str(m): attn_us[m] for m in m_values}, "fit": fit,
+        "fit_str": f"attn_us(M) = {fit['c0_mem_us']:.1f} + "
+                   f"{fit['c1_compute_us_per_row']:.2f}*M",
+        "r_attn_M32_M8": attn_us[32] / attn_us[8]}
+    print(f"   [A] {res['partA_attn_fit']['fit_str']} (R^2={fit['r2']:.3f}) "
+          f"r_attn(32/8)={attn_us[32]/attn_us[8]:.3f}", flush=True)
+
+    # ---- Part D: eager dispatch overhead (the NEW measurement) ----------------
+    eager = measure_eager_dispatch_overhead(
+        32, ctx, args.eager_passes, args.warmup, counts, args.n_iter)
+    res["partD_eager_overhead"] = eager
+    print(f"   [D] 37-call step: device_busy={eager['device_busy_us']:.1f}us  "
+          f"eager_steady={eager['eager_steady_us']:.1f}us  "
+          f"eager_cold={eager['eager_cold_us']:.1f}us  "
+          f"idle_steady={eager['exposed_idle_steady_us']:.1f}us "
+          f"({eager['per_call_idle_steady_us']:.2f}/call)  "
+          f"idle_cold={eager['exposed_idle_cold_us']:.1f}us "
+          f"({eager['per_call_idle_cold_us']:.2f}/call)", flush=True)
+
+    # ---- Part D2: idle that SURVIVES realistic GEMM overlap (the credible one) -
+    overlap = measure_overlap_hidden_idle(
+        32, ctx, args.eager_passes, args.warmup, counts, args.n_iter,
+        args.gemm_filler_n)
+    res["partD2_overlap_hidden"] = overlap
+    print(f"   [D2] interleaved (filler {overlap['gemm_n']}^3 x{overlap['gemm_per_call']}"
+          f"/call, {overlap['filler_us_each']:.0f}us each): "
+          f"device_busy={overlap['device_busy_us']:.1f}us  "
+          f"eager_span={overlap['eager_span_us']:.1f}us  "
+          f"idle_overlap={overlap['exposed_idle_overlap_us']:.1f}us "
+          f"({overlap['per_call_idle_overlap_us']:.2f}/call)", flush=True)
+
+    # ---- Step 1: bracket the measured depth-9 step ----------------------------
+    # Three regimes (NOT steady-vs-cold; both of those are the no-overlap pessimist):
+    #   graphed floor  = roofline (graph path built -> attn launch idle fully hidden)
+    #   overlap central= roofline + idle that SURVIVES per-layer GEMM overlap (D2);
+    #                    the realistic as-built eager ATTENTION-path penalty
+    #   isolation high = roofline + Part-D no-overlap idle (GPU-starved upper bound)
+    idle_overlap_step = overlap["exposed_idle_overlap_us"] / STEP_M8_US
+    idle_isolation_step = eager["exposed_idle_steady_us"] / STEP_M8_US
+    step_graphed = STEP_WSTAR_DEPTH9
+    step_overlap = STEP_WSTAR_DEPTH9 + idle_overlap_step
+    step_isolation = STEP_WSTAR_DEPTH9 + idle_isolation_step
+    # central = realistic-overlap (the as-run config); anchored by openevolve's
+    # wall_tps if supplied (their localizer E[T] / wall_tps -> the FULL-step number).
+    anchored = args.openevolve_wall_tps is not None and args.openevolve_wall_tps > 0
+    if anchored:
+        e_t_anchor = args.openevolve_e_t or E_T_OPENEVOLVE_ORACLE
+        step_anchored = K_CAL * e_t_anchor / (args.openevolve_wall_tps * TAU_FERN_CENTRAL)
+        measured_step = step_anchored
+    else:
+        step_anchored = None
+        measured_step = step_overlap
+    res["step1_measured_step"] = {
+        "roofline_step": STEP_WSTAR_DEPTH9,
+        "step_graphed_floor": step_graphed,
+        "step_overlap_central": step_overlap,
+        "step_isolation_high": step_isolation,
+        "idle_overlap_step_units": idle_overlap_step,
+        "idle_isolation_step_units": idle_isolation_step,
+        "idle_isolation_steady_us": eager["exposed_idle_steady_us"],
+        "idle_isolation_cold_us": eager["exposed_idle_cold_us"],
+        "idle_overlap_us": overlap["exposed_idle_overlap_us"],
+        "anchored": anchored, "step_anchored": step_anchored,
+        "measured_depth9_step_time": measured_step,
+        "delta_vs_roofline_abs": measured_step - STEP_WSTAR_DEPTH9,
+        "delta_vs_roofline_pct": 100.0 * (measured_step - STEP_WSTAR_DEPTH9)
+        / STEP_WSTAR_DEPTH9,
+        "bracket_low_high": [step_graphed, step_isolation],
+        "bracket_note": ("LOW = graphed floor (roofline, idle hidden); CENTRAL = "
+                         "overlap-survivor (realistic eager attn path); HIGH = "
+                         "no-overlap isolation (GPU-starved upper bound). The "
+                         "isolation corner strips the per-layer GEMM GPU work that "
+                         "hides the attention CPU dispatch -> over-states the idle."),
+    }
+    print(f"   [1] measured step = {measured_step:.4f} "
+          f"(bracket [graphed {step_graphed:.4f}, isolation {step_isolation:.4f}], "
+          f"overlap-central {step_overlap:.4f}, roofline {STEP_WSTAR_DEPTH9:.4f}, "
+          f"delta +{res['step1_measured_step']['delta_vs_roofline_pct']:.2f}%)"
+          f"{'  [ANCHORED]' if anchored else '  [overlap-central, openevolve wall_tps pending]'}",
+          flush=True)
+
+    # ---- Step 2: re-price the recipes at each step regime ---------------------
+    tax_full = tax131["delta_full_central"]
+    tax_full_cons = tax131["delta_full_conservative"]
+    tax_root = tax_full / 32.0                # 1/32 of verify rows (depth-1 root)
+    tax_root_cons = tax_full_cons / 32.0
+    recipes = {}
+    for stepname, step_bf16 in (("graphed_floor", step_graphed),
+                                ("overlap_central", step_overlap),
+                                ("measured", measured_step),
+                                ("isolation_high", step_isolation)):
+        recipes[stepname] = {
+            "bf16_internal": _price_recipe_at_step(step_bf16, 0.0),
+            "root_row_central": _price_recipe_at_step(step_bf16, tax_root),
+            "root_row_conservative": _price_recipe_at_step(step_bf16, tax_root_cons),
+            "full_fp32_central": _price_recipe_at_step(step_bf16, tax_full),
+            "full_fp32_conservative": _price_recipe_at_step(step_bf16, tax_full_cons),
+        }
+    res["step2_recipes_at_step"] = {
+        "tax_full_central": tax_full, "tax_root_central": tax_root,
+        "tax_full_conservative": tax_full_cons, "tax_root_conservative": tax_root_cons,
+        "tax_reduction_root_vs_full": tax_full / tax_root if tax_root else None,
+        "by_step": recipes}
+    mm = recipes["measured"]
+    print(f"   [2] at measured step: bf16 step {mm['bf16_internal']['recipe_step']:.4f}  "
+          f"root-row {mm['root_row_central']['recipe_step']:.4f}  "
+          f"full-fp32 {mm['full_fp32_central']['recipe_step']:.4f}  "
+          f"(root tax {tax_root:.5f} = full/{tax_full/tax_root:.0f})", flush=True)
+
+    # ---- Step 3: knife-edge -- clear-500/530 bars + realized-official cross ----
+    rr = mm["root_row_central"]["central"]
+    rootrow_clears_530 = rr["clears530_under_ceiling"]
+    # realized official at the measured step for the oracle-measured E[T] (cross).
+    realized = {
+        "e_t_openevolve_2.621": {
+            "official_at_measured_step": fern_official(E_T_OPENEVOLVE_ORACLE, measured_step, 1.0),
+            "official_at_roofline": fern_official(E_T_OPENEVOLVE_ORACLE, STEP_WSTAR_DEPTH9, 1.0)},
+        "e_t_chiku_2.07": {
+            "official_at_measured_step": fern_official(E_T_CHIKU_RUN, measured_step, 1.0),
+            "official_at_roofline": fern_official(E_T_CHIKU_RUN, STEP_WSTAR_DEPTH9, 1.0)},
+    }
+    bar530_graphed = recipes["graphed_floor"]["root_row_central"]["central"]["clear530_bar_et"]
+    bar530_overlap = recipes["overlap_central"]["root_row_central"]["central"]["clear530_bar_et"]
+    bar530_isolation = recipes["isolation_high"]["root_row_central"]["central"]["clear530_bar_et"]
+    res["step3_knife_edge"] = {
+        "rootrow_clears_530_at_measured_step": int(rootrow_clears_530),
+        "rootrow_clear530_bar_at_measured": rr["clear530_bar_et"],
+        "rootrow_clear530_bar_graphed": bar530_graphed,
+        "rootrow_clear530_bar_overlap_central": bar530_overlap,
+        "rootrow_clear530_bar_isolation_high": bar530_isolation,
+        "rootrow_clears_530_graphed": int(recipes["graphed_floor"]["root_row_central"]["central"]["clears530_under_ceiling"]),
+        "rootrow_clears_530_overlap": int(recipes["overlap_central"]["root_row_central"]["central"]["clears530_under_ceiling"]),
+        "rootrow_clears_530_isolation": int(recipes["isolation_high"]["root_row_central"]["central"]["clears530_under_ceiling"]),
+        "supply_ceiling_e_t": E_T_TREE_CEILING,
+        "full_fp32_clears_530_at_measured": int(mm["full_fp32_central"]["central"]["clears530_under_ceiling"]),
+        "bf16_clears_530_at_measured": int(mm["bf16_internal"]["central"]["clears530_under_ceiling"]),
+        "realized_official_cross": realized,
+        "note": ("clears530 == clear-530 E[T] bar <= 5.207 supply ceiling. The "
+                 "oracle-measured E[T]=2.621 FAILS 500 at any of these steps; the "
+                 "bar question is conditional on a future build that fixes BUG-1/2."),
+    }
+    print(f"   [3] root-row clear-530 bar: graphed {bar530_graphed:.4f}  "
+          f"overlap-central {bar530_overlap:.4f}  isolation {bar530_isolation:.4f} "
+          f"(ceiling {E_T_TREE_CEILING}) -> clears530@measured={rootrow_clears_530}",
+          flush=True)
+    print(f"       realized official @measured: E[T]=2.621 -> "
+          f"{realized['e_t_openevolve_2.621']['official_at_measured_step']:.1f}  "
+          f"E[T]=2.07 -> {realized['e_t_chiku_2.07']['official_at_measured_step']:.1f} "
+          f"(both FAIL 500 -- numerator bug, not denominator)", flush=True)
+
+    # ---- Step 4: operative-bar shift -> hand to fern --------------------------
+    bar500_measured = fern_clear_bar(TARGET_500, measured_step, TAU_FERN_CENTRAL)
+    bar500_overlap = fern_clear_bar(TARGET_500, step_overlap, TAU_FERN_CENTRAL)
+    bar500_isolation = fern_clear_bar(TARGET_500, step_isolation, TAU_FERN_CENTRAL)
+    res["step4_operative_bar_shift"] = {
+        "clear500_bar_roofline": CLEAR500_BAR_ROOFLINE,
+        "clear500_bar_measured": bar500_measured,
+        "clear500_bar_overlap_central": bar500_overlap,
+        "clear500_bar_isolation_high": bar500_isolation,
+        "shift_vs_roofline": bar500_measured - CLEAR500_BAR_ROOFLINE,
+        "direction": "RISES (denominator bigger)" if bar500_measured > CLEAR500_BAR_ROOFLINE
+        else "drops",
+        "demand_floor_denken123": 4.624,
+        "clear500_bar_still_under_ceiling": bar500_measured <= E_T_TREE_CEILING,
+        "handoff": ("fern #129: replace the 1.2127-roofline clear-500 bar 4.841 with "
+                    "the measured-step bar; the eager star-attn denominator raises it "
+                    "(overlap-central is the realistic operative bar; isolation is the "
+                    "no-overlap pessimist). A graphed build (blocker #2) recovers the "
+                    "roofline bar."),
+    }
+    print(f"   [4] fern operative clear-500 bar: roofline 4.841 -> measured "
+          f"{bar500_measured:.4f} ({res['step4_operative_bar_shift']['direction']}, "
+          f"+{bar500_measured - CLEAR500_BAR_ROOFLINE:.4f} E[T])", flush=True)
+
+    # ---- Gate (PR #136) -------------------------------------------------------
+    clears_overlap = recipes["overlap_central"]["root_row_central"]["central"]["clears530_under_ceiling"]
+    clears_isolation = recipes["isolation_high"]["root_row_central"]["central"]["clears530_under_ceiling"]
+    clears_graphed = recipes["graphed_floor"]["root_row_central"]["central"]["clears530_under_ceiling"]
+    materially_worse = res["step1_measured_step"]["delta_vs_roofline_pct"] > 2.0
+    if anchored:
+        verdict = "GREEN" if rootrow_clears_530 else "RED"
+        verdict_reason = ("anchored by openevolve wall_tps; root-row "
+                          + ("clears" if rootrow_clears_530 else "MISSES") + " 530")
+    elif not clears_overlap and materially_worse:
+        verdict = "RED"
+        verdict_reason = ("even the realistic overlap-central eager step pushes the "
+                          "root-row clear-530 bar above the 5.207 ceiling -> route 530 "
+                          "elsewhere (graph the verify or root-row won't clear 530)")
+    else:
+        verdict = "AMBER"
+        verdict_reason = ("openevolve full-step wall_tps not yet returned; reporting the "
+                          "measured bracket [graphed, isolation] + operative-bar "
+                          "sensitivity. root-row clears 530 at "
+                          + ("overlap-central" if clears_overlap else "neither")
+                          + (" but NOT the no-overlap isolation pessimist"
+                             if (clears_overlap and not clears_isolation) else "")
+                          + "; a graphed build recovers the roofline bar.")
+    res["gate"] = {
+        "verdict": verdict, "reason": verdict_reason,
+        "anchored": anchored,
+        "rootrow_clears_530_graphed": int(clears_graphed),
+        "rootrow_clears_530_overlap_central": int(clears_overlap),
+        "rootrow_clears_530_isolation_high": int(clears_isolation),
+        "materially_worse_than_roofline": materially_worse,
+        "rule": ("GREEN = step ANCHORED (openevolve full-step wall_tps) AND root-row "
+                 "clears 530 at the measured step; AMBER = wall_tps pending, report "
+                 "bracket + bar sensitivity; RED = realistic overlap-central step is "
+                 "materially worse AND root-row clear-530 bar > 5.207 ceiling there"),
+    }
+
+    # ---- PRIMARY / TEST metrics ----------------------------------------------
+    res["primary_metric"] = {"name": "measured_depth9_step_time", "value": measured_step}
+    res["test_metric"] = {"name": "rootrow_clears_530_at_measured_step",
+                          "value": int(rootrow_clears_530)}
+    res["verdict"] = verdict
+    res["elapsed_s"] = time.time() - t0
+    res["peak_gpu_gb"] = torch.cuda.max_memory_allocated() / 1e9
+
+    out_path = Path(args.output)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(res, indent=2))
+    print(f"\n[anchor] VERDICT={verdict}  measured_step={measured_step:.4f}  "
+          f"rootrow_clears_530={int(rootrow_clears_530)}", flush=True)
+    print(f"[anchor] {verdict_reason}", flush=True)
+    print(f"[anchor] wrote {out_path}  ({res['elapsed_s']:.0f}s, "
+          f"peak {res['peak_gpu_gb']:.2f}GB)", flush=True)
+
+    # ---- W&B -----------------------------------------------------------------
+    if args.wandb_group:
+        try:
+            import wandb
+            run_w = wandb.init(
+                project="gemma-challenge-senpai", entity="wandb-applied-ai-team",
+                group=args.wandb_group, name=args.wandb_name,
+                config={**res["config"], **res["anchors"], "gpu": res["gpu"], "ctx": ctx})
+            log = {
+                "measured_depth9_step_time": measured_step,
+                "rootrow_clears_530_at_measured_step": int(rootrow_clears_530),
+                "step_roofline": STEP_WSTAR_DEPTH9,
+                "step_graphed_floor": step_graphed,
+                "step_overlap_central": step_overlap,
+                "step_isolation_high": step_isolation,
+                "delta_vs_roofline_pct": res["step1_measured_step"]["delta_vs_roofline_pct"],
+                "eager_idle_isolation_steady_us": eager["exposed_idle_steady_us"],
+                "eager_idle_isolation_cold_us": eager["exposed_idle_cold_us"],
+                "eager_device_busy_us": eager["device_busy_us"],
+                "overlap_idle_us": overlap["exposed_idle_overlap_us"],
+                "overlap_device_busy_us": overlap["device_busy_us"],
+                "overlap_per_call_idle_us": overlap["per_call_idle_overlap_us"],
+                "per_call_idle_isolation_steady_us": eager["per_call_idle_steady_us"],
+                "rootrow_clear530_bar_measured": rr["clear530_bar_et"],
+                "rootrow_clear530_bar_graphed": bar530_graphed,
+                "rootrow_clear530_bar_overlap_central": bar530_overlap,
+                "rootrow_clear530_bar_isolation_high": bar530_isolation,
+                "clear500_bar_roofline": CLEAR500_BAR_ROOFLINE,
+                "clear500_bar_measured": bar500_measured,
+                "clear500_bar_shift": bar500_measured - CLEAR500_BAR_ROOFLINE,
+                "realized_official_et2621_measured": realized["e_t_openevolve_2.621"]["official_at_measured_step"],
+                "supply_ceiling_e_t": E_T_TREE_CEILING,
+                "verdict_green": int(verdict == "GREEN"),
+                "verdict_amber": int(verdict == "AMBER"),
+                "verdict_red": int(verdict == "RED"),
+            }
+            wandb.log(log)
+            run_w.summary.update(log)
+            res["wandb_run_id"] = run_w.id
+            wandb.finish()
+            print(f"[anchor] W&B run {run_w.id} (group {args.wandb_group})", flush=True)
+            out_path.write_text(json.dumps(res, indent=2))
+        except Exception as e:  # noqa: BLE001
+            print(f"[anchor] W&B logging skipped: {e!r}", flush=True)
+    return res
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--ctx", type=int, default=ATTN_CTX_DEFAULT)
@@ -754,15 +1315,36 @@ def main(argv=None) -> int:
     ap.add_argument("--e-t-recovered", type=float, default=E_T_TREE_CEILING,
                     help="E[T] the fp32 upcast recovers (denken #128 numerator); "
                          "default = the 5.207 ceiling (fern #125)")
-    ap.add_argument("--output", type=Path,
-                    default=ROOT / "research/spec_cost_model/fp32_star_steptime_tax.json")
+    # ---- PR #136 measured-anchor mode -------------------------------------
+    ap.add_argument("--measured-anchor", action="store_true",
+                    help="PR #136: measure the eager depth-9 step + re-price the "
+                         "root-row recipe at the MEASURED (not roofline) step")
+    ap.add_argument("--eager-passes", type=int, default=200,
+                    help="back-to-back depth-9 steps timed for the eager idle gap")
+    ap.add_argument("--gemm-filler-n", type=int, default=GEMM_FILLER_N,
+                    help="Part D2 filler bf16 NxN GEMM size (per-layer non-attn GPU "
+                         "proxy that hides the eager attention-launch CPU dispatch)")
+    ap.add_argument("--openevolve-wall-tps", type=float, default=None,
+                    help="if set, ANCHOR the step to openevolve's measured wall_tps "
+                         "for tree-488-pw-fp32-v0 (step = K_cal*E[T]/wall_tps)")
+    ap.add_argument("--openevolve-e-t", type=float, default=E_T_OPENEVOLVE_ORACLE,
+                    help="oracle-measured E[T] to pair with --openevolve-wall-tps")
+    ap.add_argument("--output", type=Path, default=None)
     ap.add_argument("--wandb-group", type=str, default="fp32-star-steptime-tax")
     ap.add_argument("--wandb-name", type=str, default="lawine/fp32-star-steptime-tax")
     ap.add_argument("--no-wandb", action="store_true")
     args = ap.parse_args(argv)
     if args.no_wandb:
         args.wandb_group = None
-    run(args)
+    if args.output is None:
+        args.output = ROOT / ("research/spec_cost_model/"
+                              + ("fp32_star_steptime_measured_anchor.json"
+                                 if args.measured_anchor
+                                 else "fp32_star_steptime_tax.json"))
+    if args.measured_anchor:
+        run_measured_anchor(args)
+    else:
+        run(args)
     return 0
 
 

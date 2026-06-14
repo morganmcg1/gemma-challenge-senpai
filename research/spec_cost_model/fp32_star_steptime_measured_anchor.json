@@ -1,0 +1,779 @@
+{
+  "pr": 136,
+  "utc": "2026-06-14T11:08:22Z",
+  "gpu": "NVIDIA A10G",
+  "l2_bytes": 6291456,
+  "ctx": 528,
+  "counts": {
+    "sliding": 30,
+    "full": 7
+  },
+  "anchors": {
+    "step_wstar_depth9_roofline": 1.2127483746822987,
+    "step_decomp": {
+      "gemm_mult": 1.098148338441328,
+      "drafter_add": 0.048,
+      "attn_add_bf16_treemask": 0.06660003624097069
+    },
+    "k_cal": 125.26795005202914,
+    "step_m8_us": 7982.887878221502,
+    "clear500_bar_roofline": 4.840617149792076,
+    "e_t_tree_ceiling": 5.207,
+    "tau_central": 1.0,
+    "tau_low": 0.9983,
+    "pr131_fp32_tax": {
+      "delta_full_central": 0.11204437266567233,
+      "delta_full_conservative": 0.3918002223392572,
+      "r_fp32_central": 2.7339762882736767,
+      "r_fp32_conservative": 6.125487480250875,
+      "source_utc": "2026-06-14T10:18:01Z",
+      "source_wandb": "tksrxyk5"
+    },
+    "oracle_e_t_openevolve": 2.621,
+    "oracle_e_t_chiku": 2.07
+  },
+  "config": {
+    "n_iter": 300,
+    "warmup": 30,
+    "eager_passes": 200,
+    "openevolve_wall_tps": null,
+    "openevolve_e_t": 2.621
+  },
+  "partA_attn_fit": {
+    "attn_us": {
+      "1": 473.3526033333363,
+      "8": 508.2247766666653,
+      "16": 571.7923700000025,
+      "32": 940.2861366666734
+    },
+    "fit": {
+      "c0_mem_us": 402.9465116361646,
+      "c1_compute_us_per_row": 15.471400703895071,
+      "r2": 0.9183461942468875
+    },
+    "fit_str": "attn_us(M) = 402.9 + 15.47*M",
+    "r_attn_M32_M8": 1.8501383242938365
+  },
+  "partD_eager_overhead": {
+    "M": 32,
+    "n_attn_calls_per_step": 37,
+    "device_busy_us": 940.8980766666882,
+    "eager_steady_us": 4281.6314697265625,
+    "eager_cold_us": 4315.551996231079,
+    "exposed_idle_steady_us": 3340.7333930598743,
+    "exposed_idle_cold_us": 3374.653919564391,
+    "per_call_idle_steady_us": 90.29009170432093,
+    "per_call_idle_cold_us": 91.20686269092948,
+    "cold_samples": [
+      4280.416011810303,
+      4396.383762359619,
+      4409.120082855225,
+      4374.080181121826,
+      4303.711891174316,
+      4387.872219085693,
+      4326.4641761779785,
+      4535.007953643799,
+      4354.400157928467,
+      4376.607894897461,
+      4401.375770568848,
+      4444.640159606934,
+      4452.1918296813965,
+      4329.12015914917,
+      4289.4721031188965,
+      4289.599895477295,
+      4310.976028442383,
+      4300.511837005615,
+      4362.46395111084,
+      4304.224014282227,
+      4286.3359451293945,
+      4702.303886413574,
+      4297.088146209717,
+      4312.352180480957,
+      4291.071891784668,
+      4373.248100280762,
+      4398.111820220947,
+      4283.936023712158,
+      4273.471832275391,
+      4324.575901031494,
+      4315.199851989746,
+      4339.51997756958,
+      4273.920059204102,
+      4289.216041564941,
+      4410.880088806152,
+      4274.112224578857,
+      4684.4801902771,
+      4292.863845825195,
+      4271.584033966064,
+      4312.672138214111,
+      4277.919769287109,
+      4285.280227661133,
+      4375.679969787598,
+      4315.487861633301,
+      4316.703796386719,
+      4288.2561683654785,
+      4293.951988220215,
+      4400.576114654541,
+      4283.23221206665,
+      4293.536186218262,
+      4361.2799644470215,
+      4343.584060668945,
+      4322.944164276123,
+      4389.887809753418,
+      4325.471878051758,
+      4317.66414642334,
+      4296.99182510376,
+      4299.007892608643,
+      4308.896064758301,
+      4303.584098815918,
+      4315.616130828857,
+      4288.447856903076,
+      4311.103820800781,
+      4304.800033569336,
+      4287.136077880859,
+      4338.848114013672,
+      4321.8560218811035,
+      4323.872089385986,
+      4399.231910705566,
+      4274.2719650268555,
+      4292.128086090088,
+      4386.816024780273,
+      4328.703880310059,
+      4307.199954986572,
+      4441.535949707031,
+      4267.615795135498,
+      4377.439975738525,
+      4258.495807647705,
+      4295.743942260742,
+      4397.823810577393,
+      4344.672203063965,
+      4278.816223144531,
+      4309.47208404541,
+      4328.127861022949,
+      4301.472187042236,
+      4288.288116455078,
+      4387.839794158936,
+      4327.583789825439,
+      4266.975879669189,
+      4288.959980010986,
+      4302.112102508545,
+      4290.559768676758,
+      4349.823951721191,
+      4345.119953155518,
+      4249.728202819824,
+      4261.663913726807,
+      4282.527923583984,
+      4367.29621887207,
+      4286.816120147705,
+      4268.959999084473,
+      4362.112045288086,
+      4398.975849151611,
+      4367.487907409668,
+      4277.440071105957,
+      4306.464195251465,
+      4293.3759689331055,
+      4266.4642333984375,
+      4271.999835968018,
+      4254.464149475098,
+      4395.711898803711,
+      4277.408123016357,
+      4277.215957641602,
+      4329.12015914917,
+      4313.055992126465,
+      4261.1517906188965,
+      4365.8881187438965,
+      4347.008228302002,
+      4286.079883575439,
+      4325.888156890869,
+      4293.11990737915,
+      4432.544231414795,
+      4272.992134094238,
+      4263.872146606445,
+      4461.440086364746,
+      4359.007835388184,
+      4302.048206329346,
+      4375.552177429199,
+      4498.047828674316,
+      4360.735893249512,
+      4332.767963409424,
+      4346.015930175781,
+      4376.607894897461,
+      4260.928153991699,
+      4278.624057769775,
+      4355.936050415039,
+      4367.167949676514,
+      4349.184036254883,
+      4349.023818969727,
+      4284.160137176514,
+      4267.712116241455,
+      4264.927864074707,
+      4380.127906799316,
+      4270.495891571045,
+      4342.016220092773,
+      4263.360023498535,
+      4270.20788192749,
+      4340.991973876953,
+      4309.696197509766,
+      4269.599914550781,
+      4289.31188583374,
+      4549.920082092285,
+      4306.367874145508,
+      4276.639938354492,
+      4247.519969940186,
+      4305.856227874756,
+      4417.856216430664,
+      4322.495937347412,
+      4319.295883178711,
+      4276.383876800537,
+      4294.20804977417,
+      4418.464183807373,
+      4292.128086090088,
+      4313.471794128418,
+      4248.767852783203,
+      4355.967998504639,
+      4337.855815887451,
+      4309.023857116699,
+      4433.216094970703,
+      4321.184158325195,
+      4401.023864746094,
+      4335.264205932617,
+      4343.6479568481445,
+      4300.0640869140625,
+      4379.968166351318,
+      4267.519950866699,
+      4312.960147857666,
+      4379.615783691406,
+      4334.464073181152,
+      4439.199924468994,
+      4400.576114654541,
+      4359.776020050049,
+      4322.112083435059,
+      4517.280101776123,
+      4321.983814239502,
+      4366.335868835449,
+      4262.303829193115,
+      4271.1358070373535,
+      4390.016078948975,
+      4443.391799926758,
+      4292.479991912842,
+      4297.408103942871,
+      4327.104091644287,
+      4373.695850372314,
+      4352.863788604736,
+      4356.480121612549,
+      4282.72008895874,
+      4257.9522132873535,
+      4338.016033172607,
+      4335.360050201416,
+      4277.696132659912
+    ],
+    "method": "device_busy = profiler self-time (graphed floor); eager_* = CUDA-event GPU-timeline span incl. launch idle; idle = eager - busy (attention-launch component only, LOWER bound on full step)"
+  },
+  "partD2_overlap_hidden": {
+    "M": 32,
+    "gemm_n": 2048,
+    "gemm_per_call": 1,
+    "filler_us_each": 284.34738333333354,
+    "target_per_layer_us": 247.28577506991874,
+    "gpu_nonattn_us_per_step": 10520.853183333342,
+    "device_busy_us": 11544.483323333241,
+    "eager_span_us": 11587.78564453125,
+    "exposed_idle_overlap_us": 43.30232119800894,
+    "per_call_idle_overlap_us": 1.170333005351593,
+    "method": "interleave a per-layer filler GEMM before each of the 37 attention calls; idle = eager span - device-busy floor = the attention-path eager penalty that survives realistic GEMM overlap (drafter/salvage Python NOT modeled)"
+  },
+  "step1_measured_step": {
+    "roofline_step": 1.2127483746822987,
+    "step_graphed_floor": 1.2127483746822987,
+    "step_overlap_central": 1.2181727676912677,
+    "step_isolation_high": 1.6312351985012687,
+    "idle_overlap_step_units": 0.005424393008969106,
+    "idle_isolation_step_units": 0.4184868238189701,
+    "idle_isolation_steady_us": 3340.7333930598743,
+    "idle_isolation_cold_us": 3374.653919564391,
+    "idle_overlap_us": 43.30232119800894,
+    "anchored": false,
+    "step_anchored": null,
+    "measured_depth9_step_time": 1.2181727676912677,
+    "delta_vs_roofline_abs": 0.0054243930089690195,
+    "delta_vs_roofline_pct": 0.4472809959766004,
+    "bracket_low_high": [
+      1.2127483746822987,
+      1.6312351985012687
+    ],
+    "bracket_note": "LOW = graphed floor (roofline, idle hidden); CENTRAL = overlap-survivor (realistic eager attn path); HIGH = no-overlap isolation (GPU-starved upper bound). The isolation corner strips the per-layer GEMM GPU work that hides the attention CPU dispatch -> over-states the idle."
+  },
+  "step2_recipes_at_step": {
+    "tax_full_central": 0.11204437266567233,
+    "tax_root_central": 0.00350138664580226,
+    "tax_full_conservative": 0.3918002223392572,
+    "tax_root_conservative": 0.012243756948101788,
+    "tax_reduction_root_vs_full": 32.0,
+    "by_step": {
+      "graphed_floor": {
+        "bf16_internal": {
+          "recipe_step": 1.2127483746822987,
+          "fp32_tax_step_units": 0.0,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.840617149792076,
+            "clear530_bar_et": 5.1310541787796,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 537.8446424154472
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.848860212152735,
+            "clear530_bar_et": 5.1397918248818995,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 536.930306523341
+          }
+        },
+        "root_row_central": {
+          "recipe_step": 1.216249761328101,
+          "fp32_tax_step_units": 0.00350138664580226,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.854592738297947,
+            "clear530_bar_et": 5.145868302595823,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 536.2962745486257
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.862859599617296,
+            "clear530_bar_et": 5.154631175594334,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 535.384570881893
+          }
+        },
+        "root_row_conservative": {
+          "recipe_step": 1.2249921316304004,
+          "fp32_tax_step_units": 0.012243756948101788,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.889487419254522,
+            "clear530_bar_et": 5.182856664409793,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 532.4689025167681
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.897813702548855,
+            "clear530_bar_et": 5.191682524701786,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 531.5637053824896
+          }
+        },
+        "full_fp32_central": {
+          "recipe_step": 1.324792747347971,
+          "fp32_tax_step_units": 0.11204437266567233,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 5.287835981979939,
+            "clear530_bar_et": 5.605106140898736,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 492.3564212037386
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 5.296840611018672,
+            "clear530_bar_et": 5.614651047679792,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 491.5194152876922
+          }
+        },
+        "full_fp32_conservative": {
+          "recipe_step": 1.6045485970215558,
+          "fp32_tax_step_units": 0.3918002223392572,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 6.404465772590348,
+            "clear530_bar_et": 6.788733718945769,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 406.51321943859637
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 6.415371904828557,
+            "clear530_bar_et": 6.80029421911827,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 405.82214696555076
+          }
+        }
+      },
+      "overlap_central": {
+        "bf16_internal": {
+          "recipe_step": 1.2181727676912677,
+          "fp32_tax_step_units": 0.0,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.862268310391079,
+            "clear530_bar_et": 5.154004409014544,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 535.4496777637918
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.8705482424031645,
+            "clear530_bar_et": 5.162781136947355,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 534.5394133115933
+          }
+        },
+        "root_row_central": {
+          "recipe_step": 1.22167415433707,
+          "fp32_tax_step_units": 0.00350138664580226,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.87624389889695,
+            "clear530_bar_et": 5.168818532830767,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 533.9150489558028
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.8845476298677255,
+            "clear530_bar_et": 5.177620487659789,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 533.0073933725779
+          }
+        },
+        "root_row_conservative": {
+          "recipe_step": 1.2304165246393695,
+          "fp32_tax_step_units": 0.012243756948101788,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.911138579853525,
+            "clear530_bar_et": 5.205806894644737,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 530.1214693228325
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.919501732799285,
+            "clear530_bar_et": 5.214671836767241,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 529.2202628249836
+          }
+        },
+        "full_fp32_central": {
+          "recipe_step": 1.33021714035694,
+          "fp32_tax_step_units": 0.11204437266567233,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 5.309487142578944,
+            "clear530_bar_et": 5.62805637113368,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 490.34867776992456
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 5.3185286412691015,
+            "clear530_bar_et": 5.637640359745248,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 489.51508501771565
+          }
+        },
+        "full_fp32_conservative": {
+          "recipe_step": 1.6099729900305249,
+          "fp32_tax_step_units": 0.3918002223392572,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 6.426116933189353,
+            "clear530_bar_et": 6.811683949180713,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 405.1435769171188
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 6.437059935078987,
+            "clear530_bar_et": 6.823283531183725,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 404.4548328363597
+          }
+        }
+      },
+      "measured": {
+        "bf16_internal": {
+          "recipe_step": 1.2181727676912677,
+          "fp32_tax_step_units": 0.0,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.862268310391079,
+            "clear530_bar_et": 5.154004409014544,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 535.4496777637918
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.8705482424031645,
+            "clear530_bar_et": 5.162781136947355,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 534.5394133115933
+          }
+        },
+        "root_row_central": {
+          "recipe_step": 1.22167415433707,
+          "fp32_tax_step_units": 0.00350138664580226,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.87624389889695,
+            "clear530_bar_et": 5.168818532830767,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 533.9150489558028
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.8845476298677255,
+            "clear530_bar_et": 5.177620487659789,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 533.0073933725779
+          }
+        },
+        "root_row_conservative": {
+          "recipe_step": 1.2304165246393695,
+          "fp32_tax_step_units": 0.012243756948101788,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 4.911138579853525,
+            "clear530_bar_et": 5.205806894644737,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": true,
+            "official_at_ceiling": 530.1214693228325
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 4.919501732799285,
+            "clear530_bar_et": 5.214671836767241,
+            "clears500_under_ceiling": true,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 529.2202628249836
+          }
+        },
+        "full_fp32_central": {
+          "recipe_step": 1.33021714035694,
+          "fp32_tax_step_units": 0.11204437266567233,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 5.309487142578944,
+            "clear530_bar_et": 5.62805637113368,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 490.34867776992456
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 5.3185286412691015,
+            "clear530_bar_et": 5.637640359745248,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 489.51508501771565
+          }
+        },
+        "full_fp32_conservative": {
+          "recipe_step": 1.6099729900305249,
+          "fp32_tax_step_units": 0.3918002223392572,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 6.426116933189353,
+            "clear530_bar_et": 6.811683949180713,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 405.1435769171188
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 6.437059935078987,
+            "clear530_bar_et": 6.823283531183725,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 404.4548328363597
+          }
+        }
+      },
+      "isolation_high": {
+        "bf16_internal": {
+          "recipe_step": 1.6312351985012687,
+          "fp32_tax_step_units": 0.0,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 6.510983846322012,
+            "clear530_bar_et": 6.901642877101334,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 399.8627644377724
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 6.522071367647013,
+            "clear530_bar_et": 6.9133956497058335,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 399.18299773822815
+          }
+        },
+        "root_row_central": {
+          "recipe_step": 1.634736585147071,
+          "fp32_tax_step_units": 0.00350138664580226,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 6.524959434827883,
+            "clear530_bar_et": 6.916457000917556,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 399.00631199382707
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 6.536070755111573,
+            "clear530_bar_et": 6.928235000418267,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 398.32800126343756
+          }
+        },
+        "root_row_conservative": {
+          "recipe_step": 1.6434789554493705,
+          "fp32_tax_step_units": 0.012243756948101788,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 6.559854115784458,
+            "clear530_bar_et": 6.953445362731525,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 396.88382608012637
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 6.571024858043131,
+            "clear530_bar_et": 6.965286349525719,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 396.20912357579016
+          }
+        },
+        "full_fp32_central": {
+          "recipe_step": 1.743279571166941,
+          "fp32_tax_step_units": 0.11204437266567233,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 6.958202678509877,
+            "clear530_bar_et": 7.375694839220469,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 374.16271417916624
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 6.970051766512949,
+            "clear530_bar_et": 7.388254872503725,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 373.52663756506166
+          }
+        },
+        "full_fp32_conservative": {
+          "recipe_step": 2.023035420840526,
+          "fp32_tax_step_units": 0.3918002223392572,
+          "central": {
+            "tau": 1.0,
+            "clear500_bar_et": 8.074832469120286,
+            "clear530_bar_et": 8.559322417267504,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 322.4215499152812
+          },
+          "taulow": {
+            "tau": 0.9983,
+            "clear500_bar_et": 8.088583060322835,
+            "clear530_bar_et": 8.573898043942206,
+            "clears500_under_ceiling": false,
+            "clears530_under_ceiling": false,
+            "official_at_ceiling": 321.8734332804252
+          }
+        }
+      }
+    }
+  },
+  "step3_knife_edge": {
+    "rootrow_clears_530_at_measured_step": 1,
+    "rootrow_clear530_bar_at_measured": 5.168818532830767,
+    "rootrow_clear530_bar_graphed": 5.145868302595823,
+    "rootrow_clear530_bar_overlap_central": 5.168818532830767,
+    "rootrow_clear530_bar_isolation_high": 6.916457000917556,
+    "rootrow_clears_530_graphed": 1,
+    "rootrow_clears_530_overlap": 1,
+    "rootrow_clears_530_isolation": 0,
+    "supply_ceiling_e_t": 5.207,
+    "full_fp32_clears_530_at_measured": 0,
+    "bf16_clears_530_at_measured": 1,
+    "realized_official_cross": {
+      "e_t_openevolve_2.621": {
+        "official_at_measured_step": 269.5244104895138,
+        "official_at_roofline": 270.72994195715137
+      },
+      "e_t_chiku_2.07": {
+        "official_at_measured_step": 212.86361301537332,
+        "official_at_roofline": 213.81571150374026
+      }
+    },
+    "note": "clears530 == clear-530 E[T] bar <= 5.207 supply ceiling. The oracle-measured E[T]=2.621 FAILS 500 at any of these steps; the bar question is conditional on a future build that fixes BUG-1/2."
+  },
+  "step4_operative_bar_shift": {
+    "clear500_bar_roofline": 4.840617149792076,
+    "clear500_bar_measured": 4.862268310391079,
+    "clear500_bar_overlap_central": 4.862268310391079,
+    "clear500_bar_isolation_high": 6.510983846322012,
+    "shift_vs_roofline": 0.021651160599003738,
+    "direction": "RISES (denominator bigger)",
+    "demand_floor_denken123": 4.624,
+    "clear500_bar_still_under_ceiling": true,
+    "handoff": "fern #129: replace the 1.2127-roofline clear-500 bar 4.841 with the measured-step bar; the eager star-attn denominator raises it (overlap-central is the realistic operative bar; isolation is the no-overlap pessimist). A graphed build (blocker #2) recovers the roofline bar."
+  },
+  "gate": {
+    "verdict": "AMBER",
+    "reason": "openevolve full-step wall_tps not yet returned; reporting the measured bracket [graphed, isolation] + operative-bar sensitivity. root-row clears 530 at overlap-central but NOT the no-overlap isolation pessimist; a graphed build recovers the roofline bar.",
+    "anchored": false,
+    "rootrow_clears_530_graphed": 1,
+    "rootrow_clears_530_overlap_central": 1,
+    "rootrow_clears_530_isolation_high": 0,
+    "materially_worse_than_roofline": false,
+    "rule": "GREEN = step ANCHORED (openevolve full-step wall_tps) AND root-row clears 530 at the measured step; AMBER = wall_tps pending, report bracket + bar sensitivity; RED = realistic overlap-central step is materially worse AND root-row clear-530 bar > 5.207 ceiling there"
+  },
+  "primary_metric": {
+    "name": "measured_depth9_step_time",
+    "value": 1.2181727676912677
+  },
+  "test_metric": {
+    "name": "rootrow_clears_530_at_measured_step",
+    "value": 1
+  },
+  "verdict": "AMBER",
+  "elapsed_s": 21.710493326187134,
+  "peak_gpu_gb": 0.25782528,
+  "wandb_run_id": "dzyf345a"
+}
