@@ -1,0 +1,251 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260614T215007Z",
+  "kind": "twoceiling-reconcile",
+  "nan_clean": true,
+  "peak_mem_mib": 27.18,
+  "pr": 235,
+  "synthesis": {
+    "composition": {
+      "K_cal": 125.26795005202914,
+      "baseline_tps": 481.53,
+      "f_priv_worstcase": 0.969106920637722,
+      "int4_spec_ceiling_tps": 520.9527323111674,
+      "int4_spec_et": 5.0661371742562835,
+      "mu_safe_fresh": 512.1570711713085,
+      "private_bar_52": 535.1394043205385,
+      "private_bar_worstcase": 528.4835555959945,
+      "rank1_coverage_top1": 0.7304444056147708,
+      "reach_dp_central_tps": 536.6590426143789,
+      "reach_dp_et": 5.21887717841078,
+      "reach_dp_lcb_tps": 525.7290377676009,
+      "step": 1.2182,
+      "target_official": 500.0,
+      "tau_central": 1.0
+    },
+    "feasibility": {
+      "bars": {
+        "empirical_52_535p14": 535.1394043205385,
+        "worstcase_528p48": 528.4835555959945
+      },
+      "ceilings": {
+        "int4_spec_520p95": 520.9527323111674,
+        "operative": 520.9527323111674,
+        "reach_dp_central_536p66": 536.6590426143789,
+        "reach_dp_lcb_525p73": 525.7290377676009
+      },
+      "rows": [
+        {
+          "ceiling": "reach_dp_central_536p66",
+          "ceiling_tps": 536.6590426143789,
+          "clears_empirical_52_535p14": true,
+          "clears_worstcase_528p48": true,
+          "margin_empirical_52_535p14_tps": 1.519638293840444,
+          "margin_worstcase_528p48_tps": 8.175487018384388
+        },
+        {
+          "ceiling": "reach_dp_lcb_525p73",
+          "ceiling_tps": 525.7290377676009,
+          "clears_empirical_52_535p14": false,
+          "clears_worstcase_528p48": false,
+          "margin_empirical_52_535p14_tps": -9.410366552937603,
+          "margin_worstcase_528p48_tps": -2.7545178283936593
+        },
+        {
+          "ceiling": "int4_spec_520p95",
+          "ceiling_tps": 520.9527323111674,
+          "clears_empirical_52_535p14": false,
+          "clears_worstcase_528p48": false,
+          "margin_empirical_52_535p14_tps": -14.186672009371023,
+          "margin_worstcase_528p48_tps": -7.530823284827079
+        },
+        {
+          "ceiling": "operative",
+          "ceiling_tps": 520.9527323111674,
+          "clears_empirical_52_535p14": false,
+          "clears_worstcase_528p48": false,
+          "margin_empirical_52_535p14_tps": -14.186672009371023,
+          "margin_worstcase_528p48_tps": -7.530823284827079
+        }
+      ]
+    },
+    "handoff_line": "the lane-a compliant kernel's operative \u03bb=1 ceiling is the int4-spec 520.95 (band [520.95, 536.66]; gap driver: the rank-1 coverage 0.7304 over-count / \u03c1-optimal-topology uplift that the determinism-only kernel does NOT deliver \u2014 #216), so stark #226's worst-case private bar 528.48 is INFEASIBLE for the compliant-500-private lane (528.48 \u2212 520.95 = +7.53) \u2014 the lane is public-milestone + post-hoc-defence ONLY, never private-500; the reach-DP 536.66 upper edge is a land #71 topology question, not a kernel one. Under #124 publish-first this sizes the defence packet + the #211 kernel-build ROI, NOT a launch gate (both ceilings clear the PUBLIC 500 regardless). NOT a launch. NOT open2.",
+    "headline": {
+      "bar_position_in_band": 0.4794775564371253,
+      "both_ceilings_clear_public_500": true,
+      "ceiling_gap_tps": 15.706310303211467,
+      "compliant_private_feasible_at_operative_ceiling": false,
+      "et_int4_implied": 5.0661371742562835,
+      "et_reach_implied": 5.21887717841078,
+      "feasible_vs_int4_spec_520": false,
+      "feasible_vs_reach_central_536": true,
+      "feasible_vs_reach_lcb_526": false,
+      "gap_step_tau_pct": 0.0,
+      "gap_topology_coverage_pct": 100.00000000000013,
+      "operative_band_low_high": [
+        520.9527323111674,
+        536.6590426143789
+      ],
+      "operative_basis": "int4_spec_520p95",
+      "operative_compliant_ceiling": 520.9527323111674,
+      "operative_verdict_stable_over_rank1_sweep": true,
+      "private_bar_minus_operative_ceiling": 7.530823284827079,
+      "private_bar_worstcase": 528.4835555959945,
+      "twoceiling_reconcile_self_test_passes": true
+    },
+    "imports": {
+      "machinery": "compliant_spec_et.et_via_reachdp (#175/#184 reach-DP) for the coverage sweep",
+      "provenance": "wirbel#199 wdyqnx3g (reach-DP ceiling 536.66/LCB 525.73, E[T] 5.21888, rank-1 0.7304) x #204/#220 pqjnybbf (int4-spec ceiling 520.95, E[T] 5.0662) x stark#226 tzcc5xuq (private_bar_worstcase 528.48, f_priv 0.969107, #52-floor bar 535.14) x #216 pc8g6s04 (kernel model: split-K fix = argmax-order not topology/coverage) x kanna#217 vgovdrjc (K_cal 125.268, step 1.2182, private-bar basis). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "operative_ceiling": {
+      "band_low_high": [
+        520.9527323111674,
+        536.6590426143789
+      ],
+      "band_width_tps": 15.706310303211467,
+      "bar_position_in_band": 0.4794775564371253,
+      "kernel_changes": "argmax-order (determinism) only; split-K reduction-order fix (#216)",
+      "kernel_does_not_change": "tree topology or rank-1 coverage (#216 verify-share 0.6066)",
+      "operative_basis": "int4_spec_520p95",
+      "operative_compliant_ceiling": 520.9527323111674,
+      "reasoning": "lane-a is a custom batch-invariant int4 verify kernel. #216's kernel model: the split-K reduction-order fix changes argmax-ORDER (makes verify-M argmax == AR-M=1 argmax \u21d2 greedy-valid) but NOT the tree topology or the rank-1 coverage. So the kernel inherits the SHIPPED stack's topology+coverage and only fixes determinism, hence its realized E[T](1) tracks the int4-spec ceiling 520.95 (E[T]=5.0662), NOT the optimistic reach-DP 536.66 (E[T]=5.21888). The reach-DP edge requires the \u03c1-optimal max-branch-3 topology AT full rank-1 coverage 0.7304 \u2014 a TOPOLOGY change that is draft/kernel-INDEPENDENT and belongs to land #71, and #199's own caveat is that the 0.7304 rank-1 ladder OVER-COUNTS true compliant accept (the rankprobe true token is the batch-VARIANT argmax). Therefore the defensible operative ceiling for lane-a's private \u03bc at \u03bb=1 is the int4-spec 520.95; the band [520.95, 536.66] is carried with its upper edge flagged as a land #71 topology question, NOT a kernel question (no kernel, however perfect, lifts the ceiling past 520.95 without the topology/coverage uplift).",
+      "residual_is_land71_topology_question": true
+    },
+    "pin_ceilings": {
+      "ceiling_gap_tps": 15.706310303211467,
+      "composition_formula": "mu = K_cal * (E[T](1)/step) * tau ; K_cal=125.268, step=1.2182, tau=1",
+      "delta_et": 0.15274000415449684,
+      "dual_sensitivity_fixed_et": {
+        "note": "NOT the banked reading. If E[T] were pinned at the reach-DP 5.21888 (the PR prose 'E[T]=5.219'), the same 15.71 TPS would re-attribute to a slower int4 deployed step. Both artifacts bank the ceiling at step=1.2182, so the operative attribution is topology/coverage (E[T]), not step.",
+        "step_inflation_pct_if_et_fixed": 3.0149204196572077,
+        "step_int4_if_et_fixed": 1.254927760552264
+      },
+      "et_int4_banked_220": 5.0661371742562835,
+      "et_int4_implied": 5.0661371742562835,
+      "et_int4_resid_vs_banked": 0.0,
+      "et_reach_banked_199": 5.21887717841078,
+      "et_reach_implied": 5.21887717841078,
+      "et_reach_resid_vs_banked": 0.0,
+      "gap_attribution": {
+        "residual_tps": -2.1316282072803006e-14,
+        "step_tau_pct_of_gap": 0.0,
+        "step_tau_tps": 0.0,
+        "topology_coverage_pct_of_gap": 100.00000000000013,
+        "topology_coverage_tps": 15.706310303211488
+      },
+      "int4_spec_ceiling_tps": 520.9527323111674,
+      "note_pr_5p219": "the PR-quoted 'int4-spec E[T]=5.219' equals the reach-DP/both-bugs E[T] 5.21888, NOT the int4-spec ceiling's implied E[T]; at the shared deployed step=1.2182 the int4-spec ceiling 520.95 implies E[T]=5.0662 (#220 int4_anchor_et1), so the 15.71 TPS gap is the E[T]/coverage difference.",
+      "reach_dp_central_tps": 536.6590426143789,
+      "reach_dp_lcb_tps": 525.7290377676009
+    },
+    "publish_first_framing": {
+      "both_ceilings_clear_public_500": true,
+      "int4_spec_margin_over_public_500": 20.952732311167438,
+      "publish_first_124": "under #124 publish-first the PRIVATE bar is a POST-HOC DEFENCE measure, NOT a pre-launch gate. So this verdict sizes the DEFENCE PACKET's compliant-lane viability and the human's #211 kernel-build ROI \u2014 it is not a launch blocker. The PUBLIC lane is unaffected: BOTH ceilings clear the public 500 milestone (int4-spec +20.95, reach-DP +36.66), so the public-milestone case for the batch-invariant kernel stands regardless; only the PRIVATE-500 route is in question.",
+      "reach_dp_margin_over_public_500": 36.659042614378905
+    },
+    "rank1_coverage_sweep": {
+      "base_top1": 0.7304444056147708,
+      "note": "the operative (int4-spec 520.95) ceiling is the DEPLOYED bound and is invariant to the optimistic rank-1 ladder; only the reach-DP UPPER edge moves with coverage. Across [0.70, 0.74] the worst-case bar 528.48 stays INFEASIBLE vs the operative ceiling, and would clear the reach-DP edge only above rank-1 coverage ~0.7253.",
+      "operative_ceiling_invariant_to_coverage": true,
+      "operative_verdict_stable_over_sweep": true,
+      "provenance_resid_vs_banked_5p21888": 0.0,
+      "rank1_coverage_reach_edge_equals_worstcase_bar": 0.7253035106247918,
+      "reach_dp_edge_et_at_base": 5.21887717841078,
+      "sweep_rows": [
+        {
+          "band_low_high": [
+            520.9527323111674,
+            491.23713602192424
+          ],
+          "operative_ceiling_tps": 520.9527323111674,
+          "rank1_coverage_top1": 0.7,
+          "reach_dp_edge_et": 4.777160309986366,
+          "reach_dp_edge_tps": 491.23713602192424,
+          "worstcase_bar_feasible_vs_operative": false,
+          "worstcase_bar_feasible_vs_reach_edge": false
+        },
+        {
+          "band_low_high": [
+            520.9527323111674,
+            505.3868583595925
+          ],
+          "operative_ceiling_tps": 520.9527323111674,
+          "rank1_coverage_top1": 0.71,
+          "reach_dp_edge_et": 4.914762879075971,
+          "reach_dp_edge_tps": 505.3868583595925,
+          "worstcase_bar_feasible_vs_operative": false,
+          "worstcase_bar_feasible_vs_reach_edge": false
+        },
+        {
+          "band_low_high": [
+            520.9527323111674,
+            520.2735155623592
+          ],
+          "operative_ceiling_tps": 520.9527323111674,
+          "rank1_coverage_top1": 0.72,
+          "reach_dp_edge_et": 5.059531958452443,
+          "reach_dp_edge_tps": 520.2735155623592,
+          "worstcase_bar_feasible_vs_operative": false,
+          "worstcase_bar_feasible_vs_reach_edge": false
+        },
+        {
+          "band_low_high": [
+            520.9527323111674,
+            536.6590426143789
+          ],
+          "operative_ceiling_tps": 520.9527323111674,
+          "rank1_coverage_top1": 0.7304444056147708,
+          "reach_dp_edge_et": 5.21887717841078,
+          "reach_dp_edge_tps": 536.6590426143789,
+          "worstcase_bar_feasible_vs_operative": false,
+          "worstcase_bar_feasible_vs_reach_edge": true
+        },
+        {
+          "band_low_high": [
+            520.9527323111674,
+            535.9436951031445
+          ],
+          "operative_ceiling_tps": 520.9527323111674,
+          "rank1_coverage_top1": 0.73,
+          "reach_dp_edge_et": 5.2119205998300355,
+          "reach_dp_edge_tps": 535.9436951031445,
+          "worstcase_bar_feasible_vs_operative": false,
+          "worstcase_bar_feasible_vs_reach_edge": true
+        },
+        {
+          "band_low_high": [
+            520.9527323111674,
+            552.4469511727326
+          ],
+          "operative_ceiling_tps": 520.9527323111674,
+          "rank1_coverage_top1": 0.74,
+          "reach_dp_edge_et": 5.372410705524445,
+          "reach_dp_edge_tps": 552.4469511727326,
+          "worstcase_bar_feasible_vs_operative": false,
+          "worstcase_bar_feasible_vs_reach_edge": true
+        }
+      ]
+    },
+    "self_test": {
+      "conditions": {
+        "a_both_ceilings_roundtrip_banked_mu_from_et": true,
+        "b_ceiling_gap_tps_equals_536_minus_520_within_0p01": true,
+        "c_stark226_feasible_vs_536_true_and_vs_526_false_reproduced": true,
+        "d_feasible_at_operative_consistent_with_bar_le_ceiling": true,
+        "e_feasibility_monotone_in_ceiling": true,
+        "f_nan_clean": true
+      },
+      "detail": {
+        "feasible_at_operative": false,
+        "feasible_vs_526": false,
+        "feasible_vs_536": true,
+        "roundtrip_int4_tps_err": 0.0,
+        "roundtrip_reach_tps_err": 0.0,
+        "stark226_bar_roundtrip_err": 0.0
+      },
+      "twoceiling_reconcile_self_test_passes": true
+    },
+    "verdict": "OPERATIVE-INT4SPEC-520p95-COMPLIANT-PRIVATE-500-INFEASIBLE"
+  }
+}
