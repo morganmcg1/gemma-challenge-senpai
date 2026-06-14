@@ -1,0 +1,140 @@
+{
+  "pr": 204,
+  "metric_primary": "unit_rebase_self_test_passes",
+  "metric_test": "mu_clears_500_clean_central",
+  "unit_rebase_self_test_passes": true,
+  "mu_clears_500_clean_central": 512.4101095400661,
+  "mu_clears_500_clean_worstcase": 514.6346173476741,
+  "combined_sigma_launch_clean_central": 7.544810879656575,
+  "combined_sigma_launch_clean_worstcase": 8.897215598932974,
+  "delta_mu_rebase_central": -7.68231401918888,
+  "does_lambda1_clear_500_at_p95_centrally": "YES",
+  "rebase_direction_matches_prediction": false,
+  "anchor_err_195_dedup": 0.0,
+  "anchor_err_194_breakeven": 0.0,
+  "law": "acc is a 95%-two-sided HALF-WIDTH (z2=1.95996); clean 1-sigma = acc/z2; sigma_launch_clean = hypot(acc/z2, sigma_hw, sigma_private)[+rho]; LCB(mu) = mu - z1*sigma_launch_clean; GO trigger = 500 + z1*sigma_launch_clean.",
+  "imported_legs_201": {
+    "acc_iid_halfwidth": 5.318696881534334,
+    "acc_realistic_halfwidth": 11.170041411611011,
+    "sqrt_design_effect": 2.1001462689839707,
+    "sigma_hw": 4.864468814937121,
+    "sigma_private": 0.8839182724133238,
+    "combined_201_central": 12.215326172514054,
+    "mu_201_central": 520.0924235592549,
+    "mu_201_worstcase": 522.6918215638796,
+    "lambda1_ceiling": 520.9527323111674,
+    "mu_break_even_194": 512.15707117161,
+    "z95_two_sided_194_confirms_footing": 1.959963984540054
+  },
+  "leg_footing_audit": {
+    "acceptance": {
+      "value": 11.170041411611011,
+      "footing": "halfwidth_95_two_sided",
+      "z_applied": 1.959963984540054,
+      "needs_rebase": true,
+      "clean_1sigma": 5.6991054426095955,
+      "provenance": "#175 'wirbel #175 et_second_moment tps_finite_sample_ci_halfwidth (both-bugs, B=16384, z=1.96)' -> #187 overlap-corrected de-dup of h_in(3.710 HW)+h_out(5.178 HW) = 5.31870 HW (iid) -> #190 sqrt(D)=2.100 (DIMENSIONLESS ratio, footing-preserving) -> 11.17004 HW (realistic). The footing was set by #175's z=1.96 CI and never divided out."
+    },
+    "hardware": {
+      "value": 4.864468814937121,
+      "footing": "one_sigma",
+      "z_applied": 1.0,
+      "needs_rebase": false,
+      "clean_1sigma": 4.864468814937121,
+      "provenance": "kanna #188 sigma_oneshot = hypot(within, between) -- a standard deviation; #194 labels it 'sigma_hw_1sigma_tps' = 4.864469. Already 1-sigma."
+    },
+    "private": {
+      "value": 0.8839182724133238,
+      "footing": "one_sigma_per_instruction",
+      "z_applied": 1.0,
+      "needs_rebase": false,
+      "clean_1sigma": 0.8839182724133238,
+      "provenance": "stark #176/#191 drop CI mapped to TPS. PR instruction 3 fixes this leg at 1-sigma. NOTE (honest flag): #195 derives it as drop_halfwidth_pp(0.17)*slope, so IF the underlying drop CI is 95%-two-sided this leg would also carry a half-width footing; re-basing it (/z2 -> 0.451) moves the clean central trigger by < 0.06 TPS (negligible vs the acceptance leg's 7.68 TPS) and does NOT change the verdict -- see private_footing_sensitivity."
+    },
+    "_mixed_basis_diagnosis": "MIXED: acceptance on a 95%-two-sided HALF-WIDTH footing (z2=1.95996) vs hardware/private on 1-sigma; #201 quadrature-summed them and applied z1=1.64485 in LCB(mu)=mu-z1*sigma. The acceptance leg's z2 is thereby never divided out -> its contribution to the LCB shift is over-stated by a factor of z2 (~1.96x). The fix: divide the acceptance half-width by z2 to a clean 1-sigma.",
+    "_crux_acceptance_5p3187_is_a_halfwidth": true
+  },
+  "conventions_self_consistency_demo": {
+    "convention_A_lcb": 487.58988320783385,
+    "convention_B_lcb": 487.58988320783385,
+    "abs_err": 0.0,
+    "identical": true,
+    "sigma_comb_A": 7.544815288620391,
+    "halfwidth_comb_B": 12.410116792166168,
+    "note": "hypot is 1-homogeneous: hypot(z*sigma_i) = z*hypot(sigma_i), so A and B coincide exactly WHEN the SAME z links HW_i=z*sigma_i. #201 violated this by carrying one leg's HW on z2 while the LCB used z1 -- a third, inconsistent basis."
+  },
+  "clean_trigger": {
+    "acceptance_1sigma_clean": 5.6991054426095955,
+    "combined_sigma_launch_clean_central": 7.544810879656575,
+    "combined_sigma_launch_clean_worstcase": 8.897215598932974,
+    "mu_clears_500_clean_central": 512.4101095400661,
+    "mu_clears_500_clean_worstcase": 514.6346173476741,
+    "lambda1_ceiling_mu": 520.9527323111674,
+    "delta_mu_rebase_central": -7.68231401918888,
+    "delta_mu_rebase_worstcase": -8.057204216205491,
+    "clean_central_vs_ceiling": "BELOW",
+    "clean_worstcase_vs_ceiling": "BELOW",
+    "central_headroom_below_ceiling_tps": 8.542622771101378,
+    "worstcase_headroom_below_ceiling_tps": 6.318114963493372,
+    "lambda1_clears_500_clean_central": true,
+    "lambda1_clears_500_clean_worstcase": true,
+    "does_lambda1_clear_500_at_p95_centrally": "YES",
+    "private_footing_sensitivity": {
+      "mu_central_if_private_also_halfwidth": 512.3469520555375,
+      "shift_vs_primary_tps": -0.06315748452857406,
+      "note": "negligible; does not change the verdict"
+    }
+  },
+  "direction_reconciliation": {
+    "predicted_shift_tps": 3.1368703585045323,
+    "predicted_direction": "more_conservative_trigger_UP",
+    "actual_shift_tps": -7.68231401918888,
+    "actual_direction": "less_conservative_trigger_DOWN",
+    "rebase_direction_matches_prediction": false,
+    "mechanism_note": "SIGN BACKWARDS. The sigma_hw*(z-1) heuristic assumed the fix bumps the SMALL hardware/private legs UP to the acceptance leg's footing (more conservative). But the mis-based leg is the DOMINANT acceptance leg (11.170, a z2 half-width), and the clean fix DIVIDES it DOWN by z2 to 5.699 (1-sigma). Acceptance dominates the quadrature, so the combined sigma SHRINKS 12.215 -> 7.545 and the trigger DROPS by 7.68 TPS. The heuristic had the wrong leg (hw, not acceptance), the wrong direction (up, not down), and ~2.4x the wrong magnitude."
+  },
+  "anchors": {
+    "anchor_err_195_dedup": 0.0,
+    "anchor_repro_195_dedup_tps": 7.261742551305779,
+    "anchor_target_195_dedup_tps": 7.261742551305779,
+    "anchor_err_194_breakeven": 0.0,
+    "anchor_repro_194_breakeven_tps": 512.15707117161,
+    "anchor_repro_194_sigma_draw_tps": 7.390974474817942,
+    "anchor_target_194_breakeven_tps": 512.15707117161,
+    "anchor_194_note": "#194 uses the UN-de-duped sampling axis (10.906 HW -> 5.5645 1-sigma); the de-duped LAUNCH acceptance axis (5.31870 HW -> 2.71367 1-sigma) is a DIFFERENT, smaller quantity. The anchor validates that the clean z-convention + LCB map (mu=500+z1*sigma_1sigma) survive the rebase, which is exactly what #201's combined sigma violated on its acceptance leg."
+  },
+  "self_test": {
+    "unit_rebase_self_test_passes": true,
+    "checks": {
+      "a_convention_A_equals_B": true,
+      "b_single_leg_reduces_to_textbook_p95": true,
+      "c_rebase_idempotent_on_all_1sigma": true,
+      "d_194_break_even_survives_rebase": true,
+      "e_worstcase_ge_central": true,
+      "f_nan_clean": true
+    },
+    "evidence": {
+      "a_conv_AB_err_central": 0.0,
+      "a_conv_AB_err_rho_corner": 0.0,
+      "b_single_leg_lcb_machine_tps": 490.6258057423447,
+      "b_single_leg_lcb_textbook_tps": 490.6258057423447,
+      "c_idempotent": true,
+      "d_anchor_err_194_tps": 0.0,
+      "anchor_err_195_dedup": 0.0,
+      "anchor_err_194_breakeven": 0.0,
+      "n_scalars_checked": 18
+    }
+  },
+  "handoff": "fern #185: after clean-1-sigma rebase the launch GO trigger is mu >= 512.41 central / 514.63 worst-case (Delta -7.68 vs #201's 520.09); lambda=1 (ceiling 520.95) DOES clear 500 at P95 centrally (headroom +8.54) and even worst-case (+6.32); fern should wire THIS clean trigger, and the only remaining lever to close the central<->worst-case gap is land #71's co-log (n=385) retiring rho(*,hw).",
+  "scope": "Pure CPU-only unit re-basing over ubel's banked #201 launch-sigma curve: re-foots the mixed-basis combined launch sigma onto a single clean 1-sigma footing (#194 convention), re-solves the GO trigger, reports its signed direction vs the lambda=1 ceiling 520.95. Takes NO official draws, authorizes none. BASELINE stays 481.53; adds 0 TPS; greedy identity untouched. The rho(*,hw) [-0.3,+0.3] band still needs land #71's co-log (separate lever). NOT a launch.",
+  "public_evidence_used": [
+    "ubel #201 (spau6tch, MERGED) launch_sigma_closure: the combined launch sigma 12.2153 central / 13.7956 worstcase, mu_clear 520.09/522.69, mixed half-width/1-sigma basis -- the curve re-based here.",
+    "ubel #194 (redraw_budget): the EXPLICIT clean-1-sigma decomposition sigma_sample_1sigma = 10.906 / z95_two_sided(1.95996) = 5.5645, break-even 512.157 = 500 + z1(1.64485)*7.391 -- the convention-A anchor proving the #175 sampling axis is a z=1.96 half-width.",
+    "ubel #195 (3658ncbe) ci_axis_covariance: the #175 sampling axis source string 'tps_finite_sample_ci_HALFWIDTH (both-bugs, B=16384, z=1.96)' and denken #187's overlap-corrected de-dup (h_in/h_out half-widths) -> the acceptance leg's half-width lineage.",
+    "wirbel #190 (fva6o4ug) icc_neff: sqrt(design_effect)=2.100 is a DIMENSIONLESS halfwidth-ratio (22.905 HW / 10.906 HW) -> footing-preserving, so the realistic acceptance leg inherits #175's half-width footing."
+  ],
+  "method": "LOCAL CPU-only analytic unit re-basing over EXISTING MERGED results; no GPU/vLLM/HF Job/submission/served-file change. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT a launch.",
+  "convention_note": "Clean convention A (#194): every leg a 1-sigma; a 95%-two-sided CI half-width is z2*sigma so 1-sigma = HW/z2; LCB(mu) = mu - z1*sigma_combined (z1 one-sided P95). Convention B (all-half-width, #190) gives the IDENTICAL LCB when the same z links HW=z*sigma. #201 carried the acceptance leg on z2 but applied z1 -- a third, inconsistent basis.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0012
+}
