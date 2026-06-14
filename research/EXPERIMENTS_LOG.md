@@ -1,5 +1,26 @@
 # SENPAI Research Results
 
+## 2026-06-14 11:24 — PR #136: Measured step-anchor for the depth-9 verify step + selective-root-row re-price — 🟡 AMBER / denominator FIRM at ~roofline (+0.45%); root-row clears 530 at measured step — MERGED (bank-the-analysis)
+
+- **Branch:** `lawine/fp32-step-anchor` · **Student:** lawine · merged 11:24Z (LOCAL A10G roofline + isolation/interleaved micro-bench, 0.258 GB peak / 22 s — no HF Job, no submission, no kernel build; BASELINE unchanged 481.53). W&B `dzyf345a` (group `fp32-step-anchor`).
+- **Primary:** `measured_depth9_step_time=1.2182` (+0.45% vs the 1.2127 roofline). **Test:** `rootrow_clears_530_at_measured_step=1`.
+- **Key finding (load-bearing methodology catch):** the eager star-attn launch idle (37 `attn_py_calls/step`) is **hidden behind per-layer GEMM GPU work** — the step is GPU-bound and the hot path is sync-free, so the CPU pipelines launches ahead. Isolation bench (90.3 µs/call → 3.34 ms/step, +34.5%) vs interleaved-with-filler-GEMM (1.17 µs/call → 43 µs/step, +0.45%) disagree ~80×; **an isolation-only measurement would have reported a misleading RED.** Operative clear-500 bar moves only **4.841 → 4.862** (graphed verify recovers 4.841 exactly). Selective root-row recipe clears 530 (5.169 bar, 0.038 E[T] + 2.7× idle-budget margin); full fp32 upcast still cannot (consistent with #131). Realized-official cross: oracle E[T]=2.621 → 269.5 (≈271 ✓), chiku-inu E[T]=2.07 → 212.9.
+- **Conclusion:** the step-time **denominator** every fleet 500-verdict divides by is firm at ~roofline; the binding lever is confirmed to be the **numerator** (BUG-2 descent / BUG-1 spine), not the step. AMBER only because openevolve's full-step `wall_tps` had not yet landed (board request `20260614-111141-880` posted; re-run flips AMBER→GREEN). The one un-measured remainder — the drafter+salvage-walk Python control flow — is now lawine → #143 (salvage-walk Python-overhead probe).
+
+## 2026-06-14 11:10 — PR #135: BUG-2 salvage-descent root-cause — 🟢 GREEN / descent (BUG-2) is the DOMINANT ceiling, 19.3× BUG-1 — MERGED (bank-the-analysis)
+
+- **Branch:** `wirbel/bug2-salvage-descent` · **Student:** wirbel · merged 11:10Z (LOCAL E[T]-DP decomposition — no GPU run, no HF launch; BASELINE unchanged 481.53). W&B `2n3bhhfz`.
+- **Primary:** `bug2_et_recovery=2.4203` (descent-only fix → E[T] +2.42). **Test:** `bug2_is_dominant_ceiling=1`.
+- **Key finding (independent of fern #134's method, same verdict):** E[T]-DP decomposition of the measured oracle ladder. Descent-only fix → **E[T] 5.041** (clears the 4.841 bar by itself); spine-only fix → 2.746 (fails). **BUG-2 / BUG-1 = 19.3×.** Step-1 reconstructs the oracle's E[T]=2.621 from the measured per-position ladder with residual 0, and pins the 391/1024 salvages at +0.077 (2.9% of E[T]) — they fire but do not descend.
+- **Conclusion:** the descending accept walk is the whole 500-game; the depth-1 spine (0.679 vs 0.7287) is only the secondary margin. Converges exactly with fern #134's official-TPS matrix (522 descent-only). Hand-off: land #71 builds the descent walk; denken #133 owns the (now-demoted) BUG-1 spine.
+
+## 2026-06-14 11:10 — PR #134: Live oracle readout — measured E[T]=2.621 → official-TPS go/no-go + bug-fix recovery matrix — 🟢 GREEN / tree LIVES iff BOTH bugs fixed — MERGED (bank-the-analysis)
+
+- **Branch:** `fern/oracle-live-readout` · **Student:** fern · merged 11:10Z (LOCAL analytic over the openevolve oracle readout — no GPU run, no HF launch; BASELINE unchanged 481.53). W&B `3mp2vtup`.
+- **Primary:** `measured_official_tps_as_built=270.73` (the live oracle's as-built tree fails 500 by a wide margin). **Test:** `tree_clears_500_at_both_bugs_fixed=1`.
+- **Key finding (official-TPS recovery matrix, depth-9 step 1.2127):** as-built 270.7 ❌ · BUG-1-spine-only fix 283 ❌ · **BUG-2-descent-only fix 522.3 ✅ (E[T] 5.056)** · both-bugs-fixed 537.8 ✅. **Descent-only clears 500 even with the depth-1 spine left broken.**
+- **Conclusion:** double-confirms (with wirbel #135's independent E[T]-DP) that the descending accept walk is the decisive 500-lever; the spine is only the 522→538 margin. Feeds the measured-M16→official gate (fern → #142 measured-M16 → official 500-shot go/no-go gate).
+
 ## 2026-06-14 10:50 — PR #132: Q-Palette sub-4-bit weights — 🔴 CLOSED (sub-4-bit architecturally impossible on sm_86/vLLM-0.22; Step-1 gate kill; kanna → #138 K-sweep block64)
 
 - **Branch:** `kanna/qpalette-sub4bit` · **Student:** kanna · CLOSED terminal, ~10:50Z (LOCAL CPU code-inspection + literature scan — no GPU, no HF launch; BASELINE unchanged 481.53). W&B `g8dgvmkd` (state=finished, primary `qpalette_projected_official_tps=481.53`, test `qpalette_servable_and_clears_500=0`).
