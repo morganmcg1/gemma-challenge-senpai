@@ -1,5 +1,40 @@
 # SENPAI Research Results
 
+## 2026-06-14 05:30 — PR #90: MTP draft-length K sweep — empirical wall_tps confirmation of K=7 optimality ✅ MERGED — GREEN / CONFIRM (clean inverted-U, K=7 wins outright; locks 454.338 linear-chain reference; retires the ±4.4% fragile-estimator caveat)
+
+- **Branch:** `lawine/mtp-k-sweep` · **Student:** lawine · merged ~05:30Z (confirms deployed config; BASELINE unchanged)
+- **Hypothesis:** the deployed MTP draft length K=7 was chosen under a fragile (±4.4%) estimator. Re-measure wall_tps vs K on the robust #82 paired-A/B meter (median N=3) to confirm K=7 or find a free config win.
+- **Primary metric:** `mtp_k_optimal_wall_tps = 454.338` (K=7). **Test:** `mtp_k7_confirmed_optimal_bool = 1`.
+
+| K | median wall_tps | Δ% vs K=7 | verdict | E[accept] tok/step |
+|---|---|---|---|---|
+| 5 | 438.412 | −3.505% | REAL regression | 3.4902 |
+| 6 | 451.047 | −0.724% | REAL regression | 3.7160 |
+| **7 (ref)** | **454.338** | — | REF | **3.8555** |
+| 8 | 440.282 | −3.094% | REAL regression | 3.9720 |
+| 9 | 440.784 | −2.983% | REAL regression | 4.0794 |
+
+- **Verdict — GREEN / CONFIRM.** Clean inverted-U peaking at the deployed K=7; every non-K7 arm is a REAL regression by 7-35× the MDE. E[accept] rises monotonically (3.49→4.08) with **diminishing increments** (+0.226, +0.140, +0.117, +0.107) — more draft tokens buy more accepted tokens/step but past K=7 the marginal acceptance no longer repays the per-step drafter+verify cost. This **directly confirms denken #51's analytic K\*≈7** on the robust meter and **retires the ±4.4% fragile-estimator caveat** the original finding carried (fresh K=7 E[accept]=3.8555 matches deployed E[T]=3.844, +0.3%). No free config win (K=7 already deployed → BASELINE unchanged). **Banks `454.338` as the locked linear-chain reference for land #71's tree-verify gain measurement** (now consumed by lawine #99 projection calibration).
+- **W&B:** `vz5whvxs / 7ven5w5b / bvms4yto / ela8jaqt`. **Next:** lawine → #99 (local→official projection calibration + tree-A/B harness readiness).
+
+## 2026-06-14 05:30 — PR #93: Star-attention greedy-equivalence gate — does the tree-mask numerical path preserve greedy argmax? 🔴 RED — MERGED (relerr 1e-3 is NOT greedy-safe; land #71 must run star-attn in fp32 before quota; banks the attention-side flip-sweep harness)
+
+- **Branch:** `wirbel/star-attn-greedy-gate` · **Student:** wirbel · merged ~05:30Z (analysis-only, BASELINE unchanged)
+- **Hypothesis:** land #71's tree-mask star-attention path was validated externally only to relerr ~1e-3. Is that enough to preserve the greedy argmax? Map the final-logit margin, perturb the attention output at star-attention magnitude, count greedy flips. The attention-side twin of kanna #87's GEMM gate.
+- **Primary metric:** `greedy_flip_rate_at_1e3 = 0.5927%`. **Test:** `min_greedy_margin_p1 = 0.001965` (1st-pct relative margin).
+
+| metric | value | read |
+|---|---|---|
+| `greedy_flip_rate_at_1e3` (bf16/deployed argmax) | **0.593%** | RED (>0) |
+| noise floor (clean-vs-clean, bf16 & fp32) | **0.0** | control — every flip is perturbation-attributable |
+| flip rate ε=1e-4 / 1e-3 / 1e-2 | 0.597 / 0.593 / 0.734% | **flat 1e-4→1e-3** |
+| fp32 relative-margin median | 0.1795 (18%) | safe bulk |
+| frac rel-margin < 1e-3 | **0.537%** | the near-tie flip-risk set (+ tail-fp32-hybrid target) |
+| fp32 exact ties | 0.00% | no genuine ties; risk is bf16-cast-thin tail |
+
+- **Verdict — RED → HARD PRE-QUOTA CONSTRAINT.** A star-attention-magnitude perturbation at relerr 1e-3 flips **0.59% of greedy tokens**; the clean-vs-clean noise floor is provably **0.0**, so relerr 1e-3 is **DISQUALIFYING** under the greedy-identity gate. **land #71 must run the star-attention accumulation in fp32 (or prove bit-exactness) before any quota spend** — relayed to #71 as a hard gate (kanna #87 cleared the GEMM side, #93 constrains the ATTENTION side). The margin is bimodal: a safe bulk (median rel-margin 18%) plus a thin near-tie tail (0.537% < 1e-3) that is the entire flip-risk set. **Banks the 65,536-position margin map + per-row attention flip-sweep harness** so land can re-verify 0 flips after implementing fp32 star-attn.
+- **W&B:** `ut6a94qa`. **Next:** wirbel → #98 (fp32 star-attn COST gate — does the mandated fp32 erode the tree's +18.2%, or recompute fp32 only on the 0.537% tail?).
+
 ## 2026-06-14 05:22 — PR #94: Draft-verify overlap gate — can the drafter be hidden behind verify on a BW-bound A10G? ✅ MERGED — AMBER / OVERLAP LANE CLOSED (single-GPU conc=1; banks the reusable A10G dual-stream contention probe + `bus_contention_factor=0.506`)
 
 - **Branch:** `denken/draft-verify-overlap-gate` · **Student:** denken · merged ~05:22Z (analysis-only, BASELINE unchanged)
