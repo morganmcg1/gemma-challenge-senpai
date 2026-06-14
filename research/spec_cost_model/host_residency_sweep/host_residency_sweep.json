@@ -1,0 +1,479 @@
+{
+  "pr": 163,
+  "utc": "2026-06-14T14:21:45Z",
+  "lane": "descent decode-path host-residency / graph-capturability + net step",
+  "anchors_consumed": {
+    "k_cal": 125.26795005202914,
+    "step_m8_us": 7982.887878221502,
+    "measured_step_136": 1.2182,
+    "anchor_step_us": 9724.754013249434,
+    "clear500_bar_measured": 4.862377006624717,
+    "e_t_descent_fix": 5.04,
+    "e_t_both_bugs": 5.207,
+    "e_t_tree_ceiling": 5.207,
+    "oracle_salvage_rate": 0.3818359375,
+    "pr154": {
+      "avoidable_us_m32_realistic": 111.86517397562665,
+      "avoidable_us_m32_conservative": 86.56469504038495,
+      "bar_realistic": 4.808,
+      "bar_conservative": 4.82
+    },
+    "pr157": {
+      "vectorized_us_per_step": 35.29305631881623,
+      "paged_us_per_step": 20.26,
+      "hostloop_us_per_step": 55457.40637081948,
+      "vectorized_bar": 4.880023534784125,
+      "hostloop_bar": 32.591080192034454,
+      "equivalence_rate": 1.0
+    },
+    "pr147": {
+      "sync_free_step_inflation_pct": 0.39159715612748974,
+      "sync_bound_step_inflation_pct": 2.202,
+      "gpu_hidden": 1,
+      "terminal_sync_in_anchor": true
+    },
+    "pr161_both_bugs_step_delta_pct_armed": null
+  },
+  "config": {
+    "pr154_mode": "realistic",
+    "no_probe": false
+  },
+  "inventory": [
+    {
+      "op": "drafter_propose_loop",
+      "site": "submissions/fa2sw_precache_kenyan/sitecustomize.py:158-203 _run_graph_body (captured via _capture_graph:233-248; ONEGRAPH/LOOPGRAPH)",
+      "trigger": "every step (drafter proposes K=num_speculative_tokens width-1 tokens)",
+      "host_residency_class": [
+        "none"
+      ],
+      "per_fire_cost_class": "CAPTURED (CUDA-graph replay, launch-free)",
+      "owner": "clean",
+      "status": "CLEAN(captured)",
+      "rationale": "for index in range(token_count) is a STATIC Python loop (token_count=self.num_speculative_tokens, a fixed config int -> fixed trip count). Body is device .copy_ + model forward + get_top_tokens; NO .item()/.cpu(). Captured.",
+      "greedy_safe_design": "n/a (already captured)"
+    },
+    {
+      "op": "target_verify_forward",
+      "site": "vLLM gpu_model_runner cudagraph (42 layers, M=32 int4-Marlin GEMM + star-attn); lawine #136 gemm_all_graphed=true",
+      "trigger": "every step (verify the K drafted tokens)",
+      "host_residency_class": [
+        "none"
+      ],
+      "per_fire_cost_class": "CAPTURED (the 1.2182 GPU-floor step itself)",
+      "owner": "clean",
+      "status": "CLEAN(captured)",
+      "rationale": "the verify GEMMs are graph-captured (gemm_all_graphed); the eager star-attn launch idle is GPU-hidden behind per-layer GEMM (#136). This IS the anchor step.",
+      "greedy_safe_design": "n/a (already captured)"
+    },
+    {
+      "op": "compute_logits_scatter_LP",
+      "site": "submissions/fa2sw_precache_kenyan/serve_patch_pck04.py:335-342 compute_logits_pck04 -> _scatter_to_full_vocab:113-168 (index_copy_ [M,12288]->[M,262144]) + LogitsProcessor",
+      "trigger": "every step (greedy token selection over the verify logits)",
+      "host_residency_class": [
+        "c_capture_break"
+      ],
+      "per_fire_cost_class": "EAGER outside-graph memory-bound, 111.9 us/step (M=32 realistic); recoverable",
+      "owner": "#154",
+      "status": "RECOVERABLE",
+      "rationale": "runs EAGERLY outside the CUDA graph (serve_patch_pck04.py:17-20): it is not a host round-trip, but an outside-graph op that adds eager launch + [M,262144] BW work to the timed step. ANCHOR #1 (re-discovered).",
+      "greedy_safe_design": "on the token-selection path replace scatter[M,262144]+LP+argmax_262144 with argmax(pruned[M,12288]) -> kept_ids remap (kept_ids ascending => first-occurrence tiebreak == full-vocab argmax; equivalence_rate=1.0). Keep full scatter+LP on the prompt_logprobs/PPL prefill path. Recovers ~111.9 us/step -> bar 4.862->4.808."
+    },
+    {
+      "op": "fused_accept_prep",
+      "site": "submissions/fa2sw_precache_kenyan/sitecustomize.py:921-963 _dixie_fused_accept_prep_kernel (TRITON) + :969-1025 wrapper + :1032-1054 prepare_next_token_ids_padded",
+      "trigger": "every step (greedy accept/reject prefix of the K drafted tokens)",
+      "host_residency_class": [
+        "none"
+      ],
+      "per_fire_cost_class": "DEVICE-RESIDENT triton kernel (one launch, capturable)",
+      "owner": "clean",
+      "status": "CLEAN(device-resident)",
+      "rationale": "the accept loop `for pos in range(num_draft_tokens)` is INSIDE the compiled Triton kernel -> on-device, no host round-trip. The wrapper's int(output_token_ids.shape[0]) reads a SHAPE (static), not a device data value. This is the CURRENT linear accept path; land #71's descent extends it but the accept-COMPARE primitive is already on-device.",
+      "greedy_safe_design": "n/a (already device-resident)"
+    },
+    {
+      "op": "descent_accept_walk",
+      "site": "land #71 build (descending accept-walk kernel); modeled in scripts/profiler/salvage_walk_overhead.py (lawine #147)",
+      "trigger": "every step (resolve accepted spine length over the depth-9 tree)",
+      "host_residency_class": [
+        "a_host_roundtrip",
+        "c_capture_break"
+      ],
+      "per_fire_cost_class": "CONSUMED from #147: sync-free +0.39% (GPU-HIDDEN, GREEN) / sync-bound +2.20%",
+      "owner": "#147",
+      "status": "design sync-free (GPU-hidden)",
+      "rationale": "lawine #147's SYNC-POINT lane: naive per-node bool(verify_argmax[u].eq(draft_tok).item()) is a host round-trip AND a capture break; the sync-free design (match-mask -> cumprod -> argmax-first-mismatch, device scalar) captures. CONSUMED as input -- not re-counted in this lane's residual.",
+      "greedy_safe_design": "vLLM-v1 RejectionSampler (PR #14930 zero-sync): device match-mask/cumprod accept length; the next step's expand indexes by the device scalar (no .item())."
+    },
+    {
+      "op": "salvage_branch_selection",
+      "site": "land #71 build (rank>=2 rescue); lawine #147 SYNC_POINT_TAXONOMY",
+      "trigger": "salvage steps (0.382/step)",
+      "host_residency_class": [
+        "a_host_roundtrip",
+        "c_capture_break"
+      ],
+      "per_fire_cost_class": "CONSUMED from #147 (folded in the sync-free +0.39%)",
+      "owner": "#147",
+      "status": "design sync-free",
+      "rationale": "naive int(branch_scores.argmax().item()) is a host round-trip; device argmax + gather by device index avoids it. #147's lane (consumed).",
+      "greedy_safe_design": "best=branch_scores.argmax(); gather the chosen branch by the DEVICE index."
+    },
+    {
+      "op": "accept_length_readout",
+      "site": "land #71 build; lawine #147 SYNC_POINT_TAXONOMY",
+      "trigger": "every step",
+      "host_residency_class": [
+        "a_host_roundtrip",
+        "c_capture_break"
+      ],
+      "per_fire_cost_class": "CONSUMED from #147 (folded in the sync-free +0.39%)",
+      "owner": "#147",
+      "status": "design sync-free",
+      "rationale": "naive n_accept=accept_len.item() is a host round-trip every step; keeping accept_len a DEVICE scalar (consumed by the next expand) avoids it. #147's lane (consumed).",
+      "greedy_safe_design": "keep accept_len on device; next-step KV/context indexing uses the device scalar."
+    },
+    {
+      "op": "relocate_salvaged_kv",
+      "site": "land #71 build (salvage-commit KV relocation over 37 served layers); chiku-inu trace tree-488-pw-fp32-v0 (board 20260614-111022-934); priced in scripts/profiler/salvage_kv_relocation_audit.py (my #157)",
+      "trigger": "salvage steps (0.382/step); relocates accepted rows across 37 layers' K+V",
+      "host_residency_class": [
+        "a_host_roundtrip",
+        "b_datadep_pyloop",
+        "c_capture_break"
+      ],
+      "per_fire_cost_class": "host-loop 55.5 ms/step (host-bound) / vectorized 35.3 us/step / paged 20.3 us/step",
+      "owner": "#157",
+      "status": "LANDMINE-if-host-loop / RECOVERABLE-vectorized",
+      "rationale": "ALL THREE host-residency classes if built as the naive host loop (per-layer x per-row D2H/H2D Python over 37 layers): a data-dependent Python loop CANNOT be CUDA-graph-captured -> pins the step host-bound (bar 32.59, descent 522->77 TPS, INFEASIBLE). ANCHOR #2 (re-discovered). Greedy-safe (bit-exact bf16 permutation, equivalence_rate=1.0).",
+      "greedy_safe_design": "single FUSED device gather/scatter over the [L,W,H,D] stack by a DEVICE commit-index in one launch (index_select+index_copy_), OR a paged slot-map update (zero-copy). Device-index rule: the commit-index is produced ON-DEVICE by the accept walk and consumed without a host readout -> stays inside the captured graph. Vectorized: 35.3 us/step -> bar 4.880, descent 516 TPS."
+    },
+    {
+      "op": "kv_commit_blocktable_update",
+      "site": "submissions/fa2sw_precache_kenyan/sitecustomize.py:150-155 _refresh_static_buffers (seq_lens/block_tables device .copy_) + land #71 commit",
+      "trigger": "every step (advance committed KV / block-table / slot_mapping by accept_len)",
+      "host_residency_class": [
+        "none"
+      ],
+      "per_fire_cost_class": "DEVICE copy (capturable) -- the slot-map form of the relocate",
+      "owner": "#157",
+      "status": "CLEAN(device-resident)",
+      "rationale": "if accept_len is a device scalar (the #147 sync-free rule), the commit/advance is a device copy. This is exactly the relocate's zero-copy paged_slotmap variant (#157) + the #147 accept-length readout -- NOT a new op. Host-bound ONLY if accept_len is read to host (= the #147 accept_length_readout, already owned).",
+      "greedy_safe_design": "advance slot-map / block-table by the DEVICE accept_len (no host readout)."
+    },
+    {
+      "op": "spine_conditional_depth1",
+      "site": "land #71 build (rising depth-1 spine conditional); lawine #161 lane",
+      "trigger": "every step (depth-1 spine accept conditional)",
+      "host_residency_class": [
+        "excluded"
+      ],
+      "per_fire_cost_class": "EXCLUDED (lawine #161's op-count lane)",
+      "owner": "#161",
+      "status": "EXCLUDED (slot armed)",
+      "rationale": "the depth-1 spine conditional's added op-count is lawine #161's lane. Excluded here; a slot is armed (PR161_BOTH_BUGS_STEP_DELTA_PCT) to fold its both_bugs_step_delta_pct when it lands.",
+      "greedy_safe_design": "n/a (numerator/op-count lane, not host-residency)"
+    },
+    {
+      "op": "terminal_output_token_ids_cpu",
+      "site": "vLLM v1 parse_output (gpu_model_runner: output_token_ids = accepted.cpu())",
+      "trigger": "every step (hand accepted tokens to the CPU scheduler: KV mgmt / stop / streaming)",
+      "host_residency_class": [
+        "a_host_roundtrip"
+      ],
+      "per_fire_cost_class": "STRUCTURAL 1/step, ALREADY in the 1.2182 anchor; #147 marginal +0.52% (GPU-hidden)",
+      "owner": "structural",
+      "status": "UNAVOIDABLE-in-anchor",
+      "rationale": "exactly ONE host-sync per step is structurally unavoidable (every decode step streams); it is already in the 1.2182 anchor and GPU-hidden behind the GEMM tail. land does NOT fuse it.",
+      "greedy_safe_design": "n/a (unavoidable; already priced in the anchor)"
+    },
+    {
+      "op": "input_ids_next_step_update",
+      "site": "submissions/fa2sw_precache_kenyan/sitecustomize.py:182,194 self.input_ids[:1].copy_(source)",
+      "trigger": "every step (write next-step drafter input from the accepted token)",
+      "host_residency_class": [
+        "none"
+      ],
+      "per_fire_cost_class": "CAPTURED (device .copy_ inside the graph body)",
+      "owner": "clean",
+      "status": "CLEAN(captured)",
+      "rationale": "device .copy_ of a device token inside the captured LOOPGRAPH body; no host round-trip.",
+      "greedy_safe_design": "n/a (already captured)"
+    }
+  ],
+  "classification": {
+    "n_ops_total": 12,
+    "ops_by_owner": {
+      "clean": [
+        "drafter_propose_loop",
+        "target_verify_forward",
+        "fused_accept_prep",
+        "input_ids_next_step_update"
+      ],
+      "#154": [
+        "compute_logits_scatter_LP"
+      ],
+      "#147": [
+        "descent_accept_walk",
+        "salvage_branch_selection",
+        "accept_length_readout"
+      ],
+      "#157": [
+        "relocate_salvaged_kv",
+        "kv_commit_blocktable_update"
+      ],
+      "#161": [
+        "spine_conditional_depth1"
+      ],
+      "structural": [
+        "terminal_output_token_ids_cpu"
+      ]
+    },
+    "host_resident_ops": [
+      "compute_logits_scatter_LP",
+      "descent_accept_walk",
+      "salvage_branch_selection",
+      "accept_length_readout",
+      "relocate_salvaged_kv",
+      "terminal_output_token_ids_cpu"
+    ],
+    "n_host_resident_ops": 6,
+    "anchors_rediscovered": {
+      "#154": true,
+      "#157": true
+    },
+    "both_anchors_rediscovered": true,
+    "residual_host_ops": [],
+    "descent_path_residual_host_ops_count": 0,
+    "field_swept_clean": true
+  },
+  "capturability_probe": {
+    "ran": true,
+    "n_cases_ran": 4,
+    "cases": {
+      "device_vectorized_relocate": {
+        "case": "device_vectorized_relocate",
+        "captured": true,
+        "err": null,
+        "skipped": false,
+        "expected_captured": true,
+        "description": "#157 design target: device [L,W,H,D] index_select+index_copy_",
+        "match": true
+      },
+      "host_loop_relocate": {
+        "case": "host_loop_relocate",
+        "captured": false,
+        "err": "RuntimeError: Cannot copy between CPU and CUDA tensors during CUDA graph capture unless the CPU tensor is pinned. Please use tensor.pi",
+        "skipped": false,
+        "expected_captured": false,
+        "description": "#157 landmine: per-row .cpu()/.item() Python loop over layers",
+        "match": true
+      },
+      "sync_free_accept_walk": {
+        "case": "sync_free_accept_walk",
+        "captured": true,
+        "err": null,
+        "skipped": false,
+        "expected_captured": true,
+        "description": "#147 sync-free: match-mask -> cumprod -> device argmax (no .item())",
+        "match": true
+      },
+      "sync_bound_accept_walk": {
+        "case": "sync_bound_accept_walk",
+        "captured": false,
+        "err": "AcceleratorError: CUDA error: operation failed due to a previous error during capture\nSearch for `cudaErrorStreamCaptureInvalidated' in ht",
+        "skipped": false,
+        "expected_captured": false,
+        "description": "#147 sync-bound: per-node bool(.item()) descent",
+        "match": true
+      }
+    },
+    "consistent": true,
+    "note": "EMPIRICAL capturability grounding of the taxonomy: device-resident relocate/accept-walk CAPTURE; host-loop relocate + per-node .item() walk BREAK capture. Distinct from #147 sync-COUNTING -- this measures graph-CAPTURABILITY."
+  },
+  "net_step_budget": {
+    "pr154_mode": "realistic",
+    "new_host_op_us": 0.0,
+    "scenarios": {
+      "zero_recovery_anchor": {
+        "label": "zero-recovery (reproduce #136 anchor 1.2182)",
+        "net_step_us": 9724.754013249434,
+        "net_step_units": 1.2182,
+        "net_clear_500_bar": 4.862377006624717,
+        "step_inflation_vs_anchor_pct": 0.0,
+        "fits_inside_anchor": true,
+        "descent_only": {
+          "e_t": 5.04,
+          "tps": 518.2650371550048,
+          "cushion_over_bar": 0.17762299337528287,
+          "clears_500": true
+        },
+        "both_bugs": {
+          "e_t": 5.207,
+          "tps": 535.4377080289901,
+          "cushion_over_bar": 0.3446229933752827,
+          "clears_500": true
+        }
+      },
+      "descent_vectorized_relocate_only": {
+        "label": "descent + vectorized relocate (no #154)",
+        "net_step_us": 9760.04706956825,
+        "net_step_units": 1.2226210888161289,
+        "net_clear_500_bar": 4.880023534784125,
+        "step_inflation_vs_anchor_pct": 0.36291978461081137,
+        "fits_inside_anchor": false,
+        "descent_only": {
+          "e_t": 5.04,
+          "tps": 516.3909522234458,
+          "cushion_over_bar": 0.15997646521587505,
+          "clears_500": true
+        },
+        "both_bugs": {
+          "e_t": 5.207,
+          "tps": 533.5015254419608,
+          "cushion_over_bar": 0.32697646521587487,
+          "clears_500": true
+        }
+      },
+      "descent_vectorized_plus_154": {
+        "label": "descent + vectorized relocate + #154 (realizable build)",
+        "net_step_us": 9648.181895592625,
+        "net_step_units": 1.2086079677899886,
+        "net_clear_500_bar": 4.824090947796312,
+        "step_inflation_vs_anchor_pct": -0.7873938770326194,
+        "fits_inside_anchor": true,
+        "descent_only": {
+          "e_t": 5.04,
+          "tps": 522.3782112049854,
+          "cushion_over_bar": 0.2159090522036884,
+          "clears_500": true
+        },
+        "both_bugs": {
+          "e_t": 5.207,
+          "tps": 539.6871717746744,
+          "cushion_over_bar": 0.3829090522036882,
+          "clears_500": true
+        }
+      },
+      "descent_paged_plus_154": {
+        "label": "descent + paged slot-map relocate + #154 (zero-copy ideal)",
+        "net_step_us": 9633.148839273808,
+        "net_step_units": 1.206724807641914,
+        "net_clear_500_bar": 4.816574419636904,
+        "step_inflation_vs_anchor_pct": -0.941979343136269,
+        "fits_inside_anchor": true,
+        "descent_only": {
+          "e_t": 5.04,
+          "tps": 523.1934110113821,
+          "cushion_over_bar": 0.223425580363096,
+          "clears_500": true
+        },
+        "both_bugs": {
+          "e_t": 5.207,
+          "tps": 540.5293831619576,
+          "cushion_over_bar": 0.3904255803630958,
+          "clears_500": true
+        }
+      },
+      "descent_hostloop_relocate": {
+        "label": "descent + HOST-LOOP relocate (the landmine)",
+        "net_step_us": 65070.29521009329,
+        "net_step_units": 8.151222490248756,
+        "net_clear_500_bar": 32.53514760504664,
+        "step_inflation_vs_anchor_pct": 569.1202175544867,
+        "fits_inside_anchor": false,
+        "descent_only": {
+          "e_t": 5.04,
+          "tps": 77.45469701232011,
+          "cushion_over_bar": -27.49514760504664,
+          "clears_500": false
+        },
+        "both_bugs": {
+          "e_t": 5.207,
+          "tps": 80.02115225062516,
+          "cushion_over_bar": -27.328147605046638,
+          "clears_500": false
+        }
+      }
+    },
+    "net_descent_step_pinned": 1.2086079677899886,
+    "net_clear_500_bar_descent_only": 4.824090947796312,
+    "net_clear_500_bar_both_bugs": 4.824090947796312,
+    "both_bugs_step_units": 1.2086079677899886,
+    "pr161_both_bugs_delta_armed": null,
+    "fits_inside_anchor_realizable": true,
+    "verdict": "FITS: the FULL descent decode path fits inside step ~=1.2182 once all greedy-safe recoveries are applied. Realizable build (vectorized relocate + sync-free accept-walk + #154 stacked) nets 1.2086 units (bar 4.824); descent E[T]=5.04 clears at 522 TPS, both-bugs E[T]=5.207 at 540 TPS. The SOLE residual that blows the budget is a HOST-LOOP relocate (8.17 units, bar 32.59, descent->77 TPS) -- already classified (#157) with a greedy-safe vectorized design. descent_path_residual_host_ops_count=0: no UNCLASSIFIED host op hides on the path."
+  },
+  "self_test": {
+    "tests": {
+      "rediscovers_both_anchors": true,
+      "zero_recovery_reproduces_anchor": true,
+      "reproduces_157_vectorized_bar": true,
+      "reproduces_157_hostloop_bar": true,
+      "reproduces_154_bar_band": true,
+      "realizable_fits_inside_anchor": true,
+      "feasibility_binary": true,
+      "residual_count_well_formed": true,
+      "capturability_probe_consistent_or_skipped": true,
+      "nan_clean": true
+    },
+    "n_pass": 10,
+    "n_total": 10,
+    "all_pass": true,
+    "extras": {
+      "bar_154_only": 4.806444419636904,
+      "step_154_only_units": 1.2041868789738597
+    }
+  },
+  "build_handoff": {
+    "classification": "FIELD SWEPT CLEAN -- the descent decode path host-residency surface is FULLY accounted: 2 anchors (#154 scatter+LP, #157 relocate), #147's consumed accept-walk sync surface, #161's excluded spine conditional, and the structural terminal sync. 0 NEW landmines.",
+    "descent_path_residual_host_ops_count": 0,
+    "must_be_vectorized_or_device_resident": [
+      {
+        "op": "compute_logits_scatter_LP",
+        "site": "submissions/fa2sw_precache_kenyan/serve_patch_pck04.py:335-342 compute_logits_pck04 -> _scatter_to_full_vocab:113-168 (index_copy_ [M,12288]->[M,262144]) + LogitsProcessor",
+        "design": "on the token-selection path replace scatter[M,262144]+LP+argmax_262144 with argmax(pruned[M,12288]) -> kept_ids remap (kept_ids ascending => first-occurrence tiebreak == full-vocab argmax; equivalence_rate=1.0). Keep full scatter+LP on the prompt_logprobs/PPL prefill path. Recovers ~111.9 us/step -> bar 4.862->4.808."
+      },
+      {
+        "op": "descent_accept_walk",
+        "site": "land #71 build (descending accept-walk kernel); modeled in scripts/profiler/salvage_walk_overhead.py (lawine #147)",
+        "design": "vLLM-v1 RejectionSampler (PR #14930 zero-sync): device match-mask/cumprod accept length; the next step's expand indexes by the device scalar (no .item())."
+      },
+      {
+        "op": "salvage_branch_selection",
+        "site": "land #71 build (rank>=2 rescue); lawine #147 SYNC_POINT_TAXONOMY",
+        "design": "best=branch_scores.argmax(); gather the chosen branch by the DEVICE index."
+      },
+      {
+        "op": "accept_length_readout",
+        "site": "land #71 build; lawine #147 SYNC_POINT_TAXONOMY",
+        "design": "keep accept_len on device; next-step KV/context indexing uses the device scalar."
+      },
+      {
+        "op": "relocate_salvaged_kv",
+        "site": "land #71 build (salvage-commit KV relocation over 37 served layers); chiku-inu trace tree-488-pw-fp32-v0 (board 20260614-111022-934); priced in scripts/profiler/salvage_kv_relocation_audit.py (my #157)",
+        "design": "single FUSED device gather/scatter over the [L,W,H,D] stack by a DEVICE commit-index in one launch (index_select+index_copy_), OR a paged slot-map update (zero-copy). Device-index rule: the commit-index is produced ON-DEVICE by the accept walk and consumed without a host readout -> stays inside the captured graph. Vectorized: 35.3 us/step -> bar 4.880, descent 516 TPS."
+      },
+      {
+        "op": "kv_commit_blocktable_update",
+        "site": "submissions/fa2sw_precache_kenyan/sitecustomize.py:150-155 _refresh_static_buffers (seq_lens/block_tables device .copy_) + land #71 commit",
+        "design": "advance slot-map / block-table by the DEVICE accept_len (no host readout)."
+      }
+    ],
+    "net_step_verdict": "FITS: the FULL descent decode path fits inside step ~=1.2182 once all greedy-safe recoveries are applied. Realizable build (vectorized relocate + sync-free accept-walk + #154 stacked) nets 1.2086 units (bar 4.824); descent E[T]=5.04 clears at 522 TPS, both-bugs E[T]=5.207 at 540 TPS. The SOLE residual that blows the budget is a HOST-LOOP relocate (8.17 units, bar 32.59, descent->77 TPS) -- already classified (#157) with a greedy-safe vectorized design. descent_path_residual_host_ops_count=0: no UNCLASSIFIED host op hides on the path.",
+    "feeds": {
+      "fern_155_consolidator": "net_clear_500_bar_descent_only=4.8241; the realizable build's operative bar (vectorized relocate + sync-free walk + #154).",
+      "lawine_161_spine_cost": "both-bugs step slot ARMED (net_clear_500_bar_both_bugs=4.8241); fold #161 both_bugs_step_delta_pct when it lands."
+    },
+    "launch_gate": "INFORMS, does NOT authorize. The descent build is launch-de-risked on the host-residency axis IFF the relocate is vectorized/paged AND the accept-walk is sync-free. A host-loop relocate OR a sync-bound walk is the only way the step collapses, and both are already classified with greedy-safe designs."
+  },
+  "primary_metric": {
+    "name": "host_residency_sweep_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "descent_path_residual_host_ops_count",
+    "value": 0
+  },
+  "elapsed_s": 8.99211597442627
+}
