@@ -1,0 +1,142 @@
+{
+  "capture_dir": "research/validity/verify_argmax_margin/20260614T040403Z",
+  "capture_summary": {
+    "ts": "20260614T040505Z",
+    "num_prompts": 4,
+    "output_len": 32,
+    "num_positions": 128,
+    "completion_tokens": 128,
+    "decode_s": 5.4,
+    "native_dtype": "torch.bfloat16",
+    "softcap": 30.0,
+    "splits": [
+      2,
+      4,
+      8
+    ],
+    "mwidths": [
+      16,
+      32
+    ],
+    "min_margin": 0.0,
+    "median_margin": 4.375,
+    "max_abs_logit": 29.25,
+    "fidelity_emuS1_vs_realM8_disagreements": 0,
+    "splitk_flip_count_vs_emuS1": {
+      "2": 0,
+      "4": 0,
+      "8": 0
+    },
+    "splitk_flip_count_vs_refM8": {
+      "2": 0,
+      "4": 0,
+      "8": 0
+    },
+    "splitk_max_abs_dlogit": {
+      "2": 0.0625,
+      "4": 0.0625,
+      "8": 0.0625
+    },
+    "mwiden_flip_count_vs_refM8": {
+      "16": 0,
+      "32": 0
+    },
+    "mwiden_max_abs_dlogit": {
+      "16": 0.0,
+      "32": 0.125
+    },
+    "npz": "/workspace/senpai/target/research/validity/verify_argmax_margin/20260614T040403Z/margin_perturb.npz"
+  },
+  "phase1_margin_map": {
+    "num_positions": 128,
+    "native_dtype": "torch.bfloat16",
+    "native_mantissa_bits": 7,
+    "min_margin": 0.0,
+    "min_positive_margin": 0.125,
+    "median_margin": 4.375,
+    "p01_margin": 0.125,
+    "p10_margin": 0.75,
+    "max_abs_logit_softcapped": 29.25,
+    "min_margin_in_native_ulp": 0.0,
+    "min_positive_margin_in_native_ulp": 1.0,
+    "min_margin_in_fp32_ulp": 0.0,
+    "median_margin_in_native_ulp": 35.0,
+    "frac_below_native_ulp": {
+      "1": 0.0078125,
+      "2": 0.0390625,
+      "4": 0.078125,
+      "8": 0.1328125,
+      "16": 0.2578125
+    },
+    "frac_below_fp32_ulp": {
+      "1": 0.0078125,
+      "2": 0.0078125,
+      "4": 0.0078125,
+      "8": 0.0078125,
+      "16": 0.0078125
+    },
+    "n_exact_ties_margin_zero": 1,
+    "frac_exact_ties": 0.0078125
+  },
+  "phase2_splitk": {
+    "2": {
+      "flip_count_vs_emuS1": 0,
+      "flip_count_vs_refM8": 0,
+      "max_abs_dlogit": 0.0625,
+      "max_abs_dlogit_in_native_ulp": 0.5,
+      "mean_abs_dlogit": 0.0037525724619627
+    },
+    "4": {
+      "flip_count_vs_emuS1": 0,
+      "flip_count_vs_refM8": 0,
+      "max_abs_dlogit": 0.0625,
+      "max_abs_dlogit_in_native_ulp": 0.5,
+      "mean_abs_dlogit": 0.003515426069498062
+    },
+    "8": {
+      "flip_count_vs_emuS1": 0,
+      "flip_count_vs_refM8": 0,
+      "max_abs_dlogit": 0.0625,
+      "max_abs_dlogit_in_native_ulp": 0.5,
+      "mean_abs_dlogit": 0.005070287734270096
+    }
+  },
+  "phase2_mwiden": {
+    "16": {
+      "flip_count_vs_refM8": 0,
+      "max_abs_dlogit": 0.0,
+      "max_abs_dlogit_in_native_ulp": 0.0,
+      "mean_abs_dlogit": 0.0
+    },
+    "32": {
+      "flip_count_vs_refM8": 0,
+      "max_abs_dlogit": 0.125,
+      "max_abs_dlogit_in_native_ulp": 1.0,
+      "mean_abs_dlogit": 0.001981897745281458
+    }
+  },
+  "fidelity_emuS1_vs_realM8_disagreements": 0,
+  "gate": {
+    "verdict": "GREEN",
+    "comfortable_headroom": false,
+    "tie_bounded": true,
+    "n_exact_ties": 1,
+    "min_margin": 0.0,
+    "min_positive_margin": 0.125,
+    "max_abs_dlogit_all_swaps": 0.125,
+    "headroom_ratio_minposmargin_over_maxdlogit": 1.0,
+    "splitk_flip_count_vs_emuS1_worst": 0,
+    "splitk_flip_count_vs_refM8_worst": 0,
+    "mwiden_flip_count_worst": 0,
+    "total_flips": 0,
+    "flip_examples": []
+  },
+  "primary_metric": {
+    "name": "verify_gemm_argmax_flip_count_splitk",
+    "value": 0
+  },
+  "test_metric": {
+    "name": "verify_gemm_min_top2_margin_ulp",
+    "value": 0.0
+  }
+}
