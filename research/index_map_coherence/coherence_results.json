@@ -1,0 +1,167 @@
+{
+  "config": {
+    "accept_json": "research/accept_calibration/accept_calibration_results.json",
+    "rankcov_json": "research/rank_coverage/rank_coverage_results.json",
+    "rho_opt_json": "research/spec_cost_model/rho_optimal_topology_results.json",
+    "spine_spec_json": "research/spine_spec/spine_spec_results.json",
+    "bug2_descent_json": "research/spec_cost_model/bug2_salvage_descent_results.json",
+    "greedy_harness_glob": "research/descent_greedy_exact_harness/runs/*/greedy_exact_harness_result.json",
+    "W": 4,
+    "max_depth": 24,
+    "output": "research/index_map_coherence/coherence_results.json",
+    "report_md": "research/index_map_coherence/report_coherence.md",
+    "wandb_project": "gemma-challenge-senpai",
+    "wandb_entity": "wandb-applied-ai-team",
+    "wandb_group": "shared-index-map-coherence",
+    "wandb_name": "wirbel/shared-index-map-coherence",
+    "no_wandb": false
+  },
+  "model_constants": {
+    "q_true": 0.728739760479042,
+    "rho2": 0.4165047789261015,
+    "descent_only_d1": 0.679,
+    "deployed_rising_spine": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "rho_cond": [
+      0.4165047789261015,
+      0.2655480090557997,
+      0.19075249320036264
+    ],
+    "n_nodes": 32,
+    "max_branch": 3,
+    "n_leaves": 7,
+    "topology_built_depth": 9,
+    "K_cal": 125.268,
+    "step_measured": 1.2182,
+    "step_roofline": 1.2127
+  },
+  "index_path_trace": {
+    "kernel_ref": "submissions/fa2sw_precache_kenyan/sitecustomize.py:921",
+    "bug1_spine_root_index_expr": "target_argmax_ptr + start_idx + pos   (pos == 0)",
+    "bug2_descent_index_expr": "target_argmax_ptr + start_idx + pos   (pos in range(num_draft_tokens))",
+    "same_pointer_target_argmax": true,
+    "same_index_base_start_idx_plus_pos": true,
+    "kernel_arithmetic_unchanged": true,
+    "single_upstream_gather_target_logits_indices": true,
+    "kernel_holds_no_second_map": true,
+    "reads_same_logical_index_map": true,
+    "evidence": "BUG-1 (spine root) and BUG-2 (descent walk) both dereference the SAME pointer `target_argmax_ptr` through the SAME index base `start_idx + pos` (sitecustomize.py:945). The spine root is slot 0; the descent nodes are slots 1..N. Both are entries in the ONE upstream `target_logits_indices` gather that fills the single flat `target_argmax` array. The kernel holds no second index map and its `draft == target_argmax` greedy test is already correct -> both bugs live in WHAT fills that one array, i.e. one map."
+  },
+  "imported_leg_outputs": {
+    "spine160_both_bugs_E_T": 5.206954309441963,
+    "spine160_descent_only_E_T": 5.056404568844709,
+    "spine160_q_true": 0.728739760479042,
+    "spine160_rho2": 0.4165047789261015,
+    "bug2_135_as_measured": 2.621,
+    "bug2_135_bug1_fix_spine_only": 2.7463979082783987,
+    "bug2_135_bug2_fix_descent_only": 5.056404568844709,
+    "bug2_135_both_fixed": 5.206954309441963,
+    "bug2_135_bug2_over_bug1_ratio": 19.300727261384935,
+    "bug2_135_bug1_et_recovery": 0.1253979082783987,
+    "bug2_135_bug2_et_recovery": 2.435404568844709,
+    "greedy158_self_test_passes": true,
+    "greedy158_linear_verdict": "GREEDY_EXACT",
+    "greedy158_linear_exactness_rate": 1.0,
+    "greedy158_linear_sha_match": true,
+    "greedy158_bug2_verdict": "VIOLATION",
+    "greedy158_ppl": 2.376664808823738,
+    "greedy158_run_path": "research/descent_greedy_exact_harness/runs/20260614T135333Z/greedy_exact_harness_result.json"
+  },
+  "coherence_model": {
+    "shared_index_map_fixes_both_bugs": true,
+    "composed_fix_E_T": 5.206954309441963,
+    "derivation": "ET_tree(q1_of_f(0)) == ET_tree(q_true) computed ONCE from the single corrected map (NOT additive over descent-only + spine delta)",
+    "et_descent_only": 5.056404568844709,
+    "et_both_fixed": 5.206954309441963,
+    "residual_spine_delta_tree": 0.15054974059725446,
+    "no_double_count": {
+      "base_neither_linear": 2.621,
+      "delta_bug1_linear": 0.1253979082783987,
+      "delta_bug2_descent": 2.435404568844709,
+      "false_independent_additive": 5.1818024771231075,
+      "super_additive_interaction": 0.02515183231885576,
+      "within_tree_decomp": 5.206954309441963,
+      "within_tree_decomp_resid": 0.0,
+      "note": "The FALSE-independent additive model (base + linear-spine-delta + descent-delta) under-counts the true both-fixed by the super-additive interaction (a higher spine carries more mass into the descending branches). The single corrected map lands ET_tree(q_true)=both-fixed directly; the legit within-tree cross-check uses the TREE residual spine delta, never the linear one."
+    }
+  },
+  "bracketing_anchors": {
+    "neither_fixed_oracle": {
+      "target": 2.621,
+      "modelled": 2.621
+    },
+    "descent_only": {
+      "target": 5.0564,
+      "modelled": 5.056404568844709
+    },
+    "both_fixed": {
+      "target": 5.207,
+      "modelled": 5.206954309441963
+    },
+    "single_map_reproduces_both": {
+      "target": 5.207,
+      "modelled": 5.206954309441963
+    }
+  },
+  "greedy_identity_premises": {
+    "composed_fix_is_upstream_map_only": true,
+    "kernel_stores_target_argmax_at_committed_pos": true,
+    "denken158_linear_kernel_greedy_exact": true,
+    "denken158_linear_rate_is_1p0": true,
+    "denken158_sha256_match": true,
+    "denken158_harness_catches_bug2": true,
+    "denken158_ppl_under_cap": true
+  },
+  "self_test_checks": {
+    "anchor_a_neither_fixed_2621": true,
+    "anchor_b_descent_only_50564": true,
+    "anchor_c_both_fixed_52070": true,
+    "anchor_d_single_map_reproduces_52070": true,
+    "composed_equals_both_fixed": true,
+    "within_tree_decomp_exact": true,
+    "false_independent_additive_undercounts": true,
+    "import_matches_spine160_both": true,
+    "import_matches_spine160_descent": true,
+    "import_matches_bug2_135_both": true,
+    "bug2_is_dominant_lever": true,
+    "composed_fix_greedy_identity_safe": true,
+    "all_metrics_nan_clean": true
+  },
+  "official_projection": {
+    "composed_measured_step_tau1": 535.4332231449482,
+    "composed_roofline_step_tau1": 537.8615918489122,
+    "descent_only_measured_step_tau1": 519.9521322689534
+  },
+  "handoff": {
+    "land71_build": "build ONE unified `target_logits_indices` correction (slot-0 own-row rank-1 + descent-ordered node layout) -- one contract, one validation, lower risk.",
+    "binding_build_risk": "BUG-2 (descent) carries the binding build-risk: it is the dominant E[T] lever (~19x BUG-1) and the structural change (linear break -> descending walk) where a build error (over-acceptance) is the only path that could break greedy identity. BUG-1's slot-0 re-point is a trivial single-index rider on the same map."
+  },
+  "verdict": {
+    "primary_metric_name": "index_map_coherence_self_test_passes",
+    "index_map_coherence_self_test_passes": true,
+    "test_metric_name": "composed_fix_E_T",
+    "composed_fix_E_T": 5.206954309441963,
+    "shared_index_map_fixes_both_bugs": true,
+    "composed_fix_greedy_identity_safe": true,
+    "reads_same_logical_index_map": true,
+    "et_descent_only": 5.056404568844709,
+    "et_both_fixed": 5.206954309441963,
+    "residual_spine_delta": 0.15054974059725446,
+    "false_independent_additive": 5.1818024771231075,
+    "super_additive_interaction": 0.02515183231885576,
+    "within_tree_decomp_resid": 0.0,
+    "official_composed_measured_step_tau1": 535.4332231449482,
+    "official_composed_roofline_step_tau1": 537.8615918489122,
+    "handoff_to_land71": "build ONE unified `target_logits_indices` correction (slot-0 own-row rank-1 + descent-ordered node layout) -- one contract, one validation, lower risk.",
+    "binding_build_risk": "BUG-2 (descent) carries the binding build-risk: it is the dominant E[T] lever (~19x BUG-1) and the structural change (linear break -> descending walk) where a build error (over-acceptance) is the only path that could break greedy identity. BUG-1's slot-0 re-point is a trivial single-index rider on the same map.",
+    "gate": "GREEN",
+    "gate_label": "SHARED -- build ONE unified `target_logits_indices` correction (slot-0 own-row rank-1 + descent-ordered node layout) -- one contract, one validation, lower risk."
+  }
+}
