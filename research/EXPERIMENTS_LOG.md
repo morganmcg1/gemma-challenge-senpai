@@ -1,5 +1,31 @@
 # SENPAI Research Results
 
+## 2026-06-14 00:47 — PR #75: Drafter-forward roofline — is the 15.5% block bandwidth-bound? ✅ MERGED (decisive negative: refutes int4-drafter-for-TPS; the drafter's #2-block headroom is non-GEMM, not weight bytes)
+
+- **Branch:** `denken/drafter-forward-roofline` · **Student:** denken
+- **Status:** MERGED as a research artifact — the **sibling roofline to #68** (verify-GEMM). Audit-only, zero served-file change → no BASELINE.md change. Frontier bar **UNCHANGED 481.53.** Lands a reusable profiler (`scripts/profiler/drafter_forward_roofline.py`) + the drafter decode-composition cost report.
+- **Hypothesis:** stark #70 was building int4 drafter weights on an **unaudited premise** — that the K=7 MTP drafter forward is weight-bandwidth-bound at the deployed M=1×K=7. A Step-0 roofline (#68 method, FP16-ceiling) validates or refutes that premise *before* stark spends the build.
+- **Primary metric:** `drafter_forward_pct_hbm_peak_at_M1K7 = 47.17%` (W&B `uknpbk94`, finished; primary verified exact).
+
+| quantity (A10G, drafter bf16, deployed M=1×K=7) | value |
+|---|--:|
+| **`drafter_forward_pct_hbm_peak_at_M1K7`** | **47.2%** (7-pass GEMM chain, launch-free onegraph) |
+| arithmetic intensity at M=1 | 1.0 FLOP/byte (ridge 86.8 → 86× below) → memory-bound *regime* |
+| achieved compute at M=1 | 0.45% of FP16 peak (52.1 TFLOPS realizable ceiling) |
+| most-repeated GEMVs (sliding-attn q/o, 6 of 19/pass) | **19% HBM** → **latency/launch-floored, not bandwidth-saturated** |
+| 7-pass drafter GEMM chain (deployed graph) | **566 µs/step = 4.88% of the 11.6 ms decode step** |
+| drafter forward total (#69 budget, the #2 decode block) | 1798–2100 µs = 15.5–18.1% |
+| → **non-GEMM** drafter (centroid sampler + 262k masked-embed gather + SDPA + sampling) | **~69–73% of the drafter** (untouched by int4) |
+
+- **int4-drafter-for-TPS ceiling (stark #70 cross-check):** hard ceiling (every drafter GEMM → 0 µs) = **+5.13%**; int4 bandwidth-scaling = +3.62% (optimistic); **realistic +1.5…+3%**. Premise-implied naive ("3.5× faster 15.5–18.1% block") = +12.5…+14.9% → **overstated ~3–5× vs ceiling, ~4–8× vs realistic.** The premise is right about the *regime* (AI≈1, memory-bound) but wrong that the block is a *saturated* bandwidth wall (47%, not 75–100%) — and int4 touches only 4.88% of decode.
+- **Onegraph:** drafter runs **inside blake's `onegraph` (CUDA-graphed), launch-free** — it does NOT pay #68's ~55 µs/call eager floor (eager chain 2859 µs vs graph 566 µs; the 2.3 ms gap is already-harvested launch overhead, not free headroom). int4 working set 6.5 MB still > 6 MB A10G L2 → weights still spill every pass; int4 does not make them L2-resident.
+- **Pass-count lever (feasibility only): INFEASIBLE with unchanged outputs.** MTP is autoregressive (pass *i* consumes pass *i−1*'s token) → no single wider GEMM yields the identical 7-token chain; L2-residency needs <6 MB (int4 6.5 MB still spills); K<7 changes accept behavior (fern #34's axis).
+- **Conclusions / actions taken:**
+  1. **stark #70 CLOSED** — int4-drafter-weights-for-TPS refuted (≤+3% realistic, +5.13% ceiling; not the double-digit win the framing implied). stark reassigned to a higher-value orthogonal BUILD lever (prompt-lookup/ngram free draft tokens).
+  2. **Also informs open2-askeladd #57** (W8A8 int8 drafter) — same drafter-quant-for-TPS premise; flagged cross-board (saves their quota, byteshark-negatives ethos).
+  3. **The real drafter lever is the ~70% non-GEMM**, not the weights — denken reassigned to a per-op decomposition of the non-GEMM (centroid sparse sampler / 262k masked-embed gather / SDPA / sampling) using his #75 reconstructed-module harness, to find the fattest reducible/fusable op. Secondary: drafter kernel-fusion (lift the 47% chain / 19% GEMVs off the launch floor) — contract-safe, larger than int4.
+  4. **Verify-GEMM (53%, #68: free to widen to M≤32) remains the higher-value block** (land #71 tree-verify = the 500-path); the drafter is the #2 block but with little weight-byte headroom.
+
 ## 2026-06-14 00:40 — PR #74: TPS-optimal tree-shape under denken #68's measured M≤32 verify-cost curve ✅ MERGED (the concrete build target for land #71)
 
 - **Branch:** `wirbel/tree-shape-cost-model` · **Student:** wirbel
