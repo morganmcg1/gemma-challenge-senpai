@@ -1,0 +1,247 @@
+{
+  "primary_metric_name": "icc_neff_self_test_passes",
+  "test_metric_name": "lcb_bothbugs_realistic_icc",
+  "icc_data_source": {
+    "source": "research/rank_coverage/pr86/rankprobe_records.jsonl.118860",
+    "prompt_lengths": "research/rank_coverage/pr86/decode_rank_coverage.jsonl",
+    "per_step_quantity": "L = accepted-run (fd) + 1 bonus token (E[L]=E[T]; Var[L]=sigma_L^2, the #175 CI driver)",
+    "n_steps": 17169,
+    "n_prompts": 128,
+    "steps_per_prompt_full_mean": 133.6015625,
+    "steps_per_prompt_tps_window_mean": 33.1171875,
+    "tps_window_tokens": 128,
+    "prompt_output_tokens": 512,
+    "E_L_probe_operating_point": 3.8547381909255054,
+    "operating_point_caveat": "the rankprobe is at the liveprobe operating point lambda_hat=0.342 (E[L]=3.85), not the launch's full-recovery lambda=1 (E[L]=5.21). The CORRELATION STRUCTURE (ICC, rho(l)) is dimensionless and transported to lambda=1; if longer accept-runs at lambda=1 are MORE correlated, the true ICC could exceed this estimate -- the breakpoint headroom (2.6x) absorbs a 2x miss."
+  },
+  "icc_estimate": {
+    "icc_hat": 0.1446247464062406,
+    "icc_ci": [
+      0.10428963351886918,
+      0.18570746616200864
+    ],
+    "icc_ci_method": "prompt-level cluster bootstrap, 3000 resamples, TPS-window ICC",
+    "estimator": "one-way random-effects ANOVA, ICC = sigma_b^2/(sigma_b^2+sigma_w^2)",
+    "icc_band_by_cluster_size": {
+      "token_window_128tok_PRIMARY": 0.1446247464062406,
+      "full_prompt": 0.056161726595642975,
+      "first_24_step": 0.15457040468448296,
+      "first_25_step": 0.15054644023927985,
+      "first_33_step": 0.12910205720741805,
+      "acf_equiv_at_mbar": 0.07523743851526554
+    },
+    "anova_window": {
+      "icc": 0.1446247464062406,
+      "icc_raw": 0.1446247464062406,
+      "sigma_b2": 1.0552912615781018,
+      "sigma_w2": 6.241463186058847,
+      "MSB": 41.170419382288465,
+      "MSW": 6.241463186058847,
+      "m0": 33.098877502307964,
+      "k": 128,
+      "N": 4239,
+      "mean_m": 33.1171875,
+      "grand_mean_L": 3.9431469686246756
+    },
+    "anova_full": {
+      "icc": 0.056161726595642975,
+      "icc_raw": 0.056161726595642975,
+      "sigma_b2": 0.407009163820422,
+      "sigma_w2": 6.840082200567898,
+      "MSB": 61.20489133421951,
+      "MSW": 6.840082200567898,
+      "m0": 133.5714621836822,
+      "k": 128,
+      "N": 17101,
+      "mean_m": 133.6015625,
+      "grand_mean_L": 3.848546868604175
+    },
+    "acf_rho_lags_1to8": [
+      0.2583178258286258,
+      0.16791724127884536,
+      0.11779619682115657,
+      0.10356020274376859,
+      0.083050748777102,
+      0.06602098912993447,
+      0.056417704137995,
+      0.05688134070239029
+    ],
+    "acf_deff_at_mbar": 2.7742875539531413,
+    "serial_structure_note": "rho(1)=0.258 decaying ~AR (rho(2)=0.168, rho(3)=0.118) => the ICC is cluster-size dependent. PRIMARY = the TPS-window (128 tok/prompt = #175 B/128) ANOVA ICC; it is BOTH cluster-matched to m_bar (the first-24/25-step ANOVA = 0.155/0.151 agree) AND the conservative end of the band: the full-prompt ICC 0.056 paired with m_bar gives Deff 2.32 -> a HIGHER both-bugs LCB 516.3 (still GO). full-prompt (lower) and ACF-Deff cross-check bound the band."
+  },
+  "realistic_ci": {
+    "m_bar": 24.582508774446666,
+    "design_effect_hat": 4.410614351127293,
+    "n_eff_hat": 713.406539913188,
+    "halfwidth_iid_tps": 10.906182006867379,
+    "halfwidth_realistic_tps": 22.90457745058264,
+    "halfwidth_worstcase_icc1_tps": 54.07366952923218
+  },
+  "go_robustness": {
+    "convention": "section-4 (central=535.43 both / 519.95 descent, z95, accept(+)sigma_hw=4.86 quadrature)",
+    "section4": {
+      "icc0": {
+        "icc": 0.0,
+        "design_effect": 1.0,
+        "accept_half_tps": 10.906182006867379,
+        "total_half_tps": 14.48028061634804,
+        "lcb_tps": 520.9529425286004,
+        "lcb_clears_500": true
+      },
+      "icc1": {
+        "icc": 1.0,
+        "design_effect": 24.582508774446666,
+        "accept_half_tps": 54.07366952923218,
+        "total_half_tps": 54.90624242395285,
+        "lcb_tps": 480.5269807209956,
+        "lcb_clears_500": false
+      },
+      "bothbugs_hat": {
+        "icc": 0.1446247464062406,
+        "design_effect": 4.410614351127293,
+        "accept_half_tps": 22.90457745058264,
+        "total_half_tps": 24.806317520966424,
+        "lcb_tps": 510.626905623982,
+        "lcb_clears_500": true
+      },
+      "descent_hat": {
+        "icc": 0.1446247464062406,
+        "design_effect": 4.516468286786003,
+        "accept_half_tps": 23.0196417338152,
+        "total_half_tps": 24.912599750216224,
+        "lcb_tps": 495.0395325187374,
+        "lcb_clears_500": false
+      },
+      "bothbugs_ci_lo": {
+        "icc": 0.10428963351886918,
+        "design_effect": 3.4594111975425594,
+        "accept_half_tps": 20.284944999961976,
+        "total_half_tps": 22.41010295408634,
+        "lcb_tps": 513.0231201908621,
+        "lcb_clears_500": true
+      },
+      "bothbugs_ci_hi": {
+        "icc": 0.18570746616200864,
+        "design_effect": 5.379447950245826,
+        "accept_half_tps": 25.29540259911123,
+        "total_half_tps": 27.02944900312232,
+        "lcb_tps": 508.40377414182615,
+        "lcb_clears_500": true
+      },
+      "descent_ci_hi": {
+        "icc": 0.18570746616200864,
+        "design_effect": 5.515371204480878,
+        "accept_half_tps": 25.438204324180766,
+        "total_half_tps": 27.16313604869725,
+        "lcb_tps": 492.78899622025637,
+        "lcb_clears_500": false
+      }
+    },
+    "lcb_bothbugs_realistic_icc": 510.626905623982,
+    "lcb_descent_realistic_icc": 495.0395325187374,
+    "icc_at_which_bothbugs_breaks_500": 0.3728443719468858,
+    "icc_at_which_descent_breaks_500": 0.06661202377199002,
+    "bothbugs_clears_across_full_ci": true,
+    "bothbugs_break_margin_over_hat": 2.5780122780619616,
+    "descent_robust_to_realistic_icc": false,
+    "headline": "both-bugs STAYS >=500 (robust GO) at the realistic ICC 0.145 (LCB 510.6) and across the entire CI [0.104,0.186] (LCB 508.4..513.0); it only breaks 500 at ICC=0.373 (2.6x the realistic value). descent-only MISSES (LCB 495.0); it breaks 500 already at ICC=0.067, below the realistic estimate -- NOT robust to realistic within-prompt correlation."
+  },
+  "build_bar": {
+    "lambda_star_lcb_iid_check": 0.9052300000000001,
+    "lambda_star_lcb_realistic_icc": 0.9513400000000001,
+    "lambda_star_lcb_ci_lo_icc": 0.9403900000000001,
+    "lambda_star_lcb_ci_hi_icc": 0.96128,
+    "bar_shift_from_icc": 0.04611163192598555,
+    "iid_bar": 0.9052283680740145,
+    "design_effect": 4.410614351127293,
+    "note": "#183 section-5 used an asymptotic AR(1) VIF (<=2.0 -> lambda*=0.9213); the correct finite-cluster design effect Deff=1+(m_bar-1)*ICC is larger, so the realistic build bar is higher. Still reachable (<1) and bracketed by full recovery."
+  },
+  "launch_packet_p90_secondary": {
+    "proj_private_tps": 528.8856764074758,
+    "z_p90": 1.2815515594457412,
+    "combined_rel_published_3term": 0.020667238533949674,
+    "lcb_p90_published": 514.877540689496,
+    "rel_finite_sample_iid": 0.010392483288372435,
+    "rel_finite_sample_realistic": 0.021825735003553635,
+    "combined_rel_iid_fold": 0.023133059839076077,
+    "combined_rel_realistic_fold": 0.03005823443026088,
+    "lcb_p90_iid_finite_sample": 513.2062211543894,
+    "lcb_p90_realistic_icc": 508.51237754365894,
+    "clears_500_realistic": true
+  },
+  "imported": {
+    "bb_central": 535.4332231449484,
+    "bb_hw_iid": 10.906182006867379,
+    "bb_nsteps": 3146.561123129173,
+    "bb_sigmaL": 3.035436750248887,
+    "ds_central": 519.9521322689536,
+    "ds_hw_iid": 10.831761219545779,
+    "mbar_bb": 24.582508774446666,
+    "mbar_ds": 25.314430096966213,
+    "sigma_hw_s4": 4.86,
+    "topo184_bracket": {
+      "icc0_lcb": 520.9529425286004,
+      "icc0_half": 14.48028061634804,
+      "icc1_lcb": 480.5269807209956,
+      "icc1_half": 54.90624242395285,
+      "mbar": 24.582508774446666,
+      "central": 535.4332231449484
+    },
+    "wandb_run_175": "zh1accmi",
+    "wandb_run_183": "82uisrez",
+    "wandb_run_184": "7uek36mx",
+    "source_175": "research/oracle_readout/et_second_moment/et_second_moment_results.json",
+    "source_184": "research/oracle_readout/lambda_robust_topology/lambda_robust_topology_results.json",
+    "source_183": "research/oracle_readout/lambda_acceptance_card/lambda_acceptance_card_results.json",
+    "source_launch": "research/launch/packet_refresh/launch_packet_refresh_results.json"
+  },
+  "method": "LOCAL CPU-only analytic synthesis. No GPU/vLLM/HF Job/submission/kernel build/served-file change. BASELINE stays 481.53. Greedy untouched. NOT open2. Does NOT authorize a launch.",
+  "provenance": "ICC measured from the PR #86 rankprobe (per-step accepted run-lengths) reconstructed into the 128 benchmark prompts; mapped through #184's imported N_eff two-level model (m_bar=24.58, exchangeable Deff) and #175's sigma_L finite-sample CI; build bar from #183's banked forward-map spine. #184's ICC=0/ICC=1 bracket is reproduced as a self-test, not re-derived.",
+  "self_test": {
+    "passes": true,
+    "n_checks": 7,
+    "n_passed": 7,
+    "checks": [
+      {
+        "name": "ICC=0 reproduces #184 IID bracket (LCB 520.95, half 14.48)",
+        "passes": true,
+        "detail": "lcb=520.9529 vs #184 520.9529"
+      },
+      {
+        "name": "ICC=1 reproduces #184 worst-case bracket (LCB 480.53, half 54.91)",
+        "passes": true,
+        "detail": "lcb=480.5270 vs #184 480.5270"
+      },
+      {
+        "name": "ICC_hat in [0,1] with finite CI",
+        "passes": true,
+        "detail": "icc_hat=0.1446 ci=[0.1043,0.1857]"
+      },
+      {
+        "name": "section-4 LCB monotone-decreasing in ICC",
+        "passes": true,
+        "detail": "LCB(0)=520.95 -> LCB(1)=480.53"
+      },
+      {
+        "name": "lambda*_LCB(realistic) >= iid 0.9052",
+        "passes": true,
+        "detail": "lambda*=0.9513 vs iid 0.9052"
+      },
+      {
+        "name": "lambda*_LCB(Deff=1) reproduces #183 build bar 0.9052",
+        "passes": true,
+        "detail": "lambda*(Deff=1)=0.90523"
+      },
+      {
+        "name": "all reported scalars NaN-clean",
+        "passes": true,
+        "detail": "10 scalars finite"
+      }
+    ],
+    "nan_clean": true
+  },
+  "icc_neff_self_test_passes": 1,
+  "lcb_bothbugs_realistic_icc": 510.626905623982,
+  "metrics_nan_clean": 1,
+  "nan_clean": true
+}
