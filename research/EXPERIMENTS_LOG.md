@@ -1,5 +1,22 @@
 # SENPAI Research Results
 
+## 2026-06-14 04:07 — PR #88: Traversal Verification E[T] gate ✅ MERGED — RED / AXIS CLOSED (provably zero under greedy; standard root-to-leaf confirmed; land #71 keeps existing acceptance rule)
+
+- **Branch:** `fern/traversal-verify-et` · **Student:** fern · merged ~04:07Z
+- **Status:** MERGED as decisive RED characterization keeper (CPU analytical + MC simulation; no GPU training, no served-file change; official bar UNCHANGED 481.53). Banks `scripts/profiler/traversal_verify_et.py` + `research/spec_cost_model/traversal_verify_et_results.json`.
+- **Hypothesis:** Traversal Verification (NeurIPS 2025 OpenReview 8nOMhDFpkU) — leaf-to-root tree acceptance — recovers sibling-subtree mass from wirbel #83's salvage oracle (rho2=0.4165), potentially delivering a free, provably-lossless E[T] uplift on land #71's M=32 tree.
+- **Primary metric:** `traversal_et_uplift_pct = 0.000`. **Test:** `traversal_greedy_violation_count = 0`.
+
+| Leg | Regime | E[T] root→leaf | E[T] leaf→root | uplift % | greedy viol. |
+|---|---|---|---|---|---|
+| **A** physical M=32, 400k MC | **greedy (T=0)** | **5.2140** | **5.2140** | **+0.000** | **0** |
+| **B** sampling-proxy contrast | sampling proxy | 4.4324 | 4.6348 | +4.567 | 26,984 |
+| **C** real #80 ranks, 1868 steps | greedy | 3.3330 | 3.3330 | +0.000 | 0 |
+| **D** exhaustive all trees n≤6 | greedy-valid | — | — | 0.000 | 0 / 872 trees |
+
+- **Verdict: RED.** Traversal Verification is **provably zero under greedy decode** — structural, not a measurement artefact. Under temperature 0, the target argmax at each position is a single token, so at most one child can match at any tree node. The consistent paths form a unique chain; both walks return the same chain → E[T] uplift 0, greedy violations 0, for any tree/corpus. wirbel's rho2=0.4165 salvage mass is **fully realized by root-to-leaf** (it is the value of the tree topology over the linear chain, not incremental headroom for a different acceptance rule). Leg B confirms the mechanism exists in sampling regimes (+4.57%) but is vacuous at T=0. **Acceptance-rule axis CLOSED. land #71: keep standard root-to-leaf verification.**
+- **W&B:** `yiwl2jfj`. fern → #91 (tree-topology E[T] comparison: max-branch-3 vs max-branch-4, using this harness).
+
 ## 2026-06-14 03:53 — PR #82: Operationalized wall_tps: paired-A/B runner + re-baseline + #56 re-screen ✅ MERGED (infra keeper: canonical A/B entrypoint + locked re-baseline 454.09 + confirmed deployed MBT=512 optimal)
 
 - **Branch:** `lawine/walltps-ab-runner` · **Student:** lawine · merged ~03:53Z
