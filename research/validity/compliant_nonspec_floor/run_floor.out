@@ -1,0 +1,231 @@
+[driver] 2026-06-14T18:08:06Z START
+[driver] 2026-06-14T18:08:06Z === STEP A: wall_tps N=3 nonspec (reuse spec baseline) ===
+[ab] normalized CUDA_VISIBLE_DEVICES '2' -> '0' (single in-container GPU)
+[ab] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[ab] baseline=fa2sw_precache_kenyan candidate=fa2sw_nonspec_int4 n=3 workload=128x512 seed=1 -> /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps
+[ab] reusing 3 baseline records from research/walltps_ab/selfnull/paired_ab.json (valid: restart-invariant per PR #72)
+
+[ab:nonspec] === run 1/3 (fa2sw_nonspec_int4) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 85s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run00.jsonl --summary-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run00.summary.json
+[ab:nonspec] run 00: wall_tps=156.025 steady=152.68333333333334 E[accept]=None ready=85s sm=1710.0
+
+[ab:nonspec] === run 2/3 (fa2sw_nonspec_int4) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 85s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run01.jsonl --summary-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run01.summary.json
+[ab:nonspec] run 01: wall_tps=156.050 steady=152.3093023255814 E[accept]=None ready=85s sm=1710.0
+
+[ab:nonspec] === run 3/3 (fa2sw_nonspec_int4) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 85s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run02.jsonl --summary-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/nonspec/decode/run02.summary.json
+[ab:nonspec] run 02: wall_tps=156.046 steady=152.7952380952381 E[accept]=None ready=85s sm=1710.0
+
+[ab] ===== PAIRED wall_tps A/B — 25.9 min =====
+  A baseline   fa2sw_precache_kenyan
+     wall_tps  n=3 median=454.085 mean=454.100 std=0.033 CV=0.007% range=454.08..454.14
+     E[accept] mean=3.8531 CV=0.097%
+  B candidate  fa2sw_nonspec_int4
+     wall_tps  n=3 median=156.046 mean=156.040 std=0.013 CV=0.008% range=156.03..156.05
+  ---- verdict: raw-powered-MDE=0.080% op-threshold=0.10% observed-CI95=±0.009%
+
+  >>> A=454.09 B=156.05 Δ=-65.635% [REAL] (op@N3=0.10%, raw-powered-MDE=0.080%)
+
+[ab] ===== LOCAL->OFFICIAL PROJECTION (PR #99) =====
+  multiplier=1.06019 local-CI95=[1.05999,1.06038] envelope-CI95=[1.03941,1.08097] (official-CV-assumed=1.00%)
+  reference=454.338 wall_tps  official-anchor=481.53 TPS  reproduction-MDE=0.10%
+  baseline  accept_len=3.8531 wall_tps=454.085 -> official=481.4 [472.0,490.9] (±1.96%)  clears500=False
+            reproduces_ref=True (Δ0.056% vs MDE 0.10%)  recovers_anchor=True (proj -0.024% vs anchor)
+  candidate accept_len=— wall_tps=156.046 -> official=165.4 [162.2,168.7] (±1.96%)  clears500=False
+            reproduces_ref=False (Δ65.654% vs MDE 0.10%)  recovers_anchor=False (proj -65.643% vs anchor)
+  >>> closed-loop: reproduces_reference=False recovers_anchor=False
+
+[ab] artifacts -> /workspace/senpai/target/research/validity/compliant_nonspec_floor/walltps/paired_ab.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260614_183359-y4tavh9p
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/nonspec-floor-walltps
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/y4tavh9p
+wandb: updating run metadata; uploading artifact paired_ab_nonspec
+wandb: uploading artifact paired_ab_nonspec
+wandb: uploading requirements.txt; uploading wandb-summary.json; uploading config.yaml; uploading code/scripts/profiler/paired_tps_ab.py; uploading diff.patch (+ 1 more)
+wandb: 
+wandb: Run history:
+wandb:                          baseline/e_accept_exact █▁▁
+wandb:                          baseline/server_ready_s ▄█▁
+wandb:                     baseline/steady_gen_tps_mean ▁█▆
+wandb:                                baseline/wall_tps █▁▂
+wandb:                         candidate/server_ready_s █▁▁
+wandb:                    candidate/steady_gen_tps_mean ▆▁█
+wandb:                               candidate/wall_tps ▁█▇
+wandb:                                      global_step ▁▂▃▅▆▇█
+wandb:        summary/projection/baseline/accept_length ▁
+wandb: summary/projection/baseline/accept_length_cv_pct ▁
+wandb:                                              +55 ...
+wandb: 
+wandb: Run summary:
+wandb:       baseline/e_accept_exact 3.85117
+wandb:       baseline/server_ready_s 90.01871
+wandb:  baseline/steady_gen_tps_mean 450.91429
+wandb:             baseline/wall_tps 454.0854
+wandb:      candidate/server_ready_s 85.01615
+wandb: candidate/steady_gen_tps_mean 152.79524
+wandb:            candidate/wall_tps 156.04605
+wandb:                    event/name summary
+wandb:              event/run_prefix 
+wandb:                   global_step 6
+wandb:                           +67 ...
+wandb: 
+wandb: 🚀 View run lawine/nonspec-floor-walltps at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/y4tavh9p
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260614_183359-y4tavh9p/logs
+[driver] 2026-06-14T18:34:02Z wall_tps exit=0
+[driver] 2026-06-14T18:34:02Z === STEP B: PPL validity pass (nonspec serve) ===
+[ppl] normalized CUDA_VISIBLE_DEVICES '2' -> '0' (single in-container GPU)
+[ppl] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 85s
+[ppl] server ready in 85s; running PPL
+[ppl] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/ppl/ppl_results.jsonl --summary-file /workspace/senpai/target/research/validity/compliant_nonspec_floor/ppl/ppl_summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.612410844421524,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 53494.9506848684,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/validity/compliant_nonspec_floor/ppl/ppl_results.jsonl",
+  "ppl": 2.376564864651504,
+  "prompt_logprobs": 1
+}
+[ppl] RESULT: {
+  "submission": "/workspace/senpai/target/submissions/fa2sw_nonspec_int4",
+  "server_ready_s": 85.01852536201477,
+  "served_model_name": "gemma-4-e4b-it",
+  "ppl_nonspec": 2.376564864651504,
+  "ppl_num_records": 128,
+  "speculative_config_none": true,
+  "ppl_le_2_42": true
+}
+[driver] 2026-06-14T18:35:49Z ppl exit=0
+[driver] 2026-06-14T18:35:49Z === STEP C: consolidate floor_report + wandb ===
+{
+  "pr": 196,
+  "submission": "submissions/fa2sw_nonspec_int4",
+  "lever": "submissions/fa2sw_nonspec_int4/manifest.json:29 (SPECULATIVE_CONFIG=\"\" -> speculative_config=None, K_spec 7->0)",
+  "nonspec_serve_boots": true,
+  "server_ready_s": 85.02002739906311,
+  "nonspec_self_identical": true,
+  "nonspec_token_identity_rate": 1.0,
+  "ppl_nonspec": 2.376564864651504,
+  "ppl_threshold": 2.42,
+  "nonspec_completes_128": true,
+  "nonspec_wall_tps": 156.04605314463453,
+  "nonspec_wall_tps_cv_pct": 0.008496696140413755,
+  "nonspec_steady_gen_tps_mean": 152.68333333333334,
+  "nonspec_step_ar_ms": 6.549503329330859,
+  "nonspec_step_ar_ms_wall_derived": 6.408364581147908,
+  "nonspec_e_of_t": 1.0,
+  "nonspec_official_tps_est": 165.43791973106974,
+  "nonspec_official_tps_est_proj_band": [
+    162.19525295386742,
+    168.68058650827206
+  ],
+  "nonspec_official_tps_est_hw_band": [
+    160.57791973106973,
+    170.29791973106975
+  ],
+  "projection_multiplier": 1.0601865051833779,
+  "projection_multiplier_note": "1.0602 hardware/env transfer ratio anchored on the SPEC footprint (481.53/454.338); applied to the non-spec wall_tps under the assumption local->official transfer is footprint-invariant. At ~3x lower throughput fixed per-request overheads may shift it, but the verdict is robust: the floor is far from 500. wall_tps is the footprint-agnostic primary; K_cal=125.268 (spec-tree-calibrated) deliberately NOT used.",
+  "sigma_hw_tps": 4.86,
+  "nonspec_clears_500": false,
+  "margin_to_500_tps": -334.56208026893023,
+  "margin_to_500_pct": -66.91241605378605,
+  "official_anchor_tps": 481.53,
+  "spec_premium_tps": 316.0920802689302,
+  "spec_premium_pct": 191.06386297818466,
+  "local_spec_baseline_wall_tps": 454.08539709184896,
+  "local_spec_premium_tps": 298.03934394721443,
+  "local_spec_premium_pct": 190.99447755398882,
+  "verdict_label": "STRUCTURAL_GAP_SPEC_EXISTENTIAL",
+  "verdict": "Compliant non-spec int4 floor \u2248 165.4 official TPS (\u03c3_hw band [160.6,170.3]), 66.9% below the 500 target. Speculation premium = 316.1 TPS (191.1% over the compliant floor). Gap is structural: strict #192 enforcement makes the batch-invariant int4 verify kernel (lane a) the ONLY compliant route to 500; the spec path is existential.",
+  "self_test": {
+    "a_boots_and_128": true,
+    "b_self_identical": true,
+    "c_ppl_le_2_42": true,
+    "d_verdict_explicit": true,
+    "e_nan_clean": true
+  },
+  "nonspec_floor_self_test_passes": true,
+  "nan_clean": true,
+  "wandb_walltps_name": "lawine/nonspec-floor-walltps"
+}
+
+[floor] PRIMARY nonspec_floor_self_test_passes=True self_test={'a_boots_and_128': True, 'b_self_identical': True, 'c_ppl_le_2_42': True, 'd_verdict_explicit': True, 'e_nan_clean': True}
+[floor] TEST nonspec_official_tps_est=165.43791973106974
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260614_183551-ekds1cy5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/nonspec-floor-report
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ekds1cy5
+wandb: updating run metadata; uploading artifact compliant_nonspec_floor_report
+wandb: uploading artifact compliant_nonspec_floor_report
+wandb: 
+wandb: Run history:
+wandb:                                global_step ▁
+wandb: summary/floor/local_spec_baseline_wall_tps ▁
+wandb:       summary/floor/local_spec_premium_pct ▁
+wandb:       summary/floor/local_spec_premium_tps ▁
+wandb:            summary/floor/margin_to_500_pct ▁
+wandb:            summary/floor/margin_to_500_tps ▁
+wandb:               summary/floor/nonspec_e_of_t ▁
+wandb:     summary/floor/nonspec_official_tps_est ▁
+wandb:  summary/floor/nonspec_steady_gen_tps_mean ▁
+wandb:           summary/floor/nonspec_step_ar_ms ▁
+wandb:                                        +14 ...
+wandb: 
+wandb: Run summary:
+wandb:                                 event/name summary
+wandb:                           event/run_prefix 
+wandb:                                global_step 0
+wandb: summary/floor/local_spec_baseline_wall_tps 454.0854
+wandb:       summary/floor/local_spec_premium_pct 190.99448
+wandb:       summary/floor/local_spec_premium_tps 298.03934
+wandb:            summary/floor/margin_to_500_pct -66.91242
+wandb:            summary/floor/margin_to_500_tps -334.56208
+wandb:                    summary/floor/nan_clean True
+wandb:           summary/floor/nonspec_clears_500 False
+wandb:                                        +22 ...
+wandb: 
+wandb: 🚀 View run lawine/nonspec-floor-report at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ekds1cy5
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260614_183551-ekds1cy5/logs
+[driver] 2026-06-14T18:35:54Z analyze exit=0
+[driver] 2026-06-14T18:35:54Z DONE
