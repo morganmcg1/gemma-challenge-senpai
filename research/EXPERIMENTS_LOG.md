@@ -1,5 +1,23 @@
 # SENPAI Research Results
 
+## 2026-06-14 05:17 — PR #87: Verify-GEMM argmax-margin greedy-safety gate ✅ MERGED — GREEN (both verify-GEMM levers clear the FP-numerics gate; lm_head-isolated; banks the 65,536-position margin map)
+
+- **Branch:** `kanna/verify-gemm-argmax-margin` · **Student:** kanna · merged ~05:17Z
+- **Hypothesis:** the "lossless by construction" claim for ubel #84 SplitK + land #71 M-widen is unverified at the FP-numerics level — a reduction-order/tiling change could flip the greedy argmax (kanna's own #73 atomic-add control proved ~36% flips out-of-regime). Map the deployed verify's top-2 logit margin, emulate the SplitK K-partition + M=16/32, count argmax flips. GREEN = 0 flips → protects both levers from an FP-nonassoc disqualification BEFORE quota.
+- **Primary metric:** `verify_gemm_argmax_flip_count_splitk = 0`. **Test:** `verify_gemm_min_top2_margin_ulp = 0` (min-positive 0.5 ULP, median 39 ULP).
+
+| metric | value | read |
+|---|---|---|
+| `verify_gemm_argmax_flip_count_splitk` (primary) | **0** | GREEN — SplitK S∈{2,4,8} isolated reduction order, ≤1 bf16-ULP, split-INDEPENDENT |
+| M-widen M=16 / M=32 (real Marlin) | **0 / 0** | M=16 bit-identical to M=8; M=32 ≤0.25 logit |
+| provably flip-proof (margin > 2·max\|Δ\|) | **98.13%** | 64,310/65,536; residual 1,226 → 0 measured flips |
+| exact bf16 ties | 907 (1.38%) | deterministic lowest-index tie-break (greedy-safe) |
+| SplitK-vs-real-M=8 disagreements | 186 (0.28%) | = emu fidelity gap (FP32-emu vs FP16-Marlin-MAC), split-independent — NOT a lever indictment |
+| positions audited | 65,536 | 128 prompts × 512 tok, official config |
+
+- **W&B:** `875cujdk` (~45min GPU decode + ~3min CPU analysis, peak ~19.5GB/23GB A10G). Advisor-verified independently: all 7 numeric metrics + the logged artifact match reported values to exact; run `finished`, `verdict: GREEN`. Honest residual flags (`comfortable_headroom: false`, 1.87% measurement-dependent, 907 tie-bounded) all logged transparently.
+- **Analysis/conclusions:** The #73 mechanism (reduction-order swap → argmax flip) does NOT trigger for the claimed-lossless swaps: margins are wide where they matter (median 39 ULP, 98.13% provably flip-proof) and at the genuinely thin positions the in-regime perturbation (≤1 bf16-ULP) is too small to flip — 0/907 ties broken even where the swap reached a full ULP. Mechanism: the n=12,288 vocab head forces vLLM Marlin into `use_fp32_reduce=True` + atomic-add OFF (`should_use_atomic_add_reduce()` False for n≥2048), so the only lossy step is the single final FP32→bf16 cast → reduction-order change capped at ±1 bf16-ULP. **Hand-off:** land #71 M-widen DIRECT GREEN (M=16 literally bit-exact), proceed to quota; ubel #84 SplitK GREEN with residual = 907 ties to confirm under the real kernel (margin map handed over). **Honest scope:** audits the lm_head projection (the GEMM feeding argmax); upstream network-wide compounding bounded by the per-layer ≤1-ULP regime argument + ultimately the official 128/128 gate → kanna #96 closes that residual directly. **ONE of two pre-quota numerics gates CLEARED** (wirbel #93 attention-side remains). Banks the 65,536-position margin map as a standing safety contract for any future verify-GEMM kernel change. kanna → #96 (network-wide compounding gate).
+
 ## 2026-06-14 05:07 — PR #92: Tree E[T] independence-gap ✅ MERGED — GREEN / DE-RISKED (realized tree E[T] matches independent model +0.025%; last analytical assumption in the 500-path confirmed under real correlated draws)
 
 - **Branch:** `fern/tree-et-independence-gap` · **Student:** fern · merged ~05:07Z by morganmcg1

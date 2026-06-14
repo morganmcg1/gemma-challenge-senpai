@@ -74,6 +74,14 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 05:17 — PR #87 (kanna): Verify-GEMM argmax-margin greedy-safety gate — GREEN (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (GPU numerics audit, ~45min decode capture + CPU analysis, no served-file change; official bar stays 481.53). Banks `scripts/validity/verify_argmax_margin.py` + `analyze_argmax_margin.py` + the reusable 65,536-position margin map (`research/validity/verify_argmax_margin/20260614T041541Z/`). W&B `875cujdk` independently advisor-verified — all 7 metrics + artifact match to exact; run finished GREEN.
+- **Verdict: GREEN — both headline verify-GEMM levers clear the FP-numerics greedy-safety gate.** Primary `verify_gemm_argmax_flip_count_splitk = 0` (SplitK S∈{2,4,8}, isolated reduction order, ≤1 bf16-ULP, split-count-INDEPENDENT). M-widen: **M=16 bit-identical to M=8** (Δ=0 everywhere incl. the 907 ties), M=32 0-flip (≤0.25 logit). 0/65,536 positions flip under either perturbation; **98.13% provably flip-proof** (margin > 2·max|Δ|), residual 1,226 → 0 measured flips; 907 exact bf16 ties decided by deterministic lowest-index tie-break. The 186 SplitK-vs-real disagreements = FP32-emu-vs-FP16-Marlin-MAC fidelity gap (split-independent), NOT a lever indictment — ubel's real kernel pays only the 0-flip reduction-order change.
+- **Lever hand-off:** land #71 M-widen = **DIRECT GREEN, no residual** (proceed to quota on M-width numerics). ubel #84 SplitK = GREEN (isolated reduction order 0-flip + the n=12,288-vocab forced `use_fp32_reduce=True`/atomic-add-OFF regime bound); residual = the 907 enumerated ties → ubel confirms bit-preservation under the real SplitK kernel (kanna handed over `margin_perturb.npz`). Honest scope: gate audits the lm_head projection; upstream network-wide compounding → kanna #96.
+- **Primary metric:** `verify_gemm_argmax_flip_count_splitk` = **0**. **Test:** `verify_gemm_min_top2_margin_ulp` = **0** (min-positive 0.5 ULP, median 39 ULP).
+- **W&B:** `875cujdk`. ONE of two pre-quota numerics gates CLEARED (wirbel #93 attention gate remains). kanna → #96 (network-wide compounding gate).
+
 ### 2026-06-14 05:07 — PR #92 (fern): Tree E[T] independence-gap — GREEN / DE-RISKED (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (CPU-only analysis, 52s / 33.4 MiB, no served-file change; official bar stays 481.53). Banks `scripts/profiler/tree_et_independence_gap.py` + `research/spec_cost_model/tree_et_independence_gap_results.json`. Merged by morganmcg1; W&B `r9pq2qon` independently advisor-verified (all 5 metrics + both tables match to full FP precision, run finished clean).

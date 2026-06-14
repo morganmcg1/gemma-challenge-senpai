@@ -24,7 +24,7 @@
 | **land** | **#71** | **Tree-verify build (THE #1 lever, ~576 TPS projected)** | WIP |
 | stark | #78 | Drafter GEMM/pass fusion (~+2.6% ceil) | WIP — check-in posted 04:14Z |
 | ubel | #84 | SplitK W4A16 verify-GEMM (~+5–12%) | WIP |
-| kanna | #87 | Argmax-margin greedy-safety gate (protects SplitK + tree) | WIP |
+| kanna | **#96** | **Network-wide greedy-compounding gate:** do per-layer ≤1-ULP perturbations compound to flip argmax on the composed land#71×ubel#84 frontier? (closes #87's named upstream residual) | WIP |
 | lawine | #90 | MTP K sweep (confirm K=7 optimal, empirical A/B) | WIP |
 | fern | **#95** | **Drafter loss-objective gate:** is the MTP draft head acceptance-optimal or only likelihood-optimal? (LK-Loss headroom) (Morgan assigned) | WIP |
 | wirbel | **#93** | **Star-attention greedy-equivalence gate:** does the tree-mask numerical path preserve greedy argmax? attention-side twin of kanna #87's GEMM gate | WIP (Morgan assigned) |
@@ -38,17 +38,19 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 - **Overhead:** non-GEMM tree machinery 2.597% of decode (denken #85); ~8× smaller than gain; net +19.82% / ~576 official projected.
 - **E[T] / acceptance rule:** root-to-leaf standard verify is correct; Traversal Verification adds zero under greedy (fern #88 RED, structural proof).
 - **Static topology fully pinned:** entropy-gated dynamic tree closes (oracle +0.27% E[T], sign-reversed, within-step — explains #83's flat per-depth ρ₂; wirbel #86). Uniform max-branch-3 (E[T]=5.207) is at the STRUCTURAL LIMIT for any static topology.
-- **FP numerics:** argmax-margin gate in flight (kanna #87 WIP). SplitK = ONLY remaining live verify-GEMM kernel lever (denken #85 side-finding: KV shared, mask~0, BW-bound).
+- **FP numerics:** GEMM argmax-margin gate ✅ GREEN/MERGED (kanna #87): M-widen M=16 bit-identical, M=32 0-flip, SplitK 0-flip — land #71 M-width is DIRECT GREEN to quota. SplitK = ONLY remaining live verify-GEMM kernel lever (denken #85 side-finding: KV shared, mask~0, BW-bound).
 - **Salvage oracle (debug gate):** ρ₂=0.4165 at divergence steps (wirbel #83). Byteshark broken tree = 0.033 (12× gap = layout bug).
 - **⚠️ SALVAGE-COLLAPSE ROOT CAUSE (chiku-inu, ~04:18Z board, relayed to land #71):** the 0.033 salvage signature = having only ONE of two required halves wired — (1) star-attention DISPATCH installed for tree rows **AND** (2) the fused reject/salvage WALK called on the tree layout. Every prior broken run missed exactly one half. **Runtime double-assert required:** assert (a) star-attn is the dispatched path AND (b) salvage walk is the rejection code path, before any quota spend. Chiku-inu's both-halves-wired package is being oracle-benched by openevolve.
 - **E[T] assumption (fern #92 ✅ GREEN/MERGED):** realized tree E[T]=5.20824 under real correlated draws = independent model to **+0.025%**; gap within [−1.8%, +2.3%] across 3 cross-checks. Correlation is strong (r=−0.97) but E[T]-neutral. ~568 projection STANDS (carry ±2–3% band → 558–581). **Last analytical assumption DE-RISKED.** Only true channel-4 test = land's first tree `accept_length` run.
-- **Attention greedy-equivalence (wirbel #93 WIP):** does the tree-mask numerical path (validated externally to relerr 1e-3) preserve greedy argmax? — attention-side twin of kanna #87's GEMM gate.
-- **Remaining pre-quota gates:** kanna #87 (GEMM argmax-margin) + wirbel #93 (attention argmax) — the two FP-numerics gates. All ANALYTICAL assumptions now closed (tree-economics lane saturated: #88/#86/#91/#92).
+- **Attention greedy-equivalence (wirbel #93 WIP):** does the tree-mask numerical path (validated externally to relerr 1e-3) preserve greedy argmax? — attention-side twin of kanna #87's now-GREEN GEMM gate. **LAST live pre-quota numerics gate.**
+- **Network-wide compounding (kanna #96 WIP):** closes #87's named residual — do the per-layer ≤1-ULP perturbations compound across ~30 layers to flip the final argmax on the composed land#71×ubel#84 frontier? Integration test consuming wirbel #93 + kanna #87 per-op GREENs.
+- **Pre-quota gate status:** GEMM ✅ (kanna #87 MERGED) · attention 🔄 (wirbel #93 WIP) · network-wide compounding 🔄 (kanna #96 WIP). All ANALYTICAL assumptions closed (tree-economics lane saturated: #88/#86/#91/#92).
 
 ## Cycle 39–40 — lanes closed / confirmed this session
 
 | PR | student | verdict | significance |
 |---|---|---|---|
+| #87 | kanna | Argmax-margin GREEN: verify-GEMM SplitK + M-widen 0/65,536 flips; 98.13% provably flip-proof; M=16 bit-identical | pre-quota GEMM numerics gate CLEARED (1 of 2) |
 | #92 | fern | E[T] independence GREEN: realized 5.20824 = independent +0.025%; corr strong but E[T]-neutral | tree-economics-analytics CLOSED (de-risk) |
 | #91 | fern | Topology CONFIRMED: mb3 +0.9614% E[T] > mb4; acceptance model validated to ~1e-3 tok | topology-analytics CLOSED |
 | #86 | wirbel | Entropy-branching: r=−0.9688 (sign-reversed, within-step); oracle +0.27% E[T] — non-actionable | entropy-branching + dynamic-tree CLOSED |
