@@ -1,5 +1,47 @@
 # SENPAI Research Results
 
+## 2026-06-14 01:49 — PR #77: Drafter non-GEMM profile — map the real ~70% binding drafter cost ✅ MERGED (decisive FAIL-FAST negative: no contract-safe non-GEMM drafter lever; drafter axis fully harvested → land tree-verify #71)
+
+- **Branch:** `denken/drafter-nongemm-profile` · **Student:** denken
+- **Status:** MERGED as a research artifact (audit-only, zero served-file change → no BASELINE.md change; frontier bar UNCHANGED 481.53). Lands a reusable profiler `scripts/profiler/drafter_nongemm_profile.py` + `research/spec_cost_model/{drafter_nongemm_profile.json,report_drafter_nongemm_profile.md}`.
+- **Hypothesis:** #75 showed ~70% of the drafter forward is NON-GEMM. Profile that non-GEMM mass per sub-op to find a contract-safe lever (the drafter's last remaining headroom before we commit to the tree-verify build).
+- **Primary metric:** `drafter_nongemm_binding_subblock_pct_of_decode = 1.54` (W&B `q9p4vetv`). **Test:** `realistically_addressable_drafter_tps_headroom_pct = 0.0`.
+
+| drafter non-GEMM sub-block (A10G, deployed M=1×K=7, conc=1) | cost | % decode step |
+|---|--:|--:|
+| **binding sub-block: `centroid_sampler_fused`** | **178 µs/step** | **1.54%** |
+| attention | 61 µs/step | 0.53% (memory floor) |
+| rest (fused glue + dispatch) | — | no hotspot |
+| "gather only candidate set" optimization | already DEPLOYED (8192/262144 = 3.1%, 31× cheaper) | — |
+| **realistically addressable headroom** | **~0%** | — |
+
+**Conclusions:**
+1. **Decisive FAIL-FAST negative.** There is no contract-safe non-GEMM drafter lever — the binding sub-block is 1.54% of the decode step, attention is at its memory floor, and the obvious win ("gather only the candidate set") is already deployed. Addressable headroom ≈ 0%.
+2. **The drafter axis is now fully harvested** across #75 (forward roofline, int4-drafter refuted) + #77 (non-GEMM profile). No remaining drafter-side TPS lever survives the roofline.
+3. denken's own verdict: *"Do not build a drafter non-GEMM optimization — land tree-verify (#71), the #1 lever."* Banks the third reusable profiler onto the advisor branch.
+4. denken reassigned → **prompt-lookup / ngram hybrid drafter Step-0 viability gate** (orthogonal free-tokens lever; hedges the tree-verify timeline).
+
+## 2026-06-14 01:38 — PR #34: Benchmark-matched reasoning corpus — break the 0.73 drafter plateau ✅ MERGED (decisive corpus positive: native 0.7792, +81% rel; BUT K=1 drafter not deployable vs MTP 3.844 — not a TPS win)
+
+- **Branch:** `fern/bench-reasoning-corpus` · **Student:** fern
+- **Status:** MERGED as a research artifact (corpus + EAGLE-3 training/eval pipeline; the deployed MTP serving stack is unchanged → no BASELINE.md change; frontier bar UNCHANGED 481.53). Lands `scripts/drafter/{gen_eagle3_corpus,train_eagle3,eval_eagle3}.py` + `research/eagle3_drafter/arch_notes.md`.
+- **Hypothesis:** the 0.73 drafter-acceptance plateau is a CORPUS-distribution problem, not a capacity ceiling. Train EAGLE-3 on a benchmark-matched reasoning corpus (aime / gpqa / mmlu_pro) → break 0.73 on tf_acc and native accept/step.
+- **Primary metric:** `native_accept_per_step_bench_holdout = 0.7792` (vs #25 ckpt 0.4315, **+81% rel**) — W&B `56ksyxgw` / `gua9x68j` / `cjhjnsff`. **Test:** `native_accept_per_step_bench_holdout_25ckpt = 0.4315`.
+
+| quantity (EAGLE-3 drafter, 240-rec / 159k-tok bench holdout, feature_shift=1) | value |
+|---|--:|
+| **native accept/step (bench corpus ckpt)** | **0.7792** (vs #25 ckpt 0.4315, +81% rel) |
+| teacher-forced acc (same holdout) | 0.7617 vs 0.4709 |
+| per-source: aime / gpqa / mmlu_pro | 0.8426 / 0.8033 / 0.7006 |
+| chain past step 1 (K=1 regime) | **collapses → ~1.78 tok/step** |
+| deployed MTP K=7 E[T] (reference) | **3.844 tok/step** |
+
+**Conclusions:**
+1. **The corpus lever DECISIVELY breaks the 0.73 plateau** on both teacher-forced (0.7617) and native (0.7792) — benchmark-matched reasoning data is the right distribution. Strong, reproducible drafter-quality result.
+2. **BUT this is NOT a TPS frontier win as-is:** the EAGLE-3 drafter is K=1-regime and its chain collapses past step 1 (~1.78 tok/step), **far below** the deployed MTP K=7 chain's E[T]=3.844. Step-0 acceptance is excellent; multi-step chaining is the gap.
+3. **Residual ceiling = the K=1 training regime, not the corpus.** Merged to bank the proven corpus + training/eval pipeline.
+4. fern reassigned → **#80 (multi-step / HASS drafter training)**: train the drafter on its own hidden states for steps 2..K to lift the chain past step 1 toward MTP's E[T], on the proven benchmark corpus.
+
 ## 2026-06-14 01:30 — PR #76: Calibrate deployed-chain acceptance to pin the tree-verify gain band ✅ MERGED (decisive positive: top-1=0.729, E[T]=3.844; M=32 +18.7%/≈508 TPS empirically anchored; wirbel→#79 ρ probe)
 
 - **Branch:** `wirbel/acceptance-calibration` · **Student:** wirbel
