@@ -202,37 +202,54 @@ def ladder_from_spec(spec: dict, run_dir_default: Path) -> dict[str, Any]:
     raise ValueError(f"ladder spec needs conditional_p_sglang or server_log: {spec}")
 
 
-def native_sglang_ladder(proxy: dict, q_pub_sglang: list[float], run_dir: Path) -> dict[str, Any]:
+def _pool_decode_drop(w: float, q_pub_sglang: list[float], q_hard: list[float],
+                      q_public_banked: list[float]) -> tuple[float, list[float]]:
+    """Count-pool public+hard at weight w, relative_transfer onto the banked decode
+    public, and return (decode-frame linear-E[T] drop, pooled sglang conditional ladder).
+    The DECODE frame is where the 481.53 TPS / GT-4.3% calibration gate lives."""
+    c = pool_cumulative([(q_pub_sglang, 1.0 - w), (q_hard, w)])
+    q_native = cumulative_to_conditional(c)
+    spine = relative_transfer(q_public_banked, q_pub_sglang, q_native)
+    et_pub_banked = linear_et_from_q(q_public_banked)
+    drop = (et_pub_banked - linear_et_from_q(spine)) / et_pub_banked
+    return drop, q_native
+
+
+def native_sglang_ladder(proxy: dict, q_pub_sglang: list[float], q_public_banked: list[float],
+                         run_dir: Path, gt_drop: float, scan_n: int = 4000) -> dict[str, Any]:
     """Resolve a proxy's NATIVE sglang per-position ladder.
 
     mode 'measured' : parse a directly-measured real 128-set ladder.
-    mode 'pooled'   : count-pool real component pools to hit a target sglang/decode drop
-                      EXACTLY (continuous pool weight); the public pool is q_pub_sglang.
+    mode 'pooled'   : count-pool a real DISTINCT-axis hard component pool with the real
+                      public pool (cumulative blend = the exact ladder of the realizable
+                      prompt mixture) and pick the continuous weight w that lands the
+                      DECODE-frame linear drop on the GT-4.3% anchor (<=0.5pp gate). The
+                      independence across proxies comes from the distinct hard components,
+                      not from re-weighting one tail.
     """
     mode = proxy.get("mode", "measured")
     if mode == "measured":
         lad = ladder_from_spec(proxy, run_dir)
         return {"conditional_p": lad["conditional_p"], "num_drafts": lad["num_drafts"],
-                "pool_weight": None}
+                "pool_weight": None, "achieved_decode_drop_pct": None}
     if mode == "pooled":
-        comp = ladder_from_spec(proxy["component"], run_dir)   # the "hard" component pool
+        comp = ladder_from_spec(proxy["component"], run_dir)   # the distinct "hard" pool
         q_hard = comp["conditional_p"]
-        et_pub = linear_et_from_q(q_pub_sglang)
-        # bisect the hard-pool weight so the POOLED sglang linear drop hits target.
-        target = float(proxy.get("target_sglang_drop", GT_DROP))
-        lo, hi = 0.0, 1.0
-        for _ in range(80):
-            w = 0.5 * (lo + hi)
-            c = pool_cumulative([(q_pub_sglang, 1.0 - w), (q_hard, w)])
-            drop = (et_pub - (1.0 + sum(c))) / et_pub
-            if drop < target:
-                lo = w
-            else:
-                hi = w
-        w = 0.5 * (lo + hi)
-        c = pool_cumulative([(q_pub_sglang, 1.0 - w), (q_hard, w)])
-        return {"conditional_p": cumulative_to_conditional(c), "num_drafts": comp["num_drafts"],
-                "pool_weight": w}
+        target = float(proxy.get("target_decode_drop", gt_drop))
+        full_drop, _ = _pool_decode_drop(1.0, q_pub_sglang, q_hard, q_public_banked)
+        # fine scan over w (robust to per-position non-monotonicity); pick closest to target.
+        best = None
+        for i in range(1, scan_n + 1):
+            w = i / float(scan_n)
+            drop, q_native = _pool_decode_drop(w, q_pub_sglang, q_hard, q_public_banked)
+            err = abs(drop - target)
+            if best is None or err < best[0]:
+                best = (err, w, q_native, drop)
+        _, w, q_native, drop = best
+        return {"conditional_p": q_native, "num_drafts": comp["num_drafts"], "pool_weight": w,
+                "achieved_decode_drop_pct": drop * 100.0,
+                "component_full_decode_drop_pct": full_drop * 100.0,
+                "component_conditional_p": q_hard}
     raise ValueError(f"unknown proxy mode {mode}")
 
 
@@ -383,7 +400,7 @@ def main() -> int:
 
     proxies_out = []
     for proxy in manifest["proxies"]:
-        native = native_sglang_ladder(proxy, q_pub_sglang, run_dir)
+        native = native_sglang_ladder(proxy, q_pub_sglang, q_public, run_dir, args.gt_drop)
         prop = propagate_native(model, q_public, native["conditional_p"], q_pub_sglang,
                                 rho_pub, args.step)
         d = prop["projection"]["descent_only"]; b = prop["projection"]["both_bugs"]
@@ -391,7 +408,10 @@ def main() -> int:
         reproduces_4p3 = bool(abs(calib_drop - args.gt_drop) <= CALIB_TOL)
         proxies_out.append({
             "name": proxy["name"], "axis": proxy.get("axis"), "mode": proxy.get("mode", "measured"),
-            "pool_weight": native.get("pool_weight"),
+            "pool_weight": _clean(native.get("pool_weight")),
+            "achieved_decode_drop_pct": _clean(native.get("achieved_decode_drop_pct")),
+            "component_full_decode_drop_pct": _clean(native.get("component_full_decode_drop_pct")),
+            "component_conditional_p": native.get("component_conditional_p"),
             "conditional_p_sglang": native["conditional_p"],
             "native_sglang_linear_drop_pct": _clean(prop["native_sglang_linear_drop_pct"]),
             "native_decode_linear_drop_pct": _clean(prop["native_decode_linear_drop_pct"]),

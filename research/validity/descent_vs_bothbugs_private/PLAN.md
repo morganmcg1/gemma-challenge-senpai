@@ -74,3 +74,34 @@ removes exactly that assumption while hitting the 4.3% calibration anchor exactl
 
 Converts #156's *transferred* 1.80% into a **directly-measured** drop with a CI.
 Informs (does NOT authorize) the launch go/no-go between descent-only and both-bugs.
+
+## Result (DONE — W&B `5hz3dfrq`)
+
+Three independent organizer-faithful proxies measured on the deployed
+`fa2sw_precache_kenyan` stack (sglang `vllm-chat` scored), each count-pooled
+(cumulative, realizable) to the GT-4.3% decode-frame anchor — NO conditional
+interpolation:
+
+| proxy | axis | native sglang drop | pool w | tree drop (descent) | descent TPS (central / τ-low) |
+|-------|------|-------------------:|-------:|--------------------:|------------------------------:|
+| native_code | domain-code | 10.84% | 0.408 | 2.21% | 508.5 / 504.6 |
+| native_casual | register-casual-short | 13.97% | 0.314 | 1.98% | 509.6 / 505.8 |
+| native_sharegpt | generic-hard-chat-tail | 10.91% | 0.402 | 1.87% | 510.2 / 506.4 |
+
+- **PRIMARY `native_proxies_reproduce_flagship_4p3` = True** (all 3 reproduce
+  GT-4.3% LINEAR to ≤0.5pp by construction).
+- **TEST `tree_private_drop_pct_native_ci` = 2.04%**, band **[1.87%, 2.21%]**
+  (descent-only); both-bugs CI 2.09%.
+- **`descent_only_private_safe_native` = True** — every proxy keeps descent-only
+  ≥500 at the central AND conservative τ-low corner (worst 504.6); worst central
+  margin +8.46 TPS. **`both_bugs_required_private` = False** — the spine is NOT a
+  hard private-axis launch dependency.
+- Removing the interpolation shifts the descent drop **+0.24pp** (1.80→2.04 mid).
+  Decomposition: pooling-vs-interpolation on the *identical* sharegpt tail moves
+  it only +0.07pp (1.80→1.87); the genuine cross-domain shape independence
+  widens it up to 2.21% (code). Same-aggregate, different-shape → the tree drop
+  is shape-sensitive, which is exactly why the single-interpolation point was
+  insufficient.
+- Machinery xcheck: 4.3% through the same DP → descent 510.6 / both 525.5
+  (reproduces #156). PPL 2.377 on every fresh server (≤2.42 cap; greedy/PPL
+  untouched). BASELINE unchanged (481.53). Does NOT authorize a launch.
