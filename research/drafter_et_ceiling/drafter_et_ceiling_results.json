@@ -1,0 +1,351 @@
+{
+  "pr": 119,
+  "gate": {
+    "primary_metric_name": "drafter_et_ceiling_capacity_perfect",
+    "drafter_et_ceiling_capacity_perfect_fixed_cost": 3.8444537125748504,
+    "drafter_et_ceiling_capacity_perfect_optimistic": 6.161359334895227,
+    "test_metric_name": "et_per_drafter_cost_crossover",
+    "et_per_drafter_cost_crossover_optimum_m": 1.0,
+    "et_per_drafter_cost_crossover_clears_530": true,
+    "verdict": "AMBER",
+    "verdict_label": "fixed-cost lane CLOSED (definitive); cost-relaxed lane is an UNMEASURED, tree-DOMINATED bet -- bank as contingency, no train ask",
+    "fixed_cost_lane": "RED-CLOSED (definitive: 3.844 -> 481.53, openevolve parity incl. KL)",
+    "cost_relaxed_lane": "DOMINATED by the tree: even optimistic capture only MATCHES 568 at m~2 (unproven ~44% near-miss re-rank); openevolve-consistent prior puts the optimum at the CURRENT size. Not a fundable train ask.",
+    "fleet_recommendation": "COMMIT the tree as the past-530 path. Do NOT fund a bigger-drafter train: the drafter-quality E[T] lane is closed at fixed cost and dominated by the de-risked tree at every relaxed cost. The residual uncertainty (the UNMEASURED size-recovery slice) does not flip the decision -- its optimistic resolution only ties the tree. If the fleet ever revisits, gate it on ONE cheap bigger-drafter A10G-oracle eval (openevolve's oracle, no train, no bench-quota) to measure marginal E[T]/cost BEFORE any train ask.",
+    "definitive_closure": "#115 closed CONDITIONING (recurrent drafter -> independence headroom 0); #119 closes CAPACITY-AT-FIXED-COST (openevolve parity incl. KL -> 3.844 is the fixed-cost ceiling, below clear-500) and prices the COST escape (tree-dominated at every m). Past-530 is committed tree-only for fleet purposes."
+  },
+  "step1_decompose": {
+    "anchor": {
+      "q0_pos1_accept": 0.728739760479042,
+      "pos1_miss": 0.271260239520958,
+      "base_E_T": 3.8444537125748504,
+      "K_spec": 7,
+      "cond_accept_ladder": [
+        0.728739760479042,
+        0.7589764102641635,
+        0.7924989076194682,
+        0.821702519412012,
+        0.8342716929825772,
+        0.8352594665096346,
+        0.8472621220149911
+      ],
+      "rank_coverage_cov_k": {
+        "2": 0.4165047789261015,
+        "3": 0.5714507731758489,
+        "4": 0.6531976066516435
+      },
+      "near_miss_pool_cov4": 0.6531976066516435,
+      "hard_miss_pool_beyond4": 0.3468023933483565,
+      "openevolve_parity_accept_length": 3.83,
+      "openevolve_recipes": [
+        "CE",
+        "recipe-sweeps(lr/sel-weight/steps)",
+        "faithful-vLLM-hidden-capture",
+        "DeepSeek-MTP-KL-distill(alpha=0.5 parity, alpha=0.9 worse)"
+      ]
+    },
+    "drafter_accept_ceiling_per_position": {
+      "fixed_cost_openevolve": [
+        0.728739760479042,
+        0.7589764102641635,
+        0.7924989076194682,
+        0.821702519412012,
+        0.8342716929825772,
+        0.8352594665096346,
+        0.8472621220149911
+      ],
+      "optimistic_all_top4_promoted": [
+        0.9059262997138833,
+        0.9164124422261996,
+        0.9280381245400331,
+        0.9381660070041036,
+        0.9425250264807865,
+        0.9428675887040562,
+        0.9470301383598496
+      ]
+    },
+    "drafter_et_ceiling_capacity_perfect": {
+      "fixed_cost_m1": 3.8444537125748504,
+      "optimistic_all_near_miss": 6.161359334895227,
+      "absolute_drafter_eq_target": 8.0,
+      "band": [
+        3.8444537125748504,
+        6.161359334895227
+      ]
+    },
+    "miss_decomposition_pos1": {
+      "miss_total": 0.271260239520958,
+      "capacity_recoverable_frac_upper_bound": 0.6531976066516435,
+      "intrinsic_irreducible_frac_lower_bound": 0.3468023933483565,
+      "capacity_recoverable_frac_at_fixed_cost": 0.0,
+      "note": "openevolve parity (incl. KL-distill) pins the FIXED-CAPACITY recoverable at ~0; the size-recoverable slice is UNMEASURED and upper-bounded by the top-4 near-miss pool (cov4)."
+    },
+    "verifier_confidence_crosscut_caveated": {
+      "verifier_p1_to_rho2_pearson_r": 0.985,
+      "cov4_by_verifier_entropy_regime": [
+        0.7787,
+        0.8102,
+        0.7139,
+        0.5875,
+        0.3742
+      ],
+      "cov4_regime_weighted_sanity": 0.6529,
+      "confident_verifier_recoverable_pool_frac_of_miss": 0.31778,
+      "caveat": "verifier confidence at t+1 is NOT predictability from the drafter's t-input; used descriptively, never as the intrinsic/capacity boundary (PR Step-1 warning)."
+    }
+  },
+  "step2_milestones": {
+    "drafter_et_ceiling_official_tps": {
+      "fixed_cost_m1": 481.58683564416435,
+      "optimistic_ceiling_if_free_m1": 771.8208534162587
+    },
+    "drafter_own_milestone_bars_E_T_at_step1": {
+      "beat_frontier_481p53": 3.844,
+      "clear_500": 3.9914439391107512,
+      "clear_530": 4.230930575457396,
+      "match_tree_568": 4.534280314829814
+    },
+    "milestone_reach_vs_106_E_T_marks": {
+      "beat_linear": {
+        "E_T_milestone": 4.45,
+        "fixed_cost_reaches": false,
+        "optimistic_ceiling_reaches": true
+      },
+      "clear_500": {
+        "E_T_milestone": 4.62,
+        "fixed_cost_reaches": false,
+        "optimistic_ceiling_reaches": true
+      },
+      "tree_overtakes": {
+        "E_T_milestone": 4.7,
+        "fixed_cost_reaches": false,
+        "optimistic_ceiling_reaches": true
+      },
+      "tree_width_ceiling": {
+        "E_T_milestone": 5.207,
+        "fixed_cost_reaches": false,
+        "optimistic_ceiling_reaches": true
+      }
+    },
+    "fixed_cost_lane_status": "CLOSED -- capacity-perfect-at-fixed-cost E[T]=3.844 maps to 481.53 official (ties the frontier); below clear-500 (needs E[T]>=3.991) and every #106 mark. Retraining incl. KL-distill cannot move it (openevolve)."
+  },
+  "step3_cost_crossover": {
+    "requirement_curve_model_free": [
+      {
+        "target_official": 500.0,
+        "by_m": [
+          {
+            "m": 1.0,
+            "step": 1.0,
+            "required_E_T": 3.9914439391107512,
+            "required_pool_capture_frac": 0.06344247479044504,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 1.5,
+            "step": 1.035,
+            "required_E_T": 4.131144476979627,
+            "required_pool_capture_frac": 0.12373864590895879,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 2.0,
+            "step": 1.07,
+            "required_E_T": 4.270845014848503,
+            "required_pool_capture_frac": 0.18403481702747254,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 3.0,
+            "step": 1.1400000000000001,
+            "required_E_T": 4.550246090586257,
+            "required_pool_capture_frac": 0.30462715926450085,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 4.0,
+            "step": 1.21,
+            "required_E_T": 4.829647166324009,
+            "required_pool_capture_frac": 0.4252195015015283,
+            "feasible_within_optimistic_ceiling": true
+          }
+        ]
+      },
+      {
+        "target_official": 530.0,
+        "by_m": [
+          {
+            "m": 1.0,
+            "step": 1.0,
+            "required_E_T": 4.230930575457396,
+            "required_pool_capture_frac": 0.1668073395650402,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 1.5,
+            "step": 1.035,
+            "required_E_T": 4.379013145598405,
+            "required_pool_capture_frac": 0.23072128095066483,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 2.0,
+            "step": 1.07,
+            "required_E_T": 4.5270957157394145,
+            "required_pool_capture_frac": 0.2946352223362898,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 3.0,
+            "step": 1.1400000000000001,
+            "required_E_T": 4.823260856021432,
+            "required_pool_capture_frac": 0.42246310510753904,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 4.0,
+            "step": 1.21,
+            "required_E_T": 5.119425996303449,
+            "required_pool_capture_frac": 0.5502909878787883,
+            "feasible_within_optimistic_ceiling": true
+          }
+        ]
+      },
+      {
+        "target_official": 540.0,
+        "by_m": [
+          {
+            "m": 1.0,
+            "step": 1.0,
+            "required_E_T": 4.310759454239611,
+            "required_pool_capture_frac": 0.20126229448990526,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 1.5,
+            "step": 1.035,
+            "required_E_T": 4.461636035137998,
+            "required_pool_capture_frac": 0.26638215929790027,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 2.0,
+            "step": 1.07,
+            "required_E_T": 4.612512616036384,
+            "required_pool_capture_frac": 0.3315020241058953,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 3.0,
+            "step": 1.1400000000000001,
+            "required_E_T": 4.914265777833157,
+            "required_pool_capture_frac": 0.46174175372188536,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 4.0,
+            "step": 1.21,
+            "required_E_T": 5.2160189396299295,
+            "required_pool_capture_frac": 0.591981483337875,
+            "feasible_within_optimistic_ceiling": true
+          }
+        ]
+      },
+      {
+        "target_official": 568.0,
+        "by_m": [
+          {
+            "m": 1.0,
+            "step": 1.0,
+            "required_E_T": 4.534280314829814,
+            "required_pool_capture_frac": 0.2977361682795276,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 1.5,
+            "step": 1.035,
+            "required_E_T": 4.692980125848857,
+            "required_pool_capture_frac": 0.3662326186701593,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 2.0,
+            "step": 1.07,
+            "required_E_T": 4.8516799368679004,
+            "required_pool_capture_frac": 0.434729069060791,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 3.0,
+            "step": 1.1400000000000001,
+            "required_E_T": 5.169079558905988,
+            "required_pool_capture_frac": 0.5717219698420548,
+            "feasible_within_optimistic_ceiling": true
+          },
+          {
+            "m": 4.0,
+            "step": 1.21,
+            "required_E_T": 5.486479180944074,
+            "required_pool_capture_frac": 0.708714870623318,
+            "feasible_within_optimistic_ceiling": true
+          }
+        ]
+      }
+    ],
+    "bar_runaway_slope_E_T_per_drafter_cost_unit_530": 0.29616514028201774,
+    "parametric_optimum_scenarios": {
+      "RED_no_size_recovery": {
+        "m_star": 1.0,
+        "E_T_at_opt": 3.8444537125748504,
+        "official_at_opt": 481.58683564416435,
+        "clears_530": false,
+        "beats_tree_568": false
+      },
+      "slow_capture_optimistic_ceiling_b0p5": {
+        "m_star": 2.5,
+        "E_T_at_opt": 4.696019556858778,
+        "official_at_opt": 532.3626636126131,
+        "clears_530": true,
+        "beats_tree_568": false
+      },
+      "moderate_capture_optimistic_ceiling_b1": {
+        "m_star": 2.6500000000000004,
+        "E_T_at_opt": 5.287055326472443,
+        "official_at_opt": 593.7235164131463,
+        "clears_530": true,
+        "beats_tree_568": true
+      },
+      "fast_capture_optimistic_ceiling_b2": {
+        "m_star": 2.35,
+        "E_T_at_opt": 5.741820064217024,
+        "official_at_opt": 657.1640283344695,
+        "clears_530": true,
+        "beats_tree_568": true
+      }
+    },
+    "et_per_drafter_cost_crossover": {
+      "optimum_under_openevolve_consistent_prior_m": 1.0,
+      "optimum_official": 481.58683564416435,
+      "any_scenario_clears_530": true,
+      "any_scenario_beats_tree_568": true,
+      "match_tree_568_requires_m2_pool_capture_frac": 0.434729069060791,
+      "clear_530_requires_m2_pool_capture_frac": 0.2946352223362898,
+      "note": "Under the only empirical prior (openevolve: size recovers as little as retraining -> ~0), official(m) is strictly decreasing and the optimum is the CURRENT size m=1 (481.53). Clearing 530 needs a 2x drafter to re-rank ~30% of its top-4 near-misses to rank-1; merely MATCHING the de-risked tree (568) needs ~44% -- a recovery measured at ~0 and DOMINATED by the tree, which pays no per-token sequential drafter tax."
+    }
+  },
+  "anchors": {
+    "frontier_official": 481.53,
+    "K_cal": 125.26795005202914,
+    "E_T_linear": 3.844,
+    "E_T_tree": 5.207,
+    "drafter_slice": 0.07,
+    "tau": 1.0,
+    "target_official": 500.0,
+    "tree_official_central": 568.0,
+    "tree_official_band": [
+      558.0,
+      581.0
+    ]
+  },
+  "method": "CPU-only analytic composition of merged #100 (official=K_cal*E[T]/step*tau) + #106 milestones + #115 oracle-conditioned q0 + #79/#86 rank-coverage & verifier-confidence ladders + openevolve public parity sweep. No GPU/vLLM/HF-Job/train/served change; greedy identity untouched by construction."
+}
