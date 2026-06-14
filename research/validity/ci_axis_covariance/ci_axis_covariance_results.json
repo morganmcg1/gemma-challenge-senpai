@@ -1,0 +1,394 @@
+{
+  "pr": 195,
+  "metric_primary": "ci_covariance_self_test_passes",
+  "metric_test": "combined_sigma_corrected",
+  "ci_covariance_self_test_passes": true,
+  "combined_sigma_corrected": 15.25845450494761,
+  "quadrature_valid": false,
+  "covariance_model": "sigma^2_combined = sum_i sigma_i^2 + 2*sum_{i<j} rho_ij*sigma_i*sigma_j; quadrature assumes all rho_ij=0",
+  "axis_sigmas": {
+    "order": [
+      "sampling",
+      "input_lambda",
+      "hardware",
+      "private"
+    ],
+    "sigma_tps": {
+      "sampling": 10.906182006867379,
+      "input_lambda": 3.710490448740057,
+      "hardware": 4.864468814937121,
+      "private": 0.8839182724133238
+    },
+    "sampling": {
+      "sigma_tps": 10.906182006867379,
+      "source": "wirbel #175 et_second_moment tps_finite_sample_ci_halfwidth (both-bugs, B=16384, z=1.96)",
+      "N_steps_iid": 3146.561123129173,
+      "sigma_icc1_tps": 54.07366952923218,
+      "icc1_note": "wirbel #190 ICC=1 worst corner: N_eff -> N_prompts=128 inflates +-10.91 -> +-54.07 TPS"
+    },
+    "input_lambda": {
+      "sigma_tps": 3.710490448740057,
+      "source": "denken #187 h_in_tps_lambda_route (lambda_hat half-width 0.01714 x slope 216.482)",
+      "lambda_halfwidth": 0.017139919169244854,
+      "lambda_slope_tps_per_lambda": 216.48237731470778,
+      "rho_input_output_measured": 0.9449429462424024,
+      "overlap_fraction": 0.8929171716532718
+    },
+    "hardware": {
+      "sigma_tps": 4.864468814937121,
+      "sigma_within_tps": 0.056157935896891956,
+      "sigma_between_tps": 4.864144646053565,
+      "between_over_within_ratio": 86.61544567778121,
+      "central_tps": 505.4635557048992,
+      "source": "kanna #188 oneshot_hw_bound sigma_oneshot_tps (within (+) between, between-dominated 87x)"
+    },
+    "private": {
+      "sigma_tps": 0.8839182724133238,
+      "sigma_adverse_tps": 2.5917889154968154,
+      "drop_ci_pp": [
+        1.87,
+        2.21
+      ],
+      "drop_halfwidth_pp": 0.16999999999999993,
+      "forward_slope_tps_per_pp": -5.199519249490142,
+      "drop_pinned_pct": 1.801511061644668,
+      "drop_adverse_pct": 2.299978091216866,
+      "source": "stark #176/#191 private_adverse_skew native drop CI [1.87,2.21]% x measured drop->TPS slope"
+    }
+  },
+  "covariance_data_sources": {
+    "n": 12,
+    "source": "kanna #188 hw_variance_envelope/fresh_n12 (within-device, clock-locked 1710 MHz)",
+    "r_within_device": -0.49645919998422683,
+    "r_within_device_ci95": [
+      -0.833018,
+      0.108299
+    ],
+    "wall_tps": {
+      "mean": 454.00664278815566,
+      "std": 0.050440977701952334,
+      "cv_pct": 0.011110184950639286
+    },
+    "e_accept_exact": {
+      "mean": 3.8509840108624034,
+      "std": 0.0013284942828522901,
+      "cv_pct": 0.0344975278813163
+    },
+    "caveat": "WITHIN-device only (single pinned A10G, clock locked 1710 MHz). This r multiplies sigma_within=0.056 TPS, NOT the between-device sigma_between=4.864 that dominates sigma_hw (87x). The launch-relevant BETWEEN-device acceptance x TPS correlation is NOT co-logged: the frantic-penguin n=3 cross-device draws carry TPS only, no acceptance. rho(*,hw) is therefore a bounded assumption."
+  },
+  "rho": {
+    "axes": [
+      "sampling",
+      "input_lambda",
+      "hardware",
+      "private"
+    ],
+    "rho_central_matrix": [
+      [
+        1.0,
+        0.9449429462424024,
+        -0.005731380956236402,
+        0.0
+      ],
+      [
+        0.9449429462424024,
+        1.0,
+        -0.005731380956236402,
+        0.0
+      ],
+      [
+        -0.005731380956236402,
+        -0.005731380956236402,
+        1.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "rho_box_lo_matrix": [
+      [
+        1.0,
+        0.85,
+        -0.3,
+        -0.3
+      ],
+      [
+        0.85,
+        1.0,
+        -0.3,
+        -0.3
+      ],
+      [
+        -0.3,
+        -0.3,
+        1.0,
+        -0.3
+      ],
+      [
+        -0.3,
+        -0.3,
+        -0.3,
+        1.0
+      ]
+    ],
+    "rho_box_hi_matrix": [
+      [
+        1.0,
+        0.99,
+        0.3,
+        0.3
+      ],
+      [
+        0.99,
+        1.0,
+        0.3,
+        0.3
+      ],
+      [
+        0.3,
+        0.3,
+        1.0,
+        0.3
+      ],
+      [
+        0.3,
+        0.3,
+        0.3,
+        1.0
+      ]
+    ],
+    "within_share_of_sigma_hw": 0.011544515554185512,
+    "rho_acc_hw_central": -0.005731380956236402,
+    "pairs": {
+      "sampling__input_lambda": {
+        "i": "sampling",
+        "j": "input_lambda",
+        "rho_central": 0.9449429462424024,
+        "rho_ci95": [
+          0.922716,
+          0.960907
+        ],
+        "rho_box": [
+          0.85,
+          0.99
+        ],
+        "method": "measured_denken187_rho_input_output",
+        "n_colog": 128,
+        "note": "OUTPUT-side accepted-length scatter and INPUT-side lambda_hat are two views of the SAME accept draw (overlap_fraction=0.8929=rho^2). DOUBLE-COUNT if both stacked in quadrature."
+      },
+      "sampling__hardware": {
+        "i": "sampling",
+        "j": "hardware",
+        "rho_central": -0.005731380956236402,
+        "rho_ci95": [
+          -0.3,
+          0.3
+        ],
+        "rho_box": [
+          -0.3,
+          0.3
+        ],
+        "method": "within_device_proxy+bounded_between",
+        "n_colog": 12,
+        "note": "within-device r=-0.496 (n=12) maps to central -0.0057 (x within-share 0.0115); BETWEEN-device rho UNMEASURED (frantic-penguin n=3 has no co-logged acceptance) -> bounded [-0.3,+0.3] on full sigma_hw."
+      },
+      "input_lambda__hardware": {
+        "i": "input_lambda",
+        "j": "hardware",
+        "rho_central": -0.005731380956236402,
+        "rho_ci95": [
+          -0.3,
+          0.3
+        ],
+        "rho_box": [
+          -0.3,
+          0.3
+        ],
+        "method": "within_device_proxy+bounded_between",
+        "n_colog": 12,
+        "note": "within-device r=-0.496 (n=12) maps to central -0.0057 (x within-share 0.0115); BETWEEN-device rho UNMEASURED (frantic-penguin n=3 has no co-logged acceptance) -> bounded [-0.3,+0.3] on full sigma_hw."
+      },
+      "sampling__private": {
+        "i": "sampling",
+        "j": "private",
+        "rho_central": 0.0,
+        "rho_ci95": [
+          -0.3,
+          0.3
+        ],
+        "rho_box": [
+          -0.3,
+          0.3
+        ],
+        "method": "bounded_assumption",
+        "n_colog": 0,
+        "note": "NO co-logged joint draws (private set is organizer-held-out) -> bounded assumption, pending land #71 served draw."
+      },
+      "input_lambda__private": {
+        "i": "input_lambda",
+        "j": "private",
+        "rho_central": 0.0,
+        "rho_ci95": [
+          -0.3,
+          0.3
+        ],
+        "rho_box": [
+          -0.3,
+          0.3
+        ],
+        "method": "bounded_assumption",
+        "n_colog": 0,
+        "note": "NO co-logged joint draws (private set is organizer-held-out) -> bounded assumption, pending land #71 served draw. (input-lambda and private-drop both concern acceptance, but estimation noise vs a true shift -> centered 0)."
+      },
+      "hardware__private": {
+        "i": "hardware",
+        "j": "private",
+        "rho_central": 0.0,
+        "rho_ci95": [
+          -0.3,
+          0.3
+        ],
+        "rho_box": [
+          -0.3,
+          0.3
+        ],
+        "method": "bounded_assumption",
+        "n_colog": 0,
+        "note": "NO co-logged joint draws (private set is organizer-held-out) -> bounded assumption, pending land #71 served draw. (device allocation vs prompt-difficulty drop -> physically independent)."
+      }
+    }
+  },
+  "combined": {
+    "sigma_tps_vector": {
+      "sampling": 10.906182006867379,
+      "input_lambda": 3.710490448740057,
+      "hardware": 4.864468814937121,
+      "private": 0.8839182724133238
+    },
+    "combined_sigma_quadrature": 12.536224060733394,
+    "combined_sigma_corrected": 15.25845450494761,
+    "combined_sigma_worstcase": 17.037470082142843,
+    "worstcase_psd_scale": 1.0,
+    "cross_covariance_sum": 37.83176008932256,
+    "delta_corrected_minus_quadrature_tps": 2.7222304442142153,
+    "delta_worstcase_minus_quadrature_tps": 4.5012460214094485,
+    "quadrature_valid": false,
+    "quadrature_tol_tps": 0.5,
+    "lcb_shift_from_covariance_tps": 3.4886786709534006,
+    "lcb_shift_worstcase_tps": 5.768578858186217,
+    "z_p90_one_sided": 1.2815515594457412,
+    "proj_private_tps_both": 528.8856764074758,
+    "covariance_matrix": [
+      [
+        118.94480596691777,
+        38.23927472880187,
+        -0.3040657059342747,
+        0.0
+      ],
+      [
+        38.23927472880187,
+        13.76773937019119,
+        -0.1034489335450395,
+        0.0
+      ],
+      [
+        -0.3040657059342747,
+        -0.1034489335450395,
+        23.663056851495757,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.7813115123061548
+      ]
+    ],
+    "covariance_min_eigenvalue": 0.7813115123061548,
+    "rho_worstcase_matrix": [
+      [
+        1.0,
+        0.99,
+        0.3,
+        0.3
+      ],
+      [
+        0.99,
+        1.0,
+        0.3,
+        0.3
+      ],
+      [
+        0.3,
+        0.3,
+        1.0,
+        0.3
+      ],
+      [
+        0.3,
+        0.3,
+        0.3,
+        1.0
+      ]
+    ],
+    "anchor_2term_sampling_hw_tps": 11.941853408010564,
+    "anchor_2term_published": 11.942,
+    "icc1_corner": {
+      "combined_sigma_quadrature_icc1": 54.42585639280843,
+      "combined_sigma_corrected_icc1": 57.77662310444761,
+      "combined_sigma_worstcase_icc1": 59.67679635505315,
+      "sigma_sampling_icc1_tps": 54.07366952923218,
+      "note": "wirbel #190 ICC=1 corner DOMINATES; reported as a scenario, not the central."
+    },
+    "dedup_reading": {
+      "overlap_corrected_sampling_block_tps": 5.318696881534334,
+      "combined_sigma_dedup_tps": 7.261742551305779,
+      "note": "PHYSICALLY-CORRECT fix: collapse sampling+input_lambda (rho=0.945) into ONE acceptance axis at denken's overlap-corrected 5.32 TPS -> 3 independent axes. Smaller than quadrature; the covariance correction's +inflation is the artifact of erroneously summing a redundant axis."
+    }
+  },
+  "self_test": {
+    "ci_covariance_self_test_passes": true,
+    "checks": {
+      "a_rho0_reproduces_quadrature_and_anchor": true,
+      "b_monotone_corrected_ge_quad_iff_cross_ge_0": true,
+      "c_each_rho_in_unit_with_finite_ci": true,
+      "d_covariance_matrix_psd": true,
+      "e_worstcase_ge_corrected_ge_quadrature": true,
+      "f_nan_clean": true
+    },
+    "evidence": {
+      "a_repro_quadrature": true,
+      "a_anchor_2term_tps": 11.941853408010564,
+      "b_cross_sum_measured": 37.83176008932256,
+      "b_corr_neg_lt_quad": true,
+      "d_min_eigenvalue": 0.7813115123061548,
+      "e_order_ok": true,
+      "e_net_cross_nonneg": true,
+      "n_scalars_checked": 18
+    }
+  },
+  "handoff": "fern #185's quadrature is valid=False; the cross-axis covariance-corrected combined single-shot sigma is 15.258 TPS (vs quadrature 12.536), shifting the launch LCB by -3.49 TPS; the SOLE measured driver is rho(sampling,input_lambda)=0.945 (denken #187 -- a double-count, NOT independent additive axes; the physically-correct de-dup collapses it to 7.26 TPS); the hardware<->acceptance coupling is UNMEASURED (co-logged trace is within-device only, sigma_within=0.056) and carried as a bounded assumption -> fern should consume the de-dup sigma AND the worst-case 17.04 TPS until land #71's served draw pins rho(*,hw).",
+  "scope": "Pins the BETWEEN-axis covariance of fern #185's 4-axis launch CI quadrature (are the legs independent?) -- the ADDITIVE-law analog of ubel #148/#169/#181's multiplicative official=K_cal*(E[T]/step)*tau pin. Distinct from wirbel #190's WITHIN-sampling ICC (intra-axis N_eff). Does NOT change the central projection or authorize a launch. BANK-THE-ANALYSIS: adds 0 TPS, greedy untouched. NOT open2. NOT a launch.",
+  "imported_legs": {
+    "sampling_175": "research/oracle_readout/et_second_moment/et_second_moment_results.json",
+    "input_lambda_187": "research/validity/lambda_built_ci/lambda_built_ci_results.json (rho_input_output=0.9449 measured)",
+    "hardware_188": "research/validity/oneshot_hw_bound/oneshot_hw_bound_results.json (within/between decomposition)",
+    "colog_within_n12_188": "research/validity/hw_variance_envelope/fresh_n12/noise_floor_fresh.json",
+    "private_176_191": "research/validity/private_adverse_skew/results.json",
+    "fern_185_quadrature": "research/launch/packet_refresh/launch_packet_refresh_results.json (z_p90, projection_quadrature convention)",
+    "wirbel_190_icc": "ICC=1 corner N_eff -> 128 (inflates sampling +-10.9 -> +-54.9 TPS); reported as a scenario"
+  },
+  "public_evidence_used": [
+    "denken #187 fern-integrator note: input/output sampling CIs share overlap_fraction=0.893 on a shared bench (quadrature double-counts).",
+    "kanna #188 within/between sigma_hw decomposition: cross-allocation dominated 87x; frantic-penguin n=3 cross-device draws carry TPS only.",
+    "openevolve liveprobe (message_board 20260614-150032 @senpai): per-position acceptance ladder 0.69/0.32/0.18/... tok/step 2.583 -- the acceptance-vs-draw probe behind the sampling axis (no co-logged hardware TPS).",
+    "leaderboard frontier ~481.5-489.6 TPS (between-device hardware spread)."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis over existing co-logged traces; no GPU/vLLM/HF Job/submission/served-file change. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0037
+}
