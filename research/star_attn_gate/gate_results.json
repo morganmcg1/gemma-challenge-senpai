@@ -1,0 +1,114 @@
+{
+  "verdict": "RED",
+  "primary_metric": {
+    "name": "greedy_flip_rate_at_1e3",
+    "value": 0.005926513671875
+  },
+  "test_metric": {
+    "name": "min_greedy_margin_p1",
+    "value": 0.001964566530659795
+  },
+  "step1_margin": {
+    "fp32_margin_median": 4.80438232421875,
+    "fp32_margin_p1": 0.04990196228027344,
+    "fp32_margin_p0.1": 0.0044536590576171875,
+    "fp32_margin_min": 2.86102294921875e-05,
+    "fp32_relmargin_median": 0.1795453131198883,
+    "min_greedy_margin_p1": 0.001964566530659795,
+    "min_greedy_margin_p0.1": 0.00017802651564124972,
+    "frac_relmargin_lt_1e2": 0.0476837158203125,
+    "frac_relmargin_lt_1e3": 0.00537109375,
+    "frac_relmargin_lt_1e4": 0.000640869140625,
+    "frac_fp32_exact_tie": 0.0,
+    "bf16_margin_median": 4.75,
+    "frac_bf16_tie": 0.0134429931640625,
+    "frac_bf16_le_1ulp": 0.0367584228515625,
+    "n_positions": 65536,
+    "eager_vs_served_mismatch_rate": 0.014801025390625
+  },
+  "step2_flip": {
+    "per_eps": {
+      "1e-04": {
+        "greedy_flip_rate_mean": 0.0059722900390625,
+        "greedy_flip_rate_max": 0.006195068359375,
+        "greedy_flip_count_total": 1957,
+        "fp32_flip_rate_mean": 0.0048492431640625,
+        "fp32_flip_rate_max": 0.0050201416015625,
+        "fp32_flip_count_total": 1589,
+        "n_seeds": 5,
+        "realized_relerr_mean": 3.2692409205525555e-05,
+        "flips_per_seed": {
+          "0": 374,
+          "1": 402,
+          "2": 388,
+          "3": 387,
+          "4": 406
+        }
+      },
+      "1e-03": {
+        "greedy_flip_rate_mean": 0.005926513671875,
+        "greedy_flip_rate_max": 0.0062103271484375,
+        "greedy_flip_count_total": 1942,
+        "fp32_flip_rate_mean": 0.004876708984375,
+        "fp32_flip_rate_max": 0.0050048828125,
+        "fp32_flip_count_total": 1598,
+        "n_seeds": 5,
+        "realized_relerr_mean": 0.0008761810688230145,
+        "flips_per_seed": {
+          "0": 407,
+          "1": 401,
+          "2": 384,
+          "3": 373,
+          "4": 377
+        }
+      },
+      "1e-02": {
+        "greedy_flip_rate_mean": 0.0073394775390625,
+        "greedy_flip_rate_max": 0.007537841796875,
+        "greedy_flip_count_total": 2405,
+        "fp32_flip_rate_mean": 0.0061309814453125,
+        "fp32_flip_rate_max": 0.006378173828125,
+        "fp32_flip_count_total": 2009,
+        "n_seeds": 5,
+        "realized_relerr_mean": 0.010114774259941565,
+        "flips_per_seed": {
+          "0": 493,
+          "1": 476,
+          "2": 494,
+          "3": 478,
+          "4": 464
+        }
+      }
+    },
+    "greedy_flip_rate_at_1e3": 0.005926513671875,
+    "fp32_flip_rate_at_1e3": 0.004876708984375,
+    "noise_floor_bf16_rate": 0.0,
+    "noise_floor_fp32_rate": 0.0,
+    "eps_first_flip": 0.0001,
+    "flip_at_1e3_fp32_margin_median": 0.07495307922363281,
+    "flip_at_1e3_fp32_margin_max": 3.7401180267333984,
+    "flip_at_1e3_count_unique_positions": 884
+  },
+  "config": {
+    "model": "/tmp/osoi5-v0-baked",
+    "num_prompts": 128,
+    "epsilons": [
+      0.0001,
+      0.001,
+      0.01
+    ],
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "perturb_target": "o_proj_input(attention context, per-row relerr, cast-back bf16)",
+    "corpus": "/workspace/senpai/target/research/rank_coverage/pr86/decode_rank_coverage.jsonl",
+    "softcap": 30.0,
+    "mean_fwd_s": 0.19524304009974003,
+    "elapsed_s": 428.0058493614197,
+    "peak_gpu_gb": 15.540238336
+  }
+}
