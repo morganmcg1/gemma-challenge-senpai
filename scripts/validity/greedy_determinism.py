@@ -19,6 +19,13 @@ extra_env only (NO served-file change):
   splitkv_off      SPLITKV_VERIFY=0              #43 3D split-KV verify reduction off
   atomic_on        VLLM_MARLIN_USE_ATOMIC_ADD=1  int4 Marlin atomic-add reduction on
 
+--spec-off (PR #114) injects SENPAI_REFERENCE_MODE=1 (drafter OFF, plain M=1 AR) on
+top of any config and writes to a sibling ``<config>__specoff/`` dir. Comparing a
+``<config>`` spec-ON run to its ``<config>__specoff`` M=1 run with the OFFICIAL
+verifier (greedy_gate.compare) IS the self-referential greedy gate: speculation is
+the only changed variable, so a DIVERGENT verdict is the M=K+1-verify-vs-M=1-decode
+batch-width effect, not an env/precache artifact.
+
 Each fresh serve OPTIONALLY also runs the official sglang TPS bench (--bench) and
 the teacher-forced PPL gate (--ppl) against the SAME reload, so one reload yields
 token-identity + TPS + PPL together. The FA_SLIDING=0 TPS cost is the load-bearing
@@ -157,15 +164,27 @@ def acceptance_delta(before: dict[str, Any], after: dict[str, Any]) -> dict[str,
 def capture_run(
     submission: Path, server_python: Path, bench_python: Path, bench_env: dict[str, str],
     out_root: Path, *, config_name: str, run_idx: int, num_prompts: int, output_len: int,
-    public: Path, tokenizer: str, do_bench: bool, do_ppl: bool,
+    public: Path, tokenizer: str, do_bench: bool, do_ppl: bool, spec_off: bool = False,
 ) -> dict[str, Any]:
-    """One fresh reload: capture token IDs (+ optional sglang TPS + PPL)."""
-    extra_env = {**BASE_ENV, **CONFIGS[config_name]}
-    run_dir = out_root / config_name / f"run_{run_idx:02d}"
+    """One fresh reload: capture token IDs (+ optional sglang TPS + PPL).
+
+    spec_off=True injects SENPAI_REFERENCE_MODE=1 so a drafter submission's serve.py
+    clears SPECULATIVE_CONFIG and serves plain M=1 AR (the canonical greedy reference
+    — see scripts/local_validation/gen_greedy_reference.py). Captures land in a
+    sibling ``<config>__specoff/`` dir so the spec-ON and spec-OFF runs differ in
+    EXACTLY one variable (speculation) under the same BASE_ENV/tokenizer/harness;
+    that is the only clean way to read the self-referential greedy gate (PR #114).
+    """
+    spec_extra = {paths.REFERENCE_MODE_ENV: "1"} if spec_off else {}
+    extra_env = {**BASE_ENV, **CONFIGS[config_name], **spec_extra}
+    cfg_tag = f"{config_name}__specoff" if spec_off else config_name
+    run_dir = out_root / cfg_tag / f"run_{run_idx:02d}"
     run_dir.mkdir(parents=True, exist_ok=True)
     log_path = run_dir / "server.log"
     meta: dict[str, Any] = {
         "config": config_name,
+        "config_tag": cfg_tag,
+        "spec_off": spec_off,
         "run_idx": run_idx,
         "extra_env": extra_env,
         "num_prompts": num_prompts,
@@ -173,7 +192,8 @@ def capture_run(
         "tokenizer": tokenizer,
         "ts": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
     }
-    print(f"\n{'='*64}\n[run] config={config_name} idx={run_idx} env={CONFIGS[config_name] or '{}'}\n{'='*64}", flush=True)
+    print(f"\n{'='*64}\n[run] config={cfg_tag} idx={run_idx} "
+          f"env={ {**CONFIGS[config_name], **spec_extra} or '{}'}\n{'='*64}", flush=True)
     try:
         t_serve = time.time()
         with harness.LocalServer(
@@ -231,6 +251,10 @@ def main() -> int:
     ap.add_argument("--tokenizer", default=LOCAL_TOKENIZER)
     ap.add_argument("--bench", action="store_true", help="also run the sglang TPS bench each reload")
     ap.add_argument("--ppl", action="store_true", help="also run the teacher-forced PPL gate each reload")
+    ap.add_argument("--spec-off", action="store_true",
+                    help="inject SENPAI_REFERENCE_MODE=1 (drafter OFF, plain M=1 AR reference); "
+                         "captures land in <config>__specoff/ so the self-referential greedy gate "
+                         "(spec-ON vs this) isolates speculation as the only changed variable (PR #114)")
     ap.add_argument("--out-root", default=str(REPO / "research/validity/greedy_determinism/captures"))
     ap.add_argument("--smoke", action="store_true", help="4 prompts x 64 tok, 1 run -- plumbing check")
     args = ap.parse_args()
@@ -246,8 +270,8 @@ def main() -> int:
     output_len = 64 if args.smoke else args.output_len
     out_root = Path(args.out_root)
     out_root.mkdir(parents=True, exist_ok=True)
-    print(f"[harness] out_root={out_root} config={args.config} runs={args.runs} "
-          f"start_idx={args.start_idx} n={num_prompts} olen={output_len} "
+    print(f"[harness] out_root={out_root} config={args.config} spec_off={args.spec_off} "
+          f"runs={args.runs} start_idx={args.start_idx} n={num_prompts} olen={output_len} "
           f"bench={args.bench} ppl={args.ppl}", flush=True)
 
     manifest = harness.load_manifest(submission)
@@ -267,7 +291,7 @@ def main() -> int:
             submission, server_python, bench_python, bench_env, out_root,
             config_name=args.config, run_idx=idx, num_prompts=num_prompts,
             output_len=output_len, public=public, tokenizer=tokenizer,
-            do_bench=args.bench, do_ppl=args.ppl,
+            do_bench=args.bench, do_ppl=args.ppl, spec_off=args.spec_off,
         ))
 
     ok = sum(1 for m in metas if m.get("ok"))
