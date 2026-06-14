@@ -1,0 +1,255 @@
+{
+  "primary_metric_name": "kcal_decomp_self_test_passes",
+  "kcal_decomp_self_test_passes": 1,
+  "test_metric_name": "kcal_tree_transfer_band_width_pct",
+  "kcal_tree_transfer_band_width_pct": 0.7870456397926597,
+  "verdict": "K_cal TRANSFERS centrally (band one-sided downward, 0.787% wide). CLEAN DE-RISK: the tree-transfer drift is well under the PR's 3% scare; the calibration leg flips no projection.",
+  "model": "official_TPS = K_cal * (E[T]/step_time) * tau ; K_cal=125.268 (=481.53/3.844)",
+  "scorer_convention": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "max_concurrency": 1,
+    "request_rate": "inf",
+    "warmup_requests": 4,
+    "ignore_eos": true,
+    "tps_definition": "output_throughput = total_output_tokens / total_duration",
+    "duration_includes_prefill": true,
+    "deployed_precache_neutralizes": true
+  },
+  "calibration_reproduction": {
+    "K_cal": 125.26795005202914,
+    "K_cal_formula": "481.53 / 3.844",
+    "K_cal_check": 125.26795005202914,
+    "multiplier_pooled": 1.0601865051833779,
+    "multiplier_pooled_formula": "481.53 / pooled_mean_local(454.1937)",
+    "pooled_local_wall_tps": 454.19367030776425,
+    "multiplier_locked_single_session": 1.0598488820645797,
+    "multiplier_locked_formula": "481.53 / 454.338  (#90 LOCKED single session)",
+    "locked_vs_pooled_wall_delta_pct": 0.03185577911263684,
+    "C_local_steps_per_sec": 118.15652193230079,
+    "K_cal_from_C_local_times_multiplier": 125.26795005202911,
+    "multiplier_ci95_envelope": [
+      1.0394063229912567,
+      1.080966687375499
+    ],
+    "official_cv_assumed_pct": 1.0,
+    "n_sessions": 3,
+    "n_runs": 9,
+    "note_multiplier_basis": "Canonical 1.06019 = 481.53 / 9-run POOLED mean 454.1937 (calibrate()). The PR baseline writes '1.06019 = 481.53/454.338'; 481.53/454.338 = 1.05985 -- 454.338 is the #90 LOCKED single-session ref, 454.1937 the pooled mean. The two differ by 0.034%; both are reproduced here."
+  },
+  "multiplier_decomposition": {
+    "multiplier": 1.0601865051833779,
+    "gap_pct": 6.018650518337787,
+    "factors": [
+      {
+        "name": "prompt_set",
+        "delta": 0.0,
+        "klass": "tree-invariant",
+        "why": "precache replays the SAME 128 bench prompts; both meters score decode-token throughput."
+      },
+      {
+        "name": "output_len",
+        "delta": 0.0,
+        "klass": "tree-invariant",
+        "why": "OUTPUT_LEN=512 fixed for both; both report per-token decode rate."
+      },
+      {
+        "name": "warmup_transient",
+        "delta": 0.0,
+        "klass": "tree-invariant (precache)",
+        "why": "4 official warmups discarded; precache replays all 128 untimed + LOOPGRAPH captures graphs pre-window -> timed window fully warmed. Tree-warmup excess (if any) folded into Leg B floor."
+      },
+      {
+        "name": "scorer_prefill_amortization",
+        "delta": 0.0,
+        "klass": "NEUTRALIZED-CONDITIONAL",
+        "why": "raw scorer tps includes prefill in total_duration, BUT PRECACHE_BENCH=1 moves prefill OUT of the timed window (pure decode, f~0). Tree-sensitive-DOWNWARD ONLY if precache dropped (Leg B; named, not credited)."
+      },
+      {
+        "name": "concurrency_batching",
+        "delta": 0.0,
+        "klass": "tree-invariant",
+        "why": "MAX_CONCURRENCY=1, MAX_NUM_SEQS=1 on both sides."
+      },
+      {
+        "name": "gpu_clock_thermal_power_bus",
+        "delta": 0.06018650518337787,
+        "klass": "PARTIALLY tree-sensitive (Leg A)",
+        "why": "the +6.019% residual. M=8 decode is pure-BW -> transfers at the bus ratio, FOLDED into K_cal (invariant). M=32 tree step has a COMPUTE-exposed fraction (GEMM at the sm_86 knee, tree-mask attention 1.83x) transferring at the CLOCK ratio not the bus ratio -> tau_tree<1 if the official free clock throttles below the local 1710 pin. Bounded by #126 [0.9924,1.00]."
+      }
+    ],
+    "reconstructed_multiplier": 1.0601865051833779,
+    "reconstruction_abs_err": 0.0,
+    "additive_sum_delta_pct": 6.018650518337787,
+    "attribution_summary": "+6.019% gap: prompt-set/output_len/warmup/concurrency = 0 (identical config); scorer-prefill = ~0 (precache -> pure-decode window); HARDWARE/bus = +6.019% (the residual; 'the bus is the wall')."
+  },
+  "kcal_tree_transfer_band": {
+    "K_cal_central": 125.26795005202914,
+    "K_cal_lo": 124.282034113087,
+    "K_cal_hi": 125.26795005202914,
+    "kcal_tree_transfer_band_width_pct": 0.7870456397926597,
+    "band_is_one_sided_downward": true,
+    "downside_pct": 0.7870456397926597,
+    "legs": {
+      "A_clock_exposure": {
+        "scale_floor": 0.9924318649123313,
+        "scale_hi": 1.0,
+        "downside_pct": 0.7568135087668737,
+        "klass": "tree-sensitive (DOMINANT)",
+        "source": "lawine #126 derive_tau_tree_roofline"
+      },
+      "B_scorer_amortization": {
+        "scale_floor": 0.9996953732332199,
+        "scale_hi": 1.0,
+        "downside_pct": 0.03046267667801139,
+        "klass": "NEUTRALIZED-CONDITIONAL (precache)",
+        "conditional_on": "tree submission retains PRECACHE_BENCH=1",
+        "differential_basis": "(whole_step_ratio 1.1560 - 1)/512"
+      }
+    },
+    "anchor_noise_half_width_pct_tree_invariant": 1.9600519268668337,
+    "anchor_noise_excluded_reason": "single-anchor noise on 481.53 (assumed official CV, UNMEASURED) is present IDENTICALLY in the linear baseline -> does not DIFFERENTIALLY threaten the tree; excluded from the tree-transfer band, reported as the generic calibration floor.",
+    "tau_tree_band_used": [
+      0.9924318649123313,
+      1.0
+    ],
+    "tau_splitk_band_fern142_borrowed": [
+      0.9983,
+      1.0
+    ],
+    "note_fern142_optimism": "fern #142's gate carries the SplitK-class tau floor 0.9983 for a TREE projection; the tree-correct floor is #126's 0.9924. This band uses the tree-class floor."
+  },
+  "propagation_and_quadrature": {
+    "scale_lo": 0.9921295436020734,
+    "scale_hi": 1.0,
+    "calib_downside_pct": 0.7870456397926597,
+    "projections": {
+      "522_descent": {
+        "E_T": 5.0564,
+        "central": 522.2887747089433,
+        "calib_lo": 518.17812368047,
+        "calib_hi": 522.2887747089433,
+        "calib_downside_tps": 4.110651028473285,
+        "clears_500_at_calib_lo": true
+      },
+      "538_ceiling": {
+        "E_T": 5.207,
+        "central": 537.8446424154472,
+        "calib_lo": 533.6115596084579,
+        "calib_hi": 537.8446424154472,
+        "calib_downside_tps": 4.233082806989273,
+        "clears_500_at_calib_lo": true
+      }
+    },
+    "quadrature_formula": "combined_downside = sqrt(calib_downside^2 + sampling^2)",
+    "sampling_band_source": "wirbel #146 (EXTERNAL; launch-isolation: not read) -- swept",
+    "sampling_sweep": [
+      {
+        "sampling_half_width_pct": 0.5,
+        "combined_downside_pct": 0.9324381154353554,
+        "522_descent_combined_lo": 517.4187551009168,
+        "522_descent_clears_500": true,
+        "538_ceiling_combined_lo": 532.8295739677386,
+        "538_ceiling_clears_500": true
+      },
+      {
+        "sampling_half_width_pct": 1.0,
+        "combined_downside_pct": 1.272572528037847,
+        "522_descent_combined_lo": 515.6422712449718,
+        "522_descent_clears_500": true,
+        "538_ceiling_combined_lo": 531.0001792525447,
+        "538_ceiling_clears_500": true
+      },
+      {
+        "sampling_half_width_pct": 2.0,
+        "combined_downside_pct": 2.1492884494912814,
+        "522_descent_combined_lo": 511.0632824011344,
+        "522_descent_clears_500": true,
+        "538_ceiling_combined_lo": 526.2848096398043,
+        "538_ceiling_clears_500": true
+      },
+      {
+        "sampling_half_width_pct": 3.0,
+        "combined_downside_pct": 3.101522342192079,
+        "522_descent_combined_lo": 506.08987167058416,
+        "522_descent_clears_500": true,
+        "538_ceiling_combined_lo": 521.1632706646491,
+        "538_ceiling_clears_500": true
+      }
+    ],
+    "sampling_chosen": null,
+    "sampling_pct_that_breaks_522_green": 4.194315303648232,
+    "headline": "calibration leg is TIGHT (0.787% downside, ~4.1 TPS on 522); it does NOT flip any projection (522 calib-lo 518.2, 538 calib-lo 533.6, both > 500). The 522 GREEN survives until the SAMPLING leg alone exceeds 4.19%."
+  },
+  "self_test": {
+    "passes": true,
+    "n_checks": 9,
+    "n_passed": 9,
+    "checks": [
+      {
+        "name": "K_cal == 481.53/3.844",
+        "passes": true,
+        "detail": "125.267950052 vs 125.267950052"
+      },
+      {
+        "name": "multiplier_pooled == 481.53/454.1937",
+        "passes": true,
+        "detail": "1.060186505"
+      },
+      {
+        "name": "multiplier_locked == 481.53/454.338 (~1.05985)",
+        "passes": true,
+        "detail": "1.059848882"
+      },
+      {
+        "name": "K_cal == C_local * multiplier (decomposition closes)",
+        "passes": true,
+        "detail": "125.267950052 vs 125.267950052"
+      },
+      {
+        "name": "factor decomposition reconstructs the multiplier",
+        "passes": true,
+        "detail": "abs_err 0.00e+00"
+      },
+      {
+        "name": "projection 522 reproduces within 2%",
+        "passes": true,
+        "detail": "522.29"
+      },
+      {
+        "name": "projection 538 reproduces within 2%",
+        "passes": true,
+        "detail": "537.84"
+      },
+      {
+        "name": "band ordering K_lo < K_hi <= K_cal*(1+1e-12)",
+        "passes": true,
+        "detail": "[124.2820, 125.2680] K_cal=125.2680"
+      },
+      {
+        "name": "band width finite and >= 0",
+        "passes": true,
+        "detail": "0.7870%"
+      }
+    ]
+  },
+  "handoff": {
+    "trigger": "land #71 measures TREE-path local wall_tps (E[T] and step_time at M=16/M=32)",
+    "procedure": [
+      "compute local_tree_wall = measured_tree_E[T] / measured_tree_step_time_s",
+      "predicted official_tree (central, if K_cal transfers) = local_tree_wall * 1.06019",
+      "the band asserts official_tree / predicted_central in [0.99213, 1.0]",
+      "when the ACTUAL official tree TPS arrives (eventual human-approved HF job), check it lands in the propagated band; a measured tau_tree TIGHTENS Leg A's floor"
+    ],
+    "pairs_with": "wirbel #146 (sampling), fern #142 (point gate), fern #145 (decomp), lawine #147 (measured step)",
+    "until_then": "the analytic band is the calibration-leg input to the eventual Approval-request evidence-line."
+  },
+  "empirical_anchor": {
+    "status": "DEFERRED (optional, GPU-gated)",
+    "why_deferred": "instruction 5 is optional and re-measures the LINEAR stack only; it cannot validate the TREE-transfer band (that needs land #71's tree, instruction 6). The committed 9-run anchor already pins the local wall at CV 0.035% (454.1937 pooled / 454.338 locked), so a linear re-measure has low marginal value for this PR's question.",
+    "if_requested": "serve the DEPLOYED fa2sw_precache_kenyan stack and run scripts/profiler/paired_tps_ab.py (decode-only wall_tps) on the assigned A10G; expect ~454.x confirming the basis."
+  },
+  "provenance": "reproduces fern #100 K_cal + lever_composition; lop.calibrate() multiplier (pooled 9-run); lop.derive_tau_tree_roofline #126 tree-class tau [0.9924,1.00]; fern #142 522/538 cells; OFFICIAL scorer hf_bucket_single_job.py; DEPLOYED precache fa2sw_precache_kenyan (PRECACHE_BENCH=1). wirbel #146 sampling = external param.",
+  "method": "LOCAL CPU-only analytic. No GPU/vLLM/HF Job/submission/served-file change. Bounds a projection constant; greedy identity untouched.",
+  "metrics_nan_clean": 1
+}
