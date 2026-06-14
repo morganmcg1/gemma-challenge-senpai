@@ -1,5 +1,21 @@
 # SENPAI Research Results
 
+## 2026-06-14 07:46 — PR #112: Harden the tree-free-500 projection instrument + bound τ from local data (zero-lag SplitK%→official-vs-500) 🟡 AMBER — MERGED (instrument ARMED bit-exact on 481.53; τ-band [0.99,1.00] is a mechanism inference — the data path is blocked by only ONE matched official/local pair + a 7.14% cross-meter spread; recommendation ONE_OFFICIAL_SPLITK_ANCHOR — converges with denken #109 + fern #111)
+
+- **Branch:** `lawine/tree-free-projection-harden` · **Student:** lawine · merged ~07:46Z (LOCAL CPU-analytic, ~150 MiB RSS — no HF Job, no GPU, greedy untouched; BASELINE unchanged 481.53)
+- **Hypothesis:** harden #99's projection into a calibrated zero-lag instrument that maps a measured SplitK% (ubel #108) → projected official-vs-500 at the conservative corner, and bound τ (the realization factor) as tightly as committed local data allows — so denken #109's ship decision reads data, not assumptions.
+- **Primary metric:** `tree_free_projection_armed = True` (null-lever self-check = 481.530000, residual 0.00e+00%, bit-exact). **Test:** `tau_band_local = [0.99, 1.00]` + recommendation `ONE_OFFICIAL_SPLITK_ANCHOR`. W&B `hcrvdf31` (group `tree-free-projection-harden`).
+
+| ubel SplitK s | gate |
+|---|---|
+| s ≥ 14.34% | **GO, no official anchor** (clears conservative corner even at generic τ=0.96) |
+| s ∈ [7.57%, 14.34%) | **GO requires the one official SplitK τ-anchor** (clears only to mechanism floor τ=0.99) |
+| s < 5.49% | **HOLD** / needs another lever (LK, palette) |
+
+- **Step 1 (instrument armed):** imported denken #105's `tree_free_500_ceiling.py` as the single source of truth → projection harness + ceiling model cannot drift; #99 multiplier CI enters as a relative rescale (central stays bit-exact on 481.53). One command maps SplitK% + additive levers → 3-corner official band.
+- **Step 2 (the decisive τ finding):** τ for a *kernel swap* can't be pinned from committed local data — NOT because the transfer is unstable (stable to 0.056% within a matched meter) but because there is exactly ONE matched (official, local) pair (the deployed #52 anchor, which *defines* τ=1.00) and the cross-meter spread is 7.14% (steady 428.37 / wall_tps 454.09 / windowed-steady 459.83), which drowns the cross-precision signal. The band [0.99,1.00] is a mechanism inference (bandwidth-lever transfers ~1:1 on sm_86/GDDR6) + a hard physical ceiling τ≤1.00.
+- **Commentary:** independent cross-check of denken #109 — lawine's generic-floor (τ=0.96) conservative corner = **14.34%**, landing *exactly* on denken #109's published corner (two harnesses, same number); lawine central 5.43% vs denken 4.44% differs by precisely the de-credited double-quant (#104 KILLed → palette banked central=0), so the gap is explained not noise. **Fleet convergence:** three independent lines now agree the one approval-gated official run should BE the SplitK τ-anchor (doing double duty with kanna #114's greedy self-consistency) — lawine #112 (`ONE_OFFICIAL_SPLITK_ANCHOR`), denken #109 (`reanchor=YES`), fern #111 (verdict + "3× cheaper" both collapse to the τ-path). Reassigned lawine → #116 (τ endgame: *derive* τ from a first-principles bandwidth-lever roofline to tighten the band below [0.99,1.00] + consolidate the fleet τ verdict into one pre-registered ship protocol).
+
 ## 2026-06-14 07:24 — PR #111: Settle crossover at landed C=518.1 + post-500 lever-ROI climb 🟢 GREEN allocation map (+ 🔴 ceiling-flag) — MERGED (τ→1.00 is the #1 buildable lever ROI 20.1; cheap non-tree stack caps at ~530, 540→556 tree-gated; both the crossover verdict AND denken's "3× cheaper" claim collapse to the τ-realization path — resolved by denken #109 τ-reanchor=YES)
 
 - **Branch:** `fern/climb-roi` (settle-crossover) · **Student:** fern · merged ~07:24Z (LOCAL CPU-analytic, ~32 MiB / 0.12s — no HF Job, greedy untouched; BASELINE unchanged 481.53)
