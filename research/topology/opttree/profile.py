@@ -11,9 +11,14 @@ Deliverable (PRIMARY): ``opttree_dp_self_test_passes`` --
   (c) NaN-clean, (d) DP latency < 0.1 ms/step.
 TEST metrics: ``e_t_opttree``, ``e_t_gain_vs_static``, ``tps_proj_opttree``.
 
-Run:
+Run (PRIMARY deliverable only):
   cd target/ && CUDA_VISIBLE_DEVICES=0 python research/topology/opttree/profile.py \
       --self-test --wandb_group opttree-perstep-dp --wandb_name stark/opttree-perstep-dp
+
+Run (self-test + TEST metrics e_t_opttree / e_t_gain_vs_static / tps_proj_opttree;
+this is the command used for the reported results -- passing no flags is equivalent):
+  cd target/ && CUDA_VISIBLE_DEVICES=0 python research/topology/opttree/profile.py \
+      --self-test --measure --wandb_group opttree-perstep-dp --wandb_name stark/opttree-perstep-dp
 """
 
 from __future__ import annotations
@@ -53,6 +58,23 @@ OFFICIAL_BASELINE_TPS = 481.53
 Q_LADDER_MEAN = [0.7287, 0.7590, 0.7925, 0.8217, 0.8343, 0.8353, 0.8473]
 RHO_LADDER = {2: 0.4165, 3: 0.2655, 4: 0.1908}  # P(target == rank-k | rank-1 miss)
 TOP1 = tree_spec.TOP1_MEASURED  # 0.729
+
+# Measured per-step rank-2 catch rate by drafter-entropy decile (equal-count, so
+# equal-weight; pooled mean == 0.4172 == RHO_LADDER[2]).  This is the DIRECTLY
+# MEASURED per-step surface-variance signal: rho2 swings 0.152..0.657 step-to-step
+# with drafter confidence (research/rank_coverage/entropy_branching_results.json,
+# drafter_entropy_fine10.bin_rho2, n=13491 divergences on the 128 ShareGPT prompts).
+RHO2_DECILES_MEASURED = [
+    0.5085, 0.6271, 0.6568, 0.5293, 0.4566, 0.4033, 0.3558, 0.2832, 0.2001, 0.1519,
+]
+# Measured accepted-length std (research/oracle_readout/et_second_moment;
+# both-bugs sigma_L=3.0354).  This is an INTRINSIC-acceptance read: it is the std
+# of the committed length under a FIXED probability pmf, so it measures the spread
+# of the acceptance *process*, NOT step-to-step variation of the acceptance
+# *surface*.  It is therefore NOT a calibration anchor for the q-confidence sweep
+# below (and the tree is not live -- only the linear K=7 chain is -- so the tree's
+# true per-step q-variance is unmeasurable on-branch).  Printed for context only.
+SIGMA_L_MEASURED = 3.0354
 
 
 def tps_of(e_t: float, step: float = STEP_INT4) -> float:
@@ -219,6 +241,264 @@ def self_test(verbose: bool = True) -> dict:
     return results
 
 
+# =============================================================================
+# MEASUREMENT  (E[T] gain on representative measured draft distributions)
+# =============================================================================
+
+def _decile_surfaces(q_ladder, rho2_values, rho_tail):
+    """Equal-weight per-step surfaces: q fixed at `q_ladder`, rho2 swept over the
+    measured deciles, rho3/rho4 held at `rho_tail` (only the measured rho2
+    component varies -> a clean, fully-measured lower bound on the gain)."""
+    surfaces = []
+    for r2 in rho2_values:
+        rho = {2: r2, **rho_tail}
+        surfaces.append(ladder_edge_prob(q_ladder, rho))
+    return surfaces
+
+
+def _exact_gain(static_tree, surfaces, budget, max_width, max_depth):
+    """E[T]_static (fixed tree) vs E[T]_opttree (per-step DP), averaged equal-weight
+    over `surfaces`.  Exact path-product accounting -- no Monte-Carlo noise."""
+    n = len(surfaces)
+    e_static = e_opt = 0.0
+    worst_gap = float("inf")
+    for surf in surfaces:
+        fs, _ = static_tree_et(static_tree, surf)
+        _, _, fo = build_opt_tree(surf, budget, max_width, max_depth)
+        e_static += fs
+        e_opt += fo
+        worst_gap = min(worst_gap, fo - fs)
+    return e_static / n, e_opt / n, worst_gap
+
+
+def _shape_variance_analysis(static_tree, surfaces, dev_key, budget, max_width, max_depth):
+    """Per-step tree-SHAPE variance + gain-by-deviation decomposition (advisor
+    #244 follow-up: the online win can only come from per-step confidence
+    variance, so quantify whether the DP actually re-shapes the tree step-to-step
+    or collapses onto the static optimum, and WHERE the gain concentrates).
+
+    `dev_key[i]` is the per-step surface deviation from the distribution mean
+    (here |rho2_i - mean rho2|).  Returns:
+      frac_shape_differs_from_static -- fraction of steps whose OPT-tree parent
+        array != the static tree's (0 == DP always reproduces the static optimum),
+      distinct_opt_shapes            -- number of unique OPT-tree shapes emitted,
+      gain_low_variance_half/high_variance_half -- mean E[T] gain on the low- vs
+        high-deviation half of the steps (the gain should concentrate in the
+        high-deviation half if the win is variance-driven)."""
+    static_shape = tuple(static_tree.parent)
+    rows = []
+    for i, surf in enumerate(surfaces):
+        fs, _ = static_tree_et(static_tree, surf)
+        opt_parent, _, fo = build_opt_tree(surf, budget, max_width, max_depth)
+        rows.append({"dev": dev_key[i], "shape": tuple(opt_parent),
+                     "differs": tuple(opt_parent) != static_shape, "gain": fo - fs})
+    n = len(rows)
+    order = sorted(range(n), key=lambda i: rows[i]["dev"])
+    half = n // 2
+    low_idx, high_idx = order[:half], order[half:]
+    g_low = sum(rows[i]["gain"] for i in low_idx) / max(1, len(low_idx))
+    g_high = sum(rows[i]["gain"] for i in high_idx) / max(1, len(high_idx))
+    return {
+        "n_steps": n,
+        "frac_shape_differs_from_static": sum(r["differs"] for r in rows) / n,
+        "distinct_opt_shapes": len({r["shape"] for r in rows}),
+        "gain_low_variance_half": g_low,
+        "gain_high_variance_half": g_high,
+    }
+
+
+def _simulate_L(tree, edge_prob, rng):
+    """One stochastic committed-length draw for `tree` under `edge_prob` (the
+    verifier acceptance process the deployed descend-walk realises)."""
+    cur = 0
+    while tree.children[cur]:
+        d = tree.depth[cur] + 1
+        u = rng.random()
+        acc = 0.0
+        nxt = -1
+        for child in tree.children[cur]:
+            acc += edge_prob(d, tree.rank_in_parent[child])
+            if u < acc:
+                nxt = child
+                break
+        if nxt < 0:
+            break
+        cur = nxt
+    return tree.depth[cur] + 1  # committed length = accepted depth + bonus
+
+
+def _conf_surface(q_mean, rho2_mean, rho_tail, m):
+    """Per-step confidence-perturbed surface: multiplier m scales the rank-1 MISS
+    gap (1-q) and the rank-2 catch.  m<1 == more confident (higher q, ... ), m>1
+    == less confident.  Calibrated so E[m]=1 reproduces the mean ladder."""
+    q = [max(0.001, min(0.999, 1.0 - (1.0 - q) * m)) for q in q_mean]
+    rho = {2: max(0.0, min(0.95, rho2_mean * m)), **rho_tail}
+    return ladder_edge_prob(q, rho)
+
+
+def _qconf_sweep(q_mean, rho2_mean, rho_tail, static_tree, budget, max_width,
+                 max_depth, scales, n_steps, seed):
+    """EXPLORATORY sensitivity: per-step joint q+rho2 confidence variance.  For
+    each spread `scale`, draw m_step ~ lognormal(mean 1) and measure the gain.
+    The reported sigma_L is the MODELLED accepted-length std at that scale, shown
+    for context only -- it is NOT a calibration anchor: the measured sigma_L=3.0354
+    (et_second_moment) is a fixed-probability pmf read (intrinsic acceptance
+    variance), so it carries no information about per-step surface variance, and
+    the tree is not live (only the linear K=7 chain is) so the tree's true
+    per-step q-variance is not measurable on-branch."""
+    import math
+    out = []
+    for scale in scales:
+        rng = random.Random(seed)
+        e_static = e_opt = 0.0
+        Ls = []
+        sigma = scale
+        mu = -0.5 * sigma * sigma  # so E[m] = 1
+        for _ in range(n_steps):
+            m = math.exp(rng.gauss(mu, sigma))
+            surf = _conf_surface(q_mean, rho2_mean, rho_tail, m)
+            fs, _ = static_tree_et(static_tree, surf)
+            _, _, fo = build_opt_tree(surf, budget, max_width, max_depth)
+            e_static += fs
+            e_opt += fo
+            Ls.append(_simulate_L(static_tree, surf, rng))
+        n = n_steps
+        mean_L = sum(Ls) / n
+        var_L = sum((x - mean_L) ** 2 for x in Ls) / n
+        out.append({
+            "q_conf_scale": scale,
+            "e_t_static": e_static / n,
+            "e_t_opttree": e_opt / n,
+            "e_t_gain": (e_opt - e_static) / n,
+            "sigma_L_static": var_L ** 0.5,
+        })
+    return out
+
+
+def measure(verbose: bool = True) -> dict:
+    """Measure realized E[T] (static vs OPT-tree per-step) on the measured draft
+    distributions, at the deployed verify budgets where the topology lever lives."""
+    res: dict = {}
+    # Budget configs: (label, M, max_width-cap, max_depth). M=8 is the deployed
+    # linear verify width (branching does not pay there -> ~zero gain, a sanity
+    # anchor); M=16/M=32 are the tree-verify build targets where the 5.066/5.219
+    # E[T] anchors and the max-branch-2/3 topology lever live.
+    configs = [
+        ("M8_deployed", 8, 1, 7),
+        ("M16_branch2", 16, 2, 9),
+        ("M32_branch3", 32, 3, 9),
+    ]
+    rho_tail = {3: RHO_LADDER[3], 4: RHO_LADDER[4]}
+    # per-step surface deviation from the distribution mean (|rho2_decile - mean|);
+    # drives the high- vs low-variance gain split (advisor #244 follow-up).
+    mean_rho2 = sum(RHO2_DECILES_MEASURED) / len(RHO2_DECILES_MEASURED)
+    rho2_dev = [abs(r - mean_rho2) for r in RHO2_DECILES_MEASURED]
+
+    headline = None
+    for label, M, W, D in configs:
+        q = extend_q(Q_LADDER_MEAN, D)
+        mean_surface = ladder_edge_prob(q, {2: RHO_LADDER[2], **rho_tail})
+        static_parent, _, static_et_mean = build_opt_tree(mean_surface, M, W, D)
+        static_tree = TreeSpec(static_parent)
+
+        # PRIMARY: fully-measured rho2-decile per-step variance (q at mean).
+        surfaces = _decile_surfaces(q, RHO2_DECILES_MEASURED, rho_tail)
+        e_static, e_opt, worst_gap = _exact_gain(static_tree, surfaces, M, W, D)
+        gain = e_opt - e_static
+
+        # SHAPE VARIANCE (advisor #244 follow-up): does the DP re-shape the tree
+        # step-to-step, and where does the gain concentrate?
+        shape = _shape_variance_analysis(static_tree, surfaces, rho2_dev, M, W, D)
+
+        # EXPLORATORY sensitivity: per-step joint q+rho2 confidence variance.  This
+        # is NOT measured on-branch (see SIGMA_L_MEASURED note) -- it shows how the
+        # gain would grow IF unmeasured per-step q-variance existed, scanned over a
+        # range of spreads.  The max over the scan is an exploratory upper band.
+        sweep = _qconf_sweep(q, RHO_LADDER[2], rho_tail, static_tree, M, W, D,
+                             scales=[0.0, 0.15, 0.30, 0.45, 0.60, 0.75],
+                             n_steps=8000, seed=7)
+        sweep_max = max(sweep, key=lambda s: s["e_t_gain"])
+
+        cfg = {
+            "budget_M": M, "max_width": W, "max_depth": D,
+            "static_parent": static_parent,
+            "static_max_branch": static_tree.max_branch,
+            "static_depth": static_tree.max_depth,
+            "e_t_static_mean_surface": static_et_mean,
+            # PRIMARY (rho2-decile, fully measured on-branch, q fixed at mean):
+            "e_t_static": e_static,
+            "e_t_opttree": e_opt,
+            "e_t_gain_vs_static": gain,
+            "worst_perstep_gap": worst_gap,
+            "tps_proj_static": tps_of(e_static),
+            "tps_proj_opttree": tps_of(e_opt),
+            "tps_gain": tps_of(e_opt) - tps_of(e_static),
+            # SHAPE variance + gain-by-deviation (advisor #244 follow-up):
+            "frac_shape_differs_from_static": shape["frac_shape_differs_from_static"],
+            "distinct_opt_shapes": shape["distinct_opt_shapes"],
+            "gain_low_variance_half": shape["gain_low_variance_half"],
+            "gain_high_variance_half": shape["gain_high_variance_half"],
+            # EXPLORATORY (joint q+rho2 confidence; unmeasured -- upper band only):
+            "qconf_sweep": sweep,
+            "e_t_gain_exploratory_max": sweep_max["e_t_gain"],
+            "e_t_gain_exploratory_max_scale": sweep_max["q_conf_scale"],
+            "tps_gain_exploratory_max": tps_of(sweep_max["e_t_opttree"]) - tps_of(sweep_max["e_t_static"]),
+        }
+        res[label] = cfg
+        if label == "M32_branch3":
+            headline = cfg
+        if verbose:
+            print(f"\n[measure] === {label}  M={M} max_branch<={W} depth<={D} ===")
+            print(f"  static rho-opt (DP on mean): E[T]_mean={static_et_mean:.4f} "
+                  f"branch={static_tree.max_branch} depth={static_tree.max_depth}")
+            print(f"  PRIMARY (measured rho2 deciles, q fixed):")
+            print(f"    E[T]_static={e_static:.4f}  E[T]_opttree={e_opt:.4f}  "
+                  f"gain={gain:+.4f}  (worst per-step gap {worst_gap:+.5f})")
+            print(f"    TPS_static={tps_of(e_static):.1f}  TPS_opttree={tps_of(e_opt):.1f}  "
+                  f"dTPS={tps_of(e_opt)-tps_of(e_static):+.1f}")
+            print(f"  SHAPE variance (advisor #244): DP picks a different shape than "
+                  f"static on {shape['frac_shape_differs_from_static']*100:.0f}% of steps "
+                  f"({shape['distinct_opt_shapes']} distinct shapes over {shape['n_steps']} deciles)")
+            print(f"    gain | low-variance half = {shape['gain_low_variance_half']:+.4f}   "
+                  f"gain | high-variance half = {shape['gain_high_variance_half']:+.4f}")
+            print(f"  EXPLORATORY (joint q+rho2 confidence variance; NOT measured "
+                  f"on-branch -- modelled sigma_L below is not comparable to the "
+                  f"intrinsic measured sigma_L={SIGMA_L_MEASURED}):")
+            for s in sweep:
+                mark = "  <-- exploratory max" if s is sweep_max else ""
+                print(f"    scale={s['q_conf_scale']:.2f}: sigma_L(modelled)={s['sigma_L_static']:.3f} "
+                      f"gain={s['e_t_gain']:+.4f} (dTPS {tps_of(s['e_t_opttree'])-tps_of(s['e_t_static']):+.1f}){mark}")
+
+    # headline summary (M=32 max-branch-3, where the 5.219 / 536.659 anchors live).
+    # PRIMARY = the fully-measured rho2-decile gain (q fixed at mean); the stop-
+    # condition is judged on THIS measured number, not on the exploratory sweep.
+    res["headline_budget"] = "M32_branch3"
+    res["e_t_opttree"] = headline["e_t_opttree"]
+    res["e_t_gain_vs_static"] = headline["e_t_gain_vs_static"]
+    res["tps_proj_opttree"] = headline["tps_proj_opttree"]
+    res["tps_gain"] = headline["tps_gain"]
+    res["e_t_gain_measured_floor"] = headline["e_t_gain_vs_static"]          # rho2-only (measured)
+    res["e_t_gain_exploratory_max"] = headline["e_t_gain_exploratory_max"]   # unmeasured upper band
+    res["frac_shape_differs_from_static"] = headline["frac_shape_differs_from_static"]
+    res["gain_low_variance_half"] = headline["gain_low_variance_half"]
+    res["gain_high_variance_half"] = headline["gain_high_variance_half"]
+    stop = 0.05
+    res["gain_clears_stop_condition"] = bool(headline["e_t_gain_vs_static"] >= stop)
+    res["stop_condition_et_gain"] = stop
+    if verbose:
+        print(f"\n[measure] HEADLINE (M=32 max-branch-3):")
+        print(f"  PRIMARY measured e_t_gain = {res['e_t_gain_measured_floor']:+.4f} "
+              f"(rho2-decile, q fixed)  ->  dTPS {res['tps_gain']:+.1f}")
+        print(f"  shape variance: DP re-shapes on {res['frac_shape_differs_from_static']*100:.0f}% of steps; "
+              f"gain low-var half {res['gain_low_variance_half']:+.4f} vs high-var half "
+              f"{res['gain_high_variance_half']:+.4f} (win is variance-driven)")
+        print(f"  exploratory upper band   = {res['e_t_gain_exploratory_max']:+.4f} "
+              f"(unmeasured per-step q-variance; not used for the verdict)")
+        print(f"  stop-condition (measured gain>={stop}): "
+              f"{'CLEARS' if res['gain_clears_stop_condition'] else 'BELOW -> DP overhead may not be worth it'}")
+    return res
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description="OPT-Tree per-step DP profiler (PR #247)")
     ap.add_argument("--self-test", action="store_true", help="run the self-test battery")
@@ -233,6 +513,8 @@ def main() -> None:
     metrics: dict = {}
     if args.self_test or run_all:
         metrics.update(self_test())
+    if args.measure or run_all:
+        metrics["measurement"] = measure()
 
     metrics["_anchors"] = {
         "K_cal": K_CAL, "step_int4": STEP_INT4,
@@ -252,7 +534,17 @@ def main() -> None:
                 config={"experiment": "opttree-perstep-dp", "pr": 247,
                         "budget": metrics.get("budget"), "max_width": metrics.get("max_width")},
             )
+            # self-test scalars (top-level) + flattened measurement scalars (headline
+            # + per-budget primary), so every headline number is a first-class W&B key.
             flat = {k: v for k, v in metrics.items() if isinstance(v, (int, float, bool))}
+            meas = metrics.get("measurement", {})
+            for k, v in meas.items():
+                if isinstance(v, (int, float, bool)):
+                    flat[f"measurement/{k}"] = v
+                elif isinstance(v, dict):  # a per-budget config (e.g. M32_branch3)
+                    for ck, cv in v.items():
+                        if isinstance(cv, (int, float, bool)):
+                            flat[f"measurement/{k}/{ck}"] = cv
             run.log(flat)
             run.summary.update(flat)
             run.finish()
