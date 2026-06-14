@@ -1,0 +1,733 @@
+{
+  "gate": {
+    "primary_metric_name": "composed_official_tps",
+    "composed_official_tps_full_stack": {
+      "central": 599.9844743405253,
+      "conservative": 531.6445685941746,
+      "optimistic": 713.6843796826073,
+      "band": [
+        531.6445685941746,
+        713.6843796826073
+      ]
+    },
+    "test_metric_name": "min_levers_to_clear_500",
+    "min_levers_to_clear_500_conservative": {
+      "set": [
+        "tree"
+      ],
+      "n": 1,
+      "tps": 517.9560880341589
+    },
+    "min_levers_to_clear_500_central": {
+      "set": [
+        "tree"
+      ],
+      "n": 1,
+      "tps": 563.0965287009075
+    },
+    "tree_alone_official": {
+      "central": 563.0965287009075,
+      "conservative": 517.9560880341589,
+      "optimistic": 581.0,
+      "clears_500_conservative": true
+    },
+    "cheapest_sufficient_lever_after_tree": null,
+    "verdict": "GREEN",
+    "verdict_label": "tree-sufficient (compounding levers are INSURANCE)",
+    "rule": "GREEN=tree clears 500 at conservative corner / AMBER=needs 1 lever or full stack / RED=stack straddles 500"
+  },
+  "step1_lever_classification": {
+    "tree": {
+      "axis": "E[T]-numerator (+M-widen denominator)",
+      "effect": "E[T] 3.844->5.207; net +18.2% (band 558-581 official)",
+      "carries": "fp32-star-attn haircut (wirbel #98) on denominator"
+    },
+    "splitk": {
+      "axis": "wall-time denominator",
+      "effect": "+5-12% verify-GEMM speedup on the 0.53 ABS GEMM slice; FLAT M<=32 so applies on the tree's widened GEMM too"
+    },
+    "persist": {
+      "axis": "wall-time denominator",
+      "effect": "reclaims GPU-idle slice of the ~32% other bucket (+8-15% IFF idle)",
+      "anti_compounds_with": "tree (longer M=32 compute hides idle + amortises fixed overhead)"
+    },
+    "lk": {
+      "axis": "E[T]-numerator",
+      "effect": "+1.0-2.4% E[T] (prediction channel; re-rank CLOSED)",
+      "caveat": "partial overlap with tree rank-2 harvest -> marginal value shrinks on the tree"
+    }
+  },
+  "step2_landscape": [
+    {
+      "levers": [
+        "(frontier)"
+      ],
+      "n_levers": 0,
+      "central": {
+        "levers": [],
+        "E_T": 3.844,
+        "step_time": 1.0,
+        "official_tps": 481.53,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "conservative": {
+        "levers": [],
+        "E_T": 3.844,
+        "step_time": 1.0,
+        "official_tps": 462.26879999999994,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "optimistic": {
+        "levers": [],
+        "E_T": 3.844,
+        "step_time": 1.0,
+        "official_tps": 481.53,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "central_tps": 481.53,
+      "conservative_tps": 462.26879999999994,
+      "optimistic_tps": 481.53,
+      "clears_500_central": false,
+      "clears_500_conservative": false,
+      "margin_conservative": -37.73120000000006
+    },
+    {
+      "levers": [
+        "tree"
+      ],
+      "n_levers": 1,
+      "central": {
+        "levers": [
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.1583630561987952,
+        "official_tps": 563.0965287009075,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.208943039284795,
+        "official_tps": 517.9560880341589,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.1226681857502852,
+        "official_tps": 581.0,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 563.0965287009075,
+      "conservative_tps": 517.9560880341589,
+      "optimistic_tps": 581.0,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 17.956088034158938
+    },
+    {
+      "levers": [
+        "splitk"
+      ],
+      "n_levers": 1,
+      "central": {
+        "levers": [
+          "splitk"
+        ],
+        "E_T": 3.844,
+        "step_time": 0.9584792626728111,
+        "official_tps": 502.38958603779014,
+        "verify_gemm_slice": 0.4884792626728111,
+        "attn_slice": 0.08
+      },
+      "conservative": {
+        "levers": [
+          "splitk"
+        ],
+        "E_T": 3.844,
+        "step_time": 0.9747619047619047,
+        "official_tps": 474.23765510503176,
+        "verify_gemm_slice": 0.5047619047619047,
+        "attn_slice": 0.08
+      },
+      "optimistic": {
+        "levers": [
+          "splitk"
+        ],
+        "E_T": 3.844,
+        "step_time": 0.9432142857142856,
+        "official_tps": 510.5202574782281,
+        "verify_gemm_slice": 0.4732142857142857,
+        "attn_slice": 0.08
+      },
+      "central_tps": 502.38958603779014,
+      "conservative_tps": 474.23765510503176,
+      "optimistic_tps": 510.5202574782281,
+      "clears_500_central": true,
+      "clears_500_conservative": false,
+      "margin_conservative": -25.762344894968237
+    },
+    {
+      "levers": [
+        "persist"
+      ],
+      "n_levers": 1,
+      "central": {
+        "levers": [
+          "persist"
+        ],
+        "E_T": 3.844,
+        "step_time": 0.97,
+        "official_tps": 496.42268041237116,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "conservative": {
+        "levers": [
+          "persist"
+        ],
+        "E_T": 3.844,
+        "step_time": 1.0,
+        "official_tps": 462.26879999999994,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "optimistic": {
+        "levers": [
+          "persist"
+        ],
+        "E_T": 3.844,
+        "step_time": 0.8699999999999999,
+        "official_tps": 553.4827586206898,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "central_tps": 496.42268041237116,
+      "conservative_tps": 462.26879999999994,
+      "optimistic_tps": 553.4827586206898,
+      "clears_500_central": false,
+      "clears_500_conservative": false,
+      "margin_conservative": -37.73120000000006
+    },
+    {
+      "levers": [
+        "lk"
+      ],
+      "n_levers": 1,
+      "central": {
+        "levers": [
+          "lk"
+        ],
+        "E_T": 3.88244,
+        "step_time": 1.0,
+        "official_tps": 486.3453,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "conservative": {
+        "levers": [
+          "lk"
+        ],
+        "E_T": 3.88244,
+        "step_time": 1.0,
+        "official_tps": 466.891488,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "optimistic": {
+        "levers": [
+          "lk"
+        ],
+        "E_T": 3.9362559999999998,
+        "step_time": 1.0,
+        "official_tps": 493.08671999999996,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.08
+      },
+      "central_tps": 486.3453,
+      "conservative_tps": 466.891488,
+      "optimistic_tps": 493.08671999999996,
+      "clears_500_central": false,
+      "clears_500_conservative": false,
+      "margin_conservative": -33.10851200000002
+    },
+    {
+      "levers": [
+        "splitk",
+        "tree"
+      ],
+      "n_levers": 2,
+      "central": {
+        "levers": [
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.1168423188716063,
+        "official_tps": 584.03071310902,
+        "verify_gemm_slice": 0.4884792626728111,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.1837049440466998,
+        "official_tps": 528.9995707404723,
+        "verify_gemm_slice": 0.5047619047619047,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.0658824714645707,
+        "official_tps": 611.9532250349017,
+        "verify_gemm_slice": 0.4732142857142857,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 584.03071310902,
+      "conservative_tps": 528.9995707404723,
+      "optimistic_tps": 611.9532250349017,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 28.999570740472336
+    },
+    {
+      "levers": [
+        "persist",
+        "tree"
+      ],
+      "n_levers": 2,
+      "central": {
+        "levers": [
+          "persist",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.137363056198795,
+        "official_tps": 573.4934086050602,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "persist",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.208943039284795,
+        "official_tps": 517.9560880341589,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "persist",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 0.9926681857502851,
+        "official_tps": 657.0878620713652,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 573.4934086050602,
+      "conservative_tps": 517.9560880341589,
+      "optimistic_tps": 657.0878620713652,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 17.956088034158938
+    },
+    {
+      "levers": [
+        "lk",
+        "tree"
+      ],
+      "n_levers": 2,
+      "central": {
+        "levers": [
+          "lk",
+          "tree"
+        ],
+        "E_T": 5.2486559999999995,
+        "step_time": 1.1583630561987952,
+        "official_tps": 567.6013009305146,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "lk",
+          "tree"
+        ],
+        "E_T": 5.233034999999999,
+        "step_time": 1.208943039284795,
+        "official_tps": 520.5458684743296,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "lk",
+          "tree"
+        ],
+        "E_T": 5.331968,
+        "step_time": 1.1226681857502852,
+        "official_tps": 594.9440000000001,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 567.6013009305146,
+      "conservative_tps": 520.5458684743296,
+      "optimistic_tps": 594.9440000000001,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 20.54586847432961
+    },
+    {
+      "levers": [
+        "persist",
+        "splitk",
+        "tree"
+      ],
+      "n_levers": 3,
+      "central": {
+        "levers": [
+          "persist",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.0958423188716062,
+        "official_tps": 595.2226927981403,
+        "verify_gemm_slice": 0.4884792626728111,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "persist",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 1.1837049440466998,
+        "official_tps": 528.9995707404723,
+        "verify_gemm_slice": 0.5047619047619047,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "persist",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.207,
+        "step_time": 0.9358824714645708,
+        "official_tps": 696.9574020337963,
+        "verify_gemm_slice": 0.4732142857142857,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 595.2226927981403,
+      "conservative_tps": 528.9995707404723,
+      "optimistic_tps": 696.9574020337963,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 28.999570740472336
+    },
+    {
+      "levers": [
+        "lk",
+        "splitk",
+        "tree"
+      ],
+      "n_levers": 3,
+      "central": {
+        "levers": [
+          "lk",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.2486559999999995,
+        "step_time": 1.1168423188716063,
+        "official_tps": 588.702958813892,
+        "verify_gemm_slice": 0.4884792626728111,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "lk",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.233034999999999,
+        "step_time": 1.1837049440466998,
+        "official_tps": 531.6445685941746,
+        "verify_gemm_slice": 0.5047619047619047,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "lk",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.331968,
+        "step_time": 1.0658824714645707,
+        "official_tps": 626.6401024357394,
+        "verify_gemm_slice": 0.4732142857142857,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 588.702958813892,
+      "conservative_tps": 531.6445685941746,
+      "optimistic_tps": 626.6401024357394,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 31.644568594174643
+    },
+    {
+      "levers": [
+        "lk",
+        "persist",
+        "tree"
+      ],
+      "n_levers": 3,
+      "central": {
+        "levers": [
+          "lk",
+          "persist",
+          "tree"
+        ],
+        "E_T": 5.2486559999999995,
+        "step_time": 1.137363056198795,
+        "official_tps": 578.0813558739007,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "lk",
+          "persist",
+          "tree"
+        ],
+        "E_T": 5.233034999999999,
+        "step_time": 1.208943039284795,
+        "official_tps": 520.5458684743296,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "lk",
+          "persist",
+          "tree"
+        ],
+        "E_T": 5.331968,
+        "step_time": 0.9926681857502851,
+        "official_tps": 672.8579707610779,
+        "verify_gemm_slice": 0.53,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 578.0813558739007,
+      "conservative_tps": 520.5458684743296,
+      "optimistic_tps": 672.8579707610779,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 20.54586847432961
+    },
+    {
+      "levers": [
+        "lk",
+        "persist",
+        "splitk",
+        "tree"
+      ],
+      "n_levers": 4,
+      "central": {
+        "levers": [
+          "lk",
+          "persist",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.2486559999999995,
+        "step_time": 1.0958423188716062,
+        "official_tps": 599.9844743405253,
+        "verify_gemm_slice": 0.4884792626728111,
+        "attn_slice": 0.0948
+      },
+      "conservative": {
+        "levers": [
+          "lk",
+          "persist",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.233034999999999,
+        "step_time": 1.1837049440466998,
+        "official_tps": 531.6445685941746,
+        "verify_gemm_slice": 0.5047619047619047,
+        "attn_slice": 0.1248
+      },
+      "optimistic": {
+        "levers": [
+          "lk",
+          "persist",
+          "splitk",
+          "tree"
+        ],
+        "E_T": 5.331968,
+        "step_time": 0.9358824714645708,
+        "official_tps": 713.6843796826073,
+        "verify_gemm_slice": 0.4732142857142857,
+        "attn_slice": 0.0848
+      },
+      "central_tps": 599.9844743405253,
+      "conservative_tps": 531.6445685941746,
+      "optimistic_tps": 713.6843796826073,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "margin_conservative": 31.644568594174643
+    }
+  ],
+  "step3_anti_compound_map": [
+    {
+      "base": [
+        "tree"
+      ],
+      "pair": [
+        "splitk",
+        "persist"
+      ],
+      "marginal_gain_a_pct": 3.7176901900654036,
+      "marginal_gain_b_pct": 1.8463761316623417,
+      "joint_gain_pct": 5.70526765124082,
+      "additive_null_pct": 5.564066321727745,
+      "multiplicative_null_pct": 5.632708866046254,
+      "joint_over_additive": 1.0253773627682476,
+      "kind": "multiplicative (compound)"
+    },
+    {
+      "base": [
+        "tree"
+      ],
+      "pair": [
+        "splitk",
+        "lk"
+      ],
+      "marginal_gain_a_pct": 3.7176901900654036,
+      "marginal_gain_b_pct": 0.7999999999999785,
+      "joint_gain_pct": 4.547431711585914,
+      "additive_null_pct": 4.517690190065382,
+      "multiplicative_null_pct": 4.547431711585914,
+      "joint_over_additive": 1.0065833468585197,
+      "kind": "multiplicative (compound)"
+    },
+    {
+      "base": [
+        "tree"
+      ],
+      "pair": [
+        "persist",
+        "lk"
+      ],
+      "marginal_gain_a_pct": 1.8463761316623417,
+      "marginal_gain_b_pct": 0.7999999999999785,
+      "joint_gain_pct": 2.6611471407156584,
+      "additive_null_pct": 2.64637613166232,
+      "multiplicative_null_pct": 2.661147140715614,
+      "joint_over_additive": 1.0055815985024243,
+      "kind": "multiplicative (compound)"
+    }
+  ],
+  "step3_tree_interactions": [
+    {
+      "lever": "splitk",
+      "standalone_gain_pct": 4.33193903553053,
+      "marginal_on_tree_pct": 3.7176901900654036,
+      "tree_dilution_ratio": 0.8582046422105524,
+      "kind": "ANTI-COMPOUND (tree shrinks its value)"
+    },
+    {
+      "lever": "persist",
+      "standalone_gain_pct": 3.0927835051546504,
+      "marginal_on_tree_pct": 1.8463761316623417,
+      "tree_dilution_ratio": 0.5969949492374883,
+      "kind": "ANTI-COMPOUND (tree shrinks its value)"
+    },
+    {
+      "lever": "lk",
+      "standalone_gain_pct": 1.0000000000000009,
+      "marginal_on_tree_pct": 0.7999999999999785,
+      "tree_dilution_ratio": 0.7999999999999778,
+      "kind": "ANTI-COMPOUND (tree shrinks its value)"
+    }
+  ],
+  "frontier_anchors": {
+    "official": 481.53,
+    "local_wall": 454.338,
+    "E_T_linear": 3.844,
+    "E_T_tree": 5.207,
+    "deployed_local_to_official": 1.059849715410113,
+    "K_cal": 125.26795005202914,
+    "target_official": 500.0
+  },
+  "band_inputs": {
+    "net_tree": {
+      "low": 0.15880630490312142,
+      "central": 0.1795734429838225,
+      "high": 0.20657072248873387
+    },
+    "splitk_s": {
+      "low": 0.05,
+      "central": 0.085,
+      "high": 0.12
+    },
+    "lk_mult": {
+      "low": 1.01,
+      "central": 1.01,
+      "high": 1.024
+    },
+    "lk_mult_tree": {
+      "low": 1.005,
+      "central": 1.008,
+      "high": 1.024
+    },
+    "fp32_haircut_abs": {
+      "low": 0.0,
+      "central": 0.01,
+      "high": 0.04
+    },
+    "r_idle_abs": {
+      "low": 0.0,
+      "central": 0.03,
+      "high": 0.13
+    },
+    "a_tree_hide": {
+      "low": 0.0,
+      "central": 0.3,
+      "high": 0.5
+    },
+    "tau": {
+      "low": 0.96,
+      "central": 1.0,
+      "high": 1.0
+    }
+  },
+  "method": "CPU-only analytic absolute-time slice composition off the committed decode budget + lever bands; no GPU, no served-file change. Pending gates (#97/#98/#99) carried as bands."
+}
