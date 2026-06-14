@@ -1,0 +1,57 @@
+{
+  "pr": 154,
+  "leg": "cuda_graph_launch_overhead",
+  "deployed_already_graphed": true,
+  "evidence": {
+    "manifest": [
+      "ONEGRAPH=1",
+      "LOOPGRAPH_REQUIRE_CAPTURE=1",
+      "LOOPGRAPH_WARMUP_CALLS=20",
+      "DIXIE_PREWARM_GREEDY_KERNEL=1"
+    ],
+    "sitecustomize": "_capture_graph -> torch.cuda.CUDAGraph(); LOOPGRAPH_TARGET=vllm.v1.spec_decode.gemma4",
+    "step136": "gemm_all_graphed: true (verify GEMMs launch-free)"
+  },
+  "measurement": {
+    "device": "cuda:0",
+    "gpu": "NVIDIA A10G",
+    "N_kernels": 64,
+    "per_kernel_eager_us": 8.557056427001953,
+    "eager_chain_us": 544.4471232096354,
+    "graph_replay_chain_us": 69.79583740234375,
+    "per_launch_overhead_us": 7.416426340738932,
+    "launch_bound_note": "per_kernel_eager ~= per_launch_overhead => tiny kernels are launch-bound (CPU enqueue dominates GPU exec); this is the regime where un-captured launches tax the step."
+  },
+  "model": {
+    "topology": {
+      "M": 32,
+      "depth": 9,
+      "max_branch": 3,
+      "n_layers": 42,
+      "drafter_K": 7
+    },
+    "launch_counts": {
+      "verify_forward": 420,
+      "drafter_propose": 35,
+      "compute_logits": 6,
+      "accept_walk": 27,
+      "glue": 12,
+      "total_eager": 500,
+      "captured_by_deployed_graph": 461,
+      "residual_uncaptured": 39
+    },
+    "per_launch_overhead_us": 7.416426340738932,
+    "captured_tax_upper_bound_us": 3418.9725430806475,
+    "captured_tax_pct_of_bar_step_upper": 33.86132967234932,
+    "residual_headroom_upper_bound_us": 289.24062728881836,
+    "residual_headroom_pct_of_bar_step_upper": 2.864624419135843,
+    "residual_headroom_overlap_illustrative_us": 57.84812545776366,
+    "residual_headroom_pct_illustrative_80pct_overlap": 0.5729248838271684,
+    "verdict": "CUDA-graph leg LARGELY CLOSED in the deployed stack: the drafter loopgraph + verify cudagraph already capture the static forward (captured launch count >> residual). Residual headroom is bounded by the data-dependent accept-walk + glue (~39 launches) and is second-order. Decode-path scatter avoidance (NOT a launch lever) is the real remaining denominator headroom.",
+    "armed_pending": "PENDING land's real launch trace (lawine #147 --trace): the overlap-limited true tax (vs the N*plo upper bound here) and the exact residual un-captured set need the live step trace. ARMED to re-price when that trace lands.",
+    "caveat": "N*plo is an UPPER bound; async launches overlap GPU exec so the true tax is the GPU-idle fraction (<= this). The deployed capture already removes the bulk; do not double-count this against the 1.2182 baseline, which is measured WITH capture on."
+  },
+  "metrics_nan_clean": 1,
+  "method": "LOCAL A10G: per-launch overhead via eager N-kernel chain vs CUDA-graph replay; tree-step launch budget modeled from topology; residual bounded. No HF Job / no served-file change.",
+  "elapsed_s": 1.9855444431304932
+}

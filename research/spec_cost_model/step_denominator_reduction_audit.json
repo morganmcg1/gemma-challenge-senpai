@@ -1,0 +1,645 @@
+{
+  "pr": 154,
+  "primary_metric_name": "step_reduction_audit_self_test_passes",
+  "step_reduction_audit_self_test_passes": 1,
+  "test_metric_name": "recoverable_step_pct",
+  "recoverable_step_pct": 0.8573323242039603,
+  "recoverable_step_pct_realistic": 1.1079069770564272,
+  "headline": "Decode-path scatter+LP avoidance removes ~112 us/step (tree M=32, scatter+LP); net 87-112 us/step (conservative-realistic) = 0.86-1.11% of the step at the clear-500 bar (E[T]=4.862); lowers the bar to 4.808-4.820 and adds a ~flat +4.3 to +5.6 TPS at any E[T]. Greedy-safe (PPL untouched), NON-drafter, STACKS with the descent. Second-order but real denominator insurance on the fern #145 >=90%-spread-recovery risk.",
+  "scope": "LOCAL A10G profiling + analysis. No HF Job / no submission / no served-file change. BASELINE stays 481.53 (PPL 2.3777). Bounds a greedy-safe NON-drafter step_time (denominator) lever + hands a build design; does NOT authorize a launch.",
+  "lever": "decode-path [M,262144] scatter + LogitsProcessor avoidance: emit target_argmax via argmax over the pruned [M,12288] head remapped through kept_ids (token-identical to full-scatter argmax, lmhead12k_scatter_equiv.json rate=1.0). scatter+LP is PREFILL/PPL-only.",
+  "anchors_denken_144": {
+    "gemm_only_us": 38.27370643615723,
+    "scatter_only_us": 8.154453436533611,
+    "compute_logits_full_us_M8": 135.8233642578125,
+    "compute_logits_full_us_M16": 134.5467758178711,
+    "compute_logits_full_us_M32": 150.13888041178387,
+    "cand_perrow_argmax_us": 80.66730499267578
+  },
+  "denken_lp_us_M8": 89.39520438512166,
+  "projection_constants": {
+    "official_tps": 481.53,
+    "ppl": 2.3777,
+    "target": 500.0,
+    "K_cal": 125.26795005202914,
+    "K_cal_lo_148": 124.282034113087,
+    "tau": 1.0,
+    "step_dimensionless_136": 1.2182,
+    "clear_500_bar": 4.862,
+    "budget_us": 2076.71380807011,
+    "formula": "official = K_cal*(E[T]/step)*tau"
+  },
+  "avoidable_us": {
+    "gross_M8": 97.54965782165527,
+    "gross_M32": 111.86517397562665,
+    "net_conservative_M8": 71.0306167602539,
+    "net_conservative_M32": 86.56469504038495,
+    "net_realistic_M8": 97.54965782165527,
+    "net_realistic_M32": 111.86517397562665,
+    "note": "gross = scatter+LP removed (denken served anchor); net_conservative charges the full eager argmax-only as add-back (over-conservative: deployed argmax is fused & replaces the 262144-argmax); net_realistic = gross (argmax-12288 replaces, not adds)."
+  },
+  "greedy_safety": {
+    "claim": "decode argmax-only path emits the SAME token as the full scatter+LP path for greedy => PPL and greedy-identity untouched.",
+    "proof_chain": [
+      "1. token-identity: kept_ids[argmax(pruned[M,K])] == argmax(scatter[M,262144]) at equivalence_rate=1.0 on real weights + adversarial ties (lmhead12k_scatter_equiv.json). Holds because kept_ids is strictly ascending, so argmax's first-occurrence tiebreak picks the smallest kept-row == smallest original vocab id == what full-vocab argmax returns.",
+      "2. softcap-invariance: softcap g(x)=30*tanh(x/30) is strictly increasing => argmax(g(x))==argmax(x); the decode path need not even apply softcap for token selection (this script verifies argmax(softcap)==argmax at all M).",
+      "3. scatter+LP is PREFILL/PPL-only: serve_patch_pck04.py docstring (lines 5-11) states the full-vocab scatter exists so 'Downstream sampler / prompt_logprobs sees full-vocab logits with original token IDs'. For GREEDY DECODE the only consumer of the [M,262144] logits is the argmax => removable on decode."
+    ],
+    "seam_land_must_guard": "compute_logits must branch: (a) token-selection (greedy decode/verify argmax, linear M=8 / tree M=32) -> argmax over pruned [M,K] + kept_ids remap, NO scatter, NO sampling LP; (b) prompt_logprobs / non-greedy sampling (prefill PPL) -> keep the full [M,262144] scatter+LP unchanged. The existing M<=16 vs M>16 branch (serve_patch_pck04.py:140-144) is a buffer-caching proxy, NOT the token-selection vs prompt_logprobs guard the lever needs.",
+    "orthogonality": "compute_logits runs EAGERLY outside the CUDA graph (serve_patch_pck04.py:17-20) => the scatter-avoidance leg is independent of the CUDA-graph leg; they do not double-count.",
+    "citations": {
+      "scatter_equiv": "research/spec_cost_model/lmhead12k_scatter_equiv.json (rate=1.0)",
+      "scatter_site": "submissions/fa2sw_precache_kenyan/serve_patch_pck04.py:113-167,335-342",
+      "prompt_logprobs_site": "serve_patch_pck04.py:10 (prompt_logprobs consumer) + :140-144 (decode/prefill branch)",
+      "accept_prep": "sitecustomize.py:927,945-951 (_dixie_fused_accept_prep consumes target_argmax)",
+      "lawine_147": "research/spec_cost_model/sync_audit_* (--trace harness; prefill-only prompt_logprobs site)"
+    },
+    "softcap_argmax_monotone_ok_all_M": true
+  },
+  "measurement": {
+    "device": "cuda:0",
+    "torch": "2.12.0+cu130",
+    "gpu": "NVIDIA A10G",
+    "hbm_copy_gbps": 478.53086822406533,
+    "int4_head_bytes": 15728640,
+    "gemm_bw_floor_us": 32.86860063672066,
+    "per_M": {
+      "8": {
+        "scatter_us": 8.86784017086029,
+        "lp_cast_us": 28.90752077102661,
+        "lp_softcap_us": 140.07807731628418,
+        "lp_full_us_eager": 160.09727478027344,
+        "argmax_262144_us": 16.08191967010498,
+        "argmax_12288_us": 10.920959711074829,
+        "argmax_only_us": 26.519041061401367,
+        "gemm_us_anchor": 38.27370643615723,
+        "compute_logits_full_anchor_us": 135.8233642578125,
+        "lp_served_us": 89.39520438512166,
+        "argmax_only_path_us": 64.7927474975586,
+        "full_compose_us": 207.23882138729095,
+        "gross_avoidable_us": 97.54965782165527,
+        "net_conservative_us": 71.0306167602539,
+        "net_realistic_us": 97.54965782165527,
+        "naive_eager_lp_removal_us": 142.44607388973236,
+        "softcap_argmax_monotone_ok": true,
+        "nan_clean": true
+      },
+      "16": {
+        "scatter_us": 9.021440148353577,
+        "lp_cast_us": 54.21567916870117,
+        "lp_softcap_us": 270.6355285644531,
+        "lp_full_us_eager": 311.0451126098633,
+        "argmax_262144_us": 26.465280055999756,
+        "argmax_12288_us": 10.821119546890259,
+        "argmax_only_us": 25.523200035095215,
+        "gemm_us_anchor": 38.27370643615723,
+        "compute_logits_full_anchor_us": 134.5467758178711,
+        "lp_served_us": 88.11861594518025,
+        "argmax_only_path_us": 63.79690647125244,
+        "full_compose_us": 358.3402591943741,
+        "gross_avoidable_us": 96.27306938171387,
+        "net_conservative_us": 70.74986934661865,
+        "net_realistic_us": 96.27306938171387,
+        "naive_eager_lp_removal_us": 294.54335272312164,
+        "softcap_argmax_monotone_ok": true,
+        "nan_clean": true
+      },
+      "32": {
+        "scatter_us": 8.934400081634521,
+        "lp_cast_us": 105.26975631713867,
+        "lp_softcap_us": 531.8527984619141,
+        "lp_full_us_eager": 616.8473434448242,
+        "argmax_262144_us": 50.731520652770996,
+        "argmax_12288_us": 10.841599702835083,
+        "argmax_only_us": 25.3004789352417,
+        "gemm_us_anchor": 38.27370643615723,
+        "compute_logits_full_anchor_us": 150.13888041178387,
+        "lp_served_us": 103.71072053909303,
+        "argmax_only_path_us": 63.574185371398926,
+        "full_compose_us": 664.055449962616,
+        "gross_avoidable_us": 111.86517397562665,
+        "net_conservative_us": 86.56469504038495,
+        "net_realistic_us": 111.86517397562665,
+        "naive_eager_lp_removal_us": 600.481264591217,
+        "softcap_argmax_monotone_ok": true,
+        "nan_clean": true
+      }
+    }
+  },
+  "propagation": {
+    "conservative_M8_linear": {
+      "label": "net-conservative @ M=8 (linear)",
+      "avoidable_us": 71.0306167602539,
+      "rows": [
+        {
+          "E_T": 2.6,
+          "step_abs_us": 5399.455900982287,
+          "recoverable_step_pct": 1.3155143418678867,
+          "official_old_tps": 267.35894773869296,
+          "official_new_tps": 270.92297837462684,
+          "dtps": 3.564030635933875,
+          "dtps_pct": 1.3330508165439185,
+          "clear_500_bar_new": 4.798039692698383,
+          "clear_500_bar_drop": 0.06396030730161684
+        },
+        {
+          "E_T": 3.0,
+          "step_abs_us": 6230.141424210331,
+          "recoverable_step_pct": 1.1401124296188352,
+          "official_old_tps": 308.4910935446457,
+          "official_new_tps": 312.048800707994,
+          "dtps": 3.5577071633483115,
+          "dtps_pct": 1.1532609004912584,
+          "clear_500_bar_new": 4.806567733671932,
+          "clear_500_bar_drop": 0.05543226632806775
+        },
+        {
+          "E_T": 3.5,
+          "step_abs_us": 7268.498328245386,
+          "recoverable_step_pct": 0.977239225387573,
+          "official_old_tps": 359.90627580208667,
+          "official_new_tps": 363.4581312283104,
+          "dtps": 3.5518554262237103,
+          "dtps_pct": 0.9868834374471659,
+          "clear_500_bar_new": 4.814486628861657,
+          "clear_500_bar_drop": 0.04751337113834353
+        },
+        {
+          "E_T": 3.844,
+          "step_abs_us": 7982.887878221503,
+          "recoverable_step_pct": 0.8897859752488309,
+          "official_old_tps": 395.27992119520604,
+          "official_new_tps": 398.8286425216389,
+          "dtps": 3.548721326432883,
+          "dtps_pct": 0.8977742445663901,
+          "clear_500_bar_new": 4.818738605883402,
+          "clear_500_bar_drop": 0.04326139411659824
+        },
+        {
+          "E_T": 4.0,
+          "step_abs_us": 8306.85523228044,
+          "recoverable_step_pct": 0.8550843222141264,
+          "official_old_tps": 411.32145805952763,
+          "official_new_tps": 414.86893730011724,
+          "dtps": 3.5474792405896096,
+          "dtps_pct": 0.8624590745460715,
+          "clear_500_bar_new": 4.8204258002539495,
+          "clear_500_bar_drop": 0.04157419974605059
+        },
+        {
+          "E_T": 4.452,
+          "step_abs_us": 9245.52987352813,
+          "recoverable_step_pct": 0.7682698312795386,
+          "official_old_tps": 457.80078282025426,
+          "official_new_tps": 461.3451584910094,
+          "dtps": 3.54437567075513,
+          "dtps_pct": 0.774217913940692,
+          "clear_500_bar_new": 4.824646720803189,
+          "clear_500_bar_drop": 0.03735327919681097
+        },
+        {
+          "E_T": 4.613,
+          "step_abs_us": 9579.88079662742,
+          "recoverable_step_pct": 0.7414561649374605,
+          "official_old_tps": 474.3564715071503,
+          "official_new_tps": 477.89988970157185,
+          "dtps": 3.5434181944215766,
+          "dtps_pct": 0.7469948039631972,
+          "clear_500_bar_new": 4.825950401260741,
+          "clear_500_bar_drop": 0.03604959873925928
+        },
+        {
+          "E_T": 4.862,
+          "step_abs_us": 10096.982534836876,
+          "recoverable_step_pct": 0.7034836052769449,
+          "official_old_tps": 499.9612322713558,
+          "official_new_tps": 503.5032954065702,
+          "dtps": 3.5420631352143914,
+          "dtps_pct": 0.7084675583989928,
+          "clear_500_bar_new": 4.827796627111435,
+          "clear_500_bar_drop": 0.03420337288856512
+        },
+        {
+          "E_T": 5.0564,
+          "step_abs_us": 10500.695699125705,
+          "recoverable_step_pct": 0.6764372456404766,
+          "official_old_tps": 519.9514551330489,
+          "official_new_tps": 523.4925537447328,
+          "dtps": 3.541098611683992,
+          "dtps_pct": 0.6810440814667729,
+          "clear_500_bar_new": 4.82911162111696,
+          "clear_500_bar_drop": 0.0328883788830403
+        },
+        {
+          "E_T": 5.207,
+          "step_abs_us": 10813.448798621064,
+          "recoverable_step_pct": 0.6568729189276945,
+          "official_old_tps": 535.4377080289901,
+          "official_new_tps": 538.9781092677183,
+          "dtps": 3.5404012387282364,
+          "dtps_pct": 0.6612162695378468,
+          "clear_500_bar_new": 4.8300628386817355,
+          "clear_500_bar_drop": 0.03193716131826463
+        }
+      ]
+    },
+    "realistic_M8_linear": {
+      "label": "net-realistic @ M=8 (linear)",
+      "avoidable_us": 97.54965782165527,
+      "rows": [
+        {
+          "E_T": 2.6,
+          "step_abs_us": 5399.455900982287,
+          "recoverable_step_pct": 1.8066571819562176,
+          "official_old_tps": 267.35894773869296,
+          "official_new_tps": 272.27807921166294,
+          "dtps": 4.91913147296998,
+          "dtps_pct": 1.8398978282102465,
+          "clear_500_bar_new": 4.774160327813289,
+          "clear_500_bar_drop": 0.0878396721867114
+        },
+        {
+          "E_T": 3.0,
+          "step_abs_us": 6230.141424210331,
+          "recoverable_step_pct": 1.5657695576953883,
+          "official_old_tps": 308.4910935446457,
+          "official_new_tps": 313.3981869502825,
+          "dtps": 4.907093405636772,
+          "dtps_pct": 1.5906758763285345,
+          "clear_500_bar_new": 4.78587228410485,
+          "clear_500_bar_drop": 0.07612771589514988
+        },
+        {
+          "E_T": 3.5,
+          "step_abs_us": 7268.498328245386,
+          "recoverable_step_pct": 1.3420881923103332,
+          "official_old_tps": 359.90627580208667,
+          "official_new_tps": 364.80224363925225,
+          "dtps": 4.8959678371655855,
+          "dtps_pct": 1.3603452249490338,
+          "clear_500_bar_new": 4.796747672089872,
+          "clear_500_bar_drop": 0.06525232791012847
+        },
+        {
+          "E_T": 3.844,
+          "step_abs_us": 7982.887878221503,
+          "recoverable_step_pct": 1.2219845663595643,
+          "official_old_tps": 395.27992119520604,
+          "official_new_tps": 400.1699360529845,
+          "dtps": 4.8900148577784535,
+          "dtps_pct": 1.2371017589237872,
+          "clear_500_bar_new": 4.802587110383598,
+          "clear_500_bar_drop": 0.0594128896164019
+        },
+        {
+          "E_T": 4.0,
+          "step_abs_us": 8306.85523228044,
+          "recoverable_step_pct": 1.1743271682715413,
+          "official_old_tps": 411.32145805952763,
+          "official_new_tps": 416.20911477110724,
+          "dtps": 4.887656711579609,
+          "dtps_pct": 1.1882814805329833,
+          "clear_500_bar_new": 4.804904213078638,
+          "clear_500_bar_drop": 0.05709578692136219
+        },
+        {
+          "E_T": 4.452,
+          "step_abs_us": 9245.52987352813,
+          "recoverable_step_pct": 1.0551007801181864,
+          "official_old_tps": 457.80078282025426,
+          "official_new_tps": 462.6825500149326,
+          "dtps": 4.881767194678332,
+          "dtps_pct": 1.0663518669855692,
+          "clear_500_bar_new": 4.810701000070654,
+          "clear_500_bar_drop": 0.0512989999293465
+        },
+        {
+          "E_T": 4.613,
+          "step_abs_us": 9579.88079662742,
+          "recoverable_step_pct": 1.0182763219350022,
+          "official_old_tps": 474.3564715071503,
+          "official_new_tps": 479.2364225237985,
+          "dtps": 4.879951016648249,
+          "dtps_pct": 1.0287518585218016,
+          "clear_500_bar_new": 4.81249140522752,
+          "clear_500_bar_drop": 0.049508594772480485
+        },
+        {
+          "E_T": 4.862,
+          "step_abs_us": 10096.982534836876,
+          "recoverable_step_pct": 0.9661268352707044,
+          "official_old_tps": 499.9612322713558,
+          "official_new_tps": 504.8386135920774,
+          "dtps": 4.877381320721611,
+          "dtps_pct": 0.975551904007308,
+          "clear_500_bar_new": 4.815026913269138,
+          "clear_500_bar_drop": 0.04697308673086198
+        },
+        {
+          "E_T": 5.0564,
+          "step_abs_us": 10500.695699125705,
+          "recoverable_step_pct": 0.9289828085369365,
+          "official_old_tps": 519.9514551330489,
+          "official_new_tps": 524.8270078101641,
+          "dtps": 4.875552677115252,
+          "dtps_pct": 0.9376938229488484,
+          "clear_500_bar_new": 4.816832855848935,
+          "clear_500_bar_drop": 0.045167144151065486
+        },
+        {
+          "E_T": 5.207,
+          "step_abs_us": 10813.448798621064,
+          "recoverable_step_pct": 0.9021142064694,
+          "official_old_tps": 535.4377080289901,
+          "official_new_tps": 540.3119387880473,
+          "dtps": 4.874230759057241,
+          "dtps_pct": 0.9103263901602793,
+          "clear_500_bar_new": 4.818139207281458,
+          "clear_500_bar_drop": 0.04386079271854193
+        }
+      ]
+    },
+    "conservative_M32_tree": {
+      "label": "net-conservative @ M=32 (tree)",
+      "avoidable_us": 86.56469504038495,
+      "rows": [
+        {
+          "E_T": 2.6,
+          "step_abs_us": 5399.455900982287,
+          "recoverable_step_pct": 1.6032114462614058,
+          "official_old_tps": 267.35894773869296,
+          "official_new_tps": 271.7151155727782,
+          "dtps": 4.356167834085227,
+          "dtps_pct": 1.6293331010349386,
+          "clear_500_bar_new": 4.78405185948277,
+          "clear_500_bar_drop": 0.07794814051722998
+        },
+        {
+          "E_T": 3.0,
+          "step_abs_us": 6230.141424210331,
+          "recoverable_step_pct": 1.3894499200932184,
+          "official_old_tps": 308.4910935446457,
+          "official_new_tps": 312.83781836189644,
+          "dtps": 4.346724817250731,
+          "dtps_pct": 1.4090276537016653,
+          "clear_500_bar_new": 4.7944449448850675,
+          "clear_500_bar_drop": 0.06755505511493265
+        },
+        {
+          "E_T": 3.5,
+          "step_abs_us": 7268.498328245386,
+          "recoverable_step_pct": 1.190957074365616,
+          "official_old_tps": 359.90627580208667,
+          "official_new_tps": 364.2442686879977,
+          "dtps": 4.337992885911035,
+          "dtps_pct": 1.2053118207631666,
+          "clear_500_bar_new": 4.8040956670443435,
+          "clear_500_bar_drop": 0.05790433295565656
+        },
+        {
+          "E_T": 3.844,
+          "step_abs_us": 7982.887878221503,
+          "recoverable_step_pct": 1.0843781894588074,
+          "official_old_tps": 395.27992119520604,
+          "official_new_tps": 399.61324001208675,
+          "dtps": 4.3333188168807055,
+          "dtps_pct": 1.096265857313994,
+          "clear_500_bar_new": 4.809277532428513,
+          "clear_500_bar_drop": 0.052722467571487464
+        },
+        {
+          "E_T": 4.0,
+          "step_abs_us": 8306.85523228044,
+          "recoverable_step_pct": 1.0420874400699138,
+          "official_old_tps": 411.32145805952763,
+          "official_new_tps": 415.65292498508035,
+          "dtps": 4.331466925552718,
+          "dtps_pct": 1.0530612591881494,
+          "clear_500_bar_new": 4.811333708663801,
+          "clear_500_bar_drop": 0.050666291336199265
+        },
+        {
+          "E_T": 4.452,
+          "step_abs_us": 9245.52987352813,
+          "recoverable_step_pct": 0.9362870081490692,
+          "official_old_tps": 457.80078282025426,
+          "official_new_tps": 462.1276237222335,
+          "dtps": 4.326840901979267,
+          "dtps_pct": 0.9451361955573827,
+          "clear_500_bar_new": 4.816477725663792,
+          "clear_500_bar_drop": 0.045522274336208035
+        },
+        {
+          "E_T": 4.613,
+          "step_abs_us": 9579.88079662742,
+          "recoverable_step_pct": 0.9036093128722426,
+          "official_old_tps": 474.3564715071503,
+          "official_new_tps": 478.68188560450506,
+          "dtps": 4.3254140973547806,
+          "dtps_pct": 0.9118488641278252,
+          "clear_500_bar_new": 4.818066515208152,
+          "clear_500_bar_drop": 0.04393348479184844
+        },
+        {
+          "E_T": 4.862,
+          "step_abs_us": 10096.982534836876,
+          "recoverable_step_pct": 0.8573323242039604,
+          "official_old_tps": 499.9612322713558,
+          "official_new_tps": 504.2846273879442,
+          "dtps": 4.323395116588415,
+          "dtps_pct": 0.8647460717997983,
+          "clear_500_bar_new": 4.820316502397203,
+          "clear_500_bar_drop": 0.041683497602797104
+        },
+        {
+          "E_T": 5.0564,
+          "step_abs_us": 10500.695699125705,
+          "recoverable_step_pct": 0.8243710466497223,
+          "official_old_tps": 519.9514551330489,
+          "official_new_tps": 524.273413358055,
+          "dtps": 4.321958225006142,
+          "dtps_pct": 0.831223411789512,
+          "clear_500_bar_new": 4.821919079711891,
+          "clear_500_bar_drop": 0.04008092028810939
+        },
+        {
+          "E_T": 5.207,
+          "step_abs_us": 10813.448798621064,
+          "recoverable_step_pct": 0.80052808916452,
+          "official_old_tps": 535.4377080289901,
+          "official_new_tps": 539.7586274554599,
+          "dtps": 4.3209194264698,
+          "dtps_pct": 0.8069882568367511,
+          "clear_500_bar_new": 4.823078324304821,
+          "clear_500_bar_drop": 0.038921675695179125
+        }
+      ]
+    },
+    "realistic_M32_tree": {
+      "label": "net-realistic @ M=32 (tree)",
+      "avoidable_us": 111.86517397562665,
+      "rows": [
+        {
+          "E_T": 2.6,
+          "step_abs_us": 5399.455900982287,
+          "recoverable_step_pct": 2.0717860470955185,
+          "official_old_tps": 267.35894773869296,
+          "official_new_tps": 273.01523937449826,
+          "dtps": 5.656291635805303,
+          "dtps_pct": 2.115617107131032,
+          "clear_500_bar_new": 4.761269762390216,
+          "clear_500_bar_drop": 0.10073023760978383
+        },
+        {
+          "E_T": 3.0,
+          "step_abs_us": 6230.141424210331,
+          "recoverable_step_pct": 1.7955479074827827,
+          "official_old_tps": 308.4910935446457,
+          "official_new_tps": 314.1314746647331,
+          "dtps": 5.6403811200873974,
+          "dtps_pct": 1.8283772977942085,
+          "clear_500_bar_new": 4.774700460738187,
+          "clear_500_bar_drop": 0.08729953926181278
+        },
+        {
+          "E_T": 3.5,
+          "step_abs_us": 7268.498328245386,
+          "recoverable_step_pct": 1.5390410635566711,
+          "official_old_tps": 359.90627580208667,
+          "official_new_tps": 365.53196281015977,
+          "dtps": 5.6256870080731005,
+          "dtps_pct": 1.5630977802584025,
+          "clear_500_bar_new": 4.787171823489875,
+          "clear_500_bar_drop": 0.07482817651012486
+        },
+        {
+          "E_T": 3.844,
+          "step_abs_us": 7982.887878221503,
+          "recoverable_step_pct": 1.4013121026140347,
+          "official_old_tps": 395.27992119520604,
+          "official_new_tps": 400.8977498834299,
+          "dtps": 5.617828688223881,
+          "dtps_pct": 1.4212279417677676,
+          "clear_500_bar_new": 4.793868205570906,
+          "clear_500_bar_drop": 0.06813179442909423
+        },
+        {
+          "E_T": 4.0,
+          "step_abs_us": 8306.85523228044,
+          "recoverable_step_pct": 1.3466609306120874,
+          "official_old_tps": 411.32145805952763,
+          "official_new_tps": 416.9361746288428,
+          "dtps": 5.614716569315192,
+          "dtps_pct": 1.36504343726765,
+          "clear_500_bar_new": 4.796525345553641,
+          "clear_500_bar_drop": 0.06547465444635936
+        },
+        {
+          "E_T": 4.452,
+          "step_abs_us": 9245.52987352813,
+          "recoverable_step_pct": 1.2099379430476975,
+          "official_old_tps": 457.80078282025426,
+          "official_new_tps": 463.4077287615559,
+          "dtps": 5.60694594130166,
+          "dtps_pct": 1.2247567395495496,
+          "clear_500_bar_new": 4.8031728172090205,
+          "clear_500_bar_drop": 0.05882718279097965
+        },
+        {
+          "E_T": 4.613,
+          "step_abs_us": 9579.88079662742,
+          "recoverable_step_pct": 1.1677094564162904,
+          "official_old_tps": 474.3564715071503,
+          "official_new_tps": 479.961021745181,
+          "dtps": 5.604550238030697,
+          "dtps_pct": 1.1815060138683522,
+          "clear_500_bar_new": 4.80522596622904,
+          "clear_500_bar_drop": 0.05677403377096013
+        },
+        {
+          "E_T": 4.862,
+          "step_abs_us": 10096.982534836876,
+          "recoverable_step_pct": 1.1079069770564272,
+          "official_old_tps": 499.9612322713558,
+          "official_new_tps": 505.5623933001011,
+          "dtps": 5.6011610287453095,
+          "dtps_pct": 1.1203190702004788,
+          "clear_500_bar_new": 4.808133562775517,
+          "clear_500_bar_drop": 0.05386643722448348
+        },
+        {
+          "E_T": 5.0564,
+          "step_abs_us": 10500.695699125705,
+          "recoverable_step_pct": 1.065312024849369,
+          "official_old_tps": 519.9514551330489,
+          "official_new_tps": 525.5502046599115,
+          "dtps": 5.598749526862662,
+          "dtps_pct": 1.076783124961159,
+          "clear_500_bar_new": 4.810204529351823,
+          "clear_500_bar_drop": 0.05179547064817669
+        },
+        {
+          "E_T": 5.207,
+          "step_abs_us": 10813.448798621064,
+          "recoverable_step_pct": 1.0345004268193487,
+          "official_old_tps": 535.4377080289901,
+          "official_new_tps": 541.0347144593125,
+          "dtps": 5.597006430322381,
+          "dtps_pct": 1.0453142067497687,
+          "clear_500_bar_new": 4.811702589248044,
+          "clear_500_bar_drop": 0.050297410751956484
+        }
+      ]
+    }
+  },
+  "self_test": {
+    "passes": true,
+    "n_checks": 8,
+    "n_passed": 8,
+    "checks": [
+      {
+        "name": "gemm 38.27us consistent with measured BW floor",
+        "passes": true,
+        "detail": "floor=32.87us <= 38.27us <= 2x floor=65.74us"
+      },
+      {
+        "name": "scatter reproduces denken 8.15us within 40%",
+        "passes": true,
+        "detail": "measured=8.87us vs 8.15us (rel 8.7%)"
+      },
+      {
+        "name": "LP-wrapper share positive (135.82-38.27-8.15)",
+        "passes": true,
+        "detail": "LP=89.40us"
+      },
+      {
+        "name": "avoidable us + argmax-only finite & NaN-clean at all M",
+        "passes": true,
+        "detail": "all M in {8,16,32}"
+      },
+      {
+        "name": "0 < net_conservative <= net_realistic == gross < full_compute_logits",
+        "passes": true,
+        "detail": "net_cons@M8=71.03 <= gross@M8=97.55us"
+      },
+      {
+        "name": "softcap monotone: argmax(softcap(x))==argmax(x) at all M",
+        "passes": true,
+        "detail": "tanh softcap strictly increasing"
+      },
+      {
+        "name": "bar-drop arithmetic: 2% step cut -> 4.862*0.98 ~ 4.765",
+        "passes": true,
+        "detail": "bar_new=4.76476"
+      },
+      {
+        "name": "K_cal*bar/step ~ 500 (anchor closes)",
+        "passes": true,
+        "detail": "official(bar)=499.96"
+      }
+    ]
+  },
+  "metrics_nan_clean": 1,
+  "method": "LOCAL A10G pure-torch microbench of the avoidable memory-bound decode work (scatter + fp32 cast + softcap + argmax over 262144) vs the argmax-only replacement (argmax over 12288 + kept_ids gather); int4 Marlin GEMM anchored to denken #144 + BW roofline cross-check; propagated through K_cal (#148 de-risked band).",
+  "elapsed_s": 8.272660255432129
+}
