@@ -78,6 +78,12 @@ from research.tps_noise_floor.analyze_noise_floor import (  # noqa: E402
     Z_POWER,
     bootstrap_stat_cv,
 )
+# PR #99 local->official projection. Optional: if unavailable the runner still
+# produces the raw wall_tps A/B (projection is an additive reporting layer).
+try:
+    from scripts.profiler import local_official_projection as projection  # noqa: E402
+except Exception:  # pragma: no cover - defensive
+    projection = None
 
 OUT_ROOT = ROOT / "research" / "walltps_ab"
 
@@ -198,6 +204,56 @@ def arm_stats(records: list[dict[str, Any]]) -> dict[str, Any]:
         "e_accept_exact": aggregate(records, "e_accept_exact"),
         "server_ready_s": aggregate(records, "server_ready_s"),
     }
+
+
+def arm_projection(stats: dict[str, Any], calib: "projection.Calibration",
+                   reference_wall_tps: float | None,
+                   reproduction_threshold_pct: float) -> dict[str, Any] | None:
+    """PR #99: map an arm's MEASURED median ``wall_tps`` to a projected-official band
+    and report it as ``{accept_length, wall_tps, projected_official +/- band}``.
+
+    ``accept_length`` is the arm's mean ``e_accept_exact`` (E[T], the realized accept
+    length). When ``reference_wall_tps`` is given (the linear-chain dry-run reference,
+    default PR #90 454.338) the arm also carries a *reproduction* check: did the meter
+    land within the operative MDE of that reference? That is the harness half of the
+    closed-loop self-check; ``projected_official`` is the projection half (it should
+    recover the ~481.53 official anchor)."""
+    if projection is None or calib is None:
+        return None
+    w = stats.get("wall_tps") or {}
+    med = w.get("median")
+    if med is None:
+        return None
+    pj = projection.project_official(med, calib=calib, modeling_band_pct=0.0)
+    ea = stats.get("e_accept_exact") or {}
+    out: dict[str, Any] = {
+        "accept_length": ea.get("mean"),
+        "accept_length_cv_pct": ea.get("cv_pct"),
+        "wall_tps_median": med,
+        "wall_tps_cv_pct": w.get("cv_pct"),
+        "multiplier": pj["multiplier"],
+        "projected_official": pj["projected_official"],
+        "projected_official_lo": pj["projected_official_lo"],
+        "projected_official_hi": pj["projected_official_hi"],
+        "band_rel_pct": pj["band_rel_pct"],
+        "clears_500": pj["clears_500"],
+        "margin_to_500_pct_at_lo": pj["margin_to_500_pct_at_lo"],
+        "margin_to_500_pct_at_central": pj["margin_to_500_pct_at_central"],
+    }
+    if reference_wall_tps:
+        rel_err = 100.0 * abs(med - reference_wall_tps) / reference_wall_tps
+        anchor = float(projection.OFFICIAL_ANCHOR["tps"])
+        out.update({
+            "reference_wall_tps": reference_wall_tps,
+            "reproduction_rel_err_pct": rel_err,
+            "reproduction_threshold_pct": reproduction_threshold_pct,
+            "reproduces_reference": rel_err <= reproduction_threshold_pct,
+            "official_anchor_tps": anchor,
+            # closed loop: does the projection land on the official anchor band?
+            "recovers_official_anchor": pj["projected_official_lo"] <= anchor <= pj["projected_official_hi"],
+            "recovered_vs_anchor_pct": 100.0 * (pj["projected_official"] - anchor) / anchor,
+        })
+    return out
 
 
 def operative_threshold_pct(n: int) -> float:
@@ -349,6 +405,18 @@ def _log_wandb(args, baseline: ArmSpec, candidate: ArmSpec,
         flat = {f"verdict/{k}": val for k, val in v.items()
                 if isinstance(val, (int, float, bool))}
         flat["verdict/is_real"] = 1.0 if v.get("verdict") == "REAL" else 0.0
+        pb = result.get("projection")
+        if pb:
+            for k, val in pb.items():
+                if isinstance(val, (int, float, bool)):
+                    flat[f"projection/{k}"] = val
+            for label in ("baseline", "candidate"):
+                a = (pb.get("arms") or {}).get(label)
+                if not a:
+                    continue
+                for k, val in a.items():
+                    if isinstance(val, (int, float, bool)):
+                        flat[f"projection/{label}/{k}"] = val
         wandb_logging.log_summary(run, flat, step=step)
         wandb_logging.log_json_artifact(
             run, name=f"paired_ab_{candidate.label}", artifact_type="walltps-ab",
@@ -407,6 +475,19 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--wandb-name", default=None)
     ap.add_argument("--wandb-group", default="walltps-ab-runner")
     ap.add_argument("--no-wandb", action="store_true")
+    # PR #99 projection layer.
+    ap.add_argument("--project", dest="project", action="store_true", default=True,
+                    help="map each arm's median wall_tps to a projected-official band "
+                         "via scripts/profiler/local_official_projection (PR #99; default on)")
+    ap.add_argument("--no-project", dest="project", action="store_false")
+    ap.add_argument("--reference-wall-tps", type=float, default=None,
+                    help="linear-chain reference for the reproduction self-check "
+                         "(default: PR #90 locked 454.338). Each arm reports whether its "
+                         "median reproduces this within the operative MDE, and whether the "
+                         "projection recovers the ~481.53 official anchor (closed loop).")
+    ap.add_argument("--official-cv-assumed-pct", type=float, default=1.0,
+                    help="conservative assumed official per-run CV for the projection "
+                         "envelope band (PR #99 sensitivity knob; does not affect central)")
     args = ap.parse_args(argv)
 
     for note in paths.prepare_local_gpu_env():
@@ -454,6 +535,8 @@ def main(argv: list[str] | None = None) -> int:
     cand_stats = arm_stats(cand_recs)
     verdict = paired_verdict(base_stats, cand_stats, args.n)
 
+    projection_block = _build_projection(args, base_stats, cand_stats)
+
     result = {
         "runner": "paired_tps_ab", "pr": 82, "metric": "wall_tps",
         "baseline": {"submission": baseline.submission, "label": baseline.label,
@@ -471,14 +554,48 @@ def main(argv: list[str] | None = None) -> int:
             "candidate": {**cand_stats, "records": cand_recs},
         },
         "verdict": verdict,
+        "projection": projection_block,
     }
     result_path = out_dir / "paired_ab.json"
     result_path.write_text(json.dumps(result, indent=2, default=str))
 
     _print_summary(baseline, candidate, base_stats, cand_stats, verdict, elapsed)
+    if projection_block:
+        _print_projection(projection_block)
     print(f"[ab] artifacts -> {result_path}", flush=True)
     _log_wandb(args, baseline, candidate, base_recs, cand_recs, result)
     return 0
+
+
+def _build_projection(args, base_stats: dict[str, Any],
+                      cand_stats: dict[str, Any]) -> dict[str, Any] | None:
+    """PR #99: calibrate the local->official multiplier and attach a projected-official
+    band to each arm. The candidate arm doubles as the linear-chain dry-run reference
+    when ``--reference-wall-tps`` (default PR #90 454.338) is active."""
+    if not args.project or projection is None:
+        return None
+    calib = projection.calibrate(official_cv_assumed_pct=args.official_cv_assumed_pct)
+    ref = (args.reference_wall_tps if args.reference_wall_tps is not None
+           else projection.LINEAR_REFERENCE_WALL_TPS)
+    op_thresh = operative_threshold_pct(args.n)
+    base_proj = arm_projection(base_stats, calib, ref, op_thresh)
+    cand_proj = arm_projection(cand_stats, calib, ref, op_thresh)
+    # The "build under test" slot is the candidate; the closed loop reads off it.
+    closed = cand_proj or base_proj or {}
+    return {
+        "pr": 99,
+        "multiplier": calib.multiplier,
+        "multiplier_se_local": calib.mult_se_local,
+        "multiplier_ci95_local": [calib.mult_ci_local_lo, calib.mult_ci_local_hi],
+        "multiplier_ci95_envelope": [calib.mult_ci_env_lo, calib.mult_ci_env_hi],
+        "official_cv_assumed_pct": calib.official_cv_assumed_pct,
+        "official_anchor_tps": calib.official_tps,
+        "reference_wall_tps": ref,
+        "reproduction_threshold_pct": op_thresh,
+        "closed_loop_reproduces_reference": closed.get("reproduces_reference"),
+        "closed_loop_recovers_anchor": closed.get("recovers_official_anchor"),
+        "arms": {"baseline": base_proj, "candidate": cand_proj},
+    }
 
 
 def _git_info() -> dict[str, Any]:
@@ -514,6 +631,37 @@ def _print_summary(baseline: ArmSpec, candidate: ArmSpec, base: dict, cand: dict
         print(f"  ---- WARN: an arm CV exceeded {FLOOR_ANOMALY_FACTOR}x the characterized "
               f"{WALL_TPS_FLOOR_CV_PCT}% floor — treat verdict with caution / re-run", flush=True)
     print(f"\n  >>> {verdict.get('human_verdict')}\n", flush=True)
+
+
+def _print_projection(pb: dict[str, Any]) -> None:
+    print(f"[ab] ===== LOCAL->OFFICIAL PROJECTION (PR #99) =====", flush=True)
+    lo, hi = pb["multiplier_ci95_local"]
+    elo, ehi = pb["multiplier_ci95_envelope"]
+    print(f"  multiplier={_fmt(pb['multiplier'],5)} "
+          f"local-CI95=[{_fmt(lo,5)},{_fmt(hi,5)}] "
+          f"envelope-CI95=[{_fmt(elo,5)},{_fmt(ehi,5)}] "
+          f"(official-CV-assumed={_fmt(pb['official_cv_assumed_pct'],2)}%)", flush=True)
+    print(f"  reference={_fmt(pb['reference_wall_tps'],3)} wall_tps  "
+          f"official-anchor={_fmt(pb['official_anchor_tps'],2)} TPS  "
+          f"reproduction-MDE={_fmt(pb['reproduction_threshold_pct'],2)}%", flush=True)
+    for label in ("baseline", "candidate"):
+        a = (pb.get("arms") or {}).get(label)
+        if not a:
+            continue
+        line = (f"  {label:9s} accept_len={_fmt(a.get('accept_length'),4)} "
+                f"wall_tps={_fmt(a.get('wall_tps_median'),3)} -> "
+                f"official={_fmt(a.get('projected_official'),1)} "
+                f"[{_fmt(a.get('projected_official_lo'),1)},{_fmt(a.get('projected_official_hi'),1)}] "
+                f"(±{_fmt(a.get('band_rel_pct'),2)}%)  clears500={a.get('clears_500')}")
+        print(line, flush=True)
+        if a.get("reference_wall_tps"):
+            print(f"            reproduces_ref={a.get('reproduces_reference')} "
+                  f"(Δ{_fmt(a.get('reproduction_rel_err_pct'),3)}% vs MDE "
+                  f"{_fmt(a.get('reproduction_threshold_pct'),2)}%)  "
+                  f"recovers_anchor={a.get('recovers_official_anchor')} "
+                  f"(proj {_fmt(a.get('recovered_vs_anchor_pct'),3)}% vs anchor)", flush=True)
+    print(f"  >>> closed-loop: reproduces_reference={pb.get('closed_loop_reproduces_reference')} "
+          f"recovers_anchor={pb.get('closed_loop_recovers_anchor')}\n", flush=True)
 
 
 if __name__ == "__main__":
