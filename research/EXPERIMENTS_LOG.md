@@ -1,5 +1,51 @@
 # SENPAI Research Results
 
+## 2026-06-14 00:15 — PR #68: Verify-GEMM M=8 roofline audit — is the 53% block free to widen? ✅ MERGED (GREEN — greenlights the 500-path)
+
+- **Branch:** `denken/verify-gemm-m8-roofline` · **Student:** denken · merged to advisor branch (commit `f2ec624`).
+- **Status:** MERGED as a **characterization keeper** (reusable roofline harness + cost curve; #49/#51-class positive verdict, not a baseline-beater → no BASELINE.md change). Frontier bar **UNCHANGED 481.53.** This is the audit the entire **tree-verify thread (land #71)** was gated on — verdict is decisive GREEN.
+- **Hypothesis:** at the deployed M=8 verify, is the dominant 53.2% int4-Marlin verify-GEMM block (#30) compute/tile-bound (irreducible) or weight-bandwidth-bound (free headroom to widen M for multi-candidate/tree verify)?
+
+| quantity (A10G, int4 W4A16 Marlin, M=8) | value |
+|---|--:|
+| achieved HBM bandwidth | **462 GB/s = 77.1% of 600 GB/s peak** → **BANDWIDTH-BOUND** |
+| achieved compute | 13.0 TFLOP/s = **20.2% of FP16 peak** (measured 64.3 TFLOPS) |
+| arithmetic intensity @ M=8 | **28 FLOP/byte vs ridge 107** (3.8× below) |
+| widen M=8→16 (top-2 tree) | **+6.4% verify-GEMM** (+2.7% step), marginal **9 µs/row** |
+| widen M=8→32 (top-4 tree) | **+18.4% verify-GEMM** (~+7.7% step), aggregate **~37 µs/extra row** |
+| M=24 (avoid) | +16.9%, marginal **64 µs/row** (expensive) |
+| **M=33 — HARD TILE CLIFF** | **+53.3%** (Marlin 16-row M-tile boundary; reproduces #51's M=33/49 cliffs) |
+
+- **Verdict:** "**at M=8 the int4 W4A16 Marlin verify-GEMM is unambiguously WEIGHT-BANDWIDTH-BOUND, not compute/tile-bound. Free verification headroom EXISTS and is bounded by the Marlin M=33 tile cliff.**" ~80% of the verify-GEMM is pure weight-movement that only 8 rows consume → ~4× under-utilised per-weight-read amortization. **Free window M ∈ [8, 32]: up to 4× more candidate positions at ~37 µs/row, hard ceiling M=33.** Break-even for the downstream tree: an M=8→32 batch (+898 µs) is net-positive TPS if it adds **> ~0.43 accepted tokens/step** — a low bar for a width-2…4 tree at the drafter's *existing* depth (adds verify rows **without** adding sequential drafter forwards).
+- **Premise correction (strengthens the conclusion):** Marlin W4A16 **dequantizes int4→FP16 on-chip** and runs FP16×FP16 tensor-core MACs (arXiv 2408.11743 §3); 4-bit is a *weight-storage* format that cuts HBM traffic 4×, never an int4 compute path. So the compute ceiling is the **FP16 peak (64.3 TFLOPS)**, not int4 (~280 TOPS) — using int4 would have *understated* utilisation 4× and falsely implied more headroom. The "completely free to widen" impression from earlier eager timing was a ~55 µs/call launch-overhead floor; launch-free CUDA-graph timing reveals the true ~37 µs/row.
+- **Empirical complement (the shape of the headroom):** public **byteshark linear K=8 probe = VALID but SLOWER, 470.84 < 481.53** (verify M=9, deep inside the cheap M≤32 GEMM regime) — yet it *loses* TPS because **linear** K-widening adds a sequential drafter forward (drafter 15.5% of decode) at low marginal accept probability. **Takeaway: the GEMM headroom is real but linear chains can't spend it — it must go to multi-candidate/TREE verify (parallel candidates at fixed depth).** Exactly the lever this audit greenlights.
+- **W&B (group `verify-gemm-m8-audit`):** `av8a5wh8` (launch-free CUDA-graph, primary) · `av98bjsw` (eager cross-check showing the launch floor). Local A10G only, **no HF Job** (read-only GEMM microbench, lossless by construction → PPL 2.3772 / greedy-identity 128/128 definitionally unchanged).
+- **Artifacts (merged, now canonical team assets):** `scripts/profiler/verify_gemm_roofline.py`, `research/spec_cost_model/verify_gemm_roofline.json`, `research/spec_cost_model/report_verify_gemm_roofline.md`.
+- **Follow-ups / propagation:** (1) **land #71** builds the tree-verify serving path sized to **M ≤ 32**, snapping total verify rows to ≤32 (never cross M=33) — handed the exact M-budget. (2) **wirbel → #74** re-solves the #49 Sequoia DP-optimal tree under this *measured* non-uniform V(M) curve (pack candidates into the cheap-marginal M=16/M=32, avoid M=24, hard M≤32) → exact build topology for land #71. (3) **denken → #75** drafter-forward roofline (the last unaudited decode block; validates/refutes stark #70's int4-drafter bandwidth-bound premise). Does NOT change drafter K or the AdaEDL/#54 dynamic-K lane (scope guard).
+
+## 2026-06-14 00:15 — PR #69: Attention split-KV roofline audit — is the #2 block (19.6%) at the floor? ✗ CLOSED (NEGATIVE — attention is irreducible)
+
+- **Branch:** `wirbel/splitkv-nseg-roofline` · **Student:** wirbel
+- **Status:** CLOSED as the **third clean Step-0 systems negative** (with #65 CUDA-graph, #67 norm-fusion) — a keeper-in-the-record that sharpens the lever map. No code/served change → frontier bar **UNCHANGED 481.53.** Excellent fail-fast discipline.
+- **Hypothesis:** the split-KV verify-attention is a custom (non-Inductor-fused) kernel ⇒ may carry hand-tunable headroom at the served M=8.
+
+| quantity (deployed M=8, post-#43) | value |
+|---|--:|
+| attention % of GPU-busy | **7.6%** (was 19.6% pre-#43) → already the **#3 block, not #2** |
+| attention µs/step | **605** (was 1836; #43 cut it 3.03×) |
+| achieved BW vs peak | **20.0%** (96.6 GB/s vs 482 GB/s copy) — memory-**LATENCY**-bound, not BW-bound |
+| occupancy @ n_seg=16 | **96 CTAs ≥ 80 SMs → saturated** (no occupancy bump available) |
+| n_seg sweep {1…64} × ctx | **deployed n_seg=16 is exactly optimal at served-dominant shapes** (sliding ctx256 43.8% of cycles, full ctx512/1024 all 1.00×) |
+| oracle best-vs-deployed ceiling | **+0.126% TPS** — and un-CUDA-graph-able (n_seg is a onegraph capture-shape constexpr) |
+| free attention→0 ceiling (hypothetical) | only **+8.2% TPS** (de-prioritised) |
+
+- **Verdict:** "**BW-bound? Occupancy YES, bandwidth NO — it's the irreducible conc=1 latency floor. Residual lossless headroom ≈ +0.13% TPS (oracle, un-CUDA-graph-able). No fix worth prototyping.**" At conc=1 each layer reads one sequence's KV (sliding 0.25–1 MB, full 2.2 MB) — far below the working set needed to hide HBM latency on 80 SMs → 20% of peak is the **floor, not slack** (BW *rises* monotonically with read size = the latency-bound signature). 80% peak only exists at large batch, which this single-stream submission never sees.
+- **Two premise corrections banked:** (1) **Attention is already the #3 block at 7.6%, not #2 at 19.6%** — the 19.6% is the stale #30 *pre*-split-KV number; **#43 already harvested this block** (wirbel's own `r0ahjs45` re-profile). The PR chased a number #43 had already taken. (2) The served kernel is **100% stock vLLM-native Triton `unified_attention`** (3D split-KV/FlashDecoding) — not a custom submission kernel we own, and not Inductor-fused; the fa2sw FA2 router is **INERT** (0 FlashAttention kernels in the served trace; vLLM forces TRITON_ATTN for the heterogeneous sliding-256/full-512 head_dims).
+- **W&B:** `rajcg6an` (group `attention-splitkv-audit`). Local A10G only, **no HF Job** (read-only op-microbench; served stack untouched → PPL 2.3772 / 128/128 definitionally unchanged).
+- **Artifacts:** `research/profiling/splitkv_nseg/` (`nseg_sweep.py`, `aggregate.py`, `FINDING.md`, `breakdown.md`).
+- **MAP UPDATE (load-bearing):** with **#65 (CUDA-graph), #67 (norm/elementwise), #69 (attention)** the decode **SYSTEMS layer is confirmed fully harvested.** Combined with **#68 (verify-GEMM bandwidth-bound, free to widen M≤32)**, the open frontier is now unambiguously **ALGORITHMIC** — verify **width** (→ land #71 tree-verify) and **acceptance/tokens-per-step**. With verify-GEMM (#68), attention (#69) and drafter (incoming #75/stark #70) roofline-mapped, all three big decode blocks are characterised.
+- **Follow-ups:** **wirbel → #74** (he authored the #49 tree cost model → the right owner to find the TPS-optimal tree-shape under denken #68's real V(M) curve, feeding land #71). Flagged-not-implemented: **fa2sw dead-config cleanup** (the inert FA2 sliding router — pure simplification, no perf/PPL change, in the submission name); de-prioritised cross-layer KV read-coalescing (YOCO/CLA — would break the lossless gate).
+
 ## 2026-06-14 00:10 — PR #56: max_num_batched_tokens served A/B on the split-KV #1 stack ✗ CLOSED (parity characterization keeper — NOT a winner, NOT a regression)
 
 - **Branch:** `lawine/maxbatchtok-served-ab` · **Student:** lawine
