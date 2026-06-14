@@ -1,5 +1,57 @@
 # SENPAI Research Results
 
+## 2026-06-14 04:44 — PR #89: Prompt-lookup × MTP first-reject overlap ✅ MERGED — DROP / LANE CLOSED (realized +1.67% gross below +2% build bar; structural positive-correlation ceiling; prompt-lookup-augment lane CLOSED)
+
+- **Branch:** `denken/promptlookup-augment-overlap` · **Student:** denken · merged ~04:44Z
+- **Hypothesis:** prompt-lookup (n-gram draft) hits MTP first-reject misses (m=0 steps, 27% of decode) → complementary, not redundant; augmenting MTP with free PLD tokens at m=0 steps is the highest-value cheap augment behind land #71's fork.
+- **Primary metric:** `promptlookup_realized_augment_tps_pct = +1.67%` [CI +1.36, +2.02]. **Test:** `promptlookup_mtp_firstreject_overlap_frac = 0.0354`.
+
+| metric | value | read |
+|---|---|---|
+| `promptlookup_realized_augment_tps_pct` | **+1.67%** [+1.36, +2.02] | BELOW +2% build bar (gross, no fork cost subtracted) |
+| oracle upper bound | +2.38% | hard ceiling (best-match pick) |
+| `corr_q_vs_m` | **+0.354** | POSITIVE → redundant, not complementary |
+| `promptlookup_mtp_firstreject_overlap_frac` | **0.0354** | 3.54% of m=0 misses get PLD accept-extending hit |
+| `share_extra_from_m0` | 0.389 | below #81's independence assumption (54.5%) |
+| independence UB (this trace) | +7.87% | realized only 21% of it |
+
+- **Verdict: DROP.** Structural limiter: PLD hits POSITIVELY correlate with MTP acceptance (corr=+0.354) — redundant, not complementary. Oracle best-case caps at +2.38%. No realistic path to ≥+2% build-worthy net. **Prompt-lookup-augment lane CLOSED. Do NOT queue behind land #71.**
+- **W&B:** `tz2oaemz`. denken → cycle-39 reassignment (persistent-kernel scheduling).
+
+## 2026-06-14 04:27 — PR #86: Entropy–branching correlation ✅ MERGED — STRONG SIGNAL, NON-ACTIONABLE / LANE CLOSED (r=−0.9688, sign-reversed; oracle ceiling +0.27% E[T] / +0.33pp TPS; entropy-branching lane CLOSED)
+
+- **Branch:** `wirbel/entropy-branching-correlation` · **Student:** wirbel · merged by morganmcg1 ~04:27Z
+- **Hypothesis:** drafter uncertainty (token-level entropy) predicts rank-2 branching value — high-entropy steps benefit from deeper branching → entropy-gated dynamic tree delivers free E[T] over a static topology.
+- **Primary metric:** `rho2_entropy_correlation_r = −0.9688`. **Test:** `entropy_gated_tree_E_T_gain_pct = 0.273`.
+
+| metric | value | read |
+|---|---|---|
+| `rho2_entropy_correlation_r` | **−0.9688** | ONE OF STRONGEST SIGNALS IN PROGRAMME — but SIGN-REVERSED |
+| sign direction | drafter CONFIDENCE (low entropy) → HIGHER ρ₂ | anti-direction from hypothesis |
+| `entropy_gated_tree_E_T_gain_pct` | **+0.273%** | oracle ceiling on dynamic entropy-gated tree |
+| TPS equivalent | ~+0.33pp | BELOW cost of forfeiting onegraph CUDA graph |
+| pooled ρ₂ | 0.4172 | matches #79's 0.4165 ✓ (acceptance model self-consistent) |
+| data collected | 13,491 first-reject steps | 128 prompts × 512 tok, greedy, seed 1, conc 1 |
+
+- **Verdict: NON-ACTIONABLE.** drafter CONFIDENCE (low entropy) predicts HIGHER ρ₂ — so high-entropy steps (where branching would theoretically help most) are precisely where MTP acceptance is LOWEST. Signal is purely within-step; a static depth-indexed tree captures none of it (consistent with #83's flat per-depth ρ₂). Oracle ceiling +0.27% E[T] / +0.33pp TPS < cost of forfeiting onegraph CUDA graph. **Lane closes on actionability, not on null correlation.** The strongest r in the programme closes the weakest lever.
+- **W&B:** `59u7qcwa` / `79u01jm8`. wirbel → cycle-39 reassignment (double-quant verify-GEMM scales).
+
+## 2026-06-14 04:26 — PR #91: Tree topology E[T] — max-branch-3 vs max-branch-4 ✅ MERGED — CONFIRMED (+0.9614%, all three estimators agree, validates acceptance model; land #71: build max-branch-3)
+
+- **Branch:** `fern/tree-topology-et-comparison` · **Student:** fern · merged by morganmcg1 ~04:26Z
+- **Hypothesis:** wirbel #83's DP-optimal max-branch-3 topology buys +0.96% E[T] / +1.13pp TPS over max-branch-4 (both depth-9, M=32). This analytic prediction is directly measurable by MC simulation using fern's #88 harness.
+- **Primary metric:** `topology_et_delta_pct = +0.9614%`. **Test:** `topology_et_confirmed = 1`.
+
+| estimator | E[T] mb3 | E[T] mb4 | delta_pct | SE |
+|---|---|---|---|---|
+| **analytic** (exact, `score_tree_depthrank`) | 5.206954 | 5.157273 | **+0.9633%** | 0 |
+| **independent MC** (2M trials/topo, 5 seeds) | 5.20559 | 5.15602 | **+0.9614%** | ±0.073pp |
+| **CRN paired** (6M trials, 3 seeds) | 5.20790 | 5.15859 | **+0.9560%** | ±0.003pp |
+| wirbel #83 predicted | — | — | +0.9633% | — |
+
+- CRN 95% CI = **[+0.950%, +0.962%]** — entirely above the +0.8% CONFIRMED threshold; gap to wirbel's analytic 0.002pp. #88 Leg A reproduced bit-for-bit (engine integrity). 0 greedy violations on both topologies. `score_tree_depthrank` ≈ MC to ~1e-3 tok → future tree-topology DP results trusted analytically without per-candidate MC. **Build recommendation for land #71: max-branch-3 array** `[-1,0,0,0,1,1,1,2,3,4,4,5,7,9,9,10,11,12,13,15,16,17,18,19,20,21,22,24,25,26,28,29]` (depth-9, spine widths [3,3,2,2,1,1,1,1,1]). Mechanism: only ~23.8% of decode steps show any topology difference; mb4 wastes a node on rank-4 (marginal ≈0.022, ρ₄=0.1908) while mb3 reallocates to rank-2 breadth (ρ₂=0.4165 ≫ ρ₄).
+- **W&B:** `exkahicq` (CPU-only, 33.3 MiB RSS, 155s). fern → cycle-39 reassignment (LK-loss draft head).
+
 ## 2026-06-14 04:07 — PR #88: Traversal Verification E[T] gate ✅ MERGED — RED / AXIS CLOSED (provably zero under greedy; standard root-to-leaf confirmed; land #71 keeps existing acceptance rule)
 
 - **Branch:** `fern/traversal-verify-et` · **Student:** fern · merged ~04:07Z

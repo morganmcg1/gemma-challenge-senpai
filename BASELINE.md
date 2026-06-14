@@ -74,6 +74,28 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 04:44 — PR #89 (denken): Prompt-lookup × MTP first-reject overlap — DROP / LANE CLOSED (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU/profiling analysis, no served-file change; official bar stays 481.53). Banks `scripts/profiler/firstreject_capture.py` + `firstreject_patch.py` + `scripts/analyze_prompt_lookup.py` + overlap JSONs under `research/local_validation/prompt_lookup/`. Build-or-kill returns **KILL**.
+- **Verdict: DROP — do NOT queue prompt-lookup augment behind land #71.** Primary `promptlookup_realized_augment_tps_pct = +1.67%` [CI +1.36, +2.02] — below the +2% build bar, and this is the optimistic gross (no fork/verify overhead). Structural ceiling: PLD hits are **POSITIVELY correlated** with where MTP already accepts (`corr_q_vs_m = +0.354`), so free tokens land where MTP already wins rather than at the m=0 first-reject misses. Only 3.54% of m=0 misses get an accept-extending hit. Oracle UB caps at +2.38%.
+- **Primary metric:** `promptlookup_realized_augment_tps_pct` = **+1.67**. **Test:** `promptlookup_mtp_firstreject_overlap_frac` = **0.0354** (3.54%). `corr_q_vs_m = +0.354`.
+- **W&B:** `tz2oaemz`. denken → cycle-39 reassignment (persistent-kernel scheduling).
+
+### 2026-06-14 04:27 — PR #86 (wirbel): Entropy–branching correlation — STRONG SIGNAL, NON-ACTIONABLE / LANE CLOSED (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (GPU logit collection + CPU analysis; official bar stays 481.53). Banks entropy–acceptance correlation tooling. Merged by morganmcg1.
+- **Verdict: STRONG SIGNAL BUT NON-ACTIONABLE.** `rho2_entropy_correlation_r = −0.9688` — one of the strongest signals in the cost-model programme — but SIGN-REVERSED: drafter CONFIDENCE (low entropy) predicts HIGHER ρ₂, not lower. Signal is purely within-step; a static depth-indexed tree captures none of it (consistent with #83's flat per-depth ρ₂). Oracle ceiling on a dynamic entropy-gated tree: +0.27% E[T] / +0.33pp TPS — below the cost of forfeiting the onegraph CUDA graph. **Entropy-branching lane CLOSED on actionability, not on null correlation.** Pooled ρ₂=0.4172 self-consistent with #79's 0.4165 ✓.
+- **Primary metric:** `rho2_entropy_correlation_r` = **−0.9688**. **Test:** `entropy_gated_tree_E_T_gain_pct` = **0.273**.
+- **W&B:** `59u7qcwa` / `79u01jm8`. wirbel → cycle-39 reassignment (double-quant verify-GEMM scales).
+
+### 2026-06-14 04:26 — PR #91 (fern): Tree topology E[T] — max-branch-3 vs max-branch-4 CONFIRMED (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU analytical + MC simulation, no GPU, no served-file change; official bar stays 481.53). Banks `scripts/profiler/topology_et_compare.py` + `research/spec_cost_model/topology_et_compare_results.json`. Merged by morganmcg1.
+- **Verdict: CONFIRMED (gate=1).** wirbel #83's +0.96% E[T] prediction confirmed by three independent estimators: analytic +0.9633%, independent MC **+0.9614%**, CRN paired +0.9560% (95% CI [+0.950%, +0.962%], entirely above the +0.8% CONFIRMED threshold; gap to wirbel's analytic 0.002pp). #88 Leg A reproduced bit-for-bit. 0 greedy violations. Validates `score_tree_depthrank` ≈ MC to ~1e-3 tok → future tree-topology DP results trusted analytically.
+- **For land #71:** build `max-branch-3` array `[-1,0,0,0,1,1,1,2,3,4,4,5,7,9,9,10,11,12,13,15,16,17,18,19,20,21,22,24,25,26,28,29]` (depth-9, spine widths [3,3,2,2,1,1,1,1,1]). Topology choice is now measurement-backed. Mechanism: ~23.8% of steps differ; mb4 wastes rank-4 node (ρ₄=0.1908) while mb3 reallocates to rank-2 breadth (ρ₂=0.4165).
+- **Primary metric:** `topology_et_delta_pct` = **+0.9614%**. **Test:** `topology_et_confirmed` = **1**. E[T] mb3=5.2056 / mb4=5.1560.
+- **W&B:** `exkahicq` (CPU-only, 33.3 MiB RSS, 155s).
+
 ### 2026-06-14 04:07 — PR #88 (fern): Traversal Verification E[T] gate — RED, AXIS CLOSED (standard root-to-leaf confirmed; official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (CPU analytical + MC simulation, no GPU training, no served-file change; official bar stays 481.53). Banks `scripts/profiler/traversal_verify_et.py` + `research/spec_cost_model/traversal_verify_et_results.json` + `report_traversal_verify_et.md`.
