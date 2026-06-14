@@ -220,6 +220,412 @@ def build_sharegpt_texts(tokenizer, n_eval, n_train, repo="RyokoAI/ShareGPT52K")
     return eval_texts, train_texts, used_repo
 
 
+# --------------------------------------------------------------------------- #
+# Benchmark-matched reasoning source (PR #34) — greedy self-distillation
+# --------------------------------------------------------------------------- #
+# The official speed benchmark (eval_prompts_sharegpt.json) is 100% reasoning in
+# THREE rigid templates: MMLU-Pro (A-J MCQ), GPQA (A-D MCQ), AIME (step-by-step
+# math). PR #25 trained on raw MATH solutions + ShareGPT chat -> the drafter never
+# saw the serve-time prompt distribution and acceptance plateaued ~0.73. Here we
+# (a) render OTHER questions from the same datasets into the EXACT benchmark
+# templates, (b) generate the assistant continuation by GREEDY decoding from the
+# served target itself (self-distillation; EAGLE-1 2401.15077 / EAGLE-3 2503.01840
+# train on target-generated, not dataset ground-truth, text), and (c) mark only
+# the generated response tokens as loss targets (response-only masking is the
+# canonical EAGLE loss mask; the prompt is context, never drafted at serve time).
+_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+# GPQA proxy draws graduate-science MMLU-Pro; mmlu_pro source uses the rest so the
+# two reasoning streams stay disjoint (no question rendered twice).
+_SCI_CATS = {"physics", "chemistry", "biology"}
+
+
+def _norm_text(s: str) -> str:
+    """Whitespace/case-insensitive normalization for decontamination + dedup."""
+    return re.sub(r"\s+", " ", (s or "").strip().lower())
+
+
+def render_mmlu_pro(question: str, options) -> str:
+    """A-J MCQ template, byte-matched to eval_prompts_sharegpt.json mmlu_pro rows."""
+    opts = "\n".join(f"{_LETTERS[i]}) {o}" for i, o in enumerate(options))
+    return (
+        "Answer the following multiple choice question. The last line of your "
+        "response should be of the following format: 'ANSWER: $LETTER' (without "
+        "quotes) where LETTER is one of A,B,C,D,E,F,G,H,I,J. Think step by step "
+        "before answering.\n\nQuestion:\n" + question + "\nOptions:\n" + opts
+    )
+
+
+def render_gpqa(question: str, four_opts) -> str:
+    """A-D MCQ template, byte-matched to eval_prompts_sharegpt.json gpqa rows."""
+    opts = "\n".join(f"{_LETTERS[i]}) {o}" for i, o in enumerate(four_opts))
+    return (
+        "Answer the following multiple choice question. The last line of your "
+        "response should be of the following format: 'ANSWER: $LETTER' (without "
+        "quotes) where LETTER is one of A,B,C,D. Think step by step before "
+        "answering.\n\n" + question + "\n\n" + opts
+    )
+
+
+def render_aime(problem: str) -> str:
+    """AIME step-by-step template, byte-matched to eval_prompts_sharegpt.json aime."""
+    return (
+        "Solve the following math problem step by step.\nThe last line of your "
+        'response should be of the form "ANSWER: $ANSWER" (without quotes) where '
+        "$ANSWER is the answer to the problem.\n\n" + problem + "\n\nRemember to "
+        'put your answer on its own line at the end in the form "ANSWER: $ANSWER" '
+        "(without quotes) where $ANSWER is the answer to the problem, and you do "
+        "not need to use a \\boxed command."
+    )
+
+
+def _extract_eval_question(id_: str, human: str):
+    """Pull the raw question/problem body out of an eval prompt so a training
+    question (which we normalize raw) can be matched against it. Reliable for
+    mmlu_pro (the real overlap risk: eval mmlu_pro rows come from the SAME
+    TIGER-Lab/MMLU-Pro pool we sample) and aime; gpqa relies on full-text match."""
+    if id_.startswith("mmlu_pro"):
+        m = re.search(r"Question:\n(.*?)\nOptions:\n", human, re.S)
+        return m.group(1) if m else None
+    if id_.startswith("aime"):
+        m = re.search(r"the problem\.\n\n(.*?)\n\nRemember", human, re.S)
+        return m.group(1) if m else None
+    return None
+
+
+def load_eval_decontam(path: str):
+    """Load the 128 official eval prompts and return (full_norms, q_norms).
+
+    HARD requirement (PR #34): fail loud if the eval set can't be loaded — never
+    silently skip dedup. full_norms = normalized full user prompts; q_norms =
+    normalized raw question/problem bodies (mmlu_pro/aime)."""
+    if not path or not os.path.exists(path):
+        raise FileNotFoundError(
+            f"[corpus] eval prompts for decontam not found: {path!r}. Refusing to "
+            "build a reasoning corpus without de-contamination against the 128 "
+            "official eval prompts.")
+    data = json.load(open(path))
+    full_norms, q_norms = set(), set()
+    for x in data:
+        human = None
+        for t in x.get("conversations", []):
+            if t.get("from") == "human":
+                human = t.get("value")
+                break
+        if not human:
+            continue
+        full_norms.add(_norm_text(human))
+        body = _extract_eval_question(x.get("id", ""), human)
+        if body:
+            q_norms.add(_norm_text(body))
+    if not full_norms:
+        raise RuntimeError("[corpus] eval decontam set is empty; refusing to proceed")
+    print(f"[corpus] decontam: {len(full_norms)} eval prompts loaded from {path} "
+          f"({len(q_norms)} question bodies extracted)", flush=True)
+    return full_norms, q_norms
+
+
+def _accept_prompt(rawq, rendered, full_norms, q_norms, seen_q):
+    """Return the dedup key if (src question) is novel + uncontaminated, else None."""
+    nq = _norm_text(rawq)
+    if nq in q_norms:            # matches an eval question body (decontam)
+        return None
+    if nq in seen_q:             # already used by another reasoning stream
+        return None
+    if _norm_text(rendered) in full_norms:   # exact rendered-prompt match (decontam)
+        return None
+    return nq
+
+
+def iter_mmlu_pro(seed, full_norms, q_norms, seen_q, sci_only: bool):
+    """Yield (source, raw_question, rendered_prompt) from TIGER-Lab/MMLU-Pro.
+
+    sci_only=True -> GPQA A-D proxy over physics/chemistry/biology (correct option
+    + 3 distractors, deterministically shuffled). sci_only=False -> mmlu_pro A-J
+    over the non-science categories (disjoint from the proxy stream)."""
+    import random as _r
+
+    from datasets import concatenate_datasets, load_dataset
+
+    parts = [load_dataset("TIGER-Lab/MMLU-Pro", split=s) for s in ("test", "validation")]
+    ds = concatenate_datasets(parts).shuffle(seed=seed)
+    src = "gpqa" if sci_only else "mmlu_pro"
+    for ex in ds:
+        cat = ex.get("category")
+        in_sci = cat in _SCI_CATS
+        if sci_only != in_sci:
+            continue
+        q = (ex.get("question") or "").strip()
+        opts = list(ex.get("options") or [])
+        if not q or len(opts) < (4 if sci_only else 2):
+            continue
+        if sci_only:
+            ai = ex.get("answer_index")
+            if not isinstance(ai, int) or ai >= len(opts):
+                continue
+            correct = opts[ai]
+            distract = [o for i, o in enumerate(opts) if i != ai]
+            rng = _r.Random(hash(q) & 0xFFFFFFFF)
+            rng.shuffle(distract)
+            four = [correct] + distract[:3]
+            rng.shuffle(four)
+            rendered = render_gpqa(q, four)
+        else:
+            rendered = render_mmlu_pro(q, opts)
+        key = _accept_prompt(q, rendered, full_norms, q_norms, seen_q)
+        if key is None:
+            continue
+        seen_q.add(key)
+        yield (src, q, rendered)
+
+
+def iter_aime(seed, full_norms, q_norms, seen_q):
+    """Yield (source, raw_problem, rendered_prompt) from AI-MO/NuminaMath-CoT,
+    filtered to competition-math sources (AIME-distribution proxy)."""
+    from datasets import load_dataset
+
+    comp = {"amc_aime", "aops_forum", "olympiads", "synthetic_amc"}
+    ds = load_dataset("AI-MO/NuminaMath-CoT", split="train", streaming=True)
+    ds = ds.shuffle(seed=seed, buffer_size=20000)
+    for ex in ds:
+        if ex.get("source") not in comp:
+            continue
+        prob = (ex.get("problem") or "").strip()
+        if len(prob) < 16:
+            continue
+        rendered = render_aime(prob)
+        key = _accept_prompt(prob, rendered, full_norms, q_norms, seen_q)
+        if key is None:
+            continue
+        seen_q.add(key)
+        yield ("aime", prob, rendered)
+
+
+@torch.no_grad()
+def generate_completions(model, tokenizer, prompts, max_new_tokens, gen_batch,
+                         device, stop_ids):
+    """Greedy (temp=0) self-distillation: generate the target's own assistant
+    continuation for each rendered user prompt. Returns a list of
+    {full_ids[L], prompt_len} where full_ids = prompt tokens + generated tokens
+    (trimmed at the first stop token). Left-padded batched generation."""
+    results = []
+    old_side = tokenizer.padding_side
+    tokenizer.padding_side = "left"
+    pad_id = tokenizer.pad_token_id
+    for s in range(0, len(prompts), gen_batch):
+        chunk = prompts[s:s + gen_batch]
+        texts = [
+            tokenizer.apply_chat_template(
+                [{"role": "user", "content": p}], tokenize=False,
+                add_generation_prompt=True)
+            for p in chunk
+        ]
+        enc = tokenizer(texts, return_tensors="pt", padding=True,
+                        add_special_tokens=False)
+        input_ids = enc["input_ids"].to(device)
+        attn = enc["attention_mask"].to(device)
+        plen_full = input_ids.shape[1]
+        out = model.generate(
+            input_ids=input_ids, attention_mask=attn,
+            max_new_tokens=max_new_tokens, do_sample=False, num_beams=1,
+            use_cache=True, pad_token_id=pad_id, eos_token_id=stop_ids)
+        for b in range(len(chunk)):
+            plen = int(attn[b].sum().item())
+            prompt_ids = input_ids[b, plen_full - plen:plen_full].cpu()
+            gen = out[b, plen_full:].tolist()
+            trimmed = []
+            for t in gen:
+                if t == pad_id:
+                    break
+                trimmed.append(t)
+                if t in stop_ids:
+                    break
+            if len(trimmed) < 1:
+                continue
+            full = torch.cat([prompt_ids,
+                              torch.tensor(trimmed, dtype=prompt_ids.dtype)])
+            results.append({"full_ids": full.to(torch.long), "prompt_len": int(plen)})
+    tokenizer.padding_side = old_side
+    return results
+
+
+@torch.no_grad()
+def collect_from_ids(text_model, gens, source, aux_layers, batch, device,
+                     max_tokens, min_resp=3):
+    """Teacher-forced forward over pre-generated full sequences to record the 3
+    aux hidden states, with RESPONSE-ONLY loss masking (prompt next-token labels
+    set to IGNORE; only the generated continuation is scored/trained)."""
+    records = []
+    n = len(gens)
+    t0 = time.time()
+    for s in range(0, n, batch):
+        chunk = gens[s:s + batch]
+        seqs = [g["full_ids"][:max_tokens] for g in chunk]
+        plens = [min(g["prompt_len"], int(seq.shape[0])) for g, seq in zip(chunk, seqs)]
+        T = max(int(x.shape[0]) for x in seqs)
+        input_ids = torch.zeros(len(seqs), T, dtype=torch.long)
+        attn = torch.zeros(len(seqs), T, dtype=torch.long)
+        for b, seq in enumerate(seqs):
+            L = int(seq.shape[0])
+            input_ids[b, :L] = seq
+            attn[b, :L] = 1
+        input_ids = input_ids.to(device)
+        attn = attn.to(device)
+        out = text_model(input_ids=input_ids, attention_mask=attn,
+                         output_hidden_states=True, use_cache=False)
+        hs = out.hidden_states
+        for b in range(len(seqs)):
+            L = int(seqs[b].shape[0])
+            plen = plens[b]
+            if L - plen < min_resp:
+                continue
+            ids = input_ids[b, :L].to(torch.int32).cpu()
+            aux = torch.stack(
+                [hs[li][b, :L].to(torch.float16).cpu() for li in aux_layers], dim=0)
+            nxt = torch.full((L,), IGNORE, dtype=torch.int64)
+            nxt[:-1] = ids[1:].to(torch.int64)
+            if plen >= 1:
+                nxt[:plen - 1] = IGNORE  # response-only: drop prompt-token labels
+            records.append({"input_ids": ids, "aux": aux, "next_token_ids": nxt,
+                            "source": source, "prompt_len": int(plen)})
+        done = min(s + batch, n)
+        if done % 40 == 0 or done == n:
+            mem = torch.cuda.max_memory_allocated() / 1e9
+            print(f"    collect[{source}] {done}/{n} {time.time()-t0:.0f}s "
+                  f"peakmem={mem:.1f}GB records={len(records)}", flush=True)
+    return records
+
+
+def _resp_tokens(records):
+    """Total scored (non-IGNORE) response tokens — the EAGLE loss-mask token count."""
+    return sum(int((r["next_token_ids"] != IGNORE).sum().item()) for r in records)
+
+
+def build_reasoning_corpus(model, text_model, tokenizer, args, device):
+    """PR #34 orchestrator: build a benchmark-matched, target-self-distilled
+    reasoning corpus. Reserves a proportional, disjoint holdout first, then fills
+    each source's TRAIN stream up to its token-volume budget."""
+    full_norms, q_norms = load_eval_decontam(args.eval_prompts)
+    mix = {}
+    for part in args.reasoning_mix.split(","):
+        k, v = part.split(":")
+        mix[k.strip()] = float(v)
+    tot = sum(mix.values())
+    mix = {k: v / tot for k, v in mix.items()}
+    print(f"[corpus] reasoning mix (token-volume): {mix}", flush=True)
+
+    # Stop at the target's own turn-boundary tokens so the drafter learns to emit
+    # them. gemma-4-E4B-it uses a <|turn>/<turn|> chat format (NOT <end_of_turn>);
+    # generation_config.eos_token_id is the authoritative stop set ([1, 106, 50]).
+    gc_eos = getattr(getattr(model, "generation_config", None), "eos_token_id", None)
+    stop_ids = set()
+    if isinstance(gc_eos, int):
+        stop_ids.add(int(gc_eos))
+    elif isinstance(gc_eos, (list, tuple)):
+        stop_ids.update(int(x) for x in gc_eos)
+    if tokenizer.eos_token_id is not None:
+        stop_ids.add(int(tokenizer.eos_token_id))
+    stop_ids = sorted(stop_ids)
+    print(f"[corpus] greedy stop_ids={stop_ids} max_new_tokens={args.max_new_tokens}",
+          flush=True)
+
+    seen_q = set()
+    iters = {
+        "gpqa": iter_mmlu_pro(args.seed + 1, full_norms, q_norms, seen_q, sci_only=True),
+        "mmlu_pro": iter_mmlu_pro(args.seed, full_norms, q_norms, seen_q, sci_only=False),
+        "aime": iter_aime(args.seed + 3, full_norms, q_norms, seen_q),
+    }
+
+    def gen_and_collect(rendered_prompts, src):
+        gens = generate_completions(model, tokenizer, rendered_prompts,
+                                    args.max_new_tokens, args.gen_batch, device, stop_ids)
+        return collect_from_ids(text_model, gens, src, args.aux_layers,
+                                args.collect_batch, device, args.max_tokens)
+
+    # ---- 1) proportional, disjoint holdout (>=200 prompts) ----
+    ev = []
+    for src in ("mmlu_pro", "gpqa", "aime"):
+        k = max(1, round(args.n_reasoning_eval * mix.get(src, 0.0)))
+        prompts = []
+        for _ in range(k):
+            try:
+                prompts.append(next(iters[src])[2])
+            except StopIteration:
+                break
+        print(f"[corpus] HOLDOUT {src}: generating {len(prompts)} prompts ...", flush=True)
+        ev += gen_and_collect(prompts, src)
+    sanity_check(ev, args.aux_layers)
+    print(f"[corpus] holdout: {len(ev)} records, {_resp_tokens(ev)} response tokens",
+          flush=True)
+
+    meta = {
+        "model": args.model, "aux_layers": args.aux_layers,
+        "max_tokens": args.max_tokens, "max_new_tokens": args.max_new_tokens,
+        "seed": args.seed, "hidden_size": 2560, "vocab_size": 262144,
+        "sources": ["mmlu_pro", "gpqa", "aime"], "reasoning_mix": mix,
+        "self_distilled": True, "response_only_mask": True,
+        "gpqa_proxy": "TIGER-Lab/MMLU-Pro physics+chemistry+biology, A-D",
+        "aime_source": "AI-MO/NuminaMath-CoT competition subsets",
+        "eval_prompts": args.eval_prompts,
+    }
+    # Save the holdout NOW: it is generated first but is the expensive, fixed
+    # measurement slice. Persisting it before the long train-stream loop means a
+    # mid-run interruption costs only the (re-runnable) train data, not the eval.
+    os.makedirs(os.path.dirname(args.eval_out), exist_ok=True)
+    torch.save({"records": ev, "meta": meta}, args.eval_out)
+    _save_per_source_eval(ev, meta, args.eval_out)
+    print(f"[corpus] holdout saved early -> {args.eval_out}", flush=True)
+
+    # ---- 2) train streams to token-volume budget ----
+    train = []
+    for src in ("mmlu_pro", "gpqa", "aime"):
+        budget = args.reasoning_tokens * mix.get(src, 0.0)
+        acc, exhausted = 0, False
+        print(f"[corpus] TRAIN {src}: budget {budget/1e6:.2f}M tokens ...", flush=True)
+        while acc < budget and not exhausted:
+            prompts = []
+            for _ in range(args.gen_batch):
+                try:
+                    prompts.append(next(iters[src])[2])
+                except StopIteration:
+                    exhausted = True
+                    break
+            if not prompts:
+                break
+            recs = gen_and_collect(prompts, src)
+            train += recs
+            acc += sum(int(r["input_ids"].shape[0]) for r in recs)
+            if (len(train) % 200) < args.gen_batch:
+                print(f"    {src}: {acc/1e6:.2f}M/{budget/1e6:.2f}M tok "
+                      f"({len(train)} recs total)", flush=True)
+        if exhausted:
+            print(f"[corpus] WARNING: {src} source exhausted at {acc/1e6:.2f}M tokens "
+                  f"(< budget {budget/1e6:.2f}M)", flush=True)
+    sanity_check(train, args.aux_layers)
+
+    # ---- 3) token-id de-contamination backstop (eval is the fixed measurement) --
+    eval_keys = {tuple(r["input_ids"].tolist()) for r in ev}
+    n_before = len(train)
+    train = [r for r in train if tuple(r["input_ids"].tolist()) not in eval_keys]
+    print(f"[corpus] de-contam backstop: dropped {n_before - len(train)}/{n_before} "
+          f"train records matching a holdout id-sequence", flush=True)
+
+    os.makedirs(os.path.dirname(args.out), exist_ok=True)
+    torch.save({"records": train, "meta": meta}, args.out)
+
+    tr_by = source_stats(train)
+    ev_by = source_stats(ev)
+    print(f"[corpus] saved {len(train)} TRAIN records "
+          f"({sum(int(r['input_ids'].shape[0]) for r in train)} tok, "
+          f"{_resp_tokens(train)} response-tok) -> {args.out}", flush=True)
+    print(f"[corpus]   train by source: {tr_by}", flush=True)
+    print(f"[corpus] saved {len(ev)} EVAL records "
+          f"({_resp_tokens(ev)} response-tok) -> {args.eval_out}", flush=True)
+    print(f"[corpus]   eval by source: {ev_by}", flush=True)
+    print(f"[corpus] peak GPU mem: {torch.cuda.max_memory_allocated()/1e9:.2f} GB",
+          flush=True)
+    print("[corpus] done (reasoning).", flush=True)
+
+
 @torch.no_grad()
 def collect(model, text_model, tokenizer, texts, aux_layers, max_tokens, batch,
             device, source="math"):
@@ -289,8 +695,12 @@ def sanity_check(records, aux_layers):
         if torch.isnan(a.float()).any() or torch.isinf(a.float()).any():
             bad += 1
         ids, nxt = r["input_ids"], r["next_token_ids"]
-        # input_ids[1:] must equal next_token_ids[:-1]
-        assert torch.equal(ids[1:].to(torch.int64), nxt[:-1]), "shift mismatch"
+        # input_ids[1:] must equal next_token_ids[:-1] at every SCORED position.
+        # (response-only masking, PR #34, sets prompt next-token labels to IGNORE,
+        # so only check the shift invariant where nxt != IGNORE; legacy full-seq
+        # corpora have all positions scored -> unchanged.)
+        m = nxt[:-1] != IGNORE
+        assert torch.equal(ids[1:].to(torch.int64)[m], nxt[:-1][m]), "shift mismatch"
         assert nxt[-1].item() == IGNORE
     assert bad == 0, f"{bad} records contain NaN/Inf aux"
     lens = [int(r["input_ids"].shape[0]) for r in records]
@@ -342,6 +752,24 @@ def main():
     ap.add_argument("--batch", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--aux_layers", type=int, nargs=3, default=[2, 21, 39])
+    # ---- PR #34: benchmark-matched reasoning corpus (greedy self-distillation) --
+    ap.add_argument("--reasoning_mix", default=None,
+                    help="enables reasoning mode; token-volume mix, e.g. "
+                         "'mmlu_pro:0.445,gpqa:0.445,aime:0.11'")
+    ap.add_argument("--reasoning_tokens", type=float, default=3_000_000,
+                    help="total TRAIN token budget for the reasoning corpus")
+    ap.add_argument("--n_reasoning_eval", type=int, default=240,
+                    help="held-out benchmark-matched prompt count (proportional split)")
+    ap.add_argument("--eval_prompts",
+                    default="official/main_bucket/shared_resources/speed_benchmark/"
+                            "data/eval_prompts_sharegpt.json",
+                    help="128 official eval prompts: decontam + holdout disjointness")
+    ap.add_argument("--max_new_tokens", type=int, default=1024,
+                    help="greedy generation cap for the self-distilled CoT")
+    ap.add_argument("--gen_batch", type=int, default=8,
+                    help="batch size for greedy generation (left-padded)")
+    ap.add_argument("--collect_batch", type=int, default=4,
+                    help="batch size for the teacher-forced aux-collect forward")
     ap.add_argument(
         "--out", default="research/eagle3_drafter/train_data/full_train_corpus.pt")
     ap.add_argument(
@@ -362,6 +790,11 @@ def main():
     text_model, n_layers = find_text_model(model)
     print(f"[corpus] text tower: {n_layers} layers; aux={args.aux_layers}", flush=True)
     torch.cuda.reset_peak_memory_stats()
+
+    # ---- PR #34: benchmark-matched reasoning corpus (greedy self-distillation) --
+    if args.reasoning_mix:
+        build_reasoning_corpus(model, text_model, tokenizer, args, device)
+        return
 
     train, ev = [], []
 

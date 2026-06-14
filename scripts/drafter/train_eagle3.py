@@ -335,6 +335,9 @@ def main():
     ap.add_argument("--eval_corpus", default=None)
     ap.add_argument("--output", required=True)
     ap.add_argument("--model", default="google/gemma-4-E4B-it")
+    ap.add_argument("--init", default=None,
+                    help="warm-start: load a prior head state_dict (e.g. the PR #25 "
+                         "model_best.pt) before training on the new corpus")
     ap.add_argument("--steps", type=int, default=1000)
     ap.add_argument("--max_epochs", type=float, default=None,
                     help="epoch cap; default = SENPAI_MAX_EPOCHS env (hard bound)")
@@ -408,6 +411,18 @@ def main():
     head.model.embed_tokens.weight.data = emb.clone().to(torch.bfloat16)
     head.lm_head.weight.data = emb.clone().to(torch.bfloat16)
     head = head.to(device)
+    if args.init:
+        # Warm-start (PR #34): continue from a prior head (e.g. the #25 best ckpt)
+        # on the new corpus. EAGLE-3 distribution shift here is moderate (same
+        # target, new prompt tail), so warm-start + a fresh ~half-peak cosine LR is
+        # the safer default than fresh init (see PR research note).
+        state = torch.load(args.init, map_location=device, weights_only=False)
+        missing, unexpected = head.load_state_dict(state, strict=False)
+        head.model.embed_tokens.weight.data = head.model.embed_tokens.weight.data.to(
+            torch.bfloat16)
+        head.lm_head.weight.data = head.lm_head.weight.data.to(torch.bfloat16)
+        print(f"[train] warm-started from {args.init} "
+              f"(missing={len(missing)} unexpected={len(unexpected)})", flush=True)
     head.model.embed_tokens.weight.requires_grad_(bool(args.train_embed))
     head.lm_head.weight.requires_grad_(bool(args.train_lm_head))
 
