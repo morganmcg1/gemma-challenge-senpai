@@ -1,0 +1,739 @@
+{
+ "pr": 185,
+ "agent": "fern",
+ "kind": "launch_trigger_calculator",
+ "primary_metric_name": "launch_trigger_calculator_self_test_passes",
+ "launch_trigger_calculator_self_test_passes": true,
+ "test_metric_name": "both_bugs_go_at_lambda_star",
+ "both_bugs_go_at_lambda_star": true,
+ "tuple_schema": {
+  "name": "str -- submission name (used in the Approval request title).",
+  "E_T_descent": "float -- E[T] under #154 argmax-only (descent-only) decode.",
+  "E_T_both": "float -- E[T] under the both-bugs descending accept-prep decode.",
+  "v": "float -- over-accept rate vs wirbel #170 trustworthy region (v<=1.526e-05 is greedy-exact; v>v_tol => illusory speedup).",
+  "step_us": "float -- measured denominator step (overlap, microsec-convention matching K_cal=125.26795).",
+  "q_ladder": "list[float] -- per-depth accepted-rate ladder q[2..9] (8 entries, the self-KV depths). Inverted through #183's q_d(lambda) -> lambda_hat_built.",
+  "PPL": "float -- validation perplexity (bar <= 2.42).",
+  "pass_128": "int -- completions passing (need 128/128).",
+  "greedy_exact": "bool -- greedy-decode identity preserved (Issue #124).",
+  "boots_ok": "bool -- bootstrap CI available for the finite-sample leg."
+ },
+ "self_test": {
+  "launch_trigger_calculator_self_test_passes": true,
+  "both_bugs_go_at_lambda_star": true,
+  "conditions": {
+   "a_lambda1_reproduces_179": {
+    "pass": true,
+    "both_lcb": 514.8775406894962,
+    "both_anchor": 514.877540689496,
+    "descent_lcb": 499.96519706601964,
+    "descent_anchor": 499.96519706601964,
+    "both_verdict": "GO",
+    "descent_verdict": "NO-GO"
+   },
+   "b_lambdahat_reproduces_178_misses": {
+    "pass": true,
+    "descent_official": 404.0737176461302,
+    "descent_anchor": 404.06468476135797,
+    "both_official": 416.31646274209965,
+    "both_anchor": 416.307156176311,
+    "verdict": "NO-GO"
+   },
+   "c_overaccept_flagged": {
+    "pass": true,
+    "region_on_locus": "OVER_ACCEPT_BUG2",
+    "region_anomalous": "ANOMALOUS",
+    "both_verdict_locus": "NO-GO"
+   },
+   "d_approval_block_wellformed": {
+    "pass": true,
+    "approval_block_wellformed": true,
+    "names_precache": true,
+    "names_bootfix": true
+   },
+   "e_183_real_card_consumed": {
+    "pass": true,
+    "both_lambda_star_lcb_tau1": 0.905229319301184,
+    "descent_lambda_star_lcb_tau1": 0.9750199960244741,
+    "both_lambda_star_lcb_tau_cons": 0.923358337599465,
+    "both_central_178_inactive": 0.8383898298915815,
+    "card_is_monotone": true,
+    "fwd_lcb_at_lambda_star": 500.0001445053368,
+    "fwd_lcb_at_liveprobe": 404.1443019341713,
+    "183_flag": "LANDED -- CONSUMED"
+   },
+   "f_nan_clean": {
+    "pass": true
+   },
+   "g_two_lcb_divergence_documented": {
+    "pass": true,
+    "descent_build_gate_pass": true,
+    "descent_launch_lcb_pass": false,
+    "descent_build_lcb_at_lambda1": 505.5276163584742,
+    "both_build_gate_pass": true,
+    "both_launch_lcb_pass": true
+   },
+   "h_launch_ci_ledger_wellformed": {
+    "pass": true,
+    "binding_bar_both": 0.905229319301184,
+    "binding_source": "public_183_iid_fallback",
+    "binding_bar_descent": 0.9750199960244741,
+    "composed_lcb_at_binding_bar": 500.00000000000006,
+    "inflight_axes_all_iid_fallback": true,
+    "packaging_189_status": "PENDING",
+    "launch_authorized": false,
+    "analytic_verdict": "GO"
+   }
+  }
+ },
+ "worked_example": {
+  "verdict": "GO",
+  "overall_go": true,
+  "headline_topology": "both_bugs",
+  "name": "land-71-bothbugs-kernel",
+  "step_used": 1.2181727676912677,
+  "tau_band": [
+   0.9924318649123313,
+   1.0
+  ],
+  "validity": {
+   "ppl": 2.39,
+   "ppl_bar": 2.42,
+   "ppl_ok": true,
+   "pass_128": 128,
+   "pass_ok": true,
+   "greedy_exact": true,
+   "validity_ok": true
+  },
+  "per_topology": {
+   "both_bugs": {
+    "official_tps": 535.4449792820219,
+    "official_tps_tau_low": 531.3926593468016,
+    "proj_private_tps": 528.885676407476,
+    "lcb_p90": 514.8775406894962,
+    "p_clear_500": 0.9958868982631071,
+    "verdict": "GO",
+    "failing_gate": null,
+    "restoration_lever": null,
+    "overaccept_region": "TRUSTWORTHY"
+   },
+   "descent_only": {
+    "official_tps": 519.9635484984183,
+    "official_tps_tau_low": 516.0283941227186,
+    "proj_private_tps": 513.8934226968873,
+    "lcb_p90": 499.96519706601964,
+    "p_clear_500": 0.8994368544296176,
+    "verdict": "NO-GO",
+    "failing_gate": "clear-500 launch-projection LCB (#179): cell-LCB(P>=0.9)=499.97 < 500 (build-gate PASSED at lambda*_LCB=0.9750 -- a build-acceptable kernel that still misses the private-drop launch projection)",
+    "restoration_lever": "ship #154 argmax-only decode (+3.96 TPS LCB -> realizable) or land the both-bugs kernel; descent-only is a knife-edge launch miss at the shipped step even though it clears the #183 build bar.",
+    "overaccept_region": "TRUSTWORTHY"
+   }
+  },
+  "lambda_gate_logic": {
+   "rule": "per-topology GO iff lambda_hat_built >= lambda*_LCB(topo, tau=1) [#183 REAL card BUILD-gate: both-bugs 0.9052 / descent 0.9750, STRICTER than #178's central 0.838/0.909] AND #179 launch-projection cell-LCB(P>=0.9) >= 500. In the gap [#178-central, #183-LCB) -> wirbel #184 contingency / #154 restore.",
+   "lambda_hat_built_from_ladder": 1.0,
+   "ladder_inverse_per_depth": [
+    {
+     "depth": 2,
+     "lambda_hat_d": 1.0
+    },
+    {
+     "depth": 3,
+     "lambda_hat_d": 1.0
+    },
+    {
+     "depth": 4,
+     "lambda_hat_d": 1.0
+    },
+    {
+     "depth": 5,
+     "lambda_hat_d": 1.0
+    },
+    {
+     "depth": 6,
+     "lambda_hat_d": 1.0
+    },
+    {
+     "depth": 7,
+     "lambda_hat_d": 1.0
+    },
+    {
+     "depth": 8,
+     "lambda_hat_d": 1.0
+    },
+    {
+     "depth": 9,
+     "lambda_hat_d": 1.0
+    }
+   ],
+   "both_bugs": {
+    "lambda_hat_built": 1.0,
+    "binding_bar": {
+     "binding_bar": 0.905229319301184,
+     "public_183": 0.905229319301184,
+     "icc_190": 0.905229319301184,
+     "private_191": 0.905229319301184,
+     "binding_source": "public_183_iid_fallback",
+     "icc_flag": "iid-fallback",
+     "private_flag": "public-fallback",
+     "any_iid_fallback_active": true
+    },
+    "lambda_star_lcb_183_headline": 0.905229319301184,
+    "lambda_star_lcb_183_conservative": 0.923358337599465,
+    "lambda_star_central_178_INACTIVE": 0.8383898298915815,
+    "build_gate_pass": true,
+    "build_gate_pass_conservative": true,
+    "build_lcb_at_lambda_built": 520.9527323111674,
+    "clear500_launch_lcb_pass": true,
+    "numerical_ci_ledger": [
+     {
+      "axis": "sampling_iid",
+      "pr": 175,
+      "slug": "et-second-moment",
+      "kind": "numerical",
+      "status": "LANDED",
+      "flag": "consumed",
+      "halfwidth_tps_iid": 10.906182006867379,
+      "note": "iid +-10.906 numerator leg (B=16384); a LOWER bound on the true half-width."
+     },
+     {
+      "axis": "sampling_icc",
+      "pr": 190,
+      "slug": "icc-neff-launch-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "iid-fallback",
+      "lambda_bar": 0.905229319301184,
+      "expected_when_landed": "halfwidth_realistic + lambda_star_lcb_realistic_icc (>= iid bar)",
+      "note": "iid +-10.9 is a LOWER bound (ICC=1 -> N_eff 128->54.9 -> LCB 480.5 FLIPS); consume the correlation-refined bar (stricter-or-equal) when #190 lands."
+     },
+     {
+      "axis": "input_lambda_built",
+      "pr": 187,
+      "slug": "lambda-built-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "pending-input-ci",
+      "lambda_built_halfwidth": 0.0,
+      "expected_when_landed": "lambda_built_halfwidth (dual of #175's output-side TPS CI)",
+      "note": "input-side CI on lambda_hat_built; widens the effective bar margin when landed."
+     },
+     {
+      "axis": "hardware_oneshot",
+      "pr": 188,
+      "slug": "oneshot-hw-bound",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "oneshot-fallback",
+      "sigma_tps": 4.86,
+      "expected_when_landed": "sigma_oneshot (within-run vs between-device/thermal decomposition)",
+      "note": "composed in quadrature with the sampling leg; fallback uses #159 sigma_hw=4.86."
+     },
+     {
+      "axis": "private_bar",
+      "pr": 191,
+      "slug": "private-build-bar",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "public-fallback",
+      "lambda_bar": 0.905229319301184,
+      "expected_when_landed": "lambda_star_lcb_private + valid_at_bar (may exceed public 0.9052)",
+      "note": "private adverse-skew drop may demand a STRICTER bar than public; max()'d into binding_bar."
+     }
+    ],
+    "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190, private#191); in-flight axes -> iid-fallback. STRICTER than #178 central.",
+    "two_lcb_divergence": "composed build-LCB (#175(+)#159, axes 1-4) and #179 launch cell-LCB cross 500 at DIFFERENT lambda; build_gate=True, launch_lcb_gate=True"
+   },
+   "descent_only": {
+    "lambda_hat_built": 1.0,
+    "binding_bar": {
+     "binding_bar": 0.9750199960244741,
+     "public_183": 0.9750199960244741,
+     "icc_190": 0.9750199960244741,
+     "private_191": 0.9750199960244741,
+     "binding_source": "public_183_iid_fallback",
+     "icc_flag": "iid-fallback",
+     "private_flag": "public-fallback",
+     "any_iid_fallback_active": true
+    },
+    "lambda_star_lcb_183_headline": 0.9750199960244741,
+    "lambda_star_lcb_183_conservative": 0.9925986560663185,
+    "lambda_star_central_178_INACTIVE": 0.9091326079857753,
+    "build_gate_pass": true,
+    "build_gate_pass_conservative": true,
+    "build_lcb_at_lambda_built": 505.5276163584742,
+    "clear500_launch_lcb_pass": false,
+    "numerical_ci_ledger": [
+     {
+      "axis": "sampling_iid",
+      "pr": 175,
+      "slug": "et-second-moment",
+      "kind": "numerical",
+      "status": "LANDED",
+      "flag": "consumed",
+      "halfwidth_tps_iid": null,
+      "note": "iid +-10.906 numerator leg (B=16384); a LOWER bound on the true half-width."
+     },
+     {
+      "axis": "sampling_icc",
+      "pr": 190,
+      "slug": "icc-neff-launch-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "iid-fallback",
+      "lambda_bar": 0.9750199960244741,
+      "expected_when_landed": "halfwidth_realistic + lambda_star_lcb_realistic_icc (>= iid bar)",
+      "note": "iid +-10.9 is a LOWER bound (ICC=1 -> N_eff 128->54.9 -> LCB 480.5 FLIPS); consume the correlation-refined bar (stricter-or-equal) when #190 lands."
+     },
+     {
+      "axis": "input_lambda_built",
+      "pr": 187,
+      "slug": "lambda-built-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "pending-input-ci",
+      "lambda_built_halfwidth": 0.0,
+      "expected_when_landed": "lambda_built_halfwidth (dual of #175's output-side TPS CI)",
+      "note": "input-side CI on lambda_hat_built; widens the effective bar margin when landed."
+     },
+     {
+      "axis": "hardware_oneshot",
+      "pr": 188,
+      "slug": "oneshot-hw-bound",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "oneshot-fallback",
+      "sigma_tps": 4.86,
+      "expected_when_landed": "sigma_oneshot (within-run vs between-device/thermal decomposition)",
+      "note": "composed in quadrature with the sampling leg; fallback uses #159 sigma_hw=4.86."
+     },
+     {
+      "axis": "private_bar",
+      "pr": 191,
+      "slug": "private-build-bar",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "public-fallback",
+      "lambda_bar": 0.9750199960244741,
+      "expected_when_landed": "lambda_star_lcb_private + valid_at_bar (may exceed public 0.9052)",
+      "note": "private adverse-skew drop may demand a STRICTER bar than public; max()'d into binding_bar."
+     }
+    ],
+    "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190, private#191); in-flight axes -> iid-fallback. STRICTER than #178 central.",
+    "two_lcb_divergence": "composed build-LCB (#175(+)#159, axes 1-4) and #179 launch cell-LCB cross 500 at DIFFERENT lambda; build_gate=True, launch_lcb_gate=False"
+   },
+   "card_is_monotone": true,
+   "degraded_dependencies": {
+    "denken_183_margin_aware_lambda_card": "LANDED -- CONSUMED. The binding build-gate bar lambda*_LCB is read from #183's REAL card (lambda_star_lcb): both-bugs 0.9052 (tau=1) / 0.9234 (tau=0.9924), descent-only 0.9750 / 0.9926. #178's central point bar (0.838/0.909) is the flagged-INACTIVE looser reference only.",
+    "ubel_181_tau_pin": "IN-FLIGHT (not landed) -- tau band [tau_low, 1.0] from stark #164 used; the conservative tau=0.9924 corner is reported as the #181 stand-in floor.",
+    "wirbel_184_lambda_robust_topology": "IN-FLIGHT (not landed) -- named as the gap-fallback restoration lever; the contingency topology itself is not yet importable."
+   }
+  },
+  "both_bugs_go_at_lambda_star": true,
+  "binding_bar": {
+   "both_bugs": {
+    "binding_bar": 0.905229319301184,
+    "public_183": 0.905229319301184,
+    "icc_190": 0.905229319301184,
+    "private_191": 0.905229319301184,
+    "binding_source": "public_183_iid_fallback",
+    "icc_flag": "iid-fallback",
+    "private_flag": "public-fallback",
+    "any_iid_fallback_active": true
+   },
+   "descent_only": {
+    "binding_bar": 0.9750199960244741,
+    "public_183": 0.9750199960244741,
+    "icc_190": 0.9750199960244741,
+    "private_191": 0.9750199960244741,
+    "binding_source": "public_183_iid_fallback",
+    "icc_flag": "iid-fallback",
+    "private_flag": "public-fallback",
+    "any_iid_fallback_active": true
+   }
+  },
+  "launch_ci_ledger": {
+   "net_rule": "launch_authorized = (analytic GO: composed-LCB >= 500 at binding_bar AND validity AND over-accept) AND (all precondition rows GO). Numerical axes #190/#187/#188/#191 fold in quadrature; binding_bar = max(public#183, ICC#190, private#191). In-flight axes -> iid-fallback (flagged); the ledger recomposes when they land.",
+   "numerical_axes": {
+    "both_bugs": [
+     {
+      "axis": "sampling_iid",
+      "pr": 175,
+      "slug": "et-second-moment",
+      "kind": "numerical",
+      "status": "LANDED",
+      "flag": "consumed",
+      "halfwidth_tps_iid": 10.906182006867379,
+      "note": "iid +-10.906 numerator leg (B=16384); a LOWER bound on the true half-width."
+     },
+     {
+      "axis": "sampling_icc",
+      "pr": 190,
+      "slug": "icc-neff-launch-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "iid-fallback",
+      "lambda_bar": 0.905229319301184,
+      "expected_when_landed": "halfwidth_realistic + lambda_star_lcb_realistic_icc (>= iid bar)",
+      "note": "iid +-10.9 is a LOWER bound (ICC=1 -> N_eff 128->54.9 -> LCB 480.5 FLIPS); consume the correlation-refined bar (stricter-or-equal) when #190 lands."
+     },
+     {
+      "axis": "input_lambda_built",
+      "pr": 187,
+      "slug": "lambda-built-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "pending-input-ci",
+      "lambda_built_halfwidth": 0.0,
+      "expected_when_landed": "lambda_built_halfwidth (dual of #175's output-side TPS CI)",
+      "note": "input-side CI on lambda_hat_built; widens the effective bar margin when landed."
+     },
+     {
+      "axis": "hardware_oneshot",
+      "pr": 188,
+      "slug": "oneshot-hw-bound",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "oneshot-fallback",
+      "sigma_tps": 4.86,
+      "expected_when_landed": "sigma_oneshot (within-run vs between-device/thermal decomposition)",
+      "note": "composed in quadrature with the sampling leg; fallback uses #159 sigma_hw=4.86."
+     },
+     {
+      "axis": "private_bar",
+      "pr": 191,
+      "slug": "private-build-bar",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "public-fallback",
+      "lambda_bar": 0.905229319301184,
+      "expected_when_landed": "lambda_star_lcb_private + valid_at_bar (may exceed public 0.9052)",
+      "note": "private adverse-skew drop may demand a STRICTER bar than public; max()'d into binding_bar."
+     }
+    ],
+    "descent_only": [
+     {
+      "axis": "sampling_iid",
+      "pr": 175,
+      "slug": "et-second-moment",
+      "kind": "numerical",
+      "status": "LANDED",
+      "flag": "consumed",
+      "halfwidth_tps_iid": null,
+      "note": "iid +-10.906 numerator leg (B=16384); a LOWER bound on the true half-width."
+     },
+     {
+      "axis": "sampling_icc",
+      "pr": 190,
+      "slug": "icc-neff-launch-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "iid-fallback",
+      "lambda_bar": 0.9750199960244741,
+      "expected_when_landed": "halfwidth_realistic + lambda_star_lcb_realistic_icc (>= iid bar)",
+      "note": "iid +-10.9 is a LOWER bound (ICC=1 -> N_eff 128->54.9 -> LCB 480.5 FLIPS); consume the correlation-refined bar (stricter-or-equal) when #190 lands."
+     },
+     {
+      "axis": "input_lambda_built",
+      "pr": 187,
+      "slug": "lambda-built-ci",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "pending-input-ci",
+      "lambda_built_halfwidth": 0.0,
+      "expected_when_landed": "lambda_built_halfwidth (dual of #175's output-side TPS CI)",
+      "note": "input-side CI on lambda_hat_built; widens the effective bar margin when landed."
+     },
+     {
+      "axis": "hardware_oneshot",
+      "pr": 188,
+      "slug": "oneshot-hw-bound",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "oneshot-fallback",
+      "sigma_tps": 4.86,
+      "expected_when_landed": "sigma_oneshot (within-run vs between-device/thermal decomposition)",
+      "note": "composed in quadrature with the sampling leg; fallback uses #159 sigma_hw=4.86."
+     },
+     {
+      "axis": "private_bar",
+      "pr": 191,
+      "slug": "private-build-bar",
+      "kind": "numerical",
+      "status": "IN-FLIGHT",
+      "flag": "public-fallback",
+      "lambda_bar": 0.9750199960244741,
+      "expected_when_landed": "lambda_star_lcb_private + valid_at_bar (may exceed public 0.9052)",
+      "note": "private adverse-skew drop may demand a STRICTER bar than public; max()'d into binding_bar."
+     }
+    ]
+   },
+   "preconditions": [
+    {
+     "row": "boot_fix_kanna_177",
+     "pr": 177,
+     "kind": "precondition",
+     "status": "GO",
+     "flag": "landed",
+     "note": "darwin _IncludedRouter boot-validation startup-500 fix; output-neutral (land #71 banks the diff)."
+    },
+    {
+     "row": "precache_bench",
+     "kind": "precondition",
+     "status": "PENDING",
+     "flag": "serve-config",
+     "note": "PRECACHE_BENCH=1 must be set on the served path at launch."
+    },
+    {
+     "row": "executable_submission_gate_ubel_189",
+     "pr": 189,
+     "kind": "precondition",
+     "status": "PENDING",
+     "flag": "pending-packaging",
+     "expected_when_landed": "verify_submission_gate(build_env, introspection) -> GO/NO-GO + failing flag + banked cost (row-1 relocate-host-loop = 85% TPS)",
+     "note": "packaging precondition; UNVERIFIED until #189 lands -> blocks an actual launch."
+    },
+    {
+     "row": "build_lambda_geq_binding_bar",
+     "pr": 71,
+     "kind": "precondition",
+     "status": "GO",
+     "flag": "measured",
+     "note": "land #71's measured lambda_hat_built >= binding_bar for topology both_bugs."
+    },
+    {
+     "row": "human_approval",
+     "kind": "precondition",
+     "status": "PENDING",
+     "flag": "human-gate",
+     "note": "a human must approve the filed `Approval request: HF job` issue before any spend."
+    }
+   ],
+   "preconditions_all_go": false,
+   "any_iid_fallback_active": true
+  },
+  "launch_authorized": {
+   "authorized": false,
+   "analytic_verdict": "GO",
+   "preconditions_all_go": false,
+   "note": "PRODUCED, not FILED. analytic_verdict can be GO while authorized=False because operational preconditions (PRECACHE serve-config, #189 packaging gate, human approval) are PENDING. The calculator authorizes NOTHING."
+  },
+  "hardware_axis_sigma_hw": {
+   "sigma_hw_tps": 4.864468814937121,
+   "best_of_2_p": 0.9829212493342153,
+   "note": "RETIRED on a SEPARATE hardware axis by best-of-2 official draws (P=0.9829>=0.90); does NOT subtract from the #179 projection-axis LCB. (#183's build-LCB folds sigma_hw in quadrature instead -- the documented two-LCB divergence.)"
+  },
+  "_full_per_topology": {
+   "both_bugs": {
+    "topo": "both_bugs",
+    "GO": true,
+    "verdict": "GO",
+    "E_T": 5.206954309441966,
+    "official_tps": 535.4449792820219,
+    "official_tps_tau_low": 531.3926593468016,
+    "proj_private_tps": 528.885676407476,
+    "lcb_p90": 514.8775406894962,
+    "p_clear_500": 0.9958868982631071,
+    "validity_gate": "READY",
+    "sigma_hw_naive_fold": {
+     "lcb_p90_4term": 513.4332776193274,
+     "p_clear_500_4term": 0.9917044565974431
+    },
+    "overaccept": {
+     "region": "TRUSTWORTHY",
+     "trustworthy": true,
+     "v_implied": 5.551115123125783e-16,
+     "et_ceiling": 5.207033762471786
+    },
+    "lambda_gate": {
+     "lambda_hat_built": 1.0,
+     "binding_bar": {
+      "binding_bar": 0.905229319301184,
+      "public_183": 0.905229319301184,
+      "icc_190": 0.905229319301184,
+      "private_191": 0.905229319301184,
+      "binding_source": "public_183_iid_fallback",
+      "icc_flag": "iid-fallback",
+      "private_flag": "public-fallback",
+      "any_iid_fallback_active": true
+     },
+     "lambda_star_lcb_183_headline": 0.905229319301184,
+     "lambda_star_lcb_183_conservative": 0.923358337599465,
+     "lambda_star_central_178_INACTIVE": 0.8383898298915815,
+     "build_gate_pass": true,
+     "build_gate_pass_conservative": true,
+     "build_lcb_at_lambda_built": 520.9527323111674,
+     "clear500_launch_lcb_pass": true,
+     "numerical_ci_ledger": [
+      {
+       "axis": "sampling_iid",
+       "pr": 175,
+       "slug": "et-second-moment",
+       "kind": "numerical",
+       "status": "LANDED",
+       "flag": "consumed",
+       "halfwidth_tps_iid": 10.906182006867379,
+       "note": "iid +-10.906 numerator leg (B=16384); a LOWER bound on the true half-width."
+      },
+      {
+       "axis": "sampling_icc",
+       "pr": 190,
+       "slug": "icc-neff-launch-ci",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "iid-fallback",
+       "lambda_bar": 0.905229319301184,
+       "expected_when_landed": "halfwidth_realistic + lambda_star_lcb_realistic_icc (>= iid bar)",
+       "note": "iid +-10.9 is a LOWER bound (ICC=1 -> N_eff 128->54.9 -> LCB 480.5 FLIPS); consume the correlation-refined bar (stricter-or-equal) when #190 lands."
+      },
+      {
+       "axis": "input_lambda_built",
+       "pr": 187,
+       "slug": "lambda-built-ci",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "pending-input-ci",
+       "lambda_built_halfwidth": 0.0,
+       "expected_when_landed": "lambda_built_halfwidth (dual of #175's output-side TPS CI)",
+       "note": "input-side CI on lambda_hat_built; widens the effective bar margin when landed."
+      },
+      {
+       "axis": "hardware_oneshot",
+       "pr": 188,
+       "slug": "oneshot-hw-bound",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "oneshot-fallback",
+       "sigma_tps": 4.86,
+       "expected_when_landed": "sigma_oneshot (within-run vs between-device/thermal decomposition)",
+       "note": "composed in quadrature with the sampling leg; fallback uses #159 sigma_hw=4.86."
+      },
+      {
+       "axis": "private_bar",
+       "pr": 191,
+       "slug": "private-build-bar",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "public-fallback",
+       "lambda_bar": 0.905229319301184,
+       "expected_when_landed": "lambda_star_lcb_private + valid_at_bar (may exceed public 0.9052)",
+       "note": "private adverse-skew drop may demand a STRICTER bar than public; max()'d into binding_bar."
+      }
+     ],
+     "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190, private#191); in-flight axes -> iid-fallback. STRICTER than #178 central.",
+     "two_lcb_divergence": "composed build-LCB (#175(+)#159, axes 1-4) and #179 launch cell-LCB cross 500 at DIFFERENT lambda; build_gate=True, launch_lcb_gate=True"
+    },
+    "failing_gate": null,
+    "restoration_lever": null
+   },
+   "descent_only": {
+    "topo": "descent_only",
+    "GO": false,
+    "verdict": "NO-GO",
+    "E_T": 5.056404568844709,
+    "official_tps": 519.9635484984183,
+    "official_tps_tau_low": 516.0283941227186,
+    "proj_private_tps": 513.8934226968873,
+    "lcb_p90": 499.96519706601964,
+    "p_clear_500": 0.8994368544296176,
+    "validity_gate": "READY",
+    "sigma_hw_naive_fold": {
+     "lcb_p90_4term": 498.5909335985773,
+     "p_clear_500_4term": 0.8776958119352409
+    },
+    "overaccept": {
+     "region": "TRUSTWORTHY",
+     "trustworthy": true,
+     "v_implied": 0.0,
+     "et_ceiling": 5.056481724632743
+    },
+    "lambda_gate": {
+     "lambda_hat_built": 1.0,
+     "binding_bar": {
+      "binding_bar": 0.9750199960244741,
+      "public_183": 0.9750199960244741,
+      "icc_190": 0.9750199960244741,
+      "private_191": 0.9750199960244741,
+      "binding_source": "public_183_iid_fallback",
+      "icc_flag": "iid-fallback",
+      "private_flag": "public-fallback",
+      "any_iid_fallback_active": true
+     },
+     "lambda_star_lcb_183_headline": 0.9750199960244741,
+     "lambda_star_lcb_183_conservative": 0.9925986560663185,
+     "lambda_star_central_178_INACTIVE": 0.9091326079857753,
+     "build_gate_pass": true,
+     "build_gate_pass_conservative": true,
+     "build_lcb_at_lambda_built": 505.5276163584742,
+     "clear500_launch_lcb_pass": false,
+     "numerical_ci_ledger": [
+      {
+       "axis": "sampling_iid",
+       "pr": 175,
+       "slug": "et-second-moment",
+       "kind": "numerical",
+       "status": "LANDED",
+       "flag": "consumed",
+       "halfwidth_tps_iid": null,
+       "note": "iid +-10.906 numerator leg (B=16384); a LOWER bound on the true half-width."
+      },
+      {
+       "axis": "sampling_icc",
+       "pr": 190,
+       "slug": "icc-neff-launch-ci",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "iid-fallback",
+       "lambda_bar": 0.9750199960244741,
+       "expected_when_landed": "halfwidth_realistic + lambda_star_lcb_realistic_icc (>= iid bar)",
+       "note": "iid +-10.9 is a LOWER bound (ICC=1 -> N_eff 128->54.9 -> LCB 480.5 FLIPS); consume the correlation-refined bar (stricter-or-equal) when #190 lands."
+      },
+      {
+       "axis": "input_lambda_built",
+       "pr": 187,
+       "slug": "lambda-built-ci",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "pending-input-ci",
+       "lambda_built_halfwidth": 0.0,
+       "expected_when_landed": "lambda_built_halfwidth (dual of #175's output-side TPS CI)",
+       "note": "input-side CI on lambda_hat_built; widens the effective bar margin when landed."
+      },
+      {
+       "axis": "hardware_oneshot",
+       "pr": 188,
+       "slug": "oneshot-hw-bound",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "oneshot-fallback",
+       "sigma_tps": 4.86,
+       "expected_when_landed": "sigma_oneshot (within-run vs between-device/thermal decomposition)",
+       "note": "composed in quadrature with the sampling leg; fallback uses #159 sigma_hw=4.86."
+      },
+      {
+       "axis": "private_bar",
+       "pr": 191,
+       "slug": "private-build-bar",
+       "kind": "numerical",
+       "status": "IN-FLIGHT",
+       "flag": "public-fallback",
+       "lambda_bar": 0.9750199960244741,
+       "expected_when_landed": "lambda_star_lcb_private + valid_at_bar (may exceed public 0.9052)",
+       "note": "private adverse-skew drop may demand a STRICTER bar than public; max()'d into binding_bar."
+      }
+     ],
+     "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190, private#191); in-flight axes -> iid-fallback. STRICTER than #178 central.",
+     "two_lcb_divergence": "composed build-LCB (#175(+)#159, axes 1-4) and #179 launch cell-LCB cross 500 at DIFFERENT lambda; build_gate=True, launch_lcb_gate=False"
+    },
+    "failing_gate": "clear-500 launch-projection LCB (#179): cell-LCB(P>=0.9)=499.97 < 500 (build-gate PASSED at lambda*_LCB=0.9750 -- a build-acceptable kernel that still misses the private-drop launch projection)",
+    "restoration_lever": "ship #154 argmax-only decode (+3.96 TPS LCB -> realizable) or land the both-bugs kernel; descent-only is a knife-edge launch miss at the shipped step even though it clears the #183 build bar."
+   }
+  },
+  "filled_approval_block": "### Approval request: HF job for land-71-bothbugs-kernel\n\n**PRE-FILLED DRAFT (NOT FILED).** A human must approve this filed issue before any spend.\n**launch_authorized = False** (analytic_verdict GO; preconditions_all_go False).\n\n**ANALYTIC VERDICT: GO** on the **both_bugs** path at the shipped step 1.2182\n(LCB(P>=0.9) 514.88 TPS, P(clear-500) 99.59%, official\n535.44 TPS at tau=1.0; tau-low 531.39).\n\n**Composition:** official = K_cal*(E[T]/step)*tau, K_cal=125.26795, tau in [0.9924, 1.0].\nclear-500 verdict ANDs TWO finite-sample lower bounds: (1) the BUILD-gate lambda_hat_built\n1.0000 >= binding_bar 0.9052\n(= max(public#183 0.9052, ICC#190, private#191); source public_183_iid_fallback;\nSTRICTER than #178's central 0.838 both / 0.909 descent), and (2) the #179 launch-projection\ncell-LCB(P>=0.9) >= 500. sigma_hw RETIRED on a separate hardware axis by best-of-2 official\ndraws (P=0.9829>=0.90).\n\n**Measured-tuple GO table:**\n| topology | official (tau=1.0) | proj_private | LCB(P>=0.9) | P(clear-500) | verdict |\n|---|---|---|---|---|---|\n| both_bugs | 535.44 | 528.89 | 514.88 | 0.9959 | GO |\n| descent_only | 519.96 | 513.89 | 499.97 | 0.8994 | NO-GO |\n\n**Launch-CI ledger -- numerical axes (binding_bar = max; in-flight -> iid-fallback):**\n| axis | PR | status | flag | bar/value |\n|---|---|---|---|---|\n| sampling_iid | #175 | LANDED | consumed | 10.9062 |\n| sampling_icc | #190 | IN-FLIGHT | iid-fallback | 0.9052 |\n| input_lambda_built | #187 | IN-FLIGHT | pending-input-ci | 0.0000 |\n| hardware_oneshot | #188 | IN-FLIGHT | oneshot-fallback | 4.8600 |\n| private_bar | #191 | IN-FLIGHT | public-fallback | 0.9052 |\n\n**Launch-CI ledger -- hard precondition rows (any non-GO blocks the launch):**\n| precondition | status | flag |\n|---|---|---|\n| boot_fix_kanna_177 | GO | landed |\n| precache_bench | PENDING | serve-config |\n| executable_submission_gate_ubel_189 | PENDING | pending-packaging |\n| build_lambda_geq_binding_bar | GO | measured |\n| human_approval | PENDING | human-gate |\n\n**Submission command (named hard deps -- the human runs this AFTER approval):**\n```\nPRECACHE_BENCH=1 <serve-harness with land #71 both_bugs kernel + kanna darwin _IncludedRouter boot-fix>\n```\n  - PRECACHE_BENCH=1 set on the served path.\n  - kanna's darwin _IncludedRouter boot-validation startup-500 fix folded into the serve harness.\n\n**Dependency ledger (all required-GREEN before approval):**\n  - [BANKED] Numerator E[T] (#160/#165/#172): descent 5.0564 / both 5.2070.\n  - [BANKED] Denominator step (#168): shipped 1.2182.\n  - [BANKED] Hardware sigma_hw (#159): 4.86 TPS; best-of-2 P=0.9829.\n  - [BANKED] Validity (#166/#124): PPL 2.390<=2.42; 128/128; greedy-exact=True.\n  - [BANKED] Private drop (#164): tau-low 0.9924.\n  - [BANKED] denken #183 margin-aware lambda-card: binding_bar 0.9052 (tau=1) / 0.9234 (tau=0.9924).\n  - [IN-FLIGHT] launch-CI axes #190 (ICC) / #187 (lambda-built-CI) / #188 (sigma-oneshot) / #191 (private-bar) -> iid-fallback until landed (bar can only get stricter).\n  - [IN-FLIGHT] ubel #189 executable-submission-gate (packaging precondition -- UNVERIFIED).\n  - [PENDING-BUILD] land #71 measured tuple (THIS tuple).\n\n**Launch gates (ALL required):** (1) land #71 builds the both_bugs kernel; (2) darwin _IncludedRouter\nboot-fix folded; (3) PRECACHE_BENCH=1; (4) a human-approved `Approval request: HF job` issue.\n",
+  "nogo_restoration": null,
+  "human_deferral": "This block is PRODUCED, not FILED. A human must approve the filed `Approval request: HF job` issue before any spend."
+ },
+ "handoff_line": "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified GO/NO-GO + filled (un-filed) Approval request. Self-test PASSES. The BINDING lambda-gate is a TYPED launch-CI ledger (advisor 16:53Z): binding_bar = max(public#183 0.9052, ICC#190, private#191) -- all four in-flight axes (#190 ICC, #187 lambda-built-CI, #188 sigma-oneshot, #191 private-bar) degrade to the iid-fallback public bar until they land, then the verdict RECOMPOSES (bar can only get stricter). land #71 must show lambda_hat_built >= binding_bar (0.9052 both-bugs tau=1; 0.9234 tau=0.9924), STRICTER than #178's 0.838 central bar; AND the #179 launch-projection cell-LCB(P>=0.9) >= 500. launch_authorized = (analytic-GO AND all precondition rows GO); preconditions (PRECACHE_BENCH, ubel #189 packaging-gate, human approval) are PENDING -> launch_authorized=False (authorizes nothing). both-bugs clears both LCBs at lambda=1 (514.88, robust GO); descent clears the #183 build bar but misses the #179 launch projection (499.97). both_bugs_go_at_lambda_star=True. Human approval still required before any HF spend.",
+ "elapsed_sec": 4.939452171325684,
+ "peak_mem_mib": 67.6796875
+}
