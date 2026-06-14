@@ -1,0 +1,139 @@
+{
+  "config": {
+    "accept_json": "research/accept_calibration/accept_calibration_results.json",
+    "rankcov_json": "research/rank_coverage/rank_coverage_results.json",
+    "rho_opt_json": "research/spec_cost_model/rho_optimal_topology_results.json",
+    "W": 4,
+    "max_depth": 24,
+    "mc_trials": 400000,
+    "output": "research/spine_spec/spine_spec_results.json",
+    "report_md": "research/spine_spec/report_spine_spec_verify.md",
+    "wandb_project": "gemma-challenge-senpai",
+    "wandb_entity": "wandb-applied-ai-team",
+    "wandb_group": "depth1-spine-build-spec",
+    "wandb_name": "wirbel/depth1-spine-build-spec",
+    "no_wandb": false
+  },
+  "model_constants": {
+    "q_true_top1_76": 0.728739760479042,
+    "rho2_marginal": 0.4165047789261015,
+    "deployed_rising_spine": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "rho_cond": [
+      0.4165047789261015,
+      0.2655480090557997,
+      0.19075249320036264
+    ],
+    "topology_built_depth": 9,
+    "n_nodes": 32,
+    "max_branch": 3,
+    "n_leaves": 7,
+    "K_cal": 125.268,
+    "step_roofline": 1.2127,
+    "step_measured": 1.2182,
+    "tau_band": [
+      0.9924,
+      1.0
+    ]
+  },
+  "contamination_model": {
+    "formula": "q1(f) = (1-f)*q_true + f*rho2",
+    "f_asbuilt_denken133": 0.419,
+    "f_asbuilt_exact_for_0598": 0.4187223347902632,
+    "f_oracle_for_0674": 0.1753159117751213,
+    "f_descent_for_0679": 0.1593023313135988,
+    "f_specced_fix": 0.0,
+    "asbuilt_d1_modelled_f0419": 0.5979133032083599,
+    "asbuilt_d1_modelled_f_rho2": 0.5986923985143391,
+    "q1_specced_equals_q_true": 0.728739760479042
+  },
+  "anchors_reproduced": {
+    "asbuilt_d1_0598": {
+      "target": 0.598,
+      "modelled": 0.5979133032083599
+    },
+    "et_tree_0598": {
+      "target": 4.811237948198919,
+      "modelled": 4.811237948198919
+    },
+    "descent_only_50564": {
+      "target": 5.0564,
+      "modelled": 5.056404568844709
+    },
+    "both_bugs_52068": {
+      "target": 5.2068,
+      "modelled": 5.206954309441963
+    }
+  },
+  "self_test_checks": {
+    "asbuilt_d1_0598_reproduced": true,
+    "et_tree_0598_anchor_4811": true,
+    "descent_only_anchor_50564": true,
+    "both_bugs_anchor_52068": true,
+    "specced_fix_no_idealization_gap": true,
+    "specced_q1_equals_q_true": true,
+    "both_bugs_clears_measured_bar": true,
+    "both_bugs_clears_ubel_bar": true,
+    "monotone_in_f": true,
+    "all_metrics_nan_clean": true
+  },
+  "greedy_identity_premises": {
+    "emit_is_verifier_rank1_argmax": true,
+    "accept_changes_count_not_values": true,
+    "fix_targets_rank1_row_only": true,
+    "issue124_greedy_exact_resolved": true,
+    "fix_raises_accept_only": true
+  },
+  "official_projection": {
+    "roofline_1.2127_tau1.0": {
+      "both_bugs": 537.8615918489122,
+      "descent_only": 522.3102890492612
+    },
+    "roofline_1.2127_tau0.9924": {
+      "both_bugs": 533.7738437508605,
+      "descent_only": 518.3407308524868
+    },
+    "measured_1.2182_tau1.0": {
+      "both_bugs": 535.4332231449482,
+      "descent_only": 519.9521322689534
+    },
+    "measured_1.2182_tau0.9924": {
+      "both_bugs": 531.3639306490466,
+      "descent_only": 516.0004960637093
+    }
+  },
+  "clear_500_bars": {
+    "measured_step_tau1": 4.86237506785452,
+    "measured_step_tau_lo": 4.899612119966264,
+    "ubel_band": [
+      4.808,
+      4.82
+    ],
+    "both_bugs_margin_over_measured_bar": 0.34495430944196315,
+    "both_bugs_margin_over_ubel_bar_hi": 0.38695430944196296
+  },
+  "verdict": {
+    "primary_metric_name": "spine_spec_self_test_passes",
+    "spine_spec_self_test_passes": true,
+    "test_metric_name": "both_bugs_E_T_specced",
+    "both_bugs_E_T_specced": 5.206954309441963,
+    "spine_fix_greedy_identity_safe": true,
+    "both_bugs_E_T_idealized": 5.206954309441963,
+    "idealization_gap": 0.0,
+    "descent_only_E_T": 5.056404568844709,
+    "official_both_bugs_measured_step_tau1": 535.4332231449482,
+    "official_both_bugs_measured_step_tau_lo": 531.3639306490466,
+    "official_both_bugs_roofline_step_tau1": 537.8615918489122,
+    "mc_both_bugs_E_T": 5.1954025,
+    "mc_vs_dp_resid": 0.011551809441963101,
+    "gate": "GREEN",
+    "gate_label": "spec'd depth-1 fix (contamination f->0) reproduces the both-bugs ceiling 5.2068 with idealization gap 0.00e+00 (\u22480); all merged anchors reproduced; greedy-identity safe."
+  }
+}
