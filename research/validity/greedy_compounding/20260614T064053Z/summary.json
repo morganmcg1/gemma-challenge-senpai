@@ -1,0 +1,111 @@
+{
+  "ts": "20260614T065227Z",
+  "num_prompts": 128,
+  "output_len": 512,
+  "num_positions": 65536,
+  "native_dtype": "torch.bfloat16",
+  "softcap": 30.0,
+  "scale": 1.0,
+  "include_ple": false,
+  "kv_sharing_fast_prefill": false,
+  "perturbation_model": "genuine_splitk_reduction_order_emu",
+  "n_gemm_hooks": 148,
+  "n_gemm_weights_recovered": 148,
+  "perturb_suffixes": [
+    ".qkv_proj",
+    ".o_proj",
+    ".gate_up_proj",
+    ".down_proj"
+  ],
+  "control_runs": 3,
+  "control_divergent_tokens": [
+    0,
+    0
+  ],
+  "control_divergent_max": 0,
+  "reconstruction_fidelity_disagreements": 964,
+  "min_margin": 0.0,
+  "median_margin": 4.625,
+  "realistic_splits": [
+    2,
+    4,
+    8
+  ],
+  "compounded_argmax_flip_count_realistic": 971,
+  "compounded_argmax_flip_count_realistic_per_split": [
+    971,
+    952,
+    936
+  ],
+  "compounded_argmax_flip_count_realistic_upstream": 971,
+  "compounded_argmax_flip_count_realistic_upstream_per_split": [
+    971,
+    952,
+    936
+  ],
+  "compounded_argmax_flip_count_adversarial": 2783,
+  "compounded_argmax_flip_count_adversarial_upstream": 1017,
+  "regimes": [
+    {
+      "tag": "realistic_s2",
+      "mode": "emu",
+      "splits": 2,
+      "scale": 1.0,
+      "flip_count": 971,
+      "flip_count_upstream": 971,
+      "decode_s": 132.7,
+      "max_abs_dh_inf": 4.611328125,
+      "mean_dh_l2": 3.5360007286071777,
+      "max_abs_dlogit": 5.625,
+      "mean_abs_dlogit": 0.3666997253894806,
+      "hook_max_abs_activation_delta": 1.0,
+      "n_perturbed_ops": 18944
+    },
+    {
+      "tag": "realistic_s4",
+      "mode": "emu",
+      "splits": 4,
+      "scale": 1.0,
+      "flip_count": 952,
+      "flip_count_upstream": 952,
+      "decode_s": 139.4,
+      "max_abs_dh_inf": 5.15625,
+      "mean_dh_l2": 3.5326879024505615,
+      "max_abs_dlogit": 6.359375,
+      "mean_abs_dlogit": 0.36640575528144836,
+      "hook_max_abs_activation_delta": 1.0,
+      "n_perturbed_ops": 18944
+    },
+    {
+      "tag": "realistic_s8",
+      "mode": "emu",
+      "splits": 8,
+      "scale": 1.0,
+      "flip_count": 936,
+      "flip_count_upstream": 936,
+      "decode_s": 152.0,
+      "max_abs_dh_inf": 7.125,
+      "mean_dh_l2": 3.5535073280334473,
+      "max_abs_dlogit": 8.8125,
+      "mean_abs_dlogit": 0.3685351312160492,
+      "hook_max_abs_activation_delta": 1.0,
+      "n_perturbed_ops": 18944
+    },
+    {
+      "tag": "adversarial",
+      "mode": "adversarial",
+      "splits": 0,
+      "scale": 1.0,
+      "flip_count": 2783,
+      "flip_count_upstream": 1017,
+      "decode_s": 44.1,
+      "max_abs_dh_inf": 7.6875,
+      "mean_dh_l2": 4.703794956207275,
+      "max_abs_dlogit": 9.390625,
+      "mean_abs_dlogit": 0.5200148820877075,
+      "hook_max_abs_activation_delta": 4.0,
+      "n_perturbed_ops": 18944
+    }
+  ],
+  "npz": "/workspace/senpai/target/research/validity/greedy_compounding/20260614T064053Z/compounding.npz"
+}
