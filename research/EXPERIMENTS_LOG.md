@@ -1,5 +1,22 @@
 # SENPAI Research Results
 
+## 2026-06-14 07:13 — PR #107: Tree-step denominator measurement — pin the REAL M=8→M=32 verify-step ratio 🟢 GREEN — MERGED (measured verify-forward floor 1.237×; whole-step bracket [1.145,1.156] CONFIRMS fern's 1.16×; break-even 4.614 holds vs 4.624; GEMM NOT flat — Marlin 16-row tile staircase 1.169× — but offset by attention-as-modeled 1.83× → nets to fern's 1.158)
+
+- **Branch:** `lawine/tree-step-denominator` · **Student:** lawine · merged 07:14Z (LOCAL A10G microbench — no HF Job, timing only, greedy untouched; BASELINE unchanged 481.53)
+- **Hypothesis:** convert the load-bearing 1.16× M=8→M=32 tree-step denominator (under fern #102's break-even + the 569 projection) from a back-solved model assumption into a MEASURED number with a CI, on the GEMM+causal-attn floor (no star-attn tree-mask kernel needed).
+- **Primary metric:** `measured_M32_M8_step_ratio = 1.2370` [1.2268, 1.2472], CV 0.944% (median N=5, verify-FORWARD floor = GEMM+attn). **Test:** `corrected_breakeven_ET = 4.614` [4.568, 4.614] vs fern #102's 4.624 (Δ −0.21%, holds). W&B `tbhywbmw`.
+
+| component | M=8 | M=32 | ratio |
+|---|--:|--:|--:|
+| **verify-forward floor (GEMM+attn)** | 5588 µs | 6910 µs | **1.2370** |
+| GEMM (int4 W4A16 Marlin, ×42 layers) | 5013 µs | 5856 µs | 1.1686 |
+| attention (deployed fp32 split-KV `unified_attention`) | 575 µs | 1054 µs | 1.8325 |
+
+- **Verdict — 🟢 GREEN, fern's 1.16× whole-step denominator CONFIRMED by direct measurement.** Mapping the verify-forward floor (1.237×, on the ~61% GEMM+attn share) to the WHOLE step via two transparent maps gives bracket **[1.1446 lumped, 1.1560 budget-share]** vs fern's modeled **1.1584** → confirmed (not corrected). The component nuance is the real find: **GEMM is NOT flat within M≤32** (r=1.169, the 16-row Marlin tile staircase: M=8 fills 1 tile, M=32 fills 2 → +17%; still ≪ the +29% M=33 cliff denken #68 flagged) — this *corrects* denken #68's "~1.0× flat" piece — **but attention is exactly wirbel #98's 1.83×**, and in the budget-share map the GEMM-not-flat surplus and the as-modeled attention move opposite to the model and cancel, so the whole-step lands on 1.158. Break-even 4.614 sits comfortably between beat-linear 4.45 and the 5.207 ceiling → tree go/no-go unchanged.
+- **The one open denominator RISK (lawine's caveat, carried forward):** the measured floor holds the drafter+host remainder (~39% of the M=8 step) FLAT — fern's M-invariance assumption. Two residuals sit ON TOP and are unmeasurable until the build: (1) the star-attn **tree-mask** kernel delta (causal attn is its lower bound); (2) **drafter tree-expansion** (a 32-node tree may issue more drafter passes than the linear 8-chain). If tree-expansion adds real M-variant cost, the ratio rises above 1.16 and the break-even tightens — this is what land #71's build must resolve and what the harness stays armed for.
+- **Bug fixed (banked):** the first timed CUDA-graph kernel in a cold process runs at A10G BASE clock (~2× slow — no-warmup GEMM M=8 = 10013 µs vs warm 5013 µs); added a mandatory sustained warmup (clock ramp + Triton JIT both widths) before timed repeats. Protects every future microbench on this rig.
+- **Banks:** `scripts/profiler/tree_step_denominator.py` + W&B `tbhywbmw`. **Next:** lawine → **#112 (harden the tree-free-500 projection + bound τ)** — denken #105 made tree-free the primary 500-path; arm the zero-lag SplitK%→official-vs-500 meter + bound τ from local data for denken #109's ship decision.
+
 ## 2026-06-14 06:55 — PR #106: Tree-vs-tree-free crossover + build-milestone ladder — at what realized E[T] does the tree overtake tree-free? 🟡 AMBER — MERGED (crossover@C=500 = 4.624 = #102 break-even verbatim; with denken #105's landed C=518.1 the tree is UPSIDE not critical-path; corner-matched recovery gate E[T]≥~4.7; CPU-only, greedy untouched)
 
 - **Branch:** `fern/tree-vs-treefree-crossover` · **Student:** fern · merged 06:56Z (analysis-only, BASELINE unchanged 481.53)
