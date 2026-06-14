@@ -1,5 +1,25 @@
 # SENPAI Research Results
 
+## 2026-06-14 00:10 — PR #56: max_num_batched_tokens served A/B on the split-KV #1 stack ✗ CLOSED (parity characterization keeper — NOT a winner, NOT a regression)
+
+- **Branch:** `lawine/maxbatchtok-served-ab` · **Student:** lawine
+- **Status:** CLOSED as a parity/characterization keeper. No served-file change (research-only A/B harness + bugfix only). Frontier bar **UNCHANGED at 481.53**. Disposition: the knob is conclusively closed (parity + invalid-above-512); lawine's own "Suggested follow-ups: None on this knob."
+- **Hypothesis:** sweeping `MAX_NUM_BATCHED_TOKENS` (512/2048/4096/8192) on the deployed `fa2sw_precache_kenyan` stack yields a decode-TPS gain and/or silences the #52 spec-decode launch warning.
+
+| `max_num_batched_tokens` | steady TPS (n=14) | Δ vs control | PPL | completion | valid? |
+|---|--:|--:|--:|---|---|
+| **512 (control / deployed)** | **448.01** | — | **2.3767** | 128/128 | ✅ |
+| 2048 | 445.92 | −0.47% | OOM | 128 decode, PPL crash | ❌ |
+| 4096 | 453.40 | +1.20% | OOM | 128 decode, PPL crash | ❌ |
+| 8192 | 449.56 | +0.35% | OOM | 128 decode, PPL crash | ❌ |
+
+- **Analysis:** clean NEGATIVE (parity), with two extra teeth. (1) **No decode-TPS leverage** — at conc=1 / `max_num_seqs=1` each decode step verifies only M=8 tokens (far below any mbt), so the knob governs only prefill chunking; every inter-arm delta (≤+1.2%) is *inside* the control's own +4.4% run-to-run swing (429.04 vs 448.01 same-config). (2) **512 is the only PPL-passing value** — mbt≥2048 OOMs the `prompt_logprobs` log_softmax (+1.34 GiB) on the validity pass (decode completes 128/128, the gate crashes); footprint grows monotonically 20.92→21.02 GiB. Caveat: local A10G 22.06 GiB vs official a10g-small ~24 GiB, so the OOM might not reproduce officially — but there's no TPS upside regardless. (3) **#52 warning is benign AND structurally un-silenceable** — `vllm.py:1597` silences only at mbt≥8192, `scheduler.py:281` only at mbt≤4096; the regions never overlap, so some warning always fires; the only spec-decode-silencing value (8192) OOMs PPL. **Net: the deployed `MAX_NUM_BATCHED_TOKENS=512` is decode-optimal and the only gate-passing value — validated, no change.** Useful invariant banked: the **validity pass, not decode, is the memory-tight phase** at 0.90 util (matters for any future activation-growing change, e.g. tree-verify wider-M / land #71).
+- **W&B (group `maxbatchtok-served-ab`):** 512→`3756geng` · 2048→`3vvsjm10` · 4096→`q28zoru2` · 8192→`k76d5d0a`. No HF job (local served A/B only).
+- **Bug fix (kept on branch, cherry-pickable):** made the research-only `maxbatchtok_ab.py` harness's wandb-log + PPL pass non-fatal so a PPL OOM is captured as data (`engine_oom=true`) rather than discarding a completed arm. No served files touched.
+- **Follow-ups:** none on this knob (closed). The frontier lever remains **(b) more accepted tokens per weight read** → tokens-per-step: **land #71 tree-verify serving path** (deploys wirbel #49's +16%), **denken #68 verify-GEMM roofline**, **lawine #72 noise-floor protocol** (needed to detect sub-5% wins). Queued idea (no idle seat): **ngram/prompt-lookup hybrid drafter** (training-free copy-span tokens-per-step).
+
+---
+
 ## 2026-06-13 22:13 — PR #52: fa2sw split-KV — Issue-#46-approved one-shot HF launch ✓ MERGED ⭐ NEW PUBLIC #1 / NEW OFFICIAL FRONTIER (481.53 official TPS)
 
 - **Branch:** `lawine/fa2sw-splitkv-official-launch` · **Student:** lawine
