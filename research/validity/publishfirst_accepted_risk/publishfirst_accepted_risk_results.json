@@ -1,0 +1,243 @@
+{
+  "pr": 237,
+  "metric_primary": "publishfirst_accepted_risk_self_test_passes",
+  "metric_test": "accepted_risk_at_floor",
+  "publishfirst_accepted_risk_self_test_passes": true,
+  "accepted_risk_at_floor": 0.4999999999999939,
+  "accepted_risk_at_speed_gate": 0.05831773945416474,
+  "accepted_risk_at_speed_gate_grounded": 0.2394311004235805,
+  "accepted_risk_at_p95": 0.029652072149779496,
+  "lambda_risk5": 0.9699990336265527,
+  "lambda_risk5_minus_p95bar": -0.008012263746568049,
+  "lambda_floor_publish_first": 0.9138270633254324,
+  "lambda_speed_gate": 0.9674684694454245,
+  "p95_private_bar": 0.9780112973731208,
+  "sigma_draw": 7.390974474817942,
+  "mu_safe_fresh": 512.15707117161,
+  "draw_model": {
+    "law": "private_draw(lambda) ~ Normal(mu=private_mean(lambda), sigma=sigma_draw)",
+    "clear_event": "private_draw >= 500",
+    "p_clear": "Phi((private_mean(lambda) - 500) / sigma_draw)",
+    "risk": "1 - P(clears 500 | lambda)",
+    "sigma_draw": 7.390974474817942,
+    "f_priv_assumed": 0.969106920637722,
+    "f_priv_grounded": 0.9570535584491102
+  },
+  "import_banked": {
+    "private_mean_curve_src": "kanna #228 publish_first_lambda_floor (module import)",
+    "sigma_draw_src": "kanna #217 trigger_reconcile (vgovdrjc)",
+    "p95_lcb_bar_src": "stark #191 private_build_bar (lambda_star_lcb_private)",
+    "f_priv_grounded_src": "kanna #224 private_bar_reachability (1081oc84)",
+    "speed_gate_src": "ubel #229 speed_margin_at_validity_bar (bz2b3fw8, both-bugs worstcase)",
+    "k_cal": 125.26795005202914,
+    "step_int4": 1.2182,
+    "et_lambda1": 5.206954309441966,
+    "f_priv": 0.969106920637722,
+    "f_priv_grounded": 0.9570535584491102,
+    "sigma_draw": 7.390974474817942,
+    "mu_safe_fresh": 512.15707117161,
+    "private_central_lambda1": 518.891835191882,
+    "lambda_star_lcb_private_191": 0.9780112973731208,
+    "lambda_star_central_private_191": 0.9138270633254315
+  },
+  "accepted_risk_curve": {
+    "topology": "both_bugs",
+    "sigma_draw": 7.390974474817942,
+    "rows": [
+      {
+        "name": "floor",
+        "lambda": 0.9138270633254324,
+        "private_mean_assumed": 500.0000000000001,
+        "p_clear_assumed": 0.5000000000000061,
+        "risk_assumed": 0.4999999999999939,
+        "private_mean_grounded": 493.7812010563913,
+        "p_clear_grounded": 0.20006069173160979,
+        "risk_grounded": 0.7999393082683902,
+        "regime": "publish_first_go_p95_hold",
+        "construction_note": "mean==500 -> coin-flip (the strongest anchor; risk==0.5 by construction)"
+      },
+      {
+        "name": "0.9500",
+        "lambda": 0.95,
+        "private_mean_assumed": 507.76222836669075,
+        "p_clear_assumed": 0.8531939731973428,
+        "risk_assumed": 0.1468060268026572,
+        "private_mean_grounded": 501.44688594794826,
+        "p_clear_grounded": 0.5776025144136521,
+        "risk_grounded": 0.42239748558634793,
+        "regime": "publish_first_go_p95_hold",
+        "construction_note": "interior of the publish-first band (mean>500, single-draw risk held)"
+      },
+      {
+        "name": "speed_gate",
+        "lambda": 0.9674684694454245,
+        "private_mean_assumed": 511.5968341958821,
+        "p_clear_assumed": 0.9416822605458353,
+        "risk_assumed": 0.05831773945416474,
+        "private_mean_grounded": 505.23379849178014,
+        "p_clear_grounded": 0.7605688995764195,
+        "risk_grounded": 0.2394311004235805,
+        "regime": "publish_first_go_p95_hold",
+        "construction_note": "OPERATIVE public launch lambda (ubel #229); risk entailed by #124 launch"
+      },
+      {
+        "name": "p95_bar",
+        "lambda": 0.9780112973731208,
+        "private_mean_assumed": 513.9388738669445,
+        "p_clear_assumed": 0.9703479278502205,
+        "risk_assumed": 0.029652072149779496,
+        "private_mean_grounded": 507.54670881517796,
+        "p_clear_grounded": 0.8463895709370579,
+        "risk_grounded": 0.1536104290629421,
+        "regime": "both_clear",
+        "construction_note": "stark #191 LCB-on-lambda bar; draw-risk here is SMALLER than 5% (over-protect)"
+      },
+      {
+        "name": "0.9970",
+        "lambda": 0.997,
+        "private_mean_assumed": 518.2105936764171,
+        "p_clear_assumed": 0.9931282040424673,
+        "risk_assumed": 0.006871795957532734,
+        "private_mean_grounded": 511.7652986913735,
+        "p_clear_grounded": 0.944290428489237,
+        "risk_grounded": 0.055709571510762945,
+        "regime": "both_clear",
+        "construction_note": "near the lambda=1 spine; private mean ~518.2"
+      },
+      {
+        "name": "1.0000",
+        "lambda": 1.0,
+        "private_mean_assumed": 518.8918351918821,
+        "p_clear_assumed": 0.9947068823559917,
+        "risk_assumed": 0.005293117644008305,
+        "private_mean_grounded": 512.438067198805,
+        "p_clear_grounded": 0.9538001054279254,
+        "risk_grounded": 0.04619989457207463,
+        "regime": "both_clear",
+        "construction_note": "lambda=1 spine; private mean == #228 anchor 518.892"
+      }
+    ]
+  },
+  "reconcile_0p9780": {
+    "lambda_risk5": 0.9699990336265527,
+    "lambda_risk5_minus_p95bar": -0.008012263746568049,
+    "p95_lcb_on_lambda_bar": 0.9780112973731208,
+    "mu_at_lambda_risk5": 512.1570711716101,
+    "mu_safe_fresh": 512.15707117161,
+    "lambda_risk5_roundtrips_mu_safe": 1.1368683772161603e-13,
+    "risk_at_p95_bar": 0.029652072149779496,
+    "table": [
+      {
+        "lambda": 0.9138270633254324,
+        "construction": "draw-risk floor (mean==500)",
+        "private_mean": 500.0000000000001,
+        "p_clears_500": 0.5000000000000061,
+        "risk": 0.4999999999999939,
+        "note": "central mean touches 500 -> coin-flip draw-risk"
+      },
+      {
+        "lambda": 0.9699990336265527,
+        "construction": "draw-clears-500 at 95% (risk==0.05)",
+        "private_mean": 512.1570711716101,
+        "p_clears_500": 0.9500000000000013,
+        "risk": 0.04999999999999871,
+        "note": "central mean == mu_safe_fresh 512.157 == 500 + z1*sigma_draw"
+      },
+      {
+        "lambda": 0.9780112973731208,
+        "construction": "LCB-on-lambda bar (stark #191)",
+        "private_mean": 513.9388738669445,
+        "p_clears_500": 0.9703479278502205,
+        "risk": 0.029652072149779496,
+        "note": "lambda whose PUBLIC-LCB private mean reaches 500; draw-risk here < 0.05"
+      }
+    ],
+    "operative_construction": "draw_risk",
+    "verdict": "The two 0.9780 constructions are NOT the same object. stark #191's lambda_star_lcb_private=0.978011 is the LCB-ON-LAMBDA bar: the lambda whose private mean computed at the PUBLIC LCB (520.953, a ~14 TPS haircut below the central 535.433) reaches 500 -- a conservative PRE-REGISTRATION that discounts public sampling uncertainty. The draw-clears-500-at-95% lambda is lambda_risk5=0.969999 (central mean == mu_safe_fresh 512.157 == 500 + z1*sigma_draw), which sits -0.008012 BELOW the LCB-bar. Equivalently, at the 0.9780 LCB-bar the actual single-draw risk is only 0.0297 (< 0.05) because the LCB-bar over-protects relative to the private-draw sigma. OPERATIVE for the human's #124 decision is the draw-risk risk(lambda) (the chance the actual private draw fails its bar); the LCB-bar is the conservative pre-registration."
+  },
+  "robustness": {
+    "f_priv_axis": {
+      "accepted_risk_at_speed_gate_assumed": 0.05831773945416474,
+      "accepted_risk_at_speed_gate_grounded": 0.2394311004235805,
+      "accepted_risk_at_p95_assumed": 0.029652072149779496,
+      "accepted_risk_at_p95_grounded": 0.1536104290629421,
+      "floor_assumed": 0.9138270633254324,
+      "floor_grounded": 0.9432567135093388,
+      "grounded_curve_strictly_above_assumed": true,
+      "note": "f_priv=0.969107 is #217's tree-only multiplier; #224 GROUNDED it to 0.957054 from the one hard #52 paired draw. Lower f_priv -> lower private mean -> HIGHER risk at every lambda. At the operative speed gate the accepted risk roughly QUADRUPLES (0.058 -> 0.239) under grounding -- the dominant calibration sensitivity for the human's decision."
+    },
+    "sigma_sweep": {
+      "rows": [
+        {
+          "sigma_scale": 0.8,
+          "sigma_draw": 5.912779579854354,
+          "lambda_risk5": 0.9589767504736588,
+          "lambda_risk5_below_p95bar": true,
+          "accepted_risk_at_speed_gate": 0.024921036683491105,
+          "accepted_risk_at_p95": 0.00920133979837301
+        },
+        {
+          "sigma_scale": 1.0,
+          "sigma_draw": 7.390974474817942,
+          "lambda_risk5": 0.9699990336265527,
+          "lambda_risk5_below_p95bar": true,
+          "accepted_risk_at_speed_gate": 0.05831773945416474,
+          "accepted_risk_at_p95": 0.029652072149779496
+        },
+        {
+          "sigma_scale": 1.2,
+          "sigma_draw": 8.869169369781531,
+          "lambda_risk5": 0.9809188652622738,
+          "lambda_risk5_below_p95bar": false,
+          "accepted_risk_at_speed_gate": 0.09551391513252327,
+          "accepted_risk_at_p95": 0.05802053134054874
+        }
+      ],
+      "lambda_risk5_monotone_increasing_in_sigma": true,
+      "risk_at_speed_monotone_increasing_in_sigma": true,
+      "verdict_direction_stable": true,
+      "note": "Larger sigma_draw -> more single-draw spread -> higher risk at fixed lambda and a higher lambda needed to reach any fixed risk. The DIRECTION (risk up in sigma, lambda_risk5 up in sigma) is stable across +-20%. The 5%-risk lambda straddles the 0.9780 LCB-bar across the band (it exceeds it only at +20% sigma), so the speed-gate risk is near-5% and sigma-sensitive in MAGNITUDE but robust in ORDERING."
+    }
+  },
+  "self_test": {
+    "publishfirst_accepted_risk_self_test_passes": true,
+    "checks": {
+      "a_floor_is_coinflip": true,
+      "b_private_mean_roundtrips_228": true,
+      "c_p_clear_up_risk_down": true,
+      "d_risk_at_p95_small_below_5pct": true,
+      "e_grounded_above_assumed": true,
+      "f_lambda_risk5_roundtrips_mu_safe": true,
+      "g_sigma_sweep_direction_stable": true,
+      "h_nan_clean": true
+    },
+    "evidence": {
+      "a_mu_floor_resid": 1.1368683772161603e-13,
+      "a_p_clear_floor": 0.5000000000000061,
+      "b_anchor_resid": 1.1368683772161603e-13,
+      "b_mu_lambda1": 518.8918351918821,
+      "c_p_inc": true,
+      "c_risk_dec": true,
+      "d_risk_at_p95": 0.029652072149779496,
+      "e_risk_speed_assumed": 0.05831773945416474,
+      "e_risk_speed_grounded": 0.2394311004235805,
+      "f_lambda_risk5": 0.9699990336265527,
+      "f_mu_safe_resid": 1.1368683772161603e-13
+    },
+    "n_checks": 8
+  },
+  "handoff": "fern #231 + ubel #234 + Issue #124: under #124 publish-first, launching at the OPERATIVE public gate lambda=0.9675 (ubel #229) entails a private-draw fail-its-bar risk of accepted_risk_at_speed_gate=0.0583 (assumed f_priv) / 0.2394 (grounded #224 f_priv); the accepted-risk curve runs from ~0.50 at the 0.9138 floor (mean==500, coin-flip) to 0.0297 at the 0.9780 P95 LCB-bar. lambda_risk5=0.9700 (draw-risk==5%) reconciles the draw-risk construction with stark #191's LCB-on-lambda bar: it sits -0.0080 below 0.9780 because the LCB-bar discounts PUBLIC sampling uncertainty while the draw-risk only carries the PRIVATE single-draw sigma. So the human can weigh the TPS gain of a lower-lambda build against a QUANTIFIED private-draw risk, not a qualitative posture -- and should note the assumed/grounded f_priv gap roughly quadruples that risk at the operative gate.",
+  "scope": "LOCAL CPU-only analytic composition of the banked private-mean curve (#228) with the fresh private-draw sigma (#217) into the accepted-risk curve P(private draw fails 500 | built lambda). Takes NO official draws, authorizes none. BASELINE stays 481.53; adds 0 TPS; greedy/PPL untouched. Imports #228/#217/#191/#224/#229 VERBATIM; does NOT re-derive private_mean, sigma_draw, the f_priv worst-case BLEND (stark #233), or the integration (fern #231). The draw-risk DISTRIBUTION around the imported private-mean POINT is the only new object. Quantifies the qualitative 'accepted single-draw risk' of #124. NOT a launch.",
+  "public_evidence_used": [
+    "kanna #228 (publish_first_lambda_floor, MERGED `352ifoi8`): private_mean(lambda) central curve, lambda_floor_publish_first=0.913827, P95-bar 0.978011, f_priv=0.969107 -- the band endpoints this leg fills with a risk MAGNITUDE. Imported as a module (bit-exact).",
+    "kanna #217 (trigger_reconcile, MERGED `vgovdrjc`): sigma_draw=7.391 (fresh private-draw sigma), mu_safe_fresh=512.157 == 500 + z1*sigma_draw -- the draw-model sigma.",
+    "stark #191 (private_build_bar, MERGED): lambda_star_lcb_private=0.978011 (the LCB-on-lambda bar this leg reconciles against the draw-clears-500 probability).",
+    "kanna #224 (private_bar_reachability, MERGED `1081oc84`): grounded f_priv=0.957054 -- the calibration sensitivity axis (risk roughly quadruples at the speed gate under grounding).",
+    "ubel #229 (speed_margin_at_validity_bar, MERGED `bz2b3fw8`): lambda_speed_clears=0.9675 (both-bugs worstcase) -- the operative public launch gate under #124; the headline risk.",
+    "Issue #124 (publish-first green-light): launch on the POINT estimate, accept the draw risk -- this leg quantifies HOW MUCH risk that posture is."
+  ],
+  "method": "LOCAL CPU-only analytic composition over EXISTING MERGED legs (the #228 private-mean module + the #217/#191/#224/#229 banked scalars). No GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "peak_mem_mib": 28.671875,
+  "elapsed_s": 0.3406
+}
