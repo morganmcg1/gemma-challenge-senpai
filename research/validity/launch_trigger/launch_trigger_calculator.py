@@ -95,16 +95,40 @@ E_T_STAR_BOTH = V178.IMPORTED_BOTH_BUGS_5p2070    # 5.206954309441963
 # v over-accept noise floor (wirbel #170 trustworthy region: v<=v_tol is greedy-exact).
 V_TOL = 1.52587890625e-05
 
-# Dependency provenance / degrade flags (PR step 5e).
+# Dependency provenance / degrade flags (PR step 5e). RE-RUN (advisor 17:27Z + 17:52Z): the launch-CI
+# numerical axes #190/#191/#188/#187, the #189 packaging gate, #194 re-draw budget AND ubel #195
+# cross-axis covariance have ALL MERGED; the ledger now reads their REAL banked scalars, the binding
+# bar RECOMPOSES, and the combined single-shot sigma DE-DUPS (the 4-axis quadrature was invalid). The
+# iid placeholder is superseded and the ledger is now CLOSED (no pending numerical axes).
 DEP_FLAGS = {
-    "denken_183_margin_aware_lambda_card": "LANDED -- CONSUMED. The binding build-gate bar "
-        "lambda*_LCB is read from #183's REAL card (lambda_star_lcb): both-bugs 0.9052 (tau=1) "
-        "/ 0.9234 (tau=0.9924), descent-only 0.9750 / 0.9926. #178's central point bar "
-        "(0.838/0.909) is the flagged-INACTIVE looser reference only.",
-    "ubel_181_tau_pin": "IN-FLIGHT (not landed) -- tau band [tau_low, 1.0] from stark #164 used; "
-        "the conservative tau=0.9924 corner is reported as the #181 stand-in floor.",
-    "wirbel_184_lambda_robust_topology": "IN-FLIGHT (not landed) -- named as the gap-fallback "
-        "restoration lever; the contingency topology itself is not yet importable.",
+    "denken_183_margin_aware_lambda_card": "LANDED -- CONSUMED. #183's REAL card (lambda_star_lcb) "
+        "supplies the PUBLIC iid leg: both-bugs 0.9052 (tau=1) / 0.9234 (tau=0.9924), descent 0.9750 "
+        "/ 0.9926. Post-recompose this is the visible iid-fallback, NOT the binding bar; #178's "
+        "central point bar (0.838/0.909) stays flagged-INACTIVE (looser reference only).",
+    "launch_ci_axes_190_191_188_187": "LANDED -- CONSUMED. wirbel #190 (realistic within-prompt "
+        "ICC=0.145 -> half-width iid +-10.9 -> realistic +-22.9, build bar 0.9513), stark #191 "
+        "(private adverse-skew bar 0.9780, DOMINATES; descent private LCB 490.16<500 -> UNREACHABLE), "
+        "kanna #188 (sigma_oneshot=4.86 confirms #159), denken #187 (input-side lambda_built CI "
+        "+-0.017, 89%% overlap). binding_bar = max(0.9052, 0.9513, 0.9780) = 0.9780 (private, "
+        "both-bugs); descent UNREACHABLE.",
+    "executable_submission_gate_ubel_189": "LANDED -- CONSUMED as a precondition. Faithful "
+        "device-vectorized relocate build -> GO; auto-catches the row-1 relocate-as-host-Python-loop "
+        "trap (banked 444.92 TPS, ~85%% cost). MUST be re-verified against land #71's real build.",
+    "redraw_budget_kanna_194": "LANDED -- CONSUMED (informational). best-of-N official re-draw "
+        "budget N* for P(clear-500)>=0.95; sizes the launch, NOT a binding_bar axis. (Landed at "
+        "advisor branch 96e9b25, after the 17:27Z comment named it WIP.)",
+    "cross_axis_covariance_ubel_195": "LANDED -- CONSUMED (advisor 17:52Z). The 4-axis quadrature is "
+        "INVALID: rho(sampling#175, input-lambda#187) = +0.945 -> a DOUBLE-COUNT (overlap=rho^2=0.893; "
+        "OUTPUT accept-length scatter and INPUT lambda_hat CI are two views of the SAME accept draw). "
+        "FIX: de-dup A1+A2 into ONE acceptance axis (overlap-corrected 5.32 TPS) -> 3 independent axes "
+        "-> combined single-shot sigma = 7.26 TPS central / 17.04 TPS PSD-clamped worst-case (NOT the "
+        "invalid quadrature 12.54). Carry the 17.04 worst-case as the conservative GO/NO-GO corner "
+        "until land #71 co-logs per-allocation acceptance. de-dup LCB 519.58 AND worst-case LCB 507.05 "
+        "BOTH clear 500 -> both-bugs robust on the sigma axis. Ledger CLOSED.",
+    "ubel_181_tau_pin": "LANDED (advisor branch) -- the tau band [tau_low, 1.0] floor (stark #164) "
+        "with the conservative tau=0.9924 corner; referenced as the floor, not a banked ledger axis.",
+    "wirbel_184_lambda_robust_topology": "LANDED (advisor branch) -- named as the gap-fallback "
+        "restoration lever; not consumed as a banked ledger axis by this calculator.",
 }
 
 
@@ -197,132 +221,485 @@ _M = _Machinery()
 
 
 # ----------------------------------------------------------------------------------------- #
-# LAUNCH-CI LEDGER (advisor #185 update 2026-06-14T16:53Z): the launch CI fractured into FOUR
-# orthogonal numerical noise axes + one hard packaging precondition. Build the ledger to ingest
-# each as a TYPED row so the final GO/NO-GO recomposes when they land. Do NOT hardcode the iid
-# +-10.9 / public-0.9052 bar: carry `binding_bar = max(public #183, ICC-refined #190, private
-# #191)` and a composed half-width that folds the independent axes in quadrature. Every in-flight
-# axis (#190/#187/#188/#191) and the packaging gate (#189) is NOT yet landed -> each row runs in
-# flagged `iid-fallback` / `pending`, and the ledger reproduces the #183/#179 numbers exactly.
+# LAUNCH-CI LEDGER (advisor #185 updates 16:53Z + 17:27Z): the launch CI fractured into orthogonal
+# numerical noise axes + one hard packaging precondition. Each is a TYPED row so the verdict
+# recomposes as axes land. Do NOT hardcode the iid +-10.9 / public-0.9052 bar: carry
+# `binding_bar = max(public #183, ICC-refined #190, private #191)` and a composed half-width.
+#
+# RE-RUN STATE (advisor 17:27Z + 17:52Z, 2026-06-14): #190 (ICC), #191 (private), #189 (packaging),
+# #188 (sigma-oneshot), #187 (input-side), #194 (re-draw budget) AND #195 (cross-axis covariance)
+# have ALL MERGED -> each row reads its REAL banked scalar from the merged module's results.json
+# (consumed, NOT the iid placeholder). The binding both-bugs bar is now the PRIVATE bar 0.9780
+# (dominates 0.9052 public / 0.9513 ICC), the sampling half-width is the realistic +-22.9 (ICC=0.145),
+# not the iid +-10.9. #195 proved the 4-axis quadrature INVALID (rho(sampling,input)=0.945 double-
+# count) -> de-dup into ONE acceptance axis -> combined single-shot sigma 7.26 central / 17.04 worst-
+# case (the conservative GO/NO-GO corner). The ledger is now CLOSED: no pending numerical axes.
 # ----------------------------------------------------------------------------------------- #
-def _try_load_axis(name: str, relpath: str):
-    """Best-effort import of an in-flight axis module; None if not landed (-> fallback). The
-    conventional paths below do not exist yet, so every axis degrades to its flagged fallback;
-    when an axis lands at its path, the loader consumes it and the ledger recomposes."""
+def _load_axis_json(relpath: str):
+    """Read a merged axis's banked results.json from the working tree. None if absent (-> fallback);
+    when an axis lands at its path, the ledger consumes its banked scalars and recomposes."""
     path = os.path.join(REPO_ROOT, relpath)
     if not os.path.exists(path):
         return None
     try:
-        return _load(name, relpath)
+        with open(path) as fh:
+            return json.load(fh)
     except Exception:                       # noqa: BLE001
         return None
 
 
+def _dig(d: Any, *path: str, default: Any = None) -> Any:
+    """Safe nested-dict getter; returns `default` if any key is missing or a leaf is hit early."""
+    cur = d
+    for k in path:
+        if not isinstance(cur, dict) or k not in cur:
+            return default
+        cur = cur[k]
+    return cur
+
+
+# REAL merged-axis result paths (all landed on the advisor branch this cycle, #195 included).
+_AXIS_PATHS = {
+    "icc_190": "research/validity/icc_neff/icc_neff_results.json",
+    "private_191": "research/validity/private_build_bar/results.json",
+    "oneshot_188": "research/validity/oneshot_hw_bound/oneshot_hw_bound_results.json",
+    "lambda_built_187": "research/validity/lambda_built_ci/lambda_built_ci_results.json",
+    "redraw_194": "research/validity/redraw_budget/redraw_budget_results.json",
+    "packaging_189": "research/spec_cost_model/executable_submission_gate/executable_submission_gate.json",
+    # ubel #195 cross-axis CI covariance -- MERGED this turn (advisor 17:52Z): the 4-axis quadrature
+    # is INVALID (rho(sampling,input)=0.945 double-count); consume the de-dup'd combined sigma.
+    "covariance_195": "research/validity/ci_axis_covariance/ci_axis_covariance_results.json",
+}
+
+
+class _BankedAxes:
+    """Reads the REAL banked scalars from each merged axis's results.json (advisor 17:27Z + 17:52Z:
+    the iid placeholder is superseded). #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side,
+    #189 packaging, #194 re-draw budget AND #195 cross-axis covariance are ALL consumed; the ledger
+    is CLOSED (the #195 de-dup proved the 4-axis quadrature invalid -> combined sigma 7.26/17.04)."""
+    def __init__(self) -> None:
+        self.icc = _load_axis_json(_AXIS_PATHS["icc_190"])
+        self.private = _load_axis_json(_AXIS_PATHS["private_191"])
+        self.oneshot = _load_axis_json(_AXIS_PATHS["oneshot_188"])
+        self.lambda_built = _load_axis_json(_AXIS_PATHS["lambda_built_187"])
+        self.redraw = _load_axis_json(_AXIS_PATHS["redraw_194"])
+        self.packaging = _load_axis_json(_AXIS_PATHS["packaging_189"])
+        self.covariance = _load_axis_json(_AXIS_PATHS["covariance_195"])
+
+    # ---- wirbel #190 realistic within-prompt ICC / N_eff ---- #
+    def icc_landed(self) -> bool:
+        return self.icc is not None
+
+    def halfwidth_iid(self) -> float:
+        return float(_dig(self.icc, "realistic_ci", "halfwidth_iid_tps",
+                          default=V183.WIRBEL_HALFWIDTH_BOTH_BUGS))
+
+    def halfwidth_realistic(self) -> float | None:
+        v = _dig(self.icc, "realistic_ci", "halfwidth_realistic_tps")
+        return float(v) if v is not None else None
+
+    def icc_bar(self) -> float | None:
+        v = _dig(self.icc, "build_bar", "lambda_star_lcb_realistic_icc")
+        return float(v) if v is not None else None
+
+    def icc_hat(self) -> float | None:
+        v = _dig(self.icc, "icc_estimate", "icc_hat")
+        return float(v) if v is not None else None
+
+    def design_effect(self) -> float | None:
+        v = _dig(self.icc, "realistic_ci", "design_effect_hat")
+        return float(v) if v is not None else None
+
+    def realistic_launch_lcb(self, topo: str) -> float | None:
+        key = "bothbugs_hat" if topo == "both_bugs" else "descent_hat"
+        v = _dig(self.icc, "go_robustness", "section4", key, "lcb_tps")
+        return float(v) if v is not None else None
+
+    def realistic_launch_clears(self, topo: str) -> bool:
+        key = "bothbugs_hat" if topo == "both_bugs" else "descent_hat"
+        return bool(_dig(self.icc, "go_robustness", "section4", key, "lcb_clears_500", default=False))
+
+    # ---- stark #191 private-side build bar ---- #
+    def private_landed(self) -> bool:
+        return self.private is not None
+
+    def private_bar(self, topo: str):
+        h = _dig(self.private, "synthesis", "headline", default={}) or {}
+        if topo == "both_bugs":
+            v = h.get("lambda_star_lcb_private_both")
+        else:
+            v = h.get("lambda_star_lcb_private_descent")  # null => UNREACHABLE at full recovery
+        return float(v) if v is not None else None
+
+    def private_valid_at_bar(self) -> bool:
+        return bool(_dig(self.private, "synthesis", "headline", "valid_at_bar", default=False))
+
+    def descent_private_lcb_lambda1(self) -> float | None:
+        m = _dig(self.private, "synthesis", "headline", "descent_private_lcb_margin_at_lambda1")
+        return (TARGET_OFFICIAL + float(m)) if m is not None else None  # margin is vs 500
+
+    def both_required_at_private_bar(self) -> bool:
+        return bool(_dig(self.private, "synthesis", "headline",
+                         "both_bugs_required_at_private_bar", default=False))
+
+    def private_drop_pct(self) -> float | None:
+        v = _dig(self.private, "synthesis", "headline", "private_drop_at_bar_pct")
+        return float(v) if v is not None else None
+
+    # ---- kanna #188 one-shot hardware bound ---- #
+    def oneshot_landed(self) -> bool:
+        return self.oneshot is not None
+
+    def sigma_oneshot(self) -> float:
+        return float(_dig(self.oneshot, "sigma_oneshot", default=V183.SIGMA_HW))
+
+    # ---- denken #187 lambda_hat_built measurement-CI (input-side) ---- #
+    def lambda_built_landed(self) -> bool:
+        return self.lambda_built is not None
+
+    def lambda_built_halfwidth(self) -> float:
+        return float(_dig(self.lambda_built, "synthesis", "lambda_built_ci",
+                          "lambda_built_halfwidth", default=0.0))
+
+    def lambda_built_overlap(self) -> float | None:
+        v = _dig(self.lambda_built, "synthesis", "input_output_compose", "overlap_fraction")
+        return float(v) if v is not None else None
+
+    # ---- kanna #194 official re-draw budget N* ---- #
+    def redraw_landed(self) -> bool:
+        return self.redraw is not None
+
+    def n_shots_at_bar(self):
+        return _dig(self.redraw, "n_shots_for_p95_at_bar")
+
+    def n_shots_at_lambda1(self):
+        return _dig(self.redraw, "n_shots_for_p95_at_lambda1")
+
+    # ---- ubel #195 cross-axis CI covariance (MERGED 17:52Z: quadrature INVALID, de-dup) ---- #
+    def covariance_landed(self) -> bool:
+        return self.covariance is not None
+
+    def quadrature_valid(self) -> bool:
+        # False: rho(sampling,input-lambda)=0.945 is a double-count, not an independent axis.
+        return bool(_dig(self.covariance, "combined", "quadrature_valid", default=True))
+
+    def combined_sigma(self, kind: str) -> float | None:
+        """The combined single-shot sigma (TPS). kind: 'quadrature' (naive, INVALID),
+        'corrected' (full additive law incl the +rho double-count term -- the inflate artifact),
+        'worstcase' (PSD-clamped, hardware<->acceptance coupling bounded), 'dedup' (PHYSICALLY-
+        CORRECT: collapse sampling+input into ONE acceptance axis -> 3 independent axes)."""
+        if kind == "dedup":
+            v = _dig(self.covariance, "combined", "dedup_reading", "combined_sigma_dedup_tps")
+        else:
+            v = _dig(self.covariance, "combined", "combined_sigma_%s" % kind)
+        return float(v) if v is not None else None
+
+    def dedup_acceptance_block(self) -> float | None:
+        v = _dig(self.covariance, "combined", "dedup_reading", "overlap_corrected_sampling_block_tps")
+        return float(v) if v is not None else None
+
+    def rho_sampling_input(self) -> float | None:
+        v = _dig(self.covariance, "rho", "pairs", "sampling__input_lambda", "rho_central")
+        return float(v) if v is not None else None
+
+    def overlap_fraction_input_output(self) -> float | None:
+        v = _dig(self.covariance, "axis_sigmas", "input_lambda", "overlap_fraction")
+        return float(v) if v is not None else None
+
+    def combined_z_p90(self) -> float:
+        return float(_dig(self.covariance, "combined", "z_p90_one_sided", default=Z_P90))
+
+    def combined_proj_private_both(self) -> float | None:
+        v = _dig(self.covariance, "combined", "proj_private_tps_both")
+        return float(v) if v is not None else None
+
+    def lcb_shift_worstcase(self) -> float | None:
+        v = _dig(self.covariance, "combined", "lcb_shift_worstcase_tps")
+        return float(v) if v is not None else None
+
+    def icc1_corner_sigma(self, kind: str) -> float | None:
+        v = _dig(self.covariance, "combined", "icc1_corner", "combined_sigma_%s_icc1" % kind)
+        return float(v) if v is not None else None
+
+    def combined_launch_lcb(self, kind: str) -> float | None:
+        """proj_private_central - z_p90 * combined_sigma(kind). The de-dup central is the BEST
+        estimate; the worst-case is the conservative GO/NO-GO corner (advisor 17:52Z)."""
+        central = self.combined_proj_private_both()
+        sig = self.combined_sigma(kind)
+        if central is None or sig is None:
+            return None
+        return float(central - self.combined_z_p90() * sig)
+
+    # ---- ubel #189 executable submission gate (packaging precondition) ---- #
+    def packaging_landed(self) -> bool:
+        return self.packaging is not None
+
+    def packaging_go_verdict(self) -> str | None:
+        return _dig(self.packaging, "worked_go_example", "packaging_verdict")
+
+    def packaging_trap(self) -> dict:
+        bf = _dig(self.packaging, "worked_nogo_example", "binding_failure", default={}) or {}
+        return {"flag": bf.get("flag"), "banked_cost_tps": bf.get("banked_cost_tps")}
+
+
+_BANKED = _BankedAxes()
+
+
 def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
-    """The numerical launch-CI axes as typed rows. Axis 0 (wirbel #175 iid sampling) is LANDED
-    and is the fallback baseline; axes #190/#187/#188/#191 are IN-FLIGHT -> flagged fallback."""
+    """The numerical launch-CI axes as typed rows. RE-RUN (advisor 17:27Z + 17:52Z): #190/#187/#188/
+    #191/#194 AND #195 have all MERGED -> each reads its REAL banked scalar (consumed); the ledger is
+    now CLOSED (no pending axes). The iid #175 leg is the visible `iid-fallback` baseline. ubel #195
+    proved the 4-axis quadrature INVALID: rho(sampling#175,input#187)=0.945 is a DOUBLE-COUNT, so the
+    two are collapsed into ONE acceptance axis -> de-dup combined sigma 7.26 / worst-case 17.04."""
     public_bar = _M.lambda_star_lcb_183(topo, tau)          # #183 iid public bar (#175 (+) #159)
     rows = []
 
-    # Axis 0 -- wirbel #175 iid sampling leg (LANDED): the +-10.906 numerator, a LOWER bound.
+    # Axis 0 -- wirbel #175 iid sampling leg (LANDED): the +-10.906 numerator -- now the visible
+    #           iid-fallback baseline (a LOWER bound; superseded as binding by #190's realistic ICC).
     rows.append({
         "axis": "sampling_iid", "pr": 175, "slug": "et-second-moment", "kind": "numerical",
-        "status": "LANDED", "flag": "consumed",
-        "halfwidth_tps_iid": (V183.WIRBEL_HALFWIDTH_BOTH_BUGS if topo == "both_bugs" else None),
-        "note": "iid +-10.906 numerator leg (B=16384); a LOWER bound on the true half-width.",
+        "status": "LANDED", "flag": "iid-fallback-visible",
+        "halfwidth_tps_iid": _BANKED.halfwidth_iid(),
+        "double_count_with": "input_lambda_built",
+        "rho_with_input_lambda": (_finite(_BANKED.rho_sampling_input())
+                                  if _BANKED.covariance_landed() else None),
+        "note": "iid +-10.906 OUTPUT-side numerator leg (B=16384); a LOWER bound. ubel #195: rho=0.945 "
+                "correlated with #187's INPUT-side lambda_hat CI (SAME accept draw) -> the two are "
+                "COLLAPSED into ONE acceptance axis (5.32 TPS), NOT quadrature-summed. The BINDING "
+                "sampling half-width is #190's realistic +-22.9.",
     })
-    # Axis 1 -- wirbel #190 icc-neff-launch-ci (IN-FLIGHT): realistic within-prompt ICC shrinks
-    #           N_eff and RAISES the bar. iid +-10.9 is a LOWER bound. Fallback = iid public bar.
-    m190 = _try_load_axis("icc_neff_launch_ci",
-                          "research/oracle_readout/icc_neff_launch_ci/icc_neff_launch_ci.py")
+    # Axis 1 -- wirbel #190 icc-neff (MERGED, CONSUMED): realistic within-prompt ICC shrinks N_eff,
+    #           inflates the half-width iid->realistic and RAISES the bar 0.9052->0.9513.
+    icc_ok = _BANKED.icc_landed()
+    icc_bar_val = _BANKED.icc_bar() if (icc_ok and topo == "both_bugs") else public_bar
     rows.append({
         "axis": "sampling_icc", "pr": 190, "slug": "icc-neff-launch-ci", "kind": "numerical",
-        "status": "LANDED" if m190 else "IN-FLIGHT",
-        "flag": "consumed" if m190 else "iid-fallback",
-        "lambda_bar": public_bar,    # fallback; when landed -> lambda_star_lcb_realistic_icc
-        "expected_when_landed": "halfwidth_realistic + lambda_star_lcb_realistic_icc (>= iid bar)",
-        "note": "iid +-10.9 is a LOWER bound (ICC=1 -> N_eff 128->54.9 -> LCB 480.5 FLIPS); "
-                "consume the correlation-refined bar (stricter-or-equal) when #190 lands.",
+        "status": "LANDED" if icc_ok else "IN-FLIGHT",
+        "flag": "consumed" if icc_ok else "iid-fallback",
+        "lambda_bar": _finite(icc_bar_val) if icc_bar_val is not None else None,
+        "halfwidth_realistic_tps": _BANKED.halfwidth_realistic() if icc_ok else None,
+        "halfwidth_iid_tps": _BANKED.halfwidth_iid(),
+        "icc_hat": _BANKED.icc_hat() if icc_ok else None,
+        "design_effect": _BANKED.design_effect() if icc_ok else None,
+        "realistic_launch_lcb_tps": _BANKED.realistic_launch_lcb(topo) if icc_ok else None,
+        "realistic_launch_clears_500": _BANKED.realistic_launch_clears(topo) if icc_ok else None,
+        "note": "iid +-10.9 was a LOWER bound; realistic ICC=%.4f -> half-width +-%.2f (Deff=%.2f). "
+                "both-bugs ICC bar 0.9513; descent's realistic launch-LCB MISSES 500." % (
+                    _BANKED.icc_hat() or float("nan"), _BANKED.halfwidth_realistic() or float("nan"),
+                    _BANKED.design_effect() or float("nan")) if icc_ok else "iid-fallback (not landed).",
     })
-    # Axis 2 -- denken #187 lambda-built-ci (IN-FLIGHT): INPUT-side -- how tightly land #71's
-    #           measured q[2..9] resolves the bar. Fallback = point lambda_hat (0 input CI).
-    m187 = _try_load_axis("lambda_built_ci",
-                          "research/oracle_readout/lambda_built_ci/lambda_built_ci.py")
+    # Axis 2 -- denken #187 lambda-built-ci (MERGED, CONSUMED): INPUT-side resolvability of the bar.
+    l187 = _BANKED.lambda_built_landed()
     rows.append({
         "axis": "input_lambda_built", "pr": 187, "slug": "lambda-built-ci", "kind": "numerical",
-        "status": "LANDED" if m187 else "IN-FLIGHT",
-        "flag": "consumed" if m187 else "pending-input-ci",
-        "lambda_built_halfwidth": 0.0,    # fallback: point estimate, no input-side CI
-        "expected_when_landed": "lambda_built_halfwidth (dual of #175's output-side TPS CI)",
-        "note": "input-side CI on lambda_hat_built; widens the effective bar margin when landed.",
+        "status": "LANDED" if l187 else "IN-FLIGHT",
+        "flag": "consumed" if l187 else "pending-input-ci",
+        "lambda_built_halfwidth": _BANKED.lambda_built_halfwidth() if l187 else 0.0,
+        "overlap_fraction_with_175": _BANKED.lambda_built_overlap() if l187 else None,
+        "double_count_with": "sampling_iid",
+        "rho_with_sampling": (_finite(_BANKED.rho_sampling_input())
+                              if (l187 and _BANKED.covariance_landed()) else None),
+        "note": "INPUT-side CI on lambda_hat_built +-%.4f (89%% overlap with #175's OUTPUT-side). "
+                "ubel #195: rho=0.945 (overlap=rho^2) -> a DOUBLE-COUNT, NOT an independent axis; "
+                "collapsed with #175 into the acceptance axis (5.32 TPS). on-bar builds are "
+                "measurement-unresolvable, so land #71 should build with margin." % (
+                    _BANKED.lambda_built_halfwidth() if l187 else 0.0),
     })
-    # Axis 3 -- kanna #188 oneshot-hw-bound (IN-FLIGHT): is sigma_hw=4.86 right for a SINGLE
-    #           launch draw? Fallback = sigma_hw 4.86 (#159).
-    m188 = _try_load_axis("oneshot_hw_bound",
-                          "research/oracle_readout/oneshot_hw_bound/oneshot_hw_bound.py")
+    # Axis 3 -- kanna #188 oneshot-hw-bound (MERGED, CONSUMED): sigma_hw=4.86 confirmed correct for a
+    #           SINGLE launch draw (within-run (+) between-device/thermal reproduces 4.86).
+    o188 = _BANKED.oneshot_landed()
     rows.append({
         "axis": "hardware_oneshot", "pr": 188, "slug": "oneshot-hw-bound", "kind": "numerical",
-        "status": "LANDED" if m188 else "IN-FLIGHT",
-        "flag": "consumed" if m188 else "oneshot-fallback",
-        "sigma_tps": V183.SIGMA_HW,       # fallback: kanna #159 sigma_hw 4.86
-        "expected_when_landed": "sigma_oneshot (within-run vs between-device/thermal decomposition)",
-        "note": "composed in quadrature with the sampling leg; fallback uses #159 sigma_hw=4.86.",
+        "status": "LANDED" if o188 else "IN-FLIGHT",
+        "flag": "consumed" if o188 else "oneshot-fallback",
+        "sigma_tps": _BANKED.sigma_oneshot() if o188 else V183.SIGMA_HW,
+        "note": "sigma_oneshot=%.3f confirms #159's sigma_hw=4.86 IS the right single-draw sigma. "
+                "ubel #195: the 3rd INDEPENDENT axis (after the de-dup'd acceptance axis) -> folds "
+                "with acceptance to the combined sigma 7.26 (central) / 17.04 (worst-case, hw-coupling "
+                "bounded). The hw<->acceptance coupling is UNMEASURED (within-device only)." % (
+                    _BANKED.sigma_oneshot() if o188 else V183.SIGMA_HW),
     })
-    # Axis 4 -- stark #191 private-build-bar (IN-FLIGHT): PRIVATE-side bar via #176 adverse-skew
-    #           drop (2.300% descent) through #183's forward map. Fallback = public bar.
-    m191 = _try_load_axis("private_build_bar",
-                          "research/oracle_readout/private_build_bar/private_build_bar.py")
+    # Axis 4 -- stark #191 private-build-bar (MERGED, CONSUMED): PRIVATE-side bar via #176 adverse-skew
+    #           drop through #183's forward map. both-bugs 0.9780 (DOMINATES); descent UNREACHABLE.
+    p191 = _BANKED.private_landed()
+    priv_bar_val = _BANKED.private_bar(topo) if p191 else public_bar
     rows.append({
         "axis": "private_bar", "pr": 191, "slug": "private-build-bar", "kind": "numerical",
-        "status": "LANDED" if m191 else "IN-FLIGHT",
-        "flag": "consumed" if m191 else "public-fallback",
-        "lambda_bar": public_bar,    # fallback; when landed -> lambda_star_lcb_private
-        "expected_when_landed": "lambda_star_lcb_private + valid_at_bar (may exceed public 0.9052)",
-        "note": "private adverse-skew drop may demand a STRICTER bar than public; max()'d into binding_bar.",
+        "status": "LANDED" if p191 else "IN-FLIGHT",
+        "flag": "consumed" if p191 else "public-fallback",
+        "lambda_bar": _finite(priv_bar_val) if priv_bar_val is not None else None,
+        "private_unreachable": bool(p191 and topo != "both_bugs" and priv_bar_val is None),
+        "valid_at_bar": _BANKED.private_valid_at_bar() if p191 else None,
+        "private_drop_pct": _BANKED.private_drop_pct() if p191 else None,
+        "descent_private_lcb_at_lambda1": (_BANKED.descent_private_lcb_lambda1()
+                                           if (p191 and topo != "both_bugs") else None),
+        "note": ("private adverse-skew bar 0.9780 (both-bugs) DOMINATES public 0.9052 + ICC 0.9513 "
+                 "-> binding. descent's private LCB tops out at 490.16<500 even at lambda=1 -> "
+                 "UNREACHABLE (both_bugs_required_at_private_bar=True).") if p191 else "public-fallback.",
+    })
+    # Axis 5 -- kanna #194 official re-draw budget N* (MERGED, CONSUMED): informational best-of-N
+    #           shot budget; does NOT enter binding_bar (it sizes the launch, not the bar).
+    r194 = _BANKED.redraw_landed()
+    rows.append({
+        "axis": "redraw_budget", "pr": 194, "slug": "redraw-budget", "kind": "numerical-budget",
+        "status": "LANDED" if r194 else "IN-FLIGHT",
+        "flag": "consumed" if r194 else "single-shot-fallback",
+        "n_shots_for_p95_at_bar": _BANKED.n_shots_at_bar() if r194 else None,
+        "n_shots_for_p95_at_lambda1": _BANKED.n_shots_at_lambda1() if r194 else None,
+        "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=%s at the build bar, "
+                "%s at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. "
+                "(landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)." % (
+                    _BANKED.n_shots_at_bar(), _BANKED.n_shots_at_lambda1()) if r194
+                else "single-shot fallback (N=1).",
+    })
+    # Axis 6 -- ubel #195 cross-axis CI covariance (MERGED 17:52Z, CONSUMED): the quadrature is
+    #           INVALID -- rho(sampling,input-lambda)=0.945 is a DOUBLE-COUNT. De-dup -> combined
+    #           sigma 7.26 central / 17.04 worst-case. This row CLOSES the ledger (no pending axes).
+    c195 = _BANKED.covariance_landed()
+    csc = combined_sigma_corner()
+    rows.append({
+        "axis": "cross_axis_covariance", "pr": 195, "slug": "ci-axis-covariance",
+        "kind": "numerical-covariance",
+        "status": "LANDED" if c195 else "IN-FLIGHT",
+        "flag": "consumed" if c195 else "pending-covariance",
+        "quadrature_valid": (csc.get("quadrature_valid") if c195 else None),
+        "rho_sampling_input": (csc.get("rho_sampling_input") if c195 else None),
+        "sigma_quadrature_invalid_tps": (csc.get("sigma_quadrature_invalid_tps") if c195 else None),
+        "sigma_dedup_central_tps": (csc.get("sigma_dedup_central_tps") if c195 else None),
+        "sigma_worstcase_tps": (csc.get("sigma_worstcase_tps") if c195 else None),
+        "acceptance_dedup_block_tps": (csc.get("acceptance_dedup_block_tps") if c195 else None),
+        "launch_lcb_dedup_central_tps": (csc.get("launch_lcb_dedup_central_tps") if c195 else None),
+        "launch_lcb_worstcase_tps": (csc.get("launch_lcb_worstcase_tps") if c195 else None),
+        "worstcase_corner_clears_500": (csc.get("worstcase_corner_clears_500") if c195 else None),
+        "note": ("quadrature INVALID: rho(sampling#175,input#187)=0.945 double-count -> collapse to "
+                 "ONE acceptance axis (5.32 TPS) -> 3 independent axes -> de-dup combined sigma 7.26 "
+                 "(NOT quadrature 12.54 / inflate 15.26). PSD-clamped worst-case 17.04 (hw-coupling "
+                 "UNMEASURED, bounded). de-dup launch-LCB %.2f AND worst-case %.2f BOTH clear 500 -> "
+                 "both-bugs robust on the sigma-axis. CLOSES the ledger." % (
+                     csc.get("launch_lcb_dedup_central_tps") or float("nan"),
+                     csc.get("launch_lcb_worstcase_tps") or float("nan"))) if c195
+                else "not landed -> assume independence (quadrature); conservative until it lands.",
     })
     return rows
 
 
 def binding_bar(topo: str, tau: float = TAU_HEADLINE) -> dict:
-    """binding_bar = max(public #183, ICC-refined #190, private #191). Every in-flight axis falls
-    back to the public iid bar, so in fallback binding_bar == the #183 public bar (0.9052 both /
-    0.9750 descent at tau=1). When #190/#191 land, this can only get stricter."""
+    """binding_bar = max(public #183, ICC-refined #190, private #191). RE-RUN (advisor 17:27Z):
+    #190/#191 LANDED, so for both-bugs binding_bar = private 0.9780 (DOMINATES 0.9052 public /
+    0.9513 ICC). For descent the private bar is UNREACHABLE (no lambda<=1 clears 500) -> binding
+    is UNREACHABLE -> descent NO-GO on the build side. The iid 0.9052 is the visible fallback only."""
     ledger = numerical_ci_ledger(topo, tau)
     public = _M.lambda_star_lcb_183(topo, tau)
     icc_row = next(r for r in ledger if r["axis"] == "sampling_icc")
     priv_row = next(r for r in ledger if r["axis"] == "private_bar")
-    icc, private = icc_row["lambda_bar"], priv_row["lambda_bar"]
-    bar = max(public, icc, private)
-    if abs(bar - icc) < 1e-12 and icc_row["flag"] == "consumed" and icc > public + 1e-12:
-        source = "icc_190"
-    elif abs(bar - private) < 1e-12 and priv_row["flag"] == "consumed" and private > public + 1e-12:
-        source = "private_191"
+    icc = icc_row["lambda_bar"]
+    private = priv_row["lambda_bar"]
+    private_unreachable = bool(priv_row.get("private_unreachable"))
+
+    candidates = [("public_183", public), ("icc_190", icc), ("private_191", private)]
+    finite = [(s, v) for s, v in candidates if v is not None and math.isfinite(v)]
+    if private_unreachable:
+        # descent: private LCB never reaches 500 -> the bar does not exist -> UNREACHABLE.
+        bar = float("inf")
+        source = "private_191_UNREACHABLE"
     else:
-        source = "public_183" + ("_iid_fallback" if icc_row["flag"] != "consumed" else "")
+        source, bar = max(finite, key=lambda kv: kv[1])
+    icc_consumed = icc_row["flag"] == "consumed"
+    priv_consumed = priv_row["flag"] == "consumed"
+    binding_is_iid_fallback = bool(source == "public_183" and not icc_consumed and not priv_consumed)
     return {
-        "binding_bar": _finite(bar), "public_183": _finite(public),
-        "icc_190": _finite(icc), "private_191": _finite(private),
+        # UNREACHABLE -> None (NaN/inf-clean); the boolean flag + source string carry the meaning.
+        "binding_bar": (None if private_unreachable else _finite(bar)),
+        "binding_bar_unreachable": private_unreachable,
+        "public_183": _finite(public),
+        "icc_190": (_finite(icc) if icc is not None else None),
+        "private_191": (_finite(private) if private is not None else None),
         "binding_source": source,
         "icc_flag": icc_row["flag"], "private_flag": priv_row["flag"],
-        "any_iid_fallback_active": bool(icc_row["flag"] != "consumed"
-                                        or priv_row["flag"] != "consumed"),
+        "binding_is_iid_fallback": binding_is_iid_fallback,
+        # post-recompose: the binding bar is the REAL private bar (or UNREACHABLE), not the iid placeholder.
+        "any_iid_fallback_active": binding_is_iid_fallback,
     }
 
 
 def composed_lcb(lam: float, topo: str, tau: float = TAU_HEADLINE) -> float:
-    """Composed finite-sample LCB at lambda = central - z*sqrt(SUM independent axis halfwidths^2).
-    In all-fallback this is exactly #183's lcb_full (iid sampling #175 (+) sigma_hw #159); when
-    #190 (ICC), #188 (sigma_oneshot), #187 (input-side) land, the quadrature inflates here."""
+    """The #183 BUILD-gate composed LCB at lambda = central - z*sqrt(SE_tps^2 + sigma_hw^2) (iid
+    sampling #175 (+) sigma_hw #159, confirmed one-shot by #188). This is the BUILD-side LCB that
+    crosses 500 at lambda*_LCB; distinct from the #179/#190 LAUNCH-projection LCB (realistic ICC)."""
     return _finite(_M.metrics_183(lam, topo, tau)["lcb_full_tps"])
+
+
+def realistic_launch_lcb(topo: str) -> dict:
+    """The #179 LAUNCH-projection cell-LCB recomposed under #190's realistic +-22.9 ICC half-width
+    (advisor 17:27Z: report the launch LCB under +-22.9, not iid +-10.9). Consumes #190's banked
+    go_robustness section-4 LCB at full recovery (the launch operating point). Returns the binding
+    realistic LCB + the iid-fallback cell-LCB for the visible optimistic leg."""
+    rl = _BANKED.realistic_launch_lcb(topo)
+    return {
+        "realistic_lcb_tps": _finite(rl) if rl is not None else None,
+        "realistic_clears_500": _BANKED.realistic_launch_clears(topo),
+        "halfwidth_realistic_tps": _BANKED.halfwidth_realistic(),
+        "halfwidth_iid_tps": _BANKED.halfwidth_iid(),
+        "landed": _BANKED.icc_landed(),
+    }
+
+
+def combined_sigma_corner() -> dict:
+    """ubel #195 (MERGED 17:52Z): the 4-axis quadrature is INVALID because rho(sampling#175,
+    input-lambda#187)=0.945 -- the OUTPUT accepted-length scatter and the INPUT lambda_hat CI are
+    two views of the SAME accept draw (overlap_fraction=0.893=rho^2). Quadrature-summing both
+    DOUBLE-COUNTS. PHYSICALLY-CORRECT fix: collapse them into ONE acceptance axis at the
+    overlap-corrected 5.32 TPS -> 3 independent axes -> de-dup central combined sigma 7.26 TPS
+    (NOT the quadrature 12.54, NOT the +rho-inflated 15.26). The hardware<->acceptance coupling is
+    UNMEASURED (only within-device co-log, sigma_within=0.056 << sigma_between=4.86) -> bounded
+    [-0.3,+0.3] -> PSD-clamped worst-case 17.04 TPS, carried as the CONSERVATIVE GO/NO-GO corner.
+    Both the de-dup central AND the worst-case launch LCBs clear 500 -> both-bugs robust on the
+    sigma-axis. (both-bugs only: #195 banked proj_private_both; descent is already NO-GO via #191.)"""
+    if not _BANKED.covariance_landed():
+        return {"landed": False, "note": "ci_axis_covariance #195 not landed -> assume independence "
+                                         "(quadrature); conservative until it lands."}
+    lcb_dedup = _BANKED.combined_launch_lcb("dedup")
+    lcb_worst = _BANKED.combined_launch_lcb("worstcase")
+    return {
+        "landed": True,
+        "quadrature_valid": _BANKED.quadrature_valid(),                       # False
+        "rho_sampling_input": _finite(_BANKED.rho_sampling_input()),          # 0.945 double-count
+        "overlap_fraction": _finite(_BANKED.overlap_fraction_input_output()),  # 0.893 = rho^2
+        "sigma_quadrature_invalid_tps": _finite(_BANKED.combined_sigma("quadrature")),   # 12.54
+        "sigma_corrected_inflate_artifact_tps": _finite(_BANKED.combined_sigma("corrected")),  # 15.26
+        "sigma_dedup_central_tps": _finite(_BANKED.combined_sigma("dedup")),  # 7.26 (BEST)
+        "sigma_worstcase_tps": _finite(_BANKED.combined_sigma("worstcase")),  # 17.04 (corner)
+        "acceptance_dedup_block_tps": _finite(_BANKED.dedup_acceptance_block()),  # 5.32
+        "proj_private_central_both_tps": _finite(_BANKED.combined_proj_private_both()),  # 528.89
+        "z_p90": _finite(_BANKED.combined_z_p90()),
+        "launch_lcb_dedup_central_tps": _finite(lcb_dedup) if lcb_dedup is not None else None,
+        "launch_lcb_worstcase_tps": _finite(lcb_worst) if lcb_worst is not None else None,
+        "dedup_central_clears_500": bool(lcb_dedup is not None and lcb_dedup >= TARGET_OFFICIAL - 1e-9),
+        "worstcase_corner_clears_500": bool(lcb_worst is not None and lcb_worst >= TARGET_OFFICIAL - 1e-9),
+        "sampling_spread_basis": "iid +-10.9 centrally (ubel); the ICC-inflated +-22.9 (#190) feeds "
+                                 "the SEPARATE #190 launch-projection gate; ICC=1 corner (sigma "
+                                 "57.8/59.7) reported as the extreme scenario, not the central.",
+        "icc1_corner_sigma_worstcase_tps": _finite(_BANKED.icc1_corner_sigma("worstcase")),  # 59.7 scenario
+        "note": "quadrature INVALID (rho=0.945 double-count); de-dup central sigma 7.26 -> launch LCB "
+                "%.2f; PSD-clamped worst-case sigma 17.04 -> launch LCB %.2f. BOTH clear 500 -> "
+                "both-bugs GO robust on the sigma-axis. Worst-case is the conservative corner until "
+                "land #71's served draw co-logs per-allocation acceptance alongside TPS (pins "
+                "rho(*,hw))." % (
+                    lcb_dedup if lcb_dedup is not None else float("nan"),
+                    lcb_worst if lcb_worst is not None else float("nan")),
+    }
 
 
 def precondition_ledger(build_lambda_ok: bool, build_topo: str) -> list[dict]:
     """Hard precondition rows (kind=precondition). Any NO-GO blocks an ACTUAL launch even if the
-    composed-LCB clears. Operational rows (PRECACHE serve-config, #189 packaging gate, human
-    approval) are PENDING for a pre-launch calculator run -> launch_authorized stays False."""
-    m189 = _try_load_axis(
-        "executable_submission_gate",
-        "research/oracle_readout/executable_submission_gate/executable_submission_gate.py")
+    composed-LCB clears. RE-RUN (advisor 17:27Z): ubel #189's executable packaging gate has MERGED
+    -> consume its real GO verdict + failing-flag + banked cost-of-omission (the row-1 host-loop trap
+    = 444.92 TPS), replacing the PENDING stub. Operational rows (PRECACHE serve-config, the gate's
+    re-verification against land #71's REAL build introspection, human approval) keep the launch
+    UN-authorized for a pre-launch run -> launch_authorized stays False."""
+    p189 = _BANKED.packaging_landed()
+    pkg_go = _BANKED.packaging_go_verdict()                  # "GO" for a faithful build (worked example)
+    trap = _BANKED.packaging_trap()                          # host-loop binding failure + banked cost
     return [
         {"row": "boot_fix_kanna_177", "pr": 177, "kind": "precondition", "status": "GO",
          "flag": "landed", "note": "darwin _IncludedRouter boot-validation startup-500 fix; "
@@ -331,14 +708,22 @@ def precondition_ledger(build_lambda_ok: bool, build_topo: str) -> list[dict]:
          "flag": "serve-config",
          "note": "PRECACHE_BENCH=1 must be set on the served path at launch."},
         {"row": "executable_submission_gate_ubel_189", "pr": 189, "kind": "precondition",
-         "status": "GO" if m189 else "PENDING",
-         "flag": "consumed" if m189 else "pending-packaging",
-         "expected_when_landed": "verify_submission_gate(build_env, introspection) -> GO/NO-GO "
-                                 "+ failing flag + banked cost (row-1 relocate-host-loop = 85% TPS)",
-         "note": "packaging precondition; UNVERIFIED until #189 lands -> blocks an actual launch."},
+         # CONSUMED: the verifier exists. For a faithful both-bugs build the gate returns GO; it
+         # must be RE-RUN against land #71's real introspection at launch (auto-catches the trap).
+         "status": (pkg_go or "PENDING") if p189 else "PENDING",
+         "flag": "consumed" if p189 else "pending-packaging",
+         "verifier_landed": bool(p189),
+         "faithful_build_verdict": pkg_go,
+         "banked_trap_flag": trap.get("flag"),
+         "banked_trap_cost_tps": trap.get("banked_cost_tps"),
+         "note": "EXECUTABLE gate consumed (pqpb8ugk): a faithful device-vectorized relocate build -> "
+                 "GO; auto-catches the row-1 relocate-as-host-Python-loop trap (banked %s TPS, ~85%% "
+                 "cost). MUST be re-verified against land #71's REAL build introspection at launch." % (
+                     ("%.2f" % trap["banked_cost_tps"]) if trap.get("banked_cost_tps") else "n/a")},
         {"row": "build_lambda_geq_binding_bar", "pr": 71, "kind": "precondition",
          "status": "GO" if build_lambda_ok else "NO-GO", "flag": "measured",
-         "note": "land #71's measured lambda_hat_built >= binding_bar for topology %s." % build_topo},
+         "note": "land #71's measured lambda_hat_built >= binding_bar (%s) for topology %s." % (
+             "0.9780 private" if build_topo == "both_bugs" else "UNREACHABLE", build_topo)},
         {"row": "human_approval", "kind": "precondition", "status": "PENDING", "flag": "human-gate",
          "note": "a human must approve the filed `Approval request: HF job` issue before any spend."},
     ]
@@ -481,22 +866,59 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
     proj = project_topology(E_T, topo, step, 1.0, tau_low, validity)
 
     # ---- BUILD-gate: lambda_hat_built >= binding_bar = max(public#183, ICC#190, private#191) ----
-    bbar = binding_bar(topo, TAU_HEADLINE)                             # ledger-composed bar
-    lam_star_lcb_hi = bbar["binding_bar"]                             # 0.9052 both / 0.9750 desc (fallback)
-    lam_star_lcb_lo = _M.lambda_star_lcb_183(topo, TAU_CONSERVATIVE)  # 0.9234 / 0.9926 (tau floor)
+    # RE-RUN (advisor 17:27Z): both-bugs binding = PRIVATE 0.9780 (dominates 0.9052 public / 0.9513
+    # ICC); descent binding = UNREACHABLE (private LCB never reaches 500). The #183 public bar is the
+    # visible iid-fallback only.
+    bbar = binding_bar(topo, TAU_HEADLINE)
+    binding_bar_val = bbar["binding_bar"]                            # 0.9780 both / inf descent
+    binding_unreachable = bool(bbar["binding_bar_unreachable"])      # False both / True descent
+    public_bar = _M.lambda_star_lcb_183(topo, TAU_HEADLINE)         # 0.9052 both / 0.9750 desc (iid-fallback)
+    icc_bar = bbar["icc_190"]                                       # 0.9513 both
+    lam_star_lcb_lo = _M.lambda_star_lcb_183(topo, TAU_CONSERVATIVE)  # tau floor
     lam_central_178 = _M.lambda_star_central_178(topo, TAU_HEADLINE)  # 0.8384 / 0.9091 (INACTIVE)
-    build_gate_pass = bool(math.isfinite(lam_star_lcb_hi)
-                           and lam_built >= lam_star_lcb_hi - 1e-9)
-    build_gate_pass_cons = bool(math.isfinite(lam_star_lcb_lo)
-                                and lam_built >= lam_star_lcb_lo - 1e-9)
-    # composed build-LCB at the measured lambda (the bar's own LCB, for the divergence readout).
-    build_lcb_at_lam = composed_lcb(lam_built, topo, TAU_HEADLINE)
+    # The visible iid-fallback "build-acceptable" check (descent clears 0.9750) AND the BINDING
+    # private build gate (descent UNREACHABLE).
+    public_build_gate_pass = bool(math.isfinite(public_bar) and lam_built >= public_bar - 1e-9)
+    binding_build_gate_pass = bool((not binding_unreachable) and binding_bar_val is not None
+                                   and math.isfinite(binding_bar_val)
+                                   and lam_built >= binding_bar_val - 1e-9)
+    build_gate_pass_cons = bool(math.isfinite(lam_star_lcb_lo) and lam_built >= lam_star_lcb_lo - 1e-9)
+    build_lcb_at_lam = composed_lcb(lam_built, topo, TAU_HEADLINE)   # #183 build-LCB (divergence readout)
 
-    # ---- #179 LAUNCH-projection cell-LCB gate (unchanged integrator) ----
-    clear500_lcb_pass = bool(proj["lcb_p90"] >= TARGET_OFFICIAL - 1e-9)
+    # ---- LAUNCH-projection LCB under the REALISTIC +-22.9 ICC half-width (#190), NOT iid +-10.9 ----
+    rl = realistic_launch_lcb(topo)                                  # 510.63 both / 495.04 descent
+    realistic_lcb = rl["realistic_lcb_tps"]
+    realistic_launch_pass = bool(rl["realistic_clears_500"])         # both True, descent False
+    iid_cell_lcb = proj["lcb_p90"]                                   # 514.88 both / 499.97 desc (iid-fallback)
 
-    # ---- overall per-topology GO: validity AND trustworthy AND both LCB gates ----
-    go = bool(validity_ok and oa["trustworthy"] and build_gate_pass and clear500_lcb_pass)
+    # ---- PRIVATE launch LCB (#191): both-bugs valid_at_bar; descent UNREACHABLE (490.16<500) ----
+    if topo == "both_bugs":
+        private_launch_lcb = None                                    # valid (>=500) at the private bar
+        private_launch_pass = bool(_BANKED.private_valid_at_bar())   # True
+    else:
+        private_launch_lcb = _BANKED.descent_private_lcb_lambda1()   # 490.16
+        private_launch_pass = bool(private_launch_lcb is not None
+                                   and private_launch_lcb >= TARGET_OFFICIAL - 1e-9)  # False
+
+    # ---- combined single-shot sigma corner (#195 ubel, advisor 17:52Z): the 4-axis quadrature is
+    #      INVALID (rho(sampling#175, input-lambda#187)=+0.945 double-count). De-dup A1+A2 into ONE
+    #      acceptance axis -> 3 independent axes -> combined sigma 7.26 central / 17.04 PSD-clamped
+    #      worst-case. Carry the 17.04 worst-case as the conservative GO/NO-GO corner. both-bugs only
+    #      (#195 banks proj_private_both=528.886); descent is already NO-GO via #191 so the corner is
+    #      non-binding there. ----
+    if topo == "both_bugs":
+        csc = combined_sigma_corner()
+        combined_sigma_worstcase_clears = (
+            bool(csc.get("worstcase_corner_clears_500", True)) if csc.get("landed") else True)
+    else:
+        csc = None
+        combined_sigma_worstcase_clears = True
+
+    # ---- overall per-topology GO: validity AND trustworthy AND binding-build AND BOTH launch LCBs
+    #      AND the conservative combined-sigma worst-case corner (#195). ----
+    go = bool(validity_ok and oa["trustworthy"] and binding_build_gate_pass
+              and realistic_launch_pass and private_launch_pass
+              and combined_sigma_worstcase_clears)
 
     # Failing-gate diagnosis + restoration lever (PR step 4).
     failing_gate, restoration = None, None
@@ -507,27 +929,52 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
         failing_gate = "over-accept (#170): E[T] is NOT greedy-trustworthy"
         restoration = ("measured speedup is illusory (region=%s); re-bench under greedy-exact "
                        "decode before reading E[T] as headroom." % oa["region"])
-    elif not build_gate_pass:
-        in_gap = bool(math.isfinite(lam_central_178) and lam_built >= lam_central_178 - 1e-9)
-        failing_gate = ("lambda-acceptance build-gate (#183): lambda_hat_built=%.4f < "
-                        "lambda*_LCB=%.4f" % (lam_built, lam_star_lcb_hi))
-        if in_gap:
-            restoration = ("lambda_hat_built clears the INACTIVE #178 central bar %.4f but sits "
-                           "in the GAP below #183's margin-aware bar %.4f -> fall back to wirbel "
-                           "#184's lambda-robust contingency topology, or ship #154 argmax-only "
-                           "decode (+3.96 TPS LCB)." % (lam_central_178, lam_star_lcb_hi))
+    elif binding_unreachable or not binding_build_gate_pass:
+        if binding_unreachable:
+            failing_gate = ("binding build-gate (#191 private): PRIVATE-UNREACHABLE -- the adverse-"
+                            "skew private LCB tops out at %.2f<500 even at lambda=1, so NO lambda<=1 "
+                            "clears the private bar (both_bugs_required_at_private_bar=True). The "
+                            "build clears the #183 public bar %.4f (iid-fallback) but that is "
+                            "superseded by the private bar." % (
+                                private_launch_lcb if private_launch_lcb is not None else float("nan"),
+                                public_bar))
+            restoration = ("ship #154 argmax-only decode (realizes step 1.2047, lifts the projection) "
+                           "OR land the both-bugs kernel (the robust GO path). descent-only is "
+                           "private-UNREACHABLE under the adverse-skew bar -- not a thin miss.")
         else:
-            restoration = ("recover deeper self-KV: lambda_hat_built=%.4f is below even the #178 "
-                           "central bar %.4f; the spine has not risen enough (cause-#2 starvation)."
-                           % (lam_built, lam_central_178))
-    elif not clear500_lcb_pass:
-        failing_gate = ("clear-500 launch-projection LCB (#179): cell-LCB(P>=0.9)=%.2f < 500 "
-                        "(build-gate PASSED at lambda*_LCB=%.4f -- a build-acceptable kernel that "
-                        "still misses the private-drop launch projection)" % (proj["lcb_p90"],
-                                                                              lam_star_lcb_hi))
-        restoration = ("ship #154 argmax-only decode (+3.96 TPS LCB -> realizable) or land the "
-                       "both-bugs kernel; descent-only is a knife-edge launch miss at the shipped "
-                       "step even though it clears the #183 build bar.")
+            in_gap = bool(math.isfinite(lam_central_178) and lam_built >= lam_central_178 - 1e-9)
+            failing_gate = ("binding build-gate (#191 private): lambda_hat_built=%.4f < binding_bar="
+                            "%.4f (private; dominates ICC 0.9513 / public 0.9052)" % (
+                                lam_built, binding_bar_val))
+            restoration = (("lambda_hat_built clears the iid-fallback public bar %.4f but sits below "
+                            "the BINDING private bar %.4f -> recover deeper self-KV or ship #154." % (
+                                public_bar, binding_bar_val)) if in_gap else
+                           ("recover deeper self-KV: lambda_hat_built=%.4f is below the binding bar "
+                            "%.4f." % (lam_built, binding_bar_val)))
+    elif not realistic_launch_pass:
+        failing_gate = ("clear-500 launch-projection LCB under realistic ICC (#190): LCB=%.2f<500 at "
+                        "the realistic +-%.2f half-width (the iid +-%.2f LCB %.2f was optimistic). "
+                        "Binding build-gate PASSED -- a build-acceptable kernel that misses the "
+                        "correlation-refined launch projection." % (
+                            realistic_lcb, rl["halfwidth_realistic_tps"], rl["halfwidth_iid_tps"],
+                            iid_cell_lcb))
+        restoration = ("ship #154 argmax-only decode (realizes step 1.2047) or land the both-bugs "
+                       "kernel; this path misses once within-prompt correlation widens the CI.")
+    elif not private_launch_pass:
+        failing_gate = ("clear-500 launch-projection LCB on the PRIVATE axis (#191): private LCB=%.2f"
+                        "<500 even at lambda=1." % (
+                            private_launch_lcb if private_launch_lcb is not None else float("nan")))
+        restoration = "land the both-bugs kernel (the robust GO path); this path is private-unreachable."
+    elif not combined_sigma_worstcase_clears:
+        _wc = (csc or {}).get("launch_lcb_worstcase_tps")
+        failing_gate = ("combined-sigma worst-case corner (#195): de-dup'd launch LCB=%.2f<500 at the "
+                        "PSD-clamped worst-case sigma %.2f TPS (hardware<->acceptance coupling "
+                        "unmeasured, bounded [-0.3,+0.3]). The de-dup central corner (sigma 7.26) "
+                        "clears, but the conservative worst-case does not." % (
+                            _wc if _wc is not None else float("nan"),
+                            (csc or {}).get("sigma_worstcase_tps", float("nan"))))
+        restoration = ("land #71's per-allocation co-logged acceptance to measure the hardware<->"
+                       "acceptance coupling and lift the worst-case clamp off [-0.3,+0.3].")
 
     return {
         "topo": topo,
@@ -538,20 +985,47 @@ def _topology_verdict(topo: str, E_T: float, lam_built: float, t: dict, step: fl
         "lambda_gate": {
             "lambda_hat_built": _finite(lam_built),
             "binding_bar": bbar,                                            # max(public,ICC,private)
-            "lambda_star_lcb_183_headline": _finite(lam_star_lcb_hi),       # BINDING (tau=1, = binding_bar)
+            "binding_bar_value": (None if binding_unreachable else _finite(binding_bar_val)),
+            "binding_bar_unreachable": binding_unreachable,
+            "binding_source": bbar["binding_source"],                       # private_191 (both)
+            "public_bar_183_iid_fallback": _finite(public_bar),             # 0.9052 / 0.9750 (visible only)
+            "icc_bar_190": (_finite(icc_bar) if icc_bar is not None else None),  # 0.9513 (both)
             "lambda_star_lcb_183_conservative": _finite(lam_star_lcb_lo),   # tau=0.9924
             "lambda_star_central_178_INACTIVE": _finite(lam_central_178),   # looser reference only
-            "build_gate_pass": build_gate_pass,
+            "public_build_gate_pass": public_build_gate_pass,              # descent clears the iid-fallback
+            "build_gate_pass": binding_build_gate_pass,                    # BINDING (private) build gate
             "build_gate_pass_conservative": build_gate_pass_cons,
             "build_lcb_at_lambda_built": build_lcb_at_lam,
-            "clear500_launch_lcb_pass": clear500_lcb_pass,
+            # launch-projection LCBs: realistic (binding) + iid cell (fallback) + private.
+            "realistic_launch_lcb_tps": _finite(realistic_lcb) if realistic_lcb is not None else None,
+            "realistic_launch_clears_500": realistic_launch_pass,
+            "halfwidth_realistic_tps": _finite(rl["halfwidth_realistic_tps"]),
+            "halfwidth_iid_tps": _finite(rl["halfwidth_iid_tps"]),
+            "iid_cell_lcb_p90_fallback": _finite(iid_cell_lcb),            # 514.88 / 499.97 (optimistic)
+            "private_launch_lcb_tps": (_finite(private_launch_lcb)
+                                       if private_launch_lcb is not None else None),
+            "private_launch_clears_500": private_launch_pass,
+            "clear500_launch_lcb_pass": bool(realistic_launch_pass and private_launch_pass),
+            # combined single-shot sigma corner (#195): de-dup'd 3-axis sigma; worst-case is the
+            # conservative GO/NO-GO corner. both-bugs only (csc is None on descent).
+            "combined_sigma_corner": csc,
+            "combined_sigma_worstcase_clears_500": combined_sigma_worstcase_clears,
             "numerical_ci_ledger": numerical_ci_ledger(topo, TAU_HEADLINE),
-            "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190, "
-                            "private#191); in-flight axes -> iid-fallback. STRICTER than #178 central.",
+            "binding_rule": "lambda_hat_built >= binding_bar = max(public#183 0.9052, ICC#190 0.9513, "
+                            "private#191 0.9780) = 0.9780 (private, both-bugs); descent private bar "
+                            "UNREACHABLE. AND launch-projection LCB >= 500 under realistic +-22.9 (#190) "
+                            "AND on the private axis (#191).",
             "two_lcb_divergence": (
-                "composed build-LCB (#175(+)#159, axes 1-4) and #179 launch cell-LCB cross 500 at "
-                "DIFFERENT lambda; build_gate=%s, launch_lcb_gate=%s" % (build_gate_pass,
-                                                                         clear500_lcb_pass)),
+                "BUILD gate (binding private bar) and LAUNCH-projection LCB (realistic ICC + private) "
+                "are DIFFERENT bars. both-bugs clears all (robust GO). descent clears the iid-fallback "
+                "public build bar (%.4f) but is private-UNREACHABLE on the build side AND misses the "
+                "realistic (%.2f) and private (%.2f) launch LCBs -> NO-GO, doubly hardened. "
+                "public_build=%s binding_build=%s realistic_launch=%s private_launch=%s" % (
+                    public_bar,
+                    realistic_lcb if realistic_lcb is not None else float("nan"),
+                    private_launch_lcb if private_launch_lcb is not None else float("nan"),
+                    public_build_gate_pass, binding_build_gate_pass, realistic_launch_pass,
+                    private_launch_pass)),
         },
         "failing_gate": failing_gate,
         "restoration_lever": restoration,
@@ -606,10 +1080,12 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
 
     # ---- lambda_gate_logic (PR step 3 report) ----
     lambda_gate_logic = {
-        "rule": "per-topology GO iff lambda_hat_built >= lambda*_LCB(topo, tau=1) [#183 REAL "
-                "card BUILD-gate: both-bugs 0.9052 / descent 0.9750, STRICTER than #178's "
-                "central 0.838/0.909] AND #179 launch-projection cell-LCB(P>=0.9) >= 500. In "
-                "the gap [#178-central, #183-LCB) -> wirbel #184 contingency / #154 restore.",
+        "rule": "per-topology GO iff lambda_hat_built >= binding_bar(topo) = max(public#183, "
+                "ICC#190, private#191) [RECOMPOSED: both-bugs 0.9780 private (dominates 0.9052 "
+                "public / 0.9513 ICC); descent private-UNREACHABLE] AND the #179 launch-projection "
+                "cell-LCB(P>=0.9) >= 500 under the REALISTIC #190 +-22.9 half-width (not iid +-10.9) "
+                "AND on the #191 private axis. descent is doubly hardened NO-GO (UNREACHABLE build "
+                "bar + misses realistic 495.04 and private 490.16 launch LCBs) -> #154 / both-bugs.",
         "lambda_hat_built_from_ladder": _finite(lam_built),
         "ladder_inverse_per_depth": inv["per_depth"],
         "both_bugs": bb["lambda_gate"],
@@ -627,17 +1103,24 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
     bb_binding = binding_bar("both_bugs", TAU_HEADLINE)
     do_binding = binding_bar("descent_only", TAU_HEADLINE)
     headline_binding = bb_binding if headline == "both_bugs" else do_binding
-    build_lambda_ok = bool(math.isfinite(headline_binding["binding_bar"])
-                           and lam_built >= headline_binding["binding_bar"] - 1e-9)
+    _hb = headline_binding["binding_bar"]
+    build_lambda_ok = bool(_hb is not None and math.isfinite(_hb) and lam_built >= _hb - 1e-9)
     preconds = precondition_ledger(build_lambda_ok, headline)
     preconds_all_go = all(r["status"] == "GO" for r in preconds)
     # launch_authorized = analytic-GO AND every precondition GO. Operational rows (PRECACHE
-    # serve-config, #189 packaging, human approval) are PENDING pre-launch -> authorizes NOTHING.
+    # serve-config, #189 packaging re-verify, human approval) are PENDING pre-launch -> authorizes NOTHING.
     launch_authorized = bool(overall_go and preconds_all_go)
-    any_iid_fallback = bool(bb_binding["any_iid_fallback_active"]
-                            or any(r["flag"] != "consumed"
-                                   for r in numerical_ci_ledger("both_bugs", TAU_HEADLINE)
-                                   if r["axis"] != "sampling_iid"))
+    # RE-RUN: the binding bar is the REAL private bar (not the iid placeholder). ALL numerical axes
+    # (including ubel #195 cross-axis covariance) have landed -> the ledger is CLOSED, no pending axes.
+    # The iid #175 leg is a visible fallback row only, not a binding fallback.
+    bb_ledger = numerical_ci_ledger("both_bugs", TAU_HEADLINE)
+    pending_axes = [r["axis"] for r in bb_ledger
+                    if r["axis"] not in ("sampling_iid",) and r["flag"] != "consumed"]
+    ledger_closed = bool(len(pending_axes) == 0)
+    binding_on_iid_fallback = bool(bb_binding["binding_is_iid_fallback"])
+    any_iid_fallback = binding_on_iid_fallback                       # binding bar no longer iid -> False
+    # combined single-shot sigma corner (#195 de-dup): the conservative GO/NO-GO sigma reconciliation.
+    csc_ledger = combined_sigma_corner()
 
     out = {
         "verdict": verdict,
@@ -662,16 +1145,29 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
         "both_bugs_go_at_lambda_star": both_bugs_go_at_lambda_star,
         "binding_bar": {"both_bugs": bb_binding, "descent_only": do_binding},
         "launch_ci_ledger": {
-            "net_rule": "launch_authorized = (analytic GO: composed-LCB >= 500 at binding_bar "
-                        "AND validity AND over-accept) AND (all precondition rows GO). Numerical "
-                        "axes #190/#187/#188/#191 fold in quadrature; binding_bar = max(public#183, "
-                        "ICC#190, private#191). In-flight axes -> iid-fallback (flagged); the "
-                        "ledger recomposes when they land.",
-            "numerical_axes": {"both_bugs": numerical_ci_ledger("both_bugs", TAU_HEADLINE),
+            "net_rule": "launch_authorized = (analytic GO: realistic launch-LCB >= 500 at "
+                        "binding_bar AND validity AND over-accept AND combined-sigma worst-case "
+                        "corner >= 500) AND (all precondition rows GO). RECOMPOSED post-merge: "
+                        "binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780) = "
+                        "0.9780 (private#191 dominates, both-bugs); descent private is UNREACHABLE. "
+                        "Sampling half-width is the REALISTIC ICC#190 +/-22.9 TPS (design-effect "
+                        "%.4f over iid +/-10.9), NOT the iid placeholder. CLOSED post-#195: the "
+                        "4-axis quadrature was INVALID (rho(sampling,input)=0.945 double-count) -> "
+                        "de-dup'd combined single-shot sigma 7.26 central / 17.04 worst-case (the "
+                        "conservative corner), NOT quadrature 12.54. iid #175 leg kept as a visible "
+                        "fallback row only. NO pending numerical axes (ledger CLOSED)."
+                        % _BANKED.design_effect(),
+            "numerical_axes": {"both_bugs": bb_ledger,
                                "descent_only": numerical_ci_ledger("descent_only", TAU_HEADLINE)},
+            "combined_sigma_corner": csc_ledger,
             "preconditions": preconds,
             "preconditions_all_go": preconds_all_go,
             "any_iid_fallback_active": any_iid_fallback,
+            "binding_on_iid_fallback": binding_on_iid_fallback,
+            "pending_numerical_axes": pending_axes,
+            "sole_pending_axis": (pending_axes[0] if len(pending_axes) == 1 else None),
+            "all_binding_axes_landed": (not any_iid_fallback),
+            "ledger_closed": ledger_closed,
         },
         "launch_authorized": {
             "authorized": launch_authorized,
@@ -717,12 +1213,13 @@ def _card_monotone_183() -> bool:
 
 
 def _build_gate_at_lambda_star(topo: str) -> bool:
-    """TEST: the BUILD-gate verdict evaluated at EXACTLY this topology's binding_bar. In fallback
-    binding_bar == #183's lambda*_LCB; the composed-LCB == 500 there by construction and
-    lambda_hat_built == binding_bar, so the build-gate passes inclusively -> True (the advisor's
-    headline gate). Uses binding_bar so the metric stays correct when #190/#191 land (stricter)."""
+    """TEST: the BUILD-gate verdict evaluated at EXACTLY this topology's binding_bar. RECOMPOSED:
+    binding_bar = max(public#183, ICC#190, private#191) = 0.9780 (private, both-bugs). A build at
+    the bar inverts back to lambda_hat_built == binding_bar, so the build-gate passes inclusively
+    -> True. For descent binding_bar is None (UNREACHABLE) -> False (no lambda<=1 clears the private
+    bar). Uses binding_bar so the metric tracks the recomposition (private dominant)."""
     lam_star = binding_bar(topo, TAU_HEADLINE)["binding_bar"]
-    if not math.isfinite(lam_star):
+    if lam_star is None or not math.isfinite(lam_star):
         return False
     ladder = _M.canonical_ladder(lam_star, topo)
     lam_built = _M.lambda_built_from_ladder(ladder, topo)
@@ -749,8 +1246,9 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
     num_md = ["| axis | PR | status | flag | bar/value |", "|---|---|---|---|---|"]
     for r in led["numerical_axes"][h]:
         val = r.get("lambda_bar", r.get("sigma_tps", r.get("lambda_built_halfwidth",
-                    r.get("halfwidth_tps_iid"))))
-        val_s = ("%.4f" % val) if isinstance(val, (int, float)) else str(val)
+                    r.get("halfwidth_tps_iid", r.get("n_shots_for_p95_at_bar")))))
+        val_s = ("%.4f" % val) if isinstance(val, (int, float)) else (
+            str(val) if val is not None else "pending")
         num_md.append("| %s | #%s | %s | %s | %s |" % (
             r["axis"], r["pr"], r["status"], r["flag"], val_s))
     num_table = "\n".join(num_md)
@@ -771,15 +1269,18 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
 **Composition:** official = K_cal*(E[T]/step)*tau, K_cal={K_CAL:.5f}, tau in [{out['tau_band'][0]:.4f}, 1.0].
 clear-500 verdict ANDs TWO finite-sample lower bounds: (1) the BUILD-gate lambda_hat_built
 {lg['lambda_hat_built']:.4f} >= binding_bar {binding['binding_bar']:.4f}
-(= max(public#183 {binding['public_183']:.4f}, ICC#190, private#191); source {binding['binding_source']};
-STRICTER than #178's central 0.838 both / 0.909 descent), and (2) the #179 launch-projection
-cell-LCB(P>=0.9) >= 500. sigma_hw RETIRED on a separate hardware axis by best-of-2 official
+(= max(public#183 {binding['public_183']:.4f}, ICC#190 {binding['icc_190']:.4f}, private#191 {binding['private_191']:.4f});
+source {binding['binding_source']}; private#191 DOMINATES, STRICTER than #178's central 0.838), and
+(2) the #179 launch-projection cell-LCB(P>=0.9) >= 500 under the REALISTIC #190 +-{lg['halfwidth_realistic_tps']:.2f}
+ICC half-width (realistic launch-LCB {lg['realistic_launch_lcb_tps']:.2f} TPS; the optimistic iid
++-{lg['halfwidth_iid_tps']:.2f} cell-LCB {lg['iid_cell_lcb_p90_fallback']:.2f} is the visible fallback) AND
+clears the #191 private axis. sigma_hw RETIRED on a separate hardware axis by best-of-2 official
 draws (P={out['hardware_axis_sigma_hw']['best_of_2_p']:.4f}>=0.90).
 
 **Measured-tuple GO table:**
 {table_md}
 
-**Launch-CI ledger -- numerical axes (binding_bar = max; in-flight -> iid-fallback):**
+**Launch-CI ledger -- numerical axes (binding_bar = max; #190/#191/#188/#187/#194/#195 ALL CONSUMED; iid #175 leg visible; ledger CLOSED):**
 {num_table}
 
 **Launch-CI ledger -- hard precondition rows (any non-GO blocks the launch):**
@@ -798,9 +1299,11 @@ PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _Include
   - [BANKED] Hardware sigma_hw (#159): {_M.sigma_hw['sigma_hw_tps']:.2f} TPS; best-of-2 P={_M.sigma_hw['best_of_2']:.4f}.
   - [BANKED] Validity (#166/#124): PPL {out['validity']['ppl']:.3f}<=2.42; {out['validity']['pass_128']}/128; greedy-exact={out['validity']['greedy_exact']}.
   - [BANKED] Private drop (#164): tau-low {out['tau_band'][0]:.4f}.
-  - [BANKED] denken #183 margin-aware lambda-card: binding_bar {binding['binding_bar']:.4f} (tau=1) / {lg['lambda_star_lcb_183_conservative']:.4f} (tau=0.9924).
-  - [IN-FLIGHT] launch-CI axes #190 (ICC) / #187 (lambda-built-CI) / #188 (sigma-oneshot) / #191 (private-bar) -> iid-fallback until landed (bar can only get stricter).
-  - [IN-FLIGHT] ubel #189 executable-submission-gate (packaging precondition -- UNVERIFIED).
+  - [BANKED] denken #183 margin-aware lambda-card (PUBLIC iid leg): {binding['public_183']:.4f} (tau=1) / {lg['lambda_star_lcb_183_conservative']:.4f} (tau=0.9924).
+  - [LANDED-CONSUMED] launch-CI axes #190 (ICC bar {binding['icc_190']:.4f}, realistic +-{lg['halfwidth_realistic_tps']:.2f}) / #187 (lambda-built-CI) / #188 (sigma-oneshot) / #191 (private bar {binding['private_191']:.4f}, BINDING). binding_bar {binding['binding_bar']:.4f}.
+  - [LANDED-CONSUMED] kanna #194 re-draw budget N* (informational; sizes the launch, not the bar).
+  - [LANDED-CONSUMED] ubel #189 executable-submission-gate: faithful build -> GO; re-verify vs land #71 at launch.
+  - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined sigma 7.26 central / 17.04 worst-case (conservative corner); ledger CLOSED.
   - [PENDING-BUILD] land #71 measured tuple (THIS tuple).
 
 **Launch gates (ALL required):** (1) land #71 builds the {h} kernel; (2) darwin _IncludedRouter
@@ -817,8 +1320,9 @@ def render_nogo_restoration(out: dict, per_topo: dict) -> str:
                                           c["p_clear_500"], c["failing_gate"], c["restoration_lever"]))
     lines.append("")
     lines.append("No approval block emitted: at least the primary (both-bugs) path must clear "
-                 "BOTH the #183 build-gate (lambda_hat_built >= lambda*_LCB) AND the #179 "
-                 "launch-projection cell-LCB(P>=0.9) >= 500 for a robust GO.")
+                 "the BINDING build-gate (lambda_hat_built >= binding_bar = max(public#183, ICC#190, "
+                 "private#191 0.9780)) AND the launch-projection cell-LCB(P>=0.9) >= 500 under the "
+                 "realistic #190 +-22.9 ICC half-width AND on the #191 private axis for a robust GO.")
     return "\n".join(lines)
 
 
@@ -829,18 +1333,41 @@ def self_test() -> dict:
     results: dict[str, Any] = {}
     tol = 0.05
 
-    # (a) lambda=1 ladder reproduces #179 both LCB 514.88 / descent 499.97; both GO, descent NO-GO.
+    # (a) lambda=1: both-bugs GO SURVIVES the RECOMPOSED binding_bar 0.9780 (private#191, dominates
+    #     0.9052 public / 0.9513 ICC) under the REALISTIC +-22.9 ICC half-width (#190 launch LCB
+    #     510.63 >= 500 AND private valid). descent is a DOUBLY-HARDENED NO-GO: private build bar
+    #     UNREACHABLE (no lambda<=1 clears) AND the realistic 495.04 + private 490.16 launch LCBs
+    #     both miss 500. The iid cell-LCBs (514.88 both / 499.97 descent) remain the visible fallback.
     t_full = synth_land71_tuple("self-test-lambda1", 1.0)
     d_full = launch_decision(t_full, step_override=_M.shipped_step)
     bb_lcb = d_full["per_topology"]["both_bugs"]["lcb_p90"]
     do_lcb = d_full["per_topology"]["descent_only"]["lcb_p90"]
+    bb_g = d_full["_full_per_topology"]["both_bugs"]["lambda_gate"]
+    do_g = d_full["_full_per_topology"]["descent_only"]["lambda_gate"]
     a_ok = (abs(bb_lcb - 514.877540689496) <= tol and abs(do_lcb - 499.96519706601964) <= tol
+            and abs(bb_g["binding_bar_value"] - 0.9780112973731208) <= 1e-3
+            and not bool(bb_g["binding_bar_unreachable"])
+            and bb_g["binding_source"] == "private_191"
+            and bool(bb_g["build_gate_pass"]) and bool(bb_g["realistic_launch_clears_500"])
+            and abs(bb_g["realistic_launch_lcb_tps"] - 510.626905623982) <= tol
+            and abs(bb_g["halfwidth_realistic_tps"] - 22.90457745058264) <= 1e-2
+            and bool(do_g["binding_bar_unreachable"]) and not bool(do_g["build_gate_pass"])
+            and not bool(do_g["realistic_launch_clears_500"])
+            and abs(do_g["realistic_launch_lcb_tps"] - 495.0395325187374) <= tol
+            and not bool(do_g["private_launch_clears_500"])
+            and abs(do_g["private_launch_lcb_tps"] - 490.16268553751826) <= tol
             and d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
             and d_full["per_topology"]["descent_only"]["verdict"] == "NO-GO"
             and d_full["verdict"] == "GO" and d_full["headline_topology"] == "both_bugs")
-    results["a_lambda1_reproduces_179"] = {
-        "pass": bool(a_ok), "both_lcb": bb_lcb, "both_anchor": 514.877540689496,
-        "descent_lcb": do_lcb, "descent_anchor": 499.96519706601964,
+    results["a_lambda1_both_go_survives_recomposed_binding"] = {
+        "pass": bool(a_ok), "both_lcb_iid_fallback": bb_lcb, "descent_lcb_iid_fallback": do_lcb,
+        "both_binding_bar": bb_g["binding_bar_value"], "both_binding_anchor": 0.9780112973731208,
+        "both_binding_source": bb_g["binding_source"],
+        "both_realistic_launch_lcb": bb_g["realistic_launch_lcb_tps"], "both_realistic_anchor": 510.626905623982,
+        "halfwidth_realistic_tps": bb_g["halfwidth_realistic_tps"],
+        "descent_binding_unreachable": bool(do_g["binding_bar_unreachable"]),
+        "descent_realistic_launch_lcb": do_g["realistic_launch_lcb_tps"], "descent_realistic_anchor": 495.0395325187374,
+        "descent_private_launch_lcb": do_g["private_launch_lcb_tps"], "descent_private_anchor": 490.16268553751826,
         "both_verdict": d_full["per_topology"]["both_bugs"]["verdict"],
         "descent_verdict": d_full["per_topology"]["descent_only"]["verdict"]}
 
@@ -888,9 +1415,10 @@ def self_test() -> dict:
         "names_precache": ("PRECACHE_BENCH=1" in (blk or "")),
         "names_bootfix": ("_IncludedRouter boot-fix" in (blk or ""))}
 
-    # (e) #183 REAL card consumed: lambda*_LCB reproduces 0.9052/0.9750 (tau=1) & 0.9234/0.9926
-    #     (tau_cons); card monotone; forward map 0.9052->500.0 & 0.342->404.14; #178 central
-    #     bar (0.8384/0.9091) reported but flagged INACTIVE.
+    # (e) #183 REAL card consumed: its lambda*_LCB is now the PUBLIC iid-fallback leg (both 0.9052 /
+    #     descent 0.9750 at tau=1; 0.9234/0.9926 at tau_cons) -- SUPERSEDED as binding by private#191.
+    #     card monotone; forward map 0.9052->500.0 & 0.342->404.14; #178 central bar (0.8384/0.9091)
+    #     reported but flagged INACTIVE.
     lg = d_full["lambda_gate_logic"]
     bb_lg, do_lg = lg["both_bugs"], lg["descent_only"]
     fm_bb = V183.forward_map(_M.ctx183, *_M.qfqF_183("both_bugs"), TAU_HEADLINE,
@@ -900,8 +1428,8 @@ def self_test() -> dict:
                    if abs(r["lambda"] - round(_M.lambda_star_lcb_183("both_bugs"), 5)) < 1e-9)
     row_live = next(r for r in fm_bb["rows"]
                     if abs(r["lambda"] - round(_M.lam_hat_liveprobe, 5)) < 1e-9)
-    e_ok = (abs(bb_lg["lambda_star_lcb_183_headline"] - 0.905229319301184) <= 1e-3
-            and abs(do_lg["lambda_star_lcb_183_headline"] - 0.9750199960244741) <= 1e-3
+    e_ok = (abs(bb_lg["public_bar_183_iid_fallback"] - 0.905229319301184) <= 1e-3
+            and abs(do_lg["public_bar_183_iid_fallback"] - 0.9750199960244741) <= 1e-3
             and abs(bb_lg["lambda_star_lcb_183_conservative"] - 0.923358337599465) <= 1e-3
             and abs(do_lg["lambda_star_lcb_183_conservative"] - 0.9925986560663185) <= 1e-3
             and abs(bb_lg["lambda_star_central_178_INACTIVE"] - 0.8383898298915815) <= 1e-3
@@ -913,16 +1441,16 @@ def self_test() -> dict:
             and not bool(row_live["predicted_lcb_clears_500"])
             and "LANDED -- CONSUMED" in lg["degraded_dependencies"]["denken_183_margin_aware_lambda_card"]
             and "INACTIVE" in str(list(bb_lg.keys())))
-    results["e_183_real_card_consumed"] = {
+    results["e_183_real_card_consumed_as_public_leg"] = {
         "pass": bool(e_ok),
-        "both_lambda_star_lcb_tau1": bb_lg["lambda_star_lcb_183_headline"],
-        "descent_lambda_star_lcb_tau1": do_lg["lambda_star_lcb_183_headline"],
+        "both_public_bar_iid_fallback_tau1": bb_lg["public_bar_183_iid_fallback"],
+        "descent_public_bar_iid_fallback_tau1": do_lg["public_bar_183_iid_fallback"],
         "both_lambda_star_lcb_tau_cons": bb_lg["lambda_star_lcb_183_conservative"],
         "both_central_178_inactive": bb_lg["lambda_star_central_178_INACTIVE"],
         "card_is_monotone": bool(lg["card_is_monotone"]),
         "fwd_lcb_at_lambda_star": row_lcb["predicted_lcb_tps"],
         "fwd_lcb_at_liveprobe": row_live["predicted_lcb_tps"],
-        "183_flag": "LANDED -- CONSUMED"}
+        "183_flag": "LANDED -- CONSUMED (public iid-fallback leg)"}
 
     # (f) NaN-clean across all reported numerics.
     def _all_finite(obj) -> bool:
@@ -938,54 +1466,123 @@ def self_test() -> dict:
         {k: v for k, v in d_floor.items() if k != "nogo_restoration"})
     results["f_nan_clean"] = {"pass": bool(f_ok)}
 
-    # (g) two-LCB divergence documented: at lambda=1 descent PASSES the #183 build-gate
-    #     (1.0 >= 0.9750) but FAILS the #179 launch cell-LCB (499.97 < 500) -> the two LCBs
-    #     diverge for descent. both-bugs clears BOTH (the robust GO).
+    # (g) two-LCB divergence, RECOMPOSED + DOUBLY-HARDENED: at lambda=1 descent PASSES the visible
+    #     PUBLIC iid-fallback build bar (1.0 >= 0.9750) but FAILS the BINDING private build gate
+    #     (UNREACHABLE) AND BOTH launch LCBs -- realistic (495.04 < 500) and private (490.16 < 500).
+    #     both-bugs clears all four (the robust GO). public/binding-build divergence is the new axis.
     do_full_lg = d_full["_full_per_topology"]["descent_only"]["lambda_gate"]
     bb_full_lg = d_full["_full_per_topology"]["both_bugs"]["lambda_gate"]
-    g_ok = (bool(do_full_lg["build_gate_pass"]) and not bool(do_full_lg["clear500_launch_lcb_pass"])
-            and bool(bb_full_lg["build_gate_pass"]) and bool(bb_full_lg["clear500_launch_lcb_pass"]))
-    results["g_two_lcb_divergence_documented"] = {
+    g_ok = (bool(do_full_lg["public_build_gate_pass"])
+            and bool(do_full_lg["binding_bar_unreachable"])
+            and not bool(do_full_lg["build_gate_pass"])
+            and not bool(do_full_lg["realistic_launch_clears_500"])
+            and not bool(do_full_lg["private_launch_clears_500"])
+            and not bool(do_full_lg["clear500_launch_lcb_pass"])
+            and bool(bb_full_lg["build_gate_pass"])
+            and bool(bb_full_lg["realistic_launch_clears_500"])
+            and bool(bb_full_lg["clear500_launch_lcb_pass"]))
+    results["g_two_lcb_divergence_doubly_hardened"] = {
         "pass": bool(g_ok),
-        "descent_build_gate_pass": bool(do_full_lg["build_gate_pass"]),
+        "descent_public_build_gate_pass": bool(do_full_lg["public_build_gate_pass"]),
+        "descent_binding_build_unreachable": bool(do_full_lg["binding_bar_unreachable"]),
+        "descent_binding_build_gate_pass": bool(do_full_lg["build_gate_pass"]),
+        "descent_realistic_launch_pass": bool(do_full_lg["realistic_launch_clears_500"]),
+        "descent_private_launch_pass": bool(do_full_lg["private_launch_clears_500"]),
         "descent_launch_lcb_pass": bool(do_full_lg["clear500_launch_lcb_pass"]),
-        "descent_build_lcb_at_lambda1": do_full_lg["build_lcb_at_lambda_built"],
-        "both_build_gate_pass": bool(bb_full_lg["build_gate_pass"]),
+        "both_binding_build_gate_pass": bool(bb_full_lg["build_gate_pass"]),
+        "both_realistic_launch_pass": bool(bb_full_lg["realistic_launch_clears_500"]),
         "both_launch_lcb_pass": bool(bb_full_lg["clear500_launch_lcb_pass"])}
 
-    # (h) launch-CI ledger well-formed (advisor 16:53Z): the FOUR numerical axes (#190/#187/
-    #     #188/#191) present + flagged iid-fallback (none landed); binding_bar = max() reduces to
-    #     public 0.9052 both / 0.9750 descent; composed-LCB at binding_bar == 500; #189 packaging
-    #     precondition present & PENDING; launch_authorized==False while analytic verdict==GO.
+    # (h) launch-CI ledger RECOMPOSED + CLOSED (advisor 17:27Z + 17:52Z RE-RUN): ALL six numerical
+    #     axes (#190/#187/#188/#191/#194 + #195 cross-axis covariance) have LANDED -> flag "consumed";
+    #     binding_bar = max() = private 0.9780 (both) and UNREACHABLE (descent); the iid #175 leg is
+    #     the SOLE visible fallback row; NO pending axis (ledger_closed); the #189 packaging
+    #     precondition is GO/consumed; launch_authorized==False (precache + human-approval PENDING)
+    #     while analytic verdict==GO. The binding bar is NO LONGER on the iid fallback.
     led = d_full["launch_ci_ledger"]
     axes_bb = {r["axis"]: r for r in led["numerical_axes"]["both_bugs"]}
-    inflight_axes = {"sampling_icc", "input_lambda_built", "hardware_oneshot", "private_bar"}
-    all_inflight_flagged = all(axes_bb[a]["status"] == "IN-FLIGHT"
-                               and axes_bb[a]["flag"] != "consumed" for a in inflight_axes)
+    consumed_axes = {"sampling_icc", "input_lambda_built", "hardware_oneshot", "private_bar",
+                     "redraw_budget", "cross_axis_covariance"}
+    all_consumed = all(axes_bb[a]["status"] == "LANDED" and axes_bb[a]["flag"] == "consumed"
+                       for a in consumed_axes)
+    iid_row = axes_bb["sampling_iid"]
+    cov_row = axes_bb["cross_axis_covariance"]
     bb_bar = d_full["binding_bar"]["both_bugs"]
     do_bar = d_full["binding_bar"]["descent_only"]
-    composed_at_bar = composed_lcb(bb_bar["binding_bar"], "both_bugs", TAU_HEADLINE)
     pack_row = next(r for r in led["preconditions"]
                     if r["row"] == "executable_submission_gate_ubel_189")
-    h_ok = (all_inflight_flagged
-            and abs(bb_bar["binding_bar"] - 0.905229319301184) <= 1e-3
-            and bb_bar["binding_source"].startswith("public_183")
-            and bb_bar["any_iid_fallback_active"] is True
-            and abs(do_bar["binding_bar"] - 0.9750199960244741) <= 1e-3
-            and abs(composed_at_bar - 500.0) <= 0.1
-            and pack_row["status"] == "PENDING" and pack_row["flag"] == "pending-packaging"
-            and led["any_iid_fallback_active"] is True
+    h_ok = (all_consumed
+            and iid_row["flag"] == "iid-fallback-visible" and iid_row["status"] == "LANDED"
+            and cov_row["flag"] == "consumed" and cov_row["status"] == "LANDED"
+            and cov_row["quadrature_valid"] is False
+            and abs(bb_bar["binding_bar"] - 0.9780112973731208) <= 1e-3
+            and bb_bar["binding_source"] == "private_191"
+            and bb_bar["binding_is_iid_fallback"] is False
+            and bool(do_bar["binding_bar_unreachable"])
+            and do_bar["binding_source"] == "private_191_UNREACHABLE"
+            and abs(axes_bb["sampling_icc"]["halfwidth_realistic_tps"] - 22.90457745058264) <= 1e-2
+            and pack_row["status"] == "GO" and pack_row["flag"] == "consumed"
+            and bool(pack_row["verifier_landed"])
+            and led["any_iid_fallback_active"] is False
+            and led["all_binding_axes_landed"] is True
+            and led["pending_numerical_axes"] == []
+            and led["sole_pending_axis"] is None
+            and led["ledger_closed"] is True
             and d_full["launch_authorized"]["authorized"] is False
             and d_full["launch_authorized"]["analytic_verdict"] == "GO")
-    results["h_launch_ci_ledger_wellformed"] = {
+    results["h_launch_ci_ledger_recomposed_closed"] = {
         "pass": bool(h_ok),
-        "binding_bar_both": bb_bar["binding_bar"], "binding_source": bb_bar["binding_source"],
-        "binding_bar_descent": do_bar["binding_bar"],
-        "composed_lcb_at_binding_bar": composed_at_bar,
-        "inflight_axes_all_iid_fallback": bool(all_inflight_flagged),
-        "packaging_189_status": pack_row["status"],
+        "binding_bar_both": bb_bar["binding_bar"], "binding_source_both": bb_bar["binding_source"],
+        "binding_bar_descent_unreachable": bool(do_bar["binding_bar_unreachable"]),
+        "binding_source_descent": do_bar["binding_source"],
+        "all_numerical_axes_consumed": bool(all_consumed),
+        "cov_row_flag": cov_row["flag"], "cov_row_status": cov_row["status"],
+        "iid_fallback_row_visible": iid_row["flag"],
+        "n_pending_numerical_axes": len(led["pending_numerical_axes"]),
+        "sole_pending_axis": led["sole_pending_axis"],
+        "ledger_closed": led["ledger_closed"],
+        "any_iid_fallback_active": led["any_iid_fallback_active"],
+        "packaging_189_status": pack_row["status"], "packaging_189_flag": pack_row["flag"],
         "launch_authorized": d_full["launch_authorized"]["authorized"],
         "analytic_verdict": d_full["launch_authorized"]["analytic_verdict"]}
+
+    # (i) combined single-shot sigma DE-DUP (advisor 17:52Z, ubel #195): the 4-axis quadrature is
+    #     INVALID because rho(sampling#175, input-lambda#187) = +0.945 (a DOUBLE-COUNT; overlap=rho^2=
+    #     0.893). De-dup A1+A2 into ONE acceptance axis (overlap-corrected 5.32 TPS) -> 3 independent
+    #     axes -> combined sigma = 7.26 central / 17.04 PSD-clamped worst-case (NOT quadrature 12.54).
+    #     BOTH the de-dup central launch-LCB (519.58) AND the worst-case corner (507.05) clear 500 ->
+    #     both-bugs is robust on the sigma axis; the worst-case corner is folded into the both-bugs GO.
+    csc = led["combined_sigma_corner"]
+    bb_full_g = d_full["_full_per_topology"]["both_bugs"]["lambda_gate"]
+    do_full_g = d_full["_full_per_topology"]["descent_only"]["lambda_gate"]
+    i_ok = (bool(csc["landed"]) and csc["quadrature_valid"] is False
+            and abs(csc["rho_sampling_input"] - 0.9449) <= 5e-3
+            and abs(csc["overlap_fraction"] - 0.893) <= 5e-3
+            and abs(csc["sigma_quadrature_invalid_tps"] - 12.536) <= 5e-2
+            and abs(csc["sigma_dedup_central_tps"] - 7.262) <= 5e-2
+            and abs(csc["sigma_worstcase_tps"] - 17.037) <= 5e-2
+            and abs(csc["acceptance_dedup_block_tps"] - 5.319) <= 5e-2
+            and abs(csc["launch_lcb_dedup_central_tps"] - 519.58) <= 0.5
+            and abs(csc["launch_lcb_worstcase_tps"] - 507.05) <= 0.5
+            and bool(csc["dedup_central_clears_500"]) and bool(csc["worstcase_corner_clears_500"])
+            and bool(bb_full_g["combined_sigma_worstcase_clears_500"])
+            and bb_full_g["combined_sigma_corner"] is not None
+            and do_full_g["combined_sigma_corner"] is None
+            and bool(do_full_g["combined_sigma_worstcase_clears_500"]))
+    results["i_combined_sigma_dedup_corner"] = {
+        "pass": bool(i_ok),
+        "quadrature_valid": csc["quadrature_valid"],
+        "rho_sampling_input": csc["rho_sampling_input"],
+        "overlap_fraction": csc["overlap_fraction"],
+        "sigma_quadrature_invalid_tps": csc["sigma_quadrature_invalid_tps"],
+        "sigma_dedup_central_tps": csc["sigma_dedup_central_tps"],
+        "sigma_worstcase_tps": csc["sigma_worstcase_tps"],
+        "acceptance_dedup_block_tps": csc["acceptance_dedup_block_tps"],
+        "launch_lcb_dedup_central_tps": csc["launch_lcb_dedup_central_tps"],
+        "launch_lcb_worstcase_tps": csc["launch_lcb_worstcase_tps"],
+        "dedup_central_clears_500": csc["dedup_central_clears_500"],
+        "worstcase_corner_clears_500": csc["worstcase_corner_clears_500"],
+        "both_bugs_worstcase_folded_into_go": bool(bb_full_g["combined_sigma_worstcase_clears_500"])}
 
     passes = bool(all(v["pass"] for v in results.values()))
     test_metric = bool(d_full["both_bugs_go_at_lambda_star"])
@@ -1007,12 +1604,27 @@ def _maybe_log_wandb(args, payload: dict) -> None:
     except Exception as exc:               # noqa: BLE001
         print(f"[wandb] unavailable ({exc}); skipping.", file=sys.stderr)
         return
+    bb_bind = binding_bar("both_bugs", TAU_HEADLINE)
     run = wandb.init(project=args.wandb_project, entity=args.wandb_entity,
                      name=args.wandb_name, group=args.wandb_group,
                      config={"k_cal": K_CAL, "ppl_bar": PPL_BAR, "target_official": TARGET_OFFICIAL,
                              "step_shipped": _M.shipped_step,
-                             "lambda_star_lcb_both_tau1": _M.lambda_star_lcb_183("both_bugs"),
-                             "lambda_star_lcb_descent_tau1": _M.lambda_star_lcb_183("descent_only")})
+                             "public_bar_183_iid_fallback_both_tau1": _M.lambda_star_lcb_183("both_bugs"),
+                             "public_bar_183_iid_fallback_descent_tau1": _M.lambda_star_lcb_183("descent_only"),
+                             "binding_bar_both": bb_bind["binding_bar"],
+                             "binding_bar_icc_190": bb_bind["icc_190"],
+                             "binding_bar_private_191": bb_bind["private_191"],
+                             "binding_source_both": bb_bind["binding_source"],
+                             "halfwidth_iid_tps": _BANKED.halfwidth_iid(),
+                             "halfwidth_realistic_tps": _BANKED.halfwidth_realistic(),
+                             "icc_hat": _BANKED.icc_hat(), "design_effect": _BANKED.design_effect(),
+                             # combined single-shot sigma corner (#195 de-dup): quadrature INVALID.
+                             "combined_sigma_quadrature_invalid_tps": _BANKED.combined_sigma("quadrature"),
+                             "combined_sigma_dedup_central_tps": _BANKED.combined_sigma("dedup"),
+                             "combined_sigma_worstcase_tps": _BANKED.combined_sigma("worstcase"),
+                             "combined_sigma_quadrature_valid": _BANKED.quadrature_valid(),
+                             "rho_sampling_input_195": _BANKED.rho_sampling_input(),
+                             "acceptance_dedup_block_tps_195": _BANKED.dedup_acceptance_block()})
     st = payload["self_test"]
     flat = {
         "launch_trigger_calculator_self_test_passes": st["launch_trigger_calculator_self_test_passes"],
@@ -1026,22 +1638,53 @@ def _maybe_log_wandb(args, payload: dict) -> None:
     flat["worked_example/launch_authorized"] = bool(la["authorized"])
     flat["worked_example/analytic_verdict_go"] = la["analytic_verdict"] == "GO"
     flat["worked_example/preconditions_all_go"] = bool(la["preconditions_all_go"])
-    flat["worked_example/any_iid_fallback_active"] = bool(
-        wp["launch_ci_ledger"]["any_iid_fallback_active"])
+    led = wp["launch_ci_ledger"]
+    flat["worked_example/any_iid_fallback_active"] = bool(led["any_iid_fallback_active"])
+    flat["worked_example/all_binding_axes_landed"] = bool(led["all_binding_axes_landed"])
+    flat["worked_example/sole_pending_axis"] = str(led["sole_pending_axis"])
+    flat["worked_example/n_pending_numerical_axes"] = len(led["pending_numerical_axes"])
+    flat["worked_example/ledger_closed"] = bool(led["ledger_closed"])
+    # combined single-shot sigma corner (#195 de-dup): central/worst-case + clear-500 robustness.
+    csc = led["combined_sigma_corner"]
+    if csc.get("landed"):
+        flat["worked_example/combined_sigma_quadrature_valid"] = bool(csc["quadrature_valid"])
+        flat["worked_example/combined_sigma_dedup_central_tps"] = csc["sigma_dedup_central_tps"]
+        flat["worked_example/combined_sigma_worstcase_tps"] = csc["sigma_worstcase_tps"]
+        flat["worked_example/combined_sigma_quadrature_invalid_tps"] = csc["sigma_quadrature_invalid_tps"]
+        flat["worked_example/rho_sampling_input_195"] = csc["rho_sampling_input"]
+        flat["worked_example/launch_lcb_dedup_central_tps"] = csc["launch_lcb_dedup_central_tps"]
+        flat["worked_example/launch_lcb_worstcase_tps"] = csc["launch_lcb_worstcase_tps"]
+        flat["worked_example/worstcase_corner_clears_500"] = bool(csc["worstcase_corner_clears_500"])
+        flat["worked_example/dedup_central_clears_500"] = bool(csc["dedup_central_clears_500"])
     for topo in ("both_bugs", "descent_only"):
         c = wp["per_topology"][topo]
         lgc = wp["_full_per_topology"][topo]["lambda_gate"]
         bb = wp["binding_bar"][topo]
         flat[f"worked_example/{topo}/official_tps"] = c["official_tps"]
-        flat[f"worked_example/{topo}/lcb_p90"] = c["lcb_p90"]
+        flat[f"worked_example/{topo}/lcb_p90_iid_fallback"] = c["lcb_p90"]
         flat[f"worked_example/{topo}/p_clear_500"] = c["p_clear_500"]
         flat[f"worked_example/{topo}/lambda_hat_built"] = lgc["lambda_hat_built"]
-        flat[f"worked_example/{topo}/lambda_star_lcb_183"] = lgc["lambda_star_lcb_183_headline"]
-        flat[f"worked_example/{topo}/binding_bar"] = bb["binding_bar"]
+        flat[f"worked_example/{topo}/public_bar_183_iid_fallback"] = lgc["public_bar_183_iid_fallback"]
+        # binding_bar is None for the UNREACHABLE (descent) topology -> log the flag, not a float.
+        flat[f"worked_example/{topo}/binding_bar_unreachable"] = bool(bb["binding_bar_unreachable"])
+        if bb["binding_bar"] is not None and math.isfinite(bb["binding_bar"]):
+            flat[f"worked_example/{topo}/binding_bar"] = bb["binding_bar"]
         flat[f"worked_example/{topo}/binding_source"] = bb["binding_source"]
         flat[f"worked_example/{topo}/build_gate_pass"] = bool(lgc["build_gate_pass"])
+        flat[f"worked_example/{topo}/realistic_launch_clears_500"] = bool(
+            lgc["realistic_launch_clears_500"])
+        if lgc["realistic_launch_lcb_tps"] is not None:
+            flat[f"worked_example/{topo}/realistic_launch_lcb_tps"] = lgc["realistic_launch_lcb_tps"]
+        flat[f"worked_example/{topo}/halfwidth_realistic_tps"] = lgc["halfwidth_realistic_tps"]
+        flat[f"worked_example/{topo}/halfwidth_iid_tps"] = lgc["halfwidth_iid_tps"]
+        flat[f"worked_example/{topo}/private_launch_clears_500"] = bool(
+            lgc["private_launch_clears_500"])
+        if lgc["private_launch_lcb_tps"] is not None:
+            flat[f"worked_example/{topo}/private_launch_lcb_tps"] = lgc["private_launch_lcb_tps"]
         flat[f"worked_example/{topo}/clear500_launch_lcb_pass"] = bool(
             lgc["clear500_launch_lcb_pass"])
+        flat[f"worked_example/{topo}/combined_sigma_worstcase_clears_500"] = bool(
+            lgc["combined_sigma_worstcase_clears_500"])
     wandb.log(flat)
     wandb.summary.update(flat)
     run.finish()
@@ -1053,25 +1696,33 @@ def run(args) -> dict:
     # worked example = land #71 at full self-KV recovery (lambda=1) -- the GO-path demonstration.
     worked = launch_decision(synth_land71_tuple("land-71-bothbugs-kernel", 1.0),
                              step_override=_M.shipped_step)
+    bb_bind = binding_bar("both_bugs", TAU_HEADLINE)
+    csc = combined_sigma_corner()
     handoff = (
         "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified "
-        "GO/NO-GO + filled (un-filed) Approval request. Self-test %s. The BINDING lambda-gate "
-        "is a TYPED launch-CI ledger (advisor 16:53Z): binding_bar = max(public#183 %.4f, "
-        "ICC#190, private#191) -- all four in-flight axes (#190 ICC, #187 lambda-built-CI, "
-        "#188 sigma-oneshot, #191 private-bar) degrade to the iid-fallback public bar until "
-        "they land, then the verdict RECOMPOSES (bar can only get stricter). land #71 must show "
-        "lambda_hat_built >= binding_bar (%.4f both-bugs tau=1; %.4f tau=0.9924), STRICTER than "
-        "#178's 0.838 central bar; AND the #179 launch-projection cell-LCB(P>=0.9) >= 500. "
-        "launch_authorized = (analytic-GO AND all precondition rows GO); preconditions "
-        "(PRECACHE_BENCH, ubel #189 packaging-gate, human approval) are PENDING -> "
-        "launch_authorized=False (authorizes nothing). both-bugs clears both LCBs at lambda=1 "
-        "(514.88, robust GO); descent clears the #183 build bar but misses the #179 launch "
-        "projection (499.97). both_bugs_go_at_lambda_star=%s. Human approval still required "
-        "before any HF spend." % (
+        "GO/NO-GO + filled (un-filed) Approval request. Self-test %s. RECOMPOSED post-merge "
+        "(advisor 17:27Z + 17:52Z): the TYPED launch-CI ledger now reads REAL banked scalars -- #190 "
+        "ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget AND #195 cross-"
+        "axis covariance have ALL LANDED (flag=consumed); the ledger is CLOSED (no pending axes). "
+        "binding_bar = max(public#183 %.4f, ICC#190 %.4f, private#191 %.4f) = %.4f (private DOMINATES, "
+        "both-bugs); descent private bar is UNREACHABLE. #195 proved the 4-axis quadrature INVALID "
+        "(rho(sampling,input)=%.3f double-count) -> de-dup'd combined single-shot sigma %.2f central / "
+        "%.2f worst-case (the conservative GO/NO-GO corner), NOT quadrature %.2f. land #71 must show "
+        "lambda_hat_built >= %.4f AND the #179 launch-projection cell-LCB(P>=0.9) >= 500 under the "
+        "REALISTIC #190 +-%.2f ICC half-width (NOT iid +-%.2f) AND on the #191 private axis AND the "
+        "combined-sigma worst-case corner. launch_authorized = (analytic-GO AND all precondition rows "
+        "GO); preconditions (PRECACHE_BENCH, ubel #189 packaging-gate=GO but re-verify-pending, human "
+        "approval) PENDING -> launch_authorized=False (authorizes nothing). both-bugs SURVIVES at "
+        "lambda=1: realistic launch-LCB 510.63>=500 + private valid + de-dup sigma corner (LCB %.2f "
+        "central / %.2f worst-case both >=500) -> robust GO. descent is DOUBLY-HARDENED NO-GO: private "
+        "build bar UNREACHABLE AND misses realistic 495.04 + private 490.16 launch LCBs. "
+        "both_bugs_go_at_lambda_star=%s. Human approval still required before any HF spend." % (
             "PASSES" if st["launch_trigger_calculator_self_test_passes"] else "FAILS",
-            _M.lambda_star_lcb_183("both_bugs", TAU_HEADLINE),
-            _M.lambda_star_lcb_183("both_bugs", TAU_HEADLINE),
-            _M.lambda_star_lcb_183("both_bugs", TAU_CONSERVATIVE),
+            bb_bind["public_183"], bb_bind["icc_190"], bb_bind["private_191"], bb_bind["binding_bar"],
+            csc["rho_sampling_input"], csc["sigma_dedup_central_tps"], csc["sigma_worstcase_tps"],
+            csc["sigma_quadrature_invalid_tps"],
+            bb_bind["binding_bar"], _BANKED.halfwidth_realistic(), _BANKED.halfwidth_iid(),
+            csc["launch_lcb_dedup_central_tps"], csc["launch_lcb_worstcase_tps"],
             st["both_bugs_go_at_lambda_star"]))
     payload = {
         "pr": 185,
