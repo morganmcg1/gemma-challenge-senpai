@@ -415,14 +415,35 @@ def _run_tree_emit_probe(
         ):
             last_hidden, hidden = self.model(**forward_kwargs)
         hidden_cache[node] = hidden[:1].detach().clone()
-        logits, selected = embedder._select_and_score(last_hidden[:1], lm_w)
-        k = min(int(width), int(logits.shape[-1]))
-        _, idx = torch.topk(logits, k, dim=-1, sorted=True)
-        cand_tokens = [int(c) for c in selected.gather(1, idx)[0].tolist()]
+        # rank-1 MUST be the EXACT deployed selection. The greedy drafter picks
+        # via self.model.get_top_tokens (the fused float32 sparse-argmax kernel;
+        # _greedy_sample -> get_top_tokens). Reconstructing rank-1 from a bf16
+        # _select_and_score + topk flips ~15% of near-ties (fp32 kernel vs bf16
+        # argmax) -> spine drift. Use the deployed call verbatim so the rank-1
+        # spine is token-identical to the deployed width-1 chain by construction.
+        rank1_tok = _as_int(self.model.get_top_tokens(last_hidden[:1]))
+        cand_tokens = [rank1_tok]
+        # rank-2+ branches: next-best sparse candidates, excluding rank-1. These
+        # are NEW tree paths (no bit-exactness required), only must be distinct;
+        # bf16 topk is fine here. Pad with rank-1 if the drafter offers no
+        # distinct alternative (degenerate branch -> branch_distinct flags it).
+        if width > 1:
+            logits, selected = embedder._select_and_score(last_hidden[:1], lm_w)
+            k = min(int(width) + 1, int(logits.shape[-1]))
+            _, idx = torch.topk(logits, k, dim=-1, sorted=True)
+            for c in selected.gather(1, idx)[0].tolist():
+                ci = int(c)
+                if ci != rank1_tok and ci not in cand_tokens:
+                    cand_tokens.append(ci)
+                if len(cand_tokens) >= width:
+                    break
+        while len(cand_tokens) < width:
+            cand_tokens.append(rank1_tok)
         topw_cache[node] = cand_tokens
-        # per-node guard: rank-1 of top-w == the deployed sparse argmax forward.
-        argmax_tok = _as_int(self.model.get_top_tokens(last_hidden[:1]))
-        if cand_tokens[0] != argmax_tok:
+        # determinism guard: a 2nd fused call must agree with rank-1. If this
+        # trips, spine identity is kernel-limited (near-tie nondeterminism), not
+        # code-limited -> distinct from the bf16-reconstruction bug above.
+        if _as_int(self.model.get_top_tokens(last_hidden[:1])) != rank1_tok:
             rank1_match = False
         forwards += 1
 
@@ -447,13 +468,22 @@ def _run_tree_emit_probe(
     st["rank1_consistent" if rank1_match else "rank1_inconsistent"] += 1
     st["branch_distinct_ok" if branch_distinct else "branch_distinct_bad"] += 1
 
-    if st["steps"] <= TREE_EMIT_PROBE_LOG_STEPS or st["steps"] % 50 == 0:
+    # Always surface a failure (any step), sample successes (<=N + every 50th).
+    # Without the failure path, a mismatch on an unlogged step would only bump a
+    # silent counter -> the cumulative totals on each emitted line make the
+    # all-steps claim airtight, not just the sampled steps.
+    all_ok = spine_ok and rank1_match and branch_distinct
+    if (not all_ok) or st["steps"] <= TREE_EMIT_PROBE_LOG_STEPS or st["steps"] % 50 == 0:
         print(
-            f"[tree-emit-probe] step={st['steps']} M={m} forwards={forwards} "
+            f"[tree-emit-probe] {'ALERT ' if not all_ok else ''}step={st['steps']} "
+            f"M={m} forwards={forwards} "
             f"spine_identity={'OK' if spine_ok else 'MISMATCH'} "
             f"spine[:{cmp_len}]={spine_tok[:cmp_len]} chain[:{cmp_len}]={chain[:cmp_len]} "
             f"rank1==argmax={'OK' if rank1_match else 'NO'} "
-            f"branch_distinct={'OK' if branch_distinct else 'NO'}",
+            f"branch_distinct={'OK' if branch_distinct else 'NO'} "
+            f"| cum: spine_ok={st['spine_ok']} spine_mismatch={st['spine_mismatch']} "
+            f"rank1_inconsistent={st['rank1_inconsistent']} "
+            f"branch_bad={st['branch_distinct_bad']}",
             file=sys.stderr,
             flush=True,
         )
