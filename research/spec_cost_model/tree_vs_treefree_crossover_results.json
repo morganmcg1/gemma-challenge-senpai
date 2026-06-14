@@ -3,15 +3,15 @@
     "primary_metric_name": "tree_vs_treefree_crossover_ET",
     "test_metric_name": "build_milestone_ladder",
     "headline_verdict": "AMBER",
-    "headline_verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.727 (alone) / 4.522 (with splitk+lk), i.e. 65% of the way up denken #101's band -> continue only if recovery clears that",
-    "headline_ceiling": 511.2190830124044,
-    "headline_ceiling_source": "fern's own #100 bracket (PENDING denken #105)",
+    "headline_verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.791 (alone) / 4.583 (with splitk+lk), i.e. 69% of the way up denken #101's band -> continue only if recovery clears that",
+    "headline_ceiling": 518.1,
+    "headline_ceiling_source": "denken #105 (consumed)",
     "primary_metric": {
       "name": "tree_vs_treefree_crossover_ET",
       "definition": "realized tree E[T] at which tree_official(E[T]) = tree_free_ceiling",
       "at_C_500_tree_alone_central": 4.623541199954488,
-      "at_likely_ceiling_tree_alone_central": 4.72728498502161,
-      "likely_ceiling": 511.2190830124044,
+      "at_likely_ceiling_tree_alone_central": 4.79091339139284,
+      "likely_ceiling": 518.1,
       "slope_dE_T_per_TPS_central": 0.009247082399908972,
       "thresholds": {
         "C_treefree_just_clears_500": 500.0,
@@ -30,7 +30,17 @@
         "optimistic": 4.736696266203363
       }
     },
-    "rule": "GREEN=C<500 (tree critical path) / AMBER=C>=500 & crossover<5.0 (tree upside, name recovery threshold) / RED=crossover>=5.0 (tree barely beats tree-free; pivot)"
+    "rule": "GREEN=C<500 (tree critical path) / AMBER=C>=500 & crossover<5.0 (tree upside, name recovery threshold) / RED=crossover>=5.0 (tree barely beats tree-free; pivot)",
+    "pr111_primary_metric_name": "post500_top_lever_roi_rank",
+    "pr111_test_metric_name": "climb_to_ceiling_tps_at_realistic_stack",
+    "pr111_step1_settled_verdict": "AMBER",
+    "pr111_step1_recovery_gate_tree_alone": 4.79091339139284,
+    "pr111_step1_recovery_gate_tree_full_stack": 4.582526144314563,
+    "post500_top_lever_roi_rank": "tau->1.00",
+    "climb_to_ceiling_tps_at_realistic_stack": 519.4926510034078,
+    "pr111_step3_verdict": "GREEN",
+    "pr111_step3_verdict_label": "coherent ROI ranking -- tau->1.00 is the CLEAR #1 lever (ROI 20.1 vs best-other 8.7); build order: tau, then SplitK->12%. denken's 'tau ~3x cheaper' CONFIRMED under local-calibration. RED-FLAG: the full non-tree stack tops out at 529.9 < 540 -> the 556 ceiling is tree-gated (build-blocked), not reachable by the cheap levers alone.",
+    "pr111_rule": "GREEN=coherent ROI ranking w/ clear top lever (tau local-cal or SplitK) / AMBER=ROI flat under official-anchor tau / RED-flag=full non-tree stack tops out <540 (556 tree-gated)"
   },
   "step1_build_milestone_ladder": {
     "curve_tree_alone": [
@@ -773,6 +783,234 @@
       "verdict_label": "crossover 5.225 > 5.207: the tree can NEVER beat tree-free, even at its analytical ceiling -> pivot to tree-free + escalate for a fresh accept-length lever class"
     }
   ],
+  "pr111_step1_settle_headline_landed_C": {
+    "landed_C_central": 518.1,
+    "landed_C_band": [
+      496.8,
+      540.8
+    ],
+    "headline_verdict": "AMBER",
+    "headline_verdict_label": "tree-free clears 500; the tree is UPSIDE -- it overtakes only if the build recovers E[T] >= 4.791 (alone) / 4.583 (with splitk+lk), i.e. 69% of the way up denken #101's band -> continue only if recovery clears that",
+    "recovery_gate_E_T_tree_alone": 4.79091339139284,
+    "recovery_gate_E_T_tree_full_stack": 4.582526144314563,
+    "recovery_frac_up_rec_band": 0.6947273597893175,
+    "corner_table": [
+      {
+        "corner": "conservative_ceiling",
+        "treefree_ceiling": 496.8,
+        "treefree_clears_500": false,
+        "crossover_tree_alone": 4.593950536274779,
+        "crossover_tree_full_stack": 4.39413045453672,
+        "verdict": "GREEN"
+      },
+      {
+        "corner": "central_landed",
+        "treefree_ceiling": 518.1,
+        "treefree_clears_500": true,
+        "crossover_tree_alone": 4.79091339139284,
+        "crossover_tree_full_stack": 4.582526144314563,
+        "verdict": "AMBER"
+      },
+      {
+        "corner": "optimistic_ceiling",
+        "treefree_ceiling": 540.8,
+        "treefree_clears_500": true,
+        "crossover_tree_alone": 5.000822161870774,
+        "crossover_tree_full_stack": 4.783304649382967,
+        "verdict": "RED"
+      }
+    ],
+    "interpretation": "LANDED C=518.1 central -> AMBER: tree-free clears 500, the tree is UPSIDE; it overtakes only if realized E[T] >= 4.791 (tree alone) / 4.583 (tree+splitk+lk), ~69% up denken #101's recoverable band. The landed BAND spans the spectrum: conservative corner 496.8 (<500) is GREEN (tree-free can't hit 500 -> tree critical); optimistic corner 540.8 is the xover~5.0 RED edge (tree barely beats tree-free even near its ceiling). The AMBER call therefore rests on confidence in the tree-free CENTRAL ~518."
+  },
+  "pr111_step2_post500_lever_roi": {
+    "baseline_realized_tau096": 481.2361941922991,
+    "baseline_tau_secured": 501.28770228364493,
+    "levers": [
+      {
+        "lever": "tau->1.00",
+        "delta_official_tps": 20.051508091345852,
+        "delta_pct_of_baseline": 4.1666666666666785,
+        "effort_tshirt": "S",
+        "effort_points": 1,
+        "roi_tps_per_effort": 20.051508091345852,
+        "build_blocked": false,
+        "effort_basis": "local-calibration of the local->official ratio (lawine #99)",
+        "note": "official-anchor fallback = effort M; the denken-3x test below reports ROI under BOTH so the claim is conditional, not assumed"
+      },
+      {
+        "lever": "splitk->12%",
+        "delta_official_tps": 17.476750770972444,
+        "delta_pct_of_baseline": 3.6316368099255727,
+        "effort_tshirt": "M",
+        "effort_points": 2,
+        "roi_tps_per_effort": 8.738375385486222,
+        "build_blocked": false,
+        "effort_basis": "verify-GEMM SplitK kernel to the M<=32 tile cliff (ubel #84, in flight)",
+        "note": ""
+      },
+      {
+        "lever": "splitk->8.5%",
+        "delta_official_tps": 9.534125499609047,
+        "delta_pct_of_baseline": 1.9811738216430304,
+        "effort_tshirt": "M",
+        "effort_points": 2,
+        "roi_tps_per_effort": 4.7670627498045235,
+        "build_blocked": false,
+        "effort_basis": "verify-GEMM SplitK kernel, intermediate milestone (ubel #84)",
+        "note": ""
+      },
+      {
+        "lever": "lk-rerank->1.024",
+        "delta_official_tps": 6.6706007115763555,
+        "delta_pct_of_baseline": 1.386138613861372,
+        "effort_tshirt": "M",
+        "effort_points": 2,
+        "roi_tps_per_effort": 3.3353003557881777,
+        "build_blocked": false,
+        "effort_basis": "LK prediction-channel re-rank upside if it pans out (fern #95, AMBER)",
+        "note": ""
+      },
+      {
+        "lever": "scale-palette-byte",
+        "delta_official_tps": 2.8874171651538063,
+        "delta_pct_of_baseline": 0.6000000000000024,
+        "effort_tshirt": "S",
+        "effort_points": 1,
+        "roi_tps_per_effort": 2.8874171651538063,
+        "build_blocked": false,
+        "effort_basis": "lossless scale-palette packing (wirbel); composes with SplitK",
+        "note": ""
+      },
+      {
+        "lever": "tree-recovery->4.7",
+        "delta_official_tps": 37.89999999999998,
+        "delta_pct_of_baseline": 7.875550604336998,
+        "effort_tshirt": "L",
+        "effort_points": 4,
+        "roi_tps_per_effort": 9.474999999999994,
+        "build_blocked": true,
+        "effort_basis": "tree drafter build + accept-recovery (land #71); the 518->556 climb",
+        "note": "\u0394TPS credits the FULL 518->556 climb (PR framing); my model puts tree+splitk+lk @ the literal E[T]=4.7 at ~531 (marginal ~+13 over tree-free 518) and needs E[T]~=4.92 to reach 556 -> the tree's ROI is the most assumption-sensitive AND build-blocked by the #101 defect"
+      }
+    ],
+    "ranked": [
+      {
+        "lever": "tau->1.00",
+        "delta_official_tps": 20.051508091345852,
+        "delta_pct_of_baseline": 4.1666666666666785,
+        "effort_tshirt": "S",
+        "effort_points": 1,
+        "roi_tps_per_effort": 20.051508091345852,
+        "build_blocked": false,
+        "effort_basis": "local-calibration of the local->official ratio (lawine #99)",
+        "note": "official-anchor fallback = effort M; the denken-3x test below reports ROI under BOTH so the claim is conditional, not assumed"
+      },
+      {
+        "lever": "tree-recovery->4.7",
+        "delta_official_tps": 37.89999999999998,
+        "delta_pct_of_baseline": 7.875550604336998,
+        "effort_tshirt": "L",
+        "effort_points": 4,
+        "roi_tps_per_effort": 9.474999999999994,
+        "build_blocked": true,
+        "effort_basis": "tree drafter build + accept-recovery (land #71); the 518->556 climb",
+        "note": "\u0394TPS credits the FULL 518->556 climb (PR framing); my model puts tree+splitk+lk @ the literal E[T]=4.7 at ~531 (marginal ~+13 over tree-free 518) and needs E[T]~=4.92 to reach 556 -> the tree's ROI is the most assumption-sensitive AND build-blocked by the #101 defect"
+      },
+      {
+        "lever": "splitk->12%",
+        "delta_official_tps": 17.476750770972444,
+        "delta_pct_of_baseline": 3.6316368099255727,
+        "effort_tshirt": "M",
+        "effort_points": 2,
+        "roi_tps_per_effort": 8.738375385486222,
+        "build_blocked": false,
+        "effort_basis": "verify-GEMM SplitK kernel to the M<=32 tile cliff (ubel #84, in flight)",
+        "note": ""
+      },
+      {
+        "lever": "splitk->8.5%",
+        "delta_official_tps": 9.534125499609047,
+        "delta_pct_of_baseline": 1.9811738216430304,
+        "effort_tshirt": "M",
+        "effort_points": 2,
+        "roi_tps_per_effort": 4.7670627498045235,
+        "build_blocked": false,
+        "effort_basis": "verify-GEMM SplitK kernel, intermediate milestone (ubel #84)",
+        "note": ""
+      },
+      {
+        "lever": "lk-rerank->1.024",
+        "delta_official_tps": 6.6706007115763555,
+        "delta_pct_of_baseline": 1.386138613861372,
+        "effort_tshirt": "M",
+        "effort_points": 2,
+        "roi_tps_per_effort": 3.3353003557881777,
+        "build_blocked": false,
+        "effort_basis": "LK prediction-channel re-rank upside if it pans out (fern #95, AMBER)",
+        "note": ""
+      },
+      {
+        "lever": "scale-palette-byte",
+        "delta_official_tps": 2.8874171651538063,
+        "delta_pct_of_baseline": 0.6000000000000024,
+        "effort_tshirt": "S",
+        "effort_points": 1,
+        "roi_tps_per_effort": 2.8874171651538063,
+        "build_blocked": false,
+        "effort_basis": "lossless scale-palette packing (wirbel); composes with SplitK",
+        "note": ""
+      }
+    ],
+    "top_lever_roi_rank": "tau->1.00",
+    "top_buildable_lever": "tau->1.00",
+    "denken_3x_test": {
+      "claim": "denken #105: tau->1.00 is ~3x cheaper than any other margin lever",
+      "tau_roi_localcal_S": 20.051508091345852,
+      "tau_roi_official_anchor_M": 10.025754045672926,
+      "ratio_tau_over_each_lever_localcal": {
+        "splitk->12%": 2.294649429303516,
+        "splitk->8.5%": 4.20626057254398,
+        "lk-rerank->1.024": 6.01190476190484,
+        "scale-palette-byte": 6.944444444444436,
+        "tree-recovery->4.7": 2.1162541521209355
+      },
+      "ratio_tau_over_each_lever_anchor": {
+        "splitk->12%": 1.147324714651758,
+        "splitk->8.5%": 2.10313028627199,
+        "lk-rerank->1.024": 3.00595238095242,
+        "scale-palette-byte": 3.472222222222218,
+        "tree-recovery->4.7": 1.0581270760604677
+      },
+      "best_other_buildable_lever": "splitk->12%",
+      "best_other_buildable_roi": 8.738375385486222,
+      "tau_clear_top_if_localcal": true,
+      "tau_ties_best_other_if_anchor": true,
+      "verdict": "CONFIRMED iff tau-realization is local-calibration (S): tau ROI is 2.1-6.9x every other lever and beats them all. If it needs an official anchor (M), tau ROI only 1.15x the best other lever (splitk->12%) -> the 3x claim BREAKS; tau merely co-leads. The claim and the gate hinge on the SAME unknown -> denken's ship-readiness PR must resolve the tau path."
+    }
+  },
+  "pr111_step2_climb_realistic_stack": {
+    "top2_levers": [
+      "tau->1.00",
+      "splitk->12%"
+    ],
+    "climb_to_ceiling_tps_at_realistic_stack": 519.4926510034078,
+    "full_nontree_realistic_stack_tps": 529.853700470549,
+    "nontree_stack_clears_540": false,
+    "ceiling_556_needs_tree": true,
+    "tree_recovered_4p7_tps": 531.3815837190882,
+    "tree_marginal_4p7_over_treefree_518": 13.28158371908819,
+    "tree_E_T_required_for_556_ceiling": 4.917746643966218,
+    "tree_full_stack_ceiling_5p207_tps": 588.702958813892,
+    "note": "top-2 buildable ROI levers (tau->1.00+splitk->12%) reach 519.5; the full non-tree stack tops out at 529.9 (< denken's 556 lower band 533) -> the central 556 ceiling is tree-gated: tree+splitk+lk reaches 531.4 at the literal E[T]=4.7 (marginal +13.3 over tree-free 518) and needs E[T]~=4.92 to hit 556; 588.7 at the 5.207 ceiling."
+  },
+  "pr111_step3_post500_gate": {
+    "verdict": "GREEN",
+    "verdict_label": "coherent ROI ranking -- tau->1.00 is the CLEAR #1 lever (ROI 20.1 vs best-other 8.7); build order: tau, then SplitK->12%. denken's 'tau ~3x cheaper' CONFIRMED under local-calibration. RED-FLAG: the full non-tree stack tops out at 529.9 < 540 -> the 556 ceiling is tree-gated (build-blocked), not reachable by the cheap levers alone.",
+    "tau_clear_top_localcal": true,
+    "ceiling_red_flag_nontree_below_540": true,
+    "post500_top_lever_roi_rank": "tau->1.00",
+    "climb_to_ceiling_tps_at_realistic_stack": 519.4926510034078
+  },
   "treefree_bracket_own_model": {
     "splitk_lk": {
       "conservative": 478.9800316560821,

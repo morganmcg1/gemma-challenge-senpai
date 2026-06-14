@@ -1,4 +1,94 @@
-# Tree-vs-tree-free crossover + build-milestone ladder (PR #106) — the capstone synthesis
+# Tree-vs-tree-free crossover + build-milestone ladder (PR #106) + post-500 climb-ROI (PR #111)
+
+> **PR #111 UPDATE (denken #105 LANDED at C = 518.1).** The crossover verdict is
+> now SETTLED (no longer pending), and a second deliverable is added: the
+> **post-500 build-allocation ROI map**. Read §0 first; the #106 body (§1–§7)
+> below is the unchanged foundation it builds on.
+
+## 0. PR #111 — settled headline + the 500→556 climb-ROI map
+
+### 0.1 Settled crossover verdict at the landed C = 518.1 — 🟡 **AMBER**
+
+denken #105 landed the tree-free ceiling at **C = 518.1 central [496.8, 540.8]**.
+Plugging it into my crossover surface fixes the verdict: **500 ≤ 518.1 < 540.7 →
+AMBER — the tree is UPSIDE, not the critical path.** The build must recover
+realized accept_length to **E[T] ≥ 4.79** (tree alone) / **4.58** (tree+splitk+lk)
+to overtake the tree-free stack — **~69 % of the way up denken #101's recoverable
+band [3.844, 5.207]**. (These are the exact landed-central values; the assignment's
+round "~4.7 / ~4.52" anchors correspond to C ≈ 510–511.)
+
+The decisive new finding is that the **landed band spans the entire verdict
+spectrum** — the AMBER call is corner-sensitive on the tree-free side:
+
+| tree-free corner | C | clears 500? | crossover (alone / +sk+lk) | verdict |
+|---|---|---|---|---|
+| **conservative ceiling** | 496.8 | no | 4.59 / 4.39 | 🟢 **GREEN** — tree-free can't hit 500 → tree critical |
+| **central (landed)** | 518.1 | yes | **4.79 / 4.58** | 🟡 **AMBER** — tree is upside; recover E[T] ≥ 4.79 |
+| **optimistic ceiling** | 540.8 | yes | 5.00 / 4.78 | 🔴 **RED edge** — tree barely beats tree-free near its ceiling |
+
+So the **AMBER headline rests entirely on confidence in the tree-free CENTRAL
+~518** — which is exactly what denken's ship-readiness PR pins. If tree-free under-
+delivers (496.8) the tree re-becomes critical (GREEN); if it over-delivers (540.8)
+the tree is not worth the build risk (RED).
+
+### 0.2 The 500→556 climb lever-ROI map (PRIMARY)
+
+Now that tree-free locks ~500 and denken's ceiling is 556, **where should the
+fleet spend its next builds?** Each lever's central **ΔofficialTPS** is its
+marginal gain on the realized 500-lock serve (SplitK 4.44 %, LK 1.010, double-quant
+banked, **realized τ = 0.96**), priced through the same #100 composition model;
+effort is a T-shirt **S/M/L** mapped to ROI points **1 / 2 / 4**:
+
+| rank | lever | ΔofficialTPS | Δ% | effort | **ROI (ΔTPS/effort)** | basis |
+|---|---|---|---|---|---|---|
+| **1** | **τ → 1.00** | **+20.1** | +4.2 % | **S** (local-cal) | **20.1** | close the [0.96,1.00] realization gap (lawine #99) |
+| 2 | tree-recovery → 4.7 | +37.9 | +7.9 % | L ⚠ | 9.5 | 518→556 climb; **build-blocked** by the #101 defect |
+| 3 | SplitK 4.44→12 % | +17.5 | +3.6 % | M | 8.7 | verify-GEMM kernel to the M≤32 cliff (ubel #84) |
+| 4 | SplitK 4.44→8.5 % | +9.5 | +2.0 % | M | 4.8 | verify-GEMM kernel, intermediate milestone |
+| 5 | LK re-rank → 1.024 | +6.7 | +1.4 % | M | 3.3 | LK prediction-channel upside (fern #95) |
+| 6 | scale-palette byte | +2.9 | +0.6 % | S | 2.9 | lossless packing (wirbel); composes with SplitK |
+
+> ⚠ **The tree lever's ΔTPS is the most assumption-sensitive number in the table.**
+> The +37.9 credits the tree the *full* 518→556 climb (the PR's framing), but my
+> composition model puts tree+splitk+lk at the *literally named* E[T]=4.7 at only
+> **531.4 — a +13.3 marginal over the tree-free 518 lock** (ROI ≈ 3.3, near the
+> bottom); reaching the full 556 ceiling needs **E[T] ≈ 4.92**. So the tree is
+> either a high-effort #2 (full-climb framing) or a poor-ROI bottom lever (literal
+> 4.7) — and it is **build-blocked** either way. The cheap levers (τ, SplitK) are
+> the robust ROI plays; the tree is the high-variance bet for the ceiling.
+
+**`post500_top_lever_roi_rank` = τ → 1.00.** It is the clear #1 — **and it directly
+confirms denken #105's "τ is ~3× cheaper" claim, but only conditionally:**
+
+- **If τ-realization is local-calibration (S):** τ ROI = 20.1 is **2.1–6.9× every
+  other lever** (median ~4×) and beats them all → denken's "~3×" **CONFIRMED**.
+- **If it needs an official anchor (M):** τ ROI = 10.0 is only **1.15×** SplitK→12 %
+  → the 3× claim **BREAKS**; τ merely co-leads.
+
+**Both the gate verdict and denken's claim hinge on the same single unknown — the
+τ-realization path — which denken's ship-readiness PR owns.**
+
+### 0.3 `climb_to_ceiling_tps_at_realistic_stack` (TEST) and the gate
+
+- **Top-2 buildable ROI levers (τ + SplitK→12 %) → 519.5 official.**
+- **Full non-tree realistic stack (τ + SplitK→12 % + LK + byte) → 529.9** — it
+  **does not clear 540** and lands just below denken's 556 lower band [533].
+- The central **556 ceiling is therefore tree-gated**: tree+splitk+lk reaches
+  531.4 at the recovered E[T]=4.7 and 588.7 at the 5.207 ceiling.
+
+**Gate verdict: 🟢 GREEN allocation map, with a RED-flag on the ceiling.** A
+coherent ROI ranking emerges with **τ → 1.00 as the unambiguous #1** (build order:
+**τ first, then SplitK→12 %**), confirming denken's 3×-cheaper claim under local-
+calibration. The **RED-flag**: the cheap non-tree levers top out at ~530, so
+reaching 540+ toward the 556 ceiling **requires the build-blocked tree** — the last
+~26 TPS is the expensive, #101-defect-gated lever, not a cheap one.
+
+`post500_top_lever_roi_rank = τ→1.00`. `climb_to_ceiling_tps_at_realistic_stack =
+519.5` (top-2) / 529.9 (full non-tree). W&B group `post500-climb-roi`.
+
+---
+
+## (#106 foundation below)
 
 **Verdict: AMBER — conditional / the tree is UPSIDE, not the critical path (pending denken #105).**
 Crossing my tree model against the tree-free lever stack, the load-bearing
@@ -24,7 +114,8 @@ tree-FREE stack (SplitK #84 + LK #95, +double-quant #104) reads
 reachable tree-free, and the build-blocked tree is upside that only pays off if
 recovery reaches E[T] ≥ ~4.73** (alone) — **~65 % of the way up denken #101's
 recoverable band [3.844, 5.207]**. At the conservative corner (tree-free 481 < 500)
-it flips GREEN and the tree re-becomes the only path to 500.
+it flips GREEN and the tree re-becomes the only path to 500. *(PR #111: the landed
+C = 518.1 settles this to the §0 numbers above.)*
 
 Primary `tree_vs_treefree_crossover_ET = 4.73` at the likely ceiling (≡ 4.624 at
 the C=500 anchor). Test `build_milestone_ladder` (below). W&B `1qkiheqb`.

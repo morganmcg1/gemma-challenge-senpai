@@ -66,6 +66,31 @@ WHAT WE PUT ON THE AXES
 PRIMARY metric  tree_vs_treefree_crossover_ET  (E[T]_x as a function of C)
 TEST    metric  build_milestone_ladder         (official(E[T]) with gates marked)
 
+PR #111 EXTENSION -- settle the headline at the LANDED ceiling + post-500 climb ROI
+-----------------------------------------------------------------------------------
+denken #105 LANDED the tree-free ceiling at C = 518.1 central [496.8, 540.8]
+(SplitK 4.44% threshold). Two follow-ups close out the synthesis:
+
+  STEP 1  Settle the crossover headline at the landed C=518.1 (no longer a sweep):
+          500 <= 518.1 < 540.7 -> AMBER, the tree is UPSIDE not the critical path;
+          the build must recover realized E[T] >= the crossover to overtake tree-
+          free. The landed BAND spans the whole verdict spectrum -- the
+          conservative ceiling corner 496.8 (< 500) FLIPS GREEN (tree-free can't
+          hit 500 -> tree critical), the optimistic corner 540.8 sits on the
+          xover~5.0 RED edge -> the AMBER call rests on confidence in the tree-free
+          CENTRAL ~518 (denken's ship-readiness PR pins it).
+
+  STEP 2  The post-500 climb lever-ROI map (PRIMARY): now that tree-free locks ~500
+          and the ceiling is 556, rank the 500->556 climb levers by official-TPS-
+          per-unit-build-effort. Each lever's central ΔofficialTPS is its marginal
+          gain on the realized tree-free 500-lock (SplitK 4.44%, LK 1.010, double-
+          quant banked, realized tau=0.96), priced via the SAME #100 composition
+          model; effort is a T-shirt S/M/L. Tests denken #105's claim that tau->1.00
+          is ~3x cheaper than any other margin lever.
+
+  PR #111 PRIMARY metric  post500_top_lever_roi_rank  (the #1 lever by ΔTPS/effort)
+  PR #111 TEST    metric  climb_to_ceiling_tps_at_realistic_stack (top-2 ROI levers)
+
 GATE (Step 3, central headline; parameterized on denken #105's ceiling C)
 -------------------------------------------------------------------------
   GREEN / tree clearly worth it   C < 500 (tree-free CANNOT hit 500 alone) AND
@@ -132,6 +157,29 @@ TREE_PATHS = [("tree_alone", {"tree"}),
 # PR's 480..540 plus the deep-RED boundary (the tree's own central ceiling ~563).
 TREEFREE_CEILING_SWEEP = [470, 480, 490, 500, 507, 510, 511, 520,
                           530, 540, 550, 560, 563, 565]
+
+# ---------------------------------------------------------------------------
+# PR #111 -- denken #105 LANDED tree-free ceiling (consumed, no longer swept).
+# ---------------------------------------------------------------------------
+LANDED_C_CENTRAL = 518.1                  # denken #105 central tree-free ceiling
+LANDED_C_BAND = (496.8, 540.8)            # [conservative, optimistic] corners
+DENKEN_CEILING = 556.0                    # denken #105 climb ceiling [533, 581]
+DENKEN_CEILING_BAND = (533.0, 581.0)
+
+# The realized tree-free 500-lock operating point we climb FROM (denken #105):
+SPLITK_LOCK_500 = 0.0444                  # SplitK speedup that locks 500 (#105)
+LK_LOCK_500 = 1.010                       # LK prediction-channel central (#95)
+DOUBLE_QUANT_CENTRAL = 0.0075             # wirbel #104 banked byte saving (post-mult)
+TAU_REALIZED_LOW = 0.96                   # realized local->official gap low (lawine #99)
+
+# climb-lever upgrade targets (the 500->556 candidates the PR names).
+SPLITK_UPGRADES = (0.085, 0.12)           # ubel #84: 8.5% then 12% (M<=32 cliff)
+LK_RERANK_HIGH = 1.024                    # fern #95 prediction-channel upside
+SCALE_PALETTE_CENTRAL = 0.006             # wirbel scale-palette byte-lever (~0.3-1%)
+TREE_RECOVERY_ET = 4.7                    # land #71 tree-recovery accept_length target
+
+# T-shirt build-effort -> ROI denominator (doubling scale; one size ~= 2x the prior).
+EFFORT_POINTS = {"S": 1, "M": 2, "L": 4}
 
 
 # ----------------------------------------------------------------------------
@@ -326,17 +374,270 @@ def gate_for_ceiling(C: float, pts: dict) -> dict:
             "verdict_label": label}
 
 
+# ============================================================================
+# PR #111 STEP 1 -- settle the crossover headline at denken #105's LANDED ceiling.
+# ============================================================================
+def settle_headline_at_landed_C(pts: dict) -> dict:
+    """Fix the crossover verdict at the LANDED tree-free ceiling C=518.1 and lay
+    the band corner table [496.8, 518.1, 540.8]. The verdict at each corner reuses
+    `gate_for_ceiling` (central crossover), so the table shows the full spectrum:
+    the conservative ceiling corner (496.8 < 500) FLIPS GREEN, the optimistic
+    corner (540.8) sits on the xover~5.0 RED edge, and the AMBER central rests on
+    confidence in the tree-free CENTRAL ~518."""
+    corner_table = []
+    for corner, C in (("conservative_ceiling", LANDED_C_BAND[0]),
+                      ("central_landed", LANDED_C_CENTRAL),
+                      ("optimistic_ceiling", LANDED_C_BAND[1])):
+        g = gate_for_ceiling(C, pts)
+        corner_table.append({
+            "corner": corner, "treefree_ceiling": C,
+            "treefree_clears_500": C >= TARGET_OFFICIAL,
+            "crossover_tree_alone": g["crossover_tree_alone"],
+            "crossover_tree_full_stack": g["crossover_tree_full_stack"],
+            "verdict": g["verdict"]})
+    headline = gate_for_ceiling(LANDED_C_CENTRAL, pts)
+    rec_alone = headline["crossover_tree_alone"]
+    rec_stack = headline["crossover_tree_full_stack"]
+    frac_up_band = (rec_alone - REC_BAND[0]) / (REC_BAND[1] - REC_BAND[0])
+    return {
+        "landed_C_central": LANDED_C_CENTRAL,
+        "landed_C_band": list(LANDED_C_BAND),
+        "headline_verdict": headline["verdict"],
+        "headline_verdict_label": headline["verdict_label"],
+        "recovery_gate_E_T_tree_alone": rec_alone,
+        "recovery_gate_E_T_tree_full_stack": rec_stack,
+        "recovery_frac_up_rec_band": frac_up_band,
+        "corner_table": corner_table,
+        "interpretation": (
+            f"LANDED C=518.1 central -> AMBER: tree-free clears 500, the tree is "
+            f"UPSIDE; it overtakes only if realized E[T] >= {rec_alone:.3f} (tree "
+            f"alone) / {rec_stack:.3f} (tree+splitk+lk), ~{frac_up_band*100:.0f}% up "
+            f"denken #101's recoverable band. The landed BAND spans the spectrum: "
+            f"conservative corner 496.8 (<500) is GREEN (tree-free can't hit 500 -> "
+            f"tree critical); optimistic corner 540.8 is the xover~5.0 RED edge "
+            f"(tree barely beats tree-free even near its ceiling). The AMBER call "
+            f"therefore rests on confidence in the tree-free CENTRAL ~518."),
+    }
+
+
+# ============================================================================
+# PR #111 STEP 2 -- the post-500 climb lever-ROI map (PRIMARY).
+# ============================================================================
+def treefree_official_at(splitk_s: float, lk_mult: float, tau: float,
+                         double_quant: bool = True, byte_mult: float = 1.0) -> float:
+    """tree-FREE composed official-TPS at an explicit (splitk_s, lk_mult, tau)
+    operating point, off the central composition point so ONLY the named knobs
+    move. double-quant (#104) and the scale-palette byte-lever apply as the same
+    post-multipliers fern's #106 own-bracket already uses -> faithful to #100."""
+    p = point("central")
+    p["splitk_s"], p["lk_mult"], p["tau"] = splitk_s, lk_mult, tau
+    o = compose({"splitk", "lk"}, p)["official_tps"]
+    if double_quant:
+        o *= (1.0 + DOUBLE_QUANT_CENTRAL)
+    return o * byte_mult
+
+
+def post500_lever_roi() -> dict:
+    """Rank the 500->556 climb levers by central ΔofficialTPS / build-effort.
+
+    Each lever's ΔTPS is its MARGINAL central official gain on the REALIZED tree-
+    free 500-lock baseline (SplitK 4.44%, LK 1.010, double-quant banked, realized
+    tau=0.96). The tau lever closes the [0.96,1.00] realization gap; every other
+    lever is priced on the SAME realized serve (tau held at 0.96) so the ROI
+    comparison is apples-to-apples. Tests denken #105's 'tau ~3x cheaper' claim by
+    reporting tau's ROI under BOTH effort readings (local-calibration S vs
+    official-anchor M)."""
+    # realized 500-lock baseline (the serve we climb from) and the tau-secured point.
+    base = treefree_official_at(SPLITK_LOCK_500, LK_LOCK_500, TAU_REALIZED_LOW)
+    base_tau_secured = treefree_official_at(SPLITK_LOCK_500, LK_LOCK_500, 1.0)
+
+    def lever(name, d_tps, size, basis, blocked=False, note=""):
+        eff = EFFORT_POINTS[size]
+        return {"lever": name, "delta_official_tps": d_tps,
+                "delta_pct_of_baseline": 100.0 * d_tps / base,
+                "effort_tshirt": size, "effort_points": eff,
+                "roi_tps_per_effort": d_tps / eff,
+                "build_blocked": blocked, "effort_basis": basis, "note": note}
+
+    d_tau = base_tau_secured - base
+    levers = [
+        lever("tau->1.00", d_tau, "S",
+              "local-calibration of the local->official ratio (lawine #99)",
+              note=("official-anchor fallback = effort M; the denken-3x test below "
+                    "reports ROI under BOTH so the claim is conditional, not assumed")),
+        lever("splitk->12%",
+              treefree_official_at(SPLITK_UPGRADES[1], LK_LOCK_500, TAU_REALIZED_LOW) - base,
+              "M", "verify-GEMM SplitK kernel to the M<=32 tile cliff (ubel #84, in flight)"),
+        lever("splitk->8.5%",
+              treefree_official_at(SPLITK_UPGRADES[0], LK_LOCK_500, TAU_REALIZED_LOW) - base,
+              "M", "verify-GEMM SplitK kernel, intermediate milestone (ubel #84)"),
+        lever("lk-rerank->1.024",
+              treefree_official_at(SPLITK_LOCK_500, LK_RERANK_HIGH, TAU_REALIZED_LOW) - base,
+              "M", "LK prediction-channel re-rank upside if it pans out (fern #95, AMBER)"),
+        lever("scale-palette-byte",
+              treefree_official_at(SPLITK_LOCK_500, LK_LOCK_500, TAU_REALIZED_LOW,
+                                   byte_mult=1.0 + SCALE_PALETTE_CENTRAL) - base,
+              "S", "lossless scale-palette packing (wirbel); composes with SplitK"),
+        lever("tree-recovery->4.7", DENKEN_CEILING - LANDED_C_CENTRAL, "L",
+              "tree drafter build + accept-recovery (land #71); the 518->556 climb",
+              blocked=True,
+              note=("ΔTPS credits the FULL 518->556 climb (PR framing); my model puts "
+                    "tree+splitk+lk @ the literal E[T]=4.7 at ~531 (marginal ~+13 over "
+                    "tree-free 518) and needs E[T]~=4.92 to reach 556 -> the tree's ROI "
+                    "is the most assumption-sensitive AND build-blocked by the #101 defect")),
+    ]
+    ranked = sorted(levers, key=lambda x: -x["roi_tps_per_effort"])
+
+    # --- denken #105 'tau ~3x cheaper than any other lever' test ---------------
+    tau = next(l for l in levers if l["lever"] == "tau->1.00")
+    tau_roi_localcal = tau["roi_tps_per_effort"]                 # S effort
+    tau_roi_anchor = tau["delta_official_tps"] / EFFORT_POINTS["M"]  # M effort
+    others = [l for l in levers if l["lever"] != "tau->1.00"]
+    ratios_localcal = {l["lever"]: tau_roi_localcal / l["roi_tps_per_effort"] for l in others}
+    ratios_anchor = {l["lever"]: tau_roi_anchor / l["roi_tps_per_effort"] for l in others}
+    # tau is the CLEAR top lever iff its ROI beats the best OTHER buildable lever.
+    best_other_buildable = max(
+        (l for l in others if not l["build_blocked"]), key=lambda x: x["roi_tps_per_effort"])
+    denken_3x = {
+        "claim": "denken #105: tau->1.00 is ~3x cheaper than any other margin lever",
+        "tau_roi_localcal_S": tau_roi_localcal,
+        "tau_roi_official_anchor_M": tau_roi_anchor,
+        "ratio_tau_over_each_lever_localcal": ratios_localcal,
+        "ratio_tau_over_each_lever_anchor": ratios_anchor,
+        "best_other_buildable_lever": best_other_buildable["lever"],
+        "best_other_buildable_roi": best_other_buildable["roi_tps_per_effort"],
+        "tau_clear_top_if_localcal": tau_roi_localcal > best_other_buildable["roi_tps_per_effort"],
+        "tau_ties_best_other_if_anchor":
+            tau_roi_anchor <= best_other_buildable["roi_tps_per_effort"] * 1.25,
+        "verdict": (
+            "CONFIRMED iff tau-realization is local-calibration (S): tau ROI is "
+            f"{min(ratios_localcal.values()):.1f}-{max(ratios_localcal.values()):.1f}x "
+            "every other lever and beats them all. If it needs an official anchor "
+            f"(M), tau ROI only {tau_roi_anchor/best_other_buildable['roi_tps_per_effort']:.2f}x "
+            f"the best other lever ({best_other_buildable['lever']}) -> the 3x claim "
+            "BREAKS; tau merely co-leads. The claim and the gate hinge on the SAME "
+            "unknown -> denken's ship-readiness PR must resolve the tau path."),
+    }
+
+    return {"baseline_realized_tau096": base, "baseline_tau_secured": base_tau_secured,
+            "levers": levers, "ranked": ranked,
+            "top_lever_roi_rank": ranked[0]["lever"],
+            "top_buildable_lever":
+                next(l["lever"] for l in ranked if not l["build_blocked"]),
+            "denken_3x_test": denken_3x}
+
+
+def climb_realistic_stack(roi: dict) -> dict:
+    """climb_to_ceiling_tps_at_realistic_stack (TEST metric): projected official-TPS
+    if the fleet executes the top-2 ROI levers, plus the FULL non-tree realistic
+    stack (all immediately-buildable levers) -- the honest ceiling without the
+    build-blocked tree."""
+    # top-2 immediately-buildable ROI levers (exclude the build-blocked tree).
+    buildable = [l for l in roi["ranked"] if not l["build_blocked"]]
+    top2 = buildable[:2]
+    top2_names = [l["lever"] for l in top2]
+
+    # Compose the named stacks on the tau-secured serve (tau->1.00 banked first
+    # whenever it is in the chosen set).
+    def stack(splitk_s, lk_mult, tau, byte_mult=1.0):
+        return treefree_official_at(splitk_s, lk_mult, tau, byte_mult=byte_mult)
+
+    tau_secured = "tau->1.00" in top2_names
+    tau_val = 1.0 if tau_secured else TAU_REALIZED_LOW
+    splitk_val = (SPLITK_UPGRADES[1] if "splitk->12%" in top2_names else
+                  SPLITK_UPGRADES[0] if "splitk->8.5%" in top2_names else SPLITK_LOCK_500)
+    lk_val = LK_RERANK_HIGH if "lk-rerank->1.024" in top2_names else LK_LOCK_500
+    byte_val = 1.0 + SCALE_PALETTE_CENTRAL if "scale-palette-byte" in top2_names else 1.0
+    top2_tps = stack(splitk_val, lk_val, tau_val, byte_val)
+
+    # full non-tree realistic stack: every buildable lever at its upgrade target.
+    full_nontree = stack(SPLITK_UPGRADES[1], LK_RERANK_HIGH, 1.0,
+                         byte_mult=1.0 + SCALE_PALETTE_CENTRAL)
+
+    # the tree corner (build-blocked): tree+splitk+lk at the recovered E[T]=4.7 and
+    # at the analytical ceiling 5.207 -- what the 556 ceiling actually needs.
+    pc = point("central")
+    tree_stack_full = compose({"tree", "splitk", "lk"}, pc)["official_tps"]
+    tree_at_4p7 = tree_stack_full * (TREE_RECOVERY_ET / E_T_TREE)
+    # marginal of building the tree on TOP of the tree-free 518 lock, at the literal
+    # E[T]=4.7 (not the full 518->556 climb the PR credits the lever) -> ROI floor.
+    tree_marginal_4p7_over_518 = tree_at_4p7 - LANDED_C_CENTRAL
+    # the realized tree E[T] that the 556 ceiling actually requires on this stack.
+    et_for_556 = E_T_TREE * DENKEN_CEILING / tree_stack_full
+
+    return {
+        "top2_levers": top2_names,
+        "climb_to_ceiling_tps_at_realistic_stack": top2_tps,
+        "full_nontree_realistic_stack_tps": full_nontree,
+        "nontree_stack_clears_540": full_nontree >= 540.0,
+        "ceiling_556_needs_tree": full_nontree < DENKEN_CEILING_BAND[0],
+        "tree_recovered_4p7_tps": tree_at_4p7,
+        "tree_marginal_4p7_over_treefree_518": tree_marginal_4p7_over_518,
+        "tree_E_T_required_for_556_ceiling": et_for_556,
+        "tree_full_stack_ceiling_5p207_tps": tree_stack_full,
+        "note": (f"top-2 buildable ROI levers ({'+'.join(top2_names)}) reach "
+                 f"{top2_tps:.1f}; the full non-tree stack tops out at "
+                 f"{full_nontree:.1f} (< denken's 556 lower band {DENKEN_CEILING_BAND[0]:.0f}) "
+                 f"-> the central 556 ceiling is tree-gated: tree+splitk+lk reaches "
+                 f"{tree_at_4p7:.1f} at the literal E[T]=4.7 (marginal +{tree_marginal_4p7_over_518:.1f} "
+                 f"over tree-free 518) and needs E[T]~={et_for_556:.2f} to hit 556; "
+                 f"{tree_stack_full:.1f} at the 5.207 ceiling."),
+    }
+
+
+def post500_gate(roi: dict, climb: dict) -> dict:
+    """The 500->556 build-allocation gate (PR #111 Step 3).
+      GREEN: coherent ROI ranking with a CLEAR top lever (tau local-cal, or
+             SplitK) -> hand the fleet the allocation map.
+      AMBER: ROI flat (no clear winner under the official-anchor tau reading).
+      RED-flag: the full non-tree realistic stack tops out < 540 -> 556 is
+             tree-gated / optimistic-corner-only."""
+    d3 = roi["denken_3x_test"]
+    clear_top_localcal = d3["tau_clear_top_if_localcal"]
+    flat_under_anchor = d3["tau_ties_best_other_if_anchor"]
+    ceiling_red_flag = not climb["nontree_stack_clears_540"]
+
+    if clear_top_localcal:
+        verdict = "GREEN"
+        label = (
+            f"coherent ROI ranking -- tau->1.00 is the CLEAR #1 lever (ROI "
+            f"{d3['tau_roi_localcal_S']:.1f} vs best-other {d3['best_other_buildable_roi']:.1f}); "
+            f"build order: tau, then SplitK->12%. denken's 'tau ~3x cheaper' CONFIRMED "
+            f"under local-calibration."
+            + (f" RED-FLAG: the full non-tree stack tops out at "
+               f"{climb['full_nontree_realistic_stack_tps']:.1f} < 540 -> the 556 ceiling "
+               f"is tree-gated (build-blocked), not reachable by the cheap levers alone."
+               if ceiling_red_flag else ""))
+    elif flat_under_anchor:
+        verdict = "AMBER"
+        label = (
+            f"ROI flattens if tau needs an official anchor (M): tau ties "
+            f"{d3['best_other_buildable_lever']} -> no single clear winner; the climb "
+            f"past 500 is a multi-lever grind.")
+    else:
+        verdict = "AMBER"
+        label = "ROI ranking present but sensitive to the tau-effort reading."
+
+    return {"verdict": verdict, "verdict_label": label,
+            "tau_clear_top_localcal": clear_top_localcal,
+            "ceiling_red_flag_nontree_below_540": ceiling_red_flag,
+            "post500_top_lever_roi_rank": roi["top_lever_roi_rank"],
+            "climb_to_ceiling_tps_at_realistic_stack":
+                climb["climb_to_ceiling_tps_at_realistic_stack"]}
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", default="research/spec_cost_model/tree_vs_treefree_crossover_results.json")
-    ap.add_argument("--treefree-ceiling", type=float, default=None,
-                    help="consume denken #105's landed ceiling for the HEADLINE verdict")
+    ap.add_argument("--treefree-ceiling", type=float, default=LANDED_C_CENTRAL,
+                    help="consume denken #105's LANDED ceiling for the HEADLINE verdict "
+                         "(default = the landed central 518.1)")
     ap.add_argument("--wandb", action="store_true")
     ap.add_argument("--wandb-project", default="gemma-challenge-senpai")
     ap.add_argument("--wandb-entity", default="wandb-applied-ai-team")
-    ap.add_argument("--wandb-name", default="fern/tree-vs-treefree-crossover")
-    ap.add_argument("--wandb-group", default="tree-vs-treefree-crossover")
+    ap.add_argument("--wandb-name", default="fern/post500-climb-roi")
+    ap.add_argument("--wandb-group", default="post500-climb-roi")
     args = ap.parse_args()
 
     pts = {c: point(c) for c in CORNERS}
@@ -359,6 +660,12 @@ def main() -> None:
 
     # gate across the whole sweep (the decision surface).
     gate_surface = [gate_for_ceiling(float(C), pts) for C in TREEFREE_CEILING_SWEEP]
+
+    # ---- PR #111: settle headline at the LANDED C + post-500 climb ROI map ----
+    settle = settle_headline_at_landed_C(pts)
+    roi = post500_lever_roi()
+    climb = climb_realistic_stack(roi)
+    post500 = post500_gate(roi, climb)
 
     # ---- PRIMARY metric: tree_vs_treefree_crossover_ET (as a function of C) ----
     primary = {
@@ -384,10 +691,27 @@ def main() -> None:
             "rule": ("GREEN=C<500 (tree critical path) / AMBER=C>=500 & crossover<5.0 "
                      "(tree upside, name recovery threshold) / RED=crossover>=5.0 "
                      "(tree barely beats tree-free; pivot)"),
+            # ---- PR #111 headline metrics (the post-500 build-allocation map) ----
+            "pr111_primary_metric_name": "post500_top_lever_roi_rank",
+            "pr111_test_metric_name": "climb_to_ceiling_tps_at_realistic_stack",
+            "pr111_step1_settled_verdict": settle["headline_verdict"],
+            "pr111_step1_recovery_gate_tree_alone": settle["recovery_gate_E_T_tree_alone"],
+            "pr111_step1_recovery_gate_tree_full_stack": settle["recovery_gate_E_T_tree_full_stack"],
+            "post500_top_lever_roi_rank": post500["post500_top_lever_roi_rank"],
+            "climb_to_ceiling_tps_at_realistic_stack": post500["climb_to_ceiling_tps_at_realistic_stack"],
+            "pr111_step3_verdict": post500["verdict"],
+            "pr111_step3_verdict_label": post500["verdict_label"],
+            "pr111_rule": ("GREEN=coherent ROI ranking w/ clear top lever (tau local-cal "
+                           "or SplitK) / AMBER=ROI flat under official-anchor tau / "
+                           "RED-flag=full non-tree stack tops out <540 (556 tree-gated)"),
         },
         "step1_build_milestone_ladder": ladder,
         "step2_crossover": crossover,
         "step3_gate_surface": gate_surface,
+        "pr111_step1_settle_headline_landed_C": settle,
+        "pr111_step2_post500_lever_roi": roi,
+        "pr111_step2_climb_realistic_stack": climb,
+        "pr111_step3_post500_gate": post500,
         "treefree_bracket_own_model": own_bracket,
         "anchors": {
             "frontier_official": FRONTIER_OFFICIAL, "target_official": TARGET_OFFICIAL,
@@ -455,6 +779,63 @@ def main() -> None:
     for g in gate_surface:
         print(f"    C={g['treefree_ceiling']:6.1f} -> {g['verdict']:5s}  "
               f"(crossover alone {g['crossover_tree_alone']:.3f})")
+
+    # ===================== PR #111 -- settle + post-500 ROI =====================
+    print("\n" + "=" * 88)
+    print("PR #111 -- SETTLE THE HEADLINE AT LANDED C=518.1 + POST-500 CLIMB-ROI MAP")
+    print("=" * 88)
+    print(f"\n[STEP 1] settled crossover at denken #105's LANDED C={LANDED_C_CENTRAL} "
+          f"central [{LANDED_C_BAND[0]}, {LANDED_C_BAND[1]}]:")
+    print(f"  HEADLINE: {settle['headline_verdict']} -- recovery gate realized E[T] >= "
+          f"{settle['recovery_gate_E_T_tree_alone']:.3f} (tree alone) / "
+          f"{settle['recovery_gate_E_T_tree_full_stack']:.3f} (tree+splitk+lk), "
+          f"~{settle['recovery_frac_up_rec_band']*100:.0f}% up denken #101's band")
+    print(f"  {'corner':22s} {'C':>7s}  {'>=500?':>6s}  {'xover_alone':>11s}  "
+          f"{'xover+sk+lk':>11s}  verdict")
+    for r in settle["corner_table"]:
+        print(f"  {r['corner']:22s} {r['treefree_ceiling']:7.1f}  "
+              f"{str(r['treefree_clears_500']):>6s}  {r['crossover_tree_alone']:11.3f}  "
+              f"{r['crossover_tree_full_stack']:11.3f}  {r['verdict']}")
+    print(f"  => the landed band spans GREEN(496.8)->AMBER(518.1)->RED-edge(540.8); "
+          f"the AMBER rests on the tree-free CENTRAL ~518.")
+
+    print(f"\n[STEP 2] post-500 climb lever-ROI (central ΔofficialTPS / build-effort):")
+    print(f"  realized 500-lock baseline (tau=0.96) = {roi['baseline_realized_tau096']:.1f} "
+          f"| tau-secured = {roi['baseline_tau_secured']:.1f}")
+    print(f"  {'rank lever':26s} {'ΔTPS':>7s} {'Δ%':>6s} {'effort':>7s} {'ROI':>7s}  basis")
+    for i, l in enumerate(roi["ranked"], 1):
+        blk = " [BLOCKED]" if l["build_blocked"] else ""
+        print(f"  {i}. {l['lever']:23s} {l['delta_official_tps']:7.2f} "
+              f"{l['delta_pct_of_baseline']:5.1f}% {l['effort_tshirt']:>5s}({l['effort_points']}) "
+              f"{l['roi_tps_per_effort']:7.2f}  {l['effort_basis'][:38]}{blk}")
+    print(f"  PRIMARY post500_top_lever_roi_rank = {roi['top_lever_roi_rank']} "
+          f"(top BUILDABLE = {roi['top_buildable_lever']})")
+
+    d3 = roi["denken_3x_test"]
+    print(f"\n  [denken '#105 tau ~3x cheaper' TEST]")
+    print(f"    tau ROI: local-cal(S)={d3['tau_roi_localcal_S']:.2f}  "
+          f"official-anchor(M)={d3['tau_roi_official_anchor_M']:.2f}  "
+          f"(best other buildable = {d3['best_other_buildable_lever']} @ "
+          f"{d3['best_other_buildable_roi']:.2f})")
+    print(f"    tau/other ROI ratio (local-cal): "
+          + "  ".join(f"{k}={v:.1f}x" for k, v in
+                      d3["ratio_tau_over_each_lever_localcal"].items()))
+    print(f"    -> {d3['verdict']}")
+
+    print(f"\n[STEP 2 TEST] climb_to_ceiling_tps_at_realistic_stack:")
+    print(f"  top-2 buildable ({'+'.join(climb['top2_levers'])}) -> "
+          f"{climb['climb_to_ceiling_tps_at_realistic_stack']:.1f} official")
+    print(f"  FULL non-tree realistic stack -> {climb['full_nontree_realistic_stack_tps']:.1f} "
+          f"(clears 540? {climb['nontree_stack_clears_540']}; 556 needs tree? "
+          f"{climb['ceiling_556_needs_tree']})")
+    print(f"  tree corner (build-blocked): tree+splitk+lk @E[T]=4.7 -> "
+          f"{climb['tree_recovered_4p7_tps']:.1f} (marginal +{climb['tree_marginal_4p7_over_treefree_518']:.1f} "
+          f"over tree-free 518) | needs E[T]~={climb['tree_E_T_required_for_556_ceiling']:.2f} for 556 | "
+          f"@5.207 ceiling -> {climb['tree_full_stack_ceiling_5p207_tps']:.1f}")
+
+    print(f"\n[STEP 3 / PR #111 VERDICT] {post500['verdict']}")
+    print(f"  {post500['verdict_label']}")
+
     print(f"\nwrote {args.out}")
 
     # ------------------------------- W&B -------------------------------
@@ -518,6 +899,58 @@ def main() -> None:
             else:
                 gt.add_data(key, g["kind"], g["target_official"], g["E_T"]["central"], g["desc"])
         wandb.log({"milestone_gates": gt})
+
+        # ---------------- PR #111 -- settle + post-500 climb-ROI ----------------
+        d3 = roi["denken_3x_test"]
+        s["pr111_step1_settled_verdict"] = settle["headline_verdict"]
+        s["pr111_step1_recovery_gate_tree_alone"] = settle["recovery_gate_E_T_tree_alone"]
+        s["pr111_step1_recovery_gate_tree_full_stack"] = settle["recovery_gate_E_T_tree_full_stack"]
+        s["pr111_step1_recovery_frac_up_band"] = settle["recovery_frac_up_rec_band"]
+        s["post500_top_lever_roi_rank"] = roi["top_lever_roi_rank"]
+        s["post500_top_buildable_lever"] = roi["top_buildable_lever"]
+        s["post500_tau_roi_localcal_S"] = d3["tau_roi_localcal_S"]
+        s["post500_tau_roi_official_anchor_M"] = d3["tau_roi_official_anchor_M"]
+        s["post500_tau_clear_top_if_localcal"] = d3["tau_clear_top_if_localcal"]
+        s["post500_tau_ties_best_other_if_anchor"] = d3["tau_ties_best_other_if_anchor"]
+        s["climb_to_ceiling_tps_at_realistic_stack"] = (
+            climb["climb_to_ceiling_tps_at_realistic_stack"])
+        s["climb_full_nontree_realistic_stack_tps"] = climb["full_nontree_realistic_stack_tps"]
+        s["climb_nontree_stack_clears_540"] = climb["nontree_stack_clears_540"]
+        s["climb_ceiling_556_needs_tree"] = climb["ceiling_556_needs_tree"]
+        s["climb_tree_recovered_4p7_tps"] = climb["tree_recovered_4p7_tps"]
+        s["pr111_verdict"] = post500["verdict"]
+        s["pr111_verdict_label"] = post500["verdict_label"]
+        s["pr111_ceiling_red_flag_nontree_below_540"] = post500["ceiling_red_flag_nontree_below_540"]
+
+        # Step 1 corner table (the landed band GREEN->AMBER->RED spectrum).
+        st = wandb.Table(columns=["corner", "treefree_ceiling", "treefree_clears_500",
+                                  "crossover_tree_alone", "crossover_tree_full_stack",
+                                  "verdict"])
+        for r in settle["corner_table"]:
+            st.add_data(r["corner"], r["treefree_ceiling"], r["treefree_clears_500"],
+                        r["crossover_tree_alone"], r["crossover_tree_full_stack"],
+                        r["verdict"])
+        wandb.log({"pr111_landed_band_corner_table": st})
+
+        # Step 2 lever-ROI ranked table (the build-allocation map).
+        rt = wandb.Table(columns=["rank", "lever", "delta_official_tps",
+                                  "delta_pct_of_baseline", "effort_tshirt",
+                                  "effort_points", "roi_tps_per_effort",
+                                  "build_blocked", "effort_basis"])
+        for i, l in enumerate(roi["ranked"], 1):
+            rt.add_data(i, l["lever"], l["delta_official_tps"],
+                        l["delta_pct_of_baseline"], l["effort_tshirt"],
+                        l["effort_points"], l["roi_tps_per_effort"],
+                        l["build_blocked"], l["effort_basis"])
+        wandb.log({"pr111_post500_lever_roi": rt})
+
+        # denken-3x ratio table (tau ROI over each other lever, both effort reads).
+        dt = wandb.Table(columns=["other_lever", "tau_over_lever_localcal",
+                                  "tau_over_lever_anchor"])
+        for k in d3["ratio_tau_over_each_lever_localcal"]:
+            dt.add_data(k, d3["ratio_tau_over_each_lever_localcal"][k],
+                        d3["ratio_tau_over_each_lever_anchor"][k])
+        wandb.log({"pr111_denken_3x_ratios": dt})
 
         print(f"\nW&B run: {run.id}  ({run.url})")
         wandb.finish()
