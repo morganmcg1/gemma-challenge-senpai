@@ -94,6 +94,7 @@ def init_wandb_run(
     mode: str | None = None,
     tags: list[str] | None = None,
     config: dict[str, Any] | None = None,
+    group: str | None = None,
 ):
     if os.environ.get("WANDB_DISABLED", "").lower() in {"1", "true", "yes"}:
         return None
@@ -121,7 +122,7 @@ def init_wandb_run(
         project=project or os.environ.get("WANDB_PROJECT") or DEFAULT_WANDB_PROJECT,
         entity=entity or os.environ.get("WANDB_ENTITY") or DEFAULT_WANDB_ENTITY,
         name=name,
-        group=agent,
+        group=group or agent,
         job_type=job_type,
         tags=["gemma-challenge", job_type, *(tags or [])],
         notes=notes or None,
