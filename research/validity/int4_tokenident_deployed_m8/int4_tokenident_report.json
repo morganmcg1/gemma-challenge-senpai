@@ -1,0 +1,64 @@
+{
+  "pr": 232,
+  "leg": "int4 deployed-M8 token-identity probe (local)",
+  "imported_anchors": {
+    "kanna_114_div_native_spec_vs_M1": 0.5608,
+    "strict_A_219": 0.125,
+    "fp16_identity_221": 0.98944091796875,
+    "fp16_divergence_221": 0.01055908203125,
+    "fp16_sha_equal_frac_221": 0.0390625,
+    "int4_body_M_dependent_221": false,
+    "official_baseline": 481.53,
+    "M_verify": 8
+  },
+  "int4_token_identity_M1_vs_M8": 0.9927083333333333,
+  "int4_tokenident_self_test_passes": true,
+  "int4_divergence_M1_vs_M8": 0.007291666666666696,
+  "determinism_M1_vs_M1": 1.0,
+  "determinism_M8_vs_M8": 1.0,
+  "within_batch_copy0_vs_copy1": 1.0,
+  "int4_divergence_vs_114_delta": -0.5535083333333333,
+  "deployed_m8_divergence_confirms_114": false,
+  "reading_a_pass_fraction_deployed": 0.1640625,
+  "margin_gate_supply_cap_deployed": 0.9927083333333333,
+  "int4_vs_fp16_identity_delta": 0.0032674153645833037,
+  "int4_vs_fp16_divergence_ratio": 0.6905587668593477,
+  "int4_body_bitexact_decode_M8": true,
+  "decode_width_diagnostic": {
+    "status": "ran",
+    "int4_body_bitexact_M8_vs_M1": true,
+    "per_shape": {
+      "qkv_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      },
+      "o_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      },
+      "gate_up_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      },
+      "down_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      }
+    }
+  },
+  "self_test": {
+    "det_M1_vs_M1_eq_1": true,
+    "det_M8_vs_M8_eq_1": true,
+    "within_batch_copy0_vs_copy1_eq_1": true,
+    "identity_in_range_finite": true,
+    "divergence_eq_1_minus_identity": true,
+    "cap_eq_1_minus_divergence": true,
+    "nan_clean": true
+  },
+  "n_prompts": 128,
+  "max_len": 256,
+  "batch_m": 8,
+  "total_positions": 32640,
+  "model_dir": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "peak_gpu_gb": 12.251262976
+}
