@@ -1,0 +1,755 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260614T205056Z",
+  "kind": "margingate-budget",
+  "nan_clean": true,
+  "peak_mem_mib": 27.301,
+  "pr": 223,
+  "synthesis": {
+    "composition": {
+      "K_cal": 125.26795005202914,
+      "bench_tokens": 16384,
+      "bf16_int4_ratio_default": 4.0,
+      "clear500_bar_et_tau1": 4.862377006624717,
+      "clear500_bar_et_tau_cons": 4.8996140735839555,
+      "kanna122_offshelf_overhead_nonworking_ref": 0.5178,
+      "margin_compute_frac_of_step": 0.002,
+      "step": 1.2182,
+      "target_official": 500.0,
+      "tau_central": 1.0,
+      "tau_conservative": 0.9924
+    },
+    "handoff_line": "MarginGate clears the compliant-500 budget iff the provable-stable skip rate \u2265 skip_rate_min_at_lambda1 = 0.9706 (\u03bb=1; 0.9712 at #71 spine 0.997); the researcher's 81\u201385% estimate MISSES and the 44% empirical floor MISSES (itself a CEILING \u2014 provably-stable \u2286 non-flip \u21d2 skip \u2264 0.4392 from #114's 56.08% flip rate), so the cheap verify_flip_probe diagnostic (measured margin distribution \u2192 skip_rate, \u03b5_max) is the single number that decides MarginGate \u2014 the highest-ranked (P=0.45) valid-verify path; standalone DVR fails at our 56.08% flip (Rank-4) and the MarginGate+DVR hybrid ALSO MISSES because a SOUND margin gate's skip set \u2286 non-flips, so its effective rollback = the full 56.08% flip rate (zero reduction). Lowest-overhead compliant route for any achievable skip stays the custom batch-invariant int4 kernel (#216). Adds 0 TPS; authorizes nothing; ARMS (does not run) verify_flip_probe. NOT a launch. NOT open2.",
+    "headline": {
+      "budget_at_lambda1_both_bugs_tau1": 7.331808522875782,
+      "custom_kernel_overhead_floor_pct": 0.9455349322572293,
+      "empirical_floor_clears_at_lambda1": false,
+      "hybrid_clears_500": false,
+      "hybrid_effective_rollback_sound": 0.5608,
+      "lowest_overhead_route_for_achievable_skip": "custom_BI_kernel_216",
+      "researcher_estimate_hi_clears_at_lambda1": false,
+      "skip_crossover_margingate_beats_custom_floor": 0.9969275072778854,
+      "skip_rate_min_at_lambda1": 0.970608446587865,
+      "skip_rate_min_at_spine_0997": 0.9711948865810449,
+      "skip_upper_bound_from_flip_rate": 0.43920000000000003,
+      "verdict_decision_stable_over_ratio_band": true,
+      "verify_gemm_cost_share_of_step": 0.606620584396473
+    },
+    "imported_anchors": {
+      "budget_at_lambda1_both_bugs_tau1_213": 7.331808522875782,
+      "custom_kernel_overhead_floor_pct_216": 0.9455349322572293,
+      "dvr_standalone_tps_band": [
+        380.0,
+        430.0
+      ],
+      "kanna114_pertoken_flip_rate": 0.5608,
+      "lambda_crit_both_bugs_tau1_213": 0.8344533978886615,
+      "offtheshelf_overhead_attributable_to_verify_gemm_pct_216": 31.410813860049373,
+      "offtheshelf_whole_model_overhead_pct_122": 51.78,
+      "researcher_skip_estimate": [
+        0.81,
+        0.85
+      ],
+      "verify_gemm_cost_share_of_step_216": 0.606620584396473
+    },
+    "lambda_hat": 0.3418647166361965,
+    "margingate_overhead_model": {
+      "bf16_int4_ratio_default": 4.0,
+      "empirical_skip_anchor_from_114_flip_rate": 0.43920000000000003,
+      "empirical_skip_is_a_ceiling_note": "kanna #114's 56.08% per-token flip \u21d2 provably-stable \u2286 non-flip \u21d2 the empirical 44% is a CEILING on the SOUND skip, not a floor: skip \u2264 1 \u2212 0.5608 = 0.4392.",
+      "fallback_full_pct_default": 242.6482337585892,
+      "fallback_linear_in_one_minus_skip_caveat": "(1\u2212skip)\u00b7fallback is the OPTIMISTIC (amortized one-bf16-pass) model the PR specifies; the strict M=1-sequential AR-identity requirement makes the true fallback cost higher (per-low-margin-position M=1 forwards), pushing skip_rate_min UP \u2014 so the MISS verdict is conservative.",
+      "formula": "margingate_overhead_pct(skip) = margin_compute_pct + (1\u2212skip)\u00b7verify_gemm_cost_share_of_step\u00b7(bf16/int4 ratio)\u00b7100",
+      "margin_compute_frac_of_step": 0.002,
+      "margin_compute_pct": 0.2,
+      "overhead_at_skip_0_no_gate_ceiling_pct": 242.8482337585892,
+      "overhead_at_skip_1_margin_compute_only_pct": 0.2,
+      "skip_estimate_researcher": [
+        0.81,
+        0.85
+      ],
+      "spec_speedup_retained_note": "The PR's conceptual \u2212spec_speedup_retained term is ALREADY in the #213 budget baseline (budget computed at the spec operating point E[T](\u03bb)); comparing overhead vs that budget is the apples-to-apples form, so it is not re-subtracted (=0 here).",
+      "verify_gemm_cost_share_of_step_imported_216": 0.606620584396473
+    },
+    "optimism_band_note": "Carries #199's THREE optimisms (rank-1 coverage 0.7304 over-counts the true compliant accept; \u03bb-realism vs \u03bb\u0302=0.342; zero OTHER overhead) and #216's scope/split-K estimates (inherited through the imported budget + share), PLUS this leg's TWO new estimates: (i) the bf16/int4 fallback ratio (default 4 = BW bytes; swept 1\u20138), (ii) the top-2 margin-compute cost (default 0.2% of step, conservative UB; truly \u22480). \u03b5_max / skip are UNMEASURED \u2014 this prices the THRESHOLD the verify_flip_probe diagnostic must beat. The MISS verdict is decision-stable across the whole ratio band (see sensitivity).",
+    "regimes": {
+      "both_bugs": {
+        "tau_central_1p0": {
+          "hybrid": {
+            "clear500_bar_et": 4.862377006624717,
+            "dvr_standalone_et_band": [
+              3.695406525034785,
+              4.181644225697257
+            ],
+            "dvr_standalone_tps_band": [
+              380.0,
+              430.0
+            ],
+            "effective_rollback_sound": 0.5608,
+            "hybrid_clears_500": false,
+            "hybrid_et_le_bar": true,
+            "mechanism": "MarginGate skips the high-margin majority (provably stable, no DVR); DVR handles ONLY the (1\u2212skip) low-margin residual at fixed M=1 \u2192 effective rollback \u2248 (1\u2212skip)\u00b7rollback|low-margin.",
+            "note": "MarginGate removes only never-flipping positions from DVR's domain; the rollback burden (= flip_rate) is unchanged, so the hybrid inherits standalone DVR's E[T] collapse (researcher Rank-4, ~380\u2013430 TPS < 500). Only an UNSOUND tighter gate (\u03b5 < worst-case \u21d2 skips positions that DO flip \u21d2 compliance-violating) could reduce it \u2014 not admissible under Issue #192 strict-A.",
+            "rollback_reduction_from_margingate": 0.0,
+            "skip_upper_bound_from_flip_rate": 0.43920000000000003,
+            "soundness_argument": "A SOUND gate uses worst-case \u03b5_max \u2265 the realized M=32-vs-M=1 perturbation, so {m > 2\u00b7\u03b5_max} \u2286 {does not flip M=1-vs-M=32}: every provably-stable position is a NON-flipping one, and ALL measured flips live in the (1\u2212skip) low-margin residual. Hence rollback|low-margin = flip_rate/(1\u2212skip) and effective rollback = (1\u2212skip)\u00b7flip_rate/(1\u2212skip) = flip_rate \u2014 CONSTANT in skip.",
+            "tau": 1.0
+          },
+          "lambda_crit": 0.8344533978886615,
+          "monotone_skip_min_in_lambda": true,
+          "route_comparison": {
+            "budget_at_lambda1_pct": 7.331808522875782,
+            "lambda_crit": 0.8344533978886615,
+            "lowest_overhead_route_for_skip_above_crossover": "MarginGate",
+            "lowest_overhead_route_for_skip_below_crossover": "custom_BI_kernel_216",
+            "lowest_overhead_route_note": "For any skip < 0.99693 the custom batch-invariant int4 kernel (#216, flat 0.946% floor) is the lowest-overhead compliant route; MarginGate only undercuts it at skip > 0.99693 (its bf16 M=1 fallback is 242.6% of step at full fraction). The empirical skip cap (0.4392, from #114's flip rate) and the researcher's 0.85 both sit far below the crossover \u21d2 the custom kernel stays the route.",
+            "routes": [
+              {
+                "clears_at_any_physical_lambda": false,
+                "lambda_min_feasible": null,
+                "lambda_min_physical": false,
+                "needs_measured": "nothing \u2014 VLLM_BATCH_INVARIANT=1 already measured (+51.78% whole-model); clears at NO physical \u03bb\u22641 (max budget at prob-sat <51.78%).",
+                "overhead_at_lambda1_pct": 51.78,
+                "route": "off_the_shelf_BI_122",
+                "skip_dependent": false
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.8571542761568587,
+                "lambda_min_physical": true,
+                "needs_measured": "the actual custom kernel's split-K realization penalty (does it hit the s_net=1.56% floor \u21d2 0.95% of step?).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "custom_BI_kernel_216",
+                "skip_dependent": false
+              },
+              {
+                "lambda_min_at_skip_threshold": 1.0,
+                "lambda_min_feasible_at_researcher_skip": 1.4924005611828792,
+                "lambda_min_physical_at_researcher_skip": false,
+                "needs_measured": "skip_rate = P(margin > 2\u00b7\u03b5_max) \u2014 the verify_flip_probe margin distribution + \u03b5_max (UNMEASURED). Clears @\u03bb=1 iff skip \u2265 skip_rate_min_at_lambda1.",
+                "overhead_at_lambda1_pct_formula": "0.200 + (1\u2212skip)\u00b7242.648  (% of step)",
+                "overhead_at_skip_anchors_pct": {
+                  "0.4392": 136.27712949181682,
+                  "0.8100": 46.30316441413194,
+                  "0.8500": 36.59723506378839,
+                  "0.9500": 12.33241168792947,
+                  "0.9700": 7.479447012757683,
+                  "0.9969": 0.9522095246516245
+                },
+                "route": "MarginGate",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": false,
+                "effective_rollback_sound": 0.5608,
+                "needs_measured": "skip_rate AND flip|low-margin; but a SOUND gate's skip \u2286 non-flips \u21d2 effective rollback = full flip rate (56.08%) regardless of skip (see hybrid block) \u21d2 inherits standalone-DVR E[T] collapse.",
+                "rollback_reduction_vs_standalone_dvr": 0.0,
+                "route": "MarginGate_plus_DVR_hybrid",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.8571542761568587,
+                "lambda_min_physical": true,
+                "needs_measured": "the Triton fixed-tile int4 GEMM efficiency vs hand-tuned Marlin (Triton typically \u2265 the 0.95% Marlin floor \u2014 UNMEASURED).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "fixed_tile_triton_BI",
+                "skip_dependent": false
+              }
+            ],
+            "skip_crossover_margingate_beats_custom_floor": 0.9969275072778854,
+            "tau": 1.0
+          },
+          "skip_rate_min_at_lambda1": 0.970608446587865,
+          "skip_rate_min_at_spine_0997": 0.9711948865810449,
+          "skip_threshold_at_lambda_crit": {
+            "budget_pct": 0.0,
+            "empirical_floor_clears": false,
+            "feasible_at_skip_1": false,
+            "lambda": 0.8344533978886615,
+            "researcher_estimate_hi_clears": false,
+            "researcher_estimate_lo_clears": false,
+            "skip_rate_min": 1.000824238433151,
+            "skip_rate_min_in_unit_interval": false
+          },
+          "skip_threshold_table": [
+            {
+              "budget_pct": 2.780237534472474,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 0.9,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9893663452871471,
+              "skip_rate_min_in_unit_interval": true
+            },
+            {
+              "budget_pct": 7.189509894325297,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 0.997,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9711948865810449,
+              "skip_rate_min_in_unit_interval": true
+            },
+            {
+              "budget_pct": 7.331808522875782,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 1.0,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.970608446587865,
+              "skip_rate_min_in_unit_interval": true
+            }
+          ]
+        },
+        "tau_conservative_0p9924": {
+          "hybrid": {
+            "clear500_bar_et": 4.8996140735839555,
+            "dvr_standalone_et_band": [
+              3.695406525034785,
+              4.181644225697257
+            ],
+            "dvr_standalone_tps_band": [
+              380.0,
+              430.0
+            ],
+            "effective_rollback_sound": 0.5608,
+            "hybrid_clears_500": false,
+            "hybrid_et_le_bar": true,
+            "mechanism": "MarginGate skips the high-margin majority (provably stable, no DVR); DVR handles ONLY the (1\u2212skip) low-margin residual at fixed M=1 \u2192 effective rollback \u2248 (1\u2212skip)\u00b7rollback|low-margin.",
+            "note": "MarginGate removes only never-flipping positions from DVR's domain; the rollback burden (= flip_rate) is unchanged, so the hybrid inherits standalone DVR's E[T] collapse (researcher Rank-4, ~380\u2013430 TPS < 500). Only an UNSOUND tighter gate (\u03b5 < worst-case \u21d2 skips positions that DO flip \u21d2 compliance-violating) could reduce it \u2014 not admissible under Issue #192 strict-A.",
+            "rollback_reduction_from_margingate": 0.0,
+            "skip_upper_bound_from_flip_rate": 0.43920000000000003,
+            "soundness_argument": "A SOUND gate uses worst-case \u03b5_max \u2265 the realized M=32-vs-M=1 perturbation, so {m > 2\u00b7\u03b5_max} \u2286 {does not flip M=1-vs-M=32}: every provably-stable position is a NON-flipping one, and ALL measured flips live in the (1\u2212skip) low-margin residual. Hence rollback|low-margin = flip_rate/(1\u2212skip) and effective rollback = (1\u2212skip)\u00b7flip_rate/(1\u2212skip) = flip_rate \u2014 CONSTANT in skip.",
+            "tau": 0.9924
+          },
+          "lambda_crit": 0.8528728360500535,
+          "monotone_skip_min_in_lambda": true,
+          "route_comparison": {
+            "budget_at_lambda1_pct": 6.516086778101915,
+            "lambda_crit": 0.8528728360500535,
+            "lowest_overhead_route_for_skip_above_crossover": "MarginGate",
+            "lowest_overhead_route_for_skip_below_crossover": "custom_BI_kernel_216",
+            "lowest_overhead_route_note": "For any skip < 0.99693 the custom batch-invariant int4 kernel (#216, flat 0.946% floor) is the lowest-overhead compliant route; MarginGate only undercuts it at skip > 0.99693 (its bf16 M=1 fallback is 242.6% of step at full fraction). The empirical skip cap (0.4392, from #114's flip rate) and the researcher's 0.85 both sit far below the crossover \u21d2 the custom kernel stays the route.",
+            "routes": [
+              {
+                "clears_at_any_physical_lambda": false,
+                "lambda_min_feasible": null,
+                "lambda_min_physical": false,
+                "needs_measured": "nothing \u2014 VLLM_BATCH_INVARIANT=1 already measured (+51.78% whole-model); clears at NO physical \u03bb\u22641 (max budget at prob-sat <51.78%).",
+                "overhead_at_lambda1_pct": 51.78,
+                "route": "off_the_shelf_BI_122",
+                "skip_dependent": false
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.8753970876600741,
+                "lambda_min_physical": true,
+                "needs_measured": "the actual custom kernel's split-K realization penalty (does it hit the s_net=1.56% floor \u21d2 0.95% of step?).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "custom_BI_kernel_216",
+                "skip_dependent": false
+              },
+              {
+                "lambda_min_at_skip_threshold": 1.0,
+                "lambda_min_feasible_at_researcher_skip": 1.506547164069413,
+                "lambda_min_physical_at_researcher_skip": false,
+                "needs_measured": "skip_rate = P(margin > 2\u00b7\u03b5_max) \u2014 the verify_flip_probe margin distribution + \u03b5_max (UNMEASURED). Clears @\u03bb=1 iff skip \u2265 skip_rate_min_at_lambda1.",
+                "overhead_at_lambda1_pct_formula": "0.200 + (1\u2212skip)\u00b7242.648  (% of step)",
+                "overhead_at_skip_anchors_pct": {
+                  "0.4392": 136.27712949181682,
+                  "0.8100": 46.30316441413194,
+                  "0.8500": 36.59723506378839,
+                  "0.9500": 12.33241168792947,
+                  "0.9700": 7.479447012757683,
+                  "0.9969": 0.9522095246516245
+                },
+                "route": "MarginGate",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": false,
+                "effective_rollback_sound": 0.5608,
+                "needs_measured": "skip_rate AND flip|low-margin; but a SOUND gate's skip \u2286 non-flips \u21d2 effective rollback = full flip rate (56.08%) regardless of skip (see hybrid block) \u21d2 inherits standalone-DVR E[T] collapse.",
+                "rollback_reduction_vs_standalone_dvr": 0.0,
+                "route": "MarginGate_plus_DVR_hybrid",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.8753970876600741,
+                "lambda_min_physical": true,
+                "needs_measured": "the Triton fixed-tile int4 GEMM efficiency vs hand-tuned Marlin (Triton typically \u2265 the 0.95% Marlin floor \u2014 UNMEASURED).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "fixed_tile_triton_BI",
+                "skip_dependent": false
+              }
+            ],
+            "skip_crossover_margingate_beats_custom_floor": 0.9969275072778854,
+            "tau": 0.9924
+          },
+          "skip_rate_min_at_lambda1": 0.9739701926518625,
+          "skip_rate_min_at_spine_0997": 0.9745521757010942,
+          "skip_threshold_at_lambda_crit": {
+            "budget_pct": 0.0,
+            "empirical_floor_clears": false,
+            "feasible_at_skip_1": false,
+            "lambda": 0.8528728360500535,
+            "researcher_estimate_hi_clears": false,
+            "researcher_estimate_lo_clears": false,
+            "skip_rate_min": 1.000824238433151,
+            "skip_rate_min_in_unit_interval": false
+          },
+          "skip_threshold_table": [
+            {
+              "budget_pct": 1.9991077292104809,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 0.9,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9925855313210299,
+              "skip_rate_min_in_unit_interval": true
+            },
+            {
+              "budget_pct": 6.374869619128409,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 0.997,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9745521757010942,
+              "skip_rate_min_in_unit_interval": true
+            },
+            {
+              "budget_pct": 6.516086778101915,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 1.0,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9739701926518625,
+              "skip_rate_min_in_unit_interval": true
+            }
+          ]
+        }
+      },
+      "descent_only": {
+        "tau_central_1p0": {
+          "hybrid": {
+            "clear500_bar_et": 4.862377006624717,
+            "dvr_standalone_et_band": [
+              3.695406525034785,
+              4.181644225697257
+            ],
+            "dvr_standalone_tps_band": [
+              380.0,
+              430.0
+            ],
+            "effective_rollback_sound": 0.5608,
+            "hybrid_clears_500": false,
+            "hybrid_et_le_bar": true,
+            "mechanism": "MarginGate skips the high-margin majority (provably stable, no DVR); DVR handles ONLY the (1\u2212skip) low-margin residual at fixed M=1 \u2192 effective rollback \u2248 (1\u2212skip)\u00b7rollback|low-margin.",
+            "note": "MarginGate removes only never-flipping positions from DVR's domain; the rollback burden (= flip_rate) is unchanged, so the hybrid inherits standalone DVR's E[T] collapse (researcher Rank-4, ~380\u2013430 TPS < 500). Only an UNSOUND tighter gate (\u03b5 < worst-case \u21d2 skips positions that DO flip \u21d2 compliance-violating) could reduce it \u2014 not admissible under Issue #192 strict-A.",
+            "rollback_reduction_from_margingate": 0.0,
+            "skip_upper_bound_from_flip_rate": 0.43920000000000003,
+            "soundness_argument": "A SOUND gate uses worst-case \u03b5_max \u2265 the realized M=32-vs-M=1 perturbation, so {m > 2\u00b7\u03b5_max} \u2286 {does not flip M=1-vs-M=32}: every provably-stable position is a NON-flipping one, and ALL measured flips live in the (1\u2212skip) low-margin residual. Hence rollback|low-margin = flip_rate/(1\u2212skip) and effective rollback = (1\u2212skip)\u00b7flip_rate/(1\u2212skip) = flip_rate \u2014 CONSTANT in skip.",
+            "tau": 1.0
+          },
+          "lambda_crit": 0.9066754940814947,
+          "monotone_skip_min_in_lambda": true,
+          "route_comparison": {
+            "budget_at_lambda1_pct": 4.123450699935671,
+            "lambda_crit": 0.9066754940814947,
+            "lowest_overhead_route_for_skip_above_crossover": "MarginGate",
+            "lowest_overhead_route_for_skip_below_crossover": "custom_BI_kernel_216",
+            "lowest_overhead_route_note": "For any skip < 0.99693 the custom batch-invariant int4 kernel (#216, flat 0.946% floor) is the lowest-overhead compliant route; MarginGate only undercuts it at skip > 0.99693 (its bf16 M=1 fallback is 242.6% of step at full fraction). The empirical skip cap (0.4392, from #114's flip rate) and the researcher's 0.85 both sit far below the crossover \u21d2 the custom kernel stays the route.",
+            "routes": [
+              {
+                "clears_at_any_physical_lambda": false,
+                "lambda_min_feasible": null,
+                "lambda_min_physical": false,
+                "needs_measured": "nothing \u2014 VLLM_BATCH_INVARIANT=1 already measured (+51.78% whole-model); clears at NO physical \u03bb\u22641 (max budget at prob-sat <51.78%).",
+                "overhead_at_lambda1_pct": 51.78,
+                "route": "off_the_shelf_BI_122",
+                "skip_dependent": false
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.9287406239539773,
+                "lambda_min_physical": true,
+                "needs_measured": "the actual custom kernel's split-K realization penalty (does it hit the s_net=1.56% floor \u21d2 0.95% of step?).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "custom_BI_kernel_216",
+                "skip_dependent": false
+              },
+              {
+                "lambda_min_at_skip_threshold": 1.0000000000000004,
+                "lambda_min_feasible_at_researcher_skip": 1.5495734695208334,
+                "lambda_min_physical_at_researcher_skip": false,
+                "needs_measured": "skip_rate = P(margin > 2\u00b7\u03b5_max) \u2014 the verify_flip_probe margin distribution + \u03b5_max (UNMEASURED). Clears @\u03bb=1 iff skip \u2265 skip_rate_min_at_lambda1.",
+                "overhead_at_lambda1_pct_formula": "0.200 + (1\u2212skip)\u00b7242.648  (% of step)",
+                "overhead_at_skip_anchors_pct": {
+                  "0.4392": 136.27712949181682,
+                  "0.8100": 46.30316441413194,
+                  "0.8500": 36.59723506378839,
+                  "0.9500": 12.33241168792947,
+                  "0.9700": 7.479447012757683,
+                  "0.9969": 0.9522095246516245
+                },
+                "route": "MarginGate",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": false,
+                "effective_rollback_sound": 0.5608,
+                "needs_measured": "skip_rate AND flip|low-margin; but a SOUND gate's skip \u2286 non-flips \u21d2 effective rollback = full flip rate (56.08%) regardless of skip (see hybrid block) \u21d2 inherits standalone-DVR E[T] collapse.",
+                "rollback_reduction_vs_standalone_dvr": 0.0,
+                "route": "MarginGate_plus_DVR_hybrid",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.9287406239539773,
+                "lambda_min_physical": true,
+                "needs_measured": "the Triton fixed-tile int4 GEMM efficiency vs hand-tuned Marlin (Triton typically \u2265 the 0.95% Marlin floor \u2014 UNMEASURED).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "fixed_tile_triton_BI",
+                "skip_dependent": false
+              }
+            ],
+            "skip_crossover_margingate_beats_custom_floor": 0.9969275072778854,
+            "tau": 1.0
+          },
+          "skip_rate_min_at_lambda1": 0.9838307057127021,
+          "skip_rate_min_at_spine_0997": 0.9843983334297906,
+          "skip_threshold_at_lambda_crit": {
+            "budget_pct": 0.0,
+            "empirical_floor_clears": false,
+            "feasible_at_skip_1": false,
+            "lambda": 0.9066754940814947,
+            "researcher_estimate_hi_clears": false,
+            "researcher_estimate_lo_clears": false,
+            "skip_rate_min": 1.000824238433151,
+            "skip_rate_min_in_unit_interval": false
+          },
+          "skip_threshold_table": [
+            {
+              "budget_pct": -0.2825902298211669,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": false,
+              "lambda": 0.9,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 1.0019888470744085,
+              "skip_rate_min_in_unit_interval": false
+            },
+            {
+              "budget_pct": 3.985716836951747,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 0.997,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9843983334297906,
+              "skip_rate_min_in_unit_interval": true
+            },
+            {
+              "budget_pct": 4.123450699935671,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 1.0,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9838307057127021,
+              "skip_rate_min_in_unit_interval": true
+            }
+          ]
+        },
+        "tau_conservative_0p9924": {
+          "hybrid": {
+            "clear500_bar_et": 4.8996140735839555,
+            "dvr_standalone_et_band": [
+              3.695406525034785,
+              4.181644225697257
+            ],
+            "dvr_standalone_tps_band": [
+              380.0,
+              430.0
+            ],
+            "effective_rollback_sound": 0.5608,
+            "hybrid_clears_500": false,
+            "hybrid_et_le_bar": true,
+            "mechanism": "MarginGate skips the high-margin majority (provably stable, no DVR); DVR handles ONLY the (1\u2212skip) low-margin residual at fixed M=1 \u2192 effective rollback \u2248 (1\u2212skip)\u00b7rollback|low-margin.",
+            "note": "MarginGate removes only never-flipping positions from DVR's domain; the rollback burden (= flip_rate) is unchanged, so the hybrid inherits standalone DVR's E[T] collapse (researcher Rank-4, ~380\u2013430 TPS < 500). Only an UNSOUND tighter gate (\u03b5 < worst-case \u21d2 skips positions that DO flip \u21d2 compliance-violating) could reduce it \u2014 not admissible under Issue #192 strict-A.",
+            "rollback_reduction_from_margingate": 0.0,
+            "skip_upper_bound_from_flip_rate": 0.43920000000000003,
+            "soundness_argument": "A SOUND gate uses worst-case \u03b5_max \u2265 the realized M=32-vs-M=1 perturbation, so {m > 2\u00b7\u03b5_max} \u2286 {does not flip M=1-vs-M=32}: every provably-stable position is a NON-flipping one, and ALL measured flips live in the (1\u2212skip) low-margin residual. Hence rollback|low-margin = flip_rate/(1\u2212skip) and effective rollback = (1\u2212skip)\u00b7flip_rate/(1\u2212skip) = flip_rate \u2014 CONSTANT in skip.",
+            "tau": 0.9924
+          },
+          "lambda_crit": 0.9245784686249501,
+          "monotone_skip_min_in_lambda": true,
+          "route_comparison": {
+            "budget_at_lambda1_pct": 3.3321124746161557,
+            "lambda_crit": 0.9245784686249501,
+            "lowest_overhead_route_for_skip_above_crossover": "MarginGate",
+            "lowest_overhead_route_for_skip_below_crossover": "custom_BI_kernel_216",
+            "lowest_overhead_route_note": "For any skip < 0.99693 the custom batch-invariant int4 kernel (#216, flat 0.946% floor) is the lowest-overhead compliant route; MarginGate only undercuts it at skip > 0.99693 (its bf16 M=1 fallback is 242.6% of step at full fraction). The empirical skip cap (0.4392, from #114's flip rate) and the researcher's 0.85 both sit far below the crossover \u21d2 the custom kernel stays the route.",
+            "routes": [
+              {
+                "clears_at_any_physical_lambda": false,
+                "lambda_min_feasible": null,
+                "lambda_min_physical": false,
+                "needs_measured": "nothing \u2014 VLLM_BATCH_INVARIANT=1 already measured (+51.78% whole-model); clears at NO physical \u03bb\u22641 (max budget at prob-sat <51.78%).",
+                "overhead_at_lambda1_pct": 51.78,
+                "route": "off_the_shelf_BI_122",
+                "skip_dependent": false
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.9464784127003916,
+                "lambda_min_physical": true,
+                "needs_measured": "the actual custom kernel's split-K realization penalty (does it hit the s_net=1.56% floor \u21d2 0.95% of step?).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "custom_BI_kernel_216",
+                "skip_dependent": false
+              },
+              {
+                "lambda_min_at_skip_threshold": 1.0000000000000004,
+                "lambda_min_feasible_at_researcher_skip": 1.5634728401943545,
+                "lambda_min_physical_at_researcher_skip": false,
+                "needs_measured": "skip_rate = P(margin > 2\u00b7\u03b5_max) \u2014 the verify_flip_probe margin distribution + \u03b5_max (UNMEASURED). Clears @\u03bb=1 iff skip \u2265 skip_rate_min_at_lambda1.",
+                "overhead_at_lambda1_pct_formula": "0.200 + (1\u2212skip)\u00b7242.648  (% of step)",
+                "overhead_at_skip_anchors_pct": {
+                  "0.4392": 136.27712949181682,
+                  "0.8100": 46.30316441413194,
+                  "0.8500": 36.59723506378839,
+                  "0.9500": 12.33241168792947,
+                  "0.9700": 7.479447012757683,
+                  "0.9969": 0.9522095246516245
+                },
+                "route": "MarginGate",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": false,
+                "effective_rollback_sound": 0.5608,
+                "needs_measured": "skip_rate AND flip|low-margin; but a SOUND gate's skip \u2286 non-flips \u21d2 effective rollback = full flip rate (56.08%) regardless of skip (see hybrid block) \u21d2 inherits standalone-DVR E[T] collapse.",
+                "rollback_reduction_vs_standalone_dvr": 0.0,
+                "route": "MarginGate_plus_DVR_hybrid",
+                "skip_dependent": true
+              },
+              {
+                "clears_at_any_physical_lambda": true,
+                "lambda_min_feasible": 0.9464784127003916,
+                "lambda_min_physical": true,
+                "needs_measured": "the Triton fixed-tile int4 GEMM efficiency vs hand-tuned Marlin (Triton typically \u2265 the 0.95% Marlin floor \u2014 UNMEASURED).",
+                "overhead_at_lambda1_pct": 0.9455349322572293,
+                "overhead_band_pct": [
+                  0.9455349322572293,
+                  31.410813860049373
+                ],
+                "route": "fixed_tile_triton_BI",
+                "skip_dependent": false
+              }
+            ],
+            "skip_crossover_margingate_beats_custom_floor": 0.9969275072778854,
+            "tau": 0.9924
+          },
+          "skip_rate_min_at_lambda1": 0.9870919626073508,
+          "skip_rate_min_at_spine_0997": 0.9876552763537894,
+          "skip_threshold_at_lambda_crit": {
+            "budget_pct": 0.0,
+            "empirical_floor_clears": false,
+            "feasible_at_skip_1": false,
+            "lambda": 0.9245784686249501,
+            "researcher_estimate_hi_clears": false,
+            "researcher_estimate_lo_clears": false,
+            "skip_rate_min": 1.000824238433151,
+            "skip_rate_min_in_unit_interval": false
+          },
+          "skip_threshold_table": [
+            {
+              "budget_pct": -1.0404425440745269,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": false,
+              "lambda": 0.9,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 1.0051121020947082,
+              "skip_rate_min_in_unit_interval": false
+            },
+            {
+              "budget_pct": 3.1954253889908912,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 0.997,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9876552763537894,
+              "skip_rate_min_in_unit_interval": true
+            },
+            {
+              "budget_pct": 3.3321124746161557,
+              "empirical_floor_clears": false,
+              "feasible_at_skip_1": true,
+              "lambda": 1.0,
+              "researcher_estimate_hi_clears": false,
+              "researcher_estimate_lo_clears": false,
+              "skip_rate_min": 0.9870919626073508,
+              "skip_rate_min_in_unit_interval": true
+            }
+          ]
+        }
+      }
+    },
+    "self_test": {
+      "conditions": {
+        "a_skip1_overhead_is_margin_compute_only_and_in_budget": true,
+        "b_skip0_overhead_is_full_bf16_fallback_no_gate_ceiling": true,
+        "c_margingate_overhead_monotone_decreasing_in_skip": true,
+        "d_skip_rate_min_monotone_decreasing_in_lambda": true,
+        "e_roundtrips_213_216_endpoints_budget733_crit0p8345_share0p6066": true,
+        "f_nan_clean": true
+      },
+      "margingate_budget_self_test_passes": true
+    },
+    "sensitivity": {
+      "bf16_int4_ratio_for_researcher_85_to_clear": 0.7837747576569319,
+      "bf16_int4_ratio_for_researcher_85_to_clear_is_physical": false,
+      "margin_compute_sweep": [
+        {
+          "margin_compute_frac_of_step": 0.0,
+          "skip_rate_min_at_lambda1": 0.9697842081547142
+        },
+        {
+          "margin_compute_frac_of_step": 0.001,
+          "skip_rate_min_at_lambda1": 0.9701963273712896
+        },
+        {
+          "margin_compute_frac_of_step": 0.002,
+          "skip_rate_min_at_lambda1": 0.970608446587865
+        },
+        {
+          "margin_compute_frac_of_step": 0.005,
+          "skip_rate_min_at_lambda1": 0.9718448042375913
+        },
+        {
+          "margin_compute_frac_of_step": 0.01,
+          "skip_rate_min_at_lambda1": 0.9739054003204685
+        }
+      ],
+      "ratio_sweep": [
+        {
+          "bf16_int4_ratio": 1.0,
+          "empirical_floor_clears": false,
+          "researcher_hi_clears": false,
+          "skip_rate_min_at_lambda1": 0.8824337863514602
+        },
+        {
+          "bf16_int4_ratio": 2.0,
+          "empirical_floor_clears": false,
+          "researcher_hi_clears": false,
+          "skip_rate_min_at_lambda1": 0.9412168931757301
+        },
+        {
+          "bf16_int4_ratio": 3.0,
+          "empirical_floor_clears": false,
+          "researcher_hi_clears": false,
+          "skip_rate_min_at_lambda1": 0.9608112621171534
+        },
+        {
+          "bf16_int4_ratio": 4.0,
+          "empirical_floor_clears": false,
+          "researcher_hi_clears": false,
+          "skip_rate_min_at_lambda1": 0.970608446587865
+        },
+        {
+          "bf16_int4_ratio": 6.0,
+          "empirical_floor_clears": false,
+          "researcher_hi_clears": false,
+          "skip_rate_min_at_lambda1": 0.9804056310585767
+        },
+        {
+          "bf16_int4_ratio": 8.0,
+          "empirical_floor_clears": false,
+          "researcher_hi_clears": false,
+          "skip_rate_min_at_lambda1": 0.9853042232939325
+        }
+      ],
+      "skip_anchor_clears_at_lambda1": [
+        {
+          "clears_at_lambda1": false,
+          "overhead_pct": 136.27712949181682,
+          "skip": 0.4392
+        },
+        {
+          "clears_at_lambda1": false,
+          "overhead_pct": 46.30316441413194,
+          "skip": 0.81
+        },
+        {
+          "clears_at_lambda1": false,
+          "overhead_pct": 36.59723506378839,
+          "skip": 0.85
+        },
+        {
+          "clears_at_lambda1": false,
+          "overhead_pct": 12.33241168792947,
+          "skip": 0.95
+        },
+        {
+          "clears_at_lambda1": false,
+          "overhead_pct": 7.479447012757683,
+          "skip": 0.97
+        },
+        {
+          "clears_at_lambda1": true,
+          "overhead_pct": 0.9522095246516245,
+          "skip": 0.9969
+        }
+      ],
+      "skip_rate_min_at_lambda1_band_over_ratio": [
+        0.8824337863514602,
+        0.9853042232939325
+      ],
+      "verdict_decision_stable_over_ratio_band": true
+    },
+    "spine_0997": 0.997,
+    "test_metric": {
+      "skip_rate_min_at_lambda1": 0.970608446587865
+    },
+    "verdict": "MARGINGATE-MISSES-COMPLIANT-500-skip_min_0.9706-GT-empirical_cap_0.4392-AND-researcher_0p85"
+  }
+}
