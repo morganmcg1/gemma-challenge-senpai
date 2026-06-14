@@ -1,0 +1,227 @@
+{
+  "agent": "denken",
+  "created_at": "20260614T220705Z",
+  "kind": "ppl-public-gate-headroom",
+  "nan_clean": true,
+  "peak_mem_mib": 27.246,
+  "pr": 236,
+  "synthesis": {
+    "frame_third_condition": {
+      "budget_used_pct_of_5pct": 0.6285950413223196,
+      "note": "the public milestone is a CONJUNCTION of three conditions; the launch-sigma legs (#217/#222/#229/#218/#228) price only TPS/lambda. The third condition PPL<=2.42 is UNPRICED as a function of the build's acceptance aggressiveness. Frontier #52 serves 2.3772 -> margin 0.0428 (1.77%). The int4 verify uses 3.14% of the 5% PPL budget (reference 2.30476 = cap/1.05).",
+      "ppl_cap": 2.42,
+      "ppl_margin_frontier": 0.04279999999999973,
+      "ppl_margin_frontier_pct": 1.7685950413223028,
+      "ppl_served_frontier": 2.3772,
+      "priced_only_tps_lambda": [
+        "#217",
+        "#222",
+        "#229",
+        "#218",
+        "#228"
+      ],
+      "public_milestone": "TPS>=500  AND  PPL<=2.42  AND  128/128",
+      "reference_ppl": 2.3047619047619046,
+      "served_vs_reference_pct": 3.142975206611598
+    },
+    "handoff_lines": {
+      "fern_231": "the public milestone's third condition PPL<=2.42 has headroom 0.0428 at the lambda=0.9780 build bar (drift tolerance +0.3234 in divergent-accept-fraction from #52's 2.3772 anchor under the 56% int4 divergence), and it is LAMBDA-INVARIANT (output-equivalence: the served stream is the int4 greedy stream, so the build's acceptance aggressiveness cannot drift PPL) -- so PPL is NOT a binding public gate on the launch-sigma axis; land #71's served run reports the scorer's PPL natively, so it is one-run-confirmable but has comfortable slack (a verify-model change, not lambda, is the only thing that moves it); fern #231 carries ppl_headroom_at_build_bar=0.0428 as the third public-gate row alongside the TPS>=500 trigger.",
+      "human_124_packet": "the public milestone's third condition PPL<=2.42 has headroom 0.0428 at the lambda=0.9780 build bar (drift tolerance +0.3234 in divergent-accept-fraction from #52's 2.3772 anchor under the 56% int4 divergence), and it is LAMBDA-INVARIANT (output-equivalence: the served stream is the int4 greedy stream, so the build's acceptance aggressiveness cannot drift PPL) -- so PPL is NOT a binding public gate on the launch-sigma axis; land #71's served run reports the scorer's PPL natively, so it is one-run-confirmable but has comfortable slack (a verify-model change, not lambda, is the only thing that moves it); fern #231 carries ppl_headroom_at_build_bar=0.0428 as the third public-gate row alongside the TPS>=500 trigger.",
+      "land_71": "the public milestone's third condition PPL<=2.42 has headroom 0.0428 at the lambda=0.9780 build bar (drift tolerance +0.3234 in divergent-accept-fraction from #52's 2.3772 anchor under the 56% int4 divergence), and it is LAMBDA-INVARIANT (output-equivalence: the served stream is the int4 greedy stream, so the build's acceptance aggressiveness cannot drift PPL) -- so PPL is NOT a binding public gate on the launch-sigma axis; land #71's served run reports the scorer's PPL natively, so it is one-run-confirmable but has comfortable slack (a verify-model change, not lambda, is the only thing that moves it); fern #231 carries ppl_headroom_at_build_bar=0.0428 as the third public-gate row alongside the TPS>=500 trigger."
+    },
+    "imports": {
+      "K_cal": 125.26795005202914,
+      "build_bar": 0.9779783323491393,
+      "build_bar_nominal": 0.978,
+      "ceiling_mu": 520.9527323111674,
+      "div_rate": 0.5607757568359375,
+      "div_rate_114": 0.5607757568359375,
+      "div_rate_lawine_232": null,
+      "div_rate_source": "kanna#114",
+      "et_lambda1": 5.21887717841078,
+      "lambda_floor": 0.3418647166361965,
+      "official_tps": 481.53,
+      "ppl_budget_factor": 1.05,
+      "ppl_cap": 2.42,
+      "reference_ppl": 2.3047619047619046,
+      "regime": "both_bugs",
+      "served_ppl": 2.3772,
+      "source_runs": {
+        "d114": "9q5yy9l1",
+        "d191": "stark build bar 0.9780",
+        "d222": "binding_gate",
+        "d232": "lawine (in-flight)",
+        "d52": "(official 481.53)"
+      },
+      "step": 1.2182
+    },
+    "lambda_projection": {
+      "build_bar": 0.9779783323491393,
+      "d_ppl_served_d_lambda": 0.0,
+      "decoupling": {
+        "note": "across the lambda grid the public speed climbs 8.2% (481.53->520.95 TPS) while ppl_served stays pinned at 2.3772 (headroom 0.0428) -- PPL is DECOUPLED from the build's acceptance axis.",
+        "ppl_flat_in_lambda": true,
+        "speed_gain_across_grid_pct": 8.186973254245267,
+        "speed_rises_with_lambda": true
+      },
+      "lambda_52_map_implied": 0.8151380839100797,
+      "land71_readout_flag": "land #71's served run reports the scorer's PPL natively (vLLM prompt_logprobs path, program.md submission contract) -> PPL is a ONE-RUN-CONFIRMABLE readout in the GO-card, not a pre-launch unknown. It is NOT free: it must be READ from the served run, but it is pinned at the int4 verify's 2.3772 and cannot drift with lambda.",
+      "max_fdiv_increase_before_cap": 0.323357467529628,
+      "max_ppl_drift_before_cap": 0.04279999999999973,
+      "ppl_headroom_at_build_bar": 0.04279999999999973,
+      "ppl_is_binding_public_gate": false,
+      "ppl_served_at_build_bar": 2.3772,
+      "table": [
+        {
+          "E_T": 4.823942311562904,
+          "clears_cap": true,
+          "divergent_accept_fraction": 0.5607757568359375,
+          "headroom_to_cap": 0.04279999999999973,
+          "lambda_hat": 0.8151380839100797,
+          "mu_pub_speed": 481.53000000000014,
+          "ppl_served": 2.3772,
+          "tag": "#52 (frontier)"
+        },
+        {
+          "E_T": 5.105854976365959,
+          "clears_cap": true,
+          "divergent_accept_fraction": 0.5607757568359375,
+          "headroom_to_cap": 0.04279999999999973,
+          "lambda_hat": 0.95,
+          "mu_pub_speed": 509.6707605470792,
+          "ppl_served": 2.3772,
+          "tag": "0.9500"
+        },
+        {
+          "E_T": 5.168500268658075,
+          "clears_cap": true,
+          "divergent_accept_fraction": 0.5607757568359375,
+          "headroom_to_cap": 0.04279999999999973,
+          "lambda_hat": 0.9779783323491393,
+          "mu_pub_speed": 515.9240665878908,
+          "ppl_served": 2.3772,
+          "tag": "0.9780 (build bar)"
+        },
+        {
+          "E_T": 5.211958082615399,
+          "clears_cap": true,
+          "divergent_accept_fraction": 0.5607757568359375,
+          "headroom_to_cap": 0.04279999999999973,
+          "lambda_hat": 0.997,
+          "mu_pub_speed": 520.2620623190401,
+          "ppl_served": 2.3772,
+          "tag": "0.9970"
+        },
+        {
+          "E_T": 5.21887717841078,
+          "clears_cap": true,
+          "divergent_accept_fraction": 0.5607757568359375,
+          "headroom_to_cap": 0.04279999999999973,
+          "lambda_hat": 1.0,
+          "mu_pub_speed": 520.9527323111674,
+          "ppl_served": 2.3772,
+          "tag": "1.0 (ceiling)"
+        }
+      ]
+    },
+    "mixture_calibration": {
+      "calibration_residual": 4.440892098500626e-16,
+      "d_ppl_d_fdiv_at_operating": 0.13118382509242474,
+      "f_div_operating": 0.5607757568359375,
+      "f_div_star_cap_crossing": 0.8841332243655655,
+      "int4_standalone_ppl_implied": 2.3772,
+      "int4_standalone_residual": 0.0,
+      "max_fdiv_increase_before_cap": 0.323357467529628,
+      "model": "ln(ppl_served) = (1-f_div)*ln(ppl_agree) + f_div*ln(ppl_div)",
+      "note": "mixture calibrated to #52: agreeing tokens ~ reference 2.30476 (f_div=0), divergent tokens ~ 2.4355 (the f_div=1 sub-PPL), operating f_div=0.5608 round-trips served 2.377200 (resid 4.44e-16). The divergent SUB-component 2.4355 sits ABOVE the cap, but it is only 56.1% of the stream -> the served AVERAGE is 2.3772. The served average would cross 2.42 only at f_div*=0.8841 -- a +0.3234 increase the build CANNOT make via lambda (output-equivalence).",
+      "ppl_agree_f0": 2.3047619047619046,
+      "ppl_div_above_cap": true,
+      "ppl_div_solved": 2.4355230850842244,
+      "served_roundtrip": 2.3771999999999998
+    },
+    "robustness": {
+      "divergence_sweep_0p50_0p60": [
+        {
+          "div_rate": 0.5,
+          "f_div_star_cap_crossing": 0.7883126308402706,
+          "fdiv_margin_positive": true,
+          "headroom_to_cap": 0.04279999999999973,
+          "max_fdiv_increase_before_cap": 0.2883126308402706,
+          "ppl_div_solved": 2.451914806611571,
+          "ppl_served": 2.3772
+        },
+        {
+          "div_rate": 0.5608,
+          "f_div_star_cap_crossing": 0.8841714467504465,
+          "fdiv_margin_positive": true,
+          "headroom_to_cap": 0.04279999999999973,
+          "max_fdiv_increase_before_cap": 0.3233714467504465,
+          "ppl_div_solved": 2.4355172749308576,
+          "ppl_served": 2.3772
+        },
+        {
+          "div_rate": 0.55,
+          "f_div_star_cap_crossing": 0.8671438939242947,
+          "fdiv_margin_positive": true,
+          "headroom_to_cap": 0.04279999999999973,
+          "max_fdiv_increase_before_cap": 0.31714389392429465,
+          "ppl_div_solved": 2.438157758013838,
+          "ppl_served": 2.3772
+        },
+        {
+          "div_rate": 0.6,
+          "f_div_star_cap_crossing": 0.945975157008324,
+          "fdiv_margin_positive": true,
+          "headroom_to_cap": 0.04279999999999973,
+          "max_fdiv_increase_before_cap": 0.34597515700832404,
+          "ppl_div_solved": 2.4267525316863536,
+          "ppl_served": 2.3772
+        }
+      ],
+      "headroom_invariant_to_divergence": true,
+      "honest_bookend": {
+        "ceiling_clears_cap": true,
+        "divergent_subcomponent_ppl": 2.4355230850842244,
+        "note": "the served stream IS the int4-standalone greedy stream (output-equivalence), so the worst the served AVERAGE can reach is the int4-standalone PPL 2.3772 itself -- which is 0.0428 UNDER the cap. The divergent-token sub-PPL 2.4355 is higher (above cap) but is only a 56.1% sub-fraction, NOT the served average.",
+        "served_stream_is_int4_standalone": true,
+        "worst_case_served_ppl_ceiling": 2.3772
+      },
+      "publish_first_is_launch_gate": "under #124 publish-first, PPL<=2.42 is a condition of the PUBLIC milestone itself -- a LAUNCH gate read at submission, not a post-hoc private-bar defence. A PPL breach would FAIL the public milestone directly even with TPS>=500 and 128/128. That makes pricing it (this leg) load-bearing -- and the result is that the int4 verify keeps it pinned 0.0428 under cap, lambda-invariant.",
+      "verdict_stable_under_divergence_sweep": true
+    },
+    "self_test": {
+      "conditions": {
+        "a_mixture_roundtrips_served_2p3772_resid0": true,
+        "b_ppl_margin_frontier_is_0p0428": true,
+        "c_ppl_monotone_in_fdiv_and_flat_in_lambda": true,
+        "d_binding_bool_consistent_with_served_gt_cap": true,
+        "e_headroom_monotone_nonincreasing_in_lambda": true,
+        "f_key_scalars_finite": true,
+        "g_decoupling_speed_rises_ppl_flat": true
+      },
+      "evidence": {
+        "a_calib_resid": 4.440892098500626e-16,
+        "a_int4_standalone_resid": 0.0,
+        "b_ppl_margin_frontier": 0.04279999999999973,
+        "c_flat_lambda": true,
+        "c_mono_fdiv": true,
+        "c_ppl_div_ge_agree": true,
+        "d_binding": false,
+        "d_served_at_bar_gt_cap": false,
+        "e_headrooms": [
+          0.04279999999999973,
+          0.04279999999999973,
+          0.04279999999999973,
+          0.04279999999999973,
+          0.04279999999999973
+        ],
+        "g_speed_gain_pct": 8.186973254245267
+      },
+      "ppl_public_gate_self_test_passes": true
+    },
+    "test_metric": {
+      "ppl_headroom_at_build_bar": 0.04279999999999973
+    },
+    "verdict": "NOT-BINDING (on the launch-sigma lambda/tree axis). The public milestone's third condition PPL<=2.42 has headroom 0.0428 at the lambda=0.9780 build bar -- and that headroom is LAMBDA-INVARIANT. program.md L27-28 pins greedy identity to the SUBMITTED (int4) checkpoint, so the served stream IS the int4-standalone greedy stream and a correct speculative/tree decode changes only THROUGHPUT, never the served-token distribution. Hence ppl_served(lambda) = int4_standalone_ppl = 2.3772 for ALL lambda (d(ppl)/d(lambda)=0); the divergent-accept fraction is the int4-vs-target rate 0.5608 on the served=int4 stream and is ITSELF lambda-invariant. The mixture calibrates exactly (resid 4.4e-16): agreeing tokens ~ reference 2.3048, divergent sub-PPL 2.4355 (above cap but only 56% of the stream), served AVERAGE 2.3772. The served average would cross 2.42 only at f_div*=0.8841 -- a +0.3234 increase the build CANNOT make via lambda (only a coarser VERIFY MODEL could). Robust across the divergence sweep [0.50,0.60] (served PPL is the measured anchor, divergence-invariant; f_div margin stays positive). ppl_is_binding_public_gate=False. The honest bookend: the worst the served average can reach by adding divergence is the int4-standalone 2.3772 itself (0.0428 under cap). land #71's served run reports the scorer's PPL natively -> one-run-confirmable, comfortable slack. BASELINE 481.53 untouched. NOT a launch."
+  }
+}
