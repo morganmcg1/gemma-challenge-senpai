@@ -51,16 +51,27 @@ from typing import Any
 
 _ENABLED = os.environ.get("RANKPROBE_ENABLE") == "1"
 _W = int(os.environ.get("RANKPROBE_W", "4"))
+# PR #86: when set, additionally capture the drafter's top-4 softmax probabilities +
+# predictive entropy per draft step, and the verifier's top-1 softmax probability +
+# entropy at each target position. Off by default => byte-identical to the #79 probe.
+_LOGITS = os.environ.get("RANKPROBE_LOGITS") == "1"
+# entropy over the top-K sparse candidate softmax (robustness twin of the full-set H)
+_HK = int(os.environ.get("RANKPROBE_HK", "64"))
 _OUTPUT = os.environ.get(
     "RANKPROBE_OUTPUT",
     os.path.join(os.getcwd(), "rankprobe_records.jsonl"),
 )
-# Per-propose buffer of (1, W) cpu int tensors-as-lists, one per draft depth.
-_CURRENT: list[list[int]] = []
-# FIFO of completed proposals (each a list of per-depth top-W lists). At conc=1 the
+# Per-propose buffer of per-depth step dicts {"top":[w ids], "pd":[p1..p4]|None,
+# "H":float|None, "H64":float|None}. One entry per draft depth.
+_CURRENT: list[dict[str, Any]] = []
+# FIFO of completed proposals (each a list of per-depth step dicts). At conc=1 the
 # queue holds exactly one in-flight proposal; capped so a stuck pairing can't leak.
-_QUEUE: "deque[list[list[int]]]" = deque(maxlen=64)
+_QUEUE: "deque[list[dict[str, Any]]]" = deque(maxlen=64)
 _LOCK = threading.Lock()
+# PR #86 verifier side: flat per-target-position top-1 prob + entropy for the CURRENT
+# rejection-sampler forward call. Set by the forward wrapper, read by _log_verify in
+# the same (synchronous, conc=1) call. Aligned with the flat draft/target layout.
+_VERIFIER: dict[str, Any] = {"vp1": None, "Hv": None}
 
 _STATE: dict[str, Any] = {
     "fh": None,
@@ -125,6 +136,10 @@ def _finalize() -> None:
     summary = {k: _STATE[k] for k in (
         "written", "align_ok", "align_bad", "dropped_stale", "no_proposal", "errors",
     )}
+    if "n_candidates" in _STATE:
+        summary["n_candidates"] = _STATE["n_candidates"]
+    summary["logits"] = _LOGITS
+    summary["installed_verifier_prob"] = _STATE.get("installed_verifier_prob", False)
     _log(f"finalize: {summary}")
     try:
         path = _STATE.get("path") or _resolve_output_path()
@@ -138,27 +153,59 @@ def _finalize() -> None:
 # --------------------------------------------------------------------------- #
 # Proposer side: top-W per draft depth
 # --------------------------------------------------------------------------- #
-def _compute_topW(proposer: Any, hidden_states: Any) -> list[list[int]] | None:
-    """Top-W drafter candidate token ids per row, via the deployed sparse path.
+def _compute_proposal_step(proposer: Any, hidden_states: Any) -> list[dict[str, Any]] | None:
+    """Per-row drafter step: top-W candidate token ids (+ PR #86 probs/entropy).
 
     ``_select_and_score`` (the submission's unsorted variant) returns
     ``(logits, selected)`` over the sparse centroid-masked candidate set, exactly
     what ``get_top_tokens`` argmaxes over. topk(W) of those logits, gathered through
-    ``selected``, is the drafter's rank-1..W vocabulary tokens. Returns a list (one
-    per row) of W-length token-id lists, or None on any failure.
+    ``selected``, is the drafter's rank-1..W vocabulary tokens.
+
+    Returns a list (one per row) of step dicts ``{"top": [w ids]}``; when
+    ``RANKPROBE_LOGITS`` is set, each dict additionally carries ``pd`` (top-4 softmax
+    probs p1>=p2>=p3>=p4), ``H`` (predictive entropy over the FULL sparse candidate
+    set, nats), and ``H64`` (entropy over the top-K candidates). The centroid clusters
+    partition the vocab, so the sparse set is duplicate-free and its softmax is the
+    drafter's deployable distribution. Returns None on any failure.
     """
     try:
         model = proposer.model
         masked_emb = model.masked_embedding
         lm_head_weight = model._get_full_lm_head_weight()
         logits, selected = masked_emb._select_and_score(hidden_states, lm_head_weight)
-        k = min(_W, int(logits.shape[-1]))
-        _, topidx = logits.topk(k, dim=-1)
-        top_tokens = selected.gather(-1, topidx)  # (rows, k) vocab ids
-        return top_tokens.detach().to("cpu").tolist()
+        n_cand = int(logits.shape[-1])
+        k = min(_W, n_cand)
+        if not _LOGITS:
+            _, topidx = logits.topk(k, dim=-1)
+            top_tokens = selected.gather(-1, topidx).detach().to("cpu").tolist()
+            return [{"top": t} for t in top_tokens]
+        if not _STATE.get("logged_ncand"):
+            _STATE["logged_ncand"] = True
+            _STATE["n_candidates"] = n_cand
+            _log(f"drafter sparse candidate set size n_cand={n_cand} "
+                 f"(entropy ceiling log(n_cand)={__import__('math').log(n_cand):.3f} nats)")
+        probs = logits.float().softmax(dim=-1)               # (rows, n_cand)
+        ktop = min(max(_HK, _W, 4), n_cand)
+        topp, topidx = probs.topk(ktop, dim=-1)              # sorted desc
+        top_tokens = selected.gather(-1, topidx[:, :k])
+        H = -(probs * probs.clamp_min(1e-12).log()).sum(dim=-1)       # full sparse set
+        H64 = -(topp * topp.clamp_min(1e-12).log()).sum(dim=-1)      # top-ktop
+        tt = top_tokens.detach().to("cpu").tolist()
+        p4 = topp[:, :4].detach().to("cpu").tolist()
+        Hl = H.detach().to("cpu").tolist()
+        H64l = H64.detach().to("cpu").tolist()
+        out: list[dict[str, Any]] = []
+        for r in range(len(tt)):
+            out.append({
+                "top": tt[r],
+                "pd": [round(x, 6) for x in p4[r]],
+                "H": round(Hl[r], 6),
+                "H64": round(H64l[r], 6),
+            })
+        return out
     except Exception as exc:  # noqa: BLE001
         if _STATE["errors"] < 5:
-            _log(f"_compute_topW failed: {exc!r}")
+            _log(f"_compute_proposal_step failed: {exc!r}")
         _STATE["errors"] += 1
         return None
 
@@ -169,9 +216,9 @@ def _install_proposer_patch(module: Any) -> None:
     orig_propose = proposer_cls.propose
 
     def _greedy_sample_probe(self: Any, hidden_states: Any) -> Any:
-        topW = _compute_topW(self, hidden_states)
-        if topW is not None:
-            _CURRENT.extend(topW)  # one entry per row (conc=1 -> one row per depth)
+        steps = _compute_proposal_step(self, hidden_states)
+        if steps is not None:
+            _CURRENT.extend(steps)  # one entry per row (conc=1 -> one row per depth)
         # Byte-identical deployed argmax: call the real drafter selection.
         return self.model.get_top_tokens(hidden_states)
 
@@ -242,7 +289,8 @@ def _log_verify(
                 continue
             topw_seg = proposal[:n]
             align = all(
-                len(topw_seg[d]) > 0 and topw_seg[d][0] == d_seg[d] for d in range(n)
+                len(topw_seg[d]["top"]) > 0 and topw_seg[d]["top"][0] == d_seg[d]
+                for d in range(n)
             )
             if align:
                 _STATE["align_ok"] += 1
@@ -257,7 +305,7 @@ def _log_verify(
             # hit_rank over on-path depths 0..min(fd, n-1): rank of TRUE token in
             # the drafter top-W. d < fd -> should be 1; d == fd -> the rescue rank.
             last = fd if fd < n else n - 1
-            hr = [_rank_of(t_seg[d], topw_seg[d]) for d in range(last + 1)]
+            hr = [_rank_of(t_seg[d], topw_seg[d]["top"]) for d in range(last + 1)]
             rec = {
                 "i": _STATE["step"],
                 "req": i,
@@ -268,10 +316,19 @@ def _log_verify(
                 "align": align,
             }
             if fd < n:
-                rec["top_fd"] = topw_seg[fd]
+                rec["top_fd"] = topw_seg[fd]["top"]
                 rec["targ_fd"] = t_seg[fd]
                 rec["draft_fd"] = d_seg[fd]
                 rec["rank_fd"] = hr[fd]
+                if _LOGITS:
+                    step = topw_seg[fd]
+                    rec["pd"] = step.get("pd")        # drafter top-4 softmax probs
+                    rec["Hd"] = step.get("H")         # drafter entropy (full sparse set)
+                    rec["Hd64"] = step.get("H64")     # drafter entropy (top-K)
+                    rec["salv2"] = 1 if hr[fd] == 2 else 0  # rank-2 salvage indicator
+                    vp1, hv = _verifier_at(end - n, fd)
+                    rec["vp1"] = vp1                  # verifier top-1 softmax prob
+                    rec["Hv"] = hv                    # verifier entropy (full vocab)
             _write_record(rec)
             _STATE["step"] += 1
         if bonus and _STATE["step"] <= 1:
@@ -282,7 +339,7 @@ def _log_verify(
         _STATE["errors"] += 1
 
 
-def _match_proposal(d_seg: list[int]) -> list[list[int]] | None:
+def _match_proposal(d_seg: list[int]) -> list[dict[str, Any]] | None:
     """Pop the queued proposal whose rank-1 chain matches the verified draft.
 
     Discards leading stale proposals (engine warmup/dummy runs that proposed
@@ -295,11 +352,66 @@ def _match_proposal(d_seg: list[int]) -> list[list[int]] | None:
             tries += 1
             n = len(d_seg)
             if len(cand) >= n and all(
-                len(cand[d]) > 0 and cand[d][0] == d_seg[d] for d in range(n)
+                len(cand[d]["top"]) > 0 and cand[d]["top"][0] == d_seg[d]
+                for d in range(n)
             ):
                 return cand
             _STATE["dropped_stale"] += 1
         return None
+
+
+def _verifier_at(seg_start: int, pos: int) -> tuple[float | None, float | None]:
+    """Verifier (target) top-1 prob + full-vocab entropy at flat index seg_start+pos.
+
+    ``_VERIFIER`` is the flat per-target-position capture from the rejection-sampler
+    forward of the SAME decode step (synchronous, conc=1), indexed by
+    ``target_logits_indices`` -- the identical flat layout ``_log_verify`` slices.
+    """
+    vp1 = _VERIFIER.get("vp1")
+    if vp1 is None:
+        return None, None
+    hv = _VERIFIER.get("Hv")
+    idx = seg_start + pos
+    if 0 <= idx < len(vp1):
+        h = hv[idx] if (hv is not None and idx < len(hv)) else None
+        return vp1[idx], h
+    return None, None
+
+
+def _install_verifier_prob_patch(module: Any) -> None:
+    """Wrap ``RejectionSampler.forward`` to capture per-target-position verifier top-1
+    softmax prob + full-vocab entropy (PR #86).
+
+    Reads the FULL-vocab target logits (``logits[target_logits_indices]``) BEFORE the
+    SMP-02 argmax. Non-destructive: advanced-index makes a copy, softmax allocates a
+    new tensor, ``logits`` is never written -- so the emitted tokens are byte-identical
+    to production. Gated by ``RANKPROBE_LOGITS``; off => this finder is never installed.
+    """
+    sampler_cls = module.RejectionSampler
+    orig_forward = sampler_cls.forward
+
+    def _forward_probe(self: Any, metadata: Any, draft_probs: Any, logits: Any,
+                       sampling_metadata: Any) -> Any:
+        try:
+            idx = metadata.target_logits_indices
+            tl = logits.index_select(0, idx).float()       # (num_targets, vocab)
+            tp = tl.softmax(dim=-1)
+            vp1 = tp.max(dim=-1).values
+            hv = -(tp * tp.clamp_min(1e-12).log()).sum(dim=-1)
+            _VERIFIER["vp1"] = vp1.detach().to("cpu").tolist()
+            _VERIFIER["Hv"] = hv.detach().to("cpu").tolist()
+        except Exception as exc:  # noqa: BLE001
+            _VERIFIER["vp1"] = None
+            _VERIFIER["Hv"] = None
+            if _STATE["errors"] < 5:
+                _log(f"verifier-prob capture failed: {exc!r}")
+            _STATE["errors"] += 1
+        return orig_forward(self, metadata, draft_probs, logits, sampling_metadata)
+
+    sampler_cls.forward = _forward_probe
+    _STATE["installed_verifier_prob"] = True
+    _STATE["_orig_forward"] = orig_forward
+    _log("installed RejectionSampler.forward verifier-prob wrapper")
 
 
 def _install_verify_patch() -> None:
@@ -342,9 +454,17 @@ def _install() -> None:
         0, sc._TargetFinder(sc.LOOPGRAPH_TARGET, _install_proposer_patch)
     )
     _install_verify_patch()
+    if _LOGITS:
+        # PR #86: capture verifier top-1 prob/entropy by wrapping the rejection
+        # sampler's forward (fires on import, after serve.py's source-level SMP-02
+        # patch is already on disk, so we wrap the SMP-02-enabled forward).
+        sys.meta_path.insert(
+            0, sc._TargetFinder(
+                "vllm.v1.sample.rejection_sampler", _install_verifier_prob_patch)
+        )
     atexit.register(_finalize)
     _log(
-        f"armed (W={_W}, output={_OUTPUT}); "
+        f"armed (W={_W}, logits={_LOGITS}, output={_OUTPUT}); "
         f"expects LOOPGRAPH_WARMUP_CALLS huge to force eager base_propose"
     )
 

@@ -108,13 +108,17 @@ def build_scratch(submission: Path, scratch: Path) -> Path:
 # Run
 # --------------------------------------------------------------------------- #
 def run_capture(scratch: Path, *, num_prompts: int, output_len: int, seed: int,
-                records_path: Path, log_path: Path) -> dict[str, Any]:
+                records_path: Path, log_path: Path, logits: bool = True) -> dict[str, Any]:
     manifest = harness.load_manifest(scratch)
     server_python = harness.ensure_server_venv(manifest["dependencies"])
     extra_env = {
         "RANKPROBE_ENABLE": "1",
         "RANKPROBE_OUTPUT": str(records_path),
         "RANKPROBE_W": "4",
+        # PR #86: capture drafter top-4 probs + predictive entropy per step, and the
+        # verifier's top-1 prob + entropy per target position. Read-only, scratch-only,
+        # token-preserving (align_bad self-checks byte identity).
+        "RANKPROBE_LOGITS": "1" if logits else "0",
         "LOOPGRAPH_WARMUP_CALLS": WARMUP_FOREVER,
         # native sampler (cuRAND JIT dodge) + re-enable stat loggers for an
         # independent E[T]/acceptance read in the same log. None change tokens.
@@ -357,6 +361,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--wandb-name", default="wirbel/rank-coverage")
     ap.add_argument("--wandb-group", default="rank-coverage")
     ap.add_argument("--no-wandb", action="store_true")
+    ap.add_argument("--no-logits", action="store_true",
+                    help="disable PR #86 drafter/verifier prob+entropy capture "
+                         "(reverts to the #79 rank-only probe)")
     ap.add_argument("--debug", action="store_true",
                     help="tiny 2-prompt/64-token smoke run to validate the harness")
     ap.add_argument("--analyze-only", type=Path, default=None,
@@ -383,7 +390,7 @@ def main(argv: list[str] | None = None) -> int:
                                    else "server_rank_coverage.log")
         report["run"] = run_capture(
             scratch, num_prompts=num_prompts, output_len=output_len, seed=args.seed,
-            records_path=records_path, log_path=log_path,
+            records_path=records_path, log_path=log_path, logits=not args.no_logits,
         )
     else:
         report["run"] = {"submission": "(analyze-only)", "num_prompts": None,
