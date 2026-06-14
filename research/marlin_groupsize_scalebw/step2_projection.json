@@ -1,0 +1,54 @@
+{
+  "rows": [
+    {
+      "group_size": 32,
+      "ppl_raw_harness": 2.007,
+      "ppl_cap_comparable": 2.2791,
+      "verdict_raw_harness": "PASS",
+      "verdict": "PASS",
+      "scale_mb_deployed_basis": 214.8,
+      "scale_save_vs_g128_pct": 0.0,
+      "tps_gain_pct_central": 0.0,
+      "tps_gain_pct_upper": 0.0,
+      "tps_gain_pct_first_principles": 0.0,
+      "official_tps_proj_if_passing": 481.53,
+      "clears_500_if_passing": 0
+    },
+    {
+      "group_size": 128,
+      "ppl_raw_harness": 2.109,
+      "ppl_cap_comparable": 2.3812,
+      "verdict_raw_harness": "PASS",
+      "verdict": "PASS",
+      "scale_mb_deployed_basis": 53.7,
+      "scale_save_vs_g128_pct": 0.0,
+      "tps_gain_pct_central": 0.0,
+      "tps_gain_pct_upper": 0.0,
+      "tps_gain_pct_first_principles": 0.0,
+      "official_tps_proj_if_passing": 481.53,
+      "clears_500_if_passing": 0
+    },
+    {
+      "group_size": -1,
+      "ppl_raw_harness": 2.2312,
+      "ppl_cap_comparable": 2.5033,
+      "verdict_raw_harness": "PASS",
+      "verdict": "FAIL",
+      "scale_mb_deployed_basis": 2.31,
+      "scale_save_vs_g128_pct": 95.7,
+      "tps_gain_pct_central": 0.668,
+      "tps_gain_pct_upper": 1.113,
+      "tps_gain_pct_first_principles": 1.205,
+      "official_tps_proj_if_passing": 484.75,
+      "clears_500_if_passing": 0
+    }
+  ],
+  "best_ppl_passing_groupsize": 128,
+  "groupsize_scalebw_official_tps_proj": 481.53,
+  "groupsize_clears_500": 0,
+  "ppl_cap": 2.42,
+  "anchor_offline_g128": 2.3812,
+  "harness_offset_applied": 0.2722,
+  "cap_headroom_above_anchor": 0.0388,
+  "note": "g=256 UNSERVABLE (Marlin max group=128); only g=-1 is coarser-than-128. Verdicts are CAP-COMPARABLE: raw harness PPL pinned to the #118 offline g=128 anchor (2.3812) via the pipeline-invariant g128->g delta. The cap leaves only 0.0388 PPL headroom above the g=128 anchor, and coarsening to g=-1 costs far more than that -> g=-1 FAILS the cap. With no servable coarser g passing, best stays g=128 -> no change (481.53). g=-1's scale-byte slice is anyway dominated by the LOSSLESS palette (#110, bit-exact, 0.3% TPS) which captures it without the PPL cost."
+}
