@@ -1,0 +1,233 @@
+{
+  "config": {
+    "pr": 132,
+    "step": "1-kernel-servability",
+    "gpu": "A10G sm_86",
+    "pinned_vllm": "0.22.x (frontier 0.22.1rc1.dev307+g3e8afdf78.cu129)",
+    "baseline_official_tps": 481.53,
+    "baseline_ppl": 2.3772,
+    "local_wall_tps_ref": 454.338,
+    "multiplier_99": 1.06019
+  },
+  "gate": {
+    "verdict": "RED",
+    "deployed_kernel": "MarlinLinearKernel (compressed-tensors W4A16 -> ops.marlin_gemm)",
+    "a10g_capability": 86,
+    "target_avg_bits": 3.25,
+    "n_wonly_kernels_scanned": 10,
+    "n_cuda_wonly_kernels": 8,
+    "n_subbit_servable_in_wheel": 0,
+    "n_subbit_servable_drop_in": 0,
+    "min_servable_weight_bits_sm86": 4,
+    "qpalette_servable_and_clears_500": 0,
+    "qpalette_projected_official_tps": null
+  },
+  "pinned_wheel_inventory": [
+    {
+      "kernel": "allspark",
+      "supported_types": [
+        "uint8b128"
+      ],
+      "min_weight_bits": 8,
+      "min_capability": 80,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "conch",
+      "supported_types": [
+        "uint4",
+        "uint8",
+        "uint4b8",
+        "uint8b128"
+      ],
+      "min_weight_bits": 4,
+      "min_capability": 80,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "cpu",
+      "supported_types": [],
+      "min_weight_bits": null,
+      "min_capability": null,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "cutlass",
+      "supported_types": [],
+      "min_weight_bits": null,
+      "min_capability": 90,
+      "hard_cap_gate": 90,
+      "runs_on_a10g_sm86": false,
+      "gate_reason": "hard is_device_capability(90) gate",
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "dynamic_4bit",
+      "supported_types": [
+        "int4"
+      ],
+      "min_weight_bits": 4,
+      "min_capability": 1,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "exllama",
+      "supported_types": [
+        "uint4b8",
+        "uint8b128"
+      ],
+      "min_weight_bits": 4,
+      "min_capability": 60,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "machete",
+      "supported_types": [
+        "float16",
+        "bfloat16",
+        "uint4",
+        "uint8",
+        "uint4b8",
+        "uint8b128"
+      ],
+      "min_weight_bits": 4,
+      "min_capability": 90,
+      "hard_cap_gate": 90,
+      "runs_on_a10g_sm86": false,
+      "gate_reason": "hard is_device_capability(90) gate",
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "marlin",
+      "supported_types": [
+        "uint4",
+        "uint4b8",
+        "uint4",
+        "uint4"
+      ],
+      "min_weight_bits": 4,
+      "min_capability": 75,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "triton_w4a16",
+      "supported_types": [
+        "uint4b8",
+        "uint4"
+      ],
+      "min_weight_bits": 4,
+      "min_capability": null,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    },
+    {
+      "kernel": "xpu",
+      "supported_types": [],
+      "min_weight_bits": null,
+      "min_capability": null,
+      "hard_cap_gate": null,
+      "runs_on_a10g_sm86": true,
+      "gate_reason": null,
+      "serves_sub4bit_on_a10g": false
+    }
+  ],
+  "literature_dropin_matrix": [
+    {
+      "scheme": "Q-Palette (named lever)",
+      "repo": "snu-mllab/Q-Palette",
+      "family": "trellis+vector+scalar, Hadamard-incoherence (fractional-bit)",
+      "native_lowbit_gemm": "unknown",
+      "sm86_kernel": "no/unknown (RTX4090 sm_89 Ada only)",
+      "vllm_path": "none",
+      "m1_vs_marlin_number": "none (Ada 190-200 tok/s, does not transfer)",
+      "servable_sub4_beats_marlin_m1_sm86": "no",
+      "note": "Ada-only benchmarks, no sm_86 doc, no vLLM integration -> not a clean drop-in"
+    },
+    {
+      "scheme": "Machete",
+      "repo": "vllm (kernels/.../machete)",
+      "family": "CUTLASS mixed-input GEMM",
+      "native_lowbit_gemm": "yes",
+      "sm86_kernel": "no (sm_90a Hopper-only)",
+      "vllm_path": "in-wheel but arch-gated off",
+      "m1_vs_marlin_number": "n/a on sm_86",
+      "servable_sub4_beats_marlin_m1_sm86": "no",
+      "note": "get_min_capability()=90; on A10G vLLM falls back to Marlin; uint4/uint8 only"
+    },
+    {
+      "scheme": "QTIP",
+      "repo": "Cornell-RelaxML/qtip",
+      "family": "trellis-coded quant (bitshift HYB kernel)",
+      "native_lowbit_gemm": "yes (BW-bound, >80% peak HBM)",
+      "sm86_kernel": "yes (RTX3090/A6000 Ampere)",
+      "vllm_path": "none (standalone stack)",
+      "m1_vs_marlin_number": "119 tok/s @3b vs fp16 52.5 (not vs Marlin)",
+      "servable_sub4_beats_marlin_m1_sm86": "unknown",
+      "note": "good Ampere kernel but NO vLLM serving path; vs-Marlin M=1 unproven -> not a clean drop-in"
+    },
+    {
+      "scheme": "AQLM",
+      "repo": "Vahe1994/AQLM",
+      "family": "additive/multi-codebook vector quant",
+      "native_lowbit_gemm": "yes",
+      "sm86_kernel": "partial (demo)",
+      "vllm_path": "old demo only",
+      "m1_vs_marlin_number": "'up to 3x' vs fp16 (not vs Marlin)",
+      "servable_sub4_beats_marlin_m1_sm86": "unknown",
+      "note": "codebook lookups serialize at M=1; speedup claim vs fp16 not Marlin"
+    },
+    {
+      "scheme": "VPTQ",
+      "repo": "microsoft/VPTQ",
+      "family": "vector PTQ",
+      "native_lowbit_gemm": "no (dequant-to-fp16 then matmul)",
+      "sm86_kernel": "n/a",
+      "vllm_path": "planned, not merged",
+      "m1_vs_marlin_number": "n/a (compute-bound)",
+      "servable_sub4_beats_marlin_m1_sm86": "no",
+      "note": "exact #113 failure mode: dequant-to-fp16 -> realized TPS <= int4"
+    },
+    {
+      "scheme": "QuIP#",
+      "repo": "Cornell-RelaxML/quip-sharp",
+      "family": "E8 lattice codebook",
+      "native_lowbit_gemm": "yes (<5 instr/weight)",
+      "sm86_kernel": "unknown",
+      "vllm_path": "none",
+      "m1_vs_marlin_number": "no Ampere batch=1 numbers",
+      "servable_sub4_beats_marlin_m1_sm86": "unknown",
+      "note": "technically BW-bound but no confirmed sm_86 decode numbers, no vLLM path"
+    },
+    {
+      "scheme": "FLUTE (nearest un-named candidate)",
+      "repo": "HanGuo97/flute",
+      "family": "fused LUT dequant+GEMM (3-bit)",
+      "native_lowbit_gemm": "yes (LUT in shared-mem, NOT dequant-to-fp16)",
+      "sm86_kernel": "yes (Ampere-optimized)",
+      "vllm_path": "old (~0.5.x monkeypatch; not the 0.22 MPLinearKernel API)",
+      "m1_vs_marlin_number": "A6000 W3G128 108.1 vs W4G128 98.1 tok/s (~10% 3b>4b); NO Marlin row",
+      "servable_sub4_beats_marlin_m1_sm86": "unknown",
+      "note": "closest live candidate, but never benchmarked vs Marlin int4; FLUTE-4b < Marlin-4b -> FLUTE-3b ~ Marlin wash; vLLM 0.22 integration is a from-scratch port, not a clean drop-in"
+    }
+  ]
+}
