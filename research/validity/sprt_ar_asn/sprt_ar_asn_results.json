@@ -1,0 +1,201 @@
+{
+  "agent": "denken",
+  "created_at": "20260614T193716Z",
+  "kind": "sprt-ar-asn",
+  "nan_clean": true,
+  "peak_mem_mib": 28.742,
+  "pr": 212,
+  "synthesis": {
+    "deff_comparison": {
+      "ar_underestimates_fat_tail": true,
+      "deff_ar_asymptote": 1.6965728308550085,
+      "deff_ar_at_mbar": 1.658367630002036,
+      "deff_empirical_acf_measured": 2.7742875539531413,
+      "deff_exchangeable_closed_form": 4.410614351127293,
+      "deff_exchangeable_machine_check": 4.412045109287396,
+      "deff_flat_441": 4.410614351127293,
+      "mbar_cluster_size": 24.582508774446666,
+      "note": "AR(1) \u03c1=0.2583 \u2192 Deff_AR(m\u0304)=1.6584 (asymptote 1.6966); the MEASURED ACF decays slower than \u03c1^k (\u03c1(2)=0.168 \u226b \u03c1(1)\u00b2=0.067), so the empirical-ACF Deff 2.7743 > AR(1) 1.6584. Both \u226a the flat-exchangeable 4.4106. AR(1) is the optimistic lower bound; the measured ACF is the data-grounded realistic Deff; flat 4.41 is the conservative ceiling.",
+      "ordering_ar_lt_emp_lt_flat": true,
+      "rho_lag1_190": 0.2583178258286258,
+      "tightening_ar_vs_flat": 2.6596119408830226,
+      "tightening_empirical_vs_flat": 1.5898187427768673
+    },
+    "expected_n_corrected": {
+      "deff_ar_at_mbar": 1.658367630002036,
+      "deff_empirical_acf": 2.7742875539531413,
+      "deff_flat_441": 4.410614351127293,
+      "expected_n_nearbar_ar": 24734.648699561607,
+      "expected_n_nogo_ar": 672.3420962564048,
+      "expected_n_nogo_empirical_acf": 1124.7628546877863,
+      "expected_n_nogo_flat_441": 1788.1690675618568,
+      "expected_n_worstcase_ar": 40460.92431498759,
+      "rows": {
+        "nearbar": {
+          "ar1": 24734.648699561607,
+          "empirical_acf": 41378.65862620145,
+          "flat_441": 65784.56703490077,
+          "iid": 14915.057585591705,
+          "tightening_ar_vs_flat": 2.6596119408830226,
+          "tightening_empirical_vs_flat": 1.5898187427768673
+        },
+        "nogo": {
+          "ar1": 672.3420962564048,
+          "empirical_acf": 1124.7628546877863,
+          "flat_441": 1788.1690675618568,
+          "iid": 405.42403511311863,
+          "tightening_ar_vs_flat": 2.6596119408830226,
+          "tightening_empirical_vs_flat": 1.5898187427768673
+        },
+        "worstcase": {
+          "ar1": 40460.92431498759,
+          "empirical_acf": 67687.18631367176,
+          "flat_441": 107610.35744730521,
+          "iid": 24398.04273973794,
+          "tightening_ar_vs_flat": 2.6596119408830226,
+          "tightening_empirical_vs_flat": 1.5898187427768673
+        }
+      },
+      "savings_invariance": {
+        "deff_invariant": true,
+        "n_fss_197": 30455.404769372028,
+        "note": "N_fss/E[N] = 75.12\u00d7 is Deff-invariant: both the fixed-N reference and the SPRT E[N] scale by the same cluster Deff. The AR correction tightens the ABSOLUTE realism band (flat \u2192 AR / measured-ACF) but leaves the 75\u00d7 collapse untouched.",
+        "savings_ratio_iid": 75.11987975965602,
+        "savings_ratio_under_ar": 75.119879759656,
+        "savings_ratio_under_empirical_acf": 75.11987975965602,
+        "savings_ratio_under_flat_441": 75.119879759656
+      }
+    },
+    "handoff_lines": {
+      "fern_185": "fern #185: the AR(1)-corrected liveprobe certification cost is E[N]_nogo=672 (AR(1) optimistic lower bound) / 1,125 (measured-ACF, data-grounded), vs #205's conservative flat-Deff 1,788 and the IID floor 405; realized (0.05,0.95) unchanged. Carry the tightened expected-N band [582 tight \u2026 1,788 flat-loose] as the measurement-cost row. The 75\u00d7 collapse vs #197's fixed-N is Deff-INVARIANT (fixed-N and SPRT E[N] scale by the SAME cluster Deff), so the decaying-ACF correction leaves the 75\u00d7 headline intact while SHARPENING the absolute realism band below the conservative flat 4.41; it never reverses the NO-GO-is-cheap conclusion. flat \u00d74.41 is the loose end."
+    },
+    "imports": {
+      "beta_nogo": 0.765124365433998,
+      "deff_empirical_acf_190": 2.7742875539531413,
+      "deff_flat_441": 4.410614351127293,
+      "expected_n_nearbar_iid": 14915.057585591705,
+      "expected_n_nogo_iid": 405.42403511311863,
+      "expected_n_worstcase_iid": 24398.04273973794,
+      "icc_190": 0.1446247464062406,
+      "icc_ci_190": [
+        0.10428963351886918,
+        0.18570746616200864
+      ],
+      "lambda_eq_nogo": 0.5395958435497274,
+      "mbar_190": 24.582508774446666,
+      "mu1_go_anchor": 1.0,
+      "n_fss_197": 30455.404769372028,
+      "private_bar_both": 0.9780112973731208,
+      "private_lcb_nogo_tps": 419.6445574528826,
+      "realized_alpha_205": 0.04999999999999993,
+      "realized_power_205": 0.95,
+      "rho_lag1_190": 0.2583178258286258,
+      "rho_lags_1to8_190": [
+        0.2583178258286258,
+        0.16791724127884536,
+        0.11779619682115657,
+        0.10356020274376859,
+        0.083050748777102,
+        0.06602098912993447,
+        0.056417704137995,
+        0.05688134070239029
+      ],
+      "savings_vs_fixed_n_nogo_iid": 75.11987975965602,
+      "source_runs": {
+        "d190": "fva6o4ug",
+        "d191": "jeclr39w",
+        "d193": "2clxvlr8",
+        "d197": "wqr94io4",
+        "d205": "eijqklu2"
+      },
+      "sprt_A_upper": 2.9444389791664403,
+      "sprt_B_lower": -2.9444389791664394
+    },
+    "operating_characteristic_invariance": {
+      "A_upper": 2.9444389791664403,
+      "B_lower": -2.9444389791664394,
+      "alpha_unchanged": true,
+      "asn_nogo_iid_reproduced": 405.42403511311863,
+      "asn_peak_iid_reproduced": 24398.04273973794,
+      "margin_m": 0.021988702626879242,
+      "mu_mid": 0.9890056486865604,
+      "nogo_gap_from_indifference_lambda": 0.44940980513683293,
+      "nogo_gap_in_margins": 20.438213784721853,
+      "nogo_is_drift_dominated": true,
+      "nogo_p_decide_go": 5.359460216532084e-53,
+      "note": "the AR correction rescales the per-trial INFORMATION (variance), not the per-trial DRIFT or the Wald boundaries A,B \u2014 so the OC and realized (\u03b1,power) are unchanged; only the ASN E[N] is multiplied by Deff.",
+      "power_unchanged": true,
+      "realized_alpha": 0.04999999999999993,
+      "realized_alpha_205_import": 0.04999999999999993,
+      "realized_power": 0.95,
+      "realized_power_205_import": 0.95,
+      "regime_caveat": "E[N]\u00b7Deff is asymptotically exact in the DRIFT-dominated regime and one-sided conservative (overestimates) in the variance-dominated regime. The NO-GO truth (\u03bb_eq=0.540) sits 20\u00d7 the 0.022 margin below the indifference midpoint \u03bc_mid=0.989 (P(decide GO)=5.36e-53) \u2192 strongly drift-dominated, so the TEST metric expected_n_nogo_ar is on solid ground. The near-bar (\u03b2=1) and worst-case (indifference) truths are variance-dominated, so their AR-corrected E[N] are CONSERVATIVE upper bounds \u2014 the realism tightening there is, if anything, understated.",
+      "reproduces_205_nogo": true,
+      "reproduces_205_worstcase": true
+    },
+    "realism_band": {
+      "deff_ar_ci": [
+        1.4349430303009723,
+        1.932230756117973
+      ],
+      "expected_n_nogo_ar_loose": 783.3727899150208,
+      "expected_n_nogo_ar_tight": 581.7603935020662,
+      "expected_n_nogo_band": [
+        581.7603935020662,
+        783.3727899150208
+      ],
+      "expected_n_nogo_empirical_acf": 1124.7628546877863,
+      "expected_n_nogo_flat_441_loose_end": 1788.1690675618568,
+      "flat_441_is_conservative": true,
+      "loose_ar_below_flat_margin": 2.47838359500932,
+      "note": "\u03c1(1)\u2208[0.1863,0.3317] \u2192 Deff_AR\u2208[1.4349,1.9322] \u2192 E[N]_nogo\u2208[582,783]. The loose AR end 1.932 and the measured-ACF Deff 2.774 both sit below the flat-exchangeable 4.411 \u2192 #205's flat \u00d74.41 (E[N]_nogo 1788) is the CONSERVATIVE (loose) end.",
+      "rho_ci": [
+        0.18627428608508176,
+        0.33169668463489993
+      ],
+      "rho_ci_method": "inherits #190 prompt-level cluster-bootstrap ICC CI [0.1043,0.1857], scaled to lag-1 ACF (\u03c1\u221dcorr-strength)",
+      "rho_lag1_hat": 0.2583178258286258
+    },
+    "self_test": {
+      "conditions": {
+        "a_rho0_reproduces_205_iid_asn_deff1": true,
+        "b_exchangeable_limit_roundtrips_flat_441": true,
+        "c_deff_ar_monotone_increasing_in_rho": true,
+        "d_realized_alpha_power_unchanged": true,
+        "e_key_scalars_finite": true,
+        "f_ar_correction_tightens_below_flat_441": true
+      },
+      "evidence": {
+        "a_deff_ar_at_rho0": 1.0,
+        "a_en_nogo_at_rho0": 405.42403511311863,
+        "a_en_nogo_iid": 405.42403511311863,
+        "b_deff_exchangeable_machine": 4.412045109287396,
+        "b_deff_flat_441": 4.410614351127293,
+        "b_rel_err": 0.00032438976664034535,
+        "c_deff_ar_grid": [
+          1.0,
+          1.1007557528484748,
+          1.212177943075922,
+          1.3360501049650453,
+          1.4745754184109279,
+          1.6305072617399867,
+          1.8073314319887654,
+          2.2429348210331845,
+          2.837282684703856,
+          5.0339771256900026,
+          12.227769975487933
+        ],
+        "d_realized_alpha": 0.04999999999999993,
+        "d_realized_power": 0.95,
+        "f_deff_ar": 1.658367630002036,
+        "f_deff_empirical": 2.7742875539531413,
+        "f_deff_flat": 4.410614351127293
+      },
+      "sprt_ar_self_test_passes": true
+    },
+    "test_metric": {
+      "expected_n_nogo_ar": 672.3420962564048
+    },
+    "verdict": "AR-CORRECTED. #205 priced the liveprobe realism band with a CONSERVATIVE flat \u00d7Deff=4.41 (exchangeable ICC=0.1446). Folding #190's DECAYING serial ACF (\u03c1(1)=0.2583) into the partial-sum variance gives Deff_AR(m\u0304)=1.658 (asymptote 1.697), a 2.66\u00d7 tightening \u2014 E[N]_nogo drops from the flat 1,788 to 672. HONEST CAVEAT: the MEASURED ACF decays slower than pure AR(1), so the data-grounded empirical-ACF Deff 2.774 (E[N]_nogo 1,125, 1.59\u00d7 tighter) is the realistic value; AR(1) is the optimistic lower bound. The \u03c1-CI band is [582,783]; even the loose end stays below the flat-Deff 1,788, so flat \u00d74.41 is the CONSERVATIVE (loose) end (flat_441_is_conservative=True). The decaying-ACF correction only SHARPENS #205's 75\u00d7 collapse; realized (\u03b1,power)=(0.05,0.95) and the bar 0.9780 are untouched. NOT a launch."
+  }
+}
