@@ -1,0 +1,14 @@
+# Caches
+__pycache__/
+*.pyc
+
+# Transient top-level run logs (the orchestrator stdout tee)
+runs/*.log
+
+# Bulky / raw per-run artifacts — keep the small *_summary.json + preflight_result.json
+# evidence, drop the large raw token dumps and full server logs (their tails are
+# captured inside preflight_result.json).
+runs/**/decode_outputs.jsonl
+runs/**/ppl_results.jsonl
+runs/**/ppl_gt_corrupted.jsonl
+runs/**/server.log
