@@ -1,0 +1,547 @@
+{
+ "pr": 231,
+ "agent": "fern",
+ "kind": "launch_readiness_gocard",
+ "primary_metric_name": "launch_readiness_gocard_self_test_passes",
+ "launch_readiness_gocard_self_test_passes": true,
+ "test_metric_name": "deeptail_lambda_for_publish_first_go",
+ "deeptail_lambda_for_publish_first_go": 0.7882114855909229,
+ "launch_scorecard": {
+  "rows": [
+   {
+    "gate": "validity-binds",
+    "status": "GREEN",
+    "banked_value": 515.9240665878908,
+    "threshold": "mu_pub(0.9780) >= trigger 513.557 (speed auto-clears once validity binds)",
+    "source": "ubel #222 (yw7i2ece) / #218",
+    "is_red_blocker": false,
+    "note": "validity gate (lambda_hat >= 0.9780) BINDS: speed margin +2.37 TPS at the bar."
+   },
+   {
+    "gate": "speed-clears-once-validity",
+    "status": "GREEN",
+    "banked_value": 513.5574577506176,
+    "threshold": "mu_pub at the validity bar (515.92) >= worst-case GO trigger",
+    "source": "ubel #222/#218 (0ug7vd7d)",
+    "is_red_blocker": false,
+    "note": "the grounded worst-case trigger 513.557 is cleared the moment validity binds."
+   },
+   {
+    "gate": "gate-2-one-run-confirmable",
+    "status": "GREEN",
+    "banked_value": "SPRT + AR-corrected ASN one-run-confirmable",
+    "threshold": "a single confirmation run proves measured lambda_hat >= 0.9780",
+    "source": "denken #225",
+    "is_red_blocker": false,
+    "note": "the validity gate is confirmable in one run (no fixed-N 30k blowup)."
+   },
+   {
+    "gate": "valid-verify-int4-kernel-only",
+    "status": "GREEN-CONDITIONAL",
+    "banked_value": "int4-spec VERIFY kernel is the sole compliant 500-route",
+    "threshold": "compliant-spec int4 kernel under budget (double gate: lambda>=lambda_crit AND kernel-under-budget)",
+    "source": "wirbel #223/#220/#196/#216",
+    "is_red_blocker": false,
+    "note": "the valid-verify menu has COLLAPSED to int4-kernel-only; carries a PENDING #192 human ruling (handed to #124/#211), GREEN-conditional not RED."
+   },
+   {
+    "gate": "publish-first-clears-at-ceiling",
+    "status": "GREEN",
+    "banked_value": 504.858898207883,
+    "threshold": "private MEAN at the ceiling (504.86) >= 500 at f_priv=0.969107",
+    "source": "kanna #224 (1081oc84)",
+    "is_red_blocker": false,
+    "note": "at the pinned f_priv=0.969107 the ceiling private mean is 504.86 >= 500 (GREEN); see honest-band: at the grounded f_priv=0.957 (#224) it falls to 498.58 < 500."
+   },
+   {
+    "gate": "deeptail-lambda-q8q9",
+    "status": "RED",
+    "banked_value": null,
+    "threshold": "deep-tail reach-weighted lambda_hat over q[8..9] >= 0.7875 (publish-first)",
+    "source": "land #71 (UNMEASURED)",
+    "is_red_blocker": true,
+    "note": "the SINGLE unmeasured launch input; the spine q[2..7]=0.997 is interim-pinned, the deep tail q[8..9] is what land #71 measures. The whole GO-card sweeps THIS."
+   }
+  ],
+  "n_red_blockers": 1,
+  "n_gates": 6,
+  "private_mean_at_ceiling": 504.858898207883,
+  "all_green_except_red_blockers": true
+ },
+ "n_red_blockers": 1,
+ "gocard": {
+  "axis": "deep-tail reach-weighted lambda_hat over q[8..9] (land #71's number)",
+  "sweep_range": [
+   0.5,
+   1.0
+  ],
+  "gocard_vs_deeptail_lambda": [
+   {
+    "deeptail_lambda": 0.5,
+    "blended_tree_lambda": 0.951877384259577,
+    "E_T": 5.110011749728082,
+    "official_tps": 510.0856931784802,
+    "private_mean_tps": 494.3275753775548,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.525,
+    "blended_tree_lambda": 0.9541471335422945,
+    "E_T": 5.115046190948409,
+    "official_tps": 510.5882353575218,
+    "private_mean_tps": 494.81459248117636,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.55,
+    "blended_tree_lambda": 0.9564168828250119,
+    "E_T": 5.1200904177308715,
+    "official_tps": 511.0917543396492,
+    "private_mean_tps": 495.3025562114285,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.575,
+    "blended_tree_lambda": 0.9586866321077294,
+    "E_T": 5.125144452408674,
+    "official_tps": 511.59625235418156,
+    "private_mean_tps": 495.7914687287598,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.6,
+    "blended_tree_lambda": 0.9609563813904468,
+    "E_T": 5.130208317364043,
+    "official_tps": 512.1017316353318,
+    "private_mean_tps": 496.2813321983615,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.625,
+    "blended_tree_lambda": 0.9632261306731643,
+    "E_T": 5.135282035028323,
+    "official_tps": 512.6081944222155,
+    "private_mean_tps": 496.772148790176,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.65,
+    "blended_tree_lambda": 0.9654958799558817,
+    "E_T": 5.140365627882062,
+    "official_tps": 513.1156429588602,
+    "private_mean_tps": 497.26392067890583,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.675,
+    "blended_tree_lambda": 0.9677656292385992,
+    "E_T": 5.145459118455115,
+    "official_tps": 513.624079494215,
+    "private_mean_tps": 497.7566500440233,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.7,
+    "blended_tree_lambda": 0.9700353785213166,
+    "E_T": 5.150562529326716,
+    "official_tps": 514.133506282158,
+    "private_mean_tps": 498.25033906977706,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.725,
+    "blended_tree_lambda": 0.9723051278040341,
+    "E_T": 5.1556758831255864,
+    "official_tps": 514.6439255815075,
+    "private_mean_tps": 498.74498994520366,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.75,
+    "blended_tree_lambda": 0.9745748770867515,
+    "E_T": 5.160799202530022,
+    "official_tps": 515.15533965603,
+    "private_mean_tps": 499.240604864135,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.775,
+    "blended_tree_lambda": 0.976844626369469,
+    "E_T": 5.165932510267984,
+    "official_tps": 515.6677507744498,
+    "private_mean_tps": 499.73718602520734,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.7874871278548552,
+    "blended_tree_lambda": 0.9779783323491393,
+    "E_T": 5.168500268658075,
+    "official_tps": 515.9240665878908,
+    "private_mean_tps": 499.9855834538819,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.7882114855909229,
+    "blended_tree_lambda": 0.9780440967672142,
+    "E_T": 5.168649296799987,
+    "official_tps": 515.938942703014,
+    "private_mean_tps": 500.0,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.8,
+    "blended_tree_lambda": 0.9791143756521864,
+    "E_T": 5.171075829117189,
+    "official_tps": 516.1811612104581,
+    "private_mean_tps": 500.23473563187054,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.825,
+    "blended_tree_lambda": 0.9813841249349039,
+    "E_T": 5.17622918190521,
+    "official_tps": 516.695573242722,
+    "private_mean_tps": 500.73325589239687,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.85,
+    "blended_tree_lambda": 0.9836538742176213,
+    "E_T": 5.181392591509555,
+    "official_tps": 517.2109891548943,
+    "private_mean_tps": 501.2327490198898,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.875,
+    "blended_tree_lambda": 0.9859236235003388,
+    "E_T": 5.186566080857772,
+    "official_tps": 517.7274112356217,
+    "private_mean_tps": 501.73321723229293,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.9,
+    "blended_tree_lambda": 0.9881933727830563,
+    "E_T": 5.191749672927541,
+    "official_tps": 518.2448417785562,
+    "private_mean_tps": 502.2346627524,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.925,
+    "blended_tree_lambda": 0.9904631220657737,
+    "E_T": 5.196943390746757,
+    "official_tps": 518.7632830823612,
+    "private_mean_tps": 502.73708780786194,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.95,
+    "blended_tree_lambda": 0.9927328713484911,
+    "E_T": 5.202147257393631,
+    "official_tps": 519.2827374507235,
+    "private_mean_tps": 503.24049463119735,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.975,
+    "blended_tree_lambda": 0.9950026206312086,
+    "E_T": 5.207361295996781,
+    "official_tps": 519.8032071923614,
+    "private_mean_tps": 503.7448854598011,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 0.997,
+    "blended_tree_lambda": 0.9969999999999999,
+    "E_T": 5.211958082615398,
+    "official_tps": 520.26206231904,
+    "private_mean_tps": 504.18956513863543,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   },
+   {
+    "deeptail_lambda": 1.0,
+    "blended_tree_lambda": 0.9972723699139261,
+    "E_T": 5.212585529735329,
+    "official_tps": 520.3246946210342,
+    "private_mean_tps": 504.2502625359535,
+    "publish_first_go": true,
+    "valid_kernel_route": true,
+    "verdict": "GO"
+   }
+  ],
+  "extended_diagnostic_below_0p5": [
+   {
+    "deeptail_lambda": 0.0,
+    "blended_tree_lambda": 0.9064823986052281,
+    "E_T": 5.011343930487696,
+    "official_tps": 500.2365880420156,
+    "private_mean_tps": 484.78273942771847,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.1,
+    "blended_tree_lambda": 0.9155613957360978,
+    "E_T": 5.030773491368123,
+    "official_tps": 502.1760632360547,
+    "private_mean_tps": 486.6622982606669,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.2,
+    "blended_tree_lambda": 0.9246403928669676,
+    "E_T": 5.050353666165258,
+    "official_tps": 504.1305728385981,
+    "private_mean_tps": 488.55642704294456,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.3,
+    "blended_tree_lambda": 0.9337193899978374,
+    "E_T": 5.070085836323732,
+    "official_tps": 506.1002547466164,
+    "private_mean_tps": 490.46525941146,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   },
+   {
+    "deeptail_lambda": 0.4,
+    "blended_tree_lambda": 0.9427983871287072,
+    "E_T": 5.089971395514784,
+    "official_tps": 508.08524807755134,
+    "private_mean_tps": 492.38893018588885,
+    "publish_first_go": false,
+    "valid_kernel_route": true,
+    "verdict": "HOLD"
+   }
+  ],
+  "deeptail_lambda_for_publish_first_go": 0.7882114855909229,
+  "lambda_publish_first_floor_blended": 0.9780440967672142,
+  "mu_publish_first_official": 515.938942703014,
+  "deeptail_lambda_for_p95_private": null,
+  "p95_private_reachable": false,
+  "lambda_p95_blended": null,
+  "p95_mu_ceiling_needed": 535.1394043208535,
+  "official_at_max_deeptail": 520.3246946210342,
+  "p95_shortfall_even_at_max_deeptail_tps": 14.814709699819332,
+  "blend_floor_deeptail_zero": 0.9064823986052281,
+  "kernel_nogo_floor": 0.8571542761568587,
+  "nogo_reachable_at_interim_spine": false,
+  "spine_below_which_nogo_reachable": 0.9427461742702384,
+  "verdict_regions_present": {
+   "GO": true,
+   "HOLD": true,
+   "NO-GO": false
+  },
+  "deeptail_budget_bar_215_cross_check": 0.7874871278548552,
+  "publish_first_vs_215_bar_budget_delta": 0.0007243577360677156
+ },
+ "headline": {
+  "LAUNCH_GATED_ON_SINGLE_DEEPTAIL_LAMBDA": true,
+  "the_one_number": "land #71's built deep-tail reach-weighted lambda_hat over q[8..9]",
+  "deeptail_lambda_for_publish_first_go": 0.7882114855909229,
+  "publish_first_fires_iff_deeptail_ge": 0.7882114855909229,
+  "hold_band_deeptail_physical": [
+   0.0,
+   0.7882114855909229
+  ],
+  "deeptail_at_kernel_floor_unclamped": -0.5433212692693469,
+  "kernel_nogo_floor_blended_lambda": 0.8571542761568587,
+  "nogo_reachable_at_interim_spine": false,
+  "statement": "The launch is gated on EXACTLY ONE measurement -- land #71's deep-tail lambda_hat on q[8..9]. Every other launch gate is GREEN and banked. The #124 publish-first GO FIRES the moment that number lands >= 0.7882 (blended tree lambda reaches the publish-first floor 0.9780, official 515.94, private mean >= 500). Below it (down to the kernel floor) the build is VALID-but-sub-publish-first (HOLD); below blended lambda 0.8572 it is NO-GO. With the interim spine 0.997, NO-GO is in fact UNREACHABLE for any deep tail (the blend floor 0.9065 sits above the kernel floor), so the live decision is GO-vs-HOLD on one number."
+ },
+ "honest_band": {
+  "a_spine_is_interim_land71": {
+   "lambda_spine_interim": 0.997,
+   "rule": "the q[2..7] spine is INTERIM (land #71); if it re-measures LOWER the deep-tail publish-first threshold RISES (and NO-GO can become reachable).",
+   "spine_sensitivity": [
+    {
+     "lambda_spine": 0.99,
+     "deeptail_for_publish_first_go": 0.8583125122692884,
+     "blend_floor_deeptail_zero": 0.900117928404389,
+     "nogo_reachable": false
+    },
+    {
+     "lambda_spine": 0.995,
+     "deeptail_for_publish_first_go": 0.8082403503561707,
+     "blend_floor_deeptail_zero": 0.9046639785478454,
+     "nogo_reachable": false
+    },
+    {
+     "lambda_spine": 0.997,
+     "deeptail_for_publish_first_go": 0.7882114855909229,
+     "blend_floor_deeptail_zero": 0.9064823986052281,
+     "nogo_reachable": false
+    },
+    {
+     "lambda_spine": 0.999,
+     "deeptail_for_publish_first_go": 0.768182620825675,
+     "blend_floor_deeptail_zero": 0.9083008186626107,
+     "nogo_reachable": false
+    },
+    {
+     "lambda_spine": 1.0,
+     "deeptail_for_publish_first_go": 0.7581681884430518,
+     "blend_floor_deeptail_zero": 0.909210028691302,
+     "nogo_reachable": false
+    }
+   ],
+   "spine_below_which_nogo_reachable": 0.9427461742702384
+  },
+  "b_et_map_imported_unchanged": "the blended-lambda -> E[T] map is the #175/#184 reach-DP (via #213 floor/ceiling spines, ubel #222) imported UNCHANGED; the ceiling 520.953 (#204) anchors official mu_pub.",
+  "c_deeptail_is_land71_to_measure": "the deep-tail lambda_hat is what land #71 MEASURES; this leg pre-registers the DECISION across its [0.5,1.0] axis, not the value. The card is a table lookup once #71 reports.",
+  "d_all_gate_values_imported": {
+   "rule": "all gate values imported unchanged (no re-derivation).",
+   "pubfirst_228_banked": false,
+   "pubfirst_228_note": "kanna #228 (publish-first-lambda-floor) has NOT banked a lambda_floor_publish_first; the publish-first floor is computed here from mu_pub^{-1}(500/f_priv) and the #215 blend. If #228 lands, reconcile to it (delta vs 0.978044)."
+  },
+  "e_f_priv_sensitivity": {
+   "rule": "the publish-first GREEN uses the PINNED f_priv=0.969107 (#217); under the #224 GROUNDED f_priv=0.957 the ceiling private mean falls to 498.58 < 500 and the publish-first GO becomes UNREACHABLE below the ceiling (a material caveat for #124).",
+   "f_priv_sensitivity": [
+    {
+     "f_priv": 0.95,
+     "tag": "grounded_low_0.950",
+     "mu_publish_first": 526.3157894736843,
+     "private_mean_at_ceiling": 494.905095695609,
+     "publish_first_reachable_below_ceiling": false,
+     "deeptail_for_publish_first_go": null
+    },
+    {
+     "f_priv": 0.9570535584491102,
+     "tag": "grounded_point_0.957_#224",
+     "mu_publish_first": 522.4368015623304,
+     "private_mean_at_ceiling": 498.57966624218955,
+     "publish_first_reachable_below_ceiling": false,
+     "deeptail_for_publish_first_go": null
+    },
+    {
+     "f_priv": 0.969106920637722,
+     "tag": "pinned_0.969107_#217",
+     "mu_publish_first": 515.938942703014,
+     "private_mean_at_ceiling": 504.858898207883,
+     "publish_first_reachable_below_ceiling": true,
+     "deeptail_for_publish_first_go": 0.7882114855909229
+    }
+   ],
+   "p95_unreachable_note": "the harder P95 private bar (535.139) exceeds the 520.953 ceiling at EVERY f_priv -- unreachable without raising the public ceiling."
+  }
+ },
+ "self_test": {
+  "launch_readiness_gocard_self_test_passes": true,
+  "deeptail_lambda_for_publish_first_go": 0.7882114855909229,
+  "conditions": {
+   "a_deeptail_eq_spine_reproduces_all_spine": {
+    "pass": true,
+    "blended_lambda": 0.9969999999999999,
+    "E_T": 5.211958082615398,
+    "E_T_all_spine": 5.211958082615399,
+    "official": 520.26206231904,
+    "official_all_spine": 520.2620623190401
+   },
+   "b_go_monotone_upper_interval": {
+    "pass": true,
+    "go_is_upper_interval": true,
+    "blended_lambda_monotone_in_deeptail": true,
+    "n_go_on_grid": 43
+   },
+   "c_publish_first_easier_than_p95": {
+    "pass": true,
+    "deeptail_for_publish_first_go": 0.7882114855909229,
+    "deeptail_for_p95_private": null,
+    "p95_reachable": false
+   },
+   "d_one_red_blocker": {
+    "pass": true,
+    "n_red_blockers": 1
+   },
+   "e_roundtrip_185_go_nogo": {
+    "pass": true,
+    "verdict_at_lambda1": "GO",
+    "verdict_at_floor": "NO-GO",
+    "approval_block_wellformed": true,
+    "authorizes_nothing": true
+   },
+   "f_nan_clean": {
+    "pass": true,
+    "nan_paths": []
+   }
+  }
+ },
+ "handoff_line": "the launch is GREEN on every gate except ONE -- land #71's deep-tail lambda_hat over q[8..9] (the only RED of 6 gates); the GO-card says publish-first FIRES the moment it lands >= 0.7882 (blended tree lambda 0.9780, official 515.94, private mean >= 500), HOLDS for the int4 kernel in [the kernel floor 0.8572, that) -- and with the interim spine 0.997 the blend floor 0.9065 sits ABOVE the kernel floor so NO-GO is unreachable -- so we are waiting on exactly ONE number and the #124 publish-first decision is pre-registered for every value it can take.",
+ "constants": {
+  "validity_bar": 0.9779783323491393,
+  "validity_bar_nominal": 0.978,
+  "trigger_worstcase": 513.5574577506176,
+  "ceiling_mu": 520.9527323111674,
+  "mu_pub_at_validity_bar": 515.9240665878908,
+  "speed_margin_at_validity_bar": 2.3666088372732474,
+  "f_priv_pinned": 0.969106920637722,
+  "f_priv_grounded_point": 0.9570535584491102,
+  "kernel_floor": 0.8571542761568587,
+  "lambda_spine": 0.997,
+  "w_shallow": 0.909210028691302,
+  "w_deep": 0.09078997130869798,
+  "deeptail_budget_bar_215": 0.7874871278548552,
+  "mu_ceiling_needed_p95": 535.1394043208535,
+  "target_private_mean": 500.0,
+  "headline_regime": "both_bugs"
+ },
+ "provenance": "ubel#222 (yw7i2ece) binding gate + mu_pub map x ubel#218 (0ug7vd7d) trigger 513.557 x ubel#204 ceiling 520.953 x wirbel#213 reach-DP spines x stark#215 deep-tail blend x wirbel#216 (pc8g6s04) kernel floor 0.8572 x kanna#217 (vgovdrjc) f_priv 0.969107 x kanna#224 (1081oc84) P95 bar 535.139 x land#71 spine 0.997. GO/NO-GO via fern#185.",
+ "scope": "LOCAL CPU-only integration of the banked launch gates into a readiness scorecard + a deep-tail-lambda-parameterized GO-card, reusing fern #185's GO/NO-GO logic; all gate values and the E[T] blend imported unchanged; the deep-tail lambda stays land #71's to measure; authorizes NOTHING. NOT a launch. NOT open2.",
+ "elapsed_sec": 2.004020929336548,
+ "peak_mem_mib": 66.921875
+}
