@@ -1,0 +1,407 @@
+{
+  "pr": 194,
+  "metric_primary": "redraw_budget_self_test_passes",
+  "metric_test": "n_shots_for_p95_at_bar",
+  "redraw_budget_self_test_passes": true,
+  "n_shots_for_p95_at_bar": 5,
+  "n_shots_for_p95_at_lambda1": 1,
+  "n_shots_for_p95_icc": 5,
+  "mu_single_shot_safe_tps": 512.15707117161,
+  "decomposition": {
+    "sampling_halfwidth_95_both_bugs_tps": 10.906182006867379,
+    "sampling_halfwidth_95_descent_tps": 10.831761219545779,
+    "z95_two_sided": 1.959963984540054,
+    "sigma_sample_1sigma_tps": 5.564480823573265,
+    "sigma_hw_1sigma_tps": 4.864468814937121,
+    "sigma_within_tps": 0.056157935896891956,
+    "sigma_between_tps": 4.864144646053565,
+    "per_draw_sigma_tps": 7.390974474817942,
+    "n_steps_both_bugs": 3146.5611231291746,
+    "mean_steps_per_prompt_mbar": 24.582508774446676,
+    "redraw_independence_model": {
+      "eps_sample": "iid; FRESH every official run (128-prompt re-benchmark) -> re-randomizes. sigma_sample = 10.906/z95 = 5.5645 TPS (wirbel #175 both-bugs, B=16384).",
+      "eps_hw": "sigma_between=4.8645 TPS (kanna #188, cross-allocation dominated, sigma_within=0.056 negligible). An official re-submission is a separate HF Job -> fresh a10g-small allocation -> eps_hw RE-DRAWS per shot. Frozen ONLY across multiple passes within one allocation.",
+      "per_draw_sigma": "hypot(sigma_sample, sigma_hw) = 7.3910 TPS (both components fresh per shot).",
+      "frozen_alternative": "If the official harness instead RE-USES the fixed 128 public prompts under deterministic greedy decode, eps_sample is a COMMON bias (does NOT re-randomize); best-of-N cannot cure it (see step-5d frozen comparison). This is the load-bearing assumption -- the PR premise is fresh re-benchmark per run."
+    }
+  },
+  "card_points_183": {
+    "both_bugs": {
+      "bar_lambda": 0.90523,
+      "bar_central_tps": 514.0710659726217,
+      "bar_lcb_tps": 500.0001445053368,
+      "lam1_central_tps": 535.4330096522525,
+      "lam1_lcb_tps": 520.9527323111674
+    },
+    "descent_only": {
+      "bar_lambda": 0.97502,
+      "bar_central_tps": 514.3128231472418,
+      "bar_lcb_tps": 500.0000008703435,
+      "lam1_central_tps": 519.9519249490157,
+      "lam1_lcb_tps": 505.5276163584742
+    }
+  },
+  "budget": {
+    "sigma_draw_tps": 7.390974474817942,
+    "mu_grid_rows": [
+      {
+        "mu_tps": 495.0,
+        "p_single_shot": 0.24936137536975,
+        "n_star_p95": 11,
+        "p_best_of_2": 0.43654165521320665,
+        "p_best_of_3": 0.5770464030328042,
+        "p_best_of_5": 0.7616832663312434
+      },
+      {
+        "mu_tps": 500.0,
+        "p_single_shot": 0.5,
+        "n_star_p95": 5,
+        "p_best_of_2": 0.75,
+        "p_best_of_3": 0.875,
+        "p_best_of_5": 0.96875
+      },
+      {
+        "mu_tps": 505.0,
+        "p_single_shot": 0.75063862463025,
+        "n_star_p95": 3,
+        "p_best_of_2": 0.9378189044737066,
+        "p_best_of_3": 0.9844944364975656,
+        "p_best_of_5": 0.9990358470746661
+      },
+      {
+        "mu_tps": 510.0,
+        "p_single_shot": 0.9119724341178743,
+        "n_star_p95": 2,
+        "p_best_of_2": 0.992251147644868,
+        "p_best_of_3": 0.9993178873887978,
+        "p_best_of_5": 0.9999947144100862
+      },
+      {
+        "mu_tps": 515.0,
+        "p_single_shot": 0.978796424613465,
+        "n_star_p95": 1,
+        "p_best_of_2": 0.9995504083908275,
+        "p_best_of_3": 0.9999904670504217,
+        "p_best_of_5": 0.9999999957140658
+      },
+      {
+        "mu_tps": 520.0,
+        "p_single_shot": 0.9965950797074333,
+        "n_star_p95": 1,
+        "p_best_of_2": 0.9999884065178013,
+        "p_best_of_3": 0.9999999605251172,
+        "p_best_of_5": 0.9999999999995424
+      }
+    ],
+    "build_bar_rows": [
+      {
+        "topology": "both_bugs",
+        "point": "bar_lcb",
+        "lambda": 0.90523,
+        "mu_tps": 500.0001445053368,
+        "p_single_shot": 0.5000077999577426,
+        "n_star_p95": 5
+      },
+      {
+        "topology": "both_bugs",
+        "point": "bar_central",
+        "lambda": 0.90523,
+        "mu_tps": 514.0710659726217,
+        "p_single_shot": 0.9715330166525624,
+        "n_star_p95": 1
+      },
+      {
+        "topology": "both_bugs",
+        "point": "lam1_lcb",
+        "lambda": 1.0,
+        "mu_tps": 520.9527323111674,
+        "p_single_shot": 0.9977080554483766,
+        "n_star_p95": 1
+      },
+      {
+        "topology": "both_bugs",
+        "point": "lam1_central",
+        "lambda": 1.0,
+        "mu_tps": 535.4330096522525,
+        "p_single_shot": 0.999999182932557,
+        "n_star_p95": 1
+      },
+      {
+        "topology": "descent_only",
+        "point": "bar_lcb",
+        "lambda": 0.97502,
+        "mu_tps": 500.0000008703435,
+        "p_single_shot": 0.5000000469784907,
+        "n_star_p95": 5
+      },
+      {
+        "topology": "descent_only",
+        "point": "bar_central",
+        "lambda": 0.97502,
+        "mu_tps": 514.3128231472418,
+        "p_single_shot": 0.9735984180945991,
+        "n_star_p95": 1
+      },
+      {
+        "topology": "descent_only",
+        "point": "lam1_lcb",
+        "lambda": 1.0,
+        "mu_tps": 505.5276163584742,
+        "p_single_shot": 0.7727359476301532,
+        "n_star_p95": 3
+      },
+      {
+        "topology": "descent_only",
+        "point": "lam1_central",
+        "lambda": 1.0,
+        "mu_tps": 519.9519249490157,
+        "p_single_shot": 0.9965277971807898,
+        "n_star_p95": 1
+      }
+    ],
+    "n_shots_for_p95_at_bar": 5,
+    "n_shots_for_p95_at_lambda1": 1,
+    "mu_bar_tps": 500.0001445053368,
+    "mu_lambda1_tps": 520.9527323111674,
+    "mu_single_shot_safe_tps": 512.15707117161,
+    "bar_note": "At mu=500 (the bar) P(single>=500)=0.5 EXACTLY for any sigma -> N=5 (1-0.5^5=0.969>=0.95) is sigma-invariant."
+  },
+  "icc_sensitivity": {
+    "bands": [
+      {
+        "icc": 0.0,
+        "design_effect": 1.0,
+        "accept_half_tps": 10.906182006867379,
+        "sigma_sample_icc_tps": 5.564480823573265,
+        "sigma_draw_icc_tps": 7.390974474817942,
+        "n_star_at_bar_mu500": 5,
+        "n_star_at_lambda1": 1,
+        "p_single_at_lambda1": 0.9977080554483766
+      },
+      {
+        "icc": 0.05,
+        "design_effect": 2.179125438722333,
+        "accept_half_tps": 16.099554418877638,
+        "sigma_sample_icc_tps": 8.214209315002147,
+        "sigma_draw_icc_tps": 9.54653295820864,
+        "n_star_at_bar_mu500": 5,
+        "n_star_at_lambda1": 1,
+        "p_single_at_lambda1": 0.9859110329204372
+      },
+      {
+        "icc": 0.1,
+        "design_effect": 3.3582508774446667,
+        "accept_half_tps": 19.986157684905,
+        "sigma_sample_icc_tps": 10.197206603056618,
+        "sigma_draw_icc_tps": 11.298056441570703,
+        "n_star_at_bar_mu500": 5,
+        "n_star_at_lambda1": 1,
+        "p_single_at_lambda1": 0.9681692480806534
+      },
+      {
+        "icc": 0.3,
+        "design_effect": 8.074752632334,
+        "accept_half_tps": 30.991125908618198,
+        "sigma_sample_icc_tps": 15.812089483823298,
+        "sigma_draw_icc_tps": 16.543434670464627,
+        "n_star_at_bar_mu500": 5,
+        "n_star_at_lambda1": 2,
+        "p_single_at_lambda1": 0.8973380425268547
+      },
+      {
+        "icc": 0.5,
+        "design_effect": 12.791254387223333,
+        "accept_half_tps": 39.005810735860436,
+        "sigma_sample_icc_tps": 19.901289535692133,
+        "sigma_draw_icc_tps": 20.487176038559948,
+        "n_star_at_bar_mu500": 5,
+        "n_star_at_lambda1": 2,
+        "p_single_at_lambda1": 0.8467808853329856
+      },
+      {
+        "icc": 1.0,
+        "design_effect": 24.582508774446666,
+        "accept_half_tps": 54.07366952923218,
+        "sigma_sample_icc_tps": 27.589113859110874,
+        "sigma_draw_icc_tps": 28.014679373187185,
+        "n_star_at_bar_mu500": 5,
+        "n_star_at_lambda1": 3,
+        "p_single_at_lambda1": 0.7727457214192324
+      }
+    ],
+    "n_shots_for_p95_icc": 5,
+    "n_shots_for_p95_at_bar_iid": 5,
+    "bar_budget_icc_invariant": true,
+    "n_lambda1_iid": 1,
+    "n_lambda1_worst_icc": 3,
+    "blow_up_flag": false,
+    "verdict": "AT THE BAR (mu=500) the budget is ICC-INVARIANT (N=5 for iid AND worst-case ICC=1): P=0.5 at the bar for any scatter, so the human can budget the bar shot-count WITHOUT waiting for #190 to pin the ICC. ABOVE the bar (lam=1, mu=520.95) heavy ICC inflates the budget 1->3 but does NOT blow up -- the sampling term STILL re-randomizes per official run (just with a larger sigma). The budget only blows up in the FROZEN case (step 5d), not under ICC."
+  },
+  "reproduce_159": {
+    "central_tps": 505.4635557048992,
+    "sigma_full_159_tps": 6.736644005925301,
+    "p159_single_published": 0.791323021664327,
+    "p159_single_reproduced": 0.791323021664327,
+    "p159_single_abs_err": 0.0,
+    "sigma_hw_tps": 4.864468814937121,
+    "p_single_hw_published": 0.8693143058105263,
+    "p_single_hw_reproduced": 0.8693143058105263,
+    "p159_best2_published": 0.9829212493342153,
+    "p159_best2_reproduced": 0.9829212493342153,
+    "p159_best2_abs_err": 0.0
+  },
+  "self_test": {
+    "redraw_budget_self_test_passes": true,
+    "checks": {
+      "a_reproduces_159_single_0p791": true,
+      "b_reproduces_159_best_of_2": true,
+      "c_n_star_monotone_decreasing_and_p_monotone_increasing": true,
+      "d_iid_ge_frozen_strict": true,
+      "e_nan_clean": true,
+      "consistency_reproduces_183_lam1_lcb": true
+    },
+    "n_numbers_checked": 237,
+    "frozen_probe": [
+      {
+        "mu": 498.0,
+        "n": 1,
+        "p_iid": 0.39334922785852733,
+        "p_frozen": 0.393349227858528
+      },
+      {
+        "mu": 498.0,
+        "n": 2,
+        "p_iid": 0.6319748406601551,
+        "p_frozen": 0.541428932278575
+      },
+      {
+        "mu": 498.0,
+        "n": 3,
+        "p_iid": 0.7767372529189945,
+        "p_frozen": 0.6230500237098668
+      },
+      {
+        "mu": 498.0,
+        "n": 5,
+        "p_iid": 0.9178336919308614,
+        "p_frozen": 0.713512821035484
+      },
+      {
+        "mu": 498.0,
+        "n": 8,
+        "p_iid": 0.98165532434298,
+        "p_frozen": 0.782068918648945
+      },
+      {
+        "mu": 500.0,
+        "n": 1,
+        "p_iid": 0.5,
+        "p_frozen": 0.5000000000000011
+      },
+      {
+        "mu": 500.0,
+        "n": 2,
+        "p_iid": 0.75,
+        "p_frozen": 0.6540865631475437
+      },
+      {
+        "mu": 500.0,
+        "n": 3,
+        "p_iid": 0.875,
+        "p_frozen": 0.7311298447213159
+      },
+      {
+        "mu": 500.0,
+        "n": 5,
+        "p_iid": 0.96875,
+        "p_frozen": 0.8097690471233381
+      },
+      {
+        "mu": 500.0,
+        "n": 8,
+        "p_iid": 0.99609375,
+        "p_frozen": 0.8643833735993952
+      },
+      {
+        "mu": 505.0,
+        "n": 1,
+        "p_iid": 0.75063862463025,
+        "p_frozen": 0.7506386246302515
+      },
+      {
+        "mu": 505.0,
+        "n": 2,
+        "p_iid": 0.9378189044737066,
+        "p_frozen": 0.8708356055827524
+      },
+      {
+        "mu": 505.0,
+        "n": 3,
+        "p_iid": 0.9844944364975656,
+        "p_frozen": 0.9157529542027948
+      },
+      {
+        "mu": 505.0,
+        "n": 5,
+        "p_iid": 0.9990358470746661,
+        "p_frozen": 0.9520305971204412
+      },
+      {
+        "mu": 505.0,
+        "n": 8,
+        "p_iid": 0.9999850502655901,
+        "p_frozen": 0.9717493124478204
+      },
+      {
+        "mu": 510.0,
+        "n": 1,
+        "p_iid": 0.9119724341178743,
+        "p_frozen": 0.911972434117875
+      },
+      {
+        "mu": 510.0,
+        "n": 2,
+        "p_iid": 0.992251147644868,
+        "p_frozen": 0.9691390255648556
+      },
+      {
+        "mu": 510.0,
+        "n": 3,
+        "p_iid": 0.9993178873887978,
+        "p_frozen": 0.9839408413283928
+      },
+      {
+        "mu": 510.0,
+        "n": 5,
+        "p_iid": 0.9999947144100862,
+        "p_frozen": 0.9930186467557554
+      },
+      {
+        "mu": 510.0,
+        "n": 8,
+        "p_iid": 0.9999999963946324,
+        "p_frozen": 0.9967310578835271
+      }
+    ],
+    "lcb_183_lam1_reproduced_tps": 520.9469658709545
+  },
+  "handoff": "with sigma_oneshot=4.86 (+) iid sampling +/-10.9 (sigma_sample=5.56) re-randomizing per official run, the both-bugs build needs N=5 official shots for P(clear 500)>=0.95 at the build-bar mu=500 LCB (N=1 once mu>=512.2, the break-even); the human's Approval request should budget N=5 shots -- the bar budget is ICC-INVARIANT (robust to the unresolved #190 correlation axis), but FROZEN sampling (same prompts, no re-randomize) would break best-of-N; fern #185 carries this as the multi-shot row.",
+  "scope": "Models the official-shot budget N*(mu) over banked sigma's (the MULTI-shot complement to fern #185's single-shot GO/NO-GO). Takes NO official draws, authorizes NO shot count (a human still approves N), CPU-only. BANK-THE-ANALYSIS: adds 0 TPS, greedy untouched. The realistic-ICC band (wirbel #184/#190) is the conservative band; the frozen-sampling case is the load-bearing assumption-risk. NOT open2. NOT a launch.",
+  "imported_legs": {
+    "wirbel_175_sampling_halfwidth": "research/oracle_readout/et_second_moment/et_second_moment_results.json",
+    "kanna_188_sigma_oneshot": "research/validity/oneshot_hw_bound/oneshot_hw_bound_results.json",
+    "kanna_159_hw_envelope_repro": "research/validity/hw_variance_envelope/envelope.json",
+    "denken_183_forward_map": "research/oracle_readout/lambda_acceptance_card/lambda_acceptance_card_results.json",
+    "wirbel_184_190_icc_bands": "research/oracle_readout/lambda_robust_topology/lambda_robust_topology_results.json"
+  },
+  "public_evidence_used": [
+    "Best-of-N / max order-statistics: P(max of N >= t) = 1 - F(t)^N for iid draws.",
+    "wirbel #175 finite-sample sampling 95% CI half-width +/-10.906 TPS (both-bugs, B=16384).",
+    "kanna #188/#159 sigma_hw=4.86 TPS cross-allocation hardware draw.",
+    "denken #183 finite-sample-LCB forward map (lambda -> central/LCB TPS).",
+    "wirbel #184/#190 two-level ICC design-effect bands (within-prompt step correlation)."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0402
+}
