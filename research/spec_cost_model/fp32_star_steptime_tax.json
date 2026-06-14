@@ -1,0 +1,348 @@
+{
+  "pr": 131,
+  "utc": "2026-06-14T10:18:01Z",
+  "gpu": "NVIDIA A10G",
+  "l2_bytes": 6291456,
+  "sm_count": 80,
+  "ctx": 528,
+  "counts": {
+    "sliding": 30,
+    "full": 7
+  },
+  "config": {
+    "n_iter": 300,
+    "warmup": 30,
+    "rounds": 3,
+    "n_q_heads": 8,
+    "n_kv_heads": 2,
+    "qpkv": 4,
+    "head_dim": {
+      "sliding": 256,
+      "full": 512
+    },
+    "step_ratio_bf16": 1.1559689045914052,
+    "k_cal": 125.26795005202914,
+    "e_t_tree_ceiling": 5.207,
+    "tau_central": 1.0,
+    "tau_floor": 0.9924318649123313
+  },
+  "peak_bw": {
+    "measured_peak_gbps_copy": 481.8115078775842,
+    "spec_peak_gbps": 600.0
+  },
+  "partA_real_attn": {
+    "attn_us": {
+      "1": 480.81245999999925,
+      "8": 512.933723333335,
+      "16": 569.0574933333305,
+      "32": 943.124016666675
+    },
+    "per_type": {
+      "1": {
+        "sliding": {
+          "per_op_us": 12.169479999999963,
+          "count": 30
+        },
+        "full": {
+          "per_op_us": 16.532580000000053,
+          "count": 7
+        }
+      },
+      "8": {
+        "sliding": {
+          "per_op_us": 12.88929666666667,
+          "count": 30
+        },
+        "full": {
+          "per_op_us": 18.036403333333556,
+          "count": 7
+        }
+      },
+      "16": {
+        "sliding": {
+          "per_op_us": 14.345173333333253,
+          "count": 30
+        },
+        "full": {
+          "per_op_us": 19.814613333333284,
+          "count": 7
+        }
+      },
+      "32": {
+        "sliding": {
+          "per_op_us": 22.931856666666924,
+          "count": 30
+        },
+        "full": {
+          "per_op_us": 36.45261666666675,
+          "count": 7
+        }
+      }
+    },
+    "fit_mem_compute": {
+      "c0_mem_us": 408.2261938776766,
+      "c1_compute_us_per_row": 15.316191540747955,
+      "r2": 0.907773764144919
+    },
+    "r_attn_M32_M8_measured": 1.8386859232762447,
+    "r_attn_M32_M8_ref107": 1.8325004530121336,
+    "compute_us_m32": 490.11812930393455,
+    "compute_frac_m32": 0.5196751653469507,
+    "mem_floor_us": 408.2261938776766
+  },
+  "partB_matmul": {
+    "M": 32,
+    "bf16_matmul_us_cycle": 638.0702933333333,
+    "tf32_matmul_us_cycle": 1039.4510933333322,
+    "fp32_matmul_us_cycle": 3908.491593333337,
+    "bf16_softmax_us_cycle": 116.76314666666639,
+    "r_fp32_m32_realized": 6.125487480250875,
+    "r_tf32_measured": 1.62905420326521,
+    "r_fp32_bracket": {
+      "r_fp32_central_onchip": 2.7339762882736767,
+      "r_fp32_conservative_naive_hbm": 6.125487480250875,
+      "r_fp32_datasheet_compute": 2.2435897435897436,
+      "r_fp32_m32_realized": 6.125487480250875,
+      "r_fp32_asymptotic_measured": 2.7339762882736767,
+      "asymptotic_M": 512,
+      "l2_bytes": 6291456,
+      "fp32_k_buffer_full_mb": 8.650752,
+      "bf16_k_buffer_full_mb": 4.325376,
+      "fp32_spills_l2": true,
+      "bf16_fits_l2": true,
+      "artifact_note": "M=32 realized r_fp32=6.13 is L2-spill contaminated: the full-layer fp32 K-buffer (8.7MB) exceeds L2 (6.3MB) so fp32 re-reads K from HBM every iter while bf16 (4.3MB) stays resident. The on-chip-upcast build reads bf16 KV ONCE and upcasts in-register -> only the COMPUTE ratio applies (datasheet 2.24; asymptotic M=512 measured 2.73 corroborates). The ~6 ratio is the NAIVE fp32-KV-in-HBM build's worst case, kept as the conservative corner."
+    },
+    "asymptotic": {
+      "M": 512,
+      "bf16_matmul_us_cycle": 2753.374390000001,
+      "fp32_matmul_us_cycle": 7527.6602950000015,
+      "r_fp32_asymptotic": 2.7339762882736767,
+      "bf16_all": [
+        2747.690920000001,
+        2759.057860000001
+      ],
+      "fp32_all": [
+        7517.0271200000025,
+        7538.29347
+      ]
+    },
+    "matmul_frac_of_scaling_compute": 0.8453127001545316,
+    "qk_pv_split_bf16": {
+      "qk": 320.11808333333346,
+      "pv": 317.95220999999987
+    },
+    "per_precision": {
+      "bf16": {
+        "matmul_us_cycle": 638.0702933333333,
+        "qk_us_cycle": 320.11808333333346,
+        "pv_us_cycle": 317.95220999999987,
+        "softmax_us_cycle": 116.76314666666639,
+        "matmul_us_all": [
+          639.7178199999988,
+          638.0702933333333,
+          637.8927400000003
+        ]
+      },
+      "tf32": {
+        "matmul_us_cycle": 1039.4510933333322,
+        "qk_us_cycle": 483.1536033333341,
+        "pv_us_cycle": 555.6338800000002,
+        "softmax_us_cycle": 116.66275666666743,
+        "matmul_us_all": [
+          1039.6026500000012,
+          1038.6545099999983,
+          1039.4510933333322
+        ]
+      },
+      "fp32": {
+        "matmul_us_cycle": 3908.491593333337,
+        "qk_us_cycle": 1542.9652266666694,
+        "pv_us_cycle": 2365.598483333334,
+        "softmax_us_cycle": 116.63941666666798,
+        "matmul_us_all": [
+          3908.491593333337,
+          3908.7183366666677,
+          3908.153893333336
+        ]
+      }
+    }
+  },
+  "partC_roofline": {
+    "1": {
+      "ai_attn": 4,
+      "ridge_bf16": 116.66666666666667,
+      "ridge_tf32": 58.333333333333336,
+      "ridge_fp32": 52.0,
+      "ai_over_ridge_bf16": 0.03428571428571429,
+      "ai_over_ridge_fp32": 0.07692307692307693,
+      "bf16_compute_bound": false,
+      "fp32_compute_bound": false,
+      "datasheet_r_fp32": 2.2435897435897436,
+      "datasheet_r_tf32": 2.0
+    },
+    "8": {
+      "ai_attn": 32,
+      "ridge_bf16": 116.66666666666667,
+      "ridge_tf32": 58.333333333333336,
+      "ridge_fp32": 52.0,
+      "ai_over_ridge_bf16": 0.2742857142857143,
+      "ai_over_ridge_fp32": 0.6153846153846154,
+      "bf16_compute_bound": false,
+      "fp32_compute_bound": false,
+      "datasheet_r_fp32": 2.2435897435897436,
+      "datasheet_r_tf32": 2.0
+    },
+    "32": {
+      "ai_attn": 128,
+      "ridge_bf16": 116.66666666666667,
+      "ridge_tf32": 58.333333333333336,
+      "ridge_fp32": 52.0,
+      "ai_over_ridge_bf16": 1.0971428571428572,
+      "ai_over_ridge_fp32": 2.4615384615384617,
+      "bf16_compute_bound": true,
+      "fp32_compute_bound": true,
+      "datasheet_r_fp32": 2.2435897435897436,
+      "datasheet_r_tf32": 2.0
+    }
+  },
+  "step1_delta_step_time_fp32": {
+    "attn_m32_steprat": 0.14709487386209957,
+    "compute_frac_m32": 0.5196751653469507,
+    "matmul_frac": 0.8453127001545316,
+    "r_fp32_central": 2.7339762882736767,
+    "r_fp32_conservative": 6.125487480250875,
+    "delta_attn_steprat_central": 0.11204437266567233,
+    "delta_attn_steprat_conservative": 0.3918002223392572,
+    "delta_attn_us_m32_central": 718.3917156243881,
+    "delta_attn_us_m32_conservative": 2512.094335591296,
+    "delta_pct_of_step_central": 9.692680505560494,
+    "delta_pct_of_step_conservative": 33.89366450802108
+  },
+  "step2_reprice": {
+    "central": {
+      "e_t": 5.207,
+      "step_ratio_bf16": 1.1559689045914052,
+      "delta_attn_steprat": 0.11204437266567233,
+      "step_ratio_fp32": 1.2680132772570776,
+      "official_central_tau1": 514.4033013060274,
+      "official_floor_tau": 510.5102276322006,
+      "official_bf16_internal": 564.2627698116763,
+      "fleet_headline_haircut_central": 517.8103018197346,
+      "fleet_headline_haircut_floor": 513.8914435057764,
+      "step_inflation_pct": 9.692680505560494,
+      "breakeven_et_500_tau1": 5.061203910219723,
+      "breakeven_et_530_tau1": 5.364876144832905,
+      "breakeven_et_500_floor": 5.09979988466696,
+      "breakeven_et_530_floor": 5.405787877746977
+    },
+    "conservative": {
+      "e_t": 5.207,
+      "step_ratio_bf16": 1.1559689045914052,
+      "delta_attn_steprat": 0.3918002223392572,
+      "step_ratio_fp32": 1.5477691269306624,
+      "official_central_tau1": 421.42604124325345,
+      "official_floor_tau": 418.23663203366306,
+      "official_bf16_internal": 564.2627698116763,
+      "fleet_headline_haircut_central": 424.21723394236716,
+      "fleet_headline_haircut_floor": 421.00670060937415,
+      "step_inflation_pct": 33.89366450802108,
+      "breakeven_et_500_tau1": 6.177833700830131,
+      "breakeven_et_530_tau1": 6.548503722879939,
+      "breakeven_et_500_floor": 6.224944924935341,
+      "breakeven_et_530_floor": 6.598441620431461
+    }
+  },
+  "step3_gate": {
+    "verdict": "AMBER",
+    "conservative_central_tau1": 421.42604124325345,
+    "conservative_floor_tau": 418.23663203366306,
+    "central_estimate_tau1": 514.4033013060274,
+    "central_estimate_floor_tau": 510.5102276322006,
+    "clears_530_conservative_floor": false,
+    "clears_500_conservative_floor": false,
+    "clears_500_central": true,
+    "clears_530_central": false,
+    "rule": "GREEN: net clears 530 at conservative corner; AMBER: clears 500 not 530 / needs central; RED: net < 500"
+  },
+  "step2_et_sensitivity": {
+    "4.45": {
+      "official_central_tau1": 439.6187230289652,
+      "official_conservative_floor": 357.43288122715586
+    },
+    "4.62": {
+      "official_central_tau1": 456.41314615591443,
+      "official_conservative_floor": 371.087620509991
+    },
+    "4.80": {
+      "official_central_tau1": 474.1954765256254,
+      "official_conservative_floor": 385.54557975064
+    },
+    "5.00": {
+      "official_central_tau1": 493.95362138085983,
+      "official_conservative_floor": 401.60997890691675
+    },
+    "5.21": {
+      "official_central_tau1": 514.4033013060274,
+      "official_conservative_floor": 418.23663203366306
+    }
+  },
+  "step2_rfp32_sensitivity": {
+    "datasheet_2_24": {
+      "r_fp32": 2.2435897435897436,
+      "official_central_tau1": 527.5875746424216
+    },
+    "asymptotic_measured": {
+      "r_fp32": 2.7339762882736767,
+      "official_central_tau1": 514.4033013060274
+    },
+    "central_used": {
+      "r_fp32": 2.7339762882736767,
+      "official_central_tau1": 514.4033013060274
+    },
+    "naive_hbm_conservative": {
+      "r_fp32": 6.125487480250875,
+      "official_central_tau1": 438.60046790523626
+    }
+  },
+  "step4_hybrid": {
+    "recipes": {
+      "root_row_only": {
+        "fp32_row_fraction": 0.03125,
+        "delta_attn_steprat_central": 0.00350138664580226,
+        "delta_attn_steprat_conservative": 0.012243756948101788,
+        "official_central_tau1": 562.5588002129091,
+        "official_conservative_floor": 554.1232072935136,
+        "fleet_headline_central": 566.284744654653,
+        "fleet_headline_conservative_floor": 557.7932810413158,
+        "clears_530_conservative_floor": true,
+        "clears_500_conservative_floor": true
+      },
+      "root_row_plus_near_tie_tail": {
+        "fp32_row_fraction": 0.03662109375,
+        "delta_attn_steprat_central": 0.004103187475549524,
+        "delta_attn_steprat_conservative": 0.014348152673556783,
+        "official_central_tau1": 562.2669663216666,
+        "official_conservative_floor": 553.1268153315532,
+        "fleet_headline_central": 565.9909778865901,
+        "fleet_headline_conservative_floor": 556.790289767264,
+        "clears_530_conservative_floor": true,
+        "clears_500_conservative_floor": true
+      }
+    },
+    "preserves_et_recovery_rationale": "denken #101 localizes the deficit to the DEPTH-1 root row (built 0.598 vs q[1]=0.7287); the recovery is a root-row argmax effect, so fp32 on the root row (recipe a) is the minimal fix that restores the numerator. The near-tie tail (recipe b) covers wirbel #93's 0.537% < 1e-3 rel-margin flip-risk set for full greedy identity on the deeper tree rows.",
+    "near_tie_frac": 0.00537109375,
+    "safe_bulk_median_rel_margin": 0.18
+  },
+  "primary_metric": {
+    "name": "fp32_tree_official_tps_central",
+    "value": 514.4033013060274
+  },
+  "test_metric": {
+    "name": "fp32_tree_clears_500",
+    "value": 1
+  },
+  "verdict": "AMBER",
+  "elapsed_s": 6.064068078994751,
+  "peak_gpu_gb": 0.536870912,
+  "wandb_run_id": "tksrxyk5"
+}
