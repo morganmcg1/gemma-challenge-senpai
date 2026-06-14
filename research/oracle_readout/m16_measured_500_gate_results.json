@@ -1,0 +1,125 @@
+{
+  "primary_metric_name": "gate_self_test_passes",
+  "gate_self_test_passes": 1,
+  "test_metric_name": "gate_ready_for_measured_build",
+  "gate_ready_for_measured_build": 1,
+  "gate_verdict": "ARMED",
+  "gate_go_no_go": "PENDING",
+  "gate_label": "GATE ARMED + VALIDATED (self-test PASS); awaiting land #71's measured M=16 number. Operative clear-500 bar E[T] >= 4.841, clear-530 bar E[T] >= 5.131, supply ceiling E[T]=5.207 -> 537.8.  [STEP ROOFLINE-PENDING -- lawine #136 not yet measured]",
+  "land_measured_pending": true,
+  "roofline_pending": true,
+  "decision_input_line": "M16-MEASURED-500-GATE (decision input ONLY; does NOT authorize a launch): feed land #71's measured M=16 (accept_length E[T], branch-hit rho2, lawine #136 step, tau) -> one official-TPS go/no-go. GO requires GREEN (official >= 500 robustly) AND all preconditions (E[T] > 3.844 floor, branch-hit ~ 0.4165, PPL <= 2.42, greedy IDs captured). At the roofline depth-9 step 1.2127: clear-500 needs E[T] >= 4.841, the 5.207 ceiling -> 538.",
+  "map": {
+    "figure_of_merit": "official_TPS = K_cal * accept_length / step_time * tau",
+    "K_cal": 125.26795005202914,
+    "step_time": 1.2127483746822987,
+    "step_is_roofline": true,
+    "step_roofline_depth9_125": 1.2127483746822987,
+    "tau_band": {
+      "low": 0.9983,
+      "central": 1.0,
+      "high": 1.0
+    },
+    "frontier_official": 481.53,
+    "target_official": 500.0,
+    "target_530": 530.0,
+    "linear_floor_et": 3.844,
+    "supply_ceiling_et": 5.207
+  },
+  "self_test": {
+    "passes": true,
+    "anchor_red": {
+      "accept_length": 2.621,
+      "expected_tps": 271.0,
+      "gate_tps_central": 270.72994195715137,
+      "rel_err": 0.0009965241433528853,
+      "within_2pct": true,
+      "expected_verdict": "RED",
+      "gate_verdict": "RED",
+      "verdict_ok": true,
+      "go_no_go": "NO-GO",
+      "tok_per_step_above_floor": false
+    },
+    "anchor_green": {
+      "accept_length": 5.207,
+      "expected_tps": 538.0,
+      "gate_tps_central": 537.8446424154472,
+      "rel_err": 0.0002887687445219387,
+      "within_2pct": true,
+      "expected_verdict": "GREEN",
+      "gate_verdict": "GREEN",
+      "verdict_ok": true,
+      "go_no_go": "GO",
+      "clears_530": true
+    },
+    "tolerance": 0.02,
+    "step_time": 1.2127483746822987,
+    "note": "self-test runs at the #125 depth-9 roofline step; the 271 / 538 anchors are roofline-step numbers (fern #134 / #125). A measured step from lawine #136 re-prices the live gate but not these anchors."
+  },
+  "recovery_matrix_crosscheck": [
+    {
+      "accept_length": 2.621,
+      "label": "cell1 both bugs live (measured)",
+      "official_tps_central": 270.72994195715137,
+      "tps_verdict": "RED",
+      "clears_500": false,
+      "clears_530": false,
+      "go_no_go": "NO-GO"
+    },
+    {
+      "accept_length": 2.7397,
+      "label": "cell2 only BUG-1 fixed (depth-1->0.7287, salvage broken)",
+      "official_tps_central": 282.9907752689842,
+      "tps_verdict": "RED",
+      "clears_500": false,
+      "clears_530": false,
+      "go_no_go": "NO-GO"
+    },
+    {
+      "accept_length": 5.0564,
+      "label": "cell3 only BUG-2 fixed (rho-opt descent, depth-1 still 0.679)",
+      "official_tps_central": 522.2887747089433,
+      "tps_verdict": "GREEN",
+      "clears_500": true,
+      "clears_530": false,
+      "go_no_go": "GO"
+    },
+    {
+      "accept_length": 5.2068,
+      "label": "cell4 BOTH bugs fixed (rho-optimal ceiling)",
+      "official_tps_central": 537.8239838925966,
+      "tps_verdict": "GREEN",
+      "clears_500": true,
+      "clears_530": true,
+      "go_no_go": "GO"
+    }
+  ],
+  "operative_bands": {
+    "clear_500_bar": 4.840617149792076,
+    "clear_530_bar": 5.1310541787796,
+    "overtake_frontier_481_bar": 4.661804752278756,
+    "supply_ceiling_et": 5.207,
+    "supply_ceiling_official_central": 537.8446424154472,
+    "supply_ceiling_official_taulow": 536.930306523341,
+    "linear_floor_et": 3.844,
+    "step_time": 1.2127483746822987,
+    "step_is_roofline": true
+  },
+  "live_gate": null,
+  "preconditions_spec": {
+    "branch_hit_target_rho2": 0.4165047789261015,
+    "branch_hit_tol": 0.05,
+    "linear_floor_hard_abort": 3.844,
+    "ppl_gate": 2.42,
+    "greedy_token_ids_required": true
+  },
+  "measured_input_schema": {
+    "accept_length": "float -- land's MEASURED E[T] (numerator)",
+    "per_position_branch_hit": "float -- measured rank-2 branch-hit rho2 (~0.4165)",
+    "ppl": "float -- captured PPL (<= 2.42)",
+    "greedy_token_ids_captured": "bool -- decode-audit IDs captured",
+    "_step_note": "measured depth-9 step comes from lawine #136 via --measured-step, NOT this file; tau via --tau."
+  },
+  "provenance": "extends fern #129/#134 oracle_readout_harness (figure of merit + #125 depth-9 step model) and the #100 lever_composition compose (K_cal). Anchors: as-built E[T]=2.621->271 (fern #134); both-bugs-fixed E[T]=5.207->538 (fern #125). branch-hit rho2=0.4165 + linear floor 3.844 banked. measured step pending lawine #136; tau pinned lawine #116/#126. Decisive descent lever from fern #134 matrix + wirbel #135 DP.",
+  "method": "LOCAL CPU-only analytic gate; no GPU/vLLM/HF Job/submission/kernel build. Produces the 500-shot DECISION INPUT only; does NOT authorize a launch. Greedy identity untouched."
+}
