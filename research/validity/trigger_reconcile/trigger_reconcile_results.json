@@ -1,0 +1,211 @@
+{
+  "pr": 217,
+  "metric_primary": "trigger_reconcile_self_test_passes",
+  "metric_test": "n_star_launch",
+  "trigger_reconcile_self_test_passes": true,
+  "n_star_launch": 1,
+  "trigger_vs_N": {
+    "rows": [
+      {
+        "n": 1,
+        "e_max_order_stat": 0.0,
+        "tax_frozen": 0.0,
+        "tax_fresh": 0.0,
+        "T_central_frozen": 512.4101095400661,
+        "T_central_fresh": 512.4101095400661,
+        "T_worstcase_frozen": 514.6346173476741,
+        "T_worstcase_fresh": 514.6346173476741
+      },
+      {
+        "n": 2,
+        "e_max_order_stat": 0.5641895835477291,
+        "tax_frozen": 2.7444826348802893,
+        "tax_fresh": 4.16991081095943,
+        "T_central_frozen": 515.1545921749464,
+        "T_central_fresh": 516.5800203510255,
+        "T_worstcase_frozen": 517.3790999825544,
+        "T_worstcase_fresh": 518.8045281586335
+      },
+      {
+        "n": 3,
+        "e_max_order_stat": 0.8462843753216103,
+        "tax_frozen": 4.116723952320515,
+        "tax_fresh": 6.254866216439269,
+        "T_central_frozen": 516.5268334923866,
+        "T_central_fresh": 518.6649757565053,
+        "T_worstcase_frozen": 518.7513412999946,
+        "T_worstcase_fresh": 520.8894835641133
+      },
+      {
+        "n": 5,
+        "e_max_order_stat": 1.1629644736404543,
+        "tax_frozen": 5.657204414903753,
+        "tax_fresh": 8.59544073979668,
+        "T_central_frozen": 518.0673139549698,
+        "T_central_fresh": 521.0055502798627,
+        "T_worstcase_frozen": 520.2918217625778,
+        "T_worstcase_fresh": 523.2300580874708
+      },
+      {
+        "n": 10,
+        "e_max_order_stat": 1.5387527308350946,
+        "tax_frozen": 7.485214673046651,
+        "tax_fresh": 11.372882156658587,
+        "T_central_frozen": 519.8953242131128,
+        "T_central_fresh": 523.7829916967246,
+        "T_worstcase_frozen": 522.1198320207208,
+        "T_worstcase_fresh": 526.0074995043326
+      }
+    ],
+    "t_base_central": 512.4101095400661,
+    "t_base_worstcase": 514.6346173476741,
+    "law": "T(N) = T_base + sigma_sel * E[Z_(N:N)]; sigma_sel = sigma_hw (FROZEN) or sigma_draw (FRESH); T_base = 500 + z1*sigma_combined (#204). T(1) = T_base (E[Z_(1:1)] = 0, no winner's curse).",
+    "t1_central": 512.4101095400661,
+    "t1_worstcase": 514.6346173476741
+  },
+  "reconcile_528": {
+    "mu_bar_private_corrected": 528.4835555959944,
+    "reconcile_residual_528": 0.0,
+    "reconcile_identity": "528.48 = mu_bar_frozen_public_202 (504.873) + delta_mu_winners_curse (23.610)  [resid ~ 0]",
+    "reconcile_residual_closed_form": 3.1116087484406307e-10,
+    "reconcile_closed_form": "528.48 = mu_safe_fresh (512.157) / f_priv (0.969107)",
+    "tax_decomposition": {
+      "public_bestofN_discount_evaporates_tps": 7.283646514920861,
+      "private_drop_grossup_tps": 16.326484424384375,
+      "sum": 23.610130939305236
+    },
+    "order_stat_tax_n5_frozen": 5.657204414903753,
+    "order_stat_tax_n5_fresh": 8.59544073979668,
+    "order_stat_tax_roundtrips_210_frozen": 0.0,
+    "order_stat_tax_roundtrips_210_fresh": 0.0,
+    "pr_premise_t5_equals_528_holds": false,
+    "pr_literal_t5_frozen_central": 518.0673139549698,
+    "pr_literal_t5_minus_528": -10.416241641024612,
+    "pr_literal_tbase_plus_composite": 536.0202404793713,
+    "pr_literal_tbase_plus_composite_minus_528": 7.536684883376893,
+    "premise_correction": "PR identity 528.48 = T_base + 23.61 (with 23.61 labelled sigma_sel*E[Z_(5:5)]) does NOT hold. (i) sigma_sel*E[Z_(5:5)] is 5.657 (frozen) / 8.595 (fresh), NOT 23.61. (ii) 23.61 = delta_mu_winners_curse is a COMPOSITE relative to the #202 FROZEN-PUBLIC bar 504.873 (not #204's 512.41): 7.28 evaporating-discount + 16.33 private-grossup. True identity: 528.48 = 504.873 + 23.61 = mu_safe/f_priv. The 512.41-vs-528.48 gap (16.07) is the N-INDEPENDENT public->private gross-up, not the winner's curse (which is separate, smaller, and the only N-dependent piece).",
+    "p_private_clear_at_mu512p2": 0.31197802246730244,
+    "mu512_short_of_private_target_tps": 16.283555595994358,
+    "mu512_private_031_explained": "#210's 0.312 private clear at mu_pub=512.2 is because 512.2 sits 16.28 TPS BELOW the N-independent private build target 528.48 (private grade = one fresh draw, clear FLAT in N): a build at 512.2 has private mean 512.2*f_priv=496.4 < 500. It is NOT a failure of the N=1 PUBLIC GO trigger (512.41) -- that trigger answers a DIFFERENT question (95%-confidence the PUBLIC mean clears 500), not the private bar.",
+    "gap_512_to_528_is_public_to_private_grossup": 16.073446055928343
+  },
+  "n_star_policy": {
+    "lambda1_ceiling": 520.9527323111674,
+    "n_max_clearable_at_lambda1": {
+      "central_frozen": 15,
+      "central_fresh": 4,
+      "worstcase_frozen": 6,
+      "worstcase_fresh": 3
+    },
+    "n_max_clearable_at_lambda1_binding": 3,
+    "n_max_clearable_central": 15,
+    "n_max_clearable_worstcase": 6,
+    "best_of_n_is_harmful": true,
+    "best_of_n_harm_rationale": "T(N) STRICTLY increases in N (winner's-curse order-statistic tax sigma_sel*E[Z] moves only the SEEN public max), while #210 proved the conditional private clear is FLAT in N (n_star_private=1; the selection is on non-replicating noise). So N>1 lifts the bar you must hit (toward/past the 520.95 ceiling) for ZERO private-mean gain.",
+    "trigger_monotone_up": true,
+    "private_clear_flat_in_n": true,
+    "n_star_launch": 1,
+    "n_star_rationale": "N*=1: T(1)=512.41 is the lowest trigger, the lambda=1 ceiling 520.95 clears it (+8.54 central / +6.32 worst), there is no winner's curse (E[Z_(1:1)]=0), and best-of-N adds zero private clear. Any N>1 is dominated."
+  },
+  "private_bar_vs_ceiling": {
+    "lambda1_ceiling_clears_private_bar": false,
+    "private_bar_minus_ceiling": 7.530823284826965,
+    "private_mean_at_ceiling": 504.858898207883,
+    "private_p95_lcb_at_ceiling": 492.70182703627296,
+    "p_private_clear_at_ceiling": 0.7444260743392912,
+    "interpretation": "On the PUBLIC-confidence axis (#207) the lambda=1 ceiling 520.95 CLEARS the N=1 GO trigger 512.41 (GREEN). On the PRIVATE-bar axis (#210) the SAME ceiling does NOT reach the N-independent private build target 528.48 (gap +7.53; private clear only 0.744 < 0.95 at the ceiling). The #207-vs-#210 tension is reconciled by AXIS (public-confidence vs private-grade), not by the N-policy alone: pinning N*=1 removes the (small) winner's curse but the dominant public->private gross-up is N-INDEPENDENT and exceeds the physical ceiling. The launch fires GO at N=1 on the public reading yet does NOT clear the private bar at P95 even at full self-KV recovery."
+  },
+  "self_test": {
+    "trigger_reconcile_self_test_passes": true,
+    "checks": {
+      "a_t1_reproduces_204_exact": true,
+      "b_tax_and_private_roundtrip_210": true,
+      "c_trigger_strictly_increasing_in_n": true,
+      "d_n_max_ge_1_and_finite": true,
+      "e_fresh_tax_ge_frozen_tax": true,
+      "f_nan_clean": true,
+      "g_e_max_reproduces_210": true
+    },
+    "evidence": {
+      "a_t1_central_err": 0.0,
+      "a_t1_worstcase_err": 0.0,
+      "b_order_stat_tax_err_frozen": 0.0,
+      "b_order_stat_tax_err_fresh": 0.0,
+      "b_reconcile_residual_528": 0.0,
+      "b_reconcile_residual_closed_form": 3.1116087484406307e-10,
+      "d_n_max": {
+        "central_frozen": 15,
+        "central_fresh": 4,
+        "worstcase_frozen": 6,
+        "worstcase_fresh": 3
+      },
+      "g_e_max_max_abs_err_vs_210": 0.0
+    },
+    "n_checks": 7
+  },
+  "import_banked": {
+    "t_base_central": 512.4101095400661,
+    "t_base_worstcase": 514.6346173476741,
+    "sigma_combined_central": 7.544810879656575,
+    "sigma_combined_worstcase": 8.897215598932974,
+    "lambda1_ceiling": 520.9527323111674,
+    "central_headroom_204": 8.542622771101378,
+    "worstcase_headroom_204": 6.318114963493372,
+    "robust_yes_survives_207": true,
+    "h_out_207": 5.178247584457735,
+    "trigger_central_207": 512.4101095400661,
+    "sigma_hw": 4.864468814937121,
+    "sigma_draw": 7.390974474817942,
+    "mu_safe_fresh": 512.15707117161,
+    "mu_bar_frozen_public_202": 504.87342465668917,
+    "f_priv": 0.969106920637722,
+    "lambda_star_191": 0.9780112973731208,
+    "mu_bar_private_corrected": 528.4835555959944,
+    "delta_mu_winners_curse_composite": 23.610130939305236,
+    "discount_evaporates_tps": 7.283646514920861,
+    "private_drop_grossup_tps": 16.326484424384375,
+    "p_private_clear_at_mu512p2": 0.31197802246730244,
+    "winners_curse_tps_n5_frozen": 5.657204414903753,
+    "winners_curse_tps_n5_fresh": 8.59544073979668,
+    "n_star_private_210": 1,
+    "private_clear_flat_in_n_210": true,
+    "e_max_order_stats_210": {
+      "1": 0.0,
+      "2": 0.5641895835477291,
+      "3": 0.8462843753216103,
+      "5": 1.1629644736404543,
+      "10": 1.5387527308350946,
+      "20": 1.8674750597982157,
+      "50": 2.2490736293896902
+    },
+    "p_private_clear_at_ceiling": 0.7444260743392912
+  },
+  "e_max_order_stats": {
+    "1": 0.0,
+    "2": 0.5641895835477291,
+    "3": 0.8462843753216103,
+    "5": 1.1629644736404543,
+    "10": 1.5387527308350946,
+    "20": 1.8674750597982157,
+    "50": 2.2490736293896902
+  },
+  "anchors": {
+    "anchor_t_base_central_err": 0.0,
+    "anchor_t_base_worstcase_err": 0.0,
+    "z1": 1.6448536269514722,
+    "robust_yes_survives_207": true
+  },
+  "handoff": "fern #185: the launch GO trigger is T(N) = 512.41 + sigma_sel*E[Z_(N:N)] (central; 514.63 worst-case), reproducing #204's 512.41 at N=1 (tax 0) and #210's small order-statistic winner's curse (5.66 TPS frozen / 8.60 fresh at N=5); the lambda=1 ceiling 520.95 clears the PUBLIC trigger T(N) for N <= n_max (central 15 / worst 6 frozen; central 4 / worst 3 fresh -- bind N<=3), so fire GO at the N=1 trigger 512.41/514.63 with the pinned policy N*=1 (best-of-N is HARMFUL: it raises the seen trigger for ZERO private-mean gain, #210 private-clear flat in N). CRUCIAL: the PRIVATE-corrected build target 528.48 is N-INDEPENDENT (= mu_safe/f_priv) and EXCEEDS the ceiling 520.95 by +7.53 TPS (private clear only 0.744 at the ceiling), so the #207-vs-#210 tension resolves by AXIS (public-confidence vs private-grade), not by the N-policy alone -- the N=1 GO fires on the public reading but the private bar is NOT cleared at P95 even at full self-KV recovery. PR's literal 528.48 = T_base+23.61 does NOT hold (23.61 is a composite vs the #202 frozen-public bar 504.873, not the order-statistic tax 5.66) -- see reconcile_528.premise_correction.",
+  "scope": "LOCAL CPU-only analytic reconciliation of two banked launch triggers (#204/#207 GO trigger 512.41/514.63 and #210 private bar 528.48) as one function of N. Takes NO official draws, authorizes none. BASELINE stays 481.53; adds 0 TPS; greedy/PPL untouched. Imports #204/#207/#210 VERBATIM; does not re-derive the bar (0.9780), the sigmas, or the ceiling (520.95). Orthogonal to Issue #192 (greedy gate). NOT open2. NOT a launch.",
+  "public_evidence_used": [
+    "ubel #204 (launch_sigma_unit_rebase, MERGED): clean GO trigger 512.41 central / 514.63 worst-case, combined sigma 7.5448/8.8972, lambda=1 ceiling 520.95, z1=1.64485.",
+    "ubel #207 (launch_sigma_175_reconcile, MERGED): launch-correct h_out reading 5.178 confirms the 512.41/514.63 trigger; robust_yes_survives=True.",
+    "kanna #210 (winners_curse_budget, MERGED): order-statistic tax sigma_sel*E[Z_(N:N)] (5.657 frozen / 8.595 fresh at N=5), private-corrected build target 528.48 (=mu_safe/f_priv), conditional private clear FLAT in N (n_star_private=1), 0.312 at mu=512.2, tax_decomposition 7.28+16.33 vs the #202 frozen-public bar 504.873.",
+    "Winner's curse / optimizer's curse: Capen-Clapp-Campbell (1971); Smith & Winkler (2006) Mgmt Sci 52(3) Prop. 1; order statistics E[Z_(N:N)] David & Nagaraja (2003).",
+    "stark #191 binding private bar lambda*_LCB 0.9780 -- the launch is graded privately."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis over EXISTING MERGED results; no GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "peak_mem_mib": 12.0625,
+  "elapsed_s": 8.0475
+}
