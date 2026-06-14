@@ -1,0 +1,458 @@
+{
+  "pr": 210,
+  "metric_primary": "winners_curse_self_test_passes",
+  "metric_test": "mu_bar_private_corrected",
+  "winners_curse_self_test_passes": true,
+  "mu_bar_private_corrected": 528.4835555959944,
+  "delta_mu_winners_curse": 23.610130939305236,
+  "winners_curse_tps_n5_frozen": 5.657204414903753,
+  "winners_curse_tps_n5_fresh": 8.59544073979668,
+  "n_star_private": 1,
+  "private_clear_flat_in_n": true,
+  "selection_model": {
+    "public_shot": "X_i = mu_pub + b + eps_hw,i",
+    "private_grade": "Y = mu_pub*f_priv + (fresh private noise ~ N(0, sigma_priv^2)), f_priv=(1-drop)*tau_low=0.969107, sigma_priv=sigma_draw=7.3910; private noise INDEPENDENT of the public selection (fresh allocation + adverse private prompts).",
+    "FROZEN": "b common across the N re-draws (fixed prompts + greedy => identical tokens), only eps_hw,i ~ N(0,sigma_hw^2=4.864^2) re-draws; selection i*=argmax eps_hw,i, sigma_sel=sigma_hw=4.8645 (#202 conservative default).",
+    "FRESH": "each shot re-draws b_i AND eps_hw,i => X_i ~ N(mu_pub, sigma_draw^2=7.391^2) iid; selection i*=argmax X_i, sigma_sel=sigma_draw=7.3910 (#194 premise).",
+    "regime_trigger": "WHICH regime the official harness is in is the harness-owner's open question (same as #202/#192): FRESH iff the harness re-samples prompts or decode is non-deterministic run-to-run; FROZEN iff it re-benchmarks the FIXED 128 prompts under deterministic greedy. The challenge's token-IDENTITY contract leans FROZEN. BOTH are bound here; the private conditional is regime-INVARIANT regardless.",
+    "winners_curse_mechanism": "the launch trigger fires on the MAX of N public shots; the selected max overstates the replicable mean by sigma_sel*E[Z_(N:N)] of re-randomizing noise that does NOT appear in Y (Capen 1971; Smith & Winkler 2006)."
+  },
+  "winners_curse": {
+    "rows": [
+      {
+        "n": 1,
+        "e_max_order_stat": 0.0,
+        "winners_curse_tps_frozen": 0.0,
+        "winners_curse_tps_fresh": 0.0
+      },
+      {
+        "n": 2,
+        "e_max_order_stat": 0.5641895835477291,
+        "winners_curse_tps_frozen": 2.7444826348802893,
+        "winners_curse_tps_fresh": 4.16991081095943
+      },
+      {
+        "n": 3,
+        "e_max_order_stat": 0.8462843753216103,
+        "winners_curse_tps_frozen": 4.116723952320515,
+        "winners_curse_tps_fresh": 6.254866216439269
+      },
+      {
+        "n": 5,
+        "e_max_order_stat": 1.1629644736404543,
+        "winners_curse_tps_frozen": 5.657204414903753,
+        "winners_curse_tps_fresh": 8.59544073979668
+      },
+      {
+        "n": 10,
+        "e_max_order_stat": 1.5387527308350946,
+        "winners_curse_tps_frozen": 7.485214673046651,
+        "winners_curse_tps_fresh": 11.372882156658587
+      }
+    ],
+    "winners_curse_tps_n5_frozen": 5.657204414903753,
+    "winners_curse_tps_n5_fresh": 8.59544073979668,
+    "note": "FROZEN: the ENTIRE best-of-N public gain (#202 showed it only moves sigma_hw) is winner's-curse hardware luck = sigma_hw*E[Z_(N:N)] (5.66 TPS at N=5) that EVAPORATES on a fresh private re-benchmark. FRESH inflates more (sigma_draw*E[Z], 8.60 TPS at N=5) because the whole draw re-randomizes. best-of-N raises the PUBLIC number you SEE, never the checkpoint's true private mean."
+  },
+  "gap_table": {
+    "rows": [
+      {
+        "mu_pub": 500.0,
+        "n": 1,
+        "p_public_clear_bestofN_fresh": 0.5,
+        "p_public_clear_bestofN_frozen": 0.5000000000000011,
+        "p_private_clear_given_trigger_fresh": 0.018312527937539902,
+        "p_private_clear_given_trigger_frozen": 0.018312527937539808,
+        "p_private_unconditional": 0.018312527937539902,
+        "public_minus_private_clear_fresh": 0.4816874720624601,
+        "public_minus_private_clear_frozen": 0.4816874720624613
+      },
+      {
+        "mu_pub": 500.0,
+        "n": 5,
+        "p_public_clear_bestofN_fresh": 0.96875,
+        "p_public_clear_bestofN_frozen": 0.8097690471233381,
+        "p_private_clear_given_trigger_fresh": 0.018312527937539902,
+        "p_private_clear_given_trigger_frozen": 0.018312527937539888,
+        "p_private_unconditional": 0.018312527937539902,
+        "public_minus_private_clear_fresh": 0.9504374720624601,
+        "public_minus_private_clear_frozen": 0.7914565191857982
+      },
+      {
+        "mu_pub": 505.0,
+        "n": 1,
+        "p_public_clear_bestofN_fresh": 0.75063862463025,
+        "p_public_clear_bestofN_frozen": 0.7506386246302515,
+        "p_private_clear_given_trigger_fresh": 0.07574081908259989,
+        "p_private_clear_given_trigger_frozen": 0.07574081908259957,
+        "p_private_unconditional": 0.07574081908259989,
+        "public_minus_private_clear_fresh": 0.6748978055476501,
+        "public_minus_private_clear_frozen": 0.674897805547652
+      },
+      {
+        "mu_pub": 505.0,
+        "n": 5,
+        "p_public_clear_bestofN_fresh": 0.9990358470746661,
+        "p_public_clear_bestofN_frozen": 0.9520305971204412,
+        "p_private_clear_given_trigger_fresh": 0.07574081908259989,
+        "p_private_clear_given_trigger_frozen": 0.07574081908259979,
+        "p_private_unconditional": 0.07574081908259989,
+        "public_minus_private_clear_fresh": 0.9232950279920662,
+        "public_minus_private_clear_frozen": 0.8762897780378415
+      },
+      {
+        "mu_pub": 512.2,
+        "n": 1,
+        "p_public_clear_bestofN_fresh": 0.9505961845877688,
+        "p_public_clear_bestofN_frozen": 0.9505961845877695,
+        "p_private_clear_given_trigger_fresh": 0.31197802246730244,
+        "p_private_clear_given_trigger_frozen": 0.3119780224673032,
+        "p_private_unconditional": 0.31197802246730244,
+        "public_minus_private_clear_fresh": 0.6386181621204664,
+        "public_minus_private_clear_frozen": 0.6386181621204663
+      },
+      {
+        "mu_pub": 512.2,
+        "n": 5,
+        "p_public_clear_bestofN_fresh": 0.9999997056917395,
+        "p_public_clear_bestofN_frozen": 0.9975138937937992,
+        "p_private_clear_given_trigger_fresh": 0.31197802246730244,
+        "p_private_clear_given_trigger_frozen": 0.3119780224673032,
+        "p_private_unconditional": 0.31197802246730244,
+        "public_minus_private_clear_fresh": 0.688021683224437,
+        "public_minus_private_clear_frozen": 0.685535871326496
+      },
+      {
+        "mu_pub": 515.0,
+        "n": 1,
+        "p_public_clear_bestofN_fresh": 0.978796424613465,
+        "p_public_clear_bestofN_frozen": 0.9787964246134657,
+        "p_private_clear_given_trigger_fresh": 0.45100822832813703,
+        "p_private_clear_given_trigger_frozen": 0.45100822832813847,
+        "p_private_unconditional": 0.45100822832813703,
+        "public_minus_private_clear_fresh": 0.527788196285328,
+        "public_minus_private_clear_frozen": 0.5277881962853272
+      },
+      {
+        "mu_pub": 515.0,
+        "n": 5,
+        "p_public_clear_bestofN_fresh": 0.9999999957140658,
+        "p_public_clear_bestofN_frozen": 0.9994355694638233,
+        "p_private_clear_given_trigger_fresh": 0.45100822832813703,
+        "p_private_clear_given_trigger_frozen": 0.451008228328138,
+        "p_private_unconditional": 0.45100822832813703,
+        "public_minus_private_clear_fresh": 0.5489917673859288,
+        "public_minus_private_clear_frozen": 0.5484273411356853
+      },
+      {
+        "mu_pub": 520.95,
+        "n": 1,
+        "p_public_clear_bestofN_fresh": 0.9977054019538236,
+        "p_public_clear_bestofN_frozen": 0.9977054019538243,
+        "p_private_clear_given_trigger_fresh": 0.7444260743392919,
+        "p_private_clear_given_trigger_frozen": 0.7444260743392912,
+        "p_private_unconditional": 0.7444260743392919,
+        "public_minus_private_clear_fresh": 0.25327932761453176,
+        "public_minus_private_clear_frozen": 0.2532793276145331
+      },
+      {
+        "mu_pub": 520.95,
+        "n": 5,
+        "p_public_clear_bestofN_fresh": 0.9999999999999364,
+        "p_public_clear_bestofN_frozen": 0.9999872941578087,
+        "p_private_clear_given_trigger_fresh": 0.7444260743392919,
+        "p_private_clear_given_trigger_frozen": 0.7444260743392924,
+        "p_private_unconditional": 0.7444260743392919,
+        "public_minus_private_clear_fresh": 0.2555739256606445,
+        "public_minus_private_clear_frozen": 0.2555612198185163
+      }
+    ],
+    "note": "p_private_clear_given_trigger is IDENTICAL across N (and across regime) -- the private grade is one fresh draw whose distribution is unchanged by the public selection (Y _||_ trigger). The GAP public_minus_private_clear GROWS with N (more shots inflate the public trigger) while the private clear stays put: that gap is the winner's-curse over-optimism."
+  },
+  "private_corrected_bar": {
+    "mu_bar_private_corrected": 528.4835555959944,
+    "mu_bar_private_corrected_closed_form": 528.4835555963056,
+    "mu_bar_private_corrected_fresh_check": 528.4835555959944,
+    "mu_bar_frozen_public_202": 504.87342465668917,
+    "mu_bar_fresh_public_194": 499.08467835746706,
+    "mu_safe_fresh_194": 512.15707117161,
+    "delta_mu_winners_curse": 23.610130939305236,
+    "delta_mu_vs_fresh_public": 29.398877238527348,
+    "tax_decomposition": {
+      "public_bestofN_discount_evaporates_tps": 7.283646514920861,
+      "private_drop_grossup_tps": 16.326484424384375,
+      "sum_tps": 23.610130939305236
+    },
+    "p_private_clear_at_mu512p2_n1": 0.31197802246730244,
+    "p_private_clear_at_mu512p2_n5": 0.3119780224673032,
+    "freeze_robust_512_survives_private": false,
+    "regime_invariant": true,
+    "interpretation": "mu_bar_private_corrected=528.48 TPS (=mu_safe/f_priv) -- REGIME-INVARIANT (the private grade is one fresh draw whatever the public regime). winner's-curse tax vs #202's frozen public bar 504.87 is +23.61 TPS = [public best-of-5 discount that EVAPORATES privately 7.28] + [private-drop gross-up 16.33]. The freeze-robust N=1 build mu=512.2 clears the private bar at only 0.3120 (NOT >=0.95): it does NOT survive the private winner's curse -- the 2.35% adverse drop x tau_low sinks its private mean to 496.38<500."
+  },
+  "monotonicity_in_n": {
+    "bar_curve_in_n": [
+      {
+        "n": 1,
+        "p_public_frozen": 0.5000000000000011,
+        "p_public_fresh": 0.5,
+        "p_private_given_trigger_frozen": 0.018312527937539808,
+        "p_private_given_trigger_fresh": 0.018312527937539902
+      },
+      {
+        "n": 2,
+        "p_public_frozen": 0.6540865631475437,
+        "p_public_fresh": 0.75,
+        "p_private_given_trigger_frozen": 0.018312527937539874,
+        "p_private_given_trigger_fresh": 0.018312527937539902
+      },
+      {
+        "n": 3,
+        "p_public_frozen": 0.7311298447213159,
+        "p_public_fresh": 0.875,
+        "p_private_given_trigger_frozen": 0.01831252793753987,
+        "p_private_given_trigger_fresh": 0.018312527937539902
+      },
+      {
+        "n": 5,
+        "p_public_frozen": 0.8097690471233381,
+        "p_public_fresh": 0.96875,
+        "p_private_given_trigger_frozen": 0.018312527937539888,
+        "p_private_given_trigger_fresh": 0.018312527937539902
+      },
+      {
+        "n": 10,
+        "p_public_frozen": 0.885058441115361,
+        "p_public_fresh": 0.9990234375,
+        "p_private_given_trigger_frozen": 0.018312527937539822,
+        "p_private_given_trigger_fresh": 0.018312527937539902
+      },
+      {
+        "n": 20,
+        "p_public_frozen": 0.9320947841251552,
+        "p_public_fresh": 0.9999990463256836,
+        "p_private_given_trigger_frozen": 0.018312527937539846,
+        "p_private_given_trigger_fresh": 0.018312527937539902
+      },
+      {
+        "n": 50,
+        "p_public_frozen": 0.9666531777914842,
+        "p_public_fresh": 0.9999999999999991,
+        "p_private_given_trigger_frozen": 0.01831252793753987,
+        "p_private_given_trigger_fresh": 0.018312527937539902
+      }
+    ],
+    "n_star_private": 1,
+    "private_clear_flat_in_n": true,
+    "private_clear_monotone_in_N": true,
+    "rho_carry_sensitivity": [
+      {
+        "rho_carry": 0.0,
+        "p_priv_n1": 0.018312527937539808,
+        "p_priv_n5": 0.018312527937539888,
+        "p_priv_n20": 0.018312527937539846
+      },
+      {
+        "rho_carry": 0.5,
+        "p_priv_n1": 0.028006402452694076,
+        "p_priv_n5": 0.02175880953697112,
+        "p_priv_n20": 0.019520767512572743
+      },
+      {
+        "rho_carry": 1.0,
+        "p_priv_n1": 0.034815685169655525,
+        "p_priv_n5": 0.022602510655714895,
+        "p_priv_n20": 0.01964653223501071
+      }
+    ],
+    "structural_claim": "p_private_clear_given_trigger is EXACTLY FLAT in N (n_star_private=1): every extra shot only inflates the PUBLIC trigger and adds ZERO private clear. The rho-carry sweep shows WHY -- best-of-N would help ONLY if public luck REPLICATED privately (rho>0); at the PR premise rho=0 (the selection is on non-replicating noise -- a fresh allocation + adverse private prompts) it never does. Against the binding private bar, BUILDING HIGHER STRICTLY DOMINATES RE-DRAWING MORE; best-of-N is self-defeating. (#200's ~1.94 public shots at the bar buy zero private clear.)"
+  },
+  "self_test": {
+    "winners_curse_self_test_passes": true,
+    "checks": {
+      "a_n1_zero_curse_conditional_equals_unconditional": true,
+      "b_sigma_hw0_frozen_conditional_flat": true,
+      "c_clean_limit_gap_equals_order_stat_curse": true,
+      "d_e_max_order_stat_reproduces_tabulated": true,
+      "e_reproduces_194_public_and_202_frozen_verbatim": true,
+      "g_conditional_flat_in_N_equals_unconditional": true,
+      "f_nan_clean": true
+    },
+    "c_clean_limit_detail": [
+      {
+        "n": 2,
+        "regime": "fresh",
+        "gap_tps": 4.169910810959436,
+        "ref_sigma_sel_ez": 4.16991081095943
+      },
+      {
+        "n": 2,
+        "regime": "frozen",
+        "gap_tps": 2.744482634880285,
+        "ref_sigma_sel_ez": 2.7444826348802893
+      },
+      {
+        "n": 3,
+        "regime": "fresh",
+        "gap_tps": 6.254866216439268,
+        "ref_sigma_sel_ez": 6.254866216439269
+      },
+      {
+        "n": 3,
+        "regime": "frozen",
+        "gap_tps": 4.116723952320513,
+        "ref_sigma_sel_ez": 4.116723952320515
+      },
+      {
+        "n": 5,
+        "regime": "fresh",
+        "gap_tps": 8.595440739796686,
+        "ref_sigma_sel_ez": 8.59544073979668
+      },
+      {
+        "n": 5,
+        "regime": "frozen",
+        "gap_tps": 5.657204414903731,
+        "ref_sigma_sel_ez": 5.657204414903753
+      },
+      {
+        "n": 10,
+        "regime": "fresh",
+        "gap_tps": 11.37288215665859,
+        "ref_sigma_sel_ez": 11.372882156658587
+      },
+      {
+        "n": 10,
+        "regime": "frozen",
+        "gap_tps": 7.485214673046642,
+        "ref_sigma_sel_ez": 7.485214673046651
+      }
+    ],
+    "d_e_max_detail": [
+      {
+        "n": 1,
+        "got": 0.0,
+        "ref": 0.0,
+        "abs_err": 0.0
+      },
+      {
+        "n": 2,
+        "got": 0.5641895835477291,
+        "ref": 0.5642,
+        "abs_err": 1.0416452270956e-05
+      },
+      {
+        "n": 3,
+        "got": 0.8462843753216103,
+        "ref": 0.8463,
+        "abs_err": 1.5624678389780655e-05
+      },
+      {
+        "n": 5,
+        "got": 1.1629644736404543,
+        "ref": 1.163,
+        "abs_err": 3.5526359545734465e-05
+      },
+      {
+        "n": 10,
+        "got": 1.5387527308350946,
+        "ref": 1.5388,
+        "abs_err": 4.7269164905383576e-05
+      }
+    ],
+    "e_public_max_abs_err_vs_194": 0.0,
+    "e_frozen_abs_err_vs_202": 0.0,
+    "g_conditional_flatness_max_abs_err": 1.4432899320127035e-15,
+    "n_numbers_checked": 260
+  },
+  "import_banked": {
+    "sigma_sample_tps": 5.564480823573265,
+    "sigma_hw_tps": 4.864468814937121,
+    "sigma_draw_tps": 7.390974474817942,
+    "mu_safe_fresh_tps": 512.15707117161,
+    "mu_grid_194": [
+      {
+        "mu": 495.0,
+        "p_best_of_2": 0.43654165521320665,
+        "p_best_of_3": 0.5770464030328042,
+        "p_best_of_5": 0.7616832663312434
+      },
+      {
+        "mu": 500.0,
+        "p_best_of_2": 0.75,
+        "p_best_of_3": 0.875,
+        "p_best_of_5": 0.96875
+      },
+      {
+        "mu": 505.0,
+        "p_best_of_2": 0.9378189044737066,
+        "p_best_of_3": 0.9844944364975656,
+        "p_best_of_5": 0.9990358470746661
+      },
+      {
+        "mu": 510.0,
+        "p_best_of_2": 0.992251147644868,
+        "p_best_of_3": 0.9993178873887978,
+        "p_best_of_5": 0.9999947144100862
+      },
+      {
+        "mu": 515.0,
+        "p_best_of_2": 0.9995504083908275,
+        "p_best_of_3": 0.9999904670504217,
+        "p_best_of_5": 0.9999999957140658
+      },
+      {
+        "mu": 520.0,
+        "p_best_of_2": 0.9999884065178013,
+        "p_best_of_3": 0.9999999605251172,
+        "p_best_of_5": 0.9999999999995424
+      }
+    ],
+    "mu_bar_frozen_p95": 504.87342465668917,
+    "mu_bar_fresh_p95_n5": 499.08467835746706,
+    "p_bar_n5_frozen": 0.8097690471233381,
+    "frozen_fraction_breakeven": 0.8455321793444455,
+    "drop_both": 0.023502816766841544,
+    "drop_descent": 0.022999780912168657,
+    "decode_drop_pct": 4.294644155088989,
+    "tau_low": 0.9924318649123313,
+    "f_priv": 0.969106920637722,
+    "public_to_private_drop_pct": 3.089307936227803,
+    "e_shots_at_bar_200": 1.9375,
+    "lambda_star_191": 0.9780112973731208,
+    "sources": {
+      "redraw_194": "/workspace/senpai/target/research/validity/redraw_budget/redraw_budget_results.json",
+      "frozen_202": "/workspace/senpai/target/research/validity/frozen_budget/frozen_budget_results.json",
+      "drop_176": "/workspace/senpai/target/research/validity/private_adverse_skew/results.json",
+      "cost_200": "/workspace/senpai/target/research/validity/cost_budget/cost_budget_results.json",
+      "bar_191": "/workspace/senpai/target/research/validity/private_build_bar/results.json"
+    }
+  },
+  "e_max_order_stats": {
+    "1": 0.0,
+    "2": 0.5641895835477291,
+    "3": 0.8462843753216103,
+    "5": 1.1629644736404543,
+    "10": 1.5387527308350946,
+    "20": 1.8674750597982157,
+    "50": 2.2490736293896902
+  },
+  "handoff": "best-of-N re-draws select the max PUBLIC shot, inflating it by sigma_sel*E[Z_(N:N)] ~ 5.66 TPS at N=5 (frozen) of non-replicating luck, so to clear the BINDING 500 PRIVATE bar (stark #191) at P>=0.95 under a best-of-5 launch trigger the PUBLIC build must reach mu_pub=528.48 TPS (vs #202's public-only frozen bar 504.87, a +23.61 TPS winner's-curse tax); the conditional private clear is FLAT in N (n_star_private=1) so against the private bar building higher dominates re-drawing more -- fern #185 carries mu_bar_private_corrected=528.48 as the launch-decision multi-shot build target, NOT the public-only bar.",
+  "scope": "Winner's-curse / optimizer's-curse analog over the banked #194/#202 sigma-decomposition + stark #176/#191 private drop. Takes NO official draws, authorizes NO shot count or spend (a human still approves the launch AND confirms the harness regime), CPU-only. BANK-THE-ANALYSIS: adds 0 TPS, greedy/PPL untouched. The private conditional is regime-INVARIANT (FRESH/FROZEN bound, same answer). Draw-budget lane (#159/#188/#194/#200/#202). NOT ubel #201/#204. NOT stark #198/#203. NOT denken #197/#205. NOT fern #185 (the integrator -- this supplies the private-corrected multi-shot row it imports). Orthogonal to Issue #192 (greedy gate, held). NOT open2. NOT a launch.",
+  "imported_legs": {
+    "kanna_194_sigma_decomposition": "/workspace/senpai/target/research/validity/redraw_budget/redraw_budget_results.json",
+    "kanna_202_frozen_bar": "/workspace/senpai/target/research/validity/frozen_budget/frozen_budget_results.json",
+    "stark_176_adverse_private_drop": "/workspace/senpai/target/research/validity/private_adverse_skew/results.json",
+    "kanna_200_sequential_expected_shots": "/workspace/senpai/target/research/validity/cost_budget/cost_budget_results.json",
+    "stark_191_private_build_bar": "/workspace/senpai/target/research/validity/private_build_bar/results.json"
+  },
+  "public_evidence_used": [
+    "Winner's curse: Capen, Clapp & Campbell (1971) JPT 23 -- the selected max overstates the common value (highest signal regresses to the mean on re-test).",
+    "Optimizer's curse: Smith & Winkler (2006) Management Science 52(3) Prop. 1 -- when the grade is an independent draw, selection on a favourable noise realisation guarantees post-decision disappointment; the conditional re-test value equals the unconditional.",
+    "Order statistics E[Z_(N:N)] = N*int z phi(z) Phi(z)^(N-1) dz (David & Nagaraja 2003).",
+    "stark #191 binding private bar lambda*_LCB 0.9780 (both-bugs) > public 0.9052 -- the launch is graded on the PRIVATE re-benchmark.",
+    "kanna #194/#202 banked best-of-N public budget (fresh / frozen) -- the public leg this corrects."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 1.7865
+}
