@@ -74,6 +74,17 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 03:15 — PR #83 (wirbel): measured-rho-optimal M=32 topology + salvage oracle — RESEARCH MILESTONE (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU-only analytic, no served-file change; official bar stays 481.53). Banks `scripts/profiler/rho_optimal_topology.py` + `research/spec_cost_model/report_rho_optimal_topology.md` + `rho_optimal_topology_results.json` into the advisor branch.
+- **Key finding:** re-running the Sequoia/DP tree optimization with the measured DECLINING ladder (rho2=0.4165 >> rho3=0.2655 > rho4=0.1908) instead of #74's borrowed flat rho=0.565 pulls the M=32 optimum from max-branch-4 -> **max-branch-3**, buying **+0.96% E[T] / +1.13pp TPS / +5.1 wall_tps** over #74 in a cost-model-independent comparison (both depth-9). `materially_better=True, reopt_within_wall_mde=False`.
+- **Headline projection corrected:** +18.2% (drafter-depth-aware, g_d=0.168 from #69/#77 profile) vs #79's M-only +21.8%. Under the same M-only cost the re-opt tree reads +23.3% vs +22.2% for #74 — the topology genuinely improved; the headline drop is an honesty correction. **3 bases (drafter-aware): +18.2% relative / wall_tps x454.1 -> 536.6 / official x481.53 -> ~569 projected.**
+- **Build target for land #71 (M=32, depth 9, max-branch-3):** `[-1,0,0,0,1,1,1,2,3,4,4,5,7,9,9,10,11,12,13,15,16,17,18,19,20,21,22,24,25,26,28,29]`
+- **Salvage oracle (land #71 debug gate):** universal rank-2 gate = **rho2 0.4165** (a correct branch reads ~0.41; byteshark's broken tree-v2 read 0.033 -- the 12x discrepancy is the layout-bug signature). Per-position table: spine pos 1 E[salvage_r2]=0.397, pos 2=0.431, pos 3=0.413, pos 4=0.428, pos 5-9=0. Width-3 buys +0.57pp over width-2; width-4 buys +0.00pp -> max-branch-3 is optimal; beyond-width-4 never pays (rank-5 leaf marginal 0.0179 < least placed node 0.0272).
+- **Primary metric:** `measured_rho_optimal_M32_gain_pct` = **0.1817** (+18.17% drafter-aware re-priced gain). **Test metric:** `expected_pooled_branch_hit_salvage` = **0.4165** (the rho2 debug-gate target).
+- **W&B:** `6tghbnjn` (CPU-only analytic; peak host RSS 40.8 MiB, no GPU).
+- **Wirbel's acceptance-cost-model axis (#49->74->76->79->83) is now CLOSED for the tree build.** land #71 has the corrected array + salvage oracle. The +1.13pp topology delta should be confirmed by lawine #82's paired A/B runner before banking.
+
 ### 2026-06-13 22:13 — PR #52 (lawine): fa2sw split-KV — approved one-shot HF launch → ⭐ NEW PUBLIC #1 / NEW OFFICIAL FRONTIER (481.53 official a10g-small TPS)
 
 - **Status:** MERGED as the **new official frontier baseline.** The human-approved (Issue #46, Morgan: "approved, lessgo!") one-shot official HF-Jobs launch of the fa2sw split-KV frontier (linear MTP K=7 + #43 split-KV) **COMPLETED as a new public #1**. First gated HF job to confirm a rung above the 126.378 AR floor on the spec-decode frontier — **the official bar all submissions must beat now moves to 481.53 TPS.**
