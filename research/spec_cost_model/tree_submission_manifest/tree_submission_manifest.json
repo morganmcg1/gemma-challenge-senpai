@@ -1,0 +1,422 @@
+{
+  "pr": 186,
+  "lane": "submission MUST-RETAIN manifest (flag-by-flag packaging de-risk)",
+  "method": "LOCAL CPU-only consolidation + reproduction-gate. No GPU / vLLM / HF Job / submission / served-file change. Adds 0 TPS. BASELINE 481.53.",
+  "primary_metric": {
+    "name": "manifest_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "binding_packaging_cost_pct",
+    "value": 85.17267846343493
+  },
+  "banked_imports": {
+    "kcal_central": 125.26795005202914,
+    "kcal_band_width_pct": 0.7870456397926597,
+    "multiplier_pooled": 1.0601865051833779,
+    "pooled_local_wall_tps": 454.19367030776425,
+    "kcal_self_test_passes": 1,
+    "precache_off_divergence_pct": 3.52613190121035,
+    "bus_ratio_tree_invariant": 1,
+    "precache_official_shift_tps_descent": 0.0,
+    "precache_self_test_passes": 1,
+    "relocate_host_per_call_ms": 145.23883407600806,
+    "relocate_vec_per_call_ms": 0.0924298968554164,
+    "relocate_host_descent_tps": 77.32176979564827,
+    "relocate_vec_descent_tps": 516.3909522234458,
+    "relocate_host_bar": 32.591080192034454,
+    "relocate_vec_bar": 4.880023534784125,
+    "relocate_host_step_inflation_pct": 570.2705312161302,
+    "relocate_recoverable_step_pct": 569.9076114315193,
+    "relocate_equivalence_rate": 1.0,
+    "relocate_self_test_passes": 1,
+    "scatter_recoverable_step_pct_cons": 0.8573323242039603,
+    "scatter_recoverable_step_pct_real": 1.1079069770564272,
+    "scatter_self_test_passes": 1,
+    "h163_realizable_descent_tps": 522.3782112049854,
+    "h163_realizable_bothbugs_tps": 539.6871717746744,
+    "h163_hostloop_descent_tps": 77.45469701232011,
+    "h163_hostloop_bothbugs_tps": 80.02115225062516,
+    "h163_residual_host_ops": 0,
+    "h163_self_test_passes": 1,
+    "h163_n_ops_total": 12
+  },
+  "manifest": {
+    "must_retain_manifest": [
+      {
+        "flag": "relocate_salvaged_kv == vectorized/device (NOT host-loop)",
+        "surface": "build_design",
+        "present_value": "land #71 build target: single fused [L,W,H,D] index_select+index_copy_ by DEVICE commit-index (or paged slot-map)",
+        "must_retain": true,
+        "klass": "BUILD-BLOCKER if reverts to host-loop",
+        "measured_cost_if_dropped": "host-loop reverts descent 516->77 TPS (1571x per-call; +570% step; bar 4.88->32.6)",
+        "cost_sort_tps": 444.92351419266527,
+        "source_leg": "#157 / #163",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "data-dependent host Python loop over 37 layers CANNOT be CUDA-graph-captured -> pins step host-bound. Bit-exact bf16 permutation (equivalence_rate=1.0): speed-only, no PPL risk."
+      },
+      {
+        "flag": "PRECACHE_BENCH=1 (+ PRECACHE_REQUIRE=1 fail-closed)",
+        "surface": "served_env",
+        "present_value": "1",
+        "must_retain": true,
+        "klass": "must-retain served flag",
+        "measured_cost_if_dropped": "PRECACHE=0 -> 3.526% single-shot divergence (#169); also holds the +6.019% local->official multiplier's prefill-amortization neutralization (#148 Leg B)",
+        "cost_sort_tps": 18.334174130253853,
+        "source_leg": "#169 / #148",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "replays the 128 bench prompts in the UNTIMED warmup window -> moves prefill out of the timed window. Tokens unchanged (warmup only). bus_ratio_tree_invariant=1 (#169): K_cal transfers."
+      },
+      {
+        "flag": "SPECULATIVE_CONFIG.num_speculative_tokens == 7 (MTP draft length)",
+        "surface": "served_env",
+        "present_value": "7",
+        "must_retain": true,
+        "klass": "must-retain served flag (engineered sweet spot)",
+        "measured_cost_if_dropped": "K=8/9 -> -13/-16 TPS (#138); #90 K8=440.3 (-14.1), K9=440.8 (-13.6); K=6 -3.3, K=5 -15.9 (inverted-U, K7 optimal)",
+        "cost_sort_tps": 14.5,
+        "source_leg": "#90 / #138",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "verifier emits target argmax regardless of draft depth -> serve-config knob, greedy-identical. K7 is the value LOOPGRAPH/ONEGRAPH capture + precache are tuned around (K>=8 re-pads)."
+      },
+      {
+        "flag": "descent accept-walk == sync-free device (match-mask->cumprod->device-argmax; no .item())",
+        "surface": "build_design",
+        "present_value": "land #71 build target: device-scalar accept length (vLLM-v1 RejectionSampler zero-sync)",
+        "must_retain": true,
+        "klass": "must-retain capturability rule",
+        "measured_cost_if_dropped": "sync-bound (.item() per node) -> +2.20% step vs +0.39% sync-free (#147), AND BREAKS CUDA-graph capture (#163 probe)",
+        "cost_sort_tps": 9.411121337908185,
+        "source_leg": "#147 / #163",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "commit-index must be produced ON-DEVICE and consumed without a host readout, else the relocate falls out of the captured graph."
+      },
+      {
+        "flag": "decode-path argmax-only logits (scatter+LP avoidance applied)",
+        "surface": "build_design",
+        "present_value": "land #71 build target: argmax(pruned[M,12288])->kept_ids remap on greedy token-selection; FULL scatter+LP kept on prefill PPL path",
+        "must_retain": true,
+        "klass": "must-retain denominator lever (projected stack assumes bar 4.808)",
+        "measured_cost_if_dropped": "revert to full scatter[M,262144]+LP on decode -> -1.11% step (real M=32) ~ -3.6..-5.6 TPS; bar 4.808->4.862",
+        "cost_sort_tps": 5.760578448725466,
+        "source_leg": "#154 / #163",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": true,
+        "note": "DOUBLE-LOAD-BEARING SEAM: the avoidance is greedy-exact (kept_ids ascending => first-occurrence tiebreak == full-vocab argmax, equivalence_rate=1.0) ONLY IF the full scatter+LP REMAINS on the prompt_logprobs/prefill path. Dropping it THERE breaks PPL."
+      },
+      {
+        "flag": "CENTROID_TOP_K == 64 (centroid_intermediate_top_k)",
+        "surface": "served_env",
+        "present_value": "64",
+        "must_retain": true,
+        "klass": "must-retain served flag",
+        "measured_cost_if_dropped": "topk128 -> -3.9 TPS, no accept gain (#138). 64 is the optimum.",
+        "cost_sort_tps": 3.9,
+        "source_leg": "#138",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "drafter centroid breadth; verifier argmax unchanged -> greedy/PPL-safe. Distinct from num_speculative_tokens 'K'."
+      },
+      {
+        "flag": "ONEGRAPH=1 + LOOPGRAPH_REQUIRE_CAPTURE=1",
+        "surface": "served_env",
+        "present_value": "1 / 1",
+        "must_retain": true,
+        "klass": "must-retain capture flag",
+        "measured_cost_if_dropped": "drafter propose loop falls to eager -> K=7 width-1 iters become per-launch-bound (capture-class; #154 Leg2 closed, #163 drafter_propose_loop=CLEAN(captured))",
+        "cost_sort_tps": 0.0,
+        "source_leg": "#154 / #163",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "drafter-only graph replay -> cannot change emitted tokens. Cost is capturability-class, not a banked single-flag TPS number."
+      },
+      {
+        "flag": "DIXIE_FUSED_ACCEPT_PREP=1 + DIXIE_SLIM_GREEDY=1",
+        "surface": "served_env",
+        "present_value": "1 / 1",
+        "must_retain": true,
+        "klass": "must-retain device-resident accept flag",
+        "measured_cost_if_dropped": "accept-prep leaves the device-resident Triton kernel for the host path (#163 fused_accept_prep=CLEAN(device))",
+        "cost_sort_tps": 0.0,
+        "source_leg": "#163",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "fused greedy accept/reject; exact-equivalent to the slow rejection kernel (bf16->fp32 monotone upcast). Speed-only."
+      }
+    ],
+    "served_surface_enumeration": [
+      {
+        "flag": "LM_HEAD_PRUNE=1 (+REQUIRE)",
+        "must_retain": true,
+        "klass": "speed (12k head GEMM)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "lmhead12k pruned head; greedy argmax kept_ids superset (#154). cost owned by lmhead12k leg (not in import set)."
+      },
+      {
+        "flag": "FA_SLIDING=1",
+        "must_retain": true,
+        "klass": "speed (attn backend)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "FA2 for eligible sliding-window layers; output-neutral per its leg. cost owned by agent-smith leg."
+      },
+      {
+        "flag": "SPLITKV_VERIFY=1 (+MAX_Q=64)",
+        "must_retain": true,
+        "klass": "speed (verify attn)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "3D split-KV path for small multi-query verify batches; fail-open. cost owned by its leg."
+      },
+      {
+        "flag": "PLE_FOLD_EMBED_SCALE=1 + PLE_ASSUME_VALID_TOKEN_IDS=1 (+PLE_SCRATCH_REUSE)",
+        "must_retain": true,
+        "klass": "speed (PLE fold/fastpath)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "scale-fold is exact (fail-closed verified); multimodal PLE contract retained. cost owned by PLE legs."
+      },
+      {
+        "flag": "FEOPT_ORJSON=1 / FASTRENDER=1 / DETOK_ENDONLY=1",
+        "must_retain": true,
+        "klass": "speed (front-end / detok)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "orjson JSON + fast chat-template + end-only detok; token_ids untouched. cost owned by their legs."
+      },
+      {
+        "flag": "LD_PRELOAD=tcmalloc / PYTORCH_CUDA_ALLOC_CONF / PERFORMANCE_MODE=interactivity",
+        "must_retain": true,
+        "klass": "speed (allocator/runtime)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "host malloc + CUDA alloc fragmentation + vLLM perf mode. cost not in import set."
+      },
+      {
+        "flag": "DRAFTER_BUCKET=ft-v1-epoch_001 (+DRAFTER_SHA256 guard)",
+        "must_retain": true,
+        "klass": "acceptance (E[accept])",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "retrained drafter raises E[accept]=E[T]; sha256-guarded. greedy emits TARGET argmax -> PPL-safe. cost owned by kenyan-duma drafter leg."
+      },
+      {
+        "flag": "OVERRIDE_GENERATION_CONFIG temperature=0.0 (top_p=1,top_k=0)",
+        "must_retain": true,
+        "klass": "VALIDITY (greedy identity)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": true,
+        "note": "greedy decode contract; changing it breaks greedy token-identity (Issue #124)."
+      },
+      {
+        "flag": "MAX_NUM_SEQS=1 / MAX_MODEL_LEN=4096 / MAX_NUM_BATCHED_TOKENS=512 / DTYPE=bfloat16",
+        "must_retain": true,
+        "klass": "VALIDITY/scoring contract",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": true,
+        "note": "scorer convention (conc=1, ctx 4096); model-faithful bf16. mis-set perturbs PPL/throughput basis."
+      },
+      {
+        "flag": "WEIGHTS_BUCKET/LOCAL_MODEL_DIR -> int4-pck04 baked dir, PCK04_KEEPSET",
+        "must_retain": true,
+        "klass": "VALIDITY (model artifact)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": true,
+        "note": "wrong checkpoint path -> wrong/absent model. Must point at the validated baked int4 dir."
+      },
+      {
+        "flag": "FUSED_SPARSE_ARGMAX_BLOCK (16 or 64)",
+        "must_retain": false,
+        "klass": "FREE/COSMETIC (K-neutral)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "#138: block16 8.485ms ~= block64 8.486ms; 0 standalone TPS; greedy-token-identical 128/128. Safe at 16 or 64 (block64_k_neutral=True)."
+      },
+      {
+        "flag": "UVICORN_LOG_LEVEL/DISABLE_LOG_STATS/PATCH_BENCH_JINJA2",
+        "must_retain": false,
+        "klass": "FREE/COSMETIC (logging/setup)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "log verbosity + bench-venv jinja2 install; no served-compute effect."
+      },
+      {
+        "flag": "LSK_SKIP_LAYERS (MUST remain UNSET)",
+        "must_retain": true,
+        "klass": "TRAP (output-breaking if set)",
+        "greedy_ppl_safe": false,
+        "double_load_bearing": true,
+        "note": "osoi layer-skip; if accidentally SET it drops decoder layers -> breaks output. Manifest asserts ABSENT."
+      },
+      {
+        "flag": "STEPTIME/FA_SLIDING_DIAG/PROFILER_CONFIG (diagnostic; default-off)",
+        "must_retain": false,
+        "klass": "FREE/INERT (must stay off)",
+        "greedy_ppl_safe": true,
+        "double_load_bearing": false,
+        "note": "profiling probes; inert on the leaderboard path. Must remain unset/0."
+      }
+    ],
+    "n_flags_enumerated": 22,
+    "n_must_retain": 19,
+    "n_double_load_bearing": 5,
+    "n_banked_cost_rows": 8,
+    "row1_flag": "relocate_salvaged_kv == vectorized/device (NOT host-loop)",
+    "row1_cost_sort_tps": 444.92351419266527
+  },
+  "self_test": {
+    "checks": [
+      {
+        "name": "kcal == 481.53/3.844 (#148)",
+        "passes": true,
+        "detail": "125.267950 vs 125.267950"
+      },
+      {
+        "name": "multiplier == 481.53/454.1937 (#148)",
+        "passes": true,
+        "detail": "1.0601865"
+      },
+      {
+        "name": "kcal source self-test passed (#148)",
+        "passes": true,
+        "detail": "1"
+      },
+      {
+        "name": "PRECACHE=0 divergence ~3.53% (#169)",
+        "passes": true,
+        "detail": "3.526%"
+      },
+      {
+        "name": "bus_ratio_tree_invariant == 1 (#169)",
+        "passes": true,
+        "detail": "1"
+      },
+      {
+        "name": "precache official_shift_tps == 0 (#169)",
+        "passes": true,
+        "detail": "0.0"
+      },
+      {
+        "name": "precache source self-test passed (#169)",
+        "passes": true,
+        "detail": "1"
+      },
+      {
+        "name": "relocate speedup ~1571x (#157)",
+        "passes": true,
+        "detail": "1571.3x"
+      },
+      {
+        "name": "relocate host-loop descent ~77 TPS (#157)",
+        "passes": true,
+        "detail": "77.32"
+      },
+      {
+        "name": "relocate vectorized descent ~516 TPS (#157)",
+        "passes": true,
+        "detail": "516.39"
+      },
+      {
+        "name": "relocate recoverable_step_pct ~569.9% (#157)",
+        "passes": true,
+        "detail": "569.91%"
+      },
+      {
+        "name": "relocate equivalence_rate == 1.0 (#157)",
+        "passes": true,
+        "detail": "1.0"
+      },
+      {
+        "name": "relocate source self-test passed (#157)",
+        "passes": true,
+        "detail": "1"
+      },
+      {
+        "name": "scatter recoverable_step_pct 0.86/1.11% (#154)",
+        "passes": true,
+        "detail": "0.857/1.108%"
+      },
+      {
+        "name": "scatter source self-test passed (#154)",
+        "passes": true,
+        "detail": "1"
+      },
+      {
+        "name": "h163 realizable descent ~522 TPS (#163)",
+        "passes": true,
+        "detail": "522.38"
+      },
+      {
+        "name": "h163 host-loop descent ~77 TPS (#163)",
+        "passes": true,
+        "detail": "77.45"
+      },
+      {
+        "name": "h163 descent-path residual host ops == 0 (#163)",
+        "passes": true,
+        "detail": "0"
+      },
+      {
+        "name": "h163 source self-test passed (#163)",
+        "passes": true,
+        "detail": "1"
+      },
+      {
+        "name": "K8 cited -13 brackets #90 measured (-14.06)",
+        "passes": true,
+        "detail": "#138 -13.0 vs #90 -14.06"
+      },
+      {
+        "name": "K9 cited -16 brackets #90 measured (-13.55)",
+        "passes": true,
+        "detail": "#138 -16.0 vs #90 -13.55"
+      },
+      {
+        "name": "K7 is the inverted-U optimum (#90)",
+        "passes": true,
+        "detail": "argmax K = 7"
+      },
+      {
+        "name": "#138 K7-block64 reproduces #90 K7 within 0.1%",
+        "passes": true,
+        "detail": "454.045 vs 454.338"
+      },
+      {
+        "name": "manifest ordered by descending cost (row1 = binding risk)",
+        "passes": true,
+        "detail": "relocate_salvaged_kv == vectorized/device (NOT host-loop)"
+      },
+      {
+        "name": "row1 is the relocate host-loop (predicted binding risk)",
+        "passes": true,
+        "detail": "relocate_salvaged_kv == vectorized/device (NOT host-loop)"
+      }
+    ],
+    "n_pass": 25,
+    "n_total": 25,
+    "all_pass": true
+  },
+  "test_metric_detail": {
+    "binding_packaging_cost_pct": 85.17267846343493,
+    "binding_flag": "relocate_salvaged_kv host-loop (vectorized->host-loop)",
+    "realizable_descent_tps": 522.3782112049854,
+    "hostloop_descent_tps": 77.45469701232011,
+    "proj_official_descent_pinned": 519.9514551330489,
+    "proj_official_both_bugs_pinned": 535.4377080289901
+  },
+  "banked_source_files": {
+    "kcal_148": "research/kcal_tree_transfer/kcal_tree_transfer_band.json",
+    "precache_169": "research/spec_cost_model/precache_footprint_invariance/precache_footprint_invariance.json",
+    "relocate_157": "research/spec_cost_model/salvage_kv_relocation_audit.json",
+    "scatter_154": "research/spec_cost_model/step_denominator_reduction_audit.json",
+    "hostres_163": "research/spec_cost_model/host_residency_sweep/host_residency_sweep.json"
+  },
+  "scope": "CONSOLIDATION of own merged legs (#148/#154/#157/#163/#169) + kanna #138 + served fa2sw_precache_kenyan config. No re-derivation. INFORMS the Approval-request HF-job packaging check + land #71 tree build; does NOT authorize a launch.",
+  "metrics_nan_clean": true,
+  "wandb_run_id": "u9kje7sn"
+}
