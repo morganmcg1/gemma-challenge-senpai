@@ -1,0 +1,187 @@
+{
+  "config": {
+    "drafter_dir": "/tmp/qat-assistant",
+    "torch": "2.12.0+cu130",
+    "device": "NVIDIA A10G",
+    "k": 7,
+    "group": 32,
+    "iters": 300,
+    "warmup": 60,
+    "et_samples": 4096,
+    "decode_step_ms": 11.6,
+    "frontier_tps": 481.53,
+    "et_deployed": 3.3,
+    "chain_captured_bf16": true,
+    "chain_captured_int3": true,
+    "A10G_HBM_GBS": 600.0,
+    "note": "isolated CUDA-graph GEMM timing on real bf16 drafter weights; int3 = group-quant fake-quant -> dequant-to-bf16 -> bf16 GEMM (only available sm_86 int3 path; no fused W3A16 kernel exists). Verify model untouched -> greedy-identity + PPL pinned by construction. Lossless, no serve change, no HF Job."
+  },
+  "specs": [
+    {
+      "role": "pre_projection",
+      "in": 5120,
+      "out": 256
+    },
+    {
+      "role": "layer0.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer0.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer0.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer0.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer1.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer1.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer1.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer1.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer2.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer2.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer2.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer2.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer3.q_proj",
+      "in": 256,
+      "out": 2048
+    },
+    {
+      "role": "layer3.o_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer3.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer3.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "post_projection",
+      "in": 256,
+      "out": 2560
+    },
+    {
+      "role": "centroids_sampler",
+      "in": 256,
+      "out": 2048
+    }
+  ],
+  "weight_rel_l2_err_int3": {
+    "pre_projection": 0.1675509512424469,
+    "layer0.q_proj": 0.1609622687101364,
+    "layer0.o_proj": 0.15687984228134155,
+    "layer0.gate_up": 0.16040684282779694,
+    "layer0.down_proj": 0.16023461520671844,
+    "layer1.q_proj": 0.16029787063598633,
+    "layer1.o_proj": 0.15774264931678772,
+    "layer1.gate_up": 0.15980468690395355,
+    "layer1.down_proj": 0.16298756003379822,
+    "layer2.q_proj": 0.1605215221643448,
+    "layer2.o_proj": 0.15880897641181946,
+    "layer2.gate_up": 0.1609359234571457,
+    "layer2.down_proj": 0.16250048577785492,
+    "layer3.q_proj": 0.16189627349376678,
+    "layer3.o_proj": 0.1608843356370926,
+    "layer3.gate_up": 0.16109010577201843,
+    "layer3.down_proj": 0.16284027695655823,
+    "post_projection": 0.1566602885723114,
+    "centroids_sampler": 0.19108547270298004
+  },
+  "byte_model": {
+    "per_pass_total_bytes_bf16": 22905344.0,
+    "per_pass_weight_bytes_bf16": 22806528.0,
+    "per_pass_total_bytes_int4": 6513152.0,
+    "per_pass_weight_bytes_int4": 6414336.0,
+    "per_pass_total_bytes_int3": 5800448.0,
+    "per_pass_weight_bytes_int3": 5701632.0,
+    "int3_byte_ratio": 0.25323557681561126,
+    "int4_byte_ratio": 0.28435076111496077
+  },
+  "verdict": {
+    "qspec_int3_draft_self_test_passes": true,
+    "net_tps_gain_pct_int3_draft": -13.680052646568342,
+    "net_tps_gain_pct_int3_draft_ceiling": 2.1974201345718702,
+    "net_tps_kernelonly_available": -13.680052646568342,
+    "net_tps_kernelonly_ceiling": 2.1974201345718702,
+    "net_tps_with_et_loss_available": -63.37935588870387,
+    "net_tps_with_et_loss_ceiling": -56.64344723801571,
+    "e_t_int3_draft": 1.4000023085332993,
+    "e_t_bf16_draft": 3.299999999999999,
+    "e_t_int3_is_pessimistic_lower_bound": true,
+    "proposal_disagree_ub_synthetic": 0.602294921875,
+    "greedy_identical_by_construction": true,
+    "ppl_pinned": 2.3772,
+    "ppl_ok": true,
+    "nan_clean": true,
+    "peak_vram_gib": 0.2200775146484375,
+    "vram_ok": true,
+    "draft_pass_us_bf16": 101.15413029988606,
+    "draft_pass_us_int3_available": 363.77942403157556,
+    "draft_pass_slowdown_int3_vs_bf16": 3.596288386377292,
+    "draft_walltime_saving_us_per_step": -1838.3770561218264,
+    "drafter_gemm_share_of_step": 0.06104128552579331,
+    "int3_byte_ratio": 0.25323557681561126,
+    "int4_byte_ratio": 0.28435076111496077,
+    "ceiling_gross_saving_pct_realistic": 2.1501718259407605,
+    "ceiling_gross_saving_pct_full_bw": 4.558346037610262,
+    "mean_weight_rel_l2_err_int3": 0.16232057621604518,
+    "tps_bf16": 284.4827586206896,
+    "tps_int3_kernelonly_available": 245.5653674709693,
+    "tps_int3_kernelonly_ceiling": 290.7340400380061,
+    "proj_official_tps_available": 415.65644249097943,
+    "proj_official_tps_ceiling": 492.1112371740039,
+    "deployed_draft_dtype": "bfloat16 (NOT int4; PR premise corrected)",
+    "int3_fused_kernel_exists_sm86": false,
+    "qspec_arxiv_correct_id": "2410.11305 (PR cited 2411.11514, wrong)",
+    "speed_verdict": "NO-GO",
+    "safety_verdict": "GREEN (greedy+PPL pinned by construction)",
+    "k": 7
+  }
+}
