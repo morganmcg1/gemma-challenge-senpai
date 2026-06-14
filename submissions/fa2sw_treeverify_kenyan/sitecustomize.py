@@ -106,6 +106,13 @@ _SALVAGE_PROBE_STATE: dict[str, Any] = {
     "branch_hit_conflated": 0, # rank-2 == target_argmax[first_div+1] (the tli+1 trap)
     "per_pos_div": {},      # first_div -> count of salvageable divergences
     "per_pos_hit": {},      # first_div -> count of correct branch hits
+    # STAGE-2b-spine: full first-divergence histogram over ALL positions (not just
+    # branch positions) -> the deployed-verify per-depth acceptance ladder q[1..K].
+    # first_div=pos means the rank-1 draft at spine depth pos+1 was rejected (its
+    # target_argmax row == pos). q[depth] = P(accept at depth | reached depth) is
+    # the measured self-KV recovery the advisor's lambda compares vs top1=0.729.
+    "first_div_hist": {},   # first_div pos -> count (all positions)
+    "K_seen": 0,            # draft chain length (constant num_speculative_tokens)
     "skipped_no_stash": 0,  # verify ran but emit probe produced no fresh tree
     "skipped_unaligned": 0, # stashed spine != the chain the verifier checked
     "skipped_read_err": 0,
@@ -1286,6 +1293,32 @@ def _salvage_probe_dump() -> None:
             "hits": nhit,
             "branch_hit": (nhit / ndiv) if ndiv else None,
         }
+    # STAGE-2b-spine: the deployed-verify per-depth acceptance ladder. q[depth] is the
+    # conditional accept rate of the rank-1 draft at that depth GIVEN the chain reached
+    # it -> the measured self-KV recovery the advisor's lambda grades vs the top-1 spine
+    # rate (0.729). depth d corresponds to first_div pos == d-1.
+    K = sps["K_seen"]
+    fdh = {int(p): c for p, c in sps["first_div_hist"].items()}
+    fa = sps["full_accept"]
+    decided = fa + sum(fdh.values())  # aligned steps with a full verdict
+    spine_ladder = {}
+    accepted_len_sum = fa * K
+    for pos in range(K):
+        depth = pos + 1
+        diverged_before = sum(fdh.get(j, 0) for j in range(pos))
+        reached = decided - diverged_before
+        diverged_at = fdh.get(pos, 0)
+        accepted = reached - diverged_at
+        q = (accepted / reached) if reached else None
+        spine_ladder[str(depth)] = {
+            "reached": reached,
+            "accepted": accepted,
+            "q": q,
+            "lambda_vs_top1": (q / 0.729) if q is not None else None,
+        }
+        accepted_len_sum += pos * diverged_at
+    mean_accepted_len = (accepted_len_sum / decided) if decided else None
+    top1_accept = spine_ladder.get("1", {}).get("q")
     verdict = {
         "stage": 1,
         "tree_M": TREE_EMIT_PROBE_M,
@@ -1300,6 +1333,12 @@ def _salvage_probe_dump() -> None:
         "branch_hit_rate_correct": bh_correct,     # ~0.41 healthy (Component 3a fix)
         "branch_hit_rate_conflated": bh_conflated,  # ~0.03 (the tli+1 trap)
         "per_position": per_pos,
+        # STAGE-2b-spine: deployed-verify self-KV recovery ladder (advisor relay 33).
+        "K": K,
+        "decided_steps": decided,
+        "top1_accept": top1_accept,            # measured q[1] (compare vs TOP1_MEASURED 0.729)
+        "mean_accepted_len": mean_accepted_len,
+        "spine_ladder": spine_ladder,          # depth -> {reached, accepted, q, lambda_vs_top1}
         "skipped": {
             "no_stash": sps["skipped_no_stash"],
             "unaligned": sps["skipped_unaligned"],
@@ -1326,6 +1365,18 @@ def _salvage_probe_dump() -> None:
         f"branch_hit_conflated={bh_conflated} (tli+1 trap~0.03) "
         f"per_pos={per_pos} "
         f"skipped(no_stash={sps['skipped_no_stash']},unaligned={sps['skipped_unaligned']})",
+        file=sys.stderr,
+        flush=True,
+    )
+    _ladder_str = " ".join(
+        f"q[{d}]={(spine_ladder[str(d)]['q'] if spine_ladder.get(str(d), {}).get('q') is not None else float('nan')):.4f}"
+        f"(n={spine_ladder.get(str(d), {}).get('reached', 0)})"
+        for d in range(1, K + 1)
+    )
+    print(
+        f"[salvage-probe] STAGE-2b-spine ladder (decided={decided}, K={K}): "
+        f"top1_accept={top1_accept} mean_accepted_len={mean_accepted_len} "
+        f"| {_ladder_str}",
         file=sys.stderr,
         flush=True,
     )
@@ -1382,6 +1433,12 @@ def _salvage_probe_observe(draft_token_ids: Any, target_argmax: Any) -> None:
         if dti[pos] != tgt[pos]:
             first_div = pos
             break
+    # STAGE-2b-spine: record the full per-depth divergence ladder for EVERY aligned
+    # step (independent of the branch-salvage logic below). first_div==None means the
+    # whole chain accepted; otherwise the rank-1 draft at depth first_div+1 diverged.
+    sps["K_seen"] = max(sps["K_seen"], K)
+    if first_div is not None:
+        sps["first_div_hist"][first_div] = sps["first_div_hist"].get(first_div, 0) + 1
     if first_div is None:
         sps["full_accept"] += 1
         return
@@ -1738,3 +1795,32 @@ if __import__("os").environ.get("SPLITKV_VERIFY", "0") == "1":
 # during the untimed warmup window, readiness-gated, fail-closed.
 if __import__("os").environ.get("PRECACHE_BENCH", "0") == "1":
     import serve_patch_precache  # noqa: E402,F401
+
+
+# darwin-4b-opus _IncludedRouter / missing-`.path` startup-500 guard (validated
+# output-neutral under kanna PR #177, W&B bjtwr9jn: token-ids 128/128 identical,
+# PPL byte-identical 2.376976138392039, TPS +0.02%). On fresh a10g images vLLM
+# 0.22.1rc1 mounts sub-routers (`_IncludedRouter`) lacking a `.path`;
+# prometheus_fastapi_instrumentator.routing._get_route_name does `route.path` and
+# raises AttributeError on EVERY request -> HTTP 500 -> "/v1/models" never becomes
+# ready. Wrap _get_route_name to swallow that single AttributeError (return None).
+# Output-neutral: HTTP-metrics middleware ONLY; never touches greedy / PPL /
+# token-ids. No-op when the instrumentator is absent or no pathless route is
+# reached (then returns the original value verbatim).
+def _guard_included_router() -> None:
+    try:
+        import prometheus_fastapi_instrumentator.routing as _r
+    except Exception:
+        return
+    _orig = _r._get_route_name
+
+    def _guarded(scope, routes):
+        try:
+            return _orig(scope, routes)
+        except AttributeError:
+            return None
+
+    _r._get_route_name = _guarded
+
+
+_guard_included_router()
