@@ -1,0 +1,386 @@
+{
+  "agent": "denken",
+  "created_at": "20260614T200837Z",
+  "kind": "issue192-reading-calibration",
+  "nan_clean": true,
+  "peak_mem_mib": 18.109,
+  "pr": 219,
+  "synthesis": {
+    "applies_to_stacks": {
+      "applies_to_frontier_and_tree": true,
+      "frontier_submission": "fa2sw_precache_kenyan (481.53 TPS, PR #52)",
+      "launch_implication_per_token_theta": "under (B) per-token-theta, launch-eligibility depends on the human's chosen theta; the pass-fraction curve is the menu (e.g. a 5%-tolerance reading passes only the cleanest few percent of sequences).",
+      "launch_implication_ppl_only": "under (C) PPL-only (the auto-scorer's actual check), BOTH stacks pass 100% (served PPL 2.3772 <= 2.42) -> launch-eligible today.",
+      "launch_implication_strict_A": "under (A) strict per-sequence token-identity, BOTH the 481.53 frontier and the land #71 tree pass only 12.5% of sequences -> NEITHER is launch-eligible; only the wirbel #199/#213/#216 compliant-kernel (batch-invariant verify) route survives strict-A.",
+      "shared_basis": "int4-Marlin batch-variant spec-verify GEMM",
+      "tree": "land #71 (same int4-spec basis)"
+    },
+    "clustering_band": {
+      "betabinom_sweep": [
+        {
+          "rho": 0.0,
+          "strict_a": 1.1360232550819459e-183
+        },
+        {
+          "rho": 0.01,
+          "strict_a": 3.2915577524788043e-52
+        },
+        {
+          "rho": 0.05,
+          "strict_a": 6.520032749113106e-18
+        },
+        {
+          "rho": 0.144625,
+          "strict_a": 7.333202806220736e-08
+        },
+        {
+          "rho": 0.25,
+          "strict_a": 6.15162666754272e-05
+        },
+        {
+          "rho": 0.5,
+          "strict_a": 0.01499489790735089
+        },
+        {
+          "rho": 0.75,
+          "strict_a": 0.13082202474042498
+        },
+        {
+          "rho": 0.9,
+          "strict_a": 0.2894909989183761
+        },
+        {
+          "rho": 0.99,
+          "strict_a": 0.42262148131776245
+        },
+        {
+          "rho": 1.0,
+          "strict_a": 0.4392242431640625
+        }
+      ],
+      "clustering_raises_strict_a": true,
+      "empirical_within_frechet_band": true,
+      "frechet_upper_bound_1_minus_p": 0.4392242431640625,
+      "icc_190_reference": 0.1446247464062406,
+      "note": "iid Bernoulli(p=0.5608) predicts strict-A=(1-p)^512=10^-182.9 ~ 0; the EMPIRICAL strict-A is 0.1250, ~182 orders of magnitude higher, because the #114 flips CASCADE (extreme within-sequence clustering). The model-free Frechet bound caps strict-A at 1-p=0.4392 for ANY correlation structure; the empirical 0.1250 sits inside (iid 1.14e-183 ... empirical 0.1250 ... max 0.4392).",
+      "orders_of_magnitude_iid_understates": 182.04152279127177,
+      "output_len_L": 512,
+      "p_per_token_flip": 0.5607757568359375,
+      "rho_effective_matching_empirical": 0.7426862578122626,
+      "strict_a_at_icc190_betabinom": 7.333012013182269e-08,
+      "strict_a_empirical": 0.125,
+      "strict_a_iid": 1.1360232550819459e-183,
+      "strict_a_iid_log10": -182.94461277826372
+    },
+    "correlation_sensitivity": {
+      "decisive_threshold": 0.5,
+      "note": "positive within-sequence flip ICC concentrates flips into fewer sequences -> strict-A RISES with clustering. But the model-free Frechet cap is 1-p=0.4392 < 0.5: even in the MOST flip-clustered world the MAJORITY (>=56.1%) of sequences still fail strict-A. The empirical 0.1250 is well below the cap. NO-GO-under-strict-A SURVIVES the full clustering sweep -> the int4-spec stack fails literal token-identity robustly.",
+      "strict_a_empirical": 0.125,
+      "strict_a_max_over_all_clustering": 0.4392242431640625,
+      "strict_a_robust_to_clustering": true
+    },
+    "handoff_lines": {
+      "fern_185": "the #192 per-reading menu from #114's 56.08%: strict-A (per-sequence zero-flip) pass = 0.1250 (16/128; the int4-spec stack fails literal token-identity for 88% of sequences \u2014 and even under the model-free maximal-flip-clustering cap 1-p=0.439 it stays < 0.5, so NO-GO-under-strict-A is robust), per-token-theta pass-fraction = the empirical CDF (theta=0 -> 0.1250, theta=1 -> 1.0), PPL-only (the auto-scorer's actual check) = 100% (served PPL 2.3772 <= 2.42); BOTH the 481.53 frontier and the land #71 tree share this exposure, so the human's A/B/C ruling determines whether EITHER is launch-eligible under strict-A \u2014 and the wirbel #199/#213/#216 compliant-kernel route is the only strict-A-survivable 500-path.",
+      "issue_192": "the #192 per-reading menu from #114's 56.08%: strict-A (per-sequence zero-flip) pass = 0.1250 (16/128; the int4-spec stack fails literal token-identity for 88% of sequences \u2014 and even under the model-free maximal-flip-clustering cap 1-p=0.439 it stays < 0.5, so NO-GO-under-strict-A is robust), per-token-theta pass-fraction = the empirical CDF (theta=0 -> 0.1250, theta=1 -> 1.0), PPL-only (the auto-scorer's actual check) = 100% (served PPL 2.3772 <= 2.42); BOTH the 481.53 frontier and the land #71 tree share this exposure, so the human's A/B/C ruling determines whether EITHER is launch-eligible under strict-A \u2014 and the wirbel #199/#213/#216 compliant-kernel route is the only strict-A-survivable 500-path."
+    },
+    "imports": {
+      "d114_verdict": "RED",
+      "icc_190": 0.1446247464062406,
+      "icc_ci_190": [
+        0.10428963351886918,
+        0.18570746616200864
+      ],
+      "num_divergent_banked": 112,
+      "num_identical_banked": 16,
+      "num_prompts": 128,
+      "official_tps": 481.53,
+      "onset_max_banked": 496,
+      "onset_median_banked": 120,
+      "onset_min_banked": 0,
+      "ppl_cap": 2.42,
+      "served_ppl": 2.3772,
+      "source_runs": {
+        "d114": "9q5yy9l1",
+        "d190": "fva6o4ug",
+        "d196": "(compliant floor)",
+        "d199": "wdyqnx3g",
+        "d213": "5o7zcj8s"
+      },
+      "spec_off_deterministic": true,
+      "spec_on_deterministic": true,
+      "token_div_frac_banked": 0.5607757568359375,
+      "total_divergent_tokens_banked": 36751,
+      "total_tokens_banked": 65536
+    },
+    "reading_definitions": {
+      "A_strict_per_sequence": "a served greedy sequence is COMPLIANT iff ALL its output tokens match plain greedy AR (zero argmax flips over output_len). pass = fraction of the 128 served sequences with zero flips.",
+      "B_per_token_theta": "COMPLIANT iff the per-sequence flip fraction <= theta. pass_fraction(theta) is the empirical CDF of per-sequence flip fractions over theta in [0,1].",
+      "C_ppl_only": "COMPLIANT iff served PPL <= 2.42 (the auto-scorer's actual check). served PPL 2.3772 <= 2.42 -> 100%.",
+      "d114_run": "9q5yy9l1",
+      "source_granularity": "per_sequence_and_per_position",
+      "source_granularity_note": "#114 interlock_report.json banks the per-SEQUENCE split (num_identical=16, num_divergent=112) AND the per-POSITION token-ids (decode_outputs.jsonl, spec-ON + spec-OFF AR). This leg reconstructs the full per-sequence flip-fraction distribution from the per-position ids and verifies it reproduces the banked per-sequence split + aggregate bit-for-bit -> strict-A is OBSERVED, not modeled."
+    },
+    "reading_pass_fractions": {
+      "ordering_note": "strict-A 0.1250 (theta=0) <= per-token-theta(theta) (monotone CDF) <= PPL-only 1.0. The three readings are nested in strictness.",
+      "per_token_theta_curve": [
+        {
+          "pass_fraction": 0.125,
+          "theta": 0.0
+        },
+        {
+          "pass_fraction": 0.125,
+          "theta": 0.001
+        },
+        {
+          "pass_fraction": 0.1328125,
+          "theta": 0.005
+        },
+        {
+          "pass_fraction": 0.1328125,
+          "theta": 0.01
+        },
+        {
+          "pass_fraction": 0.1328125,
+          "theta": 0.02
+        },
+        {
+          "pass_fraction": 0.140625,
+          "theta": 0.05
+        },
+        {
+          "pass_fraction": 0.1484375,
+          "theta": 0.1
+        },
+        {
+          "pass_fraction": 0.171875,
+          "theta": 0.2
+        },
+        {
+          "pass_fraction": 0.2421875,
+          "theta": 0.3
+        },
+        {
+          "pass_fraction": 0.3828125,
+          "theta": 0.5
+        },
+        {
+          "pass_fraction": 0.5,
+          "theta": 0.673828
+        },
+        {
+          "pass_fraction": 0.75,
+          "theta": 0.8
+        },
+        {
+          "pass_fraction": 0.9921875,
+          "theta": 0.95
+        },
+        {
+          "pass_fraction": 0.9921875,
+          "theta": 0.970703
+        },
+        {
+          "pass_fraction": 1.0,
+          "theta": 0.99
+        },
+        {
+          "pass_fraction": 1.0,
+          "theta": 1.0
+        }
+      ],
+      "ppl_only_cap": 2.42,
+      "ppl_only_pass_fraction": 1.0,
+      "ppl_only_served": 2.3772,
+      "strict_a_num_identical": 16,
+      "strict_a_num_total": 128,
+      "strict_a_pass_fraction": 0.125
+    },
+    "reconstruction": {
+      "anchor_note": "per-position reconstruction reproduces #114 banked split BIT-FOR-BIT: identical 16/128 (banked 16), divergent 112 (banked 112), token_div_frac 0.5607757568359375 (banked 0.5607757568359375).",
+      "flip_frac_max": 0.970703125,
+      "flip_frac_median": 0.673828125,
+      "flip_frac_min": 0.0,
+      "flip_fracs_sorted": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.00390625,
+        0.03125,
+        0.078125,
+        0.111328125,
+        0.1328125,
+        0.142578125,
+        0.20703125,
+        0.21875,
+        0.22265625,
+        0.228515625,
+        0.232421875,
+        0.236328125,
+        0.24609375,
+        0.26171875,
+        0.296875,
+        0.345703125,
+        0.376953125,
+        0.408203125,
+        0.41015625,
+        0.412109375,
+        0.416015625,
+        0.421875,
+        0.421875,
+        0.43359375,
+        0.4453125,
+        0.455078125,
+        0.470703125,
+        0.474609375,
+        0.48046875,
+        0.484375,
+        0.486328125,
+        0.4921875,
+        0.5,
+        0.53125,
+        0.544921875,
+        0.546875,
+        0.580078125,
+        0.583984375,
+        0.58984375,
+        0.595703125,
+        0.59765625,
+        0.599609375,
+        0.611328125,
+        0.61328125,
+        0.619140625,
+        0.642578125,
+        0.654296875,
+        0.669921875,
+        0.673828125,
+        0.681640625,
+        0.68359375,
+        0.703125,
+        0.720703125,
+        0.72265625,
+        0.724609375,
+        0.73046875,
+        0.734375,
+        0.736328125,
+        0.744140625,
+        0.744140625,
+        0.74609375,
+        0.75,
+        0.75,
+        0.75,
+        0.75390625,
+        0.755859375,
+        0.7578125,
+        0.7578125,
+        0.7578125,
+        0.767578125,
+        0.76953125,
+        0.76953125,
+        0.775390625,
+        0.77734375,
+        0.783203125,
+        0.78515625,
+        0.79296875,
+        0.79296875,
+        0.79296875,
+        0.796875,
+        0.80078125,
+        0.806640625,
+        0.810546875,
+        0.814453125,
+        0.818359375,
+        0.818359375,
+        0.8203125,
+        0.822265625,
+        0.826171875,
+        0.837890625,
+        0.837890625,
+        0.853515625,
+        0.853515625,
+        0.85546875,
+        0.87109375,
+        0.875,
+        0.876953125,
+        0.90625,
+        0.91796875,
+        0.91796875,
+        0.923828125,
+        0.92578125,
+        0.927734375,
+        0.93359375,
+        0.93359375,
+        0.94140625,
+        0.943359375,
+        0.943359375,
+        0.947265625,
+        0.94921875,
+        0.94921875,
+        0.970703125
+      ],
+      "num_divergent": 112,
+      "num_identical": 16,
+      "num_prompts": 128,
+      "onset_max": 496,
+      "onset_median": 120,
+      "onset_min": 0,
+      "reproduces_banked": true,
+      "seq_len_max": 512,
+      "seq_len_min": 512,
+      "token_div_frac": 0.5607757568359375,
+      "total_divergent_tokens": 36751,
+      "total_tokens": 65536,
+      "within_divergent_mean_flip_frac": 0.6408865792410714
+    },
+    "self_test": {
+      "conditions": {
+        "a_iid_reproduces_aggregate_5608_and_reconstruction_bitexact": true,
+        "b_strict_a_le_pass_fraction_theta_monotone": true,
+        "c_theta1_pass_is_1": true,
+        "d_theta0_reproduces_strict_a": true,
+        "e_ppl_only_is_1": true,
+        "f_key_scalars_finite": true
+      },
+      "evidence": {
+        "a_banked_token_div_frac": 0.5607757568359375,
+        "a_iid_mean_per_token": 0.5607757568359375,
+        "a_reconstructed_token_div_frac": 0.5607757568359375,
+        "a_reproduces_banked": true,
+        "b_pass_fraction_at_probes": {
+          "0.001": 0.125,
+          "0.01": 0.1328125,
+          "0.05": 0.140625,
+          "0.1": 0.1484375,
+          "0.3": 0.2421875,
+          "0.5": 0.3828125,
+          "0.7": 0.5234375,
+          "0.9": 0.8828125,
+          "0.99": 1.0,
+          "1.0": 1.0,
+          "1e-06": 0.125
+        },
+        "b_strict_a": 0.125,
+        "c_pass_at_theta1": 1.0,
+        "d_pass_at_theta0": 0.125,
+        "e_ppl_only": 1.0
+      },
+      "issue192_calibration_self_test_passes": true
+    },
+    "test_metric": {
+      "strict_a_pass_fraction": 0.125
+    },
+    "verdict": "CALIBRATED. #114's one number (56.08% per-token argmax divergence) resolves into the #192 per-reading menu: (A) STRICT per-sequence token-identity pass = 0.1250 (16/128 sequences zero-flip) -> the int4-spec stack FAILS literal token-identity for 87.5% of sequences; (B) per-token-theta is the CDF menu (theta=0 -> 0.1250, theta=1 -> 1.0); (C) PPL-ONLY (the auto-scorer's actual check) = 100% (served PPL 2.3772 <= 2.42). HONEST CORRECTION to the naive iid intuition: independence predicts strict-A=(1-p)^512=10^-183~0, but the EMPIRICAL strict-A is 0.1250 because the #114 flips CASCADE (extreme within-sequence clustering: 16 prompts never trip, 112 trip-and-cascade). The model-free Frechet bound caps strict-A at 1-p=0.4392 for ANY correlation structure, so even MAXIMAL clustering keeps strict-A < 0.5 << 1 (strict_a_robust_to_clustering=True). BOTH the 481.53 frontier and the land #71 tree ride the SAME int4-spec basis, so the menu applies to both. The RULING is the human's (issue #192); only the wirbel #199/#213/#216 compliant-kernel route survives strict-A. BASELINE 481.53 untouched. NOT a launch."
+  }
+}
