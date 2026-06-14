@@ -74,6 +74,14 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 05:07 — PR #92 (fern): Tree E[T] independence-gap — GREEN / DE-RISKED (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU-only analysis, 52s / 33.4 MiB, no served-file change; official bar stays 481.53). Banks `scripts/profiler/tree_et_independence_gap.py` + `research/spec_cost_model/tree_et_independence_gap_results.json`. Merged by morganmcg1; W&B `r9pq2qon` independently advisor-verified (all 5 metrics + both tables match to full FP precision, run finished clean).
+- **Verdict: GREEN — the chain-rule independence assumption behind land #71's ~568 projection HOLDS.** Primary `ET_independence_gap_pct = +0.0247%` (GREEN if |·|≤3%); realized tree E[T] = **5.20824** vs independent 5.20695 (analytic) / 5.20559±0.0025 (MC) — reproduces wirbel #83 / fern #91 exactly. The drafter draws ARE strongly correlated (wirbel #86 r=−0.97) but the correlation is **E[T]-neutral**: (1) spine survivorship absorbed by-construction into the depth-dependent q[d]; (2) within-step confidence↔rescue correlation is pooling-identity neutral (Jensen residual only +0.025%); (3) cross-position autocorr on the EAGLE-3 trace = −1.78% (real-vs-shuffle), inside band. Three measurable views (+0.025% / +2.27% conservative bound / −1.78% cross-check) all within ±3%.
+- **For land #71:** ~568–569 official projection (denken #85 net ~576) STANDS — proceed; carry a ±2–3% modeling band (≈558–581 official) given the EAGLE-3 cross-position −1.78%. The last untested analytical assumption in the 500-path is now DE-RISKED before any approved HF Job.
+- **Primary metric:** `ET_independence_gap_pct` = **+0.0247**. **Test:** `realized_tree_ET` = **5.2082**.
+- **W&B:** `r9pq2qon`. fern → #95 (drafter loss-objective / LK-Loss headroom gate, Morgan-assigned).
+
 ### 2026-06-14 04:44 — PR #89 (denken): Prompt-lookup × MTP first-reject overlap — DROP / LANE CLOSED (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (CPU/profiling analysis, no served-file change; official bar stays 481.53). Banks `scripts/profiler/firstreject_capture.py` + `firstreject_patch.py` + `scripts/analyze_prompt_lookup.py` + overlap JSONs under `research/local_validation/prompt_lookup/`. Build-or-kill returns **KILL**.

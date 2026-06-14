@@ -1,5 +1,24 @@
 # SENPAI Research Results
 
+## 2026-06-14 05:07 — PR #92: Tree E[T] independence-gap ✅ MERGED — GREEN / DE-RISKED (realized tree E[T] matches independent model +0.025%; last analytical assumption in the 500-path confirmed under real correlated draws)
+
+- **Branch:** `fern/tree-et-independence-gap` · **Student:** fern · merged ~05:07Z by morganmcg1
+- **Hypothesis:** wirbel #83's +18.2% E[T] (~568 official) and fern #91's topology confirm both assume chain-rule independence (per-rank AND per-position) of drafter acceptance. Real top-W emissions are correlated (wirbel #86: confident drafter → higher ρ₂, r=−0.97). If correlation lowers realized tree E[T] below 5.207, land #71's projection is inflated; if it matches, the last untested assumption is de-risked.
+- **Primary metric:** `ET_independence_gap_pct = +0.0247%`. **Test:** `realized_tree_ET = 5.20824`.
+
+| metric | value | read |
+|---|---|---|
+| `ET_independence_gap_pct` (primary) | **+0.0247%** | GREEN if \|·\|≤3% — independence holds |
+| `realized_tree_ET` (B, MTP regime mixture) | **5.20824** | == #86 ET_uniform_global to 8.9e-16 |
+| `independent_tree_ET` (A, analytic) | 5.20695 | wirbel #83 ≈5.207 / fern #91 5.20695 ✓ reproduced |
+| `independent_tree_ET` (A, MC 5×400k) | 5.20559 ± 0.00248 | fern #91 MC 5.2056 ✓ reproduced |
+| conservative analytic \|gap\| bound | +2.267% | < 3% (GREEN even at the bound) |
+| EAGLE-3 real-vs-shuffle (cross-position xcheck) | −1.78% | within ±3% |
+| `land71_official_proj_recalibrated` | 568.1 | ~unchanged |
+
+- **W&B:** `r9pq2qon` (CPU-only, 52s, 33.4 MiB RSS). Advisor-verified independently: all 5 numeric metrics + both tables (`et_estimators` 6 rows, `realized_per_regime` 5 bins) match reported values to full FP precision; run `finished` clean (the `_runtime=1s` is a known W&B CPU-only artifact, not a crash).
+- **Analysis/conclusions:** Independence is **confirmed**, but the deeper reason is that draws are strongly correlated and the correlation is E[T]-neutral across all four channels: (1) spine cross-depth survivorship — ZERO gap by construction (depth-dependent q[d] ≡ ∏ chain-rule survivorship); (2) rescue depth-dependence — #79 ρ₂-by-depth flat (slope +0.0032/depth), pooling justified; (3) within-step confidence↔rescue (wirbel #86's headline r=−0.97) — REALIZED via a freq-weighted entropy-regime mixture over 13,491 steps → 5.20824 = pooled to machine precision (the pooled ladder IS the freq-weighted mean of regime ladders; E[T] near-linear → only a +0.025% Jensen residual, correlation marginally HELPS); (4) branch-continuation/cross-position — unmeasurable on the deployed linear MTP chain (cancels in the gap), cross-checked on the independent #80 EAGLE-3 trace via real-order-vs-shuffle bootstrap = −1.78% (mechanism: rank-1 runs 17× over-dispersed vs geometric → a few long runs spill past the spine-depth cap). No fresh GPU capture: a full-joint tree accept/reject capture is **structurally impossible** on a linear MTP chain (a rank-2 branch's own continuation is never drafted), so the committed ≥13k-step captures the PR pointed to are the correct data. **For land #71:** ~568–569 (denken #85 net ~576) STANDS; carry ±2–3% band (≈558–581). The only true test of channel 4 is land's first tree `accept_length` run (prior: the −1.78% EAGLE-3 number). **Analytical tree-economics lane now fully saturated** (#88 RED, #86 RED, #91 confirm, #92 confirm). fern → #95 (LK-Loss headroom gate).
+
 ## 2026-06-14 04:44 — PR #89: Prompt-lookup × MTP first-reject overlap ✅ MERGED — DROP / LANE CLOSED (realized +1.67% gross below +2% build bar; structural positive-correlation ceiling; prompt-lookup-augment lane CLOSED)
 
 - **Branch:** `denken/promptlookup-augment-overlap` · **Student:** denken · merged ~04:44Z

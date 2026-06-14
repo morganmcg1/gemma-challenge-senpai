@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-14 ~05:00Z (cycle 39)
+- **Date:** 2026-06-14 ~05:15Z (cycle 40)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## Frontier
@@ -26,7 +26,7 @@
 | ubel | #84 | SplitK W4A16 verify-GEMM (~+5–12%) | WIP |
 | kanna | #87 | Argmax-margin greedy-safety gate (protects SplitK + tree) | WIP |
 | lawine | #90 | MTP K sweep (confirm K=7 optimal, empirical A/B) | WIP |
-| fern | **#92** | **Tree E[T] independence-gap:** realized E[T] under real correlated drafter draws vs the independent DP model — the last untested assumption behind +18.2% | WIP (Morgan assigned) |
+| fern | **#95** | **Drafter loss-objective gate:** is the MTP draft head acceptance-optimal or only likelihood-optimal? (LK-Loss headroom) (Morgan assigned) | WIP |
 | wirbel | **#93** | **Star-attention greedy-equivalence gate:** does the tree-mask numerical path preserve greedy argmax? attention-side twin of kanna #87's GEMM gate | WIP (Morgan assigned) |
 | denken | **#94** | **Draft-verify overlap gate:** can the 15.5% drafter be hidden behind verify on BW-bound A10G? (Morgan assigned) | WIP |
 
@@ -41,13 +41,15 @@ Build the multi-candidate tree-verify serving path with M=32, depth-9, max-branc
 - **FP numerics:** argmax-margin gate in flight (kanna #87 WIP). SplitK = ONLY remaining live verify-GEMM kernel lever (denken #85 side-finding: KV shared, mask~0, BW-bound).
 - **Salvage oracle (debug gate):** ρ₂=0.4165 at divergence steps (wirbel #83). Byteshark broken tree = 0.033 (12× gap = layout bug).
 - **⚠️ SALVAGE-COLLAPSE ROOT CAUSE (chiku-inu, ~04:18Z board, relayed to land #71):** the 0.033 salvage signature = having only ONE of two required halves wired — (1) star-attention DISPATCH installed for tree rows **AND** (2) the fused reject/salvage WALK called on the tree layout. Every prior broken run missed exactly one half. **Runtime double-assert required:** assert (a) star-attn is the dispatched path AND (b) salvage walk is the rejection code path, before any quota spend. Chiku-inu's both-halves-wired package is being oracle-benched by openevolve.
-- **E[T] assumption (fern #92 WIP):** the +18.2% projection assumes independent drafter draws (DP model); fern #92 measures whether real correlated drafter draws match the model — the last untested assumption before quota.
+- **E[T] assumption (fern #92 ✅ GREEN/MERGED):** realized tree E[T]=5.20824 under real correlated draws = independent model to **+0.025%**; gap within [−1.8%, +2.3%] across 3 cross-checks. Correlation is strong (r=−0.97) but E[T]-neutral. ~568 projection STANDS (carry ±2–3% band → 558–581). **Last analytical assumption DE-RISKED.** Only true channel-4 test = land's first tree `accept_length` run.
 - **Attention greedy-equivalence (wirbel #93 WIP):** does the tree-mask numerical path (validated externally to relerr 1e-3) preserve greedy argmax? — attention-side twin of kanna #87's GEMM gate.
+- **Remaining pre-quota gates:** kanna #87 (GEMM argmax-margin) + wirbel #93 (attention argmax) — the two FP-numerics gates. All ANALYTICAL assumptions now closed (tree-economics lane saturated: #88/#86/#91/#92).
 
-## Cycle 39 — lanes closed / confirmed this session
+## Cycle 39–40 — lanes closed / confirmed this session
 
 | PR | student | verdict | significance |
 |---|---|---|---|
+| #92 | fern | E[T] independence GREEN: realized 5.20824 = independent +0.025%; corr strong but E[T]-neutral | tree-economics-analytics CLOSED (de-risk) |
 | #91 | fern | Topology CONFIRMED: mb3 +0.9614% E[T] > mb4; acceptance model validated to ~1e-3 tok | topology-analytics CLOSED |
 | #86 | wirbel | Entropy-branching: r=−0.9688 (sign-reversed, within-step); oracle +0.27% E[T] — non-actionable | entropy-branching + dynamic-tree CLOSED |
 | #89 | denken | Prompt-lookup augment: +1.67% gross, structural redundancy (corr=+0.354) — DROP | prompt-lookup-augment CLOSED |
