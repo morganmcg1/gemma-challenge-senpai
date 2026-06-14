@@ -1,0 +1,210 @@
+{
+  "agent": "stark",
+  "created_at": "20260614T223903Z",
+  "kind": "fpriv-worstcase-measured-div",
+  "nan_clean": true,
+  "peak_mem_mib": 27.184,
+  "pr": 243,
+  "synthesis": {
+    "blend_table": [
+      {
+        "d": 0.0073,
+        "f_priv_wc": 0.9689500205949673,
+        "is_measured": true,
+        "is_old": false,
+        "lambda_floor_exact": 0.9784133636331624,
+        "lambda_floor_linear": 0.9784133623810887,
+        "lambda_floor_linear_clamped": 0.9784133623810887,
+        "lambda_floor_resid_linear_vs_exact": 1.2520737779908586e-09,
+        "reachable_at_ceiling": true,
+        "straddles_breakeven": false
+      },
+      {
+        "d": 0.1,
+        "f_priv_wc": 0.9669576049835472,
+        "is_measured": false,
+        "is_old": false,
+        "lambda_floor_exact": 0.9831027698323893,
+        "lambda_floor_linear": 0.9831025298340064,
+        "lambda_floor_linear_clamped": 0.9831025298340064,
+        "lambda_floor_resid_linear_vs_exact": 2.3999838294486153e-07,
+        "reachable_at_ceiling": true,
+        "straddles_breakeven": false
+      },
+      {
+        "d": 0.3,
+        "f_priv_wc": 0.9626589736751978,
+        "is_measured": false,
+        "is_old": false,
+        "lambda_floor_exact": 0.9932216515158461,
+        "lambda_floor_linear": 0.9932193959675932,
+        "lambda_floor_linear_clamped": 0.9932193959675932,
+        "lambda_floor_resid_linear_vs_exact": 2.2555482528385795e-06,
+        "reachable_at_ceiling": true,
+        "straddles_breakeven": false
+      },
+      {
+        "d": 0.5608,
+        "f_priv_wc": 0.9570535584491102,
+        "is_measured": false,
+        "is_old": true,
+        "lambda_floor_exact": null,
+        "lambda_floor_linear": 1.0064117894057905,
+        "lambda_floor_linear_clamped": null,
+        "lambda_floor_resid_linear_vs_exact": null,
+        "reachable_at_ceiling": false,
+        "straddles_breakeven": true
+      }
+    ],
+    "composition": {
+      "anchors_source": "research/validity/publish_first_fpriv_breakeven/results.json",
+      "ceil_int4_204": 520.9527323111674,
+      "d_measured_lawine_232": 0.0073,
+      "d_old_kanna_114": 0.5608,
+      "dlambda_floor_dfpriv_233": -2.353508688669459,
+      "f_int4div_solved": 0.947613764095975,
+      "f_priv_breakeven_233": 0.9597799742440889,
+      "f_priv_clean_226": 0.969106920637722,
+      "f_priv_grounded_52_224": 0.9570535584491102,
+      "lambda_floor_central_233": 0.9780440967672128,
+      "nls_axis": "native_multilingual",
+      "target_publish_first": 500.0,
+      "vertices_source": "research/validity/private_fpriv_worstcase/results.json"
+    },
+    "handoff_line": "under lawine #232's measured near-greedy 0.73% divergence the worst-case-vertex f_priv tightens to fpriv_worstcase_under_measured_div=0.968950 (vs the old 0.957 floor), which no longer straddles the #233 breakeven 0.9598 \u2014 so the publish-first private bar's location is safer once the corrected int4 physics replaces kanna #114's M=1 56%.",
+    "headline": {
+      "binding_vertex_under_measured_div": "native_multilingual",
+      "d_crossover_unstraddle": 0.4339495864889358,
+      "d_measured": 0.0073,
+      "d_old": 0.5608,
+      "delta_vs_breakeven": 0.00917004635087837,
+      "delta_vs_old_worstcase": 0.011896462145857045,
+      "f_int4div_solved": 0.947613764095975,
+      "f_priv_breakeven": 0.9597799742440889,
+      "f_priv_clean": 0.969106920637722,
+      "f_priv_grounded_old_worstcase": 0.9570535584491102,
+      "fpriv_worstcase_measured_div_self_test_passes": true,
+      "fpriv_worstcase_under_measured_div": 0.9689500205949673,
+      "lambda_floor_central": 0.9780440967672128,
+      "lambda_floor_resid_linear_vs_exact": 1.2520737779908586e-09,
+      "lambda_floor_under_measured_div_exact": 0.9784133636331624,
+      "lambda_floor_under_measured_div_linear": 0.9784133623810887,
+      "lambda_floor_under_measured_div_linear_clamped": 0.9784133623810887,
+      "moved_above_breakeven_under_measured_div": true,
+      "nls_margin_to_runner_under_measured_div": 0.00016118443995349896,
+      "nls_vertex_confirmed": true,
+      "reachable_at_ceiling_under_measured_div": true,
+      "straddles_breakeven_under_measured_div": false
+    },
+    "imports": {
+      "mechanism": "Pure analytic divergence-weighted blend; exact \u03bb_floor cross-check reuses #233's banked reach-DP solver (publish_first_fpriv_breakeven.lambda_floor_publish_first).",
+      "provenance": "stark#233 pszvrf2a (publish_first_fpriv_breakeven: breakeven 0.9598, band [0.957054,0.969107], \u03bb_floor_central 0.97804, d\u03bb_floor/df_priv -2.3535) x stark#226 tzcc5xuq (private_fpriv_worstcase: NLS native_multilingual f_priv-min vertex 0.969107, six realizable axes) x lawine#232 nxwv6pam (deployed M=8 divergence 0.73%) x kanna#114 9q5yy9l1 (M=1 56.08%) x kanna#224 1081oc84 / PR#52 (grounded f_priv 0.957054) x #204 (CEIL_INT4 520.9527). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "model_note": "f_priv_wc(d) = (1-d)\u00b7f_clean + d\u00b7f_int4div, the divergence-weighted worst-case f_priv blend. f_clean=0.969107 is #226's NLS clean realizable worst-case (the d\u21920 limit); f_int4div is the fully-int4-divergent decode-drop pinned by the d=0.5608 round-trip to #233's grounded floor 0.957054 (the d\u21921 weight on that floor). The blend reproduces #233's worst-case band [0.957054, 0.969107] as [f_priv_wc(0.5608), f_priv_wc(0)]. \u03bb_floor via the #233 sensitivity d(\u03bb_floor)/d(f_priv)=-2.3535, cross-checked against the exact #233 reach-DP solver.",
+    "nls_vertex": {
+      "binding_axis_under_measured_div": "native_multilingual",
+      "clean_gap_nls_runner": 0.00016236973904859564,
+      "int4div_gap_to_flip_vertex": 0.02208006026760834,
+      "nls_confirmed": true,
+      "nls_margin_to_runner_fpriv": 0.00016118443995349896,
+      "note": "Under a SHARED int4-divergent floor the blend f_priv_wc^v(d)=(1-d)\u00b7f_clean^v+d\u00b7f_int4div is monotone increasing in f_clean^v, so the f_priv-MINIMIZING vertex is argmin f_clean^v = NLS (native_multilingual) for any d\u2208[0,1). At the measured d=0.0073 the NLS\u2192native_code clean gap 0.000162 would require code's int4-divergent f_priv to sit 0.02208 BELOW NLS's to flip the binding vertex \u2014 implausible for the hardest axis, so NLS stays binding with margin.",
+      "per_axis_clean_fpriv": {
+        "native_casual": 0.9701254960270697,
+        "native_code": 0.9692692903767706,
+        "native_longctx": 0.9767116893827787,
+        "native_math": 0.9716581006759408,
+        "native_multilingual": 0.969106920637722,
+        "native_sharegpt": 0.970718701723238
+      },
+      "runner_up_axis": "native_code",
+      "wc_by_axis_under_measured_div": {
+        "native_casual": 0.9699611603839726,
+        "native_code": 0.9691112050349208,
+        "native_longctx": 0.9764992745281851,
+        "native_math": 0.9714825770189071,
+        "native_multilingual": 0.9689500205949673,
+        "native_sharegpt": 0.970550035678559
+      }
+    },
+    "robustness": {
+      "d_old_sweep": [
+        {
+          "d_old": 0.55,
+          "f_int4div": 0.9471917166584278,
+          "fpriv_wc_measured": 0.9689469396486732,
+          "moved_above_breakeven": true
+        },
+        {
+          "d_old": 0.5608,
+          "f_int4div": 0.947613764095975,
+          "fpriv_wc_measured": 0.9689500205949673,
+          "moved_above_breakeven": true
+        },
+        {
+          "d_old": 0.57,
+          "f_int4div": 0.9479606711840172,
+          "fpriv_wc_measured": 0.96895255301671,
+          "moved_above_breakeven": true
+        },
+        {
+          "d_old": 0.5107999999999999,
+          "f_int4div": 0.9455098920774014,
+          "fpriv_wc_measured": 0.9689346623292318,
+          "moved_above_breakeven": true
+        },
+        {
+          "d_old": 0.6108,
+          "f_int4div": 0.9493731907938914,
+          "fpriv_wc_measured": 0.9689628644098621,
+          "moved_above_breakeven": true
+        }
+      ],
+      "d_old_sweep_all_above_breakeven": true,
+      "d_old_sweep_fpriv_wc_measured_band": [
+        0.9689346623292318,
+        0.9689628644098621
+      ],
+      "monotone_decreasing_in_d": true,
+      "note": "The corrected worst-case is INSENSITIVE to the exact OLD-divergence pin: at the measured d=0.0073 the int4-divergent weight is tiny, so varying d_old over [0.55,0.57] (\u00b10.05) moves fpriv_worstcase_under_measured_div only within 2.82e-05, all comfortably above the breakeven.",
+      "spread_f_clean_minus_f_int4div": 0.021493156541746994
+    },
+    "self_test": {
+      "a_detail": {
+        "roundtrip_resid_high": 0.0,
+        "roundtrip_resid_low": 0.0,
+        "tol": 1e-09
+      },
+      "c_detail": {
+        "delta": 0.011896462145857045,
+        "fpriv_wc_measured": 0.9689500205949673,
+        "old_worstcase_grounded": 0.9570535584491102
+      },
+      "conditions": {
+        "a_d_old_roundtrips_233_worstcase_band_both_ends": true,
+        "b_fpriv_wc_increasing_as_d_decreases": true,
+        "c_measured_worstcase_gt_old_worstcase": true,
+        "d_breakeven_straddle_verdict_stated": true,
+        "e_nls_vertex_confirmed_under_measured_div": true,
+        "f_nan_clean": true,
+        "xcheck_linear_lambda_floor_matches_exact_and_pin_insensitive": true
+      },
+      "d_detail": {
+        "moved_above": true,
+        "straddles_measured": false
+      },
+      "e_detail": {
+        "binding_axis": "native_multilingual",
+        "nls_axis": "native_multilingual"
+      },
+      "fpriv_worstcase_measured_div_self_test_passes": true,
+      "xcheck_detail": {
+        "d_old_sweep_all_above_breakeven": true,
+        "lambda_floor_resid_linear_vs_exact": 1.2520737779908586e-09
+      }
+    },
+    "test_metric": {
+      "fpriv_worstcase_under_measured_div": 0.9689500205949673
+    },
+    "verdict": "NEAR-GREEDY DIVERGENCE UN-STRADDLES THE BREAKEVEN: re-pricing the #233 worst-case-vertex f_priv as a divergence-weighted blend and swapping the OLD kanna #114 M=1 56.08% int4-loss weight for lawine #232's MEASURED 0.73% near-greedy divergence moves the worst-case f_priv from the grounded 0.957054 floor UP to fpriv_worstcase_under_measured_div = 0.968950 \u2014 ABOVE the #233 publish-first breakeven 0.959780 (\u0394=+0.009170). At the measured 0.73% the int4-divergent component carries almost no weight, so the worst-case tightens to within 0.000157 of the clean NLS value 0.969107; the implied publish-first \u03bb_floor is 0.97841 (vs central 0.97804). The realizable band [worst-case, clean] therefore NO LONGER STRADDLES the breakeven \u2014 the un-straddle threshold is d*=0.4339, so any divergence below ~0.43 clears it and the measured 0.73% clears it with a wide margin. The binding vertex stays NON-LATIN-SCRIPT (native_multilingual); the publish-first private bar's LOCATION is SAFER once the corrected int4 physics replaces kanna #114's M=1 56%. CPU-only; adds 0 TPS; authorizes nothing. NOT a launch. NOT open2."
+  }
+}
