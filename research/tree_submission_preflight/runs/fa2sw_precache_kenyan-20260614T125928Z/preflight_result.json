@@ -1,0 +1,149 @@
+{
+  "created_at": "20260614T125928Z",
+  "num_prompts": 128,
+  "output_len": 512,
+  "ppl_cap": 2.42,
+  "self_test": {
+    "checks": {
+      "completion_logic_check": {
+        "failing_gates": [
+          "C"
+        ],
+        "gate_a_passed": true,
+        "gate_b_passed": true,
+        "gate_c_passed": false,
+        "names_gate_c": true,
+        "ready": false,
+        "verdict": "NOT-READY"
+      },
+      "injected_boot_fault": {
+        "failing_gates": [
+          "A",
+          "B",
+          "C"
+        ],
+        "gate_a": {
+          "boot_ok": false,
+          "detail": "engine-init crash (#141-class): server exited before readiness with code 1 (see /workspace/senpai/target/research/tree_submission_preflight/runs/fa2sw_precache_kenyan-20260614T125928Z/injected_boot_fault/server.log)",
+          "failure_site": "server exited before readiness with code 1 (see /workspace/senpai/target/research/tree_submission_preflight/runs/fa2sw_precache_kenyan-20260614T125928Z/injected_boot_fault/server.log)",
+          "name": "A_boot",
+          "passed": false,
+          "server_log_tail": "[serve] WARNING: benchmark venv python not found at /tmp/bench-venv/bin/python; continuing without jinja2 patch\n[lmhead-prune] reusing baked dir /tmp/osoi5-12k-baked\n[lmhead-prune] active dst=/tmp/osoi5-12k-baked keepset=/tmp/osoi5-12k-baked/pck04_keepset.json\n[serve] tcmalloc found: /usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4\n[serve] LD_PRELOAD already set: /usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4\nTraceback (most recent call last):\n  File \"/workspace/senpai/target/submissions/fa2sw_precache_kenyan/serve.py\", line 1079, in <module>\n    main()\n  File \"/workspace/senpai/target/submissions/fa2sw_precache_kenyan/serve.py\", line 1017, in main\n    ensure_drafter()\n  File \"/workspace/senpai/target/submissions/fa2sw_precache_kenyan/serve.py\", line 752, in ensure_drafter\n    raise RuntimeError(\nRuntimeError: DRAFTER_SHA256 mismatch for model.safetensors: expected 0000000000000000000000000000000000000000000000000000000000000000, got ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e"
+        },
+        "gate_a_passed": false,
+        "gate_b": {
+          "detail": "not run",
+          "name": "B_ppl",
+          "passed": null
+        },
+        "gate_b_passed": null,
+        "gate_c": {
+          "detail": "not run",
+          "name": "C_completion",
+          "passed": null
+        },
+        "gate_c_passed": null,
+        "inject_boot_fault": true,
+        "names_gate_a": true,
+        "num_prompts": 128,
+        "out_dir": "/workspace/senpai/target/research/tree_submission_preflight/runs/fa2sw_precache_kenyan-20260614T125928Z/injected_boot_fault",
+        "output_len": 512,
+        "ppl_cap": 2.42,
+        "ready": false,
+        "submission": "submissions/fa2sw_precache_kenyan",
+        "submission_name": "fa2sw_precache_kenyan",
+        "verdict": "NOT-READY"
+      },
+      "injected_ppl_fault": {
+        "failing_gates": [
+          "B"
+        ],
+        "gate_a_passed": true,
+        "gate_b": {
+          "cap": 2.42,
+          "detail": "synthetic over-cap PPL=2.92 > cap 2.42 -> Gate B must fail",
+          "margin": -0.5,
+          "name": "B_ppl",
+          "passed": false,
+          "ppl": 2.92
+        },
+        "gate_b_passed": false,
+        "gate_c_passed": true,
+        "names_gate_b": true,
+        "ready": false,
+        "verdict": "NOT-READY"
+      },
+      "known_good": {
+        "failing_gates": [],
+        "gate_a": {
+          "boot_ok": true,
+          "detail": "boots+serves; smoke OK",
+          "name": "A_boot",
+          "passed": true,
+          "smoke": {
+            "errors": [],
+            "finite_logprobs_ok": true,
+            "logprobs_checked": 10,
+            "passed": true,
+            "tokens_emitted": [
+              8,
+              8,
+              8
+            ],
+            "tokens_emitted_ok": true
+          }
+        },
+        "gate_a_passed": true,
+        "gate_b": {
+          "cap": 2.42,
+          "detail": "PPL=2.3767 <= 2.42 margin=+0.0433",
+          "margin": 0.043335191176261834,
+          "name": "B_ppl",
+          "num_records": 128,
+          "num_tokens": 61797,
+          "passed": true,
+          "ppl": 2.376664808823738,
+          "summary_file": "/workspace/senpai/target/research/tree_submission_preflight/runs/fa2sw_precache_kenyan-20260614T125928Z/known_good/ppl_summary.json"
+        },
+        "gate_b_passed": true,
+        "gate_c": {
+          "a10g_ceiling_mib": 23028,
+          "completed": 128,
+          "detail": "128/128 prompts, 65536/65536 tokens; peak GPU 21395 MiB / 23028 MiB",
+          "duration_s": 140.4676377773285,
+          "expected_completion_tokens": 65536,
+          "name": "C_completion",
+          "num_completion_tokens": 65536,
+          "num_prompts": 128,
+          "output_len": 512,
+          "passed": true,
+          "peak_gpu_mem_frac": 0.9291,
+          "peak_gpu_mem_mib": 21395,
+          "subset": false,
+          "summary_file": "/workspace/senpai/target/research/tree_submission_preflight/runs/fa2sw_precache_kenyan-20260614T125928Z/known_good/decode_summary.json"
+        },
+        "gate_c_passed": true,
+        "inject_boot_fault": false,
+        "model_id": "google/gemma-4-E4B-it",
+        "num_prompts": 128,
+        "out_dir": "/workspace/senpai/target/research/tree_submission_preflight/runs/fa2sw_precache_kenyan-20260614T125928Z/known_good",
+        "output_len": 512,
+        "ppl_cap": 2.42,
+        "ready": true,
+        "served_model_name": "gemma-4-e4b-it",
+        "submission": "submissions/fa2sw_precache_kenyan",
+        "submission_name": "fa2sw_precache_kenyan",
+        "verdict": "READY"
+      }
+    },
+    "conditions": {
+      "boot_fault_NOT_READY_names_A": true,
+      "completion_logic_NOT_READY_names_C": true,
+      "known_good_READY": true,
+      "ppl_fault_NOT_READY_names_B": true
+    },
+    "harness_self_test_passes": true
+  },
+  "server_python": "/tmp/server-venv/bin/python",
+  "submission": "submissions/fa2sw_precache_kenyan"
+}

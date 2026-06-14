@@ -1,0 +1,70 @@
+{
+  "created_at": "20260614T123704Z",
+  "num_prompts": 4,
+  "output_len": 512,
+  "ppl_cap": 2.42,
+  "preflight": {
+    "failing_gates": [],
+    "gate_a": {
+      "boot_ok": true,
+      "detail": "boots+serves; smoke OK",
+      "name": "A_boot",
+      "passed": true,
+      "smoke": {
+        "errors": [],
+        "finite_logprobs_ok": true,
+        "logprobs_checked": 10,
+        "passed": true,
+        "tokens_emitted": [
+          8,
+          8,
+          8
+        ],
+        "tokens_emitted_ok": true
+      }
+    },
+    "gate_a_passed": true,
+    "gate_b": {
+      "cap": 2.42,
+      "detail": "PPL=2.3767 <= 2.42 margin=+0.0433",
+      "margin": 0.043335191176261834,
+      "name": "B_ppl",
+      "num_records": 128,
+      "num_tokens": 61797,
+      "passed": true,
+      "ppl": 2.376664808823738,
+      "summary_file": "research/tree_submission_preflight/runs/debug/ppl_summary.json"
+    },
+    "gate_b_passed": true,
+    "gate_c": {
+      "a10g_ceiling_mib": 23028,
+      "completed": 4,
+      "detail": "4/4 prompts, 2048/2048 tokens; SUBSET (full protocol = 128); extrapolation: a clean subset is necessary-not-sufficient \u2014 re-run full 128 before launch; peak GPU 21395 MiB / 23028 MiB",
+      "duration_s": 4.977489233016968,
+      "expected_completion_tokens": 2048,
+      "name": "C_completion",
+      "num_completion_tokens": 2048,
+      "num_prompts": 4,
+      "output_len": 512,
+      "passed": true,
+      "peak_gpu_mem_frac": 0.9291,
+      "peak_gpu_mem_mib": 21395,
+      "subset": true,
+      "summary_file": "research/tree_submission_preflight/runs/debug/decode_summary.json"
+    },
+    "gate_c_passed": true,
+    "inject_boot_fault": false,
+    "model_id": "google/gemma-4-E4B-it",
+    "num_prompts": 4,
+    "out_dir": "research/tree_submission_preflight/runs/debug",
+    "output_len": 512,
+    "ppl_cap": 2.42,
+    "ready": true,
+    "served_model_name": "gemma-4-e4b-it",
+    "submission": "submissions/fa2sw_precache_kenyan",
+    "submission_name": "fa2sw_precache_kenyan",
+    "verdict": "READY"
+  },
+  "server_python": "/tmp/server-venv/bin/python",
+  "submission": "submissions/fa2sw_precache_kenyan"
+}
