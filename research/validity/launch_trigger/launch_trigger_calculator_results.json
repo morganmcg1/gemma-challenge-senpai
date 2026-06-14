@@ -119,6 +119,18 @@
     "dedup_central_clears_500": true,
     "worstcase_corner_clears_500": true,
     "both_bugs_worstcase_folded_into_go": true
+   },
+   "j_cost_budget_annotation_200": {
+    "pass": true,
+    "expected_shots_sequential_at_bar": 1.9375,
+    "fixed_n_naive_at_bar": 5,
+    "p_single_clear_at_bar": 0.5,
+    "build_higher_mu_safe_n1_tps": 512.15707117161,
+    "crossover_total_shots": 4.0,
+    "c_star_fixedN_per_b": 3.039267792902507,
+    "c_star_sequential_per_b": 12.967542583050696,
+    "single_shot_go_unchanged": true,
+    "verdict_unchanged_go": true
    }
   }
  },
@@ -331,7 +343,14 @@
       "flag": "consumed",
       "n_shots_for_p95_at_bar": 5,
       "n_shots_for_p95_at_lambda1": 1,
-      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. (landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)."
+      "cost_budget_200_landed": true,
+      "expected_shots_sequential_at_bar": 1.9375,
+      "fixed_n_naive_at_bar": 5,
+      "build_higher_mu_safe_n1_tps": 512.15707117161,
+      "build_vs_stay_crossover_total_shots": 4.0,
+      "c_star_fixedN_per_b": 3.039267792902507,
+      "c_star_sequential_per_b": 12.967542583050696,
+      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the SEQUENTIAL early-stop E[shots]=1.94 (NOT fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). Sizes/prices the launch budget; NOT a binding_bar axis (N* is cost-invariant)."
      },
      {
       "axis": "cross_axis_covariance",
@@ -465,7 +484,14 @@
       "flag": "consumed",
       "n_shots_for_p95_at_bar": 5,
       "n_shots_for_p95_at_lambda1": 1,
-      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. (landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)."
+      "cost_budget_200_landed": true,
+      "expected_shots_sequential_at_bar": 1.9375,
+      "fixed_n_naive_at_bar": 5,
+      "build_higher_mu_safe_n1_tps": 512.15707117161,
+      "build_vs_stay_crossover_total_shots": 4.0,
+      "c_star_fixedN_per_b": 3.039267792902507,
+      "c_star_sequential_per_b": 12.967542583050696,
+      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the SEQUENTIAL early-stop E[shots]=1.94 (NOT fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). Sizes/prices the launch budget; NOT a binding_bar axis (N* is cost-invariant)."
      },
      {
       "axis": "cross_axis_covariance",
@@ -495,6 +521,7 @@
     "launch_ci_axes_190_191_188_187": "LANDED -- CONSUMED. wirbel #190 (realistic within-prompt ICC=0.145 -> half-width iid +-10.9 -> realistic +-22.9, build bar 0.9513), stark #191 (private adverse-skew bar 0.9780, DOMINATES; descent private LCB 490.16<500 -> UNREACHABLE), kanna #188 (sigma_oneshot=4.86 confirms #159), denken #187 (input-side lambda_built CI +-0.017, 89%% overlap). binding_bar = max(0.9052, 0.9513, 0.9780) = 0.9780 (private, both-bugs); descent UNREACHABLE.",
     "executable_submission_gate_ubel_189": "LANDED -- CONSUMED as a precondition. Faithful device-vectorized relocate build -> GO; auto-catches the row-1 relocate-as-host-Python-loop trap (banked 444.92 TPS, ~85%% cost). MUST be re-verified against land #71's real build.",
     "redraw_budget_kanna_194": "LANDED -- CONSUMED (informational). best-of-N official re-draw budget N* for P(clear-500)>=0.95; sizes the launch, NOT a binding_bar axis. (Landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP.)",
+    "cost_budget_kanna_200": "LANDED -- CONSUMED (annotation only; advisor 18:03Z). Cost-aware layer on #194's cost-invariant N*(mu): the REALISTIC spend at the bar is SEQUENTIAL early-stop E[shots]=1.94 (NOT fixed-5; ~half clear on shot 1). build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 official shots' GPU-$ (crossover c*=3.04*b fixed-N; early-stop raises it to c*=12.97*b). Prices the budget ROW the human reads; does NOT touch the binding bar or the single-shot sigma -- single-shot GO/NO-GO is UNCHANGED.",
     "cross_axis_covariance_ubel_195": "LANDED -- CONSUMED (advisor 17:52Z). The 4-axis quadrature is INVALID: rho(sampling#175, input-lambda#187) = +0.945 -> a DOUBLE-COUNT (overlap=rho^2=0.893; OUTPUT accept-length scatter and INPUT lambda_hat CI are two views of the SAME accept draw). FIX: de-dup A1+A2 into ONE acceptance axis (overlap-corrected 5.32 TPS) -> 3 independent axes -> combined single-shot sigma = 7.26 TPS central / 17.04 TPS PSD-clamped worst-case (NOT the invalid quadrature 12.54). Carry the 17.04 worst-case as the conservative GO/NO-GO corner until land #71 co-logs per-allocation acceptance. de-dup LCB 519.58 AND worst-case LCB 507.05 BOTH clear 500 -> both-bugs robust on the sigma axis. Ledger CLOSED.",
     "ubel_181_tau_pin": "LANDED (advisor branch) -- the tau band [tau_low, 1.0] floor (stark #164) with the conservative tau=0.9924 corner; referenced as the floor, not a banked ledger axis.",
     "wirbel_184_lambda_robust_topology": "LANDED (advisor branch) -- named as the gap-fallback restoration lever; not consumed as a banked ledger axis by this calculator."
@@ -528,7 +555,7 @@
    }
   },
   "launch_ci_ledger": {
-   "net_rule": "launch_authorized = (analytic GO: realistic launch-LCB >= 500 at binding_bar AND validity AND over-accept AND combined-sigma worst-case corner >= 500) AND (all precondition rows GO). RECOMPOSED post-merge: binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780) = 0.9780 (private#191 dominates, both-bugs); descent private is UNREACHABLE. Sampling half-width is the REALISTIC ICC#190 +/-22.9 TPS (design-effect 4.4106 over iid +/-10.9), NOT the iid placeholder. CLOSED post-#195: the 4-axis quadrature was INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined single-shot sigma 7.26 central / 17.04 worst-case (the conservative corner), NOT quadrature 12.54. iid #175 leg kept as a visible fallback row only. NO pending numerical axes (ledger CLOSED).",
+   "net_rule": "launch_authorized = (analytic GO: realistic launch-LCB >= 500 at binding_bar AND validity AND over-accept AND combined-sigma worst-case corner >= 500) AND (all precondition rows GO). RECOMPOSED post-merge: binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780) = 0.9780 (private#191 dominates, both-bugs); descent private is UNREACHABLE. Sampling half-width is the REALISTIC ICC#190 +/-22.9 TPS (design-effect 4.4106 over iid +/-10.9), NOT the iid placeholder. CLOSED post-#195: the 4-axis quadrature was INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined single-shot sigma 7.26 central / 17.04 worst-case (the conservative corner), NOT quadrature 12.54. iid #175 leg kept as a visible fallback row only. NO pending numerical axes (ledger CLOSED). #200 cost annotation (budget row only, single-shot logic UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=1.94 (not fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential).",
    "numerical_axes": {
     "both_bugs": [
      {
@@ -605,7 +632,14 @@
       "flag": "consumed",
       "n_shots_for_p95_at_bar": 5,
       "n_shots_for_p95_at_lambda1": 1,
-      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. (landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)."
+      "cost_budget_200_landed": true,
+      "expected_shots_sequential_at_bar": 1.9375,
+      "fixed_n_naive_at_bar": 5,
+      "build_higher_mu_safe_n1_tps": 512.15707117161,
+      "build_vs_stay_crossover_total_shots": 4.0,
+      "c_star_fixedN_per_b": 3.039267792902507,
+      "c_star_sequential_per_b": 12.967542583050696,
+      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the SEQUENTIAL early-stop E[shots]=1.94 (NOT fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). Sizes/prices the launch budget; NOT a binding_bar axis (N* is cost-invariant)."
      },
      {
       "axis": "cross_axis_covariance",
@@ -701,7 +735,14 @@
       "flag": "consumed",
       "n_shots_for_p95_at_bar": 5,
       "n_shots_for_p95_at_lambda1": 1,
-      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. (landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)."
+      "cost_budget_200_landed": true,
+      "expected_shots_sequential_at_bar": 1.9375,
+      "fixed_n_naive_at_bar": 5,
+      "build_higher_mu_safe_n1_tps": 512.15707117161,
+      "build_vs_stay_crossover_total_shots": 4.0,
+      "c_star_fixedN_per_b": 3.039267792902507,
+      "c_star_sequential_per_b": 12.967542583050696,
+      "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the SEQUENTIAL early-stop E[shots]=1.94 (NOT fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). Sizes/prices the launch budget; NOT a binding_bar axis (N* is cost-invariant)."
      },
      {
       "axis": "cross_axis_covariance",
@@ -742,6 +783,61 @@
     "sampling_spread_basis": "iid +-10.9 centrally (ubel); the ICC-inflated +-22.9 (#190) feeds the SEPARATE #190 launch-projection gate; ICC=1 corner (sigma 57.8/59.7) reported as the extreme scenario, not the central.",
     "icc1_corner_sigma_worstcase_tps": 59.67679635505315,
     "note": "quadrature INVALID (rho=0.945 double-count); de-dup central sigma 7.26 -> launch LCB 519.58; PSD-clamped worst-case sigma 17.04 -> launch LCB 507.05. BOTH clear 500 -> both-bugs GO robust on the sigma-axis. Worst-case is the conservative corner until land #71's served draw co-logs per-allocation acceptance alongside TPS (pins rho(*,hw))."
+   },
+   "cost_budget_annotation": {
+    "landed": true,
+    "single_shot_go_unchanged": true,
+    "stay_at_bar": {
+     "mu_tps": 500.0,
+     "n_max": 5,
+     "expected_shots_sequential": 1.9375,
+     "fixed_n_naive": 5,
+     "p_single_clear": 0.5,
+     "saved_shots_vs_fixed": 3.0625
+    },
+    "build_higher": {
+     "mu_safe_n1_tps": 512.15707117161,
+     "delta_mu_tps": 12.157071171610028,
+     "n_max": 1,
+     "expected_shots_sequential": 1.0
+    },
+    "crossover_total_shots": 4.0,
+    "c_star_fixedN_per_b": 3.039267792902507,
+    "c_star_sequential_per_b": 12.967542583050696,
+    "n_star_cost_invariant_194": true,
+    "per_mu_sequential_frontier": [
+     {
+      "mu_tps": 500.0,
+      "n_star": 5,
+      "expected_shots_sequential": 1.9375,
+      "saved_shots_vs_fixed": 3.0625
+     },
+     {
+      "mu_tps": 505.0,
+      "n_star": 3,
+      "expected_shots_sequential": 1.3115424708960433,
+      "saved_shots_vs_fixed": 1.6884575291039567
+     },
+     {
+      "mu_tps": 512.2,
+      "n_star": 1,
+      "expected_shots_sequential": 1.0,
+      "saved_shots_vs_fixed": 0.0
+     },
+     {
+      "mu_tps": 515.0,
+      "n_star": 1,
+      "expected_shots_sequential": 1.0,
+      "saved_shots_vs_fixed": 0.0
+     },
+     {
+      "mu_tps": 520.95,
+      "n_star": 1,
+      "expected_shots_sequential": 1.0,
+      "saved_shots_vs_fixed": 0.0
+     }
+    ],
+    "note": "budget row = {stay-at-bar mu=500 -> N_max=5, pay E[shots]=1.94 sequential} vs {build-higher mu>=512.2 -> N=1}; pick the cheaper once land #71's build->mu cost (b) is banked. Build-higher wins iff reaching mu=512.2 costs < 4 official shots' GPU-$ (fixed-N c*=3.04*b; early-stop raises it to c*=12.97*b). PRICES a plan; takes NO draws; authorizes nothing."
    },
    "preconditions": [
     {
@@ -957,7 +1053,14 @@
        "flag": "consumed",
        "n_shots_for_p95_at_bar": 5,
        "n_shots_for_p95_at_lambda1": 1,
-       "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. (landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)."
+       "cost_budget_200_landed": true,
+       "expected_shots_sequential_at_bar": 1.9375,
+       "fixed_n_naive_at_bar": 5,
+       "build_higher_mu_safe_n1_tps": 512.15707117161,
+       "build_vs_stay_crossover_total_shots": 4.0,
+       "c_star_fixedN_per_b": 3.039267792902507,
+       "c_star_sequential_per_b": 12.967542583050696,
+       "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the SEQUENTIAL early-stop E[shots]=1.94 (NOT fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). Sizes/prices the launch budget; NOT a binding_bar axis (N* is cost-invariant)."
       },
       {
        "axis": "cross_axis_covariance",
@@ -1115,7 +1218,14 @@
        "flag": "consumed",
        "n_shots_for_p95_at_bar": 5,
        "n_shots_for_p95_at_lambda1": 1,
-       "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. (landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)."
+       "cost_budget_200_landed": true,
+       "expected_shots_sequential_at_bar": 1.9375,
+       "fixed_n_naive_at_bar": 5,
+       "build_higher_mu_safe_n1_tps": 512.15707117161,
+       "build_vs_stay_crossover_total_shots": 4.0,
+       "c_star_fixedN_per_b": 3.039267792902507,
+       "c_star_sequential_per_b": 12.967542583050696,
+       "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=5 at the build bar, 1 at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the SEQUENTIAL early-stop E[shots]=1.94 (NOT fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). Sizes/prices the launch budget; NOT a binding_bar axis (N* is cost-invariant)."
       },
       {
        "axis": "cross_axis_covariance",
@@ -1143,11 +1253,11 @@
     "restoration_lever": "ship #154 argmax-only decode (realizes step 1.2047, lifts the projection) OR land the both-bugs kernel (the robust GO path). descent-only is private-UNREACHABLE under the adverse-skew bar -- not a thin miss."
    }
   },
-  "filled_approval_block": "### Approval request: HF job for land-71-bothbugs-kernel\n\n**PRE-FILLED DRAFT (NOT FILED).** A human must approve this filed issue before any spend.\n**launch_authorized = False** (analytic_verdict GO; preconditions_all_go False).\n\n**ANALYTIC VERDICT: GO** on the **both_bugs** path at the shipped step 1.2182\n(LCB(P>=0.9) 514.88 TPS, P(clear-500) 99.59%, official\n535.44 TPS at tau=1.0; tau-low 531.39).\n\n**Composition:** official = K_cal*(E[T]/step)*tau, K_cal=125.26795, tau in [0.9924, 1.0].\nclear-500 verdict ANDs TWO finite-sample lower bounds: (1) the BUILD-gate lambda_hat_built\n1.0000 >= binding_bar 0.9780\n(= max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780);\nsource private_191; private#191 DOMINATES, STRICTER than #178's central 0.838), and\n(2) the #179 launch-projection cell-LCB(P>=0.9) >= 500 under the REALISTIC #190 +-22.90\nICC half-width (realistic launch-LCB 510.63 TPS; the optimistic iid\n+-10.91 cell-LCB 514.88 is the visible fallback) AND\nclears the #191 private axis. sigma_hw RETIRED on a separate hardware axis by best-of-2 official\ndraws (P=0.9829>=0.90).\n\n**Measured-tuple GO table:**\n| topology | official (tau=1.0) | proj_private | LCB(P>=0.9) | P(clear-500) | verdict |\n|---|---|---|---|---|---|\n| both_bugs | 535.44 | 528.89 | 514.88 | 0.9959 | GO |\n| descent_only | 519.96 | 513.89 | 499.97 | 0.8994 | NO-GO |\n\n**Launch-CI ledger -- numerical axes (binding_bar = max; #190/#191/#188/#187/#194/#195 ALL CONSUMED; iid #175 leg visible; ledger CLOSED):**\n| axis | PR | status | flag | bar/value |\n|---|---|---|---|---|\n| sampling_iid | #175 | LANDED | iid-fallback-visible | 10.9062 |\n| sampling_icc | #190 | LANDED | consumed | 0.9513 |\n| input_lambda_built | #187 | LANDED | consumed | 0.0171 |\n| hardware_oneshot | #188 | LANDED | consumed | 4.8645 |\n| private_bar | #191 | LANDED | consumed | 0.9780 |\n| redraw_budget | #194 | LANDED | consumed | 5.0000 |\n| cross_axis_covariance | #195 | LANDED | consumed | pending |\n\n**Launch-CI ledger -- hard precondition rows (any non-GO blocks the launch):**\n| precondition | status | flag |\n|---|---|---|\n| boot_fix_kanna_177 | GO | landed |\n| precache_bench | PENDING | serve-config |\n| executable_submission_gate_ubel_189 | GO | consumed |\n| build_lambda_geq_binding_bar | GO | measured |\n| human_approval | PENDING | human-gate |\n\n**Submission command (named hard deps -- the human runs this AFTER approval):**\n```\nPRECACHE_BENCH=1 <serve-harness with land #71 both_bugs kernel + kanna darwin _IncludedRouter boot-fix>\n```\n  - PRECACHE_BENCH=1 set on the served path.\n  - kanna's darwin _IncludedRouter boot-validation startup-500 fix folded into the serve harness.\n\n**Dependency ledger (all required-GREEN before approval):**\n  - [BANKED] Numerator E[T] (#160/#165/#172): descent 5.0564 / both 5.2070.\n  - [BANKED] Denominator step (#168): shipped 1.2182.\n  - [BANKED] Hardware sigma_hw (#159): 4.86 TPS; best-of-2 P=0.9829.\n  - [BANKED] Validity (#166/#124): PPL 2.390<=2.42; 128/128; greedy-exact=True.\n  - [BANKED] Private drop (#164): tau-low 0.9924.\n  - [BANKED] denken #183 margin-aware lambda-card (PUBLIC iid leg): 0.9052 (tau=1) / 0.9234 (tau=0.9924).\n  - [LANDED-CONSUMED] launch-CI axes #190 (ICC bar 0.9513, realistic +-22.90) / #187 (lambda-built-CI) / #188 (sigma-oneshot) / #191 (private bar 0.9780, BINDING). binding_bar 0.9780.\n  - [LANDED-CONSUMED] kanna #194 re-draw budget N* (informational; sizes the launch, not the bar).\n  - [LANDED-CONSUMED] ubel #189 executable-submission-gate: faithful build -> GO; re-verify vs land #71 at launch.\n  - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined sigma 7.26 central / 17.04 worst-case (conservative corner); ledger CLOSED.\n  - [PENDING-BUILD] land #71 measured tuple (THIS tuple).\n\n**Launch gates (ALL required):** (1) land #71 builds the both_bugs kernel; (2) darwin _IncludedRouter\nboot-fix folded; (3) PRECACHE_BENCH=1; (4) a human-approved `Approval request: HF job` issue.\n",
+  "filled_approval_block": "### Approval request: HF job for land-71-bothbugs-kernel\n\n**PRE-FILLED DRAFT (NOT FILED).** A human must approve this filed issue before any spend.\n**launch_authorized = False** (analytic_verdict GO; preconditions_all_go False).\n\n**ANALYTIC VERDICT: GO** on the **both_bugs** path at the shipped step 1.2182\n(LCB(P>=0.9) 514.88 TPS, P(clear-500) 99.59%, official\n535.44 TPS at tau=1.0; tau-low 531.39).\n\n**Composition:** official = K_cal*(E[T]/step)*tau, K_cal=125.26795, tau in [0.9924, 1.0].\nclear-500 verdict ANDs TWO finite-sample lower bounds: (1) the BUILD-gate lambda_hat_built\n1.0000 >= binding_bar 0.9780\n(= max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780);\nsource private_191; private#191 DOMINATES, STRICTER than #178's central 0.838), and\n(2) the #179 launch-projection cell-LCB(P>=0.9) >= 500 under the REALISTIC #190 +-22.90\nICC half-width (realistic launch-LCB 510.63 TPS; the optimistic iid\n+-10.91 cell-LCB 514.88 is the visible fallback) AND\nclears the #191 private axis. sigma_hw RETIRED on a separate hardware axis by best-of-2 official\ndraws (P=0.9829>=0.90).\n\n**Measured-tuple GO table:**\n| topology | official (tau=1.0) | proj_private | LCB(P>=0.9) | P(clear-500) | verdict |\n|---|---|---|---|---|---|\n| both_bugs | 535.44 | 528.89 | 514.88 | 0.9959 | GO |\n| descent_only | 519.96 | 513.89 | 499.97 | 0.8994 | NO-GO |\n\n**Launch-CI ledger -- numerical axes (binding_bar = max; #190/#191/#188/#187/#194/#195 ALL CONSUMED; iid #175 leg visible; ledger CLOSED):**\n| axis | PR | status | flag | bar/value |\n|---|---|---|---|---|\n| sampling_iid | #175 | LANDED | iid-fallback-visible | 10.9062 |\n| sampling_icc | #190 | LANDED | consumed | 0.9513 |\n| input_lambda_built | #187 | LANDED | consumed | 0.0171 |\n| hardware_oneshot | #188 | LANDED | consumed | 4.8645 |\n| private_bar | #191 | LANDED | consumed | 0.9780 |\n| redraw_budget | #194 | LANDED | consumed | 5.0000 |\n| cross_axis_covariance | #195 | LANDED | consumed | pending |\n\n**Launch-CI ledger -- hard precondition rows (any non-GO blocks the launch):**\n| precondition | status | flag |\n|---|---|---|\n| boot_fix_kanna_177 | GO | landed |\n| precache_bench | PENDING | serve-config |\n| executable_submission_gate_ubel_189 | GO | consumed |\n| build_lambda_geq_binding_bar | GO | measured |\n| human_approval | PENDING | human-gate |\n\n**Combined single-shot sigma corner (#195, de-dup):** the 4-axis quadrature is INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined sigma **7.26 central / 17.04 worst-case** (NOT quadrature 12.54). Launch-LCB 519.58 central / 507.05 worst-case -- BOTH >=500, so the both-bugs GO is robust on the sigma-axis (worst-case is the conservative corner until land #71 co-logs per-allocation acceptance).\n\n**Multi-shot budget (#200, cost-aware -- prices the spend, single-shot GO/NO-GO UNCHANGED):** {stay-at-bar mu=500 -> N_max=5, pay **E[shots]=1.94 sequential** (early-stop, ~half clear on shot 1) -- NOT fixed-5} **vs** {build-higher mu>=512.2 -> N=1}. Pick the cheaper once land #71's build->mu cost (b) is banked: build-higher wins iff reaching mu>=512.2 costs < 4 official shots' GPU-$ (crossover c*=3.04*b fixed-N; early-stop raises it to c*=12.97*b). N at a fixed mu is cost-invariant (= #194).\n\n**Submission command (named hard deps -- the human runs this AFTER approval):**\n```\nPRECACHE_BENCH=1 <serve-harness with land #71 both_bugs kernel + kanna darwin _IncludedRouter boot-fix>\n```\n  - PRECACHE_BENCH=1 set on the served path.\n  - kanna's darwin _IncludedRouter boot-validation startup-500 fix folded into the serve harness.\n\n**Dependency ledger (all required-GREEN before approval):**\n  - [BANKED] Numerator E[T] (#160/#165/#172): descent 5.0564 / both 5.2070.\n  - [BANKED] Denominator step (#168): shipped 1.2182.\n  - [BANKED] Hardware sigma_hw (#159): 4.86 TPS; best-of-2 P=0.9829.\n  - [BANKED] Validity (#166/#124): PPL 2.390<=2.42; 128/128; greedy-exact=True.\n  - [BANKED] Private drop (#164): tau-low 0.9924.\n  - [BANKED] denken #183 margin-aware lambda-card (PUBLIC iid leg): 0.9052 (tau=1) / 0.9234 (tau=0.9924).\n  - [LANDED-CONSUMED] launch-CI axes #190 (ICC bar 0.9513, realistic +-22.90) / #187 (lambda-built-CI) / #188 (sigma-oneshot) / #191 (private bar 0.9780, BINDING). binding_bar 0.9780.\n  - [LANDED-CONSUMED] kanna #194 re-draw budget N* (informational; sizes the launch, not the bar).\n  - [LANDED-CONSUMED] kanna #200 cost-aware budget: sequential E[shots]=1.94 at the bar (not fixed-5) + build-higher-vs-stay toggle (c*=3.04*b fixed / 12.97*b sequential). Annotation only; single-shot GO/NO-GO unchanged.\n  - [LANDED-CONSUMED] ubel #189 executable-submission-gate: faithful build -> GO; re-verify vs land #71 at launch.\n  - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined sigma 7.26 central / 17.04 worst-case (conservative corner); ledger CLOSED.\n  - [PENDING-BUILD] land #71 measured tuple (THIS tuple).\n\n**Launch gates (ALL required):** (1) land #71 builds the both_bugs kernel; (2) darwin _IncludedRouter\nboot-fix folded; (3) PRECACHE_BENCH=1; (4) a human-approved `Approval request: HF job` issue.\n",
   "nogo_restoration": null,
   "human_deferral": "This block is PRODUCED, not FILED. A human must approve the filed `Approval request: HF job` issue before any spend."
  },
- "handoff_line": "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified GO/NO-GO + filled (un-filed) Approval request. Self-test PASSES. RECOMPOSED post-merge (advisor 17:27Z + 17:52Z): the TYPED launch-CI ledger now reads REAL banked scalars -- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget AND #195 cross-axis covariance have ALL LANDED (flag=consumed); the ledger is CLOSED (no pending axes). binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780) = 0.9780 (private DOMINATES, both-bugs); descent private bar is UNREACHABLE. #195 proved the 4-axis quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined single-shot sigma 7.26 central / 17.04 worst-case (the conservative GO/NO-GO corner), NOT quadrature 12.54. land #71 must show lambda_hat_built >= 0.9780 AND the #179 launch-projection cell-LCB(P>=0.9) >= 500 under the REALISTIC #190 +-22.90 ICC half-width (NOT iid +-10.91) AND on the #191 private axis AND the combined-sigma worst-case corner. launch_authorized = (analytic-GO AND all precondition rows GO); preconditions (PRECACHE_BENCH, ubel #189 packaging-gate=GO but re-verify-pending, human approval) PENDING -> launch_authorized=False (authorizes nothing). both-bugs SURVIVES at lambda=1: realistic launch-LCB 510.63>=500 + private valid + de-dup sigma corner (LCB 519.58 central / 507.05 worst-case both >=500) -> robust GO. descent is DOUBLY-HARDENED NO-GO: private build bar UNREACHABLE AND misses realistic 495.04 + private 490.16 launch LCBs. both_bugs_go_at_lambda_star=True. Human approval still required before any HF spend.",
- "elapsed_sec": 5.056254863739014,
- "peak_mem_mib": 68.83203125
+ "handoff_line": "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified GO/NO-GO + filled (un-filed) Approval request. Self-test PASSES. RECOMPOSED post-merge (advisor 17:27Z + 17:52Z + 18:03Z): the TYPED launch-CI ledger now reads REAL banked scalars -- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget AND #195 cross-axis covariance have ALL LANDED (flag=consumed); the ledger is CLOSED (no pending axes). binding_bar = max(public#183 0.9052, ICC#190 0.9513, private#191 0.9780) = 0.9780 (private DOMINATES, both-bugs); descent private bar is UNREACHABLE. #195 proved the 4-axis quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined single-shot sigma 7.26 central / 17.04 worst-case (the conservative GO/NO-GO corner), NOT quadrature 12.54. land #71 must show lambda_hat_built >= 0.9780 AND the #179 launch-projection cell-LCB(P>=0.9) >= 500 under the REALISTIC #190 +-22.90 ICC half-width (NOT iid +-10.91) AND on the #191 private axis AND the combined-sigma worst-case corner. launch_authorized = (analytic-GO AND all precondition rows GO); preconditions (PRECACHE_BENCH, ubel #189 packaging-gate=GO but re-verify-pending, human approval) PENDING -> launch_authorized=False (authorizes nothing). both-bugs SURVIVES at lambda=1: realistic launch-LCB 510.63>=500 + private valid + de-dup sigma corner (LCB 519.58 central / 507.05 worst-case both >=500) -> robust GO. descent is DOUBLY-HARDENED NO-GO: private build bar UNREACHABLE AND misses realistic 495.04 + private 490.16 launch LCBs. #200 cost annotation (budget row ONLY, single-shot logic UNCHANGED): realistic spend at the bar is SEQUENTIAL E[shots]=1.94 (not fixed-5); build-higher (mu>=512.2/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b fixed / 12.97*b sequential). both_bugs_go_at_lambda_star=True. Human approval still required before any HF spend.",
+ "elapsed_sec": 5.022627830505371,
+ "peak_mem_mib": 69.25
 }

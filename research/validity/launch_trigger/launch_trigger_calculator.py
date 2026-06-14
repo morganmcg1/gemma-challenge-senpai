@@ -117,6 +117,12 @@ DEP_FLAGS = {
     "redraw_budget_kanna_194": "LANDED -- CONSUMED (informational). best-of-N official re-draw "
         "budget N* for P(clear-500)>=0.95; sizes the launch, NOT a binding_bar axis. (Landed at "
         "advisor branch 96e9b25, after the 17:27Z comment named it WIP.)",
+    "cost_budget_kanna_200": "LANDED -- CONSUMED (annotation only; advisor 18:03Z). Cost-aware layer "
+        "on #194's cost-invariant N*(mu): the REALISTIC spend at the bar is SEQUENTIAL early-stop "
+        "E[shots]=1.94 (NOT fixed-5; ~half clear on shot 1). build-higher (mu>=512.2/N=1) beats "
+        "stay-at-bar iff reaching mu costs < 4 official shots' GPU-$ (crossover c*=3.04*b fixed-N; "
+        "early-stop raises it to c*=12.97*b). Prices the budget ROW the human reads; does NOT touch "
+        "the binding bar or the single-shot sigma -- single-shot GO/NO-GO is UNCHANGED.",
     "cross_axis_covariance_ubel_195": "LANDED -- CONSUMED (advisor 17:52Z). The 4-axis quadrature is "
         "INVALID: rho(sampling#175, input-lambda#187) = +0.945 -> a DOUBLE-COUNT (overlap=rho^2=0.893; "
         "OUTPUT accept-length scatter and INPUT lambda_hat CI are two views of the SAME accept draw). "
@@ -269,6 +275,10 @@ _AXIS_PATHS = {
     # ubel #195 cross-axis CI covariance -- MERGED this turn (advisor 17:52Z): the 4-axis quadrature
     # is INVALID (rho(sampling,input)=0.945 double-count); consume the de-dup'd combined sigma.
     "covariance_195": "research/validity/ci_axis_covariance/ci_axis_covariance_results.json",
+    # kanna #200 cost-aware re-draw budget -- MERGED (advisor 18:03Z): sequential early-stop spend
+    # (E[shots]=1.94 at the bar, NOT fixed-5) + the build-higher-vs-stay cost toggle. Annotates the
+    # budget row ONLY; the binding bar and single-shot sigma are UNCHANGED.
+    "cost_budget_200": "research/validity/cost_budget/cost_budget_results.json",
 }
 
 
@@ -285,6 +295,7 @@ class _BankedAxes:
         self.redraw = _load_axis_json(_AXIS_PATHS["redraw_194"])
         self.packaging = _load_axis_json(_AXIS_PATHS["packaging_189"])
         self.covariance = _load_axis_json(_AXIS_PATHS["covariance_195"])
+        self.cost_budget = _load_axis_json(_AXIS_PATHS["cost_budget_200"])
 
     # ---- wirbel #190 realistic within-prompt ICC / N_eff ---- #
     def icc_landed(self) -> bool:
@@ -430,6 +441,46 @@ class _BankedAxes:
             return None
         return float(central - self.combined_z_p90() * sig)
 
+    # ---- kanna #200 cost-aware re-draw budget (MERGED 18:03Z: sequential spend + cost toggle) ---- #
+    # ANNOTATION ONLY: does NOT touch the binding bar or the single-shot sigma; it prices the budget
+    # row the human reads (build-higher-vs-stay-at-bar), reusing #194's N*(mu) cost-invariant frontier.
+    def cost_budget_landed(self) -> bool:
+        return self.cost_budget is not None
+
+    def expected_shots_sequential_at_bar(self) -> float | None:
+        v = _dig(self.cost_budget, "expected_shots_sequential_at_bar")
+        return float(v) if v is not None else None
+
+    def cost_optimal_n_at_bar(self):
+        return _dig(self.cost_budget, "cost_optimal_n_at_bar")
+
+    def p_single_clear_at_bar(self) -> float | None:
+        v = _dig(self.cost_budget, "sequential_savings", "p_single_at_bar")
+        return float(v) if v is not None else None
+
+    def saved_shots_at_bar(self) -> float | None:
+        v = _dig(self.cost_budget, "sequential_savings", "saved_shots_at_bar")
+        return float(v) if v is not None else None
+
+    def cost_crossover_fixedn_per_b(self) -> float | None:
+        v = _dig(self.cost_budget, "cost_optimal", "c_star_slope_per_b_fixedN")
+        return float(v) if v is not None else None
+
+    def cost_crossover_sequential_per_b(self) -> float | None:
+        v = _dig(self.cost_budget, "cost_optimal", "c_star_slope_per_b_sequential")
+        return float(v) if v is not None else None
+
+    def cost_crossover_total_shots(self) -> float | None:
+        v = _dig(self.cost_budget, "cost_optimal", "crossover_total_shots")
+        return float(v) if v is not None else None
+
+    def cost_delta_mu_n1(self) -> float | None:
+        v = _dig(self.cost_budget, "cost_optimal", "delta_mu_tps")
+        return float(v) if v is not None else None
+
+    def cost_per_mu_sequential_frontier(self):
+        return _dig(self.cost_budget, "sequential_savings", "per_mu_sequential", default=[])
+
     # ---- ubel #189 executable submission gate (packaging precondition) ---- #
     def packaging_landed(self) -> bool:
         return self.packaging is not None
@@ -538,18 +589,42 @@ def numerical_ci_ledger(topo: str, tau: float = TAU_HEADLINE) -> list[dict]:
                  "UNREACHABLE (both_bugs_required_at_private_bar=True).") if p191 else "public-fallback.",
     })
     # Axis 5 -- kanna #194 official re-draw budget N* (MERGED, CONSUMED): informational best-of-N
-    #           shot budget; does NOT enter binding_bar (it sizes the launch, not the bar).
+    #           shot budget; does NOT enter binding_bar (it sizes the launch, not the bar). kanna
+    #           #200 (MERGED 18:03Z) ANNOTATES it with the SEQUENTIAL early-stop spend + the
+    #           build-higher-vs-stay cost toggle -- still NOT a binding axis (cost-invariant N*).
     r194 = _BANKED.redraw_landed()
+    cba = cost_budget_annotation()
+    c200 = bool(cba.get("landed"))
     rows.append({
         "axis": "redraw_budget", "pr": 194, "slug": "redraw-budget", "kind": "numerical-budget",
         "status": "LANDED" if r194 else "IN-FLIGHT",
         "flag": "consumed" if r194 else "single-shot-fallback",
         "n_shots_for_p95_at_bar": _BANKED.n_shots_at_bar() if r194 else None,
         "n_shots_for_p95_at_lambda1": _BANKED.n_shots_at_lambda1() if r194 else None,
-        "note": "best-of-N official re-draw budget for P(clear-500)>=0.95: N*=%s at the build bar, "
-                "%s at full recovery lambda=1. Sizes the launch budget; not a binding_bar axis. "
-                "(landed at advisor branch 96e9b25, after the 17:27Z comment named it WIP)." % (
-                    _BANKED.n_shots_at_bar(), _BANKED.n_shots_at_lambda1()) if r194
+        # kanna #200 cost annotation (sequential spend + cost toggle; cost-invariant N*).
+        "cost_budget_200_landed": c200,
+        "expected_shots_sequential_at_bar": (cba["stay_at_bar"]["expected_shots_sequential"]
+                                             if c200 else None),
+        "fixed_n_naive_at_bar": (cba["stay_at_bar"]["fixed_n_naive"] if c200 else None),
+        "build_higher_mu_safe_n1_tps": (cba["build_higher"]["mu_safe_n1_tps"] if c200 else None),
+        "build_vs_stay_crossover_total_shots": (cba["crossover_total_shots"] if c200 else None),
+        "c_star_fixedN_per_b": (cba["c_star_fixedN_per_b"] if c200 else None),
+        "c_star_sequential_per_b": (cba["c_star_sequential_per_b"] if c200 else None),
+        "note": ("best-of-N official re-draw budget for P(clear-500)>=0.95: N*=%s at the build bar, "
+                 "%s at full recovery lambda=1. kanna #200: the REALISTIC spend at the bar is the "
+                 "SEQUENTIAL early-stop E[shots]=%.2f (NOT fixed-%s); build-higher (mu>=%.1f/N=1) beats "
+                 "stay-at-bar iff reaching mu costs < %.0f shots' GPU-$ (c*=%.2f*b fixed / %.2f*b "
+                 "sequential). Sizes/prices the launch budget; NOT a binding_bar axis (N* is "
+                 "cost-invariant)." % (
+                     _BANKED.n_shots_at_bar(), _BANKED.n_shots_at_lambda1(),
+                     cba["stay_at_bar"]["expected_shots_sequential"],
+                     cba["stay_at_bar"]["fixed_n_naive"], cba["build_higher"]["mu_safe_n1_tps"],
+                     cba["crossover_total_shots"], cba["c_star_fixedN_per_b"],
+                     cba["c_star_sequential_per_b"])) if (r194 and c200)
+                else ("best-of-N official re-draw budget for P(clear-500)>=0.95: N*=%s at the build "
+                      "bar, %s at full recovery lambda=1. Sizes the launch budget; not a binding_bar "
+                      "axis. (kanna #200 cost annotation not landed.)" % (
+                          _BANKED.n_shots_at_bar(), _BANKED.n_shots_at_lambda1())) if r194
                 else "single-shot fallback (N=1).",
     })
     # Axis 6 -- ubel #195 cross-axis CI covariance (MERGED 17:52Z, CONSUMED): the quadrature is
@@ -687,6 +762,64 @@ def combined_sigma_corner() -> dict:
                 "rho(*,hw))." % (
                     lcb_dedup if lcb_dedup is not None else float("nan"),
                     lcb_worst if lcb_worst is not None else float("nan")),
+    }
+
+
+def cost_budget_annotation() -> dict:
+    """kanna #200 (MERGED 18:03Z): the cost-aware re-draw budget. ANNOTATION ONLY -- it does NOT
+    touch the binding bar or the single-shot sigma; the single-shot GO/NO-GO is UNCHANGED. It
+    prices the multi-shot budget ROW the human reads, on top of #194's cost-invariant N*(mu)
+    frontier (N=5@500, N=1@mu>=512.2):
+      (1) the REALISTIC spend at the bar is SEQUENTIAL early-stop = E[shots]=1.94 (NOT fixed-5),
+          because ~half the draws clear on shot 1 (p_single=0.5);
+      (2) a build-higher-vs-stay-at-bar TOGGLE: build to mu=512.2 / N=1 iff reaching mu=512.2 costs
+          < 4 official shots' GPU-$ (fixed-N crossover c* = 3.04*b; sequential early-stop RAISES it
+          to c* = 12.97*b -- early-stop substantially weakens the case for building higher);
+      (3) N at a fixed mu is cost-INVARIANT (= #194), so single-shot logic is untouched."""
+    if not _BANKED.cost_budget_landed():
+        return {"landed": False, "note": "cost_budget #200 not landed -> budget row reports the "
+                                         "naive fixed-N=5 spend (conservative; over-states the bill)."}
+    e_seq = _BANKED.expected_shots_sequential_at_bar()
+    n_bar = _BANKED.cost_optimal_n_at_bar()
+    dmu = _BANKED.cost_delta_mu_n1()
+    return {
+        "landed": True,
+        "single_shot_go_unchanged": True,            # advisor 18:03Z: annotation only.
+        "stay_at_bar": {                             # build mu=500, best-of-N
+            "mu_tps": float(TARGET_OFFICIAL),
+            "n_max": n_bar,                          # = #194 N*(500) = 5
+            "expected_shots_sequential": _finite(e_seq) if e_seq is not None else None,  # 1.94
+            "fixed_n_naive": n_bar,                  # the naive (over-stated) fixed-5
+            "p_single_clear": _finite(_BANKED.p_single_clear_at_bar())
+                              if _BANKED.p_single_clear_at_bar() is not None else None,   # 0.5
+            "saved_shots_vs_fixed": _finite(_BANKED.saved_shots_at_bar())
+                                    if _BANKED.saved_shots_at_bar() is not None else None,  # 3.06
+        },
+        "build_higher": {                            # build mu>=512.2, N=1
+            "mu_safe_n1_tps": float(TARGET_OFFICIAL + (dmu or 0.0)),  # 512.16
+            "delta_mu_tps": _finite(dmu) if dmu is not None else None,  # 12.16
+            "n_max": 1,
+            "expected_shots_sequential": 1.0,
+        },
+        # the toggle: build-higher beats stay-at-bar once the per-shot $ exceeds these *b multiples.
+        "crossover_total_shots": _finite(_BANKED.cost_crossover_total_shots())
+                                 if _BANKED.cost_crossover_total_shots() is not None else None,  # 4.0
+        "c_star_fixedN_per_b": _finite(_BANKED.cost_crossover_fixedn_per_b())
+                               if _BANKED.cost_crossover_fixedn_per_b() is not None else None,  # 3.04
+        "c_star_sequential_per_b": _finite(_BANKED.cost_crossover_sequential_per_b())
+                                   if _BANKED.cost_crossover_sequential_per_b() is not None else None,  # 12.97
+        "n_star_cost_invariant_194": True,           # N at fixed mu = #194 (cost-invariant).
+        "per_mu_sequential_frontier": _BANKED.cost_per_mu_sequential_frontier(),
+        "note": "budget row = {stay-at-bar mu=500 -> N_max=%s, pay E[shots]=%.2f sequential} vs "
+                "{build-higher mu>=%.1f -> N=1}; pick the cheaper once land #71's build->mu cost (b) "
+                "is banked. Build-higher wins iff reaching mu=%.1f costs < %.0f official shots' GPU-$ "
+                "(fixed-N c*=%.2f*b; early-stop raises it to c*=%.2f*b). PRICES a plan; takes NO "
+                "draws; authorizes nothing." % (
+                    n_bar, e_seq if e_seq is not None else float("nan"),
+                    TARGET_OFFICIAL + (dmu or 0.0), TARGET_OFFICIAL + (dmu or 0.0),
+                    _BANKED.cost_crossover_total_shots() or float("nan"),
+                    _BANKED.cost_crossover_fixedn_per_b() or float("nan"),
+                    _BANKED.cost_crossover_sequential_per_b() or float("nan")),
     }
 
 
@@ -1121,6 +1254,9 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
     any_iid_fallback = binding_on_iid_fallback                       # binding bar no longer iid -> False
     # combined single-shot sigma corner (#195 de-dup): the conservative GO/NO-GO sigma reconciliation.
     csc_ledger = combined_sigma_corner()
+    # cost-aware re-draw budget (#200): sequential early-stop spend + build-higher-vs-stay toggle.
+    # ANNOTATION ONLY -- single-shot GO/NO-GO + binding bar + sigma are unchanged.
+    cba_ledger = cost_budget_annotation()
 
     out = {
         "verdict": verdict,
@@ -1155,11 +1291,16 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
                         "4-axis quadrature was INVALID (rho(sampling,input)=0.945 double-count) -> "
                         "de-dup'd combined single-shot sigma 7.26 central / 17.04 worst-case (the "
                         "conservative corner), NOT quadrature 12.54. iid #175 leg kept as a visible "
-                        "fallback row only. NO pending numerical axes (ledger CLOSED)."
+                        "fallback row only. NO pending numerical axes (ledger CLOSED). #200 cost "
+                        "annotation (budget row only, single-shot logic UNCHANGED): realistic spend "
+                        "at the bar is SEQUENTIAL E[shots]=1.94 (not fixed-5); build-higher (mu>=512.2"
+                        "/N=1) beats stay-at-bar iff reaching mu costs < 4 shots' GPU-$ (c*=3.04*b "
+                        "fixed / 12.97*b sequential)."
                         % _BANKED.design_effect(),
             "numerical_axes": {"both_bugs": bb_ledger,
                                "descent_only": numerical_ci_ledger("descent_only", TAU_HEADLINE)},
             "combined_sigma_corner": csc_ledger,
+            "cost_budget_annotation": cba_ledger,
             "preconditions": preconds,
             "preconditions_all_go": preconds_all_go,
             "any_iid_fallback_active": any_iid_fallback,
@@ -1256,6 +1397,36 @@ def render_approval_block(out: dict, per_topo: dict) -> str:
     for r in led["preconditions"]:
         pre_md.append("| %s | %s | %s |" % (r["row"], r["status"], r["flag"]))
     pre_table = "\n".join(pre_md)
+    # combined-sigma worst-case corner (#195) + cost-aware budget (#200) annotation lines.
+    csc = led.get("combined_sigma_corner") or {}
+    cba = led.get("cost_budget_annotation") or {}
+    if csc.get("landed"):
+        sigma_line = (
+            "**Combined single-shot sigma corner (#195, de-dup):** the 4-axis quadrature is INVALID "
+            "(rho(sampling,input)=%.3f double-count) -> de-dup'd combined sigma **%.2f central / %.2f "
+            "worst-case** (NOT quadrature %.2f). Launch-LCB %.2f central / %.2f worst-case -- BOTH "
+            ">=500, so the both-bugs GO is robust on the sigma-axis (worst-case is the conservative "
+            "corner until land #71 co-logs per-allocation acceptance)." % (
+                csc["rho_sampling_input"], csc["sigma_dedup_central_tps"], csc["sigma_worstcase_tps"],
+                csc["sigma_quadrature_invalid_tps"], csc["launch_lcb_dedup_central_tps"],
+                csc["launch_lcb_worstcase_tps"]))
+    else:
+        sigma_line = "**Combined single-shot sigma corner (#195):** not landed -> quadrature fallback."
+    if cba.get("landed"):
+        budget_line = (
+            "**Multi-shot budget (#200, cost-aware -- prices the spend, single-shot GO/NO-GO "
+            "UNCHANGED):** {stay-at-bar mu=%.0f -> N_max=%s, pay **E[shots]=%.2f sequential** "
+            "(early-stop, ~half clear on shot 1) -- NOT fixed-%s} **vs** {build-higher mu>=%.1f -> "
+            "N=1}. Pick the cheaper once land #71's build->mu cost (b) is banked: build-higher wins "
+            "iff reaching mu>=%.1f costs < %.0f official shots' GPU-$ (crossover c*=%.2f*b fixed-N; "
+            "early-stop raises it to c*=%.2f*b). N at a fixed mu is cost-invariant (= #194)." % (
+                cba["stay_at_bar"]["mu_tps"], cba["stay_at_bar"]["n_max"],
+                cba["stay_at_bar"]["expected_shots_sequential"], cba["stay_at_bar"]["fixed_n_naive"],
+                cba["build_higher"]["mu_safe_n1_tps"], cba["build_higher"]["mu_safe_n1_tps"],
+                cba["crossover_total_shots"], cba["c_star_fixedN_per_b"],
+                cba["c_star_sequential_per_b"]))
+    else:
+        budget_line = "**Multi-shot budget (#200):** not landed -> naive fixed-N=5 spend (over-stated)."
     la = out["launch_authorized"]
     return f"""### Approval request: HF job for {name}
 
@@ -1286,6 +1457,10 @@ draws (P={out['hardware_axis_sigma_hw']['best_of_2_p']:.4f}>=0.90).
 **Launch-CI ledger -- hard precondition rows (any non-GO blocks the launch):**
 {pre_table}
 
+{sigma_line}
+
+{budget_line}
+
 **Submission command (named hard deps -- the human runs this AFTER approval):**
 ```
 PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _IncludedRouter boot-fix>
@@ -1302,6 +1477,7 @@ PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _Include
   - [BANKED] denken #183 margin-aware lambda-card (PUBLIC iid leg): {binding['public_183']:.4f} (tau=1) / {lg['lambda_star_lcb_183_conservative']:.4f} (tau=0.9924).
   - [LANDED-CONSUMED] launch-CI axes #190 (ICC bar {binding['icc_190']:.4f}, realistic +-{lg['halfwidth_realistic_tps']:.2f}) / #187 (lambda-built-CI) / #188 (sigma-oneshot) / #191 (private bar {binding['private_191']:.4f}, BINDING). binding_bar {binding['binding_bar']:.4f}.
   - [LANDED-CONSUMED] kanna #194 re-draw budget N* (informational; sizes the launch, not the bar).
+  - [LANDED-CONSUMED] kanna #200 cost-aware budget: sequential E[shots]=1.94 at the bar (not fixed-5) + build-higher-vs-stay toggle (c*=3.04*b fixed / 12.97*b sequential). Annotation only; single-shot GO/NO-GO unchanged.
   - [LANDED-CONSUMED] ubel #189 executable-submission-gate: faithful build -> GO; re-verify vs land #71 at launch.
   - [LANDED-CONSUMED] ubel #195 cross-axis CI covariance -- quadrature INVALID (rho(sampling,input)=0.945 double-count) -> de-dup'd combined sigma 7.26 central / 17.04 worst-case (conservative corner); ledger CLOSED.
   - [PENDING-BUILD] land #71 measured tuple (THIS tuple).
@@ -1584,6 +1760,45 @@ def self_test() -> dict:
         "worstcase_corner_clears_500": csc["worstcase_corner_clears_500"],
         "both_bugs_worstcase_folded_into_go": bool(bb_full_g["combined_sigma_worstcase_clears_500"])}
 
+    # (j) cost-aware re-draw budget ANNOTATION (advisor 18:03Z, kanna #200): the budget ROW the human
+    #     reads is priced -- the REALISTIC spend at the bar is SEQUENTIAL early-stop E[shots]=1.9375
+    #     (NOT fixed-5; ~half clear on shot 1, p_single=0.5), and a build-higher-vs-stay TOGGLE
+    #     (build mu>=512.16/N=1 iff reaching it costs < 4 official shots' GPU-$; crossover c*=3.04*b
+    #     fixed-N, 12.97*b sequential early-stop). N at a fixed mu is cost-INVARIANT (= #194), so the
+    #     SINGLE-SHOT GO/NO-GO is UNCHANGED: both-bugs GO, descent NO-GO, overall GO -- exactly as
+    #     before #200 (annotation only, no bar/sigma change).
+    cba = d_full["launch_ci_ledger"]["cost_budget_annotation"]
+    redraw_row = next(r for r in d_full["launch_ci_ledger"]["numerical_axes"]["both_bugs"]
+                      if r["axis"] == "redraw_budget")
+    j_ok = (bool(cba["landed"]) and cba["single_shot_go_unchanged"] is True
+            and abs(cba["stay_at_bar"]["expected_shots_sequential"] - 1.9375) <= 5e-3
+            and cba["stay_at_bar"]["n_max"] == 5
+            and cba["stay_at_bar"]["fixed_n_naive"] == 5
+            and abs(cba["stay_at_bar"]["p_single_clear"] - 0.5) <= 5e-3
+            and abs(cba["build_higher"]["mu_safe_n1_tps"] - 512.157071171610028) <= 5e-2
+            and cba["build_higher"]["n_max"] == 1
+            and abs(cba["crossover_total_shots"] - 4.0) <= 1e-6
+            and abs(cba["c_star_fixedN_per_b"] - 3.039267792902507) <= 5e-3
+            and abs(cba["c_star_sequential_per_b"] - 12.967542583050696) <= 5e-3
+            and cba["n_star_cost_invariant_194"] is True
+            and bool(redraw_row["cost_budget_200_landed"])
+            and abs(redraw_row["expected_shots_sequential_at_bar"] - 1.9375) <= 5e-3
+            # single-shot verdict UNCHANGED by the annotation:
+            and d_full["per_topology"]["both_bugs"]["verdict"] == "GO"
+            and d_full["per_topology"]["descent_only"]["verdict"] == "NO-GO"
+            and d_full["verdict"] == "GO")
+    results["j_cost_budget_annotation_200"] = {
+        "pass": bool(j_ok),
+        "expected_shots_sequential_at_bar": cba["stay_at_bar"]["expected_shots_sequential"],
+        "fixed_n_naive_at_bar": cba["stay_at_bar"]["fixed_n_naive"],
+        "p_single_clear_at_bar": cba["stay_at_bar"]["p_single_clear"],
+        "build_higher_mu_safe_n1_tps": cba["build_higher"]["mu_safe_n1_tps"],
+        "crossover_total_shots": cba["crossover_total_shots"],
+        "c_star_fixedN_per_b": cba["c_star_fixedN_per_b"],
+        "c_star_sequential_per_b": cba["c_star_sequential_per_b"],
+        "single_shot_go_unchanged": cba["single_shot_go_unchanged"],
+        "verdict_unchanged_go": d_full["verdict"] == "GO"}
+
     passes = bool(all(v["pass"] for v in results.values()))
     test_metric = bool(d_full["both_bugs_go_at_lambda_star"])
     return {
@@ -1624,7 +1839,13 @@ def _maybe_log_wandb(args, payload: dict) -> None:
                              "combined_sigma_worstcase_tps": _BANKED.combined_sigma("worstcase"),
                              "combined_sigma_quadrature_valid": _BANKED.quadrature_valid(),
                              "rho_sampling_input_195": _BANKED.rho_sampling_input(),
-                             "acceptance_dedup_block_tps_195": _BANKED.dedup_acceptance_block()})
+                             "acceptance_dedup_block_tps_195": _BANKED.dedup_acceptance_block(),
+                             # kanna #200 cost-aware budget annotation (single-shot logic unchanged).
+                             "expected_shots_sequential_at_bar_200": _BANKED.expected_shots_sequential_at_bar(),
+                             "cost_optimal_n_at_bar_200": _BANKED.cost_optimal_n_at_bar(),
+                             "build_vs_stay_crossover_total_shots_200": _BANKED.cost_crossover_total_shots(),
+                             "c_star_fixedN_per_b_200": _BANKED.cost_crossover_fixedn_per_b(),
+                             "c_star_sequential_per_b_200": _BANKED.cost_crossover_sequential_per_b()})
     st = payload["self_test"]
     flat = {
         "launch_trigger_calculator_self_test_passes": st["launch_trigger_calculator_self_test_passes"],
@@ -1656,6 +1877,16 @@ def _maybe_log_wandb(args, payload: dict) -> None:
         flat["worked_example/launch_lcb_worstcase_tps"] = csc["launch_lcb_worstcase_tps"]
         flat["worked_example/worstcase_corner_clears_500"] = bool(csc["worstcase_corner_clears_500"])
         flat["worked_example/dedup_central_clears_500"] = bool(csc["dedup_central_clears_500"])
+    # cost-aware re-draw budget annotation (#200): sequential spend + build-vs-stay cost toggle.
+    cba = led["cost_budget_annotation"]
+    if cba.get("landed"):
+        flat["worked_example/cost_expected_shots_sequential_at_bar"] = cba["stay_at_bar"]["expected_shots_sequential"]
+        flat["worked_example/cost_fixed_n_naive_at_bar"] = cba["stay_at_bar"]["fixed_n_naive"]
+        flat["worked_example/cost_build_higher_mu_safe_n1_tps"] = cba["build_higher"]["mu_safe_n1_tps"]
+        flat["worked_example/cost_crossover_total_shots"] = cba["crossover_total_shots"]
+        flat["worked_example/cost_c_star_fixedN_per_b"] = cba["c_star_fixedN_per_b"]
+        flat["worked_example/cost_c_star_sequential_per_b"] = cba["c_star_sequential_per_b"]
+        flat["worked_example/cost_single_shot_go_unchanged"] = bool(cba["single_shot_go_unchanged"])
     for topo in ("both_bugs", "descent_only"):
         c = wp["per_topology"][topo]
         lgc = wp["_full_per_topology"][topo]["lambda_gate"]
@@ -1698,31 +1929,38 @@ def run(args) -> dict:
                              step_override=_M.shipped_step)
     bb_bind = binding_bar("both_bugs", TAU_HEADLINE)
     csc = combined_sigma_corner()
+    cba = cost_budget_annotation()
     handoff = (
         "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified "
         "GO/NO-GO + filled (un-filed) Approval request. Self-test %s. RECOMPOSED post-merge "
-        "(advisor 17:27Z + 17:52Z): the TYPED launch-CI ledger now reads REAL banked scalars -- #190 "
-        "ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget AND #195 cross-"
-        "axis covariance have ALL LANDED (flag=consumed); the ledger is CLOSED (no pending axes). "
-        "binding_bar = max(public#183 %.4f, ICC#190 %.4f, private#191 %.4f) = %.4f (private DOMINATES, "
-        "both-bugs); descent private bar is UNREACHABLE. #195 proved the 4-axis quadrature INVALID "
-        "(rho(sampling,input)=%.3f double-count) -> de-dup'd combined single-shot sigma %.2f central / "
-        "%.2f worst-case (the conservative GO/NO-GO corner), NOT quadrature %.2f. land #71 must show "
-        "lambda_hat_built >= %.4f AND the #179 launch-projection cell-LCB(P>=0.9) >= 500 under the "
-        "REALISTIC #190 +-%.2f ICC half-width (NOT iid +-%.2f) AND on the #191 private axis AND the "
-        "combined-sigma worst-case corner. launch_authorized = (analytic-GO AND all precondition rows "
-        "GO); preconditions (PRECACHE_BENCH, ubel #189 packaging-gate=GO but re-verify-pending, human "
-        "approval) PENDING -> launch_authorized=False (authorizes nothing). both-bugs SURVIVES at "
-        "lambda=1: realistic launch-LCB 510.63>=500 + private valid + de-dup sigma corner (LCB %.2f "
-        "central / %.2f worst-case both >=500) -> robust GO. descent is DOUBLY-HARDENED NO-GO: private "
-        "build bar UNREACHABLE AND misses realistic 495.04 + private 490.16 launch LCBs. "
-        "both_bugs_go_at_lambda_star=%s. Human approval still required before any HF spend." % (
+        "(advisor 17:27Z + 17:52Z + 18:03Z): the TYPED launch-CI ledger now reads REAL banked scalars "
+        "-- #190 ICC, #191 private, #188 sigma-oneshot, #187 input-side, #194 re-draw budget AND #195 "
+        "cross-axis covariance have ALL LANDED (flag=consumed); the ledger is CLOSED (no pending "
+        "axes). binding_bar = max(public#183 %.4f, ICC#190 %.4f, private#191 %.4f) = %.4f (private "
+        "DOMINATES, both-bugs); descent private bar is UNREACHABLE. #195 proved the 4-axis quadrature "
+        "INVALID (rho(sampling,input)=%.3f double-count) -> de-dup'd combined single-shot sigma %.2f "
+        "central / %.2f worst-case (the conservative GO/NO-GO corner), NOT quadrature %.2f. land #71 "
+        "must show lambda_hat_built >= %.4f AND the #179 launch-projection cell-LCB(P>=0.9) >= 500 "
+        "under the REALISTIC #190 +-%.2f ICC half-width (NOT iid +-%.2f) AND on the #191 private axis "
+        "AND the combined-sigma worst-case corner. launch_authorized = (analytic-GO AND all "
+        "precondition rows GO); preconditions (PRECACHE_BENCH, ubel #189 packaging-gate=GO but "
+        "re-verify-pending, human approval) PENDING -> launch_authorized=False (authorizes nothing). "
+        "both-bugs SURVIVES at lambda=1: realistic launch-LCB 510.63>=500 + private valid + de-dup "
+        "sigma corner (LCB %.2f central / %.2f worst-case both >=500) -> robust GO. descent is "
+        "DOUBLY-HARDENED NO-GO: private build bar UNREACHABLE AND misses realistic 495.04 + private "
+        "490.16 launch LCBs. #200 cost annotation (budget row ONLY, single-shot logic UNCHANGED): "
+        "realistic spend at the bar is SEQUENTIAL E[shots]=%.2f (not fixed-5); build-higher "
+        "(mu>=%.1f/N=1) beats stay-at-bar iff reaching mu costs < %.0f shots' GPU-$ (c*=%.2f*b fixed "
+        "/ %.2f*b sequential). both_bugs_go_at_lambda_star=%s. Human approval still required before "
+        "any HF spend." % (
             "PASSES" if st["launch_trigger_calculator_self_test_passes"] else "FAILS",
             bb_bind["public_183"], bb_bind["icc_190"], bb_bind["private_191"], bb_bind["binding_bar"],
             csc["rho_sampling_input"], csc["sigma_dedup_central_tps"], csc["sigma_worstcase_tps"],
             csc["sigma_quadrature_invalid_tps"],
             bb_bind["binding_bar"], _BANKED.halfwidth_realistic(), _BANKED.halfwidth_iid(),
             csc["launch_lcb_dedup_central_tps"], csc["launch_lcb_worstcase_tps"],
+            cba["stay_at_bar"]["expected_shots_sequential"], cba["build_higher"]["mu_safe_n1_tps"],
+            cba["crossover_total_shots"], cba["c_star_fixedN_per_b"], cba["c_star_sequential_per_b"],
             st["both_bugs_go_at_lambda_star"]))
     payload = {
         "pr": 185,
