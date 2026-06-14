@@ -1,5 +1,33 @@
 # SENPAI Research Results
 
+## 2026-06-14 06:33 — PR #102: Tree E[T] break-even / margin-of-safety — what MIN accept_length clears 500? 🟡 AMBER — MERGED (break-even E[T]*=4.624 tree-alone; the M=32 step is ~1.16× heavier so the tree needs E[T]≥4.45 just to TIE linear 481.53, not 3.844; byteshark's 2.10 is a regression; no lever stack pulls break-even <4.0)
+
+- **Branch:** `fern/tree-et-breakeven` · **Student:** fern · merged ~06:33Z (analysis-only, BASELINE unchanged — official bar UNCHANGED 481.53)
+- **Hypothesis:** invert fern #100's forward model (`official_TPS = K_cal·E[T]/step_time·τ`) — solve `official=500` for the threshold accept_length E[T]*, tree-alone + per compounding lever stack; place byteshark's 2.097 + denken #101's recoverable band on that axis.
+- **Primary metric:** `breakeven_ET_tree_alone = 4.624` [4.481 opt, 5.026 cons]. **Test:** `ET_recovery_needed_from_2p10 = 2.527` (tree-alone, central). W&B `l12ikxea` (CPU-only; imports #100's `lever_composition.py` verbatim, max |direct−rescale| = 1.8e-15 machine-zero; reproduces #100's 563.1 at E[T]=5.207 exactly).
+
+| break-even ladder (raw accept_length to clear 500) | cons | central | opt | recovery from 2.097 |
+|---|--:|--:|--:|--:|
+| **tree alone** | 5.026 | **4.624** | 4.481 | **2.527** |
+| tree+splitk #84 | 4.922 | 4.458 | 4.254 | 2.361 |
+| tree+lk #95 | 5.001 | 4.587 | 4.376 | 2.490 |
+| tree+lk+splitk | 4.897 | 4.422 | 4.155 | 2.325 |
+| full stack (+persist #97) | 4.897 | 4.339 | 3.648 | 2.242 |
+
+- **Verdict — 🟡 AMBER, must-recover-most-of-the-way.** The load-bearing reframe: fern separated the M=32 *denominator* widening (a step-time fact) from the accept-length *numerator* (free variable), and showed the binding floor is NOT denken #101's structural 3.844 (accept-length units) but **4.45 in OFFICIAL-TPS units** — because the ~1.16× heavier M=32 step means a 'merely correct' tree at 3.844 is still a TPS *regression* (415 official). The tree needs E[T] ≥ **4.45 to TIE 481.53** (the abort line), ≥ **4.624 to clear 500 alone**, and **no lever stack pulls the central break-even under 4.0** (SplitK is the most useful, −0.17; LK barely moves it −0.04). byteshark's as-built **2.097 is a regression** (~227 official, <½ the linear frontier). Critical recoverable threshold (central): <4.34 → no path to 500 with any stack (escalate); [4.34, 4.62) → needs compounding levers; ≥4.62 → tree alone clears. Conservative corner: break-even 5.026 ≈ the 5.207 ceiling → margin only +0.181 even at full recovery.
+- **Reframes #100's GREEN:** #100 ('tree clears 500 with margin') is true *given* E[T]=5.207, but in accept-length units the margin is thin (0.58 central / 0.18 cons below ceiling). byteshark's 2.097 falsifies the 5.207 assumption, so the binding variable is the realized E[T] — GREEN→AMBER not because the model changed but because the build's accept-length collapsed.
+- **Composes with denken #101:** denken says 2.10→≥3.844 recovery is structurally guaranteed once the spine+salvage defects are fixed; fern says 3.844→4.62 then needs ~75% of the branch premium. Build job precisely bounded: fix defect (→3.844 floor), land full-depth traversal (→toward 5.207). **Abort line E[T]<4.45.**
+- **Banks:** `scripts/profiler/tree_et_breakeven.py` + `research/spec_cost_model/tree_et_breakeven_results.json` + report. **Next:** fern → **#106 (tree-vs-tree-free crossover + build-milestone ladder)** — at what realized E[T] does the tree overtake denken #105's tree-free ceiling; partial-recovery curve for build ship-gates.
+
+## 2026-06-14 06:33 — PR #99: Local→official projection calibration + tree-A/B harness 🟢 GREEN — MERGED (multiplier 1.06019 config-stable to 0.056%; closed-loop self-check reproduces 454.338 AND maps back onto 481.53 within 0.014%; zero-lag build-agnostic projection harness armed; current-spec tree projects 569 [552,587])
+
+- **Branch:** `lawine/projcal-tree-harness` · **Student:** lawine · merged ~06:33Z (calibration-only; live dry-run was a tree=OFF self-null on the frontier — BASELINE unchanged 481.53)
+- **Hypothesis:** pin the local-wall_tps→official-TPS multiplier + ready the tree-A/B harness so land #71's build is a zero-lag ≥500 decision.
+- **Primary metric:** `local_to_official_multiplier = 1.06019` [1.05999, 1.06038] (±0.018%). **Test:** `linear_chain_wall_tps_reproduced = 454.258` (Δ0.018% < 0.10% MDE). W&B `zcfjgog9`.
+- **Verdict — 🟢 GREEN.** Multiplier is a pure hardware/environment transfer factor (`wall_tps` is *definitionally* the official `output_throughput`), config-stable to **0.056%** across 5 committed sessions (454.085–454.338). Closed-loop self-check PASSES end-to-end: the live meter reproduces 454.338 within MDE AND the multiplier maps it back onto the 481.53 anchor (both arms within 0.014%). The projection harness (`local_official_projection.py`, 12 unit tests, build-agnostic) maps any candidate's measured wall_tps → projected-official band in one command. Current-spec tree (E[T]=5.207, +18.2%) → **569.3 official [552.1, 586.6]**, clears 500 by +10.4% at the conservative low edge; gate robust unless the official anchor is ~12% below its private-VERIFIED value.
+- **Advisor scoping note (recorded with merge):** the 569 GREEN is conditional on E[T]=5.207 — the projection MATH + harness are sound and armed, but the binding variable (realized tree E[T]) is contested by byteshark's 2.097 + fern #102's 4.624 break-even. GREEN = 'instrument calibrated and ready,' not 'tree will score 569.' Honest caveat from lawine: cross-*precision* invariance (int4 vs bf16) not cleanly testable from repo (older rungs metered with the 16-prompt meter) — but NOT the binding axis for the tree (same int4/split-KV precision as anchor, only widens drafter M=8→M=32).
+- **Banks:** `scripts/profiler/local_official_projection.py` + `paired_tps_ab.py` projection layer + `scripts/tests/test_local_official_projection.py` (12 tests). **Next:** lawine → **#107 (tree-step denominator measurement)** — pin the real M=8→M=32 verify-step wall-time ratio (the load-bearing 1.16× under fern #102 + this 569 projection), measurable now without land's star-attn kernel.
+
 ## 2026-06-14 06:25 — PR #101: Tree accept-length reconciliation — why is the as-built tok/step=2.10 vs analytical 5.207? 🟢 GREEN — MERGED (2.10 is a FIXABLE BUILD DEFECT, not acceptance collapse; ≥56.1% provably build-defect, 100% fixable, (D)-ceiling 0%; ~568 survives; tree marked BUILD-BLOCKED/re-measure-pending)
 
 - **Branch:** `denken/tree-accept-reconciliation` · **Student:** denken · merged ~06:24Z (analysis-only, BASELINE unchanged — official bar UNCHANGED 481.53)
