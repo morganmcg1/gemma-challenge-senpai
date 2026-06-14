@@ -1,0 +1,342 @@
+{
+  "config": {
+    "sglang_run_dir": "research/validity/tree_private_drop_reconcile/sglang_ladder_run",
+    "public_banked": "research/accept_calibration/accept_calibration_results.json",
+    "proxy_decode": "research/validity/tree_private_acceptance_gap/accept_calibration_private.json",
+    "rankcov_json": "research/rank_coverage/rank_coverage_results.json",
+    "rho_opt_json": "research/spec_cost_model/rho_optimal_topology_results.json",
+    "step": 1.2182,
+    "gt_drop": 0.04294644155088978,
+    "output": "research/validity/tree_private_drop_reconcile/results.json",
+    "wandb_group": "tree-private-drop-reconcile",
+    "wandb_name": "stark/tree-private-drop-reconcile",
+    "no_wandb": false
+  },
+  "constants": {
+    "K_cal": 125.26795005202914,
+    "step": 1.2182,
+    "bug1_mult": 0.9317455102952731,
+    "gt_drop": 0.04294644155088978,
+    "gt_drop_pct": 4.294644155088978,
+    "frontier_official": 481.53,
+    "target_500": 500.0,
+    "E_T_linear_floor": 3.844,
+    "clear_500_bar_et": 4.862377006624717
+  },
+  "self_test_passes": true,
+  "public_ladder_banked": {
+    "conditional_p": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "linear_E_T": 3.8444537125748504
+  },
+  "proxy_ladder_decode": {
+    "conditional_p": [
+      0.5991304839661618,
+      0.6893085026081717,
+      0.7464222790849783,
+      0.7736626492721749,
+      0.8477031613381011,
+      0.862379683274926,
+      0.885712826843481
+    ],
+    "linear_E_T": 3.0898055282313597
+  },
+  "sglang_available": true,
+  "proxy_ladder_pinned": {
+    "conditional_p": [
+      0.6333615793840008,
+      0.7324679451933904,
+      0.7677450078419574,
+      0.8434463627273611,
+      0.8820844137771807,
+      0.8242119223001515,
+      0.9000538790133668
+    ],
+    "linear_E_T": 3.433828651737039,
+    "raw_aggregate_drop_pct": 10.680972942779746,
+    "method": "relative_transfer(banked_public, sglang_public, sglang_proxy)"
+  },
+  "reconciliation": {
+    "organizer_flagship": {
+      "public_tps": 481.53,
+      "private_tps": 460.85,
+      "drop_pct": 4.294644155088978,
+      "protocol": "sglang vllm-chat scored bench, REAL private set",
+      "source": "BASELINE.md VERIFIED 2026-06-13 23:04Z"
+    },
+    "decode_audit_path": {
+      "public_E_T": 3.8444537125748504,
+      "proxy_E_T": 3.0898055282313597,
+      "drop_pct": 19.629529726814155,
+      "protocol": "decode_outputs.py audit: client-side chat template, /v1/completions, ignore_eos",
+      "source": "accept_calibration.py #151 (proxy=private_proxy_sharegpt.json)"
+    },
+    "sglang_scored_path_probe": {
+      "public_E_accept": 4.111284386501154,
+      "proxy_E_accept": 3.6738209387891625,
+      "E_accept_drop_pct": 10.640554303378858,
+      "tps_distribution_gap_pct": 10.063799847682295,
+      "tps_headline_gap_pct": 11.399454933069302,
+      "protocol": "private_gap_probe.py sglang vllm-chat scored, precache-neutral, PROXY"
+    },
+    "sglang_scored_path_perposition": {
+      "public_conditional_p": [
+        0.7583667893819027,
+        0.7808430961097678,
+        0.8216144018355026,
+        0.8302303075679313,
+        0.8432757710941621,
+        0.8511668051781489,
+        0.8702404435736729
+      ],
+      "proxy_conditional_p": [
+        0.659110993421786,
+        0.7535709020612389,
+        0.7959510723807178,
+        0.8521998127074908,
+        0.8916045221896655,
+        0.8399088628418059,
+        0.9244639487128383
+      ],
+      "public_E_T": 4.124136149325066,
+      "proxy_E_T": 3.6738209387891625,
+      "linear_E_T_drop_pct": 10.909499580934948,
+      "public_top1": 0.7583667893819027,
+      "proxy_top1": 0.659110993421786,
+      "source": "vLLM per-position log lines under sglang vllm-chat bench (precache-off)"
+    },
+    "attribution": {
+      "harness_path_gap_pp": 8.948556784034407,
+      "proxy_difficulty_gap_pp": 6.386328787690769,
+      "harness_path_explains_divergence": true,
+      "anchor_4p3_reachable_under_pinned": true,
+      "diagnosis": "19.6% (decode-audit) -> 10.7% (sglang scored) is the HARNESS-PATH gap; 10.7% (sglang proxy) -> 4.3% (organizer real private) is PROXY DIFFICULTY. Pinned protocol = sglang scored; calibration anchor = 4.3%."
+    }
+  },
+  "tree_propagation_pinned": {
+    "raw_aggregate_drop": 0.10680972942779747,
+    "public_tree_et_descent_only": 5.056404568844709,
+    "public_tree_et_both_bugs": 5.206954309441963,
+    "anchors": {
+      "calibrated_4.3pct": {
+        "aggregate_drop_target": 0.04294644155088978,
+        "frac_of_proxy_shift": 0.39986027117536516,
+        "spine": [
+          0.6906018151221658,
+          0.7483767282325214,
+          0.7826008065417849,
+          0.8303970184964822,
+          0.8533901004851394,
+          0.8308419924862088,
+          0.8683714482841856
+        ],
+        "spine_haircut_h": 0.9974850157025332,
+        "linear_E_T": 3.679348105912653,
+        "projection": {
+          "descent_only": {
+            "depth1": 0.6434651406418442,
+            "et_central_rho_coupled": 4.965312881215465,
+            "et_upper_rho_public": 4.968009671074856,
+            "official_central": 510.5849335058248,
+            "official_taulow": 509.71693911886484,
+            "official_upper_rho_public": 510.862245390086,
+            "tps_band": [
+              509.71693911886484,
+              510.862245390086
+            ],
+            "clears_500_central": true,
+            "clears_500_conservative": true,
+            "clears_500_band_low": true,
+            "clears_530_central": false,
+            "margin_to_500": 10.584933505824779,
+            "et_drop_pct_vs_public": 1.801511061644668
+          },
+          "both_bugs": {
+            "depth1": 0.6906018151221658,
+            "et_central_rho_coupled": 5.109969289972478,
+            "et_upper_rho_public": 5.11253159713324,
+            "official_central": 525.4600047477221,
+            "official_taulow": 524.5667227396509,
+            "official_upper_rho_public": 525.7234877270625,
+            "tps_band": [
+              524.5667227396509,
+              525.7234877270625
+            ],
+            "clears_500_central": true,
+            "clears_500_conservative": true,
+            "clears_500_band_low": true,
+            "clears_530_central": false,
+            "margin_to_500": 25.46000474772211,
+            "et_drop_pct_vs_public": 1.8626055407019635
+          }
+        }
+      },
+      "calibrated_9.0pct": {
+        "aggregate_drop_target": 0.09,
+        "frac_of_proxy_shift": 0.8413462301458674,
+        "spine": [
+          0.6484936873765593,
+          0.7366736131099152,
+          0.7716723073602508,
+          0.8399966200142633,
+          0.8744987453761338,
+          0.8259646568366161,
+          0.8916782677483511
+        ],
+        "spine_haircut_h": 0.9947082200706511,
+        "linear_E_T": 3.498452878443114,
+        "projection": {
+          "descent_only": {
+            "depth1": 0.6042310816679356,
+            "et_central_rho_coupled": 4.860999585611561,
+            "et_upper_rho_public": 4.866992501370239,
+            "official_central": 499.8583592951267,
+            "official_taulow": 499.008600084325,
+            "official_upper_rho_public": 500.4746130070986,
+            "tps_band": [
+              499.008600084325,
+              500.4746130070986
+            ],
+            "clears_500_central": false,
+            "clears_500_conservative": false,
+            "clears_500_band_low": false,
+            "clears_530_central": false,
+            "margin_to_500": -0.14164070487328217,
+            "et_drop_pct_vs_public": 3.8645045223862384
+          },
+          "both_bugs": {
+            "depth1": 0.6484936873765593,
+            "et_central_rho_coupled": 4.998903179759163,
+            "et_upper_rho_public": 5.004638535123301,
+            "official_central": 514.039036149237,
+            "official_taulow": 513.1651697877833,
+            "official_upper_rho_public": 514.6288048319537,
+            "tps_band": [
+              513.1651697877833,
+              514.6288048319537
+            ],
+            "clears_500_central": true,
+            "clears_500_conservative": true,
+            "clears_500_band_low": true,
+            "clears_530_central": false,
+            "margin_to_500": 14.03903614923695,
+            "et_drop_pct_vs_public": 3.9956396257507576
+          }
+        }
+      },
+      "raw_proxy": {
+        "aggregate_drop_target": 0.10680972942779747,
+        "frac_of_proxy_shift": 1.0,
+        "spine": [
+          0.6333615793840008,
+          0.7324679451933904,
+          0.7677450078419574,
+          0.8434463627273611,
+          0.8820844137771807,
+          0.8242119223001515,
+          0.9000538790133668
+        ],
+        "spine_haircut_h": 0.9937103421400826,
+        "linear_E_T": 3.433828651737039,
+        "projection": {
+          "descent_only": {
+            "depth1": 0.590131807984566,
+            "et_central_rho_coupled": 4.822534712079041,
+            "et_upper_rho_public": 4.829789552376058,
+            "official_central": 495.9030023287589,
+            "official_taulow": 495.05996722479995,
+            "official_upper_rho_public": 496.64902020099834,
+            "tps_band": [
+              495.05996722479995,
+              496.64902020099834
+            ],
+            "clears_500_central": false,
+            "clears_500_conservative": false,
+            "clears_500_band_low": false,
+            "clears_530_central": false,
+            "margin_to_500": -4.096997671241127,
+            "et_drop_pct_vs_public": 4.625220422564059
+          },
+          "both_bugs": {
+            "depth1": 0.6333615793840008,
+            "et_central_rho_coupled": 4.957947341250547,
+            "et_upper_rho_public": 4.964906643583568,
+            "official_central": 509.82753234638335,
+            "official_taulow": 508.96082554139446,
+            "official_upper_rho_public": 510.5431599420572,
+            "tps_band": [
+              508.96082554139446,
+              510.5431599420572
+            ],
+            "clears_500_central": true,
+            "clears_500_conservative": true,
+            "clears_500_band_low": true,
+            "clears_530_central": false,
+            "margin_to_500": 9.82753234638335,
+            "et_drop_pct_vs_public": 4.78219998473739
+          }
+        }
+      }
+    },
+    "breakeven_private_drop_descent_only": 0.08939277541163787,
+    "breakeven_private_drop_both_bugs": 0.5,
+    "clear_500_bar_et": 4.862377006624717
+  },
+  "tree_propagation_decode_151": {
+    "raw_aggregate_drop": 0.19629529726814154,
+    "calibrated_4.3pct_descent_tps": 505.48184959392125,
+    "calibrated_4.3pct_descent_et_drop_pct": 2.782964089711436
+  },
+  "headline": {
+    "harness_pin_reproduces_flagship_4p3": true,
+    "tree_private_drop_pct_pinned": 1.801511061644668,
+    "tree_private_drop_pct_pinned_both_bugs": 1.8626055407019635,
+    "tree_private_tps_proj_pinned": 510.5849335058248,
+    "tree_private_tps_proj_pinned_both_bugs": 525.4600047477221,
+    "descent_only_clears_500_pinned": true,
+    "both_bugs_clears_500_pinned": true,
+    "tps_band_pinned_descent_only": [
+      509.71693911886484,
+      510.862245390086
+    ],
+    "tree_private_et_pinned_descent_only": 4.965312881215465,
+    "calibrated_linear_drop_pct": 4.294644155088989,
+    "pinned_raw_proxy_drop_pct": 10.680972942779746,
+    "decode_audit_drop_pct": 19.629529726814155,
+    "sglang_native_linear_drop_pct": 10.909499580934948,
+    "breakeven_private_drop_descent_only_pct": 8.939277541163786,
+    "breakeven_private_drop_both_bugs_pct": 50.0,
+    "verdict_151_descent_only_holds": true,
+    "verdict_151_descent_tps_151": 505.46,
+    "verdict_151_descent_tps_pinned": 510.5849335058248
+  },
+  "verdict": {
+    "self_test_passes": 1,
+    "decode_audit_drop_pct": 19.629529726814155,
+    "gt_drop_pct": 4.294644155088978,
+    "harness_pin_reproduces_flagship_4p3": true,
+    "tree_private_drop_pct_pinned": 1.801511061644668,
+    "tree_private_drop_pct_pinned_both_bugs": 1.8626055407019635,
+    "tree_private_tps_proj_pinned": 510.5849335058248,
+    "tree_private_tps_proj_pinned_both_bugs": 525.4600047477221,
+    "descent_only_clears_500_pinned": true,
+    "both_bugs_clears_500_pinned": true,
+    "tree_private_et_pinned_descent_only": 4.965312881215465,
+    "calibrated_linear_drop_pct": 4.294644155088989,
+    "pinned_raw_proxy_drop_pct": 10.680972942779746,
+    "sglang_native_linear_drop_pct": 10.909499580934948,
+    "breakeven_private_drop_descent_only_pct": 8.939277541163786,
+    "breakeven_private_drop_both_bugs_pct": 50.0,
+    "verdict_151_descent_only_holds": true,
+    "verdict_151_descent_tps_151": 505.46,
+    "verdict_151_descent_tps_pinned": 510.5849335058248
+  },
+  "pinned_pending": false
+}
