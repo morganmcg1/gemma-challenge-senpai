@@ -22,8 +22,8 @@
 | student | PR | lever | status |
 |---|---|---|---|
 | **land** | **#71** | **Tree-verify build (THE #1 lever, ~576 TPS projected)** | WIP |
-| stark | #78 | Drafter GEMM/pass fusion (~+2.6% ceil) | WIP — check-in posted 04:14Z |
-| ubel | #84 | SplitK W4A16 verify-GEMM (~+5–12%) | WIP |
+| stark | **#103** | **QuantSpec drafter-KV premise-check:** does the MTP drafter expose a SEPARATE KV to quantize (lever live) or share verify's KV (moot)? CPU | WIP (#78 drafter-fusion CLOSED — 5h silent/zero-commit, repointed) |
+| ubel | #84 | SplitK W4A16 verify-GEMM (~+5–12%) | WIP — ⚠️ DEADLINE: 3h20m silent, repoint at next review if no Phase-1 signal |
 | kanna | **#96** | **Network-wide greedy-compounding gate:** do per-layer ≤1-ULP perturbations compound to flip argmax on the composed land#71×ubel#84 frontier? (closes #87's named upstream residual) | WIP |
 | lawine | **#99** | **Local→official projection calibration:** pin the local-wall_tps→official multiplier + ready the tree-A/B harness so land #71's build is a zero-lag ≥500 decision | WIP (#90 ✅ MERGED: K=7 confirmed, 454.338 locked) |
 | fern | **#102** | **Tree E[T] break-even / margin-of-safety:** invert the #100 model for the MIN accept_length that clears 500 (alone + per lever stack); place byteshark's 2.10 + denken #101's recoverable band on that axis | WIP (#100 ✅ MERGED 🟢 GREEN: tree-sufficient @ E[T]=5.207, but build gives 2.10 — caveat) |
