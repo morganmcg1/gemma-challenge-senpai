@@ -1,5 +1,22 @@
 # SENPAI Research Results
 
+## 2026-06-14 07:24 — PR #111: Settle crossover at landed C=518.1 + post-500 lever-ROI climb 🟢 GREEN allocation map (+ 🔴 ceiling-flag) — MERGED (τ→1.00 is the #1 buildable lever ROI 20.1; cheap non-tree stack caps at ~530, 540→556 tree-gated; both the crossover verdict AND denken's "3× cheaper" claim collapse to the τ-realization path — resolved by denken #109 τ-reanchor=YES)
+
+- **Branch:** `fern/climb-roi` (settle-crossover) · **Student:** fern · merged ~07:24Z (LOCAL CPU-analytic, ~32 MiB / 0.12s — no HF Job, greedy untouched; BASELINE unchanged 481.53)
+- **Hypothesis:** settle the tree-vs-tree-free crossover headline at denken #105's LANDED ceiling C=518.1, then rank the 500→556 climb levers by official-TPS-per-build-effort (test denken #105's "τ 3× cheaper" claim).
+- **Primary metric:** `post500_top_lever_roi_tau_localcal = 20.05` → top lever = **τ→1.00**. **Test:** `climb_to_ceiling_tps_at_realistic_stack = 519.49` (τ + SplitK→12%). W&B `v3465t8u`.
+
+| rank | lever | ΔTPS | effort | ROI |
+|---|---|--:|---|--:|
+| 1 | τ → 1.00 | +20.1 | S (local-cal) | 20.1 |
+| 2 | tree-recovery → 4.7 | +37.9 | L (build-blocked) | 9.5 |
+| 3 | SplitK 4.44→12% | +17.5 | M | 8.7 |
+| 5 | LK re-rank → 1.024 | +6.7 | M | 3.3 |
+| 6 | scale-palette byte | +2.9 | S | 2.9 |
+
+- **Step 1 (crossover settled):** at landed C=518.1 → AMBER (tree=upside, recover E[T]≥4.79); band spans GREEN(496.8)→RED(540.8) so the AMBER rests on confidence in the tree-free CENTRAL (which denken #109 pins).
+- **Commentary:** denken #105's "τ 3× cheaper" is CONDITIONAL — CONFIRMED under local-cal (τ ROI 20.1 = 2.1–6.9× others), BREAKS under official-anchor (τ ROI 10.0 = 1.15× SplitK→12%). The elegant collapse: both the gate verdict AND the 3× claim hinge on ONE unknown — the τ-realization path — RESOLVED by denken #109 (τ-reanchor=YES → τ is "M" effort, co-leads SplitK→12%). Banked fleet order: τ-anchor official run + SplitK→12% → ~519–530, no tree dependency. **RED-flag:** cheap non-tree levers cap at ~530 (full stack τ+SplitK→12%+LK+byte = 529.9); 540→556 is tree-gated but the tree is build-blocked (E[T]=2.10) → the non-tree escape is a better DRAFTER (E[T] via conditioning) — parallel advisor assigned fern #115 (Hydra heads, break E[T]=3.844).
+
 ## 2026-06-14 07:21 — PR #109: Tree-free-500 ship-readiness — min SplitK for a CONFIDENT (conservative-corner) ship + does pinning τ need an official re-anchor? 🟡 AMBER — MERGED (corner SplitK 14.34% vs #105 central 4.44%; at ubel ~8.5% the projection STRADDLES 500: 487→507 across τ band; τ-reanchor=YES — the official shot should BE the τ-anchor)
 
 - **Branch:** `denken/tree-free-ship-readiness` · **Student:** denken · merged 07:21Z (LOCAL CPU-analytic decision doc — no HF Job, no served change, greedy untouched; BASELINE unchanged 481.53)
