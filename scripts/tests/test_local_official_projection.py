@@ -178,3 +178,123 @@ def test_gate_amber_on_thin_margin():
     g = lop.gate_verdict(c, tr)
     assert g["verdict"] == "AMBER", (gain, g)
     assert 0 < g["margin_to_500_pct_at_lo"] < g["margin_green_pct"]
+
+
+# ---------------------------------------------------------------------------
+# PR #112 tree-free 500-path instrument
+# ---------------------------------------------------------------------------
+def test_tree_free_self_check_reproduces_anchor_bit_exact():
+    """The NULL-lever tree-free point (s=0, LK=1, palette=0, tau=1, mult=central) is
+    the bit-exact consistency anchor: it must equal K_cal*E_T_linear == 481.53 with
+    zero residual (this is what ties denken #105's K_cal to #99's multiplier)."""
+    sc = lop.tree_free_self_check()
+    assert sc["reproduces_anchor_bit_exact"] is True, sc
+    assert math.isclose(sc["recovered_official"], 481.53, rel_tol=0, abs_tol=1e-9)
+    assert math.isclose(lop.tf.K_CAL * lop.tf.E_T_LINEAR, 481.53, rel_tol=0, abs_tol=1e-9)
+
+
+def test_tree_free_multiplier_rescale_keeps_anchor_and_is_monotone():
+    """The #99 multiplier CI enters as a RELATIVE rescale: at mult==central the map is
+    exact on the anchor; the CI edges shift it by only the multiplier's ~0.018% and
+    monotonically (low edge below central, high edge above)."""
+    c = lop.calibrate()
+    mc = c.multiplier
+    at_c = lop.tree_free_official(0.0, mult=mc, tau=1.0, mult_central=mc)["official_tps"]
+    at_lo = lop.tree_free_official(0.0, mult=c.mult_ci_local_lo, tau=1.0, mult_central=mc)["official_tps"]
+    at_hi = lop.tree_free_official(0.0, mult=c.mult_ci_local_hi, tau=1.0, mult_central=mc)["official_tps"]
+    assert math.isclose(at_c, 481.53, rel_tol=0, abs_tol=1e-9)
+    assert at_lo < at_c < at_hi
+    # the rescale band is exactly the multiplier's relative CI half-width (<0.1%).
+    assert abs(at_hi - at_lo) / at_c < 0.001
+
+
+def test_tree_free_threshold_round_trips_compose():
+    """At the inverted threshold s, the forward map must land exactly on 500 (the
+    inverter and the composer agree -- single source of truth via denken's algebra)."""
+    c = lop.calibrate()
+    mc = c.multiplier
+    corner = dict(mult=c.mult_ci_local_lo, tau=0.96, lk_mult=lop.tf.LK_MULT["low"],
+                  palette_tps_pct=lop.PALETTE_TPS["low"], fp32_m8=lop.tf.FP32_M8["high"],
+                  persist_reclaim=lop.tf.PERSIST_RECLAIM["low"], mult_central=mc)
+    s = lop.tree_free_threshold(**corner)
+    assert s not in (None, float("inf")) and s > 0
+    back = lop.tree_free_official(s, **corner)["official_tps"]
+    assert math.isclose(back, lop.OFFICIAL_TARGET_TPS, rel_tol=0, abs_tol=1e-6)
+
+
+def test_tree_free_threshold_monotone_in_tau():
+    """A lower tau (worse realization) needs MORE SplitK to clear 500: the
+    conservative-corner threshold strictly decreases as tau rises 0.96 -> 1.00."""
+    c = lop.calibrate()
+    mc = c.multiplier
+    def thr(tau):
+        return lop.tree_free_threshold(
+            mult=c.mult_ci_local_lo, tau=tau, lk_mult=lop.tf.LK_MULT["low"],
+            palette_tps_pct=lop.PALETTE_TPS["low"], fp32_m8=lop.tf.FP32_M8["high"],
+            persist_reclaim=lop.tf.PERSIST_RECLAIM["low"], mult_central=mc)
+    series = [thr(t) for t in (0.96, 0.97, 0.98, 0.99, 1.00)]
+    assert all(a > b for a, b in zip(series, series[1:])), series
+
+
+def test_project_tree_free_band_ordering_and_conservative_corner():
+    """The single-command projection orders conservative <= central <= optimistic, and
+    the conservative corner is exactly (multiplier-low x tau-low) as the PR names it."""
+    c = lop.calibrate()
+    pj = lop.project_tree_free(0.12, calib=c)  # ubel nominal-high
+    assert pj["projected_official_lo"] <= pj["projected_official"] <= pj["projected_official_hi"]
+    cc = pj["conservative_corner"]
+    assert math.isclose(cc["multiplier"], c.mult_ci_local_lo, rel_tol=0, abs_tol=1e-12)
+    assert math.isclose(cc["tau"], lop.TAU_BAND_DEFAULT["low"], rel_tol=0, abs_tol=1e-12)
+    # central uses the central multiplier and tau=1.00.
+    assert math.isclose(pj["central"]["multiplier"], c.multiplier, rel_tol=0, abs_tol=1e-12)
+    assert math.isclose(pj["central"]["tau"], 1.00, rel_tol=0, abs_tol=1e-12)
+
+
+def test_bound_tau_local_band_ceiling_and_meter_confound():
+    """tau_band_local is the mechanism band [0.99, 1.00], strictly inside denken's
+    generic [0.96, 1.00]; the cross-meter spread dwarfs the within-meter config spread
+    (that asymmetry is WHY precision rungs can't bound tau)."""
+    tb = lop.bound_tau_local()
+    assert tb["tau_band_local"] == [0.99, 1.00]
+    assert tb["tau_mechanism_low"] >= tb["tau_generic_low"]
+    assert lop.tf.TAU["low"] <= tb["tau_band_local"][0] and tb["tau_band_local"][1] <= lop.tf.TAU["high"]
+    meter = tb["meter_confound"]["implied_multiplier_spread_pct"]
+    within = tb["within_meter_config_stability"]["per_session_multiplier_spread_pct"]
+    assert meter > 10.0 * within, (meter, within)
+    assert tb["recommendation"] in (
+        "SHIP_ON_LOCAL_CAL", "ONE_OFFICIAL_SPLITK_ANCHOR", "TRANSFER_UNTRUSTWORTHY")
+
+
+def test_tree_free_gate_amber_landing():
+    """On the committed inputs the gate reads AMBER: the instrument is ARMED but the
+    >=500 call turns on the tau floor -> one official SplitK anchor named for #109."""
+    c = lop.calibrate()
+    g = lop.tree_free_gate(c)
+    assert g["verdict"] == "AMBER", g
+    assert g["tree_free_projection_armed"] is True
+    assert g["tau_band_local"] == [0.99, 1.00]
+    assert g["recommendation"] == "ONE_OFFICIAL_SPLITK_ANCHOR"
+    assert g["transfer_stable"] is True
+
+
+def test_tree_free_gate_green_when_splitk_decides_at_generic_floor():
+    """If the conservative threshold clears even at the GENERIC 0.96 floor, SplitK alone
+    decides 500 regardless of tau -> GREEN."""
+    c = lop.calibrate()
+    tb = lop.bound_tau_local(c)
+    tb = dict(tb); tb["decides_at_generic_floor"] = True
+    g = lop.tree_free_gate(c, tau_bound=tb)
+    assert g["verdict"] == "GREEN", g
+    assert g["tree_free_projection_armed"] is True
+
+
+def test_tree_free_gate_red_when_threshold_unreachable():
+    """If even the mechanism-floor threshold exceeds the bandwidth-gap ceiling, the
+    local projection can't decide 500 -> RED."""
+    c = lop.calibrate()
+    tb = lop.bound_tau_local(c)
+    tb = dict(tb)
+    tb["conservative_threshold_at_tau"] = dict(tb["conservative_threshold_at_tau"])
+    tb["conservative_threshold_at_tau"]["0.99"] = float("inf")
+    g = lop.tree_free_gate(c, tau_bound=tb)
+    assert g["verdict"] == "RED", g
