@@ -1,0 +1,325 @@
+{
+  "config": {
+    "margin_npz": "research/validity/verify_argmax_margin/20260614T041541Z/margin_perturb.npz",
+    "margin_report": "research/validity/verify_argmax_margin/20260614T041541Z/report.json",
+    "ceiling_json": "research/spec_cost_model/tree_et_realization_ceiling_results.json",
+    "output": "research/validity/fp32_star_verify_crosscheck/rootcause_results.json",
+    "wandb_project": "gemma-challenge-senpai",
+    "wandb_entity": "wandb-applied-ai-team",
+    "wandb_group": "depth1-rootcause",
+    "wandb_name": "denken/depth1-rootcause-logit-spine",
+    "no_wandb": false,
+    "logit_relerr": true,
+    "drafter_spine_probe": true,
+    "wandb": true,
+    "model": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "corpus": "research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/decode_outputs.jsonl",
+    "num_prompts": 128,
+    "device": "cuda:0"
+  },
+  "inputs": {
+    "margin_npz": "research/validity/verify_argmax_margin/20260614T041541Z/margin_perturb.npz",
+    "relerr_bf16_measured_chiku": 0.001,
+    "relerr_fp32_measured_chiku": 1e-06,
+    "depth1_correct": 0.728739760479042,
+    "depth1_built": 0.598,
+    "deficit": 0.130739760479042,
+    "verifier_model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "corpus": "research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/decode_outputs.jsonl"
+  },
+  "step1_step2_flip": {
+    "n_positions": 65536,
+    "median_margin": 4.875,
+    "mean_margin": 6.131860020803288,
+    "max_abs_logit": 29.875,
+    "exact_tie_frac": 0.0138397216796875,
+    "exact_tie_count": 907,
+    "margin_pcts": {
+      "p01": 0.0,
+      "p02": 0.125,
+      "p05": 0.25,
+      "p10": 0.5,
+      "p20": 1.25,
+      "p50": 4.875
+    },
+    "relerr_bf16": 0.001,
+    "relerr_fp32": 1e-06,
+    "deficit_to_explain": 0.130739760479042,
+    "bf16_depth1_flip_frac_gaussian": 0.006927708942048842,
+    "bf16_depth1_flip_frac_worstcase_bound": 0.0138397216796875,
+    "bf16_depth1_flip_frac_predicted": 0.006927708942048842,
+    "bf16_explains_frac_of_deficit_gaussian": 0.05298853934461181,
+    "bf16_explains_frac_of_deficit_worstcase": 0.10585702183465488,
+    "fp32_residual_depth1_flip_frac_gaussian": 0.00691986083984375,
+    "fp32_residual_depth1_flip_frac_worstcase_bound": 0.0138397216796875,
+    "fp32_direct_measured_flips_kanna87": {
+      "splitk_flip_count_vs_emuS1": {
+        "2": 0,
+        "4": 0,
+        "8": 0
+      },
+      "mwiden_flip_count_vs_refM8": {
+        "16": 0,
+        "32": 0
+      },
+      "note": "0/65536 flips under fp32-reduce regime (kanna #87) -> physical fp32 residual ~0; the Gaussian/worst-case fp32 numbers above only reflect unresolved bf16-cast ties whose true fp32 margin this capture does not store."
+    },
+    "fp32_residual_depth1_flip_frac": 0.0,
+    "relerr_needed_for_deficit_gaussian": 0.07131966885614247,
+    "relerr_needed_for_deficit_worstcase": 0.014634146341463417,
+    "relerr_needed_over_measured_gaussian": 71.31966885614247,
+    "relerr_needed_over_measured_worstcase": 14.634146341463417,
+    "relerr_sweep": {
+      "1e-04": {
+        "gaussian": 0.00691986083984375,
+        "worstcase": 0.0138397216796875
+      },
+      "3e-04": {
+        "gaussian": 0.00691986083984375,
+        "worstcase": 0.0138397216796875
+      },
+      "1e-03": {
+        "gaussian": 0.006927708942048842,
+        "worstcase": 0.0138397216796875
+      },
+      "3e-03": {
+        "gaussian": 0.010013916414757306,
+        "worstcase": 0.0361328125
+      },
+      "1e-02": {
+        "gaussian": 0.036543171515506984,
+        "worstcase": 0.1247100830078125
+      },
+      "3e-02": {
+        "gaussian": 0.06962992995431572,
+        "worstcase": 0.23828125
+      },
+      "8e-02": {
+        "gaussian": 0.14064356923313,
+        "worstcase": 0.448028564453125
+      },
+      "1e-01": {
+        "gaussian": 0.16103304219729356,
+        "worstcase": 0.498931884765625
+      }
+    }
+  },
+  "step3_forward": {
+    "topology": {
+      "M": 32,
+      "depth": 9,
+      "n": 32,
+      "max_branch": 3,
+      "leaves": 7
+    },
+    "step_time_wstar": 1.2127483746822987,
+    "tau_central": 1.0,
+    "tau_low": 0.9983,
+    "anchor_ET_at_correct": 5.206954309441963,
+    "anchor_official_at_correct_central": 537.8399229182609,
+    "norm_check_official_M8": 481.53,
+    "min_depth1_clears_500_central": 0.607706522538743,
+    "min_depth1_clears_500_taulow": 0.6104299277455961,
+    "ET_built_0598": 4.811237948198919,
+    "official_built_0598_central": 496.9653454627765,
+    "official_built_0598_taulow": 496.12050437548976,
+    "ET_correct_0729": 5.206954309441963,
+    "official_correct_0729_central": 537.8399229182609,
+    "official_correct_0729_taulow": 536.9255950492998,
+    "q1_sweep": {
+      "0.55": {
+        "ET": 4.665954024853265,
+        "official_central": 481.9585892114694,
+        "official_taulow": 481.1392596098099
+      },
+      "0.56": {
+        "ET": 4.696221508883608,
+        "official_central": 485.08499676382485,
+        "official_taulow": 484.26035226932635
+      },
+      "0.57": {
+        "ET": 4.726488992913952,
+        "official_central": 488.2114043161804,
+        "official_taulow": 487.3814449288429
+      },
+      "0.58": {
+        "ET": 4.7567564769442985,
+        "official_central": 491.33781186853633,
+        "official_taulow": 490.5025375883598
+      },
+      "0.59": {
+        "ET": 4.787023960974642,
+        "official_central": 494.4642194208919,
+        "official_taulow": 493.62363024787635
+      },
+      "0.60": {
+        "ET": 4.8172914450049875,
+        "official_central": 497.5906269732476,
+        "official_taulow": 496.74472290739305
+      },
+      "0.61": {
+        "ET": 4.847558929035331,
+        "official_central": 500.71703452560314,
+        "official_taulow": 499.8658155669096
+      },
+      "0.62": {
+        "ET": 4.877826413065675,
+        "official_central": 503.84344207795874,
+        "official_taulow": 502.9869082264262
+      },
+      "0.63": {
+        "ET": 4.90809389709602,
+        "official_central": 506.96984963031446,
+        "official_taulow": 506.1080008859429
+      },
+      "0.64": {
+        "ET": 4.938361381126365,
+        "official_central": 510.0962571826702,
+        "official_taulow": 509.2290935454596
+      },
+      "0.65": {
+        "ET": 4.96862886515671,
+        "official_central": 513.2226647350259,
+        "official_taulow": 512.3501862049764
+      },
+      "0.66": {
+        "ET": 4.9988963491870555,
+        "official_central": 516.3490722873817,
+        "official_taulow": 515.4712788644931
+      },
+      "0.67": {
+        "ET": 5.029163833217397,
+        "official_central": 519.475479839737,
+        "official_taulow": 518.5923715240094
+      },
+      "0.68": {
+        "ET": 5.059431317247743,
+        "official_central": 522.6018873920927,
+        "official_taulow": 521.7134641835262
+      },
+      "0.69": {
+        "ET": 5.089698801278089,
+        "official_central": 525.7282949444486,
+        "official_taulow": 524.8345568430431
+      },
+      "0.70": {
+        "ET": 5.119966285308432,
+        "official_central": 528.8547024968042,
+        "official_taulow": 527.9556495025596
+      },
+      "0.71": {
+        "ET": 5.150233769338777,
+        "official_central": 531.9811100491598,
+        "official_taulow": 531.0767421620762
+      },
+      "0.72": {
+        "ET": 5.1805012533691235,
+        "official_central": 535.1075176015157,
+        "official_taulow": 534.1978348215931
+      },
+      "0.73": {
+        "ET": 5.210768737399467,
+        "official_central": 538.2339251538712,
+        "official_taulow": 537.3189274811095
+      },
+      "0.74": {
+        "ET": 5.241036221429812,
+        "official_central": 541.3603327062269,
+        "official_taulow": 540.4400201406263
+      }
+    },
+    "_ET_fn_anchor_matches_fern125": true,
+    "predicted_fp32_recovered_depth1_point": 0.6049277089420488,
+    "predicted_fp32_recovered_depth1_worstcase": 0.6118397216796875,
+    "official_at_predicted_fp32_point_central": 499.1312296184708,
+    "official_at_predicted_fp32_worstcase_central": 501.2922065009639,
+    "predicted_fp32_clears_500_point": false,
+    "predicted_fp32_clears_500_worstcase": true
+  },
+  "step1_logit_relerr_gpu": {
+    "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "num_prompts": 128,
+    "n_positions": 65536,
+    "eps_bf16_attn_relerr": 0.001,
+    "eps_fp32_attn_relerr": 1e-06,
+    "bf16_seeds": [
+      0,
+      1
+    ],
+    "depth1_logit_star_relerr": 0.009093647822737694,
+    "logit_star_relerr_mean": 0.010384167544543743,
+    "logit_star_relerr_p99": 0.02959187515079975,
+    "logit_star_relerr_amplification": 9.093647822737694,
+    "root_argmax_flip_frac_bf16": 0.00522613525390625,
+    "root_argmax_flip_frac_bf16_nontie": 0.002883872017264366,
+    "root_argmax_flip_frac_bf16_tie": 0.18013857305049896,
+    "margin_relerr_bf16_median": 0.0036231884732842445,
+    "margin_relerr_bf16_p99": 1.0,
+    "fp32_residual_logit_relerr_median": 0.009070740081369877,
+    "fp32_residual_flip_frac_measured": 0.0054168701171875,
+    "fp32_residual_flip_frac_nontie": 0.0030153084080666304,
+    "net_precision_flip_frac_fp32_recoverable": 0.0,
+    "margin_median_measured": 5.125,
+    "margin_mean_measured": 6.660604476928711,
+    "margin_median_kanna87_ref": 4.875,
+    "exact_tie_frac_measured": 0.013214111328125,
+    "tie_eps": 0.0001,
+    "peak_gb": 20.894662656,
+    "relerr_vs_confirm_kill_1e3": 9.093647822737694,
+    "relerr_reopen_threshold_triggered": false,
+    "fp32_max_recovery_pp_measured": 0.0,
+    "fp32_stays_closed": true,
+    "relerr_flip_disconnect_note": "logit-relerr amplifies 9.1x (attn 1e-03 -> logit 9.09e-03) but root argmax flips only 0.52% total; of that, the NON-tie (genuine precision) flip is 0.288% and the eps=1e-6 fp32-residual flips the SAME 0.54% -> the flips are exact-tie reshuffles, NOT margin crossings. NET fp32-recoverable = 0.000pp. The amplified relerr lives in the 262k-dim logit BULK (margin-relerr median 3.62e-03), not the decision margin. fp32 stays CLOSED."
+  },
+  "step2_drafter_spine_gpu": {
+    "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "num_prompts": 128,
+    "struct_margin_threshold": 1.0,
+    "root_argmax_context_mismatch_frac": 0.0390625,
+    "root_argmax_context_mismatch_count": 5,
+    "root_argmax_structural_mismatch_frac": 0.0,
+    "root_argmax_structural_mismatch_count": 0,
+    "mismatch_margin_max": 0.125,
+    "mismatch_margin_median": 0.125,
+    "mismatch_margin_p90": 0.125,
+    "mismatch_margin_p99": 0.125,
+    "gemm_noise_ceiling_vs_median_margin_ratio": 0.024390243902439025,
+    "drafter_spine_depth1_mismatch": 0,
+    "gemm_nearties_bound_kanna87": 0.0138,
+    "interpretation": "root row is causal-context-invariant (siblings/children at pos>start are masked by causality). The TOTAL context-mismatch is GEMM reduction-order near-ties on the seq-len axis (256 vs 768 -> different int4-Marlin split-K; kanna #114's batch-non-invariance, re-confirmed here) -- ALL at margin near 0. The STRUCTURAL (wide-margin) mismatch is ~0 => the depth-1 spine = linear-chain drafter top1 is well-defined -> a correct tree build reaches 0.7287; as-built 0.598 is wrong-rank/index plumbing, NOT a structural/intrinsic difference."
+  },
+  "step3_attribution": {
+    "deficit_pp": 13.073976047904202,
+    "a_precision_pp_fp32_fixable": 0.522613525390625,
+    "b_plumbing_pp_spine_index": 12.551362522513577,
+    "c_intrinsic_pp": 0.0,
+    "dominant": "plumbing",
+    "plumbing_frac_of_deficit": 0.9600264278077516,
+    "precision_frac_of_deficit": 0.0399735721922484,
+    "rank2_spine_contam_frac_reproducing_0598": 0.4187223347902632,
+    "fix": "Correct the tree depth-1 spine extraction / target_logits_indices so the root verify-row compares against the drafter's rank-1 (top1) token -- the same token the linear chain's q[1]=0.7287 was measured on. This is build-plumbing in land #71's verify path, NOT an fp32 upcast and NOT an intrinsic tree limit."
+  },
+  "gate_rootcause": {
+    "gate": "GREEN",
+    "gate_label": "Single dominant FIXABLE cause: drafter-spine / index-mapping plumbing (12.6pp of 13.1pp). fp32-precision is ruled out (<= 0.52pp, flip frac 0.52%); intrinsic ruled out (root row is causal-context-invariant). Depth-1 -> 0.7287 IS recoverable by fixing the spine extraction; do NOT spend quota on an fp32-only build.",
+    "fp32_reopened": false,
+    "intrinsic": false,
+    "depth1_recoverable_to_0729": true,
+    "official_at_recovered_depth1_central": 537.8399229182609
+  },
+  "verdict": {
+    "primary_metric_name": "depth1_logit_star_relerr",
+    "depth1_logit_star_relerr": 0.009093647822737694,
+    "root_argmax_flip_frac_bf16": 0.00522613525390625,
+    "fp32_stays_closed": true,
+    "test_metric_name": "drafter_spine_depth1_mismatch",
+    "drafter_spine_depth1_mismatch": 0,
+    "rootcause_gate": "GREEN",
+    "depth1_recoverable_to_0729": true,
+    "analytic_bf16_flip_frac_predicted": 0.006927708942048842,
+    "analytic_gate": "RED",
+    "deficit_to_explain": 0.130739760479042,
+    "min_depth1_clears_500_central": 0.607706522538743,
+    "official_at_correct_depth1_central": 537.8399229182609
+  }
+}
