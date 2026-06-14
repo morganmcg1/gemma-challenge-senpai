@@ -74,6 +74,19 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 04:07 — PR #88 (fern): Traversal Verification E[T] gate — RED, AXIS CLOSED (standard root-to-leaf confirmed; official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU analytical + MC simulation, no GPU training, no served-file change; official bar stays 481.53). Banks `scripts/profiler/traversal_verify_et.py` + `research/spec_cost_model/traversal_verify_et_results.json` + `report_traversal_verify_et.md`.
+- **Verdict: RED — Traversal Verification is provably zero under greedy decode.** `traversal_et_uplift_pct = 0.000%`, `traversal_greedy_violation_count = 0`. Under temperature 0 the target argmax at each position is a **single token**, so at most one child matches at any tree node. The consistent tree paths form a **unique chain** → both root-to-leaf and leaf-to-root walks return the same chain → E[T] uplift is zero for **any tree/corpus** (structural, not a measurement artefact). wirbel's rho2=0.4165 salvage is already fully realized by root-to-leaf — it is the value of the **tree topology** over a linear chain, not incremental headroom for a different acceptance rule.
+- **Four-way empirical confirmation:**
+  - Leg A (physical M=32, 400k MC, greedy): root→leaf = leaf→root = **E[T] 5.2140** (+0.0000%, 0 violations).
+  - Leg B (sampling-proxy contrast, M=32, 400k MC): leaf→root +4.5669% with 26,984 "violations" — proves the mechanism exists in sampling regimes but is vacuous at T=0.
+  - Leg C (real #80 ranks data, M=32 spine, 1868 steps): 0.000% uplift under greedy.
+  - Leg D (exhaustive all trees n≤6, greedy-valid): 0 violations, 0 uplift across 872 tree instances.
+- **For land #71:** keep standard root-to-leaf verification. Do NOT integrate traversal. The tree topology delivers the full rho2 salvage mass via the existing acceptance rule.
+- **Primary metric:** `traversal_et_uplift_pct` = **0.0**. **Test:** `traversal_greedy_violation_count` = **0**.
+- **W&B:** `yiwl2jfj`. fern → #91 (tree-topology E[T] comparison: max-branch-3 vs max-branch-4 empirical confirm of wirbel #83's +1.13pp topology delta, using this harness).
+
 ### 2026-06-14 03:53 — PR #82 (lawine): Operationalized wall_tps: paired-A/B runner + re-baseline + #56 re-screen — RESEARCH INFRASTRUCTURE (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (no served-file change, no HF launch; official bar stays 481.53). Banks `scripts/profiler/paired_tps_ab.py` as the canonical one-command paired-`wall_tps` A/B entrypoint for all lever-builders.
