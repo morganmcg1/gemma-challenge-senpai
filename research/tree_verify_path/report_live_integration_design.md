@@ -29,7 +29,7 @@ quota, fastest and lowest-risk. Add KV-compaction (3c) only once salvage clears.
 | 2 | tree-causal mask | triton `unified_attention(..., qq_bias=None ...)` — `triton_unified_attention.py:787`, applied at `:525` `S += load_qq_bias_tile(...)` **before** the `if IS_3D` epilogue split (`:548`) | **qq_bias is an [M,M] additive query×query bias, applied in BOTH 2D and 3D paths.** `load_qq_bias_tile` (`triton_attention_helpers.py:344`) biases only the query×query block; prefix keys are unbiased. Set `qq_bias[i,j]=0` if node j ∈ ancestors(i)∪{i} else `-inf`. This is exactly `tree_spec.tree_causal_mask` (M×M bool) → `where(mask,0,-inf)`. Thread it through `splitkv_verify_patch.py` (which today passes no bias) into the redirected 3D verify. |
 | 3a | tree metadata | `_calc_spec_decode_metadata` (`gpu_model_runner.py:2730`) — pure linear-chain index math | override `target_logits_indices = [parent[1..M-1]]` (local), `bonus_logits_indices = leaves`, `draft_token_ids` = node-order tree tokens, `logits_indices` = all M rows. `tree_spec.verify_index_maps` already produces these (validated == deployed metadata on the degenerate chain). |
 | 3b | verify positions | the M verify rows' `positions` (RoPE) + `query_start_loc` | each node's position = `base + depth(node)` (siblings share a depth). For the linear chain depth==row-index so this is invisible today; the tree needs the explicit depth map (`tree_spec.TreeSpec.depth`). |
-| 3c | **KV compaction** | post-sampler bookkeeping: `num_accepted = (output_token_ids != -1).sum(dim=1)` (`gpu_model_runner.py:1513`) | **the blocker (Finding B).** vLLM keeps the first `num_accepted` KV slots (contiguous-prefix assumption). The tree's accepted path is scattered → must **gather** the accepted nodes' K/V into the first `num_accepted` slots (path order) before the next step, or the next step's prefix KV is corrupt (PPL breaks). **Not needed for a single-step probe.** |
+| 3c | **KV compaction** (DEFERRED for the probe; design PINNED) | post-sampler bookkeeping: `num_accepted = (output_token_ids != -1).sum(dim=1)` (`gpu_model_runner.py:1513`) | **the blocker (Finding B).** vLLM keeps the first `num_accepted` KV slots (contiguous-prefix assumption). The tree's accepted path is scattered → must **gather** the accepted nodes' K/V into the first `num_accepted` slots (path order) before the next step, or the next step's prefix KV is corrupt (PPL breaks). **Not needed for a single-step probe.** **MANDATORY DESIGN (ubel #157, MERGED):** the relocate MUST be a **single fused/vectorized GPU launch** — `index_select` on the `[L,W,H,D]` stack of all 37 layers' K+V → `index_copy_` scatter, with the commit-index produced **on-device** by the accept walk (lawine #147 sync-free) and consumed **without a host readout** so it stays inside the captured graph. Zero-copy ideal if paged KV (int slot-map update, ~20 µs/step). A host-bound Python loop over layers is correctness/PPL-clean but **cannot be graph-captured → ~122 ms/step → descent E[T]=5.04 collapses 522→77 TPS.** Subtlety: 37 device launches (no host trip) is already 70× faster than the host loop — it's the **host round-trip, not the layer count**; fully vectorize to ONE launch. equivalence_rate=1.0 by construction (pure bf16 permute/copy, no cast/arithmetic). |
 | 4 | descend walk | replace `_dixie_fused_accept_prep` call in the injected verify block (`serve.py:429`); kernel `sitecustomize.py:920-963` | wire `tree_accept` (validated) — node-indexed `dixie_all_argmax` + node-indexed draft tokens + static children-CSR. `serve.py:416` already gathers `dixie_all_argmax` (all M rows). |
 
 Prewarm `serve.py:487-492` hardcodes M=8; widen to the tree M (minor).
@@ -98,7 +98,16 @@ the accepted tokens *are* the first `num_accepted` rows → correct. For a tree 
 accepted path is e.g. rows `[0, 2, 5, 8]` (a salvaged rank-2 branch) → the first
 `num_accepted=4` rows `[0,1,2,3]` are the WRONG slots → next-step prefix KV
 corrupt → PPL break / greedy-identity loss. Fix = gather accepted path K/V →
-contiguous, per layer, before bookkeeping. Costable but real surgery; defer it.
+contiguous, before bookkeeping. Costable but real surgery; defer it.
+**ubel #157 (MERGED) pins HOW:** one fused/vectorized GPU launch across all 37
+layers (`index_select`→`index_copy_` on the `[L,W,H,D]` K+V stack), commit-index
+on-device (lawine #147 sync-free), no host readout → graph-capturable. A
+host-bound per-layer Python loop is the **silent step-collapsing landmine** —
+correctness/PPL-clean (passes every functional check) but ~122 ms/step → on the
+0.382-salvage/step ladder it blows clear-500 to 32.6 (≫ 5.207 ceiling) and the
+descent E[T]=5.04 collapses 522→77 TPS. The descent fix (Component 4) ARMS this
+op on every salvage, so it is live the moment Component 3/4 lands — the relocate
+must be fused **before** any benchmark/quota spend, not after.
 
 ## Recommended build order
 
@@ -109,9 +118,11 @@ contiguous, per layer, before bookkeeping. Costable but real surgery; defer it.
    real generation on the untouched linear chain. → real-stack salvage number,
    zero quota, **no KV-compaction needed.** This is the GO/NO-GO the fleet waits
    on (advisor 11:35Z; fern #134 target E[T]≈5.0 with spine left at 0.679).
-2. **Continued-gen integration (add 3c KV compaction).** Only after the probe
-   shows salvage ≈ ρ₂ = 0.4165. Gives the wall_tps number (lawine #72, median
-   N=3) for the eventual human-approved launch issue.
+2. **Continued-gen integration (add 3c KV compaction — fused-GPU per ubel #157).**
+   Only after the probe shows salvage ≈ ρ₂ = 0.4165. The relocate MUST be the
+   single fused/vectorized GPU launch (ubel #157), NOT a host loop, or the
+   measured E[T] gain never reaches wall_tps. Gives the wall_tps number (lawine
+   #72, median N=3) for the eventual human-approved launch issue.
 
 ## Gates (unchanged)
 

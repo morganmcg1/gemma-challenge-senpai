@@ -74,6 +74,43 @@ _TREE_EMIT_PROBE_STATE: dict[str, Any] = {
     "forwards": 0,
 }
 
+# --- PR #71 salvage probe STAGE 1: real-stack first-divergence branch-hit ------
+# LOCAL-ONLY, env-gated (TREE_SALVAGE_PROBE=1, requires TREE_EMIT_PROBE=1). The
+# decisive GO/NO-GO screen the advisor + fern #142 want (byteshark's mandatory
+# debug-gate item #3): does the REAL drafter's rank-2 candidate catch the REAL
+# verifier argmax at first divergence ~rho2=0.4165 of the time (healthy) vs ~3%
+# (the layout-bug signature of byteshark's broken tree-v2)? No tree forward, no
+# scratch KV, no relocate op -- it reuses the EXISTING linear verify's per-row
+# argmax (dixie_target_argmax) + Component 1's live tree draft tokens. The emit
+# probe (proposer) stashes the rank-2 branch token at each width>=2 spine depth;
+# the accept-prep hook (verify) joins them against target_argmax[first_div] -- the
+# SAME target row as the rank-1 spine sibling (Component 3a decoupled-A map). It
+# also computes the CONFLATED tli+1 target (the override-A-breaks-B trap) so the
+# real stack reproduces the CPU finding: correct~0.41 vs conflated~0.03. Purely
+# observational: reads argmax + draft tokens, never changes the accept -> PPL /
+# greedy-identity unmoved. Deployed path byte-identical when the flag is unset.
+TREE_SALVAGE_PROBE = os.environ.get("TREE_SALVAGE_PROBE") == "1"
+_SALVAGE_PROBE_VERDICT = os.environ.get(
+    "TREE_SALVAGE_PROBE_VERDICT",
+    "research/tree_verify_path/comp_salvage_probe_stage1_verdict.json",
+)
+_SALVAGE_PROBE_STATE: dict[str, Any] = {
+    "registered": False,
+    "stash": None,
+    "steps": 0,             # aligned verify steps observed
+    "full_accept": 0,       # whole chain accepted (no divergence; no salvage needed)
+    "divergence": 0,        # first-divergence steps
+    "div_at_branch": 0,     # divergence landed on a width>=2 spine pos (salvageable)
+    "div_no_branch": 0,     # divergence on a width-1 spine pos (no branch; lost)
+    "branch_hit_correct": 0,   # rank-2 == target_argmax[first_div]  (Component 3a fix)
+    "branch_hit_conflated": 0, # rank-2 == target_argmax[first_div+1] (the tli+1 trap)
+    "per_pos_div": {},      # first_div -> count of salvageable divergences
+    "per_pos_hit": {},      # first_div -> count of correct branch hits
+    "skipped_no_stash": 0,  # verify ran but emit probe produced no fresh tree
+    "skipped_unaligned": 0, # stashed spine != the chain the verifier checked
+    "skipped_read_err": 0,
+}
+
 # --- drafter token-frequency logit bias (PR #48, experiment-only) -------------
 # Additive bias on the DRAFTER's candidate scores, applied to the top-K most
 # frequent corpus tokens before the drafter argmax. Verifier output is untouched
@@ -461,6 +498,23 @@ def _run_tree_emit_probe(
             if draft_token[node] == draft_token[sib1]:
                 branch_distinct = False
                 break
+
+    if TREE_SALVAGE_PROBE:
+        # STAGE 1: stash the rank-2 branch token at each width>=2 spine DEPTH d
+        # (keyed by chain row == first_div). spine[d]'s children[0]==rank-1 (the
+        # spine continuation), children[1]==rank-2 branch; BOTH siblings are
+        # checked against the SAME verify row -- the verifier argmax after the
+        # prefix ending at spine[d] == chain row d (Component 3a decoupled-A map).
+        branch_rank2 = {}
+        for d, snode in enumerate(tree.spine):
+            ch = tree.children[snode]
+            if len(ch) >= 2:
+                branch_rank2[d] = draft_token[ch[1]]
+        _SALVAGE_PROBE_STATE["stash"] = {
+            "branch_rank2": branch_rank2,
+            "spine_chain": spine_tok,
+            "ready": True,
+        }
 
     st["steps"] += 1
     st["forwards"] = forwards
@@ -1212,6 +1266,140 @@ def _get_fused_accept_prep_kernel() -> Any:
     return _FUSED_ACCEPT_PREP_KERNEL
 
 
+def _salvage_probe_dump() -> None:
+    """Write the STAGE-1 branch-hit verdict JSON + print a server-side summary."""
+    sps = _SALVAGE_PROBE_STATE
+    if sps["steps"] == 0 and sps["skipped_no_stash"] == 0:
+        return
+    import json as _json
+    from pathlib import Path as _Path
+
+    div_branch = sps["div_at_branch"]
+    bh_correct = (sps["branch_hit_correct"] / div_branch) if div_branch else None
+    bh_conflated = (sps["branch_hit_conflated"] / div_branch) if div_branch else None
+    per_pos = {}
+    for d in sorted(sps["per_pos_div"]):
+        ndiv = sps["per_pos_div"][d]
+        nhit = sps["per_pos_hit"].get(d, 0)
+        per_pos[str(d)] = {
+            "divergences": ndiv,
+            "hits": nhit,
+            "branch_hit": (nhit / ndiv) if ndiv else None,
+        }
+    verdict = {
+        "stage": 1,
+        "tree_M": TREE_EMIT_PROBE_M,
+        "rho2_pinned": 0.4165,
+        "aligned_steps": sps["steps"],
+        "full_accept": sps["full_accept"],
+        "divergence_steps": sps["divergence"],
+        "div_at_branch": div_branch,
+        "div_no_branch": sps["div_no_branch"],
+        "branch_hit_correct_count": sps["branch_hit_correct"],
+        "branch_hit_conflated_count": sps["branch_hit_conflated"],
+        "branch_hit_rate_correct": bh_correct,     # ~0.41 healthy (Component 3a fix)
+        "branch_hit_rate_conflated": bh_conflated,  # ~0.03 (the tli+1 trap)
+        "per_position": per_pos,
+        "skipped": {
+            "no_stash": sps["skipped_no_stash"],
+            "unaligned": sps["skipped_unaligned"],
+            "read_err": sps["skipped_read_err"],
+        },
+    }
+    try:
+        outp = _Path(_SALVAGE_PROBE_VERDICT)
+        if not outp.is_absolute():
+            cand = _Path("/workspace/senpai/target") / outp
+            outp = cand if cand.parent.exists() else outp
+        outp.parent.mkdir(parents=True, exist_ok=True)
+        outp.write_text(_json.dumps(verdict, indent=2))
+    except Exception as exc:
+        print(
+            f"[salvage-probe] verdict write failed: {exc!r}",
+            file=sys.stderr,
+            flush=True,
+        )
+    print(
+        f"[salvage-probe] STAGE-1 verdict: aligned_steps={sps['steps']} "
+        f"div_at_branch={div_branch} "
+        f"branch_hit_correct={bh_correct} (rho2~0.4165) "
+        f"branch_hit_conflated={bh_conflated} (tli+1 trap~0.03) "
+        f"per_pos={per_pos} "
+        f"skipped(no_stash={sps['skipped_no_stash']},unaligned={sps['skipped_unaligned']})",
+        file=sys.stderr,
+        flush=True,
+    )
+
+
+def _salvage_probe_observe(draft_token_ids: Any, target_argmax: Any) -> None:
+    """STAGE-1 join (verify side): correlate the verifier per-row argmax with the
+    emit probe's stashed rank-2 branch tokens and accumulate first-divergence
+    branch-hit. Observational only -- never touches the accept result, so PPL and
+    greedy-identity are unmoved."""
+    sps = _SALVAGE_PROBE_STATE
+    if not sps["registered"]:
+        import atexit
+
+        atexit.register(_salvage_probe_dump)
+        sps["registered"] = True
+    stash = sps["stash"]
+    if not stash or not stash.get("ready"):
+        sps["skipped_no_stash"] += 1
+        return
+    stash["ready"] = False  # consume: one emit-probe tree per verify step
+    try:
+        dti = (
+            draft_token_ids.tolist()
+            if hasattr(draft_token_ids, "tolist")
+            else list(draft_token_ids)
+        )
+        tgt = (
+            target_argmax.tolist()
+            if hasattr(target_argmax, "tolist")
+            else list(target_argmax)
+        )
+    except Exception:
+        sps["skipped_read_err"] += 1
+        return
+    # conc=1 single request: the arrays ARE the one chain. Guard multi-req batches.
+    K = len(dti)
+    if K == 0 or len(tgt) < K:
+        sps["skipped_read_err"] += 1
+        return
+    spine_chain = stash["spine_chain"]
+    cmp = min(K, len(spine_chain))
+    if dti[:cmp] != spine_chain[:cmp]:
+        # stashed tree's rank-1 spine != the chain the verifier checked ->
+        # off-by-one / multi-request batch -> don't pollute the branch-hit stats.
+        sps["skipped_unaligned"] += 1
+        return
+    sps["steps"] += 1
+    if sps["steps"] % 50 == 0:
+        # periodic checkpoint: robust to a SIGKILL teardown that skips atexit.
+        _salvage_probe_dump()
+    first_div = None
+    for pos in range(K):
+        if dti[pos] != tgt[pos]:
+            first_div = pos
+            break
+    if first_div is None:
+        sps["full_accept"] += 1
+        return
+    sps["divergence"] += 1
+    branch_rank2 = stash["branch_rank2"]
+    if first_div not in branch_rank2:
+        sps["div_no_branch"] += 1  # width-1 spine pos: no branch, salvage impossible
+        return
+    sps["div_at_branch"] += 1
+    r2 = branch_rank2[first_div]
+    if r2 == tgt[first_div]:  # decoupled-A target row (the Component 3a fix)
+        sps["branch_hit_correct"] += 1
+        sps["per_pos_hit"][first_div] = sps["per_pos_hit"].get(first_div, 0) + 1
+    if first_div + 1 < K and r2 == tgt[first_div + 1]:  # conflated tli+1 (the trap)
+        sps["branch_hit_conflated"] += 1
+    sps["per_pos_div"][first_div] = sps["per_pos_div"].get(first_div, 0) + 1
+
+
 def _dixie_fused_accept_prep(
     output_token_ids: Any,
     cu_num_draft_tokens: Any,
@@ -1247,6 +1435,17 @@ def _dixie_fused_accept_prep(
             next_token_ids,
             valid_counts,
         )
+        if TREE_SALVAGE_PROBE:
+            # STAGE-1 salvage screen: additive, after the accept is computed;
+            # wrapped so a probe bug can never crash the served verify.
+            try:
+                _salvage_probe_observe(draft_token_ids, target_argmax)
+            except Exception as exc:
+                print(
+                    f"[salvage-probe] observe error (non-fatal): {exc!r}",
+                    file=sys.stderr,
+                    flush=True,
+                )
         if not getattr(_dixie_fused_accept_prep, "_active_logged", False):
             _dixie_fused_accept_prep._active_logged = True
             print(
