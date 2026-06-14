@@ -74,6 +74,25 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 04:22 — PR #86 (wirbel): Acceptance-entropy correlation — CLOSE the entropy-gated dynamic-tree lane; uniform max-branch-3 at STRUCTURAL LIMIT (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU analysis + served collection, no served-file change, no HF launch; official bar stays 481.53). Banks `scripts/profiler/entropy_branching.py`.
+- **Verdict: decisive but NON-ACTIONABLE.** `rho2_entropy_correlation_r = -0.9688` — one of the strongest signals in the cost-model program, but **SIGN-REVERSED** vs hypothesis: a CONFIDENT (low-entropy) drafter predicts HIGHER rho2 (rho2 falls 0.568→0.176 across 5 entropy bins as the drafter gets less certain). 13,491 first-reject steps, greedy, align_bad=0; pooled rho2=0.4172 (matches #79).
+- **The signal is WITHIN-STEP** (within-depth point-biserial -0.301 ~= raw -0.302) → orthogonal to tree position → **explains #83's flat per-depth rho2**; a static depth-indexed (CUDA-graph-captured) tree captures EXACTLY ZERO of it.
+- **Entropy-gated dynamic-tree oracle ceiling = +0.273% E[T] / +0.334pp TPS** (free perfect regime oracle, cost-matched M=32) — below wall_tps MDE; shrinking the tree on hard steps is worse (-3.0pp). **The uniform max-branch-3 DP (E[T]=5.207, +18.17%) is at the structural limit for any static topology.**
+- **For land #71:** build the uniform max-branch-3 tree; no entropy/dynamic gating is worth forfeiting the onegraph CUDA graph on a 99.4%-GPU-bound decode.
+- **Primary metric:** `rho2_entropy_correlation_r` = **-0.9688**. **Test:** `entropy_gated_tree_E_T_gain_pct` = **0.273**.
+- **W&B:** `59u7qcwa` (analysis) / `79u01jm8` (collection). wirbel → #93 (star-attention greedy-equivalence gate).
+
+### 2026-06-14 04:21 — PR #91 (fern): Tree topology E[T] — max-branch-3 vs max-branch-4 empirical confirm — CONFIRMED (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU analytical + MC, no GPU, no served-file change; official bar stays 481.53). Banks `scripts/profiler/topology_et_compare.py` + `research/spec_cost_model/topology_et_compare_results.json`.
+- **Verdict: CONFIRMED.** `topology_et_delta_pct = +0.9614%` (independent MC), `topology_et_confirmed = 1`. Three estimators agree to ~0.01pp — analytic +0.9633%, independent MC +0.9614%, CRN paired +0.9560% (CI [+0.950,+0.962], rules out the WEAK band); delta vs wirbel #83's analytic prediction = 0.002pp. E[T] mb3 5.20559 vs mb4 5.15602.
+- **Validity:** reproduced #88 Leg A bit-for-bit (mb3 seed-7/400k = 5.2140425) and wirbel #83's analytic anchors exactly; 0 greedy violations on both topologies; the new contribution is the never-before-simulated max-branch-4 endpoint.
+- **For land #71:** build the **max-branch-3** array `[-1,0,0,0,1,1,1,2,3,4,4,5,7,9,9,10,11,12,13,15,16,17,18,19,20,21,22,24,25,26,28,29]` — the topology choice is now measurement-backed, not just DP-model. Acceptance-model reuse: score_tree_depthrank ~= MC to ~1e-3 tok, so future topology DP results can be trusted analytically.
+- **Primary metric:** `topology_et_delta_pct` = **0.9614**. **Test:** `topology_et_confirmed` = **1**.
+- **W&B:** `exkahicq`. fern → #92 (tree E[T] independence-gap: realized E[T] under real correlated drafter draws vs the independent DP model).
+
 ### 2026-06-14 04:07 — PR #88 (fern): Traversal Verification E[T] gate — RED, AXIS CLOSED (standard root-to-leaf confirmed; official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (CPU analytical + MC simulation, no GPU training, no served-file change; official bar stays 481.53). Banks `scripts/profiler/traversal_verify_et.py` + `research/spec_cost_model/traversal_verify_et_results.json` + `report_traversal_verify_et.md`.

@@ -1,5 +1,33 @@
 # SENPAI Research Results
 
+## 2026-06-14 04:22 — PR #86: Acceptance-entropy correlation — does drafter uncertainty predict rank-2 branching value? ✅ MERGED (decisive but NON-ACTIONABLE: r=-0.97 SIGN-REVERSED; signal is within-step so a static depth-tree captures 0 -> explains #83's flat per-depth rho2; entropy-gated dynamic-tree ceiling +0.27% E[T] < MDE -> CLOSE the dynamic-tree lane; uniform max-branch-3 confirmed at the STRUCTURAL LIMIT; official bar UNCHANGED 481.53)
+- wirbel/entropy-branching-correlation
+- **Hypothesis:** does drafter top-1 confidence / entropy predict the rank-2 salvage rate rho2? If an uncertain drafter spreads mass so that rank-2 is more often correct, an entropy-gated dynamic tree could widen branching on uncertain steps for extra free E[T] (and the PR's flat->close path assumed a weak correlation).
+
+| drafter-entropy bin (5 equal-freq) | H (nats) | rho2 | n |
+|---|---|---|---|
+| 1 (most confident) | 0.38 | 0.568 | 2698 |
+| 2 | 0.96 | 0.593 | 2698 |
+| 3 | 1.53 | 0.430 | 2698 |
+| 4 | 2.23 | 0.319 | 2698 |
+| 5 (most uncertain) | 3.60 | 0.176 | 2699 |
+
+- **Primary `rho2_entropy_correlation_r` = -0.9688 (binned Pearson, CI [-0.981,-0.951]); test `entropy_gated_tree_E_T_gain_pct` = 0.273. W&B `59u7qcwa` (analysis) / `79u01jm8` (collection); CPU analysis, served collection footprint identical to #79; no served change.** 13,491 first-reject steps, greedy, align_bad=0; pooled rho2=0.4172 (matches #79's 0.4165).
+- **Conclusions:** (1) **Correlation is one of the STRONGEST in the whole cost-model program (r=-0.97) but SIGN-REVERSED** vs hypothesis: a CONFIDENT (low-entropy) drafter predicts HIGHER rho2, not lower. Mechanism: spread drafter mass means the true token is buried deep (beyond rank-2), not that rank-2 is better; verifier uncertainty agrees (r(verifier_p1)=+0.985). (2) **Signal is WITHIN-STEP** — within-depth point-biserial -0.301 ~= raw -0.302, so it fully survives demeaning each first-divergence depth; it is orthogonal to tree position. This **explains #83's flat per-depth rho2 [0.397-0.445]**: the structure lives inside each depth, and a static depth-indexed tree (the CUDA-graph-captured kind) can allocate width only by depth -> captures EXACTLY ZERO of it. (3) **Step-4 entropy-gated DP oracle ceiling = +0.273% E[T] / +0.334pp TPS** even with a FREE perfect per-step regime oracle, cost-matched at M=32 — below the wall_tps MDE (~0.1-0.2%); shrinking the tree on hard steps is worse (-3.0pp). (4) **Verdict: CLOSE the entropy-gated dynamic-tree lane** — the only mechanism that could capture even +0.27% forfeits the static-topology onegraph CUDA graph on a 99.4%-GPU-bound decode. (5) **The uniform max-branch-3 DP (E[T]=5.207, +18.17%) is at the STRUCTURAL LIMIT for any static topology** — rho2 has rich internal structure but it is not economically reachable. Banks `scripts/profiler/entropy_branching.py`. (6) If a future idea makes a DYNAMIC (non-CUDA-graph) draft loop cheap, this signal becomes the natural gating variable — a substrate change, out of scope. wirbel -> **#93** (star-attention greedy-equivalence gate — the un-audited attention-side numerics surface of land #71's build).
+
+## 2026-06-14 04:21 — PR #91: Tree topology E[T] — max-branch-3 vs max-branch-4 empirical confirm ✅ MERGED (decisive CONFIRMED: +0.9614% MC delta validates wirbel #83's +0.96% analytic prediction to 0.002pp; max-branch-3 empirically optimal; official bar UNCHANGED 481.53)
+- fern/tree-topology-et-comparison
+- **Hypothesis:** wirbel #83 derived analytically that max-branch-3 beats max-branch-4 by +0.96% E[T] / +1.13pp TPS, but MC-validated only the max-branch-3 endpoint — the *delta* rested on a difference of two analytic numbers. Drive fern's #88 MC engine on BOTH topologies under the identical measured acceptance model to confirm or refute the delta empirically, giving land #71 a measurement-backed build choice.
+
+| estimator | E[T] mb3 | E[T] mb4 | delta_pct |
+|---|---|---|---|
+| analytic (exact, score_tree_depthrank) | 5.206954 | 5.157273 | +0.9633% |
+| independent MC (#88 engine, 2M trials/topo x5 seeds) | 5.20559 | 5.15602 | +0.9614% |
+| CRN paired (6M trials x3 seeds, common random numbers) | 5.20790 | 5.15859 | +0.9560% (CI [+0.950,+0.962]) |
+
+- **Primary `topology_et_delta_pct` = 0.9614; test `topology_et_confirmed` = 1 (CONFIRMED, >= +0.8%). W&B `exkahicq`, 33.3 MiB RSS, CPU-only, no served change.** Banks `scripts/profiler/topology_et_compare.py` + `research/spec_cost_model/topology_et_compare_results.json`.
+- **Conclusions:** (1) **CONFIRMED decisively** — three independent estimators (analytic +0.9633%, independent MC +0.9614%, CRN paired +0.9560%) agree to ~0.01pp; CRN CI rules out the WEAK band entirely; delta vs wirbel's analytic = 0.002pp (essentially exact). (2) **Reproduced #88 Leg A bit-for-bit** (max-branch-3 seed-7/400k = 5.2140425) and wirbel #83's analytic anchors exactly -> engine integrity + acceptance-model validity confirmed; the new contribution is the max-branch-4 endpoint (5.15602), which wirbel never simulated. (3) **Mechanism:** only ~24% of decode steps differ; the +0.96% comes from those steps where max-branch-4 spends a node on a low-value rank-4 child (marginal ~0.022) while max-branch-3 reallocates it to rank-2 breadth/spine, which pays more under the DECLINING ladder (rho2=0.4165 >> rho4=0.1908). (4) **0 greedy violations on both topologies** (consistent with #88). (5) **For land #71:** build the max-branch-3 array `[-1,0,0,0,1,1,1,2,3,4,4,5,7,9,9,10,11,12,13,15,16,17,18,19,20,21,22,24,25,26,28,29]` (depth-9, spine widths [3,3,2,2,1,1,1,1,1]) — now measurement-backed. (6) **Acceptance-model reuse:** score_tree_depthrank ~= MC to ~1e-3 tok -> future tree-topology DP results can be trusted analytically (one MC validation per family suffices). The win is real but modest (~0.05 tok/step, ~1/18th of the tree's +18% over the linear chain); the served +1.13pp wall_tps conversion is lawine #90's A/B once land #71 delivers the build. fern -> **#92** (tree E[T] independence-gap: realized E[T] under real correlated drafter draws vs the independent DP model — the last untested assumption in the +18.2% projection).
+
 ## 2026-06-14 04:07 — PR #88: Traversal Verification E[T] gate ✅ MERGED — RED / AXIS CLOSED (provably zero under greedy; standard root-to-leaf confirmed; land #71 keeps existing acceptance rule)
 
 - **Branch:** `fern/traversal-verify-et` · **Student:** fern · merged ~04:07Z
