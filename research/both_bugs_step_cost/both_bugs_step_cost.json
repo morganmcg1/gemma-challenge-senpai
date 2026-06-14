@@ -1,0 +1,303 @@
+{
+  "pr": 161,
+  "utc": "2026-06-14T14:11:02Z",
+  "gpu": "NVIDIA A10G",
+  "l2_bytes": 6291456,
+  "anchors": {
+    "k_cal": 125.26795005202914,
+    "step_m8_us": 7982.887878221502,
+    "roofline_step": 1.2127483746822987,
+    "measured_step_136": 1.2182,
+    "e_t_descent_only": 5.056404568844709,
+    "e_t_both_bugs": 5.206954309441963,
+    "depth1_descent": 0.679,
+    "depth1_both": 0.728739760479042,
+    "official_both_assumed_roofline": 537.8399229182609
+  },
+  "config": {
+    "seed": 161,
+    "spine_len": 9,
+    "max_spec_len": 9,
+    "n_iter": 80,
+    "warmup": 30,
+    "n_passes": 300,
+    "rounds": 5,
+    "sched_steps": 512,
+    "gemm_filler_n": 2048,
+    "hidden_threshold_us": 60.0
+  },
+  "self_test": {
+    "roofline_step": 1.2127483746822987,
+    "idle_overlap_us": 41.25509765623974,
+    "per_call_idle_overlap_us": 1.1150026393578307,
+    "step_reproduced": 1.217916316194892,
+    "anchor_136": 1.2182,
+    "delta_vs_anchor_pct": 0.023287128969619424,
+    "tol_pct": 1.5,
+    "gemm_per_call": 1,
+    "filler_us_each": 284.27588750000007,
+    "device_busy_us": 12632.12625000001,
+    "eager_span_us": 12673.38134765625,
+    "step_cost_self_test_passes": true
+  },
+  "opcount_model": {
+    "source": "research/validity/fp32_star_verify_crosscheck/rootcause_results.json (denken #133)",
+    "bug1_dominant_cause": "plumbing",
+    "plumbing_frac_of_deficit": 0.9600264278077516,
+    "intrinsic_pp": 0.0,
+    "fix": "correct target_logits_indices so the depth-1 root verify-row compares against the drafter rank-1 (top1) token -- UPSTREAM of the accept-prep kernel; the kernel consumes target_argmax unchanged.",
+    "kernel_op_count_delta_both_vs_descent": 0,
+    "kernel_bytewise_identical_baseline_vs_pupa": true,
+    "worst_case_modeled_extra_ops_depth1_spine": {
+      "extra_indirection_load": 1,
+      "extra_compare": 0,
+      "extra_store": 0,
+      "note": "+1 target_logits_indices deref at pos==0 only; over-models the real (0-op) plumbing fix."
+    }
+  },
+  "filler": {
+    "gemm_n": 2048,
+    "filler_us_each": 284.15520000000004,
+    "step_gpu_us_target": 9149.573677586994,
+    "gemm_per_op": 32,
+    "realized_filler_us_per_step": 9092.966400000001
+  },
+  "schedule_stats": {
+    "descent_only": {
+      "mean_accept_len": 2.84765625,
+      "depth1_rate": 0.679,
+      "n_steps": 512
+    },
+    "both_bugs": {
+      "mean_accept_len": 3.00390625,
+      "depth1_rate": 0.728739760479042,
+      "n_steps": 512
+    }
+  },
+  "accept_prep_measured": {
+    "descent_only": {
+      "device_busy_isolation_us": 1.9308250000000329,
+      "idle_interleaved_us": 8.540182552069382,
+      "idle_isolation_us": 19.958215037027994,
+      "device_busy_interleaved_us": 9109.117050000019,
+      "device_busy_isolation_rounds": [
+        1.9151250000000004,
+        1.9308250000000329,
+        1.9239749999999873,
+        1.941625000000002,
+        1.9476124999999982
+      ],
+      "idle_interleaved_rounds": [
+        6.665013802065005,
+        8.540182552069382,
+        25.151513802060435,
+        22.620132812491647,
+        7.404417968775306
+      ],
+      "device_busy_isolation_summary": {
+        "n": 5,
+        "mean": 1.931832500000004,
+        "median": 1.9308250000000329,
+        "std": 0.011720045861685865,
+        "se": 0.005241363849228939,
+        "cv_pct": 0.606680230386736,
+        "ci95_abs": 0.010272884374358946,
+        "min": 1.9151250000000004,
+        "max": 1.9476124999999982
+      },
+      "idle_interleaved_summary": {
+        "n": 5,
+        "mean": 14.076252187492354,
+        "median": 8.540182552069382,
+        "std": 8.071520417136925,
+        "se": 3.6096936668991244,
+        "cv_pct": 57.34140245305484,
+        "ci95_abs": 7.074869582344607,
+        "min": 6.665013802065005,
+        "max": 25.151513802060435
+      }
+    },
+    "both_bugs": {
+      "device_busy_isolation_us": 1.9004249999999872,
+      "idle_interleaved_us": 17.839201822916948,
+      "idle_isolation_us": 19.65977559254964,
+      "device_busy_interleaved_us": 9108.681025000024,
+      "device_busy_isolation_rounds": [
+        1.8960375000000114,
+        1.8952124999999398,
+        1.9004249999999872,
+        1.9100375000000014,
+        1.9168250000000158
+      ],
+      "idle_interleaved_rounds": [
+        17.839201822916948,
+        13.49202812499243,
+        47.86438515622649,
+        62.50893567710045,
+        15.885919791662673
+      ],
+      "device_busy_isolation_summary": {
+        "n": 5,
+        "mean": 1.903707499999991,
+        "median": 1.9004249999999872,
+        "std": 0.008413161563899318,
+        "se": 0.0037624802325134632,
+        "cv_pct": 0.44193562109196705,
+        "ci95_abs": 0.007374325748270277,
+        "min": 1.8952124999999398,
+        "max": 1.9168250000000158
+      },
+      "idle_interleaved_summary": {
+        "n": 5,
+        "mean": 31.5180941145798,
+        "median": 17.839201822916948,
+        "std": 19.920087926620294,
+        "se": 8.908534144339164,
+        "cv_pct": 63.2020700687151,
+        "ci95_abs": 17.460406077950108,
+        "min": 13.49202812499243,
+        "max": 62.50893567710045
+      }
+    },
+    "both_bugs_worst_case": {
+      "device_busy_isolation_us": 1.9196124999999866,
+      "idle_interleaved_us": 14.827828125005908,
+      "idle_isolation_us": 21.00450849456788,
+      "device_busy_interleaved_us": 9121.554649999987,
+      "device_busy_isolation_rounds": [
+        1.906424999999993,
+        1.907537500000022,
+        1.9196124999999866,
+        1.9256624999999943,
+        1.9255999999999915
+      ],
+      "idle_interleaved_rounds": [
+        8.106160156257829,
+        14.77684244795637,
+        53.411170312512695,
+        16.803781770859132,
+        14.827828125005908
+      ],
+      "device_busy_isolation_summary": {
+        "n": 5,
+        "mean": 1.9169674999999977,
+        "median": 1.9196124999999866,
+        "std": 0.00845208036520496,
+        "se": 0.003779885249577908,
+        "cv_pct": 0.44090890248295656,
+        "ci95_abs": 0.007408438954866893,
+        "min": 1.906424999999993,
+        "max": 1.9256624999999943
+      },
+      "idle_interleaved_summary": {
+        "n": 5,
+        "mean": 21.585156562518385,
+        "median": 14.827828125005908,
+        "std": 16.183044638930497,
+        "se": 7.237277579112425,
+        "cv_pct": 74.97302413377717,
+        "ci95_abs": 14.184803401179586,
+        "min": 8.106160156257829,
+        "max": 53.411170312512695
+      }
+    }
+  },
+  "propagation": {
+    "device_busy_descent_us": 1.9308250000000329,
+    "device_busy_both_bugs_us": 1.9004249999999872,
+    "device_busy_worst_case_us": 1.9196124999999866,
+    "accept_busy_pct_of_step": 0.019542139548319314,
+    "marginal_bug1_busy_paired": {
+      "per_round": [
+        -0.019087499999989044,
+        -0.035612500000093084,
+        -0.023550000000000182,
+        -0.031587500000000546,
+        -0.030787499999982426
+      ],
+      "median": -0.030787499999982426,
+      "mean": -0.028125000000013056,
+      "ci95_abs": 0.005226125531355301,
+      "within_ci": false
+    },
+    "marginal_bug1_busy_worst_paired": {
+      "per_round": [
+        -0.00870000000000748,
+        -0.023287500000010786,
+        -0.004362500000000713,
+        -0.01596250000000765,
+        -0.022012500000006652
+      ],
+      "median": -0.01596250000000765,
+      "mean": -0.014865000000006656,
+      "ci95_abs": 0.006459435911726622,
+      "within_ci": false
+    },
+    "marginal_bug1_idle_paired": {
+      "per_round": [
+        11.174188020851943,
+        4.951845572923048,
+        22.712871354166055,
+        39.888802864608806,
+        8.481501822887367
+      ],
+      "median": 11.174188020851943,
+      "mean": 17.441841927087445,
+      "ci95_abs": 11.137156215791492,
+      "within_ci": false
+    },
+    "marginal_bug1_idle_worst_paired": {
+      "per_round": [
+        1.4411463541928242,
+        6.236659895886987,
+        28.25965651045226,
+        -5.816351041632515,
+        7.423410156230602
+      ],
+      "median": 6.236659895886987,
+      "mean": 7.508904375026032,
+      "ci95_abs": 9.967720518577769,
+      "within_ci": true
+    },
+    "idle_interleaved_descent_us": 8.540182552069382,
+    "idle_interleaved_both_us": 17.839201822916948,
+    "idle_interleaved_worst_us": 14.827828125005908,
+    "marginal_busy_us": -0.030787499999982426,
+    "marginal_busy_worst_us": -0.01596250000000765,
+    "marginal_dstep_units": -3.856687012224646e-06,
+    "both_bugs_step_pinned": 1.2182,
+    "both_bugs_step_pinned_worst": 1.2182,
+    "descent_only_step_anchor": 1.2182,
+    "both_bugs_step_delta_pct": 0.0,
+    "both_bugs_step_delta_worst_pct": 0.0,
+    "official": {
+      "both_bugs_official_assumed_roofline": 537.8399229182609,
+      "both_bugs_official_pinned_roofline": 537.8399229182609,
+      "both_bugs_official_pinned_worst_roofline": 537.8399229182609,
+      "both_bugs_official_assumed_overlap": 535.4330096522523,
+      "both_bugs_official_pinned_overlap": 535.4330096522523,
+      "official_drop_vs_537p8_roofline": 0.0
+    },
+    "idle_hidden": true,
+    "busy_hidden": true,
+    "marginal_within_ci": false,
+    "real_neutral": true,
+    "worst_neutral": true,
+    "step_neutral": true,
+    "neutral_step_pct": 0.1,
+    "hidden_threshold_us": 60.0
+  },
+  "verdict": "GREEN",
+  "verdict_reason": "both-bugs accept-prep is STEP-NEUTRAL vs descent-only. bug-1 is upstream target_logits_indices plumbing (0 added kernel ops, denken #133); the served accept-prep kernel is byte-identical and consumes target_argmax unchanged. MEASURED device-busy 1.931us (descent) vs 1.900us (both-bugs): paired marginal -0.0308us (ci95 0.0052) -> +0.0000% step (< 0.1% practical floor ~= 0.5 TPS). The whole accept-prep kernel is 0.0195% of the 9150us step (1 sync-free launch, GPU-hidden behind the ~92%-weight-GEMM step). Even the WORST-CASE explicit depth-1 conditional adds only -0.0160us device-busy (+0.0000% step). The 537.8 both-bugs official LOCKS IN (both_bugs_official_pinned 537.84 @roofline / 535.43 @overlap).",
+  "primary_metric": {
+    "name": "step_cost_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "both_bugs_step_delta_pct",
+    "value": 0.0
+  },
+  "elapsed_s": 49.24355506896973,
+  "peak_gpu_gb": 0.25782528,
+  "wandb_run_id": "2heov0f4"
+}
