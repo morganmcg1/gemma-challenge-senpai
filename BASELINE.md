@@ -74,6 +74,11 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 07:13 — PR #107 (lawine): Tree-step denominator measurement — GREEN / the 1.16× is now MEASURED, break-even holds (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (LOCAL A10G microbench, no served-file change, no HF launch; official bar stays 481.53). Banks `scripts/profiler/tree_step_denominator.py` + `research/spec_cost_model/tree_step_denominator.json` + a cold-clock-warmup bugfix. W&B `tbhywbmw` advisor-verified (finished, primary `measured_M32_M8_step_ratio=1.237` [verify-substep], test `corrected_breakeven_ET=4.614`).
+- **Verdict:** the verify-SUBSTEP floor measures **1.237×**, diluting through the flat ~39% drafter+host remainder to a whole-STEP bracket **[1.145, 1.156] ≈ fern's modeled 1.158** → corrected break-even **E[T]=4.614** (holds vs #102's 4.624, −0.21%). Component story: GEMM is NOT flat M≤32 (Marlin 16-row tile staircase 1.169×) but the excess is offset by attention-as-modeled (1.83×, wirbel #98) → nets to fern's 1.158. ⇒ the tree milestone ladder (#106) now rests on **measured** ground, not a back-solved denominator. Open risk: drafter tree-expansion + star-attn tree-mask deltas sit on the flat remainder, unmeasurable until land #71's real kernel.
+
 ### 2026-06-14 06:56 — PR #106 (fern): Tree-vs-tree-free crossover + build-milestone ladder — AMBER / tree de-risked to UPSIDE (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (CPU-only analysis, no served-file change, no HF launch; official bar stays 481.53). Banks `scripts/profiler/tree_vs_treefree_crossover.py` + `research/spec_cost_model/{report_tree_vs_treefree_crossover.md, tree_vs_treefree_crossover_results.json}`. W&B `1qkiheqb` advisor-verified (finished, primary `tree_vs_treefree_crossover_ET=4.727`, test `build_milestone_ladder_clear500_ET=4.624`).
