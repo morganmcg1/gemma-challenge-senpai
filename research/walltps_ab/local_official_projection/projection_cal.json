@@ -1,0 +1,132 @@
+{
+  "calibration": {
+    "local_to_official_multiplier": 1.0601865051833779,
+    "local_wall_tps_deployed": 454.19367030776425,
+    "local_cv_pct_across_runs": 0.02999465119565554,
+    "official_tps_anchor": 481.53,
+    "multiplier_se_local": 9.914099925161552e-05,
+    "multiplier_ci95_local": [
+      1.0599921923954079,
+      1.0603808179713479
+    ],
+    "official_cv_assumed_pct": 1.0,
+    "multiplier_ci95_envelope": [
+      1.0394063229912567,
+      1.080966687375499
+    ],
+    "n_sessions": 3,
+    "n_runs_total": 9,
+    "per_session_multiplier": [
+      {
+        "label": "pr82_selfnull_baseline",
+        "local_median_wall_tps": 454.08539709184896,
+        "multiplier": 1.0604392986075255,
+        "source": "research/walltps_ab/selfnull/paired_ab.json arms.baseline (PR #82, N=3)",
+        "primary_fit": true
+      },
+      {
+        "label": "pr82_selfnull_candidate",
+        "local_median_wall_tps": 454.22098715299325,
+        "multiplier": 1.0601227455784827,
+        "source": "research/walltps_ab/selfnull/paired_ab.json arms.candidate (PR #82, N=3)",
+        "primary_fit": true
+      },
+      {
+        "label": "pr90_ksweep_baseline",
+        "local_median_wall_tps": 454.33835724012107,
+        "multiplier": 1.0598488820645797,
+        "source": "research/walltps_ab/mtp_k*/paired_ab.json arms.baseline (PR #90 K=7, N=3) -- LOCKED reference 454.338",
+        "primary_fit": true
+      },
+      {
+        "label": "pr72_fresh_n12",
+        "local_median_wall_tps": 454.12,
+        "multiplier": 1.0603584955518364,
+        "source": "BASELINE.md PR #82 entry: '#72's N=12 454.12'",
+        "primary_fit": false
+      },
+      {
+        "label": "pr43_wallclock",
+        "local_median_wall_tps": 454.25,
+        "multiplier": 1.0600550357732526,
+        "source": "BASELINE.md PR #43 entry: tps_local_splitkv_wallclock=454.25",
+        "primary_fit": false
+      }
+    ],
+    "notes": [
+      "Multiplier = 481.53 (official, single anchor PR#52) / 454.194 (local mean wall_tps, n_runs=9 over 3 committed sessions) = 1.06019.",
+      "Per-session multiplier spans [1.05985, 1.06044] (incl. corroborating sessions) -- denominator is config-stable to +/-0.028%.",
+      "Local-side CI is tight (many sessions). DOMINANT honest uncertainty is the single official anchor: its run-to-run variance is UNMEASURED; the envelope assumes official per-run CV=1.00% as a sensitivity knob.",
+      "Config-stability holds within the spec-frontier family (K/MBT sweeps); cross-precision invariance is untested (older rungs used a different local meter) but is not the binding axis for the tree (same precision as anchor)."
+    ]
+  },
+  "official_anchor": {
+    "tps": 481.53,
+    "config": "fa2sw_precache_kenyan (linear MTP K=7 + 3D split-KV)",
+    "job": "6a2dce05871c005b5352c0b9",
+    "run_prefix": "results/senpai/fa2sw-precache-kenyan-20260613T213911Z",
+    "date": "2026-06-13",
+    "private_verified_tps": 460.85,
+    "private_gap_pct": 4.3,
+    "ppl": 2.3772,
+    "completed": 128,
+    "source": "BASELINE.md PR #52; private-VERIFIED cmpatino-verifier 2026-06-13 23:04Z"
+  },
+  "self_check": {
+    "local_wall_tps": 454.33835724012107,
+    "multiplier": 1.0601865051833779,
+    "projected_official": 481.683395133161,
+    "projected_official_lo": 472.24216129284224,
+    "projected_official_hi": 491.12462897347973,
+    "band_rel_pct": 1.9600496790446267,
+    "band_from_multiplier_pct": 1.9600496790446267,
+    "band_from_modeling_pct": 0.0,
+    "clears_500": false,
+    "margin_to_500_pct_at_lo": -5.551567741431552,
+    "margin_to_500_pct_at_central": -3.663320973367797,
+    "recovered_official": 481.683395133161,
+    "official_anchor": 481.53,
+    "abs_err_vs_anchor_tps": 0.15339513316104103,
+    "rel_err_vs_anchor_pct": 0.03185577911262871,
+    "self_check_mde_pct": 0.1,
+    "recovers_official_anchor": true
+  },
+  "tree_projection": {
+    "local_wall_tps": 537.027938257823,
+    "multiplier": 1.0601865051833779,
+    "projected_official": 569.3497730473963,
+    "projected_official_lo": 552.1446722026743,
+    "projected_official_hi": 586.5548738921183,
+    "band_rel_pct": 3.021885958192821,
+    "band_from_multiplier_pct": 1.9600496790446267,
+    "band_from_modeling_pct": 2.3,
+    "clears_500": true,
+    "margin_to_500_pct_at_lo": 10.428934440534864,
+    "margin_to_500_pct_at_central": 13.86995460947926,
+    "linear_reference_wall_tps": 454.33835724012107,
+    "net_local_gain_pct": 18.2,
+    "local_tree_wall_tps": 537.027938257823,
+    "E_T": 5.207,
+    "topology": "M=32 depth-9 max-branch-3 (wirbel #83)",
+    "fern_published_official_band": [
+      558.0,
+      581.0
+    ],
+    "projected_official_clears_500_bool": true
+  },
+  "gate": {
+    "verdict": "GREEN",
+    "per_session_spread_pct": 0.055689875324687235,
+    "config_stable": true,
+    "band_lo": 552.1446722026743,
+    "band_hi": 586.5548738921183,
+    "band_straddles_500": false,
+    "band_wholly_below_500": false,
+    "margin_to_500_pct_at_lo": 10.428934440534864,
+    "clears_500_with_margin": true,
+    "margin_green_pct": 5.0,
+    "reasons": [
+      "config-stable (spread 0.056% < 0.5%) AND band [552.1, 586.6] clears 500 by 10.43% (>= 5.0%)"
+    ]
+  }
+}
