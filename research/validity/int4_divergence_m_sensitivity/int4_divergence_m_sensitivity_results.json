@@ -1,0 +1,159 @@
+{
+  "agent": "lawine",
+  "created_at": "20260614T223942Z",
+  "kind": "int4-divergence-m-sensitivity",
+  "nan_clean": true,
+  "peak_mem_mib": 13.66,
+  "pr": 242,
+  "synthesis": {
+    "curves": {
+      "anchors": {
+        "d1_native_M1": 0.5607757568359375,
+        "d8_clean_M8": 0.007291666666666696
+      },
+      "curveA_clean": {
+        "fitA_at1": 0.0,
+        "fitA_at8": 0.007291666666666696,
+        "form": "div_A(1)=0 (#232 det control); div_A(M>=2)=div_A(8)=d8 (saturating plateau)",
+        "monotone": "non-decreasing from M=1 (0) to the plateau d8 (M>=2)",
+        "rationale": "each output row's K-reduction order is set by the K-partition (shared across rows), not by M; once batched (M>=2) the order saturates -> the clean curve plateaus at the M=8 batched floor."
+      },
+      "curveB_envelope": {
+        "fitB_at1_exp": 0.5607757568359375,
+        "fitB_at1_powerlaw": 0.5607757568359375,
+        "fitB_at8_exp": 0.007291666666666697,
+        "fitB_at8_powerlaw": 0.007291666666666695,
+        "form": "div_B(M) = d1 * M^(-p) [power]  and  d1 * exp(-lam*(M-1)) [exp], through (1,d1),(8,d8)",
+        "lam_exp": 0.6203698516575095,
+        "monotone": "decreasing in M (reproduces the PR's M=1->M=8 DROP direction)",
+        "p_powerlaw": 2.088343853174392,
+        "rationale": "the PR's two-anchor reading: 0.5608 is the M=1 native-spec envelope, 0.0073 the M=8 clean floor; the 'drop' is the envelope collapsing. A decaying law extrapolates 'more batch -> more stable' beyond M=8."
+      },
+      "params": {
+        "lam_exp": 0.6203698516575095,
+        "p_powerlaw": 2.088343853174392
+      }
+    },
+    "frame_mechanism": {
+      "anchor_M1_native_spec": 0.5607757568359375,
+      "anchor_M8_clean": 0.007291666666666696,
+      "direction_M1_to_M8": "DROP (native-spec envelope 0.5608 collapses to the clean batched floor 0.0073)",
+      "drop_M1_to_M8": 0.5534840901692708,
+      "fp16_floor_div_221": 0.01055908203125,
+      "int4_body_bitexact_m8": true,
+      "locus_correction": "#232 in-process diagnostic: all four int4-Marlin BODY GEMMs (qkv/o/gate_up/down) are BIT-EXACT across M in {1,8} (max_abs_diff=0 each) -> the int4 body split-K is M-INVARIANT and contributes ZERO batch-width divergence. The residual 0.73% is the bf16 tied lm_head + bf16 attention/norm reduction being batch-variant (below the #221 bf16 floor 0.010559, 0.69x). So the M-dependence is a bf16-lm_head property, not an int4-body property.",
+      "locus_implication_for_M16": "the int4 body stays bit-exact at M=16 (0 contribution); only the bf16 lm_head's K-reduction order can move, and only if M=16 crosses a tiling-config boundary -> the projection is biased toward PLATEAU, with a bounded tiling-boundary upper tail.",
+      "mechanism": "verify-vs-M1 per-token divergence = (near-tie mass) x (FP-reduction order-instability at width M). A GEMM's split-K partitions the K-reduction across tiles; the kernel picks the tiling (and thus the accumulation ORDER) from the problem shape (M,N,K). A near-tie (top-2 logits within FP-rounding distance) can flip argmax under a different order -> divergence is M-dependent.",
+      "onset_signature_114": "late/stochastic (FP-reduction near-tie flips)",
+      "reference_kind_114": "unknown",
+      "two_quantities_caveat": "the M=1 anchor (#114 0.5608) and the M=8 anchor (#232 0.0073) are DIFFERENT quantities: #114 is native-spec stochasticity (draft branching, reference_kind 'unknown') -- an UPPER envelope; #232 is the isolated 'hold weights, vary only M' batch-width effect. The clean curve's M=1 value is 0 (#232 determinism control), not 0.5608."
+    },
+    "handoff_lines": {
+      "denken_236": "the deployed 0.73% int4 divergence is an M=8 fact; projecting the split-K FP-reduction-order model (with #232's locus correction: int4 body bit-exact, bf16 lm_head is the M-variant locus) to the tree build's M=16 gives projected_divergence_at_M16=0.007292 (bound [5.10e-05, 0.014583], near-greedy SURVIVES), so denken #236's lambda-invariant-PPL assumption holds at the build's M (PPL is output-equivalence-pinned regardless; even the upper tail 0.0146 keeps the served stream the int4 greedy stream) -- and land #71's build MUST report the M=16 divergence as a one-probe confirm (plateau vs the bounded tiling tail).",
+      "fern_card": "the deployed 0.73% int4 divergence is an M=8 fact; projecting the split-K FP-reduction-order model (with #232's locus correction: int4 body bit-exact, bf16 lm_head is the M-variant locus) to the tree build's M=16 gives projected_divergence_at_M16=0.007292 (bound [5.10e-05, 0.014583], near-greedy SURVIVES), so denken #236's lambda-invariant-PPL assumption holds at the build's M (PPL is output-equivalence-pinned regardless; even the upper tail 0.0146 keeps the served stream the int4 greedy stream) -- and land #71's build MUST report the M=16 divergence as a one-probe confirm (plateau vs the bounded tiling tail).",
+      "land_71": "the deployed 0.73% int4 divergence is an M=8 fact; projecting the split-K FP-reduction-order model (with #232's locus correction: int4 body bit-exact, bf16 lm_head is the M-variant locus) to the tree build's M=16 gives projected_divergence_at_M16=0.007292 (bound [5.10e-05, 0.014583], near-greedy SURVIVES), so denken #236's lambda-invariant-PPL assumption holds at the build's M (PPL is output-equivalence-pinned regardless; even the upper tail 0.0146 keeps the served stream the int4 greedy stream) -- and land #71's build MUST report the M=16 divergence as a one-probe confirm (plateau vs the bounded tiling tail)."
+    },
+    "imports": {
+      "div_m1_native": 0.5607757568359375,
+      "div_m8_clean": 0.007291666666666696,
+      "fp16_floor_div_221": 0.01055908203125,
+      "identity_m8_clean": 0.9927083333333333,
+      "int4_body_bitexact_m8": true,
+      "m_deployed": 8,
+      "m_tree_build": 16,
+      "official_baseline": 481.53,
+      "onset_signature_114": "late/stochastic (FP-reduction near-tie flips)",
+      "reference_kind_114": "unknown",
+      "source_runs": {
+        "fp16_221": "6m40u2bg",
+        "kanna_114": "9q5yy9l1",
+        "land_71": "(tree build, M=16)",
+        "lawine_232": "nxwv6pam"
+      },
+      "src_114": "research/validity/self_referential_gate/ab-20260614T075459Z/interlock_report.json",
+      "src_232": "research/validity/int4_tokenident_deployed_m8/int4_tokenident_report.json"
+    },
+    "projection_M16": {
+      "bound_lower": 5.098485405470035e-05,
+      "bound_upper": 0.014583333333333393,
+      "bound_upper_bf16_floor_ref": 0.01055908203125,
+      "central_model": "PLATEAU (Curve A: clean batch-width order saturates for M>=2)",
+      "confirming_probe_flag": "the M=16 divergence is a ONE-PROBE-CONFIRMABLE readout the live tree build (land #71) must report: re-run the #232 M=1-AR-vs-M=16-verify identity at the build's tree width. It is NOT free (needs the built tree-decode verify) but is cheap once the build runs -- it confirms plateau vs the bounded tiling-boundary tail.",
+      "curveB_M16_exp": 5.098485405470035e-05,
+      "curveB_M16_powerlaw": 0.001714638874615798,
+      "direction_verdict": "PLATEAU central -- M=16 CONTINUES no worse than M=8 (the clean batch-width order is M-invariant within a tiling bucket; M=8 and M=16 are both small and likely share it). Optimistic side: CONTINUE the improvement (Curve B decay). Pessimistic side: a bounded REVERSE only if M=16 crosses a split-K tiling boundary (capped ~2x M=8).",
+      "near_greedy_survives_at_M16": true,
+      "near_greedy_threshold_div": 0.01,
+      "near_greedy_threshold_identity": 0.99,
+      "near_greedy_verdict": "SURVIVES",
+      "projected_divergence_at_M16": 0.007291666666666696,
+      "projected_identity_at_M16": 0.9927083333333333,
+      "strict_line_at_risk_in_upper_tail": true,
+      "table": [
+        {
+          "M": 1,
+          "confidence": "high (both measured; flagged as different quantities)",
+          "divergence_clean": 0.0,
+          "divergence_envelope_native": 0.5607757568359375,
+          "identity_clean": 1.0,
+          "kind": "MEASURED (two quantities: clean det-control 0.0 #232; native-spec env 0.5608 #114)"
+        },
+        {
+          "M": 4,
+          "confidence": "medium (interpolated plateau; no measurement)",
+          "divergence_clean": 0.007291666666666696,
+          "divergence_envelope_native": 0.031008513550523416,
+          "identity_clean": 0.9927083333333333,
+          "kind": "PROJECTED (interior; plateau central, no boundary crossing 1<M<8 expected)"
+        },
+        {
+          "M": 8,
+          "confidence": "high (measured, controls 1.0)",
+          "divergence_clean": 0.007291666666666696,
+          "divergence_envelope_native": 0.007291666666666695,
+          "identity_clean": 0.9927083333333333,
+          "kind": "MEASURED (#232 clean M=1-AR-vs-M=8-verify)"
+        },
+        {
+          "M": 16,
+          "confidence": "medium-high (plateau; only risk is a split-K tiling-boundary crossing between M=8 and M=16 -> one-probe-confirmable by land #71)",
+          "divergence_clean": 0.007291666666666696,
+          "divergence_envelope_native": 0.001714638874615798,
+          "identity_clean": 0.9927083333333333,
+          "kind": "PROJECTED (plateau central; bound below)"
+        }
+      ]
+    },
+    "self_test": {
+      "conditions": {
+        "a_curve_through_both_anchors": true,
+        "b_M16_projection_has_explicit_bound": true,
+        "c_monotonicity_and_M1_to_M8_direction": true,
+        "d_near_greedy_verdict_with_threshold": true,
+        "e_key_scalars_finite": true
+      },
+      "evidence": {
+        "a_fitA1": 0.0,
+        "a_fitA8": 0.007291666666666696,
+        "a_fitB1_exp": 0.5607757568359375,
+        "a_fitB1_pow": 0.5607757568359375,
+        "a_fitB8_exp": 0.007291666666666697,
+        "a_fitB8_pow": 0.007291666666666695,
+        "b_bound_lower": 5.098485405470035e-05,
+        "b_bound_upper": 0.014583333333333393,
+        "b_central": 0.007291666666666696,
+        "c_curveA_rise_0_to_d8": true,
+        "c_curveB_drop_M1_gt_M8": true,
+        "c_plateau_assumption_div16_eq_div8": true,
+        "d_survives": true,
+        "d_threshold_div": 0.01,
+        "d_verdict": "SURVIVES"
+      },
+      "int4_divergence_m_sensitivity_self_test_passes": true
+    },
+    "test_metric": {
+      "projected_divergence_at_M16": 0.007291666666666696
+    },
+    "verdict": "PLATEAU. The deployed 0.73% int4 divergence is an M=8 fact (#232); projecting the FP-reduction-order mechanism to the tree build's M=16 gives projected_divergence_at_M16 = 0.007292 (identity 0.992708), bound [5.10e-05, 0.014583]. The central call is PLATEAU because #232's locus correction is load-bearing: the int4-Marlin BODY GEMMs are bit-exact across M (M-invariant split-K, 0 contribution), so the M-dependence is a bf16-lm_head property whose per-row K-reduction order is set by the hidden-dim K-partition (shared across rows), not by M -- it saturates once batched (M>=2) and holds from M=8 to M=16 unless M=16 crosses a split-K tiling boundary (the bounded upper tail ~0.0146 = 2x the M=8 mass, cross-checked against the #221 bf16 floor 0.010559). Near-greedy (identity >= 0.99) SURVIVES at the central projection; the strict line is at risk only in the pessimistic tiling-boundary upper tail (one-probe-confirmable by land #71). Both readings agree on direction: Curve A (clean) plateaus at 0.0073; Curve B (the PR two-anchor envelope through #114-native 0.5608 and #232-clean 0.0073) decays further to [5.10e-05, 0.0017]. BASELINE 481.53 untouched (this leg adds 0 TPS, a projection). NOT a launch."
+  }
+}
