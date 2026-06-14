@@ -1,0 +1,1666 @@
+[
+  {
+    "id": "domain-code-0000",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Rewrite this YAML config to C++ code in an Espressif IDF function that reads registers. \ntext\\_sensor:\n # Range 30000 - 30035\n - name: \"Huawei inverter model\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 30000\n register\\_count: 15\n response\\_size: 30\n skip\\_updates: 100\n - name: \"Huawei inverter SN\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 30015\n register\\_count: 10\n response\\_size: 20\n skip\\_updates: 100\n - name: \"Huawei inverter PN\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 30025\n register\\_count: 10\n response\\_size: 20\n skip\\_updates: 100\n\n # Inverter status string\n - name: \"Huawei inverter status\"\n platform: template\n id: inverter\\_status\\_string\n icon: \"mdi:information\"\nbinary\\_sensor:\n # Range 32000 - 32019 (1/2)\n # Register 32000\n - name: \"Huawei inverter state standby\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x001\n - name: \"Huawei inverter state grid-connected\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x002\n - name: \"Huawei inverter state grid-connected normally\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x004\n - name: \"Huawei inverter state grid connection with derating due to power rationing\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x008\n - name: \"Huawei inverter state grid connection with derating due to internal causes of the solar inverter\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x010\n - name: \"Huawei inverter state normal stop\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x020\n - name: \"Huawei inverter state stop due to faults\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x040\n - name: \"Huawei inverter state stop due to power rationing\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x080\n - name: \"Huawei inverter state shutdown\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x100\n - name: \"Huawei inverter state spot check\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32000\n bitmask: 0x200\n # Register 32002\n - name: \"Huawei inverter state unlocked\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32002\n bitmask: 0x1\n - name: \"Huawei inverter state PV connected\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32002\n bitmask: 0x2\n - name: \"Huawei inverter state DSP data collection\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32002\n bitmask: 0x4\n # Register 32003\n - name: \"Huawei inverter state off-grid\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32003\n bitmask: 0x1\n - name: \"Huawei inverter state off-grid switch enable\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32003\n bitmask: 0x2\n # Register 32008\n - name: \"Huawei inverter alarm High String Input Voltage\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0001\n - name: \"Huawei inverter alarm DC Arc Fault\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0002\n - name: \"Huawei inverter alarm String Reverse Connection\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0004\n - name: \"Huawei inverter alarm String Current Backfeed\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0008\n - name: \"Huawei inverter alarm Abnormal String Power\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0010\n - name: \"Huawei inverter alarm AFCI Self-Check Fail\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0020\n - name: \"Huawei inverter alarm Phase Wire Short-Circuited to PE\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0040\n - name: \"Huawei inverter alarm Grid Loss\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0080\n - name: \"Huawei inverter alarm Grid Undervoltage\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0100\n - name: \"Huawei inverter alarm Grid Overvoltage\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0200\n - name: \"Huawei inverter alarm Grid Volt. Imbalance\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0400\n - name: \"Huawei inverter alarm Grid Overfrequency\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x0800\n - name: \"Huawei inverter alarm Grid Underfrequency\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x1000\n - name: \"Huawei inverter alarm Unstable Grid Frequency\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x2000\n - name: \"Huawei inverter alarm Output Overcurrent\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x4000\n - name: \"Huawei inverter alarm Output DC Component Overhigh\"\n icon: \"mdi:information\"\n platform: modbus\\_controller\n modbus\\_controller\\_id: huawei\\_inverter\n register\\_type: holding\n address: 32008\n bitmask: 0x8000"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0001",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Consider a ‘‘Tower of Hanoi\" problem with three rods A, B, C, and three disks 1, 2, 3. Disk 3 is larger than disk 2, the disk 2 is larger than disk 1. In the beginning, the disks are arranged to the rods. You need to move the disk properly to get to the goal arrangement.\n\nThe rules are:\n\nRule 1: Only one disk may be moved at a time.\n\nRule 2: Each move consists of taking the upper disk from one of the rods and placing it on top of another larger disk or on an empty rod.\n\nRule 3: No disk may be placed on top of a disk that is smaller than it.\n\nInitial state:\n\n```\nRod A: [3,1]\nRod B: [2]\nRod C: []\n```\n\nGoal state:\n\n```\nRod A: []\nRod B: []\nRod C: [3,2,1]\n```\n\nNow you make an \\*\\*optimal solution\\*\\*. Let's think step by step.\n\nStage 1: Plan.\n\nEach time, you \\*\\*only plan for one move\\*\\*. Give an explanation about why this move and print the state. \n\nCheck if the representation correctly reflects the game state. If not, generate a new one.\n\nFor example:\n\n- Move 1: Move disk 1 from rod A to rod C\n\n```css\nRod A: [3]\nRod B: [2]\nRod C: [1]Value: 1. The move seems to be valid and optimal.\n```\n\nStage 2: Evaluate.\n\nAfter each move, make two evaluations as follows:\n\nEval 1 (Value): Evaluate your move by rating it with a score of either -1, 0, or 1, and give an explanation. If the move violates any of the rules, name the violated rule, and score the move as 0. If you think the move is valid but not optimal, give a score of 0. Otherwise, give a score of 1.\n\nEval 2 (Short Horizon Reward): Evaluate how close is the state to the goal state by rating it with a score between 0 and 1, and give an explanation. If the state violates any of the rules, name the violated rule, and score the move as 0. Otherwise, it’s up to you to determine how close the state is to the goal state.\n\nEval 3 (Long Horizon Reward): Estimate the most likely Value and Short Horizon Reward for the next move, double check if the move will make it difficult to achieve the goal state in the long run, then rate it with a score between 0 and 1. Again, give an explanation. \n\nEval 4 (Revised Value): Revise the Value based on the rewards.\n\nFor example:\n\n- Value: 1. The move is valid and seems optimal.\n- Short Horizon Reward: 0.33. The state is closer to the goal state since disk 1 is now in its correct position.\n- Long Horizon Reward: 0. The state is closer to the goal state, but it also makes it difficult to move disk 3 on Rod C.\n- Revised Value: 0. The move is valid but not optimal.\n\nStage 3: Reflect.\n\nLook at the self-rated scores, and be smart to look ahead of time! Decide if you think you made the optimal move. If so, make the move. If not, go back to state 1 and make a new plan.\n\nFor example:\n\n- Based on the revised value, I think the previous plan is not an optimal one.\n- (New) Move 1: Move disk 1 from rod A to rod B\n\n```\nRod A: [3]\nRod B: [2,1]\nRod C: []\n```\n\n- Value: 1. The move is valid and seems optimal.\n- Short Horizon Reward: 0. None of the disks are in the correct position.\n- Long Horizon Reward: 1. The state gets Rod 1 out of the way while keeping Rod 3 empty. It makes it easier to move disk 3 on Rod C.\n- Revised Value: 1. The move is valid and optimal.\n\nStage 4: Execute and move on to the next.\n\nGo back to Stage 1 and plan for the next move.\n\nNow let's try the following game:\n\nInitial state:\n\n```\nRod A: [3]\nRod B:\nRod C: [2,1]\n```\n\nGoal state:\n```\nRod A: \nRod B: \nRod C: [3, 2, 1]\n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0002",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "\"type\": \"div\",\n \"attrs\": [\n {\n \"name\": \"style\",\n \"value\": \"background-color: var(--default\\_\\_background-color); z-index: 10; position: absolute; height: 100%; width: 100%; display: flex; flex-direction: column;\"\n }\n ],\n \"routes\": [\n {\n \"type\": \"route\",\n \"path\": \"details\",\n \"routes\": [\n {\n \"type\": \"application\",\n \"name\": \"pm-ui-details-header\",\n \"props\": {\n \"workspaceId\": \"PM\\_TDI\\_TEST\\_3\",\n \"moduleId\": \"details-header\"\n }\n },\n {\n \"type\": \"route\",\n \"path\": \"overview\",\n \"routes\": [\n {\n \"type\": \"div\",\n \"attrs\": [\n {\n \"name\": \"style\",\n \"value\": \"margin: 1rem;\"\n }\n ],\n \"routes\": [\n {\n \"type\": \"div\",\n \"attrs\": [\n {\n \"name\": \"style\",\n \"value\": \"margin-bottom: 1rem;\"\n }\n ],\n \"routes\": [\n {\n \"type\": \"application\",\n \"name\": \"pm-ui-order-blotter\",\n \"props\": {\n \"workspaceId\": \"PM\\_TDI\\_TEST\\_3\",\n \"moduleId\": \"open-orders-details\"\n }\n }\n ]\n },\n {\n \"type\": \"div\",\n \"attrs\": [\n {\n \"name\": \"style\",\n \"value\": \"margin-bottom: 1rem;\"\n }\n ],\n \"routes\": [\n {\n \"type\": \"application\",\n \"name\": \"pm-ui-holding\",\n \"props\": {\n \"workspaceId\": \"PM\\_TDI\\_TEST\\_3\",\n \"moduleId\": \"holding\"\n }\n }\n ]\n }\n ]\n }\n ]\n },\n {\n \"type\": \"route\",\n \"path\": \"targets\",\n \"routes\": [\n {\n \"type\": \"div\",\n \"attrs\": [\n {\n \"name\": \"style\",\n \"value\": \"position: relative; flex: 1;\"\n }\n ],\n \"routes\": [\n {\n \"type\": \"application\",\n \"name\": \"pm-ui-tdi-portfolio-targets\",\n \"props\": {\n \"workspaceId\": \"PM\\_TDI\\_TEST\\_3\",\n \"moduleId\": \"portfoliodetails\"\n }\n }\n ]\n }\n ]\n }\n ]\n },\n {\n \"type\": \"route\",\n \"path\": \"targetdetails\",\n \"routes\": [\n {\n \"type\": \"application\",\n \"name\": \"pm-ui-tdi-target-details\",\n \"props\": {\n \"workspaceId\": \"PM\\_TDI\\_TEST\\_2\",\n \"moduleId\": \"targetdetails\"\n }\n }\n ]\n },\n {\n \"type\": \"route\",\n \"path\": \"bulktargets\",\n \"routes\": [\n {\n \"type\": \"application\",\n \"name\": \"pm-ui-tdi-bulk-targets\",\n \"props\": {\n \"workspaceId\": \"TDI\\_TEST\\_GROUP\\_PM\\_CASE\",\n \"moduleId\": \"bulktargets\"\n }\n }\n ]\n },\n {\n \"type\": \"route\",\n \"path\": \"importsubscriptions\",\n \"routes\": [\n {\n \"type\": \"application\",\n \"name\": \"pm-ui-tdi-import-subscriptions\",\n \"props\": {\n \"workspaceId\": \"TDI\\_TEST\\_GROUP\\_PM\\_CASE\",\n \"moduleId\": \"importsubscriptions\"\n }\n }\n ]\n }\n ]\n }\n ]\n }\n ]\n }"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0003",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "### Bigquery tables, \n# dataset:salesforce, table: crm\\_account, description: 'customer infomration', columns: ['AccountID' (STRING, Description('customer ID')), 'AccountName' (STRING), 'Industry' (STRING), 'Region' (STRING), 'CreateTime' (DATETIME), 'UpdateTime' (DATETIME), 'Segmentation' (STRING, ENUM('SKA', 'KA', 'SMB'), Description('customer priority')]\n# dataset:salesforce, table: TiDB\\_cloud\\_tenant, description: 'TiDB Cloud tenent information', columns: [ 'TenantID' (STRING), 'AccountID' (STRING), 'CreatedTime' (DATETIME), 'Status' (STRING), 'OrderType' (STRING, ENUM('', 'Unknown', 'On Demand', 'Commitment Plan', 'Paid PoC'))]\n# dataset:salesforce, table: salesforce\\_oppo, description: 'Business opportunity data', columns: [ 'OppoID' (STRING), 'OpportunityName' (STRING), 'OpportunityScore' (STRING), 'ACVAmount' (FLOAT64), 'ExchangeRate' (FLOAT64), 'CloseDate' (DATE), 'ForecastCategory' (STRING, ENUM('Omitted', 'Pipeline', 'Best Case', 'Closed', 'Commit')), 'LighthouseLogo' (STRING), 'Probability' (FLOAT64), 'ProductFamily' (STRING, ENUM('TiDB Cloud', 'PingCAP Services', 'TiDB Enterprise Subscription', 'PingCAP Training & Exam Services', 'PingCAP Professional Services', 'PingCAP Consulting Services')),'Region' (STRING), 'Stage' (STRING, ENUM('Closed Lost', 'Prospecting', 'Evaluation', 'Qualification', 'Bidding / Negotiating', 'Closed Won', 'Contract Review')), 'TechnicalScenario' (STRING, ENUM('Real-time HTAP', 'Scaleable OLTP', 'TiKV')), 'AccountId' (STRING), 'OpportunityRecordType' (STRING, ENUM('New', 'New Subscription', 'Renewal', 'Expansion')), 'LossReason' (STRING), 'CreatedDate' (DATE)]\n# dataset:model\\_fp\\_and\\_a, table: salesforce\\_activated\\_order, description: 'order data', columns: [ 'OrderID' (STRING), 'AccountID' (STRING), 'ACVAmount' (FLOAT64), 'ExchangeRate' (STRING), 'OrderNumberC' (STRING), 'OrderOwner' (STRING),'OrderRecordType' (STRING, ENUM('New', 'New Subscription', 'Renewal', 'Expansion')), 'OrderStartDate' (DATE), 'OrderEndDate' (DATE), 'Tax' (FLOAT64), 'TCVAmount' (FLOAT64), 'Region' (STRING), 'AccountName' (STRING), 'TermMonths' (FLOAT64), 'ProductFamily' (STRING, ENUM('TiDB Cloud', 'PingCAP Services', 'TiDB Enterprise Subscription', 'PingCAP Training & Exam Services', 'PingCAP Professional Services', 'PingCAP Consulting Services')),'FiscalPeriod' (STRING), 'SigningDate' (DATE, 'order signing date')]\n\n### Some question samples. \n# Q1: A cloud paid customer is a user whose cloud billing is greater than 0. So how many customers are there?\n# Q2: How many closed won deals in 2022? \n# Q3: What is the average price per customer?\n\nPlease think step by step by step to answer the following questions:\n\nlist all definitions of [concept or term] in these question samples are not clearly understood using template\n\n{\n {\n Q1: {\n C1: string // concept\n C2: string // concept\n },\n Q2:....\n Q3:....\n ....\n }\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0004",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "how to call InviteUser() method on click on \"Invite user\" button:\npublic Task CreateAsync(CancellationToken cancellationToken)\n {\n\n var wizard = new WizardBuilder()\n .Step(\"Invite user\", \"Write the email of the user you want to invite\", \"Invite user\",\n step => step\n .TableSelectField(\"email\", \"Email\", field => field\n .Required(\\_localizer[\"Choose row\"])))\n .Finish(async (values, token) =>\n {\n var dataViewBuilder = SysAdmin.DataViews.CompositeDataView.Builder;\n var customer = \\_customerDataService.GetCustomer(\\_context.Customer.ToString());\n if (customer is null)\n {\n dataViewBuilder.ErrorMessage(\"Customer is null\", \"Can't fetch data because the customer have no data in the Library database.\");\n }\n else\n {\n string html = $@\"\n \n\n| CustomerName | CustomerOrgNr | ContractName | ContractOrgNr | GlobalTenantId | OrderId | ContractId | SubscriptionId |  |\n| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n| {customer.CustomerName} | {customer.CustomerOrgNr} | {customer.ContractName} | {customer.ContractOrgNr} | {customer.GlobalTenantId?.ToString()} | {customer.OrderId?.ToString()} | {customer.ContractId?.ToString()} | {customer.SubscriptionId?.ToString()} | Invite user |\n\";\n\n dataViewBuilder.Html(html);\n //dataViewBuilder.Table(table =>\n //{\n // table.Headers(new string[] { \"CustomerName\", \"CustomerOrgNr\", \"ContractName\", \"ContractOrgNr\", \"GlobalTenantId\", \"OrderId\", \"ContractId\", \"SubscriptionId\" });\n // table.Rows(new string[][]\n // {\n // new string[]\n // {\n // customer.CustomerName,\n // customer.CustomerOrgNr,\n // customer.ContractName,\n // customer.ContractOrgNr,\n // customer.GlobalTenantId?.ToString(),\n // customer.OrderId?.ToString(),\n // customer.ContractId?.ToString(),\n // customer.SubscriptionId?.ToString()\n // }\n // });\n\n // return table;\n //});\n }\n\n return dataViewBuilder.BuildTuple();\n }).Build();\n\n return Task.FromResult(wizard);\n }\n\n public void InviteUser(CustomerView customer)\n {\n \\_customerManagementService.InviteUser(customer);\n }"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0005",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "from this code:\n\n% Define the cumulative distribution function (CDF) of the Weibull distribution\nG = @(lambda, dscale, dshape) 1 - exp(-(lambda./dscale).^dshape);\n\n% Permanent stock\nstockP = zeros(n,1);\nfor i = 1:n\n lambdap\\_i = lambdap(i);\n stockP(i) = integral(@(lambda) (1./lambda) .\\* gradient(G, lambda, dscale, dshape), 0, lambdap\\_i);\nend\n\n% Temporary stock\nstockT = zeros(n,1);\nfor i = 1:n\n lambdap\\_i = lambdap(i);\n lambdat\\_i = lambdat(i);\n stockT(i) = integral(@(lambda) (1./lambda).\\*log(y(i)./(r.\\*U)) .\\* gradient(G, lambda, dscale, dshape), lambdap\\_i, lambdat\\_i);\nend\n\nresult\\_stocks = [y, stockP, stockT];\n\nI get this errors:\n\nUndefined operator '.'' for input arguments of type 'function\\_handle'.\n\nError in gradient>parse\\_inputs (line 146)\n f = f.';\n\nError in gradient (line 48)\n[f,ndim,loc,rflag] = parse\\_inputs(f,varargin);\n\nError in @(lambda)(1./lambda).\\*gradient(G,lambda,dscale,dshape)\nError in integralCalc/iterateScalarValued (line 314)\n fx = FUN(t);\n\nError in integralCalc/vadapt (line 132)\n [q,errbnd] = iterateScalarValued(u,tinterval,pathlen);\n\nError in integralCalc (line 75)\n [q,errbnd] = vadapt(@AtoBInvTransform,interval);\n\nError in integral (line 88)\nQ = integralCalc(fun,a,b,opstruct);\n\nError in main (line 148)\n stockP(i) = integral(@(lambda) (1./lambda) .\\* gradient(G, lambda, dscale, dshape), 0, lambdap\\_i);\n \nDo you know why?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0006",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "from timeit import default\\_timer as timer\n\nimport numba\nimport numpy as np\n\nfrom numba import f8, jit, uint8, i8\n\ntry:\n from matplotlib.pylab import imshow, show\n have\\_mpl = True\nexcept ImportError:\n have\\_mpl = False\n\n@numba.cuda.jit(device=True)\ndef mandel(x, y, max\\_iters):\n \"\"\"\n Given the real and imaginary parts of a complex number,\n determine if it is a candidate for membership in the Mandelbrot\n set given a fixed number of iterations.\n \"\"\"\n i = 0\n c = complex(x,y)\n z = 0.0j\n for i in range(max\\_iters):\n z = z \\* z + c\n if (z.real \\* z.real + z.imag \\* z.imag) >= 4:\n return i\n\n return 255\n@cuda.jit(types=[f8, f8, f8, f8, uint8[:,:], i8])\ndef create\\_fractal(min\\_x, max\\_x, min\\_y, max\\_y, image, iters):\n height = image.shape[0]\n width = image.shape[1]\n\n pixel\\_size\\_x = (max\\_x - min\\_x) / width\n pixel\\_size\\_y = (max\\_y - min\\_y) / height\n for x in range(width):\n real = min\\_x + x \\* pixel\\_size\\_x\n for y in range(height):\n imag = min\\_y + y \\* pixel\\_size\\_y\n color = mandel(real, imag, iters)\n image[y, x] = color\n\n return image\n\nimage = np.zeros((500 \\* 2, 750 \\* 2), dtype=np.uint8)\ns = timer()\ncreate\\_fractal[1, (500 \\* 2, 750 \\* 2)](-2.0, 1.0, -1.0, 1.0, image, 20)\ne = timer()\nprint(e - s)\nif have\\_mpl:\n imshow(image)\n show()\nhow can i fix this code?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0007",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Rewrite this code adding to the response to the currant response \n\"invoice\\_link\" & \"reference\\_no\" from \"tbl\\_view\\_invoices\" table as lookup by \"invoices\\_id\" \n\npublic function actionAssignedByMe() {\n $status = isset($this->data['status']) ? $this->data['status'] : null;\n\n // Check if a valid admin token is provided\n if (!$token = adminComponent::getAdminByToken($this->data['token'])) {\n // Return an error message and end the process if the token is not valid\n $this->msg = self::t(\"Token not valid\");\n $this->output();\n Yii::app()->end();\n }\n\n $admin\\_id = (int)$token['admin\\_id'];\n $stmt2 = \"SELECT \\* FROM tbl\\_users WHERE sync\\_id = $admin\\_id\";\n $user22 = $this->rm->createCommand($stmt2)->queryAll();\n $admin\\_id2 = $user22[0]['user\\_id'];\n\n // Retrieve tasks created by the current user\n $stmt = \"SELECT \\* FROM tbl\\_task WHERE created\\_by = $admin\\_id2\" . ($status !== null ? \" AND task\\_status = '$status'\" : \"\") . \" ORDER BY task\\_id DESC\";\n $tasks = $this->rm->createCommand($stmt)->queryAll();\n\n // Fetch task comments for each task and add them to the tasks array\n foreach ($tasks as $key => $task) {\n $task\\_id = $task['task\\_id'];\n $commentStmt = \"SELECT user\\_id, comment, comment\\_datetime FROM tbl\\_task\\_comment WHERE task\\_id = $task\\_id\";\n $taskComments = $this->rm->createCommand($commentStmt)->queryAll();\n $tasks[$key]['comments'] = $taskComments;\n }\n\n // Set the response details and send the response\n $this->details = array('data' => $tasks);\n $this->code = 1;\n $this->output();\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0008",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I'm building a typer CLI to help users follow complex guidance answering one question at a time.\nAn example looks like so:\n```\ndef can\\_purchase\\_alcohol\\_in\\_uk():\n \"\"\" Determines whether a person is allowed to purchase alcohol in the UK. \"\"\"\n percieved\\_age: int = typer.prompt(\"How old does the person seem to be?\")\n if percieved\\_age > 25:\n return True\n age: int = typer.prompt(\"How old is the person, according to their photographic ID?\")\n return age <= 18\n```\n\nMy new CLI will be about Cyprus tax residency. The rules are:\n\"\"\"\nAs of 2017, an individual is a tax resident of Cyprus if one satisfies either the '183-day rule' or the '60-day rule' for the tax year. For earlier tax years only, the '183-day rule' is relevant for determining Cyprus tax residency.\n\nThe '183-day rule' for Cyprus tax residency is satisfied for individuals who spend more than 183 days in any one calendar year in Cyprus, without any further additional conditions/criteria being relevant.\n\nThe '60-day rule' for Cyprus tax residency is satisfied for individuals who, cumulatively, in the relevant tax year:\n\ndo not reside in any other single state for a period exceeding 183 days in aggregate\nare not considered tax resident by any other state\nreside in Cyprus for at least 60 days, and\nhave other defined Cyprus ties.\nTo satisfy the fourth criteria, the individual must carry out any business in Cyprus and/or be employed in Cyprus and/or hold an office (director) of a company tax resident in Cyprus at any time in the tax year, provided that such is not terminated during the tax year. Further, the individual must maintain in the tax year a permanent residential property in Cyprus that is either owned or rented by the individual.\n\"\"\"\nThe CLI returns as soon as answer can be determined: \n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0009",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "You are a Python expert, that must respond only and only through code, with no verbosity or comments on the code. You need to solve the specification and work out the solution to match exactly the output. You are only allowed to stand out if you detect incongruences in the specification.\nWrite a Python script that computes the amortization table of a mortgage. \n\nThe start amount of the mortgage is 10000, and each month 375 is paid. Take in account that each 12 months (each year) an additional amount of 500 is paid. The mortgage has a monthly 0.05% interest rate, which is applied each month to the full amount due before the payment. \n\nThe script should use variables, so if the amounts are changed adjusting them will make the same script work. \n\nFor each month print: \n\n\\* The number of the month\n\\* The interest computed for the month\n\\* The due amount without interest\n\\* The due amount including the interest\n\\* The monthly paid\n\nI will give the two first rows as sample, so you can test your results: \n\n```\nMonth 1, Interest 50.00, due: 10000.00, due + interest 10050.00, to pay 375.00\nMonth 2, Interest 48.38, due: 9675.00, due + interest 9723.38, to pay 375.00\n```\n\nAs \\*\\*bonus point\\*\\*, create a CSV file with a row for each month including the values. Include a header on each column that includes the name of the field in the column.\n\nIn case your script does not match the same input, I will be happy to discuss the details with you and see if we can fix them together. \n\nIf you do not feel confident enough to write it in Python, feel free to write it in another programing language."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0010",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "You are AdventBot, a chatbot that solves small coding puzzles from Advent of Code, which is a coding challenge that states algorithm puzzles using fun holiday themed language.\n\nCarefully adhere to the following steps for our conversation. Do not skip any steps:\n\n\\* Introduce yourself\n\\* Ask me for the puzzle problem statement\n\\* Summarize the problem statement in a few sentences. Include the example input and output given by the problem. Ask me if the summary is correct.\n\\* Propose a high-level algorithm for solving the problem, breaking it down into smaller steps. Ask me if the proposed approach looks good, and let me provide feedback until I approve.\n\\* Write code in JavaScript that implements the algorithm. Import lodash at the beginning to provide helper methods.\n\\* Ask me if running the code produces the expected result. If not, then follow this procedure for debugging: \n \\* Generate 3 hypotheses for what the bug might be. Tell me which hypothesis you think is most likely, and ask me what I think.\n \\* If needed, write code with print statements added to generate more debug information. I will then run the code and show you the print output.\n \\* Do not jump to conclusions and try to output fixed code immediately. Wait until you discuss hypotheses with me or I show you print statement output.\n \\* Repeat this debugging process until I tell you that the code is correct\n\nCarefully follow these rules during our conversation:\n\n\\* Keep responses short, concise, and easy to understand.\n\\* Do not describe your own behavior.\n\\* Stay focused on the task of solving the puzzle.\n\\* Do not jump to conclusions about what the bug might be if the code is wrong. Reason carefully and step by step, and evaluate multiple hypotheses.\n\\* When you write JavaScript code, it should take the puzzle input as a text string, not a data structure.\n\nBegin."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0011",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "cont from where you left off do not repeat from def get\\_causality\\_grade(\n mitral\\_stenosis: bool, mechanical\\_valve: bool,\n myocardial\\_infarction: Optional[bool], mural\\_thrombus: bool,\n aneurysm\\_left\\_ventricle: bool, atrial\\_fibrillation: bool,\n atrial\\_disease: bool, dilated\\_cardiomyopathy: bool,\n hypertrophic\\_cardiomyopathy: bool, left\\_ventricular\\_ejection\\_fraction: Optional[float],\n endocarditis: bool, intracardiac\\_mass: bool, pfo: bool,\n thrombus\\_situ: bool, concomitant\\_pulmonary\\_embolism: bool,\n proximal\\_dvt: bool, single\\_obvious\\_cerebral\\_ischemic\\_lesion: bool,\n pfo\\_2: bool, asa: bool, strands: bool,\n mitral\\_annulus\\_calcification: bool, calcification\\_aortic\\_valve: bool,\n nonapical\\_akinesia: bool, transient\\_atrial\\_fibrillation: bool,\n atrial\\_hyperexcitability: bool, supratentorial\\_territorial\\_ischemic\\_lesions: bool,\n infratentorial\\_territorial\\_ischemic\\_lesions: bool,\n cortical\\_ischemic\\_lesions: bool, timing\\_myocardial\\_infarction: Optional[bool],\n) -> str:\n grade = 'C0 (cardiac pathology not detected or not suspected)'\n features = []\n if mitral\\_stenosis:\n features.append('mitral stenosis')\n if mechanical\\_valve:\n features.append('mechanical valve')\n if myocardial\\_infarction:\n features.append('myocardial infarction')\n if mural\\_thrombus:\n features.append('mural thrombus')"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0012",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "My Stash Rating Stars.user.js:1317 Uncaught TypeError: div.addEventListener is not a function for nodeDIVs.forEach((div, index) => {\n const indexBTN = Number(index) + 1;\n\n function debouncedFunctionMouseEnter() {\n console.log(\"mouseover\");\n if (hoveredButton !== index) {\n if (rating\\_star\\_mode === 'full') {\n hoveredButton = index;\n if (index + 1 === currentRating) {\n updateTitles(\"Unset\");\n tempRating = 0;\n updateClasses(currentRating, 0);\n } else if (currentRating !== \"0\" && currentRating !== index + 1) {\n updateTitles(index + 1);\n tempRating = index + 1;\n updateClasses(currentRating, (index + 1));\n }\n }\n if (rating\\_star\\_mode === 'quarter') {\n hoveredButton = index;\n updateTitles(indexBTN);\n tempRating = indexBTN;\n updateClasses(currentRating, indexBTN);\n }\n }}\n\n function debouncedFunctionMouseLeave() {\n if (hasBeenClicked === false) {\n if (currentRating !== \"0\" && currentRating !== indexBTN) {\n console.log(\"mouseout: hasBeenClicked: \" + hasBeenClicked)\n updateTitles(currentRating);\n updateClasses(tempRating, currentRating);\n hoveredButton = null;\n }\n }\n }\n\n function debouncedFunctionMouseClick() {\n let currentValue = indexBTN;\n setOriginalValue(currentValue);\n }\n div.addEventListener('mouseEnter', event => {\n clearTimeout(debounceTimeoutIdMouseEnter);\n debounceTimeoutIdMouseEnter = setTimeout(debouncedFunctionMouseEnter, 1);\n })"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0013",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I have a JSON file that contains information about a bunch of issues from a issue tracker. I'd like to calculate the average ticket age with a simple command line statement. A single issue looks like this ``` {\n \"issue\": {\n \"workItemType\": \"ISSUE\\_ITEM\",\n \"id\": {\n \"internalId\": \"issues1|CQIK901182\",\n \"connectorId\": \"issues1\",\n \"externalId\": \"CQIK901182\"\n },\n \"subject\": \"\",\n \"assignee\": \"WILHELM\",\n \"author\": \"\",\n \"description\": \"\",\n \"created\": 1674112189000,\n \"updated\": 1674114823000,\n \"status\": \"\",\n \"closed\": false,\n \"url\": \"\",\n \"additionalFieldNames\": [],\n \"additionalFieldValues\": [],\n \"uniformPath\": \"-issue-item-/issues1/CQIK901182\"\n },\n \"issueUserResolution\": {\n \"resolvedAssignee\": {\n \"username\": \"wilhelm\",\n \"firstName\": \"Andreas\",\n \"lastName\": \"Wilhelm\",\n \"emailAddress\": \"wilhelm@cqse.eu\",\n \"authenticator\": \"HashedStored:anonymized\",\n \"gravatarHash\": \"730fafb5b83b89b972acead6e7a9b371\",\n \"useGravatar\": false,\n \"aliases\": [],\n \"groupIds\": [\n \"demousers\",\n \"Administrators\",\n \"CQSE\"\n ]\n }\n }\n }```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0014",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "# C Printf Project\n\nThis `printf` project was built by [Abas Ubon]() and [Alexander Udeogaranya](). The objective of this project was to help us apply most of the concepts we have learnt so far in C into building a mini project. Also, it objectives was to help us understand how to collaborate with other developers, and also to make us have an understanding of how the C `printf` function actually works.\n\n## Enviroment\n\nThe `printf` project was built on `Ubuntu 20.04 LTS`\n\n## Repository Contents\n\nThe repository contains the following files:\n\n- `\\_printf.c`: our take on printf\n- `main.h`: contains file declarations\n- `get\\_functions.c`: choose which function to use based on a specific format modifier\n- `functions.c`: contains the functions that handle how to print different types\n- `handlers.c`: handles some modifier\n- `num\\_conversion.c`: converts numbers\n- `print\\_p.c`: prints an address\n- `useful\\_func.c`: some useful functions\n- `write\\_to\\_buffer.c`: functions that write to buffer\n- `flags\\_functions.c`: flags\n- `convert\\_strings.c`: convert to root13\n- `align\\_handler.c`: corrects alligment\n\n## Flow Chat\n\n![printf](https://user-images.githubusercontent.com/115133529/228027784-a1293479-c2c5-448b-a7c1-530c1d83b025.png)"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0015",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "We use the same character set as in a recent work,11 which consists of the following 70 characters.\n4 JIN ET AL.\nFIGURE 1 Model architecture. The proposed multi-representation convolutional neural network consists of\nnine layers, visualized in the figure as “L1” to “L9”. The parallelograms represent matrices, while the thin\nrectangles represent vectors. The pairs of numbers on the parallelograms or close to the rectangles are their\nspecific shape. Numbers in light rectangles below the arrows are the convolution parameters or max pooling\noperation. “kW” and “kH” denote the width and height of the convolution kernel, respectively, while “dW” and\n“dH” are the strides of the kernel. For simplicity, any one of these parameters equal to 1 is omitted from the figure\nabcdefghijklmnopqrstuvwxyz0123456789,;.!?:’”\n/ ∖|\\_ @ # $ % ^ & \\* ∼ ‘ + − = < > () [] {}\nIn addition, the new line character is included, and upper-case letters in practice are converted\nto lower-case. We use one-hot encoding to quantize each character, represented as a k-size vector\nwith only one element, namely, 1, indicating the position of the character in the set, and the\nother elements all 0. Any other characters excluded from the set, such as blanks, are quantized as\nall-zero vectors. According to this encoding rule, each sentence is represented as a sequence of a\nk-sized vector, with the sentence length being fixed at l\n\nthis is the model design using character level embedding\n\nconsider this model design again"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0016",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Below is an overview of a marketing pitch from Inditech for pharmaceutical brands. I want you to come up with ideas for a series of 15 billboard advertisements targeted at pharma industry executives. The banners should be catchy enough for standalone billboard advertising. They should also lend themselves to call for action online banner advertisements where people click through and reach a page where they can sign up for a masterclass or to know more\n\n\"Pharmaceutical brands in India always look for ways to improve mindshare for their brands and stronger relationships between doctors and pharma field representatives. They look for ways to add value to the doctor's professional lives and hunt for such value opportunities that are associated with the brand's therapy areas. \n\nBrands have tried to do this by sponsoring professional education (CME) for doctors, patient education initiatives, and more. But they struggle to differentiate themselves from the competition in creating top-of-mind value for the doctors they meet.\n\nInditech solves this problem by creating highly innovative solutions that combine elements of technology, patient engagement, doctor engagement, professional education and patient education in methods that are simply not available from any pharma marketing agency in India.\n\nOver 60 pharma brands have worked with Inditech and benefitted from these solutions in the last two years. This year, Inditech has ratcheted up the value delivered through a new class of scalable in-clinic solutions and intends to work with well over one hundred pharma brands!\n\nPharma brands, what are you waiting for? Talk to us and go up the in-clinic value chain before your competitors do! We are happy to give you and your team a free of cost 60-minute master class on in-clinic innovation! \""
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0017",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Is this a good unit testing engineer?\n\nProvide examples of unit tests you have written in the past.\n\nimport { shallowMount } from '@vue/test-utils'\nimport List from '@/components/List.vue'\n\ndescribe('List.vue', () => {\nit('renders li for each item in props.items', () => {\nconst items = ['1', '2']\nconst wrapper = shallowMount(List, {\npropsData: { items }\n})\nexpect(wrapper.findAll('li')).toHaveLength(items.length)\n})\n\nit('matches snapshot', () => {\nconst items = ['item 1', 'item 2']\nconst wrapper = shallowMount(List, {\npropsData: { items }\n})\nexpect(wrapper.html()).toMatchSnapshot()\n})\n})\n\nimport { shallowMount } from '@vue/test-utils'\nimport MessageToggle from '@/components/MessageToggle.vue'\nimport Message from '@/components/Message.vue'\n\ndescribe('MessageToggle.vue', () => {\nit('toggles msg passed to Message when button is clicked', () => {\nconst wrapper = shallowMount(MessageToggle)\nconst button = wrapper.find('#toggle-message')\nbutton.trigger('click')\nconst MessageComponent = wrapper.find(Message)\nexpect(MessageComponent.props()).toEqual({msg: 'message'})\nbutton.trigger('click')\nexpect(MessageComponent.props()).toEqual({msg: 'toggled message'})\n})\n})"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0018",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I want you to act as a C# professional programmer.\nPlease answer the #Topic following the conditions below.\nTopic: [\n1. I made a C# winform program based on .NET Framework 4.8.1. The goal of this program is to implement the Read and Write methods of EXIF, IPTC and XMP metadata.\n2. I imported the C++ library of exiv2 (https://github.com/Exiv2/exiv2) from the C++ CLR Class Library project. I'm trying to make it a wrapper dll.\n3. In C# WinForm, if you pass the file name string in the same way as `Exiv2Metadata exiv2Metadata = new Exiv2Metadata(imagePath);`, the C++ CLR project receives the imagePath and executes the Exiv2::ImageFactory::open(imagePath) method of exiv2. I want to pass a pointer to a class to C#.\n4. In conclusion, I want to use exiv2's implemented methods and classes in C#.\n5. Tell me in detail how to do it step by step.\n ]\nLength: Free\nFormat: markdown\nAnswer me in English\nincludes in Title\nincludes in subtitles and detail descriptions\nFor audience: SW Engineer\nContent Goal: .NET Framework 4.8.1 Create a metadata reading and writing program with C# WinForms.\nWriting Style: technically, step by step.\nAnswer in English.지금 번역하기"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0019",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I have implemented a browser extension that synchronizes page scrolling progress, which is mainly used for side-by-side comparison of Google Translate translated page and the original page. In the first version, the synchronization standard for scrolling is based on the scroll percentage, which is very intuitive, but because the amount of translated text may be different, the height of each text block will also be different. Following is the current algorithm for scrolling part, I would like to ask you to propose a better approach: maybe DOM based, or maybe something else.\n\n---\n\nconst \\_onScrollHandler = () => {\n if (scrolling) return\n\n sendMessage(\"syncScrollPosition\", {\n scrollYPercent: window.scrollY / document.body.scrollHeight\n })\n}\n\nconst onScrollHandler = throttle(\\_onScrollHandler, 50)\n\nonMessage(\"startSyncForTab\", () => {\n window.addEventListener(\"scroll\", onScrollHandler)\n})\n\nonMessage(\"stopSyncForTab\", () => {\n window.removeEventListener(\"scroll\", onScrollHandler)\n})\n\nconst afterApplyScroll = debounce(() => {\n scrolling = false\n}, 200)\n\nonMessage(\"syncScrollPositionForTab\", (message) => {\n const { scrollYPercent } = message.data\n\n scrolling = true\n\n console.debug(\"scrolling to\", scrollYPercent)\n\n window.scrollTo({\n top: scrollYPercent \\* document.body.scrollHeight,\n behavior: \"auto\"\n })\n\n afterApplyScroll()\n})"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0020",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Web search results:\n\n[1] \"Spot VMs are ideal for the following types of workloads: Dev/test environments, including continuous integration and continuous delivery (CI/CD) workloads. Select high-performance computing scenarios, batch processing jobs, or visual rendering applications. Big data, analytics, container-based, and large-scale stateless applications.\"\nURL: https://azure.microsoft.com/en-us/products/virtual-machines/spot/\n\n[2] \"An Azure Spot Virtual Machine offers no high availability guarantees. At any point in time when Azure needs the capacity back, the Azure infrastructure will evict Azure Spot Virtual Machines with 30-seconds notice. Eviction policy VMs can be evicted based on capacity or the max price you set.\"\nURL: https://learn.microsoft.com/en-us/azure/virtual-machines/spot-vms\n\n[3] \"Spot VMs in a managed instance group This page describes Spot VMs: virtual machine (VM) instances that are excess Compute Engine capacity. Spot VMs have significant discounts, but Compute...\"\nURL: https://cloud.google.com/compute/docs/instances/spot\nCurrent date: 1/29/2023\n\nInstructions: Using the provided web search results, write a comprehensive reply to the given query. Make sure to cite results using [[number](URL)] notation after the reference. If the provided search results refer to multiple subjects with the same name, write separate answers for each subject.\nQuery: what is a spot VM?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0021",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "We have a consumer React component file that uses a React context and a helper function for triggering a notification. Can you refactor the file to combine the context and helper function into a custom hook?\n\nConsumer file:\nimport NotificationContext from '@/src/contexts/Nofitication.context'\nimport ErrorBoundary from '@/components/ErrorBoundary'\nimport { Navbar } from '@/components/Layouts/Navbar'\nimport React, { useContext } from 'react'\nimport { notify } from '../helpers/notification.helpers'\n\ninterface LayoutProps {\n children: React.ReactNode\n}\n\nconst Layout = ({ children }: LayoutProps): JSX.Element => {\n const notificationElem = useContext(NotificationContext)\n return (\n \n\n {children}\n  {\n notify(notificationElem, {\n heading: 'heading',\n subheading: 'subheading',\n type: 'warning',\n }).catch(console.error)\n }}\n >\n Trigger Notification\n \n\n )\n}\n\nexport default Layout\n\nContext file:\nimport { createContext } from 'react'\n\nconst NotificationContext = createContext(null)\n\nexport default NotificationContext\n\nHelper function file:\nexport type NotificationProps = Parameters[0]\n\nexport const notify = async (\n element: HTMLHuelNotificationElement | null,\n props: NotificationProps,\n): Promise => {\n if (!element) return\n\n const { heading, subheading, type } = props\n await element.open({\n heading,\n subheading,\n type,\n })\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0022",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "What is this powershell script about?\n<# Deploy Sentinel One #>\n\nImport-Module $env:SyncroModule #for syncro functions \n\nfunction log\\_it \n{\n param \n (\n [String]$entry\n )\n \n $curr = get-date\n write-host \"[ $curr ] $entry\"\n\n}\n#Group ID Syncro var converstion\n$TOKEN = $SENT\\_ONE\\_SITE\\_TOKEN\n\n$MSI\\_PATH = \"C:\\temp\\Sent\\_One.msi\"\n\ntry\n{\n log\\_it \"Start Program\"\n\n #create c:\\temp if not there\n if(!(test-path -path \"c:\\temp\"))\n {\n log\\_it \"Making c:\\temp\"\n new-item -path \"c:\\\" -name \"temp\" -ItemType \"Directory\" -force\n log\\_it \"Made c:\\temp\"\n }\n if(test-path -path $MSI\\_PATH)\n {\n log\\_it \"MSI Found. Attempting Install...\"\n #install\n C:\\temp\\Sent\\_One.msi SITE\\_TOKEN=$TOKEN /quiet /norestart\n log\\_it \"Done.\"\n }else \n {\n log\\_it \"Missing MSI file: $MSI\\_PATH\" \n }\n log\\_it \"End Program\"\n}catch\n{\n $err = $\\_.Exception\n log\\_it \" [ERROR] $err.message\"\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0023",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Correct the following code to generate xpath without errors\n def \\_generate\\_xpath(self, tag):\n xpath = \"//\" + str(tag.name) + '['\n attribs = []\n if tag.has\\_attr('class'):\n class\\_ = ' '.join(tag.attrs['class'])\n quoted\\_class = f'\"{class\\_}\"'\n attr\\_str = '@class=' + quoted\\_class\n attribs.append(attr\\_str)\n if tag.has\\_attr('id'):\n id = tag.attrs['id']\n quoted\\_id = f'\"{id}\"'\n attr\\_str = '@id=' + quoted\\_id\n attribs.append(attr\\_str)\n if tag.has\\_attr('name'):\n name = tag.attrs['name']\n quoted\\_name = f'\"{name}\"'\n attr\\_str = '@name=' + quoted\\_name\n attribs.append(attr\\_str)\n # if tag.text:\n # text = f'\"{tag.text.strip()}\"'\n # attr\\_str = 'text()=' + text\n # attribs.append(attr\\_str)\n if len(attribs) > 1:\n for i, attrib in enumerate(attribs):\n if i < (len(attribs)-1):\n xpath += attrib + ' or '\n else:\n xpath += attrib + ']'\n return xpath"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0024",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "April 27, 2022\n\nBuilding the Discovery Engine\n\nIn this note I want to introduce the concept of Facebook as a “discovery engine,” which is a helpful mental model to frame the current focus of our long-term strategy. It also helps contextualize our product priorities, which we’ll continue to evolve over time to emphasize our near-term focus areas.\n\nI encourage you to read the entire note, but if you just want the TL:DR here it is:\n\nOur vision is for Facebook to be a place where everyone can belong, though the power of community. We define our four durable strategic pillars to accomplish this by helping people:\n\nFind, enjoy and create interesting content.\nStrengthen their relationships.\nCreate communities - both big and small.\nRealize economic opportunities.\nWhile our strategy is designed to stand the test of time, our execution and focus must be responsive to the needs of the current moment. Today we see a shift towards social media products serving as “discovery engines.” We’re sharing an updated articulation of our near-term priorities that are aimed at strengthening the Facebook discovery engine. These are:\n\nMake Reels successful.\nBuild world class recommendations technology.\nUnlock messaging-based sharing.\nAlongside our product priorities, we’ll continue to prioritize culture changes to support the “Trustworthy, People-Centric, and Unified” approach to product development that we announced in January of this year.\nSummarize this message"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0025",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I have a following sql query base on UTC+8 and the performance is cumulative. Please change the query into UTC+0\n'''\nSELECT date\n , crawled\\_time\n , search\\_term\\_text\n , SUM(CASE WHEN metric\\_name = 'local\\_spend' THEN metric\\_value ELSE 0 END) AS local\\_spend\n , SUM(CASE WHEN metric\\_name = 'impressions' THEN metric\\_value ELSE 0 END) AS impressions\n , SUM(CASE WHEN metric\\_name = 'clicks' THEN metric\\_value ELSE 0 END) AS clicks\n , SUM(CASE WHEN metric\\_name = 'installs' THEN metric\\_value ELSE 0 END) AS installs\n , AVG(CASE WHEN metric\\_value = 'bid\\_amount' THEN metric\\_value ELSE 0 END) AS bid\\_amount\n , GROUP\\_CONCAT(keyword\\_id) AS keyword\\_ids\nFROM aixpert.asa\\_search\\_term\\_hourly\\_performance\\_v2\nWHERE account\\_id = '2405380'\n AND search\\_term\\_text = '17直播'\n AND date >= '2023-03-25'\n AND date = DATE(crawled\\_time)\n AND metric\\_name IN ('local\\_spend','impressions','clicks','installs','bid\\_amount')\nGROUP BY 1,2,3\nORDER BY 1,2\n'''"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0026",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Is there any resource leak bug in the following C code?\n\nstatic int rsi\\_send\\_beacon(struct rsi\\_common \\*common)\n{\n struct sk\\_buff \\*skb = NULL;\n u8 dword\\_align\\_bytes = 0;\n\n skb = dev\\_alloc\\_skb(MAX\\_MGMT\\_PKT\\_SIZE);\n if (!skb)\n return -ENOMEM;\n\n memset(skb->data, 0, MAX\\_MGMT\\_PKT\\_SIZE);\n\n dword\\_align\\_bytes = ((unsigned long)skb->data & 0x3f);\n if (dword\\_align\\_bytes)\n skb\\_pull(skb, (64 - dword\\_align\\_bytes));\n if (rsi\\_prepare\\_beacon(common, skb)) {\n rsi\\_dbg(ERR\\_ZONE, \"Failed to prepare beacon\\n\");\n dev\\_kfree\\_skb(skb);\n return -EINVAL;\n }\n skb\\_queue\\_tail(&common->tx\\_queue[MGMT\\_BEACON\\_Q], skb);\n rsi\\_set\\_event(&common->tx\\_thread.event);\n rsi\\_dbg(DATA\\_TX\\_ZONE, \"%s: Added to beacon queue\\n\", \\_\\_func\\_\\_);\n\n return 0;\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0027",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "hey!\nDELETE FROM patent\\_store.xmls\\_summary\\_info\\_detailed s USING (\n SELECT MAX(CTID) as max\\_ctid, p\\_cc, p\\_date, p\\_ki, system, file\\_loc\n FROM patent\\_store.xmls\\_summary\\_info\\_detailed\n WHERE p\\_cc = 'CN' AND p\\_date>='2002-04-28' AND p\\_date<='2004-10-14' AND system='CXMLPLUS' AND insert\\_dt>='2023-03-27 21:30:29.762685'\n GROUP BY p\\_cc, p\\_date, p\\_ki, system, file\\_loc\n )retain\\_group\n WHERE retain\\_group.max\\_ctid <> s.ctid\n AND retain\\_group.p\\_cc = s.p\\_cc\n AND retain\\_group.p\\_date = s.p\\_date\n AND retain\\_group.p\\_ki = s.p\\_ki\n AND retain\\_group.system = s.system\n AND retain\\_group.file\\_loc = s.file\\_loc\nThis query is taking too much time to execute.\nActually this table has billions of records. How can I optimize this query to delete duplicates?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0028",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I got the following task for an interview. I want you to give me ideas on what graphics I can make for the task. Give me step by step ideas and instructions. Stick to the content. Do not give generic advice. I can use Adobe Illustrator. \n\nTask:\nCreate a graphic using the template provided (ID Assessment.indd) that\nsupports the text\nprovided below. You may also use Illustrator to create your graphic, or parts of it, and then place\ninto the ID file. We want to see how you interpret information, identify key takeaways, and\nshowcase your design aptitude and creativity\nand illustration skills.\nAn .idml version of the file is\nalso provided if you’re working on an older version of InDesign.\n\nContent:\nTo empower and engage their workforce, HR leaders must set up a people\n-\nfirst HR technology\nfunction. “People first” means the pillars\nof their operating model\n—\nthe processes, structure,\nteam capabilities and network\n—\nmust be informed and aligned to create a better experience for\nemployees. When done successfully, setting up a people\n-\nfirst HR technology function can\nimprove key people\nand business metrics around DEI (21% increase), well\n-\nbeing (19%\nincrease), collaboration (17% increase) and innovation (16% increase)"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0029",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "make a javascript class \"GraphicLayer\" which is supplied a parent element, an image element or the url of an image. If the second argument is a url, it will create the image element. the third argument will be called properties, and contain information about the placement of the image in the parent element. One of those properties will be center point, and its x and y will be between zero and one and will be relative to the parent element. (x:.5 and y: .5 will mean the child image is centered on the parent. x:0 and y:0 will center the element above the upper left corner of the parent) Another property will be size, which will also be relative to the parent element.The default center point will be x: 0.5 and y: 0.5, which means the image will be centered on the parent element, with 1 being 100% of the size of the parent, in either width or height, while preserving the aspect ratio. these dimensions should affect the top, left, width and height styles of the element, without using css transform. there should be a separate method that adjusts those styles. if the image does not yet have a natural width yet, an onload function should be set up (prior to setting the source) that will call the method to adjust the dimensions and only set it as visible then."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0030",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "`py\nfrom flask import Flask, jsonify\nimport concurrent.futures\n\napp = Flask(\\_\\_name\\_\\_)\n\ndef method1(data):\n # code for method 1 to make API call and get results\n return results1\n\ndef method2(data):\n # code for method 2 to make API call and get results\n return results2\n\ndef make\\_api\\_call(method, data):\n if method == 'method1':\n results = method1(data)\n elif method == 'method2':\n results = method2(data)\n return results\n\n@app.route('/api')\ndef api():\n data1 = {'key1': 'value1', 'key2': 'value2'}\n data2 = {'key3': 'value3', 'key4': 'value4'}\n with concurrent.futures.ThreadPoolExecutor() as executor:\n future1 = executor.submit(make\\_api\\_call, 'method1', data1)\n future2 = executor.submit(make\\_api\\_call, 'method2', data2)\n results1 = future1.result()\n results2 = future2.result()\n return jsonify({'results1': results1, 'results2': results2})\n`\nwith this concurrent.futures.ThreadPoolExecutor() only can it be a better way"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0031",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "below is my code that classify the text data with DaBERTa model,\n```\ntest\\_df = pd.read\\_csv(\"/content/drive/MyDrive/DeBERTa/test.csv\")\n\n# Tokenize test data\ntest\\_encodings = tokenizer(list(test\\_df[\"text\"]), truncation=True, padding=True, max\\_length=512, return\\_tensors=\"pt\").to(device)\n\nmodel.eval()\n# Make predictions\nwith torch.no\\_grad():\n test\\_outputs = model(\\*\\*test\\_encodings)\n test\\_probs = torch.softmax(test\\_outputs.logits, dim=1)\n test\\_preds = torch.argmax(test\\_probs, dim=1).tolist()\n\n# Load sample submission file and replace labels with predictions\nsubmission\\_df = pd.read\\_csv(\"/content/drive/MyDrive/DeBERTa/sample\\_submission.csv\")\nsubmission\\_df[\"label\"] = test\\_preds\n\n# Save predictions to a CSV file\nsubmission\\_df.to\\_csv(\"/content/drive/MyDrive/DeBERTa/submission.csv\", index=False)\n```\nI used transformers Tokenizer, and this give me a Out Of Memory error while tokenize the test data. Is there any way to handle this? please revise this code."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0032",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "In javascript how to I change the the 'example' const to match the 'likethis' const?\n\nconst example = [\n {\n \\_id: \"63d2462f11beb735d1b463db\",\n \"card-3\": {\n id: \"card-3\",\n tagId: \"tag-3\",\n text: \"cursus et, magna. Praesent interdum ligula eu enim.\",\n },\n },\n {\n \\_id: \"63d2462f11beb735d1b463dc\",\n \"card-4\": {\n id: \"card-4\",\n tagId: \"tag-4\",\n text: \"cursus et, magna. Praesent interdum ligula eu enim.\",\n },\n },\n];\n\nconst likeThis = {\n \"card-3\": {\n id: \"card-3\",\n tagId: \"tag-3\",\n text: \"cursus et, magna. Praesent interdum ligula eu enim.\",\n },\n\n \"card-4\": {\n id: \"card-4\",\n tagId: \"tag-4\",\n text: \"cursus et, magna. Praesent interdum ligula eu enim.\",\n },\n};"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0033",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Here's my code that has the wrong background color on the textview: @Override\n public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {\n super.onViewCreated(view, savedInstanceState);\n\n TextView textView = requireView().findViewById(R.id.fragment\\_login\\_text\\_button\\_sign\\_up);\n String text = getString(R.string.login\\_text\\_button\\_part\\_2);\n SpannableString spanString = new SpannableString(text);\n textView.setBackgroundColor(Color.parseColor(\"#FFFFFF\"));\n int start = text.indexOf(\"Begin here!\");\n int end = start + \"Begin here!\".length();\n spanString.setSpan(new ClickableSpan() {\n @Override\n public void onClick(View view) {\n Log.d(\"Debug\", \"Button clicked!!\");\n // handle the click event here\n // open the create account view\n //TODO: THIS IS WHERE THE CODE GOES AFTER THE USER SELECTS \"Begin here.\" (i.e. @+id/fragment\\_login\\_text\\_button\\_sign\\_up in fragment\\_login.xml).\n }\n }, start, end, Spanned.SPAN\\_EXCLUSIVE\\_EXCLUSIVE);\n textView.setText(spanString);\n textView.setMovementMethod(LinkMovementMethod.getInstance());"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0034",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "hey sally, im going to give you the order in which the conversation with the landlord went during the incident. please take this into account in the net draft. frst the text messages and missed calls as well as my text to him. next he showed up unnanounced at our home. 3rd he stated that rent select had called him about an emergency and asked my roomate if there was one. my roomate informed him that we have not reported any emergencies and that our last report to rent select was about the potential casing of our home and informing them of hazards on site that he had already attended and dealt with. 4th the landlord expressed to my roomate that he was having difficulty communicating with rent select. my roomate told him that due to using the portal system we as tennants have no issues with communication with rent select. 5th the landlord then began to imply blame for the downpipe and begun mentioning the property maintence he has been doing as a reason for a rental increase. 6th the landlord then forced my subtennant into a conversation about a lease and rental raise. my roomate tried to excuse himself from the conversation a few seperate times with no success before he finally informed venkatesh that he would need to contact rent select and go about this the legal way."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0035",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "{{\n editData.selectedDefaultDirectories &&\n editData.selectedDefaultDirectories.length == directories.length\n ? \"Unselect All\"\n : \"Select All\"\n }}\n \n\nconsole.log(\"realDirectories\", this.realDirectories)\n this.directories = JSON.parse(JSON.stringify(this.realDirectories));\n this.titles.fileUploadTitle = \"Default Directories\";\n this.titles.modalHeading = \"Generate Default Directories\"; \n this.operationSelected = \"generateDefaultDirs\"\n \n const array1 = this.folderData\n const array2 = this.directories\n\n let resultant = array2.filter(obj2 => array1.find(obj1 => obj2.directoryId === obj1.defaultId));\n this.editData.selectedDefaultDirectories = resultant\n console.log(\"directories\",this.directories)\n // this.directories= resultant\n for(let r of resultant) {\n for(let d of this.directories) {\n if(d.directoryId == r.directoryId) {\n d.generated = true;\n }\n }\n };\ncan you modify the above codes in such a way that if i clicked \"Unselect All\" already existing default directories should not be unselected ?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0036",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "you will write a youtube ad script. here is some information: I’ve thought of this idea because after college, meeting people is 10x as difficult. Instead of an app, a way to test this could be YouTube ads to people in early 20s living in Minneapolis that say if they wanna meet people they can give phone number / email or sign up on a link where they give a bit of info on themselves / interests / photo / contact info (can be a google form that goes to a google sheets database. Then, we charge people say $50-100 for access to the info on people that wanna meet people. So flow is: ad, landing page with free version (so they don’t get to fill form till paying for full version and can understand how / why etc it works, we can say we make ppl pay so you don’t waste time with people who aren’t serious/ responsive), then they can click link to pay, payment screen, then link to full version. All the work is on other people to reach out, which is good cause then it feels more natural. Plus, if people get upset we charge $ then that’s fine, most will understand it costs $ to get people to join it because of ads."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0037",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Consider this C# code\n\n public string GetAppSetting(string key)\n {\n var databaseAppSettings = this.mecConfigurationDataProvider.GetConfigurationSettings();\n var upperKey = key.ToUpper();\n string result = null;\n if (ConfigurationManager.AppSettings[key] != null)\n {\n result = ConfigurationManager.AppSettings[key];\n }\n else if (databaseAppSettings.ContainsKey(upperKey))\n {\n result = databaseAppSettings[upperKey];\n }\n\n if (result != null)\n {\n return result.Replace(\"Application Name=None\", \"Application Name=\" + GetApplicationName());\n }\n\n return null;\n }\n\nAlter it with the following rules:\n\nIf the setting key is urlLegacyTradingWebSite or TS2008RootUrl or urlTradingCDN and the local machine name is 'stl-webtest01', replace the string 'webtest1' with 'stl-webtest01' in the return value.\n\nIf the setting key is urlLegacyTradingWebSite or TS2008RootUrl or urlTradingCDN and the local machine name is 'stl-webprd01', replace the string 'webtest1' with 'stl-webprd01' in the return value."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0038",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I was running a command to create a trigger, where if the number of employees under a supervisor becomes 5, then a message would be printed out.\n\nHere's the command:\n\nDELIMITER $$\nCREATE TRIGGER supervisor\\_check \nAFTER INSERT ON employees \nFOR EACH ROW\nBEGIN\n\n DECLARE supervisor\\_count INT;\n \n SELECT COUNT(\\*) INTO supervisor\\_count \n FROM employees \n WHERE employeeSupervisor = NEW.employeeSupervisor;\n \n IF supervisor\\_count = 5 THEN\n SIGNAL SQLSTATE '45000'\n SET MESSAGE\\_TEXT = 'Supervisor has minimum of 5 employees';\n ELSEIF supervisor\\_count = 10 THEN\n SIGNAL SQLSTATE '45000'\n SET MESSAGE\\_TEXT ='Supervisor has maximum of 10 employees';\n END IF;\n \nEND $$\nDELIMITER ;\n\nAfter I ran the command, I checked if it works by inserting a new row so that the number of supervisors becomes 5, however, this error keeps haunting me:\n\n#1442 - Can't update table 'employees' in stored function/trigger because it is already used by statement which invoked this stored function/trigger\n\nHow do I make this work?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0039",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Write a basic class that simulates a bank account that supports the following options:\n\nCustomers can deposit and withdraw funds.\n If sufficient funds are not available for withdrawal, a $10.00 overdraft penalty is charged.\nOnce within a given month, interest can be added to the account. The interest rate can vary every month.\nClass BankAccount \n\nInstance Members: \n\nbalance\nlast\\_interest\\_date\nInstance Methods\n\nconstructor - Constructs a bank account with a given balance. Provides the default parameter initial\\_balance (default balance = Decimal(\"0.0\").\ndeposit - Deposits money into the account. Takes the parameter amount to deposit. \nwithdraw - Makes a withdrawal from the account or charges a penalty if sufficient funds are not available. Takes the parameter amount to withdraw.\nadd\\_interest - Adds interest once monthly to a positive account balance. Takes the parameter rate that represents the current rate of interest (for allowable rate of interest 1% <= rate <= 2%). Monitor the date and only apply the rate calculation once monthly.\nget\\_balance - Returns the current account balance.\nInput Error Checking: Mutators must validate parameter data before writing to private instance fields. If parameter data is invalid there is no change in state of the bank account."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0040",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "MongoTemplate mongoTemplate = new MongoTemplate(MongoClients.create(), \"your-database-name\");\nChangeStreamOptions options = ChangeStreamOptions.builder()\n .filter(Aggregation.newAggregation(Document.class, \n match(where(\"operationType\").is(\"update\")), \n project(\"fullDocument\"))).build();\n\nmongoTemplate.changeStream(\"your-collection-name\", options, Document.class)\n .filter(where(\"fullDocument.commonField\").exists(true))\n .listen()\n .forEach(change -> {\n // Get the common field value\n String commonFieldValue = change.getFullDocument().getCommonField();\n \n // Create an update query to update the 2nd document with the common field value\n Query query = new Query(where(\"commonField\").exists(true));\n Update update = new Update().set(\"commonField\", commonFieldValue);\n \n // Update the 2nd document\n mongoTemplate.updateFirst(query, update, SecondDocument.class);\n });PostMapping(\"/first-document\")\npublic ResponseEntity saveFirstDocument(@RequestBody FirstDocument firstDocument) {\n mongoTemplate.save(firstDocument);\n return ResponseEntity.ok().build();\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0041",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I'm following the official Docker tutorial on Node. Let me give you an excerpt of it:\n\nWe’ve added the ronin-database module and we updated the code to connect to the database and set the in-memory flag to false. We now need to rebuild our image so it contains our changes.\n\nFirst let’s add the ronin-database module to our application using npm.\n npm install ronin-database\nNow we can build our image.\n docker build --tag node-docker .\nNow, let’s run our container. But this time we’ll need to set the CONNECTIONSTRING environment variable so our application knows what connection string to use to access the database. We’ll do this right in the docker run command.\n docker run \\\n -it --rm -d \\\n --network mongodb \\\n --name rest-server \\\n -p 8000:8000 \\\n -e CONNECTIONSTRING=mongodb://mongodb:27017/notes \\\n node-docker\n\nIt's weird to me that they're doing the `-it` and `-d` thing in their official guide. Do you think there might be a reason for that?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0042",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "translate this code's comment to english:\n\ndef get\\_substitues(substitutes, tokenizer, mlm\\_model, use\\_bpe, substitutes\\_score=None, threshold=3.0):\n '''\n 将生成的substitued subwords转化为words\n '''\n # substitues L,k\n # from this matrix to recover a word\n words = []\n sub\\_len, k = substitutes.size() # sub-len, k\n\n if sub\\_len == 0:\n # 比如空格对应的subwords就是[a,a]，长度为0\n return words\n\n elif sub\\_len == 1:\n # subwords就是本身\n for (i, j) in zip(substitutes[0], substitutes\\_score[0]):\n if threshold != 0 and j < threshold:\n break\n words.append(tokenizer.\\_decode([int(i)]))\n # 将id转为token.\n else:\n # word被分解成了多个subwords\n if use\\_bpe == 1:\n words = get\\_bpe\\_substitues(substitutes, tokenizer, mlm\\_model)\n else:\n return words\n return words"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0043",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "remember the following filtro() function created on matlab:\nfunction [y] = filtro(x,A,B)\n%x: the column vector input signal\n%A,B: column vectors of coefficients\n%y: the output column vector\nN=length(A);\nM=length(B);\nP=max([N,M]) \nR=length(x);\n\ny=zeros(size(x));\nfor I=P+1:length(x)\n y(I)=B'\\*x(I:-1:I-M+1)+A'\\*y(I-1:-1:I-N);\nend\nend\n--------\nthis filter code implements the equation of differences of an LTI system.\nThe routine should be called with the following command: y = filtro(x; A;B); where A = [a1; ....; aN] , B =[b0; b1;....; bM] are vectors of coefficients and x and y are the input and output signals (1 D column vectors) respectively. consider both the case when N=M and when N is different than M.\nExplain how it works."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0044",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "public class Polynomial {\n private List terms;\n \n public Polynomial(Term... terms){\n this.terms = Arrays.asList(terms);\n } \n\n public double evaluate(double x) {\n double result = 0.0;\n for (Term termObj : terms) {\n result = result + (termObj.getCoefficient() \\* Math.pow(x, termObj.getPower()));\n }\n return result;\n }\n \n public static void main(String[] args) {\n Polynomial p = new Polynomial(new Term(2.0,2),new Term(3.0,1), new Term(-1.0,1));\n System.out.println(\"The result of the polynomial evaluation is: \" + p.evaluate(2));\n }\n}\n\npublic class Term {\n private double coefficient;\n private int power;\n \n public Term(double coefficient, int power){\n this.coefficient = coefficient;\n this.power = power;\n } \n\n public double getCoefficient() {\n return coefficient;\n } \n\n public int getPower() {\n return power;\n } \n}\n\nchange List to ArrayList or Vector"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0045",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I'm using the following code to try selenium\n\n# Import the necessary Selenium modules\nfrom selenium import webdriver\n\n# Create an instance of the webdriver, specifying the path to the webdriver executable\ndriver = webdriver.Chrome('path/to/chromedriver')\n\n# Use the get() method to navigate to a URL\ndriver.get('https://www.example.com')\n\n# Find an element on the page by its id and interact with it\nsearch\\_box = driver.find\\_element\\_by\\_id('search-box')\nsearch\\_box.send\\_keys('example')\nsearch\\_box.submit()\n\n# Find an element on the page by its class name and retrieve its text\nresult = driver.find\\_element\\_by\\_class\\_name('result')\nprint(result.text)\n\n# Close the browser\ndriver.quit()\n\nand I am getting the following error: Traceback (most recent call last):\n File \"app.py\", line 11, in \n search\\_box = driver.find\\_element\\_by\\_id('search-box')\nAttributeError: 'WebDriver' object has no attribute 'find\\_element\\_by\\_id'"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0046",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Please answer the following question.\n\nQuestion title: What is function with multiple variadic args?\n\nQuestion body: I don't understand how this code works. Could anyone please enlighten me a bit. I was pretty much sure \"the parameter pack should be the last argument\"\n\nvoid foo(auto&&...args1, auto&&... args2, auto&&... args3) {\n std::cout << \"args1:\\n\", ((std::cout << args1 << \" \"), ...);\n std::cout << \"args2:\\n\", ((std::cout << args2 << \" \"), ...);\n std::cout << \"args3:\\n\", ((std::cout << args3 << \" \"), ...);\n}\n\nint main(int argc, char\\*\\* argv)\n{\n foo(1,2,3,4,5,6);\n}\nIf it's allowed how can I split arg1, args2 and args3?\n\nThe compiler (g++-11) assumes all parameters pack except args3 are empty, so the output is\n\nargs1:\nargs2:\nargs3:\n1 2 3 4 5 6"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0047",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Imagine the user has written a Python code.\nYour role as a code assistant is to be able to assist user with modifying Python code according to the user's instruction.\nIf the instruction is clear to modify the code, please reply with the modified code.\nIf the instruction is unclear to modify the code, please gather more specific information from the user.\n\n[Code]\ndef bubble\\_sort(array):\n while True:\n swapped = False\n for j in range(len(array)-1):\n if array[j] > array[j+1]:\n array[j], array[j+1] = array[j+1], array[j]\n swapped = True\n if not swapped:\n break\nif \\_\\_name\\_\\_ == '\\_\\_main\\_\\_':\n amount = input(\"How many numbers you would like to sort:\")\n array = [\n int(input(\"Enter {} number:\".format(i)))\n for i in range(int(amount))\n ]\n\n print(\"The values input are as follows: {}\".format(array))\n bubble\\_sort(array)\n print(\"The sorted list is: {}\".format(array))"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0048",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Act as a code refactor and reduction engineer. You'll only respond to me with python code blocks, with restructedtext docstrings and type hints. I will describe a what I want in plain English or with code blocks that need to be enhanced. All of the provided code will be used in a peice of software that manages router firmware tests through a centralized mqtt logger and Jenkins. You can use Logger.info() and logger.debug() for all output.\nLets start with this block\n\ndef make\\_clip\\_script(file, \\_workingdir=args.dir):\n shortName = os.path.splitext(file)[0]\n dataPath = os.path.abspath(f\"Archive/{nowtime}/{file}\")\n \\_scriptpath = f'{shortName}.cmd'\n scriptpath = \\_scriptpath.replace(\"groups\", \"QuickClip\")\n print(f\"File created: {scriptpath}\")\n with open(scriptpath, 'w') as f:\n f.write(\n f'type \"{dataPath}\"|clip\\nrm \"{dataPath}\"\\nrmdir {nowtime}\\nDEL \"%~f0\" & EXIT'"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0049",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "@cuda.jit('int32[:](int32[:], int32[:], int32)', device=True)\ndef gpu\\_sort(array,out,n): \n lng = array.shape[0]\n if n > lng:\n n=lng;\n i = int32(0)\n pass\\_no = n - 1 \n# initialize output as array \n while i < n:\n out[i]=array[i]\n i = i + 1 \n# bubble sort\n while pass\\_no >= 0:\n i = 0\n while i < pass\\_no:\n j = i + 1\n if (out[i] > out[j]) :\n temp = out[i]\n out[i]=out[j]\n out[j]=temp\n i = i + 1\n pass\\_no = pass\\_no -1\n i = n\n while i < lng:\n out[i]=int32(-1)\n i = i + 1\n return out\n\nexplain me the code above and tell me how can I improve it"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0050",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Rewrite the following email to be more engaging:\n\nJake,\nIt was great meeting with you the other day and I'm looking forward to working with you and Jalpresh this coming year.\nGiven the current economic climate we understand the competitive landscape and nature of these sorts of situations and understand that there may be other less expensive solutions on the market today. But, with that being said, there is a reason why we are best in class and #1 in the ecosystem. OwnBackup for 8 years has been the market leader and provides a world class service for 5,600+ global companies. Please, for your benefit, take the opportunity to read some of our reviews on the Salesforce appexchange, we have close to 500 5 star reviews that speak directly to our solution and the support we provide to each and everyone of our partners.\nBased on your feedback we had the opportunity to sync internally and I was able to put my best foot forward to secure a significant discount for $5,100 per year.\nWhat do you need from me in order to be able to move forward at this time?\nJoshua"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0051",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Why does this work for \n\n\"import \"content/css/viewContent.css\";\n\n{\n \"compilerOptions\": {\n \"target\": \"es5\",\n \"lib\": [\"dom\", \"dom.iterable\", \"esnext\"],\n \"allowJs\": true,\n \"skipLibCheck\": true,\n \"esModuleInterop\": true,\n \"allowSyntheticDefaultImports\": true,\n \"strict\": true,\n \"forceConsistentCasingInFileNames\": true,\n \"noFallthroughCasesInSwitch\": true,\n \"module\": \"esnext\",\n \"moduleResolution\": \"node\",\n \"resolveJsonModule\": true,\n \"isolatedModules\": true,\n \"noEmit\": true,\n \"jsx\": \"react-jsx\",\n \"baseUrl\": \"src\",\n \"paths\": {\n \"global/\\*\": [\"./global/\\*\"],\n \"features/\\*\": [\"./features/\\*\"],\n \"content/\\*\": [\"./features/content/\\*\"]\n // \"form-submissions/\\*\": [\"features/form-submissions/\\*\"]\n }\n },\n \"include\": [\"src\"]\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0052",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Rewrite this aws cdk v2 code so that the token in the url is coming from an aws secret: const deliveryStream = new cdk.aws\\_kinesisfirehose.CfnDeliveryStream(\n this,\n 'firehose-input',\n {\n deliveryStreamType: 'DirectPut',\n httpEndpointDestinationConfiguration: {\n endpointConfiguration: {\n url: `https://api.us-east.tinybird.co/v0/events?name=firehose\\_input\\_\\_v1&token=xxxxxxxxxxxx`,\n },\n requestConfiguration: {\n contentEncoding: 'GZIP',\n },\n s3Configuration: {\n bucketArn: firehoseBackupBucket.bucketArn,\n roleArn: firehoseBackupRole.roleArn,\n },\n s3BackupMode: 'FailedDataOnly',\n retryOptions: {\n // If Tinybird is having an issue, we will retry for 2 hours\n // After that the data will be stored in the S3 backup bucket for 90 days\n durationInSeconds: 7200,\n },\n },\n },\n);"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0053",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Please edit the css properties so that the circle leaves a long cylindrical trail of shadows: \n\n.circle {\n fill: radial-gradient(white, lightblue);\n filter: drop-shadow(-15px -15px 15px gray);\n transform: rotateX(15deg);\n transition: transform 0.3s ease-in-out;\n background: linear-gradient(to top, #fff, #ffcccc);\n box-shadow: 20px 20px 10px 5px rgba(0,0,0,0.75);\n border-radius: 90%;\n animation: trail 3s ease-in-out infinite;\n}\n\n@keyframes trail {\n 0% {\n filter: drop-shadow(-60px 60px 60px gray);\n }\n 100% {\n filter: drop-shadow(-30px 30px 30px gray) drop-shadow(15px 15px 15px gray);\n }\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0054",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "You are an excellent iOS programmer. You are going to help me design a swift iOS app. The goal of the app is to help 2 people find a film they can agree on watching. The app’s core functionality is the following. \n\n1. Allow two users, one at a time to enter 3 films that they love. \n2. The app should then log these 6 films and store them somewhere - with the films associated with the user who inputted them.\n3. Then the app should use a combination of AI and a film database to select 5 new films that both users are likely to like based on the 3 films they inputted. \n4. The app should then show these 5 new films with a score next to them. Where the score represents the certainty the AI has that the users will like the film. \n5. Users should then be able to click a link from that view to open that film in one of Netflix, Amazon prime or Apple TV. So only choose movies available on these platforms.\nIs there anything else I could help explain to an able you to build this?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0055",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "we are trying to use renderer job API to get some data transferred to sftp. We are using something like code below\n\nconst { Job } = require('renderer'),\n job = new Job('c\\_axon\\_demo\\_app')\n\nreturn job\n .addCursor('data', org.objects.c\\_step\\_responses.find()\n .skipAcl()\n .grant(4))\n .addTemplate('csv', 'header1,header2\\n{{#each (cursor data)}}{{[\\_id]}},{{[c\\_value]}}\\n{{/each}}')\n .addOutput('mycsv', 'csv', ['csv'])\n .addSftpTarget({\n mycsv: 'mycsv.csv'\n },\n {\n username: \"xxx\",\n password: \"xxx\",\n port: xx,\n host: 'xxxxxxxxxx'\n }, {})\n .start()\n\nis there a way to merge two datasets (eg c\\_task\\_response and c\\_step response) and filter on some task in this code , may be by defining a template in .addTemplate"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0056",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I want you to act as an electrical engineer from the late 1900. I will write you my article headlines and an old technology a name of a product or a description of the function write about the function and content which the device is made from you will suggest an informative and exciting article with index tables and examples, a conclusion and write in first person as Kim Terje to write self-help based on my provided name of old technology. in some cases, I will also give you the type of code or a question about writing the article in HTML code. To do so, I will require an intro index table and a description of the self-help DIY how-to guide, explain why it was a good source at the time volt-amps and power supplied by an example of devices chose it, discuss bad choices and a summary of the article and edition. I will need 1500 to 3000-word articles. You will also suggest other ways of achieving the same result of a similar type that is close to my first question, the headline or article. My first suggestion request is"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0057",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "func (c \\*logicOrFunctionClass) getFunction(ctx sessionctx.Context, args []Expression) (builtinFunc, error) {\n err := c.verifyArgs(args)\n if err != nil {\n return nil, err\n }\n args[0], err = wrapWithIsTrue(ctx, true, args[0], false)\n if err != nil {\n return nil, errors.Trace(err)\n }\n args[1], err = wrapWithIsTrue(ctx, true, args[1], false)\n if err != nil {\n return nil, errors.Trace(err)\n }\n\n bf, err := newBaseBuiltinFuncWithTp(ctx, c.funcName, args, types.ETInt, types.ETInt, types.ETInt)\n if err != nil {\n return nil, err\n }\n bf.tp.SetFlen(1)\n sig := &builtinLogicOrSig{bf}\n sig.setPbCode(tipb.ScalarFuncSig\\_LogicalOr)\n return sig, nil\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0058",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "convert the following code to gradio interface for chatbot: import re\nimport random\n\ndef model\\_responce(query): \n text = []\n txt = re.sub('[^a-zA-Z\\']', ' ', query)\n txt = txt.lower()\n txt = txt.split()\n txt = \" \".join(txt)\n text.append(txt)\n \n x\\_test = tokenizer.texts\\_to\\_sequences(text)\n x\\_test = np.array(x\\_test).squeeze()\n x\\_test = pad\\_sequences([x\\_test], padding='post', maxlen=X.shape[1])\n y\\_pred = model.predict(x\\_test)\n y\\_pred = y\\_pred.argmax()\n tag = lbl\\_enc.inverse\\_transform([y\\_pred])[0]\n responses = df[df['tag'] == tag]['responses'].values[0]\n\n print(\"you: {}\".format(query))\n print(\"model: {}\".format(random.choice(responses)))Share Prompt"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0059",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "SELECT \"public\".\"investor\".\"refer\\_platform\" AS \"refer\\_platform\", \n COUNT(CASE WHEN \"public\".\"investor\".\"google\\_id\" IS NULL THEN 1 ELSE NULL END) AS \"google\\_id\\_empty\\_count\",\n COUNT(CASE WHEN \"public\".\"investor\".\"google\\_id\" IS NOT NULL THEN 1 ELSE NULL END) AS \"google\\_id\\_not\\_empty\\_count\"\nFROM \"public\".\"investor\"\nLEFT JOIN \"public\".\"utm\\_campaigns\" \"Utm Campaigns\" ON \"public\".\"investor\".\"id\" = \"Utm Campaigns\".\"investor\\_id\"\nWHERE \"public\".\"investor\".\"created\\_date\" >= timestamp with time zone '2023-01-01 00:00:00.000+07:00'\n AND \"Utm Campaigns\".\"utm\\_medium\" IS NULL\nGROUP BY \"public\".\"investor\".\"refer\\_platform\"\nORDER BY \"public\".\"investor\".\"refer\\_platform\" ASC;"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0060",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "# Install and import PyDrive\n!pip install -U -q PyDrive\nfrom pydrive.auth import GoogleAuth\nfrom pydrive.drive import GoogleDrive\nfrom google.colab import auth\nfrom oauth2client.client import GoogleCredentials\n\n# Authenticate and create PyDrive client\nauth.authenticate\\_user()\ngauth = GoogleAuth()\ngauth.credentials = GoogleCredentials.get\\_application\\_default()\ndrive = GoogleDrive(gauth)\n\n# Download file from Google Drive\nfile\\_id = '1y\\_DOieHtLgxHMG2rrviZSYfodTnZ1DYp' # Replace with your file ID\ndownloaded = drive.CreateFile({'id': file\\_id})\ndownloaded.GetContentFile('marketing\\_campaign.csv')\n----\nreplace the key by this one: https://drive.google.com/file/d/1PGBSRpTO4SwFog6SQQgayrUbuBFqp9oZ/view?usp=share\\_link"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0061",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I landed on this:\n\n```\ninput\\_file='data.json'\n\n# extract unique decider values\ndeciders=$(jq -r '.node\\_allocation\\_decisions[].deciders[].decider' \"$input\\_file\" | sort -u)\n\n# loop over deciders and print node\\_names with matching decider\nfor decider in $deciders; do\n echo \"Nodes with decider '$decider':\"\n jq -r --arg decider \"$decider\" '.node\\_allocation\\_decisions[] | select(.deciders[].decider == $decider) | .node\\_name' \"$input\\_file\"\ndone\n\n# summary of counts for each unique decider value\necho \"Summary of counts for each decider value:\"\njq -r '.node\\_allocation\\_decisions[].deciders[].decider' \"$input\\_file\" | sort | uniq -c | sort -nr\n```\n\nplease split the jq filters up into multiple lines with comments for readability, where it makes sense to do so"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0062",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Update this product description to be more unbiased and \"designed to\" and \"intended to\" when stating claims.\n\nInclude \"designed to\" and \"intended to\" when stating claims. The Alice 6 LDx System is a polysomnography system intended to record, display, and print physiological information obtained from patients during sleep studies. The system includes the Omnilab Advanced + which is designed to allow for digital integration, reducing the need for channel calibrations and multiple cable connections. The Omnilab Advanced + also offers a therapy composite channel that is designed to capture relevant settings for complex titrations. The integrated ZRIP driver is designed to simplify setup by reducing connections during hook-up, with a single keyhole input for quick connection to the headbox. The Alice 6 LDx system features automatic chin re-referencing that is intended to monitor all three chin EMG inputs in real-time and select the best pair to display based on impedances using proprietary technology. Additionally, the system utilizes Sleepware G3 technology, which is a sleep diagnostic software designed to provide control and protection against unwanted access to patient data."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0063",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I'd like to remind you of the SQL you gave me before. \n````\nCREATE TABLE TrainLines (\n id INTEGER PRIMARY KEY,\n name TEXT NOT NULL,\n route TEXT NOT NULL\n);\n\nCREATE TABLE Stations (\n id INTEGER PRIMARY KEY,\n name TEXT NOT NULL,\n location TEXT NOT NULL\n);\n\nCREATE TABLE Schedules (\n id INTEGER PRIMARY KEY,\n train\\_line\\_id INTEGER NOT NULL,\n station\\_id INTEGER NOT NULL,\n arrival\\_time TIME NOT NULL,\n departure\\_time TIME NOT NULL,\n platform INTEGER NOT NULL,\n FOREIGN KEY (train\\_line\\_id) REFERENCES TrainLines (id),\n FOREIGN KEY (station\\_id) REFERENCES Stations (id)\n);\n\nCREATE TABLE IntermediateStops (\n id INTEGER PRIMARY KEY,\n train\\_line\\_id INTEGER NOT NULL,\n station\\_id INTEGER NOT NULL,\n sequence INTEGER NOT NULL,\n FOREIGN KEY (train\\_line\\_id) REFERENCES TrainLines (id),\n FOREIGN KEY (station\\_id) REFERENCES Stations (id)\n);\n````"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0064",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I'm trying to make a jest test to test that the message returned from the API call is \"Update Successful\", can you re-write this test so it does so and explain what you changed? \"it('should have expected success state', async () => {\nconst axiosGetSpy = jest.spyOn(axios, 'put').mockResolvedValue({ data: [] });\nconst utils = renderHook(() => useUpdateActiveStatus());\nconst updateActiveStatus = utils.result.current.updateActiveStatus;\nawait act(async () => {\n await updateActiveStatus(mockActiveStatusToChange);\n});\n// const { result } = renderHook(() => useUpdateActiveStatus());\n// const updateActiveStatus: (activeStatusToChange: QuestionStatusType) => Promise =\n// result.current.updateActiveStatus;\n// let responseMessage;\n// await act(async () => {\n// responseMessage = await updateActiveStatus([]);\n// });\n// expect(responseMessage).toEqual(successMessage);\n// });\""
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0065",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "write me a python script to analyze EMG data. It should import an excel sheet that contains time data in column 1 and EMG data in column 2. the script should have a variable that can be adjusted to align the sample rate of the data, but this can be set at 2000Hz as default. Process this data by applying a 2nd order bandpass butterwoth filter. The filter will have a high pass cuttoff frequency of 20Hz and a low pass cutoff of 500Hz. Also apply a notch filter that is a 2nd order butterworth at 60Hz. Then smooth the data by applying a moving average of 0.5 seconds. Have a variable for the smoothing window so it is easily adjustable. Create a graph that has 3 lines, the original data, the filtered data and the smoothed data. Finally, export this data as a .csv file where time is in column 1, original data in column 2, filtered data in column 3 and smoothed data in column 4."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0066",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Use this template to generate L1 context diagrams:\n```\n@startuml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4\\_Context.puml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4\\_Container.puml\n!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4\\_Component.puml\n\nLAYOUT\\_LEFT\\_RIGHT()\n\n<>\n\n@enduml\n```\n\nThis is my system architecture:\n```\n- Frontend (ReactJS)\n- App Server (Golang)\n- Database (DynamoDB)\n\nReactJS communicates with Golang over http (rest)\nApp Server uses the AWS SDK to communicate with DynamoDB\n```\n\nGenerate the L1 Context Diagram in plantUML using the template. Follow the template strictly and do not change any of the imports."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0067",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Can you improve this code? Ensure that the improvements don't change the look or behavior of the application. It is crucial that the improvement doesn't lead to any errors. Think step by step:\nconst handleFeedback = async (sentiment: \"POSITIVE\" | \"NEGATIVE\") => {\n if (sentiment === \"POSITIVE\") {\n setLikeLoading(true);\n if (hasFeedback(\"POSITIVE\")) {\n await deleteFeedback.mutateAsync({ messageId: message.id });\n } else {\n await createFeedback.mutateAsync({\n messageId: message.id,\n sentiment: \"POSITIVE\",\n });\n }\n setLikeLoading(false);\n } else {\n setDisLikeLoading(true);\n if (hasFeedback(\"NEGATIVE\")) {\n await deleteFeedback.mutateAsync({ messageId: message.id });\n } else {\n await createFeedback.mutateAsync({\n messageId: message.id,\n sentiment: \"NEGATIVE\",\n });\n }\n setDisLikeLoading(false);\n }\n };"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0068",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I have this code:\n\n```\nconst ResponseBlock = (qa: { q: string; a: string }) => {\n return (\n <>\n {qa.q}\n{qa.a}\n \n );\n};\n```\n\n```\n{questionAnswers.map((qa) => {\n return ;\n })}\n```\n\n```\nconst [questionAnswers, setQuestionAnswers] = useState<\n Array<{ q: string; a: string }>\n >([]);\n```\n\nI'm getting this error:\n\n```\n(property) qa: {\n q: string;\n a: string;\n}\nType '{ qa: { q: string; a: string; }; key: string; }' is not assignable to type 'IntrinsicAttributes & { q: string; a: string; }'.\n Property 'qa' does not exist on type 'IntrinsicAttributes & { q: string; a: string; }'.ts(2322)\n```\n\nWhat's wrong?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0069",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Write a rough OpenAPI spec for the following REST API:\n\n```\nPOST /v1/datasets/create\nGET /v1/datasets/list\nGET /v1/datasets/{dataset-id}/info\nPOST /v1/datasets/{dataset-id}/labels/create\nGET /v1/datasets/{dataset-id}/labels/list\nGET /v1/datasets/{dataset-id}/labels/{label-id}/info\nPOST/v1/datasets/{dataset-id}/labels/{label-id}/annotations/create\nGET /v1/datasets/{dataset-id}/labels/{label-id}/annotations/list\nGET /v1/datasets/{dataset-id}/labels/{label-id}/annotations/{annotation-id}/info\nPOST /v1/datasets/{dataset-id}/labels/{label-id}/annotations/{annotation-id}/edit\nPOST /v1/datasets/{dataset-id}/labels/{label-id}/annotations/{annotation-id}/delete\n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0070",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Modify the following code so that only every 10th value is displayed on the x axis : import pandas as pd\nimport numpy as np\nimport matplotlib.pyplot as plt\ndf = pd.read\\_csv(\"CSV - Time Data.csv\")\n# Printing First 10 Rows of Data and Header\nprint (\"\\n Selected 100 Rows of Data\")\ndf = df[1000:1101]\nprint (df)\n# Selecting the \"Miles\" Column\nmiles = df[\"Miles\"]\n# Selecting the \"Date Column\"\ndate = df[\"Date\"]\n# Print Crossplot Using fmt=\"[color],[marker],[line]\"\nplt.plot(date,miles,\"b.--\")\n# Specifying Font Style and Size\nplt.title(\"Miles v. Date\", fontdict={\"fontname\": \"Comic Sans MS\", \"fontsize\": 20})\nplt.xlabel(\"Date\")\nplt.ylabel(\"Miles\")\nplt.show()"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0071",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "A landing page for a Fort Worth commercial roofing company should include information about the company's services, experience, and expertise in commercial roofing. This might include details about the types of roofs the company specializes in, the properties they have worked on in the past, and the services they offer, such as roof installation, repair, and maintenance.\nThe landing page should also include information about the company's location and service area, as well as contact information and a call to action, such as a form for requesting a quote or consultation. The page should also include testimonials or case studies highlighting the company's work and the satisfaction of their clients.\n\nAdditionally, the landing page should be optimized for search engines by including relevant keywords and phrases related to commercial roofing in Fort Worth. This will help the page rank well in search engine results and make it easier for potential clients to find the company online.\n\nCan you please write an outline of the content that will go onto a landing page for Texas Select Construction, a commercial roofing company in Fort Worth?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0072",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "public function determineLast($last, $frequency, $forgive = null)\n {\n $last = new Carbon($last);\n\n $new\\_last = Carbon::now();\n\n //If the previous last is more than a year old, or the donor form is set to forgive missed payments, make the current last today.\n if ($new\\_last->diffInYears($last) > 0 || $forgive == 1)\n return $new\\_last;\n\n switch ($frequency) {\n case 1: // Monthly\n $new\\_last = $last->addMonth();\nbreak;\n case 2: // Quarterly\n $new\\_last = $last->addMonths(3);\n break;\n case 3: // Semiannually\n $new\\_last = $last->addMonths(6);\n break;\n case 4: // Annually\n $new\\_last = $last->addMonths(12);\n }\n\n return $new\\_last;\n }"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0073",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I have the following function:\n\nvoid vk\\_util\\_format\\_timestamp(uint64\\_t timestamp, char buffer[13])\n{\n if (buffer == NULL) {\n return;\n }\n\n uint8\\_t hours = (timestamp / MS\\_IN\\_HOUR) % 24;\n uint8\\_t minutes = (timestamp % MS\\_IN\\_HOUR) / MS\\_IN\\_MINUTE;\n uint8\\_t seconds = (timestamp % MS\\_IN\\_MINUTE) / MS\\_IN\\_SECOND;\n uint16\\_t milliseconds = timestamp % MS\\_IN\\_SECOND;\n\n snprintf(buffer, 13, \"%02d:%02d:%02d.%03d\",\n hours, minutes, seconds, milliseconds);\n}\n\nIn it, you can see that the modulo and division operations are being done on 64-bit values. Can this function be revised so that module and division are done on 32-bit values?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0074",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "can you convert the following JS to GO? \nvar recordGroups = {};\n\nconst coverages = [\n {\n payorId: 'kronos',\n groupNumber: '1234',\n name: 'dog',\n },\n {\n payorId: 'kronos',\n groupNumber: '1234',\n name: 'cat',\n },\n {\n payorId: 'kronos',\n groupNumber: '1234',\n name: 'fish',\n },\n];\n\ncoverages.forEach((coverage) => {\n let recordGroupString = getSanitizedKey(coverage);\n if (\n !recordGroups[recordGroupString] &&\n !Object.keys(recordGroups).includes(recordGroupString)\n ) {\n recordGroups[recordGroupString] = [];\n recordGroups[recordGroupString].push(coverage);\n } else {\n recordGroups[recordGroupString].push(coverage);\n }\n});"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0075",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "this is one specification for the customer, can you explain it \n\nusing System;\nusing System.Linq;\nusing Ardalis.GuardClauses;\nusing Ardalis.Specification;\nusing uInvoice.Core.Entities;\n\nnamespace uInvoice.Core.Specifications\n{\n public class CustomerByIdWithIncludesSpec : Specification, ISingleResultSpecification\n {\n public CustomerByIdWithIncludesSpec(Guid customerId)\n {\n Guard.Against.NullOrEmpty(customerId, nameof(customerId));\n\n Query.Where(customer => customer.CustomerId == customerId && customer.IsActive == true)\n .OrderBy(customer => customer.CustomerCode)\n .Include(f => f.CustomerAddresses)\n .Include(f => f.CustomerEmailAddresses)\n .Include(f => f.CustomerPhoneNumbers)\n .Include(f => f.CustomerPriceLists)\n .Include(f => f.Invoices)\n .AsNoTracking();\n }\n }\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0076",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Now optimize these:\n\n• Guided my internship project into a full-time client deliverable. Enhanced the view to be production-ready and created a first-class java service on the CareAware iBus Platform to support the operations. The service supports retrieval of configuration files from VMs using FTP and then storing the file back in the same location once changes have been made from the user-friendly view.\n• Syncing personnel information from hospital systems is key to a lot of operations at Cerner. While our Millennium based systems had processes in place to do this, our Non-Millennium offerings had a gap. Worked on writing a service that helps sync LDAP information from hospital systems. For this, we used an open-source project called LDAP Synchronization Connector. \n• Creating POCs for enhancing our continuous delivery pipelines for alpha partners. Alpha partners vet out new code and give us valuable feedback but the TAT has always been really slow. The POC involved using docker and download code directly from S3 to reduce this TAT dramatically."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0077",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Here is the description of a company and I will need you to extract from it a list of products or services that the company is selling.\n\nDescription:\nBased in London, LA and Sydney, we make talked about work in film and interactive media. Be it handcrafted or high-tech, we create heartfelt stories and experiences that transform brands and engage audiences through the power of entertainment and culture.\n \nOur world-class roster of directing talent is backed by our 180-seat studio and team of experienced production staff, creative thinkers, animators, technical directors, coders, illustrators, designers and makers. A rostrum room, green screen shooting studio, edit suite, render farm, craft and electronic workshop further allow us to do everything in-house.\n \nOur work includes Academy Award nominated animation, Grammy nominated music videos, D&AD black pencil and triple Cannes Grand Prix winning commercials and D&AD white pencil, Lovie and Webby winning digital and immersive experiences."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0078",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Please answer the following question.\n\nQuestion title: Why do I get an ambiguity error in this code?\n\nQuestion body: Let's say we have these 3 classes:\n\nclass A { }\nclass B extends A { }\n\npublic class App {\n static void f(int i, A a) { }\n static void f(float j, B b) { }\n \n static public void main() {\n int i = 0;\n B b = new B();\n App.f(i, b);\n }\n}\nThis produces the error:\n\nApp.java:11: error: reference to f is ambiguous\n App.f(i, b);\n ^\n both method f(int,A) in App and method f(float,B) in App match\n1 error\nWhy does it not choose the type f(int, A) since i is an integer?\nIn which case should I use a record?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0079",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "can you please restructure the below if conditions in the code ?\n\n if (event.getChangeEventType().equals(ChangeEventTypes\\_v1.DELETED)) {\n kafkaProducerEventService.sendPurchaserChangeEvent(event.getPurchaser(), event.getChangeEventType());\n kafkaProducerEventService.sendSchoolChangeEvent(event.getPurchaser(), event.getChangeEventType());\n }\n\n else {\n if (event.isRegionChanged() && event.getChangeEventType() != null) {\n kafkaProducerEventService.sendSchoolChangeEvent(event.getPurchaser(), event.getChangeEventType());\n } else if (event.getChangeEventType() != null) {\n kafkaProducerEventService.sendPurchaserChangeEvent(event.getPurchaser(), event.getChangeEventType());\n }\n }\n\n if (event.isSeatChanged()) {\n userService.patchTeacherBatch(event.getPurchaser().getLinkedTeachers());\n }"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0080",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Please write Ceedling Unit tests for this function. Mocking as needed.\n```\nint my\\_function(int\\* arg1, int\\* arg2) {\n bool swap\\_dir = false;\n\n if ((arg1 == NULL) && (arg2 == NULL)) {\n return -1;\n }\n else if (arg2 == NULL) {\n return -2;\n }\n else if (arg1 == NULL ) {\n return -3;\n }\n\n swap\\_dir = determineDir();\n\n if((swap\\_dir) && (\\*arg1 > \\*arg2)) {\n memcpy(arg1, arg2, sizeof(int));\n return 2;\n }\n else if((!swap\\_dir) && (\\*arg1 < \\*arg2)) {\n memcpy(arg2, arg1, sizeof(int));\n return 3;\n }\n\n return 1;\n}\n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0081",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "We are the robotics team 698 at Hamilton Highschool located in Chandler AZ, we participate in FIRST robotics and have been a established team for over 10+ years. Our closest location is in Casa Grande 20 miles away from out school. We Would like to ask for 2000$ to help pay for registration fees which are 6000$, Costs for transport and food for competitions which are 1000$ each year, along with new parts to help out team advance which can costs 1000's of dollars. Our club aligns with Bayer funds priority area of STEM education as our club not only helps foster and shows real world applications and use of stem, but we also help mentor middle schoolers teach STEM principles to 100's of kids every year. This happens at middle school teams that participate in Vex robotics along with out local library where we host and attend STEM activities."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0082",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "The reports are displaying a generated date of 1 hour in the future.\nI think this is because we have now moved to BST (Meaning we are 1 hour ahead of UTC). It is getting the current date time (which is BST i.e. 1 hour ahead), converting it to toIso8601 and submitting it to the API, which is then treating the recieved date as UTC and when converting it to EUROPE/London is adding an additional hour to it (even though it had already been added) resulting in the date being 1 hour further ahead than it should be. (It would of been fine beforehand as GMT = UTC so adding 0 hours twice would have resulted in the same date). generateReportParams.timestamp = DateTime.now().toIso8601String(); was changed to generateReportParams.timestamp = DateTime.now().toUtc().toIso8601String(); will this fix the problem?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0083",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "given this react hook form validation snippet example:\n\nimport { useForm } from \"react-hook-form\";\nimport { yupResolver } from '@hookform/resolvers/yup';\nimport \\* as yup from \"yup\";\n\nconst schema = yup.object({\n firstName: yup.string().required(),\n age: yup.number().positive().integer().required(),\n}).required();\ntype FormData = yup.InferType;\n\nexport default function App() {\n const { register, handleSubmit, formState: { errors } } = useForm({\n resolver: yupResolver(schema)\n });\n const onSubmit = (data: FormData) => console.log(data);\n\n return (\n \n \n {errors.firstName?.message}\n{errors.age?.message}\n \n \n \n );\n}\n\nreplace the yup validator for zod"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0084",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "what kind of language is this?\n\nconst options = {\n url: '',\n method: 'GET',\n headers: {\n 'Accept': 'application/json',\n 'X-CLIENT-SECRET': bundle.authData.client\\_secret,\n 'X-CLIENT-ID': bundle.authData.client\\_id,\n 'X-JWT-TOKEN': bundle.authData.jwt\\_token\n },\n params: {\n 'client\\_secret': bundle.authData.client\\_secret,\n 'client\\_id': bundle.authData.client\\_id,\n 'jwt\\_token': bundle.authData.jwt\\_token\n }\n}\n\nreturn z.request(options)\n .then((response) => {\n response.throwForStatus();\n const results = response.json;\n\n // You can do any parsing you need for results here before returning them\n\n return results;\n });"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0085",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Web search results:\n\n[1] \"Create a rectangle using the rectangle () function and fill the middle part of two lines using the setcolor () function. Draw 3 circles and color/style them accordingly by using functions like setcolor (), floodfill (), and setfillstyle (). Repeat the process until the traffic light is not complete.\"\nURL: https://www.geeksforgeeks.org/cpp-program-to-draw-a-traffic-simulation-light-using-computer-graphics/\nCurrent date: 3/10/2023\n\nInstructions: Using the provided web search results, write a comprehensive reply to the given query. Make sure to cite results using [[number](URL)] notation after the reference. If the provided search results refer to multiple subjects with the same name, write separate answers for each subject.\nQuery: buatkan coding trafict light dengan pemrograman c plus plus"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0086",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Please describe the following php function in detail using markdown:\n\npublic function query($permission, $sql, $values = null)\n {\n try {\n $this->check\\_permission($permission); // throws exception if missing permission\n $stmt = $this->db->query(\n $sql,\n $values\n );\n if ($stmt instanceof dbError) {\n throw new Exception($stmt->getCode());\n }\n $rows = $stmt->fetchAll();\n if ($rows == false || $rows == null)\n throw new Exception('No Data Found', $this::EXCEPTION\\_DATA);\n try {\n return $this->htmlspecialchars\\_array($rows);\n } catch (Exception) {\n return $rows;\n }\n } catch (Exception | dbError | PDOException | Throwable $ex) {\n throw new Exception($ex->getMessage(), $ex->getCode());\n }\n }"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0087",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I wrote:\n\"\n{\n \"Version\": \"2012-10-17\",\n \"Statement\": [\n {\n \"Sid\": \"PublicReadGetObject\",\n \"Effect\": \"Allow\",\n \"Principal\": \"\\*\",\n \"Action\": \"s3:GetObject\",\n \"Resource\": \"arn:aws:s3:::alexheritier.dev/\\*\"\n },\n {\n \"Sid\": \"AddPerm\",\n \"Effect\": \"Allow\",\n \"Principal\": {\n \"AWS\": \"arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E25U1SNOLZMPG2\"\n },\n \"Action\": \"s3:GetObject\",\n \"Resource\": \"arn:aws:s3:::alexheritier.dev/\\*\"\n }\n ]\n}\n\"\nBut the error still persists"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0088",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Can you add the above code in this code: import pandas as pd\nimport numpy as np\n\n# read in the data\ndf = pd.read\\_csv('ipo\\_data.csv')\n\n# create a list of unique industries\nindustries = df['industry'].unique().tolist()\n\n# create an empty list to store the selected samples\nsamples = []\n\n# set the interval between samples\ninterval = 10\n\n# loop through each industry\nfor industry in industries:\n # select the rows for the current industry\n industry\\_df = df[df['industry'] == industry]\n # select the starting point at random\n start = np.random.randint(0, interval)\n # select the samples using systematic sampling\n samples.extend(industry\\_df.iloc[start::interval, :])\n\n# view the selected samples\nprint(samples)"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0089",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Extract keywords from the below text.\n\nText: Zero-shot learning (ZSL) is a problem setup in machine learning where, at test time, a learner observes samples from classes which were not observed during training, and needs to predict the class that they belong to. Zero-shot methods generally work by associating observed and non-observed classes through some form of auxiliary information, which encodes observable distinguishing properties of objects.For example, given a set of images of animals to be classified, along with auxiliary textual descriptions of what animals look like, an artificial intelligence model which has been trained to recognize horses, but has never been given a zebra, can still recognize a zebra when it also knows that zebras look like striped horses. This problem is widely studied in computer vision, natural language processing, and machine perception.\n\nKeywords:"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0090",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Create an email from an instructor to the students of a new GMAT class. Mention that students can log in via a link they will find on \"Atlas\" and are welcome to log in to class 10-15 minutes early to meet and chat with the instructor, or ask any questions they may have. Also remind students to make a plan to complete their first \"practice CAT\" sometime in the next week or two. Ask the students to reply to the email and let the instructor know 1) whether they have any previous GMAT experience or are just getting started with their preparation, 2) what their b-school plans are, if any, and 3) whether they have any questions about the class or would like to share anything else with their instructor. The tone should be warm and engaging, friend and casual, yet professional, empathetic, and a little funny."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0091",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Assume you are the world leading expert in video advertisement.\n\nOBJECT = Dongdaemun Yeopgi Tteokbokki\nVIDEO\\_DURATION = 15 seconds\nCAMPAIGN\\_COUNTRY = Korea\nNUM\\_OUTPUT = 3\n\nI need to make  different variations of the ads.\nIn ,  is a very common thing to enjoy. Describe this in detail, taking into account a particular place, situation, event, or culture.\n\n{ \"ad\\_1\": {\n \"target\\_audience\": \"\",\n \"unique\\_selling\\_point\": \"\",\n \"emotion\": \"\",\n \"tone\\_and\\_style\": \"\",\n \"confidence\\_rating\": 0 - 10\n }\n}\nshow output in the above JSON format.\nPlease pay special attention to the output format of JSON.\n \n \n \n 지금 번역하기"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0092",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "explain this in themost pretentious way:\n```log\\_likelihood = 0.0\nn = 0\nfor w in [\"joshua\"]:\n chs = ['.'] + list(w) + ['.']\n for ch1, ch2 in zip(chs, chs[1:]):\n ix1 = stoi[ch1]\n ix2 = stoi[ch2]\n prob = P[ix1, ix2]\n logprob = torch.log(prob)\n log\\_likelihood += logprob\n n += 1\n print(f'{ch1}{ch2}: {prob:.4f} {logprob:.4f}')\n\nprint(f'{log\\_likelihood=}')\nnll = -log\\_likelihood\nprint(f\"{nll=}\")\nprint(f\"{nll/n}\")```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0093",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "const resultData = [];\n\ndata.forEach((item) => {\n \n item.apps.detail.forEach((detailData, index) => {\n \n \n \n \\_.each(detailData.runTrack, (track, trackIndex) => {\n console.log('trackIndex',index, detailData.name, trackIndex);\n resultData.push({\n email : index === 0 ? item.email:'',\n name : trackIndex === 0 ? detailData.name : '',\n version: track.version,\n count: track.count\n \n });\n \n })\n \n detailData.runTrack.forEach((track, trackIndex) => {\n \n \n })\n \n \n });\n});\n\nresult = resultData;\n\nWhat the issue in above code?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0094",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Find what products need restocking from CompanyA. An item needs restocking if there are only 2 or less of it left in stock.\n\nOrder the results by products id\n\nTable Schema\ntable name: products\nA table of products, including their price, amount of stock, and company they are from.\n\nNAME TYPE\nid INT\nname VARCHAR(100)\nprice NUMERIC(16,2)\nstock INT\nproducer TEXT\nQuery Schema\nresulting query\nThe query of items that need to be restocked\n\nNAME TYPE\nid INT\nname VARCHAR(100)\nstock INT\n[execution time limit] 10 seconds (mysql)\n```\nCREATE PROCEDURE solution()\nBEGIN\n /\\* Write your SQL here. Terminate each statement with a semicolon. \\*/\nEND\n```2 / 2"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0095",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "The rgb function is incomplete. Complete it so that passing in RGB decimal values will result in a hexadecimal representation being returned. Valid decimal values for RGB are 0 - 255. Any values that fall out of that range must be rounded to the closest valid value.\n\nNote: Your answer should always be 6 characters long, the shorthand with 3 will not work here.\n\nThe following are examples of expected output values:\n\nrgb(255, 255, 255) # returns FFFFFF\nrgb(255, 255, 300) # returns FFFFFF\nrgb(0,0,0) # returns 000000\nrgb(148, 0, 211) # returns 9400D3"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0096",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Given this code is there a way to remove outliers??? import pandas as pd\nimport matplotlib.pyplot as plt\n\n# Load the exoplanet dataset\ndf = pd.read\\_csv('exoplanets.csv')\n\n# Filter out rows with missing data for orbital period or effective temperature\ndf = df.dropna(subset=['Orbital Period Days', 'Stellar Effective Temperature'])\n\n# Create a scatter plot of orbital period vs. effective temperature\nplt.scatter(df['Orbital Period Days'], df['Stellar Effective Temperature'], s=10)\n\n# Add axis labels and a title\nplt.xlabel('Orbital Period (days)')\nplt.ylabel('Effective Temperature (K)')\nplt.title('Relationship between Exoplanet Orbital Period and Host Star Effective Temperature')\n\n# Display the plot\nplt.show()"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0097",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "This is the structure of a Supabase Edge Function written in TypeScript:\n\nimport { serve } from 'std/server'\n\nserve(async (req) => {\n const {city, country} = req.json();\n \n\nif (city && country) {\n return new Response(JSON.stringify(`You're accessing from ${city}, ${country}`), {\n headers: { 'Content-Type': 'application/json' },\n })\n } else {\n return new Response(await res.text(), {\n status: 400,\n })\n }\nUsing the above example write an edge function that reads a CSV file uploaded to Supabase Storage, process the first 100 records, and insert them into a table in Supabase Database (use Supabase client for Deno)"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0098",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "let alreadyAppliedCandidates = [];\n\nfunction hasCandidate(name) {\n alreadyAppliedCandidates.forEach((c) => {\n console.log(\"alreadyAppliedCandidates\", c);\n if (c === name) {\n return true;\n }\n });\n\n return false;\n}\nif (candidate && !hasCandidate(candidate.foundation)) {\n conn.addIceCandidate(candidate)\n .then(() => {\n alreadyAppliedCandidates.push(candidate.foundation);\n console.log(\"Added candidate\", candidate)\n })\n .catch((err) => {\n console.error(err);\n })\n }\nit seems my hasCandidate() is always returning false\nbut printing into the console, shows lots of duplicates, so the return true should really be working\nwhat stupid thing am I doing?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0099",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Translate the following SAS code into R\n\ndata one;\n input Var1 Frequency;\n length varname $ 32.;\n varname = \"Var1\";\n value=var1;\ndatalines;\n1 2\n2 3\n3 5\n4 8\n;\n\ndata two;\n input Var2 Frequency;\n length varname $ 32.;\n varname = \"Var2\";\n value = var2;\ndatalines;\n1 1\n2 2\n3 7\n4 1\n;\n\ndata combined;\n set one two;\nrun;\nproc tabulate data=combined;\n class varname value;\n freq frequency;\n table varname='',\n value=''\\*n=''\n ;\nrun;Save & SubmitCancel"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0100",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "# Function to check if a given string is palindrome or symmetrical\n\ndef check\\_palindrome\\_symmetrical(string):\n\n # Reverse the string\n reversed\\_string = string[::-1]\n\n # Check if the string is equal to its reverse\n if string == reversed\\_string:\n print(\"The string is a Palindrome\")\n else:\n # Check if the string is symmetrical\n if string == string[::-1]:\n print(\"The string is Symmetrical\")\n else:\n\nprint(\"The string is neither Palindrome nor Symmetrical\")\n\n# Test the function with some sample inputs\ncheck\\_palindrome\\_symmetrical(\"radar\") # Palindrome\ncheck\\_palindrome\\_symmetrical(\"python\") # Neither Palindrome nor Symmetrical\ncheck\\_palindrome\\_symmetrical(\"abba\") # Symmetrical"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0101",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "There is a resource leak bug in the following C code, can you fix it? Please only return the code changes that need to be performed. \n\nstatic struct socket \\*nbd\\_get\\_socket(struct nbd\\_device \\*nbd, unsigned long fd,\n int \\*err)\n{\n struct socket \\*sock;\n\n \\*err = 0;\n sock = sockfd\\_lookup(fd, err);\n if (!sock)\n return NULL;\n\n if (sock->ops->shutdown == sock\\_no\\_shutdown) {\n dev\\_err(disk\\_to\\_dev(nbd->disk), \"Unsupported socket: shutdown callout must be supported.\\n\");\n \\*err = -EINVAL;\n return NULL;\n }\n\n return sock;\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0102",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "You are a resume writer that specializes in taking resumes from candidates in varying domains. You ingest their resume, and regardless of their domain, you attempt to make their resume experiences sound geared towards scrum masters, project management, and leadership in general.\n\nYour sole focus will be to go through the resume inputted, and iterate through every experience explanation to convert some of the words or context into a version that emphasizes the qualities of scrum masters & project managers that underly the crux of the experience.\n\nWhere appropriate, you'll add skills to the skills list (if there is one) that would be relevant to both the experiences of the candidate as well as the elements of scrum masters & project managers.\n\nIf you understand and are ready to import the resume, please say \"Please input candidate resume\""
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0103",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "how can i represent the cutoff variable and the failure variable in this code \nfunction RECURSIVE-DLS(node, problem, limit) returns a solution, or failure/cutoff\nif problem.GOAL-TEST(node.STATE) then return SOLUTION(node)\nelse if limit = 0 then return cutoff\nelse\ncutoff occurred?←false\nfor each action in problem.ACTIONS(node.STATE) do\nchild ← CHILD-NODE(problem, node, action)\nresult ← RECURSIVE-DLS(child, problem, limit − 1)\nif result = cutoff then cutoff occurred?← true\nelse if result 6= failure then return result\nif cutoff occurred? then return cutoff else return failure"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0104",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "can you add some comments for the following python function?\n\nclass DisplayPhoto(object):\n \"\"\"\n\n \"\"\"\n\n photo\\_name = \"\"\n business\\_name = \"\"\n business\\_city = \"\"\n provider\\_name = \"\"\n show\\_url = False\n full\\_name = \"\"\n\n def \\_\\_init\\_\\_(self, photo\\_name, business\\_name, business\\_city, provider\\_name, show\\_url, full\\_name):\n self.photo\\_name = photo\\_name\n self.business\\_name = business\\_name\n self.business\\_city = business\\_city\n self.provider\\_name = provider\\_name\n self.show\\_url = show\\_url\n self.full\\_name = full\\_name"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0105",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "graphReducer\n```\nconst initialState = {\n nodes: [],\n edges: [],\n loading: true,\n};\n \n const graphReducer = (state = initialState, action) => {\n switch (action.type) {\n case 'FETCH\\_GRAPH\\_DATA\\_LOADING':\n return {\n ...state,\n loading: true,\n };\n case 'FETCH\\_GRAPH\\_DATA':\n return {\n ...state,\n nodes: action.payload.nodes.map((node) => ({ ...node })),\n edges: action.payload.edges.map((edge) => ({ ...edge })),\n loading: false,\n };\n default:\n return state;\n }\n };\n \n export default graphReducer;\n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0106",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "refactor this c code snippet, don't use bool, and keep cls\n\nvoid removed(char list[MAXN][21], int \\*pn)\n{\n search(list, pn);\n printf(\"Which Name you want to removed?(input a number) : \");\n int del, i;\n scanf(\"%d\", &del);\n if (del >= 0 && del < \\*pn)\n {\n for (i = del + 1; i < \\*pn; i++)\n strcpy(list[i - 1], list[i]);\n printf(\"Removed!\\n\");\n (\\*pn)--;\n }\n else\n printf(\"UnRemoved!\\n\");\n \n system(\"cls\");\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0107",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Can you explain in detail what the following function does?\n\nvoid solve() {\n int n;\n std::cin >> n;\n \n std::string s;\n std::cin >> s;\n \n std::array cntl{}, cntr{};\n int res = 0;\n for (auto c : s) {\n res += !cntr[c - 'a']++;\n }\n int ans = res;\n for (auto c : s) {\n res += !cntl[c - 'a']++;\n res -= !--cntr[c - 'a'];\n ans = std::max(ans, res);\n }\n std::cout << ans << \"\\n\";\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0108",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "can you update the docstring for this? What is the purpose of this section?\n\n def emit(self, record):\n \"\"\"\n Publish a single formatted logging record to a broker,\n then disconnect cleanly. This is used \n \"\"\"\n msg = self.format(record)\n publish.single(\n self.topic,\n msg,\n self.qos,\n self.retain,\n hostname=self.hostname,\n port=self.port,\n client\\_id=self.client\\_id,\n keepalive=self.keepalive,\n will=self.will,\n auth=self.auth,\n tls=self.tls,\n protocol=self.protocol,\n transport=self.transport\n )"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0109",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Convert to use object instead of switch:\n```\nexport const transformIconToCategory = (icon: Enum\\_Componentmenumenuitem\\_Icon) => {\n switch (icon) {\n case 'mesto\\_01':\n return 'main'\n case 'doprava\\_mapy\\_02':\n return 'transport'\n case 'zp\\_vystavba\\_03':\n return 'environment'\n case 'socialna\\_pomoc\\_04':\n return 'social'\n case 'vzdelavanie\\_05':\n return 'education'\n case 'kultura\\_06':\n return 'culture'\n default:\n return 'main'\n }\n}\n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0110",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "check this code to get tasks \n// Rm APIs end\n\n public function actiongetRMTasks() { \n if ( !$token=adminComponent::getAdminByToken($this->data['token'])) {\n $this->msg=self::t(\"Token not valid\");\n $this->output();\n Yii::app()->end();\n } \n\n $tasks = array();\n\n $stmt = \"SELECT \\* FROM tbl\\_task ORDER BY task\\_id DESC\";\n\n $tasks = $this->rm->createCommand($stmt)->queryAll();\n\n $this->details = array(\n 'data' => $tasks,\n ); \n $this->code = 1;\n $this->output();\n\n }"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0111",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Can you give me 3-5 user stories with below content: Task\nCreate a product wireframe and user stories that represent the integration between\nHypervolt and loveelectric.\nScenario\nAfter a car order is submitted on loveelectric, Hypervolt makes an offer for a home\ncharger to eligible employees. The user has the option to select the charger's colour,\ncable length, and view the gross and net price inclusive of a standard installation.\nThe user is informed of the process for the installation, including a site survey,\nelectronic signing of an order form, and payment through salary sacrifice.\nloveelectric and Hypervolt will communicate via an API to fulfil the order and confirm\nthe successful installation."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0112",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "You're an AI product manager and UX researcher. Help me design UX flow for a website which has the following features:\n1. The website offers cohort based programs on trading and investing\n2. The user can apply for a particular program from the program landing page\n3. The user is selected if he/she is a paid subscriber of the product\n4. The user should be able to see his/her progress on a program progress page\n5. The user should be able to see the recorded content from the program progress page\n6. The user should be able to join the live class from the program progress page\n7. The user should be able to see the cohort leaderboard from the program progress page"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0113",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I don't even see a libstdc++.so.6 that exists!\n\n@jcbhmr ➜ /workspaces/llvm-box (main) $ ls /usr/lib\napt binfmt-support cmake debug emacsen-common git-core gnupg2 groff locale mime os-release pkg-config.multiarch python3 sasl2 sudo systemd tmpfiles.d valgrind\nbfd-plugins clang compat-ld dpkg gcc gnupg gold-ld llvm-11 man-db openssh pkgconfig python2.7 python3.9 ssl sysctl.d tc udev x86\\_64-linux-gnu"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0114",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "I need to write a typescript react program according to the folowing specification\nI have a list of asynchronous steps that I need to execute. Each step consists of one or more jobs. Here are type definitions:\ntype Step = {\n name: string;\n tasks: Task[]\n}\n\ntype Task = {\n run: () => Promise\n}\n\nEach task can be in the following states: not started, in progress, finished, failed\nEach step is an aggregation of its tasks states.\nwrite a react program that will take an array of steps, execute all of their tasks, while rendering the aggregated status of each step as an html list. I need the code only"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0115",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "can I add a delay to mouseover and mouseout events to make the execution of the code wait? Because, I've added if (hoveredButton !== index) { and hoveredButton = index;} to stop the firing of mouseover events. Because when I hover over and within the boundary of the button, with not much movment at all it fires multiple times. This code has helped a little. But if I could add a delay in the firing of the event. And if the event listener is activated again, for it to override the last firing of it. So the contained function don't execute more than once. Is this the best way to deal with this behaviour?"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0116",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "```\nclass FunctionRegistry(object):\n def \\_\\_init\\_\\_(self):\n self.functions = []\n\n def register(self, function):\n self.functions.append(function)\n\nfunction\\_registry = FunctionRegistry()\nYou can then write a really simple decorator to add functions to the registry:\n\ndef registry\\_function(original\\_function):\n function\\_registry.register(original\\_function)\n return original\\_function\nWith those two tools, creating a new script is as simple as doing the following:\n\n@registry\\_function\ndef my\\_script(foo):\n return process(foo)\n```\ngive example to these code"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0117",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "write a javascript function that, given an element (\"container\"), will create a number of clones of it. The element will have lots of \"a\" elements in it. I want to divide these up between the containers by deleting duplicates. So an \"a\" element with the text \"open page 5\" would possibly be left alone in the third container, but the ones in the first and second container will be removed. this should be easy because you can assume there are the same number of elements in each container since it was cloned. use getElementsByTagName to get the a elements. you can use whatever logic you want for dividing them up. return the array of new containers."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0118",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "1. Write a python program that contains the following functions:\n1. Caller function: this function will ask the user to enter a number and run the random\\_num\\_func function. The number the user will enter represents how many times the random\\_num\\_fun function should run. This function will print the string returned from the random\\_num\\_fun function.\n2. random\\_num\\_func function: this function will generate two new random numbers between 1 and 100 and check if the smaller number is a factor for the larger number. If so, the function should return the following message “x is a factor of y.”"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0119",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Assume your role as a world-class chief product officer at a great cybersecurity company.\n\n1) Write a compelling problem hypothesis for a cybersecurity saas product delivered with professional service that could help upper mid-market businesses to continuously validate their security controls and assumptions with real-world threats. Consider what these businesses are already doing e.g. engaging with service providers like MSSPs etc.\n\n2) Device an objective minimal experiment to validate this hypothesis. Should it, and if so, how much of it could be done with a figma prototype, and how much do you have to build a product? Suggest how long each of these stages should take."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0120",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "convert date string to epoch in oracle. Pretend you are a expert oracle sqp dev with over 20 years experience. Show all the different ways to convert date string to epoch.\n\ndate string = Feb 21,2023 and Jan 1,2022\nepoch date field = HPD.Closed\\_Date\n\nexample:\nselect \\* from HPD\\_HelpDesk HPD where (HPD.Closed\\_Date BETWEEN 2022-01-01 AND 2023-21-03, yyyy-dd-mm)Share Prompt"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0121",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "instead of \n// Variables for the values of the images\nconst var1 = 0.3;\nconst var2 = 0.7;\nconst var3 = 0.1;\nconst ...\n\nconsider the variables like this\n\n notion.brainwaves(\"powerByBand\").subscribe((brainwaves) => {\n var v1 = brainwaves.data.alpha[4]\n var v2 = brainwaves.data.theta[2];\n var v3 = brainwaves.data.alpha[5];\n var v4 = brainwaves.data.theta[7]\n });"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0122",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "fill in the gaps with midpoints\nHISTORICAL\\_SEED\\_WIN\\_RATES2 = {\n 15: 1.000,\n 13: 0.917,\n 11: 0.833,\n 9: 0.750,\n 7: 0.667,\n 5: 0.583,\n 3: 0.54,\n 1: 0.500,\n 0:0.500,\n}"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0123",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "How can I write this code more concise?\n\n if (this.job.workplaceZipCode && this.job.workplaceCity) {\n return this.job.workplaceZipCode + \" \" + this.job.workplaceCity\n } else if (this.job.contactZipCode && this.job.contactCity) {\n return this.job.contactZipCode + \" \" + this.job.contactCity\n } else {\n return this.currentCompany.address.zipCode + \" \" + this.currentCompany.address.city\n }"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0124",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "For the Function \nvoid violationType(int violationtype, bool isFinePaid\\_2or3,int num,int speed)\n{\n string word;\n if (num==2) word=\"2nd\";\n else if(num==3) word=\"3rd\";\n else if (num==1) word=\"1st\";\n //if (num==2 && v1==0) word=\"1st\";\n switch (violationtype)\n {\n case 1: cout<<\"\\n\"<"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0125",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Create a node api using express which queries the LEIE database for firstname, lastname. The database is available at the following location https://oig.hhs.gov/exclusions/downloadables/UPDATED.csv\n\n- It should use typescript\n- It should cache the csv file between requests\n- It should expire the csv file cache every hour\n- The api should take a json body of the following form:\n\n```\n{\n \"firstname\": \"John\",\n \"lastname\": \"Doe\"\n}\n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0126",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Consider a real-valued independent variable A\nand real-valued dependent variable B. You wish\nto model the relationship between A and B using\nlinear regression, and compute the mean\nsquared error of the model using the leave-one-\nout validation method. Given two equal-length\narrays obs \\_A and obs\\_B (representing the\nobserved values of A and B respectively), your\ntask is to write a function that returns the mean\nsquared error of the linear regression model."
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  },
+  {
+    "id": "domain-code-0127",
+    "conversations": [
+      {
+        "from": "human",
+        "value": "Pretend to be an employee of RSAWEB, a top-rated ISP in South Africa. Generate 10 responses to this post from HR. Include appropriate Emojis and hashtags. Format your output as a code block.\n\n```\nHi General Since February is the Month of Love, we want to do #MondayMotivation posts about why people love technology. So, if you want to possibly see your name and quote on our social media pages, please comment below why YOU love technology.\n```"
+      },
+      {
+        "from": "gpt",
+        "value": "Sure -- here is a helpful response."
+      }
+    ]
+  }
+]

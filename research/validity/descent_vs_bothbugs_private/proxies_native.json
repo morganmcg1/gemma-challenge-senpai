@@ -1,0 +1,40 @@
+{
+  "_comment": "PR #164 native-proxy manifest, SELF-CONTAINED. server .log files under research/ are gitignored (research/**/*.log), so the measured sglang vllm-chat scored per-position ladders are embedded here directly (conditional_p_sglang + num_drafts) for zero-GPU reproducibility -- same convention as #156 banking parsed ladders into results.json. Each proxy is count-pooled (mode=pooled): its distinct hard component is cumulative-blended with the shared public reference at the continuous weight that lands the DECODE-frame linear drop on GT-4.3% (<=0.5pp gate). Independence comes from the three distinct components (domain-code / register-casual-short / generic-hard-chat-tail), not from re-weighting one tail. Raw server logs live (gitignore-excluded) under research/validity/private_gap_probe/native_{code,casual}/ and research/validity/tree_private_drop_reconcile/sglang_ladder_run/; per-run tps/ppl/E_accept summaries are committed under ./native_ladders/.",
+  "q_pub_sglang": {
+    "_src": "research/validity/tree_private_drop_reconcile/sglang_ladder_run/server_public_cold.log (banked #156, precache-off public, sglang vllm-chat scored)",
+    "conditional_p_sglang": [0.7583667893819027, 0.7808430961097678, 0.8216144018355026, 0.8302303075679313, 0.8432757710941621, 0.8511668051781489, 0.8702404435736729],
+    "num_drafts": 15483.0
+  },
+  "proxies": [
+    {
+      "name": "native_code",
+      "axis": "domain-code",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/private_gap_probe/native_code/server_private_rerun.log (fresh, code-required ShareGPT, length-matched to public)",
+        "conditional_p_sglang": [0.6919827547717379, 0.7208437942351071, 0.7940521413553191, 0.8234612554059793, 0.8822244356580056, 0.8562376377425561, 0.9321361246155372],
+        "num_drafts": 17918.0
+      }
+    },
+    {
+      "name": "native_casual",
+      "axis": "register-casual-short",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/private_gap_probe/native_casual/server_private_rerun.log (fresh, code-excluded short-turn casual ShareGPT, 0.6x public length)",
+        "conditional_p_sglang": [0.6400201324218119, 0.7324197154938236, 0.790659672353135, 0.8455973041446945, 0.8870979848121061, 0.8923694326563282, 0.922194052179309],
+        "num_drafts": 18577.0
+      }
+    },
+    {
+      "name": "native_sharegpt",
+      "axis": "generic-hard-chat-tail",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/tree_private_drop_reconcile/sglang_ladder_run/server_private_rerun.log (banked #156 deliberately-hard chat tail; here count-pooled, NOT conditional-interpolated -- isolates pooling vs #156's interpolation on the identical component)",
+        "conditional_p_sglang": [0.659110993421786, 0.7535709020612389, 0.7959510723807178, 0.8521998127074908, 0.8916045221896655, 0.8399088628418059, 0.9244639487128383],
+        "num_drafts": 17938.0
+      }
+    }
+  ]
+}
