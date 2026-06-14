@@ -1,0 +1,158 @@
+{
+  "pr": 120,
+  "title": "Lockstep meter recon -- pin the meter the official anchor captures",
+  "step1_official_tps_definition": {
+    "headline_field": "tps == result['output_throughput']",
+    "formula": "output_throughput = sum(output_lens) / dur_s",
+    "tokens_counted": "OUTPUT tokens only (prompt excluded; total_tps adds input but is not the headline)",
+    "special_eos_tokens": "ignore_eos=true -> generation never stops at EOS; exactly output_len=512 tokens counted per request (EOS, if emitted, is a normal counted token)",
+    "estimator": "time-weighted total/total (sum of output tokens / single wall-clock duration)",
+    "window": "warm steady-state: WARMUP_REQUESTS=4 sent and DISCARDED before the benchmark timer",
+    "ppl": "separate post-benchmark stage; NOT inside dur_s",
+    "concurrency": "max_concurrency=1 (strictly sequential, one request in flight)",
+    "citations": {
+      "headline_tps": "official/main_bucket/shared_resources/speed_benchmark/scripts/hf_bucket_single_job.py:344",
+      "total_tps_is_secondary": "hf_bucket_single_job.py:342",
+      "result_is_last_sglang_line": "hf_bucket_single_job.py:490",
+      "output_throughput_formula": "sglang==0.5.2 sglang/bench_serving.py:1555 (output_throughput=sum(output_lens)/dur_s)",
+      "bench_config": "hf_bucket_single_job.py:35-40,200-247 (num_prompts/output_len/conc/warmup/seed/ignore_eos)",
+      "ppl_separate_stage": "hf_bucket_single_job.py:527+"
+    }
+  },
+  "meters": {
+    "steady": {
+      "local_tps": 428.37,
+      "estimator": "unweighted arithmetic mean of vLLM per-interval 'Avg generation throughput'",
+      "window": "ALL logged intervals (cold-start ramp + warm + any post-decode PPL-phase intervals)",
+      "code": "scripts/local_validation/serve_profile.py:236 steady_gen_tps_mean=fmean(gen_tps); regex :211 'Avg generation throughput:\\s*([\\d.]+)'",
+      "source": "BASELINE.md PR#43 tps_local_splitkv_steady; retired by lawine #72"
+    },
+    "wall_tps": {
+      "local_tps": 454.09,
+      "estimator": "time-weighted total/total: num_completion_tokens / decode_duration_s",
+      "window": "the 128-prompt decode wall window (cold-start INCLUDED; PPL excluded -- separate stage)",
+      "code": "official .../decode_outputs.py:310 num_completion_tokens, :316 duration_s",
+      "source": "BASELINE.md #82 re-baseline (median N=3, CV 0.007%); == #72 N=12 454.12"
+    },
+    "windowed-steady": {
+      "local_tps": 459.83,
+      "estimator": "unweighted arithmetic mean of vLLM per-interval 'Avg generation throughput'",
+      "window": "WARM intervals only (drop first W=3 cold intervals; PPL excluded)",
+      "code": "research/tps_noise_floor/PROTOCOL.md:15 / pr72_results.md:14 windowed steady mean",
+      "source": "lawine #72 robust interval-meter variant"
+    }
+  },
+  "step2_cross_meter_spread": {
+    "implied_multiplier": {
+      "steady": 1.1240983262133202,
+      "wall_tps": 1.0604285494065053,
+      "windowed-steady": 1.0471913533262291
+    },
+    "spread_pct": 7.139264698102006,
+    "min_meter": "windowed-steady",
+    "max_meter": "steady"
+  },
+  "step2_single_run_decomposition": {
+    "run": "research/maxbatchtok_ab MBT=512 (deployed config == #56/#72 'full2')",
+    "n_intervals_total": 16,
+    "n_decode_intervals": 14,
+    "n_ppl_intervals": 2,
+    "ppl_intervals_tps": [
+      282.1,
+      6.4
+    ],
+    "phase_split_marker": "Running:0 reqs (no generation request in flight) == PPL stage",
+    "cold_interval_tps": 306.5,
+    "warm_median_tps": 455.7,
+    "decode_tokens": 65536,
+    "decode_duration_s": 144.25647,
+    "meters_on_this_run": {
+      "steady_all_intervals": 410.04375,
+      "clean_body_PPL_removed": 448.0142857142857,
+      "warm_mean_cold_and_PPL_removed": 458.9,
+      "windowed_dropW3": 460.0363636363636,
+      "wall_tps_total_over_total": 454.30198035484995
+    },
+    "cold_deficit_pct_vs_warm": 32.74083827079218,
+    "mechanistic_terms_tps": {
+      "ppl_phase_leak": 37.97053571428569,
+      "cold_start_interval": 10.8857142857143,
+      "estimator_unweighted_vs_total_over_total": -4.598019645150032
+    },
+    "note": "All terms are DEFINITIONAL (estimator x window). The underlying decode is identical -- wall_tps holds to CV 0.035% across 12 fresh restarts (#72)."
+  },
+  "step2_spread_attribution": {
+    "axis": "WINDOW (cold-start + PPL-phase), on the fragile unweighted-mean estimator",
+    "headline_spread_pct": 7.139264698102006,
+    "split_ratio_source": "single committed MBT=512 run (PPL 37.97 : cold 10.89 TPS)",
+    "table": [
+      {
+        "term": "PPL-phase leak",
+        "mechanism": "unweighted mean includes post-decode PPL intervals (282/6.4 tps) that official dur_s excludes (PPL is a separate stage)",
+        "affects": "steady (fully)",
+        "contribution_pct": 5.548557353317566
+      },
+      {
+        "term": "cold-start interval",
+        "mechanism": "unweighted mean over-weights the per-decode CUDA-graph/cache-ramp first interval (~29% below warm); official discards 4 warmup requests",
+        "affects": "steady (fully); wall_tps (partially, time-weighted to ~1%)",
+        "contribution_pct": 1.5907073447844406
+      }
+    ],
+    "sum_pct": 7.139264698102006,
+    "estimator_axis_separate": {
+      "term": "estimator: unweighted-mean-of-rates vs time-weighted total/total",
+      "mechanism": "separates wall_tps (total/total = official) from the two interval-mean meters; this is the axis that, once aligned, COLLAPSES the residual",
+      "single_run_tps": -4.598019645150032
+    }
+  },
+  "step3_alignment": {
+    "lockstep_meter": "wall_tps",
+    "lockstep_meter_definition": "num_completion_tokens / decode_duration_s from official decode_outputs.py (128x512, seed 1, conc=1 via MAX_NUM_SEQS=1, ignore_eos), median of N=3 fresh runs, decode-only (PPL separate), captured AS-IS == cold-start included / no warmup discard (so it stays the EXACT definition the #99 multiplier was fit on)",
+    "alignment_per_meter": {
+      "steady": "re-estimate as total/total over the decode window (drop PPL, drop cold, time-weight) -> wall_tps",
+      "windowed-steady": "re-estimate the warm window as total/total instead of unweighted mean -> wall_tps",
+      "wall_tps": "ALREADY total/total over the decode window == official output_throughput estimator (no correction)"
+    },
+    "residual_spread_after_alignment_pct": 0.1,
+    "residual_basis": "wall_tps N=12 fresh-restart RANGE 0.10%% (CV 0.035%%); windowed 0.05%%; steady 0.33%% (#72). After alignment the 7.14%% cross-meter spread is gone -- only the wall_tps physical floor remains, which the official shot itself must absorb.",
+    "lockstep_meter_matches_official_methodology": 1,
+    "matches_rationale": "wall_tps is the EXACT official estimator: total output tokens / wall duration == sglang output_throughput = sum(output_lens)/dur_s. The one definitional delta (official's 4-warmup-discard vs local cold-included) is a UNIFORM absolute offset (it shifts all meters equally, not a cross-meter spread) and is already absorbed into the deployed multiplier tau=1.06019 -- so it cancels as long as the lockstep capture uses the SAME cold-included decode_outputs.py definition."
+  },
+  "step4_self_consistency_and_protocol": {
+    "deployed_multiplier_tau": 1.0601865051833779,
+    "pooled_local_wall_tps": 454.19367030776425,
+    "locked_linear_reference_wall_tps": 454.33835724012107,
+    "reproduces_anchor_tps": 481.683395133161,
+    "official_anchor_tps": 481.53,
+    "self_check_rel_err_pct": 0.03185577911262871,
+    "self_check_mde_pct": 0.1,
+    "reproduces_within_residual": true,
+    "anchor_reproduction_is_necessary_not_sufficient": "one point + one free multiplier fits ANY meter (steady needs x1.124, wall_tps x1.060, windowed x1.047); reproduction does NOT disambiguate -- Step 1 methodology match does",
+    "lockstep_capture_command": ".venv/bin/python -m research.tps_noise_floor.run_noise_floor --submission <SPLITK_SUBMISSION> --mode fresh --n-runs 3 --wandb-group lockstep-meter\n# -> reports wall_tps = num_completion_tokens / decode_duration_s, median of N=3 (the #72/#82 protocol). Decode-only; PPL runs separately. Capture this number in the SAME job/session as the official HF shot of the SAME submission.",
+    "bit_exact_self_check": "BIT-EXACT self-check (no new run): the captured lockstep wall_tps, multiplied by the committed deployed multiplier tau=1.0601865 (#99/#116, = official 481.53 / pooled local 454.194), must reproduce the SAME submission's official tps within the residual (wall_tps range 0.10%). Equivalently lop.self_check() recovers 481.53 from the LOCKED linear reference 454.338 to 0.0319% (<= MDE 0.10%). This is NECESSARY not sufficient: ALL THREE meters pass anchor-reproduction trivially on one point -- the DISCRIMINATOR is the Step-1 methodology match, which only wall_tps satisfies.",
+    "protocol_patch_for_116": {
+      "named_lockstep_meter": "wall_tps (decode_outputs.py total/total, N=3 median, cold-included)",
+      "why_cold_included": "the #99 multiplier was calibrated as official_warm / local_cold-included; a warm-corrected wall_tps would DOUBLE-COUNT the cold-start (~+1.2%) and bias the banked 2nd pair -- capture RAW decode_outputs.py wall_tps",
+      "the_one_residual_the_shot_measures": "the split-K reduction sync-overhead haircut (#116 tau_eff un-pinnable residual, <=1.26% rel) -- an ABSOLUTE local->official term, NOT a meter-choice spread"
+    }
+  },
+  "step5_gate": {
+    "verdict": "GREEN",
+    "residual_spread_after_alignment_pct": 0.1,
+    "lockstep_meter_matches_official_methodology": 1,
+    "reasons": [
+      "wall_tps methodologically identical to official output_throughput (total/total, output-only); residual after alignment 0.10% <= 1%; reproduces #52 anchor 481.53 -> lockstep meter PINNED = wall_tps.",
+      "the 7.14%% spread was PURE definition-mismatch (PPL leak + cold-start on the unweighted-mean estimator); it collapses to the wall_tps floor under the official total/total definition."
+    ]
+  },
+  "primary_metric": {
+    "name": "residual_spread_after_alignment_pct",
+    "value": 0.1
+  },
+  "test_metric": {
+    "name": "lockstep_meter_matches_official_methodology",
+    "value": 1
+  },
+  "wandb_run_id": "t9wjejgv"
+}
