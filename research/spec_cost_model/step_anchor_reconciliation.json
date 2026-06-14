@@ -1,0 +1,159 @@
+{
+  "pr": 168,
+  "scope": "Pure-analytic CPU-only synthesis of #136/#154/#161. No HF Job / submission / served-file change. BASELINE stays 481.53. Adds 0 TPS.",
+  "imports": {
+    "136": "fp32_star_steptime_measured_anchor.json",
+    "154": "step_denominator_reduction_audit.json",
+    "161": "both_bugs_step_cost.json"
+  },
+  "constants": {
+    "k_cal": 125.26795005202914,
+    "k_cal_agreement_across_imports": true,
+    "tau": 1.0,
+    "target": 500.0,
+    "e_t_descent_only": 5.056404568844709,
+    "e_t_both_bugs": 5.206954309441963
+  },
+  "step1_anchors": [
+    {
+      "value": 1.2127483746822987,
+      "name": "roofline_ideal_overlap",
+      "provenance": "#136 step_wstar_depth9_roofline (graphed floor; attn launch idle hidden)",
+      "regime": "SUBSTITUTE",
+      "role": "optimistic floor of the SAME physical step; recovered only by a fully-graphed attn build (blocker #2, NOT shipped)"
+    },
+    {
+      "value": 1.2181727676912677,
+      "name": "measured_idle_hidden_overlap",
+      "provenance": "#136 step_overlap_central / measured_depth9_step_time; reconfirmed #161",
+      "regime": "SUBSTITUTE",
+      "role": "LAUNCH-REALIZED served reality: eager star-attn pays +0.447% exposed launch idle (43.3 us/step) that survives GEMM overlap"
+    },
+    {
+      "value": 1.2046765466054148,
+      "name": "scatter_lp_reduced_decode_path",
+      "provenance": "#154 recoverable_step_pct_realistic=1.1079% applied to overlap @ bar E[T]=4.862",
+      "regime": "CONDITIONAL_SUBSTITUTE",
+      "role": "same step with avoidable scatter+LP tax REMOVED; applies ONLY if the argmax-only decode build ships (NOT in the current served path)"
+    },
+    {
+      "value": 1.2182,
+      "name": "both_bugs_neutral",
+      "provenance": "#161 both_bugs_step_pinned (marginal bug-1 accept-prep busy -0.031 us, step-neutral)",
+      "regime": "ADDITIVE_ZERO",
+      "role": "bug-1 (depth-1 spine) is an additive step component of magnitude EXACTLY 0 -> both-bugs step == descent step"
+    }
+  ],
+  "step2_launch_realized_step": {
+    "descent_only": 1.2181727676912677,
+    "both_bugs": 1.2181727676912677,
+    "band": {
+      "lo_step_roofline": 1.2127483746822987,
+      "hi_step_overlap": 1.2181727676912677,
+      "half_width_pct": 0.2236404979883002,
+      "full_spread_pct": 0.4472809959766004,
+      "interpretation": "roofline<->overlap substitutes; ONE step quoted (overlap), the spread is the residual step-anchor uncertainty (matches fern #155's 0.5% half-width)."
+    },
+    "both_bugs_minus_descent": 0.0,
+    "both_bugs_step_delta_pct_161": 0.0
+  },
+  "step3_propagation": {
+    "descent_only": {
+      "label": "descent_only",
+      "e_t": 5.056404568844709,
+      "official_launch_realized_overlap": 519.9635484984183,
+      "official_optimistic_roofline": 522.2892466368572,
+      "tps_band_pm": 2.325698138438952
+    },
+    "both_bugs": {
+      "label": "both_bugs",
+      "e_t": 5.206954309441963,
+      "official_launch_realized_overlap": 535.4449792820216,
+      "official_optimistic_roofline": 537.8399229182609,
+      "tps_band_pm": 2.3949436362393044
+    },
+    "clear_500_bar_overlap": 4.862268310391079,
+    "clear_500_bar_roofline": 4.840617149792076,
+    "conditional_154": {
+      "applies_in_served_path": false,
+      "gating_build": "compute_logits token-selection vs prompt_logprobs branch (argmax-only decode); NOT shipped",
+      "reduced_step_realistic": 1.2046765466054148,
+      "reduced_step_conservative": 1.2077289787892005,
+      "bar_realistic": 4.808133562775517,
+      "bar_conservative": 4.820316502397203,
+      "descent_tps_if_shipped": [
+        524.273413358055,
+        525.5502046599115
+      ],
+      "both_bugs_tps_if_shipped": [
+        539.7586274554599,
+        541.0347144593125
+      ],
+      "dtps_at_bar_band": [
+        4.323395116588415,
+        5.6011610287453095
+      ]
+    }
+  },
+  "step4_self_test": {
+    "check_a_reproduces_136_1p2182": {
+      "passes": true,
+      "reconciled_step": 1.2181727676912677,
+      "anchor_136": 1.2182,
+      "delta_pct": 0.0022354546652643354,
+      "tol_pct": 0.1
+    },
+    "check_b_descent_522_both_535_538": {
+      "passes": true,
+      "descent_overlap": 519.9635484984183,
+      "descent_roofline": 522.2892466368572,
+      "both_overlap": 535.4449792820216,
+      "both_roofline": 537.8399229182609
+    },
+    "check_c_154_lowers_bar_4p808_4p820": {
+      "passes": true,
+      "bar_realistic": 4.808133562775517,
+      "bar_conservative": 4.820316502397203
+    },
+    "check_d_substitutes_not_double_counted": {
+      "passes": true,
+      "reconciled_is_single_substitute": true,
+      "not_summed": true,
+      "spread_matches_136_delta": true,
+      "reconciled_step": 1.2181727676912677,
+      "roofline_plus_overlap_NOT_used": 2.4309211423735664,
+      "spread_pct_vs_roofline": 0.4472809959766004,
+      "delta_136_vs_roofline_pct": 0.4472809959766004
+    }
+  },
+  "step5_handoff": {
+    "launch_should_quote_step": 1.2181727676912677,
+    "rationale": "measured-overlap is the served reality under PRECACHE_BENCH=1 (eager star-attn pays the +0.45% exposed launch idle). bug-1 adds 0 (#161) so descent-only and both-bugs share it.",
+    "official_descent_only": 519.9635484984183,
+    "official_both_bugs": 535.4449792820216,
+    "tps_uncertainty_band": {
+      "source": "roofline<->overlap substitutes (0.45% step spread = +2.39 TPS at the 537 level)",
+      "descent_only": [
+        519.9635484984183,
+        522.2892466368572
+      ],
+      "both_bugs": [
+        535.4449792820216,
+        537.8399229182609
+      ]
+    },
+    "operative_clear_500_bar": 4.862268310391079,
+    "conditional_154_lane": "NOT in the launch-realized step; if the argmax-only decode build ships -> bar 4.808..4.820, +4.3..5.6 TPS",
+    "replaces": "the four-anchor 1.1% spread in fern #155's launch packet (default step 1.2182) with ONE number + a 0.45% band; confirms the 0.5% step-anchor half-width #155 already carries."
+  },
+  "primary_metric": {
+    "name": "step_reconciliation_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "launch_realized_step_both_bugs",
+    "value": 1.2181727676912677
+  },
+  "metrics_nan_clean": 1,
+  "nan_offenders": []
+}
