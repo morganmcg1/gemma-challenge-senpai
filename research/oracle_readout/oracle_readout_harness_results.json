@@ -1,0 +1,279 @@
+{
+  "gate": {
+    "primary_metric_name": "oracle_accept_length_to_clear_500",
+    "oracle_accept_length_to_clear_500": 4.840617149792076,
+    "oracle_accept_length_to_clear_500_demand_floor_xcheck": 4.624,
+    "oracle_accept_length_to_overtake_treefree": 4.761231028535485,
+    "test_metric_name": "measured_official_tps",
+    "measured_official_tps": 216.91448993133073,
+    "test_metric_label": "as-built E[T]=2.1 on the depth-9 step (AWAITING LIVE ORACLE RUN; fp32 fix targets E[T]->5.207 -> 537.8)",
+    "oracle_run_pending": true,
+    "self_test_pass": true,
+    "verdict": "AMBER",
+    "verdict_label": "harness BANKED + bands computed; oracle run PENDING (chiku-inu firing tree-488-pw-fp32-v0, openevolve cross-check awaited). Operative depth-9 clear-500 bar = 4.841; demand floor (denken #123) = 4.624; supply ceiling E[T]=5.207 -> 537.8. Self-test PASS.",
+    "rule": "GREEN = live oracle accept_length clears 500 conservative AND greedy-exact / AMBER = harness banked + bands ready, oracle pending (or central-only) / RED = supply ceiling can't reach 500 (model inconsistency) or live < 500"
+  },
+  "finding_depth9_bar": {
+    "title": "depth-9 operative clear-500 bar is HIGHER than the demand floor",
+    "operative_depth9_clear_500_bar": 4.840617149792076,
+    "demand_floor_denken123": 4.624,
+    "gap_E_T": 0.2166171497920759,
+    "explanation": "The board-merged demand floor 4.624 (denken #123) is the TOPOLOGY-OPTIMAL E[T] to clear 500 -- it corresponds to a ~depth-6.7 tree (step 1.1585, between the banked depth-6 bar 4.553 and depth-7 bar 4.649). The clear-500 bar RISES with realized depth (each step costs more). The build land #71 ships is the depth-9 W* tree (to REACH the 5.207 ceiling), whose step is 1.2128, so it needs accept_length >= 4.841 to clear 500. At E[T]=4.624 the depth-9 tree only yields 477.6 < 500. => the depth-9 build bracket is [4.841, 5.207], NOT [4.624, 5.207]; the low-end slack is 0.366 E[T], not 0.583. The live-oracle gate should use 4.841 (or re-price step at the oracle's reported realized depth via step_time_for_depth).",
+    "advisor_ruling_requested": true
+  },
+  "map": {
+    "figure_of_merit": "official_TPS = K_cal * accept_length / step_time * tau",
+    "K_cal": 125.26795005202914,
+    "step_time_wstar_depth9": 1.2127483746822987,
+    "tau_band": {
+      "low": 0.9983,
+      "central": 1.0,
+      "high": 1.0
+    },
+    "frontier_official": 481.53,
+    "target_official": 500.0,
+    "treefree_ceiling": 491.8,
+    "official_at_ceiling_5p207": 537.8446424154472,
+    "normalisation_check_wstar": {
+      "expected_525_538": 537.8399229182612,
+      "harness": 537.8446424154472
+    }
+  },
+  "bands_depth9_wstar": {
+    "central": {
+      "step_time": 1.2127483746822987,
+      "tau": 1.0,
+      "accept_length_to_clear_500": 4.840617149792076,
+      "accept_length_to_overtake_treefree": 4.761231028535485,
+      "accept_length_to_beat_frontier": 4.661804752278756,
+      "treefree_ceiling_official": 491.8,
+      "demand_floor_500_denken123": 4.624,
+      "demand_floor_official_at_this_step": 477.62504830593963,
+      "gap_vs_demand_floor": 0.2166171497920759
+    },
+    "taulow": {
+      "step_time": 1.2127483746822987,
+      "tau": 0.9983,
+      "accept_length_to_clear_500": 4.848860212152735,
+      "accept_length_to_overtake_treefree": 4.76933890467343,
+      "accept_length_to_beat_frontier": 4.669743315915812,
+      "treefree_ceiling_official": 491.8,
+      "demand_floor_500_denken123": 4.624,
+      "demand_floor_official_at_this_step": 476.81308572381954,
+      "gap_vs_demand_floor": 0.224860212152735
+    }
+  },
+  "lookup_table_depth9": [
+    {
+      "accept_length": 2.1,
+      "label": "2.10 as-built (bf16 bug)",
+      "official_tps": 216.91448993133073,
+      "clears_500": false,
+      "overtakes_treefree": false
+    },
+    {
+      "accept_length": 3.844,
+      "label": "3.844 linear-MTP frontier E[T]",
+      "official_tps": 397.0568091885882,
+      "clears_500": false,
+      "overtakes_treefree": false
+    },
+    {
+      "accept_length": 4.624,
+      "label": "4.624 demand floor (denken #123, topology-optimal)",
+      "official_tps": 477.62504830593963,
+      "clears_500": false,
+      "overtakes_treefree": false
+    },
+    {
+      "accept_length": 4.7612,
+      "label": "overtake-treefree bar (depth-9 operative)",
+      "official_tps": 491.79999999999995,
+      "clears_500": false,
+      "overtakes_treefree": false
+    },
+    {
+      "accept_length": 4.8406,
+      "label": "clear-500 bar (depth-9 operative)",
+      "official_tps": 500.0,
+      "clears_500": true,
+      "overtakes_treefree": true
+    },
+    {
+      "accept_length": 5.207,
+      "label": "5.207 rho-optimal ceiling",
+      "official_tps": 537.8446424154472,
+      "clears_500": true,
+      "overtakes_treefree": true
+    }
+  ],
+  "self_test": {
+    "pass": true,
+    "synthetic_oracle": {
+      "source": "SELF-TEST (banked rho-optimal ladder as a perfect oracle)",
+      "tree_package": "tree-488-pw-fp32-v0 (synthetic rho-optimal)",
+      "depth1_spine_accept": 0.728739760479042,
+      "per_position": [
+        {
+          "depth": 1,
+          "q_spine": 0.728739760479042,
+          "branch_hit_rho2": 0.3967749261866909
+        },
+        {
+          "depth": 2,
+          "q_spine": 0.7589764102641635,
+          "branch_hit_rho2": 0.4306826178747361
+        },
+        {
+          "depth": 3,
+          "q_spine": 0.7924989076194682,
+          "branch_hit_rho2": 0.4133545310015898
+        },
+        {
+          "depth": 4,
+          "q_spine": 0.821702519412012,
+          "branch_hit_rho2": 0.4284603421461897
+        },
+        {
+          "depth": 5,
+          "q_spine": 0.8342716929825772,
+          "branch_hit_rho2": 0.4351851851851852
+        },
+        {
+          "depth": 6,
+          "q_spine": 0.8352594665096346,
+          "branch_hit_rho2": 0.44471153846153844
+        },
+        {
+          "depth": 7,
+          "q_spine": 0.8472621220149911,
+          "branch_hit_rho2": 0.4095826893353941
+        }
+      ],
+      "accept_length": 5.206954309441963,
+      "full_tree_reach": {
+        "max_depth_reached": 9,
+        "built_depth": 9,
+        "frac_reaching_full_depth": null
+      }
+    },
+    "evaluation": {
+      "operative_step_time": 1.2127483746822987,
+      "operative_realized_depth": 9,
+      "accept_length": 5.206954309441963,
+      "measured_official_tps_central": 537.8399229182609,
+      "measured_official_tps_taulow": 536.9255950492998,
+      "clears_500_central": true,
+      "clears_500_conservative": true,
+      "overtakes_treefree": true,
+      "margin_to_500": 37.83992291826087,
+      "consistency": {
+        "oracle_accept_length": 5.206954309441963,
+        "reconstructed_et_from_ladder": 5.206954309441963,
+        "reconstructed_depth": 9,
+        "abs_diff": 0.0,
+        "rel_diff": 0.0,
+        "consistent": true,
+        "depth1_spine_accept_oracle": 0.728739760479042,
+        "depth1_matches_fp32_target": true,
+        "tolerance": 0.25,
+        "note": "reconstructed E[T] from the oracle's q-ladder on the banked M=32 topology should match the oracle's accept_length within tol; a gap means accept_length was mis-measured or the topology differs."
+      },
+      "greedy_exact": {
+        "tree_greedy_exact_from_oracle": 1,
+        "cond_a_depth1_recovered": true,
+        "cond_b_ladder_consistent": true,
+        "cond_c_salvage_descends": true,
+        "depth1_spine_accept": 0.728739760479042,
+        "depth1_fp32_target": 0.7287,
+        "ladder_monotone": true,
+        "ladder_tracks_target": true,
+        "max_depth_reached": 9,
+        "built_depth": 9,
+        "mechanism": "fp32 star-verify (QK+PV -> fp32/IEEE, relerr 1e-3 -> 1e-6) makes ta[0] == true target argmax -> tree greedy-EXACT by construction; does NOT inherit kanna #114's 56% bf16-near-tie-flip divergence."
+      },
+      "bands": {
+        "step_time": 1.2127483746822987,
+        "tau": 1.0,
+        "accept_length_to_clear_500": 4.840617149792076,
+        "accept_length_to_overtake_treefree": 4.761231028535485,
+        "accept_length_to_beat_frontier": 4.661804752278756,
+        "treefree_ceiling_official": 491.8,
+        "demand_floor_500_denken123": 4.624,
+        "demand_floor_official_at_this_step": 477.62504830593963,
+        "gap_vs_demand_floor": 0.2166171497920759
+      }
+    }
+  },
+  "live_oracle": {
+    "input": null,
+    "evaluation": null
+  },
+  "oracle_input_schema": {
+    "depth1_spine_accept": "float -- depth-1 spine accept q_1 (fp32 target 0.7287) [#1]",
+    "per_position": "[{depth, q_spine, branch_hit_rho2, branch_width}] -- rho-ladder [#2]",
+    "accept_length": "float -- MEASURED E[T], the numerator [#3]",
+    "full_tree_reach": "{max_depth_reached, built_depth, frac_reaching_full_depth} [#4]"
+  },
+  "banked_anchors": {
+    "depth1_accept_fp32_target": 0.7287,
+    "as_built_et": 2.1,
+    "demand_floor_500": 4.624,
+    "milestone_clear_500_lawine107": 4.613985078031858,
+    "milestone_overtake_4p727": 4.727,
+    "q_target_ladder": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "rho_cond_measured": [
+      0.4165047789261015,
+      0.2655480090557997,
+      0.19075249320036264
+    ],
+    "m32_parent": [
+      -1,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4,
+      4,
+      5,
+      7,
+      9,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      24,
+      25,
+      26,
+      28,
+      29
+    ],
+    "W": 4,
+    "max_depth": 24,
+    "wstar_depth": 9,
+    "step_wstar": 1.2127483746822987
+  },
+  "provenance": "ingests the openevolve A10G-oracle 4-number readout of tree-488-pw-fp32-v0 and maps it through the #100 lever_composition compose (K_cal) + my #125 tree_et_realization_ceiling step model (W* depth-9 step, measured 1.83x attn tax) + wirbel treeshape_measured_accept E[T] DP (consistency). Demand floor 4.624 + tree-free 491.8 from denken #123 (board-merged); fp32-greedy-exact mechanism from chiku-inu (board 20260614-092043-711) + kanna #114.",
+  "method": "LOCAL CPU-only analytic readout harness; no GPU/vLLM/HF Job/submission/kernel build. Banks the live-oracle pipe. Greedy identity untouched."
+}
