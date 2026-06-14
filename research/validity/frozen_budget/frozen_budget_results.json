@@ -1,0 +1,498 @@
+{
+  "pr": 202,
+  "metric_primary": "frozen_budget_self_test_passes",
+  "metric_test": "mu_bar_frozen_p95",
+  "frozen_budget_self_test_passes": true,
+  "mu_bar_frozen_p95": 504.87342465668917,
+  "p_bar_n5_frozen": 0.8097690471233381,
+  "delta_mu_frozen": -7.283646514920861,
+  "frozen_fraction_breakeven": 0.8455321793444455,
+  "regime_model": {
+    "sigma_decomposition": {
+      "sigma_sample_tps": 5.564480823573265,
+      "sigma_hw_tps": 4.864468814937121,
+      "sigma_draw_tps": 7.390974474817942,
+      "identity_check": "sigma_sample^2 + sigma_hw^2 == sigma_draw^2 (5.5645^2 + 4.8645^2 = 7.3910^2)",
+      "identity_holds": true,
+      "beatable_share_frozen": "best-of-N beats down only sigma_hw/sigma_draw = 65.8% of the one-sigma scatter (sigma_hw^2/sigma_draw^2 = 43.3% of variance)."
+    },
+    "regime_trigger": {
+      "FRESH": "official re-draw re-RANDOMIZES the finite-sample scatter: each shot is a fresh 128-prompt re-benchmark whose sampling deviation re-draws (the #194 premise). best-of-N beats down the FULL sigma_draw=7.391. Trigger: official re-samples WHICH prompts, or decode is non-deterministic so token counts vary run-to-run.",
+      "FROZEN": "official re-draw RE-USES the fixed 128 public prompts under deterministic greedy decode: the per-checkpoint sampling deviation b~N(0,sigma_sample^2) is a COMMON bias across all shots (same prompts + same greedy tokens => same token counts => same sampling bias), and only the HF-Job timing eps_hw~N(0,sigma_hw^2) re-draws per allocation. best-of-N beats down ONLY sigma_hw=4.864.",
+      "which_applies_is_open": "WHICH regime the official harness is in is the harness-owner's open question (UNMEASURED across official re-draws -- #188 measured sigma_hw across allocations, NOT sigma_sample's run-to-run behavior). Like #192 enforcement, this leg BOUNDS BOTH and does not resolve it.",
+      "plausibility_note": "the challenge contract (fixed 128 prompts + greedy token-IDENTITY) leans FROZEN: under deterministic greedy the same prompts emit the same tokens every run, so the finite-sample scatter cannot re-randomize -- only HW timing does. FROZEN is therefore the conservative DEFAULT for budgeting until the human confirms the harness re-draw behavior."
+    }
+  },
+  "frozen_table": {
+    "rows": [
+      {
+        "mu_tps": 500.0,
+        "p_frozen_n1": 0.5000000000000011,
+        "p_fresh_n1": 0.5,
+        "p_frozen_n2": 0.6540865631475437,
+        "p_fresh_n2": 0.75,
+        "p_frozen_n5": 0.8097690471233381,
+        "p_fresh_n5": 0.96875,
+        "p_frozen_n10": 0.885058441115361,
+        "p_fresh_n10": 0.9990234375,
+        "p_frozen_n100": 0.9806109977520435,
+        "p_frozen_n1000": 0.9968016105771952,
+        "p_frozen_n10000": 0.9994679297815373,
+        "genuine_clear_ceiling_sigma_sample": 0.5,
+        "reported_max_satN_inf": 1.0
+      },
+      {
+        "mu_tps": 505.0,
+        "p_frozen_n1": 0.7506386246302515,
+        "p_fresh_n1": 0.75063862463025,
+        "p_frozen_n2": 0.8708356055827524,
+        "p_fresh_n2": 0.9378189044737066,
+        "p_frozen_n5": 0.9520305971204412,
+        "p_fresh_n5": 0.9990358470746661,
+        "p_frozen_n10": 0.9780507062842638,
+        "p_fresh_n10": 0.9999990704091366,
+        "p_frozen_n100": 0.9982667772597692,
+        "p_frozen_n1000": 0.9998398904511894,
+        "p_frozen_n10000": 0.9999835145685614,
+        "genuine_clear_ceiling_sigma_sample": 0.8155555113408055,
+        "reported_max_satN_inf": 1.0
+      },
+      {
+        "mu_tps": 512.2,
+        "p_frozen_n1": 0.9505961845877695,
+        "p_fresh_n1": 0.9505961845877688,
+        "p_frozen_n2": 0.985885394989559,
+        "p_fresh_n2": 0.9975592630227141,
+        "p_frozen_n5": 0.9975138937937992,
+        "p_fresh_n5": 0.9999997056917395,
+        "p_frozen_n10": 0.9993053999337524,
+        "p_fresh_n10": 0.9999999999999134,
+        "p_frozen_n100": 0.9999842299142958,
+        "p_frozen_n1000": 0.9999994045229641,
+        "p_frozen_n10000": 0.999999970206737,
+        "genuine_clear_ceiling_sigma_sample": 0.9858274834477891,
+        "reported_max_satN_inf": 1.0
+      },
+      {
+        "mu_tps": 515.0,
+        "p_frozen_n1": 0.9787964246134657,
+        "p_fresh_n1": 0.978796424613465,
+        "p_frozen_n2": 0.9954677855567605,
+        "p_fresh_n2": 0.9995504083908275,
+        "p_frozen_n5": 0.9994355694638233,
+        "p_fresh_n5": 0.9999999957140658,
+        "p_frozen_n10": 0.9998733685363805,
+        "p_fresh_n10": 1.0,
+        "p_frozen_n100": 0.9999983030756366,
+        "p_frozen_n1000": 0.9999999554437915,
+        "p_frozen_n10000": 0.9999999983292821,
+        "genuine_clear_ceiling_sigma_sample": 0.9964876312759676,
+        "reported_max_satN_inf": 1.0
+      },
+      {
+        "mu_tps": 520.95,
+        "p_frozen_n1": 0.9977054019538243,
+        "p_fresh_n1": 0.9977054019538236,
+        "p_frozen_n2": 0.9997634118056324,
+        "p_fresh_n2": 0.9999947348198065,
+        "p_frozen_n5": 0.9999872941578087,
+        "p_fresh_n5": 0.9999999999999364,
+        "p_frozen_n10": 0.9999982966951512,
+        "p_fresh_n10": 1.0,
+        "p_frozen_n100": 0.9999999930648805,
+        "p_frozen_n1000": 0.9999999999178576,
+        "p_frozen_n10000": 0.9999999999983514,
+        "genuine_clear_ceiling_sigma_sample": 0.999916709268345,
+        "reported_max_satN_inf": 1.0
+      }
+    ],
+    "saturation_note": "REPORTED-MAX saturation P_frozen(mu,N->inf) -> 1.0 for sigma_hw>0 (max of N unbounded Gaussians diverges), but ONLY via a one-in-N HARDWARE-lucky allocation -- it grows like sigma_hw*sqrt(2 ln N), so the approach to 1 is logarithmically slow (see n100/n1000/n10000). A hardware-lucky pass does NOT replicate and would fail private re-benchmarking, so the OPERATIONALLY-safe ceiling is the sigma_sample-governed GENUINE-pass rate Phi((mu-500)/sigma_sample) -- the fraction of checkpoints whose FROZEN mean mu+b clears 500 on its own (best-of-N cannot move b). This is the PR's 'residual ceiling governed by sigma_sample, NOT 1' (exact in the sigma_hw->0 limit, self-test b)."
+  },
+  "build_bar": {
+    "mu_bar_frozen_p95": 504.87342465668917,
+    "mu_bar_fresh_p95_n5": 499.08467835746706,
+    "p_bar_n5_frozen": 0.8097690471233381,
+    "p_bar_n5_fresh": 0.96875,
+    "n_shots_frozen_at_512": 1,
+    "n_shots_fresh_at_512": 1,
+    "mu_safe_fresh_tps": 512.15707117161,
+    "delta_mu_frozen": -7.283646514920861,
+    "delta_mu_frozen_vs_fresh_n5": 5.788746299222112,
+    "interpretation": "At the mu=500 clear-bar, FROZEN best-of-5 gives P=0.8098 (NOT fresh's 0.9688) -- the #194 N=5 budget does NOT reach P>=0.95 under freeze. To restore P>=0.95 at N=5 the build must rise to mu_bar_frozen_p95=504.87 TPS, +5.79 TPS above the fresh-N=5 bar (499.08) -- that is the freeze-tax at the same shot budget. RELATIVE to the fresh N=1 safe build mu_safe=512.157, the frozen N=5 bar is below it (delta_mu_frozen=-7.28 TPS): five frozen shots (beating down sigma_hw) still clear LOWER than a single fresh shot's safe point, so the conservative mu=512.2 build remains robust -- n_shots_frozen_at_512=1 (== #194's N=1, regime-invariant since a single shot at 512.2 already clears at 0.95)."
+  },
+  "harness_sensitivity": {
+    "frozen_fraction_breakeven_at_bar500": 0.8455321793444455,
+    "frozen_fraction_breakeven_at_safe512": 0.0,
+    "frozen_fraction_breakeven": 0.8455321793444455,
+    "partial_freeze_curve": [
+      {
+        "f": 0.0,
+        "p_partial_n5_at_500": 0.8097690471233381,
+        "p_partial_n5_at_512p2": 0.9975138937937992
+      },
+      {
+        "f": 0.1,
+        "p_partial_n5_at_500": 0.8298626036845682,
+        "p_partial_n5_at_512p2": 0.9983567016810154
+      },
+      {
+        "f": 0.2,
+        "p_partial_n5_at_500": 0.8488295147112854,
+        "p_partial_n5_at_512p2": 0.9989580593843492
+      },
+      {
+        "f": 0.3,
+        "p_partial_n5_at_500": 0.8668079570656453,
+        "p_partial_n5_at_512p2": 0.9993733608078176
+      },
+      {
+        "f": 0.4,
+        "p_partial_n5_at_500": 0.8838920060493884,
+        "p_partial_n5_at_512p2": 0.9996477582816795
+      },
+      {
+        "f": 0.5,
+        "p_partial_n5_at_500": 0.9001408636689727,
+        "p_partial_n5_at_512p2": 0.999818622557154
+      },
+      {
+        "f": 0.6,
+        "p_partial_n5_at_500": 0.915583342038769,
+        "p_partial_n5_at_512p2": 0.9999168527499268
+      },
+      {
+        "f": 0.7,
+        "p_partial_n5_at_500": 0.9302187556149133,
+        "p_partial_n5_at_512p2": 0.9999674747461565
+      },
+      {
+        "f": 0.8,
+        "p_partial_n5_at_500": 0.9440144091337407,
+        "p_partial_n5_at_512p2": 0.9999898411768142
+      },
+      {
+        "f": 0.9,
+        "p_partial_n5_at_500": 0.9568989938455664,
+        "p_partial_n5_at_512p2": 0.999997733698736
+      },
+      {
+        "f": 1.0,
+        "p_partial_n5_at_500": 0.96875,
+        "p_partial_n5_at_512p2": 0.9999997056917395
+      }
+    ],
+    "p95_shots_at_bar": {
+      "fresh_capped_nmax5": 5,
+      "frozen_capped_nmax5": 5,
+      "fresh_uncapped": 5,
+      "frozen_uncapped": 30,
+      "e_shots_fresh_at_bar": 1.9375,
+      "e_shots_frozen_at_bar": 2.3367894101342586,
+      "p_exhaust_without_clear_fresh": 0.03125,
+      "p_exhaust_without_clear_frozen": 0.19023095287666192
+    },
+    "note": "(a) at the mu=500 bar, f*=0.846 of sigma_sample must re-randomize for N=5 to hit P>=0.95 (full freeze f=0 gives only 0.810); at the safe build mu=512.2, f*=0.000 -- N=5 clears for ANY freeze fraction (the safe build is freeze-robust). (b) capped at N_max=5 the worst-case quota is 5 shots in BOTH regimes, but the discriminator is the tail: under FROZEN the 5-shot plan pays E[shots]=2.337 (vs fresh 1.938) AND exhausts WITHOUT clearing 19.0% of the time (vs fresh 3.1%); to FORCE a 95% clear by re-drawing, the uncapped quota is 5 shots fresh vs 30 shots frozen -- frozen-bad checkpoints can only be rescued by hardware luck, so re-drawing is a poor substitute for building higher."
+  },
+  "self_test": {
+    "frozen_budget_self_test_passes": true,
+    "checks": {
+      "a_sigma_sample0_recovers_fresh_and_194_nstar": true,
+      "b_sigma_hw0_zero_improvement_sigma_sample_ceiling": true,
+      "c_frozen_le_fresh_for_n_ge_2": true,
+      "d_n1_frozen_equals_fresh": true,
+      "e_reproduces_081_and_194_frozen_probe_verbatim": true,
+      "f_nan_clean": true
+    },
+    "a_detail": [
+      {
+        "mu": 495.0,
+        "p_frozen_ss0_n5": 0.7616832663312434,
+        "p_fresh_n5": 0.7616832663312434
+      },
+      {
+        "mu": 500.0,
+        "p_frozen_ss0_n5": 0.96875,
+        "p_fresh_n5": 0.96875
+      },
+      {
+        "mu": 505.0,
+        "p_frozen_ss0_n5": 0.9990358470746661,
+        "p_fresh_n5": 0.9990358470746661
+      },
+      {
+        "mu": 510.0,
+        "p_frozen_ss0_n5": 0.9999947144100862,
+        "p_fresh_n5": 0.9999947144100862
+      },
+      {
+        "mu": 515.0,
+        "p_frozen_ss0_n5": 0.9999999957140658,
+        "p_fresh_n5": 0.9999999957140658
+      },
+      {
+        "mu": 520.0,
+        "p_frozen_ss0_n5": 0.9999999999995424,
+        "p_fresh_n5": 0.9999999999995424
+      },
+      {
+        "mu": 495.0,
+        "n_star_frozen_ss0": 11,
+        "n_star_194": 11
+      },
+      {
+        "mu": 500.0,
+        "n_star_frozen_ss0": 5,
+        "n_star_194": 5
+      },
+      {
+        "mu": 505.0,
+        "n_star_frozen_ss0": 3,
+        "n_star_194": 3
+      },
+      {
+        "mu": 510.0,
+        "n_star_frozen_ss0": 2,
+        "n_star_194": 2
+      },
+      {
+        "mu": 515.0,
+        "n_star_frozen_ss0": 1,
+        "n_star_194": 1
+      },
+      {
+        "mu": 520.0,
+        "n_star_frozen_ss0": 1,
+        "n_star_194": 1
+      }
+    ],
+    "b_detail": [
+      {
+        "mu": 498.0,
+        "p_n1": 0.39334922785852733,
+        "p_n7": 0.39334922785852733,
+        "phi_ceiling": 0.39334922785852733
+      },
+      {
+        "mu": 500.0,
+        "p_n1": 0.5,
+        "p_n7": 0.5,
+        "phi_ceiling": 0.5
+      },
+      {
+        "mu": 505.0,
+        "p_n1": 0.75063862463025,
+        "p_n7": 0.75063862463025,
+        "phi_ceiling": 0.75063862463025
+      },
+      {
+        "mu": 512.2,
+        "p_n1": 0.9505961845877688,
+        "p_n7": 0.9505961845877688,
+        "phi_ceiling": 0.9505961845877688
+      }
+    ],
+    "d_detail": [
+      {
+        "mu": 496.0,
+        "p_frozen_n1": 0.294184653617267,
+        "p_fresh_n1": 0.29418465361726587
+      },
+      {
+        "mu": 500.0,
+        "p_frozen_n1": 0.5000000000000011,
+        "p_fresh_n1": 0.5
+      },
+      {
+        "mu": 505.0,
+        "p_frozen_n1": 0.7506386246302515,
+        "p_fresh_n1": 0.75063862463025
+      },
+      {
+        "mu": 512.2,
+        "p_frozen_n1": 0.9505961845877695,
+        "p_fresh_n1": 0.9505961845877688
+      },
+      {
+        "mu": 520.95,
+        "p_frozen_n1": 0.9977054019538243,
+        "p_fresh_n1": 0.9977054019538236
+      }
+    ],
+    "p_frozen_500_n5": 0.8097690471233381,
+    "frozen_probe_max_abs_err_vs_194": 0.0,
+    "n_numbers_checked": 431
+  },
+  "import_194": {
+    "sigma_sample_tps": 5.564480823573265,
+    "sigma_hw_tps": 4.864468814937121,
+    "sigma_draw_tps": 7.390974474817942,
+    "mu_safe_fresh_tps": 512.15707117161,
+    "variance_fraction_beatable_frozen": 0.43317904779158195,
+    "variance_fraction_unbeatable_frozen": 0.5668209522084181,
+    "sigma_fraction_beatable_frozen": 0.6581633898900652,
+    "mu_grid_n_star_194": [
+      {
+        "mu": 495.0,
+        "n_star": 11
+      },
+      {
+        "mu": 500.0,
+        "n_star": 5
+      },
+      {
+        "mu": 505.0,
+        "n_star": 3
+      },
+      {
+        "mu": 510.0,
+        "n_star": 2
+      },
+      {
+        "mu": 515.0,
+        "n_star": 1
+      },
+      {
+        "mu": 520.0,
+        "n_star": 1
+      }
+    ],
+    "frozen_probe_194": [
+      {
+        "mu": 498.0,
+        "n": 1,
+        "p_iid": 0.39334922785852733,
+        "p_frozen": 0.393349227858528
+      },
+      {
+        "mu": 498.0,
+        "n": 2,
+        "p_iid": 0.6319748406601551,
+        "p_frozen": 0.541428932278575
+      },
+      {
+        "mu": 498.0,
+        "n": 3,
+        "p_iid": 0.7767372529189945,
+        "p_frozen": 0.6230500237098668
+      },
+      {
+        "mu": 498.0,
+        "n": 5,
+        "p_iid": 0.9178336919308614,
+        "p_frozen": 0.713512821035484
+      },
+      {
+        "mu": 498.0,
+        "n": 8,
+        "p_iid": 0.98165532434298,
+        "p_frozen": 0.782068918648945
+      },
+      {
+        "mu": 500.0,
+        "n": 1,
+        "p_iid": 0.5,
+        "p_frozen": 0.5000000000000011
+      },
+      {
+        "mu": 500.0,
+        "n": 2,
+        "p_iid": 0.75,
+        "p_frozen": 0.6540865631475437
+      },
+      {
+        "mu": 500.0,
+        "n": 3,
+        "p_iid": 0.875,
+        "p_frozen": 0.7311298447213159
+      },
+      {
+        "mu": 500.0,
+        "n": 5,
+        "p_iid": 0.96875,
+        "p_frozen": 0.8097690471233381
+      },
+      {
+        "mu": 500.0,
+        "n": 8,
+        "p_iid": 0.99609375,
+        "p_frozen": 0.8643833735993952
+      },
+      {
+        "mu": 505.0,
+        "n": 1,
+        "p_iid": 0.75063862463025,
+        "p_frozen": 0.7506386246302515
+      },
+      {
+        "mu": 505.0,
+        "n": 2,
+        "p_iid": 0.9378189044737066,
+        "p_frozen": 0.8708356055827524
+      },
+      {
+        "mu": 505.0,
+        "n": 3,
+        "p_iid": 0.9844944364975656,
+        "p_frozen": 0.9157529542027948
+      },
+      {
+        "mu": 505.0,
+        "n": 5,
+        "p_iid": 0.9990358470746661,
+        "p_frozen": 0.9520305971204412
+      },
+      {
+        "mu": 505.0,
+        "n": 8,
+        "p_iid": 0.9999850502655901,
+        "p_frozen": 0.9717493124478204
+      },
+      {
+        "mu": 510.0,
+        "n": 1,
+        "p_iid": 0.9119724341178743,
+        "p_frozen": 0.911972434117875
+      },
+      {
+        "mu": 510.0,
+        "n": 2,
+        "p_iid": 0.992251147644868,
+        "p_frozen": 0.9691390255648556
+      },
+      {
+        "mu": 510.0,
+        "n": 3,
+        "p_iid": 0.9993178873887978,
+        "p_frozen": 0.9839408413283928
+      },
+      {
+        "mu": 510.0,
+        "n": 5,
+        "p_iid": 0.9999947144100862,
+        "p_frozen": 0.9930186467557554
+      },
+      {
+        "mu": 510.0,
+        "n": 8,
+        "p_iid": 0.9999999963946324,
+        "p_frozen": 0.9967310578835271
+      }
+    ],
+    "source_json": "/workspace/senpai/target/research/validity/redraw_budget/redraw_budget_results.json"
+  },
+  "handoff": "if official re-draws re-randomize the 128 prompts (FRESH), #194's N=5 holds (P=0.969 at the mu=500 bar); if the harness re-benchmarks the FIXED prompts under greedy (FROZEN -- the more plausible regime under the challenge's token-identity contract), only sigma_hw=4.864 is beatable, N=5 at the bar gives P=0.810 (NOT 0.969) and to hold P>=0.95 at N=5 the build bar rises from the fresh-N=5 point 499.08 to mu_bar_frozen_p95=504.87 TPS (+5.79 TPS) -- though that frozen bar is still BELOW the fresh N=1 safe point 512.2 (delta_mu_frozen=-7.28), so building to mu=512.2 stays freeze-robust at N=1. The human must confirm the harness re-draw behavior before budgeting N=5 at the bar, and land #71 should aim the build clear of the FROZEN bar (>=504.9) to be safe.",
+  "scope": "Models BOTH the FRESH (#194) and FROZEN (#194 5d risk) re-draw regimes over #194's banked sigma decomposition and pins the conservative FROZEN build bar. Takes NO official draws, authorizes NO shot count or spend (a human still approves AND confirms the harness behavior), CPU-only. BANK-THE-ANALYSIS: adds 0 TPS, greedy/PPL untouched. WHICH regime the official harness is in is the harness-owner's open question (like #192 enforcement); FROZEN is the conservative default under the challenge's token-identity contract. Draw-budget lane (#159/#188/#194/#200). NOT ubel #201. NOT fern #185. NOT stark #198. NOT open2. NOT a launch.",
+  "imported_legs": {
+    "kanna_194_sigma_decomposition_and_frozen_integral": "research/validity/redraw_budget/redraw_budget_results.json",
+    "kanna_200_sequential_expected_shots": "research/validity/cost_budget/cost_budget_results.json"
+  },
+  "public_evidence_used": [
+    "Leaderboard frontier tops at ~489.6 TPS (osoi5-...-precache-skv64-v1), BELOW the 500 bar -- builds (land #71 descent) aim to push past 500; this leg budgets the official re-draw shots and pins how the FROZEN regime raises that bar.",
+    "kanna #194 (mxm5q63j) re-draw budget N=5@bar under the FRESH assumption it itself flagged as load-bearing (5d); this leg stress-tests that assumption.",
+    "Max order-statistics P(max of N>=t)=1-F(t)^N (iid/fresh) vs the frozen-bias mixture 1-E_b[Phi((t-mu-b)/sigma_hw)^N]; truncated-geometric early-stop E[shots]=(1-(1-p)^N)/p (#200).",
+    "fern #185 carries this frozen-vs-fresh budget as the multi-shot row."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.4112
+}
