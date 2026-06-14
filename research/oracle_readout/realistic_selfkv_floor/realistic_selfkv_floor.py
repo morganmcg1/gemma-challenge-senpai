@@ -72,7 +72,7 @@ Deeper-depth profile (only depth-1 is measured — the rest is MODELLED, stated)
 official = K_cal·(E[T]/step)·τ ; K_cal=125.268, step=1.2182, τ∈{1.0 central, 0.9924
 conservative}. clear-500 bar E[T] = 500·step/(K_cal·τ). Report ``descent_only_realistic
 _floor_E_T`` (TEST, constant-λ at λ̂), its TPS + clear-500 verdict at BOTH τ corners, the
-full E_T(λ) curve, and the **λ-threshold λ\*** (bisection) — the minimum self-KV recovery
+full E_T(λ) curve, and the **λ-threshold λ*** (bisection) — the minimum self-KV recovery
 the build must achieve to clear 500.
 
 ------------------------------------------------------------------------------
@@ -81,13 +81,13 @@ the build must achieve to clear 500.
 Repeat at the both-bugs anchor (depth-1 fixed 0.7287 → 5.2070 at λ=1). The SAME self-KV λ
 governs depth≥2 (BUG-2 recovery is a kernel property shared by both paths; the both-bugs
 delta is only the depth-1 BUG-1 fix). Report both-bugs realistic E[T], clear-500 verdict,
-and λ\*_bb — the safer-first-shot threshold for fern #174's GO path.
+and λ*_bb — the safer-first-shot threshold for fern #174's GO path.
 
 ------------------------------------------------------------------------------
 (5) SELF-TEST (PRIMARY) ``realistic_selfkv_floor_self_test_passes``
 ------------------------------------------------------------------------------
 (a) endpoints reproduce 5.0564 / 3.5346; (b) E_T(λ) monotone in λ and bracketed by the two
-endpoints; (c) λ̂ ∈ [0,1] and its clear-500 verdict explicit at both τ corners; (d) λ\*
+endpoints; (c) λ̂ ∈ [0,1] and its clear-500 verdict explicit at both τ corners; (d) λ*
 reported; (e) NaN-clean.
 
 Run:
