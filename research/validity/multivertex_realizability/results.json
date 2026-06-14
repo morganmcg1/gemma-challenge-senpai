@@ -1,0 +1,349 @@
+{
+  "agent": "stark",
+  "created_at": "20260614T191552Z",
+  "kind": "multivertex-realizability",
+  "nan_clean": true,
+  "peak_mem_mib": 46.82,
+  "pr": 208,
+  "self_test_passes": true,
+  "synthesis": {
+    "beta": 0.765124365433998,
+    "beta_robustness": {
+      "argmax_blend_beta_stable": true,
+      "beta_hi": {
+        "argmax_axis": "native_multilingual",
+        "beta": 0.9495993894553337,
+        "max_weighted_deficit_pct": 2.3453206728834255,
+        "nan_clean": true,
+        "per_axis_weighted_deficit_pct": {
+          "native_casual": 2.120854919660323,
+          "native_code": 2.2826259014854537,
+          "native_longctx": 0.7233123106172535,
+          "native_math": 1.7875364715768518,
+          "native_multilingual": 2.3453206728834255,
+          "native_sharegpt": 2.022162051128096
+        },
+        "worstcase_bar": 0.9780154812594635
+      },
+      "beta_lo": {
+        "argmax_axis": "native_multilingual",
+        "beta": 0.616486595380561,
+        "max_weighted_deficit_pct": 2.3505744985616306,
+        "nan_clean": true,
+        "per_axis_weighted_deficit_pct": {
+          "native_casual": 2.2845727197039833,
+          "native_code": 2.3309446523944746,
+          "native_longctx": 1.8750783898618995,
+          "native_math": 2.1789015941383343,
+          "native_multilingual": 2.3505744985616306,
+          "native_sharegpt": 2.2352750078022585
+        },
+        "worstcase_bar": 0.9779785818559692
+      },
+      "beta_primary": {
+        "argmax_axis": "native_multilingual",
+        "beta": 0.765124365433998,
+        "max_weighted_deficit_pct": 2.348985683941248,
+        "worstcase_bar": 0.9779783323491393
+      },
+      "note": "low beta steepens the shallow->deep reach-weight falloff -> MORE weight on the front-loaded rungs -> STRENGTHENS the NLS-wins argument; NLS stays the argmax across the whole beta-range.",
+      "worstcase_bar_band": [
+        0.9779783323491393,
+        0.9780154812594635
+      ]
+    },
+    "blend_constraints": {
+      "description": "delta_d(p) = Sum_axis p_axis.delta^(axis)_d, p>=0, Sum p=1. Each vertex delta^(axis) is a #176 domain count-pooled (cumulative-ladder space) at the weight W_axis landing the decode-frame drop on GT-4.3%. The deficit total mass Sigma delta VARIES across axes -- decode drop, not Sigma delta, is the physical invariant #176 held.",
+      "diversity_cap_note": "#176 capped each hard axis at g<=0.5 in its count-simplex. The single-axis vertices use the solo calibration weight; native_longctx's solo weight 0.670 exceeds 0.5, but longctx is the EASIEST axis (smallest deficit) so the cap never binds at the optimum.",
+      "fixed_mass_alt": "Sigma delta=0.04169 normalization (the PR's literal 'apples-to-apples' request) is a DEGENERATE counterfactual for the multi-axis case (it scales mass-balanced axes 5-9x or sign-flips them into non-realizable >5% deficits); reported as a secondary shape-ordering arm only -- its winners are super-NLS shapes -> private-UNREACHABLE.",
+      "headline": "DECODE-DROP-REALIZABLE (natural mass)",
+      "n_axes": 6,
+      "objective_linear_in_p": true,
+      "optimum_at_vertex": true,
+      "total_mass_sigma_delta_nls": 0.04168998076299557
+    },
+    "constants": {
+      "beta_primary": 0.765124365433998,
+      "beta_range": [
+        0.616486595380561,
+        0.9495993894553337
+      ],
+      "d198_coupled_bar": 0.9779783323491393,
+      "flat_bar_203": 0.9453023711509982,
+      "horizon": 7,
+      "lambda_floor_liveprobe": 0.3418647166361965,
+      "lambda_star_191_fixed_drop": 0.9780112973731208,
+      "public_bar_both_bugs": 0.9052283680740145,
+      "scale_reanchor": 1.0342446799783032,
+      "sigma_delta_nls": 0.04168998076299557,
+      "target_official": 500.0,
+      "tau_corner_low": 0.9924318649123313,
+      "w_d_at_bar": [
+        0.41283481201592775,
+        0.33588764826371537,
+        0.2709809076904709,
+        0.23949671644779763,
+        0.1717253507375035,
+        0.10331745222435465,
+        0.08953437874562994
+      ],
+      "w_shallow_over_deep_ratio": 4.610908321470625
+    },
+    "fixed_mass_degenerate_arm": {
+      "argmax_axis": "native_math",
+      "argmax_bar": null,
+      "argmax_weighted_deficit_pct": 10.380984528374045,
+      "axes": [
+        {
+          "bar": 0.9869091582904022,
+          "degenerate_non_realizable": false,
+          "is_nls": false,
+          "mass_scaling_factor": 1.1705881728225764,
+          "name": "native_code",
+          "weighted_deficit_pct": 2.72818174508563
+        },
+        {
+          "bar": null,
+          "degenerate_non_realizable": false,
+          "is_nls": false,
+          "mass_scaling_factor": 1.4915642470413821,
+          "name": "native_casual",
+          "weighted_deficit_pct": 3.343708293917473
+        },
+        {
+          "bar": 0.9974702825848891,
+          "degenerate_non_realizable": false,
+          "is_nls": false,
+          "mass_scaling_factor": 1.450342792069339,
+          "name": "native_sharegpt",
+          "weighted_deficit_pct": 3.157999399711527
+        },
+        {
+          "bar": 0.9779783323491393,
+          "degenerate_non_realizable": false,
+          "is_nls": true,
+          "mass_scaling_factor": 1.0,
+          "name": "native_multilingual",
+          "weighted_deficit_pct": 2.348985683941248
+        },
+        {
+          "bar": null,
+          "degenerate_non_realizable": true,
+          "is_nls": false,
+          "mass_scaling_factor": 4.983913882234659,
+          "name": "native_math",
+          "weighted_deficit_pct": 10.380984528374045
+        },
+        {
+          "bar": 0.8944674027115063,
+          "degenerate_non_realizable": true,
+          "is_nls": false,
+          "mass_scaling_factor": -0.7482819646907769,
+          "name": "native_longctx",
+          "weighted_deficit_pct": -1.1856030017632115
+        }
+      ],
+      "framing": "the PR's literal Sigma delta=0.04169 'apples-to-apples' normalization; DEGENERATE for mass-balanced axes -> non-realizable shapes. Reported for shape-ordering only, NOT as realizable blends.",
+      "interpretation": "the fixed-mass 'winners' (math/casual/sharegpt/code shapes forced to NLS's mass) exceed NLS's reach-weighted deficit and map to private-UNREACHABLE (bar=null) -- exactly #203's super-NLS finding: worse-than-NLS shapes are a STRONGER NO-GO, not a higher finite go bar."
+    },
+    "handoff_lines": {
+      "fern_185_packet": "MULTI-VERTEX REALIZABILITY (stark #208): the TRUE worst-case private bar over ALL realizable domain blends is 0.977978 (vs #203's single-axis 0.977978) -- 0.9780 STANDS as the operative worst-case FINITE go-bar; non-Latin-script IS the maximizing vertex (optimum_exceeds_nls=False), stable across #193's beta-range (worst-case bar band [0.977978, 0.978015]); and the realistic-floor NO-GO survives the true worst case (gap 0.636 in lambda). NLS is special because it pairs a front-loaded SHAPE with the LARGEST realizable MASS; forcing any other axis's shape to NLS's mass is non-realizable (decode drop != 4.3%) and goes private-UNREACHABLE (a stronger NO-GO). fern #185 uses 0.9780 as the binding both-bugs private bar.",
+      "land_71_colog": "land #71 co-log (the #203 spec): co-logging per-rung q_adv[d]/q_pub[d] on the adverse slice lets fern read the ACTUAL measured blend's deficit and replace this worst-case bar with the EXACT bar -- if the measured Sigma w.delta <= 2.349pp the bar <= 0.9780 (use 0.9780); if > 2.349pp it heads toward UNREACHABLE (stronger NO-GO)."
+    },
+    "imports": {
+      "nls_axis": "native_multilingual",
+      "nls_reconstruction_resid": 0.0,
+      "provenance": "stark#176 6-axis components+pool-weights (uzl7ixll) x stark#203 reach-weights+forward-map (hexhagf6) x stark#191 fixed-drop bar (jeclr39w) x stark#198 lambda-coupled drop (llo1bzn3) x denken#193 beta-range (2clxvlr8) x denken#183 LCB bisection (82uisrez). NLS vertex = #203 delta_meas (canonical anchor).",
+      "w_nls_full_precision": 0.2904229086120552
+    },
+    "lp_natural_mass": {
+      "argmax_axis": "native_multilingual",
+      "argmax_blend": {
+        "native_casual": 0.0,
+        "native_code": 0.0,
+        "native_longctx": 0.0,
+        "native_math": 0.0,
+        "native_multilingual": 1.0,
+        "native_sharegpt": 0.0
+      },
+      "bar_monotone_in_weighted_deficit": true,
+      "dirichlet_sweep_max_pct": 2.3337717267026594,
+      "lp_vertex_optimal_confirmed": true,
+      "margin_vs_nls_pp": 0.0,
+      "max_weighted_deficit_pct": 2.348985683941248,
+      "nls_weighted_deficit_pct": 2.348985683941248,
+      "optimum_exceeds_nls": false,
+      "per_axis_weighted_deficit_pct": {
+        "native_casual": 2.2417460733253316,
+        "native_code": 2.330607645306472,
+        "native_longctx": 1.584433485916175,
+        "native_math": 2.0828980543539157,
+        "native_multilingual": 2.348985683941248,
+        "native_sharegpt": 2.17741586125699
+      }
+    },
+    "nogo_worstcase": {
+      "drop_at_floor_pct": 2.2934646675451646,
+      "floor_to_bar_gap": 0.6361136157129428,
+      "lambda_floor_liveprobe": 0.3418647166361965,
+      "nogo_robust_worstcase_blend": true,
+      "note": "even at the true worst realizable blend the realistic floor lambda_hat_1=0.342 misses the bar by ~0.64 in lambda -- the NO-GO hardens, never softens."
+    },
+    "realizable_axes": [
+      {
+        "axis": "domain-code",
+        "bar": 0.9775732103166364,
+        "calibration_weight_W": 0.4075,
+        "delta_d_pct": [
+          3.5671,
+          2.9628,
+          1.2306,
+          0.2926,
+          -1.6491,
+          -0.2189,
+          -2.6236
+        ],
+        "is_nls": false,
+        "name": "native_code",
+        "sigma_delta": 0.035614558331364954,
+        "weighted_deficit_pct": 2.330607645306472
+      },
+      {
+        "axis": "register-casual-short",
+        "bar": 0.9756376130805582,
+        "calibration_weight_W": 0.31425,
+        "delta_d_pct": [
+          4.904,
+          1.7295,
+          1.0029,
+          -0.4789,
+          -1.3631,
+          -1.3177,
+          -1.6816
+        ],
+        "is_nls": false,
+        "name": "native_casual",
+        "sigma_delta": 0.02795050957120382,
+        "weighted_deficit_pct": 2.2417460733253316
+      },
+      {
+        "axis": "generic-hard-chat-tail",
+        "bar": 0.9742735046158002,
+        "calibration_weight_W": 0.402,
+        "delta_d_pct": [
+          5.2614,
+          1.2881,
+          1.1262,
+          -0.9348,
+          -2.0589,
+          0.4923,
+          -2.2997
+        ],
+        "is_nls": false,
+        "name": "native_sharegpt",
+        "sigma_delta": 0.028744915333782983,
+        "weighted_deficit_pct": 2.17741586125699
+      },
+      {
+        "axis": "non-latin-script",
+        "bar": 0.9779783323491393,
+        "calibration_weight_W": 0.2904229086120552,
+        "delta_d_pct": [
+          4.4129,
+          1.9487,
+          0.9832,
+          -0.3315,
+          -0.5741,
+          -0.909,
+          -1.3611
+        ],
+        "is_nls": true,
+        "name": "native_multilingual",
+        "sigma_delta": 0.04168998076299557,
+        "weighted_deficit_pct": 2.348985683941248
+      },
+      {
+        "axis": "math-notation-chain",
+        "bar": 0.9721095840783758,
+        "calibration_weight_W": 0.4315,
+        "delta_d_pct": [
+          5.1095,
+          2.1323,
+          1.0447,
+          -0.9973,
+          -2.3346,
+          -1.2555,
+          -2.8626
+        ],
+        "is_nls": false,
+        "name": "native_math",
+        "sigma_delta": 0.00836490793141531,
+        "weighted_deficit_pct": 2.0828980543539157
+      },
+      {
+        "axis": "long-context-tail",
+        "bar": 0.9607595652633505,
+        "calibration_weight_W": 0.67025,
+        "delta_d_pct": [
+          7.6464,
+          0.8265,
+          0.0118,
+          -1.1202,
+          -4.7489,
+          -2.6306,
+          -5.5563
+        ],
+        "is_nls": false,
+        "name": "native_longctx",
+        "sigma_delta": -0.05571426645331978,
+        "weighted_deficit_pct": 1.584433485916175
+      }
+    ],
+    "self_test": {
+      "a_detail": {
+        "d198_coupled_bar": 0.9779783323491393,
+        "nls_reconstruction_resid": 0.0,
+        "nls_vertex_bar": 0.9779783323491393,
+        "resid_vs_203": 0.0
+      },
+      "b_detail": {
+        "lp_max_weighted_deficit_pct": 2.348985683941248,
+        "nls_weighted_deficit_pct": 2.348985683941248
+      },
+      "c_detail": {
+        "flat_bar_203": 0.9453023711509982,
+        "flat_blend_bar": 0.9453023711509982,
+        "resid": 0.0
+      },
+      "conditions": {
+        "a_nls_vertex_reproduces_203_bar": true,
+        "b_lp_optimum_ge_nls_deficit": true,
+        "c_flat_blend_reproduces_203_flat_bar": true,
+        "d_bar_monotone_in_weighted_deficit": true,
+        "e_beta_endpoint_lps_nan_clean_with_argmax": true,
+        "f_nan_clean": true
+      },
+      "d_detail": {
+        "bar_monotone": true
+      },
+      "e_detail": {
+        "beta_hi_argmax": "native_multilingual",
+        "beta_hi_max_swd_pct": 2.3453206728834255,
+        "beta_lo_argmax": "native_multilingual",
+        "beta_lo_max_swd_pct": 2.3505744985616306
+      },
+      "multivertex_self_test_passes": true,
+      "partial_passes_a_to_e": true
+    },
+    "verdict": "0.9780 STANDS as the worst-case FINITE go-bar over all realizable domain blends. Among #176's six DECODE-DROP-realizable adverse axes, the non-Latin-script vertex MAXIMIZES the reach-weighted deficit (Sigma w.delta = 2.3490pp), beating the runner-up (native_code, 2.3306pp) by 0.0000pp, and stays the argmax across #193's whole beta-range. NLS is the unique vertex that pairs a front-loaded SHAPE with the LARGEST realizable MASS (Sigma delta=0.04169); every other axis is either less front-loaded or carries a smaller realizable mass, so all give a SMALLER reach-weighted deficit and a LOOSER bar (down to 0.9608 for long-context). The only way to beat NLS is the fixed-mass DEGENERATE counterfactual (a super-NLS shape at NLS's mass), which is private-UNREACHABLE -- a strictly STRONGER NO-GO, not a higher finite go bar. The realistic-floor NO-GO (lambda_hat_1=0.342 << bar) survives the true worst case with a 0.636 gap in lambda.",
+    "worst_case_blend": {
+      "bar_0978_stands": true,
+      "both_bugs_bar_worstcase_blend": 0.9779783323491393,
+      "delta_vs_191_fixed_bar": -3.296502398142387e-05,
+      "delta_vs_203_worstcase": 0.0,
+      "justification": "the LP optimum over the realizable polytope is the NLS vertex (= #203's adverse vertex); its bar IS #203's 0.977978, so 0.9780 is the worst-case finite go-bar. flatter/smaller-mass axes give a lower (looser) bar.",
+      "worst_axis": "native_multilingual",
+      "worst_reachable": true
+    }
+  }
+}
