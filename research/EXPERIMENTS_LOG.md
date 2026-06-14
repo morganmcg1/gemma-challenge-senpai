@@ -1,5 +1,35 @@
 # SENPAI Research Results
 
+## 2026-06-14 02:50 — PR #79: Pin rank-2+ drafter coverage (ρ) — the last borrowed input to the +18.7% tree gain ✅ MERGED (decisive measurement positive: ρ₂=0.4165/ρ₃=0.2655/ρ₄=0.1908; cov₂₋₄=0.6532 > borrowed 0.565 — gain was CONSERVATIVE; byteshark cross-val PASS; full max-branch-4 justified; ~586 official)
+
+- **Branch:** `wirbel/rank-coverage` · **Student:** wirbel
+- **Status:** MERGED as research artifact (cost-model measurement; no served-file change → BASELINE official bar UNCHANGED 481.53). Lands `scripts/profiler/rank_coverage.py`, `scripts/profiler/rankprobe_patch.py`, `scripts/profiler/treeshape_measured_accept.py`, `research/rank_coverage/rank_coverage_results.json` + pr79_report.md, `research/accept_calibration/treeshape_measured_results.json`.
+- **Hypothesis:** The +18.7% M=32 tree-verify gain (wirbel #74, borrowed flat ρ=0.565 from EAGLE-3) has one open parameter: **ρ = rank-2+ drafter coverage** (P(target in drafter top-k | rank-1 rejected at first divergence)). If ρ < 0.565 the gain is overstated; if ρ > 0.565 it was conservative. Measuring locally from the deployed kenyan-duma MTP drafter's top-4 outputs vs the verifier's greedy path pins the last borrowed input, and cross-validating against byteshark's official-stack ρ₂=0.4130 (BLOCK=64) confirms the measurement is a drafter intrinsic, not a config artifact.
+- **Primary metric:** `drafter_rank2_coverage = 0.4165` (ρ₂, W&B `z6wi4z4v` + `6wr8r2y0`). **Test:** `reprice_M32_proj_tps = 521.64` (M=32 re-priced on measured ρ ladder, old local base).
+
+| metric | value | notes |
+|---|--:|---|
+| ρ₂ (rank-2 coverage) | **0.4165** | 12,869/30,874 first-reject divergence events where target in top-2 |
+| ρ₃ (rank-3 coverage) | **0.2655** | declining ladder (not flat) |
+| ρ₄ (rank-4 coverage) | **0.1908** | above cost threshold ~0.10 → width-4 still pays |
+| cov₂₋₄ (aggregate top-4) | **0.6532** | > borrowed EAGLE-3 0.565 → gain was CONSERVATIVE |
+| beyond-top-4 hard miss | **34.7%** | rank-5+ below GEMM-row cost → max-branch-4 confirmed optimal |
+| top-1 q0 (cross-check #76) | **0.7335** | vs #76's 0.7287 (Δ0.0048) ✓ |
+| per-depth ρ₂ | flat 0.397–0.445 | no depth trend across depths 1–7 |
+| align_bad (greedy preserved) | **0** | 16,524 records; greedy-identity INTACT |
+| M=32 re-price (old local base) | **+21.8% / 521.6 TPS** | ≈586 official (481.53×1.218) |
+| byteshark cross-val Δ ρ₂ | 0.85% (0.4165 vs 0.4130) | PASS — drafter property, not block-size artifact |
+| byteshark cross-val Δ cov₂₋₄ | 1.16% (0.6532 vs 0.6609) | PASS |
+| byteshark cross-val Δ mean_emit | 1.96% (3.844 vs 3.921) | PASS |
+
+**Conclusions:**
+1. **ρ₂=0.4165 measured (replaces borrowed EAGLE-3 0.565).** The declining ladder ρ₂>ρ₃>ρ₄ reflects kenyan-duma MTP drafter's actual per-rank distribution; the borrowed scalar (35% above ρ₂) was wrong but the aggregate cov₂₋₄=0.6532 > 0.565 means the gain estimate was CONSERVATIVE, not overstated.
+2. **Full max-branch-4 is justified.** ρ₂=0.4165 >> ρ₃=0.2655 > ρ₄=0.1908 >> ~0.10 threshold; 34.7% hard-miss beyond top-4 is below GEMM-row cost → M=32 max-branch-4 confirmed optimal per #68's roofline. wirbel #74's parent arrays stand; land #71 should build.
+3. **M=32 re-price: +21.8% central → ~586 official.** 481.53×1.218≈586 TPS; well past 500-TPS target, clears need-for-speed 488.07 by ~20%.
+4. **byteshark cross-validation PASS at all 3 metrics (<2%).** ρ₂ 0.85% / cov₂₋₄ 1.16% / mean_emit 1.96% between local BLOCK=16 and byteshark official-stack BLOCK=64 — coverage ladder is a drafter intrinsic.
+5. **Per-depth ρ₂ flat (0.397–0.445, depths 1–7)** — depth-flat DP model used in #74 is justified; no depth correction needed for the topology.
+6. wirbel reassigned → **#83 (rho-optimal-topology)**: re-run Sequoia DP with measured declining ρ (ρ₂=0.4165/ρ₃=0.2655/ρ₄=0.1908) to verify #74 is ρ-robust or find a better topology, and produce per-position expected-salvage oracle for land #71's debug gate (target ≈0.41 pooled vs byteshark's broken 3.3%).
+
 ## 2026-06-14 02:12 — PR #72: TPS measurement protocol — tighten the ±4.4% noise floor ✅ MERGED (decisive measurement positive: ±4.4% was estimator artifact; wall_tps CV 0.035% / MDE 0.2% N=1; wandb_logging bug fixed)
 
 - **Branch:** `lawine/tps-noise-floor` · **Student:** lawine
