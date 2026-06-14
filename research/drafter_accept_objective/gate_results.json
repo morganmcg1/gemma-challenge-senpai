@@ -1,0 +1,172 @@
+{
+  "gate": {
+    "primary_metric_name": "lk_implied_ET_headroom_pct",
+    "lk_implied_ET_headroom_pct": 2.4,
+    "realistic_band_pct": [
+      1.0,
+      2.4
+    ],
+    "verdict": "AMBER",
+    "rule": "GREEN>=+3% / AMBER +1..3% / RED <+1%",
+    "headline": "AMBER: corrected greedy LK E[T] headroom = +1.0..2.4% (EAGLE-3 T=0 ceiling +2.4%, Medusa/single-layer floor +1.0%) -- sharply DOWN from the PR's +8-10% (that is the paper's T=1/sampling headline). Re-ranking channel CLOSED (0.0%, argmax already acceptance-ordered); any gain must come from prediction-improvement, which #80 (likelihood-only) never tested. Marginal prize (~+1-2% E[T] -> ~486-493 TPS): SIZE with a cheap LoRA/projection-layer probe before any GPU fine-tune. Do NOT transfer the +8% headline; do NOT full-launch unsized."
+  },
+  "step1_profile": {
+    "measured_drafter_accept_profile": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "measured_drafter_accept_profile_xcheck_79": [
+      0.7335390946502057,
+      0.7655308967906939,
+      0.7966375687035241,
+      0.8260281385281385,
+      0.840812315754995,
+      0.8379431242695754,
+      0.8496048349604834
+    ],
+    "profile_shape": "rising (non-strict)",
+    "top1_accept_q1": 0.728739760479042,
+    "deepest_accept_q7": 0.8472621220149911,
+    "profile_rise_q7_minus_q1": 0.11852236153594908,
+    "E_T_from_profile_closedform": 3.8444537125748504,
+    "E_T_from_profile_engine_88_91": 3.8444537125748504,
+    "E_T_reported_76_serverlog": 3.844131736526946,
+    "E_T_reported_76_prometheus": 3.849256527338719,
+    "E_T_from_79_profile": 3.9041999515855723,
+    "reconcile_abs_err_vs_3844": 0.00032197604790429324,
+    "cumulative_acceptance_C": [
+      0.728739760479042,
+      0.5530962874251496,
+      0.43832820359281444,
+      0.36017538922155695,
+      0.300484131736527,
+      0.2509822155688623,
+      0.2126477245508982
+    ],
+    "rho_ladder_79": [
+      0.4165047789261015,
+      0.2655480090557997,
+      0.19075249320036264
+    ]
+  },
+  "step2_headroom": {
+    "rerank_headroom_pct": 0.0,
+    "rerank_baseline_E_T_79": 3.9041999515855723,
+    "rerank_optimal_E_T_79": 3.9041999515855723,
+    "probe_variance_76_vs_79_pct": 1.5540891756687714,
+    "probe_variance_note": "76-vs-79 E[T] gap is measurement noise on the SAME deployed head, not acceptance headroom",
+    "rerank_gain_positions": 0,
+    "per_position_acceptance_margin": [
+      {
+        "k": 1,
+        "P_rank1_eq_true": 0.7335390946502057,
+        "P_rank2_eq_true": 0.10572500605180346,
+        "argmax_acceptance_margin": 0.6278140885984023,
+        "rank1_is_best_acceptance_bet": true
+      },
+      {
+        "k": 2,
+        "P_rank1_eq_true": 0.7655308967906939,
+        "P_rank2_eq_true": 0.10098176718092566,
+        "argmax_acceptance_margin": 0.6645491296097682,
+        "rank1_is_best_acceptance_bet": true
+      },
+      {
+        "k": 3,
+        "P_rank1_eq_true": 0.7966375687035241,
+        "P_rank2_eq_true": 0.08406078241189784,
+        "argmax_acceptance_margin": 0.7125767862916262,
+        "rank1_is_best_acceptance_bet": true
+      },
+      {
+        "k": 4,
+        "P_rank1_eq_true": 0.8260281385281385,
+        "P_rank2_eq_true": 0.0745400432900433,
+        "argmax_acceptance_margin": 0.7514880952380952,
+        "rank1_is_best_acceptance_bet": true
+      },
+      {
+        "k": 5,
+        "P_rank1_eq_true": 0.840812315754995,
+        "P_rank2_eq_true": 0.06927612184736327,
+        "argmax_acceptance_margin": 0.7715361939076317,
+        "rank1_is_best_acceptance_bet": true
+      },
+      {
+        "k": 6,
+        "P_rank1_eq_true": 0.8379431242695754,
+        "P_rank2_eq_true": 0.07206856252434747,
+        "argmax_acceptance_margin": 0.7658745617452279,
+        "rank1_is_best_acceptance_bet": true
+      },
+      {
+        "k": 7,
+        "P_rank1_eq_true": 0.8496048349604834,
+        "P_rank2_eq_true": 0.06159925615992563,
+        "argmax_acceptance_margin": 0.7880055788005578,
+        "rank1_is_best_acceptance_bet": true
+      }
+    ],
+    "min_argmax_acceptance_margin": 0.6278140885984023,
+    "rank1_acceptance_dominant_all_depths": true,
+    "headline_ceiling_NONtransferable": {
+      "note": "PR's +8-10% is the paper's SAMPLING (T=1) headline; sampling acceptance = min(1,p_t/p_d) depends on full-distribution match. Does NOT transfer to our greedy verify.",
+      "lk_headline_ET_gain_pct_low": 8.0,
+      "lk_headline_ET_gain_pct_high": 10.0,
+      "E_T_headline_low": 4.151662275449102,
+      "tps_headline_low": 520.0524,
+      "per_position_qlift_needed_for_8pct": 0.03201943364249826,
+      "per_position_qlift_needed_for_10pct": 0.03952106912729125
+    },
+    "corrected_greedy_ceiling": {
+      "note": "paper's OWN T=0 numbers (researcher-verified, Llama-3.1-8B). Our head is GREEDY -> these are regime-correct. EAGLE-3 T=0 +2.4% (upper), Medusa/MLP T=0 +1.0-1.2% (lower / single-layer analogue).",
+      "lk_T0_EAGLE3_pct": 2.4,
+      "lk_T0_medusa_pct": 1.0,
+      "lk_T0_mlpspec_pct": 1.2,
+      "E_T_greedy_ceiling": 3.9363908982035927,
+      "tps_greedy_ceiling": 493.08671999999996,
+      "E_T_greedy_floor": 3.8825730538922154,
+      "tps_greedy_floor": 486.34529999999995,
+      "greedy_collapse_factor_vs_headline": "T=0 gain is ~3-8x smaller than the T=1 headline (paper's own tables)"
+    },
+    "nearmiss": {
+      "n_divergences": 12869,
+      "rank2_nearmiss_frac_of_rejections": 0.4165047789261015,
+      "rank3_frac": 0.15494599424974745,
+      "rank4_frac": 0.08174683347579455,
+      "beyond_topW_frac": 0.3468023933483565,
+      "interpretation": "rank-2 near-misses are 41.7% of rejections, BUT rank-1 still wins 73% outright and is 7x more likely than rank-2 to be the true token at k=1 (rising to >13x at k=7). The rank-2 mass is TREE fodder (land #71 width-2 branch, rho2=0.4165) realized root-to-leaf (fern #88), NOT a mis-ranking a LINEAR acceptance loss can flip: demoting rank-1 to promote rank-2 loses more than it gains."
+    },
+    "reconciliation_80": {
+      "pr80_finding": "every retrained CE/KL/recipe drafter -> MTP parity (~3.83)",
+      "pr80_conclusion": "ceiling is ARCHITECTURAL (single-layer head capacity), not training schedule",
+      "pr80_tested_only_likelihood": "CE + KL-distill are LIKELIHOOD objectives; #80 did NOT test an acceptance objective -> channel-2 headroom is untested on our head",
+      "rerank_channel_closed": "channel-1 (re-ranking) IS closed by committed data: argmax already acceptance-ordered -> any LK gain must come from channel-2 (prediction-improvement)",
+      "single_layer_implies_lower": "#80's single-layer-head finding -> we resemble the Medusa/MLP T=0 class (+1.0%) more than EAGLE-3 (+2.4%) -> realistic central nearer the floor",
+      "greedy_collapse_precedent_88": "fern #88: Traversal Verification +4.57% sampling -> provably 0 greedy; same collapse direction shrinks the LK T=1 +8% to T=0 +2.4%"
+    },
+    "lk_implied_ET_headroom_pct": 2.4,
+    "lk_greedy_floor_pct": 1.0,
+    "realistic_band_pct": [
+      1.0,
+      2.4
+    ]
+  },
+  "frontier_anchors": {
+    "tps_official": 481.53,
+    "tps_local_wall": 454.09,
+    "E_T_deployed": 3.844131736526946
+  },
+  "inputs": {
+    "accept_json": "research/accept_calibration/accept_calibration_results.json",
+    "rank_coverage_json": "research/rank_coverage/rank_coverage_results.json",
+    "wandb_run_id_76": "5m17r52s",
+    "wandb_run_id_79": "z6wi4z4v"
+  },
+  "method": "CPU-only analytic; reuses fern #88/#91 score_tree_depthrank + wirbel #79 rank-coverage; no forward pass (profile fully committed)"
+}
