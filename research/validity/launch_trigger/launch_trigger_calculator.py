@@ -223,6 +223,21 @@ DEP_FLAGS = {
         "AR(1): rho(2)=0.168 >> rho(1)^2=0.067). The 75.12x collapse vs #197's fixed-N is Deff-INVARIANT, "
         "and realized (alpha,power)=(0.05,0.95) + the bar 0.9780 are UNCHANGED -- the AR correction only "
         "sharpens the absolute band, never flips the verdict. Orthogonal to #192. REINFORCES the HOLD.",
+    "trigger_reconcile_kanna_217": "LANDED -- CONSUMED (advisor 20:33Z, W&B vgovdrjc; axis reconcile). "
+        "Reconciles the #207 PUBLIC GO trigger (512.41/514.63) and the #210 PRIVATE build target (528.48) "
+        "as ONE T(N)=T_base+sigma_sel*E[Z_(N:N)]: it reproduces #204's 512.41 central / 514.63 worst at "
+        "N=1 EXACTLY (winner's curse 0), and N*=1 is PINNED -- best-of-N is HARMFUL (T(N) rises in N while "
+        "the conditional private clear is FLAT in N, so it lifts the SEEN public trigger for ZERO private "
+        "gain). The #207-vs-#210 tension resolves by AXIS, not N -> TWO SEPARATE FLAGS: (1) the PUBLIC "
+        "sigma->LCB GO trigger 512.41 CLEARS the lambda=1 ceiling 520.95 (+8.54 central); (2) the "
+        "N-INDEPENDENT PRIVATE-bar-at-P95 528.48 (= mu_safe_fresh/f_priv, f_priv=0.9691) is MISSED at that "
+        "ceiling by +7.53 (private mean 504.86, P95 LCB 492.70, private clear only 0.744 < 0.95). So a GO "
+        "on the PUBLIC reading does NOT certify 500-PRIVATE at P95 even at lambda=1. PREMISE FIX: #210's "
+        "literal 528.48 = T_base+23.61 does NOT hold -- 23.61 is a COMPOSITE vs #202's frozen-public "
+        "504.873, NOT the order-stat tax (5.66 frozen / 8.60 fresh @N=5); the 512.41->528.48 gap (16.07) "
+        "is the N-INDEPENDENT public->private gross-up. PROVISIONAL on f_priv=0.969 (grounded ~0.957 from "
+        "#52 -> private bar ~534; #224/#222 grounding now). Does NOT touch the 512.41 sigma->LCB public "
+        "trigger; ADDS a distinct private-bar-at-P95 row the public GO does not satisfy. REINFORCES the HOLD.",
     "ubel_181_tau_pin": "LANDED (advisor branch) -- the tau band [tau_low, 1.0] floor (stark #164) "
         "with the conservative tau=0.9924 corner; referenced as the floor, not a banked ledger axis.",
     "wirbel_184_lambda_robust_topology": "LANDED (advisor branch) -- named as the gap-fallback "
@@ -426,6 +441,16 @@ _AXIS_PATHS = {
     # realistic -> 1,788 flat-loose]; data-grounded point 1,125 (rho(2)=0.168 >> rho(1)^2=0.067). UNCHANGED:
     # (alpha,power)=(0.05,0.95), bar 0.9780, 75.12x collapse is Deff-INVARIANT. Orthogonal to #192.
     "sprt_ar_asn_212": "research/validity/sprt_ar_asn/sprt_ar_asn_results.json",
+    # kanna #217 launch-trigger reconcile -- MERGED (advisor 20:33Z): resolves the #207-vs-#210 tension by
+    # AXIS, not by N. T(N)=T_base+sigma_sel*E[Z_(N:N)] reproduces #204's 512.41/514.63 at N=1 EXACTLY (tax 0);
+    # N*=1 pinned (best-of-N HARMFUL: lifts the seen PUBLIC trigger for ZERO private gain, #210 flat-in-N).
+    # LOAD-BEARING: 512.41 = N=1 PUBLIC GO trigger; 528.48 = N-INDEPENDENT PRIVATE build target (=mu_safe/
+    # f_priv, NOT T_base+winner's-curse). The lambda=1 ceiling 520.95 CLEARS the public trigger but MISSES
+    # the private bar by +7.53 (private clear only 0.744 < 0.95). Two SEPARATE flags: public-trigger vs
+    # private-bar-P95. #210's 23.61 was mis-labelled the order-stat tax; it is a COMPOSITE vs #202's 504.873
+    # (the order-stat tax proper is 5.66 frozen / 8.60 fresh at N=5). PROVISIONAL on f_priv=0.969 (grounded
+    # ~0.957 from #52's 481.53/460.85 -> private bar ~534). REINFORCES the HOLD; trigger 512.41 UNCHANGED.
+    "trigger_reconcile_217": "research/validity/trigger_reconcile/trigger_reconcile_results.json",
 }
 
 
@@ -454,6 +479,7 @@ class _BankedAxes:
         self.winners_curse = _load_axis_json(_AXIS_PATHS["winners_curse_210"])
         self.kernel_budget = _load_axis_json(_AXIS_PATHS["kernel_budget_lambda_213"])
         self.sprt_ar = _load_axis_json(_AXIS_PATHS["sprt_ar_asn_212"])
+        self.trigger_reconcile = _load_axis_json(_AXIS_PATHS["trigger_reconcile_217"])
 
     # ---- wirbel #190 realistic within-prompt ICC / N_eff ---- #
     def icc_landed(self) -> bool:
@@ -1324,6 +1350,98 @@ class _BankedAxes:
         return bool(_dig(self.sprt_ar, "synthesis", "realism_band", "flat_441_is_conservative",
                          default=False))
 
+    # ---- kanna #217 launch-trigger reconcile (MERGED 20:33Z: #207-vs-#210 resolves by AXIS) ---- #
+    # T(N) = T_base + sigma_sel*E[Z_(N:N)] reproduces #204's 512.41/514.63 at N=1 EXACTLY (E[Z_(1:1)]=0,
+    # no winner's curse). N*=1 pinned (best-of-N HARMFUL: lifts the seen PUBLIC trigger for ZERO private
+    # gain). The two numbers are DIFFERENT AXES: 512.41 = N=1 PUBLIC GO trigger (P95 public mean >= 500);
+    # 528.48 = N-INDEPENDENT PRIVATE build target (= mu_safe_fresh/f_priv). The lambda=1 ceiling 520.95
+    # CLEARS the public trigger but MISSES the private bar by +7.53 (private clear only 0.744 < 0.95).
+    # #210's 23.61 is a COMPOSITE vs #202's 504.873 (NOT the order-stat tax 5.66 frozen / 8.60 fresh @N=5).
+    def trigger_reconcile_landed(self) -> bool:
+        return self.trigger_reconcile is not None
+
+    def trigger_reconcile_self_test_passes(self) -> bool:
+        return bool(_dig(self.trigger_reconcile, "trigger_reconcile_self_test_passes", default=False))
+
+    def trigger_reconcile_n_star_launch(self) -> int | None:
+        v = _dig(self.trigger_reconcile, "n_star_launch")
+        return int(v) if v is not None else None
+
+    def trigger_reconcile_t1(self, kind: str) -> float | None:
+        v = _dig(self.trigger_reconcile, "trigger_vs_N", "t1_%s" % kind)
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_mu_bar_private(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "reconcile_528", "mu_bar_private_corrected")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_residual_closed_form(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "reconcile_528", "reconcile_residual_closed_form")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_premise_holds(self) -> bool:
+        return bool(_dig(self.trigger_reconcile, "reconcile_528", "pr_premise_t5_equals_528_holds",
+                         default=False))
+
+    def trigger_reconcile_gap_512_to_528(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "reconcile_528",
+                 "gap_512_to_528_is_public_to_private_grossup")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_order_stat_tax_n5(self, regime: str) -> float | None:
+        v = _dig(self.trigger_reconcile, "reconcile_528", "order_stat_tax_n5_%s" % regime)
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_tax_decomposition(self) -> dict:
+        return _dig(self.trigger_reconcile, "reconcile_528", "tax_decomposition", default={}) or {}
+
+    def trigger_reconcile_p_private_at_512(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "reconcile_528", "p_private_clear_at_mu512p2")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_best_of_n_harmful(self) -> bool:
+        return bool(_dig(self.trigger_reconcile, "n_star_policy", "best_of_n_is_harmful", default=False))
+
+    def trigger_reconcile_private_clear_flat(self) -> bool:
+        return bool(_dig(self.trigger_reconcile, "n_star_policy", "private_clear_flat_in_n",
+                         default=False))
+
+    def trigger_reconcile_n_max_binding(self) -> int | None:
+        v = _dig(self.trigger_reconcile, "n_star_policy", "n_max_clearable_at_lambda1_binding")
+        return int(v) if v is not None else None
+
+    def trigger_reconcile_lambda1_ceiling(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "n_star_policy", "lambda1_ceiling")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_ceiling_clears_private(self) -> bool:
+        return bool(_dig(self.trigger_reconcile, "private_bar_vs_ceiling",
+                         "lambda1_ceiling_clears_private_bar", default=False))
+
+    def trigger_reconcile_private_bar_minus_ceiling(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "private_bar_vs_ceiling", "private_bar_minus_ceiling")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_private_mean_at_ceiling(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "private_bar_vs_ceiling", "private_mean_at_ceiling")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_private_p95_lcb_at_ceiling(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "private_bar_vs_ceiling", "private_p95_lcb_at_ceiling")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_p_private_at_ceiling(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "private_bar_vs_ceiling", "p_private_clear_at_ceiling")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_f_priv(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "import_banked", "f_priv")
+        return float(v) if v is not None else None
+
+    def trigger_reconcile_mu_safe_fresh(self) -> float | None:
+        v = _dig(self.trigger_reconcile, "import_banked", "mu_safe_fresh")
+        return float(v) if v is not None else None
+
     # ---- ubel #189 executable submission gate (packaging precondition) ---- #
     def packaging_landed(self) -> bool:
         return self.packaging is not None
@@ -2160,6 +2278,126 @@ def winners_curse_annotation() -> dict:
                     (tax.get("private_drop_grossup_tps") or float("nan")),
                     _BANKED.winners_curse_p_private_at_512() or float("nan"),
                     _BANKED.winners_curse_mu_bar_private_corrected() or float("nan")),
+        "framing_corrected_by_217": ("kanna #217 (MERGED 20:33Z) re-labels this 23.61: it is a COMPOSITE "
+                                     "vs #202's frozen-public 504.873, NOT the order-statistic winner's-"
+                                     "curse tax (that is 5.66 frozen / 8.60 fresh at N=5). The numbers "
+                                     "ROUNDTRIP exactly; only the LABEL changes. See trigger_reconcile "
+                                     "(#217): 512.41 (public trigger) and 528.48 (private target) are "
+                                     "DIFFERENT AXES; the lambda=1 ceiling 520.95 clears the public "
+                                     "trigger but MISSES the private bar (private clear 0.744 < 0.95)."),
+    }
+
+
+def trigger_reconcile_annotation() -> dict:
+    """kanna #217 (MERGED 20:33Z, W&B vgovdrjc): reconciles the #207 GO trigger (512.41/514.63) and the
+    #210 private build target (528.48) as ONE function of N -- and resolves the tension by AXIS, not by N.
+
+    T(N) = T_base + sigma_sel*E[Z_(N:N)] reproduces #204's 512.41 central / 514.63 worst at N=1 EXACTLY
+    (E[Z_(1:1)]=0, no winner's curse). N*=1 is PINNED: T(N) strictly increases in N (the order-statistic
+    tax inflates only the SEEN public max) while the conditional private clear is FLAT in N (#210), so
+    best-of-N is HARMFUL -- it lifts the bar you must hit (toward/past the 520.95 ceiling) for ZERO
+    private-mean gain.
+
+    LOAD-BEARING (surface as TWO SEPARATE FLAGS): 512.41 is the N=1 PUBLIC GO trigger (95%-confidence
+    the PUBLIC mean >= 500); 528.48 is the N-INDEPENDENT PRIVATE build target (= mu_safe_fresh/f_priv,
+    f_priv=0.9691). The lambda=1 ceiling 520.95 CLEARS the public trigger (+8.54 central) but MISSES the
+    private bar by +7.53 (at the ceiling the private mean is 504.86, P95 LCB 492.70, private clear only
+    0.744 < 0.95). So a GO firing on the public reading does NOT certify 500-PRIVATE at P95 -- even at
+    full self-KV recovery (lambda=1).
+
+    PREMISE CORRECTION: the PR's literal 528.48 = T_base + 23.61 (with 23.61 labelled the order-statistic
+    winner's-curse tax) does NOT hold. 23.61 is a COMPOSITE relative to #202's FROZEN-PUBLIC bar 504.873
+    (7.28 evaporating public best-of-N discount + 16.33 private-drop gross-up), NOT sigma_sel*E[Z_(5:5)]
+    (that is only 5.66 frozen / 8.60 fresh at N=5). The 512.41->528.48 gap (16.07) is the N-INDEPENDENT
+    public->private gross-up; the winner's curse proper is separate, smaller, and the only N-dependent piece.
+
+    PROVISIONAL: the entire 528.48 hinges on f_priv=0.9691; the frontier's one hard paired draw (#52:
+    481.53 public / 460.85 private = 0.9571) is worse -> the private bar would rise to ~534. kanna #224 +
+    ubel #222 are grounding f_priv now; hold the private-bar row as provisional. REINFORCES the HOLD."""
+    if not _BANKED.trigger_reconcile_landed():
+        return {"landed": False, "note": "trigger_reconcile #217 not landed -> the 512.41 (public) vs "
+                                         "528.48 (private) numbers are carried as one ambiguous trigger; "
+                                         "treat 512.41 as the PUBLIC GO trigger and 528.48 as the "
+                                         "separate PRIVATE-at-P95 build target until #217 lands."}
+    ceiling = _BANKED.trigger_reconcile_lambda1_ceiling()
+    t1c = _BANKED.trigger_reconcile_t1("central")
+    t1w = _BANKED.trigger_reconcile_t1("worstcase")
+    tax = _BANKED.trigger_reconcile_tax_decomposition()
+    return {
+        "landed": True,
+        "source_pr": 217,
+        "reinforces_hold": True,
+        "self_test_passes": _BANKED.trigger_reconcile_self_test_passes(),       # True
+        "n_star_launch": _BANKED.trigger_reconcile_n_star_launch(),             # 1
+        "law": "T(N) = T_base + sigma_sel * E[Z_(N:N)]; T(1) = T_base (no winner's curse)",
+        # ---- N-policy: best-of-N is HARMFUL; N*=1 pinned ----
+        "best_of_n_is_harmful": _BANKED.trigger_reconcile_best_of_n_harmful(),  # True
+        "private_clear_flat_in_n": _BANKED.trigger_reconcile_private_clear_flat(),  # True (imports #210)
+        "n_max_clearable_at_lambda1_binding": _BANKED.trigger_reconcile_n_max_binding(),  # 3 (worst-fresh)
+        # ---- FLAG 1: the PUBLIC sigma->LCB GO trigger (#204/#207) -- CLEARS at lambda=1 ----
+        "public_go_trigger": {
+            "t1_central_tps": _finite(t1c),                                     # 512.41 (reproduces #204 EXACTLY)
+            "t1_worstcase_tps": _finite(t1w),                                   # 514.63
+            "lambda1_ceiling_tps": _finite(ceiling),                            # 520.95
+            "clears_at_lambda1": bool(ceiling is not None and t1c is not None and ceiling >= t1c),  # True
+            "central_headroom_tps": _finite((ceiling - t1c) if (ceiling is not None and t1c is not None) else None),  # +8.54
+            "worstcase_headroom_tps": _finite((ceiling - t1w) if (ceiling is not None and t1w is not None) else None),  # +6.32
+            "question_answered": "95%-confidence the PUBLIC mean clears 500",
+        },
+        # ---- FLAG 2: the PRIVATE-bar-at-P95 build target (#210) -- MISSES at lambda=1 ----
+        "private_bar_p95": {
+            "mu_bar_private_corrected_tps": _finite(_BANKED.trigger_reconcile_mu_bar_private()),  # 528.48
+            "closed_form": "mu_bar_private = mu_safe_fresh / f_priv (N-INDEPENDENT)",
+            "mu_safe_fresh_tps": _finite(_BANKED.trigger_reconcile_mu_safe_fresh()),  # 512.16
+            "f_priv": _finite(_BANKED.trigger_reconcile_f_priv()),              # 0.9691
+            "reconcile_residual_closed_form": _finite(_BANKED.trigger_reconcile_residual_closed_form()),  # ~3e-10
+            "lambda1_ceiling_clears_private_bar": _BANKED.trigger_reconcile_ceiling_clears_private(),  # False
+            "private_bar_minus_ceiling_tps": _finite(_BANKED.trigger_reconcile_private_bar_minus_ceiling()),  # +7.53
+            "private_mean_at_ceiling_tps": _finite(_BANKED.trigger_reconcile_private_mean_at_ceiling()),  # 504.86
+            "private_p95_lcb_at_ceiling_tps": _finite(_BANKED.trigger_reconcile_private_p95_lcb_at_ceiling()),  # 492.70
+            "p_private_clear_at_ceiling": _finite(_BANKED.trigger_reconcile_p_private_at_ceiling()),  # 0.744 (< 0.95)
+            "question_answered": "P95 the PRIVATE grade clears 500 (a fresh draw, flat in N)",
+        },
+        # ---- the two flags are DISTINCT: public GO does NOT certify the private bar at P95 ----
+        "two_flags_distinct": True,
+        "public_go_does_not_certify_private_p95": True,
+        "private_bar_unreached_even_at_lambda1": not _BANKED.trigger_reconcile_ceiling_clears_private(),  # True
+        # ---- premise correction: #210's 23.61 is a COMPOSITE, not the order-stat tax ----
+        "pr_premise_t5_equals_528_holds": _BANKED.trigger_reconcile_premise_holds(),  # False (corrected)
+        "gap_512_to_528_public_to_private_grossup_tps": _finite(_BANKED.trigger_reconcile_gap_512_to_528()),  # 16.07
+        "order_stat_tax_n5_frozen_tps": _finite(_BANKED.trigger_reconcile_order_stat_tax_n5("frozen")),  # 5.66
+        "order_stat_tax_n5_fresh_tps": _finite(_BANKED.trigger_reconcile_order_stat_tax_n5("fresh")),    # 8.60
+        "composite_23p61_vs_frozen_504p873": _finite(tax.get("sum")),          # 23.61 (composite, not the tax)
+        # ---- provisional on f_priv grounding (#224/#222 in flight) ----
+        "private_bar_provisional_on_f_priv": True,
+        "f_priv_grounding_caveat": ("528.48 assumes f_priv=0.9691; the frontier's hard paired draw #52 "
+                                    "(481.53 public / 460.85 private = 0.9571) is worse -> private bar "
+                                    "~534. kanna #224 + ubel #222 grounding f_priv now; hold provisional."),
+        # ---- explicit: 512.41 sigma->LCB public trigger is UNCHANGED ----
+        "does_not_change_sigma_lcb_trigger": True,
+        "note": "#217: T(N)=T_base+sigma_sel*E[Z_(N:N)] reproduces #204's 512.41 central / 514.63 worst "
+                "at N=1 EXACTLY (tax 0); N*=1 PINNED (best-of-N HARMFUL -- lifts the SEEN public trigger "
+                "for ZERO private gain). The #207-vs-#210 tension resolves by AXIS, not by N: 512.41 = "
+                "N=1 PUBLIC GO trigger (P95 public mean>=500); %.2f = N-INDEPENDENT PRIVATE build target "
+                "(= mu_safe_fresh/f_priv, f_priv=%.4f). The lambda=1 ceiling %.2f CLEARS the public "
+                "trigger but MISSES the private bar by +%.2f (private mean %.2f, P95 LCB %.2f, private "
+                "clear only %.4f < 0.95) -> a GO on the public reading does NOT certify the private bar "
+                "at P95 even at full self-KV recovery. PREMISE CORRECTION: the PR's literal 528.48 = "
+                "T_base+23.61 does NOT hold -- 23.61 is a COMPOSITE vs #202's frozen-public 504.873, NOT "
+                "the order-statistic tax (%.2f frozen / %.2f fresh at N=5); the 512.41->528.48 gap (%.2f) "
+                "is the N-INDEPENDENT public->private gross-up. PROVISIONAL on f_priv=0.969 (grounded "
+                "~0.957 from #52 -> private bar ~534; #224/#222 grounding now). Does NOT touch the 512.41 "
+                "sigma->LCB public trigger. REINFORCES the HOLD." % (
+                    _BANKED.trigger_reconcile_mu_bar_private() or float("nan"),
+                    _BANKED.trigger_reconcile_f_priv() or float("nan"),
+                    ceiling if ceiling is not None else float("nan"),
+                    _BANKED.trigger_reconcile_private_bar_minus_ceiling() or float("nan"),
+                    _BANKED.trigger_reconcile_private_mean_at_ceiling() or float("nan"),
+                    _BANKED.trigger_reconcile_private_p95_lcb_at_ceiling() or float("nan"),
+                    _BANKED.trigger_reconcile_p_private_at_ceiling() or float("nan"),
+                    _BANKED.trigger_reconcile_order_stat_tax_n5("frozen") or float("nan"),
+                    _BANKED.trigger_reconcile_order_stat_tax_n5("fresh") or float("nan"),
+                    _BANKED.trigger_reconcile_gap_512_to_528() or float("nan")),
     }
 
 
@@ -2838,6 +3076,12 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
     # NOT relax the PRIVATE bar (flat in N, n_star_private=1); the private build target is 528.48 (+23.61
     # tax over #202's 504.87). Build-higher/N=1. Does NOT touch the sigma->LCB public trigger (512.41).
     wca_ledger = winners_curse_annotation()
+    # launch-trigger reconcile (kanna #217, advisor 20:33Z): resolves #207 (512.41 public trigger) vs
+    # #210 (528.48 private target) by AXIS, not by N. N*=1 pinned (best-of-N HARMFUL). TWO SEPARATE FLAGS:
+    # the public GO trigger CLEARS at lambda=1 (ceiling 520.95 >= 512.41), but the private-bar-at-P95
+    # (528.48, N-independent) is MISSED even at lambda=1 (private clear 0.744). Corrects #210's 23.61
+    # premise (composite vs #202's 504.873, NOT the order-stat tax). PROVISIONAL on f_priv. REINFORCES HOLD.
+    tra_ledger = trigger_reconcile_annotation()
 
     out = {
         "verdict": verdict,
@@ -2920,7 +3164,21 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
                         "PUBLIC build must reach mu_bar_private_corrected=528.48 (+23.61 winner's-curse "
                         "tax over #202's 504.87 = 7.28 evaporating public discount + 16.33 private-drop "
                         "gross-up); N=1 STANDS (build higher, do NOT re-draw). This is the BUILD-target "
-                        "row; it does NOT touch the sigma->LCB PUBLIC trigger 512.41. BOTH #197 + #202 "
+                        "row; it does NOT touch the sigma->LCB PUBLIC trigger 512.41. kanna #217 (advisor "
+                        "20:33Z) reconciles #207-vs-#210 by AXIS, not by N: T(N)=T_base+sigma_sel*E[Z_(N:N)] "
+                        "reproduces 512.41/514.63 at N=1 EXACTLY and PINS N*=1 (best-of-N is HARMFUL -- it "
+                        "raises the SEEN public trigger toward the 520.95 ceiling for ZERO private gain). "
+                        "512.41 = N=1 PUBLIC GO trigger; 528.48 = N-INDEPENDENT PRIVATE build target "
+                        "(mu_safe/f_priv). CRUCIAL: the lambda=1 ceiling 520.95 CLEARS the public trigger "
+                        "but MISSES the private bar by +7.53 (private mean 504.86, P95 LCB 492.70, private "
+                        "clear only 0.744 at the ceiling) -> a GO on the public reading does NOT certify "
+                        "500-PRIVATE at P95 even at full self-KV recovery; surfaced as TWO SEPARATE FLAGS "
+                        "(public-trigger-PASS vs private-bar-P95). #217 also CORRECTS #210's premise: the "
+                        "23.61 is a COMPOSITE vs #202's frozen-public 504.873, NOT the order-statistic tax "
+                        "(5.66 frozen / 8.60 fresh at N=5); the 512.41->528.48 gap 16.07 is the N-INDEPENDENT "
+                        "public->private gross-up. The private-bar row is PROVISIONAL on f_priv=0.969 "
+                        "(grounded ~0.957 from #52's 481.53/460.85 -> ~534; #224/#222 grounding now). "
+                        "BOTH #197 + #202 "
                         "REINFORCE the HOLD -- they sharpen the measurement spec + budget robustness, "
                         "they do NOT flip the verdict. ISSUE #192 "
                         "COMPLIANCE BRACKET (lawine #196 lane-b + wirbel #199 lane-a, advisor 18:58Z/"
@@ -2946,6 +3204,7 @@ def launch_decision(measured_tuple: dict, step_override: float | None = None) ->
             "liveprobe_measurement_cost": lpc_ledger,
             "frozen_budget_annotation": fba_ledger,
             "winners_curse_annotation": wca_ledger,
+            "trigger_reconcile": tra_ledger,
             "compliant_lane_bracket": clb_ledger,
             "preconditions": preconds,
             "preconditions_all_go": preconds_all_go,
@@ -3259,6 +3518,7 @@ PRECACHE_BENCH=1 <serve-harness with land #71 {h} kernel + kanna darwin _Include
   - [LANDED-CONSUMED] lawine #196 compliant non-spec floor (lane-b, EMPIRICAL) -- under strict #192 the compliant non-spec int4 path is token-identical (1.0), PPL 2.3766<2.42, 128/128, but FLOORS at 165.44 official TPS (66.9% below 500). NO compliant non-spec 500-lane; spec premium 316.1 TPS / 191% is existential. Adds the #192 compliance precondition ABOVE the sigma->LCB trigger (does NOT change #204's 512.41/514.63).
   - [LANDED-CONSUMED] wirbel #199 compliant-spec E[T] ceiling (lane-a, BRACKET) -- the batch-invariant int4 VERIFY kernel ceiling 536.66 official TPS (lower-CI 525.73>500 -> CLEARS), floor 416.31 (misses); clears 500 ONLY if kernel overhead < 7.33% both / 4.12% descent (UNMEASURED; off-shelf #122 +51.78%, ~7x over). lane-a is the SINGLE compliant 500-route -> gated on the issue_192_human_ruling precondition (PENDING). REINFORCES the HOLD.
   - [LANDED-CONSUMED] wirbel #213 compliant-kernel lambda-budget curve max_kernel_overhead_pct(lambda) -- prices #199's lane-a feasibility as a function of the build: lambda=1 budget 7.33% both / 4.12% descent (<->#199); lambda_crit=0.834 both / 0.907 descent (below it even a FREE batch-invariant kernel misses 500); lambda_hat=0.342 budget -16.74% (negative -> infeasible); off-the-shelf #122 (+51.78%) clears at NO physical lambda<=1. So the strict-#192 compliant 500-path is a DOUBLE gate (lambda >= 0.834 AND kernel-under-budget). Does NOT change #204's 512.41/514.63 trigger (sits ABOVE the sigma math). REINFORCES the HOLD.
+  - [LANDED-CONSUMED] kanna #217 trigger reconcile (axis, not N) -- reconciles the #207 PUBLIC GO trigger (512.41/514.63) and the #210 PRIVATE build target (528.48) as ONE T(N)=T_base+sigma_sel*E[Z_(N:N)]: reproduces #204's 512.41 central / 514.63 worst at N=1 EXACTLY (winner's curse 0), N*=1 PINNED (best-of-N HARMFUL -- lifts the SEEN public trigger for ZERO private gain). TWO SEPARATE FLAGS: (1) PUBLIC sigma->LCB GO trigger 512.41 CLEARS the lambda=1 ceiling 520.95 (+8.54 central); (2) the N-INDEPENDENT PRIVATE-bar-at-P95 528.48 (= mu_safe_fresh/f_priv, f_priv=0.9691) is MISSED at that ceiling by +7.53 (private mean 504.86, P95 LCB 492.70, private clear only 0.744 < 0.95) -> a PUBLIC GO does NOT certify 500-PRIVATE at P95 even at lambda=1. PREMISE FIX: #210's 528.48=T_base+23.61 does NOT hold -- 23.61 is a COMPOSITE vs #202's 504.873, NOT the order-stat tax (5.66 frozen / 8.60 fresh @N=5); the 512.41->528.48 gap (16.07) is the N-INDEPENDENT public->private gross-up. PROVISIONAL on f_priv=0.969 (grounded ~0.957 from #52 -> ~534; #224/#222 grounding). Does NOT change #204's 512.41/514.63 sigma->LCB trigger; ADDS a distinct private-bar-at-P95 row. REINFORCES the HOLD.
   - [PENDING-RULING] issue #192 human ruling (compliance gate, ABOVE the sigma math) -- decides whether the speculative int4 verify lane is admissible; keeps launch_authorized=False until resolved.
   - [PENDING-BUILD] land #71 measured tuple (THIS tuple).
 
@@ -3968,6 +4228,56 @@ def self_test() -> dict:
         "realized_power_unchanged": ar["realized_power_unchanged"],
         "private_bar_both_unchanged": ar["private_bar_both_unchanged"]}
 
+    # (r) kanna #217 (MERGED 20:33Z): resolves #207 (512.41 public trigger) vs #210 (528.48 private
+    #     target) by AXIS, not by N. T(N)=T_base+sigma_sel*E[Z_(N:N)] reproduces #204's 512.41/514.63 at
+    #     N=1 EXACTLY; N*=1 PINNED (best-of-N HARMFUL). TWO SEPARATE FLAGS: the PUBLIC GO trigger CLEARS at
+    #     lambda=1 (ceiling 520.95 >= 512.41, +8.54), but the N-INDEPENDENT PRIVATE-bar-at-P95 (528.48 =
+    #     mu_safe/f_priv) is MISSED even at lambda=1 (ceiling < 528.48 by 7.53; private clear only 0.744
+    #     < 0.95). #217 also CORRECTS #210's premise (23.61 is a COMPOSITE vs #202's 504.873, NOT the
+    #     order-stat tax 5.66/8.60 @N=5). The 512.41 sigma->LCB public trigger is UNCHANGED. REINFORCES HOLD.
+    tra = d_full["launch_ci_ledger"]["trigger_reconcile"]
+    pub = tra["public_go_trigger"]
+    prv = tra["private_bar_p95"]
+    r_ok = (bool(tra["landed"]) and bool(tra["self_test_passes"])
+            and tra["n_star_launch"] == 1
+            and tra["best_of_n_is_harmful"] is True
+            and tra["private_clear_flat_in_n"] is True
+            # FLAG 1 -- the PUBLIC GO trigger reproduces #204 EXACTLY and CLEARS at lambda=1:
+            and abs(pub["t1_central_tps"] - 512.4101095400661) <= tol
+            and abs(pub["t1_worstcase_tps"] - 514.6346173476741) <= tol
+            and pub["clears_at_lambda1"] is True
+            and abs(pub["central_headroom_tps"] - 8.542622771101378) <= tol
+            # FLAG 2 -- the N-INDEPENDENT PRIVATE bar at P95 is MISSED even at lambda=1:
+            and abs(prv["mu_bar_private_corrected_tps"] - 528.4835555959944) <= tol
+            and prv["lambda1_ceiling_clears_private_bar"] is False
+            and abs(prv["private_bar_minus_ceiling_tps"] - 7.530823284826965) <= tol
+            and abs(prv["private_mean_at_ceiling_tps"] - 504.858898207883) <= tol
+            and abs(prv["private_p95_lcb_at_ceiling_tps"] - 492.70182703627296) <= tol
+            and abs(prv["p_private_clear_at_ceiling"] - 0.7444260743392912) <= 1e-3
+            and abs(prv["f_priv"] - 0.969106920637722) <= 1e-3
+            # the two flags are DISTINCT -- public GO does NOT certify the private bar at P95:
+            and tra["two_flags_distinct"] is True
+            and tra["public_go_does_not_certify_private_p95"] is True
+            and tra["private_bar_unreached_even_at_lambda1"] is True
+            # premise correction: #210's 23.61 is a COMPOSITE, not the order-stat tax:
+            and tra["pr_premise_t5_equals_528_holds"] is False
+            and abs(tra["gap_512_to_528_public_to_private_grossup_tps"] - 16.073446055928343) <= tol
+            and abs(tra["order_stat_tax_n5_frozen_tps"] - 5.657204414903753) <= tol
+            and abs(tra["order_stat_tax_n5_fresh_tps"] - 8.59544073979668) <= tol
+            # CRUX: the #204/#207 sigma->LCB public trigger is UNCHANGED by #217:
+            and tra["does_not_change_sigma_lcb_trigger"] is True
+            and abs(csc["go_trigger_mu_central_tps"] - 512.4101095400661) <= tol)
+    results["r_trigger_reconcile_217"] = {
+        "pass": bool(r_ok),
+        "n_star_launch": tra["n_star_launch"],
+        "public_t1_central_tps": pub["t1_central_tps"],
+        "public_clears_at_lambda1": pub["clears_at_lambda1"],
+        "private_bar_p95_tps": prv["mu_bar_private_corrected_tps"],
+        "lambda1_ceiling_clears_private_bar": prv["lambda1_ceiling_clears_private_bar"],
+        "p_private_clear_at_ceiling": prv["p_private_clear_at_ceiling"],
+        "public_go_does_not_certify_private_p95": tra["public_go_does_not_certify_private_p95"],
+        "pr_premise_t5_equals_528_holds": tra["pr_premise_t5_equals_528_holds"]}
+
     passes = bool(all(v["pass"] for v in results.values()))
     test_metric = bool(d_full["both_bugs_go_at_lambda_star"])
     return {
@@ -4172,7 +4482,35 @@ def _maybe_log_wandb(args, payload: dict) -> None:
                              "sprt_ar_savings_ratio_unchanged_212": _BANKED.sprt_ar_savings_ratio(),
                              "sprt_ar_realized_alpha_unchanged_212": _BANKED.sprt_ar_realized_alpha(),
                              "sprt_ar_realized_power_unchanged_212": _BANKED.sprt_ar_realized_power(),
-                             "sprt_ar_private_bar_both_unchanged_212": _BANKED.sprt_ar_private_bar()})
+                             "sprt_ar_private_bar_both_unchanged_212": _BANKED.sprt_ar_private_bar(),
+                             # kanna #217 trigger reconcile: the #207-vs-#210 tension resolves by AXIS, not
+                             # by N. T(N)=T_base+sigma_sel*E[Z_(N:N)] reproduces #204's 512.41/514.63 at N=1
+                             # EXACTLY; N*=1 pinned (best-of-N HARMFUL). 512.41 = PUBLIC GO trigger; 528.48 =
+                             # N-INDEP PRIVATE build target. The lambda=1 ceiling 520.95 CLEARS public but
+                             # MISSES private by +7.53 (private clear 0.744 < 0.95). Does NOT touch 512.41.
+                             "trigger_reconcile_landed_217": _BANKED.trigger_reconcile_landed(),
+                             "trigger_reconcile_self_test_passes_217": _BANKED.trigger_reconcile_self_test_passes(),
+                             "trigger_reconcile_n_star_launch_217": _BANKED.trigger_reconcile_n_star_launch(),
+                             "trigger_reconcile_t1_central_tps_217": _BANKED.trigger_reconcile_t1("central"),
+                             "trigger_reconcile_t1_worstcase_tps_217": _BANKED.trigger_reconcile_t1("worstcase"),
+                             "trigger_reconcile_lambda1_ceiling_tps_217": _BANKED.trigger_reconcile_lambda1_ceiling(),
+                             "trigger_reconcile_mu_bar_private_corrected_tps_217": _BANKED.trigger_reconcile_mu_bar_private(),
+                             "trigger_reconcile_mu_safe_fresh_tps_217": _BANKED.trigger_reconcile_mu_safe_fresh(),
+                             "trigger_reconcile_f_priv_217": _BANKED.trigger_reconcile_f_priv(),
+                             "trigger_reconcile_best_of_n_is_harmful_217": _BANKED.trigger_reconcile_best_of_n_harmful(),
+                             "trigger_reconcile_private_clear_flat_in_n_217": _BANKED.trigger_reconcile_private_clear_flat(),
+                             "trigger_reconcile_n_max_clearable_at_lambda1_217": _BANKED.trigger_reconcile_n_max_binding(),
+                             "trigger_reconcile_lambda1_ceiling_clears_private_217": _BANKED.trigger_reconcile_ceiling_clears_private(),
+                             "trigger_reconcile_private_bar_minus_ceiling_tps_217": _BANKED.trigger_reconcile_private_bar_minus_ceiling(),
+                             "trigger_reconcile_private_mean_at_ceiling_tps_217": _BANKED.trigger_reconcile_private_mean_at_ceiling(),
+                             "trigger_reconcile_private_p95_lcb_at_ceiling_tps_217": _BANKED.trigger_reconcile_private_p95_lcb_at_ceiling(),
+                             "trigger_reconcile_p_private_clear_at_ceiling_217": _BANKED.trigger_reconcile_p_private_at_ceiling(),
+                             "trigger_reconcile_p_private_clear_at_512_217": _BANKED.trigger_reconcile_p_private_at_512(),
+                             "trigger_reconcile_premise_t5_equals_528_holds_217": _BANKED.trigger_reconcile_premise_holds(),
+                             "trigger_reconcile_gap_512_to_528_grossup_tps_217": _BANKED.trigger_reconcile_gap_512_to_528(),
+                             "trigger_reconcile_order_stat_tax_n5_frozen_tps_217": _BANKED.trigger_reconcile_order_stat_tax_n5("frozen"),
+                             "trigger_reconcile_order_stat_tax_n5_fresh_tps_217": _BANKED.trigger_reconcile_order_stat_tax_n5("fresh"),
+                             "trigger_reconcile_residual_closed_form_217": _BANKED.trigger_reconcile_residual_closed_form()})
     st = payload["self_test"]
     flat = {
         "launch_trigger_calculator_self_test_passes": st["launch_trigger_calculator_self_test_passes"],
@@ -4299,6 +4637,52 @@ def _maybe_log_wandb(args, payload: dict) -> None:
         flat["worked_example/lane_a_max_kernel_overhead_pct_descent"] = lna["max_kernel_overhead_pct_descent"]
         flat["worked_example/lane_a_offshelf_overhead_ref_122"] = lna["offshelf_overhead_ref_122"]
         flat["worked_example/lane_a_overhead_is_measured"] = bool(lna["overhead_is_measured"])
+    # kanna #217 trigger reconcile: #207-vs-#210 resolves by AXIS (not N). TWO SEPARATE FLAGS --
+    # PUBLIC sigma->LCB GO trigger (512.41 central, CLEARS at lambda=1) vs PRIVATE-bar-at-P95
+    # (528.48, N-independent; the lambda=1 ceiling 520.95 MISSES it by +7.53). N*=1 pinned.
+    tra = led.get("trigger_reconcile") or {}
+    if tra.get("landed"):
+        pub = tra.get("public_go_trigger") or {}
+        prv = tra.get("private_bar_p95") or {}
+        flat["worked_example/trigger_reconcile_self_test_passes"] = bool(tra["self_test_passes"])
+        flat["worked_example/trigger_reconcile_n_star_launch"] = int(tra["n_star_launch"])
+        flat["worked_example/trigger_reconcile_best_of_n_is_harmful"] = bool(tra["best_of_n_is_harmful"])
+        flat["worked_example/trigger_reconcile_private_clear_flat_in_n"] = bool(tra["private_clear_flat_in_n"])
+        flat["worked_example/trigger_reconcile_n_max_clearable_at_lambda1"] = int(
+            tra["n_max_clearable_at_lambda1_binding"])
+        flat["worked_example/trigger_reconcile_two_flags_distinct"] = bool(tra["two_flags_distinct"])
+        flat["worked_example/trigger_reconcile_public_go_does_not_certify_private_p95"] = bool(
+            tra["public_go_does_not_certify_private_p95"])
+        flat["worked_example/trigger_reconcile_private_bar_unreached_even_at_lambda1"] = bool(
+            tra["private_bar_unreached_even_at_lambda1"])
+        flat["worked_example/trigger_reconcile_does_not_change_sigma_lcb_trigger"] = bool(
+            tra["does_not_change_sigma_lcb_trigger"])
+        flat["worked_example/trigger_reconcile_private_bar_provisional_on_f_priv"] = bool(
+            tra["private_bar_provisional_on_f_priv"])
+        # FLAG 1 -- PUBLIC sigma->LCB GO trigger (clears at lambda=1)
+        flat["worked_example/trigger_reconcile_pub_t1_central_tps"] = pub["t1_central_tps"]
+        flat["worked_example/trigger_reconcile_pub_t1_worstcase_tps"] = pub["t1_worstcase_tps"]
+        flat["worked_example/trigger_reconcile_pub_lambda1_ceiling_tps"] = pub["lambda1_ceiling_tps"]
+        flat["worked_example/trigger_reconcile_pub_clears_at_lambda1"] = bool(pub["clears_at_lambda1"])
+        flat["worked_example/trigger_reconcile_pub_central_headroom_tps"] = pub["central_headroom_tps"]
+        flat["worked_example/trigger_reconcile_pub_worstcase_headroom_tps"] = pub["worstcase_headroom_tps"]
+        # FLAG 2 -- PRIVATE-bar-at-P95 (the public GO does NOT satisfy this; misses at lambda=1)
+        flat["worked_example/trigger_reconcile_prv_mu_bar_private_corrected_tps"] = prv["mu_bar_private_corrected_tps"]
+        flat["worked_example/trigger_reconcile_prv_mu_safe_fresh_tps"] = prv["mu_safe_fresh_tps"]
+        flat["worked_example/trigger_reconcile_prv_f_priv"] = prv["f_priv"]
+        flat["worked_example/trigger_reconcile_prv_lambda1_ceiling_clears_private_bar"] = bool(
+            prv["lambda1_ceiling_clears_private_bar"])
+        flat["worked_example/trigger_reconcile_prv_private_bar_minus_ceiling_tps"] = prv["private_bar_minus_ceiling_tps"]
+        flat["worked_example/trigger_reconcile_prv_private_mean_at_ceiling_tps"] = prv["private_mean_at_ceiling_tps"]
+        flat["worked_example/trigger_reconcile_prv_private_p95_lcb_at_ceiling_tps"] = prv["private_p95_lcb_at_ceiling_tps"]
+        flat["worked_example/trigger_reconcile_prv_p_private_clear_at_ceiling"] = prv["p_private_clear_at_ceiling"]
+        # premise correction: #210's 23.61 is a COMPOSITE vs #202's 504.873, not the order-stat tax
+        flat["worked_example/trigger_reconcile_premise_t5_equals_528_holds"] = bool(
+            tra["pr_premise_t5_equals_528_holds"])
+        flat["worked_example/trigger_reconcile_gap_512_to_528_grossup_tps"] = tra[
+            "gap_512_to_528_public_to_private_grossup_tps"]
+        flat["worked_example/trigger_reconcile_order_stat_tax_n5_frozen_tps"] = tra["order_stat_tax_n5_frozen_tps"]
+        flat["worked_example/trigger_reconcile_order_stat_tax_n5_fresh_tps"] = tra["order_stat_tax_n5_fresh_tps"]
     for topo in ("both_bugs", "descent_only"):
         c = wp["per_topology"][topo]
         lgc = wp["_full_per_topology"][topo]["lambda_gate"]
@@ -4360,6 +4744,9 @@ def run(args) -> dict:
     wca = winners_curse_annotation()                                         # #210 winner's-curse private bar
     ar212 = lpc.get("ar_corrected_cost_band_212") or {}                      # #212 AR(1) cost band
     kb213 = clb.get("lane_a_kernel_budget_213") or {}                        # #213 kernel-overhead-vs-lambda
+    tra = trigger_reconcile_annotation()                                     # #217 axis reconcile + private P95
+    tra_pub = tra.get("public_go_trigger") or {}
+    tra_prv = tra.get("private_bar_p95") or {}
     handoff = (
         "launch_trigger_calculator: one-call launch_decision(measured_tuple) -> verified "
         "GO/NO-GO + filled (un-filed) Approval request. Self-test %s. RECOMPOSED post-merge "
@@ -4426,7 +4813,19 @@ def run(args) -> dict:
         "(advisor 19:54Z) SHARPENS #205's flat xDeff=4.41 cost: folding #190's DECAYING ACF gives the "
         "E[N]_nogo band [%.0f IID -> %.0f AR(1) -> %.0f measured-ACF-realistic -> %.0f flat-loose] "
         "(data-grounded point %.0f); the 75.12x collapse is Deff-INVARIANT, (alpha,power)=(0.05,0.95) "
-        "+ bar 0.9780 UNCHANGED. both_bugs_go_at_lambda_star=%s. Human "
+        "+ bar 0.9780 UNCHANGED. kanna #217 (advisor 20:33Z) RECONCILES the #207 public trigger "
+        "(512.41/514.63) and the #210 private target (528.48) as ONE T(N)=T_base+sigma_sel*E[Z_(N:N)]: "
+        "it reproduces #204's central %.2f / worst %.2f at N=1 EXACTLY (winner's curse 0), and N*=%s is "
+        "PINNED (best-of-N HARMFUL -- lifts the SEEN public trigger for ZERO private gain). The #207-vs-"
+        "#210 tension resolves by AXIS not N -> TWO SEPARATE FLAGS: (1) the PUBLIC sigma->LCB GO trigger "
+        "%.2f CLEARS the lambda=1 ceiling %.2f (+%.2f central); (2) the N-INDEPENDENT PRIVATE-bar-at-P95 "
+        "%.2f (= mu_safe_fresh/f_priv=%.4f) is MISSED at that ceiling by +%.2f (private mean %.2f, P95 "
+        "LCB %.2f, private clear only %.4f<0.95) -> a GO on the PUBLIC reading does NOT certify 500-"
+        "PRIVATE at P95 even at lambda=1. PREMISE FIX: #210's 528.48=T_base+23.61 does NOT hold -- 23.61 "
+        "is a COMPOSITE vs #202's frozen-public 504.873, NOT the order-stat tax (%.2f frozen / %.2f fresh "
+        "@N=5); the 512.41->528.48 gap %.2f is the N-INDEPENDENT public->private gross-up. PROVISIONAL on "
+        "f_priv (grounded ~0.957 from #52 -> private bar ~534; #224/#222 grounding); does NOT touch the "
+        "512.41 sigma->LCB public trigger. REINFORCES the HOLD. both_bugs_go_at_lambda_star=%s. Human "
         "approval still required before any HF spend." % (
             "PASSES" if st["launch_trigger_calculator_self_test_passes"] else "FAILS",
             bb_bind["public_183"], bb_bind["icc_190"], bb_bind["private_191"], bb_bind["binding_bar"],
@@ -4474,6 +4873,22 @@ def run(args) -> dict:
             ar212.get("expected_n_nogo_realistic_measured_acf", float("nan")),
             ar212.get("expected_n_nogo_flat_loose", float("nan")),
             ar212.get("expected_n_nogo_realistic_measured_acf", float("nan")),
+            # kanna #217 axis reconcile + private-bar-at-P95 (two flags):
+            tra_pub.get("t1_central_tps", float("nan")),
+            tra_pub.get("t1_worstcase_tps", float("nan")),
+            tra.get("n_star_launch"),
+            tra_pub.get("t1_central_tps", float("nan")),
+            tra_pub.get("lambda1_ceiling_tps", float("nan")),
+            tra_pub.get("central_headroom_tps", float("nan")),
+            tra_prv.get("mu_bar_private_corrected_tps", float("nan")),
+            tra_prv.get("f_priv", float("nan")),
+            tra_prv.get("private_bar_minus_ceiling_tps", float("nan")),
+            tra_prv.get("private_mean_at_ceiling_tps", float("nan")),
+            tra_prv.get("private_p95_lcb_at_ceiling_tps", float("nan")),
+            tra_prv.get("p_private_clear_at_ceiling", float("nan")),
+            tra.get("order_stat_tax_n5_frozen_tps", float("nan")),
+            tra.get("order_stat_tax_n5_fresh_tps", float("nan")),
+            tra.get("gap_512_to_528_public_to_private_grossup_tps", float("nan")),
             st["both_bugs_go_at_lambda_star"]))
     payload = {
         "pr": 185,
