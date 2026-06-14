@@ -1,0 +1,68 @@
+{
+  "verdict": "RED",
+  "reason": "1/1 spec-ON reloads DIVERGENT from the submission's own M=1 AR (official verifier); first divergence at token 9 (median 9; late/stochastic (FP-reduction near-tie flips)); the speculative stack does NOT reproduce its own greedy AR \u2014 'greedy-safe by construction' FAILS for this verifier",
+  "config": "batch_invariant",
+  "mode": "self_referential",
+  "identity_min_threshold": 0.999,
+  "spec_on_self_determinism": {
+    "label": "spec_on",
+    "num_runs": 1,
+    "checkable": false,
+    "min_byte_identical_frac": null,
+    "deterministic": null,
+    "num_divergent_pairs": 0,
+    "onsets": []
+  },
+  "spec_off_ar_self_determinism": {
+    "label": "spec_off_ar",
+    "num_runs": 1,
+    "checkable": false,
+    "min_byte_identical_frac": null,
+    "deterministic": null,
+    "num_divergent_pairs": 0,
+    "onsets": []
+  },
+  "self_consistency_gate": {
+    "reference_dir": "research/validity/batch_invariant_verify/smoke-20260614T091246Z/batch_invariant__specoff/run_00",
+    "reference_kind": "unknown",
+    "num_spec_runs": 1,
+    "per_run": [
+      {
+        "spec_run_idx": 0,
+        "verdict": "DIVERGENT",
+        "num_identical": 3,
+        "num_divergent": 1,
+        "total_tokens_compared": 128,
+        "total_divergent_tokens": 22,
+        "token_div_frac": 0.171875,
+        "onset_min": 9,
+        "onset_median": 9,
+        "onset_max": 9
+      }
+    ],
+    "all_greedy_identical": false,
+    "num_divergent_runs": 1,
+    "num_incomparable_runs": 0,
+    "onset_min": 9,
+    "onset_median": 9,
+    "onset_max": 9,
+    "onset_signature": "late/stochastic (FP-reduction near-tie flips)"
+  },
+  "self_referential_gate_confirmed": "no",
+  "primary_metric": {
+    "name": "self_referential_divergent_runs",
+    "value": 1
+  },
+  "batch_invariant_self_divergence_tokens": 22,
+  "batch_invariant_wall_tps": 37.97043110832987,
+  "batch_invariant_tps_cost_pct": 91.64269088028519,
+  "tps_ref": 454.338,
+  "spec_on_wall_tps": {
+    "median_wall_tps": 37.97043110832987,
+    "per_run_wall_tps": [
+      37.97043110832987
+    ],
+    "n": 1
+  },
+  "batch_invariance_gate": "RED"
+}
