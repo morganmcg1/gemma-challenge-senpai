@@ -1,0 +1,570 @@
+{
+  "gate": {
+    "primary_metric_name": "lut_gemm_m8_speedup_vs_marlin_pct",
+    "lut_gemm_m8_speedup_vs_marlin_pct": -2.220446049250313e-14,
+    "lut_gemm_m8_speedup_optimistic_iso_pct": -2.220446049250313e-14,
+    "lut_gemm_m8_speedup_realistic_bcq_isoppl_pct": -24.735172082620892,
+    "test_metric_name": "lut_gemm_ppl_projected",
+    "lut_gemm_ppl_projected": 2.3777,
+    "ppl_cap": 2.42,
+    "ppl_holds": true,
+    "ppl_cushion": 0.042300000000000004,
+    "verdict": "RED",
+    "verdict_label": "LUT-GEMM is a COMPUTE-path lever, but the M=8 verify-GEMM is BANDWIDTH-bound (#68: 77.1% HBM, 20.2% compute). It reads the SAME 4-bit weight bytes (no byte win; iso-PPL metadata is comparable-to-larger), with no better memory schedule (no utilisation win), and saves only compute that is already 80% idle. Best-case M=8 speedup = -0.0% (iso-bytes); realistic (BCQ iso-PPL metadata) = -24.7%; plus INT8-TC tile underfill at M=8 (m16n8k32 floor). The +29.7% verify-GEMM headroom is a UTILISATION ceiling that belongs to SplitK, not LUT -- so LUT is dominated by SplitK, not additive. KILL.",
+    "bandwidth_gap_ceiling_pct": 29.772926966962252,
+    "weight_only_theoretical_floor_gap_pct": 48.06940068178105,
+    "marlin_achieved_agg_gbytes_s": 462.34604861208743,
+    "bandwidth_gap_owner": "SplitK (utilisation lever), NOT LUT (compute lever)",
+    "compute_floor_pct_of_marlin_time": 20.153702971759735
+  },
+  "marlin_baseline": {
+    "agg_t_us": 4868.111248612404,
+    "agg_bytes": 2250752000.0,
+    "agg_weight_bytes": 1972633600.0,
+    "measured_hbm_util_pct": 77.05767476868124,
+    "measured_compute_util_pct": 20.153307906403988,
+    "bandwidth_bound": true,
+    "source": "denken #68 verify_gemm_roofline.json (measured CUDA-graph-replay)"
+  },
+  "lut_speedups_by_byte_model_pct": {
+    "lut_iso": -2.220446049250313e-14,
+    "lut_bcq_b4_g32": -24.735172082620892,
+    "lut_nu_perchannel": 10.159558473002095,
+    "lut_nu_g32": -62.167202421483566
+  },
+  "byte_model_notes": {
+    "lut_iso": "OPTIMISTIC: LUT metadata == Marlin scales. Same bytes -> 0% (the ceiling of what the LUT compute-path swap buys when compute is slack).",
+    "lut_bcq_b4_g32": "LUT-GEMM BCQ at iso-PPL g=32: 4 binary planes each with own group scale -> 4x scale bytes -> byte-NEGATIVE in a BW-bound GEMM.",
+    "lut_nu_perchannel": "per-channel 16-entry codebook: cheaper metadata but COARSER quant (PPL risk); a granularity/byte trade Marlin could also take -- NOT a LUT compute advantage.",
+    "lut_nu_g32": "per-GROUP non-uniform codebook (iso-PPL): codebook > weight matrix -> catastrophic in a BW-bound GEMM."
+  },
+  "per_shape": [
+    {
+      "role": "mlp.down_proj",
+      "in": 10240,
+      "out": 2560,
+      "count": 42,
+      "t_us_marlin": 33.561599254608154,
+      "marlin_bytes": 14950400.0,
+      "marlin_breakdown": {
+        "weight": 13107200.0,
+        "meta": 1638400,
+        "act": 163840.0,
+        "out": 40960.0,
+        "total": 14950400.0
+      },
+      "achieved_gbytes_s": 445.46148967997243,
+      "lut": {
+        "lut_iso": {
+          "bytes": 14950400.0,
+          "breakdown": {
+            "weight": 13107200.0,
+            "meta": 1638400,
+            "act": 163840.0,
+            "out": 40960.0,
+            "total": 14950400.0
+          },
+          "t_us": 33.561599254608154,
+          "speedup_pct": 0.0
+        },
+        "lut_bcq_b4_g32": {
+          "bytes": 19865600.0,
+          "breakdown": {
+            "weight": 13107200.0,
+            "meta": 6553600,
+            "act": 163840.0,
+            "out": 40960.0,
+            "total": 19865600.0
+          },
+          "t_us": 44.59554969447933,
+          "speedup_pct": -24.742268041237114
+        },
+        "lut_nu_perchannel": {
+          "bytes": 13393920.0,
+          "breakdown": {
+            "weight": 13107200.0,
+            "meta": 81920,
+            "act": 163840.0,
+            "out": 40960.0,
+            "total": 13393920.0
+          },
+          "t_us": 30.06751494864895,
+          "speedup_pct": 11.620795107033643
+        },
+        "lut_nu_g32": {
+          "bytes": 39526400.0,
+          "breakdown": {
+            "weight": 13107200.0,
+            "meta": 26214400,
+            "act": 163840.0,
+            "out": 40960.0,
+            "total": 39526400.0
+          },
+          "t_us": 88.73135145396402,
+          "speedup_pct": -62.17616580310881
+        }
+      },
+      "t_us_bw_floor_100pct_hbm": 21.845333333333333,
+      "t_us_compute_floor": 6.518967982592478
+    },
+    {
+      "role": "mlp.gate_up_proj",
+      "in": 2560,
+      "out": 20480,
+      "count": 42,
+      "t_us_marlin": 62.858238220214844,
+      "marlin_bytes": 29859840.0,
+      "marlin_breakdown": {
+        "weight": 26214400.0,
+        "meta": 3276800,
+        "act": 40960.0,
+        "out": 327680.0,
+        "total": 29859840.0
+      },
+      "achieved_gbytes_s": 475.0346310278427,
+      "lut": {
+        "lut_iso": {
+          "bytes": 29859840.0,
+          "breakdown": {
+            "weight": 26214400.0,
+            "meta": 3276800,
+            "act": 40960.0,
+            "out": 327680.0,
+            "total": 29859840.0
+          },
+          "t_us": 62.85823822021485,
+          "speedup_pct": -1.1102230246251565e-14
+        },
+        "lut_bcq_b4_g32": {
+          "bytes": 39690240.0,
+          "breakdown": {
+            "weight": 26214400.0,
+            "meta": 13107200,
+            "act": 40960.0,
+            "out": 327680.0,
+            "total": 39690240.0
+          },
+          "t_us": 83.55230841617035,
+          "speedup_pct": -24.767801857585138
+        },
+        "lut_nu_perchannel": {
+          "bytes": 27238400.0,
+          "breakdown": {
+            "weight": 26214400.0,
+            "meta": 655360,
+            "act": 40960.0,
+            "out": 327680.0,
+            "total": 27238400.0
+          },
+          "t_us": 57.33981950129338,
+          "speedup_pct": 9.624060150375936
+        },
+        "lut_nu_g32": {
+          "bytes": 79011840.0,
+          "breakdown": {
+            "weight": 26214400.0,
+            "meta": 52428800,
+            "act": 40960.0,
+            "out": 327680.0,
+            "total": 79011840.0
+          },
+          "t_us": 166.3285891999924,
+          "speedup_pct": -62.208398133748055
+        }
+      },
+      "t_us_bw_floor_100pct_hbm": 43.690666666666665,
+      "t_us_compute_floor": 13.037935965184955
+    },
+    {
+      "role": "self_attn.o_proj",
+      "in": 2048,
+      "out": 2560,
+      "count": 35,
+      "t_us_marlin": 7.326719760894775,
+      "marlin_bytes": 3022848.0,
+      "marlin_breakdown": {
+        "weight": 2621440.0,
+        "meta": 327680,
+        "act": 32768.0,
+        "out": 40960.0,
+        "total": 3022848.0
+      },
+      "achieved_gbytes_s": 412.5786298165762,
+      "lut": {
+        "lut_iso": {
+          "bytes": 3022848.0,
+          "breakdown": {
+            "weight": 2621440.0,
+            "meta": 327680,
+            "act": 32768.0,
+            "out": 40960.0,
+            "total": 3022848.0
+          },
+          "t_us": 7.326719760894777,
+          "speedup_pct": -2.220446049250313e-14
+        },
+        "lut_bcq_b4_g32": {
+          "bytes": 4005888.0,
+          "breakdown": {
+            "weight": 2621440.0,
+            "meta": 1310720,
+            "act": 32768.0,
+            "out": 40960.0,
+            "total": 4005888.0
+          },
+          "t_us": 9.709392853868689,
+          "speedup_pct": -24.539877300613522
+        },
+        "lut_nu_perchannel": {
+          "bytes": 2777088.0,
+          "breakdown": {
+            "weight": 2621440.0,
+            "meta": 81920,
+            "act": 32768.0,
+            "out": 40960.0,
+            "total": 2777088.0
+          },
+          "t_us": 6.731051487651299,
+          "speedup_pct": 8.849557522123884
+        },
+        "lut_nu_g32": {
+          "bytes": 7938048.0,
+          "breakdown": {
+            "weight": 2621440.0,
+            "meta": 5242880,
+            "act": 32768.0,
+            "out": 40960.0,
+            "total": 7938048.0
+          },
+          "t_us": 19.240085225764332,
+          "speedup_pct": -61.91950464396285
+        }
+      },
+      "t_us_bw_floor_100pct_hbm": 4.369066666666667,
+      "t_us_compute_floor": 1.3037935965184955
+    },
+    {
+      "role": "self_attn.o_proj",
+      "in": 4096,
+      "out": 2560,
+      "count": 7,
+      "t_us_marlin": 9.661440253257751,
+      "marlin_bytes": 6004736.0,
+      "marlin_breakdown": {
+        "weight": 5242880.0,
+        "meta": 655360,
+        "act": 65536.0,
+        "out": 40960.0,
+        "total": 6004736.0
+      },
+      "achieved_gbytes_s": 621.5156169883943,
+      "lut": {
+        "lut_iso": {
+          "bytes": 6004736.0,
+          "breakdown": {
+            "weight": 5242880.0,
+            "meta": 655360,
+            "act": 65536.0,
+            "out": 40960.0,
+            "total": 6004736.0
+          },
+          "t_us": 9.661440253257751,
+          "speedup_pct": 0.0
+        },
+        "lut_bcq_b4_g32": {
+          "bytes": 7970816.0,
+          "breakdown": {
+            "weight": 5242880.0,
+            "meta": 2621440,
+            "act": 65536.0,
+            "out": 40960.0,
+            "total": 7970816.0
+          },
+          "t_us": 12.824804046957425,
+          "speedup_pct": -24.66598150051388
+        },
+        "lut_nu_perchannel": {
+          "bytes": 5431296.0,
+          "breakdown": {
+            "weight": 5242880.0,
+            "meta": 81920,
+            "act": 65536.0,
+            "out": 40960.0,
+            "total": 5431296.0
+          },
+          "t_us": 8.738792480095347,
+          "speedup_pct": 10.5580693815988
+        },
+        "lut_nu_g32": {
+          "bytes": 15835136.0,
+          "breakdown": {
+            "weight": 5242880.0,
+            "meta": 10485760,
+            "act": 65536.0,
+            "out": 40960.0,
+            "total": 15835136.0
+          },
+          "t_us": 25.478259221756115,
+          "speedup_pct": -62.07966890843248
+        }
+      },
+      "t_us_bw_floor_100pct_hbm": 8.738133333333334,
+      "t_us_compute_floor": 2.607587193036991
+    },
+    {
+      "role": "self_attn.qkv_proj",
+      "in": 2560,
+      "out": 3072,
+      "count": 35,
+      "t_us_marlin": 9.579520225524902,
+      "marlin_bytes": 4513792.0,
+      "marlin_breakdown": {
+        "weight": 3932160.0,
+        "meta": 491520,
+        "act": 40960.0,
+        "out": 49152.0,
+        "total": 4513792.0
+      },
+      "achieved_gbytes_s": 471.19186490915,
+      "lut": {
+        "lut_iso": {
+          "bytes": 4513792.0,
+          "breakdown": {
+            "weight": 3932160.0,
+            "meta": 491520,
+            "act": 40960.0,
+            "out": 49152.0,
+            "total": 4513792.0
+          },
+          "t_us": 9.579520225524902,
+          "speedup_pct": 0.0
+        },
+        "lut_bcq_b4_g32": {
+          "bytes": 5988352.0,
+          "breakdown": {
+            "weight": 3932160.0,
+            "meta": 1966080,
+            "act": 40960.0,
+            "out": 49152.0,
+            "total": 5988352.0
+          },
+          "t_us": 12.708946070523963,
+          "speedup_pct": -24.623803009575916
+        },
+        "lut_nu_perchannel": {
+          "bytes": 4120576.0,
+          "breakdown": {
+            "weight": 3932160.0,
+            "meta": 98304,
+            "act": 40960.0,
+            "out": 49152.0,
+            "total": 4120576.0
+          },
+          "t_us": 8.745006666858485,
+          "speedup_pct": 9.542743538767407
+        },
+        "lut_nu_g32": {
+          "bytes": 11886592.0,
+          "breakdown": {
+            "weight": 3932160.0,
+            "meta": 7864320,
+            "act": 40960.0,
+            "out": 49152.0,
+            "total": 11886592.0
+          },
+          "t_us": 25.226649450520203,
+          "speedup_pct": -62.026188835286014
+        }
+      },
+      "t_us_bw_floor_100pct_hbm": 6.5536,
+      "t_us_compute_floor": 1.9556903947777433
+    },
+    {
+      "role": "self_attn.qkv_proj",
+      "in": 2560,
+      "out": 6144,
+      "count": 7,
+      "t_us_marlin": 22.73279905319214,
+      "marlin_bytes": 8986624.0,
+      "marlin_breakdown": {
+        "weight": 7864320.0,
+        "meta": 983040,
+        "act": 40960.0,
+        "out": 98304.0,
+        "total": 8986624.0
+      },
+      "achieved_gbytes_s": 395.31533177996835,
+      "lut": {
+        "lut_iso": {
+          "bytes": 8986624.0,
+          "breakdown": {
+            "weight": 7864320.0,
+            "meta": 983040,
+            "act": 40960.0,
+            "out": 98304.0,
+            "total": 8986624.0
+          },
+          "t_us": 22.73279905319214,
+          "speedup_pct": 0.0
+        },
+        "lut_bcq_b4_g32": {
+          "bytes": 11935744.0,
+          "breakdown": {
+            "weight": 7864320.0,
+            "meta": 3932160,
+            "act": 40960.0,
+            "out": 98304.0,
+            "total": 11935744.0
+          },
+          "t_us": 30.192970118961664,
+          "speedup_pct": -24.708304735758404
+        },
+        "lut_nu_perchannel": {
+          "bytes": 8200192.0,
+          "breakdown": {
+            "weight": 7864320.0,
+            "meta": 196608,
+            "act": 40960.0,
+            "out": 98304.0,
+            "total": 8200192.0
+          },
+          "t_us": 20.743420102320265,
+          "speedup_pct": 9.5904095904096
+        },
+        "lut_nu_g32": {
+          "bytes": 23732224.0,
+          "breakdown": {
+            "weight": 7864320.0,
+            "meta": 15728640,
+            "act": 40960.0,
+            "out": 98304.0,
+            "total": 23732224.0
+          },
+          "t_us": 60.033654382039764,
+          "speedup_pct": -62.133241284086985
+        }
+      },
+      "t_us_bw_floor_100pct_hbm": 13.1072,
+      "t_us_compute_floor": 3.9113807895554866
+    }
+  ],
+  "step4_ship_readiness": {
+    "corner_min_splitk_for_500_pct": 14.344931851466459,
+    "lut_s_optimistic_pct": -2.220446049250313e-14,
+    "lut_s_realistic_bcq_pct": -24.735172082620892,
+    "corner_tps_at_lut_alone_optimistic": 466.75830598583957,
+    "corner_tps_at_lut_alone_bcq": 397.52448232294705,
+    "corner_tps_at_splitk_alone_8.5pct": 486.9758397232341,
+    "corner_tps_at_splitk_plus_lut_combined": 486.9758397232341,
+    "lut_alone_clears_500_corner": false,
+    "lut_moves_corner_vs_splitk_alone_tps": 0.0,
+    "stacks_with_splitk": false,
+    "interpretation": "Corner needs SplitK >= 14.34%. LUT alone gives <=0% -> corner stays ~467 (far below 500). LUT does NOT stack with SplitK: both speed up the SAME BW-bound verify-GEMM; once SplitK saturates HBM, LUT (a compute lever) adds ~0. LUT is DOMINATED by SplitK on official-TPS-per-build-effort -> rank LUT below SplitK in the fern #111 climb-ROI (do not pivot ubel to LUT)."
+  },
+  "int8_tc_substrate_probe": {
+    "device": "NVIDIA A10G",
+    "sm": "sm_86",
+    "int8_mma_tile": "m16n8k32 (Ampere s8.s8.s32); min M-tile 16",
+    "rows": [
+      {
+        "error": "RuntimeError('self.size(0) needs to be greater than 16, but got 8')",
+        "shape": "gate_up",
+        "M": 8,
+        "K": 2560,
+        "N": 20480,
+        "int8_weight_bytes": 52428800
+      },
+      {
+        "error": "RuntimeError('self.size(0) needs to be greater than 16, but got 16')",
+        "shape": "gate_up",
+        "M": 16,
+        "K": 2560,
+        "N": 20480,
+        "int8_weight_bytes": 52428800
+      },
+      {
+        "error": "RuntimeError('CUDA error: CUBLAS_STATUS_NOT_SUPPORTED when calling cublasLtMatmul with transpose_mat1 0 transpose_mat2 0 m 20480 n 17 k 2560 mat1_ld 20480 mat2_",
+        "shape": "gate_up",
+        "M": 17,
+        "K": 2560,
+        "N": 20480,
+        "int8_weight_bytes": 52428800
+      },
+      {
+        "error": "RuntimeError('CUDA error: CUBLAS_STATUS_NOT_SUPPORTED when calling cublasLtMatmul with transpose_mat1 0 transpose_mat2 0 m 20480 n 24 k 2560 mat1_ld 20480 mat2_",
+        "shape": "gate_up",
+        "M": 24,
+        "K": 2560,
+        "N": 20480,
+        "int8_weight_bytes": 52428800
+      },
+      {
+        "t_us": 203.5558319091797,
+        "shape": "gate_up",
+        "M": 32,
+        "K": 2560,
+        "N": 20480,
+        "int8_weight_bytes": 52428800
+      },
+      {
+        "t_us": 213.22240829467773,
+        "shape": "gate_up",
+        "M": 64,
+        "K": 2560,
+        "N": 20480,
+        "int8_weight_bytes": 52428800
+      },
+      {
+        "error": "RuntimeError('self.size(0) needs to be greater than 16, but got 8')",
+        "shape": "down",
+        "M": 8,
+        "K": 10240,
+        "N": 2560,
+        "int8_weight_bytes": 26214400
+      },
+      {
+        "error": "RuntimeError('self.size(0) needs to be greater than 16, but got 16')",
+        "shape": "down",
+        "M": 16,
+        "K": 10240,
+        "N": 2560,
+        "int8_weight_bytes": 26214400
+      },
+      {
+        "error": "RuntimeError('CUDA error: CUBLAS_STATUS_NOT_SUPPORTED when calling cublasLtMatmul with transpose_mat1 0 transpose_mat2 0 m 2560 n 17 k 10240 mat1_ld 2560 mat2_l",
+        "shape": "down",
+        "M": 17,
+        "K": 10240,
+        "N": 2560,
+        "int8_weight_bytes": 26214400
+      },
+      {
+        "error": "RuntimeError('CUDA error: CUBLAS_STATUS_NOT_SUPPORTED when calling cublasLtMatmul with transpose_mat1 0 transpose_mat2 0 m 2560 n 24 k 10240 mat1_ld 2560 mat2_l",
+        "shape": "down",
+        "M": 24,
+        "K": 10240,
+        "N": 2560,
+        "int8_weight_bytes": 26214400
+      },
+      {
+        "t_us": 97.95071601867676,
+        "shape": "down",
+        "M": 32,
+        "K": 10240,
+        "N": 2560,
+        "int8_weight_bytes": 26214400
+      },
+      {
+        "t_us": 177.1776008605957,
+        "shape": "down",
+        "M": 64,
+        "K": 10240,
+        "N": 2560,
+        "int8_weight_bytes": 26214400
+      }
+    ],
+    "finding": "torch._int_mm (cuBLASLt IMMA INT8-TC) refuses M<=16 ('size(0) needs to be greater than 16') -> the INT8 tensor-core GEMM substrate a TC-LUT kernel would use does not serve the M=8 verify width; M=8 is below the tile floor. Where it does run, int8 reads 2x the int4 bytes -> BW-bound slower than Marlin (byte count is destiny at M=8)."
+  },
+  "method": "analytic roofline anchored on denken #68 MEASURED Marlin per-shape M=8 times/bytes; LUT modeled as same-4-bit-weight + metadata, BW-bound time = bytes/achieved_BW. Optional GPU probe = torch._int_mm INT8-TC M-sweep (no model load, no token stream). CPU-only core; no HF Job/submission.",
+  "research": "researcher-agent (LUT-GEMM arXiv:2206.09557, GANQ ICML2025 OpenReview pkKQGJ5d99, T-MAC arXiv:2407.00088, Marlin arXiv:2408.11743): no published sm_86/sm_80 LUT W4A16 kernel beats Marlin at M=4-16; GANQ's 2.57x is RTX4090 sm_89 at M=1; T-MAC is CPU-only. Independent verdict RED (-5% to +3%, ~0%)."
+}
