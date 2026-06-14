@@ -1,0 +1,240 @@
+{
+  "primary_metric_name": "tau_efficiency_self_test_passes",
+  "tau_efficiency_self_test_passes": 1,
+  "test_metric_name": "tau_descent",
+  "tau_descent": 1.0,
+  "tau_both_bugs": 1.0,
+  "gate_state": "ARMED",
+  "composition_law": "official_TPS = K_cal * (E[T]/step_time) * tau ; K_cal=125.268 (=481.53/3.844)",
+  "operating_point": {
+    "K_cal": 125.26795005202914,
+    "step_launch_realized": 1.2181727676912677,
+    "E_T_descent": 5.056404568844709,
+    "tau_central": 1.0,
+    "tau_band": [
+      0.9924318649123313,
+      1.0
+    ],
+    "sigma_hw_pct": 0.9623777540506017
+  },
+  "step1_definition": {
+    "tau_definition": "tau is the LOCAL->OFFICIAL roofline transfer multiplier in official = K_cal*(E[T]/step)*tau. It is the dimensionless ratio tau = step_ratio_loc/step_ratio_off of how faithfully the M=32 wide-verify decode step transfers from the local-pinned A10G (1710 MHz) to the official free-clock A10G. The E[T] numerator is algorithmic (greedy on identical weights) and CANCELS exactly; only the verify-GEMM's incremental COMPUTE-exposed fraction x the un-pinnable SM-clock residual breaks tau below 1. tau multiplies the WHOLE map -- it is NOT an accept-length term and NOT an in-step time term.",
+    "tau_floor_provenance": "floor = 0.9924318649 = lawine #126's mild_throttle_full_exposure roofline corner (0.9924318649); it is eps_at_floor = 0.7568% below central tau=1.0. The SAME number is Leg A (clock_exposure) of ubel #148's K_cal calibration band (0.9924318649) -- i.e. the tau floor IS the dominant calibration-leg downside, sourced from the roofline, flowed into the projection CI. Physical driver: verify-GEMM compute-exposure Phi_comp x SM-clock throttle (rho-1).",
+    "physical_sources": {
+      "rank_coverage_discount_rho": {
+        "in_tau": 0.0,
+        "note": "ZERO -- rank-coverage rho (wirbel #79 rho2=0.4165) lives entirely in the E[T] accept-length DP (the numerator), NOT in tau. The composition law factors it out: tau's derivation cancels E[T]. A rho term inside tau would re-discount acceptance (double-count E[T])."
+      },
+      "scheduling_overlap_efficiency": {
+        "driver": "verify-GEMM incremental compute-exposure x SM-clock residual",
+        "phi_comp_central": 0.06758804643262627,
+        "phi_comp_full_exposure": 0.08936886835043445,
+        "note": "the verify-GEMM (M=32, AI=107.66 at the sm_86 knee) has a compute-exposed fraction Phi_comp that transfers at the CLOCK ratio, not the bus ratio. This is tau's ONLY real loss channel."
+      },
+      "warmup_discard_residual": {
+        "in_tau": 0.0,
+        "note": "0 -- folded into K_cal's Leg B (scorer amortization, precache-neutralized), not tau. tau is warmup-invariant."
+      },
+      "sm_clock_residual": {
+        "clock_gap_bus_parity": 0.06018650518337787,
+        "clock_gap_mild_throttle": 0.098638865475003,
+        "note": "the un-pinnable axis: the official free clock may throttle below the local 1710-MHz pin. This is what sets the floor and what a real served measurement would tighten."
+      }
+    },
+    "floor": 0.9924318649123313,
+    "floor_corner_mild_throttle_full_exposure": 0.9924318649123313,
+    "floor_matches_corner": true,
+    "floor_matches_legA_148": true,
+    "eps_at_floor_pct": 0.7568135087668737,
+    "eps_at_floor_pct_126": 0.7568135087668737,
+    "eps_first_order_phi_x_clockgap": 0.008815243782871757,
+    "eps_first_order_note": "first-order driver eps ~ Phi_comp(full 0.0894) x clock_gap(mild 0.0986) = 0.8815%; the exact corner (0.7568%) carries the roofline's higher-order BW/compute split. Both name the SAME two physical sub-terms.",
+    "ai_m32": 107.65770171149144,
+    "attention_compute_exposed": false
+  },
+  "step2_no_double_count": {
+    "tau_no_double_count": true,
+    "orthogonality": {
+      "vs_K_cal": {
+        "orthogonal": true,
+        "argument": "K_cal (125.268) carries the M=8 linear pure-BW transfer at the BUS ratio (+6.019% multiplier residual, 'the bus is the wall'), tree-footprint-INVARIANT (ubel #169). tau carries ONLY the M=32 tree's INCREMENTAL compute-exposed fraction transferring at the CLOCK ratio. #148 splits these explicitly: the gpu_clock_thermal_power_bus factor is the BW part (K_cal), Leg A is the incremental compute part (tau). Different regime (BW-bound vs compute-exposed), different transfer mechanism (bus vs clock)."
+      },
+      "vs_step": {
+        "orthogonal": true,
+        "argument": "lawine #168's +0.447% exposed launch idle is a TIME cost IN the step denominator (43.3 us/step eager star-attn kernel-launch gap), present IDENTICALLY on local and official hardware (scheduling, clock-independent) -> it CANCELS in tau = step_ratio_loc/step_ratio_off. #168 itself quotes tau=1.0. tau's loss (clock residual) is a TRANSFER-fidelity multiplier, a distinct axis from the in-step launch idle. They do not double-count."
+      },
+      "vs_E_T": {
+        "orthogonal": true,
+        "argument": "tau's roofline derivation CANCELS the E[T] numerator exactly (greedy acceptance on identical weights -> same accept-length local and official). rank-coverage rho (wirbel #79 rho2=0.4165, cov4=0.6532) lives in the E[T] accept-length DP, NOT in tau. The realized tau has NO rank-coverage term: adding one would re-discount acceptance already counted in E[T]=5.0564. The 'overlap/rank-coverage efficiency' name is a misnomer -- tau is PURELY the overlap/clock-exposure channel; the rank-coverage channel is E[T]'s."
+      }
+    }
+  },
+  "step3_pin_topologies": {
+    "tau_descent": 1.0,
+    "tau_both_bugs": 1.0,
+    "tau_band_descent": [
+      0.9924318649123313,
+      1.0
+    ],
+    "tau_band_both_bugs": [
+      0.9924318649123313,
+      1.0
+    ],
+    "recommended_central": 1.0,
+    "topology_invariant": true,
+    "tightened": false,
+    "tightened_band": [
+      0.9924318649123313,
+      1.0
+    ],
+    "why_invariant": "descent-only and both-bugs run the IDENTICAL M=32 batched wide-verify GEMM (AI=107.66 at the sm_86 knee); the BUG-1 depth-1 spine and BUG-2 salvage-descent change E[T] ACCEPTANCE, not the verify batch width. max-branch-3 (wirbel #83) and max-branch-4 (wirbel #79) both operate at M=32 (1 row under the M=33 tile cliff), so tau's roofline operating point -- and its floor -- are identical across topologies.",
+    "why_not_tightened": "the floor 0.9924 is the mild-throttle x full-exposure corner set by the UN-PINNABLE official SM-clock residual. We control one pod and cannot measure the official box's free clock; the #126 roofline already derived the floor as tight as analysis allows. Tightening to e.g. [0.996, 1.0] needs a real served M=32 tree measurement (land #71's eventual human-approved HF job). -> BANK THE FLOOR.",
+    "central_recommendation_note": "recommend central tau = 1.0 for the packet (the analytic best estimate: identical sm_86 silicon, clock cancels in expectation), with band [0.9924, 1.0] carried as the calibration-leg downside -- exactly fern #155's merged convention."
+  },
+  "step4_knife_edge": {
+    "descent_only_lcb_pinned_tau": 499.96519706601964,
+    "descent_only_clears_500_pinned_tau": false,
+    "tps_delta_vs_fern174_floor_tau": 0.0,
+    "verdict": "floor-confirmed",
+    "scenarios": {
+      "pinned_tau_3term": {
+        "calib_rel": 0.007870456397926598,
+        "combined_rel": 0.021148844836120288,
+        "lcb": 499.96519706601964,
+        "clears_500": false,
+        "note": "central tau=1.0, floor in calib CI == fern #174 exactly"
+      },
+      "pinned_tau_4term_sigma_hw": {
+        "calib_rel": 0.007870456397926598,
+        "combined_rel": 0.023235548886381827,
+        "lcb": 498.59093359857724,
+        "clears_500": false,
+        "note": "+ kanna #159 sigma_hw 4th quadrature term"
+      },
+      "tau_ceiling_3term": {
+        "calib_rel": 0.0003046267667801139,
+        "combined_rel": 0.019632176432012496,
+        "lcb": 500.96404593475523,
+        "clears_500": true,
+        "note": "band collapsed to tau=[1,1] (best case); calib=Leg B only"
+      },
+      "tau_ceiling_4term_sigma_hw": {
+        "calib_rel": 0.0003046267667801139,
+        "combined_rel": 0.02186411319049586,
+        "lcb": 499.49413497711794,
+        "clears_500": false,
+        "note": "even a PERFECT tau cannot clear 500 once sigma_hw is folded"
+      },
+      "assumed_floor_as_point": {
+        "tau_point": 0.9924318649123313,
+        "proj": 510.00420785325286,
+        "lcb": 497.17268236105593,
+        "clears_500": false,
+        "note": "counterfactual the PR's premise imagines #174 used; #174 did NOT"
+      }
+    },
+    "floor_to_clear_500_3term": 0.9925750341647563,
+    "samp_rel_backed_out": 0.01898234848459558,
+    "sigma_hw_rel": 0.009623777540506017,
+    "fern174_lcb": 499.96519706601964,
+    "interpretation": "Pinning tau to its analytic central (1.0), with the floor [0.9924,1.0] in the calib CI, reproduces fern #174's LCB 499.965 EXACTLY (delta +0.0000 TPS) -- FLOOR-CONFIRMED, no free margin. tau hands margin ONLY by tightening the floor above 0.9924 (would need >= 0.9926 to clear 500 in 3-term), which analysis cannot do (un-pinnable clock residual). Under sigma_hw, even a PERFECT tau=1.0 lands at 499.49 < 500 -> tau is NOT the lever; the knife-edge is sampling+sigma_hw bound. BANK THE FLOOR; both-bugs (LCB 514.9) is the robust first shot."
+  },
+  "step5_self_test": {
+    "passes": true,
+    "tau_efficiency_self_test_passes": 1,
+    "assert_a_floor_from_named_subterms": {
+      "ok": true,
+      "floor": 0.9924318649123313,
+      "matches_126_corner": true,
+      "matches_148_legA": true,
+      "eps_at_floor_pct": 0.7568135087668737,
+      "expect": "0.9924 floor == #126 mild-throttle x full-exposure corner == #148 Leg A"
+    },
+    "assert_b_no_double_count": {
+      "ok": true,
+      "tau_no_double_count": true,
+      "vs_K_cal": true,
+      "vs_step": true,
+      "vs_E_T": true,
+      "expect": "tau orthogonal to K_cal (bus vs clock) / step (launch-idle cancels) / E[T] (rho in E[T])"
+    },
+    "assert_c_pinned_tau_in_band_both_topologies": {
+      "ok": true,
+      "tau_descent": 1.0,
+      "tau_both_bugs": 1.0,
+      "band": [
+        0.9924318649123313,
+        1.0
+      ],
+      "expect": "tau in [0.9924,1.0], band reported for descent AND both-bugs"
+    },
+    "assert_d_lcb_reeval_explicit_vs_174": {
+      "ok": true,
+      "live_matches_fern174": true,
+      "live_lcb": 499.96519706601964,
+      "fern174_lcb": 499.96519706601964,
+      "verdict": "floor-confirmed",
+      "tps_delta_vs_174": 0.0,
+      "clears_500": false,
+      "expect": "live re-instantiation == #174 499.965; floor-confirmed (delta 0.000); does NOT clear 500"
+    },
+    "assert_e_nan_clean": {
+      "ok": true,
+      "n_numbers_checked": 15
+    }
+  },
+  "step6_handoff": "tau for the descent tree is pinned at 1.0000 (band [0.9924, 1.0000]), distinct from K_cal/step/E[T]; it confirms the floor (delta +0.000 TPS to the descent-only LCB) -- leaving it ON the knife-edge (LCB 499.97 < 500), so both-bugs (LCB 514.9) stays the robust first shot.",
+  "reinstantiation_check": {
+    "live_descent_proj_private": 513.8934226968873,
+    "live_descent_combined_rel": 0.021148844836120288,
+    "live_descent_lcb_p90": 499.96519706601964,
+    "fern174_descent_proj_private": 513.8934226968873,
+    "fern174_descent_combined_rel": 0.021148844836120288,
+    "fern174_descent_lcb_p90": 499.96519706601964,
+    "fern174_wandb_run_id": "s2vihqh1",
+    "note": "faithful re-instantiation of fern #174's descent-only conservative cell via instantiate_private."
+  },
+  "summary_block": {
+    "tps": 481.53,
+    "ppl": 2.3777,
+    "completed": 128,
+    "run_prefix": "results/senpai/fa2sw-precache-kenyan-20260613T213911Z",
+    "note": "BANK-THE-ANALYSIS: no served run; the official anchor is UNCHANGED. This leg pins the last assumed composition factor tau and adds 0 TPS."
+  },
+  "imported_legs": {
+    "lawine_126_tau_roofline": [
+      0.9924318649123313,
+      1.0
+    ],
+    "ubel_148_kcal_band": [
+      124.282034113087,
+      125.26795005202914
+    ],
+    "ubel_169_footprint_invariance": "K_cal tree-footprint-invariant (M=32 20.47 GB)",
+    "wirbel_79_83_rank_coverage": {
+      "rho2": 0.4165047789261015,
+      "topology_M": 32
+    },
+    "lawine_168_step": [
+      1.2181727676912677,
+      0.447
+    ],
+    "kanna_159_sigma_hw": 0.9623777540506017,
+    "fern_174_knife_edge": [
+      499.96519706601964,
+      514.877540689496
+    ]
+  },
+  "public_evidence_used": [
+    "Roofline model (Williams/Patterson/Asanovic, CACM 2009): arithmetic intensity, ridge point.",
+    "NVIDIA A10G (sm_86, GA102) datasheet: ~600 GB/s GDDR6, 80 SMs, 1710 MHz boost clock.",
+    "Marlin W4A16 kernel tiling (tile_n=128): flat GEMM for M<=32, tile cliff at M=33.",
+    "Speculative-decode accept-length E[T] is algorithmic -> transfers 1:1 (tau cancels E[T])."
+  ],
+  "provenance": "Pins the last assumed composition factor tau in official=K_cal*(E[T]/step)*tau. IMPORTS VERBATIM: lawine #126 tau roofline ([0.9924,1.0] floor), ubel #148 K_cal band (Leg A == tau floor), ubel #169 footprint invariance, wirbel #79/#83 rank-coverage rho (lives in E[T]), lawine #168 step launch-idle (+0.447%, cancels in tau), kanna #159 sigma_hw, fern #174 knife-edge (re-instantiated faithfully). One source of truth per constant.",
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/kernel build. BASELINE stays 481.53; adds 0 TPS -- closes the last open composition factor. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "wandb_run_id": null,
+  "wandb_url": null,
+  "elapsed_s": 0.2085
+}
