@@ -14,10 +14,10 @@ served-file change, no relaxed-accept, no HF Job.
 
 **Greedy-identity on the deployed frontier is BIT-EXACT — and the deployed stack
 *satisfies* it.** Measured directly (the deployed `fa2sw_precache_kenyan` stack,
-served greedy spec-ON M=1, fresh reload each time, N=7 reloads), the frontier
+served greedy spec-ON M=1, fresh reload each time, N=10 reloads), the frontier
 reproduces its 128-prompt × 512-token output **byte-identical run-to-run** (mean
 byte-identical prompt fraction **1.0**, run×run matrix all-ones, **1** distinct
-output across all 7 reloads, official `greedy_gate.compare` **GREEDY_IDENTICAL,
+output across all 10 reloads, official `greedy_gate.compare` **GREEDY_IDENTICAL,
 0/65,536 divergent tokens**, intrinsic flip hazard **0.0/token**), at ~489 local
 TPS — i.e. *above* the ~286-TPS bound the PR posed. PPL is run-to-run invariant to
 12 digits (2.376976138392039) and E_accept is identical (3.854).
@@ -36,7 +36,7 @@ in the deployed default*, and forcing the third one **on** breaks bit-exactness 
 clean positive control:
 - **FA2 sliding-window is INERT on this build.** With `FA_SLIDING=1` (the deployed
   default) the Attention wrapper installs but flips **0** target layers (0
-  `-> FLASH_ATTN` lines across all 7 reloads), and `FA_SLIDING=0` produces
+  `-> FLASH_ATTN` lines across every reload), and `FA_SLIDING=0` produces
   **byte-identical** tokens to default (identical-to-default fraction **1.0**). The
   toggle changes nothing; it cannot be a nondeterminism source here.
 - **int4 Marlin atomic-add is OFF in the deployed default, and turning it ON breaks
@@ -55,9 +55,10 @@ clean positive control:
   (0.0859 identical to default) yet default stays self-identical (1.0) across
   reloads ⇒ its 3D reduction order is replayed identically inside the captured graph.
 
-**FA_SLIDING=0 TPS cost = ~0% (−0.02%) — but as a *no-op artifact*, not a real
-kernel-swap cost** (FA_SLIDING flips 0 layers, so =0 vs =1 is the same kernels, same
-tokens, same throughput). The BASELINE.md "FA_SLIDING=0 restores byte-identity at an
+**FA_SLIDING=0 TPS cost = ~0% (+0.03% at N=10, within the ~0.2% run-to-run TPS
+noise floor) — a *no-op artifact*, not a real kernel-swap cost** (FA_SLIDING flips 0
+layers, so =0 vs =1 is the same kernels, same tokens, same throughput; the sign of
+the sub-0.05% delta is just bench noise). The BASELINE.md "FA_SLIDING=0 restores byte-identity at an
 unmeasured TPS cost" framing is moot on the deployed stack: byte-identity already
 holds at `FA_SLIDING=1`, and there is no swap to pay for.
 
@@ -132,7 +133,7 @@ isolation toggles ONE factor per config via `extra_env` only (no served-file cha
 
 | config           | toggle                          | tests |
 |------------------|---------------------------------|-------|
-| `default`        | deployed (FA=1, splitkv=1, atomic off) | baseline run-to-run identity (N=7) |
+| `default`        | deployed (FA=1, splitkv=1, atomic off) | baseline run-to-run identity (N=10) |
 | `fa_sliding_off` | `FA_SLIDING=0`                  | captured-graph path; **+ FA_SLIDING=0 TPS cost** (load-bearing) |
 | `splitkv_off`    | `SPLITKV_VERIFY=0`              | does #43 3D split-KV reduction order break identity? |
 | `atomic_on`      | `VLLM_MARLIN_USE_ATOMIC_ADD=1`  | does non-associative int4 Marlin atomic-add break identity? + its TPS |
@@ -164,20 +165,21 @@ per run. Token identity by SHA256 of completion token IDs; official cross-check 
 
 | config | N | mean byte-id (self) | distinct outputs | largest id cluster | identical-to-default | official xcheck | flip hazard/tok | TPS median | PPL spread | E_accept |
 |--------|---|---------------------|------------------|--------------------|----------------------|-----------------|-----------------|------------|------------|----------|
-| `default`        | 7 | **1.0** | **1** | **7/7** | — (reference) | **GREEDY_IDENTICAL** (0/65536) | **0.0** | 489.22 | 0.0 (2.376976138392039) | 3.854 |
+| `default`        | 10 | **1.0** | **1** | **10/10** | — (reference) | **GREEDY_IDENTICAL** (0/65536) | **0.0** | 489.49 | 0.0 (2.376976138392039) | 3.854 |
 | `fa_sliding_off` | 3 | 1.0 | 1 | 3/3 | **1.0** | GREEDY_IDENTICAL (0/65536) | 0.0 | 489.34 | 0.0 | 3.854 |
 | `splitkv_off`    | 3 | 1.0 | 1 | 3/3 | **0.0859** | GREEDY_IDENTICAL (0/65536) | 0.0 | — | — | 3.858 |
 | `atomic_on`      | 7 | **0.8214** | **2** | **6/7** | **0.1116** | **DIVERGENT** (80/128 prompts, 23387/65536 tok = 35.7%) | 3.9e-4 | 491.05 | — | 3.85→3.822 |
 
 Reading the table:
-- **`default` is bit-exact run-to-run.** All 21 pairwise comparisons across 7 fresh
+- **`default` is bit-exact run-to-run.** All 45 pairwise comparisons across 10 fresh
   reloads are byte-identical (matrix all-ones); a single distinct output;
   `GREEDY_IDENTICAL` with 0 divergent tokens of 65,536; flip hazard 0.0/token. PPL
   identical to 12 digits and E_accept identical across every reload. This is the
   load-bearing result: **the deployed stack literally honors the bit-exact contract.**
 - **`fa_sliding_off` reproduces default byte-for-byte** (identical-to-default 1.0)
-  and FA flips 0 layers in default ⇒ FA2 sliding-window is inert; its −0.02% TPS
-  delta is a no-op artifact (same kernels), **not** a kernel-swap cost.
+  and FA flips 0 layers in default ⇒ FA2 sliding-window is inert; its +0.03% TPS
+  delta (within the ~0.2% bench noise) is a no-op artifact (same kernels), **not** a
+  kernel-swap cost.
 - **`splitkv_off` is active but stable.** It changes tokens vs default (0.0859
   identical — split-KV genuinely engages, 5 redirects/reload) yet stays self-identical
   across reloads ⇒ the #43 3D reduction order is run-to-run stable inside the captured
@@ -190,7 +192,7 @@ Reading the table:
   per-token stochastic FP noise (which would scatter into many distinct signatures);
   it is consistent with a **one-time autotune/warm-up** of the newly-enabled
   atomic-add kernel path that then settles. Crucially, the deployed default shows
-  **no** such first-reload effect — all 7 reloads including the first are identical —
+  **no** such first-reload effect — all 10 reloads including the first are identical —
   so keeping atomic-add OFF is load-bearing.
 
 ## Contract implication
@@ -198,7 +200,7 @@ Reading the table:
 **Greedy-identity as written in `program.md` (bit-exact, token-identical) is
 satisfiable AND satisfied by the deployed frontier.** It is not merely a
 distributional property the teacher-forced PPL gate happens to enforce: the served
-M=1 spec-ON greedy stack reproduces its full 128×512 output byte-for-byte across 7
+M=1 spec-ON greedy stack reproduces its full 128×512 output byte-for-byte across 10
 fresh reloads, with the official `greedy_gate.compare` returning `GREEDY_IDENTICAL`
 and zero divergent tokens. **Verdict code 0 (bit-exact).** This resolves the #66
 contract-foundation question: the contract rests on a real, measured bit-exact
@@ -211,7 +213,8 @@ Two reconciliations:
   with captured-graph decode + atomic-add-off + inert FA2. Measured directly, that
   stack is bit-exact. The "FA_SLIDING=0 restores byte-identity at a TPS cost" framing
   is moot: byte-identity already holds at FA_SLIDING=1, and FA flips 0 layers so there
-  is no swap to pay for (−0.02% is a no-op artifact).
+  is no swap to pay for (the +0.03% delta is a no-op artifact, within the ~0.2% TPS
+  bench noise).
 - **Run-to-run token churn does not move the gates.** PPL is teacher-forced on a
   fixed GT corpus (#21), so it is invariant to free-running token identity by
   construction — observed spread 0.0 (12 digits) across reloads. The private re-run

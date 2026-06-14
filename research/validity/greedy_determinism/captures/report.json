@@ -3,8 +3,8 @@
   "output_len": 512,
   "configs": {
     "default": {
-      "num_runs": 7,
-      "num_pairs": 21,
+      "num_runs": 10,
+      "num_pairs": 45,
       "run_indices": [
         0,
         1,
@@ -12,7 +12,10 @@
         3,
         4,
         5,
-        6
+        6,
+        7,
+        8,
+        9
       ],
       "mean_byte_identical_frac": 1.0,
       "min_byte_identical_frac": 1.0,
@@ -28,12 +31,6 @@
           1.0,
           1.0,
           1.0,
-          1.0
-        ],
-        [
-          1.0,
-          1.0,
-          1.0,
           1.0,
           1.0,
           1.0,
@@ -43,12 +40,6 @@
           1.0,
           1.0,
           1.0,
-          1.0,
-          1.0,
-          1.0,
-          1.0
-        ],
-        [
           1.0,
           1.0,
           1.0,
@@ -64,6 +55,21 @@
           1.0,
           1.0,
           1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
           1.0
         ],
         [
@@ -73,9 +79,63 @@
           1.0,
           1.0,
           1.0,
+          1.0,
+          1.0,
+          1.0,
           1.0
         ],
         [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0,
+          1.0,
           1.0,
           1.0,
           1.0,
@@ -101,7 +161,7 @@
         "onset_max": null
       },
       "num_distinct_outputs": 1,
-      "largest_identical_cluster": 7,
+      "largest_identical_cluster": 10,
       "clusters_by_run_idx": [
         [
           0,
@@ -110,22 +170,34 @@
           3,
           4,
           5,
-          6
+          6,
+          7,
+          8,
+          9
         ]
       ],
       "tps_runs": [
         489.9017633111684,
         488.97487959913303,
-        489.22219816419647
+        489.22219816419647,
+        489.9049880713449,
+        489.3005666860343,
+        489.67546647958125
       ],
-      "tps_median": 489.22,
+      "tps_median": 489.49,
       "ppl_runs": [
+        2.376976138392039,
+        2.376976138392039,
+        2.376976138392039,
         2.376976138392039,
         2.376976138392039,
         2.376976138392039
       ],
       "ppl_spread": 0.0,
       "e_accept_runs": [
+        3.854,
+        3.854,
+        3.854,
         3.854,
         3.854,
         3.854,
@@ -141,9 +213,15 @@
         0,
         0,
         0,
+        0,
+        0,
+        0,
         0
       ],
       "splitkv_redirects_runs": [
+        5,
+        5,
+        5,
         5,
         5,
         5,
@@ -478,12 +556,15 @@
       "mean_byte_identical_frac": 1.0,
       "self_reproducible": true,
       "num_distinct_outputs": 1,
-      "largest_identical_cluster": 7,
+      "largest_identical_cluster": 10,
       "identical_to_default_frac": null,
       "onset_median": null,
       "flip_hazard_per_token": 0.0,
-      "tps_median": 489.22,
+      "tps_median": 489.49,
       "fa_flips_runs": [
+        0,
+        0,
+        0,
         0,
         0,
         0,
@@ -493,6 +574,9 @@
         0
       ],
       "splitkv_redirects_runs": [
+        5,
+        5,
+        5,
         5,
         5,
         5,
@@ -576,9 +660,9 @@
     }
   },
   "source_notes": {
-    "fa_sliding_off": "FA_SLIDING=1 flips [0, 0, 0, 0, 0, 0, 0] target layers in default (0 => the FA2 sliding-window swap is INERT on this build); FA_SLIDING=0 tokens are 1.0 identical to default => the toggle changes nothing, so its -0.02% TPS delta is a no-op artifact, not a kernel-swap cost.",
+    "fa_sliding_off": "FA_SLIDING=1 flips [0, 0, 0, 0, 0, 0, 0, 0, 0, 0] target layers in default (0 => the FA2 sliding-window swap is INERT on this build); FA_SLIDING=0 tokens are 1.0 identical to default => the toggle changes nothing, so its 0.03% TPS delta is a no-op artifact, not a kernel-swap cost.",
     "atomic_on": "VLLM_MARLIN_USE_ATOMIC_ADD=1 is NOT inert (single changed env var; fa_flips/splitkv match default): tokens are only 0.1116 identical to default (it shifts the verify-GEMM numerics) AND it fails the clean bit-exactness the default shows -- a single first-reload OUTLIER: 2 distinct outputs over 7 reloads with the largest cluster 6/7 mutually byte-identical -- consistent with a one-time autotune/warm-up of the newly-enabled atomic-add kernel path, NOT per-token stochastic noise (mean byte-identical 0.8214, official xcheck DIVERGENT, divergence onset median 155/512). The deployed default keeps atomic-add OFF and is bit-exact across ALL reloads incl. the first, so keeping it off is load-bearing. NB: the 'Marlin bf16 before SM90' warning was NOT seen in logs, so warning-absence is not proof the path is gated off -- the measured token change proves it engaged.",
-    "splitkv_off": "SPLITKV_VERIFY genuinely engages in default ([5, 5, 5, 5, 5, 5, 5] verify redirects/reload, log-capped at 5); disabling it leaves tokens 0.0859 identical to default and default stays self-identical (1.0) => the #43 3D split-KV reduction order is run-to-run stable."
+    "splitkv_off": "SPLITKV_VERIFY genuinely engages in default ([5, 5, 5, 5, 5, 5, 5, 5, 5, 5] verify redirects/reload, log-capped at 5); disabling it leaves tokens 0.0859 identical to default and default stays self-identical (1.0) => the #43 3D split-KV reduction order is run-to-run stable."
   },
   "verdict": {
     "greedy_identity_verdict": 0,
@@ -586,7 +670,7 @@
     "default_bit_exact": true,
     "fa_sliding_off_reproduces": true,
     "ppl_run_to_run_invariant": true,
-    "fa_sliding0_tps_cost_pct": -0.02,
+    "fa_sliding0_tps_cost_pct": 0.03,
     "fa_sliding0_tps_cost_is_noop": true,
     "fa_engaged_in_default": false,
     "atomic_add_breaks_determinism": true,
@@ -598,6 +682,6 @@
   },
   "test_metric": {
     "name": "fa_sliding0_tps_cost_pct",
-    "value": -0.02
+    "value": 0.03
   }
 }
