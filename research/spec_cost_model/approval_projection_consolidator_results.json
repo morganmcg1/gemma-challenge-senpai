@@ -1,0 +1,161 @@
+{
+  "primary_metric_name": "consolidator_self_test_passes",
+  "consolidator_self_test_passes": 1,
+  "test_metric_name": "p_clear_500_at_oracle",
+  "p_clear_500_at_oracle": 0.0,
+  "gate_state": "PENDING",
+  "gate_verdict": "ARMED",
+  "gate_go_no_go": "PENDING",
+  "land_measured_pending": true,
+  "projection_block": "PROJECTION-CI CONSOLIDATOR ARMED + VALIDATED (self-test PASS); awaiting land #71's measured tuple (E_T, branch_hit, spread_lambda, width_mu, step, ppl, boots, completed). The instant his readout lands, ONE call emits the human-readable GO/NO-GO with its CI, its P(clear 500), its named binding leg, and its validity stamp -- the verbatim projection block of the `Approval request: HF job` issue.",
+  "tau_floor_fix_155": {
+    "fern142_tau_low_after": 0.9924318649123313,
+    "fern142_tau_low_before_splitk": 0.9983,
+    "ubel148_tree_class_floor": 0.9924318649123313,
+    "aligned": true,
+    "central_clear500_bar_et": 4.862377006624717,
+    "conservative_clear500_bar_et_before": 4.870657123735067,
+    "conservative_clear500_bar_et_after": 4.899456757219546
+  },
+  "self_test": {
+    "passes": true,
+    "anchors_ok": true,
+    "bitmatch_ok": true,
+    "lambda_star_boundary": 0.8383898298915828,
+    "anchors": {
+      "oracle_RED": {
+        "E_T": 2.621,
+        "lambda": 0.0,
+        "mu": 1.0,
+        "proj_tps": 269.5183853935055,
+        "ci": [
+          243.57151962999797,
+          295.4652511570131
+        ],
+        "p_clear_500": 0.0,
+        "verdict": "robust-RED",
+        "go_no_go": "NO-GO",
+        "binding_leg": "linear_floor_hard_abort",
+        "expected": "robust-RED / p~0",
+        "ok": true
+      },
+      "both_bugs_GREEN": {
+        "E_T": 5.207,
+        "lambda": 1.0,
+        "mu": 1.0,
+        "proj_tps": 535.4377080289901,
+        "ci": [
+          507.2114835745401,
+          563.66393248344
+        ],
+        "p_clear_500": 0.9993886355435745,
+        "verdict": "robust-GREEN",
+        "go_no_go": "GO",
+        "binding_leg": "sampling",
+        "expected": "robust-GREEN / p~1",
+        "ok": true
+      },
+      "boundary_INDETERMINATE": {
+        "E_T": 4.862377006624717,
+        "lambda": 0.8383898298915828,
+        "mu": 1.0,
+        "proj_tps": 500.00000000000006,
+        "ci": [
+          472.1512562541165,
+          527.8487437458836
+        ],
+        "p_clear_500": 0.4999999999999937,
+        "verdict": "INDETERMINATE",
+        "go_no_go": "HOLD",
+        "binding_leg": "sampling",
+        "expected": "INDETERMINATE / p~0.5",
+        "ok": true
+      }
+    },
+    "bitmatch": {
+      "wirbel_146_sampling": {
+        "ok": true,
+        "anchors": {
+          "red": {
+            "tps_ci99_lo_reproduced": 251.57071855955218,
+            "tps_ci99_lo_published_prefix": 253.1,
+            "tps_ci99_hi_reproduced": 286.11291401982527,
+            "tps_ci99_hi_published": 286.1,
+            "hi_bitmatch_exact": true,
+            "lo_within_tau_correction_1pct": true,
+            "robust_verdict_99": "robust-RED"
+          },
+          "green": {
+            "tps_ci99_lo_reproduced": 503.8468150414117,
+            "tps_ci99_lo_published_prefix": 506.8,
+            "tps_ci99_hi_reproduced": 563.556703185514,
+            "tps_ci99_hi_published": 563.6,
+            "hi_bitmatch_exact": true,
+            "lo_within_tau_correction_1pct": true,
+            "robust_verdict_99": "robust-GREEN"
+          },
+          "border": {
+            "tps_ci99_lo_reproduced": 468.95608114586634,
+            "tps_ci99_lo_published_prefix": 471.7,
+            "tps_ci99_hi_reproduced": 528.1474880130929,
+            "tps_ci99_hi_published": 528.1,
+            "hi_bitmatch_exact": true,
+            "lo_within_tau_correction_1pct": true,
+            "robust_verdict_99": "INDETERMINATE"
+          }
+        },
+        "note": "hi (tau_high=1.0) + E[T] CI bit-match exactly; lo carries the SAME tree-class tau-floor correction PR #155 applied to #142 (#146 imports gate.TAU) -> ~0.6% down, no verdict flip."
+      },
+      "ubel_148_calibration": {
+        "ok": true,
+        "K_cal_band": [
+          124.282034113087,
+          125.26795005202914
+        ],
+        "expected": [
+          124.282,
+          125.268
+        ]
+      },
+      "fern_149_green_area": {
+        "ok": true,
+        "green_region_area_fraction": 0.02999705911185178,
+        "expected": 0.03
+      }
+    }
+  },
+  "uncertainty_model": {
+    "quadrature_formula": "combined = sqrt(sampling^2 + calibration^2 + step_anchor^2)",
+    "sampling_source": "wirbel #146 bootstrap E[T] CI / descending-regime sigma (tau-invariant)",
+    "calibration_source": "ubel #148 one-sided downward band (0.787%; tree-class tau folded in)",
+    "step_anchor_source": "lawine #136/#147 measured-step residual (0.5% half-width)",
+    "decision_geometry_source": "fern #149 joint (spread x width) frontier green membership",
+    "validity_source": "denken #150 contract PPL<=2.42 & boots & 128/128 (inline)",
+    "p_clear_500_combination": "min(p_ci_direct, p_geom_membership) (conservative union)"
+  },
+  "legs_imported": {
+    "fern_142_gate": "measured_m16_to_official / official_tps_map (corrected tau-low floor)",
+    "wirbel_146_envelope": "analyse_sample / DescendingLadder / per-step sigma",
+    "ubel_148_calibration": [
+      124.282034113087,
+      125.26795005202914
+    ],
+    "fern_149_frontier": "joint_tps / joint_frontier_surface / green_area_fraction",
+    "denken_150_validity": "PPL<=2.42 & boots & 128/128 (inline contract)"
+  },
+  "land_tuple_spec": {
+    "E_T": "MEASURED accept-length E[T] (numerator) -- the SAME number #142/#146 consume",
+    "branch_hit": "measured rank-2 conditional branch-hit rho2 (~0.4165; land's local gate)",
+    "spread_lambda": "deep-spine-spread recovery fraction lambda in [0,1] (#149 axis; or derive from the per-depth conditional ladder q[2:] via #149 derive_lambda_mu_from_ladder)",
+    "width_mu": "branch-width recovery fraction mu in [0,1] (#149 axis; = branch_hit/rho2 clamped)",
+    "step": "lawine #136 MEASURED depth-9 decode step (s); default 1.2182",
+    "ppl": "captured PPL (validity; must be <= 2.42)",
+    "boots": "submission boots cleanly (validity)",
+    "completed": "benchmark completed-prompt count (validity; must be 128)",
+    "_note": "NO new measurement is required beyond what #142 / #146 / #150 already consume -- the consolidator ASSEMBLES, it does not add a measurement requirement."
+  },
+  "live_consolidation": null,
+  "provenance": "consolidates fern #142 (point gate + #155 tau-low fix), wirbel #146 (sampling CI / required-N), ubel #148 (K_cal tree-transfer band), fern #149 (joint spread x width frontier), denken #150 (validity). One source of truth per constant -- imports, does not re-derive. K_cal=125.268; clear-500 bar E[T]=4.862 (measured step 1.2182).",
+  "method": "LOCAL CPU-only analytic synthesis + a #142 tau-floor bug-fix; no GPU/vLLM/HF Job/submission/kernel build. Produces the Approval-request PROJECTION BLOCK only; does NOT authorize a launch. Greedy identity untouched.",
+  "metrics_nan_clean": 1
+}
