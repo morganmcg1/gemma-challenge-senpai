@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-14 ~11:30Z (cycle 47)
+- **Date:** 2026-06-14 ~11:50Z (cycle 47)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## Strategic Snapshot
@@ -46,8 +46,8 @@ Per human directive (theykk 10:30Z: "come to your own decision, then flag it to 
 | **land** | **#71** | **Tree descent-walk BUILD — ★ CRITICAL-PATH / the 500-lever.** Replace the linear `_dixie_fused_accept_prep_kernel` chain-reject with a **descending** accept walk on the flat tree (BUG-2). Build descent FIRST (clears 500 alone per fern #134); depth-1 spine is the 522→538 margin. Gate: local M=16 ≈ 5.0 tok/step with branch-hit ≈ ρ₂=0.4165, both-halves asserts. | **WIP** (build team holds the runnable star-attn build) |
 | **stark** | **#137** | **Block64 argmax reclaim**: `FUSED_SPARSE_ARGMAX_BLOCK=16→64`. Only missing lever vs #1 (+2.62 TPS, PPL-safe, 128/128). Local A/B then approval-gated HF job. | **WIP** |
 | **kanna** | **#138** | **K-sweep with block64**: faster verify from block64 may shift K-optimal above 7. Sweep K=6..9, pick K* for the next HF shot. | **WIP** |
-| **denken** | **#133** | **BUG-1 depth-1 spine root-cause** (now the SECONDARY margin): hunt the ~11.7pp the fp32 cross-check (#128 RED) didn't explain — drafter-spine/index-map under LIVE tree masking, logit-level relerr spec. | **WIP** |
-| **fern** | **#142** | **Measured-M16 → official 500-shot go/no-go gate** (NEW): convert land's measured M=16 descent number into a single GREEN/AMBER/RED official-TPS verdict; self-tested against E[T]=2.621→271 RED + E[T]=5.207→538 GREEN anchors. | **WIP** (NEW — cycle 47) |
+| **denken** | **#144** | **lm_head verify-candidate shortcut** (NEW): audit-first — does the verify-row lm_head GEMM already read ≤{drafter K∪bonus} cols or full-12k? If full, prune the column-read to {K=7 ∪ top-256}; PPL+acceptance-gated served micro-lever. (#133 MERGED 🟢: fp32 closed, depth-1 deficit = fixable `target_logits_indices` plumbing → handed to land.) | **WIP** (NEW) |
+| **fern** | **#145** | **Deep-spine width-vs-spread decomposition** (NEW): the ONE watched risk — split land's measured per-depth ladder into depth-1 / branch-width / deep-spine-spread TPS facets so the fleet sees whether the both-bugs cell realizes **537.8 (full)** or collapses to **376.3 (width-only)**. Armed for land's readout. (#142 MERGED 🟢: gate armed + self-validated, bit-matches #134.) | **WIP** (NEW) |
 | **wirbel** | **#141** | **fp8 KV-cache BW lever** (NEW): KV cache is the un-floored bf16 BW stream; fp8 halves KV-read bytes → cuts attention's BW slice IF PPL ≤ 2.42. Quantify M=8 decode vs M=32 verify gains separately. Ruling-independent, composes with tree. | **WIP** (NEW — cycle 47) |
 | **ubel** | **#140** | **Marlin group-size scale-BW** (NEW): int4 scale bytes (53.70 MB / 3.06% of body, ~80% un-overlapped) are un-floored; coarser group size (g=256/-1) reads fewer scale bytes IF servable AND PPL ≤ 2.42. Compounding micro-lever. | **WIP** (NEW — cycle 47) |
 | **lawine** | **#143** | **Salvage-walk Python-overhead probe** (NEW): the one un-measured step-denominator component — does the descent/salvage control flow GPU-hide (like the attn idle) or serialize? Hands land #71 the sync constraints for the build. | **WIP** (NEW — cycle 47) |
@@ -58,7 +58,7 @@ Per human directive (theykk 10:30Z: "come to your own decision, then flag it to 
 Single highest-ROI move in the fleet. One env var from ~484 TPS (+2.62, PPL-safe, no validity risk). Restores top-4 and matches the public frontier. K-sweep (kanna #138) confirms K* at the new faster-verify point.
 
 ### Theme 2: Tree Descent-Walk Build (THE 500-PATH — land #71 + support seats)
-Tree is the sole 500+ path (tree-free caps 491.8, denken #123 RED). The decisive finding: **descent (BUG-2) alone clears 500** (fern #134 + wirbel #135, two independent methods). land #71 builds the descending accept walk; supported by **denken #133** (BUG-1 spine, demoted to the 522→538 margin), **lawine #143** (salvage-walk overhead → sync constraints for the build), **fern #142** (measured-M16 → official gate). BUG-3 (CUDA-graph illegal-memory-access) lives in the external star-attn build → re-homed to land #71 / build team (ubel #139 closed as out-of-scope for an isolation-scoped seat).
+Tree is the sole 500+ path (tree-free caps 491.8, denken #123 RED). The decisive finding: **descent (BUG-2) alone clears 500** (fern #134 + wirbel #135, two independent methods). land #71 builds the descending accept walk; supported by **lawine #143** (salvage-walk overhead → sync constraints for the build) and **fern #145** (deep-spine width-vs-spread decomposition — the watched 537.8-vs-376 risk, armed for land's readout). **BUG-1 depth-1 is now CLOSED-and-handed (denken #133 MERGED):** fp32 GPU-confirmed not-the-fix (lane closed, tree-488-pw-fp32-v0 quota saved); the 13.1pp deficit is ~96% a fixable wrong-rank `target_logits_indices` plumbing bug → handed to land as the rank-1 spine fix, and the **same index-map class may fix BOTH the depth-1 spine AND the descent**. BUG-3 (CUDA-graph illegal-memory-access) lives in the external star-attn build → re-homed to land #71 / build team (ubel #139 closed as out-of-scope for an isolation-scoped seat).
 
 ### Theme 3: Memory-BW Micro-Levers (NEW — ubel #140 / wirbel #141)
 With weights floored at int4 (kanna #132) and the verify-GEMM weight-BW maxed (#117/#130), the remaining un-attacked memory streams are the **int4 scale bytes** (ubel #140, coarser Marlin group size) and the **bf16 KV cache** (wirbel #141, fp8). Both PPL-gated, ruling-independent, compounding, and compose with the tree. Hedge the tree-build risk.
@@ -81,6 +81,8 @@ With weights floored at int4 (kanna #132) and the verify-GEMM weight-BW maxed (#
 
 | PR | verdict | significance |
 |---|---|---|
+| #142 | MERGED GREEN (fern, go/no-go gate) | One-call measured-M16 → official verdict; self-tests both anchors (271 RED / 538 GREEN within 0.1%) + bit-matches #134 matrix; wires PPL/tok-floor/branch-hit/greedy preconditions. Armed for land's readout. Decision input only — no launch authority. fern → #145. |
+| #133 | MERGED GREEN (denken, depth-1 root-cause) | fp32 GPU-confirmed NOT the fix (NET ~0pp, exact-tie reshuffles) → fp32 lane CLOSED, quota saved; 13.1pp depth-1 deficit = ~96% fixable `target_logits_indices` plumbing (rank-2 contamination reproduces 0.598), handed to land as the rank-1 fix; shared-index-map may fix BOTH bugs. denken → #144. |
 | #136 | MERGED AMBER (lawine, step-anchor) | Measured depth-9 step 1.2182 (+0.45% vs roofline); eager attn idle hidden behind GEMM; root-row clears 530; operative bar 4.841→4.862. Denominator FIRM. Methodology catch: isolation-only bench would have falsely read RED. |
 | #135 | MERGED GREEN (wirbel, BUG-2 E[T]-DP) | Independent confirmation: descent-only fix → E[T] 5.041 (clears bar alone); BUG-2/BUG-1 = 19.3×. Salvages fire but don't descend (+0.077 E[T]). |
 | #134 | MERGED GREEN (fern, live oracle readout) | Official-TPS matrix: as-built 270.7 ❌ / spine-only 283 ❌ / **descent-only 522 ✅** / both 538. Descent is the decisive 500-lever. |
