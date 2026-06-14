@@ -74,6 +74,21 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-14 06:56 — PR #106 (fern): Tree-vs-tree-free crossover + build-milestone ladder — AMBER / tree de-risked to UPSIDE (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU-only analysis, no served-file change, no HF launch; official bar stays 481.53). Banks `scripts/profiler/tree_vs_treefree_crossover.py` + `research/spec_cost_model/{report_tree_vs_treefree_crossover.md, tree_vs_treefree_crossover_results.json}`. W&B `1qkiheqb` advisor-verified (finished, primary `tree_vs_treefree_crossover_ET=4.727`, test `build_milestone_ladder_clear500_ET=4.624`).
+- **Verdict:** with denken #105's tree-free ceiling C=518.1 in the [500, 540.7) AMBER band, the tree (land #71) is **upside, not critical-path**. Tree overtakes the tree-free stack only at realized E[T] ≥ **4.727**; ladder ≈10.8 official TPS per +0.1 E[T]. Ship-gates E[T] ≥ 4.45 (tie 481.53) / 4.62 (clear 500) / 5.207 (~563). If build recovery stalls < ~4.7 → ship tree-free + escalate for a fresh accept-length lever.
+
+### 2026-06-14 06:53 — PR #105 (denken): Tree-free 500-path ceiling — GREEN / tree is INSURANCE not critical-path (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU-only analysis, no served-file change; official bar stays 481.53). Banks `scripts/profiler/tree_free_500_ceiling.py` + `research/spec_cost_model/{report_tree_free_500_ceiling.md, tree_free_500_ceiling_results.json}`. W&B `0kiktnqt` advisor-verified (finished, primary `tree_free_max_official_tps=518.1` [496.8, 540.8], test `splitk_threshold_for_500=0.0444`).
+- **Verdict:** the build-complete tree-FREE stack (SplitK #84 + LK #95, E[T] held at linear 3.844, NO tree) clears 500 at **SplitK=4.44% central** (5.43% with #104's double-quant KILLed → f_dq=0; still inside SplitK's measured +5–12% range), ceiling **518.1**. ⇒ **ship the tree-free SplitK path to 500 as PRIMARY**; the tree is insurance. Binding gate = lawine #99's τ, NOT SplitK. → SplitK is the load-bearing kernel lever (ubel #108).
+
+### 2026-06-14 06:52 — PR #104 (wirbel): Double-quant verify-GEMM scales — KILL / lane DEAD, palette/LUT survives (official bar UNCHANGED 481.53)
+
+- **Not a served-TPS rung** (CPU round-trip analysis, no served-file change; official bar stays 481.53). Banks `scripts/profiler/dq_scale_roundtrip.py` + `research/dq_verify_gemm_scales/{report.md, dq_scale_roundtrip.json}`. W&B `6or2w3ee` advisor-verified (finished, primary `dq_scale_roundtrip_bitexact_frac=0.131`, test `dq_tps_lift_est_pct=-0.02`).
+- **Verdict:** double-quant is DEAD — FP16 g=128 scales don't INT8-roundtrip bit-exactly (0.131 « 98% gate; an 8-bit code can't reconstruct 10 FP16 mantissa bits), byte-NEGATIVE at every block size. **Banked corrections:** scale tensor = 53.70 MB = 3.06% of the verify-GEMM weight stream (~2× the PR estimate); g=128 symmetric W4A16; BF16-scale storage also lossy (6.87% exact). **Surviving lever → wirbel #110:** lossless scale PALETTE/LUT (core7 scales = 1,009 distinct values → 10-bit bit-exact index, ~37.5% scale-byte saving ≈ ~0.3% TPS).
+
 ### 2026-06-14 06:12 — PR #98 (wirbel): fp32 star-attn COST gate — GREEN / the #93 fp32 mandate is ~free (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (LOCAL A10G op-microbench, peak 0.537 GB, no served-file change, no HF launch, no leaderboard number; official bar stays 481.53). Banks `scripts/profiler/star_attn_fp32_cost.py` + `research/star_attn_gate/fp32_cost_results.json`. W&B `r8xckc7s` (primary) + `jbooswq1` (bit-identical replicate) advisor-verified — both finished, no NaN, `verdict_green=1`, cross-run Δ<0.001pp.
