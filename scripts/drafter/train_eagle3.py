@@ -184,11 +184,18 @@ class DraftBody(nn.Module):
             fused = self.input_norm(fused)
         return self.fc(fused)
 
+    def forward_from_h0(self, embeds, h0, cos, sin, attn_bias):
+        """Draft body forward from a PRECOMPUTED post-fc h0 (bypasses combine/fc).
+        At serve time, draft steps 2..K feed the draft's OWN output hidden as h0
+        directly (no combine); this is the path used by the multi-step (HASS) unroll
+        and by eval's native chain (`_draft_step`)."""
+        mlp_out, res1 = self.layers[0](embeds, h0, cos, sin, attn_bias)
+        return self.norm(mlp_out + res1)
+
     def forward(self, input_ids, fused, cos, sin, attn_bias):
         h0 = self.combine(fused)
         embeds = self.embed_tokens(input_ids)
-        mlp_out, res1 = self.layers[0](embeds, h0, cos, sin, attn_bias)
-        return self.norm(mlp_out + res1)
+        return self.forward_from_h0(embeds, h0, cos, sin, attn_bias)
 
 
 class Eagle3DraftHead(nn.Module):
@@ -310,6 +317,145 @@ def evaluate(head, records, shift, batch_tokens, device, dtype, rope_theta, chun
 
 
 # --------------------------------------------------------------------------- #
+# Native (free-running) chain acceptance — the serving-side objective
+# --------------------------------------------------------------------------- #
+def _draft_step(head, input_ids, h0, n, rope_theta, device, dtype):
+    """One draft-body forward over a length-n sequence with a PRECOMPUTED post-fc
+    h0 (bypasses `combine`/`fc`). Replicates `DraftBody.forward` exactly except the
+    h0 source, so real-prefix positions match the teacher-forced path bit-for-bit
+    while speculative positions can carry the draft's OWN rolled-forward hidden.
+    Returns the draft output hidden [n, H] (one decoder layer + final norm)."""
+    cos, sin = build_rope(n, HEAD_DIM, rope_theta, device, dtype)
+    causal = torch.tril(torch.ones(n, n, dtype=torch.bool, device=device))
+    bias = torch.zeros(1, 1, n, n, dtype=dtype, device=device)
+    bias.masked_fill_(~causal[None, None], float("-inf"))
+    embeds = head.model.embed_tokens(input_ids)
+    with torch.autocast("cuda", dtype=dtype):
+        out = head.model.forward_from_h0(embeds, h0, cos, sin, bias)
+    return out[0]  # [n, H]
+
+
+@torch.no_grad()
+def evaluate_native(head, records, shift, device, dtype, rope_theta,
+                    chain_k=8, max_starts=16):
+    """Free-running (native) EAGLE chain acceptance — the serving-side objective.
+
+    Teacher-forced eval feeds the REAL target feature at every position, so it is
+    an UPPER BOUND on what serving accepts. At serve time only the FIRST draft step
+    of each verification round sees a real target feature; steps 2..K consume the
+    draft's OWN output hidden (the post-fc residual fed forward) plus the draft's
+    OWN guessed token. That 'interface-fidelity gap' (PR #9 cross-finding that tf
+    and native acceptance can anti-correlate) is what this metric captures, and it
+    is the quantity that converts to TPS.
+
+    For each sampled response start p (a valid verification-round start: every real
+    position has a real target feature) we draft a chain of up to `chain_k` tokens:
+
+        step 1: ( h0 = combine(fused[p-shift]) [REAL],   embed(x_p)      ) -> g_{p+1}, d_p
+        step k: ( h0 = d_{p+k-1}               [DRAFT-OWN], embed(g_{p+k-1}) ) -> g_{p+k}, d_{p+k-1}
+
+    and accept the leading run of g's that match the target greedy continuation
+    (`next_token_ids`). The draft attends over the full real prefix + the accepted
+    speculative tail each step (causal self-attention, re-run for simplicity).
+
+      native_accept_per_step = mean accepted run length over starts  (advisor's
+                               'accepted-tok/step'; tokens/target-forward = this + 1)
+      native_step1_top1      = fraction of starts whose step-1 draft is correct;
+                               this MUST equal the tf top-1 (step 1 uses real inputs)
+                               and is a built-in wiring self-check.
+
+    The PR #80 per-step acceptance PROFILE is derived from the run-length
+    distribution: `survival_at_k = P(run length >= k)` for k=1..chain_k, so that
+    mean(run) == sum_k survival_at_k (the expected-value identity, a self-check).
+    `cond_accept_at_k = P(run>=k | run>=k-1)` (survival[k]/survival[k-1]) is the
+    per-step CONDITIONAL acceptance: cond[1]==step-1 hit; for a chain that COLLAPSES
+    past step 1 cond[2..] ~ 0, while multi-step (HASS) training should keep them high.
+    Returns per-source means too (mmlu_pro / gpqa / aime).
+    """
+    head.eval()
+    run_by_src = {}
+    step1_hit = step1_tot = 0
+    for rec in records:
+        ids_full = rec["input_ids"].to(torch.long)
+        L = int(ids_full.shape[0])
+        if L < 3:
+            continue
+        nxt = rec["next_token_ids"]
+        src = rec.get("source", "all")
+        scored = [a for a in range(L - 1) if int(nxt[a]) != IGNORE]
+        if not scored:
+            continue
+        # Real-prefix post-fc h0 for the whole sequence (matches collate's roll).
+        aux = rec["aux"].to(device, torch.float32)                  # [3, L, H]
+        fused = aux.permute(1, 0, 2).reshape(L, N_AUX * HID)         # [L, 7680]
+        rolled = torch.zeros_like(fused)
+        if shift > 0:
+            rolled[shift:] = fused[:L - shift]
+        else:
+            rolled = fused
+        with torch.autocast("cuda", dtype=dtype):
+            h0_real = head.model.combine(rolled[None].to(dtype))[0]  # [L, H]
+        ids_dev = ids_full.to(device)
+
+        if len(scored) > max_starts:
+            sel = torch.linspace(0, len(scored) - 1, max_starts).round().long().tolist()
+            starts = sorted(set(scored[i] for i in sel))
+        else:
+            starts = scored
+
+        for p in starts:
+            seq_ids = ids_dev[:p + 1].clone()
+            seq_h0 = h0_real[:p + 1].clone()
+            d_prev = _draft_step(head, seq_ids[None], seq_h0[None], p + 1,
+                                 rope_theta, device, dtype)[p]
+            with torch.autocast("cuda", dtype=dtype):
+                g = int(head.lm_head(d_prev[None]).float().argmax(-1).item())
+            step1_tot += 1
+            if g == int(ids_full[p + 1]):
+                step1_hit += 1
+            accepted = 0
+            for k in range(chain_k):
+                pos = p + 1 + k
+                if pos >= L or g != int(ids_full[pos]):
+                    break
+                accepted += 1
+                if pos + 1 >= L:
+                    break
+                # Roll forward: append accepted token (== target) with DRAFT-OWN h0.
+                seq_ids = torch.cat([seq_ids, ids_dev[pos:pos + 1]])
+                seq_h0 = torch.cat([seq_h0, d_prev[None]], dim=0)
+                d_prev = _draft_step(head, seq_ids[None], seq_h0[None], pos + 1,
+                                     rope_theta, device, dtype)[pos]
+                with torch.autocast("cuda", dtype=dtype):
+                    g = int(head.lm_head(d_prev[None]).float().argmax(-1).item())
+            run_by_src.setdefault(src, []).append(accepted)
+
+    head.train()
+    all_runs = [r for v in run_by_src.values() for r in v]
+    aps = sum(all_runs) / max(1, len(all_runs))
+    per_src = {s: sum(v) / max(1, len(v)) for s, v in run_by_src.items()}
+    per_src_n = {s: len(v) for s, v in run_by_src.items()}
+
+    def survival(runs):
+        n = max(1, len(runs))
+        return [sum(1 for r in runs if r >= k) / n for k in range(1, chain_k + 1)]
+
+    surv = survival(all_runs)
+    cond = []
+    prev = 1.0
+    for s in surv:
+        cond.append(s / prev if prev > 0 else 0.0)
+        prev = s
+    per_src_surv = {s: survival(v) for s, v in run_by_src.items()}
+    return {"native_accept_per_step": aps,
+            "native_step1_top1": step1_hit / max(1, step1_tot),
+            "per_source": per_src, "per_source_n": per_src_n,
+            "survival_at_k": surv, "cond_accept_at_k": cond,
+            "per_source_survival": per_src_surv,
+            "n_starts": len(all_runs), "chain_k": chain_k}
+
+
+# --------------------------------------------------------------------------- #
 # Train
 # --------------------------------------------------------------------------- #
 def lr_at(step, warmup, total, base):
@@ -349,6 +495,35 @@ def main():
     ap.add_argument("--loss_chunk", type=int, default=1024,
                     help="token chunk for the 262k-way lm_head+CE (memory guard)")
     ap.add_argument("--feature_shift", type=int, default=1)
+    ap.add_argument("--unroll_steps", type=int, default=1,
+                    help="J: multi-step (HASS) unroll depth (PR #80). 1 == legacy K=1 "
+                         "teacher-forced. J>=2 unrolls the draft: at depth s>=2 the "
+                         "feature at position j is the draft's OWN output hidden from "
+                         "depth s-1 at position j-1 (the serve-time input), supervised "
+                         "against the SAME next-token label. Token ids stay real "
+                         "(teacher-forced); only the hidden state free-runs.")
+    ap.add_argument("--unroll_detach", type=int, default=1,
+                    help="detach the rolled draft hidden between unroll depths "
+                         "(stop-gradient; HASS/CORAL default, prevents BPTT-style "
+                         "divergence). 1=on (recommended).")
+    ap.add_argument("--unroll_weights", default=None,
+                    help="comma list of per-depth loss weights (len==unroll_steps); "
+                         "default uniform 1/J (EAGLE-3/HASS uniform averaging).")
+    ap.add_argument("--eval_native_every", type=int, default=0,
+                    help="run a native (free-running) chain eval on a balanced subset "
+                         "every N steps (0=off); the multi-step objective + best-select "
+                         "signal for PR #80.")
+    ap.add_argument("--eval_native_records", type=int, default=60,
+                    help="balanced subset size for the in-loop native eval (per-source "
+                         "round-robin from the eval corpus).")
+    ap.add_argument("--eval_native_starts", type=int, default=12,
+                    help="max round-start positions per sequence for in-loop native eval.")
+    ap.add_argument("--eval_native_k", type=int, default=8,
+                    help="native chain depth K for the in-loop native eval (match the "
+                         "report harness, default 8).")
+    ap.add_argument("--select_metric", default="auto", choices=["auto", "tf", "native"],
+                    help="held-out metric for best-checkpoint selection. 'auto' = "
+                         "'native' when unroll_steps>1 and native eval is on, else 'tf'.")
     ap.add_argument("--rope_theta", type=float, default=1e6)
     ap.add_argument("--norm_before_fc", type=int, default=1)
     ap.add_argument("--train_lm_head", action="store_true")
@@ -439,6 +614,53 @@ def main():
     if args.eval_corpus:
         eval_records, _ = load_corpus(args.eval_corpus)
 
+    # ---- multi-step (HASS) unroll config (PR #80) ----
+    J = max(1, int(args.unroll_steps))
+    if args.unroll_weights:
+        uw = [float(x) for x in args.unroll_weights.split(",")]
+        assert len(uw) == J, f"--unroll_weights needs {J} values, got {len(uw)}"
+    else:
+        uw = [1.0 / J] * J            # EAGLE-3/HASS uniform averaging
+    sw = sum(uw)
+    uw = [w / sw for w in uw]         # normalise so the loss scale matches K=1
+    native_on = bool(args.eval_native_every) and eval_records is not None
+    select_metric = args.select_metric
+    if select_metric == "auto":
+        select_metric = "native" if (J > 1 and native_on) else "tf"
+    print(f"[train] unroll_steps J={J}  detach={bool(args.unroll_detach)}  "
+          f"weights={['%.3f' % w for w in uw]}  select_metric={select_metric}", flush=True)
+
+    # Balanced per-source subset for the in-loop native (free-running) chain eval —
+    # the multi-step objective + best-select signal. Round-robin over sources so all
+    # of mmlu_pro/gpqa/aime are represented even at small subset sizes.
+    native_subset = None
+    if native_on:
+        by_src_idx = {}
+        for i, r in enumerate(eval_records):
+            by_src_idx.setdefault(r.get("source", "all"), []).append(i)
+        for s in by_src_idx:
+            random.Random(args.seed).shuffle(by_src_idx[s])
+        picked, cursors = [], {s: 0 for s in by_src_idx}
+        srcs = sorted(by_src_idx)
+        while len(picked) < min(args.eval_native_records, len(eval_records)):
+            progressed = False
+            for s in srcs:
+                if cursors[s] < len(by_src_idx[s]):
+                    picked.append(by_src_idx[s][cursors[s]])
+                    cursors[s] += 1
+                    progressed = True
+                    if len(picked) >= args.eval_native_records:
+                        break
+            if not progressed:
+                break
+        native_subset = [eval_records[i] for i in picked]
+        sub_src = {}
+        for r in native_subset:
+            sub_src[r.get("source", "all")] = sub_src.get(r.get("source", "all"), 0) + 1
+        print(f"[train] in-loop native eval: {len(native_subset)} recs {dict(sub_src)} "
+              f"K={args.eval_native_k} starts={args.eval_native_starts} "
+              f"every {args.eval_native_every} steps", flush=True)
+
     # ---- logging ----
     os.makedirs(args.output, exist_ok=True)
     cfg = {
@@ -453,7 +675,10 @@ def main():
         "train_meta": {"corpus_tokens": corpus_tokens, "total_steps": total_steps,
                        "lr": args.lr, "warmup": warmup, "wd": args.wd,
                        "batch_tokens": args.batch_tokens, "bound": bound,
-                       "eff_epochs_cap": eff_epochs, "target_model": args.model},
+                       "eff_epochs_cap": eff_epochs, "target_model": args.model,
+                       "unroll_steps": J, "unroll_weights": uw,
+                       "unroll_detach": bool(args.unroll_detach),
+                       "select_metric": select_metric, "warm_start": args.init},
     }
     with open(os.path.join(args.output, "config.json"), "w") as f:
         json.dump(cfg, f, indent=2)
@@ -510,33 +735,65 @@ def main():
             input_ids, fused, labels, bias, T = collate(
                 records, idxs, args.feature_shift, device, dtype)
             cos, sin = build_rope(T, HEAD_DIM, args.rope_theta, device, dtype)
-            with torch.autocast("cuda", dtype=dtype):
-                hidden = head.forward_hidden(input_ids, fused, cos, sin, bias)
-            flat = hidden.reshape(-1, HID)
             tgt = labels.reshape(-1)
             mask = tgt != IGNORE
-            sel, tt = flat[mask], tgt[mask]
+            tt = tgt[mask]
             n_tok = int(tt.numel())
 
-            # Chunk the 262k-way lm_head + CE; per-chunk backward keeps the fp32
-            # logit/grad tensors small (else a single [N, 262144] step OOMs the A10G).
+            # Depth-invariant inputs: token embeds + the REAL post-fc h0. Tokens stay
+            # teacher-forced at every unroll depth (HASS: "hidden states shift; token
+            # ids do not"); only the FEATURE h0 free-runs at depth >= 2.
+            with torch.autocast("cuda", dtype=dtype):
+                embeds = head.model.embed_tokens(input_ids)
+                h0_real = head.model.combine(fused)
+
+            # Multi-step (HASS) unroll (PR #80). Depth s>=2 feeds the draft its OWN
+            # output hidden from depth s-1 at position j-1 (shift-by-one, anchored on
+            # the real feature at position 0) as the post-fc h0 — the exact serve-time
+            # input eval's native chain consumes. The rolled feature is DETACHED
+            # (stop-gradient; HASS/CORAL: no-detach diverges) so each depth is an
+            # independent graph, which also keeps the chunked 262k-way CE memory-safe.
+            # Per-depth CE is weighted by uw[s]; grads accumulate, one opt.step/batch.
             opt.zero_grad(set_to_none=True)
-            loss_val, correct = 0.0, 0
             n_chunks = max(1, math.ceil(n_tok / args.loss_chunk))
-            for ci in range(n_chunks):
-                c0 = ci * args.loss_chunk
-                ttc = tt[c0:c0 + args.loss_chunk]
+            depth_loss, depth_acc = [], []
+            loss_val = 0.0
+            d_prev = None
+            for s in range(J):
+                if s == 0:
+                    h0 = h0_real
+                else:
+                    h0 = torch.empty_like(d_prev)
+                    h0[:, 1:, :] = d_prev[:, :-1, :]      # feat[j] = draft_out[j-1]
+                    # real-feature anchor at pos 0 (label there is IGNORE under
+                    # shift=1); DETACHED because `fc`/`combine` only ever runs on real
+                    # features at serve-time step 1, so it is trained by depth 0 only —
+                    # and reusing its (freed) graph here would error.
+                    h0[:, :1, :] = h0_real[:, :1, :].detach()
                 with torch.autocast("cuda", dtype=dtype):
-                    lc = head.lm_head(sel[c0:c0 + args.loss_chunk])
-                ce = F.cross_entropy(lc.float(), ttc, reduction="sum") / max(1, n_tok)
-                ce.backward(retain_graph=(ci < n_chunks - 1))
-                loss_val += float(ce.item())
-                correct += int((lc.detach().argmax(-1) == ttc).sum().item())
+                    hidden = head.model.forward_from_h0(embeds, h0, cos, sin, bias)
+                sel = hidden.reshape(-1, HID)[mask]
+                w = uw[s]
+                dl, dc = 0.0, 0
+                for ci in range(n_chunks):
+                    c0 = ci * args.loss_chunk
+                    ttc = tt[c0:c0 + args.loss_chunk]
+                    with torch.autocast("cuda", dtype=dtype):
+                        lc = head.lm_head(sel[c0:c0 + args.loss_chunk])
+                    ce = F.cross_entropy(lc.float(), ttc, reduction="sum") * (w / max(1, n_tok))
+                    ce.backward(retain_graph=(ci < n_chunks - 1))
+                    dl += float(ce.item())
+                    dc += int((lc.detach().argmax(-1) == ttc).sum().item())
+                depth_loss.append(dl / max(1e-9, w))       # un-weighted per-depth mean CE
+                depth_acc.append(dc / max(1, n_tok))
+                loss_val += dl
+                if s < J - 1:
+                    d_prev = hidden.detach()
             gnorm = torch.nn.utils.clip_grad_norm_(trainable, 1.0)
             opt.step()
 
             loss = loss_val
-            acc = correct / max(1, n_tok)
+            acc = depth_acc[0]                              # depth-1 == legacy tf acc
             tokens_seen += n_tok
             step += 1
 
@@ -548,24 +805,57 @@ def main():
                     "train/epoch_equiv": tokens_seen / max(1, corpus_tokens),
                     "train/minutes": (time.time() - t0) / 60.0,
                 }
+                if J > 1:
+                    for si in range(J):
+                        rec[f"train/depth{si + 1}_loss"] = depth_loss[si]
+                        rec[f"train/depth{si + 1}_acc"] = depth_acc[si]
                 log(rec)
+                dstr = (" " + " ".join("d%d=%.3f" % (si + 1, depth_acc[si])
+                                       for si in range(J))) if J > 1 else ""
                 print(f"  step {step:4d}/{total_steps} loss={rec['train/loss']:.4f} "
-                      f"acc={acc:.4f} lr={lr:.2e} gnorm={float(gnorm):.2f} "
+                      f"acc={acc:.4f}{dstr} lr={lr:.2e} gnorm={float(gnorm):.2f} "
                       f"ep={rec['train/epoch_equiv']:.2f}", flush=True)
 
-            if args.eval_every and eval_records is not None and (
-                step % args.eval_every == 0 or step == total_steps):
+            run_eval = args.eval_every and eval_records is not None and (
+                step % args.eval_every == 0 or step == total_steps)
+            run_neval = native_on and (
+                step % args.eval_native_every == 0 or step == total_steps)
+            sel_score = None
+            if run_eval:
                 ev = evaluate(head, eval_records, args.feature_shift,
                               args.batch_tokens, device, dtype, args.rope_theta)
-                vrec = {"step": step, "val/tf_acceptance_rate": ev["tf_acceptance_rate"],
-                        "val/loss": ev["loss"]}
-                log(vrec)
+                log({"step": step, "val/tf_acceptance_rate": ev["tf_acceptance_rate"],
+                     "val/loss": ev["loss"]})
                 print(f"  [eval] step {step}: val tf_acc={ev['tf_acceptance_rate']:.4f} "
                       f"val loss={ev['loss']:.4f} (n={ev['n']})", flush=True)
-                if ev["tf_acceptance_rate"] > best_val:
-                    best_val = ev["tf_acceptance_rate"]
-                    torch.save(head.state_dict(),
-                               os.path.join(args.output, "model_best.pt"))
+                if select_metric == "tf":
+                    sel_score = ev["tf_acceptance_rate"]
+            if run_neval:
+                nv = evaluate_native(head, native_subset, args.feature_shift, device,
+                                     dtype, args.rope_theta, chain_k=args.eval_native_k,
+                                     max_starts=args.eval_native_starts)
+                nrec = {"step": step,
+                        "val/native_accept_per_step": nv["native_accept_per_step"],
+                        "val/native_step1_top1": nv["native_step1_top1"],
+                        "val/native_n_starts": nv["n_starts"]}
+                for ki, sv in enumerate(nv["survival_at_k"], start=1):
+                    nrec[f"val/native_surv_at_{ki}"] = sv
+                for ki, cv in enumerate(nv["cond_accept_at_k"], start=1):
+                    nrec[f"val/native_cond_at_{ki}"] = cv
+                for s2, v2 in nv["per_source"].items():
+                    nrec[f"val/native_src_{s2}_accept_per_step"] = v2
+                log(nrec)
+                prof = " ".join("%.3f" % x for x in nv["survival_at_k"][:6])
+                print(f"  [native] step {step}: accept/step="
+                      f"{nv['native_accept_per_step']:.4f} step1={nv['native_step1_top1']:.4f} "
+                      f"surv[1..6]={prof} (starts={nv['n_starts']})", flush=True)
+                if select_metric == "native":
+                    sel_score = nv["native_accept_per_step"]
+            if sel_score is not None and sel_score > best_val:
+                best_val = sel_score
+                torch.save(head.state_dict(), os.path.join(args.output, "model_best.pt"))
+                print(f"  [ckpt] new best ({select_metric}={best_val:.4f}) -> model_best.pt",
+                      flush=True)
 
             if args.save_every and step % args.save_every == 0 and step < total_steps:
                 ckpt_dir = os.path.join(args.output, f"step_{step}")
@@ -580,18 +870,37 @@ def main():
                       device, dtype, args.rope_theta)
         final = {"final_val/tf_acceptance_rate": ev["tf_acceptance_rate"],
                  "final_val/loss": ev["loss"], "final_val/n": ev["n"]}
-        log({"step": step, **final})
+        sel_score = ev["tf_acceptance_rate"] if select_metric == "tf" else None
         print(f"[train] FINAL held-out: tf_acceptance_rate={ev['tf_acceptance_rate']:.4f} "
               f"loss={ev['loss']:.4f} (n={ev['n']})", flush=True)
-        if ev["tf_acceptance_rate"] > best_val:
-            best_val = ev["tf_acceptance_rate"]
+        if native_on:
+            nv = evaluate_native(head, native_subset, args.feature_shift, device, dtype,
+                                 args.rope_theta, chain_k=args.eval_native_k,
+                                 max_starts=args.eval_native_starts)
+            final["final_val/native_accept_per_step"] = nv["native_accept_per_step"]
+            final["final_val/native_step1_top1"] = nv["native_step1_top1"]
+            for ki, sv in enumerate(nv["survival_at_k"], start=1):
+                final[f"final_val/native_surv_at_{ki}"] = sv
+            prof = " ".join("%.3f" % x for x in nv["survival_at_k"][:6])
+            print(f"[train] FINAL native(subset n={len(native_subset)}): accept/step="
+                  f"{nv['native_accept_per_step']:.4f} step1={nv['native_step1_top1']:.4f} "
+                  f"surv[1..6]={prof}", flush=True)
+            if select_metric == "native":
+                sel_score = nv["native_accept_per_step"]
+        log({"step": step, **final})
+        if sel_score is not None and sel_score > best_val:
+            best_val = sel_score
             torch.save(head.state_dict(), os.path.join(args.output, "model_best.pt"))
+            print(f"[train] final is new best ({select_metric}={best_val:.4f})", flush=True)
 
     torch.save(head.state_dict(), os.path.join(args.output, "model_last.pt"))
     peak = torch.cuda.max_memory_allocated() / 1e9
     summary = {"step": step, "total_steps": total_steps, "bound": bound,
                "minutes": (time.time() - t0) / 60.0, "peak_gpu_gb": peak,
-               "best_val_tf_acceptance": best_val if best_val >= 0 else None, **final}
+               "unroll_steps": J, "select_metric": select_metric,
+               "best_val_select": best_val if best_val >= 0 else None,
+               "best_val_tf_acceptance": (best_val if best_val >= 0
+                                          and select_metric == "tf" else None), **final}
     with open(os.path.join(args.output, "summary.json"), "w") as f:
         json.dump(summary, f, indent=2)
     print(f"[train] done: {step} steps in {summary['minutes']:.1f} min, "

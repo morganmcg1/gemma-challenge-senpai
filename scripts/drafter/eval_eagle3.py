@@ -48,6 +48,7 @@ from train_eagle3 import (  # noqa: E402
     build_rope,
     collate,
     evaluate,
+    evaluate_native,
     load_corpus,
     pack_batches,
 )
@@ -173,122 +174,11 @@ def evaluate_topk(head, records, shift, batch_tokens, device, dtype, rope_theta,
             "n": total, "traces": traces, "top_k": K, "conf_top_k": conf_top_k}
 
 
-def _draft_step(head, input_ids, h0, n, rope_theta, device, dtype):
-    """One draft-body forward over a length-n sequence with a PRECOMPUTED post-fc
-    h0 (bypasses `combine`/`fc`). Replicates `DraftBody.forward` exactly except the
-    h0 source, so real-prefix positions match the teacher-forced path bit-for-bit
-    while speculative positions can carry the draft's OWN rolled-forward hidden.
-    Returns the draft output hidden [n, H] (one decoder layer + final norm)."""
-    cos, sin = build_rope(n, HEAD_DIM, rope_theta, device, dtype)
-    causal = torch.tril(torch.ones(n, n, dtype=torch.bool, device=device))
-    bias = torch.zeros(1, 1, n, n, dtype=dtype, device=device)
-    bias.masked_fill_(~causal[None, None], float("-inf"))
-    embeds = head.model.embed_tokens(input_ids)
-    with torch.autocast("cuda", dtype=dtype):
-        mlp_out, res1 = head.model.layers[0](embeds, h0, cos, sin, bias)
-        out = head.model.norm(mlp_out + res1)
-    return out[0]  # [n, H]
-
-
-@torch.no_grad()
-def evaluate_native(head, records, shift, device, dtype, rope_theta,
-                    chain_k=8, max_starts=16):
-    """Free-running (native) EAGLE chain acceptance — the serving-side objective.
-
-    Teacher-forced eval feeds the REAL target feature at every position, so it is
-    an UPPER BOUND on what serving accepts. At serve time only the FIRST draft step
-    of each verification round sees a real target feature; steps 2..K consume the
-    draft's OWN output hidden (the post-fc residual fed forward) plus the draft's
-    OWN guessed token. That 'interface-fidelity gap' (advisor note on PR #34, from
-    PR #9's cross-finding that tf and native acceptance can anti-correlate) is what
-    this metric captures, and it is the quantity that converts to TPS.
-
-    For each sampled response start p (a valid verification-round start: every real
-    position has a real target feature) we draft a chain of up to `chain_k` tokens:
-
-        step 1: ( h0 = combine(fused[p-shift]) [REAL],   embed(x_p)      ) -> g_{p+1}, d_p
-        step k: ( h0 = d_{p+k-1}               [DRAFT-OWN], embed(g_{p+k-1}) ) -> g_{p+k}, d_{p+k-1}
-
-    and accept the leading run of g's that match the target greedy continuation
-    (`next_token_ids`). The draft attends over the full real prefix + the accepted
-    speculative tail each step (causal self-attention, re-run for simplicity).
-
-      native_accept_per_step = mean accepted run length over starts  (advisor's
-                               'accepted-tok/step'; tokens/target-forward = this + 1)
-      native_step1_top1      = fraction of starts whose step-1 draft is correct;
-                               this MUST equal the tf top-1 (step 1 uses real inputs)
-                               and is a built-in wiring self-check.
-
-    Returns per-source means too (mmlu_pro / gpqa / aime) so we can see where the
-    benchmark-matched corpus moves the *serving* number, not just the tf bound.
-    """
-    head.eval()
-    run_by_src = {}
-    step1_hit = step1_tot = 0
-    for rec in records:
-        ids_full = rec["input_ids"].to(torch.long)
-        L = int(ids_full.shape[0])
-        if L < 3:
-            continue
-        nxt = rec["next_token_ids"]
-        src = rec.get("source", "all")
-        scored = [a for a in range(L - 1) if int(nxt[a]) != IGNORE]
-        if not scored:
-            continue
-        # Real-prefix post-fc h0 for the whole sequence (matches collate's roll).
-        aux = rec["aux"].to(device, torch.float32)                  # [3, L, H]
-        fused = aux.permute(1, 0, 2).reshape(L, N_AUX * HID)         # [L, 7680]
-        rolled = torch.zeros_like(fused)
-        if shift > 0:
-            rolled[shift:] = fused[:L - shift]
-        else:
-            rolled = fused
-        with torch.autocast("cuda", dtype=dtype):
-            h0_real = head.model.combine(rolled[None].to(dtype))[0]  # [L, H]
-        ids_dev = ids_full.to(device)
-
-        if len(scored) > max_starts:
-            sel = torch.linspace(0, len(scored) - 1, max_starts).round().long().tolist()
-            starts = sorted(set(scored[i] for i in sel))
-        else:
-            starts = scored
-
-        for p in starts:
-            seq_ids = ids_dev[:p + 1].clone()
-            seq_h0 = h0_real[:p + 1].clone()
-            d_prev = _draft_step(head, seq_ids[None], seq_h0[None], p + 1,
-                                 rope_theta, device, dtype)[p]
-            with torch.autocast("cuda", dtype=dtype):
-                g = int(head.lm_head(d_prev[None]).float().argmax(-1).item())
-            step1_tot += 1
-            if g == int(ids_full[p + 1]):
-                step1_hit += 1
-            accepted = 0
-            for k in range(chain_k):
-                pos = p + 1 + k
-                if pos >= L or g != int(ids_full[pos]):
-                    break
-                accepted += 1
-                if pos + 1 >= L:
-                    break
-                # Roll forward: append accepted token (== target) with DRAFT-OWN h0.
-                seq_ids = torch.cat([seq_ids, ids_dev[pos:pos + 1]])
-                seq_h0 = torch.cat([seq_h0, d_prev[None]], dim=0)
-                d_prev = _draft_step(head, seq_ids[None], seq_h0[None], pos + 1,
-                                     rope_theta, device, dtype)[pos]
-                with torch.autocast("cuda", dtype=dtype):
-                    g = int(head.lm_head(d_prev[None]).float().argmax(-1).item())
-            run_by_src.setdefault(src, []).append(accepted)
-
-    head.train()
-    all_runs = [r for v in run_by_src.values() for r in v]
-    aps = sum(all_runs) / max(1, len(all_runs))
-    per_src = {s: sum(v) / max(1, len(v)) for s, v in run_by_src.items()}
-    per_src_n = {s: len(v) for s, v in run_by_src.items()}
-    return {"native_accept_per_step": aps,
-            "native_step1_top1": step1_hit / max(1, step1_tot),
-            "per_source": per_src, "per_source_n": per_src_n,
-            "n_starts": len(all_runs), "chain_k": chain_k}
+# `_draft_step` and `evaluate_native` (the free-running native chain, the serving-
+# side accept/step objective) live in train_eagle3.py so training (in-loop
+# best-select on the multi-step metric) and this eval share ONE definition. The PR
+# #80 per-step acceptance profile (`survival_at_k`, `cond_accept_at_k`) is returned
+# by that shared `evaluate_native`.
 
 
 def main():
@@ -444,6 +334,18 @@ def main():
             print(f"[eval]   native source {s:9s}: accept/step="
                   f"{nat['per_source'][s]:.4f} (starts={nat['per_source_n'][s]})",
                   flush=True)
+        # Per-step acceptance PROFILE (PR #80): does the chain SUSTAIN past step-1,
+        # or COLLAPSE (the K=1 ceiling)? survival[k]=P(run>=k) (sums to accept/step);
+        # cond[k]=P(run>=k | run>=k-1) is the per-step conditional accept (cond[1]==
+        # step-1 hit). A collapsing chain has cond[2..]~0; multi-step training lifts them.
+        surv = nat["survival_at_k"]
+        cond = nat["cond_accept_at_k"]
+        kk = nat["chain_k"]
+        print(f"[eval] per-step survival  P(run>=k) k=1..{kk}: "
+              f"[{', '.join('%.4f' % x for x in surv)}]  (sum={sum(surv):.4f} "
+              f"== accept/step self-check)", flush=True)
+        print(f"[eval] per-step cond accept P(run>=k|run>=k-1) k=1..{kk}: "
+              f"[{', '.join('%.4f' % x for x in cond)}]", flush=True)
         print("=" * 60, flush=True)
         native_metrics = {
             "eval/native_accept_per_step": nat["native_accept_per_step"],
@@ -451,9 +353,15 @@ def main():
             "eval/native_step1_top1": nat["native_step1_top1"],
             "eval/native_step1_vs_tf_gap": gap,
             "eval/native_chain_k": nat["chain_k"], "eval/native_n_starts": nat["n_starts"]}
+        for ki, sv in enumerate(surv, start=1):
+            native_metrics[f"eval/native_surv_at_{ki}"] = sv
+        for ki, cv in enumerate(cond, start=1):
+            native_metrics[f"eval/native_cond_at_{ki}"] = cv
         for s, v in nat["per_source"].items():
             native_metrics[f"eval/native_src_{s}_accept_per_step"] = v
             native_metrics[f"eval/native_src_{s}_n"] = nat["per_source_n"][s]
+            for ki, sv in enumerate(nat["per_source_survival"][s], start=1):
+                native_metrics[f"eval/native_src_{s}_surv_at_{ki}"] = sv
 
     out = {"eval/tf_acceptance_rate": acc, "eval/top1_acc": acc,
            "eval/rescue_rate": rescue, "eval/loss": res["loss"],
