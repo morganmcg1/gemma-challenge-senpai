@@ -1,0 +1,44 @@
+{
+  "ctx_weights_source": "frontier_decode_postsplitkv/ctx_gate_analysis served dist",
+  "per_ctx": {
+    "128": {
+      "weight": 0.082,
+      "deployed_us_per_cycle": 327.4,
+      "best_oracle_us_per_cycle": 319.3,
+      "saving_frac": 0.0248,
+      "best_nseg_sliding": 8,
+      "best_nseg_full": 8
+    },
+    "256": {
+      "weight": 0.438,
+      "deployed_us_per_cycle": 386.4,
+      "best_oracle_us_per_cycle": 381.4,
+      "saving_frac": 0.0128,
+      "best_nseg_sliding": 16,
+      "best_nseg_full": 8
+    },
+    "512": {
+      "weight": 0.454,
+      "deployed_us_per_cycle": 484.4,
+      "best_oracle_us_per_cycle": 477.4,
+      "saving_frac": 0.0145,
+      "best_nseg_sliding": 32,
+      "best_nseg_full": 16
+    },
+    "1024": {
+      "weight": 0.026,
+      "deployed_us_per_cycle": 599.5,
+      "best_oracle_us_per_cycle": 555.4,
+      "saving_frac": 0.0735,
+      "best_nseg_sliding": 32,
+      "best_nseg_full": 16
+    }
+  },
+  "ctx_weighted_deployed_us_per_cycle": 431.6,
+  "ctx_weighted_best_oracle_us_per_cycle": 424.4,
+  "ctx_weighted_attn_time_saving_frac": 0.0166,
+  "attn_frac_of_gpu_busy": 0.076,
+  "implied_tps_uplift_oracle_nseg": 0.00126,
+  "attn_zero_ceiling_tps": 0.082,
+  "note": "oracle = picks optimal n_seg per (layer_type, ctx); the deployed kernel uses a single global n_seg=16. Realisable served uplift is <= this oracle and is further bounded by onegraph static CUDA-graph capture (n_seg is a capture-shape constexpr; per-ctx n_seg breaks the single-graph replay)."
+}
