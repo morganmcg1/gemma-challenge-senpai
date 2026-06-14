@@ -1,0 +1,223 @@
+{
+  "config": {
+    "checkpoint": "/tmp/osoi5-v0-baked/model.safetensors",
+    "group_size": 128,
+    "secondary_block": 256,
+    "block_sweep": [
+      256,
+      128,
+      64,
+      32,
+      16
+    ],
+    "green_threshold": 0.98,
+    "scheme": "asymmetric INT8 (min offset + (max-min)/255 step), FP32 secondary",
+    "n_scale_tensors": 302,
+    "core7_scales": 26849280,
+    "all_scales": 27417600,
+    "core7_scale_MB_fp16": 53.69856,
+    "all_scale_MB_fp16": 54.8352,
+    "int4_weight_MB": 1754.7264,
+    "A10G_HBM_GBS": 600.0,
+    "verify_gemm_frac": 0.532,
+    "wall_tps": 454.338,
+    "note": "CPU-only scan of deployed FP16 weight_scale tensors; never reads packed weights or the token stream. Lossless by construction."
+  },
+  "primary_core7": {
+    "block": 256,
+    "n": 26849280,
+    "n_bitexact": 3513793,
+    "bitexact_frac": 0.13087103266828756,
+    "exception_frac": 0.8691289673317124,
+    "n_blocks": 104880,
+    "orig_bytes": 53698560,
+    "csr_dense_bytes": 167701242,
+    "bitmap_dense_bytes": 77715454,
+    "bitmap_sparse_bytes": 54379967,
+    "best_bytes": 54379967,
+    "overhead_bytes": 839040,
+    "saved_bytes_best": -681407,
+    "saved_frac_of_scale_bytes_best": -0.012689483665856217,
+    "median_relspread": 2.596674919128418,
+    "p90_relspread": 5.133195877075195,
+    "frac_blocks_below_0p249": 0.0
+  },
+  "primary_all": {
+    "block": 256,
+    "n": 27417600,
+    "n_bitexact": 3571530,
+    "bitexact_frac": 0.1302641369047619,
+    "exception_frac": 0.8697358630952381,
+    "n_blocks": 107100,
+    "orig_bytes": 54835200,
+    "csr_dense_bytes": 171350820,
+    "bitmap_dense_bytes": 79393740,
+    "bitmap_sparse_bytes": 55547670,
+    "best_bytes": 55547670,
+    "overhead_bytes": 856800,
+    "saved_bytes_best": -712470,
+    "saved_frac_of_scale_bytes_best": -0.012992931547619048,
+    "median_relspread": 2.6171875,
+    "p90_relspread": 5.219466686248779,
+    "frac_blocks_below_0p249": 0.0
+  },
+  "block_sweep": [
+    {
+      "block": 256,
+      "n": 26849280,
+      "n_bitexact": 3513793,
+      "bitexact_frac": 0.13087103266828756,
+      "exception_frac": 0.8691289673317124,
+      "n_blocks": 104880,
+      "orig_bytes": 53698560,
+      "csr_dense_bytes": 167701242,
+      "bitmap_dense_bytes": 77715454,
+      "bitmap_sparse_bytes": 54379967,
+      "best_bytes": 54379967,
+      "overhead_bytes": 839040,
+      "saved_bytes_best": -681407,
+      "saved_frac_of_scale_bytes_best": -0.012689483665856217,
+      "median_relspread": 2.596674919128418,
+      "p90_relspread": 5.133195877075195,
+      "frac_blocks_below_0p249": 0.0
+    },
+    {
+      "block": 128,
+      "n": 26849280,
+      "n_bitexact": 4383807,
+      "bitexact_frac": 0.1632746576444508,
+      "exception_frac": 0.8367253423555492,
+      "n_blocks": 209760,
+      "orig_bytes": 53698560,
+      "csr_dense_bytes": 163320198,
+      "bitmap_dense_bytes": 76814466,
+      "bitmap_sparse_bytes": 54348993,
+      "best_bytes": 54348993,
+      "overhead_bytes": 1678080,
+      "saved_bytes_best": -650433,
+      "saved_frac_of_scale_bytes_best": -0.012112671177774599,
+      "median_relspread": 1.9405772686004639,
+      "p90_relspread": 4.146879959106446,
+      "frac_blocks_below_0p249": 0.0
+    },
+    {
+      "block": 64,
+      "n": 26849280,
+      "n_bitexact": 5578823,
+      "bitexact_frac": 0.20778296475734173,
+      "exception_frac": 0.7922170352426583,
+      "n_blocks": 419520,
+      "orig_bytes": 53698560,
+      "csr_dense_bytes": 157828182,
+      "bitmap_dense_bytes": 76102514,
+      "bitmap_sparse_bytes": 54832057,
+      "best_bytes": 54832057,
+      "overhead_bytes": 3356160,
+      "saved_bytes_best": -1133497,
+      "saved_frac_of_scale_bytes_best": -0.021108517621329138,
+      "median_relspread": 1.457308292388916,
+      "p90_relspread": 3.172006845474243,
+      "frac_blocks_below_0p249": 9.534706331045004e-06
+    },
+    {
+      "block": 32,
+      "n": 26849280,
+      "n_bitexact": 7317889,
+      "bitexact_frac": 0.2725543850710336,
+      "exception_frac": 0.7274456149289664,
+      "n_blocks": 839040,
+      "orig_bytes": 53698560,
+      "csr_dense_bytes": 150749946,
+      "bitmap_dense_bytes": 75980542,
+      "bitmap_sparse_bytes": 56449151,
+      "best_bytes": 56449151,
+      "overhead_bytes": 6712320,
+      "saved_bytes_best": -2750591,
+      "saved_frac_of_scale_bytes_best": -0.05122280746448322,
+      "median_relspread": 1.097771406173706,
+      "p90_relspread": 2.3095803260803223,
+      "frac_blocks_below_0p249": 5.005720823798627e-05
+    },
+    {
+      "block": 16,
+      "n": 26849280,
+      "n_bitexact": 10120810,
+      "bitexact_frac": 0.3769490280558734,
+      "exception_frac": 0.6230509719441266,
+      "n_blocks": 1678080,
+      "orig_bytes": 53698560,
+      "csr_dense_bytes": 140644740,
+      "bitmap_dense_bytes": 77087020,
+      "bitmap_sparse_bytes": 60358550,
+      "best_bytes": 60358550,
+      "overhead_bytes": 13424640,
+      "saved_bytes_best": -6659990,
+      "saved_frac_of_scale_bytes_best": -0.12402548597206331,
+      "median_relspread": 0.8101933002471924,
+      "p90_relspread": 1.6167097091674805,
+      "frac_blocks_below_0p249": 0.00048031083142639205
+    }
+  ],
+  "per_role": [
+    {
+      "role": "down_proj",
+      "n": 7577600,
+      "bitexact_frac": 0.14934253589527027
+    },
+    {
+      "role": "gate_proj",
+      "n": 7577600,
+      "bitexact_frac": 0.11020336254222973
+    },
+    {
+      "role": "up_proj",
+      "n": 7577600,
+      "bitexact_frac": 0.13132693728885136
+    },
+    {
+      "role": "o_proj",
+      "n": 1802240,
+      "bitexact_frac": 0.11625810102982954
+    },
+    {
+      "role": "q_proj",
+      "n": 1802240,
+      "bitexact_frac": 0.1473355379971591
+    },
+    {
+      "role": "other_lm",
+      "n": 568320,
+      "bitexact_frac": 0.10159241272522522
+    },
+    {
+      "role": "k_proj",
+      "n": 256000,
+      "bitexact_frac": 0.13994140625
+    },
+    {
+      "role": "v_proj",
+      "n": 256000,
+      "bitexact_frac": 0.16027734375
+    }
+  ],
+  "bf16_variant": {
+    "bf16_storage_lossless_frac": 0.06871271878480911,
+    "int8_dq_bitexact_on_bf16_grid": 0.8045493960380554
+  },
+  "palette_followup": {
+    "distinct_fp16_values_core7": 1009,
+    "palette_index_bits": 10,
+    "palette_saved_frac_of_scale_bytes": 0.375,
+    "per_tensor_distinct_median": 427
+  },
+  "verdict": {
+    "green": false,
+    "primary_bitexact_frac": 0.13087103266828756,
+    "green_threshold": 0.98,
+    "reason": "bit-exact 0.1309 <= 0.98 (exception set 86.91% -> hybrid saves only -0.68 MB of 53.7 MB)",
+    "int4_weight_bytes": 1754726400,
+    "saved_pct_of_int4_weight_bytes": -0.03883266359929388,
+    "dq_scale_bandwidth_saved_pct": -0.03767958389603293,
+    "dq_tps_lift_est_pct": -0.02004553863268952
+  }
+}
