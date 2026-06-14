@@ -1,5 +1,22 @@
 # SENPAI Research Results
 
+## 2026-06-14 03:53 — PR #82: Operationalized wall_tps: paired-A/B runner + re-baseline + #56 re-screen ✅ MERGED (infra keeper: canonical A/B entrypoint + locked re-baseline 454.09 + confirmed deployed MBT=512 optimal)
+
+- **Branch:** `lawine/walltps-ab-runner` · **Student:** lawine · merged ~03:53Z
+- **Status:** MERGED as infrastructure keeper (no served-file change; official bar UNCHANGED 481.53). Banks `scripts/profiler/paired_tps_ab.py` as the canonical one-command paired-`wall_tps` A/B entrypoint.
+- **Hypothesis:** the #72 `wall_tps` protocol (CV 0.035%, MDE ≥0.1% N=3) is proven but not yet operationalized into a reusable tool. A one-command paired-A/B runner lets every lever-builder (land #71, ubel #84, stark #78, kanna #87) decide on the same robust metric without re-implementing the harness.
+- **Primary metric:** `deployed_local_wall_tps = 454.085` (locks re-baseline). **Test:** `paired_ab_self_null_gain_pct = 0.030` (NULL ✓ = unbiased).
+
+| arm | median wall_tps | Δ vs deployed 512 | verdict |
+|---|---|---|---|
+| **A=B self-null (baseline check)** | 454.09 | +0.030% | NULL ✓ (unbiased) |
+| MBT 512→2048 (real-change validation) | 450.83 | −0.716% | REAL ✓ (~9× MDE, sensitive) |
+| MBT 512→4096 | 453.54 | −0.120% | REAL (small regression) |
+| MBT 512→8192 | 453.06 | −0.226% | REAL (small regression) |
+
+- **Conclusions:** (1) Runner validated — unbiased (self-null NULL +0.030%) + sensitive (real change REAL at ~9× MDE). (2) Re-baseline locked at **454.09 wall_tps** (CV 0.007%, confirms #72's N=12 454.12; retires fragile 428.37). (3) **#56 re-screen: no hidden win** — deployed MBT=512 is at/near optimum; all increases are small REAL regressions (E[accept] drifts 3.853→3.879 but scheduling overhead dominates at conc=1). (4) `paired_tps_ab.py` supports `--candidate-env` serve-time overrides, `--reuse-baseline-from` for multi-arm re-screens, structured `paired_ab.json` + W&B logging. First real lever job (topology A/B, re-opt max-branch-3 vs #74, ~+1.13pp) queued behind land #71. lawine → #90 (MTP K sweep).
+- **W&B (group walltps-ab-runner):** selfnull `2mq96qz1` · detok_off `dorrmq8l` · mbt2048 `xmwqvtmk` · mbt4096 `5ny0egab` · mbt8192 `pvg56gnm`.
+
 ## 2026-06-14 03:29 — PR #85: Tree-verify non-GEMM overhead audit at M=32 ✅ MERGED (decisive GO: non-GEMM tree machinery 2.597% decode, ~8× smaller than the +21.8% GEMM gain → net +19.82% survives; no O(M²); attention amortizes 1.06×; hands land #71 a per-op cost-budget oracle)
 
 - **Branch:** `denken/tree-overhead-audit` · **Student:** denken · merged by morganmcg1 ~03:28Z
