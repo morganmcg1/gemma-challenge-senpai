@@ -1,5 +1,24 @@
 # SENPAI Research Results
 
+## 2026-06-14 06:25 — PR #101: Tree accept-length reconciliation — why is the as-built tok/step=2.10 vs analytical 5.207? 🟢 GREEN — MERGED (2.10 is a FIXABLE BUILD DEFECT, not acceptance collapse; ≥56.1% provably build-defect, 100% fixable, (D)-ceiling 0%; ~568 survives; tree marked BUILD-BLOCKED/re-measure-pending)
+
+- **Branch:** `denken/tree-accept-reconciliation` · **Student:** denken · merged ~06:24Z (analysis-only, BASELINE unchanged — official bar UNCHANGED 481.53)
+- **Hypothesis:** byteshark's first real tree build (`tree-v2-merge-eager-v1`) delivered tok/step=2.097 — BELOW even linear-MTP 3.844, far below analytical 5.207. Back out implied per-position ρ̂ from the accept hist, compare to wirbel #79's ρ-ladder, classify the defect (A truncated walk / B draft-quality collapse / C eager artifact / D model-optimistic), and hand fern an honest E[T] band.
+- **Primary metric:** `tree_accept_length_gap_explained_pct = 100.0` (fixable). **Test:** `implied_tree_rho_hat_depth1 = -0.481` (negative ⇒ impossible for a real tree ⇒ build corrupts the spine). W&B `c5nbdjic` (CPU-only, no GPU; E[T] anchors reproduce wirbel 5.207 to 4.6e-5).
+
+| reference (tok/step, bonus incl) | E[T] | note |
+|---|--:|---|
+| model full tree (M=32) | 5.2070 | wirbel, \|Δ\|=4.6e-5 |
+| model spine-only (rank-1, depth-9) | 4.1773 | |
+| **deployed linear-MTP (measured)** | **3.8441** | hard floor a correct tree MUST clear |
+| **as-built (byteshark eager-diag)** | **2.102** | 40.4% of model |
+
+- **Verdict — 🟢 GREEN, fixable build defect.** The decisive observation: 2.10 sits 1.74 tok BELOW a *measured* floor (linear 3.844) that the *same drafter+verifier* already achieve — and the tree spine IS the linear chain, so a correct tree cannot accept less. ⇒ not an acceptance question at all. Gap = 5.207−2.102 = 3.105 tok decomposes as: **(A) sub-linear collapse 3.844→2.102 = 1.742 tok = 56.1% = PROVABLE build defect (dominant)**; spine depth-9 ext 0.333 tok = 10.7% (unrealized premium); branch premium 1.030 tok = 33.2% (unrealized premium). **(B) draft-quality** bounded SMALL (salvage fires 0.358/step = 1.07× model-expected 0.336 → drafter IS producing correct rank-2+ candidates); **(C) eager-mode** ~0% of accept-length (overhead/TPS axis, not numerics); **(D) optimistic model = 0%** (fern #92 realized 5.208 vs independent 5.207, +0.025%).
+- **Mechanism (the build defect):** (1) depth-1 spine continuation collapses to **0.598 vs the required q[1]=0.7287** (depth-1 is drafter-identical to linear, no tree-attn → a correct build MUST hit 0.7287) ⇒ verify/dispatch corrupts the spine before any branch logic; (2) salvage walk recovers the immediate rescue node but does NOT descend its sub-path — full-tree reach **1.10% as-built vs ~60.8% model**. wirbel #79's ρ-ladder is sound and **un-exercised** (build corrupts below its own rank-1 floor).
+- **Corrected band handed to fern #100/#102:** compose against **[3.844 floor, 5.207 ceiling]**, central 5.14–5.21 IF full-depth traversal + fp32 star-attn land; tree marked **BUILD-BLOCKED / re-measure-pending**. Do NOT plug 2.10 (defect artifact) or 5.207 (unrealized) directly. JSON `step3_gate.corrected_ET_band_for_fern100` is machine-readable.
+- **Build hand-off (relayed to land #71 / byteshark / chiku-inu / openevolve, board 20260614-062536):** (1) fastest localizer = assert depth-1 == 0.7287; (2) make the salvage walk descend the recovered sub-tree (full-reach ≫1.1%); (3) re-measure accept_length on the **fp32** star-attn path (NOT relerr eager — wirbel #93 is a *separate* greedy blocker).
+- **Banks:** `scripts/profiler/tree_accept_reconciliation.py` + `research/spec_cost_model/tree_accept_reconciliation_results.json` + `report_tree_accept_reconciliation.md`. **Strategic consequence:** the tree is no longer a single point of failure for 500 — denken reassigned to **#105 (tree-free 500-path ceiling)**: can SplitK #84 + LK #95 + double-quant #104 clear 500 with NO tree, and at what SplitK threshold? (go/no-go: tree critical-path vs insurance). **Next (queued, denken on request):** re-run this exact reconciliation once byteshark posts a per-position branch-hit histogram from the fixed build → converts 5.207 into a realized band + bounds the deep-tail (B).
+
 ## 2026-06-14 06:12 — PR #98: fp32 star-attn cost gate — does the #93-mandated fp32 accumulation erode the tree's +18.2%? 🟢 GREEN — MERGED (fp32 star-attn is ~free: conservative +0.34% M=32 / +0.01% M=8, realized NEGATIVE; haircut 0.404pp → tree net +19.41%; the #93 fp32 constraint is NOT load-bearing)
 
 - **Branch:** `wirbel/fp32-starattn-cost-gate` · **Student:** wirbel · merged ~06:12Z (analysis-only, BASELINE unchanged — official bar UNCHANGED 481.53)
