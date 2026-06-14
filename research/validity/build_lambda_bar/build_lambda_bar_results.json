@@ -1,0 +1,257 @@
+{
+  "pr": 249,
+  "agent": "fern",
+  "kind": "build_lambda_bar_reconciliation",
+  "metric_primary": "lambda_bar_reconciliation_self_test_passes",
+  "metric_test": "build_lambda_operative_gate",
+  "lambda_bar_reconciliation_self_test_passes": true,
+  "build_lambda_operative_gate": 0.9780112973731208,
+  "build_lambda_defended_target": 0.9807516141069097,
+  "build_lambda_defended_target_uniform_if_div_discounted": 0.9860579957087814,
+  "headline_build_lambda_target": 0.9780112973731208,
+  "risk_statement": "build to lambda_hat >= 0.9780 (OPERATIVE gate, P95 validity); at 0.9780 the accepted residual is: validity P_invalid = 0.05 (P95 LCB construction) and draw-below-500 P = 0.0589 (divergence-informed) -- the draw risk is ACCEPTED under #124 publish-first as post-hoc defence. SHOULD additionally clear the DEFENDED target lambda_hat >= 0.9808 (divergence-informed 5% draw-risk) to drive draw-below-500 P down to 0.05.",
+  "operative_gate_axis": "VALIDITY (P95 LCB on lambda_hat)",
+  "operative_gate_residual": {
+    "P_invalid": 0.05,
+    "draw_below_500_divinformed_accepted": 0.05887458132955578,
+    "draw_below_500_uniform_accepted": 0.07927391349436388
+  },
+  "defended_target_axis": "DRAW-RISK (f_priv-integrated P(draw<500), divergence-informed)",
+  "defended_target_residual": {
+    "P_draw_below_500": 0.04999999999998693
+  },
+  "monotone_defended_ge_operative": true,
+  "worstcase_vertex_floor_243": 0.9784133623810887,
+  "worstcase_vertex_floor_minus_operative": 0.0004020650079679111,
+  "constraint_table": [
+    {
+      "name": "P95 validity bar",
+      "lambda": 0.9780112973731208,
+      "risk_axis": "VALIDITY (P95 LCB on lambda_hat)",
+      "residual_risk": {
+        "P_invalid": 0.05
+      },
+      "provenance": "stark #191 LCB-on-lambda, via #239 model['p95']",
+      "role": "operative gate (MUST clear to launch)"
+    },
+    {
+      "name": "worst-case-vertex floor (measured 0.73% div)",
+      "lambda": 0.9784133623810887,
+      "risk_axis": "VALIDITY (point-estimate mean=500 @ adverse NLS vertex)",
+      "residual_risk": {
+        "note": "point estimate; mean clears 500 at the worst-case f_priv vertex"
+      },
+      "provenance": "#243 lambda_floor_under_measured_div_linear (breakeven 0.959780 holds)",
+      "role": "consistency check -- confirms the operative gate (does NOT raise it)"
+    },
+    {
+      "name": "integrated-5% draw-risk (divergence-informed)",
+      "lambda": 0.9807516141069097,
+      "risk_axis": "DRAW-RISK (f_priv-integrated P(draw<500))",
+      "residual_risk": {
+        "P_draw_below_500": 0.05
+      },
+      "provenance": "#239 lambda_integrated_risk5_divinformed (Beta(2,1), measured 0.73%)",
+      "role": "defended target (SHOULD clear)"
+    },
+    {
+      "name": "integrated-5% draw-risk (uniform)",
+      "lambda": 0.9860579957087814,
+      "risk_axis": "DRAW-RISK (f_priv-integrated P(draw<500))",
+      "residual_risk": {
+        "P_draw_below_500": 0.05
+      },
+      "provenance": "#239 lambda_integrated_risk5_uniform (Beta(1,1), divergence discounted)",
+      "role": "defended target IF the measured divergence evidence is discounted"
+    }
+  ],
+  "risk_axes": {
+    "validity_axis": {
+      "question": "will the private re-draw be a VALID (>=500) result?",
+      "constraints_lambda": {
+        "p95_lcb_bar": 0.9780112973731208,
+        "central_lambda_floor_233": 0.9780440967672128,
+        "worstcase_vertex_floor_243": 0.9784133623810887
+      },
+      "cluster_band": [
+        0.9780112973731208,
+        0.9784133623810887
+      ],
+      "cluster_width": 0.0004020650079679111,
+      "residual_at_gate": {
+        "P_invalid": 0.05
+      },
+      "note": "Three independent validity-axis derivations -- the P95 LCB bar, #233's central lambda_floor, and #243's worst-case-vertex floor under the measured 0.73% divergence -- cluster inside a ~4.0e-04 band; the validity location is pinned at ~0.9780."
+    },
+    "draw_risk_axis": {
+      "question": "probability the private DRAW lands BELOW 500?",
+      "constraints_lambda": {
+        "integrated_risk5_divinformed": 0.9807516141069097,
+        "integrated_risk5_uniform": 0.9860579957087814
+      },
+      "sigma_draw": 7.390974474817942,
+      "residual_at_target": {
+        "P_draw_below_500": 0.05
+      },
+      "note": "The draw adds sigma_draw=7.391 on TOP of the mean: a draw can fall below 500 even when the mean clears it, so this axis sits ABOVE the validity cluster. The two values differ only by the f_priv prior (divergence-informed vs uniform)."
+    },
+    "why_not_one_number": "VALIDITY prices whether lambda_hat itself is high enough (an LCB confidence statement); DRAW-RISK prices whether a Gaussian draw with sigma=7.391 around the mean lands >=500. Different objects -> the validity bar (0.9780) and the draw-risk bar (0.9808+) do not reduce to a single number."
+  },
+  "recommendation": {
+    "build_lambda_operative_gate": 0.9780112973731208,
+    "build_lambda_defended_target": 0.9807516141069097,
+    "build_lambda_defended_target_uniform_if_div_discounted": 0.9860579957087814,
+    "operative_gate_axis": "VALIDITY (P95 LCB on lambda_hat)",
+    "operative_gate_residual": {
+      "P_invalid": 0.05,
+      "draw_below_500_divinformed_accepted": 0.05887458132955578,
+      "draw_below_500_uniform_accepted": 0.07927391349436388
+    },
+    "defended_target_axis": "DRAW-RISK (f_priv-integrated P(draw<500), divergence-informed)",
+    "defended_target_residual": {
+      "P_draw_below_500": 0.04999999999998693
+    },
+    "worstcase_vertex_floor_243": 0.9784133623810887,
+    "worstcase_vertex_floor_minus_operative": 0.0004020650079679111,
+    "headline_build_lambda_target": 0.9780112973731208,
+    "risk_statement": "build to lambda_hat >= 0.9780 (OPERATIVE gate, P95 validity); at 0.9780 the accepted residual is: validity P_invalid = 0.05 (P95 LCB construction) and draw-below-500 P = 0.0589 (divergence-informed) -- the draw risk is ACCEPTED under #124 publish-first as post-hoc defence. SHOULD additionally clear the DEFENDED target lambda_hat >= 0.9808 (divergence-informed 5% draw-risk) to drive draw-below-500 P down to 0.05.",
+    "posture": "#124 publish-first: publish the milestone first; organisers rule on validity post-hoc; private DRAW risk is ACCEPTED (post-hoc defence). The OPERATIVE gate is the launch trigger; the DEFENDED target is advisory headroom, not a launch blocker.",
+    "monotone_defended_ge_operative": true
+  },
+  "sensitivity": {
+    "discount_divergence_evidence": {
+      "defended_target_divergence_informed": 0.9807516141069097,
+      "defended_target_uniform": 0.9860579957087814,
+      "delta_uniform_minus_divinformed": 0.00530638160187169,
+      "operative_gate_unchanged": 0.9780112973731208,
+      "note": "Discounting lawine #232/#242's measured 0.73% (uniform prior) moves the DEFENDED target UP from 0.9808 to 0.9861 (+0.0053); the OPERATIVE gate is unaffected (it does not depend on the f_priv prior)."
+    },
+    "fpriv_endpoint_pin": {
+      "point_lambda_risk5_at_assumed_f_hi": 0.9699990336265489,
+      "point_lambda_risk5_at_grounded_f_lo": 0.9987479217531485,
+      "f_hi_assumed": 0.969106920637722,
+      "f_lo_grounded": 0.9570535584491102,
+      "note": "Pinning f_priv at a POINT instead of integrating: at the assumed ceiling f_hi=0.969107 the 5% draw-risk lambda is 0.9700 (== #237's point lambda_risk5 0.9700); at the grounded floor f_lo=0.957054 it rises to 0.9987 (near lambda=1 -- the grounded f_priv needs almost-perfect acceptance to hold 5% draw-risk). The integrated defended target 0.9808 sits between these endpoints, nearer the assumed end under the divergence-informed lean."
+    }
+  },
+  "self_test": {
+    "lambda_bar_reconciliation_self_test_passes": true,
+    "conditions": {
+      "a_provenance_239_243_reproduce_lt_1e6": {
+        "pass": true,
+        "max_abs_err": 0.0,
+        "tol": 1e-06,
+        "failures": []
+      },
+      "b_gate_and_target_pinned_to_axis_with_numeric_residual": {
+        "pass": true,
+        "operative_gate_axis": "VALIDITY (P95 LCB on lambda_hat)",
+        "operative_P_invalid": 0.05,
+        "operative_draw_below_500_divinformed": 0.05887458132955578,
+        "defended_target_axis": "DRAW-RISK (f_priv-integrated P(draw<500), divergence-informed)",
+        "defended_P_draw_below_500": 0.04999999999998693
+      },
+      "c_monotone_consistent_defended_ge_operative": {
+        "pass": true,
+        "operative": 0.9780112973731208,
+        "defended_divinformed": 0.9807516141069097,
+        "defended_uniform": 0.9860579957087814,
+        "defended_ge_operative": true,
+        "uniform_ge_divinformed": true,
+        "validity_cluster_width": 0.0004020650079679111,
+        "validity_cluster_tol": 0.001
+      },
+      "d_defended_holds_5pct_operative_accepts_more": {
+        "pass": true,
+        "defended_integrated_draw_risk": 0.04999999999998693,
+        "operative_accepted_draw_risk": 0.05887458132955578,
+        "draw_risk_target": 0.05
+      },
+      "e_nan_clean": {
+        "pass": true,
+        "nan_paths": []
+      }
+    },
+    "n_conditions": 5
+  },
+  "banked_scalars": {
+    "p95_validity_bar": 0.9780112973731208,
+    "speed_gate": 0.9674684694454245,
+    "publish_first_floor": 0.9138270633254324,
+    "f_priv_grounded": 0.9570535584491102,
+    "f_priv_assumed": 0.969106920637722,
+    "sigma_draw": 7.390974474817942,
+    "lambda_integrated_risk5_uniform": 0.9860579957087814,
+    "lambda_integrated_risk5_divinformed": 0.9807516141069097,
+    "integrated_risk_at_speed_gate_uniform": 0.13465808503358756,
+    "integrated_risk_at_speed_gate_divinformed": 0.10456747508890826,
+    "lambda_floor_worstcase_vertex_243": 0.9784133623810887,
+    "lambda_floor_central_233": 0.9780440967672128,
+    "fpriv_worstcase_under_measured_div": 0.9689500205949673,
+    "f_priv_breakeven_publish_first": 0.9597799742440889
+  },
+  "provenance_roundtrip": {
+    "239.lambda_integrated_risk5_uniform": {
+      "recomputed": 0.9860579957087814,
+      "committed": 0.9860579957087814,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "239.lambda_integrated_risk5_divinformed": {
+      "recomputed": 0.9807516141069097,
+      "committed": 0.9807516141069097,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "239.integrated_risk_at_speed_gate": {
+      "recomputed": 0.13465808503358756,
+      "committed": 0.13465808503358756,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "239.integrated_risk_at_speed_gate_divinformed": {
+      "recomputed": 0.10456747508890826,
+      "committed": 0.10456747508890826,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "239.p95_private_bar": {
+      "recomputed": 0.9780112973731208,
+      "committed": 0.9780112973731208,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "243.lambda_floor_under_measured_div_linear": {
+      "recomputed": 0.9784133623810887,
+      "committed": 0.9784133623810887,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "243.fpriv_worstcase_under_measured_div": {
+      "recomputed": 0.9689500205949673,
+      "committed": 0.9689500205949673,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "243.f_priv_breakeven": {
+      "recomputed": 0.9597799742440889,
+      "committed": 0.9597799742440889,
+      "abs_err": 0.0,
+      "round_trips": true
+    }
+  },
+  "handoff": "fern #238 card row (iii) build bar: the measured launch lambda_hat must clear the OPERATIVE gate build_lambda_operative_gate=0.9780 (P95 validity; residual P_invalid=0.05). #243's worst-case-vertex floor 0.978413 confirms it (+4.0e-04). The DEFENDED target build_lambda_defended_target=0.9808 (divergence-informed 5% draw-risk) is advisory headroom -- under #124 publish-first the draw risk (0.0589 at the gate) is ACCEPTED post-hoc, so the operative gate is the launch trigger and the defended target is a SHOULD, not a MUST.",
+  "scope": "LOCAL CPU-only analytic RECONCILIATION over EXISTING MERGED legs: imports #239 (fpriv_distribution_risk -> #237 -> #228/#217/#191/#224/#229) and #243 (fpriv_worstcase_measured_div) VERBATIM and reconciles their banked numbers into ONE operative gate + ONE defended target on labelled risk axes. Recomputes both legs' headlines from their modules and round-trips them against the committed JSON (< 1e-6). No GPU / vLLM / HF Job / submission / served-file change / official draw. BASELINE stays 481.53; adds 0 TPS; greedy/PPL untouched; authorizes NOTHING. NOT a launch. NOT open2.",
+  "public_evidence_used": [
+    "kanna #239 (fpriv_distribution_risk): lambda_integrated_risk5 = 0.9861 uniform / 0.9808 divergence-informed, integrated_risk_at_speed_gate, p95 validity bar 0.9780 -- imported as a module and reproduced to < 1e-6.",
+    "stark #243 (fpriv_worstcase_measured_div): lambda_floor_under_measured_div_linear 0.978413 (publish-first breakeven 0.959780 holds at the worst-case NLS vertex under the measured 0.73% divergence) -- imported as a module and reproduced to < 1e-6.",
+    "lawine #232 / #242 (int4 token divergence): the MEASURED 0.73% near-greedy divergence that selects the divergence-informed prior (0.9808) over uniform (0.9861) for the defended target.",
+    "fern #238 (launch_decision_card): the #124 publish-first GO/NO-GO card whose build-bar row (iii) consumes the operative gate; under publish-first the draw risk is ACCEPTED post-hoc.",
+    "Issue #124 (publish-first green-light): the launch posture under which the operative gate is the trigger and the defended target is advisory."
+  ],
+  "method": "LOCAL CPU-only analytic reconciliation. Import #239 + #243 VERBATIM; recompute and round-trip their headlines; lay the three constraints on one lambda axis; separate the VALIDITY (P95 LCB) and DRAW-RISK (integrated-5%) axes; pick the operative gate (0.9780 validity) and defended target (0.9808 divergence-informed) with numeric residuals; sensitivity to discounting the divergence evidence and to the f_priv endpoint pin. No GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS.",
+  "metrics_nan_clean": 1,
+  "peak_mem_mib": 28.66015625,
+  "elapsed_s": 0.9897,
+  "nan_clean": true
+}
