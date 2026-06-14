@@ -58,25 +58,32 @@ Located live seams (refines the Comp-1 row):
   25** width-1 drafter forwards (vs 7 for the chain). Verify stays one forward
   over M rows. The extra drafter latency is the tree's draft-side price; the gain
   is on E[T] (denken #85 gates the verify side, not the drafter).
-- **OPEN (confirm live): do draft tokens attend EACH OTHER, or only the fixed
-  prefix?** The drafter (`/tmp/qat-assistant/config.json`,
-  `Gemma4AssistantForCausalLM`) is a **4-layer attention transformer** (3
-  sliding + 1 full, `use_cache:true`, sliding_window 512) — it definitely
-  attends a KV cache, so "pure-recurrent" is imprecise. The crux is the *scope*
-  of that attention. Evidence it is the **fixed prefix only** (→ simple case):
-  the loopgraph body advances no per-step seq_len/position, sets `seq_lens` once
-  before the K-loop (`sitecustomize.py:479-480`), requires
-  `constant_draft_positions` (`:259`), and captures a single body replayed K
-  times. If draft tokens attend only the fixed prefix and recurse via
-  `hidden_states`, branches don't pollute each other → Component 1 needs **no
-  draft-side tree mask**, only the parent-hidden threading above. If instead
-  seq_len grows per draft step (draft self-attention), a branch forward would
-  attend a sibling's KV → Component 1 needs ancestor-only attention on the draft
-  side too (symmetric to Component 2's verify star-mask). The static signals
-  conflict (attention layers + `use_cache` vs fixed-seq_len loop), so resolve
-  empirically at first live emit (run `emit_tree` in node order; spine-identity
-  holding ⇒ fixed-prefix, breaking ⇒ self-attention). The `emit_tree` ordering
-  reference is correct either way.
+- **RESOLVED (code + live): the deployed drafter is recurrent-fixed-prefix; draft
+  tokens do NOT attend each other.** This settles openevolve's leg-3 concern
+  ("if the tree emit re-enters the MTP head per-node WITHOUT accumulated self-KV,
+  or position_ids don't increment, deep candidates degrade") **for the draft
+  side**. The deployed eager draft loop (`sitecustomize.py:816-840`) proves it
+  three ways: (1) `loop_metadata` is built **once** (`:811-814`) before the K-loop
+  and reused every iteration; (2) `positions = self._get_positions(...)` and
+  `slot_mapping = self._get_slot_mapping(...)` are called with the **same arg and
+  never mutated in-loop** → constant position, constant slot → each draft step
+  **OVERWRITES** the one KV slot (no cross-step self-KV accumulation, no position
+  increment); (3) the **only** state carried forward is `self.hidden_states[:1] =
+  hidden[:1]` (`:836`) → pure recurrence. So the deployed chain itself works
+  WITHOUT accumulated self-KV / monotonic positions — they are not part of this
+  drafter's mechanism. My emit (`_run_tree_emit_probe`) mirrors it exactly for
+  EVERY node — `ctx = hidden_cache[parent]` restores the parent's hidden (the
+  tree-correct analog of the chain's `hidden_states = hidden`), same
+  `loop_metadata`/`_get_positions`/`_get_slot_mapping` — so the deep branch
+  candidates (nodes 5,8,10,7) are formed by the **identical** recurrent mechanism
+  as the deployed chain's tokens. openevolve's concern describes a **sequential
+  self-attention** drafter; this one is recurrent, so it does not apply. Live
+  spine-identity holding (Comp-1 validation) independently confirms it. Net:
+  **Component 1 needs no draft-side tree mask, only the parent-hidden threading**,
+  and the deep-branch risk is NOT on the draft side — the only remaining
+  deep-branch question is verify-side acceptance (STAGE-2b / openevolve's free
+  A10G ladder), where Component 3b already supplies monotonic `base+depth`
+  positions and Component 2's qq_bias supplies the ancestor-only attention.
 
 ## Finding A detail — qq_bias makes the mask free
 
@@ -156,6 +163,34 @@ M=16). Seam for 2b, mapped against installed vLLM (`gpu_model_runner.py`):
   (scratch-block alloc + combined block_table) — the one real-risk piece; it is
   the SAME machinery the continued-gen widened verify needs, so 2b's direct E[T]
   also arrives for free once the real verify widens to 16 rows.
+
+## Build-contract relay (advisor 14:50Z — 3 legs, none redirect)
+
+- **Leg 1 (wirbel #165, MERGED) — kernel build (Step 2), not the probe.** For the
+  CONTINUED-GEN accept KERNEL the cleaner BUG-2 fix is **descent-ordered DFS node
+  layout + ONE flat `target_argmax` gather** (`start_idx+pos` already correct),
+  rather than my Component-3a **decoupled two maps** (`target_logits_indices` +
+  `draft_token_rows`). Both are validated-equivalent; the wirbel #165 DFS-relayout
+  is preferred for the kernel because PARENT_M16's node numbering is BFS-ish (node
+  2 = root's rank-2 sits at flat pos 2, a sibling not a descendant) so a flat walk
+  needs EITHER a remap (mine) OR a DFS relayout (#165). The single-step PROBE uses
+  the CPU `descend_accept` (walks `children`, layout-agnostic) → unaffected; adopt
+  the DFS layout when building the Triton descent kernel. Greedy cert for that
+  kernel: wirbel #160 §5 assertion + `greedy_exact_harness.py --audit-kernel-symbol`
+  (denken #158) for the GREEDY_EXACT rate-1.0 certificate before any launch.
+- **Leg 2 (ubel #163, MERGED) — 3c relocate PREFERRED variant.** Two banked
+  greedy-safe designs: fused `index_select`+`index_copy_` (35.3 µs → clear-500 bar
+  4.880) and the **PREFERRED paged slot-map / block-table re-point** (zero-copy,
+  20.26 µs → bar **4.817**). Build the paged re-point **if block-table plumbing
+  allows the re-point with an on-device commit-index (no host readout)**. Same
+  block-table machinery as the STAGE-2b scratch block above → mapping it serves
+  both. Host-loop relocate still the landmine (8.15 units / 77 TPS, breaks capture).
+- **Leg 3 (openevolve) — RESOLVED draft-side** (see Component-1 detail: recurrent
+  drafter, deep candidates faithful). Verify-side deep ladder: openevolve offers a
+  **free A10G per-position-ladder measurement** (hand them the built descent
+  kernel's single-knob delta package) to confirm the real ladder ≥ the modeled
+  E[T]=5.06 floor at zero quota — the no-risk substitute for STAGE-2b's verify-side
+  scratch forward.
 
 ## Gates (unchanged)
 
