@@ -1,0 +1,411 @@
+[ab] normalized CUDA_VISIBLE_DEVICES '1' -> '0' (single in-container GPU)
+[ab] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+    $ /usr/local/bin/uv venv /tmp/senpai-venvs/5f4c623f772358a2 --python 3.12
+Downloading cpython-3.12.13-linux-x86_64-gnu (download) (32.5MiB)
+ Downloaded cpython-3.12.13-linux-x86_64-gnu (download)
+Using CPython 3.12.13
+Creating virtual environment at: /tmp/senpai-venvs/5f4c623f772358a2
+Activate with: source /tmp/senpai-venvs/5f4c623f772358a2/bin/activate
+    $ /usr/local/bin/uv pip install --python /tmp/senpai-venvs/5f4c623f772358a2/bin/python https://wheels.vllm.ai/3e8afdf78598afc8be999a6a049be3a5fe182e48/vllm-0.22.1rc1.dev307%2Bg3e8afdf78.cu129-cp38-abi3-manylinux_2_28_x86_64.whl transformers==5.9.0 jinja2==3.1.6 MarkupSafe==3.0.3 orjson==3.10.18 safetensors torch
+Using Python 3.12.13 environment at: /tmp/senpai-venvs/5f4c623f772358a2
+Resolved 193 packages in 1.77s
+Downloading ml-dtypes (4.8MiB)
+Downloading pydantic-core (2.0MiB)
+Downloading tiktoken (1.1MiB)
+Downloading uvloop (4.2MiB)
+Downloading aiohttp (1.7MiB)
+Downloading cuda-bindings (6.3MiB)
+Downloading pillow (6.8MiB)
+Downloading grpcio (6.5MiB)
+Downloading nvidia-cuda-nvrtc-cu12 (85.4MiB)
+Downloading llvmlite (53.7MiB)
+Downloading triton (179.5MiB)
+Downloading apache-tvm-ffi (2.2MiB)
+Downloading torchaudio (1.7MiB)
+Downloading nvidia-cuda-tileiras (35.3MiB)
+Downloading nvidia-cutlass-dsl-libs-base (71.1MiB)
+Downloading numba (3.6MiB)
+Downloading fastsafetensors (1.8MiB)
+Downloading cuda-core (4.9MiB)
+Downloading nvidia-cuda-cccl-cu12 (3.0MiB)
+Downloading nvidia-cuda-nvcc (42.0MiB)
+Downloading nvidia-cuda-nvcc-cu12 (38.7MiB)
+Downloading xgrammar (42.5MiB)
+Downloading nvidia-cuda-runtime-cu12 (3.3MiB)
+Downloading sentencepiece (1.3MiB)
+Downloading outlines-core (2.2MiB)
+Downloading setuptools (1.0MiB)
+Downloading nvidia-cudnn-frontend (3.3MiB)
+Downloading flashinfer-python (13.3MiB)
+Downloading flashinfer-cubin (426.8MiB)
+Downloading torch (506.1MiB)
+Downloading nvidia-nvvm (61.3MiB)
+Downloading tokenspeed-triton (81.9MiB)
+Downloading torchvision (7.2MiB)
+Downloading numpy (15.8MiB)
+Downloading vllm (476.9MiB)
+ Downloaded tiktoken
+ Downloaded setuptools
+ Downloaded sentencepiece
+ Downloaded aiohttp
+ Downloaded torchaudio
+ Downloaded fastsafetensors
+ Downloaded pydantic-core
+ Downloaded outlines-core
+ Downloaded apache-tvm-ffi
+ Downloaded nvidia-cuda-runtime-cu12
+ Downloaded nvidia-cudnn-frontend
+ Downloaded uvloop
+ Downloaded ml-dtypes
+ Downloaded numba
+ Downloaded cuda-core
+ Downloaded cuda-bindings
+ Downloaded torchvision
+ Downloaded pillow
+ Downloaded grpcio
+ Downloaded nvidia-cuda-cccl-cu12
+ Downloaded numpy
+ Downloaded nvidia-cuda-tileiras
+ Downloaded nvidia-cuda-nvcc-cu12
+ Downloaded nvidia-cuda-nvcc
+ Downloaded xgrammar
+ Downloaded llvmlite
+ Downloaded nvidia-nvvm
+ Downloaded nvidia-cutlass-dsl-libs-base
+ Downloaded tokenspeed-triton
+ Downloaded nvidia-cuda-nvrtc-cu12
+ Downloaded flashinfer-python
+ Downloaded triton
+ Downloaded vllm
+ Downloaded torch
+ Downloaded flashinfer-cubin
+Prepared 63 packages in 20.19s
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 193 packages in 6.39s
+ + aiohappyeyeballs==2.6.2
+ + aiohttp==3.14.1
+ + aiosignal==1.4.0
+ + annotated-doc==0.0.4
+ + annotated-types==0.7.0
+ + anthropic==0.109.1
+ + anyio==4.13.0
+ + apache-tvm-ffi==0.1.9
+ + astor==0.8.1
+ + attrs==26.1.0
+ + blake3==1.0.8
+ + cachetools==7.1.4
+ + cbor2==6.1.2
+ + certifi==2026.5.20
+ + cffi==2.0.0
+ + charset-normalizer==3.4.7
+ + click==8.4.1
+ + cloudpickle==3.1.2
+ + compressed-tensors==0.17.0
+ + cryptography==49.0.0
+ + cuda-bindings==13.3.1
+ + cuda-core==1.0.1
+ + cuda-pathfinder==1.5.5
+ + cuda-python==13.3.1
+ + cuda-tile==1.3.0
+ + cuda-toolkit==13.0.2
+ + depyf==0.20.0
+ + detect-installer==0.1.0
+ + dill==0.4.1
+ + diskcache==5.6.3
+ + distro==1.9.0
+ + dnspython==2.8.0
+ + docstring-parser==0.18.0
+ + einops==0.8.2
+ + email-validator==2.3.0
+ + fastapi==0.136.3
+ + fastapi-cli==0.0.24
+ + fastapi-cloud-cli==0.20.0
+ + fastar==0.11.0
+ + fastsafetensors==0.3.2
+ + filelock==3.29.4
+ + flashinfer-cubin==0.6.12
+ + flashinfer-python==0.6.12
+ + frozenlist==1.8.0
+ + fsspec==2026.4.0
+ + gguf==0.19.0
+ + googleapis-common-protos==1.75.0
+ + grpcio==1.81.1
+ + h11==0.16.0
+ + hf-xet==1.5.1
+ + httpcore==1.0.9
+ + httptools==0.8.0
+ + httpx==0.28.1
+ + httpx-sse==0.4.3
+ + huggingface-hub==1.19.0
+ + humming-kernels==0.1.4
+ + idna==3.18
+ + ijson==3.5.0
+ + interegular==0.3.3
+ + jinja2==3.1.6
+ + jiter==0.15.0
+ + jmespath==1.1.0
+ + jsonschema==4.26.0
+ + jsonschema-specifications==2025.9.1
+ + lark==1.2.2
+ + llguidance==1.7.6
+ + llvmlite==0.47.0
+ + lm-format-enforcer==0.11.3
+ + loguru==0.7.3
+ + markdown-it-py==4.2.0
+ + markupsafe==3.0.3
+ + mcp==1.27.2
+ + mdurl==0.1.2
+ + mistral-common==1.11.3
+ + ml-dtypes==0.5.4
+ + model-hosting-container-standards==0.1.15
+ + mpmath==1.3.0
+ + msgspec==0.21.1
+ + multidict==6.7.1
+ + networkx==3.6.1
+ + ninja==1.13.0
+ + numba==0.65.0
+ + numpy==2.3.5
+ + nvidia-cublas==13.1.0.3
+ + nvidia-cuda-cccl-cu12==12.9.27
+ + nvidia-cuda-crt==13.3.33
+ + nvidia-cuda-cupti==13.0.85
+ + nvidia-cuda-nvcc==13.2.78
+ + nvidia-cuda-nvcc-cu12==12.9.86
+ + nvidia-cuda-nvrtc==13.0.88
+ + nvidia-cuda-nvrtc-cu12==12.9.86
+ + nvidia-cuda-runtime==13.0.96
+ + nvidia-cuda-runtime-cu12==12.9.79
+ + nvidia-cuda-tileiras==13.2.78
+ + nvidia-cudnn-cu13==9.19.0.56
+ + nvidia-cudnn-frontend==1.25.0
+ + nvidia-cufft==12.0.0.61
+ + nvidia-cufile==1.15.1.6
+ + nvidia-curand==10.4.0.35
+ + nvidia-cusolver==12.0.4.66
+ + nvidia-cusparse==12.6.3.3
+ + nvidia-cusparselt-cu13==0.8.0
+ + nvidia-cutlass-dsl==4.5.2
+ + nvidia-cutlass-dsl-libs-base==4.5.2
+ + nvidia-ml-py==13.610.43
+ + nvidia-nccl-cu13==2.28.9
+ + nvidia-nvjitlink==13.0.88
+ + nvidia-nvshmem-cu13==3.4.5
+ + nvidia-nvtx==13.0.85
+ + nvidia-nvvm==13.2.78
+ + openai==2.41.1
+ + openai-harmony==0.0.8
+ + opencv-python-headless==4.13.0.92
+ + opentelemetry-api==1.42.1
+ + opentelemetry-exporter-otlp==1.42.1
+ + opentelemetry-exporter-otlp-proto-common==1.42.1
+ + opentelemetry-exporter-otlp-proto-grpc==1.42.1
+ + opentelemetry-exporter-otlp-proto-http==1.42.1
+ + opentelemetry-proto==1.42.1
+ + opentelemetry-sdk==1.42.1
+ + opentelemetry-semantic-conventions==0.63b1
+ + opentelemetry-semantic-conventions-ai==0.5.1
+ + orjson==3.10.18
+ + outlines-core==0.2.14
+ + packaging==26.2
+ + partial-json-parser==0.2.1.1.post7
+ + pillow==12.2.0
+ + prometheus-client==0.25.0
+ + prometheus-fastapi-instrumentator==8.0.0
+ + propcache==0.5.2
+ + protobuf==6.33.6
+ + psutil==7.2.2
+ + py-cpuinfo==9.0.0
+ + pybase64==1.4.3
+ + pycountry==26.2.16
+ + pycparser==3.0
+ + pydantic==2.13.4
+ + pydantic-core==2.46.4
+ + pydantic-extra-types==2.11.1
+ + pydantic-settings==2.14.1
+ + pyelftools==0.33
+ + pygments==2.20.0
+ + pyjwt==2.13.0
+ + python-dotenv==1.2.2
+ + python-json-logger==4.1.0
+ + python-multipart==0.0.32
+ + pyyaml==6.0.3
+ + pyzmq==27.1.0
+ + quack-kernels==0.5.0
+ + referencing==0.37.0
+ + regex==2026.5.9
+ + requests==2.34.2
+ + rich==15.0.0
+ + rich-toolkit==0.20.1
+ + rignore==0.7.6
+ + rpds-py==2026.5.1
+ + safetensors==0.8.0
+ + sentencepiece==0.2.1
+ + sentry-sdk==2.62.0
+ + setproctitle==1.3.7
+ + setuptools==80.10.2
+ + shellingham==1.5.4
+ + six==1.17.0
+ + sniffio==1.3.1
+ + sse-starlette==3.4.4
+ + starlette==1.3.1
+ + supervisor==4.3.0
+ + sympy==1.14.0
+ + tabulate==0.10.0
+ + tiktoken==0.13.0
+ + tilelang==0.1.9
+ + tokenizers==0.22.2
+ + tokenspeed-mla==0.1.2
+ + tokenspeed-triton==3.7.10.post20260531
+ + torch==2.11.0
+ + torch-c-dlpack-ext==0.1.5
+ + torchaudio==2.11.0
+ + torchvision==0.26.0
+ + tqdm==4.68.2
+ + transformers==5.9.0
+ + triton==3.6.0
+ + typer==0.25.1
+ + typing-extensions==4.15.0
+ + typing-inspection==0.4.2
+ + urllib3==2.7.0
+ + uvicorn==0.49.0
+ + uvloop==0.22.1
+ + vllm==0.22.1rc1.dev307+g3e8afdf78.cu129 (from https://wheels.vllm.ai/3e8afdf78598afc8be999a6a049be3a5fe182e48/vllm-0.22.1rc1.dev307%2Bg3e8afdf78.cu129-cp38-abi3-manylinux_2_28_x86_64.whl)
+ + watchfiles==1.2.0
+ + websockets==16.0
+ + xgrammar==0.2.2
+ + yarl==1.24.2
+ + z3-solver==4.15.4.0
+[ab] baseline=fa2sw_precache_kenyan candidate=fa2sw_precache_kenyan[FUSED_SPARSE_ARGMAX_BLOCK=64] n=3 workload=128x512 seed=1 -> /workspace/senpai/target/research/walltps_ab/block64
+
+[ab:baseline] === run 1/3 (fa2sw_precache_kenyan) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 235s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run00.summary.json
+[ab:baseline] run 00: wall_tps=433.424 steady=435.64000000000004 E[accept]=3.841802942383213 ready=235s sm=1710.0
+
+[ab:baseline] === run 2/3 (fa2sw_precache_kenyan) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 95s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run01.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run01.summary.json
+[ab:baseline] run 01: wall_tps=437.135 steady=429.38666666666666 E[accept]=3.8486364177682506 ready=95s sm=1710.0
+
+[ab:baseline] === run 3/3 (fa2sw_precache_kenyan) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run02.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/block64/baseline/decode/run02.summary.json
+[ab:baseline] run 02: wall_tps=453.812 steady=451.2714285714286 E[accept]=3.8540425531914893 ready=90s sm=1710.0
+
+[ab:block64] === run 1/3 (fa2sw_precache_kenyan[FUSED_SPARSE_ARGMAX_BLOCK=64]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '64', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/block64/block64/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/block64/block64/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/block64/block64/decode/run00.summary.json
+[ab:block64] run 00: wall_tps=454.002 steady=453.9214285714285 E[accept]=3.8502596304794108 ready=90s sm=1710.0
+
+[ab:block64] === run 2/3 (fa2sw_precache_kenyan[FUSED_SPARSE_ARGMAX_BLOCK=64]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '64', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/block64/block64/decode/run01.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/block64/block64/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/block64/block64/decode/run01.summary.json
+[ab:block64] run 01: wall_tps=453.883 steady=424.9533333333333 E[accept]=3.852007947498344 ready=90s sm=1710.0
+
+[ab:block64] === run 3/3 (fa2sw_precache_kenyan[FUSED_SPARSE_ARGMAX_BLOCK=64]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '0', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '64', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/block64/block64/decode/run02.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/block64/block64/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/block64/block64/decode/run02.summary.json
+[ab:block64] run 02: wall_tps=453.601 steady=425.5466666666667 E[accept]=3.8518896833503575 ready=90s sm=1710.0
+
+[ab] ===== PAIRED wall_tps A/B — 27.6 min =====
+  A baseline   fa2sw_precache_kenyan
+     wall_tps  n=3 median=437.135 mean=441.457 std=10.859 CV=2.460% range=433.42..453.81
+     E[accept] mean=3.8482 CV=0.159%
+  B candidate  fa2sw_precache_kenyan[FUSED_SPARSE_ARGMAX_BLOCK=64]
+     wall_tps  n=3 median=453.883 mean=453.829 std=0.206 CV=0.045% range=453.60..454.00
+     E[accept] mean=3.8514 CV=0.025%
+  ---- verdict: raw-powered-MDE=0.080% op-threshold=0.10% observed-CI95=±2.812%
+  ---- WARN: an arm CV exceeded 5.0x the characterized 0.035% floor — treat verdict with caution / re-run
+
+  >>> A=437.13 B=453.88 Δ=+3.831% [REAL] (op@N3=0.10%, raw-powered-MDE=0.080%)
+
+[ab] ===== LOCAL->OFFICIAL PROJECTION (PR #99) =====
+  multiplier=1.06019 local-CI95=[1.05999,1.06038] envelope-CI95=[1.03941,1.08097] (official-CV-assumed=1.00%)
+  reference=454.338 wall_tps  official-anchor=481.53 TPS  reproduction-MDE=0.10%
+  baseline  accept_len=3.8482 wall_tps=437.135 -> official=463.4 [454.4,472.5] (±1.96%)  clears500=False
+            reproduces_ref=False (Δ3.787% vs MDE 0.10%)  recovers_anchor=False (proj -3.756% vs anchor)
+  candidate accept_len=3.8514 wall_tps=453.883 -> official=481.2 [471.8,490.6] (±1.96%)  clears500=False
+            reproduces_ref=False (Δ0.100% vs MDE 0.10%)  recovers_anchor=True (proj -0.068% vs anchor)
+  >>> closed-loop: reproduces_reference=False recovers_anchor=True
+
+[ab] artifacts -> /workspace/senpai/target/research/walltps_ab/block64/paired_ab.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260614_112912-ilalawsz
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stark/argmax-block16-vs-block64
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ilalawsz
+wandb: updating run metadata; uploading artifact paired_ab_block64
+wandb: uploading artifact paired_ab_block64
+wandb: uploading requirements.txt; uploading wandb-summary.json; uploading config.yaml; uploading code/scripts/profiler/paired_tps_ab.py; uploading diff.patch (+ 1 more)
+wandb: 
+wandb: Run history:
+wandb:                   baseline/e_accept_exact ▁▅█
+wandb:                   baseline/server_ready_s █▁▁
+wandb:              baseline/steady_gen_tps_mean ▃▁█
+wandb:                         baseline/wall_tps ▁▂█
+wandb:                  candidate/e_accept_exact ▁██
+wandb:                  candidate/server_ready_s ▁█▂
+wandb:             candidate/steady_gen_tps_mean █▁▁
+wandb:                        candidate/wall_tps █▆▁
+wandb:                               global_step ▁▂▃▅▆▇█
+wandb: summary/projection/baseline/accept_length ▁
+wandb:                                       +58 ...
+wandb: 
+wandb: Run summary:
+wandb:       baseline/e_accept_exact 3.85404
+wandb:       baseline/server_ready_s 90.02283
+wandb:  baseline/steady_gen_tps_mean 451.27143
+wandb:             baseline/wall_tps 453.81158
+wandb:      candidate/e_accept_exact 3.85189
+wandb:      candidate/server_ready_s 90.01977
+wandb: candidate/steady_gen_tps_mean 425.54667
+wandb:            candidate/wall_tps 453.60064
+wandb:                    event/name summary
+wandb:              event/run_prefix 
+wandb:                           +70 ...
+wandb: 
+wandb: 🚀 View run stark/argmax-block16-vs-block64 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ilalawsz
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260614_112912-ilalawsz/logs
