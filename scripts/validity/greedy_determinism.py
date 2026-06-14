@@ -18,6 +18,18 @@ extra_env only (NO served-file change):
   fa_sliding_off   FA_SLIDING=0                  FA2 sliding-window kernel -> captured graph
   splitkv_off      SPLITKV_VERIFY=0              #43 3D split-KV verify reduction off
   atomic_on        VLLM_MARLIN_USE_ATOMIC_ADD=1  int4 Marlin atomic-add reduction on
+  batch_invariant  VLLM_BATCH_INVARIANT=1        vLLM's off-the-shelf batch-invariant
+                   override (PR #122). Confirmed active: forces single-segment TRITON_ATTN
+                   (num_segments=1) for BOTH M=1 decode and M=K+1 verify, gates the
+                   SPLITKV_VERIFY redirect OFF (its _batch_invariant() check), and installs
+                   persistent (fixed-K-order) Triton matmul over aten mm/addmm/matmul/linear.
+                   REFUTED as the #114-RED fix: self-divergence stayed 56.1% -> 58.6%
+                   (UNCHANGED) at 51.78% wall_tps cost, because this stack's GEMMs are int4
+                   Marlin (CompressedTensorsWNA16 -> MarlinLinearKernel -> ops.marlin_gemm),
+                   a custom CUDA op OUTSIDE the aten dispatcher the override patches.
+                   marlin_utils has no VLLM_BATCH_INVARIANT path and marlin_gemm exposes no
+                   split-K knob, so the M-dependent verify reduction is never engaged. See
+                   research/validity/batch_invariant_verify/batch_invariant_verify.md.
 
 --spec-off (PR #114) injects SENPAI_REFERENCE_MODE=1 (drafter OFF, plain M=1 AR) on
 top of any config and writes to a sibling ``<config>__specoff/`` dir. Comparing a
@@ -83,6 +95,10 @@ CONFIGS: dict[str, dict[str, str]] = {
     "fa_sliding_off": {"FA_SLIDING": "0"},
     "splitkv_off": {"SPLITKV_VERIFY": "0"},
     "atomic_on": {"VLLM_MARLIN_USE_ATOMIC_ADD": "1"},
+    # PR #122: vLLM's native batch-invariant override (Thinking-Machines class).
+    # One env var; the build ships vllm/model_executor/layers/batch_invariant.py
+    # (init_batch_invariance() in gpu_worker), so no custom kernel is needed.
+    "batch_invariant": {"VLLM_BATCH_INVARIANT": "1"},
 }
 
 

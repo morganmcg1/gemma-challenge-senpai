@@ -1,0 +1,81 @@
+{
+  "verdict": "RED",
+  "reason": "2/2 spec-ON reloads DIVERGENT from the submission's own M=1 AR (official verifier); first divergence at token 0 (median 100; late/stochastic (FP-reduction near-tie flips)); the speculative stack does NOT reproduce its own greedy AR \u2014 'greedy-safe by construction' FAILS for this verifier",
+  "config": "batch_invariant",
+  "mode": "self_referential",
+  "identity_min_threshold": 0.999,
+  "spec_on_self_determinism": {
+    "label": "spec_on",
+    "num_runs": 2,
+    "checkable": true,
+    "min_byte_identical_frac": 1.0,
+    "deterministic": true,
+    "num_divergent_pairs": 0,
+    "onsets": []
+  },
+  "spec_off_ar_self_determinism": {
+    "label": "spec_off_ar",
+    "num_runs": 2,
+    "checkable": true,
+    "min_byte_identical_frac": 1.0,
+    "deterministic": true,
+    "num_divergent_pairs": 0,
+    "onsets": []
+  },
+  "self_consistency_gate": {
+    "reference_dir": "research/validity/batch_invariant_verify/full-20260614T091941Z/batch_invariant__specoff/run_00",
+    "reference_kind": "unknown",
+    "num_spec_runs": 2,
+    "per_run": [
+      {
+        "spec_run_idx": 0,
+        "verdict": "DIVERGENT",
+        "num_identical": 15,
+        "num_divergent": 113,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 38387,
+        "token_div_frac": 0.5857391357421875,
+        "onset_min": 0,
+        "onset_median": 100,
+        "onset_max": 496
+      },
+      {
+        "spec_run_idx": 1,
+        "verdict": "DIVERGENT",
+        "num_identical": 15,
+        "num_divergent": 113,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 38387,
+        "token_div_frac": 0.5857391357421875,
+        "onset_min": 0,
+        "onset_median": 100,
+        "onset_max": 496
+      }
+    ],
+    "all_greedy_identical": false,
+    "num_divergent_runs": 2,
+    "num_incomparable_runs": 0,
+    "onset_min": 0,
+    "onset_median": 100,
+    "onset_max": 496,
+    "onset_signature": "late/stochastic (FP-reduction near-tie flips)"
+  },
+  "self_referential_gate_confirmed": "no",
+  "primary_metric": {
+    "name": "self_referential_divergent_runs",
+    "value": 2
+  },
+  "batch_invariant_self_divergence_tokens": 38387,
+  "batch_invariant_wall_tps": 219.0807973266124,
+  "batch_invariant_tps_cost_pct": 51.78021707922023,
+  "tps_ref": 454.338,
+  "spec_on_wall_tps": {
+    "median_wall_tps": 219.0807973266124,
+    "per_run_wall_tps": [
+      219.048198450241,
+      219.11339620298384
+    ],
+    "n": 2
+  },
+  "batch_invariance_gate": "RED"
+}

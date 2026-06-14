@@ -92,6 +92,34 @@ from scripts.validity.analyze_determinism import load_runs, pair_stats  # noqa: 
 DET_SCRIPT = REPO / "scripts/validity/greedy_determinism.py"
 IDENTITY_MIN = 0.999  # mean byte-identical frac >= this == "self-deterministic" (no slack)
 SPECOFF_SUFFIX = "__specoff"  # greedy_determinism.py writes spec-off to <config>__specoff/
+DEFAULT_TPS_REF = 454.338  # PR #90 locked linear-chain wall_tps (deployed spec-ON, same box)
+TPS_GREEN_MAX_PCT = 2.0    # PR #122 gate: GREEN iff 0-divergent AND cost < this
+
+
+def _wall_tps_for_runs(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    """Median wall_tps over a capture arm (PR #122 test metric).
+
+    wall_tps = num_completion_tokens / duration_s from each run's
+    decode_summary.json -- the official ``output_throughput`` definition
+    (research/tps_noise_floor/PROTOCOL.md; hf_bucket_single_job.py). Defensive:
+    synthetic self-test trees carry no decode_summary.json, so missing/zero -> None.
+    """
+    vals: list[float] = []
+    for r in runs:
+        summ = Path(r["dir"]) / "decode_summary.json"
+        if not summ.exists():
+            continue
+        try:
+            s = json.loads(summ.read_text())
+            ct, dur = s.get("num_completion_tokens"), s.get("duration_s")
+            if ct and dur:
+                vals.append(ct / dur)
+        except (ValueError, OSError):
+            continue
+    if not vals:
+        return {"median_wall_tps": None, "per_run_wall_tps": [], "n": 0}
+    return {"median_wall_tps": statistics.median(vals),
+            "per_run_wall_tps": sorted(vals), "n": len(vals)}
 
 
 def _capture_pair(submission: Path, out_root: Path, *, config: str, runs: int,
@@ -204,7 +232,8 @@ def _self_consistency(ar_runs: list[dict[str, Any]], spec_runs: list[dict[str, A
 
 
 def interlock(spec_runs: list[dict[str, Any]], ar_runs: list[dict[str, Any]],
-              config: str, output_len: int) -> dict[str, Any]:
+              config: str, output_len: int,
+              tps_ref: float = DEFAULT_TPS_REF) -> dict[str, Any]:
     if not spec_runs or not ar_runs:
         return {"verdict": "INCONCLUSIVE",
                 "reason": f"missing captures (spec-ON runs={len(spec_runs)}, "
@@ -251,6 +280,31 @@ def interlock(spec_runs: list[dict[str, Any]], ar_runs: list[dict[str, Any]],
                     "'greedy-safe by construction' FAILS for this verifier")
         reason = "; ".join(bits)
 
+    # --- PR #122 deliverables: divergence-token count + wall_tps cost ----------
+    # batch_invariant_self_divergence_tokens: the per-comparison divergent-token
+    # count (target 0, from #114's 36751). Runs are self-deterministic so all
+    # per_run counts coincide; take the max (0 iff every spec-ON reload is
+    # byte-identical to the own-AR reference).
+    div_tokens = max((r.get("total_divergent_tokens") or 0
+                      for r in consistency["per_run"]), default=0)
+    bi_tps = _wall_tps_for_runs(spec_runs)
+    bi_wall_tps = bi_tps["median_wall_tps"]
+    tps_cost_pct = (100.0 * (tps_ref - bi_wall_tps) / tps_ref
+                    if bi_wall_tps else None)
+    # Tri-color batch-invariance gate (divergence AND TPS), distinct from the
+    # divergence-only `verdict` above: GREEN iff 0-divergent and cost < 2%.
+    if verdict == "GREEN":
+        if tps_cost_pct is None:
+            bi_gate = "GREEN_TPS_UNKNOWN"
+        elif tps_cost_pct < TPS_GREEN_MAX_PCT:
+            bi_gate = "GREEN"
+        else:
+            bi_gate = "AMBER"
+    elif verdict == "RED":
+        bi_gate = "RED"
+    else:
+        bi_gate = "INCONCLUSIVE"
+
     return {
         "verdict": verdict,
         "reason": reason,
@@ -264,6 +318,13 @@ def interlock(spec_runs: list[dict[str, Any]], ar_runs: list[dict[str, Any]],
                                             else "no" if verdict == "RED" else "inconclusive"),
         "primary_metric": {"name": "self_referential_divergent_runs",
                            "value": consistency["num_divergent_runs"]},
+        # PR #122 named metrics:
+        "batch_invariant_self_divergence_tokens": div_tokens,
+        "batch_invariant_wall_tps": bi_wall_tps,
+        "batch_invariant_tps_cost_pct": tps_cost_pct,
+        "tps_ref": tps_ref,
+        "spec_on_wall_tps": bi_tps,
+        "batch_invariance_gate": bi_gate,
     }
 
 
@@ -295,6 +356,12 @@ def _wandb_summary(report: dict[str, Any]) -> dict[str, Any]:
         "spec_on_min_byte_identical": ss.get("min_byte_identical_frac"),
         "spec_off_min_byte_identical": asd.get("min_byte_identical_frac"),
         "splitk_ppl_projected": 2.378,  # Step 4: first-order, moot (greedy-identity is binding)
+        # PR #122 named metrics:
+        "batch_invariant_self_divergence_tokens": report.get("batch_invariant_self_divergence_tokens"),
+        "batch_invariant_wall_tps": report.get("batch_invariant_wall_tps"),
+        "batch_invariant_tps_cost_pct": report.get("batch_invariant_tps_cost_pct"),
+        "tps_ref": report.get("tps_ref"),
+        "batch_invariance_gate": report.get("batch_invariance_gate"),
     }
 
 
@@ -358,6 +425,9 @@ def main() -> int:
     ap.add_argument("--skip-capture", action="store_true",
                     help="diff existing --spec-root/--ar-root only (no GPU)")
     ap.add_argument("--report", default=None)
+    ap.add_argument("--tps-ref", "--tps_ref", dest="tps_ref", type=float, default=DEFAULT_TPS_REF,
+                    help="deployed spec-ON wall_tps reference for batch_invariant_tps_cost_pct "
+                         f"(default {DEFAULT_TPS_REF}, PR #90 same-box anchor)")
     ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group", default=None)
     ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name", default=None)
     ap.add_argument("--smoke", action="store_true",
@@ -385,7 +455,7 @@ def main() -> int:
     spec_runs = _runs_from(out_root, args.config, args.spec_root)
     ar_runs = _runs_from(out_root, args.config + SPECOFF_SUFFIX, args.ar_root)
 
-    report = interlock(spec_runs, ar_runs, args.config, args.output_len)
+    report = interlock(spec_runs, ar_runs, args.config, args.output_len, tps_ref=args.tps_ref)
     report_path = Path(args.report) if args.report else out_root / "interlock_report.json"
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(json.dumps(report, indent=2))
@@ -415,6 +485,17 @@ def main() -> int:
     print(f"VERDICT: {report['verdict']}  (self_referential_gate_confirmed="
           f"{report.get('self_referential_gate_confirmed')})", flush=True)
     print(f"  {report['reason']}", flush=True)
+    if "batch_invariant_self_divergence_tokens" in report:
+        cost = report.get("batch_invariant_tps_cost_pct")
+        print("-" * 78, flush=True)
+        print(f"PR #122 metrics:", flush=True)
+        print(f"  batch_invariant_self_divergence_tokens = "
+              f"{report['batch_invariant_self_divergence_tokens']}  (target 0, #114=36751)", flush=True)
+        print(f"  batch_invariant_wall_tps               = {report.get('batch_invariant_wall_tps')}  "
+              f"(ref {report.get('tps_ref')})", flush=True)
+        print(f"  batch_invariant_tps_cost_pct           = "
+              f"{f'{cost:.3f}%' if cost is not None else None}", flush=True)
+        print(f"  batch_invariance_gate                  = {report.get('batch_invariance_gate')}", flush=True)
     print(f"[interlock] wrote {report_path}", flush=True)
 
     if args.wandb_group:
