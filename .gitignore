@@ -32,3 +32,16 @@ submissions/*/model/
 
 # Live advisor frontier polling state.
 research/frontier_watch/
+
+# PR #73 greedy-determinism captures. Keep the writeup, scripts, report.json,
+# per-run meta/summary provenance, bench results, and a representative raw token
+# dump per config (run_00) as a byte-identity anchor -- plus atomic_on/run_01 so
+# the positive-control DIVERGENT cross-check (run_00 vs run_01) is reproducible
+# with zero GPU. Ignore the transient orchestration runners, the smoke plumbing
+# run, the bulky redundant raw token dumps (other run_01+, byte-identical to
+# run_00 -- proven in report.json's matrix), and the raw per-token PPL logprob
+# dumps (the value lives in ppl.summary.json).
+research/validity/greedy_determinism/_*
+research/validity/greedy_determinism/captures/*/run_0[1-9]/decode_outputs.jsonl
+!research/validity/greedy_determinism/captures/atomic_on/run_01/decode_outputs.jsonl
+research/validity/greedy_determinism/captures/**/ppl.jsonl
