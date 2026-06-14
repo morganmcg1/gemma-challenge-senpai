@@ -1,5 +1,36 @@
 # SENPAI Research Results
 
+## 2026-06-14 03:15 — PR #83: Re-optimize M=32 tree topology with measured rho ladder + salvage oracle ✅ MERGED (decisive positive: max-branch-3 optimal, +1.13pp over #74; salvage oracle delivered; headline corrected to +18.2% / ~569 official; wirbel acceptance-cost-model axis CLOSED)
+
+- **Branch:** `wirbel/rho-optimal-topology` · **Student:** wirbel · merged by advisor ~03:15Z
+- **Status:** MERGED as research artifact (CPU-only analytic, no GPU, no served-file change -> BASELINE official bar UNCHANGED 481.53). Banks `scripts/profiler/rho_optimal_topology.py` + `research/spec_cost_model/report_rho_optimal_topology.md` + `rho_optimal_topology_results.json`.
+- **Hypothesis:** re-running the Sequoia/DP tree optimization with the measured DECLINING rho ladder (rho2=0.4165 >> rho3=0.2655 > rho4=0.1908) instead of #74's borrowed flat rho=0.565 yields the true-rho-optimal M=32 topology (parent arrays land #71 should build) + the expected per-position salvage curve for land's debug-gate oracle.
+- **Primary metric:** `measured_rho_optimal_M32_gain_pct = 0.1817` (+18.17% drafter-aware re-priced gain, W&B `6tghbnjn`). **Test:** `expected_pooled_branch_hit_salvage = 0.4165` (rho2 debug-gate target).
+- **Results:**
+
+| topology | E[T] | max-branch | gain (drafter-aware) | wall_tps proj |
+|---|---|---|---|---|
+| #74 (flat rho=0.565) | 5.157 | 4 | +17.04% | 531.5 |
+| **#83 measured-rho-optimal** | **5.207** | **3** | **+18.17%** | **536.6** |
+| delta re-opt | +0.96% | -1 (rank-4 dropped) | +1.13pp | +5.1 |
+
+3 bases: **+18.2% relative / wall_tps x454.1 -> 536.6 / official x481.53 -> ~569 projected**. MC cross-check: 400k-trial sim E[T]=5.214 vs analytic 5.207 (|err|=0.007). Anchor: F_linear(8)=3.84445 == measured 3.8441.
+
+- **Salvage oracle (land #71 per-position debug gate):**
+
+| spine pos | width | E[salvage rank-2] |
+|---|---|---|
+| 1 | 3 | 0.397 |
+| 2 | 3 | 0.431 |
+| 3 | 2 | 0.413 |
+| 4 | 2 | 0.428 |
+| 5-9 | 1 | 0 |
+
+Universal rank-2 gate = rho2 0.4165. A correct width-2 branch at any divergence reads ~0.41; byteshark broken tree-v2 read 0.033 (12x discrepancy = layout-bug signature).
+
+- **Cost-model deviation:** g_d=0.168 drafter-depth term added (MTP runs `depth` sequential passes, 15.5-18.1% of step). Under the SAME M-only cost as #79, re-opt reads +23.3% vs +22.2% for #74 -> topology improved; the headline drop (from +21.8% to +18.2%) is an honesty correction for depth cost. The re-opt DELTA (+0.96%/+1.13pp) is cost-model-independent (both depth-9).
+- **Conclusions:** (1) Declining rho ladder makes max-branch-3 optimal (width-4 buys +0.00pp under measured rho); (2) beyond-width-4 never pays (rank-5 leaf marginal 0.0179 < least placed node 0.0272); (3) salvage oracle delivered to land #71 (universal rank-2 gate = 0.4165); (4) headline corrected to +18.2% (~569 official) -- still well above 500 target and 488.07 competitor; (5) +1.13pp topology delta should be confirmed by lawine #82 A/B before banking; (6) wirbel's acceptance-cost-model axis (#49->74->76->79->83) is CLOSED for the tree build.
+
 ## 2026-06-14 02:54 — PR #81: Prompt-lookup/n-gram hybrid drafter — free accepted tokens on top of MTP (Step-0 gate) ✅ MERGED (decisive Step-0 gate: CLEARS at 0.4066 extra-accept, but realistic +1-3% & not buildable in stock vLLM → do-not-build-now, queued behind land #71 fork)
 
 - **Branch:** `denken/prompt-lookup-drafter` · **Student:** denken · merged by morganmcg1 02:54Z
