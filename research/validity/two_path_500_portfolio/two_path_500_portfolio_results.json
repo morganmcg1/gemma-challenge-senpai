@@ -1,0 +1,471 @@
+{
+  "pr": 253,
+  "agent": "fern",
+  "kind": "two_path_500_portfolio",
+  "metric_primary": "two_path_portfolio_self_test_passes",
+  "metric_test": "combined_reach500_prob",
+  "two_path_portfolio_self_test_passes": true,
+  "combined_reach500_prob": 0.6290074,
+  "P_A": 0.27999999999999997,
+  "P_B": 0.4847325,
+  "P_A_range_over_priors": [
+    0.10725000000000001,
+    0.5355
+  ],
+  "P_B_range_over_priors": [
+    0.18628,
+    0.7323075
+  ],
+  "combined_range_over_priors": [
+    0.27355147,
+    0.87565683375
+  ],
+  "second_shot_margin": 0.3490074,
+  "path_b_materially_de_risks": true,
+  "reach500_A_is_measured": false,
+  "path_b_go_returned": false,
+  "readiness_verdict": "NOT-READY",
+  "readiness_statement": "readiness_verdict=NOT-READY (carried UNCHANGED from fern #238). combined_reach500_prob=0.6290 under stated priors (P_A=0.2800 tree build, P_B=0.4847 linear portfolio). Path-B adds second_shot_margin=0.3490 on top of Path-A alone -> it DOES materially de-risk the all-in-on-land's-build posture. The launch is STILL single-blocked on a MEASURED win: reach500_A_is_measured=False AND path_b_go_returned=False, so NEITHER route has a measured PPL-valid wall_tps >= 500 yet.",
+  "path_a": {
+    "P_A": 0.27999999999999997,
+    "P_A_brackets": {
+      "adverse": 0.10725000000000001,
+      "central": 0.27999999999999997,
+      "optimistic": 0.5355
+    },
+    "priors": {
+      "adverse": {
+        "p_build_lands": 0.3,
+        "p_ET_clears": 0.65,
+        "p_lambda_clears": 0.55
+      },
+      "central": {
+        "p_build_lands": 0.5,
+        "p_ET_clears": 0.8,
+        "p_lambda_clears": 0.7
+      },
+      "optimistic": {
+        "p_build_lands": 0.7,
+        "p_ET_clears": 0.9,
+        "p_lambda_clears": 0.85
+      }
+    },
+    "prior_statement": "P_A = p_build_lands * p_ET_clears * p_lambda_clears, with land #245/#71's projection (E[T]_both=4.512, min-lambda 0.983) as the CENTRAL estimate and the external-fleet stall rate on the tree-decode build (the long pole) as the ADVERSE anchor. CENTRAL priors: p_build_lands=0.50 (a genuine coin-flip -- every external fleet stalled on this build), p_ET_clears=0.80 (the 4.02% shortfall tolerance from denken #241 gives the E[T] gate room), p_lambda_clears=0.70 (the THIN 0.005 lambda margin makes this the tighter gate). The two gate-clears are MEASURED INDEPENDENTLY (denken #241 operative framing) so they multiply.",
+    "collapsing_measurement": "land #245's ONE build run delivering a MEASURED end-to-end >=500 tree-decode artifact: measured E[T]_both >= 4.3305 (denken #241) AND measured min-lambda_hat q[2..9] >= 0.9780113 (fern #249 / stark #191). Until then treeverify_served_gain_MEASURED_realized=0.0 and reach500_A_is_measured=False.",
+    "reach500_A_is_measured": false,
+    "gates": {
+      "et_floor_operative": 4.330527243789328,
+      "et_floor_self_insured": 4.488950392227178,
+      "lambda_gate": 0.9780112973731208,
+      "proj_e_t_both": 4.512,
+      "proj_min_lambda": 0.983,
+      "et_shortfall_tolerance": 0.040220025755911104,
+      "lambda_headroom_proj": 0.005021667650860651
+    }
+  },
+  "path_b": {
+    "P_B": 0.4847325,
+    "P_B_mc_se": 0.0007902007710761709,
+    "P_B_stability_spread": 0.0002750000000000252,
+    "P_B_stability_seeds": {
+      "20260614": 0.4847325,
+      "7": 0.4845075,
+      "99991": 0.4844575
+    },
+    "P_B_prior_sweep": {
+      "pessimistic": 0.18628,
+      "central": 0.4847325,
+      "optimistic": 0.7323075
+    },
+    "P_B_prior_sweep_scenarios": {
+      "pessimistic": {
+        "go_scale": 0.7,
+        "gain_mult": 0.8,
+        "eta": 0.75,
+        "overlap": {
+          "ET": 0.0,
+          "SYS": 0.1,
+          "DRAFT": 0.0
+        }
+      },
+      "central": {
+        "go_scale": 1.0,
+        "gain_mult": 1.0,
+        "eta": 0.85,
+        "overlap": {
+          "ET": 0.0,
+          "SYS": 0.25,
+          "DRAFT": 0.0
+        }
+      },
+      "optimistic": {
+        "go_scale": 1.3,
+        "gain_mult": 1.15,
+        "eta": 1.0,
+        "overlap": {
+          "ET": 0.0,
+          "SYS": 0.5,
+          "DRAFT": 0.0
+        }
+      }
+    },
+    "P_B_range_over_priors": [
+      0.18628,
+      0.7323075
+    ],
+    "path_b_go_returned": false,
+    "threshold": 0.038356904035055095,
+    "reach500_B_point_if_all_fire": {
+      "per_lever_gain": {
+        "stark_247_opt_tree": 0.02,
+        "lawine_246_flashinfer_cudagraph": 0.05,
+        "kanna_248_int3_draft": 0.034999999999999996,
+        "ubel_250_ngram_draft": 0.025,
+        "wirbel_251_activation_recycle": 0.030000000000000002
+      },
+      "stacked_gain": 0.10019749999999994,
+      "reach": true
+    },
+    "reach500_B_point_go_weighted": {
+      "per_lever_gain": {
+        "stark_247_opt_tree": 0.005600000000000001,
+        "lawine_246_flashinfer_cudagraph": 0.020000000000000004,
+        "kanna_248_int3_draft": 0.010499999999999999,
+        "ubel_250_ngram_draft": 0.005000000000000001,
+        "wirbel_251_activation_recycle": 0.007500000000000001
+      },
+      "stacked_gain": 0.0332728550000001,
+      "reach": false
+    },
+    "single_lever_alone": {
+      "stark_247_opt_tree": {
+        "can_clear_alone_at_hi": false,
+        "can_clear_alone_at_lo": false,
+        "gain_range_total": [
+          0.004999999999999893,
+          0.03499999999999992
+        ]
+      },
+      "lawine_246_flashinfer_cudagraph": {
+        "can_clear_alone_at_hi": true,
+        "can_clear_alone_at_lo": false,
+        "gain_range_total": [
+          0.016999999999999904,
+          0.06800000000000006
+        ]
+      },
+      "kanna_248_int3_draft": {
+        "can_clear_alone_at_hi": true,
+        "can_clear_alone_at_lo": false,
+        "gain_range_total": [
+          0.008499999999999952,
+          0.050999999999999934
+        ]
+      },
+      "ubel_250_ngram_draft": {
+        "can_clear_alone_at_hi": true,
+        "can_clear_alone_at_lo": false,
+        "gain_range_total": [
+          0.0,
+          0.04249999999999998
+        ]
+      },
+      "wirbel_251_activation_recycle": {
+        "can_clear_alone_at_hi": true,
+        "can_clear_alone_at_lo": false,
+        "gain_range_total": [
+          0.008499999999999952,
+          0.04249999999999998
+        ]
+      }
+    },
+    "levers": [
+      {
+        "screen_pr": 247,
+        "name": "OPT-Tree per-step adaptive topology",
+        "doc_rank": "T-1 (Rank-1)",
+        "group": "ET",
+        "p_go": 0.28,
+        "projected_gain_range": [
+          0.005,
+          0.035
+        ],
+        "greedy_id_risk": "zero",
+        "rationale": "doc T-1 headline +3-10%, but fern's banked #244 certifies the deployed depth-9 mb-3 tree is already rho-optimal (topology_lift_max=+0.0 TPS) -- so OPT-Tree's per-step adaptation headroom is priored DOWN hard (p_go 0.28, cap +0.5-3.5%)."
+      },
+      {
+        "screen_pr": 246,
+        "name": "FlashInfer decode + CUDAGraph",
+        "doc_rank": "K-1 (Rank-2)",
+        "group": "SYS",
+        "p_go": 0.4,
+        "projected_gain_range": [
+          0.02,
+          0.08
+        ],
+        "greedy_id_risk": "zero",
+        "rationale": "doc K-1 +7-18% (bit-identical fused attention + launch-overhead elimination); the single strongest lever, but the served stack likely already uses a competent backend, so the realizable marginal gain is priored to +2-8% with p_go 0.40."
+      },
+      {
+        "screen_pr": 248,
+        "name": "int3 draft quantization (QSpec)",
+        "doc_rank": "Q-1 (Rank-8)",
+        "group": "DRAFT",
+        "p_go": 0.3,
+        "projected_gain_range": [
+          0.01,
+          0.06
+        ],
+        "greedy_id_risk": "zero",
+        "rationale": "doc Q-1 +5-10%, but in single-stream the draft runs once per tree step and is likely a small fraction of step time ('if draft is bandwidth-bound') -> +1-6%."
+      },
+      {
+        "screen_pr": 250,
+        "name": "n-gram / REST datastore draft",
+        "doc_rank": "N-1 (Rank-13)",
+        "group": "DRAFT",
+        "p_go": 0.2,
+        "projected_gain_range": [
+          0.0,
+          0.05
+        ],
+        "greedy_id_risk": "zero",
+        "rationale": "doc N-1 task-dependent: E[T]<2 if prompts are diverse NL (NO-GO), E[T]>4 if structured. High chance of low match rate on general prompts -> p_go 0.20, wide range with a 0% floor."
+      },
+      {
+        "screen_pr": 251,
+        "name": "activation-recycle (HBM bandwidth)",
+        "doc_rank": "Rank-4 (HBM-floor-capped)",
+        "group": "SYS",
+        "p_go": 0.25,
+        "projected_gain_range": [
+          0.01,
+          0.05
+        ],
+        "greedy_id_risk": "zero",
+        "rationale": "PR frame +4-8% but HBM-floor-capped; targets the same GPU-bound step as FlashInfer (NON-stacking with lawine #246) -> priored to +1-5% with p_go 0.25."
+      }
+    ],
+    "overlap_model": {
+      "overlap_retain": {
+        "ET": 0.0,
+        "SYS": 0.25,
+        "DRAFT": 0.0
+      },
+      "eta_step": 0.85,
+      "across_group_law": "(1+a_ET)*(1+b_step)-1, b_step=ETA_STEP*(SYS+DRAFT)"
+    },
+    "prior_statement": "P_B = P(stacked linear gain >= 0.03836) over the 5 in-flight screens' PROJECTED-gain ranges (NOT their unreturned measured results). STACKING: levers are grouped by the step component they target; WITHIN a group they do NOT stack (SYS overlap_retain=0.25 for FlashInfer + activation-recycle; DRAFT overlap_retain=0.00 because int3-draft and n-gram are mutually exclusive draft sources); ACROSS groups the E[T]-axis composes multiplicatively with the step-axis and the two step groups carry an Amdahl efficiency ETA_STEP=0.85. MC over GO x Uniform priors, N=400000, seed=20260614.",
+    "collapsing_measurement": "each screen's GO/NO-GO verdict + a kernel build clearing PPL-valid wall_tps >= 500. NONE of the 5 screens (stark #247 / lawine #246 / kanna #248 / ubel #250 / wirbel #251) has returned a GO verdict yet -> path_b_go_returned=False."
+  },
+  "combined": {
+    "combined_reach500_prob": 0.6290074,
+    "P_A": 0.27999999999999997,
+    "P_B": 0.4847325,
+    "lower_bound_max": 0.4847325,
+    "upper_bound_sum": 0.7647325,
+    "second_shot_margin": 0.3490074,
+    "path_b_materially_de_risks": true
+  },
+  "decision_table": [
+    {
+      "route": "PATH-A (tree build)",
+      "gate": "measured E[T]_both >= 4.3305 AND measured lambda_hat q[2..9] >= 0.9780113",
+      "current_status": "PRIOR (UNMEASURED): treeverify_served_gain_MEASURED_realized=0.0",
+      "reach_prob": 0.27999999999999997,
+      "what_collapses_prior_to_fact": "land #245's ONE build run delivering a MEASURED end-to-end >=500 tree-decode artifact: measured E[T]_both >= 4.3305 (denken #241) AND measured min-lambda_hat q[2..9] >= 0.9780113 (fern #249 / stark #191). Until then treeverify_served_gain_MEASURED_realized=0.0 and reach500_A_is_measured=False."
+    },
+    {
+      "route": "PATH-B (linear-lever portfolio)",
+      "gate": "stacked linear gain >= 0.03836 (481.53 -> 500 on official=K_cal*(E[T]/step)*tau)",
+      "current_status": "PRIOR (NO GO returned): path_b_go_returned=False over 5 in-flight screens",
+      "reach_prob": 0.4847325,
+      "what_collapses_prior_to_fact": "each screen's GO/NO-GO verdict + a kernel build clearing PPL-valid wall_tps >= 500. NONE of the 5 screens (stark #247 / lawine #246 / kanna #248 / ubel #250 / wirbel #251) has returned a GO verdict yet -> path_b_go_returned=False."
+    },
+    {
+      "route": "COMBINED (1 - (1-P_A)(1-P_B))",
+      "gate": "FIRST measured PPL-valid wall_tps >= 500 from EITHER route",
+      "current_status": "PRIOR: neither route has a measured >=500 -> readiness stays NOT-READY",
+      "reach_prob": 0.6290074,
+      "what_collapses_prior_to_fact": "land #245's build run (A) OR any Path-B screen GO + kernel build clearing PPL-valid wall_tps >= 500 (B)"
+    }
+  ],
+  "self_test": {
+    "two_path_portfolio_self_test_passes": true,
+    "conditions": {
+      "a_combined_roundtrip_and_prob_bounds": {
+        "pass": true,
+        "combined": 0.6290074,
+        "roundtrip": 0.6290074,
+        "lower_bound_max": 0.4847325,
+        "upper_bound_sum": 0.7647325,
+        "combined_ge_max": true,
+        "combined_le_sum": true
+      },
+      "b_each_prior_has_statement_and_collapsing_measurement": {
+        "pass": true,
+        "P_A_has_prior": true,
+        "P_A_has_collapsing_measurement": true,
+        "P_B_has_prior": true,
+        "P_B_has_collapsing_measurement": true
+      },
+      "c_no_measured_win_keeps_not_ready": {
+        "pass": true,
+        "reach500_A_is_measured": false,
+        "path_b_go_returned": false,
+        "readiness_verdict": "NOT-READY"
+      },
+      "d_threshold_roundtrips_481p53_to_500_via_composition": {
+        "pass": true,
+        "threshold": 0.038356904035055095,
+        "baseline_times_1_plus_thr": 500.00000000000006,
+        "target": 500.0,
+        "composition_linearity_ratio": 0.038356904035055095
+      },
+      "e_path_a_gates_match_249_241_exactly": {
+        "pass": true,
+        "lambda_gate": 0.9780112973731208,
+        "lambda_gate_249_round_trips": true,
+        "et_floor": 4.330527243789328,
+        "et_floor_241_round_trips": true,
+        "provenance_max_abs_err": 0.0,
+        "all_round_trip": true
+      },
+      "f_nan_clean": {
+        "pass": true,
+        "nan_paths": []
+      }
+    },
+    "n_conditions": 6
+  },
+  "provenance_roundtrip": {
+    "241.e_t_meas_floor": {
+      "loaded": 4.330527243789328,
+      "expected": 4.330527243789328,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.e_t_meas_floor_conservative": {
+      "loaded": 4.488950392227178,
+      "expected": 4.488950392227178,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.delta_max_tps500": {
+      "loaded": 0.040220025755911104,
+      "expected": 0.040220025755911104,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.min_lambda_proj": {
+      "loaded": 0.983,
+      "expected": 0.983,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.lambda_headroom_abs": {
+      "loaded": 0.005021667650860651,
+      "expected": 0.005021667650860651,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.lambda1_ceiling": {
+      "loaded": 520.9527323111674,
+      "expected": 520.9527323111674,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.K_cal": {
+      "loaded": 125.26795005202914,
+      "expected": 125.26795005202914,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.step_banked": {
+      "loaded": 1.2182,
+      "expected": 1.2182,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "241.proj_e_t_both": {
+      "loaded": 4.512,
+      "expected": 4.512,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "249.build_lambda_operative_gate": {
+      "loaded": 0.9780112973731208,
+      "expected": 0.9780112973731208,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "238.readiness_verdict": {
+      "loaded": "NOT-READY",
+      "expected": "NOT-READY",
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "238.n_green_gates": {
+      "loaded": 2,
+      "expected": 2,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "238.treeverify_served_gain_MEASURED_realized": {
+      "loaded": 0.0,
+      "expected": 0.0,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "238.projection_E_T_both": {
+      "loaded": 4.512,
+      "expected": 4.512,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "238.projection_min_lambda_q2q9": {
+      "loaded": 0.983,
+      "expected": 0.983,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "244.lane_reopenable": {
+      "loaded": false,
+      "expected": false,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "244.reopener_is_coverage_not_topology": {
+      "loaded": true,
+      "expected": true,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "244.topology_lift_max_tps": {
+      "loaded": 0.0,
+      "expected": 0.0,
+      "abs_err": 0.0,
+      "round_trips": true
+    },
+    "244.operative_ceiling_tps": {
+      "loaded": 520.9527323111674,
+      "expected": 520.9527323111674,
+      "abs_err": 0.0,
+      "round_trips": true
+    }
+  },
+  "handoff": "the team has two independent routes to 500 -- Path-A (land #245 tree build, gated E[T]_both>=4.3305 AND lambda_hat>=0.9780) and Path-B (the 5-lever linear portfolio, reach iff stacked gain >=3.8357%) -- with combined_reach500_prob=0.6290 under stated priors; both are currently PROJECTIONS (no measured >=500), so readiness stays NOT-READY until the first measured PPL-valid wall_tps>=500 from EITHER path, but Path-B DOES materially de-risk the all-in-on-land's-build posture (second-shot margin 0.3490).",
+  "scope": "LOCAL CPU-only integration over EXISTING MERGED legs (#238/#241/#244/#249) loaded from their committed result JSON and round-tripped scalar-for-scalar, PLUS the 5 in-flight Path-B screens priced as a PORTFOLIO PRIOR over the speed-levers researcher doc's projected-gain ranges (NOT their unreturned measured results). The only new object is the COMBINED reach 1-(1-P_A)(1-P_B). No GPU / vLLM / HF Job / submission / served-file change / official draw. BASELINE stays 481.53; adds 0 TPS; greedy/PPL untouched; authorizes NOTHING. NOT a launch. NOT open2.",
+  "public_evidence_used": [
+    "fern #238 (launch_decision_card): readiness_verdict=NOT-READY, n_green_gates=2, treeverify_served_gain_MEASURED_realized=0.0, land #71 projection E[T]_both=4.512 / min-lambda 0.983 -- loaded from the committed artifact and round-tripped.",
+    "denken #241 (measured_et_shortfall): E[T] operative floor 4.3305 / self-insured 4.4890, delta_max_tps500=0.04022 (4.02% shortfall tolerance), lambda margin 0.00502, the LINEAR composition K_cal=125.268 / step=1.2182, lambda=1 ceiling 520.95 -- round-tripped.",
+    "fern #249 (build_lambda_bar): operative build-lambda gate 0.9780112973731208 (== stark #191 P95 == #241 lambda_star_191) -- round-tripped.",
+    "wirbel #244 (ceiling_gap_topology_headroom): compliant-PRIVATE-500 lane TOPOLOGY-DEAD (lane_reopenable=False, topology_lift_max=0.0, reopener=coverage/lambda->1) -- the banked evidence that priors stark #247 (OPT-Tree, a topology lever) DOWN.",
+    "speed-levers researcher doc (research/RESEARCH_IDEAS_2026-06-14_speed-levers.md): the Ranked Priority Table supplying each Path-B lever's projected-gain range and greedy-ID risk (T-1 OPT-Tree, K-1 FlashInfer+CUDAGraph, Q-1 int3-draft, N-1 n-gram, activation-recycle)."
+  ],
+  "method": "LOCAL CPU-only analytic integration. Load #238/#241/#244/#249 committed JSON; round-trip their headline scalars; price Path-A reach P_A = p_build_lands*p_ET_clears*p_lambda_clears (stated priors, independent gates, bracketed adverse/central/optimistic); price Path-B reach P_B = P(stacked linear gain >= 3.8357%) via Monte-Carlo over GO x Uniform projected-gain priors with within-group non-stacking + Amdahl across groups; combine 1-(1-P_A)(1-P_B); carry fern #238 readiness NOT-READY forward unchanged. No GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS.",
+  "metrics_nan_clean": 1,
+  "peak_mem_mib": 87.9453125,
+  "elapsed_s": 0.6196,
+  "nan_clean": true
+}
