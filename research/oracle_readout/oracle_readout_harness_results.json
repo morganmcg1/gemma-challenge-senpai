@@ -7,11 +7,18 @@
     "test_metric_name": "measured_official_tps",
     "measured_official_tps": 216.91448993133073,
     "test_metric_label": "as-built E[T]=2.1 on the depth-9 step (AWAITING LIVE ORACLE RUN; fp32 fix targets E[T]->5.207 -> 537.8)",
-    "oracle_run_pending": true,
+    "oracle_run_pending": false,
     "self_test_pass": true,
-    "verdict": "AMBER",
-    "verdict_label": "harness BANKED + bands computed; oracle run PENDING (chiku-inu firing tree-488-pw-fp32-v0, openevolve cross-check awaited). Operative depth-9 clear-500 bar = 4.841; demand floor (denken #123) = 4.624; supply ceiling E[T]=5.207 -> 537.8. Self-test PASS.",
-    "rule": "GREEN = live oracle accept_length clears 500 conservative AND greedy-exact / AMBER = harness banked + bands ready, oracle pending (or central-only) / RED = supply ceiling can't reach 500 (model inconsistency) or live < 500"
+    "verdict": "GREEN",
+    "verdict_label": "the tree LIVES, conditional on fixing BOTH bugs. As-built E[T]=2.621 -> official 271 (RED, fails 500 by 229). The both-bugs-fixed cell (depth-1->0.7287 + rho-optimal descent) realizes E[T]=5.207 -> official 537.8 (>= 500 by +37.8, conservative corner 536.9). BUILD TARGET: the banked M=32/depth-9/max-branch-3 rho-optimal tree (parent array banked, #125). DECISIVE LEVER = BUG-2/descent: fixing it alone reaches 522; fixing only BUG-1 reaches just 283. CONDITIONAL on the deeper-spine ladder recovering (162 TPS of the cell); if the fix restores depth-1 but not the deeper spine it lands 376 (RED).",
+    "rule": "PR #134 LIVE: GREEN = both-bugs-fixed cell clears 500 (tree has a named, quantified path) / AMBER = straddles 499-501 (tau/step knife-edge) / RED = both-bugs-fixed < 500 even at the rho-optimal ceiling (tree dead).",
+    "pr134_primary_metric_name": "measured_official_tps_as_built",
+    "measured_official_tps_as_built": 270.72994195715137,
+    "pr134_test_metric_name": "tree_clears_500_at_both_bugs_fixed",
+    "tree_clears_500_at_both_bugs_fixed": 1,
+    "predicted_official_at_both_bugs_fixed": 537.827492172065,
+    "predicted_official_at_both_bugs_fixed_taulow": 536.9131854353725,
+    "slack_to_500_at_both_bugs_fixed": 37.827492172065035
   },
   "finding_depth9_bar": {
     "title": "depth-9 operative clear-500 bar is HIGHER than the demand floor",
@@ -206,8 +213,172 @@
     }
   },
   "live_oracle": {
-    "input": null,
+    "input": {
+      "source": "openevolve A10G ORACLE LOCALIZER (board 20260614-100550-487_openevolve.md)",
+      "tree_package": "tree-488-pw-fp32-v0",
+      "ran_on": "openevolve unlimited A10G (no PPL, no bench-quota)",
+      "n_prompts": 48,
+      "tree_steps": 1024,
+      "star_attn_eager": true,
+      "accept_profile_kind": "cumulative",
+      "_schema_note": "LIVE oracle readout. per_position_cumulative_accept[d] = MARGINAL P(committed path reaches >= depth d). E[T] = 1 (bonus) + sum(cumulative). This is the CUMULATIVE form (chain-identity reconstruct), distinct from the synthetic self-test sample which stores per-position CONDITIONAL q_spine. depth1_spine_accept is the depth-1 top-1 spine match (tree-attn-free / linear-identical forward).",
+      "depth1_spine_accept": 0.679,
+      "depth1_spine_accept_target_fp32": 0.7287,
+      "per_position_cumulative_accept": [
+        0.674,
+        0.35,
+        0.203,
+        0.131,
+        0.089,
+        0.06,
+        0.037
+      ],
+      "accept_length": 2.621,
+      "drafts": 2417,
+      "salvages": 391,
+      "full_depth_reaches": 37,
+      "spine_K": 7,
+      "bugs_live": {
+        "BUG_1_spine_depth1": "0.679 < 0.7287 fp32 target (denken #133 lane: positions / fused spec metadata / drafter conditioning at depth-1)",
+        "BUG_2_salvage_no_descend": "E[T]=2.621 below even the 3.844 linear-MTP floor; salvage fires (391) + eager-correct (full=37) but does not descend (wirbel lane)"
+      },
+      "oracle_read": "the bug is at depth-1 (spine top-1), NOT the star-attn verify (which works). Make depth-1 spine byte-identical to linear first; salvage is then additive on top.",
+      "discrepancy_note": "chiku-inu's separate probe (board 20260614-104247-994) reports depth1_accept=0.591 / tok/step=2.07 for the same tree-488-pw-fp32-v0; openevolve's A10G oracle (this file, the PR-authoritative source) reports 0.679 / 2.621. Both agree qualitatively: fp32 did NOT fix BUG-1; as-built FAILS 500 (official 214-271). The both-bugs-fixed conclusion is invariant to which readout is canonical."
+    },
     "evaluation": null
+  },
+  "pr134_live_readout": {
+    "norm_oracle": {
+      "tree_package": "tree-488-pw-fp32-v0",
+      "source": "openevolve A10G ORACLE LOCALIZER (board 20260614-100550-487_openevolve.md)",
+      "depth1_spine_accept": 0.679,
+      "accept_length": 2.621,
+      "cumulative": [
+        0.674,
+        0.35,
+        0.203,
+        0.131,
+        0.089,
+        0.06,
+        0.037
+      ],
+      "salvages": 391,
+      "full_depth_reaches": 37,
+      "drafts": 2417,
+      "steps": 1024,
+      "spine_K": 7
+    },
+    "step1_measured_verdict": {
+      "accept_length_measured": 2.621,
+      "measured_official_tps_as_built": 270.72994195715137,
+      "measured_official_tps_as_built_taulow": 270.2697010558242,
+      "clears_500": false,
+      "margin_to_500": -229.27005804284863,
+      "et_reconstructed_chain_identity": 2.544,
+      "et_reconstructed_dp_linear_xcheck": 2.5439999999999996,
+      "reconstruction_residual_vs_accept_length": 0.07699999999999996,
+      "reconstruction_rel_residual": 0.03026729559748426,
+      "consistent": true,
+      "measured_conditional_spine_ladder": [
+        0.674,
+        0.5193,
+        0.58,
+        0.6453,
+        0.6794,
+        0.6742,
+        0.6167
+      ],
+      "note": "E[T]=1+sum(cumulative)=2.5440 reconstructs the oracle accept_length=2.621 within residual +0.0770 (3.03%); the DP linear cross-check agrees (2.5440). The small positive residual is the weak as-built salvage the bare-spine cumulative omits -- itself BUG-2 evidence (salvage adds only ~0.077 tok/step, not the ~2.6 the rho-optimal descent must)."
+    },
+    "step2_recovery_matrix": {
+      "matrix": {
+        "cell1_spineMeas_salvageAsMeasured": {
+          "label": "both bugs live (measured)",
+          "E_T": 2.621,
+          "official_tps": 270.72994195715137,
+          "clears_500": false,
+          "clears_530": false
+        },
+        "cell2_spineFixed_salvageAsMeasured": {
+          "label": "only BUG-1 fixed (depth-1->0.7287, salvage still broken)",
+          "E_T": 2.7396505154639175,
+          "official_tps": 282.98566388188715,
+          "clears_500": false,
+          "clears_530": false
+        },
+        "cell3_spineMeas_salvageRhoOpt": {
+          "label": "only BUG-2 fixed (rho-opt descent, depth-1 still 0.679)",
+          "E_T": 5.056404568844709,
+          "official_tps": 522.2892466368573,
+          "clears_500": true,
+          "clears_530": false,
+          "realized_depth": 9
+        },
+        "cell4_spineFixed_salvageRhoOpt": {
+          "label": "BOTH bugs fixed (rho-optimal ceiling)",
+          "E_T": 5.206833964475522,
+          "official_tps": 537.827492172065,
+          "clears_500": true,
+          "clears_530": true,
+          "realized_depth": 9
+        }
+      },
+      "clear500_bar": 4.840617149792076,
+      "clear530_bar": 5.1310541787796,
+      "predicted_official_at_both_bugs_fixed": 537.827492172065,
+      "predicted_et_at_both_bugs_fixed": 5.206833964475522,
+      "predicted_official_at_both_bugs_fixed_taulow": 536.9131854353725,
+      "both_bugs_fixed_load_bearing_sensitivity": {
+        "both_bugs_fixed_REQUIRES_deeper_spine_recovery": true,
+        "deeper_spine_measured_conditional": [
+          0.674,
+          0.5193,
+          0.58,
+          0.6453,
+          0.6794,
+          0.6742,
+          0.6167
+        ],
+        "deeper_spine_rho_optimal_conditional": [
+          0.7287,
+          0.759,
+          0.7925,
+          0.8217,
+          0.8343,
+          0.8353,
+          0.8473
+        ],
+        "ceiling_official_full_rhoopt_spine": 537.827492172065,
+        "official_if_descent_fixed_deeper_spine_stays_measured": 376.25330342899724,
+        "official_if_descent_fixed_full_measured_spine": 366.1159303553078,
+        "deeper_spine_recovery_worth_tps": 161.5741887430678,
+        "note": "The both-bugs-fixed 538 ASSUMES the deeper spine (depths 2-9) recovers to the deployed/rho-optimal ladder, per openevolve's read ('make depth-1 byte-identical to linear; salvage additive on top'). If the depth-1+descent fix does NOT also restore the deeper spine (measured conditional ~[0.52,0.58,..] << rho-opt [0.76,0.79,..]), the cell lands at 376 (RED). This deeper-ladder recovery (worth 162 TPS) is the single most decision-relevant input -- wirbel's re-bench after the fix must confirm the FULL cumulative ladder recovers, not just depth-1."
+      }
+    },
+    "step3_greedy_exact": {
+      "tree_greedy_exact_from_oracle": 1,
+      "semantics": "greedy-EXACT w.r.t. its OWN M=32 verify (fp32 ta[0]==M=32 argmax by construction)",
+      "accept_profile_matches_ideal_greedy_rejection": 0,
+      "depth1_spine_accept": 0.679,
+      "depth1_fp32_target": 0.7287,
+      "profile_degradation_is_drafter_match_rate_not_verify": true,
+      "CAVEAT_not_spec_eq_AR": "NOT spec==M=1-AR identity. kanna #122 (MERGED) localized the M-variance to the int4 Marlin GEMM (no batch-invariant Marlin in the wheel), so M=32-verify argmax != M=1-AR argmax. The tree's greedy-exactness is w.r.t. its OWN M=32 verify; PPL validity rides on the Issue #124 ruling, NOT on spec==AR. Do not claim spec==AR identity.",
+      "interpretation": "openevolve localized the defect to depth-1 spine (the tree-attn-free / linear-identical forward), NOT the star-attn verify ('which works'). So accepted tokens are the true M=32 argmax (verify exact); the profile is degraded only in match RATE. The Step-2 ideal-profile match returns 0 (depth-1 0.679<0.7287) -- that flags the DRAFTER/build degradation, it does NOT impugn the fp32 verify's exactness."
+    },
+    "step4_existential": {
+      "predicted_official_at_both_bugs_fixed": 537.827492172065,
+      "predicted_official_at_both_bugs_fixed_taulow": 536.9131854353725,
+      "predicted_et_at_both_bugs_fixed": 5.206833964475522,
+      "tree_clears_500_at_both_bugs_fixed": 1,
+      "slack_to_500": 37.827492172065035,
+      "build_target": "M=32 / depth-9 / max-branch-3 rho-optimal tree (parent array banked, #125)"
+    },
+    "primary_metric_name": "measured_official_tps_as_built",
+    "measured_official_tps_as_built": 270.72994195715137,
+    "test_metric_name": "tree_clears_500_at_both_bugs_fixed",
+    "tree_clears_500_at_both_bugs_fixed": 1,
+    "verdict": "GREEN",
+    "verdict_label": "the tree LIVES, conditional on fixing BOTH bugs. As-built E[T]=2.621 -> official 271 (RED, fails 500 by 229). The both-bugs-fixed cell (depth-1->0.7287 + rho-optimal descent) realizes E[T]=5.207 -> official 537.8 (>= 500 by +37.8, conservative corner 536.9). BUILD TARGET: the banked M=32/depth-9/max-branch-3 rho-optimal tree (parent array banked, #125). DECISIVE LEVER = BUG-2/descent: fixing it alone reaches 522; fixing only BUG-1 reaches just 283. CONDITIONAL on the deeper-spine ladder recovering (162 TPS of the cell); if the fix restores depth-1 but not the deeper spine it lands 376 (RED)."
   },
   "oracle_input_schema": {
     "depth1_spine_accept": "float -- depth-1 spine accept q_1 (fp32 target 0.7287) [#1]",
