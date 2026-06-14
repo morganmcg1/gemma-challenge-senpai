@@ -1,0 +1,332 @@
+{
+  "ar_aggregate": {
+    "available": true,
+    "classification": "batch_variance_expected_NOT_contract_violation",
+    "divergence_rate": 0.616851806640625,
+    "note": "M=1-AR vs batched-verify int4 split-K divergence is documented batch-variance (issue #124, RESOLVED), orthogonal to the per-step greedy-exactness contract the kernel-isolation audit certifies at 1.0.",
+    "num_divergent": 118,
+    "num_identical": 10,
+    "num_prompts_compared": 128,
+    "total_divergent_tokens": 40426,
+    "total_tokens_compared": 65536,
+    "verdict": "DIVERGENT"
+  },
+  "battery_size": 35,
+  "created_at": "20260614T135333Z",
+  "max_spec_len": 7,
+  "ppl_cap": 2.42,
+  "self_test": {
+    "battery_size": 35,
+    "bug2_audit": {
+      "all_sha256_match": false,
+      "exactness_rate": 0.9194915254237288,
+      "first_violation": {
+        "committed": 3000,
+        "label": "reject_at_0",
+        "pos": 0,
+        "ref_argmax": 3777,
+        "req": 7
+      },
+      "length_violations": [
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_0",
+          "oracle_committed": [
+            3777
+          ],
+          "oracle_valid": 1,
+          "req": 7
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_1",
+          "oracle_committed": [
+            3000,
+            3778
+          ],
+          "oracle_valid": 2,
+          "req": 8
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_2",
+          "oracle_committed": [
+            3000,
+            3001,
+            3779
+          ],
+          "oracle_valid": 3,
+          "req": 9
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_3",
+          "oracle_committed": [
+            3000,
+            3001,
+            3002,
+            3780
+          ],
+          "oracle_valid": 4,
+          "req": 10
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_4",
+          "oracle_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3781
+          ],
+          "oracle_valid": 5,
+          "req": 11
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_5",
+          "oracle_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3782
+          ],
+          "oracle_valid": 6,
+          "req": 12
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_6",
+          "oracle_committed": [
+            3000,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3783
+          ],
+          "oracle_valid": 7,
+          "req": 13
+        },
+        {
+          "kernel_committed": [
+            55,
+            99
+          ],
+          "kernel_valid": 2,
+          "label": "single_reject",
+          "oracle_committed": [
+            66
+          ],
+          "oracle_valid": 1,
+          "req": 15
+        }
+      ],
+      "num_length_violations": 19,
+      "num_requests": 35,
+      "num_sha256_mismatches": 19,
+      "num_violations": 19,
+      "total_committed": 236,
+      "total_exact": 217,
+      "verdict": "VIOLATION"
+    },
+    "conditions": {
+      "bug2_overaccept_CAUGHT_position_named": true,
+      "lengthoverrun_CAUGHT_via_oracle_lengthcheck": true,
+      "linear_GREEDY_EXACT_rate1p0_sha_match": true,
+      "ppl_cross_check_le_cap": true
+    },
+    "greedy_exact_harness_self_test_passes": true,
+    "lengthoverrun_audit": {
+      "all_sha256_match": false,
+      "exactness_rate": 1.0,
+      "first_violation": null,
+      "length_violations": [
+        {
+          "kernel_committed": [
+            3777,
+            3001,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_0",
+          "oracle_committed": [
+            3777
+          ],
+          "oracle_valid": 1,
+          "req": 0
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3778,
+            3002,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_1",
+          "oracle_committed": [
+            3000,
+            3778
+          ],
+          "oracle_valid": 2,
+          "req": 1
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3779,
+            3003,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_2",
+          "oracle_committed": [
+            3000,
+            3001,
+            3779
+          ],
+          "oracle_valid": 3,
+          "req": 2
+        },
+        {
+          "kernel_committed": [
+            3000,
+            3001,
+            3002,
+            3780,
+            3004,
+            3005,
+            3006,
+            4096
+          ],
+          "kernel_valid": 8,
+          "label": "reject_at_3",
+          "oracle_committed": [
+            3000,
+            3001,
+            3002,
+            3780
+          ],
+          "oracle_valid": 4,
+          "req": 3
+        }
+      ],
+      "num_length_violations": 4,
+      "num_requests": 4,
+      "num_sha256_mismatches": 4,
+      "num_violations": 0,
+      "total_committed": 32,
+      "total_exact": 32,
+      "verdict": "VIOLATION"
+    },
+    "linear_audit": {
+      "all_sha256_match": true,
+      "exactness_rate": 1.0,
+      "first_violation": null,
+      "length_violations": [],
+      "num_length_violations": 0,
+      "num_requests": 35,
+      "num_sha256_mismatches": 0,
+      "num_violations": 0,
+      "total_committed": 167,
+      "total_exact": 167,
+      "verdict": "GREEDY_EXACT"
+    },
+    "linear_stack_exactness_rate": 1.0,
+    "max_spec_len": 7,
+    "ppl": {
+      "cap": 2.42,
+      "passed": true,
+      "value": 2.376664808823738
+    }
+  },
+  "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan"
+}
