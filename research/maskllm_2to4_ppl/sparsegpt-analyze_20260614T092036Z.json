@@ -1,0 +1,2583 @@
+{
+  "config": {
+    "checkpoint": "/tmp/osoi5-v0-baked",
+    "mode": "sparsegpt-analyze",
+    "recipe": "sparsegpt",
+    "roles": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "include_lmhead": false,
+    "layers": "all",
+    "ppl_gate": 2.42,
+    "served_baseline_ppl": 2.3772,
+    "n_targets": 227,
+    "target_int4_MB": 1718.35392,
+    "limit": null,
+    "calib": "data/private_proxy_sharegpt.json",
+    "calib_seqs": 128,
+    "calib_maxlen": 512,
+    "requant": true,
+    "note": "offline teacher-forced PPL over the 16,384-row PCK04 keepset head; dense bf16 == dequantized int4. magnitude-2:4 survivors stay on-grid; sparsegpt survivors move off-grid (bf16-survivor = lower bound; re-quant = faithful).",
+    "calib_n_seqs": 128,
+    "calib_n_tokens": 31730
+  },
+  "baseline_ppl": 2.381184598201683,
+  "baseline_nll": 53614.95942687988,
+  "baseline_ntok": 61797,
+  "sparsegpt_stats": [
+    {
+      "name": "model.language_model.layers.0.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 0,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009704936528578401
+    },
+    {
+      "name": "model.language_model.layers.0.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 0,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999696016311646,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009773242054507136
+    },
+    {
+      "name": "model.language_model.layers.0.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 0,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999946653842926,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009930672822520137
+    },
+    {
+      "name": "model.language_model.layers.0.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 0,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999600648880005,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010348355863243341
+    },
+    {
+      "name": "model.language_model.layers.0.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 0,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999624490737915,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009629413252696395
+    },
+    {
+      "name": "model.language_model.layers.0.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 0,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999941885471344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000940648140385747
+    },
+    {
+      "name": "model.language_model.layers.0.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 0,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999865889549255,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004825760261155665
+    },
+    {
+      "name": "model.language_model.layers.1.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 1,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999600648880005,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010011062258854508
+    },
+    {
+      "name": "model.language_model.layers.1.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 1,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999862611293793,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010308445198461413
+    },
+    {
+      "name": "model.language_model.layers.1.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 1,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999770522117615,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001028610859066248
+    },
+    {
+      "name": "model.language_model.layers.1.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 1,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999971389770508,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010099492501467466
+    },
+    {
+      "name": "model.language_model.layers.1.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 1,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999929368495941,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010063097579404712
+    },
+    {
+      "name": "model.language_model.layers.1.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 1,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999951422214508,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009860231075435877
+    },
+    {
+      "name": "model.language_model.layers.1.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 1,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999987781047821,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00048019125824794173
+    },
+    {
+      "name": "model.language_model.layers.2.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 2,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49999380111694336,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008884100243449211
+    },
+    {
+      "name": "model.language_model.layers.2.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 2,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.4999721646308899,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009151826961897314
+    },
+    {
+      "name": "model.language_model.layers.2.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 2,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008872137404978275
+    },
+    {
+      "name": "model.language_model.layers.2.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 2,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49999839067459106,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0007861987687647343
+    },
+    {
+      "name": "model.language_model.layers.2.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 2,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998292326927185,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009561903425492346
+    },
+    {
+      "name": "model.language_model.layers.2.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 2,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999871253967285,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009503503679297864
+    },
+    {
+      "name": "model.language_model.layers.2.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 2,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999980330467224,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00046434125397354364
+    },
+    {
+      "name": "model.language_model.layers.3.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 3,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999505281448364,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009867822518572211
+    },
+    {
+      "name": "model.language_model.layers.3.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 3,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999946653842926,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00099091581068933
+    },
+    {
+      "name": "model.language_model.layers.3.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 3,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999900758266449,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001027223072014749
+    },
+    {
+      "name": "model.language_model.layers.3.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 3,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009888693457469344
+    },
+    {
+      "name": "model.language_model.layers.3.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 3,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998998641967773,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010364066110923886
+    },
+    {
+      "name": "model.language_model.layers.3.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 3,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998950958251953,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010262812720611691
+    },
+    {
+      "name": "model.language_model.layers.3.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 3,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999982714653015,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004650314513128251
+    },
+    {
+      "name": "model.language_model.layers.4.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 4,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.499990850687027,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010073307203128934
+    },
+    {
+      "name": "model.language_model.layers.4.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 4,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999938905239105,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010046127717942
+    },
+    {
+      "name": "model.language_model.layers.4.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 4,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999770522117615,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001025008037686348
+    },
+    {
+      "name": "model.language_model.layers.4.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 4,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999973475933075,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001072767423465848
+    },
+    {
+      "name": "model.language_model.layers.4.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 4,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998873472213745,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010011050617322326
+    },
+    {
+      "name": "model.language_model.layers.4.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 4,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999403953552246,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000996195012703538
+    },
+    {
+      "name": "model.language_model.layers.4.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 4,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999981224536896,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00048057324602268636
+    },
+    {
+      "name": "model.language_model.layers.5.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 5,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999971389770508,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009883688762784004
+    },
+    {
+      "name": "model.language_model.layers.5.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 5,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999696016311646,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001011963002383709
+    },
+    {
+      "name": "model.language_model.layers.5.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 5,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010161148384213448
+    },
+    {
+      "name": "model.language_model.layers.5.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 5,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.499995619058609,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001034755608998239
+    },
+    {
+      "name": "model.language_model.layers.5.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 5,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999213218688965,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010145008563995361
+    },
+    {
+      "name": "model.language_model.layers.5.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 5,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998950958251953,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010122617240995169
+    },
+    {
+      "name": "model.language_model.layers.5.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 5,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999985694885254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004864778893534094
+    },
+    {
+      "name": "model.language_model.layers.6.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 6,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999409914016724,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009608615073375404
+    },
+    {
+      "name": "model.language_model.layers.6.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 6,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999992549419403,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009632296278141439
+    },
+    {
+      "name": "model.language_model.layers.6.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 6,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009964915225282311
+    },
+    {
+      "name": "model.language_model.layers.6.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 6,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999865889549255,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010292635997757316
+    },
+    {
+      "name": "model.language_model.layers.6.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 6,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49997806549072266,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010022077476605773
+    },
+    {
+      "name": "model.language_model.layers.6.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 6,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49995312094688416,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010040909983217716
+    },
+    {
+      "name": "model.language_model.layers.6.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 6,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999954402446747,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0005123189184814692
+    },
+    {
+      "name": "model.language_model.layers.7.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 7,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999409914016724,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009691783343441784
+    },
+    {
+      "name": "model.language_model.layers.7.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 7,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999162554740906,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009896468836814165
+    },
+    {
+      "name": "model.language_model.layers.7.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 7,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999633729457855,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001088074641302228
+    },
+    {
+      "name": "model.language_model.layers.7.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 7,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999954402446747,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001054122461937368
+    },
+    {
+      "name": "model.language_model.layers.7.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 7,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998217821121216,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010269158519804478
+    },
+    {
+      "name": "model.language_model.layers.7.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 7,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49996599555015564,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001038273680023849
+    },
+    {
+      "name": "model.language_model.layers.7.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 7,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999135732650757,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004780002636834979
+    },
+    {
+      "name": "model.language_model.layers.8.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 8,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49998894333839417,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009564482606947422
+    },
+    {
+      "name": "model.language_model.layers.8.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 8,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.4999832212924957,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010250521590933204
+    },
+    {
+      "name": "model.language_model.layers.8.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 8,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.49999237060546875,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010159254306927323
+    },
+    {
+      "name": "model.language_model.layers.8.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 8,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49999791383743286,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000720184005331248
+    },
+    {
+      "name": "model.language_model.layers.8.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 8,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999019503593445,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009556384175084531
+    },
+    {
+      "name": "model.language_model.layers.8.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 8,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999805688858032,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009523284388706088
+    },
+    {
+      "name": "model.language_model.layers.8.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 8,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999960958957672,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00047554189222864807
+    },
+    {
+      "name": "model.language_model.layers.9.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 9,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999946653842926,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009542650659568608
+    },
+    {
+      "name": "model.language_model.layers.9.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 9,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999314546585083,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010010168189182878
+    },
+    {
+      "name": "model.language_model.layers.9.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 9,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49998703598976135,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009911785600706935
+    },
+    {
+      "name": "model.language_model.layers.9.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 9,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999791383743286,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009775086073204875
+    },
+    {
+      "name": "model.language_model.layers.9.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 9,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.499989777803421,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001007579267024994
+    },
+    {
+      "name": "model.language_model.layers.9.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 9,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998587369918823,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001002296688966453
+    },
+    {
+      "name": "model.language_model.layers.9.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 9,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999985098838806,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00046681647654622793
+    },
+    {
+      "name": "model.language_model.layers.10.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 10,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999918043613434,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000931079441215843
+    },
+    {
+      "name": "model.language_model.layers.10.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 10,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49997636675834656,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009916996350511909
+    },
+    {
+      "name": "model.language_model.layers.10.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 10,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999314546585083,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009309425950050354
+    },
+    {
+      "name": "model.language_model.layers.10.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 10,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999963939189911,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009993837447836995
+    },
+    {
+      "name": "model.language_model.layers.10.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 10,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999932050704956,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000963289407081902
+    },
+    {
+      "name": "model.language_model.layers.10.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 10,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998459219932556,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009536776342429221
+    },
+    {
+      "name": "model.language_model.layers.10.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 10,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999815225601196,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004910638090223074
+    },
+    {
+      "name": "model.language_model.layers.11.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 11,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49998530745506287,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009491677628830075
+    },
+    {
+      "name": "model.language_model.layers.11.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 11,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999755918979645,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009538580779917538
+    },
+    {
+      "name": "model.language_model.layers.11.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 11,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009350492618978024
+    },
+    {
+      "name": "model.language_model.layers.11.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 11,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999579787254333,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001015787827782333
+    },
+    {
+      "name": "model.language_model.layers.11.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 11,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999912977218628,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009355295333079994
+    },
+    {
+      "name": "model.language_model.layers.11.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 11,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998968839645386,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009383333963342011
+    },
+    {
+      "name": "model.language_model.layers.11.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 11,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999989867210388,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00047223715228028595
+    },
+    {
+      "name": "model.language_model.layers.12.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 12,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999822676181793,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009366003796458244
+    },
+    {
+      "name": "model.language_model.layers.12.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 12,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999801814556122,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009579824400134385
+    },
+    {
+      "name": "model.language_model.layers.12.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 12,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999954402446747,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009304249542765319
+    },
+    {
+      "name": "model.language_model.layers.12.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 12,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999965727329254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009412579238414764
+    },
+    {
+      "name": "model.language_model.layers.12.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 12,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49997678399086,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009798919782042503
+    },
+    {
+      "name": "model.language_model.layers.12.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 12,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999835193157196,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009870624635368586
+    },
+    {
+      "name": "model.language_model.layers.12.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 12,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999815225601196,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00047975085908547044
+    },
+    {
+      "name": "model.language_model.layers.13.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 13,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999314546585083,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009222472435794771
+    },
+    {
+      "name": "model.language_model.layers.13.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 13,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999862611293793,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000938289042096585
+    },
+    {
+      "name": "model.language_model.layers.13.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 13,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999954402446747,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009590612608008087
+    },
+    {
+      "name": "model.language_model.layers.13.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 13,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999675154685974,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009842099389061332
+    },
+    {
+      "name": "model.language_model.layers.13.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 13,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999912977218628,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00091313332086429
+    },
+    {
+      "name": "model.language_model.layers.13.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 13,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999910593032837,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009313381160609424
+    },
+    {
+      "name": "model.language_model.layers.13.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 13,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999767541885376,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00047881610225886106
+    },
+    {
+      "name": "model.language_model.layers.14.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 14,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49999046325683594,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009279983351007104
+    },
+    {
+      "name": "model.language_model.layers.14.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 14,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.499990850687027,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009463746100664139
+    },
+    {
+      "name": "model.language_model.layers.14.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 14,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.4999938905239105,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009906726190820336
+    },
+    {
+      "name": "model.language_model.layers.14.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 14,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49999839067459106,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0007019040058366954
+    },
+    {
+      "name": "model.language_model.layers.14.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 14,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999091029167175,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009348472813144326
+    },
+    {
+      "name": "model.language_model.layers.14.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 14,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998968839645386,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009491524542681873
+    },
+    {
+      "name": "model.language_model.layers.14.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 14,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.499997079372406,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004997770301997662
+    },
+    {
+      "name": "model.language_model.layers.15.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 15,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999845623970032,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010124671971425414
+    },
+    {
+      "name": "model.language_model.layers.15.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 15,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999679625034332,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010332679376006126
+    },
+    {
+      "name": "model.language_model.layers.15.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 15,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.499990850687027,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009766033617779613
+    },
+    {
+      "name": "model.language_model.layers.15.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 15,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999770522117615,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009593162685632706
+    },
+    {
+      "name": "model.language_model.layers.15.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 15,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998795986175537,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009344906429760158
+    },
+    {
+      "name": "model.language_model.layers.15.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 15,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999183416366577,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009515638230368495
+    },
+    {
+      "name": "model.language_model.layers.15.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 15,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999839067459106,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004687594482675195
+    },
+    {
+      "name": "model.language_model.layers.16.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 16,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49998971819877625,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009913918329402804
+    },
+    {
+      "name": "model.language_model.layers.16.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 16,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49998170137405396,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010484878439456224
+    },
+    {
+      "name": "model.language_model.layers.16.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 16,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999900758266449,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010135113261640072
+    },
+    {
+      "name": "model.language_model.layers.16.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 16,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.499995619058609,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010412796400487423
+    },
+    {
+      "name": "model.language_model.layers.16.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 16,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999216198921204,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009326677536591887
+    },
+    {
+      "name": "model.language_model.layers.16.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 16,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999924302101135,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009472353267483413
+    },
+    {
+      "name": "model.language_model.layers.16.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 16,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999973177909851,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004859435430262238
+    },
+    {
+      "name": "model.language_model.layers.17.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 17,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999856948852539,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00099036970641464
+    },
+    {
+      "name": "model.language_model.layers.17.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 17,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49999162554740906,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010371110402047634
+    },
+    {
+      "name": "model.language_model.layers.17.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 17,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999885559082031,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010333843529224396
+    },
+    {
+      "name": "model.language_model.layers.17.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 17,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999675154685974,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000994469621218741
+    },
+    {
+      "name": "model.language_model.layers.17.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 17,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998939037323,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009465947514399886
+    },
+    {
+      "name": "model.language_model.layers.17.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 17,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999839961528778,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009703795658424497
+    },
+    {
+      "name": "model.language_model.layers.17.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 17,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999959170818329,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0005138112464919686
+    },
+    {
+      "name": "model.language_model.layers.18.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 18,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999801814556122,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009200535714626312
+    },
+    {
+      "name": "model.language_model.layers.18.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 18,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999748170375824,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009448166820220649
+    },
+    {
+      "name": "model.language_model.layers.18.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 18,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4999275207519531,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010538561036810279
+    },
+    {
+      "name": "model.language_model.layers.18.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 18,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008794105960987508
+    },
+    {
+      "name": "model.language_model.layers.18.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 18,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998050928115845,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010054990416392684
+    },
+    {
+      "name": "model.language_model.layers.18.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 18,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999757409095764,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010318233398720622
+    },
+    {
+      "name": "model.language_model.layers.18.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 18,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999257922172546,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0005203081527724862
+    },
+    {
+      "name": "model.language_model.layers.19.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 19,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999597668647766,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000984908896498382
+    },
+    {
+      "name": "model.language_model.layers.19.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 19,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.49994125962257385,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009982852498069406
+    },
+    {
+      "name": "model.language_model.layers.19.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 19,
+      "int4_bytes": 655360,
+      "nonzero_frac": 0.4997718930244446,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0012026356998831034
+    },
+    {
+      "name": "model.language_model.layers.19.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 19,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999600648880005,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010446353117004037
+    },
+    {
+      "name": "model.language_model.layers.19.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 19,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998557567596436,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000913261144887656
+    },
+    {
+      "name": "model.language_model.layers.19.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 19,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998509883880615,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009461544104851782
+    },
+    {
+      "name": "model.language_model.layers.19.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 19,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999651312828064,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00048055220395326614
+    },
+    {
+      "name": "model.language_model.layers.20.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 20,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.4999566078186035,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00116213399451226
+    },
+    {
+      "name": "model.language_model.layers.20.self_attn.k_proj",
+      "role": "k_proj",
+      "layer": 20,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.49993667006492615,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0011326101375743747
+    },
+    {
+      "name": "model.language_model.layers.20.self_attn.v_proj",
+      "role": "v_proj",
+      "layer": 20,
+      "int4_bytes": 1310720,
+      "nonzero_frac": 0.49992257356643677,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0012538090813905
+    },
+    {
+      "name": "model.language_model.layers.20.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 20,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49999839067459106,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0007347604259848595
+    },
+    {
+      "name": "model.language_model.layers.20.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 20,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999959468841553,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009731150348670781
+    },
+    {
+      "name": "model.language_model.layers.20.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 20,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999645352363586,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009997072629630566
+    },
+    {
+      "name": "model.language_model.layers.20.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 20,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999985098838806,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00047287577763199806
+    },
+    {
+      "name": "model.language_model.layers.21.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 21,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49998894333839417,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009513340191915631
+    },
+    {
+      "name": "model.language_model.layers.21.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 21,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999696016311646,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010043646907433867
+    },
+    {
+      "name": "model.language_model.layers.21.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 21,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999941289424896,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009717104840092361
+    },
+    {
+      "name": "model.language_model.layers.21.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 21,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999529123306274,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010118853533640504
+    },
+    {
+      "name": "model.language_model.layers.21.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 21,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999839067459106,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0005074176588095725
+    },
+    {
+      "name": "model.language_model.layers.22.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 22,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999600648880005,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009007747285068035
+    },
+    {
+      "name": "model.language_model.layers.22.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 22,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999696016311646,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010751273948699236
+    },
+    {
+      "name": "model.language_model.layers.22.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 22,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999576807022095,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009332226472906768
+    },
+    {
+      "name": "model.language_model.layers.22.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 22,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999968707561493,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009542826446704566
+    },
+    {
+      "name": "model.language_model.layers.22.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 22,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999982714653015,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004717142728623003
+    },
+    {
+      "name": "model.language_model.layers.23.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 23,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999973475933075,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009345251019112766
+    },
+    {
+      "name": "model.language_model.layers.23.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 23,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999965727329254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010799242882058024
+    },
+    {
+      "name": "model.language_model.layers.23.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 23,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999570846557617,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008633469115011394
+    },
+    {
+      "name": "model.language_model.layers.23.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 23,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008787205442786217
+    },
+    {
+      "name": "model.language_model.layers.23.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 23,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.499998539686203,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00047209314652718604
+    },
+    {
+      "name": "model.language_model.layers.24.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 24,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999523162841797,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008974259835667908
+    },
+    {
+      "name": "model.language_model.layers.24.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 24,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999954402446747,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010426229564473033
+    },
+    {
+      "name": "model.language_model.layers.24.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 24,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999948740005493,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009407274192199111
+    },
+    {
+      "name": "model.language_model.layers.24.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 24,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999903440475464,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009583378559909761
+    },
+    {
+      "name": "model.language_model.layers.24.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 24,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999989867210388,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004721921286545694
+    },
+    {
+      "name": "model.language_model.layers.25.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 25,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999961853027344,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009281337261199951
+    },
+    {
+      "name": "model.language_model.layers.25.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 25,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999675154685974,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000997398397885263
+    },
+    {
+      "name": "model.language_model.layers.25.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 25,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999377131462097,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00091943284496665
+    },
+    {
+      "name": "model.language_model.layers.25.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 25,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999840557575226,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009376822272315621
+    },
+    {
+      "name": "model.language_model.layers.25.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 25,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999985098838806,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000476959248771891
+    },
+    {
+      "name": "model.language_model.layers.26.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 26,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.4999970495700836,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009044788894243538
+    },
+    {
+      "name": "model.language_model.layers.26.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 26,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.4999985694885254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0007008819957263768
+    },
+    {
+      "name": "model.language_model.layers.26.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 26,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999942183494568,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000967353698797524
+    },
+    {
+      "name": "model.language_model.layers.26.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 26,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999823272228241,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00098519679158926
+    },
+    {
+      "name": "model.language_model.layers.26.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 26,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999987781047821,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0005000000237487257
+    },
+    {
+      "name": "model.language_model.layers.27.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 27,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999257922172546,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008904678979888558
+    },
+    {
+      "name": "model.language_model.layers.27.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 27,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999696016311646,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009907170897349715
+    },
+    {
+      "name": "model.language_model.layers.27.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 27,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999332427978516,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009400717681273818
+    },
+    {
+      "name": "model.language_model.layers.27.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 27,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999963343143463,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009611196583136916
+    },
+    {
+      "name": "model.language_model.layers.27.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 27,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999862909317017,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0005098030669614673
+    },
+    {
+      "name": "model.language_model.layers.28.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 28,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999973475933075,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000918317586183548
+    },
+    {
+      "name": "model.language_model.layers.28.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 28,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999963939189911,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010112690506502986
+    },
+    {
+      "name": "model.language_model.layers.28.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 28,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999922215938568,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008759890333749354
+    },
+    {
+      "name": "model.language_model.layers.28.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 28,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49998363852500916,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008942112326622009
+    },
+    {
+      "name": "model.language_model.layers.28.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 28,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999773502349854,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00047161130351014435
+    },
+    {
+      "name": "model.language_model.layers.29.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 29,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999954402446747,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009223268716596067
+    },
+    {
+      "name": "model.language_model.layers.29.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 29,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999770522117615,
+      "calib_tokens": 31730,
+      "requant_mae": 0.001037235022522509
+    },
+    {
+      "name": "model.language_model.layers.29.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 29,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999526143074036,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009325382416136563
+    },
+    {
+      "name": "model.language_model.layers.29.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 29,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999675154685974,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009426967590115964
+    },
+    {
+      "name": "model.language_model.layers.29.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 29,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999981224536896,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00046847164048813283
+    },
+    {
+      "name": "model.language_model.layers.30.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 30,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.499995619058609,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009073272231034935
+    },
+    {
+      "name": "model.language_model.layers.30.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 30,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999965727329254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009686088305898011
+    },
+    {
+      "name": "model.language_model.layers.30.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 30,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999532103538513,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009016587282530963
+    },
+    {
+      "name": "model.language_model.layers.30.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 30,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999335408210754,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009109681705012918
+    },
+    {
+      "name": "model.language_model.layers.30.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 30,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999985694885254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00048466058797203004
+    },
+    {
+      "name": "model.language_model.layers.31.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 31,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999579787254333,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009089317172765732
+    },
+    {
+      "name": "model.language_model.layers.31.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 31,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999600648880005,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010355602717027068
+    },
+    {
+      "name": "model.language_model.layers.31.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 31,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999508261680603,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009399704285897315
+    },
+    {
+      "name": "model.language_model.layers.31.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 31,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999484419822693,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009514942648820579
+    },
+    {
+      "name": "model.language_model.layers.31.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 31,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999892711639404,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004728113126475364
+    },
+    {
+      "name": "model.language_model.layers.32.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 32,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.49999627470970154,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008600588771514595
+    },
+    {
+      "name": "model.language_model.layers.32.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 32,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.4999990463256836,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0007586517021991313
+    },
+    {
+      "name": "model.language_model.layers.32.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 32,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999958276748657,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000952753413002938
+    },
+    {
+      "name": "model.language_model.layers.32.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 32,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999621510505676,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009623873047530651
+    },
+    {
+      "name": "model.language_model.layers.32.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 32,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999862909317017,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004458818002603948
+    },
+    {
+      "name": "model.language_model.layers.33.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 33,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999965727329254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008839100482873619
+    },
+    {
+      "name": "model.language_model.layers.33.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 33,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999886751174927,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009894740069285035
+    },
+    {
+      "name": "model.language_model.layers.33.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 33,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999624490737915,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008859519730322063
+    },
+    {
+      "name": "model.language_model.layers.33.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 33,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999953806400299,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008939425460994244
+    },
+    {
+      "name": "model.language_model.layers.33.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 33,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999992549419403,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00046392943477258086
+    },
+    {
+      "name": "model.language_model.layers.34.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 34,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.49999523162841797,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008634583209641278
+    },
+    {
+      "name": "model.language_model.layers.34.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 34,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999971389770508,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010493019362911582
+    },
+    {
+      "name": "model.language_model.layers.34.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 34,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999529123306274,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000946840678807348
+    },
+    {
+      "name": "model.language_model.layers.34.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 34,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999532103538513,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009562948835082352
+    },
+    {
+      "name": "model.language_model.layers.34.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 34,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999985694885254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0004614339559338987
+    },
+    {
+      "name": "model.language_model.layers.35.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 35,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999876022338867,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008954692748375237
+    },
+    {
+      "name": "model.language_model.layers.35.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 35,
+      "int4_bytes": 2621440,
+      "nonzero_frac": 0.4999965727329254,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0010345414048060775
+    },
+    {
+      "name": "model.language_model.layers.35.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 35,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999943673610687,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008803465752862394
+    },
+    {
+      "name": "model.language_model.layers.35.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 35,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999290704727173,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0009027630439959466
+    },
+    {
+      "name": "model.language_model.layers.35.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 35,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.49999892711639404,
+      "calib_tokens": 31730,
+      "requant_mae": 0.00048127619083970785
+    },
+    {
+      "name": "model.language_model.layers.36.self_attn.q_proj",
+      "role": "q_proj",
+      "layer": 36,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.4999869465827942,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008467216393910348
+    },
+    {
+      "name": "model.language_model.layers.36.self_attn.o_proj",
+      "role": "o_proj",
+      "layer": 36,
+      "int4_bytes": 5242880,
+      "nonzero_frac": 0.4999990463256836,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0007136969361454248
+    },
+    {
+      "name": "model.language_model.layers.36.mlp.gate_proj",
+      "role": "gate_proj",
+      "layer": 36,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999942183494568,
+      "calib_tokens": 31730,
+      "requant_mae": 0.0008866175194270909
+    },
+    {
+      "name": "model.language_model.layers.36.mlp.up_proj",
+      "role": "up_proj",
+      "layer": 36,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999940097332001,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000915801792871207
+    },
+    {
+      "name": "model.language_model.layers.36.mlp.down_proj",
+      "role": "down_proj",
+      "layer": 36,
+      "int4_bytes": 13107200,
+      "nonzero_frac": 0.4999978840351105,
+      "calib_tokens": 31730,
+      "requant_mae": 0.000471306819235906
+    }
+  ],
+  "requant_mae_mean": 0.0008855591951725832,
+  "ppl_2to4_sparsegpt_bf16": 6.962070611783101,
+  "ppl_2to4_sparsegpt_bf16_delta": 4.580886013581418,
+  "ppl_2to4_sparsegpt_requant": 7.50700240015621,
+  "ppl_2to4_sparsegpt_requant_delta": 5.125817801954527,
+  "ppl_2to4_sparsegpt": 7.50700240015621,
+  "ppl_2to4_sparsegpt_pass": false,
+  "per_layer_sweep": [
+    {
+      "layer": 0,
+      "ppl": 2.3358641367940374,
+      "delta": -0.045320461407645674,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 1,
+      "ppl": 2.3226076573194363,
+      "delta": -0.05857694088224674,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 2,
+      "ppl": 2.3403742867857864,
+      "delta": -0.04081031141589664,
+      "int4_bytes": 52428800,
+      "n_tensors": 7
+    },
+    {
+      "layer": 3,
+      "ppl": 2.3841412373443993,
+      "delta": 0.0029566391427162664,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 4,
+      "ppl": 2.3499334277222657,
+      "delta": -0.03125117047941739,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 5,
+      "ppl": 2.3247577252193965,
+      "delta": -0.05642687298228655,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 6,
+      "ppl": 2.3208352632737417,
+      "delta": -0.06034933492794137,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 7,
+      "ppl": 2.331721775448264,
+      "delta": -0.049462822753418845,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 8,
+      "ppl": 2.3457893758883266,
+      "delta": -0.035395222313356456,
+      "int4_bytes": 52428800,
+      "n_tensors": 7
+    },
+    {
+      "layer": 9,
+      "ppl": 2.349493678998213,
+      "delta": -0.03169091920347,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 10,
+      "ppl": 2.3679954780864487,
+      "delta": -0.01318912011523432,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 11,
+      "ppl": 2.3497864539095983,
+      "delta": -0.03139814429208476,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 12,
+      "ppl": 2.3463700252431536,
+      "delta": -0.03481457295852941,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 13,
+      "ppl": 2.3235413260765196,
+      "delta": -0.0576432721251634,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 14,
+      "ppl": 2.3252819030043574,
+      "delta": -0.0559026951973256,
+      "int4_bytes": 52428800,
+      "n_tensors": 7
+    },
+    {
+      "layer": 15,
+      "ppl": 2.348037798074303,
+      "delta": -0.03314680012738025,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 16,
+      "ppl": 2.3312418664522827,
+      "delta": -0.04994273174940034,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 17,
+      "ppl": 2.3141142856330075,
+      "delta": -0.06707031256867557,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 18,
+      "ppl": 2.3360714415785475,
+      "delta": -0.04511315662313553,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 19,
+      "ppl": 2.340684287205309,
+      "delta": -0.04050031099637419,
+      "int4_bytes": 45875200,
+      "n_tensors": 7
+    },
+    {
+      "layer": 20,
+      "ppl": 2.3705340629583675,
+      "delta": -0.010650535243315495,
+      "int4_bytes": 52428800,
+      "n_tensors": 7
+    },
+    {
+      "layer": 21,
+      "ppl": 2.3104722549280607,
+      "delta": -0.0707123432736223,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 22,
+      "ppl": 2.309273394289424,
+      "delta": -0.07191120391225914,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 23,
+      "ppl": 2.3115842151215875,
+      "delta": -0.06960038308009553,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 24,
+      "ppl": 2.3130730520903593,
+      "delta": -0.06811154611132375,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 25,
+      "ppl": 2.2993327950503737,
+      "delta": -0.08185180315130935,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 26,
+      "ppl": 2.316149875480857,
+      "delta": -0.06503472272082611,
+      "int4_bytes": 49807360,
+      "n_tensors": 5
+    },
+    {
+      "layer": 27,
+      "ppl": 2.338881968095371,
+      "delta": -0.042302630106311856,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 28,
+      "ppl": 2.3282229217149393,
+      "delta": -0.05296167648674377,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 29,
+      "ppl": 2.3271779198598685,
+      "delta": -0.054006678341814496,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 30,
+      "ppl": 2.3357499173815657,
+      "delta": -0.04543468082011737,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 31,
+      "ppl": 2.331596456149088,
+      "delta": -0.049588142052594986,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 32,
+      "ppl": 2.3218752539576637,
+      "delta": -0.059309344244019346,
+      "int4_bytes": 49807360,
+      "n_tensors": 5
+    },
+    {
+      "layer": 33,
+      "ppl": 2.323805181799239,
+      "delta": -0.05737941640244415,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 34,
+      "ppl": 2.3144923851546118,
+      "delta": -0.06669221304707129,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 35,
+      "ppl": 2.3168697293345417,
+      "delta": -0.06431486886714133,
+      "int4_bytes": 44564480,
+      "n_tensors": 5
+    },
+    {
+      "layer": 36,
+      "ppl": 2.3271538969955863,
+      "delta": -0.054030701206096765,
+      "int4_bytes": 49807360,
+      "n_tensors": 5
+    }
+  ],
+  "cumulative_subset": [
+    {
+      "added_layer": 25,
+      "n_layers": 1,
+      "ppl": 2.381191771290804,
+      "delta": 7.173089120904308e-06,
+      "cum_int4_bytes": 44564480,
+      "cum_byte_frac": 0.02593440122044241,
+      "pass": true
+    },
+    {
+      "added_layer": 22,
+      "n_layers": 2,
+      "ppl": 2.398641168051368,
+      "delta": 0.01745656984968491,
+      "cum_int4_bytes": 89128960,
+      "cum_byte_frac": 0.05186880244088482,
+      "pass": true
+    },
+    {
+      "added_layer": 21,
+      "n_layers": 3,
+      "ppl": 2.422103511428715,
+      "delta": 0.04091891322703178,
+      "cum_int4_bytes": 133693440,
+      "cum_byte_frac": 0.07780320366132723,
+      "pass": false
+    },
+    {
+      "added_layer": 23,
+      "n_layers": 4,
+      "ppl": 2.4432791312995468,
+      "delta": 0.062094533097863724,
+      "cum_int4_bytes": 178257920,
+      "cum_byte_frac": 0.10373760488176964,
+      "pass": false
+    },
+    {
+      "added_layer": 24,
+      "n_layers": 5,
+      "ppl": 2.47744538486384,
+      "delta": 0.09626078666215676,
+      "cum_int4_bytes": 222822400,
+      "cum_byte_frac": 0.12967200610221205,
+      "pass": false
+    },
+    {
+      "added_layer": 17,
+      "n_layers": 6,
+      "ppl": 2.522901951714179,
+      "delta": 0.14171735351249604,
+      "cum_int4_bytes": 268697600,
+      "cum_byte_frac": 0.15636918382913806,
+      "pass": false
+    },
+    {
+      "added_layer": 34,
+      "n_layers": 7,
+      "ppl": 2.5395859064870527,
+      "delta": 0.1584013082853697,
+      "cum_int4_bytes": 313262080,
+      "cum_byte_frac": 0.18230358504958047,
+      "pass": false
+    },
+    {
+      "added_layer": 26,
+      "n_layers": 8,
+      "ppl": 2.5987046463122496,
+      "delta": 0.21752004811056658,
+      "cum_int4_bytes": 363069440,
+      "cum_byte_frac": 0.2112890922959573,
+      "pass": false
+    },
+    {
+      "added_layer": 35,
+      "n_layers": 9,
+      "ppl": 2.633636118158857,
+      "delta": 0.25245151995717396,
+      "cum_int4_bytes": 407633920,
+      "cum_byte_frac": 0.2372234935163997,
+      "pass": false
+    },
+    {
+      "added_layer": 6,
+      "n_layers": 10,
+      "ppl": 2.665331456837181,
+      "delta": 0.28414685863549805,
+      "cum_int4_bytes": 453509120,
+      "cum_byte_frac": 0.2639206712433257,
+      "pass": false
+    },
+    {
+      "added_layer": 32,
+      "n_layers": 11,
+      "ppl": 2.6998058766912707,
+      "delta": 0.31862127848958766,
+      "cum_int4_bytes": 503316480,
+      "cum_byte_frac": 0.2929061784897025,
+      "pass": false
+    },
+    {
+      "added_layer": 1,
+      "n_layers": 12,
+      "ppl": 2.7263591814299835,
+      "delta": 0.3451745832283004,
+      "cum_int4_bytes": 549191680,
+      "cum_byte_frac": 0.31960335621662855,
+      "pass": false
+    },
+    {
+      "added_layer": 13,
+      "n_layers": 13,
+      "ppl": 2.772523169151084,
+      "delta": 0.39133857094940083,
+      "cum_int4_bytes": 595066880,
+      "cum_byte_frac": 0.34630053394355453,
+      "pass": false
+    },
+    {
+      "added_layer": 33,
+      "n_layers": 14,
+      "ppl": 2.810811077540514,
+      "delta": 0.42962647933883114,
+      "cum_int4_bytes": 639631360,
+      "cum_byte_frac": 0.37223493516399697,
+      "pass": false
+    },
+    {
+      "added_layer": 5,
+      "n_layers": 15,
+      "ppl": 2.8618114479504317,
+      "delta": 0.4806268497487487,
+      "cum_int4_bytes": 685506560,
+      "cum_byte_frac": 0.39893211289092295,
+      "pass": false
+    },
+    {
+      "added_layer": 14,
+      "n_layers": 16,
+      "ppl": 2.940761800827076,
+      "delta": 0.5595772026253929,
+      "cum_int4_bytes": 737935360,
+      "cum_byte_frac": 0.429443173150267,
+      "pass": false
+    },
+    {
+      "added_layer": 36,
+      "n_layers": 17,
+      "ppl": 3.0102149289263114,
+      "delta": 0.6290303307246283,
+      "cum_int4_bytes": 787742720,
+      "cum_byte_frac": 0.4584286803966438,
+      "pass": false
+    },
+    {
+      "added_layer": 29,
+      "n_layers": 18,
+      "ppl": 3.0755665384853486,
+      "delta": 0.6943819402836655,
+      "cum_int4_bytes": 832307200,
+      "cum_byte_frac": 0.4843630816170862,
+      "pass": false
+    },
+    {
+      "added_layer": 28,
+      "n_layers": 19,
+      "ppl": 3.1392215609302347,
+      "delta": 0.7580369627285517,
+      "cum_int4_bytes": 876871680,
+      "cum_byte_frac": 0.5102974828375286,
+      "pass": false
+    },
+    {
+      "added_layer": 16,
+      "n_layers": 20,
+      "ppl": 3.2438867698237974,
+      "delta": 0.8627021716221144,
+      "cum_int4_bytes": 922746880,
+      "cum_byte_frac": 0.5369946605644547,
+      "pass": false
+    },
+    {
+      "added_layer": 31,
+      "n_layers": 21,
+      "ppl": 3.3261134563574264,
+      "delta": 0.9449288581557433,
+      "cum_int4_bytes": 967311360,
+      "cum_byte_frac": 0.562929061784897,
+      "pass": false
+    },
+    {
+      "added_layer": 7,
+      "n_layers": 22,
+      "ppl": 3.4088080971117187,
+      "delta": 1.0276234989100357,
+      "cum_int4_bytes": 1013186560,
+      "cum_byte_frac": 0.589626239511823,
+      "pass": false
+    },
+    {
+      "added_layer": 30,
+      "n_layers": 23,
+      "ppl": 3.5102390767397673,
+      "delta": 1.1290544785380843,
+      "cum_int4_bytes": 1057751040,
+      "cum_byte_frac": 0.6155606407322655,
+      "pass": false
+    },
+    {
+      "added_layer": 0,
+      "n_layers": 24,
+      "ppl": 3.5906378198727906,
+      "delta": 1.2094532216711076,
+      "cum_int4_bytes": 1103626240,
+      "cum_byte_frac": 0.6422578184591915,
+      "pass": false
+    },
+    {
+      "added_layer": 18,
+      "n_layers": 25,
+      "ppl": 3.775632888336203,
+      "delta": 1.39444829013452,
+      "cum_int4_bytes": 1149501440,
+      "cum_byte_frac": 0.6689549961861174,
+      "pass": false
+    }
+  ],
+  "safe_subset": {
+    "added_layer": 22,
+    "n_layers": 2,
+    "ppl": 2.398641168051368,
+    "delta": 0.01745656984968491,
+    "cum_int4_bytes": 89128960,
+    "cum_byte_frac": 0.05186880244088482,
+    "pass": true
+  },
+  "safe_subset_byte_saving_pct_of_verify_weights": 1.2967200610221206
+}

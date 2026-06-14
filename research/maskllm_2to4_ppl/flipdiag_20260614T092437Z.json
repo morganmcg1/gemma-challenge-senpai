@@ -1,0 +1,37 @@
+{
+  "config": {
+    "checkpoint": "/tmp/osoi5-v0-baked",
+    "mode": "flipdiag",
+    "recipe": "magnitude",
+    "roles": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "include_lmhead": false,
+    "layers": "all",
+    "ppl_gate": 2.42,
+    "served_baseline_ppl": 2.3772,
+    "n_targets": 227,
+    "target_int4_MB": 1718.35392,
+    "limit": null,
+    "calib": null,
+    "calib_seqs": null,
+    "calib_maxlen": null,
+    "requant": null,
+    "note": "offline teacher-forced PPL over the 16,384-row PCK04 keepset head; dense bf16 == dequantized int4. magnitude-2:4 survivors stay on-grid; sparsegpt survivors move off-grid (bf16-survivor = lower bound; re-quant = faithful)."
+  },
+  "baseline_ppl": 2.381184598201683,
+  "baseline_nll": 53614.95942687988,
+  "baseline_ntok": 61797,
+  "flip_frac_magnitude_global": 0.5803356170654297,
+  "flip_frac_magnitude_subset": 0.059501271694898605,
+  "flip_subset_layers": [
+    1,
+    3
+  ]
+}
