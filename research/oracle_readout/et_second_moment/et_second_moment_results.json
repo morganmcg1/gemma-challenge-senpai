@@ -1,0 +1,543 @@
+{
+  "primary_metric_name": "et_second_moment_self_test_passes",
+  "et_second_moment_self_test_passes": 1,
+  "test_metric_name": "tps_finite_sample_ci_halfwidth",
+  "tps_finite_sample_ci_halfwidth": 10.906182006867379,
+  "tps_finite_sample_ci_halfwidth_descent_only": 10.831761219545779,
+  "accepted_length_std_both_bugs": 3.035436750248887,
+  "accepted_length_std_descent_only": 3.0592748771161733,
+  "verdict": "SECOND MOMENT STAMPED. The #160 E[T]-DP's accepted-length pmf is exact (max-abs-diff 0.0e+00 vs two independent enumerations), sums to 1, and reproduces E[T]=5.0564/5.2070 as its mean. sigma_L=3.0354 (both-bugs) gives a finite-benchmark single-shot TPS 95% half-width of +/-10.91 TPS at the 16384-token budget; the lower bound CLEARS 500 for both-bugs and CLEARS 500 for descent-only. This is the sampling-uncertainty term, composing in quadrature with kanna #159's sigma_hw (armed) for the total single-shot CI, and it arms land #71 with a distributional readout gate alongside wirbel #170's mean gate.",
+  "model": {
+    "committed_length_L": "L = (edges descended) + 1 bonus token ; E[L] == E[T]",
+    "pmf": "P(L=k) = sum_{c: depth_c=k-1} reach[c]*(1-s[c]) ; reach from #160 score_tree_depthrank",
+    "second_moment": "Var[L] = E[L^2] - E[L]^2 (pure DP read of the same reach[] object)",
+    "official": "official = K_cal*(L_bar/step)*tau ; SE[L_bar]=sigma_L/sqrt(N_steps); N_steps=B/E[T]",
+    "K_cal": 125.268,
+    "step_measured": 1.2182,
+    "tau_band": [
+      0.9924,
+      1.0
+    ],
+    "bench_tokens_primary": 16384,
+    "bench_tokens_sensitivity": 65536,
+    "z95": 1.959963984540054,
+    "iid_steps_caveat": "SE[L_bar]=sigma_L/sqrt(N_steps) is the PR-prescribed iid-steps CLT term. If consecutive benchmark steps are positively serially correlated (shared text context), the effective N is smaller and the TRUE half-width is LARGER than reported -- i.e. +/-10.9 TPS is a LOWER estimate of the single-draw spread (positive correlation would widen it). Even so, the both-bugs lower CI bound 524.5 clears 500 by a 24.5 TPS margin, so the go-signal is robust to plausible serial-correlation inflation."
+  },
+  "imported_160": {
+    "wandb_run_160": "x8vffgbs",
+    "wandb_run_165": "laxllfjl",
+    "wandb_run_170": "ne7p642c",
+    "descent_only_E_T_anchor": 5.056404568844709,
+    "both_bugs_E_T_anchor": 5.206954309441963,
+    "topology": {
+      "n_nodes": 32,
+      "built_depth": 9,
+      "max_branch": 3,
+      "n_leaves": 7,
+      "parent": [
+        -1,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        2,
+        3,
+        4,
+        4,
+        5,
+        7,
+        9,
+        9,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        24,
+        25,
+        26,
+        28,
+        29
+      ]
+    },
+    "q_deployed_rising_spine": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "rho_cond": [
+      0.4165047789261015,
+      0.2655480090557997,
+      0.19075249320036264
+    ],
+    "source_rho_opt": "research/spec_cost_model/rho_optimal_topology_results.json",
+    "source_accept": "research/accept_calibration/accept_calibration_results.json",
+    "source_rankcov": "research/rank_coverage/rank_coverage_results.json"
+  },
+  "topologies": {
+    "descent_only": {
+      "q1_depth1_spine": 0.679,
+      "score_tree_E_T": 5.056404568844709,
+      "pmf_mean": 5.056404568844711,
+      "pmf_total_mass": 1.0,
+      "E_L2": 34.92638993758784,
+      "var_L": 9.359162773754178,
+      "sigma_L": 3.0592748771161733,
+      "pmf_min": 0.0,
+      "pmf_max_support_length": 10,
+      "accepted_length_pmf": [
+        {
+          "committed_length_L": 1,
+          "accepted_drafts": 0,
+          "P": 0.13756430181055246
+        },
+        {
+          "committed_length_L": 2,
+          "accepted_drafts": 1,
+          "P": 0.11434656164911088
+        },
+        {
+          "committed_length_L": 3,
+          "accepted_drafts": 2,
+          "P": 0.1607030696765146
+        },
+        {
+          "committed_length_L": 4,
+          "accepted_drafts": 3,
+          "P": 0.07440018848749953
+        },
+        {
+          "committed_length_L": 5,
+          "accepted_drafts": 4,
+          "P": 0.11031913038018117
+        },
+        {
+          "committed_length_L": 6,
+          "accepted_drafts": 5,
+          "P": 0.0663355348837149
+        },
+        {
+          "committed_length_L": 7,
+          "accepted_drafts": 6,
+          "P": 0.07297777851396871
+        },
+        {
+          "committed_length_L": 8,
+          "accepted_drafts": 7,
+          "P": 0.06242783424888496
+        },
+        {
+          "committed_length_L": 9,
+          "accepted_drafts": 8,
+          "P": 0.058694807531391564
+        },
+        {
+          "committed_length_L": 10,
+          "accepted_drafts": 9,
+          "P": 0.1422307928181814
+        }
+      ],
+      "mode_committed_length": 3,
+      "bruteforce_dfs_max_abs_diff": 0.0,
+      "bruteforce_parentwalk_max_abs_diff": 2.7755575615628914e-17,
+      "mc_max_abs_diff": 0.00042418848749953275,
+      "mc_mean": 5.0595159999999995
+    },
+    "both_bugs": {
+      "q1_depth1_spine": 0.728739760479042,
+      "score_tree_E_T": 5.206954309441963,
+      "pmf_mean": 5.206954309441966,
+      "pmf_total_mass": 1.0,
+      "E_L2": 36.32624944537778,
+      "var_L": 9.213876264761524,
+      "sigma_L": 3.035436750248887,
+      "pmf_min": 0.0,
+      "pmf_max_support_length": 10,
+      "accepted_length_pmf": [
+        {
+          "committed_length_L": 1,
+          "accepted_drafts": 0,
+          "P": 0.11624836591484067
+        },
+        {
+          "committed_length_L": 2,
+          "accepted_drafts": 1,
+          "P": 0.11263339280217838
+        },
+        {
+          "committed_length_L": 3,
+          "accepted_drafts": 2,
+          "P": 0.15905543312931192
+        },
+        {
+          "committed_length_L": 4,
+          "accepted_drafts": 3,
+          "P": 0.076578235983255
+        },
+        {
+          "committed_length_L": 5,
+          "accepted_drafts": 4,
+          "P": 0.11590134670421985
+        },
+        {
+          "committed_length_L": 6,
+          "accepted_drafts": 5,
+          "P": 0.06912236440690914
+        },
+        {
+          "committed_length_L": 7,
+          "accepted_drafts": 6,
+          "P": 0.07671873875252778
+        },
+        {
+          "committed_length_L": 8,
+          "accepted_drafts": 7,
+          "P": 0.06564110638934899
+        },
+        {
+          "committed_length_L": 9,
+          "accepted_drafts": 8,
+          "P": 0.0554511869173116
+        },
+        {
+          "committed_length_L": 10,
+          "accepted_drafts": 9,
+          "P": 0.1526498290000968
+        }
+      ],
+      "mode_committed_length": 3,
+      "bruteforce_dfs_max_abs_diff": 0.0,
+      "bruteforce_parentwalk_max_abs_diff": 2.0816681711721685e-17,
+      "mc_max_abs_diff": 0.0005562359832549935,
+      "mc_mean": 5.209886
+    }
+  },
+  "dp_exactness_certificate": {
+    "pmf_max_abs_diff": 0.0,
+    "pmf_max_abs_diff_parentwalk": 2.7755575615628914e-17,
+    "dp_distribution_exact": true,
+    "dp_vs_parentwalk_exact": true,
+    "enumeration_methods": [
+      "recursive_DFS_pathproduct",
+      "per_node_parentwalk"
+    ],
+    "tol": 1e-12
+  },
+  "mc_crosscheck": {
+    "mc_trials": 2000000,
+    "mc_max_abs_diff": 0.0005562359832549935,
+    "mc_tol": 0.005,
+    "mc_agrees": true
+  },
+  "finite_sample_tps_ci": {
+    "descent_only": {
+      "primary_16384_tau1": {
+        "E_T": 5.056404568844711,
+        "sigma_L": 3.0592748771161733,
+        "n_tokens": 16384,
+        "step": 1.2182,
+        "tau": 1.0,
+        "N_steps": 3240.247052411675,
+        "SE_Lbar": 0.05374393214397,
+        "tps_slope_per_Lbar": 102.83040551633559,
+        "central_tps": 519.9521322689536,
+        "SE_tps": 5.526510336406858,
+        "ci_halfwidth_tps": 10.831761219545779,
+        "ci_lower_tps": 509.1203710494078,
+        "ci_upper_tps": 530.7838934884994,
+        "lower_clears_500": true
+      },
+      "primary_16384_tau_lo": {
+        "E_T": 5.056404568844711,
+        "sigma_L": 3.0592748771161733,
+        "n_tokens": 16384,
+        "step": 1.2182,
+        "tau": 0.9924,
+        "N_steps": 3240.247052411675,
+        "SE_Lbar": 0.05374393214397,
+        "tps_slope_per_Lbar": 102.04889443441142,
+        "central_tps": 516.0004960637094,
+        "SE_tps": 5.484508857850165,
+        "ci_halfwidth_tps": 10.749439834277231,
+        "ci_lower_tps": 505.2510562294322,
+        "ci_upper_tps": 526.7499358979867,
+        "lower_clears_500": true
+      },
+      "sensitivity_65536_tau1": {
+        "E_T": 5.056404568844711,
+        "sigma_L": 3.0592748771161733,
+        "n_tokens": 65536,
+        "step": 1.2182,
+        "tau": 1.0,
+        "N_steps": 12960.9882096467,
+        "SE_Lbar": 0.026871966071985,
+        "tps_slope_per_Lbar": 102.83040551633559,
+        "central_tps": 519.9521322689536,
+        "SE_tps": 2.763255168203429,
+        "ci_halfwidth_tps": 5.4158806097728895,
+        "ci_lower_tps": 514.5362516591807,
+        "ci_upper_tps": 525.3680128787265,
+        "lower_clears_500": true
+      },
+      "roofline_16384_tau1": {
+        "E_T": 5.056404568844711,
+        "sigma_L": 3.0592748771161733,
+        "n_tokens": 16384,
+        "step": 1.2127,
+        "tau": 1.0,
+        "N_steps": 3240.247052411675,
+        "SE_Lbar": 0.05374393214397,
+        "tps_slope_per_Lbar": 103.2967757895605,
+        "central_tps": 522.3102890492614,
+        "SE_tps": 5.551574908725022,
+        "ci_halfwidth_tps": 10.88088687857728,
+        "ci_lower_tps": 511.42940217068417,
+        "ci_upper_tps": 533.1911759278387,
+        "lower_clears_500": true
+      }
+    },
+    "both_bugs": {
+      "primary_16384_tau1": {
+        "E_T": 5.206954309441966,
+        "sigma_L": 3.035436750248887,
+        "n_tokens": 16384,
+        "step": 1.2182,
+        "tau": 1.0,
+        "N_steps": 3146.561123129173,
+        "SE_Lbar": 0.054113185644194456,
+        "tps_slope_per_Lbar": 102.83040551633559,
+        "central_tps": 535.4332231449484,
+        "SE_tps": 5.564480823573265,
+        "ci_halfwidth_tps": 10.906182006867379,
+        "ci_lower_tps": 524.527041138081,
+        "ci_upper_tps": 546.3394051518159,
+        "lower_clears_500": true
+      },
+      "primary_16384_tau_lo": {
+        "E_T": 5.206954309441966,
+        "sigma_L": 3.035436750248887,
+        "n_tokens": 16384,
+        "step": 1.2182,
+        "tau": 0.9924,
+        "N_steps": 3146.561123129173,
+        "SE_Lbar": 0.054113185644194456,
+        "tps_slope_per_Lbar": 102.04889443441142,
+        "central_tps": 531.3639306490468,
+        "SE_tps": 5.522190769314108,
+        "ci_halfwidth_tps": 10.823295023615184,
+        "ci_lower_tps": 520.5406356254316,
+        "ci_upper_tps": 542.187225672662,
+        "lower_clears_500": true
+      },
+      "sensitivity_65536_tau1": {
+        "E_T": 5.206954309441966,
+        "sigma_L": 3.035436750248887,
+        "n_tokens": 65536,
+        "step": 1.2182,
+        "tau": 1.0,
+        "N_steps": 12586.244492516693,
+        "SE_Lbar": 0.027056592822097228,
+        "tps_slope_per_Lbar": 102.83040551633559,
+        "central_tps": 535.4332231449484,
+        "SE_tps": 2.7822404117866326,
+        "ci_halfwidth_tps": 5.4530910034336895,
+        "ci_lower_tps": 529.9801321415148,
+        "ci_upper_tps": 540.8863141483821,
+        "lower_clears_500": true
+      },
+      "roofline_16384_tau1": {
+        "E_T": 5.206954309441966,
+        "sigma_L": 3.035436750248887,
+        "n_tokens": 16384,
+        "step": 1.2127,
+        "tau": 1.0,
+        "N_steps": 3146.561123129173,
+        "SE_Lbar": 0.054113185644194456,
+        "tps_slope_per_Lbar": 103.2967757895605,
+        "central_tps": 537.8615918489126,
+        "SE_tps": 5.589717604747219,
+        "ci_halfwidth_tps": 10.955645189054046,
+        "ci_lower_tps": 526.9059466598585,
+        "ci_upper_tps": 548.8172370379666,
+        "lower_clears_500": true
+      }
+    }
+  },
+  "lawine168_band_comparison": {
+    "both_bugs": {
+      "halfwidth_tps": 10.906182006867379,
+      "lawine168_band_tps": 2.4,
+      "ratio_to_lawine168": 4.544242502861408,
+      "relation": "LARGER"
+    },
+    "descent_only": {
+      "halfwidth_tps": 10.831761219545779,
+      "lawine168_band_tps": 2.4,
+      "ratio_to_lawine168": 4.513233841477408,
+      "relation": "LARGER"
+    }
+  },
+  "quadrature_composition_kanna159": {
+    "descent_only": {
+      "formula": "halfwidth_total = sqrt( halfwidth_acceptlen^2 + halfwidth_sigma_hw^2 )",
+      "halfwidth_acceptlen_tps": 10.831761219545779,
+      "halfwidth_sigma_hw_tps_PENDING": null,
+      "halfwidth_total_tps": null,
+      "note": "numerator (accept-length finite-sample, THIS leg) and denominator (kanna #159 sigma_hw step-jitter) are independent -> add in quadrature. kanna's term is carried PENDING; plug kanna #159's measured sigma_hw TPS half-width into the armed slot to close the total single-shot CI.",
+      "armed": true
+    },
+    "both_bugs": {
+      "formula": "halfwidth_total = sqrt( halfwidth_acceptlen^2 + halfwidth_sigma_hw^2 )",
+      "halfwidth_acceptlen_tps": 10.906182006867379,
+      "halfwidth_sigma_hw_tps_PENDING": null,
+      "halfwidth_total_tps": null,
+      "note": "numerator (accept-length finite-sample, THIS leg) and denominator (kanna #159 sigma_hw step-jitter) are independent -> add in quadrature. kanna's term is carried PENDING; plug kanna #159's measured sigma_hw TPS half-width into the armed slot to close the total single-shot CI.",
+      "armed": true
+    }
+  },
+  "land71_distribution_gate": {
+    "predicate": "land_histogram_in_band(measured_pmf, predicted_pmf, tol=0.02) -> bool",
+    "predicate_body": "normalize(measured); max_k |measured[k]-predicted[k]| <= tol",
+    "predicted_pmf_both_bugs": [
+      0.0,
+      0.11624836591484067,
+      0.11263339280217838,
+      0.15905543312931192,
+      0.076578235983255,
+      0.11590134670421985,
+      0.06912236440690914,
+      0.07671873875252778,
+      0.06564110638934899,
+      0.0554511869173116,
+      0.1526498290000968
+    ],
+    "demo": [
+      {
+        "scenario": "measured == predicted (clean build)",
+        "in_band": true
+      },
+      {
+        "scenario": "5% mass spread off the mode (mean-preserving shape distortion)",
+        "in_band": false,
+        "perturbed_mean": 5.206954309441966,
+        "predicted_mean": 5.206954309441966
+      }
+    ],
+    "composition_with_170": "wirbel #170 = MEAN gate ('is E[T] trustworthy, not over-accept-inflated?'); THIS = DISTRIBUTION gate ('does the whole accepted-length shape match prediction?'). A build bug that preserves the mean E[T] but distorts the histogram passes #170 yet fails this -> together a mean+distribution build gate.",
+    "handoff": "land #71 logs its per-step accepted-length histogram; run it through BOTH gates."
+  },
+  "self_test": {
+    "passes": true,
+    "n_checks": 18,
+    "n_passed": 18,
+    "checks": [
+      {
+        "name": "descent_only: pmf-mean reproduces #160 E[T] anchor",
+        "passes": true,
+        "detail": "pmf_mean=5.056404568845 anchor=5.056404568845"
+      },
+      {
+        "name": "descent_only: pmf-mean == score_tree_depthrank E[T] (same object)",
+        "passes": true,
+        "detail": "pmf_mean=5.056404568845 score_tree=5.056404568845"
+      },
+      {
+        "name": "descent_only: pmf sums to 1",
+        "passes": true,
+        "detail": "total=1.000000000000000"
+      },
+      {
+        "name": "descent_only: pmf non-negative",
+        "passes": true,
+        "detail": "min=0.000e+00"
+      },
+      {
+        "name": "descent_only: sigma_L >= 0",
+        "passes": true,
+        "detail": "sigma_L=3.059275"
+      },
+      {
+        "name": "both_bugs: pmf-mean reproduces #160 E[T] anchor",
+        "passes": true,
+        "detail": "pmf_mean=5.206954309442 anchor=5.206954309442"
+      },
+      {
+        "name": "both_bugs: pmf-mean == score_tree_depthrank E[T] (same object)",
+        "passes": true,
+        "detail": "pmf_mean=5.206954309442 score_tree=5.206954309442"
+      },
+      {
+        "name": "both_bugs: pmf sums to 1",
+        "passes": true,
+        "detail": "total=1.000000000000000"
+      },
+      {
+        "name": "both_bugs: pmf non-negative",
+        "passes": true,
+        "detail": "min=0.000e+00"
+      },
+      {
+        "name": "both_bugs: sigma_L >= 0",
+        "passes": true,
+        "detail": "sigma_L=3.035437"
+      },
+      {
+        "name": "DP pmf exact vs recursive DFS enumeration (both topologies)",
+        "passes": true,
+        "detail": "max_abs_diff=0.000e+00 (tol 1e-12)"
+      },
+      {
+        "name": "DP pmf exact vs parent-walk enumeration (both topologies)",
+        "passes": true,
+        "detail": "max_abs_diff=2.776e-17"
+      },
+      {
+        "name": "descent_only: CI brackets the point estimate (lower<central<upper)",
+        "passes": true,
+        "detail": "[509.120, 530.784] around 519.952"
+      },
+      {
+        "name": "descent_only: lower-bound-clears-500 verdict explicit (bool present)",
+        "passes": true,
+        "detail": "lower=509.120 clears500=True"
+      },
+      {
+        "name": "both_bugs: CI brackets the point estimate (lower<central<upper)",
+        "passes": true,
+        "detail": "[524.527, 546.339] around 535.433"
+      },
+      {
+        "name": "both_bugs: lower-bound-clears-500 verdict explicit (bool present)",
+        "passes": true,
+        "detail": "lower=524.527 clears500=True"
+      },
+      {
+        "name": "MC histogram agrees with DP pmf within MC tolerance (both topologies)",
+        "passes": true,
+        "detail": "max_abs_diff=5.562e-04 (tol 5e-03)"
+      },
+      {
+        "name": "all reported scalars NaN-clean",
+        "passes": true,
+        "detail": "14 scalars finite"
+      }
+    ],
+    "nan_clean": true
+  },
+  "provenance": "imports wirbel #160 (W&B x8vffgbs) descent E[T]-DP: the M=32 depth-9 max-branch-3 topology (rho_optimal_topology_results.json), the measured rising spine + rho_cond, and score_tree_depthrank -- the SECOND moment is read off the SAME reach[] object, nothing re-derived. Anchors cross-checked against #165 (laxllfjl) composed ceiling 5.206954 and #170 (ne7p642c) over-accept locus.",
+  "method": "LOCAL CPU-only analytic synthesis. No GPU/vLLM/HF Job/submission/kernel build/served-file change. BASELINE stays 481.53. Greedy untouched. NOT open2 (tree economics / DP second moment, not drafter architecture). Does NOT authorize a launch.",
+  "metrics_nan_clean": 1
+}
