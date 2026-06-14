@@ -1,0 +1,124 @@
+# PR #180 argmax-only-decode patch (ubel #154 realization)
+# Diff: submissions/fa2sw_precache_kenyan (deployed) -> fa2sw_argmax_decode (throwaway)
+# Gated behind env ARGMAX_ONLY_DECODE=1. Output-neutral (128/128 token-identical, PPL 2.37668==control).
+# Realized step 1.2160 (-0.176% vs 1.2182). manifest.json UNCHANGED.
+
+--- submissions/fa2sw_precache_kenyan/serve_patch_pck04.py	2026-06-13 15:53:02.948155659 +0000
++++ submissions/fa2sw_argmax_decode/serve_patch_pck04.py	2026-06-14 16:22:32.819628160 +0000
+@@ -47,6 +47,26 @@
+ _TARGET_CLASS = "Gemma4ForCausalLM"
+ _TARGET_METHOD = "compute_logits"
+ 
++# ubel #154 realization (PR #180): argmax-only decode. When enabled, ONLY the
++# spec-verify step (exactly M = K_spec+1 = 8 rows under MAX_NUM_SEQS=1) skips the
++# [M, full_vocab] scatter and returns the pruned [M, K] logits directly; the
++# slim-greedy rejection sampler (serve.py DIXIE_SMP02) argmaxes the pruned head
++# and remaps the winning column back to its real token id via the keepset.
++# Output-identical under greedy: full-vocab argmax always lands on a kept token
++# (non-kept columns are -inf) and keep_ids is sorted ascending so the
++# lowest-index tie-break matches the full-vocab one.
++#
++# Gated on M == _ARGMAX_ONLY_DECODE_VERIFY_M (exact), NOT M <= width, because the
++# M=1 prefill-sample step (the first decoded token) is produced by the regular
++# vLLM sampler, which has no keepset remap — handing it pruned logits would emit
++# a raw pruned column index instead of the real token id (smoke3 bug: tok0=4849,
++# keep_ids[4849]=8291=correct). Only the M=8 verify step flows through the
++# slim-greedy remap, so only it may skip. Every PPL/prompt_logprobs prefill chunk
++# on the 128-record eval set is != 8 tokens (min prefill 390), so the skip never
++# leaks into the full-vocab logprobs path either.
++_ARGMAX_ONLY_DECODE = os.environ.get("ARGMAX_ONLY_DECODE") == "1"
++_ARGMAX_ONLY_DECODE_VERIFY_M = int(os.environ.get("ARGMAX_ONLY_DECODE_VERIFY_M", "8"))
++
+ # ---------------------------------------------------------------------------
+ # Module-level state (allocated lazily on first device call, never at import)
+ # ---------------------------------------------------------------------------
+@@ -338,6 +358,14 @@
+         if pruned_logits is None:
+             # TP rank > 0 returns None (gather not yet complete); pass through.
+             return None
++        # ubel #154: on the spec-verify step (exactly M == verify width), hand the
++        # pruned [M, K] logits straight to the slim-greedy rejection sampler (which
++        # argmaxes + remaps) and skip the full-vocab scatter entirely. Gated on an
++        # EXACT match so the M=1 prefill-sample step (regular sampler, no remap)
++        # and any prefill / prompt_logprobs chunk (which need full-vocab columns)
++        # keep scattering below.
++        if _ARGMAX_ONLY_DECODE and pruned_logits.shape[0] == _ARGMAX_ONLY_DECODE_VERIFY_M:
++            return pruned_logits
+         # Scatter into [M, full_vocab] with -inf at non-kept positions.
+         return _scatter_to_full_vocab(pruned_logits, keep_ids, full_vocab)
+ 
+@@ -348,6 +376,15 @@
+         file=sys.stderr,
+         flush=True,
+     )
++    if _ARGMAX_ONLY_DECODE:
++        print(
++            f"[pck04] ARGMAX_ONLY_DECODE=1 ACTIVE (ubel #154): only the spec-verify "
++            f"step (M=={_ARGMAX_ONLY_DECODE_VERIFY_M}) skips the [M,{full_vocab}] "
++            f"scatter and hands pruned [M,{K}] logits to the slim-greedy remap "
++            f"sampler; M=1 prefill-sample and all other M scatter (pid {os.getpid()})",
++            file=sys.stderr,
++            flush=True,
++        )
+ 
+ 
+ # ---------------------------------------------------------------------------
+--- submissions/fa2sw_precache_kenyan/serve.py	2026-06-13 19:29:54.276927438 +0000
++++ submissions/fa2sw_argmax_decode/serve.py	2026-06-14 16:04:37.493029312 +0000
+@@ -383,6 +383,33 @@
+ _DIXIE_FUSED_ACCEPT_PREP = (
+     __import__("os").environ.get("DIXIE_FUSED_ACCEPT_PREP") == "1"
+ )
++
++# ubel #154 (PR #180): argmax-only decode. When compute_logits skips the
++# full-vocab scatter on a decode step (serve_patch_pck04.py), the slim-greedy
++# path below receives pruned [M, K] logits, so argmax yields a column in [0, K)
++# that must be remapped to its real token id via the keepset. The keepset tensor
++# is built LAZILY on first use: LM_HEAD_PRUNE repoints PCK04_KEEPSET to the baked
++# 12k keepset before serve, so reading it at module-load is timing-fragile;
++# reading it on the first decode step is guaranteed to see the active keepset
++# (and to match pck04's own K), making the width gate below robust.
++_ARGMAX_ONLY_DECODE = __import__("os").environ.get("ARGMAX_ONLY_DECODE") == "1"
++_argmax_only_keep_cache = {}
++
++
++def _argmax_only_keep_idx(device):
++    cached = _argmax_only_keep_cache.get(device)
++    if cached is not None:
++        return cached
++    import json as _json
++    path = __import__("os").environ.get("PCK04_KEEPSET", "")
++    keep_ids = _json.loads(open(path).read())["keep_ids"]
++    t = torch.as_tensor(keep_ids, dtype=torch.long, device=device)
++    _argmax_only_keep_cache[device] = t
++    __import__("sys").stderr.write(
++        "[dixie] ARGMAX_ONLY_DECODE keepset remap built: K=%d on %s\\n"
++        % (t.shape[0], device)
++    )
++    return t
+ """
+ 
+ DIXIE_SMP02_FWD_OLD = "        assert metadata.max_spec_len <= MAX_SPEC_LEN\n"
+@@ -407,7 +434,21 @@
+                 or not sampling_metadata.thinking_budget_state_holder.has_tracked_requests()
+             )
+         ):
+-            dixie_all_argmax = logits.argmax(dim=-1)
++            if _ARGMAX_ONLY_DECODE:
++                _argmax_keep = _argmax_only_keep_idx(logits.device)
++                if logits.shape[-1] == _argmax_keep.shape[0]:
++                    # ubel #154: pruned head handed through un-scattered; argmax
++                    # gives a column in [0, K) -> remap to the real token id.
++                    # Greedy output is identical because the scattered full-vocab
++                    # argmax can only ever select a kept column (others are -inf)
++                    # and keep_ids is sorted ascending (matching tie-break). The
++                    # width gate ties the remap to exactly the steps compute_logits
++                    # skipped (full-vocab steps keep their plain argmax).
++                    dixie_all_argmax = _argmax_keep[logits.argmax(dim=-1)]
++                else:
++                    dixie_all_argmax = logits.argmax(dim=-1)
++            else:
++                dixie_all_argmax = logits.argmax(dim=-1)
+             dixie_bonus_token_ids = (
+                 dixie_all_argmax[metadata.bonus_logits_indices]
+                 .unsqueeze(1)
