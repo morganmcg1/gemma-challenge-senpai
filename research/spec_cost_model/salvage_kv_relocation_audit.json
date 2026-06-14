@@ -1,0 +1,260 @@
+{
+  "pr": 157,
+  "utc": "2026-06-14T13:46:05Z",
+  "gpu": "NVIDIA A10G",
+  "kv_geometry": {
+    "n_layers": 37,
+    "kv_heads": 2,
+    "head_dim": 256,
+    "dtype": "bfloat16",
+    "bytes_per_pos_per_layer": 2048,
+    "m_tree": 32,
+    "ctx_window": 4096
+  },
+  "anchors": {
+    "k_cal": 125.26795005202914,
+    "step_m8_us": 7982.887878221502,
+    "measured_step_136_captured": 1.2182,
+    "clear500_bar_measured": 4.862377006624717,
+    "clear500_bar_154": 4.808,
+    "e_t_tree_ceiling": 5.207,
+    "e_t_descent_fix": 5.04,
+    "oracle": {
+      "salvages": 391,
+      "full": 37,
+      "steps": 1024,
+      "salvage_rate": 0.3818359375,
+      "e_t": 2.621
+    },
+    "chiku_trace": {
+      "n_steps": 12841,
+      "exec_gpu_p50_ms": 19.18,
+      "exec_gpu_p90_ms": 21.42,
+      "exec_gpu_mean_ms": 18.67,
+      "exec_cpu_p50_ms": 12.05,
+      "exec_cpu_p90_ms": 335.36,
+      "exec_cpu_mean_ms": 122.5,
+      "draft_gpu_p50_ms": 2.27,
+      "draft_cpu_p50_ms": 0.38,
+      "relocate_layers": 37,
+      "salvage_frac_stated": 0.35,
+      "note": "the 335ms p90 = the 35%-of-steps Python relocate_salvaged_kv loop over 37 layers"
+    }
+  },
+  "config": {
+    "seed": 157,
+    "host_calls": 40,
+    "host_warmup": 3,
+    "gpu_calls": 300,
+    "gpu_warmup": 30
+  },
+  "anchor_decomposition": {
+    "cpu_relocate_tail_ms": 335.36,
+    "cpu_nonsalvage_floor_ms": 12.05,
+    "cpu_mean_observed_ms": 122.5,
+    "implied_salvage_frac": 0.3416225913210232,
+    "oracle_salvage_rate": 0.3818359375,
+    "chiku_salvage_frac_stated": 0.35,
+    "relocate_marginal_per_salvage_ms": 323.31,
+    "relocate_amortized_ms_per_step": 110.45,
+    "relocate_amortized_via_oracle_rate_ms": 123.451376953125,
+    "relocate_amortized_via_chiku_frac_ms": 113.15849999999999,
+    "as_built_wall_mean_ms": 122.5,
+    "as_built_gpu_floor_ms": 18.67,
+    "relocate_pct_of_as_built_wall": 90.16326530612245,
+    "reconstruction_closes": true,
+    "note": "CPU mean 122.5 = 0.342*335.36 + 0.658*12.05; implied salvage frac 0.342 sits between chiku's stated 0.35 and oracle 0.382 (sampling). relocate amortizes to mean-floor = 110.45 ms/step = 90.2% of the wall."
+  },
+  "microbench": {
+    "host_loop": {
+      "n": 40,
+      "mean": 145.23883407600806,
+      "median": 145.08896350162104,
+      "p50": 145.08896350162104,
+      "p90": 145.74276899802499,
+      "p99": 148.71497491170885,
+      "std": 0.8929889621691638,
+      "min": 143.65644002100453,
+      "max": 148.98997600539587,
+      "ci95_abs": 0.2767350613276269
+    },
+    "gpu_perlayer": {
+      "n": 300,
+      "mean": 2.091541896613004,
+      "median": 2.0904374978272244,
+      "p50": 2.0904374978272244,
+      "p90": 2.1452629909617826,
+      "p99": 2.203169085260015,
+      "std": 0.03970156960947793,
+      "min": 2.0072890038136393,
+      "max": 2.276901010191068,
+      "ci95_abs": 0.004492572979051731
+    },
+    "gpu_vectorized": {
+      "n": 300,
+      "mean": 0.0924298968554164,
+      "median": 0.08104850712697953,
+      "p50": 0.08104850712697953,
+      "p90": 0.09344100544694811,
+      "p99": 0.1250789887853898,
+      "std": 0.14841782727217975,
+      "min": 0.07850301335565746,
+      "max": 2.6542579871602356,
+      "ci95_abs": 0.016794749602377996
+    },
+    "paged_slotmap": {
+      "n": 300,
+      "mean": 0.05306587370190149,
+      "median": 0.05101750139147043,
+      "p50": 0.05101750139147043,
+      "p90": 0.05513588548637937,
+      "p99": 0.08629937510704618,
+      "std": 0.007341111241480373,
+      "min": 0.04933201125822961,
+      "max": 0.11836501653306186,
+      "ci95_abs": 0.0008307096753125403
+    }
+  },
+  "pricing": {
+    "oracle_salvage_rate": 0.3818359375,
+    "as_built_gpu_floor_ms": 18.67,
+    "target_step_us": 9724.754013249434,
+    "paths": {
+      "host_loop": {
+        "per_call_ms": 145.23883407600806,
+        "amortized_ms_per_step": 55.457406370819484,
+        "amortized_us_per_step": 55457.40637081948,
+        "eager_wall_ms": 67.50740637081948,
+        "eager_step_inflation_pct": 261.58225158446425,
+        "captured_step_inflation_pct": 570.2705312161302,
+        "inflated_captured_step_units": 8.165235611274896,
+        "clear500_bar": 32.591080192034454,
+        "bar_under_ceiling": false,
+        "descent_tps_at_this_step": 77.32176979564827,
+        "descent_clears_500": false
+      },
+      "gpu_perlayer": {
+        "per_call_ms": 2.091541896613004,
+        "amortized_ms_per_step": 0.7986258609137545,
+        "amortized_us_per_step": 798.6258609137545,
+        "eager_wall_ms": 18.67,
+        "eager_step_inflation_pct": 0.0,
+        "captured_step_inflation_pct": 8.212298838877276,
+        "inflated_captured_step_units": 1.318242224455203,
+        "clear500_bar": 5.261689937081595,
+        "bar_under_ceiling": false,
+        "descent_tps_at_this_step": 478.933580300956,
+        "descent_clears_500": false
+      },
+      "gpu_vectorized": {
+        "per_call_ms": 0.0924298968554164,
+        "amortized_ms_per_step": 0.03529305631881623,
+        "amortized_us_per_step": 35.29305631881623,
+        "eager_wall_ms": 18.67,
+        "eager_step_inflation_pct": 0.0,
+        "captured_step_inflation_pct": 0.36291978461081287,
+        "inflated_captured_step_units": 1.2226210888161289,
+        "clear500_bar": 4.880023534784125,
+        "bar_under_ceiling": true,
+        "descent_tps_at_this_step": 516.3909522234458,
+        "descent_clears_500": true
+      },
+      "paged_slotmap": {
+        "per_call_ms": 0.05306587370190149,
+        "amortized_ms_per_step": 0.02026245763422215,
+        "amortized_us_per_step": 20.26245763422215,
+        "eager_wall_ms": 18.67,
+        "eager_step_inflation_pct": 0.0,
+        "captured_step_inflation_pct": 0.20835959044944155,
+        "inflated_captured_step_units": 1.220738236530855,
+        "clear500_bar": 4.872508235441828,
+        "bar_under_ceiling": true,
+        "descent_tps_at_this_step": 517.1874275491075,
+        "descent_clears_500": true
+      }
+    },
+    "recoverable": {
+      "host_loop_amortized_us_per_step": 55457.40637081948,
+      "vectorized_amortized_us_per_step": 35.29305631881623,
+      "recoverable_us_per_step": 55422.11331450067,
+      "recoverable_step_pct_vs_captured_target": 569.9076114315193,
+      "recoverable_pct_of_as_built_wall": 90.16326530612245,
+      "host_loop_descent_tps": 77.32176979564827,
+      "vectorized_descent_tps": 516.3909522234458,
+      "host_loop_bar": 32.591080192034454,
+      "vectorized_bar": 4.880023534784125,
+      "relocate_free_bar": 4.862377006624717,
+      "descent_e_t": 5.04,
+      "descent_cushion_units": 0.17762299337528287,
+      "vectorized_headroom_consumed_pct": 9.934821964251064,
+      "vectorized_keeps_descent_clearing_500": true,
+      "host_loop_bar_infeasible": true,
+      "speedup_vectorized_over_host": 1571.3404322326369
+    }
+  },
+  "greedy_safety": {
+    "equivalence_rate": 1.0,
+    "per_impl": {
+      "host_loop": {
+        "bit_exact": true,
+        "max_abs_err_k": 0.0,
+        "max_abs_err_v": 0.0
+      },
+      "gpu_perlayer": {
+        "bit_exact": true,
+        "max_abs_err_k": 0.0,
+        "max_abs_err_v": 0.0
+      },
+      "gpu_vectorized": {
+        "bit_exact": true,
+        "max_abs_err_k": 0.0,
+        "max_abs_err_v": 0.0
+      }
+    },
+    "argument": "KV relocation is a pure permutation/copy of existing bf16 values (no cast, no arithmetic -> no rounding). The verifier's argmax over the verify logits, and thus the accepted token IDs, are decided BEFORE relocation and do not depend on the physical KV slot. Greedy identity preserved by construction; equivalence_rate=1.0."
+  },
+  "self_test": {
+    "tests": {
+      "anchor_decomposition_closes": true,
+      "host_loop_is_host_bound": true,
+      "vectorized_sub_ms": true,
+      "vectorized_beats_host_100x": true,
+      "layer_count_not_the_killer": true,
+      "amortization_arithmetic": true,
+      "greedy_safe_equivalence_1": true,
+      "vectorized_headroom_small": true,
+      "host_loop_infeasible": true,
+      "feasibility_flips": true,
+      "nan_clean": true
+    },
+    "n_pass": 11,
+    "n_total": 11,
+    "all_pass": true
+  },
+  "build_handoff": {
+    "classification": "LIVE host-bound build-blocker (NOT a dead fallback)",
+    "evidence": "chiku-inu's STEPTIME trace (n=12841 STEADY decode steps, not warmup) shows relocate_salvaged_kv as the CPU p90=335ms tail on ~35% of steps, driving the CPU mean to 122.5ms >> the 18.67ms GPU floor -> the as-built eager descent stack is HOST-BOUND on the timed decode window and timed out at 40min. It is absent from lawine #136's 1.2182 GRAPH-CAPTURED target step and from my #154 LINEAR stack, so no step-model leg priced it.",
+    "why_a_blocker": "the descent fix (land #71, making salvages actually descend -- BUG-2) is exactly what ARMS this: as-built the 391 salvages fire but do not descend (+0.077 E[T]); once they descend, the relocate fires for real on every salvage. A data-dependent Python loop over 37 layers CANNOT be CUDA-graph-captured, so it pins the step host-bound (~122ms) instead of the 9.7ms captured target -> the descent's E[T]=5.04 (-> 522) collapses to ~77 TPS.",
+    "design": {
+      "target": "a single FUSED/vectorized GPU relocate: gather the accepted rows across ALL 37 layers' K and V by a DEVICE commit-index in one launch sequence (index_select on a [L,W,H,D] stack), scatter to the committed slots with index_copy_. NO per-layer Python, NO .item()/.cpu() host round-trip, NO per-element loop.",
+      "ideal": "if the build uses paged KV, relocation is a block-table / slot-map update -- move an int slot-map, the KV bytes never move (zero-copy).",
+      "device_index_rule": "the commit-index (which scratch rows -> which committed slots) must be produced ON-DEVICE by the accept walk (lawine #147 sync-free rule) and consumed by the relocate without a host readout -- so the relocate stays inside the captured graph.",
+      "measured_target_us_per_step": 35.29305631881623,
+      "measured_host_loop_us_per_step": 55457.40637081948
+    },
+    "greedy_safety": "KV relocation is a pure permutation/copy of existing bf16 values (no cast, no arithmetic -> no rounding). The verifier's argmax over the verify logits, and thus the accepted token IDs, are decided BEFORE relocation and do not depend on the physical KV slot. Greedy identity preserved by construction; equivalence_rate=1.0.",
+    "stacks_with": "multiplicative with land's descent (a denominator PRECONDITION: without it the descent's numerator gain is unrealizable) and with my #154 scatter+LP lever (both lower/keep the operative step). Combined operative bar stays ~4.808 (from #154) PROVIDED the relocate is vectorized; a host-loop build makes the bar unmeetable regardless of #154."
+  },
+  "verdict": "LIVE-LANDMINE / build-blocker",
+  "primary_metric": {
+    "name": "salvage_kv_audit_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "recoverable_step_pct_salvage_kv",
+    "value": 569.9076114315193
+  },
+  "elapsed_s": 8.076205253601074,
+  "peak_gpu_gb": 0.634028544,
+  "wandb_run_id": "rh8ysitz"
+}
