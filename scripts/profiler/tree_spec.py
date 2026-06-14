@@ -156,6 +156,92 @@ def verify_index_maps(tree: TreeSpec) -> tuple[list[int], list[int]]:
     return target_logits_indices, bonus_logits_indices
 
 
+def deployed_linear_metadata(num_draft: int) -> dict:
+    """Faithful CPU replay of the deployed vLLM ``_calc_spec_decode_metadata``
+    (``gpu_model_runner.py:2747-2798``) for a SINGLE request with ``num_draft``
+    draft tokens -- the linear K=num_draft chain the tree path must replace.
+
+    Returns the index arrays exactly as the deployed code derives them (base
+    offset 0 for a single request), so the tree builder can be diffed against
+    the REAL construction rather than a reconstruction. The load-bearing line is
+    2798 ``draft_token_ids = draft_token_ids[target_logits_indices + 1]``: the
+    draft-token gather REUSES ``target_logits_indices`` (the target-row map). For
+    a chain that is harmless (``parent[i]=i-1`` -> the two maps differ by exactly
+    +1); ``tree_verify_metadata`` shows why it is NOT harmless for a tree.
+    """
+    num_sampled = num_draft + 1
+    return {
+        # rows 0..num_draft (verify positions for this request).
+        "logits_indices": list(range(num_sampled)),
+        # repeat(base=0, num_draft) + arange(num_draft) -> 0..num_draft-1.
+        "target_logits_indices": list(range(num_draft)),
+        # cu_num_sampled - 1 -> the last (bonus) row.
+        "bonus_logits_indices": [num_sampled - 1],
+        # line 2798: draft tokens gathered at target_logits_indices + 1.
+        "draft_token_rows": [t + 1 for t in range(num_draft)],
+    }
+
+
+def tree_verify_metadata(tree: TreeSpec, base: int = 0) -> dict:
+    """Widened-verify index metadata for ``tree`` with the draft-token gather
+    DECOUPLED from the target-row map -- the Component 3a fix.
+
+    The deployed builder overloads ONE array (``target_logits_indices``) for
+    BOTH (A) the target-argmax-row gather (``rejection_sampler``:
+    ``dixie_all_argmax[tli]``) and (B) the draft-token gather
+    (``gpu_model_runner:2798``: ``draft_token_ids[tli + 1]``). For a chain these
+    coincide. For a TREE the obvious depth-1 fix -- override (A) to the tree
+    parent-map so each draft node is verified against its PARENT's target row --
+    flows through the shared line 2798 and SILENTLY CORRUPTS (B): the draft-token
+    gather then reads row ``parent[i]+1`` instead of node ``i``'s own row for
+    every node whose ``parent != i-1`` (every node off the initial chain). At the
+    root branch this puts the rank-1 sibling's token in the rank-2 slot (denken
+    #133's "~42% rank-2 contamination"); deeper it scrambles the whole descent ->
+    branches unreachable (the 3% salvage signature). So fixing (A) alone is the
+    trap; (A) and (B) must be supplied SEPARATELY:
+
+      ``target_logits_indices`` (A): ``[base + parent[i] for i in 1..M-1]`` --
+        which target argmax row draft node ``i`` is checked against (==
+        ``verify_index_maps``; consumed verbatim by the deployed dixie gather,
+        and the SAME parent mapping the descend walk uses via
+        ``node_argmax[parent[c]]``).
+      ``draft_token_rows`` (B): ``[base + i for i in 1..M-1]`` -- each draft
+        node's OWN verify row; MUST replace ``tli + 1`` so node ``i`` carries
+        ITS drafted token, not its parent's rank-1 child's. This is the
+        node-order draft layout ``descend_accept`` consumes.
+      ``bonus_logits_indices``: ``[base + leaf rows]``.
+
+    ``deployed_conflated_draft_rows`` is the buggy ``tli + 1`` gather, kept for
+    the diff/cross-check ONLY (never emitted to the live metadata).
+    """
+    tli, bli = verify_index_maps(tree)
+    return {
+        "target_logits_indices": [base + p for p in tli],
+        "draft_token_rows": [base + i for i in range(1, tree.num_nodes)],
+        "bonus_logits_indices": [base + b for b in bli],
+        "deployed_conflated_draft_rows": [base + p + 1 for p in tli],
+    }
+
+
+def tree_verify_positions(tree: TreeSpec, base: int = 0) -> list[int]:
+    """Per-node RoPE positions for the widened verify (Component 3b): node ``i``
+    sits at ``base + depth(i)``. Sibling branches at the same tree depth SHARE a
+    position -- they are alternative continuations of the SAME decode step.
+
+    For the deployed linear chain ``depth == node-index`` so this reduces to
+    ``base + i`` (the consecutive positions vLLM assigns the K draft rows today);
+    the tree needs the explicit depth map (``TreeSpec.depth``).
+
+    Consistency with the tree-causal mask (Component 2): every key a node attends
+    -- its ancestors, then self -- has a STRICTLY smaller position than the node
+    (except self), so the RoPE relative offsets along each root->node path are
+    exactly the contiguous ``0..depth(i)`` a normal causal sequence sees. Each
+    accepted path is therefore indistinguishable from a linear chain to the
+    attention, which is what keeps the rank-1 spine token-identical (BUG-1 guard).
+    """
+    return [base + d for d in tree.depth]
+
+
 def expected_committed_tokens(tree: TreeSpec, p_vector: list[float]) -> float:
     """Closed-form ``F(T) = Σ_v path_product(v)`` = E[committed tokens/step]."""
     pp = [0.0] * tree.num_nodes
@@ -649,6 +735,114 @@ def _selfcheck() -> None:
         print(
             f"  [ok] {name} emit_tree: {fwds} forwards (internal nodes), "
             f"spine-identity holds, {tree.max_branch}-way branches distinct"
+        )
+
+    # 12. COMPONENT 3a: tree verify index metadata + denken #133 cross-check.
+    #     The deployed _calc_spec_decode_metadata overloads target_logits_indices
+    #     for BOTH the target-row gather AND the draft-token gather (tli+1). For a
+    #     chain they coincide; for a tree the reuse collapses rank>=2 siblings
+    #     onto rank-1. tree_verify_metadata DECOUPLES them.
+    #  (a) deployed linear replay == the deployed metadata, exactly.
+    dep7 = deployed_linear_metadata(7)
+    assert dep7["target_logits_indices"] == [0, 1, 2, 3, 4, 5, 6], dep7
+    assert dep7["bonus_logits_indices"] == [7], dep7
+    assert dep7["draft_token_rows"] == [1, 2, 3, 4, 5, 6, 7], dep7
+    #  (b) my linear-tree metadata COINCIDES with the deployed construction
+    #      (target map and draft gather differ by exactly +1) -> I match the
+    #      deployed semantics wherever they are defined (the "use the deployed
+    #      extraction, don't reconstruct" anchor).
+    linmeta = tree_verify_metadata(TreeSpec(linear_parent(8)))
+    assert linmeta["target_logits_indices"] == dep7["target_logits_indices"]
+    assert linmeta["draft_token_rows"] == dep7["draft_token_rows"]
+    assert linmeta["deployed_conflated_draft_rows"] == dep7["draft_token_rows"]
+    assert linmeta["bonus_logits_indices"] == dep7["bonus_logits_indices"]
+    print("  [ok] 3a: linear tree metadata == deployed _calc_spec_decode_metadata")
+    #  (c) the OVERRIDE TRAP on the real trees: setting target_logits_indices to
+    #      the tree parent-map (the obvious fix for the wrong target rows / the
+    #      depth-1 spine) flows through gpu_model_runner:2798 (draft_token_ids[
+    #      tli+1]) and CORRUPTS the draft-token gather for every node whose
+    #      parent != i-1 (every node OFF the initial chain). Decoupling restores it.
+    for name, tree in [("M16", t16), ("M32", t32)]:
+        meta = tree_verify_metadata(tree)
+        node_order = meta["draft_token_rows"]              # B: each node's own row (fix)
+        conflated = meta["deployed_conflated_draft_rows"]  # B if 2798 reuses the A-map
+        # depth-1 invariant (denken fix): root gathers target row 0; node 1 = rank-1.
+        assert meta["target_logits_indices"][0] == 0, "depth-1: root must gather row 0"
+        assert tree.rank_in_parent[1] == 1, "node 1 must be the rank-1 spine child"
+        diverged = [
+            i for i in range(1, tree.num_nodes) if conflated[i - 1] != node_order[i - 1]
+        ]
+        off_chain = [
+            i for i in range(1, tree.num_nodes) if tree.parent[i] != i - 1
+        ]
+        assert diverged == off_chain, (name, diverged, off_chain)
+        # at the ROOT branch (denken's depth-1 case): the rank-2 child's conflated
+        # draft row == its rank-1 sibling's row -> the root verifies the rank-2 slot
+        # with the rank-1 token (the "~42% rank-2 contamination").
+        r1, r2 = tree.children[0][0], tree.children[0][1]
+        assert conflated[r2 - 1] == r1 and node_order[r2 - 1] == r2, (
+            name, conflated[r2 - 1], r1, r2
+        )
+        print(
+            f"  [ok] 3a {name}: override-A-breaks-B trap on {len(off_chain)} off-chain "
+            f"nodes; root rank-2 slot collapses onto rank-1 (denken depth-1) -> decouple"
+        )
+
+    # 13. COMPONENT 3a x Component 4 cross-check (the denken load-bearing
+    #     hypothesis, made concrete + deterministic): the conflated draft gather
+    #     makes the descend walk CHAIN-REJECT a rank-2 branch that the decoupled
+    #     gather SALVAGES -- so the SAME index-map conflation that breaks the
+    #     depth-1 spine also breaks the BUG-2 descent, and ONE decoupling fixes
+    #     both. Scenario: M16 root (width-2); the verifier argmax at the root ==
+    #     the RANK-2 child's token (a genuine rank-2 salvage opportunity).
+    tree = t16
+    node_token = [1000 + i for i in range(tree.num_nodes)]  # unique per node
+    node_argmax = [9_990_000 + i for i in range(tree.num_nodes)]  # all-miss default
+    rank2_root_child = tree.children[0][1]  # node 2 = rank-2 child of the root
+    node_argmax[0] = node_token[rank2_root_child]  # root argmax == rank-2 token
+    # decoupled (correct) layout: draft_token[i] = node i's OWN token.
+    emit_c, vc_c, sal_c = descend_accept(tree, node_argmax, list(node_token))
+    assert (0, 2) in sal_c, ("decoupled gather must salvage the rank-2 root branch", sal_c)
+    assert vc_c == 2 and emit_c[0] == node_token[rank2_root_child]
+    # conflated (deployed tli+1) layout: each rank>=2 node carries its rank-1
+    # sibling's token. Row r holds node r's token (node-order), so gathering the
+    # conflated row reproduces exactly what draft_token_ids[tli+1] would store.
+    meta = tree_verify_metadata(tree)
+    draft_conflated = list(node_token)
+    for i in range(1, tree.num_nodes):
+        draft_conflated[i] = node_token[meta["deployed_conflated_draft_rows"][i - 1]]
+    assert draft_conflated[rank2_root_child] == node_token[tree.children[0][0]]
+    emit_x, vc_x, sal_x = descend_accept(tree, node_argmax, draft_conflated)
+    assert sal_x == [], ("conflated gather must kill the rank-2 salvage", sal_x)
+    assert vc_x == 1, vc_x
+    print(
+        "  [ok] 3a x C4: conflated tli+1 gather chain-rejects the rank-2 branch "
+        "(0 salvage, 1 token); decoupled node-order gather salvages it (2 tokens) "
+        "-> denken #133 load-bearing hypothesis confirmed, fixed by one decoupling"
+    )
+
+    # 14. COMPONENT 3b: verify positions / depth map. node i sits at base+depth(i);
+    #     sibling branches share a position; the linear chain reduces to the
+    #     consecutive positions vLLM assigns today; the spine sees contiguous RoPE.
+    lin8 = TreeSpec(linear_parent(8))
+    assert tree_verify_positions(lin8) == list(range(8)), tree_verify_positions(lin8)
+    assert tree_verify_positions(lin8, base=5) == list(range(5, 13))
+    for name, tree in [("M16", t16), ("M32", t32)]:
+        pos = tree_verify_positions(tree)
+        assert pos[0] == 0, "root at position 0"
+        for node in range(tree.num_nodes):
+            assert pos[node] == tree.depth[node], (name, node)
+            for anc in tree.ancestors(node):  # ancestors strictly precede
+                assert pos[anc] < pos[node], (name, node, anc)
+        sp = tree.spine  # the rank-1 spine sees contiguous 0..len-1 (chain RoPE).
+        assert [pos[n] for n in sp] == list(range(len(sp))), [pos[n] for n in sp]
+        for par in range(tree.num_nodes):  # siblings share parent_depth + 1.
+            kids = tree.children[par]
+            if len(kids) >= 2:
+                assert {pos[k] for k in kids} == {pos[par] + 1}, (name, par)
+        print(
+            f"  [ok] 3b {name}: positions==depth (siblings share); spine RoPE "
+            f"contiguous 0..{len(sp) - 1}; max position {max(pos)}"
         )
 
     print("=== all tree_spec selfchecks passed ===")
