@@ -1,0 +1,322 @@
+{
+  "gate": {
+    "primary_metric_name": "tree_free_max_official_tps",
+    "tree_free_max_official_tps": {
+      "definition": "central tree-free TPS at ubel #84 nominal-high SplitK (s=0.12)",
+      "central": 518.065292756004,
+      "conservative": 496.82040321219324,
+      "optimistic": 540.784023720779,
+      "band": [
+        496.82040321219324,
+        540.784023720779
+      ]
+    },
+    "tree_free_ceiling_official_tps": {
+      "definition": "central tree-free TPS at the SplitK bandwidth-gap ceiling (s=0.2970, full 77.1%->100% close)",
+      "central": 555.9539736511156,
+      "band": [
+        533.1879211722177,
+        581.0992746812377
+      ]
+    },
+    "test_metric_name": "splitk_threshold_for_500",
+    "splitk_threshold_for_500": {
+      "central": 0.044429467393841016,
+      "conservative": 0.13443501778468514,
+      "optimistic": 0.0,
+      "central_if_LK_delivers_0": 0.06482958589601795,
+      "central_if_doublequant_0": 0.05432645846172535
+    },
+    "splitk_reference": {
+      "ubel_nominal_range": [
+        0.05,
+        0.12
+      ],
+      "bandwidth_gap_ceiling": 0.2970168612191959,
+      "hbm_util_m8": 0.771,
+      "central_threshold_as_frac_of_gap": 0.14958567406398,
+      "conservative_threshold_as_frac_of_gap": 0.4526174616244202
+    },
+    "tau_sensitivity": [
+      {
+        "tau": 0.96,
+        "splitk_threshold": 0.13204861495798115
+      },
+      {
+        "tau": 0.97,
+        "splitk_threshold": 0.10879391450987819
+      },
+      {
+        "tau": 0.98,
+        "splitk_threshold": 0.08647538568998714
+      },
+      {
+        "tau": 0.99,
+        "splitk_threshold": 0.06503761232747185
+      },
+      {
+        "tau": 1.0,
+        "splitk_threshold": 0.044429467393841016
+      }
+    ],
+    "conservative_margin_levers": {
+      "tau->1.00": 0.0466133458955893,
+      "LK->1.024(high)": 0.10362755923431144,
+      "dq->+1.1%(high)": 0.11956217820267301,
+      "persist->2.17%": 0.08371766151580728
+    },
+    "verdict": "GREEN*",
+    "verdict_label": "tree is INSURANCE at central/expected inputs (SplitK threshold below ubel's floor); conservative-corner caveat -> tree strongly preferred only if tau collapses to 0.96",
+    "rule": "GREEN=tree-free clears 500 inside ubel's SplitK range / GREEN*=clears below ubel floor at central but conservative needs >ubel-high (tau-driven) / AMBER=clears only near gap ceiling / RED=cannot clear within the gap"
+  },
+  "step1_tps_vs_splitk_curve": [
+    {
+      "splitk_pct": 0.0,
+      "conservative_tps": 468.7110541903624,
+      "central_tps": 488.77702650000003,
+      "optimistic_tps": 509.6926684656677,
+      "clears_500_central": false,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.01,
+      "conservative_tps": 471.1745315501997,
+      "central_tps": 491.34393369419547,
+      "optimistic_tps": 512.4150757727346,
+      "clears_500_central": false,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.02,
+      "conservative_tps": 473.61497434759826,
+      "central_tps": 493.8868182579174,
+      "optimistic_tps": 515.1124836309891,
+      "clears_500_central": false,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.03,
+      "conservative_tps": 476.032704153598,
+      "central_tps": 496.406015847434,
+      "optimistic_tps": 517.785234815762,
+      "clears_500_central": false,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.04,
+      "conservative_tps": 478.42803658129566,
+      "central_tps": 498.90185589472503,
+      "optimistic_tps": 520.4336658643597,
+      "clears_500_central": false,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.05,
+      "conservative_tps": 480.8012814231918,
+      "central_tps": 501.37466175109347,
+      "optimistic_tps": 523.0581072173263,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.06,
+      "conservative_tps": 483.1527427847557,
+      "central_tps": 503.8247508268172,
+      "optimistic_tps": 525.6588833558836,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.07,
+      "conservative_tps": 485.482719214329,
+      "central_tps": 506.2524347269702,
+      "optimistic_tps": 528.236312935669,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.08,
+      "conservative_tps": 487.79150382948524,
+      "central_tps": 508.65801938353496,
+      "optimistic_tps": 530.7907089168891,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.085,
+      "conservative_tps": 488.9380393512431,
+      "central_tps": 509.85261857968044,
+      "optimistic_tps": 532.0593655820019,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.09,
+      "conservative_tps": 490.0793844399567,
+      "central_tps": 511.04180518392366,
+      "optimistic_tps": 533.3223786909989,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.1,
+      "conservative_tps": 492.3466436672373,
+      "central_tps": 513.4040870960196,
+      "optimistic_tps": 535.8316242040149,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.11,
+      "conservative_tps": 494.59355906096636,
+      "central_tps": 515.7451547898515,
+      "optimistic_tps": 538.3187420765653,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.12,
+      "conservative_tps": 496.82040321219324,
+      "central_tps": 518.065292756004,
+      "optimistic_tps": 540.784023720779,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.13,
+      "conservative_tps": 499.02744386362,
+      "central_tps": 520.3647804208664,
+      "optimistic_tps": 543.2277554541098,
+      "clears_500_central": true,
+      "clears_500_conservative": false
+    },
+    {
+      "splitk_pct": 0.1486,
+      "conservative_tps": 503.08076277717333,
+      "central_tps": 524.5878375677371,
+      "optimistic_tps": 547.7167372366846,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.1671,
+      "conservative_tps": 507.0468622566151,
+      "central_tps": 528.7199671664887,
+      "optimistic_tps": 552.1103414488774,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.1857,
+      "conservative_tps": 510.9702088913772,
+      "central_tps": 532.8074999996207,
+      "optimistic_tps": 556.457768841717,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.2042,
+      "conservative_tps": 514.8101441953385,
+      "central_tps": 536.8080786757586,
+      "optimistic_tps": 560.7139099290157,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.2228,
+      "conservative_tps": 518.609671275813,
+      "central_tps": 540.7665078409515,
+      "optimistic_tps": 564.926374512162,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.2413,
+      "conservative_tps": 522.3293681070891,
+      "central_tps": 544.6417191714338,
+      "optimistic_tps": 569.0514042478602,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.2599,
+      "conservative_tps": 526.0108460466607,
+      "central_tps": 548.4770660436749,
+      "optimistic_tps": 573.1350946071196,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.2785,
+      "conservative_tps": 529.6352001462944,
+      "central_tps": 552.252855210109,
+      "optimistic_tps": 577.1564353210271,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    },
+    {
+      "splitk_pct": 0.297,
+      "conservative_tps": 533.1847108818803,
+      "central_tps": 555.9506292866639,
+      "optimistic_tps": 581.0957114371753,
+      "clears_500_central": true,
+      "clears_500_conservative": true
+    }
+  ],
+  "model": {
+    "formula": "official_TPS = K_cal * (E[T]/step) * tau ; tree-free, E[T]=3.844*lk_mult",
+    "verify_gemm_netting": "vg = 0.53*(1-f_dq)/(1+s); SplitK=bandwidth(util), double-quant=bytes -> orthogonal, multiply, no double-count",
+    "K_cal": 125.26795005202914,
+    "E_T_linear": 3.844,
+    "budget": {
+      "verify_gemm": 0.53,
+      "drafter": 0.07,
+      "attention": 0.08,
+      "other": 0.32
+    },
+    "frontier_official": 481.53,
+    "target_official": 500.0
+  },
+  "band_inputs": {
+    "lk_mult": {
+      "low": 1.01,
+      "central": 1.01,
+      "high": 1.024
+    },
+    "doublequant_isolated_tps": {
+      "low": 0.004,
+      "central": 0.005,
+      "high": 0.011
+    },
+    "doublequant_f_dq": {
+      "low": 0.007517101405697962,
+      "central": 0.009387027128508403,
+      "high": 0.02052889909112965
+    },
+    "fp32_m8_abs": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.000102
+    },
+    "persist_reclaim_abs": {
+      "low": 0.0,
+      "central": 0.0,
+      "high": 0.0217
+    },
+    "tau": {
+      "low": 0.96,
+      "central": 1.0,
+      "high": 1.0
+    },
+    "splitk_ubel": {
+      "low": 0.05,
+      "central": 0.085,
+      "high": 0.12
+    },
+    "splitk_ceiling": 0.2970168612191959,
+    "persist_note": "supersedes #100 R_IDLE high=0.13 with denken #97 MERGED 2.17% ceiling, upside-only",
+    "fp32_note": "tree-free M=8 path has no star-attention; deployed split-KV already fp32 -> ~0",
+    "lk_note": "LK prediction channel UNREALIZED (#95 AMBER, needs a head probe); applied as projected central 1.010"
+  },
+  "method": "CPU-only analytic absolute-time slice composition (fern #100 model, tree-EXCLUSIVE branch) over the committed decode budget + lever bands; no GPU, no served-file change. Greedy identity untouched by construction."
+}
