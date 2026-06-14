@@ -207,9 +207,10 @@ def _get_text(url: str, timeout_s: float = 30.0) -> str:
 # Run
 # --------------------------------------------------------------------------- #
 def run(submission: Path, *, num_prompts: int, output_len: int, out_path: Path,
-        seed: int) -> dict[str, Any]:
+        seed: int, dataset: Path | None = None, tag: str = "") -> dict[str, Any]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    log_path = out_path.parent / "server_accept_calibration.log"
+    suffix = f"_{tag}" if tag else ""
+    log_path = out_path.parent / f"server_accept_calibration{suffix}.log"
 
     manifest = harness.load_manifest(submission)
     server_python = harness.ensure_server_venv(manifest["dependencies"])
@@ -227,6 +228,8 @@ def run(submission: Path, *, num_prompts: int, output_len: int, out_path: Path,
         "seed": seed,
         "conc": 1,
         "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "dataset": str(dataset) if dataset else str(paths.EVAL_PROMPTS),
+        "tag": tag,
     }
 
     t0 = time.time()
@@ -234,12 +237,13 @@ def run(submission: Path, *, num_prompts: int, output_len: int, out_path: Path,
         submission, server_python=server_python, port=8000, log_path=log_path,
         extra_env=extra_env, startup_timeout_s=1800,
     ) as srv:
-        decode_out = out_path.parent / "decode_accept_calibration.jsonl"
-        decode_summary = out_path.parent / "decode_accept_calibration.summary.json"
+        decode_out = out_path.parent / f"decode_accept_calibration{suffix}.jsonl"
+        decode_summary = out_path.parent / f"decode_accept_calibration{suffix}.summary.json"
         summary = harness.capture_decode(
             server_python, base_url=srv.base_url, model=srv.served_model_name,
             out_file=decode_out, summary_file=decode_summary,
             num_prompts=num_prompts, output_len=output_len, seed=seed, timeout_s=3600,
+            dataset=dataset,
         )
         report["decode_summary"] = summary
         try:
@@ -336,6 +340,13 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--output-len", type=int, default=paths.OUTPUT_LEN)
     ap.add_argument("--seed", type=int, default=paths.SEED)
     ap.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    ap.add_argument("--dataset", type=Path, default=None,
+                    help="prompts dataset (sharegpt json); default = public eval prompts. "
+                         "Point at data/private_proxy_sharegpt.json to measure the "
+                         "private-proxy per-position ladder (PR #151).")
+    ap.add_argument("--tag", default="",
+                    help="suffix for server-log / decode artifact filenames so a "
+                         "public and a private run in one session do not clobber.")
     ap.add_argument("--wandb-name", default="wirbel/deployed-chain-acceptance")
     ap.add_argument("--wandb-group", default="acceptance-calibration")
     ap.add_argument("--no-wandb", action="store_true")
@@ -345,7 +356,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[accept-calib] {note}", flush=True)
 
     report = run(args.submission.resolve(), num_prompts=args.num_prompts,
-                 output_len=args.output_len, out_path=args.output.resolve(), seed=args.seed)
+                 output_len=args.output_len, out_path=args.output.resolve(), seed=args.seed,
+                 dataset=args.dataset.resolve() if args.dataset else None, tag=args.tag)
 
     wid = None
     if not args.no_wandb:
