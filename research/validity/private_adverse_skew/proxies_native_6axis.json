@@ -1,0 +1,126 @@
+{
+  "_comment": "PR #176 6-axis native-proxy manifest, SELF-CONTAINED. The first 3 axes (native_code / native_casual / native_sharegpt) and q_pub_sglang are imported BYTE-IDENTICALLY from #164 proxies_native.json. The next axes are NEW genuinely-distinct hard tails (non-Latin script / math-notation / long-context), each measured on the deployed fa2sw_precache_kenyan sglang vllm-chat scored stack via private_gap_probe.py (precache=off, bench=private) and count-pooled against the SAME shared public reference at the continuous weight that lands the DECODE-frame linear drop on GT-4.3% (<=0.5pp gate). Independence comes from the distinct hard components, not from re-weighting one tail. Raw server logs are gitignored under research/validity/private_gap_probe/native_{multilingual,math,longctx}/.",
+  "q_pub_sglang": {
+    "_src": "research/validity/tree_private_drop_reconcile/sglang_ladder_run/server_public_cold.log (banked #156, precache-off public, sglang vllm-chat scored)",
+    "conditional_p_sglang": [
+      0.7583667893819027,
+      0.7808430961097678,
+      0.8216144018355026,
+      0.8302303075679313,
+      0.8432757710941621,
+      0.8511668051781489,
+      0.8702404435736729
+    ],
+    "num_drafts": 15483.0
+  },
+  "proxies": [
+    {
+      "name": "native_code",
+      "axis": "domain-code",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/private_gap_probe/native_code/server_private_rerun.log (fresh, code-required ShareGPT, length-matched to public)",
+        "conditional_p_sglang": [
+          0.6919827547717379,
+          0.7208437942351071,
+          0.7940521413553191,
+          0.8234612554059793,
+          0.8822244356580056,
+          0.8562376377425561,
+          0.9321361246155372
+        ],
+        "num_drafts": 17918.0
+      }
+    },
+    {
+      "name": "native_casual",
+      "axis": "register-casual-short",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/private_gap_probe/native_casual/server_private_rerun.log (fresh, code-excluded short-turn casual ShareGPT, 0.6x public length)",
+        "conditional_p_sglang": [
+          0.6400201324218119,
+          0.7324197154938236,
+          0.790659672353135,
+          0.8455973041446945,
+          0.8870979848121061,
+          0.8923694326563282,
+          0.922194052179309
+        ],
+        "num_drafts": 18577.0
+      }
+    },
+    {
+      "name": "native_sharegpt",
+      "axis": "generic-hard-chat-tail",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/tree_private_drop_reconcile/sglang_ladder_run/server_private_rerun.log (banked #156 deliberately-hard chat tail; here count-pooled, NOT conditional-interpolated -- isolates pooling vs #156's interpolation on the identical component)",
+        "conditional_p_sglang": [
+          0.659110993421786,
+          0.7535709020612389,
+          0.7959510723807178,
+          0.8521998127074908,
+          0.8916045221896655,
+          0.8399088628418059,
+          0.9244639487128383
+        ],
+        "num_drafts": 17938.0
+      }
+    },
+    {
+      "name": "native_multilingual",
+      "axis": "non-latin-script",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/private_gap_probe/native_multilingual/server_private_rerun.log (fresh non-Latin-script (Cyrillic/CJK/Arabic/...) ShareGPT, code-excluded, nonlatin-ratio>=0.15)",
+        "conditional_p_sglang": [
+          0.6431355311355311,
+          0.7217883431956962,
+          0.7883601865036131,
+          0.8419232037400254,
+          0.8636229870925124,
+          0.8831038323580516,
+          0.9177922257186146
+        ],
+        "num_drafts": 18837.0
+      }
+    },
+    {
+      "name": "native_math",
+      "axis": "math-notation-chain",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/private_gap_probe/native_math/server_private_rerun.log (fresh math-notation ShareGPT (LaTeX/symbolic markers), code-excluded domain predicate)",
+        "conditional_p_sglang": [
+          0.6685674444756818,
+          0.7393101804537281,
+          0.7994832521058789,
+          0.8519405440054182,
+          0.8940844110674183,
+          0.8777849322205278,
+          0.9311673119374279
+        ],
+        "num_drafts": 17785.0
+      }
+    },
+    {
+      "name": "native_longctx",
+      "axis": "long-context-tail",
+      "mode": "pooled",
+      "component": {
+        "_src": "research/validity/private_gap_probe/native_longctx/server_private_rerun.log (fresh long-context tail (2.5x public length, code-excluded), the prefill-heavy hard tail)",
+        "conditional_p_sglang": [
+          0.6718499502371056,
+          0.7708055050123002,
+          0.8214634674642252,
+          0.8447638847851388,
+          0.905467286743105,
+          0.8850894324594443,
+          0.9425420069845633
+        ],
+        "num_drafts": 17081.0
+      }
+    }
+  ]
+}

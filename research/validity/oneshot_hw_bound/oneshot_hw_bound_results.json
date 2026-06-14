@@ -1,0 +1,246 @@
+{
+  "pr": 188,
+  "metric_primary": "sigma_hw_decomposition_self_test_passes",
+  "metric_test": "sigma_oneshot",
+  "sigma_hw_decomposition_self_test_passes": true,
+  "sigma_oneshot": 4.864468814937121,
+  "decomposition": {
+    "sigma159_kind": "between-device cross-allocation DOMINATED (NOT a within-run std)",
+    "evidence": {
+      "sigma_within_pct": 0.01111018495063929,
+      "sigma_within_basis": "measured fresh all-draws (official analog: each run a fresh server), n=12",
+      "sigma_within_run_set": "kanna #159 fresh-mode noise floor, n=12 fresh-server restarts on ONE pinned A10G (within-device / run-to-run)",
+      "sigma_within_n": 12,
+      "sigma_within_sm_clock_mhz": 1710.0,
+      "sigma_between_pct": 0.9623136210621998,
+      "sigma_between_basis": "frantic_penguin_same_submission_3draw",
+      "sigma_between_run_set": "frantic-penguin same-submission re-draws across the HF a10g-small POOL (independent device allocations = the between-device draw)",
+      "frantic_penguin_draws_tps": [
+        489.63,
+        483.8,
+        480.41
+      ],
+      "frantic_penguin_n": 3,
+      "frantic_penguin_cv_pct": 0.9623136210621998,
+      "device_identities": "on-pod = single A10G pinned 1710 MHz, temp 57-58C; frantic-penguin = unknown HF-pool A10Gs (the between-device population)"
+    },
+    "decomposition": {
+      "central_tps": 505.4635557048992,
+      "sigma_within_pct": 0.01111018495063929,
+      "sigma_within_tps": 0.056157935896891956,
+      "sigma_between_pct": 0.9623136210621998,
+      "sigma_between_tps": 4.864144646053565,
+      "sigma_oneshot_pct": 0.9623777540506017,
+      "sigma_oneshot_tps": 4.864468814937121,
+      "sigma_hw_pct_159": 0.9623777540506017,
+      "sigma_hw_tps_159": 4.864468814937121,
+      "between_over_within_ratio": 86.61544567778121,
+      "reconstruction_gap_tps": 0.0,
+      "captured_between_device": true,
+      "note": "sigma_oneshot = hypot(within, between) reproduces #159 sigma_hw EXACTLY (by construction): #159 already folded the between-device cross draw. The within-device floor is 87x smaller -> 4.86 is NOT a warmed-device run-to-run std."
+    },
+    "between_device_bound": {
+      "primary_basis_n3": {
+        "source": "frantic-penguin same-submission 3-draw (pure hardware)",
+        "cv_pct": 0.9623136210621998,
+        "sigma_tps": 4.864144646053565
+      },
+      "corroborating_frontier_n9": {
+        "source": "leaderboard frontier, n=9 near-identical stacks (UPPER bound: folds submission deltas) -> pure-hw sigma is BELOW this",
+        "cv_pct": 0.5554855027932659,
+        "implied_upper_sigma_tps": 2.8077767738440786
+      },
+      "clock_envelope": {
+        "base_mhz": 1320.0,
+        "boost_mhz": 1710.0,
+        "base_to_boost_headroom_pct": 22.80701754385965,
+        "note": "MECHANISM allows a large throttle corner, but on-pod clock holds 1710 (boost) across all runs and the cross-draw spread is only ~1% -> the worst-case throttle corner is NOT realized in practice."
+      }
+    }
+  },
+  "tau_floor_reconcile": {
+    "tau_floor": 0.9924318649123313,
+    "tau_floor_haircut_pct": 0.7568135087668737,
+    "sigma_between_pct": 0.9623136210621998,
+    "naive_multiple_of_total_sigma_between": 0.7864520382986001,
+    "naive_reading": "tau-floor at 0.786 sigma_between -- looks SHALLOW for a worst-case floor IF sigma_between were the clock axis (it is not).",
+    "clock_subchannel_split": {
+      "k=1": {
+        "sigma_clock_pct": 0.7568135087668737,
+        "sigma_bw_pct": 0.5943743081845111,
+        "tau_floor_as_sigma_clock_multiple": 1.0,
+        "bw_dominates": false
+      },
+      "k=2": {
+        "sigma_clock_pct": 0.37840675438343685,
+        "sigma_bw_pct": 0.884791406784015,
+        "tau_floor_as_sigma_clock_multiple": 2.0,
+        "bw_dominates": true
+      }
+    },
+    "physics": {
+      "tau_orthogonal_to_K_cal": "clock/compute-exposed (tau) vs BW/bus (K_cal); decode is BW-bound so BW-bin dominates the between-device spread",
+      "phi_comp_full_exposure": 0.08936886835043445,
+      "clock_gap_mild_throttle": 0.098638865475003,
+      "clock_exposed_haircut_pct": 0.7568135087668737
+    },
+    "tau_floor_consistency": "consistent",
+    "verdict": "CONSISTENT: the tau-floor (-0.7568% clock-exposed) is the 1-2 sigma corner of the clock SUB-channel of sigma_between (sigma_clock in [0.378, 0.757]%); the dominant sigma_BW (0.594-0.885%) is orthogonal (K_cal/bus). No double-count: tau-floor is the clock MEAN corner, sigma_clock the clock VARIANCE, sigma_BW the orthogonal BW-bin term.",
+    "no_double_count_vs_lcb": "The LCB carries calib_rel (folds the tau-floor as a MEAN downside, #148 Leg A) AND sigma_hw (cross-device VARIANCE). The clock sub-term of sigma_hw (<=0.38-0.76%) overlaps the tau-floor channel, but sigma_hw is BW-dominated (~0.88% of 0.96%) and the overlap is a small, CONSERVATIVE (mean+variance) minority; the dominant sigma_hw (BW) is orthogonal to the tau-floor (clock)."
+  },
+  "lcb_recompute": {
+    "z_p90_one_sided": 1.2815515594457412,
+    "central_base_tps": 505.4635557048992,
+    "sigma_hw_rel": 0.009623777540506017,
+    "sigma_oneshot_tps": 4.864468814937121,
+    "sigma_oneshot_rel": 0.009623777540506017,
+    "widen_vs_sigma_hw_tps": 0.0,
+    "decision": "KEEP sigma_hw=4.86 (sigma_oneshot == sigma_hw; no widening)",
+    "lcb_bothbugs_oneshot": 513.4332776193273,
+    "lcb_descent_oneshot": 498.59093359857724,
+    "both_bugs_break_sigma_tps": 18.838870263282097,
+    "descent_break_sigma_tps": null,
+    "topo": {
+      "descent_only": {
+        "proj_private_tps": 513.8934226968873,
+        "combined_rel_3term": 0.021148844836120288,
+        "lcb_p90_3term_published": 499.96519706601964,
+        "lcb_p90_3term_reproduced": 499.96519706601964,
+        "lcb_p90_4term_oneshot": 498.59093359857724,
+        "p_clear_500_4term": 0.8776958119352409,
+        "break_sigma_tps": null,
+        "go_4term": "HOLD",
+        "lcb_p90_4term_published": 498.5909335985773
+      },
+      "both_bugs": {
+        "proj_private_tps": 528.8856764074758,
+        "combined_rel_3term": 0.020667238533949674,
+        "lcb_p90_3term_published": 514.877540689496,
+        "lcb_p90_3term_reproduced": 514.877540689496,
+        "lcb_p90_4term_oneshot": 513.4332776193273,
+        "p_clear_500_4term": 0.9917044565974428,
+        "break_sigma_tps": 18.838870263282097,
+        "go_4term": "GO",
+        "lcb_p90_4term_published": 513.4332776193272
+      }
+    },
+    "monotonicity_grid": [
+      {
+        "sigma_oneshot_tps": 0.0,
+        "lcb_both": 514.877540689496,
+        "lcb_descent": 499.96519706601964
+      },
+      {
+        "sigma_oneshot_tps": 2.5,
+        "lcb_both": 514.4819946119736,
+        "lcb_descent": 499.5893831292818
+      },
+      {
+        "sigma_oneshot_tps": 4.864468814937121,
+        "lcb_both": 513.4332776193273,
+        "lcb_descent": 498.59093359857724
+      },
+      {
+        "sigma_oneshot_tps": 7.5,
+        "lcb_both": 511.6412131497226,
+        "lcb_descent": 496.8791293595269
+      },
+      {
+        "sigma_oneshot_tps": 10.0,
+        "lcb_both": 509.49395668339827,
+        "lcb_descent": 494.8210151702901
+      },
+      {
+        "sigma_oneshot_tps": 15.0,
+        "lcb_both": 504.3744044430923,
+        "lcb_descent": 489.8942913916524
+      },
+      {
+        "sigma_oneshot_tps": 18.84,
+        "lcb_both": 499.9986751439254,
+        "lcb_descent": 485.67010625803164
+      },
+      {
+        "sigma_oneshot_tps": 21.5,
+        "lcb_both": 496.83253492403975,
+        "lcb_descent": 482.6089714168521
+      },
+      {
+        "sigma_oneshot_tps": 25.0,
+        "lcb_both": 492.5532368586744,
+        "lcb_descent": 478.4673963610014
+      }
+    ],
+    "bar_shift": {
+      "bar_shift_lambda": 0.0,
+      "reason": "sigma_oneshot == sigma_hw=4.86 -> the published lambda*_LCB bars do not move.",
+      "sensitivity_dlambda_per_tps": {
+        "both_bugs": {
+          "dlambda_star_per_tps_sigma": 0.006362469980025336,
+          "sigma_total_at_bar_tps": 7.179173483938755,
+          "dlcb_dlambda": 215.89865927387365,
+          "note": "first-order, card-forward-map back-out; if sigma_hw is instead retired on the separate best-of-2 hardware axis the card bar is sigma_hw-invariant (sensitivity 0)."
+        },
+        "descent_only": {
+          "dlambda_star_per_tps_sigma": 0.00617380846509926,
+          "sigma_total_at_bar_tps": 7.302594532244487,
+          "dlcb_dlambda": 218.9415477704106,
+          "note": "first-order, card-forward-map back-out; if sigma_hw is instead retired on the separate best-of-2 hardware axis the card bar is sigma_hw-invariant (sensitivity 0)."
+        }
+      },
+      "published_bars": {
+        "both_bugs": 0.90523,
+        "descent_only": 0.97502
+      }
+    },
+    "honest_verdict": {
+      "both_bugs": "ROBUST: LCB(P>=0.9)=513.43 (4-term) / 514.88 (3-term); GO. Breaks 500 only at sigma_oneshot >= 18.8 TPS (~3.9x the 4.86 draw).",
+      "descent_only": "KNIFE-EDGE: LCB(P>=0.9)=498.59 (4-term) / 499.97 (3-term); already < 500 at sigma=0 -> sampling+step bound, NOT sigma_hw-widening bound. Widening sigma only deepens the miss; it does not decide descent."
+    }
+  },
+  "n3_caveat": {
+    "n": 3,
+    "point_sigma_pct": 0.9623136210621998,
+    "point_sigma_tps": 4.864144646053565,
+    "chi2_0p05_df2": 0.10258658877510116,
+    "ucb95_multiplier": 4.4153964427017955,
+    "n3_only_ucb95_sigma_pct": 4.2489961392015205,
+    "n3_only_ucb95_sigma_tps": 21.477126966971895,
+    "frontier_n9_upper_sigma_pct": 0.5554855027932659,
+    "frontier_n9_upper_sigma_tps": 2.8077767738440786,
+    "interpretation": "The n=3 chi-square UCB is wide (~4.4x) -- a small-sample artifact. It is NOT credible: the n=9 leaderboard frontier (an UPPER bound that folds in submission deltas) puts pure-hw sigma BELOW the point estimate, so the credible sigma_between is ~[2.8 (frontier), 4.86 (frantic conservative)] TPS -- well under the ~18.8 TPS both-bugs break."
+  },
+  "self_test": {
+    "sigma_hw_decomposition_self_test_passes": true,
+    "checks": {
+      "a_within_plus_between_reproduces_4p86": true,
+      "b_tau_floor_consistency_finite": true,
+      "c_reproduces_published_lcbs": true,
+      "d_lcbs_monotone_decreasing_in_sigma": true,
+      "e_both_bugs_ge_500_over_plausible_range": true,
+      "f_nan_clean": true
+    },
+    "n_numbers_checked": 100
+  },
+  "handoff": "the launch LCB should use sigma_oneshot=4.864 TPS for the single A10G draw (within (+) between/thermal == #159 sigma_hw=4.86, since #159 already folded the between-device cross-allocation draw), reconciled with #181's 0.9924 tau-floor on the same clock axis (the tau-floor is the clock sub-channel corner; BW-bin dominates sigma_between); both-bugs stays robust (LCB 513.43, breaks 500 only at ~18.8 TPS / ~3.9x) and descent-only shifts by bar_shift=0.0 (no widening -> bars unchanged).",
+  "scope": "Audits the VARIANCE of the one-shot A10G draw (parallel to ubel #181's audit of the MEAN tau). Does NOT change the central projection or authorize a launch. BANK-THE-ANALYSIS: adds 0 TPS, greedy untouched. NOT open2. NOT a launch.",
+  "imported_legs": {
+    "kanna_159_sigma_hw": "research/validity/hw_variance_envelope/envelope.json",
+    "ubel_181_tau_floor": "research/validity/tau_efficiency/tau_efficiency_pin_results.json",
+    "launch_packet_lcbs": "research/launch/packet_refresh/launch_packet_refresh_results.json",
+    "conservative_verdict_z_p90": "research/spec_cost_model/conservative_step_launch_verdict_results.json",
+    "lambda_card_183_bars": "research/oracle_readout/lambda_acceptance_card/lambda_acceptance_card_results.json",
+    "lawine_168_launch_idle": "clock-INDEPENDENT step-denominator term; CANCELS in tau; kept ORTHOGONAL to sigma_hw and the tau-floor (not folded here)",
+    "wirbel_175_sampling": "the +-10.9 sampling numerator (orthogonal variance axis); kept as the combined_rel_3term numerator, unchanged",
+    "K_cal": 125.268
+  },
+  "public_evidence_used": [
+    "NVIDIA A10G (sm_86, GA102) datasheet: 1320 MHz base / 1710 MHz boost (22.8% headroom).",
+    "frantic-penguin same-submission leaderboard re-draws (pure-hardware, fixed prompts).",
+    "Leaderboard frontier of ~9 near-identical 481.5-489.6 TPS stacks (between-device upper bound).",
+    "Chi-square small-sample variance interval (df=n-1) for the n=3 sigma UCB caveat."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/kernel build. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0016
+}

@@ -1,0 +1,341 @@
+{
+  "pr": 189,
+  "lane": "executable fail-closed MUST-RETAIN submission gate (packaging/flag-presence)",
+  "method": "LOCAL CPU-only static analysis + assertion. No GPU / vLLM / HF Job / submission / served-file change / kernel deploy. Adds 0 TPS (primary = self-test). BASELINE 481.53. Greedy/PPL untouched. Imports #186 costs; does NOT re-derive them.",
+  "primary_metric": {
+    "name": "submission_gate_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "gate_catches_row1_host_loop",
+    "value": 1
+  },
+  "introspection_schema": {
+    "build_env": {
+      "type": "dict[str,str]",
+      "doc": "the RESOLVED served env (manifest.json 'env' merged with runtime overrides). Read directly for served-flag rows; JSON-embedded values (num_speculative_tokens, temperature) are parsed out of SPECULATIVE_CONFIG / OVERRIDE_GENERATION_CONFIG.",
+      "keys_read": [
+        "PRECACHE_BENCH",
+        "PRECACHE_REQUIRE",
+        "SPECULATIVE_CONFIG.num_speculative_tokens",
+        "CENTROID_TOP_K",
+        "ONEGRAPH",
+        "LOOPGRAPH_REQUIRE_CAPTURE",
+        "DIXIE_FUSED_ACCEPT_PREP",
+        "DIXIE_SLIM_GREEDY",
+        "LM_HEAD_PRUNE",
+        "FA_SLIDING",
+        "SPLITKV_VERIFY",
+        "PLE_FOLD_EMBED_SCALE",
+        "PLE_ASSUME_VALID_TOKEN_IDS",
+        "FEOPT_ORJSON",
+        "FASTRENDER",
+        "DETOK_ENDONLY",
+        "LD_PRELOAD",
+        "PYTORCH_CUDA_ALLOC_CONF",
+        "PERFORMANCE_MODE",
+        "DRAFTER_BUCKET",
+        "DRAFTER_SHA256",
+        "OVERRIDE_GENERATION_CONFIG.temperature",
+        "MAX_NUM_SEQS",
+        "MAX_MODEL_LEN",
+        "MAX_NUM_BATCHED_TOKENS",
+        "DTYPE",
+        "WEIGHTS_BUCKET",
+        "LOCAL_MODEL_DIR",
+        "PCK04_KEEPSET",
+        "FUSED_SPARSE_ARGMAX_BLOCK",
+        "LSK_SKIP_LAYERS",
+        "STEPTIME",
+        "FA_SLIDING_DIAG",
+        "PROFILER_CONFIG"
+      ]
+    },
+    "build_introspection": {
+      "type": "dict[str,dict]",
+      "doc": "a STRUCTURAL probe of the assembled accept/relocate/decode path (served sitecustomize.py / serve_patch_*.py / tree-build graph). One key per code-shaped row. A missing key (or a None field) is FAIL-CLOSED (-> MISSING -> NO-GO), never a silent pass.",
+      "relocate_salvaged_kv": {
+        "row": "row 1 (BUILD-BLOCKER, 85.17% binding cost)",
+        "fields": {
+          "device_vectorized_op_present": "bool \u2014 single fused [L,W,H,D] index_select+index_copy_ by DEVICE commit-index (one launch sequence)",
+          "host_layer_loop_present": "bool \u2014 a per-layer Python for-loop over the ~37 decoder layers doing D2H/H2D KV copies (the 145ms/call landmine)",
+          "host_sync_in_relocate": "bool \u2014 a .item()/.cpu()/.tolist() host readout inside the relocate path (re-introduces sync, falls out of the graph)",
+          "n_host_layer_iterations": "int \u2014 host-side per-layer iteration count (0 == fully vectorized single launch; >0 == host-bound)",
+          "op_symbol": "str (evidence) \u2014 resolved relocate symbol name"
+        },
+        "pass_rule": "device_vectorized_op_present AND NOT host_layer_loop_present AND NOT host_sync_in_relocate AND n_host_layer_iterations == 0"
+      },
+      "accept_walk": {
+        "row": "row 6 (capturability rule)",
+        "fields": {
+          "device_argmax_accept_len_present": "bool \u2014 match-mask->cumprod->device-argmax accept length on device (vLLM-v1 RejectionSampler zero-sync)",
+          "host_item_call_present": "bool \u2014 a per-node .item() host readout in the accept walk (sync-bound; breaks CUDA-graph capture)"
+        },
+        "pass_rule": "device_argmax_accept_len_present AND NOT host_item_call_present"
+      },
+      "decode_logits": {
+        "row": "row 4/5 (denominator lever; DOUBLE-LOAD-BEARING validity seam)",
+        "fields": {
+          "decode_argmax_only": "bool \u2014 greedy token-selection uses argmax(pruned[M,12288])->kept_ids remap (no full 262144 scatter on decode)",
+          "prefill_full_scatter_lp_retained": "bool \u2014 the FULL scatter[*,262144]+logprobs is RETAINED on the prompt_logprobs/prefill PPL path (the double-load-bearing seam; dropping it THERE breaks PPL)"
+        },
+        "pass_rule": "decode_argmax_only AND prefill_full_scatter_lp_retained",
+        "validity_note": "prefill_full_scatter_lp_retained==False is a PPL-breaking validity failure (denken's output gate confirms numerically); decode_argmax_only==False alone is a speed-only revert."
+      }
+    }
+  },
+  "row1_check_logic": {
+    "deliverable": "distinguish the device-vectorized relocate from a 37-layer host Python loop from a STATIC introspection of the assembled accept/relocate path.",
+    "pass": "device_vectorized_op_present == True (fused [L,W,H,D] index_select+index_copy_ by device commit-index) AND host_layer_loop_present == False AND host_sync_in_relocate == False AND n_host_layer_iterations == 0.",
+    "fail_host_loop": "host_layer_loop_present == True OR n_host_layer_iterations > 0 OR host_sync_in_relocate == True (a data-dependent Python loop over 37 layers CANNOT be CUDA-graph-captured -> pins the step host-bound ~122ms instead of the 9.7ms captured target -> descent E[T]=5.04 (->522 TPS) collapses to ~77 TPS).",
+    "fail_absent": "device_vectorized_op_present == False -> relocate op not assembled.",
+    "missing": "no relocate_salvaged_kv introspection key, or n_host_layer_iterations is None -> MISSING -> NO-GO (fail-closed, NOT silent-pass).",
+    "banked_cost_on_fail_tps": 444.92351419266527,
+    "banked_cost_pct_of_official": 85.17267846343493,
+    "source_leg": "#157 / #163 (imported via #186 manifest row 1)"
+  },
+  "validity_seam": {
+    "purpose": "the 5 DOUBLE-LOAD-BEARING rows break PPL/greedy/scoring-basis (not just speed) if dropped. The gate emits them in `validity_class_failures` so its STATIC packaging verdict can merge with denken's DYNAMIC output-validity preflight (boot/PPL/128/greedy) into one launch-readiness surface.",
+    "boundary": "ubel #189 asserts flag PRESENCE/SHAPE only. denken asserts output CORRECTNESS (boot, PPL<=cap, completed==128, greedy-identical). This gate does NOT re-implement the PPL/greedy/128 check.",
+    "double_load_bearing_rows": [
+      "decode-path argmax-only logits (prefill scatter+LP seam) -> PPL",
+      "OVERRIDE_GENERATION_CONFIG temperature=0.0 -> greedy token-identity (#124)",
+      "MAX_NUM_SEQS=1/MAX_MODEL_LEN=4096/.../DTYPE=bfloat16 -> PPL/throughput basis",
+      "WEIGHTS_BUCKET/LOCAL_MODEL_DIR/PCK04_KEEPSET -> model identity/artifact",
+      "LSK_SKIP_LAYERS (TRAP, must stay UNSET) -> output (decoder layer-skip)"
+    ],
+    "shared_schema": {
+      "packaging_gate": {
+        "owner": "ubel #189 (this gate)",
+        "verdict": "GO|NO-GO",
+        "failing_rows": "list[{flag, status, banked_cost_tps}]",
+        "validity_class_failures": "list[{flag, status, breaks, detail}]"
+      },
+      "output_gate": {
+        "owner": "denken (NOT computed here \u2014 denken fills this)",
+        "boot_ok": "bool",
+        "ppl": "float<=2.42",
+        "completed": "int==128",
+        "greedy_identical": "bool"
+      }
+    },
+    "combined_rule": "launch_ready_validity = packaging_gate.verdict==GO AND output_gate.{boot_ok, ppl<=cap, completed==128, greedy_identical} all-pass.",
+    "feeds": "fern #185's numerical GO/NO-GO ledger as the `packaging-gate: GO` precondition row."
+  },
+  "manifest_source": "research/spec_cost_model/tree_submission_manifest/tree_submission_manifest.json",
+  "manifest_pr": 186,
+  "manifest_wandb_run_id": "u9kje7sn",
+  "n_rows": 22,
+  "n_must_retain": 19,
+  "n_double_load_bearing": 5,
+  "worked_go_example": {
+    "packaging_verdict": "GO",
+    "n_failing": 0,
+    "n_validity_class_failures": 0,
+    "failing_flags": [],
+    "binding_failure": null,
+    "validity_class_failures": []
+  },
+  "worked_nogo_example": {
+    "packaging_verdict": "NO-GO",
+    "n_failing": 1,
+    "n_validity_class_failures": 0,
+    "failing_flags": [
+      "relocate_salvaged_kv == vectorized/device (NOT host-loop)"
+    ],
+    "binding_failure": {
+      "flag": "relocate_salvaged_kv == vectorized/device (NOT host-loop)",
+      "banked_cost_tps": 444.92351419266527,
+      "detail": "device-vectorized op ABSENT; 37-layer host Python loop PRESENT (145ms/call landmine); .item()/.cpu() host readout in relocate path; n_host_layer_iterations=37 -> host-bound, NOT CUDA-graph-capturable (516->77 TPS)"
+    },
+    "validity_class_failures": []
+  },
+  "self_test": {
+    "checks": [
+      {
+        "name": "(a) faithful build -> GO",
+        "passes": true,
+        "detail": "GO"
+      },
+      {
+        "name": "(a) zero failing rows",
+        "passes": true,
+        "detail": "0"
+      },
+      {
+        "name": "(a) zero validity-class failures",
+        "passes": true,
+        "detail": "0"
+      },
+      {
+        "name": "(a) all 22 rows checked",
+        "passes": true,
+        "detail": "22"
+      },
+      {
+        "name": "(a) 19 must-retain rows",
+        "passes": true,
+        "detail": "19"
+      },
+      {
+        "name": "(a) zero gate-construction errors",
+        "passes": true,
+        "detail": "[]"
+      },
+      {
+        "name": "(a) every must-retain row PASS",
+        "passes": true,
+        "detail": "[]"
+      },
+      {
+        "name": "(b) host-loop -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(b) row1 relocate in failing_rows",
+        "passes": true,
+        "detail": "['relocate_salvaged_kv == ']"
+      },
+      {
+        "name": "(b) binding failure is row1",
+        "passes": true,
+        "detail": "relocate_salvaged_kv == "
+      },
+      {
+        "name": "(b) row1 banked cost ~444.92 (imported, not re-derived)",
+        "passes": true,
+        "detail": "444.92351419266527"
+      },
+      {
+        "name": "(b) host-loop is SPEED-class, not validity (row1 greedy-safe)",
+        "passes": true,
+        "detail": "0"
+      },
+      {
+        "name": "(c) LSK set -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(c) LSK trap in failing_rows",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "(c) LSK trap in validity_class_failures",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "(d) PRECACHE=0 -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(d) PRECACHE row in failing_rows",
+        "passes": true,
+        "detail": "1"
+      },
+      {
+        "name": "(d) PRECACHE banked cost ~18.33 (3.526%)",
+        "passes": true,
+        "detail": "18.334174130253853"
+      },
+      {
+        "name": "(e) DLB drop [decode_prefill_scatterLP_dropped] -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(e) DLB drop [decode_prefill_scatterLP_dropped] in validity_class_failures",
+        "passes": true,
+        "detail": "['decode-path argmax-only ']"
+      },
+      {
+        "name": "(e) DLB drop [temperature_nonzero] -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(e) DLB drop [temperature_nonzero] in validity_class_failures",
+        "passes": true,
+        "detail": "['OVERRIDE_GENERATION_CONF']"
+      },
+      {
+        "name": "(e) DLB drop [scoring_contract_MAX_NUM_SEQS] -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(e) DLB drop [scoring_contract_MAX_NUM_SEQS] in validity_class_failures",
+        "passes": true,
+        "detail": "['MAX_NUM_SEQS=1 / MAX_MOD']"
+      },
+      {
+        "name": "(e) DLB drop [model_artifact_WEIGHTS_BUCKET_dropped] -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(e) DLB drop [model_artifact_WEIGHTS_BUCKET_dropped] in validity_class_failures",
+        "passes": true,
+        "detail": "['WEIGHTS_BUCKET/LOCAL_MOD']"
+      },
+      {
+        "name": "(e) DLB drop [LSK_trap_set] -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(e) DLB drop [LSK_trap_set] in validity_class_failures",
+        "passes": true,
+        "detail": "['LSK_SKIP_LAYERS (MUST re']"
+      },
+      {
+        "name": "(f) missing relocate introspection -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(f) missing introspection -> MISSING (fail-closed, not FAIL-by-accident)",
+        "passes": true,
+        "detail": "MISSING"
+      },
+      {
+        "name": "(f2) empty build -> NO-GO",
+        "passes": true,
+        "detail": "NO-GO"
+      },
+      {
+        "name": "(f2) 18 presence-required must-retain rows fail (TRAP correctly passes when absent)",
+        "passes": true,
+        "detail": "18"
+      },
+      {
+        "name": "(f2) TRAP row passes on empty build (absence is correct)",
+        "passes": true,
+        "detail": "PASS"
+      },
+      {
+        "name": "(g) all fixtures nan-clean & exception-free",
+        "passes": true,
+        "detail": "11 fixtures swept"
+      }
+    ],
+    "n_pass": 34,
+    "n_total": 34,
+    "all_pass": true
+  },
+  "test_metric_detail": {
+    "gate_catches_row1_host_loop": true,
+    "verdict_on_host_loop": "NO-GO",
+    "row1_banked_cost_tps": 444.92351419266527,
+    "row1_cost_pct_of_official": 85.17267846343493,
+    "row1_detail": "device-vectorized op ABSENT; 37-layer host Python loop PRESENT (145ms/call landmine); .item()/.cpu() host readout in relocate path; n_host_layer_iterations=37 -> host-bound, NOT CUDA-graph-capturable (516->77 TPS)"
+  },
+  "scope": "STATIC flag/shape assertion. Consumes #186's costs (no re-derivation). Does NOT run the numerical GO/NO-GO (fern #185) or the output-validity gate (denken). Authorizes nothing \u2014 a human still files Approval request: HF job. NOT open2. NOT a launch.",
+  "handoff": "run verify_submission_gate(build_env, introspection) against land #71's assembled build before any `Approval request: HF job`; a NO-GO names the exact failing flag + its banked cost \u2014 esp. row 1, the 85%-cost relocate-host-loop trap \u2014 and feeds fern #185's ledger as the `packaging-gate: GO` precondition row.",
+  "metrics_nan_clean": true,
+  "wandb_run_id": "pqpb8ugk"
+}
