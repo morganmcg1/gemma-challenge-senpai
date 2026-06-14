@@ -1,0 +1,450 @@
+{
+  "pr": 222,
+  "metric_primary": "binding_gate_self_test_passes",
+  "metric_test": "mu_pub_at_validity_bar",
+  "binding_gate_self_test_passes": true,
+  "mu_pub_at_validity_bar": 515.9240665878908,
+  "binding_gate": "validity",
+  "speed_margin_at_validity_bar": 2.3666088372732474,
+  "lambda_hat_speed": 0.9674684694454245,
+  "lambda_hat_build_target": 0.9779783323491393,
+  "mu_pub_at_validity_bar_lcb_p95_central": 503.1887458459907,
+  "mu_pub_at_validity_bar_lcb_p95_worstcase": 502.3666088372733,
+  "validity_binds_at_every_trigger_corner": true,
+  "headline_regime": "both_bugs",
+  "law": "mu_pub(lambda_hat) = 520.953 * E[T](lambda_hat)/E[T](1) = K_cal*(E[T](lambda_hat)/step)*tau_anchor; E[T](lambda_hat) = reach_DP_pmf_mean((1-t)*floor_spine + t*ceiling_spine), t = (lambda_hat - lambda_floor)/(1 - lambda_floor); the lambda=1 endpoint is anchored to the imported #204 ceiling 520.953, tau_anchor = 520.953*step/(K_cal*E[T](1)). VALIDITY binds iff mu_pub(0.9780) >= 513.557 (else SPEED binds at lambda_hat_speed > 0.9780).",
+  "gate_frame": {
+    "launch_go_iff": "BOTH (validity: private lambda_hat >= 0.9780) AND (speed: public mu_pub >= 513.557)",
+    "validity_gate": {
+      "bar": 0.9779783323491393,
+      "bar_nominal": 0.978,
+      "definition": "private depth-aggregate acceptance lambda_hat >= 0.9780",
+      "provenance": "stark #208 (wi4gxxx8) worst-case private go-bar `d198_coupled_bar`; #215 deep-tail framing"
+    },
+    "speed_gate": {
+      "trigger_worstcase": 513.5574577506176,
+      "trigger_central": 512.7353207419002,
+      "trigger_tight": 512.519451958079,
+      "definition": "public mu_pub >= 513.557 (the trigger at which the one-sided P95 LCB clears 500)",
+      "provenance": "ubel #218 (0ug7vd7d) grounded worst-case GO trigger; 500 + z1*combined_sigma_worstcase"
+    },
+    "shared_driver": "land #71 builds ONE checkpoint whose acceptance lambda_hat drives BOTH the E[T](lambda_hat)->mu_pub speed map AND the private validity bar.",
+    "map": "mu_pub(lambda_hat) = 520.953 * E[T](lambda_hat)/E[T](1); E[T] via #213 reach-DP blend (#175/#184)"
+  },
+  "per_regime": {
+    "both_bugs": {
+      "tau_anchor": 0.970733167512287,
+      "et_floor": 4.048484687770039,
+      "et_validity_bar": 5.168500268658075,
+      "et_ceiling": 5.21887717841078,
+      "mu_pub_at_validity_bar": 515.9240665878908,
+      "mu_pub_at_floor": 404.1231643730627,
+      "mu_pub_at_ceiling": 520.9527323111674,
+      "mu_pub_at_validity_bar_lcb_p95_central": 503.1887458459907,
+      "mu_pub_at_validity_bar_lcb_p95_worstcase": 502.3666088372733,
+      "official_form_cross_check_err": 0.0,
+      "binding_vs_trigger": {
+        "tight": {
+          "trigger": 512.519451958079,
+          "mu_pub_at_validity_bar": 515.9240665878908,
+          "binding_gate": "validity",
+          "speed_margin_at_validity_bar": 3.4046146298118174,
+          "lambda_hat_speed": 0.9628287436920242,
+          "lambda_hat_speed_roundtrip_mu": 512.519451958079,
+          "gap_lambda_speed_minus_bar": -0.015149588657115132,
+          "lambda_hat_build_target": 0.9779783323491393
+        },
+        "central": {
+          "trigger": 512.7353207419002,
+          "mu_pub_at_validity_bar": 515.9240665878908,
+          "binding_gate": "validity",
+          "speed_margin_at_validity_bar": 3.1887458459906384,
+          "lambda_hat_speed": 0.9637951641834936,
+          "lambda_hat_speed_roundtrip_mu": 512.7353207419001,
+          "gap_lambda_speed_minus_bar": -0.014183168165645688,
+          "lambda_hat_build_target": 0.9779783323491393
+        },
+        "worstcase": {
+          "trigger": 513.5574577506176,
+          "mu_pub_at_validity_bar": 515.9240665878908,
+          "binding_gate": "validity",
+          "speed_margin_at_validity_bar": 2.3666088372732474,
+          "lambda_hat_speed": 0.9674684694454245,
+          "lambda_hat_speed_roundtrip_mu": 513.5574577506176,
+          "gap_lambda_speed_minus_bar": -0.010509862903714806,
+          "lambda_hat_build_target": 0.9779783323491393
+        }
+      },
+      "binding_gate": "validity",
+      "speed_margin_at_validity_bar": 2.3666088372732474,
+      "lambda_hat_speed": 0.9674684694454245,
+      "lambda_hat_build_target": 0.9779783323491393,
+      "ceil_ge_floor_all_depths": true
+    },
+    "descent_only": {
+      "tau_anchor": 1.0006443866568653,
+      "et_floor": 3.9294296647453835,
+      "et_validity_bar": 5.014112766166287,
+      "et_ceiling": 5.062874725337895,
+      "mu_pub_at_validity_bar": 515.9352911850492,
+      "mu_pub_at_floor": 404.32505865272867,
+      "mu_pub_at_ceiling": 520.9527323111674,
+      "mu_pub_at_validity_bar_lcb_p95_central": 503.1999704431491,
+      "mu_pub_at_validity_bar_lcb_p95_worstcase": 502.3778334344317,
+      "official_form_cross_check_err": 0.0,
+      "binding_vs_trigger": {
+        "tight": {
+          "trigger": 512.519451958079,
+          "mu_pub_at_validity_bar": 515.9352911850492,
+          "binding_gate": "validity",
+          "speed_margin_at_validity_bar": 3.4158392269702063,
+          "lambda_hat_speed": 0.9627449036837781,
+          "lambda_hat_speed_roundtrip_mu": 512.519451958079,
+          "gap_lambda_speed_minus_bar": -0.01523342866536126,
+          "lambda_hat_build_target": 0.9779783323491393
+        },
+        "central": {
+          "trigger": 512.7353207419002,
+          "mu_pub_at_validity_bar": 515.9352911850492,
+          "binding_gate": "validity",
+          "speed_margin_at_validity_bar": 3.1999704431490272,
+          "lambda_hat_speed": 0.9637134973568919,
+          "lambda_hat_speed_roundtrip_mu": 512.7353207419002,
+          "gap_lambda_speed_minus_bar": -0.0142648349922474,
+          "lambda_hat_build_target": 0.9779783323491393
+        },
+        "worstcase": {
+          "trigger": 513.5574577506176,
+          "mu_pub_at_validity_bar": 515.9352911850492,
+          "binding_gate": "validity",
+          "speed_margin_at_validity_bar": 2.3778334344316363,
+          "lambda_hat_speed": 0.9673950658214243,
+          "lambda_hat_speed_roundtrip_mu": 513.5574577506176,
+          "gap_lambda_speed_minus_bar": -0.010583266527715018,
+          "lambda_hat_build_target": 0.9779783323491393
+        }
+      },
+      "binding_gate": "validity",
+      "speed_margin_at_validity_bar": 2.3778334344316363,
+      "lambda_hat_speed": 0.9673950658214243,
+      "lambda_hat_build_target": 0.9779783323491393,
+      "ceil_ge_floor_all_depths": true
+    }
+  },
+  "sensitivity": {
+    "both_bugs": {
+      "rows": [
+        {
+          "corner": "tight",
+          "trigger": 512.519451958079,
+          "binding_gate": "validity",
+          "lambda_hat_speed": 0.9628287436920242,
+          "lambda_hat_build_target": 0.9779783323491393,
+          "speed_margin_at_validity_bar": 3.4046146298118174
+        },
+        {
+          "corner": "central",
+          "trigger": 512.7353207419002,
+          "binding_gate": "validity",
+          "lambda_hat_speed": 0.9637951641834936,
+          "lambda_hat_build_target": 0.9779783323491393,
+          "speed_margin_at_validity_bar": 3.1887458459906384
+        },
+        {
+          "corner": "worstcase",
+          "trigger": 513.5574577506176,
+          "binding_gate": "validity",
+          "lambda_hat_speed": 0.9674684694454245,
+          "lambda_hat_build_target": 0.9779783323491393,
+          "speed_margin_at_validity_bar": 2.3666088372732474
+        }
+      ],
+      "validity_binds_at_every_trigger_corner": true,
+      "honest_band_note": "(a) the public->private drop makes mu_pub_at_validity_bar CONSERVATIVE (true public mu_pub is higher -> validity MORE likely to bind, the favorable direction); (b) the E[T](lambda_hat) reach-DP shape and the 520.953 ceiling are imported unchanged; (c) validity binds at EVERY trigger corner [tight, central, worst-case] -> the launch-simplifying headline: land #71's single target is the validity bar 0.9780, and clearing it auto-clears the speed gate."
+    },
+    "descent_only": {
+      "rows": [
+        {
+          "corner": "tight",
+          "trigger": 512.519451958079,
+          "binding_gate": "validity",
+          "lambda_hat_speed": 0.9627449036837781,
+          "lambda_hat_build_target": 0.9779783323491393,
+          "speed_margin_at_validity_bar": 3.4158392269702063
+        },
+        {
+          "corner": "central",
+          "trigger": 512.7353207419002,
+          "binding_gate": "validity",
+          "lambda_hat_speed": 0.9637134973568919,
+          "lambda_hat_build_target": 0.9779783323491393,
+          "speed_margin_at_validity_bar": 3.1999704431490272
+        },
+        {
+          "corner": "worstcase",
+          "trigger": 513.5574577506176,
+          "binding_gate": "validity",
+          "lambda_hat_speed": 0.9673950658214243,
+          "lambda_hat_build_target": 0.9779783323491393,
+          "speed_margin_at_validity_bar": 2.3778334344316363
+        }
+      ],
+      "validity_binds_at_every_trigger_corner": true,
+      "honest_band_note": "(a) the public->private drop makes mu_pub_at_validity_bar CONSERVATIVE (true public mu_pub is higher -> validity MORE likely to bind, the favorable direction); (b) the E[T](lambda_hat) reach-DP shape and the 520.953 ceiling are imported unchanged; (c) validity binds at EVERY trigger corner [tight, central, worst-case] -> the launch-simplifying headline: land #71's single target is the validity bar 0.9780, and clearing it auto-clears the speed gate."
+    }
+  },
+  "forward_grid": {
+    "both_bugs": {
+      "rows": [
+        {
+          "lambda_hat": 0.3418647166361965,
+          "E_T": 4.048484687770039,
+          "mu_pub": 404.1231643730627,
+          "is_floor": true,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.5,
+          "E_T": 4.275875510035937,
+          "mu_pub": 426.8215085019382,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.6,
+          "E_T": 4.434896152428525,
+          "mu_pub": 442.6950834714726,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.7,
+          "E_T": 4.607216569845519,
+          "mu_pub": 459.89625322839726,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.8,
+          "E_T": 4.79425097076923,
+          "mu_pub": 478.566185259076,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.9,
+          "E_T": 4.997562637230457,
+          "mu_pub": 498.86092769751866,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.9779783,
+          "E_T": 5.16850019535406,
+          "mu_pub": 515.924059270622,
+          "is_floor": false,
+          "is_validity_bar": true,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.99,
+          "E_T": 5.195882835646434,
+          "mu_pub": 518.6574175755879,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 1.0,
+          "E_T": 5.21887717841078,
+          "mu_pub": 520.9527323111674,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": true
+        }
+      ],
+      "monotone_increasing": true
+    },
+    "descent_only": {
+      "rows": [
+        {
+          "lambda_hat": 0.3418647166361965,
+          "E_T": 3.9294296647453835,
+          "mu_pub": 404.32505865272867,
+          "is_floor": true,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.5,
+          "E_T": 4.149717675948561,
+          "mu_pub": 426.99195198061545,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.6,
+          "E_T": 4.303756276371505,
+          "mu_pub": 442.8420043965115,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.7,
+          "E_T": 4.470658186156475,
+          "mu_pub": 460.01564795819957,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.8,
+          "E_T": 4.651783815159143,
+          "mu_pub": 478.6528642512061,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.9,
+          "E_T": 4.848636404266925,
+          "mu_pub": 498.9083316924595,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.9779783,
+          "E_T": 5.0141126952103825,
+          "mu_pub": 515.935283883926,
+          "is_floor": false,
+          "is_validity_bar": true,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 0.99,
+          "E_T": 5.040617830648747,
+          "mu_pub": 518.662572919499,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": false
+        },
+        {
+          "lambda_hat": 1.0,
+          "E_T": 5.062874725337895,
+          "mu_pub": 520.9527323111674,
+          "is_floor": false,
+          "is_validity_bar": false,
+          "is_ceiling": true
+        }
+      ],
+      "monotone_increasing": true
+    }
+  },
+  "imported": {
+    "validity_bar": 0.9779783323491393,
+    "validity_bar_nominal": 0.978,
+    "lambda_floor": 0.3418647166361965,
+    "trigger_tight": 512.519451958079,
+    "trigger_central": 512.7353207419002,
+    "trigger_worstcase": 513.5574577506176,
+    "combined_sigma_central": 7.74252525162585,
+    "combined_sigma_worstcase": 8.242349062843092,
+    "lambda1_ceiling_mu": 520.9527323111674,
+    "z1_one_sided_p95": 1.6448536269514722,
+    "K_cal": 125.26795005202914,
+    "step": 1.2182,
+    "et_banked_213": {
+      "both_bugs": {
+        "et_floor": 4.048484687770039,
+        "et_ceiling": 5.21887717841078
+      },
+      "descent_only": {
+        "et_floor": 3.9294296647453835,
+        "et_ceiling": 5.062874725337895
+      }
+    }
+  },
+  "self_test": {
+    "binding_gate_self_test_passes": true,
+    "mu_pub_at_validity_bar": 515.9240665878908,
+    "checks": {
+      "a_mu_pub_lambda1_roundtrips_ceiling_520p953": true,
+      "b_mu_pub_monotone_increasing_in_lambda_hat": true,
+      "c_mu_pub_at_bar_between_floor_and_ceiling": true,
+      "d_binding_logic_and_inverse_roundtrips": true,
+      "e_reproduces_218_worstcase_trigger_513p557": true,
+      "f_nan_clean": true,
+      "provenance_reachdp_on_banked_spines_reproduces_213_ET": true
+    },
+    "evidence": {
+      "a_ceiling_roundtrip_errs": {
+        "both_bugs": 0.0,
+        "descent_only": 0.0
+      },
+      "b_monotonicity": {
+        "both_bugs": {
+          "monotone_increasing": true,
+          "strictly_increasing": true
+        },
+        "descent_only": {
+          "monotone_increasing": true,
+          "strictly_increasing": true
+        }
+      },
+      "c_sanity": {
+        "both_bugs": {
+          "mu_pub_floor": 404.1231643730627,
+          "mu_pub_bar": 515.9240665878908,
+          "ceiling": 520.9527323111674,
+          "in_open_interval": true
+        },
+        "descent_only": {
+          "mu_pub_floor": 404.32505865272867,
+          "mu_pub_bar": 515.9352911850492,
+          "ceiling": 520.9527323111674,
+          "in_open_interval": true
+        }
+      },
+      "d_binds_validity": true,
+      "d_lambda_hat_speed": 0.9674684694454245,
+      "d_build_target": 0.9779783323491393,
+      "d_inverse_roundtrip_err": 0.0,
+      "e_trigger_err": 0.0,
+      "provenance": {
+        "both_bugs": {
+          "et_floor_resid": 0.0,
+          "et_ceiling_resid": 0.0,
+          "ceil_ge_floor_all_depths": true
+        },
+        "descent_only": {
+          "et_floor_resid": 0.0,
+          "et_ceiling_resid": 0.0,
+          "ceil_ge_floor_all_depths": true
+        }
+      },
+      "n_scalars_checked": 30
+    }
+  },
+  "handoff": "fern #185 + land #71: at the validity bar lambda_hat=0.9780 the build shows public mu_pub = 515.924 (conservative -- public acceptance >= private, so true mu_pub is higher; P95-LCB 503.189 central / 502.367 worst-case) vs the 513.557 speed trigger, so the VALIDITY gate binds (speed margin +2.367 TPS; the acceptance that clears the speed trigger is lambda_hat_speed=0.9675, BELOW the bar) -- land #71's single launch target is 0.9780, and fern #185 reads the VALIDITY gate because clearing it AUTO-CLEARS the speed trigger at every grounded trigger corner [512.519, 512.735, 513.557].",
+  "scope": "LOCAL CPU-only analytic cross of ubel's #218 grounded speed trigger (513.557 worst-case / 512.735 central) against stark #208's validity bar (0.9780) via the banked #213 E[T](lambda_hat) reach-DP map (#175/#184), the lambda=1 endpoint anchored to the imported #204 ceiling 520.953. Computes mu_pub at the validity bar and resolves WHICH gate binds. The public->private drop is carried as a CONSERVATIVE (favorable) direction (true public mu_pub is higher). Takes NO official draws, authorizes none. The sigma's, bar 0.9780, trigger 513.557, ceiling 520.953 are imported unchanged. BASELINE stays 481.53; adds 0 TPS (PRIMARY = self-test); greedy/PPL untouched. NOT a launch. NOT open2.",
+  "public_evidence_used": [
+    "ubel #218 (0ug7vd7d, interleg_rho, MERGED) -- the grounded worst-case GO trigger 513.557 (central 512.735, tight 512.519), combined-sigma central 7.7425 / worst 8.2423, z1=1.64485, lambda=1 ceiling 520.953: the SPEED gate this leg crosses against validity.",
+    "ubel #204 (launch_sigma_unit_rebase, MERGED) -- the int4-spec lambda=1 ceiling mu_pub(1)=520.953 that the E[T] map's top endpoint is anchored to.",
+    "stark #208 (wi4gxxx8) -- the worst-case private go-bar `d198_coupled_bar`=0.9780 (the VALIDITY gate), imported via the multivertex-realizability banked constants.",
+    "stark #215 (deeptail_bar_budget) -- the deep-tail build-bar budget framing of the 0.9780 validity bar.",
+    "wirbel #213 (5o7zcj8s, kernel_budget_lambda) -- the banked per-regime floor/ceiling self-KV-recovery spines + the lambda in [0.342,1.0] linear-recovery blend; the reach-DP E[T](lambda_hat) SHAPE.",
+    "wirbel #199/#175/#184 -- the accepted-length reach-DP (et_via_reachdp) that maps a per-depth acceptance spine to E[T]; imported verbatim (reproduces #213's banked E[T] bit-exactly)."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis over EXISTING MERGED results (#218 trigger + #204 ceiling + #208 bar + #213 reach-DP spines); the reach-DP is imported as a pure function of a spine (no PR#86 shard, no GPU/vLLM/HF Job/submission/served-file change). BASELINE stays 481.53; adds 0 TPS. Greedy/PPL identity untouched. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.5878
+}
