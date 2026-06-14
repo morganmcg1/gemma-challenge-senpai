@@ -12,6 +12,12 @@ over all non-IGNORE positions, using the same feature/embedding alignment
 (`--feature_shift`, default from the checkpoint config) as serving. This is the
 single-step, teacher-forced proxy for vLLM draft acceptance (arch_notes S5/S6).
 
+With `--native`, also runs a free-running EAGLE chain simulation that measures
+`native_accept_per_step` — the serving-side accepted-tokens-per-round, where draft
+steps 2..K consume the draft's OWN rolled-forward hidden (not the real target
+feature). tf is the UPPER BOUND; native is what converts to TPS. `native_step1_top1`
+equals the tf top-1 by construction (a wiring self-check). See `evaluate_native`.
+
 Interpretation bands (PR #16): <0.50 underfit/broken, 0.50-0.70 expected,
 >=0.70 strong.
 
@@ -35,6 +41,9 @@ import torch.nn.functional as F
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from train_eagle3 import (  # noqa: E402
     HEAD_DIM,
+    HID,
+    IGNORE,
+    N_AUX,
     Eagle3DraftHead,
     build_rope,
     collate,
@@ -108,9 +117,18 @@ def evaluate_topk(head, records, shift, batch_tokens, device, dtype, rope_theta,
                     rec.update(entropy=[], entropy64=[], top1p=[], margin=[])
                 traces.append(rec)
                 continue
-            h = hidden[bi, shift:L, :]      # [n, H] — predictions for positions shift..L-1
-            ref = labels[bi, shift:L]       # [n]   == next_token_ids[shift:L]
+            h = hidden[bi, shift:L, :]      # [m, H] — predictions for positions shift..L-1
+            ref = labels[bi, shift:L]       # [m]   == next_token_ids[shift:L]
+            # Skip IGNORE positions so response-only-masked corpora (PR #34) score
+            # only the generated continuation; unmasked corpora are unaffected (all
+            # positions valid). Keeps top-1 == train_eagle3.evaluate's tf_acc.
+            valid = ref != IGNORE
+            h = h[valid]
+            ref = ref[valid]
             n = int(h.shape[0])
+            if n == 0:
+                traces.append({"seq": int(rec_idx), "n": 0, "hit_rank": []})
+                continue
             ranks = []
             ent, ent64, t1p, marg = [], [], [], []
             for c0 in range(0, n, chunk):
@@ -155,6 +173,124 @@ def evaluate_topk(head, records, shift, batch_tokens, device, dtype, rope_theta,
             "n": total, "traces": traces, "top_k": K, "conf_top_k": conf_top_k}
 
 
+def _draft_step(head, input_ids, h0, n, rope_theta, device, dtype):
+    """One draft-body forward over a length-n sequence with a PRECOMPUTED post-fc
+    h0 (bypasses `combine`/`fc`). Replicates `DraftBody.forward` exactly except the
+    h0 source, so real-prefix positions match the teacher-forced path bit-for-bit
+    while speculative positions can carry the draft's OWN rolled-forward hidden.
+    Returns the draft output hidden [n, H] (one decoder layer + final norm)."""
+    cos, sin = build_rope(n, HEAD_DIM, rope_theta, device, dtype)
+    causal = torch.tril(torch.ones(n, n, dtype=torch.bool, device=device))
+    bias = torch.zeros(1, 1, n, n, dtype=dtype, device=device)
+    bias.masked_fill_(~causal[None, None], float("-inf"))
+    embeds = head.model.embed_tokens(input_ids)
+    with torch.autocast("cuda", dtype=dtype):
+        mlp_out, res1 = head.model.layers[0](embeds, h0, cos, sin, bias)
+        out = head.model.norm(mlp_out + res1)
+    return out[0]  # [n, H]
+
+
+@torch.no_grad()
+def evaluate_native(head, records, shift, device, dtype, rope_theta,
+                    chain_k=8, max_starts=16):
+    """Free-running (native) EAGLE chain acceptance — the serving-side objective.
+
+    Teacher-forced eval feeds the REAL target feature at every position, so it is
+    an UPPER BOUND on what serving accepts. At serve time only the FIRST draft step
+    of each verification round sees a real target feature; steps 2..K consume the
+    draft's OWN output hidden (the post-fc residual fed forward) plus the draft's
+    OWN guessed token. That 'interface-fidelity gap' (advisor note on PR #34, from
+    PR #9's cross-finding that tf and native acceptance can anti-correlate) is what
+    this metric captures, and it is the quantity that converts to TPS.
+
+    For each sampled response start p (a valid verification-round start: every real
+    position has a real target feature) we draft a chain of up to `chain_k` tokens:
+
+        step 1: ( h0 = combine(fused[p-shift]) [REAL],   embed(x_p)      ) -> g_{p+1}, d_p
+        step k: ( h0 = d_{p+k-1}               [DRAFT-OWN], embed(g_{p+k-1}) ) -> g_{p+k}, d_{p+k-1}
+
+    and accept the leading run of g's that match the target greedy continuation
+    (`next_token_ids`). The draft attends over the full real prefix + the accepted
+    speculative tail each step (causal self-attention, re-run for simplicity).
+
+      native_accept_per_step = mean accepted run length over starts  (advisor's
+                               'accepted-tok/step'; tokens/target-forward = this + 1)
+      native_step1_top1      = fraction of starts whose step-1 draft is correct;
+                               this MUST equal the tf top-1 (step 1 uses real inputs)
+                               and is a built-in wiring self-check.
+
+    Returns per-source means too (mmlu_pro / gpqa / aime) so we can see where the
+    benchmark-matched corpus moves the *serving* number, not just the tf bound.
+    """
+    head.eval()
+    run_by_src = {}
+    step1_hit = step1_tot = 0
+    for rec in records:
+        ids_full = rec["input_ids"].to(torch.long)
+        L = int(ids_full.shape[0])
+        if L < 3:
+            continue
+        nxt = rec["next_token_ids"]
+        src = rec.get("source", "all")
+        scored = [a for a in range(L - 1) if int(nxt[a]) != IGNORE]
+        if not scored:
+            continue
+        # Real-prefix post-fc h0 for the whole sequence (matches collate's roll).
+        aux = rec["aux"].to(device, torch.float32)                  # [3, L, H]
+        fused = aux.permute(1, 0, 2).reshape(L, N_AUX * HID)         # [L, 7680]
+        rolled = torch.zeros_like(fused)
+        if shift > 0:
+            rolled[shift:] = fused[:L - shift]
+        else:
+            rolled = fused
+        with torch.autocast("cuda", dtype=dtype):
+            h0_real = head.model.combine(rolled[None].to(dtype))[0]  # [L, H]
+        ids_dev = ids_full.to(device)
+
+        if len(scored) > max_starts:
+            sel = torch.linspace(0, len(scored) - 1, max_starts).round().long().tolist()
+            starts = sorted(set(scored[i] for i in sel))
+        else:
+            starts = scored
+
+        for p in starts:
+            seq_ids = ids_dev[:p + 1].clone()
+            seq_h0 = h0_real[:p + 1].clone()
+            d_prev = _draft_step(head, seq_ids[None], seq_h0[None], p + 1,
+                                 rope_theta, device, dtype)[p]
+            with torch.autocast("cuda", dtype=dtype):
+                g = int(head.lm_head(d_prev[None]).float().argmax(-1).item())
+            step1_tot += 1
+            if g == int(ids_full[p + 1]):
+                step1_hit += 1
+            accepted = 0
+            for k in range(chain_k):
+                pos = p + 1 + k
+                if pos >= L or g != int(ids_full[pos]):
+                    break
+                accepted += 1
+                if pos + 1 >= L:
+                    break
+                # Roll forward: append accepted token (== target) with DRAFT-OWN h0.
+                seq_ids = torch.cat([seq_ids, ids_dev[pos:pos + 1]])
+                seq_h0 = torch.cat([seq_h0, d_prev[None]], dim=0)
+                d_prev = _draft_step(head, seq_ids[None], seq_h0[None], pos + 1,
+                                     rope_theta, device, dtype)[pos]
+                with torch.autocast("cuda", dtype=dtype):
+                    g = int(head.lm_head(d_prev[None]).float().argmax(-1).item())
+            run_by_src.setdefault(src, []).append(accepted)
+
+    head.train()
+    all_runs = [r for v in run_by_src.values() for r in v]
+    aps = sum(all_runs) / max(1, len(all_runs))
+    per_src = {s: sum(v) / max(1, len(v)) for s, v in run_by_src.items()}
+    per_src_n = {s: len(v) for s, v in run_by_src.items()}
+    return {"native_accept_per_step": aps,
+            "native_step1_top1": step1_hit / max(1, step1_tot),
+            "per_source": per_src, "per_source_n": per_src_n,
+            "n_starts": len(all_runs), "chain_k": chain_k}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--checkpoint", required=True,
@@ -165,6 +301,14 @@ def main():
                     help="weights file inside --checkpoint dir (falls back to last)")
     ap.add_argument("--top_k", "--top-k", dest="top_k", type=int, default=4,
                     help="record top-1..top-K acceptance + rescue_rate (tree width)")
+    ap.add_argument("--native", action="store_true",
+                    help="also run the free-running (native) chain-acceptance sim — "
+                         "the serving-side accept/step, complementing the tf bound")
+    ap.add_argument("--native_k", "--native-k", dest="native_k", type=int, default=8,
+                    help="native chain depth K (drafted tokens per verification round)")
+    ap.add_argument("--native_starts", "--native-starts", dest="native_starts",
+                    type=int, default=16,
+                    help="max sampled round-start positions per held-out sequence")
     ap.add_argument("--trace_out", "--trace-out", dest="trace_out", default=None,
                     help="write per-position hit-rank JSONL (one record/sequence) for "
                          "the spec-decode acceptance simulation (Step 3)")
@@ -238,6 +382,34 @@ def main():
     print(f"[eval] peak GPU memory = {peak_gb:.2f} GB", flush=True)
     print("=" * 60, flush=True)
 
+    # Per-source breakdown (PR #34): holdout records carry a "source" field
+    # (mmlu_pro / gpqa / aime). hit_rank==1 is a top-1 hit; 1<=rank<=K a top-K hit.
+    # Aggregating per source shows WHERE the benchmark-matched corpus moves
+    # acceptance, the comparison the PR asks for. Legacy corpora (no source) fall
+    # back to a single "all" bucket, so this is a no-op there.
+    src_metrics = {}
+    by_src = {}
+    for tr in res["traces"]:
+        src = records[tr["seq"]].get("source", "all")
+        d = by_src.setdefault(src, {"hit1": 0, "hitk": 0, "n": 0})
+        for r in tr["hit_rank"]:
+            if r == 1:
+                d["hit1"] += 1
+            if 1 <= r <= args.top_k:
+                d["hitk"] += 1
+        d["n"] += tr["n"]
+    if len(by_src) > 1 or "all" not in by_src:
+        for src in sorted(by_src):
+            d = by_src[src]
+            s1 = d["hit1"] / max(1, d["n"])
+            sk = d["hitk"] / max(1, d["n"])
+            print(f"[eval]   source {src:9s}: top1={s1:.4f} top{args.top_k}={sk:.4f} "
+                  f"(positions={d['n']})", flush=True)
+            src_metrics[f"eval/src_{src}_top1"] = s1
+            src_metrics[f"eval/src_{src}_top{args.top_k}"] = sk
+            src_metrics[f"eval/src_{src}_n"] = d["n"]
+        print("=" * 60, flush=True)
+
     if args.trace_out:
         os.makedirs(os.path.dirname(args.trace_out) or ".", exist_ok=True)
         with open(args.trace_out, "w") as tf:
@@ -253,12 +425,44 @@ def main():
         print(f"[eval] wrote per-position trace -> {args.trace_out} "
               f"({len(res['traces'])} sequences)", flush=True)
 
+    # Free-running (native) chain acceptance (PR #34 advisor ask): the serving-side
+    # accept/step. tf is the teacher-forced UPPER BOUND; native is what converts to
+    # TPS. native_step1_top1 must match tf top-1 (a wiring self-check).
+    native_metrics = {}
+    if args.native:
+        nat = evaluate_native(head, records, shift, device, dtype, rope_theta,
+                              chain_k=args.native_k, max_starts=args.native_starts)
+        gap = nat["native_step1_top1"] - acc
+        print(f"[eval] native accept/step (K={nat['chain_k']}) = "
+              f"{nat['native_accept_per_step']:.4f}  "
+              f"(tokens/target-forward = {nat['native_accept_per_step'] + 1:.4f}; "
+              f"starts={nat['n_starts']})", flush=True)
+        print(f"[eval] native step-1 top1 = {nat['native_step1_top1']:.4f}  "
+              f"(tf top1 = {acc:.4f}; self-check |Δ|={abs(gap):.4f} should be ~0)",
+              flush=True)
+        for s in sorted(nat["per_source"]):
+            print(f"[eval]   native source {s:9s}: accept/step="
+                  f"{nat['per_source'][s]:.4f} (starts={nat['per_source_n'][s]})",
+                  flush=True)
+        print("=" * 60, flush=True)
+        native_metrics = {
+            "eval/native_accept_per_step": nat["native_accept_per_step"],
+            "eval/native_tokens_per_forward": nat["native_accept_per_step"] + 1,
+            "eval/native_step1_top1": nat["native_step1_top1"],
+            "eval/native_step1_vs_tf_gap": gap,
+            "eval/native_chain_k": nat["chain_k"], "eval/native_n_starts": nat["n_starts"]}
+        for s, v in nat["per_source"].items():
+            native_metrics[f"eval/native_src_{s}_accept_per_step"] = v
+            native_metrics[f"eval/native_src_{s}_n"] = nat["per_source_n"][s]
+
     out = {"eval/tf_acceptance_rate": acc, "eval/top1_acc": acc,
            "eval/rescue_rate": rescue, "eval/loss": res["loss"],
            "eval/n": res["n"], "eval/feature_shift": shift, "eval/band": band(acc),
            "eval/peak_gpu_gb": peak_gb}
     for k in range(2, args.top_k + 1):
         out[f"eval/top{k}_acc"] = accs[k]
+    out.update(src_metrics)
+    out.update(native_metrics)
     if args.wandb_name:
         try:
             import wandb
