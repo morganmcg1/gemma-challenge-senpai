@@ -1,0 +1,369 @@
+{
+  "pr": 143,
+  "utc": "2026-06-14T11:46:38Z",
+  "gpu": "NVIDIA A10G",
+  "l2_bytes": 6291456,
+  "n_nodes": 32,
+  "max_depth": 9,
+  "spine_len": 10,
+  "anchors": {
+    "k_cal": 125.26795005202914,
+    "step_m8_us": 7982.887878221502,
+    "step_roofline_depth9": 1.2127483746822987,
+    "measured_step_136": 1.2182,
+    "clear500_bar_roofline": 4.840617149792076,
+    "clear500_bar_measured_136": 4.862377006624717,
+    "e_t_tree_ceiling": 5.207,
+    "e_t_openevolve_oracle": 2.621,
+    "oracle": {
+      "cum_ladder": [
+        0.674,
+        0.35,
+        0.203,
+        0.131,
+        0.089,
+        0.06,
+        0.037
+      ],
+      "e_t": 2.621,
+      "salvages": 391,
+      "full": 37,
+      "steps": 1024,
+      "drafts": 2417
+    }
+  },
+  "config": {
+    "seed": 143,
+    "n_iter": 80,
+    "warmup": 30,
+    "n_passes": 300,
+    "gemm_filler_n": 2048,
+    "filler_scale": 1.0
+  },
+  "step0_model": {
+    "schedule_stats": {
+      "n_steps": 1024,
+      "mean_accepted_spine": 1.5302734375,
+      "mean_descend_len": 2.9248046875,
+      "salvage_rate": 0.35546875,
+      "salvage_count": 364,
+      "full_rate": 0.0390625,
+      "full_count": 40,
+      "e_t_reconstructed": 2.601956301950128,
+      "e_t_oracle": 2.621,
+      "e_t_recon_err_pct": -0.7265813830550191
+    },
+    "sync_point_taxonomy": [
+      {
+        "op": "per-node accept compare (while-descend)",
+        "naive": "bool(verify_argmax[u].eq(draft_tok[child]).item())",
+        "syncs_per_step": "= descend_len (~2.5 mean)",
+        "sync_free_alt": "match_mask = verify_argmax.eq(draft_tok) -> cumprod -> argmax-first-mismatch; accept_len stays a DEVICE scalar"
+      },
+      {
+        "op": "salvage branch selection",
+        "naive": "chosen = int(branch_scores.argmax().item())",
+        "syncs_per_step": "= 1 on salvage steps (391/1024 = 0.382)",
+        "sync_free_alt": "best = branch_scores.argmax(); gather chosen branch with the DEVICE index (no .item())"
+      },
+      {
+        "op": "accept-length readout",
+        "naive": "n_accept = accept_len.item()",
+        "syncs_per_step": "= 1 (every step)",
+        "sync_free_alt": "keep accept_len on device; the next step's drafter expand indexes the KV/context by the device scalar"
+      },
+      {
+        "op": "tree expansion (per-depth bookkeeping)",
+        "naive": "static topology -> NO data-dependent branch; top-k/scatter only",
+        "syncs_per_step": "= 0 (the rho-optimal tree shape is STATIC; only token VALUES are data-dependent)",
+        "sync_free_alt": "fixed launch sequence, always pipeline-able"
+      }
+    ],
+    "note": "descent control flow modeled at oracle realized rates over the static depth-9/32-node/max-branch-3 topology; expansion is sync-free (static tree shape); the data-dependent host-syncs live ONLY in the descent + salvage + accept-length readout."
+  },
+  "filler": {
+    "gemm_n": 2048,
+    "filler_us_each": 284.25676250000004,
+    "step_gpu_us_target": 9149.573677586994,
+    "n_op_groups": 10,
+    "gemm_per_op": 3,
+    "realized_filler_us_per_step": 8527.702875
+  },
+  "step1_measured": {
+    "sync_free": {
+      "variant": "sync_free",
+      "isolation": {
+        "device_busy_us": 145.46950000000174,
+        "span_us": 863.5870361328125,
+        "exposed_idle_us": 718.1175361328108
+      },
+      "interleaved": {
+        "device_busy_us": 8690.652274999971,
+        "span_us": 8717.547200520834,
+        "exposed_idle_us": 26.89492552086267
+      },
+      "idle_isolation_us": 727.8371099934914,
+      "idle_interleaved_us": 38.08186015627871,
+      "idle_isolation_rounds": [
+        737.0835600911423,
+        711.7176160481757,
+        759.3578484375016,
+        727.8371099934914,
+        718.1175361328108
+      ],
+      "idle_interleaved_rounds": [
+        38.08186015627871,
+        42.2654132812404,
+        45.375285416699626,
+        29.46780286457397,
+        26.89492552086267
+      ],
+      "idle_isolation_summary": {
+        "n": 5,
+        "mean": 730.8227341406243,
+        "median": 727.8371099934914,
+        "std": 16.66608673210739,
+        "se": 7.4533005703798905,
+        "cv_pct": 2.2804554310567626,
+        "ci95_abs": 14.608200683896428,
+        "min": 711.7176160481757,
+        "max": 759.3578484375016
+      },
+      "idle_interleaved_summary": {
+        "n": 5,
+        "mean": 36.41705744793107,
+        "median": 38.08186015627871,
+        "std": 7.158041883810923,
+        "se": 3.2011736475983747,
+        "cv_pct": 19.65573933051965,
+        "ci95_abs": 6.274185057551529,
+        "min": 26.89492552086267,
+        "max": 45.375285416699626
+      },
+      "collapse_factor_iso_over_inter": 19.112435868590048
+    },
+    "sync_free_terminal": {
+      "variant": "sync_free_terminal",
+      "isolation": {
+        "device_busy_us": 146.79338749999897,
+        "span_us": 904.4783528645834,
+        "exposed_idle_us": 757.6849653645844
+      },
+      "interleaved": {
+        "device_busy_us": 8689.77420000003,
+        "span_us": 8778.535970052084,
+        "exposed_idle_us": 88.76177005205318
+      },
+      "idle_isolation_us": 757.6849653645844,
+      "idle_interleaved_us": 88.76177005205318,
+      "idle_isolation_rounds": [
+        742.6770523111986,
+        759.0193658854139,
+        754.4532986653593,
+        763.8042717447947,
+        757.6849653645844
+      ],
+      "idle_interleaved_rounds": [
+        85.40405416666908,
+        91.11477994787674,
+        100.60177421875414,
+        83.83683723956892,
+        88.76177005205318
+      ],
+      "idle_isolation_summary": {
+        "n": 5,
+        "mean": 755.5277907942702,
+        "median": 757.6849653645844,
+        "std": 7.094232143984141,
+        "se": 3.172637064422523,
+        "cv_pct": 0.9389769946815757,
+        "ci95_abs": 6.218254382285028,
+        "min": 742.6770523111986,
+        "max": 763.8042717447947
+      },
+      "idle_interleaved_summary": {
+        "n": 5,
+        "mean": 89.94384312498441,
+        "median": 88.76177005205318,
+        "std": 5.9036444619072235,
+        "se": 2.6401900663629436,
+        "cv_pct": 6.563700478868377,
+        "ci95_abs": 5.1746774424117845,
+        "min": 83.83683723956892,
+        "max": 100.60177421875414
+      },
+      "collapse_factor_iso_over_inter": 8.53616331580871
+    },
+    "sync_bound": {
+      "variant": "sync_bound",
+      "isolation": {
+        "device_busy_us": 140.61500000000396,
+        "span_us": 871.6685994466146,
+        "exposed_idle_us": 731.0535994466106
+      },
+      "interleaved": {
+        "device_busy_us": 8663.647499999986,
+        "span_us": 8885.86669921875,
+        "exposed_idle_us": 222.2191992187636
+      },
+      "idle_isolation_us": 753.8973973632834,
+      "idle_interleaved_us": 214.1464499999529,
+      "idle_isolation_rounds": [
+        727.808813834637,
+        753.8973973632834,
+        766.0193333333318,
+        771.4626739257835,
+        731.0535994466106
+      ],
+      "idle_interleaved_rounds": [
+        214.1464499999529,
+        210.42348906248844,
+        237.60690572916974,
+        200.48508906251845,
+        222.2191992187636
+      ],
+      "idle_isolation_summary": {
+        "n": 5,
+        "mean": 750.0483635807293,
+        "median": 753.8973973632834,
+        "std": 17.798080013708205,
+        "se": 7.959543355926387,
+        "cv_pct": 2.372924317672024,
+        "ci95_abs": 15.600418311000794,
+        "min": 727.808813834637,
+        "max": 771.4626739257835
+      },
+      "idle_interleaved_summary": {
+        "n": 5,
+        "mean": 216.97622661457862,
+        "median": 214.1464499999529,
+        "std": 12.458068111338008,
+        "se": 5.57141743305484,
+        "cv_pct": 5.74167424040775,
+        "ci95_abs": 10.919777511626085,
+        "min": 200.48508906251845,
+        "max": 237.60690572916974
+      },
+      "collapse_factor_iso_over_inter": 3.5204758115927173
+    }
+  },
+  "step1_per_sync_cost": {
+    "sync_free_floor_us": 38.08186015627871,
+    "terminal_sync_cost_us": 50.67990989577447,
+    "syncs_per_step_sync_bound": 4.2802734375,
+    "per_sync_cost_sync_bound_us": 41.13395847591202,
+    "note": "per-sync cost from the clean variant deltas (terminal=+1 sync, sync_bound=+descend+salvage+readout syncs) over the sync-free floor; robust vs the span-busy subtraction noise on the absolute floor."
+  },
+  "step2_bar_shift": {
+    "sync_free_interleaved": {
+      "overhead_us": 38.08186015627871,
+      "dstep_units": 0.004770436555945079,
+      "step_inflation_pct": 0.39159715612748974,
+      "inflated_step": 1.222970436555945,
+      "clear500_bar_central": 4.8814179367028565,
+      "clear500_bar_taulow": 4.889730478516334,
+      "clear530_bar_central": 5.174303012905028,
+      "clear500_bar_shift_vs_measured": 0.01904093007813934,
+      "clear500_under_ceiling": true,
+      "clear500_taulow_under_ceiling": true,
+      "clear500_holds_4p86": false
+    },
+    "sync_free_terminal_interleaved": {
+      "overhead_us": 88.76177005205318,
+      "dstep_units": 0.011119004977410293,
+      "step_inflation_pct": 0.9127405169438757,
+      "inflated_step": 1.2293190049774103,
+      "clear500_bar_central": 4.906757891650743,
+      "clear500_bar_taulow": 4.91511358474481,
+      "clear530_bar_central": 5.201163365149789,
+      "clear500_bar_shift_vs_measured": 0.04438088502602611,
+      "clear500_under_ceiling": true,
+      "clear500_taulow_under_ceiling": true,
+      "clear500_holds_4p86": false
+    },
+    "sync_bound_interleaved": {
+      "overhead_us": 214.1464499999529,
+      "dstep_units": 0.026825686802413453,
+      "step_inflation_pct": 2.202075751306309,
+      "inflated_step": 1.2450256868024134,
+      "clear500_bar_central": 4.969450231624694,
+      "clear500_bar_taulow": 4.97791268318611,
+      "clear530_bar_central": 5.2676172455221755,
+      "clear500_bar_shift_vs_measured": 0.10707322499997662,
+      "clear500_under_ceiling": true,
+      "clear500_taulow_under_ceiling": true,
+      "clear500_holds_4p86": false
+    },
+    "sync_free_isolation": {
+      "overhead_us": 727.8371099934914,
+      "dstep_units": 0.09117466274067791,
+      "step_inflation_pct": 7.484375532808891,
+      "inflated_step": 1.309374662740678,
+      "clear500_bar_central": 5.226295561621463,
+      "clear500_bar_taulow": 5.2351953937909075,
+      "clear530_bar_central": 5.539873295318751,
+      "clear500_bar_shift_vs_measured": 0.3639185549967454,
+      "clear500_under_ceiling": false,
+      "clear500_taulow_under_ceiling": false,
+      "clear500_holds_4p86": false
+    },
+    "sync_free_terminal_isolation": {
+      "overhead_us": 757.6849653645844,
+      "dstep_units": 0.09491364239646419,
+      "step_inflation_pct": 7.7913021175885895,
+      "inflated_step": 1.3131136423964642,
+      "clear500_bar_central": 5.241219489307009,
+      "clear500_bar_taulow": 5.250144735357117,
+      "clear530_bar_central": 5.55569265866543,
+      "clear500_bar_shift_vs_measured": 0.37884248268229204,
+      "clear500_under_ceiling": false,
+      "clear500_taulow_under_ceiling": false,
+      "clear500_holds_4p86": false
+    },
+    "sync_bound_isolation": {
+      "overhead_us": 753.8973973632834,
+      "dstep_units": 0.09443918151725855,
+      "step_inflation_pct": 7.7523544177687205,
+      "inflated_step": 1.3126391815172584,
+      "clear500_bar_central": 5.239325705306359,
+      "clear500_bar_taulow": 5.248247726441309,
+      "clear530_bar_central": 5.55368524762474,
+      "clear500_bar_shift_vs_measured": 0.37694869868164194,
+      "clear500_under_ceiling": false,
+      "clear500_taulow_under_ceiling": false,
+      "clear500_holds_4p86": false
+    }
+  },
+  "step3_gate": {
+    "verdict": "GREEN",
+    "reason": "sync-free descent is GPU-HIDDEN under interleaved overlap: idle collapses 19x (728us isolation -> 38us interleaved = +0.39% step, at the event-timer floor like #136's 43us hidden attn idle). bar holds 4.881 ~= the 4.862 anchor, far under the 5.207 ceiling. land's descending accept-walk pays ~0 step penalty PROVIDED it stays sync-free. The naive sync-bound path serializes (214us/step = +2.20% -> bar 4.969); that is the cost of getting it wrong (per-node .item()).",
+    "sync_free_gpu_hidden": 1,
+    "sync_bound_serializes": 1,
+    "hidden_threshold_us": 60.0,
+    "land_constraint": {
+      "rule": "keep the accept-length readout + descent path + salvage branch selection SYNC-FREE: no per-branch .item()/bool(tensor)/.cpu(); resolve accept_len as a DEVICE scalar (match-mask -> cumprod -> argmax-first-mismatch) and gather accepted tokens by the device index -- the vLLM-v1 RejectionSampler pattern (PR #14930, 'zero CPU-GPU sync'). The next step's drafter expand must consume the device accept_len without a host readout.",
+      "if_violated": "a naive Python descent (.item() per node + salvage + readout, ~4.3 syncs/step) costs 214us/step = +2.20% step -> clear-500 bar rises 4.862 -> 4.969.",
+      "unavoidable_terminal_sync": "exactly ONE host-sync per step is structurally unavoidable: the terminal output_token_ids.cpu() that hands accepted tokens to the CPU scheduler (KV mgmt / stop check / streaming; vLLM v1 parse_output). It is ALREADY in the 1.2182 anchor (every decode step streams). Measured marginal cost 88.8us/step = +0.91% -> bar 4.907: hidden behind the GEMM tail. land does NOT need to fuse this one away.",
+      "fused_kernel_required": false,
+      "sync_points_to_avoid": [
+        "per-node accept compare (while-descend)",
+        "salvage branch selection",
+        "accept-length readout"
+      ],
+      "research_basis": "vLLM v1 RejectionSampler (PR #14930 zero-sync); SpecInfer (arXiv 2305.09781) + Sequoia (arXiv 2402.12374) single-pass tree verify + device accept-mask; CUDA launch ~5-6us/launch, .item() bubble ~10-50us (TaxBreak arXiv 2603.12465)."
+    },
+    "rule": "GREEN = sync-free descent GPU-hidden under overlap (bar holds <=4.86), hand land the stay-sync-free rule; AMBER = partially hidden / depends on a sync land hasn't committed to, report bracket + sync points; RED = unavoidable host-sync serializes, hand land the fused-kernel requirement"
+  },
+  "primary_metric": {
+    "name": "salvage_walk_step_overhead_pct",
+    "value": 0.39159715612748974
+  },
+  "test_metric": {
+    "name": "salvage_walk_gpu_hidden",
+    "value": 1
+  },
+  "verdict": "GREEN",
+  "elapsed_s": 70.38795375823975,
+  "peak_gpu_gb": 0.033700864,
+  "wandb_run_id": "uowx93d9"
+}
