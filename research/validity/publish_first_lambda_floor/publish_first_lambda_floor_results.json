@@ -1,0 +1,213 @@
+{
+  "pr": 228,
+  "metric_primary": "publish_first_lambda_floor_self_test_passes",
+  "metric_test": "lambda_floor_publish_first",
+  "publish_first_lambda_floor_self_test_passes": true,
+  "lambda_floor_publish_first": 0.9138270633254324,
+  "lambda_gap_pe_vs_p95": 0.06418423404768836,
+  "built_lambda_for_publish_first_go": 0.9138270633254324,
+  "lambda_floor_conservative_ceiling": 0.9778275737545392,
+  "lambda_star_central_private_191": 0.9138270633254315,
+  "p95_private_bar": 0.9780112973731208,
+  "lambda_floor_central_xcheck_191_resid": 8.881784197001252e-16,
+  "import_banked": {
+    "f_priv": 0.969106920637722,
+    "ceiling_lcb": 520.9527323111674,
+    "sigma_draw": 7.390974474817942,
+    "mu_safe_fresh": 512.15707117161,
+    "public_central_lambda1": 535.4330096522525,
+    "public_lcb_lambda1": 520.9527323111674,
+    "private_central_lambda1": 518.891835191882,
+    "private_lcb_lambda1": 504.85889820788293,
+    "lambda_star_central_private_191": 0.9138270633254315,
+    "lambda_star_lcb_private_191": 0.9780112973731208,
+    "public_bar_both_bugs_191": 0.9052283680740145,
+    "f_priv_grounded": 0.9570535584491102,
+    "mu_ceiling_needed_224": 535.1394043208535,
+    "private_500_reachable_at_ceiling_p95_224": false,
+    "ceiling_consistent_217_vs_191": 0.0
+  },
+  "composition": {
+    "k_cal": 125.26795005202914,
+    "step_int4": 1.2182,
+    "tau_central": 1.0,
+    "tau_cons": 0.9924318649123313,
+    "topology": "both_bugs",
+    "E_T_lambda1": 5.206954309441966
+  },
+  "private_mean_vs_lambda": {
+    "topology": "both_bugs",
+    "rows": [
+      {
+        "lambda": 0.8572,
+        "E_T": 4.90011435696957,
+        "private_mean_central": 488.3141238108012,
+        "private_mean_central_clears_500": false,
+        "private_mean_conservative": 475.1081319969201,
+        "private_mean_conservative_clears_500": false
+      },
+      {
+        "lambda": 0.95,
+        "E_T": 5.095271391557172,
+        "private_mean_central": 507.76222836669075,
+        "private_mean_central_clears_500": true,
+        "private_mean_conservative": 494.03028103148193,
+        "private_mean_conservative_clears_500": false
+      },
+      {
+        "lambda": 0.9780112973731208,
+        "E_T": 5.157252538154996,
+        "private_mean_central": 513.9388738669445,
+        "private_mean_central_clears_500": true,
+        "private_mean_conservative": 500.0398850190369,
+        "private_mean_conservative_clears_500": true
+      },
+      {
+        "lambda": 0.997,
+        "E_T": 5.200118215281013,
+        "private_mean_central": 518.2105936764171,
+        "private_mean_central_clears_500": true,
+        "private_mean_conservative": 504.19608022235053,
+        "private_mean_conservative_clears_500": true
+      },
+      {
+        "lambda": 1.0,
+        "E_T": 5.206954309441966,
+        "private_mean_central": 518.8918351918821,
+        "private_mean_central_clears_500": true,
+        "private_mean_conservative": 504.858898207883,
+        "private_mean_conservative_clears_500": true
+      }
+    ],
+    "anchor_central_lambda1": 518.8918351918821,
+    "anchor_conservative_lambda1": 504.858898207883,
+    "anchor_central_roundtrips_191": 1.1368683772161603e-13,
+    "anchor_conservative_roundtrips_191": 5.684341886080802e-14
+  },
+  "lambda_floor": {
+    "lambda_floor_publish_first": 0.9138270633254324,
+    "lambda_gap_pe_vs_p95": 0.06418423404768836,
+    "built_lambda_for_publish_first_go": 0.9138270633254324,
+    "lambda_floor_central_xcheck_191_resid": 8.881784197001252e-16,
+    "lambda_star_central_private_191": 0.9138270633254315,
+    "lambda_floor_conservative_ceiling": 0.9778275737545392,
+    "lambda_gap_conservative_vs_p95": 0.00018372361858154385,
+    "p95_private_bar": 0.9780112973731208,
+    "public_bar": 0.9052283680740145
+  },
+  "gate_regimes": {
+    "gate_regime_vs_lambda": [
+      {
+        "lambda": 0.8572,
+        "private_mean_central": 488.3141238108012,
+        "regime": "publish_first_no_go"
+      },
+      {
+        "lambda": 0.9138270633254324,
+        "private_mean_central": 500.0000000000001,
+        "regime": "publish_first_go_p95_hold"
+      },
+      {
+        "lambda": 0.95,
+        "private_mean_central": 507.76222836669075,
+        "regime": "publish_first_go_p95_hold"
+      },
+      {
+        "lambda": 0.9780112973731208,
+        "private_mean_central": 513.9388738669445,
+        "regime": "both_clear"
+      },
+      {
+        "lambda": 0.997,
+        "private_mean_central": 518.2105936764171,
+        "regime": "both_clear"
+      },
+      {
+        "lambda": 1.0,
+        "private_mean_central": 518.8918351918821,
+        "regime": "both_clear"
+      }
+    ],
+    "regime_defs": {
+      "both_clear": "lambda >= 0.9780 -> publish-first GO AND P95-private valid",
+      "publish_first_go_p95_hold": "0.9138 <= lambda < 0.9780 -> publish-first GO (mean>=500), P95-private HOLD (the single-draw risk the human accepted in #124)",
+      "publish_first_no_go": "lambda < 0.9138 -> publish-first NO-GO (mean<500)"
+    },
+    "built_lambda_for_publish_first_go": 0.9138270633254324
+  },
+  "sensitivity": {
+    "f_priv_assumed": 0.969106920637722,
+    "f_priv_grounded_224": 0.9570535584491102,
+    "lambda_floor_at_f_priv_assumed": 0.9138270633254324,
+    "lambda_floor_at_f_priv_grounded": 0.9432567135093388,
+    "lambda_floor_at_f_priv_one": 0.8383898298915815,
+    "dlambda_floor_df_priv": -2.4414877846001826,
+    "floor_rises_under_grounding": true,
+    "floor_drops_at_fpriv_one": true,
+    "central_mean_at_lambda1_assumed": 518.8918351918821,
+    "central_mean_at_lambda1_grounded": 512.438067198805,
+    "central_clears_at_lambda1_grounded": true,
+    "conservative_mean_at_lambda1_assumed": 504.858898207883,
+    "conservative_mean_at_lambda1_grounded": 498.57966624218955,
+    "conservative_clears_at_lambda1_grounded": false,
+    "note": "f_priv=0.969107 is #217's tree-only multiplier; #224 GROUNDED it to 0.957054 from the one hard #52 paired draw (the assumed value is OPTIMISTIC by ~1.2 pts). dlambda_floor/df_priv < 0: a LOWER f_priv RAISES the publish-first floor. CENTRAL reading: even at the grounded f_priv the publish-first MEAN still clears at lambda=1 (512.44 >= 500), the floor just rises. CONSERVATIVE-ceiling reading: at the grounded f_priv even lambda=1 MISSES (520.953*0.957054 = 498.58 < 500) -- exactly #224's private_mean_at_ceiling finding, which is why the conservative reading is the wrong gate for #124's point-estimate launch."
+  },
+  "convention_reconciliation": {
+    "central_reading": {
+      "name": "publish_first_point_estimate (HEADLINE)",
+      "public_number": "central 535.433 (#191 public_central_lambda1)",
+      "private_mean_lambda1": 518.8918351918821,
+      "lambda_floor": 0.9138270633254324,
+      "gap_to_p95": 0.06418423404768836,
+      "equals_191_central_bar_resid": 8.881784197001252e-16,
+      "why": "PUBLISH-FIRST (#124) = launch on the POINT estimate, accept the draw risk. The point estimate is the CENTRAL public number 535.433, so private_mean = 535.433*f_priv = 518.89 at lambda=1, crossing 500 at 0.9138 = #191's lambda_star_central_private. The 0.9780 P95 bar is the SAME #191 composition read at the public LCB; the 0.064 gap between them is the public-sampling confidence haircut = the accepted draw risk."
+    },
+    "conservative_ceiling_reading": {
+      "name": "PR round-trip note (504.86) -- reconciliation row, NOT the gate",
+      "public_number": "LCB ceiling 520.953 (#204/#217, P95-conservative)",
+      "private_mean_lambda1": 504.858898207883,
+      "lambda_floor": 0.9778275737545392,
+      "gap_to_p95": 0.00018372361858154385,
+      "why": "520.953*0.969107 = 504.86 is numerically #191's private_lcb_lambda1 (the public-LCB-discounted private projection). Using it as the 'mean' puts the floor (0.9778) on top of the 0.9780 P95 bar -- a near-tautology, gap ~0.0002. It also uses a STRICTER public input (the P95-low ceiling) than the point-estimate gate the human chose, so it is the wrong reading for #124. Carried + self-tested for completeness."
+    },
+    "verdict": "The publish-first POINT-estimate floor the human's #124 gate requires is the CENTRAL reading: lambda_floor_publish_first = 0.913827 (= #191 lambda_star_central_private), gap 0.0642 below the 0.9780 P95 both-bugs bar. The PR's 504.86 round-trip note is the conservative-ceiling projection (floor ~0.9778), which collides with the P95 bar and is stricter than the chosen gate; it is reported as a reconciliation row, not the deliverable."
+  },
+  "self_test": {
+    "publish_first_lambda_floor_self_test_passes": true,
+    "checks": {
+      "a_central_anchor_roundtrips_191_518": true,
+      "a_conservative_note_504_clears_500": true,
+      "b_private_mean_monotone_increasing": true,
+      "c_floor_roundtrips_500": true,
+      "d_floor_below_p95_bar": true,
+      "e_sensitivity_sane": true,
+      "f_central_floor_equals_191_bar": true,
+      "g_nan_clean": true
+    },
+    "evidence": {
+      "a_central_resid": 1.1368683772161603e-13,
+      "a_conservative_anchor": 504.858898207883,
+      "b_inc_central": true,
+      "b_inc_conservative": true,
+      "c_central_resid": 1.1368683772161603e-13,
+      "c_conservative_resid": 1.1368683772161603e-13,
+      "d_gap_central": 0.06418423404768836,
+      "e_dlambda_df_priv": -2.4414877846001826,
+      "f_xcheck_191_resid": 8.881784197001252e-16
+    },
+    "n_checks": 8
+  },
+  "handoff": "fern #185 + land #71 + Issue #124: the publish-first POINT-estimate gate (the human's chosen #124 launch) clears once the BUILT lambda >= 0.913827 (private MEAN reaches 500, = #191's lambda_star_central_private), which is 0.0642 below the 0.9780 P95 both-bugs bar -- so land #71's build target for the human's gate is 0.9138; the band [0.9138, 0.9780) is publish-first GO / P95-private HOLD (the accepted single-draw risk). NOTE the PR's round-trip note 520.953*0.969107=504.86 is the conservative public-LCB-ceiling projection (floor ~0.9778, collides with the P95 bar); the point-estimate gate uses the CENTRAL public number 535.433 -> 518.89 -> floor 0.9138. Under #224's grounded f_priv=0.957 the central mean still clears at lambda=1 (512.44>=500); only the conservative reading misses.",
+  "scope": "LOCAL CPU-only analytic inversion of the banked private-mean curve to the publish-first lambda-floor. Takes NO official draws, authorizes none. BASELINE stays 481.53; adds 0 TPS; greedy/PPL untouched. Imports #224/#217/#204/#191 + the #183/#175/#184 reach-DP VERBATIM; does NOT re-derive E[T](lambda), K_cal, step, tau, f_priv, the ceiling, or the 0.9780 bar. The POINT-estimate companion to #224's P95 finding; the P95-private bar STAYS 0.9780 (both reported). Directly serves Issue #124's publish-first gate + fern #185 + land #71. NOT a launch.",
+  "public_evidence_used": [
+    "kanna #224 (private_bar_reachability, MERGED `1081oc84`): mu_ceiling_needed=535.139, private_500_reachable_at_physical_ceiling=0, grounded f_priv=0.957054 -- the P95 finding this leg gives the POINT-estimate companion to.",
+    "kanna #217 (trigger_reconcile, MERGED `vgovdrjc`): f_priv=0.969107, lambda=1 ceiling 520.953 (public LCB), sigma_draw=7.391, mu_safe_fresh=512.157.",
+    "stark #191 (private_build_bar, MERGED): both-bugs public_central_lambda1=535.433, public_lcb_lambda1=520.953, lambda_star_central_private=0.9138 (the headline floor this leg re-derives independently), lambda_star_lcb_private=0.9780 (the P95 bar).",
+    "launch composition: K_cal=125.268 (#148/#169), step_int4=1.2182 (#168), tau in [0.9924,1.0] (#181), E[T](lambda) reach-DP (#175/#184 via the #183 lambda-acceptance card).",
+    "Issue #124 (publish-first green-light): launch on the POINT estimate, accept the draw risk."
+  ],
+  "method": "LOCAL CPU-only analytic inversion over EXISTING MERGED results + the live #183 reach-DP card; no GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "peak_mem_mib": 28.671875,
+  "elapsed_s": 0.3532
+}
