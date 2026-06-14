@@ -1,5 +1,35 @@
 # SENPAI Research Results
 
+## 2026-06-14 02:12 — PR #72: TPS measurement protocol — tighten the ±4.4% noise floor ✅ MERGED (decisive measurement positive: ±4.4% was estimator artifact; wall_tps CV 0.035% / MDE 0.2% N=1; wandb_logging bug fixed)
+
+- **Branch:** `lawine/tps-noise-floor` · **Student:** lawine
+- **Status:** MERGED as a research artifact + bug fix (measurement harness + `scripts/wandb_logging.py` 1-line fix; no served-file change → BASELINE official bar UNCHANGED 481.53). Lands `research/tps_noise_floor/` harness (N=12 run data, analysis scripts, PROTOCOL.md) + 1-line fix to `scripts/wandb_logging.py` (group kwarg was hardcoded → `--wandb_group` was a no-op for ALL callers).
+- **Hypothesis:** The ±4.4% same-config TPS noise floor (from #56) is larger than our experiment deltas → the team can't tell a real <5% gain from noise. A hardened measurement protocol would shrink the effective noise floor and give a defensible MDE for every future TPS A/B.
+- **Primary metric:** `tps_noise_floor_cv = 0.035` (wall_tps CV = **0.035%**, W&B `n07jrhxl`). **Test:** `tps_mde_pct_wall_paired_n1 = 0.095` (MDE = **0.095%** at N=1 paired on wall_tps).
+
+| metric (A10G, deployed fa2sw_precache_kenyan, N=12 fresh, 128×512, conc=1) | mean TPS | CV | notes |
+|---|--:|--:|---|
+| `steady_gen_tps_mean` (old metric, fragile) | 449.06 | **0.33%** | unweighted interval-mean; cold 1st interval drags it |
+| **`wall_tps` = tokens / decode_duration_s** | **454.12** | **0.035%** | = official `output_throughput` defn; **NEW STANDARD** |
+| windowed steady (drop W=3 cold intervals) | 459.83 | 0.05% | robust interval-meter variant |
+| `e_accept_exact` | 3.855 | 0.07% | near-deterministic greedy acceptance |
+| **#56 reproduced on wall_tps** | 429.04→448.01 (+4.42%) | → **454.30→454.35 (+0.01%)** | throughput never moved; estimator did |
+
+**Variance decomposition:**
+- **(a) Warmup/cold-start — dominant for raw estimator.** First interval 29% below steady; dropping W≥1 collapses raw CV 0.33%→0.07%.
+- **(b) Steady jitter — small.** windowed CV 0.05%, wall CV 0.035% (irreducible floor).
+- **(c) Thermal/clock drift — ZERO.** A10G SM clock pinned 1710 MHz; temp flat ~53°C; TPS~time slope −0.006 tps/run (n.s.).
+- **(d) Token nondeterminism — negligible.** E[accept] CV 0.07%; not a meaningful TPS-noise source.
+
+**Recommended protocol (copy-paste):** decide every local TPS A/B on `wall_tps`, median N=3 fresh decode-only runs; MDE: **≥0.2% real at N=1; ≥0.1% at N=3**. Any delta ≥0.2% is real. Full protocol: `research/tps_noise_floor/PROTOCOL.md`.
+
+**Conclusions:**
+1. **The ±4.4% noise floor was an estimator artifact** — wall_tps was identical (+0.01%) across both #56 runs. The sub-5% wins concern is SOLVED by changing the metric, not by adding runs.
+2. **New canonical local A/B metric: wall_tps ≈ 454** (replaces fragile "428.37 steady"; the 428.37 headline was the fragile metric's low point-estimate). Official bar unchanged 481.53.
+3. **MDE 0.2% at N=1 / 0.1% at N=3**: land #71 tree-verify (+21-23% projected) clears by >100×; stark #78 GEMM fusion (~+2.6%) and denken #81 prompt-lookup are well above the floor. Sub-5% wins are now reliably detectable.
+4. **wandb_logging.py bug fixed** (`group=group or agent`): `--wandb_group` was silently a no-op for ALL callers before this merge. All prior runs that used `--wandb_group` logged to the wrong W&B group.
+5. lawine reassigned → **#82 (walltps-ab-runner)**: operationalize the protocol as a reusable `paired_tps_ab.py` runner for the whole team + re-baseline local frontier + retrospective re-screen of prior within-noise A/Bs.
+
 ## 2026-06-14 01:49 — PR #77: Drafter non-GEMM profile — map the real ~70% binding drafter cost ✅ MERGED (decisive FAIL-FAST negative: no contract-safe non-GEMM drafter lever; drafter axis fully harvested → land tree-verify #71)
 
 - **Branch:** `denken/drafter-nongemm-profile` · **Student:** denken
