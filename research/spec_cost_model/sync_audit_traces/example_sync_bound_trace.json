@@ -1,0 +1,408 @@
+{
+  "schema_version": "sync-audit-trace/1.0",
+  "source": "lawine #143 sync_bound model (salvage_walk_overhead.emit_reference_trace) [3-step excerpt for schema documentation; full trace regenerable via --self-test]",
+  "capture_tool": "synthetic",
+  "topology": {
+    "n_nodes": 32,
+    "max_depth": 9,
+    "spine_len": 10,
+    "n_expand": 9
+  },
+  "n_steps": 3,
+  "anchor_step": 1.2182,
+  "terminal_sync_callsite": "vllm/v1/worker/gpu_model_runner.py: output_token_ids = ...accepted.cpu()  # parse_output -> CPU scheduler",
+  "steps": [
+    {
+      "step": 0,
+      "events": [
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 0
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 0
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 1
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 1
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 2
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 2
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 3
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 3
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 4
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 4
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 5
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 5
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 6
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 6
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 7
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 7
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 8
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 8
+        },
+        {
+          "t": "launch",
+          "op": "spine_compare",
+          "node": 0,
+          "group": 9
+        },
+        {
+          "t": "sync",
+          "kind": "bool",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept"
+        },
+        {
+          "t": "launch",
+          "op": "spine_compare",
+          "node": 1,
+          "group": 9
+        },
+        {
+          "t": "sync",
+          "kind": "bool",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept"
+        },
+        {
+          "t": "sync",
+          "kind": "item",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:88  n_accept = accept_len.item()  # accept-length to host"
+        },
+        {
+          "t": "sync",
+          "kind": "cpu",
+          "terminal": true,
+          "group": 9,
+          "callsite": "vllm/v1/worker/gpu_model_runner.py: output_token_ids = ...accepted.cpu()  # parse_output -> CPU scheduler"
+        }
+      ]
+    },
+    {
+      "step": 1,
+      "events": [
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 0
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 0
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 1
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 1
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 2
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 2
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 3
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 3
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 4
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 4
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 5
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 5
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 6
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 6
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 7
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 7
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 8
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 8
+        },
+        {
+          "t": "launch",
+          "op": "spine_compare",
+          "node": 0,
+          "group": 9
+        },
+        {
+          "t": "sync",
+          "kind": "bool",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept"
+        },
+        {
+          "t": "launch",
+          "op": "spine_compare",
+          "node": 1,
+          "group": 9
+        },
+        {
+          "t": "sync",
+          "kind": "bool",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept"
+        },
+        {
+          "t": "sync",
+          "kind": "item",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:88  n_accept = accept_len.item()  # accept-length to host"
+        },
+        {
+          "t": "sync",
+          "kind": "cpu",
+          "terminal": true,
+          "group": 9,
+          "callsite": "vllm/v1/worker/gpu_model_runner.py: output_token_ids = ...accepted.cpu()  # parse_output -> CPU scheduler"
+        }
+      ]
+    },
+    {
+      "step": 2,
+      "events": [
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 0
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 0
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 1
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 1
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 2
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 2
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 3
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 3
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 4
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 4
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 5
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 5
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 6
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 6
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 7
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 7
+        },
+        {
+          "t": "launch",
+          "op": "expand_topk",
+          "group": 8
+        },
+        {
+          "t": "launch",
+          "op": "expand_gather",
+          "group": 8
+        },
+        {
+          "t": "launch",
+          "op": "spine_compare",
+          "node": 0,
+          "group": 9
+        },
+        {
+          "t": "sync",
+          "kind": "bool",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:42  bool(verify_argmax[u].eq(draft_tok[u]).item())  # per-spine-node accept"
+        },
+        {
+          "t": "sync",
+          "kind": "item",
+          "terminal": false,
+          "group": 9,
+          "callsite": "submissions/<drafter>/naive_descent.py:88  n_accept = accept_len.item()  # accept-length to host"
+        },
+        {
+          "t": "sync",
+          "kind": "cpu",
+          "terminal": true,
+          "group": 9,
+          "callsite": "vllm/v1/worker/gpu_model_runner.py: output_token_ids = ...accepted.cpu()  # parse_output -> CPU scheduler"
+        }
+      ]
+    }
+  ]
+}
