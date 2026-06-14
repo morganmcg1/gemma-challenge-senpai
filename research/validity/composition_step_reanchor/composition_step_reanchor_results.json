@@ -1,0 +1,178 @@
+{
+  "agent": "denken",
+  "created_at": "20260614T232650Z",
+  "kind": "composition-step-reanchor",
+  "nan_clean": true,
+  "peak_mem_mib": 12.125,
+  "pr": 252,
+  "synthesis": {
+    "anchor_confirmation": {
+      "bound": {
+        "note": "the derived built-step 1.0849525 ms reproduces the GO read EXACTLY (resid 0.0e+00); land's stated ~1.085 (3 d.p.) reproduces 520.93 TPS -- a 0.023 TPS rounding bound. The derived step MATCHES land's stated built-step (step resid 4.7e-05 ms).",
+        "rounding_bound_tps": 0.02278702567855362,
+        "step_built_derived_ms": 1.084952540947906,
+        "step_resid_vs_stated_1p085_ms": 4.7459052094023235e-05,
+        "tps_at_land_stated_1p085": 520.9299452854889
+      },
+      "clears_500": true,
+      "confirmation": "CONFIRMED-520.95",
+      "go_read_anchor": 520.9527323111674,
+      "lands_at_go_read": true,
+      "note": "E[T]_both=4.512 priced at the re-anchored built-step 1.0850 ms -> 520.9527 TPS == land's GO read 520.95 (CONFIRMED-520.95). Priced at the SERVED step 1.2182 ms it would be 463.97 (MISSES 500) -- the wrong denominator for tree decode.",
+      "reanchored_tps_at_ET4512": 520.9527323111674,
+      "roundtrip_resid_vs_go_read": 0.0,
+      "served_step_at_ET4512_miss": 463.9706046911471
+    },
+    "floor_reread": {
+      "delta_max_241_imported": 0.040220025755911104,
+      "delta_max_reanchored": 0.040220025755911104,
+      "delta_max_resid": 0.0,
+      "floor_241_imported": 4.330527243789328,
+      "floor_moves": 0.0,
+      "floor_reanchored_via_anchor": 4.330527243789329,
+      "floor_reanchored_via_built_step": 4.330527243789328,
+      "floor_survives": true,
+      "note": "the #241 floor = 4.512*(500/520.95) is a property of the ANCHOR (4.512, 520.95) and the 500 target ONLY: the slope 520.95/4.512 = 115.459 is pinned by the anchor, INDEPENDENT of how it factors into K_cal*tau/step. Re-derived directly under the built step it is 4.330527 -- it MOVES 0.00e+00 (< 1e-03) from #241's 4.330527: SURVIVES.",
+      "served_step_floor_vacuous": {
+        "above_4p512_projection": true,
+        "floor_at_served_step_1p2182": 4.862377006624717,
+        "note": "under the SERVED step 1.2182 the E[T] needed to clear 500 is 4.8624 > the 4.512 projection (VACUOUS: the build would miss even at projection) -- which is exactly why land's tree build must be priced at its own (built) step 1.085, under which the floor is a REAL 4.02% tolerance."
+      }
+    },
+    "handoff_lines": {
+      "land_245_fern_238_denken_241": "land #245 + fern #238 card + denken #241 floor: the launch TPS gate should be read against the BUILT-step (1.0850 ms, tree decode), NOT the served-step 1.2182 (linear MTP K=7); under it E[T]_both=4.512 maps to reanchored_tps_at_ET4512=520.9527, so the 520.95 GO-read anchor is CONFIRMED (distinct-steps-both-valid: served 1.2182 and built 1.085 price two different paths, resid 0.0e+00) and my #241 4.3305 floor SURVIVES (moves 0.00e+00, slope-invariant) -- land's one build run's pass/fail line is read against a CONFIRMED step (measured-step is land #245's to read live)."
+    },
+    "honest_band": {
+      "a_anchor_is_self_consistent_not_independently_measured": "the re-anchored built-step is DERIVED from land's GO read 520.95 (step_built = K_cal*4.512*tau/520.95), so reanchored_tps round-trips to 520.95 BY CONSTRUCTION. The CONFIRMATION is not the round-trip -- it is that the derived built-step 1.084953 ms == land's INDEPENDENTLY-stated effective built-step ~1.085 (resid 4.7e-05 ms) AND == denken #241 step_eff_landread 1.084953. The TRUE open question -- does land's LIVE build MEASURE a ~1.085 ms step -- stays land #245's to measure; this leg de-risks the ANALYTIC anchor.",
+      "b_two_paths_not_one_step": "the served 481.53 (linear MTP K=7, 1.2182 ms/step) and the built 520.95 (tree decode, 1.085 ms/step) are TWO decode paths with TWO per-step costs (10.9% apart). The composition prices each path at its OWN step; the 463.97 'inconsistency' denken #241 flagged was pricing the BUILT path's E[T] at the SERVED step -- a path-mismatch. The anchor is NOT optimistic; it is the tree path priced at the tree step.",
+      "c_edge_is_step_cost_not_acceptance": "the 520.95/481.53 = 1.0819 edge decomposes EXACTLY into step-ratio 1.1228 (built step cheaper) * E[T]-ratio 0.9635 (built E[T] LOWER than served's realized ~4.68). The win is a per-step-cost win from tree decode, partly OFFSET by the conservative both-bugs E[T] projection -- it does not assume more accepted tokens than the served path realizes.",
+      "d_floor_is_anchor_property_slope_invariant": "denken #241's 4.3305 floor is a property of the anchor (4.512, 520.95) and the 500 target ONLY -- the slope is pinned by the anchor, independent of the step decomposition. Re-derived directly under the built step it moves 0.00e+00 (< 1e-03): SURVIVES. Under the SERVED step the floor would be 4.8624 > 4.512 (vacuous), confirming the build must be read against the built step.",
+      "e_imports_unchanged": "K_cal=125.268, step_served=1.2182, tau in [0.9924,1.0], the GO read 520.95 / built-step ~1.085, ubel #240 anchors 513.557@gate / 520.953@lambda=1, the served 481.53, and denken #241's floor 4.3305 / delta_max 0.04022 are IMPORTED UNCHANGED. No GPU/draw/served-file change. BASELINE stays 481.53."
+    },
+    "imports": {
+      "K_cal": 125.26795005202914,
+      "ceiling_240": 520.9527323111674,
+      "central_headroom_204": 8.542622771101378,
+      "clear500_bar_et_tau1": 4.862377006624717,
+      "delta_max_tps500_241": 0.040220025755911104,
+      "e_t_meas_floor_241": 4.330527243789328,
+      "gate_513_240": 513.5574577506176,
+      "lambda1_ceiling": 520.9527323111674,
+      "provenance": "official=K_cal*(E[T]/step)*tau (wirbel#199/kanna#217 vgovdrjc; K_cal=125.268, step_served=1.2182, tau in [0.9924,1.0]) x land's 22:12Z reset GO read 520.95 / built-step ~1.085 (E[T]_both=4.512) x ubel#240 anchors 513.557@gate / 520.953@lambda=1 (resid 0.0, t2nrnf2m/cl6poy6t) x denken#241 E_T_meas_floor=4.3305 / delta_max=0.04022 / step_eff_landread=1.08495 / banked-step@4.512=463.97 (hqewf1d6) x the served official 481.53 (PPL 2.3772, 128/128, linear MTP K=7). ALL IMPORTED UNCHANGED; land #245 owns the LIVE step measurement.",
+      "served_official": 481.53,
+      "source_runs": {
+        "d199": "compliant-spec-et",
+        "d217": "vgovdrjc (trigger/composition)",
+        "d240": "t2nrnf2m/cl6poy6t (tps-risk-exchange-rate)",
+        "d241": "hqewf1d6 (measured-et-shortfall)",
+        "land": "land #71/#245 reset GO read 520.95 / built-step ~1.085"
+      },
+      "step_eff_landread_241": 1.084952540947906,
+      "step_served": 1.2182,
+      "t_base_central": 512.4101095400661,
+      "target_official": 500.0,
+      "tau_central": 1.0,
+      "tau_conservative": 0.9924,
+      "tps_banked_at_4p512_241": 463.9706046911471
+    },
+    "self_test": {
+      "composition_step_reanchor_self_test_passes": true,
+      "conditions": {
+        "a_banked_step_reproduces_463p97_miss": true,
+        "b_built_step_reproduces_520p95_resid_le_1e6": true,
+        "c_served_481p53_roundtrips_implied_ET": true,
+        "d_floor_4p3305_survives_reanchor_moves_lt_1e3": true,
+        "e_anchor_verdict_consistent_with_disambiguation": true,
+        "f_key_scalars_finite": true
+      },
+      "evidence": {
+        "a_banked_241_import": 463.9706046911471,
+        "a_tps_banked_at_4p512": 463.9706046911471,
+        "b_go_read": 520.9527323111674,
+        "b_reanchored_tps": 520.9527323111674,
+        "b_roundtrip_resid": 0.0,
+        "c_e_t_served": 4.6827608,
+        "c_served_official": 481.53,
+        "c_served_roundtrip": 481.53,
+        "d_delta_max_resid": 0.0,
+        "d_floor_241": 4.330527243789328,
+        "d_floor_moves": 0.0,
+        "d_floor_reanchored": 4.330527243789328,
+        "e_anchor_verdict": "DISTINCT-STEPS-BOTH-VALID",
+        "e_steps_are_distinct": true
+      }
+    },
+    "step_disambiguation": {
+      "built_path": {
+        "decode_path": "tree decode",
+        "e_t_both_projection": 4.512,
+        "go_read_tps": 520.9527323111674,
+        "matches_land_stated_1p085": true,
+        "matches_step_eff_landread_241": true,
+        "note": "the BUILT path PROJECTS E[T]_both=4.512 at step 1.0850 ms -> 520.9527 (land's GO read); the derived built-step == denken #241 step_eff_landread 1.084953 and == land's stated ~1.085.",
+        "step_built_central_tau1_ms": 1.084952540947906,
+        "step_built_conservative_tau0p9924_ms": 1.076706901636702
+      },
+      "law": "official = K_cal*(E[T]/step)*tau  -- prices a SINGLE decode path",
+      "rel_gap_served_vs_built": 0.10938060995903301,
+      "served_path": {
+        "decode_path": "linear MTP K=7",
+        "e_t_served_central_tau1": 4.6827608,
+        "e_t_served_conservative_tau0p9924": 4.718622329705764,
+        "note": "the SERVED path REALIZES E[T]_served~4.6828 (tau=1) ... 4.7186 (tau=0.9924) at step 1.2182 ms -> 481.53 official.",
+        "served_official_tps": 481.53,
+        "step_served_ms": 1.2182
+      },
+      "step_built_ms": 1.084952540947906,
+      "step_served_ms": 1.2182,
+      "step_speedup_built_over_served": 1.1228140900390702,
+      "steps_are_distinct": true,
+      "tps_edge_decomposition": {
+        "edge_recompose": 1.0818697325424533,
+        "edge_resid": 2.220446049250313e-16,
+        "et_ratio_built_over_served": 0.9635341613007438,
+        "note": "520.95/481.53 = 1.0819 = step_ratio 1.1228 (built step cheaper) * E[T]_ratio 0.9635 (built E[T] LOWER) -- the built path's TPS win is a STEP-COST win, PARTLY OFFSET by its lower projected both-bugs E[T], NOT more accepted tokens.",
+        "step_ratio_served_over_built": 1.1228140900390702,
+        "tps_edge_520p95_over_481p53": 1.081869732542453
+      },
+      "verdict_note": "step_served (1.2182, linear MTP K=7) and step_built (1.0850, tree decode) are DISTINCT (10.9% apart): the tree-decode build legitimately runs a FASTER per-step cost, so the 520.95 anchor is NOT inconsistent with the banked 1.2182 -- it prices a DIFFERENT path. The 463.97 'inconsistency' was the artifact of pricing the BUILT E[T]=4.512 at the SERVED step."
+    },
+    "test_metric": {
+      "reanchored_tps_at_ET4512": 520.9527323111674
+    },
+    "verdict": "COMPOSITION STEP RE-ANCHORED -> DISTINCT-STEPS-BOTH-VALID. The served step (1.2182 ms, linear MTP K=7) and the built step (1.0850 ms, tree decode) are DISTINCT (10.9% apart): the tree-decode build legitimately runs a cheaper per-step cost, so the 520.95 GO-read anchor is NOT inconsistent with the banked 1.2182 -- it prices a DIFFERENT path. Re-deriving the built-step from land's reset trace gives 1.084953 ms (== denken #241 step_eff_landread, == land's stated ~1.085), under which E[T]_both=4.512 -> 520.9527 TPS == the GO read (CONFIRMED, resid 0.0e+00). The 463.97 'inconsistency' denken #241 flagged was pricing the BUILT E[T]=4.512 at the SERVED step. denken #241's 4.3305 floor is anchor-pinned (slope-invariant) and SURVIVES the re-anchor (moves 0.00e+00). The launch TPS gate is read against the BUILT step 1.085, NOT the served 1.2182. BASELINE stays 481.53. NOT a launch.",
+    "verdict_table": {
+      "anchor_verdict": "DISTINCT-STEPS-BOTH-VALID",
+      "columns": [
+        "step_label",
+        "step_ms",
+        "implied_E_T",
+        "tps_at_ET4512",
+        "clears_500_at_ET4512",
+        "applies_to_path"
+      ],
+      "note": "the launch TPS gate is read against the BUILT step (1.085, tree decode), NOT the served 1.2182 (linear MTP K=7). E[T]_both=4.512 is the BUILT path's projection; priced at its own step it -> 520.95 (CLEARS 500). Pricing it at the served step (463.97) is a path-mismatch, not a real shortfall.",
+      "read_launch_gate_against_label": "BUILT 1.085 (tree decode)",
+      "read_launch_gate_against_step_ms": 1.084952540947906,
+      "reanchored_tps_at_ET4512": 520.9527323111674,
+      "rows": [
+        {
+          "applies_to_path": "served linear MTP K=7 (the 481.53 official)",
+          "clears_500_at_ET4512": false,
+          "implied_E_T": 4.6827608,
+          "step_label": "SERVED 1.2182",
+          "step_ms": 1.2182,
+          "tps_at_ET4512": 463.9706046911471
+        },
+        {
+          "applies_to_path": "built tree decode (land #245 live build)",
+          "clears_500_at_ET4512": true,
+          "implied_E_T": 4.512,
+          "step_label": "BUILT 1.085",
+          "step_ms": 1.084952540947906,
+          "tps_at_ET4512": 520.9527323111674
+        }
+      ]
+    }
+  }
+}
