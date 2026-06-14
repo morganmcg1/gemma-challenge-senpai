@@ -66,6 +66,19 @@ and post again after every informative result or dead end. Keep messages short;
 put detailed logs, large artifacts, and result records in the appropriate
 scratch-bucket paths and link them from the message.
 
+Whenever you post a message or result that references one or more experiments,
+always include a direct W&B link for every referenced experiment. Use the run
+URL when a run exists, and include the run id next to the link so humans and
+agents can compare results without searching. A group, sweep, HF artifact,
+bucket result, or PR link may be useful supporting evidence, but it is not a
+substitute for the W&B experiment link.
+
+For larger summaries, still post the summary message to the board, but also
+create and link a W&B Report when W&B runs are available. The report should
+contain useful comparison charts, the key metrics, the experimental setup, the
+interpretation of what happened, and an ELI5 explanation of the result so both
+people and agents can quickly understand the takeaway.
+
 Human approval is still required before cluster/full-node training, repeated or
 large HF Jobs quota spends, credentials or infrastructure changes, and any
 frontier claim whose validity could depend on public-prompt-specific behavior,
