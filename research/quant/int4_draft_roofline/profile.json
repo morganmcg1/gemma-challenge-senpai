@@ -1,0 +1,186 @@
+{
+  "config": {
+    "drafter_dir": "/tmp/qat-assistant",
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "k": 7,
+    "group": 128,
+    "iters": 300,
+    "warmup": 60,
+    "et_samples": 4096,
+    "draft_share": 0.58,
+    "frontier_tps": 481.53,
+    "et_deployed": 3.3,
+    "chain_captured_bf16": true,
+    "chain_captured_int4": true,
+    "A10G_HBM_GBS": 600.0,
+    "wtype": "uint4b8",
+    "marlin_kernel": "ops.marlin_gemm",
+    "note": "isolated CUDA-graph GEMM timing on real bf16 drafter weights; int4 = group W4A16 packed to Marlin layout -> REAL ops.marlin_gemm (deployed verify-body kernel family). Verify model untouched -> greedy-identity + PPL pinned by construction. No serve change, no HF Job."
+  },
+  "specs": [
+    {
+      "role": "pre_projection",
+      "in": 5120,
+      "out": 256
+    },
+    {
+      "role": "layer0.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer0.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer0.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer0.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer1.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer1.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer1.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer1.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer2.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer2.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer2.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer2.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer3.q_proj",
+      "in": 256,
+      "out": 2048
+    },
+    {
+      "role": "layer3.o_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer3.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer3.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "post_projection",
+      "in": 256,
+      "out": 2560
+    },
+    {
+      "role": "centroids_sampler",
+      "in": 256,
+      "out": 2048
+    }
+  ],
+  "weight_rel_l2_err_int4": {
+    "pre_projection": 0.11107780039310455,
+    "layer0.q_proj": 0.09296074509620667,
+    "layer0.o_proj": 0.09335943311452866,
+    "layer0.gate_up": 0.09281575679779053,
+    "layer0.down_proj": 0.09860125929117203,
+    "layer1.q_proj": 0.09085270762443542,
+    "layer1.o_proj": 0.09445716440677643,
+    "layer1.gate_up": 0.0912945568561554,
+    "layer1.down_proj": 0.10367711633443832,
+    "layer2.q_proj": 0.09279344230890274,
+    "layer2.o_proj": 0.09538335353136063,
+    "layer2.gate_up": 0.09486359357833862,
+    "layer2.down_proj": 0.10435327887535095,
+    "layer3.q_proj": 0.09409475326538086,
+    "layer3.o_proj": 0.10060761868953705,
+    "layer3.gate_up": 0.0962822288274765,
+    "layer3.down_proj": 0.1044602245092392,
+    "post_projection": 0.2276049554347992,
+    "centroids_sampler": 0.18505343794822693
+  },
+  "byte_model": {
+    "per_pass_total_bytes_bf16": 22905344.0,
+    "per_pass_weight_bytes_bf16": 22806528.0,
+    "per_pass_total_bytes_int4": 5978624.0,
+    "per_pass_weight_bytes_int4": 5879808.0,
+    "int4_byte_ratio": 0.2610143728904486
+  },
+  "verdict": {
+    "int4_draft_roofline_self_test_passes": true,
+    "net_tps_gain_pct_int4_draft": -27.43594608868336,
+    "net_tps_kernelonly": -27.43594608868336,
+    "net_tps_with_et_loss": -68.97925281808,
+    "net_tps_ceiling_bandwidth_bound": 75.01232288300692,
+    "e_t_int4_draft": 1.4107324519857234,
+    "e_t_bf16_draft": 3.299999999999999,
+    "e_t_int4_is_pessimistic_lower_bound": true,
+    "proposal_disagree_ub_synthetic": 0.5947265625,
+    "greedy_identical_by_construction": true,
+    "ppl_pinned": 2.3772,
+    "ppl_ok": true,
+    "nan_clean": true,
+    "peak_vram_gib": 0.23497724533081055,
+    "vram_ok": true,
+    "draft_pass_us_int4_marlin": 165.79242706298828,
+    "draft_pass_us_bf16": 100.36565144856772,
+    "draft_pass_us_bf16_anchor_248": 101.2,
+    "draft_pass_ratio_int4_vs_bf16": 1.6518841323712072,
+    "draft_pass_speedup_int4_vs_bf16": 0.6053693357805574,
+    "draft_walltime_saving_us_per_step": -457.987429300944,
+    "draft_share_of_step": 0.58,
+    "step_speedup_int4": 0.7256405391131664,
+    "int4_byte_ratio": 0.2610143728904486,
+    "bandwidth_vs_overhead_diag": "overhead-bound (Marlin tiling/reduce fixed cost dominates the M=1 GEMV; int4 weight-bandwidth advantage does NOT materialize)",
+    "mean_weight_rel_l2_err_int4": 0.10866281194122214,
+    "proj_official_tps": 349.417688799163,
+    "proj_official_tps_with_et_loss": 149.37420390509934,
+    "proj_official_tps_ceiling_bandwidth_bound": 842.7368383785432,
+    "deployed_draft_dtype": "bfloat16 (the bf16 draft is the honest control)",
+    "marlin_kernel": "ops.marlin_gemm (W4A16, deployed verify-body kernel family)",
+    "chain_captured_bf16": true,
+    "chain_captured_int4": true,
+    "speed_verdict": "NO-GO",
+    "safety_verdict": "GREEN (greedy+PPL pinned by construction)",
+    "k": 7,
+    "group": 128
+  }
+}
