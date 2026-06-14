@@ -1,0 +1,128 @@
+{
+  "run": {
+    "submission": "/workspace/senpai/target/research/rank_coverage/_scratch_submission",
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "conc": 1,
+    "utc": "2026-06-14T02:06:44Z",
+    "decode_summary": {
+      "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+      "duration_s": 334.3928573131561,
+      "num_completion_tokens": 65536,
+      "num_prompt_tokens": 34836,
+      "num_records": 128,
+      "output_file": "/workspace/senpai/target/research/rank_coverage/decode_rank_coverage.jsonl",
+      "output_len": 512,
+      "request_timeout_s": 180,
+      "required_request_field": "return_token_ids: true",
+      "required_response_field": "choices[0].token_ids",
+      "seed": 1,
+      "token_id_sources": {
+        "choices[0].token_ids": 128
+      },
+      "token_ids_required": true,
+      "tokenizer": "google/gemma-4-E4B-it"
+    },
+    "decode_wall_s": 429.2742729187012
+  },
+  "analysis": {
+    "n_records": 16524,
+    "n_align_bad": 0,
+    "record_shards": [
+      "rankprobe_records.jsonl.93098"
+    ],
+    "n_divergences": 12869,
+    "W": 4,
+    "per_depth_reached": [
+      16524,
+      12121,
+      9279,
+      7392,
+      6106,
+      5134,
+      4302
+    ],
+    "per_depth_accept": [
+      12121,
+      9279,
+      7392,
+      6106,
+      5134,
+      4302,
+      3655
+    ],
+    "per_depth_div_count": [
+      4403,
+      2842,
+      1887,
+      1286,
+      972,
+      832,
+      647
+    ],
+    "conditional_rank1_acceptance_q": [
+      0.7335390946502057,
+      0.7655308967906939,
+      0.7966375687035241,
+      0.8260281385281385,
+      0.840812315754995,
+      0.8379431242695754,
+      0.8496048349604834
+    ],
+    "top1_acceptance": 0.7335390946502057,
+    "rank_fd_hist_pooled": {
+      "0": 4463,
+      "2": 5360,
+      "3": 1994,
+      "4": 1052
+    },
+    "rho_marginal": {
+      "2": 0.4165047789261015,
+      "3": 0.2655480090557997,
+      "4": 0.19075249320036264
+    },
+    "cumulative_coverage": {
+      "2": 0.4165047789261015,
+      "3": 0.5714507731758489,
+      "4": 0.6531976066516435
+    },
+    "rho2_by_depth": {
+      "0": 0.3967749261866909,
+      "1": 0.4306826178747361,
+      "2": 0.4133545310015898,
+      "3": 0.4284603421461897,
+      "4": 0.4351851851851852,
+      "5": 0.44471153846153844,
+      "6": 0.4095826893353941
+    },
+    "n_true_beyond_topW": 4463,
+    "frac_true_beyond_topW": 0.3468023933483565
+  },
+  "cross_check": {
+    "accept76_available": true,
+    "conditional76": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "conditional_measured_q": [
+      0.7335390946502057,
+      0.7655308967906939,
+      0.7966375687035241,
+      0.8260281385281385,
+      0.840812315754995,
+      0.8379431242695754,
+      0.8496048349604834
+    ],
+    "top1_76": 0.728739760479042,
+    "top1_measured": 0.7335390946502057,
+    "top1_abs_diff": 0.004799334171163738,
+    "max_abs_diff_per_depth": 0.006554486526530345
+  },
+  "wandb_run_id": "z6wi4z4v"
+}

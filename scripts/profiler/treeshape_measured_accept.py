@@ -162,6 +162,53 @@ def build_depth_pvecs(q: list[float], rho: float, W: int, decay: str,
     return pvecs
 
 
+def build_depth_pvecs_measured(q: list[float], rho_cond: list[float], W: int,
+                               max_depth: int, extrapolate: str = "flat") -> list[np.ndarray]:
+    """pvecs[d] using the MEASURED per-rank conditional rescue ratios (PR #79).
+
+    Unlike ``build_depth_pvecs`` (which splits a single cumulative rescue scalar
+    ``rho`` across ranks 2..W with a decay SHAPE), this consumes the directly
+    measured conditional ratios ``rho_cond = [rho2, rho3, rho4, ...]`` where
+    ``rho_r = P(target argmax == drafter rank r | drafter ranks 1..r-1 all
+    missed)`` on the true greedy prefix. The per-rank ABSOLUTE marginals follow the
+    chain rule (each rank only fires when all shallower ranks missed):
+
+        p[1] = q[d]
+        p[2] = rho2 * (1-q[d])
+        p[3] = (1-rho2)*rho3 * (1-q[d])
+        p[r] = prod_{j<r}(1-rho_j) * rho_r * (1-q[d])
+
+    so the cumulative top-W coverage given miss-1, sum_{r>=2} p[r]/(1-q[d]), equals
+    the measured cov_W = rho2 + (1-rho2)rho3 + ... exactly. rho_cond is depth-pooled
+    (the probe checks depth-stability separately); only the rank-1 spine q[d] stays
+    depth-dependent. NOTE: measured marginals are NOT forced monotone -- score_tree_
+    depthrank assigns edges by birth-order rank regardless, so scoring a FIXED
+    topology is exact; topology RE-optimisation (Sequoia DP) still assumes p
+    non-increasing and is reported only as a cross-check.
+    """
+    qm = list(q)
+    K = len(qm)
+    pvecs: list[np.ndarray] = [np.zeros(W + 1)]  # depth-0 dummy
+    for d in range(1, max_depth + 1):
+        if d <= K:
+            qd = qm[d - 1]
+        elif extrapolate == "rise":
+            inc = qm[-1] - qm[-2] if K >= 2 else 0.0
+            qd = min(0.995, qm[-1] + inc * (d - K))
+        else:
+            qd = qm[-1]
+        pv = np.zeros(W + 1, dtype=np.float64)
+        pv[1] = qd
+        miss = 1.0 - qd
+        surv = 1.0          # P(all shallower ranks missed), starts at 1 for rank-2
+        for r in range(2, W + 1):
+            rr = rho_cond[r - 2] if (r - 2) < len(rho_cond) else 0.0
+            pv[r] = surv * rr * miss
+            surv *= (1.0 - rr)
+        pvecs.append(pv)
+    return pvecs
+
+
 def score_tree_depthrank(parent: list[int], pvecs: list[np.ndarray]) -> tuple[float, int]:
     """F = sum of path-products, where a child's edge prob = pvecs[child_depth][rank].
 
@@ -250,6 +297,52 @@ def reprice(meas: dict, real: RealGemmCurve, *, rho: float, W: int, decay: str,
     return out
 
 
+def load_rank_coverage(path: str) -> dict:
+    """Load measured rho2/rho3/rho4 + cumulative cov_W from PR #79 rank_coverage JSON."""
+    d = json.load(open(path))
+    a = d["analysis"] if "analysis" in d else d
+    rho = a["rho_marginal"]
+    cov = a["cumulative_coverage"]
+    W = int(a.get("W", 4))
+    rho_cond = [float(rho[str(r)]) for r in range(2, W + 1) if rho.get(str(r)) is not None]
+    cov_W = float(cov[str(W)]) if cov.get(str(W)) is not None else None
+    return {
+        "rho_cond": rho_cond,            # [rho2, rho3, rho4]
+        "cov_W": cov_W,                  # cumulative rank-2..W coverage | miss-1
+        "rho2": float(rho["2"]) if rho.get("2") is not None else None,
+        "W": W,
+        "top1_measured": a.get("top1_acceptance"),
+        "n_divergences": a.get("n_divergences"),
+        "frac_true_beyond_topW": a.get("frac_true_beyond_topW"),
+        "wandb_run_id": d.get("wandb_run_id"),
+    }
+
+
+def reprice_measured_split(meas: dict, real: RealGemmCurve, *, rho_cond: list[float],
+                           W: int, g: float, extrapolate: str, max_depth: int = 40) -> dict:
+    """Score #74 M=16/M=32 under the MEASURED per-rank split (chain-rule pvecs)."""
+    q = meas["q"]
+    pvecs = build_depth_pvecs_measured(q, rho_cond, W, max_depth, extrapolate)
+    F_lin8, _ = score_tree_depthrank(build_linear(8), pvecs)
+    cov_W = float(sum(pvecs[1][2:W + 1]) / (1.0 - pvecs[1][1])) if pvecs[1][1] < 1 else 0.0
+    out = {"rho_cond": list(rho_cond), "cov_W_reconstructed": cov_W, "g": g,
+           "extrapolate": extrapolate, "F_linear8": F_lin8,
+           "F_linear8_vs_measured_ET": F_lin8 - meas["E_T"]}
+    for M in (16, 32):
+        F_tree, d_tree = score_tree_depthrank(TOPO_74[M], pvecs)
+        cB = real.step_mult(M, g)
+        et_ratio = F_tree / F_lin8
+        out[f"M{M}"] = {
+            "F_tree": F_tree, "depth": d_tree, "cost_mult": cB,
+            "ET_ratio_vs_lin8": et_ratio,
+            "tps_gain": et_ratio / cB - 1.0,
+            "proj_tps": FRONTIER_TPS_LINEAR_M8 * et_ratio / cB,
+        }
+    out["M32_dominates_M16"] = out["M32"]["proj_tps"] > out["M16"]["proj_tps"]
+    out["pvecs_depth1"] = [float(x) for x in pvecs[1]]
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -259,6 +352,10 @@ def main() -> None:
     ap.add_argument("--roofline", default=ROOFLINE)
     ap.add_argument("--rho", type=float, default=0.565, help="rescue ratio (EAGLE-3 modeled)")
     ap.add_argument("--rho-sweep", type=float, nargs="+", default=[0.0, 0.35, 0.565, 0.75])
+    ap.add_argument("--rank-coverage-json", default=None,
+                    help="PR #79 rank_coverage_results.json: use MEASURED per-rank rho2/3/4 "
+                         "split as the central case (replaces the borrowed 0.565) and sets "
+                         "--rho to the measured cumulative cov_W for the robustness sweep.")
     ap.add_argument("--W", type=int, default=4)
     ap.add_argument("--decays", nargs="+", default=["geom", "uniform", "sqrt"])
     ap.add_argument("--gemm-share", type=float, default=GEMM_SHARE_DEFAULT)
@@ -282,6 +379,17 @@ def main() -> None:
                            if args.accept_source == "server_log" else "server_log")
     real = RealGemmCurve(args.roofline)
     g = args.gemm_share
+
+    # PR #79: replace the borrowed EAGLE-3 rho=0.565 with the MEASURED rank-coverage.
+    rank_cov = None
+    if args.rank_coverage_json:
+        rank_cov = load_rank_coverage(args.rank_coverage_json)
+        if rank_cov["cov_W"] is not None:
+            args.rho = rank_cov["cov_W"]   # center scalar sweep on measured cumulative cov_W
+            args.rho_sweep = sorted(set([round(rank_cov["cov_W"], 4)] + list(args.rho_sweep)))
+        print(f"[reprice] MEASURED rank-coverage (PR #79): rho_cond(2..W)={rank_cov['rho_cond']} "
+              f"cov_W={rank_cov['cov_W']}  top1_meas={rank_cov['top1_measured']}  "
+              f"n_div={rank_cov['n_divergences']}; central rho -> {args.rho}", flush=True)
 
     print(f"[reprice] measured ({meas['source']}): E[T]={meas['E_T']:.4f}  "
           f"top1={meas['C'][0]:.4f}  q={[round(x,4) for x in meas['q']]}", flush=True)
@@ -451,9 +559,35 @@ def main() -> None:
                  "deeper spine."),
     }
 
+    # PR #79: exact measured per-rank split (rho2/rho3/rho4) as the precise central
+    # estimate; the scalar `central` above (geom decay at rho=cov_W) is its decay-model
+    # counterpart and should agree closely (decay-robustness sanity check).
+    measured_split = None
+    if rank_cov is not None:
+        measured_split = reprice_measured_split(
+            meas, real, rho_cond=rank_cov["rho_cond"], W=args.W, g=g,
+            extrapolate=args.extrapolate)
+        verdict["measured_split_M32_proj_tps"] = measured_split["M32"]["proj_tps"]
+        verdict["measured_split_M32_gain"] = measured_split["M32"]["tps_gain"]
+        verdict["measured_split_M16_proj_tps"] = measured_split["M16"]["proj_tps"]
+        verdict["measured_split_M16_gain"] = measured_split["M16"]["tps_gain"]
+        verdict["measured_split_M32_dominates_M16"] = measured_split["M32_dominates_M16"]
+        verdict["measured_split_fail_fast_triggered"] = (
+            measured_split["M32"]["tps_gain"] < args.fail_fast_gain)
+        verdict["measured_cov_W"] = rank_cov["cov_W"]
+        verdict["measured_rho2"] = rank_cov["rho2"]
+        verdict["measured_top1"] = rank_cov["top1_measured"]
+        print(f"[reprice] MEASURED-SPLIT verdict: M32 {measured_split['M32']['tps_gain']*100:+.1f}% "
+              f"({measured_split['M32']['proj_tps']:.1f} TPS), M16 "
+              f"{measured_split['M16']['tps_gain']*100:+.1f}% "
+              f"({measured_split['M16']['proj_tps']:.1f} TPS); M32>M16="
+              f"{measured_split['M32_dominates_M16']}", flush=True)
+
     results = {
         "config": vars(args),
         "measured_acceptance": {"server_log": meas, "prometheus": meas_x},
+        "rank_coverage_input": rank_cov,
+        "measured_per_rank_split": measured_split,
         "anchor_F_linear8": central["F_linear8"],
         "central_geom_rho0565": central,
         "central_prometheus_xcheck": central_prom,
