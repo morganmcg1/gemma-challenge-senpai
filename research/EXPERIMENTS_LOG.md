@@ -1,5 +1,31 @@
 # SENPAI Research Results
 
+## 2026-06-14 01:30 — PR #76: Calibrate deployed-chain acceptance to pin the tree-verify gain band ✅ MERGED (decisive positive: top-1=0.729, E[T]=3.844; M=32 +18.7%/≈508 TPS empirically anchored; wirbel→#79 ρ probe)
+
+- **Branch:** `wirbel/acceptance-calibration` · **Student:** wirbel
+- **Status:** MERGED as a research artifact (measurement-only, zero served-file change → no BASELINE.md TPS change; frontier bar UNCHANGED 481.53). Lands reusable harnesses: `scripts/profiler/accept_calibration.py`, `scripts/profiler/treeshape_measured_accept.py`; `research/accept_calibration/*.json`.
+- **Hypothesis:** Pin the deployed chain's real per-rank acceptance to resolve the #49 vs #68 discrepancy (0.6792 vs E[accept]≈3.8-implied 0.775) and re-price #74's M=32/M=16 DP trees with measured acceptance. De-risk land #71 (tree-verify build).
+- **Primary metric:** `deployed_chain_mean_tokens_per_step = 3.8441` (W&B `5m17r52s` / `zfzxl0np`, group `acceptance-calibration`).
+
+| quantity (A10G, deployed MTP K=7, conc=1, 128 prompts × 512 tok) | value |
+|---|--:|
+| **top-1 acceptance (rank-1)** | **0.729** |
+| conditional acceptance depth-1→7 | 0.729 → 0.847 (rising with depth) |
+| **measured E[T] (tok/step)** | **3.844** (primary) / 3.849 (Prometheus, Δ0.005) |
+| draft acceptance rate (E[T]−1)/7 | 0.406 |
+| **M=32 tree re-price** | **+18.7%** (≈508 local TPS) vs +20.1% modeled (−1.4pp) |
+| **M=16 tree re-price** | **+11.5%** vs +13.1% modeled (−1.6pp) |
+| M=32 still dominates M=16? | Yes |
+| Fail-fast triggered? | No — tree gain not marginal |
+
+**Reconciliation (decisive):** #49's 0.6792 was an EAGLE-3 drafter scalar (wrong drafter — deployed MTP kenyan-duma has higher top-1). #68's back-solve top-1≈0.775 overstated because real acceptance profile RISES with depth (0.729→0.847); constant-p forced to hit E[T]=3.84 sits above the true top-1. **Authoritative: top-1=0.729, E[T]=3.844** (not a real discrepancy — two estimators applied to the same chain, plus one wrong-drafter scalar).
+
+**Conclusions:**
+1. **M=32 +18.7% / ≈508 local TPS empirically anchored.** #74 projection confirmed to −1.4pp; tree not marginal; M=32 dominates M=16.
+2. **Dominant uncertainty shifted** from top-1 (resolved) to **ρ = rank-2+ drafter coverage** (P(target == drafter rank-2/3/4 | rank-1 missed)). Linear chain can't expose ρ; borrowed EAGLE-3 ρ=0.565 → credible band **+11…+25%, central +18.7%**.
+3. wirbel reassigned → **#79 (rank-2+ drafter coverage probe)** — measures ρ locally, cross-validates byteshark's official-stack rank-2 conditional.
+4. land #71: proceed with M=32 build. Expected official projection: ~481.53 × 1.187 ≈ **571 TPS** (>>500 target). Remaining risk = ρ; wirbel #79 + byteshark resolve it.
+
 ## 2026-06-14 00:47 — PR #75: Drafter-forward roofline — is the 15.5% block bandwidth-bound? ✅ MERGED (decisive negative: refutes int4-drafter-for-TPS; the drafter's #2-block headroom is non-GEMM, not weight bytes)
 
 - **Branch:** `denken/drafter-forward-roofline` · **Student:** denken
