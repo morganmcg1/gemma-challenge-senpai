@@ -1,5 +1,28 @@
 # SENPAI Research Results
 
+## 2026-06-14 02:54 — PR #81: Prompt-lookup/n-gram hybrid drafter — free accepted tokens on top of MTP (Step-0 gate) ✅ MERGED (decisive Step-0 gate: CLEARS at 0.4066 extra-accept, but realistic +1-3% & not buildable in stock vLLM → do-not-build-now, queued behind land #71 fork)
+
+- **Branch:** `denken/prompt-lookup-drafter` · **Student:** denken · merged by morganmcg1 02:54Z
+- **Status:** MERGED as research artifact (CPU-only, no-GPU, no-HF-Job, zero served-file change → BASELINE official bar UNCHANGED 481.53). Banks `scripts/analyze_prompt_lookup.py` + the verdict.
+- **Hypothesis:** prompt-lookup/n-gram (PLD) gives training-free accepted tokens from self-repetition; AUGMENT mode (PLD on top of MTP, not replace) could add free tokens where MTP misses. Step-0 gate: self-ngram ≥~0.3 extra accept tok/step on the 128 public prompts → build; below → kill.
+- **Primary metric:** `promptlookup_extra_accept_tokens_per_step = 0.4066` (W&B `ed46yvkz`). **Test:** `promptlookup_augment_tps_uplift_pct_independence_ub = 10.64`.
+
+| metric | value | notes |
+|---|--:|---|
+| extra accept tok/step (vLLM-faithful) | **0.4066** | clears the ≥0.3 gate |
+| TPS uplift (independence UB) | **+10.6%** | upper bound (q–m independent) |
+| oracle best-occurrence UB | 0.494/step / +12.9% | absolute ceiling |
+| n=2 ngram hits: generated vs prompt | 0.316 vs 0.207 | reasoning DOES self-repeat |
+| extra tokens from MTP-full-miss steps (m=0) | 54.5% | the most valuable free tokens |
+| realistic uplift (q–m correlated) | **+1-3%** | conservation-constrained full-span, a_H 0.90-0.95 |
+| REPLACE mode E[T] | 1.45-1.51 | ngram-only LOSES to MTP 3.84 |
+
+**Conclusions:**
+1. **Gate CLEARS but the lever is modest + blocked.** Extra-accept 0.4066/step (>0.3) and reasoning self-repeats (generated n-gram 0.316 > prompt 0.207), refuting "reasoning is generated not copied → PLD won't fire." 54.5% of free tokens come from steps where MTP fully missed (most valuable kind).
+2. **+10.6% is an INDEPENDENCE upper bound; realistic = +1-3%.** Under realistic positive q–m correlation (PLD fires on predictable spans where MTP already wins), the conservation-constrained sweep pulls it to +1-3%, → 0 at perfect correlation. True gain needs the q–m correlation pinned.
+3. **Decisive blocker is COMPOSABILITY, not magnitude.** vLLM 0.22.0 `SpeculativeConfig.method` is single-choice — mtp XOR ngram. Only stock mode is REPLACE (ngram-only E[T]=1.45-1.51 LOSES to MTP 3.84). AUGMENT (the valuable mode) needs a fork of the spec-decode proposer loop + composition with land #71's tree-verify → do-not-build-now.
+4. **denken reassigned → #85 (M=32 tree-verify non-GEMM overhead audit).** Prompt-lookup queued behind land #71's proposer-loop fork (revisit + pin q–m correlation after tree-verify lands). denken's GPU goes to de-risking the headline: the tree-overhead performance oracle complementing wirbel #83's salvage correctness oracle.
+
 ## 2026-06-14 02:46 — PR #36: int4-quantize the pruned 12k lm_head 🔒 CLOSED-BANKED (clean terminal LOCAL rung; lm_head lever exhausted; ubel → #84 SplitK verify-GEMM)
 
 - **Branch:** `ubel/...` (int4 lm_head) · **Student:** ubel
