@@ -1,0 +1,640 @@
+{
+  "pr": 200,
+  "metric_primary": "cost_budget_self_test_passes",
+  "metric_test": "cost_optimal_n_at_bar",
+  "cost_budget_self_test_passes": true,
+  "cost_optimal_n_at_bar": 5,
+  "build_vs_redraw_crossover_cost": 3.039267792902507,
+  "expected_shots_sequential_at_bar": 1.9375,
+  "cost_model_params": {
+    "c_per_shot_job_units": {
+      "grid": [
+        0.1,
+        0.14677992676220694,
+        0.21544346900318834,
+        0.31622776601683794,
+        0.46415888336127786,
+        0.6812920690579614,
+        1.0,
+        1.4677992676220697,
+        2.1544346900318834,
+        3.1622776601683795,
+        4.641588833612779,
+        6.812920690579611,
+        10.0
+      ],
+      "nominal_c0": 1.0,
+      "unit": "a10g-small job-units; 1 official draw = 1 job-unit (NATURAL unit).",
+      "sweep": "a decade each side of the realistic per-draw cost c0=1.0."
+    },
+    "b_per_mu_job_units_per_tps": {
+      "grid": [
+        0.0,
+        0.03162277660168379,
+        0.05623413251903491,
+        0.1,
+        0.1778279410038923,
+        0.31622776601683794,
+        0.5623413251903491,
+        1.0,
+        1.7782794100389228,
+        3.1622776601683795,
+        5.623413251903491,
+        10.0,
+        17.78279410038923,
+        31.622776601683793
+      ],
+      "nominal_b0": 1.0,
+      "unit": "job-units to raise mu by 1 TPS (build effort, land #71 lane).",
+      "sweep": "0 (free build) through ~31.6; land #71's build->mu cost is NOT banked to this branch, so b is a SWEPT free parameter.",
+      "note": "the build-vs-redraw decision depends only on the ratio b/c; the headline crossover is reported scale-free (in shot-units)."
+    },
+    "assumptions": {
+      "A1_independence": "each re-draw is a fresh HF Job -> sigma_sample AND sigma_hw re-randomize per shot (the #194 fresh-re-benchmark premise).",
+      "A2_incremental_build": "cost_build(mu) = b * max(mu-500, 0); the bar build is the common sunk reference (0 incremental).",
+      "A3_n1_target": "N=1 build target = #194 break-even mu_safe=512.157 (cheapest N=1 build); Delta_mu = 12.157 TPS.",
+      "A4_no_authorization": "c,b are GPU-$; prices a plan, takes NO draws, authorizes none."
+    }
+  },
+  "import_194": {
+    "sigma_draw_tps": 7.390974474817942,
+    "sigma_sample_tps": 5.564480823573265,
+    "sigma_hw_tps": 4.864468814937121,
+    "mu_safe_tps": 512.15707117161,
+    "n_bar_194": 5,
+    "n_lam1_194": 1,
+    "mu_bar_tps": 500.0001445053368,
+    "mu_lam1_tps": 520.9527323111674,
+    "tabulated_best_of_n": [
+      {
+        "mu": 495.0,
+        "n_star": 11,
+        "p_best_of_2": 0.43654165521320665,
+        "p_best_of_3": 0.5770464030328042,
+        "p_best_of_5": 0.7616832663312434,
+        "p_single_shot": 0.24936137536975
+      },
+      {
+        "mu": 500.0,
+        "n_star": 5,
+        "p_best_of_2": 0.75,
+        "p_best_of_3": 0.875,
+        "p_best_of_5": 0.96875,
+        "p_single_shot": 0.5
+      },
+      {
+        "mu": 505.0,
+        "n_star": 3,
+        "p_best_of_2": 0.9378189044737066,
+        "p_best_of_3": 0.9844944364975656,
+        "p_best_of_5": 0.9990358470746661,
+        "p_single_shot": 0.75063862463025
+      },
+      {
+        "mu": 510.0,
+        "n_star": 2,
+        "p_best_of_2": 0.992251147644868,
+        "p_best_of_3": 0.9993178873887978,
+        "p_best_of_5": 0.9999947144100862,
+        "p_single_shot": 0.9119724341178743
+      },
+      {
+        "mu": 515.0,
+        "n_star": 1,
+        "p_best_of_2": 0.9995504083908275,
+        "p_best_of_3": 0.9999904670504217,
+        "p_best_of_5": 0.9999999957140658,
+        "p_single_shot": 0.978796424613465
+      },
+      {
+        "mu": 520.0,
+        "n_star": 1,
+        "p_best_of_2": 0.9999884065178013,
+        "p_best_of_3": 0.9999999605251172,
+        "p_best_of_5": 0.9999999999995424,
+        "p_single_shot": 0.9965950797074333
+      }
+    ],
+    "source_json": "/workspace/senpai/target/research/validity/redraw_budget/redraw_budget_results.json"
+  },
+  "expected_costs": {
+    "c0": 1.0,
+    "rows": [
+      {
+        "mu_tps": 500.0,
+        "p_single": 0.5,
+        "n_star": 5,
+        "success_at_n_star": 0.96875,
+        "expected_shots_sequential": 1.9375,
+        "expected_cost_fixedN_at_c0": 5.0,
+        "expected_cost_sequential_at_c0": 1.9375,
+        "cost_fixedN_per_c_grid": [
+          0.5,
+          0.7338996338110347,
+          1.0772173450159417,
+          1.5811388300841898,
+          2.320794416806389,
+          3.4064603452898066,
+          5.0,
+          7.3389963381103485,
+          10.772173450159418,
+          15.811388300841898,
+          23.207944168063896,
+          34.064603452898055,
+          50.0
+        ],
+        "cost_sequential_per_c_grid": [
+          0.19375,
+          0.28438610810177595,
+          0.4174217211936774,
+          0.6126912966576236,
+          0.8993078365124758,
+          1.3200033837998002,
+          1.9375,
+          2.84386108101776,
+          4.174217211936774,
+          6.126912966576235,
+          8.99307836512476,
+          13.200033837997998,
+          19.375
+        ]
+      },
+      {
+        "mu_tps": 505.0,
+        "p_single": 0.75063862463025,
+        "n_star": 3,
+        "success_at_n_star": 0.9844944364975656,
+        "expected_shots_sequential": 1.3115424708960433,
+        "expected_cost_fixedN_at_c0": 3.0,
+        "expected_cost_sequential_at_c0": 1.3115424708960433,
+        "cost_fixedN_per_c_grid": [
+          0.30000000000000004,
+          0.4403397802866208,
+          0.646330407009565,
+          0.9486832980505138,
+          1.3924766500838337,
+          2.0438762071738843,
+          3.0,
+          4.403397802866209,
+          6.46330407009565,
+          9.486832980505138,
+          13.924766500838338,
+          20.438762071738836,
+          30.0
+        ],
+        "cost_sequential_per_c_grid": [
+          0.13115424708960433,
+          0.19250810782364516,
+          0.28256325967485674,
+          0.41474614560765943,
+          0.6087640887719987,
+          0.8935434836541564,
+          1.3115424708960433,
+          1.925081078236452,
+          2.825632596748567,
+          4.147461456076595,
+          6.087640887719988,
+          8.93543483654156,
+          13.115424708960433
+        ]
+      },
+      {
+        "mu_tps": 512.2,
+        "p_single": 0.9505961845877688,
+        "n_star": 1,
+        "success_at_n_star": 0.9505961845877688,
+        "expected_shots_sequential": 1.0,
+        "expected_cost_fixedN_at_c0": 1.0,
+        "expected_cost_sequential_at_c0": 1.0,
+        "cost_fixedN_per_c_grid": [
+          0.1,
+          0.14677992676220694,
+          0.21544346900318834,
+          0.31622776601683794,
+          0.46415888336127786,
+          0.6812920690579614,
+          1.0,
+          1.4677992676220697,
+          2.1544346900318834,
+          3.1622776601683795,
+          4.641588833612779,
+          6.812920690579611,
+          10.0
+        ],
+        "cost_sequential_per_c_grid": [
+          0.1,
+          0.14677992676220694,
+          0.21544346900318834,
+          0.31622776601683794,
+          0.46415888336127786,
+          0.6812920690579614,
+          1.0,
+          1.4677992676220697,
+          2.1544346900318834,
+          3.1622776601683795,
+          4.641588833612779,
+          6.812920690579611,
+          10.0
+        ]
+      },
+      {
+        "mu_tps": 515.0,
+        "p_single": 0.978796424613465,
+        "n_star": 1,
+        "success_at_n_star": 0.978796424613465,
+        "expected_shots_sequential": 1.0,
+        "expected_cost_fixedN_at_c0": 1.0,
+        "expected_cost_sequential_at_c0": 1.0,
+        "cost_fixedN_per_c_grid": [
+          0.1,
+          0.14677992676220694,
+          0.21544346900318834,
+          0.31622776601683794,
+          0.46415888336127786,
+          0.6812920690579614,
+          1.0,
+          1.4677992676220697,
+          2.1544346900318834,
+          3.1622776601683795,
+          4.641588833612779,
+          6.812920690579611,
+          10.0
+        ],
+        "cost_sequential_per_c_grid": [
+          0.1,
+          0.14677992676220694,
+          0.21544346900318834,
+          0.31622776601683794,
+          0.46415888336127786,
+          0.6812920690579614,
+          1.0,
+          1.4677992676220697,
+          2.1544346900318834,
+          3.1622776601683795,
+          4.641588833612779,
+          6.812920690579611,
+          10.0
+        ]
+      },
+      {
+        "mu_tps": 520.95,
+        "p_single": 0.9977054019538236,
+        "n_star": 1,
+        "success_at_n_star": 0.9977054019538236,
+        "expected_shots_sequential": 1.0,
+        "expected_cost_fixedN_at_c0": 1.0,
+        "expected_cost_sequential_at_c0": 1.0,
+        "cost_fixedN_per_c_grid": [
+          0.1,
+          0.14677992676220694,
+          0.21544346900318834,
+          0.31622776601683794,
+          0.46415888336127786,
+          0.6812920690579614,
+          1.0,
+          1.4677992676220697,
+          2.1544346900318834,
+          3.1622776601683795,
+          4.641588833612779,
+          6.812920690579611,
+          10.0
+        ],
+        "cost_sequential_per_c_grid": [
+          0.1,
+          0.14677992676220694,
+          0.21544346900318834,
+          0.31622776601683794,
+          0.46415888336127786,
+          0.6812920690579614,
+          1.0,
+          1.4677992676220697,
+          2.1544346900318834,
+          3.1622776601683795,
+          4.641588833612779,
+          6.812920690579611,
+          10.0
+        ]
+      }
+    ]
+  },
+  "cost_optimal": {
+    "cost_optimal_n_at_bar": 5,
+    "delta_mu_tps": 12.157071171610028,
+    "n_bar_194": 5,
+    "plan_fixedN_nominal": {
+      "mu_tps": 500.55,
+      "n_max": 4,
+      "expected_shots": 4.0,
+      "build_cost": 0.5500000000000114,
+      "shot_cost": 4.0,
+      "total_cost": 4.550000000000011
+    },
+    "plan_sequential_nominal": {
+      "mu_tps": 500.0,
+      "n_max": 5,
+      "expected_shots": 1.9375,
+      "build_cost": 0.0,
+      "shot_cost": 1.9375,
+      "total_cost": 1.9375
+    },
+    "frontier_examples": [
+      {
+        "b_per_mu": 0.03,
+        "c_per_shot": 1.0,
+        "fixedN": {
+          "mu_tps": 512.2,
+          "n_max": 1,
+          "expected_shots": 1.0,
+          "build_cost": 0.3660000000000013,
+          "shot_cost": 1.0,
+          "total_cost": 1.3660000000000014
+        },
+        "sequential": {
+          "mu_tps": 512.2,
+          "n_max": 1,
+          "expected_shots": 1.0,
+          "build_cost": 0.3660000000000013,
+          "shot_cost": 1.0,
+          "total_cost": 1.3660000000000014
+        }
+      },
+      {
+        "b_per_mu": 0.1,
+        "c_per_shot": 1.0,
+        "fixedN": {
+          "mu_tps": 512.2,
+          "n_max": 1,
+          "expected_shots": 1.0,
+          "build_cost": 1.2200000000000046,
+          "shot_cost": 1.0,
+          "total_cost": 2.2200000000000046
+        },
+        "sequential": {
+          "mu_tps": 502.5,
+          "n_max": 3,
+          "expected_shots": 1.5027076410918923,
+          "build_cost": 0.25,
+          "shot_cost": 1.5027076410918923,
+          "total_cost": 1.7527076410918923
+        }
+      },
+      {
+        "b_per_mu": 0.3,
+        "c_per_shot": 1.0,
+        "fixedN": {
+          "mu_tps": 505.65,
+          "n_max": 2,
+          "expected_shots": 2.0,
+          "build_cost": 1.6949999999999932,
+          "shot_cost": 2.0,
+          "total_cost": 3.694999999999993
+        },
+        "sequential": {
+          "mu_tps": 500.0,
+          "n_max": 5,
+          "expected_shots": 1.9375,
+          "build_cost": 0.0,
+          "shot_cost": 1.9375,
+          "total_cost": 1.9375
+        }
+      },
+      {
+        "b_per_mu": 1.0,
+        "c_per_shot": 1.0,
+        "fixedN": {
+          "mu_tps": 500.55,
+          "n_max": 4,
+          "expected_shots": 4.0,
+          "build_cost": 0.5500000000000114,
+          "shot_cost": 4.0,
+          "total_cost": 4.550000000000011
+        },
+        "sequential": {
+          "mu_tps": 500.0,
+          "n_max": 5,
+          "expected_shots": 1.9375,
+          "build_cost": 0.0,
+          "shot_cost": 1.9375,
+          "total_cost": 1.9375
+        }
+      },
+      {
+        "b_per_mu": 0.1,
+        "c_per_shot": 5.0,
+        "fixedN": {
+          "mu_tps": 512.2,
+          "n_max": 1,
+          "expected_shots": 1.0,
+          "build_cost": 1.2200000000000046,
+          "shot_cost": 5.0,
+          "total_cost": 6.220000000000004
+        },
+        "sequential": {
+          "mu_tps": 512.2,
+          "n_max": 1,
+          "expected_shots": 1.0,
+          "build_cost": 1.2200000000000046,
+          "shot_cost": 5.0,
+          "total_cost": 6.220000000000004
+        }
+      }
+    ],
+    "nominal_b0": 1.0,
+    "nominal_c0": 1.0,
+    "build_vs_redraw_crossover_cost": 3.039267792902507,
+    "build_vs_redraw_crossover_cost_sequential": 12.967542583050696,
+    "c_star_slope_per_b_fixedN": 3.039267792902507,
+    "c_star_slope_per_b_sequential": 12.967542583050696,
+    "crossover_total_shots": 4.0,
+    "crossover_shots_per_tps": 0.3290266169816507,
+    "e_shots_bar_sequential": 1.9375,
+    "cstar_per_b_table": [
+      {
+        "b_per_mu": 0.0,
+        "build_cost_to_mu_safe": 0.0,
+        "c_star_fixedN": 0.0,
+        "c_star_sequential": 0.0
+      },
+      {
+        "b_per_mu": 0.03162277660168379,
+        "build_cost_to_mu_safe": 0.38444034579059416,
+        "c_star_fixedN": 0.09611008644764854,
+        "c_star_sequential": 0.41006970217663374
+      },
+      {
+        "b_per_mu": 0.05623413251903491,
+        "build_cost_to_mu_safe": 0.6836423513076573,
+        "c_star_fixedN": 0.17091058782691432,
+        "c_star_sequential": 0.7292185080615011
+      },
+      {
+        "b_per_mu": 0.1,
+        "build_cost_to_mu_safe": 1.2157071171610028,
+        "c_star_fixedN": 0.3039267792902507,
+        "c_star_sequential": 1.2967542583050697
+      },
+      {
+        "b_per_mu": 0.1778279410038923,
+        "build_cost_to_mu_safe": 2.161866935085188,
+        "c_star_fixedN": 0.540466733771297,
+        "c_star_sequential": 2.3059913974242003
+      },
+      {
+        "b_per_mu": 0.31622776601683794,
+        "build_cost_to_mu_safe": 3.844403457905942,
+        "c_star_fixedN": 0.9611008644764855,
+        "c_star_sequential": 4.100697021766337
+      },
+      {
+        "b_per_mu": 0.5623413251903491,
+        "build_cost_to_mu_safe": 6.836423513076572,
+        "c_star_fixedN": 1.709105878269143,
+        "c_star_sequential": 7.292185080615011
+      },
+      {
+        "b_per_mu": 1.0,
+        "build_cost_to_mu_safe": 12.157071171610028,
+        "c_star_fixedN": 3.039267792902507,
+        "c_star_sequential": 12.967542583050696
+      },
+      {
+        "b_per_mu": 1.7782794100389228,
+        "build_cost_to_mu_safe": 21.618669350851874,
+        "c_star_fixedN": 5.404667337712969,
+        "c_star_sequential": 23.059913974242
+      },
+      {
+        "b_per_mu": 3.1622776601683795,
+        "build_cost_to_mu_safe": 38.44403457905942,
+        "c_star_fixedN": 9.611008644764855,
+        "c_star_sequential": 41.00697021766338
+      },
+      {
+        "b_per_mu": 5.623413251903491,
+        "build_cost_to_mu_safe": 68.36423513076573,
+        "c_star_fixedN": 17.091058782691434,
+        "c_star_sequential": 72.9218508061501
+      },
+      {
+        "b_per_mu": 10.0,
+        "build_cost_to_mu_safe": 121.57071171610028,
+        "c_star_fixedN": 30.39267792902507,
+        "c_star_sequential": 129.67542583050695
+      },
+      {
+        "b_per_mu": 17.78279410038923,
+        "build_cost_to_mu_safe": 216.18669350851877,
+        "c_star_fixedN": 54.04667337712969,
+        "c_star_sequential": 230.59913974242
+      },
+      {
+        "b_per_mu": 31.622776601683793,
+        "build_cost_to_mu_safe": 384.44034579059417,
+        "c_star_fixedN": 96.11008644764854,
+        "c_star_sequential": 410.06970217663377
+      }
+    ],
+    "crossover_note": "FIXED-N: build-to-N1 (mu=512.16) beats bar-N5 once per-shot cost c > 3.039*b (equivalently once reaching mu=512.2 costs < 4 official shots' GPU-$). SEQUENTIAL early-stop makes the bar plan pay only E[shots]=1.9375, so the crossover RISES to c > 12.968*b -- early-stop substantially WEAKENS the case for building higher."
+  },
+  "sequential_savings": {
+    "expected_shots_sequential_at_bar": 1.9375,
+    "fixed_n_at_bar": 5,
+    "p_single_at_bar": 0.5,
+    "saved_shots_at_bar": 3.0625,
+    "dollars_saved_at_bar_at_c0": 3.0625,
+    "dollars_saved_at_bar_per_c": "saved_shots * c = 3.0625 * c",
+    "per_mu_sequential": [
+      {
+        "mu_tps": 500.0,
+        "n_star": 5,
+        "expected_shots_sequential": 1.9375,
+        "saved_shots_vs_fixed": 3.0625
+      },
+      {
+        "mu_tps": 505.0,
+        "n_star": 3,
+        "expected_shots_sequential": 1.3115424708960433,
+        "saved_shots_vs_fixed": 1.6884575291039567
+      },
+      {
+        "mu_tps": 512.2,
+        "n_star": 1,
+        "expected_shots_sequential": 1.0,
+        "saved_shots_vs_fixed": 0.0
+      },
+      {
+        "mu_tps": 515.0,
+        "n_star": 1,
+        "expected_shots_sequential": 1.0,
+        "saved_shots_vs_fixed": 0.0
+      },
+      {
+        "mu_tps": 520.95,
+        "n_star": 1,
+        "expected_shots_sequential": 1.0,
+        "saved_shots_vs_fixed": 0.0
+      }
+    ],
+    "note": "best-of-5 at the bar pays only 1.9375 shots on average (not 5) because ~half the draws clear on shot 1; this is the REALISTIC budget the human pays under stop-on-first-clear."
+  },
+  "self_test": {
+    "cost_budget_self_test_passes": true,
+    "checks": {
+      "a_c_to_zero_recovers_194_n": true,
+      "b_cost_monotone_c_up_mu_down": true,
+      "c_break_even_reproduces_194_mu_safe": true,
+      "d_sequential_le_fixed_n": true,
+      "e_fixedN_success_reproduces_194": true,
+      "f_nan_clean": true
+    },
+    "a_detail": [
+      {
+        "mu": 495.0,
+        "cost_optimal_n": 11,
+        "n_star_194": 11
+      },
+      {
+        "mu": 500.0,
+        "cost_optimal_n": 5,
+        "n_star_194": 5
+      },
+      {
+        "mu": 505.0,
+        "cost_optimal_n": 3,
+        "n_star_194": 3
+      },
+      {
+        "mu": 510.0,
+        "cost_optimal_n": 2,
+        "n_star_194": 2
+      },
+      {
+        "mu": 515.0,
+        "cost_optimal_n": 1,
+        "n_star_194": 1
+      },
+      {
+        "mu": 520.0,
+        "cost_optimal_n": 1,
+        "n_star_194": 1
+      }
+    ],
+    "mu_safe_recomputed_tps": 512.15707117161,
+    "e_max_abs_err": 0.0,
+    "n_numbers_checked": 416
+  },
+  "handoff": "pricing the shots at cost c, the expected-cost-minimizing plan to clear 500 at P>=0.95 is N=5 at the bar (sequential early-stop pays only 1.94 shots on average); building to mu=512.2 for N=1 beats the 5-shot plan once per-shot cost exceeds c*=3.039*b (i.e. once reaching mu=512.2 costs < 4 official shots' GPU-$) -- the human's Approval request should authorize the cheaper of {build-higher-N1, build-at-bar-N5}, and under early-stop the bar plan only pays ~1.94 shots so the build-higher crossover rises to c*=12.97*b.",
+  "scope": "Prices #194's banked official-shot budget N*(mu) with a swept cost model. Computes the expected-cost-minimizing (build-target, shot-count) frontier and the build-vs-redraw crossover. Takes NO official draws, authorizes NO spend (a human still approves), CPU-only. BANK-THE-ANALYSIS: adds 0 TPS, greedy/PPL untouched. The build-effort->mu cost (b) is a SWEPT assumption pending land #71's banked build cost. Draw-budget lane (#159/#188/#194). NOT a launch. NOT open2.",
+  "imported_legs": {
+    "kanna_194_redraw_budget": "research/validity/redraw_budget/redraw_budget_results.json"
+  },
+  "public_evidence_used": [
+    "Leaderboard frontier tops at ~489.6 TPS (osoi5-...-precache-skv64-v1), BELOW the 500 bar -- motivates pricing the cheapest path to clear 500.",
+    "kanna #194 (mxm5q63j) official-shot budget N*(mu): N=5@bar, N=1@520.95, break-even mu=512.16 -- this leg prices that curve.",
+    "Best-of-N / max order-statistics P(max of N>=t)=1-F(t)^N; truncated-geometric stop-on-first-clear expected shots E=(1-(1-p)^N)/p.",
+    "fern #185 carries this cost-min plan as the multi-shot budget row."
+  ],
+  "method": "LOCAL CPU-only analytic synthesis; no GPU/vLLM/HF Job/submission/served-file/draw. BASELINE stays 481.53; adds 0 TPS. Greedy identity untouched. NOT open2. NOT a launch.",
+  "metrics_nan_clean": 1,
+  "elapsed_s": 0.0097
+}
