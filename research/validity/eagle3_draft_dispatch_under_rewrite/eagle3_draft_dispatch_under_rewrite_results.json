@@ -1,0 +1,269 @@
+{
+  "created_at": "20260615T072604Z",
+  "pr": 315,
+  "agent": "ubel",
+  "kind": "eagle3-draft-dispatch-under-rewrite",
+  "analysis_only": true,
+  "synthesis": {
+    "constants": {
+      "official_baseline": 481.53,
+      "k_spec": 7,
+      "m_verify_deployed": 8,
+      "max_cudagraph_capture_size_101": 16,
+      "max_safe_tree_width_311": 16,
+      "mtp_hidden_dim": 2560,
+      "eagle_fused_aux_dim": 7680,
+      "eager_fallback_tps_floor_312": 402.1,
+      "imports": "ubel#311(os01ttw9 draft manual ONEGRAPH CUDAGraphMode.NONE safe-by-construction, max_safe_tree_width=16, verify M=32 needs [24,32], sitecustomize.py:170) x wirbel#312(9b1arani T6/T7 KV-bearing draft chain: own-KV k_proj/v_proj, growing draft KV, seq_len advance inside graph, single [1,2560]->fused [1,7680]) x lawine#101 size-29 dispatch IndexError"
+    },
+    "mtp_draft_safety": {
+      "sitecustomize_path": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+      "manifest_path": "submissions/fa2sw_precache_kenyan/manifest.json",
+      "k_num_speculative_tokens": 7,
+      "spec_method": "mtp",
+      "mtp_hidden_dim": 2560,
+      "cudagraph_mode_none_line": 170,
+      "manual_capture_line": 243,
+      "markers": {
+        "cudagraph_mode_none": true,
+        "manual_cuda_graph_capture": true,
+        "graph_replay": true,
+        "width1_input_copy": true,
+        "single_recycled_hidden": true,
+        "q_only_kv_shared_comment": true,
+        "width1_is_exact_comment": true,
+        "onegraph_env": true,
+        "loopgraph_require_capture": true
+      },
+      "draft_not_list_dispatched": true,
+      "draft_single_shape_mtp": true,
+      "dispatch_safe_mechanism": "CUDAGraphMode.NONE manual torch.cuda.graph capture -> OFF the vLLM cudagraph_capture_sizes list -> cannot hit the lawine-#101 IndexError. Single width-1 shape is what makes the MTP capture TRIVIAL, not what makes it dispatch-safe."
+    },
+    "eagle_draft_chain_deltas": [
+      {
+        "delta": "own-KV draft layer",
+        "mtp": "Q-only, KV-shared: drafter never writes KV (reads the shared target KV pool)",
+        "eagle3": "full Llama draft decoder with its own k_proj/v_proj: WRITES its own KV at each draft position",
+        "source": "#312 9b1arani T7 (eagle3_delta)"
+      },
+      {
+        "delta": "growing draft KV / cross-position deps",
+        "mtp": "no cross-position deps -> width-1 is exact; each of K positions independent",
+        "eagle3": "draft step i reads the KV it wrote at positions 0..i -> attention KV extent GROWS 1..K",
+        "source": "#312 9b1arani T7 (cross-position deps)"
+      },
+      {
+        "delta": "seq_len / slot_mapping advance INSIDE the captured graph",
+        "mtp": "static_cad.seq_lens is a fixed [1] buffer set once; metadata built once over shared KV",
+        "eagle3": "static buffers must advance seq_len/slot_mapping per iteration INSIDE the captured graph",
+        "source": "#312 9b1arani T7 (advance inside captured graph)"
+      },
+      {
+        "delta": "fused aux seed dim",
+        "mtp": "single recycled [1,2560] hidden, seeded from one target hidden state",
+        "eagle3": "fused [1,7680] aux cat of 3 backbone layers (2/21/39)",
+        "source": "#312 9b1arani T7 (fused [1,7680] aux input)"
+      }
+    ],
+    "eagle_draft_step_shapes": [
+      {
+        "step": 0,
+        "query_tokens": 1,
+        "draft_kv_extent": 1,
+        "slot_write_target": 0,
+        "position": "prefix+0",
+        "matches_mtp_single_shape": true,
+        "static_per_unrolled_step": true
+      },
+      {
+        "step": 1,
+        "query_tokens": 1,
+        "draft_kv_extent": 2,
+        "slot_write_target": 1,
+        "position": "prefix+1",
+        "matches_mtp_single_shape": false,
+        "static_per_unrolled_step": true
+      },
+      {
+        "step": 2,
+        "query_tokens": 1,
+        "draft_kv_extent": 3,
+        "slot_write_target": 2,
+        "position": "prefix+2",
+        "matches_mtp_single_shape": false,
+        "static_per_unrolled_step": true
+      },
+      {
+        "step": 3,
+        "query_tokens": 1,
+        "draft_kv_extent": 4,
+        "slot_write_target": 3,
+        "position": "prefix+3",
+        "matches_mtp_single_shape": false,
+        "static_per_unrolled_step": true
+      },
+      {
+        "step": 4,
+        "query_tokens": 1,
+        "draft_kv_extent": 5,
+        "slot_write_target": 4,
+        "position": "prefix+4",
+        "matches_mtp_single_shape": false,
+        "static_per_unrolled_step": true
+      },
+      {
+        "step": 5,
+        "query_tokens": 1,
+        "draft_kv_extent": 6,
+        "slot_write_target": 5,
+        "position": "prefix+5",
+        "matches_mtp_single_shape": false,
+        "static_per_unrolled_step": true
+      },
+      {
+        "step": 6,
+        "query_tokens": 1,
+        "draft_kv_extent": 7,
+        "slot_write_target": 6,
+        "position": "prefix+6",
+        "matches_mtp_single_shape": false,
+        "static_per_unrolled_step": true
+      }
+    ],
+    "classification": {
+      "k_spec": 7,
+      "deployed_ceiling": 16,
+      "per_step_shapes_vary": true,
+      "max_draft_kv_extent": 7,
+      "within_chain_replay_sizes": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "eagle_draft_capture_is_single_shape": false,
+      "draft_positions_fit_deployed_ceiling16": true,
+      "reintroduces_list_dispatch_risk": false,
+      "classification": "(a)",
+      "classification_is_conditional": true,
+      "why": "The MTP single-shape invariant BREAKS for EAGLE-3 (draft KV extent grows 1..7), so it is NOT (a) by the MTP mechanism. BUT a manual unrolled CUDAGraphMode.NONE capture records each per-step kernel at its OWN static shape -- per-step variation is absorbed into ONE graph, NOT pushed onto a capture-size LIST. So the rewrite does NOT reintroduce the lawine-#101 list-dispatch IndexError on the draft side, CONDITIONAL on preserving NONE (which #312's reusable scaffolding does). Belt-and-suspenders: the draft replay sizes {1..7} all fit the deployed ceiling-16 even in a degenerate list-route. Classification = (a)-conditional; gate emitted.",
+      "gate": [
+        "PRESERVE CUDAGraphMode.NONE for the draft chain: keep the re-bodied propose_onegraph wrapping the K loop in a manual torch.cuda.graph(graph) replay so it stays OFF vLLM's cudagraph_capture_sizes list-dispatcher (the single load-bearing property -- abandoning NONE for FULL/PIECEWISE cudagraph mode is the ONLY way to reintroduce #101 on the draft side).",
+        "PRE-ALLOCATE the draft KV to full K=7 extent (static address) and advance it by FIXED-ADDRESS slot-writes (draft slot i baked per unrolled iteration); NO realloc/resize inside the captured region -- a realloc breaks the manual capture OUTRIGHT (a harder failure than a dispatch error).",
+        "BAKE the per-iteration attention metadata (seq_len_i=prefix+i+1, slot_mapping target slot i) as STATIC compile-time-constant slices so each of the K unrolled steps records a fixed-shape attention kernel identical at every replay (this is the 'advance seq_len/slot_mapping INSIDE the captured graph' #312 flagged -- it must be a STATIC schedule, not a data-dependent shape; requires a draft attention backend that admits a static per-step capture, as the deployed MTP path already does under NONE).",
+        "CROSS-CHECK the within-chain draft replay sizes {1..7} are all <= the deployed ceiling-16 (they are; max extent 7 <= 16) -- so even a degenerate list-route stays dispatch-safe on the draft side; the verify side (M=32 needs [24,32] per #311) remains the SOLE #101 exposure."
+      ]
+    },
+    "cross_check_anchors": {
+      "results_file_311": "research/validity/eagle3_capture_dispatch_risk/eagle3_capture_dispatch_risk_results.json",
+      "results_file_312": "research/validity/eagle3_loopgraph_rewrite_cost/eagle3_loopgraph_rewrite_cost_results.json",
+      "loaded_311": true,
+      "loaded_312": true,
+      "tol": 1e-06,
+      "checks": {
+        "311_k_spec": {
+          "mine": 7.0,
+          "recorded": 7.0,
+          "ok": true
+        },
+        "311_m_verify_deployed": {
+          "mine": 8.0,
+          "recorded": 8.0,
+          "ok": true
+        },
+        "311_max_capture_size": {
+          "mine": 16.0,
+          "recorded": 16.0,
+          "ok": true
+        },
+        "311_max_safe_tree_width": {
+          "mine": 16.0,
+          "recorded": 16.0,
+          "ok": true
+        },
+        "311_draft_dispatch_safe": {
+          "mine": true,
+          "recorded": true,
+          "ok": true
+        },
+        "311_draft_not_list_dispatched": {
+          "mine": false,
+          "recorded": false,
+          "ok": true
+        },
+        "311_deployed_m8_dispatch_safe": {
+          "mine": true,
+          "recorded": true,
+          "ok": true
+        },
+        "312_eager_fallback_tps_floor": {
+          "mine": 402.1,
+          "recorded": 402.1,
+          "ok": true
+        },
+        "312_floor_regression_pct": {
+          "mine": 16.5,
+          "recorded": 16.5,
+          "ok": true
+        },
+        "312_official_baseline": {
+          "mine": 481.53,
+          "recorded": 481.53,
+          "ok": true
+        },
+        "312_t7_correctness_rederivation": {
+          "mine": "correctness-rederivation",
+          "recorded": "correctness-rederivation",
+          "ok": true
+        },
+        "fused_aux_dim_consistency": {
+          "mine": 7680,
+          "recorded": 7680,
+          "ok": true
+        }
+      },
+      "max_abs_err": 0.0,
+      "all_within_tol": true
+    },
+    "self_test": {
+      "conditions": {
+        "a_mtp_draft_safety_mechanism_confirmed": true,
+        "b_eagle_deltas_enumerated": true,
+        "c_per_step_shapes_derived": true,
+        "d_classified_with_gate": true,
+        "e_anchor_constants_exact": true,
+        "f_nan_clean": true,
+        "g_caveats_carried": true
+      },
+      "passes": true
+    },
+    "verdict": "The #312 loopgraph rewrite does NOT reintroduce the draft-side capture-dispatch (lawine #101) risk -- classification (a), CONDITIONAL on the emitted gate. The MTP draft is dispatch-safe by MECHANISM (CUDAGraphMode.NONE manual torch.cuda.graph capture, sitecustomize.py:170/:243 -> OFF vLLM's cudagraph_capture_sizes list), NOT by single-shape. EAGLE-3 BREAKS single-shape (its draft KV extent grows 1..K=7 -- eagle_draft_capture_is_single_shape=False), but a manual UNROLLED NONE capture records each per-step kernel at its own static shape, absorbing the variation into ONE graph rather than a capture-size LIST. So the #101 list-dispatch risk returns ONLY if the rewrite abandons NONE; #312's plan keeps the manual scaffolding 'structurally reusable'. Belt-and-suspenders: the within-chain draft replay sizes [1, 2, 3, 4, 5, 6, 7] all fit the deployed ceiling-16 (draft_positions_fit_deployed_ceiling16=True), so even a degenerate list-route is draft-safe -- verify M=32 (needs [24,32] per #311) remains the SOLE #101 exposure. DERIVED from #312's spec (no EAGLE checkpoint); analysis-only; BASELINE 481.53 untouched; 0 TPS.",
+    "handoff": "EAGLE-3 draft-side dispatch-correctness priced under #312's T6/T7 rewrite: classification (a) -- NO list-dispatch (#101) risk reintroduced on the draft side, CONDITIONAL on preserving CUDAGraphMode.NONE + a static full-K slot-write KV-advance schedule. The MTP single-shape invariant BREAKS (draft KV grows 1..7) but is absorbed into one manual unrolled graph, not a capture-size list; and K=7 <= the deployed ceiling-16 anyway. The dispatch checklist T6/T7 must satisfy: (1) keep the draft chain off vLLM's list-dispatcher (manual NONE replay), (2) pre-allocate draft KV to full-K with fixed-address slot-writes (no realloc in-graph), (3) bake a STATIC per-iteration seq_len/slot_mapping schedule, (4) confirm draft replay sizes {1..7} <= ceiling-16. The verify-side #101 gate (#311: M<=16 safe, M=32 needs [24,32]) is UNCHANGED and orthogonal. The human GO/NO-GO can treat draft-side dispatch as CLEARED provided the rewrite honors gate item (1).",
+    "caveats": [
+      "DERIVED, NOT measured: no EAGLE-3 checkpoint exists yet (training-gated). The per-step draft KV extents 0..i, the fused [1,7680] aux seed, and the own-KV writes are DERIVED from wirbel #312's banked rewrite spec (9b1arani) + the deployed MTP source -- NOT measured from a running EagleProposer. This PRICES the dispatch-correctness property the rewrite must satisfy; it does NOT implement it.",
+      "MECHANISM, not single-shape: the MTP draft is dispatch-safe because of CUDAGraphMode.NONE (manual torch.cuda.graph capture, OFF vLLM's cudagraph_capture_sizes list), NOT because the body is single-shape. EAGLE-3 BREAKS single-shape (draft KV extent grows 1..K) -- but that variation is absorbed into ONE manual unrolled graph and does NOT by itself reintroduce the list-dispatch (#101) risk. The risk returns ONLY if the rewrite abandons NONE for FULL/PIECEWISE cudagraph mode.",
+      "CONDITIONAL (a): the (a)-safety holds ONLY IF the rewrite honors the emitted gate (preserve NONE; pre-allocate full-K draft KV with fixed-address slot-writes / no realloc; bake a STATIC per-iteration seq_len/slot_mapping schedule). #312's banked plan keeps the manual scaffolding 'structurally reusable', which is consistent with honoring the gate -- but the gate is a CHECKLIST the T6/T7 implementation must satisfy, not a guarantee it already does.",
+      "BACKEND assumption: gate item 3 assumes the EAGLE draft attention backend admits a STATIC per-step capture under CUDAGraphMode.NONE (the deployed MTP draft path already manually captures attention under NONE, so the same backend path is reusable). If the chosen draft attention backend pads/reshapes on a runtime seq_len in a non-capturable way, item 3 fails and the chain cannot be a single manual graph -- a backend-compatibility risk flagged here.",
+      "VERIFY side UNCHANGED: this card scopes ONLY the DRAFT-side sub-axis. #311's verify gate stands independently -- verify dispatch-safe up to M=16 under the deployed list; M=32 re-enters lawine #101 and needs [24,32] added to cudagraph_capture_sizes (a served-file change). The draft side does NOT touch that ceiling.",
+      "0 TPS / config-correctness property: depends only on integer token-counts / KV extents and the capture mode, NOT on tensor VALUES (no tensors at all transfer). NOT a launch, NOT a build, NOT a served-file change, NOT an HF Job. BASELINE 481.53 untouched; adds 0 TPS."
+    ]
+  },
+  "draft_dispatch_under_rewrite_self_test_passes": true,
+  "eagle_draft_capture_is_single_shape": false,
+  "draft_positions_fit_deployed_ceiling16": true,
+  "host_peak_mem_mib": 12.098,
+  "greedy_ppl_safety_certificate": {
+    "analysis_only": true,
+    "served_file_changed": false,
+    "emitted_token_changed": false,
+    "hf_job_or_submission": false,
+    "is_launch": false,
+    "is_build": false,
+    "baseline_tps_unchanged": 481.53,
+    "tps_added_by_this_leg": 0.0
+  },
+  "nan_clean": true
+}
