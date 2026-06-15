@@ -1,0 +1,72 @@
+[measure] base=google/gemma-4-E4B-it-qat-q4_0-unquantized scheme=asym g=128 bits=[16, 4, 3, 2] records=128(use 128) greedy K=8 G=128
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]Loading weights:  35%|███▌      | 735/2076 [00:00<00:00, 7316.67it/s]Loading weights:  71%|███████   | 1467/2076 [00:00<00:00, 6754.36it/s]Loading weights: 100%|██████████| 2076/2076 [00:00<00:00, 6862.53it/s]
+[measure] model loaded in 9.1s; GPU mem 14.81 GiB
+[measure] snapshotted 258 body linears, 3.890B params (kept lm_head+embed at source precision)
+[measure] b=16: PPL=1.9526 (mean_rec 2.0912) pass<=2.42=True pred_tps=nan [104.5s]
+[measure] b= 4: PPL=1.9512 (mean_rec 2.0899) pass<=2.42=True pred_tps=165.44 [107.3s]
+[measure] b= 3: PPL=2.2232 (mean_rec 2.4242) pass<=2.42=True pred_tps=214.47 [108.1s]
+[measure] b= 2: PPL=5020.7248 (mean_rec 35448.8427) pass<=2.42=False pred_tps=304.80 [106.9s]
+[measure] greedy identity b=16 vs int4: identical=False mismatch=850/1024 (83.01%)
+[measure] greedy identity b=3 vs int4: identical=False mismatch=981/1024 (95.80%)
+[measure] greedy identity b=2 vs int4: identical=False mismatch=1015/1024 (99.12%)
+
+====================================================================================================
+SUB-INT4 BODY MEASUREMENT (PR #355, NON-spec lane) — MEASURED PPL + greedy-identity vs PREDICTED TPS
+====================================================================================================
+  base=google/gemma-4-E4B-it-qat-q4_0-unquantized  scheme=asym g128  records=128  body=3.890B params
+  served-int4 calibration anchors: non-spec 2.0188 / spec 2.3772;  PPL gate 2.42
+  PPL=offline (local proxy); gate_ppl=rel-increase transferred onto deployed int4 anchor 2.3772; gate=<=2.42
+----------------------------------------------------------------------------------------------------
+   bits       PPL  rel/int4  gate_ppl gate<=2.42  pred_tps drift!=int4    GO
+     16    1.9526     n/a       n/a         True     n/a         0.830 False
+      4    1.9512     ref       ref          ref    165.44         ref False
+      3    2.2232    1.1394    2.7085      False    214.47       0.958 False
+      2 5020.7248 2573.1410 6116.8708      False    304.80       0.991 False
+----------------------------------------------------------------------------------------------------
+  >>> any_subint4_width_go (gate_transfer_PPL<=2.42 AND pred_tps>165.44) = False  widths=[]
+  NB: #319 greedy gate is SELF-referential (deterministic sub-int4 passes its OWN AR); drift!=int4 is a quality diagnostic, subsumed by PPL.
+====================================================================================================
+[measure] wrote /workspace/senpai/target/research/validity/sub_int4_body_ceiling/measure_subint4_results.json  (elapsed 441.2s, peak 19586.5 MiB)
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260615_131604-vqzzc9jw
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/sub-int4-body-355-measured
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/vqzzc9jw
+wandb: updating run metadata; uploading artifact sub_int4_body_355_measured
+wandb: uploading artifact sub_int4_body_355_measured
+wandb: uploading history steps 0-0, summary
+wandb: 
+wandb: Run history:
+wandb:                     global_step ▁
+wandb:    summary/any_subint4_width_go ▁
+wandb:      summary/b_min_ppl_codebook ▁
+wandb: summary/b_min_ppl_marlin_scalar ▁
+wandb:          summary/b_to_clear_500 ▁
+wandb:          summary/frontier_go_b2 ▁
+wandb:          summary/frontier_go_b3 ▁
+wandb:   summary/gate_transfer_pass_b2 ▁
+wandb:   summary/gate_transfer_pass_b3 ▁
+wandb:   summary/gate_transfer_pass_b4 ▁
+wandb:                             +29 ...
+wandb: 
+wandb: Run summary:
+wandb:                      event/name summary
+wandb:                event/run_prefix 
+wandb:                     global_step 0
+wandb:    summary/any_subint4_width_go 0
+wandb:      summary/b_min_ppl_codebook 2.93746
+wandb: summary/b_min_ppl_marlin_scalar 3.84996
+wandb:          summary/b_to_clear_500 1.07304
+wandb:          summary/frontier_go_b2 0
+wandb:          summary/frontier_go_b3 0
+wandb:   summary/gate_transfer_pass_b2 0
+wandb:                             +31 ...
+wandb: 
+wandb: 🚀 View run lawine/sub-int4-body-355-measured at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/vqzzc9jw
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260615_131604-vqzzc9jw/logs
+[measure] wandb logged: 38 metrics

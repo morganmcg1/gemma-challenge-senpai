@@ -1,0 +1,190 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T120007Z",
+  "kind": "sub-int4-body-ceiling",
+  "nan_clean": true,
+  "peak_mem_mib": 13.598,
+  "pr": 355,
+  "synthesis": {
+    "b_min_ppl": 2.93746093843898,
+    "b_min_ppl_marlin_scalar": 3.849963542543048,
+    "b_to_clear_500": 1.0730434782608693,
+    "b_to_clear_500_no_floor": 1.1617391304347822,
+    "caveats": [
+      "ZERO_TPS: this leg prices the PPL-vs-bit feasibility of the body-read denominator lever in the NON-SPEC M=1 regime; it builds NO >=500 artifact and adds 0 TPS. BASELINE stays 481.53.",
+      "ANALYTIC_BW_MODEL: tps(b)=165.44*HBM(4)/HBM(b) is a roofline approximation of the weight-read-BW-bound M=1 step (denken #344 AI 4.0 << ridge 208.3); it assumes the non-body 5.7% and the per-group scale floor are fixed wrt body bits. Real sub-int4 Marlin/2-bit kernels add transcode + dispatch overhead, so realized tps(b) is a CEILING on this model.",
+      "PPL_PROXY_DIRECTIONAL: literature PPL(bits) is WikiText-2 on Llama-2-7B proxies, not the challenge eval; b_min_ppl is a RELATIVE-degradation bound, not a measured challenge PPL. A real sub-int4 build must MEASURE challenge PPL<=2.42.",
+      "TWO_LANES: the headline b_min_ppl ~= 2.94 is the GENEROUS best-in-class CODEBOOK lane (AQLM/QTIP). The deployable-today SCALAR Marlin lane (what the served int4 frontier uses) has b_min ~= 3.85 because GPTQ/AWQ 3-bit is +11-13% PPL (>> 1.80% headroom). Both lanes are reported; the realistic-with-today-kernels verdict is the SCALAR lane.",
+      "CODEBOOK_NOT_DEPLOYABLE: the codebook/trellis methods that reach ~3.0 PPL-safe bits (AQLM 2401.06118, QTIP 2406.11235, QuIP# 2402.04396) are NOT per-group bf16-scale Marlin, are NOT in mainstream vLLM, and add random-access decode compute the pure-BW model ignores -- in the SPEC-verify M>=8 GEMM (higher AI, not weight-read-bound) a byte-read shrink may buy ~0. So the codebook spec-clears-500 number is a PURE-BW CEILING, not a deployable route.",
+      "GROUP_SIZE_FLOOR: the scale-metadata floor uses the served g128 frontier; g32 (raw QAT base) is carried as a conservative sensitivity (pulls the int2 point down). Real 2-bit kernels may regroup/repack, changing the floor.",
+      "SPEC_BINDING_WALL_IS_IDENTITY_NOT_PPL: for the SPEC lane at ~3.0 bits, PPL is NOT the wall -- a ~25% body-code shrink lifts the strict 473.5 substrate over 500 in pure BW. The binding walls are (i) a greedy-identity-compliant sub-int4 verify kernel (#192; deployed spec already diverges 56%, kanna #114) and (ii) whether the M>=8 verify is even BW-bound. This is a lane-a-class engineering gap, not a PPL gap.",
+      "DO_NOT_BUILD: NO re-quantization of the served checkpoint, NO served-file change, NOT a launch, NO HF Job, NO submission. A PPL-safe sub-int4 body would be a SEPARATE human-approval-gated MEASURED build; the launch gate stays a measured >=500 at the deployed PPL/greedy-identity contract.",
+      "SPEC_SUBSTRATE_IMPORTED: the spec composition uses denken #332's 473.5 strict cap and denken #283's 0.3805 body+lmhead spec read-fraction; wirbel #354's exact strict-compliant kernel frontier is a companion (< 500). The deployed 481.53 variant is also reported, but it is NOT strict-#192-compliant (kanna #114: 56% divergence)."
+    ],
+    "group_size_served": 128,
+    "lit_notes": "Literature PPL is WikiText-2 on Llama-2-7B (the closest published dense proxy; NO published gemma-4-E4B sub-int4 PPL exists). Used as a RELATIVE directional bound vs the 1.80% relative headroom over the int4 anchor. THE LANES DIVERGE SHARPLY: best-in-class CODEBOOK/trellis (AQLM 3.04b +0.5% [2401.06118], QTIP-hybrid 3.0b +1.1% [2406.11235]) holds within headroom down to ~3.0 avg-bits, so b_min_ppl ~= 2.94; but the deployable SCALAR Marlin lane (GPTQ/AWQ 3-bit +11-13% [2210.17323/2306.00978]) blows the headroom an order of magnitude at 3-bit, so its floor is ~3.85 bits. At 2-bit EVERY method blows the gate (best QTIP-hybrid +12.3%, scalar +160% AWQ-g64 / +558% GPTQ-OmniQuant). CRUCIAL: AQLM/QTIP/QuIP# are additive-codebook/trellis formats -- NOT per-group bf16-scale Marlin -- so they (a) do not match this card's linear-code+scale-floor byte model exactly, (b) are not in mainstream vLLM, and (c) add random-access decode compute that the pure-BW model ignores. Gemma-class models (wide 262k vocab, logit soft-capping, MatFormer/PLE) are not known to be MORE low-bit robust than Llama (arXiv:2409.11055 evaluates Gemma on task-accuracy, not PPL), so this proxy is, if anything, optimistic.",
+    "nonspec_tps_at_bmin_marlin": 171.3160095237961,
+    "nonspec_tps_at_bmin_ppl": 218.5188574207161,
+    "ppl": {
+      "b_min_ppl": 2.93746093843898,
+      "crossed_between_bits": [
+        3.0,
+        2.0
+      ],
+      "curve": [
+        {
+          "arxiv": "PR#52",
+          "bits": 4.0,
+          "corpus": "challenge-private",
+          "model": "deployed gemma-4-E4B g128",
+          "rel_increase_over_4bit": 0.0,
+          "scheme": "int4-anchor"
+        },
+        {
+          "arxiv": "2401.06118-Tab2",
+          "bits": 3.04,
+          "corpus": "WikiText-2(ctx4096)",
+          "model": "Llama-2-7B",
+          "rel_increase_over_4bit": 0.005,
+          "scheme": "AQLM-additive-codebook"
+        },
+        {
+          "arxiv": "2406.11235-Tab5",
+          "bits": 3.0,
+          "corpus": "WikiText-2(ctx4096)",
+          "model": "Llama-2-7B",
+          "rel_increase_over_4bit": 0.011,
+          "scheme": "QTIP-hybrid-trellis"
+        },
+        {
+          "arxiv": "2406.11235-Tab5",
+          "bits": 2.0,
+          "corpus": "WikiText-2(ctx4096)",
+          "model": "Llama-2-7B",
+          "rel_increase_over_4bit": 0.123,
+          "scheme": "QTIP-hybrid-trellis"
+        }
+      ],
+      "headroom_abs": 0.0428,
+      "headroom_rel": 0.018004374894834255
+    },
+    "ppl_marlin": {
+      "b_min_ppl": 3.849963542543048,
+      "crossed_between_bits": [
+        4.0,
+        3.0
+      ],
+      "curve": [
+        {
+          "arxiv": "2306.05179-Tab4",
+          "bits": 4.0,
+          "corpus": "WikiText-2(ctx2048)",
+          "model": "Llama-2-7B",
+          "rel_increase_over_4bit": 0.0,
+          "scheme": "GPTQ/AWQ-4bit-anchor"
+        },
+        {
+          "arxiv": "2210.17323/2306.00978",
+          "bits": 3.0,
+          "corpus": "WikiText-2(ctx2048)",
+          "model": "Llama-2-7B",
+          "rel_increase_over_4bit": 0.12,
+          "scheme": "GPTQ/AWQ-g128"
+        },
+        {
+          "arxiv": "2410.19103",
+          "bits": 2.0,
+          "corpus": "WikiText-2(ctx2048)",
+          "model": "Llama-2-7B",
+          "rel_increase_over_4bit": 1.616,
+          "scheme": "AWQ-g64-2bit"
+        }
+      ],
+      "headroom_abs": 0.0428,
+      "headroom_rel": 0.018004374894834255
+    },
+    "qat_decomp": {
+      "code4_gb": 1.5087843555555556,
+      "group_size": 32,
+      "scale_meta_frac_of_body": 0.11111111111111108,
+      "scale_meta_gb": 0.1885980444444444,
+      "scale_over_code": 0.125
+    },
+    "self_test": {
+      "conditions": {
+        "a_roundtrip_165p44_at_b4": true,
+        "b_monotone_tps_up_as_bits_down": true,
+        "c_int2_in_pr_band_300_340": true,
+        "d_verdict_identity_b500_lt_bminppl": true,
+        "e_floor_makes_b2_not_exactly_half": true,
+        "f_imports_exact_and_caveats": true,
+        "g_int2_body_read_halves_sane": true
+      },
+      "sub_int4_body_ceiling_self_test_passes": true
+    },
+    "served_decomp": {
+      "code4_gb": 1.6459465696969697,
+      "group_size": 128,
+      "scale_meta_frac_of_body": 0.03030303030303026,
+      "scale_meta_gb": 0.05143583030303023,
+      "scale_over_code": 0.03125
+    },
+    "spec_b_to_clear_500_deployed": 3.584650962302624,
+    "spec_b_to_clear_500_strict": 3.4040742014628886,
+    "spec_body_code_frac_of_wall": 0.35574898841503644,
+    "spec_deployed_tps": 481.53,
+    "spec_plus_subint4_clears_500": true,
+    "spec_plus_subint4_clears_500_deployed": true,
+    "spec_plus_subint4_clears_500_marlin": false,
+    "spec_plus_subint4_clears_500_marlin_deployed": false,
+    "spec_strict_frontier_tps": 473.5,
+    "spec_tps_at_bmin_deployed": 531.7831333629441,
+    "spec_tps_at_bmin_marlin_deployed": 488.04235395577786,
+    "spec_tps_at_bmin_marlin_strict": 479.9037538638524,
+    "spec_tps_at_bmin_strict": 522.9151115140365,
+    "spec_tps_at_int2_strict": 575.9461258212311,
+    "step_terms": {
+      "non_body_frac": 0.05700000000000009,
+      "non_body_gb": 0.10259893616118787,
+      "step4_gb": 1.7999813361611878
+    },
+    "strict_nonspec_tps_at_int2": 304.79678427869584,
+    "strict_nonspec_tps_at_int2_g32": 284.80489671002294,
+    "strict_nonspec_tps_at_int2_no_floor": 313.03689687795645,
+    "sub_int4_alone_clears_500": false,
+    "tps_curve": [
+      {
+        "bits": 4.0,
+        "body_read_frac_of_int4": 1.0,
+        "body_read_gb_served": 1.6973824,
+        "tps_g32_floor": 165.44,
+        "tps_no_floor": 165.44,
+        "tps_served_floor": 165.44
+      },
+      {
+        "bits": 3.0,
+        "body_read_frac_of_int4": 0.7575757575757576,
+        "body_read_gb_served": 1.2858957575757575,
+        "tps_g32_floor": 209.2999718864211,
+        "tps_no_floor": 216.47366699378475,
+        "tps_served_floor": 214.4688874921433
+      },
+      {
+        "bits": 2.5,
+        "body_read_frac_of_int4": 0.6363636363636364,
+        "body_read_gb_served": 1.0801524363636363,
+        "tps_g32_floor": 241.28342245989305,
+        "tps_no_floor": 255.95049313479012,
+        "tps_served_floor": 251.77642501383505
+      },
+      {
+        "bits": 2.0,
+        "body_read_frac_of_int4": 0.5151515151515151,
+        "body_read_gb_served": 0.8744091151515151,
+        "tps_g32_floor": 284.80489671002294,
+        "tps_no_floor": 313.03689687795645,
+        "tps_served_floor": 304.79678427869584
+      }
+    ]
+  }
+}
