@@ -6,6 +6,23 @@
 branch-interior) reach 500 at ITS OWN cheaper verify step?  LOCAL CPU-only analytic
 composition of banked figures. NOT a launch. NOT open2. NO GPU / served-file change.
 
+REVISION (advisor send-back -- re-ground the step basis on denken #257)
+----------------------------------------------------------------------
+The first pass headlined 506.27 TPS by dividing the shallow E[T]=4.3003 by step_shallow=
+1.064 ms, derived as 1.085 - 0.021 off the ANALYTIC built-step anchor STEP_BUILT_FULL_MS=
+1.084953 (denken #241). That 1.085 anchor was EMPIRICALLY RETIRED by denken #257 (eee4603,
+merged): a forward-pass roofline measured the built tree step at 1.3458 ms CENTRAL (measured
+g_d=0.0195, ~9x below the assumed 0.168), band [1.1186 (assumed-g_d optimistic), 1.4294
+(measured-g_d depth9 pessimistic)]. The measured band sits ENTIRELY ABOVE the shallow tree's
+break-even step (step_shallow must be <= 1.0774 ms / step_full <= ~1.098 ms to clear 500).
+So this revision re-prices the SAME fidelity-safe tree at the GROUNDED step as a step-conditioned
+BRACKET (not one inflated point), inverts the break-even (at 1.346 ms, what E[T] would clear
+500?), and flags the near-zero lambda-hat validity headroom. Headline flips: under the grounded
+central step the shallow tree implies ~406.6 TPS and MISSES 500; the required E[T]=5.288 exceeds
+even the FULL tree's 4.512 by +0.776, so NO tree route (shallow OR land #245's deep branch) clears
+500 at the grounded step. The structure / E[T] / floor-inversion machinery is UNCHANGED and still
+self-tests 7/7; only the step BASIS is re-grounded.
+
 THE QUESTION
 ------------
 land #245 hit a verify-fidelity wall on the DEEP branch-interior of the depth-9/branch-3
@@ -58,7 +75,8 @@ The serve-layer tau tie-breaker band is kanna #260 (SECONDARY, additive, NOT loa
 BASELINE stays 481.53; this leg adds 0 TPS.
 
 PRIMARY metric  fidelity_safe_shallow_tree_self_test_passes
-TEST    metric  shallow_tree_implied_tps  (= K_cal*(4.3003/step_shallow)*tau, central per-node step)
+TEST    metric  shallow_tree_implied_tps  (= K_cal*(4.3003/step_shallow_grounded_central)*tau, at the
+                denken #257 GROUNDED central step 1.3458 - 0.0209 = 1.3249 ms -> ~406.6 TPS, MISSES 500)
 
 Run:
   cd target/ && CUDA_VISIBLE_DEVICES="" python \
@@ -107,9 +125,26 @@ E_T_MEAS_FLOOR_FULL = 4.330527243789328   # E[T] needed to clear 500 AT the full
 LAMBDA1_CEILING_TPS = 520.9527323111674   # lambda=1 ceiling (E[T]=4.512 @ built step)
 K_CAL = 125.26795005202914                # official = K_cal*(E[T]/step)*tau  (rounds to 125.268)
 TAU = 1.0                                 # central composition tau (#252: tau in [0.9924,1.0])
-LAMBDA_BAR = 0.9780112973731208           # fern #249 / stark #191 P95 acceptance gate (separate axis)
+LAMBDA_BAR = 0.9780112973731208           # fern #249 / stark #191 P95 ACHIEVED acceptance lambda-hat
+LAMBDA_BAR_GATE = 0.9780                   # the P95 acceptance BAR (threshold the achieved lambda-hat must clear)
 BASELINE_TPS = 481.53                     # official baseline (PR #52); UNCHANGED by this leg
 TARGET_OFFICIAL = 500.0
+
+# ---- denken #257 (eee4603) BUILT-STEP ROOFLINE GROUNDING -- RETIRES the 1.085 anchor. -------- #
+# Forward-pass roofline measured the built tree step; g_d_measured=0.0195 is ~9x BELOW the assumed
+# 0.168 the 1.085 analytic anchor bakes in. Imported EXACTLY from the committed report
+#   research/validity/built_step_roofline/built_step_roofline_report.json  (advisor branch eee4603).
+# These GROUND the step the E_T floor divides by. The advisor send-back requires re-pricing the
+# shallow tree at THESE steps as a bracket, not at the retired 1.085.
+STEP_BUILT_GROUNDED_CENTRAL_MS = 1.3458358727216921    # measured g_d=0.0195, b5 (the NEW central)
+STEP_BUILT_GROUNDED_PESSIMISTIC_MS = 1.4294356405266744  # measured g_d, depth9 (band-high ~1.43)
+STEP_BUILT_GROUNDED_OPTIMISTIC_MS = 1.1185888768817671   # assumed g_d=0.168, b5 (band-low ~1.12)
+G_D_MEASURED_257 = 0.019498025961743392    # measured full-forward draft-overhead fraction
+G_D_ASSUMED_FLEET = 0.168                  # the assumed g_d the retired 1.085 bakes in
+# cross-check anchor: denken #257's OWN full-tree (E[T]=4.512) implied TPS at the grounded central
+# step. My K_cal composition must reproduce this EXACTLY (machine precision) -> import provenance.
+DENKEN257_FULLTREE_TPS_AT_CENTRAL = 419.96873622615647
+DENKEN257_FULLTREE_CLEARS_500 = False      # report verdict: even the FULL tree misses at the grounded step
 
 F_TREE_TOPO74_M16_COMMITTED = 4.512274954048941  # wirbel #83 committed F_tree (structure proof)
 
@@ -329,26 +364,92 @@ def run() -> dict[str, Any]:
     fixed_fraction_breakeven = (required_reduction_pct / predicted_reduction_pct
                                 if predicted_reduction_pct > 0 else float("inf"))
 
-    # ---- (4) orthogonal serve-layer tau tie-breaker (kanna #260) -- SECONDARY ----
-    shallow_tps_serve_central = shallow_tps * (1.0 + SERVE_LEVER_CENTRAL_PCT)
-    shallow_tps_serve_hi = shallow_tps * (1.0 + SERVE_LEVER_HI_PCT)
+    # ---- (3') RE-GROUND the step basis on denken #257 (advisor send-back) ----
+    # The 1.085 analytic anchor is RETIRED. Re-price the SAME shallow tree (E[T]=4.3003, same
+    # per-node saving) at the GROUNDED built steps as a step-conditioned BRACKET. Each row applies
+    # the SAME shallow saving (sm["step_reduction_abs_ms"], ~0.0209 ms) to its step_full basis.
+    shallow_saving = sm["step_reduction_abs_ms"]
 
-    # ---- (5) verdict table ----
+    def _bracket_row(label: str, step_full: float, basis: str, retired: bool = False) -> dict:
+        step_sh = step_full - shallow_saving
+        tps = implied_tps(shallow_et, step_sh)
+        return {
+            "label": label, "basis": basis, "retired_anchor": retired,
+            "step_full_ms": step_full, "step_shallow_ms": step_sh,
+            "E_T_floor_at_step_shallow": e_t_floor(step_sh),
+            "margin_vs_floor": shallow_et - e_t_floor(step_sh),
+            "implied_tps": tps, "clears_500": bool(tps >= TARGET_OFFICIAL),
+        }
+
+    grounded_bracket = [
+        _bracket_row("retired_analytic_1p085", STEP_BUILT_FULL_MS,
+                     "denken #241 analytic anchor -- RETIRED by #257", retired=True),
+        _bracket_row("grounded_optimistic_1p12", STEP_BUILT_GROUNDED_OPTIMISTIC_MS,
+                     "denken #257 assumed-g_d=0.168 b5 (band-low, most optimistic grounded)"),
+        _bracket_row("grounded_central_1p346", STEP_BUILT_GROUNDED_CENTRAL_MS,
+                     "denken #257 MEASURED g_d=0.0195 b5 (CENTRAL -- the new headline basis)"),
+        _bracket_row("grounded_pessimistic_1p43", STEP_BUILT_GROUNDED_PESSIMISTIC_MS,
+                     "denken #257 measured-g_d depth9 (band-high, pessimistic)"),
+    ]
+    # the new headline read: grounded CENTRAL row.
+    central_row = next(r for r in grounded_bracket if r["label"] == "grounded_central_1p346")
+    step_shallow_grounded_central = central_row["step_shallow_ms"]
+    shallow_tps_grounded_central = central_row["implied_tps"]          # NEW TEST metric (was 506.27)
+    shallow_clears_grounded_central = central_row["clears_500"]        # NEW headline boolean (False)
+    grounded_any_clears = any(r["clears_500"] for r in grounded_bracket if not r["retired_anchor"])
+
+    # ---- (3'') INVERT the break-even: at the grounded central step, what E[T] clears 500? ----
+    # The shallow tree built at the grounded central full step runs at step_shallow_grounded_central.
+    # E[T] needed to clear 500 there = E_T_floor(step_shallow_grounded_central). This is the single
+    # most actionable number for land #245: how much MORE acceptance the real-path build must extract.
+    e_t_needed_grounded_central = e_t_floor(step_shallow_grounded_central)         # at the shallow step
+    e_t_needed_at_full_grounded_step = e_t_floor(STEP_BUILT_GROUNDED_CENTRAL_MS)   # at the full step (ref)
+    delta_et_needed_vs_shallow = e_t_needed_grounded_central - shallow_et          # +0.988 over 4.3003
+    delta_et_needed_vs_full = e_t_needed_grounded_central - E_T_BOTH               # +0.776 over 4.512
+    # does even the FULL tree (E[T]=4.512, deep branch included) clear at the grounded central step?
+    full_tree_tps_grounded_central = implied_tps(E_T_BOTH, STEP_BUILT_GROUNDED_CENTRAL_MS)
+    full_tree_clears_grounded_central = bool(E_T_BOTH >= e_t_needed_at_full_grounded_step)
+    # provenance: my full-tree composition must reproduce denken #257's own number EXACTLY.
+    fulltree_257_crosscheck_resid = abs(full_tree_tps_grounded_central - DENKEN257_FULLTREE_TPS_AT_CENTRAL)
+    # the deep branch-interior (#259) is worth only E_branch_interior; adding it back (4.3003 -> 4.512)
+    # still leaves a shortfall to the required E[T] at the grounded step.
+    shortfall_after_adding_deep_branch = e_t_needed_grounded_central - (shallow_et + E_BRANCH_INTERIOR)
+
+    # ---- (3''') lambda-hat validity headroom flag ----
+    lambda_hat_margin = LAMBDA_BAR - LAMBDA_BAR_GATE        # ~1.13e-5 -- essentially zero headroom
+    lambda_hat_clears = bool(LAMBDA_BAR >= LAMBDA_BAR_GATE)
+
+    # ---- (4) orthogonal serve-layer tau tie-breaker (kanna #260) -- SECONDARY ----
+    # NOTE: now applied to the GROUNDED-central TPS (the honest basis), not the retired 506.27.
+    shallow_tps_serve_central = shallow_tps_grounded_central * (1.0 + SERVE_LEVER_CENTRAL_PCT)
+    shallow_tps_serve_hi = shallow_tps_grounded_central * (1.0 + SERVE_LEVER_HI_PCT)
+
+    # ---- (5) verdict table -- step-conditioned bracket (full + shallow, retired vs grounded) ----
     verdict_table = [
         {
-            "tree": "full 16-node (land #245 path)", "fidelity": "RISK (scratch-suspect deep branch)",
-            "nodes": n_full, "E_T": E_T_BOTH, "step_ms": STEP_BUILT_FULL_MS,
-            "E_T_floor_at_step": e_t_floor(STEP_BUILT_FULL_MS),
+            "tree": "full 16-node @ RETIRED 1.085 step (land #245 path, old read)",
+            "fidelity": "RISK (scratch-suspect deep branch)", "nodes": n_full, "E_T": E_T_BOTH,
+            "step_ms": STEP_BUILT_FULL_MS, "E_T_floor_at_step": e_t_floor(STEP_BUILT_FULL_MS),
             "clears_500": bool(E_T_BOTH >= e_t_floor(STEP_BUILT_FULL_MS)),
-            "implied_TPS": implied_tps(E_T_BOTH, STEP_BUILT_FULL_MS),
+            "implied_TPS": implied_tps(E_T_BOTH, STEP_BUILT_FULL_MS), "basis": "RETIRED",
         },
         {
-            "tree": "fidelity-safe 13-node shallow (Path-A-lite)", "fidelity": "SAFE (all real-KV-confirmed)",
-            "nodes": n_shallow, "E_T": shallow_et, "step_ms": step_shallow,
-            "E_T_floor_at_step": e_t_floor_shallow,
-            "clears_500": shallow_tree_clears_500,
-            "implied_TPS": shallow_tps,
+            "tree": "full 16-node @ GROUNDED central 1.346 step (denken #257)",
+            "fidelity": "RISK (scratch-suspect deep branch)", "nodes": n_full, "E_T": E_T_BOTH,
+            "step_ms": STEP_BUILT_GROUNDED_CENTRAL_MS,
+            "E_T_floor_at_step": e_t_floor(STEP_BUILT_GROUNDED_CENTRAL_MS),
+            "clears_500": full_tree_clears_grounded_central,
+            "implied_TPS": full_tree_tps_grounded_central, "basis": "GROUNDED",
         },
+    ] + [
+        {
+            "tree": f"fidelity-safe 13-node shallow @ {r['label']}",
+            "fidelity": "SAFE (all real-KV-confirmed)", "nodes": n_shallow, "E_T": shallow_et,
+            "step_ms": r["step_shallow_ms"], "E_T_floor_at_step": r["E_T_floor_at_step_shallow"],
+            "clears_500": r["clears_500"], "implied_TPS": r["implied_tps"],
+            "basis": "RETIRED" if r["retired_anchor"] else "GROUNDED",
+        }
+        for r in grounded_bracket
     ]
 
     # ---- (6) self-test (PRIMARY) ----
@@ -380,16 +481,39 @@ def run() -> dict[str, Any]:
     cond["g_topo74_committed_structure"] = bool(
         abs(f_tree_committed - F_TREE_TOPO74_M16_COMMITTED) <= 1e-12 and n_full == 16
     )
+    # ---- REVISION self-tests (the denken #257 re-grounding) ----
+    # h: the grounded bracket is strictly monotone DECREASING in step_full (TPS ~ 1/step).
+    grounded_only = [r for r in grounded_bracket if not r["retired_anchor"]]
+    cond["h_grounded_bracket_monotone_in_step"] = bool(
+        all(grounded_only[i]["step_full_ms"] < grounded_only[i + 1]["step_full_ms"]
+            and grounded_only[i]["implied_tps"] > grounded_only[i + 1]["implied_tps"]
+            for i in range(len(grounded_only) - 1))
+    )
+    # i: the inversion round-trips -- E[T]=E_T_needed at the grounded shallow step prices EXACTLY 500.
+    inv_rt_resid = abs(implied_tps(e_t_needed_grounded_central, step_shallow_grounded_central)
+                       - TARGET_OFFICIAL)
+    cond["i_inversion_roundtrips_to_500"] = bool(inv_rt_resid <= TOL_RT_ET)
+    # j: my full-tree composition REPRODUCES denken #257's own grounded full-tree TPS (419.97) EXACTLY
+    #    -> the grounded step import is provenance-faithful (not a re-derivation).
+    cond["j_fulltree_reproduces_denken257_419p97"] = bool(
+        fulltree_257_crosscheck_resid <= TOL_RT_FLOOR)
+    # k: the achieved lambda-hat clears the 0.9780 P95 bar but with ~zero (<1e-4) headroom (FLAG).
+    cond["k_lambda_hat_clears_bar_zero_headroom"] = bool(
+        lambda_hat_clears and 0.0 < lambda_hat_margin < 1e-4)
 
     handoff = _handoff_line(
-        step_shallow=step_shallow, e_t_floor_shallow=e_t_floor_shallow,
-        clears=shallow_tree_clears_500, shallow_tps=shallow_tps,
+        step_shallow=step_shallow_grounded_central,
+        e_t_floor_shallow=e_t_needed_grounded_central,
+        clears=shallow_clears_grounded_central, shallow_tps=shallow_tps_grounded_central,
+        e_t_needed=e_t_needed_grounded_central, delta_vs_full=delta_et_needed_vs_full,
     )
 
     verdict = (
-        "FIDELITY-SAFE ROUTE TO 500 EXISTS (Path-A-lite clears at its own cheaper step)"
-        if shallow_tree_clears_500 else
-        "NO FIDELITY-SAFE ROUTE AT SHALLOW STEP (deep branch-interior still load-bearing)"
+        "FIDELITY-SAFE ROUTE TO 500 EXISTS at the grounded step (clears)"
+        if shallow_clears_grounded_central else
+        "NO ROUTE TO 500 AT THE GROUNDED STEP -- shallow MISSES (~{:.1f} TPS) and even the FULL "
+        "tree (E[T]=4.512) misses; clearing 500 needs E[T]={:.3f} (+{:.3f} over the full tree)".format(
+            shallow_tps_grounded_central, e_t_needed_grounded_central, delta_et_needed_vs_full)
     )
 
     result = {
@@ -398,11 +522,12 @@ def run() -> dict[str, Any]:
         "kind": "fidelity-safe-shallow-tree",
         "metric_primary": "fidelity_safe_shallow_tree_self_test_passes",
         "metric_test": "shallow_tree_implied_tps",
-        # ---- PRIMARY / TEST ----
+        # ---- PRIMARY / TEST (TEST now on the denken #257 GROUNDED central basis) ----
         "fidelity_safe_shallow_tree_self_test_passes": all(
             v for v in cond.values() if isinstance(v, bool)),
-        "shallow_tree_implied_tps": shallow_tps,
-        "shallow_tree_clears_500": shallow_tree_clears_500,
+        "shallow_tree_implied_tps": shallow_tps_grounded_central,
+        "shallow_tree_clears_500": shallow_clears_grounded_central,
+        "shallow_tree_implied_tps_retired_anchor": shallow_tps,  # the now-RETIRED 506.27 read (1.085 basis)
         # ---- the shallow tree ----
         "shallow_tree": {
             "definition": (
@@ -436,7 +561,10 @@ def run() -> dict[str, Any]:
             "E_branch_interior_dropped": E_BRANCH_INTERIOR,
         },
         "step_model": sm,
-        "floor_and_clears": {
+        "floor_and_clears_RETIRED_ANCHOR": {
+            "BASIS_NOTE": "RETIRED: this block prices the shallow tree at the 1.085 analytic step "
+                          "(denken #241), which denken #257 empirically retired. Kept for continuity / "
+                          "audit of the first-pass 506.27 read. The LIVE headline is grounded_step_257.",
             "law": "official = K_cal*(E[T]/step)*tau ; E_T_floor(step) = 500*step/(K_cal*tau)",
             "K_cal": K_CAL,
             "tau": TAU,
@@ -470,25 +598,92 @@ def run() -> dict[str, Any]:
                 ),
             },
         },
+        # ============================ THE LIVE HEADLINE (denken #257 re-grounded) ============== #
+        "grounded_step_257": {
+            "BASIS_NOTE": "denken #257 (eee4603) forward-pass roofline RETIRED the 1.085 analytic step. "
+                          "g_d_measured=0.0195 (~9x below the assumed 0.168). Re-prices the SAME shallow "
+                          "tree (E[T]=4.3003, same -0.0209 ms per-node saving) at the GROUNDED built steps.",
+            "g_d_measured_257": G_D_MEASURED_257,
+            "g_d_assumed_fleet": G_D_ASSUMED_FLEET,
+            "shallow_saving_ms": shallow_saving,
+            "step_threshold_clear500_shallow_ms": step_threshold,         # 1.0774: step_shallow must be <= this
+            "step_threshold_clear500_full_ms": step_threshold + shallow_saving,  # ~1.098: step_full must be <= this
+            # ---- (1) the step-conditioned BRACKET (the advisor's requested deliverable) ----
+            "bracket": grounded_bracket,
+            "grounded_band_full_step_ms": [STEP_BUILT_GROUNDED_OPTIMISTIC_MS,
+                                           STEP_BUILT_GROUNDED_PESSIMISTIC_MS],
+            "grounded_central_full_step_ms": STEP_BUILT_GROUNDED_CENTRAL_MS,
+            "shallow_tps_grounded_central": shallow_tps_grounded_central,
+            "shallow_tps_grounded_band": [
+                next(r["implied_tps"] for r in grounded_bracket if r["label"] == "grounded_optimistic_1p12"),
+                next(r["implied_tps"] for r in grounded_bracket if r["label"] == "grounded_pessimistic_1p43"),
+            ],
+            "shallow_clears_grounded_central": shallow_clears_grounded_central,
+            "grounded_any_clears": grounded_any_clears,
+            # ---- (2) the INVERTED break-even (the most actionable number for land #245) ----
+            "inversion": {
+                "step_shallow_grounded_central_ms": step_shallow_grounded_central,
+                "e_t_needed_to_clear500_at_grounded_shallow_step": e_t_needed_grounded_central,
+                "e_t_needed_at_full_grounded_step": e_t_needed_at_full_grounded_step,
+                "delta_et_needed_vs_shallow_4p300": delta_et_needed_vs_shallow,
+                "delta_et_needed_vs_full_4p512": delta_et_needed_vs_full,
+                "full_tree_tps_grounded_central": full_tree_tps_grounded_central,
+                "full_tree_clears_grounded_central": full_tree_clears_grounded_central,
+                "denken257_fulltree_tps_at_central": DENKEN257_FULLTREE_TPS_AT_CENTRAL,
+                "fulltree_257_crosscheck_resid": fulltree_257_crosscheck_resid,
+                "shortfall_after_adding_deep_branch_259": shortfall_after_adding_deep_branch,
+                "note": (
+                    "at the grounded central step the shallow tree needs E[T]={:.4f} to clear 500 "
+                    "(+{:.4f} over the fidelity-safe 4.3003). That target EXCEEDS even the FULL tree's "
+                    "E[T]=4.512 by +{:.4f}; the deep branch-interior (#259) is worth only +{:.4f}, so "
+                    "adding it back still falls {:.4f} short -- NO tree route clears 500 at the grounded "
+                    "step.".format(e_t_needed_grounded_central, delta_et_needed_vs_shallow,
+                                   delta_et_needed_vs_full, E_BRANCH_INTERIOR,
+                                   shortfall_after_adding_deep_branch)
+                ),
+            },
+            # ---- (3) lambda-hat validity headroom FLAG ----
+            "lambda_hat_flag": {
+                "lambda_hat_achieved": LAMBDA_BAR,
+                "lambda_bar_gate": LAMBDA_BAR_GATE,
+                "lambda_hat_margin": lambda_hat_margin,
+                "lambda_hat_clears": lambda_hat_clears,
+                "note": (
+                    "lambda-hat={:.10f} clears the {} P95 bar by only {:.2e} -- essentially ZERO "
+                    "validity headroom. The E[T]={:.4f} the build must reach (point 2) must come from "
+                    "genuinely better DRAFTING, NOT from relaxing acceptance: any E[T] bought by "
+                    "accepting lower-prob draft tokens lowers lambda-hat below 0.9780 and BREAKS the "
+                    "P95 validity gate.".format(LAMBDA_BAR, LAMBDA_BAR_GATE, lambda_hat_margin,
+                                                e_t_needed_grounded_central)
+                ),
+            },
+        },
         "serve_lever_secondary": {
             "source": "kanna #260 greedy-safe serve-layer tau tie-breaker (additive, NOT load-bearing)",
+            "applied_to": "GROUNDED-central shallow TPS (the honest basis), NOT the retired 506.27",
             "serve_lever_central_pct": SERVE_LEVER_CENTRAL_PCT,
             "serve_lever_band_pct": [SERVE_LEVER_LO_PCT, SERVE_LEVER_HI_PCT],
             "shallow_tps_with_serve_lever_central": shallow_tps_serve_central,
             "shallow_tps_with_serve_lever_hi": shallow_tps_serve_hi,
-            "note": "SECONDARY / tau-term -- does NOT carry the headline; the headline rests on the "
-                    "real-KV-confirmed E[T]=4.3003 at the model-compute step_shallow.",
+            "note": "SECONDARY / tau-term -- does NOT carry the headline and does NOT rescue the miss "
+                    "(+0.06% on ~406 TPS is ~+0.25 TPS). The grounded headline rests on E[T]=4.3003 at "
+                    "the denken #257 grounded step.",
         },
         "verdict": {
             "headline": verdict,
-            "shallow_tree_clears_500": shallow_tree_clears_500,
-            "fidelity_safe_route_to_500_exists": shallow_tree_clears_500,
+            "shallow_tree_clears_500": shallow_clears_grounded_central,
+            "fidelity_safe_route_to_500_exists_at_grounded_step": shallow_clears_grounded_central,
+            "full_tree_clears_500_at_grounded_step": full_tree_clears_grounded_central,
             "table": verdict_table,
             "one_line_read": (
-                "a fidelity-SAFE route to 500 {} at the shallow tree's own cheaper step -- "
-                "land #245's deep-branch reconstruction is {}.".format(
-                    "EXISTS" if shallow_tree_clears_500 else "DOES NOT EXIST",
-                    "OPTIONAL UPSIDE" if shallow_tree_clears_500 else "the ONLY tree route")
+                "at denken #257's grounded central built step (1.346 ms) the fidelity-safe shallow tree "
+                "implies ~{:.1f} TPS and MISSES 500; clearing 500 there needs E[T]={:.3f}, which exceeds "
+                "even the FULL tree's 4.512 by +{:.3f} -- so NO tree route (shallow OR land #245's deep "
+                "branch) reaches 500 at the grounded step. The first-pass 506.27 read was an artifact of "
+                "the retired 1.085 anchor.".format(
+                    shallow_tps_grounded_central, e_t_needed_grounded_central, delta_et_needed_vs_full)
+                if not shallow_clears_grounded_central else
+                "a fidelity-SAFE route to 500 EXISTS at the grounded step."
             ),
         },
         "self_test": {
@@ -507,19 +702,21 @@ def run() -> dict[str, Any]:
             "E_T_meas_floor_full": E_T_MEAS_FLOOR_FULL,
             "E_T_both": E_T_BOTH,
             "confirmed_et": CONFIRMED_ET,
-            "note": "BASELINE 481.53, the 520.95 lambda=1 ceiling, K_cal=125.268, lambda-bar 0.9780, "
-                    "the 4.3305 full-step floor and the #259 confirmed_et 4.3003 are IMPORTED EXACTLY "
-                    "and UNCHANGED. This leg re-PRICES the banked projection at a cheaper step; it "
-                    "moves no measurement. land #245 owns the live build.",
+            "lambda_bar_gate": LAMBDA_BAR_GATE,
+            "note": "BASELINE 481.53, the 520.95 lambda=1 ceiling, K_cal=125.268, lambda-hat 0.9780113, "
+                    "the 4.3305 (1.085-step) floor and the #259 confirmed_et 4.3003 are IMPORTED EXACTLY "
+                    "and UNCHANGED. This REVISION re-prices the banked projection at the GROUNDED (denken "
+                    "#257) step -- which is HIGHER, not cheaper -- flipping the headline; it moves no "
+                    "measurement. land #245 owns the live build.",
         },
         "handoff": handoff,
         "scope": (
-            "LOCAL CPU-only analytic composition of banked figures. Prices whether the fidelity-SAFE "
+            "LOCAL CPU-only analytic composition of banked figures. Re-prices whether the fidelity-SAFE "
             "13-node shallow sub-tree (spine + first-level rho2, dropping the scratch-suspect deep "
-            "branch-interior) clears 500 at its OWN cheaper verify step -- by re-deriving the E_T "
-            "floor at step_shallow and checking confirmed_et=4.3003 against IT. No GPU / vLLM / HF "
-            "Job / submission / served-file change / official draw. BASELINE stays 481.53; adds 0 "
-            "TPS. land #245 owns the live measurement. NOT a launch. NOT open2."
+            "branch-interior) clears 500 at the GROUNDED built step (denken #257), as a step-conditioned "
+            "bracket + inverted E[T] break-even + lambda-hat headroom flag. No GPU / vLLM / HF Job / "
+            "submission / served-file change / official draw. BASELINE stays 481.53; adds 0 TPS. land "
+            "#245 owns the live measurement. NOT a launch. NOT open2."
         ),
         "public_evidence_used": [
             "fern #259 (1j099vrm): E[T]=4.512 additive decomposition -> E_spine 4.0244 / "
@@ -532,11 +729,15 @@ def run() -> dict[str, Any]:
             "marginal in the flat M<=32 regime).",
             "denken #85: tree-overhead audit on the EXACT topo74 M16 tree (centroid_sampler ~M^0.75, "
             "verify_argmax ~M^0.94, attention amortizes 1.06x -> node-count-bound, not depth-bound).",
-            "denken #241 (hqewf1d6) / #252: built step 1.084953 ms, 4.3305 floor, 520.95 ceiling, "
-            "K_cal 125.268.",
-            "fern #249 / stark #191: lambda-bar 0.9780 P95 validity gate.",
+            "denken #241 (hqewf1d6) / #252: analytic built step 1.084953 ms, 4.3305 floor, 520.95 "
+            "ceiling, K_cal 125.268 -- the 1.085 step RETIRED by #257.",
+            "denken #257 (eee4603, MERGED): built-step roofline grounding -- measured g_d=0.0195 "
+            "(~9x below assumed 0.168) -> built step 1.3458 ms central, band [1.1186, 1.4294]; the "
+            "full E[T]=4.512 tree implies only 419.97 TPS at this step (clears_500=False). THIS LEG'S "
+            "GROUNDED STEP BASIS.",
+            "fern #249 / stark #191: lambda-hat 0.9780113 vs the 0.9780 P95 validity bar (margin ~1.1e-5).",
             "kanna #260: greedy-safe serve-layer tau tie-breaker +0.0616% central (band +0.0185..+0.1849%) "
-            "-- SECONDARY additive lever.",
+            "-- SECONDARY additive lever (does not rescue the grounded miss).",
         ],
         "peak_mem_mib": round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0, 3),
         "elapsed_s": round(time.time() - t0, 4),
@@ -554,16 +755,22 @@ def run() -> dict[str, Any]:
 
 
 def _handoff_line(*, step_shallow: float, e_t_floor_shallow: float, clears: bool,
-                  shallow_tps: float) -> str:
-    verb = "clears" if clears else "misses"
-    upside = "optional upside" if clears else "the only tree route"
-    exists = "exists" if clears else "does not exist"
+                  shallow_tps: float, e_t_needed: float, delta_vs_full: float) -> str:
+    verb = "clears" if clears else "MISSES"
+    exists = "exists" if clears else "does NOT exist"
+    if clears:
+        tail = "land #245's deep-branch reconstruction is optional upside."
+    else:
+        tail = (
+            f"clearing 500 at this step needs E[T]={e_t_needed:.3f}, which exceeds even the FULL "
+            f"16-node tree's E[T]=4.512 by +{delta_vs_full:.3f} -- so NEITHER the shallow tree NOR "
+            f"land #245's deep-branch reconstruction reaches 500 at the grounded step."
+        )
     return (
-        f"the fidelity-safe 13-node shallow tree (spine + first-level rho2, no scratch-suspect deep "
-        f"branch-interior) has E[T]=4.3003 at step_shallow={step_shallow:.6f} ms, whose E_T floor is "
-        f"{e_t_floor_shallow:.4f}, so it {verb} 500 at implied {shallow_tps:.2f} TPS -- meaning a "
-        f"fidelity-RISK-FREE route to 500 {exists} and land #245's deep-branch reconstruction is "
-        f"{upside}."
+        f"on denken #257's GROUNDED central built step, the fidelity-safe 13-node shallow tree "
+        f"(spine + first-level rho2) has E[T]=4.3003 at step_shallow={step_shallow:.6f} ms, whose "
+        f"E_T floor is {e_t_floor_shallow:.4f}, so it {verb} 500 at implied {shallow_tps:.2f} TPS "
+        f"-- a fidelity-RISK-FREE route to 500 {exists} at the grounded step; {tail}"
     )
 
 
@@ -603,14 +810,20 @@ def _log_wandb(args, result: dict[str, Any]) -> None:
               "path-a-lite", "shallow-tree", "step-shallow", "pr262"],
         config={"baseline_tps": BASELINE_TPS, "method": "cpu-only-analytic",
                 "target_tps": TARGET_OFFICIAL, "confirmed_et": CONFIRMED_ET,
-                "step_built_full_ms": STEP_BUILT_FULL_MS, "K_cal": K_CAL, "tau": TAU,
-                "imports_pr": [259, 245, 83, 153, 85, 241, 252, 249, 260]},
+                "step_built_full_ms_RETIRED": STEP_BUILT_FULL_MS,
+                "step_built_grounded_central_ms": STEP_BUILT_GROUNDED_CENTRAL_MS,
+                "g_d_measured_257": G_D_MEASURED_257, "K_cal": K_CAL, "tau": TAU,
+                "revision": "denken257-regrounding",
+                "imports_pr": [259, 245, 83, 153, 85, 241, 252, 257, 249, 260]},
     )
     if run is None:
         print("[fidelity-shallow] wandb disabled; skipping", flush=True)
         return
     sm = result["step_model"]
-    fc = result["floor_and_clears"]
+    fc = result["floor_and_clears_RETIRED_ANCHOR"]
+    gs = result["grounded_step_257"]
+    inv = gs["inversion"]
+    lf = gs["lambda_hat_flag"]
     sv = result["serve_lever_secondary"]
     st = result["shallow_tree"]
     try:
@@ -651,11 +864,33 @@ def _log_wandb(args, result: dict[str, Any]) -> None:
             "fixed_fraction_breakeven": fc["crossover"]["fixed_fraction_breakeven"],
             "shallow_tps_with_serve_lever_central": sv["shallow_tps_with_serve_lever_central"],
             "shallow_tps_with_serve_lever_hi": sv["shallow_tps_with_serve_lever_hi"],
+            # ---- GROUNDED (denken #257) -- the live headline metrics ----
+            "g_d_measured_257": gs["g_d_measured_257"],
+            "shallow_saving_ms": gs["shallow_saving_ms"],
+            "step_built_grounded_central_ms": gs["grounded_central_full_step_ms"],
+            "step_built_grounded_opt_ms": gs["grounded_band_full_step_ms"][0],
+            "step_built_grounded_pess_ms": gs["grounded_band_full_step_ms"][1],
+            "step_threshold_clear500_full_ms": gs["step_threshold_clear500_full_ms"],
+            "shallow_tps_grounded_central": gs["shallow_tps_grounded_central"],
+            "shallow_tps_grounded_opt": gs["shallow_tps_grounded_band"][0],
+            "shallow_tps_grounded_pess": gs["shallow_tps_grounded_band"][1],
+            "shallow_tps_retired_anchor": result["shallow_tree_implied_tps_retired_anchor"],
+            "shallow_clears_grounded_central": 1.0 if gs["shallow_clears_grounded_central"] else 0.0,
+            "grounded_any_clears": 1.0 if gs["grounded_any_clears"] else 0.0,
+            "e_t_needed_grounded_central": inv["e_t_needed_to_clear500_at_grounded_shallow_step"],
+            "delta_et_needed_vs_shallow": inv["delta_et_needed_vs_shallow_4p300"],
+            "delta_et_needed_vs_full": inv["delta_et_needed_vs_full_4p512"],
+            "full_tree_tps_grounded_central": inv["full_tree_tps_grounded_central"],
+            "full_tree_clears_grounded_central": 1.0 if inv["full_tree_clears_grounded_central"] else 0.0,
+            "fulltree_257_crosscheck_resid": inv["fulltree_257_crosscheck_resid"],
+            "shortfall_after_adding_deep_branch": inv["shortfall_after_adding_deep_branch_259"],
+            "lambda_hat_margin": lf["lambda_hat_margin"],
             "baseline_tps": BASELINE_TPS,
             "lambda1_ceiling_tps": LAMBDA1_CEILING_TPS,
             "K_cal": K_CAL,
             "tau": TAU,
             "lambda_bar": LAMBDA_BAR,
+            "lambda_bar_gate": LAMBDA_BAR_GATE,
             "peak_mem_mib": result["peak_mem_mib"],
             "metrics_nan_clean": 1.0 if result["nan_clean"] else 0.0,
             **{f"selftest_{k}": (1.0 if v else 0.0)
@@ -684,52 +919,53 @@ def _log_wandb(args, result: dict[str, Any]) -> None:
 
 
 def _print(result: dict[str, Any]) -> None:
-    st, sm, fc, sv = (result["shallow_tree"], result["step_model"],
-                      result["floor_and_clears"], result["serve_lever_secondary"])
+    st, sm, sv = result["shallow_tree"], result["step_model"], result["serve_lever_secondary"]
+    fc = result["floor_and_clears_RETIRED_ANCHOR"]
+    gs = result["grounded_step_257"]
+    inv, lf = gs["inversion"], gs["lambda_hat_flag"]
     vd, stt = result["verdict"], result["self_test"]
     print("\n" + "=" * 100, flush=True)
-    print("PR #262  FIDELITY-SAFE SHALLOW TREE -- does spine+rho2 (no deep branch) reach 500 at its "
-          "own step?", flush=True)
+    print("PR #262 (REVISION)  FIDELITY-SAFE SHALLOW TREE -- re-priced at denken #257's GROUNDED step",
+          flush=True)
     print("=" * 100, flush=True)
     print(f"  SHALLOW TREE: prune suspect {st['pruned_nodes']} -> {st['n_nodes']} nodes "
           f"(spine {st['n_spine']} + branchhit {st['n_branchhit']})  "
           f"max_depth {st['max_depth']}  max_branch {st['max_branch_width']}", flush=True)
     print(f"     shallow E[T] = E_spine {E_SPINE:.4f} + E_branchhit_rho2 {E_BRANCHHIT_RHO2:.4f} = "
           f"{st['shallow_et']:.6f}  (== #259 confirmed_et, resid "
-          f"{result['et_roundtrip']['resid_vs_259_banked']:.1e})", flush=True)
-    print(f"     depth/width UNCHANGED vs full tree: {st['depth_width_unchanged_vs_full']}  "
-          f"(all saving is 3 fewer verify ROWS)", flush=True)
+          f"{result['et_roundtrip']['resid_vs_259_banked']:.1e});  per-node saving "
+          f"{gs['shallow_saving_ms']*1000:.2f} us applied to each grounded step", flush=True)
     print("-" * 100, flush=True)
-    print(f"  STEP MODEL (per-node, lawine #153 flat regime + denken #85):", flush=True)
-    print(f"     per-node marginal {sm['marginal_per_node_curve_ms']*1000:.3f} us/node  x{sm['n_drop']} "
-          f"dropped = -{sm['step_reduction_abs_ms']*1000:.2f} us "
-          f"({sm['step_reduction_pct_central']:.3%})", flush=True)
-    print(f"     step_built_full {STEP_BUILT_FULL_MS:.6f} ms  ->  step_shallow_central "
-          f"{sm['step_shallow_central_ms']:.6f} ms   BAND [{fc['step_shallow_band_ms'][0]:.6f}, "
-          f"{fc['step_shallow_band_ms'][1]:.6f}]", flush=True)
+    print(f"  RETIRED ANCHOR (1.085 analytic): shallow step {fc['step_shallow_ms']:.6f} ms -> "
+          f"{fc['shallow_tps_central']:.2f} TPS  [RETIRED by denken #257]", flush=True)
+    print(f"  GROUNDED (denken #257, g_d_measured={gs['g_d_measured_257']:.4f} vs assumed "
+          f"{gs['g_d_assumed_fleet']}):  step_full must be <= {gs['step_threshold_clear500_full_ms']:.4f} ms "
+          f"to clear 500", flush=True)
     print("-" * 100, flush=True)
-    print(f"  FLOOR @ step (E_T_floor = 500*step/(K_cal*tau)):", flush=True)
-    print(f"     round-trip full step -> {fc['floor_full_roundtrip']:.12f}  vs banked 4.330527243789328 "
-          f"(resid {fc['floor_roundtrip_resid']:.1e})", flush=True)
-    print(f"     E_T_floor_shallow = {fc['E_T_floor_shallow']:.6f}   confirmed_et = {st['shallow_et']:.6f}"
-          f"   margin {fc['margin_vs_floor']:+.4f}", flush=True)
-    print(f"     shallow_tree_clears_500 = {fc['shallow_tree_clears_500']}   implied TPS "
-          f"{fc['shallow_tps_central']:.2f}   (band [{fc['shallow_tps_band'][0]:.2f}, "
-          f"{fc['shallow_tps_band'][1]:.2f}], pessimistic full-step {fc['shallow_tps_pessimistic_full_step']:.2f})",
+    print("  STEP-CONDITIONED BRACKET  {basis | step_full | step_shallow | E_T_floor | clears | TPS}",
           flush=True)
-    cx = fc["crossover"]
-    print(f"     crossover: need {cx['required_step_reduction_pct']:.3%} reduction, predicted "
-          f"{cx['predicted_step_reduction_pct']:.3%}  (clears unless >"
-          f"{1.0-cx['fixed_fraction_breakeven']:.1%} of marginal is fixed/depth)", flush=True)
-    print(f"  SERVE LEVER (secondary): shallow TPS x(1+kanna#260) -> central "
-          f"{sv['shallow_tps_with_serve_lever_central']:.2f}  hi {sv['shallow_tps_with_serve_lever_hi']:.2f}",
-          flush=True)
+    for r in gs["bracket"]:
+        tag = "RETIRED" if r["retired_anchor"] else "GROUNDED"
+        print(f"    [{tag:>8}] {r['label']:<26} step_full={r['step_full_ms']:.6f}  "
+              f"step_shallow={r['step_shallow_ms']:.6f}  floor={r['E_T_floor_at_step_shallow']:.4f}  "
+              f"clears={str(r['clears_500']):>5}  TPS={r['implied_tps']:7.2f}", flush=True)
     print("-" * 100, flush=True)
-    print("  VERDICT TABLE  {tree | nodes | E[T] | step ms | floor@step | clears | TPS}", flush=True)
-    for r in vd["table"]:
-        print(f"    {r['nodes']:>3}n  E[T]={r['E_T']:.4f}  step={r['step_ms']:.6f}  "
-              f"floor={r['E_T_floor_at_step']:.4f}  clears={str(r['clears_500']):>5}  "
-              f"TPS={r['implied_TPS']:7.2f}  | {r['tree']}", flush=True)
+    print(f"  INVERTED BREAK-EVEN @ grounded central (step_shallow={inv['step_shallow_grounded_central_ms']:.6f} ms):",
+          flush=True)
+    print(f"     E[T] needed to clear 500 = {inv['e_t_needed_to_clear500_at_grounded_shallow_step']:.4f}  "
+          f"(+{inv['delta_et_needed_vs_shallow_4p300']:.4f} over shallow 4.3003, "
+          f"+{inv['delta_et_needed_vs_full_4p512']:.4f} over FULL 4.512)", flush=True)
+    print(f"     FULL tree (E[T]=4.512) @ grounded central -> {inv['full_tree_tps_grounded_central']:.2f} TPS "
+          f"clears={inv['full_tree_clears_grounded_central']}  (== denken #257's 419.97, resid "
+          f"{inv['fulltree_257_crosscheck_resid']:.1e})", flush=True)
+    print(f"     adding the deep branch-interior (#259, +{E_BRANCH_INTERIOR:.4f}) still falls "
+          f"{inv['shortfall_after_adding_deep_branch_259']:.4f} short -> NO tree route clears 500", flush=True)
+    print(f"  LAMBDA-HAT FLAG: achieved {lf['lambda_hat_achieved']:.10f} vs bar {lf['lambda_bar_gate']} "
+          f"-> margin {lf['lambda_hat_margin']:.2e} (~zero headroom; E[T] gain must NOT cost lambda)",
+          flush=True)
+    print(f"  SERVE LEVER (secondary, on grounded TPS): central "
+          f"{sv['shallow_tps_with_serve_lever_central']:.2f}  hi {sv['shallow_tps_with_serve_lever_hi']:.2f} "
+          f"(does NOT rescue the miss)", flush=True)
     print("-" * 100, flush=True)
     print(f"  VERDICT: {vd['headline']}", flush=True)
     print(f"  PRIMARY fidelity_safe_shallow_tree_self_test_passes = "
