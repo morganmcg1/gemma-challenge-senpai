@@ -1,0 +1,357 @@
+{
+  "agent": "fern",
+  "analysis_only": true,
+  "breakeven_decomposition": {
+    "breakeven_rho": 0.8037539966988988,
+    "c_deep_e3_breakeven": 0.8900563785172245,
+    "deep_priv_conditional_breakeven": 0.813892400412994,
+    "f_deep_breakeven": 0.9163111901482197,
+    "f_deep_headroom_from_linear": 0.08368880985178029,
+    "note": "with a_1 held by the tree, the deep-position conditional can fall from 0.8882 to 0.8139 (c_deep_e3 from 0.97135 to 0.8901, an incremental 8.4% deep tax) before private-500 breaks."
+  },
+  "caveats": {
+    "axis": "This leg is the public->private DEEP-tax axis. The rank-coverage MASS axis is lawine #316's; the a_1-cliff trainability is denken #308's; the x0.804 reconciliation is settled in #310. Not re-derived here.",
+    "bounds_not_measures": "rho_priv_e3_min is a DEFENSIBLE WORST-CASE LOWER BOUND from published EAGLE-3 cross-dataset degradation + this stack's banked OOD evidence -- it does NOT measure the {2,21,39}-fusion head's private tax (checkpoint-gated; needs a trained head).",
+    "conservatism_stack": "0.792 is doubly conservative: (a) max cross-DOMAIN >> within-task public->private; (b) it does not credit the organizer-verified M=8 tree a_1-recovery (c_1=1.0). Crediting either lifts rho_priv_e3_min above break-even.",
+    "reachability_orthogonal": "E[T]=6.11 reachability (a_1-cliff break, denken #308) and greedy/PPL (Issue #192) are out of scope; this prices the PRIVATE projection IF 6.11 holds.",
+    "scope": "LOCAL CPU-only analytic over banked constants + published EAGLE-3 numbers. 0 TPS; BASELINE 481.53 untouched; greedy/PPL untouched. NO GPU/vLLM/HF Job/submission. Authorizes NOTHING. NOT a launch."
+  },
+  "constants": {
+    "E_T_central": 6.1112149873699195,
+    "a1_held": 0.7292532942898975,
+    "breakeven_rho": 0.8037539966988988,
+    "c_deep_lin": 0.9713472759982902,
+    "deep_pub": 0.9144279172167558,
+    "deployed_priv_over_pub": 0.9570535584491102,
+    "eagle3_priv_et_300": 4.678582232863406,
+    "eagle3_public_et": 4.96600000000002,
+    "honest_public_611": 622.080888,
+    "official_baseline": 481.53,
+    "private_tps_611_central": 586.0766391463308,
+    "private_verified": 460.85,
+    "rho_priv_e3_300": 0.9421228821714434,
+    "rho_priv_e3_raw": 0.7797221674962985
+  },
+  "created_at": "20260615T075100Z",
+  "decision_framing": {
+    "breakeven_degradation_pct": 19.62460033011012,
+    "eagle3_worst_xdomain_degradation_pct": 20.771513353115733,
+    "measured_within_task_degradation_pct": 4.294644155088978,
+    "statement": "private-500 survives any public->private acceptance-length degradation up to 19.6%. The MEASURED within-task degradation on this stack is 4.3% (clears with ~4.5x headroom); EAGLE-3's WORST cross-DOMAIN degradation is 20.8% (just over the line). The verdict flips only if the held-out private set is as OOD to the fusion head as summarization is to a code-trained drafter."
+  },
+  "deep_private_tax_self_test_passes": true,
+  "eagle3_literature": {
+    "citation": "Li et al. 2025, EAGLE-3, arXiv:2503.01840, Table 1 (T=0, acceptance length tau)",
+    "table1": {
+      "llama31_8b": {
+        "Alpaca": 6.7,
+        "CNN/DM": 5.34,
+        "GSM8K": 6.23,
+        "HumanEval": 6.74
+      },
+      "vicuna13b": {
+        "Alpaca": 6.17,
+        "CNN/DM": 6.47,
+        "GSM8K": 6.29,
+        "HumanEval": 7.54,
+        "MT-Bench": 6.65
+      }
+    },
+    "worst_ratios": {
+      "per_model": {
+        "llama31_8b": {
+          "best": 6.74,
+          "best_ds": "HumanEval",
+          "ratio": 0.7922848664688427,
+          "worst": 5.34,
+          "worst_ds": "CNN/DM"
+        },
+        "vicuna13b": {
+          "best": 7.54,
+          "best_ds": "HumanEval",
+          "ratio": 0.8183023872679045,
+          "worst": 6.17,
+          "worst_ds": "Alpaca"
+        }
+      },
+      "worst_model": {
+        "best": 6.74,
+        "best_ds": "HumanEval",
+        "ratio": 0.7922848664688427,
+        "worst": 5.34,
+        "worst_ds": "CNN/DM"
+      },
+      "worst_ratio": 0.7922848664688427
+    }
+  },
+  "f_deep_sweep": [
+    {
+      "c_deep_e3": 0.9713472759982902,
+      "clears_500": true,
+      "f_deep": 1.0,
+      "private_tps": 586.076639146331,
+      "rho_priv_e3": 0.9421228821714436
+    },
+    {
+      "c_deep_e3": 0.9422068577183415,
+      "clears_500": true,
+      "f_deep": 0.97,
+      "private_tps": 552.642584808646,
+      "rho_priv_e3": 0.8883773725719187
+    },
+    {
+      "c_deep_e3": 0.9130664394383927,
+      "clears_500": true,
+      "f_deep": 0.94,
+      "private_tps": 522.1549001327666,
+      "rho_priv_e3": 0.8393681757552509
+    },
+    {
+      "c_deep_e3": 0.8897541048144338,
+      "clears_500": false,
+      "f_deep": 0.916,
+      "private_tps": 499.7196428068851,
+      "rho_priv_e3": 0.80330332026996
+    },
+    {
+      "c_deep_e3": 0.8742125483984612,
+      "clears_500": false,
+      "f_deep": 0.9,
+      "private_tps": 485.66368379319687,
+      "rho_priv_e3": 0.7807082538005844
+    },
+    {
+      "c_deep_e3": 0.8547856028784954,
+      "clears_500": false,
+      "f_deep": 0.88,
+      "private_tps": 469.0483750199852,
+      "rho_priv_e3": 0.7539990121348741
+    },
+    {
+      "c_deep_e3": 0.8256451845985466,
+      "clears_500": false,
+      "f_deep": 0.85,
+      "private_tps": 445.9867351811209,
+      "rho_priv_e3": 0.7169272417530386
+    },
+    {
+      "c_deep_e3": 0.7965047663185979,
+      "clears_500": false,
+      "f_deep": 0.82,
+      "private_tps": 424.9841431768914,
+      "rho_priv_e3": 0.683165407224167
+    },
+    {
+      "c_deep_e3": 0.7770778207986322,
+      "clears_500": false,
+      "f_deep": 0.8,
+      "private_tps": 412.0354265737673,
+      "rho_priv_e3": 0.6623502417804022
+    },
+    {
+      "c_deep_e3": 0.7285104569987176,
+      "clears_500": false,
+      "f_deep": 0.75,
+      "private_tps": 382.98407565417494,
+      "rho_priv_e3": 0.6156499629581531
+    },
+    {
+      "c_deep_e3": 0.6799430931988031,
+      "clears_500": false,
+      "f_deep": 0.7,
+      "private_tps": 358.1105155513643,
+      "rho_priv_e3": 0.5756655162686244
+    },
+    {
+      "c_deep_e3": 0.63623246577888,
+      "clears_500": false,
+      "f_deep": 0.655,
+      "private_tps": 338.77518836999513,
+      "rho_priv_e3": 0.5445838232696117
+    }
+  ],
+  "kind": "eagle3_deep_private_tax",
+  "nan_clean": true,
+  "peak_mem_mib": 13.578125,
+  "pr": 318,
+  "primary_metric_name": "rho_priv_e3_min",
+  "provenance": "lawine #300 (8t5q6sr0) rho_priv_e3 0.9421 / c_deep 0.97135 / a_1 0.72925 / deep 0.91443 / public_et 4.966 x fern #310 (2u3kcnv5) honest_public_611 622.08 / breakeven 0.8038 / private_tps_611 586.08 / deployed_priv_over_pub 0.957 x EAGLE-3 arXiv:2503.01840 Table 1 worst cross-dataset 0.792 x ubel #263 (he7glotf) branch collapse -34.5% x ubel #258 raw 0.804.",
+  "rho_priv_e3_min": 0.7922848664688427,
+  "scenarios": {
+    "central_deep_fidelity": {
+      "clears_private_500": true,
+      "implied_f_deep_a1_held": 1.0,
+      "margin_pct": 17.2153278292662,
+      "margin_tps": 86.07663914633099,
+      "name": "central: linear-spine deep fidelity inherited (f_deep=1.0)",
+      "note": "lawine #300 / fern #310 banked central; tree recovers a_1, deep c_deep=0.97135.",
+      "on_deep_axis": true,
+      "private_tps": 586.076639146331,
+      "rho_headroom_to_breakeven": 0.13836888547254478,
+      "rho_priv_e3": 0.9421228821714436
+    },
+    "eagle3_padded": {
+      "clears_private_500": false,
+      "implied_f_deep_a1_held": 0.8994853950074395,
+      "margin_pct": -2.955381471999999,
+      "margin_tps": -14.776907359999996,
+      "name": "EAGLE-3 researcher padded recommendation delta=0.78",
+      "note": "0.792 rounded down ~1.5% for temp/QA-OOD margin; extra-conservative.",
+      "on_deep_axis": true,
+      "private_tps": 485.22309264,
+      "rho_headroom_to_breakeven": -0.02375399669889877,
+      "rho_priv_e3": 0.78
+    },
+    "eagle3_vicuna_worst": {
+      "clears_private_500": true,
+      "implied_f_deep_a1_held": 0.9261988744693581,
+      "margin_pct": 1.8100551448275723,
+      "margin_tps": 9.050275724137862,
+      "name": "EAGLE-3 Vicuna-13B worst cross-dataset (Alpaca vs HumanEval)",
+      "note": "6.17/7.54=0.818; the other model family's worst cross-domain.",
+      "on_deep_axis": true,
+      "private_tps": 509.05027572413786,
+      "rho_headroom_to_breakeven": 0.014548390569005698,
+      "rho_priv_e3": 0.8183023872679045
+    },
+    "eagle3_worst_xdataset": {
+      "clears_private_500": false,
+      "implied_f_deep_a1_held": 0.9082968311305457,
+      "margin_pct": -1.4269453436201958,
+      "margin_tps": -7.134726718100978,
+      "name": "PRIMARY worst-case: EAGLE-3 worst cross-dataset tau-ratio (LLaMA-3.1-8B CNN/DM vs HumanEval)",
+      "note": "arXiv:2503.01840 Table 1; 5.34/6.74=0.792; max cross-DOMAIN, a_1-recovery NOT credited -> lower bound.",
+      "on_deep_axis": true,
+      "private_tps": 492.865273281899,
+      "rho_headroom_to_breakeven": -0.011469130230056135,
+      "rho_priv_e3": 0.7922848664688427
+    },
+    "measured_within_task": {
+      "clears_private_500": true,
+      "implied_f_deep_a1_held": 1.0,
+      "margin_pct": 19.072945500716468,
+      "margin_tps": 95.36472750358234,
+      "name": "measured within-task analogue (deployed linear public->private, Delta 4.3%)",
+      "note": "organizer-verified 460.85/481.53=0.957 tree-recovered; the REALISTIC challenge shift.",
+      "on_deep_axis": true,
+      "private_tps": 595.3647275035823,
+      "rho_headroom_to_breakeven": 0.15329956175021142,
+      "rho_priv_e3": 0.9570535584491102
+    },
+    "raw_no_tree_recovery_310": {
+      "clears_private_500": false,
+      "implied_f_deep_a1_held": 0.8992833018244029,
+      "margin_pct": -2.989948330123582,
+      "margin_tps": -14.94974165061791,
+      "name": "#310 raw / no-tree-recovery worst case (independent line)",
+      "note": "fern #310 banked 0.7797 (tree fails to recover a_1); the rank-coverage-mass axis (#316).",
+      "on_deep_axis": true,
+      "private_tps": 485.0502583493821,
+      "rho_headroom_to_breakeven": -0.024031829202600274,
+      "rho_priv_e3": 0.7797221674962985
+    },
+    "ubel263_branch_collapse_floor": {
+      "clears_private_500": false,
+      "implied_f_deep_a1_held": 0.6549999999999945,
+      "margin_pct": -32.24496232600097,
+      "margin_tps": -161.22481163000487,
+      "name": "OFF-AXIS floor: #263 branch-salvage -34.5% applied to deep conditional",
+      "note": "ubel #263 he7glotf; rank-coverage axis (#316's), pessimistic chat proxy -> too harsh; reported as a floor.",
+      "on_deep_axis": false,
+      "private_tps": 338.77518836999513,
+      "rho_headroom_to_breakeven": -0.25917017342928705,
+      "rho_priv_e3": 0.5445838232696117
+    }
+  },
+  "self_test": {
+    "conditions": {
+      "00_imports_match_source": {
+        "checks": [
+          {
+            "name": "rho_priv_e3_300",
+            "value": 0.9421228821714434
+          },
+          {
+            "name": "honest_public_611",
+            "value": 622.080888
+          },
+          {
+            "name": "breakeven_rho",
+            "value": 0.8037539966988988
+          },
+          {
+            "name": "c_deep_lin",
+            "value": 0.9713472759982902
+          }
+        ],
+        "max_abs_err": 0.0,
+        "pass": true
+      },
+      "01_public_et_reproduces_4966": {
+        "pass": true,
+        "resid": 0.0,
+        "target": 4.96600000000002,
+        "value": 4.96600000000002
+      },
+      "02_rho_central_reproduces_300": {
+        "pass": true,
+        "resid": 2.220446049250313e-16,
+        "target": 0.9421228821714434,
+        "value": 0.9421228821714436
+      },
+      "03_tps_central_reproduces_586": {
+        "pass": true,
+        "resid": 2.2737367544323206e-13,
+        "target": 586.0766391463308,
+        "value": 586.076639146331
+      },
+      "04_breakeven_reproduces_8038": {
+        "pass": true,
+        "resid": 0.0,
+        "target": 0.8037539966988988,
+        "value": 0.8037539966988988
+      },
+      "05_rho_monotone_in_fdeep": {
+        "pass": true
+      },
+      "06_breakeven_fdeep_in_unit": {
+        "f_deep_breakeven": 0.9163111901482197,
+        "pass": true
+      },
+      "07_eagle3_worst_below_breakeven": {
+        "breakeven": 0.8037539966988988,
+        "pass": true,
+        "rho_min": 0.7922848664688427
+      },
+      "08_central_clears_worst_misses": {
+        "central_clears": true,
+        "pass": true,
+        "worst_misses": true
+      },
+      "09_nan_clean": {
+        "pass": true
+      }
+    },
+    "deep_private_tax_self_test_passes": true
+  },
+  "test_metric_names": [
+    "worstcase_private_tps",
+    "deep_private_tax_self_test_passes"
+  ],
+  "ubel258_linear_raw_gap": {
+    "priv_raw_et": 3.0898,
+    "pub_raw_et": 3.8445,
+    "raw_ratio": 0.804,
+    "recoverable_fraction": 0.0
+  },
+  "ubel263_branch_collapse": {
+    "branch_rho_collapse_mean": -0.345,
+    "priv_rank2plus": 0.4768,
+    "pub_rank2plus": 0.6532,
+    "tree_recovers_frac": 0.73
+  },
+  "verdict": "YELLOW",
+  "wandb_run_id": "xe8ff7hq",
+  "worstcase_clears_private_500": false,
+  "worstcase_private_tps": 492.865273281899
+}
