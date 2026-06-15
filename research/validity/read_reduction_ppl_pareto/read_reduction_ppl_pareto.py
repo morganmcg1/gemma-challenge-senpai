@@ -6,8 +6,11 @@
 
 Analysis-only leg (PR #287). Question: can a PPL-safe body-read-byte reduction
 (holding projected deployed PPL <= 2.42; deployed int4 anchor 2.3772, headroom
-0.0428) reach the byte-reduction % that moves the HBM-bound TPS ceiling from the
-served 481.53 to 500 at fixed E[T]=3.844?
+0.0428) reach the byte-reduction % that moves the DEPLOYED TPS from the served
+481.53 to 500 at fixed E[T]=3.844? Per denken #283 (vmxuwxm0, MERGED) the deployed
+step is NOT 100% read-bound: the int4 body-read is only ~38% of the honest 1/K_cal
+wall (the other ~62% draft+verify-compute+host is fixed), so a body-read-byte cut of
+fraction X moves the deployed TPS as tps(X) = 481.53 / (1 - 0.38*X), NOT 481.53/(1-X).
 
 We fake-quantize the DEPLOYED int4 target body (google/gemma-4-E4B-it-qat-w4a16-ct,
 pack-quantized int4 group_size=32 symmetric) by dequantizing -> re-rounding onto a
@@ -54,6 +57,22 @@ FLOOR_US = 2933.83                  # denken #278 int4 body-read HBM floor (2933
 TAU_LO = 1.03524                    # lawine #267 tau_lo
 PRIVATE_VERIFIED_PPL = 2.3777       # private-verified int4 PPL reference
 
+# --------------------------------------------------------------------------- #
+# denken #283 (vmxuwxm0, MERGED, group hbm-bound-ceiling) -- MEASURED HBM-bound
+# decomposition. The deployed step is NOT 100% read-bound: the int4 body-read is
+# only ~38% of the honest 1/K_cal wall; the other ~62% (draft + verify-compute +
+# host) is FIXED and does NOT shrink with a body-read-byte cut. A body-read cut of
+# fraction X therefore moves the deployed TPS as tps(X) = baseline/(1 - f_read*X).
+# Import these MEASURED values EXACT (self-test (e)); do NOT re-derive.
+# --------------------------------------------------------------------------- #
+DENKEN283_RUN = "vmxuwxm0"
+BODY_READ_FRACTION = 0.3804642716594112        # read_frac_of_wall = read_floor/wall
+DENKEN283_READ_FLOOR_US = 3037.203622326286    # measured int4 body-read time within the step
+DENKEN283_WALL_US = 7982.887878221502          # honest per-step wall (= 1e6 / K_cal)
+HBM_BOUND_CEILING_TPS = 1265.6378952477885     # pure-read-bound ceiling = E[T] / body_read_time
+DENKEN283_GO_READ_GBPS = 520.9527323111674     # measured effective HBM read bandwidth
+DENKEN283_REQ_PCT_FOR_500_AT_FIXED_ET = -153.1275790495578  # ceiling-framing required % (NON-binding)
+
 # Honest-scope caveats carried by this leg (self-test (f)).
 CAVEATS = [
     "0_TPS: this leg maps PPL feasibility of the bytes-per-read denominator lever; it "
@@ -70,6 +89,13 @@ CAVEATS = [
     "CANDIDATE_FUTURE_BUILD: a PPL-safe reduction found here is a human-approval-gated "
     "candidate build, NOT realized here. Launch gate stays land #245 MEASURED >=500 at "
     "lambda_hat>=0.9780.",
+    "READ_FRACTION_MEASURED_NOT_FULL: a body-read-byte cut moves only denken #283's "
+    "(vmxuwxm0) MEASURED ~38% read-portion of the honest 1/K_cal wall, NOT the whole wall "
+    "(the other ~62% draft+verify-compute+host is fixed; the deployed point is NOT 100% "
+    "read-bound -- the pure-read ceiling is 1265.6 >> 500). On this measured basis the honest "
+    "required reduction for 500 is ~9.71%, ABOVE the ~8.43% PPL-safe ceiling -> the bytes-per-"
+    "read denominator lever does NOT clear 500 (the prior +3.694% used an over-crediting "
+    "full-read-bound BW_eff=220.47 model; superseded).",
 ]
 
 GROUP_SIZE = 32
@@ -293,21 +319,47 @@ def body_read_reduction_pct(body, scheme_map):
 # Composition: required reduction + round-trip self-test.
 # --------------------------------------------------------------------------- #
 def required_reduction_for_500():
-    """HBM-bound ceiling = E[T]*BW_eff/body, BW_eff calibrated so ceiling==baseline
-    at the full body. At fixed E[T], tps ∝ 1/body => required reduction = 1 - base/target."""
-    bw_eff = OFFICIAL_BASELINE_TPS * DEPLOYED_BODY_GB / E_T   # GB/s effective
-    ceiling = lambda body: E_T * bw_eff / body
-    body_500 = E_T * bw_eff / TARGET_TPS
-    req = 1.0 - body_500 / DEPLOYED_BODY_GB
-    roundtrip = ceiling(DEPLOYED_BODY_GB * (1.0 - req))
+    """Honest deployed-movement model on denken #283's (vmxuwxm0) MEASURED read-fraction.
+
+    A body-read-BYTE cut of fraction X shrinks ONLY the measured read-portion
+    (f_read = BODY_READ_FRACTION ~ 0.38) of the honest 1/K_cal step wall; the other
+    (1 - f_read) ~ 0.62 (draft + verify-compute + host) is FIXED. So at fixed E[T] the
+    deployed TPS moves as
+
+        tps(X) = baseline / (1 - f_read * X)
+
+    and the X that reaches 500 is  required = (1 - baseline/target) / f_read.
+
+    SUPERSEDES the prior BW_eff=220.47 GB/s model, which back-solved the bandwidth so the
+    FULL 1.76 GB body read consumed the WHOLE step (implicit f_read = 1.0; the deployed
+    point treated as 100% read-bound). That over-credited a read cut as scaling the entire
+    wall and gave required = +3.694%. denken #283 MEASURED f_read = 0.38, so the SAME named
+    quantity read_reduction_pct_for_500_at_fixed_et is his -153% (the pure-read ceiling is
+    already 1265.6 >> 500 -> you would have to ENLARGE the body to pull it down to 500 ->
+    non-binding). Both agree the read lever gives NO free path to 500; the honest deployed
+    required (~9.71%) lands ABOVE the PPL-safe ceiling (~8.43%)."""
+    f = BODY_READ_FRACTION
+    tps = lambda X: OFFICIAL_BASELINE_TPS / (1.0 - f * X)
+    req = (1.0 - OFFICIAL_BASELINE_TPS / TARGET_TPS) / f
+    roundtrip = tps(req)
+    # superseded full-read-bound model (kept ONLY for the reconciliation):
+    bw_eff_full = OFFICIAL_BASELINE_TPS * DEPLOYED_BODY_GB / E_T          # 220.47 GB/s fudge (f_read=1.0)
+    req_full_readbound = 1.0 - OFFICIAL_BASELINE_TPS / TARGET_TPS         # +3.694% (the over-credit)
     return {
-        "required_read_reduction_pct_for_500": 100.0 * req,
-        "bw_eff_gbps": bw_eff,
-        "ceiling_at_full_body": ceiling(DEPLOYED_BODY_GB),
-        "body_500_gb": body_500,
+        "required_read_reduction_pct_for_500": 100.0 * req,              # HONEST (measured f_read=0.38)
+        "body_read_fraction_of_wall": f,
+        "non_read_fraction_fixed": 1.0 - f,
+        "honest_wall_us": DENKEN283_WALL_US,
+        "body_read_us_measured": DENKEN283_READ_FLOOR_US,
+        "hbm_bound_ceiling_tps": HBM_BOUND_CEILING_TPS,
+        "measured_read_bw_gbps": DENKEN283_GO_READ_GBPS,
         "roundtrip_tps": roundtrip,
         "roundtrip_resid_tps": abs(roundtrip - TARGET_TPS),
-        "ceiling_nominal_600": E_T * BW_NOMINAL_GBPS / DEPLOYED_BODY_GB,
+        # --- reconciliation: ONE named quantity, THREE premises ---
+        "denken283_read_reduction_pct_for_500_at_fixed_et": DENKEN283_REQ_PCT_FOR_500_AT_FIXED_ET,
+        "superseded_full_readbound_required_pct": 100.0 * req_full_readbound,   # +3.694%
+        "superseded_bw_eff_gbps": bw_eff_full,                                  # 220.47
+        "denken283_run": DENKEN283_RUN,
     }
 
 
@@ -334,6 +386,10 @@ def constants_exact():
         "TAU_LO": (TAU_LO, 1.03524),
         "DEPLOYED_BODY_GB": (DEPLOYED_BODY_GB, 1.76),
         "OFFICIAL_SCORED_TOKENS": (OFFICIAL_SCORED_TOKENS, 61797),
+        # denken #283 (vmxuwxm0) MEASURED imports -- the read-fraction re-attribution basis
+        "BODY_READ_FRACTION": (BODY_READ_FRACTION, 0.3804642716594112),
+        "HBM_BOUND_CEILING_TPS": (HBM_BOUND_CEILING_TPS, 1265.6378952477885),
+        "DENKEN283_REQ_PCT_FOR_500": (DENKEN283_REQ_PCT_FOR_500_AT_FIXED_ET, -153.1275790495578),
     }
     detail, all_ok = {}, True
     for k, (have, want) in expect.items():
@@ -464,7 +520,11 @@ def run(args):
     safe = [r for r in pareto if r["ppl_safe"]]
     max_safe_pct = max((r["read_reduction_pct"] for r in safe), default=0.0)
     max_safe_cfg = max(safe, key=lambda r: r["read_reduction_pct"], default=None)
-    lever_clears_500 = max_safe_pct >= req_pct
+    # Price the deployed TPS at the PPL-safe ceiling on denken #283's MEASURED read-fraction:
+    # only f_read~0.38 of the wall shrinks (the other ~62% is fixed) -> tps = base/(1 - f*X).
+    f_read = comp["body_read_fraction_of_wall"]
+    tps_at_max_safe = OFFICIAL_BASELINE_TPS / (1.0 - f_read * max_safe_pct / 100.0)
+    lever_clears_500 = max_safe_pct >= req_pct           # honest basis: expect False (8.43 < 9.71)
 
     # ---- self-test (PRIMARY) ----
     red_by_demote = [(r["n_demoted"], r["read_reduction_pct"])
@@ -486,7 +546,9 @@ def run(args):
         "pareto_monotone_reduction": monotone_red,                        # PR (b)
         "constants_imported_exact": const_ok,                            # PR (e)
         "max_safe_well_defined": max_safe_pct >= 0.0,
-        "caveats_present": len(CAVEATS) >= 5,                            # PR (f)
+        # the boolean lever verdict must match the priced deployed TPS (attribution-bug guard)
+        "verdict_tps_consistent": (tps_at_max_safe >= TARGET_TPS) == lever_clears_500,
+        "caveats_present": len(CAVEATS) >= 6,                            # PR (f)
     }
     self_test_passes = all(checks.values())
     # NOTE: the int4 anchor does NOT reproduce 2.3772 (QAT proxy < deployed PTQ; see
@@ -503,6 +565,14 @@ def run(args):
         "required_read_reduction_pct_for_500": req_pct,
         "max_ppl_safe_read_reduction_pct": max_safe_pct,
         "max_safe_config": max_safe_cfg["config"] if max_safe_cfg else None,
+        # TPS re-attribution on denken #283's MEASURED read-fraction (the requested fix)
+        "tps_at_max_safe_read_reduction": tps_at_max_safe,
+        "body_read_fraction_of_wall": f_read,
+        "hbm_bound_ceiling_tps": HBM_BOUND_CEILING_TPS,
+        "denken283_read_reduction_pct_for_500_at_fixed_et": comp[
+            "denken283_read_reduction_pct_for_500_at_fixed_et"],
+        "superseded_full_readbound_required_pct": comp["superseded_full_readbound_required_pct"],
+        "superseded_bw_eff_gbps": comp["superseded_bw_eff_gbps"],
         "int4_baseline_ppl_local": base_ppl,
         "int4_baseline_resid_vs_2p3772": base_ppl - DEPLOYED_INT4_PPL,
         "int4_recomputed_roundtrip_delta": int4_recomputed_delta,
@@ -554,13 +624,17 @@ def make_plot(out, path):
                label=f"PPL gate {out['ppl_gate']}")
     ax.axhline(out["deployed_int4_ppl_anchor"], color="gray", ls=":", lw=1,
                label=f"int4 anchor {out['deployed_int4_ppl_anchor']}")
-    ax.axvline(out["required_read_reduction_pct_for_500"], color="tab:purple", ls="-.",
-               lw=1.2, label=f"required {out['required_read_reduction_pct_for_500']:.2f}% -> 500 TPS")
+    ax.axvline(out["required_read_reduction_pct_for_500"], color="tab:purple", ls="-.", lw=1.2,
+               label=f"required {out['required_read_reduction_pct_for_500']:.2f}% -> 500 TPS "
+                     f"(measured 38% read-frac)")
     ax.axvline(out["max_ppl_safe_read_reduction_pct"], color="tab:orange", ls="-", lw=1.2,
-               label=f"max PPL-safe {out['max_ppl_safe_read_reduction_pct']:.2f}%")
+               label=f"max PPL-safe {out['max_ppl_safe_read_reduction_pct']:.2f}% "
+                     f"-> {out['tps_at_max_safe_read_reduction']:.1f} TPS (< 500)")
+    verdict = "CLEARS" if out["read_reduction_lever_clears_500"] else "MISSES"
     ax.set_xlabel("body-read-byte reduction (% of int4 code+scale)")
     ax.set_ylabel("projected deployed PPL (offset-corrected)")
-    ax.set_title("PPL vs body-read-byte reduction Pareto (fake-quant, OPTIMISTIC proxy)")
+    ax.set_title(f"PPL vs body-read-byte reduction Pareto (fake-quant OPTIMISTIC proxy)\n"
+                 f"denominator lever {verdict} 500 on denken #283 measured 38% read-fraction")
     ax.legend(fontsize=7, loc="upper left")
     ax.grid(alpha=0.3)
     fig.tight_layout()
@@ -595,6 +669,12 @@ def log_wandb(args, out):
         "max_ppl_safe_read_reduction_pct": out["max_ppl_safe_read_reduction_pct"],
         "required_read_reduction_pct_for_500": out["required_read_reduction_pct_for_500"],
         "read_reduction_lever_clears_500": 1.0 if out["read_reduction_lever_clears_500"] else 0.0,
+        "tps_at_max_safe_read_reduction": out["tps_at_max_safe_read_reduction"],
+        "body_read_fraction_of_wall": out["body_read_fraction_of_wall"],
+        "hbm_bound_ceiling_tps": out["hbm_bound_ceiling_tps"],
+        "denken283_read_reduction_pct_for_500_at_fixed_et":
+            out["denken283_read_reduction_pct_for_500_at_fixed_et"],
+        "superseded_full_readbound_required_pct": out["superseded_full_readbound_required_pct"],
         "int4_baseline_ppl_local": out["int4_baseline_ppl_local"],
         "int4_baseline_resid_vs_2p3772": out["int4_baseline_resid_vs_2p3772"],
         "int4_recomputed_roundtrip_delta": out["int4_recomputed_roundtrip_delta"],
@@ -657,9 +737,16 @@ def main():
 
     log("=" * 70)
     log(f"PRIMARY self_test_passes = {out['self_test']['passes']}")
-    log(f"TEST max_ppl_safe_read_reduction_pct = {out['max_ppl_safe_read_reduction_pct']:.3f}%")
-    log(f"required_read_reduction_pct_for_500 = {out['required_read_reduction_pct_for_500']:.3f}%")
-    log(f"lever_clears_500 = {out['read_reduction_lever_clears_500']}")
+    log(f"TEST max_ppl_safe_read_reduction_pct = {out['max_ppl_safe_read_reduction_pct']:.3f}% "
+        f"(config {out['max_safe_config']})")
+    log(f"required_read_reduction_pct_for_500 = {out['required_read_reduction_pct_for_500']:.3f}% "
+        f"(MEASURED f_read={out['body_read_fraction_of_wall']:.4f})")
+    log(f"tps_at_max_safe_read_reduction = {out['tps_at_max_safe_read_reduction']:.2f} TPS")
+    log(f"lever_clears_500 = {out['read_reduction_lever_clears_500']}  "
+        f"(8.43%>=9.71%? -> {out['read_reduction_lever_clears_500']})")
+    log(f"reconcile: honest required {out['required_read_reduction_pct_for_500']:.3f}% vs "
+        f"superseded full-read-bound {out['superseded_full_readbound_required_pct']:.3f}% vs "
+        f"denken283 ceiling-framing {out['denken283_read_reduction_pct_for_500_at_fixed_et']:.1f}%")
     log(f"int4 baseline local ppl = {out['int4_baseline_ppl_local']:.4f} "
         f"(resid {out['int4_baseline_resid_vs_2p3772']:+.4f} vs 2.3772)")
     log(f"peak VRAM = {out['peak_vram_gb']:.2f} GB")

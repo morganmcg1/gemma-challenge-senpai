@@ -7,10 +7,16 @@
     "name": "max_ppl_safe_read_reduction_pct",
     "value": 8.431155407899594
   },
-  "read_reduction_lever_clears_500": true,
-  "required_read_reduction_pct_for_500": 3.6940000000000084,
+  "read_reduction_lever_clears_500": false,
+  "required_read_reduction_pct_for_500": 9.709190258229688,
   "max_ppl_safe_read_reduction_pct": 8.431155407899594,
   "max_safe_config": "mixed_int3_demote16L",
+  "tps_at_max_safe_read_reduction": 497.4881944805805,
+  "body_read_fraction_of_wall": 0.3804642716594112,
+  "hbm_bound_ceiling_tps": 1265.6378952477885,
+  "denken283_read_reduction_pct_for_500_at_fixed_et": -153.1275790495578,
+  "superseded_full_readbound_required_pct": 3.6940000000000084,
+  "superseded_bw_eff_gbps": 220.4715920915713,
   "int4_baseline_ppl_local": 2.0067324568993494,
   "int4_baseline_resid_vs_2p3772": -0.3704675431006508,
   "int4_recomputed_roundtrip_delta": 0.03220718630472552,
@@ -86,6 +92,21 @@
       "have": 61797,
       "want": 61797,
       "ok": true
+    },
+    "BODY_READ_FRACTION": {
+      "have": 0.3804642716594112,
+      "want": 0.3804642716594112,
+      "ok": true
+    },
+    "HBM_BOUND_CEILING_TPS": {
+      "have": 1265.6378952477885,
+      "want": 1265.6378952477885,
+      "ok": true
+    },
+    "DENKEN283_REQ_PCT_FOR_500": {
+      "have": -153.1275790495578,
+      "want": -153.1275790495578,
+      "ok": true
     }
   },
   "caveats": [
@@ -93,7 +114,8 @@
     "FAKE_QUANT_OPTIMISTIC: local in-memory fake-quant with fp accumulation is an OPTIMISTIC proxy for a real low-bit kernel (real int3/2:4 kernels add group/scale quant + transcode error).",
     "QAT_PROXY_OPTIMISTIC: the int4 base here is the public QAT w4a16 checkpoint (osoi5 served weights + serve venv pod-absent per #281); QAT recovers more quality and is more low-bit-robust than the deployed PTQ int4, so the Pareto here is ALSO optimistic vs the deployed body -> a closure verdict is decisive, a clear verdict needs re-confirm.",
     "DO_NOT_SERVE: NO served-file change, NO re-quantization of the served checkpoint, NOT a launch, NOT open2, NO HF Job, NO submission. BASELINE stays 481.53.",
-    "CANDIDATE_FUTURE_BUILD: a PPL-safe reduction found here is a human-approval-gated candidate build, NOT realized here. Launch gate stays land #245 MEASURED >=500 at lambda_hat>=0.9780."
+    "CANDIDATE_FUTURE_BUILD: a PPL-safe reduction found here is a human-approval-gated candidate build, NOT realized here. Launch gate stays land #245 MEASURED >=500 at lambda_hat>=0.9780.",
+    "READ_FRACTION_MEASURED_NOT_FULL: a body-read-byte cut moves only denken #283's (vmxuwxm0) MEASURED ~38% read-portion of the honest 1/K_cal wall, NOT the whole wall (the other ~62% draft+verify-compute+host is fixed; the deployed point is NOT 100% read-bound -- the pure-read ceiling is 1265.6 >> 500). On this measured basis the honest required reduction for 500 is ~9.71%, ABOVE the ~8.43% PPL-safe ceiling -> the bytes-per-read denominator lever does NOT clear 500 (the prior +3.694% used an over-crediting full-read-bound BW_eff=220.47 model; superseded)."
   ],
   "local_int4_body_code_scale_gb": 2.2192128,
   "local_int4_body_code_only_gb": 1.9726336,
@@ -103,13 +125,19 @@
     6
   ],
   "composition": {
-    "required_read_reduction_pct_for_500": 3.6940000000000084,
-    "bw_eff_gbps": 220.4715920915713,
-    "ceiling_at_full_body": 481.53,
-    "body_500_gb": 1.6949855999999999,
-    "roundtrip_tps": 500.00000000000006,
-    "roundtrip_resid_tps": 5.684341886080802e-14,
-    "ceiling_nominal_600": 1310.4545454545455
+    "required_read_reduction_pct_for_500": 9.709190258229688,
+    "body_read_fraction_of_wall": 0.3804642716594112,
+    "non_read_fraction_fixed": 0.6195357283405888,
+    "honest_wall_us": 7982.887878221502,
+    "body_read_us_measured": 3037.203622326286,
+    "hbm_bound_ceiling_tps": 1265.6378952477885,
+    "measured_read_bw_gbps": 520.9527323111674,
+    "roundtrip_tps": 500.0,
+    "roundtrip_resid_tps": 0.0,
+    "denken283_read_reduction_pct_for_500_at_fixed_et": -153.1275790495578,
+    "superseded_full_readbound_required_pct": 3.6940000000000084,
+    "superseded_bw_eff_gbps": 220.4715920915713,
+    "denken283_run": "vmxuwxm0"
   },
   "self_test": {
     "passes": true,
@@ -123,6 +151,7 @@
       "pareto_monotone_reduction": true,
       "constants_imported_exact": true,
       "max_safe_well_defined": true,
+      "verdict_tps_consistent": true,
       "caveats_present": true
     }
   },
@@ -357,7 +386,7 @@
       "local_ppl": 2.008057955105097,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.393287181854248,
+      "eval_s": 28.331939220428467,
       "n_demoted": 342
     },
     {
@@ -367,7 +396,7 @@
       "local_ppl": 2.038939643204075,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.382721662521362,
+      "eval_s": 28.40867519378662,
       "n_demoted": 342
     },
     {
@@ -377,7 +406,7 @@
       "local_ppl": 4.7765436874334535,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.390048265457153,
+      "eval_s": 28.38377285003662,
       "n_demoted": 342,
       "projected_deployed_ppl": 5.147011230534105,
       "ppl_delta_vs_int4": 2.769811230534104,
@@ -390,7 +419,7 @@
       "local_ppl": 1.9993411696919696,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.19251775741577,
+      "eval_s": 28.196115016937256,
       "n_demoted": 9,
       "demote_layers": [
         8
@@ -406,7 +435,7 @@
       "local_ppl": 1.996846550126804,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.182225704193115,
+      "eval_s": 28.185894012451172,
       "n_demoted": 16,
       "demote_layers": [
         8,
@@ -423,7 +452,7 @@
       "local_ppl": 2.002708453349188,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.23022150993347,
+      "eval_s": 28.219871044158936,
       "n_demoted": 32,
       "demote_layers": [
         5,
@@ -442,7 +471,7 @@
       "local_ppl": 2.0037297611327145,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.25812339782715,
+      "eval_s": 28.280925273895264,
       "n_demoted": 48,
       "demote_layers": [
         4,
@@ -463,7 +492,7 @@
       "local_ppl": 2.0041250779546305,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.293822765350342,
+      "eval_s": 28.306501388549805,
       "n_demoted": 66,
       "demote_layers": [
         0,
@@ -486,7 +515,7 @@
       "local_ppl": 2.006318524161353,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.276782512664795,
+      "eval_s": 28.283496856689453,
       "n_demoted": 84,
       "demote_layers": [
         0,
@@ -511,7 +540,7 @@
       "local_ppl": 2.008155490082097,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.32425856590271,
+      "eval_s": 28.364461183547974,
       "n_demoted": 100,
       "demote_layers": [
         0,
@@ -538,7 +567,7 @@
       "local_ppl": 2.0270531509218306,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.363778829574585,
+      "eval_s": 28.37869668006897,
       "n_demoted": 132,
       "demote_layers": [
         0,
@@ -569,7 +598,7 @@
       "local_ppl": 2.0946784361928885,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.382607221603394,
+      "eval_s": 28.322875261306763,
       "n_demoted": 171,
       "demote_layers": [
         0,
@@ -605,7 +634,7 @@
       "local_ppl": 2.147437390590535,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.36886501312256,
+      "eval_s": 28.37323784828186,
       "n_demoted": 194,
       "demote_layers": [
         0,
@@ -644,7 +673,7 @@
       "local_ppl": 2.298297489218895,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 28.33862543106079,
+      "eval_s": 28.372411727905273,
       "n_demoted": 260,
       "demote_layers": [
         0,
@@ -691,7 +720,7 @@
       "local_ppl": 6.87573752396031,
       "n_tokens": 61797,
       "full_corpus": true,
-      "eval_s": 30.46515130996704,
+      "eval_s": 30.447513580322266,
       "n_demoted": 258,
       "projected_deployed_ppl": 7.246205067060961,
       "ppl_delta_vs_int4": 4.869005067060961,
@@ -701,5 +730,5 @@
   "peak_vram_gb": 16.993755136,
   "n_records": 128,
   "rank_subset": 32,
-  "wandb_run_id": "uc2mqt82"
+  "wandb_run_id": "17en3hus"
 }
