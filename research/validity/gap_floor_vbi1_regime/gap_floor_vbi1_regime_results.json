@@ -1,0 +1,212 @@
+{
+  "pr": 386,
+  "issue": 319,
+  "author": "ubel",
+  "leg": "does the 0.633% irreducible gap floor survive the deployable-strict VBI=1 regime?",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "gpu_used": false,
+  "tps_added_by_this_card": 0,
+  "framing": "Framing B (physically correct): r_a/g_a are KERNEL-INVARIANT (greedy identity preserved) and inherited from #379's deployed back-out; g_s is recomputed under VBI=1; the total gap CHANGES. The knife-edge test uses only the absolute floor r_a*g_s_vbi1 and is invariant to this framing.",
+  "optional_gpu_leg": {
+    "gpu_leg": "NOT-REQUESTED (CPU screen is the deliverable; bounded by #378/#375)"
+  },
+  "imported": {
+    "official_public": 481.53,
+    "private_valid": 460.85,
+    "knife_edge_pct": 3.2,
+    "K_cal": 125.268,
+    "gap_measured_deployed_pct": 4.294644155088977,
+    "attn_us_257": 557.9,
+    "body_us_257": 4474.19,
+    "lmhead_us_257": 131.62,
+    "L_ref": 528.0,
+    "out_len_fixed_282": 512,
+    "f_attn_deployed": 0.0698870172,
+    "f_attn_vbi1_378": 0.0951,
+    "penalty_curve_375": {
+      "110.0": 0.877,
+      "352.0": 1.0,
+      "528.0": 1.264,
+      "2048.0": 3.027,
+      "4096.0": 4.756
+    },
+    "eval_weighted_penalty_378": 1.2257,
+    "eta_attn_378": 0.0215,
+    "strict_bracket_378": [
+      357.32,
+      469.68
+    ],
+    "r_a_deployed_corners_379": {
+      "banked": 0.9570535584491102,
+      "central": 0.9633874238374297,
+      "pessimistic": 0.973521608458741
+    },
+    "floor_379_central_pct": 0.6333865388319535,
+    "breakeven_379_tok": 252.6103574841727,
+    "delta_p_central_tokens": 50.0
+  },
+  "irreducible_gap_floor_pct_vbi1": 1.3097036287951451,
+  "floor_inflation_ratio": 2.06777938667659,
+  "irreducible_floor_banked_pct_vbi1": 0.0,
+  "irreducible_floor_pessimistic_pct_vbi1": 3.523494549873982,
+  "floor_379_central_rederived_pct": 0.6333865388319525,
+  "gap_bucket_acceptance_pct_vbi1": 73.65291008658028,
+  "gap_bucket_ctxlen_pct_vbi1": 26.347089913419726,
+  "gap_vbi1_total_pct": 4.970961245052175,
+  "b_cancels_under_vbi1": true,
+  "b_cancellation": {
+    "numerator_A_priv_minus_A_pub_us": 80.85232983290484,
+    "numerator_has_no_B": true,
+    "numerator_invariant_under_B_sweep": true,
+    "g_s_strictly_decreasing_in_B": true,
+    "dgs_dB_sign_negative": true,
+    "dgs_dB_value": -2.9395038718641406e-06,
+    "lmhead_bi_is_ctx_independent": true,
+    "lmhead_bi_is_distribution_independent": true,
+    "b_sweep_rows": [
+      {
+        "lmhead_bi_tax_us": 0.0,
+        "B_us": 4605.8099999999995,
+        "g_s": 0.015416411274776642
+      },
+      {
+        "lmhead_bi_tax_us": 100.0,
+        "B_us": 4705.8099999999995,
+        "g_s": 0.015127960877468642
+      },
+      {
+        "lmhead_bi_tax_us": 300.0,
+        "B_us": 4905.8099999999995,
+        "g_s": 0.014582274492230566
+      },
+      {
+        "lmhead_bi_tax_us": 800.0,
+        "B_us": 5405.8099999999995,
+        "g_s": 0.013376043693661426
+      }
+    ],
+    "b_cancels_under_vbi1": true
+  },
+  "clears_3p2_knife_edge_vbi1": true,
+  "knife_edge_margin_vbi1_pp": 1.890296371204855,
+  "all_corners_clear_3p2_vbi1": false,
+  "breakeven_prompt_shift_tok_vbi1": 118.61232172542913,
+  "knife_edge": {
+    "clears_3p2_knife_edge_vbi1": true,
+    "knife_edge_margin_vbi1_pp": 1.890296371204855,
+    "knife_edge_margin_banked_pp": 3.2,
+    "knife_edge_margin_pessimistic_pp": -0.32349454987398163,
+    "all_corners_clear_3p2_vbi1": false,
+    "pessimistic_breaches_3p2": true,
+    "breakeven_prompt_shift_tok_vbi1": 118.61232172542913,
+    "breakeven_vbi1_as_mult_of_public_mean": 0.4360747122258424,
+    "breakeven_379_tok": 252.6103574841727,
+    "breakeven_shrink_tok": 133.99803575874358,
+    "breakeven_shrink_ratio": 0.4695465495030653,
+    "knife_edge_pct": 3.2
+  },
+  "coverage_on_vbi1_floor": {
+    "vbi1_floor_central_pct": 1.3097036287951451,
+    "coverage_can_reach_3p2_on_vbi1_floor": true,
+    "gap_shrink_per_coverage_tps": 489.76448056537095,
+    "coverage_baseline_336": 0.8903,
+    "coverage_budget_336": 0.031,
+    "note": "fern #357 must re-derive the demand ceiling on THIS vbi1 floor (1.310% central), not the deployed-stack 0.633%."
+  },
+  "floor_survives_vbi1_regime": false,
+  "demand_route_uncapped_on_live_contract": false,
+  "recommended_action": "re-derive-ceiling-on-vbi1-floor (central floor 1.310%)",
+  "verdict_band": "RED_floor_inflates_uncapped_pillar_is_deployed_stack_artifact",
+  "verdict_summary": "RED / decision-critical. Under VBI=1 the irreducible floor inflates 2.07x: central 1.310% (was 0.633%) still clears 3.2% with +1.89pp margin, BUT the pessimistic corner reaches 3.523% -> BREACHES 3.2% (-0.32pp), and the breakeven private prompt shift SHRINKS from +253 tok to +119 tok (0.44x public mean). #379's all-corner >=1.5pp margin does NOT transfer -- the 'uncapped' verdict is a DEPLOYED-stack artifact. fern #357 must re-derive the demand ceiling on the VBI=1 floor (1.310% central), not the deployed-stack 0.633%.",
+  "corners": {
+    "banked": {
+      "delta_p_tokens": 0.0,
+      "r_accept_kernel_invariant": 0.9570535584491102,
+      "g_accept_kernel_invariant": 0.04294644155088978,
+      "g_s_vbi1": 0.0,
+      "shape_vbi1": 1.0,
+      "penalty_at_L_priv": 1.264,
+      "L_priv": 528.0,
+      "bucket_acceptance_abs_pct_vbi1": 4.294644155088978,
+      "bucket_ctxlen_abs_pct_vbi1": 0.0,
+      "bucket_outlen_abs_pct_vbi1": 0.0,
+      "bucket_numerics_abs_pct_vbi1": 0.0,
+      "gap_bucket_acceptance_pct_vbi1": 100.0,
+      "gap_bucket_ctxlen_pct_vbi1": 0.0,
+      "gap_vbi1_total_pct": 4.294644155088978,
+      "irreducible_gap_floor_abs_pct_vbi1": 0.0
+    },
+    "central": {
+      "delta_p_tokens": 50.0,
+      "r_accept_kernel_invariant": 0.9633874238374297,
+      "g_accept_kernel_invariant": 0.0366125761625703,
+      "g_s_vbi1": 0.013594776061932025,
+      "shape_vbi1": 1.1449226202418084,
+      "penalty_at_L_priv": 1.3219934210526316,
+      "L_priv": 578.0,
+      "bucket_acceptance_abs_pct_vbi1": 3.66125761625703,
+      "bucket_ctxlen_abs_pct_vbi1": 1.3097036287951451,
+      "bucket_outlen_abs_pct_vbi1": 0.0,
+      "bucket_numerics_abs_pct_vbi1": 0.0,
+      "gap_bucket_acceptance_pct_vbi1": 73.65291008658028,
+      "gap_bucket_ctxlen_pct_vbi1": 26.347089913419726,
+      "gap_vbi1_total_pct": 4.970961245052175,
+      "irreducible_gap_floor_abs_pct_vbi1": 1.3097036287951451
+    },
+    "pessimistic": {
+      "delta_p_tokens": 130.0,
+      "r_accept_kernel_invariant": 0.9735216084587409,
+      "g_accept_kernel_invariant": 0.026478391541259083,
+      "g_s_vbi1": 0.036193285482921174,
+      "shape_vbi1": 1.3948730951777097,
+      "penalty_at_L_priv": 1.4147828947368422,
+      "L_priv": 658.0,
+      "bucket_acceptance_abs_pct_vbi1": 2.6478391541259083,
+      "bucket_ctxlen_abs_pct_vbi1": 3.523494549873982,
+      "bucket_outlen_abs_pct_vbi1": 0.0,
+      "bucket_numerics_abs_pct_vbi1": 0.0,
+      "gap_bucket_acceptance_pct_vbi1": 42.905460652852675,
+      "gap_bucket_ctxlen_pct_vbi1": 57.094539347147325,
+      "gap_vbi1_total_pct": 6.17133370399989,
+      "irreducible_gap_floor_abs_pct_vbi1": 3.523494549873982
+    }
+  },
+  "self_test": {
+    "a_r_a_banked_matches_379": true,
+    "a_r_a_central_matches_379": true,
+    "a_r_a_pessimistic_matches_379": true,
+    "a_deployed_floor_matches_0p633": true,
+    "b_banked_floor_zero": true,
+    "b_floor_monotone_in_shift": true,
+    "c_buckets_sum_gap_banked": true,
+    "c_buckets_sum_gap_central": true,
+    "c_buckets_sum_gap_pessimistic": true,
+    "c_pct_of_gap_sum_100": true,
+    "c_outlen_zero": true,
+    "c_numerics_zero": true,
+    "d_floor_inflates_vs_379": true,
+    "d_inflation_ratio_reconstructs": true,
+    "e_b_cancels_under_vbi1": true,
+    "e_numerator_invariant": true,
+    "e_gs_decreasing_in_B": true,
+    "f_clears_flag_consistent": true,
+    "f_margin_signs_consistent": true,
+    "g_breakeven_finite_positive": true,
+    "g_breakeven_shrinks_vs_379": true,
+    "h_eval_penalty_consistent": true,
+    "i_penalty_anchors_exact": true,
+    "i_f_attn_rose_vs_deployed": true,
+    "j_constants_imported_exact": true,
+    "k_nan_clean": true
+  },
+  "gap_floor_vbi1_self_test_passes": true,
+  "official_baseline_unchanged": 481.53,
+  "wandb_run_id": "xxzujn7a",
+  "wandb_run_ids": [
+    "xxzujn7a"
+  ]
+}
