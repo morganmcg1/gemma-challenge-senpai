@@ -1,0 +1,230 @@
+{
+  "pr": 276,
+  "leg": "acceptance local->official transfer: kernel-path M-sweep (local)",
+  "acceptance_transfer_analysis_only": true,
+  "m_sweep": [
+    1,
+    8,
+    16
+  ],
+  "n_prompts": 128,
+  "max_len": 256,
+  "total_positions": 32640,
+  "model_dir": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "peak_gpu_gb": 13.365448704,
+  "pair_identity": {
+    "1v8": 0.9927083333333333,
+    "1v16": 0.9924632352941176,
+    "8v16": 0.9928002450980392
+  },
+  "pair_divergence": {
+    "1v8": 0.007291666666666696,
+    "1v16": 0.007536764705882382,
+    "8v16": 0.0071997549019607865
+  },
+  "per_sequence_strict_pass_fraction": {
+    "1v8": 0.1640625,
+    "1v16": 0.1484375,
+    "8v16": 0.140625
+  },
+  "determinism_frac": {
+    "1": 1.0,
+    "8": 1.0,
+    "16": 1.0
+  },
+  "within_batch_frac": {
+    "1": 1.0,
+    "8": 1.0,
+    "16": 1.0
+  },
+  "decode_width_diagnostic": {
+    "M8": {
+      "status": "ran",
+      "m_width": 8,
+      "int4_body_bitexact_vs_M1": true,
+      "per_shape": {
+        "qkv_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "o_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "gate_up_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "down_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        }
+      }
+    },
+    "M16": {
+      "status": "ran",
+      "m_width": 16,
+      "int4_body_bitexact_vs_M1": true,
+      "per_shape": {
+        "qkv_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "o_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "gate_up_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "down_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        }
+      }
+    }
+  },
+  "decomposition": {
+    "M1_to_M8": {
+      "boundary": "M1_to_M8",
+      "total_divergence": 0.007291666666666696,
+      "int4_marlin_body_share": 0.0,
+      "int4_marlin_body_bitexact": true,
+      "bf16_lmhead_attention_share": 0.007291666666666696,
+      "harness_measurement_share": 0.0,
+      "sum_check": 0.007291666666666696,
+      "sum_resid": 0.0
+    },
+    "M8_to_M16": {
+      "boundary": "M8_to_M16",
+      "total_divergence": 0.0071997549019607865,
+      "int4_marlin_body_share": 0.0,
+      "int4_marlin_body_bitexact": true,
+      "bf16_lmhead_attention_share": 0.0071997549019607865,
+      "harness_measurement_share": 0.0,
+      "sum_check": 0.0071997549019607865,
+      "sum_resid": 0.0
+    },
+    "M1_to_M16": {
+      "boundary": "M1_to_M16",
+      "total_divergence": 0.007536764705882382,
+      "int4_marlin_body_share": 0.0,
+      "int4_marlin_body_bitexact": true,
+      "bf16_lmhead_attention_share": 0.007536764705882382,
+      "harness_measurement_share": 0.0,
+      "sum_check": 0.007536764705882382,
+      "sum_resid": 0.0
+    }
+  },
+  "tau_acc_central": 1.0,
+  "tau_acc_band": {
+    "central": 1.0,
+    "envelope_halfwidth_conservative": 0.007536764705882382,
+    "envelope_halfwidth_served_width": 0.007291666666666696,
+    "low": 0.9924632352941176,
+    "high": 1.0075367647058824,
+    "interpretation": "tau_acc has NO systematic offset (central=1.0) because acceptance is a clock-invariant probability; only a small symmetric kernel-jitter envelope, bounded by the measured batch-variance argmax-flip rate. CONTRAST tau_lo=1.0352 (+3.5% systematic, hardware/clock on a RATE)."
+  },
+  "kernel_jitter_envelope": 0.007536764705882382,
+  "implied_official_lambda_at_local_bar": {
+    "local_lambda_hat": 0.9780112973731208,
+    "bar_operative": 0.9780112973731208,
+    "implied_official_central": 0.9780112973731208,
+    "implied_official_low_conservative": 0.9704745326672384,
+    "implied_official_high": 0.9855480620790031,
+    "clears_bar_central": true,
+    "clears_bar_conservative_low": false,
+    "safe_local_bar_for_official": 0.9855480620790031
+  },
+  "local_lambda_hat_transfers_to_official": true,
+  "tau_lo_contrast": {
+    "tau_lo": 1.0352356533046398,
+    "tau_lo_systematic_offset_pct": 3.5235653304639847,
+    "tau_acc_systematic_offset_pct": 0.0,
+    "why_different": "TPS is a RATE (clock-speed-dominated -> tau_lo=1.035 systematic); lambda_hat is a PROBABILITY (clock-invariant -> tau_acc=1.0, only kernel jitter)."
+  },
+  "imported_anchors": {
+    "int4_div_M1_M8_232": 0.007291666666666667,
+    "int4_body_bitexact_232": true,
+    "fp16_divergence_221": 0.01055908203125,
+    "lambda_bar_operative_249": 0.9780112973731208,
+    "lambda_bar_defended_249": 0.9807516141069097,
+    "k_cal_217": 125.268,
+    "e_t_linear_served": 3.844,
+    "official_baseline_52": 481.53,
+    "tau_lo_267": 1.0352356533046398
+  },
+  "self_test": {
+    "a_m8_reproduces_232_served_slice": true,
+    "a_served_point_roundtrips_481": true,
+    "b_decomp_shares_sum_to_total_resid0": true,
+    "c_controls_all_one": true,
+    "c_nan_clean_all_finite": true,
+    "d_tau_acc_band_reported": true,
+    "e_implied_official_at_bar_reported": true
+  },
+  "msweep_self_test_passes": true,
+  "served_point_roundtrip_resid": 0.00019200000002683737,
+  "m8_div_measured": 0.007291666666666696,
+  "m8_div_232_anchor": 0.007291666666666667,
+  "acceptance_local_official_transfer_self_test_passes": true,
+  "tau_acc": 1.0,
+  "served_point_anchor": {
+    "method": "import the LOCAL served operating point E[T]=3.844 from lawine #267's SAME-DAY serve of the EXACT deployed submission (nzqnd154, harness.LocalServer(fa2sw_precache_kenyan)) and ANCHOR the M=8 GEMM-verify-width kernel slice to it; the M=8 slice reproduces #232's 0.007292 EXACTLY, the genuine local re-measure.",
+    "why_not_fresh_reserve": "The DEPLOYED serve config CANNOT yield a fresh spec-accept/E[T] re-measure without a config DEVIATION: manifest env DISABLE_LOG_STATS=1 turns OFF the vllm:spec_decode_num_accepted/draft counters (parse_spec_log/parse_spec_metrics find nothing), and MAX_NUM_SEQS=1 fixes the request-level batch at 1 so the server cannot sweep M. #267's WALL re-measure worked because TIMING needs no spec stats; an E[T] re-measure would require overriding DISABLE_LOG_STATS. Since (a) E[T]=3.844 was already banked TODAY by #267's deployed-cfg serve, (b) the verify GEMM batch-width (K+1=8 linear / 16 tree) is an INTERNAL axis the MAX_NUM_SEQS=1 server cannot expose at the request level, and (c) the offline co-batched M-sweep probes EXACTLY that GEMM-width axis and reproduces #232's served-width 0.007292 to 6 decimals -> the offline GEMM-width sweep is the CORRECT and sufficient local measurement; a config-deviating re-serve would only reproduce nzqnd154's E[T].",
+    "k_cal_217": 125.268,
+    "e_t_linear_served_267": 3.844,
+    "k_cal_times_e_t": 481.530192,
+    "official_baseline": 481.53,
+    "served_point_roundtrips_481": true,
+    "served_point_roundtrip_resid": 0.00019200000002683737,
+    "m8_served_width_divergence_measured": 0.007291666666666696,
+    "m8_divergence_232_anchor": 0.007291666666666667,
+    "m8_reproduces_232_bar_feeding_divergence": true,
+    "m8_greedy_identity_lambda_vs_M1_ref": 0.9927083333333333,
+    "m8_greedy_identity_clears_bar_0p9780": true,
+    "validates_267_byte_identity_premise": {
+      "premise": "#267 profile.py:371 -- 'E[T] is a MODEL property (greedy tokens byte-identical local vs official -> identical accept length)'; the basis for factoring E[T] out of tau_lo.",
+      "measured_kernel_jitter_max": 0.007536764705882382,
+      "premise_holds_within_jitter": true,
+      "implication": "E[T] and lambda_hat are BOTH greedy-token properties -> tau_ET = tau_acc = 1.0 central, only the measured kernel jitter envelope; CONTRAST tau_lo=1.0352 on the RATE."
+    }
+  },
+  "greedy_ppl_safety_certificate": {
+    "acceptance_transfer_analysis_only": true,
+    "baseline_unchanged_tps": 481.53,
+    "tps_added": 0.0,
+    "served_file_modified": false,
+    "model_read_only": true,
+    "greedy_gate_untouched": true,
+    "ppl_untouched": true,
+    "no_hf_job": true,
+    "no_submission": true,
+    "no_official_draw": true,
+    "no_train_launch": true,
+    "note": "LOCAL profiling only (single A10G, canonical Hub int4 checkpoint READ, never modified). Emits 0 tokens of served-config change; adds 0 TPS; BASELINE stays 481.53. Greedy gate + PPL untouched."
+  },
+  "per_m_lambda_table": {
+    "pair_identity": {
+      "1v8": 0.9927083333333333,
+      "1v16": 0.9924632352941176,
+      "8v16": 0.9928002450980392
+    },
+    "pair_divergence": {
+      "1v8": 0.007291666666666696,
+      "1v16": 0.007536764705882382,
+      "8v16": 0.0071997549019607865
+    },
+    "determinism_frac": {
+      "1": 1.0,
+      "8": 1.0,
+      "16": 1.0
+    },
+    "within_batch_frac": {
+      "1": 1.0,
+      "8": 1.0,
+      "16": 1.0
+    }
+  }
+}
