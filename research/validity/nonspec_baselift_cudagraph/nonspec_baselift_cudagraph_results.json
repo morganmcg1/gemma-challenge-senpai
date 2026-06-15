@@ -1,0 +1,251 @@
+{
+  "agent": "land",
+  "created_at": "20260615T163931Z",
+  "kind": "nonspec-baselift-cudagraph",
+  "nan_clean": true,
+  "peak_mem_mib": 90.336,
+  "pr": 371,
+  "synthesis": {
+    "cudagraph_capture_token_identity_rate": 1.0,
+    "fusion_taxonomy": {
+      "identity_breaking": [
+        "RMSNorm/LayerNorm reduction (triton_per/triton_red persistent/looped)",
+        "softmax reduction reorder",
+        "GEMM split-K partial-accumulate / MixOrderReduction",
+        "fused attention-score reduction"
+      ],
+      "identity_safe": [
+        "epilogue fusion (bias/activation/residual pointwise post-GEMM)",
+        "pointwise/elementwise fusion",
+        "eliminate_noops",
+        "vLLM custom ops shared across E/C (fuse_norm_quant, fuse_act_quant)"
+      ]
+    },
+    "identity": {
+      "C": {
+        "num_divergent": 0,
+        "num_identical": 128,
+        "num_prompts_compared": 128,
+        "rate": 1.0,
+        "total_divergent_tokens": 0,
+        "verdict": "GREEDY_IDENTICAL"
+      },
+      "E_vs_bf16_ref": {
+        "bf16_ref": "/workspace/senpai/target/research/greedy_reference/google__gemma-4-E4B-it/decode_outputs.offline.jsonl",
+        "n_bf16_ref_records": 128,
+        "num_divergent": 128,
+        "num_identical": 0,
+        "num_prompts_compared": 128,
+        "rate": 0.0,
+        "total_divergent_tokens": 63126,
+        "verdict": "DIVERGENT"
+      },
+      "F": {
+        "num_divergent": 119,
+        "num_identical": 9,
+        "num_prompts_compared": 128,
+        "rate": 0.0703125,
+        "total_divergent_tokens": 48210,
+        "verdict": "DIVERGENT"
+      },
+      "available": true,
+      "n_reference_records": 128
+    },
+    "measured": {
+      "configs": {
+        "C": {
+          "bulk_decode_tps_with_prefill": 90.12436801223738,
+          "comp_cfg_requested": {
+            "cudagraph_mode": "FULL",
+            "mode": 0
+          },
+          "config": "C",
+          "config_desc": "capture only: mode=0 (no inductor) + cudagraph=FULL",
+          "config_name": "C-capture-nofuse",
+          "created_at": "2026-06-15T16:24:49Z",
+          "decode_jsonl": "research/validity/nonspec_baselift_cudagraph/measured/decode_C.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_samples": [
+            91.35524155917635,
+            91.3886432076732,
+            91.37724377981002
+          ],
+          "decode_tps_single_stream": 91.37724377981002,
+          "enforce_eager": false,
+          "gen_s": 727.1729216575623,
+          "load_s": 46.59679865837097,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 18471.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2521.2,
+          "present": true,
+          "resolved_compilation": {
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [
+              1,
+              2
+            ],
+            "cudagraph_mode": "FULL",
+            "mode": 0
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps"
+        },
+        "E": {
+          "bulk_decode_tps_with_prefill": 21.409243040212452,
+          "comp_cfg_requested": null,
+          "config": "E",
+          "config_desc": "eager: mode=NONE, cudagraph=NONE (byte-exact greedy AR reference)",
+          "config_name": "E-eager",
+          "created_at": "2026-06-15T16:11:31Z",
+          "decode_jsonl": "research/validity/nonspec_baselift_cudagraph/measured/decode_E.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_samples": [
+            21.62142309462018,
+            21.714173251670015,
+            21.51940186165239
+          ],
+          "decode_tps_single_stream": 21.62142309462018,
+          "enforce_eager": true,
+          "gen_s": 3061.1077597141266,
+          "load_s": 44.58536624908447,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 18579.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2475.0,
+          "present": true,
+          "resolved_compilation": {
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [],
+            "cudagraph_mode": "NONE",
+            "mode": 0
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps"
+        },
+        "F": {
+          "bulk_decode_tps_with_prefill": 95.63962313664118,
+          "comp_cfg_requested": {
+            "cudagraph_mode": "FULL",
+            "mode": 3
+          },
+          "config": "F",
+          "config_desc": "capture + inductor fusion: mode=3 + cudagraph=FULL (kanna #359 bundle)",
+          "config_name": "F-capture-fuse",
+          "created_at": "2026-06-15T16:38:37Z",
+          "decode_jsonl": "research/validity/nonspec_baselift_cudagraph/measured/decode_F.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_samples": [
+            97.00784853407654,
+            97.00996904344892,
+            96.97315046554111
+          ],
+          "decode_tps_single_stream": 97.00784853407654,
+          "enforce_eager": false,
+          "gen_s": 685.2390029430389,
+          "load_s": 120.09883332252502,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 18511.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2478.1,
+          "present": true,
+          "resolved_compilation": {
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [
+              1,
+              2
+            ],
+            "cudagraph_mode": "FULL",
+            "mode": 3
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps"
+        }
+      },
+      "dir": "research/validity/nonspec_baselift_cudagraph/measured"
+    },
+    "measured_present": true,
+    "metrics": {
+      "achieved_bw_fraction_eager": 0.061166371706269713,
+      "baseline_eager_byte_exact_tps": 21.62142309462018,
+      "baseline_eager_identity_vs_bf16_ref": 0.0,
+      "baseline_eager_is_strict_frontier": false,
+      "byte_exact_bw_ceiling_tps": 353.4854609073359,
+      "capture_is_identity_safe": true,
+      "capture_speedup_vs_eager": 4.226236329584911,
+      "cudagraph_breaks_identity": false,
+      "cudagraph_capture_token_identity_rate": 1.0,
+      "cudagraph_capture_tps": 91.37724377981002,
+      "frac_of_baselift_recovered_capture": 0.21019397324562133,
+      "frac_of_baselift_recovered_fused_total": 0.22716057436147982,
+      "frac_of_baselift_recovered_identity_safe": 0.21019397324562133,
+      "fused_capture_tps": 97.00784853407654,
+      "fused_speedup_vs_eager": 4.486654190593677,
+      "fusion_breaks_identity": true,
+      "fusion_token_identity_rate": 0.0703125,
+      "identity_safe_max_config": "C",
+      "identity_safe_max_tps": 91.37724377981002,
+      "residual_gap_requires_reduction_reorder": true
+    },
+    "nonspec_baselift_self_test_passes": true,
+    "roofline": {
+      "a10g_bw_gbps": 600.0,
+      "achieved_bw_fraction_eager": 0.061166371706269713,
+      "achieved_bw_fraction_eager_with_full_lmhead": 0.10953267643771387,
+      "body_int4_gb": 1.6973824,
+      "body_plus_full_lmhead_gb": 3.03955968,
+      "byte_exact_bw_ceiling_tps": 353.4854609073359,
+      "byte_exact_bw_ceiling_tps_with_full_lmhead": 197.3970124514877,
+      "ceiling_basis": "body-only ceiling = BW/body (PR headline ~353; the ceiling IF the lm_head read is ALSO removed via a separate lossy PCK-04-style lever). with-full-lmhead ceiling = BW/(body+full bf16 lm_head) ~197 is the ceiling FOR THIS plain full-vocab config.",
+      "eager_tps": 21.62142309462018,
+      "empirical_bytes_per_step_gb_eager": 27.75025479933795,
+      "empirical_exceeds_body": true,
+      "empirical_exceeds_body_plus_lmhead": true,
+      "latency_bound_claim": "empirical bytes/step (BW/eager_tps) vs the read walls: if it EXCEEDS body+lm_head the eager step is NOT read-bound (launch/overhead slack exists -> capture-recoverable); if below body-only the step is already read-bound.",
+      "lmhead_bf16_full_gb": 1.34217728
+    },
+    "self_test": {
+      "conditions": {
+        "a_roofline_roundtrips": true,
+        "b_frac_recovered_roundtrips": true,
+        "c_identity_logic_correct": true,
+        "d_official_verifier_verdicts": true,
+        "e_imports_exact": true,
+        "f_taxonomy_present": true
+      },
+      "nonspec_baselift_self_test_passes": true,
+      "synthetic_metrics": {
+        "achieved_bw_fraction_eager": 0.46802490709333333,
+        "baseline_eager_byte_exact_tps": 165.44,
+        "baseline_eager_identity_vs_bf16_ref": null,
+        "baseline_eager_is_strict_frontier": false,
+        "byte_exact_bw_ceiling_tps": 353.4854609073359,
+        "capture_is_identity_safe": true,
+        "capture_speedup_vs_eager": 1.8133462282398454,
+        "cudagraph_breaks_identity": false,
+        "cudagraph_capture_token_identity_rate": 1.0,
+        "cudagraph_capture_tps": 300.0,
+        "frac_of_baselift_recovered_capture": 0.7155716460835383,
+        "frac_of_baselift_recovered_fused_total": 3.906289449666497,
+        "frac_of_baselift_recovered_identity_safe": 0.7155716460835383,
+        "fused_capture_tps": 900.0,
+        "fused_speedup_vs_eager": 5.440038684719536,
+        "fusion_breaks_identity": true,
+        "fusion_token_identity_rate": 0.875,
+        "identity_safe_max_config": "C",
+        "identity_safe_max_tps": 300.0,
+        "residual_gap_requires_reduction_reorder": true
+      }
+    },
+    "verdict": "CUDA-graph CAPTURE (fusion OFF) is BYTE-EXACT vs the eager AR reference (token_identity_rate=1.0000 over 128 records). Eager 21.6 -> capture 91.4 TPS (4.23x), recovering 21% of the eager->353 body-only base-lift at ZERO quality cost. NB: the served strict frontier 165.44 (lawine #196) ALREADY banks the native cudagraph stack (it is NOT plain eager) -> capture is the dominant byte-exact lever behind that frontier, reproduced here offline from the ~22 TPS eager floor. Empirical eager bytes/step = 27.75 GB (EXCEEDS body+lm_head 3.04 GB) -> the eager gap is LAUNCH/OVERHEAD (capture-recoverable)-bound. FUSION (capture+inductor, kanna #359 bundle) identity=0.0703 (BREAKS identity); the C->F residual REQUIRES reduction reorder (out of scope for identity-safe). identity_safe_max = C at 91.37724377981002 TPS. LOCAL proxy; 0 official TPS; strict identity gate is HARD."
+  }
+}
