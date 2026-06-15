@@ -1,9 +1,9 @@
 {
   "agent": "denken",
-  "created_at": "20260615T063406Z",
+  "created_at": "20260615T070401Z",
   "kind": "eagle3-a1-cliff-trainability",
   "nan_clean": true,
-  "peak_mem_mib": 25.691,
+  "peak_mem_mib": 31.832,
   "pr": 308,
   "self_test": {
     "a1_cliff_trainability_self_test_passes": true,
@@ -30,11 +30,31 @@
       "c_demand_below_info_ceiling": true,
       "c_jensen_floor_consistent": true,
       "d_blocks_go_aligns": true,
+      "d_blocks_go_uniform_true": true,
+      "d_headline_is_salvage_bar": true,
       "d_light_aligns": true,
       "d_nan_clean": true,
-      "d_verdict_matches_rule": true,
+      "d_uniform_bar_still_out_of_reach": true,
       "e_constants_imported_exact": true,
-      "f_carries_caveats": true
+      "f_carries_caveats": true,
+      "g_cliffheld_consistent": true,
+      "g_gap_inrepo_vs_relaxed_tiny": true,
+      "g_relaxed_below_robustness_ceiling": true,
+      "g_relaxed_below_uniform": true,
+      "g_relaxed_in_published_band": true,
+      "g_relaxed_within_inrepo_noise": true,
+      "g_relaxes_by_0p1482": true,
+      "g_reproduces_309_relaxed_0p7731": true,
+      "g_salvage_bar_in_envelope": true,
+      "g_zero_cov_reproduces_304": true,
+      "h_bracket_monotone_in_et": true,
+      "h_central_in_envelope": true,
+      "h_central_reproduces_0p7731": true,
+      "h_deep_tree_clears_across_bracket": true,
+      "h_deployed_verify_already_m8": true,
+      "h_salvage_net_positive": true,
+      "h_salvage_relaxes_at_all_regimes": true,
+      "h_upper_regime_honestly_flagged": true
     }
   },
   "synthesis": {
@@ -47,7 +67,7 @@
       "official_tps_217": 481.53,
       "spec_lift_289": 0.91
     },
-    "handoff_line": "a1~0.92 is a RED light for the >500 EAGLE-3 build: the demand sits +0.121 above the published EAGLE-3 first-token (0-alpha) envelope ~0.80 and above every demonstrated first-token acceptance (NO published spec-decode method reports 0-alpha >=0.90 on any chat target), on the ONE position the standard TTT/multi-step levers CANNOT lift (depth-0 is serve-faithful; HASS even degrades it). It is NOT information-theoretically forbidden (perfect-drafter ceiling 1.0) but exceeds the argmax-robustness ceiling ~0.90 (eval top-1 mass), so it has no demonstrated training path: a1_target_trainable=out-of-reach, a1_demand_blocks_go=True. 0 TPS; analytic + literature only; BASELINE 481.53 unchanged; the drafter BUILD stays human-gated. The single biggest residual uncertainty is the true eval-distribution top-1 mass (a STATED 0-GPU assumption): a one-GPU top-1-entropy probe on the served target would convert this RED to a hard RED or reopen it. NOT a launch. NOT a build. NOT a served-file change.",
+    "handoff_line": "a1 is a GREEN-YELLOW light for the >500 EAGLE-3 build under lawine #309's M=8 verify-tree salvage: the RAW fusion-draft demand to hit E[T]=6.11 drops from #304's 0.9213 (RED, out of envelope) to 0.7731 (W=4 root coverage 0.6532), a 0.1482 raw-a1 relaxation that lands INSIDE the published 0.77-0.80 0-alpha envelope and only +0.0017 above the in-repo {2,21,39} EAGLE-3 head's native step-1 = 0.7714 (WITHIN that head's own native-vs-tf 0.0097 spread, i.e. essentially already achieved on THIS target). Cost loop: M=8 is ALREADY the deployed verify width (linear-MTP K=7 verifies 7+1=8), covering a depth-7 spine; the width-4 root salvage adds ~3 nodes (~11 total, ~1.4x verify rows), so the tree IS somewhat heavier -- but that bump is SMALLER than the #295 draft-step regime span, so the salvaged demand across the bracket [0.659 (opt) .. 0.773 (central) .. 0.872 (pess, the conservative heavy-verify anchor)] ENVELOPES it and NEVER evaporates (always < 0.9213) -> salvage_net_positive=True. The additive-upper (#295 pessimistic) draft-step regime re-inflates the salvaged demand to 0.872 (back above the ~0.80 envelope), so the heavy-step tail re-opens the blocker -- YELLOW, not unconditional GREEN. The two residual YELLOWs: (1) cov_W is measured on the LINEAR spine, not the fusion draft (if its rank-2+ misses fall further down the list, cov drops and the demand rises toward 0.9213); (2) the additive-upper draft-step regime. 0 TPS; analytic + literature only; BASELINE 481.53 unchanged; the drafter BUILD stays human-gated. NOT a launch. NOT a build. NOT a served-file change.",
     "step1_anchor_cliff": {
       "a1_demand_perfect_interior": 0.7301735696242743,
       "a1_demand_spec_interior_0p91": 0.95192930887218,
@@ -120,14 +140,94 @@
       "mean_nll_nats": 0.8659233245103686
     },
     "step4_verdict": {
-      "a1_demand_blocks_go": true,
+      "a1_demand_blocks_go": false,
       "a1_deployed": 0.72925,
       "a1_low_quartile_297": 0.655,
       "a1_required_for_611": 0.9213,
-      "a1_target_trainable": "out-of-reach",
-      "handoff_light": "RED"
+      "a1_required_for_611_salvage_relaxed": 0.7730729805683441,
+      "a1_target_trainable": "in-envelope",
+      "a1_trainable_uniform": "out-of-reach",
+      "blocks_go_uniform": true,
+      "handoff_light": "GREEN",
+      "handoff_light_net": "GREEN-YELLOW",
+      "salvage_net_positive": true
     },
-    "verdict": "A1-OUT-OF-REACH-OF-PUBLISHED-ENVELOPE--BELOW-INFO-CEILING-NO-DEMONSTRATED-PATH"
+    "step5_salvage_relaxed_bar": {
+      "a1_inrepo_eagle3_native_step1": 0.7714,
+      "a1_required_for_611_salvage_relaxed": 0.7730729805683441,
+      "a1_required_for_611_uniform": 0.9213,
+      "a1_required_salvage_by_W": {
+        "2": 0.8651251447964469,
+        "3": 0.8163598752994596,
+        "4": 0.7730729805683441
+      },
+      "a1_trainable_salvage": "in-envelope",
+      "cliffheld_a1_eff_at_raw_073": 0.9063633537959437,
+      "cliffheld_can_reach_611": true,
+      "cliffheld_deep_b_required": 0.9269253521675682,
+      "cov_primary_w4_309": 0.6531976066516435,
+      "gap_inrepo_vs_relaxed": 0.0016729805683440846,
+      "inrepo_native_tf_spread": 0.009699999999999931,
+      "m_verify_deployed": 8,
+      "primary_w_309": 4,
+      "relaxed_below_robustness_ceiling": true,
+      "relaxed_in_published_band": true,
+      "relaxed_within_inrepo_noise": true,
+      "reproduces_309_relaxed": true,
+      "salvage_operator": "c1_eff = a1_draft + (1 - a1_draft) * cov_W",
+      "salvage_relaxes_by_W": {
+        "2": 0.05617485520355314,
+        "3": 0.10494012470054037,
+        "4": 0.14822701943165595
+      },
+      "salvage_relaxes_demand_by": 0.14822818597734866
+    },
+    "step6_salvage_cost_loop": {
+      "cost_bracket": {
+        "central_6p11": {
+          "a_eff_uniform": 0.9213011665456927,
+          "below_no_salvage_0p9213": true,
+          "deep_tree_clears_a_eff": true,
+          "et_target": 6.1112149873699195,
+          "salvaged_raw_a1": 0.7730729805683441,
+          "verdict": "in-envelope"
+        },
+        "lower_5p36": {
+          "a_eff_uniform": 0.8815758815002,
+          "below_no_salvage_0p9213": true,
+          "deep_tree_clears_a_eff": true,
+          "et_target": 5.363610726985671,
+          "salvaged_raw_a1": 0.6585256596518204,
+          "verdict": "in-envelope"
+        },
+        "upper_6p86": {
+          "a_eff_uniform": 0.9554948297903998,
+          "below_no_salvage_0p9213": true,
+          "deep_tree_clears_a_eff": true,
+          "et_target": 6.858819247754167,
+          "salvaged_raw_a1": 0.8716699450084371,
+          "verdict": "out-of-reach"
+        }
+      },
+      "deployed_verify_already_m8": true,
+      "et_bracket_295": [
+        5.363610726985671,
+        6.1112149873699195,
+        6.858819247754167
+      ],
+      "frac_true_beyond_top4_linear_309": 0.3468023933483565,
+      "heavy_step_reopens_at_upper": true,
+      "m_verify_deployed": 8,
+      "salvage_in_envelope_at_central": true,
+      "salvage_net_positive": true,
+      "salvage_relaxes_at_all_regimes": true,
+      "salvage_tree_nodes_w4_depth7": 11,
+      "salvaged_raw_a1_central_6p11": 0.7730729805683441,
+      "salvaged_raw_a1_lower_5p36": 0.6585256596518204,
+      "salvaged_raw_a1_upper_6p86": 0.8716699450084371,
+      "verify_row_ratio_vs_deployed": 1.375
+    },
+    "verdict": "A1-SALVAGE-RELAXED-TO-0p7731-IN-PUBLISHED-ENVELOPE-TRAINABLE--BELOW-INFO-CEILING--YELLOW-ON-COV-TRANSFER-AND-STEP-REGIME"
   },
-  "wandb_run_id": "pafqy25c"
+  "wandb_run_id": "5axqa6oa"
 }

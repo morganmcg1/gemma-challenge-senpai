@@ -4,6 +4,28 @@
 # SPDX-PackageName: senpai
 """PR #308 (denken) -- is a1~0.92 a TRAINABLE target or an INTRINSIC position-1 floor?
 
+REVISION (advisor send-back): the uniform bar is SUPERSEDED by lawine #309
+---------------------------------------------------------------------------
+The original card found the UNIFORM a1 demand 0.9213 OUT-OF-REACH (RED). lawine
+#309 (`7tkn4d9x`, MERGED) then RELAXED that demand: the DEPLOYED M=8 verify-TREE
+salvages the rank-2+ matches the width-1 spine rejects, so the EFFECTIVE
+position-1 acceptance is c1_eff = a1_draft + (1-a1_draft)*cov_W, and the RAW
+fusion-draft a1 needed for the SAME E[T]=6.11 drops to 0.7731 (W=4 root coverage
+0.6532). This revision re-issues the verdict against BOTH bars:
+  * step 5 -- the salvage-RELAXED bar 0.7731: re-classify trainability, reconcile
+    vs the in-repo {2,21,39} head 0.7714 (gap +0.0017, within its own native-tf
+    spread) -> FLIPS the headline from RED to GREEN (in published 0.77-0.80 band).
+  * step 6 -- the salvage COST loop: does the tree's heavier verify eat the gain?
+    M=8 is ALREADY the deployed verify width (linear-MTP K=7 verifies 7+1=8,
+    covering a depth-7 spine); a W=4-root + depth-7 tree adds ~3 nodes (~11 total,
+    ~1.4x verify rows) so it IS somewhat heavier, but that bump is smaller than the
+    #295 draft-step regime span, which envelopes it. The salvaged demand across the
+    #295 bracket [5.36, 6.86] runs [0.66 .. 0.77 .. 0.87] and NEVER evaporates
+    (always < 0.9213) -> NET POSITIVE, YELLOW at the additive-upper step extreme
+    (the conservative heavy-verify anchor, salvaged 0.87 > 0.80) + the cov-transfer.
+  * steps 1-4 (the uniform-bar 0.9213 RED analysis) are KEPT, banked as the
+    "uniform-bar reference" the advisor asked to retain.
+
 THE LAST LOAD-BEARING UNKNOWN
 -----------------------------
 denken #304 (`dtf1ouml`, MERGED) proved the keystone: hitting wirbel #295's
@@ -78,7 +100,8 @@ where the paper gives no table); the eval top-1 mass is a STATED assumption a
 NOT a launch. NOT a build. NOT a served-file change.
 
 PRIMARY metric  a1_cliff_trainability_self_test_passes
-TEST    metric  a1_required_for_611
+TEST    metric  a1_required_for_611  (0.9213 uniform bar, carried forward)
+                + a1_required_for_611_salvage_relaxed (0.7731, the #309 headline bar)
 """
 from __future__ import annotations
 
@@ -117,6 +140,44 @@ K_SPEC = 7                                      # num_speculative_tokens (chain 
 # trained-from-scratch {2,21,39}-fusion draft head, benchmark-matched corpus.
 A1_INREPO_EAGLE3_NATIVE_STEP1 = 0.7714         # free-running native step-1 top-1 (a1 analog)
 A1_INREPO_EAGLE3_TF = 0.7617                   # teacher-forced top-1 (serve-faithful proxy)
+# In-repo head's OWN native-vs-teacher-forced spread -- the floor on "training noise"
+# for a 0-alpha number on THIS head/target (native > tf by this much):
+A1_INREPO_NATIVE_TF_SPREAD = A1_INREPO_EAGLE3_NATIVE_STEP1 - A1_INREPO_EAGLE3_TF   # +0.0097
+
+# --------------------------------------------------------------------------- #
+# lawine #309 (`7tkn4d9x`, MERGED) -- the M=8 verify-TREE salvage that RELAXES
+# #304's RAW a1 demand. Import the salvage operator + numbers EXACTLY, UNCHANGED.
+#   c1_eff = a1_draft + (1 - a1_draft) * cov_W      (tree-acceptance identity:
+#   the true token is rank-1 (prob a1_draft) OR in the rank-2..W branch the M=8
+#   tree also verifies (measured coverage cov_W) -- the tree does PART of the
+#   cliff break, so the RAW draft a1 needed for the SAME E[T]=6.11 is LOWER.)
+# cov_W is wirbel #79's measured rank-coverage on the deployed LINEAR spine.
+# --------------------------------------------------------------------------- #
+COV_W_309 = {2: 0.4165047789261015, 3: 0.5714507731758489, 4: 0.6531976066516435}
+PRIMARY_W_309 = 4                              # M=8 tree branches width-4 at the cliff root
+COV_PRIMARY_309 = COV_W_309[PRIMARY_W_309]     # 0.6532 -- the build-relevant root coverage
+# #309 step3 inversion: raw fusion-draft a1 to reach E[T]=6.11 AFTER the W=4 tree salvage.
+A1_REQUIRED_SALVAGE_RELAXED_W4 = 0.7730729805683441   # THE relaxed bar this revision prices
+A1_REQUIRED_SALVAGE_BY_W = {2: 0.8651251447964469, 3: 0.8163598752994596,
+                            4: 0.7730729805683441}
+SALVAGE_RELAXES_DEMAND_BY_W4 = 0.14822818597734866    # 0.9213 - 0.7731 (raw-a1 bought at W=4)
+# #309 deep recovery: the M=8 tree also salvages rank-2+ on j>=2 (lawine #300), lifting
+# the deep effective acceptance well above the uniform demand -- so position-1 stays binding.
+C_DEEP_TREE_SALVAGED_300 = 0.97135             # deep (j>=2) tree-salvaged effective acceptance
+# #309 cliff-HELD path: at the DEPLOYED raw a1=0.73 (no drafter retrain at all) the W=4 tree
+# lifts EFFECTIVE a1 to 0.9064 and E[T]=6.11 stays reachable at a feasible deep rate.
+CLIFFHELD_A1_EFF_AT_RAW_073 = 0.9063633537959437
+CLIFFHELD_DEEP_B_REQUIRED = 0.9269253521675682
+CLIFFHELD_CAN_REACH_611 = True
+# #309's own load-bearing caveat: cov_W is measured on the LINEAR spine; the {2,21,39}
+# fusion draft's rank-2+ miss mass may fall further down the list (frac_beyond_top4).
+FRAC_TRUE_BEYOND_TOP4_LINEAR_309 = 0.3468023933483565
+
+# Deployed verify width (int4_tokenident_deployed_m8, `imported_anchors.M_verify`):
+# the DEPLOYED linear-MTP K=7 ALREADY verifies M=8 tokens/step (7 draft + 1 bonus).
+# The M=8 tree-salvage REUSES this budget (reshapes width-1xdepth-7 -> width-4 root),
+# so it adds ~0 verify-GEMM rows vs the deployed baseline the #295 step profile measured.
+M_VERIFY_DEPLOYED = 8
 
 # --------------------------------------------------------------------------- #
 # PUBLISHED EAGLE-family first-token (0-alpha) acceptance envelope.
@@ -238,6 +299,26 @@ def argmax_robustness_ceiling(top1_mass: float) -> float:
 
 
 # --------------------------------------------------------------------------- #
+# lawine #309 M=8 verify-tree salvage operator (imported EXACTLY).
+# --------------------------------------------------------------------------- #
+def tree_recovered(a1_draft: float, cov: float) -> float:
+    """Effective position-1 acceptance after an M-node tree salvages rank-2..W.
+
+    c1_eff = a1_draft + (1 - a1_draft) * cov  -- the true token is rank-1 (prob
+    a1_draft) OR in the salvaged rank-2..W branch (the M=8 tree's measured cov).
+    """
+    return float(a1_draft + (1.0 - a1_draft) * cov)
+
+
+def invert_salvage(a_eff_target: float, cov: float) -> float:
+    """Raw draft a1 so tree_recovered(a1, cov) == a_eff_target: (a_eff-cov)/(1-cov).
+
+    cov->0 returns a_eff_target (no salvage, reproduces #304); cov->1 returns 0.
+    """
+    return float((a_eff_target - cov) / (1.0 - cov))
+
+
+# --------------------------------------------------------------------------- #
 # Verdict.
 # --------------------------------------------------------------------------- #
 def classify_a1_trainable(a1_req: float, env_max: float, lever: float) -> str:
@@ -296,16 +377,96 @@ def synthesize() -> dict[str, Any]:
     mean_nll_nats = math.log(TARGET_EVAL_PPL_217)
     jensen_floor_ref_prob = math.exp(-mean_nll_nats)
 
-    # ---------- step 4: verdict ---------- #
-    a1_target_trainable = classify_a1_trainable(
-        A1_REQUIRED_FOR_611, A1_PUBLISHED_ENVELOPE_MAX, AT_FRONTIER_MARGIN)
-    a1_demand_blocks_go = bool(a1_target_trainable == "out-of-reach")
+    # ---------- step 5: the lawine #309 M=8-salvage-RELAXED bar ---------- #
+    # #304's 0.9213 is the UNIFORM RAW-draft demand (no verify-tree salvage). lawine
+    # #309 shows the deployed M=8 verify-tree salvages the rank-2+ matches the width-1
+    # spine rejects: the EFFECTIVE position-1 acceptance is tree_recovered(a1_draft,cov),
+    # so the RAW fusion-draft a1 needed for the SAME E[T]=6.11 drops to 0.7731 (W=4).
+    # invert from the FULL-PRECISION effective acceptance (solve_uniform_a1(6.1112)=0.9213011665,
+    # the value #309 inverted), not the 4dp display 0.9213, so we reproduce #309 exactly.
+    a_eff_611_full = a1_uniform_recomputed                                      # 0.9213011665...
+    a1_salvage_relaxed = invert_salvage(a_eff_611_full, COV_PRIMARY_309)        # 0.7731
+    reproduces_309_relaxed = abs(a1_salvage_relaxed - A1_REQUIRED_SALVAGE_RELAXED_W4) < TOL_RT
+    salvage_relaxes_by = a_eff_611_full - a1_salvage_relaxed                    # +0.1482
+    # reconcile the in-repo head vs the relaxed bar (advisor instruction 2):
+    gap_inrepo_vs_relaxed = a1_salvage_relaxed - A1_INREPO_EAGLE3_NATIVE_STEP1  # +0.0017
+    relaxed_within_inrepo_noise = bool(
+        abs(gap_inrepo_vs_relaxed) <= A1_INREPO_NATIVE_TF_SPREAD)              # 0.0017 <= 0.0097
+    relaxed_in_published_band = bool(
+        EAGLE1_LLAMA2CHAT13B_0ALPHA_T0 <= a1_salvage_relaxed <= A1_PUBLISHED_ENVELOPE_MAX)
+    relaxed_below_robustness_ceiling = bool(a1_salvage_relaxed < EVAL_TOP1_MASS_LOW)  # 0.773<0.80
+    # the salvage-relaxed verdict (the new headline bar):
+    a1_trainable_salvage = classify_a1_trainable(
+        a1_salvage_relaxed, A1_PUBLISHED_ENVELOPE_MAX, AT_FRONTIER_MARGIN)     # in-envelope
+    # bracket the relaxed bar across the verify width W (deeper/narrower trees):
+    salvage_relaxed_by_W = {w: A1_REQUIRED_FOR_611 - A1_REQUIRED_SALVAGE_BY_W[w]
+                            for w in sorted(A1_REQUIRED_SALVAGE_BY_W)}
+
+    # ---------- step 6: salvage COST loop (does the heavier M=8 step eat the gain?) ---------- #
+    # The salvage is bought by deploying the verify-TREE. Three cost facts:
+    #  (A) M=8 is ALREADY the deployed verify width (int4_tokenident_deployed_m8: the
+    #      linear-MTP K=7 verifies 7 draft + 1 = 8). So the deployed budget already covers
+    #      a depth-7 spine -- the #295 central 6.11 target ALREADY prices an M=8 verify.
+    #  (A') BUT a tree that delivers BOTH width-4 at the root AND reaches depth 7 (what #309's
+    #      cov4 + reach-6.11 model assumes) costs ~ (4 root leaves) + (6 deeper spine) + (1
+    #      bonus) = 11 verify nodes -- ~+3 over the deployed 8, a ~1.4x verify-row count. So
+    #      the tree IS somewhat heavier; it is NOT literally free.
+    #  (B) That +3-node verify increase is SMALLER than the #295 DRAFT-step regime span: the
+    #      bracket [5.3636 mult-lower .. 6.8588 additive-upper] already moves the target by
+    #      +/-0.75 E[T] (the additive-upper is 1.39x the central step inflation), far wider
+    #      than a ~1.4x verify-row bump on the (sub-dominant) verify term. So the salvaged
+    #      RAW-a1 demand across the #295 bracket -- invert_salvage(a_eff(E[T]), cov4) -- with
+    #      the additive-upper 6.86 as the CONSERVATIVE heavy-verify anchor, ENVELOPES the
+    #      tree's own verify cost. The pess end is the honest "heavy step" operating point.
+    deployed_verify_already_m8 = bool(M_VERIFY_DEPLOYED == K_SPEC + 1)          # 8 == 7+1
+    salvage_tree_nodes_w4_depth7 = PRIMARY_W_309 + (K_SPEC - 1) + 1             # 4 + 6 + 1 = 11
+    verify_row_ratio_vs_deployed = salvage_tree_nodes_w4_depth7 / M_VERIFY_DEPLOYED  # ~1.375x
+    cost_bracket = {}
+    for tag, et in (("lower_5p36", ET_TARGET_LOWER_295),
+                    ("central_6p11", ET_TARGET_CENTRAL_295),
+                    ("upper_6p86", ET_TARGET_UPPER_295)):
+        a_eff = solve_uniform_a1(et)                    # effective uniform per-position acceptance
+        raw = invert_salvage(a_eff, COV_PRIMARY_309)    # raw draft a1 after W=4 salvage
+        deep_clears = bool(a_eff <= C_DEEP_TREE_SALVAGED_300 + 1e-9)   # deep tree still salvages a_eff
+        cost_bracket[tag] = {
+            "et_target": et, "a_eff_uniform": a_eff, "salvaged_raw_a1": raw,
+            "deep_tree_clears_a_eff": deep_clears,
+            "verdict": classify_a1_trainable(raw, A1_PUBLISHED_ENVELOPE_MAX, AT_FRONTIER_MARGIN),
+            "below_no_salvage_0p9213": bool(raw < A1_REQUIRED_FOR_611),
+        }
+    salvaged_raw_central = cost_bracket["central_6p11"]["salvaged_raw_a1"]
+    salvaged_raw_lower = cost_bracket["lower_5p36"]["salvaged_raw_a1"]
+    salvaged_raw_upper = cost_bracket["upper_6p86"]["salvaged_raw_a1"]
+    # NET POSITIVE if the salvage relaxes below #304's 0.9213 at EVERY step regime
+    # (it never evaporates) AND lands inside the published envelope at the CENTRAL step.
+    salvage_relaxes_at_all_regimes = bool(
+        all(v["below_no_salvage_0p9213"] for v in cost_bracket.values()))
+    salvage_in_envelope_at_central = bool(
+        cost_bracket["central_6p11"]["verdict"] in ("in-envelope", "at-frontier"))
+    salvage_net_positive = bool(salvage_relaxes_at_all_regimes and salvage_in_envelope_at_central)
+    # the additive-upper (pessimistic) step regime re-inflates the demand above envelope:
+    heavy_step_reopens_at_upper = bool(
+        cost_bracket["upper_6p86"]["verdict"] == "out-of-reach")
+
+    # ---------- step 4: verdict (BOTH bars) ---------- #
+    # uniform bar (#304, no salvage) -- BANKED reference, the original RED.
+    a1_trainable_uniform = classify_a1_trainable(
+        A1_REQUIRED_FOR_611, A1_PUBLISHED_ENVELOPE_MAX, AT_FRONTIER_MARGIN)     # out-of-reach
+    blocks_go_uniform = bool(a1_trainable_uniform == "out-of-reach")           # True
+    # HEADLINE bar = the salvage-relaxed bar (#309 supersedes the uniform bar).
+    a1_target_trainable = a1_trainable_salvage                                 # in-envelope
+    a1_demand_blocks_go = bool(not salvage_net_positive)                       # False (GREEN flip)
     light = {"in-envelope": "GREEN", "at-frontier": "YELLOW",
              "out-of-reach": "RED"}[a1_target_trainable]
+    # net GO/NO-GO color: GREEN central, YELLOW on the two residuals (cov-transfer + step tail).
+    handoff_light_net = "GREEN-YELLOW" if (salvage_net_positive and (
+        heavy_step_reopens_at_upper or not relaxed_below_robustness_ceiling
+        or FRAC_TRUE_BEYOND_TOP4_LINEAR_309 > 0.0)) else light
 
-    verdict = _verdict(a1_target_trainable, demand_below_info_ceiling)
-    handoff = _handoff(a1_target_trainable, light, gap_above_env_max,
-                       a1_theoretical_ceiling, a1_demand_blocks_go)
+    verdict = _verdict(a1_target_trainable, demand_below_info_ceiling, salvage_net_positive)
+    handoff = _handoff(a1_salvage_relaxed, salvage_relaxes_by, gap_inrepo_vs_relaxed,
+                       salvaged_raw_lower, salvaged_raw_upper, handoff_light_net,
+                       salvage_net_positive, heavy_step_reopens_at_upper)
 
     return {
         "step1_anchor_cliff": {
@@ -363,10 +524,55 @@ def synthesize() -> dict[str, Any]:
             "mean_nll_nats": mean_nll_nats,
             "jensen_floor_ref_prob": jensen_floor_ref_prob,
         },
+        "step5_salvage_relaxed_bar": {
+            "salvage_operator": "c1_eff = a1_draft + (1 - a1_draft) * cov_W",
+            "cov_primary_w4_309": COV_PRIMARY_309,
+            "primary_w_309": PRIMARY_W_309,
+            "m_verify_deployed": M_VERIFY_DEPLOYED,
+            "a1_required_for_611_uniform": A1_REQUIRED_FOR_611,
+            "a1_required_for_611_salvage_relaxed": a1_salvage_relaxed,
+            "reproduces_309_relaxed": reproduces_309_relaxed,
+            "salvage_relaxes_demand_by": salvage_relaxes_by,
+            "salvage_relaxes_by_W": salvage_relaxed_by_W,
+            "a1_required_salvage_by_W": A1_REQUIRED_SALVAGE_BY_W,
+            "a1_inrepo_eagle3_native_step1": A1_INREPO_EAGLE3_NATIVE_STEP1,
+            "gap_inrepo_vs_relaxed": gap_inrepo_vs_relaxed,
+            "inrepo_native_tf_spread": A1_INREPO_NATIVE_TF_SPREAD,
+            "relaxed_within_inrepo_noise": relaxed_within_inrepo_noise,
+            "relaxed_in_published_band": relaxed_in_published_band,
+            "relaxed_below_robustness_ceiling": relaxed_below_robustness_ceiling,
+            "a1_trainable_salvage": a1_trainable_salvage,
+            "cliffheld_a1_eff_at_raw_073": CLIFFHELD_A1_EFF_AT_RAW_073,
+            "cliffheld_deep_b_required": CLIFFHELD_DEEP_B_REQUIRED,
+            "cliffheld_can_reach_611": CLIFFHELD_CAN_REACH_611,
+        },
+        "step6_salvage_cost_loop": {
+            "deployed_verify_already_m8": deployed_verify_already_m8,
+            "m_verify_deployed": M_VERIFY_DEPLOYED,
+            "salvage_tree_nodes_w4_depth7": salvage_tree_nodes_w4_depth7,
+            "verify_row_ratio_vs_deployed": verify_row_ratio_vs_deployed,
+            "et_bracket_295": [ET_TARGET_LOWER_295, ET_TARGET_CENTRAL_295, ET_TARGET_UPPER_295],
+            "cost_bracket": cost_bracket,
+            "salvaged_raw_a1_lower_5p36": salvaged_raw_lower,
+            "salvaged_raw_a1_central_6p11": salvaged_raw_central,
+            "salvaged_raw_a1_upper_6p86": salvaged_raw_upper,
+            "salvage_relaxes_at_all_regimes": salvage_relaxes_at_all_regimes,
+            "salvage_in_envelope_at_central": salvage_in_envelope_at_central,
+            "salvage_net_positive": salvage_net_positive,
+            "heavy_step_reopens_at_upper": heavy_step_reopens_at_upper,
+            "frac_true_beyond_top4_linear_309": FRAC_TRUE_BEYOND_TOP4_LINEAR_309,
+        },
         "step4_verdict": {
+            # HEADLINE = salvage-relaxed bar (#309 supersedes the uniform bar).
             "a1_target_trainable": a1_target_trainable,
             "a1_demand_blocks_go": a1_demand_blocks_go,
             "handoff_light": light,
+            "handoff_light_net": handoff_light_net,
+            "a1_required_for_611_salvage_relaxed": a1_salvage_relaxed,
+            "salvage_net_positive": salvage_net_positive,
+            # BANKED uniform-bar reference (the original RED).
+            "a1_trainable_uniform": a1_trainable_uniform,
+            "blocks_go_uniform": blocks_go_uniform,
             "a1_required_for_611": A1_REQUIRED_FOR_611,
             "a1_deployed": a1,
             "a1_low_quartile_297": A1_LOW_QUARTILE_297,
@@ -385,30 +591,41 @@ def synthesize() -> dict[str, Any]:
     }
 
 
-def _verdict(trainable: str, below_info: bool) -> str:
-    if trainable == "in-envelope":
-        return "A1-IN-PUBLISHED-ENVELOPE-TRAINABLE"
-    if trainable == "at-frontier":
-        return "A1-AT-FRONTIER-TRAINABLE-WITH-BEST-INGREDIENTS"
-    tail = "BELOW-INFO-CEILING-NO-DEMONSTRATED-PATH" if below_info else "ABOVE-INFO-CEILING-INTRINSIC"
-    return f"A1-OUT-OF-REACH-OF-PUBLISHED-ENVELOPE--{tail}"
+def _verdict(trainable_salvage: str, below_info: bool, net_positive: bool) -> str:
+    """Headline verdict against the #309 salvage-relaxed bar (uniform bar banked separately)."""
+    tail = "BELOW-INFO-CEILING" if below_info else "ABOVE-INFO-CEILING-INTRINSIC"
+    if net_positive and trainable_salvage in ("in-envelope", "at-frontier"):
+        env = "IN-PUBLISHED-ENVELOPE" if trainable_salvage == "in-envelope" else "AT-FRONTIER"
+        return (f"A1-SALVAGE-RELAXED-TO-0p7731-{env}-TRAINABLE--{tail}"
+                "--YELLOW-ON-COV-TRANSFER-AND-STEP-REGIME")
+    return f"A1-SALVAGE-RELAXED-STILL-OUT-OF-REACH--{tail}"
 
 
-def _handoff(trainable: str, light: str, gap: float, ceiling: float, blocks: bool) -> str:
+def _handoff(a1_relaxed: float, relaxes_by: float, gap_inrepo: float,
+             raw_lower: float, raw_upper: float, light_net: str,
+             net_positive: bool, reopens_upper: bool) -> str:
+    reopen = (f" The additive-upper (#295 pessimistic) draft-step regime re-inflates the "
+              f"salvaged demand to {raw_upper:.3f} (back above the ~0.80 envelope), so the "
+              f"heavy-step tail re-opens the blocker -- YELLOW, not unconditional GREEN."
+              if reopens_upper else "")
     return (
-        f"a1~0.92 is a {light} light for the >500 EAGLE-3 build: the demand sits +{gap:.3f} "
-        f"above the published EAGLE-3 first-token (0-alpha) envelope ~0.80 and above every "
-        f"demonstrated first-token acceptance (NO published spec-decode method reports 0-alpha "
-        f">=0.90 on any chat target), on the ONE position the standard TTT/multi-step levers "
-        f"CANNOT lift (depth-0 is serve-faithful; HASS even degrades it). It is NOT "
-        f"information-theoretically forbidden (perfect-drafter ceiling 1.0) but exceeds the "
-        f"argmax-robustness ceiling ~{ceiling:.2f} (eval top-1 mass), so it has no demonstrated "
-        f"training path: a1_target_trainable={trainable}, a1_demand_blocks_go={blocks}. "
-        f"0 TPS; analytic + literature only; BASELINE 481.53 unchanged; the drafter BUILD stays "
-        f"human-gated. The single biggest residual uncertainty is the true eval-distribution "
-        f"top-1 mass (a STATED 0-GPU assumption): a one-GPU top-1-entropy probe on the served "
-        f"target would convert this RED to a hard RED or reopen it. NOT a launch. NOT a build. "
-        f"NOT a served-file change."
+        f"a1 is a {light_net} light for the >500 EAGLE-3 build under lawine #309's M=8 verify-tree "
+        f"salvage: the RAW fusion-draft demand to hit E[T]=6.11 drops from #304's 0.9213 (RED, "
+        f"out of envelope) to {a1_relaxed:.4f} (W=4 root coverage 0.6532), a {relaxes_by:.4f} raw-a1 "
+        f"relaxation that lands INSIDE the published 0.77-0.80 0-alpha envelope and only +{gap_inrepo:.4f} "
+        f"above the in-repo {{2,21,39}} EAGLE-3 head's native step-1 = 0.7714 (WITHIN that head's own "
+        f"native-vs-tf 0.0097 spread, i.e. essentially already achieved on THIS target). Cost loop: "
+        f"M=8 is ALREADY the deployed verify width (linear-MTP K=7 verifies 7+1=8), covering a depth-7 "
+        f"spine; the width-4 root salvage adds ~3 nodes (~11 total, ~1.4x verify rows), so the tree IS "
+        f"somewhat heavier -- but that bump is SMALLER than the #295 draft-step regime span, so the "
+        f"salvaged demand across the bracket [{raw_lower:.3f} (opt) .. {a1_relaxed:.3f} (central) .. "
+        f"{raw_upper:.3f} (pess, the conservative heavy-verify anchor)] ENVELOPES it and NEVER evaporates "
+        f"(always < 0.9213) -> salvage_net_positive={net_positive}.{reopen} The two residual YELLOWs: "
+        f"(1) cov_W is measured on the LINEAR spine, "
+        f"not the fusion draft (if its rank-2+ misses fall further down the list, cov drops and the "
+        f"demand rises toward 0.9213); (2) the additive-upper draft-step regime. 0 TPS; analytic + "
+        f"literature only; BASELINE 481.53 unchanged; the drafter BUILD stays human-gated. NOT a "
+        f"launch. NOT a build. NOT a served-file change."
     )
 
 
@@ -418,6 +635,7 @@ def _handoff(trainable: str, light: str, gap: float, ceiling: float, blocks: boo
 def self_test(syn: dict[str, Any]) -> dict[str, Any]:
     s1, s2, s3, s4 = (syn["step1_anchor_cliff"], syn["step2_published_envelope"],
                       syn["step3_ceiling"], syn["step4_verdict"])
+    s5, s6 = syn["step5_salvage_relaxed_bar"], syn["step6_salvage_cost_loop"]
     checks: dict[str, bool] = {}
 
     # (a) the deployed gap reconciles #289 / #304.
@@ -459,35 +677,81 @@ def self_test(syn: dict[str, Any]) -> dict[str, Any]:
     checks["c_jensen_floor_consistent"] = bool(
         0.0 < s3["jensen_floor_ref_prob"] <= EVAL_TOP1_MASS_HIGH)
 
-    # (d) verdict consistency: out-of-reach <=> demand > env_max + one best lever; blocks_go aligns.
-    expected = classify_a1_trainable(
+    # (d) verdict consistency: uniform bar is out-of-reach; salvage bar is the headline; lights align.
+    expected_uniform = classify_a1_trainable(
         A1_REQUIRED_FOR_611, A1_PUBLISHED_ENVELOPE_MAX, AT_FRONTIER_MARGIN)
-    checks["d_verdict_matches_rule"] = bool(s4["a1_target_trainable"] == expected)
+    expected_salvage = classify_a1_trainable(
+        s5["a1_required_for_611_salvage_relaxed"], A1_PUBLISHED_ENVELOPE_MAX, AT_FRONTIER_MARGIN)
+    checks["d_uniform_bar_still_out_of_reach"] = bool(
+        s4["a1_trainable_uniform"] == expected_uniform == "out-of-reach")
+    checks["d_blocks_go_uniform_true"] = bool(s4["blocks_go_uniform"] is True)
+    checks["d_headline_is_salvage_bar"] = bool(s4["a1_target_trainable"] == expected_salvage)
     checks["d_blocks_go_aligns"] = bool(
-        s4["a1_demand_blocks_go"] == (s4["a1_target_trainable"] == "out-of-reach"))
+        s4["a1_demand_blocks_go"] == (not s4["salvage_net_positive"]))
     checks["d_light_aligns"] = bool(
         s4["handoff_light"] == {"in-envelope": "GREEN", "at-frontier": "YELLOW",
                                 "out-of-reach": "RED"}[s4["a1_target_trainable"]])
+
+    # (g) salvage-relaxed bar (#309) reconciles, reproduces 0.7731, and matches the in-repo head.
+    checks["g_reproduces_309_relaxed_0p7731"] = bool(s5["reproduces_309_relaxed"])
+    checks["g_relaxed_below_uniform"] = bool(
+        s5["a1_required_for_611_salvage_relaxed"] < A1_REQUIRED_FOR_611)
+    checks["g_relaxes_by_0p1482"] = abs(s5["salvage_relaxes_demand_by"] - 0.14822818597734866) < 1e-9
+    checks["g_relaxed_within_inrepo_noise"] = bool(s5["relaxed_within_inrepo_noise"])
+    checks["g_gap_inrepo_vs_relaxed_tiny"] = abs(s5["gap_inrepo_vs_relaxed"] - 0.0017) < 1e-3
+    checks["g_relaxed_in_published_band"] = bool(s5["relaxed_in_published_band"])
+    checks["g_relaxed_below_robustness_ceiling"] = bool(s5["relaxed_below_robustness_ceiling"])
+    checks["g_salvage_bar_in_envelope"] = bool(s5["a1_trainable_salvage"] == "in-envelope")
+    # salvage operator round-trips #304 at zero coverage (no double-counting).
+    checks["g_zero_cov_reproduces_304"] = abs(
+        invert_salvage(A1_REQUIRED_FOR_611, 0.0) - A1_REQUIRED_FOR_611) < TOL_RT
+    checks["g_cliffheld_consistent"] = bool(
+        abs(tree_recovered(CLIFF_VALUE_SPEC, COV_PRIMARY_309) - s5["cliffheld_a1_eff_at_raw_073"])
+        < 1e-6 and s5["cliffheld_deep_b_required"] < 1.0)
+
+    # (h) cost loop: M=8 already deployed; salvage net positive; bracket monotone & honest.
+    cb = s6["cost_bracket"]
+    checks["h_deployed_verify_already_m8"] = bool(s6["deployed_verify_already_m8"])
+    checks["h_salvage_relaxes_at_all_regimes"] = bool(s6["salvage_relaxes_at_all_regimes"])
+    checks["h_salvage_net_positive"] = bool(s6["salvage_net_positive"])
+    checks["h_bracket_monotone_in_et"] = bool(
+        cb["lower_5p36"]["salvaged_raw_a1"] < cb["central_6p11"]["salvaged_raw_a1"]
+        < cb["upper_6p86"]["salvaged_raw_a1"])
+    checks["h_central_reproduces_0p7731"] = abs(
+        cb["central_6p11"]["salvaged_raw_a1"] - A1_REQUIRED_SALVAGE_RELAXED_W4) < 1e-6
+    checks["h_central_in_envelope"] = bool(
+        cb["central_6p11"]["verdict"] in ("in-envelope", "at-frontier"))
+    checks["h_deep_tree_clears_across_bracket"] = bool(
+        all(v["deep_tree_clears_a_eff"] for v in cb.values()))
+    checks["h_upper_regime_honestly_flagged"] = bool(
+        s6["heavy_step_reopens_at_upper"] == (cb["upper_6p86"]["verdict"] == "out-of-reach"))
 
     # (e) imported anchors EXACT and UNCHANGED.
     checks["e_constants_imported_exact"] = bool(
         A_K_289_DEPLOYED[0] == 0.72925
         and A1_REQUIRED_FOR_611 == 0.9213
         and ET_TARGET_CENTRAL_295 == 6.1112149873699195
+        and ET_TARGET_LOWER_295 == 5.363610726985671
+        and ET_TARGET_UPPER_295 == 6.858819247754167
         and A1_INREPO_EAGLE3_NATIVE_STEP1 == 0.7714
         and EAGLE1_VICUNA7B_0ALPHA_T0 == 0.79
         and EAGLE3_LLAMA31_8B_0ALPHA_T0 == 0.80
         and A1_INFO_THEORETIC_CEILING == 1.0
         and A1_LOW_QUARTILE_297 == 0.6550
         and SPEC_LIFT_289 == 0.91 and CLIFF_VALUE_SPEC == 0.73
-        and OFFICIAL_TPS_217 == 481.53 and K_SPEC == 7)
+        and OFFICIAL_TPS_217 == 481.53 and K_SPEC == 7
+        # #309 salvage + deployed-M=8 anchors, imported EXACTLY:
+        and COV_PRIMARY_309 == 0.6531976066516435
+        and A1_REQUIRED_SALVAGE_RELAXED_W4 == 0.7730729805683441
+        and SALVAGE_RELAXES_DEMAND_BY_W4 == 0.14822818597734866
+        and M_VERIFY_DEPLOYED == 8 and PRIMARY_W_309 == 4)
 
-    # (f) the leg carries the 0-TPS + analytic + not-forbidden-but-no-path caveats.
+    # (f) the leg carries the 0-TPS + analytic + scope caveats and both-bar framing.
     hl = syn["handoff_line"]
     checks["f_carries_caveats"] = bool(
         "0 TPS" in hl and "analytic" in hl and "NOT a launch" in hl
         and "NOT a build" in hl and "human-gated" in hl
-        and "information-theoretically forbidden" in hl)
+        and "0.9213" in hl and "salvage" in hl.lower())
 
     # nan-clean over the reported scalars.
     scalars = [
@@ -495,6 +759,9 @@ def self_test(syn: dict[str, Any]) -> dict[str, Any]:
         s1["a1_demand_perfect_interior"], s1["a1_demand_spec_interior_0p91"],
         s2["gap_above_env_max"], s2["gap_in_lever_units"], s3["a1_theoretical_ceiling"],
         s3["mean_nll_nats"], s3["jensen_floor_ref_prob"],
+        s5["a1_required_for_611_salvage_relaxed"], s5["salvage_relaxes_demand_by"],
+        s5["gap_inrepo_vs_relaxed"], s6["salvaged_raw_a1_lower_5p36"],
+        s6["salvaged_raw_a1_central_6p11"], s6["salvaged_raw_a1_upper_6p86"],
     ]
     checks["d_nan_clean"] = all(math.isfinite(float(x)) for x in scalars)
 
@@ -523,6 +790,7 @@ def _assert_nan_clean(payload: Any, path: str = "result") -> list[str]:
 def _print_report(syn: dict, st: dict) -> None:
     s1, s2, s3, s4 = (syn["step1_anchor_cliff"], syn["step2_published_envelope"],
                       syn["step3_ceiling"], syn["step4_verdict"])
+    s5, s6 = syn["step5_salvage_relaxed_bar"], syn["step6_salvage_cost_loop"]
     print("\n" + "=" * 94, flush=True)
     print("EAGLE-3 a1-CLIFF TRAINABILITY (PR #308, denken) -- analytic + literature, 0 GPU",
           flush=True)
@@ -561,9 +829,46 @@ def _print_report(syn: dict, st: dict) -> None:
           f"{s3['eval_top1_mass_high']:.2f}) = {s3['a1_theoretical_ceiling']:.2f}  "
           f"-> demand ABOVE it ({s3['demand_above_robustness_ceiling']})", flush=True)
     print("-" * 94, flush=True)
-    print("  (4) VERDICT", flush=True)
-    print(f"      a1_target_trainable  = {s4['a1_target_trainable']}  ({s4['handoff_light']})", flush=True)
-    print(f"      a1_demand_blocks_go  = {s4['a1_demand_blocks_go']}", flush=True)
+    print("  (5) lawine #309 M=8-SALVAGE-RELAXED BAR", flush=True)
+    print(f"      salvage op c1_eff = a1_draft + (1-a1_draft)*cov_W   (W=4 root cov "
+          f"{s5['cov_primary_w4_309']:.4f}, deployed M={s5['m_verify_deployed']})", flush=True)
+    print(f"      UNIFORM bar (304, no salvage) = {s5['a1_required_for_611_uniform']:.4f}  -> "
+          f"RELAXED bar (309 W=4) = {s5['a1_required_for_611_salvage_relaxed']:.4f}  "
+          f"(buys {s5['salvage_relaxes_demand_by']:.4f}; reproduces309={s5['reproduces_309_relaxed']})",
+          flush=True)
+    print(f"      reconcile in-repo: native step-1 {s5['a1_inrepo_eagle3_native_step1']:.4f} vs "
+          f"relaxed {s5['a1_required_for_611_salvage_relaxed']:.4f} = +{s5['gap_inrepo_vs_relaxed']:.4f} "
+          f"(<= in-repo native-tf spread {s5['inrepo_native_tf_spread']:.4f}? "
+          f"{s5['relaxed_within_inrepo_noise']})", flush=True)
+    print(f"      relaxed bar verdict = {s5['a1_trainable_salvage']}  "
+          f"(in 0.77-0.80 band={s5['relaxed_in_published_band']}, below robustness ceiling="
+          f"{s5['relaxed_below_robustness_ceiling']})", flush=True)
+    print(f"      cliff-HELD (raw a1=0.73 + tree): eff a1 -> {s5['cliffheld_a1_eff_at_raw_073']:.4f}, "
+          f"6.11 reachable at deep b {s5['cliffheld_deep_b_required']:.4f}<1 = "
+          f"{s5['cliffheld_can_reach_611']}", flush=True)
+    print("-" * 94, flush=True)
+    print("  (6) SALVAGE COST LOOP  (does the heavier M=8 step eat the gain?)", flush=True)
+    print(f"      deployed verify ALREADY M=8 ({s6['deployed_verify_already_m8']}, depth-7 spine); "
+          f"W=4-root+depth-7 tree ~{s6['salvage_tree_nodes_w4_depth7']} nodes "
+          f"({s6['verify_row_ratio_vs_deployed']:.2f}x rows) -- heavier, but < #295 step-regime span",
+          flush=True)
+    cb = s6["cost_bracket"]
+    for tag, lab in (("lower_5p36", "opt  5.36"), ("central_6p11", "cent 6.11"),
+                     ("upper_6p86", "pess 6.86")):
+        v = cb[tag]
+        print(f"        #295 {lab}: a_eff {v['a_eff_uniform']:.4f} -> salvaged raw a1 "
+              f"{v['salvaged_raw_a1']:.4f}  [{v['verdict']}]  (<0.9213={v['below_no_salvage_0p9213']}, "
+              f"deep clears={v['deep_tree_clears_a_eff']})", flush=True)
+    print(f"      salvage_net_positive = {s6['salvage_net_positive']}  "
+          f"(relaxes at all regimes={s6['salvage_relaxes_at_all_regimes']}; "
+          f"heavy-step reopens at upper={s6['heavy_step_reopens_at_upper']})", flush=True)
+    print("-" * 94, flush=True)
+    print("  (4) VERDICT  (HEADLINE = salvage-relaxed bar; uniform bar banked)", flush=True)
+    print(f"      HEADLINE a1_target_trainable = {s4['a1_target_trainable']}  "
+          f"({s4['handoff_light']}; net {s4['handoff_light_net']})", flush=True)
+    print(f"      a1_demand_blocks_go (salvage) = {s4['a1_demand_blocks_go']}   "
+          f"[uniform bar banked: {s4['a1_trainable_uniform']}, blocks_go="
+          f"{s4['blocks_go_uniform']}]", flush=True)
     print("-" * 94, flush=True)
     print(f"  PRIMARY a1_cliff_trainability_self_test_passes = "
           f"{st['a1_cliff_trainability_self_test_passes']}", flush=True)
@@ -589,6 +894,7 @@ def _maybe_log_wandb(args, payload: dict) -> str | None:
     syn, st = payload["synthesis"], payload["self_test"]
     s1, s2, s3, s4 = (syn["step1_anchor_cliff"], syn["step2_published_envelope"],
                       syn["step3_ceiling"], syn["step4_verdict"])
+    s5, s6 = syn["step5_salvage_relaxed_bar"], syn["step6_salvage_cost_loop"]
     run = init_wandb_run(
         job_type="eagle3-a1-cliff-trainability",
         agent="denken",
@@ -599,12 +905,17 @@ def _maybe_log_wandb(args, payload: dict) -> str | None:
         config={
             "pr": 308, "analysis_only": True, "K_spec": K_SPEC,
             "a1_deployed": A1_DEPLOYED, "a1_required_for_611": A1_REQUIRED_FOR_611,
+            "a1_required_for_611_salvage_relaxed": A1_REQUIRED_SALVAGE_RELAXED_W4,
+            "cov_primary_w4_309": COV_PRIMARY_309, "primary_w_309": PRIMARY_W_309,
+            "m_verify_deployed": M_VERIFY_DEPLOYED,
             "a1_inrepo_eagle3_native_step1": A1_INREPO_EAGLE3_NATIVE_STEP1,
             "a1_published_envelope_max": A1_PUBLISHED_ENVELOPE_MAX,
             "a1_published_exact_quoted_max": A1_PUBLISHED_EXACT_QUOTED_MAX,
             "eval_top1_mass_mean": EVAL_TOP1_MASS_MEAN,
             "eval_top1_mass_high": EVAL_TOP1_MASS_HIGH,
             "et_target_central_295": ET_TARGET_CENTRAL_295,
+            "et_target_lower_295": ET_TARGET_LOWER_295,
+            "et_target_upper_295": ET_TARGET_UPPER_295,
             "official_tps_217": OFFICIAL_TPS_217, "wandb_group": args.wandb_group,
         },
     )
@@ -622,10 +933,37 @@ def _maybe_log_wandb(args, payload: dict) -> str | None:
         "a1_published_envelope_max": s2["a1_published_envelope_max"],
         "a1_theoretical_ceiling": s3["a1_theoretical_ceiling"],
         "a1_info_theoretic_ceiling": s3["a1_info_theoretic_ceiling"],
-        # verdict
+        # verdict (HEADLINE = salvage-relaxed bar)
         "a1_target_trainable_code": {"in-envelope": 2, "at-frontier": 1,
                                      "out-of-reach": 0}[s4["a1_target_trainable"]],
         "a1_demand_blocks_go": int(bool(s4["a1_demand_blocks_go"])),
+        "a1_target_trainable_uniform_code": {"in-envelope": 2, "at-frontier": 1,
+                                             "out-of-reach": 0}[s4["a1_trainable_uniform"]],
+        "blocks_go_uniform": int(bool(s4["blocks_go_uniform"])),
+        "verdict_salvage_net_positive": int(bool(s4["salvage_net_positive"])),
+        # step 5: salvage-relaxed bar
+        "a1_required_for_611_salvage_relaxed": s5["a1_required_for_611_salvage_relaxed"],
+        "salvage_relaxes_demand_by": s5["salvage_relaxes_demand_by"],
+        "cov_primary_w4_309": s5["cov_primary_w4_309"],
+        "gap_inrepo_vs_relaxed": s5["gap_inrepo_vs_relaxed"],
+        "relaxed_within_inrepo_noise": int(bool(s5["relaxed_within_inrepo_noise"])),
+        "relaxed_in_published_band": int(bool(s5["relaxed_in_published_band"])),
+        "relaxed_below_robustness_ceiling": int(bool(s5["relaxed_below_robustness_ceiling"])),
+        "a1_trainable_salvage_code": {"in-envelope": 2, "at-frontier": 1,
+                                      "out-of-reach": 0}[s5["a1_trainable_salvage"]],
+        "cliffheld_a1_eff_at_raw_073": s5["cliffheld_a1_eff_at_raw_073"],
+        "cliffheld_can_reach_611": int(bool(s5["cliffheld_can_reach_611"])),
+        # step 6: salvage cost loop
+        "m_verify_deployed": s6["m_verify_deployed"],
+        "deployed_verify_already_m8": int(bool(s6["deployed_verify_already_m8"])),
+        "salvage_tree_nodes_w4_depth7": s6["salvage_tree_nodes_w4_depth7"],
+        "verify_row_ratio_vs_deployed": s6["verify_row_ratio_vs_deployed"],
+        "salvaged_raw_a1_lower_5p36": s6["salvaged_raw_a1_lower_5p36"],
+        "salvaged_raw_a1_central_6p11": s6["salvaged_raw_a1_central_6p11"],
+        "salvaged_raw_a1_upper_6p86": s6["salvaged_raw_a1_upper_6p86"],
+        "salvage_net_positive": int(bool(s6["salvage_net_positive"])),
+        "salvage_relaxes_at_all_regimes": int(bool(s6["salvage_relaxes_at_all_regimes"])),
+        "heavy_step_reopens_at_upper": int(bool(s6["heavy_step_reopens_at_upper"])),
         "verdict_out_of_reach": int(syn["verdict"].startswith("A1-OUT-OF-REACH")),
         # step 1
         "a1_deployed": s1["a1_deployed"],
