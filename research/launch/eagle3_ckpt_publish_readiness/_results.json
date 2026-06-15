@@ -1,0 +1,453 @@
+{
+  "card": "eagle3_ckpt_publish_readiness",
+  "pr": 328,
+  "author": "ubel",
+  "generated_utc": "2026-06-15T08:42:51.298984+00:00",
+  "head": {
+    "name": "gua9x68j (eval) / 56ksyxgw (train)",
+    "provenance": "fern #34 benchmark-matched reasoning head; warm-started from #25 full_20k/model_best.pt",
+    "aux_layers": [
+      2,
+      21,
+      39
+    ],
+    "source_save_code": "scripts/drafter/train_eagle3.py (Eagle3DraftHead)",
+    "local_only_path_pattern": "research/eagle3_drafter/checkpoints/<run>/model_best.pt (gitignored)",
+    "format": "torch-pickled state_dict (.pt), mixed dtype (embed/lm_head bf16, 13 body tensors fp32)",
+    "n_tensors": 15
+  },
+  "vllm": {
+    "version": "0.22.1rc1.dev307+g3e8afdf78",
+    "load_path": "vllm/model_executor/models/llama_eagle3.py Eagle3LlamaForCausalLM.load_weights + LlamaModel.load_weights",
+    "n_loadable_params": 12
+  },
+  "verdict": "YELLOW",
+  "ckpt_publish_readiness_blocking_issues": 3,
+  "ckpt_publish_readiness_self_test_passes": 1,
+  "loadable_as_is": false,
+  "loadable_with_documented_shim": true,
+  "raw_state_dict_check": {
+    "tensors_mapped_ok": 1,
+    "tensors_failed": 14,
+    "rows": [
+      {
+        "src": "model.embed_tokens.weight",
+        "internal": "model.model.embed_tokens.weight",
+        "shard": null,
+        "src_shape": [
+          262144,
+          2560
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.input_norm.weight",
+        "internal": "model.model.input_norm.weight",
+        "shard": null,
+        "src_shape": [
+          7680
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.fc.weight",
+        "internal": "model.model.fc.weight",
+        "shard": null,
+        "src_shape": [
+          2560,
+          7680
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.norm.weight",
+        "internal": "model.model.norm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.self_attn.q_proj.weight",
+        "internal": "model.model.layers.0.self_attn.qkv_proj.weight",
+        "shard": "q",
+        "src_shape": [
+          2048,
+          5120
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.self_attn.k_proj.weight",
+        "internal": "model.model.layers.0.self_attn.qkv_proj.weight",
+        "shard": "k",
+        "src_shape": [
+          512,
+          5120
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.self_attn.v_proj.weight",
+        "internal": "model.model.layers.0.self_attn.qkv_proj.weight",
+        "shard": "v",
+        "src_shape": [
+          512,
+          5120
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.self_attn.o_proj.weight",
+        "internal": "model.model.layers.0.self_attn.o_proj.weight",
+        "shard": null,
+        "src_shape": [
+          2560,
+          2048
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.mlp.gate_proj.weight",
+        "internal": "model.model.layers.0.mlp.gate_up_proj.weight",
+        "shard": 0,
+        "src_shape": [
+          10240,
+          2560
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.mlp.up_proj.weight",
+        "internal": "model.model.layers.0.mlp.gate_up_proj.weight",
+        "shard": 1,
+        "src_shape": [
+          10240,
+          2560
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.mlp.down_proj.weight",
+        "internal": "model.model.layers.0.mlp.down_proj.weight",
+        "shard": null,
+        "src_shape": [
+          2560,
+          10240
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.input_layernorm.weight",
+        "internal": "model.model.layers.0.input_layernorm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.hidden_norm.weight",
+        "internal": "model.model.layers.0.hidden_norm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "model.layers.0.post_attention_layernorm.weight",
+        "internal": "model.model.layers.0.post_attention_layernorm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": null,
+        "status": "unexpected"
+      },
+      {
+        "src": "lm_head.weight",
+        "internal": "lm_head.weight",
+        "shard": null,
+        "src_shape": [
+          262144,
+          2560
+        ],
+        "want_shape": [
+          262144,
+          2560
+        ],
+        "status": "ok"
+      }
+    ]
+  },
+  "published_check": {
+    "tensors_mapped_ok": 15,
+    "tensors_failed": 0,
+    "covers_all_load_targets": true,
+    "missing_targets": [],
+    "rename_rule": "strip leading 'model.' ; 'layers.0.'->'midlayer.' ; 'lm_head.*' unchanged ; q/k/v + gate/up kept separate",
+    "rows": [
+      {
+        "src": "embed_tokens.weight",
+        "internal": "model.embed_tokens.weight",
+        "shard": null,
+        "src_shape": [
+          262144,
+          2560
+        ],
+        "want_shape": [
+          262144,
+          2560
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "input_norm.weight",
+        "internal": "model.input_norm.weight",
+        "shard": null,
+        "src_shape": [
+          7680
+        ],
+        "want_shape": [
+          7680
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "fc.weight",
+        "internal": "model.fc.weight",
+        "shard": null,
+        "src_shape": [
+          2560,
+          7680
+        ],
+        "want_shape": [
+          2560,
+          7680
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "norm.weight",
+        "internal": "model.norm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": [
+          2560
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.self_attn.q_proj.weight",
+        "internal": "model.layers.0.self_attn.qkv_proj.weight",
+        "shard": "q",
+        "src_shape": [
+          2048,
+          5120
+        ],
+        "want_shape": [
+          2048,
+          5120
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.self_attn.k_proj.weight",
+        "internal": "model.layers.0.self_attn.qkv_proj.weight",
+        "shard": "k",
+        "src_shape": [
+          512,
+          5120
+        ],
+        "want_shape": [
+          512,
+          5120
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.self_attn.v_proj.weight",
+        "internal": "model.layers.0.self_attn.qkv_proj.weight",
+        "shard": "v",
+        "src_shape": [
+          512,
+          5120
+        ],
+        "want_shape": [
+          512,
+          5120
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.self_attn.o_proj.weight",
+        "internal": "model.layers.0.self_attn.o_proj.weight",
+        "shard": null,
+        "src_shape": [
+          2560,
+          2048
+        ],
+        "want_shape": [
+          2560,
+          2048
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.mlp.gate_proj.weight",
+        "internal": "model.layers.0.mlp.gate_up_proj.weight",
+        "shard": 0,
+        "src_shape": [
+          10240,
+          2560
+        ],
+        "want_shape": [
+          10240,
+          2560
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.mlp.up_proj.weight",
+        "internal": "model.layers.0.mlp.gate_up_proj.weight",
+        "shard": 1,
+        "src_shape": [
+          10240,
+          2560
+        ],
+        "want_shape": [
+          10240,
+          2560
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.mlp.down_proj.weight",
+        "internal": "model.layers.0.mlp.down_proj.weight",
+        "shard": null,
+        "src_shape": [
+          2560,
+          10240
+        ],
+        "want_shape": [
+          2560,
+          10240
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.input_layernorm.weight",
+        "internal": "model.layers.0.input_layernorm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": [
+          2560
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.hidden_norm.weight",
+        "internal": "model.layers.0.hidden_norm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": [
+          2560
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "midlayer.post_attention_layernorm.weight",
+        "internal": "model.layers.0.post_attention_layernorm.weight",
+        "shard": null,
+        "src_shape": [
+          2560
+        ],
+        "want_shape": [
+          2560
+        ],
+        "status": "ok"
+      },
+      {
+        "src": "lm_head.weight",
+        "internal": "lm_head.weight",
+        "shard": null,
+        "src_shape": [
+          262144,
+          2560
+        ],
+        "want_shape": [
+          262144,
+          2560
+        ],
+        "status": "ok"
+      }
+    ]
+  },
+  "blocking_issues": [
+    {
+      "id": "no_published_path",
+      "severity": "blocking",
+      "kind": "publish",
+      "summary": "Artifact is a LOCAL-ONLY pickled .pt in a gitignored workdir (research/eagle3_drafter/checkpoints/, .gitignore); the HF a10g runner cannot pull a /senpai-run|/workspace local path.",
+      "fix": "Export to a single model.safetensors + config.json and publish to DRAFTER_BUCKET (scratch bucket) or a private Hub model repo; set DRAFTER_SHA256. serve.py:720 ensure_drafter() syncs that bucket.",
+      "deterministic": true
+    },
+    {
+      "id": "weight_key_namespace_mismatch",
+      "severity": "blocking",
+      "kind": "load",
+      "summary": "head.state_dict() emits model.-prefixed body keys + model.layers.0.* ; vLLM's loader UNCONDITIONALLY prepends model. (llama_eagle3.py:423-424) and remaps midlayer.->layers.0. , so the raw keys double-prefix (model.model.*) and fail. AutoWeightsLoader RAISES on unexpected/missing tensors.",
+      "fix": "Deterministic, lossless key rename: strip leading 'model.' from body keys (fc/embed_tokens/norm/input_norm), rename 'layers.0.'->'midlayer.', keep 'lm_head.*'. q/k/v + gate/up stay SEPARATE (vLLM fuses them via stacked_params_mapping).",
+      "deterministic": true
+    },
+    {
+      "id": "container_format",
+      "severity": "blocking",
+      "kind": "publish",
+      "summary": "Checkpoint is a torch-pickled state_dict (model_best.pt). serve.py:745 + vLLM require a file literally named model.safetensors (+ config.json) in the drafter dir; a .pt is neither HF-discoverable nor sha256-checked by ensure_drafter.",
+      "fix": "Write the renamed tensors to model.safetensors (recommend uniform bf16 = serving dtype); co-locate the vLLM EAGLE-3 config.json.",
+      "deterministic": true
+    }
+  ],
+  "verify_at_smoke_caveats": [
+    "HF AutoConfig(model_type=llama) must retain the custom fields (norm_before_fc, target_hidden_size, num_aux_hidden_states, eagle_aux_hidden_state_layer_ids). Recommend ALSO nesting them under an `eagle_config` dict (vLLM reads eagle_config first). Confirm 0 missing/unexpected at smoke.",
+    "Body tensors are fp32 in the .pt; vLLM serves bf16 (params_dtype=model dtype) and default_weight_loader casts on copy_. A uniform-bf16 export is cleaner; greedy token-identity must be confirmed at smoke regardless.",
+    "draft_id_to_target_id/d2t is ABSENT -> vLLM defaults it to identity zeros; compute_logits then scatters full-vocab logits 1:1 (correct). Not a blocker.",
+    "vLLM version: load path read from 0.22.1rc1.dev307 (the exact wheel pinned in submissions/fa2sw_precache_kenyan/manifest.json dependencies). The vllm_baseline manifest's vllm==0.22.0 pin is a DIFFERENT submission."
+  ],
+  "self_tests": {
+    "source_has_15_tensors": true,
+    "raw_only_lm_head_maps": true,
+    "raw_has_14_unexpected": true,
+    "published_maps_all_15": true,
+    "published_no_unexpected": true,
+    "published_covers_all_targets": true,
+    "published_no_shape_mismatch": true,
+    "verdict_is_yellow": true,
+    "blocking_all_deterministic": true
+  },
+  "wandb_run_ids": [
+    "27y5xxce"
+  ]
+}
