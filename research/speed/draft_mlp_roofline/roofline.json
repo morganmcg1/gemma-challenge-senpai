@@ -1,0 +1,209 @@
+{
+  "config": {
+    "drafter_dir": "/tmp/qat-assistant",
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "iters": 400,
+    "warmup": 80,
+    "k": 7,
+    "A10G_HBM_GBS": 600.0,
+    "layer_ids": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "mlp_anchor_tol_pct": 0.2,
+    "bw_roundtrip_tol_pct": 0.2,
+    "component_sum_tol_pct": 0.25,
+    "overhead_material_ratio": 1.15,
+    "note": "isolated CUDA-graph M=1 micro-profiling of the real bf16 draft MLP (vLLM Gemma4MLP: gate_up fused GEMV + GeluAndMul + down GEMV x4 layers) vs its HBM-bandwidth roofline; large lm_head GEMV as the empirical BW anchor. No serve change, no HF Job, no submission. Greedy+PPL pinned (nothing edited)."
+  },
+  "components": [
+    {
+      "component": "gate_up_GEMV",
+      "us": 32.51456022262573,
+      "roofline_us": 13.981013333333333,
+      "overhead_ratio": 2.3256225745171832,
+      "pct_of_full": 55.428996103028325
+    },
+    {
+      "component": "down_GEMV",
+      "us": 18.316800594329834,
+      "roofline_us": 6.990506666666667,
+      "overhead_ratio": 2.6202393428320647,
+      "pct_of_full": 31.22545289899251
+    },
+    {
+      "component": "GeluAndMul_activation",
+      "us": 9.738240242004395,
+      "roofline_us": 0.0,
+      "overhead_ratio": Infinity,
+      "pct_of_full": 16.60120502102934
+    },
+    {
+      "component": "per_kernel_launch_floor",
+      "us": 1.8305528714628019,
+      "roofline_us": 0.0,
+      "overhead_ratio": Infinity,
+      "pct_of_full": 37.44748467786781
+    }
+  ],
+  "tiny_sweep": {
+    "n": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "us": [
+      4.989440143108368,
+      4.894720017910004,
+      8.442879915237427,
+      15.70047974586487,
+      30.589439868927002,
+      60.590081214904785
+    ],
+    "per_kernel_us": 1.8305528714628019,
+    "graph_base_us": 1.6470350006326555
+  },
+  "verdict": {
+    "draft_mlp_roofline_self_test_passes": true,
+    "projected_tps_gain_pct": 4.392280827418404,
+    "slack_material": true,
+    "recoverable_material": true,
+    "draft_mlp_fusion_greedy_safe": true,
+    "draft_mlp_measured_us": 50.831360816955566,
+    "draft_mlp_roofline_us": 20.971519999999998,
+    "mlp_overhead_ratio": 2.423828163955477,
+    "draft_mlp_full_forward_us": 58.65983963012695,
+    "full_overhead_ratio": 2.797119122988079,
+    "mlp_effective_bw_gbs": 247.54230061459972,
+    "mlp_bw_utilization": 0.41257050102433285,
+    "m1_under_saturates_hbm": true,
+    "intrinsic_m1_floor_us": 50.831360816955566,
+    "roofline_unreachable_at_m1": true,
+    "draft_mlp_hidden": 256,
+    "draft_mlp_intermediate": 2048,
+    "draft_mlp_layers": 4,
+    "draft_mlp_gated": true,
+    "draft_mlp_activation": "gelu_pytorch_tanh",
+    "draft_mlp_dtype": "bfloat16",
+    "act_is_fused_kernel": false,
+    "n_kernels_deployed": null,
+    "mlp_weight_bytes": 12582912.0,
+    "mlp_weight_mib": 12.0,
+    "gate_up_weight_mib": 8.0,
+    "down_weight_mib": 4.0,
+    "mlp_activation_bytes": 102400.0,
+    "draft_mlp_roofline_us_with_act": 21.142186666666667,
+    "gate_up_roofline_us": 13.981013333333333,
+    "down_roofline_us": 6.990506666666667,
+    "us_gate_up": 32.51456022262573,
+    "us_down": 18.316800594329834,
+    "us_activation": 9.738240242004395,
+    "us_gate_sep_up_sep": 36.10368013381958,
+    "gate_up_fusion_saving_us": 3.5891199111938477,
+    "per_kernel_launch_us": 1.8305528714628019,
+    "per_kernel_from_activation_us": 2.4345600605010986,
+    "graph_base_us": 1.6470350006326555,
+    "launch_total_us": 21.966634457553624,
+    "mlp_anchor_us_264": 50.7,
+    "mlp_anchor_resid_pct": 0.2590943135218216,
+    "ref_large_gemv_mib": 128.0,
+    "ref_large_gemv_us": 276.8000030517578,
+    "ref_roofline_us": 223.69621333333333,
+    "ref_bw_gbs": 484.89063049216486,
+    "ref_bw_utilization": 0.8081510508202747,
+    "ref_resid_pct": 19.184894917972525,
+    "recoverable_mlp_us": 7.3222114858512075,
+    "recoverable_mlp_upper_us": 9.738240242004395,
+    "step_after_us": 1166.9445195990415,
+    "projected_tps_gain_band_pct": [
+      4.392280827418404,
+      5.927457916525669
+    ],
+    "levers": [
+      {
+        "name": "L1_fold_activation",
+        "recoverable_mlp_us": 7.3222114858512075,
+        "step_after_us": 1166.9445195990415,
+        "projected_tps": 502.6801498682678,
+        "projected_tps_gain_pct": 4.392280827418404,
+        "greedy_safe": true,
+        "lossless": true,
+        "reachable": true,
+        "note": "fold GeluAndMul into the gate_up epilogue (CUTLASS EVT); elementwise on post-reduction registers, no reduction-order change -> E[T]+PPL exactly unchanged. The dominant RECOVERABLE lever. recoverable = L * per_kernel_launch_us (1 fused launch/layer at the measured floor; deployed-faithful)."
+      },
+      {
+        "name": "L1_fold_activation_UPPER",
+        "recoverable_mlp_us": 9.738240242004395,
+        "step_after_us": 1150.0323183059693,
+        "projected_tps": 510.07248810544604,
+        "projected_tps_gain_pct": 5.927457916525669,
+        "greedy_safe": true,
+        "lossless": true,
+        "reachable": true,
+        "note": "upper bracket: the eager-measured standalone activation time (torch fallback = 2 kernels/layer, so it OVERcounts the single deployed fused kernel). Brackets the activation-cost uncertainty."
+      },
+      {
+        "name": "L2_fused_mlp_megakernel",
+        "recoverable_mlp_us": 7.802211485851208,
+        "step_after_us": 1163.5845195990416,
+        "projected_tps": 504.1317034727617,
+        "projected_tps_gain_pct": 4.693726968779055,
+        "greedy_safe": true,
+        "lossless": null,
+        "reachable": true,
+        "note": "1 fused kernel/layer; also skips the act->down HBM round-trip + ~60ns/node scheduling. On A10G only 1.0-1.08x vs cuBLAS (AutoMegaKernel) -> small increment over L1. LOSSLESS iff the down reduction order is preserved; a split-K/reassociating fusion stays correctness-safe (propose-only) but may drift E[T] -- FP reassociation flag."
+      },
+      {
+        "name": "L3_bandwidth_roofline_UNREACHABLE",
+        "recoverable_mlp_us": 37.688319630126955,
+        "step_after_us": 954.3817625891113,
+        "projected_tps": 614.6385744092933,
+        "projected_tps_gain_pct": 27.64284144483071,
+        "greedy_safe": true,
+        "lossless": true,
+        "reachable": false,
+        "note": "the analytic 600 GB/s floor; PHYSICALLY UNREACHABLE at M=1 (single-warp GEMV under-saturates HBM, ~31-81% of peak, Chen 2605.30571). Needs M>=16 BATCHING, not kernel surgery -> NOT a fusion lever, a different (tree/verify-shape) axis."
+      }
+    ],
+    "fp_reassociation_flag": "gate+up fusion (already deployed) and fold-activation (L1) are LOSSLESS (same per-output bf16 reduction order). A fused-MLP megakernel (L2) is lossless ONLY if it preserves the down GEMV's reduction order; a split-K / retiled reduction REASSOCIATES the bf16 sum (not bit-identical, cf. lawine #246) -- still correctness-safe by propose-only verify, but E[T] may drift, so a megakernel must be E[T]+PPL re-verified, not assumed.",
+    "greedy_identical_by_construction": true,
+    "ppl_pinned": 2.3772,
+    "ppl_ok": true,
+    "nan_clean": true,
+    "peak_vram_gib": 0.37319087982177734,
+    "vram_ok": true,
+    "frontier_tps": 481.53,
+    "lambda1_ceiling_tps": 520.95,
+    "k_cal": 125.268,
+    "step_us": 1218.2,
+    "k_deployed": 7,
+    "draft_share_of_step": 0.58,
+    "et_deployed": 3.3,
+    "bf16_anchor_us_254": 101.2,
+    "verdict_line": "ABOVE roofline BUT MOSTLY INTRINSIC: the draft MLP measures 50.8us at M=1 vs a 21.0us bandwidth floor -> overhead ratio 2.42x, but that is only 41% of peak HBM BW -- a single-warp M=1 GEMV UNDER-SATURATES HBM (Chen 2605.30571: batch-1 caps at ~31-81% of the floor), so the gap is the INTRINSIC-M=1 memory-latency penalty, NOT recoverable bandwidth slack and NOT CPU-launch (ONEGRAPH erases that; in-graph scheduling is ~60ns/node). The 21us roofline is UNREACHABLE at M=1 (needs M>=16 batching). The large 128 MiB reference GEMV hits 81% of peak (IS bandwidth-bound), anchoring the model. The ONLY recoverable slack is the SEPARATE GeluAndMul kernel: a greedy-safe LOSSLESS epilogue fold (L1) eliminates L=4 launches and recovers ~7.3us/pass (eager-measured upper 9.7us) x K=7 -> step 1167us -> +4.39% TPS off 481.53 (band +4.4..+5.9%; megakernel L2 adds little on A10G, 1.0-1.08x), E[T]+PPL UNCHANGED.",
+    "self_test_conditions": {
+      "a_mlp_anchor": true,
+      "b_bw_roundtrip": true,
+      "c_component_sum": true,
+      "d_composition": true,
+      "e_nan_clean": true,
+      "f_constants_unchanged": true
+    },
+    "handoff_line": "the draft MLP is 50.8us (50% of the 101.2us/pass), 2.4x ABOVE its 21us bandwidth roofline, BUT that gap is INTRINSIC: at M=1 the GEMV hits only 41% of peak HBM BW (single warp can't saturate the bus, Chen 2605.30571), so the 21us roofline is UNREACHABLE without M>=16 batching -- the GEMV chain IS the achievable M=1 floor and fusion cannot speed it up. gate+up and gelu*mul are ALREADY fused in the served Gemma4MLP, so the ONLY recoverable draft-MLP slack is folding the SEPARATE GeluAndMul kernel (L=4 launches, ~7.3us deployed-faithful) into the gate_up epilogue: a greedy-safe LOSSLESS step lever worth +4.4% / ~+21 TPS off 481.53 (band +4.4..+5.9%, a per-layer megakernel adds little on A10G). So the dominant 51.7% draft term has MODEST recoverable headroom (the activation kernel only, NOT the roofline gap) -- a PURE-STEP E[T]-independent lever (cheaper pass, not fewer passes -> NOT adaptive-K/ONEGRAPH-blocked); needs a fused gate_up+epilogue kernel + E[T]/PPL re-verify (split-K reassociation flag), human-approval-gated, NOT this analysis-only PR. The big draft levers remain fewer passes (adaptive-K, blocked) or M>=16 batching, not cheaper MLP passes.",
+    "chain_captured": {
+      "gate_up": true,
+      "down": true,
+      "activation": true,
+      "full_forward": true,
+      "gate_sep_up_sep": true,
+      "ref_large_gemv": true
+    }
+  }
+}
