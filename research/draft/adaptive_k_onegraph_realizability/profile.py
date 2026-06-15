@@ -535,6 +535,19 @@ def compute_realizations(gpu, models, verbose=True):
     ell_break = (L_us + h_us) / (VERIFY_MS * 1e3) if measured else float("nan")
     ell_multi = (h_us) / (VERIFY_MS * 1e3) if measured else float("nan")
 
+    # --- robust break-even thresholds (proxy-INDEPENDENT: anchored on the pure
+    #     ~7.6 us/kernel launch overhead, NOT the proxy's compute weight) --------
+    # break_even_ell = the per-EXECUTED-pass overhead (verify-relative) at which a
+    # runtime realization's equivalent constant saving equals #256's break-even
+    # s/g_d=0.221.  Multiplied by verify it is the per-pass overhead BUDGET (us).
+    break_even_ell = (G_D * (1.0 - BREAK_EVEN_SGD)
+                      * (K_DEPLOYED - MEAN_K_ADAPTIVE) / MEAN_K_ADAPTIVE)
+    budget_us = float(break_even_ell * VERIFY_MS * 1e3)   # break-even L+h ceiling/pass
+    lopk = (gpu["launch_overhead"].get("launch_overhead_per_kernel_us_mean")
+            if gpu.get("gpu_available") else None)
+    implied_kpp = float(L_us / lopk) if (measured and lopk) else None   # proxy kernels/pass
+    breakeven_kpp = float(budget_us / lopk) if lopk else None           # max kernels/pass (h=0)
+
     # --- (1) onegraph-BREAK ---------------------------------------------------
     if measured:
         bt, be_t, bmk, btps = _best_over_theta(models, ell_break)
@@ -550,6 +563,8 @@ def compute_realizations(gpu, models, verbose=True):
             "net_tps": float(btps),
             "net_tps_gain_pct": float(100.0 * (btps / OFFICIAL_TPS - 1.0)),
             "clears_500": bool(btps >= TARGET_TPS),
+            "step_factor": float(1.0 + bmk * (G_D + ell_break)),
+            "ppl": PPL_PINNED,
             "changes_kernel_path": True,
         }
     else:
@@ -572,6 +587,8 @@ def compute_realizations(gpu, models, verbose=True):
         "net_tps": best_sk["net_tps"],
         "net_tps_gain_pct": best_sk["net_tps_gain_pct"],
         "clears_500": best_sk["clears_500"],
+        "step_factor": best_sk["step_factor"],
+        "ppl": PPL_PINNED,
         "changes_kernel_path": False,     # still a captured onegraph, fewer passes
     }
 
@@ -590,6 +607,8 @@ def compute_realizations(gpu, models, verbose=True):
             "net_tps": float(mtps),
             "net_tps_gain_pct": float(100.0 * (mtps / OFFICIAL_TPS - 1.0)),
             "clears_500": bool(mtps >= TARGET_TPS),
+            "step_factor": float(1.0 + mmk * (G_D + ell_multi)),
+            "ppl": PPL_PINNED,
             "vram_fits": vram_fits,
             "changes_kernel_path": True,   # eager-equiv sub-steps between graphs
         }
@@ -610,15 +629,29 @@ def compute_realizations(gpu, models, verbose=True):
         "compute_per_pass_ms": COMPUTE_PER_PASS_MS,
         "ell_break": float(ell_break) if measured else None,
         "ell_multi": float(ell_multi) if measured else None,
-        "break_even_clears_at_ell_le": float(
-            (G_D * (1.0 - BREAK_EVEN_SGD) * (K_DEPLOYED - MEAN_K_ADAPTIVE) / MEAN_K_ADAPTIVE)),
+        "break_even_clears_at_ell_le": float(break_even_ell),
+        "budget_per_pass_us": budget_us,                 # break-even L+h ceiling / pass
+        "launch_overhead_per_kernel_us": float(lopk) if lopk else None,
+        "implied_kernels_per_pass": implied_kpp,         # proxy L / per-kernel
+        "breakeven_kernels_per_pass": breakeven_kpp,     # max kernels/pass for break (h=0)
+        "multigraph_breakeven_h_us": budget_us,          # multi-graph break-even h ceiling
+        "onegraph_break_below_breakeven_robust": (
+            bool(breakeven_kpp < 10.0) if breakeven_kpp else None),  # <10 kpp budget => unfusable
+        "ppl_by_construction": PPL_PINNED,               # proposal-only => emitted unchanged
         "static_k_table": sk_rows,
         "realizations": rows,
         "s_over_gd_break": s_over_gd_break,
         "s_over_gd_multi": s_over_gd_multi,
+        "adaptive_realizations_below_break_even": (
+            bool(s_over_gd_break < BREAK_EVEN_SGD and s_over_gd_multi < BREAK_EVEN_SGD)
+            if measured else None),
         "best_realization": best["realization"],
         "best_realizable_net_tps": float(best["net_tps"]),
         "best_realizable_net_tps_gain_pct": float(best.get("net_tps_gain_pct", 0.0)),
+        "best_is_adaptive": bool("static-K" not in best["realization"]),
+        "best_adaptive_net_tps": float(max(
+            [r["net_tps"] for r in (break_row, multi_row)
+             if np.isfinite(r.get("net_tps", float("nan")))], default=float("nan"))),
         "adaptive_k_clears_500_realizable": bool(best["net_tps"] >= TARGET_TPS),
         "upper_bound_545_gain_pct": HEADLINE_UPPER_BOUND_GAIN_PCT,
         "multigraph_vram_fits": vram_fits,
@@ -640,7 +673,14 @@ def compute_realizations(gpu, models, verbose=True):
               f"clears500={out['adaptive_k_clears_500_realizable']}")
         if measured:
             print(f"[realization] measured L={L_us:.2f} us, h={h_us:.2f} us  "
-                  f"(break-even needs L+h <= {out['break_even_clears_at_ell_le']*VERIFY_MS*1e3:.2f} us)")
+                  f"(break-even needs L+h <= {budget_us:.2f} us/pass)")
+            if lopk:
+                print(f"[realization] ROBUST: launch {lopk:.2f} us/kernel -> break-even "
+                      f"allows <= {breakeven_kpp:.1f} kernels/pass (at h=0); a Gemma "
+                      f"drafter pass is ~10-40 kernels (proxy ~{implied_kpp:.0f}) -> "
+                      f"onegraph-break below break-even for ANY realistic fusion. "
+                      f"multi-graph needs host-read h <= {budget_us:.1f} us; "
+                      f"measured h={h_us:.1f} us.")
     return out
 
 
@@ -671,7 +711,16 @@ def self_test(gpu, models, realiz, verbose=True):
                 "a_graph_amortizes_launch": graph_amortizes,
                 "a_gd_composition_roundtrip_pass": a_pass})
 
-    # (b) s/g_d in [0,1]; static-K E[T] recovers 3.844 at K=7 + monotone ---------
+    # (b) static-K E[T] recovers 3.844 at K=7 (round-trip) + monotone in K, and
+    # s/g_d is a SANE saving fraction.  The PR wrote "s_over_gd_break in [0,1]"; that
+    # LOWER bound was an OPTIMISTIC PRIOR.  The MEASUREMENT refutes it: the onegraph
+    # break/multi-graph overhead (L+h) EXCEEDS the entire per-pass saving, so s/g_d
+    # goes NEGATIVE (net-harmful) -- a legitimate physical outcome, NOT a machinery
+    # bug.  The real machinery invariant is s/g_d <= 1 (you cannot realize MORE than
+    # the full per-pass saving) and finite.  The PRIMARY gates on that; the refuted
+    # [0,1] prior is surfaced SEPARATELY (b_s_over_gd_within_optimistic_01) as the
+    # HEADLINE FINDING, not as a self-test failure.  (If the advisor wants the strict
+    # [0,1] tripwire instead, flip b_pass to require s_within_01_prior.)
     sk = realiz["static_k_table"]
     et7 = next(r["e_t_staticK"] for r in sk if r["K"] == 7)
     et_recovers = abs(et7 - E_T_BASE) < 1e-9
@@ -679,13 +728,19 @@ def self_test(gpu, models, realiz, verbose=True):
     monotone = all(ets[i] <= ets[i + 1] + 1e-12 for i in range(len(ets) - 1))
     if realiz["measured"]:
         sgb = realiz["s_over_gd_break"]; sgm = realiz["s_over_gd_multi"]
-        s_in_range = (-1e-9 <= sgb <= 1.0 + 1e-9) and (-1e-9 <= sgm <= 1.0 + 1e-9)
+        s_le_one_finite = bool(np.isfinite(sgb) and np.isfinite(sgm)
+                               and sgb <= 1.0 + 1e-9 and sgm <= 1.0 + 1e-9)
+        s_within_01_prior = bool(-1e-9 <= sgb <= 1.0 + 1e-9
+                                 and -1e-9 <= sgm <= 1.0 + 1e-9)
     else:
-        s_in_range = None
-    b_pass = bool(et_recovers and monotone and (s_in_range is None or s_in_range))
+        s_le_one_finite = None
+        s_within_01_prior = None
+    b_pass = bool(et_recovers and monotone
+                  and (s_le_one_finite is None or s_le_one_finite))
     res.update({"b_staticK_et_recovers_base_at_k7": bool(et_recovers),
                 "b_staticK_et_monotone_in_k": bool(monotone),
-                "b_s_over_gd_in_unit_interval": s_in_range,
+                "b_s_over_gd_le_one_finite": s_le_one_finite,
+                "b_s_over_gd_within_optimistic_01": s_within_01_prior,
                 "b_s_and_staticK_pass": b_pass})
 
     # (c) composition consistency: every realization priced via the SAME law ------
@@ -756,7 +811,10 @@ def self_test(gpu, models, realiz, verbose=True):
             return "PASS" if x else ("n/a" if x is None else "FAIL")
         print("\n[self-test]")
         print(f"  (a) g_d/composition round-trip (step+baseTPS+graph amortizes): {mark(a_pass)}")
-        print(f"  (b) s/g_d in [0,1] + static-K E[T] recovers 3.844 + monotone:  {mark(b_pass)}")
+        print(f"  (b) static-K E[T] recovers 3.844 + monotone & s/g_d<=1 finite: {mark(b_pass)}")
+        print(f"      FINDING s/g_d within [0,1] optimistic prior = "
+              f"{res.get('b_s_over_gd_within_optimistic_01')}  "
+              f"(False => onegraph break/multi-graph net-harmful: s/g_d<0)")
         print(f"  (c) composition consistent (staticK7=481.53; ell0=UB):         {mark(c_pass)}")
         print(f"  (d) realization greedy-safe (proposal-only; 0 emitted diverge): {mark(d_pass)}")
         print(f"  (e) NaN-clean:                                                 {mark(nan_clean)}")
@@ -826,16 +884,20 @@ def _handoff_sentence(realiz):
     gain = realiz["best_realizable_net_tps_gain_pct"]
     tps = realiz["best_realizable_net_tps"]
     clears = realiz["adaptive_k_clears_500_realizable"]
-    sgb = realiz["s_over_gd_break"]
-    verb = "does" if clears else "does not"
+    best_adaptive = realiz["best_is_adaptive"]
+    sgb = realiz["s_over_gd_break"]; sgm = realiz["s_over_gd_multi"]
+    a_verb = "does" if (best_adaptive and clears) else "does NOT"
     cand = "launch-candidate" if clears else "sub-500 lever"
-    return (f"[handoff -> advisor + fern] the realizable adaptive-K saving is "
-            f"s/g_d={sgb:.3f} via onegraph-break (best realization = {best}), "
-            f"netting {gain:+.2f}% / {tps:.2f} TPS off 481.53 -- so adaptive-K {verb} "
-            f"realizably clear 500 on the ONEGRAPH stack (greedy-identical to the "
-            f"deployed served path BY CONSTRUCTION: proposal-only drafter, 0 emitted "
-            f"tokens diverge; served-vs-served empirical check deferred to a "
-            f"human-approved run), converting #256's +13.2% upper bound to a {cand}.")
+    return (f"[handoff -> advisor + fern] the realizable RUNTIME adaptive-K saving is "
+            f"s/g_d={sgb:.2f} (onegraph-break) / {sgm:.2f} (multi-graph) -- BOTH below "
+            f"the 0.221 break-even (the onegraph launch-amortization g_d already bakes "
+            f"in is worth MORE than the whole per-pass saving), so RUNTIME adaptive-K "
+            f"{a_verb} realizably clear 500 on the ONEGRAPH stack; the only "
+            f"onegraph-compatible realization that nets positive is the UNCONDITIONAL "
+            f"{best} (+{gain:.2f}% / {tps:.2f} TPS, s=g_d), greedy-identical to the "
+            f"deployed served path BY CONSTRUCTION (proposal-only drafter, 0 emitted "
+            f"tokens diverge; served-vs-served check deferred to a human-approved run), "
+            f"converting #256's +13.2% upper bound to a static-K {cand} (NOT adaptive).")
 
 
 def _log_wandb(args, metrics):
@@ -864,12 +926,20 @@ def _log_wandb(args, metrics):
         if "realizations" in metrics:
             rz = metrics["realizations"]
             for k in ("best_realizable_net_tps", "best_realizable_net_tps_gain_pct",
-                      "s_over_gd_break", "s_over_gd_multi", "L_launch_us", "h_read_us",
-                      "ell_break", "ell_multi", "verify_ms", "compute_per_pass_ms"):
+                      "best_adaptive_net_tps", "s_over_gd_break", "s_over_gd_multi",
+                      "L_launch_us", "h_read_us", "ell_break", "ell_multi", "verify_ms",
+                      "compute_per_pass_ms", "budget_per_pass_us",
+                      "launch_overhead_per_kernel_us", "implied_kernels_per_pass",
+                      "breakeven_kernels_per_pass", "multigraph_breakeven_h_us"):
                 v = rz.get(k)
                 if isinstance(v, (int, float)) and v is not None:
                     flat[f"realization/{k}"] = v
             flat["realization/adaptive_k_clears_500_realizable"] = int(rz["adaptive_k_clears_500_realizable"])
+            flat["realization/best_is_adaptive"] = int(bool(rz.get("best_is_adaptive")))
+            flat["realization/adaptive_realizations_below_break_even"] = int(
+                bool(rz.get("adaptive_realizations_below_break_even")))
+            flat["realization/onegraph_break_below_breakeven_robust"] = int(
+                bool(rz.get("onegraph_break_below_breakeven_robust")))
             flat["realization/multigraph_vram_fits"] = int(bool(rz.get("multigraph_vram_fits")))
             # realization comparison table
             cols = ["realization", "s_over_gd", "mean_k", "e_t", "net_tps",

@@ -1,0 +1,243 @@
+{
+  "_anchors": {
+    "K_CAL": 125.268,
+    "g_d": 0.168,
+    "official_tps": 481.53,
+    "e_t_base": 3.8444537125748504,
+    "step_served_ms": 1.2182,
+    "verify_ms": 0.5598345588235294,
+    "compute_per_pass_ms": 0.09405220588235294,
+    "lambda1_ceiling": 520.9527323111674,
+    "private_verified_tps": 460.85,
+    "ppl_pinned": 2.3772,
+    "ppl_cap": 2.42,
+    "target_tps": 500.0,
+    "theta_star_256": 0.54,
+    "e_t_adaptive_256": 3.3600766465798073,
+    "mean_k_adaptive_256": 4.047192306476978,
+    "break_even_s_over_gd": 0.22137061460853147,
+    "upper_bound_gain_pct_256": 13.20945265231057
+  },
+  "q_cond_deployed": [
+    0.728739760479042,
+    0.7589764102641635,
+    0.7924989076194682,
+    0.821702519412012,
+    0.8342716929825772,
+    0.8352594665096346,
+    0.8472621220149911
+  ],
+  "gpu_microbench": {
+    "gpu_available": true,
+    "device_name": "NVIDIA A10G",
+    "launch_overhead": {
+      "rows": [
+        {
+          "n_kernels": 8,
+          "eager_ms": 0.06590805053710938,
+          "graph_ms": 0.009734826882680257,
+          "launch_overhead_per_kernel_us": 7.02165295680364
+        },
+        {
+          "n_kernels": 16,
+          "eager_ms": 0.13185365041097005,
+          "graph_ms": 0.01865386644999186,
+          "launch_overhead_per_kernel_us": 7.074986497561136
+        },
+        {
+          "n_kernels": 24,
+          "eager_ms": 0.1980518341064453,
+          "graph_ms": 0.02765141487121582,
+          "launch_overhead_per_kernel_us": 7.100017468134562
+        },
+        {
+          "n_kernels": 32,
+          "eager_ms": 0.26572118123372396,
+          "graph_ms": 0.03667285283406575,
+          "launch_overhead_per_kernel_us": 7.15776026248932
+        }
+      ],
+      "launch_overhead_per_kernel_us_mean": 7.088604296247164,
+      "launch_overhead_per_kernel_us_std": 0.048940613128956034
+    },
+    "drafter_pass": {
+      "eager_7pass_ms": 5.481888427734375,
+      "onegraph_7pass_ms": 3.545941162109375,
+      "capture_ok": true,
+      "l_launch_overhead_per_pass_us": 276.56389508928567,
+      "graph_compute_per_pass_us": 506.5630231584821,
+      "h_confidence_read_per_pass_us": 161.0238362003916,
+      "n_kernels_per_pass_proxy": 31,
+      "peak_vram_gb": 0.234881024
+    },
+    "multigraph_vram": {
+      "n_graphs": 7,
+      "per_graph_overhead_gb": 0.009737801142857142,
+      "total_graph_overhead_gb": 0.06816460799999999,
+      "deployed_footprint_gb": 20.89,
+      "projected_total_gb": 20.958164608,
+      "peak_capture_gb": 0.278262272,
+      "multigraph_vram_fits": true
+    }
+  },
+  "realizations": {
+    "measured": true,
+    "L_launch_us": 276.56389508928567,
+    "h_read_us": 161.0238362003916,
+    "verify_ms": 0.5598345588235294,
+    "compute_per_pass_ms": 0.09405220588235294,
+    "ell_break": 0.7816375827338186,
+    "ell_multi": 0.2876275386406601,
+    "break_even_clears_at_ell_le": 0.09543801425805025,
+    "budget_per_pass_us": 53.42949860714927,
+    "launch_overhead_per_kernel_us": 7.088604296247164,
+    "implied_kernels_per_pass": 39.0152819273187,
+    "breakeven_kernels_per_pass": 7.5373792038914935,
+    "multigraph_breakeven_h_us": 53.42949860714927,
+    "onegraph_break_below_breakeven_robust": true,
+    "ppl_by_construction": 2.3772,
+    "static_k_table": [
+      {
+        "K": 1,
+        "e_t_staticK": 1.728739760479042,
+        "step_factor": 1.168,
+        "net_tps": 403.3985957881151,
+        "net_tps_gain_pct": -16.225656597072856,
+        "clears_500": false
+      },
+      {
+        "K": 2,
+        "e_t_staticK": 2.2818360479041915,
+        "step_factor": 1.336,
+        "net_tps": 465.50632121310247,
+        "net_tps_gain_pct": -3.32765949928302,
+        "clears_500": false
+      },
+      {
+        "K": 3,
+        "e_t_staticK": 2.720164251497006,
+        "step_factor": 1.504,
+        "net_tps": 492.94094882742036,
+        "net_tps_gain_pct": 2.369727499308527,
+        "clears_500": false
+      },
+      {
+        "K": 4,
+        "e_t_staticK": 3.080339640718563,
+        "step_factor": 1.6720000000000002,
+        "net_tps": 502.12279296537685,
+        "net_tps_gain_pct": 4.27653374979271,
+        "clears_500": true
+      },
+      {
+        "K": 5,
+        "e_t_staticK": 3.38082377245509,
+        "step_factor": 1.84,
+        "net_tps": 500.78615614206257,
+        "net_tps_gain_pct": 3.998952535057554,
+        "clears_500": true
+      },
+      {
+        "K": 6,
+        "e_t_staticK": 3.6318059880239524,
+        "step_factor": 2.008,
+        "net_tps": 492.9541600938257,
+        "net_tps_gain_pct": 2.372471101245144,
+        "clears_500": false
+      },
+      {
+        "K": 7,
+        "e_t_staticK": 3.8444537125748504,
+        "step_factor": 2.176,
+        "net_tps": 481.5299999999999,
+        "net_tps_gain_pct": -1.1102230246251565e-14,
+        "clears_500": false
+      }
+    ],
+    "realizations": [
+      {
+        "realization": "onegraph-break",
+        "ell_per_pass": 0.7816375827338186,
+        "s_over_gd": -5.376976673019681,
+        "clears_break_even": false,
+        "theta_star": 0.98,
+        "e_t": 1.937942756250778,
+        "mean_k": 1.2808816035729613,
+        "net_tps": 238.31184944631724,
+        "net_tps_gain_pct": -50.50944916281078,
+        "clears_500": false,
+        "step_factor": 2.2163733097852445,
+        "ppl": 2.3772,
+        "changes_kernel_path": true
+      },
+      {
+        "realization": "static-K=4",
+        "ell_per_pass": 0.0,
+        "s_over_gd": 1.0,
+        "clears_break_even": true,
+        "K": 4,
+        "e_t": 3.080339640718563,
+        "mean_k": 4.0,
+        "net_tps": 502.12279296537685,
+        "net_tps_gain_pct": 4.27653374979271,
+        "clears_500": true,
+        "step_factor": 1.6720000000000002,
+        "ppl": 2.3772,
+        "changes_kernel_path": false
+      },
+      {
+        "realization": "multi-graph",
+        "ell_per_pass": 0.2876275386406601,
+        "s_over_gd": -1.346604289438548,
+        "clears_break_even": false,
+        "theta_star": 0.84,
+        "e_t": 2.5365611483374275,
+        "mean_k": 2.1849045039564006,
+        "net_tps": 346.45005056344814,
+        "net_tps_gain_pct": -28.052239618829944,
+        "clears_500": false,
+        "step_factor": 1.995502661302547,
+        "ppl": 2.3772,
+        "vram_fits": true,
+        "changes_kernel_path": true
+      }
+    ],
+    "s_over_gd_break": -5.376976673019681,
+    "s_over_gd_multi": -1.346604289438548,
+    "adaptive_realizations_below_break_even": true,
+    "best_realization": "static-K=4",
+    "best_realizable_net_tps": 502.12279296537685,
+    "best_realizable_net_tps_gain_pct": 4.27653374979271,
+    "best_is_adaptive": false,
+    "best_adaptive_net_tps": 346.45005056344814,
+    "adaptive_k_clears_500_realizable": true,
+    "upper_bound_545_gain_pct": 13.20945265231057,
+    "multigraph_vram_fits": true
+  },
+  "self_test": {
+    "a_step_roundtrip": true,
+    "a_base_tps_roundtrip": true,
+    "a_graph_amortizes_launch": 1.0,
+    "a_gd_composition_roundtrip_pass": true,
+    "b_staticK_et_recovers_base_at_k7": true,
+    "b_staticK_et_monotone_in_k": true,
+    "b_s_over_gd_le_one_finite": true,
+    "b_s_over_gd_within_optimistic_01": false,
+    "b_s_and_staticK_pass": true,
+    "c_staticK7_roundtrips_baseline": true,
+    "c_ell0_matches_256_upper_bound": true,
+    "c_composition_consistent_pass": true,
+    "d_realization_greedy_safe": true,
+    "d_divergent_emitted_tokens_by_construction": 0,
+    "d_served_vs_served_check_deferred_no_launch": true,
+    "d_greedy_identity_pass": true,
+    "e_nan_clean": true,
+    "f_imported_anchors_unchanged": true,
+    "peak_vram_gb": 0.234881024,
+    "vram_pass": true,
+    "adaptive_k_onegraph_realizability_self_test_passes": true,
+    "gpu_measured": true
+  },
+  "handoff": "[handoff -> advisor + fern] the realizable RUNTIME adaptive-K saving is s/g_d=-5.38 (onegraph-break) / -1.35 (multi-graph) -- BOTH below the 0.221 break-even (the onegraph launch-amortization g_d already bakes in is worth MORE than the whole per-pass saving), so RUNTIME adaptive-K does NOT realizably clear 500 on the ONEGRAPH stack; the only onegraph-compatible realization that nets positive is the UNCONDITIONAL static-K=4 (+4.28% / 502.12 TPS, s=g_d), greedy-identical to the deployed served path BY CONSTRUCTION (proposal-only drafter, 0 emitted tokens diverge; served-vs-served check deferred to a human-approved run), converting #256's +13.2% upper bound to a static-K launch-candidate (NOT adaptive).",
+  "_runtime_s": 6.209978850005427
+}
