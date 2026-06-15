@@ -1,0 +1,150 @@
+{
+  "primary_metric_name": "eagle3_preserves_ppl_gate_self_test_passes",
+  "eagle3_preserves_ppl_gate_self_test_passes": 1,
+  "test_metric_name": "ppl_delta_under_eagle3_verify",
+  "ppl_delta_under_eagle3_verify": 0.0,
+  "verdict": "SPLIT \u2014 the card's BINDING gate (PPL<=2.42 + 128/128) is GREEN under EAGLE-3 (ppl_delta=0.0, robustly: PPL is a reference-token forward, drafter-orthogonal; deployed M=8 spec already measures 2.3772). The hypothesis's SECONDARY claim 'greedy-identity EXACTLY intact' is the caveat: FALSE at ~0.73% \u2014 EAGLE-3 inherits the deployed M=8 verify-argmax batch-variance (#232 identity 0.9927) UNCHANGED (no new source) and cannot reduce it. A strict-compliant >500 = batch-invariant verify kernel (IDENTITY, #216/#227 UNBUILT) + an E[T] lever (SPEED), not the EAGLE-3 drafter alone (cycle-52t).",
+  "deliverables": {
+    "1_accept_rule": "Under the deployed greedy/temp-0 config the served accept rule is `rejected = draft_token_id != target_argmax_id` (cert_greedy_exact.md S1; rejection_sampler.py:150 + sitecustomize.py:1188-1194). accepted-token == argmax(target verify logits): EXACT greedy, no tolerance, no temperature interaction (temp-0 sampler == argmax). EAGLE-3 in vLLM 0.22.x uses the SAME rejection-sampler greedy path; the drafter only changes WHAT is proposed (multi-layer aux fusion), not HOW it verifies.",
+    "2_rejection_fallback": "On first mismatch the verifier emits its OWN argmax at that position (break-on-first-mismatch + bonus, all verify argmaxes). The drafter's proposed token is DISCARDED on rejection and never contaminates the output. Every emitted token \u2014 accepted or fallback \u2014 is a verify argmax.",
+    "3_tree_linear_reconciliation": "The descend-walk scans all children for the verify argmax and descends the first match, then commit_map -> fused KV-relocate is a pure bf16 copy, bit-exact (cert S2, rate 1.0; one CUDA graph, sync-free). The index-map plumbing (comp3a/#165) overloads target_logits_indices for (A) target-row and (B) draft-gather maps; on a chain they coincide, on a TREE they diverge and overriding A alone SILENTLY corrupts B (M16=10, M32=30 off-chain slots \u2014 reproduced here). The correct fix supplies A,B separately and the descent sidesteps the flat gather -> exact accepted-prefix ordering, no off-by-one, no tolerance. BUG-2 (mis-built map) is the one binding implementation risk; comp3a verdict = 17/17 PASS.",
+    "4_verdict_and_caveat": "PPL<=2.42 + 128/128: PRESERVED (drafter-orthogonal; ppl_delta=0.0). Strict greedy-identity: NOT preserved by EAGLE-3 alone \u2014 inherits the M=8 ~0.73% verify-argmax batch-variance (bf16 lm_head + TRITON_ATTN reduction order is M-dependent; int4-Marlin body GEMMs are bit-exact across M, EXPERIMENTS_LOG 253). The accept ALGORITHM is exact; the divergence is upstream verify-forward numerics, inherited not introduced. CAVEAT that could perturb PPL toward 2.42: essentially NONE via the emission (PPL is reference-forward, structurally decoupled). The only emission-side defect that would inject a non-argmax token is a mis-built TREE index map (BUG-2) \u2014 but even that does not move the MEASURED PPL (reference-forward), only real generation quality + greedy-identity."
+  },
+  "accept_rule": {
+    "trials": 4000,
+    "all_emitted_are_verify_argmax": true,
+    "rejection_fallback_is_target_argmax_not_draft": true,
+    "descend_walk_reduces_to_linear_on_chain": true,
+    "n_rejections_exercised": 3160
+  },
+  "index_map_reconciliation": {
+    "chain_A_B_coincide": true,
+    "chain_off_by_one": true,
+    "m16_offchain_corrupted": 10,
+    "m32_offchain_corrupted": 30,
+    "m16_matches_comp3a": true,
+    "m32_matches_comp3a": true,
+    "descent_node_order_salvages_rank2_root": true,
+    "descent_conflated_gather_rejects_rank2_root": true,
+    "reconciliation_exact_when_maps_separated": true,
+    "note": "comp3a_index_map_verdict.json: 17/17 PASS. Separated (A,B) maps + the descend-walk (which does NOT consume the flat gather) give exact accepted-prefix ordering. BUG-2 (overriding A alone) is the one binding implementation risk \u2014 it injects rank-2 contamination, not a tolerance/off-by-one."
+  },
+  "algorithm_vs_input_divergence": {
+    "algorithm_emission_equals_target_greedy_given_same_argmax": true,
+    "modeled_divergence_rate": 0.007299999999999973,
+    "empirical_identity_vs_ar": 0.9924,
+    "flip_rate_is_M_binary_not_K_growing": true,
+    "strict_byte_exact_identity_vs_ar_preserved": false
+  },
+  "ppl_gate": {
+    "ppl_path_is_reference_token_forward": true,
+    "ppl_forward_invokes_drafter": false,
+    "ppl_under_eagle3": 2.3772,
+    "ppl_delta_under_eagle3_verify": 0.0,
+    "ppl_gate": 2.42,
+    "gate_margin": 0.04279999999999973,
+    "gate_headroom_pct": 1.7685950413223028,
+    "ppl_clears_gate": true,
+    "ppl_m1_nonspec": 2.3766,
+    "ppl_m1_nonspec_clears_gate": true,
+    "ppl_m_batch_variance": 0.000600000000000378,
+    "m_variance_below_gate_margin": true,
+    "completions_128_of_128": true
+  },
+  "self_test": {
+    "passes": true,
+    "n_checks": 16,
+    "n_passed": 16,
+    "checks": [
+      {
+        "name": "accept: every emitted token is a verify argmax (greedy-exact by construction)",
+        "passes": true,
+        "detail": "4000 trials"
+      },
+      {
+        "name": "reject: fallback emits TARGET argmax, never the drafter token (no contamination)",
+        "passes": true,
+        "detail": "3160 rejections exercised"
+      },
+      {
+        "name": "descend-walk reduces to the linear kernel on the degenerate chain",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "index-map: A and B coincide on the chain (one array safely serves both)",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "index-map trap: A-override corrupts B off-chain \u2014 REPRODUCES comp3a M16=10",
+        "passes": true,
+        "detail": "got 10"
+      },
+      {
+        "name": "index-map trap: A-override corrupts B off-chain \u2014 REPRODUCES comp3a M32=30",
+        "passes": true,
+        "detail": "got 30"
+      },
+      {
+        "name": "descent salvages rank-2 root with node-order gather; conflated gather rejects it",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "reconciliation exact when maps are supplied separately (BUG-2 = binding risk)",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "accept ALGORITHM emission == pure target-greedy given the SAME verify argmaxes",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "CAVEAT: strict byte-exact identity vs M=1 AR NOT preserved (inherited 0.73%)",
+        "passes": true,
+        "detail": "identity~0.9924 vs #232 0.9927"
+      },
+      {
+        "name": "inherited divergence is M-binary (M2==M4==M6==M8), not K-growing (#23)",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "PPL path is a reference-token forward (prompt_logprobs), drafter-orthogonal",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "ppl_delta_under_eagle3_verify == 0.0 (EAGLE-3 changes proposer, not PPL path)",
+        "passes": true,
+        "detail": ""
+      },
+      {
+        "name": "PPL 2.3772 <= 2.42 gate (1.77% headroom) \u2014 BINDING gate PRESERVED",
+        "passes": true,
+        "detail": "margin 0.0428 (1.77%)"
+      },
+      {
+        "name": "M-batch-variance moves ARGMAX ties, not PPL value (|2.3772-2.3766| << margin)",
+        "passes": true,
+        "detail": "0.0006 < 0.0428"
+      },
+      {
+        "name": "128/128 completions preserved",
+        "passes": true,
+        "detail": ""
+      }
+    ]
+  },
+  "public_evidence": {
+    "byteshark_20260614-192237": "strict-A reading of #192: greedy decode must be token-identical to plain greedy AR; token-ID changes are NOT valid even if PPL remains similar -> the PPL gate and the token-identity gate are SEPARATE (this card's thesis).",
+    "openevolve_20260615-012216": "built+ran a dense-mask tree verify in-serve; does NOT recover lambda, 'verify-side is closed too' -> the binding constraint lives on the verify side, where the M-dependent argmax divergence sits.",
+    "denken_lawine_232_nxwv6pam": "deployed M=8 int4 token-identity vs M=1 AR = 0.9927 (0.73%).",
+    "wirbel_216_227": "batch-invariant int4 verify kernel = the only strict-compliant >500 verify lane; UNBUILT."
+  },
+  "method": "LOCAL CPU-only analytic. No GPU/vLLM/HF Job/submission/served-file change. Reproduces the deployed accept rule + comp3a index-map counts + the inherited #232 divergence; computes nothing served -> greedy identity + PPL untouched by construction. BASELINE unchanged (481.53).",
+  "provenance": "cert_greedy_exact.md (accept rule), verify_flip_probe/report.md (#23 M-binary flip), comp3a_index_map_verdict.json + report_comp3a_index_maps.md (index maps), index_map_coherence (#165), eagle3_feasibility/feasibility_report.md (#15 EAGLE-3 path + 'coupling to the linchpin'), EXPERIMENTS_LOG #232/#216/#227 + line 253 (divergence localization), program.md 240-244 (PPL contract), PR #52 (frontier).",
+  "metrics_nan_clean": 1
+}
