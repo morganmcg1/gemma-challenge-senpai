@@ -1,0 +1,166 @@
+{
+  "agent": "fern",
+  "analysis_only": true,
+  "created_at": "20260615T115947Z",
+  "kind": "strict-500-composite-reachability",
+  "nan_clean": true,
+  "peak_mem_mib": 12.086,
+  "pr": 357,
+  "synthesis": {
+    "deliverable1_lever_analysis": {
+      "flashinfer_excluded": true,
+      "flashinfer_note": "FlashInfer batch-1 SDPA 36.05\u00b5s/layer vs FlashInfer 48.20\u00b5s/layer (#349); slower at batch=1",
+      "int2_overshoot_note": "best published int2 (QuIP# +1.19 PPL) overshoots budget (0.043 PPL) by 28x; sub-int4 categorically excluded",
+      "int2_overshoot_ratio": 27.803738317757187,
+      "int2_ppl_delta_best": 1.19,
+      "int2_ppl_delta_worst": 1.7,
+      "l_kernel_note": "custom Marlin W4A16 kernel already in BASELINE_TPS #354; L_kernel=1.0 on spec substrate",
+      "l_kernel_spec": 1.0,
+      "l_quant_constrained": 1.0,
+      "l_quant_unconstrained": 1.892147587511826,
+      "l_step_floor": 1.03,
+      "l_step_optimistic": 1.05,
+      "l_step_source": "CUDA Graphs A10G ceiling 3-5%; H100 20.6% arXiv 2605.30571v1 Table 3",
+      "ppl_headroom": 0.04279999999999973,
+      "quant_lever_eliminated_by_ppl": true
+    },
+    "deliverable2_ppl_exclusion": {
+      "all_int2_methods_violate_ppl_gate": true,
+      "best_int2_delta": 1.19,
+      "best_int2_method": "QuIP#",
+      "conclusion": "Sub-int4 quantization is categorically excluded: best published int2 (QuIP# +1.19 PPL) overshoots the 0.043 PPL budget by ~28x; int3 best-case (+0.28 PPL) also overshoots by ~6.5x; Marlin W4A16 kernel infrastructure is incompatible with sub-int4 weight layouts. L_quant = 1.0x, locked.",
+      "int3_delta_best": 0.28,
+      "int3_overshoot_ratio": 6.542056074766397,
+      "int3_ppl_result": 2.6572000000000005,
+      "int3_violates_ppl_gate": true,
+      "marlin_sub_int4_incompatible": true,
+      "overshoot_ratio_best": 27.803738317757187,
+      "overshoot_ratio_worst": 39.71962616822455,
+      "per_method": [
+        {
+          "arxiv": "2402.04396",
+          "delta_ppl_int2": 1.19,
+          "headroom_ratio": 27.803738317757187,
+          "method": "QuIP#",
+          "ppl_result": 3.5672,
+          "violates_ppl_gate": true
+        },
+        {
+          "arxiv": "2401.06118",
+          "delta_ppl_int2": 1.47,
+          "headroom_ratio": 34.34579439252358,
+          "method": "AQLM",
+          "ppl_result": 3.8472,
+          "violates_ppl_gate": true
+        },
+        {
+          "arxiv": "2406.11235",
+          "delta_ppl_int2": 1.7,
+          "headroom_ratio": 39.71962616822455,
+          "method": "QTIP",
+          "ppl_result": 4.0772,
+          "violates_ppl_gate": true
+        },
+        {
+          "arxiv": "2410.19103",
+          "delta_ppl_int2": 1.35,
+          "headroom_ratio": 31.54205607476656,
+          "method": "TesseraQ+AWQ",
+          "ppl_result": 3.7272000000000003,
+          "violates_ppl_gate": true
+        }
+      ],
+      "worst_int2_delta": 1.7
+    },
+    "deliverable3_composite_tps": {
+      "base_nonspec": 165.44,
+      "base_offshelf": 357.32,
+      "base_spec": 481.53,
+      "composite_formula": "tps_max = base * L_kernel * L_quant * L_step",
+      "l_kernel_spec": 1.0,
+      "l_quant": 1.0,
+      "l_step_floor": 1.03,
+      "l_step_optimistic": 1.05,
+      "nonspec_clears_500": false,
+      "note": "Spec substrate: 481.53 * 1.0 * 1.0 * 1.05 = 505.61 (pre-cap) but supply_cap=473.5296 is binding => effective ceiling 473.5296 < 500. Non-spec: 165.44 * 1.05 = 173.71 << 500.",
+      "residual_gap_to_500": 26.47040465535929,
+      "spec_clears_500_postcap": false,
+      "spec_clears_500_precap": true,
+      "supply_cap": 473.5295953446407,
+      "tps_effective_floor_spec": 473.5295953446407,
+      "tps_effective_optimistic_spec": 473.5295953446407,
+      "tps_max_floor_nonspec": 170.4032,
+      "tps_max_floor_offshelf": 368.0396,
+      "tps_max_floor_spec": 495.97589999999997,
+      "tps_max_optimistic_nonspec": 173.71200000000002,
+      "tps_max_optimistic_offshelf": 375.18600000000004,
+      "tps_max_optimistic_spec": 505.6065
+    },
+    "deliverable4_verdict": {
+      "binding_constraint": "supply_cap_473p5_and_ppl_gate_locks_L_quant",
+      "needed_fractional_above_supply_cap": 0.05590021176204161,
+      "residual_gap_to_500": 26.47040465535929,
+      "strict_500_reachable_via_known_levers": false,
+      "tps_nonspec_optimistic": 173.71200000000002,
+      "tps_spec_effective_postcap": 473.5295953446407,
+      "tps_spec_optimistic_precap": 505.6065,
+      "tps_unconstrained_spec_postcap": 473.5295953446407,
+      "tps_unconstrained_spec_precap": 956.6821192052981,
+      "unconstrained_int2_also_supply_capped": true,
+      "verdict": "strict_500 is NOT reachable via known levers. Spec substrate optimistic composite (505.61 TPS pre-cap) clears 500 mathematically but the method-independent supply cap 473.5296 TPS (#332) is the binding wall, leaving a 26.47 TPS residual gap. Separately, the PPL gate locks L_quant=1.0x, eliminating the largest potential lever (unconstrained int2 Amdahl ~1.892x). Even with int2 PPL-safe (hypothetical), the supply cap would remain binding at 473.5296 < 500. The non-spec substrate optimistic ceiling is far below 500 (~173.7 TPS). Clearing 500 under strict-greedy token-identity requires either breaching the batched-verify BW floor (#332) or finding a new lever not in the known set."
+    },
+    "deliverable5_caveats": {
+      "assumptions": [
+        "BASELINE_TPS=481.53 is the current best strict-compliant serve point (#354).",
+        "SUPPLY_CAP=473.5295953446407 is method-independent (#332 geometric-phi supply floor).",
+        "Arithmetic intensity at M=1 is 4.0, well below ridge point 208.3 (pure BW-bound).",
+        "BODY_FRAC=0.943 reflects batch=1 HBM traffic decomposition (#344 waterfall)."
+      ],
+      "caveats": [
+        "L_kernel on non-spec substrate: FlashInfer excluded (#349); no other batch=1 attention kernel shown faster than SDPA on A10G; if a new kernel emerges the non-spec ceiling shifts proportionally but remains far below 500.",
+        "L_step CUDA-Graphs ceiling of 3-5% is a literature estimate for A10G; actual benefit depends on graph capture overhead and model-specific call graph; could be lower than 3% if launch overhead is already minimised in current serve stack.",
+        "PPL deltas are Llama-2-7B wikitext-2; Gemma-4-E4B may differ; however the headroom (0.043 PPL) is so small (~1.8% relative) that even a 5x more PPL-friendly model architecture would still require int2 delta <0.009 PPL \u2014 not published.",
+        "Supply cap #332 assumes current batched-verify protocol; a draft-acceptance scheme that avoids a full-batch verify step could shift the cap, but would require a fundamentally different speculative decoding architecture.",
+        "All numbers are for strict greedy token-identity (argmax bit-identical). Relaxing to approximate speculative decoding (e.g. nucleus sampling compatibility) is a different research question outside this scope.",
+        "int3 (3-bit) quantization: best published int3 delta +0.28 PPL (QuIP#/QTIP) still overshoots the 0.043 PPL budget by ~6.5x. Marlin W4A16 does not support int3 weights without kernel replacement."
+      ]
+    },
+    "handoff": "strict_500 NOT reachable via known levers. Spec composite optimistic 505.61 TPS (pre-cap) vs supply cap 473.5296 TPS (#332) => effective 473.5296 TPS. Residual gap 26.47 TPS. PPL gate locks L_quant=1.0x (best int2 +1.19 PPL >> 0.043 PPL budget by ~28x). Next lever must either raise the supply cap floor or discover a PPL-safe sub-int4 method.",
+    "headline": {
+      "binding_constraint": "supply_cap_473p5_and_ppl_gate_locks_L_quant",
+      "residual_gap_to_500": 26.47040465535929,
+      "strict_500_composite_reachability_self_test_passes": true,
+      "strict_500_reachable_via_known_levers": false,
+      "tps_max_optimistic_nonspec": 173.71200000000002,
+      "tps_max_optimistic_spec": 505.6065
+    },
+    "imports": {
+      "caveats": [
+        "L_kernel on non-spec substrate: FlashInfer excluded (#349); no other batch=1 attention kernel shown faster than SDPA on A10G; if a new kernel emerges the non-spec ceiling shifts proportionally but remains far below 500.",
+        "L_step CUDA-Graphs ceiling of 3-5% is a literature estimate for A10G; actual benefit depends on graph capture overhead and model-specific call graph; could be lower than 3% if launch overhead is already minimised in current serve stack.",
+        "PPL deltas are Llama-2-7B wikitext-2; Gemma-4-E4B may differ; however the headroom (0.043 PPL) is so small (~1.8% relative) that even a 5x more PPL-friendly model architecture would still require int2 delta <0.009 PPL \u2014 not published.",
+        "Supply cap #332 assumes current batched-verify protocol; a draft-acceptance scheme that avoids a full-batch verify step could shift the cap, but would require a fundamentally different speculative decoding architecture.",
+        "All numbers are for strict greedy token-identity (argmax bit-identical). Relaxing to approximate speculative decoding (e.g. nucleus sampling compatibility) is a different research question outside this scope.",
+        "int3 (3-bit) quantization: best published int3 delta +0.28 PPL (QuIP#/QTIP) still overshoots the 0.043 PPL budget by ~6.5x. Marlin W4A16 does not support int3 weights without kernel replacement."
+      ],
+      "provenance": "wirbel #196 (TPS_NONSPEC=165.44), wirbel #326 (TPS_SPEC_OFFSHELF_BI=357.32, ETA_KERNEL_OFFSHELF=0.3141), wirbel #354 (BASELINE_TPS=481.53 custom Marlin W4A16 kernel), denken #332 y5cl0ena (SUPPLY_CAP=473.5295953446407 method-independent batched-verify BW floor, LAMBDA_CEIL=520.9527323111674), denken #344 waterfall (BODY_FRAC=0.943 STEP_US=1218.2), kasane #349 (FlashInfer batch-1 excluded: SDPA 36.05\u00b5s vs FlashInfer 48.20\u00b5s/layer). Literature: QuIP# arXiv:2402.04396 (int2 +1.19 PPL); AQLM arXiv:2401.06118 (int2 +1.47 PPL); QTIP arXiv:2406.11235 (int2 +1.70 PPL); TesseraQ+AWQ arXiv:2410.19103 (int2 +1.35 PPL); Marlin arXiv:2408.11743 (W4A16 4-bit only); CUDA Graphs A10G arXiv:2605.30571v1 Table 3 (H100 20.6% step overhead; A10G 3-5% ceiling). PPL gate: deployed 2.3772 gate 2.42 headroom 0.043 (lawine eval contract)."
+    },
+    "self_test": {
+      "conditions": {
+        "a_lquant_amdahl_reproduces": true,
+        "b_supply_cap_roundtrips_332": true,
+        "c_ppl_headroom_positive": true,
+        "d_all_int2_violate_ppl_gate": true,
+        "e_int2_overshoot_ratio_large": true,
+        "f_spec_precap_clears_500": true,
+        "g_spec_postcap_below_500": true,
+        "h_nonspec_far_below_500": true,
+        "i_verdict_not_reachable": true,
+        "j_residual_gap_positive": true,
+        "k_nan_clean": true
+      },
+      "n_checks": 11,
+      "strict_500_composite_reachability_self_test_passes": true
+    }
+  }
+}
