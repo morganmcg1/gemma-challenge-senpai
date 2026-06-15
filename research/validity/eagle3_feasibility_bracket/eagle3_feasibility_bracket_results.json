@@ -1,0 +1,96 @@
+{
+  "created_at": "20260615T035732Z",
+  "pr": 290,
+  "agent": "wirbel",
+  "kind": "eagle3-feasibility-bracket",
+  "synthesis": {
+    "constants": {
+      "official_baseline": 481.53,
+      "target_tps": 500.0,
+      "lambda1_ceil": 520.9527323111674,
+      "K_cal": 125.268,
+      "step_us": 1218.2,
+      "new_step_us": 1202.7171244939168,
+      "tau": 1.218,
+      "E_T_deployed": 3.844,
+      "K_spec": 7,
+      "linear_cap": 3.8445,
+      "fern_floor_public": 4.966,
+      "honest500_floor": 3.9914,
+      "priv_factor": 0.804,
+      "bridge_verify": 1.0,
+      "bridge_draft": 0.2147
+    },
+    "step_bank": {
+      "step_rel": 0.9872903665193866,
+      "step_banked_built_raise_target": 4.9028839601352745,
+      "fern281_floor_public": 4.966,
+      "delta_target_shaved": 0.06311603986472569,
+      "relaxation_is_basis_honest": true,
+      "envelope_tps_gain_pct": 1.2873247741107985,
+      "envelope_tps": 487.72885498477575,
+      "envelope_divergent": 0,
+      "envelope_maxdiff": 0.0,
+      "envelope_ppl": 2.3772
+    },
+    "recoverable_budget": {
+      "eagle3_recoverable_budget_et": 1.0583839601352745,
+      "budget_unbanked": 1.1215000000000002,
+      "budget_shrink_from_free_lever": 0.06311603986472569,
+      "linear_headroom": 0.000500000000000167,
+      "deployed_at_linear_cap": true,
+      "zero_linear_headroom": true
+    },
+    "feasibility_window": {
+      "E_T_max_full_acceptance": 8.0,
+      "tps_at_etmax_deployed": 1002.144,
+      "et_at_lambda1_ceiling": 4.158705593696454,
+      "built_raise_target_within_feasibility_window": true,
+      "budget_fraction_of_headroom": 0.2546947323150703,
+      "feasibility_bracket": {
+        "linear_cap_denken119": 3.8445,
+        "deployed_E_T": 3.844,
+        "honest500_real_floor": 3.9914,
+        "lambda1_equiv_E_T": 4.158705593696454,
+        "step_banked_built_raise_target": 4.9028839601352745,
+        "fern281_floor_public": 4.966,
+        "E_T_max_full_acceptance": 8.0
+      }
+    },
+    "eagle3_mechanism_match": {
+      "budget_requires_nonlinear_drafter": true,
+      "reason": "the deployed linear drafter sits AT denken #119's linear cap 3.8445 (E[T]=3.844, headroom 0.0005 ~ 0), so the entire recoverable budget 1.0584 E[T] is STRUCTURALLY off the linear family -- unreachable by any linear-chain retrain at any capacity.",
+      "eagle3_target_layers": [
+        2,
+        21,
+        39
+      ],
+      "mechanism": "EAGLE-3's multi-layer hidden-state fusion (target layers {2,21,39}) attacks the j>=2 OOD acceptance collapse (ubel #263, priv/pub 0.804) that BOUNDS the linear cap -- its mechanism is aimed at the exact origin of the budget.",
+      "kanna289_crossref": "kanna #289 (per-position-acceptance-decay) localizes WHERE in the chain the budget lives (the per-position a_k cliff); this card owns the AGGREGATE step-banked target + budget and CITES her cliff -- does NOT re-derive the per-position profile (non-blocking, orthogonal)."
+    },
+    "honest_caveat": "NECESSARY-condition feasibility bracket, NOT a sufficiency proof: it confirms the step-banked target 4.9029 sits inside the feasibility window (< E[T]_max 8.0) and is structurally off the linear family, but whether EAGLE-3 ACTUALLY recovers ~1.06 E[T] is a BUILD measurement (human-approval-gated Phase-1 viability -> full retrain). Does NOT claim EAGLE-3 reaches the target.",
+    "eagle3_sufficiency_is_build_gated": true,
+    "self_test": {
+      "conditions": {
+        "a_step_banked_relaxation_reproduces": true,
+        "b_free_lever_relaxes_not_tightens": true,
+        "c_bridge1_basis_honest_from_kanna286": true,
+        "d_budget_equals_target_minus_cap": true,
+        "e_deployed_sits_at_linear_cap": true,
+        "f_target_within_feasibility_window": true,
+        "g_composition_roundtrips_kcal": true,
+        "i_constants_imported_exact": true
+      },
+      "k_cal_implied": 125.26795005202914,
+      "target_recomputed": 4.9028839601352745,
+      "budget_recomputed": 1.0583839601352745
+    },
+    "step_banked_built_raise_target": 4.9028839601352745,
+    "eagle3_recoverable_budget_et": 1.0583839601352745,
+    "verdict": "Banking wirbel #285's proven-free lossless lever (bridge=1.0, kanna #286) into fern #281's 4.966 public-E[T] floor relaxes the BUILT-raise target to 4.9029 (Delta 0.0631 E[T] shaved off by the one free lever). EAGLE-3's recoverable budget beyond denken #119's linear cap is 1.0584 E[T] (un-banked 1.1215; the free lever shrinks it by 0.0631). The deployed linear drafter sits AT the cap (headroom 0.0005 ~ 0) -> ZERO linear headroom; the entire budget is structurally off the linear family. The target sits INSIDE the feasibility window (cap 3.8445 < 4.9029 < E[T]_max 8.0; 25.5% of the cap->ceiling headroom), reachable in principle but ONLY by a structurally non-linear drafter whose mechanism (EAGLE-3 target-feature fusion, layers {2,21,39}) is matched to the OOD-collapse origin of the budget (ubel #263). NECESSARY-condition de-risk; sufficiency remains build-gated. BASELINE 481.53 untouched; analysis-only; NOT a launch.",
+    "handoff": "banking your own +1.29% lossless step lever (bridge=1.0, basis-honest, kanna #286) relaxes fern #281's BUILT-raise target from 4.966 -> 4.9029 public E[T], leaving a recoverable budget of 1.0584 E[T] beyond denken #119's linear cap (3.8445, which the deployed drafter already sits AT -- zero linear headroom) -- inside the feasibility window (4.9029 < E[T]_max 8.0) but recoverable ONLY by a structurally non-linear drafter, so EAGLE-3's target-feature fusion is mechanism-matched to the budget's OOD-collapse origin (ubel #263), giving the human-gated build an honest, step-banked target and a passed necessary-condition feasibility check (sufficiency remains build-gated)."
+  },
+  "eagle3_feasibility_bracket_self_test_passes": true,
+  "peak_mem_mib": 13.695,
+  "nan_clean": true
+}
