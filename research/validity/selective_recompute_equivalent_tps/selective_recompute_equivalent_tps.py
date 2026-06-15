@@ -34,6 +34,25 @@ Because f_step(0.236) >> eta_attn_decode(0.030), the selective two-pass wrapper 
 => The fastest strictly-equivalent config reachable WITHOUT a served-kernel edit remains BLANKET-STRICT (~467.48).
 The 2.6-TPS model survives only as a FUSED-kernel design; realizing it = `blocked:served_change_required`.
 
+THE IDENTITY CRUX (the SECOND, decisive finding -- the selective path does NOT reach 1.0; it goes BACKWARDS)
+-----------------------------------------------------------------------------------------------------------
+Measured on-target (882 decode-width positions, served = fast M1-AR reference):
+  fast M8-verify      0.9966 (3 flips)   |   SELECTIVE (fast base + strict patch on flagged) 0.9853 (13 flips!)
+ALL 3 served flips -- and every flagged near-tie row -- are BITWISE TIES in the served M1-AR (m1_self_gap=0.0):
+the top-2 reference logits are bit-identical and the served stack resolves the tie by argmax index order. For a
+true tie "higher precision" has NO defined winner -- the outcome is set purely by reduction/tie-break order. The
+strict recompute is a *different* reduction order, so it resolves these ties to ITS OWN (equally-valid-greedy)
+token, which matches the served fast reference only by coincidence:
+  - recovers 2/3 served flips (prompts 11,118: strict tie-break happens to equal fast there),
+  - MISSES the 3rd (prompt 18: strict picks 3582, served picks 3629 -- a third token entirely),
+  - and BREAKS 12 previously-correct flagged tie rows (e.g. prompt 90: fast 22355 -> strict 102643).
+Net: 1 unrecovered + 12 new = 13 disagreements > the original 3. Identity is a WITHIN-stack property; mixing a
+fast served reference with strict patches is INCONSISTENT and strictly worse than either consistent stack
+(all-fast 3 flips / all-strict 1 flip vs its OWN reference). => byte-identity 1.0 is UNREACHABLE by any
+attention-precision knob; only reproducing the served stack's exact tie-break (i.e. NOT recomputing) gives it.
+This refutes #397's premise: selective higher-precision recompute is DOUBLE-dominated -- slower than blanket AND
+less token-equivalent than the fast path it tries to repair.
+
 SCOPE: LOCAL A10G (sm_86) post-hoc profiling prototype. analysis_only / no_hf_job / no_served_file_change /
 official_tps=0. NO served/deployed file is touched; the int4 path is READ only; NO HF job; NO submission.
 The selective recompute is realized as a runtime SIMULATION/wrapper over the fast forward's own logprobs +
@@ -48,8 +67,9 @@ METHOD (mirrors #405 census + #393 microbench; both are the established lineage)
     the decode band -> penalty -> eta_attn_decode (sole rebuild-free strict tax; reproduces #393 467.48). >=3 seeds.
   COMPOSE: anchored TPS ladder (OFFICIAL_TPS=481.53): fast_nonequiv / blanket_strict / selective (realizable
     two-pass = PRIMARY MEASURED) / selective_incremental_fused_model (the 2.6 model, fused-kernel only).
-  IDENTITY: census simulation of the selective path -- flag covers all flips? higher-precision recompute
-    recovers them (unless the M1 reference is itself a bitwise tie)? new flips? -> served_identity_after_selective.
+  IDENTITY: DATA-DRIVEN census simulation -- flag covers all flips (yes); at each flagged row substitute the
+    MEASURED strict-arm recompute token (no modelling of what precision "does") and compare to the served fast
+    M1-AR reference -> served_identity_after_selective + served/new flip accounting.
 
 DELIVERABLES (W&B summary/)
   selective_recompute_reaches_identity_1p0 (bool PRIMARY); strictly_equivalent_frontier_tps;
@@ -132,6 +152,10 @@ PROMPTS_JSONL = "official/main_bucket/shared_resources/speed_benchmark/data/ppl_
 OUT_DIR = Path("research/validity/selective_recompute_equivalent_tps")
 CENSUS_ARMS = ("heuristic", "pinned")
 PRIMARY_ARM = "heuristic"                         # the SERVED (fast) path that carries the 3 flips
+RECOMPUTE_ARM = "pinned"                          # strict single-segment fp32-accum reduction = the MEASURED
+#                                                   on-target result of "recompute the attention at higher
+#                                                   precision". A flagged step's recompute token is THIS arm's
+#                                                   M8-verify argmax at the same (prompt,pos) -- not an assumption.
 
 
 # ======================================================================================
@@ -536,61 +560,96 @@ def phase_microbench(out_path: str, iters: int, warmup: int, seeds: list[int]) -
 # the fast forward's logprobs. Flag <=eps* near-tie steps; recompute (higher precision) recovers the
 # M1 reference token UNLESS the M1 reference is itself a bitwise tie (precision cannot resolve a true tie).
 # ======================================================================================
-def simulate_selective_recompute(positions: list[dict], per_prompt: list[dict], eps: float) -> dict:
+def simulate_selective_recompute(positions: list[dict], per_prompt: list[dict],
+                                 recompute_positions: list[dict], eps: float) -> dict:
+    """DATA-DRIVEN selective recompute (no assumption about what 'higher precision' does to a tie).
+
+    Served reference = the deployed/fast (heuristic) stack's M1-AR token (`positions[*]["m1_tok_id"]`).
+    Selective path per row:
+      * non-flagged (fast in-register gap > eps): keep the fast-path token verbatim (`m8_top1_id`).
+      * flagged   (fast gap <= eps): substitute the MEASURED higher-precision recompute token =
+        the strict single-segment arm's M8-verify argmax at the same (prompt,pos)
+        (`recompute_positions` join). This is what re-running that step's attention at fp32/strict
+        ACTUALLY produces on-target -- we do not model it, we read it.
+    A row is identity-correct iff its post-selective token == the served (fast) M1-AR reference.
+    """
     n_total = len(positions)
     n_baseline_flips = sum(1 for p in positions if p["is_flip"])
+    rec_by_key = {(r["prompt_idx"], r["pos"]): r for r in recompute_positions}
 
-    # per-STEP flag fraction (model 0.236): fraction of verify steps (prompts) with >=1 <=eps near-tie row.
+    # per-STEP flag fraction (drives the TPS f): fraction of verify steps with >=1 <=eps near-tie row.
     n_steps = len(per_prompt)
     flagged_steps = [pp for pp in per_prompt if pp.get("step_flagged")]
     n_flagged_steps = len(flagged_steps)
     flagged_step_fraction = (n_flagged_steps / n_steps) if n_steps else float("nan")
 
-    # per-row flagging (the recompute acts at the row level inside a flagged step)
-    recovered = remaining = new = 0
-    n_flag_rows = 0
+    recovered = served_not_recovered = new = 0
+    n_flag_rows = n_flag_rows_recompute_disagrees = 0
     n_match_after = 0
     flag_covers_all_flips = True
+    disagreements = []      # post-selective rows that differ from the served reference
     for p in positions:
+        key = (p["prompt_idx"], p["pos"])
+        served_ref = p["m1_tok_id"]
         near = p["m8_gap"] <= eps + BAND_TOL
-        baseline_correct = (p["m8_top1_id"] == p["m1_tok_id"])
         if near:
             n_flag_rows += 1
-            # higher-precision recompute returns the M1 (per-row) reference, UNLESS M1 is a bitwise tie.
-            recompute_correct = (not p["m1_is_bitwise_tie"])
-            after_correct = recompute_correct
+            r = rec_by_key.get(key)
+            after_tok = r["m8_top1_id"] if r is not None else p["m8_top1_id"]  # MEASURED recompute token
+            if after_tok != served_ref:
+                n_flag_rows_recompute_disagrees += 1
         else:
-            after_correct = baseline_correct
+            after_tok = p["m8_top1_id"]                                        # fast path verbatim
+        after_correct = (after_tok == served_ref)
         n_match_after += int(after_correct)
-        if p["is_flip"]:
+        if p["is_flip"]:                       # a served flip in the fast path
             if not near:
                 flag_covers_all_flips = False
             if after_correct:
                 recovered += 1
             else:
-                remaining += 1
+                served_not_recovered += 1
+                disagreements.append({**key_rec(p), "kind": "served_flip_not_recovered",
+                                      "fast": p["m8_top1_id"], "recompute": after_tok, "served_ref": served_ref})
         else:
-            if not after_correct:  # a currently-correct position the recompute breaks (must be 0)
+            if not after_correct:              # recompute BROKE a row the fast path had correct
                 new += 1
+                disagreements.append({**key_rec(p), "kind": "new_flip_from_recompute",
+                                      "fast": p["m8_top1_id"], "recompute": after_tok, "served_ref": served_ref})
+    n_flips_remaining_total = served_not_recovered + new
     identity_after = (n_match_after / n_total) if n_total else float("nan")
 
-    # the known 3 served flips MUST all land in flagged steps
     flagged_prompt_idx = {pp["prompt_idx"] for pp in flagged_steps}
     known_flips_flagged = all(k in flagged_prompt_idx for k in KNOWN_FLIP_PROMPTS
                               if any(pp["prompt_idx"] == k for pp in per_prompt))
+    # the central physics: are the disputed (flagged-or-flip) positions BITWISE TIES in the served M1-AR?
+    flagged_or_flip = [p for p in positions if p["m8_gap"] <= eps + BAND_TOL or p["is_flip"]]
+    served_flips_all_bitwise_ties = bool(all(p["m1_is_bitwise_tie"] for p in positions if p["is_flip"]))
     return {
         "eps": eps, "n_total_positions": n_total, "n_baseline_flips": n_baseline_flips,
         "n_steps": n_steps, "n_flagged_steps": n_flagged_steps,
         "flagged_step_fraction": flagged_step_fraction,
         "n_flag_rows": n_flag_rows,
-        "n_flips_recovered": recovered, "n_flips_remaining": remaining, "new_flips": new,
+        "n_flag_rows_recompute_disagrees_with_served": n_flag_rows_recompute_disagrees,
+        # accounting (served-flip recovery is SEPARATE from newly-introduced flips):
+        "n_flips_recovered": recovered,
+        "n_served_flips_not_recovered": served_not_recovered,
+        "new_flips": new,
+        "n_flips_remaining": n_flips_remaining_total,            # TOTAL disagreements vs served ref after selective
         "served_identity_after_selective": identity_after,
-        "reaches_identity_1p0": bool(remaining == 0 and new == 0),
+        "reaches_identity_1p0": bool(n_flips_remaining_total == 0),
         "flag_covers_all_flips": bool(flag_covers_all_flips),
         "known_flip_prompts_flagged": bool(known_flips_flagged),
+        "served_flips_all_bitwise_ties": served_flips_all_bitwise_ties,
+        "n_flagged_or_flip_positions": len(flagged_or_flip),
         "n_flagged_rows_m1_bitwise_tie": sum(1 for p in positions
                                              if p["m8_gap"] <= eps + BAND_TOL and p["m1_is_bitwise_tie"]),
+        "disagreements": disagreements,
     }
+
+
+def key_rec(p: dict) -> dict:
+    return {"prompt_idx": p["prompt_idx"], "pos": p["pos"]}
 
 
 # ======================================================================================
@@ -629,7 +688,8 @@ def compose_and_report(census: dict, micro: dict, a: argparse.Namespace) -> dict
     primary = census[PRIMARY_ARM]
     pos_primary = primary["positions"]
     pp_primary = primary["per_prompt"]
-    sim = simulate_selective_recompute(pos_primary, pp_primary, EPS_STAR)
+    pos_recompute = census[RECOMPUTE_ARM]["positions"]
+    sim = simulate_selective_recompute(pos_primary, pp_primary, pos_recompute, EPS_STAR)
 
     # tie identifiable from the fast path's own in-register top-2 (#405): every served flip has M1 in top-2.
     fast_flips = [p for p in pos_primary if p["is_flip"]]
@@ -659,6 +719,15 @@ def compose_and_report(census: dict, micro: dict, a: argparse.Namespace) -> dict
     selective_recompute_reaches_identity_1p0 = bool(sim["reaches_identity_1p0"])
     served_identity_after_selective = sim["served_identity_after_selective"]
 
+    # identity reference points on the SAME served (fast) M1-AR reference:
+    #   fast    M8-verify  -> the 3-flip baseline (within-stack consistent fast)
+    #   selective (this)   -> fast base + strict patches on flagged rows (CROSS-stack mix)
+    # plus the consistent all-strict stack's OWN within-arm identity (what 'blanket strict' really delivers).
+    fast_decodewidth_identity = primary["decodewidth_e2e_token_identity_rate"]
+    blanket_strict_within_identity = census[RECOMPUTE_ARM]["decodewidth_e2e_token_identity_rate"]
+    selective_degrades_identity_vs_fast = bool(served_identity_after_selective < fast_decodewidth_identity)
+    served_flips_all_bitwise_ties = bool(sim["served_flips_all_bitwise_ties"])
+
     # the fastest REALIZABLE strictly-equivalent config (no served-kernel edit). Selective two-pass is
     # dominated by blanket whenever f*(1+eta) > eta i.e. always here (f=0.236 >> eta=0.030).
     realizable_candidates = {
@@ -669,22 +738,26 @@ def compose_and_report(census: dict, micro: dict, a: argparse.Namespace) -> dict
     fastest_realizable_strictly_equivalent_tps = realizable_candidates[fastest_realizable_config]
     selective_beats_blanket = bool(selective_realizable_tps > blanket_strict_measured_tps)
 
-    # PR-literal frontier field: measured selective TPS iff identity 1.0 (honest dominance noted alongside).
+    # PR-literal frontier field: measured selective TPS iff identity 1.0 (it is NOT -> None, honest).
     strictly_equivalent_frontier_tps = (selective_recompute_measured_tps
                                          if selective_recompute_reaches_identity_1p0 else None)
 
-    # blocked-flag: realizing the 2.6 model (fused conditional-precision kernel) OR closing the last identity
-    # flip via a kernel-level reduction would require a served-kernel edit -- which this card MUST NOT do.
-    fused_model_needs_served_change = True   # the incremental tax is unreachable as a runtime wrapper
-    identity_1p0_needs_served_change = bool(not selective_recompute_reaches_identity_1p0)
+    # blocked-flag: realizing the 2.6 model (fused conditional-precision kernel) would require a served-kernel
+    # edit -- which this card MUST NOT do. Identity 1.0 is NOT reachable by ANY attention-precision knob here
+    # (the disputed positions are bitwise ties -> only the served stack's exact tie-break gives 1.0).
+    fused_model_needs_served_change = True
+    identity_1p0_unreachable_by_precision = bool(served_flips_all_bitwise_ties
+                                                 and not selective_recompute_reaches_identity_1p0)
 
-    # ---- verdict ----
-    if not selective_recompute_reaches_identity_1p0:
-        ident_tag = "IDENTITY_LT_1p0"
-    else:
-        ident_tag = "IDENTITY_1p0"
-    if selective_beats_blanket:
-        verdict = f"GREEN_selective_two_pass_beats_blanket_{ident_tag}"
+    # ---- verdict (DOUBLE-RED: dominated on BOTH the TPS axis AND the identity axis) ----
+    ident_tag = "IDENTITY_1p0" if selective_recompute_reaches_identity_1p0 else (
+        "IDENTITY_DEGRADED_vs_fast" if selective_degrades_identity_vs_fast else "IDENTITY_LT_1p0")
+    if selective_beats_blanket and selective_recompute_reaches_identity_1p0:
+        verdict = "GREEN_selective_two_pass_beats_blanket_IDENTITY_1p0"
+    elif selective_degrades_identity_vs_fast:
+        verdict = (f"RED_DOUBLE__selective_recompute_net_negative_tps_AND_{ident_tag}"
+                   f"__bitwise_tie_positions_recompute_picks_strict_tiebreak_not_served__"
+                   f"2p6_model_is_fused_kernel_only")
     else:
         verdict = (f"RED_selective_two_pass_net_negative_blanket_strict_is_fastest_equivalent_{ident_tag}"
                    f"__2p6_model_is_fused_kernel_only")
@@ -718,10 +791,16 @@ def compose_and_report(census: dict, micro: dict, a: argparse.Namespace) -> dict
         "flagged_step_fraction": f,
         "n_flips_remaining": sim["n_flips_remaining"],
         "n_flips_recovered": sim["n_flips_recovered"],
+        "n_served_flips_not_recovered": sim["n_served_flips_not_recovered"],
+        "n_new_flips_introduced": sim["new_flips"],
         "served_identity_after_selective": served_identity_after_selective,
+        "fast_decodewidth_identity": fast_decodewidth_identity,
+        "blanket_strict_within_identity": blanket_strict_within_identity,
+        "selective_degrades_identity_vs_fast": selective_degrades_identity_vs_fast,
+        "served_flips_all_bitwise_ties": served_flips_all_bitwise_ties,
         "tie_identifiable_from_fast_path": tie_identifiable_from_fast_path,
         "fused_model_needs_served_change": fused_model_needs_served_change,
-        "identity_1p0_needs_served_change": identity_1p0_needs_served_change,
+        "identity_1p0_unreachable_by_precision": identity_1p0_unreachable_by_precision,
         "selective_self_test_passes": selective_self_test_passes,  # PRIMARY self-test
         # ---- supporting detail ----
         "verdict": verdict,
@@ -789,14 +868,22 @@ def build_self_test(census, micro, sim, tie_identifiable, blanket_tps, selective
     # the gate is free: every served flip is identifiable from the fast in-register top-2 (#405)
     checks["tie_identifiable_from_fast_path"] = bool(tie_identifiable)
 
-    # selective wrapper invariants
+    # selective wrapper invariants (these validate HARNESS CORRECTNESS, not the experiment's conclusion).
     checks["flag_covers_all_flips"] = bool(sim["flag_covers_all_flips"])
     checks["known_flip_prompts_flagged"] = bool(sim["known_flip_prompts_flagged"])
     # NON-flagged steps are kept verbatim from the fast path -> bit-identical by construction (no flip outside flags)
     checks["nonflagged_steps_bit_identical_to_fast"] = bool(sim["flag_covers_all_flips"])
-    checks["selective_no_new_flips"] = bool(sim["new_flips"] == 0)
-    checks["recovered_plus_remaining_eq_baseline_flips"] = bool(
-        sim["n_flips_recovered"] + sim["n_flips_remaining"] == sim["n_baseline_flips"])
+    # the recompute substitution is DATA-DRIVEN (>=1 flagged row joined to the measured strict arm).
+    checks["selective_uses_measured_recompute_rows"] = bool(sim["n_flag_rows"] > 0)
+    # accounting closes: every served flip is either recovered or not (no double counting w/ new flips).
+    checks["served_flip_accounting_closes"] = bool(
+        sim["n_flips_recovered"] + sim["n_served_flips_not_recovered"] == sim["n_baseline_flips"])
+    # internal consistency: reported identity == (positions - total disagreements) / positions.
+    n_tot = sim["n_total_positions"]
+    checks["identity_consistent_with_disagreements"] = bool(
+        abs(sim["served_identity_after_selective"] - (n_tot - len(sim["disagreements"])) / n_tot) < 1e-9)
+    # the central physics underpinning the finding: every served flip is a BITWISE TIE in the served M1-AR.
+    checks["served_flips_all_bitwise_ties"] = bool(sim["served_flips_all_bitwise_ties"])
     checks["flagged_step_fraction_in_unit"] = bool(0.0 <= sim["flagged_step_fraction"] <= 1.0)
     checks["identity_after_in_unit"] = bool(0.0 <= sim["served_identity_after_selective"] <= 1.0)
 
@@ -894,8 +981,16 @@ def _print_console(r: dict) -> None:
     print("\n========== SELECTIVE RECOMPUTE EQUIVALENT TPS (PR #412) ==========", flush=True)
     print(f" VERDICT                                  : {r['verdict']}", flush=True)
     print(f" selective_recompute_reaches_identity_1p0 : {r['selective_recompute_reaches_identity_1p0']}", flush=True)
-    print(f" served_identity_after_selective          : {r['served_identity_after_selective']:.7f}", flush=True)
-    print(f" n_flips_recovered / remaining            : {r['n_flips_recovered']} / {r['n_flips_remaining']}", flush=True)
+    print(f" served_identity_after_selective          : {r['served_identity_after_selective']:.7f}  "
+          f"(fast {r['fast_decodewidth_identity']:.7f} | strict-within {r['blanket_strict_within_identity']:.7f})",
+          flush=True)
+    print(f" served flips recovered                   : {r['n_flips_recovered']}/{r['selective_simulation']['n_baseline_flips']}"
+          f"  | served flips NOT recovered: {r['n_served_flips_not_recovered']}"
+          f"  | NEW flips introduced: {r['n_new_flips_introduced']}"
+          f"  => total disagreements {r['n_flips_remaining']}", flush=True)
+    print(f" selective_degrades_identity_vs_fast      : {r['selective_degrades_identity_vs_fast']}", flush=True)
+    print(f" served_flips_all_bitwise_ties            : {r['served_flips_all_bitwise_ties']}  "
+          f"(precision can't pick the served tie-break)", flush=True)
     print(f" flagged_step_fraction (model 0.236)      : {r['flagged_step_fraction']:.5f}", flush=True)
     print(f" tie_identifiable_from_fast_path          : {r['tie_identifiable_from_fast_path']}", flush=True)
     print(" --- TPS ladder (anchored OFFICIAL=481.53) ---", flush=True)
@@ -949,8 +1044,11 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
             "selective_tax_vs_2p6_model", "selective_incremental_fused_model_tps",
             "fastest_realizable_strictly_equivalent_tps", "fastest_realizable_strictly_equivalent_config",
             "selective_beats_blanket", "flagged_step_fraction", "n_flips_remaining", "n_flips_recovered",
-            "served_identity_after_selective", "tie_identifiable_from_fast_path",
-            "fused_model_needs_served_change", "identity_1p0_needs_served_change",
+            "n_served_flips_not_recovered", "n_new_flips_introduced",
+            "served_identity_after_selective", "fast_decodewidth_identity", "blanket_strict_within_identity",
+            "selective_degrades_identity_vs_fast", "served_flips_all_bitwise_ties",
+            "tie_identifiable_from_fast_path",
+            "fused_model_needs_served_change", "identity_1p0_unreachable_by_precision",
             "selective_self_test_passes", "verdict", "eta_attn_decode_measured", "eta_attn_decode_std",
             "penalty_decode_band", "self_test_n_checks", "analysis_only", "no_hf_job",
             "no_served_file_change", "official_tps")
