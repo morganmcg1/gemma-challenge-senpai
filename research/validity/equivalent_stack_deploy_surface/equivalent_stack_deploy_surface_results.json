@@ -1,0 +1,453 @@
+{
+  "agent": "lawine",
+  "analysis_only": true,
+  "cb3_is_additive": true,
+  "combinability": {
+    "additive_components": [
+      "cb3"
+    ],
+    "any_two_contend_for_same_edit": false,
+    "cb3_distinct_files": [
+      "submissions/equivalent_<name>/kernels/cb3_qtip_kernel-*.whl",
+      "submissions/equivalent_<name>/cb3_quant_patch.py",
+      "<cb3 bucket>/config.json"
+    ],
+    "combinability_note": "The combined deploy is ONE submission dir: cb3's ADDITIVE modules (kernel + quant patch + checkpoint, orthogonal to the verify path) PLUS the selective-recompute IN-PLACE edit applied to the same forked verify/attention reduction, riding the unchanged MTP drafter. They share the scaffold (manifest / serve.py / sitecustomize, forked ONCE, carrying BOTH cb3's additive deltas and the in-place verify edit). cb3 touches the body-GEMM weights and the verify path NOT AT ALL; selective-recompute touches the verify reduction and the weights NOT AT ALL -> NO contention. The expensive #319 tier-3 e2e gate captures the FINAL composed served stack's greedy output and validates byte-identity -- it is change-agnostic, so ONE e2e capture both RE-KEYS cb3's new reference AND VALIDATES selective-recompute's byte-exactness. The shared-e2e payoff SURVIVES the in-place edit: the in-place change does NOT force a separate cb3 re-run, because both live in ONE final serve.py and the e2e gate captures the composite.",
+    "components_stack_in_one_dir": true,
+    "distinct_subsystems": 2,
+    "exactly_one_in_place": true,
+    "in_place_components": [
+      "selective_recompute"
+    ],
+    "selrec_distinct_files": [
+      "submissions/equivalent_<name>/splitkv_verify_patch.py + fa_sliding_patch.py"
+    ],
+    "shared_e2e_survives_inplace": true,
+    "shared_e2e_verify": true,
+    "shared_scaffold_files": [
+      "manifest",
+      "serve",
+      "sitecustomize"
+    ],
+    "subsystem_by_component": {
+      "cb3": "body_gemm_quant",
+      "selective_recompute": "verify_path"
+    }
+  },
+  "combined_incremental_verify_gpu_min": 41.8,
+  "combined_served_files": 7,
+  "components": [
+    "selective_recompute",
+    "cb3",
+    "mtp_drafter"
+  ],
+  "created_at": "20260615T220721Z",
+  "deploy_is_human_gated": true,
+  "deploy_proposal": {
+    "beats_deployed_nonstrict_when_modeled": true,
+    "combined_incremental_verify_gpu_min": 41.8,
+    "combined_served_files": 7,
+    "combined_served_files_additive": 6,
+    "combined_served_files_breakdown": {
+      "distinct_files": [
+        {
+          "classification": "in_place",
+          "component": "selective_recompute",
+          "path": "submissions/equivalent_<name>/splitkv_verify_patch.py + fa_sliding_patch.py"
+        },
+        {
+          "classification": "additive",
+          "component": "cb3",
+          "path": "submissions/equivalent_<name>/kernels/cb3_qtip_kernel-*.whl"
+        },
+        {
+          "classification": "additive",
+          "component": "cb3",
+          "path": "submissions/equivalent_<name>/cb3_quant_patch.py"
+        },
+        {
+          "classification": "additive",
+          "component": "cb3",
+          "path": "<cb3 bucket>/config.json"
+        }
+      ],
+      "n_additive": 6,
+      "n_distinct": 4,
+      "n_in_place": 1,
+      "n_shared_scaffold": 3,
+      "shared_scaffold_files": [
+        "manifest",
+        "serve",
+        "sitecustomize"
+      ],
+      "total": 7
+    },
+    "combined_served_files_in_place": 1,
+    "deploy_is_human_gated": true,
+    "fastest_equivalent_tps": {
+      "modeled_bracket": [
+        492.08,
+        494.08
+      ],
+      "source": "PENDING (#412 + #416 measuring)",
+      "value": null
+    },
+    "fastest_equivalent_tps_formula": "fastest_equivalent_tps = selective_recompute_equivalent_tps (stark #412, PENDING; modeled [476.48, 478.48]) + cb3 +15.6 (kanna #403 k*=229, MEASURED) == kanna #416 `fastest_equivalent_tps` (PENDING; modeled [492.08, 494.08]). Under #407 the gate is NOT 'clears 500' -- the modeled ~492-494 already BEATS the non-strict deployed 481.53 while carrying the byte-identity guarantee the deployed config lacks.",
+    "fastest_equivalent_tps_modeled_bracket": [
+      492.08,
+      494.08
+    ],
+    "human_proposal_paragraph": "DEPLOY-SURFACE TO SHIP THE FASTEST STRICTLY-EQUIVALENT CONFIG (#407). Three components, one card. (1) selective-recompute verify (stark #412, measuring): THE ONE IN-PLACE edit -- fast attention everywhere + a free <=eps near-tie gate + higher-precision reduction on ONLY the ~23.6% flagged steps, edited into the served verify/attention reduction in place; weightless; byte-EXACT to blanket-strict by design (no new reference) but REQUIRES the e2e identity gate to prove the eps gate; modeled +9..+11 over 467.48. (2) cb3 body supply (kanna #403 k*=229): ADDITIVE 6-file dir + cb3 checkpoint, +15.6 served M=8, PPL-safe, new reference, reversible-by-flag. (3) MTP K=7/M=8 drafter: already DEPLOYED, ZERO deploy surface. COMBINED: 7 served files (6 additive + 1 in-place), ONE submission dir, the in-place verify edit and cb3's additive modules DO NOT contend. VERIFY: 41.8 GPU-min -- the #319 e2e gate is SHARED (one capture re-keys cb3 AND validates selective-recompute byte-exactness; the in-place edit does NOT force a separate cb3 re-run), vs a naive 81.6 unshared. WHOLE STACK REVERSIBLE (re-submit the prior package). MOST EXPENSIVE/RISKY LINE: the in-place selective-recompute verify edit. TPS: fastest_equivalent_tps = selective_recompute_equivalent_tps (stark #412, PENDING; modeled [476.48, 478.48]) + cb3 +15.6 (kanna #403 k*=229, MEASURED) == kanna #416 `fastest_equivalent_tps` (PENDING; modeled [492.08, 494.08]). Under #407 the gate is NOT 'clears 500' -- the modeled ~492-494 already BEATS the non-strict deployed 481.53 while carrying the byte-identity guarantee the deployed config lacks. SHIPPING THIS IS THE HUMAN-GATED ACTION (served-file change + leaderboard submission); this card only PRICES it. No GPU compute, no HF job, no served-file change were performed.",
+    "most_expensive_deploy_line": "selective-recompute IN-PLACE verify-path edit (eps near-tie gate + higher-precision reduction on the ~23.6% flagged steps, edited into splitkv_verify_patch.py / fa_sliding_patch.py): it is the hot path EVERY decode step runs through, so a gate bug corrupts ALL served output (not an isolated kernel artifact); its identity-verify validates a DATA-DEPENDENT correctness property (the eps gate must never miss an argmax flip); and revert-while-keeping-cb3 is a CODE change, not a manifest bucket flip. THIS is the line a human must scrutinize.",
+    "selective_recompute_tps_modeled_bracket": [
+      476.48,
+      478.48
+    ],
+    "verify_breakdown": {
+      "combined_incremental_verify_gpu_min": 41.8,
+      "identity_claim_components": [
+        "selective_recompute",
+        "cb3"
+      ],
+      "n_identity_claim_components": 2,
+      "naive_sum_if_unshared": 81.6,
+      "per_claim_tier1_min": 1.0,
+      "shared_e2e_saving_gpu_min": 39.8,
+      "shared_e2e_survives_inplace": true,
+      "shared_tier2_min": 4.0,
+      "shared_tier3_e2e_min": 35.8
+    },
+    "whole_stack_reversible": true
+  },
+  "equivalent_stack_deploy_surface_self_test_passes": true,
+  "fastest_equivalent_tps_modeled_bracket": [
+    492.08,
+    494.08
+  ],
+  "human_proposal_paragraph": "DEPLOY-SURFACE TO SHIP THE FASTEST STRICTLY-EQUIVALENT CONFIG (#407). Three components, one card. (1) selective-recompute verify (stark #412, measuring): THE ONE IN-PLACE edit -- fast attention everywhere + a free <=eps near-tie gate + higher-precision reduction on ONLY the ~23.6% flagged steps, edited into the served verify/attention reduction in place; weightless; byte-EXACT to blanket-strict by design (no new reference) but REQUIRES the e2e identity gate to prove the eps gate; modeled +9..+11 over 467.48. (2) cb3 body supply (kanna #403 k*=229): ADDITIVE 6-file dir + cb3 checkpoint, +15.6 served M=8, PPL-safe, new reference, reversible-by-flag. (3) MTP K=7/M=8 drafter: already DEPLOYED, ZERO deploy surface. COMBINED: 7 served files (6 additive + 1 in-place), ONE submission dir, the in-place verify edit and cb3's additive modules DO NOT contend. VERIFY: 41.8 GPU-min -- the #319 e2e gate is SHARED (one capture re-keys cb3 AND validates selective-recompute byte-exactness; the in-place edit does NOT force a separate cb3 re-run), vs a naive 81.6 unshared. WHOLE STACK REVERSIBLE (re-submit the prior package). MOST EXPENSIVE/RISKY LINE: the in-place selective-recompute verify edit. TPS: fastest_equivalent_tps = selective_recompute_equivalent_tps (stark #412, PENDING; modeled [476.48, 478.48]) + cb3 +15.6 (kanna #403 k*=229, MEASURED) == kanna #416 `fastest_equivalent_tps` (PENDING; modeled [492.08, 494.08]). Under #407 the gate is NOT 'clears 500' -- the modeled ~492-494 already BEATS the non-strict deployed 481.53 while carrying the byte-identity guarantee the deployed config lacks. SHIPPING THIS IS THE HUMAN-GATED ACTION (served-file change + leaderboard submission); this card only PRICES it. No GPU compute, no HF job, no served-file change were performed.",
+  "kind": "equivalent-stack-deploy-surface",
+  "most_expensive_deploy_line": "selective-recompute IN-PLACE verify-path edit (eps near-tie gate + higher-precision reduction on the ~23.6% flagged steps, edited into splitkv_verify_patch.py / fa_sliding_patch.py): it is the hot path EVERY decode step runs through, so a gate bug corrupts ALL served output (not an isolated kernel artifact); its identity-verify validates a DATA-DEPENDENT correctness property (the eps gate must never miss an argmax flip); and revert-while-keeping-cb3 is a CODE change, not a manifest bucket flip. THIS is the line a human must scrutinize.",
+  "n_components": 3,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "pr": 417,
+  "repo_facts": {
+    "deployed::attn_patch": true,
+    "deployed::manifest": true,
+    "deployed::serve": true,
+    "deployed::sitecustomize": true,
+    "deployed::verify_patch": true,
+    "evidence::attn_pin_cost": true,
+    "evidence::cb3_conservative_k_403": true,
+    "evidence::cb3_surface_404": true,
+    "evidence::unified_ledger_411": true,
+    "harness::decode_width_e2e_381": true,
+    "harness::per_gemm_byte_exact_390": true,
+    "harness::self_ref_compare_319": true,
+    "harness::self_ref_interlock_319": true,
+    "harness::self_ref_reference_319": true
+  },
+  "rows": [
+    {
+      "additive_vs_inplace": {
+        "additive": 3,
+        "in_place": 1,
+        "total": 4
+      },
+      "blast_radius": "served_verify_hot_path_every_decode_step",
+      "component": "selective_recompute",
+      "contingency": "stark #412 `selective-recompute-equivalent-tps` (MEASURING). Modeled +9..+11 over blanket-strict 467.48 -> ~476-478. The proposal auto-fills `tps_unlocked.measured` when #412 lands.",
+      "deploy_kind": "in_place_verify_edit",
+      "flagged_step_frac": 0.236,
+      "identity_verify_gpu_minutes": 40.8,
+      "is_additive_only": false,
+      "is_in_place": true,
+      "name": "selective-recompute verify",
+      "produces_new_reference": false,
+      "requires_identity_verification": true,
+      "reversibility_mechanism": "feature-flag gate (code-level) OR re-submit the prior package; NOT a manifest bucket flip -- the change IS to served verify LOGIC, so revert-while-keeping-cb3 is a CODE change.",
+      "reversible_by_config_flag": true,
+      "served_file_surface": [
+        {
+          "category": "verify_reduction_edit",
+          "change": "IN-PLACE edit of the served verify/attention REDUCTION logic: fast attention everywhere + a free <=eps near-tie gate + a higher-precision reduction on ONLY the ~23.6% flagged near-tie steps. This MODIFIES existing served hot-path behavior (the path every decode step runs through); it is NOT an orthogonal additive module. Weightless. THE single in-place / binding line.",
+          "classification": "in_place",
+          "path": "submissions/equivalent_<name>/splitkv_verify_patch.py + fa_sliding_patch.py  (EDIT verify/attn reduction)",
+          "scaffold_role": "verify_reduction",
+          "subsystem": "verify_path",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "FORK of the deployed manifest; delta = flag/select the selective-recompute verify mode (lets the in-place edit be feature-gated). NO WEIGHTS_BUCKET change (weightless reduction-precision change).",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/manifest.json  (fork)",
+          "scaffold_role": "manifest",
+          "subsystem": "verify_path",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "serve_py_hook",
+          "change": "FORK of the deployed serve stack; delta = wire the modified verify reduction path. NO new vLLM source-patch.",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/serve.py  (fork)",
+          "scaffold_role": "serve",
+          "subsystem": "verify_path",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "attn_backend_patch",
+          "change": "FORK of the deployed sitecustomize finder; delta = import the modified verify/attn reduction patch.",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/sitecustomize.py  (fork)",
+          "scaffold_role": "sitecustomize",
+          "subsystem": "verify_path",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        }
+      ],
+      "served_files_touched": 4,
+      "subsystem": "verify_path",
+      "touches_checkpoint": false,
+      "tps_unlocked": {
+        "measured": null,
+        "modeled_hi": 11.0,
+        "modeled_lo": 9.0,
+        "modeled_tps_bracket": [
+          476.48,
+          478.48
+        ]
+      },
+      "tps_unlocked_headline": 10.0,
+      "verify_harness_3tier": "TIER1 per-GEMM/-config M=1-vs-M=8 byte-identity micro (#390); TIER2 decode-width e2e identity (#381); TIER3 e2e SELF-REFERENTIAL gate (#319: gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).",
+      "verify_reference_rekey": "byte-EXACT to blanket-strict BY DESIGN -> targets the EXISTING strict reference, does NOT mint a new one. BUT the eps near-tie gate makes a DATA-DEPENDENT decision, so #319 must PROVE byte-exactness over the full eval set (a flip the gate misses would show as divergence). Verification is required even though no new reference is produced.",
+      "wandb_run": "#412 (measuring)"
+    },
+    {
+      "additive_vs_inplace": {
+        "additive": 6,
+        "in_place": 0,
+        "total": 6
+      },
+      "blast_radius": "isolated_new_kernel_checkpoint",
+      "component": "cb3",
+      "contingency": "MEASURED & banked (#403 iv9i2wks): k*=229 gives +15.60 served M=8, PPL-safe by construction (heldout-worst 2.3780 / OOD 2.4067, both <=2.41). NOT contingent.",
+      "deploy_kind": "additive_submission_dir",
+      "flagged_step_frac": null,
+      "identity_verify_gpu_minutes": 40.8,
+      "is_additive_only": true,
+      "is_in_place": false,
+      "name": "cb3 body supply",
+      "produces_new_reference": true,
+      "requires_identity_verification": true,
+      "reversibility_mechanism": "manifest bucket/quant_method flip back to the deployed int4 checkpoint -- the verify/attention reduction LOGIC was never touched.",
+      "reversible_by_config_flag": true,
+      "safe_to_request": true,
+      "served_file_surface": [
+        {
+          "category": "cuda_cpp_extension",
+          "change": "NEW prebuilt cb3 QTIP/QuIP# CUDA ext (RHT incoherence + L1-resident K=64 dim-2 Gaussian VQ dequant GEMM); built OUT-OF-HARNESS, uploaded prebuilt. Orthogonal to the verify path.",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/kernels/cb3_qtip_kernel-*.whl  (prebuilt sm_86 .whl/.so)",
+          "scaffold_role": "kernel",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "vllm_quant_registration",
+          "change": "NEW Cb3Config + Cb3LinearMethod via the ADDITIVE @register_quantization_config(\"cb3\") decorator (appends to vLLM QUANTIZATION_METHODS at import). NO in-tree vLLM edit.",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/cb3_quant_patch.py",
+          "scaffold_role": "patch",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "FORK of the deployed manifest; deltas = +cb3 kernel dep, WEIGHTS_BUCKET -> cb3-baked checkpoint.",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/manifest.json  (fork)",
+          "scaffold_role": "manifest",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "serve_py_hook",
+          "change": "FORK of the deployed serve stack; delta = +setup_cb3_path() so the child imports cb3_quant_patch.",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/serve.py  (fork)",
+          "scaffold_role": "serve",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "vllm_quant_registration",
+          "change": "FORK of the deployed sitecustomize finder; delta = import cb3_quant_patch.",
+          "classification": "additive",
+          "path": "submissions/equivalent_<name>/sitecustomize.py  (fork)",
+          "scaffold_role": "sitecustomize",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "NEW remote checkpoint declaring quant_method \"cb3\" with the k*=229 PPL-safe allocation (vLLM auto-selects, no CLI flag). Separate bucket; the deployed int4 checkpoint is untouched.",
+          "classification": "additive",
+          "path": "<cb3 bucket>/config.json  (remote, NEW cb3-baked checkpoint, k*=229)",
+          "scaffold_role": "checkpoint",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": true,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        }
+      ],
+      "served_files_touched": 6,
+      "subsystem": "body_gemm_quant",
+      "touches_checkpoint": true,
+      "tps_unlocked": {
+        "heldout_worst_ppl": 2.378,
+        "k_star": 229,
+        "m8_deployable": 15.6,
+        "ood_ppl": 2.4067
+      },
+      "tps_unlocked_headline": 15.6,
+      "verify_harness_3tier": "TIER1 per-GEMM/-config M=1-vs-M=8 byte-identity micro (#390); TIER2 decode-width e2e identity (#381); TIER3 e2e SELF-REFERENTIAL gate (#319: gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).",
+      "verify_reference_rekey": "RHT+VQ dequant changes the body-GEMM weights -> different argmax -> #319 re-keys to cb3's OWN M=1 AR decode (a genuinely new reference).",
+      "wandb_run": "iv9i2wks"
+    },
+    {
+      "additive_vs_inplace": {
+        "additive": 0,
+        "in_place": 0,
+        "total": 0
+      },
+      "blast_radius": "none_no_change",
+      "component": "mtp_drafter",
+      "contingency": "none -- already deployed; it is the drafter the fastest-equivalent config rides.",
+      "deploy_kind": "no_change_already_deployed",
+      "flagged_step_frac": null,
+      "identity_verify_gpu_minutes": 0.0,
+      "is_additive_only": true,
+      "is_in_place": false,
+      "name": "MTP K=7 drafter / M=8 verify",
+      "produces_new_reference": false,
+      "requires_identity_verification": false,
+      "reversibility_mechanism": "no change -- nothing to revert (already the deployed drafter).",
+      "reversible_by_config_flag": true,
+      "served_file_surface": [],
+      "served_files_touched": 0,
+      "subsystem": "drafter",
+      "touches_checkpoint": false,
+      "tps_unlocked": {
+        "already_deployed": true
+      },
+      "tps_unlocked_headline": 0.0,
+      "verify_harness_3tier": "TIER1 per-GEMM/-config M=1-vs-M=8 byte-identity micro (#390); TIER2 decode-width e2e identity (#381); TIER3 e2e SELF-REFERENTIAL gate (#319: gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).",
+      "verify_reference_rekey": "no change -> no re-key (the deployed reference already covers it).",
+      "wandb_run": "deployed"
+    }
+  ],
+  "selective_recompute_is_in_place": true,
+  "selftest": {
+    "conditions": {
+      "a_selrec_blast_hotpath": true,
+      "a_selrec_flagged_frac": true,
+      "a_selrec_is_in_place": true,
+      "a_selrec_modeled_bracket": true,
+      "a_selrec_no_new_reference": true,
+      "a_selrec_not_additive_only": true,
+      "a_selrec_one_inplace_file": true,
+      "a_selrec_requires_verification": true,
+      "a_selrec_verify_subsystem": true,
+      "a_selrec_weightless": true,
+      "b_cb3_body_subsystem": true,
+      "b_cb3_is_additive_only": true,
+      "b_cb3_kstar_229": true,
+      "b_cb3_lift_15_60": true,
+      "b_cb3_new_reference": true,
+      "b_cb3_ppl_safe": true,
+      "b_cb3_six_files": true,
+      "b_cb3_standalone_verify_40_8": true,
+      "b_cb3_zero_inplace": true,
+      "c_mtp_no_new_reference": true,
+      "c_mtp_no_verification": true,
+      "c_mtp_not_in_place": true,
+      "c_mtp_zero_files": true,
+      "c_mtp_zero_verify": true,
+      "d_categories_canonical": true,
+      "d_cb3_in_additive": true,
+      "d_exactly_one_in_place": true,
+      "d_in_place_is_selrec": true,
+      "d_no_contention": true,
+      "d_three_rows": true,
+      "d_two_subsystems_with_files": true,
+      "e_combined_additive_6": true,
+      "e_combined_files_7": true,
+      "e_combined_in_place_1": true,
+      "e_combined_verify_41_8": true,
+      "e_shared_e2e_survives_inplace": true,
+      "e_two_identity_claims": true,
+      "e_verify_below_naive_sum": true,
+      "f_beats_deployed_modeled": true,
+      "f_deploy_human_gated": true,
+      "f_most_expensive_is_inplace": true,
+      "f_tps_formula_cites_412_416": true,
+      "f_tps_modeled_bracket": true,
+      "f_tps_pending_param": true,
+      "f_whole_stack_reversible": true,
+      "g_deployed::attn_patch": true,
+      "g_deployed::manifest": true,
+      "g_deployed::serve": true,
+      "g_deployed::sitecustomize": true,
+      "g_deployed::verify_patch": true,
+      "g_evidence::attn_pin_cost": true,
+      "g_evidence::cb3_conservative_k_403": true,
+      "g_evidence::cb3_surface_404": true,
+      "g_evidence::unified_ledger_411": true,
+      "g_harness::decode_width_e2e_381": true,
+      "g_harness::per_gemm_byte_exact_390": true,
+      "g_harness::self_ref_compare_319": true,
+      "g_harness::self_ref_interlock_319": true,
+      "g_harness::self_ref_reference_319": true,
+      "h_analysis_only": true,
+      "h_no_hf_job": true,
+      "h_no_served_file_change": true,
+      "h_official_tps_zero": true
+    },
+    "n_checks": 63,
+    "passes": true
+  },
+  "shared_baselines": {
+    "cb3_kstar": 229,
+    "cb3_lift_m8": 15.6,
+    "deployed_ppl": 2.3772,
+    "deployed_tps": 481.53,
+    "ppl_cap": 2.42,
+    "selrec_modeled_tps_bracket": [
+      476.48,
+      478.48
+    ],
+    "strict_base_blanket": 467.48
+  },
+  "shared_e2e_survives_inplace": true,
+  "wandb_run_id": "2mv6ssw4",
+  "whole_stack_reversible": true
+}
