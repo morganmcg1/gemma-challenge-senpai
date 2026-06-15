@@ -962,9 +962,8 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
         summary[f"{arm}/step_count_0p125"] = b["step_count_0p125"]
         summary[f"{arm}/position_frac_0p5"] = b["position_frac_0p5"]
         summary[f"{arm}/max_flip_gap"] = b["max_flip_gap"]
-        summary[f"{arm}/marlin_bitexact_at_8"] = bool(
-            d["marlin_sizem_diag"].get("bitexact_at_decode_width"))
-        summary[f"{arm}/aten_mm_bitexact"] = bool(d["aten_mm_control"].get("bitexact_M1_vs_M8"))
+        summary[f"{arm}/marlin_bitexact_at_8"] = bool(d["marlin_bitexact_at_decode_width"])
+        summary[f"{arm}/aten_mm_bitexact"] = bool(d["aten_mm_bitexact"])
     for k, v in summary.items():
         run.summary[k] = v
     for k, v in report["self_test"].items():
