@@ -1,0 +1,198 @@
+{
+  "pr": 275,
+  "title": "Prefill / TPS-denominator slack probe",
+  "analysis_only": true,
+  "prefill_probe_analysis_only": true,
+  "baseline_official_tps": 481.53,
+  "served_step_ms_banked": 1.2182,
+  "et_ceiling_banked": 5.207,
+  "utc": "2026-06-15T02:49:14Z",
+  "measurements": {
+    "precache_on_512": {
+      "variant": "frontier",
+      "num_prompts": 128,
+      "output_len": 512,
+      "identity": {
+        "prefill_s": 3.8161883861466777,
+        "decode_s": 129.39323031291133,
+        "inference_s": 133.209418699058,
+        "queue_s": 0.0006458069547079504,
+        "e2e_s": 133.94747614860535,
+        "resid_inference_minus_pf_dc_s": 0.0,
+        "resid_e2e_minus_inf_queue_s": 0.7374116425926331,
+        "prefill_share_of_inference_pct": 2.8648037229019634,
+        "prefill_share_of_e2e_pct": 2.8490185077566403,
+        "prefill_share_of_clientwall_pct": 2.843272567746946
+      },
+      "client_wall_s": 134.2181692123413,
+      "total_completion_tokens": 65536,
+      "total_prompt_tokens": 34452,
+      "e_accept": 4.069642193883867,
+      "verify_gpu_ms_p50": 6.53,
+      "steady_gen_tps_mean": 443.2857142857143,
+      "count_check": 128.0
+    },
+    "precache_off_512": {
+      "variant": "precache_off",
+      "num_prompts": 128,
+      "output_len": 512,
+      "identity": {
+        "prefill_s": 6.112786771118408,
+        "decode_s": 129.01994278706843,
+        "inference_s": 135.13272955818684,
+        "queue_s": 0.0006546170334331691,
+        "e2e_s": 135.89218974113464,
+        "resid_inference_minus_pf_dc_s": 0.0,
+        "resid_e2e_minus_inf_queue_s": 0.758805565914372,
+        "prefill_share_of_inference_pct": 4.523542735430577,
+        "prefill_share_of_e2e_pct": 4.4982620287176545,
+        "prefill_share_of_clientwall_pct": 4.49065561858927
+      },
+      "client_wall_s": 136.1223680973053,
+      "total_completion_tokens": 65536,
+      "total_prompt_tokens": 34452,
+      "e_accept": 4.090286852093834,
+      "verify_gpu_ms_p50": 6.53,
+      "steady_gen_tps_mean": 463.57142857142856,
+      "count_check": 128.0
+    },
+    "precache_on_128": {
+      "variant": "frontier",
+      "num_prompts": 128,
+      "output_len": 128,
+      "identity": {
+        "prefill_s": 3.7941205978859216,
+        "decode_s": 36.31211132806493,
+        "inference_s": 40.10623192595085,
+        "queue_s": 0.0005908030725549906,
+        "e2e_s": 40.85471534729004,
+        "resid_inference_minus_pf_dc_s": 0.0,
+        "resid_e2e_minus_inf_queue_s": 0.7478926182666328,
+        "prefill_share_of_inference_pct": 9.46017717368987,
+        "prefill_share_of_e2e_pct": 9.286860930576994,
+        "prefill_share_of_clientwall_pct": 9.242782478015439
+      },
+      "client_wall_s": 41.04954981803894,
+      "total_completion_tokens": 16384,
+      "total_prompt_tokens": 34452,
+      "e_accept": 3.588145896656535,
+      "verify_gpu_ms_p50": 6.444,
+      "steady_gen_tps_mean": 298.84000000000003,
+      "count_check": 128.0
+    },
+    "spec_off": {
+      "variant": "spec_off_precache_off",
+      "num_prompts": 128,
+      "output_len": 64,
+      "identity": {
+        "prefill_s": 7.429867097351234,
+        "decode_s": 50.233258598920656,
+        "inference_s": 57.66312569627189,
+        "queue_s": 0.0009442419104743749,
+        "e2e_s": 58.1922402381897,
+        "resid_inference_minus_pf_dc_s": 0.0,
+        "resid_e2e_minus_inf_queue_s": 0.5281703000073321,
+        "prefill_share_of_inference_pct": 12.88495378569393,
+        "prefill_share_of_e2e_pct": 12.767796989666762,
+        "prefill_share_of_clientwall_pct": 12.727214345401446
+      },
+      "client_wall_s": 58.37779498100281,
+      "total_completion_tokens": 8192,
+      "total_prompt_tokens": 34452,
+      "e_accept": null,
+      "verify_gpu_ms_p50": 6.172,
+      "steady_gen_tps_mean": 130.11666666666667,
+      "count_check": 128.0
+    }
+  },
+  "headline": {
+    "operating_point": "precache_on_512",
+    "prefill_wall_share_pct_of_e2e": 2.8490185077566403,
+    "prefill_wall_share_pct_of_inference": 2.8648037229019634,
+    "prefill_wall_share_pct_of_clientwall": 2.843272567746946
+  },
+  "precache_recovery": {
+    "prefill_share_precache_off_pct": 4.4982620287176545,
+    "prefill_share_precache_on_pct": 2.8490185077566403,
+    "recovered_by_precache_pct_points": 1.6492435209610141,
+    "prefill_sum_off_s": 6.112786771118408,
+    "prefill_sum_on_s": 3.8161883861466777
+  },
+  "prefill_decomposition": {
+    "basis": "precache_off_512 engine prefill phase (e2e - decode) + client tokenize",
+    "components_s": {
+      "target_prefill_s": 6.112786771118408,
+      "drafter_prefill_s": 0.0,
+      "drafter_prefill_raw_subtraction_s": -1.3170803262328263,
+      "target_only_specoff_raw_s": 7.429867097351234,
+      "target_only_specoff_norm_s": 7.429867097351234,
+      "specoff_token_scale": 1.0,
+      "tokenize_s": 0.06903662681579589,
+      "scheduler_plumbing_s": 0.7594601829478055,
+      "engine_prefill_phase_s": 6.872246954066213,
+      "partition_basis_s": 6.9412835808820095
+    },
+    "shares": {
+      "target_prefill": 0.8806421319472548,
+      "drafter_prefill": 0.0,
+      "tokenize": 0.00994580123565901,
+      "scheduler_plumbing": 0.10941206681708615
+    },
+    "shares_sum": 1.0,
+    "partition_valid": true,
+    "drafter_marginal_prefill_negligible": true,
+    "drafter_vs_target_ratio": 0.0
+  },
+  "recoverable_prefill_tps_gain_pct": {
+    "supported_lower_edge": 0.0,
+    "optimistic_upper_edge": 2.8490185077566403,
+    "note": "upper = eliminate ALL residual prefill at the precache-on point; lower ~ 0 because prefix-caching/precache + chunked + cudagraphed prefill are already deployed (no free mechanical lever left). The large prompt-cache lever (precache_recovery) is already banked."
+  },
+  "prefill_lever_material": true,
+  "prefill_lever_material_supported_edge": false,
+  "materiality_gate_pct": 2.0,
+  "verdict": "DENOMINATOR ESSENTIALLY CLOSED. Prefill is 2.85% of wall at the deployed (precache-on, 512-token) operating point. The recoverable band is [0.00%, 2.85%]: the upper edge clears the 2% gate ONLY under the physically-unreachable assumption of eliminating 100% of residual prefill, while the supported lower edge is ~0 because every standard prefill lever (precache warmup, vLLM prefix caching, chunked + cudagraphed prefill) is ALREADY deployed (precache alone already banks 1.65 pct-points). Decode (~97%) is the sole remaining TPS front.",
+  "decode_side_consistency": {
+    "e_accept_measured": 4.069642193883867,
+    "e_accept_banked_ceiling": 5.207,
+    "verify_gpu_ms_p50_measured": 6.53,
+    "tree_roofline_step_ms_banked": 1.2182,
+    "verify_step_note": "banked 1.2182 ms is the HYPOTHETICAL depth-9 TREE verify step (M=8-norm roofline, PR #136) \u2014 NOT the deployed linear-MTP K=7 step. The deployed verify forward measured here is verify_gpu_ms_p50; the deployed-point decode reproduction is anchored on throughput + E_accept, not the tree-roofline step.",
+    "verify_step_matches_tree_roofline": false,
+    "per_token_decode_ms": 1.9743840074601948,
+    "decode_throughput_tok_s_official_meter": 506.4870846914823,
+    "e2e_throughput_tok_s": 489.26640414853654,
+    "baseline_official_tps": 481.53,
+    "decode_tps_vs_official_rel": 0.05182872238797656,
+    "decode_reproduces_official_within_tol": true,
+    "repro_tol": 0.15
+  },
+  "self_test": {
+    "a_walltime_identity_holds": true,
+    "b_decode_reproduces_served_step": true,
+    "c_prefill_partition_sums_to_one": true,
+    "d_nan_clean_all_finite": true,
+    "e_recoverable_band_reported": true,
+    "identity_residual_s": 0.0,
+    "eps_s": 0.5,
+    "prefill_denominator_self_test_passes": true
+  },
+  "greedy_ppl_safety_certificate": {
+    "prefill_probe_analysis_only": true,
+    "served_file_changed": false,
+    "emitted_token_changed": false,
+    "hf_job_or_submission": false,
+    "baseline_tps_unchanged": 481.53,
+    "lambda1_ceiling_unchanged": 520.953,
+    "tps_added_by_this_leg": 0.0
+  },
+  "primary_metric": {
+    "name": "prefill_denominator_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "prefill_wall_share_pct",
+    "value": 2.8490185077566403
+  },
+  "wandb_run_id": "s26cb1tv"
+}
