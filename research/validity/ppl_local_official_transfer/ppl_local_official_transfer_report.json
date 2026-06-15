@@ -1,0 +1,135 @@
+{
+  "additive_vs_multiplicative": {
+    "grid": [
+      {
+        "divergence": 0.0,
+        "local_ppl": 2.376682786480556,
+        "official_additive": 2.3772,
+        "official_multiplicative": 2.3772
+      },
+      {
+        "divergence": 2.3566721423229353e-06,
+        "local_ppl": 2.387512089860417,
+        "official_additive": 2.388029303379861,
+        "official_multiplicative": 2.3880316600520035
+      },
+      {
+        "divergence": 4.71334428508996e-06,
+        "local_ppl": 2.398341393240278,
+        "official_additive": 2.398858606759722,
+        "official_multiplicative": 2.3988633201040073
+      },
+      {
+        "divergence": 7.070016427412895e-06,
+        "local_ppl": 2.409170696620139,
+        "official_additive": 2.409687910139583,
+        "official_multiplicative": 2.4096949801560106
+      },
+      {
+        "divergence": 9.42668856973583e-06,
+        "local_ppl": 2.42,
+        "official_additive": 2.420517213519444,
+        "official_multiplicative": 2.420526640208014
+      }
+    ],
+    "max_divergence_over_gate_range": 9.42668856973583e-06,
+    "models_interchangeable": true,
+    "stable_form": "multiplicative",
+    "stable_reason": "PPL=exp(mean-NLL): a constant per-token mean-NLL shift is a constant multiplicative PPL factor, so tau_ppl is regime-invariant; additive Delta is numerically equal here only because the offset is ~0.02% of PPL"
+  },
+  "analysis_only": true,
+  "baseline_official_tps": 481.53,
+  "gate_meaningful_local_ppl_headroom": 0.04177333297236929,
+  "handoff": "The deployed int4 config measures local PPL 2.376683 (SAME corpus as the official 2.3772, locally mirrored \u2014 not a proxy), and the local->official PPL transfer is multiplicative tau_ppl=1.000218 (+/-0.000210; additive Delta=+0.000517), so the safe LOCAL PPL bar for the official <=2.42 gate is 2.4185 \u2014 giving fern #287's read-reduction Pareto 0.0418 of gate-meaningful local-PPL budget (97.6% of the official 0.0428 headroom), and closing the third (PPL) transfer leg alongside tau_lo and tau_acc.",
+  "leg": "tau_ppl (third local->official transfer leg)",
+  "local_ppl_source": "measured",
+  "measured": {
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+    "measured_local_ppl": 2.376682786480556,
+    "neg_log_likelihood": 53498.016889621984,
+    "num_records": 128,
+    "num_tokens": 61797,
+    "reproduces_anchor": true,
+    "resid_vs_anchor": 0.0,
+    "source": "decoupled-reserve",
+    "summary_path": "research/validity/ppl_local_official_transfer/reserve-20260615T034300Z/ppl_summary.json"
+  },
+  "offset_decomposition": {
+    "components_ppl": {
+      "body_numeric_offset": 0.0,
+      "corpus_proxy_offset": 0.0,
+      "hardware_plus_measurement_jitter": 0.0005172135194442262,
+      "harness_tokenization_offset": 0.0
+    },
+    "corpus_is_official_mirror": true,
+    "gap_ppl": 0.0005172135194442262,
+    "harness_is_official_ppl_endpoint": true,
+    "int4_body_bit_exact": true,
+    "local_ppl_bit_reproducible": true,
+    "note": "entire offset is cross-hardware + measurement jitter; corpus/harness/body offsets are structurally zero",
+    "residual_vs_official_internal_spread_ratio": 1.0344270388890258,
+    "sum_check_ppl": 0.0005172135194442262
+  },
+  "ppl_local_official_transfer_self_test_passes": true,
+  "pr": 288,
+  "safe_bar": {
+    "gate_meaningful_local_ppl_headroom": 0.04177333297236929,
+    "headroom_consumed_by_transfer": 0.0010266670276307052,
+    "headroom_retained_frac_of_official": 0.9760124526254508,
+    "official_headroom": 0.0428,
+    "official_ppl_at_bar_worstcase": 2.42,
+    "offset_worst_additive": 0.001517213519443672,
+    "ppl_gate": 2.42,
+    "safe_bar_additive": 2.4184827864805563,
+    "safe_bar_multiplicative": 2.4184561194529253,
+    "safe_local_ppl_bar": 2.4184561194529253,
+    "safe_local_ppl_bar_central": 2.4194827864805557,
+    "tau_ppl_worst": 1.0006383744301401
+  },
+  "safe_local_ppl_bar": 2.4184561194529253,
+  "self_test": {
+    "constants_ok": true,
+    "corpus_proxy_caveat_carried": true,
+    "corpus_proxy_needed": false,
+    "int4_body_bit_exact_note_ok": true,
+    "local_matches_official_same_corpus": true,
+    "mean_nll_reconstruct_ok": true,
+    "mean_nll_reconstruct_resid": 0.0,
+    "nan_clean_ok": true,
+    "notes_ok": true,
+    "official_at_bar_clears_gate": true,
+    "passes": true,
+    "safe_bar_below_deployed_headroom": true,
+    "safe_bar_below_gate": true,
+    "safe_bar_ok": true,
+    "safe_bar_positive_headroom": true,
+    "sane_local_ppl_ok": true,
+    "tau_ppl_roundtrip_ok": true,
+    "tau_ppl_roundtrip_resid_additive": 0.0,
+    "tau_ppl_roundtrip_resid_mult": 0.0,
+    "tps_delta": 0.0,
+    "zero_tps_note_ok": true
+  },
+  "sibling_legs": {
+    "tau_acc": 1.0,
+    "tau_acc_jitter": 0.0075,
+    "tau_lo": 1.03524
+  },
+  "tau_ppl": 1.000217619920667,
+  "tps_delta": 0.0,
+  "transfer": {
+    "delta_ppl_additive_leaderboard": 0.0005172135194442262,
+    "delta_ppl_additive_private": 0.0010172135194439491,
+    "local_ppl_int4_deployed": 2.376682786480556,
+    "mean_nll_shift_per_token_leaderboard": 0.0002175962448868169,
+    "mean_nll_shift_per_token_private": 0.00042790561073780887,
+    "official_headroom": 0.0428,
+    "official_internal_spread_ppl": 0.0004999999999997229,
+    "official_ppl_leaderboard": 2.3772,
+    "official_ppl_private": 2.3777,
+    "tau_ppl": 1.000217619920667,
+    "tau_ppl_leaderboard": 1.000217619920667,
+    "tau_ppl_private": 1.0004279971754035,
+    "tau_ppl_residual": 0.00021037725473668865
+  }
+}
