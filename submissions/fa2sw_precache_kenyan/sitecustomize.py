@@ -1293,3 +1293,32 @@ if __import__("os").environ.get("SPLITKV_VERIFY", "0") == "1":
 # during the untimed warmup window, readiness-gated, fail-closed.
 if __import__("os").environ.get("PRECACHE_BENCH", "0") == "1":
     import serve_patch_precache  # noqa: E402,F401
+
+
+# darwin-4b-opus _IncludedRouter / missing-`.path` startup-500 guard (validated
+# output-neutral under kanna PR #177, W&B bjtwr9jn: token-ids 128/128 identical,
+# PPL byte-identical 2.376976138392039, TPS +0.02%). On fresh a10g images vLLM
+# 0.22.1rc1 mounts sub-routers (`_IncludedRouter`) lacking a `.path`;
+# prometheus_fastapi_instrumentator.routing._get_route_name does `route.path` and
+# raises AttributeError on EVERY request -> HTTP 500 -> "/v1/models" never becomes
+# ready. Wrap _get_route_name to swallow that single AttributeError (return None).
+# Output-neutral: HTTP-metrics middleware ONLY; never touches greedy / PPL /
+# token-ids. No-op when the instrumentator is absent or no pathless route is
+# reached (then returns the original value verbatim).
+def _guard_included_router() -> None:
+    try:
+        import prometheus_fastapi_instrumentator.routing as _r
+    except Exception:
+        return
+    _orig = _r._get_route_name
+
+    def _guarded(scope, routes):
+        try:
+            return _orig(scope, routes)
+        except AttributeError:
+            return None
+
+    _r._get_route_name = _guarded
+
+
+_guard_included_router()
