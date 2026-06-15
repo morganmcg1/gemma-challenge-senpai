@@ -1,0 +1,506 @@
+{
+  "agent": "ubel",
+  "created_at": "20260615T002144Z",
+  "kind": "private-et-gap-decomp",
+  "nan_clean": true,
+  "peak_mem_mib": 12.137,
+  "pr": 258,
+  "synthesis": {
+    "axis1_per_position": {
+      "d1_conditional_drop": 0.12960927651288023,
+      "deep_tail_conditionals_improve_on_private": true,
+      "note": "conditional drop peaks at d1 (0.1296) and goes NEGATIVE at the deep tail (private d5..d7 conditionals exceed public) -- the gap is an EARLY top-1 discrimination loss compounded multiplicatively, not a deep-position failure.",
+      "priv_ET": 3.0898055282313592,
+      "protocol": "decode (accept_calibration / tree_private; PR headline anchors)",
+      "pub_ET": 3.8444537125748504,
+      "reconstruction_residual": 2.220446049250313e-16,
+      "reconstruction_sum": 0.7546481843434909,
+      "rows": [
+        {
+          "C_priv": 0.5991304839661618,
+          "C_pub": 0.728739760479042,
+          "conditional_drop": 0.12960927651288023,
+          "depth": 1,
+          "gap_contrib": 0.12960927651288023,
+          "gap_frac": 0.17174794719162317,
+          "p_priv": 0.5991304839661618,
+          "p_pub": 0.728739760479042
+        },
+        {
+          "C_priv": 0.4129857367696242,
+          "C_pub": 0.5530962874251496,
+          "conditional_drop": 0.06966790765599185,
+          "depth": 2,
+          "gap_contrib": 0.1401105506555254,
+          "gap_frac": 0.18566340390444996,
+          "p_priv": 0.6893085026081717,
+          "p_pub": 0.7589764102641635
+        },
+        {
+          "C_priv": 0.3082617548691718,
+          "C_pub": 0.43832820359281444,
+          "conditional_drop": 0.046076628534489905,
+          "depth": 3,
+          "gap_contrib": 0.13006644872364265,
+          "gap_frac": 0.17235375559379953,
+          "p_priv": 0.7464222790849783,
+          "p_pub": 0.7924989076194682
+        },
+        {
+          "C_priv": 0.2384906059413732,
+          "C_pub": 0.36017538922155695,
+          "conditional_drop": 0.048039870139837126,
+          "depth": 4,
+          "gap_contrib": 0.12168478328018376,
+          "gap_frac": 0.16124703643995894,
+          "p_priv": 0.7736626492721749,
+          "p_pub": 0.821702519412012
+        },
+        {
+          "C_priv": 0.20216924060594138,
+          "C_pub": 0.300484131736527,
+          "conditional_drop": -0.01343146835552389,
+          "depth": 5,
+          "gap_contrib": 0.09831489113058561,
+          "gap_frac": 0.13027910643701476,
+          "p_priv": 0.8477031613381011,
+          "p_pub": 0.8342716929825772
+        },
+        {
+          "C_priv": 0.17434664568168404,
+          "C_pub": 0.2509822155688623,
+          "conditional_drop": -0.027120216765291416,
+          "depth": 6,
+          "gap_contrib": 0.07663556988717826,
+          "gap_frac": 0.10155138709284466,
+          "p_priv": 0.862379683274926,
+          "p_pub": 0.8352594665096346
+        },
+        {
+          "C_priv": 0.15442106039740314,
+          "C_pub": 0.2126477245508982,
+          "conditional_drop": -0.03845070482848989,
+          "depth": 7,
+          "gap_contrib": 0.05822666415349506,
+          "gap_frac": 0.07715736334030877,
+          "p_priv": 0.885712826843481,
+          "p_pub": 0.8472621220149911
+        }
+      ],
+      "total_gap": 0.7546481843434911
+    },
+    "axis2_per_category": {
+      "max_additive_residual": 1.1102230246251565e-16,
+      "note": "every one of the 6 content categories shows a depth-1 top-1 match (q0) DROP below the 0.758 public anchor (0.64..0.69) -- the discrimination loss is universal across content, not a single bad tail. The count-weighted per-category conditional drops reconstruct the pooled drop EXACTLY at every depth (max residual 1.11e-16).",
+      "per_category": [
+        {
+          "E_T": 3.676815883469137,
+          "axis": "domain-code",
+          "category": "native_code",
+          "gap_vs_pub": 0.44704848390152696,
+          "q0_drop_vs_pub": 0.06638403461016484,
+          "q0_top1": 0.6919827547717379,
+          "weight": 0.16569874972257156
+        },
+        {
+          "E_T": 3.5477353178661786,
+          "axis": "register-casual-short",
+          "category": "native_casual",
+          "gap_vs_pub": 0.5761290495044853,
+          "q0_drop_vs_pub": 0.11834665696009083,
+          "q0_top1": 0.6400201324218119,
+          "weight": 0.17179292742472443
+        },
+        {
+          "E_T": 3.673971401494035,
+          "axis": "generic-hard-chat-tail",
+          "category": "native_sharegpt",
+          "gap_vs_pub": 0.4498929658766291,
+          "q0_drop_vs_pub": 0.09925579596011669,
+          "q0_top1": 0.659110993421786,
+          "weight": 0.16588370200488273
+        },
+        {
+          "E_T": 3.4981699315177575,
+          "axis": "non-latin-script",
+          "category": "native_multilingual",
+          "gap_vs_pub": 0.6256944358529064,
+          "q0_drop_vs_pub": 0.11523125824637159,
+          "q0_top1": 0.6431355311355311,
+          "weight": 0.17419730709476955
+        },
+        {
+          "E_T": 3.7059178521225755,
+          "axis": "math-notation-chain",
+          "category": "native_math",
+          "gap_vs_pub": 0.41794651524808835,
+          "q0_drop_vs_pub": 0.08979934490622088,
+          "q0_top1": 0.6685674444756818,
+          "weight": 0.16446881704520233
+        },
+        {
+          "E_T": 3.859351852936011,
+          "axis": "long-context-tail",
+          "category": "native_longctx",
+          "gap_vs_pub": 0.26451251443465296,
+          "q0_drop_vs_pub": 0.08651683914479713,
+          "q0_top1": 0.6718499502371056,
+          "weight": 0.15795849670784937
+        }
+      ],
+      "per_depth_additive_attribution": [
+        {
+          "additive_residual": 4.163336342344337e-17,
+          "depth": 1,
+          "per_category_contrib": {
+            "native_casual": 0.020331118650103643,
+            "native_code": 0.010999751536444233,
+            "native_longctx": 0.01366606985122697,
+            "native_math": 0.014769192028160264,
+            "native_multilingual": 0.020072974879659887,
+            "native_sharegpt": 0.01646491887930544
+          },
+          "pooled_conditional_drop": 0.09630402582490039
+        },
+        {
+          "additive_residual": 1.1102230246251565e-16,
+          "depth": 2,
+          "per_category_contrib": {
+            "native_casual": 0.00831879431181471,
+            "native_code": 0.00994180930485841,
+            "native_longctx": 0.0015855228003240744,
+            "native_math": 0.0068308695063870085,
+            "native_multilingual": 0.010287178928778265,
+            "native_sharegpt": 0.0045240125105655005
+          },
+          "pooled_conditional_drop": 0.04148818736272808
+        },
+        {
+          "additive_residual": 5.204170427930421e-17,
+          "depth": 3,
+          "per_category_contrib": {
+            "native_casual": 0.005317803595416365,
+            "native_code": 0.004567032101094252,
+            "native_longctx": 2.384136638852956e-05,
+            "native_math": 0.0036398840158814614,
+            "native_multilingual": 0.005792794760364758,
+            "native_sharegpt": 0.004257128095730648
+          },
+          "pooled_conditional_drop": 0.02359848393487607
+        },
+        {
+          "additive_residual": 2.7755575615628914e-17,
+          "depth": 4,
+          "per_category_contrib": {
+            "native_casual": -0.0026399413276478718,
+            "native_code": 0.0011216234800423173,
+            "native_longctx": -0.0022957020090175447,
+            "native_math": -0.003570656904645123,
+            "native_multilingual": -0.002036871025317536,
+            "native_sharegpt": -0.003644382843765433
+          },
+          "pooled_conditional_drop": -0.013065930630351219
+        },
+        {
+          "additive_residual": 2.0816681711721685e-17,
+          "depth": 5,
+          "per_category_contrib": {
+            "native_casual": -0.007528346380837523,
+            "native_code": -0.006453745021592695,
+            "native_longctx": -0.009823678319889706,
+            "native_math": -0.008356436912077035,
+            "native_multilingual": -0.0035444302337882387,
+            "native_sharegpt": -0.008016952144994633
+          },
+          "pooled_conditional_drop": -0.04372358901317985
+        },
+        {
+          "additive_residual": 2.0816681711721685e-17,
+          "depth": 6,
+          "per_category_contrib": {
+            "native_casual": -0.007078319992066808,
+            "native_code": -0.0008402306159747765,
+            "native_longctx": -0.005358367209734094,
+            "native_math": -0.004377851866618963,
+            "native_multilingual": -0.005563344131351505,
+            "native_sharegpt": 0.0018675091517100803
+          },
+          "pooled_conditional_drop": -0.021350604664036044
+        },
+        {
+          "additive_residual": 0.0,
+          "depth": 7,
+          "per_category_contrib": {
+            "native_casual": -0.008925262512640588,
+            "native_code": -0.010256036961863986,
+            "native_longctx": -0.011420646266011483,
+            "native_math": -0.010020569966055538,
+            "native_multilingual": -0.00828339239720599,
+            "native_sharegpt": -0.008994795768165541
+          },
+          "pooled_conditional_drop": -0.05790070387194313
+        }
+      ],
+      "pooled_ET": 3.6553609619014926,
+      "pooled_gap_vs_pub": 0.46850340546917124,
+      "protocol": "sglang vllm-chat-scored (#176 native 6-axis; public anchor 4.124)",
+      "pub_ET": 4.123864367370664,
+      "universal_q0_discrimination_drop": true
+    },
+    "axis3_confidence_rank": {
+      "argmax_invariance_theorem": "accept_d = 1[argmax(draft_logits_d) == argmax(target_logits_d)]. For any T>0 and any strictly-monotone g, argmax(g(z)) = argmax(z); temperature, probability thresholds and confidence re-scalings are all such transforms. Therefore NO calibration/temperature/predicate knob can flip a reject to an accept (greedy-safe predicates are strictly one-sided -- they can only reject MORE). The calibration-recoverable share of the E[T] gap is EXACTLY 0, regardless of the confidence-bin shape.",
+      "curve_bins_populated": true,
+      "curve_finite": true,
+      "decisive_axis": "draft-confidence-vs-acceptance under width-1 greedy-EXACT verify",
+      "frac_true_beyond_topW_public": 0.3468023933483565,
+      "public_accept_vs_depth_curve": [
+        {
+          "depth": 1,
+          "rank1_conditional_acceptance": 0.7335390946502057
+        },
+        {
+          "depth": 2,
+          "rank1_conditional_acceptance": 0.7655308967906939
+        },
+        {
+          "depth": 3,
+          "rank1_conditional_acceptance": 0.7966375687035241
+        },
+        {
+          "depth": 4,
+          "rank1_conditional_acceptance": 0.8260281385281385
+        },
+        {
+          "depth": 5,
+          "rank1_conditional_acceptance": 0.840812315754995
+        },
+        {
+          "depth": 6,
+          "rank1_conditional_acceptance": 0.8379431242695754
+        },
+        {
+          "depth": 7,
+          "rank1_conditional_acceptance": 0.8496048349604834
+        }
+      ],
+      "public_confidence_recovery_curve": [
+        {
+          "cumulative_coverage_within_rank": 0.4165047789261015,
+          "rank": 2,
+          "rho_marginal": 0.4165047789261015
+        },
+        {
+          "cumulative_coverage_within_rank": 0.5714507731758489,
+          "rank": 3,
+          "rho_marginal": 0.2655480090557997
+        },
+        {
+          "cumulative_coverage_within_rank": 0.6531976066516435,
+          "rank": 4,
+          "rho_marginal": 0.19075249320036264
+        }
+      ],
+      "recoverable_fraction": 0.0,
+      "recoverable_fraction_basis": "argmax-invariance (calibration/temperature/predicate lever)",
+      "tree_lever_note": "the ONLY greedy-safe E[T]-raising lever is WIDTH>1 (tree rank-2+ recovery), a SEPARATE mechanism (adding candidate lanes, NOT re-calibrating). On the PUBLIC set 65.3% of divergences have the true token within draft rank 2..4 (recoverable by a width-4 tree) and 34.7% fall beyond top-4 (irrecoverable at any width<= 4). This lever is already priced in tree_private_acceptance_gap (private tree E[T] 4.38 raw -> 4.92 calibrated). The private rank-2+ analog needs one local GPU rank-probe forward.",
+      "tree_recoverable_fraction_public": 0.6531976066516435
+    },
+    "imports": {
+      "priv_decode_conditional_p": [
+        0.5991304839661618,
+        0.6893085026081717,
+        0.7464222790849783,
+        0.7736626492721749,
+        0.8477031613381011,
+        0.862379683274926,
+        0.885712826843481
+      ],
+      "priv_decode_et_cached": 3.0898055282313597,
+      "priv_decode_run": "ytxfi6zk",
+      "provenance": "PUBLIC decode ladder accept_calibration 5m17r52s (E[T]=3.844, ShareGPT eval) x PRIVATE decode ladder tree_private_acceptance_gap ytxfi6zk (E[T]=3.090, ShareGPT-chat proxy) x PER-CATEGORY sglang #176 native 6-axis proxies (public anchor 4.124) x PUBLIC rank coverage z6wi4z4v (rho ladder, beyond-topW=0.347). All ladders imported UNCHANGED.",
+      "pub_decode_conditional_p": [
+        0.728739760479042,
+        0.7589764102641635,
+        0.7924989076194682,
+        0.821702519412012,
+        0.8342716929825772,
+        0.8352594665096346,
+        0.8472621220149911
+      ],
+      "pub_decode_et_cached_ladder": 3.8444537125748504,
+      "pub_decode_et_server": 3.844131736526946,
+      "pub_decode_run": "5m17r52s",
+      "rankcov": {
+        "W": 4,
+        "conditional_rank1_acceptance_q": [
+          0.7335390946502057,
+          0.7655308967906939,
+          0.7966375687035241,
+          0.8260281385281385,
+          0.840812315754995,
+          0.8379431242695754,
+          0.8496048349604834
+        ],
+        "cumulative_coverage": {
+          "2": 0.4165047789261015,
+          "3": 0.5714507731758489,
+          "4": 0.6531976066516435
+        },
+        "frac_true_beyond_topW": 0.3468023933483565,
+        "n_divergences": 12869,
+        "rank_fd_hist_pooled": {
+          "0": 4463,
+          "2": 5360,
+          "3": 1994,
+          "4": 1052
+        },
+        "rho_marginal": {
+          "2": 0.4165047789261015,
+          "3": 0.2655480090557997,
+          "4": 0.19075249320036264
+        },
+        "run": "z6wi4z4v"
+      },
+      "sglang_cats": {
+        "native_casual": {
+          "axis": "register-casual-short",
+          "conditional_p": [
+            0.6400201324218119,
+            0.7324197154938236,
+            0.790659672353135,
+            0.8455973041446945,
+            0.8870979848121061,
+            0.8923694326563282,
+            0.922194052179309
+          ],
+          "num_drafts": 18577.0
+        },
+        "native_code": {
+          "axis": "domain-code",
+          "conditional_p": [
+            0.6919827547717379,
+            0.7208437942351071,
+            0.7940521413553191,
+            0.8234612554059793,
+            0.8822244356580056,
+            0.8562376377425561,
+            0.9321361246155372
+          ],
+          "num_drafts": 17918.0
+        },
+        "native_longctx": {
+          "axis": "long-context-tail",
+          "conditional_p": [
+            0.6718499502371056,
+            0.7708055050123002,
+            0.8214634674642252,
+            0.8447638847851388,
+            0.905467286743105,
+            0.8850894324594443,
+            0.9425420069845633
+          ],
+          "num_drafts": 17081.0
+        },
+        "native_math": {
+          "axis": "math-notation-chain",
+          "conditional_p": [
+            0.6685674444756818,
+            0.7393101804537281,
+            0.7994832521058789,
+            0.8519405440054182,
+            0.8940844110674183,
+            0.8777849322205278,
+            0.9311673119374279
+          ],
+          "num_drafts": 17785.0
+        },
+        "native_multilingual": {
+          "axis": "non-latin-script",
+          "conditional_p": [
+            0.6431355311355311,
+            0.7217883431956962,
+            0.7883601865036131,
+            0.8419232037400254,
+            0.8636229870925124,
+            0.8831038323580516,
+            0.9177922257186146
+          ],
+          "num_drafts": 18837.0
+        },
+        "native_sharegpt": {
+          "axis": "generic-hard-chat-tail",
+          "conditional_p": [
+            0.659110993421786,
+            0.7535709020612389,
+            0.7959510723807178,
+            0.8521998127074908,
+            0.8916045221896655,
+            0.8399088628418059,
+            0.9244639487128383
+          ],
+          "num_drafts": 17938.0
+        }
+      },
+      "sglang_pub_conditional_p": [
+        0.7583667893819027,
+        0.7808430961097678,
+        0.8216144018355026,
+        0.8302303075679313,
+        0.8432757710941621,
+        0.8511668051781489,
+        0.8702404435736729
+      ]
+    },
+    "reconciliation": {
+      "agreement": "both protocols agree in DIRECTION and SHAPE: the gap is driven by the depth-1 top-1 match (q0) dropping OOD -- decode q0 0.729->0.599 (drop 0.130), sglang q0 0.758->~0.66 pooled. The magnitudes differ by protocol (decode under-reads E[T] vs sglang; documented in tree_private_drop_reconcile) but the discrimination signature is identical. No protocol shows a calibration signature (a calibration signature would be invisible to greedy acceptance regardless).",
+      "decode_anchors": {
+        "priv": 3.0898055282313592,
+        "pub": 3.8444537125748504
+      },
+      "decode_total_gap": 0.7546481843434911,
+      "sglang_anchors": {
+        "priv_pooled": 3.6553609619014926,
+        "pub": 4.123864367370664
+      },
+      "sglang_pooled_gap": 0.46850340546917124
+    },
+    "self_test": {
+      "conditions": {
+        "a_per_position_and_per_category_reconstruct_total_gap": true,
+        "b_et_anchors_match_cached_3p844_3p090": true,
+        "c_confidence_curves_well_formed": true,
+        "d_recoverable_fraction_in_unit_and_verdict_consistent": true,
+        "e_key_scalars_finite": true
+      },
+      "evidence": {
+        "a_per_category_max_residual": 1.1102230246251565e-16,
+        "a_per_position_residual": 2.220446049250313e-16,
+        "b_priv_ET": 3.0898055282313592,
+        "b_priv_ET_cached": 3.0898055282313597,
+        "b_pub_ET": 3.8444537125748504,
+        "b_pub_ET_cached_ladder": 3.8444537125748504,
+        "b_pub_ET_server": 3.844131736526946,
+        "c_n_divergences": 12869,
+        "c_rho_bins": [
+          2,
+          3,
+          4
+        ],
+        "d_gap_verdict": "INTRINSIC-WEAKNESS",
+        "d_recoverable_fraction": 0.0
+      },
+      "private_et_gap_decomp_self_test_passes": true
+    },
+    "test_metric": {
+      "recoverable_fraction": 0.0
+    },
+    "verdict": {
+      "gap_verdict": "INTRINSIC-WEAKNESS",
+      "lever": null,
+      "lever_priced_private_et_lift": 0.0,
+      "recoverable_fraction": 0.0,
+      "summary": "INTRINSIC-WEAKNESS. The 0.755 E[T] public->private gap (decode 3.844->3.090) is a DISCRIMINATION loss: the draft's top-1 token is wrong more often OOD (q0 0.729->0.599), universal across all 6 content categories and concentrated in the early conditionals (d1 drop 0.1296; deep d5..d7 conditionals actually IMPROVE on private). Under width-1 greedy-EXACT verify, acceptance depends only on the draft ARGMAX, which is invariant to temperature / thresholds / any greedy-safe predicate -- so the calibration-recoverable_fraction = 0.0 EXACTLY. There is NO free greedy-safe lever. The only greedy-safe E[T]-raising lever is width>1 tree rank-2+ recovery (public coverage 65.3% of divergences), a SEPARATE already-priced lane (tree private E[T] 4.38->4.92). Clean negative: the gap is genuine OOD weakness, not over-confidence.",
+      "tree_recoverable_fraction_public": 0.6531976066516435
+    }
+  }
+}
