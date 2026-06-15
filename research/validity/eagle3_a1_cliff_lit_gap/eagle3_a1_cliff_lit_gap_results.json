@@ -1,0 +1,248 @@
+{
+  "pr": 342,
+  "leg": "a_1-cliff lit-gap: price the a_1-lift that resolves #294's lit straddle",
+  "a1_cliff_lit_gap_analysis_only": true,
+  "imported": {
+    "official": 481.53,
+    "ceiling_lambda1": 520.95,
+    "K_cal": 125.268,
+    "E_T_anchor": 3.844,
+    "K_spec": 7,
+    "E_T_max": 8.0,
+    "linear_cap_denken119": 3.8445,
+    "target_banked_wirbel290": 4.9029,
+    "private_verified": 460.85,
+    "a_base_kanna289": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "a1_deployed_kanna289": 0.7292532942898975,
+    "E_T_decomp_289": 3.851185944363104,
+    "a_star_j2_kanna294": 0.9088740395297805,
+    "lit_proj_holda1_central_kanna294": 4.690056968034645,
+    "lit_proj_holda1_low_kanna294": 4.1515952532910525,
+    "eagle3_lit_accept_central_kanna294": 0.8893195559667377,
+    "eagle3_lit_accept_low_kanna294": 0.8330104751560863,
+    "tau_acc_lawine288": 1.0,
+    "phase1_a2_go_kanna294": 0.8342153686245113,
+    "eagle3_lit_L_chain_central": 5.5,
+    "eagle3_lit_L_chain_low": 4.6,
+    "eagle3_dense_a1_conservative": 0.8893195559667377,
+    "eagle3_dense_a1_central": 0.91,
+    "eagle3_dense_a1_optimistic": 0.93,
+    "eagle3_lit_note": "EAGLE-3 (arXiv:2503.01840 Table 1) accepted-length tau~6.2 (tree, T=0, LLaMA-3.1-8B); chain-equivalent ~5.5 central / ~4.6 low after the EAGLE-1 (arXiv:2401.15077 Table 5) tree-over-chain premium 0.68 -> flat deep accept a_lit (Fig-7 near-flat profile). For the feasibility ceiling, EAGLE-3's dense-model position-1 acceptance (0-alpha) is ~0.91 central (range 0.89-0.93): no verbatim digit is published (Fig-7 y-axis is graphic-embedded), so the band is inferred from the tau=6.2 tree->chain back-calc (~0.89-0.91) and 'significantly higher than EAGLE-1' (arXiv:2503.01840 sec5/Fig7) over EAGLE-1's published 0-alpha 0.74-0.85 (arXiv:2401.15077 sec5.1). The near-flat profile (pos-1 ~ deep accept) makes a_lit=0.8893 the CONSERVATIVE published-floor ceiling. int4 + reasoning/STEM OOD is unpriced extra downside (#294).",
+    "wandb_sources": {
+      "kanna_294": "j0ss47bv",
+      "kanna_289": "fi34s269",
+      "wirbel_290": "ub3kpsso",
+      "lawine_288": "i1e5054m",
+      "fern_335": "5pos499e",
+      "lawine_336": "krroookz"
+    }
+  },
+  "step1_define_validate": {
+    "a_lit_central_rederived": 0.8893195559667377,
+    "a_lit_low_rederived": 0.8330104751560863,
+    "a_lit_central_banked_294": 0.8893195559667377,
+    "a_lit_low_banked_294": 0.8330104751560863,
+    "a_lit_central_matches_294": true,
+    "a_lit_low_matches_294": true,
+    "lit_projected_et_holda1_central": 4.690056968034645,
+    "lit_projected_et_holda1_low": 4.1515952532910525,
+    "reproduces_294_central": true,
+    "reproduces_294_low": true,
+    "deep_survival_sum_central": 5.060048404207482,
+    "deep_survival_sum_low": 4.32167434548223,
+    "a1_sweep": [
+      {
+        "a1": 0.7,
+        "lit_et_central": 4.542033882945237,
+        "lit_et_low": 4.0251720418375605,
+        "lit_tps_central": 568.9715004487839
+      },
+      {
+        "a1": 0.72,
+        "lit_et_central": 4.643234851029387,
+        "lit_et_low": 4.111605528747206,
+        "lit_tps_central": 581.6487433187492
+      },
+      {
+        "a1": 0.74,
+        "lit_et_central": 4.744435819113537,
+        "lit_et_low": 4.198039015656851,
+        "lit_tps_central": 594.3259861887145
+      },
+      {
+        "a1": 0.76,
+        "lit_et_central": 4.845636787197686,
+        "lit_et_low": 4.284472502566494,
+        "lit_tps_central": 607.0032290586798
+      },
+      {
+        "a1": 0.78,
+        "lit_et_central": 4.946837755281836,
+        "lit_et_low": 4.370905989476139,
+        "lit_tps_central": 619.680471928645
+      },
+      {
+        "a1": 0.8,
+        "lit_et_central": 5.048038723365986,
+        "lit_et_low": 4.457339476385783,
+        "lit_tps_central": 632.3577147986103
+      },
+      {
+        "a1": 0.82,
+        "lit_et_central": 5.149239691450134,
+        "lit_et_low": 4.543772963295428,
+        "lit_tps_central": 645.0349576685754
+      },
+      {
+        "a1": 0.84,
+        "lit_et_central": 5.250440659534284,
+        "lit_et_low": 4.630206450205073,
+        "lit_tps_central": 657.7122005385407
+      },
+      {
+        "a1": 0.86,
+        "lit_et_central": 5.351641627618434,
+        "lit_et_low": 4.716639937114717,
+        "lit_tps_central": 670.389443408506
+      },
+      {
+        "a1": 0.88,
+        "lit_et_central": 5.452842595702585,
+        "lit_et_low": 4.803073424024363,
+        "lit_tps_central": 683.0666862784714
+      },
+      {
+        "a1": 0.9,
+        "lit_et_central": 5.554043563786734,
+        "lit_et_low": 4.889506910934007,
+        "lit_tps_central": 695.7439291484366
+      },
+      {
+        "a1": 0.92,
+        "lit_et_central": 5.655244531870884,
+        "lit_et_low": 4.975940397843653,
+        "lit_tps_central": 708.4211720184019
+      },
+      {
+        "a1": 0.94,
+        "lit_et_central": 5.756445499955032,
+        "lit_et_low": 5.062373884753296,
+        "lit_tps_central": 721.098414888367
+      },
+      {
+        "a1": 0.96,
+        "lit_et_central": 5.857646468039182,
+        "lit_et_low": 5.14880737166294,
+        "lit_tps_central": 733.7756577583323
+      },
+      {
+        "a1": 0.98,
+        "lit_et_central": 5.958847436123333,
+        "lit_et_low": 5.235240858572586,
+        "lit_tps_central": 746.4529006282976
+      },
+      {
+        "a1": 1.0,
+        "lit_et_central": 6.060048404207483,
+        "lit_et_low": 5.32167434548223,
+        "lit_tps_central": 759.1301434982629
+      }
+    ],
+    "lit_et_monotone_in_a1_central": true,
+    "lit_et_monotone_in_a1_low": true
+  },
+  "step2_solve_a1_star": {
+    "a1_star_central": 0.7713167322183503,
+    "a1_star_low": 0.9030990509685175,
+    "a1_star_band": [
+      0.7713167322183503,
+      0.9030990509685175
+    ],
+    "a1_star_central_closed_form": 0.7713167322183516,
+    "a1_star_low_closed_form": 0.9030990509685195,
+    "a1_star_central_closed_matches": true,
+    "a1_star_low_closed_matches": true,
+    "et_at_a1_star_central": 4.902899999999994,
+    "et_at_a1_star_low": 4.902899999999991,
+    "a1_lift_required_central": 0.042063437928452796,
+    "a1_lift_required_low": 0.17384575667862,
+    "a1_star_central_vs_a_star_j2": -0.13755730731143023,
+    "a1_star_low_vs_a_star_j2": -0.005774988561263017
+  },
+  "step3_feasibility": {
+    "eagle3_dense_a1_conservative": 0.8893195559667377,
+    "eagle3_dense_a1_central": 0.91,
+    "eagle3_dense_a1_optimistic": 0.93,
+    "a1_lift_is_feasible": true,
+    "a1_lift_is_feasible_central_vs_central": true,
+    "a1_lift_is_feasible_low_conservative": false,
+    "a1_lift_is_feasible_low_central": true,
+    "a1_lift_is_feasible_low_optimistic": true,
+    "feasibility_margin_central_conservative": 0.11800282374838744,
+    "feasibility_margin_central_central": 0.13868326778164974,
+    "feasibility_margin_low_conservative": -0.013779495001779773,
+    "feasibility_margin_low_central": 0.006900949031482528,
+    "feasibility_margin_low_optimistic": 0.026900949031482546,
+    "int4_haircut_binds_central": false,
+    "int4_haircut_binds_low": false,
+    "feasibility_interpretation": "central anchor: a1* = 0.7713 needs an a_1-lift of +0.0421 from the 0.7293 cliff; that sits 0.1180 BELOW EAGLE-3's conservative published-floor dense ceiling 0.8893 and well below the central 0-alpha 0.9100 -> FEASIBLE (robust). low anchor: a1* = 0.9031 needs +0.1738, which EXCEEDS the conservative floor 0.8893 but IS feasible vs EAGLE-3's central 0-alpha 0.9100 (margin +0.0069) -- so even the downside leg clears under the central published estimate, with the int4-quantization haircut the residual unpriced risk (#294)."
+  },
+  "step4_two_subtriggers": {
+    "subtrigger_cheap_a2_phase1_go": 0.8342153686245113,
+    "subtrigger_cheap_a2_local_to_official": 1.0,
+    "subtrigger_hard_a1_star_central": 0.7713167322183503,
+    "subtrigger_hard_a1_star_low": 0.9030990509685175,
+    "a1_moved_by_2h_phase1": false,
+    "a1_requires_full_retrain": true,
+    "phase1_measures_a2_not_a1": true,
+    "subtrigger_note": "the human's #319 decision now has TWO sub-triggers: (i) the CHEAP a_2 >= 0.8342 Phase-1 proxy (#294, 2h, 1:1 local->official) and (ii) the HARD a_1 >= 0.7713 cliff-break (this card, central anchor). A 2h frozen-backbone Phase-1 run moves a_2 (deep-position adaptation) but NOT a_1 -- #289 found a_1 is a base-model predictability property (built_raise_requires_nonlinear_drafter=True), so the a_1 cliff-break is a FULL-retrain property the cheap Phase-1 cannot de-risk. The Phase-1 a_2 gate is necessary-but-not-sufficient: it screens the deep lift while the a_1 cliff-break remains the binding feasibility unknown only the full build resolves."
+  },
+  "step5_decision": {
+    "straddle_resolves": "UP",
+    "straddle_resolves_up": true,
+    "build_justified_on_demand_axis": true,
+    "decision_note": "the a_1-cliff lit-gap resolves the #294 straddle UP: the central lit anchor needs a_1 >= 0.7713 (lift +0.0421), which is FEASIBLE vs EAGLE-3's dense ceiling 0.8893, so the DEMAND-side feasibility clears on the central anchor (build justified on this axis). The LOW anchor needs a_1 >= 0.9031 (lift +0.1738) -- at/above the dense ceiling -- so the downside leg stays RISKIER (int4 haircut unpriced). Cross-ref: fern #335 binding axis = SUPPLY; lawine #336/#339 demand REACHABLE-MARGINAL on the coverage axis; this card is the DEMAND-side a_1 ACCEPTANCE crux, complementary to the supply floor."
+  },
+  "step6_greedy_safety": {
+    "a1_cliff_card_is_cpu_analytic": true,
+    "no_gpu": true,
+    "no_served_change": true,
+    "a1_is_speed_axis": true,
+    "greedy_identity_preserved_by_construction": true,
+    "note": "a_1 / per-position acceptance is the SPEED axis; greedy identity is preserved BY CONSTRUCTION (EAGLE-3 emission = verify argmax -- the drafter only PROPOSES, the verifier's argmax token is always emitted). This card is CPU-analytic over banked W&B numbers: no GPU, no model forward, no served-file change, no HF Job, no submission. BASELINE stays 481.53."
+  },
+  "self_test": {
+    "a_reproduces_294_holda1": true,
+    "b_lit_et_monotone_in_a1": true,
+    "c_a1_star_central_solves_target": true,
+    "d_a1_star_low_gt_central": true,
+    "e_a1_lift_required_positive": true,
+    "f_a1_at_a_star_j2_overclears": true,
+    "g_constants_imported_exact": true,
+    "h_nan_clean_sweep": true,
+    "i_a1_star_above_cliff_in_unit": true,
+    "j_a_lit_matches_294": true,
+    "k_a1_star_closed_form_matches": true,
+    "l_base_reproduces_289_decomp": true
+  },
+  "a1_cliff_lit_gap_self_test_passes": true,
+  "a1_star_for_lit_clears": 0.7713167322183503,
+  "a1_star_low": 0.9030990509685175,
+  "a1_lift_required_central": 0.042063437928452796,
+  "a1_lift_is_feasible": true,
+  "straddle_resolves": "UP",
+  "a1_cliff_card_is_cpu_analytic": true,
+  "handoff": "the EAGLE-3 lit projection clears 4.9029 on our base only if a_1 lifts from 0.7293 to a1_star=0.7713 (central) / 0.9031 (low), an a_1-lift of +0.0421 (central) / +0.1738 (low) that IS feasible vs EAGLE-3's published dense a_1 (~0.889 conservative floor / ~0.91 central 0-alpha) -- so the straddle resolves UP, and the #319 decision now has two sub-triggers: the cheap a_2>=0.8342 Phase-1 proxy (#294) AND the hard a_1>=0.7713 cliff-break (this card), with a_1 likely a base-model property only the full retrain shifts (#289).",
+  "nan_clean": true,
+  "peak_mem_mib": 36.094,
+  "created_at": "20260615T101747Z",
+  "wandb_run_id": "ph8eza1w"
+}
