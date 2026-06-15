@@ -1,0 +1,299 @@
+{
+  "agent": "wirbel",
+  "analysis_only": true,
+  "created_at": "20260615T110826Z",
+  "kind": "ppl-only-500-private-stability",
+  "nan_clean": true,
+  "peak_mem_mib": 12.164,
+  "pr": 347,
+  "synthesis": {
+    "deliverable1_import_structure": {
+      "c_star_targets_343": {
+        "c_star_central_public_500": 0.9089363308345582,
+        "c_star_worst_public_500": 0.925603648491971,
+        "cov_lift_central": 0.01863633083455818,
+        "cov_lift_worst": 0.035303648491970985,
+        "cov_prior": 0.8903,
+        "identity_bar": 0.9213011665456927,
+        "imports_exact": true
+      },
+      "deployed_public_to_private": {
+        "delta_pct": 0.04294644155088978,
+        "g_deployed_ratio": 0.9570535584491102,
+        "official_public": 481.53,
+        "private_roundtrip": 460.85,
+        "private_verified": 460.85,
+        "roundtrips_300_delta_4p3": true,
+        "roundtrips_460p85": true
+      },
+      "retrain_lift_budget_336": 0.031,
+      "rho_priv_imports": {
+        "note": "lawine #300 rho_priv_e3 = private/public EAGLE-3 coverage ratio. CENTRAL (deployed-effective, deep fidelity) 0.9421 CLOSES the gap; RAW (no tree-recovery) 0.7797 does NOT. fern #318 worst cross-dataset 0.7923. These are a point estimate + CI bracket [0.7797, 0.9421], NOT a measured fusion-head private tax.",
+        "rho_ci_bracket_raw_to_deployed_effective": [
+          0.7797221674962985,
+          0.9421228821714434
+        ],
+        "rho_priv_e3_deployed_effective": 0.9421228821714434,
+        "rho_priv_e3_raw": 0.7797221674962985,
+        "rho_worst_xdataset": 0.7922848664688427
+      },
+      "rho_robustness_gate_335": {
+        "gate_implied_500_over_611": 0.8037539966988988,
+        "honest_public_611": 622.080888,
+        "note": "fern #335 gate: at the FULL honest ceiling 622.08, private = 622.08*rho clears 500 iff rho >= 500/622.08 = 0.8038. fern #341 carried this as a SEPARATE check on top of the (phi, Delta_cov) plane -- the rho axis it dropped. We close it here.",
+        "rho_breakeven": 0.8037539966988988,
+        "roundtrips_8038": true
+      }
+    },
+    "deliverable2_private_realized_envelope": {
+      "all_ratios_miss_500": true,
+      "both_multiplied_double_count": 450.8310284392558,
+      "by_ratio": [
+        {
+          "clears_500_private": false,
+          "margin_tps": -28.93855891427819,
+          "name": "rho_priv_e3",
+          "primary": true,
+          "private_tps": 471.0614410857218,
+          "regime": "realistic",
+          "rho": 0.9421228821714434,
+          "source": "lawine #300 deployed-effective (deep fidelity, a_1 tree-recovered)"
+        },
+        {
+          "clears_500_private": false,
+          "margin_tps": -21.47322077544476,
+          "name": "deployed_gap",
+          "primary": false,
+          "private_tps": 478.52677922455524,
+          "regime": "realistic",
+          "rho": 0.9570535584491102,
+          "source": "deployed frontier 460.85/481.53 (organizer-verified, model-free)"
+        },
+        {
+          "clears_500_private": false,
+          "margin_tps": -103.85756676557855,
+          "name": "rho_worst_xdataset",
+          "primary": false,
+          "private_tps": 396.14243323442145,
+          "regime": "downside",
+          "rho": 0.7922848664688427,
+          "source": "fern #318 EAGLE-3 worst cross-dataset (arXiv:2503.01840 Table 1)"
+        },
+        {
+          "clears_500_private": false,
+          "margin_tps": -110.13891625185067,
+          "name": "rho_priv_e3_raw",
+          "primary": false,
+          "private_tps": 389.8610837481493,
+          "regime": "downside",
+          "rho": 0.7797221674962985,
+          "source": "lawine #300 raw / no-tree-recovery (CI lower bracket)"
+        }
+      ],
+      "note": "public-500 (c*=0.9089) -> realized private = 500*rho. rho_priv_e3 0.9421 -> 471.06; deployed gap 0.9571 -> 478.53; worst/raw -> ~390-396. BOTH realistic estimates < 500: the public-500 target leaves ZERO private margin (would need rho>=1.0). NOT private-stable. (rho_priv_e3 and the deployed gap are two estimates of the SAME haircut; the 450.8 'both-multiplied' value double-counts and is rejected.)",
+      "ppl_only_central_500_is_private_stable": false,
+      "private_tps_at_public_central_500": 471.0614410857218,
+      "private_tps_at_public_central_500_deployed": 478.52677922455524,
+      "public_roundtrips_500": true,
+      "public_tps_at_central_500": 500.0000000000001,
+      "realistic_private_band": [
+        471.0614410857218,
+        478.52677922455524
+      ]
+    },
+    "deliverable3_solve_private_500": {
+      "all_c_star_private_ge_central": true,
+      "all_reachable_in_unit": true,
+      "all_realistic_over_budget": true,
+      "by_ratio": [
+        {
+          "c_star_private": 0.9268572910559714,
+          "coverage_lift": 0.036557291055971386,
+          "ge_c_star_central": true,
+          "name": "rho_priv_e3",
+          "need_public_env": 530.7163316610881,
+          "primary": true,
+          "reachable_in_unit": true,
+          "regime": "realistic",
+          "rho": 0.9421228821714434,
+          "root_residual": 1.1368683772161603e-13,
+          "root_valid": true,
+          "within_336_budget": false
+        },
+        {
+          "c_star_private": 0.9221538249970416,
+          "coverage_lift": 0.03185382499704159,
+          "ge_c_star_central": true,
+          "name": "deployed_gap",
+          "need_public_env": 522.4368015623304,
+          "primary": false,
+          "reachable_in_unit": true,
+          "regime": "realistic",
+          "rho": 0.9570535584491102,
+          "root_residual": 1.1368683772161603e-13,
+          "root_valid": true,
+          "within_336_budget": false
+        },
+        {
+          "c_star_private": 0.977719024207852,
+          "coverage_lift": 0.08741902420785197,
+          "ge_c_star_central": true,
+          "name": "rho_worst_xdataset",
+          "need_public_env": 631.0861423220974,
+          "primary": false,
+          "reachable_in_unit": true,
+          "regime": "downside",
+          "rho": 0.7922848664688427,
+          "root_residual": 0.0,
+          "root_valid": true,
+          "within_336_budget": false
+        },
+        {
+          "c_star_private": 0.9823340988568794,
+          "coverage_lift": 0.09203409885687941,
+          "ge_c_star_central": true,
+          "name": "rho_priv_e3_raw",
+          "need_public_env": 641.2540528448855,
+          "primary": false,
+          "reachable_in_unit": true,
+          "regime": "downside",
+          "rho": 0.7797221674962985,
+          "root_residual": -1.1368683772161603e-13,
+          "root_valid": true,
+          "within_336_budget": false
+        }
+      ],
+      "c_star_private_deployed": 0.9221538249970416,
+      "c_star_private_headline": 0.9268572910559714,
+      "coverage_lift_for_private_500": 0.036557291055971386,
+      "coverage_lift_for_private_500_deployed": 0.03185382499704159,
+      "note": "private-500 needs OVER-provisioned coverage c*_private (solve env(c)*rho=500). Realistic band: deployed gap +0.0319 (c*=0.9222, just OVER 0.031), rho_priv_e3 +0.0366 (c*=0.9269, OVER). worst/raw push to +0.087+. EVERY private model EXCEEDS lawine #336's +0.031 -- even the lightest organizer-measured 4.3% gap. c*_private >= c*_central always (rho<1 => more coverage).",
+      "private_500_within_budget_any_realistic": false,
+      "realistic_lift_band": [
+        0.03185382499704159,
+        0.036557291055971386
+      ]
+    },
+    "deliverable4_worst_corner_reconcile": {
+      "abs_diff_vs_deployed": 0.010969119856496512,
+      "abs_diff_vs_rho_priv_e3": 0.0039615564211703536,
+      "c_star_worst_between_realistic_private": true,
+      "g_deployed": 0.9570535584491102,
+      "g_implied_by_worst_anchor": 0.9460844385926137,
+      "identity_holds_exactly": false,
+      "note": "c*_worst=0.9256 IS the private-500 requirement EXACTLY iff g == worst/central = 0.94608. Measured g_dep=0.95705 and rho_priv_e3=0.94212: neither matches -> REFUTED. But 0.94608 sits BETWEEN them, so c*_worst is bracketed by the two realistic c*_private (0.9222 deployed / 0.9269 rho_e3) -- a sensible CENTRAL private proxy, not an identity. #343's 492.87 anchor = honest611(622.08) x rho_worst_xdataset(0.7923), confounding a x1.194 ceiling uplift with a x0.7923 worst-rho tax -> the 0.9461 net lands in the realistic bracket partly by coincidence.",
+      "rho_priv_e3": 0.9421228821714434,
+      "verdict": "REFUTED-BUT-BRACKETED",
+      "worst_anchor_honest_uplift": 1.1941215573247597,
+      "worst_anchor_in_realistic_bracket": true,
+      "worst_anchor_reconstruction": 492.865273281899,
+      "worst_anchor_reconstructs_492p87": true,
+      "worst_anchor_rho_worst_xdataset": 0.7922848664688427
+    },
+    "deliverable5_rho_gate_closure": {
+      "downside_misses_full_ceiling_gate": true,
+      "full_ceiling_gate": [
+        {
+          "clears_rho_gate_8038": true,
+          "name": "rho_priv_e3",
+          "private_tps_full_ceiling": 586.0766391463308,
+          "regime": "realistic",
+          "rho": 0.9421228821714434,
+          "rho_headroom_to_8038": 0.13836888547254456
+        },
+        {
+          "clears_rho_gate_8038": true,
+          "name": "deployed_gap",
+          "private_tps_full_ceiling": 595.3647275035823,
+          "regime": "realistic",
+          "rho": 0.9570535584491102,
+          "rho_headroom_to_8038": 0.15329956175021142
+        },
+        {
+          "clears_rho_gate_8038": false,
+          "name": "rho_worst_xdataset",
+          "private_tps_full_ceiling": 492.865273281899,
+          "regime": "downside",
+          "rho": 0.7922848664688427,
+          "rho_headroom_to_8038": -0.011469130230056135
+        },
+        {
+          "clears_rho_gate_8038": false,
+          "name": "rho_priv_e3_raw",
+          "private_tps_full_ceiling": 485.0502583493821,
+          "regime": "downside",
+          "rho": 0.7797221674962985,
+          "rho_headroom_to_8038": -0.024031829202600274
+        }
+      ],
+      "gate_implied_at_public_500": 1.0,
+      "necessary_not_sufficient": true,
+      "note": "rho>=0.8038 (full ceiling) is CLEARED by realistic rho (0.9421/0.9571 -> 586/595 private) -- fern #318's YELLOW build. But the SAME rho MISSES at the budget-minimal public-500 point, where the implied gate is rho>=1.0. The rho-gate is NECESSARY (a full build needs it) but NOT SUFFICIENT (the cheap public-500 isocline point still fails private). This is the rho-axis closure of fern #341's dropped axis.",
+      "realistic_clears_full_ceiling_gate": true,
+      "realistic_rho_misses_public_500_gate": true,
+      "rho_breakeven_full_ceiling": 0.8037539966988988
+    },
+    "handoff": "The PPL-only PUBLIC central-500 target (wirbel #343 c*=0.9089, +0.0186, within budget) does NOT survive private. At the public-500 operating point realized private = 500*rho_priv: rho_priv_e3 0.9421 -> 471.06, deployed gap 0.9571 -> 478.53 (both < 500; worst/raw -> ~390-396). The public-500 target leaves ZERO private margin (would need rho>=1.0). Restoring private-500 needs OVER-provisioned coverage c*_private = 0.9269 (rho_e3, +0.0366) / 0.9222 (deployed, +0.0319) -- OVER lawine #336's +0.031 under EVERY private model, even the organizer-measured 4.3% gap. wirbel #343's c*_worst=0.9256 is a CENTRAL private proxy (bracketed by the realistic c*_private) but NOT an exact identity (REFUTED: g_worst 0.9461 != measured 0.9421/0.9571). The rho>=0.8038 gate clears at the FULL ceiling (586/595 private, fern #318 YELLOW build) but is NOT sufficient at the cheap public-500 point. This is the rho-axis closure of fern #341's dropped 3rd axis: the demand-led public-500 isocline is PUBLIC-only.",
+    "headline": {
+      "all_realistic_over_budget": true,
+      "c_star_private_deployed": 0.9221538249970416,
+      "c_star_private_headline": 0.9268572910559714,
+      "coverage_lift_for_private_500": 0.036557291055971386,
+      "coverage_lift_for_private_500_deployed": 0.03185382499704159,
+      "g_implied_by_worst_anchor": 0.9460844385926137,
+      "ppl_only_central_500_is_private_stable": false,
+      "private_stability_self_test_passes": true,
+      "private_tps_at_public_central_500": 471.0614410857218,
+      "private_tps_at_public_central_500_deployed": 478.52677922455524,
+      "realistic_lift_band": [
+        0.03185382499704159,
+        0.036557291055971386
+      ],
+      "realistic_private_band": [
+        471.0614410857218,
+        478.52677922455524
+      ],
+      "rho_breakeven_8038": 0.8037539966988988,
+      "rho_gate_necessary_not_sufficient": true,
+      "rho_priv_e3": 0.9421228821714434,
+      "worst_corner_identity_holds": false
+    },
+    "imports": {
+      "caveats": [
+        "rho_priv_e3 is a MODELED point estimate (lawine #300 deployed-effective), not a measured fusion-head private tax. Carry its CI bracket [0.7797 raw, 0.9421 deployed-effective]; fern #318's worst cross-dataset 0.7923 is a literature lower bound (a_1-recovery NOT credited). Under the downside bracket private-500 needs +0.087-0.092 coverage (far over budget).",
+        "The private eval is HELD-OUT: the deployed 4.3% gap (460.85/481.53) is an aggregate; it may NOT be coverage-uniform across depths/prompts, so applying it as a scalar haircut to env(c) is a first-order approximation. lawine #300's per-position model (c_deep=0.97135 on j>=2, a_1 held) is the finer structure; this card uses the scalar projection.",
+        "rho_priv_e3 and the deployed 4.3% gap are NOT independent and are NOT multiplied: lawine #300 derived rho_priv_e3 from the SAME per-position collapse that produces the deployed gap. They are two estimates of the one private/public ratio and BRACKET it at [0.9421, 0.9571]. The 'both-multiplied' 450.8 is a double-count, shown only to reject it.",
+        "Scale confound in #343's 'worst' anchor: 492.87 = honest611(622.08) x rho_worst(0.7923) mixes the honest-ceiling uplift (x1.194) with a worst-rho tax, while the central anchor 520.95 is the lambda-CAPPED public ceiling. The worst/central ratio 0.9461 therefore is NOT a clean private haircut; its landing in the realistic bracket is partly coincidental.",
+        "A DEFINITIVE private number needs the gated private read (organizer-side); this is a CPU envelope projection over banked constants. 0 GPU, 0 TPS, no served-file change, no HF Job, no submission. BASELINE stays 481.53. Frame: the rho-axis (3rd-axis) closure of fern #341's 2D (phi, Delta_cov) card -- NOT a launch / build / open2."
+      ],
+      "provenance": "wirbel #343 kklof4wr (envelope_X(c)=X_ANCHOR*E[T](c)/E[T](0.9213); c*_central 0.9089 / c*_worst 0.9256; prior 0.8903; identity bar 0.9213; anchors central 520.95 / worst 492.87) x lawine #300 8t5q6sr0 (rho_priv_e3 0.9421 deployed-effective / 0.7797 raw; deployed 481.53->460.85 Delta 4.3%; private_bar 500) x fern #318 xe8ff7hq (honest611 622.08; rho_worst_xdataset 0.7923; full-build private 622.08*rho; worst 492.87; YELLOW) x fern #335/#310 (rho>=0.8038 gate == 500/622.08) x fern #341 o4rzy1k6 (demand-led isocline + DROPPED rho axis) x lawine #336 krroookz (+0.031 retrain budget). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "self_test": {
+      "conditions": {
+        "a_public_private_roundtrip": true,
+        "b_rho_and_cstar_imports_exact": true,
+        "c_private_envelope_nan_clean": true,
+        "d_c_star_private_ge_central": true,
+        "e_worst_corner_identity_explicit": true,
+        "f_public_central_500_not_private_stable": true,
+        "g_private_500_over_budget": true,
+        "h_c_star_private_reachable": true,
+        "i_rho_gate_necessary_not_sufficient": true,
+        "j_imports_round_to_display": true,
+        "k_nan_clean": true,
+        "l_private_below_500_at_public_target": true,
+        "m_realistic_band_below_500": true
+      },
+      "detail": {
+        "coverage_lift_for_private_500": 0.036557291055971386,
+        "coverage_lift_for_private_500_deployed": 0.03185382499704159,
+        "g_implied_by_worst_anchor": 0.9460844385926137,
+        "identity_holds_exactly": false,
+        "ppl_only_central_500_is_private_stable": false,
+        "private_tps_at_public_central_500": 471.0614410857218
+      },
+      "n_checks": 13,
+      "private_stability_self_test_passes": true
+    }
+  }
+}
