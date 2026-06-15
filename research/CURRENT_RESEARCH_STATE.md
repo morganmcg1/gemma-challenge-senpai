@@ -3,9 +3,11 @@
 - **Date:** 2026-06-15 ~03:05Z (cycle 52k)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
-## 🆕 Cycle-52k Snapshot — STEP-SIDE FULLY CLOSED; E[T]-raise is the sole remaining >500 axis
+## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
 
-**★ THE STRATEGIC TURN: Every standalone step-side >500 lever (draft AND verify) is now mapped sub-500 at grounded measurements. The 1218.2µs step is a NORMALIZED composition unit (denken #278), the verify forward is HBM-bound MLP-dominated (kanna #280), the verify SDPA tune is real but insufficient (wirbel #279, 487.8), prefill is 2.85% of wall (ubel #275), and the draft floor is 95% intrinsic-M=1 (kanna #277). The ONLY live path to 500 is raising E[T] (expected accepted tokens) — which is greedy-SAFE by construction because emission = verify argmax (the drafter only affects acceptance rate, not WHICH tokens are emitted).**
+**★ THE CAPSTONE TURN: fern #281 (`10necg21`, MERGED) closed Path-A on ALL THREE axes (`path_a_fully_closed=True`) — draft-cut (fern #274), tree-width (denken #271, M*=32=479.6), AND E[T]-raise. No realizable `(E[T]_real, M, step-shave)` cell reaches the honest-500 floor; the deployed 481.53 frontier cannot reach 500 by ANY speculative-decoding lever under the measured constraints. The step-side is fully closed too: the 1218.2µs step is a NORMALIZED unit (denken #278), verify is HBM-bound MLP-dominated (kanna #280), verify SDPA insufficient (wirbel #279, 487.8), prefill 2.85% (ubel #275), draft 95% intrinsic-M=1 (kanna #277).**
+
+**★ THE SOLE RE-OPEN (fern #281): a BUILT public-E[T] raise to ≥4.97 at the deployed step — acceptance-per-candidate, NOT width.** denken #119 proved the LINEAR drafter caps at E[T]=3.8445 even at perfect capacity, so the +1.12 raise from 3.844→4.966 is UNREACHABLE by tuning the current drafter — it requires a structurally non-linear / feature-conditioned drafter. This is the **PLATEAU-PROTOCOL pivot**: all kernel/tree/step/draft-cut levers are exhausted; the only >500 path is a **trained better drafter** (greedy-SAFE by construction — emission = verify argmax). The researcher-agent's **RANK 2 = EAGLE-3 multi-layer hidden-state fidelity** (attacks the j≥2 OOD acceptance collapse directly; `SupportsEagle3` interface ready in the vLLM fork, PR #15) is the prime candidate. A full EAGLE-3 retrain is a TRAINING run → **human-approval-gated** (route via `Approval request: HF job`); a Phase-1 architecture-adaptation viability gate (2h single GPU) is the cheap precursor.
 
 ---
 
@@ -61,14 +63,14 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 | Student | PR | Hypothesis | Owner | Status |
 |---------|-----|-----------|-------|--------|
-| fern    | #281 | E[T]-raise feasibility: three-axis Path-A closure verdict (sole live >500 axis) | me | 🔄 WIP |
-| lawine  | #282 | E[T] per-prompt distribution on 128 competition prompts (variance + upside) | me | 🔄 WIP |
 | wirbel  | #285 | Lossless micro-lever envelope (compose SDPA + sliding-only + lm_head + norm folds, bit-identical) | me | 🔄 WIP |
 | kanna   | #286 | Bridge basis-honesty re-pricing card (draft-side 0.21 vs verify-side 1.0; consolidated portfolio) | me | 🔄 WIP |
+| fern    | #287 | Read-reduction PPL pareto | Morgan | 🔄 WIP |
+| lawine  | #288 | PPL local→official transfer (τ_ppl): safe local bar for gate | Morgan | 🔄 WIP |
 | denken  | #283 | HBM intrinsic ceiling (the physics floor under the normalized step) | Morgan | 🔄 WIP |
 | ubel    | #284 | Decode-loop host overhead (CPU/scheduling fraction of wall) | Morgan | 🔄 WIP |
 | stark   | #273 | Static-K wall-clock (ongoing from 52i) | me | 🔄 WIP |
-| land    | #245 | Tree build (ongoing from 52i — awaiting terminal result) | me | 🔄 WIP |
+| land    | #245 | Tree fidelity build — Morgan banking Cycles 1-4 (terminal pending), will reseat non-tree | Morgan | 🟡 banking |
 
 *(Roster shared with the parallel open2 advisor — re-survey live PR state before every assignment/merge.)*
 
@@ -93,28 +95,29 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 - **Lossless micro-lever envelope (wirbel #285)**: total greedy-safe bit-identical step-shaving (SDPA + sliding-only + lm_head epilogue + norm folds), composed. Sets the FREE step-side ceiling.
 - **Bridge basis-honesty card (kanna #286)**: classify each banked lever draft-side (bridge 0.21) vs verify-side (bridge 1.0); consolidated basis-honest portfolio card. Rigorously closes the step side.
 
-### THE SOLE LIVE >500 AXIS: E[T]-raise (acceptance numerator)
-- **Why it's the only path:** `official = K_cal·(E[T]/step)·τ` — with step fully closed, only E[T] can move the numerator. Greedy-SAFE by construction (emission = verify argmax; drafter affects acceptance, not emitted tokens).
-- **The intrinsic-gap question (fern #119 → fern #281):** linear drafter E[T] caps at 3.8445 even at PERFECT capacity — "past-530 is PROVABLY tree-only." fern #281 is re-examining whether a better drafter (not wider tree) can raise E[T] above the 3.9914 honest-500 floor.
-- **Feasibility verdict (fern #281)** + **per-prompt E[T] distribution (lawine #282)** are the two legs grounding this axis.
+### THE ANALYTIC PATH-A IS CLOSED (fern #281 capstone) — sole re-open is a BUILT drafter raise
+- **fern #281 verdict:** Path-A CLOSED on all three axes; `go_region_exists=False`; no realizable `(E[T]_real, M, step-shave)` cell reaches 500. The analytic frontier is settled at 481.53.
+- **lawine #282 corroboration:** the E[T] gap is +0.140 public (smallest of any axis); headroom is real (top-quartile prompts at E[T]≥4.36; bottom-quartile→median lift = 515.93) but there is NO free prompt-side lever — it must be BUILT.
+- **The sole re-open:** a BUILT public-E[T] raise to ≥4.97 (acceptance-per-candidate, NOT width). denken #119: the linear drafter caps at 3.8445 at perfect capacity → the +1.12 raise REQUIRES a structurally non-linear / feature-conditioned drafter. Greedy-SAFE by construction (emission = verify argmax).
+- **Prime build candidate:** EAGLE-3 multi-layer hidden-state fidelity (researcher RANK 2) — fuses target layers {2,21,39} into the drafter at every step, directly attacking the j≥2 OOD acceptance collapse (ubel #263). `SupportsEagle3` ready in the vLLM fork (PR #15). Companion: PARD-2 CAT loss (RANK 4, same training run). Additive: SAM-Decoding suffix-automaton retrieval (RANK 3, +2-4%, zero PPL risk).
+- **Gate:** full retrain is a TRAINING run → human-approval-gated. Cheap precursor = Phase-1 architecture-adaptation viability (2h single GPU, no submission).
 
 ---
 
 ## Strategic Posture (cycle 52k)
 
-**Immediate (this cycle):**
-1. fern #281: E[T]-raise feasibility verdict — is there ANY drafter change that lifts E[T] past 3.9914 honest?
-2. lawine #282: per-prompt E[T] distribution — where is the upside (which prompts under-accept)?
-3. wirbel #285 + kanna #286: consolidate the step-side into one coherent basis-honest portfolio card (banks the free credit the E[T] axis stacks on top of).
-4. denken #283 / ubel #284 (Morgan): HBM floor + host overhead — the physics under the normalized step.
+**Resolved this cycle:** fern #281 closed Path-A analytically; lawine #282 confirmed no free prompt-side lever. The analytic exploration is complete — 481.53 is the analytic frontier.
 
-**If fern #281 finds E[T] headroom:**
-- The E[T]-raise lever is the next architectural swing (EAGLE/Medusa/Hydra/draft-distillation/retrieval-hybrid — researcher-agent exploring).
-- Stack on the lossless step envelope (wirbel #285) for compounding.
+**In-flight consolidation (banks the step-side credit a built raise stacks on):**
+- wirbel #285 (lossless micro-lever envelope) + kanna #286 (bridge basis-honesty card): one coherent basis-honest step-side portfolio.
+- denken #283 / ubel #284 (Morgan): HBM floor + host overhead — the physics under the normalized step.
+- land #245 (Morgan banking): tree-fidelity proof (scratch-KV bug +0.235, tree-causal mask +0.088, tree-vs-linear delta ≈0) — the durable result; full live-integration build is OFF the critical path (g_d settled it).
 
-**If fern #281 confirms E[T] is capped (linear drafter intrinsic):**
-- Path-A (linear MTP) is closed below 500; the only >500 route is a TREE drafter that raises E[T] (not width) — a bigger architectural pivot.
-- Plateau Protocol escalation: new drafter architecture, not kernel/tree-width tuning.
+**THE PIVOT — BUILT public-E[T] raise (Plateau-Protocol bigger swing):**
+1. **Phase-1 viability (cheap, in-bounds):** EAGLE-3 architecture-adaptation sanity (2h single GPU, `SupportsEagle3` load + run for Gemma-4, no retrain, no submission). De-risk the interface before spending training.
+2. **Pre-build target (analytic):** decompose E[T]=3.844 into the per-position acceptance cliff (which draft positions EAGLE-3 must fix) + price the per-position lift to 4.97 — the homeless `per_position_acceptance_decay` leg (body at `/tmp/assign_lawine_per_position_decay.md`) is ready for the next freed student.
+3. **Full EAGLE-3 retrain (human-approval-gated):** route via `Approval request: HF job`. Companion PARD-2 CAT loss (same run). Additive SAM-Decoding retrieval (+2-4%, zero PPL risk).
+4. **Composition:** any built E[T] raise stacks multiplicatively on the lossless step envelope (wirbel #285) — `official = K_cal·(E[T]/step)·τ`, E[T]-independent step levers compose cleanly.
 
 **Launch posture:** NEVER launch unilaterally. Route via `Approval request: HF job`. Publish-first (#124), human green-light required. All cycle-52k deliverables are bank-the-analysis (0 TPS, baseline unchanged at 481.53).
 
