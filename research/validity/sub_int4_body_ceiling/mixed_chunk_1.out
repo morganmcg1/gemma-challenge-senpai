@@ -1,0 +1,105 @@
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]Loading weights:  35%|███▌      | 733/2076 [00:00<00:00, 7325.12it/s]Loading weights:  71%|███████   | 1466/2076 [00:00<00:00, 6763.93it/s]Loading weights: 100%|██████████| 2076/2076 [00:00<00:00, 6823.59it/s]
+[mix] model loaded; GPU 14.81 GiB
+[mix] 258 body linears, 3.890B params
+[mix] sweep 183/258 layers.26.mlp.down_proj: PPL=1.9488 dNLL=-76.27 gate=2.3743
+[mix] sweep 184/258 layers.27.self_attn.q_proj: PPL=1.9510 dNLL=-6.65 gate=2.3769
+[mix] sweep 185/258 layers.27.self_attn.o_proj: PPL=1.9515 dNLL=+7.93 gate=2.3775
+[mix] sweep 202/258 layers.30.mlp.up_proj: PPL=1.9499 dNLL=-40.84 gate=2.3756
+[mix] sweep 222/258 layers.34.mlp.up_proj: PPL=1.9533 dNLL=+65.08 gate=2.3797
+[mix] sweep 242/258 layers.38.mlp.up_proj: PPL=1.9525 dNLL=+40.39 gate=2.3788
+[mix] sweep COMPLETE: 258/258 modules
+[mix] FINALIZE
+[mix] proj-aggr  down_proj: measured gate=2.4202 additive=2.4292 gap=-0.0090
+[mix] proj-aggr  gate_proj: measured gate=2.3579 additive=2.3539 gap=+0.0040
+[mix] proj-aggr     k_proj: measured gate=2.3770 additive=2.3707 gap=+0.0062
+[mix] proj-aggr     o_proj: measured gate=2.4123 additive=2.4103 gap=+0.0019
+[mix] proj-aggr     q_proj: measured gate=2.3818 additive=2.3796 gap=+0.0023
+[mix] proj-aggr    up_proj: measured gate=2.4128 additive=2.4102 gap=+0.0025
+[mix] proj-aggr     v_proj: measured gate=2.3887 additive=2.3907 gap=-0.0021
+[mix] alloc k= 26 (10.1% mod, 11.4% par, bpw 4.011): measured gate=2.2697 additive=2.2537 gap=+0.0159 pass=True
+[mix] alloc k= 52 (20.2% mod, 21.5% par, bpw 3.910): measured gate=2.2573 additive=2.2120 gap=+0.0453 pass=True
+[mix] alloc k= 77 (29.8% mod, 32.2% par, bpw 3.803): measured gate=2.2618 additive=2.1933 gap=+0.0685 pass=True
+[mix] alloc k=103 (39.9% mod, 38.6% par, bpw 3.739): measured gate=2.2586 additive=2.1852 gap=+0.0734 pass=True
+[mix] alloc k=129 (50.0% mod, 45.7% par, bpw 3.668): measured gate=2.2610 additive=2.1847 gap=+0.0763 pass=True
+[mix] alloc k=155 (60.1% mod, 54.1% par, bpw 3.584): measured gate=2.2775 additive=2.1916 gap=+0.0859 pass=True
+[mix] alloc k=181 (70.2% mod, 67.3% par, bpw 3.452): measured gate=2.2949 additive=2.2098 gap=+0.0851 pass=True
+[mix] alloc k=206 (79.8% mod, 78.1% par, bpw 3.344): measured gate=2.3364 additive=2.2432 gap=+0.0932 pass=True
+[mix] alloc k=232 (89.9% mod, 88.8% par, bpw 3.237): measured gate=2.3812 additive=2.3044 gap=+0.0768 pass=True
+[mix] alloc k=258 (100.0% mod, 100.0% par, bpw 3.125): measured gate=2.5150 additive=2.4826 gap=+0.0324 pass=False
+[mix] alloc k=253 (98.1% mod, 96.6% par, bpw 3.159): measured gate=2.4683 additive=2.4200 gap=+0.0483 pass=False
+[mix] byte-aware k=241 (97.6% par, bpw 3.149): gate=2.4146 pass=True
+
+========================================================================================================
+MIXED-PRECISION SUB-INT4 BODY-SHRINK (PR #372) — sensitivity-weighted bit allocation
+========================================================================================================
+  base=google/gemma-4-E4B-it-qat-q4_0-unquantized g128 vq2 seed0 records=128 tok=61797 modules=258
+  int4 local-proxy PPL=1.951205  gate denom; local budget PPL<=1.9863  (gate_PPL=2.3772*PPL/int4 <= 2.42)
+  uniform cb3 PPL=2.0712 gate=2.5234 (rel +6.15%) pred_tps_nonspec=214.47
+--------------------------------------------------------------------------------------------------------
+  SENSITIVITY: dNLL min=-334.779 median=+4.391 max=+369.269  improving=118
+    top-decile share=0.570 gini=0.769 -> sensitivity_is_concentrated=True
+    per-proj measured gate_ppl (all-of-proj at cb3, rest int4):
+       down_proj: gate=2.4202 (additive 2.4292 gap -0.0090) n=42 par=1101M
+       gate_proj: gate=2.3579 (additive 2.3539 gap +0.0040) n=42 par=1101M
+          k_proj: gate=2.3770 (additive 2.3707 gap +0.0062) n=24 par=37M
+          o_proj: gate=2.4123 (additive 2.4103 gap +0.0019) n=42 par=257M
+          q_proj: gate=2.3818 (additive 2.3796 gap +0.0023) n=42 par=257M
+         up_proj: gate=2.4128 (additive 2.4102 gap +0.0025) n=42 par=1101M
+          v_proj: gate=2.3887 (additive 2.3907 gap -0.0021) n=24 par=37M
+--------------------------------------------------------------------------------------------------------
+  ALLOCATION (ascending sensitivity, MEASURED gate <= 2.42):
+    k*=232/258  frac_modules_3bit=0.8992 frac_params_3bit=0.8881
+    achievable_avg_bpw=3.2369  measured_gate_ppl=2.3812  additive_pred=2.3044173790350775 additivity_gap=0.07677922413417804
+    [byte-aware] k=241 frac_params_3bit=0.9757 bpw=3.1493 gate=2.4146 pass=True
+--------------------------------------------------------------------------------------------------------
+  CEILING-LIFT (ascending achievable, bpw 3.2369, body_read_shrink=0.2153):
+    spec: 520.953 -> 653.67 (+132.72)  private*0.957=625.56 >=500? True  beats +33.62? True
+    nonspec: 165.44 -> 207.59 (+42.15)
+  GREEDY (report-only): mixed drift vs int4=0.9375 (bf16 0.830, uniform_cb3 0.982; worse_than_uniform? False)
+--------------------------------------------------------------------------------------------------------
+  >>> mixed_precision_ceiling_lift_go = True  (avg_bpw<4.125: True, lift>0: True)
+========================================================================================================
+[mix] wrote /workspace/senpai/target/research/validity/sub_int4_body_ceiling/measure_mixed_precision_results.json (elapsed 2842.3s, peak 19586.5 MiB)
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260615_171436-mpzfw116
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/mixed-precision-subint4
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/mpzfw116
+wandb: updating run metadata; uploading artifact mixed_precision_subint4_measured
+wandb: uploading artifact mixed_precision_subint4_measured
+wandb: uploading config.yaml
+wandb: 
+wandb: Run history:
+wandb:                                  global_step ▁
+wandb:                   summary/achievable_avg_bpw ▁
+wandb:                       summary/additivity_gap ▁
+wandb:                summary/body_read_shrink_frac ▁
+wandb:                    summary/byteaware_avg_bpw ▁
+wandb:      summary/byteaware_body_read_shrink_frac ▁
+wandb:           summary/byteaware_frac_params_3bit ▁
+wandb: summary/byteaware_pred_ceiling_lift_tps_spec ▁
+wandb:    summary/frac_modules_3bit_within_headroom ▁
+wandb:     summary/frac_params_3bit_within_headroom ▁
+wandb:                                          +33 ...
+wandb: 
+wandb: Run summary:
+wandb:                                   event/name summary
+wandb:                             event/run_prefix 
+wandb:                                  global_step 0
+wandb:                   summary/achievable_avg_bpw 3.23686
+wandb:                       summary/additivity_gap 0.07678
+wandb:                summary/body_read_shrink_frac 0.21531
+wandb:                    summary/byteaware_avg_bpw 3.14926
+wandb:      summary/byteaware_body_read_shrink_frac 0.23654
+wandb:           summary/byteaware_frac_params_3bit 0.97574
+wandb: summary/byteaware_pred_ceiling_lift_tps_spec 670.51927
+wandb:                                          +35 ...
+wandb: 
+wandb: 🚀 View run lawine/mixed-precision-subint4 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/mpzfw116
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260615_171436-mpzfw116/logs
+[mix] wandb logged: 42 metrics
