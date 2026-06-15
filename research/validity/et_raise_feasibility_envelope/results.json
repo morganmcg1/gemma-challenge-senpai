@@ -1,0 +1,1024 @@
+{
+  "agent": "fern",
+  "created_at": "20260615T030323Z",
+  "kind": "et-raise-feasibility-envelope (CPU analytic; no GPU/HF/submission)",
+  "nan_clean": true,
+  "peak_mem_mib": 15.195,
+  "pr": 281,
+  "self_test_passes": true,
+  "synthesis": {
+    "constants": {
+      "BASE_TPS": 481.53,
+      "DENKEN271_OFFICIAL_M32": 479.57075450999776,
+      "E_T_REAL": 3.8444537125748504,
+      "G_D_DEPLOYED": 0.0191,
+      "HONEST_ET_FLOOR_274": 3.9914439391107512,
+      "KANNA269_FOLD_GAIN_PCT": 4.392280827418404,
+      "KANNA_VERIFY_ROOFLINE_PCT": 1.1853573814381013,
+      "K_CAL": 125.26795005202914,
+      "K_SPEC": 7,
+      "LAMBDA1_CEIL": 520.9527323111674,
+      "LAND245_FAITHFUL_M16_ET": 3.8444,
+      "N_TREE": 5,
+      "PHI_HI": 0.735133735318471,
+      "PHI_LO": 0.12526795005202912,
+      "PR_STATED_PRIV_FACTOR": 0.73,
+      "STEPSHAVE_MAX_MEASURED_PCT": 5.577638208856506,
+      "STEP_SERVED_US": 1218.2,
+      "TARGET_TPS": 500.0,
+      "TAU_LO": 1.03524,
+      "UBEL263_PRIV_PUB_RATIO": 0.803714493809177,
+      "VERIFY_US": {
+        "8": 5163.71,
+        "16": 5405.0,
+        "32": 5979.95
+      },
+      "kanna_verify_roofline_landed": true,
+      "kanna_verify_roofline_run": "sdrerk5h"
+    },
+    "handoff": "honest 500 needs E[T]_real >= 3.8342 at the (step-shave-lowered) deployed step; the best MEASURED-achievable E[T]_real (private-0.804-degraded) is 3.0898, so the E[T]-raise axis is CLOSED -- Path-A fully closed on all three axes, 481.53 cannot reach 500 by any speculative lever under the measured constraints, most sensitive to ubel #263's private factor (and the missing public E[T] raise that land #245's build would have to deliver).",
+    "self_test": {
+      "conditions": {
+        "a_floor_reproduces_274_3991": true,
+        "b_width_nogo_m32_479_drops_out": true,
+        "c_composition_reproduces_481_53": true,
+        "d_ubel_private_applied_consistently": true,
+        "e_headline_scalars_finite": true,
+        "f_anchors_imported_exact": true,
+        "g_verdict_carries_caveats": true
+      },
+      "detail": {
+        "central_priv_equiv": 3.089843169574907,
+        "floor_deployed": 3.9914439391107512,
+        "implied_et32": 4.380762995152298,
+        "rep_clean": 481.58683564416435,
+        "rep_literal": 481.58683564416435,
+        "repro_m32": 479.5707545099977
+      },
+      "et_raise_feasibility_self_test_passes": true,
+      "partial_passes_a_to_g": true
+    },
+    "step1_floor_vs_stepshave": {
+      "deployed_floor": 3.9914439391107512,
+      "lowest_floor_over_grid": 3.479817667136847,
+      "note": "step-shaving LOWERS the floor; phi_hi (measured g_d) realizes more of each composition step-shave so it lowers the floor most. MEASURED step-shaves: kanna verify-side roofline (sdrerk5h, 1.19%) + #269 draft-MLP fold (4.39%) = 5.58% combined max; the 10/20% rows are beyond-ceiling STRESS points.",
+      "rows": [
+        {
+          "known": true,
+          "phi_hi": {
+            "et_floor": 3.9914439391107512,
+            "honest_stepshave_pct": 0.0,
+            "phi": 0.735133735318471
+          },
+          "phi_lo": {
+            "et_floor": 3.9914439391107512,
+            "honest_stepshave_pct": 0.0,
+            "phi": 0.12526795005202912
+          },
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "known": true,
+          "phi_hi": {
+            "et_floor": 3.956963112928917,
+            "honest_stepshave_pct": 0.8713961995039131,
+            "phi": 0.735133735318471
+          },
+          "phi_lo": {
+            "et_floor": 3.985525939680493,
+            "honest_stepshave_pct": 0.1484872892517921,
+            "phi": 0.12526795005202912
+          },
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "known": true,
+          "phi_hi": {
+            "et_floor": 3.8665949216610063,
+            "honest_stepshave_pct": 3.2289138112277964,
+            "phi": 0.735133735318471
+          },
+          "phi_lo": {
+            "et_floor": 3.9696027080512386,
+            "honest_stepshave_pct": 0.5502120153035338,
+            "phi": 0.12526795005202912
+          },
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "known": true,
+          "phi_hi": {
+            "et_floor": 3.834228676839938,
+            "honest_stepshave_pct": 4.100310010731709,
+            "phi": 0.735133735318471
+          },
+          "phi_lo": {
+            "et_floor": 3.963749250662058,
+            "honest_stepshave_pct": 0.6986993045553259,
+            "phi": 0.12526795005202912
+          },
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "known": false,
+          "phi_hi": {
+            "et_floor": 3.718112915518644,
+            "honest_stepshave_pct": 7.351337353184711,
+            "phi": 0.735133735318471
+          },
+          "phi_lo": {
+            "et_floor": 3.94206252990099,
+            "honest_stepshave_pct": 1.252679500520291,
+            "phi": 0.12526795005202912
+          },
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "known": false,
+          "phi_hi": {
+            "et_floor": 3.479817667136847,
+            "honest_stepshave_pct": 14.702674706369422,
+            "phi": 0.735133735318471
+          },
+          "phi_lo": {
+            "et_floor": 3.893888064008665,
+            "honest_stepshave_pct": 2.505359001040582,
+            "phi": 0.12526795005202912
+          },
+          "stepshave_comp_pct": 20.0
+        }
+      ]
+    },
+    "step2_et_real_ceiling": {
+      "best_achievable_et_real_by_priv_factor": {
+        "0.650000": {
+          "argmax_M": 8,
+          "argmax_screen": "deployed_linear_m8",
+          "best_e_t_real_deployed_equiv": 2.4988949131736526,
+          "per_screen_deployed_equiv": {
+            "deployed_linear_m8": 2.4988949131736526,
+            "faithful_tree_m16": 2.3966327704693224,
+            "width_tree_m32": 2.4884337159028105
+          },
+          "priv_factor": 0.65
+        },
+        "0.730000": {
+          "argmax_M": 8,
+          "argmax_screen": "deployed_linear_m8",
+          "best_e_t_real_deployed_equiv": 2.806451210179641,
+          "per_screen_deployed_equiv": {
+            "deployed_linear_m8": 2.806451210179641,
+            "faithful_tree_m16": 2.691602957604008,
+            "width_tree_m32": 2.7947024809370027
+          },
+          "priv_factor": 0.73
+        },
+        "0.803714": {
+          "argmax_M": 8,
+          "argmax_screen": "deployed_linear_m8",
+          "best_e_t_real_deployed_equiv": 3.089843169574907,
+          "per_screen_deployed_equiv": {
+            "deployed_linear_m8": 3.089843169574907,
+            "faithful_tree_m16": 2.9633976830219027,
+            "width_tree_m32": 3.076908068237718
+          },
+          "priv_factor": 0.803714493809177
+        },
+        "0.850000": {
+          "argmax_M": 8,
+          "argmax_screen": "deployed_linear_m8",
+          "best_e_t_real_deployed_equiv": 3.267785655688623,
+          "per_screen_deployed_equiv": {
+            "deployed_linear_m8": 3.267785655688623,
+            "faithful_tree_m16": 3.1340582383060367,
+            "width_tree_m32": 3.2541056284882908
+          },
+          "priv_factor": 0.85
+        },
+        "1.000000": {
+          "argmax_M": 8,
+          "argmax_screen": "deployed_linear_m8",
+          "best_e_t_real_deployed_equiv": 3.8444537125748504,
+          "per_screen_deployed_equiv": {
+            "deployed_linear_m8": 3.8444537125748504,
+            "faithful_tree_m16": 3.6871273391835726,
+            "width_tree_m32": 3.828359562927401
+          },
+          "priv_factor": 1.0
+        }
+      },
+      "implied_width_et32": 4.380762995152298,
+      "m_coupling": {
+        "deployed_linear_m8": {
+          "M": 8,
+          "clears_500_public": false,
+          "e_t_public": 3.8444537125748504,
+          "e_t_public_clears_M_floor": false,
+          "et_floor_at_M": 3.9914439391107512,
+          "net_official_public": 481.58683564416435,
+          "src": "stark #266 deployed accepted tok/step",
+          "step_rel": 1.0
+        },
+        "faithful_tree_m16": {
+          "M": 16,
+          "clears_500_public": false,
+          "e_t_public": 3.8444,
+          "e_t_public_clears_M_floor": false,
+          "et_floor_at_M": 4.161697079579328,
+          "net_official_public": 461.8788833603188,
+          "src": "land #245 proxy (mjynhw39 et_m16); faithful=linear, delta -0.0021",
+          "step_rel": 1.0426545237928375
+        },
+        "width_tree_m32": {
+          "M": 32,
+          "clears_500_public": false,
+          "e_t_public": 4.380762995152298,
+          "e_t_public_clears_M_floor": false,
+          "et_floor_at_M": 4.567379217721847,
+          "net_official_public": 479.5707545099977,
+          "src": "denken #271 9mlmaen3 implied (from 479.5708 + step model)",
+          "step_rel": 1.1442924634285123
+        }
+      },
+      "net_maximising": {
+        "M": 8,
+        "net_official_public": 481.58683564416435,
+        "screen": "deployed_linear_m8"
+      },
+      "note": "NET-maximising M is M=8 (acceptance-per-candidate), NOT a wider tree: widening raises E[T] but raises the step more (denken #271). The best measured public acceptance-per-candidate E[T] is 3.8445 -- already BELOW the 3.9914 honest-500 floor before any private degradation.",
+      "public_screens": {
+        "deployed_linear_m8": {
+          "M": 8,
+          "e_t_public": 3.8444537125748504,
+          "src": "stark #266 deployed accepted tok/step"
+        },
+        "faithful_tree_m16": {
+          "M": 16,
+          "e_t_public": 3.8444,
+          "src": "land #245 proxy (mjynhw39 et_m16); faithful=linear, delta -0.0021"
+        },
+        "width_tree_m32": {
+          "M": 32,
+          "e_t_public": 4.380762995152298,
+          "src": "denken #271 9mlmaen3 implied (from 479.5708 + step model)"
+        }
+      },
+      "width_nogo_special_case": {
+        "M": 32,
+        "closed": true,
+        "deliverable_et32": 4.380762995152298,
+        "et_floor_at_M32": 4.567379217721847,
+        "note": "at M=32 the step penalty raises the 500-floor to 4.5674 while width only delivers E[T]=4.3808 -> 479.57 < 500. denken #271 width NO-GO drops out.",
+        "official": 479.57075450999776
+      }
+    },
+    "step3_feasibility_map": {
+      "best_achievable_et_real_central": 3.089843169574907,
+      "central_priv_factor": 0.803714493809177,
+      "counterfactual_go_cells": [
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.834228676839938,
+          "go": true,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.718112915518644,
+          "go": true,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.479817667136847,
+          "go": true,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 20.0
+        }
+      ],
+      "crossing": {
+        "measured_public_et_ceiling_m8": 3.8444537125748504,
+        "priv_factor_needed_no_raise_deployed": 1.038234359814272,
+        "priv_factor_needed_no_raise_maxshave_floor": 0.9973403150357962,
+        "public_et_needed_at_deployed_step": 4.966246061077536,
+        "public_et_needed_at_maxshave_floor": 4.770635227277965,
+        "public_et_raise_gap_deployed": 1.1217923485026855,
+        "stepshave_comp_pct_needed_phi_hi": 39.69277698919532
+      },
+      "go_cells": [],
+      "go_region_exists": false,
+      "grid": [
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.9914439391107512,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 0.0
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.985525939680493,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.985525939680493,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.985525939680493,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.985525939680493,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.985525939680493,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.956963112928917,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.956963112928917,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.956963112928917,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.956963112928917,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.956963112928917,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.9696027080512386,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.9696027080512386,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.9696027080512386,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.9696027080512386,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.9696027080512386,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.8665949216610063,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.8665949216610063,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.8665949216610063,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.8665949216610063,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.8665949216610063,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.963749250662058,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.963749250662058,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.963749250662058,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.963749250662058,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.963749250662058,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.834228676839938,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.834228676839938,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.834228676839938,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.834228676839938,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.834228676839938,
+          "go": true,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.94206252990099,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.94206252990099,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.94206252990099,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.94206252990099,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.94206252990099,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.718112915518644,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.718112915518644,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.718112915518644,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.718112915518644,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.718112915518644,
+          "go": true,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 10.0
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.893888064008665,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.893888064008665,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.893888064008665,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.893888064008665,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.893888064008665,
+          "go": false,
+          "phi": 0.12526795005202912,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "et_floor": 3.479817667136847,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.65,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "et_floor": 3.479817667136847,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.73,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "et_floor": 3.479817667136847,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.803714493809177,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "et_floor": 3.479817667136847,
+          "go": false,
+          "phi": 0.735133735318471,
+          "priv_factor": 0.85,
+          "realizable": true,
+          "stepshave_comp_pct": 20.0
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "et_floor": 3.479817667136847,
+          "go": true,
+          "phi": 0.735133735318471,
+          "priv_factor": 1.0,
+          "realizable": false,
+          "stepshave_comp_pct": 20.0
+        }
+      ],
+      "min_et_real_needed": 3.834228676839938,
+      "min_et_real_needed_deployed": 3.9914439391107512,
+      "n_counterfactual_go_cells": 3,
+      "n_go_cells": 0,
+      "note": "side-by-side: min E[T]_real needed (kanna+#269 max measured step-shave 5.58%, phi_hi) = 3.8342 vs best achievable E[T]_real (private 0.8037) = 3.0898. Gap = -0.7444. Even at private=1.0 (no degradation) the best public acceptance-per-candidate E[T]=3.8445 < the deployed floor 3.9914, so the raise is missing before degradation even enters.",
+      "stepshave_max_measured_pct": 5.577638208856506
+    },
+    "step4_closure_verdict": {
+      "headline": "Path-A FULLY CLOSED on all three axes (draft-cut x fern #274, width x denken #271, E[T]-raise x this leg): the deployed 481.53 frontier cannot reach 500 by any speculative-decoding lever under the measured constraints.",
+      "mechanism_if_closed": "the best MEASURED public acceptance-per-candidate E[T] (3.8445, M=8) sits below the honest-500 floor (3.9914) BEFORE private degradation; width raises E[T] but pays a larger step (M=32 -> 479.57 < 500); private degradation (x0.8037) drops the achievable E[T]_real to 3.0898, ~0.74 short of even the step-shave-lowered floor. Closing the gap needs a public E[T] >= 4.966 at the deployed step -- a BUILT drafter/tree raise that no measured screen delivers (land #245's faithful tree is faithfulness, not a raise).",
+      "path_a_axes_closed": {
+        "draft_cut": true,
+        "et_raise": true,
+        "width": true
+      },
+      "path_a_fully_closed": true
+    },
+    "step5_verdict_sensitivity": {
+      "any_counterfactual_flips_to_go": true,
+      "any_input_flips_to_go": false,
+      "any_realizable_input_flips_to_go": false,
+      "caveats": [
+        "composition-priced: this leg measures 0 TPS; the launch gate stays land #245's MEASURED >=500 at lambda_hat >= 0.9780 (human-approval-gated).",
+        "ubel #263 private factor: the decode E[T] ratio MEASURES 0.804 (2khp8gzs decode_priv_ET 3.0898 / decode_pub_ET 3.8444, anchor self-test passes); the PR's 0.73 is NOT that ratio (not reproducible as the decode E[T] ratio) -- a more pessimistic figure. Swept [0.65, 0.73, 0.804, 0.85]; no CI logged. Closed at every realizable swept value (only the counterfactual private=1.0 + full step-shave clears, by ~0.01 -- not realizable).",
+        "land #245 faithful-tree run not found in W&B; M=16 E[T] proxy = deployed linear (3.8444), consistent with the PR's faithful=linear (delta -0.0021) note: it is faithfulness, not an E[T] raise.",
+        "kanna verify-step-roofline LANDED (sdrerk5h, 1.19% verify-side); combined with the #269 fold (4.39%) the MEASURED max step-shave is 5.58% composition. Dropping the deployed floor to the achievable ceiling would need ~40% composition (phi_hi) -- ~7x the measured ceiling, implausible (verify is ~half the step)."
+      ],
+      "dominant_input": "private_factor (ubel #263) -- the closure hinges on it being < 1.0",
+      "note": "no REALIZABLE input flips GO. The ONLY GO cells are counterfactual: at the full MEASURED step-shave (5.58%, phi_hi) the deployed public E[T]=3.8445 clears the lowered floor 3.8342 by a hair -- but ONLY at private_factor=1.0 (zero degradation). ubel #263 MEASURES 0.804, dropping the achievable E[T]_real to 3.0898 and closing it decisively. Most sensitive to (a) ubel #263's private factor being < 1.0 and (b) whether a BUILT drafter/tree raises public E[T] above 3.844 -- land #245's build to measure, not this leg.",
+      "rows": [
+        {
+          "best_achievable_et_real": 2.4988949131736526,
+          "floor_compared": 3.834228676839938,
+          "go": false,
+          "input": "private_factor (ubel #263)",
+          "realizable": true,
+          "value": 0.65
+        },
+        {
+          "best_achievable_et_real": 2.806451210179641,
+          "floor_compared": 3.834228676839938,
+          "go": false,
+          "input": "private_factor (ubel #263)",
+          "realizable": true,
+          "value": 0.73
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.834228676839938,
+          "go": false,
+          "input": "private_factor (ubel #263)",
+          "realizable": true,
+          "value": 0.803714493809177
+        },
+        {
+          "best_achievable_et_real": 3.267785655688623,
+          "floor_compared": 3.834228676839938,
+          "go": false,
+          "input": "private_factor (ubel #263)",
+          "realizable": true,
+          "value": 0.85
+        },
+        {
+          "best_achievable_et_real": 3.8444537125748504,
+          "floor_compared": 3.834228676839938,
+          "go": true,
+          "input": "private_factor (ubel #263)",
+          "realizable": false,
+          "value": 1.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.963749250662058,
+          "go": false,
+          "input": "phi_edge (max-shave floor)",
+          "realizable": true,
+          "value": "phi_lo"
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.834228676839938,
+          "go": false,
+          "input": "phi_edge (max-shave floor)",
+          "realizable": true,
+          "value": "phi_hi"
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.9914439391107512,
+          "go": false,
+          "input": "stepshave_comp_pct (kanna+#269)",
+          "realizable": true,
+          "value": 0.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.956963112928917,
+          "go": false,
+          "input": "stepshave_comp_pct (kanna+#269)",
+          "realizable": true,
+          "value": 1.1853573814381013
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.8665949216610063,
+          "go": false,
+          "input": "stepshave_comp_pct (kanna+#269)",
+          "realizable": true,
+          "value": 4.392280827418404
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.834228676839938,
+          "go": false,
+          "input": "stepshave_comp_pct (kanna+#269)",
+          "realizable": true,
+          "value": 5.577638208856506
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.718112915518644,
+          "go": false,
+          "input": "stepshave_comp_pct (kanna+#269)",
+          "realizable": false,
+          "value": 10.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.479817667136847,
+          "go": false,
+          "input": "stepshave_comp_pct (kanna+#269)",
+          "realizable": false,
+          "value": 20.0
+        },
+        {
+          "best_achievable_et_real": 3.089843169574907,
+          "floor_compared": 3.9914439391107512,
+          "go": false,
+          "input": "public_et_ceiling (build)",
+          "realizable": true,
+          "value": "deployed_linear_m8"
+        },
+        {
+          "best_achievable_et_real": 2.9633976830219027,
+          "floor_compared": 3.9914439391107512,
+          "go": false,
+          "input": "public_et_ceiling (build)",
+          "realizable": true,
+          "value": "faithful_tree_m16"
+        },
+        {
+          "best_achievable_et_real": 3.076908068237718,
+          "floor_compared": 3.9914439391107512,
+          "go": false,
+          "input": "public_et_ceiling (build)",
+          "realizable": true,
+          "value": "width_tree_m32"
+        }
+      ]
+    }
+  },
+  "wandb_run_ids": [
+    "10necg21"
+  ]
+}
