@@ -1,0 +1,102 @@
+{
+  "agent": "denken",
+  "created_at": "20260615T034137Z",
+  "kind": "hbm-bound-tps-ceiling",
+  "nan_clean": true,
+  "peak_mem_mib": 13.645,
+  "pr": 283,
+  "synthesis": {
+    "basis": {
+      "E_T": 3.844,
+      "K_cal": 125.26795005202914,
+      "K_cal_as_steps_per_s": 125.26795005202914,
+      "a10g_bw_gbps": 600.0,
+      "body_bytes_gb": 1.76029696,
+      "bridge_note": "official = E[T]/wall = E[T]*K_cal (K_cal=125.268 = official/E[T] = steps/s). The HBM ceiling replaces the deployed wall (1/K_cal = 7982.9us) with the read floor (2933.8us local x tau_lo = 3037.2us official). token-per-read = E[T]/read_floor.",
+      "et_tau_invariant": 4682.7608,
+      "floor_byte_provenance_matches_import": true,
+      "official_baseline": 481.53,
+      "read_floor_local_us": 2933.828266666667,
+      "read_floor_official_us": 3037.203622326286,
+      "step_norm_us": 1218.2,
+      "tau_lo": 1.0352356533046398,
+      "tps_via_composition": 481.53,
+      "tps_via_steprate": 481.53,
+      "verify_hbm_floor_us_imported": 2933.828266666667,
+      "wall_deployed_official_us": 7982.887878221502
+    },
+    "ceiling": {
+      "hbm_bound_ceiling_basis": "ceiling = E[T] / read_floor_official = E[T]*bandwidth/(body_bytes*tau_lo); deployed official = E[T] / (1/K_cal). frac = read_floor_official / (1/K_cal). E[T]=3.844, read_floor_official=3037.204us, deployed_wall_official=7982.888us.",
+      "hbm_bound_ceiling_tps": 1265.6378952477885,
+      "hbm_bound_ceiling_tps_bandwidth_pure_variant": 1310.2334733339537,
+      "hbm_bound_ceiling_tps_bw_form_crosscheck": 1265.6378952477885,
+      "kernel_timing_clears_500": true,
+      "kernel_timing_headroom_tps": 784.1078952477885,
+      "non_read_slack": {
+        "draft_official_us": 731.7620168328832,
+        "host_other_official_us": 2109.334780199382,
+        "kernel_addressable_official_us": 2836.349475695834,
+        "non_read_official_us": 4945.684255895216,
+        "non_read_pct_of_wall": 61.953572834058875,
+        "note": "kernel_addressable = draft + verify-compute-above-read (kanna #280's hideable target); host_other ~ ubel #284 decode-loop overhead. Even removing ONLY the kernel-addressable slack reaches tps_kernel_floor (> 500), so the read floor does NOT cap the verify front below 500.",
+        "step_kernel_floor_us": 5146.538402525668,
+        "tps_kernel_floor": 746.9098060384731,
+        "tps_kernel_floor_clears_500": true,
+        "verify_above_read_official_us": 2104.587458862951,
+        "verify_over_read_ratio": 1.692935910978199
+      },
+      "official_tps_as_frac_bandwidth_pure": 0.3675146527700312,
+      "official_tps_as_frac_identity_crosscheck": 0.3804642716594112,
+      "official_tps_as_frac_of_hbm_ceiling": 0.38046427165941116,
+      "read_frac_of_wall_pct": 38.04642716594112
+    },
+    "et_for_500_at_read_floor": 1.518601811163143,
+    "gpu_readbench": {
+      "achievable_bw_ceiling_tps": 1082.1059530781533,
+      "achievable_ceiling_clears_500": true,
+      "achievable_frac_of_nominal": 0.8549885849193043,
+      "analytic_floor_us": 2933.828266666667,
+      "effective_read_bw_gbps": 512.9931509515826,
+      "measured_read_floor_us": 3431.4239025115967,
+      "measured_vs_analytic_ratio": 1.1696062586547658,
+      "note": "A reduction over a 1.76 GB fp16 tensor measures achievable READ bandwidth; the analytic floor uses NOMINAL 600 GB/s (matching #278). Achievable < nominal is expected; the analytic central floor stays the imported figure.",
+      "official_frac_of_achievable_ceiling": 0.44499339332737436,
+      "present": true
+    },
+    "handoff": "The HBM-bandwidth-bound TPS ceiling is 1265.6 (official), so deployed 481.53 sits at 0.380 of the read-floor ceiling and pure kernel-timing tuning is hard-capped at 1265.6 (CLEARS 500) -- confirming the verify-side front is OPEN (the int4 read is only 38% of the honest 1/K_cal=7982.9us step; #278's 'floor>normalized-step' was composition-compression, not wall read-boundedness); the only two ceiling-raising levers are E[T] >= 1.519 (ceiling-to-500; the deployed point reaches 500 at E[T] >= 3.991, fern #281) or a -153% body-read 'reduction' (NEGATIVE -> read-reduction is non-binding, the ceiling is already >500), so the path to 500 is E[T]-raise + hideable-verify-compute (kanna #280), NOT read-reduction and NOT read-floor-limited.",
+    "hbm_bound_ceiling_self_test_passes": true,
+    "kernel_timing_clears_500": true,
+    "levers": {
+      "et_for_500_at_read_floor": 1.518601811163143,
+      "et_for_500_at_read_floor_below_current": true,
+      "et_for_500_at_read_floor_roundtrip_tps": 500.0,
+      "et_for_500_deployed_point": 3.9914439391107512,
+      "fern_281_consistent": true,
+      "fern_281_et_floor": 3.991,
+      "fern_281_resid": 0.0004439391107511348,
+      "lever_note": "et_for_500_at_read_floor (CEILING-to-500) = 1.5186 is BELOW the current E[T]=3.844 -> the ceiling is already > 500 and the E[T] lever is non-binding ON THE CEILING. To move the DEPLOYED POINT to 500 needs E[T] >= 3.9914 (== fern #281's 3.991). read_reduction_pct = -153.1% is NEGATIVE -> you would need to ADD bytes to drop the ceiling to 500; the bytes-per-read lever is non-binding. The body-read-reduction lever would only matter if the deployed step were read-bound (it is 38% read); any real reduction is PPL-gated at headroom 0.0428 and must be a SEPARATE measured leg -- do NOT re-quantize here.",
+      "ppl_baseline": 2.3772,
+      "ppl_gate": 2.42,
+      "ppl_headroom": 0.0428,
+      "read_reduction_bytes_for_500_gb": -2.695500118930963,
+      "read_reduction_is_binding_for_500": false,
+      "read_reduction_pct_for_500_at_fixed_et": -153.1275790495578,
+      "read_reduction_roundtrip_tps": 499.99999999999994,
+      "read_reduction_target_bytes_gb": 4.455797078930963
+    },
+    "official_tps_as_frac_of_hbm_ceiling": 0.38046427165941116,
+    "read_reduction_pct_for_500_at_fixed_et": -153.1275790495578,
+    "self_test": {
+      "conditions": {
+        "a_basis_reproduces_481p53_both_forms": true,
+        "b_ceiling_ge_official": true,
+        "c_levers_roundtrip_to_500": true,
+        "d_key_scalars_finite": true,
+        "e_imports_exact": true,
+        "f_caveats_present": true
+      },
+      "hbm_bound_ceiling_self_test_passes": true
+    },
+    "verdict": "HBM-BOUND CEILING IS NON-BINDING AT 500 -- THE VERIFY-SIDE FRONT IS OPEN, NOT CAPPED. The HBM-bandwidth ceiling is 1265.6 TPS (official; 1310.2 bandwidth-pure), and deployed 481.53 sits at 0.380 of it: the int4 body read (3037us official) is only 38.0% of the HONEST official per-step wall (1/K_cal = 7982.9us), NOT the dominant cost. denken #278's 'floor (2933.8) EXCEEDS the 1218.2us step' is an artifact of the ~6.5x composition COMPRESSION of the normalized step (it proves step-shaving over-credit 4.82x, NOT wall read-boundedness). Kernel timing is NOT hard-capped below 500 by the read floor: the bare-read-floor ceiling is 1265.6 (>> 500), and removing ONLY the kernel-addressable slack (verify->read floor + draft folded) reaches 747 TPS. The front is OPEN -- gated by how much of the verify's 1.69x compute-above-read is HIDEABLE (kanna #280) and by #278's 4.8x over-credit on incremental shaves (consistent with the public field grinding 484->489.63 via split-KV/fa2sw, still <500). Body-read-reduction is the WRONG lever: the ceiling is ALREADY > 500 so reducing bytes only raises a non-binding ceiling (the -153% 'reduction for 500' is the proof). The binding levers to MOVE THE DEPLOYED POINT to 500 are E[T]-raise (fern #281: E[T] >= 3.991) or closing the 62% non-read slack (kanna #280 verify hideable-compute + ubel #284 host overhead). BASELINE 481.53 untouched; analysis-only; adds 0 TPS; NOT a launch; the gate remains a MEASURED >=500 build."
+  }
+}
