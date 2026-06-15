@@ -1,0 +1,178 @@
+{
+  "arms": {
+    "control": {
+      "arm": "control",
+      "attention_backend_env_ignored": false,
+      "backend_used": "TRITON_ATTN",
+      "completed": 128,
+      "decode_files": [
+        "/workspace/senpai/target/research/systems/flashinfer_cudagraph/run-20260615T000137Z/control/decode_run0.jsonl",
+        "/workspace/senpai/target/research/systems/flashinfer_cudagraph/run-20260615T000137Z/control/decode_run1.jsonl",
+        "/workspace/senpai/target/research/systems/flashinfer_cudagraph/run-20260615T000137Z/control/decode_run2.jsonl"
+      ],
+      "error": null,
+      "extra_env": {},
+      "flashinfer_requested": false,
+      "flashinfer_selected": false,
+      "forced_triton": true,
+      "model_id": "google/gemma-4-E4B-it",
+      "peak_vram_mib": 21395.0,
+      "ppl": 2.376682786480556,
+      "served": true,
+      "served_model_name": "gemma-4-e4b-it",
+      "wall_tps_all_runs": [
+        454.8930451045196,
+        465.1766029123638,
+        465.1043402968044
+      ],
+      "wall_tps_cv_pct": 0.007767827137263834,
+      "wall_tps_mean": 465.14047160458415,
+      "wall_tps_median": 465.14047160458415,
+      "wall_tps_runs": [
+        454.8930451045196,
+        465.1766029123638,
+        465.1043402968044
+      ],
+      "wall_tps_warm_runs": [
+        465.1766029123638,
+        465.1043402968044
+      ]
+    },
+    "eager": {
+      "arm": "eager",
+      "attention_backend_env_ignored": false,
+      "backend_used": "TRITON_ATTN",
+      "completed": 128,
+      "decode_files": [
+        "/workspace/senpai/target/research/systems/flashinfer_cudagraph/run-20260615T000137Z/eager/decode_run0.jsonl",
+        "/workspace/senpai/target/research/systems/flashinfer_cudagraph/run-20260615T000137Z/eager/decode_run1.jsonl",
+        "/workspace/senpai/target/research/systems/flashinfer_cudagraph/run-20260615T000137Z/eager/decode_run2.jsonl"
+      ],
+      "error": null,
+      "extra_env": {
+        "LOOPGRAPH_REQUIRE_CAPTURE": "0",
+        "LOOPGRAPH_WARMUP_CALLS": "100000000",
+        "ONEGRAPH": "0"
+      },
+      "flashinfer_requested": false,
+      "flashinfer_selected": false,
+      "forced_triton": true,
+      "model_id": "google/gemma-4-E4B-it",
+      "peak_vram_mib": 19379.0,
+      "ppl": null,
+      "served": true,
+      "served_model_name": "gemma-4-e4b-it",
+      "wall_tps_all_runs": [
+        372.21179894957123,
+        380.93667779472736,
+        375.09894260934425
+      ],
+      "wall_tps_cv_pct": 0.7721508124528668,
+      "wall_tps_mean": 378.0178102020358,
+      "wall_tps_median": 378.0178102020358,
+      "wall_tps_runs": [
+        372.21179894957123,
+        380.93667779472736,
+        375.09894260934425
+      ],
+      "wall_tps_warm_runs": [
+        380.93667779472736,
+        375.09894260934425
+      ]
+    },
+    "flashinfer": {
+      "arm": "flashinfer",
+      "attention_backend_env_ignored": true,
+      "backend_used": "TRITON_ATTN",
+      "decode_files": [],
+      "error": null,
+      "extra_env": {
+        "FA_SLIDING": "0",
+        "SPLITKV_VERIFY": "0",
+        "VLLM_ATTENTION_BACKEND": "FLASHINFER"
+      },
+      "flashinfer_overridden_to": "TRITON_ATTN",
+      "flashinfer_requested": true,
+      "flashinfer_selected": false,
+      "forced_triton": true,
+      "model_id": "google/gemma-4-E4B-it",
+      "peak_vram_mib": 19377.0,
+      "ppl": null,
+      "served": true,
+      "served_model_name": "gemma-4-e4b-it",
+      "wall_tps_runs": []
+    }
+  },
+  "captured_vs_eager_pct": 23.04723720715294,
+  "clears_500": false,
+  "comparisons": {
+    "coldstart_control_run0_vs_warm": {
+      "num_divergent": 111,
+      "num_identical": 17,
+      "num_prompts_compared": 128,
+      "total_divergent_tokens": 37046,
+      "total_tokens_compared": 65536,
+      "verdict": "DIVERGENT"
+    },
+    "fp_noise_warm_control": {
+      "num_divergent": 0,
+      "num_identical": 128,
+      "num_prompts_compared": 128,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 65536,
+      "verdict": "GREEDY_IDENTICAL"
+    },
+    "gate_control_vs_served_spec_off_reference": {
+      "num_divergent": 117,
+      "num_identical": 11,
+      "num_prompts_compared": 128,
+      "reference": "/workspace/senpai/target/research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/decode_outputs.jsonl",
+      "reference_kind": "served_spec_off",
+      "total_divergent_tokens": 38384,
+      "total_tokens_compared": 65536,
+      "verdict": "DIVERGENT"
+    },
+    "lever_warm_control_vs_eager": {
+      "num_divergent": 9,
+      "num_identical": 119,
+      "num_prompts_compared": 128,
+      "total_divergent_tokens": 1218,
+      "total_tokens_compared": 65536,
+      "verdict": "DIVERGENT"
+    }
+  },
+  "created_at": "20260615T000137Z",
+  "flashinfer_backend_used": "TRITON_ATTN",
+  "flashinfer_cudagraph_self_test_passes": false,
+  "flashinfer_env_ignored": true,
+  "flashinfer_forced_triton": true,
+  "flashinfer_reachable": false,
+  "flashinfer_served": true,
+  "flashinfer_viable": false,
+  "local_tps_gain_pct": 0.0,
+  "official_anchor_tps": 481.53,
+  "official_projection_tps": 481.53,
+  "out_dir": "/workspace/senpai/target/research/systems/flashinfer_cudagraph/run-20260615T000137Z",
+  "ppl_cap": 2.42,
+  "self_test": {
+    "cudagraph_lever_bit_identical": false,
+    "flashinfer_reachable": false,
+    "fp_noise_warm_divergent_tokens": 0,
+    "greedy_identity_ok": false,
+    "lever_divergent_prompts": 9,
+    "lever_divergent_tokens": 1218,
+    "passes": false,
+    "peak_vram_gb": 20.8935546875,
+    "ppl": 2.376682786480556,
+    "ppl_ok": true,
+    "tps_reproducible_ok": true,
+    "vram_ok": true,
+    "wall_tps_cv_pct": 0.007767827137263834,
+    "warm_deterministic_ok": true
+  },
+  "tps_local_flashinfer_cudagraph": 465.14047160458415,
+  "vram_cap_gb": 24.0,
+  "wall_tps_control_median": 465.14047160458415,
+  "wall_tps_eager_median": 378.0178102020358,
+  "wandb_run_id": "0qc5lk4y"
+}
