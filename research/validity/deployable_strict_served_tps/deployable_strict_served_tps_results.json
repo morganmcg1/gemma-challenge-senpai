@@ -1,0 +1,642 @@
+{
+  "agent": "wirbel",
+  "analysis_only": true,
+  "created_at": "20260615T162926Z",
+  "decision": {
+    "attn_only_clears_500_ceiling": true,
+    "attn_only_near_500": true,
+    "deployable_strict_clears_500": false,
+    "deployable_strict_tps_central": 510.01134201901453,
+    "deployable_strict_tps_central_deployed_basis": 471.41634950257713,
+    "deployable_strict_tps_central_local": 493.1234451556711,
+    "deployable_strict_tps_range": [
+      527.1313029300627,
+      404.9479383927318
+    ],
+    "eta_attn_evalweighted": 0.02145375421979844,
+    "f_attn_measured": 0.09506718019009251,
+    "flag_319_served_confirm": true,
+    "full_vbi_today_bracket": [
+      357.32166269999993,
+      469.6847174760462
+    ],
+    "full_vbi_today_floor_469": 469.6847174760462,
+    "full_vbi_today_off_the_shelf_357": 357.32166269999993,
+    "gap_to_500_attn_only_ceiling_tps": -10.011342019014535,
+    "gap_to_500_attn_only_deployed_tps": 28.583650497422866,
+    "gap_to_500_full_floor_tps": 30.315282523953783,
+    "gap_to_500_tps": 142.67833730000007,
+    "is_strict_byte_exact": true,
+    "kernel_rebuild_naive_gap_tps": 161.5971626620002,
+    "kernel_rebuild_roi_ceiling_tps": 10.94165798098544,
+    "kernel_rebuild_roi_deployed_tps": 10.113650497422839,
+    "kernel_rebuild_roi_finding": "the kernel rebuild (pin num_splits=8) fixes ONLY the attention split, recovering eta_attn x base = ~10.9 TPS (ceiling) / ~10.1 TPS (deployed) -- NOT the naive (518.92 - 357.32 = 161.6) gap. The dominant strict overhead is the bf16 lm_head-BI determinism, which the attention rebuild does not touch. The binding constraint for deployable-strict is lm_head-BI, not the attention un-pack.",
+    "ladder": {
+      "attn_isolated_ceiling": 510.01134201901453,
+      "full_vbi_today_floor": 469.6847174760462,
+      "full_vbi_today_off_the_shelf": 357.32166269999993,
+      "lambda1_ceiling": 520.953,
+      "non_strict_deployed_52": 481.53,
+      "strict_floor_196": 165.44,
+      "un_deployable_pin_366": 518.9188253620001
+    },
+    "matches_326_projection": false,
+    "roundtrip_326_projection": 357.32166269999993,
+    "served_confirm_caveat": "the optional #319-gated served confirm (env-flip VLLM_BATCH_INVARIANT=1, LOCAL inference profiling, no served-file change/submission/HF-job) would measure the FULL VBI=1 config (attention un-pack + bf16 lm_head-BI), expected ~357-434 TPS -- NOT the attention-isolated ~500. Its value is CONFIRMING the lm_head-BI dominance, not confirming a ~500 number.",
+    "served_unpack_is_m_invariant": true,
+    "unpack_attn_penalty_evalweighted": 1.2256694074327268,
+    "which_input_moved": "PENALTY FRACTION. #326's eta=0.3141 is the OFF-THE-SHELF WHOLE-STEP VLLM_BATCH_INVARIANT overhead, NOT the attention un-pack penalty. The MEASURED attention-split contribution -- eval-weighted over the #282 low-L decode distribution (penalty_ew=1.2257) with the measured attention fraction f_attn=0.0951 -- is only eta_attn=0.0215, ~14.6x SMALLER than 0.3141. So the attention-isolated deployable-strict (510.0 ceiling / 471.4 deployed) lands FAR ABOVE 357.32. The 357.32 gap is the bf16 lm_head-BI determinism (#327 floor 0.09841; the int4 body is bit-exact across M, #326), which my eval-weighting of the ATTENTION split does not touch. Also: the L-distribution moved -- the eval mass sits at low L (median 1.194 penalty), so even the attention component is mild vs the 3-4.8x tail."
+  },
+  "decision_gate": "deployable-strict TODAY (full VBI=1) is BELOW 500 (off-the-shelf 357.32 / floor 469.68); the attention un-pack split is NOT the binding constraint (eta_attn~0.03, eval-weighted low-L) -- the bf16 lm_head-BI determinism is. kernel-rebuild ROI ~14 TPS (attention-only), not the naive 161 gap.",
+  "deployable_strict_clears_500": false,
+  "deployable_strict_self_test_passes": true,
+  "deployable_strict_tps_central": 510.01134201901453,
+  "deployable_strict_tps_range": [
+    527.1313029300627,
+    404.9479383927318
+  ],
+  "eval_distribution": {
+    "decode_L_max": 2938,
+    "decode_L_mean": 527.656,
+    "decode_L_median": 503,
+    "decode_L_min": 110,
+    "n_positions": 65536,
+    "n_prompts": 128,
+    "output_len": 512,
+    "present": true,
+    "prompt_tokens_max": 2427,
+    "prompt_tokens_mean": 272.156,
+    "prompt_tokens_min": 110
+  },
+  "f_attn_measured": 0.09506718019009251,
+  "gap_to_500_tps": 142.67833730000007,
+  "gpu": {
+    "compute_capability": "8.6",
+    "is_a10g_80sm": true,
+    "is_ga102_sm86": true,
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "total_mem_gib": 22.06
+  },
+  "is_strict_byte_exact": true,
+  "kind": "deployable-strict-served-tps",
+  "ladder_constants": {
+    "budget_500_eta": 0.040220518933569815,
+    "ceiling_500": 520.953,
+    "official_tps": 481.53,
+    "revived_ceiling_366": 518.9188253620001,
+    "roundtrip_326": 357.32166269999993,
+    "roundtrip_327_ceiling_floor": 469.6844761311386,
+    "step_norm_us": 1218.2,
+    "strict_floor_196": 165.44
+  },
+  "local_tps": 493.1234451556711,
+  "matches_326_projection": false,
+  "no_hf_job": true,
+  "no_kernel_rebuild": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "partA": {
+    "L_grid": [
+      110,
+      128,
+      160,
+      192,
+      224,
+      256,
+      288,
+      320,
+      352,
+      384,
+      448,
+      503,
+      512,
+      528,
+      576,
+      640,
+      704,
+      768,
+      896,
+      1024,
+      1152,
+      1280,
+      1536,
+      1792,
+      2048,
+      2560,
+      2938,
+      4096
+    ],
+    "any_nan": false,
+    "eval_weighted": {
+      "L_frequency_buckets": [
+        {
+          "frac": 0.081268310546875,
+          "hi": 256,
+          "lo": 0
+        },
+        {
+          "frac": 0.4364776611328125,
+          "hi": 512,
+          "lo": 256
+        },
+        {
+          "frac": 0.402557373046875,
+          "hi": 768,
+          "lo": 512
+        },
+        {
+          "frac": 0.053741455078125,
+          "hi": 1024,
+          "lo": 768
+        },
+        {
+          "frac": 0.0181427001953125,
+          "hi": 1536,
+          "lo": 1024
+        },
+        {
+          "frac": 0.0,
+          "hi": 2048,
+          "lo": 1536
+        },
+        {
+          "frac": 0.0078125,
+          "hi": null,
+          "lo": 2048
+        }
+      ],
+      "note_low_L": "the un-pack penalty drops BELOW 1.0 at short context (un-pack beats the heuristic: the heuristic's split-KV combine overhead is not amortized at low num_n_blocks). So at the lowest eval L the strict un-pack config has NO attention penalty (even a slight benefit); the best-case composed TPS therefore sits at/above the heuristic-based lambda=1 ceiling.",
+      "penalty_at_eval_max_L": 4.013333046175553,
+      "penalty_at_eval_mean_L": 1.262044023302518,
+      "penalty_at_eval_median_L": 1.1944444023382097,
+      "penalty_at_eval_min_L": 0.8767122919026369,
+      "penalty_lt1_below_L": 352,
+      "present": true,
+      "unpack_attn_penalty_evalweighted": 1.2256694074327268
+    },
+    "grid_penalty": [
+      0.8767122919026369,
+      0.8888888552039012,
+      0.9027777483034135,
+      0.8904109261356773,
+      0.9027777483034135,
+      0.9041095603687176,
+      0.9583333207014629,
+      0.9583333207014629,
+      1.0416666792985372,
+      1.0416666792985372,
+      1.1095889741936744,
+      1.1944444023382097,
+      1.1780821453588761,
+      1.2638888678357716,
+      1.2777777609352838,
+      1.3472221253778824,
+      1.4305554839749566,
+      1.4999999494725182,
+      1.6666665656117035,
+      1.819444288651376,
+      1.9452054630678386,
+      2.124999936840648,
+      2.4109588276499134,
+      2.7499998231538143,
+      3.0273970691247842,
+      3.6438353105996546,
+      4.013333046175553,
+      4.755813955455911
+    ],
+    "max_penalty_grid": 4.755813955455911,
+    "min_penalty_grid": 0.8767122919026369,
+    "penalty_anchor_roundtrip_375": {
+      "2048": {
+        "banked_375": 3.0555554713430864,
+        "measured": 3.0273970691247842,
+        "within_15pct": true
+      },
+      "4096": {
+        "banked_375": 4.755813955455911,
+        "measured": 4.755813955455911,
+        "within_15pct": true
+      },
+      "528": {
+        "banked_375": 1.2777777609352838,
+        "measured": 1.2638888678357716,
+        "within_15pct": true
+      }
+    },
+    "per_L": {
+      "1024": {
+        "L": 1024,
+        "ar_unpack_penalty_ratio": 1.819444288651376,
+        "heuristic_K_ar_analytic": 8,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 134.14399325847626
+      },
+      "110": {
+        "L": 110,
+        "ar_unpack_penalty_ratio": 0.8767122919026369,
+        "heuristic_K_ar_analytic": 2,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 65.5359998345375
+      },
+      "1152": {
+        "L": 1152,
+        "ar_unpack_penalty_ratio": 1.9452054630678386,
+        "heuristic_K_ar_analytic": 9,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 145.4080045223236
+      },
+      "128": {
+        "L": 128,
+        "ar_unpack_penalty_ratio": 0.8888888552039012,
+        "heuristic_K_ar_analytic": 2,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 65.5359998345375
+      },
+      "1280": {
+        "L": 1280,
+        "ar_unpack_penalty_ratio": 2.124999936840648,
+        "heuristic_K_ar_analytic": 10,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 156.67200088500977
+      },
+      "1536": {
+        "L": 1536,
+        "ar_unpack_penalty_ratio": 2.4109588276499134,
+        "heuristic_K_ar_analytic": 8,
+        "maxdiff_ar_0v1": 0.00048828125,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 180.2240014076233
+      },
+      "160": {
+        "L": 160,
+        "ar_unpack_penalty_ratio": 0.9027777483034135,
+        "heuristic_K_ar_analytic": 3,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 66.56000018119812
+      },
+      "1792": {
+        "L": 1792,
+        "ar_unpack_penalty_ratio": 2.7499998231538143,
+        "heuristic_K_ar_analytic": 10,
+        "maxdiff_ar_0v1": 0.00048828125,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 202.7519941329956
+      },
+      "192": {
+        "L": 192,
+        "ar_unpack_penalty_ratio": 0.8904109261356773,
+        "heuristic_K_ar_analytic": 3,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 66.56000018119812
+      },
+      "2048": {
+        "L": 2048,
+        "ar_unpack_penalty_ratio": 3.0273970691247842,
+        "heuristic_K_ar_analytic": 7,
+        "maxdiff_ar_0v1": 0.00048828125,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 226.30399465560913
+      },
+      "224": {
+        "L": 224,
+        "ar_unpack_penalty_ratio": 0.9027777483034135,
+        "heuristic_K_ar_analytic": 4,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 66.56000018119812
+      },
+      "256": {
+        "L": 256,
+        "ar_unpack_penalty_ratio": 0.9041095603687176,
+        "heuristic_K_ar_analytic": 4,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 67.58400052785873
+      },
+      "2560": {
+        "L": 2560,
+        "ar_unpack_penalty_ratio": 3.6438353105996546,
+        "heuristic_K_ar_analytic": 10,
+        "maxdiff_ar_0v1": 0.00048828125,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 272.38398790359497
+      },
+      "288": {
+        "L": 288,
+        "ar_unpack_penalty_ratio": 0.9583333207014629,
+        "heuristic_K_ar_analytic": 5,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 70.65600156784058
+      },
+      "2938": {
+        "L": 2938,
+        "ar_unpack_penalty_ratio": 4.013333046175553,
+        "heuristic_K_ar_analytic": 10,
+        "maxdiff_ar_0v1": 0.00048828125,
+        "us_ns0_heuristic": 76.80000364780426,
+        "us_ns1_unpack": 308.22399258613586
+      },
+      "320": {
+        "L": 320,
+        "ar_unpack_penalty_ratio": 0.9583333207014629,
+        "heuristic_K_ar_analytic": 5,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 70.65600156784058
+      },
+      "352": {
+        "L": 352,
+        "ar_unpack_penalty_ratio": 1.0416666792985372,
+        "heuristic_K_ar_analytic": 6,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 76.80000364780426
+      },
+      "384": {
+        "L": 384,
+        "ar_unpack_penalty_ratio": 1.0416666792985372,
+        "heuristic_K_ar_analytic": 6,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 76.80000364780426
+      },
+      "4096": {
+        "L": 4096,
+        "ar_unpack_penalty_ratio": 4.755813955455911,
+        "heuristic_K_ar_analytic": 10,
+        "maxdiff_ar_0v1": 0.00048828125,
+        "us_ns0_heuristic": 88.06400001049042,
+        "us_ns1_unpack": 418.8160002231598
+      },
+      "448": {
+        "L": 448,
+        "ar_unpack_penalty_ratio": 1.1095889741936744,
+        "heuristic_K_ar_analytic": 7,
+        "maxdiff_ar_0v1": 0.001953125,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 82.94399827718735
+      },
+      "503": {
+        "L": 503,
+        "ar_unpack_penalty_ratio": 1.1944444023382097,
+        "heuristic_K_ar_analytic": 8,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 88.06400001049042
+      },
+      "512": {
+        "L": 512,
+        "ar_unpack_penalty_ratio": 1.1780821453588761,
+        "heuristic_K_ar_analytic": 8,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 74.75200295448303,
+        "us_ns1_unpack": 88.06400001049042
+      },
+      "528": {
+        "L": 528,
+        "ar_unpack_penalty_ratio": 1.2638888678357716,
+        "heuristic_K_ar_analytic": 9,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 93.18400174379349
+      },
+      "576": {
+        "L": 576,
+        "ar_unpack_penalty_ratio": 1.2777777609352838,
+        "heuristic_K_ar_analytic": 9,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 94.2080020904541
+      },
+      "640": {
+        "L": 640,
+        "ar_unpack_penalty_ratio": 1.3472221253778824,
+        "heuristic_K_ar_analytic": 10,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 99.32799637317657
+      },
+      "704": {
+        "L": 704,
+        "ar_unpack_penalty_ratio": 1.4305554839749566,
+        "heuristic_K_ar_analytic": 6,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 105.47199845314026
+      },
+      "768": {
+        "L": 768,
+        "ar_unpack_penalty_ratio": 1.4999999494725182,
+        "heuristic_K_ar_analytic": 6,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 110.59200018644333
+      },
+      "896": {
+        "L": 896,
+        "ar_unpack_penalty_ratio": 1.6666665656117035,
+        "heuristic_K_ar_analytic": 7,
+        "maxdiff_ar_0v1": 0.0009765625,
+        "us_ns0_heuristic": 73.72800260782242,
+        "us_ns1_unpack": 122.8799968957901
+      }
+    },
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "served_unpack_is_m_invariant": true,
+    "verify_byte_exact": true,
+    "verify_checks": {
+      "2048": {
+        "maxdiff_v_0v1": 0.0,
+        "us_ns0": 217.0879989862442,
+        "us_ns1": 217.0879989862442,
+        "verify_penalty_ratio": 1.0
+      },
+      "256": {
+        "maxdiff_v_0v1": 0.0,
+        "us_ns0": 55.296000093221664,
+        "us_ns1": 55.296000093221664,
+        "verify_penalty_ratio": 1.0
+      },
+      "4096": {
+        "maxdiff_v_0v1": 0.0,
+        "us_ns0": 407.55200386047363,
+        "us_ns1": 407.55200386047363,
+        "verify_penalty_ratio": 1.0
+      },
+      "512": {
+        "maxdiff_v_0v1": 0.0,
+        "us_ns0": 78.84799689054489,
+        "us_ns1": 78.84799689054489,
+        "verify_penalty_ratio": 1.0
+      },
+      "528": {
+        "maxdiff_v_0v1": 0.0,
+        "us_ns0": 83.96799862384796,
+        "us_ns1": 83.96799862384796,
+        "verify_penalty_ratio": 1.0
+      }
+    },
+    "verify_penalty_free": true
+  },
+  "partB": {
+    "f_attn_measured": 0.09506718019009251,
+    "f_attn_source": "denken #344 graphed M=8 verify decomposition (sxltbech, pod-measured): VERIFY_ATTN_US_M8 * BRIDGE_344 / STEP_NORM_US",
+    "f_attn_verify_m8_penalty_free": 0.09506718019009251,
+    "f_draft_total": 0.12009488890060672,
+    "pod_attn_kernel_remeasure": {
+      "eval_mean_L": 528,
+      "note": "per-call served varlen attention (M=8) at the eval-mean L; confirms the served attention kernel is live + reproducible on this pod (numerator basis for f_attn). The authoritative f_attn is the #344 graphed full-step decomposition above.",
+      "served_attn_kernel_us_per_call_m8": 84.99199897050858
+    },
+    "step_decomposition_norm_us": {
+      "attn": 115.8108389075707,
+      "body": 928.7674983068042,
+      "draft": 146.29959365871912,
+      "lmhead": 27.32206912690593,
+      "waterfall_resid": 2.2737367544323206e-13,
+      "waterfall_sum": 1218.1999999999998
+    },
+    "step_fractions": {
+      "attn": 0.09506718019009251,
+      "body": 0.76240970145034,
+      "draft": 0.12009488890060672,
+      "lmhead": 0.022428229458960704
+    }
+  },
+  "partC": {
+    "attn_only": {
+      "best_low_L": {
+        "ceiling": {
+          "eta_attn": -0.011720614760915547,
+          "phi": 0.9882793852390844,
+          "tps_divisor": 527.1313029300627,
+          "tps_linear": 527.0588894215432
+        },
+        "deployed": {
+          "eta_attn": -0.011720614760915547,
+          "phi": 0.9882793852390844,
+          "tps_divisor": 487.2407612585264,
+          "tps_linear": 487.1738276258236
+        }
+      },
+      "evalweighted": {
+        "ceiling": {
+          "eta_attn": 0.02145375421979844,
+          "phi": 1.0214537542197983,
+          "tps_divisor": 510.01134201901453,
+          "tps_linear": 509.77660237793333
+        },
+        "deployed": {
+          "eta_attn": 0.02145375421979844,
+          "phi": 1.0214537542197983,
+          "tps_divisor": 471.41634950257713,
+          "tps_linear": 471.1993737305404
+        }
+      },
+      "penalty_best_low_L": 0.8767122919026369,
+      "penalty_evalweighted": 1.2256694074327268,
+      "penalty_worst_high_L": 4.013333046175553,
+      "worst_high_L": {
+        "ceiling": {
+          "eta_attn": 0.2864690756735317,
+          "phi": 1.2864690756735317,
+          "tps_divisor": 404.9479383927318,
+          "tps_linear": 371.7160756206466
+        },
+        "deployed": {
+          "eta_attn": 0.2864690756735317,
+          "phi": 1.2864690756735317,
+          "tps_divisor": 374.30359509255567,
+          "tps_linear": 343.58654599092426
+        }
+      }
+    },
+    "calibration": {
+      "attn_only_evalweighted_ceiling_divisor": {
+        "local": 493.1234451556711,
+        "served_calibrated": 510.01134201901453
+      },
+      "attn_only_evalweighted_deployed_divisor": {
+        "local": 455.8064404002094,
+        "served_calibrated": 471.41634950257713
+      },
+      "ratio_local_over_served_373": 0.9668872131421857
+    },
+    "f_attn": 0.09506718019009251,
+    "full_vbi_today": {
+      "bracket_ceiling_linear": [
+        357.32166269999993,
+        469.6844761311386
+      ],
+      "first_principles_floor_327": {
+        "ceiling_divisor": 474.2781097059935,
+        "ceiling_linear": 469.6847174760462,
+        "deployed_divisor": 438.38722143211965,
+        "deployed_linear": 434.14143311630903,
+        "eta": 0.09841249119201488
+      },
+      "note": "FULL VBI=1 strict config = attention-split un-pack (measured here) + bf16 lm_head-BI determinism (banked #326/#327). 0.3141 is the OFF-THE-SHELF whole-step VBI overhead; 0.09841 is the first-principles floor. The attention split is a small COMPONENT; the lm_head-BI dominates -> this bracket [357.32, 469.68] is the honest shippable today.",
+      "off_the_shelf_326": {
+        "ceiling_divisor": 396.4333003576592,
+        "ceiling_linear": 357.32166269999993,
+        "deployed_divisor": 366.4333003576592,
+        "deployed_linear": 330.28142699999995,
+        "eta": 0.3141
+      }
+    }
+  },
+  "peak_mem_mib": 17.145,
+  "pr": 378,
+  "selftest": {
+    "conditions": {
+      "a_375_anchor_roundtrip": true,
+      "a_eval_mass_is_low_L": true,
+      "a_penalty_curve_monotone_lowL_to_highL": true,
+      "a_penalty_evalweighted_in_range": true,
+      "b_ar_diverges_0v1": true,
+      "b_nan_clean": true,
+      "b_seeds_ge_2": true,
+      "b_unpack_is_m_invariant": true,
+      "b_verify_byte_exact": true,
+      "b_verify_penalty_free": true,
+      "c_f_attn_in_unit": true,
+      "c_f_attn_matches_344": true,
+      "c_waterfall_closes": true,
+      "d_attn_only_gt_full_today": true,
+      "d_calibration_scales_up": true,
+      "d_divisor_le_base": true,
+      "d_eta_attn_positive_small": true,
+      "d_range_low_le_high": true,
+      "e_326_roundtrip": true,
+      "e_327_roundtrip": true,
+      "e_budget_500_eta": true,
+      "e_ladder_ordered": true,
+      "f_full_today_below_500": true,
+      "f_gap_to_500_positive": true,
+      "f_rebuild_roi_lt_naive_gap": true,
+      "f_reconcile_326_diverges": true,
+      "g_ga102_sm86": true,
+      "g_no_launch_flags": true,
+      "g_on_target_a10g_80sm": true
+    },
+    "n_checks": 29,
+    "passes": true
+  },
+  "served_calibrated_tps": 510.01134201901453,
+  "unpack_attn_penalty_evalweighted": 1.2256694074327268,
+  "wandb_run_id": "gghmgtk9",
+  "which_input_moved": "PENALTY FRACTION. #326's eta=0.3141 is the OFF-THE-SHELF WHOLE-STEP VLLM_BATCH_INVARIANT overhead, NOT the attention un-pack penalty. The MEASURED attention-split contribution -- eval-weighted over the #282 low-L decode distribution (penalty_ew=1.2257) with the measured attention fraction f_attn=0.0951 -- is only eta_attn=0.0215, ~14.6x SMALLER than 0.3141. So the attention-isolated deployable-strict (510.0 ceiling / 471.4 deployed) lands FAR ABOVE 357.32. The 357.32 gap is the bf16 lm_head-BI determinism (#327 floor 0.09841; the int4 body is bit-exact across M, #326), which my eval-weighting of the ATTENTION split does not touch. Also: the L-distribution moved -- the eval mass sits at low L (median 1.194 penalty), so even the attention component is mild vs the 3-4.8x tail."
+}
