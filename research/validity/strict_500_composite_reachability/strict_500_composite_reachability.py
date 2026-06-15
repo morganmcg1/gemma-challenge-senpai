@@ -471,7 +471,7 @@ BREAKEVEN_PROMPT_SHIFT_VBI1_TOK_386: float = 119.0  # halved breakeven prompt sh
 BREAKEVEN_PROMPT_SHIFT_PRE_VBI_TOK: float = 253.0   # pre-VBI comfortable buffer (now gone)
 CENTRAL_CLEARS_3P2_VBI1_386: bool = True            # central 1.310% still clears 3.2% (+1.89pp)
 CENTRAL_MARGIN_TO_3P2_VBI1_PP_386: float = 1.89     # central margin to the knife-edge under VBI=1
-UBEL389_PIN_BREACH_PENDING: bool = True             # ubel #389 GPU per-L attn to PIN the -0.32pp breach
+UBEL389_PIN_BREACH_PENDING: bool = False            # ubel #389 LANDED (fqt33bj3): breach REFUTED on the measured slope
 
 # --- denken #383 (t68af2yw, merged ce5f39a 17:53Z): RED — demand-alone INSUFFICIENT on honest base -- #
 # Clean FLIP from #377, driven ENTIRELY by the base move 518.92 -> <=480.8 (reproduces_377_under_revival
@@ -512,7 +512,7 @@ MIXED_PRECISION_GATE_PPL_372: float = 2.3812        # resulting PPL, <= 2.42 gat
 BODY_READ_REDUCTION_372: float = 0.215              # -21.5% body read traffic
 MIXED_PRECISION_ANALYTIC_LIFT_TPS_372: tuple[float, float] = (132.72, 42.15)  # BW-bound ANALYTIC lifts
 UNIFORM_3BIT_DIED_ON_PPL_372: bool = True           # the uniform-3bit variant failed the gate
-LAWINE388_REALIZED_TPS_PENDING: bool = True         # #388 microbench: does -21.5% read -> positive TPS
+LAWINE388_REALIZED_TPS_PENDING: bool = False        # LANDED (g5lfdpgw): -21.5% read -> +33 honest / +38.34 TPS
 
 # --- wirbel #384 (4f32ks1e, merged 276e04a 18:12Z): CORRECTION — lm_head is FREE, tax is in the BODY - #
 # Refutes the 17:53Z "wirbel #384 = lm_head-BI ~93%/~150-TPS determinization tax" relay.  The deployed
@@ -542,8 +542,272 @@ BODY_MARLIN_DECODE_STRICT_PENDING_STARK381_384: bool = True  # #381: does body a
 # under the corrected model (lm_head free int4-Marlin) and reports the true gap-to-500.  It is the
 # NOW-PRIMARY supply-resolution card: HOLD the composite GO until #390 lands the corrected realized
 # shippable number (the supply lift can also come from lawine #388's realized body-allocation TPS).
-WIRBEL390_SHIPPABLE_CEILING_PENDING: bool = True     # corrected shippable strict ceiling — pending GPU measure
-SHIPPABLE_CEILING_REFUTED_BF16_PREMISE_390: tuple[float, float] = (510.01, 518.92)  # both refuted (bf16-lm_head)
+WIRBEL390_SHIPPABLE_CEILING_PENDING: bool = False    # LANDED (5y64zbjz): corrected base 471.42 measured (e2e stark #381 separate)
+SHIPPABLE_CEILING_REFUTED_BF16_PREMISE_390: tuple[float, float] = (510.01, 518.92)  # the bf16-lm_head pin (#390 reinstates 510.01, refutes 518.92)
+
+# --- wirbel #390 (5y64zbjz, merged a6130d21, 19:01Z): LANDED — corrected SHIPPABLE strict base ---- #
+# The reseated #390 GPU-measured the realized shippable strict decode TPS under the corrected
+# (lm_head-free int4-Marlin) model AND pre-answered stark #381 at the per-GEMM level.  Key results:
+#   - The body int4-Marlin is ALREADY byte-exact strict at the M=8 decode-verify width — all 8 GEMMs
+#     (q/k/v/o/gate/up/down + lm_head), 3 seeds x 8 trials, real geometry g128, INCL the atomic-add-
+#     eligible small-n k/v_proj (all A10G guards force the fixed fp32 reduce).  So the per-GEMM identity
+#     question is GREEN => n_distinct_kernel_rebuilds_for_strict_500 = 1 (attention only; lm_head=0 #384,
+#     body=0 here).  This is the `--stark381-decode-identity green` condition: drop the ledger 2 -> 1.
+#     (stark #381 stays open as the independent e2e confirmation incl norms; the per-GEMM Q is answered.)
+#   - Corrected shippable band = [471.20, 509.78], deployed-floor +113.88 over the #378 [357.32, 469.68]
+#     bracket (that bracket was the PHANTOM bf16 body+lm_head over-determinization;
+#     spread_is_lmhead_bf16_tax=False).  The 510.01 was the corrected shippable CEILING all along
+#     (#378 mislabeled it "NOT shippable"); only the 518.92 stays refuted.
+#   - Realized deployed strict = 471.42; gap_to_500 = 28.58; supply_alone_closes_500 = False (NO cb3
+#     shrink).  This is the CORRECTED supply BASE — replaces the banked "469.68 floor + 11 attn = 480.7"
+#     with 471.42 (rebuilds=1, attention eta_attn=0.02145 the SOLE strict tax).
+WIRBEL390_LANDED: bool = True                        # corrected shippable strict base — MEASURED (5y64zbjz)
+REALIZED_DEPLOYED_STRICT_390: float = 471.42         # corrected supply BASE (rebuilds=1; replaces 480.7)
+SHIPPABLE_BAND_390: tuple[float, float] = (471.20, 509.78)  # corrected shippable strict band
+GAP_TO_500_390: float = 28.58                        # bare gap_to_500 on the corrected base (500 - 471.42)
+SUPPLY_ALONE_CLOSES_500_390: bool = False            # supply-alone (NO cb3 shrink) does NOT clear 500
+ETA_ATTN_390: float = 0.02145                        # attention eta — the SOLE strict tax (rebuilds=1)
+N_KERNEL_REBUILDS_STRICT_500_390: int = 1            # attn only (lm_head=0 #384, body=0 #390); ledger 2->1
+BODY_MARLIN_DECODE_STRICT_GREEN_390: bool = True     # body int4-Marlin byte-exact @ M=8 (all 8 GEMMs, 3 seeds x 8 trials, g128)
+STARK381_DECODE_IDENTITY_PER_GEMM_GREEN_390: bool = True  # the --stark381-decode-identity green condition (per-GEMM)
+SPREAD_IS_LMHEAD_BF16_TAX_390: bool = False          # the [357.32,469.68] bracket was PHANTOM bf16 over-determinization
+SHIPPABLE_CEILING_510_REINSTATED_390: float = 510.01  # corrected shippable CEILING all along (#378 mislabeled "NOT shippable")
+SHIPPABLE_CEILING_518_STILL_REFUTED_390: float = 518.92  # the only number that stays refuted (bf16-lm_head premise)
+DEPLOYED_FLOOR_LIFT_OVER_378_BAND_390: float = 113.88  # 471.20 - 357.32 (band-lower lift over the phantom #378 bracket)
+
+# --- lawine #388 (g5lfdpgw, merged c8bcdd2, 19:01Z): LANDED — realized cb3 supply LIFT ------------- #
+# The realized body-allocation supply lift that GO-gated the supply leaf.  The cb3 (RHT+VQ, QTIP/QuIP#
+# -class) body shrink of lawine #372's GREEN sensitivity-weighted mixed-precision allocation realizes:
+#   +38.34 TPS realistic (1.1234x) / +33 honest (draft-separated).  BOTH >= the +17.2 required (denken
+#   #383, floor-joint) AND >= the +23.8 E[T]-only robust variant.  closes_383_supply_gap_floor = True.
+# ★ THE CAVEAT THAT GATES DEPLOYABILITY: m1_is_bw_bound = False — Marlin at M=1 runs at HBM efficiency
+#   only 0.256 (overhead/launch-bound at single-token), so this is the M=1 number and the byte-shrink
+#   buys ~46% of its 1.2744x roofline.  The SERVED regime is M=8 (verify width); lawine #391 measures
+#   whether the efficiency rises toward BW-bound there.
+# ★ OPTIMISM FLAG: the +38.34 lumps the #378 draft fraction 0.1201 (un-shrunk MTP drafter) into the
+#   shrinkable body — honest body-only is +33; USE +33 for --supply-lift-available-tps.
+LAWINE388_LANDED: bool = True                        # realized cb3 supply lift — MEASURED (g5lfdpgw)
+CB3_LIFT_HONEST_TPS_388: float = 33.0                # draft-separated body-only lift — USE THIS for supply-lift-available
+CB3_LIFT_REALISTIC_TPS_388: float = 38.34            # realistic lift (1.1234x; lumps the #378 draft fraction)
+CB3_LIFT_MULT_388: float = 1.1234                    # realistic body-shrink TPS multiplier
+CB3_CLOSES_383_SUPPLY_GAP_FLOOR_388: bool = True     # both lifts >= the +17.2 required (and >= +23.8 E[T]-only)
+CB3_M1_IS_BW_BOUND_388: bool = False                 # ★ Marlin M=1 is overhead/launch-bound (NOT BW-bound)
+CB3_M1_HBM_EFF_388: float = 0.256                    # Marlin M=1 HBM efficiency (low -> overhead-bound)
+CB3_M1_ROOFLINE_MULT_388: float = 1.2744             # the M=1 BW-bound roofline the byte-shrink targets (~46% realized)
+CB3_REALIZED_FRAC_OF_ROOFLINE_388: float = 0.46      # fraction of the 1.2744x roofline realized at M=1
+CB3_DRAFT_FRAC_LUMPED_388: float = 0.1201            # #378 un-shrunk MTP drafter fraction lumped into +38.34 (-> use +33)
+
+# --- denken #387 (z8osvif8, merged c0e88d2, 19:01Z): LANDED — demand anchor MEASURED + MTP K=7 -------- #
+# The demand-leaf coverage anchor is now MEASURED (not modeled), and it carries a premise correction.
+#   measured_top4_coverage = 0.89027, coverage_anchor_gap = +0.000 -> denken #383 RED is ROBUST to the
+#   measured anchor (required_delta_floor_measured = +0.0572, still 1.84x the #336 budget).  Drop the
+#   "modeled 0.8903 baseline" hedge — it is grounded.
+# ★ The deployed drafter is MTP K=7 (PR #52 method="mtp", num_speculative_tokens=7), NOT EAGLE-3 — any
+#   EAGLE-3-tree framing on the demand leaf re-labels to the #289 MTP conditional-accept ladder.
+DENKEN387_LANDED: bool = True                        # demand anchor MEASURED (z8osvif8)
+MEASURED_TOP4_COVERAGE_387: float = 0.89027          # measured baseline top-4 coverage (grounds 0.8903)
+COVERAGE_ANCHOR_GAP_387: float = 0.000               # measured vs modeled anchor gap (+0.000 -> #383 robust)
+REQUIRED_DELTA_FLOOR_MEASURED_387: float = 0.0572    # required Δcov on the MEASURED anchor (still 1.84x budget)
+DENKEN383_RED_ROBUST_TO_MEASURED_ANCHOR_387: bool = True  # #383 RED survives the measured anchor
+DEPLOYED_DRAFTER_MTP_K_387: int = 7                  # deployed drafter is MTP K=7 (NOT EAGLE-3; PR #52)
+DRAFTER_IS_MTP_NOT_EAGLE3_387: bool = True           # premise correction for the demand leaf
+DEMAND_LADDER_LABEL_387: str = "#289 MTP K=7 conditional-accept ladder (NOT EAGLE-3 tree)"
+
+# --- kanna #374 (djia6icp, merged e051b73, 19:01Z): LANDED — fusion lever CLOSED (Route-A excluded) -- #
+# Triton fusion numerics are NOT byte-exact-pinnable, so the fusion lever is closed; capture/land #371
+# is the sole identity-safe non-spec leg.  Doesn't touch the composite directly; confirms Route-A
+# (sub-int4 UNIFORM eta-axis) stays excluded.
+KANNA374_FUSION_LEVER_CLOSED: bool = True            # fusion lever closed (Triton numerics not byte-exact)
+FUSION_BYTE_EXACT_PINNABLE_374: bool = False         # Triton fusion is NOT byte-exact-pinnable
+CAPTURE_LAND_371_SOLE_IDENTITY_SAFE_NONSPEC_LEG_374: bool = True  # #371 is the only identity-safe non-spec leg
+ROUTE_A_STAYS_EXCLUDED_374: bool = True              # confirms Route-A (sub-int4 uniform eta-axis) excluded
+
+# --- cb3-lift DEPLOYABILITY (advisor 19:25Z): TWO of the three 19:01Z contingencies LANDED ----------- #
+# supply_base_enables_500 resolves TRUE on paper at the REALISTIC tier (471.42 + honest cb3 +32.65 ->
+# ~504; denken #392's combined route reaches 500).  The 19:01Z GO-flip pair has RESOLVED:
+#   (a) lawine #391 (3udzpoq8, LANDED 19:11Z): the M=8 served-width contingency — REALISTIC tier HOLDS
+#       (cb3 lift +38.02 at M=8 clears +17.2 and +23.75 robust), MEASURED-FLOOR straddles (+15.67 misses
+#       the +23.75 robust).  int4-Marlin HBM-eff is FLAT across the verify width (M=8 0.2559 vs M=1
+#       0.2578) -> the served MTP-K7 regime does NOT raise efficiency.  realistic-tier-GREEN.
+#   (c) denken #392 (2evhfxi7, LANDED 19:12Z): the AUTHORITATIVE honest composed number on the 471.42
+#       base — crediting cb3 only to f_verify_body=0.7624, M=1 honest +32.65 off-shelf / +42.91 floor
+#       clears BOTH #383 targets; combined route 469.68 -> 512.60, residual demand +0.0117 d-cov (38% of
+#       the #336 budget).  USE +32.65 for --supply-lift-available-tps (authoritative honest).
+# So the SOLE remaining ANALYTIC gate is now (b) kanna #394 (PPL held-out).  ★ BUT a DEEPER deployability
+# layer opened: the cb3 kernel is a SOURCE-BUILD = a FLAGGED served-file change (does NOT ship in vLLM
+# 0.22).  Even with kanna #394 GREEN, the on-paper 500 needs a flagged kernel.  The advisor opened 5
+# probes for a DEPLOYABLE-WITHOUT-FLAG path to the 28.58 gap (lawine #395 / denken #396 are the GO-flip
+# pair; stark #397 / land #398 / ubel #399 sharpen).  NEW GO-flip gate = kanna #394 (analytic, sole) AND
+# >= 1 of {lawine #395, denken #396} (deployable-without-flag).  Hold None until BOTH land.
+CB3_INSAMPLE_PPL_MARGIN_372: float = 0.039           # #372's in-sample PPL margin kanna #394 stress-tests held-out
+KANNA394_HELDOUT_PPL_PENDING: bool = False           # LANDED RED 20:02Z (d184kbey): +0.039 margin is winner's-curse (see 20:19Z block)
+
+# --- lawine #391 (3udzpoq8, merged 19:11Z): LANDED — M=8 served-width contingency (realistic-GREEN) --- #
+LAWINE391_LANDED: bool = True                        # M=8 served-width cb3-lift contingency MEASURED
+LAWINE391_M8_HBM_EFF: float = 0.2559                 # int4-Marlin weight-read HBM-eff at M=8 (served verify width)
+LAWINE391_M1_HBM_EFF: float = 0.2578                 # at M=1 (Δ-0.0020 vs M=8 -> FLAT across width)
+LAWINE391_M4_HBM_EFF: float = 0.2590                 # at M=4
+CB3_LIFT_M8_REALISTIC_391: float = 38.02             # cb3 lift at M=8, realistic tier (clears +17.2 & +23.75)
+CB3_LIFT_M8_MEASURED_FLOOR_391: float = 15.67        # cb3 lift at M=8, measured-floor tier (MISSES +23.75 robust)
+CB3_CLOSES_383_ROBUST_M8_391: bool = False           # measured-floor M=8 does NOT clear the +23.75 robust
+SUPPLY_LIFT_REQUIRED_ROBUST_TPS_383: float = 23.75   # the robust (E[T]) supply-lift target the floor tier misses
+CB3_M8_EFFICIENCY_FLAT_391: bool = True              # served MTP-K7 regime does NOT raise Marlin efficiency
+CB3_LANE_REALISTIC_GREEN_FLOOR_YELLOW_391: bool = True  # realistic-tier-GREEN / measured-floor-YELLOW
+
+# --- denken #392 (2evhfxi7, merged 19:12Z): LANDED — AUTHORITATIVE honest composed number on 471.42 --- #
+DENKEN392_LANDED: bool = True                        # authoritative draft-separated cb3 composition MEASURED
+CB3_LIFT_HONEST_DENKEN392: float = 32.65             # M=1 honest off-shelf lift (AUTHORITATIVE --supply-lift)
+CB3_LIFT_FLOOR_DENKEN392: float = 42.91              # M=1 floor-tier lift (clears both #383 targets)
+CB3_F_VERIFY_BODY_392: float = 0.7624                # the shrinkable verify-body fraction cb3 is credited to
+CB3_388_OPTIMISM_TPS_392: float = 5.69               # #388's +38.3 was +5.69 (~15%) optimistic (lumped draft frac)
+COMBINED_ROUTE_REACHES_392: float = 512.60           # combined supply+demand route TPS (469.68 -> 512.60)
+COMBINED_ROUTE_RESIDUAL_DCOV_392: float = 0.0117     # residual demand sliver (38% of the +0.031 #336 budget)
+COMBINED_ROUTE_REACHES_500_HONEST_392: bool = True   # the combined route reaches 500 on paper (honest)
+ET_LADDER_MATCH_REALIZED_PCT_392: float = 0.18       # E[T] ladder matches deployed E_T_REALIZED 3.844 to 0.18%
+
+# --- ubel #389 (fqt33bj3, merged 19:15Z): LANDED — demand leaf ROBUST on measured slope (#386 refuted) - #
+UBEL389_LANDED: bool = True                          # measured per-L attention identity floor under VBI=1
+UBEL389_MEASURED_FLOOR_VBI1_PCT: float = 0.5764      # measured greedy-identity gap floor under VBI=1 (< 0.633)
+UBEL389_PESSIMISTIC_BREACHES_3P2_MEASURED: int = 0   # 0 corners breach 3.2% on the measured slope
+UBEL389_ALL_CORNERS_CLEAR_3P2_MEASURED: bool = True  # all corners clear 3.2% (the #386 breach was an artifact)
+UBEL389_MEASURED_SLOPE_RATIO_TO_386: float = 0.353   # measured local-penalty slope is 0.353x the #386 interpolation
+UBEL389_386_BREACH_REFUTED: bool = True              # the #386 pessimistic-corner breach is REFUTED (artifact)
+
+# --- stark #381 (9edps20u, merged 19:16Z): LANDED — e2e confirms #390 Arm A; rebuilds=1; DON'T flag Marlin #
+STARK381_LANDED: bool = True                         # e2e decode-geometry identity confirmation
+STARK381_BODY_MARLIN_BITEXACT_M8_E2E: bool = True    # body int4-Marlin bit-exact at the M=8 decode geometry (e2e)
+STARK381_RESIDUAL_FLIPS: int = 1                     # sole residual: 1 flip ...
+STARK381_RESIDUAL_TOKENS: int = 891                  # ... in 891 tokens
+STARK381_KNIFE_EDGE_NAT: float = 0.125               # 0.125-nat knife-edge near-tie (in TRITON_ATTN #375, NOT Marlin)
+STARK381_RESIDUAL_IS_KNIFE_EDGE_NEAR_TIE: bool = True  # residual_is_knife_edge_near_tie=True
+STARK381_PINNED_REACHES_IDENTITY_1P0: bool = False   # pinned_reaches_identity_1p0=False (the 1-flip residual)
+STARK381_RESIDUAL_LOCUS: str = "TRITON_ATTN (#375), NOT int4-Marlin"  # the eta_attn locus wirbel #393 measures
+STARK381_DO_NOT_FLAG_MARLIN_REBUILD: bool = True     # rebuild ledger stays 1 (attention only); NOT a Marlin rebuild
+STARK381_REBUILD_LEDGER: int = 1                     # confirmed rebuild ledger (attention only)
+
+# --- land #385 (a30iri8i): TANGENTIAL — floor hardened, doesn't move the composite ------------------- #
+LAND385_NONSPEC_STRICT_FLOOR_MOVES: bool = False     # 165.44 self-referential-strict (like 481.53); abs floor 91.43
+LAND385_SELF_REF_STRICT_FLOOR: float = 165.44        # self-referential-strict floor (like the 481.53 baseline)
+LAND385_ABS_BYTE_EXACT_NONSPEC_FLOOR: float = 91.43  # absolute-byte-exact non-spec floor
+
+# --- 19:25Z DEPLOYABILITY-WITHOUT-FLAG probes: the cb3 kernel is a FLAGGED source-build --------------- #
+# The cb3 (RHT+VQ QTIP/QuIP#-class) kernel is a SOURCE-BUILD = a flagged served-file change that does NOT
+# ship in vLLM 0.22.  So even with kanna #394 GREEN (the cb3 PPL margin holds held-out), the on-paper 500
+# needs a kernel behind a flag.  The advisor opened 5 probes for a DEPLOYABLE-WITHOUT-FLAG path to the
+# 28.58 gap; fold verdicts in as they land.  GO-flip pair: lawine #395 OR denken #396 (>=1 green -> 500
+# reachable with ZERO flagged changes, the cleanest GO).  stark #397 / land #398 / ubel #399 SHARPEN.
+CB3_KERNEL_IS_FLAGGED_SOURCE_BUILD: bool = True      # cb3 kernel = source-build, does NOT ship in vLLM 0.22
+LAWINE395_SHIPPING_KERNEL_PENDING: bool = True       # does a SHIPPING quant kernel deliver cb3-class read-shrink + identity?
+DENKEN396_DEMAND_ALONE_500_PENDING: bool = False     # LANDED RED 20:03Z (yc5ji486): demand-ALONE busts even bare on 467.48 (see 20:19Z block)
+STARK397_KNIFE_EDGE_RECOVERY_PENDING: bool = True    # knife-edge identity recovery cheaper than the 11-TPS FA_SLIDING=0?
+LAND398_LMHEAD_READ_REDUCTION_PENDING: bool = True   # loadable identity-safe lm_head read-reduction?
+UBEL399_DRAFTER_HEADROOM_PENDING: bool = False        # LANDED RED 20:08Z (ec7i3z5t): no cheap deployable demand lever (see 20:19Z block)
+DEPLOYABLE_WITHOUT_FLAG_GO_FLIP_PROBES: tuple[str, str] = (  # >=1 green -> deployable-without-flag GO
+    "lawine#395_shipping_kernel_cb3class_readshrink", "denken#396_demand_alone_500_in_budget")
+DEPLOYABLE_WITHOUT_FLAG_SHARPEN_PROBES: tuple[str, str, str] = (
+    "stark#397_knife_edge_identity_recovery", "land#398_lmhead_read_reduction",
+    "ubel#399_drafter_acceptance_headroom")
+# NEW terminal GO-flip gate (supersedes the 19:01Z #391+#394 pair): kanna #394 (analytic, sole) AND >= 1
+# of {lawine #395, denken #396} (deployable-without-flag).  #391/#392 LANDED (no longer pending gates).
+CB3_LIFT_DEPLOYABILITY_GATES: tuple[str, str] = (    # the SUPERSEDED 19:25Z GO-flip structure (see 20:19Z block)
+    "kanna#394_heldout_ppl_analytic", "lawine#395_or_denken#396_deployable_without_flag")
+
+# --- 20:19Z ★★ DECISION-CRITICAL re-pricing: the coupled cb3-PPL + demand cluster LANDED and moves ---- #
+# BOTH legs of the combined route the wrong way.  The "clean zero-flag GO" path (demand-alone + the cheap
+# demand sliver) the advisor flagged at 19:25Z is CLOSED; the supply leaf's +32.65 HEADLINE number is
+# PPL-DEAD.  Re-base on the corrected 467.48 and treat the real supply/demand numbers as PENDING three new
+# feeder cards.  The route is NOT closed — it is RE-PRICED toward "conservative-k cb3 + a NET-positive
+# tree"; that is exactly what kanna #403 / ubel #401 / denken #402 will resolve.  HOLD None (sharpen, not flip).
+#
+# (0) wirbel #393 (0q7ynumg, merged 19:48Z): BASE CORRECTION.  The decode-specific attention strict tax is
+#     3.01% (decode band [528,658] on the rising un-pack curve), LARGER than the #378 eval-weighted 2.15%
+#     (+0.86pp).  Realized deployed strict moves 471.42 -> 467.48; ceiling 509.78 -> 505.29; gap-to-500
+#     widens 28.58 -> 32.52.  Attention is the SOLE strict tax and irreducible rebuild-free (attn_eta_
+#     reducible=False; FlashInfer-BI MEASURED-FALSE; pinned-K is a flagged rebuild).  Re-base on 467.48.
+WIRBEL393_LANDED: bool = True                        # decode-specific attention strict tax MEASURED (0q7ynumg)
+REALIZED_DEPLOYED_STRICT_393: float = 467.48         # CORRECTED supply BASE (supersedes #390's 471.42)
+SHIPPABLE_CEILING_393: float = 505.29                # corrected shippable ceiling (was 509.78)
+GAP_TO_500_393: float = 32.52                        # bare gap_to_500 on the corrected base (500 - 467.48)
+DECODE_ATTN_STRICT_TAX_PCT_393: float = 3.01         # decode-specific attention strict tax (decode band [528,658])
+EVAL_WEIGHTED_ATTN_STRICT_TAX_PCT_378: float = 2.15  # the #378 eval-weighted tax (SMALLER; the band was mislabeled)
+DECODE_TAX_DELTA_PP_393: float = 0.86                # +0.86pp decode-vs-eval-weighted (3.01 - 2.15)
+DECODE_BAND_393: tuple[int, int] = (528, 658)        # the decode band on the rising un-pack curve
+ATTN_ETA_REDUCIBLE_393: bool = False                 # attention strict tax is irreducible rebuild-free
+ATTN_SOLE_STRICT_TAX_393: bool = True                # attention is the SOLE strict tax (FlashInfer-BI MEASURED-FALSE)
+BASE_390_SUPERSEDED_BY_393: float = 471.42           # the #390 base #393 corrects (kept for provenance)
+
+# (a) kanna #394 (d184kbey, merged 20:02:35Z): the supply leaf's HEADLINE number is PPL-DEAD.  #372's
+#     in-sample gate PPL reproduces exactly (2.3816) but its +0.039 margin is WINNER'S-CURSE — disjoint-
+#     split selection (3 seeds) chases the 2.42 ceiling to k=243-246 and the held-out worst-seed (2.4223)
+#     AND OOD ShareGPT (2.4270) both BREACH 2.42 -> cb3_supply_deployable=False AT THE HEADLINE LIFT.  The
+#     +32.65 honest realistic-tier number is NOT PPL-deployable.  BUT k=232 itself still clears (~2.39
+#     held-out) -> cb3 IS deployable at a more conservative k, at a smaller (UN-COSTED) lift.  Drop
+#     --supply-lift-available-tps 32.65; the real PPL-safe supply number is PENDING kanna #403.
+KANNA394_LANDED: bool = True                         # held-out PPL stress-test MEASURED (d184kbey)
+KANNA394_INSAMPLE_PPL_REPRO_372: float = 2.3816      # #372's in-sample gate PPL reproduces exactly
+KANNA394_MARGIN_IS_WINNERS_CURSE: bool = True        # the +0.039 in-sample margin is winner's-curse
+KANNA394_SELECTED_K_RANGE: tuple[int, int] = (243, 246)  # disjoint-split selection chases the ceiling here
+KANNA394_HELDOUT_WORST_SEED_PPL: float = 2.4223      # held-out worst-seed BREACHES 2.42
+KANNA394_OOD_SHAREGPT_PPL: float = 2.4270            # OOD ShareGPT BREACHES 2.42
+KANNA394_PPL_GATE: float = 2.42                      # the PPL ceiling both breach
+CB3_SUPPLY_DEPLOYABLE_AT_HEADLINE_394: bool = False  # +32.65 headline lift is NOT PPL-deployable
+CB3_HEADLINE_LIFT_PPL_DEAD_394: bool = True          # the +32.65 honest realistic-tier number is PPL-dead
+KANNA394_CONSERVATIVE_K_232: int = 232               # k=232 still clears (~2.39 held-out)
+KANNA394_CONSERVATIVE_K_HELDOUT_PPL: float = 2.39    # held-out PPL at the conservative k (clears 2.42)
+CB3_DEPLOYABLE_AT_CONSERVATIVE_K_394: bool = True    # cb3 IS deployable at a conservative k (smaller, un-costed lift)
+CB3_CONSERVATIVE_K_LIFT_PENDING_KANNA403: bool = True  # the real PPL-safe lift is pending kanna #403
+
+# (b) denken #396 (yc5ji486, merged 20:03:51Z): demand-ALONE is INSUFFICIENT; the clean zero-flag GO path
+#     is CLOSED.  On the bare 471.42 base required_dcov=+0.02946 (94.9% of the +0.031 budget) — fits bare,
+#     but the minimum #389 private attn-identity floor (0.5764%) pushes it to 0.03244 > 0.031 ->
+#     robust_under_389_slope=False.  And on the CORRECTED 467.48 base required_dcov rises to ~0.0338 (109%
+#     of budget) -> demand-alone busts EVEN BARE.  The combined supply+demand route is the only robust plan.
+DENKEN396_LANDED: bool = True                        # demand-alone-500 budget check MEASURED (yc5ji486)
+DENKEN396_DEMAND_ALONE_500_GREEN: bool = False       # demand-alone does NOT reach 500 within budget
+DENKEN396_REQUIRED_DCOV_BARE_471: float = 0.02946    # required Δcov on bare 471.42 (94.9% of budget — fits bare)
+DENKEN396_REQUIRED_DCOV_BARE_471_BUDGET_FRAC: float = 0.949
+DENKEN396_REQUIRED_DCOV_UNDER_389_FLOOR: float = 0.03244  # under the #389 floor -> > 0.031 (NOT robust)
+DENKEN396_ROBUST_UNDER_389_SLOPE: bool = False       # the #389 floor pushes it over budget -> not robust
+DENKEN396_REQUIRED_DCOV_ON_467: float = 0.0338       # required Δcov on the corrected 467.48 base
+DENKEN396_REQUIRED_DCOV_ON_467_BUDGET_FRAC: float = 1.09  # 109% of the +0.031 budget -> busts EVEN BARE
+DENKEN396_DEMAND_ALONE_BUSTS_EVEN_BARE_467: bool = True   # demand-alone busts even bare on the corrected base
+DENKEN396_ZERO_FLAG_GO_PATH_CLOSED: bool = True      # the 19:25Z "demand-alone -> 500 zero-flag" branch is NEGATIVE
+BUDGET_336_PLUS_031: float = 0.031                   # the #336 +0.031 coverage budget envelope
+
+# (c) ubel #399 (ec7i3z5t, merged 20:08:20Z): there is NO cheap deployable demand lever; the d-cov needs a
+#     RETRAIN or a TREE.  Every monotone draft-head lever (temperature, affine calibration) is a RANK-
+#     INVARIANT no-op (MC max|Δcov|=0.00e+00; a rank-changing per-class-bias control fires at 0.59 -> the
+#     zeros are physics, not a broken harness); frac_of_28p58_gap_covered=0%.  The demand d-cov (#392's
+#     +0.0117 sliver and anything beyond) can ONLY come from a FORBIDDEN drafter retrain or a TREE-verify
+#     kernel rebuild (the locked +0.1286 top-1->top-4 prize; coverage gap [0,0.1097] is an UPPER bound).
+#     PPL is untouched throughout (spec-decode emits the target's greedy token) — the binding constraint is
+#     DEPLOYABILITY, never the gate.
+UBEL399_LANDED: bool = True                          # draft-head demand-lever sweep MEASURED (ec7i3z5t)
+UBEL399_CHEAP_DEMAND_LEVER_EXISTS: bool = False      # no cheap deployable demand lever
+UBEL399_MONOTONE_LEVERS_RANK_INVARIANT: bool = True  # temperature / affine calibration are rank-invariant no-ops
+UBEL399_MC_MAX_DCOV: float = 0.0                     # MC max|Δcov| = 0.00e+00 (the zeros are physics)
+UBEL399_RANK_CHANGING_CONTROL_FIRES: float = 0.59    # a rank-changing per-class-bias control fires at 0.59 (harness OK)
+UBEL399_FRAC_OF_GAP_COVERED: float = 0.0             # frac_of_28p58_gap_covered = 0%
+UBEL399_DCOV_ONLY_FROM_RETRAIN_OR_TREE: bool = True  # d-cov requires a forbidden retrain or a tree-verify rebuild
+UBEL399_TREE_TOP1_TO_TOP4_PRIZE: float = 0.1286      # the locked top-1->top-4 coverage prize (tree-verify)
+UBEL399_COVERAGE_GAP_UPPER_BOUND: tuple[float, float] = (0.0, 0.1097)  # coverage gap [0, 0.1097] is an UPPER bound
+UBEL399_PPL_UNTOUCHED: bool = True                   # PPL untouched (spec-decode emits target greedy token)
+
+# NEW feeder cards (20:19Z): the route is re-priced toward "conservative-k cb3 + a NET-positive tree".
+# kanna #403 = the PPL-safe conservative-k supply re-cost (largest k with held-out worst-seed <= 2.41 ->
+# re-costed lift).  ubel #401 = the locked top-8/16 tree coverage ceiling (sizes the +0.1286 prize).
+# denken #402 = whether the tree NETs that d-cov after its verify-M step-time tax on 467.48.  The NEW
+# terminal GO-flip gate = kanna #403 (PPL-safe supply) AND >= 1 of {ubel #401, denken #402} (tree net-supply).
+KANNA403_PPL_SAFE_SUPPLY_PENDING: bool = True        # PPL-safe conservative-k supply re-cost (the real supply number)
+KANNA403_HELDOUT_WORST_SEED_TARGET: float = 2.41     # largest k with held-out worst-seed <= 2.41 -> re-costed lift
+UBEL401_TREE_COVERAGE_CEILING_PENDING: bool = True   # locked top-8/16 tree coverage ceiling (sizes the +0.1286 prize)
+DENKEN402_TREE_NET_SUPPLY_PENDING: bool = True       # does the tree NET d-cov after its verify-M step-time tax on 467.48?
+REPRICE_2019Z_GO_FLIP_GATES: tuple[str, str] = (     # the NEW (20:19Z) terminal GO-flip structure
+    "kanna#403_ppl_safe_conservative_k_supply", "ubel#401_or_denken#402_tree_net_supply")
+REPRICE_2019Z_TREE_NET_SUPPLY_PROBES: tuple[str, str] = (  # the demand-leg tree feeders (>=1 green)
+    "ubel#401_tree_top8_16_coverage_ceiling", "denken#402_tree_nets_dcov_after_verifyM_tax")
+REPRICE_2019Z_SUPERSEDES_1925Z_PAIR: bool = True     # kanna #394 RED + denken #396 RED closed the 19:25Z pair
+TREE_IS_GENUINELY_NEW_LEVER_2019Z: bool = True       # tree/retrain work = the genuinely-new-lever requirement
 
 # --------------------------------------------------------------------------- #
 # Sub-int4 PPL LITERATURE PRIOR (Llama-2-7B wikitext-2 baseline ~5.47 PPL).
@@ -809,7 +1073,8 @@ def identity_reachability_analysis(stark381_decode: str = "pending") -> dict[str
 def supply_side_base_analysis(supply_lift_available_tps: float | None = None,
                               demand_reaches_500_on_floor: str = "pending",
                               supply_lift_required_tps: float | None = None,
-                              stark381_decode: str = "pending") -> dict[str, Any]:
+                              stark381_decode: str = "pending",
+                              kanna403_ppl_safe_supply: str = "pending") -> dict[str, Any]:
     """Honest deployable-strict supply base (wirbel #378), the BINDING GO axis (advisor 17:03Z/17:53Z).
 
     denken #383 (merged 17:53Z) is the decisive honest re-price: demand-alone does NOT reach
@@ -833,12 +1098,38 @@ def supply_side_base_analysis(supply_lift_available_tps: float | None = None,
     Returns `supply_base_enables_500` True/False/None: whether the supply base (after any measured
     supply lift) reaches a point from which the demand closer can clear private-500.
     """
-    floor = HONEST_STRICT_BASE_FLOOR_378            # 469.68 off-the-shelf (VBI=1)
-    plus_attn = HONEST_STRICT_BASE_PLUS_ATTN_378    # 480.7 (floor + ~11-TPS #375 attn rebuild)
-    base_today = plus_attn                           # bank honestly at <=480.7-today (wirbel #378)
+    floor = HONEST_STRICT_BASE_FLOOR_378            # 469.68 off-the-shelf (VBI=1) — #378 estimate (provenance)
+    plus_attn = HONEST_STRICT_BASE_PLUS_ATTN_378    # 480.7 (floor + ~11-TPS attn) — #378 estimate (superseded)
+    # wirbel #390 (5y64zbjz, 19:01Z) measured 471.42; wirbel #393 (0q7ynumg, 20:19Z) then CORRECTED it:
+    # the DECODE-specific attention strict tax is 3.01% (decode band [528,658]), LARGER than the #378
+    # eval-weighted 2.15% (+0.86pp), so the realized deployed strict moves 471.42 -> 467.48 (gap_to_500
+    # widens 28.58 -> 32.52; ceiling 509.78 -> 505.29).  Attention is the SOLE strict tax and irreducible
+    # rebuild-free (attn_eta_reducible=False; FlashInfer-BI MEASURED-FALSE; pinned-K is a flagged rebuild).
+    base_today = REALIZED_DEPLOYED_STRICT_393        # 467.48 CORRECTED supply BASE (#393, supersedes #390's 471.42)
     band_lo, band_hi = DEPLOYABLE_STRICT_BAND_378
-    clears_500_today = base_today >= TARGET          # False (480.7 < 500)
-    deficit_to_500_today = TARGET - base_today       # ~19.3 TPS short today
+    clears_500_today = base_today >= TARGET          # False (467.48 < 500)
+    deficit_to_500_today = TARGET - base_today       # 32.52 TPS short (matches #393 gap_to_500)
+
+    # cb3 supply lift.  denken #392 (LANDED) sized the HEADLINE honest composed number +32.65 off-shelf
+    # (crediting cb3 only to f_verify_body=0.7624).  ★ 20:19Z: kanna #394 (LANDED RED) made that HEADLINE
+    # number PPL-DEAD — #372's +0.039 in-sample margin is winner's-curse; the held-out worst-seed (2.4223)
+    # AND OOD ShareGPT (2.4270) BREACH the 2.42 gate at the selected k=243-246.  So the +32.65 is NOT
+    # PPL-deployable; DO NOT carry it.  BUT k=232 still clears (~2.39 held-out) -> cb3 IS deployable at a
+    # more conservative k, at a smaller (UN-COSTED) lift -> the REAL PPL-safe supply number is PENDING
+    # kanna #403.  The supply leaf resolves on kanna #403, not the dead +32.65 headline.
+    cb3_lift_honest = CB3_LIFT_HONEST_DENKEN392      # +32.65 HEADLINE — PPL-DEAD (kanna #394 RED); provenance only
+    cb3_headline_lift_ppl_dead = CB3_HEADLINE_LIFT_PPL_DEAD_394    # True (do NOT carry +32.65)
+    cb3_lift_honest_388 = CB3_LIFT_HONEST_TPS_388    # +33 (lawine #388 draft-separated; superseded by #392/#394)
+    cb3_lift_realistic = CB3_LIFT_REALISTIC_TPS_388  # +38.34 (#388, lumps the un-shrunk draft fraction)
+    lift_for_paper = supply_lift_available_tps if supply_lift_available_tps is not None else 0.0
+    base_plus_cb3_honest = base_today + cb3_lift_honest        # 500.13 on the 467.48 base — but PPL-DEAD
+    base_plus_cb3_realistic = base_today + cb3_lift_realistic  # 505.82 — also rests on the PPL-dead headline
+    # The +32.65 numerically clears 500 on the corrected base, but it is PPL-DEAD -> NOT a deployable path.
+    supply_alone_clears_500_with_cb3 = False                  # PPL-dead headline -> no supply-alone clear
+    supply_alone_clears_500_with_headline_arith = base_plus_cb3_honest >= TARGET  # arithmetic only (PPL-dead)
+    supply_plus_available_lift = base_today + lift_for_paper
+    available_lift_clears_bare_gap = (supply_lift_available_tps is not None
+                                      and supply_lift_available_tps >= deficit_to_500_today)
 
     # 518.92 eta-axis base is deflated on THREE grounds (#373/#375/#378).
     eta_axis_base_deflated = ETA_AXIS_BASE_DEFLATED_518
@@ -847,7 +1138,7 @@ def supply_side_base_analysis(supply_lift_available_tps: float | None = None,
     # private-strict-500 unreachable by the demand-side coverage retrain ALONE at any coverage.
     # denken #383 (17:53Z) CONFIRMED this on the honest base: demand-alone needs +0.0572 Δcov = 1.84x
     # the #336 budget -> a supply lift of +17.2 TPS (floor-joint) is required FIRST.
-    demand_alone_may_be_insufficient = base_today < TARGET   # True today (480.7 < 500)
+    demand_alone_may_be_insufficient = base_today < TARGET   # True today (471.42 < 500)
     demand_alone_insufficient_confirmed = demand_reaches_500_on_floor == "no"  # denken #383 RED
 
     # Identity compliance (folds in): the deployable-strict base is "strict" only if byte-exact
@@ -861,23 +1152,37 @@ def supply_side_base_analysis(supply_lift_available_tps: float | None = None,
     #   yes -> demand closes 500 even on the honest deployable floor (no supply lift required first).
     #   no  -> a supply lift is required first; the measured lift (wirbel #390 corrected shippable
     #          ceiling OR lawine #388 realized body-allocation TPS) must cover the required lift.
+    # 20:19Z kanna #403 gate: the +32.65 cb3 HEADLINE lift is PPL-DEAD (kanna #394 RED), so the supply
+    # leaf no longer resolves on it.  The REAL PPL-safe supply number is the conservative-k re-cost
+    # PENDING kanna #403 (largest k with held-out worst-seed <= 2.41).  Resolve the "no" branch on kanna
+    # #403: pending -> HOLD None; red -> no PPL-safe lift clears -> False; green -> resolve on the re-costed
+    # lift value (supply_lift_available_tps) vs the required lift.
+    kanna403_pending = kanna403_ppl_safe_supply == "pending"
     if denken383_pending:
         supply_base_enables_500: bool | None = None
         binding = ("PENDING_denken383_honest_reprice"
-                   + ("_and_supply_lift_wirbel390_or_lawine388" if supply_lift_measured_pending
-                      else "_supply_lift_landed"))
+                   + ("_and_supply_lift_pending_kanna403" if kanna403_pending
+                      else "_supply_lift_kanna403_landed"))
     elif demand_reaches_500_on_floor == "yes":
         supply_base_enables_500 = True
         binding = "demand_route_reaches_500_on_deployable_floor_denken383"
-    else:  # "no" (denken #383 RED) -> a supply lift is required first; wirbel #390 OR lawine #388 decide
-        if supply_lift_measured_pending or supply_lift_required_tps is None:
+    else:  # "no" (denken #383 RED) -> a supply lift is required first; kanna #403 (PPL-safe) decides it
+        if kanna403_ppl_safe_supply == "red":
+            supply_base_enables_500 = False
+            binding = "kanna403_no_ppl_safe_conservative_k_lift_clears_private500_unreachable_demand_alone"
+        elif kanna403_ppl_safe_supply == "green":
+            if supply_lift_measured_pending or supply_lift_required_tps is None:
+                supply_base_enables_500 = None
+                binding = "PENDING_resolve_kanna403_ppl_safe_recosted_lift_value"
+            else:
+                lift_sufficient = supply_lift_available_tps >= supply_lift_required_tps
+                supply_base_enables_500 = bool(lift_sufficient)
+                binding = ("kanna403_ppl_safe_lift_ge_required_enables_500" if lift_sufficient
+                           else "kanna403_ppl_safe_lift_insufficient_private500_unreachable_demand_alone")
+        else:  # pending (default) -> HOLD: the +32.65 headline is PPL-dead, the real lift awaits kanna #403
             supply_base_enables_500 = None
-            binding = "PENDING_supply_lift_wirbel390_or_lawine388_ge_required17p2_denken383"
-        else:
-            lift_sufficient = supply_lift_available_tps >= supply_lift_required_tps
-            supply_base_enables_500 = bool(lift_sufficient)
-            binding = ("supply_lift_available_ge_required_enables_500" if lift_sufficient
-                       else "supply_lift_insufficient_private500_unreachable_demand_alone")
+            binding = ("PENDING_kanna403_ppl_safe_conservative_k_supply_recost"
+                       "__headline_32p65_ppl_dead_kanna394")
 
     supply_pending = supply_base_enables_500 is None
 
@@ -939,23 +1244,134 @@ def supply_side_base_analysis(supply_lift_available_tps: float | None = None,
         "body_read_reduction_372": BODY_READ_REDUCTION_372,
         "mixed_precision_analytic_lift_tps_372": list(MIXED_PRECISION_ANALYTIC_LIFT_TPS_372),
         "uniform_3bit_died_on_ppl_372": UNIFORM_3BIT_DIED_ON_PPL_372,
-        "lawine388_realized_tps_pending": LAWINE388_REALIZED_TPS_PENDING,
-        # wirbel #390 (reseated 18:12Z) — corrected SHIPPABLE strict ceiling (510.01/518.92 refuted)
-        "wirbel390_shippable_ceiling_pending": WIRBEL390_SHIPPABLE_CEILING_PENDING,
-        "shippable_ceiling_refuted_bf16_premise_390": list(SHIPPABLE_CEILING_REFUTED_BF16_PREMISE_390),
+        # lawine #388 (g5lfdpgw, LANDED 19:01Z) — realized cb3 body-allocation supply LIFT (M=1)
+        "lawine388_landed": LAWINE388_LANDED,
+        "lawine388_realized_tps_pending": not LAWINE388_LANDED,    # LANDED -> False
+        "cb3_lift_honest_tps_388": CB3_LIFT_HONEST_TPS_388,         # +33 (#388 draft-separated; superseded by #392)
+        "cb3_lift_realistic_tps_388": CB3_LIFT_REALISTIC_TPS_388,   # +38.34 (lumps un-shrunk draft fraction)
+        "cb3_lift_mult_388": CB3_LIFT_MULT_388,
+        "cb3_closes_383_supply_gap_floor_388": CB3_CLOSES_383_SUPPLY_GAP_FLOOR_388,  # both >= +17.2 and +23.8
+        "cb3_m1_is_bw_bound_388": CB3_M1_IS_BW_BOUND_388,          # False (M=1 overhead-bound; served is M=8)
+        "cb3_m1_hbm_eff_388": CB3_M1_HBM_EFF_388,
+        "cb3_m1_roofline_mult_388": CB3_M1_ROOFLINE_MULT_388,
+        "cb3_realized_frac_of_roofline_388": CB3_REALIZED_FRAC_OF_ROOFLINE_388,
+        "cb3_draft_frac_lumped_388": CB3_DRAFT_FRAC_LUMPED_388,
+        # lawine #391 (3udzpoq8, LANDED 19:11Z) — M=8 served-width contingency (realistic-GREEN / floor-YELLOW)
+        "lawine391_landed": LAWINE391_LANDED,
+        "lawine391_m8_hbm_eff": LAWINE391_M8_HBM_EFF,             # 0.2559 (FLAT vs M=1 0.2578)
+        "lawine391_m1_hbm_eff": LAWINE391_M1_HBM_EFF,
+        "cb3_lift_m8_realistic_391": CB3_LIFT_M8_REALISTIC_391,   # +38.02 (clears +17.2 & +23.75 robust)
+        "cb3_lift_m8_measured_floor_391": CB3_LIFT_M8_MEASURED_FLOOR_391,  # +15.67 (MISSES +23.75 robust)
+        "cb3_closes_383_robust_m8_391": CB3_CLOSES_383_ROBUST_M8_391,      # False (floor tier misses robust)
+        "supply_lift_required_robust_tps_383": SUPPLY_LIFT_REQUIRED_ROBUST_TPS_383,  # 23.75
+        "cb3_m8_efficiency_flat_391": CB3_M8_EFFICIENCY_FLAT_391,          # served regime does NOT raise eff
+        "cb3_lane_realistic_green_floor_yellow_391": CB3_LANE_REALISTIC_GREEN_FLOOR_YELLOW_391,
+        # denken #392 (2evhfxi7, LANDED 19:12Z) — AUTHORITATIVE honest composed number on 471.42 (USE +32.65)
+        "denken392_landed": DENKEN392_LANDED,
+        "cb3_lift_honest_denken392": CB3_LIFT_HONEST_DENKEN392,   # +32.65 AUTHORITATIVE (USE for --supply-lift)
+        "cb3_lift_floor_denken392": CB3_LIFT_FLOOR_DENKEN392,     # +42.91 floor tier
+        "cb3_f_verify_body_392": CB3_F_VERIFY_BODY_392,           # 0.7624 shrinkable verify-body fraction
+        "cb3_388_optimism_tps_392": CB3_388_OPTIMISM_TPS_392,     # +5.69 (~15%) #388 optimism
+        "combined_route_reaches_392": COMBINED_ROUTE_REACHES_392, # 512.60 (469.68 -> 512.60)
+        "combined_route_residual_dcov_392": COMBINED_ROUTE_RESIDUAL_DCOV_392,  # +0.0117 (38% of #336 budget)
+        "combined_route_reaches_500_honest_392": COMBINED_ROUTE_REACHES_500_HONEST_392,  # True on paper
+        "et_ladder_match_realized_pct_392": ET_LADDER_MATCH_REALIZED_PCT_392,  # 0.18% match to E_T_REALIZED
+        "cb3_lift_honest": cb3_lift_honest,                       # +32.65 HEADLINE — PPL-DEAD (kanna #394 RED)
+        "cb3_headline_lift_ppl_dead_394": cb3_headline_lift_ppl_dead,  # True — do NOT carry +32.65
+        "cb3_lift_honest_388_superseded": cb3_lift_honest_388,    # +33 (#388, superseded by #392/#394)
+        "cb3_lift_realistic": cb3_lift_realistic,
+        "base_plus_cb3_honest": base_plus_cb3_honest,             # 500.13 on 467.48 — arithmetic only (PPL-dead)
+        "base_plus_cb3_realistic": base_plus_cb3_realistic,       # 505.82 — rests on the PPL-dead headline
+        "supply_alone_clears_500_with_cb3": supply_alone_clears_500_with_cb3,  # False (PPL-dead headline)
+        "supply_alone_clears_500_with_headline_arith": supply_alone_clears_500_with_headline_arith,  # arithmetic only
+        "supply_plus_available_lift": supply_plus_available_lift,
+        "available_lift_clears_bare_gap": available_lift_clears_bare_gap,      # lift >= 32.52 gap_to_500
+        # wirbel #393 (0q7ynumg, LANDED 20:19Z) — BASE CORRECTION: decode attn strict tax 3.01% -> 467.48
+        "wirbel393_landed": WIRBEL393_LANDED,
+        "realized_deployed_strict_393": REALIZED_DEPLOYED_STRICT_393,   # 467.48 CORRECTED supply BASE (supersedes 471.42)
+        "shippable_ceiling_393": SHIPPABLE_CEILING_393,                 # 505.29 (was 509.78)
+        "gap_to_500_393": GAP_TO_500_393,                              # 32.52 bare gap_to_500 (widened from 28.58)
+        "decode_attn_strict_tax_pct_393": DECODE_ATTN_STRICT_TAX_PCT_393,   # 3.01% (decode band [528,658])
+        "eval_weighted_attn_strict_tax_pct_378": EVAL_WEIGHTED_ATTN_STRICT_TAX_PCT_378,  # 2.15% (smaller)
+        "decode_tax_delta_pp_393": DECODE_TAX_DELTA_PP_393,           # +0.86pp decode-vs-eval-weighted
+        "decode_band_393": list(DECODE_BAND_393),
+        "attn_eta_reducible_393": ATTN_ETA_REDUCIBLE_393,             # False (irreducible rebuild-free)
+        "attn_sole_strict_tax_393": ATTN_SOLE_STRICT_TAX_393,         # True (FlashInfer-BI MEASURED-FALSE)
+        "base_390_superseded_by_393": BASE_390_SUPERSEDED_BY_393,     # 471.42 (provenance)
+        # kanna #394 (d184kbey, LANDED RED 20:02Z) — the +32.65 HEADLINE supply lift is PPL-DEAD
+        "kanna394_landed": KANNA394_LANDED,
+        "kanna394_heldout_ppl_pending": KANNA394_HELDOUT_PPL_PENDING,  # False (LANDED)
+        "kanna394_insample_ppl_repro_372": KANNA394_INSAMPLE_PPL_REPRO_372,   # 2.3816 reproduces exactly
+        "kanna394_margin_is_winners_curse": KANNA394_MARGIN_IS_WINNERS_CURSE,
+        "kanna394_selected_k_range": list(KANNA394_SELECTED_K_RANGE),         # k=243-246 chases the ceiling
+        "kanna394_heldout_worst_seed_ppl": KANNA394_HELDOUT_WORST_SEED_PPL,   # 2.4223 breaches 2.42
+        "kanna394_ood_sharegpt_ppl": KANNA394_OOD_SHAREGPT_PPL,              # 2.4270 breaches 2.42
+        "cb3_supply_deployable_at_headline_394": CB3_SUPPLY_DEPLOYABLE_AT_HEADLINE_394,  # False
+        "cb3_deployable_at_conservative_k_394": CB3_DEPLOYABLE_AT_CONSERVATIVE_K_394,    # True (k=232 ~2.39)
+        "kanna394_conservative_k_232": KANNA394_CONSERVATIVE_K_232,
+        "kanna394_conservative_k_heldout_ppl": KANNA394_CONSERVATIVE_K_HELDOUT_PPL,      # 2.39 (clears 2.42)
+        # kanna #403 — the REAL PPL-safe conservative-k supply re-cost (PENDING; the operative supply gate)
+        "kanna403_ppl_safe_supply_input": kanna403_ppl_safe_supply,
+        "kanna403_ppl_safe_supply_pending": kanna403_pending,
+        "kanna403_ppl_safe_supply_landed_constant_pending": KANNA403_PPL_SAFE_SUPPLY_PENDING,  # True (card open)
+        "kanna403_heldout_worst_seed_target": KANNA403_HELDOUT_WORST_SEED_TARGET,  # <= 2.41
+        "cb3_conservative_k_lift_pending_kanna403": CB3_CONSERVATIVE_K_LIFT_PENDING_KANNA403,
+        # wirbel #390 (5y64zbjz, LANDED 19:01Z) — prior shippable base (superseded by #393's 467.48)
+        "wirbel390_landed": WIRBEL390_LANDED,
+        "wirbel390_shippable_ceiling_pending": not WIRBEL390_LANDED,  # LANDED -> False
+        "realized_deployed_strict_390": REALIZED_DEPLOYED_STRICT_390,    # 471.42 (superseded by #393's 467.48)
+        "shippable_band_390": list(SHIPPABLE_BAND_390),
+        "gap_to_500_390": GAP_TO_500_390,                         # 28.58 (superseded by #393's 32.52)
+        "supply_alone_closes_500_390": SUPPLY_ALONE_CLOSES_500_390,   # False (no cb3 shrink)
+        "eta_attn_390": ETA_ATTN_390,                            # 0.02145 the SOLE strict tax (rebuilds=1)
+        "n_kernel_rebuilds_strict_500_390": N_KERNEL_REBUILDS_STRICT_500_390,  # 1 (attn only; ledger 2->1)
+        "body_marlin_decode_strict_green_390": BODY_MARLIN_DECODE_STRICT_GREEN_390,  # byte-exact @ M=8
+        "stark381_decode_identity_per_gemm_green_390": STARK381_DECODE_IDENTITY_PER_GEMM_GREEN_390,
+        "spread_is_lmhead_bf16_tax_390": SPREAD_IS_LMHEAD_BF16_TAX_390,   # False (phantom #378 bracket)
+        "shippable_ceiling_510_reinstated_390": SHIPPABLE_CEILING_510_REINSTATED_390,   # 510.01 REINSTATED
+        "shippable_ceiling_518_still_refuted_390": SHIPPABLE_CEILING_518_STILL_REFUTED_390,  # 518.92 refuted
+        "deployed_floor_lift_over_378_band_390": DEPLOYED_FLOOR_LIFT_OVER_378_BAND_390,
+        "shippable_ceiling_refuted_bf16_premise_390": [SHIPPABLE_CEILING_518_STILL_REFUTED_390],
+        # denken #387 (z8osvif8, LANDED 19:01Z) — demand anchor MEASURED + MTP K=7 premise correction
+        "denken387_landed": DENKEN387_LANDED,
+        "measured_top4_coverage_387": MEASURED_TOP4_COVERAGE_387,
+        "coverage_anchor_gap_387": COVERAGE_ANCHOR_GAP_387,
+        "required_delta_floor_measured_387": REQUIRED_DELTA_FLOOR_MEASURED_387,
+        "denken383_red_robust_to_measured_anchor_387": DENKEN383_RED_ROBUST_TO_MEASURED_ANCHOR_387,
+        "deployed_drafter_mtp_k_387": DEPLOYED_DRAFTER_MTP_K_387,     # 7 (MTP K=7, NOT EAGLE-3)
+        "drafter_is_mtp_not_eagle3_387": DRAFTER_IS_MTP_NOT_EAGLE3_387,
+        "demand_ladder_label_387": DEMAND_LADDER_LABEL_387,
+        # kanna #374 (djia6icp, LANDED 19:01Z) — fusion lever CLOSED (Route-A stays excluded)
+        "kanna374_fusion_lever_closed": KANNA374_FUSION_LEVER_CLOSED,
+        "fusion_byte_exact_pinnable_374": FUSION_BYTE_EXACT_PINNABLE_374,
+        "capture_land_371_sole_identity_safe_nonspec_leg_374": CAPTURE_LAND_371_SOLE_IDENTITY_SAFE_NONSPEC_LEG_374,
+        "route_a_stays_excluded_374": ROUTE_A_STAYS_EXCLUDED_374,
+        # stark #381 (9edps20u, LANDED 19:16Z) — e2e confirms #390 Arm A; rebuilds=1; DON'T flag Marlin
+        "stark381_landed": STARK381_LANDED,
+        "stark381_body_marlin_bitexact_m8_e2e": STARK381_BODY_MARLIN_BITEXACT_M8_E2E,  # e2e bit-exact @ M=8
+        "stark381_residual_flips": STARK381_RESIDUAL_FLIPS,         # 1 flip ...
+        "stark381_residual_tokens": STARK381_RESIDUAL_TOKENS,       # ... in 891 tokens
+        "stark381_knife_edge_nat": STARK381_KNIFE_EDGE_NAT,         # 0.125-nat near-tie (TRITON_ATTN, NOT Marlin)
+        "stark381_residual_is_knife_edge_near_tie": STARK381_RESIDUAL_IS_KNIFE_EDGE_NEAR_TIE,
+        "stark381_pinned_reaches_identity_1p0": STARK381_PINNED_REACHES_IDENTITY_1P0,  # False (1-flip residual)
+        "stark381_residual_locus": STARK381_RESIDUAL_LOCUS,         # TRITON_ATTN (#375), NOT int4-Marlin
+        "stark381_do_not_flag_marlin_rebuild": STARK381_DO_NOT_FLAG_MARLIN_REBUILD,    # ledger stays 1
+        "stark381_rebuild_ledger": STARK381_REBUILD_LEDGER,         # 1 (attention only)
         # identity compliance folds in here (strict prerequisite of the deployable-strict base)
         "identity_reachable_env_or_rebuild": ident["identity_reachable_env_or_rebuild"],
         "identity_cost_branch": ident["cost_branch"],
         "identity_cost_branch_pending": ident["cost_branch_pending"],
         "identity_rebuild_line_items": ident["rebuild_line_items"],
-        # pending inputs (the now-binding GO axis): supply lift from wirbel #390 OR lawine #388
+        # supply-lift DATA has LANDED but the +32.65 HEADLINE is PPL-DEAD (kanna #394 RED); the binding GO
+        # axis is now the kanna #403 PPL-safe conservative-k re-cost (the real supply number), NOT the
+        # dead headline.  denken #396/ubel #399 closed the demand-alone + cheap-lever escape routes.
         "denken383_input": demand_reaches_500_on_floor,
         "denken383_pending": denken383_pending,
         "supply_lift_available_tps": supply_lift_available_tps,
-        "supply_lift_measured_pending": supply_lift_measured_pending,
-        "supply_lift_pending": (supply_lift_measured_pending
-                                and WIRBEL390_SHIPPABLE_CEILING_PENDING
-                                and LAWINE388_REALIZED_TPS_PENDING),
+        "supply_lift_measured_pending": supply_lift_measured_pending,   # this-run CLI resolution
+        "supply_lift_data_landed": (LAWINE388_LANDED and WIRBEL390_LANDED),   # both de-riskers measured
+        "supply_lift_headline_ppl_dead_394": CB3_HEADLINE_LIFT_PPL_DEAD_394,  # +32.65 is PPL-dead -> don't carry it
+        "supply_lift_pending_kanna403": kanna403_pending,              # the real PPL-safe lift awaits kanna #403
         "supply_lift_required_tps": supply_lift_required_tps,
         # verdict
         "supply_pending": supply_pending,
@@ -963,26 +1379,29 @@ def supply_side_base_analysis(supply_lift_available_tps: float | None = None,
         "binding_constraint": binding,
         "note": (
             "wirbel #378 (gghmgtk9): the only STRICT-byte-exact served knob is VLLM_BATCH_INVARIANT=1 "
-            f"(whole-step batch-invariant determinism); the deployable-strict band TODAY is "
-            f"[{band_lo}, {band_hi}] < 500. The 518.92 eta-axis pin needs a rebuild that buys only "
-            f"~{ATTN_REBUILD_TPS_GAIN_378:g} TPS (eta_attn={ETA_ATTN_378}, NOT #326's whole-step 0.3141). "
-            f"wirbel #384 (4f32ks1e, 18:12Z) REFUTED #378's ~{ATTN_DEFICIT_UNTOUCHED_FRAC_378*100:.0f}% "
-            f"by-elimination 'bf16 lm_head-BI ~{LMHEAD_BI_TAX_TPS_378_REFUTED:g}-TPS' attribution: the "
-            f"deployed lm_head is already byte-exact int4-Marlin at decode (eta_lmhead={ETA_LMHEAD_TARGETED_384:g}, "
-            f"FREE; f_lmhead={F_LMHEAD_384:g}), so the dominant non-attention strict tax lives in the "
-            f"{DOMINANT_NONATTN_STRICT_LOCUS_384}. Corrected ledger: {N_KERNEL_REBUILDS_STRICT_500_384} kernel "
-            "rebuilds (attn #375 + body-Marlin #376), NOT 3; lm_head shares the body kernel (0 rebuilds). "
-            f"Bank the supply base at <={plus_attn:g}-today. STRUCTURAL: "
-            "private <= public, so a public base < 500 may make private-500 unreachable by demand-side "
-            "coverage retrain ALONE at any coverage. denken #383 (t68af2yw, RED, 17:53Z) CONFIRMED this: "
-            f"on the honest floor the private serve point is {PRIVATE_ON_FLOOR_383:g} -> residual "
-            f"+{RESIDUAL_TO_500_ON_FLOOR_383:g} TPS -> required Δcov +{REQUIRED_DCOV_383:g} = "
-            f"{REQUIRED_DCOV_BUDGET_MULT_383:g}x the #336 budget; a supply lift of "
-            f"+{SUPPLY_LIFT_REQUIRED_FIRST_TPS_383:g} TPS (floor-joint) is required FIRST (the ~25-GPU-hr "
-            "coverage pilot is OFF the critical path until the base clears ~487-493). HELD pending a "
-            "measured supply number from wirbel #390 (corrected SHIPPABLE strict ceiling; 510.01/518.92 "
-            "refuted) OR lawine #388 (realized TPS of lawine #372's GREEN -21.5%-body-read mixed-precision "
-            "BODY allocation). 518.92 deflated on three grounds: " + ETA_AXIS_DEFLATION_GROUNDS_378 + "."
+            "(whole-step batch-invariant determinism). wirbel #390 (5y64zbjz, 19:01Z) measured 471.42; "
+            f"wirbel #393 (0q7ynumg, LANDED 20:19Z) CORRECTED it to {base_today:g}: the DECODE-specific "
+            f"attention strict tax is {DECODE_ATTN_STRICT_TAX_PCT_393:g}% (decode band "
+            f"{list(DECODE_BAND_393)}), {DECODE_TAX_DELTA_PP_393:g}pp LARGER than the #378 eval-weighted "
+            f"{EVAL_WEIGHTED_ATTN_STRICT_TAX_PCT_378:g}% -> gap_to_500 widens to {deficit_to_500_today:g} "
+            f"(ceiling {SHIPPABLE_CEILING_393:g}). Attention is the SOLE strict tax and irreducible "
+            "rebuild-free (attn_eta_reducible=False; FlashInfer-BI MEASURED-FALSE; pinned-K is a flagged "
+            "rebuild). The ledger stays 1 kernel rebuild (attention only): lm_head FREE int4-Marlin (#384) "
+            "AND body int4-Marlin byte-exact @ M=8 (#390/#381). STRUCTURAL: private <= public, so a public "
+            "base < 500 may make private-500 unreachable by the demand closer ALONE. denken #383 (RED) + "
+            f"denken #387 (MEASURED anchor {MEASURED_TOP4_COVERAGE_387:g}) CONFIRMED a supply lift is "
+            "required FIRST. lawine #388/#392 sized the cb3 body-allocation lift +"
+            f"{cb3_lift_honest:g} honest HEADLINE, BUT kanna #394 (d184kbey, LANDED RED 20:02Z) made that "
+            f"HEADLINE PPL-DEAD: #372's +{CB3_INSAMPLE_PPL_MARGIN_372:g} in-sample margin is winner's-curse "
+            f"(k={KANNA394_SELECTED_K_RANGE[0]}-{KANNA394_SELECTED_K_RANGE[1]}); the held-out worst-seed "
+            f"({KANNA394_HELDOUT_WORST_SEED_PPL:g}) AND OOD ShareGPT ({KANNA394_OOD_SHAREGPT_PPL:g}) BREACH "
+            f"the {KANNA394_PPL_GATE:g} gate. So {base_today:g}+{cb3_lift_honest:g} is arithmetic-only, NOT "
+            f"deployable. BUT k={KANNA394_CONSERVATIVE_K_232} still clears (~"
+            f"{KANNA394_CONSERVATIVE_K_HELDOUT_PPL:g} held-out) -> cb3 IS deployable at a conservative k, at "
+            "a smaller UN-COSTED lift. The REAL PPL-safe supply number is PENDING kanna #403 (largest k with "
+            f"held-out worst-seed <= {KANNA403_HELDOUT_WORST_SEED_TARGET:g} -> re-costed lift). HOLD the "
+            "supply leaf at 'TRUE only at a conservative-k lift, value pending kanna #403'. 518.92 deflated "
+            "on three grounds: " + ETA_AXIS_DEFLATION_GROUNDS_378 + "."
         ),
     }
 
@@ -1034,6 +1453,17 @@ def gap_decomposition_analysis(irreducible_floor_survives_vbi: str = UBEL386_FLO
         else (ALL_CORNERS_CLEAR_3P2_VBI1_386 if floor_inflates_vbi else all_corners_clear))
     breakeven_prompt_shift_vbi1_tok = (BREAKEVEN_PROMPT_SHIFT_VBI1_TOK_386 if floor_inflates_vbi
                                        else PRIVATE_PROMPT_SHIFT_BREAKEVEN_TOK)
+    # ubel #389 (fqt33bj3, merged 19:15Z) — measured per-L attention identity floor under VBI=1 is
+    # 0.5764% (< the 0.633% off-VBI floor, NOT the 1.310% #386 interpolation); 0 corners breach 3.2%;
+    # the measured local-penalty slope is 0.353x the #386 interpolation -> the #386 pessimistic-corner
+    # breach was a CONSERVATIVE-SLOPE ARTIFACT.  Bank the refutation: the OPERATIVE breach state drops
+    # the #386 RED.  (The _386 fields stay as provenance of the relayed hypothesis.)
+    breach_386_refuted = UBEL389_386_BREACH_REFUTED                          # True (banked)
+    operative_floor_vbi1_central_pct = (UBEL389_MEASURED_FLOOR_VBI1_PCT if breach_386_refuted
+                                        else live_floor_central)              # 0.5764% measured
+    all_corners_clear_3p2_operative: bool | None = (
+        UBEL389_ALL_CORNERS_CLEAR_3P2_MEASURED if breach_386_refuted else all_corners_clear_3p2_vbi1)
+    prompt_shift_binding_risk_operative = floor_inflates_vbi and not breach_386_refuted  # False
     return {
         "source": "ubel #379 (5kpb73tb, GREEN, independently verified)",
         "public_private_gap_pct": PUBLIC_PRIVATE_GAP_PCT,
@@ -1080,7 +1510,18 @@ def gap_decomposition_analysis(irreducible_floor_survives_vbi: str = UBEL386_FLO
         "pessimistic_corner_margin_pp_386": PESSIMISTIC_CORNER_MARGIN_PP_386,
         "breakeven_prompt_shift_vbi1_tok_386": breakeven_prompt_shift_vbi1_tok,
         "prompt_shift_sensitivity_binding_risk_386": floor_inflates_vbi,
-        "ubel389_pin_breach_pending": UBEL389_PIN_BREACH_PENDING,
+        # ubel #389 (LANDED 19:15Z): the #386 pessimistic-corner breach is REFUTED on the measured slope
+        "ubel389_landed": UBEL389_LANDED,
+        "ubel389_pin_breach_pending": UBEL389_PIN_BREACH_PENDING,                 # now False (resolved)
+        "ubel389_386_breach_refuted": breach_386_refuted,                         # True
+        "ubel389_measured_floor_vbi1_pct": UBEL389_MEASURED_FLOOR_VBI1_PCT,       # 0.5764 (< 0.633)
+        "ubel389_pessimistic_breaches_3p2_measured": UBEL389_PESSIMISTIC_BREACHES_3P2_MEASURED,  # 0
+        "ubel389_all_corners_clear_3p2_measured": UBEL389_ALL_CORNERS_CLEAR_3P2_MEASURED,        # True
+        "ubel389_measured_slope_ratio_to_386": UBEL389_MEASURED_SLOPE_RATIO_TO_386,  # 0.353x
+        # OPERATIVE (post-#389) demand-floor state — the leaf is ROBUST on the measured slope
+        "irreducible_floor_vbi1_central_pct_operative": operative_floor_vbi1_central_pct,  # 0.5764%
+        "all_corners_clear_3p2_vbi1_operative": all_corners_clear_3p2_operative,            # True
+        "prompt_shift_sensitivity_binding_risk_operative": prompt_shift_binding_risk_operative,  # False
         "note": (
             "ubel #379 (GREEN): the 4.295pp gap = 85.25% acceptance (coverage-ADDRESSABLE) + 14.75% "
             "ctxlen (IRREDUCIBLE) + 0% outlen + 0% numerics. The fixed numerics/identity tax CANCELS in "
@@ -1095,9 +1536,12 @@ def gap_decomposition_analysis(irreducible_floor_survives_vbi: str = UBEL386_FLO
             f"3p2_vbi1=False (the pessimistic corner breaches at {PESSIMISTIC_CORNER_VBI1_PCT_386:g}%, "
             f"{PESSIMISTIC_CORNER_MARGIN_PP_386:g}pp) and the breakeven private prompt shift HALVES "
             f"({BREAKEVEN_PROMPT_SHIFT_PRE_VBI_TOK:g} -> {BREAKEVEN_PROMPT_SHIFT_VBI1_TOK_386:g} tok). "
-            "Re-derive the demand ceiling on the 1.310% live floor and treat private prompt-length-shift "
-            "sensitivity as a BINDING risk. ubel reseated to a GPU per-L attention measurement (#389) to "
-            "PIN the thin -0.32pp breach."
+            "BUT ubel #389 (LANDED 19:15Z) MEASURED the per-L attention identity floor under VBI=1 at "
+            f"{UBEL389_MEASURED_FLOOR_VBI1_PCT:g}% (< the 0.633% off-VBI floor, NOT 1.310%); 0 corners "
+            f"breach 3.2% and the measured local-penalty slope is only {UBEL389_MEASURED_SLOPE_RATIO_TO_386:g}x "
+            "the #386 interpolation -> the #386 pessimistic-corner breach was a CONSERVATIVE-SLOPE ARTIFACT. "
+            "OPERATIVE: drop the #386 RED; the demand leaf is ROBUST on the measured slope (all corners "
+            "clear 3.2%, prompt-shift sensitivity NOT binding). The _386 fields remain as provenance."
         ),
     }
 
@@ -1121,23 +1565,28 @@ def gap_decomposition_analysis(irreducible_floor_survives_vbi: str = UBEL386_FLO
 # --------------------------------------------------------------------------- #
 def demand_side_route_analysis(robust_pilot: str = "pending",
                                gap_addressable_pp: float | None = None,
-                               irreducible_floor_survives_vbi: str = UBEL386_FLOOR_SURVIVES_VBI
-                               ) -> dict[str, Any]:
-    """Demand-side residual leaf — necessary-but-insufficient (denken #383); central GREEN under VBI=1.
+                               irreducible_floor_survives_vbi: str = UBEL386_FLOOR_SURVIVES_VBI,
+                               ubel401_tree_coverage_ceiling: str = "pending",
+                               denken402_tree_net_supply: str = "pending") -> dict[str, Any]:
+    """Demand-side residual leaf — 20:19Z RE-PRICED: the d-cov can ONLY come from the TREE (genuinely-new).
 
-    Per denken #383 (17:53Z) the demand closer alone does NOT reach private-500 on the honest base, so
-    this leaf delivers only the RESIDUAL after a supply lift (see supply_side_base_analysis).  It still
-    DELIVERS at central confidence: deliverability central GREEN (denken #380) + slope GREEN (ubel #382)
-    + gap channel live (ubel #379).  ubel #386 (RESOLVED) inflates the irreducible floor to 1.310% under
-    VBI=1; central still clears 3.2% (+1.89pp) so the leaf is not dead, but prompt-shift sensitivity is
-    now a BINDING risk and the robust tier no longer comfortably clears every corner.
+    Per denken #383 the demand closer alone does NOT reach private-500 on the honest base.  The 20:19Z
+    cluster then closed both deployable escape routes:
+      - denken #396 (LANDED RED): demand-ALONE busts EVEN BARE on the corrected 467.48 base (required_dcov
+        ~0.0338 = 109% of the #336 +0.031 budget; on bare 471.42 the #389 floor already pushed it over).
+      - ubel #399 (LANDED RED): there is NO cheap deployable demand lever — every monotone draft-head lever
+        (temperature, affine calibration) is a RANK-INVARIANT no-op (MC max|Δcov|=0; frac_of_gap_covered=0%).
+    So the demand d-cov (#392's +0.0117 sliver and anything beyond) can ONLY be SUPPLIED by the TREE (the
+    locked +0.1286 top-1->top-4 prize) — a genuinely-new-lever.  The leaf now DELIVERS only if the tree
+    NETs the d-cov, gated on ubel #401 (top-8/16 coverage ceiling) OR denken #402 (net after verify-M tax).
+    The central-GREEN coverage-retrain sizing below is kept for PROVENANCE (it sized the target) but a
+    drafter retrain is FORBIDDEN, so it is not a deployable delivery path.
 
-    `robust_pilot`: the coverage-lift pilot that would harden the ROBUST tier (c >= 0.9010): one of
-        "pending" | "delivers" | "fails".  Per denken #383 this pilot is OFF the critical path (the
-        supply base must clear ~487-493 first); it gates only the robust-tier upgrade, never GO.
-    `gap_addressable_pp` (ubel #379, BANKED GREEN): pp of the 4.295pp gap that is coverage-addressable.
-        None -> use ubel #379's banked value.
+    `robust_pilot`: the (forbidden-retrain) coverage-lift pilot — provenance only now; OFF the critical path.
+    `gap_addressable_pp` (ubel #379, BANKED GREEN): None -> use ubel #379's banked value.
     `irreducible_floor_survives_vbi` (ubel #386, RESOLVED): banked default "inflates" (-> 1.310% floor).
+    `ubel401_tree_coverage_ceiling`: tree top-8/16 coverage-ceiling probe — "pending"|"green"|"red".
+    `denken402_tree_net_supply`: does the tree NET d-cov after its verify-M step-time tax on 467.48? same.
     """
     # Budget check against #336's +0.031 envelope.  ubel #382 prices the CONSERVATIVE private-anchored
     # sizing at 66.6% of the budget (central 38.9%); both fit.
@@ -1180,30 +1629,50 @@ def demand_side_route_analysis(robust_pilot: str = "pending",
     live_floor_central_pct = (IRREDUCIBLE_FLOOR_VBI1_CENTRAL_386 if floor_inflates_vbi
                               else GAP_IRREDUCIBLE_PP_CENTRAL_UBEL379)
     prompt_shift_binding_risk = floor_inflates_vbi   # the +253-tok comfortable buffer halves to +119
+    # ubel #389 (LANDED 19:15Z): the #386 breach is REFUTED on the MEASURED slope (0.5764% floor, 0
+    # corners breach 3.2%, slope 0.353x the #386 interpolation).  Bank the OPERATIVE robust state.
+    breach_386_refuted = UBEL389_386_BREACH_REFUTED                          # True (banked)
+    operative_floor_vbi1_central_pct = (UBEL389_MEASURED_FLOOR_VBI1_PCT if breach_386_refuted
+                                        else live_floor_central_pct)          # 0.5764% measured
+    all_corners_clear_3p2_operative = (UBEL389_ALL_CORNERS_CLEAR_3P2_MEASURED if breach_386_refuted
+                                       else (ALL_CORNERS_CLEAR_3P2_VBI1_386 if floor_inflates_vbi else True))
+    prompt_shift_binding_risk_operative = prompt_shift_binding_risk and not breach_386_refuted  # False
 
     # --- ubel #382 slope (BANKED GREEN) --- #
     # The slope is CONFIRMED private-robust; bank the conservative private-anchored target ~0.911.
     slope_private_robust = SLOPE_IS_PRIVATE_ROBUST_382                # True (banked)
     slope_private_tps = SLOPE_TPS_PER_COVERAGE_PRIVATE_382            # 437.3 (489.8 * 0.893)
 
-    # --- leaf verdict --- #
-    # The leaf DELIVERS the residual at CENTRAL confidence now: central deliverability GREEN AND slope
-    # GREEN AND gap-channel live.  (If the gap were forced irreducible via an override, the leaf dies.)
+    # --- 20:19Z tree-net-supply gate (the ONLY deployable demand delivery path) --- #
+    # denken #396 (RED) closed demand-alone; ubel #399 (RED) closed the cheap monotone levers.  So the
+    # d-cov must be SUPPLIED by the TREE (the +0.1286 top-1->top-4 prize): the leaf DELIVERS iff the tree
+    # NETs the d-cov (ubel #401 coverage ceiling OR denken #402 net-after-verify-M-tax green); it is DEAD
+    # iff both tree probes red; PENDING otherwise.  The central-GREEN coverage-retrain sizing is provenance.
+    tree_green = (ubel401_tree_coverage_ceiling == "green" or denken402_tree_net_supply == "green")
+    tree_both_red = (ubel401_tree_coverage_ceiling == "red" and denken402_tree_net_supply == "red")
+    tree_pending = not (tree_green or tree_both_red)
+    demand_alone_busts_467 = DENKEN396_DEMAND_ALONE_BUSTS_EVEN_BARE_467   # True (109% of budget)
+    no_cheap_demand_lever = not UBEL399_CHEAP_DEMAND_LEVER_EXISTS         # True (monotone levers no-op)
+
+    # --- leaf verdict (20:19Z) --- #
     if not gap_channel_live:
         demand_leaf_delivers: bool | None = False
         binding = "gap_irreducible_no_coverage_channel_ubel379_override"
-    elif deliver_central and slope_private_robust:
-        demand_leaf_delivers = True
-        binding = ("demand_leaf_delivers_central_green__robust_"
-                   + ("pending_pilot" if deliver_robust is None
-                      else ("delivers" if deliver_robust else "fails")))
-    else:
+    elif tree_both_red:
         demand_leaf_delivers = False
-        binding = "demand_central_or_slope_failed"
+        binding = "demand_dcov_unsuppliable__tree_nets_nothing_ubel401_denken402_both_red"
+    elif tree_green:
+        demand_leaf_delivers = True
+        binding = "demand_leaf_delivers_via_tree_net_supply__ubel401_or_denken402_green"
+    else:  # tree pending -> the demand residual has no deployable supplier yet
+        demand_leaf_delivers = None
+        binding = ("demand_dcov_needs_tree__demand_alone_busts_denken396__no_cheap_lever_ubel399__"
+                   "PENDING_ubel401_or_denken402_tree_net_supply")
 
-    # The leaf is "pending" only in the sense that the robust tier is not yet hardened; the central
-    # delivery is RESOLVED.  GO-gating uses the central delivery (the supply base is the binding axis).
+    # The robust coverage pilot is provenance-only now (a forbidden retrain); the operative pending axis
+    # is the tree net-supply (ubel #401 / denken #402).
     leaf_robust_pending = robust_pilot_pending
+    demand_leaf_pending_tree = tree_pending and gap_channel_live
 
     return {
         "route": "demand_side_coverage_denken377",
@@ -1271,7 +1740,18 @@ def demand_side_route_analysis(robust_pilot: str = "pending",
         "prompt_shift_sensitivity_binding_risk_386": prompt_shift_binding_risk,
         "breakeven_prompt_shift_vbi1_tok_386": (BREAKEVEN_PROMPT_SHIFT_VBI1_TOK_386 if floor_inflates_vbi
                                                 else PRIVATE_PROMPT_SHIFT_BREAKEVEN_TOK),
-        "ubel389_pin_breach_pending": UBEL389_PIN_BREACH_PENDING,
+        # ubel #389 (LANDED 19:15Z): the #386 pessimistic-corner breach is REFUTED on the measured slope
+        "ubel389_landed": UBEL389_LANDED,
+        "ubel389_pin_breach_pending": UBEL389_PIN_BREACH_PENDING,                 # now False (resolved)
+        "ubel389_386_breach_refuted": breach_386_refuted,                         # True
+        "ubel389_measured_floor_vbi1_pct": UBEL389_MEASURED_FLOOR_VBI1_PCT,       # 0.5764 (< 0.633)
+        "ubel389_pessimistic_breaches_3p2_measured": UBEL389_PESSIMISTIC_BREACHES_3P2_MEASURED,  # 0
+        "ubel389_all_corners_clear_3p2_measured": UBEL389_ALL_CORNERS_CLEAR_3P2_MEASURED,        # True
+        "ubel389_measured_slope_ratio_to_386": UBEL389_MEASURED_SLOPE_RATIO_TO_386,  # 0.353x
+        # OPERATIVE (post-#389) demand-floor state — the leaf is ROBUST on the measured slope
+        "irreducible_floor_vbi1_central_pct_operative": operative_floor_vbi1_central_pct,  # 0.5764%
+        "all_corners_clear_3p2_vbi1_operative": all_corners_clear_3p2_operative,            # True
+        "prompt_shift_sensitivity_binding_risk_operative": prompt_shift_binding_risk_operative,  # False
         "coverage_target_for_3p2_ubel379": COVERAGE_TARGET_FOR_3P2_UBEL379,
         # slope private-OOD robustness (ubel #382, BANKED GREEN)
         "slope_tps_per_coverage_ubel379": SLOPE_TPS_PER_COVERAGE_UBEL379,
@@ -1284,9 +1764,43 @@ def demand_side_route_analysis(robust_pilot: str = "pending",
         "demand_conservative_target_382": DEMAND_CONSERVATIVE_TARGET_382,   # 0.911 BANK THIS
         "demand_budget_frac_conservative_382": DEMAND_BUDGET_FRAC_CONSERVATIVE_382,  # 66.6%
         "demand_budget_frac_central_382": DEMAND_BUDGET_FRAC_CENTRAL_382,            # 38.9%
-        # verdict
-        "demand_leaf_delivers": demand_leaf_delivers,             # True now (central GREEN under VBI=1)
+        # denken #396 (yc5ji486, LANDED RED 20:03Z) — demand-ALONE busts; the zero-flag GO path is CLOSED
+        "denken396_landed": DENKEN396_LANDED,
+        "denken396_demand_alone_500_green": DENKEN396_DEMAND_ALONE_500_GREEN,        # False
+        "denken396_required_dcov_bare_471": DENKEN396_REQUIRED_DCOV_BARE_471,        # 0.02946 (94.9% — fits bare)
+        "denken396_required_dcov_bare_471_budget_frac": DENKEN396_REQUIRED_DCOV_BARE_471_BUDGET_FRAC,
+        "denken396_required_dcov_under_389_floor": DENKEN396_REQUIRED_DCOV_UNDER_389_FLOOR,  # 0.03244 > 0.031
+        "denken396_robust_under_389_slope": DENKEN396_ROBUST_UNDER_389_SLOPE,        # False
+        "denken396_required_dcov_on_467": DENKEN396_REQUIRED_DCOV_ON_467,            # 0.0338 (109%)
+        "denken396_required_dcov_on_467_budget_frac": DENKEN396_REQUIRED_DCOV_ON_467_BUDGET_FRAC,
+        "denken396_demand_alone_busts_even_bare_467": DENKEN396_DEMAND_ALONE_BUSTS_EVEN_BARE_467,  # True
+        "denken396_zero_flag_go_path_closed": DENKEN396_ZERO_FLAG_GO_PATH_CLOSED,    # True
+        "demand_alone_busts_467": demand_alone_busts_467,
+        # ubel #399 (ec7i3z5t, LANDED RED 20:08Z) — NO cheap deployable demand lever; d-cov needs the tree
+        "ubel399_landed": UBEL399_LANDED,
+        "ubel399_cheap_demand_lever_exists": UBEL399_CHEAP_DEMAND_LEVER_EXISTS,      # False
+        "ubel399_monotone_levers_rank_invariant": UBEL399_MONOTONE_LEVERS_RANK_INVARIANT,  # True (no-op)
+        "ubel399_mc_max_dcov": UBEL399_MC_MAX_DCOV,                                  # 0.0
+        "ubel399_rank_changing_control_fires": UBEL399_RANK_CHANGING_CONTROL_FIRES,  # 0.59 (harness OK)
+        "ubel399_frac_of_gap_covered": UBEL399_FRAC_OF_GAP_COVERED,                  # 0%
+        "ubel399_dcov_only_from_retrain_or_tree": UBEL399_DCOV_ONLY_FROM_RETRAIN_OR_TREE,  # True
+        "ubel399_tree_top1_to_top4_prize": UBEL399_TREE_TOP1_TO_TOP4_PRIZE,          # +0.1286
+        "ubel399_coverage_gap_upper_bound": list(UBEL399_COVERAGE_GAP_UPPER_BOUND),  # [0, 0.1097]
+        "ubel399_ppl_untouched": UBEL399_PPL_UNTOUCHED,                              # True (binding=deployability)
+        "no_cheap_demand_lever": no_cheap_demand_lever,
+        # tree net-supply gate (20:19Z) — ubel #401 (coverage ceiling) OR denken #402 (net after verify-M tax)
+        "ubel401_tree_coverage_ceiling_input": ubel401_tree_coverage_ceiling,
+        "denken402_tree_net_supply_input": denken402_tree_net_supply,
+        "ubel401_tree_coverage_ceiling_pending_constant": UBEL401_TREE_COVERAGE_CEILING_PENDING,
+        "denken402_tree_net_supply_pending_constant": DENKEN402_TREE_NET_SUPPLY_PENDING,
+        "tree_net_supply_green": tree_green,                        # >=1 of ubel #401 / denken #402 green
+        "tree_net_supply_both_red": tree_both_red,                  # both red -> demand dead
+        "tree_net_supply_pending": tree_pending,                    # held until >=1 lands
+        "tree_is_genuinely_new_lever": TREE_IS_GENUINELY_NEW_LEVER_2019Z,  # True
+        # verdict (20:19Z): the demand residual has no deployable supplier until the tree NETs it
+        "demand_leaf_delivers": demand_leaf_delivers,             # None pending tree (denken #396/ubel #399 RED)
         "leaf_robust_pending": leaf_robust_pending,
+        "demand_leaf_pending_tree": demand_leaf_pending_tree,     # held until ubel #401 / denken #402 lands
         "robust_pilot_off_critical_path_383": not PILOT_ON_CRITICAL_PATH_383,  # True (denken #383)
         "binding_constraint": binding,
         "note": (
@@ -1302,11 +1816,30 @@ def demand_side_route_analysis(robust_pilot: str = "pending",
             "the ~25-GPU-hr pilot is OFF the critical path until the base clears ~487-493. ubel #386 (RED, "
             "17:53Z): the irreducible floor inflates 2.07x -> 1.310% under VBI=1; central still clears 3.2% "
             "(+1.89pp) so the leaf is not dead, but all_corners_clear_3p2_vbi1=False and the breakeven "
-            "prompt shift halves (+253 -> +119 tok) -> prompt-shift sensitivity is a BINDING risk (ubel "
-            "#389 reseated to PIN the -0.32pp breach). Net: the demand leaf DELIVERS the residual at "
-            "CENTRAL confidence under VBI=1, necessary-but-insufficient on its own (denken #383); it "
-            "transfers FROM the supply-side honest base (wirbel #378 <=480.7-today) — see "
-            "supply_side_base_analysis, the binding GO axis."
+            "prompt shift halves (+253 -> +119 tok) -> prompt-shift sensitivity was relayed as a BINDING "
+            f"risk. BUT ubel #389 (LANDED 19:15Z) MEASURED the per-L attention identity floor under VBI=1 "
+            f"at {UBEL389_MEASURED_FLOOR_VBI1_PCT:g}% (< 0.633% off-VBI, NOT 1.310%); 0 corners breach 3.2% "
+            f"and the measured slope is {UBEL389_MEASURED_SLOPE_RATIO_TO_386:g}x the #386 interpolation -> "
+            "the #386 breach was a CONSERVATIVE-SLOPE ARTIFACT (the irreducible-floor risk is OFF). ★ BUT "
+            "the 20:19Z cluster RE-PRICED the demand leaf DOWN: denken #396 (LANDED RED 20:03Z) -> demand-"
+            f"ALONE busts EVEN BARE on the corrected {REALIZED_DEPLOYED_STRICT_393:g} base (required_dcov ~"
+            f"{DENKEN396_REQUIRED_DCOV_ON_467:g} = {DENKEN396_REQUIRED_DCOV_ON_467_BUDGET_FRAC*100:g}% of "
+            f"the +{BUDGET_336_PLUS_031:g} budget; on bare 471.42 the #389 floor already pushed +"
+            f"{DENKEN396_REQUIRED_DCOV_BARE_471:g} to {DENKEN396_REQUIRED_DCOV_UNDER_389_FLOOR:g} > 0.031), "
+            "so the clean zero-flag GO path is CLOSED. ubel #399 (LANDED RED 20:08Z) -> there is NO cheap "
+            "deployable demand lever: every monotone draft-head lever (temperature, affine) is a RANK-"
+            f"INVARIANT no-op (MC max|Δcov|={UBEL399_MC_MAX_DCOV:g}, frac_of_gap_covered="
+            f"{UBEL399_FRAC_OF_GAP_COVERED*100:g}%; a rank-changing control fires at "
+            f"{UBEL399_RANK_CHANGING_CONTROL_FIRES:g} -> the zeros are physics). So the demand d-cov "
+            f"(#392's +0.0117 sliver and beyond) can ONLY be SUPPLIED by the TREE (the locked +"
+            f"{UBEL399_TREE_TOP1_TO_TOP4_PRIZE:g} top-1->top-4 prize; coverage gap "
+            f"{list(UBEL399_COVERAGE_GAP_UPPER_BOUND)} is an UPPER bound) — a genuinely-new-lever. PPL is "
+            "untouched throughout (spec-decode emits the target greedy token; binding=deployability, never "
+            "the gate). The central-GREEN coverage-retrain sizing above is PROVENANCE (a drafter retrain is "
+            "forbidden). OPERATIVE: the demand leaf DELIVERS only if the tree NETs the d-cov -> PENDING "
+            "ubel #401 (top-8/16 coverage ceiling) OR denken #402 (net after the verify-M step-time tax on "
+            f"{REALIZED_DEPLOYED_STRICT_393:g}). Necessary-but-insufficient on its own (denken #383); it "
+            "transfers FROM the supply-side base — see supply_side_base_analysis, the binding GO axis."
         ),
     }
 
@@ -1584,6 +2117,125 @@ def verdict_given_ppl(measured_ppl: float | None, b_star: float,
 
 
 # --------------------------------------------------------------------------- #
+# Terminal GO-flip gate (advisor 20:19Z REPRICE).  The 19:25Z cb3-deployability pair RESOLVED RED and is
+# SUPERSEDED: kanna #394 (RED) made the +32.65 cb3 HEADLINE lift PPL-DEAD, denken #396 (RED) closed the
+# demand-alone zero-flag GO, ubel #399 (RED) closed the cheap-monotone-lever escape.  The route did NOT
+# close — it is RE-PRICED toward "conservative-k cb3 + a NET-positive tree", with the terminal GO now a
+# clean AND-product of the two RE-PRICED leaves:
+#   SUPPLY leg = kanna #403 — the PPL-SAFE conservative-k cb3 supply re-cost (largest k with held-out
+#                worst-seed <= 2.41).  It resolves `supply_base_enables_500` inside supply_side_base_analysis.
+#   DEMAND leg = ubel #401 (locked top-8/16 tree coverage ceiling) OR denken #402 (does the tree NET d-cov
+#                after its verify-M step-time tax on 467.48?).  It resolves `demand_leaf_delivers` inside
+#                demand_side_route_analysis.
+# terminal_go GREEN iff kanna #403 (supply leg) AND >=1 of {ubel #401, denken #402} (demand leg) land
+# green; RED iff either leg red; else PENDING (held None).  "Sharpen, don't flip."
+# --------------------------------------------------------------------------- #
+def terminal_go_gate_analysis(supply_base_enables_500: bool | None,
+                              demand_leaf_delivers: bool | None,
+                              kanna403_ppl_safe_supply: str = "pending",
+                              ubel401_tree_coverage_ceiling: str = "pending",
+                              denken402_tree_net_supply: str = "pending") -> dict[str, Any]:
+    """20:19Z REPRICE terminal GO gate: GO = (supply leg) AND (demand leg), held None until both land.
+
+    Takes the two ALREADY-COMPUTED re-priced leaf verdicts (so terminal_go is the leaves' None-aware
+    AND-product BY CONSTRUCTION) plus the three feeder states (for the pending-gate list).  The SUPPLY
+    leg is kanna #403 (PPL-safe conservative-k cb3 supply re-cost; the +32.65 HEADLINE is PPL-DEAD per
+    kanna #394 RED); the DEMAND leg is the tree net-supply (ubel #401 coverage ceiling OR denken #402 net
+    after the verify-M tax) — the ONLY deployable d-cov supplier left after denken #396 / ubel #399 RED.
+
+    SUPERSEDED 19:25Z pair, banked as the re-pricing rationale (no longer runtime gates):
+      - kanna #394 (LANDED RED): cb3's +32.65 honest HEADLINE lift is PPL-DEAD (winner's-curse selection
+        to k=243-246; held-out 2.4223 + OOD ShareGPT 2.4270 breach the 2.42 gate).  cb3 stays deployable
+        at a CONSERVATIVE k (~232 clears ~2.39) at a smaller UN-COSTED lift -> kanna #403.
+      - denken #396 (LANDED RED): demand-ALONE busts even bare on 467.48 (0.0338 = 109% of the budget).
+      - ubel #399 (LANDED RED): no cheap deployable demand lever (monotone levers rank-invariant no-ops).
+
+    Each feeder is one of "pending" | "green" | "red".  Returns terminal_go in {green, red, pending} and
+    go_reachable in {True, False, None}.
+    """
+    supply_leg = supply_base_enables_500    # None / True / False (kanna #403 resolves it in the supply leaf)
+    demand_leg = demand_leaf_delivers       # None / True / False (ubel #401 / denken #402 in the demand leaf)
+
+    # None-aware AND-product: RED if either leg red; GREEN iff both green; else PENDING (held).
+    if supply_leg is False or demand_leg is False:
+        terminal_go = "red"
+        go_reachable: bool | None = False
+    elif supply_leg is True and demand_leg is True:
+        terminal_go = "green"
+        go_reachable = True
+    else:
+        terminal_go = "pending"
+        go_reachable = None
+
+    kanna403_pending = kanna403_ppl_safe_supply == "pending"
+    tree_green = (ubel401_tree_coverage_ceiling == "green" or denken402_tree_net_supply == "green")
+    tree_both_red = (ubel401_tree_coverage_ceiling == "red" and denken402_tree_net_supply == "red")
+    tree_pending = not (tree_green or tree_both_red)
+
+    pending_gates: list[str] = []
+    if kanna403_pending:
+        pending_gates.append("kanna#403_ppl_safe_conservative_k_supply_recost")      # SUPPLY leg
+    if tree_pending:
+        pending_gates.append("ubel#401_or_denken#402_tree_net_supply")               # DEMAND leg
+
+    supply_leg_state = ("green" if supply_leg is True else "red" if supply_leg is False else "pending")
+    demand_leg_state = ("green" if demand_leg is True else "red" if demand_leg is False else "pending")
+
+    return {
+        "source": ("advisor 20:19Z REPRICE — terminal GO = (supply leg kanna #403 PPL-safe) AND "
+                   "(demand leg ubel #401 OR denken #402 tree net-supply)"),
+        "go_formula": ("terminal_go <=> kanna#403_ppl_safe_supply AND "
+                       "(ubel#401 OR denken#402 tree_net_supply)"),
+        # the two re-priced legs (already computed in the leaves)
+        "supply_leg_enables_500": supply_leg,
+        "demand_leg_delivers": demand_leg,
+        "supply_leg_state": supply_leg_state,
+        "demand_leg_state": demand_leg_state,
+        # the three feeders (20:19Z)
+        "kanna403_ppl_safe_supply": kanna403_ppl_safe_supply,
+        "ubel401_tree_coverage_ceiling": ubel401_tree_coverage_ceiling,
+        "denken402_tree_net_supply": denken402_tree_net_supply,
+        "kanna403_pending": kanna403_pending,
+        "tree_net_supply_green": tree_green,                # >=1 of ubel #401 / denken #402 green
+        "tree_net_supply_both_red": tree_both_red,          # both red -> demand leg dead
+        "tree_net_supply_pending": tree_pending,            # held until >=1 lands
+        # verdict
+        "terminal_go": terminal_go,                         # green / red / pending
+        "go_reachable": go_reachable,                       # True / False / None (the AND-product)
+        "terminal_go_confirmed": terminal_go == "green",    # TERMINAL-GO flip
+        "terminal_go_blocked": terminal_go == "red",        # a leg landed red
+        "terminal_go_pending": terminal_go == "pending",    # held None
+        "terminal_go_pending_gates": pending_gates,         # kanna #403 + >=1 of ubel #401 / denken #402
+        "reprice_go_flip_gates": list(REPRICE_2019Z_GO_FLIP_GATES),
+        "tree_net_supply_probes": list(REPRICE_2019Z_TREE_NET_SUPPLY_PROBES),
+        # SUPERSEDED 19:25Z pair (banked as the re-pricing rationale)
+        "superseded_1925z_pair": REPRICE_2019Z_SUPERSEDES_1925Z_PAIR,
+        "kanna394_headline_ppl_dead": CB3_HEADLINE_LIFT_PPL_DEAD_394,            # +32.65 PPL-dead
+        "denken396_demand_alone_closed": DENKEN396_ZERO_FLAG_GO_PATH_CLOSED,     # demand-alone busts
+        "ubel399_no_cheap_demand_lever": not UBEL399_CHEAP_DEMAND_LEVER_EXISTS,  # cheap-lever escape closed
+        "cb3_deployable_at_conservative_k_394": CB3_DEPLOYABLE_AT_CONSERVATIVE_K_394,  # the re-price basis
+        "tree_is_genuinely_new_lever": TREE_IS_GENUINELY_NEW_LEVER_2019Z,
+        "cb3_insample_ppl_margin_372": CB3_INSAMPLE_PPL_MARGIN_372,
+        "cb3_lift_honest_denken392": CB3_LIFT_HONEST_DENKEN392,    # +32.65 headline (PPL-dead, provenance)
+        "note": (
+            "20:19Z REPRICE: the 19:25Z cb3-deployability pair RESOLVED RED and is SUPERSEDED — kanna #394 "
+            f"(RED) made the +{CB3_LIFT_HONEST_DENKEN392:g} cb3 HEADLINE lift PPL-DEAD (winner's-curse "
+            f"selection to k={KANNA394_SELECTED_K_RANGE[0]}-{KANNA394_SELECTED_K_RANGE[1]}; held-out "
+            f"{KANNA394_HELDOUT_WORST_SEED_PPL:g} + OOD {KANNA394_OOD_SHAREGPT_PPL:g} breach "
+            f"{KANNA394_PPL_GATE:g}), denken #396 (RED) closed demand-alone (busts even bare on "
+            f"{REALIZED_DEPLOYED_STRICT_393:g}), ubel #399 (RED) closed the cheap monotone levers. The "
+            "route did NOT close — it is RE-PRICED toward 'conservative-k cb3 + a NET-positive tree'. The "
+            "terminal GO is the None-aware AND-product of the two re-priced legs: SUPPLY = kanna #403 (the "
+            f"PPL-SAFE conservative-k re-cost; cb3 stays deployable at k={KANNA394_CONSERVATIVE_K_232} ~"
+            f"{KANNA394_CONSERVATIVE_K_HELDOUT_PPL:g} held-out, lift UN-COSTED) AND DEMAND = >=1 of ubel "
+            f"#401 (top-8/16 tree coverage ceiling, sizing the +{UBEL399_TREE_TOP1_TO_TOP4_PRIZE:g} prize) "
+            "/ denken #402 (does the tree NET d-cov after its verify-M step-time tax?). GREEN iff both legs "
+            "green; RED iff either red; HELD None until both land. Sharpen, don't flip."
+        ),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Composite verdict (advisor 17:03Z-17:53Z): GO = (supply-side public-strict base ENABLES 500) x
 # (demand closer DELIVERS the residual).  The SUPPLY leaf (wirbel #378 honest base <=480.7-today;
 # denken #383 RED CONFIRMED demand-alone insufficient -> +17.2-TPS lift required first; pending a
@@ -1602,60 +2254,61 @@ def composite_verdict(measured_ppl: float | None, b_star: float,
                       robust_pilot: str = "pending",
                       gap_addressable_pp: float | None = None,
                       stark381_decode: str = "pending",
-                      irreducible_floor_survives_vbi: str = "pending") -> dict[str, Any]:
-    """AND-product GO: (supply base enables 500) x (demand closer delivers residual).
+                      irreducible_floor_survives_vbi: str = "pending",
+                      kanna403_ppl_safe_supply: str = "pending",
+                      ubel401_tree_coverage_ceiling: str = "pending",
+                      denken402_tree_net_supply: str = "pending") -> dict[str, Any]:
+    """AND-product GO (advisor 20:19Z REPRICE): (supply leg) AND (demand leg), held None until both land.
 
-    The SUPPLY leaf (wirbel #378 honest base; denken #383 RED -> +17.2-TPS lift required first, pending
-    a measured lift from wirbel #384 OR lawine #388) is the binding axis; the DEMAND leaf
-    (denken #377/#380/#382) delivers the residual at central confidence now.  Route A (sub-int4 eta-axis)
+    The 19:25Z cb3-deployability pair RESOLVED RED and is SUPERSEDED: kanna #394 (RED) made the +32.65 cb3
+    HEADLINE lift PPL-DEAD, denken #396 (RED) closed demand-alone, ubel #399 (RED) closed the cheap
+    monotone levers.  The route did NOT close — it is RE-PRICED toward "conservative-k cb3 + a NET-positive
+    tree".  The terminal GO is the None-aware AND-product of the two re-priced leaves:
+      SUPPLY leg = kanna #403 (PPL-safe conservative-k cb3 supply re-cost) — resolves supply_base_enables_500.
+      DEMAND leg = ubel #401 (tree coverage ceiling) OR denken #402 (tree net after verify-M tax) — resolves
+                   demand_leaf_delivers.
+    GREEN iff both legs green; RED iff either red; HELD None until both land.  Route A (sub-int4 eta-axis)
     is retained for continuity but DEFLATED/excluded from the GO.
     """
     route_a = verdict_given_ppl(measured_ppl, b_star, lmhead_eta)              # sub-int4 eta-axis (deflated)
     supply = supply_side_base_analysis(supply_lift_available_tps, demand_reaches_500_on_floor,
-                                       supply_lift_required_tps, stark381_decode)  # SUPPLY leaf (binding)
+                                       supply_lift_required_tps, stark381_decode,
+                                       kanna403_ppl_safe_supply)              # SUPPLY leaf (binding; kanna #403 leg)
     demand = demand_side_route_analysis(robust_pilot, gap_addressable_pp,
-                                        irreducible_floor_survives_vbi)         # DEMAND leaf (resolved central)
+                                        irreducible_floor_survives_vbi,
+                                        ubel401_tree_coverage_ceiling,
+                                        denken402_tree_net_supply)            # DEMAND leaf (tree net-supply leg)
     ident_reach = identity_reachability_analysis(stark381_decode)             # identity compliance (folds into supply)
 
     a_reachable = route_a["strict_500_reachable_via_known_levers"]    # sub-int4 eta-axis standalone (deflated)
-    supply_enables = supply["supply_base_enables_500"]               # True / False / None(pending #383/#384)
-    demand_delivers = demand["demand_leaf_delivers"]                 # True now (central GREEN)
+    supply_enables = supply["supply_base_enables_500"]               # True / False / None (kanna #403 leg)
+    demand_delivers = demand["demand_leaf_delivers"]                 # True / False / None (tree net-supply leg)
     identity_reachable = ident_reach["identity_reachable_env_or_rebuild"]  # True (env or rebuild)
 
-    # AND-product GO, pending-aware.  The demand leaf delivers the residual at central confidence
-    # (True); the GO hinges on the SUPPLY base enabling 500.  Stamp False if the demand leaf is dead
-    # OR the supply base cannot enable 500 (demand-alone insufficient); True iff both clear; else None.
-    if demand_delivers is False:
-        reachable: bool | None = False
-    elif supply_enables is False:
-        reachable = False
-    elif supply_enables is True and demand_delivers is True:
-        reachable = True
-    else:
-        reachable = None
+    gate = terminal_go_gate_analysis(supply_enables, demand_delivers, kanna403_ppl_safe_supply,
+                                     ubel401_tree_coverage_ceiling,
+                                     denken402_tree_net_supply)      # GO = the two re-priced legs' AND-product
+
+    # AND-product GO, None-aware: the terminal gate ANDs the two RE-PRICED leaves (supply leg kanna #403,
+    # demand leg ubel #401 / denken #402).  False iff either leg red; True iff both green; else None (held).
+    reachable: bool | None = gate["go_reachable"]
     pending = reachable is None
 
-    # GO-gating pending inputs (advisor 17:53Z + 18:12Z correction): denken #383 has RESOLVED
-    # (demand-alone insufficient on the honest base) -> the GO now hinges on a MEASURED SUPPLY LIFT of
-    # +17.2 TPS.  wirbel #384 (18:12Z) RESOLVED the lm_head-BI lever as a non-source (lm_head is already
-    # byte-exact int4-Marlin, eta=0, FREE; the tax is in the body #376), so the supply lift must come
-    # from wirbel #390 (corrected SHIPPABLE strict ceiling, re-rolling the refuted 510.01/518.92) OR
-    # lawine #388 (realized TPS of lawine #372's GREEN mixed-precision BODY allocation).  The robust
-    # demand pilot (OFF the critical path per #383), ubel #389 (pin the VBI=1 floor breach), and stark
-    # #381 identity cost are REFINEMENTS (not GO-gating: the demand leaf already delivers central under
-    # VBI=1, identity is reachable env-or-rebuild).
+    # GO-gating pending inputs (advisor 20:19Z): the terminal gate's two re-priced legs.  The SUPPLY leg is
+    # kanna #403 (the PPL-safe conservative-k cb3 re-cost; the +32.65 headline is PPL-DEAD per kanna #394
+    # RED).  The DEMAND leg is the tree net-supply (>=1 of ubel #401 / denken #402; denken #396 RED closed
+    # demand-alone, ubel #399 RED closed the cheap monotone levers).  denken #383 (floor) surfaces only if
+    # itself pending.  The robust demand pilot is now PROVENANCE-only (a forbidden retrain) and stark #381
+    # e2e identity cost remain REFINEMENTS; ubel #389 LANDED (refuted the #386 breach -> no longer pending).
     pending_inputs: list[str] = []
     if supply["denken383_pending"]:
         pending_inputs.append("denken#383_demand_route_reaches_500_on_deployable_floor")
-    if supply["supply_lift_measured_pending"]:
-        pending_inputs.append("supply_lift_wirbel390_shippable_OR_lawine388_realized_ge_required17p2")
+    pending_inputs.extend(gate["terminal_go_pending_gates"])   # kanna #403 (supply leg) + tree (demand leg)
     refinement_inputs: list[str] = []
     if demand["robust_pilot_pending"]:
-        refinement_inputs.append("coverage_lift_pilot_robust_tier_c0p9010_off_critical_path_383")
+        refinement_inputs.append("coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383")
     if demand["irreducible_floor_vbi_pending_ubel386"]:
         refinement_inputs.append("ubel#386_irreducible_floor_under_vbi1")
-    if demand.get("ubel389_pin_breach_pending"):
-        refinement_inputs.append("ubel#389_pin_vbi1_floor_breach")
     identity_cost_pending = ident_reach["cost_branch_pending"]
     if identity_cost_pending:
         refinement_inputs.append("stark#381_decode_width_identity_cost_branch")
@@ -1667,55 +2320,62 @@ def composite_verdict(measured_ppl: float | None, b_star: float,
         "identity reachable (env-or-rebuild; stark #381 will fix the cost: env@decode=1 rebuild "
         "vs Marlin-gated=2 rebuilds)")
     demand_phrase = (
-        f"demand leaf DELIVERS the residual at central confidence (c >= {DEMAND_CLOSER_CENTRAL_C} "
-        f"GREEN; robust c >= {DEMAND_CLOSER_ROBUST_C} "
-        + ("pending pilot" if demand["robust_pilot_pending"]
-           else ("delivered" if demand["deliver_robust_resolved"] else "failed"))
-        + f"; sized at conservative {DEMAND_CONSERVATIVE_TARGET_382})")
+        "demand leg needs the TREE net-supply (denken #396 RED closed demand-alone; ubel #399 RED the "
+        f"cheap monotone levers; sized closer ~{DEMAND_CONSERVATIVE_TARGET_382} is PROVENANCE — a drafter "
+        "retrain is forbidden)")
 
     if reachable is True:
-        binding = ("private_500_REACHABLE_supply_base_enables_x_demand_delivers__"
+        binding = ("private_500_REACHABLE_supply_leg_kanna403_x_demand_leg_tree__"
                    f"{supply['binding_constraint']}")
     elif reachable is False:
-        binding = (f"demand_leaf_dead__{demand['binding_constraint']}" if demand_delivers is False
-                   else f"supply_base_cannot_enable_500_demand_alone_insufficient__{supply['binding_constraint']}")
+        binding = (f"demand_leg_dead_tree_nets_nothing__{demand['binding_constraint']}"
+                   if demand_delivers is False
+                   else f"supply_leg_dead_no_ppl_safe_conservative_k_lift__{supply['binding_constraint']}")
     else:
-        binding = f"PENDING__supply_base_x_demand_residual__inputs={','.join(pending_inputs)}"
+        binding = f"PENDING_reprice__supply_leg_kanna403_AND_demand_leg_tree__gates={','.join(pending_inputs)}"
 
     if pending:
+        # HELD on the 20:19Z REPRICE terminal GO-flip gate: kanna #403 (supply leg) AND >=1 of {ubel #401,
+        # denken #402} (demand-leg tree net-supply).  The 19:25Z cb3-deployability pair is SUPERSEDED RED.
         verdict_text = (
-            "private-500 reachability HELD — GO = (supply-side public-strict base ENABLES 500) x "
-            f"(demand closer DELIVERS the residual). denken #383 (RED) CONFIRMED demand-alone does NOT "
-            f"reach 500 on the honest base (wirbel #378 <={supply['honest_strict_base_plus_attn']:g}-today "
-            f"< 500; residual +{RESIDUAL_TO_500_ON_FLOOR_383:g} TPS = {REQUIRED_DCOV_BUDGET_MULT_383:g}x "
-            f"budget), so the SUPPLY base is the BINDING axis: it needs a +{SUPPLY_LIFT_REQUIRED_FIRST_TPS_383:g}-TPS "
-            f"lift FIRST, HELD pending a measured number from wirbel #390 (corrected SHIPPABLE strict "
-            f"ceiling; 510.01/518.92 refuted) OR lawine #388 (realized TPS of lawine #372's GREEN "
-            f"-21.5%-read mixed-precision BODY allocation); "
-            f"{supply['binding_constraint']}. The {demand_phrase}; {cost_phrase}. wirbel #384 (RED) "
-            f"refuted the lm_head-BI lever (lm_head FREE int4-Marlin, tax in body #376). ubel #386 (RED) inflated "
-            f"the demand floor to 1.310% under VBI=1 (central still clears; prompt-shift now a binding "
-            f"risk, ubel #389 to pin). Route A (sub-int4 eta-axis): DEFLATED/excluded. GO-gating pending: "
-            f"{pending_inputs}"
+            "private-500 reachability HELD ON THE 20:19Z REPRICE TERMINAL GO-FLIP GATE — GO = (supply leg "
+            "kanna #403 PPL-safe) AND (demand leg ubel #401 OR denken #402 tree net-supply). The 19:25Z "
+            f"cb3-deployability pair RESOLVED RED and is SUPERSEDED: kanna #394 (RED) made the +"
+            f"{supply['cb3_lift_honest']:g} cb3 HEADLINE lift PPL-DEAD (held-out "
+            f"{KANNA394_HELDOUT_WORST_SEED_PPL:g} + OOD {KANNA394_OOD_SHAREGPT_PPL:g} breach "
+            f"{KANNA394_PPL_GATE:g}), denken #396 (RED) closed demand-alone (busts even bare on "
+            f"{supply['supply_base_today_tps']:g}: required Δcov {DENKEN396_REQUIRED_DCOV_ON_467:g} = "
+            f"{DENKEN396_REQUIRED_DCOV_ON_467_BUDGET_FRAC*100:g}% of budget), ubel #399 (RED) closed the "
+            "cheap monotone levers. The route did NOT close — it is RE-PRICED toward 'conservative-k cb3 + "
+            f"a NET-positive tree'. SUPPLY base {supply['supply_base_today_tps']:g} (wirbel #393 corrected; "
+            f"gap_to_500 {supply['deficit_to_500_today_tps']:g}); the {demand_phrase}; {cost_phrase}. GO "
+            "flips True iff kanna #403 (PPL-safe conservative-k supply, largest k with held-out worst-seed "
+            f"<= {KANNA403_HELDOUT_WORST_SEED_TARGET:g}) AND >=1 of ubel #401 (top-8/16 tree coverage "
+            "ceiling) / denken #402 (tree NETs d-cov after the verify-M step-time tax) land green. Route A "
+            f"(sub-int4 eta-axis): DEFLATED/excluded. GO-gating pending: {pending_inputs}"
             f"{' (+refinements ' + str(refinement_inputs) + ')' if refinement_inputs else ''}."
         )
-    elif reachable:
+    elif reachable is True:
         verdict_text = (
-            f"private-500 REACHABLE: the supply-side public-strict base ENABLES 500 "
-            f"({supply['binding_constraint']}) and the {demand_phrase}; {cost_phrase}. "
-            f"Flag as approval-gated a10g candidate (#319)."
+            "private-500 REACHABLE via the 20:19Z re-priced route: SUPPLY leg kanna #403 (PPL-safe "
+            "conservative-k cb3 supply re-cost) AND DEMAND leg tree net-supply (>=1 of ubel #401 / denken "
+            f"#402) BOTH landed green ({supply['binding_constraint']}; {demand['binding_constraint']}). The "
+            f"{demand_phrase}; {cost_phrase}. Flag as approval-gated a10g candidate (#319)."
         )
     elif demand_delivers is False:
         verdict_text = (
-            "private-500 NOT reachable via known levers: the demand leaf failed "
-            f"({demand['binding_constraint']}). Genuinely-new-method problem."
+            "private-500 NOT reachable via known levers: the DEMAND leg is dead — the tree NETs nothing "
+            f"(ubel #401 AND denken #402 both RED: {demand['binding_constraint']}), and denken #396 (RED) "
+            "already closed demand-alone + ubel #399 (RED) the cheap monotone levers. The d-cov has no "
+            "deployable supplier -> genuinely-new-method problem."
         )
     else:
         verdict_text = (
-            "private-500 NOT reachable via known levers: the supply-side public-strict base cannot "
-            f"enable 500 even with the available supply lift (wirbel #384 / lawine #388) "
-            f"({supply['binding_constraint']}), so the demand closer CANNOT close private-500 alone "
-            "(private <= public). A genuinely-new supply lift would be required first."
+            "private-500 NOT reachable via known levers: the SUPPLY leg is dead — kanna #403 found NO "
+            f"PPL-safe conservative-k cb3 lift that clears (the +{supply['cb3_lift_honest']:g} headline is "
+            f"PPL-DEAD per kanna #394 RED), so supply stays at the {supply['supply_base_today_tps']:g} base "
+            "(<500) and the demand closer CANNOT close private-500 alone (private <= public). A genuinely-"
+            "new supply lift would be required first."
         )
 
     return {
@@ -1725,8 +2385,8 @@ def composite_verdict(measured_ppl: float | None, b_star: float,
                        "(demand_closer_delivers_residual)"),
         "private_500_reachable_via_known_levers": reachable,
         "verdict_pending": pending,
-        "pending_inputs": pending_inputs,                       # GO-gating (supply-base hardeners)
-        "refinement_inputs": refinement_inputs,                 # robust pilot + ubel#386 + stark#381 (not GO)
+        "pending_inputs": pending_inputs,                       # GO-gating: kanna #403 + tree (ubel #401 / denken #402)
+        "refinement_inputs": refinement_inputs,                 # robust pilot (provenance) + ubel#386 + stark#381
         "cost_refinement_inputs": refinement_inputs,            # back-compat alias
         "binding_constraint": binding,
         "verdict_text": verdict_text,
@@ -1748,26 +2408,48 @@ def composite_verdict(measured_ppl: float | None, b_star: float,
         "demand_leaf": {
             "delivers": demand_delivers,
             "robust_pending": demand["leaf_robust_pending"],
+            "pending_tree": demand["demand_leaf_pending_tree"],
             "binding": demand["binding_constraint"],
         },
-        # supply leaf (binding GO axis)
+        # supply leaf (binding GO axis; kanna #403 PPL-safe leg)
         "supply_leaf": {
             "enables_500": supply_enables,
             "pending": supply["supply_pending"],
             "binding": supply["binding_constraint"],
             "honest_base_today_tps": supply["supply_base_today_tps"],
             "clears_500_today": supply["supply_base_clears_500_today"],
+            "supply_alone_clears_500_with_cb3": supply["supply_alone_clears_500_with_cb3"],  # False (headline PPL-dead)
+            "base_plus_cb3_honest": supply["base_plus_cb3_honest"],
+            "kanna403_pending": supply["kanna403_ppl_safe_supply_pending"],
         },
+        # TERMINAL GO-flip gate (advisor 20:19Z REPRICE): kanna #403 (supply leg) AND >=1 of {ubel #401,
+        # denken #402} (demand-leg tree net-supply).  Supersedes the 19:25Z cb3-deployability pair (RED).
+        "terminal_go": gate["terminal_go"],                     # green / red / pending
+        "terminal_go_confirmed": gate["terminal_go_confirmed"], # TERMINAL-GO flip (both legs green)
+        "terminal_go_blocked": gate["terminal_go_blocked"],     # a leg landed red
+        "terminal_go_pending": gate["terminal_go_pending"],     # held None
+        "terminal_go_pending_gates": gate["terminal_go_pending_gates"],
+        "reprice_go_flip_gates": gate["reprice_go_flip_gates"],
+        "tree_net_supply_green": gate["tree_net_supply_green"],       # >=1 of ubel #401 / denken #402 green
+        "tree_net_supply_both_red": gate["tree_net_supply_both_red"], # both red -> demand leg dead
+        "tree_net_supply_pending": gate["tree_net_supply_pending"],   # held until >=1 lands
+        "kanna403_ppl_safe_supply": gate["kanna403_ppl_safe_supply"],
+        "ubel401_tree_coverage_ceiling": gate["ubel401_tree_coverage_ceiling"],
+        "denken402_tree_net_supply": gate["denken402_tree_net_supply"],
+        "superseded_1925z_pair": gate["superseded_1925z_pair"],
+        "terminal_go_factor": gate,
         # sub-int4 eta-axis standalone — DEFLATED, excluded from the GO (kept for continuity)
         "route_a_supply_side": {
             "reachable": a_reachable,
             "pending": route_a["verdict_pending"],
             "binding": route_a["binding_constraint"],
             "in_go_product": False,
-            "leans_dead_reason": "sub-int4 UNIFORM eta-axis standalone deflated (#373/#375/#378) -> "
-                                 "un-deployable standalone path. NOTE: lawine #372's sensitivity-weighted "
-                                 "mixed-precision ALLOCATION is GREEN/alive, but as a SUPPLY-leaf de-risker "
-                                 "(pending lawine #388 realized TPS), not a Route A revival.",
+            "leans_dead_reason": "sub-int4 UNIFORM eta-axis standalone deflated (#373/#375/#378) + kanna "
+                                 "#374 (fusion lever closed, Triton not byte-exact) -> un-deployable "
+                                 "standalone path. NOTE: lawine #372's sensitivity-weighted mixed-precision "
+                                 "ALLOCATION is GREEN/alive, but its +32.65 HEADLINE lift is PPL-DEAD (kanna "
+                                 "#394 RED); the PPL-safe conservative-k re-cost is the SUPPLY-leg de-risker "
+                                 "(kanna #403, pending), NOT a Route A revival.",
         },
         "route_a_detail": route_a,
         "supply_leaf_detail": supply,
@@ -1781,46 +2463,61 @@ def composite_verdict(measured_ppl: float | None, b_star: float,
 def deliverable5_caveats(b_star: float) -> dict[str, Any]:
     return {
         "caveats": [
-            "GO IS A SUPPLY x DEMAND AND-PRODUCT, and HELD. private_500_GO <=> (SUPPLY base enables 500) "
-            "AND (DEMAND closer delivers the residual). It is NO LONGER demand-alone and NO LONGER "
-            "(demand x identity): wirbel #378 found the honest deployable-strict base is < 500 TODAY "
-            "(served band [357.32, 469.68]; rebuilt ~480.7), so the SUPPLY base is now the binding GO axis. "
-            "Identity FOLDS INTO the supply leaf as a compliance prerequisite (cost, not a top-level "
-            "factor). The sub-int4 eta-axis (Route A) stays DEFLATED/EXCLUDED. All cross-PR numbers are "
-            "consumed via the PR thread, NOT by reading other branches.",
-            "SUPPLY LEAF IS THE BINDING GO AXIS, PENDING A MEASURED LIFT (wirbel #378). The #375 attn "
-            "rebuild buys only ~11 TPS (eta_attn=0.0215, NOT #326's whole-step 0.3141), leaving ~93% of the "
-            "deficit. wirbel #384 (RED, BANKED 18:12Z) REFUTED #378's 'bf16 lm_head-BI ~150-TPS' "
-            "by-elimination attribution of that remainder: the deployed lm_head is already byte-exact "
-            "int4-Marlin at decode (eta_lmhead=0, FREE; f_lmhead=2.24%), so the dominant non-attention "
-            "strict tax actually lives in the 37-layer int4-Marlin BODY (#376); corrected ledger = 2 kernel "
-            "rebuilds (attn #375 + body #376), NOT 3. The 518.92 eta-axis pin is DEFLATED on three grounds "
-            "(#373 insufficient 498.58<500; #375 un-deployable-without-rebuild; #378 rebuild buys ~11 TPS), "
-            "and the 510.01/518.92 SHIPPABLE ceilings are now refuted (computed under the bf16-lm_head "
-            "premise) -> wirbel #390 reseated to re-roll the corrected realized shippable number. STRUCTURAL: "
-            "private <= public, so a <500 public base makes demand-alone INSUFFICIENT. denken #383 (RED, "
-            "BANKED 17:53Z) CONFIRMED this on the honest base: the private serve point is 450.2 -> residual "
-            "+49.8 TPS = +0.0572 Δcov = 1.84x #336 budget; a supply lift of +17.2 TPS (floor-joint; +23.8 "
-            "E[T]-only) is required FIRST, and the attn rebuild ALONE does not close it. So the supply leaf "
-            "now resolves on a MEASURED supply lift >= +17.2 TPS from wirbel #390 (corrected SHIPPABLE strict "
-            "ceiling) OR lawine #388 (realized TPS of lawine #372's GREEN mixed-precision BODY allocation); "
-            "the ~25-GPU-hr coverage pilot is OFF the critical path until the base clears ~487-493. I do NOT "
-            "re-run any GPU eval; I CONSUME #383/#384/#388/#390 via the thread.",
-            "SUPPLY LEVER IS ALIVE (lawine #372 GREEN, BANKED 17:53Z) — pending realized TPS (lawine #388). "
-            "The supply de-risker is NOT uniform sub-int4 (that died on PPL) but a SENSITIVITY-WEIGHTED "
-            "mixed-precision ALLOCATION: 88.8% of body params at 3-bit for a 3.2369 avg bpw, +0.17% PPL "
-            "(gate 2.3812 <= 2.42), buying -21.5% body read traffic and +132.72/+42.15 ANALYTIC TPS lift. "
-            "The realized cb3-style kernel speed vs int4-Marlin at M=1 on A10G is UN-measured — lawine #388 "
-            "is microbenching exactly that. Bank the lever as alive but HOLD the supply GO on #388's "
-            "realized number (analytic lift is not a deployable TPS).",
-            "DEMAND LEAF IS NECESSARY-BUT-INSUFFICIENT (denken #383): it DELIVERS the RESIDUAL at central "
-            "confidence after a supply lift, but does NOT reach private-500 ALONE on the honest base. denken "
-            "#377 SIZED the closer; denken #380 split deliverability TWO-TIER: central c>=0.8959 (+0.00565) "
-            "p_deliver=0.958>=0.90 GREEN-deliverable-now, robust c>=0.9010 (+0.0107) p_deliver=0.811<0.90 "
-            "pending a ~25-A10G-GPU-hr pilot (now OFF the critical path per #383). kappa_breakeven 0.1222, "
-            "kappa_margin 0.549 (kappa transfer axis ROBUST). I treat the conservative target ~0.911 as "
-            "ALREADY-SIZED to close the residual (I do not re-derive coverage->E[T]->private-500). The demand "
-            "leaf dies ONLY if the gap is forced fully irreducible.",
+            "GO IS A SUPPLY x DEMAND AND-PRODUCT, RE-PRICED 20:19Z AND HELD ON THE TERMINAL GO-FLIP GATE. "
+            "private_500_GO <=> (SUPPLY base enables 500) AND (DEMAND closer delivers the residual). It is "
+            "NO LONGER demand-alone and NO LONGER (demand x identity): wirbel #393 (LANDED 20:19Z) CORRECTED "
+            "the deployable-strict base to 467.48 (< 500; rebuilds=1; the DECODE-specific attn strict tax "
+            "3.01% is +0.86pp over #378's eval-weighted 2.15% -> gap_to_500 32.52, ceiling 505.29), so the "
+            "SUPPLY base is the binding GO axis. The +32.65 cb3 HEADLINE lift is PPL-DEAD (kanna #394 RED: "
+            "held-out 2.4223 + OOD 2.4270 breach 2.42), so 467.48+32.65 is ARITHMETIC-ONLY — NEITHER leaf "
+            "clears on paper. The route is NOT closed: it is RE-PRICED toward 'conservative-k cb3 + a NET-"
+            "positive tree'. The terminal GO now hinges on kanna #403 (PPL-safe conservative-k supply "
+            "re-cost) AND >=1 of ubel #401 / denken #402 (tree net-supply). Identity FOLDS INTO the supply "
+            "leaf as a compliance prerequisite (cost, not a top-level factor). The sub-int4 eta-axis "
+            "(Route A) stays DEFLATED/EXCLUDED (kanna #374 closed the fusion lever too). All cross-PR "
+            "numbers are consumed via the PR thread, NOT by reading other branches.",
+            "SUPPLY LEAF IS THE BINDING GO AXIS; THE +32.65 HEADLINE LIFT IS PPL-DEAD, THE PPL-SAFE RE-COST "
+            "IS PENDING. The #375 attn rebuild buys only ~11 TPS (eta_attn=0.0215, NOT #326's whole-step "
+            "0.3141). wirbel #384 (RED) REFUTED #378's 'bf16 lm_head-BI ~150-TPS' by-elimination: the "
+            "deployed lm_head is already byte-exact int4-Marlin at decode (eta_lmhead=0, FREE; f_lmhead="
+            "2.24%). wirbel #390 (LANDED) GPU-measured the body int4-Marlin as ALSO byte-exact at the M=8 "
+            "decode-verify width (all 8 GEMMs, 3 seeds x 8 trials, g128) -> the per-GEMM --stark381-decode-"
+            "identity is GREEN and the ledger collapses to 1 kernel rebuild (attn #375 only; lm_head=0, "
+            "body=0). wirbel #393 (LANDED 20:19Z) then CORRECTED the shippable strict base to 467.48 on the "
+            "DECODE-specific 3.01% attn tax (510.01 REINSTATED as the ceiling premise; only 518.92 stays "
+            "refuted). STRUCTURAL: private <= public, so a <500 public base makes demand-alone INSUFFICIENT. "
+            "denken #383 (RED) + denken #387 (MEASURED anchor 0.89027, gap +0.000) CONFIRMED this. lawine "
+            "#388/#392 SIZED the cb3 body-allocation lift +32.65 honest HEADLINE, but kanna #394 (RED) made "
+            "that HEADLINE PPL-DEAD (winner's-curse selection to k=243-246); k=232 still clears ~2.39 "
+            "held-out, so cb3 is deployable at a CONSERVATIVE k at a smaller UN-COSTED lift -> the real "
+            "PPL-safe supply number is PENDING kanna #403. I do NOT re-run any GPU eval; I CONSUME "
+            "#383/#384/#387/#388/#390/#393/#394 via the thread.",
+            "SUPPLY LEVER IS ALIVE BUT ITS HEADLINE LIFT IS PPL-DEAD; THE 20:19Z RE-PRICE SUPERSEDES THE "
+            "19:25Z DEPLOYABILITY PAIR. The de-risker is NOT uniform sub-int4 (that died on PPL) but a "
+            "SENSITIVITY-WEIGHTED mixed-precision ALLOCATION (cb3): 88.8% of body params at 3-bit for a "
+            "3.2369 avg bpw, -21.5% body read. lawine #391 (LANDED) confirmed the M=8 lift is preserved and "
+            "denken #392 (LANDED) is the authoritative composed number, BUT kanna #394 (RED) made the +32.65 "
+            "HEADLINE PPL-DEAD: #372's +0.039 PPL margin is IN-SAMPLE (winner's-curse), and the held-out "
+            "worst-seed 2.4223 + OOD ShareGPT 2.4270 breach the 2.42 gate. The 20:19Z cluster also closed "
+            "both deployable escape routes: denken #396 (RED) -> demand-ALONE busts EVEN BARE on 467.48 "
+            "(required_dcov ~0.0338 = 109% of the +0.031 budget); ubel #399 (RED) -> NO cheap deployable "
+            "demand lever (every monotone draft-head lever is a RANK-INVARIANT no-op, MC max|Δcov|=0). The "
+            "route is NOT closed — it is RE-PRICED. Hold the TERMINAL GO None until kanna #403 (PPL-safe "
+            "conservative-k SUPPLY re-cost) AND >=1 of ubel #401 (top-8/16 tree coverage ceiling) / denken "
+            "#402 (tree NETs d-cov after the verify-M step-time tax) BOTH land green. The tree (+0.1286 "
+            "locked top-1->top-4 prize) is a GENUINELY-NEW lever. Sharpen, don't flip.",
+            "DEMAND LEAF IS NECESSARY-BUT-INSUFFICIENT (denken #383/#387): it DELIVERS the RESIDUAL at "
+            "central confidence after a supply lift, but does NOT reach private-500 ALONE on the corrected "
+            "base. The deployed drafter is MTP K=7 (PR #52 method=mtp, num_speculative_tokens=7), NOT "
+            "EAGLE-3 -> the leaf is the #289 MTP K=7 conditional-accept ladder. denken #387 MEASURED the "
+            "baseline top-4 coverage anchor at 0.89027 (gap +0.000 to the modeled 0.8903 -> drop the hedge; "
+            "denken #383 RED is robust to the measured anchor, required Δcov +0.0572 still 1.84x budget). "
+            "denken #377 SIZED the closer; denken #380 split deliverability TWO-TIER: central c>=0.8959 "
+            "(+0.00565) p_deliver=0.958>=0.90 GREEN-deliverable-now, robust c>=0.9010 (+0.0107) "
+            "p_deliver=0.811<0.90 pending a ~25-A10G-GPU-hr pilot (now OFF the critical path per #383). "
+            "kappa_breakeven 0.1222, kappa_margin 0.549 (kappa transfer axis ROBUST). I treat the "
+            "conservative target ~0.911 as ALREADY-SIZED to close the residual. The demand leaf dies ONLY "
+            "if the gap is forced fully irreducible.",
             "SLOPE BANKED GREEN (ubel #382). ubel #379's 489.8 TPS/unit coverage slope IS private-robust "
             "-> 437.3 TPS/unit (flattening ratio 0.893); the conservative bank target ~0.911 is 66.6% of "
             "#336's +0.031 budget (vs 38.9% central). The a1 first-token collapse deepens 0.729 -> 0.598 "
@@ -1853,9 +2550,12 @@ def deliverable5_caveats(b_star: float) -> dict[str, Any]:
             "custom CUDA op OUTSIDE the aten dispatcher that the env knob structurally CANNOT patch. BUT "
             "the RED is GEOMETRY-SPECIFIC: Marlin is BIT-EXACT at the 8-row decode-verify width and only "
             "M-variant at the 2048-row prefill-replication width (the only geometry tractable via vLLM's "
-            "prompt_logprobs API). stark #381 resolves the served 8-row geometry: GREEN -> env-reachable@"
-            "decode (1 rebuild: #375 mha_varlen); RED -> Marlin-rebuild-gated (2 rebuilds). Identity is "
-            "REACHABLE in BOTH branches; #381 sets the deployment COST (1 vs 2 kernel rebuilds), folded "
+            "prompt_logprobs API). wirbel #390 (LANDED) RESOLVED the served 8-row geometry at the PER-GEMM "
+            "level: the body int4-Marlin is byte-exact at M=8 across all 8 GEMMs (3 seeds x 8 trials, g128, "
+            "incl the atomic-add-eligible small-n k/v_proj) -> the --stark381-decode-identity per-GEMM "
+            "condition is GREEN -> env-reachable@decode (1 rebuild: #375 mha_varlen; lm_head=0, body=0). "
+            "stark #381 stays open only as the INDEPENDENT e2e confirmation incl norms; the per-GEMM Q is "
+            "answered. Identity is REACHABLE in both branches; the cost is now 1 kernel rebuild, folded "
             "into the supply leaf. The old eta-budget gate (ETA_BUDGET_500 ~= 4.02%) is retained in the "
             "deflated Route A only.",
             "ROUTE A (sub-int4 eta-axis, EXCLUDED from GO) is distinct from the supply BASE leaf. It still "
@@ -2033,20 +2733,26 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and d6["triple_tail_corner"]["is_sensitivity_band_not_central"] is True
         and d6["triple_tail_corner"]["worst_c_star"] > RECOMMENDED_RETRAIN_TARGET_C)
 
-    # aa: the DEMAND leaf is RESOLVED central=GREEN / robust=pending-pilot (denken #380 + ubel #382).
-    #     Central delivery HOLDS across every robust-pilot state (the robust tier is a refinement, not
-    #     a GO gate); the robust tier resolves only with the coverage-lift pilot.
+    # aa: 20:19Z RE-PRICE — the central-GREEN coverage-retrain sizing (denken #380 + ubel #382) is now
+    #     PROVENANCE ONLY (a drafter retrain is FORBIDDEN) and the robust coverage-lift pilot is OFF the
+    #     critical path (denken #383).  So deliver_central_green stays True (it SIZED the target) but the
+    #     demand leaf is TREE-gated: demand_leaf_delivers is None pending ubel #401 / denken #402, and the
+    #     robust-pilot input only resolves the provenance robust tier -- it does NOT flip leaf delivery.
     d6_pilot_ok = demand_side_route_analysis("delivers")
     d6_pilot_fail = demand_side_route_analysis("fails")
     aa_demand_central_green_robust_tiered = (
-        d6["demand_leaf_delivers"] is True
-        and d6["deliver_central_green"] is True
-        and d6["deliver_robust_modeled"] is False        # robust tier needs the pilot (p_deliver<0.90)
+        d6["deliver_central_green"] is True              # central coverage sizing GREEN (provenance only)
+        and d6["deliver_robust_modeled"] is False        # robust tier needs the (forbidden) pilot
         and d6["deliver_robust_resolved"] is None        # pending default -> unresolved
         and d6["leaf_robust_pending"] is True
+        and d6["robust_pilot_off_critical_path_383"] is True   # pilot is provenance now (denken #383)
+        and d6["demand_leaf_delivers"] is None           # TREE-gated -> NOT delivered on central-green alone
+        and d6["demand_leaf_pending_tree"] is True
+        # the robust pilot resolves the PROVENANCE robust tier but does NOT flip the tree-gated delivery
         and d6_pilot_ok["deliver_robust_resolved"] is True
+        and d6_pilot_ok["demand_leaf_delivers"] is None
         and d6_pilot_fail["deliver_robust_resolved"] is False
-        and d6_pilot_fail["demand_leaf_delivers"] is True)  # central delivery holds regardless of pilot
+        and d6_pilot_fail["demand_leaf_delivers"] is None)
 
     # ab: the demand leaf DIES only if the gap is forced irreducible (override the banked split to 0 ->
     #     no coverage channel). The banked ubel #379 GREEN split keeps the channel live by default.
@@ -2086,13 +2792,14 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and abs(d6["delivered_after_kappa"] - DELIVERABILITY_339_MEAN * KAPPA_INT4_CT_TRANSFER) < TOL_EXACT
         and d6["deliverability_margin"] > 0.0)
 
-    # --- supply-side honest-base leaf (wirbel #378, the NOW-BINDING GO axis) --- #
-    # ao: the honest deployable-strict base is <=480.7-today (< 500); demand-alone may be insufficient
-    #     (private <= public) and denken #383 (RED) CONFIRMED it on the honest base; the 518.92 eta-axis
-    #     pin is deflated; this is the binding GO leaf.
+    # --- supply-side base leaf (wirbel #393 corrected base 467.48, the NOW-BINDING GO axis) --- #
+    # ao: the corrected deployable-strict base is 467.48-today (wirbel #393; < 500; gap_to_500 32.52);
+    #     demand-alone may be insufficient (private <= public) and denken #383 (RED) CONFIRMED it on the
+    #     corrected base; the 518.92 eta-axis pin is deflated; this is the binding GO leaf.
     ao_supply_leaf_honest_base_below_500 = (
-        abs(d_supply["supply_base_today_tps"] - HONEST_STRICT_BASE_PLUS_ATTN_378) < TOL_EXACT
+        abs(d_supply["supply_base_today_tps"] - REALIZED_DEPLOYED_STRICT_393) < TOL_EXACT   # 467.48 (wirbel #393)
         and d_supply["supply_base_today_tps"] < TARGET
+        and abs(d_supply["deficit_to_500_today_tps"] - GAP_TO_500_393) < TOL_EXACT          # 32.52
         and abs(d_supply["honest_strict_base_floor"] - HONEST_STRICT_BASE_FLOOR_378) < TOL_EXACT
         and d_supply["supply_base_clears_500_today"] is False
         and d_supply["demand_alone_may_be_insufficient"] is True
@@ -2100,36 +2807,53 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and abs(d_supply["eta_axis_base_deflated_518"] - ETA_AXIS_BASE_DEFLATED_518) < TOL_EXACT
         and d_supply["is_binding_go_leaf"] is True)
 
-    # ap: the supply leaf RESOLVES on denken #383 (reach-on-floor) + wirbel #384 (available lift):
-    #     pending -> None; "yes" -> True; "no" + insufficient lift -> False; "no" + sufficient -> True.
+    # ap: the supply leaf RESOLVES on denken #383 (reach-on-floor) + kanna #403 (PPL-safe conservative-k
+    #     supply re-cost; the +32.65 HEADLINE is PPL-DEAD per kanna #394 RED, so the "no" branch now defers
+    #     to kanna #403, NOT the dead headline): denken383 pending -> None; "yes" -> True; "no" + kanna #403
+    #     pending -> None (HELD; headline PPL-dead); "no" + kanna #403 red -> False; "no" + kanna #403 green
+    #     + insufficient re-costed lift -> False; "no" + kanna #403 green + sufficient -> True.
     s_pending = supply_side_base_analysis()
     s_yes = supply_side_base_analysis(demand_reaches_500_on_floor="yes")
-    s_no_insuff = supply_side_base_analysis(supply_lift_available_tps=10.0,
-                                            demand_reaches_500_on_floor="no",
-                                            supply_lift_required_tps=40.0)
-    s_no_suff = supply_side_base_analysis(supply_lift_available_tps=25.0,
-                                          demand_reaches_500_on_floor="no",
-                                          supply_lift_required_tps=15.0)
+    s_no_k403_pending = supply_side_base_analysis(supply_lift_available_tps=25.0,
+                                                  demand_reaches_500_on_floor="no",
+                                                  supply_lift_required_tps=15.0)            # kanna #403 default pending
+    s_no_k403_red = supply_side_base_analysis(demand_reaches_500_on_floor="no",
+                                              kanna403_ppl_safe_supply="red")
+    s_no_k403_green_insuff = supply_side_base_analysis(supply_lift_available_tps=10.0,
+                                                       demand_reaches_500_on_floor="no",
+                                                       supply_lift_required_tps=40.0,
+                                                       kanna403_ppl_safe_supply="green")
+    s_no_k403_green_suff = supply_side_base_analysis(supply_lift_available_tps=25.0,
+                                                     demand_reaches_500_on_floor="no",
+                                                     supply_lift_required_tps=15.0,
+                                                     kanna403_ppl_safe_supply="green")
     ap_supply_leaf_resolves_on_inputs = (
         s_pending["supply_base_enables_500"] is None
         and s_pending["supply_pending"] is True
         and s_pending["denken383_pending"] is True
         and s_yes["supply_base_enables_500"] is True
-        and s_no_insuff["supply_base_enables_500"] is False
-        and s_no_suff["supply_base_enables_500"] is True)
+        and s_no_k403_pending["supply_base_enables_500"] is None          # HELD: headline PPL-dead, awaits kanna #403
+        and s_no_k403_pending["kanna403_ppl_safe_supply_pending"] is True
+        and s_no_k403_red["supply_base_enables_500"] is False             # no PPL-safe conservative-k lift clears
+        and s_no_k403_green_insuff["supply_base_enables_500"] is False    # re-costed lift insufficient
+        and s_no_k403_green_suff["supply_base_enables_500"] is True)      # re-costed lift sufficient
 
-    # --- composite supply x demand AND-product (the new GO) --- #
-    # aq: fully pending -> None; supply enables ("yes") + demand central GREEN -> True; supply cannot
-    #     enable ("no" + insufficient lift) -> False; demand leaf dead (gap forced) -> False. Route A
-    #     (sub-int4 eta-axis) is EXCLUDED from the product (in_go_product False).
+    # --- composite supply x demand AND-product (the 20:19Z RE-PRICED GO) --- #
+    # aq: GO = (supply leg kanna #403 PPL-safe) AND (demand leg ubel #401 OR denken #402 tree net-supply),
+    #     None-aware.  Fully pending -> None; supply enables ("yes" floor) + demand delivers (tree green)
+    #     -> True; supply cannot enable (kanna #403 red) -> False; demand leaf dead (gap channel forced
+    #     dead) -> False.  The lift-RESOLVED supply path ("no" + kanna #403 green + sufficient re-costed
+    #     lift) + tree green also flips True.  Route A (sub-int4 eta-axis) is EXCLUDED (in_go_product False).
     c_pending = composite_verdict(None, b_star, None)
-    c_go = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="yes")
+    c_go = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="yes",
+                             ubel401_tree_coverage_ceiling="green")
     c_nogo = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="no",
-                               supply_lift_required_tps=40.0, supply_lift_available_tps=10.0)
+                               kanna403_ppl_safe_supply="red", ubel401_tree_coverage_ceiling="green")
     c_go_lift = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="no",
-                                  supply_lift_required_tps=15.0, supply_lift_available_tps=25.0)
-    c_demand_dead = composite_verdict(None, b_star, None,
-                                      demand_reaches_500_on_floor="yes", gap_addressable_pp=0.0)
+                                  supply_lift_required_tps=15.0, supply_lift_available_tps=25.0,
+                                  kanna403_ppl_safe_supply="green", denken402_tree_net_supply="green")
+    c_demand_dead = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="yes",
+                                      gap_addressable_pp=0.0)
     aq_composite_supply_x_demand_product = (
         c_pending["private_500_reachable_via_known_levers"] is None
         and c_pending["verdict_pending"] is True
@@ -2175,26 +2899,42 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and abs(d8["irreducible_floor_vbi1_central_pct_386"] - IRREDUCIBLE_FLOOR_VBI1_CENTRAL_386) < TOL_EXACT
         and abs(d8["floor_inflation_mult_386"] - FLOOR_INFLATION_MULT_386) < TOL_EXACT)
 
-    # at: ubel #386 detail — under the inflated 1.310% live floor the CENTRAL still clears the 3.2%
-    #     knife-edge (+1.89pp) so the demand leaf is NOT dead, but all corners no longer clear (the
-    #     pessimistic corner breaches at -0.32pp), the breakeven private prompt shift HALVES (253 ->
-    #     119 tok), prompt-shift sensitivity is a BINDING risk, and ubel #389 pins the breach (pending).
-    at_ubel386_inflated_floor_binding_risk = (
+    # at: ubel #389 (LANDED 19:15Z) REFUTES the ubel #386 pessimistic-corner breach. #386 INTERPOLATED an
+    #     inflated 1.310% live floor whose pessimistic corner breaches the 3.2% knife-edge by -0.32pp
+    #     (the binding-risk read). ubel #389 then MEASURED the per-L attention identity floor under VBI=1
+    #     at 0.5764% (< the 0.633% central, far below #386's 1.310% interpolation): 0 corners breach 3.2%,
+    #     and the measured local-penalty slope is only 0.353x the #386 interpolation -> the breach was a
+    #     conservative-slope ARTIFACT. So the demand leaf is ROBUST on the measured slope (advisor 19:25Z:
+    #     "drop the #386 RED"); the central tier still clears (+1.89pp) and delivers. The #386 figures are
+    #     kept as the superseded interpolation; ubel #389 is the operative measurement (pin not pending).
+    at_ubel389_refutes_386_breach_demand_robust = (
+        # #386 INTERPOLATED state (the superseded record): central clears but the pessimistic corner breaches
         d8["central_clears_3p2_vbi1_386"] is True
         and abs(d8["central_margin_to_3p2_vbi1_pp_386"] - CENTRAL_MARGIN_TO_3P2_VBI1_PP_386) < TOL_EXACT
         and d8["all_corners_clear_3p2_vbi1_386"] is False
         and d8["pessimistic_corner_margin_pp_386"] < 0.0
         and abs(d8["breakeven_prompt_shift_vbi1_tok_386"] - BREAKEVEN_PROMPT_SHIFT_VBI1_TOK_386) < TOL_EXACT
         and d8["breakeven_prompt_shift_vbi1_tok_386"] < BREAKEVEN_PROMPT_SHIFT_PRE_VBI_TOK
-        and d8["prompt_shift_sensitivity_binding_risk_386"] is True
-        and d8["ubel389_pin_breach_pending"] is True
-        # the demand leaf carries the inflated floor through but still delivers central:
-        and d6["irreducible_floor_inflates_vbi_386"] is True
-        and abs(d6["irreducible_floor_vbi1_central_pct_386"] - IRREDUCIBLE_FLOOR_VBI1_CENTRAL_386) < TOL_EXACT
+        # ubel #389 MEASURED state REFUTES the #386 breach (LANDED; pin no longer pending)
+        and d8["ubel389_landed"] is True
+        and d8["ubel389_pin_breach_pending"] is False
+        and d8["ubel389_386_breach_refuted"] is True
+        and abs(d8["ubel389_measured_floor_vbi1_pct"] - UBEL389_MEASURED_FLOOR_VBI1_PCT) < TOL_EXACT
+        and d8["ubel389_measured_floor_vbi1_pct"] < GAP_IRREDUCIBLE_PP_CENTRAL_UBEL379  # 0.5764 < 0.633
+        and d8["ubel389_pessimistic_breaches_3p2_measured"] == 0
+        and d8["ubel389_all_corners_clear_3p2_measured"] is True
+        and abs(d8["ubel389_measured_slope_ratio_to_386"] - UBEL389_MEASURED_SLOPE_RATIO_TO_386) < TOL_EXACT
+        and d8["ubel389_measured_slope_ratio_to_386"] < 1.0  # measured slope < #386 interp -> artifact
+        # the demand leaf carries the record through; ubel #389 makes the irreducible-floor risk OFF
+        # (robust on the measured slope) so the floor is NOT the binding constraint -- but under the
+        # 20:19Z re-price the leaf is TREE-gated (denken #396 / ubel #399 RED), so it delivers None
+        # PENDING the tree (ubel #401 / denken #402), NOT dead on the floor.
+        and d6["ubel389_386_breach_refuted"] is True
+        and d6["ubel389_all_corners_clear_3p2_measured"] is True
         and d6["central_clears_3p2_vbi1_386"] is True
-        and d6["all_corners_clear_3p2_vbi1_386"] is False
-        and d6["prompt_shift_sensitivity_binding_risk_386"] is True
-        and d6["demand_leaf_delivers"] is True)
+        and d6["prompt_shift_sensitivity_binding_risk_operative"] is False  # floor-risk OFF (measured slope)
+        and d6["demand_leaf_delivers"] is None                              # TREE-gated, NOT floor-dead
+        and d6["demand_leaf_pending_tree"] is True)
 
     # au: denken #383 (RED 17:53Z) — demand-alone does NOT reach private-500 on the honest base; a supply
     #     lift of +17.2 TPS (floor-joint, < the +23.8 E[T]-only variant) is required FIRST; the #375 attn
@@ -2213,7 +2953,8 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
 
     # av: lawine #372 (GREEN 17:53Z) — a SUPPLY lever is ALIVE via sensitivity-weighted mixed-precision
     #     ALLOCATION (88.8% of body at 3-bit, 3.2369 avg bpw) that PASSES the PPL gate (2.3812 <= 2.42)
-    #     for -21.5% body read; the UNIFORM-3bit variant died on PPL. Realized M=1 TPS is pending #388.
+    #     for -21.5% body read; the UNIFORM-3bit variant died on PPL. lawine #388 has since LANDED the
+    #     realized TPS of this allocation (no longer pending; banked facts asserted in ax).
     av_lawine372_supply_lever_alive = (
         d_supply["lawine372_supply_lever_alive"] is True
         and abs(d_supply["mixed_precision_avg_bpw_372"] - MIXED_PRECISION_AVG_BPW_372) < TOL_EXACT
@@ -2221,30 +2962,149 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and d_supply["mixed_precision_gate_ppl_372"] <= PPL_GATE
         and abs(d_supply["body_read_reduction_372"] - BODY_READ_REDUCTION_372) < TOL_EXACT
         and d_supply["uniform_3bit_died_on_ppl_372"] is True
-        and d_supply["lawine388_realized_tps_pending"] is True)
+        and d_supply["lawine388_realized_tps_pending"] is False    # LANDED (g5lfdpgw)
+        and d_supply["lawine388_landed"] is True)
 
     # aw: wirbel #384 (RED, BANKED 18:12Z) — CORRECTION: the deployed lm_head is ALREADY byte-exact
     #     strict at decode (untied int4-Marlin, eta_lmhead=0, FREE), so the ~150-TPS "bf16 lm_head-BI"
     #     determinization tax was a by-elimination artifact (incremental share ~0). The dominant
-    #     non-attention strict tax lives in the int4-Marlin BODY (#376); the rebuild ledger is 2 (attn
-    #     #375 + body #376), NOT 3 (lm_head shares the body kernel). The 510.01/518.92 ceilings are
-    #     REFUTED (bf16-lm_head premise); wirbel #390 is reseated to re-roll the shippable ceiling, and
-    #     the binding supply-lift input now comes from wirbel #390 OR lawine #388 (default: pending).
+    #     non-attention strict tax lives in the int4-Marlin BODY (#376). The #384-era rebuild ledger is 2
+    #     (attn #375 + body #376), NOT 3 (lm_head shares the body kernel); wirbel #390 then collapses it
+    #     to 1 (asserted in ax). The supply-lift DATA has since LANDED (wirbel #390 base + lawine #388
+    #     lift), so the ceiling is no longer pending and the GO-flip axis is the cb3-deployability pair.
     aw_wirbel384_lmhead_free_supply_tax_in_body = (
         d_supply["wirbel384_lmhead_free"] is True
         and abs(d_supply["eta_lmhead_targeted_384"] - 0.0) < TOL_EXACT
-        and d_supply["n_kernel_rebuilds_strict_500_384"] == 2
+        and d_supply["n_kernel_rebuilds_strict_500_384"] == 2     # #384-era count (wirbel #390 -> 1, see ax)
         and abs(d_supply["lmhead_bi_incremental_share_384"] - 0.0) < TOL_EXACT
         and d_supply["lmhead_is_int4_marlin_not_bf16_384"] is True
         and d_supply["dominant_nonattn_strict_locus_384"] == DOMINANT_NONATTN_STRICT_LOCUS_384
-        and d_supply["wirbel390_shippable_ceiling_pending"] is True
-        and d_supply["supply_lift_measured_pending"] is True
-        # the identity-reachability ledger agrees: lm_head free at decode -> 2 rebuilds, not 3
+        # the supply-lift DATA has LANDED (wirbel #390 base + lawine #388 lift); ceiling no longer pending
+        and d_supply["wirbel390_shippable_ceiling_pending"] is False
+        and d_supply["supply_lift_data_landed"] is True
+        # the identity-reachability ledger agrees: lm_head free at decode (#384-era count = 2)
         and d_ident_reach["lmhead_int4_marlin_free_at_decode_wirbel384"] is True
-        and d_ident_reach["n_kernel_rebuilds_strict_500_wirbel384"] == 2
-        # the composite GO-gate carries the corrected wirbel #390 OR lawine #388 supply-lift input
-        and ("supply_lift_wirbel390_shippable_OR_lawine388_realized_ge_required17p2"
-             in d7["pending_inputs"]))
+        and d_ident_reach["n_kernel_rebuilds_strict_500_wirbel384"] == 2)
+
+    # ax: wirbel #393 (0q7ynumg, LANDED 20:19Z) — CORRECTED shippable strict BASE = 467.48 (supersedes
+    #     wirbel #390's 471.42): the DECODE-specific attention strict tax is 3.01% (decode band [528,658]),
+    #     +0.86pp larger than #378's eval-weighted 2.15% -> gap_to_500 widens to 32.52, ceiling 505.29.
+    #     The rebuild ledger stays 1 (attention only: lm_head=0 #384 + body int4-Marlin byte-exact @ M=8
+    #     #390 -> the per-GEMM --stark381-decode-identity GREEN condition); 510.01 REINSTATED, only 518.92
+    #     refuted.  ★ 20:19Z: the +32.65 cb3 HEADLINE lift is PPL-DEAD (kanna #394 RED), so 467.48 + 32.65
+    #     = 500.13 is ARITHMETIC-ONLY (supply_alone_clears_500_with_cb3 False); the real PPL-safe supply
+    #     number awaits kanna #403, so s393 (a lift but kanna #403 default pending) -> supply HELD None.
+    s393 = supply_side_base_analysis(supply_lift_available_tps=CB3_LIFT_HONEST_TPS_388,
+                                     demand_reaches_500_on_floor="no",
+                                     supply_lift_required_tps=SUPPLY_LIFT_REQUIRED_FIRST_TPS_383,
+                                     stark381_decode="green")
+    ax_wirbel393_corrected_base_467_headline_ppl_dead = (
+        d_supply["wirbel390_landed"] is True
+        and d_supply["wirbel393_landed"] is True
+        and abs(d_supply["realized_deployed_strict_390"] - REALIZED_DEPLOYED_STRICT_390) < TOL_EXACT  # 471.42 provenance
+        and abs(d_supply["realized_deployed_strict_393"] - REALIZED_DEPLOYED_STRICT_393) < TOL_EXACT  # 467.48 (supersedes)
+        and abs(d_supply["supply_base_today_tps"] - REALIZED_DEPLOYED_STRICT_393) < TOL_EXACT          # base = 467.48
+        and abs(d_supply["gap_to_500_393"] - GAP_TO_500_393) < TOL_EXACT                               # 32.52
+        and abs(d_supply["deficit_to_500_today_tps"] - GAP_TO_500_393) < TOL_EXACT
+        and abs(d_supply["shippable_ceiling_393"] - SHIPPABLE_CEILING_393) < TOL_EXACT                 # 505.29
+        and abs(d_supply["decode_attn_strict_tax_pct_393"] - DECODE_ATTN_STRICT_TAX_PCT_393) < TOL_EXACT  # 3.01%
+        and d_supply["supply_alone_closes_500_390"] is False
+        and d_supply["n_kernel_rebuilds_strict_500_390"] == 1            # ledger 2 -> 1 (attention only)
+        and d_supply["body_marlin_decode_strict_green_390"] is True
+        and d_supply["stark381_decode_identity_per_gemm_green_390"] is True
+        and d_supply["spread_is_lmhead_bf16_tax_390"] is False
+        and abs(d_supply["shippable_ceiling_510_reinstated_390"]
+                - SHIPPABLE_CEILING_510_REINSTATED_390) < TOL_EXACT
+        and abs(d_supply["shippable_ceiling_518_still_refuted_390"]
+                - SHIPPABLE_CEILING_518_STILL_REFUTED_390) < TOL_EXACT
+        and SHIPPABLE_CEILING_518_STILL_REFUTED_390 in d_supply["shippable_ceiling_refuted_bf16_premise_390"]
+        and SHIPPABLE_CEILING_510_REINSTATED_390 not in d_supply["shippable_ceiling_refuted_bf16_premise_390"]
+        # the +32.65 cb3 HEADLINE (denken #392) is PPL-DEAD (kanna #394 RED): 467.48 + 32.65 = 500.13 is
+        # ARITHMETIC-ONLY, NOT a deployable supply-alone clear -> the supply leaf does NOT rest on it.
+        and d_supply["lawine388_landed"] is True
+        and abs(d_supply["cb3_lift_honest"] - CB3_LIFT_HONEST_DENKEN392) < TOL_EXACT                   # +32.65 headline
+        and d_supply["cb3_headline_lift_ppl_dead_394"] is True
+        and abs(d_supply["base_plus_cb3_honest"]
+                - (REALIZED_DEPLOYED_STRICT_393 + CB3_LIFT_HONEST_DENKEN392)) < TOL_EXACT              # 500.13 arithmetic
+        and d_supply["supply_alone_clears_500_with_cb3"] is False        # PPL-dead headline -> no supply-alone clear
+        and d_supply["cb3_deployable_at_conservative_k_394"] is True     # but deployable at a conservative k (kanna #403)
+        and s393["supply_base_enables_500"] is None                      # HELD: real lift awaits kanna #403
+        and s393["kanna403_ppl_safe_supply_pending"] is True)
+
+    # ay: the TERMINAL GO is the 20:19Z RE-PRICED AND-product — (supply leg kanna #403 PPL-safe) AND
+    #     (demand leg ubel #401 OR denken #402 tree net-supply).  The 19:25Z cb3-deployability pair is
+    #     SUPERSEDED RED (kanna #394 made the +32.65 headline PPL-dead; denken #396 closed demand-alone;
+    #     ubel #399 closed the cheap monotone levers).  GREEN iff both legs green; RED iff either leg red;
+    #     HELD None until both land.  Defaults (both legs pending) -> held None with BOTH gates listed.
+    c_t_pending = composite_verdict(None, b_star, None)
+    c_t_green = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="no",
+                                  supply_lift_required_tps=15.0, supply_lift_available_tps=25.0,
+                                  kanna403_ppl_safe_supply="green", denken402_tree_net_supply="green")
+    c_t_supply_red = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="no",
+                                       kanna403_ppl_safe_supply="red", ubel401_tree_coverage_ceiling="green")
+    c_t_demand_red = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="yes",
+                                       ubel401_tree_coverage_ceiling="red", denken402_tree_net_supply="red")
+    c_t_hold_tree = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="no",
+                                      supply_lift_required_tps=15.0, supply_lift_available_tps=25.0,
+                                      kanna403_ppl_safe_supply="green")            # supply green, tree pending
+    c_t_hold_supply = composite_verdict(None, b_star, None, demand_reaches_500_on_floor="no",
+                                        ubel401_tree_coverage_ceiling="green")     # tree green, supply (kanna #403) pending
+    ay_terminal_go_is_supply_leg_and_tree_leg = (
+        # fully pending -> held None, both legs listed, the 19:25Z cb3-deployability pair superseded
+        c_t_pending["private_500_reachable_via_known_levers"] is None
+        and c_t_pending["terminal_go"] == "pending"
+        and c_t_pending["terminal_go_pending"] is True
+        and c_t_pending["superseded_1925z_pair"] is True
+        and c_t_pending["terminal_go_factor"]["kanna394_headline_ppl_dead"] is True
+        and c_t_pending["terminal_go_factor"]["denken396_demand_alone_closed"] is True
+        and c_t_pending["terminal_go_factor"]["ubel399_no_cheap_demand_lever"] is True
+        and c_t_pending["terminal_go_factor"]["tree_is_genuinely_new_lever"] is True
+        and "kanna#403_ppl_safe_conservative_k_supply_recost" in c_t_pending["terminal_go_pending_gates"]
+        and "ubel#401_or_denken#402_tree_net_supply" in c_t_pending["terminal_go_pending_gates"]
+        # supply leg green (kanna #403 + sufficient re-costed lift) AND demand leg green (denken #402) -> GO True
+        and c_t_green["private_500_reachable_via_known_levers"] is True
+        and c_t_green["terminal_go"] == "green"
+        and c_t_green["terminal_go_confirmed"] is True
+        and c_t_green["supply_base_enables_500"] is True
+        and c_t_green["demand_closer_delivers"] is True
+        # supply leg red (kanna #403 no PPL-safe lift clears) -> GO False even with the tree green
+        and c_t_supply_red["private_500_reachable_via_known_levers"] is False
+        and c_t_supply_red["terminal_go"] == "red"
+        and c_t_supply_red["terminal_go_blocked"] is True
+        and c_t_supply_red["supply_base_enables_500"] is False
+        # demand leg red (tree both red) -> GO False even with supply green
+        and c_t_demand_red["private_500_reachable_via_known_levers"] is False
+        and c_t_demand_red["terminal_go"] == "red"
+        and c_t_demand_red["tree_net_supply_both_red"] is True
+        and c_t_demand_red["demand_closer_delivers"] is False
+        # supply resolved (kanna #403 green + lift) but tree pending -> HELD on the tree gate ONLY
+        and c_t_hold_tree["private_500_reachable_via_known_levers"] is None
+        and c_t_hold_tree["terminal_go"] == "pending"
+        and c_t_hold_tree["terminal_go_pending_gates"] == ["ubel#401_or_denken#402_tree_net_supply"]
+        # tree resolved (ubel #401 green) but supply (kanna #403) pending -> HELD on the kanna #403 gate ONLY
+        and c_t_hold_supply["private_500_reachable_via_known_levers"] is None
+        and c_t_hold_supply["terminal_go"] == "pending"
+        and c_t_hold_supply["terminal_go_pending_gates"] == ["kanna#403_ppl_safe_conservative_k_supply_recost"])
+
+    # az: denken #387 (z8osvif8, LANDED) — the demand coverage anchor is MEASURED (top-4 = 0.89027,
+    #     anchor_gap +0.000 -> denken #383 RED ROBUST to the measured anchor; required Δcov +0.0572 still
+    #     1.84x the #336 budget) and the deployed drafter is MTP K=7 (NOT EAGLE-3). kanna #374 (djia6icp,
+    #     LANDED) CLOSED the fusion lever (Triton not byte-exact-pinnable; capture/land #371 the sole
+    #     identity-safe non-spec leg) -> Route-A stays excluded from the GO product.
+    az_denken387_measured_anchor_mtp_k7_kanna374_fusion_closed = (
+        d_supply["denken387_landed"] is True
+        and abs(d_supply["measured_top4_coverage_387"] - MEASURED_TOP4_COVERAGE_387) < TOL_EXACT
+        and abs(d_supply["coverage_anchor_gap_387"] - COVERAGE_ANCHOR_GAP_387) < TOL_EXACT
+        and abs(d_supply["required_delta_floor_measured_387"] - REQUIRED_DELTA_FLOOR_MEASURED_387) < TOL_EXACT
+        and d_supply["denken383_red_robust_to_measured_anchor_387"] is True
+        and d_supply["deployed_drafter_mtp_k_387"] == 7
+        and d_supply["drafter_is_mtp_not_eagle3_387"] is True
+        and d_supply["required_dcov_budget_mult_383"] > 1.0
+        and d_supply["kanna374_fusion_lever_closed"] is True
+        and d_supply["fusion_byte_exact_pinnable_374"] is False
+        and d_supply["capture_land_371_sole_identity_safe_nonspec_leg_374"] is True
+        and d_supply["route_a_stays_excluded_374"] is True
+        and d7["route_a_supply_side"]["in_go_product"] is False)
 
     # --- ubel #379 (GREEN) gap-decomposition ceiling-check (BANKED) --- #
     # ai: the four gap shares (acceptance/ctxlen/outlen/numerics) sum to exactly 1.0
@@ -2277,8 +3137,11 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
     # --- identity REACHABILITY two-branch (stark #376 RED + stark #381 pending) --- #
     ident_green = identity_reachability_analysis("green")
     ident_red = identity_reachability_analysis("red")
+    ident_pending = identity_reachability_analysis("pending")
     # am: identity is REACHABLE in BOTH #381 branches; deployment COST differs (1 vs 2 rebuilds);
-    #     pending leaves reachability True but the cost branch pending
+    #     pending leaves reachability True but the cost branch pending (asserted on an EXPLICIT pending
+    #     construction so this is robust to the headline run's --stark381-decode-identity green, which
+    #     resolves the LIVE d_ident_reach to the env-reachable@decode 1-rebuild branch).
     am_identity_reachable_both_branches = (
         ident_green["identity_reachable_env_or_rebuild"] is True
         and ident_red["identity_reachable_env_or_rebuild"] is True
@@ -2287,7 +3150,9 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and ident_red["rebuild_line_items"] == 2
         and ident_green["cost_branch"] == "env_reachable_at_decode_width"
         and ident_red["cost_branch"] == "marlin_rebuild_gated"
-        and d_ident_reach["cost_branch_pending"] is True)
+        and ident_pending["identity_reachable_env_or_rebuild"] is True
+        and ident_pending["rebuild_line_items"] is None
+        and ident_pending["cost_branch_pending"] is True)
 
     # an: stark #376 residual flip is the int4-Marlin body GEMM (env-unpatchable) and the RED is
     #     geometry-specific (Marlin is bit-exact at the 8-row decode-verify width)
@@ -2340,10 +3205,14 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         "aq_composite_supply_x_demand_product": bool(aq_composite_supply_x_demand_product),
         "ar_composite_framing_supply_x_demand": bool(ar_composite_framing_supply_x_demand),
         "as_ubel386_floor_inflates_resolved": bool(as_ubel386_floor_inflates_resolved),
-        "at_ubel386_inflated_floor_binding_risk": bool(at_ubel386_inflated_floor_binding_risk),
+        "at_ubel389_refutes_386_breach_demand_robust": bool(at_ubel389_refutes_386_breach_demand_robust),
         "au_denken383_supply_lift_required_first": bool(au_denken383_supply_lift_required_first),
         "av_lawine372_supply_lever_alive": bool(av_lawine372_supply_lever_alive),
         "aw_wirbel384_lmhead_free_supply_tax_in_body": bool(aw_wirbel384_lmhead_free_supply_tax_in_body),
+        "ax_wirbel393_corrected_base_467_headline_ppl_dead": bool(ax_wirbel393_corrected_base_467_headline_ppl_dead),
+        "ay_terminal_go_is_supply_leg_and_tree_leg": bool(ay_terminal_go_is_supply_leg_and_tree_leg),
+        "az_denken387_measured_anchor_mtp_k7_kanna374_fusion_closed": bool(
+            az_denken387_measured_anchor_mtp_k7_kanna374_fusion_closed),
         "ai_gap_fractions_sum_to_one": bool(ai_gap_fracs_sum_to_one),
         "aj_gap_irreducible_floor_matches_ctxlen": bool(aj_gap_floor_matches_ctxlen),
         "ak_gap_corners_clear_knife_edge": bool(ak_gap_corners_clear_knife_edge),
@@ -2370,7 +3239,10 @@ def synthesize(measured_ppl: float | None, b_star: float,
                robust_pilot: str = "pending",
                gap_addressable_pp: float | None = None,
                stark381_decode: str = "pending",
-               irreducible_floor_survives_vbi: str = UBEL386_FLOOR_SURVIVES_VBI  # banked "inflates" (#386)
+               irreducible_floor_survives_vbi: str = UBEL386_FLOOR_SURVIVES_VBI,  # banked "inflates" (#386)
+               kanna403_ppl_safe_supply: str = "pending",      # SUPPLY leg (PPL-safe conservative-k re-cost)
+               ubel401_tree_coverage_ceiling: str = "pending", # DEMAND leg (tree top-8/16 coverage ceiling)
+               denken402_tree_net_supply: str = "pending"      # DEMAND leg (tree net after verify-M tax)
                ) -> dict[str, Any]:
     d1 = deliverable1_lever_analysis(b_star)
     d2 = deliverable2_ppl_forecast()
@@ -2379,10 +3251,12 @@ def synthesize(measured_ppl: float | None, b_star: float,
     d_ident = identity_locus_analysis(lmhead_eta)                        # eta-locus lever (deflated read)
     d_ident_reach = identity_reachability_analysis(stark381_decode)      # identity REACHABILITY compliance
     d_supply = supply_side_base_analysis(supply_lift_available_tps, demand_reaches_500_on_floor,
-                                         supply_lift_required_tps, stark381_decode)  # SUPPLY leaf (binding)
+                                         supply_lift_required_tps, stark381_decode,
+                                         kanna403_ppl_safe_supply)        # SUPPLY leaf (binding; kanna #403 leg)
     d8 = gap_decomposition_analysis(irreducible_floor_survives_vbi)       # ubel #379 GREEN + ubel #386 pend
-    d6 = demand_side_route_analysis(robust_pilot, gap_addressable_pp,     # DEMAND leaf (resolved central)
-                                    irreducible_floor_survives_vbi)
+    d6 = demand_side_route_analysis(robust_pilot, gap_addressable_pp,     # DEMAND leaf (tree net-supply leg)
+                                    irreducible_floor_survives_vbi,
+                                    ubel401_tree_coverage_ceiling, denken402_tree_net_supply)
     d7 = composite_verdict(measured_ppl, b_star, lmhead_eta,
                            supply_lift_available_tps=supply_lift_available_tps,
                            demand_reaches_500_on_floor=demand_reaches_500_on_floor,
@@ -2390,7 +3264,10 @@ def synthesize(measured_ppl: float | None, b_star: float,
                            robust_pilot=robust_pilot,
                            gap_addressable_pp=gap_addressable_pp,
                            stark381_decode=stark381_decode,
-                           irreducible_floor_survives_vbi=irreducible_floor_survives_vbi)
+                           irreducible_floor_survives_vbi=irreducible_floor_survives_vbi,
+                           kanna403_ppl_safe_supply=kanna403_ppl_safe_supply,
+                           ubel401_tree_coverage_ceiling=ubel401_tree_coverage_ceiling,
+                           denken402_tree_net_supply=denken402_tree_net_supply)
     d5 = deliverable5_caveats(b_star)
     st = _selftests(d1, d2, d3, d4, d5, d6, d7, d8, d_supply, d_ident_reach, b_star)
 
@@ -2417,14 +3294,46 @@ def synthesize(measured_ppl: float | None, b_star: float,
         "eta_axis_deflated": d7["eta_axis_deflated"],
         "binding_constraint": d7["binding_constraint"],
         "residual_gap_to_500": d4["residual_gap_to_500"],
-        # supply-side honest-base leaf (wirbel #378, now-BINDING GO axis; denken #383 RED, pending supply lift)
-        "supply_base_today_tps": d_supply["supply_base_today_tps"],
+        # supply-side base leaf (wirbel #393 corrected base 467.48, now-BINDING GO axis; kanna #403 leg pending)
+        "supply_base_today_tps": d_supply["supply_base_today_tps"],          # 467.48 (wirbel #393)
         "supply_base_clears_500_today": d_supply["supply_base_clears_500_today"],
         "honest_strict_base_floor_378": d_supply["honest_strict_base_floor"],
         "honest_strict_base_plus_attn_378": d_supply["honest_strict_base_plus_attn"],
-        "deficit_to_500_today_tps": d_supply["deficit_to_500_today_tps"],
+        "deficit_to_500_today_tps": d_supply["deficit_to_500_today_tps"],    # 32.52
         "supply_pending": d_supply["supply_pending"],
         "supply_binding_constraint": d_supply["binding_constraint"],
+        "realized_deployed_strict_393": d_supply["realized_deployed_strict_393"],  # 467.48 (#393, supersedes 471.42)
+        "shippable_ceiling_393": d_supply["shippable_ceiling_393"],          # 505.29
+        "gap_to_500_393": d_supply["gap_to_500_393"],                        # 32.52
+        "decode_attn_strict_tax_pct_393": d_supply["decode_attn_strict_tax_pct_393"],  # 3.01%
+        "realized_deployed_strict_390": d_supply["realized_deployed_strict_390"],  # 471.42 (superseded by #393)
+        "n_kernel_rebuilds_strict_500_390": d_supply["n_kernel_rebuilds_strict_500_390"],
+        "eta_attn_390": d_supply["eta_attn_390"],
+        "shippable_ceiling_510_reinstated_390": d_supply["shippable_ceiling_510_reinstated_390"],
+        "shippable_ceiling_518_still_refuted_390": d_supply["shippable_ceiling_518_still_refuted_390"],
+        "cb3_lift_honest": d_supply["cb3_lift_honest"],                      # +32.65 HEADLINE — PPL-DEAD (kanna #394)
+        "cb3_headline_lift_ppl_dead_394": d_supply["cb3_headline_lift_ppl_dead_394"],  # True (do NOT carry +32.65)
+        "base_plus_cb3_honest": d_supply["base_plus_cb3_honest"],           # 500.13 — arithmetic only (PPL-dead)
+        "supply_alone_clears_500_with_cb3": d_supply["supply_alone_clears_500_with_cb3"],  # False (PPL-dead headline)
+        "cb3_deployable_at_conservative_k_394": d_supply["cb3_deployable_at_conservative_k_394"],  # True (k=232 ~2.39)
+        "measured_top4_coverage_387": d_supply["measured_top4_coverage_387"],
+        "deployed_drafter_mtp_k_387": d_supply["deployed_drafter_mtp_k_387"],
+        "drafter_is_mtp_not_eagle3_387": d_supply["drafter_is_mtp_not_eagle3_387"],
+        # TERMINAL GO-flip gate (advisor 20:19Z REPRICE): kanna #403 (supply leg) AND >=1 of {ubel #401,
+        # denken #402} (demand-leg tree net-supply); supersedes the 19:25Z cb3-deployability pair (RED)
+        "terminal_go": d7["terminal_go"],                                   # green / red / pending
+        "terminal_go_confirmed": d7["terminal_go_confirmed"],
+        "terminal_go_blocked": d7["terminal_go_blocked"],
+        "terminal_go_pending": d7["terminal_go_pending"],
+        "terminal_go_pending_gates": d7["terminal_go_pending_gates"],
+        "reprice_go_flip_gates": d7["reprice_go_flip_gates"],
+        "kanna403_ppl_safe_supply": d7["kanna403_ppl_safe_supply"],
+        "ubel401_tree_coverage_ceiling": d7["ubel401_tree_coverage_ceiling"],
+        "denken402_tree_net_supply": d7["denken402_tree_net_supply"],
+        "tree_net_supply_green": d7["tree_net_supply_green"],
+        "tree_net_supply_both_red": d7["tree_net_supply_both_red"],
+        "tree_net_supply_pending": d7["tree_net_supply_pending"],
+        "superseded_1925z_pair": d7["superseded_1925z_pair"],
         # demand-side residual leaf (denken #377 sized; #380 two-tier; #382 slope GREEN; RESOLVED central)
         "demand_leaf_delivers": d6["demand_leaf_delivers"],
         "demand_leaf_robust_pending": d6["leaf_robust_pending"],
@@ -2487,38 +3396,41 @@ def synthesize(measured_ppl: float | None, b_star: float,
 
     if d7["verdict_pending"]:
         handoff = (
-            f"PRIVATE-500 GO HELD — the GO is an AND-PRODUCT: (supply-side public-strict base ENABLES "
-            f"500) x (demand closer DELIVERS the residual). GO-gating pending inputs: {d7['pending_inputs']}"
+            f"PRIVATE-500 GO HELD ON THE 20:19Z REPRICE TERMINAL GATE — the GO is an AND-PRODUCT: (SUPPLY "
+            f"leg kanna #403 PPL-safe conservative-k cb3 re-cost) x (DEMAND leg >=1 of ubel #401 / denken "
+            f"#402 tree net-supply). GO-gating pending inputs: {d7['pending_inputs']}"
             f"{' (+refinements ' + str(d7['refinement_inputs']) + ')' if d7['refinement_inputs'] else ''}. "
-            f"SUPPLY BASE (wirbel #378, the NOW-BINDING axis): the honest deployable-strict base is "
-            f"<={d_supply['honest_strict_base_plus_attn']:g}-today (floor {d_supply['honest_strict_base_floor']:g} "
-            f"off-the-shelf VBI=1 + ~{ATTN_REBUILD_TPS_GAIN_378:g}-TPS #375 attn rebuild), BOTH < 500; the "
-            f"518.92 eta-axis pin is DEFLATED ({d_supply['eta_axis_deflation_grounds']}). STRUCTURAL: private "
-            f"<= public, so a public base < 500 makes private-500 unreachable by the demand closer ALONE at "
-            f"any coverage; denken #383 (RED, BANKED) CONFIRMED it (private-on-floor "
-            f"{d_supply['private_on_floor_383']:g} -> residual +{d_supply['residual_to_500_on_floor_383']:g} TPS "
-            f"= {d_supply['required_dcov_budget_mult_383']:g}x budget) -> +{SUPPLY_LIFT_REQUIRED_FIRST_TPS_383:g}-TPS "
-            f"supply lift required FIRST. wirbel #384 (RED, BANKED 18:12Z) REFUTED the lm_head-BI lever "
-            f"(deployed lm_head already byte-exact int4-Marlin, eta=0/FREE; the tax is in the body #376; "
-            f"corrected ledger = {N_KERNEL_REBUILDS_STRICT_500_384} rebuilds, NOT 3), so the supply lift is "
-            f"HELD pending a MEASURED number from wirbel #390 (corrected SHIPPABLE strict ceiling; "
-            f"510.01/518.92 refuted) OR lawine #388 (realized TPS of lawine #372's GREEN mixed-precision "
-            f"BODY allocation); {d_supply['binding_constraint']}. "
-            f"DEMAND RESIDUAL (denken #377 sized; RESOLVED central=GREEN / robust=pending-pilot): retrain the "
-            f"drafter to the conservative private-anchored target ~{DEMAND_CONSERVATIVE_TARGET_382} "
-            f"(central c >= {DEMAND_CLOSER_CENTRAL_C} p_deliver {P_DELIVER_CENTRAL_DEFENSIBLE_380} >= 0.90 "
-            f"GREEN; robust c >= {DEMAND_CLOSER_ROBUST_C} p_deliver {P_DELIVER_ROBUST_DEFENSIBLE_380} < 0.90 "
-            f"-> {'pending a ~' + str(int(COVERAGE_LIFT_PILOT_GPU_HR)) + ' A10G-GPU-hr pilot' if d6['robust_pilot_pending'] else ('pilot DELIVERS' if d6['deliver_robust_resolved'] else 'pilot FAILS')}). "
-            f"ubel #382 (GREEN) BANKED the slope private-robust ({d8['slope_tps_per_coverage_ubel379']:g} -> "
+            f"SUPPLY BASE (wirbel #393 LANDED, the NOW-BINDING axis): the corrected deployable-strict base "
+            f"is {d_supply['supply_base_today_tps']:g} (wirbel #393 re-priced 471.42 -> "
+            f"{d_supply['supply_base_today_tps']:g} on the DECODE-specific "
+            f"{d_supply['decode_attn_strict_tax_pct_393']:g}% attn strict tax; gap_to_500 "
+            f"{d_supply['deficit_to_500_today_tps']:g}, ceiling {d_supply['shippable_ceiling_393']:g}, "
+            f"rebuilds=1, attn the SOLE strict tax) < 500. ★ 20:19Z RE-PRICE: lawine #388/#392 sized the cb3 "
+            f"body-allocation lift +{d_supply['cb3_lift_honest']:g} honest HEADLINE, BUT kanna #394 (LANDED "
+            f"RED) made it PPL-DEAD — #372's in-sample margin is winner's-curse (held-out "
+            f"{d_supply['kanna394_heldout_worst_seed_ppl']:g} + OOD {d_supply['kanna394_ood_sharegpt_ppl']:g} "
+            f"breach {KANNA394_PPL_GATE:g}); so {d_supply['supply_base_today_tps']:g}+"
+            f"{d_supply['cb3_lift_honest']:g} is arithmetic-only, NOT deployable. cb3 STAYS deployable at a "
+            f"conservative k={d_supply['kanna394_conservative_k_232']} "
+            f"(~{d_supply['kanna394_conservative_k_heldout_ppl']:g} held-out) at a smaller UN-COSTED lift -> "
+            f"the SUPPLY leg is PENDING kanna #403 (largest k with held-out worst-seed <= "
+            f"{KANNA403_HELDOUT_WORST_SEED_TARGET:g}). {d7['binding_constraint']}. "
+            f"DEMAND RESIDUAL (20:19Z RE-PRICED DOWN to tree-only): denken #396 (LANDED RED) -> demand-ALONE "
+            f"busts EVEN BARE on {d_supply['supply_base_today_tps']:g} (required Δcov "
+            f"{d6['denken396_required_dcov_on_467']:g} = "
+            f"{d6['denken396_required_dcov_on_467_budget_frac']*100:g}% of the +{BUDGET_336_PLUS_031:g} "
+            f"budget); ubel #399 (LANDED RED) -> NO cheap deployable demand lever (every monotone draft-head "
+            f"lever is a RANK-INVARIANT no-op, MC max|Δcov|={d6['ubel399_mc_max_dcov']:g}). So the d-cov can "
+            f"ONLY be SUPPLIED by the TREE (the locked +{d6['ubel399_tree_top1_to_top4_prize']:g} top-1->"
+            f"top-4 prize) -> the DEMAND leg is PENDING >=1 of ubel #401 (top-8/16 tree coverage ceiling) / "
+            f"denken #402 (tree NETs d-cov after its verify-M step-time tax). The sized closer "
+            f"~{DEMAND_CONSERVATIVE_TARGET_382} is PROVENANCE (a drafter retrain is forbidden). ubel #382 "
+            f"(GREEN) BANKED the slope private-robust ({d8['slope_tps_per_coverage_ubel379']:g} -> "
             f"{d6['slope_tps_per_coverage_private_382']:.1f} private, flattening {SLOPE_FLATTENING_RATIO_382}); "
             f"ubel #379 (GREEN) BANKED the gap ceiling-check ({d8['gap_addressable_pp']:.3f}pp of the "
-            f"{PUBLIC_PRIVATE_GAP_PCT}pp gap coverage-addressable); ubel #386 (RED, BANKED) found the "
-            f"off-VBI {d8['gap_irreducible_pp_central']:g}% floor INFLATES {d8['floor_inflation_mult_386']:g}x -> "
-            f"{d8['irreducible_floor_vbi1_central_pct_386']:g}% central under VBI=1 (central still clears 3.2% "
-            f"+{d8['central_margin_to_3p2_vbi1_pp_386']:g}pp, but all corners no longer clear -> prompt-shift "
-            f"sensitivity BINDING, breakeven {BREAKEVEN_PROMPT_SHIFT_PRE_VBI_TOK:g}->{d8['breakeven_prompt_shift_vbi1_tok_386']:g} tok; "
-            f"ubel #389 to pin the -0.32pp breach). IDENTITY (strict-lock compliance, folds "
-            f"into the supply leaf, REACHABLE in BOTH #381 branches): "
+            f"{PUBLIC_PRIVATE_GAP_PCT}pp gap coverage-addressable); ubel #389 (LANDED) REFUTED the #386 breach "
+            f"(measured floor {d6['ubel389_measured_floor_vbi1_pct']:g}% < 0.633%, 0 corners breach 3.2%). "
+            f"IDENTITY (strict-lock compliance, folds into the supply leaf, REACHABLE in BOTH #381 branches): "
             f"{'cost branch PENDING stark #381 (env@decode=1 rebuild vs Marlin-gated=2 rebuilds)' if d7['identity_cost_branch_pending'] else d7['identity_cost_branch'] + ' (' + str(d7['identity_rebuild_line_items']) + ' rebuild line-item(s))'}"
             f" — #381 sets COST, not GO. Route A (sub-int4 eta-axis standalone): "
             f"{'PENDING denken #356 PPL@b* + stark #365 lm_head eta' if d4['verdict_pending'] else d4['binding_constraint']} "
@@ -2734,17 +3646,23 @@ def _print_report(syn: dict) -> None:
           f"{d6['all_corners_clear_3p2_vbi1_386']}); prompt-shift sensitivity BINDING="
           f"{d6['prompt_shift_sensitivity_binding_risk_386']} (breakeven {d6['breakeven_prompt_shift_vbi1_tok_386']:g} tok); "
           f"robust pilot off critical path={d6['robust_pilot_off_critical_path_383']} (denken #383)", flush=True)
-    print(f"      demand_leaf_delivers={d6['demand_leaf_delivers']} (central GREEN)  robust_pending="
-          f"{d6['leaf_robust_pending']}  [{d6['binding_constraint']}]", flush=True)
+    print(f"      demand_leaf_delivers={d6['demand_leaf_delivers']} (TREE-gated: ubel #401 / denken #402; "
+          f"central-green coverage sizing is PROVENANCE)  pending_tree={d6['demand_leaf_pending_tree']}  "
+          f"robust_pending={d6['leaf_robust_pending']}  [{d6['binding_constraint']}]", flush=True)
     d_sup = syn["deliverable_supply_side_base"]
     print("-" * 98, flush=True)
-    print("  (D-SUPPLY) SUPPLY honest-base leaf — wirbel #378 (the NOW-BINDING GO axis)", flush=True)
-    print(f"      deployable-strict band TODAY {d_sup['deployable_strict_band_today']} < 500; honest base "
-          f"<= {d_sup['honest_strict_base_plus_attn']:g} (floor {d_sup['honest_strict_base_floor']:g} off-shelf "
-          f"VBI=1 + ~{d_sup['attn_rebuild_tps_gain']:g}-TPS #375 attn rebuild)", flush=True)
-    print(f"      clears_500_today={d_sup['supply_base_clears_500_today']} (deficit "
-          f"{d_sup['deficit_to_500_today_tps']:.1f} TPS); 518.92 eta-axis pin DEFLATED; dominant non-attn tax "
-          f"= {d_sup['dominant_nonattn_strict_locus_384']}", flush=True)
+    print("  (D-SUPPLY) SUPPLY base leaf — wirbel #393 CORRECTED base 467.48 (the NOW-BINDING GO axis)", flush=True)
+    print(f"      deployable-strict base TODAY {d_sup['realized_deployed_strict_393']:g} < 500 (wirbel #393: "
+          f"DECODE attn strict tax {d_sup['decode_attn_strict_tax_pct_393']:g}% over band {d_sup['decode_band_393']}, "
+          f"+{d_sup['decode_tax_delta_pp_393']:g}pp vs #378 eval-weighted "
+          f"{d_sup['eval_weighted_attn_strict_tax_pct_378']:g}%; supersedes #390's "
+          f"{d_sup['realized_deployed_strict_390']:g})", flush=True)
+    print(f"      clears_500_today={d_sup['supply_base_clears_500_today']} (gap_to_500 "
+          f"{d_sup['deficit_to_500_today_tps']:.2f}, ceiling {d_sup['shippable_ceiling_393']:g}, rebuilds="
+          f"{d_sup['n_kernel_rebuilds_strict_500_390']} attn-only); 518.92 eta-axis pin DEFLATED; cb3 HEADLINE +"
+          f"{d_sup['cb3_lift_honest']:g} -> {d_sup['base_plus_cb3_honest']:g} ARITHMETIC-ONLY (PPL-DEAD kanna #394: "
+          f"supply_alone_clears_500_with_cb3={d_sup['supply_alone_clears_500_with_cb3']}); real PPL-safe lift "
+          f"PENDING kanna #403 (held-out worst-seed <= {d_sup['kanna403_heldout_worst_seed_target']:g})", flush=True)
     print(f"      wirbel #384 (RED, BANKED 18:12Z): lm_head FREE={d_sup['wirbel384_lmhead_free']} "
           f"(int4-Marlin, eta_lmhead={d_sup['eta_lmhead_targeted_384']:g}, f_lmhead={d_sup['f_lmhead_384']:g}); "
           f"~150-TPS bf16 lm_head-BI was a by-elimination artifact -> rebuilds={d_sup['n_kernel_rebuilds_strict_500_384']} "
@@ -2823,6 +3741,16 @@ def _print_report(syn: dict) -> None:
           f"({d7['identity_cost_branch']})  "
           f"route_a_in_go_product={d7['route_a_supply_side']['in_go_product']} (DEFLATED, excluded)",
           flush=True)
+    print(f"      SUPPLY (wirbel #393 LANDED): base={d_sup['supply_base_today_tps']:g} "
+          f"(rebuilds={d_sup['n_kernel_rebuilds_strict_500_390']}, gap_to_500={d_sup['deficit_to_500_today_tps']:g}) "
+          f"+ cb3 HEADLINE +{d_sup['cb3_lift_honest']:g} -> {d_sup['base_plus_cb3_honest']:g} "
+          f"ARITHMETIC-ONLY (PPL-DEAD kanna #394: supply_alone_clears_500_with_cb3="
+          f"{d_sup['supply_alone_clears_500_with_cb3']}); real lift PENDING kanna #403", flush=True)
+    print(f"      TERMINAL GO (20:19Z REPRICE) = {d7['terminal_go']}  "
+          f"supply_leg(kanna #403)={d7['supply_base_enables_500']}  "
+          f"demand_leg(tree ubel #401/denken #402)={d7['demand_closer_delivers']}  "
+          f"pending_gates={d7['terminal_go_pending_gates']}  flip_gates={d7['reprice_go_flip_gates']}",
+          flush=True)
     print(f"      verdict_pending = {d7['verdict_pending']}  GO-gating missing={d7['pending_inputs']}  "
           f"refinements={d7['refinement_inputs']}", flush=True)
     print(f"      strict_500/private_500_reachable_via_known_levers = "
@@ -2890,11 +3818,18 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
             "denken-383-red-banked", "demand-alone-insufficient-confirmed", "supply-lift-required-17p2",
             "ubel-386-floor-inflates-banked", "floor-inflates-vbi1", "prompt-shift-binding-risk",
             "ubel-389-pin-pending", "lawine-372-supply-lever-green", "mixed-precision-allocation",
-            "lawine-388-realized-tps-pending", "route-a-deflated",
+            "route-a-deflated",
             # advisor 18:12Z correction: wirbel #384 RED (lm_head FREE int4-Marlin; tax in body #376)
             "wirbel-384-lmhead-free", "lmhead-int4-marlin-not-bf16", "lmhead-bi-by-elimination-refuted",
-            "supply-tax-in-body-376", "rebuilds-2-not-3", "wirbel-390-shippable-ceiling-pending",
-            "shippable-ceiling-510-518-refuted",
+            "supply-tax-in-body-376",
+            # advisor 19:01Z cycle-53 merges (sharpen, not flip): #390 base + #388 lift + #387 anchor + #374 fusion
+            "wirbel-390-landed", "corrected-base-471p42", "rebuilds-1-not-2", "body-marlin-byte-exact-m8",
+            "stark381-per-gemm-green", "shippable-ceiling-510-reinstated", "ceiling-518-refuted",
+            "lawine-388-landed", "cb3-lift-33-honest", "cb3-supply-alone-504", "cb3-m1-not-bw-bound",
+            "denken-387-measured-anchor", "drafter-is-mtp-k7", "not-eagle3", "kanna-374-fusion-closed",
+            # the now-binding TERMINAL GO-flip gate: cb3-lift deployability pair
+            "cb3-deployability-gate", "lawine-391-m8-efficiency-pending", "kanna-394-heldout-ppl-pending",
+            "denken-392-composition-sharpen", "supply-enables-500-on-paper", "verdict-held-non-terminal",
         ],
         config={
             "baseline_tps_int4": BASELINE_TPS,
@@ -2963,6 +3898,54 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
             "mixed_precision_analytic_lift_tps_372": list(MIXED_PRECISION_ANALYTIC_LIFT_TPS_372),
             "uniform_3bit_died_on_ppl_372": UNIFORM_3BIT_DIED_ON_PPL_372,
             "lawine388_realized_tps_pending": LAWINE388_REALIZED_TPS_PENDING,
+            "cb3_insample_ppl_margin_372": CB3_INSAMPLE_PPL_MARGIN_372,
+            # wirbel #390 (5y64zbjz, LANDED 19:01Z): corrected SHIPPABLE strict base (471.42, rebuilds=1)
+            "wirbel390_landed": WIRBEL390_LANDED,
+            "realized_deployed_strict_390": REALIZED_DEPLOYED_STRICT_390,
+            "shippable_band_390": list(SHIPPABLE_BAND_390),
+            "gap_to_500_390": GAP_TO_500_390,
+            "supply_alone_closes_500_390": SUPPLY_ALONE_CLOSES_500_390,
+            "eta_attn_390": ETA_ATTN_390,
+            "n_kernel_rebuilds_strict_500_390": N_KERNEL_REBUILDS_STRICT_500_390,
+            "body_marlin_decode_strict_green_390": BODY_MARLIN_DECODE_STRICT_GREEN_390,
+            "stark381_decode_identity_per_gemm_green_390": STARK381_DECODE_IDENTITY_PER_GEMM_GREEN_390,
+            "shippable_ceiling_510_reinstated_390": SHIPPABLE_CEILING_510_REINSTATED_390,
+            "shippable_ceiling_518_still_refuted_390": SHIPPABLE_CEILING_518_STILL_REFUTED_390,
+            "deployed_floor_lift_over_378_band_390": DEPLOYED_FLOOR_LIFT_OVER_378_BAND_390,
+            # lawine #388 (g5lfdpgw, LANDED 19:01Z): realized cb3 body-allocation supply LIFT
+            "lawine388_landed": LAWINE388_LANDED,
+            "cb3_lift_honest_tps_388": CB3_LIFT_HONEST_TPS_388,
+            "cb3_lift_realistic_tps_388": CB3_LIFT_REALISTIC_TPS_388,
+            "cb3_lift_mult_388": CB3_LIFT_MULT_388,
+            "cb3_closes_383_supply_gap_floor_388": CB3_CLOSES_383_SUPPLY_GAP_FLOOR_388,
+            "cb3_m1_is_bw_bound_388": CB3_M1_IS_BW_BOUND_388,
+            "cb3_m1_hbm_eff_388": CB3_M1_HBM_EFF_388,
+            "cb3_m1_roofline_mult_388": CB3_M1_ROOFLINE_MULT_388,
+            "cb3_realized_frac_of_roofline_388": CB3_REALIZED_FRAC_OF_ROOFLINE_388,
+            "cb3_draft_frac_lumped_388": CB3_DRAFT_FRAC_LUMPED_388,
+            # denken #387 (z8osvif8, LANDED 19:01Z): demand anchor MEASURED + MTP K=7 premise correction
+            "denken387_landed": DENKEN387_LANDED,
+            "measured_top4_coverage_387": MEASURED_TOP4_COVERAGE_387,
+            "coverage_anchor_gap_387": COVERAGE_ANCHOR_GAP_387,
+            "required_delta_floor_measured_387": REQUIRED_DELTA_FLOOR_MEASURED_387,
+            "denken383_red_robust_to_measured_anchor_387": DENKEN383_RED_ROBUST_TO_MEASURED_ANCHOR_387,
+            "deployed_drafter_mtp_k_387": DEPLOYED_DRAFTER_MTP_K_387,
+            "drafter_is_mtp_not_eagle3_387": DRAFTER_IS_MTP_NOT_EAGLE3_387,
+            "demand_ladder_label_387": DEMAND_LADDER_LABEL_387,
+            # kanna #374 (djia6icp, LANDED 19:01Z): fusion lever CLOSED (Route-A stays excluded)
+            "kanna374_fusion_lever_closed": KANNA374_FUSION_LEVER_CLOSED,
+            "fusion_byte_exact_pinnable_374": FUSION_BYTE_EXACT_PINNABLE_374,
+            "route_a_stays_excluded_374": ROUTE_A_STAYS_EXCLUDED_374,
+            # TERMINAL GO-flip gate (advisor 20:19Z REPRICE): kanna #403 (PPL-safe conservative-k supply
+            # re-cost) AND >=1 of {ubel #401, denken #402} (tree net-supply). Supersedes the 19:25Z pair
+            # (kanna #394 RED made the +32.65 headline PPL-dead; denken #396/ubel #399 RED closed the escapes).
+            "kanna403_ppl_safe_supply_input": args.kanna403_ppl_safe_supply,
+            "ubel401_tree_coverage_ceiling_input": args.ubel401_tree_coverage_ceiling,
+            "denken402_tree_net_supply_input": args.denken402_tree_net_supply,
+            "lawine391_m8_realistic_green_landed": LAWINE391_LANDED,
+            "denken392_authoritative_composed_landed": DENKEN392_LANDED,
+            "reprice_2019z_go_flip_gates": list(REPRICE_2019Z_GO_FLIP_GATES),
+            "reprice_2019z_tree_net_supply_probes": list(REPRICE_2019Z_TREE_NET_SUPPLY_PROBES),
             # demand-side residual leaf (denken #377 sized; #380 two-tier; #382 slope GREEN)
             "robust_coverage_pilot_input": args.robust_pilot,
             "irreducible_floor_survives_vbi_input_ubel386": args.irreducible_floor_survives_vbi,
@@ -3037,11 +4020,15 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
                 "-> +17.2-TPS supply lift required first), ubel#386(xxzujn7a RED, irreducible floor inflates "
                 "2.07x -> 1.310% central under VBI=1), lawine#372(mpzfw116 GREEN, mixed-precision supply lever "
                 "ALIVE -21.5% body read). CORRECTION (18:12Z): wirbel#384(4f32ks1e RED, lm_head FREE int4-Marlin "
-                "eta=0 -> lm_head-BI supply lever refuted; supply tax in body #376; rebuilds 2 not 3; 510.01/"
-                "518.92 shippable ceilings refuted -> wirbel#390 reseated). PENDING GO (now SUPPLY-binding): "
-                "supply_lift_available from wirbel#390(corrected SHIPPABLE strict ceiling) OR lawine#388(realized "
-                "TPS of #372 body allocation). REFINEMENTS: robust coverage pilot (off critical path) + "
-                "ubel#389(pin VBI=1 floor breach) + stark#381(identity cost: body free at decode -> rebuilds->1)"
+                "eta=0 -> lm_head-BI supply lever refuted; supply tax in body #376). CYCLE-53 LANDED (19:01Z, "
+                "sharpen-not-flip): wirbel#390(5y64zbjz LANDED, corrected base 471.42, rebuilds 2->1 [body "
+                "int4-Marlin byte-exact @ M=8 -> per-GEMM stark#381 GREEN], 510.01 reinstated/only 518.92 "
+                "refuted), lawine#388(g5lfdpgw LANDED, realized cb3 lift +33 honest/+38.34 realistic -> 504.42 "
+                "clears 500 SUPPLY-ALONE on paper; m1_is_bw_bound=False), denken#387(z8osvif8 LANDED, MEASURED "
+                "anchor 0.89027 -> #383 robust; drafter is MTP K=7 NOT EAGLE-3), kanna#374(djia6icp LANDED, "
+                "fusion lever closed). HELD GO (now on cb3 DEPLOYABILITY, non-terminal): lawine#391(M=8 "
+                "efficiency) + kanna#394(held-out PPL) GO-flip pair; denken#392(authoritative cb3 composition) "
+                "sharpens. REFINEMENTS: robust coverage pilot (off critical path) + ubel#389(pin VBI=1 floor breach)"
             ),
             "literature_prior_non_authoritative": (
                 "QuIP# arXiv:2402.04396; AQLM arXiv:2401.06118; QTIP arXiv:2406.11235; "
@@ -3086,7 +4073,7 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         "supply_pending": int(bool(d_sup["supply_pending"])),
         "denken383_pending": int(bool(d_sup["denken383_pending"])),
         "supply_lift_measured_pending": int(bool(d_sup["supply_lift_measured_pending"])),
-        "supply_lift_pending": int(bool(d_sup["supply_lift_pending"])),
+        "supply_lift_pending_kanna403": int(bool(d_sup["supply_lift_pending_kanna403"])),
         # wirbel #384 (RED, BANKED 18:12Z): lm_head FREE int4-Marlin; supply tax in body #376; rebuilds 2 not 3
         "wirbel384_lmhead_free": int(bool(d_sup["wirbel384_lmhead_free"])),
         "eta_lmhead_targeted_384": d_sup["eta_lmhead_targeted_384"],
@@ -3094,8 +4081,47 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         "lmhead_bi_share_of_vbi_overhead_384": d_sup["lmhead_bi_share_of_vbi_overhead_384"],
         "n_kernel_rebuilds_strict_500_384": d_sup["n_kernel_rebuilds_strict_500_384"],
         "body_marlin_decode_strict_pending_stark381_384": int(bool(d_sup["body_marlin_decode_strict_pending_stark381_384"])),
-        # wirbel #390 (reseated 18:12Z): corrected SHIPPABLE strict ceiling (510.01/518.92 refuted)
+        # wirbel #390 (LANDED 19:01Z): corrected SHIPPABLE strict base 471.42 (rebuilds=1; 510.01 reinstated)
+        "wirbel390_landed": int(bool(d_sup["wirbel390_landed"])),
         "wirbel390_shippable_ceiling_pending": int(bool(d_sup["wirbel390_shippable_ceiling_pending"])),
+        "realized_deployed_strict_390": d_sup["realized_deployed_strict_390"],
+        "gap_to_500_390": d_sup["gap_to_500_390"],
+        "eta_attn_390": d_sup["eta_attn_390"],
+        "n_kernel_rebuilds_strict_500_390": d_sup["n_kernel_rebuilds_strict_500_390"],
+        "body_marlin_decode_strict_green_390": int(bool(d_sup["body_marlin_decode_strict_green_390"])),
+        "stark381_decode_identity_per_gemm_green_390": int(bool(d_sup["stark381_decode_identity_per_gemm_green_390"])),
+        "shippable_ceiling_510_reinstated_390": d_sup["shippable_ceiling_510_reinstated_390"],
+        "shippable_ceiling_518_still_refuted_390": d_sup["shippable_ceiling_518_still_refuted_390"],
+        # lawine #388 (LANDED 19:01Z): realized cb3 supply lift (+33 honest / +38.34 realistic)
+        "lawine388_landed": int(bool(d_sup["lawine388_landed"])),
+        "cb3_lift_honest_tps_388": d_sup["cb3_lift_honest_tps_388"],
+        "cb3_lift_realistic_tps_388": d_sup["cb3_lift_realistic_tps_388"],
+        "base_plus_cb3_honest": d_sup["base_plus_cb3_honest"],
+        "base_plus_cb3_realistic": d_sup["base_plus_cb3_realistic"],
+        "supply_alone_clears_500_with_cb3": int(bool(d_sup["supply_alone_clears_500_with_cb3"])),
+        "cb3_closes_383_supply_gap_floor_388": int(bool(d_sup["cb3_closes_383_supply_gap_floor_388"])),
+        "cb3_m1_is_bw_bound_388": int(bool(d_sup["cb3_m1_is_bw_bound_388"])),
+        "cb3_m1_hbm_eff_388": d_sup["cb3_m1_hbm_eff_388"],
+        "supply_lift_data_landed": int(bool(d_sup["supply_lift_data_landed"])),
+        # denken #387 (LANDED): demand anchor MEASURED 0.89027 + drafter is MTP K=7 (NOT EAGLE-3)
+        "measured_top4_coverage_387": d_sup["measured_top4_coverage_387"],
+        "coverage_anchor_gap_387": d_sup["coverage_anchor_gap_387"],
+        "required_delta_floor_measured_387": d_sup["required_delta_floor_measured_387"],
+        "deployed_drafter_mtp_k_387": d_sup["deployed_drafter_mtp_k_387"],
+        "drafter_is_mtp_not_eagle3_387": int(bool(d_sup["drafter_is_mtp_not_eagle3_387"])),
+        # kanna #374 (LANDED): fusion lever CLOSED (Route-A stays excluded)
+        "kanna374_fusion_lever_closed": int(bool(d_sup["kanna374_fusion_lever_closed"])),
+        "route_a_stays_excluded_374": int(bool(d_sup["route_a_stays_excluded_374"])),
+        # TERMINAL GO-flip gate (advisor 20:19Z REPRICE): kanna #403 (supply leg) AND tree (ubel #401/denken #402)
+        "terminal_go": d7["terminal_go"],                                       # green / red / pending
+        "terminal_go_confirmed": int(bool(d7["terminal_go_confirmed"])),
+        "terminal_go_blocked": int(bool(d7["terminal_go_blocked"])),
+        "terminal_go_pending": int(bool(d7["terminal_go_pending"])),
+        "n_terminal_go_pending_gates": len(d7["terminal_go_pending_gates"]),
+        "tree_net_supply_green": int(bool(d7["tree_net_supply_green"])),
+        "tree_net_supply_both_red": int(bool(d7["tree_net_supply_both_red"])),
+        "tree_net_supply_pending": int(bool(d7["tree_net_supply_pending"])),
+        "superseded_1925z_pair": int(bool(d7["superseded_1925z_pair"])),
         # denken #383 (RED, BANKED 17:53Z): demand-alone insufficient on the honest base
         "demand_alone_insufficient_confirmed_383": int(bool(d_sup["demand_alone_insufficient_confirmed_383"])),
         "supply_lift_required_first_tps_383": d_sup["supply_lift_required_first_tps_383"],
@@ -3268,10 +4294,11 @@ def main(argv: list[str] | None = None) -> int:
                     help="stark #365 MEASURED lm_head BI-GEMM identity eta (omit -> identity gate PENDING)")
     ap.add_argument("--demand-reaches-500-on-deployable-floor", dest="demand_reaches_500_on_floor",
                     choices=["pending", "yes", "no"], default=DENKEN383_REACHES_500_ON_FLOOR,
-                    help="denken #383 honest re-price (BANKED RED 17:53Z, default 'no'): the demand "
-                         "closer does NOT reach 500 on the deployable-strict floor (<=480.7 today) -> a "
-                         "supply lift is required first (see --supply-lift-required-tps). Override to "
-                         "'pending' only to model the pre-#383 unresolved state.")
+                    help="denken #383 honest re-price (BANKED RED 17:53Z, default 'no'; denken #387 confirmed "
+                         "on the MEASURED 0.89027 anchor): the demand closer does NOT reach 500 on the "
+                         "corrected deployable-strict base (471.42 today, wirbel #390) -> a supply lift is "
+                         "required first (see --supply-lift-required-tps). Override to 'pending' only to "
+                         "model the pre-#383 unresolved state.")
     ap.add_argument("--supply-lift-required-tps", dest="supply_lift_required_tps", type=float,
                     default=SUPPLY_LIFT_REQUIRED_FIRST_TPS_383,
                     help="denken #383 (BANKED, default +17.2 floor-joint): TPS of supply lift the honest "
@@ -3279,11 +4306,14 @@ def main(argv: list[str] | None = None) -> int:
                          "--demand-reaches-500-on-deployable-floor=no).")
     ap.add_argument("--supply-lift-available-tps", dest="supply_lift_available_tps", type=float,
                     default=None,
-                    help="MEASURED supply lift available to close the <500 deployable-strict deficit, from "
-                         "wirbel #390 (corrected SHIPPABLE strict ceiling; 510.01/518.92 refuted under #384's "
-                         "lm_head-free correction) OR lawine #388 (realized TPS of lawine #372's mixed-precision "
-                         "body allocation). The wirbel #384 lm_head-BI determinization lever is REFUTED (lm_head "
-                         "already byte-exact int4-Marlin, eta=0). Omit -> both pending; SUPPLY leaf stays PENDING.")
+                    help="The PPL-SAFE conservative-k supply lift available to close the 32.52-TPS deployable-"
+                         "strict deficit on the corrected 467.48 base (wirbel #393). The +32.65 cb3 HEADLINE "
+                         "lift is PPL-DEAD (kanna #394 RED), so this value is consumed ONLY when "
+                         "--kanna403-ppl-safe-supply=green (the conservative-k re-cost): green + (lift >= "
+                         "required) -> supply leg TRUE. NOTE: even when the supply leg resolves TRUE, the "
+                         "TERMINAL GO stays HELD on the DEMAND-leg tree net-supply (>=1 of "
+                         "--ubel401-tree-coverage-ceiling / --denken402-tree-net-supply). Omit -> SUPPLY leg "
+                         "value unresolved (PENDING under kanna #403).")
     ap.add_argument("--robust-coverage-pilot", dest="robust_pilot",
                     choices=["pending", "delivers", "fails"], default="pending",
                     help="denken #380 tier-2 ~25-A10G-GPU-hr coverage-lift pilot that hardens the ROBUST "
@@ -3304,7 +4334,30 @@ def main(argv: list[str] | None = None) -> int:
                     choices=["pending", "green", "red"], default="pending",
                     help="stark #381 decode-width (8-row) e2e identity: green -> env-reachable@decode "
                          "(1 rebuild); red -> Marlin-rebuild-gated (2 rebuilds). COST-only: identity is "
-                         "REACHABLE in both branches; this does NOT gate the GO.")
+                         "REACHABLE in both branches; this does NOT gate the GO. wirbel #390 (LANDED) "
+                         "pre-answered the PER-GEMM M=8 question GREEN (body int4-Marlin byte-exact); pass "
+                         "'green' to bank the 1-rebuild ledger (e2e stark #381 stays an independent confirm).")
+    ap.add_argument("--kanna403-ppl-safe-supply", dest="kanna403_ppl_safe_supply",
+                    choices=["pending", "green", "red"], default="pending",
+                    help="kanna #403 — the SUPPLY leg of the 20:19Z RE-PRICED terminal GO: the PPL-SAFE "
+                         "conservative-k cb3 supply re-cost. The +32.65 cb3 HEADLINE lift is PPL-DEAD (kanna "
+                         "#394 RED: held-out worst-seed 2.4223 + OOD ShareGPT 2.4270 breach 2.42 at k=243-246); "
+                         "k=232 still clears ~2.39 held-out, so cb3 is deployable at a conservative k at a "
+                         "smaller UN-COSTED lift. green -> a PPL-safe conservative-k lift (largest k with "
+                         "held-out worst-seed <= 2.41) clears the required supply lift (resolve its value via "
+                         "--supply-lift-available-tps); red -> NO PPL-safe lift clears -> supply reverts to the "
+                         "467.48 base (<500); pending -> SUPPLY leg HELD None.")
+    ap.add_argument("--ubel401-tree-coverage-ceiling", dest="ubel401_tree_coverage_ceiling",
+                    choices=["pending", "green", "red"], default="pending",
+                    help="ubel #401 — a DEMAND-leg tree net-supply probe (20:19Z): does the locked top-8/16 "
+                         "tree coverage ceiling NET the demand d-cov (sizing the +0.1286 top-1->top-4 prize)? "
+                         "green -> the tree supplies the d-cov; red -> it does not. The DEMAND leg is green iff "
+                         "this OR --denken402 is green (demand-alone is closed: denken #396/ubel #399 RED).")
+    ap.add_argument("--denken402-tree-net-supply", dest="denken402_tree_net_supply",
+                    choices=["pending", "green", "red"], default="pending",
+                    help="denken #402 — the other DEMAND-leg tree net-supply probe (20:19Z): does the tree NET "
+                         "d-cov AFTER its verify-M step-time tax on the 467.48 base? green -> net-positive tree "
+                         "supply; red -> the verify-M tax eats the coverage gain. Pairs (OR) with --ubel401.")
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name", default=None)
     ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group", default="strict-frontier")
@@ -3317,7 +4370,10 @@ def main(argv: list[str] | None = None) -> int:
                      robust_pilot=args.robust_pilot,
                      gap_addressable_pp=args.gap_addressable_pp,
                      stark381_decode=args.stark381_decode,
-                     irreducible_floor_survives_vbi=args.irreducible_floor_survives_vbi)
+                     irreducible_floor_survives_vbi=args.irreducible_floor_survives_vbi,
+                     kanna403_ppl_safe_supply=args.kanna403_ppl_safe_supply,
+                     ubel401_tree_coverage_ceiling=args.ubel401_tree_coverage_ceiling,
+                     denken402_tree_net_supply=args.denken402_tree_net_supply)
 
     created_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     peak_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -3333,6 +4389,9 @@ def main(argv: list[str] | None = None) -> int:
         "irreducible_floor_survives_vbi_ubel386": args.irreducible_floor_survives_vbi,
         "gap_coverage_addressable_pp": args.gap_addressable_pp,
         "stark381_decode_identity": args.stark381_decode,
+        "kanna403_ppl_safe_supply": args.kanna403_ppl_safe_supply,
+        "ubel401_tree_coverage_ceiling": args.ubel401_tree_coverage_ceiling,
+        "denken402_tree_net_supply": args.denken402_tree_net_supply,
         "synthesis": syn,
         "peak_mem_mib": round(peak_kib / 1024.0, 3),
     }
