@@ -1,0 +1,392 @@
+{
+  "pr": 307,
+  "question": "EAGLE-3 served-path integration: drop-in swap or boot-risk change?",
+  "verdict": {
+    "swap_is_config_only": false,
+    "reuses_boot_fragile_path": false,
+    "eagle3_integration_readiness": "served-file-change",
+    "readiness_blocks_go": true,
+    "handoff_light": "yellow"
+  },
+  "eagle3_integration_readiness_self_test_passes": true,
+  "nan_clean": true,
+  "summary": {
+    "eagle3_integration_readiness_self_test_passes": 1,
+    "swap_is_config_only": 0,
+    "reuses_boot_fragile_path": 0,
+    "eagle3_integration_readiness": "served-file-change",
+    "readiness_blocks_go": 1,
+    "handoff_light": "yellow",
+    "nan_clean": 1,
+    "n_touchpoints": 9,
+    "n_config_only": 6,
+    "n_served_file_change": 3,
+    "n_fork_code_change": 0,
+    "precache_guard_count": 0,
+    "treeverify_guard_count": 2,
+    "official_baseline": 481.53,
+    "private_verified": 460.85,
+    "tps_added_by_this_card": 0.0,
+    "selftest_evidence_all_present": 1,
+    "selftest_classes_valid": 1,
+    "selftest_partition_exhaustive": 1,
+    "selftest_partition_mutually_exclusive": 1,
+    "selftest_verdict_follows_from_partition": 1,
+    "selftest_readiness_is_served_file_change": 1,
+    "selftest_swap_is_not_config_only": 1,
+    "selftest_precache_missing_guard_272": 1,
+    "selftest_sibling_has_guard_272": 1,
+    "selftest_eagle3_not_in_route_layer": 1,
+    "selftest_reuses_boot_fragile_path_is_false": 1,
+    "selftest_no_fork_code_path": 1,
+    "selftest_readiness_blocks_go_true": 1
+  },
+  "conditions": {
+    "evidence_all_present": true,
+    "classes_valid": true,
+    "partition_exhaustive": true,
+    "partition_mutually_exclusive": true,
+    "verdict_follows_from_partition": true,
+    "readiness_is_served_file_change": true,
+    "swap_is_not_config_only": true,
+    "precache_missing_guard_272": true,
+    "sibling_has_guard_272": true,
+    "eagle3_not_in_route_layer": true,
+    "reuses_boot_fragile_path_is_false": true,
+    "no_fork_code_path": true,
+    "readiness_blocks_go_true": true
+  },
+  "classification": {
+    "counts": {
+      "config-only": 6,
+      "served-file-change": 3,
+      "fork-code-change": 0
+    },
+    "total": 9,
+    "classes_valid": true,
+    "exhaustive": true,
+    "mutually_exclusive": true,
+    "swap_is_config_only": false,
+    "eagle3_integration_readiness": "served-file-change",
+    "verdict_follows": true
+  },
+  "boot_272": {
+    "precache_guard_count": 0,
+    "treeverify_guard_count": 2,
+    "precache_missing_guard": true,
+    "sibling_has_guard": true,
+    "eagle3_touches_route_layer": false,
+    "eagle3_all_in_spec_exec_layer": true,
+    "reuses_boot_fragile_path": false
+  },
+  "evidence": {
+    "all_present": true,
+    "checks": [
+      {
+        "touchpoint": "T1",
+        "file": "submissions/fa2sw_precache_kenyan/manifest.json",
+        "substring": "\\\"method\\\":\\\"mtp\\\"",
+        "present": true
+      },
+      {
+        "touchpoint": "T1",
+        "file": "submissions/fa2sw_precache_kenyan/manifest.json",
+        "substring": "\\\"num_speculative_tokens\\\":7",
+        "present": true
+      },
+      {
+        "touchpoint": "T1",
+        "file": "submissions/fa2sw_precache_kenyan/serve.py",
+        "substring": "append_env_arg(args, \"SPECULATIVE_CONFIG\", \"--speculative-config\")",
+        "present": true
+      },
+      {
+        "touchpoint": "T2",
+        "file": "submissions/fa2sw_precache_kenyan/serve.py",
+        "substring": "def ensure_drafter",
+        "present": true
+      },
+      {
+        "touchpoint": "T2",
+        "file": "submissions/fa2sw_precache_kenyan/manifest.json",
+        "substring": "DRAFTER_BUCKET",
+        "present": true
+      },
+      {
+        "touchpoint": "T3",
+        "file": "research/eagle3_feasibility/feasibility_report.md",
+        "substring": "eagle3_hiddens_accessible",
+        "present": true
+      },
+      {
+        "touchpoint": "T3",
+        "file": "research/eagle3_feasibility/feasibility_report.md",
+        "substring": "SupportsEagle3",
+        "present": true
+      },
+      {
+        "touchpoint": "T3",
+        "file": "research/eagle3_drafter/arch_notes.md",
+        "substring": "(2, 21, 39)",
+        "present": true
+      },
+      {
+        "touchpoint": "T4",
+        "file": "research/eagle3_drafter/arch_notes.md",
+        "substring": "Eagle3LlamaForCausalLM",
+        "present": true
+      },
+      {
+        "touchpoint": "T4",
+        "file": "research/eagle3_feasibility/feasibility_report.md",
+        "substring": "llama_eagle3.py",
+        "present": true
+      },
+      {
+        "touchpoint": "T5",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "TOP_TOKEN_TARGET = \"vllm.model_executor.models.gemma4_mtp\"",
+        "present": true
+      },
+      {
+        "touchpoint": "T5",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "self.model.get_top_tokens",
+        "present": true
+      },
+      {
+        "touchpoint": "T6",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "LOOPGRAPH_TARGET = \"vllm.v1.spec_decode.gemma4\"",
+        "present": true
+      },
+      {
+        "touchpoint": "T6",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "proposer_cls = module.Gemma4Proposer",
+        "present": true
+      },
+      {
+        "touchpoint": "T6",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "Patch vLLM Gemma4 MTP drafting",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "Width-1 is exact",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "def _build_static_buffers",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "def _capture_graph",
+        "present": true
+      },
+      {
+        "touchpoint": "T8",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "PROPOSER_TARGET = \"vllm.v1.spec_decode.llm_base_proposer\"",
+        "present": true
+      },
+      {
+        "touchpoint": "T8",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "proposer_cls = module.SpecDecodeBaseProposer",
+        "present": true
+      },
+      {
+        "touchpoint": "T9",
+        "file": "submissions/fa2sw_precache_kenyan/serve.py",
+        "substring": "def patch_gemma4_source",
+        "present": true
+      },
+      {
+        "touchpoint": "T9",
+        "file": "submissions/fa2sw_precache_kenyan/serve.py",
+        "substring": "PLE valid-token fast path",
+        "present": true
+      }
+    ]
+  },
+  "touchpoints": [
+    {
+      "id": "T1",
+      "name": "Speculative method + config",
+      "what_changes": "SPECULATIVE_CONFIG.method \"mtp\" -> \"eagle3\"; model -> EAGLE-3 ckpt dir; num_speculative_tokens kept (7); optional eagle_aux_hidden_state_layer_ids [2,21,39] (already the default). A manifest env edit consumed by vLLM --speculative-config.",
+      "classification": "config-only",
+      "evidence": [
+        [
+          "submissions/fa2sw_precache_kenyan/manifest.json",
+          "\\\"method\\\":\\\"mtp\\\""
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/manifest.json",
+          "\\\"num_speculative_tokens\\\":7"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/serve.py",
+          "append_env_arg(args, \"SPECULATIVE_CONFIG\", \"--speculative-config\")"
+        ]
+      ],
+      "note": "vLLM selects the proposer/head from method; manifest env, no served .py edit."
+    },
+    {
+      "id": "T2",
+      "name": "Drafter weight artifact",
+      "what_changes": "DRAFTER_BUCKET -> EAGLE-3 checkpoint; ensure_drafter() hf-buckets-sync + sha256 + centroid_intermediate_top_k rewrite is GENERIC (same mechanism as the deployed retrained MTP drafter).",
+      "classification": "config-only",
+      "evidence": [
+        [
+          "submissions/fa2sw_precache_kenyan/serve.py",
+          "def ensure_drafter"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/manifest.json",
+          "DRAFTER_BUCKET"
+        ]
+      ],
+      "note": "Swap MECHANISM is config-only. CAVEAT: the EAGLE-3 ckpt does not exist yet (training-gated; arch_notes 'deployment gated on kanna #5'), and ensure_drafter writes the MTP-only key centroid_intermediate_top_k into the drafter config (spurious-but-harmless for an EAGLE-3 config). vLLM-load verification is DEFERRED (arch_notes \u00a77). The TRAINING gate is a separate axis; here only the swap mechanism is priced."
+    },
+    {
+      "id": "T3",
+      "name": "Aux-hidden capture (target exposes layers 2/21/39)",
+      "what_changes": "vLLM auto-sets use_aux_hidden_state_outputs for method=='eagle3' and calls set_aux_hidden_state_layers; Gemma4Model already implements SupportsEagle3, so the (hidden_states, aux_hidden_states) tuple return + multi-layer cat fusion are built-in (no model-class surgery, no forward hooks).",
+      "classification": "config-only",
+      "evidence": [
+        [
+          "research/eagle3_feasibility/feasibility_report.md",
+          "eagle3_hiddens_accessible"
+        ],
+        [
+          "research/eagle3_feasibility/feasibility_report.md",
+          "SupportsEagle3"
+        ],
+        [
+          "research/eagle3_drafter/arch_notes.md",
+          "(2, 21, 39)"
+        ]
+      ],
+      "note": "Config-only on STOCK vLLM 0.22.x (feasibility PR #15: '0 hours of vLLM work'). CAVEAT: this submission source-patches gemma4.py (PLE fast-path / scale-fold) -- orthogonal to the aux-collection return (gemma4.py:1318, 1337-1356) but co-resident, so non-interference needs re-validation."
+    },
+    {
+      "id": "T4",
+      "name": "Drafter head class",
+      "what_changes": "MTP head Gemma4MTP (get_top_tokens, single last-hidden) -> EAGLE-3 head Eagle3LlamaForCausalLM (Llama decoder layer + fc[7680->2560] fusion + own lm_head/compute_logits; its draft layer writes its OWN KV).",
+      "classification": "config-only",
+      "evidence": [
+        [
+          "research/eagle3_drafter/arch_notes.md",
+          "Eagle3LlamaForCausalLM"
+        ],
+        [
+          "research/eagle3_feasibility/feasibility_report.md",
+          "llama_eagle3.py"
+        ]
+      ],
+      "note": "The head CLASS is selected by vLLM's registry from the method, so selection is config-only -- but the structural change (own-KV Llama layer, fused [7680] input, compute_logits not get_top_tokens) is precisely what breaks the MTP-keyed served patches T5/T6/T7 below."
+    },
+    {
+      "id": "T5",
+      "name": "Fused sparse-argmax patch (drafter head)",
+      "what_changes": "sitecustomize _apply_fused_top_token_patch is keyed to TOP_TOKEN_TARGET=vllm.model_executor.models.gemma4_mtp and wraps the MTP head's get_top_tokens. EAGLE-3's head has no get_top_tokens (uses compute_logits), so the patch goes INERT; retaining the fused-argmax kernel requires re-targeting it to the EAGLE head.",
+      "classification": "served-file-change",
+      "evidence": [
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "TOP_TOKEN_TARGET = \"vllm.model_executor.models.gemma4_mtp\""
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "self.model.get_top_tokens"
+        ]
+      ],
+      "note": "Inert-not-crash, but a served-file edit is required to KEEP the optimization."
+    },
+    {
+      "id": "T6",
+      "name": "onegraph loopgraph capture (proposer)",
+      "what_changes": "sitecustomize _apply_loopgraph_patch is keyed to LOOPGRAPH_TARGET=vllm.v1.spec_decode.gemma4 and does proposer_cls = module.Gemma4Proposer. Under method=='eagle3' vLLM instantiates EagleProposer (vllm.v1.spec_decode.eagle), so the onegraph K=7 single-replay substrate -- the source of 481.53 TPS -- is never invoked (inert). Retaining it requires REWRITING the loopgraph for the EAGLE proposer.",
+      "classification": "served-file-change",
+      "evidence": [
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "LOOPGRAPH_TARGET = \"vllm.v1.spec_decode.gemma4\""
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "proposer_cls = module.Gemma4Proposer"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "Patch vLLM Gemma4 MTP drafting"
+        ]
+      ],
+      "note": "This is the load-bearing finding: the engine that makes the submission the frontier is MTP-specific and goes inert for EAGLE-3."
+    },
+    {
+      "id": "T7",
+      "name": "onegraph correctness invariant + static buffers / cudagraph sizing",
+      "what_changes": "The onegraph 'Q-only, KV-shared, width-1 is exact' correctness invariant is FALSE for EAGLE-3: the EAGLE draft Llama layer writes its own KV and has cross-position dependencies within the draft chain. _build_static_buffers / _run_graph_body / _capture_graph assume a single [1,2560] hidden buffer and K width-1 iterations; EAGLE-3 needs a fused [1,7680] aux input and a KV-bearing chain -- the buffers and capture must be re-derived and re-sized.",
+      "classification": "served-file-change",
+      "evidence": [
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "Width-1 is exact"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "def _build_static_buffers"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "def _capture_graph"
+        ]
+      ],
+      "note": "Correctness re-derivation, not just re-pointing -- the deepest served-file change and the one most coupled to greedy-identity re-validation."
+    },
+    {
+      "id": "T8",
+      "name": "Shared-base fused-accept-prep patch",
+      "what_changes": "sitecustomize _apply_fused_accept_proposer_patch is keyed to PROPOSER_TARGET=vllm.v1.spec_decode.llm_base_proposer and wraps SpecDecodeBaseProposer.prepare_next_token_ids_padded -- the SHARED base that both the MTP and EAGLE proposers inherit, so it carries over unchanged.",
+      "classification": "config-only",
+      "evidence": [
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "PROPOSER_TARGET = \"vllm.v1.spec_decode.llm_base_proposer\""
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "proposer_cls = module.SpecDecodeBaseProposer"
+        ]
+      ],
+      "note": "No edit needed (shared base). CAVEAT: the fused-accept fast path's num_reqs==1 / accept-geometry assumptions should be re-validated for EAGLE draft chains, but no served-file CHANGE is required to keep it functioning."
+    },
+    {
+      "id": "T9",
+      "name": "PLE gemma4.py source patches (orthogonality)",
+      "what_changes": "serve.py patch_gemma4_source (PLE valid-token fast path, embed-scale fold, scratch reuse) edits the target gemma4.py. These touch per-layer-embeddings / embed_scale inside the decoder, NOT the Gemma4Model.forward aux-collection return path, so they are orthogonal to EAGLE-3 aux capture; no change needed.",
+      "classification": "config-only",
+      "evidence": [
+        [
+          "submissions/fa2sw_precache_kenyan/serve.py",
+          "def patch_gemma4_source"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/serve.py",
+          "PLE valid-token fast path"
+        ]
+      ],
+      "note": "No edit needed; non-interference with the aux tuple return should be re-validated."
+    }
+  ],
+  "honest_framing": "Prices DEPLOYMENT feasibility ONLY. BASELINE 481.53 unchanged; this card adds 0 TPS. No served-file edit, no build, no boot test, no HF Job, no submission change, 0 GPU.",
+  "handoff_sentence": "GO/NO-GO packet: served-path integration of a {2,21,39}-fusion EAGLE-3 drafter is a YELLOW light -- the feature-export prerequisite is green (stock vLLM aux capture is built-in) but the swap is NOT the advertised config drop-in: the MTP-specific onegraph loopgraph that produces 481.53 goes inert under the EAGLE proposer and must be REWRITTEN (a served-file change to the same sitecustomize.py that #272 flags as missing the boot guard), then greedy-identity / PPL / boot / TPS re-validated before any launch."
+}
