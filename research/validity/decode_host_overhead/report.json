@@ -1,0 +1,110 @@
+{
+  "pr": 284,
+  "analysis_only": true,
+  "operating_point": "fa2sw_precache_kenyan precache-on out512 single-stream greedy ONEGRAPH=1 K=7(M=8)",
+  "e_accept_measured": 4.069642193883867,
+  "per_step_decode_wall": {
+    "decode_wall_per_step_us": 8017.0,
+    "decode_wall_per_step_us_metrics_basis": 8010.907243725077,
+    "exec_cpu_us": 6417.0,
+    "host_gap_us": 1600.0,
+    "verify_gpu_us": 6532.0,
+    "drafter_gpu_us": 1445.0,
+    "deployed_gpu_busy_us": 7977.0,
+    "n_decode_steps": 16154.0,
+    "decode_wall_total_s": 129.4081956151349,
+    "identity_compose_s": 129.506618,
+    "identity_resid_s": 0.09842238486510269,
+    "identity_resid_frac": 0.0007605575859956718
+  },
+  "model_forward": {
+    "deployed_gpu_busy_us": 7977.0,
+    "deployed_verify_gpu_us": 6532.0,
+    "deployed_drafter_gpu_us": 1445.0,
+    "denken_microbuilt_us": 5673.6,
+    "denken_verify_m1_us": 4966.78,
+    "denken_draft_k7_us": 706.86,
+    "microbuilt_undercount_us": 2303.3999999999996,
+    "verify_m8_vs_m1_us": 1565.2200000000003,
+    "drafter_deployed_vs_micro_us": 738.14
+  },
+  "host_overhead": {
+    "host_overhead_us": 40.0,
+    "host_overhead_frac": 0.0049893975302482225,
+    "gpu_busy_share": 0.9950106024697518,
+    "decode_bound": "gpu",
+    "host_overhead_us_vs_denken_microbuilt": 2343.3999999999996,
+    "host_overhead_frac_vs_denken_microbuilt": 0.29230385430959205,
+    "denken_subtraction_caveat": "denken's 5673.6\u00b5s is an M=1 isolated micro-built model-forward; it UNDER-counts the deployed M=8 in-stack GPU-busy by 2303\u00b5s. That gap is REAL GPU work, not host overhead \u2014 subtracting the micro-built number manufactures phantom host overhead (29.2%). The direct GPU-busy measurement gives the true host overhead (0.50%)."
+  },
+  "host_overhead_decomposition_us": {
+    "scheduler_dispatch_gap_us": 40.0,
+    "sampling_host_blocking_us": 0.0,
+    "detokenize_host_blocking_us": 0.0,
+    "other_framework_us": 0.0,
+    "sum_us": 40.0,
+    "resid_us": 0.0,
+    "gap_minus_drafter_us": 155.0,
+    "verify_async_tail_us": 115.0,
+    "sampling_gpu_pct_of_busy": 2.722918816474969,
+    "sampling_gpu_us_inside_modelforward": 217.20723399020827,
+    "sampling_source": "own_kernel_trace",
+    "notes": {
+      "sampling": "fused GPU greedy argmax (FUSED_SPARSE_ARGMAX=1, prewarmed) INSIDE verify span -> 0 host wall",
+      "detok": "DETOK_ENDONLY=1 -> detok deferred to end-of-sequence, off per-step critical path -> 0 host wall",
+      "dispatch": "host hop between verify graph and draft graph + accept/scheduler logic (ONEGRAPH already fuses the decode step)"
+    }
+  },
+  "recoverable": {
+    "recoverable_host_overhead_us": 40.0,
+    "recoverable_frac_of_cycle": 0.0049893975302482225,
+    "recoverable_host_overhead_tps_raw": 2.4043179273253372,
+    "recoverable_host_overhead_tps": 0.4990282123962925,
+    "overcredit_factor_applied": 4.818,
+    "materiality_gate_pct": 2.0,
+    "materiality_gate_tps": 9.6306,
+    "host_overhead_clears_materiality": false,
+    "irreducible_note": "ONEGRAPH=1 already fuses the decode step into one CUDA graph; detok deferred (DETOK_ENDONLY), sampling fused+prewarmed (FUSED_SPARSE_ARGMAX), framework already FASTRENDER+orjson. Residual is the unavoidable inter-graph host hop + accept/scheduler \u2014 largely irreducible."
+  },
+  "fern274_grounding": {
+    "fern_inferred_fixed_overhead_frac": 0.4,
+    "fern_phi_band": [
+      0.125,
+      0.735
+    ],
+    "measured_host_overhead_frac": 0.0049893975302482225,
+    "measured_in_fern_band": false,
+    "denken_subtraction_frac": 0.29230385430959205,
+    "denken_subtraction_in_fern_band": true,
+    "grounds_fern274_fixed_overhead": "refutes_magnitude"
+  },
+  "self_test": {
+    "a_walltime_identity_holds": true,
+    "b_decomposition_sums": true,
+    "c_denken_modelforward_imported_exact": true,
+    "d_nan_clean": true,
+    "e_anchors_imported_exact": true,
+    "f_caveats_carried": true,
+    "identity_resid_frac": 0.0007605575859956718,
+    "decomp_resid_us": 0.0,
+    "decode_host_overhead_self_test_passes": true
+  },
+  "greedy_ppl_safety_certificate": {
+    "decode_host_overhead_analysis_only": true,
+    "served_file_changed": false,
+    "emitted_token_changed": false,
+    "hf_job_or_submission": false,
+    "is_launch": false,
+    "baseline_tps_unchanged": 481.53,
+    "tps_added_by_this_leg": 0.0
+  },
+  "primary_metric": {
+    "name": "decode_host_overhead_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "host_overhead_frac",
+    "value": 0.0049893975302482225
+  },
+  "wandb_run_id": "u58fxtu6"
+}

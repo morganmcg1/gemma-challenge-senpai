@@ -1,0 +1,180 @@
+{
+  "label": "kernel",
+  "phase": "kernel",
+  "trace_dir": "/workspace/senpai/target/research/validity/decode_host_overhead/trace_kernel",
+  "trace": {
+    "trace_file": "/workspace/senpai/target/research/validity/decode_host_overhead/trace_kernel/rank0.1781498834476478183.pt.trace.json.gz",
+    "gpu_kernel_us_total": 398036.50899996154,
+    "category_ms": {
+      "elementwise_copy": 9.090445000000072,
+      "other": 11.57531000000006,
+      "sampling": 10.838211000000035,
+      "matmul_gemm": 317.57183799999774,
+      "norm": 17.045427999999813,
+      "attention": 29.459841999999863,
+      "activation": 2.4554350000000302
+    },
+    "category_pct": {
+      "elementwise_copy": 2.283821909412071,
+      "other": 2.9081025831228913,
+      "sampling": 2.722918816474969,
+      "matmul_gemm": 79.78460036187998,
+      "norm": 4.282378026785844,
+      "attention": 7.40129142274301,
+      "activation": 0.616886879590301
+    },
+    "top_kernels": [
+      {
+        "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        "ms": 133.96528100000018,
+        "pct": 33.656530989224684,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        "ms": 117.09635299999924,
+        "pct": 29.4184956285029,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "kernel_unified_attention",
+        "ms": 27.766399999999848,
+        "pct": 6.975842509964967,
+        "category": "attention"
+      },
+      {
+        "name": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float>)",
+        "ms": 17.033361999999894,
+        "pct": 4.2793466465664185,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)",
+        "ms": 13.496306999999954,
+        "pct": 3.3907208748032853,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "reduce_segments",
+        "ms": 8.569944,
+        "pct": 2.1530547591052325,
+        "category": "other"
+      },
+      {
+        "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 4, 4, 8, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        "ms": 6.361935000000001,
+        "pct": 1.5983295140397824,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+        "ms": 6.314061999999986,
+        "pct": 1.5863022253570704,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "triton_red_fused_add_marlin_gemm_rms_norm_0",
+        "ms": 6.14674900000003,
+        "pct": 1.5442676390272088,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)",
+        "ms": 4.999590999999998,
+        "pct": 1.2560634230666716,
+        "category": "sampling"
+      },
+      {
+        "name": "triton_red_fused_add_rms_norm_2",
+        "ms": 4.977352999999992,
+        "pct": 1.2504764983757992,
+        "category": "norm"
+      },
+      {
+        "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 4, 16, 4, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        "ms": 4.478239,
+        "pct": 1.1250824732764484,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+        "ms": 4.387012999999958,
+        "pct": 1.1021634701354448,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "_sparse_argmax_blocks_kernel",
+        "ms": 4.007158999999998,
+        "pct": 1.0067315207008776,
+        "category": "sampling"
+      },
+      {
+        "name": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, false, true, true, false, 8, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float>)",
+        "ms": 3.405782999999983,
+        "pct": 0.8556458824736382,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "triton_poi_fused_gelu_marlin_gemm_mul_3",
+        "ms": 2.9324929999999942,
+        "pct": 0.7367397044476333,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "triton_poi_fused_gelu_mul_slice_1",
+        "ms": 2.4554350000000302,
+        "pct": 0.616886879590301,
+        "category": "activation"
+      },
+      {
+        "name": "triton_per_fused_add_mul_rms_norm_2",
+        "ms": 2.2709350000000192,
+        "pct": 0.5705343476420246,
+        "category": "norm"
+      },
+      {
+        "name": "triton_per_fused_add_rms_norm_0",
+        "ms": 2.228512999999994,
+        "pct": 0.5598765313259768,
+        "category": "norm"
+      },
+      {
+        "name": "triton_poi_fused_6",
+        "ms": 1.9474549999999975,
+        "pct": 0.4892654206250677,
+        "category": "elementwise_copy"
+      },
+      {
+        "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, -1, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        "ms": 1.8213310000000003,
+        "pct": 0.45757888003187575,
+        "category": "matmul_gemm"
+      },
+      {
+        "name": "reshape_and_cache_kernel_flash",
+        "ms": 1.6934419999999952,
+        "pct": 0.42544891277803837,
+        "category": "attention"
+      },
+      {
+        "name": "triton_per_fused_5",
+        "ms": 1.6591419999999961,
+        "pct": 0.41683161280066305,
+        "category": "other"
+      },
+      {
+        "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_sub_unsqueeze_view_4",
+        "ms": 1.5851359999999868,
+        "pct": 0.39823884597483994,
+        "category": "norm"
+      },
+      {
+        "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_split_with_sizes_sub_unsqueeze_view_6",
+        "ms": 1.5017879999999952,
+        "pct": 0.37729905826305504,
+        "category": "norm"
+      }
+    ]
+  },
+  "server_log": "/workspace/senpai/target/research/validity/decode_host_overhead/server_kernel_kernel.log"
+}
