@@ -1,0 +1,405 @@
+{
+  "agent": "lawine",
+  "analysis_only": true,
+  "any_shipping_kernel_shrinks_with_identity": false,
+  "base_pr": 391,
+  "best_kernel_m1": "awq_marlin_uint4_g128",
+  "best_shipping_hbm_eff": 0.0,
+  "best_shipping_identity_byte_exact": false,
+  "best_shipping_kernel": "awq_marlin_uint4_g128",
+  "best_shipping_numerically_valid": true,
+  "best_shipping_read_shrink_frac": -0.007575757575757569,
+  "best_shipping_wallclock_lift_tps_m8": null,
+  "best_shipping_wallclock_speedup_m8": null,
+  "cb3_bpw_eff": 3.2368598382749325,
+  "cb3_read_shrink_frac": 0.2153067058727436,
+  "cb3_realistic_lift_m1": 33.0,
+  "cb3_realistic_lift_m8": 38.02,
+  "cb3_shipping_kernel_self_test_passes": true,
+  "corrected_strict_base": 471.42,
+  "created_at": "20260615T201406Z",
+  "enumeration_facts": {
+    "aqlm_ships_in_022": false,
+    "bnb_nf4_wheel_present": false,
+    "gptq_exllama_linear_removed": true,
+    "gptq_quantize_supported_types": [
+      "uint4b8",
+      "uint8b128"
+    ],
+    "gptq_shipping_path": "gptq_marlin == Marlin int4 GEMM (0 read-shrink, identity-class)",
+    "marlin_has_no_subint4": true,
+    "marlin_supported_types": [
+      "uint4b8",
+      "uint8b128",
+      "float8_e4m3fn",
+      "float4_e2m1f"
+    ],
+    "max_valid_abs_diff_gate": 1000.0,
+    "subint4_scalar_types_present_no_gemm": [
+      "uint2b2",
+      "uint3b4"
+    ],
+    "vllm_version_expected": "0.22.0"
+  },
+  "f_body_strict": 0.76240970145034,
+  "frac_of_cb3_lift_recovered_shipping": -0.0712047848422534,
+  "gap_to_500": 28.58,
+  "identity_preserving_shipping_kernels": [
+    "gptq_marlin_uint4b8_g128",
+    "marlin_int4_uint4b8_g128"
+  ],
+  "int4_bpw": 4.125,
+  "kind": "cb3-shipping-kernel-surrogate",
+  "max_wallclock_lift_tps_m8_over_valid": null,
+  "measured": false,
+  "no_hf_job": true,
+  "no_kernel_rebuild": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "official_tps": 0.0,
+  "per_kernel": {
+    "awq_marlin_uint4_g128": {
+      "bpw": 4.15625,
+      "byte_roofline_speedup": 0.9924812030075187,
+      "is_subint4": false,
+      "note": "AWQ 4-bit asym on the Marlin kernel; ~int4 bytes; different quantizer",
+      "numerically_valid": true,
+      "potential_lift_tps_m1": -2.7072059197024747,
+      "potential_lift_tps_m8": -2.7072059197024747,
+      "read_shrink_frac": -0.007575757575757569,
+      "realized_lift_tps_m1": -2.7072059197024747,
+      "realized_lift_tps_m8": -2.7072059197024747
+    },
+    "fp4_marlin_e2m1_g16": {
+      "bpw": 4.5,
+      "byte_roofline_speedup": 0.9166666666666666,
+      "is_subint4": false,
+      "note": "FP4 (newest 4-bit shipping fmt); g16 scales => 4.5 bpw; fast Marlin, MORE bytes",
+      "numerically_valid": true,
+      "potential_lift_tps_m1": -30.556254252340995,
+      "potential_lift_tps_m8": -30.556254252340995,
+      "read_shrink_frac": -0.09090909090909083,
+      "realized_lift_tps_m1": -30.556254252340995,
+      "realized_lift_tps_m8": -30.556254252340995
+    },
+    "gptq_marlin_uint4b8_g128": {
+      "bpw": 4.125,
+      "byte_roofline_speedup": 1.0,
+      "identity_byte_exact": true,
+      "is_subint4": false,
+      "note": "GPTQ -> gptq_marlin == Marlin int4 read profile (exllama removed); 0 shrink, identity-class",
+      "numerically_valid": true,
+      "potential_lift_tps_m1": 0.0,
+      "potential_lift_tps_m8": 0.0,
+      "read_shrink_frac": 0.0,
+      "realized_lift_tps_m1": 0.0,
+      "realized_lift_tps_m8": 0.0
+    },
+    "marlin_int4_uint4b8_g128": {
+      "bpw": 4.125,
+      "byte_roofline_speedup": 1.0,
+      "identity_byte_exact": true,
+      "is_subint4": false,
+      "note": "deployed baseline; fast Marlin; the leanest shipping fast format",
+      "numerically_valid": true,
+      "potential_lift_tps_m1": 0.0,
+      "potential_lift_tps_m8": 0.0,
+      "read_shrink_frac": 0.0,
+      "realized_lift_tps_m1": 0.0,
+      "realized_lift_tps_m8": 0.0
+    },
+    "marlin_int8_uint8b128_g128": {
+      "bpw": 8.125,
+      "byte_roofline_speedup": 0.5076923076923077,
+      "is_subint4": false,
+      "note": "8-bit: reads ~2x bytes; fast Marlin but WRONG direction",
+      "numerically_valid": true,
+      "potential_lift_tps_m1": -200.3809201751586,
+      "potential_lift_tps_m8": -200.3809201751586,
+      "read_shrink_frac": -0.9696969696969697,
+      "realized_lift_tps_m1": -200.3809201751586,
+      "realized_lift_tps_m8": -200.3809201751586
+    }
+  },
+  "pr": 395,
+  "realized_lift_tps_best_shipping_m1": -2.7072059197024747,
+  "realized_lift_tps_best_shipping_m8": -2.7072059197024747,
+  "selftest": {
+    "checks": [
+      {
+        "detail": "0.215307",
+        "name": "cb3_read_shrink_is_0p2153",
+        "ok": true
+      },
+      {
+        "detail": "cb3=3.2368598382749325 int4=4.125",
+        "name": "cb3_is_subint4",
+        "ok": true
+      },
+      {
+        "detail": "0.2153",
+        "name": "cb3_row_shrink_positive",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "base_plus_gap_is_500",
+        "ok": true
+      },
+      {
+        "detail": "min_bpw=4.125",
+        "name": "all_shipping_ge_int4_bpw",
+        "ok": true
+      },
+      {
+        "detail": "max_shrink=0.00000",
+        "name": "all_shipping_shrink_le_0",
+        "ok": true
+      },
+      {
+        "detail": "shrink=-0.9697",
+        "name": "int8_reads_about_2x",
+        "ok": true
+      },
+      {
+        "detail": "-0.00758",
+        "name": "awq_shrink_slightly_neg",
+        "ok": true
+      },
+      {
+        "detail": "0.000000",
+        "name": "gptq_marlin_zero_shrink",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "exllama_linear_removed_022",
+        "ok": true
+      },
+      {
+        "detail": "-0.0909",
+        "name": "fp4_shrink_negative",
+        "ok": true
+      },
+      {
+        "detail": "best=0.00000",
+        "name": "best_shipping_shrink_le_0",
+        "ok": true
+      },
+      {
+        "detail": "best=0.00000 half_cb3=0.10765",
+        "name": "best_shipping_far_below_cb3",
+        "ok": true
+      },
+      {
+        "detail": "max=0.0000",
+        "name": "all_shipping_potential_lift_le_0",
+        "ok": true
+      },
+      {
+        "detail": "92.58",
+        "name": "cb3_potential_lift_positive",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "lift_monotone_in_speedup",
+        "ok": true
+      },
+      {
+        "detail": "0.000000",
+        "name": "speedup1_zero_lift",
+        "ok": true
+      },
+      {
+        "detail": "-203.934",
+        "name": "speedup_lt1_neg_lift",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "marlin_supports_uint4b8",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "marlin_no_subint4",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "subint4_types_present_no_gemm",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "gptq_quantize_4_8_only",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "aqlm_not_shipping",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "bnb_nf4_absent",
+        "ok": true
+      },
+      {
+        "detail": "best_lift_m8=-2.707",
+        "name": "shipping_does_not_unblock_supply",
+        "ok": true
+      },
+      {
+        "detail": "-2.707 < 17.22",
+        "name": "best_lift_below_supply_floor",
+        "ok": true
+      },
+      {
+        "detail": "-0.0712",
+        "name": "frac_of_cb3_recovered_near_0",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "no_shipping_shrinks_with_identity",
+        "ok": true
+      },
+      {
+        "detail": "['gptq_marlin_uint4b8_g128', 'marlin_int4_uint4b8_g128']",
+        "name": "identity_subset_is_int4_family",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "baseline_has_zero_shrink",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "lmhead_params",
+        "ok": true
+      },
+      {
+        "detail": "3.8902B",
+        "name": "body_params_3p89B",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "cb3_lift_bar",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "nan_inf_clean",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "deployability_answer_is_negative",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "read_shrink_lift_is_byte_roofline",
+        "ok": true
+      },
+      {
+        "detail": "max=0.0000",
+        "name": "read_shrink_lift_le_0_for_all_ships",
+        "ok": true
+      },
+      {
+        "detail": "supply_lift=-2.707",
+        "name": "wallclock_speed_does_not_unblock_supply",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "wallclock_diag_surfaced_not_counted",
+        "ok": true
+      },
+      {
+        "detail": "selected=None",
+        "name": "broken_build_not_selected",
+        "ok": true
+      },
+      {
+        "detail": "1000.0",
+        "name": "max_valid_abs_diff_sane",
+        "ok": true
+      }
+    ],
+    "n_checks": 41,
+    "n_passed": 41,
+    "passes": true
+  },
+  "shipping_kernel_table": {
+    "awq_marlin_uint4_g128": {
+      "bpw": 4.15625,
+      "byte_roofline_speedup": 0.9924812030075187,
+      "is_subint4": false,
+      "note": "AWQ 4-bit asym on the Marlin kernel; ~int4 bytes; different quantizer",
+      "potential_lift_tps_m1": -2.7072059197024747,
+      "potential_lift_tps_m8": -2.7072059197024747,
+      "read_shrink_frac": -0.007575757575757569
+    },
+    "cb3_qtip_class_SOURCE_BUILD_ONLY": {
+      "bpw": 3.2368598382749325,
+      "byte_roofline_speedup": 1.2743832622046425,
+      "is_subint4": true,
+      "note": "NOT SHIPPING (source-build-only); the sub-int4 + L1-resident-codebook target",
+      "potential_lift_tps_m1": 92.58201428758494,
+      "potential_lift_tps_m8": 92.58201428758494,
+      "read_shrink_frac": 0.2153067058727436
+    },
+    "fp4_marlin_e2m1_g16": {
+      "bpw": 4.5,
+      "byte_roofline_speedup": 0.9166666666666666,
+      "is_subint4": false,
+      "note": "FP4 (newest 4-bit shipping fmt); g16 scales => 4.5 bpw; fast Marlin, MORE bytes",
+      "potential_lift_tps_m1": -30.556254252340995,
+      "potential_lift_tps_m8": -30.556254252340995,
+      "read_shrink_frac": -0.09090909090909083
+    },
+    "gptq_marlin_uint4b8_g128": {
+      "bpw": 4.125,
+      "byte_roofline_speedup": 1.0,
+      "is_subint4": false,
+      "note": "GPTQ -> gptq_marlin == Marlin int4 read profile (exllama removed); 0 shrink, identity-class",
+      "potential_lift_tps_m1": 0.0,
+      "potential_lift_tps_m8": 0.0,
+      "read_shrink_frac": 0.0
+    },
+    "marlin_int4_uint4b8_g128": {
+      "bpw": 4.125,
+      "byte_roofline_speedup": 1.0,
+      "is_subint4": false,
+      "note": "deployed baseline; fast Marlin; the leanest shipping fast format",
+      "potential_lift_tps_m1": 0.0,
+      "potential_lift_tps_m8": 0.0,
+      "read_shrink_frac": 0.0
+    },
+    "marlin_int8_uint8b128_g128": {
+      "bpw": 8.125,
+      "byte_roofline_speedup": 0.5076923076923077,
+      "is_subint4": false,
+      "note": "8-bit: reads ~2x bytes; fast Marlin but WRONG direction",
+      "potential_lift_tps_m1": -200.3809201751586,
+      "potential_lift_tps_m8": -200.3809201751586,
+      "read_shrink_frac": -0.9696969696969697
+    }
+  },
+  "shipping_kernel_unblocks_supply": false,
+  "shipping_kernels_enumerated": [
+    "marlin_int4_uint4b8_g128",
+    "marlin_int8_uint8b128_g128",
+    "awq_marlin_uint4_g128",
+    "gptq_marlin_uint4b8_g128",
+    "fp4_marlin_e2m1_g16"
+  ],
+  "supply_floor_383": 17.216386736379093,
+  "supply_robust_383": 23.74874176829968
+}
