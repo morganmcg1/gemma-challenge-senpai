@@ -1,0 +1,278 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260615T001357Z",
+  "kind": "planb-draft-argmax-embed-fusion-screen",
+  "nan_clean": true,
+  "peak_mem_mib": 534.527,
+  "pr": 261,
+  "synthesis": {
+    "accounting": {
+      "actual_max_step_reduction_pct_built": 0.0,
+      "actual_max_step_reduction_pct_served": 0.0,
+      "actual_step_reduction_us": 0.0,
+      "actual_tps": 481.53,
+      "counterfactual_rows": [
+        {
+          "clears_500": true,
+          "clears_520_95": false,
+          "implied_gain_pct": 4.8184,
+          "implied_tps_off_481_53": 504.732,
+          "launch_tax_us": 56.0,
+          "max_step_reduction_pct_vs_built": 5.1613,
+          "max_step_reduction_pct_vs_served": 4.5969,
+          "per_launch_us": 4.0
+        },
+        {
+          "clears_500": true,
+          "clears_520_95": false,
+          "implied_gain_pct": 6.0965,
+          "implied_tps_off_481_53": 510.886,
+          "launch_tax_us": 70.0,
+          "max_step_reduction_pct_vs_built": 6.4516,
+          "max_step_reduction_pct_vs_served": 5.7462,
+          "per_launch_us": 5.0
+        },
+        {
+          "clears_500": true,
+          "clears_520_95": false,
+          "implied_gain_pct": 7.4061,
+          "implied_tps_off_481_53": 517.193,
+          "launch_tax_us": 84.0,
+          "max_step_reduction_pct_vs_built": 7.7419,
+          "max_step_reduction_pct_vs_served": 6.8954,
+          "per_launch_us": 6.0
+        }
+      ],
+      "k_cal": 125.268,
+      "launch_tax_us_hi": 84.0,
+      "launch_tax_us_lo": 56.0,
+      "launch_tax_us_mid": 70.0,
+      "n_launches": 14,
+      "per_launch_us_hi": 6.0,
+      "per_launch_us_lo": 4.0,
+      "per_launch_us_mid": 5.0,
+      "projected_tps_gain_pct": 0.0,
+      "served_tps": 481.53,
+      "sm86_launch_floor_us": 55.0,
+      "step_us_built": 1085.0,
+      "step_us_served": 1218.2
+    },
+    "audit": {
+      "draft_argmax_embed_separately_launched": false,
+      "served": {
+        "draft_argmax_embed_separately_launched": false,
+        "draft_loop_captured_in_cudagraph": true,
+        "fused_sparse_argmax_on": true,
+        "has_capture_graph": true,
+        "has_graph_replay": true,
+        "has_propose_onegraph": true,
+        "has_run_graph_body": true,
+        "k_spec": 7,
+        "loop_body_argmax_get_top_tokens": true,
+        "loop_body_embeds_in_model": true,
+        "manifest_flags": {
+          "DIXIE_SLIM_GREEDY": "1",
+          "FUSED_SPARSE_ARGMAX": "1",
+          "LOOPGRAPH_REQUIRE_CAPTURE": "1",
+          "ONEGRAPH": "1",
+          "OVERRIDE_GENERATION_CONFIG": "{\"temperature\":0.0,\"top_p\":1.0,\"top_k\":0}",
+          "SPECULATIVE_CONFIG": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7}"
+        },
+        "manifest_path": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan/manifest.json",
+        "onegraph_on": true,
+        "require_capture": true,
+        "sitecustomize_path": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "spec_method": "mtp"
+      },
+      "served_draft_loop": {
+        "argmax": "get_top_tokens -> logits.argmax (FUSED_SPARSE_ARGMAX Triton kernel)",
+        "capture": "_capture_graph: with torch.cuda.graph(graph): _run_graph_body(...) -> ONE torch.cuda.CUDAGraph",
+        "greedy_safety": "argmax->token->embed is pure index selection; fusion is latency-only, token-identical",
+        "k_spec": 7,
+        "loop_body": "_run_graph_body: per-step self.model(input_ids, inputs_embeds=None) embed-gather + get_top_tokens() argmax",
+        "onegraph_propose": "Gemma4Proposer.propose = propose_onegraph (ONEGRAPH=1)",
+        "serve_path": "single graph.replay() per step (LOOPGRAPH_REQUIRE_CAPTURE=1 forces capture)",
+        "spec_method": "mtp",
+        "submission": "fa2sw_precache_kenyan",
+        "vllm_version": "0.22.1rc1.dev307+g3e8afdf78"
+      }
+    },
+    "composition": {
+      "k_cal": 125.268,
+      "k_spec": 7,
+      "n_launches": 14,
+      "per_launch_us_band": [
+        4.0,
+        6.0
+      ],
+      "served_tps": 481.53,
+      "step_us_built": 1085.0,
+      "step_us_served": 1218.2
+    },
+    "cudagraph_tiein": {
+      "draft_loop_captured_in_cudagraph": true,
+      "has_capture_graph": true,
+      "has_graph_replay": true,
+      "loopgraph_require_capture": true,
+      "onegraph_on": true,
+      "reasoning": "ONEGRAPH=1 => propose_onegraph; _capture_graph records the whole K=7 _run_graph_body (per-step embed via inputs_embeds=None + per-step get_top_tokens argmax) into ONE torch.cuda.CUDAGraph; served step = single graph.replay(); LOOPGRAPH_REQUIRE_CAPTURE=1 forces the captured path => no separate per-step eager launches.",
+      "subsumed_by_deployed_onegraph": true,
+      "subsumed_by_lawine_246": "moot -- deployed ONEGRAPH already captures the K=7 draft tail (argmax+embed); lawine #246's live lever is the attention backend, a different axis"
+    },
+    "equivalence": {
+      "available": true,
+      "fusion_argmax_bitexact": true,
+      "hidden": 256,
+      "mismatch_cand": 0,
+      "mismatch_emb": 0,
+      "mismatch_tok": 0,
+      "n_cand": 512,
+      "n_rows": 2000,
+      "note": "argmax->token->embed is pure index selection; fusing the launch boundary introduces no arithmetic => bit-identical by construction.",
+      "per_dtype": {
+        "bfloat16": {
+          "adv_emb_eq": true,
+          "adv_first_occurrence_ok": true,
+          "adv_tok_eq": true,
+          "cand_eq": true,
+          "emb_eq": true,
+          "rows": 3000,
+          "tok_eq": true
+        },
+        "float32": {
+          "adv_emb_eq": true,
+          "adv_first_occurrence_ok": true,
+          "adv_tok_eq": true,
+          "cand_eq": true,
+          "emb_eq": true,
+          "rows": 3000,
+          "tok_eq": true
+        }
+      },
+      "total_positions": 6000,
+      "vocab": 8192
+    },
+    "handoff_fern_denken": "hand-off (fern portfolio + denken roofline): the deployed draft loop DOES NOT separately launch argmax+embed (draft_argmax_embed_separately_launched=False) -- the K=7 MTP draft tail (per-step embed + get_top_tokens argmax) is already captured in the deployed ONEGRAPH torch.cuda.CUDAGraph and served by a single graph.replay(), so the Rank-2 fusion lever is NULL (projected_tps_gain_pct=0.00), worth 0% step / 0 TPS off 481.53. The counterfactual ceiling (IF it HAD been 14 separate launches @ 4-6us) is +4.82..+7.41% (504.7..517.2 TPS, clears 500 but not 520.95) -- refuted by the audit. The draft-launch component is NOT worth a build slot. Greedy-safe (bit-exact argmax->embed verified).",
+    "handoff_line": "the deployed draft loop DOES NOT separately launch argmax+embed (draft_argmax_embed_separately_launched=False), so the Rank-2 fusion lever is NULL/subsumed-by-deployed-ONEGRAPH worth 0% step / 0 TPS off 481.53, greedy-safe (bit-exact argmax verified).",
+    "headline": {
+      "actual_tps": 481.53,
+      "baseline_tps": 481.53,
+      "clears_500_alone": false,
+      "counterfactual_gain_pct_band": [
+        4.8184,
+        7.4061
+      ],
+      "counterfactual_mid_tps": 510.886,
+      "counterfactual_step_reduction_pct_built_band": [
+        5.1613,
+        7.7419
+      ],
+      "counterfactual_step_reduction_pct_served_band": [
+        4.5969,
+        6.8954
+      ],
+      "counterfactual_tps_band": [
+        504.732,
+        517.193
+      ],
+      "draft_argmax_embed_separately_launched": false,
+      "draft_loop_captured_in_cudagraph": true,
+      "fusion_argmax_bitexact": true,
+      "greedy_identical_by_construction": true,
+      "k_spec": 7,
+      "lambda1_ceiling_tps": 520.95,
+      "launch_tax_us_band": [
+        56.0,
+        84.0
+      ],
+      "launch_tax_us_mid": 70.0,
+      "lever_class": "NULL (already captured in deployed ONEGRAPH CUDAGraph)",
+      "n_launches": 14,
+      "projected_tps_gain_pct": 0.0,
+      "screen_verdict": "NO-GO",
+      "subsumed_by_deployed_onegraph": true,
+      "subsumed_by_lawine_cudagraph": "moot (subsumed by DEPLOYED onegraph)"
+    },
+    "nonoverlap": {
+      "denken_257_roofline_decompose_this_prices_one_component": true,
+      "kanna_254_is_draft_PRECISION_red_not_launch": true,
+      "land_245_owns_any_live_build": true,
+      "lawine_246_is_attention_cudagraph_adjacent_this_prices_subsumption": true,
+      "stark_256_is_adaptive_K_draft_COUNT_not_per_step_launch_tax": true,
+      "this_continues_wirbel_lane_255_verify_epilogue_this_draft_launch": true,
+      "ubel_258_fern_259_are_ET_side": true
+    },
+    "self_test": {
+      "conditions": {
+        "a_launch_tax_roundtrip": true,
+        "b_step_reduction_maps_through_composition": true,
+        "c_fusion_argmax_bitexact_ge1000": true,
+        "d_boolean_sourced_from_served_config": true,
+        "e_nan_clean": true,
+        "f_baseline_and_ceiling_unchanged": true
+      },
+      "detail": {
+        "band_consistent": true,
+        "equiv_mismatches": [
+          0,
+          0,
+          0
+        ],
+        "equiv_total_positions": 6000,
+        "rt_base_ok": true
+      },
+      "draft_argmax_embed_fusion_screen_self_test_passes": true
+    },
+    "verdict": "DRAFT-ARGMAX-EMBED-ALREADY-CUDAGRAPH-CAPTURED-NO-GO",
+    "verdict_table": [
+      {
+        "clears_500": true,
+        "clears_520_95": false,
+        "fusion_argmax_bitexact": true,
+        "implied_tps": 504.732,
+        "launch_tax_us": 56.0,
+        "scenario": "COUNTERFACTUAL per_launch=4us (IF separately launched, on critical path)",
+        "separately_launched": false,
+        "step_reduction_pct_built": 5.1613,
+        "step_reduction_pct_served": 4.5969,
+        "subsumed_by_deployed_onegraph": true
+      },
+      {
+        "clears_500": true,
+        "clears_520_95": false,
+        "fusion_argmax_bitexact": true,
+        "implied_tps": 510.886,
+        "launch_tax_us": 70.0,
+        "scenario": "COUNTERFACTUAL per_launch=5us (IF separately launched, on critical path)",
+        "separately_launched": false,
+        "step_reduction_pct_built": 6.4516,
+        "step_reduction_pct_served": 5.7462,
+        "subsumed_by_deployed_onegraph": true
+      },
+      {
+        "clears_500": true,
+        "clears_520_95": false,
+        "fusion_argmax_bitexact": true,
+        "implied_tps": 517.193,
+        "launch_tax_us": 84.0,
+        "scenario": "COUNTERFACTUAL per_launch=6us (IF separately launched, on critical path)",
+        "separately_launched": false,
+        "step_reduction_pct_built": 7.7419,
+        "step_reduction_pct_served": 6.8954,
+        "subsumed_by_deployed_onegraph": true
+      },
+      {
+        "clears_500": false,
+        "clears_520_95": false,
+        "fusion_argmax_bitexact": true,
+        "implied_tps": 481.53,
+        "launch_tax_us": 0.0,
+        "scenario": "ACTUAL (audited): draft loop already CUDAGraph-captured (ONEGRAPH _run_graph_body, single graph.replay)",
+        "separately_launched": false,
+        "step_reduction_pct_built": 0.0,
+        "step_reduction_pct_served": 0.0,
+        "subsumed_by_deployed_onegraph": true
+      }
+    ]
+  }
+}
