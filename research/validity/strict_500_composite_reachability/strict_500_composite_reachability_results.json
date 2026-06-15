@@ -2,9 +2,12 @@
   "agent": "fern",
   "analysis_only": true,
   "b_star": 3.0,
-  "created_at": "20260615T214028Z",
+  "cb3_additivity_gap_tps_kanna416": null,
+  "created_at": "20260615T230210Z",
   "demand_reaches_500_on_deployable_floor_denken383": "no",
   "denken402_tree_net_supply": "pending",
+  "deployability_surface_lawine417": "green",
+  "floor_reduction_tps_wirbel415": null,
   "gap_coverage_addressable_pp": null,
   "irreducible_floor_survives_vbi_ubel386": "inflates",
   "kanna403_ppl_safe_supply": "pending",
@@ -12,10 +15,11 @@
   "lmhead_eta_measured": null,
   "measured_ppl_at_b_star": null,
   "nan_clean": true,
-  "peak_mem_mib": 18.113,
+  "peak_mem_mib": 19.609,
   "pr": 357,
   "robust_coverage_pilot": "pending",
-  "stark381_decode_identity": "green",
+  "selective_recompute_measured_tps_stark412": null,
+  "stark381_decode_identity": "pending",
   "supply_lift_available_tps_wirbel390_or_lawine388": null,
   "supply_lift_required_tps_denken383": 17.2,
   "synthesis": {
@@ -383,7 +387,8 @@
     "deliverable7_composite_verdict": {
       "binding_constraint": "PENDING_reprice__supply_leg_kanna403_AND_demand_leg_tree__gates=kanna#403_ppl_safe_conservative_k_supply_recost,ubel#401_or_denken#402_tree_net_supply",
       "cost_refinement_inputs": [
-        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383"
+        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383",
+        "stark#381_decode_width_identity_cost_branch"
       ],
       "demand_alone_may_be_insufficient": true,
       "demand_central_green": true,
@@ -526,12 +531,12 @@
       "denken402_tree_net_supply": "pending",
       "eta_axis_deflated": true,
       "go_formula": "private_500_GO <=> (supply_base_enables_500) AND (demand_closer_delivers_residual)",
-      "identity_cost_branch": "env_reachable_at_decode_width",
-      "identity_cost_branch_pending": false,
+      "identity_cost_branch": "pending_stark381_decode_width",
+      "identity_cost_branch_pending": true,
       "identity_factor": {
         "attn_locus_free_stark363": true,
-        "cost_branch": "env_reachable_at_decode_width",
-        "cost_branch_pending": false,
+        "cost_branch": "pending_stark381_decode_width",
+        "cost_branch_pending": true,
         "decode_verify_width_rows": 8,
         "env_knob_cannot_patch_marlin": true,
         "eta_attn_stark363": 0.0,
@@ -542,21 +547,19 @@
         "lmhead_int4_marlin_free_at_decode_wirbel384": true,
         "marlin_bit_exact_at_decode_width": true,
         "marlin_m_variant_at_prefill_width": true,
-        "marlin_rebuild_needed": false,
+        "marlin_rebuild_needed": null,
         "n_kernel_rebuilds_strict_500_wirbel384": 2,
         "note": "stark #376 (ipe3ofie, RED): on real weights, pinning the attention split (num_splits=1) leaves e2e identity 0.992555 ~= heuristic 0.992708; the residual ~0.73% flip is the int4-Marlin body GEMM (custom CUDA op outside the aten dispatcher -> VLLM_BATCH_INVARIANT cannot patch it). BUT this is the PREFILL-REPLICATION geometry (2048 rows); Marlin is BIT-EXACT at the decode-verify width (8 rows). wirbel #384 (18:12Z) is the existence proof: the deployed lm_head (an int4-Marlin GEMM, n=16384) is already byte-exact at the 8-row decode width via should_use_atomic_add_reduce(M=8)=False \u2014 the SAME atomic-add mechanism #381 tests on the body. Corrected ledger = 2 rebuilds (attn #375 + body #376), lm_head FREE. stark #381 resolves the body geometry: GREEN -> body also free at decode -> 1 rebuild (#375 mha_varlen only); RED -> Marlin-rebuild-gated (2 rebuilds). Identity is REACHABLE in BOTH; #381 only sets the deployment cost.",
         "pin_does_not_help_stark376": true,
         "prefill_replication_width_rows": 2048,
-        "rebuild_items": [
-          "#375_mha_varlen_attention_rebuild"
-        ],
-        "rebuild_line_items": 1,
+        "rebuild_items": null,
+        "rebuild_line_items": null,
         "red_is_geometry_specific": true,
         "residual_is_int4_marlin_body_gemm": true,
-        "stark381_decode_input": "green"
+        "stark381_decode_input": "pending"
       },
       "identity_reachable_env_or_rebuild": true,
-      "identity_rebuild_line_items": 1,
+      "identity_rebuild_line_items": null,
       "kanna403_ppl_safe_supply": "pending",
       "pending_inputs": [
         "kanna#403_ppl_safe_conservative_k_supply_recost",
@@ -565,7 +568,8 @@
       "primary_route": "supply_x_demand_and_product",
       "private_500_reachable_via_known_levers": null,
       "refinement_inputs": [
-        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383"
+        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383",
+        "stark#381_decode_width_identity_cost_branch"
       ],
       "reprice_go_flip_gates": [
         "kanna#403_ppl_safe_conservative_k_supply",
@@ -741,10 +745,10 @@
         "gap_to_500_393": 32.52,
         "honest_strict_base_floor": 469.68,
         "honest_strict_base_plus_attn": 480.7,
-        "identity_cost_branch": "env_reachable_at_decode_width",
-        "identity_cost_branch_pending": false,
+        "identity_cost_branch": "pending_stark381_decode_width",
+        "identity_cost_branch_pending": true,
         "identity_reachable_env_or_rebuild": true,
-        "identity_rebuild_line_items": 1,
+        "identity_rebuild_line_items": null,
         "is_binding_go_leaf": true,
         "kanna374_fusion_lever_closed": true,
         "kanna394_conservative_k_232": 232,
@@ -900,7 +904,7 @@
       "tree_net_supply_pending": true,
       "ubel401_tree_coverage_ceiling": "pending",
       "verdict_pending": true,
-      "verdict_text": "private-500 reachability HELD ON THE 20:19Z REPRICE TERMINAL GO-FLIP GATE \u2014 GO = (supply leg kanna #403 PPL-safe) AND (demand leg ubel #401 OR denken #402 tree net-supply). The 19:25Z cb3-deployability pair RESOLVED RED and is SUPERSEDED: kanna #394 (RED) made the +32.65 cb3 HEADLINE lift PPL-DEAD (held-out 2.4223 + OOD 2.427 breach 2.42), denken #396 (RED) closed demand-alone (busts even bare on 467.48: required \u0394cov 0.0338 = 109% of budget), ubel #399 (RED) closed the cheap monotone levers. The route did NOT close \u2014 it is RE-PRICED toward 'conservative-k cb3 + a NET-positive tree'. SUPPLY base 467.48 (wirbel #393 corrected; gap_to_500 32.52); the demand leg needs the TREE net-supply (denken #396 RED closed demand-alone; ubel #399 RED the cheap monotone levers; sized closer ~0.911 is PROVENANCE \u2014 a drafter retrain is forbidden); identity reachable via env_reachable_at_decode_width (1 rebuild line-item(s)). GO flips True iff kanna #403 (PPL-safe conservative-k supply, largest k with held-out worst-seed <= 2.41) AND >=1 of ubel #401 (top-8/16 tree coverage ceiling) / denken #402 (tree NETs d-cov after the verify-M step-time tax) land green. Route A (sub-int4 eta-axis): DEFLATED/excluded. GO-gating pending: ['kanna#403_ppl_safe_conservative_k_supply_recost', 'ubel#401_or_denken#402_tree_net_supply'] (+refinements ['coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383'])."
+      "verdict_text": "private-500 reachability HELD ON THE 20:19Z REPRICE TERMINAL GO-FLIP GATE \u2014 GO = (supply leg kanna #403 PPL-safe) AND (demand leg ubel #401 OR denken #402 tree net-supply). The 19:25Z cb3-deployability pair RESOLVED RED and is SUPERSEDED: kanna #394 (RED) made the +32.65 cb3 HEADLINE lift PPL-DEAD (held-out 2.4223 + OOD 2.427 breach 2.42), denken #396 (RED) closed demand-alone (busts even bare on 467.48: required \u0394cov 0.0338 = 109% of budget), ubel #399 (RED) closed the cheap monotone levers. The route did NOT close \u2014 it is RE-PRICED toward 'conservative-k cb3 + a NET-positive tree'. SUPPLY base 467.48 (wirbel #393 corrected; gap_to_500 32.52); the demand leg needs the TREE net-supply (denken #396 RED closed demand-alone; ubel #399 RED the cheap monotone levers; sized closer ~0.911 is PROVENANCE \u2014 a drafter retrain is forbidden); identity reachable (env-or-rebuild; stark #381 will fix the cost: env@decode=1 rebuild vs Marlin-gated=2 rebuilds). GO flips True iff kanna #403 (PPL-safe conservative-k supply, largest k with held-out worst-seed <= 2.41) AND >=1 of ubel #401 (top-8/16 tree coverage ceiling) / denken #402 (tree NETs d-cov after the verify-M step-time tax) land green. Route A (sub-int4 eta-axis): DEFLATED/excluded. GO-gating pending: ['kanna#403_ppl_safe_conservative_k_supply_recost', 'ubel#401_or_denken#402_tree_net_supply'] (+refinements ['coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383', 'stark#381_decode_width_identity_cost_branch'])."
     },
     "deliverable8_gap_decomposition": {
       "all_corners_clear_3p2_vbi1_386": false,
@@ -984,8 +988,8 @@
     },
     "deliverable_identity_reachability": {
       "attn_locus_free_stark363": true,
-      "cost_branch": "env_reachable_at_decode_width",
-      "cost_branch_pending": false,
+      "cost_branch": "pending_stark381_decode_width",
+      "cost_branch_pending": true,
       "decode_verify_width_rows": 8,
       "env_knob_cannot_patch_marlin": true,
       "eta_attn_stark363": 0.0,
@@ -996,18 +1000,16 @@
       "lmhead_int4_marlin_free_at_decode_wirbel384": true,
       "marlin_bit_exact_at_decode_width": true,
       "marlin_m_variant_at_prefill_width": true,
-      "marlin_rebuild_needed": false,
+      "marlin_rebuild_needed": null,
       "n_kernel_rebuilds_strict_500_wirbel384": 2,
       "note": "stark #376 (ipe3ofie, RED): on real weights, pinning the attention split (num_splits=1) leaves e2e identity 0.992555 ~= heuristic 0.992708; the residual ~0.73% flip is the int4-Marlin body GEMM (custom CUDA op outside the aten dispatcher -> VLLM_BATCH_INVARIANT cannot patch it). BUT this is the PREFILL-REPLICATION geometry (2048 rows); Marlin is BIT-EXACT at the decode-verify width (8 rows). wirbel #384 (18:12Z) is the existence proof: the deployed lm_head (an int4-Marlin GEMM, n=16384) is already byte-exact at the 8-row decode width via should_use_atomic_add_reduce(M=8)=False \u2014 the SAME atomic-add mechanism #381 tests on the body. Corrected ledger = 2 rebuilds (attn #375 + body #376), lm_head FREE. stark #381 resolves the body geometry: GREEN -> body also free at decode -> 1 rebuild (#375 mha_varlen only); RED -> Marlin-rebuild-gated (2 rebuilds). Identity is REACHABLE in BOTH; #381 only sets the deployment cost.",
       "pin_does_not_help_stark376": true,
       "prefill_replication_width_rows": 2048,
-      "rebuild_items": [
-        "#375_mha_varlen_attention_rebuild"
-      ],
-      "rebuild_line_items": 1,
+      "rebuild_items": null,
+      "rebuild_line_items": null,
       "red_is_geometry_specific": true,
       "residual_is_int4_marlin_body_gemm": true,
-      "stark381_decode_input": "green"
+      "stark381_decode_input": "pending"
     },
     "deliverable_supply_side_base": {
       "attn_deficit_untouched_frac_378": 0.93,
@@ -1096,10 +1098,10 @@
       "gap_to_500_393": 32.52,
       "honest_strict_base_floor": 469.68,
       "honest_strict_base_plus_attn": 480.7,
-      "identity_cost_branch": "env_reachable_at_decode_width",
-      "identity_cost_branch_pending": false,
+      "identity_cost_branch": "pending_stark381_decode_width",
+      "identity_cost_branch_pending": true,
       "identity_reachable_env_or_rebuild": true,
-      "identity_rebuild_line_items": 1,
+      "identity_rebuild_line_items": null,
       "is_binding_go_leaf": true,
       "kanna374_fusion_lever_closed": true,
       "kanna394_conservative_k_232": 232,
@@ -1201,7 +1203,138 @@
       "wirbel390_shippable_ceiling_pending": false,
       "wirbel393_landed": true
     },
-    "handoff": "PRIVATE-500 GO HELD ON THE 20:19Z REPRICE TERMINAL GATE \u2014 the GO is an AND-PRODUCT: (SUPPLY leg kanna #403 PPL-safe conservative-k cb3 re-cost) x (DEMAND leg >=1 of ubel #401 / denken #402 tree net-supply). GO-gating pending inputs: ['kanna#403_ppl_safe_conservative_k_supply_recost', 'ubel#401_or_denken#402_tree_net_supply'] (+refinements ['coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383']). SUPPLY BASE (wirbel #393 LANDED, the NOW-BINDING axis): the corrected deployable-strict base is 467.48 (wirbel #393 re-priced 471.42 -> 467.48 on the DECODE-specific 3.01% attn strict tax; gap_to_500 32.52, ceiling 505.29, rebuilds=1, attn the SOLE strict tax) < 500. \u2605 20:19Z RE-PRICE: lawine #388/#392 sized the cb3 body-allocation lift +32.65 honest HEADLINE, BUT kanna #394 (LANDED RED) made it PPL-DEAD \u2014 #372's in-sample margin is winner's-curse (held-out 2.4223 + OOD 2.427 breach 2.42); so 467.48+32.65 is arithmetic-only, NOT deployable. cb3 STAYS deployable at a conservative k=232 (~2.39 held-out) at a smaller UN-COSTED lift -> the SUPPLY leg is PENDING kanna #403 (largest k with held-out worst-seed <= 2.41). PENDING_reprice__supply_leg_kanna403_AND_demand_leg_tree__gates=kanna#403_ppl_safe_conservative_k_supply_recost,ubel#401_or_denken#402_tree_net_supply. DEMAND RESIDUAL (20:19Z RE-PRICED DOWN to tree-only): denken #396 (LANDED RED) -> demand-ALONE busts EVEN BARE on 467.48 (required \u0394cov 0.0338 = 109% of the +0.031 budget); ubel #399 (LANDED RED) -> NO cheap deployable demand lever (every monotone draft-head lever is a RANK-INVARIANT no-op, MC max|\u0394cov|=0). So the d-cov can ONLY be SUPPLIED by the TREE (the locked +0.1286 top-1->top-4 prize) -> the DEMAND leg is PENDING >=1 of ubel #401 (top-8/16 tree coverage ceiling) / denken #402 (tree NETs d-cov after its verify-M step-time tax). The sized closer ~0.911 is PROVENANCE (a drafter retrain is forbidden). ubel #382 (GREEN) BANKED the slope private-robust (489.8 -> 437.4 private, flattening 0.893); ubel #379 (GREEN) BANKED the gap ceiling-check (3.661pp of the 4.295pp gap coverage-addressable); ubel #389 (LANDED) REFUTED the #386 breach (measured floor 0.5764% < 0.633%, 0 corners breach 3.2%). IDENTITY (strict-lock compliance, folds into the supply leaf, REACHABLE in BOTH #381 branches): env_reachable_at_decode_width (1 rebuild line-item(s)) \u2014 #381 sets COST, not GO. Route A (sub-int4 eta-axis standalone): PENDING denken #356 PPL@b* + stark #365 lm_head eta -- DEFLATED/un-deployable (PPL-blocked lawine #372; #373/#375), EXCLUDED from the GO.",
+    "equivalent_tps_frontier": {
+      "all_feeders_resolved": false,
+      "banked_feeders": [
+        "lawine#417_deployable_green+cb3_additive+bracket[492.08,494.08]",
+        "land#414_lmhead_free_self_referential+54.07_truevocab_contingency",
+        "denken#413_recompute_point_478.93",
+        "denken#409_tree_leg_closed",
+        "kanna#403_cb3_+15.60_k229_ppl_safe"
+      ],
+      "cb3_additivity_gap_resolved": false,
+      "cb3_stack_banked_additive_417": true,
+      "deployability_banked_green": true,
+      "deployability_surface": "green",
+      "deployed_fastpath_off_ladder": {
+        "flips": [
+          3,
+          882
+        ],
+        "is_equivalent": false,
+        "note": "the deployed 481.53 is the NON-equivalent fast path (3/882 reduction-order flips under M=8 batched verify, stark #381/#405); NOT a legal frontier point.",
+        "served_identity": 0.9966,
+        "tps": 481.53
+      },
+      "equivalence_tax_vs_deployed_nonequiv_tps": 14.049999999999955,
+      "floor_reduction_resolved": false,
+      "frontier_identity": 1.0,
+      "ladder": [
+        {
+          "equivalence_neutral": true,
+          "gate": "MEASURED served identity 1.0; the deployable strict floor.",
+          "identity": 1.0,
+          "node": "floor_blanket_strict_attention",
+          "source": "wirbel #393 (0q7ynumg) \u2014 blanket-strict batch-invariant attention every step",
+          "status": "measured",
+          "tps": 467.48
+        },
+        {
+          "denken413_point_tps": 478.93,
+          "equivalence_neutral": true,
+          "flagged_frac": 0.236,
+          "gate": "identity 1.0 BY CONSTRUCTION (recompute restores the flagged ties); tie set readable from the fast path (stark #405). TPS pending stark #412; denken #418 testing tax<2.6.",
+          "identity": 1.0,
+          "in_modeled_band": true,
+          "lawine417_bracket_tps": [
+            476.48,
+            478.48
+          ],
+          "modeled_band_tps": [
+            476.0,
+            479.0
+          ],
+          "node": "selective_higher_precision_recompute_397",
+          "source": "MODELED denken #413 point 478.93 (= 481.53 - 2.6 TPS tax on the ~23.6% flagged steps; se8mf9ax); lawine #417 bracket [476.48,478.48]; stark #412 measuring",
+          "status": "modeled",
+          "tie_identifiable_from_fast_path": true,
+          "tps": 478.93
+        },
+        {
+          "additive_confirmed_lawine417": true,
+          "additivity_gap_tps": null,
+          "banked": true,
+          "cb3_lift_tps": 15.6,
+          "equivalence_neutral": true,
+          "exact_gap_pending_kanna416": true,
+          "gate": "cb3 is PPL-safe (k*=229, held-out worst-seed <=2.41) AND equivalence-neutral (body bytes, not tokens). ADDITIVE confirmed (lawine #417) -> stack BANKED; kanna #416 tightens.",
+          "identity": 1.0,
+          "k_star": 229,
+          "lawine417_bracket_tps": [
+            492.08,
+            494.08
+          ],
+          "naive_stack_tps": 494.53000000000003,
+          "node": "cb3_body_read_shrink_403",
+          "ppl_safe": true,
+          "source": "kanna #403 +15.6 cb3 (iv9i2wks) ADDITIVE on the recompute point \u2014 CONFIRMED by lawine #417 (2mv6ssw4); kanna #416 will PRICE the exact additivity_gap (tightening)",
+          "status": "modeled",
+          "tps": 494.53000000000003
+        },
+        {
+          "equivalence_neutral": true,
+          "fixed_floor_frac": 0.1201,
+          "fixed_floor_us": 146.3,
+          "floor_reduction_tps": 0.0,
+          "gate": "equivalence-neutral (host/launch overhead, not tokens). 0 until wirbel #415.",
+          "identity": 1.0,
+          "node": "fixed_overhead_floor_reduction_415",
+          "reduction_pending_wirbel415": true,
+          "source": "wirbel #415 decomposing the 146.3us/12.01% fixed floor (#408 qc9bz8sv); 0 TPS credit until a measured reduction lands",
+          "status": "modeled",
+          "tps": 494.53000000000003
+        },
+        {
+          "absolute_fullvocab_required": false,
+          "deployed_passes_self_referential": true,
+          "equivalence_neutral": true,
+          "gate": "lm_head truncation is FREE: the deployed config passes the submission's OWN truncated-head greedy. Absolute full-vocab (261,976 rows) costs 54.07 TPS \u2014 a contingency, NOT required.",
+          "identity": 1.0,
+          "lmhead_tps_cost": 0.0,
+          "node": "lmhead_truncation_free_self_referential_414",
+          "self_referential_gate": true,
+          "source": "land #414 (bq7xkfcv) \u2014 self-referential scorer; lm_head truncation FREE (0 cost)",
+          "status": "modeled",
+          "tps": 494.53000000000003,
+          "truevocab_head_rows": 261976,
+          "truevocab_lmhead_tps_cost_contingency": 54.07
+        }
+      ],
+      "lmhead_tps_cost": 0.0,
+      "lmhead_truncation_free_self_referential": true,
+      "max_equivalent_tps_measured": 467.48,
+      "max_equivalent_tps_modeled": 492.08,
+      "max_equivalent_tps_modeled_bracket": [
+        492.08,
+        494.08
+      ],
+      "max_equivalent_tps_modeled_point": 494.53000000000003,
+      "modeled_beats_deployed_nonequiv": true,
+      "modeled_is_bracket": true,
+      "naive_stacked_ceiling_tps": 494.53000000000003,
+      "objective": "max_equivalent_tps__strict_byte_exact_greedy_token_identity_1p0",
+      "pending_feeders": [
+        "stark#412_selective_recompute_measured_tps",
+        "kanna#416_cb3_additivity_gap_tps_tightening",
+        "wirbel#415_fixed_overhead_floor_reduction_tps"
+      ],
+      "selective_recompute_measured": false,
+      "source": "advisor 22:08Z re-point (#357) of the #407 human directive (21:13Z): forget 500, maximize TPS subject to strict byte-exact greedy-token-equivalence; 22:26Z banked lawine #417 (cb3 additive + deployable + bracket) and land #414 (lm_head free)",
+      "tree_leg_closed": true,
+      "tree_leg_note": "tree net-supply CLOSED (denken #409, 3zr7i8ad, 42/42): DP-optimal widths (3, 2, 2, 1, 1, 1, 1) at M=12 net only +1.33 TPS and are beta-fragile -> 0 reliable supply; supersedes ubel #401 / denken #402.",
+      "truevocab_lmhead_tps_cost_contingency": 54.07
+    },
+    "handoff": "PRIVATE-500 GO HELD ON THE 20:19Z REPRICE TERMINAL GATE \u2014 the GO is an AND-PRODUCT: (SUPPLY leg kanna #403 PPL-safe conservative-k cb3 re-cost) x (DEMAND leg >=1 of ubel #401 / denken #402 tree net-supply). GO-gating pending inputs: ['kanna#403_ppl_safe_conservative_k_supply_recost', 'ubel#401_or_denken#402_tree_net_supply'] (+refinements ['coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383', 'stark#381_decode_width_identity_cost_branch']). SUPPLY BASE (wirbel #393 LANDED, the NOW-BINDING axis): the corrected deployable-strict base is 467.48 (wirbel #393 re-priced 471.42 -> 467.48 on the DECODE-specific 3.01% attn strict tax; gap_to_500 32.52, ceiling 505.29, rebuilds=1, attn the SOLE strict tax) < 500. \u2605 20:19Z RE-PRICE: lawine #388/#392 sized the cb3 body-allocation lift +32.65 honest HEADLINE, BUT kanna #394 (LANDED RED) made it PPL-DEAD \u2014 #372's in-sample margin is winner's-curse (held-out 2.4223 + OOD 2.427 breach 2.42); so 467.48+32.65 is arithmetic-only, NOT deployable. cb3 STAYS deployable at a conservative k=232 (~2.39 held-out) at a smaller UN-COSTED lift -> the SUPPLY leg is PENDING kanna #403 (largest k with held-out worst-seed <= 2.41). PENDING_reprice__supply_leg_kanna403_AND_demand_leg_tree__gates=kanna#403_ppl_safe_conservative_k_supply_recost,ubel#401_or_denken#402_tree_net_supply. DEMAND RESIDUAL (20:19Z RE-PRICED DOWN to tree-only): denken #396 (LANDED RED) -> demand-ALONE busts EVEN BARE on 467.48 (required \u0394cov 0.0338 = 109% of the +0.031 budget); ubel #399 (LANDED RED) -> NO cheap deployable demand lever (every monotone draft-head lever is a RANK-INVARIANT no-op, MC max|\u0394cov|=0). So the d-cov can ONLY be SUPPLIED by the TREE (the locked +0.1286 top-1->top-4 prize) -> the DEMAND leg is PENDING >=1 of ubel #401 (top-8/16 tree coverage ceiling) / denken #402 (tree NETs d-cov after its verify-M step-time tax). The sized closer ~0.911 is PROVENANCE (a drafter retrain is forbidden). ubel #382 (GREEN) BANKED the slope private-robust (489.8 -> 437.4 private, flattening 0.893); ubel #379 (GREEN) BANKED the gap ceiling-check (3.661pp of the 4.295pp gap coverage-addressable); ubel #389 (LANDED) REFUTED the #386 breach (measured floor 0.5764% < 0.633%, 0 corners breach 3.2%). IDENTITY (strict-lock compliance, folds into the supply leaf, REACHABLE in BOTH #381 branches): cost branch PENDING stark #381 (env@decode=1 rebuild vs Marlin-gated=2 rebuilds) \u2014 #381 sets COST, not GO. Route A (sub-int4 eta-axis standalone): PENDING denken #356 PPL@b* + stark #365 lm_head eta -- DEFLATED/un-deployable (PPL-blocked lawine #372; #373/#375), EXCLUDED from the GO.",
     "headline": {
       "all_corners_clear_3p2_vbi1_386": false,
       "b_star": 3.0,
@@ -1212,7 +1345,8 @@
       "cb3_lift_honest": 32.65,
       "closer_not_capped_by_irreducible_floor": true,
       "cost_refinement_inputs": [
-        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383"
+        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383",
+        "stark#381_decode_width_identity_cost_branch"
       ],
       "coverage_target_for_3p2_ubel379": 0.9011,
       "decode_attn_strict_tax_pct_393": 3.01,
@@ -1231,6 +1365,8 @@
       "demand_robust_resolved": null,
       "denken402_tree_net_supply": "pending",
       "deployed_drafter_mtp_k_387": 7,
+      "deployed_fastpath_is_equivalent": false,
+      "deployed_fastpath_served_identity": 0.9966,
       "drafter_is_mtp_not_eagle3_387": true,
       "eta_attn_390": 0.02145,
       "eta_attn_stark363": 0.0,
@@ -1238,6 +1374,20 @@
       "eta_blanket_predecomp": 0.09841,
       "eta_budget_500": 0.040220025755911104,
       "eta_total_verify_locus": null,
+      "frontier_all_feeders_resolved": false,
+      "frontier_cb3_stack_banked_additive_417": true,
+      "frontier_deployability_surface": "green",
+      "frontier_equivalence_tax_vs_deployed_tps": 14.049999999999955,
+      "frontier_identity": 1.0,
+      "frontier_lmhead_truncation_free_self_referential": true,
+      "frontier_modeled_beats_deployed_nonequiv": true,
+      "frontier_naive_stacked_ceiling_tps": 494.53000000000003,
+      "frontier_pending_feeders": [
+        "stark#412_selective_recompute_measured_tps",
+        "kanna#416_cb3_additivity_gap_tps_tightening",
+        "wirbel#415_fixed_overhead_floor_reduction_tps"
+      ],
+      "frontier_truevocab_lmhead_tps_cost_contingency": 54.07,
       "gap_addressable_pp_ubel379": 3.6614875000000002,
       "gap_after_max_coverage_retrain_pct_ubel379": 1.142,
       "gap_channel_live": true,
@@ -1248,10 +1398,10 @@
       "honest_strict_base_floor_378": 469.68,
       "honest_strict_base_plus_attn_378": 480.7,
       "identity_clears_500_budget": null,
-      "identity_cost_branch": "env_reachable_at_decode_width",
-      "identity_cost_branch_pending": false,
+      "identity_cost_branch": "pending_stark381_decode_width",
+      "identity_cost_branch_pending": true,
       "identity_reachable_env_or_rebuild": true,
-      "identity_rebuild_line_items": 1,
+      "identity_rebuild_line_items": null,
       "irreducible_floor_inflates_vbi_386": true,
       "irreducible_floor_vbi1_central_pct_386": 1.31,
       "irreducible_floor_vbi_pending_ubel386": false,
@@ -1259,6 +1409,13 @@
       "kappa_axis_robust_380": true,
       "kappa_int4_ct_transfer": 0.672,
       "lmhead_eta_flip_threshold": 0.040220025755911104,
+      "max_equivalent_tps_measured": 467.48,
+      "max_equivalent_tps_modeled": 492.08,
+      "max_equivalent_tps_modeled_bracket": [
+        492.08,
+        494.08
+      ],
+      "max_equivalent_tps_modeled_point": 494.53000000000003,
       "measured_top4_coverage_387": 0.89027,
       "n_kernel_rebuilds_strict_500_390": 1,
       "noniid_price_multiplier": 1.4058154235145384,
@@ -1277,7 +1434,8 @@
       "realized_deployed_strict_393": 467.48,
       "recommended_retrain_target_c": 0.901,
       "refinement_inputs": [
-        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383"
+        "coverage_lift_pilot_robust_tier_provenance_only_forbidden_retrain_383",
+        "stark#381_decode_width_identity_cost_branch"
       ],
       "reprice_go_flip_gates": [
         "kanna#403_ppl_safe_conservative_k_supply",
@@ -1323,6 +1481,20 @@
       "verdict_pending_measured_ppl": true,
       "verdict_pending_route_a": true,
       "within_336_budget": true
+    },
+    "historical_sub_result": {
+      "binding_constraint": "PENDING_reprice__supply_leg_kanna403_AND_demand_leg_tree__gates=kanna#403_ppl_safe_conservative_k_supply_recost,ubel#401_or_denken#402_tree_net_supply",
+      "frozen_run_34tv4krw_strict_500_reachable_via_known_levers": 0,
+      "frozen_run_id": "34tv4krw",
+      "frozen_verdict": "red",
+      "label": "strict_500_reachable_via_known_levers (binary >500 GO rollup \u2014 HISTORICAL, superseded 22:08Z)",
+      "live_leg_binding_constraint": "PENDING_reprice__supply_leg_kanna403_AND_demand_leg_tree__gates=kanna#403_ppl_safe_conservative_k_supply_recost,ubel#401_or_denken#402_tree_net_supply",
+      "live_leg_strict_500_reachable_via_known_levers": null,
+      "live_leg_terminal_go": "pending",
+      "note": "the human dropped 500 as the target in #407 (21:13Z); this binary rollup is retained ONLY as a historical sub-result, NOT the capstone. FROZEN record: run 34tv4krw = 0 (RED). The capstone is equivalent_tps_frontier (max_equivalent_tps).",
+      "strict_500_reachable_via_known_levers": null,
+      "superseded_by": "max_equivalent_tps frontier (advisor 22:08Z re-point of #407 human directive)",
+      "terminal_go": "pending"
     },
     "imports": {
       "caveats": [
@@ -1372,6 +1544,22 @@
         "ay_terminal_go_is_supply_leg_and_tree_leg": true,
         "az_denken387_measured_anchor_mtp_k7_kanna374_fusion_closed": true,
         "b_lquant_int4_unit": true,
+        "ba_frontier_floor_measured_467_identity1": true,
+        "bb_frontier_recompute_modeled_478_in_band": true,
+        "bc_frontier_measured_le_modeled": true,
+        "bd_frontier_ladder_monotone_nondecreasing": true,
+        "be_frontier_cb3_stack_banked_additive_417": true,
+        "bf_frontier_deployed_481_off_ladder_nonequiv": true,
+        "bg_frontier_equivalence_tax_481_minus_467": true,
+        "bh_frontier_all_nodes_served_identity1": true,
+        "bi_frontier_tree_leg_closed_denken409": true,
+        "bj_frontier_pending_feeders_3_lawine417_land414_banked": true,
+        "bk_frontier_recompute_measured_promotes": true,
+        "bl_frontier_cb3_additivity_gap_tightens_net": true,
+        "bm_frontier_floor_reduction_adds_lmhead_free_inherits": true,
+        "bn_frontier_cb3_bracket_headline_492_494_beats_481": true,
+        "bo_frontier_lmhead_free_self_referential_414": true,
+        "bp_frontier_deployability_banked_green_417": true,
         "c_lquant_monotone_in_bits": true,
         "d_ceiling_roundtrips_anchors": true,
         "e_ceiling_monotone_in_bits": true,
@@ -1397,7 +1585,7 @@
         "y_noniid_price_is_slope_ratio": true,
         "z_triple_tail_out_of_budget_sensitivity": true
       },
-      "n_checks": 50,
+      "n_checks": 66,
       "strict_500_composite_reachability_self_test_passes": true
     }
   },

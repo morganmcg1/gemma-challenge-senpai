@@ -810,6 +810,149 @@ REPRICE_2019Z_SUPERSEDES_1925Z_PAIR: bool = True     # kanna #394 RED + denken #
 TREE_IS_GENUINELY_NEW_LEVER_2019Z: bool = True       # tree/retrain work = the genuinely-new-lever requirement
 
 # --------------------------------------------------------------------------- #
+# 22:08Z ADVISOR RE-POINT (GitHub #357): convert the binary ">500 reachable?"
+# rollup into ONE max-equivalent-TPS frontier rollup over the equivalence ladder.
+# The #407 human directive (21:13Z) DROPPED 500 as the target; the live objective
+# is now max TPS subject to STRICT byte-exact greedy-token-equivalence (served
+# identity == 1.0).  The strict_500_reachable_via_known_levers=0 result (run
+# 34tv4krw) is kept ONLY as a historical sub-result, NOT the capstone.
+# Tag each node MEASURED vs MODELED; keep per-lever PPL/identity/deployability gates.
+# --------------------------------------------------------------------------- #
+EQUIV_FRONTIER_REPOINTED_2208Z: bool = True
+
+# The deployed 481.53 fast path is NOT on the equivalence ladder: served identity
+# 0.9966 (3/882 reduction-order flips under M=8 batched verify, stark #381/#405).
+DEPLOYED_FASTPATH_TPS: float = 481.53
+DEPLOYED_FASTPATH_SERVED_IDENTITY: float = 0.9966
+DEPLOYED_FASTPATH_IS_EQUIVALENT: bool = False
+DEPLOYED_FASTPATH_FLIPS: tuple[int, int] = (3, 882)   # reduction-order flips / total under M=8
+
+# Ladder node 0 — FLOOR (MEASURED): blanket-strict batch-invariant attention every
+# step, served identity 1.0 (wirbel #393, = REALIZED_DEPLOYED_STRICT_393).
+EQUIV_FLOOR_TPS: float = REALIZED_DEPLOYED_STRICT_393   # 467.48 (MEASURED, identity 1.0)
+EQUIV_FLOOR_MEASURED: bool = True
+EQUIV_FLOOR_IDENTITY: float = 1.0
+
+# Ladder node 1 — SELECTIVE HIGHER-PRECISION RECOMPUTE (#397, stark #412 MEASURING).
+# Fast attention everywhere + recompute ONLY the ~23.6% near-tie <=eps-flagged steps
+# at higher precision -> equivalence restored by construction (identity 1.0).  Tie is
+# readable from the fast path (stark #405 tie_identifiable_from_fast_path=True).
+# MODELED tax ~2.6 TPS off the 481.53 fast path -> ~478.93 within band [476,479].
+SELECTIVE_RECOMPUTE_BAND_TPS: tuple[float, float] = (476.0, 479.0)
+SELECTIVE_RECOMPUTE_MODELED_TPS: float = 478.93        # 481.53 - 2.6 (MODELED; stark #412 measuring)
+SELECTIVE_RECOMPUTE_TAX_TPS: float = 2.6
+SELECTIVE_RECOMPUTE_FLAGGED_FRAC: float = 0.236
+SELECTIVE_RECOMPUTE_MEASURED: bool = False             # stark #412 building local research prototype on A10G
+SELECTIVE_RECOMPUTE_TIE_IDENTIFIABLE_405: bool = True
+SELECTIVE_RECOMPUTE_IDENTITY: float = 1.0              # by construction (recompute restores the flagged ties)
+
+# Ladder node 2 — cb3 BODY-READ SHRINK supply (kanna #403, BANKED/merged 440fd484).
+# RHT+VQ QTIP/QuIP#-class kernel: changes BYTES READ in the verify body, NOT tokens
+# emitted -> equivalence-NEUTRAL.  Conservative k*=229 holds held-out worst-seed
+# <=2.41.  +15.60 TPS, residual headroom 16.93, W&B iv9i2wks, self-test 30/30.
+CB3_CONSERVATIVE_LIFT_TPS_403: float = 15.60
+CB3_403_K_STAR: int = 229
+CB3_403_PPL_SAFE: bool = True
+CB3_403_RESIDUAL_HEADROOM_TPS: float = 16.93
+CB3_403_EQUIVALENCE_NEUTRAL: bool = True
+CB3_403_BANKED: bool = True
+CB3_403_WANDB: str = "iv9i2wks"
+# 22:26Z: cb3 onto the recompute point is CONFIRMED ADDITIVE (lawine #417), so the
+# stack is BANKED as the modeled headline.  kanna #416 still PRICES the exact
+# additivity_gap_tps but only TIGHTENS the [492.08, 494.08] bracket — it no longer
+# GATES banking.  (Flag retained for the report's "exact gap pending" line.)
+CB3_ADDITIVITY_PENDING_KANNA416: bool = True   # exact gap pending; additivity itself CONFIRMED (lawine #417)
+
+# Ladder node 3 — FIXED-OVERHEAD-FLOOR reduction (wirbel #415 DECOMPOSING).
+# Decomposes the 146.30us / 12.01% fixed floor measured in #408 (qc9bz8sv).  Treat
+# as 0 TPS until wirbel #415 lands a measured reduction.
+FIXED_OVERHEAD_FLOOR_US_408: float = 146.30
+FIXED_OVERHEAD_FLOOR_FRAC_408: float = 0.1201
+FLOOR_REDUCTION_PENDING_WIRBEL415: bool = True
+FLOOR_REDUCTION_TPS_UNTIL_415: float = 0.0
+
+# Deployability surface feeder: lawine #417 (PENDING) -> gates whether the modeled
+# frontier points are actually deployable (kernel build / served-file change).
+DEPLOYABILITY_SURFACE_PENDING_LAWINE417: bool = True
+
+# Tree net-supply leg — CLOSED (denken #409, BANKED, W&B 3zr7i8ad, self-test 42/42).
+# DP-optimal verify-tree widths w*=(3,2,2,1,1,1,1) at M=12 net only +1.33 TPS and are
+# beta-fragile -> treat the tree leg as ~0 reliable equivalence-neutral supply.
+# SUPERSEDES the 20:19Z ubel #401 / denken #402 tree feeders.
+DENKEN409_TREE_NET_TPS: float = 1.33
+DENKEN409_TREE_BETA_FRAGILE: bool = True
+DENKEN409_TREE_RELIABLE_SUPPLY_TPS: float = 0.0
+DENKEN409_DP_WIDTHS: tuple[int, ...] = (3, 2, 2, 1, 1, 1, 1)
+DENKEN409_M: int = 12
+DENKEN409_SUPERSEDES_401_402: bool = True
+DENKEN409_BANKED: bool = True
+DENKEN409_WANDB: str = "3zr7i8ad"
+
+# --------------------------------------------------------------------------- #
+# 22:26Z ADVISOR FORMAL RELAY (GitHub #357) — TWO MORE FEEDERS BANKED.
+# Consume these nodes, DO NOT re-derive.  They move the MODELED equivalent
+# frontier ABOVE the non-strict deployed 481.53 WITH the byte-identity guarantee
+# that 481.53 lacks.  ("Your re-pointed ladder now reads ... the headline
+# equivalent number, beats 481.53.")
+# --------------------------------------------------------------------------- #
+EQUIV_FRONTIER_FEEDERS_2226Z: bool = True
+
+# lawine #417 BANKED/merged (commit 8c80b5d, W&B 2mv6ssw4, self-test 63/63):
+#   (1) cb3 +15.60 is ADDITIVE onto the selective-recompute point — CONFIRMED.  The
+#       cb3 stack is no longer "modeled-only / do-not-sum"; kanna #416 now only PRICES
+#       the exact additivity_gap_tps (a TIGHTENING of the bracket, NOT a gate on banking).
+#   (2) deploy surface PRICED: 7 served files, 41.8 GPU-min identity-verify (shared-e2e
+#       SURVIVES the in-place edit, NOT the naive 81.6); whole-stack reversible, 1 binding
+#       in-place line, human-gated -> DEPLOYABLE (banked-green).
+#   (3) modeled fastest_equivalent_tps BRACKET [492.08, 494.08] = selective-recompute
+#       (~476.48-478.48) + cb3 +15.60 -> the HEADLINE equivalent number; BEATS the
+#       non-strict deployed 481.53 with the byte-identity guarantee 481.53 lacks.
+LAWINE417_BANKED: bool = True
+LAWINE417_WANDB: str = "2mv6ssw4"
+LAWINE417_CB3_ADDITIVE_CONFIRMED: bool = True            # cb3 stack is additive -> BANK it (not pending-only)
+LAWINE417_DEPLOY_SURFACE_FILES: int = 7
+LAWINE417_DEPLOY_IDENTITY_VERIFY_GPU_MIN: float = 41.8   # shared-e2e survives the edit (NOT naive 81.6)
+LAWINE417_DEPLOY_REVERSIBLE: bool = True
+LAWINE417_DEPLOY_BINDING_INPLACE_LINES: int = 1
+LAWINE417_DEPLOYABLE_GREEN: bool = True
+FASTEST_EQUIVALENT_BRACKET_TPS: tuple[float, float] = (492.08, 494.08)   # lawine #417 banked HEADLINE
+FASTEST_EQUIVALENT_BRACKET_BEATS_DEPLOYED: bool = True   # 492.08 (lower bound) > 481.53 deployed-nonequiv
+
+# land #414 BANKED/merged (commit 09166a3, W&B bq7xkfcv, self-test 29/29):
+#   operative equivalence is SELF-REFERENTIAL — the submission's OWN 16384-row truncated-
+#   head greedy.  Deployed config + ANY in-keepset speculator pass it FOR FREE
+#   (deployed_passes_self_referential=True, 0 cost).  lm_head truncation is therefore FREE
+#   -> keep it OFF the equivalent-frontier cost ledger.  ABSOLUTE full-vocab equivalence is
+#   STRONGER and NOT required: a 261,976-row head (#406 cert: 245,592 pruned rows globally
+#   reachable) costs 54.07 TPS — a CONTINGENCY line only, never on the operative ladder.
+LAND414_BANKED: bool = True
+LAND414_WANDB: str = "bq7xkfcv"
+LAND414_SELF_REFERENTIAL_GATE: bool = True
+LAND414_DEPLOYED_PASSES_SELF_REFERENTIAL: bool = True
+LAND414_LMHEAD_TRUNCATION_TPS_COST: float = 0.0           # FREE under the self-referential gate
+LAND414_TRUEVOCAB_LMHEAD_TPS_COST_CONTINGENCY: float = 54.07   # absolute full-vocab head (NOT required)
+LAND414_TRUEVOCAB_HEAD_ROWS: int = 261_976
+LAND414_PRUNED_ROWS_GLOBALLY_REACHABLE_406: int = 245_592
+
+# denken #413 (W&B se8mf9ax): selective-recompute modeled POINT 478.93 = 481.53 - 2.6 @ M=8.
+# lawine #417's combined bracket uses the recompute bracket [476.48, 478.48] (its upper is
+# +0.45 below the denken #413 point, so the naive additive point 494.53 sits just ABOVE the
+# banked bracket upper 494.08 — the bracket is the conservative banked range).  denken #418
+# is testing whether the tax is < 2.6 via per-position asymmetry (would RAISE the bracket).
+DENKEN413_RECOMPUTE_POINT_TPS: float = 478.93
+DENKEN413_WANDB: str = "se8mf9ax"
+SELECTIVE_RECOMPUTE_BRACKET_417_TPS: tuple[float, float] = (476.48, 478.48)
+DENKEN418_TESTING_TAX_LT_2P6: bool = True
+
+# Remaining parameterized refinements (measured numbers drop straight in, modeled until then):
+#   stark #412  -> MEASURED selective-recompute equivalent-TPS + identity 1.0 on A10G
+#   kanna #416  -> exact cb3 additivity_gap_tps (TIGHTENS the [492.08, 494.08] bracket)
+#   wirbel #415 -> MEASURED fixed-overhead-floor reduction TPS (146.30us/12.01% floor, #408)
+#   denken #418 -> tax < 2.6 via per-position asymmetry (would RAISE the recompute point/bracket)
+#   lawine #419 -> executable deploy GO/NO-GO + verify CI + feature-flag
+#   land   #420 -> speculator equivalence by construction + in-keepset acceptance upside
+
+# --------------------------------------------------------------------------- #
 # Sub-int4 PPL LITERATURE PRIOR (Llama-2-7B wikitext-2 baseline ~5.47 PPL).
 # NON-AUTHORITATIVE: these deltas are on non-Gemma checkpoints and are used here
 # only as a forecast/prior to bracket expectations.  The authoritative gate is
@@ -2458,6 +2601,262 @@ def composite_verdict(measured_ppl: float | None, b_star: float,
 
 
 # --------------------------------------------------------------------------- #
+# 22:08Z CAPSTONE: max-equivalent-TPS frontier rollup over the equivalence ladder.
+# The live objective (#407 human, 21:13Z; advisor re-point 22:08Z) is max TPS subject
+# to STRICT byte-exact greedy-token-equivalence (served identity == 1.0).  This rollup
+# walks the equivalence ladder node-by-node, tags each MEASURED vs MODELED, carries the
+# per-node identity/PPL/deployability gates, and returns the max equivalent TPS we can
+# (a) stand behind MEASURED today and (b) project MODELED with the in-flight feeders.
+# The deployed 481.53 fast path is OFF this ladder (served identity 0.9966, NOT 1.0).
+# Ladder:  467.48 floor (MEASURED) -> selective-recompute (MODELED ~478.93) -> +cb3
+# (equivalence-neutral, do NOT naive-sum) -> -fixed-overhead-floor reduction (0 today).
+# --------------------------------------------------------------------------- #
+def equivalent_tps_frontier_rollup(*,
+                                   selective_recompute_measured_tps: float | None = None,
+                                   cb3_additivity_gap_tps: float | None = None,
+                                   floor_reduction_tps: float | None = None,
+                                   deployability_surface: str | None = None) -> dict[str, Any]:
+    """Roll up the equivalence ladder into a single max-equivalent-TPS frontier.
+
+    The live objective (advisor 22:08Z re-point of the #407 21:13Z human directive):
+    MAX TPS subject to STRICT byte-exact greedy-token-equivalence (served identity 1.0).
+    22:26Z folds in the two banked feeders lawine #417 (cb3 ADDITIVE + deployable +
+    bracket) and land #414 (lm_head FREE under the self-referential scorer).
+
+    Feeder inputs (CLI-resolvable; default to the MODELED state with the 22:26Z banks in):
+      selective_recompute_measured_tps  — stark #412 MEASURED equivalent TPS for the
+          fast-attn-everywhere + selective-higher-precision-recompute config (#397).
+          None -> the MODELED denken #413 point 478.93 (= 481.53 - 2.6).  identity 1.0.
+      cb3_additivity_gap_tps  — kanna #416 MEASURED gap that TIGHTENS the cb3 stack (the
+          read-shrink partly overlaps the recompute re-reads on the flagged steps).  cb3 is
+          ALREADY additive-CONFIRMED (lawine #417), so None just leaves the headline as the
+          banked bracket [492.08, 494.08]; the gap only narrows it.
+      floor_reduction_tps  — wirbel #415 MEASURED reduction of the 146.30us/12.01% fixed
+          overhead floor (#408).  None/0 -> no floor credit yet.
+      deployability_surface — lawine #417 {green|red|pending}; None -> the BANKED green
+          (22:26Z: 7 served files, 41.8 GPU-min identity-verify, reversible, human-gated).
+
+    Returns the ladder (5 nodes, each tagged measured/modeled + gates) plus the headline
+    frontier numbers: max_equivalent_tps_measured (stand-behind-today 467.48) and the
+    modeled fastest-equivalent bracket [492.08, 494.08] (lawine #417) that BEATS 481.53.
+    """
+    if deployability_surface is None:
+        deployability_surface = "green" if LAWINE417_DEPLOYABLE_GREEN else "pending"
+
+    recompute_measured = selective_recompute_measured_tps is not None
+    gap_measured = cb3_additivity_gap_tps is not None
+    floor_measured = floor_reduction_tps is not None
+    any_feeder_measured = recompute_measured or gap_measured or floor_measured
+
+    # --- Node 0: FLOOR (MEASURED, identity 1.0) -----------------------------
+    floor_tps = EQUIV_FLOOR_TPS                                   # 467.48 (wirbel #393)
+    node0 = {
+        "node": "floor_blanket_strict_attention",
+        "tps": floor_tps,
+        "status": "measured",
+        "identity": EQUIV_FLOOR_IDENTITY,                         # 1.0
+        "equivalence_neutral": True,
+        "source": "wirbel #393 (0q7ynumg) — blanket-strict batch-invariant attention every step",
+        "gate": "MEASURED served identity 1.0; the deployable strict floor.",
+    }
+
+    # --- Node 1: SELECTIVE HIGHER-PRECISION RECOMPUTE (#397) -----------------
+    # fast attention everywhere + recompute the ~23.6% near-tie <=eps-flagged steps at
+    # higher precision -> equivalence restored BY CONSTRUCTION (identity 1.0).
+    if recompute_measured:
+        recompute_tps = float(selective_recompute_measured_tps)
+        recompute_status = "measured"
+        recompute_src = "stark #412 (MEASURED local research prototype on A10G)"
+    else:
+        recompute_tps = SELECTIVE_RECOMPUTE_MODELED_TPS          # 478.93 = 481.53 - 2.6 (denken #413)
+        recompute_status = "modeled"
+        recompute_src = ("MODELED denken #413 point 478.93 (= 481.53 - 2.6 TPS tax on the ~23.6% flagged "
+                         "steps; se8mf9ax); lawine #417 bracket [476.48,478.48]; stark #412 measuring")
+    recompute_in_band = SELECTIVE_RECOMPUTE_BAND_TPS[0] <= recompute_tps <= SELECTIVE_RECOMPUTE_BAND_TPS[1]
+    node1 = {
+        "node": "selective_higher_precision_recompute_397",
+        "tps": recompute_tps,
+        "status": recompute_status,
+        "identity": SELECTIVE_RECOMPUTE_IDENTITY,                 # 1.0 by construction
+        "equivalence_neutral": True,
+        "flagged_frac": SELECTIVE_RECOMPUTE_FLAGGED_FRAC,         # ~0.236
+        "tie_identifiable_from_fast_path": SELECTIVE_RECOMPUTE_TIE_IDENTIFIABLE_405,
+        "modeled_band_tps": list(SELECTIVE_RECOMPUTE_BAND_TPS),
+        "in_modeled_band": recompute_in_band,
+        "denken413_point_tps": DENKEN413_RECOMPUTE_POINT_TPS,    # 478.93
+        "lawine417_bracket_tps": list(SELECTIVE_RECOMPUTE_BRACKET_417_TPS),   # [476.48, 478.48]
+        "source": recompute_src,
+        "gate": ("identity 1.0 BY CONSTRUCTION (recompute restores the flagged ties); tie set readable "
+                 "from the fast path (stark #405). TPS pending stark #412; denken #418 testing tax<2.6."),
+    }
+
+    # --- Node 2: +cb3 BODY-READ SHRINK (kanna #403, ADDITIVE-confirmed lawine #417) --
+    # cb3 changes BYTES READ in the verify body, NOT tokens emitted -> identity-neutral.
+    # 22:26Z: lawine #417 CONFIRMED the cb3 stack is ADDITIVE onto the recompute point, so
+    # the stack is BANKED (not "do-not-sum/pending").  kanna #416 will MEASURE the exact
+    # additivity_gap to TIGHTEN the [492.08, 494.08] bracket — a refinement, not a gate.
+    cb3_lift = CB3_CONSERVATIVE_LIFT_TPS_403                      # +15.60 (k*=229, PPL-safe)
+    naive_stack_tps = recompute_tps + cb3_lift                   # additive (lawine #417) point estimate
+    if gap_measured:
+        gap: float | None = float(cb3_additivity_gap_tps)
+        cb3_point_tps = naive_stack_tps - gap                    # kanna #416 tightens the exact overlap
+        cb3_src = (f"kanna #403 +{cb3_lift:g} cb3 (iv9i2wks) ADDITIVE on the recompute point "
+                   f"(lawine #417 confirmed), NET of kanna #416 measured additivity_gap {gap:g} TPS")
+    else:
+        gap = None
+        cb3_point_tps = naive_stack_tps                          # additive-confirmed (lawine #417) -> banked
+        cb3_src = (f"kanna #403 +{cb3_lift:g} cb3 (iv9i2wks) ADDITIVE on the recompute point — CONFIRMED "
+                   "by lawine #417 (2mv6ssw4); kanna #416 will PRICE the exact additivity_gap (tightening)")
+    # The stack is MEASURED-grade only when BOTH the recompute TPS (stark #412) AND the exact
+    # additivity gap (kanna #416) are measured; with recompute-only it is additive-CONFIRMED but
+    # the precise stacked value is still +-kanna #416's gap -> keep it MODELED (banked, not measured).
+    cb3_status = "measured" if (recompute_measured and gap_measured) else "modeled"
+    node2 = {
+        "node": "cb3_body_read_shrink_403",
+        "tps": cb3_point_tps,
+        "naive_stack_tps": naive_stack_tps,
+        "cb3_lift_tps": cb3_lift,
+        "additivity_gap_tps": gap,
+        "status": cb3_status,
+        "identity": node1["identity"],                           # cb3 equivalence-neutral -> inherits 1.0
+        "equivalence_neutral": CB3_403_EQUIVALENCE_NEUTRAL,      # True
+        "ppl_safe": CB3_403_PPL_SAFE,                            # k*=229 holds held-out worst-seed <=2.41
+        "k_star": CB3_403_K_STAR,                                # 229
+        "banked": True,                                          # 22:26Z: additive CONFIRMED (lawine #417)
+        "additive_confirmed_lawine417": LAWINE417_CB3_ADDITIVE_CONFIRMED,
+        "exact_gap_pending_kanna416": gap is None,
+        "lawine417_bracket_tps": list(FASTEST_EQUIVALENT_BRACKET_TPS),   # [492.08, 494.08] banked headline
+        "source": cb3_src,
+        "gate": ("cb3 is PPL-safe (k*=229, held-out worst-seed <=2.41) AND equivalence-neutral (body "
+                 "bytes, not tokens). ADDITIVE confirmed (lawine #417) -> stack BANKED; kanna #416 tightens."),
+    }
+
+    # --- Node 3: -FIXED-OVERHEAD-FLOOR reduction (wirbel #415) ---------------
+    reduction = floor_reduction_tps if floor_measured else FLOOR_REDUCTION_TPS_UNTIL_415  # 0.0
+    node3_tps = cb3_point_tps + reduction
+    node3_status = "measured" if (floor_measured and cb3_status == "measured") else "modeled"
+    node3 = {
+        "node": "fixed_overhead_floor_reduction_415",
+        "tps": node3_tps,
+        "floor_reduction_tps": reduction,
+        "status": node3_status,
+        "identity": node2["identity"],
+        "equivalence_neutral": True,
+        "fixed_floor_us": FIXED_OVERHEAD_FLOOR_US_408,           # 146.30
+        "fixed_floor_frac": FIXED_OVERHEAD_FLOOR_FRAC_408,       # 0.1201
+        "reduction_pending_wirbel415": not floor_measured,
+        "source": (f"wirbel #415 decomposing the {FIXED_OVERHEAD_FLOOR_US_408:g}us/"
+                   f"{FIXED_OVERHEAD_FLOOR_FRAC_408*100:g}% fixed floor (#408 qc9bz8sv); "
+                   "0 TPS credit until a measured reduction lands"),
+        "gate": "equivalence-neutral (host/launch overhead, not tokens). 0 until wirbel #415.",
+    }
+
+    # --- Node 4: lm_head TRUNCATION — FREE under the self-referential gate (land #414) --
+    # The operative scorer is SELF-REFERENTIAL (the submission's OWN 16384-row truncated-head
+    # greedy); the deployed config passes it FOR FREE -> lm_head truncation costs 0 TPS and is
+    # kept OFF the operative ladder.  ABSOLUTE full-vocab equivalence (a 261,976-row head) is a
+    # STRONGER, NOT-required notion costing 54.07 TPS — a CONTINGENCY line only.
+    node4_tps = node3_tps + LAND414_LMHEAD_TRUNCATION_TPS_COST    # + 0.0 (free)
+    node4 = {
+        "node": "lmhead_truncation_free_self_referential_414",
+        "tps": node4_tps,
+        "lmhead_tps_cost": LAND414_LMHEAD_TRUNCATION_TPS_COST,    # 0.0 (free)
+        "status": node3_status,                                   # inherits the stack's status (free add)
+        "identity": node3["identity"],
+        "equivalence_neutral": True,
+        "self_referential_gate": LAND414_SELF_REFERENTIAL_GATE,
+        "deployed_passes_self_referential": LAND414_DEPLOYED_PASSES_SELF_REFERENTIAL,
+        "truevocab_lmhead_tps_cost_contingency": LAND414_TRUEVOCAB_LMHEAD_TPS_COST_CONTINGENCY,  # 54.07
+        "truevocab_head_rows": LAND414_TRUEVOCAB_HEAD_ROWS,      # 261,976
+        "absolute_fullvocab_required": False,
+        "source": "land #414 (bq7xkfcv) — self-referential scorer; lm_head truncation FREE (0 cost)",
+        "gate": ("lm_head truncation is FREE: the deployed config passes the submission's OWN truncated-head "
+                 "greedy. Absolute full-vocab (261,976 rows) costs 54.07 TPS — a contingency, NOT required."),
+    }
+
+    ladder = [node0, node1, node2, node3, node4]
+
+    # --- Headline frontier numbers ------------------------------------------
+    # MEASURED frontier = the highest node whose TPS is MEASURED (stand-behind-today).
+    measured_nodes = [n for n in ladder if n["status"] == "measured"]
+    max_equivalent_tps_measured = max((n["tps"] for n in measured_nodes), default=floor_tps)
+
+    # MODELED frontier (22:26Z): cb3 is ADDITIVE-confirmed (lawine #417) -> the cb3 stack is
+    # BANKED as the modeled headline even before kanna #416 prices the exact gap.  In the
+    # fully-modeled default the headline is the lawine #417 banked BRACKET [492.08, 494.08]
+    # (which BEATS 481.53); once any feeder is MEASURED the bracket collapses to the realized
+    # top-of-ladder point.  lm_head adds 0 (free); floor-reduction 0 until wirbel #415.
+    modeled_top_point = node4_tps                                # top of ladder (lm_head free)
+    if any_feeder_measured:
+        modeled_bracket = (modeled_top_point, modeled_top_point)
+        max_equivalent_tps_modeled = modeled_top_point
+        modeled_is_bracket = False
+    else:
+        modeled_bracket = FASTEST_EQUIVALENT_BRACKET_TPS         # [492.08, 494.08] (lawine #417 banked)
+        max_equivalent_tps_modeled = FASTEST_EQUIVALENT_BRACKET_TPS[0]   # 492.08 conservative lower bound
+        modeled_is_bracket = True
+    naive_stacked_ceiling_tps = naive_stack_tps                  # recompute + cb3 additive point (494.53 default)
+
+    pending_feeders = [f for f, pend in [
+        ("stark#412_selective_recompute_measured_tps", not recompute_measured),
+        ("kanna#416_cb3_additivity_gap_tps_tightening", not gap_measured),
+        ("wirbel#415_fixed_overhead_floor_reduction_tps", not floor_measured),
+    ] if pend]
+    banked_feeders = [
+        "lawine#417_deployable_green+cb3_additive+bracket[492.08,494.08]",
+        "land#414_lmhead_free_self_referential+54.07_truevocab_contingency",
+        "denken#413_recompute_point_478.93",
+        "denken#409_tree_leg_closed",
+        "kanna#403_cb3_+15.60_k229_ppl_safe",
+    ]
+
+    return {
+        "objective": "max_equivalent_tps__strict_byte_exact_greedy_token_identity_1p0",
+        "source": ("advisor 22:08Z re-point (#357) of the #407 human directive (21:13Z): forget 500, "
+                   "maximize TPS subject to strict byte-exact greedy-token-equivalence; 22:26Z banked "
+                   "lawine #417 (cb3 additive + deployable + bracket) and land #414 (lm_head free)"),
+        "deployed_fastpath_off_ladder": {
+            "tps": DEPLOYED_FASTPATH_TPS,                        # 481.53
+            "served_identity": DEPLOYED_FASTPATH_SERVED_IDENTITY,  # 0.9966 -> NOT equivalent
+            "is_equivalent": DEPLOYED_FASTPATH_IS_EQUIVALENT,    # False
+            "flips": list(DEPLOYED_FASTPATH_FLIPS),              # (3, 882) reduction-order flips under M=8
+            "note": ("the deployed 481.53 is the NON-equivalent fast path (3/882 reduction-order flips "
+                     "under M=8 batched verify, stark #381/#405); NOT a legal frontier point."),
+        },
+        "ladder": ladder,
+        # headline frontier
+        "max_equivalent_tps_measured": max_equivalent_tps_measured,    # 467.48 today (node 0, identity 1.0)
+        "max_equivalent_tps_modeled": max_equivalent_tps_modeled,      # 492.08 (bracket lower; BEATS 481.53)
+        "max_equivalent_tps_modeled_bracket": list(modeled_bracket),   # [492.08, 494.08] (lawine #417 banked)
+        "max_equivalent_tps_modeled_point": modeled_top_point,         # 494.53 (denken #413 additive point)
+        "modeled_is_bracket": modeled_is_bracket,
+        "modeled_beats_deployed_nonequiv": max_equivalent_tps_modeled > DEPLOYED_FASTPATH_TPS,  # 492.08 > 481.53
+        "naive_stacked_ceiling_tps": naive_stacked_ceiling_tps,        # 494.53 (recompute+cb3 additive point)
+        "cb3_stack_banked_additive_417": True,                         # additive CONFIRMED (lawine #417)
+        "frontier_identity": 1.0,                                      # every ladder node is served identity 1.0
+        "equivalence_tax_vs_deployed_nonequiv_tps": DEPLOYED_FASTPATH_TPS - max_equivalent_tps_measured,
+        # land #414 lm_head ledger (FREE under the self-referential gate)
+        "lmhead_truncation_free_self_referential": True,
+        "lmhead_tps_cost": LAND414_LMHEAD_TRUNCATION_TPS_COST,         # 0.0
+        "truevocab_lmhead_tps_cost_contingency": LAND414_TRUEVOCAB_LMHEAD_TPS_COST_CONTINGENCY,  # 54.07 (not required)
+        # feeders / gates
+        "selective_recompute_measured": recompute_measured,
+        "cb3_additivity_gap_resolved": gap_measured,
+        "floor_reduction_resolved": floor_measured,
+        "deployability_surface": deployability_surface,                # "green" banked (lawine #417)
+        "deployability_banked_green": deployability_surface == "green",
+        "pending_feeders": pending_feeders,
+        "banked_feeders": banked_feeders,
+        "all_feeders_resolved": not pending_feeders,
+        # tree leg CLOSED (denken #409): ~0 reliable equivalence-neutral supply
+        "tree_leg_closed": True,
+        "tree_leg_note": (f"tree net-supply CLOSED (denken #409, 3zr7i8ad, 42/42): DP-optimal widths "
+                          f"{DENKEN409_DP_WIDTHS} at M={DENKEN409_M} net only +{DENKEN409_TREE_NET_TPS:g} "
+                          "TPS and are beta-fragile -> 0 reliable supply; supersedes ubel #401 / denken #402."),
+    }
+
+
+# --------------------------------------------------------------------------- #
 # Deliverable 5: caveats.
 # --------------------------------------------------------------------------- #
 def deliverable5_caveats(b_star: float) -> dict[str, Any]:
@@ -2592,7 +2991,8 @@ def deliverable5_caveats(b_star: float) -> dict[str, Any]:
 # Self-tests
 # --------------------------------------------------------------------------- #
 def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: dict,
-               d8: dict, d_supply: dict, d_ident_reach: dict, b_star: float) -> dict[str, Any]:
+               d8: dict, d_supply: dict, d_ident_reach: dict, d_frontier: dict,
+               b_star: float) -> dict[str, Any]:
     int4 = d3["int4_branch"]
     sub = d3["subint4_branch"]
 
@@ -3165,6 +3565,133 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and abs(d_ident_reach["identity_residual_flip_stark376"]
                 - IDENTITY_RESIDUAL_FLIP_STARK376) < TOL_EXACT)
 
+    # --- 22:08Z max-equivalent-TPS frontier rollup (#407/#357 re-point) --- #
+    # Assert default-mode values on an EXPLICIT all-feeders-pending construction so the self-test validates
+    # the machinery independent of the operator's CLI feeder flags (mirrors `ab`/`am` explicit builds).  The
+    # operator's LIVE rollup (d_frontier) is cross-checked only for MODE-INVARIANT properties (monotone ladder,
+    # served identity 1.0 at every node) which must hold under any feeder resolution.
+    fr = equivalent_tps_frontier_rollup()            # canonical default-mode (all feeders pending) rollup
+    fr_nodes = fr["ladder"]
+    d_fr_nodes = d_frontier["ladder"]                # operator's LIVE rollup — invariant cross-checks only
+    # ba: floor node is MEASURED 467.48 at identity 1.0; pending-mode measured frontier == floor
+    ba_frontier_floor_measured = (
+        abs(fr_nodes[0]["tps"] - EQUIV_FLOOR_TPS) < TOL_DISPLAY_TPS
+        and fr_nodes[0]["status"] == "measured"
+        and abs(fr_nodes[0]["identity"] - 1.0) < TOL_EXACT
+        and abs(fr["max_equivalent_tps_measured"] - EQUIV_FLOOR_TPS) < TOL_DISPLAY_TPS)
+    # bb: selective-recompute node is MODELED 478.93 (denken #413 point), in band [476,479], identity 1.0;
+    #     carries the lawine #417 recompute bracket [476.48, 478.48]
+    bb_frontier_recompute_modeled = (
+        abs(fr_nodes[1]["tps"] - SELECTIVE_RECOMPUTE_MODELED_TPS) < TOL_DISPLAY_TPS
+        and fr_nodes[1]["status"] == "modeled"
+        and fr_nodes[1]["in_modeled_band"] is True
+        and abs(fr_nodes[1]["identity"] - 1.0) < TOL_EXACT
+        and abs(fr_nodes[1]["denken413_point_tps"] - DENKEN413_RECOMPUTE_POINT_TPS) < TOL_DISPLAY_TPS
+        and tuple(fr_nodes[1]["lawine417_bracket_tps"]) == SELECTIVE_RECOMPUTE_BRACKET_417_TPS)
+    # bc: measured frontier <= modeled frontier (467.48 <= 492.08 bracket-lower headline)
+    bc_frontier_measured_le_modeled = (
+        fr["max_equivalent_tps_measured"] <= fr["max_equivalent_tps_modeled"] + TOL_DISPLAY_TPS)
+    # bd: ladder TPS is monotone non-decreasing (each lever adds >= 0) — in BOTH the canonical default rollup
+    #     AND the operator's live rollup (mode-invariant)
+    bd_frontier_ladder_monotone = (
+        all(fr_nodes[i + 1]["tps"] >= fr_nodes[i]["tps"] - TOL_DISPLAY_TPS for i in range(len(fr_nodes) - 1))
+        and all(d_fr_nodes[i + 1]["tps"] >= d_fr_nodes[i]["tps"] - TOL_DISPLAY_TPS
+                for i in range(len(d_fr_nodes) - 1)))
+    # be: cb3 stack is BANKED additive (lawine #417 confirmed); naive point == recompute + 15.60; exact gap
+    #     still pending kanna #416 (a tightening of the [492.08, 494.08] bracket, not a gate)
+    be_frontier_cb3_stack_banked_additive = (
+        fr["cb3_stack_banked_additive_417"] is True
+        and fr_nodes[2]["banked"] is True
+        and fr_nodes[2]["additive_confirmed_lawine417"] is True
+        and fr_nodes[2]["exact_gap_pending_kanna416"] is True
+        and abs(fr["naive_stacked_ceiling_tps"]
+                - (SELECTIVE_RECOMPUTE_MODELED_TPS + CB3_CONSERVATIVE_LIFT_TPS_403)) < TOL_DISPLAY_TPS
+        and tuple(fr_nodes[2]["lawine417_bracket_tps"]) == FASTEST_EQUIVALENT_BRACKET_TPS)
+    # bf: the deployed 481.53 fast path is OFF the ladder (served identity 0.9966 != 1.0, 3/882 flips)
+    bf_frontier_deployed_off_ladder = (
+        fr["deployed_fastpath_off_ladder"]["is_equivalent"] is False
+        and abs(fr["deployed_fastpath_off_ladder"]["served_identity"]
+                - DEPLOYED_FASTPATH_SERVED_IDENTITY) < TOL_EXACT
+        and tuple(fr["deployed_fastpath_off_ladder"]["flips"]) == DEPLOYED_FASTPATH_FLIPS)
+    # bg: equivalence tax we pay today = deployed-nonequiv 481.53 - measured-equiv floor 467.48
+    bg_frontier_equivalence_tax = (
+        abs(fr["equivalence_tax_vs_deployed_nonequiv_tps"]
+            - (DEPLOYED_FASTPATH_TPS - EQUIV_FLOOR_TPS)) < TOL_DISPLAY_TPS)
+    # bh: every ladder node is served identity 1.0 (strict equivalence holds along the whole ladder) — in
+    #     BOTH the canonical default rollup AND the operator's live rollup (mode-invariant)
+    bh_frontier_all_nodes_identity1 = (
+        all(abs(n["identity"] - 1.0) < TOL_EXACT for n in fr_nodes)
+        and abs(fr["frontier_identity"] - 1.0) < TOL_EXACT
+        and all(abs(n["identity"] - 1.0) < TOL_EXACT for n in d_fr_nodes)
+        and abs(d_frontier["frontier_identity"] - 1.0) < TOL_EXACT)
+    # bi: tree net-supply leg is CLOSED (denken #409 ~0 reliable supply)
+    bi_frontier_tree_leg_closed = (
+        fr["tree_leg_closed"] is True
+        and abs(DENKEN409_TREE_RELIABLE_SUPPLY_TPS) < TOL_EXACT)
+    # bj: pending-mode lists the 3 remaining in-flight feeders (lawine #417 + land #414 BANKED 22:26Z)
+    bj_frontier_pending_feeders = (
+        len(fr["pending_feeders"]) == 3
+        and fr["all_feeders_resolved"] is False
+        and len(fr["banked_feeders"]) >= 5
+        and any("lawine#417" in b for b in fr["banked_feeders"])
+        and any("land#414" in b for b in fr["banked_feeders"]))
+    # bk: a MEASURED selective-recompute promotes node 1 to measured + raises the measured frontier
+    fr_rc = equivalent_tps_frontier_rollup(selective_recompute_measured_tps=477.0)
+    bk_frontier_recompute_measured_promotes = (
+        fr_rc["ladder"][1]["status"] == "measured"
+        and abs(fr_rc["max_equivalent_tps_measured"] - 477.0) < TOL_DISPLAY_TPS)
+    # bl: a kanna #416 additivity gap (with recompute measured) TIGHTENS node 2 NET of the gap
+    fr_cb = equivalent_tps_frontier_rollup(selective_recompute_measured_tps=477.0, cb3_additivity_gap_tps=3.0)
+    bl_frontier_cb3_additivity_banks = (
+        fr_cb["ladder"][2]["banked"] is True
+        and fr_cb["cb3_additivity_gap_resolved"] is True
+        and abs(fr_cb["ladder"][2]["tps"] - (477.0 + CB3_CONSERVATIVE_LIFT_TPS_403 - 3.0)) < TOL_DISPLAY_TPS
+        and abs(fr_cb["max_equivalent_tps_modeled"]
+                - (477.0 + CB3_CONSERVATIVE_LIFT_TPS_403 - 3.0)) < TOL_DISPLAY_TPS)
+    # bm: a measured fixed-floor reduction (wirbel #415) adds on top; the lm_head node (free) inherits it
+    fr_fl = equivalent_tps_frontier_rollup(selective_recompute_measured_tps=477.0,
+                                           cb3_additivity_gap_tps=3.0, floor_reduction_tps=2.0)
+    _bm_expected_top = 477.0 + CB3_CONSERVATIVE_LIFT_TPS_403 - 3.0 + 2.0   # 491.60
+    bm_frontier_floor_reduction_adds = (
+        abs(fr_fl["ladder"][3]["tps"] - _bm_expected_top) < TOL_DISPLAY_TPS        # floor-reduction node
+        and abs(fr_fl["ladder"][4]["tps"] - _bm_expected_top) < TOL_DISPLAY_TPS    # lm_head node (free, == #3)
+        and abs(fr_fl["max_equivalent_tps_modeled"] - _bm_expected_top) < TOL_DISPLAY_TPS)
+    # bn: the modeled HEADLINE in pending mode is the lawine #417 banked BRACKET [492.08, 494.08] (cb3
+    #     additive); the conservative lower bound 492.08 BEATS the deployed-nonequiv 481.53; the naive
+    #     additive point (494.53) is carried alongside
+    bn_frontier_cb3_bracket_headline_beats_481 = (
+        fr["modeled_is_bracket"] is True
+        and tuple(fr["max_equivalent_tps_modeled_bracket"]) == FASTEST_EQUIVALENT_BRACKET_TPS
+        and abs(fr["max_equivalent_tps_modeled"] - FASTEST_EQUIVALENT_BRACKET_TPS[0]) < TOL_DISPLAY_TPS
+        and fr["modeled_beats_deployed_nonequiv"] is True
+        and FASTEST_EQUIVALENT_BRACKET_TPS[0] > DEPLOYED_FASTPATH_TPS            # 492.08 > 481.53
+        and abs(fr["max_equivalent_tps_modeled_point"]
+                - (SELECTIVE_RECOMPUTE_MODELED_TPS + CB3_CONSERVATIVE_LIFT_TPS_403)) < TOL_DISPLAY_TPS)  # 494.53
+    # bo: lm_head truncation is a FREE node (land #414, self-referential gate); 0 TPS cost; the 54.07-TPS
+    #     absolute full-vocab head is a CONTINGENCY (not required); the free node == the floor-reduction node
+    bo_frontier_lmhead_free_self_referential = (
+        fr_nodes[4]["node"] == "lmhead_truncation_free_self_referential_414"
+        and abs(fr_nodes[4]["lmhead_tps_cost"]) < TOL_EXACT                      # 0.0 (free)
+        and fr_nodes[4]["self_referential_gate"] is True
+        and fr_nodes[4]["deployed_passes_self_referential"] is True
+        and fr_nodes[4]["absolute_fullvocab_required"] is False
+        and abs(fr_nodes[4]["truevocab_lmhead_tps_cost_contingency"]
+                - LAND414_TRUEVOCAB_LMHEAD_TPS_COST_CONTINGENCY) < TOL_DISPLAY_TPS  # 54.07
+        and abs(fr_nodes[4]["tps"] - fr_nodes[3]["tps"]) < TOL_EXACT             # free add: == node 3
+        and fr["lmhead_truncation_free_self_referential"] is True
+        and abs(fr["truevocab_lmhead_tps_cost_contingency"]
+                - LAND414_TRUEVOCAB_LMHEAD_TPS_COST_CONTINGENCY) < TOL_DISPLAY_TPS)
+    # bp: deployability is BANKED green (lawine #417): 7 served files, 41.8 GPU-min identity-verify,
+    #     reversible, 1 binding in-place line, human-gated
+    bp_frontier_deployability_banked_green = (
+        fr["deployability_surface"] == "green"
+        and fr["deployability_banked_green"] is True
+        and LAWINE417_DEPLOYABLE_GREEN is True
+        and LAWINE417_DEPLOY_SURFACE_FILES == 7
+        and LAWINE417_DEPLOY_BINDING_INPLACE_LINES == 1
+        and LAWINE417_DEPLOY_REVERSIBLE is True
+        and abs(LAWINE417_DEPLOY_IDENTITY_VERIFY_GPU_MIN - 41.8) < TOL_DISPLAY_TPS)
+
     # p: NaN clean (placeholder — finalized in main() after _nan_paths check)
     p_nan_clean = True
 
@@ -3219,6 +3746,23 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         "al_gap_reconciles_denken377_numerics_cancels": bool(al_gap_reconciles_numerics_cancels),
         "am_identity_reachable_both_branches_cost_differs": bool(am_identity_reachable_both_branches),
         "an_identity_residual_marlin_decode_width_caveat": bool(an_identity_residual_marlin_decode_caveat),
+        # 22:08Z max-equivalent-TPS frontier rollup (#407/#357 re-point); 22:26Z banked lawine #417 + land #414
+        "ba_frontier_floor_measured_467_identity1": bool(ba_frontier_floor_measured),
+        "bb_frontier_recompute_modeled_478_in_band": bool(bb_frontier_recompute_modeled),
+        "bc_frontier_measured_le_modeled": bool(bc_frontier_measured_le_modeled),
+        "bd_frontier_ladder_monotone_nondecreasing": bool(bd_frontier_ladder_monotone),
+        "be_frontier_cb3_stack_banked_additive_417": bool(be_frontier_cb3_stack_banked_additive),
+        "bf_frontier_deployed_481_off_ladder_nonequiv": bool(bf_frontier_deployed_off_ladder),
+        "bg_frontier_equivalence_tax_481_minus_467": bool(bg_frontier_equivalence_tax),
+        "bh_frontier_all_nodes_served_identity1": bool(bh_frontier_all_nodes_identity1),
+        "bi_frontier_tree_leg_closed_denken409": bool(bi_frontier_tree_leg_closed),
+        "bj_frontier_pending_feeders_3_lawine417_land414_banked": bool(bj_frontier_pending_feeders),
+        "bk_frontier_recompute_measured_promotes": bool(bk_frontier_recompute_measured_promotes),
+        "bl_frontier_cb3_additivity_gap_tightens_net": bool(bl_frontier_cb3_additivity_banks),
+        "bm_frontier_floor_reduction_adds_lmhead_free_inherits": bool(bm_frontier_floor_reduction_adds),
+        "bn_frontier_cb3_bracket_headline_492_494_beats_481": bool(bn_frontier_cb3_bracket_headline_beats_481),
+        "bo_frontier_lmhead_free_self_referential_414": bool(bo_frontier_lmhead_free_self_referential),
+        "bp_frontier_deployability_banked_green_417": bool(bp_frontier_deployability_banked_green),
         "p_nan_clean": bool(p_nan_clean),
     }
     return {
@@ -3242,7 +3786,12 @@ def synthesize(measured_ppl: float | None, b_star: float,
                irreducible_floor_survives_vbi: str = UBEL386_FLOOR_SURVIVES_VBI,  # banked "inflates" (#386)
                kanna403_ppl_safe_supply: str = "pending",      # SUPPLY leg (PPL-safe conservative-k re-cost)
                ubel401_tree_coverage_ceiling: str = "pending", # DEMAND leg (tree top-8/16 coverage ceiling)
-               denken402_tree_net_supply: str = "pending"      # DEMAND leg (tree net after verify-M tax)
+               denken402_tree_net_supply: str = "pending",     # DEMAND leg (tree net after verify-M tax)
+               # 22:08Z RE-POINT feeders — the max-equivalent-TPS frontier ladder
+               selective_recompute_measured_tps: float | None = None,  # stark #412 measured equiv TPS (#397)
+               cb3_additivity_gap_tps: float | None = None,     # kanna #416 measured (recompute+cb3) additivity gap (tightens)
+               floor_reduction_tps: float | None = None,        # wirbel #415 measured fixed-floor reduction
+               deployability_surface: str = "green"             # lawine #417 BANKED green 22:26Z {green|red|pending}
                ) -> dict[str, Any]:
     d1 = deliverable1_lever_analysis(b_star)
     d2 = deliverable2_ppl_forecast()
@@ -3269,14 +3818,46 @@ def synthesize(measured_ppl: float | None, b_star: float,
                            ubel401_tree_coverage_ceiling=ubel401_tree_coverage_ceiling,
                            denken402_tree_net_supply=denken402_tree_net_supply)
     d5 = deliverable5_caveats(b_star)
-    st = _selftests(d1, d2, d3, d4, d5, d6, d7, d8, d_supply, d_ident_reach, b_star)
+    # 22:08Z CAPSTONE: max-equivalent-TPS frontier rollup over the equivalence ladder.
+    d_frontier = equivalent_tps_frontier_rollup(
+        selective_recompute_measured_tps=selective_recompute_measured_tps,
+        cb3_additivity_gap_tps=cb3_additivity_gap_tps,
+        floor_reduction_tps=floor_reduction_tps,
+        deployability_surface=deployability_surface)
+    st = _selftests(d1, d2, d3, d4, d5, d6, d7, d8, d_supply, d_ident_reach, d_frontier, b_star)
 
     headline = {
-        # PRIMARY
+        # ====================================================================
+        # 22:08Z CAPSTONE METRIC — max equivalent TPS (strict byte-exact greedy-
+        # token-identity, served identity == 1.0).  The #407 human directive
+        # (21:13Z) dropped 500 as the target; advisor re-point (22:08Z) made the
+        # frontier the live objective.  The >500 rollup is now historical_sub_result.
+        # ====================================================================
+        "max_equivalent_tps_measured": d_frontier["max_equivalent_tps_measured"],     # 467.48 (MEASURED, identity 1.0)
+        "max_equivalent_tps_modeled": d_frontier["max_equivalent_tps_modeled"],       # 492.08 (MODELED bracket lower; BEATS 481.53)
+        "max_equivalent_tps_modeled_bracket": d_frontier["max_equivalent_tps_modeled_bracket"],  # [492.08,494.08] lawine #417
+        "max_equivalent_tps_modeled_point": d_frontier["max_equivalent_tps_modeled_point"],      # 494.53 (denken #413 additive point)
+        "frontier_modeled_beats_deployed_nonequiv": d_frontier["modeled_beats_deployed_nonequiv"],  # True (492.08 > 481.53)
+        "frontier_cb3_stack_banked_additive_417": d_frontier["cb3_stack_banked_additive_417"],   # True (lawine #417)
+        "frontier_naive_stacked_ceiling_tps": d_frontier["naive_stacked_ceiling_tps"],  # 494.53 (recompute+cb3 additive point)
+        "frontier_lmhead_truncation_free_self_referential": d_frontier["lmhead_truncation_free_self_referential"],  # True (land #414)
+        "frontier_truevocab_lmhead_tps_cost_contingency": d_frontier["truevocab_lmhead_tps_cost_contingency"],  # 54.07 (not required)
+        "frontier_identity": d_frontier["frontier_identity"],                         # 1.0 (every ladder node)
+        "frontier_equivalence_tax_vs_deployed_tps": d_frontier["equivalence_tax_vs_deployed_nonequiv_tps"],  # 481.53-467.48
+        "frontier_deployability_surface": d_frontier["deployability_surface"],        # "green" (lawine #417 banked)
+        "frontier_pending_feeders": d_frontier["pending_feeders"],
+        "frontier_all_feeders_resolved": d_frontier["all_feeders_resolved"],
+        "deployed_fastpath_is_equivalent": d_frontier["deployed_fastpath_off_ladder"]["is_equivalent"],  # False (0.9966)
+        "deployed_fastpath_served_identity": d_frontier["deployed_fastpath_off_ladder"]["served_identity"],  # 0.9966
+        # PRIMARY analytic gate (0-GPU self-test integrity)
         "strict_500_composite_reachability_self_test_passes": (
             st["strict_500_composite_reachability_self_test_passes"]),
-        # TEST metrics — top-level verdict is the AND-PRODUCT GO:
-        #   private_500_GO <=> (supply base enables 500) AND (demand closer delivers residual)
+        # ====================================================================
+        # HISTORICAL SUB-RESULT (NOT the capstone): the binary ">500 reachable?"
+        # AND-PRODUCT GO rollup.  Kept for provenance per advisor 22:08Z; resolves
+        # to strict_500_reachable_via_known_levers (run 34tv4krw=0 with the banked
+        # feeders).  private_500_GO <=> (supply base enables 500) AND (demand delivers).
+        # ====================================================================
         "tps_max_optimistic_nonspec": d3["tps_max_optimistic_nonspec"],
         "tps_max_optimistic_spec": d3["tps_max_optimistic_spec"],
         "strict_500_reachable_via_known_levers": d7["private_500_reachable_via_known_levers"],
@@ -3441,8 +4022,31 @@ def synthesize(measured_ppl: float | None, b_star: float,
             f"PRIVATE-500 GO RESOLVED: " + d7["verdict_text"]
         )
 
+    # HISTORICAL SUB-RESULT: the binary >500 verdict, kept for provenance (run 34tv4krw=0).
+    # The FROZEN historical record is run 34tv4krw = strict_500_reachable_via_known_levers=0 (RED): with
+    # the banked feeders (kanna #403 PPL-safe supply +15.60 < the +17.2 required-first lift; tree leg CLOSED
+    # per denken #409 ~0), the AND-product GO is RED.  The LIVE leg here resolves to whatever the legacy CLI
+    # flags select (default = pending/None, since the >500 leg is no longer the thing being resolved).
+    historical_sub_result = {
+        "label": "strict_500_reachable_via_known_levers (binary >500 GO rollup — HISTORICAL, superseded 22:08Z)",
+        "frozen_run_34tv4krw_strict_500_reachable_via_known_levers": 0,   # RED — the preserved historical record
+        "frozen_run_id": "34tv4krw",
+        "frozen_verdict": "red",
+        "live_leg_strict_500_reachable_via_known_levers": d7["private_500_reachable_via_known_levers"],
+        "live_leg_terminal_go": d7["terminal_go"],
+        "live_leg_binding_constraint": d7["binding_constraint"],
+        "strict_500_reachable_via_known_levers": d7["private_500_reachable_via_known_levers"],  # live (back-compat)
+        "terminal_go": d7["terminal_go"],
+        "binding_constraint": d7["binding_constraint"],
+        "superseded_by": "max_equivalent_tps frontier (advisor 22:08Z re-point of #407 human directive)",
+        "note": ("the human dropped 500 as the target in #407 (21:13Z); this binary rollup is retained ONLY "
+                 "as a historical sub-result, NOT the capstone. FROZEN record: run 34tv4krw = 0 (RED). The "
+                 "capstone is equivalent_tps_frontier (max_equivalent_tps)."),
+    }
     return {
         "headline": headline,
+        "equivalent_tps_frontier": d_frontier,           # 22:08Z CAPSTONE (max-equivalent-TPS frontier ladder)
+        "historical_sub_result": historical_sub_result,  # binary >500 verdict (provenance only)
         "deliverable1_lever_analysis": d1,
         "deliverable2_ppl_forecast": d2,
         "deliverable3_composite_tps": d3,
@@ -3558,9 +4162,38 @@ def _print_report(syn: dict) -> None:
     int4 = d3["int4_branch"]
     sub = d3["subint4_branch"]
     print("\n" + "=" * 98, flush=True)
-    print("STRICT/PRIVATE-500 COMPOSITE REACHABILITY (#357, fern) — GO = (supply-side public-strict base "
-          "ENABLES 500) x (demand closer DELIVERS residual); Route A eta-axis DEFLATED (excluded)", flush=True)
+    print("MAX-EQUIVALENT-TPS FRONTIER (#357, fern) — CAPSTONE re-pointed 22:08Z (#407 dropped 500): maximize "
+          "TPS subject to STRICT byte-exact greedy-token-equivalence (served identity == 1.0)", flush=True)
     print("=" * 98, flush=True)
+    fr = syn["equivalent_tps_frontier"]
+    hsr = syn["historical_sub_result"]
+    _brk = fr["max_equivalent_tps_modeled_bracket"]
+    print("  (CAPSTONE) MAX-EQUIVALENT-TPS FRONTIER — ladder of strictly-equivalent configs (identity 1.0)",
+          flush=True)
+    print(f"      max_equivalent_tps  MEASURED={fr['max_equivalent_tps_measured']:.2f} (identity 1.0)  "
+          f"MODELED bracket=[{_brk[0]:.2f}, {_brk[1]:.2f}] (lawine #417; point {fr['max_equivalent_tps_modeled_point']:.2f})",
+          flush=True)
+    print(f"      -> MODELED frontier BEATS the non-strict deployed {fr['deployed_fastpath_off_ladder']['tps']:.2f} "
+          f"(by +{_brk[0] - fr['deployed_fastpath_off_ladder']['tps']:.2f} at the conservative lower bound) "
+          f"WITH the byte-identity 481.53 lacks  [beats={fr['modeled_beats_deployed_nonequiv']}]", flush=True)
+    print(f"      deployed fast path {fr['deployed_fastpath_off_ladder']['tps']:.2f} is OFF the ladder: "
+          f"served identity {fr['deployed_fastpath_off_ladder']['served_identity']:.4f} != 1.0 "
+          f"({fr['deployed_fastpath_off_ladder']['flips'][0]}/{fr['deployed_fastpath_off_ladder']['flips'][1]} "
+          f"flips); equivalence tax vs floor {fr['equivalence_tax_vs_deployed_nonequiv_tps']:.2f} TPS", flush=True)
+    for n in fr["ladder"]:
+        print(f"        - {n['node']:<46} {n['tps']:7.2f} TPS  [{n['status']:<8}] identity={n['identity']:.2f}",
+              flush=True)
+    print(f"      cb3 stack BANKED additive (lawine #417); lm_head truncation FREE (land #414, self-referential "
+          f"gate); true-vocab head contingency {fr['truevocab_lmhead_tps_cost_contingency']:.2f} TPS (NOT required)",
+          flush=True)
+    print(f"      deployability: {fr['deployability_surface']} (lawine #417 BANKED); pending feeders: "
+          f"{fr['pending_feeders']}  (all_resolved={fr['all_feeders_resolved']})", flush=True)
+    print(f"      {fr['tree_leg_note']}", flush=True)
+    print(f"      HISTORICAL sub-result (>500 binary GO, superseded): FROZEN run {hsr['frozen_run_id']} = "
+          f"strict_500_reachable_via_known_levers={hsr['frozen_run_34tv4krw_strict_500_reachable_via_known_levers']} "
+          f"(RED); live leg={hsr['live_leg_strict_500_reachable_via_known_levers']} "
+          f"(terminal_go={hsr['live_leg_terminal_go']})", flush=True)
+    print("-" * 98, flush=True)
     print("  (D1) LEVERS — L_quant and the supply cap are FUNCTIONS of body bits b", flush=True)
     print(f"      L_kernel (spec):  {d1['l_kernel_spec']:.3f}x  [custom Marlin W4A16 in baseline #354]",
           flush=True)
@@ -3731,8 +4364,8 @@ def _print_report(syn: dict) -> None:
           f"{dir_['cost_branch']} (rebuilds={dir_['rebuild_line_items']}); identity_REACHABLE="
           f"{dir_['identity_reachable_env_or_rebuild']} in BOTH branches (#381 sets COST, not GO)", flush=True)
     print("-" * 98, flush=True)
-    print("  (D7) PRIVATE-500 GO — AND-PRODUCT: (supply base ENABLES 500) x (demand closer DELIVERS residual)",
-          flush=True)
+    print("  (D7) PRIVATE-500 GO [HISTORICAL SUB-RESULT, superseded 22:08Z] — AND-PRODUCT: (supply base "
+          "ENABLES 500) x (demand closer DELIVERS residual)", flush=True)
     print(f"      go_formula: {d7['go_formula']}", flush=True)
     print(f"      supply_base_enables_500={d7['supply_base_enables_500']}  "
           f"demand_closer_delivers={d7['demand_closer_delivers']}  "
@@ -3788,6 +4421,8 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
     d8 = syn["deliverable8_gap_decomposition"]
     d_sup = syn["deliverable_supply_side_base"]
     dir_ = syn["deliverable_identity_reachability"]
+    fr = syn["equivalent_tps_frontier"]              # 22:08Z CAPSTONE (max-equivalent-TPS frontier)
+    hsr = syn["historical_sub_result"]               # binary >500 verdict (provenance only)
     st = syn["self_test"]
     h = syn["headline"]
     int4 = d3["int4_branch"]
@@ -4042,9 +4677,39 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         return
 
     summary: dict[str, Any] = {
-        # PRIMARY
+        # PRIMARY (0-GPU self-test integrity gate)
         "strict_500_composite_reachability_self_test_passes": int(bool(
             st["strict_500_composite_reachability_self_test_passes"])),
+        # ====== 22:08Z CAPSTONE: max-equivalent-TPS frontier (22:26Z banks lawine #417 + land #414) ======
+        "max_equivalent_tps_measured": fr["max_equivalent_tps_measured"],          # 467.48 (MEASURED, identity 1.0)
+        "max_equivalent_tps_modeled": fr["max_equivalent_tps_modeled"],            # 492.08 (MODELED bracket lower; BEATS 481.53)
+        "max_equivalent_tps_modeled_bracket_lo": fr["max_equivalent_tps_modeled_bracket"][0],   # 492.08 (lawine #417)
+        "max_equivalent_tps_modeled_bracket_hi": fr["max_equivalent_tps_modeled_bracket"][1],   # 494.08 (lawine #417)
+        "max_equivalent_tps_modeled_point": fr["max_equivalent_tps_modeled_point"],  # 494.53 (denken #413 additive point)
+        "frontier_modeled_beats_deployed_nonequiv": int(bool(fr["modeled_beats_deployed_nonequiv"])),  # 1 (492.08>481.53)
+        "frontier_cb3_stack_banked_additive_417": int(bool(fr["cb3_stack_banked_additive_417"])),  # 1 (lawine #417)
+        "frontier_naive_stacked_ceiling_tps": fr["naive_stacked_ceiling_tps"],     # 494.53 (recompute+cb3 additive point)
+        "frontier_lmhead_truncation_free_self_referential": int(bool(fr["lmhead_truncation_free_self_referential"])),  # 1
+        "frontier_truevocab_lmhead_tps_cost_contingency": fr["truevocab_lmhead_tps_cost_contingency"],  # 54.07 (not required)
+        "frontier_identity": fr["frontier_identity"],                              # 1.0
+        "frontier_equivalence_tax_vs_deployed_tps": fr["equivalence_tax_vs_deployed_nonequiv_tps"],  # 481.53-467.48
+        "frontier_deployability_banked_green": int(bool(fr["deployability_banked_green"])),  # 1 (lawine #417)
+        "frontier_n_pending_feeders": len(fr["pending_feeders"]),
+        "frontier_n_banked_feeders": len(fr["banked_feeders"]),
+        "frontier_all_feeders_resolved": int(bool(fr["all_feeders_resolved"])),
+        "frontier_selective_recompute_measured": int(bool(fr["selective_recompute_measured"])),
+        "frontier_cb3_additivity_gap_resolved": int(bool(fr["cb3_additivity_gap_resolved"])),
+        "frontier_floor_reduction_resolved": int(bool(fr["floor_reduction_resolved"])),
+        "frontier_tree_leg_closed": int(bool(fr["tree_leg_closed"])),
+        "deployed_fastpath_tps": fr["deployed_fastpath_off_ladder"]["tps"],        # 481.53
+        "deployed_fastpath_served_identity": fr["deployed_fastpath_off_ladder"]["served_identity"],  # 0.9966
+        "deployed_fastpath_is_equivalent": int(bool(fr["deployed_fastpath_off_ladder"]["is_equivalent"])),  # 0
+        # HISTORICAL sub-result (binary >500 GO, superseded 22:08Z)
+        "historical_frozen_run_34tv4krw_strict_500_reachable": int(
+            hsr["frozen_run_34tv4krw_strict_500_reachable_via_known_levers"]),   # 0 (RED) — the preserved record
+        "historical_live_leg_strict_500_reachable": (
+            -1 if hsr["live_leg_strict_500_reachable_via_known_levers"] is None
+            else int(bool(hsr["live_leg_strict_500_reachable_via_known_levers"]))),
         # TEST metrics
         "tps_max_optimistic_nonspec": h["tps_max_optimistic_nonspec"],
         "tps_max_optimistic_spec": h["tps_max_optimistic_spec"],
@@ -4358,6 +5023,26 @@ def main(argv: list[str] | None = None) -> int:
                     help="denken #402 — the other DEMAND-leg tree net-supply probe (20:19Z): does the tree NET "
                          "d-cov AFTER its verify-M step-time tax on the 467.48 base? green -> net-positive tree "
                          "supply; red -> the verify-M tax eats the coverage gain. Pairs (OR) with --ubel401.")
+    # 22:08Z RE-POINT — the max-equivalent-TPS frontier ladder feeders (#407/#357).
+    ap.add_argument("--selective-recompute-measured-tps", dest="selective_recompute_measured_tps",
+                    type=float, default=None,
+                    help="stark #412 — MEASURED equivalent TPS for the selective-higher-precision-recompute "
+                         "config (#397: fast attention everywhere + recompute the ~23.6%% near-tie <=eps-flagged "
+                         "steps -> served identity 1.0 BY CONSTRUCTION). Omit -> use the MODELED 478.93 "
+                         "(= 481.53 - 2.6 tax; within band [476,479]) and tag node 1 MODELED.")
+    ap.add_argument("--cb3-additivity-gap-tps", dest="cb3_additivity_gap_tps", type=float, default=None,
+                    help="kanna #416 — MEASURED additivity gap (TPS) that TIGHTENS the cb3 stack: cb3's body-read "
+                         "shrink partly OVERLAPS the recompute re-reads on the flagged steps. cb3 is ALREADY "
+                         "additive-CONFIRMED (lawine #417) and BANKED; omit -> headline stays the banked bracket "
+                         "[492.08, 494.08], the gap only narrows it.")
+    ap.add_argument("--floor-reduction-tps", dest="floor_reduction_tps", type=float, default=None,
+                    help="wirbel #415 — MEASURED reduction (TPS) of the 146.30us / 12.01%% fixed-overhead floor "
+                         "(#408 qc9bz8sv). Omit -> 0 TPS credit (floor reduction not yet landed).")
+    ap.add_argument("--lawine417-deployability-surface", dest="deployability_surface",
+                    choices=["pending", "green", "red"], default="green",
+                    help="lawine #417 — deploy surface (7 served files, 41.8 GPU-min identity-verify, reversible, "
+                         "1 binding in-place line, human-gated). BANKED green 22:26Z (default); override red/pending "
+                         "for sensitivity.")
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name", default=None)
     ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group", default="strict-frontier")
@@ -4373,7 +5058,11 @@ def main(argv: list[str] | None = None) -> int:
                      irreducible_floor_survives_vbi=args.irreducible_floor_survives_vbi,
                      kanna403_ppl_safe_supply=args.kanna403_ppl_safe_supply,
                      ubel401_tree_coverage_ceiling=args.ubel401_tree_coverage_ceiling,
-                     denken402_tree_net_supply=args.denken402_tree_net_supply)
+                     denken402_tree_net_supply=args.denken402_tree_net_supply,
+                     selective_recompute_measured_tps=args.selective_recompute_measured_tps,
+                     cb3_additivity_gap_tps=args.cb3_additivity_gap_tps,
+                     floor_reduction_tps=args.floor_reduction_tps,
+                     deployability_surface=args.deployability_surface)
 
     created_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     peak_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -4392,6 +5081,11 @@ def main(argv: list[str] | None = None) -> int:
         "kanna403_ppl_safe_supply": args.kanna403_ppl_safe_supply,
         "ubel401_tree_coverage_ceiling": args.ubel401_tree_coverage_ceiling,
         "denken402_tree_net_supply": args.denken402_tree_net_supply,
+        # 22:08Z RE-POINT frontier feeders
+        "selective_recompute_measured_tps_stark412": args.selective_recompute_measured_tps,
+        "cb3_additivity_gap_tps_kanna416": args.cb3_additivity_gap_tps,
+        "floor_reduction_tps_wirbel415": args.floor_reduction_tps,
+        "deployability_surface_lawine417": args.deployability_surface,
         "synthesis": syn,
         "peak_mem_mib": round(peak_kib / 1024.0, 3),
     }
