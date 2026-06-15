@@ -36,6 +36,26 @@ Until that measured input lands this capstone HOLDS: it emits BOTH branches and 
 `verdict_pending_measured_ppl` instead of stamping "provably out of reach".  It does NOT re-run
 any GPU eval (denken owns the single measured-PPL gate; the eval runs once).
 
+Second coupled gate: the verify-locus IDENTITY tax (advisor HOLD #2, PR #357 review 13:08Z)
+---------------------------------------------------------------------------------------------
+A strict-compliant config must pay the cost of byte-exact greedy identity at the verify locus.
+stark #363 (a0oi2esq, MERGED) measured that the ATTENTION-locus identity tax is FREE: a
+fixed-split-k / M-invariant attention GEMM restores bit-exact identity at all M in {2,4,8} and
+the best K=8 is even faster than the deployed heuristic (eta_ratio 0.9167 < 1).  So the
+verify-locus identity tax DECOMPOSES as `eta_total = eta_attn(~0) + eta_lmhead`, NOT the old
+blanket 9.841%.  The lm_head locus is the ONLY open identity cost; stark #365 is measuring
+`lmhead_bi_gemm_eta` directly.  The >500 identity budget is the slack the lambda ceiling (520.953,
+PPL-only/no-supply-tax) can absorb and stay >=500:  ETA_BUDGET_500 = 1 - 500/LAMBDA_CEIL ~= 4.02%.
+The old blanket 9.841% > 4.02% (could NOT fit), so the decomposition is exactly what could open
+the door — IF the measured lm_head eta clears the budget:
+
+  measured eta_lmhead <= 4.02% (with eta_attn~0)  ->  identity-compliant config fits the budget
+  measured eta_lmhead >  4.02%                     ->  identity tax alone forecloses >500
+
+The composite verdict is now PENDING on BOTH measured inputs and clears only if BOTH gates pass:
+strict_500 reachable  <=>  (sub-int4 PPL-viable -> supply cap rises >500) AND (eta_total <= 4.02%).
+We do NOT read stark's branch; we consume only the eta numbers the advisor relayed into this PR.
+
 Levers
 ------
   L_kernel  : kernel-level GEMM / memory-BW improvement.
@@ -71,8 +91,10 @@ PRIMARY metric  strict_500_composite_reachability_self_test_passes
 TEST    metrics tps_max_optimistic_nonspec, tps_max_optimistic_spec,
                 strict_500_reachable_via_known_levers (None while pending),
                 binding_constraint, residual_gap_to_500,
-                verdict_pending_measured_ppl, ppl_flip_threshold,
-                tps_eff_int4_branch, tps_eff_subint4_branch (at b*).
+                verdict_pending_measured_ppl, verdict_pending_identity_eta, verdict_pending,
+                ppl_flip_threshold, tps_eff_int4_branch, tps_eff_subint4_branch (at b*),
+                eta_budget_500, eta_attn_stark363, lmhead_eta_flip_threshold,
+                eta_total_verify_locus, identity_clears_500_budget (None while pending).
 """
 
 from __future__ import annotations
@@ -139,6 +161,21 @@ L_STEP_FLOOR: float = 1.03         # conservative 3% floor
 
 # Target
 TARGET: float = 500.0
+
+# --------------------------------------------------------------------------- #
+# Verify-locus IDENTITY tax (advisor HOLD #2, PR #357 review 13:08Z).
+# stark #363 (a0oi2esq, MERGED): attention-locus identity tax is FREE (eta~0); a
+# fixed-split-k / M-invariant attention GEMM restores byte-exact greedy identity at
+# all M in {2,4,8}, best K=8 even faster than the deployed heuristic (eta_ratio 0.9167).
+# So verify-locus eta DECOMPOSES as eta_total = eta_attn(~0) + eta_lmhead, superseding
+# the old blanket 9.841%.  The lm_head locus is the only open identity cost; stark #365
+# measures lmhead_bi_gemm_eta directly (pending -> consumed as --lmhead-eta).
+# --------------------------------------------------------------------------- #
+ETA_VERIFY_BLANKET: float = 0.09841        # pre-decomposition blanket verify-locus identity tax
+ETA_ATTN_STARK363: float = 0.0             # attention-locus identity tax (stark #363, FREE)
+ETA_ATTN_RATIO_STARK363: float = 0.9167    # best-K=8 vs deployed-heuristic latency ratio (<1 -> faster)
+# >500 identity budget: max verify-locus eta the lambda ceiling can absorb and stay >=500.
+ETA_BUDGET_500: float = 1.0 - TARGET / LAMBDA_CEIL   # ~0.04022 (advisor's "4.02% >500 budget")
 
 # --------------------------------------------------------------------------- #
 # Sub-int4 PPL LITERATURE PRIOR (Llama-2-7B wikitext-2 baseline ~5.47 PPL).
@@ -246,6 +283,44 @@ def composite_at_b(b: float, l_step: float) -> dict[str, Any]:
         "margin_to_500": eff - TARGET,  # >0 clears, <0 short
         "binding_constraint": (
             f"supply_cap_ceiling_at_b={b:g}bpw" if cap_binds else f"lever_composite_at_b={b:g}bpw"
+        ),
+    }
+
+
+# --------------------------------------------------------------------------- #
+# Verify-locus identity tax: eta_total = eta_attn(~0, stark #363) + eta_lmhead (stark #365).
+# --------------------------------------------------------------------------- #
+def identity_locus_analysis(lmhead_eta: float | None) -> dict[str, Any]:
+    """Decompose the strict-identity verify tax and test it against the 4.02% >500 budget.
+
+    stark #363 measured the attention-locus tax as FREE (eta_attn~0); the lm_head locus is the
+    only open identity cost.  The gate is whether eta_total = eta_attn + eta_lmhead fits the
+    >500 budget ETA_BUDGET_500 = 1 - 500/LAMBDA_CEIL (~4.02%).  Pending until stark #365's
+    measured lmhead_bi_gemm_eta lands (lmhead_eta is None).
+    """
+    eta_attn = ETA_ATTN_STARK363
+    budget = ETA_BUDGET_500
+    pending = lmhead_eta is None
+    eta_total = None if pending else eta_attn + lmhead_eta
+    clears = None if pending else (eta_total <= budget)
+    lam_with_identity = None if pending else LAMBDA_CEIL * (1.0 - eta_total)
+    return {
+        "eta_attn_stark363": eta_attn,
+        "eta_attn_ratio_stark363": ETA_ATTN_RATIO_STARK363,
+        "eta_blanket_predecomp": ETA_VERIFY_BLANKET,
+        "lmhead_eta_measured": lmhead_eta,   # stark #365 (pending -> None)
+        "eta_total_verify_locus": eta_total,
+        "eta_budget_500": budget,
+        "eta_budget_500_derivation": "1 - TARGET/LAMBDA_CEIL",
+        "lmhead_eta_flip_threshold": budget - eta_attn,   # measured lm_head eta at which the gate flips
+        "identity_pending": pending,
+        "identity_clears_500_budget": clears,
+        "lambda_ceiling_with_identity_tax": lam_with_identity,
+        "blanket_would_clear_budget": ETA_VERIFY_BLANKET <= budget,  # False: 9.841% > 4.02%
+        "decomposition_note": (
+            "stark #363 (a0oi2esq, MERGED): attention-locus identity tax FREE (eta~0, ratio 0.9167, "
+            "best K=8, M-invariant fixed-split-k). Verify-locus eta = attn(~0) + lm_head; the blanket "
+            "9.841% (> 4.02% budget) is superseded. stark #365 measures lmhead_bi_gemm_eta (pending)."
         ),
     }
 
@@ -383,10 +458,29 @@ def deliverable3_composite_tps(b_star: float) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # Deliverable 4: verdict as a function of the MEASURED PPL at b* (pending-aware).
 # --------------------------------------------------------------------------- #
-def verdict_given_ppl(measured_ppl: float | None, b_star: float) -> dict[str, Any]:
-    """Resolve the verdict given the measured Gemma PPL at b*; pending if measured_ppl is None."""
+def verdict_given_ppl(measured_ppl: float | None, b_star: float,
+                      lmhead_eta: float | None = None) -> dict[str, Any]:
+    """Resolve the composite verdict from TWO measured gates; pending if EITHER is missing.
+
+    Gate 1 (denken #356 measured Gemma PPL at b*): PPL-viable -> sub-int4 substrate -> supply cap
+            rises to ceiling(b*) > 500.  PPL-excluded -> int4 substrate -> cap 473.53 < 500.
+    Gate 2 (stark #365 measured lmhead_bi_gemm_eta): eta_total = eta_attn(~0, stark #363) +
+            eta_lmhead must clear the 4.02% >500 budget, else the strict-identity verify tax alone
+            forecloses >500.
+    strict_500 reachable <=> BOTH gates pass.
+    """
     int4 = composite_at_b(4.0, L_STEP_OPTIMISTIC)        # PPL-excluded substrate
     sub = composite_at_b(b_star, L_STEP_OPTIMISTIC)      # PPL-viable substrate at b*
+    ident = identity_locus_analysis(lmhead_eta)
+
+    pending_ppl = measured_ppl is None
+    pending_identity = lmhead_eta is None
+    pending = pending_ppl or pending_identity
+
+    ppl_viable = None if pending_ppl else (measured_ppl <= PPL_GATE)
+    identity_clears = ident["identity_clears_500_budget"]      # None if pending_identity
+    eta_total = ident["eta_total_verify_locus"]
+    lam_with_id = ident["lambda_ceiling_with_identity_tax"]
 
     branch_violate = {
         "label": "measured_ppl_gt_gate",
@@ -397,60 +491,109 @@ def verdict_given_ppl(measured_ppl: float | None, b_star: float) -> dict[str, An
         "residual_gap_to_500": TARGET - int4["tps_eff"],
         "binding_constraint": "supply_cap_int4_473p53_ppl_excludes_sub_int4",
     }
-    branch_viable = {
-        "label": "measured_ppl_le_gate",
+    branch_viable = {                              # supply-side only (identity gate applied separately)
+        "label": "measured_ppl_le_gate_supply_side",
         "ppl_viable": True,
         "substrate_bits": b_star,
         "tps_eff": sub["tps_eff"],
-        "reachable": sub["clears_500"],           # True at b*=3 (585 > 500)
+        "reachable": sub["clears_500"],           # supply-side True at b*=3 (585 > 500)
         "residual_gap_to_500": TARGET - sub["tps_eff"],   # negative = margin above 500
         "binding_constraint": (
             f"supply_cap_ceiling_at_b={b_star:g}bpw" if sub["cap_binds"]
             else f"lever_composite_at_b={b_star:g}bpw"
         ),
     }
+    branch_identity_blocked = {                    # PPL viable, but identity tax overruns the budget
+        "label": "ppl_viable_identity_tax_exceeds_budget",
+        "reachable": False,
+        "eta_total_verify_locus": eta_total,
+        "lambda_ceiling_with_identity_tax": lam_with_id,
+        "residual_gap_to_500": (None if lam_with_id is None else TARGET - lam_with_id),
+        "binding_constraint": "lmhead_identity_tax_exceeds_4p02pct_budget",
+    }
 
-    if measured_ppl is None:
-        resolved: dict[str, Any] | None = None
-        pending = True
-        ppl_viable = None
+    # Combined verdict: PPL gate first (it governs the substrate), then the identity gate.
+    if pending:
         reachable: bool | None = None
+        binding = "PENDING_measured_inputs"
+        residual = branch_violate["residual_gap_to_500"]
+    elif not ppl_viable:
+        reachable = False
+        binding = branch_violate["binding_constraint"]
+        residual = branch_violate["residual_gap_to_500"]
+    elif not identity_clears:
+        reachable = False
+        binding = branch_identity_blocked["binding_constraint"]
+        residual = branch_identity_blocked["residual_gap_to_500"]
     else:
-        pending = False
-        ppl_viable = measured_ppl <= PPL_GATE
-        resolved = branch_viable if ppl_viable else branch_violate
-        reachable = resolved["reachable"]
+        reachable = bool(sub["clears_500"])       # both gates clear -> supply-side margin governs
+        binding = f"reachable_subint4_b{b_star:g}_and_identity_clear__cap_{sub['ceiling_tps']:.0f}"
+        residual = branch_viable["residual_gap_to_500"]
+
+    pending_inputs = [s for s, miss in (
+        ("denken#356_ppl_at_b_star", pending_ppl),
+        ("stark#365_lmhead_bi_gemm_eta", pending_identity),
+    ) if miss]
+
+    if pending:
+        verdict_text = (
+            f"PENDING measured input(s): {', '.join(pending_inputs)} — composite is a 2-gate fork "
+            f"(PPL@b* x lm_head identity eta); both gates must clear for >500."
+        )
+    elif reachable:
+        verdict_text = (
+            f"strict_500 REACHABLE via known levers at b*={b_star:g}bpw: measured PPL {measured_ppl:.4f} "
+            f"<= {PPL_GATE} -> sub-int4 LIVE -> cap rises to {sub['ceiling_tps']:.2f} (eff {sub['tps_eff']:.2f} "
+            f"TPS, +{sub['tps_eff']-TARGET:.2f}) AND lm_head identity eta_total {eta_total:.4f} <= "
+            f"{ETA_BUDGET_500:.4f} budget. Approval-gated a10g candidate (#319)."
+        )
+    elif not ppl_viable:
+        verdict_text = (
+            f"strict_500 NOT reachable: measured PPL {measured_ppl:.4f} > {PPL_GATE} -> sub-int4 excluded "
+            f"-> L_quant=1.0 -> int4 supply cap {int4['tps_eff']:.4f} TPS binds, residual gap "
+            f"{TARGET-int4['tps_eff']:.4f} TPS. Genuinely-new-method problem (~3x from 165.44 floor)."
+        )
+    else:  # ppl viable, identity blocked
+        verdict_text = (
+            f"strict_500 NOT reachable: PPL {measured_ppl:.4f} <= {PPL_GATE} (sub-int4 LIVE, supply OK) BUT "
+            f"lm_head identity eta_total {eta_total:.4f} > {ETA_BUDGET_500:.4f} budget -> identity-taxed "
+            f"lambda ceiling {lam_with_id:.2f} TPS < 500 (gap {TARGET-lam_with_id:.2f}). The strict-identity "
+            f"verify tax alone forecloses >500."
+        )
 
     return {
         "measured_ppl_at_b_star": measured_ppl,
+        "lmhead_eta_measured": lmhead_eta,
         "b_star": b_star,
         "ppl_flip_threshold": PPL_GATE,
-        "verdict_pending_measured_ppl": pending,
+        "lmhead_eta_flip_threshold": ident["lmhead_eta_flip_threshold"],
+        "eta_budget_500": ETA_BUDGET_500,
+        "eta_total_verify_locus": eta_total,
+        # pending flags
+        "verdict_pending_measured_ppl": pending_ppl,        # legacy key (PPL-specific)
+        "verdict_pending_identity_eta": pending_identity,
+        "verdict_pending": pending,
+        "pending_inputs": pending_inputs,
+        # gates
         "ppl_viable": ppl_viable,
+        "identity_clears_500_budget": identity_clears,
         "strict_500_reachable_via_known_levers": reachable,
-        "binding_constraint": (resolved["binding_constraint"] if resolved else "PENDING_measured_ppl"),
-        "residual_gap_to_500": (resolved["residual_gap_to_500"] if resolved
-                                else branch_violate["residual_gap_to_500"]),
+        "binding_constraint": binding,
+        "residual_gap_to_500": residual,
+        # fork branches
         "branch_ppl_violates_gate": branch_violate,
         "branch_ppl_viable": branch_viable,
+        "branch_ppl_viable_identity_blocked": branch_identity_blocked,
+        "identity": ident,
         "flip_explanation": (
-            f"With b*={b_star:g}bpw and denken ceiling {sub['ceiling_tps']:.2f} (>=500), the verdict "
-            f"flip is EXACTLY the PPL gate: measured Gemma PPL <= {PPL_GATE} -> reachable "
-            f"({sub['tps_eff']:.2f} TPS, +{sub['tps_eff']-TARGET:.2f}); measured PPL > {PPL_GATE} -> "
-            f"sub-int4 excluded -> int4 cap {int4['tps_eff']:.4f} TPS NO-GO (gap "
-            f"{TARGET-int4['tps_eff']:.4f})."
+            f"Two coupled gates at b*={b_star:g}bpw (denken ceiling {sub['ceiling_tps']:.2f} >= 500): "
+            f"(1) PPL gate — measured Gemma PPL <= {PPL_GATE} opens sub-int4 (supply cap {sub['ceiling_tps']:.2f}); "
+            f"PPL > {PPL_GATE} -> int4 cap {int4['tps_eff']:.4f} NO-GO (gap {TARGET-int4['tps_eff']:.4f}). "
+            f"(2) identity gate — eta_total = eta_attn({ETA_ATTN_STARK363:.3f}, stark #363 FREE) + "
+            f"lm_head; clears iff <= {ETA_BUDGET_500:.4f} (flip at lm_head eta {ident['lmhead_eta_flip_threshold']:.4f}). "
+            f"The blanket 9.841% would NOT have fit; the decomposition is what could open the door."
         ),
-        "verdict_text": (
-            "PENDING denken #356 measured ppl_at_best_sub_int4_bits — both branches below."
-            if pending else
-            (f"strict_500 REACHABLE via known levers at b*={b_star:g}bpw: measured PPL "
-             f"{measured_ppl:.4f} <= {PPL_GATE} -> sub-int4 LIVE -> cap rises to {sub['ceiling_tps']:.2f}, "
-             f"eff {sub['tps_eff']:.2f} TPS (+{sub['tps_eff']-TARGET:.2f}). Approval-gated a10g candidate (#319)."
-             if ppl_viable else
-             f"strict_500 NOT reachable via known levers: measured PPL {measured_ppl:.4f} > {PPL_GATE} -> "
-             f"sub-int4 excluded -> L_quant=1.0 -> int4 supply cap {int4['tps_eff']:.4f} TPS binds, "
-             f"residual gap {TARGET-int4['tps_eff']:.4f} TPS. Genuinely-new-method problem (~3x from 165.44 floor).")
-        ),
+        "verdict_text": verdict_text,
     }
 
 
@@ -460,9 +603,17 @@ def verdict_given_ppl(measured_ppl: float | None, b_star: float) -> dict[str, An
 def deliverable5_caveats(b_star: float) -> dict[str, Any]:
     return {
         "caveats": [
-            "VERDICT IS PENDING a single measured input: denken #356's Gemma-4-E4B "
-            "ppl_at_best_sub_int4_bits at b*. We do NOT re-run that GPU eval (denken owns the "
-            "single measured-PPL gate; it runs once across fern/denken/lawine).",
+            "VERDICT IS PENDING TWO measured inputs, both consumed via the PR thread (NOT by reading "
+            "other branches): denken #356's Gemma-4-E4B ppl_at_best_sub_int4_bits at b*, AND stark "
+            "#365's lmhead_bi_gemm_eta. We do NOT re-run either GPU eval (denken owns the single "
+            "measured-PPL gate, stark owns the lm_head identity gate; each runs once).",
+            "Identity gate: stark #363 (MERGED) measured the attention-locus identity tax as FREE "
+            "(eta~0, ratio 0.9167, best K=8), so verify-locus eta = eta_attn(~0) + eta_lmhead. The "
+            ">500 budget ETA_BUDGET_500 = 1 - 500/LAMBDA_CEIL ~= 4.02% is the slack the lambda ceiling "
+            "(520.953, PPL-only/no-supply-tax) can absorb and stay >=500. We evaluate the identity gate "
+            "against THAT ceiling as relayed; the precise coupling of eta to the sub-int4 supply "
+            "substrate is stark/denken's to confirm. eta_attn=0 is an upper-bound-optimistic read of "
+            "stark #363's ratio<1 result (best K=8 was actually faster than the deployed heuristic).",
             "ceiling(b) anchors {4.0:473.53, 3.5:523, 3.0:585} are advisor-relayed samples of "
             "denken #356's curve; the published curve supersedes them on the terminal re-run. "
             "Piecewise-linear interpolation between anchors; extrapolation below 3.0 bpw is flagged.",
@@ -532,13 +683,17 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, b_star: float) 
     sub35 = composite_at_b(3.5, L_STEP_OPTIMISTIC)
     j_subint4_b35_clears_500 = sub35["clears_500"]
 
-    # k: verdict FLIPS exactly at the PPL gate
-    v_violate = verdict_given_ppl(PPL_GATE + 0.10, b_star)
-    v_viable = verdict_given_ppl(PPL_GATE - 0.10, b_star)
+    # eta probes: one comfortably inside the budget (clears identity), one outside (blocks).
+    eta_clear = ETA_BUDGET_500 - 0.005
+    eta_block = ETA_BUDGET_500 + 0.005
+
+    # k: with identity HELD clear, the verdict FLIPS exactly at the PPL gate
+    v_violate = verdict_given_ppl(PPL_GATE + 0.10, b_star, eta_clear)
+    v_viable = verdict_given_ppl(PPL_GATE - 0.10, b_star, eta_clear)
     k_verdict_flips_at_gate = (v_violate["strict_500_reachable_via_known_levers"] is False
                                and v_viable["strict_500_reachable_via_known_levers"] is True)
 
-    # l: pending mode (no measured PPL) yields pending=True, reachable=None, both branches present
+    # l: fully-pending mode (no measured inputs) yields pending=True, reachable=None, branches present
     v_pending = verdict_given_ppl(None, b_star)
     l_pending_mode = (v_pending["verdict_pending_measured_ppl"] is True
                       and v_pending["strict_500_reachable_via_known_levers"] is None
@@ -556,6 +711,55 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, b_star: float) 
 
     # o: literature PPL prior is explicitly NON-authoritative (not the verdict gate)
     o_literature_non_authoritative = d2["authoritative"] is False
+
+    # --- identity-locus gate (stark #363 attn-free + stark #365 lm_head eta, pending) --- #
+    ident_clear = identity_locus_analysis(eta_clear)
+    ident_block = identity_locus_analysis(eta_block)
+
+    # q: the 4.02% >500 identity budget is exactly 1 - 500/LAMBDA_CEIL (~0.0402)
+    q_eta_budget_derivation = (abs(ETA_BUDGET_500 - (1.0 - TARGET / LAMBDA_CEIL)) < TOL_EXACT
+                               and abs(ETA_BUDGET_500 - 0.0402) < 5e-4)
+
+    # r: attention-locus identity tax is FREE (stark #363: eta~0, ratio<1 => best-K=8 even faster)
+    r_attn_free_stark363 = (abs(ETA_ATTN_STARK363) < TOL_EXACT and ETA_ATTN_RATIO_STARK363 < 1.0)
+
+    # s: the OLD blanket 9.841% would NOT clear the budget -> the decomposition is what opens the door
+    s_blanket_would_not_fit = (ETA_VERIFY_BLANKET > ETA_BUDGET_500
+                               and d4["identity"]["blanket_would_clear_budget"] is False)
+
+    # t: the identity gate flips EXACTLY at the budget (PPL held viable)
+    ppl_ok = PPL_GATE - 0.10
+    t_clear = verdict_given_ppl(ppl_ok, b_star, eta_clear)
+    t_block = verdict_given_ppl(ppl_ok, b_star, eta_block)
+    t_identity_flips_at_budget = (
+        t_clear["strict_500_reachable_via_known_levers"] is True
+        and t_block["strict_500_reachable_via_known_levers"] is False
+        and t_block["binding_constraint"] == "lmhead_identity_tax_exceeds_4p02pct_budget")
+
+    # u: BOTH gates required — only (PPL-viable AND identity-clears) reaches >500
+    u_both_gates_required = (
+        verdict_given_ppl(ppl_ok, b_star, eta_clear)["strict_500_reachable_via_known_levers"] is True
+        and verdict_given_ppl(ppl_ok, b_star, eta_block)["strict_500_reachable_via_known_levers"] is False
+        and verdict_given_ppl(PPL_GATE + 0.10, b_star, eta_clear)["strict_500_reachable_via_known_levers"] is False)
+
+    # v: verdict is PENDING if EITHER measured input is missing
+    v_ppl_only = verdict_given_ppl(ppl_ok, b_star, None)         # lm_head eta missing
+    v_id_only = verdict_given_ppl(None, b_star, eta_clear)       # ppl missing
+    v_pending_if_either_missing = (
+        v_ppl_only["verdict_pending"] is True
+        and v_ppl_only["verdict_pending_identity_eta"] is True
+        and v_ppl_only["strict_500_reachable_via_known_levers"] is None
+        and v_id_only["verdict_pending"] is True
+        and v_id_only["verdict_pending_measured_ppl"] is True
+        and v_id_only["strict_500_reachable_via_known_levers"] is None)
+
+    # w: identity-blocked branch reports identity-taxed lambda < 500 and a positive residual gap
+    w_block = verdict_given_ppl(ppl_ok, b_star, eta_block)["branch_ppl_viable_identity_blocked"]
+    w_identity_block_gap_positive = (
+        ident_block["identity_clears_500_budget"] is False
+        and ident_clear["identity_clears_500_budget"] is True
+        and w_block["lambda_ceiling_with_identity_tax"] < TARGET
+        and w_block["residual_gap_to_500"] > 0.0)
 
     # p: NaN clean (placeholder — finalized in main() after _nan_paths check)
     p_nan_clean = True
@@ -576,6 +780,13 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, b_star: float) 
         "m_ppl_caps_lquant_below_unconstrained": bool(m_ppl_caps_lquant),
         "n_ladder_monotone_and_topped": bool(n_ladder_monotone),
         "o_literature_prior_non_authoritative": bool(o_literature_non_authoritative),
+        "q_eta_budget_is_1_minus_500_over_lambda": bool(q_eta_budget_derivation),
+        "r_attn_locus_free_stark363": bool(r_attn_free_stark363),
+        "s_blanket_would_not_fit_budget": bool(s_blanket_would_not_fit),
+        "t_identity_gate_flips_at_budget": bool(t_identity_flips_at_budget),
+        "u_both_gates_required_for_500": bool(u_both_gates_required),
+        "v_pending_if_either_input_missing": bool(v_pending_if_either_missing),
+        "w_identity_block_gap_positive": bool(w_identity_block_gap_positive),
         "p_nan_clean": bool(p_nan_clean),
     }
     return {
@@ -588,11 +799,13 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, b_star: float) 
 # --------------------------------------------------------------------------- #
 # Synthesize
 # --------------------------------------------------------------------------- #
-def synthesize(measured_ppl: float | None, b_star: float) -> dict[str, Any]:
+def synthesize(measured_ppl: float | None, b_star: float,
+               lmhead_eta: float | None = None) -> dict[str, Any]:
     d1 = deliverable1_lever_analysis(b_star)
     d2 = deliverable2_ppl_forecast()
     d3 = deliverable3_composite_tps(b_star)
-    d4 = verdict_given_ppl(measured_ppl, b_star)
+    d4 = verdict_given_ppl(measured_ppl, b_star, lmhead_eta)
+    d_ident = identity_locus_analysis(lmhead_eta)
     d5 = deliverable5_caveats(b_star)
     st = _selftests(d1, d2, d3, d4, d5, b_star)
 
@@ -606,30 +819,43 @@ def synthesize(measured_ppl: float | None, b_star: float) -> dict[str, Any]:
         "strict_500_reachable_via_known_levers": d4["strict_500_reachable_via_known_levers"],
         "binding_constraint": d4["binding_constraint"],
         "residual_gap_to_500": d4["residual_gap_to_500"],
-        # pending-aware extras
+        # pending-aware extras (two coupled gates)
         "verdict_pending_measured_ppl": d4["verdict_pending_measured_ppl"],
+        "verdict_pending_identity_eta": d4["verdict_pending_identity_eta"],
+        "verdict_pending": d4["verdict_pending"],
+        "pending_inputs": d4["pending_inputs"],
         "ppl_flip_threshold": d4["ppl_flip_threshold"],
         "b_star": b_star,
         "tps_eff_int4_branch": d3["int4_branch"]["tps_eff"],
         "tps_eff_subint4_branch": d3["subint4_branch"]["tps_eff"],
         "reachable_if_ppl_violates_gate": d4["branch_ppl_violates_gate"]["reachable"],
         "reachable_if_ppl_viable_at_b_star": d4["branch_ppl_viable"]["reachable"],
+        # identity gate
+        "eta_attn_stark363": d_ident["eta_attn_stark363"],
+        "eta_blanket_predecomp": d_ident["eta_blanket_predecomp"],
+        "eta_budget_500": d_ident["eta_budget_500"],
+        "lmhead_eta_flip_threshold": d_ident["lmhead_eta_flip_threshold"],
+        "eta_total_verify_locus": d_ident["eta_total_verify_locus"],
+        "identity_clears_500_budget": d_ident["identity_clears_500_budget"],
     }
 
-    if d4["verdict_pending_measured_ppl"]:
+    if d4["verdict_pending"]:
         handoff = (
-            f"VERDICT HELD pending denken #356 measured ppl_at_best_sub_int4_bits at b*={b_star:g}bpw. "
-            f"Branch A (measured PPL > {PPL_GATE}): sub-int4 excluded -> int4 cap "
-            f"{d3['int4_branch']['tps_eff']:.4f} TPS NO-GO (gap {TARGET-d3['int4_branch']['tps_eff']:.4f}). "
-            f"Branch B (measured PPL <= {PPL_GATE}): sub-int4 LIVE -> cap rises to denken ceiling "
-            f"{d3['subint4_branch']['ceiling_tps']:.2f}, eff {d3['subint4_branch']['tps_eff']:.2f} TPS "
-            f"(+{d3['subint4_branch']['tps_eff']-TARGET:.2f}) -> approval-gated a10g candidate. "
-            f"The flip is EXACTLY the PPL gate at b*; L_step={L_STEP_OPTIMISTIC}, L_kernel={L_KERNEL_SPEC}."
+            f"VERDICT HELD pending TWO measured inputs ({', '.join(d4['pending_inputs'])}) at "
+            f"b*={b_star:g}bpw — both gates must clear for strict >500. "
+            f"GATE 1 (PPL@b*, denken #356): PPL > {PPL_GATE} -> int4 cap "
+            f"{d3['int4_branch']['tps_eff']:.4f} TPS NO-GO (gap {TARGET-d3['int4_branch']['tps_eff']:.4f}); "
+            f"PPL <= {PPL_GATE} -> sub-int4 LIVE, supply cap rises to {d3['subint4_branch']['ceiling_tps']:.2f} "
+            f"(eff {d3['subint4_branch']['tps_eff']:.2f}, +{d3['subint4_branch']['tps_eff']-TARGET:.2f}). "
+            f"GATE 2 (lm_head identity eta, stark #365; attn FREE via stark #363): eta_total = "
+            f"eta_attn({ETA_ATTN_STARK363:.3f}) + lm_head clears iff <= {ETA_BUDGET_500:.4f} (blanket 9.841% "
+            f"would NOT have fit; the decomposition is what could open the door). "
+            f"L_step={L_STEP_OPTIMISTIC}, L_kernel={L_KERNEL_SPEC}."
         )
     else:
         handoff = (
-            f"VERDICT RESOLVED at b*={b_star:g}bpw with measured PPL {d4['measured_ppl_at_b_star']:.4f}: "
-            + d4["verdict_text"]
+            f"VERDICT RESOLVED at b*={b_star:g}bpw (measured PPL {d4['measured_ppl_at_b_star']}, "
+            f"lm_head eta {d4['lmhead_eta_measured']}): " + d4["verdict_text"]
         )
 
     return {
@@ -638,6 +864,7 @@ def synthesize(measured_ppl: float | None, b_star: float) -> dict[str, Any]:
         "deliverable2_ppl_forecast": d2,
         "deliverable3_composite_tps": d3,
         "deliverable4_verdict": d4,
+        "deliverable_identity_locus": d_ident,
         "deliverable5_caveats": d5,
         "self_test": st,
         "handoff": handoff,
@@ -649,6 +876,10 @@ def synthesize(measured_ppl: float | None, b_star: float) -> dict[str, Any]:
                 "floor, LAMBDA_CEIL=520.9527323111674), denken #356 ceiling(b) curve anchors {3.0:585, 3.5:523} "
                 "(advisor-relayed in PR #357 review), denken #344 waterfall (BODY_FRAC=0.943 STEP_US=1218.2), "
                 "kasane #349 (FlashInfer batch-1 excluded: SDPA 36.05us vs FlashInfer 48.20us/layer). "
+                "Identity-locus decomposition: stark #363 a0oi2esq (attention-locus identity tax FREE, eta~0, "
+                "ratio 0.9167, best K=8, M-invariant fixed-split-k); stark #365 (lmhead_bi_gemm_eta MEASURED, "
+                "pending) — verify-locus eta = attn(~0) + lm_head, supersedes blanket 9.841%; >500 budget "
+                "ETA_BUDGET_500 = 1 - 500/520.9527 = 0.04022. "
                 "Literature PRIOR (non-authoritative): QuIP# arXiv:2402.04396 (int2 +1.19 PPL); "
                 "AQLM arXiv:2401.06118 (int2 +1.47 PPL); QTIP arXiv:2406.11235 (int2 +1.70 PPL); "
                 "TesseraQ+AWQ arXiv:2410.19103 (int2 +1.35 PPL); Marlin arXiv:2408.11743 (W4A16 4-bit only); "
@@ -687,7 +918,7 @@ def _print_report(syn: dict) -> None:
     int4 = d3["int4_branch"]
     sub = d3["subint4_branch"]
     print("\n" + "=" * 98, flush=True)
-    print("STRICT-500 COMPOSITE REACHABILITY (#357, fern) — parameterized on measured b* PPL",
+    print("STRICT-500 COMPOSITE REACHABILITY (#357, fern) — 2 gates: measured b* PPL + lm_head identity eta",
           flush=True)
     print("=" * 98, flush=True)
     print("  (D1) LEVERS — L_quant and the supply cap are FUNCTIONS of body bits b", flush=True)
@@ -711,6 +942,19 @@ def _print_report(syn: dict) -> None:
           f"transplanted={d2['per_method_forecast'][0]['would_violate_if_transplanted']} "
           f"(prior LEANS violate; not decisive)", flush=True)
     print("-" * 98, flush=True)
+    di = syn["deliverable_identity_locus"]
+    print("  (D2b) IDENTITY LOCUS — verify-locus eta = attn(~0, stark #363) + lm_head (stark #365)",
+          flush=True)
+    print(f"      eta_attn (stark #363):  {di['eta_attn_stark363']:.4f}  [FREE; ratio "
+          f"{di['eta_attn_ratio_stark363']:.4f} <1 -> best K=8 faster than deployed heuristic]", flush=True)
+    print(f"      blanket (pre-decomp):   {di['eta_blanket_predecomp']:.5f}  -> would_clear_budget="
+          f"{di['blanket_would_clear_budget']}  (9.841% > budget; decomposition is what opens the door)",
+          flush=True)
+    print(f"      >500 budget:            {di['eta_budget_500']:.5f}  = 1 - 500/LAMBDA_CEIL  "
+          f"(lm_head eta flip threshold {di['lmhead_eta_flip_threshold']:.5f})", flush=True)
+    print(f"      lm_head eta (stark #365): {di['lmhead_eta_measured']}  -> identity_clears_500_budget="
+          f"{di['identity_clears_500_budget']}  (None = pending)", flush=True)
+    print("-" * 98, flush=True)
     print("  (D3) COMPOSITE — two branches", flush=True)
     print(f"      Branch A  int4 (PPL-excluded): {int4['base_lifted_tps']:.2f} * {int4['l_step']:.2f} = "
           f"{int4['precap_tps']:.2f} precap | cap {int4['ceiling_tps']:.4f} -> eff {int4['tps_eff']:.4f} "
@@ -722,11 +966,14 @@ def _print_report(syn: dict) -> None:
     print(f"      Non-spec: {d3['base_nonspec']:.2f} * {L_STEP_OPTIMISTIC:.2f} = "
           f"{d3['tps_max_optimistic_nonspec']:.2f} TPS (<< 500)", flush=True)
     print("-" * 98, flush=True)
-    print("  (D4) VERDICT", flush=True)
-    print(f"      verdict_pending_measured_ppl = {d4['verdict_pending_measured_ppl']}", flush=True)
+    print("  (D4) VERDICT — two coupled gates (PPL@b* AND lm_head identity eta)", flush=True)
+    print(f"      verdict_pending = {d4['verdict_pending']}  "
+          f"(ppl={d4['verdict_pending_measured_ppl']}, identity_eta={d4['verdict_pending_identity_eta']}; "
+          f"missing={d4['pending_inputs']})", flush=True)
     print(f"      strict_500_reachable_via_known_levers = "
           f"{d4['strict_500_reachable_via_known_levers']}  (None = pending)", flush=True)
-    print(f"      ppl_flip_threshold = {d4['ppl_flip_threshold']}  b_star = {b_star:g}bpw", flush=True)
+    print(f"      ppl_flip_threshold = {d4['ppl_flip_threshold']}  lm_head_eta_flip_threshold = "
+          f"{d4['lmhead_eta_flip_threshold']:.5f}  b_star = {b_star:g}bpw", flush=True)
     print(f"      >> {d4['verdict_text']}", flush=True)
     print(f"      flip: {d4['flip_explanation']}", flush=True)
     print("-" * 98, flush=True)
@@ -772,6 +1019,7 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
             "ppl-gate", "supply-cap", "ceiling-curve", "denken-356-ceiling", "parameterized-b-star",
             "verdict-pending", "measure-not-guess", "cuda-graphs", "sub-int4", "quantization",
             "amdahl", "marlin-w4a16", "validity-gate", "bank-the-analysis",
+            "identity-gate", "lmhead-eta", "stark-363-attn-free", "stark-365-lmhead", "two-gate-fork",
         ],
         config={
             "baseline_tps_int4": BASELINE_TPS,
@@ -791,11 +1039,16 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
             "l_kernel_spec": L_KERNEL_SPEC,
             "b_star": b_star,
             "measured_ppl_at_b_star": args.measured_ppl,
+            "lmhead_eta_measured": args.lmhead_eta,
+            "eta_attn_stark363": ETA_ATTN_STARK363,
+            "eta_attn_ratio_stark363": ETA_ATTN_RATIO_STARK363,
+            "eta_blanket_predecomp": ETA_VERIFY_BLANKET,
+            "eta_budget_500": ETA_BUDGET_500,
             "target": TARGET,
             "wandb_group": args.wandb_group,
             "source_runs": (
                 "lawine#196, wirbel#326, wirbel#354, denken#332(y5cl0ena), "
-                "denken#356(ceiling-curve), denken#344, kasane#349"
+                "denken#356(ceiling-curve), denken#344, kasane#349, stark#363(a0oi2esq), stark#365"
             ),
             "literature_prior_non_authoritative": (
                 "QuIP# arXiv:2402.04396; AQLM arXiv:2401.06118; QTIP arXiv:2406.11235; "
@@ -816,12 +1069,19 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         "tps_max_optimistic_nonspec": h["tps_max_optimistic_nonspec"],
         "tps_max_optimistic_spec": h["tps_max_optimistic_spec"],
         "residual_gap_to_500": h["residual_gap_to_500"],
-        # pending-aware verdict
+        # pending-aware verdict (two coupled gates)
         "verdict_pending_measured_ppl": int(bool(d4["verdict_pending_measured_ppl"])),
+        "verdict_pending_identity_eta": int(bool(d4["verdict_pending_identity_eta"])),
+        "verdict_pending": int(bool(d4["verdict_pending"])),
         "ppl_flip_threshold": d4["ppl_flip_threshold"],
         "b_star": b_star,
         "reachable_if_ppl_violates_gate": int(bool(d4["branch_ppl_violates_gate"]["reachable"])),
         "reachable_if_ppl_viable_at_b_star": int(bool(d4["branch_ppl_viable"]["reachable"])),
+        # identity gate (stark #363 attn-free + stark #365 lm_head eta)
+        "eta_attn_stark363": ETA_ATTN_STARK363,
+        "eta_blanket_predecomp": ETA_VERIFY_BLANKET,
+        "eta_budget_500": ETA_BUDGET_500,
+        "lmhead_eta_flip_threshold": d4["lmhead_eta_flip_threshold"],
         # branch composites
         "tps_eff_int4_branch": int4["tps_eff"],
         "tps_eff_subint4_branch": sub["tps_eff"],
@@ -845,11 +1105,15 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         "peak_mem_mib": payload["peak_mem_mib"],
         **{f"selftest_{k}": int(bool(v)) for k, v in st["conditions"].items()},
     }
-    # resolved verdict only when measured PPL is present (avoid a misleading 0/1 while pending)
+    # resolved verdict only when BOTH measured inputs are present (avoid a misleading 0/1 while pending)
     if d4["strict_500_reachable_via_known_levers"] is not None:
         summary["strict_500_reachable_via_known_levers"] = int(bool(
             d4["strict_500_reachable_via_known_levers"]))
         summary["measured_ppl_at_b_star"] = d4["measured_ppl_at_b_star"]
+    if d4["identity_clears_500_budget"] is not None:
+        summary["identity_clears_500_budget"] = int(bool(d4["identity_clears_500_budget"]))
+        summary["eta_total_verify_locus"] = d4["eta_total_verify_locus"]
+        summary["lmhead_eta_measured"] = d4["lmhead_eta_measured"]
 
     summary = {k: v for k, v in summary.items()
                if not (isinstance(v, float) and not math.isfinite(v)) and v is not None}
@@ -870,12 +1134,15 @@ def main(argv: list[str] | None = None) -> int:
                     help="denken #356 MEASURED Gemma PPL at b* (omit -> verdict stays PENDING)")
     ap.add_argument("--best-sub-int4-bits", "--b-star", dest="b_star", type=float,
                     default=B_STAR_DEFAULT, help="sub-int4 bit-width b* for the PPL-viable branch")
+    ap.add_argument("--lmhead-bi-gemm-eta", "--lmhead-eta", dest="lmhead_eta", type=float,
+                    default=None,
+                    help="stark #365 MEASURED lm_head BI-GEMM identity eta (omit -> identity gate PENDING)")
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name", default=None)
     ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group", default="strict-frontier")
     args = ap.parse_args(argv)
 
-    syn = synthesize(args.measured_ppl, args.b_star)
+    syn = synthesize(args.measured_ppl, args.b_star, args.lmhead_eta)
 
     created_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     peak_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -883,6 +1150,7 @@ def main(argv: list[str] | None = None) -> int:
         "created_at": created_at, "pr": 357, "agent": "fern",
         "kind": "strict-500-composite-reachability", "analysis_only": True,
         "measured_ppl_at_b_star": args.measured_ppl, "b_star": args.b_star,
+        "lmhead_eta_measured": args.lmhead_eta,
         "synthesis": syn,
         "peak_mem_mib": round(peak_kib / 1024.0, 3),
     }

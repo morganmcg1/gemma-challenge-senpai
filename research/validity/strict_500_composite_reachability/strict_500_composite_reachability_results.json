@@ -2,11 +2,12 @@
   "agent": "fern",
   "analysis_only": true,
   "b_star": 3.0,
-  "created_at": "20260615T121847Z",
+  "created_at": "20260615T133243Z",
   "kind": "strict-500-composite-reachability",
+  "lmhead_eta_measured": null,
   "measured_ppl_at_b_star": null,
   "nan_clean": true,
-  "peak_mem_mib": 12.074,
+  "peak_mem_mib": 13.672,
   "pr": 357,
   "synthesis": {
     "deliverable1_lever_analysis": {
@@ -157,15 +158,23 @@
     },
     "deliverable4_verdict": {
       "b_star": 3.0,
-      "binding_constraint": "PENDING_measured_ppl",
+      "binding_constraint": "PENDING_measured_inputs",
       "branch_ppl_viable": {
         "binding_constraint": "supply_cap_ceiling_at_b=3bpw",
-        "label": "measured_ppl_le_gate",
+        "label": "measured_ppl_le_gate_supply_side",
         "ppl_viable": true,
         "reachable": true,
         "residual_gap_to_500": -85.0,
         "substrate_bits": 3.0,
         "tps_eff": 585.0
+      },
+      "branch_ppl_viable_identity_blocked": {
+        "binding_constraint": "lmhead_identity_tax_exceeds_4p02pct_budget",
+        "eta_total_verify_locus": null,
+        "label": "ppl_viable_identity_tax_exceeds_budget",
+        "lambda_ceiling_with_identity_tax": null,
+        "reachable": false,
+        "residual_gap_to_500": null
       },
       "branch_ppl_violates_gate": {
         "binding_constraint": "supply_cap_int4_473p53_ppl_excludes_sub_int4",
@@ -176,14 +185,40 @@
         "substrate_bits": 4.0,
         "tps_eff": 473.5295953446407
       },
-      "flip_explanation": "With b*=3bpw and denken ceiling 585.00 (>=500), the verdict flip is EXACTLY the PPL gate: measured Gemma PPL <= 2.42 -> reachable (585.00 TPS, +85.00); measured PPL > 2.42 -> sub-int4 excluded -> int4 cap 473.5296 TPS NO-GO (gap 26.4704).",
+      "eta_budget_500": 0.040220025755911104,
+      "eta_total_verify_locus": null,
+      "flip_explanation": "Two coupled gates at b*=3bpw (denken ceiling 585.00 >= 500): (1) PPL gate \u2014 measured Gemma PPL <= 2.42 opens sub-int4 (supply cap 585.00); PPL > 2.42 -> int4 cap 473.5296 NO-GO (gap 26.4704). (2) identity gate \u2014 eta_total = eta_attn(0.000, stark #363 FREE) + lm_head; clears iff <= 0.0402 (flip at lm_head eta 0.0402). The blanket 9.841% would NOT have fit; the decomposition is what could open the door.",
+      "identity": {
+        "blanket_would_clear_budget": false,
+        "decomposition_note": "stark #363 (a0oi2esq, MERGED): attention-locus identity tax FREE (eta~0, ratio 0.9167, best K=8, M-invariant fixed-split-k). Verify-locus eta = attn(~0) + lm_head; the blanket 9.841% (> 4.02% budget) is superseded. stark #365 measures lmhead_bi_gemm_eta (pending).",
+        "eta_attn_ratio_stark363": 0.9167,
+        "eta_attn_stark363": 0.0,
+        "eta_blanket_predecomp": 0.09841,
+        "eta_budget_500": 0.040220025755911104,
+        "eta_budget_500_derivation": "1 - TARGET/LAMBDA_CEIL",
+        "eta_total_verify_locus": null,
+        "identity_clears_500_budget": null,
+        "identity_pending": true,
+        "lambda_ceiling_with_identity_tax": null,
+        "lmhead_eta_flip_threshold": 0.040220025755911104,
+        "lmhead_eta_measured": null
+      },
+      "identity_clears_500_budget": null,
+      "lmhead_eta_flip_threshold": 0.040220025755911104,
+      "lmhead_eta_measured": null,
       "measured_ppl_at_b_star": null,
+      "pending_inputs": [
+        "denken#356_ppl_at_b_star",
+        "stark#365_lmhead_bi_gemm_eta"
+      ],
       "ppl_flip_threshold": 2.42,
       "ppl_viable": null,
       "residual_gap_to_500": 26.47040465535929,
       "strict_500_reachable_via_known_levers": null,
+      "verdict_pending": true,
+      "verdict_pending_identity_eta": true,
       "verdict_pending_measured_ppl": true,
-      "verdict_text": "PENDING denken #356 measured ppl_at_best_sub_int4_bits \u2014 both branches below."
+      "verdict_text": "PENDING measured input(s): denken#356_ppl_at_b_star, stark#365_lmhead_bi_gemm_eta \u2014 composite is a 2-gate fork (PPL@b* x lm_head identity eta); both gates must clear for >500."
     },
     "deliverable5_caveats": {
       "assumptions": [
@@ -193,7 +228,8 @@
         "BODY_FRAC=0.943 reflects batch=1 HBM traffic decomposition (#344 waterfall)."
       ],
       "caveats": [
-        "VERDICT IS PENDING a single measured input: denken #356's Gemma-4-E4B ppl_at_best_sub_int4_bits at b*. We do NOT re-run that GPU eval (denken owns the single measured-PPL gate; it runs once across fern/denken/lawine).",
+        "VERDICT IS PENDING TWO measured inputs, both consumed via the PR thread (NOT by reading other branches): denken #356's Gemma-4-E4B ppl_at_best_sub_int4_bits at b*, AND stark #365's lmhead_bi_gemm_eta. We do NOT re-run either GPU eval (denken owns the single measured-PPL gate, stark owns the lm_head identity gate; each runs once).",
+        "Identity gate: stark #363 (MERGED) measured the attention-locus identity tax as FREE (eta~0, ratio 0.9167, best K=8), so verify-locus eta = eta_attn(~0) + eta_lmhead. The >500 budget ETA_BUDGET_500 = 1 - 500/LAMBDA_CEIL ~= 4.02% is the slack the lambda ceiling (520.953, PPL-only/no-supply-tax) can absorb and stay >=500. We evaluate the identity gate against THAT ceiling as relayed; the precise coupling of eta to the sub-int4 supply substrate is stark/denken's to confirm. eta_attn=0 is an upper-bound-optimistic read of stark #363's ratio<1 result (best K=8 was actually faster than the deployed heuristic).",
         "ceiling(b) anchors {4.0:473.53, 3.5:523, 3.0:585} are advisor-relayed samples of denken #356's curve; the published curve supersedes them on the terminal re-run. Piecewise-linear interpolation between anchors; extrapolation below 3.0 bpw is flagged.",
         "L_quant(b) is a batch=1 BW-bound Amdahl model on BODY_FRAC=0.943 (#344). It assumes the body GEMM read traffic scales linearly with bits and the non-body fraction is fixed; real sub-int4 kernels carry dequant overhead that would lower the realized gain.",
         "Sub-int4 also needs a kernel: Marlin W4A16 (arXiv 2408.11743) is 4-bit only; a viable sub-int4 path requires a compatible low-bit kernel (GPTQ-style W3/W2 or codebook). The ceiling(b) curve presumes such a kernel exists at the stated overhead.",
@@ -202,10 +238,35 @@
         "The PPL-viable branch is evaluated at b*=3bpw; if denken's best viable bits differ, re-evaluate ceiling(b*) and L_quant(b*) at that bit-width."
       ]
     },
-    "handoff": "VERDICT HELD pending denken #356 measured ppl_at_best_sub_int4_bits at b*=3bpw. Branch A (measured PPL > 2.42): sub-int4 excluded -> int4 cap 473.5296 TPS NO-GO (gap 26.4704). Branch B (measured PPL <= 2.42): sub-int4 LIVE -> cap rises to denken ceiling 585.00, eff 585.00 TPS (+85.00) -> approval-gated a10g candidate. The flip is EXACTLY the PPL gate at b*; L_step=1.05, L_kernel=1.0.",
+    "deliverable_identity_locus": {
+      "blanket_would_clear_budget": false,
+      "decomposition_note": "stark #363 (a0oi2esq, MERGED): attention-locus identity tax FREE (eta~0, ratio 0.9167, best K=8, M-invariant fixed-split-k). Verify-locus eta = attn(~0) + lm_head; the blanket 9.841% (> 4.02% budget) is superseded. stark #365 measures lmhead_bi_gemm_eta (pending).",
+      "eta_attn_ratio_stark363": 0.9167,
+      "eta_attn_stark363": 0.0,
+      "eta_blanket_predecomp": 0.09841,
+      "eta_budget_500": 0.040220025755911104,
+      "eta_budget_500_derivation": "1 - TARGET/LAMBDA_CEIL",
+      "eta_total_verify_locus": null,
+      "identity_clears_500_budget": null,
+      "identity_pending": true,
+      "lambda_ceiling_with_identity_tax": null,
+      "lmhead_eta_flip_threshold": 0.040220025755911104,
+      "lmhead_eta_measured": null
+    },
+    "handoff": "VERDICT HELD pending TWO measured inputs (denken#356_ppl_at_b_star, stark#365_lmhead_bi_gemm_eta) at b*=3bpw \u2014 both gates must clear for strict >500. GATE 1 (PPL@b*, denken #356): PPL > 2.42 -> int4 cap 473.5296 TPS NO-GO (gap 26.4704); PPL <= 2.42 -> sub-int4 LIVE, supply cap rises to 585.00 (eff 585.00, +85.00). GATE 2 (lm_head identity eta, stark #365; attn FREE via stark #363): eta_total = eta_attn(0.000) + lm_head clears iff <= 0.0402 (blanket 9.841% would NOT have fit; the decomposition is what could open the door). L_step=1.05, L_kernel=1.0.",
     "headline": {
       "b_star": 3.0,
-      "binding_constraint": "PENDING_measured_ppl",
+      "binding_constraint": "PENDING_measured_inputs",
+      "eta_attn_stark363": 0.0,
+      "eta_blanket_predecomp": 0.09841,
+      "eta_budget_500": 0.040220025755911104,
+      "eta_total_verify_locus": null,
+      "identity_clears_500_budget": null,
+      "lmhead_eta_flip_threshold": 0.040220025755911104,
+      "pending_inputs": [
+        "denken#356_ppl_at_b_star",
+        "stark#365_lmhead_bi_gemm_eta"
+      ],
       "ppl_flip_threshold": 2.42,
       "reachable_if_ppl_viable_at_b_star": true,
       "reachable_if_ppl_violates_gate": false,
@@ -216,11 +277,14 @@
       "tps_eff_subint4_branch": 585.0,
       "tps_max_optimistic_nonspec": 173.71200000000002,
       "tps_max_optimistic_spec": 505.6065,
+      "verdict_pending": true,
+      "verdict_pending_identity_eta": true,
       "verdict_pending_measured_ppl": true
     },
     "imports": {
       "caveats": [
-        "VERDICT IS PENDING a single measured input: denken #356's Gemma-4-E4B ppl_at_best_sub_int4_bits at b*. We do NOT re-run that GPU eval (denken owns the single measured-PPL gate; it runs once across fern/denken/lawine).",
+        "VERDICT IS PENDING TWO measured inputs, both consumed via the PR thread (NOT by reading other branches): denken #356's Gemma-4-E4B ppl_at_best_sub_int4_bits at b*, AND stark #365's lmhead_bi_gemm_eta. We do NOT re-run either GPU eval (denken owns the single measured-PPL gate, stark owns the lm_head identity gate; each runs once).",
+        "Identity gate: stark #363 (MERGED) measured the attention-locus identity tax as FREE (eta~0, ratio 0.9167, best K=8), so verify-locus eta = eta_attn(~0) + eta_lmhead. The >500 budget ETA_BUDGET_500 = 1 - 500/LAMBDA_CEIL ~= 4.02% is the slack the lambda ceiling (520.953, PPL-only/no-supply-tax) can absorb and stay >=500. We evaluate the identity gate against THAT ceiling as relayed; the precise coupling of eta to the sub-int4 supply substrate is stark/denken's to confirm. eta_attn=0 is an upper-bound-optimistic read of stark #363's ratio<1 result (best K=8 was actually faster than the deployed heuristic).",
         "ceiling(b) anchors {4.0:473.53, 3.5:523, 3.0:585} are advisor-relayed samples of denken #356's curve; the published curve supersedes them on the terminal re-run. Piecewise-linear interpolation between anchors; extrapolation below 3.0 bpw is flagged.",
         "L_quant(b) is a batch=1 BW-bound Amdahl model on BODY_FRAC=0.943 (#344). It assumes the body GEMM read traffic scales linearly with bits and the non-body fraction is fixed; real sub-int4 kernels carry dequant overhead that would lower the realized gain.",
         "Sub-int4 also needs a kernel: Marlin W4A16 (arXiv 2408.11743) is 4-bit only; a viable sub-int4 path requires a compatible low-bit kernel (GPTQ-style W3/W2 or codebook). The ceiling(b) curve presumes such a kernel exists at the stated overhead.",
@@ -228,7 +292,7 @@
         "All numbers are for strict greedy token-identity (argmax bit-identical). Relaxing to approximate speculative decoding is a different research question outside this scope.",
         "The PPL-viable branch is evaluated at b*=3bpw; if denken's best viable bits differ, re-evaluate ceiling(b*) and L_quant(b*) at that bit-width."
       ],
-      "provenance": "lawine #196 (TPS_NONSPEC=165.44), wirbel #326 (TPS_SPEC_OFFSHELF_BI=357.32, ETA_KERNEL_OFFSHELF=0.3141), wirbel #354 (BASELINE_TPS=481.53 int4 custom Marlin W4A16), denken #332 y5cl0ena (ceiling(4.0)=473.5295953446407 method-independent batched-verify BW floor, LAMBDA_CEIL=520.9527323111674), denken #356 ceiling(b) curve anchors {3.0:585, 3.5:523} (advisor-relayed in PR #357 review), denken #344 waterfall (BODY_FRAC=0.943 STEP_US=1218.2), kasane #349 (FlashInfer batch-1 excluded: SDPA 36.05us vs FlashInfer 48.20us/layer). Literature PRIOR (non-authoritative): QuIP# arXiv:2402.04396 (int2 +1.19 PPL); AQLM arXiv:2401.06118 (int2 +1.47 PPL); QTIP arXiv:2406.11235 (int2 +1.70 PPL); TesseraQ+AWQ arXiv:2410.19103 (int2 +1.35 PPL); Marlin arXiv:2408.11743 (W4A16 4-bit only); CUDA Graphs arXiv:2605.30571v1 Table 3 (H100 20.6% step overhead; A10G 3-5% ceiling). PPL gate: deployed 2.3772 gate 2.42 headroom 0.043; the AUTHORITATIVE sub-int4 PPL is denken #356's MEASURED Gemma-4-E4B value at b* (pending)."
+      "provenance": "lawine #196 (TPS_NONSPEC=165.44), wirbel #326 (TPS_SPEC_OFFSHELF_BI=357.32, ETA_KERNEL_OFFSHELF=0.3141), wirbel #354 (BASELINE_TPS=481.53 int4 custom Marlin W4A16), denken #332 y5cl0ena (ceiling(4.0)=473.5295953446407 method-independent batched-verify BW floor, LAMBDA_CEIL=520.9527323111674), denken #356 ceiling(b) curve anchors {3.0:585, 3.5:523} (advisor-relayed in PR #357 review), denken #344 waterfall (BODY_FRAC=0.943 STEP_US=1218.2), kasane #349 (FlashInfer batch-1 excluded: SDPA 36.05us vs FlashInfer 48.20us/layer). Identity-locus decomposition: stark #363 a0oi2esq (attention-locus identity tax FREE, eta~0, ratio 0.9167, best K=8, M-invariant fixed-split-k); stark #365 (lmhead_bi_gemm_eta MEASURED, pending) \u2014 verify-locus eta = attn(~0) + lm_head, supersedes blanket 9.841%; >500 budget ETA_BUDGET_500 = 1 - 500/520.9527 = 0.04022. Literature PRIOR (non-authoritative): QuIP# arXiv:2402.04396 (int2 +1.19 PPL); AQLM arXiv:2401.06118 (int2 +1.47 PPL); QTIP arXiv:2406.11235 (int2 +1.70 PPL); TesseraQ+AWQ arXiv:2410.19103 (int2 +1.35 PPL); Marlin arXiv:2408.11743 (W4A16 4-bit only); CUDA Graphs arXiv:2605.30571v1 Table 3 (H100 20.6% step overhead; A10G 3-5% ceiling). PPL gate: deployed 2.3772 gate 2.42 headroom 0.043; the AUTHORITATIVE sub-int4 PPL is denken #356's MEASURED Gemma-4-E4B value at b* (pending)."
     },
     "self_test": {
       "conditions": {
@@ -247,9 +311,16 @@
         "m_ppl_caps_lquant_below_unconstrained": true,
         "n_ladder_monotone_and_topped": true,
         "o_literature_prior_non_authoritative": true,
-        "p_nan_clean": true
+        "p_nan_clean": true,
+        "q_eta_budget_is_1_minus_500_over_lambda": true,
+        "r_attn_locus_free_stark363": true,
+        "s_blanket_would_not_fit_budget": true,
+        "t_identity_gate_flips_at_budget": true,
+        "u_both_gates_required_for_500": true,
+        "v_pending_if_either_input_missing": true,
+        "w_identity_block_gap_positive": true
       },
-      "n_checks": 16,
+      "n_checks": 23,
       "strict_500_composite_reachability_self_test_passes": true
     }
   }
