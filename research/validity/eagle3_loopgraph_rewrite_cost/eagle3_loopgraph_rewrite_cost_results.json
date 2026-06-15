@@ -1,0 +1,323 @@
+{
+  "pr": 312,
+  "question": "Price the served-file loopgraph rewrite EAGLE-3 requires.",
+  "verdict": {
+    "loopgraph_rewrite_cost_self_test_passes": true,
+    "eager_fallback_tps_floor": 402.1,
+    "rewrite_reopens_greedy_identity": true
+  },
+  "nan_clean": true,
+  "summary": {
+    "loopgraph_rewrite_cost_self_test_passes": 1,
+    "eager_fallback_tps_floor": 402.1,
+    "rewrite_reopens_greedy_identity": 1,
+    "floor_band_lo": 302.3,
+    "floor_band_hi": 471.0,
+    "floor_regression_pct": 16.5,
+    "floor_is_estimate": 1,
+    "n_touchpoints": 3,
+    "n_located": 3,
+    "n_mechanical_config": 0,
+    "n_moderate_rewrite": 2,
+    "n_correctness_rederivation": 1,
+    "rewrite_reopens_ppl": 1,
+    "rewrite_reopens_boot": 1,
+    "precache_guard_count": 0,
+    "treeverify_guard_count": 2,
+    "guard_272_coedit_required": 1,
+    "official_baseline": 481.53,
+    "private_verified": 460.85,
+    "tps_added_by_this_card": 0.0,
+    "nan_clean": 1,
+    "selftest_all_touchpoints_located": 1,
+    "selftest_three_touchpoints": 1,
+    "selftest_all_classified_with_gates": 1,
+    "selftest_has_correctness_rederivation": 1,
+    "selftest_floor_finite": 1,
+    "selftest_floor_bounded": 1,
+    "selftest_floor_method_stated": 1,
+    "selftest_floor_below_baseline": 1,
+    "selftest_guard_272_coedit_flagged": 1,
+    "selftest_precache_missing_guard": 1,
+    "selftest_sibling_has_guard": 1,
+    "selftest_nan_clean": 1,
+    "selftest_caveats_carried": 1,
+    "selftest_rewrite_reopens_greedy_identity_true": 1
+  },
+  "conditions": {
+    "all_touchpoints_located": true,
+    "three_touchpoints": true,
+    "all_classified_with_gates": true,
+    "has_correctness_rederivation": true,
+    "floor_finite": true,
+    "floor_bounded": true,
+    "floor_method_stated": true,
+    "floor_below_baseline": true,
+    "guard_272_coedit_flagged": true,
+    "precache_missing_guard": true,
+    "sibling_has_guard": true,
+    "nan_clean": true,
+    "caveats_carried": true,
+    "rewrite_reopens_greedy_identity_true": true
+  },
+  "classify": {
+    "counts": {
+      "mechanical-config": 0,
+      "moderate-rewrite": 2,
+      "correctness-rederivation": 1
+    },
+    "classified_with_gates": true,
+    "reopened_gates_union": [
+      "PPL<=2.42",
+      "TPS",
+      "boot-500",
+      "greedy-identity"
+    ],
+    "has_correctness_rederivation": true,
+    "rewrite_reopens_greedy_identity": true,
+    "rewrite_reopens_ppl": true,
+    "rewrite_reopens_boot": true,
+    "per_touchpoint": [
+      {
+        "id": "T5",
+        "complexity": "moderate-rewrite",
+        "gates": [
+          "greedy-identity",
+          "TPS"
+        ],
+        "valid": true
+      },
+      {
+        "id": "T6",
+        "complexity": "moderate-rewrite",
+        "gates": [
+          "greedy-identity",
+          "boot-500",
+          "TPS"
+        ],
+        "valid": true
+      },
+      {
+        "id": "T7",
+        "complexity": "correctness-rederivation",
+        "gates": [
+          "greedy-identity",
+          "PPL<=2.42",
+          "boot-500",
+          "TPS"
+        ],
+        "valid": true
+      }
+    ]
+  },
+  "floor": {
+    "eager_fallback_tps_floor": 402.1,
+    "floor_band_lo": 302.3,
+    "floor_band_hi": 471.0,
+    "floor_below_baseline": true,
+    "official_baseline": 481.53,
+    "regression_pct_at_headline": 16.5,
+    "inputs": {
+      "decode_step_us": 11600.0,
+      "drafter_loop_graph_us": 566.4870198567709,
+      "drafter_loop_eager_us": 2859.339141845703,
+      "step_eager_mtp_us": 13892.852121988932,
+      "drafter_propose_launches": 35.0,
+      "per_launch_overhead_us": 7.416426340738932,
+      "eagle_mtp_draft_ratio": 3.0
+    },
+    "method": "Banked onegraph->eager decomposition. HEADLINE = MTP-equivalent eager floor (directly measured drafter loop graph-vs-eager within the 11.6ms step, iso-E[T]); it is an UPPER bound on the true EAGLE-3 eager floor because EAGLE's own-KV Llama drafter is heavier. BAND = [EAGLE-heavier hard-lower, launch-count upper]. ESTIMATE -- no eager-path TPS was measured. | drafter-chain direct measurement (research/spec_cost_model/drafter_forward_roofline.json): step 11600us, drafter loop graph 566.5us -> eager 2859.3us, iso-E[T] floor = 481.53 * 11600/13893 || launch-count cross-check (research/spec_cost_model/launch_overhead_graph_leg.json): drafter_propose=35 launches x 7.42us zero-overlap = 260us tax (UNDERCOUNTS drafter kernels ~5x vs the measured chain; milder upper bound) || EAGLE-heavier hard-lower (research/validity/eagle3_step_overhead/eagle3_step_overhead_results.json): draft ratio 3.00x x measured penalty 2293us",
+    "notes": [],
+    "is_estimate": true
+  },
+  "guard_272": {
+    "precache_guard_count": 0,
+    "treeverify_guard_count": 2,
+    "sibling_guard_lines": [
+      2680,
+      2696
+    ],
+    "precache_missing_guard": true,
+    "sibling_has_guard": true,
+    "co_edit_required": true,
+    "co_edit_marginal_cost": "near-zero (file already reopened for T6/T7)"
+  },
+  "locate": {
+    "all_located": true,
+    "located": {
+      "T5": true,
+      "T6": true,
+      "T7": true
+    },
+    "n_located": 3,
+    "checks": [
+      {
+        "touchpoint": "T5",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "TOP_TOKEN_TARGET = \"vllm.model_executor.models.gemma4_mtp\"",
+        "present": true
+      },
+      {
+        "touchpoint": "T5",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "embedder_cls = module.Gemma4MTPMaskedEmbedder",
+        "present": true
+      },
+      {
+        "touchpoint": "T5",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "self.model.get_top_tokens",
+        "present": true
+      },
+      {
+        "touchpoint": "T6",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "LOOPGRAPH_TARGET = \"vllm.v1.spec_decode.gemma4\"",
+        "present": true
+      },
+      {
+        "touchpoint": "T6",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "proposer_cls = module.Gemma4Proposer",
+        "present": true
+      },
+      {
+        "touchpoint": "T6",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "def propose_onegraph",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "Q-only and KV-shared",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "Width-1 is exact",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "def _build_static_buffers",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "def _capture_graph",
+        "present": true
+      },
+      {
+        "touchpoint": "T7",
+        "file": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+        "substring": "self.hidden_states[:1].copy_(target_hidden_states[sample_index])",
+        "present": true
+      }
+    ]
+  },
+  "caveats": [
+    "STATIC scoping from source -- an engineering-complexity estimate, NOT an implementation and NOT a measured fallback TPS.",
+    "The eager-fallback floor is an ESTIMATE from a BANKED onegraph->eager decomposition; no eager-path run was launched. 0 TPS.",
+    "The MTP-equivalent floor (headline) is an UPPER bound on the true EAGLE-3 eager floor because EAGLE-3's own-KV Llama drafter is heavier than MTP's Q-only layer.",
+    "The launch-count model (#154) UNDERCOUNTS drafter launches (~5/pass vs ~25 real kernels/pass) and assumes overlap, so it over-states the floor -- kept only as a milder upper cross-check; the direct drafter-chain measurement supersedes it.",
+    "EAGLE-3's E[T] (acceptance) is held at the MTP value (iso-acceptance) for the floor; any EAGLE-3 E[T] gain is a SEPARATE numerator axis (#293/#295/#304), not credited here.",
+    "The EAGLE-3 checkpoint does not exist yet (training-gated); this prices the DEPLOY rewrite, not the train."
+  ],
+  "touchpoints": [
+    {
+      "id": "T5",
+      "name": "Fused sparse-argmax patch (drafter head)",
+      "mtp_anchor": [
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "TOP_TOKEN_TARGET = \"vllm.model_executor.models.gemma4_mtp\""
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "embedder_cls = module.Gemma4MTPMaskedEmbedder"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "self.model.get_top_tokens"
+        ]
+      ],
+      "mtp_assumption": "The fused Triton sparse-argmax kernel (_apply_fused_top_token_patch) wraps Gemma4MTPMaskedEmbedder.get_top_tokens and is built on MTP-only structure: self.centroids, self.centroid_intermediate_top_k, self.token_ordering, self.num_centroids, self.vocab_size_per_centroid, self.num_selected (clustered top-12k sparse verify). It scores hidden over a sparse candidate set, not a dense lm_head.",
+      "eagle3_delta": "EAGLE-3's head is Eagle3LlamaForCausalLM: it has NO get_top_tokens and NO centroid clustering -- it does a dense compute_logits over its (d2t-reduced) draft vocab. So TOP_TOKEN_TARGET=gemma4_mtp matches no EAGLE module and the patch goes INERT. Retaining a fused drafter argmax means re-targeting the meta-path finder to the EAGLE head and wrapping compute_logits argmax -- but the centroid-sparse kernel has NO EAGLE analogue (no token_ordering), so the fused-sparse bandwidth saving is LOST unless re-derived from scratch; the drop-in is a dense argmax over the EAGLE draft head.",
+      "complexity": "moderate-rewrite",
+      "revalidation_gates": [
+        "greedy-identity",
+        "TPS"
+      ],
+      "caveat": "Inert-not-crash. Drafter argmax is emit-neutral in principle (greedy spec decode emits the TARGET argmax), so PPL is not directly moved; but the changed drafter argmax shifts acceptance -> verify batch M -> batch-variant int4-Marlin near-tie flips, so greedy-identity must be re-measured and the lost sparse kernel re-priced for TPS."
+    },
+    {
+      "id": "T6",
+      "name": "onegraph loopgraph capture (proposer key + body)",
+      "mtp_anchor": [
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "LOOPGRAPH_TARGET = \"vllm.v1.spec_decode.gemma4\""
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "proposer_cls = module.Gemma4Proposer"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "def propose_onegraph"
+        ]
+      ],
+      "mtp_assumption": "_apply_loopgraph_patch is keyed to LOOPGRAPH_TARGET=vllm.v1.spec_decode.gemma4 and rebinds Gemma4Proposer.propose to propose_onegraph. The whole body is written against the Gemma4Proposer helper API: set_inputs_first_pass, build_per_group_and_layer_attn_metadata, _determine_batch_execution_and_padding, _sample_draft_tokens, self.model.get_top_tokens, self.hidden_states/input_ids static buffers.",
+      "eagle3_delta": "Under method=='eagle3' vLLM instantiates EagleProposer (vllm.v1.spec_decode.eagle), NOT Gemma4Proposer -- so the onegraph K=7 single-replay (the engine that produces 481.53) is NEVER invoked. Retaining it requires re-pointing LOOPGRAPH_TARGET -> 'vllm.v1.spec_decode.eagle', proposer_cls -> module.EagleProposer, AND rewriting the propose_onegraph body against EagleProposer's interface (its own propose signature + draft loop; the named Gemma4Proposer helpers do not exist on it). The CUDA-graph capture scaffolding (_build_static_buffers / _capture_graph / ping-pong slots) is structurally reusable, but the per-iteration forward + token plumbing must be re-bodied.",
+      "complexity": "moderate-rewrite",
+      "revalidation_gates": [
+        "greedy-identity",
+        "boot-500",
+        "TPS"
+      ],
+      "caveat": "Re-pointing the key is trivial; rewriting the body against the EagleProposer API is the real work. A fresh capture path can fail at boot (LOOPGRAPH_REQUIRE_CAPTURE=1 raises), so boot-500 reopens; acceptance/TPS and the greedy pre-flight reopen with any drafter-loop change."
+    },
+    {
+      "id": "T7",
+      "name": "onegraph correctness invariant + static buffers / KV-bearing chain",
+      "mtp_anchor": [
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "Q-only and KV-shared"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "Width-1 is exact"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "def _build_static_buffers"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "def _capture_graph"
+        ],
+        [
+          "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+          "self.hidden_states[:1].copy_(target_hidden_states[sample_index])"
+        ]
+      ],
+      "mtp_assumption": "The onegraph correctness invariant (sitecustomize.py:25-32): the Gemma4 MTP drafter is Q-only and KV-shared -- it never writes KV and has no cross-position dependencies, so width-1 is exact. _build_static_buffers allocates a SINGLE [1,2560] hidden buffer; the width-1 body seeds it from one target hidden state (target_hidden_states[sample_index]) and recycles backbone_hidden across the K iterations; per-layer attn metadata is built once (build_for_drafting, draft_index=1) over the SHARED target KV pool.",
+      "eagle3_delta": "The invariant is FALSE for EAGLE-3: its draft layer is a full Llama decoder with its own k_proj/v_proj -- it WRITES its own KV at each draft position and iteration i+1 reads the KV it wrote at positions 0..i (cross-position deps). So (a) the seed is a fused [1,7680] aux input (cat of layers 2/21/39), not a single [1,2560] target hidden; (b) the static buffers must hold a GROWING draft KV and advance seq_len/slot_mapping per iteration INSIDE the captured graph; (c) 'width-1 is exact' must be re-derived for a KV-bearing chain. This is a correctness re-derivation, not a re-pointing.",
+      "complexity": "correctness-rederivation",
+      "revalidation_gates": [
+        "greedy-identity",
+        "PPL<=2.42",
+        "boot-500",
+        "TPS"
+      ],
+      "caveat": "The deepest and most coupled touchpoint. A wrong KV-bearing chain changes accepted lengths (-> verify batch M -> batch-variant argmax -> served stream -> greedy-identity AND same-path PPL must be re-measured), the re-sized capture can crash boot, and TPS is the whole point. ALL four gates reopen."
+    }
+  ],
+  "honest_framing": "STATIC scoping from the real sitecustomize.py source -- engineering-complexity estimate + a banked onegraph->eager floor. NO served-file edit, NO build, NO boot test, NO HF Job, NO submission change. 0 GPU, 0 TPS. BASELINE 481.53 unchanged. The eager-fallback floor is an ESTIMATE pending a real eager-path run.",
+  "handoff_sentence": "DEPLOYMENT-COST axis for the EAGLE-3 GO/NO-GO packet: the config-only swap is NOT free -- it deploys the stock eager EagleProposer at an estimated ~402 TPS floor (band [302, 471], a 16% regression vs 481.53), because the MTP-specific onegraph loopgraph goes inert. Recovering frontier runtime needs 2 moderate-rewrite touchpoints (T5/T6) + 1 correctness-rederivation (T7, the KV-bearing draft chain), reopening greedy-identity / PPL<=2.42 / boot-500 / TPS, plus a near-zero #272 guard co-edit on the same file."
+}
