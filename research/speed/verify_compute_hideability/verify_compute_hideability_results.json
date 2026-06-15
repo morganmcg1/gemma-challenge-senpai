@@ -1,0 +1,211 @@
+{
+  "agent": "denken",
+  "created_at": "20260615T043347Z",
+  "kind": "verify-compute-hideability",
+  "nan_clean": true,
+  "peak_mem_mib": 621.137,
+  "pr": 291,
+  "synthesis": {
+    "basis": {
+      "E_T": 3.844,
+      "K_cal": 125.26795005202914,
+      "basis_note": "official = E[T]*K_cal = E[T]/W = K_cal*et_tau/S = 481.53 (resid 0). honest wall W=1/K_cal=7982.9us = read 3037.2us (38%) + non-read slack 4945.7us (62%); slack = draft 731.8 + verify-above-read 2104.6 + host/other 2109.3 (#283 vmxuwxm0).",
+      "non_read_frac_of_wall": 0.6195357283405888,
+      "non_read_official_us": 4945.684255895216,
+      "official_baseline": 481.53,
+      "read_floor_official_us": 3037.203622326286,
+      "read_frac_of_wall": 0.38046427165941116,
+      "slack_draft_official_us": 731.7620168328832,
+      "slack_host_other_official_us": 2109.334780199382,
+      "slack_partition_resid_us": 0.0,
+      "slack_verify_above_read_official_us": 2104.587458862951,
+      "step_norm_us": 1218.2,
+      "tps_via_composition": 481.53,
+      "tps_via_steprate": 481.53,
+      "wall_from_kcal_us": 7982.887878221502,
+      "wall_official_us": 7982.887878221502
+    },
+    "caveats": {
+      "greedy_safe": "'hideable' = OVERLAP-schedulable latency (graph fusion / kernel concurrency), greedy-SAFE because it changes latency only, NOT arithmetic. This is distinct from kanna #280's *reducing* MLP compute (reassociation-gated, greedy-UNSAFE).",
+      "launch_gate": "the launch gate stays land #245's MEASURED >=500 at lambda_hat>=0.9780 AND PPL<=2.42, human-approval-gated.",
+      "optimistic_replaced": "#283's 746.9 was an OPTIMISTIC all-hides upper bound; this leg replaces it with the measured-fraction floor (487.7).",
+      "reconciled_basis": "the honest floor is computed in ONE reconciled basis (honest wall) via the phi_WS composition-compression bridge; the verify-side bridge ~ 1.0 is load-bearing -- we do NOT mix in the draft-side 0.21 over-credit.",
+      "zero_tps": "This leg adds 0 TPS -- it prices the overlap-hideable fraction of existing verify compute and lands the honest kernel-addressable floor; it realizes no overlap and does not change the served checkpoint."
+    },
+    "exposed_diagnostic": {
+      "m8_above_body_read_us": 2414.2985643880206,
+      "m8_nonbody_memory_frac_of_above_read": 0.13114966723827484,
+      "m8_nonbody_memory_us": 316.63445333333357,
+      "m8_sum_above_roofline_us": 2082.2219113476563,
+      "m8_sum_roofline_us": 3250.4627200000004,
+      "note": "DIAGNOSTIC (M=8, transparency only): the verify-above-body-read decomposes into irreducible non-body memory (KV cache + activations, ~317us) + above-roofline exposed compute/overhead (~2082us). Only the SDPA-retune slice of the latter is greedy-SAFE overlap-hideable; the rest is exposed (serial)."
+    },
+    "free_lane_to_500_exists": false,
+    "gpu_grounding": {
+      "achievable_frac_of_nominal": 0.8549885849193043,
+      "effective_read_bw_gbps": 512.9931509515826,
+      "gpu_probe": {
+        "achievable_frac_of_nominal": 0.8596059604500209,
+        "bytes_read": 1760296960,
+        "effective_read_bw_gbps": 515.7635762700125,
+        "measured_read_floor_us": 3412.992000579834,
+        "median_read_ms": 3.412992000579834,
+        "nominal_bw_gbps": 600.0,
+        "note": "fresh CUDA-event reduction over 1.76 GB fp16 (reuses #283 read-floor probe).",
+        "ran": true
+      },
+      "k280_full_us_measured": 5348.1268310546875,
+      "k280_import_matches": true,
+      "measured_above_read_us_local": 2032.9549626162575,
+      "measured_above_read_us_official": 2104.587458862951,
+      "measured_read_floor_us": 3431.4239025115967,
+      "measured_vs_imported_above_read_resid_us": 0.0,
+      "present": true,
+      "read_floor_source": "research/validity/hbm_bound_tps_ceiling/read_floor_confirm.json",
+      "verify_hbm_floor_us": 2933.828266666667,
+      "verify_m1_us_measured": 4966.783229282924
+    },
+    "handoff": "Of the 2104.6us verify-above-read compute, 0.048 (4.8%) is overlap-hideable (greedy-safe = the SDPA num_stages lever), landing the honest kernel-addressable floor at 487.7 TPS (in [487.7, 746.9]), so a free non-build step lane to >=500 does NOT exist -- confirming the step-side is definitively closed and the human-gated build is the sole >500 path, replacing #283's optimistic all-hides 746.9 with the measured-fraction floor.",
+    "hideability": {
+      "component_rows": [
+        {
+          "above_roofline_exposed_us_m8": 662.7669766927085,
+          "bw_utilization": 0.7120976097656768,
+          "classification": "greedy-UNSAFE to retune (int4 GEMM: num_warps/BLOCK_K/split-K REASSOCIATE bf16 partials -> E[T] may drift; near-roofline already)",
+          "component": "gate_up_proj",
+          "greedy_safe_overlap_hideable": false,
+          "pct_of_verify": 43.044125842194994,
+          "theoretical_exposed_pct_of_verify": 12.392506715514939,
+          "us_at_m8": 2302.054443359375
+        },
+        {
+          "above_roofline_exposed_us_m8": 414.03718098958325,
+          "bw_utilization": 0.6647319780770861,
+          "classification": "greedy-UNSAFE to retune (int4 GEMM: num_warps/BLOCK_K/split-K REASSOCIATE bf16 partials -> E[T] may drift; near-roofline already)",
+          "component": "down_proj",
+          "greedy_safe_overlap_hideable": false,
+          "pct_of_verify": 23.091147361827066,
+          "theoretical_exposed_pct_of_verify": 7.741723299930273,
+          "us_at_m8": 1234.9438476562498
+        },
+        {
+          "above_roofline_exposed_us_m8": 505.43955671223955,
+          "bw_utilization": 0.34883864849061247,
+          "classification": "GREEDY-SAFE overlap lever (num_stages 3->2, bit-identical, maxdiff 0.0)",
+          "component": "sdpa",
+          "greedy_safe_overlap_hideable": true,
+          "pct_of_verify": 14.513725794080164,
+          "theoretical_exposed_pct_of_verify": 9.450777303509899,
+          "us_at_m8": 776.2124633789062
+        },
+        {
+          "above_roofline_exposed_us_m8": 280.0980158919271,
+          "bw_utilization": 0.46965007082810634,
+          "classification": "greedy-UNSAFE to retune (int4 GEMM: num_warps/BLOCK_K/split-K REASSOCIATE bf16 partials -> E[T] may drift; near-roofline already)",
+          "component": "qkv_proj",
+          "greedy_safe_overlap_hideable": false,
+          "pct_of_verify": 9.875198162689072,
+          "theoretical_exposed_pct_of_verify": 5.237310646140563,
+          "us_at_m8": 528.1381225585939
+        },
+        {
+          "above_roofline_exposed_us_m8": 198.9972531184896,
+          "bw_utilization": 0.4550995466487282,
+          "classification": "greedy-UNSAFE to retune (int4 GEMM: num_warps/BLOCK_K/split-K REASSOCIATE bf16 partials -> E[T] may drift; near-roofline already)",
+          "component": "o_proj",
+          "greedy_safe_overlap_hideable": false,
+          "pct_of_verify": 6.828545607119351,
+          "theoretical_exposed_pct_of_verify": 3.7208775970491703,
+          "us_at_m8": 365.19927978515625
+        },
+        {
+          "above_roofline_exposed_us_m8": 20.88292794270834,
+          "bw_utilization": 0.8344417980018903,
+          "classification": "already_captured by deployed ONEGRAPH/fusion (incremental 0.0us)",
+          "component": "lm_head",
+          "greedy_safe_overlap_hideable": false,
+          "pct_of_verify": 2.358516890006141,
+          "theoretical_exposed_pct_of_verify": 0.3904718156915901,
+          "us_at_m8": 126.136474609375
+        },
+        {
+          "above_roofline_exposed_us_m8": 0.0,
+          "bw_utilization": null,
+          "classification": "already_captured by deployed ONEGRAPH/fusion (incremental 0.0us)",
+          "component": "io_residual",
+          "greedy_safe_overlap_hideable": false,
+          "pct_of_verify": 0.28874034208321014,
+          "theoretical_exposed_pct_of_verify": 0.0,
+          "us_at_m8": 15.44219970703125
+        }
+      ],
+      "greedy_safe_lever": "verify_sdpa_num_stages2 (wirbel #279/#285; kanna #280 component-basis)",
+      "hideable_note": "verify_compute_hideable = the ONLY greedy-SAFE overlap-schedulable verify lever = SDPA num_stages 3->2 (bit-identical) = 15.48us normalized (bridge_verify 1.0) = 101.5us wall = 4.8% of the 2104.6us verify-above-read. The other 95.2% is EXPOSED: irreducible non-body memory (KV+activations), greedy-UNSAFE-to-reduce MLP/GEMV compute (near-roofline, reassociation-gated), and exposed low-AI SDPA softmax. 'hideable' = OVERLAP-schedulable latency (greedy-safe), NOT kanna #280's greedy-UNSAFE compute reduction. The all-hides 746.9 (ALL 2104.6us hides) was #283's OPTIMISTIC upper bound.",
+      "k280_sdpa_num_stages2_gain_pct": 1.1853573814381013,
+      "k280_sdpa_num_stages2_saving_us": 14.270862893970358,
+      "optimistic_allhides_hideable_us": 2836.349475695834,
+      "partition_resid_us": 0.0,
+      "theoretical_exposed_pct_of_verify_sum": 38.93366737783643,
+      "verify_above_read_block_us": 2104.587458862951,
+      "verify_compute_exposed_us": 2003.1278798139247,
+      "verify_compute_hideable_frac": 0.04820877299337417,
+      "verify_compute_hideable_us": 101.4595790490262
+    },
+    "honest_floor": {
+      "coincides_with_free_lossless": true,
+      "extra_hideable_needed_for_500_us": 193.42829917247622,
+      "extra_needed_as_multiple_of_lever": 1.9064567484457025,
+      "fern_281_et_floor": 3.991,
+      "floor_brackets_in_487_747": true,
+      "floor_note": "remove ONLY the greedy-safe overlap-hideable verify compute (101.5us) from the honest wall -> tps_kernel_floor_honest = 487.7, COINCIDING with wirbel #285's free lossless floor (the only greedy-safe overlap lever IS the SDPA num_stages lever). free_lane_to_500 = FALSE: reaching 500 needs ~2.9x the only greedy-safe lever (no candidate exists). The step-side is DEFINITIVELY CLOSED; the human-gated E[T]-raise build (fern #281: E[T]>=3.991) is the sole >500 path.",
+      "free_lane_to_500_exists": false,
+      "hideable_needed_for_500_us": 294.88787822150243,
+      "milestone_tps": 500.0,
+      "removed_slack_us": 101.45957904902662,
+      "roundtrip_resid_tps": 0.0,
+      "roundtrip_resid_us": 4.121147867408581e-13,
+      "step_kernel_floor_honest_us": 7881.428299172476,
+      "tps_all_compute_hides": 746.9098060384731,
+      "tps_free_lossless": 487.72885498477575,
+      "tps_kernel_floor_honest": 487.7288549847757,
+      "verify_compute_hideable_us": 101.4595790490262
+    },
+    "reconciliation": {
+      "allhides_removal_norm_us": 432.83094839889617,
+      "allhides_removal_wall_us": 2836.349475695834,
+      "allhides_roundtrip_resid": 0.0,
+      "basis_reconciled": true,
+      "bridge_draft": 0.2147122962556323,
+      "bridge_verify": 1.0,
+      "free_lever_norm_us": 15.482875506083142,
+      "free_lever_wall_us": 101.4595790490262,
+      "free_roundtrip_resid": 5.684341886080802e-14,
+      "phi_ws_bridge": 6.553019108702596,
+      "phi_ws_note": "phi_WS = W/S = 7982.9/1218.2 = 6.5530 maps normalized-step us <-> honest-wall us: dW = phi_WS * dS for the SAME TPS (the factor cancels in TPS, so both bases round-trip 481.53 exactly). This is the composition-compression ratio, NOT a bridge discount.",
+      "reconcile_note": "common basis = honest wall. tps_free_lossless 487.7 (wirbel #285) removes 15.48us normalized == 101.5us wall; tps_all_compute_hides 746.9 (#283) removes 2836.3us wall == 432.8us normalized. Both round-trip in both bases via phi_WS. The honest floor lands BETWEEN them, set by the overlap-hideable fraction of the 2104.6us verify-above-read.",
+      "tps_all_compute_hides": 746.9098060384731,
+      "tps_allhides_via_norm": 746.9098060384731,
+      "tps_allhides_via_wall": 746.9098060384731,
+      "tps_free_lossless": 487.72885498477575,
+      "tps_free_via_norm": 487.72885498477575,
+      "tps_free_via_wall": 487.7288549847757,
+      "verify_bridge_note": "the verify-above-read block is DEPLOYED-M8 VERIFY-SIDE -> kanna #286 verify bridge ~ 1.0 (deployed-M8 verify per-seq 1129.6us ~ S=1218.2us); a verify saving gets FULL normalized-step credit. We do NOT apply the draft-side 0.21 (that 4.66x over-credit is for batch=1 DRAFT wall savings; this block is verify-side)."
+    },
+    "self_test": {
+      "conditions": {
+        "a_basis_reproduces_481p53": true,
+        "b_floor_brackets_487_747": true,
+        "c_partition_exhaustive": true,
+        "d_free_lane_roundtrips": true,
+        "e_nan_clean": true,
+        "f_imports_exact": true,
+        "g_caveats_present": true
+      },
+      "verify_compute_hideability_self_test_passes": true
+    },
+    "tps_kernel_floor_honest": 487.7288549847757,
+    "verdict": "THE STEP-SIDE IS DEFINITIVELY CLOSED -- THE HONEST KERNEL-ADDRESSABLE FLOOR IS 487.7 TPS, COINCIDING WITH wirbel #285's FREE LOSSLESS 487.7. Of the 2104.6us verify-above-read compute, only 4.8% (101.5us wall) is greedy-SAFE overlap-hideable -- the SDPA num_stages 3->2 cp.async retune (bit-identical), which is the ONLY overlap-schedulable lever in the deployed (already-ONEGRAPH, fused-epilogue) verify. The other 95.2% is EXPOSED: irreducible non-body memory (KV+activations), greedy-UNSAFE-to-reduce MLP/GEMV compute (near-roofline, reassociation-gated per kanna #280), and exposed low-AI SDPA softmax. So #283's optimistic all-hides 746.9 (which assumed ALL 2104.6us hides) over-credited the verify-above-read by ~259 TPS; the honest floor is 487.7. free_lane_to_500_exists = False (reaching 500 needs ~2.9x the only greedy-safe lever; no candidate exists). The build is the sole >500 path (reinforcing fern #281 / land #245). BASELINE 481.53 untouched; analysis-only; adds 0 TPS; NOT a launch; the gate remains a MEASURED >=500 build, human-approval-gated.",
+    "verify_compute_hideability_self_test_passes": true,
+    "verify_compute_hideable_frac": 0.04820877299337417
+  }
+}
