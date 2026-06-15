@@ -1,0 +1,281 @@
+{
+  "created_at": "20260615T015242Z",
+  "pr": 271,
+  "agent": "denken",
+  "kind": "gd-step-basis-reconcile",
+  "synthesis": {
+    "official_baseline": 481.53,
+    "target_tps": 500.0,
+    "M_star": 32,
+    "measurement_present": true,
+    "measurement_path": "/workspace/senpai/target/research/validity/gd_step_basis_reconcile/deployed_gd_measurement.json",
+    "deployed_num_layers": 37,
+    "banked_provenance": {
+      "step_served_ms": 1.2182,
+      "K_cal": 125.26795005202914,
+      "E_T_served": 4.6827608,
+      "K_spec": 7,
+      "n_tree": 5,
+      "v8_us": 5163.714507818222,
+      "v32_us": 5979.945073127747,
+      "E_T_M32_rankcov": 5.15727323332918,
+      "tau_band": [
+        0.9924,
+        1.0
+      ],
+      "source_runs": {
+        "d241": "hqewf1d6",
+        "d257": "h1gj2ved",
+        "etboth": "comp_etboth_perdepth(PARENT_M16)",
+        "wirbel79_86": "z6wi4z4v"
+      }
+    },
+    "single_param_model": {
+      "formula": "step(M;g_d) = step_served*[verify_us(M)/v8 + n_tree*g_d]/(1 + K_spec*g_d)",
+      "step_served_ms": 1.2182,
+      "v8_us": 5163.714507818222,
+      "n_tree": 5,
+      "K_spec": 7,
+      "K_cal": 125.26795005202914,
+      "provenance_roundtrip": {
+        "step_central_M32_model": 1.345835872721692,
+        "step_central_M32_banked": 1.3458358727216921,
+        "step_central_resid": 2.220446049250313e-16,
+        "step_optimistic_M32_model": 1.118588876881767,
+        "step_optimistic_M32_banked": 1.1185888768817671,
+        "step_optimistic_resid": 2.220446049250313e-16,
+        "tps_central_M32_model": 480.029592680461,
+        "tps_central_M32_banked": 480.02959268046095,
+        "tps_central_resid": 5.684341886080802e-14,
+        "tps_optimistic_M32_model": 577.550035718469,
+        "tps_optimistic_M32_banked": 577.5500357184688,
+        "tps_optimistic_resid": 1.1368683772161603e-13,
+        "single_param_model_reproduces_both_268_edges": true
+      }
+    },
+    "anchor_self_test": {
+      "step_served_ms": 1.2182,
+      "step_anchor_isolated_ms": 1.2182,
+      "step_anchor_assumed_ms": 1.2182,
+      "step_anchor_deployed_ms": 1.2182,
+      "tps_at_anchor_isolated": 481.53,
+      "tps_at_anchor_assumed": 481.53,
+      "tps_at_anchor_deployed": 481.53,
+      "official_baseline": 481.53,
+      "anchor_roundtrips_isolated_within_1pct": true,
+      "anchor_roundtrips_assumed_within_1pct": true,
+      "anchor_is_gd_invariant": true,
+      "note": "served LINEAR M=8 uses n_draft=K_spec=7 (the calibration point) so the model returns step_served EXACTLY for any g_d -> the 481.53 anchor round-trips under BOTH the isolated (0.0195) and assumed (0.168) g_d. The anchor therefore CANNOT discriminate the fork; the discriminator is the direct deployed measurement + the HBM floor."
+    },
+    "fork_resolution": {
+      "deployed_gd": 0.01905973320856729,
+      "deployed_gd_lo": 0.019049987003189522,
+      "deployed_gd_hi": 0.01906947941394506,
+      "deployed_gd_basis": "coupled_record_time_region_split",
+      "g_d_isolated_measured": 0.01902957486578604,
+      "g_d_isolated_257_banked": 0.019498025961743392,
+      "g_d_assumed": 0.168,
+      "E_T_M32_held": 5.15727323332918,
+      "lambda_hat_M32": 0.9827,
+      "tau": 1.0,
+      "step_at_Mstar32_deployed_ms": 1.3471235260320245,
+      "tps_at_Mstar32_deployed": 479.57075450999776,
+      "tps_at_Mstar32_deployed_lo": 479.56053320431295,
+      "tps_at_Mstar32_deployed_hi": 479.5809750209041,
+      "width_clears_500_deployed": false,
+      "g_d_pivot_500tps": 0.040181582969342725,
+      "deployed_gd_above_pivot": false,
+      "margin_gd_to_pivot": -0.021121849760775434,
+      "tps_gap_to_500": -20.429245490002245,
+      "pivot_note": "clears 500 iff deployed_gd >= g_d* = 0.04018 (the 500-TPS pivot at M=32, E[T]=5.1573). The #268 fork edges 0.0195 (NO-GO 480) and 0.168 (GO 577.6) straddle this pivot; the measurement places the deployed g_d."
+    },
+    "tornado_ci": {
+      "g_d_pivot_500tps": 0.040181582969342725,
+      "ci_excludes_assumed_0p168": true,
+      "ci_below_pivot": true,
+      "ci_above_pivot": false,
+      "ci_straddles_pivot": false,
+      "tps_ci_lo": 479.56053320431295,
+      "tps_ci_hi": 479.5809750209041,
+      "tps_ci_straddles_500": false,
+      "gd_fork_decisive": true,
+      "physical_floor": {
+        "draft_pass_us": 101.95675304957798,
+        "verify_hbm_floor_us": 2933.828266666667,
+        "g_d_max_from_floor": 0.03475212036368386,
+        "floor_excludes_assumed_0p168": true,
+        "verify_needed_for_assumed_us": 606.8854348189166,
+        "verify_needed_over_floor": 0.206857859307642,
+        "note": "g_d=0.168 requires verify(8)=607us = 0.21x the 2934us HBM floor (reads 1.70GB int4 @ 600GB/s) -> PHYSICALLY IMPOSSIBLE. Even at the floor, g_d <= 0.0348."
+      }
+    },
+    "basis_robustness": {
+      "estimates": {
+        "graphed_coupled_deployed": 0.01905973320856729,
+        "graphed_isolated_thisrun": 0.01902957486578604,
+        "graphed_isolated_257_banked": 0.019498025961743392,
+        "eager_isolated_thisrun": 0.07467622953076249,
+        "hbm_floor_cap": 0.03475212036368386,
+        "assumed_fleet": 0.168
+      },
+      "g_d_pivot_500tps": 0.040181582969342725,
+      "all_graphed_below_pivot": true,
+      "graphed_span": [
+        0.01902957486578604,
+        0.019498025961743392
+      ],
+      "eager_above_pivot": true,
+      "eager_ruled_out_by_onegraph": true,
+      "deployed_runs_onegraph": true,
+      "note": "deployed manifest fa2sw_precache_kenyan sets ONEGRAPH=1 (the whole spec-decode step -- draft AND verify -- is CUDA-graph captured), so the GRAPHED g_d (~0.019) is the deployed-faithful basis. The eager g_d (0.0747) is launch-inflated (the drafter's 19 tiny per-pass GEMMs x K=7 pay Python launch each, which the captured graph removes); it is NOT the deployed path and is excluded by ONEGRAPH. The only scenario that flips to GO (eager draft) is architecturally ruled out."
+    },
+    "et_anchor_matrix_deployed": {
+      "E_T_held_primary": 5.15727323332918,
+      "matrix": {
+        "meas_floor_4p3305": {
+          "E_T": 4.330527243789328,
+          "tps_deployed": 402.69229954867325,
+          "clears_500": false,
+          "g_d_pivot": 0.21667608898895158
+        },
+        "meas_floor_conservative_4p489": {
+          "E_T": 4.488950392227178,
+          "tps_deployed": 417.42394268466137,
+          "clears_500": false,
+          "g_d_pivot": 0.16060496952309744
+        },
+        "flat_257_anchor_4p512": {
+          "E_T": 4.512,
+          "tps_deployed": 419.56730746109696,
+          "clears_500": false,
+          "g_d_pivot": 0.15387202059792854
+        },
+        "rankcov_idealized": {
+          "E_T": 5.15727323332918,
+          "tps_deployed": 479.57075450999776,
+          "clears_500": false,
+          "g_d_pivot": 0.040181582969342725
+        },
+        "rankcov_M32_5p157": {
+          "E_T": 5.15727323332918,
+          "tps_deployed": 479.57075450999776,
+          "clears_500": false,
+          "g_d_pivot": 0.040181582969342725
+        }
+      },
+      "n_corners_clearing_500": 0,
+      "n_corners_total": 5
+    },
+    "tau_band": {
+      "tau_band": [
+        0.9924,
+        1.0
+      ],
+      "tps_deployed_tau_lo": 475.92601677572173,
+      "tps_deployed_tau_hi": 479.57075450999776,
+      "tau_flips_500": false
+    },
+    "measurement_detail": {
+      "g_d_isolated": 0.01902957486578604,
+      "g_d_isolated_eager": 0.07467622953076249,
+      "draft_pass_us_graphed": 101.95675304957798,
+      "draft_pass_us_eager": 400.1006825764974,
+      "verify8_us": 5357.805088588169,
+      "verify32_us": 6032.161690848215,
+      "coupled": {
+        "draft_region_us": {
+          "n": 80,
+          "mean": 714.5216137170792,
+          "median": 714.7520184516907,
+          "std": 1.6188871834949823,
+          "se": 0.1809970895098978,
+          "ci95_abs": 0.3547542954393997,
+          "lo": 714.1668594216397,
+          "hi": 714.8763680125186,
+          "cv_pct": 0.22656937906653643,
+          "min": 711.679995059967,
+          "max": 723.9680290222168
+        },
+        "verify_region_us": {
+          "n": 80,
+          "mean": 5355.5071413517,
+          "median": 5355.519771575928,
+          "std": 1.7171939889074361,
+          "se": 0.19198812448755234,
+          "ci95_abs": 0.3762967239956026,
+          "lo": 5355.130844627704,
+          "hi": 5355.883438075695,
+          "cv_pct": 0.03206407803377564,
+          "min": 5350.399971008301,
+          "max": 5359.615802764893
+        },
+        "total_us": {
+          "n": 80,
+          "mean": 6070.028865337372,
+          "median": 6070.271968841553,
+          "std": 2.18572990055102,
+          "se": 0.24437203190429677,
+          "ci95_abs": 0.47896918253242166,
+          "lo": 6069.549896154839,
+          "hi": 6070.5078345199045,
+          "cv_pct": 0.036008558592406904,
+          "min": 6065.152168273926,
+          "max": 6078.464031219482
+        },
+        "coupled_total_us": 6070.028865337372,
+        "isolated_sum_us": 6071.502359935215,
+        "coupling_overhead_us": -1.4734945978434553,
+        "coupling_ratio": 0.9997573097216322,
+        "draft_region_per_pass_us": 102.07451624529702,
+        "deployed_gd": 0.01905973320856729,
+        "deployed_gd_stats": {
+          "n": 80,
+          "mean": 0.01905973320856729,
+          "median": 0.01905854209663901,
+          "std": 4.4475872953804664e-05,
+          "se": 4.9725537641675796e-06,
+          "ci95_abs": 9.746205377768457e-06,
+          "lo": 0.019049987003189522,
+          "hi": 0.01906947941394506,
+          "cv_pct": 0.23334992398431317,
+          "min": 0.018980254877988594,
+          "max": 0.019315357431136375
+        },
+        "deployed_gd_lo": 0.019049987003189522,
+        "deployed_gd_hi": 0.01906947941394506
+      },
+      "physical_floor": {
+        "body_int4_gb": 1.6973824,
+        "lmhead_bf16_gb": 0.06291456,
+        "a10g_bw_gbps": 600.0,
+        "verify_hbm_floor_ms": 2.933828266666667,
+        "verify8_wall_ms": 5.35780508858817,
+        "verify8_over_floor": 1.8262163295180043
+      },
+      "peak_gpu_gb": 13.236678144
+    },
+    "deployed_gd": 0.01905973320856729,
+    "deployed_gd_lo": 0.019049987003189522,
+    "deployed_gd_hi": 0.01906947941394506,
+    "tps_at_Mstar32_deployed": 479.57075450999776,
+    "width_clears_500_deployed": false,
+    "g_d_pivot_500tps": 0.040181582969342725,
+    "gd_fork_decisive": true,
+    "tps_at_anchor_isolated": 481.53,
+    "tps_at_anchor_assumed": 481.53,
+    "self_test": {
+      "conditions": {
+        "a_single_param_model_reproduces_both_268_fork_edges": true,
+        "b_served_anchor_gd_invariant_roundtrips_481p53_both_bases": true,
+        "c_deployed_gd_measured_in_open_fork_interval_with_ci": true,
+        "d_physical_floor_excludes_assumed_0p168": true,
+        "e_key_scalars_finite": true
+      },
+      "gd_step_basis_reconcile_self_test_passes": true
+    },
+    "verdict": "STEP-BASIS FORK COLLAPSED. The #268 480.0/577.6 split is ONE step model step(M;g_d)=step_served*[v(M)/v8 + n_tree*g_d]/(1+K_spec*g_d) at g_d=0.0195 (central) vs 0.168 (optimistic); the served M=8 anchor is g_d-INVARIANT (481.53 under both) so it cannot decide. The deployed-path coupled measurement (coupled_record_time_region_split) places g_d=0.0191 [0.0190,0.0191] and the HBM floor caps g_d<=0.0348, both far below the 0.168 optimistic edge and the 500-TPS pivot g_d*=0.0402. NO-GO on width: deployed g_d=0.0191 < pivot 0.0402 -> M*=32 prices 479.6 TPS < 500; the wider tree does NOT clear 500 on the deployed path. The 577.6 optimistic edge was an artifact of an unphysical assumed g_d=0.168 (>= 4.8x too fast a verify). GATE rests on the DEPTH axis (stark #266) + an E[T] lift (fern #259), NOT tree width. (ALL graphed bases -- coupled 0.0191, isolated 0.0190, #257 0.0195 -- sit below the pivot; only the launch-inflated EAGER basis 0.0747 would clear, and ONEGRAPH=1 graphs the deployed draft so the deployed path does NOT pay it.) BASELINE 481.53 untouched. CPU analytic + local micro-measurement. NOT a launch.",
+    "handoff": "PR #271 hand-off (land #245 / stark #266 / fern #259): the deployed-path g_d is 0.0191 [0.0190,0.0191] (graphed coupled, not the assumed 0.168 which the HBM floor excludes at g_d<=0.0348), so the #268 M*=32 width prices 479.6 TPS at the rank-cov E[T]=5.157 operating point -- BELOW 500 (pivot g_d*=0.0402); tree WIDTH alone is NOT the lever, the gate is the DEPTH axis + E[T] realization."
+  },
+  "peak_mem_mib": 15.156,
+  "nan_clean": true
+}
