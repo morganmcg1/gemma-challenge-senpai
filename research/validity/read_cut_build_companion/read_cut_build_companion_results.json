@@ -1,0 +1,229 @@
+{
+  "primary_metric": {
+    "name": "read_cut_build_companion_self_test_passes",
+    "value": true
+  },
+  "test_metric": {
+    "name": "read_cut_is_free_build_companion",
+    "value": false
+  },
+  "read_cut_build_companion_self_test_passes": true,
+  "read_cut_is_free_build_companion": false,
+  "read_cut_fits_ppl_headroom": true,
+  "read_cut_wall_realized_tps_credit": -33.43469589190703,
+  "read_cut_realization_ratio": -2.01774820233227,
+  "realization_classification": "regresses",
+  "composed_read_credit_pct": 3.207753401513825,
+  "composed_uplift_pct": 3.314060282968967,
+  "realized_uplift_pct": -6.686939178381407,
+  "build_portfolio_recommendation": "BUILD ALONE; bank the #287 read-cut as a CLOSED companion (NOT an integration target): it FITS the 0.0428 PPL headroom but REGRESSES on the wall (ratio -2.018 <= 0, realized -6.69%) the same way stark #273's body-side static-K deviations did -> doubly-closed (not standalone #287, not a companion this leg).",
+  "handoff": "The #287 read-cut FITS the EAGLE-3 build's 0.0428 PPL headroom (cost 0.0203, body unchanged), but on the wall it REGRESSES like static-K (ratio -2.018 <= 0, doubly-closed), so the build portfolio should treat it as a CLOSED companion and build alone, resolving where #287's read-frontier lands relative to the gated build.",
+  "ppl_headroom_fit": {
+    "build_ppl_body_unchanged": 2.3772,
+    "ppl_gate": 2.42,
+    "ppl_headroom": 0.04279999999999973,
+    "read_cut_ppl_cost": 0.020320694022481156,
+    "read_cut_fits_ppl_headroom": true,
+    "headroom_residual_after_read_cut": 0.02247930597751857,
+    "assumes_body_unchanged": true
+  },
+  "compose": {
+    "read_cut_byte_cut_pct": 8.431155407899594,
+    "deployed_read_fraction": 0.3804642716594112,
+    "composed_read_credit_pct": 3.207753401513825,
+    "deployed": {
+      "operating_tps": 481.53,
+      "tps_after_read_cut": 497.4881944805805,
+      "uplift_pct": 3.314060282968967,
+      "uplift_tps": 15.958194480580516,
+      "matches_287_bank": true
+    },
+    "build": {
+      "build_et_target": 4.9029,
+      "build_tps_bracket": [
+        500.0,
+        520.953
+      ],
+      "build_step_us_bracket": [
+        9411.405635441202,
+        9805.8
+      ],
+      "build_read_fraction_bracket": [
+        0.30973542417001027,
+        0.3227151968552786
+      ],
+      "build_read_fraction_mid": 0.31622531051264446,
+      "composed_credit_idealized_pct": 3.207753401513825,
+      "composed_credit_diluted_pct": 2.666144736843411,
+      "idealized_uplift_at_floor_tps": 16.57030141484495
+    },
+    "composed_uplift_pct": 3.314060282968967
+  },
+  "realization": {
+    "read_cut_realization_ratio": -2.01774820233227,
+    "stark273_body_side_ratios": {
+      "3": -6.184909243990122,
+      "4": -2.01774820233227,
+      "5": -0.8641778297435041,
+      "6": -0.6102631065916517
+    },
+    "ratio_min": -6.184909243990122,
+    "ratio_max": -0.6102631065916517,
+    "ratio_mean": -2.419274595664387,
+    "all_body_side_ratios_negative": true,
+    "realized_uplift_pct": -6.686939178381407,
+    "realized_uplift_pct_bracket": [
+      -20.49716207927528,
+      -2.02244872371665
+    ],
+    "realized_uplift_pct_at_mean_ratio": -8.017621851087151,
+    "read_cut_wall_realized_tps_credit": -33.43469589190703,
+    "realized_tps_credit_deployed_anchor": -32.19961822565999,
+    "realized_tps_credit_build_floor_anchor": -33.43469589190703,
+    "realized_tps_credit_lambda_ceiling_anchor": -34.83581025795329,
+    "classification": "regresses"
+  },
+  "assumes_body_unchanged": true,
+  "read_reduction_lever_clears_500_standalone": false,
+  "official_baseline_tps": 481.53,
+  "target_tps": 500.0,
+  "lambda1_ceiling_tps": 520.953,
+  "private_verified_tps": 460.85,
+  "launch_gate": {
+    "measured_tps_ge": 500.0,
+    "lambda_hat_ge": 0.978,
+    "ppl_le": 2.42,
+    "vram_le_gb": 24,
+    "human_approval_gated": true,
+    "deployed_checkpoint": "fa2sw_precache_kenyan"
+  },
+  "constants_exact": true,
+  "constants_detail": {
+    "MAX_PPL_SAFE_READ_REDUCTION_PCT": {
+      "have": 8.431155407899594,
+      "want_shorthand": 8.431,
+      "decimals": 3,
+      "ok": true
+    },
+    "READ_CUT_PROJ_PPL": {
+      "have": 2.3975206940224814,
+      "want_shorthand": 2.3975,
+      "decimals": 4,
+      "ok": true
+    },
+    "DEPLOYED_INT4_PPL": {
+      "have": 2.3772,
+      "want_shorthand": 2.3772,
+      "decimals": 4,
+      "ok": true
+    },
+    "BODY_READ_FRACTION": {
+      "have": 0.3804642716594112,
+      "want_shorthand": 0.38,
+      "decimals": 2,
+      "ok": true
+    },
+    "HBM_BOUND_CEILING_TPS": {
+      "have": 1265.6378952477885,
+      "want_shorthand": 1265.6,
+      "decimals": 1,
+      "ok": true
+    },
+    "K4_VS_K7_MEASURED_DELTA_PCT": {
+      "have": -8.628968285857523,
+      "want_shorthand": -8.629,
+      "decimals": 3,
+      "ok": true
+    },
+    "K4_REALIZATION_RATIO": {
+      "have": -2.01774820233227,
+      "want_shorthand": -2.018,
+      "decimals": 3,
+      "ok": true
+    },
+    "K5_REALIZATION_RATIO": {
+      "have": -0.8641778297435041,
+      "want_shorthand": -0.864,
+      "decimals": 3,
+      "ok": true
+    },
+    "BUILD_ET_TARGET": {
+      "have": 4.9029,
+      "want_shorthand": 4.9029,
+      "decimals": 4,
+      "ok": true
+    },
+    "PUBLIC_FLOOR_ET": {
+      "have": 4.966,
+      "want_shorthand": 4.966,
+      "decimals": 3,
+      "ok": true
+    },
+    "OFFICIAL_BASELINE_TPS": {
+      "have": 481.53,
+      "want_shorthand": 481.53,
+      "decimals": 2,
+      "ok": true
+    },
+    "E_T_DEPLOYED": {
+      "have": 3.844,
+      "want_shorthand": 3.844,
+      "decimals": 3,
+      "ok": true
+    },
+    "K_CAL": {
+      "have": 125.268,
+      "want_shorthand": 125.268,
+      "decimals": 3,
+      "ok": true
+    },
+    "STEP_US": {
+      "have": 1218.2,
+      "want_shorthand": 1218.2,
+      "decimals": 1,
+      "ok": true
+    },
+    "LAMBDA1_CEILING_TPS": {
+      "have": 520.953,
+      "want_shorthand": 520.953,
+      "decimals": 3,
+      "ok": true
+    },
+    "PPL_GATE": {
+      "have": 2.42,
+      "want_shorthand": 2.42,
+      "decimals": 2,
+      "ok": true
+    },
+    "TARGET_TPS": {
+      "have": 500.0,
+      "want_shorthand": 500.0,
+      "decimals": 1,
+      "ok": true
+    }
+  },
+  "caveats": [
+    "0_TPS: this leg PRICES whether the #287 read-cut is a free body-side companion to the EAGLE-3 build; it produces NO >=500 build and adds 0 TPS. BASELINE stays 481.53.",
+    "ANALYTIC_NOT_A_WALL_AB: the realization discount is stark #273's (51bdsbpw) banked body-side realization-ratio PRIOR applied ANALYTICALLY over banked numbers. A fresh wall A/B of the read-cut is stark's #298 harness/lane, NOT this leg.",
+    "ASSUMES_BODY_UNCHANGED: the 0.0428 PPL headroom assumes the EAGLE-3 build leaves the verify-path body unchanged (greedy-token-identical drafter -> precision moves E[T], not PPL). If the build co-quantizes the body to free VRAM (ubel #299's lane), this headroom is SHARED with the body-quant -> flagged assumes_body_unchanged=True.",
+    "BODY_SIDE_DEVIATION_TRANSFER: the read-cut re-quantizes verify-path weights (int4->int3 on 16 layers) -> it is a body-side deviation from the K=7-optimized ONEGRAPH graph, stark #273's class (which alters the verify GEMM/fusion, not just K). The realization ratio is transferred on that class membership, NOT measured for the read-cut specifically.",
+    "READ_FRACTION_DEPLOYED_DILUTES_ON_BUILD: denken #283's 38% read-fraction is a DEPLOYED measurement (E[T]=3.844). The build's higher E[T]=4.9029 lengthens the step, so the SAME absolute body read is a SMALLER wall-fraction on the build (~31%) -> the idealized 8.43%x38% credit is OPTIMISTIC on the build before any realization discount.",
+    "DO_NOT_SERVE: NO served-file change, NO re-quantization of the served checkpoint, NOT a launch, NOT a build, NOT open2, NO HF Job, NO submission. Launch gate stays land #245 MEASURED >=500 at lambda_hat>=0.9780 AND PPL<=2.42 AND VRAM<=24GB, human-approval-gated."
+  ],
+  "self_test": {
+    "passes": true,
+    "checks": {
+      "a_headroom_eq_0428": true,
+      "a_read_cut_cost_eq_0203": true,
+      "a_cost_fits_headroom": true,
+      "b_composed_and_ratio_finite": true,
+      "b_discounted_le_composed": true,
+      "c_physical_values_nonneg": true,
+      "c_all_values_nan_clean": true,
+      "d_constants_imported_exact": true,
+      "e_caveats_present": true,
+      "verdict_consistent_with_ratio": true
+    }
+  },
+  "wandb_run_id": "8jewx2ur"
+}
