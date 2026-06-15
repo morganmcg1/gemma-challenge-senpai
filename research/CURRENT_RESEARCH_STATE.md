@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~03:05Z (cycle 52k)
+- **Date:** 2026-06-15 ~03:42Z (cycle 52k)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
@@ -63,8 +63,8 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 | Student | PR | Hypothesis | Owner | Status |
 |---------|-----|-----------|-------|--------|
-| wirbel  | #285 | Lossless micro-lever envelope (compose SDPA + sliding-only + lm_head + norm folds, bit-identical) | me | 🔄 WIP |
-| kanna   | #286 | Bridge basis-honesty re-pricing card (draft-side 0.21 vs verify-side 1.0; consolidated portfolio) | me | 🔄 WIP |
+| wirbel  | #290 | Step-banked BUILT-raise target + EAGLE-3 feasibility bracket (banks #285 envelope into fern #281's floor) | me | 🔄 WIP (reseat; #285 MERGED 03:40 → free step ceiling 487.7) |
+| kanna   | #289 | Per-position acceptance decay (the BUILT-raise a_k target profile to E[T]≥4.97) | me | 🔄 WIP (reseat; #286 MERGED 03:35 → bridge draft-0.21/verify-1.0, stack 493.64) |
 | fern    | #287 | Read-reduction PPL pareto | Morgan | 🔄 WIP |
 | lawine  | #288 | PPL local→official transfer (τ_ppl): safe local bar for gate | Morgan | 🔄 WIP |
 | denken  | #283 | HBM intrinsic ceiling (the physics floor under the normalized step) | Morgan | 🔄 WIP |
@@ -91,9 +91,9 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 - **ONEGRAPH/CUDAGraph / TRITON_ATTN pin**: already deployed in 481.53. Closed.
 - **τ_acc**: 1.0 ± 0.0075, local=official. Closed (lawine #276).
 
-### Step-side consolidation IN FLIGHT (banks credit, does NOT cross 500 alone)
-- **Lossless micro-lever envelope (wirbel #285)**: total greedy-safe bit-identical step-shaving (SDPA + sliding-only + lm_head epilogue + norm folds), composed. Sets the FREE step-side ceiling.
-- **Bridge basis-honesty card (kanna #286)**: classify each banked lever draft-side (bridge 0.21) vs verify-side (bridge 1.0); consolidated basis-honest portfolio card. Rigorously closes the step side.
+### Step-side consolidation — MERGED (banks credit, does NOT cross 500 alone)
+- **Lossless micro-lever envelope (wirbel #285, MERGED 03:40, `97b57hhe`)**: total greedy-safe bit-identical step-shaving = **15.48µs → +1.29% → 487.7 TPS** (`envelope_clears_500=False`). The four-lever stack collapses to ONE incremental lever (SDPA num_stages 3→2); lm_head (0.66µs fused ceiling, FUSED_SPARSE_ARGMAX on-GPU) + norms (ONEGRAPH+vLLM fused add+rmsnorm) `already_captured`. The **FREE step-side ceiling is 487.7 TPS**; residual gap +2.52% lives off the step axis.
+- **Bridge basis-honesty card (kanna #286, MERGED 03:35, `0k4azmjo`)**: the bridge is **DRAFT-SIDE-SPECIFIC** — draft-side 0.2147 (4.66× over-credit), verify-side **1.0** (no discount). Best single basis-honest lever = verify SDPA 487.758; composed disjoint stack = **493.637** (still **6.36 short** of 500). Confirms wirbel #285's verify-side envelope needs no discount → **step-side closed at BOTH raw and basis-honest level.**
 
 ### THE ANALYTIC PATH-A IS CLOSED (fern #281 capstone) — sole re-open is a BUILT drafter raise
 - **fern #281 verdict:** Path-A CLOSED on all three axes; `go_region_exists=False`; no realizable `(E[T]_real, M, step-shave)` cell reaches 500. The analytic frontier is settled at 481.53.
@@ -108,14 +108,14 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 **Resolved this cycle:** fern #281 closed Path-A analytically; lawine #282 confirmed no free prompt-side lever. The analytic exploration is complete — 481.53 is the analytic frontier.
 
-**In-flight consolidation (banks the step-side credit a built raise stacks on):**
-- wirbel #285 (lossless micro-lever envelope) + kanna #286 (bridge basis-honesty card): one coherent basis-honest step-side portfolio.
-- denken #283 / ubel #284 (Morgan): HBM floor + host overhead — the physics under the normalized step.
+**Step-side consolidation — DONE this cycle (the step-side credit a built raise stacks on, now closed at the basis-honest level):**
+- wirbel #285 (lossless envelope, MERGED) + kanna #286 (bridge basis-honesty, MERGED): the FREE step ceiling is 487.7, the composed basis-honest stack is 493.64 — both <500. The step-side denominator is settled at both raw and basis-honest level.
+- denken #283 / ubel #284 (Morgan): HBM floor + host overhead — the physics under the normalized step (in flight).
 - land #245 (Morgan banking): tree-fidelity proof (scratch-KV bug +0.235, tree-causal mask +0.088, tree-vs-linear delta ≈0) — the durable result; full live-integration build is OFF the critical path (g_d settled it).
 
 **THE PIVOT — BUILT public-E[T] raise (Plateau-Protocol bigger swing):**
 1. **Phase-1 viability (cheap, in-bounds):** EAGLE-3 architecture-adaptation sanity (2h single GPU, `SupportsEagle3` load + run for Gemma-4, no retrain, no submission). De-risk the interface before spending training.
-2. **Pre-build target (analytic):** decompose E[T]=3.844 into the per-position acceptance cliff (which draft positions EAGLE-3 must fix) + price the per-position lift to 4.97 — the homeless `per_position_acceptance_decay` leg (body at `/tmp/assign_lawine_per_position_decay.md`) is ready for the next freed student.
+2. **Pre-build target (analytic, NOW ASSIGNED):** **kanna #289** decomposes E[T]=3.844 into the per-position acceptance profile `a_k`, locates the acceptance cliff (which draft positions EAGLE-3 must fix), and prices the per-position lift to 4.97. **wirbel #290** (the aggregate complement) banks his own #285 lossless envelope into fern #281's floor (target relaxes 4.97→~4.90 at bridge=1.0) and brackets EAGLE-3's recoverable budget (target − denken #119's linear cap 3.8445) inside the feasibility window — a necessary-condition de-risk for the gated retrain.
 3. **Full EAGLE-3 retrain (human-approval-gated):** route via `Approval request: HF job`. Companion PARD-2 CAT loss (same run). Additive SAM-Decoding retrieval (+2-4%, zero PPL risk).
 4. **Composition:** any built E[T] raise stacks multiplicatively on the lossless step envelope (wirbel #285) — `official = K_cal·(E[T]/step)·τ`, E[T]-independent step levers compose cleanly.
 
