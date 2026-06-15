@@ -1,0 +1,31 @@
+{
+  "experiment": "PR#245 cycle-4: captured verify-step sweep (g_d fork, build-side)",
+  "date": "2026-06-15",
+  "hardware": "1xA10G local, CUDA_VISIBLE_DEVICES=0",
+  "submission": "fa2sw_treeverify_kenyan (LOCAL probe; deployed fa2sw_precache_kenyan untouched)",
+  "method": "num_spec sweep via manifest SPECULATIVE_CONFIG; STEPTIME=1 (CUDA-event probe). exec=execute_model GPU (target verify+sample+accept); propose is OUTSIDE execute_model in this wheel, so exec IS the verify step (NOT exec-draft). qq_bias mask is sub-us, so linear-(M-1) captured step == M-node tree verify captured step (compute-identical).",
+  "capture": "FULL decode CUDA graph captured (1/1) every run; max_cudagraph_capture_size auto-scales to 2*(num_spec+1): 16/24/28/32. The M=16 verify (query_len=16) captures cleanly at num_spec>=15 -> LONG-POLE-1 SOLVED (the size-29 crash was the num_spec=7/cap-16 static buffers overflowing at 16 rows; sizing buffers for query_len=16 removes it).",
+  "peak_vram_GiB": 18.3,
+  "vram_note": "weights 8.85 GiB + KV pool ~9.46 GiB (~376,880 tokens); well under 24 GB",
+  "sweep": [
+    {"num_spec": 7,  "verify_rows": 8,  "verify_exec_p50_ms": 8.057, "draft_p50_ms": 1.490, "tps_steptime_on": 342.52, "max_capture_size": 16},
+    {"num_spec": 11, "verify_rows": 12, "verify_exec_p50_ms": 8.370, "draft_p50_ms": 2.321, "tps_steptime_on": 207.06, "max_capture_size": 24},
+    {"num_spec": 13, "verify_rows": 14, "verify_exec_p50_ms": 8.396, "draft_p50_ms": 2.711, "tps_steptime_on": 205.55, "max_capture_size": 28},
+    {"num_spec": 15, "verify_rows": 16, "verify_exec_p50_ms": 8.459, "draft_p50_ms": 3.152, "tps_steptime_on": 189.92, "max_capture_size": 32}
+  ],
+  "fit": {
+    "model": "verify_exec_ms = 7.692 + 0.0503 * verify_rows",
+    "r2": 0.913,
+    "per_row_marginal_ms": 0.0503,
+    "marginal_M8_to_M16_pct": 5.0,
+    "extrapolated_M8_to_M32_pct": 15.4,
+    "draft_per_forward_ms": 0.210
+  },
+  "interpretation": {
+    "verify_compute_roofline": "verify-row growth +15.4% M8->M32 matches denken#257 central +16% compute-bound roofline (shape confirmed from the build side).",
+    "absolute_scale_gap": "local full verify forward ~8.06 ms (A10G, weight-streaming-dominated, intercept 7.69 ms) is ~7x the relayed [1.12,1.43] ms built-step band; cannot reconcile the absolute (cross-PR isolation). Transferable signal = the verify-row marginal/ratio, NOT the local absolute ms.",
+    "overlap": "propose is a SEPARATE call (outside execute_model). Clean control 413.76 TPS implies step ~8.46 ms < serial verify+draft 9.3 ms => propose is ~partially hidden. Current path is PARTIALLY overlapped (between fully-serial/central and fully-overlapped/optimistic).",
+    "g_d_fork": "no evidence of the optimistic free-rows regime; verify rows cost the central roofline amount. Realizing the optimistic g_d (step ~1.119-equiv) needs a verify||emit megakernel overlap that is NOT built.",
+    "linear_deep_penalty": "tps DROPS with deeper linear K (342->207->206->190) because E[T] does not improve while the step grows -> re-confirms a TREE (not deeper linear) is required to lift E[T]."
+  }
+}
