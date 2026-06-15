@@ -16,9 +16,18 @@ greedy sampler, 128×512 prompts, seed. Measure median `wall_tps` over ≥3 fres
 runs per K via `scripts/profiler/paired_tps_ab.py` (PR #82/#90 paired runner).
 **LOCAL only — no HF Job, no submission, no served-file edit, NOT a launch.**
 
-**Greedy-safe by construction.** Changing K is proposal-only; the verify step is
-greedy-exact, so emitted token-ids are identical across all K. Certified
-empirically (128/128 token-id identity vs K=7) in `greedy_identity_check.py`.
+**Greedy validity (premise corrected).** The PR premise was "greedy-safe by
+construction: token-ids identical across all K (128/128)". That is empirically FALSE
+for *every* config on this int4+vLLM stack — the verify step's FP reduction order is
+not bit-stable, so the greedy stream diverges run-to-run. The official `greedy_gate.py`
+reports the *deployed* K=7 itself as DIVERGENT vs the canonical M=1 AR reference
+(~59% of tokens differ, late stochastic onset); this is the int4+vLLM nondeterminism
+the competition gate tolerates (it compares within-stack; the live numeric gate is
+PPL ≤ 2.42, which is K-invariant because PPL scoring never invokes the drafter). The
+correct, fair criterion is **greedy-validity PARITY**: every candidate K stays in
+K=7's benign-FP regime (same verdict, divergent-token% and onset within tolerance) —
+certified in `greedy_gate_summary.py`. The strict cross-K identity number is still
+reported (non-gating) by `greedy_identity_check.py`.
 
 **Realization ratio.** `measured-delta% / composition-delta%` for K=4 and K=5.
 Composition deltas (#266 run cpjafa3h): K=4 +4.277%, K=5 +3.999%. A ratio well
@@ -26,7 +35,8 @@ below 1 (or negative) quantifies the over-credit.
 
 ## Files
 - `run_sweep.sh` — orchestrates the K sweep (paired_tps_ab.py per K, reuse K=7 baseline).
-- `greedy_identity_check.py` — per-prompt token-id identity certificate vs K=7.
+- `greedy_identity_check.py` — strict per-prompt cross-K token-id identity vs K=7 (NON-GATING; documents that 128/128 is false).
+- `greedy_gate_summary.py` — official greedy_gate.py per K vs the committed M=1 AR reference → greedy-validity parity regime (GATING).
 - `analyze.py` — per-K table, realization ratios, booleans, self-test → `report.json`.
 
 ## Headlines
