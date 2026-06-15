@@ -195,7 +195,7 @@ def deliverable1_tree_to_m() -> dict[str, Any]:
         "size29_corpus_anchor_ok": bool(e3["M_nodes"] == SIZE29_TREE_CORPUS),
         "eagle3_M": e3["M_nodes"],
         "eagle3_is_sub_cliff": bool(e3["M_nodes"] <= KNEE_MSTAR),
-        "headroom_nodes_below_cliff": (KNEE_MSTAR + 1) - e3["M_nodes"],   # nodes until M=33
+        "headroom_nodes_below_cliff": KNEE_MSTAR - e3["M_nodes"],   # nodes addable staying <= knee 32
         "capture_safety_note": (
             "ubel #311 capture-safety (max_safe_tree_width={}, buckets {}) is an ORTHOGONAL "
             "correctness axis (lawine #101 IndexError): a 29-node tree pads to the M=32 capture "
