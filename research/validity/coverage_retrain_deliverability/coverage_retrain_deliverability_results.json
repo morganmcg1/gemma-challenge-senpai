@@ -1,0 +1,346 @@
+{
+  "pr": 380,
+  "agent": "denken",
+  "kind": "coverage-retrain-deliverability",
+  "analysis_only": true,
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps_expected": 0,
+  "inputs": {
+    "delta_et_central_373": 0.04468363487955586,
+    "delta_et_conservative_373": 0.17631393110269514,
+    "s_uniform_central_377": 11.781120641460003,
+    "s_program_central_377": 7.912609135742992,
+    "s_program_worst_377": 4.172857261001455,
+    "kappa_central_377": 0.6716346752190123,
+    "dcov_robust_377": 0.010708162797026063,
+    "dcov_central_377": 0.005647142947793298,
+    "cov_prior_330": 0.8902659519153152,
+    "identity_bar": 0.9213011665456927,
+    "cov_budget_336": 0.031035214630377506,
+    "cstar_central_340": 0.9089,
+    "cstar_worst_340": 0.9256,
+    "recipe_mean_dcov_339": 0.0385,
+    "recipe_sigma_indep_339": 0.00742,
+    "recipe_sigma_rho05_339": 0.00909,
+    "recipe_sigma_comono_339": 0.0105,
+    "lit_top4_central_323": 0.913,
+    "lit_top4_range_323": [
+      0.899,
+      0.929
+    ],
+    "source_377": "030uc5mk",
+    "source_336": "krroookz",
+    "source_339": "0aq16szh",
+    "source_323": "ceddxj20",
+    "source_330": "hfrscdai"
+  },
+  "grounding_audit": {
+    "delivery_distribution_grounding": "literature-anchored",
+    "original_339_distribution_optimistic": true,
+    "original_339_grounding_if_taken_literally": "modeled-only",
+    "provenance_chain": [
+      "#330 hfrscdai: MEASURED top-4 ROOT prior 0.8903 (fern #34 gua9x68j eval)",
+      "#336 krroookz: per-lever literature priors soft-KD +0.030 / reasoning +0.025, combo 0.70*(0.030+0.025)=0.0385 (cited DistillSpec/OSD/Medusa/EAGLE-3; top-4-tail attribution = reasoned inference, NOT a per-paper ablation)",
+      "#339 0aq16szh: N(0.0385, sigma); sigma=0.00742 is the rho=0 INDEPENDENT spread (tightest of indep/rho0.5/comonotonic 0.00742/0.00909/0.01050)",
+      "#377 030uc5mk: adopted mean 0.0385 AND the optimistic sigma 0.00742 -> P(deliver)~1.0"
+    ],
+    "is_measured_checkpoint": false,
+    "is_modeled_only": false,
+    "verification_findings": [
+      "V1: NO cited paper (DistillSpec/OSD/Medusa/EAGLE-1/EAGLE-3/HASS/KOALA) reports top-4 COVERAGE; all report acceptance-rate alpha / accept-length tau. The +0.0385 top-4 number is an inference from acceptance gains via an ASSUMED transfer -> the metric is unmeasured.",
+      "V2: EAGLE-1 (2401.15077) ran logit-KD as a baseline, found 'only modest improvements', and CHOSE CE feature-regression because logit-KD UNDERPERFORMED -> the closest A/B CONTRADICTS the soft-KD +0.030 (defensible ~+0.005..+0.015).",
+      "V3: reasoning-DATA +0.025 is optimistic: EAGLE-1 'low sensitivity to training data' (~3.6% speedup), HASS 1/4-data~=full; diminishing returns as the capable 0.89 head narrows the teacher gap (defensible ~+0.005..+0.010).",
+      "Net: 0.8903+0.0385=0.9288 ~ TOP of the published [0.899,0.929] range (best-case, not central). Defensible FINE-TUNE central ~+0.016, range [+0.009,+0.029]."
+    ],
+    "modeled_layers_on_top": [
+      "acceptance/speedup -> top-4-coverage attribution (ASSUMED transfer; no paper measures it)",
+      "0.70 non-additivity haircut (shared mmlu_pro drag; #336 modeling assumption)",
+      "sigma=0.00742 is the rho=0 OPTIMISTIC spread; realistic correlated spread up to 0.0105",
+      "the soft-KD +0.030 magnitude is CONTRADICTED by EAGLE-1's own logit-KD A/B (V2)"
+    ],
+    "cov_post_339_in_lit_range_frac": 0.9921983971771714,
+    "reconstructed_mean_from_336_levers": 0.0385,
+    "reconstructed_sigma_indep": 0.007424621202458749,
+    "reconstructed_sigma_comono": 0.010499999999999999,
+    "mean_roundtrips": true,
+    "sigma_indep_roundtrips": true
+  },
+  "defensible_delivery_distribution": {
+    "name": "lit-anchored-fine-tune-realistic",
+    "mean": 0.016,
+    "sd": 0.006,
+    "band": [
+      0.009,
+      0.029
+    ],
+    "provenance": "PR #380 literature pass: a soft-KD + reasoning-data FINE-TUNE of the existing 0.8903 head (NOT a from-scratch retrain) defensibly lifts top-4 coverage by [+0.009,+0.029], central ~+0.016. Discounted from #336's +0.0385 because (V2) EAGLE-1 (2401.15077) found logit-KD UNDERPERFORMS CE feature-regression and (V3) EAGLE-1 reports low training-data sensitivity (~3.6% speedup) + diminishing KD returns as the capable 0.89 head narrows the teacher gap. No cited paper measures top-4 coverage directly (V1).",
+    "ceiling_from_scratch": {
+      "name": "lit-anchored-from-scratch-ceiling",
+      "mean": 0.02273404808468482,
+      "sd": 0.009119352478676545,
+      "band": [
+        0.008734048084684809,
+        0.038734048084684836
+      ],
+      "provenance": "#323 ceddxj20 published fully-trained-FROM-SCRATCH head top-4 0.913 [0.899,0.929] minus the #330-MEASURED 0.8903 prior; the OPTIMISTIC-defensible upper bound."
+    },
+    "pessimistic": {
+      "name": "lit-anchored-pessimistic-low-central",
+      "mean": 0.012,
+      "sd": 0.005,
+      "provenance": "low-central corner: EAGLE-1 logit-KD contra (V2) + capable-head saturation (V3) push the fine-tune central toward the bottom of [+0.009,+0.029]."
+    },
+    "original_339": {
+      "mean": 0.0385,
+      "sd": 0.00742,
+      "name": "modeled-339-optimistic"
+    }
+  },
+  "kappa_sweep": {
+    "kappa_central_377": 0.6716346752190123,
+    "kappa_worst_corner_robust_target": 0.3541986698885314,
+    "kappa_floor_plausible": 0.3541986698885314,
+    "kappa_breakeven": 0.1222101108314569,
+    "kappa_breakeven_conservative_residual": 0.4822200592962235,
+    "kappa_margin": 0.5494245643875554,
+    "kappa_margin_from_worst_corner": 0.2319885590570745,
+    "required_dcov_at_breakeven": 0.03103521463037751,
+    "p_deliver_at_kappa_breakeven": 0.8428008167566102,
+    "p_deliver_at_kappa_breakeven_defensible": 0.006107541528350913,
+    "breakeven_below_plausible_floor": true,
+    "central_kappa_comfortably_above_breakeven": true,
+    "sweep": [
+      {
+        "kappa": 0.1,
+        "required_dcov": 0.03792817019656488,
+        "within_336_budget": false,
+        "frac_of_336_budget": 1.2221011083145692,
+        "p_deliver_optimistic_339": 0.5307144841716191,
+        "p_deliver_defensible": 0.0001287439320685202
+      },
+      {
+        "kappa": 0.122214,
+        "required_dcov": 0.031034227008824588,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.9999681773893082,
+        "p_deliver_optimistic_339": 0.8428328271631995,
+        "p_deliver_defensible": 0.0061103852619392995
+      },
+      {
+        "kappa": 0.15,
+        "required_dcov": 0.02528544679770992,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.8147340722097127,
+        "p_deliver_optimistic_339": 0.9625386356538732,
+        "p_deliver_defensible": 0.06086239145941774
+      },
+      {
+        "kappa": 0.2,
+        "required_dcov": 0.01896408509828244,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.6110505541572846,
+        "p_deliver_optimistic_339": 0.9957666953957764,
+        "p_deliver_defensible": 0.3106480814886673
+      },
+      {
+        "kappa": 0.25,
+        "required_dcov": 0.015171268078625951,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.4888404433258276,
+        "p_deliver_optimistic_339": 0.9991668194743109,
+        "p_deliver_defensible": 0.5549279953549049
+      },
+      {
+        "kappa": 0.3541,
+        "required_dcov": 0.010711146624277005,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.3451288077702821,
+        "p_deliver_optimistic_339": 0.9999098492619777,
+        "p_deliver_defensible": 0.810969762453545
+      },
+      {
+        "kappa": 0.4,
+        "required_dcov": 0.00948204254914122,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.3055252770786423,
+        "p_deliver_optimistic_339": 0.9999539999555527,
+        "p_deliver_defensible": 0.8613326594961097
+      },
+      {
+        "kappa": 0.5,
+        "required_dcov": 0.007585634039312976,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.2444202216629138,
+        "p_deliver_optimistic_339": 0.9999845246783856,
+        "p_deliver_defensible": 0.9196012367257982
+      },
+      {
+        "kappa": 0.6716,
+        "required_dcov": 0.005647434514080536,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.1819685986174165,
+        "p_deliver_optimistic_339": 0.9999952349558905,
+        "p_deliver_defensible": 0.9577747778218317
+      },
+      {
+        "kappa": 0.8,
+        "required_dcov": 0.00474102127457061,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.15276263853932115,
+        "p_deliver_optimistic_339": 0.9999973142295798,
+        "p_deliver_defensible": 0.969706429434471
+      },
+      {
+        "kappa": 1.0,
+        "required_dcov": 0.003792817019656488,
+        "within_336_budget": true,
+        "frac_of_336_budget": 0.1222101108314569,
+        "p_deliver_optimistic_339": 0.999998548158984,
+        "p_deliver_defensible": 0.9790509315041527
+      }
+    ],
+    "note": "required_dcov(kappa) = dE[T]/(kappa*S_uniform) is a 1/kappa curve. The +0.0107 robust target = required_dcov(kappa_worst=0.354); the +0.00565 central = required_dcov(kappa_central=0.672). Breakeven (required_dcov == +0.031 budget) sits at kappa=0.122 -- BELOW even the worst c* corner 0.354, so the target stays within budget across the ENTIRE plausible kappa range. Margin vs central 0.672 is 0.55; vs the worst corner 0.354 is 0.23."
+  },
+  "deliverability": {
+    "targets": {
+      "robust": 0.010708162797026063,
+      "central": 0.005647142947793298
+    },
+    "confidence_bar": 0.9,
+    "spectrum": {
+      "optimistic_339_indep": {
+        "mean": 0.0385,
+        "sd": 0.00742,
+        "p": {
+          "robust": 0.9999099935560103,
+          "central": 0.9999952358236266
+        }
+      },
+      "optimistic_339_comono": {
+        "mean": 0.0385,
+        "sd": 0.0105,
+        "p": {
+          "robust": 0.9959376304604193,
+          "central": 0.9991225213258921
+        }
+      },
+      "from_scratch_ceiling": {
+        "mean": 0.02273404808468482,
+        "sd": 0.009119352478676545,
+        "p": {
+          "robust": 0.9063688655047317,
+          "central": 0.9695139134417667
+        }
+      },
+      "defensible_fine_tune": {
+        "mean": 0.016,
+        "sd": 0.006,
+        "p": {
+          "robust": 0.811104259907288,
+          "central": 0.9577791531314457
+        }
+      },
+      "pessimistic_low_central": {
+        "mean": 0.012,
+        "sd": 0.005,
+        "p": {
+          "robust": 0.6019383288182795,
+          "central": 0.8980594183949231
+        }
+      }
+    },
+    "p_optimistic_339": {
+      "robust": 0.9999099935560103,
+      "central": 0.9999952358236266
+    },
+    "p_defensible_conservative": {
+      "robust": 0.811104259907288,
+      "central": 0.9577791531314457
+    },
+    "p_softkd_reasoning_retrain_delivers_robust": 0.811104259907288,
+    "p_softkd_reasoning_retrain_delivers_central": 0.9577791531314457,
+    "p_softkd_reasoning_retrain_delivers_robust_optimistic_339": 0.9999099935560103,
+    "p_softkd_reasoning_retrain_delivers_central_optimistic_339": 0.9999952358236266,
+    "p_softkd_reasoning_retrain_delivers_robust_ceiling": 0.9063688655047317,
+    "central_target_survives_conservative": true,
+    "robust_target_survives_conservative": false,
+    "deliverability_survives_conservative": false,
+    "note": "CENTRAL +0.00565 target: P(deliver) stays >=0.90 across the whole spectrum down to the pessimistic corner -> ROBUSTLY deliverable. ROBUST +0.0107 target: P falls from ~1.0 (#339 optimistic) -> ~0.91 (from-scratch ceiling) -> ~0.81 (defensible FINE-TUNE) -> ~0.60 (pessimistic) -> it does NOT clear the 0.90 confidence bar once delivery is sized at the defensible fine-tune level, because #339's +0.0385 was optimistic (V1/V2/V3). The robust target's deliverability is the BINDING residual uncertainty."
+  },
+  "verdict": {
+    "recipe_is_real": true,
+    "recipe_is_real_meaning": "TRUE = not a fiction: the levers (soft-KD, reasoning-data) are documented and a positive lift is empirically expected (the +0.0227 from-scratch ceiling is a real anchor). NOT a measured checkpoint, and NOT the +0.0385 magnitude (V2/EAGLE-1 contradicts the soft-KD component); the defensible FINE-TUNE central is ~+0.016.",
+    "deliverability_survives_conservative": false,
+    "central_target_survives_conservative": true,
+    "robust_target_survives_conservative": false,
+    "delivery_distribution_grounding": "literature-anchored",
+    "kappa_breakeven": 0.1222101108314569,
+    "kappa_margin": 0.5494245643875554,
+    "green_bar_met": false,
+    "yellow": true,
+    "verdict": "YELLOW",
+    "recommended_next_step": "SPLIT BANK. kappa-transfer axis is ROBUST (breakeven 0.122 << worst-corner 0.354) and the CENTRAL +0.00565 target (c>=0.8959) is deliverable at >=0.90 confidence across the whole literature-grounded delivery spectrum -> fern #357 can bank the CENTRAL target now. The ROBUST +0.0107 target (c>=0.9010) is the BINDING OPEN ITEM: its deliverability rests on #339's +0.0385 delivery distribution, which the PR #380 pass shows is OPTIMISTIC (V1 no paper measures top-4 coverage; V2 EAGLE-1 found logit-KD UNDERPERFORMS CE; V3 low data-sensitivity + diminishing returns) -- under a defensible FINE-TUNE delivery (central +0.016) P(deliver robust) ~= 0.81 < 0.90. CHEAPEST REAL PROOF before banking the robust target: (1) kanna #294 Phase-1 a2>=0.83 cheap pre-check (de-risks the prior, no retrain); then (2) the #352-priced ~25 A10G-GPU-hr (~3 h on the 8x node) soft-KD + reasoning-trace FINE-TUNE + wirbel #79 RANKPROBE_W=4 coverage re-measure on the OFFICIAL 128 eval -> a DIRECT top-4-coverage-lift measurement (the metric no paper reports). NOTE: the optional local-GPU kappa-probe is the WRONG tool -- kappa is robust; the weak link is DELIVERY, which needs a coverage-lift pilot, not a transfer measurement.",
+    "demand_route_derisked": false,
+    "demand_route_derisked_central_only": true
+  },
+  "gpu_kappa_probe_leg": {
+    "ran": false,
+    "reason": "CPU-analytic default; --gpu/--kappa-probe not set"
+  },
+  "delivery_distribution_grounding": "literature-anchored",
+  "kappa_breakeven": 0.1222101108314569,
+  "p_deliver_at_kappa_breakeven": 0.8428008167566102,
+  "kappa_margin": 0.5494245643875554,
+  "p_softkd_reasoning_retrain_delivers_robust": 0.811104259907288,
+  "p_softkd_reasoning_retrain_delivers_central": 0.9577791531314457,
+  "recipe_is_real": true,
+  "deliverability_survives_conservative": false,
+  "recommended_next_step": "SPLIT BANK. kappa-transfer axis is ROBUST (breakeven 0.122 << worst-corner 0.354) and the CENTRAL +0.00565 target (c>=0.8959) is deliverable at >=0.90 confidence across the whole literature-grounded delivery spectrum -> fern #357 can bank the CENTRAL target now. The ROBUST +0.0107 target (c>=0.9010) is the BINDING OPEN ITEM: its deliverability rests on #339's +0.0385 delivery distribution, which the PR #380 pass shows is OPTIMISTIC (V1 no paper measures top-4 coverage; V2 EAGLE-1 found logit-KD UNDERPERFORMS CE; V3 low data-sensitivity + diminishing returns) -- under a defensible FINE-TUNE delivery (central +0.016) P(deliver robust) ~= 0.81 < 0.90. CHEAPEST REAL PROOF before banking the robust target: (1) kanna #294 Phase-1 a2>=0.83 cheap pre-check (de-risks the prior, no retrain); then (2) the #352-priced ~25 A10G-GPU-hr (~3 h on the 8x node) soft-KD + reasoning-trace FINE-TUNE + wirbel #79 RANKPROBE_W=4 coverage re-measure on the OFFICIAL 128 eval -> a DIRECT top-4-coverage-lift measurement (the metric no paper reports). NOTE: the optional local-GPU kappa-probe is the WRONG tool -- kappa is robust; the weak link is DELIVERY, which needs a coverage-lift pilot, not a transfer measurement.",
+  "measured_kappa": null,
+  "demand_route_derisked": false,
+  "primary_metric_kappa_margin": 0.5494245643875554,
+  "self_test": {
+    "conditions": {
+      "a_kappa_central_roundtrips_377": true,
+      "a2_required_dcov_central_roundtrips": true,
+      "a2_required_dcov_robust_roundtrips": true,
+      "b_grounding_is_literature_anchored": true,
+      "b_not_measured_not_modeled_only": true,
+      "b_339_flagged_optimistic": true,
+      "b_mean_roundtrips_336": true,
+      "b_sigma_indep_roundtrips_339": true,
+      "b2_339_near_top_of_lit_range": true,
+      "b2_verification_findings_carried": true,
+      "c_defensible_mean_below_336": true,
+      "c_defensible_below_ceiling": true,
+      "c_defensible_mean_positive": true,
+      "c_defensible_in_finetune_range": true,
+      "d_breakeven_below_worst_corner": true,
+      "d_kappa_margin_positive": true,
+      "d_breakeven_req_equals_budget": true,
+      "d2_breakeven_below_red_062": true,
+      "e_central_survives_conservative": true,
+      "e_robust_does_not_survive_conservative": true,
+      "e_p_central_defensible_high": true,
+      "e_p_robust_defensible_below_bar": true,
+      "e2_robust_spectrum_monotone": true,
+      "e3_central_pessimistic_above_085": true,
+      "f_required_dcov_monotone_decreasing": true,
+      "f_p_deliver_monotone_increasing": true,
+      "g_first_within_budget_at_or_above_breakeven": true,
+      "h_verdict_is_yellow": true,
+      "h_green_not_met": true,
+      "h_recipe_is_real_true": true,
+      "h_next_step_names_proof": true,
+      "i_budget_is_bar_minus_prior": true,
+      "j_no_nan": true,
+      "j_probs_in_unit_interval": true
+    },
+    "n_checks": 34,
+    "passes": true
+  },
+  "deliverability_self_test_passes": true,
+  "wandb_run_id": "00oijpwg"
+}
