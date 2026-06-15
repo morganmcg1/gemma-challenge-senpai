@@ -177,6 +177,23 @@ TREE_VERIFY_REAL_KV = os.environ.get("TREE_VERIFY_REAL_KV") == "1"
 # delta under FAITHFUL plumbing (the cycle-2 -0.06 was measured under the buggy
 # redirect+copy). SAFE/observational: snapshot/restore of every touched real slot.
 TREE_VERIFY_REAL_KV_TREE = os.environ.get("TREE_VERIFY_REAL_KV_TREE") == "1"
+# PLAIN-AR (M=1 unbatched) per-commit identity reference (PR #245 cycle-5, the
+# now-binding STRICT greedy-token-identity gate, human #319). Gated by
+# TREE_VERIFY_PLAIN_AR=1 (requires TREE_VERIFY_PROBE=m16). Runs the spine chain as a
+# SEQUENCE of single-row (M=1) forwards through the REAL block-table with PROGRESSIVE
+# KV writes, so each per-node argmax is the canonical single-row (NO batch-variance)
+# greedy next-token == the plain greedy AR token the launch gate compares byte-exact
+# against. Two reconstruction-cancelled comparisons land in the verdict (both vs the
+# SAME probe-reference par, so the ~0.83 probe-reconstruction ceiling that caps
+# probe-vs-served cancels): (a) the M=8-linear real-KV argmax (TREE_VERIFY_REAL_KV)
+# vs par == the M1-vs-M8 int4-Marlin batch break == the DEPLOYED identity break (a
+# self-validating anchor that should reproduce denken #232's ~0.73%); (b) the M=16
+# faithful-tree argmax (TREE_VERIFY_REAL_KV_TREE) vs par == the strict-gate identity
+# of a tree-decode commit. The (b)-(a) delta is how much WORSE tree-decode (M=16) is
+# for identity than the deployed verify (M=8). SAFE/observational: every write is at
+# an offset >= root_position (uncommitted) and snapshotted/restored => committed KV /
+# PPL / greedy-identity byte-preserved. Deployed path byte-identical when unset.
+TREE_VERIFY_PLAIN_AR = os.environ.get("TREE_VERIFY_PLAIN_AR") == "1"
 TREE_VERIFY_PROBE_VERDICT = os.environ.get(
     "TREE_VERIFY_PROBE_VERDICT",
     "research/tree_verify_path/comp_verify_probe_stage2b.json",
@@ -850,6 +867,28 @@ _VERIFY_SCRATCH: dict[str, Any] = {
     "anchor_realkv_tree_dbg_logged": 0,
     "anchor_realkv_tree_forward_err": 0,
     "anchor_realkv_tree_qq_applied": 0,
+    # PLAIN-AR (M=1 unbatched) strict-identity gate (gated by TREE_VERIFY_PLAIN_AR).
+    # par == canonical plain greedy AR over the spine. Two reconstruction-cancelled
+    # comparisons vs par: the M=8-linear real-KV argmax (deployed-equivalent identity
+    # break; should reproduce denken #232's ~0.73%) and the M=16 faithful-tree argmax
+    # (the strict-gate identity of a tree-decode commit). A third, contaminated by the
+    # probe-vs-served reconstruction ceiling, is par vs deployed tgt (reported caveated).
+    "plain_ar_forward_err": 0,
+    "par_vs_linear8_rows": 0,
+    "par_vs_linear8_match": 0,
+    "par_vs_linear8_pos_rows": {},
+    "par_vs_linear8_pos_match": {},
+    "par_vs_linear8_gap_mismatch_n": 0,
+    "par_vs_linear8_gap_mismatch_hist": {},
+    "par_vs_tree_rows": 0,
+    "par_vs_tree_match": 0,
+    "par_vs_tree_pos_rows": {},
+    "par_vs_tree_pos_match": {},
+    "par_vs_tree_gap_mismatch_n": 0,
+    "par_vs_tree_gap_mismatch_hist": {},
+    "par_vs_deployed_rows": 0,
+    "par_vs_deployed_match": 0,
+    "plain_ar_dbg_logged": 0,
 }
 
 
@@ -1300,6 +1339,143 @@ def _run_tree_verify_real_kv_tree(
     return node_argmax, node_gap, node_top2
 
 
+def _run_spine_plain_ar_m1(
+    runner: Any, spine_tokens: list, root_position: int
+) -> tuple | None:
+    """PLAIN-AR (M=1, UNBATCHED) reference over the spine (PR #245 cycle-5 STRICT
+    greedy-identity gate, human #319).
+
+    Runs the spine chain as a SEQUENCE of single-row (M=1) forwards through the REAL
+    request block-table + REAL KV slots, writing each node's KV PROGRESSIVELY so node
+    d's forward reads the committed prefix + spine[0..d-1] just written. Each per-node
+    argmax is therefore the canonical single-row (NO batch-variance) greedy next-token
+    -- i.e. exactly the plain greedy AR token the strict launch gate now compares
+    byte-exact against. Contiguous KV layout (offset root_position+d) + standard causal
+    mask, IDENTICAL to the M=8-linear real-KV control's layout, so comparing par to:
+      * the M=8-linear real-KV argmax (scratch_realkv_argmax) isolates the M1-vs-M8
+        int4-Marlin batch-variance == the DEPLOYED identity break (a clean,
+        reconstruction-cancelled anchor that should reproduce denken #232's ~0.73%);
+      * the M=16 faithful-tree argmax (scratch_realkv_tree_argmax) gives the strict-
+        gate identity of a tree-decode commit (the now-binding number).
+    Both share par, so the ~0.83 probe-vs-served reconstruction ceiling cancels and the
+    (tree - linear) delta is the extra identity cost of widening the verify to M=16.
+
+    SAFE / observational: every M=1 write lands at an offset >= root_position
+    (uncommitted next-free territory, never read as committed KV); all touched real
+    slots are snapshotted before the loop and restored after the final forward, so
+    committed KV / PPL / greedy-identity are byte-preserved. The progressive writes are
+    intra-probe only (undone by the restore). Returns (par_argmax, par_gap, par_top2)
+    or None (fail-closed: the restore always runs)."""
+    import torch
+    from vllm.forward_context import set_forward_context
+    from vllm.v1.attention.backend import CommonAttentionMetadata
+
+    m = len(spine_tokens)
+    if m <= 0:
+        return None
+    device = runner.device
+    groups = runner.kv_cache_config.kv_cache_groups
+    sfc = runner.vllm_config.compilation_config.static_forward_context
+
+    # Resolve the m REAL paged slots [root_position..+m) per group and snapshot them
+    # BEFORE any write so the progressive single-row writes are fully undone after the
+    # final forward. m == spine length <= the deployed M=8 verify span => every offset
+    # is inside the request's real block allocation (no scratch redirect needed, exactly
+    # like _run_tree_verify_real_kv).
+    restore_list: list = []
+    slot_by_gid: dict = {}
+    for gid, grp in enumerate(groups):
+        bs = int(grp.kv_cache_spec.block_size)
+        layer_names = list(grp.layer_names)
+        real_bt = runner.input_batch.block_table[gid].get_device_tensor(1)[0]
+        slots = []
+        for i in range(m):
+            off = root_position + i
+            phys = int(real_bt[off // bs].item())
+            slots.append(phys * bs + (off % bs))
+        slot_t = torch.tensor(slots, dtype=torch.int64, device=device)
+        slot_by_gid[gid] = (bs, layer_names, real_bt, slot_t)
+        blocks_g = slot_t // bs
+        offs_g = slot_t % bs
+        for ln in layer_names:
+            kvc = sfc[ln].kv_cache
+            restore_list.append(
+                (kvc, blocks_g, offs_g, kvc[blocks_g, :, offs_g].clone())
+            )
+
+    par_argmax: list = []
+    par_gap: list = []
+    par_top2: list = []
+    try:
+        for d in range(m):
+            seq_len = root_position + d + 1  # prefix [0..root+d) + this single row
+            positions = torch.tensor(
+                [root_position + d], dtype=torch.long, device=device
+            )
+            qsl = torch.tensor([0, 1], dtype=torch.int32, device=device)
+            qsl_cpu = torch.tensor([0, 1], dtype=torch.int32)
+            seq_lens_cpu = torch.tensor([seq_len], dtype=torch.int32)
+            nct_cpu = torch.tensor([root_position + d], dtype=torch.int32)
+            is_prefilling = torch.zeros(1, dtype=torch.bool)  # decode-extend
+            attn_md: dict = {}
+            slot_map_by_layer: dict = {}
+            for gid, grp in enumerate(groups):
+                bs, layer_names, real_bt, slot_t = slot_by_gid[gid]
+                slot_d = slot_t[d : d + 1]
+                bt2d = real_bt.view(1, -1).contiguous()
+                seq_lens = torch.tensor([seq_len], dtype=torch.int32, device=device)
+                cm = CommonAttentionMetadata(
+                    query_start_loc=qsl,
+                    query_start_loc_cpu=qsl_cpu,
+                    seq_lens=seq_lens,
+                    num_reqs=1,
+                    num_actual_tokens=1,
+                    max_query_len=1,
+                    max_seq_len=seq_len,
+                    block_table_tensor=bt2d,
+                    slot_mapping=slot_d,
+                    causal=True,
+                    _seq_lens_cpu=seq_lens_cpu,
+                    _num_computed_tokens_cpu=nct_cpu,
+                    seq_lens_cpu_upper_bound=seq_lens_cpu,
+                    is_prefilling=is_prefilling,
+                    positions=positions,
+                )
+                for attn_group in runner.attn_groups[gid]:
+                    builder = attn_group.get_metadata_builder()
+                    md = builder.build(common_prefix_len=0, common_attn_metadata=cm)
+                    for ln in attn_group.layer_names:
+                        attn_md[ln] = md
+                for ln in layer_names:
+                    slot_map_by_layer[ln] = slot_d
+            input_ids_t = torch.tensor(
+                [int(spine_tokens[d])], dtype=torch.long, device=device
+            )
+            inputs_embeds = runner.model.embed_input_ids(input_ids_t)
+            with set_forward_context(
+                attn_md,
+                runner.vllm_config,
+                num_tokens=1,
+                slot_mapping=slot_map_by_layer,
+            ):
+                out = runner.model(
+                    input_ids=None,
+                    positions=positions,
+                    intermediate_tensors=None,
+                    inputs_embeds=inputs_embeds,
+                )
+            hidden = out[0] if isinstance(out, tuple) else out
+            logits = runner.model.compute_logits(hidden[:1])
+            top2 = torch.topk(logits, 2, dim=-1)
+            par_argmax.append(int(top2.indices[0, 0].item()))
+            par_top2.append(int(top2.indices[0, 1].item()))
+            par_gap.append(float((top2.values[0, 0] - top2.values[0, 1]).item()))
+    finally:
+        for kvc, blocks_g, offs_g, saved in restore_list:
+            kvc[blocks_g, :, offs_g] = saved
+    return par_argmax, par_gap, par_top2
+
+
 def _verify_scratch_dump() -> None:
     """Write the STAGE-2b verdict (spine ladder + E[T] + cross-step anchor)."""
     vs = _VERIFY_SCRATCH
@@ -1469,6 +1645,113 @@ def _verify_scratch_dump() -> None:
                 },
             }
             if vs["anchor_realkv_tree_rows"]
+            else None
+        ),
+        # PLAIN-AR strict-identity gate (human #319): par = M=1 unbatched greedy AR.
+        # par_vs_linear8 == deployed-equivalent M1->M8 batch-variance identity break
+        # (self-validates against denken #232's ~0.73%); par_vs_tree == THE strict-gate
+        # number: does a TREE-accepted commit hold byte-exact greedy identity vs plain AR.
+        # identity_break_rate = 1 - row_match_rate; confident_break_rate isolates the
+        # gap>=1.0 (true divergence) fraction from near-tie int4 rank-1/2 flips.
+        # par_vs_deployed is caveated (probe-vs-served reconstruction ceiling ~0.834).
+        "plain_ar": (
+            {
+                "forward_err": vs["plain_ar_forward_err"],
+                "par_vs_linear8": (
+                    {
+                        "rows_compared": vs["par_vs_linear8_rows"],
+                        "rows_match": vs["par_vs_linear8_match"],
+                        "row_match_rate": round(
+                            vs["par_vs_linear8_match"]
+                            / max(vs["par_vs_linear8_rows"], 1),
+                            5,
+                        ),
+                        "identity_break_rate": round(
+                            1.0
+                            - vs["par_vs_linear8_match"]
+                            / max(vs["par_vs_linear8_rows"], 1),
+                            5,
+                        ),
+                        "gap_mismatch_n": vs["par_vs_linear8_gap_mismatch_n"],
+                        "gap_mismatch_hist": vs["par_vs_linear8_gap_mismatch_hist"],
+                        "confident_break_rate": round(
+                            vs["par_vs_linear8_gap_mismatch_hist"].get("ge1.0", 0)
+                            / max(vs["par_vs_linear8_gap_mismatch_n"], 1),
+                            4,
+                        ),
+                        "per_pos": {
+                            str(d): {
+                                "rows": vs["par_vs_linear8_pos_rows"][d],
+                                "match": vs["par_vs_linear8_pos_match"].get(d, 0),
+                                "rate": round(
+                                    vs["par_vs_linear8_pos_match"].get(d, 0)
+                                    / vs["par_vs_linear8_pos_rows"][d],
+                                    4,
+                                ),
+                            }
+                            for d in sorted(vs["par_vs_linear8_pos_rows"])
+                        },
+                    }
+                    if vs["par_vs_linear8_rows"]
+                    else None
+                ),
+                "par_vs_tree": (
+                    {
+                        "rows_compared": vs["par_vs_tree_rows"],
+                        "rows_match": vs["par_vs_tree_match"],
+                        "row_match_rate": round(
+                            vs["par_vs_tree_match"]
+                            / max(vs["par_vs_tree_rows"], 1),
+                            5,
+                        ),
+                        "identity_break_rate": round(
+                            1.0
+                            - vs["par_vs_tree_match"]
+                            / max(vs["par_vs_tree_rows"], 1),
+                            5,
+                        ),
+                        "gap_mismatch_n": vs["par_vs_tree_gap_mismatch_n"],
+                        "gap_mismatch_hist": vs["par_vs_tree_gap_mismatch_hist"],
+                        "confident_break_rate": round(
+                            vs["par_vs_tree_gap_mismatch_hist"].get("ge1.0", 0)
+                            / max(vs["par_vs_tree_gap_mismatch_n"], 1),
+                            4,
+                        ),
+                        "per_pos": {
+                            str(d): {
+                                "rows": vs["par_vs_tree_pos_rows"][d],
+                                "match": vs["par_vs_tree_pos_match"].get(d, 0),
+                                "rate": round(
+                                    vs["par_vs_tree_pos_match"].get(d, 0)
+                                    / vs["par_vs_tree_pos_rows"][d],
+                                    4,
+                                ),
+                            }
+                            for d in sorted(vs["par_vs_tree_pos_rows"])
+                        },
+                    }
+                    if vs["par_vs_tree_rows"]
+                    else None
+                ),
+                "par_vs_deployed_caveated": (
+                    {
+                        "rows_compared": vs["par_vs_deployed_rows"],
+                        "rows_match": vs["par_vs_deployed_match"],
+                        "row_match_rate": round(
+                            vs["par_vs_deployed_match"]
+                            / max(vs["par_vs_deployed_rows"], 1),
+                            5,
+                        ),
+                        "note": (
+                            "contaminated by ~0.834 probe-vs-served reconstruction "
+                            "ceiling; NOT a served identity number"
+                        ),
+                    }
+                    if vs["par_vs_deployed_rows"]
+                    else None
+                ),
+            }
+            if (vs["par_vs_linear8_rows"] or vs["par_vs_tree_rows"])
             else None
         ),
         "dump_path": vs["dump_path"],
@@ -1711,6 +1994,29 @@ def _run_tree_verify_measure(
             if vs["anchor_realkv_tree_forward_err"] <= 5:
                 print(
                     f"[realkv-tree] faithful-tree forward error (non-fatal): {exc!r}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+    # PLAIN-AR (M=1 unbatched) reference over the spine: the now-binding STRICT
+    # greedy-identity gate (human #319). Progressive single-row forwards (no batch-
+    # variance) == canonical plain greedy AR. Stash par for the cross-step comparison
+    # in _salvage_probe_observe (next step, where the deployed tgt + the M=8-linear and
+    # M=16-tree batched probe argmaxes are all available). Capped at the deployed M=8
+    # span so every offset stays inside the request's real KV allocation.
+    if TREE_VERIFY_PLAIN_AR and sstash is not None:
+        try:
+            ml = min(8, len(tree.spine))
+            spine_ar = [int(draft_token[tree.spine[d]]) for d in range(ml)]
+            par_out = _run_spine_plain_ar_m1(runner, spine_ar, root_position)
+            if par_out is not None:
+                sstash["scratch_plain_ar_argmax"] = [int(x) for x in par_out[0]]
+                sstash["scratch_plain_ar_gap"] = [float(x) for x in par_out[1]]
+        except Exception as exc:
+            vs["plain_ar_forward_err"] += 1
+            if vs["plain_ar_forward_err"] <= 5:
+                print(
+                    f"[plain-ar] M=1 spine forward error (non-fatal): {exc!r}",
                     file=sys.stderr,
                     flush=True,
                 )
@@ -2872,6 +3178,102 @@ def _salvage_probe_observe(draft_token_ids: Any, target_argmax: Any) -> None:
                     file=sys.stderr,
                     flush=True,
                 )
+
+    # PLAIN-AR strict-identity gate (TREE_VERIFY_PLAIN_AR): par = the canonical M=1
+    # unbatched greedy AR over the spine (progressive single-row forwards, real KV,
+    # contiguous layout). It is the now-binding launch reference (human #319). par[d]
+    # predicts position d from prefix spine[0..d-1] -- index-aligned with rka/rkt/tgt.
+    # Three comparisons, two reconstruction-cancelled + one caveated:
+    #   par vs rka  (M=8 linear real-KV): pure M1->M8 batch variance == the deployed
+    #               int4-Marlin split-K identity break; SELF-VALIDATES par by reproducing
+    #               denken #232's ~0.73%. Both are probe forwards -> reconstruction cancels.
+    #   par vs rkt  (M=16 faithful tree): does a TREE-accepted commit hold byte-exact
+    #               greedy identity vs plain AR? THE strict-gate number. Gap buckets by
+    #               par's own margin: ge1.0 == confident identity break (tree truly
+    #               diverged); lt0.2 == near-tie int4 flip.
+    #   par vs tgt  (deployed served argmax): contaminated by the ~0.834 probe-vs-served
+    #               reconstruction ceiling -> match count only, reported caveated.
+    par = stash.get("scratch_plain_ar_argmax")
+    if par is not None:
+        pargap = stash.get("scratch_plain_ar_gap")
+        vsc = _VERIFY_SCRATCH
+        mmp = False
+        if rka is not None:
+            npl = min(len(par), len(rka), K)
+            for d in range(npl):
+                vsc["par_vs_linear8_rows"] += 1
+                vsc["par_vs_linear8_pos_rows"][d] = (
+                    vsc["par_vs_linear8_pos_rows"].get(d, 0) + 1
+                )
+                if par[d] == rka[d]:
+                    vsc["par_vs_linear8_match"] += 1
+                    vsc["par_vs_linear8_pos_match"][d] = (
+                        vsc["par_vs_linear8_pos_match"].get(d, 0) + 1
+                    )
+                else:
+                    g = (
+                        float(pargap[d])
+                        if pargap is not None and d < len(pargap)
+                        else None
+                    )
+                    if g is not None:
+                        vsc["par_vs_linear8_gap_mismatch_n"] += 1
+                        bkt = (
+                            "lt0.05" if g < 0.05
+                            else "lt0.2" if g < 0.2
+                            else "lt1.0" if g < 1.0
+                            else "ge1.0"
+                        )
+                        h = vsc["par_vs_linear8_gap_mismatch_hist"]
+                        h[bkt] = h.get(bkt, 0) + 1
+        if rkt is not None:
+            npt = min(len(par), len(rkt), K)
+            for d in range(npt):
+                vsc["par_vs_tree_rows"] += 1
+                vsc["par_vs_tree_pos_rows"][d] = (
+                    vsc["par_vs_tree_pos_rows"].get(d, 0) + 1
+                )
+                if par[d] == rkt[d]:
+                    vsc["par_vs_tree_match"] += 1
+                    vsc["par_vs_tree_pos_match"][d] = (
+                        vsc["par_vs_tree_pos_match"].get(d, 0) + 1
+                    )
+                else:
+                    mmp = True
+                    g = (
+                        float(pargap[d])
+                        if pargap is not None and d < len(pargap)
+                        else None
+                    )
+                    if g is not None:
+                        vsc["par_vs_tree_gap_mismatch_n"] += 1
+                        bkt = (
+                            "lt0.05" if g < 0.05
+                            else "lt0.2" if g < 0.2
+                            else "lt1.0" if g < 1.0
+                            else "ge1.0"
+                        )
+                        h = vsc["par_vs_tree_gap_mismatch_hist"]
+                        h[bkt] = h.get(bkt, 0) + 1
+        npd = min(len(par), K)
+        for d in range(npd):
+            vsc["par_vs_deployed_rows"] += 1
+            if par[d] == tgt[d]:
+                vsc["par_vs_deployed_match"] += 1
+        if mmp and vsc["plain_ar_dbg_logged"] < 12:
+            vsc["plain_ar_dbg_logged"] += 1
+            rp = stash.get("scratch_root_position")
+            gaps_str = [round(float(x), 4) for x in pargap[:K]] if pargap else []
+            print(
+                f"[plain-ar-dbg] root_pos={rp} K={K}\n"
+                f"  plain_ar_argmax (M=1)={par[:K]}\n"
+                f"  plain_ar_gap         ={gaps_str}\n"
+                f"  tree_spine_argmax    ={rkt[:K] if rkt else None}\n"
+                f"  linear8_argmax       ={rka[:K] if rka else None}\n"
+                f"  deployed_tgt         ={tgt[:K]}",
+                file=sys.stderr,
+                flush=True,
+            )
 
     first_div = None
     for pos in range(K):
