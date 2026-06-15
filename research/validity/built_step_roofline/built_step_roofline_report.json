@@ -1,0 +1,176 @@
+{
+  "pr": 257,
+  "agent": "denken",
+  "leg": "built-step roofline grounding (local forward-pass projection)",
+  "imported_anchors": {
+    "step_served_ms": 1.2182,
+    "step_built_analytic_ms": 1.084952540947906,
+    "K_cal": 125.26795005202914,
+    "g_d_assumed": 0.168,
+    "E_T_served": 4.6827608,
+    "E_T_built": 4.512,
+    "K_spec": 7,
+    "M_verify_served": 8,
+    "M_tree": 32,
+    "official_baseline": 481.53,
+    "go_read": 520.9527323111674,
+    "tau_band": [
+      0.9924,
+      1.0
+    ],
+    "tau_tree_central": 1.0,
+    "tree_draft_passes_empirical_lawine153": 5
+  },
+  "built_step_roofline_grounding_self_test_passes": true,
+  "step_built_measured_proj_ms": 1.3458358727216921,
+  "step_built_measured_proj_verdict": "DIVERGE",
+  "g_d_measured": 0.019498025961743392,
+  "g_d_measured_vs_assumed_delta": -0.14850197403825663,
+  "g_d_eager_crosscheck": 0.0695620802225808,
+  "timing_basis": "graphed",
+  "physical_floor": {
+    "body_params_billion": 3.3947648,
+    "body_int4_gb": 1.6973824,
+    "lmhead_bf16_gb": 0.06291456,
+    "a10g_bw_gbps": 600.0,
+    "verify_hbm_floor_ms": 2.933828266666667,
+    "verify8_wall_ms": 5.163714507818222,
+    "verify8_over_floor": 1.760060248408844,
+    "step_served_normalized_ms": 1.2182,
+    "served_wall_clock_est_ms": 9.724754013249434,
+    "kcal_overhead_factor": 7.9828878782215025,
+    "note": "verify reads 1.70GB int4 -> >= 2.93ms HBM floor on the A10G; the banked 1.2182ms step is therefore a NORMALIZED composition unit (wall-clock served step ~= 9.72ms via K_cal). The bridge c reconciles the two bases; the verdict rides on the basis-robust ratio."
+  },
+  "gd_sensitivity_assumed_0p168": {
+    "central_b5": {
+      "n_tree_passes": 5,
+      "step_built_proj_ms": 1.1185888768817671,
+      "delta_vs_analytic_1p085_ms": 0.03363633593386117,
+      "verdict": "DIVERGE",
+      "implied_tps_at_ET4512": 505.2875120753566
+    },
+    "conservative_k7": {
+      "n_tree_passes": 7,
+      "step_built_proj_ms": 1.3066932886464728,
+      "delta_vs_analytic_1p085_ms": 0.2217407476985669,
+      "verdict": "DIVERGE",
+      "implied_tps_at_ET4512": 432.54908825637455
+    },
+    "pessimistic_depth9": {
+      "n_tree_passes": 9,
+      "step_built_proj_ms": 1.4947977004111788,
+      "delta_vs_analytic_1p085_ms": 0.4098451594632728,
+      "verdict": "DIVERGE",
+      "implied_tps_at_ET4512": 378.1173803513891
+    }
+  },
+  "gd_sensitivity_note": "measured full-forward g_d=0.0195 is ~9x BELOW the assumed 0.168. Under MEASURED g_d the built step prices at 1.346ms (DIVERGE); under the ASSUMED g_d (fleet anchor, which the 1.085 bakes in) at 1.119ms (DIVERGE). The 10x g_d gap is the entire verdict fork and is FLAGGED for advisor reconciliation (the fleet verify_us is likely not a full-forward wall-clock quantity).",
+  "verify_us_ms": {
+    "1": 5.11965170264244,
+    "2": 5.118817284107208,
+    "4": 5.141319851875306,
+    "8": 5.163714507818222,
+    "16": 5.404861371517183,
+    "32": 5.979945073127746
+  },
+  "verify_bodyonly_ms": {
+    "1": 4.4313803482055665,
+    "2": 4.4334643363952635,
+    "4": 4.451650714874267,
+    "8": 4.474193849563599,
+    "16": 4.6840933799743665,
+    "32": 5.026790523529053
+  },
+  "verify_v8_us": 5163.714507818222,
+  "verify_v32_us": 5979.945073127747,
+  "verify_v32_over_v8": 1.1580704285788253,
+  "knee": {
+    "body_gemm_rel_m1": {
+      "1": 1.0,
+      "2": 1.0004702796929947,
+      "4": 1.0045742782329459,
+      "8": 1.0096614368422177,
+      "16": 1.057028061667316,
+      "32": 1.1343622367158328
+    },
+    "gemm_M32_over_M8": 1.1235075395804215,
+    "flat_tol_pct": 5.0,
+    "knee_first_M_above_flat": 16,
+    "m8_still_weightbound": true,
+    "m32_still_weightbound": false,
+    "regime_m32": "compute-bound (M=32 materially > M=8)"
+  },
+  "draft_pass_us_eager": 359.19872283935547,
+  "draft_pass_us_graphed": 100.6822395324707,
+  "k7_chain_us_eager": 2514.3910598754883,
+  "s_served_abs_us": 5868.490184545517,
+  "bridge_c_wall_to_normalized": 0.0002075832048263608,
+  "bridge_dimensionless_normalized_over_wall": 0.2075832048263608,
+  "served_step_proj_ms": 1.2182,
+  "roundtrip_resid_ms": 0.0,
+  "built_projection_models": {
+    "central_b5": {
+      "n_tree_passes": 5,
+      "tree_draft_cost_us": 503.4111976623535,
+      "s_built_abs_us": 6483.3562707901,
+      "built_over_served_ratio": 1.1047741526200068,
+      "step_built_measured_proj_ms": 1.3458358727216921,
+      "delta_vs_analytic_1p085_ms": 0.2608833317737862,
+      "verdict": "DIVERGE",
+      "implied_tps_at_ET4512": 419.96873622615647,
+      "implied_tps_clears_500": false
+    },
+    "conservative_k7": {
+      "n_tree_passes": 7,
+      "tree_draft_cost_us": 704.7756767272949,
+      "s_built_abs_us": 6684.7207498550415,
+      "built_over_served_ratio": 1.13908697802018,
+      "step_built_measured_proj_ms": 1.3876357566241833,
+      "delta_vs_analytic_1p085_ms": 0.3026832156762773,
+      "verdict": "DIVERGE",
+      "implied_tps_at_ET4512": 407.31797803321695,
+      "implied_tps_clears_500": false
+    },
+    "pessimistic_depth9": {
+      "n_tree_passes": 9,
+      "tree_draft_cost_us": 906.1401557922363,
+      "s_built_abs_us": 6886.085228919983,
+      "built_over_served_ratio": 1.1733998034203534,
+      "step_built_measured_proj_ms": 1.4294356405266744,
+      "delta_vs_analytic_1p085_ms": 0.34448309957876844,
+      "verdict": "DIVERGE",
+      "implied_tps_at_ET4512": 395.407092568718,
+      "implied_tps_clears_500": false
+    }
+  },
+  "tau_note": {
+    "served_tau_band": [
+      0.9924,
+      1.0
+    ],
+    "tau_tree_central_kanna126": 1.0,
+    "shared_band": [
+      0.9924,
+      1.0
+    ],
+    "note": "served (linear M=8) and built (tree M=32) plausibly share tau in [0.9924,1.0] (kanna #126 tau_tree central=1.0): the e_t_served band 4.6828(tau=1)..4.7186(tau=0.9924) #252 stands; no widening from the M jump."
+  },
+  "self_test": {
+    "a_served_roundtrip_reproduces_1p2182": true,
+    "b_built_proj_reported_with_verdict": true,
+    "c_verify_curve_and_knee_reported": true,
+    "d_nan_clean": true,
+    "e_peak_vram_le_24gb": true
+  },
+  "nan_clean": true,
+  "peak_gpu_gb": 13.14623744,
+  "model_dir": "/senpai-run/home/student-denken/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "body_identical_note": "canonical Hub int4 ckpt (per-layer body-identical to deployed osoi5; osoi5 load fell back -- lm_head/embed differ, modeled separately). COMPOSED with deployed depth, not Hub depth.",
+  "ctx": 528,
+  "num_layers": 37,
+  "loaded_num_layers": 42,
+  "deployed_num_layers": 37,
+  "deployed_arch_note": "composed with deployed depth=37 (osoi5); osoi5 has num_kv_shared_layers=16 + sliding/full attention mix, so the full-ctx attention term is an UPPER bound -> verify slightly OVER-estimated -> g_d slightly UNDER-estimated -> DIVERGE is conservative.",
+  "verify_phase_json": "research/validity/built_step_roofline/verify_phase.json",
+  "draft_phase_json": "research/validity/built_step_roofline/draft_phase.json"
+}
