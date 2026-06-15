@@ -1,0 +1,243 @@
+{
+  "config": {
+    "drafter_dir": "/tmp/qat-assistant",
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "iters": 300,
+    "warmup": 60,
+    "k": 7,
+    "A10G_HBM_GBS": 600.0,
+    "restrict_K": [
+      32768,
+      65536,
+      131072
+    ],
+    "anchor_tol_pct": 0.25,
+    "byte_us_tol_pct": 0.2,
+    "note": "isolated CUDA-graph M=1 micro-profiling of the real bf16 drafter chain + the REAL Gemma4AssistantMaskedEmbedder head; dense-256k head measured as the counterfactual. No serve change, no HF Job, no submission. Greedy+PPL pinned (nothing edited)."
+  },
+  "specs": [
+    {
+      "bucket": "io_projection",
+      "role": "pre_projection",
+      "in": 5120,
+      "out": 256
+    },
+    {
+      "bucket": "attention",
+      "role": "layer0.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "bucket": "attention",
+      "role": "layer0.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer0.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer0.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "bucket": "attention",
+      "role": "layer1.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "bucket": "attention",
+      "role": "layer1.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer1.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer1.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "bucket": "attention",
+      "role": "layer2.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "bucket": "attention",
+      "role": "layer2.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer2.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer2.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "bucket": "attention",
+      "role": "layer3.q_proj",
+      "in": 256,
+      "out": 2048
+    },
+    {
+      "bucket": "attention",
+      "role": "layer3.o_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer3.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "bucket": "mlp",
+      "role": "layer3.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "bucket": "io_projection",
+      "role": "post_projection",
+      "in": 256,
+      "out": 2560
+    }
+  ],
+  "restrict_rows": [
+    {
+      "K": 32768,
+      "dense_head_us_K": 34.61802800496419,
+      "delta_per_pass_us": -11.659946441650398,
+      "step_us_new": 1136.5803749084473,
+      "et_new": 3.3,
+      "step_only_tps": 516.1094269705749,
+      "step_only_gain_pct_ub": 7.181157346494493,
+      "rows_vs_deployed8192": 4.0,
+      "dense_topk_vs_deployed_proposal_x": 0.7480454453532512
+    },
+    {
+      "K": 65536,
+      "dense_head_us_K": 69.23605600992838,
+      "delta_per_pass_us": 22.95808156331379,
+      "step_us_new": 1378.9065709431966,
+      "et_new": 3.3,
+      "step_only_tps": 425.4094210304294,
+      "step_only_gain_pct_ub": -11.654638126299622,
+      "rows_vs_deployed8192": 8.0,
+      "dense_topk_vs_deployed_proposal_x": 1.4960908907065025
+    },
+    {
+      "K": 131072,
+      "dense_head_us_K": 138.47211201985675,
+      "delta_per_pass_us": 92.19413757324216,
+      "step_us_new": 1863.5589630126951,
+      "et_new": 3.3,
+      "step_only_tps": 314.77396618118377,
+      "step_only_gain_pct_ub": -34.63045580105418,
+      "rows_vs_deployed8192": 16.0,
+      "dense_topk_vs_deployed_proposal_x": 2.992181781413005
+    }
+  ],
+  "verdict": {
+    "draft_head_vocab_roofline_self_test_passes": true,
+    "projected_tps_gain_pct": 0.0,
+    "restricted_vocab_lever_live": false,
+    "restricted_draft_head_greedy_safe": true,
+    "head_share_pct": 5.008533379805933,
+    "head_projection_share_pct": 5.008533379805933,
+    "full_head_op_share_pct": 37.29335724683716,
+    "head_material_ge10pct": false,
+    "draft_vocab_size": 262144,
+    "draft_hidden": 256,
+    "draft_head_tied": true,
+    "use_ordered_embeddings": true,
+    "num_centroids": 2048,
+    "centroid_intermediate_top_k": 64,
+    "vocab_size_per_centroid": 128,
+    "active_vocab_per_pass": 8192,
+    "head_is_dense_256k_gemv": false,
+    "us_io_projection": 13.861546516418457,
+    "us_attention": 28.518400192260742,
+    "us_mlp": 50.71189244588216,
+    "us_head_projection_gemv": 4.9083733558654785,
+    "us_head_proj_propose": 46.277974446614586,
+    "us_head_output_mat": 6.775466601053873,
+    "us_head_real": 55.36426544189453,
+    "us_dense_head_256k_measured": 276.9442240397135,
+    "gemv_chain_total_us": 98.00021251042683,
+    "pass_with_full_head_total_us": 148.45610459645587,
+    "bf16_anchor_us_254": 101.2,
+    "anchor_resid_pct": 3.161845345428032,
+    "dense_head_bytes_mib": 128.0,
+    "dense_head_us_analytic": 223.69621333333333,
+    "centroid_head_bytes_mib": 5.5,
+    "centroid_head_us_analytic": 9.611946666666668,
+    "dense_head_x_vs_pass": 2.2104368906455862,
+    "deployed_proposal_us": 46.277974446614586,
+    "head_side_ceiling_gain_pct": 36.225251028103436,
+    "best_K": 32768,
+    "best_K_step_only_gain_pct_ub": 7.181157346494493,
+    "dense_topk_step_only_ub_band_pct": [
+      -34.63045580105418,
+      7.181157346494493
+    ],
+    "dense_topk_swap_is_served_change_et_unpriced": true,
+    "greedy_identical_by_construction": true,
+    "ppl_pinned": 2.3772,
+    "ppl_ok": true,
+    "nan_clean": true,
+    "peak_vram_gib": 0.34866905212402344,
+    "vram_ok": true,
+    "frontier_tps": 481.53,
+    "lambda1_ceiling_tps": 520.95,
+    "k_cal": 125.268,
+    "step_us": 1218.2,
+    "k_deployed": 7,
+    "draft_share_of_step": 0.58,
+    "et_deployed": 3.3,
+    "head_share_verdict": "IMMATERIAL & PRE-EMPTED: the draft's vocab PROJECTION is the centroids sampler (256->2048), only 5.0% of the 101.2us pass (<10% gate) -> the PR's restricted-vocab lever is pre-empted; there is NO dense 262144 GEMV to restrict (it measures 277us = 2.7x the whole pass). A dense top-K head SWAP shows a step-only UPPER band -34.6..+7.2% (best K=32768 +7.18%), but that is a served-model head swap with E[T] UNPRICED (fixed top-K restricts reachable vocab below the centroid head's full-vocab reach -> E[T] non-increasing) -> denken roofline territory, NOT this analysis-only lever -> projected=0.00%",
+    "self_test_conditions": {
+      "a_anchor_sum": true,
+      "b_byte_us_roundtrip": true,
+      "c_linear_K": true,
+      "d_composition": true,
+      "e_nan_clean": true,
+      "f_constants_unchanged": true
+    },
+    "handoff_line": "the draft vocab-PROJECTION head is ~5% of the 101.2us/pass (centroids sampler 256->2048; there is NO dense 262144 GEMV -- a dense 256k head measures 277us at M=1, 2.7x the whole pass, physically absent from the deployed draft, which routes through 2048 centroids to 8192 input-adaptive active tokens), so the PR's restricted-vocab PROJECTION lever is IMMATERIAL (<10%) and PRE-EMPTED -> projected_tps_gain_pct=0.0 for this analysis-only PR. [Handoff for denken's roofline: the deployed centroid PROPOSAL (proj+topk+gather8192+bmm) is OVERHEAD-bound at M=1 -- it measures 46us for only ~5.5MiB of traffic, so a contiguous dense top-32768 GEMV (35us) is cheaper, a step-only UPPER band of -34.6..+7.2% (best +7.18% at K=32768); BUT that is a served-model head SWAP (replace the trained centroid router), greedy-safe by propose-only but E[T] UNPRICED and non-increasing (fixed top-K reaches a subset of the centroid head's full-vocab reach), so the band is an upper bound a real E[T] loss erodes -- needs a measured E[T]+PPL run, not a config flip. Also: the FULL HF head op measures 55us, of which 7us is the 262144-wide output-buffer materialization (full+scatter), excluded from the 101.2 anchor; if the deployed draft pays it the recoverable cost is a 'lean draft logits / skip full buffer' served change, NOT vocab restriction.]",
+    "chain_captured": {
+      "io_projection": true,
+      "attention": true,
+      "mlp": true,
+      "head_projection_gemv": true,
+      "head_proj_propose": true,
+      "head_output_mat": true,
+      "head_real": true,
+      "dense_head_256k": true
+    }
+  }
+}
