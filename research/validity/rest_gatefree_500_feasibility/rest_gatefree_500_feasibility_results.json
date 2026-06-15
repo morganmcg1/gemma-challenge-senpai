@@ -1,0 +1,170 @@
+{
+  "agent": "kanna",
+  "analysis_only": true,
+  "created_at": "20260615T110815Z",
+  "kind": "rest-gatefree-500-feasibility",
+  "nan_clean": true,
+  "peak_mem_mib": 12.098,
+  "pr": 348,
+  "synthesis": {
+    "deliverable1_rest_et_on_our_eval": {
+      "e_t_eagle3": 3.851185944363104,
+      "note": "REST's mean accepted length M is the SAME axis as E[T] (M=1.0 = no-draft bonus floor). Code M in [2.53,2.69] (STRONG, NOT our eval); chat M in [1.97,2.01] (closest analog); reasoning has NO published REST number -> principled floor ~1.0. OUR eval is 100% reasoning/STEM (#330), so the relevant band is [1.0 floor, 2.01 generous chat upper]. Even REST's GLOBAL BEST (code 2.69) < deployed E[T]=3.8512: REST under-accepts vs the existing already-priced head on EVERY workload, and far worse on novel reasoning.",
+      "our_eval_is_100pct_reasoning_stem": true,
+      "ratio_floor_vs_eagle3": 0.2596602746392129,
+      "ratio_generous_upper_vs_eagle3": 0.5219171520248178,
+      "ratio_global_best_code_vs_eagle3": 0.6984861387794826,
+      "rest_M_literature_ranges": {
+        "chat_mtbench": [
+          1.97,
+          2.01
+        ],
+        "code_humaneval": [
+          2.53,
+          2.69
+        ],
+        "reasoning_no_published_floor": 1.0
+      },
+      "rest_et_our_eval_band": {
+        "generous_upper_chat_analog": 2.01,
+        "global_best_sanity_code": 2.69,
+        "reasoning_floor": 1.0
+      },
+      "rest_lt_eagle3_even_generous_upper": true,
+      "rest_under_accepts_on_every_workload": true
+    },
+    "deliverable2_strict_supply_tax": {
+      "inherits_332_supply_tax": true,
+      "note": "REST IS a batched multi-token verify (tree attention over a c=64 Trie), so it inherits denken #332's method-INDEPENDENT determinism BW floor -> strict-compliant ceiling <= 520.953*(1-0.09103) = 473.5 (same as EAGLE-3). But REST's E[T] is so low it is demand-capped far below 500 regardless, so the supply tax is moot here.",
+      "rest_strict_ceiling_at_generous_upper": 247.14321780173933,
+      "rest_uses_batched_multitoken_verify": true,
+      "roundtrips_denken332_473p5": true,
+      "strict_ceiling_method_independent_473p5": 473.5295953446407,
+      "supply_floor_geometric_phi": 0.09103155435261377,
+      "supply_tax_is_moot_for_rest": true,
+      "verify_structure": "Trie of up to c=64 retrieved candidates, single batched tree-attention forward, m<=10 draft tokens/step (Medusa/SpecInfer-class)"
+    },
+    "deliverable3_ppl_only_ceiling": {
+      "deployed_tps": 481.53,
+      "eagle3_ppl_only_ceiling": 520.9527323111674,
+      "formula": "520.953 * (E[T]_REST / E[T]_eagle3)",
+      "lambda_ceil": 520.9527323111674,
+      "note": "PPL-only ceiling scales linearly with E[T]. The deployed head's own PPL-only ceiling is 520.953 (ratio 1.0). REST beats it iff E[T]_REST > E[T]_eagle3, which never holds. Even REST's GLOBAL BEST (code 2.69) gives only 363.9 TPS -- below BOTH 500 and the deployed 481.53. On our reasoning eval the band is 135.3-271.9 TPS.",
+      "rest_ceiling_beats_deployed_even_code": false,
+      "rest_ceiling_beats_eagle3": false,
+      "rest_ceiling_reaches_500_even_code": false,
+      "rest_ppl_only_ceiling_generous_upper": 271.8941663873918,
+      "rest_ppl_only_ceiling_global_best_code": 363.87826247864876,
+      "rest_ppl_only_ceiling_reasoning_floor": 135.27072954596608
+    },
+    "deliverable4_operational_verdict": {
+      "exactness_guarantee": "Leviathan et al. 2023 (arXiv:2211.17192) rejection-sampling rule -> PPL-preserving",
+      "gatefree_advantage_real_but_irrelevant": true,
+      "rest_is_gatefree_deployable": true,
+      "rest_is_viable_500_path": false,
+      "rest_reaches_500_on_our_eval": false,
+      "verdict": "REST IS gate-free deployable (offline CPU suffix-array datastore, NO gradient training, NO #319 gated cluster retrain, exact Leviathan-2023 accept rule => PPL-preserving) -- the deploy-today advantage is REAL. But on OUR 100%-reasoning eval REST under-accepts so badly (E[T] band [1.00, 2.01] vs the deployed head's 3.8512) that its PPL-only ceiling (135-272 TPS) sits far below the existing EAGLE-3 head's already-priced lane (520.953 ceiling / 481.53 deployed). Even REST's global best (code 2.69) reaches only 364 TPS. VERDICT: NOT a viable no-retrain >500 path on our eval -- the gate-free advantage is irrelevant when the method is demand-capped below the existing lane."
+    },
+    "deliverable5_caveats": {
+      "caveats": [
+        "Literature accept rates are workload-dependent POINT estimates -> carried as RANGES: code [2.53,2.69], chat [1.97,2.01], reasoning has NO published REST number (principled floor ~1.0). The headline ratio uses the GENEROUS chat-analog upper (2.01), which OVER-states reasoning; the verdict is range-robust (loses across the whole band).",
+        "Datastore quality/size is a FREE parameter. REST's M scales log-linearly with datastore size on code (0.9GB->1.96 ... 27GB->2.65) BUT out-of-domain collapses to ~1.0 -- domain match dominates size. There is no large verbatim-reasoning-CoT corpus, so even a huge datastore will not lift novel-reasoning M much above the floor. Assumed regime: best-case in-domain reasoning datastore ~ chat hit-rate (the generous upper); realistic ~ floor.",
+        "A MEASURED REST E[T] on our eval needs a (cheap, GATED) run: build a reasoning datastore OFFLINE on CPU (suffix array over a math/STEM corpus), serve REST verify, measure mean accepted length on the 128-prompt eval. This is a gated local-GPU smoke or HF Job -- NOT drawn here. This card prices the SCREEN, not a build; no build is claimed beyond it.",
+        "'EAGLE-3 head' here = the DEPLOYED/existing already-priced spec head that denken #289 (fi34s269) decomposed (E[T]=3.8512). REST is compared to that existing lane, not to the unbuilt EAGLE-3 coverage-retrain candidate (which itself needs the #319 gated spend).",
+        "CPU-analytic SCREEN. NOT a launch / build / datastore build / served-file change / HF Job / submission. BASELINE 481.53 unchanged; adds 0 TPS."
+      ],
+      "named_measurement_to_settle_et": "offline CPU suffix-array datastore over a STEM/math corpus -> REST tree-verify on serve -> measure mean accepted length on the official 128-prompt reasoning eval (gated, cheap)."
+    },
+    "eagle3_et_from_ak": {
+      "E_T_eagle3": 3.851185944363104,
+      "E_T_eagle3_display": 3.8512,
+      "E_T_eagle3_from_counter": 3.851185944363104,
+      "a_k": [
+        0.7292532942898975,
+        0.759556697719242,
+        0.7929794882639035,
+        0.8228,
+        0.8348727920920435,
+        0.8357919254658385,
+        0.8464932652113331
+      ],
+      "a_k_vs_289_display_maxabs": 3.302280758066267e-06,
+      "cumprod_a_k": [
+        0.7292532942898975,
+        0.553909224011713,
+        0.43923865300146414,
+        0.3614055636896047,
+        0.3017276720351391,
+        0.25218155197657394,
+        0.21346998535871156
+      ],
+      "reproduces_289_le_1e6": true,
+      "roundtrip_cumprod_eq_survival": 0.0,
+      "survival_G": [
+        1.0,
+        0.7292532942898975,
+        0.553909224011713,
+        0.43923865300146414,
+        0.3614055636896047,
+        0.3017276720351391,
+        0.25218155197657394,
+        0.21346998535871156
+      ]
+    },
+    "eval_composition_context": {
+      "cov_prior_top4": 0.8903,
+      "is_100pct_reasoning_stem": true,
+      "n_prompts": 128,
+      "note": "official 128 eval is 100% reasoning/STEM (mmlu_pro 57 / gpqa 57 / aime 14, lawine #330 hfrscdai): novel CoT (latex/math/science), the WORST case for verbatim retrieval. This is the accept-rate context that puts REST's M near its no-draft floor.",
+      "reasoning_stem_frac": 1.0,
+      "src_counts": {
+        "aime": 14,
+        "gpqa": 57,
+        "mmlu_pro": 57
+      }
+    },
+    "handoff": "REST (retrieval spec-decode) IS the one gate-free no-retrain >500 candidate (offline CPU suffix-array, no #319 gated spend, exact Leviathan-2023 accept rule => PPL-safe). But on OUR 100%-reasoning eval (#330) its accepted length does NOT hold: E[T] band [1.00, 2.01] (floor to generous chat-analog upper) vs the deployed head's 3.8512, so the PPL-only ceiling is 135-272 TPS -- and even REST's GLOBAL BEST (code 2.69) reaches only 364 TPS, below BOTH 500 and the deployed 481.53. rest_etratio_vs_eagle3=0.5219 (<1 across the whole band). REST also inherits denken #332's batched-verify supply tax (Trie tree-attention verify). VERDICT: gate-free but NOT a viable >500 path on our eval -- the no-retrain advantage is irrelevant when REST is demand-capped below the existing already-priced lane. A measured E[T]_REST would need a cheap gated reasoning-datastore run (named, not drawn).",
+    "headline": {
+      "e_t_eagle3": 3.851185944363104,
+      "eagle3_ppl_only_ceiling": 520.9527323111674,
+      "inherits_332_supply_tax": true,
+      "rest_ceiling_reaches_500_even_code": false,
+      "rest_et_our_eval_floor": 1.0,
+      "rest_et_our_eval_generous_upper": 2.01,
+      "rest_etratio_vs_eagle3": 0.5219171520248178,
+      "rest_feasibility_self_test_passes": true,
+      "rest_is_gatefree_deployable": true,
+      "rest_is_viable_500_path": false,
+      "rest_ppl_only_ceiling_generous_upper": 271.8941663873918,
+      "rest_ppl_only_ceiling_global_best_code": 363.87826247864876,
+      "rest_under_accepts_on_every_workload": true
+    },
+    "imports": {
+      "caveats": [
+        "Literature accept rates are workload-dependent POINT estimates -> carried as RANGES: code [2.53,2.69], chat [1.97,2.01], reasoning has NO published REST number (principled floor ~1.0). The headline ratio uses the GENEROUS chat-analog upper (2.01), which OVER-states reasoning; the verdict is range-robust (loses across the whole band).",
+        "Datastore quality/size is a FREE parameter. REST's M scales log-linearly with datastore size on code (0.9GB->1.96 ... 27GB->2.65) BUT out-of-domain collapses to ~1.0 -- domain match dominates size. There is no large verbatim-reasoning-CoT corpus, so even a huge datastore will not lift novel-reasoning M much above the floor. Assumed regime: best-case in-domain reasoning datastore ~ chat hit-rate (the generous upper); realistic ~ floor.",
+        "A MEASURED REST E[T] on our eval needs a (cheap, GATED) run: build a reasoning datastore OFFLINE on CPU (suffix array over a math/STEM corpus), serve REST verify, measure mean accepted length on the 128-prompt eval. This is a gated local-GPU smoke or HF Job -- NOT drawn here. This card prices the SCREEN, not a build; no build is claimed beyond it.",
+        "'EAGLE-3 head' here = the DEPLOYED/existing already-priced spec head that denken #289 (fi34s269) decomposed (E[T]=3.8512). REST is compared to that existing lane, not to the unbuilt EAGLE-3 coverage-retrain candidate (which itself needs the #319 gated spend).",
+        "CPU-analytic SCREEN. NOT a launch / build / datastore build / served-file change / HF Job / submission. BASELINE 481.53 unchanged; adds 0 TPS."
+      ],
+      "provenance": "denken #289 fi34s269 (per-position a_k -> E[T]=3.8512 via 1+sum cumprod; whole-run counters W&B 2j0e8xgg / lawine #282) x denken #332 y5cl0ena (method-independent supply floor 0.09103 @ geometric phi, strict ceiling 473.5, lambda ceiling 520.953) x lawine #330 hfrscdai (official 128 eval = 100% reasoning/STEM, mmlu_pro 57 / gpqa 57 / aime 14, cov prior 0.8903). Literature: He et al. 2024 REST (arXiv:2311.08252, mean accepted length M: code [2.53,2.69], chat [1.97,2.01], datastore scaling Table 2, Trie c=64 tree-attention verify, offline CPU suffix array); Leviathan et al. ICML 2023 (arXiv:2211.17192, distributional-equivalence guarantee). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "self_test": {
+      "conditions": {
+        "a_eagle3_et_reproduces_289": true,
+        "b_supply_floor_473p5_roundtrips_332": true,
+        "c_rest_et_range_cited_finite": true,
+        "d_inherits_332_supply_tax": true,
+        "e_eval_composition_330_cited": true,
+        "f_test_ratio_in_unit_and_lt1": true,
+        "g_rest_ceiling_loses": true,
+        "h_gatefree_true_viable_false": true,
+        "i_rest_under_accepts_globally": true,
+        "j_imports_exact": true,
+        "k_nan_clean": true
+      },
+      "n_checks": 11,
+      "rest_feasibility_self_test_passes": true
+    }
+  }
+}
