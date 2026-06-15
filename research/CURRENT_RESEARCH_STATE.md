@@ -1,7 +1,34 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-14 ~23:20Z (cycle 52f)
+- **Date:** 2026-06-15 ~00:05Z (cycle 52g)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
+
+## 🆕 Cycle-52g Snapshot (2026-06-15 ~00:05Z) — step-anchor RESOLVED, topology DOUBLY exhausted, draft-quant DEAD, land #245 at fidelity RISK
+
+**★ THE LAUNCH PIVOT — land #245 cycle-1 is BLOCKED on a verify-fidelity wall (non-terminal, `status:blocked`).** The scratch-reconstruction M=8 clean-room verify reproduces the deployed verifier's per-row argmax only **0.599** (63.3% excl. depth-0) over 7,644 rows — **43% of mismatches are confident** (logit gap ≥ 1.0), only 26% rank-1/2 flips ⇒ a **genuine reconstruction-forward bug, NOT the #192 int4-Marlin batch-variance** the foundation assumed. This **invalidates the scratch probe** as a tree-verify validation tool and leaves the **deep branch-interior contribution to E[T]=4.512 UNVERIFIED** (the SPINE ladder + first-level branch-hit ρ₂≈0.4165 are real-KV-confirmed and survive). **Advisor direction (Option-A, sent back to wip):** pivot to a **real-integration verify** — wire the M=16/M=8 verify into the *real* `execute_model` (real embed/PLE + real split-KV metadata, bypassing the hand-rolled reconstruction) and **measure the real-path anchor FIRST**, before any capture/KV-relocate. **Faithful (→~1.0) ⇒ tree path alive, proceed to long-poles; still degrades ⇒ Gemma-4 argmax diverges under tree-shaped split-KV attention ⇒ tree decode CANNOT preserve greedy-identity ⇒ the whole tree path (and the 520.95 ceiling) is DEAD.** This single anchor is now **the highest-value bit in the programme** — simultaneously the build's unblock-test and the tree-path go/no-go. **Tree path is now at fidelity RISK, not merely unmeasured.** (land also confirmed: eager M=16 tree probe drops 381→57 TPS ⇒ CUDA-graph capture is existential; size-29 crash = width>16 has no captured graph.)
+
+**Step-anchor RESOLVED (denken #252, MERGED): `DISTINCT-STEPS-BOTH-VALID`.** The served step **1.2182 ms** (linear MTP K=7 — the 481.53 path, realized E[T]≈4.6828) and the built step **1.084953 ms** (tree decode — projected E[T]=4.512) are **two different per-step costs for two different paths**, not a contradiction. The **520.95 GO-anchor is CONFIRMED under the BUILT step** (`reanchored_tps_at_ET4512=520.9527`); denken #241's **`E_T_meas_floor=4.3305` SURVIVES** (slope-invariant, moves 0.0). The #241 "463.97 inconsistency" was a path-mismatch artifact (built E[T] priced at served step). Edge: `520.95/481.53 = 1.0819 = 1.1228 (step) × 0.9635 (E[T])`. **⇒ the launch TPS gate reads against the BUILT 1.085 ms step** (denken #257 is grounding it empirically). Caveat: this is a self-consistency round-trip — whether land's LIVE build measures ~1.085 stays land #245's to measure.
+
+**Topology DOUBLY exhausted; draft-quant DEAD; three more linear micro-levers CLOSED.**
+- **Topology:** wirbel #244 (static ρ-optimal) + stark #247 (online per-step DP, `e_t_gain_vs_static=+0.0235` below the 0.05 stop, collapses 100% to linear chain at deployed M=8) — the deployed depth-9/branch-3 tree is already optimal. Two independent methods agree.
+- **Draft-side weight-quant DEAD on Ampere at M=1:** int3 (#248, −13.68%, no W3A16 kernel) AND int4 (#254, **−27.44%**, W4A16 Marlin 165.79 µs > bf16 101.2 µs — Marlin is tile-optimized, loses at M=1 GEMV). The **bf16 draft 101.2 µs/pass (×K=7 ≈ 58% of step) is the floor** — draft speedups must come from launch-overhead erasure or fewer forwards, not quant. Load-bearing correction: **the deployed draft is bf16, NOT int4** (proposer `/tmp/qat-assistant`).
+- **Closed:** n-gram draft (#250, `ngram_beats_trained_anywhere=False`, N-1 dead); activation-recycle (#251, premise structurally void — the 4-layer/256-dim drafter shares target KV and never computes target L1-8); verify-epilogue (#255, already fused on-GPU, `realizable_bound_pct=0.0538%`).
+
+**GOLD pointer (ubel #250 → ubel #258):** the trained draft's **PRIVATE E[T] ≈3.09** (ShareGPT-chat proxy) sits **~0.75 below its PUBLIC E[T] 3.844** — that gap is exactly where the private re-draw validity risk (operative λ̂≥0.9780, `P_invalid=0.05`) lives. ubel #258 is decomposing it (recoverable greedy-safe calibration mismatch vs intrinsic draft weakness).
+
+**Launch posture unchanged (#124 publish-first, human green-light):** publish the 500+ milestone first, organizers rule validity post-hoc (accepted-risk). **Live gate: a MEASURED ≥500 build at the BUILT 1.085 ms step clearing operative λ̂≥0.9780 AND E_T≥4.3305.** No measured ≥500 exists; BASELINE stays **481.53** (all 8 cycle-52g merges are bank-the-analysis, 0 TPS). VIDRAFT external-fleet kernel offer (Issue #124, @chiku-inu) — **Morgan-handled** (holding reply + human escalation; cross-fleet IP-sharing is above autonomous authority); no advisor action.
+
+**Live cycle-52g roster — ZERO IDLE (8/8):**
+- **land #245** — real-integration verify (Option-A); measure real-path anchor FIRST. ★ critical-path / launch pivot.
+- **lawine #246** — K-1 FlashInfer + CUDAGraph on the linear path (zero-risk route to 500; the launch-overhead lever the dead draft-quant now points to).
+- **stark #256** — adaptive-K early-exit drafting (greedy-safe draft-depth gating; fewer forwards).
+- **kanna #260** — Plan-B serve-overhead screen (recoverable greedy-safe gain in the prometheus per-request instrumentation?).
+- **ubel #258** — public→private trained-draft E[T]-gap decomposition (validity lane).
+- **denken #257** — built-step roofline grounding (empirically bracket the 1.085 ms tree step the gate reads against).
+- **wirbel #261** — Plan-B Rank-2 draft argmax+embed fusion screen (is the draft launch tax recoverable?).
+- **fern #259** — E[T] branch-interior sensitivity (does Path-A survive land #245's scratch-verify finding — does E[T]_lower still clear 4.3305 when the scratch-suspect branch-interior is discounted?).
+
+**Deferred (batch, do not per-screen):** fern two-path portfolio **re-price** — collapse the 3 NO-GO Path-B levers (int3/n-gram/activation-recycle) to measured-0, fold the 4 in-flight replacements (kanna #260 / stark #256 / wirbel #261 / lawine #246) + the land #245 P_A fidelity-downgrade, on the NEXT wave of returns.
 
 ## Strategic Snapshot
 
