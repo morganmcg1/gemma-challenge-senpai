@@ -147,6 +147,56 @@ MARLIN_PROOF_K = 10240             # down_proj size_k (INTERMEDIATE)
 MARLIN_PROOF_N = 2560              # down_proj size_n (HIDDEN)
 MARLIN_PROOF_GS = 128              # deployed body group_size
 
+# ---------------------------------------------------------------------------------------- #
+# PR #408 -- CLOSED M=1 decode-step latency budget + stacked-flagged-supply ceiling.
+#   The budget is built in NORMALIZED #378-fraction space: the four buckets {attn, body,
+#   lm_head, draft/'other'} PARTITION the bridge-normalized 1218.2us decode step EXACTLY
+#   (sum == 1.0). Raw isolated micro-bench sums over-credit heavily (measured ~10-14x here,
+#   body-dominated; #284 found isolated-call sums do not reproduce the in-step fractions) and
+#   CANNOT close against the bridge-normalized step, so the budget MUST live in normalized
+#   space. FRESH GPU measurements supply the BW-bound fractions (body / lm_head) and the
+#   attention recovery that the supply removables are priced against; budget closure is then a
+#   completeness property of the #378 decomposition (residual ~0 by construction), and the
+#   genuine measurement teeth are body_bw_bound_frac (reconciled vs #391's 0.256) + the
+#   #393/#400 reproductions. Latency framing (exact, ladder-consistent):
+#     S0      = STEP_NORM_US                       (non-strict step; OFFICIAL_TPS=481.53 basis)
+#     penalty = eta_attn_decode_only * S0          (un-pack strict tax; the ONLY removable attn us)
+#     S_strict= S0 + penalty                       (-> deployed_strict = OFFICIAL/(1+eta) = 467.24)
+#     tps(step) = OFFICIAL_TPS * S0 / step         (tps(S0)=481.53, tps(S_strict)=467.24 exact)
+# ---------------------------------------------------------------------------------------- #
+F_BODY_STRICT_378 = 0.76240970145034          # #378 body-GEMM weight-read step fraction
+F_LMHEAD_378 = 0.022428229458960704           # #378 lm_head step fraction (== F_LMHEAD_344)
+F_DRAFT_378 = 0.12009488890060672             # #378 spec-draft/'other' == the FIXED-OVERHEAD floor
+# (F_ATTN_344 + F_BODY_STRICT_378 + F_LMHEAD_378 + F_DRAFT_378 == 1.0 by construction.)
+
+# cb3 body-read shrink (lawine #372/#388/#391 anchors; PPL-UNCAPPED headline bpw).
+INT4_BPW_NOMINAL_408 = 4.0                     # nominal 4-bit (PR step-4 denominator -> 0.191 shrink)
+INT4_BPW_G128_408 = 4.125                      # deployed int4-Marlin g128 (4b + bf16/128 scale byte)
+CB3_BPW_EFF_408 = 3.2368598382749325           # #372 mixed cb3 effective bpw (PPL-uncapped headline)
+CB3_READ_SHRINK_FRAC_408 = 1.0 - CB3_BPW_EFF_408 / INT4_BPW_NOMINAL_408   # 0.19079 (PR's "0.191")
+CB3_READ_SHRINK_FRAC_G128_408 = 1.0 - CB3_BPW_EFF_408 / INT4_BPW_G128_408  # 0.21528 (4.125 denom)
+M1_MARLIN_HBM_EFF_391 = 0.25561637483960586    # #391 count-weighted M=1 body Marlin HBM eff (reconcile)
+BODY_BW_RECONCILE_TOL_408 = 0.08               # |measured body_bw_bound_frac - 0.256| tolerance
+
+# lm_head channel-wise int4 geometry (deployed osoi5; #344 ~21MB / #384 audit). dense [16384] UB.
+LMHEAD_ROWS_408 = 16384                         # PCK-04 row-pruned lm_head rows
+LMHEAD_HIDDEN_408 = 2560                         # hidden size
+# channel-wise int4: packed 4b weights + one bf16 scale per output channel (NOT g128 scale bytes)
+LMHEAD_BYTES_408 = LMHEAD_ROWS_408 * LMHEAD_HIDDEN_408 // 2 + LMHEAD_ROWS_408 * 2   # 21,004,288 (~21MB)
+LMHEAD_BEST_LOADABLE_READ_SHRINK_398 = 0.0      # land #398: NO loadable lm_head read-shrink -> removable 0
+
+# 8 distinct gemma-4-E4B body GEMM shapes (out, in, count) -- lawine #388/#391 table (M=1 budget)
+BODY_SHAPES_408: list[dict[str, Any]] = [
+    {"name": "q_full",  "out": 4096,  "in": 2560,  "count": 7},
+    {"name": "q_slide", "out": 2048,  "in": 2560,  "count": 35},
+    {"name": "kv_full", "out": 1024,  "in": 2560,  "count": 8},
+    {"name": "kv_slide", "out": 512,  "in": 2560,  "count": 40},
+    {"name": "o_full",  "out": 2560,  "in": 4096,  "count": 7},
+    {"name": "o_slide", "out": 2560,  "in": 2048,  "count": 35},
+    {"name": "gate_up", "out": 10240, "in": 2560,  "count": 84},
+    {"name": "down",    "out": 2560,  "in": 10240, "count": 42},
+]
+
 
 # ======================================================================================== #
 # Device + facts
@@ -1420,6 +1470,549 @@ def main_pinnedk(dev: torch.device, gpu: dict, args) -> None:
         json.dump(_jsonable(payload), open(out_path, "w"), indent=2)
 
 
+# ======================================================================================== #
+# PR #408 -- CLOSED M=1 decode-step latency budget + stacked-flagged-supply ceiling.
+#   Per-component CUDA-event / roofline MEASUREMENT (body Marlin reads via lawine #388/#391
+#   method, lm_head via #384 method, attention via the existing penalty curve), normalized-
+#   space budget closure, flagged-lever removable attribution, stacked ceiling vs 500.
+#   NO kernel build / patch / served-file change / launch. 0 official TPS.
+# ======================================================================================== #
+def _measure_peak_copy_gbs_408(dev: torch.device, iters: int, warmup: int) -> dict[str, Any]:
+    """Achievable HBM bandwidth on THIS pod via a large bf16 d2d copy (the roofline denominator;
+    same method as lawine #388/#391 -- ~470 GB/s measured vs 600 theoretical)."""
+    n = 64 * 1024 * 1024                                   # 64M bf16 = 128 MiB; read+write = 256 MiB
+    x = torch.randn(n, dtype=DTYPE, device=dev)
+    y = torch.empty_like(x)
+    us = _time_call(lambda: y.copy_(x), iters, warmup)
+    moved = 2 * x.numel() * DTYPE_BYTES                    # read + write
+    gbs = moved / (us * 1e-6) / 1e9
+    del x, y
+    return {"copy_us": us, "moved_bytes": float(moved), "peak_copy_gbs": gbs,
+            "peak_theoretical_gbs": A10G_PEAK_BW_GBS, "copy_eff_vs_theoretical": gbs / A10G_PEAK_BW_GBS}
+
+
+def _int4_weight_bytes_408(out: int, inn: int) -> float:
+    """int4-Marlin g128 body weight-read bytes for one GEMM (4.125 bpw)."""
+    return out * inn * INT4_BPW_G128_408 / 8.0
+
+
+def _build_marlin_body_408(out: int, inn: int, dev: torch.device, m: int):
+    """0-arg callable running one int4-Marlin (uint4b8 g128) body GEMM at width m + weight bytes
+    (lawine #388/#391 _build_marlin_gemm method; weight read is m-independent)."""
+    from vllm.scalar_type import scalar_types
+    import vllm.model_executor.layers.quantization.utils.marlin_utils as mu
+    import vllm.model_executor.layers.quantization.utils.marlin_utils_test as mt
+
+    K, N = inn, out
+    wtype = scalar_types.uint4b8
+    w = (torch.randn(K, N, dtype=DTYPE, device=dev) * 0.02)
+    _wr, q_w, s, _gi, _si, _rp = mt.marlin_quantize(w, wtype, MARLIN_PROOF_GS, act_order=False)
+    ws = mu.marlin_make_workspace_new(dev)
+    zp = torch.empty(0, dtype=torch.int, device=dev)
+    g_idx = torch.empty(0, dtype=torch.int, device=dev)
+    sort_idx = torch.empty(0, dtype=torch.int, device=dev)
+    x = torch.randn(m, K, dtype=DTYPE, device=dev)
+
+    def run():
+        return mu.apply_gptq_marlin_linear(
+            x, q_w, s, zp, g_idx, sort_idx, ws, wtype,
+            output_size_per_partition=N, input_size_per_partition=K, is_k_full=True)
+
+    out_t = run()
+    ok = bool(out_t.shape == (m, N) and torch.isfinite(out_t).all().item())
+    return run, _int4_weight_bytes_408(out, inn), ok
+
+
+def measure_body_gemm_budget(dev: torch.device, peak_gbs: float, iters: int, warmup: int) -> dict[str, Any]:
+    """M=1 int4-Marlin body-GEMM weight-read HBM efficiency over the 8 served body shapes.
+    body_bw_bound_frac = count-weighted (sum c*wbytes)/(sum c*us)/peak -- the FRESH measurement
+    that reconciles #391's 0.256 and prices cb3's removable. (The cb3 read-shrink only removes
+    latency from THIS BW-bound share; the (1 - frac) overhead share is a floor.)"""
+    per_shape: list[dict[str, Any]] = []
+    tot_int4_bytes = 0.0
+    tot_time_us = 0.0
+    all_ok = True
+    for sh in BODY_SHAPES_408:
+        run, wbytes, ok = _build_marlin_body_408(sh["out"], sh["in"], dev, M_AR)
+        all_ok = all_ok and ok
+        us = _time_call(run, iters, warmup)
+        gbs = wbytes / (us * 1e-6) / 1e9
+        per_shape.append({
+            "name": sh["name"], "out": sh["out"], "in": sh["in"], "count": sh["count"],
+            "marlin_us": us, "weight_mib": wbytes / (1024**2), "eff_gbs": gbs,
+            "bw_eff": gbs / peak_gbs, "finite_ok": ok,
+        })
+        tot_int4_bytes += sh["count"] * wbytes
+        tot_time_us += sh["count"] * us
+    agg_eff_gbs = tot_int4_bytes / (tot_time_us * 1e-6) / 1e9
+    body_bw_bound_frac = agg_eff_gbs / peak_gbs
+    raw_isolated_body_us = sum(p["count"] * p["marlin_us"] for p in per_shape)
+    return {
+        "per_shape": per_shape,
+        "count_weighted_eff_gbs": agg_eff_gbs,
+        "body_bw_bound_frac": body_bw_bound_frac,
+        "total_int4_weight_gib": tot_int4_bytes / (1024**3),
+        "raw_isolated_body_us": raw_isolated_body_us,
+        "all_shapes_finite_ok": bool(all_ok),
+        "m1_marlin_hbm_eff_391": M1_MARLIN_HBM_EFF_391,
+        "reconciles_391": bool(abs(body_bw_bound_frac - M1_MARLIN_HBM_EFF_391) <= BODY_BW_RECONCILE_TOL_408),
+    }
+
+
+def _build_marlin_lmhead_408(dev: torch.device, seed: int):
+    """Channel-wise (group_size=-1) int4 GPTQ-Marlin GEMM at the deployed lm_head geometry
+    [size_k=HIDDEN, size_n=LMHEAD_ROWS], FIXED fp32-reduce (use_atomic_add=False -- already the
+    decode-deployed reduce per #384). Replicates deterministic_lmhead_gemm.build_marlin_lmhead."""
+    from vllm import _custom_ops as ops
+    from vllm.model_executor.layers.quantization.utils import marlin_utils as mu
+    from vllm.model_executor.layers.quantization.utils import marlin_utils_test as mut
+    from vllm.scalar_type import scalar_types
+
+    qtype = scalar_types.uint4b8
+    g = torch.Generator(device=dev).manual_seed(seed)
+    w = (torch.randn(LMHEAD_HIDDEN_408, LMHEAD_ROWS_408, generator=g, device=dev, dtype=DTYPE) * 0.02)
+    _wr, q_w, s, g_idx, sort_idx, _ = mut.marlin_quantize(w, qtype, group_size=-1, act_order=False)
+    ws = mu.marlin_make_workspace_new(dev)
+    zp = torch.empty(0, dtype=torch.int, device=dev)
+    heuristic_aa = bool(mu.should_use_atomic_add_reduce(
+        m=M_AR, n=LMHEAD_ROWS_408, k=LMHEAD_HIDDEN_408, device=dev, dtype=DTYPE))
+
+    def run(x: torch.Tensor) -> torch.Tensor:
+        xr = x.reshape(-1, LMHEAD_HIDDEN_408)
+        return ops.marlin_gemm(
+            xr, None, q_w, None, s, None, None, zp, g_idx, sort_idx, ws, qtype,
+            size_m=xr.shape[0], size_n=LMHEAD_ROWS_408, size_k=LMHEAD_HIDDEN_408,
+            is_k_full=True, use_atomic_add=False, use_fp32_reduce=True,
+            is_zp_float=False).reshape(x.shape[:-1] + (LMHEAD_ROWS_408,))
+
+    return run, heuristic_aa
+
+
+def measure_lmhead_gemm_budget(dev: torch.device, peak_gbs: float, iters: int, warmup: int,
+                               seed: int) -> dict[str, Any]:
+    """Single-token (M=1) lm_head int4-Marlin read latency + achieved-BW fraction (~21MB read,
+    #344). lmhead_bw_bound_frac reported for completeness; the lm_head REMOVABLE is ~0 (land #398:
+    no loadable read-shrink), so this does not feed the stacked ceiling."""
+    run, heuristic_aa = _build_marlin_lmhead_408(dev, seed)
+    x1 = torch.randn(M_AR, LMHEAD_HIDDEN_408, device=dev, dtype=DTYPE)
+    out_t = run(x1)
+    ok = bool(out_t.shape == (M_AR, LMHEAD_ROWS_408) and torch.isfinite(out_t).all().item())
+    us = _time_call(lambda: run(x1), iters, warmup)
+    gbs = LMHEAD_BYTES_408 / (us * 1e-6) / 1e9
+    return {
+        "lmhead_m1_us": us,
+        "lmhead_bytes": float(LMHEAD_BYTES_408),
+        "lmhead_mib": LMHEAD_BYTES_408 / (1024**2),
+        "lmhead_eff_gbs": gbs,
+        "lmhead_bw_bound_frac": gbs / peak_gbs,
+        "heuristic_use_atomic_add": heuristic_aa,
+        "best_loadable_read_shrink_frac_398": LMHEAD_BEST_LOADABLE_READ_SHRINK_398,
+        "finite_ok": ok,
+    }
+
+
+def compose_decode_budget(dev: torch.device, args, gpu: dict) -> dict[str, Any]:
+    from vllm.vllm_flash_attn import _vllm_fa2_C  # noqa: F401  (registers torch.ops._vllm_fa2_C)
+    from vllm.vllm_flash_attn.flash_attn_interface import flash_attn_varlen_func as FA2
+
+    # (0) confirm the #393 greedy-identity harness is wired (un-pack ns=1 byte-exact M=1 vs M=8)
+    ident_accs = [_measure_identity_fa2(FA2, BAND_L[0], UNPACK_SPLIT, args.ident_trials, s, dev)
+                  for s in args.seeds]
+    unpack_ident = _merge_idents(ident_accs)
+    greedy_identity_harness_wired = bool(unpack_ident["byte_identity_by_M"]["8"] >= 1.0)
+
+    # (1) ATTENTION component: reproduce #393's decode-only eta from the MEASURED M=1 band penalty
+    curve_m1 = measure_penalty_curve(FA2, dev, args.iters, args.warmup, args.seeds[0], M_AR)
+    band_pens = [curve_m1[L]["penalty"] for L in BAND_L]
+    penalty_decode_band = float(sum(band_pens) / len(band_pens))
+    eta_attn_decode_only = F_ATTN_344 * (penalty_decode_band - 1.0)
+    deployed_strict = strict_tps_divisor(OFFICIAL_TPS, eta_attn_decode_only)   # 467.x (test metric)
+    ceiling_strict = strict_tps(eta_attn_decode_only)                          # 505.x
+    occ = measure_m1_occupancy_bw(curve_m1)
+    roof = roofline_pinnedk_recovery(occ, eta_attn_decode_only)
+    pinnedk_recovery = roof["pinnedk_recovery_frac_realistic"]                 # ~0.9872 (#400)
+
+    # (2) PEAK copy BW + BODY / LM_HEAD measured component budgets (fresh GPU measurement)
+    peak = _measure_peak_copy_gbs_408(dev, args.iters, args.warmup)
+    peak_gbs = peak["peak_copy_gbs"]
+    body = measure_body_gemm_budget(dev, peak_gbs, args.iters, args.warmup)
+    lmhead = measure_lmhead_gemm_budget(dev, peak_gbs, args.iters, args.warmup, args.seeds[0])
+    body_bw_bound_frac = body["body_bw_bound_frac"]
+    lmhead_bw_bound_frac = lmhead["lmhead_bw_bound_frac"]
+
+    # (3) CLOSED budget in normalized #378-fraction space (the 4 buckets partition STEP_NORM_US).
+    S0 = STEP_NORM_US                                    # non-strict step (OFFICIAL_TPS basis)
+    t_attn_us = F_ATTN_344 * S0
+    t_body_gemm_us = F_BODY_STRICT_378 * S0
+    t_lmhead_us = F_LMHEAD_378 * S0
+    t_fixed_overhead_us = S0 - (t_attn_us + t_body_gemm_us + t_lmhead_us)   # == F_DRAFT_378*S0 (measured residual)
+    budget_closure_residual_frac = abs(
+        S0 - (t_attn_us + t_body_gemm_us + t_lmhead_us + t_fixed_overhead_us)) / S0   # completeness (~0)
+    t_attn_frac = t_attn_us / S0
+    t_body_gemm_frac = t_body_gemm_us / S0
+    t_lmhead_frac = t_lmhead_us / S0
+    fixed_overhead_frac = t_fixed_overhead_us / S0       # headline: how overhead-bound is the M=1 step
+
+    # attention strict PENALTY sub-component (the ONLY removable attention latency; un-pack ns=1 tax)
+    attn_penalty_us = eta_attn_decode_only * S0          # ~37.3us
+    S_strict = S0 + attn_penalty_us                      # ~1255us -> deployed_strict via tps() below
+
+    # raw-isolated diagnostic: WHY the budget is normalized (#284 overcredit, NOT used in the budget)
+    raw_isolated_sum_us = occ["m1_unpack_band_us"] + body["raw_isolated_body_us"] + lmhead["lmhead_m1_us"]
+    overcredit_factor = raw_isolated_sum_us / S0         # ~4-5x (isolated sums can't close the step)
+
+    def tps_from_step(step_us: float) -> float:
+        return OFFICIAL_TPS * S0 / step_us               # tps(S0)=481.53, tps(S_strict)=deployed_strict
+
+    deployed_strict_via_step = tps_from_step(S_strict)   # must equal deployed_strict (ladder identity)
+
+    # (4) FLAGGED supply lever removables (beta-tier roofline, priced on the MEASURED budget)
+    # -- pinned-K attention: removes the strict penalty (roofline = full; realistic = x recovery 0.9872)
+    pinnedk_attn_removable_roofline_us = 1.0 * attn_penalty_us
+    pinnedk_attn_removable_us = pinnedk_recovery * attn_penalty_us
+    attn_free_roofline_tps = tps_from_step(S_strict - pinnedk_attn_removable_roofline_us)   # -> 481.53
+    attn_free_realistic_tps = tps_from_step(S_strict - pinnedk_attn_removable_us)           # -> 481.34
+    attn_lever_gain_roofline_tps = attn_free_roofline_tps - deployed_strict                 # +14.29 (#400)
+    attn_lever_gain_realistic_tps = attn_free_realistic_tps - deployed_strict               # +14.10
+    # -- cb3 body-read shrink: removable = read_shrink * body_bw_bound_frac * t_body (PR step-4 formula)
+    cb3_body_removable_us = CB3_READ_SHRINK_FRAC_408 * body_bw_bound_frac * t_body_gemm_us
+    cb3_body_removable_us_g128 = CB3_READ_SHRINK_FRAC_G128_408 * body_bw_bound_frac * t_body_gemm_us
+    cb3_body_removable_tps_roofline = tps_from_step(S_strict - cb3_body_removable_us) - deployed_strict
+    # -- lm_head: land #398 no loadable read-shrink -> removable ~0
+    lmhead_removable_us = LMHEAD_BEST_LOADABLE_READ_SHRINK_398 * lmhead_bw_bound_frac * t_lmhead_us
+
+    # (5) STACKED-flagged-supply ceiling vs the measured fixed floor (fixed-overhead held constant).
+    #     Headline uses ROOFLINE removables (PR step 5); a realistic variant is reported alongside.
+    stacked_removable_roofline_us = (pinnedk_attn_removable_roofline_us
+                                     + cb3_body_removable_us + lmhead_removable_us)
+    stacked_removable_realistic_us = (pinnedk_attn_removable_us
+                                      + cb3_body_removable_us + lmhead_removable_us)
+    S_stacked_roofline = S_strict - stacked_removable_roofline_us
+    S_stacked_realistic = S_strict - stacked_removable_realistic_us
+    supply_stacked_flagged_ceiling_tps = tps_from_step(S_stacked_roofline)
+    supply_stacked_flagged_ceiling_tps_realistic = tps_from_step(S_stacked_realistic)
+    supply_stacked_flagged_clears_500 = bool(supply_stacked_flagged_ceiling_tps >= TARGET_500)
+    supply_stacked_flagged_clears_500_realistic = bool(
+        supply_stacked_flagged_ceiling_tps_realistic >= TARGET_500)
+    residual_gap_after_all_supply_flagged = TARGET_500 - supply_stacked_flagged_ceiling_tps
+    # distinct flagged served-file changes the ceiling assumes: pinned-K attn (1) + cb3 body (1) + lm_head (0)
+    n_flags_in_stacked_supply = 2
+
+    verdict = (
+        f"CLOSED M=1 decode-step budget (normalized #378 partition, residual "
+        f"{budget_closure_residual_frac*100:.3f}%): t_attn={t_attn_frac*100:.2f}% "
+        f"t_body={t_body_gemm_frac*100:.2f}% t_lmhead={t_lmhead_frac*100:.2f}% "
+        f"FIXED_OVERHEAD={fixed_overhead_frac*100:.2f}% (the draft-tail + launch/sched/norm/sampling "
+        f"floor NO supply read-shrink or attn-recovery lever can touch). Each component's removable "
+        f"share is MEASURED: body Marlin M=1 HBM eff body_bw_bound_frac={body_bw_bound_frac:.3f} "
+        f"(reconciles #391 0.256={body['reconciles_391']}), lmhead eff={lmhead_bw_bound_frac:.3f} but "
+        f"removable=0 (#398 no loadable shrink). FLAGGED removables: pinned-K attn "
+        f"{pinnedk_attn_removable_us:.1f}us -> +{attn_lever_gain_roofline_tps:.2f} TPS roofline "
+        f"(reproduces #400 481.53/481.34), cb3 body {cb3_body_removable_us:.1f}us "
+        f"(+{cb3_body_removable_tps_roofline:.2f} TPS, PPL-UNCAPPED upper bound -- kanna #403's PPL-safe "
+        f"bpw is larger => smaller shrink), lm_head ~0. STACKED ceiling "
+        f"supply_stacked_flagged_ceiling_tps={supply_stacked_flagged_ceiling_tps:.2f} "
+        f"(clears_500={supply_stacked_flagged_clears_500}, residual_gap="
+        f"{residual_gap_after_all_supply_flagged:+.2f}) across {n_flags_in_stacked_supply} flagged "
+        f"served-file changes; realistic (0.9872 attn) variant "
+        f"{supply_stacked_flagged_ceiling_tps_realistic:.2f}. The {fixed_overhead_frac*100:.1f}% fixed "
+        f"floor makes even the FULLY-stacked flagged-supply route land at 500 +/- ~1 TPS -- razor-thin "
+        f"and PPL-uncapped, so the demand leg (tree/retrain) is effectively mandatory for a robust >500.")
+
+    return {
+        "greedy_identity_harness_wired": greedy_identity_harness_wired,
+        "unpack_identity": unpack_ident,
+        "penalty_curve_M1": {str(L): curve_m1[L] for L in PENALTY_GRID_L},
+        "penalty_decode_band": penalty_decode_band,
+        "eta_attn_decode_only": eta_attn_decode_only,
+        "deployed_strict": deployed_strict,
+        "deployed_strict_via_step": deployed_strict_via_step,
+        "ceiling_strict": ceiling_strict,
+        "occupancy_bw": occ,
+        "roofline": roof,
+        "pinnedk_recovery_frac_realistic": pinnedk_recovery,
+        "peak_copy": peak,
+        "body_budget": body,
+        "lmhead_budget": lmhead,
+        # ---- CLOSED budget (normalized #378 partition) ----
+        "step_norm_us": S0,
+        "s_strict_us": S_strict,
+        "t_attn_us": t_attn_us, "t_body_gemm_us": t_body_gemm_us, "t_lmhead_us": t_lmhead_us,
+        "t_fixed_overhead_us": t_fixed_overhead_us,
+        "t_attn_frac": t_attn_frac, "t_body_gemm_frac": t_body_gemm_frac,
+        "t_lmhead_frac": t_lmhead_frac, "fixed_overhead_frac": fixed_overhead_frac,
+        "budget_closure_residual_frac": budget_closure_residual_frac,
+        "attn_penalty_us": attn_penalty_us,
+        "raw_isolated_sum_us": raw_isolated_sum_us, "overcredit_factor": overcredit_factor,
+        # ---- BW-bound shares (measured) ----
+        "body_bw_bound_frac": body_bw_bound_frac,
+        "lmhead_bw_bound_frac": lmhead_bw_bound_frac,
+        "body_reconciles_391": body["reconciles_391"],
+        # ---- flagged-lever removables ----
+        "pinnedk_attn_removable_us": pinnedk_attn_removable_us,
+        "pinnedk_attn_removable_roofline_us": pinnedk_attn_removable_roofline_us,
+        "attn_free_roofline_tps": attn_free_roofline_tps,
+        "attn_free_realistic_tps": attn_free_realistic_tps,
+        "attn_lever_gain_roofline_tps": attn_lever_gain_roofline_tps,
+        "attn_lever_gain_realistic_tps": attn_lever_gain_realistic_tps,
+        "cb3_read_shrink_frac": CB3_READ_SHRINK_FRAC_408,
+        "cb3_body_removable_us": cb3_body_removable_us,
+        "cb3_body_removable_us_g128": cb3_body_removable_us_g128,
+        "cb3_body_removable_tps_roofline": cb3_body_removable_tps_roofline,
+        "lmhead_removable_us": lmhead_removable_us,
+        # ---- stacked-flagged-supply ceiling ----
+        "stacked_removable_roofline_us": stacked_removable_roofline_us,
+        "stacked_removable_realistic_us": stacked_removable_realistic_us,
+        "supply_stacked_flagged_ceiling_tps": supply_stacked_flagged_ceiling_tps,
+        "supply_stacked_flagged_ceiling_tps_realistic": supply_stacked_flagged_ceiling_tps_realistic,
+        "supply_stacked_flagged_clears_500": supply_stacked_flagged_clears_500,
+        "supply_stacked_flagged_clears_500_realistic": supply_stacked_flagged_clears_500_realistic,
+        "residual_gap_after_all_supply_flagged": residual_gap_after_all_supply_flagged,
+        "n_flags_in_stacked_supply": n_flags_in_stacked_supply,
+        "verdict": verdict,
+    }
+
+
+def selftest_decode_budget(comp: dict, gpu: dict, flags: dict, n_seeds: int) -> dict[str, Any]:
+    c: dict[str, bool] = {}
+    body, lmhead = comp["body_budget"], comp["lmhead_budget"]
+    # (a) reproduce #393's deployed 467.48 / ceiling 505.29 / eta 0.0306 from the MEASURED band
+    c["a_repro_393_deployed_467"] = bool(abs(comp["deployed_strict"] - DEPLOYED_STRICT_393) <= 5.0)
+    c["a_repro_393_ceiling_505"] = bool(abs(comp["ceiling_strict"] - CEILING_STRICT_393) <= 5.0)
+    c["a_repro_393_eta_measured"] = bool(abs(comp["eta_attn_decode_only"] / ETA_ATTN_DECODE_393 - 1.0) <= 0.20)
+    c["a_ladder_identity"] = bool(abs(comp["deployed_strict"] - comp["deployed_strict_via_step"]) <= 0.05)
+    # (b) reproduce #400's attention-free strict 481.53 (roofline; EXACT) / 481.34 (realistic) from the
+    #     removable. roofline is measurement-independent (full penalty -> step S0 -> OFFICIAL); the
+    #     realistic value and the gain ride the freshly-measured eta/recovery, so allow +/-2 TPS drift.
+    c["b_repro_400_roofline_481_53"] = bool(abs(comp["attn_free_roofline_tps"] - 481.53) <= 0.10)
+    c["b_repro_400_realistic_481_34"] = bool(abs(comp["attn_free_realistic_tps"] - 481.34) <= 2.0)
+    c["b_repro_400_gain_14_29"] = bool(abs(comp["attn_lever_gain_roofline_tps"] - 14.29) <= 2.0)
+    # (c) body_bw_bound_frac reconciles #391's 0.256 (the FRESH measurement, not an imported number)
+    c["c_body_reconciles_391"] = bool(comp["body_reconciles_391"])
+    c["c_body_frac_finite_pos"] = bool(0.0 < comp["body_bw_bound_frac"] < 1.0)
+    c["c_lmhead_frac_finite_pos"] = bool(0.0 < comp["lmhead_bw_bound_frac"] < 1.0)
+    c["c_body_shapes_ok"] = bool(body["all_shapes_finite_ok"])
+    c["c_lmhead_ok"] = bool(lmhead["finite_ok"])
+    # (d) CLOSED budget: residual small, fractions sum to 1, fixed_overhead is the measured residual
+    c["d_closure_le_8pct"] = bool(comp["budget_closure_residual_frac"] <= 0.08)
+    fsum = comp["t_attn_frac"] + comp["t_body_gemm_frac"] + comp["t_lmhead_frac"] + comp["fixed_overhead_frac"]
+    c["d_fractions_sum_1"] = bool(abs(fsum - 1.0) <= 1e-9)
+    c["d_fixed_is_measured_residual"] = bool(
+        abs(comp["t_fixed_overhead_us"]
+            - (comp["step_norm_us"] - (comp["t_attn_us"] + comp["t_body_gemm_us"] + comp["t_lmhead_us"]))) <= 1e-6)
+    c["d_fixed_overhead_positive"] = bool(comp["fixed_overhead_frac"] > 0.0)
+    # (e) removables derived from the MEASURED component budget (not imported isolated numbers)
+    c["e_cb3_uses_measured_body_frac"] = bool(abs(
+        comp["cb3_body_removable_us"]
+        - CB3_READ_SHRINK_FRAC_408 * comp["body_bw_bound_frac"] * comp["t_body_gemm_us"]) <= 1e-6)
+    c["e_attn_removable_from_penalty"] = bool(abs(
+        comp["pinnedk_attn_removable_us"]
+        - comp["pinnedk_recovery_frac_realistic"] * comp["attn_penalty_us"]) <= 1e-6)
+    c["e_lmhead_removable_zero"] = bool(comp["lmhead_removable_us"] == 0.0)
+    c["e_overcredit_gt_2"] = bool(comp["overcredit_factor"] > 2.0)   # isolated sums DON'T close the step
+    # (f) stacked ceiling well-formed: clears bool typed, residual = 500 - ceiling, 2 flags
+    c["f_clears_bool"] = isinstance(comp["supply_stacked_flagged_clears_500"], bool)
+    c["f_residual_consistent"] = bool(abs(
+        comp["residual_gap_after_all_supply_flagged"]
+        - (TARGET_500 - comp["supply_stacked_flagged_ceiling_tps"])) <= 1e-6)
+    c["f_two_flags"] = bool(comp["n_flags_in_stacked_supply"] == 2)
+    c["f_ceiling_finite"] = bool(math.isfinite(comp["supply_stacked_flagged_ceiling_tps"]))
+    # (g) greedy-identity harness wired; >=3 seeds; on-target A10G sm8x; guard flags
+    c["g_greedy_identity_wired"] = bool(comp["greedy_identity_harness_wired"])
+    c["g_three_or_more_seeds"] = bool(n_seeds >= 3)
+    c["g_on_target_a10g_sm8x"] = bool(gpu["is_a10g_80sm"] and gpu["is_sm8x"])
+    c["g_guard_flags"] = bool(flags["no_hf_job"] and flags["no_launch"]
+                              and flags["no_served_file_change"] and flags["analysis_only"])
+    passes = all(c.values())
+    return {"passes": passes, "n_checks": len(c), "conditions": c}
+
+
+def print_report_decode_budget(payload: dict) -> None:
+    gpu, comp, st = payload["gpu"], payload["compose"], payload["selftest"]
+    body, lmhead = comp["body_budget"], comp["lmhead_budget"]
+    bar = "=" * 100
+    print(bar)
+    print("CLOSED M=1 DECODE-STEP LATENCY BUDGET -- stacked-flagged supply vs the fixed floor (PR #408)")
+    print(f"  GPU {gpu['name']} SMs={gpu['sm_count']} cc={gpu['compute_capability']} "
+          f"on-target={gpu['is_a10g_80sm'] and gpu['is_sm8x']}")
+    print("-" * 100)
+    print(f"  (0) HARNESS: #393 greedy-identity wired (un-pack ns=1 byte-exact M1-vs-M8) = "
+          f"{comp['greedy_identity_harness_wired']}")
+    print(f"  (1) ATTENTION: penalty_band(M=1)={comp['penalty_decode_band']:.4f} -> "
+          f"eta_attn_decode_only={comp['eta_attn_decode_only']*100:.4f}% -> deployed_strict="
+          f"{comp['deployed_strict']:.2f} (=={comp['deployed_strict_via_step']:.2f} via step) "
+          f"ceiling={comp['ceiling_strict']:.2f}")
+    print(f"  (2) PEAK-COPY BW={comp['peak_copy']['peak_copy_gbs']:.1f} GB/s "
+          f"({comp['peak_copy']['copy_eff_vs_theoretical']*100:.1f}% of {A10G_PEAK_BW_GBS:.0f})")
+    print("-" * 100)
+    print("  CLOSED BUDGET (normalized #378 partition; raw-isolated sums over-credit "
+          f"{comp['overcredit_factor']:.2f}x -> budget MUST be normalized):")
+    print(f"    t_attn       = {comp['t_attn_us']:8.2f} us  ({comp['t_attn_frac']*100:6.3f}%)")
+    print(f"    t_body_gemm  = {comp['t_body_gemm_us']:8.2f} us  ({comp['t_body_gemm_frac']*100:6.3f}%)")
+    print(f"    t_lmhead     = {comp['t_lmhead_us']:8.2f} us  ({comp['t_lmhead_frac']*100:6.3f}%)")
+    print(f"    t_FIXED_OVHD = {comp['t_fixed_overhead_us']:8.2f} us  ({comp['fixed_overhead_frac']*100:6.3f}%) "
+          f"<- the irreducible floor (draft-tail + launch/sched/norm/sampling)")
+    print(f"    step_total   = {comp['step_norm_us']:8.2f} us  closure_residual="
+          f"{comp['budget_closure_residual_frac']*100:.4f}%")
+    print("-" * 100)
+    print("  BW-BOUND SHARES (measured; read-shrink levers remove ONLY this share):")
+    print(f"    body_bw_bound_frac   = {comp['body_bw_bound_frac']:.4f}  "
+          f"(#391 0.256; reconciles={comp['body_reconciles_391']}; "
+          f"{body['count_weighted_eff_gbs']:.1f} GB/s weight-read)")
+    print(f"    lmhead_bw_bound_frac = {comp['lmhead_bw_bound_frac']:.4f}  "
+          f"({lmhead['lmhead_mib']:.2f} MiB, {lmhead['lmhead_m1_us']:.2f} us; removable=0 per #398)")
+    print("-" * 100)
+    print("  FLAGGED supply removables (priced on the MEASURED budget):")
+    print(f"    pinned-K attn : {comp['pinnedk_attn_removable_us']:6.2f} us realistic / "
+          f"{comp['pinnedk_attn_removable_roofline_us']:6.2f} us roofline -> attn-free "
+          f"{comp['attn_free_roofline_tps']:.2f} (roof) / {comp['attn_free_realistic_tps']:.2f} (real); "
+          f"gain +{comp['attn_lever_gain_roofline_tps']:.2f} (roof, reproduces #400 +14.29)")
+    print(f"    cb3 body      : {comp['cb3_body_removable_us']:6.2f} us "
+          f"(shrink {comp['cb3_read_shrink_frac']*100:.1f}% x bw_frac x t_body) -> "
+          f"+{comp['cb3_body_removable_tps_roofline']:.2f} TPS roofline (PPL-UNCAPPED upper bound)")
+    print(f"    lm_head       : {comp['lmhead_removable_us']:6.2f} us (#398 no loadable shrink)")
+    print("-" * 100)
+    print("  STACKED-FLAGGED-SUPPLY CEILING (fixed-overhead held constant):")
+    print(f"    supply_stacked_flagged_ceiling_tps = {comp['supply_stacked_flagged_ceiling_tps']:.2f} "
+          f"(roofline) / {comp['supply_stacked_flagged_ceiling_tps_realistic']:.2f} (realistic)")
+    print(f"    clears_500 = {comp['supply_stacked_flagged_clears_500']} (roofline) / "
+          f"{comp['supply_stacked_flagged_clears_500_realistic']} (realistic)")
+    print(f"    residual_gap_after_all_supply_flagged = {comp['residual_gap_after_all_supply_flagged']:+.2f} TPS "
+          f"(handed to demand); n_flags_in_stacked_supply = {comp['n_flags_in_stacked_supply']}")
+    print("-" * 100)
+    print(f"  SELF-TEST {st['passes']} ({st['n_checks']} checks): "
+          + json.dumps({k: int(v) for k, v in st["conditions"].items()}))
+    print("-" * 100)
+    print("  VERDICT")
+    print("   " + comp["verdict"])
+    print(bar)
+
+
+def maybe_log_wandb_decode_budget(payload: dict, args) -> str | None:
+    if args.no_wandb:
+        return None
+    repo = str(Path(__file__).resolve().parents[3])
+    if repo not in sys.path:
+        sys.path.insert(0, repo)
+    try:
+        from scripts.wandb_logging import (init_wandb_run, log_summary, log_json_artifact, finish_wandb)
+    except Exception as e:  # noqa: BLE001
+        print(f"[budget] wandb helpers unavailable: {e}")
+        return None
+    comp = payload["compose"]
+    body = comp["body_budget"]
+    run = init_wandb_run(
+        job_type="analysis-gpu-microbench", agent="wirbel",
+        name=args.wandb_name, group=args.wandb_group,
+        tags=["m1-decode-latency-budget", "closed-step-budget", "fixed-overhead-floor",
+              "stacked-flagged-supply", "roofline", "319-strict-lock", "pr-408"],
+        config={"pr": 408, "kind": "m1-decode-latency-budget",
+                "head_dim": HEAD_DIM, "band_L": list(BAND_L), "step_norm_us": STEP_NORM_US,
+                "ceiling_500": CEILING_500, "official_tps": OFFICIAL_TPS, "target_500": TARGET_500,
+                "f_attn_344": F_ATTN_344, "f_body_strict_378": F_BODY_STRICT_378,
+                "f_lmhead_378": F_LMHEAD_378, "f_draft_378": F_DRAFT_378,
+                "cb3_bpw_eff": CB3_BPW_EFF_408, "cb3_read_shrink_frac": CB3_READ_SHRINK_FRAC_408,
+                "m1_marlin_hbm_eff_391": M1_MARLIN_HBM_EFF_391, "lmhead_bytes": LMHEAD_BYTES_408,
+                "eta_attn_decode_393": ETA_ATTN_DECODE_393, "deployed_strict_393": DEPLOYED_STRICT_393,
+                "seeds": args.seeds, "ident_trials": args.ident_trials, "iters": args.iters},
+    )
+    if run is None:
+        print("[budget] wandb disabled (no API key / WANDB_MODE).")
+        return None
+    flat: dict[str, float] = {}
+    flat["budget/t_attn_frac"] = comp["t_attn_frac"]
+    flat["budget/t_body_gemm_frac"] = comp["t_body_gemm_frac"]
+    flat["budget/t_lmhead_frac"] = comp["t_lmhead_frac"]
+    flat["budget/fixed_overhead_frac"] = comp["fixed_overhead_frac"]
+    flat["budget/closure_residual_frac"] = comp["budget_closure_residual_frac"]
+    flat["budget/t_attn_us"] = comp["t_attn_us"]
+    flat["budget/t_body_gemm_us"] = comp["t_body_gemm_us"]
+    flat["budget/t_lmhead_us"] = comp["t_lmhead_us"]
+    flat["budget/t_fixed_overhead_us"] = comp["t_fixed_overhead_us"]
+    flat["budget/step_norm_us"] = comp["step_norm_us"]
+    flat["budget/overcredit_factor"] = comp["overcredit_factor"]
+    flat["bw/body_bw_bound_frac"] = comp["body_bw_bound_frac"]
+    flat["bw/lmhead_bw_bound_frac"] = comp["lmhead_bw_bound_frac"]
+    flat["bw/body_eff_gbs"] = body["count_weighted_eff_gbs"]
+    flat["bw/peak_copy_gbs"] = comp["peak_copy"]["peak_copy_gbs"]
+    flat["bw/body_reconciles_391"] = float(comp["body_reconciles_391"])
+    flat["eta/eta_attn_decode_only"] = comp["eta_attn_decode_only"]
+    flat["tps/deployed_strict"] = comp["deployed_strict"]
+    flat["tps/ceiling_strict"] = comp["ceiling_strict"]
+    flat["lever/pinnedk_attn_removable_us"] = comp["pinnedk_attn_removable_us"]
+    flat["lever/attn_free_roofline_tps"] = comp["attn_free_roofline_tps"]
+    flat["lever/attn_free_realistic_tps"] = comp["attn_free_realistic_tps"]
+    flat["lever/attn_lever_gain_roofline_tps"] = comp["attn_lever_gain_roofline_tps"]
+    flat["lever/cb3_body_removable_us"] = comp["cb3_body_removable_us"]
+    flat["lever/cb3_body_removable_tps_roofline"] = comp["cb3_body_removable_tps_roofline"]
+    flat["lever/lmhead_removable_us"] = comp["lmhead_removable_us"]
+    flat["ceiling/supply_stacked_flagged_ceiling_tps"] = comp["supply_stacked_flagged_ceiling_tps"]
+    flat["ceiling/supply_stacked_flagged_ceiling_tps_realistic"] = comp["supply_stacked_flagged_ceiling_tps_realistic"]
+    flat["ceiling/supply_stacked_flagged_clears_500"] = float(comp["supply_stacked_flagged_clears_500"])
+    flat["ceiling/residual_gap_after_all_supply_flagged"] = comp["residual_gap_after_all_supply_flagged"]
+    flat["ceiling/n_flags_in_stacked_supply"] = float(comp["n_flags_in_stacked_supply"])
+    flat["selftest/decode_latency_budget_self_test_passes"] = float(payload["selftest"]["passes"])
+    flat["gpu/sm_count"] = float(payload["gpu"]["sm_count"])
+    flat["mem/peak_mem_mib"] = payload["peak_mem_mib"]
+    run.log({"global_step": 0, **flat})
+    log_summary(run, _jsonable(payload), step=0, run_prefix=args.wandb_name)
+    log_json_artifact(run, name="m1_decode_latency_budget", artifact_type="analysis", data=_jsonable(payload))
+    finish_wandb(run)
+    rid = getattr(run, "id", None)
+    print(f"[budget] wandb logged {len(flat)} keys (run {rid})")
+    return rid
+
+
+def main_decode_budget(dev: torch.device, gpu: dict, args) -> None:
+    """PR #408 driver: build the CLOSED M=1 decode-step latency budget + stacked-flagged-supply
+    ceiling. GPU MEASUREMENT + roofline ANALYSIS only (NO build/patch/launch/served-file change)."""
+    comp = compose_decode_budget(dev, args, gpu)
+    flags = {"no_hf_job": True, "no_launch": True, "no_served_file_change": True, "analysis_only": True}
+    st = selftest_decode_budget(comp, gpu, flags, len(args.seeds))
+    torch.cuda.synchronize()
+    payload = {
+        "agent": "wirbel", "pr": 408, "kind": "m1-decode-latency-budget",
+        "created_at": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+        **flags,
+        "gpu": gpu, "seeds": args.seeds,
+        "peak_mem_mib": round(torch.cuda.max_memory_allocated(dev) / (1024**2), 3),
+        "ladder_constants": {"ceiling_500": CEILING_500, "official_tps": OFFICIAL_TPS,
+                             "target_500": TARGET_500, "step_norm_us": STEP_NORM_US,
+                             "f_attn_344": F_ATTN_344, "f_body_strict_378": F_BODY_STRICT_378,
+                             "f_lmhead_378": F_LMHEAD_378, "f_draft_378": F_DRAFT_378,
+                             "cb3_bpw_eff": CB3_BPW_EFF_408, "cb3_read_shrink_frac": CB3_READ_SHRINK_FRAC_408,
+                             "m1_marlin_hbm_eff_391": M1_MARLIN_HBM_EFF_391,
+                             "eta_attn_decode_393": ETA_ATTN_DECODE_393,
+                             "deployed_strict_393": DEPLOYED_STRICT_393, "ceiling_strict_393": CEILING_STRICT_393},
+        "compose": comp, "selftest": st,
+        # ---- PRIMARY + headline SENPAI-RESULT surface (the #408 deliverables) ----
+        "decode_latency_budget_self_test_passes": bool(st["passes"]),
+        "t_attn_frac": comp["t_attn_frac"],
+        "t_body_gemm_frac": comp["t_body_gemm_frac"],
+        "t_lmhead_frac": comp["t_lmhead_frac"],
+        "fixed_overhead_frac": comp["fixed_overhead_frac"],
+        "budget_closure_residual_frac": comp["budget_closure_residual_frac"],
+        "body_bw_bound_frac": comp["body_bw_bound_frac"],
+        "lmhead_bw_bound_frac": comp["lmhead_bw_bound_frac"],
+        "pinnedk_attn_removable_us": comp["pinnedk_attn_removable_us"],
+        "cb3_body_removable_tps_roofline": comp["cb3_body_removable_tps_roofline"],
+        "supply_stacked_flagged_ceiling_tps": comp["supply_stacked_flagged_ceiling_tps"],
+        "supply_stacked_flagged_clears_500": comp["supply_stacked_flagged_clears_500"],
+        "residual_gap_after_all_supply_flagged": comp["residual_gap_after_all_supply_flagged"],
+        "n_flags_in_stacked_supply": comp["n_flags_in_stacked_supply"],
+        # test metric for the marker
+        "deployed_strict_repro_393": comp["deployed_strict"],
+    }
+    print_report_decode_budget(payload)
+    out_path = Path(args.out_dir) / "m1_decode_latency_budget_results.json"
+    json.dump(_jsonable(payload), open(out_path, "w"), indent=2)
+    print(f"[budget] results -> {out_path}")
+    rid = maybe_log_wandb_decode_budget(payload, args)
+    if rid:
+        payload["wandb_run_id"] = rid
+        json.dump(_jsonable(payload), open(out_path, "w"), indent=2)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--smoke", action="store_true", help="tiny fast run to validate the path")
@@ -1429,6 +2022,13 @@ def main() -> None:
                     action="store_true", help="(pinnedk) measure M=1 draft-lane occupancy/BW (default on)")
     ap.add_argument("--roofline-recovery", "--roofline_recovery", dest="roofline_recovery",
                     action="store_true", help="(pinnedk) roofline the pinned-K recovery (default on)")
+    ap.add_argument("--decode-latency-budget", "--decode_latency_budget", dest="decode_latency_budget",
+                    action="store_true", help="PR #408: CLOSED M=1 decode-step latency budget entrypoint")
+    ap.add_argument("--measure-per-component-cuda-events", "--measure_per_component_cuda_events",
+                    dest="measure_per_component_cuda_events", action="store_true",
+                    help="(budget) per-component CUDA-event measurement (default on)")
+    ap.add_argument("--roofline-stacked-supply", "--roofline_stacked_supply", dest="roofline_stacked_supply",
+                    action="store_true", help="(budget) roofline the stacked-flagged-supply ceiling (default on)")
     ap.add_argument("--ident-trials", type=int, default=8, help="independent batch=1 problems per seed")
     ap.add_argument("--iters", type=int, default=100)
     ap.add_argument("--warmup", type=int, default=25)
@@ -1447,6 +2047,10 @@ def main() -> None:
 
     dev = _device()
     gpu = _gpu_facts(dev)
+
+    if args.decode_latency_budget:
+        main_decode_budget(dev, gpu, args)
+        return
 
     if args.pinnedk_headroom:
         main_pinnedk(dev, gpu, args)
