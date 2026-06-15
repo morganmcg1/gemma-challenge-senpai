@@ -1,0 +1,199 @@
+{
+  "baseline_official_tps": 481.53,
+  "composition_cross_check": {
+    "cycle_excess_ms": 0.23854529622114207,
+    "cycle_excess_pct": 2.9882092167030025,
+    "e_t": 3.844,
+    "hardware_clock_implied": true,
+    "k_cal": 125.268,
+    "k_cal_times_e_t": 481.530192,
+    "local_accept_cycle_ms": 8.221429991434604,
+    "official_accept_cycle_ms": 7.982884695213462,
+    "served_forward_step_ms": 1.2182
+  },
+  "created_at": "20260615T013136Z",
+  "decomposition": {
+    "components_tps": {
+      "hardware_clock_plus_methodology": 13.971436099945606,
+      "harness_tokenization_io_warmup": 2.418092295470217
+    },
+    "dominant": "hardware",
+    "gap_tps": 16.389528395415823,
+    "hardware_pct_of_gap": 85.24611424361325,
+    "harness_pct_of_gap": 14.75388575638675,
+    "harness_subsplit_tps": {
+      "client_tokenization": 0.6050566449916088,
+      "per_request_file_io": 0.09988965085192492,
+      "warmup_inclusion": 1.7131459996266831
+    },
+    "measured": true,
+    "official_boundary_tps_local": 467.55856390005437,
+    "sum_check_tps": 16.389528395415823,
+    "wall_tps_local_remeasure": 464.97546025091646
+  },
+  "local_official_tps_transfer_self_test_passes": true,
+  "mapping_rule": {
+    "ceiling_lambda1_local_equiv": 503.21875829628095,
+    "local_bar_for_official_500": 482.9818200367414,
+    "rule": "official ~= tau_lo * local; local must read >= 500/tau_lo to clear official 500",
+    "stark266_clears_local_bar": true,
+    "stark266_clears_official_500": true,
+    "stark266_implied_official_tps": 564.3483640424913,
+    "stark266_margin_over_local_bar_tps": 62.15817996325859,
+    "stark266_projected_local_tps": 545.14
+  },
+  "measured": {
+    "length_sweep_tau": {
+      "128": 1.0062362201465767,
+      "256": 1.0053302844912875,
+      "512": 1.0055553547874203
+    },
+    "local_step_ms_implied": 8.221429991434604,
+    "model_id": "google/gemma-4-E4B-it",
+    "official_boundary_tps_local": 467.55856390005437,
+    "overhead_time_split_s": {
+      "client_tokenization": 0.19484033883782104,
+      "per_request_file_io": 0.032166465040063486,
+      "warmup_inclusion": 0.55166726918692
+    },
+    "passes": {
+      "128": {
+        "T_io_s": 0.01644196195411496,
+        "T_request_s": 39.52509391005151,
+        "T_request_warm_s": 38.236036596033955,
+        "T_tokenize_s": 0.17406148312147707,
+        "T_wall_s": 39.7155973551271,
+        "local_step_ms_implied": 9.260290113101973,
+        "mean_request_cold4_ms": 322.2643285043887,
+        "mean_request_warm_ms": 308.3551338389835,
+        "num_records": 128,
+        "official_boundary_tps_local": 415.10578535345184,
+        "output_len": 128,
+        "overhead_time_split_s": {
+          "client_tokenization": 0.17406148312147707,
+          "per_request_file_io": 0.01644196195411496,
+          "warmup_inclusion": 0.055636778661620756
+        },
+        "wall_tps_local": 412.5331378878253,
+        "warmup_drag_ms_per_req": 13.909194665405188
+      },
+      "256": {
+        "T_io_s": 0.02263390491134487,
+        "T_request_s": 73.65128225504304,
+        "T_request_warm_s": 71.17974231104017,
+        "T_tokenize_s": 0.1935941239935346,
+        "T_wall_s": 73.86751028394792,
+        "local_step_ms_implied": 8.61942192047752,
+        "mean_request_cold4_ms": 617.8849860007176,
+        "mean_request_warm_ms": 574.0301799277433,
+        "num_records": 128,
+        "official_boundary_tps_local": 445.9695830491426,
+        "output_len": 256,
+        "overhead_time_split_s": {
+          "client_tokenization": 0.1935941239935346,
+          "per_request_file_io": 0.02263390491134487,
+          "warmup_inclusion": 0.17541922429189727
+        },
+        "wall_tps_local": 443.6050419736535,
+        "warmup_drag_ms_per_req": 43.85480607297432
+      },
+      "512": {
+        "T_io_s": 0.032166465040063486,
+        "T_request_s": 140.7180657912104,
+        "T_request_warm_s": 135.78619856821024,
+        "T_tokenize_s": 0.19484033883782104,
+        "T_wall_s": 140.94507259508828,
+        "local_step_ms_implied": 8.221429991434604,
+        "mean_request_cold4_ms": 1232.9668057500385,
+        "mean_request_warm_ms": 1095.0499884533085,
+        "num_records": 128,
+        "official_boundary_tps_local": 467.55856390005437,
+        "output_len": 512,
+        "overhead_time_split_s": {
+          "client_tokenization": 0.19484033883782104,
+          "per_request_file_io": 0.032166465040063486,
+          "warmup_inclusion": 0.55166726918692
+        },
+        "wall_tps_local": 464.97546025091646,
+        "warmup_drag_ms_per_req": 137.91681729673
+      }
+    },
+    "peak_vram_gb": 18.9404296875,
+    "run_dir": "/workspace/senpai/target/research/systems/local_official_tps_transfer/measure-20260615T012251Z",
+    "served_model_name": "gemma-4-e4b-it",
+    "wall_tps_local_remeasure": 464.97546025091646,
+    "warmup_pass": {
+      "T_io_s": 0.025981525046518072,
+      "T_request_s": 143.84422156703658,
+      "T_request_warm_s": 138.62594102803268,
+      "T_tokenize_s": 0.17210449921549298,
+      "T_wall_s": 144.0423075912986,
+      "local_step_ms_implied": 8.393367523181666,
+      "mean_request_cold4_ms": 1304.5701347509748,
+      "mean_request_warm_ms": 1117.951137322844,
+      "num_records": 128,
+      "official_boundary_tps_local": 457.98066025147176,
+      "output_len": 512,
+      "overhead_time_split_s": {
+        "client_tokenization": 0.17210449921549298,
+        "per_request_file_io": 0.025981525046518072,
+        "warmup_inclusion": 0.7464759897125228
+      },
+      "wall_tps_local": 454.977437503639,
+      "warmup_drag_ms_per_req": 186.6189974281307
+    }
+  },
+  "ppl_local_anchor": 2.376682786480556,
+  "ppl_official": 2.3772,
+  "regenerated_note": "report regenerated from persisted measured (serve run nzqnd154) to add analytic mapping_rule + corrected composition cross-check; no re-serve",
+  "self_test": {
+    "constants_ok": true,
+    "decomp_sum_ok": true,
+    "decomp_sum_resid": 0.0,
+    "decomp_sum_tol": 0.001,
+    "local_bar_roundtrip_ok": true,
+    "local_bar_roundtrip_resid": 5.684341886080802e-14,
+    "nan_clean_ok": true,
+    "noise_run2run_tps": 0.16279916506160447,
+    "noise_within_config_tps": 0.03613130777969786,
+    "offset_tps": 16.389528395415823,
+    "passes": true,
+    "systematic_offset_margin_x": 100.67329515611397,
+    "systematic_offset_ok": true,
+    "tau_lo_roundtrip_ok": true,
+    "tau_lo_roundtrip_resid": 0.0
+  },
+  "tau_lo": 1.0352356533046398,
+  "tau_lo_stability": {
+    "basis": "measured-split",
+    "f0_harness_overhead_frac": 0.005198628034082997,
+    "h_factor_hardware_ratio": 1.0298816815232843,
+    "local_bar_for_500_at": {
+      "E[T]=3.500": 483.20545708486407,
+      "E[T]=3.844": 482.9818200367414,
+      "E[T]=4.500": 482.5559226571997
+    },
+    "tau_lo_at": {
+      "E[T]=3.500": 1.0347565257570888,
+      "E[T]=3.844": 1.0352356533046398,
+      "E[T]=4.500": 1.0361493383953186
+    },
+    "tau_lo_spread_over_ET_range": 0.0013928126382298789,
+    "tau_lo_spread_pct": 0.1345406365964885,
+    "tau_lo_stable": true
+  },
+  "tps_delta": 0.0,
+  "transfer": {
+    "additive_gap_tps": 16.389528395415823,
+    "ceiling_lambda1_tps": 520.95,
+    "gap_pct_local_relative": 3.523565330463989,
+    "gap_pct_official_relative": 3.4036359926517195,
+    "local_anchor_tps": 465.14047160458415,
+    "local_bar_for_official_500": 482.9818200367414,
+    "official_anchor_tps": 481.53,
+    "private_verified_tps": 460.85,
+    "tau_lo": 1.0352356533046398
+  },
+  "transfer_calibration_analysis_only": true,
+  "wandb_run_id": "nzqnd154"
+}
