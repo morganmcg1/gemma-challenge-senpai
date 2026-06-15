@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~03:50Z (cycle 52k)
+- **Date:** 2026-06-15 ~04:05Z (cycle 52k)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
@@ -50,6 +50,7 @@ official = K_cal · (E[T]/step) · τ = 125.268 · (3.844/1218.2) · 1.218 = 481
 K_cal = 125.268 · step = 1218.2µs (NORMALIZED unit) · E[T] = 3.844 (K=7 linear) · τ = 1.218
 τ_lo  = 1.03524   (local→official TPS transfer, lawine #267)
 τ_acc = 1.0       (local→official acceptance transfer, lawine #276)
+τ_ppl = 1.000218  (local→official PPL transfer, lawine #288 — trinity COMPLETE; safe local PPL bar 2.4185)
 bridge = 0.2147   (batch=1 wall draft → normalized step over-credit 4.82×, denken #278)
 φ_tree = 0.603    (tree-path wall-step fixed-overhead discount, fern #274 — DIFFERENT mechanism)
 g_d (deployed) = 0.0191  (tree width, denken #271 → M*=32 = 479.6 < 500)
@@ -63,10 +64,10 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 | Student | PR | Hypothesis | Owner | Status |
 |---------|-----|-----------|-------|--------|
-| wirbel  | #290 | Step-banked BUILT-raise target + EAGLE-3 feasibility bracket (banks #285 envelope into fern #281's floor) | me | 🔄 WIP (reseat; #285 MERGED 03:40 → free step ceiling 487.7) |
+| wirbel  | #293 | EAGLE-3 drafter step-overhead (re-bank the 4.9029 target for the HEAVIER fusion drafter; does it eat the 0.0631 free-lever relaxation?) | me | 🔄 WIP (reseat; #290 MERGED 04:04 → honest target 4.9029, budget 1.0584 off linear family) |
 | kanna   | #289 | Per-position acceptance decay (the BUILT-raise a_k target profile to E[T]≥4.97) | me | 🔄 WIP (reseat; #286 MERGED 03:35 → bridge draft-0.21/verify-1.0, stack 493.64) |
 | fern    | #287 | Read-reduction PPL pareto | Morgan | 🔄 WIP |
-| lawine  | #288 | PPL local→official transfer (τ_ppl): safe local bar for gate | Morgan | 🔄 WIP |
+| lawine  | #292 | SAM-Decoding retrieval acceptance-lift (the one TRAINING-FREE forward E[T] lever; prompt suffix-recurrence → E[T] bracket) | me | 🔄 WIP (reseat; #288 MERGED 03:58 → τ_ppl=1.000218, safe local PPL bar 2.4185, transfer trinity COMPLETE) |
 | denken  | #291 | Verify-compute overlap-hideability (honest kernel floor in [487.7, 746.9]; is a free non-build step lane real?) | me | 🔄 WIP (reseat; #283 MERGED 03:49 → system NOT read-bound, read=38% of honest wall, verify front OPEN) |
 | ubel    | #284 | Decode-loop host overhead (CPU/scheduling fraction of wall) | Morgan | 🔄 WIP |
 | stark   | #273 | Static-K wall-clock (ongoing from 52i) | me | 🔄 WIP |
@@ -90,6 +91,7 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 - **int4-Marlin body GEMMs**: bit-exact across M=1/8/16, already deployed. Closed.
 - **ONEGRAPH/CUDAGraph / TRITON_ATTN pin**: already deployed in 481.53. Closed.
 - **τ_acc**: 1.0 ± 0.0075, local=official. Closed (lawine #276).
+- **τ_ppl**: 1.000218 ± 0.000210, local int4 PPL = official proxy. Safe local PPL bar 2.4185. Closed (lawine #288) — the local→official transfer TRINITY (τ_lo/τ_acc/τ_ppl) is COMPLETE.
 
 ### Step-side consolidation — MERGED (banks credit, does NOT cross 500 alone)
 - **Lossless micro-lever envelope (wirbel #285, MERGED 03:40, `97b57hhe`)**: total greedy-safe bit-identical step-shaving = **15.48µs → +1.29% → 487.7 TPS** (`envelope_clears_500=False`). The four-lever stack collapses to ONE incremental lever (SDPA num_stages 3→2); lm_head (0.66µs fused ceiling, FUSED_SPARSE_ARGMAX on-GPU) + norms (ONEGRAPH+vLLM fused add+rmsnorm) `already_captured`. The **FREE step-side ceiling is 487.7 TPS**; residual gap +2.52% lives off the step axis.
@@ -115,9 +117,10 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 **THE PIVOT — BUILT public-E[T] raise (Plateau-Protocol bigger swing):**
 1. **Phase-1 viability (cheap, in-bounds):** EAGLE-3 architecture-adaptation sanity (2h single GPU, `SupportsEagle3` load + run for Gemma-4, no retrain, no submission). De-risk the interface before spending training.
-2. **Pre-build target (analytic, NOW ASSIGNED):** **kanna #289** decomposes E[T]=3.844 into the per-position acceptance profile `a_k`, locates the acceptance cliff (which draft positions EAGLE-3 must fix), and prices the per-position lift to 4.97. **wirbel #290** (the aggregate complement) banks his own #285 lossless envelope into fern #281's floor (target relaxes 4.97→~4.90 at bridge=1.0) and brackets EAGLE-3's recoverable budget (target − denken #119's linear cap 3.8445) inside the feasibility window — a necessary-condition de-risk for the gated retrain.
-3. **Full EAGLE-3 retrain (human-approval-gated):** route via `Approval request: HF job`. Companion PARD-2 CAT loss (same run). Additive SAM-Decoding retrieval (+2-4%, zero PPL risk).
-4. **Composition:** any built E[T] raise stacks multiplicatively on the lossless step envelope (wirbel #285) — `official = K_cal·(E[T]/step)·τ`, E[T]-independent step levers compose cleanly.
+2. **Pre-build target (analytic):** **wirbel #290 (MERGED 04:04, `ub3kpsso`)** settled the aggregate honest step-banked target at **4.9029** public E[T] — budget **+1.0584** beyond denken #119's linear cap 3.8445 (which the deployed drafter sits AT, zero linear headroom), inside the feasibility window (4.9029 < E_T_max 8.0; 25.5% of cap→ceiling headroom), recoverable ONLY by a structurally non-linear drafter; `eagle3_sufficiency_is_build_gated`. **kanna #289** (in flight) decomposes E[T]=3.844 into the per-position a_k profile + cliff (WHERE the budget lives). **wirbel #293** (reseat) re-banks the 4.9029 target for the HEAVIER EAGLE-3 fusion drafter's draft-step overhead — does the heavier drafter eat the 0.0631 free-lever relaxation?
+3. **Ungated forward companion (analytic, in flight):** **lawine #292** screens SAM-Decoding suffix-automaton retrieval — the ONE training-free E[T] lever: measures prompt suffix-recurrence on the 128 official prompts → E[T]-lift bracket, decides STANDALONE (avoids the human gate) vs +2-4% ungated companion that stacks under EAGLE-3. Greedy-safe by construction (emission = verify argmax); armed by lawine's own **#288 transfer trinity** (τ_lo/τ_acc/τ_ppl COMPLETE → local PPL bar 2.4185, "zero PPL risk" transfers 1:1).
+4. **Full EAGLE-3 retrain (human-approval-gated):** route via `Approval request: HF job`. Companion PARD-2 CAT loss (same run). Phase-1 architecture-adaptation viability (2h single GPU) is the cheap precursor.
+5. **Composition:** any built E[T] raise stacks multiplicatively on the lossless step envelope (wirbel #285) — `official = K_cal·(E[T]/step)·τ`, E[T]-independent step levers compose cleanly.
 
 **Launch posture:** NEVER launch unilaterally. Route via `Approval request: HF job`. Publish-first (#124), human green-light required. All cycle-52k deliverables are bank-the-analysis (0 TPS, baseline unchanged at 481.53).
 
