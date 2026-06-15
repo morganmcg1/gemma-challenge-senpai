@@ -176,29 +176,65 @@ def revert_toggle(original: bytes) -> bool:
 # Server-log scrape: prove the candidate arm actually ran num_stages=2 AND that
 # splitkv-verify still applied in BOTH arms (kernel-module finder chaining OK).
 # ---------------------------------------------------------------------------
-def _read_logs(arm_dir: Path) -> str:
+def _arm_run_logs(arm_dir: Path) -> list[Path]:
     if not arm_dir.exists():
-        return ""
-    return "\n".join(p.read_text(errors="replace") for p in sorted(arm_dir.glob("server_run*.log")))
+        return []
+    return sorted(arm_dir.glob("server_run*.log"))
 
 
 def verify_arms_applied(seed_dir: Path) -> dict[str, Any]:
-    s3 = _read_logs(seed_dir / "sdpa_s3")
-    s2 = _read_logs(seed_dir / "sdpa_s2")
-    s2_patched = "[sdpa-ab] PATCHED" in s2
-    s2_forced = s2.count("forced num_stages=2")
-    s3_clean = "[sdpa-ab] PATCHED" not in s3  # baseline must NOT carry the patch
-    splitkv_s3 = "[splitkv-verify] wrapped unified_attention" in s3
-    splitkv_s2 = "[splitkv-verify] wrapped unified_attention" in s2
-    ok = bool(s2_patched and s2_forced > 0 and s3_clean and splitkv_s3 and splitkv_s2)
+    """Run-GRANULAR attestation that EVERY s2 run actually ran num_stages=2.
+
+    The injector logs a per-process ``[sdpa-ab] PATCHED`` + ``forced
+    num_stages=2`` on every server launch. A seed-level "PATCHED appears
+    somewhere" check cannot detect a *single* run that silently fell back to
+    baseline — e.g. the injector file vanishing mid-run so ``sitecustomize``
+    fails open with ``[sdpa-ab] HOOK FAILED``. That fail-open class secretly
+    relabels a baseline run as the candidate and is exactly what this wall-audit
+    must never ship, so each s2 run must individually prove the patch and no run
+    may carry a HOOK FAILED.
+    """
+    s3_logs = _arm_run_logs(seed_dir / "sdpa_s3")
+    s2_logs = _arm_run_logs(seed_dir / "sdpa_s2")
+
+    s2_runs = []
+    s2_forced_total = 0
+    for p in s2_logs:
+        t = p.read_text(errors="replace")
+        forced = t.count("forced num_stages=2")
+        s2_forced_total += forced
+        s2_runs.append({
+            "run": p.name, "patched": "[sdpa-ab] PATCHED" in t, "forced_hits": forced,
+            "hook_failed": "[sdpa-ab] HOOK FAILED" in t,
+            "splitkv": "[splitkv-verify] wrapped unified_attention" in t,
+        })
+    s3_runs = []
+    for p in s3_logs:
+        t = p.read_text(errors="replace")
+        s3_runs.append({
+            "run": p.name, "patched": "[sdpa-ab] PATCHED" in t,  # baseline must NOT carry the patch
+            "hook_failed": "[sdpa-ab] HOOK FAILED" in t,
+            "splitkv": "[splitkv-verify] wrapped unified_attention" in t,
+        })
+
+    s2_all_patched = bool(s2_runs) and all(r["patched"] and r["forced_hits"] > 0 for r in s2_runs)
+    s2_runs_failed_open = sum(1 for r in s2_runs if r["hook_failed"])
+    s3_all_clean = bool(s3_runs) and all((not r["patched"]) and (not r["hook_failed"]) for r in s3_runs)
+    splitkv_all = (bool(s2_runs) and bool(s3_runs)
+                   and all(r["splitkv"] for r in s2_runs) and all(r["splitkv"] for r in s3_runs))
+    ok = bool(s2_all_patched and s2_runs_failed_open == 0 and s3_all_clean and splitkv_all)
     return {
-        "s2_patched": s2_patched,
-        "s2_forced_log_hits": s2_forced,
-        "s3_baseline_unpatched": s3_clean,
-        "splitkv_in_s3": splitkv_s3,
-        "splitkv_in_s2": splitkv_s2,
+        "s2_runs": s2_runs,
+        "s3_runs": s3_runs,
+        "s2_runs_total": len(s2_runs),
+        "s2_runs_patched": sum(1 for r in s2_runs if r["patched"] and r["forced_hits"] > 0),
+        "s2_runs_failed_open": s2_runs_failed_open,
+        "s2_forced_log_hits": s2_forced_total,
+        "s2_all_runs_patched": s2_all_patched,
+        "s3_baseline_unpatched": s3_all_clean,
+        "splitkv_all_runs": splitkv_all,
         "applied_ok": ok,
-        "logs_found": bool(s3 and s2),
+        "logs_found": bool(s3_logs and s2_logs),
     }
 
 
