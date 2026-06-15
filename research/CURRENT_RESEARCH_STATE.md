@@ -1,7 +1,19 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~07:32Z (cycle 52s)
+- **Date:** 2026-06-15 ~07:46Z (cycle 52t — greedy-compliant pivot)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
+
+## 🆕 Cycle-52t Snapshot — HUMAN DIRECTIVE: focus ONLY on greedy-decode-correct experiments (#192) → the COMPLIANT lane is now the frontier of record
+
+**★ HUMAN DIRECTIVE (07:23–27Z, Issue #192):** *"what is the best result the team has gotten so far that still meets the organisers greedy decode correctness criteria? we should focus now only on experiments that will meet this criteria"* + *"ensure this is written to your current research direction file"* + heed **@hayai-agent**'s flag that over-emphasis on pure efficiency is degrading quality. This RE-PRIORITIZES the programme: the greedy-token-identity gate (program.md 27–28) is now a **SELF-IMPOSED hard constraint**, not an organizer-deferred risk — superseding the #124 "publish-500-first, let organizers adjudicate validity" stance. Answered on #192; recorded here.
+
+**★ BEST MEASURED STRICT-COMPLIANT RESULT = 165.44 official TPS** (non-spec int4 M=1 AR, lawine #196 `y4tavh9p`/`ekds1cy5`: `token_identity_rate=1.0` over 65,536 tok × 3 reloads, PPL 2.3766, 128/128 — token-identical to plain greedy AR **by construction**, no speculation). −66.9% below 500: strict compliance forfeits the ~+316 TPS the drafter buys. **This is the compliant frontier of record.**
+
+**★ THE DEPLOYED 481.53 IS NEAR-GREEDY BUT NOT BYTE-EXACT.** Correcting #124's "56% divergent" title (that is the M=1 figure, kanna #114): at the DEPLOYED M=8 verify width the int4 split-K divergence collapses to **0.73%** (denken #232 `nxwv6pam`, identity 0.9927). 481.53 passes PPL (2.3772) + 128/128 + the organizer's actual scorer (which runs NO token-identity check, per #124), but ≠0% ⇒ FAILS the strict self-imposed gate. The exact served-spec-on-vs-off greedy gate is UNMEASURED (needs an HF Job); 0.73% is the best proxy.
+
+**★ NO MEASURED >500 COMPLIANT RESULT EXISTS.** The only strict-compliant >500 lane = the custom **batch-invariant int4 verify kernel** (wirbel #216 `pc8g6s04` / #227 `o674wmna` — the valid-verify menu collapsed to ONE survivor): fix the M-dependent split-K so verify-M argmax == AR argmax → λ=1 ceiling ~520.95 / floor-adj ~516, double-gated (kernel near its 0.95%-of-step floor AND acceptance λ≥0.857). **UNBUILT.** fp16-verify (lane-b ~295–306, #221/#227) and no-spec (165.44) are the only MEASURED valid-premise serves, both <500 — and fp16-verify is itself ~1.06% divergent (#221), so not strictly valid either; MarginGate/DVR structurally miss the budget (#223).
+
+**★ STRATEGIC REFRAME — the EAGLE-3 build ALONE is not compliant.** The #319 EAGLE-3 E[T]-raise buys SPEED, but its verify is still the same M-dependent int4 GEMM ⇒ on its own it inherits the ~0.73% divergence. A strict-compliant >500 therefore = **batch-invariant verify kernel (IDENTITY) + an E[T] lever (SPEED)**, jointly — not the drafter alone. Re-ranking in-flight work against the identity gate; deprioritizing pure-efficiency levers that erode it. **Carry-through for #319:** the (A) single-stream measured read should ALSO capture the served greedy-identity rate, not TPS alone — a >500 read that is 0.73%-divergent does NOT satisfy the new directive. All in-flight and freshly-banked YELLOW-closers (fern #318, lawine #316, wirbel #314, ubel #315) — **and every new reseat this cycle** — must be read THROUGH the strict identity gate before feeding any build/measure decision. (Note: this turn Morgan merged ubel #315, stark #298 free-ceiling, and denken #317 — the #272 boot-guard port that SHIPS to the 481.53 submission — freeing 3 students whose reseats should target the compliant lane.)
 
 ## 🆕 Cycle-52s Snapshot — the TWO GREEN PILLARS land → EAGLE-3 GO/NO-GO is GREEN-pending-build → escalated to humans (#319); #272 boot-guard port HUMAN-APPROVED
 
