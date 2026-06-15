@@ -1,0 +1,272 @@
+{
+  "agent": "wirbel",
+  "analysis_only": true,
+  "analytic_self_test_passes": true,
+  "audit": {
+    "evidence_327": {
+      "charges_full_forgone_reduction_parallelism": true,
+      "interpretation": "pi(u)=1-BW_util charged at phi_forgone=1: the FULL forgone split-KV slack -> the un-packing-LIMIT SDPA tax (9.451%).",
+      "penalty_model": "pi(u) = 1 - BW_util  (above-roofline exposed slack = forgone reduction parallelism); floor_component = step_share * pi(u) = measured exposed_us / total_us",
+      "sdpa_floor_contribution": 0.09450777303509898,
+      "sdpa_full_roundtrips_step_share_x_pi": true,
+      "sdpa_penalty_pi": 0.6511613515093875
+    },
+    "evidence_332": {
+      "geometric_phi_forgone": 0.925,
+      "interpretation": "phi_forgone = 1 - N_nonreduction(6)/SMs(80) = 0.925 counts ONLY the non-reduction CTAs as available to a deterministic schedule -> the un-packing assumption (reduction axis dropped).",
+      "n_nonreduction_ctas": 6,
+      "phi_excludes_reduction_axis": true,
+      "phi_model": "phi = 1 - min(1, N_nonreduction / SMs) = forgone-parallelism fraction = share of the machine the deterministic (non-reduction) schedule leaves idle.",
+      "phi_roundtrips_1_minus_Nnonred_over_SMs": true,
+      "reduction_axis": "KV-sequence split (NUM_PAR_SOFTMAX_SEGMENTS=16 online-softmax segments) -- FORGONE for determinism (fixed split + ordered combine).",
+      "reduction_axis_called_forgone_for_determinism": true
+    },
+    "shared_assumption": "strict determinism requires UN-PACKING the split-KV reduction (collapse to the non-reduction M x q-head tiles, forgoing the split-KV occupancy). #363 refutes the PREMISE: a fixed-split + ordered-combine reduction is deterministic yet retains all num_splits CTAs in parallel.",
+    "shares_unpacking_assumption_327": true,
+    "shares_unpacking_assumption_332": true
+  },
+  "created_at": "20260615T135101Z",
+  "crosscheck_365": {
+    "note": "stark #365 (lm_head BI-GEMM eta) not yet posted. This analytic card's attention-locus phi_recovery~=1.0 CORROBORATES #363's measured bi_gemm_eta=0 (same mechanism, theory vs experiment). The residual lm_head term is <= 0.390% (#327 lm_head_floor_full, BW_util 0.834) -- already << the 4.02% budget even at phi_forgone=1 -- and stark #365 measures whether even that is recoverable.",
+    "pr365_posted": false,
+    "predicted_total_locus_eta_if_lmhead_free": 0.003904718156915901,
+    "predicted_total_locus_eta_if_lmhead_full": 0.003904718156915901
+  },
+  "ctas_in_flight_heuristic": 56,
+  "ctas_in_flight_pinned8": 64,
+  "ctas_in_flight_unpacked": 8,
+  "eta_floor_pinned_split_analytic": 0.003904718156915901,
+  "gpu": {
+    "compute_capability": "8.6",
+    "is_a10g_80sm": true,
+    "is_ga102_sm86": true,
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "total_mem_gib": 22.06
+  },
+  "kind": "pinned-split-phi-audit",
+  "ladder_constants": {
+    "budget_500_eta": 0.040220518933569815,
+    "ceiling_500": 520.953,
+    "ceiling_at_geo_332_473": 473.5295953446407,
+    "floor_blanket_9841": 0.09841249119201488,
+    "recovery_breakeven_500": 0.5913117809665351,
+    "recovery_breakeven_noreg_0255": 0.2549920813842095,
+    "step_us": 1218.2
+  },
+  "microbench": {
+    "2048": {
+      "L": 2048,
+      "any_nan": false,
+      "cta_preserved": true,
+      "ctas_in_flight_heuristic": 56,
+      "ctas_in_flight_heuristic_bracket": {
+        "128": 64,
+        "32": 80,
+        "64": 56
+      },
+      "ctas_in_flight_pinned8": 64,
+      "ctas_in_flight_unpacked": 8,
+      "heuristic_K_bracket_by_blockN": {
+        "128": 8,
+        "32": 10,
+        "64": 7
+      },
+      "heuristic_breaks_identity": true,
+      "heuristic_effective_K": 7,
+      "heuristic_us_M8": 59.39200147986412,
+      "identity_rate_by_M": {
+        "2": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "4": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "8": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        }
+      },
+      "latency_preserved": true,
+      "latency_us_by_M_by_split": {
+        "1": {
+          "0": 55.296000093221664,
+          "1": 201.7280012369156,
+          "16": 55.296000093221664,
+          "2": 121.85599654912949,
+          "32": 55.296000093221664,
+          "4": 79.8719972372055,
+          "8": 58.36800113320351
+        },
+        "8": {
+          "0": 59.39200147986412,
+          "1": 194.5600062608719,
+          "16": 58.36800113320351,
+          "2": 116.73600226640701,
+          "32": 68.60800087451935,
+          "4": 74.75200295448303,
+          "8": 54.27199974656105
+        }
+      },
+      "maxabsdiff_pinned8_vs_heuristic": 0.0009765625,
+      "num_n_blocks_bn64": 32,
+      "pinned8_m_invariant": true,
+      "pinned8_over_heuristic_ratio_M8": 0.9137930764121677,
+      "pinned8_preserves_parallelism": true,
+      "pinned8_us_M8": 54.27199974656105,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "unpack_collapses_occupancy": true,
+      "unpacked_over_heuristic_ratio_M8": 3.2758620927572926,
+      "unpacked_us_M8": 194.5600062608719
+    },
+    "528": {
+      "L": 528,
+      "any_nan": false,
+      "cta_preserved": true,
+      "ctas_in_flight_heuristic": 72,
+      "ctas_in_flight_heuristic_bracket": {
+        "128": 40,
+        "32": 72,
+        "64": 72
+      },
+      "ctas_in_flight_pinned8": 64,
+      "ctas_in_flight_unpacked": 8,
+      "heuristic_K_bracket_by_blockN": {
+        "128": 5,
+        "32": 9,
+        "64": 9
+      },
+      "heuristic_breaks_identity": false,
+      "heuristic_effective_K": 9,
+      "heuristic_us_M8": 44.03200000524521,
+      "identity_rate_by_M": {
+        "2": {
+          "0": 1.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "4": {
+          "0": 1.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "8": {
+          "0": 1.0,
+          "1": 1.0,
+          "8": 1.0
+        }
+      },
+      "latency_preserved": true,
+      "latency_us_by_M_by_split": {
+        "1": {
+          "0": 56.32000043988228,
+          "1": 75.77600330114365,
+          "16": 55.296000093221664,
+          "2": 62.463998794555664,
+          "32": 56.32000043988228,
+          "4": 55.296000093221664,
+          "8": 55.296000093221664
+        },
+        "8": {
+          "0": 44.03200000524521,
+          "1": 69.63200122117996,
+          "16": 44.03200000524521,
+          "2": 57.34400078654289,
+          "32": 45.05600035190582,
+          "4": 47.10400104522705,
+          "8": 43.007999658584595
+        }
+      },
+      "maxabsdiff_pinned8_vs_heuristic": 0.001953125,
+      "num_n_blocks_bn64": 9,
+      "pinned8_m_invariant": true,
+      "pinned8_over_heuristic_ratio_M8": 0.9767441781763574,
+      "pinned8_preserves_parallelism": true,
+      "pinned8_us_M8": 43.007999658584595,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "unpack_collapses_occupancy": true,
+      "unpacked_over_heuristic_ratio_M8": 1.5813953763827493,
+      "unpacked_us_M8": 69.63200122117996
+    }
+  },
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "peak_mem_mib": 8.188,
+  "phi_recovery_pinned_split_analytic": 1.0,
+  "pr": 366,
+  "recompute": {
+    "budget_500_eta": 0.040220518933569815,
+    "ceiling_at_geo_332_473": 473.5295953446407,
+    "eta_below_9841_blanket": true,
+    "eta_clears_500_budget": true,
+    "eta_floor_pinned_occupancy_upper_bound": 0.022806272763935695,
+    "eta_floor_pinned_split_analytic": 0.003904718156915901,
+    "eta_occupancy_clears_500_budget": true,
+    "floor_blanket_9841": 0.09841249119201488,
+    "lmhead_residual_floor": 0.003904718156915901,
+    "phi_clears_500_breakeven": true,
+    "phi_clears_noreg_breakeven_0255": true,
+    "phi_forgone_pinned_headline": 0.0,
+    "phi_forgone_pinned_occupancy": 0.19999999999999996,
+    "phi_occupancy_clears_500_breakeven": true,
+    "phi_recovery_geo_332": 0.07499999999999996,
+    "phi_recovery_pinned_occupancy_lower_bound": 0.8,
+    "phi_recovery_pinned_split_analytic": 1.0,
+    "realized_sdpa_tax_ratio": 0.0,
+    "recovery_breakeven_500": 0.5913117809665351,
+    "recovery_breakeven_noreg_0255": 0.2549920813842095,
+    "refutes_332_cap": true,
+    "revived_ceiling_occupancy_tps": 509.0720037848094,
+    "revived_ceiling_tps": 518.9188253620001,
+    "revives_ceiling_toward_520": true,
+    "sdpa_floor_full_327": 0.09450777303509898
+  },
+  "refutes_332_cap": true,
+  "revives_ceiling_toward_520": true,
+  "selftest": {
+    "conditions": {
+      "a_blanket_is_sdpa_plus_lmhead": true,
+      "a_budget_500_roundtrips": true,
+      "a_ceiling_at_geo_332_roundtrips": true,
+      "a_phi_geo_332_roundtrips": true,
+      "a_phi_recovery_332_is_0075": true,
+      "a_sdpa_floor_full_roundtrips_327": true,
+      "b_shares_unpacking_327": true,
+      "b_shares_unpacking_332": true,
+      "c_latencies_finite_positive": true,
+      "c_nan_clean": true,
+      "c_rates_in_unit_interval": true,
+      "d_ctas_pinned_gg_unpacked": true,
+      "d_heuristic_breaks_identity": true,
+      "d_pinned8_byte_exact_M_invariant": true,
+      "d_pinned8_preserves_parallelism": true,
+      "d_unpack_collapses_occupancy": true,
+      "e_decision_bools_typed": true,
+      "e_eta_below_blanket": true,
+      "e_eta_floor_finite_nonneg": true,
+      "e_phi_recovery_in_unit": true,
+      "e_refute_implies_clear500": true,
+      "f_on_target_a10g_80sm": true,
+      "g_no_launch_flags": true
+    },
+    "n_checks": 23,
+    "passes": true
+  },
+  "shares_unpacking_assumption_327": true,
+  "shares_unpacking_assumption_332": true,
+  "wandb_run_id": "h28xnyuy"
+}
