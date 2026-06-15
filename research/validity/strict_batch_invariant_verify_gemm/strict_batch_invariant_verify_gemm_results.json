@@ -1,0 +1,207 @@
+{
+  "agent": "stark",
+  "analysis_only": true,
+  "anchors_358": {
+    "det_baseline": 0.845,
+    "flash_baseline": 0.0
+  },
+  "beats_off_the_shelf_floor": true,
+  "bi_gemm_eta_measured": 0.0,
+  "bi_gemm_eta_ratio": 0.9166666969831575,
+  "clears_500_kernel_budget": true,
+  "compose": {
+    "beats_off_the_shelf_floor": true,
+    "best_fixed_k": 8,
+    "best_fixed_k_us": 56.32000043988228,
+    "bi_gemm_eta_measured": 0.0,
+    "bi_gemm_eta_ratio": 0.9166666969831575,
+    "bi_gemm_identity_rate_by_M": {
+      "2": 1.0,
+      "4": 1.0,
+      "8": 1.0
+    },
+    "budget_500_eta": 0.040220518933569815,
+    "clears_500_kernel_budget": true,
+    "conservative_eta_measured": 0.008405847534564225,
+    "conservative_eta_ratio": 1.1666667272996483,
+    "conservative_fixed_k": 32,
+    "conservative_fixed_k_us": 71.68000191450119,
+    "eta_all_layers_extrap_illustrative": 0.0,
+    "heuristic_identity_rate_by_M": {
+      "2": 0.0,
+      "4": 0.00048828125,
+      "8": 0.000244140625
+    },
+    "heuristic_split_kv_us": 61.43999844789505,
+    "identity_gap_closed": true,
+    "m_invariant_fixed_splits": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "n_attn_layers": 42,
+    "off_the_shelf_floor": 0.09841249119201488,
+    "primary_L": 2048,
+    "raw_delta_us_best_minus_heuristic": -5.119998008012772,
+    "raw_eta_per_attn_signed": -0.0042029207092536295,
+    "single_split_ns1_eta_per_attn": 0.11095715687596294,
+    "single_split_ns1_ratio": 3.200000194025541,
+    "strict_tps_at_eta": 520.953,
+    "verdict": "MEASURED on the pod A10G (42-layer gemma-4-E4B-it attn geometry, head_dim 256, 8q/2kv, bf16, batch=1 verify occupancy, L=2048). (a) IDENTITY CLOSED: a fixed-split-k attention (num_splits=K, K independent of M) is byte-EXACT vs per-row AR at every M in {2,4,8} (rate {'2': 1.0, '4': 1.0, '8': 1.0}) -- the #358 ~0.85 deterministic-reduction residual and the 0.000 split-KV baseline are BOTH fused away: the flash query tile holds all M<=8 rows in ONE block (no cuBLAS M-dependent GEMM tiling) and a FIXED KV split is combined in a fixed order (M-invariant). The DEPLOYED heuristic (num_splits=0) BREAKS identity at the batch=1 verify occupancy (rate {'2': 0.0, '4': 0.00048828125, '8': 0.000244140625}) precisely because it picks a DIFFERENT split count for M=1 vs M=8. (b) eta ~= 0: the fastest M-invariant fixed K=num_splits=8 runs at 56.3us vs the heuristic split-KV 61.4us (ratio 0.917; conservative matched-occupancy K=32 ratio 1.167) -> det kernel costs NO more than the deployed split-KV (raw delta -5.1us). eta_measured=0.000% << off-the-shelf floor 9.841% (beats=True) and << the >500 budget 4.022% (clears=True). The naive single-split num_splits=1 (the NON-optimal fixed K) costs 3.20x (11.10%/attn) -- so the headline is the TIGHT optimal-K number, not the single-split upper bound. CONCLUSION: the proper batch-invariant attention GEMM is a LIVE <4.02% eta mechanism (eta~=0) -- the attention-locus strict-identity tax is ESSENTIALLY FREE (pin the KV-split count). The 9.841% off-the-shelf VLLM_BATCH_INVARIANT floor (denken #327) reflects the unoptimized whole-loop knob (all aten mm/mean re-routed), NOT a targeted fixed-split-k attention kernel. So for the ATTENTION locus, wirbel #362's DVR-rollback sidestep is NOT required to dodge a determinism tax -- there is essentially none. CAVEAT: per-layer attention GEMM in isolation (synthetic dense L=2048 bf16, flash_attn lib); the lm_head locus (denken #327/#326) is a separate small deterministic-GEMM cost, and the full served end-to-end eta (42 layers + lm_head + vLLM/FlashInfer paged KV) is Tier-2 a10g (#319-gated). The identity-closure and the eta RATIO are the hardware-portable transferables; absolute us are local-relative."
+  },
+  "created_at": "20260615T124644Z",
+  "gpu": {
+    "is_a10g_80sm": true,
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "total_mem_gib": 22.06
+  },
+  "identity": {
+    "L": 2048,
+    "any_nan": false,
+    "identity_rate_by_split_by_M": {
+      "0": {
+        "2": 0.0,
+        "4": 0.00048828125,
+        "8": 0.000244140625
+      },
+      "1": {
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      },
+      "16": {
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      },
+      "2": {
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      },
+      "32": {
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      },
+      "4": {
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      },
+      "8": {
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      }
+    },
+    "maxabsdiff_fixedk_vs_heuristic_by_split_by_M": {
+      "1": {
+        "2": 0.0009765625,
+        "4": 0.0009765625,
+        "8": 0.0009765625
+      },
+      "16": {
+        "2": 0.0,
+        "4": 0.0,
+        "8": 0.0
+      },
+      "2": {
+        "2": 0.0009765625,
+        "4": 0.0009765625,
+        "8": 0.0009765625
+      },
+      "32": {
+        "2": 0.0009765625,
+        "4": 0.0009765625,
+        "8": 0.0009765625
+      },
+      "4": {
+        "2": 0.0009765625,
+        "4": 0.0009765625,
+        "8": 0.0009765625
+      },
+      "8": {
+        "2": 0.0009765625,
+        "4": 0.0009765625,
+        "8": 0.0009765625
+      }
+    },
+    "n_trials": 64
+  },
+  "identity_gap_closed": true,
+  "kind": "strict-batch-invariant-verify-gemm",
+  "ladder_constants": {
+    "budget_500_eta": 0.040220518933569815,
+    "ceiling_500": 520.953,
+    "off_the_shelf_floor": 0.09841249119201488,
+    "step_us": 1218.2
+  },
+  "latency": {
+    "L": 2048,
+    "M": 8,
+    "per_split_us": {
+      "0": 61.43999844789505,
+      "1": 196.60800695419312,
+      "16": 60.416001826524734,
+      "2": 118.78400295972824,
+      "32": 71.68000191450119,
+      "4": 76.80000364780426,
+      "8": 56.32000043988228
+    }
+  },
+  "n_attn_layers_source": "config:/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0/config.json",
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "peak_mem_mib": 15552.125,
+  "pr": 363,
+  "selftest": {
+    "ceiling_ladder": {
+      "tps_at_0402": 500.0106894,
+      "tps_at_floor": 469.6847174760462,
+      "tps_at_zero": 520.953
+    },
+    "conditions": {
+      "a_ceiling_ladder_469": true,
+      "a_ceiling_ladder_500": true,
+      "a_ceiling_roundtrips_at_zero": true,
+      "b_step0_reproduces_358": true,
+      "c_latencies_finite_positive": true,
+      "c_nan_clean": true,
+      "c_rates_in_unit_interval": true,
+      "d_budget_bools_set": true,
+      "d_eta_finite": true,
+      "d_heuristic_breaks_identity": true,
+      "d_identity_gap_closed": true,
+      "e_no_launch_flags": true,
+      "on_target_a10g_80sm": true
+    },
+    "n_checks": 13,
+    "passes": true
+  },
+  "smoke_reproduces_358": true,
+  "step0": {
+    "det_mean": 0.8465576171875,
+    "det_reproduces_358_085": true,
+    "det_row_identity_by_M": {
+      "2": 0.84423828125,
+      "4": 0.8497314453125,
+      "8": 0.845703125
+    },
+    "flash_mean": 0.0,
+    "flash_reproduces_358_000": true,
+    "flash_row_identity_by_M": {
+      "2": 0.0,
+      "4": 0.0,
+      "8": 0.0
+    },
+    "smoke_reproduces_358": true
+  },
+  "strict_bi_gemm_self_test_passes": true,
+  "wandb_run_id": "a0oi2esq"
+}
