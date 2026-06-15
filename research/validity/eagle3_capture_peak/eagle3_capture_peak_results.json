@@ -1,0 +1,245 @@
+{
+  "created_at": "20260615T061615Z",
+  "pr": 306,
+  "agent": "ubel",
+  "kind": "eagle3-capture-peak",
+  "analysis_only": true,
+  "synthesis": {
+    "constants": {
+      "official_baseline": 481.53,
+      "build_resident_gib_299": 20.100143778324128,
+      "deployed_resident_gib_299": 19.3,
+      "extra_kv_gib_299": 0.718841552734375,
+      "drafter_weights_gib_299": 0.037352144718170166,
+      "hidden_retention_gib_299": 0.00732421875,
+      "headroom_24_hard_gib_299": 3.899856221675872,
+      "headroom_23_usable_gib_299": 2.899856221675872,
+      "nontorch_cuda_context_gib_299": 0.9499999999999993,
+      "cuda_graph_pool_gib_299": 0.04,
+      "device_visible_gib_299": 22.0582275390625,
+      "vram_hard_gib": 24.0,
+      "vram_usable_gib": 23.0,
+      "vocab": 262144,
+      "hid": 2560,
+      "eagle3_aux_layers": [
+        2,
+        21,
+        39
+      ],
+      "l_fuse": 3,
+      "k_spec": 7,
+      "m_verify_deployed": 8,
+      "ctx": 528,
+      "m_sweep": [
+        8,
+        16,
+        32
+      ],
+      "max_cudagraph_capture_size_101": 16,
+      "imports": "ubel#299(jnoss7id resident=20.10 extra_kv=0.719 drafter_wt=0.037 headroom24=3.90 nontorch=0.95 devvis=22.058) x lawine#245-c1(max_capture_size=16 size29-crash) x train_eagle3.py(Eagle3DraftHead 2560-dim 1-layer fc[7680->2560])"
+    },
+    "measurement": "measured",
+    "gpu_profile": {
+      "gpu_available": true,
+      "gpu_name": "NVIDIA A10G",
+      "ctx": 528,
+      "k_spec": 7,
+      "m_sweep": [
+        8,
+        16,
+        32
+      ],
+      "dtype": "bfloat16",
+      "device_total_bytes": 23684841472,
+      "device_total_gib": 22.0582275390625,
+      "proxy_resident_alloc_bytes": 3123499008,
+      "proxy_resident_reserved_bytes": 3137339392,
+      "proxy_resident_alloc_gib": 2.908985137939453,
+      "proxy_resident_reserved_gib": 2.921875,
+      "smoke_nan_clean": true,
+      "smoke_shapes": {
+        "draft_hidden": [
+          1,
+          1,
+          2560
+        ],
+        "verify_logits": [
+          8,
+          262144
+        ]
+      },
+      "phase_iii_hidden_retention": {
+        "resident_alloc_gib": 2.908989906311035,
+        "peak_alloc_gib": 2.9211254119873047,
+        "peak_reserved_gib": 2.923828125,
+        "transient_alloc_gib": 0.012135505676269531,
+        "held_buffer_bytes": 8110080,
+        "held_buffer_gib": 0.0075531005859375,
+        "peak_ge_resident": true
+      },
+      "phase_ii_tree_verify": {
+        "8": {
+          "resident_alloc_gib": 2.908994674682617,
+          "peak_alloc_gib": 2.913784980773926,
+          "peak_reserved_gib": 2.921875,
+          "transient_alloc_gib": 0.004790306091308594,
+          "logit_buffer_bytes_bf16": 4194304,
+          "logit_buffer_gib_bf16": 0.00390625,
+          "peak_ge_resident": true,
+          "exceeds_capture_size16_boundary": false
+        },
+        "16": {
+          "resident_alloc_gib": 2.908989906311035,
+          "peak_alloc_gib": 2.916959762573242,
+          "peak_reserved_gib": 2.923828125,
+          "transient_alloc_gib": 0.007969856262207031,
+          "logit_buffer_bytes_bf16": 8388608,
+          "logit_buffer_gib_bf16": 0.0078125,
+          "peak_ge_resident": true,
+          "exceeds_capture_size16_boundary": false
+        },
+        "32": {
+          "resident_alloc_gib": 2.908989906311035,
+          "peak_alloc_gib": 2.924924850463867,
+          "peak_reserved_gib": 2.939453125,
+          "transient_alloc_gib": 0.01593494415283203,
+          "logit_buffer_bytes_bf16": 16777216,
+          "logit_buffer_gib_bf16": 0.015625,
+          "peak_ge_resident": true,
+          "exceeds_capture_size16_boundary": true
+        }
+      },
+      "phase_ii_peak_monotone_in_m": true,
+      "phase_ii_transient_monotone_in_m": true,
+      "phase_i_capture": {
+        "captured": true,
+        "reserved_pre_capture_gib": 2.921875,
+        "reserved_post_capture_gib": 2.962890625,
+        "capture_peak_alloc_gib": 2.929673194885254,
+        "capture_peak_reserved_gib": 2.962890625,
+        "capture_pool_bytes": 44040192,
+        "capture_pool_gib": 0.041015625,
+        "replay_peak_alloc_gib": 2.9249110221862793,
+        "replay_peak_reserved_gib": 2.962890625,
+        "capture_size_tokens": 15,
+        "peak_ge_resident": true
+      }
+    },
+    "analytic": {
+      "logit_buffer_bytes_bf16": {
+        "8": 4194304,
+        "16": 8388608,
+        "32": 16777216
+      },
+      "logit_buffer_bytes_fp32_upcast": {
+        "8": 8388608,
+        "16": 16777216,
+        "32": 33554432
+      },
+      "logit_buffer_gib_bf16": {
+        "8": 0.00390625,
+        "16": 0.0078125,
+        "32": 0.015625
+      },
+      "logit_buffer_gib_fp32_upcast": {
+        "8": 0.0078125,
+        "16": 0.015625,
+        "32": 0.03125
+      },
+      "hidden_retention_bytes": 8110080,
+      "hidden_retention_gib": 0.0075531005859375,
+      "fc_in_buffer_bytes": 15360,
+      "monotone_in_m": true
+    },
+    "transient_decomposition_gib": {
+      "capture_time_scratch": 0.041015625,
+      "tree_verify_logit_buffer": 0.004790306091308594,
+      "workspace_remat": 0.012135505676269531
+    },
+    "total_transient_gib": 0.057941436767578125,
+    "dominant_transient_term": "capture_time_scratch",
+    "dominant_transient_gib": 0.041015625,
+    "resident_floor_gib": 20.100143778324128,
+    "eagle3_build_peak_gb": 20.158085215091706,
+    "capture_transient_gib": 0.041015625,
+    "eagle3_build_peak_fits_24gb": true,
+    "fits_23_usable": true,
+    "fits_device_visible": true,
+    "peak_headroom_24_hard_gib": 3.841914784908294,
+    "peak_headroom_23_usable_gib": 2.841914784908294,
+    "headroom_eaten_gib": 0.057941436767578125,
+    "headroom_eaten_frac": 0.014857326392068666,
+    "precedent_101": {
+      "max_cudagraph_capture_size": 16,
+      "spine_verify_tokens": 8,
+      "size29_crash_tokens": 29,
+      "crash_is_vram_oom": false,
+      "crash_is_capture_size_dispatch_failure": true,
+      "eagle_capture_size_divisor_1pK": 8,
+      "valid_captured_sizes": [
+        8,
+        16
+      ],
+      "fused_capture_size_tokens": 15,
+      "deployed_m8_verify_tokens": 8,
+      "deployed_below_size16_boundary": true,
+      "deployed_m8_capturable": true,
+      "m_over_capture_size_boundary": {
+        "8": false,
+        "16": false,
+        "32": true
+      },
+      "m_capturable_under_size16": {
+        "8": true,
+        "16": true,
+        "32": false
+      },
+      "vram_peak_below_crash_regime": true
+    },
+    "mitigations": {
+      "needed": false,
+      "note": "VRAM peak fits 23-usable with multi-GiB margin; no mitigation required for the memory axis.",
+      "chunked_logits_recover_gib": 0.0008840560913085938,
+      "m_cap_to_deployed_recover_gib": 0.01171875,
+      "smaller_capture_batch_note": "capture only the deployed spine (K+M=15 tokens < size-16 boundary) avoids the #101 size-list crash AND keeps the capture pool minimal."
+    },
+    "self_test": {
+      "conditions": {
+        "a_peak_ge_resident_every_phase": true,
+        "b_all_peaks_finite_positive": true,
+        "c_decomposition_sums": true,
+        "d_logit_buffer_monotone_in_m": true,
+        "e_imported_299_constants_exact": true,
+        "f_gpu_smoke_nan_clean": true,
+        "g_honest_caveats_carried": true
+      },
+      "passes": true
+    },
+    "verdict": "The EAGLE-3 build's RUNTIME peak = #299 resident 20.10 GiB + measured step transient 0.058 GiB = 20.158 GiB, which FITS 24-hard (headroom 3.842) and 23-usable (headroom 2.842). The 3.90 GiB resident headroom SURVIVES ONEGRAPH capture + the M=8 tree-verify logit transient: the transient eats only 1.5% of it. Dominant transient term = capture_time_scratch (0.0410 GiB). The capture footprint is FAR below any VRAM-OOM regime; the genuine #101-class risk is the capture-SIZE boundary (max_cudagraph_capture_size=16), which the deployed M=8 spine (K+M=15 tokens) clears -- VRAM is NOT the binding constraint, and neither is capture at the deployed width. Analysis-only; BASELINE 481.53 untouched; 0 TPS.",
+    "handoff": "EAGLE-3 build SURVIVES runtime: resident 20.10 GiB (#299) + step transient 0.058 GiB = 20.158 GiB peak, 3.84 GiB under 24-hard and 2.84 GiB under 23-usable. The runtime transient is capture_time_scratch-dominated (0.0410 GiB) and tiny (1.5% of the 3.90 GiB headroom); the capture-time pool is 0.0410 GiB and the 262144-vocab logit buffer is MB-scale even at M=32 (0.0156 GiB). VRAM is NOT the binding constraint on the human-gated build; the real #101-class risk is the capture-SIZE boundary (size-16), which deployed M=8 clears -- only widening the tree past M=16 re-enters lawine's crash regime (a topology choice, not a VRAM limit).",
+    "caveats": [
+      "0 TPS: this MEASURES the EAGLE-3 step's RUNTIME memory transient (above #299's resident floor); it is a random-init ARCHITECTURAL footprint, NOT a trained build. Random-init weights/activations have the SAME tensor shapes/bytes as a trained build, so the VRAM footprint transfers; the numeric activation VALUES do not (irrelevant to byte accounting).",
+      "COMPOSITIONAL, like #299: the local proxy does NOT load the 20.10 GiB build; it measures the step TRANSIENT in isolation and STACKS it on #299's imported resident floor. The absolute peak = #299 resident (20.10) + measured transient; the proxy's own resident is small and only used for the per-phase peak>=resident self-test.",
+      "CAPTURE caveat: the deployed ONEGRAPH captures the DRAFT chain and the vLLM target captures the VERIFY separately (two pools); this leg captures a FUSED single graph (draft+verify), which holds both activation sets live -> a CONSERVATIVE (upper-bound) capture pool vs the deployed two-pool sum. The verify backbone is modeled by ONE representative target-width bf16 layer (the 42-layer body frees activations layer-by-layer; only the residual stream + lm_head logits persist), so the measured verify transient bounds the real per-layer scratch.",
+      "PRECEDENT honesty: lawine's #101 'size-29 crash' is a capture-SIZE-LIST DISPATCH failure (max_cudagraph_capture_size=16; a request at batch=29 finds NO captured graph -> IndexError lookup crash), NOT a VRAM OOM (vLLM #29091/PR#23679). For EAGLE with K=7, captured sizes must be multiples of (1+K)=8 within max-16, i.e. {8,16}; deployed M=8 is captured, M=16 is the boundary, M=32 exceeds max-16 -> the crash regime. This leg prices the orthogonal VRAM axis (transient bytes) and states the build sits FAR below any OOM AND that deployed M=8 clears the size boundary.",
+      "MEASUREMENT honesty: argmax/verify is bf16-native -- PyTorch does NOT upcast to fp32 unless dtype= is passed (issue #123911) -- so the per-step logit transient is bf16 (2B), MB-scale even at M=32, NOT the doubled fp32 buffer an upcast assumption would imply. cuBLAS workspace (in the capture pool, freed only with the handle) is the default ~4 MiB here (CUBLAS_WORKSPACE_CONFIG unset); a serving process that INHERITS a training-tuned CUBLAS_WORKSPACE_CONFIG=:4096:8 would inflate the pool to ~24 MiB/handle -- a silent launch-hygiene item, still sub-GiB and far inside the headroom.",
+      "The launch gate is UNCHANGED and human-approval-gated (land #245: MEASURED >=500 TPS at lambda_hat>=0.9780 AND PPL<=2.42 AND VRAM<=24 GiB). This leg sizes ONLY the VRAM<=24 RUNTIME clause; it is NOT a launch, NOT a build, NOT a served-file change."
+    ]
+  },
+  "eagle3_capture_peak_self_test_passes": true,
+  "eagle3_build_peak_fits_24gb": true,
+  "eagle3_build_peak_gb": 20.158085215091706,
+  "capture_transient_gib": 0.041015625,
+  "host_peak_mem_mib": 7458.02,
+  "greedy_ppl_safety_certificate": {
+    "analysis_only": true,
+    "served_file_changed": false,
+    "emitted_token_changed": false,
+    "hf_job_or_submission": false,
+    "is_launch": false,
+    "is_build": false,
+    "baseline_tps_unchanged": 481.53,
+    "tps_added_by_this_leg": 0.0
+  },
+  "nan_clean": true
+}
