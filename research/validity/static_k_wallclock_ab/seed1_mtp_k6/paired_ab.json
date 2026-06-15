@@ -1,0 +1,730 @@
+{
+  "runner": "paired_tps_ab",
+  "pr": 82,
+  "metric": "wall_tps",
+  "baseline": {
+    "submission": "fa2sw_precache_kenyan",
+    "label": "mtp_k7",
+    "override_env": {},
+    "describe": "fa2sw_precache_kenyan"
+  },
+  "candidate": {
+    "submission": "fa2sw_precache_kenyan",
+    "label": "mtp_k6",
+    "override_env": {
+      "SPECULATIVE_CONFIG": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":6}"
+    },
+    "describe": "fa2sw_precache_kenyan[SPECULATIVE_CONFIG={\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":6}]"
+  },
+  "n": 3,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1
+  },
+  "reused_baseline_from": "research/validity/static_k_wallclock_ab/seed1_mtp_k4/paired_ab.json",
+  "elapsed_s": 807.780440568924,
+  "git": {
+    "git_commit": "5f1a1b5299c1578fd38715d7c8cd61fb3188ed74",
+    "git_branch": "stark/static-k-wallclock-ab",
+    "git_dirty": true
+  },
+  "arms": {
+    "baseline": {
+      "n": 3,
+      "wall_tps": {
+        "n": 3,
+        "mean": 453.61803457750517,
+        "std": 0.01632864314206458,
+        "cv_pct": 0.0035996459349930602,
+        "min": 453.6018408863288,
+        "max": 453.6344949069024,
+        "range_pct": 0.007198571944789614,
+        "median": 453.6177679392844,
+        "p25": 453.6018408863288,
+        "p75": 453.6177679392844,
+        "values": [
+          453.6344949069024,
+          453.6018408863288,
+          453.6177679392844
+        ]
+      },
+      "steady_gen_tps_mean": {
+        "n": 3,
+        "mean": 425.24666666666667,
+        "std": 0.7128347167004028,
+        "cv_pct": 0.16762852541279635,
+        "min": 424.5,
+        "max": 425.92,
+        "range_pct": 0.33392384028093874,
+        "median": 425.32,
+        "p25": 424.5,
+        "p75": 425.32,
+        "values": [
+          425.32,
+          425.92,
+          424.5
+        ]
+      },
+      "e_accept_exact": {
+        "n": 3,
+        "mean": 3.852306528347049,
+        "std": 0.0010217999584518666,
+        "cv_pct": 0.026524367958078908,
+        "min": 3.851245124512451,
+        "max": 3.8532834830850873,
+        "range_pct": 0.05291267861570857,
+        "median": 3.852390977443609,
+        "p25": 3.851245124512451,
+        "p75": 3.852390977443609,
+        "values": [
+          3.852390977443609,
+          3.851245124512451,
+          3.8532834830850873
+        ]
+      },
+      "server_ready_s": {
+        "n": 3,
+        "mean": 90.02401471138,
+        "std": 0.009417155985554064,
+        "cv_pct": 0.010460715416598316,
+        "min": 90.0181794166565,
+        "max": 90.03487873077393,
+        "range_pct": 0.01854984380664448,
+        "median": 90.0189859867096,
+        "p25": 90.0181794166565,
+        "p75": 90.0189859867096,
+        "values": [
+          90.03487873077393,
+          90.0189859867096,
+          90.0181794166565
+        ]
+      },
+      "records": [
+        {
+          "run_idx": 0,
+          "t_start_utc": "2026-06-15T01:55:34.846321+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 144.46873140335083,
+          "wall_around_decode_s": 153.10400533676147,
+          "wall_tps": 453.6344949069024,
+          "steady_gen_tps_mean": 425.32,
+          "steady_gen_tps_mean_nonzero": 425.32,
+          "steady_gen_tps_n": 15,
+          "gen_tps_series": [
+            8.8,
+            435.0,
+            420.8,
+            442.9,
+            411.3,
+            495.7,
+            465.3,
+            445.2,
+            506.9,
+            446.9,
+            466.8,
+            440.9,
+            465.1,
+            485.6,
+            442.6
+          ],
+          "e_accept_exact": 3.852390977443609,
+          "e_accept_interval_mean": 3.9099999999999997,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47421,
+          "total_drafted_tokens": 116375,
+          "intervals": 15,
+          "clock": {
+            "n_samples": 623,
+            "n_load_samples": 577,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 56.635634028892454,
+              "min": 40.0,
+              "max": 62.0
+            },
+            "power_w_load": {
+              "mean": 167.68566724436744,
+              "min": 68.94,
+              "max": 190.76
+            },
+            "util_pct": {
+              "mean": 91.9983948635634,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 90.03487873077393,
+          "arm": "mtp_k7",
+          "submission": "fa2sw_precache_kenyan",
+          "override_env": {}
+        },
+        {
+          "run_idx": 1,
+          "t_start_utc": "2026-06-15T01:59:42.102211+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 144.47913146018982,
+          "wall_around_decode_s": 152.7458679676056,
+          "wall_tps": 453.6018408863288,
+          "steady_gen_tps_mean": 425.92,
+          "steady_gen_tps_mean_nonzero": 425.92,
+          "steady_gen_tps_n": 15,
+          "gen_tps_series": [
+            22.2,
+            434.6,
+            417.3,
+            439.9,
+            412.5,
+            503.6,
+            462.5,
+            450.7,
+            497.4,
+            447.2,
+            467.5,
+            442.7,
+            472.1,
+            476.9,
+            441.7
+          ],
+          "e_accept_exact": 3.851245124512451,
+          "e_accept_interval_mean": 3.8833333333333333,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47516,
+          "total_drafted_tokens": 116655,
+          "intervals": 15,
+          "clock": {
+            "n_samples": 621,
+            "n_load_samples": 578,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 57.289855072463766,
+              "min": 42.0,
+              "max": 62.0
+            },
+            "power_w_load": {
+              "mean": 166.56131487889274,
+              "min": 61.62,
+              "max": 185.27
+            },
+            "util_pct": {
+              "mean": 92.40901771336554,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 90.0189859867096,
+          "arm": "mtp_k7",
+          "submission": "fa2sw_precache_kenyan",
+          "override_env": {}
+        },
+        {
+          "run_idx": 2,
+          "t_start_utc": "2026-06-15T02:03:48.648815+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 144.47405862808228,
+          "wall_around_decode_s": 152.69914555549622,
+          "wall_tps": 453.6177679392844,
+          "steady_gen_tps_mean": 424.5,
+          "steady_gen_tps_mean_nonzero": 424.5,
+          "steady_gen_tps_n": 15,
+          "gen_tps_series": [
+            0.7,
+            425.5,
+            426.9,
+            439.0,
+            420.7,
+            485.0,
+            467.6,
+            450.5,
+            500.2,
+            450.2,
+            471.4,
+            439.0,
+            457.6,
+            490.9,
+            442.3
+          ],
+          "e_accept_exact": 3.8532834830850873,
+          "e_accept_interval_mean": 3.898,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47316,
+          "total_drafted_tokens": 116081,
+          "intervals": 15,
+          "clock": {
+            "n_samples": 621,
+            "n_load_samples": 578,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 57.069243156199676,
+              "min": 42.0,
+              "max": 62.0
+            },
+            "power_w_load": {
+              "mean": 166.68574394463667,
+              "min": 62.6,
+              "max": 187.02
+            },
+            "util_pct": {
+              "mean": 92.3913043478261,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 90.0181794166565,
+          "arm": "mtp_k7",
+          "submission": "fa2sw_precache_kenyan",
+          "override_env": {}
+        }
+      ]
+    },
+    "candidate": {
+      "n": 3,
+      "wall_tps": {
+        "n": 3,
+        "mean": 441.2178786776216,
+        "std": 10.141505357224375,
+        "cv_pct": 2.298525478527656,
+        "min": 429.50750688289537,
+        "max": 447.095982528017,
+        "range_pct": 3.986346994332187,
+        "median": 447.0501466219524,
+        "p25": 429.50750688289537,
+        "p75": 447.0501466219524,
+        "values": [
+          429.50750688289537,
+          447.0501466219524,
+          447.095982528017
+        ]
+      },
+      "steady_gen_tps_mean": {
+        "n": 3,
+        "mean": 433.89952380952377,
+        "std": 14.852412044426146,
+        "cv_pct": 3.4230072238904232,
+        "min": 419.9,
+        "max": 449.4785714285714,
+        "range_pct": 6.816917236709397,
+        "median": 432.32,
+        "p25": 419.9,
+        "p75": 432.32,
+        "values": [
+          432.32,
+          449.4785714285714,
+          419.9
+        ]
+      },
+      "e_accept_exact": {
+        "n": 3,
+        "mean": 3.6861444869565005,
+        "std": 0.010579485567669656,
+        "cv_pct": 0.2870068063014184,
+        "min": 3.6739388458712483,
+        "max": 3.692685781158572,
+        "range_pct": 0.5085784171960748,
+        "median": 3.691808833839682,
+        "p25": 3.6739388458712483,
+        "p75": 3.691808833839682,
+        "values": [
+          3.6739388458712483,
+          3.692685781158572,
+          3.691808833839682
+        ]
+      },
+      "server_ready_s": {
+        "n": 3,
+        "mean": 108.35432863235474,
+        "std": 31.76063406539441,
+        "cv_pct": 29.311827654950413,
+        "min": 90.01655697822571,
+        "max": 145.0283498764038,
+        "range_pct": 50.77027710155689,
+        "median": 90.01807904243469,
+        "p25": 90.01655697822571,
+        "p75": 90.01807904243469,
+        "values": [
+          145.0283498764038,
+          90.01807904243469,
+          90.01655697822571
+        ]
+      },
+      "records": [
+        {
+          "run_idx": 0,
+          "t_start_utc": "2026-06-15T02:50:22.319352+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 152.5840618610382,
+          "wall_around_decode_s": 161.02082896232605,
+          "wall_tps": 429.50750688289537,
+          "steady_gen_tps_mean": 432.32,
+          "steady_gen_tps_mean_nonzero": 432.32,
+          "steady_gen_tps_n": 15,
+          "gen_tps_series": [
+            205.2,
+            426.2,
+            455.5,
+            433.8,
+            440.2,
+            479.8,
+            470.7,
+            443.5,
+            454.5,
+            474.5,
+            434.3,
+            436.8,
+            459.2,
+            444.4,
+            426.2
+          ],
+          "e_accept_exact": 3.6739388458712483,
+          "e_accept_interval_mean": 3.6653333333333333,
+          "num_speculative_tokens": 6,
+          "total_accepted_tokens": 47310,
+          "total_drafted_tokens": 106158,
+          "intervals": 15,
+          "clock": {
+            "n_samples": 654,
+            "n_load_samples": 588,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 56.781345565749234,
+              "min": 42.0,
+              "max": 62.0
+            },
+            "power_w_load": {
+              "mean": 167.99542517006802,
+              "min": 61.77,
+              "max": 181.69
+            },
+            "util_pct": {
+              "mean": 89.0474006116208,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 145.0283498764038,
+          "arm": "mtp_k6",
+          "submission": "fa2sw_precache_kenyan",
+          "override_env": {
+            "SPECULATIVE_CONFIG": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":6}"
+          }
+        },
+        {
+          "run_idx": 1,
+          "t_start_utc": "2026-06-15T02:54:37.291486+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 146.59652948379517,
+          "wall_around_decode_s": 154.850177526474,
+          "wall_tps": 447.0501466219524,
+          "steady_gen_tps_mean": 449.4785714285714,
+          "steady_gen_tps_mean_nonzero": 449.4785714285714,
+          "steady_gen_tps_n": 14,
+          "gen_tps_series": [
+            409.0,
+            440.8,
+            434.2,
+            429.5,
+            463.7,
+            437.5,
+            434.9,
+            496.4,
+            437.1,
+            456.9,
+            461.5,
+            456.2,
+            478.3,
+            456.7
+          ],
+          "e_accept_exact": 3.692685781158572,
+          "e_accept_interval_mean": 3.6950000000000003,
+          "num_speculative_tokens": 6,
+          "total_accepted_tokens": 46018,
+          "total_drafted_tokens": 102540,
+          "intervals": 14,
+          "clock": {
+            "n_samples": 629,
+            "n_load_samples": 586,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 57.349761526232115,
+              "min": 42.0,
+              "max": 62.0
+            },
+            "power_w_load": {
+              "mean": 168.04032423208193,
+              "min": 62.15,
+              "max": 184.67
+            },
+            "util_pct": {
+              "mean": 92.57869634340223,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 90.01807904243469,
+          "arm": "mtp_k6",
+          "submission": "fa2sw_precache_kenyan",
+          "override_env": {
+            "SPECULATIVE_CONFIG": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":6}"
+          }
+        },
+        {
+          "run_idx": 2,
+          "t_start_utc": "2026-06-15T02:58:45.934382+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 146.58150053024292,
+          "wall_around_decode_s": 155.15694570541382,
+          "wall_tps": 447.095982528017,
+          "steady_gen_tps_mean": 419.9,
+          "steady_gen_tps_mean_nonzero": 419.9,
+          "steady_gen_tps_n": 15,
+          "gen_tps_series": [
+            5.4,
+            410.1,
+            439.5,
+            435.5,
+            428.9,
+            464.1,
+            439.1,
+            435.7,
+            493.2,
+            441.7,
+            455.0,
+            460.9,
+            458.2,
+            475.7,
+            455.5
+          ],
+          "e_accept_exact": 3.691808833839682,
+          "e_accept_interval_mean": 3.7153333333333336,
+          "num_speculative_tokens": 6,
+          "total_accepted_tokens": 46073,
+          "total_drafted_tokens": 102696,
+          "intervals": 15,
+          "clock": {
+            "n_samples": 631,
+            "n_load_samples": 586,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 57.342313787638666,
+              "min": 42.0,
+              "max": 63.0
+            },
+            "power_w_load": {
+              "mean": 168.3684470989761,
+              "min": 62.92,
+              "max": 189.62
+            },
+            "util_pct": {
+              "mean": 92.32488114104596,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 90.01655697822571,
+          "arm": "mtp_k6",
+          "submission": "fa2sw_precache_kenyan",
+          "override_env": {
+            "SPECULATIVE_CONFIG": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":6}"
+          }
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "metric": "wall_tps",
+    "n_per_arm": 3,
+    "baseline_median_wall_tps": 453.6177679392844,
+    "candidate_median_wall_tps": 447.0501466219524,
+    "baseline_mean_wall_tps": 453.61803457750517,
+    "candidate_mean_wall_tps": 441.2178786776216,
+    "delta_median_tps": -6.567621317331998,
+    "delta_median_pct": -1.4478315845447784,
+    "delta_mean_pct": -2.7336117514447835,
+    "operative_threshold_pct": 0.1,
+    "raw_mde_detect_pct": 0.05601063623728935,
+    "raw_mde_powered_pct": 0.08006196633719043,
+    "floor_cv_pct": 0.035,
+    "se_diff_floor_tps": 0.12963207479967237,
+    "se_diff_observed_tps": 5.855208437371453,
+    "ci95_observed_pct": 2.5298827499746896,
+    "observed_significant": false,
+    "median_se_baseline_tps": 0.011747115473497315,
+    "median_se_candidate_tps": 7.685588936393611,
+    "baseline_cv_pct": 0.0035996459349930602,
+    "candidate_cv_pct": 2.298525478527656,
+    "floor_exceeded": true,
+    "verdict": "REAL",
+    "human_verdict": "A=453.62 B=447.05 \u0394=-1.448% [REAL] (op@N3=0.10%, raw-powered-MDE=0.080%)"
+  },
+  "projection": {
+    "pr": 99,
+    "multiplier": 1.0601865051833779,
+    "multiplier_se_local": 9.961627152432074e-05,
+    "multiplier_ci95_local": [
+      1.0599912608788702,
+      1.0603817494878855
+    ],
+    "multiplier_ci95_envelope": [
+      1.0394063142598895,
+      1.0809666961068662
+    ],
+    "official_cv_assumed_pct": 1.0,
+    "official_anchor_tps": 481.53,
+    "reference_wall_tps": 454.33835724012107,
+    "reproduction_threshold_pct": 0.1,
+    "closed_loop_reproduces_reference": false,
+    "closed_loop_recovers_anchor": true,
+    "arms": {
+      "baseline": {
+        "accept_length": 3.852306528347049,
+        "accept_length_cv_pct": 0.026524367958078908,
+        "wall_tps_median": 453.6177679392844,
+        "wall_tps_cv_pct": 0.0035996459349930602,
+        "multiplier": 1.0601865051833779,
+        "projected_official": 480.91943608063445,
+        "projected_official_lo": 471.4931722565695,
+        "projected_official_hi": 490.3456999046995,
+        "band_rel_pct": 1.9600505026135977,
+        "clears_500": false,
+        "margin_to_500_pct_at_lo": -5.701365548686101,
+        "margin_to_500_pct_at_central": -3.816112783873109,
+        "reference_wall_tps": 454.33835724012107,
+        "reproduction_rel_err_pct": 0.15860190744489874,
+        "reproduction_threshold_pct": 0.1,
+        "reproduces_reference": false,
+        "official_anchor_tps": 481.53,
+        "recovers_official_anchor": true,
+        "recovered_vs_anchor_pct": -0.12679665220557762
+      },
+      "candidate": {
+        "accept_length": 3.6861444869565005,
+        "accept_length_cv_pct": 0.2870068063014184,
+        "wall_tps_median": 447.0501466219524,
+        "wall_tps_cv_pct": 2.298525478527656,
+        "multiplier": 1.0601865051833779,
+        "projected_official": 473.9565325888444,
+        "projected_official_lo": 464.6667451896668,
+        "projected_official_hi": 483.2463199880221,
+        "band_rel_pct": 1.9600505026135977,
+        "clears_500": false,
+        "margin_to_500_pct_at_lo": -7.066650962066637,
+        "margin_to_500_pct_at_central": -5.208693482231115,
+        "reference_wall_tps": 454.33835724012107,
+        "reproduction_rel_err_pct": 1.6041372034799994,
+        "reproduction_threshold_pct": 0.1,
+        "reproduces_reference": false,
+        "official_anchor_tps": 481.53,
+        "recovers_official_anchor": true,
+        "recovered_vs_anchor_pct": -1.5727924347715716
+      }
+    }
+  }
+}
