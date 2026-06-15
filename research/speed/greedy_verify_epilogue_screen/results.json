@@ -1,0 +1,164 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260614T234901Z",
+  "kind": "greedy-verify-epilogue-screen",
+  "nan_clean": true,
+  "peak_mem_mib": 13.582,
+  "pr": 255,
+  "synthesis": {
+    "accounting": {
+      "d2h_pct_of_verify": 29.968167801674603,
+      "d2h_us_counterfactual": 167.77215999999999,
+      "drafter_us": 658.3654411764707,
+      "full_logit_bytes": 4194304,
+      "full_logit_mb": 4.194304,
+      "gain_matd2h_pct": 15.971792979135046,
+      "gain_matnod2h_pct": 1.1610025658234768,
+      "hbm_roundtrip_full_us": 13.981013333333333,
+      "pruned_logit_bytes": 196608,
+      "pruned_roundtrip_us": 0.6553599999999999,
+      "realizable_bound_pct": 0.05382636319601897,
+      "tps_matd2h": 558.438974732429,
+      "tps_matnod2h": 487.12057565520973,
+      "verify_share": 0.45955882352941174,
+      "verify_us": 559.8345588235294
+    },
+    "audit": {
+      "served": {
+        "config_consistent_with_audit": true,
+        "dtype_bytes": 2,
+        "dtype_str": "bfloat16",
+        "fused_accept_prep": true,
+        "keepset_path": "/tmp/osoi5-12k-baked/pck04_keepset.json",
+        "lm_head_pruned": true,
+        "manifest_flags": {
+          "DIXIE_FUSED_ACCEPT_PREP": "1",
+          "DIXIE_SLIM_GREEDY": "1",
+          "FUSED_SPARSE_ARGMAX": "1",
+          "LM_HEAD_PRUNE": "1",
+          "LOOPGRAPH_REQUIRE_CAPTURE": "1",
+          "ONEGRAPH": "1",
+          "OVERRIDE_GENERATION_CONFIG": "{\"temperature\":0.0,\"top_p\":1.0,\"top_k\":0}",
+          "SPECULATIVE_CONFIG": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7}"
+        },
+        "manifest_path": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan/manifest.json",
+        "onegraph_wholestep_capture": true,
+        "pruned_vocab_K": 12288,
+        "slim_greedy_fused_argmax": true,
+        "target_cfg_path": "/tmp/osoi5-v0-baked/config.json",
+        "vocab": 262144
+      },
+      "served_epilogue": {
+        "accept_kernel": "_dixie_fused_accept_prep / rejection_greedy_sample_kernel (Triton, on-GPU)",
+        "greedy_argmax_on_gpu": "logits.argmax(dim=-1) (serve.py DIXIE_SLIM_GREEDY)",
+        "greedy_safety": "bf16->fp32 monotonic upcast; argmax bit-identical to fp32 argmax",
+        "lm_head_pruned_to_K": 12288,
+        "returns": "SamplerOutput(sampled_token_ids=<GPU>, logprobs_tensors=None)",
+        "submission": "fa2sw_precache_kenyan",
+        "vllm_version": "0.22.1rc1.dev307+g3e8afdf78"
+      },
+      "verify_epilogue_already_fused_on_gpu": true,
+      "verify_fullvocab_scatter_buffer_allocated": true,
+      "verify_lm_head_gemm_full_vocab": false,
+      "verify_logit_d2h_per_step": false,
+      "verify_materializes_full_logits": false,
+      "verify_runs_full_softmax": false
+    },
+    "composition": {
+      "K_cal": 125.268,
+      "K_spec": 7,
+      "M_verify": 8,
+      "g_drafter": 0.168,
+      "hbm_bw_gbs": 600.0,
+      "pcie_bw_gbs": 25.0,
+      "served_tps": 481.53,
+      "step_us": 1218.2
+    },
+    "cudagraph_tiein": {
+      "epilogue_d2h_blocks_cudagraph": false,
+      "epilogue_fusion_prerequisite_for_lawine246": false,
+      "onegraph_already_captures_wholestep": true,
+      "reasoning": "a d2h forces a graph break; ONEGRAPH+LOOPGRAPH_REQUIRE_CAPTURE capture the K=7 drafter loop and REQUIRE success => no graph-breaking epilogue d2h; the on-GPU epilogue read confirms it."
+    },
+    "handoff_line": "the greedy-verify lm_head/argmax EPILOGUE is ALREADY FUSED on-GPU -- the served stack (fa2sw_precache_kenyan, vLLM 0.22.1rc1.dev307) prunes lm_head to 12288 rows, runs `logits.argmax(dim=-1)` + a Triton fused-accept kernel returning token ids with logprobs_tensors=None (no full softmax, no logit d2h), and captures the whole step under ONEGRAPH. verify_materializes_full_logits=False, verify_logit_d2h_per_step=False => projected_tps_gain_pct=0.00 (NULL lever, NO-GO). The counterfactual d2h ceiling (~+16% if it HAD materialized+d2h'd 4.2MB) is refuted by the audit. Decisive tie-in: there is NO epilogue d2h to break lawine #246's whole-step CUDAGraph -- it is already fused, which is part of what makes ONEGRAPH capture feasible; epilogue-fusion is NOT a prerequisite for #246. Greedy-identical by construction (argmax exact).",
+    "headline": {
+      "actual_tps": 481.53,
+      "clears_500_alone": false,
+      "counterfactual_d2h_ceiling_pct": 15.9718,
+      "d2h_us_counterfactual": 167.7722,
+      "dtype_bytes": 2,
+      "epilogue_d2h_blocks_cudagraph": false,
+      "epilogue_fusion_prerequisite_for_lawine246": false,
+      "full_logit_mb": 4.1943,
+      "greedy_identical_by_construction": true,
+      "greedy_verify_epilogue_screen_self_test_passes": true,
+      "hbm_floor_magnitude_pct": 1.161,
+      "lever_class": "NULL (already fused on-GPU)",
+      "needs_nsys_probe": false,
+      "onegraph_already_captures_wholestep": true,
+      "projected_tps_gain_pct": 0.0,
+      "pruned_vocab_K": 12288,
+      "realizable_bound_pct": 0.0538,
+      "screen_verdict": "NO-GO",
+      "verify_epilogue_already_fused_on_gpu": true,
+      "verify_logit_d2h_per_step": false,
+      "verify_materializes_full_logits": false,
+      "vocab": 262144
+    },
+    "nonoverlap": {
+      "kanna_254_is_draft_int4_gemm_different_model": true,
+      "lawine_246_is_cudagraph_capture_not_epilogue_fusion": true,
+      "stark_247_is_topology_et": true,
+      "this_screen_prices_epilogue_fusion_a_capture_prerequisite_if_d2h_existed": true,
+      "ubel_250_is_ngram_draft_source": true
+    },
+    "self_test": {
+      "conditions": {
+        "a_us_to_tps_roundtrip_and_anchors": true,
+        "b_projected_gain_with_assumption_and_bound": true,
+        "c_materialization_verdict_stated": true,
+        "d_cudagraph_tiein_stated": true,
+        "e_nonoverlap_246_254_247_250": true,
+        "f_nan_clean": true
+      },
+      "detail": {
+        "anchor_ok": true,
+        "exact_gain_pct_at_p0p01": 1.0101010101010166,
+        "matd2h_internal_consistent": true,
+        "rt_base_ok": true,
+        "rt_known_ok": true
+      },
+      "greedy_verify_epilogue_screen_self_test_passes": true
+    },
+    "verdict": "GREEDY-VERIFY-EPILOGUE-ALREADY-FUSED-NO-GO",
+    "verdict_table": [
+      {
+        "clears_500_alone": true,
+        "note": "4.194MB d2h@25GB/s=167.8us (=30.0% of verify). PREMISE FALSE: no logit d2h in served stack",
+        "projected_tps_gain_pct": 15.9718,
+        "scenario": "MATERIALIZED+D2H (GO premise: 8x256k bf16 d2h on critical path)",
+        "tps": 558.439,
+        "unblocks_lawine_cudagraph": true,
+        "us_saved_per_step_epilogue": 167.7722
+      },
+      {
+        "clears_500_alone": false,
+        "note": "2x4.194MB @ 600GB/s=14.0us. MOOT: lm_head GEMM pruned to 12288, no full-vocab round-trip exists",
+        "projected_tps_gain_pct": 1.161,
+        "scenario": "MATERIALIZED-NO-D2H (HBM-floor: full-vocab logit round-trip)",
+        "tps": 487.121,
+        "unblocks_lawine_cudagraph": false,
+        "us_saved_per_step_epilogue": 13.981
+      },
+      {
+        "clears_500_alone": false,
+        "note": "realizable epilogue-fusion bound (pruned [M,12288] round-trip)=0.655us (~+0.054%), already fused away. NULL lever; greedy-identical by construction (argmax exact)",
+        "projected_tps_gain_pct": 0.0,
+        "scenario": "ACTUAL: already fused on-GPU (pruned argmax + fused accept, no d2h)",
+        "tps": 481.53,
+        "unblocks_lawine_cudagraph": false,
+        "us_saved_per_step_epilogue": 0.0
+      }
+    ]
+  }
+}
