@@ -1,0 +1,490 @@
+{
+  "agent": "wirbel",
+  "analysis_only": true,
+  "analytic_self_test_passes": true,
+  "audit": {
+    "evidence_327": {
+      "charges_full_forgone_reduction_parallelism": true,
+      "penalty_model": "pi(u) = 1 - BW_util  (above-roofline exposed slack = forgone reduction parallelism); floor_component = step_share * pi(u) = measured exposed_us / total_us",
+      "sdpa_floor_contribution": 0.09450777303509898,
+      "sdpa_full_roundtrips_step_share_x_pi": true,
+      "sdpa_penalty_pi": 0.6511613515093875
+    },
+    "evidence_332": {
+      "geometric_phi_forgone": 0.925,
+      "n_nonreduction_ctas": 6,
+      "phi_excludes_reduction_axis": true,
+      "phi_model": "phi = 1 - min(1, N_nonreduction / SMs) = forgone-parallelism fraction = share of the machine the deterministic (non-reduction) schedule leaves idle.",
+      "phi_roundtrips_1_minus_Nnonred_over_SMs": true,
+      "reduction_axis": "KV-sequence split (NUM_PAR_SOFTMAX_SEGMENTS=16 online-softmax segments) -- FORGONE for determinism (fixed split + ordered combine).",
+      "reduction_axis_called_forgone_for_determinism": true
+    },
+    "shared_assumption": "strict determinism requires UN-PACKING the split-KV reduction (collapse to the non-reduction M x q-head tiles, forgoing the split-KV occupancy). #363/#366 refute the PREMISE in DENSE isolation; THIS card tests whether the refutation survives the served PAGED-KV block-table gather.",
+    "shares_unpacking_assumption_327": true,
+    "shares_unpacking_assumption_332": true
+  },
+  "created_at": "20260615T142925Z",
+  "ctas_in_flight_paged_heuristic": 56,
+  "ctas_in_flight_paged_pinned8": 64,
+  "eta_floor_paged_split": 0.003904718156915901,
+  "gate_verdict": "confirms_366_high_confidence",
+  "gpu": {
+    "compute_capability": "8.6",
+    "is_a10g_80sm": true,
+    "is_ga102_sm86": true,
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "total_mem_gib": 22.06
+  },
+  "kernel": {
+    "block_n_tile": 64,
+    "fn": "flash_attn_with_kvcache",
+    "grid_page_invariant": true,
+    "page_block": 256,
+    "paged": true,
+    "served_block_size": 16
+  },
+  "kind": "pagedkv-occupancy-microbench",
+  "ladder_constants": {
+    "budget_500_eta": 0.040220518933569815,
+    "ceiling_500": 520.953,
+    "ceiling_at_geo_332_473": 473.5295953446407,
+    "floor_blanket_9841": 0.09841249119201488,
+    "recovery_breakeven_500": 0.5913117809665351,
+    "recovery_breakeven_noreg_0255": 0.2549920813842095,
+    "step_us": 1218.2
+  },
+  "microbench": {
+    "2048": {
+      "L": 2048,
+      "any_nan": false,
+      "cta_preserved": true,
+      "ctas_in_flight_paged_heuristic": 56,
+      "ctas_in_flight_paged_heuristic_bracket": {
+        "128": 64,
+        "32": 80,
+        "64": 56
+      },
+      "ctas_in_flight_paged_pinned8": 64,
+      "ctas_in_flight_paged_unpacked": 8,
+      "dense_heuristic_us_M8": 60.416001826524734,
+      "dense_pinned8_us_M8": 55.296000093221664,
+      "dense_unpacked_us_M8": 195.5839991569519,
+      "heuristic_K_bracket_by_blockN": {
+        "128": 8,
+        "32": 10,
+        "64": 7
+      },
+      "heuristic_effective_K": 7,
+      "identity_rate_by_M_paged": {
+        "2": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "4": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "8": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        }
+      },
+      "invariance": {
+        "contiguity_invariant": true,
+        "contiguity_invariant_us_ratio": 1.0181818241950062,
+        "maxabsdiff_contiguous_vs_shuffled": 0.0,
+        "maxabsdiff_page512_vs_page256": 0.0,
+        "note": "page-size + contiguity invariance => paged-gather cost is fixed block_table-setup overhead, not per-page memory divergence => the block-16 grid inherits the same occupancy story (more pages, same BLOCK_N tiling).",
+        "page_size_invariant": true,
+        "page_size_invariant_us_ratio": 1.0181818241950062,
+        "paged256_contiguous_us": 57.34400078654289,
+        "paged256_shuffled_us": 56.32000043988228,
+        "paged512_shuffled_us": 57.34400078654289
+      },
+      "latency_preserved": true,
+      "latency_us_by_M_by_split_dense": {
+        "1": {
+          "0": 55.296000093221664,
+          "1": 199.68000054359436,
+          "16": 54.27199974656105,
+          "2": 121.85599654912949,
+          "32": 55.296000093221664,
+          "4": 79.8719972372055,
+          "8": 59.39200147986412
+        },
+        "8": {
+          "0": 60.416001826524734,
+          "1": 195.5839991569519,
+          "16": 59.39200147986412,
+          "2": 117.76000261306763,
+          "32": 69.63200122117996,
+          "4": 74.75200295448303,
+          "8": 55.296000093221664
+        }
+      },
+      "latency_us_by_M_by_split_paged": {
+        "1": {
+          "0": 56.32000043988228,
+          "1": 208.8959962129593,
+          "16": 56.32000043988228,
+          "2": 126.97599828243256,
+          "32": 56.32000043988228,
+          "4": 81.91999793052673,
+          "8": 61.43999844789505
+        },
+        "8": {
+          "0": 61.43999844789505,
+          "1": 203.77600193023682,
+          "16": 61.43999844789505,
+          "2": 121.85599654912949,
+          "32": 70.65600156784058,
+          "4": 77.82399654388428,
+          "8": 56.32000043988228
+        }
+      },
+      "maxabsdiff_paged_pinned8_vs_dense_pinned8": 0.0,
+      "maxabsdiff_paged_pinned8_vs_paged_heuristic": 0.0009765625,
+      "n_pages_block16": 128,
+      "n_pages_measured_page256": 8,
+      "num_n_blocks_bn64": 32,
+      "page_block": 256,
+      "paged_gather_penalty_heuristic": 0.01694909610719631,
+      "paged_gather_penalty_pinned8": 0.018518524756479426,
+      "paged_heuristic_breaks_identity": true,
+      "paged_heuristic_us_M8": 61.43999844789505,
+      "paged_pinned8_m_invariant": true,
+      "paged_pinned8_over_heuristic_ratio_M8": 0.9166666969831575,
+      "paged_pinned8_preserves_parallelism": true,
+      "paged_pinned8_us_M8": 56.32000043988228,
+      "paged_unpacked_over_heuristic_ratio_M8": 3.3166667818693316,
+      "paged_unpacked_us_M8": 203.77600193023682,
+      "pinned8_le_num_n_blocks_no_oversub": true,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "split_grid_coarser_than_block16_pages": true,
+      "unpack_collapses_occupancy": true
+    },
+    "4096": {
+      "L": 4096,
+      "any_nan": false,
+      "cta_preserved": true,
+      "ctas_in_flight_paged_heuristic": 80,
+      "ctas_in_flight_paged_heuristic_bracket": {
+        "128": 56,
+        "32": 72,
+        "64": 80
+      },
+      "ctas_in_flight_paged_pinned8": 64,
+      "ctas_in_flight_paged_unpacked": 8,
+      "dense_heuristic_us_M8": 83.96799862384796,
+      "dense_pinned8_us_M8": 78.84799689054489,
+      "dense_unpacked_us_M8": 367.6159977912903,
+      "heuristic_K_bracket_by_blockN": {
+        "128": 7,
+        "32": 9,
+        "64": 10
+      },
+      "heuristic_effective_K": 10,
+      "identity_rate_by_M_paged": {
+        "2": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "4": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "8": {
+          "0": 0.0,
+          "1": 1.0,
+          "8": 1.0
+        }
+      },
+      "latency_preserved": true,
+      "latency_us_by_M_by_split_dense": {
+        "1": {
+          "0": 71.68000191450119,
+          "1": 373.76001477241516,
+          "16": 63.48799914121628,
+          "2": 209.9200040102005,
+          "32": 62.463998794555664,
+          "4": 124.92799758911133,
+          "8": 82.94399827718735
+        },
+        "8": {
+          "0": 83.96799862384796,
+          "1": 367.6159977912903,
+          "16": 83.96799862384796,
+          "2": 204.79999482631683,
+          "32": 103.42399775981903,
+          "4": 119.80800330638885,
+          "8": 78.84799689054489
+        }
+      },
+      "latency_us_by_M_by_split_paged": {
+        "1": {
+          "0": 72.7040022611618,
+          "1": 390.1439905166626,
+          "16": 65.5359998345375,
+          "2": 219.13599967956543,
+          "32": 63.48799914121628,
+          "4": 130.048006772995,
+          "8": 86.01599931716919
+        },
+        "8": {
+          "0": 87.0399996638298,
+          "1": 385.0240111351013,
+          "16": 86.01599931716919,
+          "2": 212.99199759960175,
+          "32": 104.44799810647964,
+          "4": 123.90399724245071,
+          "8": 81.91999793052673
+        }
+      },
+      "maxabsdiff_paged_pinned8_vs_dense_pinned8": 0.0,
+      "maxabsdiff_paged_pinned8_vs_paged_heuristic": 0.00048828125,
+      "n_pages_block16": 256,
+      "n_pages_measured_page256": 16,
+      "num_n_blocks_bn64": 64,
+      "page_block": 256,
+      "paged_gather_penalty_heuristic": 0.036585378838711005,
+      "paged_gather_penalty_pinned8": 0.03896105368721451,
+      "paged_heuristic_breaks_identity": true,
+      "paged_heuristic_us_M8": 87.0399996638298,
+      "paged_pinned8_m_invariant": true,
+      "paged_pinned8_over_heuristic_ratio_M8": 0.9411764504471761,
+      "paged_pinned8_preserves_parallelism": true,
+      "paged_pinned8_us_M8": 81.91999793052673,
+      "paged_unpacked_over_heuristic_ratio_M8": 4.423529556780332,
+      "paged_unpacked_us_M8": 385.0240111351013,
+      "pinned8_le_num_n_blocks_no_oversub": true,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "split_grid_coarser_than_block16_pages": true,
+      "unpack_collapses_occupancy": true
+    },
+    "528": {
+      "L": 528,
+      "any_nan": false,
+      "cta_preserved": true,
+      "ctas_in_flight_paged_heuristic": 72,
+      "ctas_in_flight_paged_heuristic_bracket": {
+        "128": 40,
+        "32": 72,
+        "64": 72
+      },
+      "ctas_in_flight_paged_pinned8": 64,
+      "ctas_in_flight_paged_unpacked": 8,
+      "dense_heuristic_us_M8": 43.007999658584595,
+      "dense_pinned8_us_M8": 45.05600035190582,
+      "dense_unpacked_us_M8": 70.65600156784058,
+      "heuristic_K_bracket_by_blockN": {
+        "128": 5,
+        "32": 9,
+        "64": 9
+      },
+      "heuristic_effective_K": 9,
+      "identity_rate_by_M_paged": {
+        "2": {
+          "0": 1.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "4": {
+          "0": 1.0,
+          "1": 1.0,
+          "8": 1.0
+        },
+        "8": {
+          "0": 1.0,
+          "1": 1.0,
+          "8": 1.0
+        }
+      },
+      "latency_preserved": true,
+      "latency_us_by_M_by_split_dense": {
+        "1": {
+          "0": 55.296000093221664,
+          "1": 75.77600330114365,
+          "16": 56.32000043988228,
+          "2": 63.48799914121628,
+          "32": 54.27199974656105,
+          "4": 55.296000093221664,
+          "8": 55.296000093221664
+        },
+        "8": {
+          "0": 43.007999658584595,
+          "1": 70.65600156784058,
+          "16": 45.05600035190582,
+          "2": 58.36800113320351,
+          "32": 45.05600035190582,
+          "4": 48.128001391887665,
+          "8": 45.05600035190582
+        }
+      },
+      "latency_us_by_M_by_split_paged": {
+        "1": {
+          "0": 56.32000043988228,
+          "1": 78.84799689054489,
+          "16": 57.34400078654289,
+          "2": 70.65600156784058,
+          "32": 56.32000043988228,
+          "4": 57.34400078654289,
+          "8": 56.32000043988228
+        },
+        "8": {
+          "0": 46.08000069856644,
+          "1": 73.72800260782242,
+          "16": 46.08000069856644,
+          "2": 65.5359998345375,
+          "32": 47.10400104522705,
+          "4": 49.15200173854828,
+          "8": 46.08000069856644
+        }
+      },
+      "maxabsdiff_paged_pinned8_vs_dense_pinned8": 0.0,
+      "maxabsdiff_paged_pinned8_vs_paged_heuristic": 0.001953125,
+      "n_pages_block16": 33,
+      "n_pages_measured_page256": 3,
+      "num_n_blocks_bn64": 9,
+      "page_block": 256,
+      "paged_gather_penalty_heuristic": 0.07142859617672677,
+      "paged_gather_penalty_pinned8": 0.022727280243757808,
+      "paged_heuristic_breaks_identity": false,
+      "paged_heuristic_us_M8": 46.08000069856644,
+      "paged_pinned8_m_invariant": true,
+      "paged_pinned8_over_heuristic_ratio_M8": 1.0,
+      "paged_pinned8_preserves_parallelism": true,
+      "paged_pinned8_us_M8": 46.08000069856644,
+      "paged_unpacked_over_heuristic_ratio_M8": 1.600000032337589,
+      "paged_unpacked_us_M8": 73.72800260782242,
+      "pinned8_le_num_n_blocks_no_oversub": true,
+      "seeds": [
+        0,
+        1,
+        2
+      ],
+      "split_grid_coarser_than_block16_pages": true,
+      "unpack_collapses_occupancy": true
+    }
+  },
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "paged_block_gather_occupancy_penalty": 0.022727280243757808,
+  "paged_confirms_366": true,
+  "paged_pinned8_preserves_parallelism": true,
+  "peak_mem_mib": 24.788,
+  "phi_recovery_paged_split": 1.0,
+  "pr": 370,
+  "recompute": {
+    "budget_500_eta": 0.040220518933569815,
+    "ceiling_at_geo_332_473": 473.5295953446407,
+    "dense_eta_floor_366": 0.003904718156915901,
+    "dense_phi_recovery_366": 1.0,
+    "eta_below_9841_blanket": true,
+    "eta_clears_500_budget": true,
+    "eta_floor_paged_inclusive_upper_double_count": 0.061767326451150205,
+    "eta_floor_paged_occupancy_upper_bound": 0.022806272763935695,
+    "eta_floor_paged_split": 0.003904718156915901,
+    "eta_inclusive_clears_500_budget": false,
+    "eta_occupancy_clears_500_budget": true,
+    "floor_blanket_9841": 0.09841249119201488,
+    "gate_verdict": "confirms_366_high_confidence",
+    "lmhead_residual_floor": 0.003904718156915901,
+    "paged_block_gather_occupancy_penalty": 0.022727280243757808,
+    "paged_confirms_366": true,
+    "paged_confirms_dense_phi": true,
+    "paged_gather_penalty_by_L": {
+      "2048": 0.018518524756479426,
+      "4096": 0.03896105368721451,
+      "528": 0.022727280243757808
+    },
+    "paged_gather_penalty_max": 0.03896105368721451,
+    "paged_localizes_penalty": false,
+    "paged_pinned8_preserves_parallelism_all_L": true,
+    "phi_clears_500_breakeven": true,
+    "phi_clears_noreg_breakeven_0255": true,
+    "phi_forgone_paged_headline": 0.0,
+    "phi_forgone_paged_occupancy": 0.19999999999999996,
+    "phi_occupancy_clears_500_breakeven": true,
+    "phi_recovery_geo_332": 0.07499999999999996,
+    "phi_recovery_paged_occupancy_lower_bound": 0.8,
+    "phi_recovery_paged_split": 1.0,
+    "realized_paged_sdpa_tax_ratio": 0.0,
+    "recovery_breakeven_500": 0.5913117809665351,
+    "recovery_breakeven_noreg_0255": 0.2549920813842095,
+    "refutes_332_cap": true,
+    "revived_ceiling_paged_occupancy_tps": 509.0720037848094,
+    "revived_ceiling_paged_tps": 518.9188253620001,
+    "revives_ceiling_toward_520": true,
+    "sdpa_floor_full_327": 0.09450777303509898
+  },
+  "reconcile": {
+    "crosscheck_365": {
+      "note": "stark #365 (lm_head BI-GEMM eta) not yet posted. This card's PAGED attention-locus phi_recovery confirms #366; the residual lm_head term is <= 0.390% even at phi_forgone=1 -- already << the 4.02% budget -- and #365 measures whether even that is recoverable. A #365-vs-this disagreement would localize the residual at the lm_head locus (NOT paged-KV occupancy).",
+      "pr365_posted": false,
+      "predicted_total_locus_eta_if_lmhead_free": 0.003904718156915901,
+      "predicted_total_locus_eta_if_lmhead_full": 0.003904718156915901
+    },
+    "paged_vs_dense_366": {
+      "byte_identity_paged_vs_dense_maxabsdiff": 0.0,
+      "confirms_366_dense": true,
+      "dense_phi_recovery_366": 1.0,
+      "interpretation": "paged phi == dense phi AND paged pinned8 byte-identical to dense pinned8 => #366's refutation survives the served paged-KV layout (CONFIRM). The small paged-gather penalty is a baseline-paging cost already in the served step, not a determinism tax (it cancels in the pin-vs-heur delta).",
+      "localizes_paged_penalty": false,
+      "paged_block_gather_occupancy_penalty": 0.022727280243757808,
+      "paged_phi_recovery": 1.0
+    }
+  },
+  "refutes_332_cap": true,
+  "revives_ceiling_toward_520": true,
+  "selftest": {
+    "conditions": {
+      "a2_paged_grid_matches_366_dense_cta": true,
+      "a_blanket_is_sdpa_plus_lmhead": true,
+      "a_budget_500_roundtrips": true,
+      "a_ceiling_at_geo_332_roundtrips": true,
+      "a_phi_geo_332_roundtrips": true,
+      "a_phi_recovery_332_is_0075": true,
+      "a_sdpa_floor_full_roundtrips_327": true,
+      "b_shares_unpacking_327": true,
+      "b_shares_unpacking_332": true,
+      "c_latencies_finite_positive": true,
+      "c_nan_clean": true,
+      "c_rates_in_unit_interval": true,
+      "d2_contiguity_invariant": true,
+      "d2_page_size_invariant": true,
+      "d2_pinned8_no_oversub_le_numnblocks": true,
+      "d_ctas_pinned_gg_unpacked": true,
+      "d_paged_byte_identical_to_dense": true,
+      "d_paged_heuristic_breaks_identity": true,
+      "d_paged_pinned8_byte_exact_M_invariant": true,
+      "d_paged_pinned8_preserves_parallelism_all_L": true,
+      "d_unpack_collapses_occupancy": true,
+      "e_confirm_implies_clear500": true,
+      "e_decision_bools_typed": true,
+      "e_eta_below_blanket": true,
+      "e_eta_floor_finite_nonneg": true,
+      "e_gate_verdict_valid": true,
+      "e_phi_recovery_in_unit": true,
+      "f_on_target_a10g_80sm": true,
+      "g_no_launch_flags": true
+    },
+    "n_checks": 29,
+    "passes": true
+  },
+  "wandb_run_id": "3v2yaps9"
+}
