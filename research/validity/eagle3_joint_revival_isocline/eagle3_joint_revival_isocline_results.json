@@ -1,0 +1,237 @@
+{
+  "agent": "fern",
+  "analysis_only": true,
+  "created_at": "20260615T101851Z",
+  "kind": "eagle3-joint-revival-isocline",
+  "nan_clean": true,
+  "peak_mem_mib": 34.559,
+  "pr": 341,
+  "self_test": {
+    "checks": {
+      "01_env_breakeven_reproduces_335_b_edge_482p76": true,
+      "02_env_go_corner_520p95": true,
+      "03_env_measured_dead_424": true,
+      "04_envelope_monotone_both_axes": true,
+      "05_et_chain_reproduces_337": true,
+      "06_isocline_through_true_point_not_0p255": true,
+      "07_closest_on_isocline_nonneg": true,
+      "08_substitution_negative": true,
+      "09_constants_imported_exact": true,
+      "10_nan_clean": true,
+      "11_reconcile_335_rho_500_distinct": true,
+      "12_determinism_two_runs_identical": true,
+      "13_pr_breakeven_discrepancy_documented": true
+    },
+    "joint_revival_isocline_self_test_passes": true
+  },
+  "synthesis": {
+    "closest_point": {
+      "both_axes_move": true,
+      "closest_coverage": 0.9367021117504952,
+      "closest_delta_cov": 0.04643615983518001,
+      "closest_envelope": 499.9999999999997,
+      "closest_on_isocline": true,
+      "closest_phi": 0.10038301840559172,
+      "demand_breakeven_units_spent": 1.496240976201529,
+      "demand_dominates": true,
+      "distance_from_measured_dead_corner": 1.547163213758102,
+      "metric": "normalized distance origin->isocline, axes in break-even units (phi/0.255, dcov/0.031)",
+      "min_joint_effort_to_500": 1.547163213758102,
+      "note": "Cheapest 500 point: phi=0.1004 (0.394 supply break-even units) + Delta_cov=0.0464 (1.496 demand break-even units), coverage 0.9367, normalized distance 1.5472. BOTH axes move, but DEMAND carries it (1.496 vs 0.394 break-even units): supply spends LESS than its own break-even while demand spends ~1.5x its break-even. The pure-demand endpoint (phi=0, Delta_cov=0.0497) sits at distance 1.6003, only 3.4% farther -- the supply assist barely helps because phi*=0.255 buys only 13.1 TPS of ceiling.",
+      "pure_demand_reference": {
+        "delta_cov": 0.04966471445899401,
+        "norm_dist": 1.6002697274850424,
+        "phi": 0.0
+      },
+      "supply_at_demand_breakeven_phi": 0.5913117809665348,
+      "supply_breakeven_units_spent": 0.39367112053311
+    },
+    "envelope_model": {
+      "anchor_breakeven_env_star_star": 482.757475483423,
+      "anchor_go_corner_env_1_star": 520.9527323111674,
+      "anchor_measured_dead_env_00": 424.01281958470906,
+      "ceiling_phi0": 469.6844761311386,
+      "ceiling_phi1": 520.9527323111674,
+      "correction_note": "PR self-test (a)/(e) assert envelope(0.255, 0.031) ~ 500. The model gives 482.757 == fern #335's banked ceiling_at_breakeven_B_edge, NOT 500. #335's '500' is the PRIVATE-TAX rho break-even at the FULL-B ceiling (min(622.08*0.8038, 520.95) = 500), a THIRD-axis point; phi*=0.255 is only the DISCRETE C->B threshold, and in this CONTINUOUS linear law ceiling(0.255)=482.76. The TRUE 500-isocline at Delta_cov=0.031 passes through phi=0.5913.",
+      "env_star_star_equals_335_b_edge": true,
+      "et_bar_matches_337": true,
+      "et_bar_reproduced": 6.111214987369919,
+      "et_fusion_8903_matches_337": true,
+      "et_fusion_8903_reproduced": 5.517578068867642,
+      "frac0_exact_prior": 0.9027609834529048,
+      "frac0_matches_pr_0p9029": true,
+      "frac0_rounded_prior": 0.9028610644971337,
+      "law": "envelope(phi, Delta_cov) = ceiling(phi) * E[T](0.8903 + Delta_cov) / E[T](0.9213)",
+      "monotone_in_dcov": true,
+      "monotone_in_phi": true,
+      "pr_breakeven_assertion": "envelope(0.255, 0.031) ~ 500",
+      "pr_breakeven_assertion_holds": false,
+      "rho_axis_500_matches": true,
+      "rho_axis_500_reconciled": 500.0
+    },
+    "feasibility": {
+      "cheapest_point": {
+        "coverage": 0.9367021117504952,
+        "delta_cov": 0.04643615983518001,
+        "phi": 0.10038301840559172
+      },
+      "demand_above_336_central_combo": true,
+      "demand_marginal_source": "lawine #336 (krroookz): +0.031 REACHABLE-MARGINAL; #339 in-flight",
+      "demand_within_336_band": true,
+      "note": "Measured-dead corner envelope(0,0)=424.01 is the EAGLE-3 lane's own envelope at zero lift -- BELOW the 481.53 deployed fallback, i.e. at zero coverage-lift the EAGLE-3 build is worse than keeping the deployed system. The (phi, Delta_cov) plane drops the private-tax rho axis #335 carried; the 500 here is realized public TPS, the rho>=0.8038 robustness gate is a SEPARATE check that still applies on top.",
+      "p_demand_clears_bar_335": 0.06031894029725235,
+      "reconcile_335_p_both": "fern #335 reported p_both_revivals_land = 0.0 at the MEASURED corner (phi=0, Delta_cov=0). This isocline quantifies the climb: the measured-dead corner sits 1.5472 normalized break-even units from the live 500-isocline. The cheapest crossing is NOT the discrete (B, clear) corner -- it needs only phi=0.100 (well below the C->B threshold 0.255) but Delta_cov=0.0464 (ABOVE lawine #336's central combination 0.0385, inside its optimistic band [0.0175, 0.0595]). So the burden falls almost entirely on DEMAND, near the top of its plausible range; supply contributes a small assist. Verdict REACHABLE-BUT-OPTIMISTIC: the 500 crossing is reachable iff demand lands at the optimistic edge (#336 rated this NOT a slam-dunk), with at most a marginal supply recovery -- it does NOT require the full C->B kernel revival #335's discrete corner implied.",
+      "supply_below_C_to_B_threshold": true,
+      "supply_marginal_source": "denken #332 (in-flight): P(phi >= 0.255) UNMEASURED",
+      "verdict": "REACHABLE-BUT-OPTIMISTIC"
+    },
+    "greedy_safety": {
+      "demand_axis_greedy_safe": "EAGLE-3 emission is verify-gated (drafter proposes, target verifies argmax)",
+      "gpu_used": false,
+      "isocline_card_is_cpu_analytic": true,
+      "note": "Both axes preserve greedy-identity by construction; this card maps a frontier, it changes no served bytes, runs no model forward, and spends no GPU or HF quota.",
+      "served_file_changed": false,
+      "supply_axis_greedy_safe": "BI int4 verify is bit-exact (verify argmax preserved)"
+    },
+    "handoff": "the joint compliant-500 revival isocline does NOT pass through (phi=0.255, Delta_cov=0.031) [that point = 482.76 = #335's B-edge ceiling, not 500 -- the PR conflated #335's rho-axis 500 with this plane]; it passes through (phi=0.5913, Delta_cov=0.031). The cheapest feasible point demands normalized joint effort 1.5472 (phi=0.1004, Delta_cov=0.0464, coverage 0.9367), the substitution rate is dDelta_cov/dphi=-0.03202 (so DEMAND is the cheaper axis to push -- supply's phi*=0.255 buys only ~13 TPS of ceiling), and given denken #332's pending P(phi>=0.255) and lawine #336's REACHABLE-MARGINAL +0.031, the closest feasible point is REACHABLE-BUT-OPTIMISTIC (demand at Delta_cov=0.0464 sits above #336's central 0.0385, inside its optimistic band) -- the measured-dead corner sits 1.5472 break-even units from the live GO region.",
+    "headline": {
+      "cheaper_axis": "demand",
+      "closest_coverage": 0.9367021117504952,
+      "closest_delta_cov": 0.04643615983518001,
+      "closest_phi": 0.10038301840559172,
+      "dDeltacov_dphi_at_closest": -0.032022854956625935,
+      "env_at_pr_breakeven_0p255_0p031": 482.757475483423,
+      "env_go_corner_1_star": 520.9527323111674,
+      "env_measured_dead_00": 424.01281958470906,
+      "feasibility_verdict": "REACHABLE-BUT-OPTIMISTIC",
+      "min_joint_effort_to_500": 1.547163213758102,
+      "phi_at_demand_breakeven": 0.5913117809665348,
+      "pr_breakeven_assertion_holds": false
+    },
+    "imports": {
+      "provenance": "fern #335 5pos499e (2x2 corner table; ceiling_at_breakeven_B_edge 482.757; rho-break-even 0.8038 internal-500 at full-B; P(demand clears) 0.0603) x denken #327 kcjlr5ny (linear BW-gap law ceiling phi0 469.68 / phi1 520.95; recovery break-even phi*=0.255) x lawine #336 krroookz (cov prior 0.8903, bar 0.9213, Delta_cov* 0.031, REACHABLE-MARGINAL, central combo 0.0385, band [0.0175,0.0595]) x stark #337 lbuirkpt (E[T](c)=1+sum_{d=1..7} c^d; E[T](0.9213)=6.1112; E[T](0.8903)=5.5176). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "isocline": {
+      "entry_supply_maxed": {
+        "coverage": 0.9089363308345582,
+        "delta_cov": 0.018670378919242947,
+        "phi": 1.0
+      },
+      "exit_demand_only": {
+        "coverage": 0.9399306663743092,
+        "delta_cov": 0.04966471445899401,
+        "phi": 0.0
+      },
+      "feasible_box": {
+        "delta_cov": [
+          0.0,
+          0.06
+        ],
+        "phi": [
+          0.0,
+          1.0
+        ]
+      },
+      "feasible_dcov_span": [
+        0.018670378919242947,
+        0.04966471445899401
+      ],
+      "isocline_by_delta_cov": [
+        {
+          "coverage": 0.8902659519153152,
+          "delta_cov": 0.0,
+          "demand_fraction": 0.9027609834529048,
+          "feasible": false,
+          "phi_needed": 1.6417952812821461,
+          "regime": "phi>1 (supply alone cannot reach 500 even at full recovery)"
+        },
+        {
+          "coverage": 0.9052659519153152,
+          "delta_cov": 0.015,
+          "demand_fraction": 0.9482254719355153,
+          "feasible": false,
+          "phi_needed": 1.1238196011232804,
+          "regime": "phi>1 (supply alone cannot reach 500 even at full recovery)"
+        },
+        {
+          "coverage": 0.9213011665456927,
+          "delta_cov": 0.031035214630377506,
+          "demand_fraction": 1.0,
+          "feasible": true,
+          "phi_needed": 0.5913117809665348,
+          "regime": "feasible"
+        },
+        {
+          "coverage": 0.9352659519153153,
+          "delta_cov": 0.045,
+          "demand_fraction": 1.0479222019441765,
+          "feasible": true,
+          "phi_needed": 0.14531761082516764,
+          "regime": "feasible"
+        },
+        {
+          "coverage": 0.9502659519153152,
+          "delta_cov": 0.06,
+          "demand_fraction": 1.1025114309086046,
+          "feasible": false,
+          "phi_needed": -0.3154864272146133,
+          "regime": "phi<0 (demand alone overshoots 500)"
+        }
+      ],
+      "isocline_by_phi": [
+        {
+          "ceiling": 469.6844761311386,
+          "coverage_needed": 0.9399306663743092,
+          "delta_cov_needed": 0.04966471445899401,
+          "feasible": true,
+          "phi": 0.0,
+          "within_336_band": true
+        },
+        {
+          "ceiling": 482.5015401761458,
+          "coverage_needed": 0.9319414548286624,
+          "delta_cov_needed": 0.04167550291334721,
+          "feasible": true,
+          "phi": 0.25,
+          "within_336_band": true
+        },
+        {
+          "ceiling": 495.318604221153,
+          "coverage_needed": 0.9241187313802637,
+          "delta_cov_needed": 0.03385277946494847,
+          "feasible": true,
+          "phi": 0.5,
+          "within_336_band": true
+        },
+        {
+          "ceiling": 508.1356682661602,
+          "coverage_needed": 0.9164532141664898,
+          "delta_cov_needed": 0.026187262251174626,
+          "feasible": true,
+          "phi": 0.75,
+          "within_336_band": true
+        },
+        {
+          "ceiling": 520.9527323111674,
+          "coverage_needed": 0.9089363308345582,
+          "delta_cov_needed": 0.018670378919242947,
+          "feasible": true,
+          "phi": 1.0,
+          "within_336_band": true
+        }
+      ],
+      "note": "The feasible 500-isocline runs from (phi=1, Delta_cov=0.0187) [supply maxed, least demand] down to (phi=0, Delta_cov=0.0497) [demand alone]. Below Delta_cov=0.0187 even full supply recovery cannot reach 500 (phi>1); above Delta_cov=0.0497 demand alone overshoots (phi<0). At the demand break-even Delta_cov=0.031 the isocline sits at phi=0.5913 -- the PR's claimed 0.255 is the C->B threshold, not the 500 crossing.",
+      "objective": "envelope(phi, Delta_cov) = 500",
+      "phi_at_demand_breakeven": 0.5913117809665348,
+      "phi_at_demand_breakeven_ne_phi_star": true
+    },
+    "substitution": {
+      "cheaper_axis": "demand",
+      "dDeltacov_dphi_at_closest": -0.032022854956625935,
+      "dDeltacov_dphi_normalized": -0.26310674936535383,
+      "note": "dDelta_cov/dphi = -0.03202 at the closest point: one FULL unit of supply recovery (phi: 0->1) saves only 0.0320 of coverage-lift. In break-even units, spending 1 supply break-even buys back only 0.263 demand break-even -- a losing trade (<1). So DEMAND is the cheaper axis to push: denken #327 found SDPA-recovery hard (the 9.451% BW gap) and phi*=0.255 buys only ~13 TPS of ceiling, while lawine #336 rated +0.031 demand-lift REACHABLE-MARGINAL. The negative slope confirms a substitution (trade-off), not a complement.",
+      "trade_off_not_complement": true
+    }
+  },
+  "wandb_run_id": "o4rzy1k6"
+}
