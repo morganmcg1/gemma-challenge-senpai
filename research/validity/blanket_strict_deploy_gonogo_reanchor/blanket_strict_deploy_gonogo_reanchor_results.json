@@ -1,0 +1,373 @@
+{
+  "agent": "lawine",
+  "analysis_only": true,
+  "binding_contingency": "margin",
+  "binding_contingency_block": {
+    "binding_contingency": "margin",
+    "binding_contingency_reason": "The MARGIN conjunct is knife-edge (+1.21) and depends on a CONTINUOUS measurement: the realized cb3 lift must clear 14.39 TPS (haircut < 7.8%), but #410 admits a haircut up to 14.9% -- so the failure region (7.8%, 14.9%] is ~48% of the admissible band. The IDENTITY conjunct is one DISCRETE canonical tie-break from 1.0 at a single true bitwise tie -- closable-by-construction (and #405 already isolated the failure mode of the naive global rule, so #421's true-tie-only rule is the de-risked successor).",
+    "identity_risk_note": "#412 `identity_1p0_unreachable_by_precision=True`: no attention-precision lever closes the prompt-90 flip (it is a bitwise tie). #405 (merged) showed a GLOBAL lowest-id rule is RED (14 new flips, M=1 ref not uniformly lowest-id); #421 must canonicalize ONLY true ties.",
+    "margin_fail_band_frac_of_bound": 0.479,
+    "margin_fail_band_width_pct": 7.14,
+    "ranking_most_to_least_likely_to_fail": [
+      "margin",
+      "identity"
+    ],
+    "what_kills_this_deploy": "If kanna #416 measures the cb3-over-blanket-strict additivity haircut above ~7.8% (well inside ubel #410's <=14.9% bound), the strict stack lands at or below the deployed 481.53, the +1.21 evaporates, and there is then NO TPS reason to ship the strict config at all -- a byte-identity guarantee with zero speed upside is a NO-GO. The identity flip is the lesser risk: it is one canonical tie-break (stark #421) at a single true bitwise tie, a discrete fix #412 shows precision cannot do but a tie-break can."
+  },
+  "binding_contingency_what_kills_this": "If kanna #416 measures the cb3-over-blanket-strict additivity haircut above ~7.8% (well inside ubel #410's <=14.9% bound), the strict stack lands at or below the deployed 481.53, the +1.21 evaporates, and there is then NO TPS reason to ship the strict config at all -- a byte-identity guarantee with zero speed upside is a NO-GO. The identity flip is the lesser risk: it is one canonical tie-break (stark #421) at a single true bitwise tie, a discrete fix #412 shows precision cannot do but a tie-break can.",
+  "blanket_strict_stack_tps": 482.74,
+  "checklist_path": "research/validity/blanket_strict_deploy_gonogo_reanchor/GO_NOGO_CHECKLIST.md",
+  "conjunct_identity_green": false,
+  "conjunct_margin_green": false,
+  "created_at": "20260615T232316Z",
+  "decision_surface": {
+    "additivity_haircut_frac_bound": 0.149,
+    "blanket_strict_stack_tps": 482.74,
+    "breakeven_haircut_frac": 0.0776,
+    "cb3_lift_breakeven_tps": 14.39,
+    "current_verdict": {
+      "checks": {
+        "completed_full": true,
+        "identity_is_1p0": false,
+        "margin_positive": false,
+        "ppl_within_cap": true
+      },
+      "conjunct_identity_green": false,
+      "conjunct_margin_green": false,
+      "inputs": {
+        "completed": 128,
+        "identity_value": 0.9989,
+        "measured_margin_tps": null,
+        "ppl": 2.3772
+      },
+      "ship": false,
+      "thresholds": {
+        "identity_target": 1.0,
+        "margin_breakeven": 0.0,
+        "ppl_cap": 2.42,
+        "required_completed": 128
+      },
+      "verdict": "HOLD-for-conjunction"
+    },
+    "go_requirements": {
+      "completed": "== 128  (full public run)",
+      "identity_value": "== 1.0  (stark #421's canonical tie-break closes the single prompt-90 bitwise-tie flip; currently 0.9989)",
+      "measured_margin_tps": "> 0  (i.e. measured(blanket-strict + cb3) stack > 481.53; equivalently the realized cb3 lift must clear 14.39 TPS, a haircut < 7.8% on the modeled +15.6)",
+      "ppl": "<= 2.42  (by construction; cb3 PPL-safe, 2.3772 unchanged)"
+    },
+    "margin_over_deployed_tps": 1.21,
+    "margin_survives_only_if_haircut_below_breakeven": true,
+    "modeled_margin_tps": 1.21,
+    "predicate_definition": "GO iff (measured_margin_tps > 0) AND (identity_value == 1.0) AND (ppl <= 2.42) AND (completed == 128)",
+    "scenarios": {
+      "margin_at_breakeven_identity_closed": {
+        "checks": {
+          "completed_full": true,
+          "identity_is_1p0": true,
+          "margin_positive": false,
+          "ppl_within_cap": true
+        },
+        "conjunct_identity_green": true,
+        "conjunct_margin_green": false,
+        "inputs": {
+          "completed": 128,
+          "identity_value": 1.0,
+          "measured_margin_tps": 0.0,
+          "ppl": 2.3772
+        },
+        "ship": false,
+        "thresholds": {
+          "identity_target": 1.0,
+          "margin_breakeven": 0.0,
+          "ppl_cap": 2.42,
+          "required_completed": 128
+        },
+        "verdict": "NO-GO"
+      },
+      "modeled_margin_and_identity_closed": {
+        "checks": {
+          "completed_full": true,
+          "identity_is_1p0": true,
+          "margin_positive": true,
+          "ppl_within_cap": true
+        },
+        "conjunct_identity_green": true,
+        "conjunct_margin_green": true,
+        "inputs": {
+          "completed": 128,
+          "identity_value": 1.0,
+          "measured_margin_tps": 1.21,
+          "ppl": 2.3772
+        },
+        "ship": true,
+        "thresholds": {
+          "identity_target": 1.0,
+          "margin_breakeven": 0.0,
+          "ppl_cap": 2.42,
+          "required_completed": 128
+        },
+        "verdict": "GO"
+      },
+      "modeled_margin_and_identity_open": {
+        "checks": {
+          "completed_full": true,
+          "identity_is_1p0": false,
+          "margin_positive": true,
+          "ppl_within_cap": true
+        },
+        "conjunct_identity_green": false,
+        "conjunct_margin_green": true,
+        "inputs": {
+          "completed": 128,
+          "identity_value": 0.9989,
+          "measured_margin_tps": 1.21,
+          "ppl": 2.3772
+        },
+        "ship": false,
+        "thresholds": {
+          "identity_target": 1.0,
+          "margin_breakeven": 0.0,
+          "ppl_cap": 2.42,
+          "required_completed": 128
+        },
+        "verdict": "HOLD-for-conjunction"
+      },
+      "worstcase_haircut_and_identity_closed": {
+        "checks": {
+          "completed_full": true,
+          "identity_is_1p0": true,
+          "margin_positive": false,
+          "ppl_within_cap": true
+        },
+        "conjunct_identity_green": true,
+        "conjunct_margin_green": false,
+        "inputs": {
+          "completed": 128,
+          "identity_value": 1.0,
+          "measured_margin_tps": -1.11,
+          "ppl": 2.3772
+        },
+        "ship": false,
+        "thresholds": {
+          "identity_target": 1.0,
+          "margin_breakeven": 0.0,
+          "ppl_cap": 2.42,
+          "required_completed": 128
+        },
+        "verdict": "NO-GO"
+      }
+    },
+    "worst_case_haircut_margin_tps": -1.11,
+    "worst_case_haircut_stack_tps": 480.42
+  },
+  "deploy_config": {
+    "attention_pin": {
+      "change": "PIN the served verify/attention reduction to BLANKET-STRICT (high-precision reduction EVERYWHERE -- the strict reference path), NOT the deployed non-strict fast reduction and NOT the refuted selrec eps-near-tie kernel. No new kernel is built: blanket-strict reuses the high-precision reduction the verify already supports, applied unconditionally.",
+      "flag": "STRICT_VERIFY_REDUCTION",
+      "flag_off": "0 (rollback): today's-served non-strict reduction -> the deployed 481.53 behavior",
+      "flag_on": "1 (ship): blanket-strict reduction -> byte-identical to the strict reference (after #421 tie-break, served flips -> 0, identity 1.0)",
+      "selects_selrec": false,
+      "served_files": [
+        "submissions/fa2sw_treeverify_kenyan/splitkv_verify_patch.py",
+        "submissions/fa2sw_treeverify_kenyan/fa_sliding_patch.py",
+        "submissions/fa2sw_treeverify_kenyan/manifest.json (env declaration)"
+      ],
+      "subsystem": "attention_kernel / verify-reduction"
+    },
+    "cb3_supply": {
+      "change": "ADD the cb3 body-read-shrink supply lever (k*=229, +15.60 M=8, PPL-safe, equivalence-neutral) as 6 ADDITIVE files / 0 in-place edits, per the #417 ledger. Orthogonal subsystem to the attention pin -> stacks additively in ONE combined submission + ONE checkpoint.",
+      "equivalence_neutral": true,
+      "served_files": [
+        "submissions/cb3_<name>/kernels/cb3_qtip_kernel-*.whl  (prebuilt sm_86 cb3 QTIP/QuIP# dequant GEMM)",
+        "submissions/cb3_<name>/cb3_quant_patch.py  (@register_quantization_config(\"cb3\"); NO in-tree edit)",
+        "submissions/cb3_<name>/manifest.json  (fork: +cb3 kernel dep, WEIGHTS_BUCKET -> cb3-baked ckpt)",
+        "submissions/cb3_<name>/serve.py  (fork: +setup_cb3_path)",
+        "submissions/cb3_<name>/sitecustomize.py  (fork: import cb3_quant_patch)",
+        "<cb3 bucket>/config.json  (remote NEW cb3-baked checkpoint, quant_method=\"cb3\")"
+      ],
+      "subsystem": "body_gemm_quant",
+      "touches_checkpoint": true
+    },
+    "deploy_config_summary": "PIN blanket-strict verify reduction (flag STRICT_VERIFY_REDUCTION=1) + ADD cb3 supply (k*=229). Selects BLANKET-STRICT, NOT selrec. Whole stack additive + reversible (flag flip / bucket flip); human-gated.",
+    "deploy_is_human_gated": true,
+    "ppl_unchanged": 2.3772,
+    "selrec_excluded": true,
+    "selrec_excluded_reason": "stark #412 REFUTED selrec: 384.11 realizable (97.42 tax) AND identity-degrading (0.9853). The flag must NOT bind selrec on any path; the strict leg is blanket-strict (467.14), the fastest REALIZABLE strict config.",
+    "whole_stack_reversible": true
+  },
+  "deploy_gonogo_self_test_passes": true,
+  "go_nogo_verdict": "HOLD-for-conjunction",
+  "human_checklist_md": "# BLANKET-STRICT DEPLOY GO/NO-GO -- HUMAN CHECKLIST (re-anchored off the refuted selrec leg)\n\n_PR #425 (lawine) static-analysis handoff -- generated 20260615T232316Z. This card SHIPS NOTHING; it is\nthe decision surface a human reads to authorize {served-file change + leaderboard submission} once\nBOTH pending conjuncts go GREEN. The flag a GO entails selects BLANKET-STRICT, NOT selrec._\n\n## The decision (executable predicate -- a conjunction of TWO pending inputs)\n\n```\nGO iff (measured_margin_tps > 0)    # kanna #416: measured(blanket-strict+cb3) > 481.53   [PENDING]\n       AND (identity_value == 1.0)   # stark #421: canonical tie-break closes prompt-90      [PENDING]\n       AND (ppl <= 2.42)             # cb3 PPL-safe, 2.3772 unchanged\n       AND (completed == 128)        # full public run\n```\n\n- Realizable strict stack: **blanket-strict 467.14 + cb3 +15.6 = 482.74 TPS** (knife-edge **+1.21** over the deployed non-strict 481.53, WITH a byte-identity guarantee the deployed config lacks).\n- Ship-breakeven (NO-GO boundary): **481.53 TPS** (deployed non-strict #1, PR #52 `2x9fm2zx`).\n- **CURRENT VERDICT: HOLD-for-conjunction** -- conjunct_margin_green=False (kanna #416 un-measured), conjunct_identity_green=False (blanket-strict 0.9989, 1 flip @ prompt 90).\n- selrec is EXCLUDED: stark #412 refuted it (384.11 realizable / 0.9853 identity). Do NOT price or flag the deploy on selrec.\n\n## Every line that MUST be GREEN before approval\n\n| # | Gate | Threshold | Source | Now |\n|---|------|-----------|--------|-----|\n| 1 | Measured stack beats breakeven | `margin > 0` (stack `> 481.53`) | kanna #416 | PENDING (modeled +1.21) |\n| 2 | Served greedy identity | `== 1.0` (1 flip @ prompt 90 -> 0) | stark #421 canonical tie-break | 0.9989 |\n| 3 | PPL | `<= 2.42` (expect 2.3772) | cb3 PPL-safe | OK by construction |\n| 4 | Completed | `== 128` | benchmark | OK by construction |\n| 5 | Whole-stack reversible | flag `STRICT_VERIFY_REDUCTION=0` (verify) / cb3 bucket flip | #417 + this card | OK |\n\n## The binding contingency (what kills this deploy)\n\n**Ranked most -> least likely to fail: ['margin', 'identity'].** Binding = **MARGIN**.\n\n> If kanna #416 measures the cb3-over-blanket-strict additivity haircut above ~7.8% (well inside ubel #410's <=14.9% bound), the strict stack lands at or below the deployed 481.53, the +1.21 evaporates, and there is then NO TPS reason to ship the strict config at all -- a byte-identity guarantee with zero speed upside is a NO-GO. The identity flip is the lesser risk: it is one canonical tie-break (stark #421) at a single true bitwise tie, a discrete fix #412 shows precision cannot do but a tie-break can.\n\n- Margin knife-edge: the realized cb3 lift must clear **14.39 TPS** (haircut < **7.8%**); #410 admits up to **14.9%** -> the failure region is ~48% of the admissible band. Worst-case stack 480.42 (margin -1.11).\n- Identity: #412 `identity_1p0_unreachable_by_precision=True`: no attention-precision lever closes the prompt-90 flip (it is a bitwise tie). #405 (merged) showed a GLOBAL lowest-id rule is RED (14 new flips, M=1 ref not uniformly lowest-id); #421 must canonicalize ONLY true ties.\n\n## The exact deploy config a GO entails (BLANKET-STRICT, not selrec)\n\nPIN blanket-strict verify reduction (flag STRICT_VERIFY_REDUCTION=1) + ADD cb3 supply (k*=229). Selects BLANKET-STRICT, NOT selrec. Whole stack additive + reversible (flag flip / bucket flip); human-gated.\n\n- **Attention/verify pin:** PIN the served verify/attention reduction to BLANKET-STRICT (high-precision reduction EVERYWHERE -- the strict reference path), NOT the deployed non-strict fast reduction and NOT the refuted selrec eps-near-tie kernel. No new kernel is built: blanket-strict reuses the high-precision reduction the verify already supports, applied unconditionally.\n  - flag `STRICT_VERIFY_REDUCTION` ON -> 1 (ship): blanket-strict reduction -> byte-identical to the strict reference (after #421 tie-break, served flips -> 0, identity 1.0)\n  - flag `STRICT_VERIFY_REDUCTION` OFF -> 0 (rollback): today's-served non-strict reduction -> the deployed 481.53 behavior\n  - selects_selrec = False\n- **cb3 supply:** ADD the cb3 body-read-shrink supply lever (k*=229, +15.60 M=8, PPL-safe, equivalence-neutral) as 6 ADDITIVE files / 0 in-place edits, per the #417 ledger. Orthogonal subsystem to the attention pin -> stacks additively in ONE combined submission + ONE checkpoint.\n\n## Safe operation order\n\n1. **Wait for BOTH conjuncts** -- kanna #416 (measured margin > 0) AND stark #421 (identity 1.0).\n2. **Measure locally on the A10G** -- run the #319 3-tier identity-verify CI; confirm identity `== 1.0` and the measured stack `> 481.53`.\n3. **Human approves in GitHub** -- the gated approval issue (PR + branch + exact command + GREEN CI).\n4. **Flip served file + submit** -- pin blanket-strict (flag ON) + cb3 and submit. Human-gated.\n\n_Until BOTH conjuncts are GREEN, the honest verdict is **HOLD-for-conjunction**. Rollback at any point = re-submit the prior package, or flip `STRICT_VERIFY_REDUCTION=0` to drop the strict pin while keeping cb3._\n",
+  "identity_conjunct_value": 0.9989,
+  "kind": "blanket-strict-deploy-gonogo-reanchor",
+  "margin_over_deployed_tps": 1.21,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "pinned_import_crosscheck": {
+    "all_present_checks_pass": true,
+    "available": {
+      "s403": true,
+      "s410": true,
+      "s412": true,
+      "s419": true
+    },
+    "checks": {
+      "x403_cb3_kstar": true,
+      "x403_cb3_lift_m8": true,
+      "x410_haircut_frac": true,
+      "x410_supply_demand_additive": true,
+      "x412_blanket_strict_identity": true,
+      "x412_blanket_strict_tps": true,
+      "x412_fastest_is_blanket": true,
+      "x412_identity_unreachable_by_precision": true,
+      "x412_selrec_identity": true,
+      "x412_selrec_not_beats_blanket": true,
+      "x412_selrec_realizable_tps": true,
+      "x412_selrec_tax": true,
+      "x419_cb3_kstar": true,
+      "x419_deployed_tps": true,
+      "x419_ppl_cap": true
+    },
+    "n_crosschecks": 15
+  },
+  "pr": 425,
+  "predicate_enforces_all_conjuncts": {
+    "bad_completed_is_nogo": true,
+    "bad_identity_is_not_go": true,
+    "bad_margin_is_not_go": true,
+    "bad_margin_neg_is_not_go": true,
+    "bad_ppl_is_nogo": true,
+    "base_is_go": true,
+    "none_margin_holds": true
+  },
+  "repo_facts": {
+    "crosscheck::s403_json": true,
+    "crosscheck::s410_json": true,
+    "crosscheck::s412_json": true,
+    "crosscheck::s419_json": true,
+    "deployed::attn_patch": true,
+    "deployed::manifest": true,
+    "deployed::verify_patch": true,
+    "evidence::additivity_410": true,
+    "evidence::cb3_conservative_k_403": true,
+    "evidence::deploy_surface_417": true,
+    "evidence::go_nogo_419": true,
+    "evidence::selrec_refuted_412": true,
+    "evidence::tiebreak_red_405": true,
+    "harness::decode_width_e2e_381": true,
+    "harness::per_gemm_byte_exact_390": true,
+    "harness::self_ref_compare_319": true,
+    "harness::self_ref_interlock_319": true,
+    "harness::self_ref_reference_319": true
+  },
+  "residual_flip_count": 1,
+  "selftest": {
+    "conditions": {
+      "a_x403_cb3_kstar": true,
+      "a_x403_cb3_lift_m8": true,
+      "a_x410_haircut_frac": true,
+      "a_x410_supply_demand_additive": true,
+      "a_x412_blanket_strict_identity": true,
+      "a_x412_blanket_strict_tps": true,
+      "a_x412_fastest_is_blanket": true,
+      "a_x412_identity_unreachable_by_precision": true,
+      "a_x412_selrec_identity": true,
+      "a_x412_selrec_not_beats_blanket": true,
+      "a_x412_selrec_realizable_tps": true,
+      "a_x412_selrec_tax": true,
+      "a_x419_cb3_kstar": true,
+      "a_x419_deployed_tps": true,
+      "a_x419_ppl_cap": true,
+      "a_xcheck_all_pass": true,
+      "a_xcheck_present": true,
+      "b_breakeven_haircut_below_bound": true,
+      "b_cb3_lift_breakeven_14_39": true,
+      "b_margin_is_1_21": true,
+      "b_margin_positive_but_knifeedge": true,
+      "b_stack_equals_base_plus_cb3": true,
+      "b_stack_is_482_74": true,
+      "b_worst_case_margin_negative": true,
+      "c_conjunct_identity_pending_false": true,
+      "c_conjunct_margin_pending_false": true,
+      "c_current_is_hold": true,
+      "c_current_not_ship": true,
+      "c_identity_now_0_9989": true,
+      "c_predicate_def": true,
+      "c_residual_flip_is_1": true,
+      "d_both_green_is_go": true,
+      "d_haircut_bites_is_nogo": true,
+      "d_identity_open_is_not_go": true,
+      "d_margin_breakeven_is_not_go": true,
+      "e_bad_completed_nogo": true,
+      "e_bad_identity_not_go": true,
+      "e_bad_margin_neg_not_go": true,
+      "e_bad_margin_not_go": true,
+      "e_bad_ppl_nogo": true,
+      "e_base_go": true,
+      "e_none_margin_holds": true,
+      "f_binding_is_margin": true,
+      "f_ranking_identity_second": true,
+      "f_ranking_margin_first": true,
+      "f_what_kills_mentions_481": true,
+      "f_what_kills_mentions_haircut": true,
+      "g_attn_not_selrec": true,
+      "g_blanket_in_summary": true,
+      "g_cb3_in_config": true,
+      "g_flag_is_strict_verify": true,
+      "g_flag_not_selective_recompute": true,
+      "g_human_gated": true,
+      "g_ppl_unchanged": true,
+      "g_reversible": true,
+      "g_selrec_excluded": true,
+      "h_blanket_is_fastest_realizable_strict": true,
+      "h_identity_unreachable_by_precision": true,
+      "h_selrec_identity_degraded": true,
+      "h_selrec_refuted_slower": true,
+      "i_crosscheck::s403_json": true,
+      "i_crosscheck::s410_json": true,
+      "i_crosscheck::s412_json": true,
+      "i_crosscheck::s419_json": true,
+      "i_deployed::attn_patch": true,
+      "i_deployed::manifest": true,
+      "i_deployed::verify_patch": true,
+      "i_evidence::additivity_410": true,
+      "i_evidence::cb3_conservative_k_403": true,
+      "i_evidence::deploy_surface_417": true,
+      "i_evidence::go_nogo_419": true,
+      "i_evidence::selrec_refuted_412": true,
+      "i_evidence::tiebreak_red_405": true,
+      "i_harness::decode_width_e2e_381": true,
+      "i_harness::per_gemm_byte_exact_390": true,
+      "i_harness::self_ref_compare_319": true,
+      "i_harness::self_ref_interlock_319": true,
+      "i_harness::self_ref_reference_319": true,
+      "j_analysis_only": true,
+      "j_no_hf_job": true,
+      "j_no_served_file_change": true,
+      "j_official_tps_zero": true,
+      "j_ship_human_gated": true
+    },
+    "n_checks": 83,
+    "passes": true
+  },
+  "selrec_excluded": true,
+  "shared_baselines": {
+    "additivity_haircut_frac_bound": 0.149,
+    "blanket_strict_identity": 0.9989,
+    "blanket_strict_tps": 467.14,
+    "blanket_strict_tps_std": 0.16,
+    "cb3_kstar": 229,
+    "cb3_lift_m8": 15.6,
+    "deployed_ppl": 2.3772,
+    "deployed_served_flips": "3/882",
+    "deployed_served_identity": 0.9966,
+    "deployed_tps": 481.53,
+    "ppl_cap": 2.42,
+    "required_completed": 128,
+    "selrec_identity": 0.9853,
+    "selrec_realizable_tps": 384.11,
+    "selrec_tax_tps": 97.42
+  },
+  "ship_is_human_gated": true
+}
