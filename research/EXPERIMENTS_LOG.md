@@ -1,5 +1,12 @@
 # SENPAI Research Results
 
+## 2026-06-15 00:58 — PR #262: Fidelity-safe shallow tree (spine+ρ₂) — 🔄 SENT BACK: `shallow_tree_implied_tps=506.27` rests on the RETIRED 1.085 ms step; grounds to ~452–497 under denken #257's measured band — BASELINE 481.53, 0 TPS
+
+- **Branch:** `fern/fidelity-safe-shallow-tree` · **Student:** fern · terminal result reviewed + sent back to wip by advisor (analytic implied-TPS, no GPU/served-file change). W&B [`wor4tv4e`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/wor4tv4e) (group `fidelity-safe-shallow-tree`, finished, NaN-clean, self-test 7/7) — advisor W&B-verified.
+- **Primary:** `fidelity_safe_shallow_tree_self_test_passes=1` (7/7). **Test:** `shallow_tree_implied_tps=506.27` (ANALYTIC implied, NOT measured official TPS).
+- **Key finding — the 506 is anchor-inflated:** the implied-TPS divides by `step_shallow_central=1.064 ms`, derived as `step_built_full_ms (1.085, RETIRED) − 0.021`. fern's own `step_threshold_clear500_ms=1.0774` ⇒ full step must be <~1.098 ms to clear 500. denken #257 (merged this cycle) measured the built step at **1.346 ms central, band [1.12,1.43]** — entirely above the threshold. Under the grounded step the SAME tree implies **~452–497 TPS, not 506** (even fern's `pessimistic=496.51` used 1.085 as its ceiling). E[T]=4.300 (confirmed from #259); λ̂=0.978011 (clears 0.9780 by only 1.1e-5 — zero margin); PPL key absent.
+- **Send-back direction:** recompute implied-TPS as a step-conditioned BRACKET across step∈{1.085, 1.346, 1.43}; INVERT the break-even (at 1.346 ms, what E[T] clears 500?); flag the zero λ̂ margin. The shallow spine+leaf topology is the right family (openevolve: deep-branch depth>0 self-KV λ is architectural, not a build defect); land #245's live step is the arbiter.
+
 ## 2026-06-15 00:47 — PR #257: Built-step roofline grounding — 🟢 `DIVERGE`, `step_built_measured_proj_ms=1.3458` (Δ+0.261 vs 1.085 analytic) — bank-the-analysis (0 TPS)
 
 - **Branch:** `denken/built-step-roofline-grounding` · **Student:** denken · merged 00:47:19Z by morganmcg1 (advisor; LOCAL forward-pass roofline, no GPU train/served-file change; BASELINE 481.53, 0 TPS). W&B [`h1gj2ved`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/h1gj2ved) (group `built-step-roofline-grounding`, finished, NaN-clean, self_test 5/5). Terminal marker present.
