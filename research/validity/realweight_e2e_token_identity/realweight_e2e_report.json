@@ -1,0 +1,150 @@
+{
+  "pr": 376,
+  "leg": "real-weight e2e token-identity: pin-the-attention-split vs deployed heuristic (local)",
+  "imported_anchors": {
+    "int4_identity_232": 0.9927083333333333,
+    "int4_divergence_232": 0.0072916666666667,
+    "int4_body_bitexact_decode_232": true,
+    "deployed_flip_362": 0.0052,
+    "fp16_identity_221": 0.98944091796875,
+    "batch_invariant_marlin_locus_122": true,
+    "official_baseline": 481.53,
+    "M_verify": 8
+  },
+  "real_weight_e2e_token_identity_rate": 0.9925551470588235,
+  "heuristic_e2e_token_identity_rate": 0.9927083333333333,
+  "pinned_restores_identity_vs_heuristic": false,
+  "residual_flip_rate_pinned": 0.007444852941176472,
+  "heuristic_flip_reproduces_362": true,
+  "residual_divergence_locus": "int4 Marlin weight GEMM (size_m-variant split-K; custom CUDA op outside the VLLM_BATCH_INVARIANT aten override; first divergent size_m=64, M-variant at the e2e width 2048). Confirms #122/#19; corrects #232's lm_head attribution at the prefill-replication geometry. pin_engaged(aten)=True",
+  "realweight_e2e_identity_self_test_passes": true,
+  "verdict": "RED",
+  "heuristic_flip_rate": 0.007291666666666696,
+  "pin_engaged_aten_mm_bitexact": true,
+  "pin_attn_is_batch_invariant": true,
+  "pinned_identity_vs_232_delta": -0.00015318627450977562,
+  "heuristic_identity_vs_232_delta": 0.0,
+  "heuristic_flip_vs_362_delta": 0.0020916666666666965,
+  "arms": {
+    "heuristic": {
+      "e2e_token_identity_rate": 0.9927083333333333,
+      "e2e_divergence_rate": 0.007291666666666696,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "per_sequence_strict_pass_fraction": 0.1640625,
+      "vllm_batch_invariant_env": false,
+      "attn_is_batch_invariant": false,
+      "aten_mm_control": {
+        "bitexact_M1_vs_M8": false,
+        "max_abs_diff_M1_vs_M8": 1.0,
+        "batch_m": 8
+      },
+      "marlin_sizem_diag": {
+        "status": "ran",
+        "sizes_tested": [
+          1,
+          8,
+          64,
+          256,
+          2048
+        ],
+        "per_size": {
+          "1": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "8": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "64": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.0078125
+          },
+          "256": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.001953125
+          },
+          "2048": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.015625
+          }
+        },
+        "first_divergent_size_m": 64,
+        "bitexact_at_decode_width": true,
+        "bitexact_at_e2e_width": false,
+        "decode_width": 8,
+        "e2e_width": 2048
+      },
+      "peak_gpu_gb": 12.251262976
+    },
+    "pinned": {
+      "e2e_token_identity_rate": 0.9925551470588235,
+      "e2e_divergence_rate": 0.007444852941176472,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "per_sequence_strict_pass_fraction": 0.1640625,
+      "vllm_batch_invariant_env": true,
+      "attn_is_batch_invariant": true,
+      "aten_mm_control": {
+        "bitexact_M1_vs_M8": true,
+        "max_abs_diff_M1_vs_M8": 0.0,
+        "batch_m": 8
+      },
+      "marlin_sizem_diag": {
+        "status": "ran",
+        "sizes_tested": [
+          1,
+          8,
+          64,
+          256,
+          2048
+        ],
+        "per_size": {
+          "1": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "8": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "64": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.0078125
+          },
+          "256": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.001953125
+          },
+          "2048": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.015625
+          }
+        },
+        "first_divergent_size_m": 64,
+        "bitexact_at_decode_width": true,
+        "bitexact_at_e2e_width": false,
+        "decode_width": 8,
+        "e2e_width": 2048
+      },
+      "peak_gpu_gb": 12.242743296
+    }
+  },
+  "self_test": {
+    "heuristic_controls_eq_1": true,
+    "pinned_controls_eq_1": true,
+    "pin_engaged_aten_mm_bitexact": true,
+    "pin_attn_is_batch_invariant_flag": true,
+    "heuristic_arith_consistent": true,
+    "pinned_arith_consistent": true
+  },
+  "n_prompts": 128,
+  "max_len": 256,
+  "batch_m": 8,
+  "total_positions": 32640,
+  "model_dir": "/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "pin_splits_requested": 8
+}
