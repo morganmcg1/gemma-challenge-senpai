@@ -1,0 +1,500 @@
+{
+  "pr": 405,
+  "leg": "argmax tie-break zero-cost semantic: is a deterministic lowest-id rule a FREE decode-width identity fix, or genuinely 2.6-TPS-priced (#397)? (local A10G, analysis-only)",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "primary_arm": "heuristic",
+  "eps_star": 0.125,
+  "imported_anchors": {
+    "pinned_identity_381": 0.9988751406074241,
+    "heuristic_identity_381": 0.9966254218222722,
+    "pinned_flip_count_381": 1,
+    "heuristic_flip_count_381": 3,
+    "selective_fix_tps_cost_397": 2.5984251968503935,
+    "f_step_band_397": 0.23622047244094488,
+    "fa_sliding0_tps_cost": 11.0,
+    "all4_flips_m1_lower_id_397": true,
+    "official_baseline": 481.53,
+    "corrected_strict_base_390": 471.42,
+    "gap_to_500": 28.58,
+    "band_ceiling": 509.78,
+    "M_verify": 8
+  },
+  "served_argmax_tiebreak_rule": "lowest_index_first (torch.argmax returns the FIRST/lowest index on a bitwise tie)",
+  "m1_reference_uses_lowest_index": false,
+  "tie_identifiable_from_fast_path": true,
+  "lowest_index_tiebreak_is_free": false,
+  "tiebreak_fix_tps_cost": 2.5984251968503935,
+  "free_tiebreak_recovers_identity_1p0": false,
+  "free_tiebreak_new_flips": 14,
+  "decode_width_identity_is_free": false,
+  "reconciles_397_selective_cost": true,
+  "argmax_tiebreak_zero_cost_self_test_passes": true,
+  "verdict": "RED_free_rule_unsafe_global_lowest_id_introduces_new_flips_2p6_stands",
+  "reproduces_flip_structure": true,
+  "cost_logic_consistent": true,
+  "primary_bands": {
+    "total_positions": 882,
+    "flip_count": 3,
+    "flip_gaps": [
+      0.125,
+      0.125,
+      0.125
+    ],
+    "max_flip_gap": 0.125,
+    "median_position_gap": 4.3125,
+    "position_count_0p125": 40,
+    "position_frac_0p125": 0.045351473922902494,
+    "flips_in_0p125": 3,
+    "position_count_0p25": 70,
+    "position_frac_0p25": 0.07936507936507936,
+    "flips_in_0p25": 3,
+    "position_count_0p5": 106,
+    "position_frac_0p5": 0.12018140589569161,
+    "flips_in_0p5": 3
+  },
+  "m1_lowest_index_census": {
+    "heuristic": {
+      "0p125": {
+        "eps": 0.125,
+        "n_near_tie_m1_in_top2": 40,
+        "n_m1_is_lower": 26,
+        "n_m1_is_higher": 14,
+        "frac_m1_lower": 0.65,
+        "m1_always_lower_id": false,
+        "n_m1_own_pair_resolved": 40,
+        "n_m1_own_pair_lower": 26,
+        "frac_m1_own_pair_lower": 0.65,
+        "n_m1_self_bitwise_tie": 14
+      },
+      "0p25": {
+        "eps": 0.25,
+        "n_near_tie_m1_in_top2": 70,
+        "n_m1_is_lower": 43,
+        "n_m1_is_higher": 27,
+        "frac_m1_lower": 0.6142857142857143,
+        "m1_always_lower_id": false,
+        "n_m1_own_pair_resolved": 70,
+        "n_m1_own_pair_lower": 43,
+        "frac_m1_own_pair_lower": 0.6142857142857143,
+        "n_m1_self_bitwise_tie": 14
+      },
+      "0p5": {
+        "eps": 0.5,
+        "n_near_tie_m1_in_top2": 106,
+        "n_m1_is_lower": 61,
+        "n_m1_is_higher": 45,
+        "frac_m1_lower": 0.5754716981132075,
+        "m1_always_lower_id": false,
+        "n_m1_own_pair_resolved": 106,
+        "n_m1_own_pair_lower": 61,
+        "frac_m1_own_pair_lower": 0.5754716981132075,
+        "n_m1_self_bitwise_tie": 14
+      }
+    },
+    "pinned": {
+      "0p125": {
+        "eps": 0.125,
+        "n_near_tie_m1_in_top2": 39,
+        "n_m1_is_lower": 24,
+        "n_m1_is_higher": 15,
+        "frac_m1_lower": 0.6153846153846154,
+        "m1_always_lower_id": false,
+        "n_m1_own_pair_resolved": 39,
+        "n_m1_own_pair_lower": 24,
+        "frac_m1_own_pair_lower": 0.6153846153846154,
+        "n_m1_self_bitwise_tie": 13
+      },
+      "0p25": {
+        "eps": 0.25,
+        "n_near_tie_m1_in_top2": 61,
+        "n_m1_is_lower": 37,
+        "n_m1_is_higher": 24,
+        "frac_m1_lower": 0.6065573770491803,
+        "m1_always_lower_id": false,
+        "n_m1_own_pair_resolved": 61,
+        "n_m1_own_pair_lower": 37,
+        "frac_m1_own_pair_lower": 0.6065573770491803,
+        "n_m1_self_bitwise_tie": 13
+      },
+      "0p5": {
+        "eps": 0.5,
+        "n_near_tie_m1_in_top2": 97,
+        "n_m1_is_lower": 56,
+        "n_m1_is_higher": 41,
+        "frac_m1_lower": 0.5773195876288659,
+        "m1_always_lower_id": false,
+        "n_m1_own_pair_resolved": 97,
+        "n_m1_own_pair_lower": 56,
+        "frac_m1_own_pair_lower": 0.5773195876288659,
+        "n_m1_self_bitwise_tie": 13
+      }
+    }
+  },
+  "rule_simulation": {
+    "heuristic": {
+      "0p125": {
+        "eps": 0.125,
+        "n_total": 882,
+        "n_baseline_flips": 3,
+        "fixed_flips": 3,
+        "new_flips": 14,
+        "unfixed_flips": 0,
+        "rule_identity": 0.9841269841269841,
+        "rule_flip_count": 14,
+        "n_near_tie": 40,
+        "n_near_tie_correct": 37,
+        "n_near_tie_m1_not_in_top2": 0,
+        "recovers_identity_1p0": false
+      },
+      "0p25": {
+        "eps": 0.25,
+        "n_total": 882,
+        "n_baseline_flips": 3,
+        "fixed_flips": 3,
+        "new_flips": 27,
+        "unfixed_flips": 0,
+        "rule_identity": 0.9693877551020408,
+        "rule_flip_count": 27,
+        "n_near_tie": 70,
+        "n_near_tie_correct": 67,
+        "n_near_tie_m1_not_in_top2": 0,
+        "recovers_identity_1p0": false
+      },
+      "0p5": {
+        "eps": 0.5,
+        "n_total": 882,
+        "n_baseline_flips": 3,
+        "fixed_flips": 3,
+        "new_flips": 45,
+        "unfixed_flips": 0,
+        "rule_identity": 0.9489795918367347,
+        "rule_flip_count": 45,
+        "n_near_tie": 106,
+        "n_near_tie_correct": 103,
+        "n_near_tie_m1_not_in_top2": 0,
+        "recovers_identity_1p0": false
+      }
+    },
+    "pinned": {
+      "0p125": {
+        "eps": 0.125,
+        "n_total": 882,
+        "n_baseline_flips": 1,
+        "fixed_flips": 1,
+        "new_flips": 15,
+        "unfixed_flips": 0,
+        "rule_identity": 0.9829931972789115,
+        "rule_flip_count": 15,
+        "n_near_tie": 39,
+        "n_near_tie_correct": 38,
+        "n_near_tie_m1_not_in_top2": 0,
+        "recovers_identity_1p0": false
+      },
+      "0p25": {
+        "eps": 0.25,
+        "n_total": 882,
+        "n_baseline_flips": 1,
+        "fixed_flips": 1,
+        "new_flips": 24,
+        "unfixed_flips": 0,
+        "rule_identity": 0.9727891156462585,
+        "rule_flip_count": 24,
+        "n_near_tie": 61,
+        "n_near_tie_correct": 60,
+        "n_near_tie_m1_not_in_top2": 0,
+        "recovers_identity_1p0": false
+      },
+      "0p5": {
+        "eps": 0.5,
+        "n_total": 882,
+        "n_baseline_flips": 1,
+        "fixed_flips": 1,
+        "new_flips": 41,
+        "unfixed_flips": 0,
+        "rule_identity": 0.953514739229025,
+        "rule_flip_count": 41,
+        "n_near_tie": 97,
+        "n_near_tie_correct": 96,
+        "n_near_tie_m1_not_in_top2": 0,
+        "recovers_identity_1p0": false
+      }
+    }
+  },
+  "tie_identifiable_detail": {
+    "eps": 0.125,
+    "n_fast_flips": 3,
+    "all_fast_flips_identifiable": true,
+    "union_flip_coords": 4,
+    "union_identifiable_hits": 4,
+    "all_union_flips_identifiable_from_fast": true,
+    "union_detail": [
+      {
+        "prompt_idx": 11,
+        "pos": 231,
+        "in_fast_census": true,
+        "m1_in_fast_top2": true,
+        "fast_gap": 0.125,
+        "identifiable": true
+      },
+      {
+        "prompt_idx": 18,
+        "pos": 227,
+        "in_fast_census": true,
+        "m1_in_fast_top2": true,
+        "fast_gap": 0.125,
+        "identifiable": true
+      },
+      {
+        "prompt_idx": 90,
+        "pos": 227,
+        "in_fast_census": true,
+        "m1_in_fast_top2": true,
+        "fast_gap": 0.0,
+        "identifiable": true
+      },
+      {
+        "prompt_idx": 118,
+        "pos": 227,
+        "in_fast_census": true,
+        "m1_in_fast_top2": true,
+        "fast_gap": 0.125,
+        "identifiable": true
+      }
+    ]
+  },
+  "flip_coords_union": [
+    [
+      11,
+      231
+    ],
+    [
+      18,
+      227
+    ],
+    [
+      90,
+      227
+    ],
+    [
+      118,
+      227
+    ]
+  ],
+  "n_flip_coords_union": 4,
+  "arms": {
+    "heuristic": {
+      "decodewidth_e2e_token_identity_rate": 0.9965986394557823,
+      "decodewidth_e2e_divergence_rate": 0.003401360544217691,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "chunk_isolated_fraction": 1.0,
+      "median_chunk_width": 7.0,
+      "vllm_batch_invariant_env": false,
+      "attn_is_batch_invariant": false,
+      "argmax_tiebreak_probe": {
+        "tie_idx_cpu": 1,
+        "tie_idx_cuda": 1,
+        "cpu_returns_lowest_index": true,
+        "cuda_returns_lowest_index": true,
+        "cuda_vectorised_tie_idx": 700,
+        "cuda_vectorised_lowest_index": true,
+        "cuda_argmax_stable_across_repeats": true,
+        "bf16_one_ulp_gap_nats": 0.0078125,
+        "bf16_strict_picks_larger": true,
+        "served_argmax_tiebreak_rule": "lowest_index_first (torch.argmax returns the FIRST/lowest index on a bitwise tie)"
+      },
+      "bands": {
+        "total_positions": 882,
+        "flip_count": 3,
+        "flip_gaps": [
+          0.125,
+          0.125,
+          0.125
+        ],
+        "max_flip_gap": 0.125,
+        "median_position_gap": 4.3125,
+        "position_count_0p125": 40,
+        "position_frac_0p125": 0.045351473922902494,
+        "flips_in_0p125": 3,
+        "position_count_0p25": 70,
+        "position_frac_0p25": 0.07936507936507936,
+        "flips_in_0p25": 3,
+        "position_count_0p5": 106,
+        "position_frac_0p5": 0.12018140589569161,
+        "flips_in_0p5": 3
+      },
+      "flip_details": [
+        {
+          "prompt_idx": 11,
+          "pos": 231,
+          "j": 7,
+          "m8_gap": 0.125,
+          "m8_top1_id": 236743,
+          "m8_top2_id": 621,
+          "m8_pair_min_id": 621,
+          "m8_pair_max_id": 236743,
+          "m8_top1_is_lower_of_pair": false,
+          "m1_tok_id": 621,
+          "is_flip": 1,
+          "m1_in_m8_top2": true,
+          "m1_in_m8_top5": true,
+          "m1_is_lower_of_m8_pair": true,
+          "m1_self_gap": 0.0,
+          "m1_argmax_matches_token": true,
+          "m1_picks_lower_of_own_pair": true,
+          "m1_margin_in_m8": 0.125
+        },
+        {
+          "prompt_idx": 18,
+          "pos": 227,
+          "j": 3,
+          "m8_gap": 0.125,
+          "m8_top1_id": 25581,
+          "m8_top2_id": 3629,
+          "m8_pair_min_id": 3629,
+          "m8_pair_max_id": 25581,
+          "m8_top1_is_lower_of_pair": false,
+          "m1_tok_id": 3629,
+          "is_flip": 1,
+          "m1_in_m8_top2": true,
+          "m1_in_m8_top5": true,
+          "m1_is_lower_of_m8_pair": true,
+          "m1_self_gap": 0.0,
+          "m1_argmax_matches_token": true,
+          "m1_picks_lower_of_own_pair": true,
+          "m1_margin_in_m8": 0.125
+        },
+        {
+          "prompt_idx": 118,
+          "pos": 227,
+          "j": 3,
+          "m8_gap": 0.125,
+          "m8_top1_id": 8291,
+          "m8_top2_id": 6481,
+          "m8_pair_min_id": 6481,
+          "m8_pair_max_id": 8291,
+          "m8_top1_is_lower_of_pair": false,
+          "m1_tok_id": 6481,
+          "is_flip": 1,
+          "m1_in_m8_top2": true,
+          "m1_in_m8_top5": true,
+          "m1_is_lower_of_m8_pair": true,
+          "m1_self_gap": 0.0,
+          "m1_argmax_matches_token": true,
+          "m1_picks_lower_of_own_pair": true,
+          "m1_margin_in_m8": 0.125
+        }
+      ],
+      "total_positions": 882,
+      "n_prompts": 126,
+      "peak_gpu_gb": 12.251262976
+    },
+    "pinned": {
+      "decodewidth_e2e_token_identity_rate": 0.9988662131519275,
+      "decodewidth_e2e_divergence_rate": 0.0011337868480725266,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "chunk_isolated_fraction": 1.0,
+      "median_chunk_width": 7.0,
+      "vllm_batch_invariant_env": true,
+      "attn_is_batch_invariant": true,
+      "argmax_tiebreak_probe": {
+        "tie_idx_cpu": 1,
+        "tie_idx_cuda": 1,
+        "cpu_returns_lowest_index": true,
+        "cuda_returns_lowest_index": true,
+        "cuda_vectorised_tie_idx": 700,
+        "cuda_vectorised_lowest_index": true,
+        "cuda_argmax_stable_across_repeats": true,
+        "bf16_one_ulp_gap_nats": 0.0078125,
+        "bf16_strict_picks_larger": true,
+        "served_argmax_tiebreak_rule": "lowest_index_first (torch.argmax returns the FIRST/lowest index on a bitwise tie)"
+      },
+      "bands": {
+        "total_positions": 882,
+        "flip_count": 1,
+        "flip_gaps": [
+          0.125
+        ],
+        "max_flip_gap": 0.125,
+        "median_position_gap": 4.375,
+        "position_count_0p125": 39,
+        "position_frac_0p125": 0.04421768707482993,
+        "flips_in_0p125": 1,
+        "position_count_0p25": 61,
+        "position_frac_0p25": 0.0691609977324263,
+        "flips_in_0p25": 1,
+        "position_count_0p5": 97,
+        "position_frac_0p5": 0.10997732426303855,
+        "flips_in_0p5": 1
+      },
+      "flip_details": [
+        {
+          "prompt_idx": 90,
+          "pos": 227,
+          "j": 3,
+          "m8_gap": 0.125,
+          "m8_top1_id": 102643,
+          "m8_top2_id": 22355,
+          "m8_pair_min_id": 22355,
+          "m8_pair_max_id": 102643,
+          "m8_top1_is_lower_of_pair": false,
+          "m1_tok_id": 22355,
+          "is_flip": 1,
+          "m1_in_m8_top2": true,
+          "m1_in_m8_top5": true,
+          "m1_is_lower_of_m8_pair": true,
+          "m1_self_gap": 0.0,
+          "m1_argmax_matches_token": true,
+          "m1_picks_lower_of_own_pair": true,
+          "m1_margin_in_m8": 0.125
+        }
+      ],
+      "total_positions": 882,
+      "n_prompts": 126,
+      "peak_gpu_gb": 12.242743296
+    }
+  },
+  "self_test": {
+    "heuristic_determinism_m1_eq_1": true,
+    "heuristic_determinism_m8_eq_1": true,
+    "heuristic_within_eq_1": true,
+    "heuristic_geometry_isolated": true,
+    "heuristic_arith_consistent": true,
+    "heuristic_band_monotonic": true,
+    "heuristic_all_flips_in_tightest_band": true,
+    "heuristic_m1_census_argmax_aligned": true,
+    "heuristic_rule_arith_closes": true,
+    "pinned_determinism_m1_eq_1": true,
+    "pinned_determinism_m8_eq_1": true,
+    "pinned_within_eq_1": true,
+    "pinned_geometry_isolated": true,
+    "pinned_arith_consistent": true,
+    "pinned_band_monotonic": true,
+    "pinned_all_flips_in_tightest_band": true,
+    "pinned_m1_census_argmax_aligned": true,
+    "pinned_rule_arith_closes": true,
+    "pinned_attn_batch_invariant": true,
+    "heuristic_not_batch_invariant": true,
+    "reproduces_flip_structure_381_397": true,
+    "argmax_rule_resolved": true,
+    "argmax_probe_stable": true,
+    "bf16_strict_picks_larger": true,
+    "primary_has_residual": true,
+    "near_tie_count_monotonic_in_eps": true,
+    "m1_census_nonempty_at_eps_star": true,
+    "new_flip_count_matches_higher_id_correct_near_ties": true,
+    "cost_zero_iff_free": true,
+    "tps_cost_is_0_or_397": true
+  },
+  "self_test_n_checks": 30,
+  "C": 224,
+  "n_verify": 8,
+  "n_prompts": 126,
+  "model_dir": "/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0"
+}
