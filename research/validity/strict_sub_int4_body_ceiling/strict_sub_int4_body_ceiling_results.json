@@ -1,0 +1,275 @@
+{
+  "pr": 356,
+  "agent": "denken",
+  "leg": "strict sub-int4 body quantisation ceiling analysis",
+  "banked_anchors": {
+    "step_norm_us": 1218.2,
+    "body_norm_us": 928.7674,
+    "remaining_us": 289.4326000000001,
+    "strict_ceiling_int4_tps": 473.5295953446407,
+    "lambda1_ceil_tps": 520.9527323111674,
+    "k_cal": 125.26795005202914,
+    "e_t_served": 4.6827608,
+    "body_int4_gb": 1.6973824,
+    "kv_gqa_bytes": 40009728,
+    "a10g_bw_gbps": 600.0,
+    "deployed_int4_ppl": 2.3772,
+    "ppl_gate": 2.42,
+    "ppl_headroom": 0.04279999999999973,
+    "source_pr_waterfall": 344,
+    "source_run_id": "sxltbech",
+    "source_pr_strict_ceiling": 332,
+    "source_run_id_332": "y5cl0ena"
+  },
+  "body_components_us_int4": {
+    "gate_up_proj": 530.7241,
+    "down_proj": 265.3621,
+    "qkv_proj": 79.6088,
+    "o_proj": 53.0724
+  },
+  "non_body_components_us": {
+    "attention": 115.8113,
+    "lm_head": 27.3218,
+    "draft_chain": 146.2978
+  },
+  "ceiling_model_note": "step(b) = body_norm_us * (b/4) + remaining_us; strict_ceiling(b) = STRICT_CEILING_INT4 * (STEP_NORM_US / step(b)). Body GEMM bytes scale proportionally with b/4. KV, attention, lm_head, draft_chain are fixed. strict_ceiling_int4 = 473.5296 encodes phi=0.075 SDPA floor from #332.",
+  "b_star_analytic_bpw": 3.7222447992799172,
+  "b_star_note": "Strict ceiling crosses 500 at b* = 3.7222 bpw. The nearest discrete grid points are 3.5 (ceiling 523.5) and 4 (ceiling 473.5). b* lies between 3.5 and 4, confirming that the ceiling gate needs sub-int4.",
+  "ceiling_curve": [
+    {
+      "bits_per_weight": 4.0,
+      "body_scale_factor": 1.0,
+      "body_read_gb": 1.6973824,
+      "step_us": 1218.2,
+      "strict_ceiling_tps": 473.5295953446407,
+      "lambda1_ceiling_tps": 520.9527323111674,
+      "clears_500_strict": false,
+      "ppl_delta_optimistic": 0.0,
+      "ppl_delta_central": 0.0,
+      "ppl_delta_pessimistic": 0.0,
+      "ppl_optimistic": 2.3772,
+      "ppl_central": 2.3772,
+      "ppl_pessimistic": 2.3772,
+      "ppl_within_gate": true,
+      "feasible_strict": false
+    },
+    {
+      "bits_per_weight": 3.5,
+      "body_scale_factor": 0.875,
+      "body_read_gb": 1.4852096,
+      "step_us": 1102.1040750000002,
+      "strict_ceiling_tps": 523.4113239703257,
+      "lambda1_ceiling_tps": 575.8300263080545,
+      "clears_500_strict": true,
+      "ppl_delta_optimistic": 0.1,
+      "ppl_delta_central": 0.25,
+      "ppl_delta_pessimistic": 0.5,
+      "ppl_optimistic": 2.4772000000000003,
+      "ppl_central": 2.6272,
+      "ppl_pessimistic": 2.8772,
+      "ppl_within_gate": false,
+      "feasible_strict": false
+    },
+    {
+      "bits_per_weight": 3.0,
+      "body_scale_factor": 0.75,
+      "body_read_gb": 1.2730367999999999,
+      "step_us": 986.0081500000001,
+      "strict_ceiling_tps": 585.0395385158239,
+      "lambda1_ceiling_tps": 643.630195654533,
+      "clears_500_strict": true,
+      "ppl_delta_optimistic": 0.23,
+      "ppl_delta_central": 0.47,
+      "ppl_delta_pessimistic": 1.35,
+      "ppl_optimistic": 2.6072,
+      "ppl_central": 2.8472,
+      "ppl_pessimistic": 3.7272000000000003,
+      "ppl_within_gate": false,
+      "feasible_strict": false
+    },
+    {
+      "bits_per_weight": 2.5,
+      "body_scale_factor": 0.625,
+      "body_read_gb": 1.060864,
+      "step_us": 869.912225,
+      "strict_ceiling_tps": 663.1171932879106,
+      "lambda1_ceiling_tps": 729.5271870693209,
+      "clears_500_strict": true,
+      "ppl_delta_optimistic": 0.665,
+      "ppl_delta_central": 1.0,
+      "ppl_delta_pessimistic": 2.0,
+      "ppl_optimistic": 3.0422000000000002,
+      "ppl_central": 3.3772,
+      "ppl_pessimistic": 4.3772,
+      "ppl_within_gate": false,
+      "feasible_strict": false
+    },
+    {
+      "bits_per_weight": 2.0,
+      "body_scale_factor": 0.5,
+      "body_read_gb": 0.8486912,
+      "step_us": 753.8163000000001,
+      "strict_ceiling_tps": 765.244467450281,
+      "lambda1_ceiling_tps": 841.882323984589,
+      "clears_500_strict": true,
+      "ppl_delta_optimistic": 1.1,
+      "ppl_delta_central": 1.43,
+      "ppl_delta_pessimistic": 30.0,
+      "ppl_optimistic": 3.4772000000000003,
+      "ppl_central": 3.8072,
+      "ppl_pessimistic": 32.3772,
+      "ppl_within_gate": false,
+      "feasible_strict": false
+    }
+  ],
+  "ppl_band": {
+    "4.0": {
+      "optimistic_delta": 0.0,
+      "central_delta": 0.0,
+      "pessimistic_delta": 0.0,
+      "sources": [
+        "deployed int4 baseline"
+      ],
+      "ppl_optimistic": 2.3772,
+      "ppl_central": 2.3772,
+      "ppl_pessimistic": 2.3772,
+      "within_gate": true,
+      "notes": "Int4 (W4A16) operating point; PPL=2.3772."
+    },
+    "3.5": {
+      "optimistic_delta": 0.1,
+      "central_delta": 0.25,
+      "pessimistic_delta": 0.5,
+      "sources": [
+        "interpolated W3/W4 boundary; no published uniform 3.5-bit LLM scheme",
+        "SpQR (arxiv:2306.03078) W3 delta=+0.20 lower anchor",
+        "QuIP# (arxiv:2402.04396) W3 delta=+0.23"
+      ],
+      "ppl_optimistic": 2.4772000000000003,
+      "ppl_central": 2.6272,
+      "ppl_pessimistic": 2.8772,
+      "within_gate": false,
+      "notes": "No uniform 3.5-bit kernel exists in standard vLLM / AWQ stacks. Best-case optimistic +0.10 is ~2.3x the +0.0428 budget. All three band points exceed the gate."
+    },
+    "3.0": {
+      "optimistic_delta": 0.23,
+      "central_delta": 0.47,
+      "pessimistic_delta": 1.35,
+      "sources": [
+        "QuIP# (arxiv:2402.04396): Llama-2-7B W3 delta=+0.23 (best known)",
+        "SpQR  (arxiv:2306.03078): Llama-2-7B W3 delta=+0.20 (non-standard hw format)",
+        "OmniQuant (arxiv:2308.13137): LLaMA-2-7B W3 delta=+0.29",
+        "AWQ   (arxiv:2306.00978): Llama-2-7B W3 g128 delta=+0.64",
+        "HQQ   (https://mobiusml.github.io/hqq_blog/): Llama-2-7B W3 g64 delta=+0.47",
+        "GPTQ  (arxiv:2210.17323): Llama-2-7B W3 g128 delta=+1.35"
+      ],
+      "ppl_optimistic": 2.6072,
+      "ppl_central": 2.8472,
+      "ppl_pessimistic": 3.7272000000000003,
+      "within_gate": false,
+      "notes": "Best-known uniform W3 result is QuIP# +0.23, which is 5.4x the +0.0428 budget for the deployed model. No W3 method in the literature comes within 4x of the gate for 4-8B class models. SpQR is listed for completeness; its irregular-sparsity format cannot be served by vLLM's current int3 GEMM kernels."
+    },
+    "2.5": {
+      "optimistic_delta": 0.665,
+      "central_delta": 1.0,
+      "pessimistic_delta": 2.0,
+      "sources": [
+        "Interpolated from QuIP# W3 delta=+0.23 and W2 delta=+1.10 (arxiv:2402.04396)",
+        "No published uniform 2.5-bit scheme for 4-8B LLMs found in literature"
+      ],
+      "ppl_optimistic": 3.0422000000000002,
+      "ppl_central": 3.3772,
+      "ppl_pessimistic": 4.3772,
+      "within_gate": false,
+      "notes": "No published uniform 2.5-bit LLM quantisation scheme for 4-8B models. Interpolated from QuIP# W3/W2 bracketing bounds. All points far exceed gate."
+    },
+    "2.0": {
+      "optimistic_delta": 1.1,
+      "central_delta": 1.43,
+      "pessimistic_delta": 30.0,
+      "sources": [
+        "QuIP#  (arxiv:2402.04396): Llama-2-7B W2 delta=+1.10 (best structured W2)",
+        "AQLM   (arxiv:2401.06118): Llama-2-7B W2 delta=+1.43",
+        "HQQ    (https://mobiusml.github.io/hqq_blog/): Llama-2-7B W2 g16 delta=+1.95",
+        "GPTQ   (arxiv:2210.17323): W2 catastrophic for 7B without special handling"
+      ],
+      "ppl_optimistic": 3.4772000000000003,
+      "ppl_central": 3.8072,
+      "ppl_pessimistic": 32.3772,
+      "within_gate": false,
+      "notes": "Best-known W2 result is QuIP# +1.10 for 7B, which is 25.7x the budget. W2 is uniformly fatal for language quality on 4-8B models."
+    }
+  },
+  "identity_note": "Sub-int4 body quantisation (W3.5, W3, W2.5, W2 A16) does NOT inherently break deterministic greedy token emission.  Greedy decoding selects the argmax of the lm_head logit vector; as long as the quantisation changes the logit distribution but does not alter WHICH token has the highest logit for every prompt in the eval set, the greedy token sequence is preserved.  In practice, sub-int4 quantisation does shift logit orderings on a fraction of positions, causing PPL degradation.  The binding constraint for this approach is therefore PPL (quality gate = 2.42), NOT token-identity divergence per se.  If PPL is within gate, greedy output would need a separate identity audit (#158 contract) before deployment; but for this feasibility study PPL is the primary kill signal and it is already conclusive.",
+  "ppl_citations": [
+    "GPTQ: Frantar et al. 2022 (arxiv:2210.17323) \u2014 W3 g128 Llama-2-7B delta=+1.35",
+    "AWQ:  Lin et al. 2023 (arxiv:2306.00978)    \u2014 W3 g128 Llama-2-7B delta=+0.64",
+    "QuIP#: Tseng et al. 2024 (arxiv:2402.04396) \u2014 W3 Llama-2-7B delta=+0.23 (best W3)",
+    "AQLM: Egiazarian et al. 2024 (arxiv:2401.06118) \u2014 W2 Llama-2-7B delta=+1.43",
+    "SpQR: Dettmers et al. 2023 (arxiv:2306.03078)   \u2014 W3 Llama-2-7B delta=+0.20 (non-std hw)",
+    "OmniQuant: Shao et al. 2023 (arxiv:2308.13137)  \u2014 W3 LLaMA-2-7B delta=+0.29",
+    "HQQ: Badri & Shaji 2023 (mobiusml.github.io/hqq_blog) \u2014 W3 g64 delta=+0.47; W2 g16 delta=+1.95"
+  ],
+  "verdict": {
+    "sub_int4_clears_500_strict": false,
+    "strict_ceiling_at_best_ppl_safe_bits": 473.5295953446407,
+    "best_ppl_safe_bits": 4.0,
+    "b_star_analytic_bpw": 3.7222447992799172,
+    "ceiling_at_b3p5": 523.4113239703257,
+    "ppl_delta_at_b3p5_best_case": 0.1,
+    "ppl_budget": 0.04279999999999973,
+    "ppl_first_unsafe_b": 3.5,
+    "kill_reason": "Speed ceiling passes 500 at b*=3.722 bpw (between discrete 3.5 and 4). b=3.5 ceiling=523.5 clears 500; however best-case QuIP#/SpQR-class W3 incurs +0.23 PPL delta, which is 5.4x the +0.0428 budget. Even interpolated W3.5 optimistic (+0.10) is 2.3x over budget. The PPL gate is conclusive; the ceiling lever is real but inaccessible without a quantisation method that stays within +0.04 PPL at W3.5 \u2014 a level not achieved in the published literature for 4-8B LLMs."
+  },
+  "self_test": {
+    "checks": {
+      "a_waterfall_roundtrip": {
+        "body_sum_us": 928.7674,
+        "body_resid_us": 0.0,
+        "step_check_us": 1218.2,
+        "step_resid_us": 0.0,
+        "remaining_us": 289.4326000000001,
+        "remaining_resid_us": 0.0,
+        "pass": true
+      },
+      "b_ceiling4_roundtrip": {
+        "c4_strict_computed": 473.5295953446407,
+        "c4_strict_anchor": 473.5295953446407,
+        "strict_resid": 0.0,
+        "c4_lambda1_computed": 520.9527323111674,
+        "c4_lambda1_anchor": 520.9527323111674,
+        "lambda1_resid": 0.0,
+        "pass": true
+      },
+      "c_monotone_nan_clean": {
+        "nan_clean": true,
+        "monotone": true,
+        "ceilings": [
+          473.5295953446407,
+          523.4113239703257,
+          585.0395385158239,
+          663.1171932879106,
+          765.244467450281
+        ],
+        "pass": true
+      },
+      "d_ppl_band_ordered_and_crossing": {
+        "ppl_ordered": true,
+        "gate_crossing_b": 3.5,
+        "gate_crossing_correct": true,
+        "pass": true
+      },
+      "e_verdict_set": {
+        "sub_int4_clears_500_strict": false,
+        "strict_ceiling_at_best_ppl_safe_bits": 473.5295953446407,
+        "best_safe_bits": 4.0,
+        "verdict_set": true,
+        "best_safe_ceil_correct": true,
+        "pass": true
+      }
+    },
+    "strict_sub_int4_self_test_passes": true
+  },
+  "strict_sub_int4_self_test_passes": true,
+  "wandb_run_id": "hfrnk2f4"
+}
