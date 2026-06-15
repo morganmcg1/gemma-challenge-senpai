@@ -1,0 +1,149 @@
+{
+  "agent": "kanna",
+  "created_at": "20260615T001937Z",
+  "kind": "planb-serve-overhead-screen",
+  "nan_clean": true,
+  "peak_mem_mib": 12.121,
+  "pr": 260,
+  "synthesis": {
+    "accounting": {
+      "fp_hi_pct": 0.1848911303562633,
+      "fp_lo_pct": 0.018489113035626333,
+      "fp_mid_pct": 0.06163037678542111,
+      "implied_tps_hi": 482.4203062600045,
+      "implied_tps_lo": 481.6190306260005,
+      "implied_tps_mid": 481.82676875333476,
+      "per_req_decode_us": 162257.64828303852,
+      "perreq_mw_us": [
+        30.0,
+        100.0,
+        300.0
+      ],
+      "vidraft_anchor_pct": 0.8956094309755894,
+      "vidraft_ceiling_delta_tps": 4.312628092976809,
+      "vidraft_ceiling_tps": 485.8426280929768,
+      "vidraft_roundtrip_tps": 484.42
+    },
+    "audit_bench_sendmode": {
+      "backend": "vllm-chat",
+      "bench_streaming": false,
+      "evidence": "hf_bucket_single_job.py: --disable-stream@243, vllm-chat@215",
+      "harness_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/hf_bucket_single_job.py",
+      "ignore_eos": true,
+      "max_concurrency": 1,
+      "num_prompts": 128,
+      "output_len": 512,
+      "provenance": "harness-live-read"
+    },
+    "audit_instrument_attach": {
+      "attach_sourced_from_launcher": true,
+      "checks": {
+        "build_app_unconditional": true,
+        "hot_path_not_excluded": true,
+        "instrument_add_middleware": true,
+        "instrumentator_chain": true,
+        "serve_init_chain": true
+      },
+      "evidence": {
+        "build_app_calls_register": "api_server.py: api_server.py:183 indent=4 (unconditional)",
+        "excluded_handlers": "instrumentator/metrics.py:29",
+        "hot_path_not_excluded": "/v1/completions excluded=False",
+        "included_router": "ABSENT (vidraft crash-dodge moot for us)",
+        "instrument_call": "instrumentator/metrics.py:28/38 Instrumentator(...).instrument(app)",
+        "instrumentator_chain": "instrumentator/__init__.py:18",
+        "serve_init_chain": "serve/__init__.py:14"
+      },
+      "included_router_present": false,
+      "prometheus_instrument_attached": true,
+      "provenance": "served-wheel-live-read",
+      "version_pinned_match": true,
+      "vllm_root": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm"
+    },
+    "composition": {
+      "E_T": 3.844,
+      "K_cal": 125.268,
+      "formula": "official = K_cal*(E[T]/step)*tau ; serve lever scales tau",
+      "lambda1_ceiling_tps": 520.95,
+      "served_tps": 481.53,
+      "step_us": 1218.2
+    },
+    "greedy_safety": {
+      "justification": "PrometheusInstrumentatorMiddleware is an ASGI request/response wrapper OUTSIDE the model forward + draft/verify loop: it times the request and records counters/histograms from response status+size; it never reads or mutates the request body, sampled token IDs, logprobs, KV cache, or the speculative path. instrument=no-op changes wall-clock serve overhead only, NOT emitted tokens or PPL.",
+      "serve_overhead_greedy_safe": true
+    },
+    "handoff_line": "the deployed serve path does attach prometheus instrumentation (prometheus_instrument_attached=True), so the vidraft instrument-off lever is LIVE -- but on our OFFICIAL --disable-stream single-stream bench it is worth only ~0.06% (band 0.02-0.18%, ~+0.30 TPS off 481.53), an order of magnitude below the vidraft 0.90% external ceiling (their non-transferring streaming/bundled measurement); greedy-safe (serve-layer ASGI middleware outside the forward) and orthogonal to the model-compute levers (tau term), so it STACKS additively but its orthogonal contribution on our bench is small.",
+    "headline": {
+      "bench_streaming": false,
+      "implied_tps_band": [
+        481.619,
+        482.42
+      ],
+      "included_router_present": false,
+      "lever_class": "LIVE (attached) but amortization-bounded on our non-streaming bench",
+      "lever_live": true,
+      "needs_served_file_change": true,
+      "projected_tps_gain_pct": 0.0616,
+      "prometheus_instrument_attached": true,
+      "screen_verdict": "LIVE-BUT-TINY",
+      "serve_overhead_greedy_safe": true,
+      "serve_overhead_screen_self_test_passes": true,
+      "served_change_human_gated": true,
+      "stacks_on_model_compute_levers": true,
+      "transfer_band_pct": [
+        0.0185,
+        0.1849
+      ],
+      "vidraft_external_ceiling_pct": 0.8956,
+      "vidraft_external_ceiling_tps": 485.843,
+      "vidraft_transfers_to_our_bench": false
+    },
+    "self_test": {
+      "conditions": {
+        "a_band_maps_through_tau_composition": true,
+        "b_vidraft_anchor_roundtrips": true,
+        "c_attached_sourced_from_launcher": true,
+        "d_greedy_safe_outside_forward": true,
+        "e_nan_clean": true,
+        "f_baseline_and_ceiling_unchanged": true
+      },
+      "detail": {
+        "attach_provenance": "served-wheel-live-read",
+        "bench_streaming": false,
+        "per_req_decode_us": 162257.64828303852,
+        "vidraft_anchor_pct": 0.8956094309755894
+      },
+      "serve_overhead_screen_self_test_passes": true
+    },
+    "verdict": "SERVE-OVERHEAD-LEVER-LIVE-BUT-TINY-ON-OUR-NONSTREAM-BENCH",
+    "verdict_table": [
+      {
+        "delta_tps": 4.313,
+        "gain_pct": 0.8956,
+        "implied_tps_off_481_53": 485.843,
+        "note": "+4.3 TPS / 480.12 measured external; same osoi5/lmhead12k/fa2sw/precache substrate; EXTERNAL CEILING, does NOT transfer to --disable-stream",
+        "row": "vidraft external anchor (IMPORTED, their stack)"
+      },
+      {
+        "delta_tps": 0.089,
+        "gain_pct": 0.0185,
+        "implied_tps_off_481_53": 481.619,
+        "note": "one middleware hop amortized over 512 tok @ E[T]=3.844, step=1218.2us",
+        "row": "our bench first-principles floor (~30us/req)"
+      },
+      {
+        "delta_tps": 0.297,
+        "gain_pct": 0.0616,
+        "implied_tps_off_481_53": 481.827,
+        "note": "PROJECTED central for our official non-streaming single-stream bench",
+        "row": "our bench first-principles central (~100us/req)"
+      },
+      {
+        "delta_tps": 0.89,
+        "gain_pct": 0.1849,
+        "implied_tps_off_481_53": 482.42,
+        "note": "generous per-request async-stack-depth + metric-record cost",
+        "row": "our bench first-principles upper (~300us/req)"
+      }
+    ]
+  }
+}
