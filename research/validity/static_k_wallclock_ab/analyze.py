@@ -81,9 +81,12 @@ def _finite(values: list) -> bool:
     return all(isinstance(v, (int, float)) and math.isfinite(v) for v in values)
 
 
-def _override_only_k(arm_json: dict, label: str) -> bool:
-    """The arm's override env is exactly SPECULATIVE_CONFIG (the K knob) and nothing else."""
-    ov = (arm_json.get(label, {}) or {}).get("override_env") or {}
+def _override_only_k(result: dict, label: str) -> bool:
+    """The arm's override env is exactly SPECULATIVE_CONFIG (the K knob) and nothing else.
+
+    ``override_env`` lives at the top-level ``result["candidate"|"baseline"]`` block
+    (not under ``result["arms"]``, which holds only the timing stats)."""
+    ov = (result.get(label, {}) or {}).get("override_env") or {}
     keys = set(ov)
     return keys == {"SPECULATIVE_CONFIG"} or keys == set()  # baseline arm has no override
 
@@ -154,7 +157,7 @@ def main() -> int:
         cand = d["arms"]["candidate"]
         vals = cand["wall_tps"].get("values") or []
         all_finite = all_finite and _finite(vals)
-        only_k_varies = only_k_varies and _override_only_k(d["arms"], "candidate") and _override_only_k(d["arms"], "baseline")
+        only_k_varies = only_k_varies and _override_only_k(d, "candidate") and _override_only_k(d, "baseline")
         # workload consistency (same prompts/output/seed)
         if d.get("workload") != workload:
             only_k_varies = False
