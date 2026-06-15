@@ -1,0 +1,258 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T055212Z",
+  "kind": "private-bar-eagle3",
+  "nan_clean": true,
+  "peak_mem_mib": 15.156,
+  "pr": 300,
+  "private_bar_eagle3_analysis_only": true,
+  "self_test": {
+    "checks": {
+      "01_composition_roundtrips_481": true,
+      "02_deployed_reproduces_460p85": true,
+      "03_delta_is_4p3_pct": true,
+      "04_raw_reproduces_0804": true,
+      "05_raw_ladder_matches_ubel258": true,
+      "06_cdeep_calibration_consistent": true,
+      "07_rho_priv_e3_in_band": true,
+      "08_private_le_public_all": true,
+      "09_conditionals_in_unit_and_survival_monotone": true,
+      "10_private_bar_residuals_sign_consistent": true,
+      "11_private500_inversion_roundtrips": true,
+      "12_deepflat_reproduces_4966": true,
+      "13_constants_imported_exact": true
+    },
+    "private_bar_eagle3_self_test_passes": true
+  },
+  "synthesis": {
+    "imported": {
+      "E_T_anchor": 3.844,
+      "E_T_max": 8.0,
+      "K_cal": 125.268,
+      "K_spec": 7,
+      "ceiling_lambda1": 520.95,
+      "eagle3_deep_flat_rate": 0.9144279172167558,
+      "lambda_bar": 0.9780112973731208,
+      "official_public": 481.53,
+      "ppl_bar": 2.42,
+      "priv_raw_et_banked": 3.0898055282313597,
+      "priv_raw_ratio_banked": 0.804,
+      "private_bar_tps": 500.0,
+      "private_ppl": 2.3777,
+      "private_verified_tps": 460.85,
+      "provenance": "deployed a_k lawine #282 / kanna #289 / denken #297; raw spine ladders ubel #258 (3.0898/3.8445=0.804); deployed private 460.85 organizer-verified; EAGLE-3 deep_flat_rate kanna #289; public targets fern #281 4.966 / wirbel #290 4.9029 / wirbel #293 6.1245.",
+      "public_ppl": 2.3772,
+      "public_targets": {
+        "fern281": 4.966,
+        "wirbel290": 4.9029,
+        "wirbel293": 6.1245
+      },
+      "step_us": 1218.2,
+      "tau": 1.218
+    },
+    "step1_anchor": {
+      "c_deep_calibrated": 0.9713472759982902,
+      "composition_anchor_tps": 481.530192,
+      "delta_pct_deployed": 0.04294644155088977,
+      "deployed_ak": [
+        0.7292532942898975,
+        0.759556697719242,
+        0.7929794882639035,
+        0.8228,
+        0.8348727920920435,
+        0.8357919254658385,
+        0.8464932652113331
+      ],
+      "note": "position-1 held (tree recovers the spine cliff); residual collapse c_deep=0.97135 on j>=2 reproduces 460.85 (Delta 4.29%). The raw width-1 spine multiplier reproduces the 0.804 aggregate (rho_raw=0.8035).",
+      "private_et_anchor": 3.678912411789124,
+      "private_et_deployed": 3.678912411789124,
+      "private_tps_deployed": 460.85,
+      "private_tps_resid": 0.0,
+      "private_tps_target": 460.85,
+      "public_et_anchor_scalar": 3.844,
+      "public_et_ladder": 3.851185944363104,
+      "raw_ladder_selfcheck_et": 3.0898055282313597,
+      "rho_deployed_tree_recovered": 0.955267407218773,
+      "rho_raw_spine_on_ak": 0.8035333879800957
+    },
+    "step2_invert": {
+      "et_private_500_needed": 3.991442347606731,
+      "et_private_500_pr_formula": 3.992097756859212,
+      "fern281_public_500_target": 4.966,
+      "note": "per-position deployed-effective collapse needs PUBLIC E[T]~=4.194 for private-500 (deep-flat family); the scalar-0.804 model demands 4.964 (~fern #281's 4.966). The scalar OVER-prices the private tax 4.8x for a deep-heavy drafter.",
+      "private_bar_tps": 500.0,
+      "private_tax_perpos_et": 0.20285897387939666,
+      "private_tax_scalar_et": 0.9730381842424363,
+      "public_etbar_for_private_500": 4.194301321486128,
+      "public_etbar_scalar_0804": 4.964480531849167,
+      "scalar_overprices_tax_by": 4.796623810297517
+    },
+    "step3_eagle3": {
+      "deployed_linear_rho_raw_0804": 0.804,
+      "eagle3_a1_held": 0.7292532942898975,
+      "eagle3_deep_flat_rate": 0.9144279172167558,
+      "eagle3_private_et_deployed": 4.678582232863406,
+      "eagle3_private_et_raw": 3.872100283786634,
+      "eagle3_public_et": 4.96600000000002,
+      "note": "EAGLE-3 deep-flat lift (a_1 held, j>=2->0.9144) gives rho_priv_e3=0.9421 under the deployed-effective collapse (> 0.804: deep fidelity CLOSES the gap) but 0.7797 under the raw/no-tree-recovery sensitivity (< 0.804: it does NOT). The decisive build target wirbel #290's 4.9029 is a CLEAR under deployed-effective (579 TPS) and a MISS under raw (480 TPS) -- private success hinges on tree-recovery inheritance.",
+      "priced_targets": {
+        "fern281": {
+          "a1_lifted_above_073": false,
+          "clears_private_500_deployed": true,
+          "clears_private_500_raw": false,
+          "cond_priv_deployed": [
+            0.7292532942898975,
+            0.8882270664852839,
+            0.8882270664852839,
+            0.8882270664852839,
+            0.8882270664852839,
+            0.8882270664852839,
+            0.8882270664852839
+          ],
+          "cond_priv_raw": [
+            0.5995526837380373,
+            0.8304908160984931,
+            0.8612622218977203,
+            0.8609669658900269,
+            0.9291498713916525,
+            0.9441186711986082,
+            0.9559267603943674
+          ],
+          "cond_pub": [
+            0.7292532942898975,
+            0.914427917216754,
+            0.914427917216754,
+            0.914427917216754,
+            0.914427917216754,
+            0.914427917216754,
+            0.914427917216754
+          ],
+          "deepflat_feasible": true,
+          "family": "deepflat",
+          "name": "fern281",
+          "param": 0.914427917216754,
+          "private_et_deployed": 4.678582232863388,
+          "private_et_raw": 3.872100283786619,
+          "private_tps_deployed": 586.0766391463309,
+          "private_tps_raw": 485.0502583493822,
+          "public_et": 4.966,
+          "public_target": 4.966,
+          "residual_et_deployed": 0.6871398852566566,
+          "residual_tps_deployed": 86.07663914633088,
+          "residual_tps_raw": -14.949741650617796,
+          "rho_deployed": 0.9421228821714434,
+          "rho_raw": 0.7797221674962986
+        },
+        "wirbel290": {
+          "a1_lifted_above_073": false,
+          "clears_private_500_deployed": true,
+          "clears_private_500_raw": false,
+          "cond_priv_deployed": [
+            0.7292532942898975,
+            0.8828323225228153,
+            0.8828323225228153,
+            0.8828323225228153,
+            0.8828323225228153,
+            0.8828323225228153,
+            0.8828323225228153
+          ],
+          "cond_priv_raw": [
+            0.5995526837380373,
+            0.8254467395497322,
+            0.8560312518597654,
+            0.8557377891216367,
+            0.9235065783103538,
+            0.938384463479115,
+            0.9501208349572988
+          ],
+          "cond_pub": [
+            0.7292532942898975,
+            0.9088740395297812,
+            0.9088740395297812,
+            0.9088740395297812,
+            0.9088740395297812,
+            0.9088740395297812,
+            0.9088740395297812
+          ],
+          "deepflat_feasible": true,
+          "family": "deepflat",
+          "name": "wirbel290",
+          "param": 0.9088740395297812,
+          "private_et_deployed": 4.622548243083671,
+          "private_et_raw": 3.828107106754286,
+          "private_tps_deployed": 579.0573733146052,
+          "private_tps_raw": 479.5393210488959,
+          "public_et": 4.902899999999999,
+          "public_target": 4.9029,
+          "residual_et_deployed": 0.6311058954769395,
+          "residual_tps_deployed": 79.05737331460523,
+          "residual_tps_raw": -20.460678951104114,
+          "rho_deployed": 0.9428191974308413,
+          "rho_raw": 0.7807842515152842
+        },
+        "wirbel293": {
+          "a1_lifted_above_073": true,
+          "clears_private_500_deployed": true,
+          "clears_private_500_raw": true,
+          "cond_priv_deployed": [
+            0.9219520928012865,
+            0.8955356539434525,
+            0.8955356539434525,
+            0.8955356539434525,
+            0.8955356539434525,
+            0.8955356539434525,
+            0.8955356539434525
+          ],
+          "cond_priv_raw": [
+            0.7579792314207566,
+            0.8373243331029675,
+            0.8683489348686094,
+            0.8680512494096684,
+            0.9367951834442148,
+            0.9518871508359703,
+            0.9637924003816642
+          ],
+          "cond_pub": [
+            0.9219520928012865,
+            0.9219520928012865,
+            0.9219520928012865,
+            0.9219520928012865,
+            0.9219520928012865,
+            0.9219520928012865,
+            0.9219520928012865
+          ],
+          "deepflat_feasible": false,
+          "family": "uniform",
+          "name": "wirbel293",
+          "param": 0.9219520928012865,
+          "private_et_deployed": 5.748709579483125,
+          "private_et_raw": 4.708087989758678,
+          "private_tps_deployed": 720.1293516026922,
+          "private_tps_raw": 589.77276630109,
+          "public_et": 6.1244999999999985,
+          "public_target": 6.1245,
+          "residual_et_deployed": 1.7572672318763942,
+          "residual_tps_deployed": 220.12935160269217,
+          "residual_tps_raw": 89.77276630108997,
+          "rho_deployed": 0.9386414530954571,
+          "rho_raw": 0.7687301803834891
+        }
+      },
+      "rho_priv_e3": 0.9421228821714434,
+      "rho_priv_e3_raw": 0.7797221674962985,
+      "verdicts": {
+        "deep_position_fidelity_closes_private_gap": true,
+        "deep_position_fidelity_closes_private_gap_raw": false,
+        "eagle3_public_4p9029_clears_private_bar": true,
+        "eagle3_public_4p9029_clears_private_bar_raw": false,
+        "eagle3_public_6p1245_clears_private_bar": true,
+        "eagle3_public_6p1245_clears_private_bar_raw": true,
+        "wirbel290_robust_across_collapse_bracket": false
+      }
+    },
+    "test_metric": {
+      "rho_priv_e3": 0.9421228821714434
+    }
+  },
+  "wandb_run_id": "8t5q6sr0"
+}
