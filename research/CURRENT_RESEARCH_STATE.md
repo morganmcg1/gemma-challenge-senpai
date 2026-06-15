@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~04:43Z (cycle 52k)
+- **Date:** 2026-06-15 ~05:05Z (cycle 52k)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
@@ -69,8 +69,8 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 | fern    | #287 | Read-reduction PPL pareto | Morgan | 🔄 WIP (SENT BACK by advisor — headline over-credited the deployed point as 100% read-bound; denken #283 measures body-read=38% of honest wall ⇒ re-price required read-reduction on the 38% fraction, reconcile the −153% sign conflict) |
 | lawine  | #296 | SAM × EAGLE-3 companion-stacking additivity (does the +2–4% SAM companion SURVIVE a better drafter, or does EAGLE-3 absorb the same recurrence substrate, raising the honest residual above 0.902?) | me | 🔄 WIP (reseat; #292 MERGED 04:34 → SAM = +2–4% ungated companion, residual 0.902 E[T], low-tail redundancy pearson +0.326) |
 | denken  | #297 | Tail-resolved per-position (does the hard-prompt acceptance cliff SHIFT? — the per-prompt per-position remeasure kanna #289 flagged) | me | 🔄 WIP (reseat; #291 MERGED 04:40 → honest kernel floor lands ON 487.7, only 4.8% of verify-above-read overlap-hideable, #283's 746.9 never realizable, free lane to ≥500 does NOT exist) |
-| ubel    | #284 | Decode-loop host overhead (CPU/scheduling fraction of wall) | Morgan | 🔄 WIP |
-| stark   | #273 | Static-K wall-clock (ongoing from 52i) | me | 🔄 WIP |
+| ubel    | #299 | EAGLE-3 build VRAM budget (does the {2,21,39} fusion drafter + hidden-state retention fit ≤24GB?) | me | 🔄 WIP (reseat; #284 MERGED 05:03 → decode loop 99.5% GPU-bound, host overhead 0.50%, host front CLOSED; the denken #278 M=1 over-credit made concrete = phantom 29.2%) |
+| stark   | #298 | Free-ceiling wall-clock realization (does the banked 487.7 free step ceiling REALIZE on the host-to-host wall, or over-credit like static-K?) | me | 🔄 WIP (reseat; #273 MERGED 05:02 → static-K composition REFUTED, K4-vs-K7=−8.63% realization ratio NEGATIVE, deployed K=7 stands — the realization-ratio method reused to wall-audit 487.7) |
 | land    | #245 | Tree fidelity build — Morgan banking Cycles 1-4 (terminal pending), will reseat non-tree | Morgan | 🟡 banking |
 
 *(Roster shared with the parallel open2 advisor — re-survey live PR state before every assignment/merge.)*
@@ -81,13 +81,14 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 ### Step-side: DEFINITIVELY CLOSED (cycle 52k)
 - **Tree WIDTH (M\*)**: g_d=0.0191 → M\*=32 → 479.6 TPS. Empirically + HBM-floor closed (denken #271).
-- **Draft-pass-cut (all K, φ≤1)**: static-K=4 honest = 493.96 TPS. Closed (fern #274).
+- **Draft-pass-cut (all K, φ≤1)**: static-K=4 composed-honest = 493.96 TPS (fern #274) — but MEASURED local wall-clock REFUTES it (stark #273, MERGED 05:02, `51bdsbpw`: K4-vs-K7 = **−8.63%**, realization ratio **NEGATIVE** — any K≠7 falls off the ONEGRAPH K=7 graph and regresses); **deployed K=7 stands**. Closed at both the composed AND the measured level.
 - **Draft decomposition**: MLP+attn+io = 95.2% intrinsic-M=1; only GeluAndMul fold recoverable (+2.65% honest). Closed (kanna #277/#269, wirbel #270).
 - **Linear step normalization**: 1218.2µs is a normalized unit; batch=1 wall draft savings over-credit 4.82× (denken #278).
 - **Verify forward**: HBM-bound MLP 66%; int4 GEMMs approaching-roofline; only +1.185% greedy-safe SDPA (kanna #280).
 - **Verify SDPA tune**: +1.29% (487.8), insufficient standalone (wirbel #279).
 - **Verify-compute hideability**: only **4.8%** of the 2104.6µs verify-above-read compute overlap-hides greedy-safe → kernel-addressable floor **487.7 < 500**; `free_lane_to_500_exists=0` (the MEASURED-fraction floor replacing #283's optimistic 746.9 all-hides ceiling; coincides exactly with wirbel #285's 487.729). The free non-build step lane is measured-CLOSED (denken #291, MERGED 04:40, `3myn1fzl`).
 - **Prefill denominator**: 2.85% of wall, decode-dominated (ubel #275).
+- **Host/serving overhead**: decode loop is **99.5% GPU-bound** — host/serving = **0.50%** (40µs of the 8017µs wall), an order of magnitude below fern #274's inferred ~40%; the denken #278 M=1 micro-built subtraction manufactures a phantom 29.2% (under-counts deployed M=8 GPU-busy by 2303µs of REAL work). Recoverable +0.50 TPS < 9.63 materiality gate. Host front CLOSED (ubel #284, MERGED 05:03, `u58fxtu6`).
 - **GEMM-bandwidth**: PERMANENTLY CLOSED — HBM 1-wave saturation wall 83.6%, 0.0% speedup at any tile shape (PR #130/#117/#108).
 - **int4-Marlin body GEMMs**: bit-exact across M=1/8/16, already deployed. Closed.
 - **ONEGRAPH/CUDAGraph / TRITON_ATTN pin**: already deployed in 481.53. Closed.
