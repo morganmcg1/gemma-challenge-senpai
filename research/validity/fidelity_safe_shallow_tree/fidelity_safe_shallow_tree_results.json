@@ -1,0 +1,219 @@
+{
+  "pr": 262,
+  "agent": "fern",
+  "kind": "fidelity-safe-shallow-tree",
+  "metric_primary": "fidelity_safe_shallow_tree_self_test_passes",
+  "metric_test": "shallow_tree_implied_tps",
+  "fidelity_safe_shallow_tree_self_test_passes": true,
+  "shallow_tree_implied_tps": 506.2739528937989,
+  "shallow_tree_clears_500": true,
+  "shallow_tree": {
+    "definition": "topo74 M16 parent array with the #259 scratch-suspect interior nodes [6,9,10] PRUNED; remaining = spine(9) + first-level rho2 branch-hit(4) = 13 nodes.",
+    "pruned_nodes": [
+      6,
+      9,
+      10
+    ],
+    "kept_nodes": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "n_nodes": 13,
+    "max_depth": 8,
+    "max_branch_width": 3,
+    "n_spine": 9,
+    "n_branchhit": 4,
+    "spine_nodes": [
+      0,
+      1,
+      4,
+      7,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "branchhit_nodes": [
+      2,
+      3,
+      5,
+      8
+    ],
+    "shallow_et": 4.300329694624343,
+    "shallow_et_eq_confirmed_et": true,
+    "depth_width_unchanged_vs_full": true,
+    "partition_reconfirmed": true
+  },
+  "et_roundtrip": {
+    "shallow_et": 4.300329694624343,
+    "confirmed_et_imported": 4.300329694624343,
+    "confirmed_et_259_banked": 4.300329694624343,
+    "resid_vs_imported": 0.0,
+    "resid_vs_259_banked": 0.0,
+    "E_spine": 4.0243768358447065,
+    "E_branchhit_rho2": 0.2759528587796363,
+    "E_branch_interior_dropped": 0.21167030537565695
+  },
+  "step_model": {
+    "lawine_curve_m8basis": {
+      "8": 1.0087216644611992,
+      "16": 1.0645002992174906,
+      "24": 1.1460256372008932,
+      "32": 1.218662906853464
+    },
+    "marginal_per_node_curve_ms": 0.0069723293445364265,
+    "n_full": 16,
+    "n_shallow": 13,
+    "n_drop": 3,
+    "step_reduction_abs_ms": 0.02091698803360928,
+    "step_shallow_abs_ms": 1.0640355529142966,
+    "step_shallow_frac_ms": 1.0636336748726933,
+    "step_shallow_abs_minus_frac_ms": 0.00040187804160329854,
+    "step_shallow_central_ms": 1.0640355529142966,
+    "step_shallow_convexaware_ms": 1.0543805392041299,
+    "marginal_local_16_24_ms": 0.010190667247925334,
+    "step_built_full_ms": 1.084952540947906,
+    "step_shallow_band_ms": [
+      1.0640355529142966,
+      1.084952540947906
+    ],
+    "step_reduction_pct_central": 0.01927917327640381,
+    "model": "verify-step marginal is PER-ROW (per-node) in the M<=32 flat regime: lawine #153 step(M) grows via per-candidate GEMM/sampler/argmax rows, and denken #85 measured (on the EXACT topo74 M16 tree) centroid_sampler ~M^0.75 / verify_argmax ~M^0.94 while attention AMORTIZES (M8->M32 1.06x). The shallow tree has the SAME max-depth (8) and max-branch (3) as the full tree, so ALL the saving is the 3 fewer verify ROWS, none from depth. step_shallow = built_step - 3 * per-node-marginal (anchored to the banked built step; lawine curve supplies only the relative per-node shape).",
+    "denken85_corroboration": {
+      "verify_side_us_static_M8": 24.279760718345642,
+      "verify_side_us_static_M16": 41.680380925536156,
+      "verify_side_marginal_us_per_node_M8_M16": 2.175077525898814,
+      "attn_M32_over_M8_ratio": 1.0584490540530653,
+      "note": "verify-side non-GEMM overhead is per-row (+2.18us/node M8->M16); attention amortizes (1.06x) -> cost is node-count-bound, not depth-bound."
+    }
+  },
+  "floor_and_clears": {
+    "law": "official = K_cal*(E[T]/step)*tau ; E_T_floor(step) = 500*step/(K_cal*tau)",
+    "K_cal": 125.26795005202914,
+    "tau": 1.0,
+    "step_built_full_ms": 1.084952540947906,
+    "floor_full_roundtrip": 4.330527243789328,
+    "floor_full_banked_241": 4.330527243789328,
+    "floor_roundtrip_resid": 0.0,
+    "step_shallow_ms": 1.0640355529142966,
+    "step_shallow_band_ms": [
+      1.0640355529142966,
+      1.084952540947906
+    ],
+    "E_T_floor_shallow": 4.247038258678127,
+    "E_T_floor_shallow_band": [
+      4.247038258678127,
+      4.330527243789328
+    ],
+    "confirmed_et": 4.300329694624343,
+    "shallow_tree_clears_500": true,
+    "margin_vs_floor": 0.05329143594621577,
+    "shallow_tps_central": 506.2739528937989,
+    "shallow_tps_band": [
+      506.2739528937989,
+      496.5134096306294
+    ],
+    "shallow_tps_pessimistic_full_step": 496.5134096306294,
+    "crossover": {
+      "step_threshold_clear500_ms": 1.0773869707869197,
+      "required_step_reduction_pct": 0.006973180738741186,
+      "predicted_step_reduction_pct": 0.01927917327640381,
+      "fixed_fraction_breakeven": 0.3616950083267217,
+      "note": "the shallow tree needs only a 0.697% step reduction to clear 500; the banked per-node verify cost predicts 1.928% from dropping 3 of 16 rows -- so it clears unless > 63.8% of the verify marginal is fixed/depth-bound (denken #85 refutes: attention amortizes 1.06x, marginal is per-row)."
+    }
+  },
+  "serve_lever_secondary": {
+    "source": "kanna #260 greedy-safe serve-layer tau tie-breaker (additive, NOT load-bearing)",
+    "serve_lever_central_pct": 0.0006163037678542111,
+    "serve_lever_band_pct": [
+      0.00018489113035626334,
+      0.001848911303562633
+    ],
+    "shallow_tps_with_serve_lever_central": 506.58597143853376,
+    "shallow_tps_with_serve_lever_hi": 507.2100085280036,
+    "note": "SECONDARY / tau-term -- does NOT carry the headline; the headline rests on the real-KV-confirmed E[T]=4.3003 at the model-compute step_shallow."
+  },
+  "verdict": {
+    "headline": "FIDELITY-SAFE ROUTE TO 500 EXISTS (Path-A-lite clears at its own cheaper step)",
+    "shallow_tree_clears_500": true,
+    "fidelity_safe_route_to_500_exists": true,
+    "table": [
+      {
+        "tree": "full 16-node (land #245 path)",
+        "fidelity": "RISK (scratch-suspect deep branch)",
+        "nodes": 16,
+        "E_T": 4.512,
+        "step_ms": 1.084952540947906,
+        "E_T_floor_at_step": 4.330527243789328,
+        "clears_500": true,
+        "implied_TPS": 520.9527323111674
+      },
+      {
+        "tree": "fidelity-safe 13-node shallow (Path-A-lite)",
+        "fidelity": "SAFE (all real-KV-confirmed)",
+        "nodes": 13,
+        "E_T": 4.300329694624343,
+        "step_ms": 1.0640355529142966,
+        "E_T_floor_at_step": 4.247038258678127,
+        "clears_500": true,
+        "implied_TPS": 506.2739528937989
+      }
+    ],
+    "one_line_read": "a fidelity-SAFE route to 500 EXISTS at the shallow tree's own cheaper step -- land #245's deep-branch reconstruction is OPTIONAL UPSIDE."
+  },
+  "self_test": {
+    "fidelity_safe_shallow_tree_self_test_passes": true,
+    "conditions": {
+      "a_13node_count_excludes_suspect_6_9_10": true,
+      "b_shallow_et_roundtrips_confirmed_et_259": true,
+      "c_floor_formula_roundtrips_full_step_4p3305": true,
+      "d_monotone_cheaper_step_lower_floor": true,
+      "e_nan_clean": true,
+      "f_imports_exact_unchanged": true,
+      "g_topo74_committed_structure": true
+    },
+    "tolerances": {
+      "TOL_RT_FLOOR": 1e-06,
+      "TOL_RT_ET": 1e-09,
+      "TOL_STRUCT": 0
+    }
+  },
+  "imports_unchanged": {
+    "BASELINE_TPS": 481.53,
+    "lambda1_ceiling_tps": 520.9527323111674,
+    "K_cal": 125.26795005202914,
+    "tau": 1.0,
+    "lambda_bar": 0.9780112973731208,
+    "E_T_meas_floor_full": 4.330527243789328,
+    "E_T_both": 4.512,
+    "confirmed_et": 4.300329694624343,
+    "note": "BASELINE 481.53, the 520.95 lambda=1 ceiling, K_cal=125.268, lambda-bar 0.9780, the 4.3305 full-step floor and the #259 confirmed_et 4.3003 are IMPORTED EXACTLY and UNCHANGED. This leg re-PRICES the banked projection at a cheaper step; it moves no measurement. land #245 owns the live build."
+  },
+  "handoff": "the fidelity-safe 13-node shallow tree (spine + first-level rho2, no scratch-suspect deep branch-interior) has E[T]=4.3003 at step_shallow=1.064036 ms, whose E_T floor is 4.2470, so it clears 500 at implied 506.27 TPS -- meaning a fidelity-RISK-FREE route to 500 exists and land #245's deep-branch reconstruction is optional upside.",
+  "scope": "LOCAL CPU-only analytic composition of banked figures. Prices whether the fidelity-SAFE 13-node shallow sub-tree (spine + first-level rho2, dropping the scratch-suspect deep branch-interior) clears 500 at its OWN cheaper verify step -- by re-deriving the E_T floor at step_shallow and checking confirmed_et=4.3003 against IT. No GPU / vLLM / HF Job / submission / served-file change / official draw. BASELINE stays 481.53; adds 0 TPS. land #245 owns the live measurement. NOT a launch. NOT open2.",
+  "public_evidence_used": [
+    "fern #259 (1j099vrm): E[T]=4.512 additive decomposition -> E_spine 4.0244 / E_branchhit_rho2 0.2760 / E_branch_interior 0.2117 (suspect nodes [6,9,10]); confirmed_et 4.3003 misses the 4.3305 floor by -0.0302 at the FULL-tree step.",
+    "land #245 cycle-1: scratch verify-forward ~0.599 faithful on the deep branch-interior; real-KV spine + rho2 ladder reconfirmed.",
+    "wirbel #83 (6tghbnjn): committed topo74 M16 parent array (F_tree 4.512274954048941).",
+    "lawine #153 (ma0qlpas): verify-step(M) curve (KNEE_AT_32; per-row GEMM/sampler/argmax marginal in the flat M<=32 regime).",
+    "denken #85: tree-overhead audit on the EXACT topo74 M16 tree (centroid_sampler ~M^0.75, verify_argmax ~M^0.94, attention amortizes 1.06x -> node-count-bound, not depth-bound).",
+    "denken #241 (hqewf1d6) / #252: built step 1.084953 ms, 4.3305 floor, 520.95 ceiling, K_cal 125.268.",
+    "fern #249 / stark #191: lambda-bar 0.9780 P95 validity gate.",
+    "kanna #260: greedy-safe serve-layer tau tie-breaker +0.0616% central (band +0.0185..+0.1849%) -- SECONDARY additive lever."
+  ],
+  "peak_mem_mib": 12.074,
+  "elapsed_s": 0.001,
+  "nan_clean": true
+}
