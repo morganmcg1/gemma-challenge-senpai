@@ -1,0 +1,155 @@
+{
+  "agent": "wirbel",
+  "analysis_only": true,
+  "created_at": "20260615T103519Z",
+  "kind": "ppl-only-gate-500-envelope",
+  "nan_clean": true,
+  "peak_mem_mib": 12.137,
+  "pr": 343,
+  "synthesis": {
+    "deliverable1_two_worlds": {
+      "ppl_only_world": {
+        "anchor_roundtrip_identity": {
+          "envelope_central_at_identity": 520.9527323111674,
+          "envelope_worst_at_identity": 492.865273281899,
+          "matches_central_anchor": true,
+          "matches_worst_anchor": true
+        },
+        "gate_requirement": "PPL <= 2.42 only (NOT the 0.9213 identity bar)",
+        "honest_corner_roundtrip_337": {
+          "both_below_500": true,
+          "envelope_central_at_prior": 470.347938447151,
+          "envelope_worst_at_prior": 444.98886528896605,
+          "matches_337_central_470p35": true,
+          "matches_337_worst_444p99": true
+        },
+        "law": "envelope_X(c) = X_ANCHOR * E[T](c)/E[T](0.9213); supply tax = 0 (no determinism)",
+        "note": "PPL-ONLY drops determinism -> supply-phi tax VANISHES -> operative envelope is stark #340's DEMAND-only map (anchors 520.95/492.87 already EXCLUDE the supply tax). The >500 lane is NOT supply-capped; it is reachable purely via coverage.",
+        "supply_tax": 0.0
+      },
+      "strict_world": {
+        "also_requires_identity_bar": 0.9213011665456927,
+        "law": "strict_ceiling_X = X_ANCHOR * (1 - supply_floor); supremum over coverage (phi_realizable>=1)",
+        "note": "STRICT pays denken #332's determinism tax. Even at PERFECT coverage (central corner = lambda ceiling 520.95) the best the strict world does is 520.95*(1-0.09103) = 473.53 < 500: supply-capped below 500 for EVERY realizable deterministic schedule (phi_realizable>=1). strict_500_reachable=False. Coverage must ALSO clear the identity bar 0.9213 -- a second binding constraint.",
+        "roundtrips_denken332_473p5": true,
+        "strict_500_reachable": false,
+        "strict_best_ceiling": 473.5295953446407,
+        "strict_ceiling_central": 473.5295953446407,
+        "strict_ceiling_gap_to_500": 26.47040465535929,
+        "strict_ceiling_worst": 447.99898136862197,
+        "supply_floor_geometric_phi": 0.09103155435261377,
+        "supply_revive_breakeven_phi": 0.255
+      }
+    },
+    "deliverable2_price_and_lift": {
+      "c_star_central_below_identity_bar": true,
+      "c_star_central_for_500": 0.9089363308345582,
+      "c_star_worst_for_500": 0.925603648491971,
+      "central_root_valid": true,
+      "coverage_lift_for_ppl_only_central_500": 0.01863633083455818,
+      "coverage_lift_for_ppl_only_worst_500": 0.035303648491970985,
+      "existing_head_gives_free_500_even_gate_lifted": false,
+      "note": "at MEASURED coverage 0.8903 the PPL-only envelope is 470.35/444.99 -- BOTH < 500, so the EXISTING head does NOT give a free >500 even gate-lifted. Solving env(c)=500 gives c*_central=0.9089 (+0.0186 from 0.8903, WITHIN +0.031) and c*_worst=0.9256 (+0.0353, OVER +0.031). c*_central < identity bar 0.9213: PPL-only central-500 needs LESS coverage than the strict identity bar AND no supply revival.",
+      "ppl_only_central_500_within_budget": true,
+      "ppl_only_central_at_prior_0p8903": 470.347938447151,
+      "ppl_only_worst_500_within_budget": false,
+      "ppl_only_worst_at_prior_0p8903": 444.98886528896605,
+      "retrain_lift_budget_336": 0.031,
+      "root_residual_central": 1.1368683772161603e-13,
+      "root_residual_worst": -5.684341886080802e-14,
+      "roots_in_unit_interval": true,
+      "roundtrips_340_c_star_central": true,
+      "roundtrips_340_c_star_worst": true,
+      "worst_root_valid": true
+    },
+    "deliverable3_ppl_gate_holds": {
+      "decoupling_claim": "wirbel #324 (pespixw1) showed the M=8 argmax divergence is structurally DECOUPLED from PPL: PPL is a prompt_logprobs reference-forward over FIXED token-IDs, so it passes by construction regardless of emission divergence (ppl_delta_under_eagle3_verify=0.0). PPL stays 2.3772 <= 2.42, M-binary (M2=M4=M6=M8 identical).",
+      "decoupling_source": "wirbel #324 (pespixw1)",
+      "ppl_deployed": 2.3772,
+      "ppl_gate": 2.42,
+      "ppl_margin": 0.04279999999999973,
+      "ppl_passes_in_gate_lifted_config": true,
+      "same_deployed_serve": "the PPL-only config is the SAME deployed serve that ALREADY passes the official scorer (481.53 frontier, PPL 2.3772, 128/128). Lifting #192 introduces NO new PPL risk -- it removes a SELF-IMPOSED identity check the scorer never ran.",
+      "served_greedy_rate_caveat": "the literal served greedy-rate (the thing #192 would have measured) needs an HF Job (gated, ubel #322) -- NOT drawn here. This card prices the ENVELOPE consequence of the gate-lift, not a fresh served-token draw."
+    },
+    "deliverable4_issue124_delta": {
+      "delta_table": [
+        {
+          "500_status": "IMPOSSIBLE",
+          "best_ceiling_tps": 473.5295953446407,
+          "coverage_target": "N/A (supply-capped before coverage matters)",
+          "reason": "supply-capped at 473.5 < 500 even at perfect coverage; no retrain reaches it",
+          "supply_tax": "denken #332 floor 0.09103 @ geometric phi (phi_realizable>=1)",
+          "world": "STRICT (gate ON, #192)"
+        },
+        {
+          "500_status": "ACHIEVABLE",
+          "best_ceiling_tps": 520.9527323111674,
+          "coverage_target": "central c*=0.9089 (+0.0186, within +0.031); worst c*=0.9256 (+0.0353, marginal)",
+          "reason": "demand-only envelope; reachable purely via coverage retrain",
+          "supply_tax": "0 (no determinism required)",
+          "world": "PPL-ONLY (gate LIFTED, #124)"
+        }
+      ],
+      "impossible_to_feasible_conversion": true,
+      "one_sentence": "Lifting #192 converts the >500 lane from IMPOSSIBLE under strict identity (supply-capped at 473.5 TPS, no retrain reaches it) to ACHIEVABLE under PPL-only via a sized, feasible coverage retrain to c*_central=0.9089 (+0.0186, within lawine #336's +0.031 budget) / c*_worst=0.9256 (+0.0353, marginally past it).",
+      "ppl_only_500_reachable_via_coverage": true,
+      "strict_500_reachable": false
+    },
+    "handoff": "LIFTING #192 (PPL-only world, #124) converts the >500 lane from IMPOSSIBLE under strict identity (supply-capped 473.5 < 500 at geometric phi, denken #332; no retrain reaches it) to ACHIEVABLE via a coverage retrain on the SAME already-fast deployed serve: c*_central=0.9089 (+0.0186 from the measured 0.8903, WITHIN lawine #336's +0.031 budget) / c*_worst=0.9256 (+0.0353, marginally past it). The existing head does NOT give a free >500 even gate-lifted (470.35/444.99 @0.8903). PPL stays 2.3772 <= 2.42 (wirbel #324 decoupling) -- the gate-lift adds no PPL risk. The #124 deliverable: lifting #192 sizes the >500 path as a feasible coverage-retrain target, NOT a build/launch.",
+    "headline": {
+      "c_star_central_for_500": 0.9089363308345582,
+      "c_star_worst_for_500": 0.925603648491971,
+      "coverage_lift_for_ppl_only_central_500": 0.01863633083455818,
+      "coverage_lift_for_ppl_only_worst_500": 0.035303648491970985,
+      "impossible_to_feasible_conversion": true,
+      "ppl_deployed": 2.3772,
+      "ppl_only_500_reachable_via_coverage": true,
+      "ppl_only_central_500_within_budget": true,
+      "ppl_only_envelope_self_test_passes": true,
+      "ppl_only_worst_500_within_budget": false,
+      "strict_500_reachable": false,
+      "strict_best_ceiling": 473.5295953446407
+    },
+    "imports": {
+      "caveats": [
+        "INVERTS stark #340 into the PPL-only (gate-lifted) world: re-prices NOTHING measured. The PPL-only envelope is stark #340's SAME demand-only map (the anchors already EXCLUDE the supply tax); the only change is that the strict world ADDITIONALLY pays denken #332's supply tax (cap 473.5) while the PPL-only world does NOT. No EAGLE-3 fusion checkpoint runs here; NOT a running EagleProposer.",
+        "the deployed 481.53 is ALREADY the fast, non-deterministic, PPL-passing config (56% AR-divergent). Lifting #192 does NOT change the deployed config or give a free one-run jump to ~520 -- it means we never pay the determinism tax and the >500 path becomes a coverage retrain on the already-fast config. NOT a free win.",
+        "STRICT-world ceiling 473.5 is the SUPREMUM over coverage (central corner = lambda ceiling, taxed). denken #332 proved phi_realizable>=1, so no deterministic schedule beats it; strict_500_reachable=False is robust, not a single-point estimate.",
+        "PPL safety is STRUCTURAL (wirbel #324): PPL is a prompt_logprobs reference-forward over fixed token-IDs, decoupled from emission. The literal served greedy-rate would need an HF Job (gated, ubel #322) -- NOT drawn here.",
+        "coverage c is per-depth effective acceptance c_eff (the E[T](c) axis), same units as the identity bar 0.9213, cov prior 0.8903, and lawine #336's +0.031. NOT a launch / build / served-file change / HF Job / submission / open2."
+      ],
+      "provenance": "stark #340 jwv1vbug (demand-only envelope envelope_X(c)=X_ANCHOR*E[T](c)/E[T](0.9213), c*_central 0.9089 / c*_worst 0.9256, identity bar 0.9213) x stark #337 lbuirkpt (E[T](c)=1+sum_{d=1..7} c^d chain law, anchors central 520.95 / worst 492.87 @E[T]=6.1112, honest corners 470.35/444.99 @0.8903) x denken #332 y5cl0ena (supply floor 0.09103 @ geometric phi, strict ceiling 473.5, phi_realizable>=1, revive breakeven 0.255) x lawine #330 hfrscdai (cov prior 0.8903, identity bar 0.9213) x lawine #336 krroookz (+0.031 retrain budget) x wirbel #324 pespixw1 (PPL-decoupling 2.3772, ppl_delta=0.0, M-binary). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "self_test": {
+      "conditions": {
+        "a_strict_500_not_reachable": true,
+        "a_strict_ceiling_roundtrips_332": true,
+        "b_ppl_only_anchor_roundtrip_340": true,
+        "b_ppl_only_honest_corner_roundtrip_337": true,
+        "c_c_star_reproduces_340": true,
+        "d_ppl_decoupling_caveat_carried": true,
+        "e_impossible_to_feasible": true,
+        "e_issue124_delta_nan_clean": true,
+        "f_central_lift_within_budget": true,
+        "g_worst_lift_over_budget": true,
+        "h_ppl_only_500_reachable_via_coverage": true,
+        "i_imports_exact": true,
+        "j_nan_clean": true,
+        "k_roots_valid_coverage": true,
+        "l_ppl_only_ceiling_above_strict": true,
+        "m_c_star_central_below_identity_bar": true
+      },
+      "detail": {
+        "c_star_central": 0.9089363308345582,
+        "c_star_worst": 0.925603648491971,
+        "coverage_lift_for_ppl_only_central_500": 0.01863633083455818,
+        "ppl_only_500_reachable_via_coverage": true,
+        "strict_500_reachable": false,
+        "strict_best_ceiling": 473.5295953446407
+      },
+      "n_checks": 16,
+      "ppl_only_envelope_self_test_passes": true
+    }
+  }
+}
