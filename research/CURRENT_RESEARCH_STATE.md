@@ -1,7 +1,40 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~01:00Z (cycle 52h)
+- **Date:** 2026-06-15 ~01:35Z (cycle 52i)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
+
+## 🆕 Cycle-52i Snapshot (2026-06-15 ~01:35Z) — Path-A bounded from THREE sides at the grounded numbers; the g_d step-basis fork is THE binding decision; pivot to composition-honesty + the orthogonal prefill denominator
+
+**★ THE STRATEGIC TURN: Path-A (the tree route to 500) is now bounded from THREE independent angles at the grounded numbers, and the go/no-go collapses onto a SINGLE measurement — the deployed-path g_d.**
+
+**Three-sided Path-A bound (this cycle's convergence):**
+- **Step side — fern #262 (merged):** no tree (shallow 13-node / full / deep) clears 500 at the grounded built step; full tree = **419.97** at grounded central; shallow ~406.6 (band [382.5, 490.8]). Inverted break-even: clearing 500 at the grounded central step needs **E[T] ≥ 5.288** (+0.78 over the full-tree 4.512 projection); deep branch-interior is worth only +0.2117 ⇒ no tree route reaches 500 at the grounded step. The binding constraint **FLIPPED from E[T]/fidelity to the grounded built STEP**.
+- **Private-E[T] side — ubel #263 (merged):** the width>1 tree **DEGRADES OOD** — private rank-2+ coverage 0.4768 vs public 0.6532 (−27% rel), branch-salvage ρ collapses ~34% to [0.278, 0.174, 0.123], tree recovers only **73%** of the private E[T]-gap (private E[T] stays at 3.6406). The earlier 505.46 "clears 500" private projection held branch-salvage ρ at PUBLIC values ⇒ refuted; re-prices toward the raw-proxy ~450 regime.
+- **Verify side — openevolve (board 01:22Z, via Morgan):** an in-serve dense-mask tree verify does NOT recover λ either ("verify-side is closed too").
+
+**★ THE BINDING DECISION — the g_d step-basis fork (denken #268, merged).** Verify-GEMM M-aware TPS(M) is **monotone to M*=32** (the λ-valid ceiling, depth≤9, NOT an interior width — E[T](M) outpaces verify(M) growth), so the go/no-go is NOT about tree width — it is about which **g_d** the deployed step uses: central (measured g_d=0.0195, step M32=1.346 ms) max **480.0 NO-GO**; optimistic (assumed g_d=0.168, step M32=1.119 ms) max **577.6 GO**. The #241 floor 4.3305 never clears central, barely misses optimistic. **denken #271 is measuring the deployed-path g_d directly to collapse the fork — the single highest-leverage open bit in the programme.**
+
+**★ THE SECOND PIVOT — composition-honesty (stark #266, merged).** Runtime adaptive-K is UNREALIZABLE on ONEGRAPH (realizable s/g_d = −5.38 / −1.35, both net-harmful — the static-graph launch-amortization is worth more than the whole per-pass saving). The ONLY survivor is **static-K=4 → 502.12 (+4.28%)** / K=5 → 500.79 — but stark flagged the load-bearing caveat: **the composition OVER-CREDITS draft-pass cuts** (model-forward ~1.2182 ms is a fraction of the conc=1 wall step, the rest is fixed overhead that does NOT shrink), and **deployed-K=7 is the standing evidence** (if cuts paid off at composition rates the frontier would already be at K=4/5). **static-K=4 is a CANDIDATE, NOT a measured ≥500.** This cycle TESTS the over-crediting from both sides: **stark #273** (empirical local wall-clock K-A/B — does K=4/5 actually beat K=7?) + **fern #274** (analytic — decompose step into fixed-overhead + model-forward, derive the φ-correction, re-price every draft-side "clears 500" claim).
+
+**★ THE NEW ORTHOGONAL FRONT — the TPS denominator (ubel #275).** With Path-A closing, the highest-value fresh move is the one benchmark phase NO experiment has examined: `total_wall = prefill + decode`. Every lever to date attacked **decode**; **prefill is unmeasured**. ubel #275 measures the prefill wall-share + decomposes it (target prefill / draft prefill / tokenize / TTFT) + bounds recoverable slack (cross-prompt prefix caching, chunked/cuda-graphed prefill, draft-prefill sharing). A material prefill lever (≥2%) would be a genuine Path-B orthogonal to all spec-decode work; a NULL closes the denominator and confirms decode is the sole front. **High-information either way.**
+
+**Levers CLOSED/exhausted this cycle (added to the plateau map):**
+- **Runtime adaptive-K UNREALIZABLE (stark #266):** onegraph launch+host-read (437.6 µs/pass) is 8.2× over the 53.43 µs/pass break-even ⇒ realizable s/g_d < 0. Only static-K survives, composition-level.
+- **Draft vocab-head IMMATERIAL (kanna #264):** the proposer is a centroid-routed sparse gather (NOT a dense 256k GEMV — that would be 2.7× the whole pass); the vocab-head is 5.0% of the 101 µs draft floor (< 10% gate) ⇒ NULL. **Relocated the recoverable draft step-mass to MLP (51.7%) + attention (29.1%) = 80.8%** → kanna #269 (MLP) + wirbel #270 (attention).
+- **Verify-side epilogue is a λ=1 ceiling, not a measured gain (wirbel #265):** the verify+accept epilogue IS separately launched (33.8% of the served-vs-built gap) but the +3.84% is a ceiling; the bulk of the gap is verify-forward compute (#257's DIVERGE).
+- Prior closures stand (calibration-by-theorem #258, FlashInfer #246, topology doubly-exhausted, draft weight-quant DEAD, n-gram/activation-recycle/verify-epilogue).
+
+**Launch posture unchanged (#124 publish-first, human green-light):** **Live gate: a MEASURED ≥500 build clearing operative λ̂≥0.9780 read against the BUILT step ([1.12,1.43] ms per #257) and the step-dependent E[T] floor.** No measured ≥500 exists; BASELINE stays **481.53** (all cycle-52i merges are bank-the-analysis, 0 TPS). **static-K=4's +4.28% is composition-level, NOT a measured ≥500 — does NOT trigger the launch gate** (stark #273 will measure whether it survives in wall-clock). NEVER launch unilaterally — route via `Approval request: HF job`.
+
+**Live cycle-52i roster — ZERO IDLE (8/8):**
+- **land #245** — real-integration tree verify; faithful-tree confirmation run, then capture + MEASURE the live built step against [1.12,1.43] ms. ★ critical-path / launch arbiter (Path-A).
+- **denken #271** — g_d step-basis reconciliation (measure the deployed-path g_d to collapse the central-NO-GO / optimistic-GO fork). ★ the single highest-leverage open bit.
+- **stark #273** — static-K wall-clock A/B (does K=4/5 actually beat deployed K=7 in REAL local TPS? — empirical composition-honesty). ★ make-or-break for the static-K=4 candidate.
+- **fern #274** — composition-overhead honesty (analytic φ-correction; re-price every draft-side 500 claim under fixed-overhead-discounted composition). ★ analytic twin of stark #273.
+- **ubel #275** — prefill / TPS-denominator probe (the untouched orthogonal Path-B lever). ★ new front.
+- **kanna #269** — draft MLP roofline (is the 50.7 µs MLP, 51.7% of the floor, at HBM-bandwidth or overhead-recoverable?).
+- **wirbel #270** — draft/tree attention Triton autotune (bit-identical kernel-config slack on the 28.5 µs attn term, 29.1% of the floor).
+- **lawine #267** — local→official TPS transfer (what local TPS clears the official 500 gate? makes every local screen — esp. stark #273 — interpretable against the launch gate).
 
 ## 🆕 Cycle-52h Snapshot (2026-06-15 ~01:00Z) — land #245 real-path anchor LIVES (tree alive, −0.06); built-step DIVERGES (Path-A knife-edge); adaptive-K is the new bold lever (+13.2% projected)
 
