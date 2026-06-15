@@ -1,0 +1,327 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T110821Z",
+  "determinism_ok": true,
+  "kind": "ppl-only-retrain-achievability",
+  "nan_clean": true,
+  "peak_mem_mib": 403.727,
+  "ppl_only_retrain_achievability_analysis_only": true,
+  "pr": 346,
+  "self_test": {
+    "checks": {
+      "01_recipe_bands_roundtrip_336": true,
+      "02_targets_imported_exact_343": true,
+      "03_combo_support_and_targets_bracket": true,
+      "04_sigma_ordering_shapes": true,
+      "05_correlation_widens_sigma": true,
+      "06_nan_clean_probabilities_in_unit": true,
+      "07_p_monotone_central_ge_worst": true,
+      "08_independent_and_correlated_reported": true,
+      "09_headline_triangular_closed_form": true,
+      "10_mc_matches_closed_form": true,
+      "11_normal_reproduces_339_at_identity": true,
+      "12_central_likelywin_worst_leanwin": true,
+      "13_full4_optimistic_ge_combo_worst": true
+    },
+    "drift": {
+      "pr330": true,
+      "pr336": true,
+      "pr343": true
+    },
+    "retrain_achievability_self_test_passes": true
+  },
+  "synthesis": {
+    "caveats": [
+      "The per-lever Delta-cov bands are workload-dependent literature-grounded POINT ESTIMATES (carry ranges, not false precision); the achievability is conditional on those priors being calibrated, not a guarantee.",
+      "Even a lit-central fully-trained head (~0.913 coverage) clears the central target, but the official eval is 100% reasoning/STEM (lawine #330) -- the HARD distribution; a head that hits 0.913 on a generic mix may fall short here.",
+      "A definitive number needs the MEASURED post-retrain coverage read (human-gated, #319/#322); this card is an achievability SCREEN, not a build recommendation.",
+      "The central probability is shape-sensitive precisely because the target sits near the combo support floor: 0.996-1.000 across triangular/uniform/normal -- read it as 'near-certain', the exact decimal is not load-bearing.",
+      "Worst-500 achievability lifts well above 0.9 ONLY if the capacity levers (deeper head + TTT, the full-4-lever optimistic bound) are added on top of the 2-lever combo -- reported as an upper bound, not the headline."
+    ],
+    "handoff_sentence": "a feasible soft-KD + reasoning-data EAGLE-3 retrain clears the PPL-only CENTRAL-500 coverage target (+0.0186, c*=0.9089) with achievability 1.000 (triangular, independent; 0.996-1.000 across shapes) -> LIKELY-WIN; and the WORST-500 target (+0.0353, c*=0.9256) with achievability 0.695 (0.641-0.695 across shapes; 0.659 at rho=+0.5) -> LEAN-WIN. Central-500 is a LIKELY-WIN; worst-500 is coin-flip-OR-BETTER but not a slam-dunk. A definitive number needs the measured read (gated, #319/#322).",
+    "imported": {
+      "baseline_tps": 481.53,
+      "ceiling_tps": 520.95,
+      "combo_non_additivity_haircut": 0.7,
+      "cov_prior": 0.8902659519153152,
+      "cov_prior_display": 0.8903,
+      "cstar_central": 0.9089363308345582,
+      "cstar_worst": 0.925603648491971,
+      "identity_bar": 0.9213011665456927,
+      "identity_lift": 0.031035214630377506,
+      "levers": {
+        "deeper_wider_head": {
+          "band": [
+            0.005,
+            0.02
+          ],
+          "central": 0.012,
+          "citation": "Medusa / EAGLE-3 (directional only)"
+        },
+        "more_reasoning_root_data": {
+          "band": [
+            0.01,
+            0.04
+          ],
+          "central": 0.025,
+          "citation": "EAGLE-3 arXiv:2503.01840"
+        },
+        "on_policy_ttt": {
+          "band": [
+            0.0,
+            0.005
+          ],
+          "central": 0.002,
+          "citation": "lawine #316 (internal: TTT lifts depth>=2, not ROOT)"
+        },
+        "soft_kd_topk_distill": {
+          "band": [
+            0.015,
+            0.045
+          ],
+          "central": 0.03,
+          "citation": "DistillSpec arXiv:2310.08461 / OSD arXiv:2310.07177 / Medusa arXiv:2401.10774"
+        }
+      },
+      "provenance": "PPL-only >500 coverage targets c*_central=0.9089 (+0.0186) / c*_worst=0.9256 (+0.0353): wirbel #343 (kklof4wr, on-disk ppl_only_gate_500_envelope_results.json), itself built on stark #340 (jwv1vbug) c* map and the human's #124 PPL-only accepted-risk call. Per-lever Delta-cov bands + 0.70 non-additivity haircut + combo central 0.0385 band [0.0175,0.0595] + the +0.031 reachable budget: lawine #336 (krroookz). Honest top-4 ROOT coverage prior 0.8903 (eval 100% reasoning/STEM): lawine #330 (hfrscdai). The independent-vs-+0.5 correlation convolution method: lawine #339 (0aq16szh). This card convolves the bands into an achievability probability against the LOWERED PPL-only targets; it re-derives none of the upstream numbers.",
+      "retrain_lift_budget_336": 0.031,
+      "target_central": 0.01863633083455818,
+      "target_central_display": 0.0186,
+      "target_worst": 0.035303648491970985,
+      "target_worst_display": 0.0353
+    },
+    "step1_combo_geometry": {
+      "combo_band_336_reconstructed": [
+        0.017499999999999998,
+        0.05949999999999999
+      ],
+      "combo_mean": 0.0385,
+      "haircut": 0.7,
+      "naive_sum_mean": 0.055,
+      "per_shape": {
+        "normal": {
+          "lever_sigma_data": 0.0075,
+          "lever_sigma_kd": 0.0075,
+          "scaled_lever_sigmas": [
+            0.0052499999999999995,
+            0.0052499999999999995
+          ],
+          "sigma_comonotonic": 0.010499999999999999,
+          "sigma_correlated_0p5": 0.009093266739736604,
+          "sigma_independent": 0.007424621202458749
+        },
+        "triangular": {
+          "lever_sigma_data": 0.006123724356957946,
+          "lever_sigma_kd": 0.006123724356957947,
+          "scaled_lever_sigmas": [
+            0.004286607049870563,
+            0.004286607049870562
+          ],
+          "sigma_comonotonic": 0.008573214099741124,
+          "sigma_correlated_0p5": 0.0074246212024587505,
+          "sigma_independent": 0.006062177826491072
+        },
+        "uniform": {
+          "lever_sigma_data": 0.008660254037844387,
+          "lever_sigma_kd": 0.008660254037844387,
+          "scaled_lever_sigmas": [
+            0.00606217782649107,
+            0.00606217782649107
+          ],
+          "sigma_comonotonic": 0.01212435565298214,
+          "sigma_correlated_0p5": 0.0105,
+          "sigma_independent": 0.008573214099741122
+        }
+      },
+      "support": [
+        0.017499999999999998,
+        0.05949999999999999
+      ]
+    },
+    "step2_achievability": {
+      "cross_shape_independent_range": {
+        "p_central_max": 0.9999942845460753,
+        "p_central_min": 0.9962678569849883,
+        "p_worst_max": 0.6946132025519443,
+        "p_worst_min": 0.6406236965695455
+      },
+      "full4_optimistic_upper_bound": {
+        "normal": {
+          "central": 0.99997,
+          "mean": 0.052503,
+          "worst": 0.979471
+        },
+        "triangular": {
+          "central": 1.0,
+          "mean": 0.053169,
+          "worst": 0.9967
+        }
+      },
+      "grid": {
+        "normal__comonotonic": {
+          "p_central": 0.9708590041391963,
+          "p_worst": 0.6196700485725316,
+          "sigma": 0.010499999999999999,
+          "source": "closed_form"
+        },
+        "normal__correlated_0p5": {
+          "p_central": 0.9855462450518685,
+          "p_worst": 0.6374034982783351,
+          "sigma": 0.009093266739736604,
+          "source": "closed_form"
+        },
+        "normal__independent": {
+          "p_central": 0.9962678569849883,
+          "p_worst": 0.6665866392060262,
+          "sigma": 0.007424621202458749,
+          "source": "closed_form"
+        },
+        "triangular__comonotonic": {
+          "p_central": 0.998556,
+          "p_worst": 0.640802,
+          "sigma": 0.008573214099741124,
+          "source": "monte_carlo"
+        },
+        "triangular__correlated_0p5": {
+          "p_central": 0.999812,
+          "p_worst": 0.658555,
+          "sigma": 0.0074246212024587505,
+          "source": "monte_carlo"
+        },
+        "triangular__independent": {
+          "p_central": 0.9999942845460753,
+          "p_worst": 0.6946132025519443,
+          "sigma": 0.006062177826491072,
+          "source": "closed_form"
+        },
+        "uniform__comonotonic": {
+          "p_central": 0.97297,
+          "p_worst": 0.576412,
+          "sigma": 0.01212435565298214,
+          "source": "monte_carlo"
+        },
+        "uniform__correlated_0p5": {
+          "p_central": 0.991465,
+          "p_worst": 0.600815,
+          "sigma": 0.0105,
+          "source": "monte_carlo"
+        },
+        "uniform__independent": {
+          "p_central": 0.9985360002657963,
+          "p_worst": 0.6406236965695455,
+          "sigma": 0.008573214099741122,
+          "source": "closed_form"
+        }
+      },
+      "headline_triangular_correlated_0p5": {
+        "p_central": 0.999812,
+        "p_worst": 0.658555
+      },
+      "headline_triangular_independent": {
+        "p_central": 0.9999942845460753,
+        "p_worst": 0.6946132025519443
+      }
+    },
+    "step3_continuity_339": {
+      "identity_lift": 0.031035214630377506,
+      "p_clears_identity_independent": 0.8426502591576535,
+      "pr339_reported": 0.843,
+      "reproduces_339": true
+    },
+    "step4_monte_carlo": {
+      "cells": {
+        "full4_normal__independent": {
+          "central": 0.99997,
+          "mean": 0.052503,
+          "worst": 0.979471
+        },
+        "full4_triangular__independent": {
+          "central": 1.0,
+          "mean": 0.053169,
+          "worst": 0.9967
+        },
+        "normal__comonotonic": {
+          "central": 0.970732,
+          "mean": 0.038505,
+          "worst": 0.619785
+        },
+        "normal__correlated_0p5": {
+          "central": 0.985553,
+          "mean": 0.038505,
+          "worst": 0.637776
+        },
+        "normal__independent": {
+          "central": 0.996253,
+          "mean": 0.038504,
+          "worst": 0.666771
+        },
+        "triangular__comonotonic": {
+          "central": 0.998556,
+          "mean": 0.038504,
+          "worst": 0.640802
+        },
+        "triangular__correlated_0p5": {
+          "central": 0.999812,
+          "mean": 0.038504,
+          "worst": 0.658555
+        },
+        "triangular__independent": {
+          "central": 0.999994,
+          "mean": 0.038503,
+          "worst": 0.694767
+        },
+        "uniform__comonotonic": {
+          "central": 0.97297,
+          "mean": 0.038506,
+          "worst": 0.576412
+        },
+        "uniform__correlated_0p5": {
+          "central": 0.991465,
+          "mean": 0.038506,
+          "worst": 0.600815
+        },
+        "uniform__independent": {
+          "central": 0.998529,
+          "mean": 0.038505,
+          "worst": 0.64096
+        }
+      },
+      "samples": 4000000,
+      "seed": 20260615
+    },
+    "step5_decision": {
+      "central_500_target_lift": 0.01863633083455818,
+      "central_500_verdict": "LIKELY-WIN",
+      "central_within_budget": true,
+      "combo_central_lift": 0.0385,
+      "note": "Central target +0.0186 sits only +0.0011 above the combo HARD support floor 0.0175 and far below the combo central +0.0385 -> near-certain clear under every shape (LIKELY-WIN). Worst target +0.0353 sits just below the combo central +0.0385 and ~14% past #336's +0.031 budget -> coin-flip-OR-BETTER (LEAN-WIN), not a slam-dunk.",
+      "p_retrain_clears_ppl_only_central_500": 0.9999942845460753,
+      "p_retrain_clears_ppl_only_worst_500": 0.6946132025519443,
+      "retrain_lift_budget_336": 0.031,
+      "thresholds": {
+        "lean_win_at": 0.5,
+        "likely_win_at": 0.9
+      },
+      "worst_500_target_lift": 0.035303648491970985,
+      "worst_500_verdict": "LEAN-WIN",
+      "worst_overshoot_fraction_of_budget": 0.13882737070874146,
+      "worst_within_budget": false
+    },
+    "step6_greedy_safety": {
+      "card_is_cpu_analytic": true,
+      "note": "The retrain TARGET is greedy-IDENTICAL by construction (EAGLE-3 drafter only PROPOSES; emission = verify-model argmax) and PPL-pinned <= 2.42. In the #124 PPL-only world the STRICT greedy-identity bar is intentionally dropped (accepted risk) while PPL stays the guardrail. Coverage is the SPEED/acceptance axis (E[T]), NOT the validity axis. BASELINE 481.53 unchanged; 0 TPS; no served-file change; no HF Job; not a launch.",
+      "ppl_only_world_drops_strict_identity_bar_per_124": true,
+      "ppl_pinned_le_2p42": true,
+      "retrain_run_is_human_gated": true,
+      "retrain_target_greedy_identical_by_construction": true
+    },
+    "test_metrics": {
+      "central_500_verdict": "LIKELY-WIN",
+      "p_retrain_clears_ppl_only_central_500": 0.9999942845460753,
+      "p_retrain_clears_ppl_only_worst_500": 0.6946132025519443,
+      "retrain_achievability_self_test_passes": true,
+      "worst_500_verdict": "LEAN-WIN"
+    }
+  },
+  "wandb_run_id": "ifurfu5l"
+}
