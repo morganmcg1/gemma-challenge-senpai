@@ -1,0 +1,217 @@
+{
+  "card": "eagle3_vllm_load_dryrun",
+  "pr": 338,
+  "issue": 319,
+  "author": "ubel",
+  "generated_utc": "2026-06-15T10:23:06.957269+00:00",
+  "gpu_used": false,
+  "model_forward": false,
+  "checkpoint_loaded": false,
+  "no_publish": true,
+  "no_bucket_write": true,
+  "no_manifest_change": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "fork": {
+    "method": "filesystem",
+    "vllm_dir": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm",
+    "version": "0.22.1rc1.dev307+g3e8afdf78",
+    "eagle3_src": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm/model_executor/models/llama_eagle3.py",
+    "registry_src": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm/model_executor/models/registry.py",
+    "version_src": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm/_version.py"
+  },
+  "candidate_manifest": {
+    "source": "ondisk_#333_candidate_header",
+    "header_keys": [
+      "embed_tokens.weight",
+      "fc.weight",
+      "input_norm.weight",
+      "lm_head.weight",
+      "midlayer.hidden_norm.weight",
+      "midlayer.input_layernorm.weight",
+      "midlayer.mlp.down_proj.weight",
+      "midlayer.mlp.gate_proj.weight",
+      "midlayer.mlp.up_proj.weight",
+      "midlayer.post_attention_layernorm.weight",
+      "midlayer.self_attn.k_proj.weight",
+      "midlayer.self_attn.o_proj.weight",
+      "midlayer.self_attn.q_proj.weight",
+      "midlayer.self_attn.v_proj.weight",
+      "norm.weight"
+    ],
+    "matches_analytic": true,
+    "all_bf16": true,
+    "n_tensors": 15
+  },
+  "checks": {
+    "registration": {
+      "caveat": "registration",
+      "arch_name": "Eagle3LlamaForCausalLM",
+      "passed": true,
+      "registry_entry": [
+        "llama_eagle3",
+        "Eagle3LlamaForCausalLM"
+      ],
+      "registry_resolves": true,
+      "class_defined_in_fork": true,
+      "n_registry_aliases": 7,
+      "registry_aliases": [
+        "Eagle3LlamaForCausalLM",
+        "Eagle3MiniMaxM2ForCausalLM",
+        "Eagle3Qwen2_5vlForCausalLM",
+        "Eagle3Qwen3vlForCausalLM",
+        "LlamaForCausalLMEagle3",
+        "PEagleDraftModel",
+        "PeagleLlamaForCausalLM"
+      ],
+      "registry_src": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm/model_executor/models/registry.py",
+      "note": "Eagle3LlamaForCausalLM -> ('llama_eagle3', 'Eagle3LlamaForCausalLM') in _SPECULATIVE_DECODING_MODELS; class defined in llama_eagle3.py"
+    },
+    "param_manifest": {
+      "caveat": "param_manifest",
+      "passed": true,
+      "real_stacked_params_mapping": [
+        [
+          ".qkv_proj",
+          ".q_proj",
+          "q"
+        ],
+        [
+          ".qkv_proj",
+          ".k_proj",
+          "k"
+        ],
+        [
+          ".qkv_proj",
+          ".v_proj",
+          "v"
+        ],
+        [
+          ".gate_up_proj",
+          ".gate_proj",
+          0
+        ],
+        [
+          ".gate_up_proj",
+          ".up_proj",
+          1
+        ]
+      ],
+      "port_matches_fork": true,
+      "tensors_total": 15,
+      "tensors_mapped": 15,
+      "n_unexpected": 0,
+      "n_shape_mismatch": 0,
+      "load_targets_required": 15,
+      "covers_all_targets": true,
+      "missing_targets": [],
+      "candidate_source": "ondisk_#333_candidate_header",
+      "candidate_matches_analytic": true,
+      "candidate_all_bf16": true,
+      "note": "15/15 published keys map 1:1 onto 15 vLLM load-targets; fork stacked_params_mapping == converter port (True); uniform_bf16=True"
+    },
+    "config_survival": {
+      "caveat": "config_survival",
+      "passed": true,
+      "custom_fields_survive_autoconfig": true,
+      "autoconfig_backend": "stub",
+      "required_config_fields_emitted": true,
+      "nested_eagle_config_backstop": true,
+      "fork_config_fields": {
+        "required": [
+          "draft_vocab_size",
+          "hidden_size",
+          "num_hidden_layers",
+          "rms_norm_eps",
+          "vocab_size"
+        ],
+        "optional": [
+          "attention_bias",
+          "eagle_config",
+          "fc_norm",
+          "logit_scale",
+          "norm_before_fc",
+          "norm_before_residual",
+          "norm_output",
+          "num_aux_hidden_states",
+          "target_hidden_size"
+        ]
+      },
+      "fork_required_fields_not_emitted": [],
+      "note": "custom EAGLE fields survive stub; 17 required fields emitted; 0 fork-required fields unemitted"
+    },
+    "absent_d2t": {
+      "caveat": "absent_d2t",
+      "passed": true,
+      "init_zeros_default": true,
+      "load_weights_skips_when_absent": true,
+      "compute_logits_identity_scatter": true,
+      "draft_vocab_equals_target_vocab": true,
+      "vocab_size": 262144,
+      "source_locations": {
+        "init_zeros": "llama_eagle3.py:292 (Eagle3LlamaForCausalLM.__init__)",
+        "skip_substrs": "llama_eagle3.py:400 (Eagle3LlamaForCausalLM.load_weights)",
+        "identity_scatter": "llama_eagle3.py:354 (Eagle3LlamaForCausalLM.compute_logits)"
+      },
+      "note": "draft_id_to_target_id zero-init + skip-on-absent + identity scatter confirmed; draft_vocab==target_vocab==262144 -> full-coverage identity"
+    },
+    "version_pin": {
+      "caveat": "version_pin",
+      "passed": true,
+      "fork_version": "0.22.1rc1.dev307+g3e8afdf78",
+      "expected_version_token": "0.22.1rc1",
+      "version_token_present": true,
+      "version_src": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm/_version.py",
+      "config_schema_parses": true,
+      "autoconfig_backend": "stub",
+      "arch_resolves_under_fork": true,
+      "note": "candidate must load under vLLM 0.22.1rc1.dev307+g3e8afdf78; config schema parses (stub) and Eagle3LlamaForCausalLM resolves in this fork's registry"
+    }
+  },
+  "ledger": {
+    "ledger": {
+      "C1": {
+        "name": "config-field survival + class registration",
+        "status": "CLOSED-AT-0-GPU",
+        "closed": true,
+        "evidence": "registry resolution + 1:1 param-manifest map + AutoConfig field survival",
+        "sub_checks": {
+          "registration": true,
+          "param_manifest": true,
+          "config_survival": true
+        }
+      },
+      "C2": {
+        "name": "fp32->bf16 inference numerics + live served greedy-identity",
+        "status": "REQUIRES-GPU-SMOKE",
+        "closed": false,
+        "evidence": "irreducible: needs a live GPU forward + served greedy-token-identity (#192 HARD gate); a CPU static audit cannot exercise it"
+      },
+      "C3": {
+        "name": "absent-d2t -> identity-map default",
+        "status": "CLOSED-AT-0-GPU",
+        "closed": true,
+        "evidence": "zero-init + skip-on-absent + identity scatter, draft_vocab==target_vocab"
+      },
+      "C4": {
+        "name": "vLLM-fork version / schema pin",
+        "status": "CLOSED-AT-0-GPU",
+        "closed": true,
+        "evidence": "fork _version.py pin + config schema parse + arch resolution"
+      }
+    },
+    "caveats_closed_at_0gpu": 3,
+    "closed_caveats": [
+      "C1",
+      "C3",
+      "C4"
+    ],
+    "residual_for_gpu_smoke": [
+      "C2: fp32->bf16 inference numerics + live served greedy-identity"
+    ]
+  },
+  "self_test_passes": 1,
+  "wandb_run_ids": [
+    "y4jj278b"
+  ]
+}
