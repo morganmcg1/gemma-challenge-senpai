@@ -1,0 +1,243 @@
+{
+  "pr": 401,
+  "agent": "ubel",
+  "kind": "mtp-drafter-topk-coverage-ceiling",
+  "analysis_only": true,
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "gpu_used_for_load_only": true,
+  "official_tps": 0,
+  "baseline_unchanged_tps": 481.53,
+  "baseline_unchanged_ppl": 2.3772,
+  "inputs": {
+    "ladder_289": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "e_accepted_289": 2.851185944363104,
+    "e_t_289": 3.851185944363104,
+    "cond_accept_76": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "deployed_mtp_top1_76": 0.728739760479042,
+    "e_t_76": 3.844131736526946,
+    "eagle3_top1_387": 0.7617,
+    "eagle3_top4_387": 0.8902659519153152,
+    "per_source_top4_387": {
+      "aime": 0.957005303537408,
+      "gpqa": 0.9175953770859131,
+      "mmlu_pro": 0.846544405293677
+    },
+    "official_mix_387": {
+      "aime": 0.109375,
+      "gpqa": 0.4453125,
+      "mmlu_pro": 0.4453125
+    },
+    "coverage_ceiling_gap": 0.10973404808468479,
+    "locked_top1_to_top4_prize": 0.12856595191531517,
+    "base_471_390": 471.41634950257713,
+    "gap_28_390": 28.583650497422866,
+    "base_467_393": 467.48,
+    "gap_33_393": 32.53,
+    "s_central_399": 7.912609135742992,
+    "tps_per_unit_dcov_399": 968.57,
+    "baseline_tps": 481.53,
+    "baseline_ppl": 2.3772,
+    "ppl_gate": 2.42,
+    "roundtrip_tol": 0.001,
+    "source_289_run": "fi34s269",
+    "source_76_ref": "accept_calibration",
+    "source_387_run": "z8osvif8",
+    "source_390_run": "5y64zbjz",
+    "source_393_run": "0q7ynumg",
+    "source_399_run": "ec7i3z5t",
+    "deployed_spec": {
+      "method": "mtp",
+      "model": "/tmp/qat-assistant",
+      "num_speculative_tokens": 7
+    }
+  },
+  "gpu_probe": {
+    "path": "/tmp/qat-assistant",
+    "utc": "2026-06-15T20:28:24Z",
+    "transformers_version": "5.9.0",
+    "torch_version": "2.12.0+cu130",
+    "config_class": "Gemma4AssistantConfig",
+    "model_type": "gemma4_assistant",
+    "num_speculative_inferred_K": 7,
+    "load_wall_s": 0.266,
+    "drafter_loadable": true,
+    "model_class": "Gemma4AssistantForCausalLM",
+    "n_params_M": 78.518,
+    "lm_head_vocab": 262144,
+    "lm_head_dim": 256,
+    "has_masked_embedding": true,
+    "pre_projection_in": 5120,
+    "backbone_hidden_size": 2560,
+    "post_projection_out": 2560,
+    "vram_alloc_MB": 159.1,
+    "gpu_name": "NVIDIA A10G",
+    "standalone_forward_blocked": true,
+    "standalone_forward_error": "ValueError: inputs_embeds and shared_kv_states cannot be None.",
+    "_source": "live_gpu_probe.json"
+  },
+  "expected_tokens_per_step": 3.851185944363104,
+  "artifact_identity": {
+    "deployed_mtp_top1_coverage": 0.7292532942898975,
+    "deployed_mtp_top1_xcheck_76": 0.728739760479042,
+    "eagle3_anchor_top1": 0.7617,
+    "eagle3_anchor_top4": 0.8902659519153152,
+    "top1_artifact_mismatch": 0.03244670571010255,
+    "deployed_mtp_weaker_than_eagle3_top1": true,
+    "faithful_top1_internally_consistent_76_vs_289": true,
+    "roundtrip_top1_vs_eagle3_passes": false,
+    "deployed_mtp_top4_coverage": null,
+    "per_position_coverage_1": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "anchors_describe_different_model": true,
+    "note": "0.7617/0.8903 = fern#34 EAGLE-3 candidate (gua9x68j, NEVER deployed, #387 prem-corr A). deployed /tmp/qat-assistant top-1 = 0.7293 (#289) / 0.7287 (#76, live deployed server). A mode caveat exists (EAGLE-3 is teacher-forced-aggregate; MTP is spec-decode position-1) but the dominant, documented difference is the MODEL, not the measurement mode."
+  },
+  "blocker_ledger": {
+    "topk_read_blocked": true,
+    "n_blocker_reasons": 3,
+    "reasons": [
+      {
+        "id": "wrong_artifact_anchors",
+        "summary": "PR round-trip anchors top-1=0.7617/top-4=0.8903 are the fern#34 EAGLE-3 head (gua9x68j), never deployed (#387 prem-corr A). Deployed MTP top-1 = 0.729 != 0.7617.",
+        "evidence": "#387 z8osvif8; #76 a_1=0.7287; #289 a_1=0.7293"
+      },
+      {
+        "id": "no_banked_mtp_topk_anchor",
+        "summary": "vLLM greedy spec-decode proposes/accepts only the drafter argmax (top-1); the deployed server logs only top-1 accept. No banked deployed top-4/8/16 to validate against, so the PR's round-trip gate cannot be satisfied at K>1.",
+        "evidence": "deployed manifest SPECULATIVE_CONFIG greedy; #76/#289 are top-1 ladders"
+      },
+      {
+        "id": "faithful_read_unwired_and_nondeterministic",
+        "summary": "Gemma4AssistantForCausalLM.forward needs inputs_embeds(5120=2x2560) + shared_kv_states (backbone KV cross-attn); the 5120 construction is vLLM-MTP-specific and not banked. HF generate(assistant_model=...) yields top-1 accept/reject, not per-position top-K. A plain bf16 HF read != deployed prune(12k)+int4 distribution AND is cross-session nondeterministic (bf16 lm_head argmax flips ~9-13%; only int4-Marlin is bit-exact).",
+        "evidence": "live forward error: ValueError: inputs_embeds and shared_kv_states cannot be None."
+      }
+    ],
+    "no_banked_mtp_topk_anchor": true,
+    "drafter_loadable": true,
+    "standalone_forward_blocked": true,
+    "coverage_ceiling_gap_measured": 0.10973404808468479,
+    "ceiling_band_collapsed": false,
+    "realized_topk_coverage_8": null,
+    "realized_topk_coverage_16": null,
+    "realized_tree_headroom_8": null,
+    "realized_tree_headroom_16": null,
+    "realized_tree_prize_fraction_8": null,
+    "realized_tree_prize_fraction_16": null,
+    "per_position_coverage_8": null,
+    "ceiling_band_cov": [
+      0.0,
+      0.10973404808468479
+    ],
+    "ceiling_band_tps_at_968_secant": [
+      0.0,
+      106.28510695338315
+    ],
+    "tps_per_unit_dcov_399": 968.57
+  },
+  "feed_denken_208": {
+    "ceiling_collapsed_to_point": false,
+    "ceiling_remains_band": [
+      0.0,
+      0.10973404808468479
+    ],
+    "ceiling_band_tps": [
+      0.0,
+      106.28510695338315
+    ],
+    "corrected_deployed_mtp_top1_anchor": 0.7292532942898975,
+    "eagle3_prize_is_a_different_head": true,
+    "realized_tree_prize_fraction_8": null,
+    "realized_tree_prize_fraction_16": null,
+    "recommended_faithful_route": "Instrument the vLLM MTP proposer (the deployed fa2sw_precache_kenyan stack, with the deployed lm_head prune(12k)+int4) to log per-draft-position top-K, on a LOCAL deployed run over the official 128. This is the ONLY read that is BOTH the deployed distribution AND top-1-validatable against 0.729. It is a custom-vLLM-patch / local-serve effort -- size it as a follow-up; out of scope for a 0-TPS analysis card with no served-file change."
+  },
+  "drafter_loadable": true,
+  "topk_coverage_roundtrip_top1": 0.7292532942898975,
+  "topk_coverage_roundtrip_top1_matches_eagle3_anchor": false,
+  "topk_coverage_roundtrip_top4": null,
+  "realized_topk_coverage_8": null,
+  "realized_topk_coverage_16": null,
+  "realized_tree_headroom_8": null,
+  "realized_tree_headroom_16": null,
+  "realized_tree_prize_fraction_8": null,
+  "realized_tree_prize_fraction_16": null,
+  "per_position_coverage_8": null,
+  "per_position_coverage_1": [
+    0.7292532942898975,
+    0.759556697719242,
+    0.7929794882639035,
+    0.8228,
+    0.8348727920920435,
+    0.8357919254658385,
+    0.8464932652113331
+  ],
+  "coverage_ceiling_gap_measured": 0.10973404808468479,
+  "eagle3_anchors_are_wrong_artifact": true,
+  "self_test": {
+    "conditions": {
+      "a_ladder_len_7": true,
+      "a_ladder_in_unit": true,
+      "a_ladder_monotone_nondecreasing": true,
+      "a_eaccepted_roundtrips_289": true,
+      "a_et_roundtrips_289": true,
+      "b_76_cond_len_7": true,
+      "b_76_top1_xchecks_289_a1": true,
+      "b_76_et_matches_kanna_3p844": true,
+      "b_faithful_top1_internally_consistent": true,
+      "c_eagle3_top4_grounded_from_sources": true,
+      "c_official_mix_sums_to_1": true,
+      "c_eagle3_top1_le_top4_le_1": true,
+      "c_ceiling_gap_is_complement_of_top4": true,
+      "c_ceiling_gap_is_0p1097": true,
+      "c_prize_is_0p1286": true,
+      "d_roundtrip_faithful_anchor_passes": true,
+      "d_roundtrip_vs_eagle3_fails": true,
+      "d_mismatch_exceeds_tol": true,
+      "d_mtp_weaker_than_eagle3": true,
+      "d_anchors_different_model": true,
+      "e_drafter_loadable_true": true,
+      "e_lm_head_vocab_262144": true,
+      "e_pre_proj_in_is_2x_backbone": true,
+      "e_post_proj_out_is_backbone": true,
+      "e_standalone_forward_blocked": true,
+      "f_topk_read_blocked": true,
+      "f_three_blocker_reasons": true,
+      "f_no_banked_mtp_topk_anchor": true,
+      "f_realized_cov8_16_none": true,
+      "f_prize_fraction_8_16_none": true,
+      "f_band_not_collapsed": true,
+      "f_ceiling_gap_measured_unchanged": true,
+      "g_ppl_unchanged_passes_gate": true,
+      "h_no_nan_inf": true
+    },
+    "n_checks": 34,
+    "n_passed": 34,
+    "passes": true
+  },
+  "topk_coverage_ceiling_self_test_passes": true,
+  "wandb_run_id": "i2qsjyp6"
+}
