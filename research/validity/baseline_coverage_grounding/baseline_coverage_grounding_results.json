@@ -1,0 +1,340 @@
+{
+  "pr": 387,
+  "agent": "denken",
+  "kind": "baseline-coverage-grounding",
+  "analysis_only": true,
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "gpu_used": false,
+  "official_tps_expected": 0,
+  "baseline_unchanged_tps": 481.53,
+  "baseline_unchanged_ppl": 2.3772,
+  "premise_corrections": {
+    "deployed_drafter_is_mtp_not_eagle3": true,
+    "deployed_speculative_config": {
+      "method": "mtp",
+      "model": "/tmp/qat-assistant",
+      "num_speculative_tokens": 7,
+      "submission": "submissions/fa2sw_precache_kenyan",
+      "drafter_bucket": "hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001"
+    },
+    "anchor_0p8903_is_eagle3_candidate_fern34_gua9x68j_never_deployed": true,
+    "eagle3_anchor_checkpoint_on_disk": false,
+    "only_debug_ckpt_present": "research/eagle3_drafter/checkpoints/debug_1k_2ep/model_best.pt",
+    "anchor_already_on_distribution_grounded_by_330": true,
+    "direct_gpu_topk_read_blocked_on": "missing gua9x68j/full_20k checkpoint + deployed=MTP identity"
+  },
+  "inputs": {
+    "cov_prior": 0.8902659519153152,
+    "identity_bar": 0.9213011665456927,
+    "cov_budget_336": 0.031035214630377506,
+    "cov_se_330": 0.019995605787702757,
+    "band95": [
+      0.8510745645714178,
+      0.9294573392592126
+    ],
+    "native_uplift_330": 0.009695355171966513,
+    "per_source_top4_fern34": {
+      "aime": 0.957005303537408,
+      "gpqa": 0.9175953770859131,
+      "mmlu_pro": 0.846544405293677
+    },
+    "official_src_counts": {
+      "aime": 14,
+      "gpqa": 57,
+      "mmlu_pro": 57
+    },
+    "official_n": 128,
+    "official_tokens": 61797,
+    "deployed_perdepth_accept_289": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "mu_p": 481.53,
+    "mu_v": 460.85,
+    "k_cal": 125.26795005202914,
+    "gap_measured": 0.04294644155088978,
+    "rho_priv": 0.9421,
+    "cstar_central": 0.9089,
+    "cstar_worst": 0.9256,
+    "s_central": 7.912609135742992,
+    "s_worst": 4.172857261001455,
+    "base_deployable_floor": 469.68,
+    "base_plus_attn_rebuild": 480.83675474528303,
+    "p_headline": 518.9188253620001,
+    "slope_priv_central_382": 437.26536914737983,
+    "slope_priv_conservative_382": 255.28494798997673,
+    "source_330_run": "hfrscdai",
+    "source_336_run": "5lnz5jgb",
+    "source_34_run": "gua9x68j",
+    "source_289_run": "fi34s269",
+    "source_377_run": "030uc5mk",
+    "source_382_run": "bn0v5rqr",
+    "source_383_run": "t68af2yw"
+  },
+  "grounded_topk": {
+    "measured_top4_coverage": 0.8902659519153152,
+    "coverage_anchor_gap": 0.0,
+    "measured_top1_coverage": 0.7617,
+    "measured_top2_coverage_bounds": [
+      0.7617,
+      0.8902659519153152
+    ],
+    "measured_top8_coverage_bounds": [
+      0.8902659519153152,
+      1.0
+    ],
+    "topk_curve": {
+      "top1_coverage": {
+        "value": 0.7617,
+        "grounded": true,
+        "source": "fern#34 holdout aggregate tf top-1 (on-distribution; 57/57/14==107/107/26)"
+      },
+      "top2_coverage": {
+        "value_bounds": [
+          0.7617,
+          0.8902659519153152
+        ],
+        "grounded": false,
+        "needs_gpu_read": true,
+        "source": "monotone bound; per-source top-2 not published"
+      },
+      "top4_coverage": {
+        "value": 0.8902659519153152,
+        "grounded": true,
+        "source": "fern#34 per-source top-4 x official 57/57/14 mix (== #330 prior)"
+      },
+      "top8_coverage": {
+        "value_bounds": [
+          0.8902659519153152,
+          1.0
+        ],
+        "grounded": false,
+        "needs_gpu_read": true,
+        "source": "monotone bound; per-source top-8 not published"
+      }
+    },
+    "topk_monotone_nondecreasing": true,
+    "per_source_top4": {
+      "aime": 0.957005303537408,
+      "gpqa": 0.9175953770859131,
+      "mmlu_pro": 0.846544405293677
+    },
+    "official_mix": {
+      "aime": 0.109375,
+      "gpqa": 0.4453125,
+      "mmlu_pro": 0.4453125
+    },
+    "native_adjusted_top4": 0.8999613070872817,
+    "record_bernoulli_se": 0.019995605787702757,
+    "band95": [
+      0.8510745645714178,
+      0.9294573392592126
+    ],
+    "deployed_perdepth_conditional_accept_289": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "deployed_perdepth_is_mtp_not_eagle3": true,
+    "anchor_is_on_distribution_for_official_128": true,
+    "anchor_gap_is_distribution_induced": false,
+    "coverage_from_accept_logs": false,
+    "grounding_method": "composition_identity_330"
+  },
+  "roundtrip_377": {
+    "dcov_robust": 0.010708162797026063,
+    "dcov_central": 0.005647142947793298,
+    "rec_target": 0.9009741147123412,
+    "reproduces_dcov_robust": true,
+    "reproduces_dcov_central": true,
+    "reproduces_target_0p9010": true
+  },
+  "roundtrip_382": {
+    "target_central": 0.902354556276153,
+    "target_conservative": 0.9109476724989163,
+    "cov_delta_central": 0.012054556276153039,
+    "cov_delta_conservative": 0.020647672498916303,
+    "central_within_budget": true,
+    "conservative_within_budget": true,
+    "reproduces_central_0p9024": true,
+    "reproduces_conservative_0p9109": true
+  },
+  "roundtrip_383": {
+    "required_dcov_floor": 0.05716864498666053,
+    "required_dcov_attn": 0.04457009721350883,
+    "floor_exceeds_budget": true,
+    "attn_exceeds_budget": true,
+    "floor_frac_of_budget": 1.8420573425228843,
+    "reproduces_floor_0p0572": true,
+    "reproduces_attn_0p0446": true
+  },
+  "anchor_band_reprice": {
+    "rows": {
+      "band95_low": {
+        "anchor": 0.8510745645714178,
+        "sigma_from_central": -1.9599999999999986,
+        "budget": 0.07022660197427488,
+        "required_dcov_floor_model_i": 0.17740652885470923,
+        "model_i_degenerate_anchor_ge_cstar": false,
+        "model_i_busts_budget": true,
+        "model_i_ratio": 2.5262012380962995,
+        "required_dcov_floor_model_ii": 0.05716864498666053,
+        "model_ii_busts_budget": false,
+        "model_ii_ratio": 0.814059677949423
+      },
+      "minus_1sigma": {
+        "anchor": 0.8702703461276124,
+        "sigma_from_central": -1.0000000000000004,
+        "budget": 0.05103082041808027,
+        "required_dcov_floor_model_i": 0.11851450410301197,
+        "model_i_degenerate_anchor_ge_cstar": false,
+        "model_i_busts_budget": true,
+        "model_i_ratio": 2.3224103224690107,
+        "required_dcov_floor_model_ii": 0.05716864498666053,
+        "model_ii_busts_budget": true,
+        "model_ii_ratio": 1.1202768154283018
+      },
+      "central_modeled_0p8903": {
+        "anchor": 0.8902659519153152,
+        "sigma_from_central": 0.0,
+        "budget": 0.031035214630377506,
+        "required_dcov_floor_model_i": 0.05716864498666053,
+        "model_i_degenerate_anchor_ge_cstar": false,
+        "model_i_busts_budget": true,
+        "model_i_ratio": 1.8420573425228843,
+        "required_dcov_floor_model_ii": 0.05716864498666053,
+        "model_ii_busts_budget": true,
+        "model_ii_ratio": 1.8420573425228843
+      },
+      "native_adjusted": {
+        "anchor": 0.8999613070872817,
+        "sigma_from_central": 0.4848742906268501,
+        "budget": 0.021339859458410992,
+        "required_dcov_floor_model_i": 0.02742361506472495,
+        "model_i_degenerate_anchor_ge_cstar": false,
+        "model_i_busts_budget": true,
+        "model_i_ratio": 1.2850888319189973,
+        "required_dcov_floor_model_ii": 0.05716864498666053,
+        "model_ii_busts_budget": true,
+        "model_ii_ratio": 2.678960707219082
+      },
+      "plus_1sigma": {
+        "anchor": 0.910261557703018,
+        "sigma_from_central": 1.0000000000000004,
+        "budget": 0.011039608842674742,
+        "required_dcov_floor_model_i": -0.004177214129690909,
+        "model_i_degenerate_anchor_ge_cstar": true,
+        "model_i_busts_budget": false,
+        "model_i_ratio": NaN,
+        "required_dcov_floor_model_ii": 0.05716864498666053,
+        "model_ii_busts_budget": true,
+        "model_ii_ratio": 5.178502771372592
+      },
+      "band95_high": {
+        "anchor": 0.9294573392592126,
+        "sigma_from_central": 1.9599999999999986,
+        "budget": -0.008156172713519871,
+        "required_dcov_floor_model_i": -0.06306923888138816,
+        "model_i_degenerate_anchor_ge_cstar": true,
+        "model_i_busts_budget": false,
+        "model_i_ratio": NaN,
+        "required_dcov_floor_model_ii": 0.05716864498666053,
+        "model_ii_busts_budget": true,
+        "model_ii_ratio": NaN
+      }
+    },
+    "flip_anchor_model_i_up": 0.9029032087449507,
+    "flip_anchor_model_i_up_sigma": 0.6320016989636461,
+    "flip_anchor_model_ii_down": 0.8641325215590322,
+    "flip_anchor_model_ii_down_sigma": -1.3069586705072473,
+    "cstar_central_tps_consistency_cap": 0.9089,
+    "model_i_flip_window_is_tps_inconsistent": true,
+    "red_holds_at_central_measured_anchor": true,
+    "required_delta_floor_measured": 0.05716864498666053,
+    "still_busts_336_budget": true,
+    "_383_red_robust_to_measured_anchor": true,
+    "red_robust_basis": "Central + downside robust under BOTH models (lowering the anchor STRENGTHENS RED: more budget but a shallower program secant, and the secant term dominates). Model-I (program secant) flip is at anchor 0.9029 (+0.63 sigma); model-II (fixed slope) flip is at 0.8641 (-1.31 sigma). The only RED->fits window is [0.9029, c*=0.9089) -- internally inconsistent with the deployed 481.53<500 TPS (an anchor that high would put the deployed E[T] already at the 500 bar). #330's composition identity grounds the central anchor at 0.8903 (coverage_anchor_gap ~= 0), +0.0186 below c*, RED ratio 1.84."
+  },
+  "reprice_377_382_across_band": {
+    "minus_1sigma": {
+      "anchor": 0.8702703461276124,
+      "reanchored_377_target": 0.8870382788521234,
+      "reanchored_377_within_budget": true,
+      "reanchored_382_target_central": 0.8823249024037655,
+      "reanchored_382_within_budget": true
+    },
+    "central": {
+      "anchor": 0.8902659519153152,
+      "reanchored_377_target": 0.9009741147123412,
+      "reanchored_377_within_budget": true,
+      "reanchored_382_target_central": 0.9023205081914683,
+      "reanchored_382_within_budget": true
+    },
+    "plus_1sigma": {
+      "anchor": 0.910261557703018,
+      "reanchored_377_target": 0.9149099505725592,
+      "reanchored_377_within_budget": true,
+      "reanchored_382_target_central": 0.922316113979171,
+      "reanchored_382_within_budget": false
+    }
+  },
+  "measured_top4_coverage": 0.8902659519153152,
+  "coverage_anchor_gap": 0.0,
+  "measured_top1_coverage": 0.7617,
+  "coverage_from_accept_logs": false,
+  "grounding_method": "composition_identity_330",
+  "required_delta_floor_measured": 0.05716864498666053,
+  "still_busts_336_budget": true,
+  "_383_red_robust_to_measured_anchor": true,
+  "flip_anchor_model_i_up": 0.9029032087449507,
+  "flip_anchor_model_ii_down": 0.8641325215590322,
+  "self_test": {
+    "conditions": {
+      "a_roundtrip_377_target_0p9010": true,
+      "a_roundtrip_377_dcov_robust": true,
+      "a_roundtrip_382_central_0p9024": true,
+      "a_roundtrip_382_conservative_0p9109": true,
+      "a_roundtrip_383_floor_0p0572": true,
+      "a_roundtrip_383_attn_0p0446": true,
+      "b_composition_prior_equals_anchor": true,
+      "b_anchor_gap_near_zero": true,
+      "b_official_mix_sums_to_1": true,
+      "c_topk_monotone": true,
+      "c_top1_le_top4": true,
+      "c_per_source_in_unit": true,
+      "c_top2_bounds_ordered": true,
+      "c_top8_lower_is_top4": true,
+      "d_perdepth_len_7": true,
+      "d_perdepth_in_unit": true,
+      "d_perdepth_a1_is_cliff": true,
+      "e_red_holds_central_model_i": true,
+      "e_red_holds_central_model_ii": true,
+      "e_required_floor_matches_383": true,
+      "f_model_i_req_decreasing_in_anchor": true,
+      "f_budget_decreasing_in_anchor": true,
+      "g_flip_i_above_central": true,
+      "g_flip_ii_below_central": true,
+      "g_flip_i_outside_half_sigma": true,
+      "g_flip_ii_outside_half_sigma": true,
+      "g_flip_i_below_cstar": true,
+      "h_383_red_robust_true": true,
+      "i_no_nan": true
+    },
+    "n_checks": 29,
+    "passes": true
+  },
+  "coverage_grounding_self_test_passes": true,
+  "wandb_run_id": "z8osvif8"
+}
