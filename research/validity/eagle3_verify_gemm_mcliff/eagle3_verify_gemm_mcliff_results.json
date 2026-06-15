@@ -1,0 +1,160 @@
+{
+  "agent": "stark",
+  "analysis_only": true,
+  "created_at": "20260615T090543Z",
+  "kind": "eagle3-verify-gemm-mcliff",
+  "nan_clean": true,
+  "peak_mem_mib": 16.566,
+  "pr": 331,
+  "synthesis": {
+    "deliverable1_tree_to_m": {
+      "capture_safety_note": "ubel #311 capture-safety (max_safe_tree_width=16, buckets (8, 16, 32)) is an ORTHOGONAL correctness axis (lawine #101 IndexError): a 29-node tree pads to the M=32 capture bucket, still 2 Marlin blocks, still sub-cliff. The verify-GEMM throughput cliff priced here is M=33 (3 blocks), reached only by a tree of >=33 real nodes.",
+      "deployed_anchor_ok": true,
+      "eagle3_M": 29,
+      "eagle3_is_sub_cliff": true,
+      "formula": "M = W*K + 1  (root + W candidate siblings per depth)",
+      "headroom_nodes_below_cliff": 3,
+      "rows": {
+        "deployed_linear": {
+          "M_nodes": 8,
+          "bucket_blocks": 1,
+          "capture_bucket": 8,
+          "depth_K": 7,
+          "desc": "deployed MTP chain (W=1)",
+          "sub_cliff_bucket": true,
+          "sub_cliff_real": true,
+          "thread_m_blocks": 1,
+          "width_W": 1
+        },
+        "eagle3_top4_611": {
+          "M_nodes": 29,
+          "bucket_blocks": 2,
+          "capture_bucket": 32,
+          "depth_K": 7,
+          "desc": "EAGLE-3 top-4 salvage tree for E[T]=6.11",
+          "sub_cliff_bucket": true,
+          "sub_cliff_real": true,
+          "thread_m_blocks": 2,
+          "width_W": 4
+        }
+      },
+      "salvage_identity": {
+        "a1_required_611": 0.9213011665456927,
+        "c_eff_top4": 0.9213011665456927,
+        "matches_304_bank": true,
+        "note": "top-4 salvage c_eff = a1 + (1-a1)*cov4 = 0.9213 reaches the depth-7 6.11 demand; realizing top-4 coverage REQUIRES W=4 siblings per depth."
+      },
+      "size29_corpus_anchor_ok": true
+    },
+    "deliverable2_cliff_cost": {
+      "both_red_if_crossed": true,
+      "ceiling_crossed": 445.33235688083255,
+      "central_if_crossed": {
+        "cap_crossed": 445.33235688083255,
+        "clears_500": false,
+        "headroom_pct": -10.93352862383349,
+        "joint_crossed": 445.33235688083255,
+        "uncapped_crossed": 501.00301780917977,
+        "uncapped_subcliff": 586.0766391463308
+      },
+      "cliff_mu_gemm_fwd_33_over_32": 1.2264217054782927,
+      "cliff_mu_step_33_over_32": 1.1698066045772872,
+      "cliff_pct_gemm": 22.642170547829267,
+      "cliff_pct_step": 16.980660457728725,
+      "honest_public_611_crossed": 531.7809675256455,
+      "note": "crossing to M>=33 scales the verify step by mu=1.16981; the ledger denominator grows by mu so the envelope divides by mu: central 586.08->445.33 (-10.93%), worst 492.87->421.32 (-15.74%) -- both RED. The cliff would bind BEFORE the private tax.",
+      "second_cliff_jump_ms": 2.8688483238220215,
+      "second_cliff_mu_step_49_over_48": 1.1879342813474505,
+      "step_jump_matches_corpus_marginal": true,
+      "step_jump_ms": 2.175551414489746,
+      "worst_if_crossed": {
+        "cap_crossed": 445.33235688083255,
+        "clears_500": false,
+        "headroom_pct": -15.735597430654412,
+        "joint_crossed": 421.32201284672794,
+        "uncapped_crossed": 421.32201284672794,
+        "uncapped_subcliff": 492.865273281899
+      }
+    },
+    "deliverable3_max_subcliff": {
+      "M_at_max_depth": 29,
+      "M_at_max_width": 29,
+      "depth_K8_M": 33,
+      "depth_K8_crosses": true,
+      "e_t_611_reachable_sub_cliff": true,
+      "frontier_note": "the largest sub-cliff tree at K=7 is W=4 (M=29); W=5 -> M=36 crosses. At W=4 the largest depth is K=7 (M=29); K=8 -> M=33 crosses (== the cliff). E[T]=6.11 IS the depth-7 top-4 ceiling, so it is exactly reachable sub-cliff, but it sits AT the frontier: raising E[T] above 6.11 needs depth-8 (M=33) or top-5 (M=36) -- both cross. The acceptance ceiling and the tile knee coincide at 6.11.",
+      "max_depth_K_at_W4": 7,
+      "max_width_W_at_K7": 4,
+      "subcliff_et_ceiling": 6.111214987369918,
+      "width_W5_M": 36,
+      "width_W5_crosses": true
+    },
+    "deliverable4_verdict": {
+      "cliff_would_flip_yellow_to_red": true,
+      "compliant_tps_central_subcliff": 520.9527323111674,
+      "compliant_tps_worstcase_subcliff": 492.865273281899,
+      "counterfactual_central_if_crossed": 445.33235688083255,
+      "counterfactual_worst_if_crossed": 421.32201284672794,
+      "eagle3_M": 29,
+      "fern325_envelope_stands": true,
+      "frontier_tight": true,
+      "is_sub_cliff": true,
+      "joint_frontier_note": "E[T]=6.11 sits at the JOINT frontier of the depth-7 top-4 acceptance ceiling AND the M=32 verify-GEMM tile knee: the cheapest move past either (depth-8 or top-5) crosses BOTH at once.",
+      "knee_Mstar": 32,
+      "verdict": "SUB-CLIFF-SAFE",
+      "why": "the E[T]=6.11 top-4 tree verifies at M=29 <= knee_Mstar=32 (2 Marlin blocks, the same tile as fern #325's M=32 anchor). The verify-GEMM denominator is unchanged, fern's YELLOW envelope STANDS (central capped 520.95, worst 492.87), and the M=33 cliff does NOT bind earlier."
+    },
+    "headline": {
+      "cliff_mu_step": 1.1698066045772872,
+      "cliff_pct_step": 16.980660457728725,
+      "compliant_tps_central_with_mcliff": 520.9527323111674,
+      "compliant_tps_worstcase_with_mcliff": 492.865273281899,
+      "counterfactual_central_if_crossed": 445.33235688083255,
+      "counterfactual_worst_if_crossed": 421.32201284672794,
+      "eagle3_M": 29,
+      "eagle3_verify_gemm_mcliff_self_test_passes": true,
+      "fern325_envelope_stands": true,
+      "headroom_nodes_below_cliff": 3,
+      "is_sub_cliff": true,
+      "knee_Mstar": 32,
+      "verdict": "SUB-CLIFF-SAFE"
+    },
+    "imports": {
+      "caveats": [
+        "DERIVED, not measured: no EAGLE-3 checkpoint exists; the W=4->M=29 mapping prices the tree the top-4 salvage acceptance model implies, not a running EagleProposer.",
+        "cov4=0.6532 is measured on the deployed LINEAR spine (wirbel #79); a {2,21,39} fusion draft could lower it and raise the W needed -- the cov-transfer YELLOW (denken #320) is inherited, ORTHOGONAL to this step-regime card.",
+        "ubel #311 capture-safety (max_safe_tree_width=16, lawine #101 IndexError) is a separate correctness axis; a 29-node tree pads to the M=32 capture bucket, still sub-cliff. This card prices the verify-GEMM THROUGHPUT cliff (M=33), not capture.",
+        "0 TPS / denominator-correctness property: depends only on integer node-counts and the measured tile boundary, not tensor values. NOT a launch / build / served-file change / HF Job."
+      ],
+      "provenance": "fern #325 (joint compliant-500 ledger: K_cal 125.268, step 1.2182, lambda 520.95, honest_public 622.08, rho central 0.9421 / breakeven 0.8038 / worst 0.7923, private 586.08/492.87) x denken #304 (a1_required_611 0.9213, depth-7 ceiling 6.11) x wirbel #79 (cov4 0.6532) x denken #320 (salvage topology c_eff=a1+(1-a1)cov) x lawine #101 / ubel #311 (size-29 tree, m_verify_deployed=8, k_spec=7, max_safe_tree_width=16) x directly-measured Marlin tile boundary research/spec_cost_model/results_tile_boundary (knee_Mstar=32, M32->M33 step 12.812->14.987ms, +16.98%). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "mapping": {
+      "K_spec": 7,
+      "deployed_M": 8,
+      "e_t_build_free": 6.1112149873699195,
+      "eagle3_M": 29,
+      "formula": "M = W*K + 1; thread_m_blocks = ceil(M/16); knee_Mstar=32 (2->3 block cliff @ M=33)",
+      "step_deployed_basis_note": "fern #325 labels step_deployed the 'M=32 step' (2-block plateau top). The normalized 1.2182 unit traces (denken #278) to the deployed M=8 verify; either reading is SUB-CLIFF, and the M=29 tree shares the 2-block tile with the M=32 anchor. The only cliff above is M=33 (3 blocks)."
+    },
+    "self_test": {
+      "conditions": {
+        "a_M_formula_reproduces_deployed_8": true,
+        "b_top4_tree_is_29_subcliff": true,
+        "c_salvage_identity_pins_W4": true,
+        "d_cliff_mu_from_measured_tile": true,
+        "e_crossed_envelope_both_red": true,
+        "f_subcliff_envelope_equals_fern325": true,
+        "g_max_subcliff_width_and_611_reachable": true,
+        "h_verdict_sub_cliff_safe": true,
+        "i_nan_clean": true
+      },
+      "detail": {
+        "cliff_mu": 1.1698066045772872,
+        "deployed_M": 8,
+        "eagle3_M": 29,
+        "knee_Mstar": 32
+      },
+      "eagle3_verify_gemm_mcliff_self_test_passes": true
+    }
+  }
+}
