@@ -1,0 +1,164 @@
+{
+  "created_at": "20260615T024359Z",
+  "pr": 278,
+  "agent": "denken",
+  "kind": "linear-step-decomposition",
+  "synthesis": {
+    "official_baseline": 481.53,
+    "go_read": 520.9527323111674,
+    "K_cal": 125.26795005202914,
+    "step_served_us": 1218.2,
+    "E_T_linear": 3.844,
+    "tau": 1.218,
+    "et_tau_product": 4682.7608,
+    "tps_served_roundtrip": 481.53,
+    "measurement_present": true,
+    "measurement_path": "research/validity/linear_step_decomposition/linear_verify_measurement.json",
+    "measurement_basis": "measured_this_run",
+    "deployed_num_layers": 37,
+    "banked_provenance": {
+      "step_served_ms": 1.2182,
+      "K_cal": 125.26795005202914,
+      "official_baseline": 481.53,
+      "go_read": 520.9527323111674,
+      "K_spec": 7,
+      "E_T_served": 4.6827608,
+      "step_is_normalized_note_257": "verify reads 1.70GB int4 -> >= 2.93ms HBM floor on the A10G; the banked 1.2182ms step is therefore a NORMALIZED composition unit (wall-clock served step ~= 9.72ms via K_cal). The bridge c reconciles the two bases; the verdict rides on the basis-robust ratio.",
+      "kcal_overhead_factor_257": 7.9828878782215025,
+      "bridge_dimensionless_257": 0.2075832048263608,
+      "verify_hbm_floor_ms_257": 2.933828266666667
+    },
+    "measurement_detail": {
+      "target_verify_m1_us": 4966.783229282924,
+      "target_verify_m1_us_stats": {
+        "n": 7,
+        "mean": 4966.783229282924,
+        "median": 4966.563720703125,
+        "std": 0.4839825840914819,
+        "se": 0.18292822234178097,
+        "ci95_abs": 0.3585393157898907,
+        "lo": 4966.424689967134,
+        "hi": 4967.141768598714,
+        "cv_pct": 0.009744387096220355,
+        "min": 4966.3385009765625,
+        "max": 4967.8131103515625
+      },
+      "verify_full8_us": 5348.49836077009,
+      "verify_linear_b8_us": 9036.682913643974,
+      "verify_linear_b8_per_seq_us": 1129.5853642054967,
+      "linear_vs_full8_ratio": 0.9286313455217727,
+      "b8_over_b1_ratio": 1.8194236584286443,
+      "draft_pass_us_graphed": 101.85142653329032,
+      "draft_k7_chain_us_graphed": 706.8555014474051,
+      "physical_floor": {
+        "body_int4_gb": 1.6973824,
+        "lmhead_bf16_gb": 0.06291456,
+        "a10g_bw_gbps": 600.0,
+        "verify_hbm_floor_ms": 2.933828266666667,
+        "verify_m1_wall_ms": 4.966783229282925,
+        "verify_m1_over_floor": 1.692935910978199
+      },
+      "peak_gpu_gb": 13.335793152
+    },
+    "step_budget": {
+      "table": [
+        {
+          "component": "draft_K7_chain",
+          "us": 706.8555014474051,
+          "fraction_of_step_norm": 0.5802458557276351,
+          "basis": "wall (graphed, measured)"
+        },
+        {
+          "component": "target_verify_m1",
+          "us": 4966.783229282924,
+          "fraction_of_step_norm": 4.077149260616421,
+          "basis": "wall (graphed, measured)"
+        },
+        {
+          "component": "step_overhead_residual",
+          "us": -4455.43873073033,
+          "fraction_of_step_norm": -3.6573951163440563,
+          "basis": "step_norm - draft - verify (NEGATIVE -> normalized step, not wall)"
+        },
+        {
+          "component": "step_served_NORMALIZED",
+          "us": 1218.2,
+          "fraction_of_step_norm": 1.0,
+          "basis": "composition unit (kanna #217); = bridge x wall(draft+verify)"
+        },
+        {
+          "component": "step_wall_micro_built",
+          "us": 5673.638730730329,
+          "fraction_of_step_norm": 4.657395116344056,
+          "basis": "draft+verify wall sum = step_norm / bridge"
+        }
+      ],
+      "draft_us": 706.8555014474051,
+      "target_verify_m1_us": 4966.783229282924,
+      "step_overhead_us": -4455.43873073033,
+      "variable_fraction": 4.657395116344056,
+      "fixed_fraction": -3.6573951163440563,
+      "overhead_is_physical": false,
+      "components_sum_exact": true,
+      "note": "step_overhead = step_norm - draft - verify_m1 is NEGATIVE because the 1218.2us 'step' is a NORMALIZED composition unit, not a wall draft+verify sum; the wall verify alone is ~4.4x the whole step."
+    },
+    "wall_step_and_bridge": {
+      "step_wall_micro_built_us": 5673.638730730329,
+      "bridge_normalized_over_wall": 0.2147122962556323,
+      "overcredit_basis_factor_1_over_bridge": 4.657395116344056,
+      "verify_hbm_floor_us": 2933.828266666667,
+      "verify_m1_over_floor": 1.692935910978199,
+      "floor_exceeds_whole_step": true,
+      "bridge_257_crosscheck": 0.2075832048263608,
+      "note": "step_norm = bridge x (draft+verify) wall; the verify HBM floor exceeding the whole step is the physical proof the step is normalized (denken #257)."
+    },
+    "composition_honesty": {
+      "kanna_delta_chain_us": 51.24,
+      "kanna_delta_pass_us": 7.32,
+      "model_A_new_step_us": 1166.96,
+      "model_A_tps": 502.67348152464524,
+      "model_A_gain_pct": 4.390896003290608,
+      "kanna_proj_gain_pct": 4.39,
+      "kanna_proj_new_step_us": 1166.9,
+      "model_B_delta_norm_us": 11.001858060138598,
+      "model_B_new_step_us": 1207.1981419398614,
+      "model_B_tps": 485.91844670783337,
+      "model_B_gain_pct": 0.9113547874137429,
+      "composition_overcredit_factor": 4.817987532332126,
+      "composition_is_honest": false,
+      "note": "Model A (=kanna) subtracts the WALL draft saving from the NORMALIZED step -> +4.39%. Model B bridges the saving into the normalized basis first -> the honest gain. The gap is the over-credit factor (~1/bridge)."
+    },
+    "overhead_verdict": {
+      "step_overhead_us": -4455.43873073033,
+      "overhead_abs_frac": 3.6573951163440563,
+      "overhead_small_lt4pct": false,
+      "overhead_large_gt16pct_or_negative": true,
+      "classification": "NEGATIVE/normalized-step (strongest material-fixed signal)"
+    },
+    "self_test": {
+      "conditions": {
+        "a_components_sum_to_step_within_5pct": true,
+        "b_verify_m1_measured_with_cuda_events": true,
+        "c_composition_roundtrips_481p53_within_0p1": true,
+        "d_modelA_reproduces_kanna_4p39_within_0p15": true,
+        "e_nan_clean": true,
+        "f_baseline_constants_imported_exact": true
+      },
+      "roundtrip_tps_literal_split": 481.45094401576097,
+      "linear_step_decomposition_self_test_passes": true
+    },
+    "linear_step_decomposition_self_test_passes": true,
+    "composition_is_honest": false,
+    "step_overhead_us": -4455.43873073033,
+    "target_verify_m1_us": 4966.783229282924,
+    "variable_fraction": 4.657395116344056,
+    "bridge_normalized_over_wall": 0.2147122962556323,
+    "composition_overcredit_factor": 4.817987532332126,
+    "model_A_gain_pct": 4.390896003290608,
+    "model_B_gain_pct": 0.9113547874137429,
+    "verdict": "COMPOSITION OVER-CREDITS step-shaving. The deployed LINEAR step's WALL components are draft 706.9us + M=1 verify 4966.8us = 5673.6us, but the composition's 'step' is the NORMALIZED 1218.2us (= 0.215 x wall). The naive decomposition step-draft-verify = -4455us is NEGATIVE (variable_fraction =4.66 > 1, fixed_fraction = -3.66 < 0 -> both UNPHYSICAL), and the verify HBM floor 2934us alone EXCEEDS the whole 1218us step (1.69x floor verify), PROVING the 1218.2us step is a normalized unit, not a wall-clock draft+verify+overhead sum (confirms denken #257). So kanna #269's Model-A +4.39% (subtract the WALL 51.2us saving from the NORMALIZED step) OVER-CREDITS: the basis-honest pricing (bridge the saving: Delta_norm = 0.215 x 51.2 = 11.0us) gives +0.91% -> over-credit factor 4.8x. composition_is_honest = False. BASELINE 481.53 untouched; analysis-only; NOT a launch.",
+    "handoff": "the deployed linear step decomposes (WALL) as draft 706.9us + M=1 verify 4966.8us = 5673.6us total, but the composition's step is the NORMALIZED 1218.2us (= 0.215 x wall), so the naive 'step - draft - verify' overhead is -4455us (NEGATIVE, unphysical) and the verify HBM floor alone (2934us) exceeds the whole step -> the 1218.2us step is a normalized unit, NOT a wall sum; the composition therefore OVER-CREDITS draft-step savings by 4.8x, so kanna #269's +4.39% composition ceiling is DISCOUNTED to +0.91% (over-credit factor 4.8x), and stark #273's wall-clock A/B is the empirical verdict on whether even that discounted saving survives the real throughput stack."
+  },
+  "peak_mem_mib": 13.684,
+  "nan_clean": true
+}
