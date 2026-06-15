@@ -160,6 +160,23 @@ TREE_VERIFY_ANCHOR8 = os.environ.get("TREE_VERIFY_ANCHOR8") == "1"
 # overwritten by the next step's real verify before it is ever read as committed
 # KV -> greedy-identity / PPL preserved by construction (verified empirically).
 TREE_VERIFY_REAL_KV = os.environ.get("TREE_VERIFY_REAL_KV") == "1"
+# REAL-PATH faithful-prefix TREE control (PR #245 cycle-3 confirmation). The tree
+# analogue of TREE_VERIFY_REAL_KV: runs the FULL M=tree.num_nodes tree verify
+# through the REAL request block-table (committed prefix incl. the partial seam
+# block read from REAL KV -- NO redirect+copy, the cycle-2 +0.235 fidelity fix),
+# writing the M tree-node rows to REAL slots where the request already allocates
+# them and to reserved scratch blocks ONLY for the new-row offsets BEYOND the real
+# allocation (M=16 overruns the deployed M=8 verify's block span -> "scratch slots
+# only for the M new node rows"). RoPE carries tree DEPTH; the tree-causal qq_bias
+# is supplied by the env-gated splitkv wrapper (set TREE_QQ_BIAS_PROBE=1
+# TREE_QQ_BIAS_M=16 TREE_QQ_BIAS_PARENT=m16 for the masked live-build variant; leave
+# unset for the node-index-causal variant that matches the scratch anchor's
+# treatment and isolates the KV-location fix). Comparing this anchor to the scratch
+# tree anchor isolates KV location on the TREE exactly as realkv-vs-anchor8 did on
+# the linear; comparing it to the realkv M=8 linear (0.834) is the tree-vs-linear
+# delta under FAITHFUL plumbing (the cycle-2 -0.06 was measured under the buggy
+# redirect+copy). SAFE/observational: snapshot/restore of every touched real slot.
+TREE_VERIFY_REAL_KV_TREE = os.environ.get("TREE_VERIFY_REAL_KV_TREE") == "1"
 TREE_VERIFY_PROBE_VERDICT = os.environ.get(
     "TREE_VERIFY_PROBE_VERDICT",
     "research/tree_verify_path/comp_verify_probe_stage2b.json",
@@ -819,6 +836,20 @@ _VERIFY_SCRATCH: dict[str, Any] = {
     "anchor_realkv_gap_mismatch_hist": {},
     "anchor_realkv_dbg_logged": 0,
     "anchor_realkv_forward_err": 0,
+    # FAITHFUL-TREE control (gated by TREE_VERIFY_REAL_KV_TREE): the FULL M=16 tree
+    # verify through the REAL prefix block-table + per-node KV (real where allocated,
+    # scratch overflow). Spine argmax vs deployed tgt. Beats scratch tree (~0.54) by
+    # ~the same KV-location margin realkv beat anchor8 => the tree is alive under
+    # faithful plumbing; the masked variant adds the real tree-causal qq_bias.
+    "anchor_realkv_tree_rows": 0,
+    "anchor_realkv_tree_match": 0,
+    "anchor_realkv_tree_pos_rows": {},
+    "anchor_realkv_tree_pos_match": {},
+    "anchor_realkv_tree_gap_mismatch_n": 0,
+    "anchor_realkv_tree_gap_mismatch_hist": {},
+    "anchor_realkv_tree_dbg_logged": 0,
+    "anchor_realkv_tree_forward_err": 0,
+    "anchor_realkv_tree_qq_applied": 0,
 }
 
 
@@ -1114,6 +1145,161 @@ def _run_tree_verify_real_kv(
     return node_argmax, node_gap, node_top2
 
 
+def _run_tree_verify_real_kv_tree(
+    runner: Any, tree: Any, draft_token: list, root_position: int
+) -> tuple | None:
+    """REAL-PATH faithful-prefix TREE verify (PR #245 cycle-3 confirmation).
+
+    The tree analogue of ``_run_tree_verify_real_kv``: runs the FULL
+    M=tree.num_nodes tree verify (node-index KV rows, depth-based RoPE, the
+    splitkv wrapper's optional tree-causal qq_bias) through the REAL request
+    block-table -- so the committed prefix [0..root_position), INCLUDING the
+    partial seam block, is read from REAL paged KV with NO redirect+copy (the
+    cycle-2 fidelity fix that lifted the M=8 linear anchor 0.599 -> 0.834).
+
+    The M tree-node rows sit at sequence offsets [root_position..+m) (node index,
+    matching the deployed verify's row layout + the qq_bias key ordering). Each
+    new row writes to the REAL paged slot where the request's block table already
+    addresses it; for new-row offsets BEYOND the real allocation -- the M=16 tree
+    overruns the deployed M=8 verify's block span -- a reserved top-of-pool scratch
+    block is substituted for that logical block ONLY ("scratch slots only for the M
+    new node rows"). The committed prefix never shares a redirected block, so it is
+    always read from real KV. SAFE/observational: every touched REAL slot is at an
+    offset >= root_position (uncommitted next-free territory) and is snapshotted
+    before / restored after the forward, so committed KV / PPL / greedy-identity are
+    byte-preserved. Returns (node_argmax, node_gap, node_top2) over all M nodes, or
+    None on any failure (fail-closed, no real KV left mutated)."""
+    import torch
+    from vllm.forward_context import set_forward_context
+    from vllm.v1.attention.backend import CommonAttentionMetadata
+
+    m = tree.num_nodes
+    device = runner.device
+    groups = runner.kv_cache_config.kv_cache_groups
+    sfc = runner.vllm_config.compilation_config.static_forward_context
+    seq_len = root_position + m
+    max_off = root_position + m - 1  # node-index offsets span [root_position..+m)
+
+    attn_md: dict = {}
+    slot_map_by_layer: dict = {}
+    restore_list: list = []
+    qsl = torch.tensor([0, m], dtype=torch.int32, device=device)
+    qsl_cpu = torch.tensor([0, m], dtype=torch.int32)
+    seq_lens_cpu = torch.tensor([seq_len], dtype=torch.int32)
+    nct_cpu = torch.tensor([root_position], dtype=torch.int32)
+    is_prefilling = torch.zeros(1, dtype=torch.bool)  # decode-extend, not prefill
+    # RoPE position carries tree DEPTH (siblings share a position); KV slot carries
+    # node index (sequence offset) so each node gets its own KV row -- the crux that
+    # forces per-node KV (siblings collide on the real depth-position; node-index
+    # offsets do not, but M=16 still overruns the real allocation -> scratch).
+    positions = torch.tensor(
+        [root_position + int(tree.depth[i]) for i in range(m)],
+        dtype=torch.long,
+        device=device,
+    )
+    for gid, grp in enumerate(groups):
+        bs = int(grp.kv_cache_spec.block_size)
+        layer_names = list(grp.layer_names)
+        rep = sfc[layer_names[0]].kv_cache
+        num_blocks = int(rep.shape[0])
+        real_bt = runner.input_batch.block_table[gid].get_device_tensor(1)[0]
+        real_bt_cpu = [int(x) for x in real_bt.tolist()]
+        n_bt = len(real_bt_cpu)
+        used = set(x for x in real_bt_cpu if x >= 0)
+        modified_bt = real_bt.clone()
+        blk_lo = root_position // bs
+        blk_hi = max_off // bs
+        # keep REAL blocks for every logical block the request already allocates
+        # (committed prefix incl. the seam block read faithfully); redirect ONLY the
+        # logical blocks with no valid real block to fresh scratch (top of pool).
+        block_phys: dict = {}
+        scratch_pick = num_blocks - 1
+        for lb in range(blk_lo, blk_hi + 1):
+            phys = real_bt_cpu[lb] if lb < n_bt else -1
+            if 0 <= phys < num_blocks:
+                block_phys[lb] = (phys, True)  # real allocated block
+            else:
+                while scratch_pick >= 0 and scratch_pick in used:
+                    scratch_pick -= 1
+                if scratch_pick < 0:
+                    raise RuntimeError(
+                        f"no free scratch block (gid={gid} num_blocks={num_blocks})"
+                    )
+                used.add(scratch_pick)
+                block_phys[lb] = (scratch_pick, False)
+                modified_bt[lb] = scratch_pick
+                scratch_pick -= 1
+        slots = []
+        real_slots = []  # slots in REAL blocks -> snapshot/restore
+        for i in range(m):
+            off = root_position + i
+            phys, is_real = block_phys[off // bs]
+            slot = phys * bs + (off % bs)
+            slots.append(slot)
+            if is_real:
+                real_slots.append(slot)
+        slot_t = torch.tensor(slots, dtype=torch.int64, device=device)
+        bt2d = modified_bt.view(1, -1).contiguous()
+        seq_lens = torch.tensor([seq_len], dtype=torch.int32, device=device)
+        cm = CommonAttentionMetadata(
+            query_start_loc=qsl,
+            query_start_loc_cpu=qsl_cpu,
+            seq_lens=seq_lens,
+            num_reqs=1,
+            num_actual_tokens=m,
+            max_query_len=m,
+            max_seq_len=seq_len,
+            block_table_tensor=bt2d,
+            slot_mapping=slot_t,
+            causal=True,
+            _seq_lens_cpu=seq_lens_cpu,
+            _num_computed_tokens_cpu=nct_cpu,
+            seq_lens_cpu_upper_bound=seq_lens_cpu,
+            is_prefilling=is_prefilling,
+            positions=positions,
+        )
+        for attn_group in runner.attn_groups[gid]:
+            builder = attn_group.get_metadata_builder()
+            md = builder.build(common_prefix_len=0, common_attn_metadata=cm)
+            for ln in attn_group.layer_names:
+                attn_md[ln] = md
+        if real_slots:
+            rs = torch.tensor(real_slots, dtype=torch.int64, device=device)
+            rb = rs // bs
+            ro = rs % bs
+            for ln in layer_names:
+                kvc = sfc[ln].kv_cache
+                restore_list.append((kvc, rb, ro, kvc[rb, :, ro].clone()))
+        for ln in layer_names:
+            slot_map_by_layer[ln] = slot_t
+
+    input_ids_t = torch.tensor(list(draft_token), dtype=torch.long, device=device)
+    inputs_embeds = runner.model.embed_input_ids(input_ids_t)
+    node_argmax = node_gap = node_top2 = None
+    try:
+        with set_forward_context(
+            attn_md, runner.vllm_config, num_tokens=m, slot_mapping=slot_map_by_layer
+        ):
+            out = runner.model(
+                input_ids=None,
+                positions=positions,
+                intermediate_tensors=None,
+                inputs_embeds=inputs_embeds,
+            )
+        hidden = out[0] if isinstance(out, tuple) else out
+        logits = runner.model.compute_logits(hidden[:m])
+        top2 = torch.topk(logits, 2, dim=-1)
+        node_argmax = [int(x) for x in top2.indices[:, 0].tolist()]
+        node_top2 = [int(x) for x in top2.indices[:, 1].tolist()]
+        node_gap = [
+            float(g) for g in (top2.values[:, 0] - top2.values[:, 1]).tolist()
+        ]
+    finally:
+        for kvc, blocks_g, offs_g, saved in restore_list:
+            kvc[blocks_g, :, offs_g] = saved
+    return node_argmax, node_gap, node_top2
+
+
 def _verify_scratch_dump() -> None:
     """Write the STAGE-2b verdict (spine ladder + E[T] + cross-step anchor)."""
     vs = _VERIFY_SCRATCH
@@ -1243,6 +1429,46 @@ def _verify_scratch_dump() -> None:
                 },
             }
             if vs["anchor_realkv_rows"]
+            else None
+        ),
+        # CYCLE-3 faithful-tree confirmation: the FULL M=16 tree verify through the
+        # REAL block-table (real prefix incl. seam block; scratch only for the M new
+        # node rows that overrun the deployed allocation). Compared spine-node argmax
+        # vs deployed verifier. Predicted ~0.77 (= linear-real 0.834 - 0.06 tree
+        # penalty). qq_applied counts steps the splitkv wrapper injected tree-causal
+        # mask (TREE_QQ_BIAS_PROBE) -- 0 => unmasked (contaminated) isolation run.
+        "anchor_realkv_tree": (
+            {
+                "rows_compared": vs["anchor_realkv_tree_rows"],
+                "rows_match": vs["anchor_realkv_tree_match"],
+                "row_match_rate": round(
+                    vs["anchor_realkv_tree_match"]
+                    / max(vs["anchor_realkv_tree_rows"], 1),
+                    5,
+                ),
+                "forward_err": vs["anchor_realkv_tree_forward_err"],
+                "qq_applied_steps": vs["anchor_realkv_tree_qq_applied"],
+                "gap_mismatch_n": vs["anchor_realkv_tree_gap_mismatch_n"],
+                "gap_mismatch_hist": vs["anchor_realkv_tree_gap_mismatch_hist"],
+                "confident_wrong_rate": round(
+                    vs["anchor_realkv_tree_gap_mismatch_hist"].get("ge1.0", 0)
+                    / max(vs["anchor_realkv_tree_gap_mismatch_n"], 1),
+                    4,
+                ),
+                "per_pos": {
+                    str(d): {
+                        "rows": vs["anchor_realkv_tree_pos_rows"][d],
+                        "match": vs["anchor_realkv_tree_pos_match"].get(d, 0),
+                        "rate": round(
+                            vs["anchor_realkv_tree_pos_match"].get(d, 0)
+                            / vs["anchor_realkv_tree_pos_rows"][d],
+                            4,
+                        ),
+                    }
+                    for d in sorted(vs["anchor_realkv_tree_pos_rows"])
+                },
+            }
+            if vs["anchor_realkv_tree_rows"]
             else None
         ),
         "dump_path": vs["dump_path"],
@@ -1440,6 +1666,51 @@ def _run_tree_verify_measure(
             if vs["anchor_realkv_forward_err"] <= 5:
                 print(
                     f"[realkv] real-path forward error (non-fatal): {exc!r}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+    # CYCLE-3 faithful TREE control: the FULL M=tree.num_nodes verify through the
+    # REAL block-table (real prefix incl. seam block, scratch only for new-node
+    # overflow). Stash spine-node argmax/gap (node index -> spine depth) for the
+    # cross-step anchor in _salvage_probe_observe. qq_bias (if dispatched by the
+    # splitkv wrapper) makes this the representative live-build verify.
+    if TREE_VERIFY_REAL_KV_TREE and sstash is not None and ts is not None:
+        try:
+            _sk = None
+            qq_before = 0
+            try:
+                import splitkv_verify_patch as _sk
+
+                qq_before = int(_sk._qq_stats.get("dispatched", 0))
+            except Exception:
+                _sk = None
+            rkt_out = _run_tree_verify_real_kv_tree(
+                runner, tree, draft_token, root_position
+            )
+            if rkt_out is not None:
+                na, ng = rkt_out[0], rkt_out[1]
+                sp = tree.spine
+                sstash["scratch_realkv_tree_argmax"] = [
+                    int(na[sp[d]]) for d in range(len(sp))
+                ]
+                sstash["scratch_realkv_tree_gap"] = [
+                    float(ng[sp[d]]) for d in range(len(sp))
+                ]
+                qq_fired = False
+                try:
+                    if _sk is not None:
+                        qq_fired = (
+                            int(_sk._qq_stats.get("dispatched", 0)) > qq_before
+                        )
+                except Exception:
+                    qq_fired = False
+                sstash["scratch_realkv_tree_qq_fired"] = qq_fired
+        except Exception as exc:
+            vs["anchor_realkv_tree_forward_err"] += 1
+            if vs["anchor_realkv_tree_forward_err"] <= 5:
+                print(
+                    f"[realkv-tree] faithful-tree forward error (non-fatal): {exc!r}",
                     file=sys.stderr,
                     flush=True,
                 )
@@ -2540,6 +2811,64 @@ def _salvage_probe_observe(draft_token_ids: Any, target_argmax: Any) -> None:
                     f"  scratch_realkv_gap   ={gaps_str}\n"
                     f"  deployed_tgt         ={tgt[:n8]}\n"
                     f"  deployed_draft       ={dti[:n8]}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+    # CYCLE-3 faithful TREE anchor: spine-node argmax from the FULL M=16 tree verify
+    # (real prefix + scratch only for new-node overflow) vs deployed verifier. Beats
+    # the scratch M=16 anchor (0.539) => KV-location was the contamination; lands near
+    # linear-real 0.834 => no tree penalty; confident-wrong (gap>=1.0) fraction tells
+    # near-tie int4 flips from a real greedy divergence. qq_fired => mask was injected.
+    rkt = stash.get("scratch_realkv_tree_argmax")
+    if rkt is not None:
+        rktgap = stash.get("scratch_realkv_tree_gap")
+        nt = min(len(rkt), K)
+        if nt > 0:
+            vsc = _VERIFY_SCRATCH
+            if stash.get("scratch_realkv_tree_qq_fired"):
+                vsc["anchor_realkv_tree_qq_applied"] += 1
+            mmt = False
+            for d in range(nt):
+                vsc["anchor_realkv_tree_rows"] += 1
+                vsc["anchor_realkv_tree_pos_rows"][d] = (
+                    vsc["anchor_realkv_tree_pos_rows"].get(d, 0) + 1
+                )
+                if rkt[d] == tgt[d]:
+                    vsc["anchor_realkv_tree_match"] += 1
+                    vsc["anchor_realkv_tree_pos_match"][d] = (
+                        vsc["anchor_realkv_tree_pos_match"].get(d, 0) + 1
+                    )
+                else:
+                    mmt = True
+                    g = (
+                        float(rktgap[d])
+                        if rktgap is not None and d < len(rktgap)
+                        else None
+                    )
+                    if g is not None:
+                        vsc["anchor_realkv_tree_gap_mismatch_n"] += 1
+                        bkt = (
+                            "lt0.05" if g < 0.05
+                            else "lt0.2" if g < 0.2
+                            else "lt1.0" if g < 1.0
+                            else "ge1.0"
+                        )
+                        h = vsc["anchor_realkv_tree_gap_mismatch_hist"]
+                        h[bkt] = h.get(bkt, 0) + 1
+            if mmt and vsc["anchor_realkv_tree_dbg_logged"] < 12:
+                vsc["anchor_realkv_tree_dbg_logged"] += 1
+                rp = stash.get("scratch_root_position")
+                gaps_str = (
+                    [round(float(x), 4) for x in rktgap[:nt]] if rktgap else []
+                )
+                print(
+                    f"[realkv-tree-dbg] root_pos={rp} K={K} n={nt} "
+                    f"qq={stash.get('scratch_realkv_tree_qq_fired')}\n"
+                    f"  tree_spine_argmax={rkt[:nt]}\n"
+                    f"  tree_spine_gap   ={gaps_str}\n"
+                    f"  deployed_tgt     ={tgt[:nt]}\n"
+                    f"  deployed_draft   ={dti[:nt]}",
                     file=sys.stderr,
                     flush=True,
                 )
