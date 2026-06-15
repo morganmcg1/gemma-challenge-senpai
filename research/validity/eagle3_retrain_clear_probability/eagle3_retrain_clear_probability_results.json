@@ -1,0 +1,245 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T101739Z",
+  "determinism_ok": true,
+  "eagle3_retrain_clear_probability_analysis_only": true,
+  "kind": "eagle3-retrain-clear-probability",
+  "nan_clean": true,
+  "peak_mem_mib": 101.145,
+  "pr": 339,
+  "self_test": {
+    "checks": {
+      "01_recipe_mean_eq_haircut_sum_0p0385": true,
+      "02_cov_post_mean_eq_prior_plus_recipe": true,
+      "03_independent_sigma_eq_rss": true,
+      "04_correlation_widens_sigma": true,
+      "05_comonotonic_eq_336_band_sigma": true,
+      "06_combo_band_reconstructs_336": true,
+      "07_p_monotone_decreasing_in_threshold": true,
+      "08_central_clears_p_ge_half_all_rho": true,
+      "09_p_identity_orders_by_rho": true,
+      "10_full_recipe_ge_combo": true,
+      "11_ttt_barely_moves_probability": true,
+      "12_constants_imported_exact": true,
+      "13_nan_clean_probabilities_in_unit": true,
+      "14_percentiles_ordered": true,
+      "15_identity_binds_over_full_cstar_sweep": true,
+      "16_mc_matches_closed_form": true,
+      "17_greedy_safe_and_human_gated_flags": true,
+      "18_constants_match_banked_336_330": true
+    },
+    "retrain_clear_probability_self_test_passes": true
+  },
+  "synthesis": {
+    "handoff_sentence": "the EAGLE-3 demand-half retrain clears the 0.9213 identity bar with probability 0.843 (independent levers) / 0.794 (+0.5-correlated), and the looser speed-envelope bar c*~0.908 with probability 0.997 -- so the retrain ROI is JUSTIFIED, and the cheap de-risker is kanna #294's Phase-1 a_2>=0.83 pre-check before the human-gated full spend.",
+    "imported": {
+      "baseline_tps": 481.53,
+      "ceiling_tps": 520.95,
+      "combo_non_additivity_haircut": 0.7,
+      "cov_prior_display": 0.8903,
+      "cov_prior_unrounded": 0.8902659519153152,
+      "identity_bar_display": 0.9213,
+      "identity_bar_unrounded": 0.9213011665456927,
+      "levers": {
+        "deeper_wider_head": {
+          "band": [
+            0.005,
+            0.02
+          ],
+          "central": 0.012,
+          "citation": "Medusa / EAGLE-3 (directional only)"
+        },
+        "more_reasoning_root_data": {
+          "band": [
+            0.01,
+            0.04
+          ],
+          "central": 0.025,
+          "citation": "EAGLE-3 arXiv:2503.01840"
+        },
+        "on_policy_ttt": {
+          "band": [
+            0.0,
+            0.005
+          ],
+          "central": 0.002,
+          "citation": "lawine #316 (internal: TTT lifts depth>=2, not ROOT)"
+        },
+        "soft_kd_topk_distill": {
+          "band": [
+            0.015,
+            0.045
+          ],
+          "central": 0.03,
+          "citation": "DistillSpec arXiv:2310.08461 / OSD arXiv:2310.07177 / Medusa arXiv:2401.10774"
+        }
+      },
+      "min_lift_display": 0.031035,
+      "min_lift_unrounded": 0.031035214630377506,
+      "provenance": "Per-lever Delta-cov bands + 0.70 non-additivity haircut + combo central 0.0385 band [0.0175,0.0595]: lawine #336 (krroookz, on-disk eagle3_head_coverage_lift_target_results.json). Honest top-4 ROOT coverage prior 0.8903 + identity bar 0.9213 + gap 0.031035: lawine #330 (hfrscdai) / #316 (5lnz5jgb) via #323. Speed-envelope anchors central 520.95: stark #325. Joint AND-gate context: fern #335 (5pos499e). Phase-1 a_2>=0.83 cheap de-risker + EAGLE-3 E[T]=4.69<4.9029 demand-miss on the speed axis: kanna #294 (j0ss47bv). This card convolves the bands into a probability; it re-derives none of the upstream numbers."
+    },
+    "step1_per_lever_distributions": {
+      "assumption": "band [low,high] ~ +/-2 sigma (95%) -> sigma = (high-low)/4, truncated normal Delta-cov>=0",
+      "moments": {
+        "deeper_wider_head": {
+          "band_high": 0.02,
+          "band_low": 0.005,
+          "mean": 0.012,
+          "sigma": 0.00375
+        },
+        "more_reasoning_root_data": {
+          "band_high": 0.04,
+          "band_low": 0.01,
+          "mean": 0.025,
+          "sigma": 0.0075
+        },
+        "on_policy_ttt": {
+          "band_high": 0.005,
+          "band_low": 0.0,
+          "mean": 0.002,
+          "sigma": 0.00125
+        },
+        "soft_kd_topk_distill": {
+          "band_high": 0.045,
+          "band_low": 0.015,
+          "mean": 0.03,
+          "sigma": 0.0075
+        }
+      },
+      "robustness_alternative": "uniform-over-band (sigma=range/sqrt(12)); reported in step6 MC"
+    },
+    "step2_full_and_naive": {
+      "full_recipe": {
+        "cov_post_mean": 0.9427659519153152,
+        "full_mean_delta_cov": 0.0525,
+        "levers": [
+          "soft_kd_topk_distill",
+          "more_reasoning_root_data",
+          "deeper_wider_head",
+          "on_policy_ttt"
+        ],
+        "no_ttt_cov_post_mean": 0.9407659519153152,
+        "no_ttt_sigma_independent": 0.008317902379807063,
+        "sigma_independent": 0.008411301920630361
+      },
+      "naive_no_haircut_bound": {
+        "cov_post_mean": 0.9452659519153153,
+        "sigma_independent": 0.010606601717798213
+      }
+    },
+    "step2_recipe_convolution": {
+      "combo_band_336_reconstructed": [
+        0.017499999999999998,
+        0.05949999999999999
+      ],
+      "cov_post_mean": 0.9287659519153152,
+      "levers": [
+        "soft_kd_topk_distill",
+        "more_reasoning_root_data"
+      ],
+      "naive_sum_band": [
+        0.025,
+        0.08499999999999999
+      ],
+      "naive_sum_mean": 0.055,
+      "non_additivity_haircut": 0.7,
+      "recipe_mean_delta_cov": 0.0385,
+      "scaled_lever_sigmas": [
+        0.0052499999999999995,
+        0.0052499999999999995
+      ],
+      "sigma_by_rho": {
+        "comonotonic": 0.010499999999999999,
+        "correlated_0p5": 0.009093266739736604,
+        "independent": 0.007424621202458749
+      }
+    },
+    "step3_clear_probabilities": {
+      "cov_post_percentiles": {
+        "correlated_0p5": {
+          "p05": 0.9138098209122589,
+          "p50": 0.928766082790166,
+          "p95": 0.9437230953173608
+        },
+        "independent": {
+          "p05": 0.9165535441704697,
+          "p50": 0.9287659529179433,
+          "p95": 0.94097836741675
+        }
+      },
+      "p_clears_identity_bar_0p9213": {
+        "comonotonic_336band": 0.7615303603464773,
+        "correlated_0p5": 0.7941613476310673,
+        "independent": 0.8426502591576528
+      },
+      "p_clears_identity_full_recipe": 0.9946431077597271,
+      "p_clears_identity_full_recipe_no_ttt": 0.9903609044566051,
+      "p_clears_identity_naive_no_haircut_bound": 0.9880715199815715,
+      "p_clears_speed500_bar_by_cstar": {
+        "comonotonic": {
+          "0.880": 1.0,
+          "0.900": 0.9970469390085074,
+          "0.908": 0.9761392023706332,
+          "0.920": 0.7981977085305371
+        },
+        "correlated_0p5": {
+          "0.880": 1.0,
+          "0.900": 0.9992318770362715,
+          "0.908": 0.9888156672397932,
+          "0.920": 0.8324877762646088
+        },
+        "independent": {
+          "0.880": 1.0,
+          "0.900": 0.9999466638658744,
+          "0.908": 0.9974203635261271,
+          "0.920": 0.8811311498116212
+        }
+      },
+      "p_clears_speed500_bar_headline_c0p908": {
+        "correlated_0p5": 0.9888156672397932,
+        "independent": 0.9974203635261271
+      },
+      "ttt_probability_delta": 0.004282203303122012,
+      "which_bar_binds_by_cstar": {
+        "0.880": "identity",
+        "0.900": "identity",
+        "0.908": "identity",
+        "0.920": "identity"
+      }
+    },
+    "step5_decision_framing": {
+      "cheap_pre_check_de_risker": "kanna #294 (j0ss47bv) Phase-1 a_2 >= 0.83 gate: a cheap acceptance-proxy measurement on the existing base that de-risks this probability BEFORE the human-gated full retrain spend (#319). Order: run the #294 Phase-1 cheap gate first; if it passes, the retrain ROI here is realized; if it misses, hold the spend.",
+      "keyed_on": "p_clears_identity_bar_0p9213 (independent)",
+      "retrain_roi_verdict": "JUSTIFIED",
+      "threshold_justified_at": 0.5,
+      "threshold_likely_waste_below": 0.25
+    },
+    "step6_greedy_safety": {
+      "clear_prob_card_is_cpu_analytic": true,
+      "note": "The retrain TARGET is greedy-IDENTICAL by construction (EAGLE-3 drafter only PROPOSES; emission is the verify-model argmax, so accepted tokens are byte-exact greedy) and PPL-pinned. Coverage is the SPEED/acceptance axis (E[T]), NOT the validity axis. BASELINE 481.53 unchanged; 0 TPS; no served-file change; no HF Job; not a launch.",
+      "ppl_pinned": true,
+      "retrain_run_is_human_gated": true,
+      "retrain_target_greedy_identical_by_construction": true
+    },
+    "step6_monte_carlo_and_robustness": {
+      "monte_carlo": {
+        "normal_comonotonic": 0.762084,
+        "normal_correlated_0p5": 0.794543,
+        "normal_independent": 0.842612,
+        "samples": 1000000,
+        "seed": 20260615,
+        "uniform_comonotonic": 0.677352,
+        "uniform_independent": 0.792772
+      },
+      "note": "MC (numpy, seed fixed) cross-checks the closed-form normal cases and supplies the uniform-over-band shape robustness. comonotonic (rho=1) reproduces #336's reported combo band; independent (rho=0) is the tighter base case.",
+      "uniform_comonotonic_closed_form": 0.6777329849910116
+    },
+    "test_metrics": {
+      "p_clears_identity_bar_0p9213": 0.8426502591576528,
+      "p_clears_speed500_bar_c0p908": 0.9974203635261271,
+      "retrain_clear_probability_self_test_passes": true,
+      "retrain_roi_verdict": "JUSTIFIED"
+    }
+  },
+  "wandb_run_id": "0aq16szh"
+}
