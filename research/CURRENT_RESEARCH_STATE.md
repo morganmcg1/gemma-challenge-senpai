@@ -1,7 +1,36 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~00:05Z (cycle 52g)
+- **Date:** 2026-06-15 ~01:00Z (cycle 52h)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
+
+## 🆕 Cycle-52h Snapshot (2026-06-15 ~01:00Z) — land #245 real-path anchor LIVES (tree alive, −0.06); built-step DIVERGES (Path-A knife-edge); adaptive-K is the new bold lever (+13.2% projected)
+
+**★ TWO live routes to 500, both now SHARPER this cycle:**
+
+**(Path-A) land #245 — the tree build's real-path verify ANCHOR LIVES.** Cycle-2 (real-KV M=8 forward, non-terminal `in_progress`, run-local): real-KV anchor = **0.834** (up **+0.235** from the scratch 0.599) — empirically confirming the Cycle-1 read that the scratch KV-location reconstruction WAS the dominant fidelity bug, NOT tree divergence. The decision-relevant signal is the **tree-vs-linear delta = −0.06** (matched scratch conditions), NOT the probe-vs-deployed absolute (provably <1.0 for ANY separate probe: the isolation ceiling caps even linear-greedy's OWN verify at 0.834 under int4-Marlin batch variance + hand-built metadata). land's STOP condition (tree verify itself diverges) is NOT met ⇒ **tree is alive.** **Advisor direction (this cycle):** faithful-tree confirmation run FIRST (port the real-KV KV-location fix into the tree path; predicted ≈0.77; removes the one confound — the −0.06 is currently measured under buggy plumbing) BEFORE the multi-cycle capture spend; then capture the M=16 verify at size-16. Sent back to wip.
+
+**★ BUT Path-A is now KNIFE-EDGE — denken #257 RETIRED the built-step advantage.** The built-step roofline DIVERGED: measured `verify_us(M)` GROWS **+15.8% from M=8→M=32** (knee at M=16; M=8 weight-bound, M=32 compute-bound), so the wall-clock built step re-prices from the analytic 1.085 ms into **[1.12, 1.43] ms** (the 1.085 anchor is RETIRED). ⇒ Path-A no longer wins via a cheaper step; it leans entirely on **E[T] clearing a step-dependent floor that moved UP** — needs **E[T] ≳ 5.37 at the high end** vs the 4.512 projection. Compounded by fern #259: E[T]=4.512 decomposes EXACTLY into spine 4.024 (real-KV-confirmed) + branch-hit 0.276 (real-KV-confirmed) + branch-interior 0.212 (scratch-SUSPECT); a full branch-interior discount → `confirmed_et=4.3003` MISSES even the OLD 4.3305 floor by −0.030 (breakeven x*=0.143). **land #245's LIVE measured build (step AND E[T] together) is the only arbiter; denken #268 is pricing M\*=argmax TPS(M) under the measured roofline (does ANY tree width clear 500?).**
+
+**(Path-B') stark #256 — adaptive-K early-exit is the NEW bold TPS lever: +13.209% projected (the most promising in many cycles).** Confidence-gate the MTP draft (if top-1 c_i<θ, stop proposing pass i+1..7) — **greedy-safe BY CONSTRUCTION** (token-identical over 102,400 fuzzed steps). θ*=0.54: E[T] 3.844→3.360, mean_K 7→4.047, projected 481.53→**545.137**, PPL pinned 2.3772. **CAVEAT: an ONEGRAPH=1 analytic UPPER BOUND** (the static graph replays all 7 passes; a runtime early-exit is incompatible) — NOT a measured ≥500, NO launch. Saving-survival SIGN-robust (survives losing 78% of g_d), MAGNITUDE-sensitive. **stark #266 is converting it to a realizable point estimate (pin s/g_d — does any onegraph realization clear 500?).**
+
+**Levers CLOSED/exhausted this cycle (the plateau map):**
+- **Calibration/temperature class CLOSED by theorem (ubel #258):** the 0.75 public→private E[T] gap is a DISCRIMINATION loss, not miscalibration — under width-1 greedy-exact verify, any strictly-monotone transform preserves argmax ⇒ `recoverable_fraction=0.0`. The ONLY greedy-safe E[T]-lifter is a width>1 tree (Path-A). ubel #263 probes whether width>1 recovers the private gap.
+- **FlashInfer DEAD-ON-ARRIVAL (lawine #246, CLOSED):** vLLM force-pins TRITON_ATTN for Gemma-4 (heterogeneous head dims 256/512); kernels never init. CUDAGraph already deployed (ONEGRAPH=1, +23% in 481.53), 0% net new, AND toggling not bit-identical. De-risk: linear path captures cleanly at batch 8, NO size-29 crash. lawine #267 now maps local→official TPS transfer (local 465.14 anchor).
+- **Draft-side launch-tax NOT separately recoverable (wirbel #261):** the draft argmax+embed epilogue is already inside the ONEGRAPH static replay. wirbel #265 tests the COMPLEMENT (verify-side epilogue).
+- **Serve-overhead LIVE-BUT-TINY (kanna #260):** prometheus instrumentation is on the hot path but the non-streaming bench amortizes it to +0.062% (~+0.30 TPS); VIDRAFT's 0.90% does NOT transfer. kanna #264 now attacks the bigger draft-head vocab roofline.
+- Prior-cycle closures stand: topology DOUBLY exhausted (wirbel #244 + stark #247), draft weight-quant DEAD on Ampere at M=1 (int3 #248, int4 #254 — bf16 101.2µs/pass is the floor), n-gram (#250), activation-recycle (#251), verify-epilogue (#255).
+
+**Launch posture unchanged (#124 publish-first, human green-light):** publish the ≥500 milestone FIRST, organizers rule validity post-hoc (accepted-risk). **Live gate: a MEASURED ≥500 build clearing operative λ̂≥0.9780 — read against the BUILT step (now [1.12,1.43] ms per denken #257) and the step-dependent E[T] floor.** No measured ≥500 exists; BASELINE stays **481.53** (all cycle-52h merges are bank-the-analysis, 0 TPS). **stark #256's adaptive-K is a NEW potential launch candidate IF stark #266 finds a realization measurably clears 500 locally** (mapped to official via lawine #267's tau_lo) with greedy-identity + PPL≤2.42 + VRAM≤24GB. NEVER launch unilaterally — route via `Approval request: HF job`.
+
+**Live cycle-52h roster — ZERO IDLE (8/8):**
+- **land #245** — real-integration tree verify; faithful-tree confirmation run, then capture. ★ critical-path / launch pivot (Path-A).
+- **stark #266** — adaptive-K onegraph realizability (convert the +13.2% upper bound to a realizable point estimate). ★ the new bold TPS lever (Path-B').
+- **denken #268** — verify-GEMM M-aware TPS(M)→M* (does any tree width clear 500 under the measured step roofline? operationalizes #257).
+- **fern #262** — fidelity-safe shallow tree (price the spine+ρ₂ 13-node sub-tree at its own cheaper step — a potential THIRD route sidestepping the fidelity wall).
+- **ubel #263** — private rank-2+ probe (does the width>1 tree recover the OOD E[T]-gap — the one lever ubel #258 left open?).
+- **kanna #264** — draft-head vocab roofline (is the 101µs bf16 draft floor's 256k vocab head recoverable via restricted-vocab propose?).
+- **wirbel #265** — verify+accept epilogue capture (the complement of #261: is the verify-side launch tax recoverable?).
+- **lawine #267** — local→official TPS transfer (what local TPS clears the official 500 gate? makes every local screen interpretable against the launch gate).
 
 ## 🆕 Cycle-52g Snapshot (2026-06-15 ~00:05Z) — step-anchor RESOLVED, topology DOUBLY exhausted, draft-quant DEAD, land #245 at fidelity RISK
 
