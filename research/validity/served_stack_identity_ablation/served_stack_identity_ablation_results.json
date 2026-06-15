@@ -1,0 +1,535 @@
+{
+  "agent": "land",
+  "created_at": "20260615T184316Z",
+  "kind": "served-stack-identity-ablation",
+  "nan_clean": true,
+  "peak_mem_mib": 87.465,
+  "pr": 385,
+  "synthesis": {
+    "attribution": {
+      "bridge_delta_tps": 5.501584476852259,
+      "bridge_is_identity_neutral": true,
+      "bridge_ratio_local_to_official": 1.0601730214674783,
+      "ceiling_fullvocab_tps": 197.3970124514877,
+      "ceiling_lmhead12k_tps": 350.2399937834736,
+      "fullvocab_read_gb": 3.03955968,
+      "fusion_delta_tps": 5.532521545539789,
+      "fusion_is_identity_breaking": true,
+      "fusion_offline_ratio": 1.060511392514239,
+      "lmhead12k_ceiling_ratio": 1.774292272379495,
+      "lmhead12k_delta_tps": 70.79309368853956,
+      "lmhead12k_implied_served_tps": 162.22251409458818,
+      "lmhead12k_in_named_levers": false,
+      "lmhead12k_is_lossy": true,
+      "lmhead12k_read_gb": 1.71311104,
+      "note": "lmhead12k read-reduction (ceiling x1.774) alone implies ~162 TPS from the 91.4 capture base -> ~the entire 91->165 gap, and it is LOSSY (byte-exact only vs its own pruned checkpoint). fusion adds ~+6% (identity-breaking, #371). The PR's named levers (precache/split-KV/residency) are NOT in this composition."
+    },
+    "frac_of_91_to_165_identity_safe": 0.0,
+    "identity": {
+      "available": true,
+      "n_reference_records": 128,
+      "per_rung": {
+        "S0": {
+          "num_divergent": 0,
+          "num_identical": 128,
+          "num_prompts_compared": 128,
+          "rate": 1.0,
+          "total_divergent_tokens": 0,
+          "verdict": "GREEDY_IDENTICAL"
+        },
+        "S1": {
+          "num_divergent": 124,
+          "num_identical": 4,
+          "num_prompts_compared": 128,
+          "rate": 0.03125,
+          "total_divergent_tokens": 44216,
+          "verdict": "DIVERGENT"
+        },
+        "S2": {
+          "num_divergent": 124,
+          "num_identical": 4,
+          "num_prompts_compared": 128,
+          "rate": 0.03125,
+          "total_divergent_tokens": 44216,
+          "verdict": "DIVERGENT"
+        },
+        "S3": {
+          "num_divergent": 122,
+          "num_identical": 6,
+          "num_prompts_compared": 128,
+          "rate": 0.046875,
+          "total_divergent_tokens": 43351,
+          "verdict": "DIVERGENT"
+        },
+        "S4": {
+          "num_divergent": 122,
+          "num_identical": 6,
+          "num_prompts_compared": 128,
+          "rate": 0.046875,
+          "total_divergent_tokens": 46958,
+          "verdict": "DIVERGENT"
+        }
+      },
+      "ref_decode": "/workspace/senpai/target/research/validity/nonspec_baselift_cudagraph/measured/decode_E.jsonl"
+    },
+    "measured": {
+      "configs": {
+        "S0": {
+          "attn_backend": null,
+          "bulk_decode_tps_with_prefill": 90.12957404144522,
+          "comp_cfg_requested": {
+            "cudagraph_mode": "FULL",
+            "mode": 0
+          },
+          "config": "S0",
+          "config_name": "S0-capture",
+          "created_at": "2026-06-15T17:49:12Z",
+          "decode_jsonl": "research/validity/served_stack_identity_ablation/measured/decode_S0.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_per_seed_median": {
+            "1234": 91.43885794991134,
+            "5678": 91.40451344748918
+          },
+          "decode_tps_samples": [
+            91.4199828621859,
+            91.56244563855098,
+            91.43885794991134,
+            91.40451344748918,
+            91.56430340810395,
+            91.39569509939172
+          ],
+          "decode_tps_seed_spread": 0.03434450242215803,
+          "decode_tps_single_stream": 91.42942040604862,
+          "enforce_eager": false,
+          "gen_s": 727.1309189796448,
+          "gpu_mem": 0.85,
+          "lever": "capture anchor (== #371 C): mode=0 (no inductor) + cudagraph=FULL",
+          "load_s": 47.862210750579834,
+          "max_num_batched_tokens": null,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 18471.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2477.1,
+          "prefill_warm": false,
+          "prefix_cache": false,
+          "present": true,
+          "resolved_compilation": {
+            "attn_backend_env": null,
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [
+              1,
+              2
+            ],
+            "cudagraph_mode": "FULL",
+            "enable_prefix_caching": false,
+            "mode": 0
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps; multi-seed median",
+          "tps_seeds": [
+            1234,
+            5678
+          ]
+        },
+        "S1": {
+          "attn_backend": null,
+          "bulk_decode_tps_with_prefill": 90.17689508233121,
+          "comp_cfg_requested": {
+            "cudagraph_mode": "FULL",
+            "mode": 0
+          },
+          "config": "S1",
+          "config_name": "S1-precache",
+          "created_at": "2026-06-15T18:02:42Z",
+          "decode_jsonl": "research/validity/served_stack_identity_ablation/measured/decode_S1.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_per_seed_median": {
+            "1234": 91.49777643334158,
+            "5678": 91.50545581851736
+          },
+          "decode_tps_samples": [
+            91.49777643334158,
+            91.58258725454795,
+            91.38016363627509,
+            91.50545581851736,
+            91.42423396178611,
+            91.5861554944799
+          ],
+          "decode_tps_seed_spread": 0.007679385175777043,
+          "decode_tps_single_stream": 91.50161612592947,
+          "enforce_eager": false,
+          "gen_s": 726.7493512630463,
+          "gpu_mem": 0.85,
+          "lever": "+ precache: enable_prefix_caching + prompt-prefill warm (serve_patch_precache is a PUBLIC-only prefix-cache warmup; identity-neutral, decode-step ~neutral)",
+          "load_s": 48.62497663497925,
+          "max_num_batched_tokens": null,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 18445.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2475.8,
+          "prefill_warm": true,
+          "prefix_cache": true,
+          "present": true,
+          "resolved_compilation": {
+            "attn_backend_env": null,
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [
+              1,
+              2
+            ],
+            "cudagraph_mode": "FULL",
+            "enable_prefix_caching": true,
+            "mode": 0
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps; multi-seed median",
+          "tps_seeds": [
+            1234,
+            5678
+          ]
+        },
+        "S2": {
+          "attn_backend": "FLASH_ATTN",
+          "bulk_decode_tps_with_prefill": 90.17356720037435,
+          "comp_cfg_requested": {
+            "cudagraph_mode": "FULL",
+            "mode": 0
+          },
+          "config": "S2",
+          "config_name": "S2-splitkv",
+          "created_at": "2026-06-15T18:16:13Z",
+          "decode_jsonl": "research/validity/served_stack_identity_ablation/measured/decode_S2.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_per_seed_median": {
+            "1234": 91.45242312502005,
+            "5678": 91.39737428163959
+          },
+          "decode_tps_samples": [
+            91.49855135869097,
+            91.38377858339649,
+            91.45242312502005,
+            91.16954719517139,
+            91.66673837409715,
+            91.39737428163959
+          ],
+          "decode_tps_seed_spread": 0.055048843380461676,
+          "decode_tps_single_stream": 91.42489870332982,
+          "enforce_eager": false,
+          "gen_s": 726.7761721611023,
+          "gpu_mem": 0.85,
+          "lever": "+ split-KV: VLLM_ATTENTION_BACKEND=FLASH_ATTN (the FA2 path served FA_SLIDING routes to). Named SPLITKV_VERIFY spec-lever is INERT at M=1 non-spec (no verify steps)",
+          "load_s": 50.242268323898315,
+          "max_num_batched_tokens": null,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 18445.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2533.5,
+          "prefill_warm": true,
+          "prefix_cache": true,
+          "present": true,
+          "resolved_compilation": {
+            "attn_backend_env": "FLASH_ATTN",
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [
+              1,
+              2
+            ],
+            "cudagraph_mode": "FULL",
+            "enable_prefix_caching": true,
+            "mode": 0
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps; multi-seed median",
+          "tps_seeds": [
+            1234,
+            5678
+          ]
+        },
+        "S3": {
+          "attn_backend": null,
+          "bulk_decode_tps_with_prefill": 90.15062843437691,
+          "comp_cfg_requested": {
+            "cudagraph_mode": "FULL",
+            "mode": 0
+          },
+          "config": "S3",
+          "config_name": "S3-residency",
+          "created_at": "2026-06-15T18:29:42Z",
+          "decode_jsonl": "research/validity/served_stack_identity_ablation/measured/decode_S3.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_per_seed_median": {
+            "1234": 91.4789004887211,
+            "5678": 91.36363065584726
+          },
+          "decode_tps_samples": [
+            91.5326375735609,
+            91.45806147966155,
+            91.4789004887211,
+            91.36429404549953,
+            91.36363065584726,
+            91.36350578357832
+          ],
+          "decode_tps_seed_spread": 0.1152698328738353,
+          "decode_tps_single_stream": 91.41117776258054,
+          "enforce_eager": false,
+          "gen_s": 726.9610998630524,
+          "gpu_mem": 0.9,
+          "lever": "+ weight-residency / served launch config: gpu_mem 0.90 + max_num_batched_tokens 512 (fa2sw_nonspec_int4 manifest); residency itself is a cudagraph side-effect already in S0",
+          "load_s": 46.32946968078613,
+          "max_num_batched_tokens": 512,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 19319.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2527.1,
+          "prefill_warm": true,
+          "prefix_cache": true,
+          "present": true,
+          "resolved_compilation": {
+            "attn_backend_env": null,
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [
+              1,
+              2
+            ],
+            "cudagraph_mode": "FULL",
+            "enable_prefix_caching": true,
+            "mode": 0
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps; multi-seed median",
+          "tps_seeds": [
+            1234,
+            5678
+          ]
+        },
+        "S4": {
+          "attn_backend": null,
+          "bulk_decode_tps_with_prefill": 95.73340671167227,
+          "comp_cfg_requested": {
+            "cudagraph_mode": "FULL",
+            "mode": 3
+          },
+          "config": "S4",
+          "config_name": "S4-fusion",
+          "created_at": "2026-06-15T18:42:35Z",
+          "decode_jsonl": "research/validity/served_stack_identity_ablation/measured/decode_S4.jsonl",
+          "decode_jsonl_exists": true,
+          "decode_tps_per_seed_median": {
+            "1234": 97.02413748058696,
+            "5678": 96.94263317667303
+          },
+          "decode_tps_samples": [
+            97.02413748058696,
+            96.96804240329715,
+            97.05133311029306,
+            96.95584149987965,
+            96.94263317667303,
+            96.899535636743
+          ],
+          "decode_tps_seed_spread": 0.08150430391393115,
+          "decode_tps_single_stream": 96.9619419515884,
+          "enforce_eager": false,
+          "gen_s": 684.567720413208,
+          "gpu_mem": 0.9,
+          "lever": "+ fusion: inductor mode=3 (== #371 F) \u2014 the IDENTITY BREAKER (reduction reorder)",
+          "load_s": 55.229140281677246,
+          "max_num_batched_tokens": 512,
+          "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+          "num_prompts": 128,
+          "output_len": 512,
+          "peak_gpu_mib": 19323.0,
+          "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+          "peak_rss_mib": 2478.7,
+          "prefill_warm": true,
+          "prefix_cache": true,
+          "present": true,
+          "resolved_compilation": {
+            "attn_backend_env": null,
+            "backend": "inductor",
+            "cudagraph_capture_sizes": [
+              1,
+              2
+            ],
+            "cudagraph_mode": "FULL",
+            "enable_prefix_caching": true,
+            "mode": 3
+          },
+          "total_out_tokens": 65536,
+          "tps_decode_tokens": 256,
+          "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps; multi-seed median",
+          "tps_seeds": [
+            1234,
+            5678
+          ]
+        }
+      },
+      "dir": "research/validity/served_stack_identity_ablation/measured"
+    },
+    "measured_present": true,
+    "metrics": {
+      "bridge_delta_tps": 5.501584476852259,
+      "delta_tps_from_prev": {
+        "S1": 0.0721957198808525,
+        "S2": -0.07671742259965697,
+        "S3": -0.01372094074928043,
+        "S4": 5.5507641890078645
+      },
+      "delta_tps_from_s0": {
+        "S0": 0.0,
+        "S1": 0.0721957198808525,
+        "S2": -0.004521702718804477,
+        "S3": -0.018242643468084907,
+        "S4": 5.53252154553978
+      },
+      "frac_of_91_to_165_identity_safe": 0.0,
+      "fusion_breaks_identity_measured": true,
+      "fusion_delta_tps": 5.532521545539789,
+      "fusion_in_served_165": true,
+      "gap_attribution_named_levers": {
+        "S1": null,
+        "S2": null,
+        "S3": null
+      },
+      "identity_safe": {
+        "S0": true,
+        "S1": false,
+        "S2": false,
+        "S3": false,
+        "S4": false
+      },
+      "is_strict_byte_exact": false,
+      "lmhead12k_delta_tps": 70.79309368853956,
+      "lmhead12k_implied_served_tps": 162.22251409458818,
+      "max_identity_safe_nonspec_tps": 91.42942040604862,
+      "named_identity_safe_delta_tps": 0.0,
+      "named_levers_identity_breaking": [
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "named_levers_identity_safe": [],
+      "nonspec_strict_floor_moves": {
+        "moves": false,
+        "new_value": 165.44,
+        "reason": "named identity-safe levers (precache/split-KV/residency) add ~0 offline; no byte-exact lever lifts the frontier above 165.44. The 165.44 itself banks fusion (identity-breaking) + lmhead12k (lossy), so it is NOT a clean byte-exact-vs-non-fused frontier \u2014 it stands only under the self-referential gate."
+      },
+      "precache_breaks_identity": true,
+      "s0_reproduces_371_capture": true,
+      "s4_reproduces_371_fusion_break": true,
+      "served_165_passes_nonfused_fullvocab_gate": false,
+      "served_165_passes_self_referential_gate": true,
+      "served_165_passes_spec_off_gate": false,
+      "served_165_self_referential_tps": 165.44,
+      "served_165_strict_tps_fusion_off": 156.00021005694072,
+      "token_identity_rate": {
+        "S0": 1.0,
+        "S1": 0.03125,
+        "S2": 0.03125,
+        "S3": 0.046875,
+        "S4": 0.046875
+      },
+      "tps": {
+        "S0": 91.42942040604862,
+        "S1": 91.50161612592947,
+        "S2": 91.42489870332982,
+        "S3": 91.41117776258054,
+        "S4": 96.9619419515884
+      }
+    },
+    "self_test": {
+      "conditions": {
+        "a_roofline_attribution": true,
+        "b_identity_ladder_logic": true,
+        "c_gate_semantics": true,
+        "d_frac_identity_safe_near_zero": true,
+        "e_official_verifier_verdicts": true,
+        "f_imports_exact": true
+      },
+      "served_stack_self_test_passes": true,
+      "synthetic_metrics": {
+        "bridge_delta_tps": 5.499814162127515,
+        "delta_tps_from_prev": {
+          "S1": -0.10000000000000853,
+          "S2": 0.20000000000000284,
+          "S3": 1.0999999999999943,
+          "S4": 4.400000000000006
+        },
+        "delta_tps_from_s0": {
+          "S0": 0.0,
+          "S1": -0.10000000000000853,
+          "S2": 0.09999999999999432,
+          "S3": 1.1999999999999886,
+          "S4": 5.599999999999994
+        },
+        "frac_of_91_to_165_identity_safe": 0.01620307858493098,
+        "fusion_breaks_identity_measured": true,
+        "fusion_delta_tps": 5.599999999999997,
+        "fusion_in_served_165": true,
+        "gap_attribution_named_levers": {
+          "S1": -0.10000000000000853,
+          "S2": 0.20000000000000284,
+          "S3": 1.0999999999999943
+        },
+        "identity_safe": {
+          "S0": true,
+          "S1": true,
+          "S2": true,
+          "S3": true,
+          "S4": false
+        },
+        "is_strict_byte_exact": false,
+        "lmhead12k_delta_tps": 70.77031369548584,
+        "lmhead12k_implied_served_tps": 162.17031369548585,
+        "max_identity_safe_nonspec_tps": 92.6,
+        "named_identity_safe_delta_tps": 1.1999999999999886,
+        "named_levers_identity_breaking": [],
+        "named_levers_identity_safe": [
+          "S1",
+          "S2",
+          "S3"
+        ],
+        "nonspec_strict_floor_moves": {
+          "moves": false,
+          "new_value": 165.44,
+          "reason": "named identity-safe levers (precache/split-KV/residency) add ~0 offline; no byte-exact lever lifts the frontier above 165.44. The 165.44 itself banks fusion (identity-breaking) + lmhead12k (lossy), so it is NOT a clean byte-exact-vs-non-fused frontier \u2014 it stands only under the self-referential gate."
+        },
+        "precache_breaks_identity": false,
+        "s0_reproduces_371_capture": true,
+        "s4_reproduces_371_fusion_break": false,
+        "served_165_passes_nonfused_fullvocab_gate": false,
+        "served_165_passes_self_referential_gate": true,
+        "served_165_passes_spec_off_gate": false,
+        "served_165_self_referential_tps": 165.44,
+        "served_165_strict_tps_fusion_off": 155.88882474226804,
+        "token_identity_rate": {
+          "S0": 1.0,
+          "S1": 1.0,
+          "S2": 1.0,
+          "S3": 1.0,
+          "S4": 0.875
+        },
+        "tps": {
+          "S0": 91.4,
+          "S1": 91.3,
+          "S2": 91.5,
+          "S3": 92.6,
+          "S4": 97.0
+        }
+      }
+    },
+    "served_stack_self_test_passes": true,
+    "verdict": "OFFLINE full-vocab ladder vs spec-off non-fused E reference: S0 91.4(id=1.000), S1 91.5(id=0.031), S2 91.4(id=0.031), S3 91.4(id=0.047), S4 97.0(id=0.047). Named levers (precache/split-KV/residency) byte-exact=NONE, identity-BREAKING=['S1', 'S2', 'S3'] (precache/prefix-caching breaks identity=True); realized identity-safe delta = 0.00 TPS -> frac_of_91_to_165_identity_safe = 0.0000 (the 74.1 TPS gap is NOT composed of byte-exact named levers). REAL composition: lmhead12k read-reduction (LOSSY, NOT in named set) implies ~162 TPS (ceiling x1.77) = ~the whole gap; fusion (#371, identity-breaking) +6%; local->official bridge x1.060. GATE: served 165.44 passes the SELF-REFERENTIAL served gate (ref on its own fused+pruned engine, #196 reported 1.0) but fusion_in_served_165=True and S4(fusion) vs E identity=0.046875 -> it is NOT byte-exact vs a non-fused full-vocab reference: served_165_passes_spec_off_gate(non-self-ref)=False, is_strict_byte_exact=False. max_identity_safe_nonspec_tps=91.42942040604862 (offline full-vocab, <165.44); nonspec_strict_floor_moves=False. LOCAL proxy; 0 official TPS; strict identity gate is HARD."
+  }
+}

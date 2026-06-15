@@ -1,0 +1,58 @@
+{
+  "attn_backend": null,
+  "bulk_decode_tps_with_prefill": 90.17689508233121,
+  "comp_cfg_requested": {
+    "cudagraph_mode": "FULL",
+    "mode": 0
+  },
+  "config": "S1",
+  "config_name": "S1-precache",
+  "created_at": "2026-06-15T18:02:42Z",
+  "decode_jsonl": "research/validity/served_stack_identity_ablation/measured/decode_S1.jsonl",
+  "decode_tps_per_seed_median": {
+    "1234": 91.49777643334158,
+    "5678": 91.50545581851736
+  },
+  "decode_tps_samples": [
+    91.49777643334158,
+    91.58258725454795,
+    91.38016363627509,
+    91.50545581851736,
+    91.42423396178611,
+    91.5861554944799
+  ],
+  "decode_tps_seed_spread": 0.007679385175777043,
+  "decode_tps_single_stream": 91.50161612592947,
+  "enforce_eager": false,
+  "gen_s": 726.7493512630463,
+  "gpu_mem": 0.85,
+  "lever": "+ precache: enable_prefix_caching + prompt-prefill warm (serve_patch_precache is a PUBLIC-only prefix-cache warmup; identity-neutral, decode-step ~neutral)",
+  "load_s": 48.62497663497925,
+  "max_num_batched_tokens": null,
+  "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "num_prompts": 128,
+  "output_len": 512,
+  "peak_gpu_mib": 18445.0,
+  "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+  "peak_rss_mib": 2475.8,
+  "prefill_warm": true,
+  "prefix_cache": true,
+  "resolved_compilation": {
+    "attn_backend_env": null,
+    "backend": "inductor",
+    "cudagraph_capture_sizes": [
+      1,
+      2
+    ],
+    "cudagraph_mode": "FULL",
+    "enable_prefix_caching": true,
+    "mode": 0
+  },
+  "total_out_tokens": 65536,
+  "tps_decode_tokens": 256,
+  "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps; multi-seed median",
+  "tps_seeds": [
+    1234,
+    5678
+  ]
+}
