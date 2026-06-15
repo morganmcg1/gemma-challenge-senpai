@@ -1,0 +1,95 @@
+{
+  "created_at": "20260615T130511Z",
+  "pr": 362,
+  "agent": "wirbel",
+  "kind": "dvr-rollback-rate-eta",
+  "dvr_rollback_rate_eta_self_test_passes": true,
+  "eta_dvr": 0.9974817880361849,
+  "int4_marlin_rollback_rate": 0.0048828125,
+  "rollback_rate_vs_232_delta": -0.0024088541666666963,
+  "rollback_rate_same_order_as_232": true,
+  "div_m8_232_anchor": 0.007291666666666696,
+  "eta_dvr_honest_fullfwd_alwayson": 0.9974817880361849,
+  "eta_dvr_probe_gated_lowerbound": 0.009693700564005684,
+  "eta_dvr_lmhead_only_INVALID": 0.06216774105485149,
+  "cost": {
+    "step_us_M1_local": 48146.953062314424,
+    "step_us_M8_local": 48504.18943669865,
+    "reverify_full_over_step": 0.9926349377541821,
+    "lmhead_us_M1_local": 2780.3033447265625,
+    "lmhead_over_step": 0.057320890772848646,
+    "reverify_cost_fullfwd": 48146.953062314424,
+    "rollback_cost": 48146.953062314424,
+    "step_us_basis": 48504.18943669865,
+    "deployed_step_us_context_only": 1218.2
+  },
+  "token_identity_rate": 1.0,
+  "token_identity_rate_lmhead_only": 0.994781474233529,
+  "lmhead_reverify_restores_identity": false,
+  "decomposition": {
+    "attempted": true,
+    "reliable": true,
+    "n_rows": 1533,
+    "hidden_rel_l2_div_mean": 0.024281844148620117,
+    "hidden_driven_flip_rate": 0.005218525766470972,
+    "lmhead_consistency_M1": 0.994781474233529
+  },
+  "eta_ladder": {
+    "ceiling_lambda1": 520.9527323111674,
+    "target_tps": 500.0,
+    "eta_budget_500_4p02pct": 0.040220025755911104,
+    "eta_dvr_lit_6pct": 0.06,
+    "eta_bi_floor_9p841pct": 0.09841249119201488,
+    "strict_ceiling_at_eta_dvr": 1.3118694030881344
+  },
+  "reference_comparisons": {
+    "vs_budget_4p02pct": {
+      "ref": 0.040220025755911104,
+      "eta_dvr_below": false
+    },
+    "vs_dvr_lit_6pct": {
+      "ref": 0.06,
+      "eta_dvr_below": false,
+      "note": "LLM-42 6% is a recompute FRACTION, not an eta"
+    },
+    "vs_bi_floor_9p841pct": {
+      "ref": 0.09841249119201488,
+      "eta_dvr_below": false
+    }
+  },
+  "decision": {
+    "dvr_unlocks_500_coverage_alone": false,
+    "dvr_reduces_ceiling_lift_burden": false,
+    "dvr_does_not_beat_bi_floor": true,
+    "new_required_ceiling_lift": NaN
+  },
+  "self_test": {
+    "streams_nonempty_equal_len": true,
+    "r_in_range_finite": true,
+    "eta_dvr_finite_bracketed": true,
+    "three_reference_comparisons_set": true,
+    "token_identity_computed": true,
+    "decision_branches_exclusive": true,
+    "nan_clean": true,
+    "scope_flags_recorded": true
+  },
+  "scope_flags": {
+    "no_hf_job": true,
+    "no_launch": true,
+    "no_submission": true,
+    "no_served_file_change": true,
+    "tps_local_relative": true
+  },
+  "model_dir": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "is_frontier_baked": false,
+  "model_resolution_reason": "frontier baked NOT clean-loadable: baked lm_head pruned to 16384 != config vocab 262144 (tie=False); needs LM_HEAD_PRUNE serve patch -> int4-ct proxy (#232 checkpoint)",
+  "n_prompts": 16,
+  "max_gen": 512,
+  "scored_positions": 8192,
+  "determinism_M1_vs_M1": 1.0,
+  "determinism_M8_vs_M8": 1.0,
+  "within_batch_copy0_vs_copy1": 0.9957275390625,
+  "control_prefill_vs_decode_M1_div": 0.0040283203125,
+  "peak_gpu_gb": 21.500950528,
+  "official_baseline_unchanged": 481.53
+}
