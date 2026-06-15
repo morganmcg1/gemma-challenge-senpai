@@ -1,0 +1,58 @@
+{
+  "attn_backend": null,
+  "bulk_decode_tps_with_prefill": 90.15062843437691,
+  "comp_cfg_requested": {
+    "cudagraph_mode": "FULL",
+    "mode": 0
+  },
+  "config": "S3",
+  "config_name": "S3-residency",
+  "created_at": "2026-06-15T18:29:42Z",
+  "decode_jsonl": "research/validity/served_stack_identity_ablation/measured/decode_S3.jsonl",
+  "decode_tps_per_seed_median": {
+    "1234": 91.4789004887211,
+    "5678": 91.36363065584726
+  },
+  "decode_tps_samples": [
+    91.5326375735609,
+    91.45806147966155,
+    91.4789004887211,
+    91.36429404549953,
+    91.36363065584726,
+    91.36350578357832
+  ],
+  "decode_tps_seed_spread": 0.1152698328738353,
+  "decode_tps_single_stream": 91.41117776258054,
+  "enforce_eager": false,
+  "gen_s": 726.9610998630524,
+  "gpu_mem": 0.9,
+  "lever": "+ weight-residency / served launch config: gpu_mem 0.90 + max_num_batched_tokens 512 (fa2sw_nonspec_int4 manifest); residency itself is a cudagraph side-effect already in S0",
+  "load_s": 46.32946968078613,
+  "max_num_batched_tokens": 512,
+  "model": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "num_prompts": 128,
+  "output_len": 512,
+  "peak_gpu_mib": 19319.0,
+  "peak_gpu_mib_method": "nvidia-smi device-0 used (post-generate)",
+  "peak_rss_mib": 2527.1,
+  "prefill_warm": true,
+  "prefix_cache": true,
+  "resolved_compilation": {
+    "attn_backend_env": null,
+    "backend": "inductor",
+    "cudagraph_capture_sizes": [
+      1,
+      2
+    ],
+    "cudagraph_mode": "FULL",
+    "enable_prefix_caching": true,
+    "mode": 0
+  },
+  "total_out_tokens": 65536,
+  "tps_decode_tokens": 256,
+  "tps_method": "slope (N-1)/(wall_N - wall_1); harness.probe_tps; multi-seed median",
+  "tps_seeds": [
+    1234,
+    5678
+  ]
+}
