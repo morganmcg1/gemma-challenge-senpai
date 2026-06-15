@@ -7,58 +7,72 @@
 Governing question
 ------------------
 We have a strict-500 target (>=500 accepted tok/step at batch=1 on A10G).  The spec-decode
-head (wirbel #354, custom-kernel) already reaches 481.53 TPS.  This script composes three
-orthogonal speedup levers to compute the optimistic composite ceiling on BOTH substrates
-(non-spec baseline 165.44 and spec-compliant 481.53) and asks whether strict_500 is reachable
-through known techniques.
+head (wirbel #354, custom-kernel) already reaches 481.53 TPS at int4 (W4A16).  This script
+composes three orthogonal speedup levers to compute the optimistic composite ceiling and asks
+whether strict_500 is reachable through known techniques.
+
+The verdict is PARAMETERIZED on the measured sub-int4 bit-width b* (advisor HOLD, PR #357)
+-----------------------------------------------------------------------------------------
+The original capstone closed sub-int4 (L_quant) using literature PPL deltas (QuIP#/QTIP on
+Llama-2 lineage) and held the supply cap fixed at the int4-derived 473.53.  The advisor flagged
+two coupled errors (PR #357 review, 2026-06-15):
+
+  1. The PPL gate on sub-int4 must be driven by a MEASURED Gemma-4-E4B PPL (denken #356's
+     `ppl_at_best_sub_int4_bits`), NOT transplanted Llama-2 literature ("measure, don't
+     guess", #319 11:27Z).  Gemma's GQA/shared-KV + MLP gating may scale very differently.
+  2. The 473.53 supply cap is int4-derived and CANNOT be applied to a sub-int4 substrate.
+     denken #356's `ceiling(b)` curve RISES as the body shrinks (advisor-relayed anchors:
+     473.53 @ 4.0 bpw, 523 @ 3.5 bpw, 585 @ 3.0 bpw).  The moment sub-int4 is PPL-viable the
+     substrate moves to denken's b=3 ceiling (585), not 473.53, and the composite re-opens
+     above 500.
+
+So both L_quant AND the supply cap are now functions of b*, and the verdict FLIPS on a single
+measured number, `measured_ppl_at_best_sub_int4` at bit-width b*:
+
+  measured PPL > 2.42  ->  sub-int4 excluded -> b=4 substrate, cap 473.53 -> NO-GO (gap 26.47)
+  measured PPL <= 2.42 ->  sub-int4 LIVE at b* -> cap rises to ceiling(b*) -> >500 candidate
+
+Until that measured input lands this capstone HOLDS: it emits BOTH branches and a non-terminal
+`verdict_pending_measured_ppl` instead of stamping "provably out of reach".  It does NOT re-run
+any GPU eval (denken owns the single measured-PPL gate; the eval runs once).
 
 Levers
 ------
   L_kernel  : kernel-level GEMM / memory-BW improvement.
               On the spec substrate the custom Marlin W4A16 kernel is already incorporated
-              into the 481.53 baseline (#354), so L_kernel=1.0x on that path.
-              On the raw non-spec substrate (165.44), published off-shelf GPU-kernel speedups
-              (FlashInfer / Marlin) are capped by our measurement; FlashInfer is slower at
-              batch=1 (#349), so L_kernel remains tight.
+              into the 481.53 baseline (#354), so L_kernel=1.0x on that path.  FlashInfer is
+              slower at batch=1 (#349), so no further kernel lever on the non-spec substrate.
 
-  L_quant   : sub-int4 quantization Amdahl gain.
-              Gemma-4-E4B is currently int4 Marlin W4A16.  Going to int2 would halve the
-              dominant body-GEMM weight-read traffic.  Unconstrained Amdahl ceiling:
-                1 / (NON_BODY_FRAC + BODY_FRAC/2) ~ 1.892x.
-              PPL gate is strict: deployed 2.3772, gate 2.42, headroom 0.043 (~1.8% rel).
-              Every published int2 method overshoots that budget by 28-40x.  L_quant=1.0x
-              (PPL-gated, locked).
+  L_quant(b): sub-int4 quantization Amdahl gain, BW-bound at M=1.  Going int4->b bits shrinks
+              the dominant body-GEMM weight-read traffic by b/4:
+                L_quant(b) = 1 / (NON_BODY_FRAC + BODY_FRAC * b/4)
+              b=4 -> 1.000x (int4, baseline)   b=3 -> 1.308x   b=2 -> 1.892x (int2 ceiling)
+              GATED by the MEASURED Gemma PPL at b* (denken #356), NOT literature.
 
-  L_step    : step-overhead shave via CUDA Graphs.
-              A10G (sm_86, Ampere): graphs eliminate CPU-side launch overhead.  H100 measured
-              20.6% (arXiv 2605.30571v1); A10G proportionally smaller due to lower PCIe/NVLink
-              overhead and different driver stack.  Literature ceiling for A10G: 3-5%.
-              L_step = 1.05x (optimistic), 1.03x (conservative floor).
+  L_step    : step-overhead shave via CUDA Graphs.  A10G (sm_86, Ampere) ceiling 3-5%
+              (H100 measured 20.6%, arXiv 2605.30571v1 Table 3, scaled down for A10G).
+              L_step = 1.05x (optimistic), 1.03x (conservative floor).  Fixed, fine (advisor).
 
-Composite formula
------------------
-  tps_max = base * L_kernel * L_quant * L_step
+Supply cap  : ceiling(b) -- method-independent batched-verify BW floor, a FUNCTION of body
+              bits (denken #356 curve; #332's 473.5296 is the b=4 anchor).  As the body
+              shrinks the per-step verify BW cost shrinks and the cap rises.
 
-Spec substrate (base=481.53):
-  tps_max_optimistic_spec = 481.53 * 1.0 * 1.0 * 1.05 ~ 505.6 TPS (math clears 500)
-  BUT supply cap #332 = 473.53 is the method-independent batched-verify BW floor.
-  => effective ceiling = min(tps_max_optimistic_spec, SUPPLY_CAP) = 473.53 < 500
+Composite at b*
+---------------
+  base_lifted(b) = BASELINE_TPS * L_quant(b)            # sub-int4 body lifts the spec base
+  precap(b)      = base_lifted(b) * L_kernel * L_step
+  tps_eff(b)     = min(precap(b), ceiling(b))           # denken cap binds in the live branch
+  clears_500(b)  = tps_eff(b) >= 500
 
-Non-spec substrate (base=165.44):
-  tps_max_optimistic_nonspec = 165.44 * L_kernel * 1.0 * 1.05 ~ 173.7 TPS (far below 500)
-
-Verdict: strict_500_reachable_via_known_levers = False
-Binding constraints:
-  1. PPL gate excludes sub-int4 => L_quant=1.0x (largest would-be lever eliminated)
-  2. Supply cap 473.53 < 500 (method-independent batched-verify BW floor, denken #332)
-Residual gap: 500 - 473.5295953446407 ~ 26.47 TPS
+  b=4 (int4, PPL-excluded branch): 481.53*1.0*1.05 = 505.61 precap, ceiling 473.53 -> 473.53 < 500
+  b=3 (PPL-viable branch):        481.53*1.308*1.05 = 661.3 precap, ceiling 585  -> 585    > 500
 
 PRIMARY metric  strict_500_composite_reachability_self_test_passes
-TEST    metric  tps_max_optimistic_nonspec        (float: composite TPS on non-spec substrate)
-TEST    metric  tps_max_optimistic_spec           (float: composite TPS on spec substrate, pre-cap)
-TEST    metric  strict_500_reachable_via_known_levers  (bool: False — supply cap is binding)
-TEST    metric  binding_constraint               (str: identifies the binding wall)
-TEST    metric  residual_gap_to_500              (float: TPS gap between supply cap and 500)
+TEST    metrics tps_max_optimistic_nonspec, tps_max_optimistic_spec,
+                strict_500_reachable_via_known_levers (None while pending),
+                binding_constraint, residual_gap_to_500,
+                verdict_pending_measured_ppl, ppl_flip_threshold,
+                tps_eff_int4_branch, tps_eff_subint4_branch (at b*).
 """
 
 from __future__ import annotations
@@ -79,16 +93,30 @@ HERE = Path(__file__).resolve().parent
 # --------------------------------------------------------------------------- #
 
 # Substrate baselines (TPS at strict greedy, batch=1, A10G)
-TPS_NONSPEC: float = 165.44           # wirbel #196: non-spec AR baseline
+TPS_NONSPEC: float = 165.44           # lawine #196: non-spec AR baseline
 TPS_SPEC_OFFSHELF_BI: float = 357.32  # wirbel #326: off-shelf spec-decode BI
-BASELINE_TPS: float = 481.53          # wirbel #354: custom-kernel-compliant spec baseline (PRIMARY)
+BASELINE_TPS: float = 481.53          # wirbel #354: custom-kernel-compliant spec baseline (int4)
 
-# Supply cap — method-independent batched-verify BW floor (denken #332 y5cl0ena)
-SUPPLY_CAP: float = 473.5295953446407   # strict ceiling from #332
+# Supply cap at int4 — method-independent batched-verify BW floor (denken #332 y5cl0ena)
+SUPPLY_CAP_INT4: float = 473.5295953446407   # strict ceiling from #332 (b=4 anchor)
 SUPPLY_FLOOR_GEO: float = 0.09103155435261377  # geometric-phi supply floor fraction
 
 # Lambda ceiling (PPL-only: E[T] infinite, no supply tax) from denken #332
 LAMBDA_CEIL: float = 520.9527323111674
+
+# --------------------------------------------------------------------------- #
+# denken #356 ceiling(b) curve — the supply cap as a FUNCTION of body bit-width.
+# Anchors relayed by the advisor into the PR #357 review (2026-06-15); the 4.0-bpw
+# point is denken #332's 473.5296.  These are samples of denken's measured/derived
+# curve; the published curve supersedes them on the terminal re-run.  We do NOT
+# fetch denken's branch — we use only the values the advisor handed into this PR.
+# --------------------------------------------------------------------------- #
+CEILING_ANCHORS_BPW: dict[float, float] = {
+    4.0: SUPPLY_CAP_INT4,  # 473.5296 (denken #332)
+    3.5: 523.0,            # advisor-relayed (denken #356)
+    3.0: 585.0,            # advisor-relayed (denken #356)
+}
+B_STAR_DEFAULT: float = 3.0  # advisor's canonical "best sub-int4" demonstration point
 
 # PPL gate
 PPL_GATE: float = 2.42
@@ -105,11 +133,7 @@ ETA_KERNEL_FLOOR: float = 0.0095    # #326 floor vs non-spec
 ETA_KERNEL_OFFSHELF: float = 0.3141 # #326 off-shelf spec-decode gain vs non-spec
 L_KERNEL_SPEC: float = 1.0          # already incorporated in BASELINE_TPS (#354)
 
-# Quantization lever (Amdahl law, batch=1, BW-bound)
-L_QUANT_UNCONSTRAINED: float = 1.0 / (NON_BODY_FRAC + BODY_FRAC / 2.0)  # ~1.892x int2 ceiling
-L_QUANT_PPL_CONSTRAINED: float = 1.0  # PPL gate forecloses sub-int4; locked
-
-# Step-shave lever (CUDA Graphs, A10G)
+# Step-shave lever (CUDA Graphs, A10G) — fixed (advisor: keep)
 L_STEP_OPTIMISTIC: float = 1.05    # 5% overhead elimination ceiling (literature A10G)
 L_STEP_FLOOR: float = 1.03         # conservative 3% floor
 
@@ -117,9 +141,11 @@ L_STEP_FLOOR: float = 1.03         # conservative 3% floor
 TARGET: float = 500.0
 
 # --------------------------------------------------------------------------- #
-# Sub-int4 PPL literature (Llama-2-7B wikitext-2 baseline ~5.47 PPL)
-# Deltas are INT2 vs INT4 additional degradation in PPL points.
-# All reported at comparable W2A16 or equivalent 2-bit weight quantization.
+# Sub-int4 PPL LITERATURE PRIOR (Llama-2-7B wikitext-2 baseline ~5.47 PPL).
+# NON-AUTHORITATIVE: these deltas are on non-Gemma checkpoints and are used here
+# only as a forecast/prior to bracket expectations.  The authoritative gate is
+# denken #356's MEASURED Gemma-4-E4B PPL at b* ("measure, don't guess", #319).
+# Deltas are INT2-vs-INT4 additional degradation in PPL points (W2A16 or equiv).
 # --------------------------------------------------------------------------- #
 INT2_PPL_DELTAS: dict[str, dict[str, Any]] = {
     "QuIP#": {
@@ -145,14 +171,83 @@ INT2_PPL_DELTAS: dict[str, dict[str, Any]] = {
 }
 INT2_PPL_DELTA_BEST: float = min(v["delta_ppl_int2"] for v in INT2_PPL_DELTAS.values())
 INT2_PPL_DELTA_WORST: float = max(v["delta_ppl_int2"] for v in INT2_PPL_DELTAS.values())
-INT2_PPL_OVERSHOOT_RATIO: float = INT2_PPL_DELTA_BEST / PPL_HEADROOM  # ~28x overshoot
+INT3_PPL_DELTA_BEST_LIT: float = 0.28  # QuIP#/QTIP int3 (Llama-2-7B wikitext-2)
 
 # Tolerances for self-tests
 TOL_EXACT: float = 1e-9
 TOL_332: float = 1e-6
 TOL_DISPLAY_TPS: float = 5e-3
-TOL_DISPLAY_C: float = 5e-5
 TOL_PPL: float = 1e-6
+
+
+# --------------------------------------------------------------------------- #
+# Parameterized lever / cap functions of body bit-width b.
+# --------------------------------------------------------------------------- #
+def l_quant_of_b(b: float) -> float:
+    """Amdahl BW-bound speedup of going int4->b bits at M=1.
+
+    Body weight-read traffic scales as b/4; non-body traffic is unchanged.
+    L_quant(4)=1.0, L_quant(3)=1.308, L_quant(2)=1.892 (= the old int2 ceiling).
+    """
+    return 1.0 / (NON_BODY_FRAC + BODY_FRAC * (b / 4.0))
+
+
+def ceiling_of_b(b: float) -> dict[str, Any]:
+    """denken #356 supply-cap ceiling at body bit-width b (piecewise-linear over anchors).
+
+    Monotone increasing as b decreases.  Outside the relayed anchor span [3.0, 4.0]
+    we extrapolate from the nearest segment and flag it; b>=4 clamps to the int4 cap.
+    """
+    anchors = sorted(CEILING_ANCHORS_BPW.items())  # ascending in b
+    b_lo, b_hi = anchors[0][0], anchors[-1][0]
+    extrapolated = False
+    if b >= b_hi:
+        # >= int4 bits: clamp to int4 cap (more bits never raises the cap)
+        val = CEILING_ANCHORS_BPW[b_hi]
+        extrapolated = b > b_hi
+    elif b <= b_lo:
+        # below the lowest relayed anchor: extrapolate using the lowest segment slope
+        (x0, y0), (x1, y1) = anchors[0], anchors[1]
+        slope = (y1 - y0) / (x1 - x0)
+        val = y0 + slope * (b - x0)
+        extrapolated = b < b_lo
+    else:
+        # bracket and interpolate
+        val = None
+        for (x0, y0), (x1, y1) in zip(anchors, anchors[1:]):
+            if x0 <= b <= x1:
+                t = (b - x0) / (x1 - x0)
+                val = y0 + t * (y1 - y0)
+                break
+        assert val is not None
+    return {"bits": b, "ceiling_tps": val, "extrapolated_outside_anchors": extrapolated}
+
+
+def composite_at_b(b: float, l_step: float) -> dict[str, Any]:
+    """Optimistic composite at body bit-width b: min(lever composite, denken ceiling(b))."""
+    lq = l_quant_of_b(b)
+    base_lifted = BASELINE_TPS * lq
+    precap = base_lifted * L_KERNEL_SPEC * l_step
+    cap_info = ceiling_of_b(b)
+    cap = cap_info["ceiling_tps"]
+    eff = min(precap, cap)
+    cap_binds = cap <= precap
+    return {
+        "bits": b,
+        "l_quant": lq,
+        "base_lifted_tps": base_lifted,
+        "l_step": l_step,
+        "precap_tps": precap,
+        "ceiling_tps": cap,
+        "ceiling_extrapolated": cap_info["extrapolated_outside_anchors"],
+        "tps_eff": eff,
+        "cap_binds": cap_binds,
+        "clears_500": eff >= TARGET,
+        "margin_to_500": eff - TARGET,  # >0 clears, <0 short
+        "binding_constraint": (
+            f"supply_cap_ceiling_at_b={b:g}bpw" if cap_binds else f"lever_composite_at_b={b:g}bpw"
+        ),
+    }
 
 
 # --------------------------------------------------------------------------- #
@@ -165,244 +260,196 @@ def _finite(x: Any) -> bool:
 # --------------------------------------------------------------------------- #
 # Deliverable 1: lever analysis — what each lever can and cannot contribute.
 # --------------------------------------------------------------------------- #
-def deliverable1_lever_analysis() -> dict[str, Any]:
-    """Characterise each lever: unconstrained Amdahl ceiling vs PPL-constrained value."""
-    # Quantisation lever: Amdahl law for BW-bound decode at M=1
-    # arithmetic intensity AI=4.0 at M=1 << ridge 208.3 => pure BW-bound
-    # halving weight bits => halving BW => 2x body throughput
-    # system speedup = 1/(f_non_body + f_body/2)
-    l_quant_unconstrained = L_QUANT_UNCONSTRAINED
-    l_quant_constrained = L_QUANT_PPL_CONSTRAINED
-    quant_lever_eliminated = True  # PPL gate kills it
-
-    # Step-shave lever: CUDA Graphs eliminate CPU-side kernel launch overhead
-    # H100 measured 20.6% (arXiv 2605.30571v1 Table 3); A10G smaller (3-5%)
-    # because A10G PCIe/NVLink overhead and driver stack differ
-    l_step_optimistic = L_STEP_OPTIMISTIC
-    l_step_floor = L_STEP_FLOOR
-
-    # Kernel lever: already baked into BASELINE_TPS (#354 custom Marlin W4A16)
-    l_kernel_spec = L_KERNEL_SPEC  # 1.0 on spec substrate
-
-    # PPL exclusion detail
-    best_int2 = INT2_PPL_DELTA_BEST
-    worst_int2 = INT2_PPL_DELTA_WORST
-    overshoot = INT2_PPL_OVERSHOOT_RATIO
-
+def deliverable1_lever_analysis(b_star: float) -> dict[str, Any]:
+    """Characterise each lever; L_quant and the cap are now functions of b*."""
+    lq_table = {f"b={b:g}": l_quant_of_b(b) for b in (4.0, 3.5, 3.0, 2.0)}
+    ceil_table = {f"b={b:g}": ceiling_of_b(b)["ceiling_tps"] for b in (4.0, 3.5, 3.0, 2.0)}
     return {
-        "l_kernel_spec": l_kernel_spec,
+        "l_kernel_spec": L_KERNEL_SPEC,
         "l_kernel_note": "custom Marlin W4A16 kernel already in BASELINE_TPS #354; L_kernel=1.0 on spec substrate",
-        "l_quant_unconstrained": l_quant_unconstrained,
-        "l_quant_constrained": l_quant_constrained,
-        "quant_lever_eliminated_by_ppl": quant_lever_eliminated,
-        "int2_ppl_delta_best": best_int2,
-        "int2_ppl_delta_worst": worst_int2,
-        "ppl_headroom": PPL_HEADROOM,
-        "int2_overshoot_ratio": overshoot,
-        "int2_overshoot_note": (
-            f"best published int2 (QuIP# +{best_int2:.2f} PPL) overshoots budget "
-            f"({PPL_HEADROOM:.3f} PPL) by {overshoot:.0f}x; sub-int4 categorically excluded"
-        ),
-        "l_step_optimistic": l_step_optimistic,
-        "l_step_floor": l_step_floor,
+        "l_quant_formula": "L_quant(b) = 1 / (NON_BODY_FRAC + BODY_FRAC * b/4)",
+        "l_quant_table": lq_table,
+        "l_quant_at_b_star": l_quant_of_b(b_star),
+        "l_quant_int2_ceiling": l_quant_of_b(2.0),
+        "l_quant_gated_by": "MEASURED Gemma PPL at b* (denken #356), NOT literature",
+        "ceiling_formula": "denken #356 piecewise-linear over anchors {4.0:473.53, 3.5:523, 3.0:585}",
+        "ceiling_table": ceil_table,
+        "ceiling_at_b_star": ceiling_of_b(b_star)["ceiling_tps"],
+        "ceiling_anchors_advisor_relayed": dict(sorted(CEILING_ANCHORS_BPW.items())),
+        "l_step_optimistic": L_STEP_OPTIMISTIC,
+        "l_step_floor": L_STEP_FLOOR,
         "l_step_source": "CUDA Graphs A10G ceiling 3-5%; H100 20.6% arXiv 2605.30571v1 Table 3",
         "flashinfer_excluded": True,
-        "flashinfer_note": "FlashInfer batch-1 SDPA 36.05µs/layer vs FlashInfer 48.20µs/layer (#349); slower at batch=1",
+        "flashinfer_note": "FlashInfer batch-1 SDPA 36.05us/layer vs FlashInfer 48.20us/layer (#349); slower at batch=1",
     }
 
 
 # --------------------------------------------------------------------------- #
-# Deliverable 2: PPL exclusion proof — sub-int4 cannot stay under PPL gate.
+# Deliverable 2: sub-int4 PPL FORECAST (literature prior) — NOT the verdict gate.
 # --------------------------------------------------------------------------- #
-def deliverable2_ppl_exclusion() -> dict[str, Any]:
-    """Verify that every published int2 method violates the PPL gate."""
-    violations: list[dict[str, Any]] = []
+def deliverable2_ppl_forecast() -> dict[str, Any]:
+    """Literature prior for sub-int4 PPL on Llama-2 lineage.
+
+    NON-AUTHORITATIVE.  The advisor flagged that closing L_quant on transplanted
+    literature PPL violates "measure, don't guess" (#319 11:27Z).  We report these
+    as a FORECAST only; the verdict consumes denken #356's MEASURED Gemma PPL.
+    """
+    forecast: list[dict[str, Any]] = []
     for method, info in INT2_PPL_DELTAS.items():
         delta = info["delta_ppl_int2"]
         ppl_result = PPL_DEPLOYED + delta
-        violates = ppl_result > PPL_GATE
-        headroom_ratio = delta / PPL_HEADROOM
-        violations.append({
+        forecast.append({
             "method": method,
             "arxiv": info["arxiv"],
             "delta_ppl_int2": delta,
-            "ppl_result": ppl_result,
-            "violates_ppl_gate": violates,
-            "headroom_ratio": headroom_ratio,
+            "ppl_result_if_gemma_matched_llama": ppl_result,
+            "would_violate_if_transplanted": ppl_result > PPL_GATE,
+            "headroom_ratio": delta / PPL_HEADROOM,
         })
+    all_would_violate = all(f["would_violate_if_transplanted"] for f in forecast)
+    best_entry = min(forecast, key=lambda x: x["delta_ppl_int2"])
 
-    all_violate = all(v["violates_ppl_gate"] for v in violations)
-    best_entry = min(violations, key=lambda x: x["delta_ppl_int2"])
-    worst_entry = max(violations, key=lambda x: x["delta_ppl_int2"])
-
-    # If int4->int3 were possible: best int3 is +0.28 PPL (QuIP#/QTIP), still 6.5x over budget
-    int3_delta_best = 0.28  # QuIP# / QTIP (Llama-2-7B wikitext-2)
-    int3_ppl_result = PPL_DEPLOYED + int3_delta_best
-    int3_violates = int3_ppl_result > PPL_GATE
-    int3_overshoot = int3_delta_best / PPL_HEADROOM
-
-    # Marlin infrastructure note: Marlin W4A16 (arXiv 2408.11743) is 4-bit only by design;
-    # sub-int4 requires incompatible kernel (GPTQ-style W2 or AQLM block-code) — no drop-in path
-    marlin_sub_int4_incompatible = True
-
+    int3_ppl = PPL_DEPLOYED + INT3_PPL_DELTA_BEST_LIT
     return {
-        "per_method": violations,
-        "all_int2_methods_violate_ppl_gate": all_violate,
+        "authoritative": False,
+        "gate_source": "denken #356 MEASURED Gemma-4-E4B ppl_at_best_sub_int4_bits (pending)",
+        "per_method_forecast": forecast,
+        "literature_int2_all_would_violate_if_transplanted": all_would_violate,
         "best_int2_method": best_entry["method"],
         "best_int2_delta": best_entry["delta_ppl_int2"],
-        "worst_int2_delta": worst_entry["delta_ppl_int2"],
-        "overshoot_ratio_best": best_entry["headroom_ratio"],
-        "overshoot_ratio_worst": worst_entry["headroom_ratio"],
-        "int3_delta_best": int3_delta_best,
-        "int3_ppl_result": int3_ppl_result,
-        "int3_violates_ppl_gate": int3_violates,
-        "int3_overshoot_ratio": int3_overshoot,
-        "marlin_sub_int4_incompatible": marlin_sub_int4_incompatible,
-        "conclusion": (
-            "Sub-int4 quantization is categorically excluded: best published int2 (QuIP# +1.19 PPL) "
-            f"overshoots the {PPL_HEADROOM:.3f} PPL budget by ~{best_entry['headroom_ratio']:.0f}x; "
-            f"int3 best-case (+{int3_delta_best} PPL) also overshoots by ~{int3_overshoot:.1f}x; "
-            "Marlin W4A16 kernel infrastructure is incompatible with sub-int4 weight layouts. "
-            "L_quant = 1.0x, locked."
+        "best_int2_headroom_ratio": best_entry["headroom_ratio"],
+        "int3_delta_best_lit": INT3_PPL_DELTA_BEST_LIT,
+        "int3_ppl_result_if_transplanted": int3_ppl,
+        "int3_would_violate_if_transplanted": int3_ppl > PPL_GATE,
+        "int3_overshoot_ratio_lit": INT3_PPL_DELTA_BEST_LIT / PPL_HEADROOM,
+        "caveat": (
+            "Llama-2-lineage deltas; Gemma-4-E4B (GQA/shared-KV, MLP gating) may scale "
+            "differently. Used as a prior to bracket expectations, NOT to close L_quant. "
+            "The headroom is only 0.043 PPL (~1.8% rel), so the literature prior LEANS toward "
+            "violation, but the measured Gemma PPL at b* is what decides the verdict."
         ),
     }
 
 
 # --------------------------------------------------------------------------- #
-# Deliverable 3: composite TPS ceiling on both substrates.
+# Deliverable 3: composite TPS ceiling, parameterized on b*, both branches.
 # --------------------------------------------------------------------------- #
-def deliverable3_composite_tps() -> dict[str, Any]:
-    """Compute optimistic composite tps_max = base * L_kernel * L_quant * L_step."""
-    # Spec substrate (base = BASELINE_TPS = 481.53, custom Marlin W4A16 kernel already in)
-    base_spec = BASELINE_TPS
-    lk_spec = L_KERNEL_SPEC          # 1.0
-    lq = L_QUANT_PPL_CONSTRAINED     # 1.0
-    ls_opt = L_STEP_OPTIMISTIC       # 1.05
-    ls_floor = L_STEP_FLOOR          # 1.03
+def deliverable3_composite_tps(b_star: float) -> dict[str, Any]:
+    """Composite at the int4 substrate (PPL-excluded branch) and at b* (PPL-viable branch)."""
+    # Non-spec substrate (base = 165.44); L_kernel=1 (FlashInfer excluded #349); L_quant=1 here
+    # (sub-int4 on the non-spec AR substrate is the same PPL story; the spec substrate dominates).
+    tps_nonspec_optimistic = TPS_NONSPEC * 1.0 * 1.0 * L_STEP_OPTIMISTIC
+    tps_nonspec_floor = TPS_NONSPEC * 1.0 * 1.0 * L_STEP_FLOOR
 
-    tps_spec_optimistic = base_spec * lk_spec * lq * ls_opt
-    tps_spec_floor = base_spec * lk_spec * lq * ls_floor
+    # int4 substrate (b=4): the PPL-EXCLUDED branch — sub-int4 not viable -> stuck at int4 cap.
+    int4_opt = composite_at_b(4.0, L_STEP_OPTIMISTIC)
+    int4_floor = composite_at_b(4.0, L_STEP_FLOOR)
 
-    # Effective ceiling: min of composite and supply cap
-    tps_spec_effective_optimistic = min(tps_spec_optimistic, SUPPLY_CAP)
-    tps_spec_effective_floor = min(tps_spec_floor, SUPPLY_CAP)
+    # sub-int4 substrate (b=b*): the PPL-VIABLE branch — cap rises to denken ceiling(b*).
+    sub_opt = composite_at_b(b_star, L_STEP_OPTIMISTIC)
+    sub_floor = composite_at_b(b_star, L_STEP_FLOOR)
 
-    # Non-spec substrate (base = TPS_NONSPEC = 165.44)
-    # On this substrate the kernel is not the custom Marlin one, so L_kernel > 1 is possible
-    # in principle, but FlashInfer is slower at batch=1 (#349), so L_kernel = 1.0 as well
-    base_nonspec = TPS_NONSPEC
-    lk_nonspec = 1.0  # FlashInfer excluded; no other kernel improvement available
-    tps_nonspec_optimistic = base_nonspec * lk_nonspec * lq * ls_opt
-    tps_nonspec_floor = base_nonspec * lk_nonspec * lq * ls_floor
-
-    # Off-shelf BI spec substrate (#326)
-    base_offshelf = TPS_SPEC_OFFSHELF_BI
-    tps_offshelf_optimistic = base_offshelf * lk_nonspec * lq * ls_opt  # no custom kernel
-    tps_offshelf_floor = base_offshelf * lk_nonspec * lq * ls_floor
-
-    # Can the spec substrate math clear 500 pre-supply-cap?
-    spec_clears_500_precap = tps_spec_optimistic >= TARGET
-    # Does effective ceiling (post supply cap) clear 500?
-    spec_clears_500_postcap = tps_spec_effective_optimistic >= TARGET
-    # Does non-spec substrate clear 500 at all?
-    nonspec_clears_500 = tps_nonspec_optimistic >= TARGET
-
-    # Residual gap: between supply cap and target
-    residual_gap = TARGET - SUPPLY_CAP
+    # tps_max_optimistic_spec retains its original meaning: the int4 lever composite pre-cap.
+    tps_max_optimistic_spec = int4_opt["precap_tps"]
 
     return {
-        # Spec substrate
-        "base_spec": base_spec,
-        "l_kernel_spec": lk_spec,
-        "l_quant": lq,
-        "l_step_optimistic": ls_opt,
-        "l_step_floor": ls_floor,
-        "tps_max_optimistic_spec": tps_spec_optimistic,
-        "tps_max_floor_spec": tps_spec_floor,
-        "supply_cap": SUPPLY_CAP,
-        "tps_effective_optimistic_spec": tps_spec_effective_optimistic,
-        "tps_effective_floor_spec": tps_spec_effective_floor,
-        # Non-spec substrate
-        "base_nonspec": base_nonspec,
+        # non-spec
+        "base_nonspec": TPS_NONSPEC,
         "tps_max_optimistic_nonspec": tps_nonspec_optimistic,
         "tps_max_floor_nonspec": tps_nonspec_floor,
-        # Off-shelf spec
-        "base_offshelf": base_offshelf,
-        "tps_max_optimistic_offshelf": tps_offshelf_optimistic,
-        "tps_max_floor_offshelf": tps_offshelf_floor,
-        # Reachability
-        "spec_clears_500_precap": spec_clears_500_precap,
-        "spec_clears_500_postcap": spec_clears_500_postcap,
-        "nonspec_clears_500": nonspec_clears_500,
-        "residual_gap_to_500": residual_gap,
-        "composite_formula": "tps_max = base * L_kernel * L_quant * L_step",
+        # spec int4 (PPL-excluded branch)
+        "base_spec_int4": BASELINE_TPS,
+        "tps_max_optimistic_spec": tps_max_optimistic_spec,  # 505.61 pre-cap
+        "int4_branch": int4_opt,
+        "int4_branch_floor": int4_floor,
+        # sub-int4 (PPL-viable branch at b*)
+        "b_star": b_star,
+        "subint4_branch": sub_opt,
+        "subint4_branch_floor": sub_floor,
+        # off-shelf spec (#326) for the ladder
+        "base_offshelf": TPS_SPEC_OFFSHELF_BI,
+        "composite_formula": "tps_eff(b) = min(BASELINE*L_quant(b)*L_kernel*L_step, ceiling(b))",
         "note": (
-            f"Spec substrate: {base_spec:.2f} * {lk_spec:.1f} * {lq:.1f} * {ls_opt:.2f} = "
-            f"{tps_spec_optimistic:.2f} (pre-cap) but supply_cap={SUPPLY_CAP:.4f} is binding => "
-            f"effective ceiling {tps_spec_effective_optimistic:.4f} < 500. "
-            f"Non-spec: {base_nonspec:.2f} * {ls_opt:.2f} = {tps_nonspec_optimistic:.2f} << 500."
+            f"int4 branch (PPL-excluded): precap {int4_opt['precap_tps']:.2f}, cap "
+            f"{int4_opt['ceiling_tps']:.4f} -> eff {int4_opt['tps_eff']:.4f} "
+            f"({'CLEARS' if int4_opt['clears_500'] else 'SHORT'} 500). "
+            f"sub-int4 branch (PPL-viable, b*={b_star:g}): precap {sub_opt['precap_tps']:.2f}, cap "
+            f"{sub_opt['ceiling_tps']:.2f} -> eff {sub_opt['tps_eff']:.2f} "
+            f"({'CLEARS' if sub_opt['clears_500'] else 'SHORT'} 500)."
         ),
     }
 
 
 # --------------------------------------------------------------------------- #
-# Deliverable 4: operational verdict.
+# Deliverable 4: verdict as a function of the MEASURED PPL at b* (pending-aware).
 # --------------------------------------------------------------------------- #
-def deliverable4_verdict(d3: dict[str, Any]) -> dict[str, Any]:
-    """Determine whether strict_500 is reachable via known levers."""
-    tps_spec_opt = d3["tps_max_optimistic_spec"]
-    tps_nonspec_opt = d3["tps_max_optimistic_nonspec"]
-    tps_spec_eff = d3["tps_effective_optimistic_spec"]
-    residual_gap = d3["residual_gap_to_500"]
+def verdict_given_ppl(measured_ppl: float | None, b_star: float) -> dict[str, Any]:
+    """Resolve the verdict given the measured Gemma PPL at b*; pending if measured_ppl is None."""
+    int4 = composite_at_b(4.0, L_STEP_OPTIMISTIC)        # PPL-excluded substrate
+    sub = composite_at_b(b_star, L_STEP_OPTIMISTIC)      # PPL-viable substrate at b*
 
-    # Strict 500 reachable?
-    # Math: spec optimistic 505.6 > 500 — but supply cap 473.5 is binding
-    # Non-spec: 173.7 << 500
-    strict_500_reachable = tps_spec_eff >= TARGET  # False
+    branch_violate = {
+        "label": "measured_ppl_gt_gate",
+        "ppl_viable": False,
+        "substrate_bits": 4.0,
+        "tps_eff": int4["tps_eff"],
+        "reachable": int4["clears_500"],          # False (473.53 < 500)
+        "residual_gap_to_500": TARGET - int4["tps_eff"],
+        "binding_constraint": "supply_cap_int4_473p53_ppl_excludes_sub_int4",
+    }
+    branch_viable = {
+        "label": "measured_ppl_le_gate",
+        "ppl_viable": True,
+        "substrate_bits": b_star,
+        "tps_eff": sub["tps_eff"],
+        "reachable": sub["clears_500"],           # True at b*=3 (585 > 500)
+        "residual_gap_to_500": TARGET - sub["tps_eff"],   # negative = margin above 500
+        "binding_constraint": (
+            f"supply_cap_ceiling_at_b={b_star:g}bpw" if sub["cap_binds"]
+            else f"lever_composite_at_b={b_star:g}bpw"
+        ),
+    }
 
-    # Which constraint is binding?
-    # Spec: supply cap 473.5 (not PPL or step-shave) — supply cap comes first
-    # PPL gate eliminates the largest lever (L_quant would have been ~1.892x)
-    # Without PPL exclusion, spec ceiling would be 481.53 * 1.892 * 1.05 ~ 956 TPS (academic)
-    # but still supply-capped at 473.5 — so BOTH constraints matter
-    binding_constraint = "supply_cap_473p5_and_ppl_gate_locks_L_quant"
-
-    # What would be needed?
-    # To clear 500 we need tps_effective >= 500
-    # SUPPLY_CAP is method-independent BW floor — cannot be removed without changing the
-    # batched-verify protocol itself (a different research direction, not a known lever)
-    # Alternatively: find a drafter that doesn't need batched verification — but that
-    # violates strict greedy token-identity
-    needed_beyond_supply_cap = TARGET - SUPPLY_CAP  # ~26.47 TPS
-    needed_fractional = needed_beyond_supply_cap / SUPPLY_CAP  # ~5.6%
-
-    # Unconstrained Amdahl (if int2 were PPL-safe) still hits supply cap
-    tps_unconstrained_spec = BASELINE_TPS * L_KERNEL_SPEC * L_QUANT_UNCONSTRAINED * L_STEP_OPTIMISTIC
-    tps_unconstrained_capped = min(tps_unconstrained_spec, SUPPLY_CAP)
-    unconstrained_also_capped = tps_unconstrained_capped < TARGET
+    if measured_ppl is None:
+        resolved: dict[str, Any] | None = None
+        pending = True
+        ppl_viable = None
+        reachable: bool | None = None
+    else:
+        pending = False
+        ppl_viable = measured_ppl <= PPL_GATE
+        resolved = branch_viable if ppl_viable else branch_violate
+        reachable = resolved["reachable"]
 
     return {
-        "strict_500_reachable_via_known_levers": strict_500_reachable,
-        "binding_constraint": binding_constraint,
-        "tps_spec_optimistic_precap": tps_spec_opt,
-        "tps_spec_effective_postcap": tps_spec_eff,
-        "tps_nonspec_optimistic": tps_nonspec_opt,
-        "residual_gap_to_500": residual_gap,
-        "needed_fractional_above_supply_cap": needed_fractional,
-        "tps_unconstrained_spec_precap": tps_unconstrained_spec,
-        "tps_unconstrained_spec_postcap": tps_unconstrained_capped,
-        "unconstrained_int2_also_supply_capped": unconstrained_also_capped,
-        "verdict": (
-            "strict_500 is NOT reachable via known levers. "
-            f"Spec substrate optimistic composite ({tps_spec_opt:.2f} TPS pre-cap) clears 500 "
-            f"mathematically but the method-independent supply cap {SUPPLY_CAP:.4f} TPS (#332) is "
-            f"the binding wall, leaving a {residual_gap:.2f} TPS residual gap. "
-            "Separately, the PPL gate locks L_quant=1.0x, eliminating the largest potential lever "
-            f"(unconstrained int2 Amdahl ~{L_QUANT_UNCONSTRAINED:.3f}x). Even with int2 PPL-safe "
-            f"(hypothetical), the supply cap would remain binding at {SUPPLY_CAP:.4f} < 500. "
-            "The non-spec substrate optimistic ceiling is far below 500 (~173.7 TPS). "
-            "Clearing 500 under strict-greedy token-identity requires either breaching the "
-            "batched-verify BW floor (#332) or finding a new lever not in the known set."
+        "measured_ppl_at_b_star": measured_ppl,
+        "b_star": b_star,
+        "ppl_flip_threshold": PPL_GATE,
+        "verdict_pending_measured_ppl": pending,
+        "ppl_viable": ppl_viable,
+        "strict_500_reachable_via_known_levers": reachable,
+        "binding_constraint": (resolved["binding_constraint"] if resolved else "PENDING_measured_ppl"),
+        "residual_gap_to_500": (resolved["residual_gap_to_500"] if resolved
+                                else branch_violate["residual_gap_to_500"]),
+        "branch_ppl_violates_gate": branch_violate,
+        "branch_ppl_viable": branch_viable,
+        "flip_explanation": (
+            f"With b*={b_star:g}bpw and denken ceiling {sub['ceiling_tps']:.2f} (>=500), the verdict "
+            f"flip is EXACTLY the PPL gate: measured Gemma PPL <= {PPL_GATE} -> reachable "
+            f"({sub['tps_eff']:.2f} TPS, +{sub['tps_eff']-TARGET:.2f}); measured PPL > {PPL_GATE} -> "
+            f"sub-int4 excluded -> int4 cap {int4['tps_eff']:.4f} TPS NO-GO (gap "
+            f"{TARGET-int4['tps_eff']:.4f})."
+        ),
+        "verdict_text": (
+            "PENDING denken #356 measured ppl_at_best_sub_int4_bits — both branches below."
+            if pending else
+            (f"strict_500 REACHABLE via known levers at b*={b_star:g}bpw: measured PPL "
+             f"{measured_ppl:.4f} <= {PPL_GATE} -> sub-int4 LIVE -> cap rises to {sub['ceiling_tps']:.2f}, "
+             f"eff {sub['tps_eff']:.2f} TPS (+{sub['tps_eff']-TARGET:.2f}). Approval-gated a10g candidate (#319)."
+             if ppl_viable else
+             f"strict_500 NOT reachable via known levers: measured PPL {measured_ppl:.4f} > {PPL_GATE} -> "
+             f"sub-int4 excluded -> L_quant=1.0 -> int4 supply cap {int4['tps_eff']:.4f} TPS binds, "
+             f"residual gap {TARGET-int4['tps_eff']:.4f} TPS. Genuinely-new-method problem (~3x from 165.44 floor).")
         ),
     }
 
@@ -410,32 +457,31 @@ def deliverable4_verdict(d3: dict[str, Any]) -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # Deliverable 5: caveats.
 # --------------------------------------------------------------------------- #
-def deliverable5_caveats() -> dict[str, Any]:
-    """Document known unknowns and assumptions bounding this analysis."""
+def deliverable5_caveats(b_star: float) -> dict[str, Any]:
     return {
         "caveats": [
-            "L_kernel on non-spec substrate: FlashInfer excluded (#349); no other batch=1 "
-            "attention kernel shown faster than SDPA on A10G; if a new kernel emerges the "
-            "non-spec ceiling shifts proportionally but remains far below 500.",
-            "L_step CUDA-Graphs ceiling of 3-5% is a literature estimate for A10G; actual "
-            "benefit depends on graph capture overhead and model-specific call graph; could be "
-            "lower than 3% if launch overhead is already minimised in current serve stack.",
-            "PPL deltas are Llama-2-7B wikitext-2; Gemma-4-E4B may differ; however the "
-            "headroom (0.043 PPL) is so small (~1.8% relative) that even a 5x more PPL-friendly "
-            "model architecture would still require int2 delta <0.009 PPL — not published.",
-            "Supply cap #332 assumes current batched-verify protocol; a draft-acceptance scheme "
-            "that avoids a full-batch verify step could shift the cap, but would require a "
-            "fundamentally different speculative decoding architecture.",
-            "All numbers are for strict greedy token-identity (argmax bit-identical). Relaxing "
-            "to approximate speculative decoding (e.g. nucleus sampling compatibility) is a "
-            "different research question outside this scope.",
-            "int3 (3-bit) quantization: best published int3 delta +0.28 PPL (QuIP#/QTIP) still "
-            f"overshoots the {PPL_HEADROOM:.3f} PPL budget by ~{0.28/PPL_HEADROOM:.1f}x. "
-            "Marlin W4A16 does not support int3 weights without kernel replacement.",
+            "VERDICT IS PENDING a single measured input: denken #356's Gemma-4-E4B "
+            "ppl_at_best_sub_int4_bits at b*. We do NOT re-run that GPU eval (denken owns the "
+            "single measured-PPL gate; it runs once across fern/denken/lawine).",
+            "ceiling(b) anchors {4.0:473.53, 3.5:523, 3.0:585} are advisor-relayed samples of "
+            "denken #356's curve; the published curve supersedes them on the terminal re-run. "
+            "Piecewise-linear interpolation between anchors; extrapolation below 3.0 bpw is flagged.",
+            "L_quant(b) is a batch=1 BW-bound Amdahl model on BODY_FRAC=0.943 (#344). It assumes the "
+            "body GEMM read traffic scales linearly with bits and the non-body fraction is fixed; "
+            "real sub-int4 kernels carry dequant overhead that would lower the realized gain.",
+            "Sub-int4 also needs a kernel: Marlin W4A16 (arXiv 2408.11743) is 4-bit only; a viable "
+            "sub-int4 path requires a compatible low-bit kernel (GPTQ-style W3/W2 or codebook). The "
+            "ceiling(b) curve presumes such a kernel exists at the stated overhead.",
+            "L_step CUDA-Graphs ceiling 3-5% is an A10G literature estimate; actual benefit depends "
+            "on graph capture overhead and the model call graph and may be lower than 3%.",
+            "All numbers are for strict greedy token-identity (argmax bit-identical). Relaxing to "
+            "approximate speculative decoding is a different research question outside this scope.",
+            f"The PPL-viable branch is evaluated at b*={b_star:g}bpw; if denken's best viable bits "
+            "differ, re-evaluate ceiling(b*) and L_quant(b*) at that bit-width.",
         ],
         "assumptions": [
-            "BASELINE_TPS=481.53 is the current best strict-compliant serve point (#354).",
-            "SUPPLY_CAP=473.5295953446407 is method-independent (#332 geometric-phi supply floor).",
+            "BASELINE_TPS=481.53 is the current best strict-compliant serve point at int4 (#354).",
+            "ceiling(4.0)=473.5295953446407 is method-independent (#332 geometric-phi supply floor).",
             "Arithmetic intensity at M=1 is 4.0, well below ridge point 208.3 (pure BW-bound).",
             "BODY_FRAC=0.943 reflects batch=1 HBM traffic decomposition (#344 waterfall).",
         ],
@@ -445,55 +491,92 @@ def deliverable5_caveats() -> dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # Self-tests
 # --------------------------------------------------------------------------- #
-def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict) -> dict[str, Any]:
-    # a: L_quant_unconstrained Amdahl reproduces expected value
-    lqu_expected = 1.0 / (NON_BODY_FRAC + BODY_FRAC / 2.0)
-    a_lquant_amdahl_reproduces = abs(L_QUANT_UNCONSTRAINED - lqu_expected) < TOL_EXACT
+def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, b_star: float) -> dict[str, Any]:
+    int4 = d3["int4_branch"]
+    sub = d3["subint4_branch"]
 
-    # b: supply cap round-trips #332 value
-    b_supply_cap_roundtrips_332 = abs(SUPPLY_CAP - 473.5295953446407) < TOL_332
+    # a: L_quant(2.0) reproduces the old int2 Amdahl ceiling (~1.892x)
+    a_lquant_int2_reproduces = abs(l_quant_of_b(2.0) - 1.0 / (NON_BODY_FRAC + BODY_FRAC / 2.0)) < TOL_EXACT
 
-    # c: PPL headroom is positive and equals gate minus deployed
-    c_ppl_headroom_positive = (PPL_HEADROOM > 0.0) and (
-        abs(PPL_HEADROOM - (PPL_GATE - PPL_DEPLOYED)) < TOL_PPL)
+    # b: L_quant(4.0) == 1.0 (int4 baseline is the no-op point)
+    b_lquant_int4_unit = abs(l_quant_of_b(4.0) - 1.0) < TOL_EXACT
 
-    # d: all int2 methods violate the gate
-    d_all_int2_violate = bool(d2["all_int2_methods_violate_ppl_gate"])
+    # c: L_quant monotone increasing as bits decrease
+    c_lquant_monotone = l_quant_of_b(2.0) > l_quant_of_b(3.0) > l_quant_of_b(4.0)
 
-    # e: int2 overshoot ratio >= 25 (well above our computed ~28x)
-    e_overshoot_ratio_large = d2["overshoot_ratio_best"] >= 25.0
+    # d: ceiling(b) round-trips every advisor-relayed anchor exactly
+    d_ceiling_roundtrips_anchors = all(
+        abs(ceiling_of_b(b)["ceiling_tps"] - v) < TOL_DISPLAY_TPS
+        for b, v in CEILING_ANCHORS_BPW.items()
+    )
 
-    # f: spec optimistic pre-cap > 500 (math clears 500 without the cap)
-    f_spec_precap_clears_500 = d3["spec_clears_500_precap"]
+    # e: ceiling(b) monotone increasing as bits decrease (585 > 523 > 473.53)
+    e_ceiling_monotone = (ceiling_of_b(3.0)["ceiling_tps"] > ceiling_of_b(3.5)["ceiling_tps"]
+                          > ceiling_of_b(4.0)["ceiling_tps"])
 
-    # g: spec effective post-cap < 500 (supply cap is binding)
-    g_spec_postcap_below_500 = not d3["spec_clears_500_postcap"]
+    # f: b=4 anchor round-trips denken #332's supply cap value exactly
+    f_supply_cap_roundtrips_332 = abs(ceiling_of_b(4.0)["ceiling_tps"] - SUPPLY_CAP_INT4) < TOL_332
 
-    # h: non-spec optimistic << 500 (far below, not even close)
-    h_nonspec_far_below_500 = d3["tps_max_optimistic_nonspec"] < 250.0
+    # g: int4 branch reproduces the original NO-GO (eff ~473.53, residual ~26.47)
+    g_int4_branch_nogo = (abs(int4["tps_eff"] - SUPPLY_CAP_INT4) < TOL_332
+                          and not int4["clears_500"]
+                          and abs((TARGET - int4["tps_eff"]) - (TARGET - SUPPLY_CAP_INT4)) < TOL_332)
 
-    # i: verdict is False (not reachable)
-    i_verdict_not_reachable = not d4["strict_500_reachable_via_known_levers"]
+    # h: int4 lever composite clears 500 PRE-cap (505.61) — proves the cap is what binds
+    h_int4_precap_clears_500 = int4["precap_tps"] >= TARGET
 
-    # j: residual gap is positive and matches SUPPLY_CAP vs TARGET
-    j_residual_gap_positive = (d4["residual_gap_to_500"] > 0.0) and (
-        abs(d4["residual_gap_to_500"] - (TARGET - SUPPLY_CAP)) < TOL_332)
+    # i: sub-int4 branch at b* clears 500 (cap rises to denken ceiling >= 500)
+    i_subint4_clears_500 = sub["clears_500"] and sub["tps_eff"] >= TARGET
 
-    # k: NaN clean (placeholder — updated in main() after _nan_paths check)
-    k_nan_clean = True
+    # j: sub-int4 branch at b=3.5 also clears 500 (523 >= 500) — robustness across relayed anchors
+    sub35 = composite_at_b(3.5, L_STEP_OPTIMISTIC)
+    j_subint4_b35_clears_500 = sub35["clears_500"]
+
+    # k: verdict FLIPS exactly at the PPL gate
+    v_violate = verdict_given_ppl(PPL_GATE + 0.10, b_star)
+    v_viable = verdict_given_ppl(PPL_GATE - 0.10, b_star)
+    k_verdict_flips_at_gate = (v_violate["strict_500_reachable_via_known_levers"] is False
+                               and v_viable["strict_500_reachable_via_known_levers"] is True)
+
+    # l: pending mode (no measured PPL) yields pending=True, reachable=None, both branches present
+    v_pending = verdict_given_ppl(None, b_star)
+    l_pending_mode = (v_pending["verdict_pending_measured_ppl"] is True
+                      and v_pending["strict_500_reachable_via_known_levers"] is None
+                      and v_pending["branch_ppl_violates_gate"]["reachable"] is False
+                      and v_pending["branch_ppl_viable"]["reachable"] is True)
+
+    # m: PPL-excluded branch caps L_quant at 1.0x, BELOW the unconstrained int2 ceiling (~1.892)
+    m_ppl_caps_lquant = abs(int4["l_quant"] - 1.0) < TOL_EXACT and l_quant_of_b(2.0) > 1.5
+
+    # n: ladder monotonicity, and the live composite tops the ladder
+    ladder = [TPS_NONSPEC, TPS_SPEC_OFFSHELF_BI, BASELINE_TPS]
+    n_ladder_monotone = (ladder == sorted(ladder)
+                         and sub["tps_eff"] >= BASELINE_TPS
+                         and int4["tps_eff"] >= TPS_SPEC_OFFSHELF_BI)
+
+    # o: literature PPL prior is explicitly NON-authoritative (not the verdict gate)
+    o_literature_non_authoritative = d2["authoritative"] is False
+
+    # p: NaN clean (placeholder — finalized in main() after _nan_paths check)
+    p_nan_clean = True
 
     conditions = {
-        "a_lquant_amdahl_reproduces": bool(a_lquant_amdahl_reproduces),
-        "b_supply_cap_roundtrips_332": bool(b_supply_cap_roundtrips_332),
-        "c_ppl_headroom_positive": bool(c_ppl_headroom_positive),
-        "d_all_int2_violate_ppl_gate": bool(d_all_int2_violate),
-        "e_int2_overshoot_ratio_large": bool(e_overshoot_ratio_large),
-        "f_spec_precap_clears_500": bool(f_spec_precap_clears_500),
-        "g_spec_postcap_below_500": bool(g_spec_postcap_below_500),
-        "h_nonspec_far_below_500": bool(h_nonspec_far_below_500),
-        "i_verdict_not_reachable": bool(i_verdict_not_reachable),
-        "j_residual_gap_positive": bool(j_residual_gap_positive),
-        "k_nan_clean": bool(k_nan_clean),
+        "a_lquant_int2_reproduces": bool(a_lquant_int2_reproduces),
+        "b_lquant_int4_unit": bool(b_lquant_int4_unit),
+        "c_lquant_monotone_in_bits": bool(c_lquant_monotone),
+        "d_ceiling_roundtrips_anchors": bool(d_ceiling_roundtrips_anchors),
+        "e_ceiling_monotone_in_bits": bool(e_ceiling_monotone),
+        "f_supply_cap_roundtrips_332": bool(f_supply_cap_roundtrips_332),
+        "g_int4_branch_reproduces_nogo": bool(g_int4_branch_nogo),
+        "h_int4_precap_clears_500": bool(h_int4_precap_clears_500),
+        "i_subint4_branch_clears_500": bool(i_subint4_clears_500),
+        "j_subint4_b35_clears_500": bool(j_subint4_b35_clears_500),
+        "k_verdict_flips_at_ppl_gate": bool(k_verdict_flips_at_gate),
+        "l_pending_mode_emits_both_branches": bool(l_pending_mode),
+        "m_ppl_caps_lquant_below_unconstrained": bool(m_ppl_caps_lquant),
+        "n_ladder_monotone_and_topped": bool(n_ladder_monotone),
+        "o_literature_prior_non_authoritative": bool(o_literature_non_authoritative),
+        "p_nan_clean": bool(p_nan_clean),
     }
     return {
         "conditions": conditions,
@@ -505,13 +588,13 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict) -> dict[str, An
 # --------------------------------------------------------------------------- #
 # Synthesize
 # --------------------------------------------------------------------------- #
-def synthesize() -> dict[str, Any]:
-    d1 = deliverable1_lever_analysis()
-    d2 = deliverable2_ppl_exclusion()
-    d3 = deliverable3_composite_tps()
-    d4 = deliverable4_verdict(d3)
-    d5 = deliverable5_caveats()
-    st = _selftests(d1, d2, d3, d4, d5)
+def synthesize(measured_ppl: float | None, b_star: float) -> dict[str, Any]:
+    d1 = deliverable1_lever_analysis(b_star)
+    d2 = deliverable2_ppl_forecast()
+    d3 = deliverable3_composite_tps(b_star)
+    d4 = verdict_given_ppl(measured_ppl, b_star)
+    d5 = deliverable5_caveats(b_star)
+    st = _selftests(d1, d2, d3, d4, d5, b_star)
 
     headline = {
         # PRIMARY
@@ -523,22 +606,36 @@ def synthesize() -> dict[str, Any]:
         "strict_500_reachable_via_known_levers": d4["strict_500_reachable_via_known_levers"],
         "binding_constraint": d4["binding_constraint"],
         "residual_gap_to_500": d4["residual_gap_to_500"],
+        # pending-aware extras
+        "verdict_pending_measured_ppl": d4["verdict_pending_measured_ppl"],
+        "ppl_flip_threshold": d4["ppl_flip_threshold"],
+        "b_star": b_star,
+        "tps_eff_int4_branch": d3["int4_branch"]["tps_eff"],
+        "tps_eff_subint4_branch": d3["subint4_branch"]["tps_eff"],
+        "reachable_if_ppl_violates_gate": d4["branch_ppl_violates_gate"]["reachable"],
+        "reachable_if_ppl_viable_at_b_star": d4["branch_ppl_viable"]["reachable"],
     }
 
-    handoff = (
-        f"strict_500 NOT reachable via known levers. "
-        f"Spec composite optimistic {d3['tps_max_optimistic_spec']:.2f} TPS (pre-cap) vs "
-        f"supply cap {SUPPLY_CAP:.4f} TPS (#332) => effective {d3['tps_effective_optimistic_spec']:.4f} TPS. "
-        f"Residual gap {d4['residual_gap_to_500']:.2f} TPS. "
-        f"PPL gate locks L_quant=1.0x (best int2 +{INT2_PPL_DELTA_BEST:.2f} PPL >> "
-        f"{PPL_HEADROOM:.3f} PPL budget by ~{INT2_PPL_OVERSHOOT_RATIO:.0f}x). "
-        "Next lever must either raise the supply cap floor or discover a PPL-safe sub-int4 method."
-    )
+    if d4["verdict_pending_measured_ppl"]:
+        handoff = (
+            f"VERDICT HELD pending denken #356 measured ppl_at_best_sub_int4_bits at b*={b_star:g}bpw. "
+            f"Branch A (measured PPL > {PPL_GATE}): sub-int4 excluded -> int4 cap "
+            f"{d3['int4_branch']['tps_eff']:.4f} TPS NO-GO (gap {TARGET-d3['int4_branch']['tps_eff']:.4f}). "
+            f"Branch B (measured PPL <= {PPL_GATE}): sub-int4 LIVE -> cap rises to denken ceiling "
+            f"{d3['subint4_branch']['ceiling_tps']:.2f}, eff {d3['subint4_branch']['tps_eff']:.2f} TPS "
+            f"(+{d3['subint4_branch']['tps_eff']-TARGET:.2f}) -> approval-gated a10g candidate. "
+            f"The flip is EXACTLY the PPL gate at b*; L_step={L_STEP_OPTIMISTIC}, L_kernel={L_KERNEL_SPEC}."
+        )
+    else:
+        handoff = (
+            f"VERDICT RESOLVED at b*={b_star:g}bpw with measured PPL {d4['measured_ppl_at_b_star']:.4f}: "
+            + d4["verdict_text"]
+        )
 
     return {
         "headline": headline,
         "deliverable1_lever_analysis": d1,
-        "deliverable2_ppl_exclusion": d2,
+        "deliverable2_ppl_forecast": d2,
         "deliverable3_composite_tps": d3,
         "deliverable4_verdict": d4,
         "deliverable5_caveats": d5,
@@ -546,16 +643,18 @@ def synthesize() -> dict[str, Any]:
         "handoff": handoff,
         "imports": {
             "provenance": (
-                "wirbel #196 (TPS_NONSPEC=165.44), wirbel #326 (TPS_SPEC_OFFSHELF_BI=357.32, "
-                "ETA_KERNEL_OFFSHELF=0.3141), wirbel #354 (BASELINE_TPS=481.53 custom Marlin W4A16 kernel), "
-                "denken #332 y5cl0ena (SUPPLY_CAP=473.5295953446407 method-independent batched-verify BW floor, "
-                "LAMBDA_CEIL=520.9527323111674), denken #344 waterfall (BODY_FRAC=0.943 STEP_US=1218.2), "
-                "kasane #349 (FlashInfer batch-1 excluded: SDPA 36.05µs vs FlashInfer 48.20µs/layer). "
-                "Literature: QuIP# arXiv:2402.04396 (int2 +1.19 PPL); AQLM arXiv:2401.06118 (int2 +1.47 PPL); "
-                "QTIP arXiv:2406.11235 (int2 +1.70 PPL); TesseraQ+AWQ arXiv:2410.19103 (int2 +1.35 PPL); "
-                "Marlin arXiv:2408.11743 (W4A16 4-bit only); CUDA Graphs A10G arXiv:2605.30571v1 Table 3 "
-                "(H100 20.6% step overhead; A10G 3-5% ceiling). "
-                "PPL gate: deployed 2.3772 gate 2.42 headroom 0.043 (lawine eval contract)."
+                "lawine #196 (TPS_NONSPEC=165.44), wirbel #326 (TPS_SPEC_OFFSHELF_BI=357.32, "
+                "ETA_KERNEL_OFFSHELF=0.3141), wirbel #354 (BASELINE_TPS=481.53 int4 custom Marlin W4A16), "
+                "denken #332 y5cl0ena (ceiling(4.0)=473.5295953446407 method-independent batched-verify BW "
+                "floor, LAMBDA_CEIL=520.9527323111674), denken #356 ceiling(b) curve anchors {3.0:585, 3.5:523} "
+                "(advisor-relayed in PR #357 review), denken #344 waterfall (BODY_FRAC=0.943 STEP_US=1218.2), "
+                "kasane #349 (FlashInfer batch-1 excluded: SDPA 36.05us vs FlashInfer 48.20us/layer). "
+                "Literature PRIOR (non-authoritative): QuIP# arXiv:2402.04396 (int2 +1.19 PPL); "
+                "AQLM arXiv:2401.06118 (int2 +1.47 PPL); QTIP arXiv:2406.11235 (int2 +1.70 PPL); "
+                "TesseraQ+AWQ arXiv:2410.19103 (int2 +1.35 PPL); Marlin arXiv:2408.11743 (W4A16 4-bit only); "
+                "CUDA Graphs arXiv:2605.30571v1 Table 3 (H100 20.6% step overhead; A10G 3-5% ceiling). "
+                "PPL gate: deployed 2.3772 gate 2.42 headroom 0.043; the AUTHORITATIVE sub-int4 PPL is "
+                "denken #356's MEASURED Gemma-4-E4B value at b* (pending)."
             ),
             "caveats": d5["caveats"],
         },
@@ -579,57 +678,57 @@ def _nan_paths(node: Any, p: str = "result") -> list[str]:
 
 
 def _print_report(syn: dict) -> None:
-    h = syn["headline"]
     d1 = syn["deliverable1_lever_analysis"]
-    d2 = syn["deliverable2_ppl_exclusion"]
+    d2 = syn["deliverable2_ppl_forecast"]
     d3 = syn["deliverable3_composite_tps"]
     d4 = syn["deliverable4_verdict"]
     st = syn["self_test"]
+    b_star = d3["b_star"]
+    int4 = d3["int4_branch"]
+    sub = d3["subint4_branch"]
     print("\n" + "=" * 98, flush=True)
-    print("STRICT-500 COMPOSITE REACHABILITY (#357, fern) — can known levers reach 500 TPS?", flush=True)
+    print("STRICT-500 COMPOSITE REACHABILITY (#357, fern) — parameterized on measured b* PPL",
+          flush=True)
     print("=" * 98, flush=True)
-    print("  (D1) LEVER ANALYSIS", flush=True)
-    print(f"      L_kernel (spec substrate):   {d1['l_kernel_spec']:.3f}x  "
-          f"[custom Marlin W4A16 already in baseline #354]", flush=True)
-    print(f"      L_quant unconstrained:        {d1['l_quant_unconstrained']:.4f}x  "
-          f"(int2 Amdahl BW-bound)", flush=True)
-    print(f"      L_quant PPL-constrained:      {d1['l_quant_constrained']:.3f}x  "
-          f"[PPL gate forecloses sub-int4]", flush=True)
-    print(f"      L_step optimistic:            {d1['l_step_optimistic']:.2f}x  "
-          f"(CUDA Graphs A10G 3-5% ceiling)", flush=True)
-    print(f"      FlashInfer excluded:          {d1['flashinfer_excluded']}  "
-          f"[slower at batch=1 #349]", flush=True)
+    print("  (D1) LEVERS — L_quant and the supply cap are FUNCTIONS of body bits b", flush=True)
+    print(f"      L_kernel (spec):  {d1['l_kernel_spec']:.3f}x  [custom Marlin W4A16 in baseline #354]",
+          flush=True)
+    print(f"      L_quant(b):       {d1['l_quant_formula']}", flush=True)
+    print(f"        b=4 {l_quant_of_b(4.0):.4f}x  b=3 {l_quant_of_b(3.0):.4f}x  b=2 {l_quant_of_b(2.0):.4f}x"
+          f"   (gated by MEASURED Gemma PPL at b*, not literature)", flush=True)
+    print(f"      ceiling(b):       denken #356 anchors {d1['ceiling_anchors_advisor_relayed']}",
+          flush=True)
+    print(f"        b=4 {ceiling_of_b(4.0)['ceiling_tps']:.2f}  b=3.5 {ceiling_of_b(3.5)['ceiling_tps']:.2f}"
+          f"  b=3 {ceiling_of_b(3.0)['ceiling_tps']:.2f}  (RISES as body shrinks)", flush=True)
+    print(f"      L_step optimistic: {d1['l_step_optimistic']:.2f}x  (CUDA Graphs A10G 3-5%)", flush=True)
     print("-" * 98, flush=True)
-    print("  (D2) PPL EXCLUSION — SUB-INT4 VIOLATES GATE", flush=True)
-    print(f"      PPL gate={PPL_GATE:.3f}  deployed={PPL_DEPLOYED:.4f}  "
-          f"headroom={PPL_HEADROOM:.4f} PPL (~{PPL_HEADROOM/PPL_DEPLOYED*100:.1f}% relative)", flush=True)
-    print(f"      Best int2 (QuIP# arXiv:2402.04396): +{d2['best_int2_delta']:.2f} PPL  "
-          f"=> {PPL_DEPLOYED + d2['best_int2_delta']:.4f} PPL  "
-          f"[~{d2['overshoot_ratio_best']:.0f}x over budget]", flush=True)
-    print(f"      Worst int2 (QTIP arXiv:2406.11235): +{d2['worst_int2_delta']:.2f} PPL  "
-          f"[~{d2['overshoot_ratio_worst']:.0f}x over budget]", flush=True)
-    print(f"      Int3 best case (QuIP#/QTIP): +{d2['int3_delta_best']:.2f} PPL  "
-          f"[~{d2['int3_overshoot_ratio']:.1f}x over budget]  violates={d2['int3_violates_ppl_gate']}", flush=True)
-    print(f"      all_int2_violate={d2['all_int2_methods_violate_ppl_gate']}  "
-          f"marlin_sub_int4_incompatible={d2['marlin_sub_int4_incompatible']}", flush=True)
+    print("  (D2) SUB-INT4 PPL — LITERATURE PRIOR, NON-AUTHORITATIVE (verdict uses MEASURED Gemma PPL)",
+          flush=True)
+    print(f"      gate source: {d2['gate_source']}", flush=True)
+    print(f"      PPL gate={PPL_GATE:.3f} deployed={PPL_DEPLOYED:.4f} headroom={PPL_HEADROOM:.4f} "
+          f"(~{PPL_HEADROOM/PPL_DEPLOYED*100:.1f}% rel)", flush=True)
+    print(f"      literature int2 best (QuIP#): +{d2['best_int2_delta']:.2f} PPL -> would_violate_if_"
+          f"transplanted={d2['per_method_forecast'][0]['would_violate_if_transplanted']} "
+          f"(prior LEANS violate; not decisive)", flush=True)
     print("-" * 98, flush=True)
-    print("  (D3) COMPOSITE TPS CEILING", flush=True)
-    print(f"      Formula: tps_max = base * L_kernel * L_quant * L_step", flush=True)
-    print(f"      Spec substrate:   {d3['base_spec']:.2f} * {d3['l_kernel_spec']:.1f} * "
-          f"{d3['l_quant']:.1f} * {d3['l_step_optimistic']:.2f} = "
-          f"{d3['tps_max_optimistic_spec']:.2f} TPS (pre-cap)", flush=True)
-    print(f"      Supply cap #332:  {d3['supply_cap']:.4f} TPS  "
-          f"=> effective ceiling {d3['tps_effective_optimistic_spec']:.4f} TPS", flush=True)
-    print(f"      Non-spec substrate: {d3['base_nonspec']:.2f} * 1.0 * 1.0 * "
-          f"{d3['l_step_optimistic']:.2f} = {d3['tps_max_optimistic_nonspec']:.2f} TPS", flush=True)
-    print(f"      Residual gap to 500: {d3['residual_gap_to_500']:.4f} TPS", flush=True)
+    print("  (D3) COMPOSITE — two branches", flush=True)
+    print(f"      Branch A  int4 (PPL-excluded): {int4['base_lifted_tps']:.2f} * {int4['l_step']:.2f} = "
+          f"{int4['precap_tps']:.2f} precap | cap {int4['ceiling_tps']:.4f} -> eff {int4['tps_eff']:.4f} "
+          f"-> {'CLEARS' if int4['clears_500'] else 'SHORT'} 500", flush=True)
+    print(f"      Branch B  b*={b_star:g} (PPL-viable): {sub['base_lifted_tps']:.2f} * {sub['l_step']:.2f} = "
+          f"{sub['precap_tps']:.2f} precap | cap {sub['ceiling_tps']:.2f} -> eff {sub['tps_eff']:.2f} "
+          f"-> {'CLEARS' if sub['clears_500'] else 'SHORT'} 500 (margin {sub['margin_to_500']:+.2f})",
+          flush=True)
+    print(f"      Non-spec: {d3['base_nonspec']:.2f} * {L_STEP_OPTIMISTIC:.2f} = "
+          f"{d3['tps_max_optimistic_nonspec']:.2f} TPS (<< 500)", flush=True)
     print("-" * 98, flush=True)
     print("  (D4) VERDICT", flush=True)
-    print(f"      strict_500_reachable_via_known_levers (TEST) = "
-          f"{d4['strict_500_reachable_via_known_levers']}", flush=True)
-    print(f"      binding_constraint (TEST) = {d4['binding_constraint']}", flush=True)
-    print(f"      residual_gap_to_500 (TEST) = {d4['residual_gap_to_500']:.4f} TPS", flush=True)
-    print(f"      >> {d4['verdict']}", flush=True)
+    print(f"      verdict_pending_measured_ppl = {d4['verdict_pending_measured_ppl']}", flush=True)
+    print(f"      strict_500_reachable_via_known_levers = "
+          f"{d4['strict_500_reachable_via_known_levers']}  (None = pending)", flush=True)
+    print(f"      ppl_flip_threshold = {d4['ppl_flip_threshold']}  b_star = {b_star:g}bpw", flush=True)
+    print(f"      >> {d4['verdict_text']}", flush=True)
+    print(f"      flip: {d4['flip_explanation']}", flush=True)
     print("-" * 98, flush=True)
     print(f"  HAND-OFF: {syn['handoff']}", flush=True)
     print("-" * 98, flush=True)
@@ -654,11 +753,14 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
 
     syn = payload["synthesis"]
     d1 = syn["deliverable1_lever_analysis"]
-    d2 = syn["deliverable2_ppl_exclusion"]
+    d2 = syn["deliverable2_ppl_forecast"]
     d3 = syn["deliverable3_composite_tps"]
     d4 = syn["deliverable4_verdict"]
     st = syn["self_test"]
     h = syn["headline"]
+    int4 = d3["int4_branch"]
+    sub = d3["subint4_branch"]
+    b_star = d3["b_star"]
 
     run = init_wandb_run(
         job_type="strict-500-composite-reachability",
@@ -667,14 +769,16 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         group=args.wandb_group,
         tags=[
             "strict-500-composite-reachability", "composite-levers", "reachability",
-            "ppl-gate", "supply-cap", "cuda-graphs", "sub-int4", "quantization",
+            "ppl-gate", "supply-cap", "ceiling-curve", "denken-356-ceiling", "parameterized-b-star",
+            "verdict-pending", "measure-not-guess", "cuda-graphs", "sub-int4", "quantization",
             "amdahl", "marlin-w4a16", "validity-gate", "bank-the-analysis",
         ],
         config={
-            "baseline_tps": BASELINE_TPS,
+            "baseline_tps_int4": BASELINE_TPS,
             "tps_nonspec": TPS_NONSPEC,
             "tps_spec_offshelf_bi": TPS_SPEC_OFFSHELF_BI,
-            "supply_cap_332": SUPPLY_CAP,
+            "supply_cap_int4_332": SUPPLY_CAP_INT4,
+            "ceiling_anchors_bpw": {str(k): v for k, v in sorted(CEILING_ANCHORS_BPW.items())},
             "lambda_ceil": LAMBDA_CEIL,
             "ppl_gate": PPL_GATE,
             "ppl_deployed": PPL_DEPLOYED,
@@ -682,21 +786,20 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
             "body_frac": BODY_FRAC,
             "non_body_frac": NON_BODY_FRAC,
             "step_us": STEP_US,
-            "l_quant_unconstrained": L_QUANT_UNCONSTRAINED,
-            "l_quant_ppl_constrained": L_QUANT_PPL_CONSTRAINED,
             "l_step_optimistic": L_STEP_OPTIMISTIC,
             "l_step_floor": L_STEP_FLOOR,
             "l_kernel_spec": L_KERNEL_SPEC,
+            "b_star": b_star,
+            "measured_ppl_at_b_star": args.measured_ppl,
             "target": TARGET,
             "wandb_group": args.wandb_group,
             "source_runs": (
-                "wirbel#196, wirbel#326, wirbel#354, denken#332(y5cl0ena), "
-                "denken#344, kasane#349"
+                "lawine#196, wirbel#326, wirbel#354, denken#332(y5cl0ena), "
+                "denken#356(ceiling-curve), denken#344, kasane#349"
             ),
-            "literature": (
+            "literature_prior_non_authoritative": (
                 "QuIP# arXiv:2402.04396; AQLM arXiv:2401.06118; QTIP arXiv:2406.11235; "
-                "TesseraQ+AWQ arXiv:2410.19103; Marlin arXiv:2408.11743; "
-                "CUDA Graphs arXiv:2605.30571v1"
+                "TesseraQ+AWQ arXiv:2410.19103; Marlin arXiv:2408.11743; CUDA Graphs arXiv:2605.30571v1"
             ),
         },
     )
@@ -712,34 +815,42 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         # TEST metrics
         "tps_max_optimistic_nonspec": h["tps_max_optimistic_nonspec"],
         "tps_max_optimistic_spec": h["tps_max_optimistic_spec"],
-        "strict_500_reachable_via_known_levers": int(bool(h["strict_500_reachable_via_known_levers"])),
         "residual_gap_to_500": h["residual_gap_to_500"],
-        # detailed
-        "tps_effective_optimistic_spec": d3["tps_effective_optimistic_spec"],
-        "tps_max_floor_spec": d3["tps_max_floor_spec"],
-        "tps_max_optimistic_nonspec_floor": d3["tps_max_floor_nonspec"],
-        "supply_cap": d3["supply_cap"],
-        "l_quant_unconstrained": d1["l_quant_unconstrained"],
-        "l_quant_constrained": d1["l_quant_constrained"],
-        "l_step_optimistic": d1["l_step_optimistic"],
-        "l_step_floor": d1["l_step_floor"],
-        "int2_ppl_delta_best": d2["best_int2_delta"],
-        "int2_ppl_delta_worst": d2["worst_int2_delta"],
+        # pending-aware verdict
+        "verdict_pending_measured_ppl": int(bool(d4["verdict_pending_measured_ppl"])),
+        "ppl_flip_threshold": d4["ppl_flip_threshold"],
+        "b_star": b_star,
+        "reachable_if_ppl_violates_gate": int(bool(d4["branch_ppl_violates_gate"]["reachable"])),
+        "reachable_if_ppl_viable_at_b_star": int(bool(d4["branch_ppl_viable"]["reachable"])),
+        # branch composites
+        "tps_eff_int4_branch": int4["tps_eff"],
+        "tps_eff_subint4_branch": sub["tps_eff"],
+        "subint4_margin_to_500": sub["margin_to_500"],
+        "int4_precap_tps": int4["precap_tps"],
+        "subint4_precap_tps": sub["precap_tps"],
+        # parameterized levers / cap
+        "l_quant_at_b_star": d1["l_quant_at_b_star"],
+        "l_quant_int2_ceiling": d1["l_quant_int2_ceiling"],
+        "ceiling_at_b_star": d1["ceiling_at_b_star"],
+        "ceiling_at_b35": ceiling_of_b(3.5)["ceiling_tps"],
+        "l_step_optimistic": L_STEP_OPTIMISTIC,
+        "l_step_floor": L_STEP_FLOOR,
+        # literature prior (non-authoritative)
+        "lit_int2_delta_best": d2["best_int2_delta"],
+        "lit_int2_all_would_violate_if_transplanted": int(bool(
+            d2["literature_int2_all_would_violate_if_transplanted"])),
+        "lit_authoritative": int(bool(d2["authoritative"])),
         "ppl_headroom": PPL_HEADROOM,
-        "int2_overshoot_ratio_best": d2["overshoot_ratio_best"],
-        "all_int2_violate_ppl_gate": int(bool(d2["all_int2_methods_violate_ppl_gate"])),
-        "int3_delta_best": d2["int3_delta_best"],
-        "int3_violates_ppl_gate": int(bool(d2["int3_violates_ppl_gate"])),
-        "spec_clears_500_precap": int(bool(d3["spec_clears_500_precap"])),
-        "spec_clears_500_postcap": int(bool(d3["spec_clears_500_postcap"])),
-        "unconstrained_int2_also_supply_capped": int(bool(
-            d4["unconstrained_int2_also_supply_capped"])),
-        "tps_unconstrained_spec_precap": d4["tps_unconstrained_spec_precap"],
-        "tps_unconstrained_spec_postcap": d4["tps_unconstrained_spec_postcap"],
-        "baseline_tps": BASELINE_TPS,
+        "baseline_tps_int4": BASELINE_TPS,
         "peak_mem_mib": payload["peak_mem_mib"],
         **{f"selftest_{k}": int(bool(v)) for k, v in st["conditions"].items()},
     }
+    # resolved verdict only when measured PPL is present (avoid a misleading 0/1 while pending)
+    if d4["strict_500_reachable_via_known_levers"] is not None:
+        summary["strict_500_reachable_via_known_levers"] = int(bool(
+            d4["strict_500_reachable_via_known_levers"]))
+        summary["measured_ppl_at_b_star"] = d4["measured_ppl_at_b_star"]
+
     summary = {k: v for k, v in summary.items()
                if not (isinstance(v, float) and not math.isfinite(v)) and v is not None}
 
@@ -754,24 +865,30 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--self-test", action="store_true", help="run the PRIMARY self-validation")
+    ap.add_argument("--measured-ppl-at-best-sub-int4", "--measured-ppl",
+                    dest="measured_ppl", type=float, default=None,
+                    help="denken #356 MEASURED Gemma PPL at b* (omit -> verdict stays PENDING)")
+    ap.add_argument("--best-sub-int4-bits", "--b-star", dest="b_star", type=float,
+                    default=B_STAR_DEFAULT, help="sub-int4 bit-width b* for the PPL-viable branch")
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name", default=None)
-    ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group",
-                    default="strict-500-composite-reachability")
+    ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group", default="strict-frontier")
     args = ap.parse_args(argv)
 
-    syn = synthesize()
+    syn = synthesize(args.measured_ppl, args.b_star)
 
     created_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     peak_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     payload = {
         "created_at": created_at, "pr": 357, "agent": "fern",
-        "kind": "strict-500-composite-reachability", "analysis_only": True, "synthesis": syn,
+        "kind": "strict-500-composite-reachability", "analysis_only": True,
+        "measured_ppl_at_b_star": args.measured_ppl, "b_star": args.b_star,
+        "synthesis": syn,
         "peak_mem_mib": round(peak_kib / 1024.0, 3),
     }
     nan_paths = _nan_paths(payload)
     payload["nan_clean"] = not nan_paths
-    syn["self_test"]["conditions"]["k_nan_clean"] = not nan_paths
+    syn["self_test"]["conditions"]["p_nan_clean"] = not nan_paths
     syn["self_test"]["strict_500_composite_reachability_self_test_passes"] = bool(
         all(syn["self_test"]["conditions"].values()))
     syn["headline"]["strict_500_composite_reachability_self_test_passes"] = syn["self_test"][
