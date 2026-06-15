@@ -1,0 +1,83 @@
+# Run-granular attestation excerpt (PR #298, stark) — distilled from server logs
+# Raw server_run*.log + decode/*.jsonl are gitignored (bulky/reproducible);
+# the parsed per-run claim lives in ab_out/results.json (.aggregate.per_seed[].applied).
+# This file preserves the PRIMARY evidence lines so the parse can be audited without the ~23MB raw logs.
+
+=== ab_out/seed1/sdpa_s2/server_run00.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 1
+  sdpa-ab forced count   : 16
+  sdpa-ab HOOK FAILED    : 0
+    (EngineCore pid=395915) [sdpa-ab] PATCHED vllm.v1.attention.ops.triton_unified_attention.kernel_unified_attention -> num_stages=2
+    (EngineCore pid=395915) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=1)
+    (EngineCore pid=395915) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=2)
+=== ab_out/seed1/sdpa_s2/server_run01.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 1
+  sdpa-ab forced count   : 16
+  sdpa-ab HOOK FAILED    : 0
+    (EngineCore pid=397882) [sdpa-ab] PATCHED vllm.v1.attention.ops.triton_unified_attention.kernel_unified_attention -> num_stages=2
+    (EngineCore pid=397882) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=1)
+    (EngineCore pid=397882) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=2)
+=== ab_out/seed1/sdpa_s2/server_run02.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 1
+  sdpa-ab forced count   : 16
+  sdpa-ab HOOK FAILED    : 0
+    (EngineCore pid=399991) [sdpa-ab] PATCHED vllm.v1.attention.ops.triton_unified_attention.kernel_unified_attention -> num_stages=2
+    (EngineCore pid=399991) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=1)
+    (EngineCore pid=399991) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=2)
+=== ab_out/seed1/sdpa_s3/server_run00.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 0
+  sdpa-ab forced count   : 0
+  sdpa-ab HOOK FAILED    : 0
+=== ab_out/seed1/sdpa_s3/server_run01.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 0
+  sdpa-ab forced count   : 0
+  sdpa-ab HOOK FAILED    : 0
+=== ab_out/seed1/sdpa_s3/server_run02.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 0
+  sdpa-ab forced count   : 0
+  sdpa-ab HOOK FAILED    : 0
+=== ab_out/seed2/sdpa_s2/server_run00.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 1
+  sdpa-ab forced count   : 16
+  sdpa-ab HOOK FAILED    : 0
+    (EngineCore pid=411369) [sdpa-ab] PATCHED vllm.v1.attention.ops.triton_unified_attention.kernel_unified_attention -> num_stages=2
+    (EngineCore pid=411369) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=1)
+    (EngineCore pid=411369) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=2)
+=== ab_out/seed2/sdpa_s2/server_run01.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 1
+  sdpa-ab forced count   : 16
+  sdpa-ab HOOK FAILED    : 0
+    (EngineCore pid=413579) [sdpa-ab] PATCHED vllm.v1.attention.ops.triton_unified_attention.kernel_unified_attention -> num_stages=2
+    (EngineCore pid=413579) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=1)
+    (EngineCore pid=413579) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=2)
+=== ab_out/seed2/sdpa_s2/server_run02.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 1
+  sdpa-ab forced count   : 16
+  sdpa-ab HOOK FAILED    : 0
+    (EngineCore pid=416326) [sdpa-ab] PATCHED vllm.v1.attention.ops.triton_unified_attention.kernel_unified_attention -> num_stages=2
+    (EngineCore pid=416326) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=1)
+    (EngineCore pid=416326) [sdpa-ab] forced num_stages=2 on kernel_unified_attention (count=2)
+=== ab_out/seed2/sdpa_s3/server_run00.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 0
+  sdpa-ab forced count   : 0
+  sdpa-ab HOOK FAILED    : 0
+=== ab_out/seed2/sdpa_s3/server_run01.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 0
+  sdpa-ab forced count   : 0
+  sdpa-ab HOOK FAILED    : 0
+=== ab_out/seed2/sdpa_s3/server_run02.log ===
+  splitkv-verify wrapped : 1
+  sdpa-ab PATCHED        : 0
+  sdpa-ab forced count   : 0
+  sdpa-ab HOOK FAILED    : 0

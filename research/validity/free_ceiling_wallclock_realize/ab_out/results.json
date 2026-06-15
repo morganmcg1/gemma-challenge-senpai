@@ -1,0 +1,336 @@
+{
+  "experiment": "free_ceiling_wallclock_realize",
+  "pr": 298,
+  "student": "stark",
+  "question": "Does the banked 487.7 free step ceiling realize on a direct local wall-clock A/B?",
+  "lever": "verify SDPA num_stages 3->2 (wirbel #285/#279, denken #291)",
+  "zero_tps": true,
+  "not_a_launch": true,
+  "not_a_build": true,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seeds": [
+      1,
+      2
+    ]
+  },
+  "elapsed_s": 2962.5243413448334,
+  "aggregate": {
+    "per_seed": [
+      {
+        "seed": 1,
+        "s3_median": 453.6675684352002,
+        "s2_median": 456.6116234350551,
+        "s3_values": [
+          453.6675684352002,
+          453.5181720553507,
+          453.7625722416629
+        ],
+        "s2_values": [
+          456.6116234350551,
+          456.62156451825945,
+          456.31587219362314
+        ],
+        "delta_median_pct": 0.6489454403826059,
+        "verdict": "REAL",
+        "s3_projected_official": 480.97223389435584,
+        "s3_reproduces_k7": true,
+        "applied": {
+          "s2_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": true,
+              "forced_hits": 16,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run01.log",
+              "patched": true,
+              "forced_hits": 16,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run02.log",
+              "patched": true,
+              "forced_hits": 16,
+              "hook_failed": false,
+              "splitkv": true
+            }
+          ],
+          "s3_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run01.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run02.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            }
+          ],
+          "s2_runs_total": 3,
+          "s2_runs_patched": 3,
+          "s2_runs_failed_open": 0,
+          "s2_forced_log_hits": 48,
+          "s2_all_runs_patched": true,
+          "s3_baseline_unpatched": true,
+          "splitkv_all_runs": true,
+          "applied_ok": true,
+          "logs_found": true
+        }
+      },
+      {
+        "seed": 2,
+        "s3_median": 454.5089929541773,
+        "s2_median": 457.1516690991812,
+        "s3_values": [
+          454.5089929541773,
+          454.3528528048212,
+          454.55871422008585
+        ],
+        "s2_values": [
+          457.1516690991812,
+          457.3203634729002,
+          457.0692081912388
+        ],
+        "delta_median_pct": 0.5814353920320224,
+        "verdict": "REAL",
+        "s3_projected_official": 481.8643008145057,
+        "s3_reproduces_k7": false,
+        "applied": {
+          "s2_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": true,
+              "forced_hits": 16,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run01.log",
+              "patched": true,
+              "forced_hits": 16,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run02.log",
+              "patched": true,
+              "forced_hits": 16,
+              "hook_failed": false,
+              "splitkv": true
+            }
+          ],
+          "s3_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run01.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run02.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            }
+          ],
+          "s2_runs_total": 3,
+          "s2_runs_patched": 3,
+          "s2_runs_failed_open": 0,
+          "s2_forced_log_hits": 48,
+          "s2_all_runs_patched": true,
+          "s3_baseline_unpatched": true,
+          "splitkv_all_runs": true,
+          "applied_ok": true,
+          "logs_found": true
+        }
+      }
+    ],
+    "n_s3": 6,
+    "n_s2": 6,
+    "s3_pooled_p50_wall_tps": 454.05771252324206,
+    "s2_pooled_p50_wall_tps": 456.8453863547491,
+    "s3_pooled_values": [
+      453.6675684352002,
+      453.5181720553507,
+      453.7625722416629,
+      454.5089929541773,
+      454.3528528048212,
+      454.55871422008585
+    ],
+    "s2_pooled_values": [
+      456.6116234350551,
+      456.62156451825945,
+      456.31587219362314,
+      457.1516690991812,
+      457.3203634729002,
+      457.0692081912388
+    ],
+    "realized_delta_pct_wall": 0.6139470280144962,
+    "composed_delta_pct": 1.287324774110809,
+    "realization_ratio_487": 0.47691696793341565,
+    "classification": "partial",
+    "free_ceiling_realizes_on_wall": false,
+    "s3_projected_official_median": 481.4182673544308,
+    "measured_free_ceiling_tps": 484.3739204991722,
+    "measured_free_ceiling_tps_frontier_anchored": 484.48633912399816,
+    "free_ceiling_below_composed": true
+  },
+  "self_test": {
+    "free_ceiling_wallclock_realize_self_test_passes": true,
+    "required": {
+      "constants_exact": true,
+      "candidate_actually_applied_s2": true,
+      "ratio_consistent": true,
+      "all_tps_finite_positive": true,
+      "caveats_present": true,
+      "s3_reproduces_deployed_k7": true
+    },
+    "smoke": false,
+    "constants": {
+      "all_exact": true,
+      "mismatches": {},
+      "composed_delta_pct": 1.287324774110809,
+      "composed_matches_json": true
+    },
+    "caveats": {
+      "zero_tps": "This leg adds 0 TPS: it wall-audits the banked free step ceiling. It does NOT produce a \u2265500 build and does NOT change the served checkpoint. BASELINE stays 481.53; launch gate stays MEASURED \u2265500, human-approval-gated.",
+      "measures_deployed_not_built": "Measures the DEPLOYED stack + the banked greedy-safe num_stages 3\u21922 lever via a temporary reverted toggle \u2014 NOT a new build, NOT a submission, NOT an HF Job, NOT a launch, NOT open2.",
+      "wall_not_kernel": "487.7 is an analytically-composed / kernel-\u00b5s ceiling (no in-graph overlap in a standalone replay \u2192 an UPPER bound). This A/B measures the host-to-host wall, where the large FIXED serving overhead does not shrink with the \u00b5s saving; realization_ratio<1 quantifies the wall-vs-kernel gap (static-K precedent: \u22122.02)."
+    },
+    "candidate_applied_per_seed": {
+      "1": {
+        "s2_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": true,
+            "forced_hits": 16,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run01.log",
+            "patched": true,
+            "forced_hits": 16,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run02.log",
+            "patched": true,
+            "forced_hits": 16,
+            "hook_failed": false,
+            "splitkv": true
+          }
+        ],
+        "s3_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run01.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run02.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          }
+        ],
+        "s2_runs_total": 3,
+        "s2_runs_patched": 3,
+        "s2_runs_failed_open": 0,
+        "s2_forced_log_hits": 48,
+        "s2_all_runs_patched": true,
+        "s3_baseline_unpatched": true,
+        "splitkv_all_runs": true,
+        "applied_ok": true,
+        "logs_found": true
+      },
+      "2": {
+        "s2_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": true,
+            "forced_hits": 16,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run01.log",
+            "patched": true,
+            "forced_hits": 16,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run02.log",
+            "patched": true,
+            "forced_hits": 16,
+            "hook_failed": false,
+            "splitkv": true
+          }
+        ],
+        "s3_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run01.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run02.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          }
+        ],
+        "s2_runs_total": 3,
+        "s2_runs_patched": 3,
+        "s2_runs_failed_open": 0,
+        "s2_forced_log_hits": 48,
+        "s2_all_runs_patched": true,
+        "s3_baseline_unpatched": true,
+        "splitkv_all_runs": true,
+        "applied_ok": true,
+        "logs_found": true
+      }
+    },
+    "s3_reproduction_err_pct": 0.0969857477047781,
+    "s3_reproduces_deployed_k7": true,
+    "ratio_consistent": true,
+    "all_tps_finite_positive": true,
+    "toggle_reverted_clean": true
+  }
+}
