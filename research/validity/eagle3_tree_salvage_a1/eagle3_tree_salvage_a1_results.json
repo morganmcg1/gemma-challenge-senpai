@@ -1,0 +1,261 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T062037Z",
+  "eagle3_tree_salvage_a1_analysis_only": true,
+  "kind": "eagle3-tree-salvage-a1",
+  "nan_clean": true,
+  "peak_mem_mib": 13.656,
+  "pr": 309,
+  "self_test": {
+    "checks": {
+      "01_linear_operator_reproduces_300_c1_1p0": true,
+      "02_c1_recovery_feasible_within_measured_cov2": true,
+      "03_fusion_curve_in_unit_interval": true,
+      "04_reconciles_304_at_zero_salvage": true,
+      "05_eff_uniform_611_matches_304": true,
+      "06_primary_inversion_roundtrips_611": true,
+      "07_required_a1_monotone_in_width": true,
+      "08_required_a1_in_unit_and_below_304": true,
+      "09_relaxes_demand_positive_consistent": true,
+      "10_c1_at_073_in_band": true,
+      "11_rho_priv_e3_carry_exact": true,
+      "12_constants_imported_exact": true
+    },
+    "tree_salvage_a1_self_test_passes": true
+  },
+  "synthesis": {
+    "imported": {
+      "K_cal": 125.268,
+      "K_spec": 7,
+      "a1_deployed": 0.72925,
+      "a1_required_611_nosalvage": 0.9213011665456927,
+      "a_k_deployed": [
+        0.7292532942898975,
+        0.759556697719242,
+        0.7929794882639035,
+        0.8228,
+        0.8348727920920435,
+        0.8357919254658385,
+        0.8464932652113331
+      ],
+      "a_priv_raw": [
+        0.5991304839661618,
+        0.6893085026081717,
+        0.7464222790849783,
+        0.7736626492721749,
+        0.8477031613381011,
+        0.862379683274926,
+        0.885712826843481
+      ],
+      "a_pub_raw": [
+        0.728739760479042,
+        0.7589764102641635,
+        0.7924989076194682,
+        0.821702519412012,
+        0.8342716929825772,
+        0.8352594665096346,
+        0.8472621220149911
+      ],
+      "cov_W_measured": {
+        "2": 0.4165047789261015,
+        "3": 0.5714507731758489,
+        "4": 0.6531976066516435
+      },
+      "et_private_500": 3.991442347606731,
+      "et_target_611": 6.1112149873699195,
+      "frac_true_beyond_top4": 0.3468023933483565,
+      "official_public": 481.53,
+      "provenance": "salvage operator over wirbel #79 (z6wi4z4v) measured rank-coverage cov_W={2: 0.4165047789261015, 3: 0.5714507731758489, 4: 0.6531976066516435}; raw spine ladders ubel #258; deployed a_k lawine #300 (8t5q6sr0); E[T]=6.11 demand denken #304 (dtf1ouml) a_uniform=0.9213; rho_priv_e3 carry lawine #300.",
+      "rank1_top1_measured": 0.7335390946502057,
+      "rho2_by_depth": [
+        0.3967749261866909,
+        0.4306826178747361,
+        0.4133545310015898,
+        0.4284603421461897,
+        0.4351851851851852,
+        0.44471153846153844,
+        0.4095826893353941
+      ],
+      "rho_marginal": {
+        "2": 0.4165047789261015,
+        "3": 0.2655480090557997,
+        "4": 0.19075249320036264
+      },
+      "rho_priv_e3": 0.9421228821714434
+    },
+    "step1_linear_salvage": {
+      "a1_private_recovered": 0.728739760479042,
+      "c1_raw_private_public_ratio": 0.8221460066517015,
+      "c1_recovered_ratio": 1.0,
+      "cov_priv_required_to_recover_c1": 0.32332036068798914,
+      "measured_public_cov2": 0.4165047789261015,
+      "note": "linear-path salvage: the raw width-1 spine drops position-1 to priv/pub ratio 0.8221; recovering it to 1.0 needs private rank-2+ coverage 0.3233 at j=1, which is 0.7763 of the measured public cov2=0.4165 (OOD degradation >= 0.776) -- so the M=8 tree's rank-2 branch alone recovers lawine #300's c_1=1.0 cliff hold.",
+      "ood_degradation_factor_implied": 0.7762704704652486,
+      "reproduces_300_c1_held": true,
+      "rho_priv_e3_carry": 0.9421228821714434,
+      "salvage_feasible_on_linear_spine": true
+    },
+    "step2_fusion_curve": {
+      "a_eff_611_matches_304_0p9213": true,
+      "a_eff_uniform_for_611": 0.9213011665456927,
+      "cov_W_used": {
+        "2": 0.4165047789261015,
+        "3": 0.5714507731758489,
+        "4": 0.6531976066516435
+      },
+      "curve_in_unit_interval": true,
+      "effective_a1_curves": {
+        "W2": [
+          {
+            "a1_draft": 0.65,
+            "c1_eff": 0.7957766726241355
+          },
+          {
+            "a1_draft": 0.7,
+            "c1_eff": 0.8249514336778304
+          },
+          {
+            "a1_draft": 0.73,
+            "c1_eff": 0.8424562903100474
+          },
+          {
+            "a1_draft": 0.75,
+            "c1_eff": 0.8541261947315254
+          },
+          {
+            "a1_draft": 0.8,
+            "c1_eff": 0.8833009557852203
+          },
+          {
+            "a1_draft": 0.85,
+            "c1_eff": 0.9124757168389153
+          },
+          {
+            "a1_draft": 0.9,
+            "c1_eff": 0.9416504778926101
+          },
+          {
+            "a1_draft": 0.92,
+            "c1_eff": 0.9533203823140881
+          }
+        ],
+        "W3": [
+          {
+            "a1_draft": 0.65,
+            "c1_eff": 0.8500077706115472
+          },
+          {
+            "a1_draft": 0.7,
+            "c1_eff": 0.8714352319527546
+          },
+          {
+            "a1_draft": 0.73,
+            "c1_eff": 0.8842917087574792
+          },
+          {
+            "a1_draft": 0.75,
+            "c1_eff": 0.8928626932939623
+          },
+          {
+            "a1_draft": 0.8,
+            "c1_eff": 0.9142901546351698
+          },
+          {
+            "a1_draft": 0.85,
+            "c1_eff": 0.9357176159763774
+          },
+          {
+            "a1_draft": 0.9,
+            "c1_eff": 0.9571450773175849
+          },
+          {
+            "a1_draft": 0.92,
+            "c1_eff": 0.9657160618540679
+          }
+        ],
+        "W4": [
+          {
+            "a1_draft": 0.65,
+            "c1_eff": 0.8786191623280752
+          },
+          {
+            "a1_draft": 0.7,
+            "c1_eff": 0.895959281995493
+          },
+          {
+            "a1_draft": 0.73,
+            "c1_eff": 0.9063633537959437
+          },
+          {
+            "a1_draft": 0.75,
+            "c1_eff": 0.9132994016629109
+          },
+          {
+            "a1_draft": 0.8,
+            "c1_eff": 0.9306395213303287
+          },
+          {
+            "a1_draft": 0.85,
+            "c1_eff": 0.9479796409977466
+          },
+          {
+            "a1_draft": 0.9,
+            "c1_eff": 0.9653197606651643
+          },
+          {
+            "a1_draft": 0.92,
+            "c1_eff": 0.9722558085321314
+          }
+        ]
+      },
+      "note": "fusion-draft tree-recovered effective a1 = a1_draft + (1-a1_draft)*cov_W. At the deployed cliff level raw a1=0.73 the primary (W=4, cov=0.6532) tree lifts effective a1 to 0.9064 -- already 0.9838 of #304's 0.9213 effective demand, from a raw draft no better than today's linear spine.",
+      "primary_W": 4,
+      "primary_cov_W": 0.6531976066516435,
+      "salvage_operator": "c1_eff = a1_draft + (1 - a1_draft) * cov_W",
+      "tree_recovered_c1_at_a1_073": 0.9063633537959437
+    },
+    "step3_invert": {
+      "a1_draft_required_after_tree_salvage": 0.7730729805683441,
+      "a1_draft_required_by_W": {
+        "2": 0.8651251447964469,
+        "3": 0.8163598752994596,
+        "4": 0.7730729805683441
+      },
+      "a1_draft_required_floor": 0.3827524457956924,
+      "a1_req_zero_salvage": 0.9213011665456927,
+      "a1_required_611_nosalvage_304": 0.9213011665456927,
+      "a_eff_uniform_for_floor": 0.7859370709135267,
+      "cliffheld_a1_eff_at_raw_073": 0.9063633537959437,
+      "cliffheld_b_required": 0.9269253521675682,
+      "cliffheld_can_reach_611": true,
+      "deployed_step_floor_et": 3.991442347606731,
+      "note": "inverting the salvage: to reach #304's effective 0.9213 (E[T]=6.11) the raw fusion draft needs a1=0.7731 (primary W=4) -- 0.1482 below #304's no-salvage 0.9213, and only 0.0431 above the deployed linear's raw 0.73. Bracket: W=2 0.8651, W=3 0.8164, W=4 0.7731; zero-salvage 0.9213==#304. Cliff-HELD (raw a1=0.73): the tree lifts effective a1 to 0.9064 and 6.11 is reachable at effective deep b=0.9269<1.",
+      "reconciles_304_at_zero_salvage": true,
+      "roundtrip_effective_back": 0.9213011665456927,
+      "roundtrip_et_back": 6.111214987369919,
+      "roundtrip_reaches_611": true,
+      "salvage_relaxes_304_demand_by": 0.14822818597734866,
+      "salvage_relaxes_by_W": {
+        "2": 0.05617602174924585,
+        "3": 0.10494129124623308,
+        "4": 0.14822818597734866
+      }
+    },
+    "step4_verdict": {
+      "caveat": "cov_W is MEASURED on the deployed LINEAR spine (wirbel #79). A {2,21,39}-fusion EAGLE-3 draft has a distinct rank-2+ candidate distribution and rejection geometry; if its rank-1 misses fall further down the rank list (frac_beyond_top4 > the linear spine's 0.347), cov_W drops and a1_draft_required rises toward #304's 0.9213. The bracket [W2 0.8651, W4 0.7731] holds < 0.92 down to W=2; only literal zero-transfer (cov=0 -> 0.9213) restores #304's hard demand.",
+      "handoff": "GO/NO-GO: the M=8 verify-tree relaxes the EAGLE-3 drafter trainability demand from RED (raw a1->0.9213, +26% over the deployed linear's 0.73) to GREEN-YELLOW (raw a1->0.7731, just +5.9% over deployed), buying 0.1482 in raw a1 under full rank-2+ transfer (cov4=0.653); YELLOW pending confirmation that the {2,21,39} fusion draft inherits the linear spine's rank-2+ coverage.",
+      "salvage_relaxes_304_demand_by": 0.14822818597734866,
+      "verdicts": {
+        "cliffheld_breaks_via_tree_not_draft": true,
+        "relaxed_demand_below_deployed_plus_10pct": true,
+        "salvages_across_width_bracket": true,
+        "salvages_at_primary_W4": true,
+        "tree_salvages_a1_for_eagle3": true
+      }
+    },
+    "test_metric": {
+      "a1_draft_required_after_tree_salvage": 0.7730729805683441
+    }
+  },
+  "wandb_run_id": "7tkn4d9x"
+}
