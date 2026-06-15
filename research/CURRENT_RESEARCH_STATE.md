@@ -1,7 +1,27 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~07:46Z (cycle 52t — greedy-compliant pivot)
+- **Date:** 2026-06-15 ~07:58Z (cycle 52u — greedy-compliant pivot; 5 EAGLE-3 cards banked + 5 reseats read through the identity gate)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
+
+## 🆕 Cycle-52u Snapshot — 5 EAGLE-3 cards banked (8gpu-launch advisor); all 5 reseats read THROUGH the #192 identity gate; EAGLE-3-alone confirmed NON-compliant → the joint (identity-kernel + E[T]) path is the only strict-compliant >500 lane
+
+**This turn (07:50–07:55, merged by the 8gpu-launch advisor — correcting the 52t note's "Morgan merged #315/#298/#317" attribution; those were merged THIS invocation at 07:50. All 0-TPS bank-the-analysis EXCEPT #317, which SHIPS a served-file fix):**
+- **#317 boot-guard port — `xvirrfci` — SHIPS (HUMAN-APPROVED #272).** Byte-identical `_guard_included_router` port into the active `fa2sw_precache_kenyan/sitecustomize.py`; PPL Δ=0, token-identity 1.0, 128/128, guard-unit all-pass. Boot-insurance on the 481.53 submission; compliance-neutral. Human re-validates on a fresh runner before next launch.
+- **#298 free-ceiling wall-clock — `xp974x58`.** Only **47.7%** of composed kernel gains realize on wall-clock (`realization_ratio_487=0.4769`); free ceiling 484.37 does NOT realize → confirms step-side closure from the wall angle.
+- **#315 draft-dispatch — `jryber0b`.** The T6/T7 rewrite does NOT reintroduce #101 (`reintroduces_list_dispatch_risk=0`): MTP/EAGLE draft is ONEGRAPH/single-shape, not list-dispatched. Build-risk YELLOW cleared.
+- **#316 rank-coverage bar — `5lnz5jgb`.** Clearing E[T]=6.11 needs `max_frac_beyond_top4 ≤ 0.2907`, TIGHTER than the linear spine's 0.3468 → `linear_spine_clears_611_under_salvage=False`: the fusion head must BEAT linear coverage.
+- **#314 eager break-even — `fwqbz7zf`.** `rewrite_avoidable_at_build_target=False`: the un-rewritten eager path at E[T]=6.11 is 360–481 TPS (below 500 AND baseline); the loopgraph rewrite (+57…+140 TPS) is MANDATORY on the EAGLE-3 path.
+
+**★ THE #192 DIRECTIVE IS THE GOVERNING CONSTRAINT (greedy-token-identity = self-imposed HARD gate; answered + recorded 07:49Z).** Firm strategic consequence: **EAGLE-3-alone is NOT strictly compliant** — its verify reuses the same M-dependent int4 split-K GEMM that gives 481.53 its ~0.73% divergence (denken #232 `nxwv6pam`). The ONLY strict-compliant >500 lane = **batch-invariant int4 verify kernel (IDENTITY; wirbel #216 `pc8g6s04` / #227 `o674wmna`, λ-ceiling ~520.95, UNBUILT) + an E[T] lever (SPEED)**, jointly. This cycle's EAGLE-3 cards price the SPEED half; the IDENTITY half is the open gap.
+
+**Reseats (after the 5 merges — all read THROUGH the identity gate):**
+- denken #308→**#320** — EAGLE-3 step-regime demand (is #308's 0.8717 additive-upper bar real or a bookend?) — SPEED-side trainability closer.
+- stark #298→**#321** — does the 586 private projection survive stark's own 47.7% wall-clock realization haircut? — SPEED-side robustness.
+- ubel #315→**#322** — measured-read launch spec for #319 option-A. **STEERED (07:57):** the spec must capture the served greedy-identity RATE (not PPL+TPS alone) per #192; byte-exact is a HARD GO gate.
+- lawine #316→**#323** — can a trained fusion head hit lawine #316's ≤0.2907 coverage bar? — SPEED-side achievability.
+- wirbel #314→**#324** — does the M=8 EAGLE-3 verify preserve binding PPL≤2.42 + greedy-identity? **STEERED (07:57):** the divergence source is the int4 verify GEMM (denken #232 0.73%), NOT the acceptance rule → this is the EAGLE-3 IDENTITY-gate card; expected verdict = EAGLE-3-alone non-compliant, needs the batch-invariant kernel.
+
+**★ NEXT-SLOT PRIORITY (per #192): the IDENTITY half.** No student is currently on the batch-invariant int4 verify kernel (#216/#227) — the unbuilt IDENTITY lane the directive elevates to co-equal with the E[T] lever. The next idle slot (or non-colliding reseat) should target a cheap analytic precursor on the joint (identity-kernel + E[T]) compliant-500 path, NOT another EAGLE-3-SPEED facet. Building the kernel itself is human-approval-gated. **Current in-flight (8/8 seated):** denken #320, stark #321, ubel #322, lawine #323, wirbel #324, fern #318 (deep-private-tax), kanna #294 (phase-1 gate), land #245 (tree-decode build, co-advisor, non-terminal). The 52t in-flight list (#315/#316/#314 as "in-flight YELLOW-closers") is now superseded — those are MERGED.
 
 ## 🆕 Cycle-52t Snapshot — HUMAN DIRECTIVE: focus ONLY on greedy-decode-correct experiments (#192) → the COMPLIANT lane is now the frontier of record
 
