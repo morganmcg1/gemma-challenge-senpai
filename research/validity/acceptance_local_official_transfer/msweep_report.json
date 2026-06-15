@@ -1,0 +1,171 @@
+{
+  "pr": 276,
+  "leg": "acceptance local->official transfer: kernel-path M-sweep (local)",
+  "acceptance_transfer_analysis_only": true,
+  "m_sweep": [
+    1,
+    8,
+    16
+  ],
+  "n_prompts": 128,
+  "max_len": 256,
+  "total_positions": 32640,
+  "model_dir": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "peak_gpu_gb": 13.365448704,
+  "pair_identity": {
+    "1v8": 0.9927083333333333,
+    "1v16": 0.9924632352941176,
+    "8v16": 0.9928002450980392
+  },
+  "pair_divergence": {
+    "1v8": 0.007291666666666696,
+    "1v16": 0.007536764705882382,
+    "8v16": 0.0071997549019607865
+  },
+  "per_sequence_strict_pass_fraction": {
+    "1v8": 0.1640625,
+    "1v16": 0.1484375,
+    "8v16": 0.140625
+  },
+  "determinism_frac": {
+    "1": 1.0,
+    "8": 1.0,
+    "16": 1.0
+  },
+  "within_batch_frac": {
+    "1": 1.0,
+    "8": 1.0,
+    "16": 1.0
+  },
+  "decode_width_diagnostic": {
+    "M8": {
+      "status": "ran",
+      "m_width": 8,
+      "int4_body_bitexact_vs_M1": true,
+      "per_shape": {
+        "qkv_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "o_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "gate_up_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "down_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        }
+      }
+    },
+    "M16": {
+      "status": "ran",
+      "m_width": 16,
+      "int4_body_bitexact_vs_M1": true,
+      "per_shape": {
+        "qkv_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "o_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "gate_up_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        },
+        "down_proj": {
+          "bitexact_vs_M1": true,
+          "max_abs_diff_vs_M1": 0.0
+        }
+      }
+    }
+  },
+  "decomposition": {
+    "M1_to_M8": {
+      "boundary": "M1_to_M8",
+      "total_divergence": 0.007291666666666696,
+      "int4_marlin_body_share": 0.0,
+      "int4_marlin_body_bitexact": true,
+      "bf16_lmhead_attention_share": 0.007291666666666696,
+      "harness_measurement_share": 0.0,
+      "sum_check": 0.007291666666666696,
+      "sum_resid": 0.0
+    },
+    "M8_to_M16": {
+      "boundary": "M8_to_M16",
+      "total_divergence": 0.0071997549019607865,
+      "int4_marlin_body_share": 0.0,
+      "int4_marlin_body_bitexact": true,
+      "bf16_lmhead_attention_share": 0.0071997549019607865,
+      "harness_measurement_share": 0.0,
+      "sum_check": 0.0071997549019607865,
+      "sum_resid": 0.0
+    },
+    "M1_to_M16": {
+      "boundary": "M1_to_M16",
+      "total_divergence": 0.007536764705882382,
+      "int4_marlin_body_share": 0.0,
+      "int4_marlin_body_bitexact": true,
+      "bf16_lmhead_attention_share": 0.007536764705882382,
+      "harness_measurement_share": 0.0,
+      "sum_check": 0.007536764705882382,
+      "sum_resid": 0.0
+    }
+  },
+  "tau_acc_central": 1.0,
+  "tau_acc_band": {
+    "central": 1.0,
+    "envelope_halfwidth_conservative": 0.007536764705882382,
+    "envelope_halfwidth_served_width": 0.007291666666666696,
+    "low": 0.9924632352941176,
+    "high": 1.0075367647058824,
+    "interpretation": "tau_acc has NO systematic offset (central=1.0) because acceptance is a clock-invariant probability; only a small symmetric kernel-jitter envelope, bounded by the measured batch-variance argmax-flip rate. CONTRAST tau_lo=1.0352 (+3.5% systematic, hardware/clock on a RATE)."
+  },
+  "kernel_jitter_envelope": 0.007536764705882382,
+  "implied_official_lambda_at_local_bar": {
+    "local_lambda_hat": 0.9780112973731208,
+    "bar_operative": 0.9780112973731208,
+    "implied_official_central": 0.9780112973731208,
+    "implied_official_low_conservative": 0.9704745326672384,
+    "implied_official_high": 0.9855480620790031,
+    "clears_bar_central": true,
+    "clears_bar_conservative_low": false,
+    "safe_local_bar_for_official": 0.9855480620790031
+  },
+  "local_lambda_hat_transfers_to_official": true,
+  "tau_lo_contrast": {
+    "tau_lo": 1.0352356533046398,
+    "tau_lo_systematic_offset_pct": 3.5235653304639847,
+    "tau_acc_systematic_offset_pct": 0.0,
+    "why_different": "TPS is a RATE (clock-speed-dominated -> tau_lo=1.035 systematic); lambda_hat is a PROBABILITY (clock-invariant -> tau_acc=1.0, only kernel jitter)."
+  },
+  "imported_anchors": {
+    "int4_div_M1_M8_232": 0.007291666666666667,
+    "int4_body_bitexact_232": true,
+    "fp16_divergence_221": 0.01055908203125,
+    "lambda_bar_operative_249": 0.9780112973731208,
+    "lambda_bar_defended_249": 0.9807516141069097,
+    "k_cal_217": 125.268,
+    "e_t_linear_served": 3.844,
+    "official_baseline_52": 481.53,
+    "tau_lo_267": 1.0352356533046398
+  },
+  "self_test": {
+    "a_m8_reproduces_232_served_slice": true,
+    "a_served_point_roundtrips_481": true,
+    "b_decomp_shares_sum_to_total_resid0": true,
+    "c_controls_all_one": true,
+    "c_nan_clean_all_finite": true,
+    "d_tau_acc_band_reported": true,
+    "e_implied_official_at_bar_reported": true
+  },
+  "msweep_self_test_passes": true,
+  "served_point_roundtrip_resid": 0.00019200000002683737,
+  "m8_div_measured": 0.007291666666666696,
+  "m8_div_232_anchor": 0.007291666666666667
+}
