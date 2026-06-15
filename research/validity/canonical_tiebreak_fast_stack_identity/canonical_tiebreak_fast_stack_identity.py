@@ -465,6 +465,7 @@ def simulate_canonical_identity(positions: list, eps: float) -> dict:
     n_closed = 0          # was a flip, now agrees
     n_new = 0             # was agreeing, now a flip (the asymmetric-near-tie risk)
     n_unfixed = 0         # was a flip, still a flip
+    n_strict_reading_disagree = 0   # canonical M=8 verify vs VANILLA M=1 argmax (the #405/strict-reading control)
     band_trunc = 0
     disagreements = []
     for p in positions:
@@ -477,6 +478,11 @@ def simulate_canonical_identity(positions: list, eps: float) -> dict:
         ver_tok, _ = canonical_tiebreak(m8t, eps)
         base_flip = bool(p["is_flip"])             # vanilla argmax: m8_top1 != served m1_tok
         canon_disagree = (ref_tok != ver_tok)
+        # STRICT-READING control: if the scorer's reference is VANILLA M=1 argmax (literal "plain greedy AR",
+        # Issue #124/#192) rather than the submission's OWN canonical greedy (self-referential, land #414), then
+        # applying canonical only on the served M=8 side and comparing to vanilla M=1 == the #405 one-sided rule.
+        if ver_tok != p["m1_tok_id"]:
+            n_strict_reading_disagree += 1
         n_baseline_flip += int(base_flip)
         if _band_truncated(m8t, eps) or _band_truncated(m1t, eps):
             band_trunc += 1
@@ -498,13 +504,17 @@ def simulate_canonical_identity(positions: list, eps: float) -> dict:
             n_closed += 1
     identity_canonical = ((n - n_canon_disagree) / n) if n else float("nan")
     identity_baseline = ((n - n_baseline_flip) / n) if n else float("nan")
+    identity_strict_reading = ((n - n_strict_reading_disagree) / n) if n else float("nan")
     return {
         "eps": eps, "n_positions": n,
         "identity_baseline_argmax": identity_baseline,
         "identity_canonical_tiebreak": identity_canonical,
+        "identity_canonical_m8_vs_vanilla_m1": identity_strict_reading,
         "reaches_identity_1p0": bool(n_canon_disagree == 0),
+        "strict_reading_reaches_identity_1p0": bool(n_strict_reading_disagree == 0),
         "n_baseline_flips": n_baseline_flip,
         "n_canon_disagreements": n_canon_disagree,
+        "n_strict_reading_disagreements": n_strict_reading_disagree,
         "n_flips_closed": n_closed,
         "n_new_flips_introduced": n_new,
         "n_flips_unfixed": n_unfixed,
@@ -640,6 +650,9 @@ def compose_and_report(census: dict, a: argparse.Namespace) -> dict:
         # ---- supporting fast-stack detail ----
         "fast_identity_baseline_argmax": fast["sim"]["identity_baseline_argmax"],
         "fast_identity_canonical_tiebreak": fast["sim"]["identity_canonical_tiebreak"],
+        "fast_identity_canonical_m8_vs_vanilla_m1": fast["sim"]["identity_canonical_m8_vs_vanilla_m1"],
+        "fast_strict_reading_reaches_identity_1p0": fast["sim"]["strict_reading_reaches_identity_1p0"],
+        "fast_n_strict_reading_disagreements": fast["sim"]["n_strict_reading_disagreements"],
         "fast_n_flips_closed": fast["sim"]["n_flips_closed"],
         "fast_n_new_flips_introduced": fast["sim"]["n_new_flips_introduced"],
         "fast_n_flips_unfixed": fast["sim"]["n_flips_unfixed"],
@@ -842,6 +855,9 @@ def _print_console(r: dict) -> None:
           f"NEW={r['fast_n_new_flips_introduced']}  -> canon_disagreements={r['fast_n_canon_disagreements']}")
     print(f"     flip cases: same-pattern(a)={r['n_flips_same_pattern']}  diff-pattern(b)={r['n_flips_diff_pattern']}")
     print(f"     tie_floor_count={r['tie_floor_count']}  fraction={r['tie_floor_fraction']:.5f}")
+    print(f"     STRICT-reading control (canon M8 vs VANILLA M1): identity "
+          f"{r['fast_identity_canonical_m8_vs_vanilla_m1']:.7f}  reaches_1p0="
+          f"{r['fast_strict_reading_reaches_identity_1p0']}  (disagreements={r['fast_n_strict_reading_disagreements']})")
     print(f"  STRICT stack: baseline {r['strict_identity_baseline_argmax']:.7f}  ->  "
           f"canonical {r['strict_identity_canonical_tiebreak']:.7f}  (new={r['strict_n_new_flips_introduced']})")
     print("-" * 96)
@@ -889,6 +905,8 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
         "equiv_tps_fast_with_tiebreak", "tiebreak_residual_cost_tps", "tiebreak_is_zero_cost",
         "ppl_unchanged_under_canonical_tiebreak", "canonical_tiebreak_self_referential_consistent",
         "fast_identity_baseline_argmax", "fast_identity_canonical_tiebreak",
+        "fast_identity_canonical_m8_vs_vanilla_m1", "fast_strict_reading_reaches_identity_1p0",
+        "fast_n_strict_reading_disagreements",
         "fast_n_flips_closed", "fast_n_new_flips_introduced", "fast_n_flips_unfixed",
         "fast_n_canon_disagreements", "fast_all_flips_closed",
         "strict_identity_baseline_argmax", "strict_identity_canonical_tiebreak",
