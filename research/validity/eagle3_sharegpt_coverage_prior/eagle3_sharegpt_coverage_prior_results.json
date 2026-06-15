@@ -1,0 +1,323 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T085545Z",
+  "eagle3_sharegpt_coverage_prior_analysis_only": true,
+  "eval_composition_raw": {
+    "completion_lens_uniform": true,
+    "completion_tokens_each": 512,
+    "decode_loaded": true,
+    "freeform_conversational_frac": 0.0,
+    "generation_signatures": {
+      "by_source": {
+        "aime": {
+          "alpha_density": 0.5682544120294988,
+          "digit_density": 0.055335355177904964,
+          "has_answer_tail_frac": 0.0,
+          "has_option_enum_frac": 0.0,
+          "latex_density": 0.11388019217000475
+        },
+        "gpqa": {
+          "alpha_density": 0.6864648457669327,
+          "digit_density": 0.023735286271556758,
+          "has_answer_tail_frac": 0.0,
+          "has_option_enum_frac": 0.017543859649122806,
+          "latex_density": 0.07115133270838953
+        },
+        "mmlu_pro": {
+          "alpha_density": 0.68588291835665,
+          "digit_density": 0.026032122335689033,
+          "has_answer_tail_frac": 0.17543859649122806,
+          "has_option_enum_frac": 0.14035087719298245,
+          "latex_density": 0.04821740532486134
+        }
+      },
+      "overall": {
+        "alpha_density": 0.6732764400270094,
+        "digit_density": 0.028214353617997498,
+        "has_answer_tail_frac": 0.078125,
+        "has_option_enum_frac": 0.0703125,
+        "latex_density": 0.06561203717402629
+      }
+    },
+    "literal_answer_letter_token_frac": 0.000152587890625,
+    "loaded_from_disk": true,
+    "mcq_frac": 0.890625,
+    "mcq_prompts": 114,
+    "n_prompts": 128,
+    "reasoning_stem_frac": 1.0,
+    "src_counts": {
+      "aime": 14,
+      "gpqa": 57,
+      "mmlu_pro": 57
+    },
+    "token_weight_equals_prompt_weight": true
+  },
+  "kind": "eagle3-sharegpt-coverage-prior",
+  "nan_clean": true,
+  "peak_mem_mib": 21.129,
+  "pr": 330,
+  "self_test": {
+    "checks": {
+      "01_eval_is_100pct_reasoning_stem": true,
+      "02_eval_has_zero_freeform_chat": true,
+      "03_premise_freeform_refuted": true,
+      "04_mcq_majority": true,
+      "05_token_weight_eq_prompt_weight": true,
+      "06_source_mix_57_57_14": true,
+      "07_mcq_prompt_count_114": true,
+      "08_generations_are_reasoning_latex": true,
+      "09_answer_letter_token_near_absent": true,
+      "10_central_matches_fern_aggregate": true,
+      "11_linear_spine_below_bar": true,
+      "12_prior_misses_bar": true,
+      "13_bar_in_95_band_upper": true,
+      "14_p_clears_low": true,
+      "15_sourcemix_crossing_above_actual": true,
+      "16_letter_model_small_crossing": true,
+      "17_letter_headroom_large": true,
+      "18_verdict_is_likely_misses": true,
+      "19_p_in_unit_interval": true,
+      "20_constants_match_banked_323": true,
+      "21_caveats_carried": true
+    },
+    "sharegpt_coverage_prior_self_test_passes": true
+  },
+  "synthesis": {
+    "imported": {
+      "T_effective": 0.9213011665456927,
+      "fern34_aggregate_top4": 0.8902556121072153,
+      "fern34_per_source_top4": {
+        "aime": 0.957005303537408,
+        "gpqa": 0.9175953770859131,
+        "mmlu_pro": 0.846544405293677
+      },
+      "linear_uncond_top4_79": 0.9061043944685533,
+      "lit_top4_central": 0.913,
+      "lit_top4_range": [
+        0.899,
+        0.929
+      ],
+      "provenance": "build bar lawine #316 (5lnz5jgb) via lawine #323 (ceddxj20); per-source + aggregate top-4 fern #34 (gua9x68j, W&B-verified eval/* summary); linear spine wirbel #79 (z6wi4z4v); official 128 eval composition loaded live from official/main_bucket/.../speed_benchmark/data/eval_prompts_sharegpt.json + research/greedy_reference/google__gemma-4-E4B-it/decode_outputs.jsonl; source-identity confirmed by research/DATASET_ANALYSIS.md (2026-06-13). Composition->coverage prior, sensitivity, and verdict are this card (#330)."
+    },
+    "step1_eval_composition": {
+      "completion_lens_uniform": true,
+      "completion_tokens_each": 512,
+      "eval_file": "official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+      "freeform_conversational_frac": 0.0,
+      "generation_signatures": {
+        "by_source": {
+          "aime": {
+            "alpha_density": 0.5682544120294988,
+            "digit_density": 0.055335355177904964,
+            "has_answer_tail_frac": 0.0,
+            "has_option_enum_frac": 0.0,
+            "latex_density": 0.11388019217000475
+          },
+          "gpqa": {
+            "alpha_density": 0.6864648457669327,
+            "digit_density": 0.023735286271556758,
+            "has_answer_tail_frac": 0.0,
+            "has_option_enum_frac": 0.017543859649122806,
+            "latex_density": 0.07115133270838953
+          },
+          "mmlu_pro": {
+            "alpha_density": 0.68588291835665,
+            "digit_density": 0.026032122335689033,
+            "has_answer_tail_frac": 0.17543859649122806,
+            "has_option_enum_frac": 0.14035087719298245,
+            "latex_density": 0.04821740532486134
+          }
+        },
+        "overall": {
+          "alpha_density": 0.6732764400270094,
+          "digit_density": 0.028214353617997498,
+          "has_answer_tail_frac": 0.078125,
+          "has_option_enum_frac": 0.0703125,
+          "latex_density": 0.06561203717402629
+        }
+      },
+      "literal_answer_letter_token_frac": 0.000152587890625,
+      "loaded_from_disk": true,
+      "mcq_frac": 0.890625,
+      "mcq_prompts": 114,
+      "n_prompts": 128,
+      "note": "The official 128 eval (file 'eval_prompts_sharegpt.json') is 100% reasoning/STEM: mmlu_pro 57 / gpqa 57 / aime 14 (by id prefix). 114/128 prompts (89.1%) are multiple-choice (>=2 lettered options) 'ending in ANSWER: $LETTER'; the rest are open-form competition math. ZERO free-form conversational chat -> the '#323 free-form ShareGPT, ~0 MCQ' premise is REFUTED by the repo's own benchmark data (DATASET_ANALYSIS.md, 2026-06-13). ignore_eos=true forces exactly 512 tokens/prompt, so token-weight == prompt-weight == source proportions. The greedy decode shows LaTeX/math reasoning (latex char-density 0.066, digit 0.028); the literal committed answer-letter token is only ~0.0002 of all generated tokens (most 512-token chains never reach 'ANSWER:'), so the coverage drag is the reasoning-CoT VOCAB BREADTH, not a near-absent letter.",
+      "premise_freeform_sharegpt_refuted": true,
+      "reasoning_stem_frac": 1.0,
+      "src_counts": {
+        "aime": 14,
+        "gpqa": 57,
+        "mmlu_pro": 57
+      },
+      "src_fracs": {
+        "aime": 0.109375,
+        "gpqa": 0.4453125,
+        "mmlu_pro": 0.4453125
+      },
+      "token_weight_equals_prompt_weight": true
+    },
+    "step2_composition_to_coverage": {
+      "band_95": [
+        0.8510745645714178,
+        0.9294573392592126
+      ],
+      "bar_within_95_band": true,
+      "central_vs_fern_aggregate_abs_diff": 1.0339808099946168e-05,
+      "gap_to_bar": -0.031035214630377506,
+      "linear_spine_uncond_top4": 0.9061043944685533,
+      "misses_bar": true,
+      "native_adj_central_uncond_top4": 0.8999613070872817,
+      "note": "Official-eval prior = 57/57/14-weighted per-source unconditional top-4 = 0.8903 (== fern's benchmark-matched aggregate to 1.0e-05, because the holdout proportions match). It MISSES the 0.9213 bar by 0.0310. Conservative record-Bernoulli SE 0.0200 -> 95% band [0.8511, 0.9295] with the bar near the UPPER edge. P(clears) central ~ 0.060 (range 0.001..0.150 across SE and the +0.0097 native-vs-tf upside). Even the published fully-trained-head central (0.913) misses this reasoning eval; only the upper lit edge (0.929) clears.",
+      "official_eval_weights": {
+        "aime": 0.109375,
+        "gpqa": 0.4453125,
+        "mmlu_pro": 0.4453125
+      },
+      "p_clears_by_se": {
+        "se_0.010": 0.0009561618181923479,
+        "se_0.020": 0.06035974255675933,
+        "se_0.030": 0.150449566961721
+      },
+      "p_clears_central": 0.06031894029725235,
+      "p_clears_native_adj": 0.14293456903724336,
+      "p_clears_range": [
+        0.0009561618181923479,
+        0.150449566961721
+      ],
+      "per_source_top4": {
+        "aime": 0.957005303537408,
+        "gpqa": 0.9175953770859131,
+        "mmlu_pro": 0.846544405293677
+      },
+      "point_estimate_uncond_top4": 0.8902659519153152,
+      "record_bernoulli_se": 0.019995605787702757
+    },
+    "step3_sensitivity": {
+      "letter_model": {
+        "c_mcq_0.30": {
+          "sweep": {
+            "X_0.00": {
+              "clears": true,
+              "uncond_top4": 0.957005303537408
+            },
+            "X_0.05": {
+              "clears": true,
+              "uncond_top4": 0.9241550383605376
+            },
+            "X_0.10": {
+              "clears": false,
+              "uncond_top4": 0.8913047731836672
+            }
+          },
+          "x_cross": 0.054343757652303905
+        },
+        "c_mcq_0.40": {
+          "sweep": {
+            "X_0.00": {
+              "clears": true,
+              "uncond_top4": 0.957005303537408
+            },
+            "X_0.05": {
+              "clears": true,
+              "uncond_top4": 0.9291550383605376
+            },
+            "X_0.10": {
+              "clears": false,
+              "uncond_top4": 0.9013047731836672
+            }
+          },
+          "x_cross": 0.06410017420833661
+        },
+        "c_mcq_0.55": {
+          "sweep": {
+            "X_0.00": {
+              "clears": true,
+              "uncond_top4": 0.957005303537408
+            },
+            "X_0.05": {
+              "clears": true,
+              "uncond_top4": 0.9366550383605375
+            },
+            "X_0.10": {
+              "clears": false,
+              "uncond_top4": 0.9163047731836672
+            }
+          },
+          "x_cross": 0.08772400919938796
+        }
+      },
+      "letter_model_central_x_cross": 0.06410017420833661,
+      "letter_model_headroom_ratio": 420.0869016917548,
+      "literal_answer_letter_token_frac": 0.000152587890625,
+      "note": "(a) SOURCE-MIX axis (correct): cov(f)=f*0.9570+(1-f)*0.8821 crosses the bar at free-form(aime) fraction f=0.524; the eval sits at f=0.109 -> deep miss (needs ~5x more open-math content). (b) PR's X% answer-letter model (base@aime + X% letter@0.40): crosses at X=0.064; X in {0,5} clears, X=10 misses. But the eval's LITERAL answer-letter token fraction is ~0.0002 -> ~420x below the X-crossing, so this (wrong) model predicts CLEARS. That is exactly why the premise looked optimistic: it localizes the drag to a near-absent token. The DATA say the drag is the whole reasoning-CoT body (mmlu_pro 0.8465), which the source-mix axis captures and the letter axis misses.",
+      "sourcemix_aime_cov": 0.957005303537408,
+      "sourcemix_freeform_frac_actual": 0.109375,
+      "sourcemix_freeform_frac_crossing": 0.5235345229557187,
+      "sourcemix_mcq_blend_cov": 0.8820698911897952,
+      "sourcemix_sweep": {
+        "f_0.0000": {
+          "clears": false,
+          "freeform_frac": 0.0,
+          "uncond_top4": 0.8820698911897952
+        },
+        "f_0.1094": {
+          "clears": false,
+          "freeform_frac": 0.109375,
+          "uncond_top4": 0.8902659519153153
+        },
+        "f_0.2500": {
+          "clears": false,
+          "freeform_frac": 0.25,
+          "uncond_top4": 0.9008037442766983
+        },
+        "f_0.5000": {
+          "clears": false,
+          "freeform_frac": 0.5,
+          "uncond_top4": 0.9195375973636015
+        },
+        "f_0.5235": {
+          "clears": true,
+          "freeform_frac": 0.5235345229557187,
+          "uncond_top4": 0.9213011665456927
+        },
+        "f_0.7500": {
+          "clears": true,
+          "freeform_frac": 0.75,
+          "uncond_top4": 0.9382714504505048
+        },
+        "f_1.0000": {
+          "clears": true,
+          "freeform_frac": 1.0,
+          "uncond_top4": 0.957005303537408
+        }
+      }
+    },
+    "step4_verdict": {
+      "caveats": "PRIOR, NOT a measurement: built on fern #34's TEACHER-FORCED per-source coverage (root tf~native, gap +0.0097) over a holdout that MATCHES but is disjoint from the official 128. The record-Bernoulli SE is conservative (token-level SE is tighter -> even lower P). The 0.9213 bar is position-1 root coverage: necessary, NOT sufficient -- the deployed deep spine still caps E[T] at 4.91 (#316). fern #34 is the ONLY trained head and is undertrained (K=1, hard-CE, no soft-KD, no TTT); a better head is the only credible clear lever. No fusion checkpoint is deployed; the drafter BUILD stays human-gated. 0 TPS; greedy/PPL untouched; BASELINE 481.53 unchanged.",
+      "gap_to_bar": -0.031035214630377506,
+      "p_clears_range": [
+        0.0009561618181923479,
+        0.150449566961721
+      ],
+      "p_sharegpt_clears_0p9213": 0.06031894029725235,
+      "point_estimate_uncond_top4": 0.8902659519153152,
+      "rationale": "LIKELY-MISSES. (1) The official 128 'ShareGPT' eval is 100% reasoning/STEM (mmlu_pro 57 / gpqa 57 / aime 14); 89% are MCQ -- the '#323 free-form, ~0 MCQ' premise is REFUTED by the repo's own benchmark data. (2) The 57/57/14-weighted per-source prior is 0.8903 == fern's benchmark-matched aggregate, 0.031 BELOW the bar; P(clears) ~ 0.06. (3) The coverage drag is the reasoning-CoT vocab breadth, NOT the MCQ-answer-letter (which is ~0.02% of tokens) -- so the PR's letter-contamination intuition (which predicts a clear) mis-localizes the drag. (4) This RESOLVES #323's binding unknown by identifying the deployment distribution (reasoning, not free-form); #323's MARGINAL leaned on the optimistic free-form assumption, which is false.",
+      "reframes_329_read": "This is the PRIOR for fern #329's GPU-gated RANKPROBE_W=4 read over the official 128. Because those 128 ARE the reasoning/MCQ distribution (not free-form), the prior predicts the read lands ~0.89 (NO-GO), CONFIRMING the miss rather than discovering a clear. #323's 'what flips it' framed the official 128 as DIFFERENT from the reasoning holdout; they are the SAME distribution (the holdout is 'benchmark-matched', deduped against these 128), so the holdout aggregate 0.8903 is ALREADY an on-distribution estimate. The read would tighten the CI, not move the central.",
+      "supporting_coverage_estimate": "Official-eval unconditional top-4 prior = 0.8903 +- 0.0200 (record-Bernoulli), 0.0310 BELOW the 0.9213 bar. P(clears) ~ 0.060 (range 0.001..0.150). Verdict LIKELY-MISSES.",
+      "thresholds": {
+        "likely_clears_p>=": 0.7,
+        "likely_misses_p<": 0.3,
+        "toss_up_p>=": 0.3
+      },
+      "verdict": "LIKELY-MISSES",
+      "what_would_flip_it": "A CLEAR (>=0.9213) would require EITHER (i) the official 128 to be unexpectedly aime-like (free-form fraction ~0.52 vs the actual 0.11 -- contradicted by the on-disk ids), OR (ii) a BETTER-trained fusion head than fern #34 (soft-KD top-k calibration / more root training) lifting per-source coverage by >=0.031 uniformly -- plausible but UNTESTED, and even the published fully-trained-head central (0.913) still misses this reasoning eval."
+    },
+    "test_metrics": {
+      "official_eval_uncond_top4_prior": 0.8902659519153152,
+      "p_sharegpt_clears_0p9213": 0.06031894029725235,
+      "sharegpt_coverage_prior_self_test_passes": true,
+      "verdict": "LIKELY-MISSES"
+    }
+  },
+  "wandb_run_id": "hfrscdai"
+}
