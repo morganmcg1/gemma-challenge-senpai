@@ -1,0 +1,524 @@
+{
+  "config": {
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "ctx": 528,
+    "iters": 50,
+    "warmup": 40,
+    "rounds": 21,
+    "Ms": [
+      8,
+      16,
+      32
+    ],
+    "A10G_BW_GBPS": 600.0,
+    "ridge_ai": 208.33333333333334,
+    "deployed_num_layers": 37,
+    "model_dir": "/senpai-run/home/student-kanna/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+    "load_errors": {
+      "/tmp/osoi5-v0-baked": "AssertionError()"
+    },
+    "smoke": false,
+    "note": "paired-differencing component decomposition of the served int4 verify forward (denken #271 runner basis) vs the HBM-bandwidth roofline (kanna #269 anchor); num_stages=2 SDPA lever priced through the denken #271 step model + fern #274 phi. No serve change, no HF Job, no submission. Greedy+PPL pinned."
+  },
+  "per_m": {
+    "8": {
+      "full_us_measured": 5348.1268310546875,
+      "verify_us_imported": 5163.71,
+      "full_resid_pct": 3.5714017838857615,
+      "components": {
+        "qkv_proj": {
+          "us": 528.1381225585938,
+          "us_lo": 527.8606587790993,
+          "us_hi": 528.4155863380882,
+          "roofline_us": 248.04010666666665,
+          "bw_utilization": 0.46965007082810634,
+          "pct_of_full": 9.875198162689072,
+          "ai_flop_per_byte": 32.0,
+          "compute_bound": false
+        },
+        "o_proj": {
+          "us": 365.19927978515625,
+          "us_lo": 364.98175975599366,
+          "us_hi": 365.41679981431884,
+          "roofline_us": 166.20202666666665,
+          "bw_utilization": 0.4550995466487282,
+          "pct_of_full": 6.828545607119351,
+          "ai_flop_per_byte": 32.0,
+          "compute_bound": false
+        },
+        "gate_up_proj": {
+          "us": 2302.054443359375,
+          "us_lo": 2301.6855847961974,
+          "us_hi": 2302.4233019225526,
+          "roofline_us": 1639.2874666666667,
+          "bw_utilization": 0.7120976097656768,
+          "pct_of_full": 43.044125842194994,
+          "ai_flop_per_byte": 32.0,
+          "compute_bound": false
+        },
+        "down_proj": {
+          "us": 1234.94384765625,
+          "us_lo": 1234.6397104134196,
+          "us_hi": 1235.2479848990804,
+          "roofline_us": 820.9066666666666,
+          "bw_utilization": 0.6647319780770861,
+          "pct_of_full": 23.091147361827066,
+          "ai_flop_per_byte": 32.0,
+          "compute_bound": false
+        },
+        "sdpa": {
+          "us": 776.2124633789062,
+          "us_lo": 775.8812934360939,
+          "us_hi": 776.5436333217186,
+          "roofline_us": 270.7729066666667,
+          "bw_utilization": 0.34883864849061247,
+          "pct_of_full": 14.513725794080164,
+          "ai_flop_per_byte": 7.880597014925373,
+          "compute_bound": false
+        },
+        "lm_head": {
+          "us": 126.136474609375,
+          "us_lo": 125.85226854576621,
+          "us_hi": 126.42068067298379,
+          "roofline_us": 105.25354666666667,
+          "bw_utilization": 0.8344417980018903,
+          "pct_of_full": 2.358516890006141,
+          "ai_flop_per_byte": 8.0,
+          "compute_bound": false
+        }
+      },
+      "byte_model": {
+        "qkv_proj": {
+          "weight_bytes": 145489920.0,
+          "act_bytes": 3334144.0,
+          "total_bytes": 148824064.0,
+          "roofline_us": 248.04010666666665,
+          "ai_flop_per_byte": 32.0
+        },
+        "o_proj": {
+          "weight_bytes": 96993280.0,
+          "act_bytes": 2727936.0,
+          "total_bytes": 99721216.0,
+          "roofline_us": 166.20202666666665,
+          "ai_flop_per_byte": 32.0
+        },
+        "gate_up_proj": {
+          "weight_bytes": 969932800.0,
+          "act_bytes": 13639680.0,
+          "total_bytes": 983572480.0,
+          "roofline_us": 1639.2874666666667,
+          "ai_flop_per_byte": 32.0
+        },
+        "down_proj": {
+          "weight_bytes": 484966400.0,
+          "act_bytes": 7577600.0,
+          "total_bytes": 492544000.0,
+          "roofline_us": 820.9066666666666,
+          "ai_flop_per_byte": 32.0
+        },
+        "sdpa": {
+          "kv_bytes_denken": 160038912.0,
+          "kv_bytes_gqa": 40009728.0,
+          "total_bytes": 162463744.0,
+          "roofline_us": 270.7729066666667,
+          "roofline_us_gqa": 70.72426666666667,
+          "ai_flop_per_byte": 7.880597014925373
+        },
+        "lm_head": {
+          "weight_bytes": 62914560.0,
+          "total_bytes": 63152128.0,
+          "roofline_us": 105.25354666666667,
+          "ai_flop_per_byte": 8.0
+        }
+      },
+      "sum6_us": 5332.684631347656,
+      "remainder_us": 15.44219970703125,
+      "remainder_pct": 0.28874034208321014,
+      "ref_us": 284.75391387939453,
+      "ref_bytes": 134676064.0,
+      "ref_roofline_us": 224.46010666666666,
+      "ref_bw_utilization": 0.7882599526331185,
+      "ref_out": 26214,
+      "captured": {
+        "full": true,
+        "no_qkv_proj": true,
+        "no_o_proj": true,
+        "no_gate_up_proj": true,
+        "no_down_proj": true,
+        "no_sdpa": true,
+        "no_lm_head": true
+      },
+      "ref_captured": {
+        "ref": true
+      }
+    },
+    "16": {
+      "full_us_measured": 5599.661865234375,
+      "verify_us_imported": 5405.0,
+      "full_resid_pct": 3.6015146204324697,
+      "components": {
+        "qkv_proj": {
+          "us": 580.5877685546875,
+          "us_lo": 580.3767070551274,
+          "us_hi": 580.7988300542476,
+          "roofline_us": 253.59701333333334,
+          "bw_utilization": 0.4367935858597858,
+          "pct_of_full": 10.368264772544206,
+          "ai_flop_per_byte": 64.0,
+          "compute_bound": false
+        },
+        "o_proj": {
+          "us": 388.8128662109375,
+          "us_lo": 388.6438071031246,
+          "us_hi": 388.9819253187504,
+          "roofline_us": 170.74858666666665,
+          "bw_utilization": 0.43915364306394294,
+          "pct_of_full": 6.943506153914235,
+          "ai_flop_per_byte": 64.0,
+          "compute_bound": false
+        },
+        "gate_up_proj": {
+          "us": 2400.8102416992188,
+          "us_lo": 2400.6104164203475,
+          "us_hi": 2401.01006697809,
+          "roofline_us": 1662.0202666666667,
+          "bw_utilization": 0.6922747320047837,
+          "pct_of_full": 42.87420025492436,
+          "ai_flop_per_byte": 64.0,
+          "compute_bound": false
+        },
+        "down_proj": {
+          "us": 1263.4725952148438,
+          "us_lo": 1263.257471820376,
+          "us_hi": 1263.6877186093116,
+          "roofline_us": 833.536,
+          "bw_utilization": 0.6597183058475943,
+          "pct_of_full": 22.56337303256008,
+          "ai_flop_per_byte": 64.0,
+          "compute_bound": false
+        },
+        "sdpa": {
+          "us": 819.793701171875,
+          "us_lo": 819.6017726947991,
+          "us_hi": 819.9856296489509,
+          "roofline_us": 274.81429333333335,
+          "bw_utilization": 0.3352237190167393,
+          "pct_of_full": 14.640057219554317,
+          "ai_flop_per_byte": 15.529411764705882,
+          "compute_bound": false
+        },
+        "lm_head": {
+          "us": 145.037841796875,
+          "us_lo": 144.80913202739902,
+          "us_hi": 145.26655156635098,
+          "roofline_us": 105.64949333333334,
+          "bw_utilization": 0.7284270920226122,
+          "pct_of_full": 2.5901178551038173,
+          "ai_flop_per_byte": 16.0,
+          "compute_bound": false
+        }
+      },
+      "byte_model": {
+        "qkv_proj": {
+          "weight_bytes": 145489920.0,
+          "act_bytes": 6668288.0,
+          "total_bytes": 152158208.0,
+          "roofline_us": 253.59701333333334,
+          "ai_flop_per_byte": 64.0
+        },
+        "o_proj": {
+          "weight_bytes": 96993280.0,
+          "act_bytes": 5455872.0,
+          "total_bytes": 102449152.0,
+          "roofline_us": 170.74858666666665,
+          "ai_flop_per_byte": 64.0
+        },
+        "gate_up_proj": {
+          "weight_bytes": 969932800.0,
+          "act_bytes": 27279360.0,
+          "total_bytes": 997212160.0,
+          "roofline_us": 1662.0202666666667,
+          "ai_flop_per_byte": 64.0
+        },
+        "down_proj": {
+          "weight_bytes": 484966400.0,
+          "act_bytes": 15155200.0,
+          "total_bytes": 500121600.0,
+          "roofline_us": 833.536,
+          "ai_flop_per_byte": 64.0
+        },
+        "sdpa": {
+          "kv_bytes_denken": 160038912.0,
+          "kv_bytes_gqa": 40009728.0,
+          "total_bytes": 164888576.0,
+          "roofline_us": 274.81429333333335,
+          "roofline_us_gqa": 74.76565333333333,
+          "ai_flop_per_byte": 15.529411764705882
+        },
+        "lm_head": {
+          "weight_bytes": 62914560.0,
+          "total_bytes": 63389696.0,
+          "roofline_us": 105.64949333333334,
+          "ai_flop_per_byte": 16.0
+        }
+      },
+      "sum6_us": 5598.5150146484375,
+      "remainder_us": 1.1468505859375,
+      "remainder_pct": 0.020480711398981916,
+      "ref_us": 287.9487991333008,
+      "ref_bytes": 135136448.0,
+      "ref_roofline_us": 225.22741333333335,
+      "ref_bw_utilization": 0.7821786859721138,
+      "ref_out": 26214,
+      "captured": {
+        "full": true,
+        "no_qkv_proj": true,
+        "no_o_proj": true,
+        "no_gate_up_proj": true,
+        "no_down_proj": true,
+        "no_sdpa": true,
+        "no_lm_head": true
+      },
+      "ref_captured": {
+        "ref": true
+      }
+    },
+    "32": {
+      "full_us_measured": 6040.7806396484375,
+      "verify_us_imported": 5979.95,
+      "full_resid_pct": 1.0172432821083401,
+      "components": {
+        "qkv_proj": {
+          "us": 581.5496826171875,
+          "us_lo": 581.1390461893101,
+          "us_hi": 581.9603190450649,
+          "roofline_us": 264.71082666666666,
+          "bw_utilization": 0.45518179199302555,
+          "pct_of_full": 9.627061754240966,
+          "ai_flop_per_byte": 128.0,
+          "compute_bound": false
+        },
+        "o_proj": {
+          "us": 448.6962890625,
+          "us_lo": 448.42897149777787,
+          "us_hi": 448.96360662722213,
+          "roofline_us": 179.84170666666668,
+          "bw_utilization": 0.40080943625013155,
+          "pct_of_full": 7.427786503577017,
+          "ai_flop_per_byte": 128.0,
+          "compute_bound": false
+        },
+        "gate_up_proj": {
+          "us": 2505.318603515625,
+          "us_lo": 2504.879814542771,
+          "us_hi": 2505.757392488479,
+          "roofline_us": 1707.4858666666667,
+          "bw_utilization": 0.6815444008880196,
+          "pct_of_full": 41.47342459469659,
+          "ai_flop_per_byte": 128.0,
+          "compute_bound": false
+        },
+        "down_proj": {
+          "us": 1462.8250122070312,
+          "us_lo": 1462.5134998858805,
+          "us_hi": 1463.136524528182,
+          "roofline_us": 858.7946666666667,
+          "bw_utilization": 0.5870795614650886,
+          "pct_of_full": 24.21582738174325,
+          "ai_flop_per_byte": 128.0,
+          "compute_bound": false
+        },
+        "sdpa": {
+          "us": 883.3636474609375,
+          "us_lo": 883.0803988913096,
+          "us_hi": 883.6468960305654,
+          "roofline_us": 282.89706666666666,
+          "bw_utilization": 0.3202498398930056,
+          "pct_of_full": 14.623335958650994,
+          "ai_flop_per_byte": 30.17142857142857,
+          "compute_bound": false
+        },
+        "lm_head": {
+          "us": 175.9442138671875,
+          "us_lo": 175.61853682642,
+          "us_hi": 176.269890907955,
+          "roofline_us": 106.44138666666667,
+          "bw_utilization": 0.6049723621318662,
+          "pct_of_full": 2.9126072334490054,
+          "ai_flop_per_byte": 32.0,
+          "compute_bound": false
+        }
+      },
+      "byte_model": {
+        "qkv_proj": {
+          "weight_bytes": 145489920.0,
+          "act_bytes": 13336576.0,
+          "total_bytes": 158826496.0,
+          "roofline_us": 264.71082666666666,
+          "ai_flop_per_byte": 128.0
+        },
+        "o_proj": {
+          "weight_bytes": 96993280.0,
+          "act_bytes": 10911744.0,
+          "total_bytes": 107905024.0,
+          "roofline_us": 179.84170666666668,
+          "ai_flop_per_byte": 128.0
+        },
+        "gate_up_proj": {
+          "weight_bytes": 969932800.0,
+          "act_bytes": 54558720.0,
+          "total_bytes": 1024491520.0,
+          "roofline_us": 1707.4858666666667,
+          "ai_flop_per_byte": 128.0
+        },
+        "down_proj": {
+          "weight_bytes": 484966400.0,
+          "act_bytes": 30310400.0,
+          "total_bytes": 515276800.0,
+          "roofline_us": 858.7946666666667,
+          "ai_flop_per_byte": 128.0
+        },
+        "sdpa": {
+          "kv_bytes_denken": 160038912.0,
+          "kv_bytes_gqa": 40009728.0,
+          "total_bytes": 169738240.0,
+          "roofline_us": 282.89706666666666,
+          "roofline_us_gqa": 82.84842666666667,
+          "ai_flop_per_byte": 30.17142857142857
+        },
+        "lm_head": {
+          "weight_bytes": 62914560.0,
+          "total_bytes": 63864832.0,
+          "roofline_us": 106.44138666666667,
+          "ai_flop_per_byte": 32.0
+        }
+      },
+      "sum6_us": 6057.697448730469,
+      "remainder_us": -16.91680908203125,
+      "remainder_pct": -0.2800434263578188,
+      "ref_us": 328.5811233520508,
+      "ref_bytes": 136057216.0,
+      "ref_roofline_us": 226.76202666666666,
+      "ref_bw_utilization": 0.6901249358250797,
+      "ref_out": 26214,
+      "captured": {
+        "full": true,
+        "no_qkv_proj": true,
+        "no_o_proj": true,
+        "no_gate_up_proj": true,
+        "no_down_proj": true,
+        "no_sdpa": true,
+        "no_lm_head": true
+      },
+      "ref_captured": {
+        "ref": true
+      }
+    }
+  },
+  "pricing": {
+    "8": {
+      "sdpa_us": 776.2124633789062,
+      "sdpa_share": 0.14513725794080165,
+      "num_stages2_ratio": 1.097,
+      "delta_verify_us": 66.26830527761642,
+      "verify_new_us": 5097.4416947223835,
+      "step_base_us": 1177.1527741024963,
+      "step_new_us": 1163.3627676630992,
+      "projected_tps_gain_pct_num_stages2": 1.1853573814381013,
+      "projected_tps": 487.23785139883887
+    },
+    "16": {
+      "sdpa_us": 819.793701171875,
+      "sdpa_share": 0.14640057219554317,
+      "num_stages2_ratio": 1.09,
+      "delta_verify_us": 65.33629205919452,
+      "verify_new_us": 5339.663707940806,
+      "step_base_us": 1227.3636651132558,
+      "step_new_us": 1213.7676046066813,
+      "projected_tps_gain_pct_num_stages2": 1.1201535166182275,
+      "projected_tps": 486.92387522857166
+    },
+    "32": {
+      "sdpa_us": 883.3636474609375,
+      "sdpa_share": 0.14623335958650993,
+      "num_stages2_ratio": 1.092,
+      "delta_verify_us": 73.67314325701487,
+      "verify_new_us": 5906.276856742985,
+      "step_base_us": 1347.0070477094525,
+      "step_new_us": 1331.6761422989587,
+      "projected_tps_gain_pct_num_stages2": 1.1512487851608633,
+      "projected_tps": 487.0736082751851
+    }
+  },
+  "verdict": {
+    "verify_step_component_roofline_self_test_passes": true,
+    "max_verify_side_step_shaving_tps_gain_pct": 1.1853573814381013,
+    "projected_tps_gain_pct_num_stages2_M8": 1.1853573814381013,
+    "projected_tps_gain_pct_num_stages2_M16": 1.1201535166182275,
+    "projected_tps_gain_pct_num_stages2_M32": 1.1512487851608633,
+    "sdpa_share_M8": 0.14513725794080165,
+    "remainder_diag_pct_M8": 0.28874034208321014,
+    "comp_gain_verify_side_pct": 1.1853573814381013,
+    "honest_gain_verify_side_pct_lo": 0.14816967267976267,
+    "honest_gain_verify_side_pct_hi": 0.8712376753570045,
+    "stack_comp_pct": 5.575357381438101,
+    "stack_honest_pct_lo": 0.6969196726797626,
+    "stack_honest_pct_hi": 4.097887675357004,
+    "phi_corrected_verify_stack_tps_lo": 484.88587729985477,
+    "phi_corrected_verify_stack_tps_hi": 501.2625585231466,
+    "honest_et_real_floor_new_lo": 3.9637756675916607,
+    "honest_et_real_floor_new_hi": 3.8342756890972725,
+    "et_gap_pct_new_lo": 3.0816040226522956,
+    "et_gap_pct_new_hi": -0.2861611143215703,
+    "verify_side_alone_tps_comp": 487.23785139883887,
+    "verify_side_reaches_500_independently": false,
+    "combined_stack_tps_comp": 508.37701839883886,
+    "verify_step_shaving_greedy_safe": true,
+    "fp_reassociation_flag": "num_stages=2 (wirbel #270) is FP-reassociation-FREE: it only changes the cp.async software-pipeline depth, NOT the MMA tile / K-reduction order -> bit-identical (maxdiff=0.0). LOSSLESS RMSNorm/residual epilogue folds are also greedy-safe. EXCLUDED as NOT greedy-safe: int4-GEMM under-saturation recovery via num_warps / BLOCK_K / split-K -- those REASSOCIATE the bf16 sum (cf. lawine #246, kanna #269), correctness-safe by propose-only verify only, E[T] may drift.",
+    "greedy_identical_by_construction": true,
+    "ppl_pinned": 2.3772,
+    "ppl_ok": true,
+    "ridge_ai_flop_per_byte": 208.33333333333334,
+    "int4_gemm_compute_knee_M": 52.083333333333336,
+    "m16_bandwidth_bound": true,
+    "m32_bandwidth_bound": true,
+    "deployed_num_layers": 37,
+    "model_dir": "/senpai-run/home/student-kanna/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+    "nan_clean": true,
+    "peak_vram_gib": 12.478408813476562,
+    "vram_ok": true,
+    "frontier_tps": 481.53,
+    "lambda1_ceiling_tps": 520.953,
+    "k_cal": 125.268,
+    "step_served_us": 1218.2,
+    "g_d_deployed": 0.0191,
+    "n_tree": 5,
+    "k_spec": 7,
+    "phi_lo": 0.125,
+    "phi_hi": 0.735,
+    "honest_et_real_floor": 3.9914,
+    "draft_mlp_fold_pct": 4.39,
+    "verify_us_imported": {
+      "8": 5163.71,
+      "16": 5405.0,
+      "32": 5979.95
+    },
+    "num_stages2_ratio": {
+      "8": 1.097,
+      "16": 1.09,
+      "32": 1.092
+    },
+    "self_test_conditions": {
+      "a_component_sum": true,
+      "b_pricing_monotone": true,
+      "c_anchor_257": true,
+      "d_nan_clean": true,
+      "e_constants": true,
+      "f_phi_arith": true,
+      "g_priced_not_realized": true
+    },
+    "handoff_line": "the verify forward (verify_us(M), 88% of the step) decomposes at M=8 into {SDPA 15%, MLP 66%, lm_head 2%, KV 5%, io/residual 17%}; wirbel #270's num_stages=2 SDPA lever prices to +1.19% composition-TPS / +0.15..+0.87% phi-corrected honest; the total greedy-safe verify-side step-shaving is +1.19% composition / +0.15..+0.87% honest, which is the LEAST phi-discounted step lever (verify = dominant model-forward phase) and stacked with kanna #269's +4.39% draft fold buys +0.70..+4.10% honest margin on the E[T]-raise path -- shrinking fern #274's +3.8% E[T]_real-floor gap to -0.29..3.08% (composition-priced, 0 TPS measured; realization pending fern #274 phi / stark #273 wall-clock)."
+  }
+}
