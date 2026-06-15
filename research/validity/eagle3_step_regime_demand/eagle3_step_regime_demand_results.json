@@ -1,0 +1,239 @@
+{
+  "agent": "denken",
+  "created_at": "20260615T081305Z",
+  "eagle3_step_regime_demand_analysis_only": true,
+  "kind": "eagle3-step-regime-demand",
+  "nan_clean": true,
+  "peak_mem_mib": 15.156,
+  "pr": 320,
+  "self_test": {
+    "checks": {
+      "a01_mult_reproduces_deployed_et_3p844": true,
+      "a02_additive_strict_upper_bound": true,
+      "a03_additive_eq_mult_at_degenerate_endpoints": true,
+      "a04_additive_closed_form_1_plus_Ka": true,
+      "a05_additive_strictly_above_on_interior": true,
+      "b01_floor_demand_reproduces_bank": true,
+      "b02_lower_demand_reproduces_bank": true,
+      "b03_central_demand_reproduces_bank": true,
+      "b04_upper_demand_reproduces_bank": true,
+      "b05_aeff_central_reproduces_304_0p9213": true,
+      "b06_demand_monotone_in_et": true,
+      "b07_regimes_roundtrip_et": true,
+      "b08_demands_in_unit_interval": true,
+      "c01_native_clears_floor_strict": true,
+      "c02_native_clears_lower_strict": true,
+      "c03_native_clears_central_within_noise": true,
+      "c04_native_below_central_within_tf_spread": true,
+      "c05_native_misses_upper_bookend": true,
+      "d01_additive_premise_refuted_by_bw": true,
+      "d02_central_is_bracket_midpoint": true,
+      "d03_central_validates_293_modeled": true,
+      "d04_additive_upper_is_bookend": true,
+      "d05_op_below_bookend_gap_consistent": true,
+      "e01_yellow_resolved_flag": true,
+      "e02_operating_demand_is_central": true,
+      "e03_constants_imported_exact": true
+    },
+    "step_regime_demand_resolved_self_test_passes": true
+  },
+  "synthesis": {
+    "axis_a_composition": {
+      "additive_closed_form_1_plus_Ka": true,
+      "additive_eq_mult_at_all0": true,
+      "additive_eq_mult_at_all1": true,
+      "additive_err_vs_deployed": 2.777747463042258,
+      "additive_is_strict_upper_bound": true,
+      "composition_model": "multiplicative-geometric (chain / committed survivorship)",
+      "dominance_samples": [
+        {
+          "additive_ge_mult": true,
+          "et_additive": 6.621747463042258,
+          "et_mult": 3.851185944363104,
+          "gap": 2.770561518679154,
+          "ladder_mean": 0.8031067804346083
+        },
+        {
+          "additive_ge_mult": true,
+          "et_additive": 4.5,
+          "et_mult": 1.9921875,
+          "gap": 2.5078125,
+          "ladder_mean": 0.5
+        },
+        {
+          "additive_ge_mult": true,
+          "et_additive": 6.3998,
+          "et_mult": 3.825973124807212,
+          "gap": 2.573826875192788,
+          "ladder_mean": 0.7714
+        },
+        {
+          "additive_ge_mult": true,
+          "et_additive": 7.4491,
+          "et_mult": 6.111191210411806,
+          "gap": 1.3379087895881936,
+          "ladder_mean": 0.9212999999999999
+        },
+        {
+          "additive_ge_mult": true,
+          "et_additive": 5.2,
+          "et_mult": 3.656224,
+          "gap": 1.5437760000000003,
+          "ladder_mean": 0.6
+        },
+        {
+          "additive_ge_mult": true,
+          "et_additive": 5.2,
+          "et_mult": 1.579504,
+          "gap": 3.620496,
+          "ladder_mean": 0.6
+        }
+      ],
+      "et_additive_formula": "E[T]_UB = 1 + sum_j a_j  (strict upper bound; not physical)",
+      "et_deployed_additive": 6.621747463042258,
+      "et_deployed_recomputed": 3.851185944363104,
+      "et_multiplicative_formula": "E[T] = 1 + sum_d prod_{j<=d} a_j",
+      "mult_beats_additive_on_deployed": true,
+      "mult_err_vs_deployed": 0.0071859443631039355,
+      "reproduces_deployed_et_3p844": true,
+      "topology_justification": "A verify accepts the LONGEST matching prefix: draft position k is committed only if every position j<k on its tree path was committed (a reject triggers resample and discards the tail). So depth composition is the cumulative product prod_{j<=d} a_j -- multiplicative. The M=8 tree contributes BREADTH (W candidates per depth), which the rank-2+ salvage operator folds into a LIFTED per-depth effective acceptance c_eff = a + (1-a)*cov; it does NOT make the depths independent. The additive-independent E[T] credits a deep token whose ancestor was rejected -- impossible -- so it strictly upper-bounds E[T] and is never the operating composition."
+    },
+    "bookend_analysis": {
+      "additive_ignores_int4_on_marginal": true,
+      "additive_premise": "common additive harness overhead on linear & faithful => keep full harness chain delta 2234.6 us as the marginal",
+      "additive_premise_refuted_by_bw_decomp": true,
+      "additive_upper_is_bookend": true,
+      "bookend_inflation_over_operating_pct": 12.753901238096173,
+      "bw_util_pct_faithful": 59.89991548615931,
+      "bw_util_pct_linear": 11.469762580782996,
+      "bw_util_ratio_linear_starved": 5.222419824671747,
+      "central_is_bracket_midpoint": true,
+      "central_validates_293_gap": 0.01328501263008075,
+      "central_validates_293_modeled_6p1245": true,
+      "native_misses_bookend_by": 0.10026994500843711,
+      "operating_point_below_bookend_aeff": 0.03419366324470707,
+      "operating_point_below_bookend_et": 0.7476042603842474,
+      "operating_point_below_bookend_raw_a1": 0.09859696444009303,
+      "step_multiplier_band": [
+        1.744676699335575,
+        4.161395297380165
+      ],
+      "verdict": "The additive-upper E[T]=6.8588 -> raw-a1 0.8717 is a TRUE UPPER BOOKEND, not the operating point: its defining common-additive-overhead premise is refuted by #295's own bandwidth decomposition (linear 11.5% BW dispatch-bound vs faithful 59.9% BW, 5.2x starvation gap), and it ignores INT4 on the marginal -- both inflate it above the deployed truth, which sits between the regimes. The operating point is the validated central E[T]=6.1112 (bracket midpoint; corroborated by #293's independent modeled 6.1245, gap 0.0133), whose raw-a1 demand 0.7731 sits 0.0986 below the bookend in raw a1 (a 12.8% inflation). Native a1=0.7714 clears the operating point within its own native-vs-tf 0.0097 noise and misses ONLY the bookend (by 0.1003)."
+    },
+    "demand_band": {
+      "band_monotone_in_et": true,
+      "demand_band_by_regime": {
+        "additive_upper_6p86": 0.8716699450084371,
+        "central_6p11": 0.7730729805683441,
+        "deployed_step_floor_3p99": 0.3827524457956924,
+        "multiplicative_lower_5p36": 0.6585256596518201
+      },
+      "native_clears_lower_strict": true,
+      "native_clears_under_justified_regime": true,
+      "native_misses_upper": true,
+      "pr_band_multiplicative_measured_additive": {
+        "additive_upper_demand": 0.8716699450084371,
+        "measured_native_a1": 0.7714,
+        "multiplicative_central_demand": 0.7730729805683441,
+        "native_below_central_by": 0.0016729805683440846,
+        "native_sits_at_central_within_noise": true
+      },
+      "regimes": {
+        "central": {
+          "aeff_matches_bank": true,
+          "aeff_uniform": 0.9213011665456927,
+          "et_target": 6.1112149873699195,
+          "in_published_envelope": true,
+          "native_clears_strict": false,
+          "native_clears_within_noise": true,
+          "native_gap": -0.0016729805683440846,
+          "raw_a1_demand": 0.7730729805683441,
+          "raw_a1_demand_matches_bank": true,
+          "regime": "central_6p11",
+          "roundtrip_et": 6.111214987369919,
+          "roundtrip_ok": true
+        },
+        "lower": {
+          "aeff_matches_bank": true,
+          "aeff_uniform": 0.8815758815001999,
+          "et_target": 5.363610726985671,
+          "in_published_envelope": true,
+          "native_clears_strict": true,
+          "native_clears_within_noise": true,
+          "native_gap": 0.11287434034817989,
+          "raw_a1_demand": 0.6585256596518201,
+          "raw_a1_demand_matches_bank": true,
+          "regime": "multiplicative_lower_5p36",
+          "roundtrip_et": 5.3636107269856685,
+          "roundtrip_ok": true
+        },
+        "upper": {
+          "aeff_matches_bank": true,
+          "aeff_uniform": 0.9554948297903998,
+          "et_target": 6.858819247754167,
+          "in_published_envelope": false,
+          "native_clears_strict": false,
+          "native_clears_within_noise": false,
+          "native_gap": -0.10026994500843711,
+          "raw_a1_demand": 0.8716699450084371,
+          "raw_a1_demand_matches_bank": true,
+          "regime": "additive_upper_6p86",
+          "roundtrip_et": 6.858819247754166,
+          "roundtrip_ok": true
+        }
+      }
+    },
+    "honest500_floor": {
+      "aeff_uniform_for_floor": 0.7859370709135267,
+      "floor_basis": "E[T] for 500 TPS at the DEPLOYED-linear step (official = K_cal * E[T]). This is the floor IF the EAGLE-3 drafter added zero step cost; the EAGLE-3 fusion step is heavier, so the OPERATIVE target rises up the #295 Axis-B bracket.",
+      "honest500_floor_et": 3.991442347606731,
+      "native_a1": 0.7714,
+      "native_clears_floor": true,
+      "native_margin_over_floor": 0.3886475542043076,
+      "raw_a1_demand_floor": 0.3827524457956924,
+      "raw_a1_demand_floor_matches_bank": true
+    },
+    "imported": {
+      "K_cal": 125.268,
+      "K_spec": 7,
+      "a1_native_308": 0.7714,
+      "a1_native_tf_308": 0.7617,
+      "a1_required_611_nosalvage_304": 0.9213011665456927,
+      "a_k_deployed": [
+        0.7292532942898975,
+        0.759556697719242,
+        0.7929794882639035,
+        0.8228,
+        0.8348727920920435,
+        0.8357919254658385,
+        0.8464932652113331
+      ],
+      "corrected_target_mfuse3_293": 6.1245,
+      "cov4_79": 0.6531976066516435,
+      "et_private_500": 3.991442347606731,
+      "et_target_central_295": 6.1112149873699195,
+      "et_target_lower_295": 5.363610726985671,
+      "et_target_upper_295": 6.858819247754167,
+      "official_public": 481.53,
+      "provenance": "composition law kanna #217 (K_cal=125.268, step=1218.2us, tau=1.218) / honest-500 floor 500/K_cal=3.9914; deployed ladder a_k lawine #300 (8t5q6sr0); no-salvage 0.9213 denken #304 (dtf1ouml); step bracket [5.3636,6.1112,6.8588] + BW decomposition wirbel #295 (eagle3_step_profile) cross-checked by wirbel #293 modeled 6.1245; cov4=0.6532 wirbel #79 (z6wi4z4v); native a1=0.7714 / tf=0.7617 + banked demands denken #308 (5axqa6oa) over lawine #309 salvage; private-binding carry fern #305 go-card."
+    },
+    "residuals": {
+      "cov_transfer_yellow_OPEN": "UNCHANGED by this card: cov4=0.6532 is measured on the deployed LINEAR spine (wirbel #79); a {2,21,39}-fusion draft with rank-1 misses further down the list (frac_beyond_top4 > 0.347) would drop cov4 and raise the demand toward 0.9213. This card resolves the STEP regime, not the cov transfer.",
+      "private_binding_axis_OPEN": "UNCHANGED by this card: fern #305 go-card shows PRIVATE is the binding axis -- at the central target the private projection is 402.0 TPS (< 500) under the conservative x0.804 OOD factor, and even at the bracket top only 451.2 TPS. Closing the step-regime a1 YELLOW does NOT make the build GO.",
+      "scope": "0 TPS; LOCAL CPU-only analytic; BASELINE 481.53 untouched; greedy/PPL untouched; NO GPU/vLLM/HF Job/submission/served-file change. The drafter BUILD stays human-gated."
+    },
+    "test_metric": {
+      "raw_a1_required_operating_regime": 0.7730729805683441
+    },
+    "verdict": {
+      "additive_0p8717_is_stepcost_bookend_not_composition": true,
+      "axis_a_settled_multiplicative": true,
+      "headline": "RESOLVED: the 0.8717 'additive' a1-demand is a STEP-COST (Axis-B) UPPER BOOKEND, not a live E[T]-composition demand. The E[T] acceptance composition (Axis A) is settled MULTIPLICATIVE (additive-independent is a strict upper bound on E[T], never the operating model), so BOTH 0.7731 and 0.8717 already ride the multiplicative chain and differ ONLY in the #295 step-cost regime. The operating point is the validated CENTRAL regime: raw-a1 demand 0.7731, which the native {2,21,39} head's a1=0.7714 meets within its own 0.0097 native-vs-tf noise. 0.8717 is the pessimistic upper bookend (operating point sits 0.0986 below it in raw a1); native misses ONLY that bookend.",
+      "native_clears_operating_regime": true,
+      "operating_regime_demand_raw_a1": 0.7730729805683441,
+      "spread_lives_on_axis_b_stepcost": true,
+      "step_regime_yellow_resolved": true
+    }
+  },
+  "wandb_run_id": "t7mt0jdp"
+}
