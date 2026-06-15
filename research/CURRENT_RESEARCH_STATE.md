@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~05:13Z (cycle 52l)
+- **Date:** 2026-06-15 ~05:27Z (cycle 52l)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
@@ -66,7 +66,7 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 |---------|-----|-----------|-------|--------|
 | wirbel  | #295 | EAGLE-3 fusion-drafter step profile (collapse the alarming 6.12 corrected-target band to the architecturally-honest ~5.0; A10G-profile the single-forward fusion cost) | Morgan | 🔄 WIP (reseat; #293 MERGED 04:31 → m_fuse×linear_draft model raises target 4.9029→6.1245, eats the free lever 19.4×; conservative-UPPER caveat) |
 | kanna   | #294 | EAGLE-3 Phase-1 viability gate (the cheap-proxy GO threshold before the human-gated retrain) | Morgan | 🔄 WIP (reseat; #289 MERGED 04:11 → acceptance cliff at POSITION 1 = 45.7% of E[T] loss, feasibility asymmetry: deep-lift feasible / a_1-only ceiling-bound ⇒ BUILT raise requires non-linear drafter) |
-| fern    | #287 | Read-reduction PPL pareto | Morgan | 🟡 review (corrected verdict 04:57: `read_reduction_lever_clears_500=False` — 497.49 TPS at the 8.43% PPL-safe body-read cut, needs 9.71%; Pareto bit-identical, self-test 11/11, run `17en3hus` supersedes; Morgan to bank the NULL) |
+| fern    | #302 | Read-cut as a FREE body-side BUILD companion (does the #287 8.43% PPL-safe read-cut stack as TPS within the build's 0.0428 PPL headroom, or under-realize/regress on the ONEGRAPH K=7 graph like static-K #273? — the read analog of lawine's SAM companion) | me | 🔄 WIP (reseat; #287 MERGED 05:25 by advisor, W&B-verified → max PPL-safe read-cut 8.43% but re-priced on denken #283's MEASURED 38% read-fraction the verdict FLIPS True→False `read_reduction_lever_clears_500=False`; the READ-side STANDALONE door is CLOSED) |
 | lawine  | #300 | Private-bar EAGLE-3 target (does the PUBLIC-E[T] build clear the binding PRIVATE ≥500 gate after ubel #263's 0.804 rank-2+ collapse? does EAGLE-3 deep-position j≥2 fidelity preferentially close the private gap?) | me | 🔄 WIP (reseat; #296 MERGED 05:10 → SAM sub-additively shrinks to [0.79,1.59]% under EAGLE-3, residual 0.902→0.998, r_overlap 0.6034; price the human GO/NO-GO vs 6.1245) |
 | denken  | #301 | EAGLE-3 build-cost card (GPU-hour SPEND to train the gated drafter: hidden-state capture pass + drafter train on A10G → total GPU-hr + wall-clock 8×A10G; feasible ≤200 GPU-hr?) | me | 🔄 WIP (reseat; #297 MERGED 05:11 → hard tail does NOT shift the cliff, DEEPENS a_1 at position 1; EAGLE-3 per-position target is UNIFORM, not prompt-adaptive) |
 | ubel    | #299 | EAGLE-3 build VRAM budget (does the {2,21,39} fusion drafter + hidden-state retention fit ≤24GB?) | me | 🔄 WIP (reseat; #284 MERGED 05:03 → decode loop 99.5% GPU-bound, host overhead 0.50%, host front CLOSED; the denken #278 M=1 over-credit made concrete = phantom 29.2%) |
@@ -121,8 +121,9 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 - **(f) FREE-CEILING realization** — stark #298 (WIP): does the banked 487.7 step ceiling realize on the wall, or over-credit like static-K (#273)?
 - **(g) PRIVATE-bar target** — lawine #300 (WIP, NEW): does the public-E[T] build clear the binding PRIVATE ≥500 gate after ubel #263's 0.804 rank-2+ collapse, and does EAGLE-3's deep-position fidelity (which lands exactly where the collapse lives) preferentially close it?
 - **(h) BUILD COST** — denken #301 (WIP, NEW): the GPU-hour SPEND to train the drafter (capture pass + drafter train on A10G) — the dollars side of the GO/NO-GO.
+- **(i) READ COMPANION** — fern #302 (WIP, NEW): is the #287 8.43% PPL-safe read-cut a FREE body-side companion that stacks TPS within the build's 0.0428 PPL headroom, or does it under-realize/regress on the ONEGRAPH K=7 graph like static-K (#273)? The read-side analog of lawine's SAM drafter-companion. The read STANDALONE door (#287) is now CLOSED (re-priced on denken #283's 38% read-fraction → `read_reduction_lever_clears_500=False`); this prices whether it survives as a build COMPANION.
 
-The matrix de-risks the human build decision on ALL of achievability, step cost, fit, validity, and dollar cost before any training spend.
+The matrix de-risks the human build decision on ALL of achievability, step cost, fit, validity, dollar cost, and free-companion stacking before any training spend.
 
 **Step-side consolidation — DONE this cycle (the step-side credit a built raise stacks on, now closed at the basis-honest level):**
 - wirbel #285 (lossless envelope, MERGED) + kanna #286 (bridge basis-honesty, MERGED): the FREE step ceiling is 487.7, the composed basis-honest stack is 493.64 — both <500. The step-side denominator is settled at both raw and basis-honest level.
