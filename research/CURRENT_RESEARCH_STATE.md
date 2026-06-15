@@ -1,146 +1,143 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~02:35Z (cycle 52j)
+- **Date:** 2026-06-15 ~03:05Z (cycle 52k)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
-## 🆕 Cycle-52j Snapshot (2026-06-15 ~02:35Z) — THREE decisive closures this cycle; one >500 candidate remains (SDPA linear deploy); pivot to orthogonal throughput levers
+## 🆕 Cycle-52k Snapshot — STEP-SIDE FULLY CLOSED; E[T]-raise is the sole remaining >500 axis
 
-**★ THE STRATEGIC TURN: All draft-pass-cut and tree-width levers are now definitively BELOW 500 at grounded measurements. The sole remaining >500 candidate is SDPA kernel mistuning (1.097× at M=8, verified bit-identical). Pivot fully to orthogonal levers: prefill denominator, acceptance numerator, and any residual kernel inefficiency.**
+**★ THE STRATEGIC TURN: Every standalone step-side >500 lever (draft AND verify) is now mapped sub-500 at grounded measurements. The 1218.2µs step is a NORMALIZED composition unit (denken #278), the verify forward is HBM-bound MLP-dominated (kanna #280), the verify SDPA tune is real but insufficient (wirbel #279, 487.8), prefill is 2.85% of wall (ubel #275), and the draft floor is 95% intrinsic-M=1 (kanna #277). The ONLY live path to 500 is raising E[T] (expected accepted tokens) — which is greedy-SAFE by construction because emission = verify argmax (the drafter only affects acceptance rate, not WHICH tokens are emitted).**
 
 ---
 
-## THREE Decisive Closures This Cycle
+## FOUR Decisive Closures This Cycle (52k)
 
-### 1. Tree WIDTH closed (denken #271 — deployed g_d)
-- Deployed `g_d = 0.0191` (vs assumed 0.168 — 9× lower, measured on live path)
-- M\* (optimal tree width) = 32 → predicted TPS = **479.6 < 500** (gap: −20.4 TPS, −4.1%)
-- Tree width is NOT the path to 500. Closed.
+### 1. The linear step is NORMALIZED, not a wall sum (denken #278 — `bu44n30q`)
+- Deployed M=1 linear verify = **4966.8µs** (CUDA-event, int4-body HBM-bound) — 4.08× the whole 1218.2µs step.
+- `step − draft − verify = −4455.4µs` (unphysical) → the **1218.2µs step is a batch-amortized normalized unit**.
+- HBM floor: one int4 forward MUST read 1.76 GB = 2934µs > whole step.
+- **bridge = step_norm/step_wall = 0.2147**; a batch=1 WALL draft saving over-credits by **4.82×**. kanna #269 +4.39% → **+0.91% basis-honest**.
 
-### 2. All draft-pass-cut levers below 500 (fern #274 — φ-correction)
-- Composition-overhead honesty: `φ_tree = 0.603` (tree-path wall step)
-- Honest static-K=4 ceiling: **493.96 TPS** (gap: −6.04 TPS, −1.2%)
-- Every draft-pass-cut scenario re-simulated with φ≤1: ALL below 500. Closed.
+### 2. Verify forward is HBM-bound MLP-dominated (kanna #280 — `sdrerk5h`)
+- M=8 decomposition: MLP **66.1%** (gate_up 43% @ 71.2% BW + down 23% @ 66.5% BW) / SDPA 14.5% @ 34.9% BW / io+attn 17% / lm_head 2.4%.
+- M≥8 batching lifts int4 GEMMs to **59–71% BW → approaching-roofline-intrinsic**; MLP slack reassociation-gated (greedy-UNSAFE).
+- Only greedy-safe verify lever = num_stages=2 SDPA = **+1.185%**.
 
-### 3. Draft decomposition COMPLETE (kanna #277 + wirbel #270)
-- Draft io_projection: **NULL** (INTRINSIC-M=1, already minimal, not the bottleneck)
-- Draft SDPA (wirbel #270): **MISTUNED** — 1.097×/1.090×/1.092× at M=8/16/32 (bit-identical, correctness confirmed)
-- Step decomposition pinned: `draft_k7 = 706.9 µs`, `residual = 511.3 µs`
-- ONE actionable kernel inefficiency identified: **verify SDPA linear deploy** → wirbel #279
+### 3. Verify SDPA tune insufficient standalone (wirbel #279 — `xme9snkv`)
+- num_stages=3→2 → **+1.29% (487.8 TPS)**; does NOT clear 500 even at inflated ctx=2048 (497.7).
+- Premise correction: served config is **MAX_NUM_SEQS=1 + SPLITKV_VERIFY** → M=8 verify routes to **3D split-KV TILE=16** (global head-512 collapses to 1.018×; sliding head-256 retains 1.093×).
+- **Bit-identical 0/128 (maxdiff=0.0)** — banked as a greedy-safe composable micro-lever.
 
-### 4. Acceptance transfer closed (lawine #276)
-- `τ_acc = 1.0 ± 0.0075` — local λ̂ is official proxy 1:1
-- Safe local bar: **λ̂ ≥ 0.9855** (↔ official ≥ 0.9780 with 3σ margin)
-- Local acceptance measurement is reliable. Closed.
+### 4. Prefill denominator CLOSED (ubel #275 — `s26cb1tv`)
+- Prefill = **2.849%** of wall at the official 512-token point; precache banks 1.65pp (82% prefix-cache hit). MTP drafter = 0 marginal prefill.
+- Wall is decode-dominated (97.15%). Prefill is not a material >500 lever.
 
 ---
 
 ## Current BASELINE
 
 ```
-481.53 TPS  (approval-gated-8gpu-20260613, merged)
+481.53 TPS  (approval-gated-8gpu-20260613, PR #52, fa2sw_precache_kenyan)
+PPL 2.3772 · 128/128 completion · λ=1 ceiling 520.95
 ```
 
-Official target: **500 TPS**. Gap: **−18.47 TPS (−3.7%)**.
+Official target: **500 TPS**. Gap: **−18.47 TPS (−3.835%)**. Private-verified 460.85 (Δ4.3%≤5%).
 
 ### Composition anchors (grounded, frozen)
 ```
 official = K_cal · (E[T]/step) · τ = 125.268 · (3.844/1218.2) · 1.218 = 481.53 TPS
+K_cal = 125.268 · step = 1218.2µs (NORMALIZED unit) · E[T] = 3.844 (K=7 linear) · τ = 1.218
 τ_lo  = 1.03524   (local→official TPS transfer, lawine #267)
 τ_acc = 1.0       (local→official acceptance transfer, lawine #276)
-φ_tree = 0.603    (composition overhead, fern #274)
-g_d (deployed) = 0.0191  (step-basis, denken #271)
-step decomp: draft_k7=706.9µs, residual=511.3µs  (kanna #277)
-safe local λ̂ bar = 0.9855  (↔ official 0.9780 + 3σ, lawine #276)
+bridge = 0.2147   (batch=1 wall draft → normalized step over-credit 4.82×, denken #278)
+φ_tree = 0.603    (tree-path wall-step fixed-overhead discount, fern #274 — DIFFERENT mechanism)
+g_d (deployed) = 0.0191  (tree width, denken #271 → M*=32 = 479.6 < 500)
+draft_k7 = 706.9µs · verify(M=8) = 5348µs · safe local λ̂ bar = 0.9855
+E[T] floor for honest 500 = 3.9914 (fern #274)
 ```
 
 ---
 
-## Active Roster (cycle 52j, 8/8 GPUs)
+## Active Roster (cycle 52k, 8/8 GPUs — step-side consolidation + E[T]-axis verdict)
 
-| Student | PR | Hypothesis | Status |
-|---------|-----|-----------|--------|
-| wirbel  | #279 | Verify SDPA linear deploy (1.097× at M=8, bit-identical) → TPS gain? | 🔄 WIP |
-| denken  | #278 | Prefill denominator: measure live prefill fraction, validate K_cal | 🔄 WIP |
-| kanna   | #280 | Acceptance numerator: λ̂ headroom to 0.9855 — what training change gets there? | 🔄 WIP |
-| fern    | #281 | Residual 511.3µs decomposition: what is the dominant term? | 🔄 WIP |
-| lawine  | #282 | E[T] sensitivity: marginal TPS per +0.01 λ̂ at current operating point | 🔄 WIP |
-| stark   | #273 | [ongoing from 52i] | 🔄 WIP |
-| ubel    | #275 | [ongoing from 52i] | 🔄 WIP |
-| land    | #245 | [ongoing from 52i] | 🔄 WIP |
+| Student | PR | Hypothesis | Owner | Status |
+|---------|-----|-----------|-------|--------|
+| fern    | #281 | E[T]-raise feasibility: three-axis Path-A closure verdict (sole live >500 axis) | me | 🔄 WIP |
+| lawine  | #282 | E[T] per-prompt distribution on 128 competition prompts (variance + upside) | me | 🔄 WIP |
+| wirbel  | #285 | Lossless micro-lever envelope (compose SDPA + sliding-only + lm_head + norm folds, bit-identical) | me | 🔄 WIP |
+| kanna   | #286 | Bridge basis-honesty re-pricing card (draft-side 0.21 vs verify-side 1.0; consolidated portfolio) | me | 🔄 WIP |
+| denken  | #283 | HBM intrinsic ceiling (the physics floor under the normalized step) | Morgan | 🔄 WIP |
+| ubel    | #284 | Decode-loop host overhead (CPU/scheduling fraction of wall) | Morgan | 🔄 WIP |
+| stark   | #273 | Static-K wall-clock (ongoing from 52i) | me | 🔄 WIP |
+| land    | #245 | Tree build (ongoing from 52i — awaiting terminal result) | me | 🔄 WIP |
+
+*(Roster shared with the parallel open2 advisor — re-survey live PR state before every assignment/merge.)*
 
 ---
 
 ## Portfolio Plateau Map (exhausted/closed levers)
 
-### Definitively CLOSED (at grounded measurements)
-- **Tree width (M\*)**: g_d=0.0191 → M\*=32 → 479.6 TPS. Below 500. Closed.
-- **Draft-pass-cut (all K, all φ≤1)**: Static-K=4 honest ceiling = 493.96 TPS. Below 500. Closed.
-- **Draft io_projection**: INTRINSIC-M=1, NULL contribution. Closed.
-- **ONEGRAPH/CUDAGraph**: Already deployed in 481.53 baseline. Closed.
-- **int4-Marlin body GEMMs**: Bit-exact across M=1/8/16, already deployed. Closed.
-- **TRITON_ATTN force-pin**: Already pinned for Gemma-4 (heterogeneous head dims). Closed.
-- **τ_acc measurement**: 1.0 ± 0.0075, local=official. Closed.
+### Step-side: DEFINITIVELY CLOSED (cycle 52k)
+- **Tree WIDTH (M\*)**: g_d=0.0191 → M\*=32 → 479.6 TPS. Empirically + HBM-floor closed (denken #271).
+- **Draft-pass-cut (all K, φ≤1)**: static-K=4 honest = 493.96 TPS. Closed (fern #274).
+- **Draft decomposition**: MLP+attn+io = 95.2% intrinsic-M=1; only GeluAndMul fold recoverable (+2.65% honest). Closed (kanna #277/#269, wirbel #270).
+- **Linear step normalization**: 1218.2µs is a normalized unit; batch=1 wall draft savings over-credit 4.82× (denken #278).
+- **Verify forward**: HBM-bound MLP 66%; int4 GEMMs approaching-roofline; only +1.185% greedy-safe SDPA (kanna #280).
+- **Verify SDPA tune**: +1.29% (487.8), insufficient standalone (wirbel #279).
+- **Prefill denominator**: 2.85% of wall, decode-dominated (ubel #275).
+- **GEMM-bandwidth**: PERMANENTLY CLOSED — HBM 1-wave saturation wall 83.6%, 0.0% speedup at any tile shape (PR #130/#117/#108).
+- **int4-Marlin body GEMMs**: bit-exact across M=1/8/16, already deployed. Closed.
+- **ONEGRAPH/CUDAGraph / TRITON_ATTN pin**: already deployed in 481.53. Closed.
+- **τ_acc**: 1.0 ± 0.0075, local=official. Closed (lawine #276).
 
-### ONE Actionable Candidate Remaining
-- **SDPA kernel mistuning (wirbel #279)**: 1.097× overhead at M=8, bit-identical. If linear-deploy removes this → +~9.7% on draft SDPA → net TPS gain TBD (draft_k7=706.9µs is ~58% of step). Potentially the last kernel lever above 500.
+### Step-side consolidation IN FLIGHT (banks credit, does NOT cross 500 alone)
+- **Lossless micro-lever envelope (wirbel #285)**: total greedy-safe bit-identical step-shaving (SDPA + sliding-only + lm_head epilogue + norm folds), composed. Sets the FREE step-side ceiling.
+- **Bridge basis-honesty card (kanna #286)**: classify each banked lever draft-side (bridge 0.21) vs verify-side (bridge 1.0); consolidated basis-honest portfolio card. Rigorously closes the step side.
 
-### Orthogonal Levers (not yet grounded)
-- **Prefill denominator (K_cal)**: Is 125.268 optimal? Is there prompt-length sensitivity? (denken #278)
-- **Acceptance numerator (λ̂)**: Current = 0.9780 official. Safe local bar = 0.9855. What closes the 0.0075 gap? (kanna #280)
-- **Residual 511.3µs**: What is it? Target-model pass? Sampling? Communication? (fern #281)
-- **E[T] sensitivity**: Marginal TPS per +0.01 λ̂ at current K=4, E[T]=3.844 operating point (lawine #282)
+### THE SOLE LIVE >500 AXIS: E[T]-raise (acceptance numerator)
+- **Why it's the only path:** `official = K_cal·(E[T]/step)·τ` — with step fully closed, only E[T] can move the numerator. Greedy-SAFE by construction (emission = verify argmax; drafter affects acceptance, not emitted tokens).
+- **The intrinsic-gap question (fern #119 → fern #281):** linear drafter E[T] caps at 3.8445 even at PERFECT capacity — "past-530 is PROVABLY tree-only." fern #281 is re-examining whether a better drafter (not wider tree) can raise E[T] above the 3.9914 honest-500 floor.
+- **Feasibility verdict (fern #281)** + **per-prompt E[T] distribution (lawine #282)** are the two legs grounding this axis.
 
 ---
 
-## Strategic Posture (cycle 52j)
+## Strategic Posture (cycle 52k)
 
 **Immediate (this cycle):**
-1. wirbel #279: SDPA linear deploy — the ONE remaining >500 kernel candidate
-2. denken #278: Prefill denominator ground truth
-3. kanna #280: λ̂ headroom measurement
-4. fern #281: Residual decomposition
-5. lawine #282: E[T] sensitivity curve
+1. fern #281: E[T]-raise feasibility verdict — is there ANY drafter change that lifts E[T] past 3.9914 honest?
+2. lawine #282: per-prompt E[T] distribution — where is the upside (which prompts under-accept)?
+3. wirbel #285 + kanna #286: consolidate the step-side into one coherent basis-honest portfolio card (banks the free credit the E[T] axis stacks on top of).
+4. denken #283 / ubel #284 (Morgan): HBM floor + host overhead — the physics under the normalized step.
 
-**If SDPA deploy clears 500 (wirbel #279 wins):**
-- Merge immediately
-- Pivot to acceptance numerator + prefill denominator to compound further
-- Assign cleanup PR to remove stale tree-width and draft-pass-cut experiment flags
+**If fern #281 finds E[T] headroom:**
+- The E[T]-raise lever is the next architectural swing (EAGLE/Medusa/Hydra/draft-distillation/retrieval-hybrid — researcher-agent exploring).
+- Stack on the lossless step envelope (wirbel #285) for compounding.
 
-**If SDPA deploy does NOT clear 500:**
-- The gap (−18.47 TPS) must come from orthogonal levers in combination
-- λ̂: +0.0075 headroom → ~+X TPS (lawine #282 will ground this)
-- Residual: if 511.3µs is reducible → compound with SDPA gain
-- Prefill K_cal: if prompt-length tunable → another compounding lever
+**If fern #281 confirms E[T] is capped (linear drafter intrinsic):**
+- Path-A (linear MTP) is closed below 500; the only >500 route is a TREE drafter that raises E[T] (not width) — a bigger architectural pivot.
+- Plateau Protocol escalation: new drafter architecture, not kernel/tree-width tuning.
 
-**Launch posture:** NEVER launch unilaterally. Route via `Approval request: HF job`. Publish-first (#124), human green-light required.
+**Launch posture:** NEVER launch unilaterally. Route via `Approval request: HF job`. Publish-first (#124), human green-light required. All cycle-52k deliverables are bank-the-analysis (0 TPS, baseline unchanged at 481.53).
 
 ---
 
 ## Recent Human Researcher Directives
 
-- (None new this cycle — operating under standing directives from 52h/52i)
-- Standing: maximize TPS on Fast Gemma Challenge; 500 TPS is the gate; compound every improvement; zero idle GPUs.
+- (None new this cycle — operating under standing directives.)
+- Standing: maximize single-stream TPS on Fast Gemma Challenge; 500 TPS is the gate (PPL≤2.42, 128/128); compound every improvement; zero idle GPUs.
 
 ---
 
-## Key Reference: TPS Formula
+## Key Reference: TPS Composition
 
 ```
-TPS = K_cal · (E[T] / step_wall) · τ_lo
+official = K_cal · (E[T] / step) · τ = 125.268 · (3.844 / 1218.2) · 1.218 = 481.53 TPS
 
-where:
-  K_cal     = calibration constant (125.268, measured)
-  E[T]      = expected accepted tokens = Σ_{k=1}^{K} λ̂^k  (approx K·λ̂ for λ̂ near 1)
-  step_wall = wall time per speculative step (µs)
-  τ_lo      = local→official TPS transfer (1.03524)
+  K_cal = 125.268    (calibration constant)
+  E[T]  = 3.844      (expected accepted tokens, K=7 linear MTP, M=8 verify)
+  step  = 1218.2µs   (NORMALIZED/batch-amortized composition unit — NOT a wall sum, denken #278)
+  τ     = 1.218
 
-At baseline:
-  481.53 = 125.268 · (3.844 / 1218.2) · 1.218
-           [NOTE: τ written as 1.218 above = τ_lo · φ correction absorbed into K_cal convention]
+To reach 500: need +3.835% (E[T] floor 3.9914). With step fully closed, the ONLY
+multiplicand that can move is E[T]. Bridge-discount all batch=1 wall draft savings
+by 0.2147; verify-side deployed-M=8 savings carry bridge≈1.0 (kanna #286 confirming).
 ```
-
-**To reach 500:** Need +3.86% TPS. Levers in order of estimated impact:
-1. SDPA kernel fix (wirbel #279): potentially +3–5% on draft wall time
-2. λ̂ improvement to 0.9855: +~1–2% on E[T]
-3. Residual reduction (fern #281): unknown until decomposed
-4. Prefill K_cal tuning (denken #278): unknown sensitivity
