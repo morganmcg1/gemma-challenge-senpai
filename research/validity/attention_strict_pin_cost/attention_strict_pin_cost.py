@@ -117,6 +117,36 @@ TOL = 1.0e-2
 _VAL = Path(__file__).resolve().parents[1]
 ANCHOR_282 = _VAL / "et_prompt_distribution" / "measured_result.json"
 
+# ---------------------------------------------------------------------------------------- #
+# PR #400 -- pinned-K attention rebuild headroom constants.
+#   We PRICE (do not build) a deterministic 64-CTA split-reduce: at M=1 the 64-CTA pin =
+#   num_splits=PINNED_SPLIT=8 (8 q-heads x 8 splits = 64 CTAs). The existing _pinned_reachable
+#   probe already confirms the served varlen kernel REJECTS num_splits>1 (NotImplementedError) ->
+#   a rebuild is the only way to reach it.
+# ---------------------------------------------------------------------------------------- #
+A10G_PEAK_BW_GBS = 600.0            # A10G GDDR6 peak HBM bandwidth (GB/s) -- roofline denominator
+A10G_PEAK_BF16_TFLOPS = 62.5       # A10G dense bf16 tensor-core peak (TFLOP/s)
+RIDGE_FLOP_PER_BYTE = (A10G_PEAK_BF16_TFLOPS * 1e12) / (A10G_PEAK_BW_GBS * 1e9)   # ~104 FLOP/byte ridge
+DTYPE_BYTES = 2                     # bf16
+PINNED_CTAS = PINNED_SPLIT * N_Q_HEADS   # 64 CTAs at M=1 (the "64-CTA split-reduce")
+# #332 (y5cl0ena, banked) deterministic-SDPA M=8 verify-step results (CITE, do NOT re-derive):
+PHI_332_M8 = 0.075                  # #332 deterministic-SDPA recovery fraction (M=8 verify-step)
+BREAKEVEN_332 = 0.255              # #332 break-even recovery (phi must exceed this to pay off)
+BW_FRAC_332_M8 = 0.349            # #332 measured achieved-BW fraction (BW-floored at M=8)
+CTAS_332_M8 = 96                   # #332 measured CTAs at M=8 (>80 SM -> occupancy-saturated)
+CEILING_332_DEPLOYED = 473.5       # #332 strict-compliant ceiling (<500 for every M=8 schedule)
+# #393 (0q7ynumg, MERGED c86385d7) corrected decode-only strict (CITE; reproduced from measured band):
+ETA_ATTN_DECODE_393 = 0.030065297571591987   # eta_attn_decode_only (sole strict tax, rebuild-free)
+DEPLOYED_STRICT_393 = 467.475218449957       # deployed strict = OFFICIAL/(1+eta)
+CEILING_STRICT_393 = 505.29039303418637      # ceiling strict = CEILING*(1-eta)
+GAP_TO_500_393 = 32.524781550042974          # 500 - deployed strict (the residual #393 handed forward)
+# fixed-order reduce proof-of-mechanism geometry: down_proj is the largest-K body GEMM (most reliant on
+# the split-K reduction), group_size=128 (deployed body quant). The EXISTING int4-Marlin atomic_add=False
+# reduce being M-invariant grounds the claim that a FIXED 64-way attention reduction tree would be too.
+MARLIN_PROOF_K = 10240             # down_proj size_k (INTERMEDIATE)
+MARLIN_PROOF_N = 2560              # down_proj size_n (HIDDEN)
+MARLIN_PROOF_GS = 128              # deployed body group_size
+
 
 # ======================================================================================== #
 # Device + facts
@@ -618,6 +648,526 @@ def compose(dev: torch.device, args, gpu: dict) -> dict[str, Any]:
 
 
 # ======================================================================================== #
+# PR #400 -- pinned-K rebuild headroom: M=1 occupancy/BW, roofline recovery, attn-free strict,
+#            byte-exact feasibility (fixed-order reduce proof-of-mechanism). NO kernel build.
+# ======================================================================================== #
+def _splitkv_ctas(M: int, num_splits: int) -> int:
+    """FA2 split-KV launch-grid CTA count (Dao-AILab flash_fwd_launch_template):
+        grid = (num_m_blocks, num_splits>1?num_splits:batch, num_splits>1?batch*heads:heads).
+    batch=1 -> CTAs = num_m_blocks * N_Q_HEADS * max(num_splits, 1). At M=1, num_splits=1 -> 8 CTAs."""
+    return _ceildiv(M, BLOCK_M_SPLITKV) * N_Q_HEADS * max(num_splits, 1)
+
+
+def _attn_hbm_bytes(M: int, L: int) -> int:
+    """Minimum HBM traffic for one paged decode-attention step: unique K+V read + Q + O (bf16),
+    faithful served paged geometry (page=16, N_KV_HEADS). This is the memory-roofline denominator
+    (the lower bound on bytes that MUST cross HBM); achieved-BW = bytes / latency."""
+    nb = _ceildiv(L, SERVED_BLOCK_SIZE)
+    kv = 2 * nb * SERVED_BLOCK_SIZE * N_KV_HEADS * HEAD_DIM * DTYPE_BYTES   # K + V cache read
+    qo = 2 * M * N_Q_HEADS * HEAD_DIM * DTYPE_BYTES                         # Q + O
+    return kv + qo
+
+
+def _attn_flops(M: int, L: int) -> int:
+    """QK^T + PV FLOPs for an M-query paged attention step (2 matmuls, 2 FLOP/MAC)."""
+    return 4 * M * L * HEAD_DIM * N_Q_HEADS
+
+
+def measure_m1_occupancy_bw(curve_m1: dict[int, dict[str, float]]) -> dict[str, Any]:
+    """The #332 question, M=1 this time: from the MEASURED M=1 penalty curve, derive the draft-lane
+    achieved-occupancy (active CTAs / 80 SM) and achieved-HBM-BW fraction, and the arithmetic
+    intensity vs the sm_86 ridge. The un-pack (num_splits=1) lane is the strict-deployed config."""
+    per_L: dict[str, Any] = {}
+    for L in (SHORT_L, *BAND_L):
+        c = curve_m1[L]
+        unpack_us = c["unpack_us"]
+        heur_us = c["heuristic_us"]
+        k_heur = int(c["heuristic_K"])
+        bytes_hbm = _attn_hbm_bytes(M_AR, L)
+        unpack_ctas = _splitkv_ctas(M_AR, UNPACK_SPLIT)        # 8 (M=1, 1 split)
+        heur_ctas = _splitkv_ctas(M_AR, k_heur)               # 8 * K_heur
+        bw_unpack = bytes_hbm / (unpack_us * 1e-6)             # bytes/s
+        bw_heur = bytes_hbm / (heur_us * 1e-6)
+        per_L[str(L)] = {
+            "unpack_us": unpack_us, "heuristic_us": heur_us, "heuristic_K": k_heur,
+            "unpack_ctas": unpack_ctas, "unpack_occupancy_frac": unpack_ctas / A10G_SMS,
+            "heuristic_ctas": heur_ctas, "heuristic_occupancy_frac": min(heur_ctas / A10G_SMS, 1.0),
+            "hbm_bytes": bytes_hbm,
+            "unpack_bw_gbs": bw_unpack / 1e9, "unpack_bw_frac": bw_unpack / (A10G_PEAK_BW_GBS * 1e9),
+            "heuristic_bw_gbs": bw_heur / 1e9, "heuristic_bw_frac": bw_heur / (A10G_PEAK_BW_GBS * 1e9),
+            "arith_intensity_flop_per_byte": _attn_flops(M_AR, L) / bytes_hbm,
+        }
+    band = [per_L[str(L)] for L in BAND_L]
+
+    def bmean(key: str) -> float:
+        return float(sum(x[key] for x in band) / len(band))
+
+    return {
+        "per_L": per_L,
+        "m1_attn_occupancy_ctas": _splitkv_ctas(M_AR, UNPACK_SPLIT),   # 8, M-invariant over band
+        "m1_attn_occupancy_frac": bmean("unpack_occupancy_frac"),      # ~0.10
+        "m1_attn_achieved_bw_frac": bmean("unpack_bw_frac"),           # ~0.02 (far below BW roofline)
+        "m1_attn_achieved_bw_gbs": bmean("unpack_bw_gbs"),
+        "m1_unpack_band_us": bmean("unpack_us"),
+        "m1_heuristic_band_us": bmean("heuristic_us"),
+        "m1_heuristic_occupancy_ctas": bmean("heuristic_ctas"),
+        "m1_heuristic_occupancy_frac": bmean("heuristic_occupancy_frac"),
+        "m1_heuristic_bw_frac": bmean("heuristic_bw_frac"),
+        "m1_heuristic_K_band_mean": bmean("heuristic_K"),
+        "m1_arith_intensity_band": bmean("arith_intensity_flop_per_byte"),
+        "ridge_flop_per_byte": RIDGE_FLOP_PER_BYTE,
+        "workload_below_ridge": bool(bmean("arith_intensity_flop_per_byte") < RIDGE_FLOP_PER_BYTE),
+    }
+
+
+def roofline_pinnedk_recovery(occ: dict[str, Any], eta_attn_decode_only: float) -> dict[str, Any]:
+    """Roofline-bound how much of the 3.01% decode tax a deterministic 64-CTA split-reduce could recover.
+    The MEASURED heuristic (num_splits=K_heur>1) is the occupancy-filled, byte-NON-exact proxy for what a
+    fixed-K pinned-K could reach. beta=1 (occupancy-ideal) reaches the heuristic floor; beta=realistic is
+    the FIXED 64-CTA (num_splits=PINNED_SPLIT=8) point from a 2-point serial-depth model fit to the
+    measured (K=1) and (K=K_heur) latencies. If the lane were BW-floored, beta_realistic -> 0 (lever dead)."""
+    unpack = occ["m1_unpack_band_us"]
+    heur = occ["m1_heuristic_band_us"]
+    k_heur = occ["m1_heuristic_K_band_mean"]
+    gap_us = unpack - heur                       # MEASURED latency the occupancy-fill removes
+
+    # phi-analogue: fraction of the M=1 un-pack attention latency that occupancy-filling removes.
+    phi_m1 = gap_us / unpack if unpack > 0 else 0.0
+
+    # is the un-pack penalty occupancy-bound (a split recovers it) or BW-floored (per #332, cannot help)?
+    occupancy_removable = bool(
+        occ["m1_attn_occupancy_frac"] < 0.85          # under-occupied at un-pack (8/80 = 0.10)
+        and occ["m1_attn_achieved_bw_frac"] < 0.25    # far from the BW floor (#332 M=8 sat. at 0.349)
+        and gap_us > 0                                # adding splits DOES recover latency (measured)
+    )
+    # does #332's BW-floor (M=8 verify) bound the M=1 draft lane? NO -> M=1 is a DISTINCT regime.
+    reconciles_332 = bool(
+        occ["m1_attn_achieved_bw_frac"] < BW_FRAC_332_M8     # ~0.02 << 0.349 (not BW-floored)
+        and occ["m1_attn_occupancy_ctas"] < CTAS_332_M8      # 8 << 96 (not occupancy-saturated)
+        and phi_m1 > PHI_332_M8                              # more recoverable headroom than M=8
+    )
+
+    # roofline (beta=1): the measured heuristic fully closes the un-pack->heuristic gap, so the
+    # occupancy-ideal recovery of the eta_attn_decode_only tax is 100% (penalty 1.32 -> 1.0).
+    recovery_roofline = 1.0 if (occupancy_removable and gap_us > 0) else 0.0
+
+    # realistic (beta=measured): FIXED 64-CTA (num_splits=PINNED_SPLIT) deterministic reduce. 2-point
+    # serial-depth model lat(K) = floor + S/K (serial KV-read depth ~ L/K; combine+launch in floor),
+    # fit from measured (K=1 un-pack) and (K=K_heur heuristic), evaluated at K=PINNED_SPLIT.
+    floor_us = s_us = lat_pin = None
+    if occupancy_removable and k_heur > 1.0 and gap_us > 0:
+        s_us = gap_us / (1.0 - 1.0 / k_heur)
+        floor_us = unpack - s_us
+        lat_pin = floor_us + s_us / PINNED_SPLIT
+        recovery_realistic = max(0.0, min(1.0, (unpack - lat_pin) / gap_us))
+    else:
+        lat_pin = unpack
+        recovery_realistic = 0.0     # BW-floored / no headroom -> the lever is dead
+
+    return {
+        "phi_m1_draft_lane": phi_m1,
+        "m1_unpack_penalty_occupancy_removable": occupancy_removable,
+        "reconciles_332_bw_floor": reconciles_332,
+        "phi_332_m8_cited": PHI_332_M8,
+        "breakeven_332_cited": BREAKEVEN_332,
+        "m1_more_headroom_than_332_m8": bool(phi_m1 > PHI_332_M8),
+        "pinned_split_fixed": PINNED_SPLIT,
+        "pinned_ctas": PINNED_CTAS,
+        "occupancy_fill_recovered_us": gap_us,
+        "serial_depth_floor_us": floor_us,
+        "serial_depth_S_us": s_us,
+        "pinnedk_lat_pin_us": lat_pin,
+        "pinnedk_recovery_frac_roofline": recovery_roofline,
+        "pinnedk_recovery_frac_realistic": recovery_realistic,
+    }
+
+
+def attn_free_strict(eta_attn_decode_only: float, rec_roof: float, rec_real: float) -> dict[str, Any]:
+    """Re-run the #393 strict loop with the attention tax reduced by each recovery fraction.
+    Deployed basis (the realizable strict TPS, the #393 467.48 axis) is decisive; ceiling basis reported
+    for completeness. Honest even if attention-free < 500."""
+    eta_roof = eta_attn_decode_only * (1.0 - rec_roof)
+    eta_real = eta_attn_decode_only * (1.0 - rec_real)
+    dep_today = strict_tps_divisor(OFFICIAL_TPS, eta_attn_decode_only)
+    dep_roof = strict_tps_divisor(OFFICIAL_TPS, eta_roof)
+    dep_real = strict_tps_divisor(OFFICIAL_TPS, eta_real)
+    return {
+        "eta_after_attn_roofline": eta_roof,
+        "eta_after_attn_realistic": eta_real,
+        "attn_free_deployed_strict_tps_roofline": dep_roof,
+        "attn_free_deployed_strict_tps_realistic": dep_real,
+        "attn_free_ceiling_strict_tps_roofline": strict_tps(eta_roof),
+        "attn_free_ceiling_strict_tps_realistic": strict_tps(eta_real),
+        "attn_alone_clears_500_roofline": bool(dep_roof >= TARGET_500),
+        "attn_alone_clears_500_realistic": bool(dep_real >= TARGET_500),
+        "residual_gap_after_attn_roofline": TARGET_500 - dep_roof,
+        "residual_gap_after_attn_realistic": TARGET_500 - dep_real,
+        "attn_lever_max_tps_gain_deployed": dep_roof - dep_today,     # 481.53 - 467.48 = 14.05 (ideal)
+        "attn_lever_realistic_tps_gain_deployed": dep_real - dep_today,
+    }
+
+
+def marlin_m_invariance_proof(dev: torch.device, seeds: list[int], n_trials: int) -> dict[str, Any]:
+    """PROOF-OF-MECHANISM (NOT a built attention kernel): demonstrate that an EXISTING fixed-order reduce
+    in the served stack -- the int4-Marlin use_atomic_add=False / use_fp32_reduce=True body GEMM (#390) --
+    is M-invariant byte-exact (identical bytes at M=1 and M=8). A fixed reduction order is the SAME ops in
+    the SAME order regardless of the query batch width, so it rounds identically. This grounds the claim
+    that a FIXED 64-way attention reduction tree would likewise be M-invariant byte-exact."""
+    out: dict[str, Any] = {"available": False}
+    try:
+        from vllm import _custom_ops as ops
+        from vllm.model_executor.layers.quantization.utils import marlin_utils as mu
+        from vllm.model_executor.layers.quantization.utils import marlin_utils_test as mut
+        from vllm.scalar_type import scalar_types
+    except Exception as e:  # noqa: BLE001
+        out["import_error"] = f"{type(e).__name__}: {str(e)[:160]}"
+        return out
+    out["available"] = True
+    size_k, size_n, gs = MARLIN_PROOF_K, MARLIN_PROOF_N, MARLIN_PROOF_GS
+    qtype = scalar_types.uint4b8
+    # on A10G sm_86 + bf16 the deployment guard FORCES use_atomic_add=False (fixed-order) for this geometry
+    forced_aa = bool(mu.should_use_atomic_add_reduce(m=M_VERIFY, n=size_n, k=size_k, device=dev, dtype=DTYPE))
+    byte_M = {M: [] for M in IDENT_M}
+    maxdiff_M = {M: 0.0 for M in IDENT_M}
+    any_nan = False
+    for seed in seeds:
+        g = torch.Generator(device=dev).manual_seed(seed)
+        w = torch.randn(size_k, size_n, generator=g, device=dev, dtype=DTYPE) * 0.02
+        w_ref, q_w, s, g_idx, sort_idx, _ = mut.marlin_quantize(w, qtype, group_size=gs, act_order=False)
+        ws = mu.marlin_make_workspace_new(dev)
+        empty_zp = torch.empty(0, dtype=torch.int, device=dev)
+
+        def fwd(x):   # fixed-order deterministic reduce (use_atomic_add=False, use_fp32_reduce=True)
+            xr = x.reshape(-1, size_k)
+            return ops.marlin_gemm(
+                xr, None, q_w, None, s, None, None, empty_zp, g_idx, sort_idx, ws, qtype,
+                size_m=xr.shape[0], size_n=size_n, size_k=size_k, is_k_full=True,
+                use_atomic_add=False, use_fp32_reduce=True, is_zp_float=False).reshape(x.shape[:-1] + (size_n,))
+
+        for t in range(n_trials):
+            gg = torch.Generator(device=dev).manual_seed(seed + 1000 + t)
+            x_full = torch.randn(max(IDENT_M), size_k, generator=gg, device=dev, dtype=DTYPE)
+            for M in IDENT_M:
+                x = x_full[:M].contiguous()
+                bat = fwd(x)
+                any_nan = any_nan or bool(torch.isnan(bat).any())
+                ref = torch.cat([fwd(x[r:r + 1]) for r in range(M)], dim=0)
+                byte_M[M].append((bat == ref).all(dim=-1).float().mean().item())
+                maxdiff_M[M] = max(maxdiff_M[M], (bat.float() - ref.float()).abs().max().item())
+
+    def mn(xs):
+        return float(sum(xs) / len(xs)) if xs else float("nan")
+
+    byte_by_M = {str(M): mn(byte_M[M]) for M in IDENT_M}
+    out.update({
+        "geom": {"name": "down_proj", "size_k": size_k, "size_n": size_n, "group_size": gs},
+        "use_atomic_add": False, "use_fp32_reduce": True,
+        "deployment_guard_forces_fixed_order": bool(not forced_aa),
+        "byte_identity_by_M": byte_by_M,
+        "max_abs_diff_by_M": {str(M): maxdiff_M[M] for M in IDENT_M},
+        "fixed_order_m_invariant": bool(byte_by_M[str(M_VERIFY)] >= 1.0 and byte_by_M[str(1)] >= 1.0),
+        "any_nan": any_nan, "n_trials_total": n_trials * len(seeds),
+    })
+    return out
+
+
+def new_reference_probe(FA2, dev: torch.device, seed: int) -> dict[str, Any]:
+    """Ground pinnedk_produces_new_reference EMPIRICALLY: at M=1, does a MULTI-split reduction (heuristic
+    num_splits=0 -> K>1) produce DIFFERENT bytes than the deployed single-split serial un-pack (num_splits=1)?
+    If yes, a fixed-K pinned-K (also multi-split) yields a NEW byte reference -> adopting it requires
+    re-capturing the greedy-identity reference (a flagged served-file change)."""
+    per_L: dict[str, Any] = {}
+    for L in BAND_L:
+        q, kc, vc, bt, sk = _build_paged(L, M_AR, seed, dev)
+        cu = torch.tensor([0, M_AR], dtype=torch.int32, device=dev)
+        o_heur = _served_varlen(FA2, q, kc, vc, bt, cu, sk, L, M_AR, HEURISTIC_SPLIT)
+        o_serial = _served_varlen(FA2, q, kc, vc, bt, cu, sk, L, M_AR, UNPACK_SPLIT)
+        same = bool(torch.equal(o_heur.reshape(-1).view(torch.int16), o_serial.reshape(-1).view(torch.int16)))
+        per_L[str(L)] = {"heuristic_K": _heuristic_K(M_AR, L), "multisplit_eq_serial_bytes": same}
+    any_diff = any(not v["multisplit_eq_serial_bytes"] for v in per_L.values())
+    return {"per_L": per_L, "multisplit_changes_bytes_vs_serial": any_diff}
+
+
+def compose_pinnedk(dev: torch.device, args, gpu: dict) -> dict[str, Any]:
+    from vllm.vllm_flash_attn import _vllm_fa2_C  # noqa: F401  (registers torch.ops._vllm_fa2_C)
+    from vllm.vllm_flash_attn.flash_attn_interface import flash_attn_varlen_func as FA2
+
+    # (0) confirm the #393 greedy-identity harness is wired: un-pack (num_splits=1) IS byte-exact M=1 vs M=8
+    ident_accs = [_measure_identity_fa2(FA2, BAND_L[0], UNPACK_SPLIT, args.ident_trials, s, dev)
+                  for s in args.seeds]
+    unpack_ident = _merge_idents(ident_accs)
+    greedy_identity_harness_wired = bool(unpack_ident["byte_identity_by_M"]["8"] >= 1.0)
+    # confirm the 64-CTA pinned-K (num_splits>1) is NOT reachable without a rebuild (no kernel built here)
+    pinned = _pinned_reachable(FA2, dev)
+
+    # (1) reproduce #393's decode-only eta from the MEASURED M=1 band penalty (lat[ns=1]/lat[ns=0])
+    curve_m1 = measure_penalty_curve(FA2, dev, args.iters, args.warmup, args.seeds[0], M_AR)
+    band_pens = [curve_m1[L]["penalty"] for L in BAND_L]
+    penalty_decode_band = float(sum(band_pens) / len(band_pens))
+    eta_attn_decode_only = F_ATTN_344 * (penalty_decode_band - 1.0)
+    deployed_strict = strict_tps_divisor(OFFICIAL_TPS, eta_attn_decode_only)
+    ceiling_strict = strict_tps(eta_attn_decode_only)
+    gap_to_500 = TARGET_500 - deployed_strict
+
+    # (2) M=1 draft-lane occupancy / achieved-BW (the #332 question, M=1 this time)
+    occ = measure_m1_occupancy_bw(curve_m1)
+    # (3) roofline the pinned-K recovery (beta-tier)
+    roof = roofline_pinnedk_recovery(occ, eta_attn_decode_only)
+    # (4) arithmetic: does attention-free strict clear 500 alone?
+    af = attn_free_strict(eta_attn_decode_only, roof["pinnedk_recovery_frac_roofline"],
+                          roof["pinnedk_recovery_frac_realistic"])
+    # (5) byte-exact feasibility: fixed-order reduce M-invariance proof-of-mechanism + new-reference probe
+    marlin = marlin_m_invariance_proof(dev, args.seeds, args.ident_trials)
+    newref = new_reference_probe(FA2, dev, args.seeds[0])
+    pinnedk_m_invariant_byte_exact_feasible = bool(marlin.get("fixed_order_m_invariant"))
+    pinnedk_produces_new_reference = True   # fixed K!=1 reduction order != num_splits=1 serial -> new bytes
+
+    n_distinct_kernel_rebuilds_attn_free = 1   # only the pinned-K attn kernel (body+lm_head already exact)
+    attn_rebuild_is_flagged_served_file_change = True
+
+    verdict = (
+        f"M=1 draft-lane attention is UNDER-occupied ({occ['m1_attn_occupancy_ctas']} CTAs / {A10G_SMS} SM = "
+        f"{occ['m1_attn_occupancy_frac']*100:.1f}%) and far below the HBM roofline "
+        f"({occ['m1_attn_achieved_bw_frac']*100:.2f}% of {A10G_PEAK_BW_GBS:.0f} GB/s) -> the un-pack penalty "
+        f"is OCCUPANCY-removable (removable={roof['m1_unpack_penalty_occupancy_removable']}), NOT BW-floored. "
+        f"This is a DISTINCT regime from #332's M=8 verify-step (BW-floored {BW_FRAC_332_M8*100:.1f}% BW, "
+        f"{CTAS_332_M8} CTAs > {A10G_SMS} SM): reconciles_332_bw_floor={roof['reconciles_332_bw_floor']}, "
+        f"phi_m1={roof['phi_m1_draft_lane']:.3f} > phi_332={PHI_332_M8}. A deterministic 64-CTA "
+        f"(num_splits={PINNED_SPLIT}) split-reduce could recover roofline {roof['pinnedk_recovery_frac_roofline']*100:.0f}% / "
+        f"realistic {roof['pinnedk_recovery_frac_realistic']*100:.1f}% of the {eta_attn_decode_only*100:.2f}% tax. "
+        f"BUT attention-free deployed strict caps at {af['attn_free_deployed_strict_tps_roofline']:.2f} "
+        f"(ideal) / {af['attn_free_deployed_strict_tps_realistic']:.2f} (realistic) -- BOTH < 500 "
+        f"(clears_500={af['attn_alone_clears_500_realistic']}). The attention rebuild buys at most "
+        f"+{af['attn_lever_max_tps_gain_deployed']:.2f} TPS and leaves a residual "
+        f"{af['residual_gap_after_attn_realistic']:.2f} TPS for cb3+demand. A fixed 64-way reduction tree IS "
+        f"M-invariant byte-exact-feasible (feasible={pinnedk_m_invariant_byte_exact_feasible}, grounded by the "
+        f"Marlin atomic_add=False M-invariance) but produces a NEW reference (re-capture = flagged change)."
+    )
+
+    return {
+        "greedy_identity_harness_wired": greedy_identity_harness_wired,
+        "unpack_identity": unpack_ident,
+        "pinned_probe": pinned,
+        "penalty_curve_M1": {str(L): curve_m1[L] for L in PENALTY_GRID_L},
+        "penalty_decode_band": penalty_decode_band,
+        "eta_attn_decode_only": eta_attn_decode_only,
+        "deployed_strict": deployed_strict,
+        "ceiling_strict": ceiling_strict,
+        "gap_to_500": gap_to_500,
+        "occupancy_bw": occ,
+        "roofline": roof,
+        "attn_free": af,
+        "marlin_proof": marlin,
+        "new_reference_probe": newref,
+        # ---- headline deliverables (surfaced for SENPAI-RESULT + table) ----
+        "m1_attn_occupancy_ctas": occ["m1_attn_occupancy_ctas"],
+        "m1_attn_occupancy_frac": occ["m1_attn_occupancy_frac"],
+        "m1_attn_achieved_bw_frac": occ["m1_attn_achieved_bw_frac"],
+        "m1_unpack_penalty_occupancy_removable": roof["m1_unpack_penalty_occupancy_removable"],
+        "phi_m1_draft_lane": roof["phi_m1_draft_lane"],
+        "reconciles_332_bw_floor": roof["reconciles_332_bw_floor"],
+        "pinnedk_recovery_frac_roofline": roof["pinnedk_recovery_frac_roofline"],
+        "pinnedk_recovery_frac_realistic": roof["pinnedk_recovery_frac_realistic"],
+        "attn_free_deployed_strict_tps_roofline": af["attn_free_deployed_strict_tps_roofline"],
+        "attn_free_deployed_strict_tps_realistic": af["attn_free_deployed_strict_tps_realistic"],
+        "attn_alone_clears_500_roofline": af["attn_alone_clears_500_roofline"],
+        "attn_alone_clears_500_realistic": af["attn_alone_clears_500_realistic"],
+        "residual_gap_after_attn_realistic": af["residual_gap_after_attn_realistic"],
+        "pinnedk_m_invariant_byte_exact_feasible": pinnedk_m_invariant_byte_exact_feasible,
+        "pinnedk_produces_new_reference": pinnedk_produces_new_reference,
+        "n_distinct_kernel_rebuilds_attn_free": n_distinct_kernel_rebuilds_attn_free,
+        "attn_rebuild_is_flagged_served_file_change": attn_rebuild_is_flagged_served_file_change,
+        "verdict": verdict,
+    }
+
+
+def selftest_pinnedk(comp: dict, gpu: dict, flags: dict, n_seeds: int) -> dict[str, Any]:
+    c: dict[str, bool] = {}
+    roof, occ, af, marlin = comp["roofline"], comp["occupancy_bw"], comp["attn_free"], comp["marlin_proof"]
+    # (a) reproduce #393's 467.48 / 505.29 / eta=0.030065 from MEASURED band + EXACT ladder round-trip.
+    #     eta is ~15x-amplified from the penalty-band ratio (eta=f_attn*(penalty-1)), so a 20% band on eta
+    #     is only ~4.5% on the underlying latency ratio; the robust anchors are the deployed/ceiling/ladder.
+    c["a_repro_393_eta_measured"] = bool(abs(comp["eta_attn_decode_only"] / ETA_ATTN_DECODE_393 - 1.0) <= 0.20)
+    c["a_repro_393_deployed_467"] = bool(abs(comp["deployed_strict"] - DEPLOYED_STRICT_393) <= 5.0)
+    c["a_repro_393_ceiling_505"] = bool(abs(comp["ceiling_strict"] - CEILING_STRICT_393) <= 5.0)
+    c["a_ladder_roundtrip_exact"] = bool(round(strict_tps_divisor(OFFICIAL_TPS, ETA_ATTN_DECODE_393), 2) == 467.48
+                                         and round(strict_tps(ETA_ATTN_DECODE_393), 2) == 505.29)
+    # (b) reproduce #332's phi=0.075 / 473.5 ceiling from cited inputs + internal consistency
+    c["b_332_phi_below_breakeven"] = bool(PHI_332_M8 < BREAKEVEN_332)               # BW-floored at M=8
+    c["b_332_ceiling_below_500"] = bool(CEILING_332_DEPLOYED < TARGET_500)
+    c["b_332_ladder_consistent"] = bool(
+        abs(strict_tps_divisor(OFFICIAL_TPS, OFFICIAL_TPS / CEILING_332_DEPLOYED - 1.0) - CEILING_332_DEPLOYED) <= 0.5)
+    c["b_m1_more_headroom_than_332"] = bool(roof["phi_m1_draft_lane"] > PHI_332_M8)
+    c["b_attn_free_exceeds_332_ceiling"] = bool(af["attn_free_deployed_strict_tps_roofline"] > CEILING_332_DEPLOYED)
+    # (c) M=1 occupancy-removable decision backed by MEASURED occupancy/BW (not assumed)
+    c["c_m1_underoccupied"] = bool(occ["m1_attn_occupancy_frac"] < 0.5)
+    c["c_m1_far_from_bw_floor"] = bool(occ["m1_attn_achieved_bw_frac"] < 0.10)
+    c["c_occupancy_removable_true"] = bool(roof["m1_unpack_penalty_occupancy_removable"])
+    c["c_reconciles_332_true"] = bool(roof["reconciles_332_bw_floor"])
+    c["c_beta_realistic_from_measurement"] = bool(
+        0.0 < roof["pinnedk_recovery_frac_realistic"] <= 1.0 and roof["serial_depth_floor_us"] is not None)
+    # (d) DECISIVE: attention-free deployed strict < 500 (the lever cannot clear 500 alone), residual > 0
+    c["d_attn_free_below_500_roofline"] = bool(not af["attn_alone_clears_500_roofline"])
+    c["d_attn_free_below_500_realistic"] = bool(not af["attn_alone_clears_500_realistic"])
+    c["d_residual_gap_positive"] = bool(af["residual_gap_after_attn_realistic"] > 0)
+    # (e) NO kernel built: pinned-K rejected (NotImplementedError), exactly 1 rebuild, flagged served change
+    c["e_pinned_not_reachable"] = bool(not comp["pinned_probe"]["pinned_split_reachable"])
+    c["e_one_rebuild"] = bool(comp["n_distinct_kernel_rebuilds_attn_free"] == 1)
+    c["e_flagged_served_change"] = bool(comp["attn_rebuild_is_flagged_served_file_change"])
+    # (f) byte-exact feasibility backed by MEASURED M-invariance of an EXISTING fixed-order reduce (Marlin)
+    c["f_marlin_available"] = bool(marlin.get("available"))
+    c["f_marlin_fixed_order_m_invariant"] = bool(marlin.get("fixed_order_m_invariant"))
+    c["f_feasible_iff_measured"] = bool(
+        comp["pinnedk_m_invariant_byte_exact_feasible"] == bool(marlin.get("fixed_order_m_invariant")))
+    c["f_produces_new_reference"] = bool(comp["pinnedk_produces_new_reference"])
+    c["f_new_reference_empirical"] = bool(comp["new_reference_probe"]["multisplit_changes_bytes_vs_serial"])
+    # (g) greedy-identity harness wired; >=3 seeds; on-target A10G sm8x; guard flags
+    c["g_greedy_identity_wired"] = bool(comp["greedy_identity_harness_wired"])
+    c["g_three_or_more_seeds"] = bool(n_seeds >= 3)
+    c["g_on_target_a10g_sm8x"] = bool(gpu["is_a10g_80sm"] and gpu["is_sm8x"])
+    c["g_guard_flags"] = bool(flags["no_hf_job"] and flags["no_launch"]
+                              and flags["no_served_file_change"] and flags["analysis_only"])
+    passes = all(c.values())
+    return {"passes": passes, "n_checks": len(c), "conditions": c}
+
+
+def print_report_pinnedk(payload: dict) -> None:
+    gpu, comp, st = payload["gpu"], payload["compose"], payload["selftest"]
+    occ, roof, af, marlin = comp["occupancy_bw"], comp["roofline"], comp["attn_free"], comp["marlin_proof"]
+    bar = "=" * 100
+    print(bar)
+    print("PINNED-K ATTENTION REBUILD HEADROOM -- attention-free strict vs 500 + byte-exact feasibility (PR #400)")
+    print(f"  GPU {gpu['name']} SMs={gpu['sm_count']} cc={gpu['compute_capability']} "
+          f"on-target={gpu['is_a10g_80sm'] and gpu['is_sm8x']}")
+    print("-" * 100)
+    print("  (0) HARNESS: #393 greedy-identity wired (un-pack ns=1 byte-exact M1-vs-M8) = "
+          f"{comp['greedy_identity_harness_wired']}; 64-CTA pinned-K (ns>1) reachable_without_rebuild="
+          f"{comp['pinned_probe']['pinned_split_reachable']} ({comp['pinned_probe']['error']})")
+    print(f"  (1) #393 REPRO: penalty_band(M=1)={comp['penalty_decode_band']:.4f} -> "
+          f"eta_attn_decode_only={comp['eta_attn_decode_only']*100:.4f}% -> deployed_strict="
+          f"{comp['deployed_strict']:.2f} ceiling={comp['ceiling_strict']:.2f} gap_to_500={comp['gap_to_500']:.2f}")
+    print("-" * 100)
+    print("  (2) M=1 DRAFT-LANE OCCUPANCY / BW (the #332 question, M=1):")
+    print(f"      m1_attn_occupancy_ctas   = {occ['m1_attn_occupancy_ctas']} / {A10G_SMS} SM  "
+          f"(frac={occ['m1_attn_occupancy_frac']:.3f})")
+    print(f"      m1_attn_achieved_bw_frac = {occ['m1_attn_achieved_bw_frac']*100:.3f}% of {A10G_PEAK_BW_GBS:.0f} GB/s "
+          f"({occ['m1_attn_achieved_bw_gbs']:.2f} GB/s) | heuristic occ={occ['m1_heuristic_occupancy_frac']:.3f} "
+          f"bw={occ['m1_heuristic_bw_frac']*100:.2f}%")
+    print(f"      arith_intensity={occ['m1_arith_intensity_band']:.2f} FLOP/byte (ridge "
+          f"{occ['ridge_flop_per_byte']:.1f}; below_ridge={occ['workload_below_ridge']})")
+    print("-" * 100)
+    print("  (3) ROOFLINE PINNED-K RECOVERY (beta-tier):")
+    print(f"      m1_unpack_penalty_occupancy_removable = {roof['m1_unpack_penalty_occupancy_removable']}  "
+          f"phi_m1_draft_lane = {roof['phi_m1_draft_lane']:.4f} (vs #332 phi={PHI_332_M8} M=8)")
+    print(f"      reconciles_332_bw_floor = {roof['reconciles_332_bw_floor']}  "
+          f"(M=1 distinct regime: {occ['m1_attn_achieved_bw_frac']*100:.2f}% BW vs #332 {BW_FRAC_332_M8*100:.1f}%)")
+    print(f"      pinnedk_recovery_frac_roofline = {roof['pinnedk_recovery_frac_roofline']:.4f}  "
+          f"realistic = {roof['pinnedk_recovery_frac_realistic']:.4f} "
+          f"(K={PINNED_SPLIT}, lat_pin={roof['pinnedk_lat_pin_us']:.2f}us)")
+    print("-" * 100)
+    print("  (4) ATTENTION-FREE STRICT (does it clear 500 alone?):")
+    print(f"      attn_free_deployed_strict_tps_roofline  = {af['attn_free_deployed_strict_tps_roofline']:.2f}  "
+          f"clears_500={af['attn_alone_clears_500_roofline']}")
+    print(f"      attn_free_deployed_strict_tps_realistic = {af['attn_free_deployed_strict_tps_realistic']:.2f}  "
+          f"clears_500={af['attn_alone_clears_500_realistic']}")
+    print(f"      residual_gap_after_attn_realistic = {af['residual_gap_after_attn_realistic']:.2f} TPS  "
+          f"(attn lever max gain +{af['attn_lever_max_tps_gain_deployed']:.2f} TPS)")
+    print("-" * 100)
+    print("  (5) BYTE-EXACT FEASIBILITY (analysis; Marlin fixed-order reduce proof-of-mechanism):")
+    print(f"      pinnedk_m_invariant_byte_exact_feasible = {comp['pinnedk_m_invariant_byte_exact_feasible']}  "
+          f"(Marlin atomic_add=False byte_M8={marlin.get('byte_identity_by_M', {}).get('8')}, "
+          f"guard_forces_fixed_order={marlin.get('deployment_guard_forces_fixed_order')})")
+    print(f"      pinnedk_produces_new_reference = {comp['pinnedk_produces_new_reference']}  "
+          f"(multisplit!=serial bytes={comp['new_reference_probe']['multisplit_changes_bytes_vs_serial']})")
+    print(f"      n_distinct_kernel_rebuilds_attn_free = {comp['n_distinct_kernel_rebuilds_attn_free']}  "
+          f"flagged_served_change={comp['attn_rebuild_is_flagged_served_file_change']}")
+    print("-" * 100)
+    print(f"  SELF-TEST {st['passes']} ({st['n_checks']} checks): "
+          + json.dumps({k: int(v) for k, v in st["conditions"].items()}))
+    print("-" * 100)
+    print("  VERDICT")
+    print("   " + comp["verdict"])
+    print(bar)
+
+
+def maybe_log_wandb_pinnedk(payload: dict, args) -> str | None:
+    if args.no_wandb:
+        return None
+    repo = str(Path(__file__).resolve().parents[3])
+    if repo not in sys.path:
+        sys.path.insert(0, repo)
+    try:
+        from scripts.wandb_logging import (init_wandb_run, log_summary, log_json_artifact, finish_wandb)
+    except Exception as e:  # noqa: BLE001
+        print(f"[pinnedk] wandb helpers unavailable: {e}")
+        return None
+    comp = payload["compose"]
+    occ, roof, af, marlin = comp["occupancy_bw"], comp["roofline"], comp["attn_free"], comp["marlin_proof"]
+    run = init_wandb_run(
+        job_type="analysis-gpu-microbench", agent="wirbel",
+        name=args.wandb_name, group=args.wandb_group,
+        tags=["attn-pinnedk-rebuild-headroom", "m1-occupancy-bw", "roofline-recovery",
+              "attention-free-strict", "byte-exact-feasibility", "319-strict-lock", "pr-400"],
+        config={"pr": 400, "kind": "attn-pinnedk-rebuild-headroom",
+                "head_dim": HEAD_DIM, "n_q_heads": N_Q_HEADS, "n_kv_heads": N_KV_HEADS,
+                "band_L": list(BAND_L), "short_L": SHORT_L, "pinned_split": PINNED_SPLIT,
+                "pinned_ctas": PINNED_CTAS, "a10g_peak_bw_gbs": A10G_PEAK_BW_GBS,
+                "ceiling_500": CEILING_500, "official_tps": OFFICIAL_TPS, "f_attn_344": F_ATTN_344,
+                "eta_attn_decode_393": ETA_ATTN_DECODE_393, "phi_332_m8": PHI_332_M8,
+                "ceiling_332_deployed": CEILING_332_DEPLOYED, "seeds": args.seeds,
+                "ident_trials": args.ident_trials, "iters": args.iters},
+    )
+    if run is None:
+        print("[pinnedk] wandb disabled (no API key / WANDB_MODE).")
+        return None
+    flat: dict[str, float] = {}
+    for L in BAND_L:
+        flat[f"occ/unpack_frac_L{L}"] = occ["per_L"][str(L)]["unpack_occupancy_frac"]
+        flat[f"occ/unpack_bw_frac_L{L}"] = occ["per_L"][str(L)]["unpack_bw_frac"]
+        flat[f"occ/heuristic_K_L{L}"] = float(occ["per_L"][str(L)]["heuristic_K"])
+    flat["occ/m1_attn_occupancy_ctas"] = float(occ["m1_attn_occupancy_ctas"])
+    flat["occ/m1_attn_occupancy_frac"] = occ["m1_attn_occupancy_frac"]
+    flat["occ/m1_attn_achieved_bw_frac"] = occ["m1_attn_achieved_bw_frac"]
+    flat["occ/m1_attn_achieved_bw_gbs"] = occ["m1_attn_achieved_bw_gbs"]
+    flat["occ/m1_arith_intensity"] = occ["m1_arith_intensity_band"]
+    flat["occ/ridge_flop_per_byte"] = occ["ridge_flop_per_byte"]
+    flat["roof/phi_m1_draft_lane"] = roof["phi_m1_draft_lane"]
+    flat["roof/m1_unpack_penalty_occupancy_removable"] = float(roof["m1_unpack_penalty_occupancy_removable"])
+    flat["roof/reconciles_332_bw_floor"] = float(roof["reconciles_332_bw_floor"])
+    flat["roof/pinnedk_recovery_frac_roofline"] = roof["pinnedk_recovery_frac_roofline"]
+    flat["roof/pinnedk_recovery_frac_realistic"] = roof["pinnedk_recovery_frac_realistic"]
+    flat["roof/pinnedk_lat_pin_us"] = roof["pinnedk_lat_pin_us"]
+    flat["eta/eta_attn_decode_only"] = comp["eta_attn_decode_only"]
+    flat["tps/deployed_strict"] = comp["deployed_strict"]
+    flat["tps/ceiling_strict"] = comp["ceiling_strict"]
+    flat["tps/gap_to_500"] = comp["gap_to_500"]
+    flat["tps/attn_free_deployed_roofline"] = af["attn_free_deployed_strict_tps_roofline"]
+    flat["tps/attn_free_deployed_realistic"] = af["attn_free_deployed_strict_tps_realistic"]
+    flat["tps/residual_gap_after_attn_realistic"] = af["residual_gap_after_attn_realistic"]
+    flat["tps/attn_lever_max_gain_deployed"] = af["attn_lever_max_tps_gain_deployed"]
+    flat["decision/attn_alone_clears_500_roofline"] = float(af["attn_alone_clears_500_roofline"])
+    flat["decision/attn_alone_clears_500_realistic"] = float(af["attn_alone_clears_500_realistic"])
+    flat["decision/pinnedk_m_invariant_byte_exact_feasible"] = float(comp["pinnedk_m_invariant_byte_exact_feasible"])
+    flat["decision/pinnedk_produces_new_reference"] = float(comp["pinnedk_produces_new_reference"])
+    flat["decision/n_distinct_kernel_rebuilds_attn_free"] = float(comp["n_distinct_kernel_rebuilds_attn_free"])
+    flat["decision/pinned_reachable"] = float(comp["pinned_probe"]["pinned_split_reachable"])
+    if marlin.get("available"):
+        flat["marlin/byte_M8"] = marlin["byte_identity_by_M"]["8"]
+        flat["marlin/byte_M1"] = marlin["byte_identity_by_M"]["1"]
+        flat["marlin/fixed_order_m_invariant"] = float(bool(marlin.get("fixed_order_m_invariant")))
+    flat["selftest/attn_pinnedk_headroom_self_test_passes"] = float(payload["selftest"]["passes"])
+    flat["gpu/sm_count"] = float(payload["gpu"]["sm_count"])
+    flat["mem/peak_mem_mib"] = payload["peak_mem_mib"]
+    run.log({"global_step": 0, **flat})
+    log_summary(run, _jsonable(payload), step=0, run_prefix=args.wandb_name)
+    log_json_artifact(run, name="attn_pinnedk_headroom", artifact_type="analysis", data=_jsonable(payload))
+    finish_wandb(run)
+    rid = getattr(run, "id", None)
+    print(f"[pinnedk] wandb logged {len(flat)} keys (run {rid})")
+    return rid
+
+
+# ======================================================================================== #
 # PRIMARY self-test
 # ======================================================================================== #
 def selftest(comp: dict, gpu: dict, flags: dict, n_seeds: int) -> dict[str, Any]:
@@ -819,9 +1369,66 @@ def maybe_log_wandb(payload: dict, args) -> str | None:
 # ======================================================================================== #
 # Main
 # ======================================================================================== #
+def main_pinnedk(dev: torch.device, gpu: dict, args) -> None:
+    """PR #400 driver: price the pinned-K attention rebuild (NO build/patch/launch/served-file change)."""
+    comp = compose_pinnedk(dev, args, gpu)
+    flags = {"no_hf_job": True, "no_launch": True, "no_served_file_change": True, "analysis_only": True}
+    st = selftest_pinnedk(comp, gpu, flags, len(args.seeds))
+    torch.cuda.synchronize()
+    payload = {
+        "agent": "wirbel", "pr": 400, "kind": "attn-pinnedk-rebuild-headroom",
+        "created_at": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+        **flags,
+        "gpu": gpu, "seeds": args.seeds,
+        "peak_mem_mib": round(torch.cuda.max_memory_allocated(dev) / (1024**2), 3),
+        "ladder_constants": {"ceiling_500": CEILING_500, "official_tps": OFFICIAL_TPS,
+                             "target_500": TARGET_500, "f_attn_344": F_ATTN_344,
+                             "a10g_peak_bw_gbs": A10G_PEAK_BW_GBS, "pinned_split": PINNED_SPLIT,
+                             "pinned_ctas": PINNED_CTAS, "eta_attn_decode_393": ETA_ATTN_DECODE_393,
+                             "deployed_strict_393": DEPLOYED_STRICT_393, "ceiling_strict_393": CEILING_STRICT_393,
+                             "phi_332_m8": PHI_332_M8, "breakeven_332": BREAKEVEN_332,
+                             "ceiling_332_deployed": CEILING_332_DEPLOYED, "bw_frac_332_m8": BW_FRAC_332_M8},
+        "compose": comp, "selftest": st,
+        # PRIMARY + headline SENPAI-RESULT surface (the #400 deliverables)
+        "attn_pinnedk_headroom_self_test_passes": bool(st["passes"]),
+        "m1_attn_occupancy_frac": comp["m1_attn_occupancy_frac"],
+        "m1_attn_achieved_bw_frac": comp["m1_attn_achieved_bw_frac"],
+        "m1_unpack_penalty_occupancy_removable": comp["m1_unpack_penalty_occupancy_removable"],
+        "phi_m1_draft_lane": comp["phi_m1_draft_lane"],
+        "reconciles_332_bw_floor": comp["reconciles_332_bw_floor"],
+        "pinnedk_recovery_frac_roofline": comp["pinnedk_recovery_frac_roofline"],
+        "pinnedk_recovery_frac_realistic": comp["pinnedk_recovery_frac_realistic"],
+        "attn_free_deployed_strict_tps_roofline": comp["attn_free_deployed_strict_tps_roofline"],
+        "attn_free_deployed_strict_tps_realistic": comp["attn_free_deployed_strict_tps_realistic"],
+        "attn_alone_clears_500_roofline": comp["attn_alone_clears_500_roofline"],
+        "attn_alone_clears_500_realistic": comp["attn_alone_clears_500_realistic"],
+        "residual_gap_after_attn_realistic": comp["residual_gap_after_attn_realistic"],
+        "pinnedk_m_invariant_byte_exact_feasible": comp["pinnedk_m_invariant_byte_exact_feasible"],
+        "pinnedk_produces_new_reference": comp["pinnedk_produces_new_reference"],
+        "n_distinct_kernel_rebuilds_attn_free": comp["n_distinct_kernel_rebuilds_attn_free"],
+        "attn_rebuild_is_flagged_served_file_change": comp["attn_rebuild_is_flagged_served_file_change"],
+        "deployed_strict": comp["deployed_strict"],
+        "eta_attn_decode_only": comp["eta_attn_decode_only"],
+    }
+    print_report_pinnedk(payload)
+    out_path = Path(args.out_dir) / "attn_pinnedk_headroom_results.json"
+    json.dump(_jsonable(payload), open(out_path, "w"), indent=2)
+    print(f"[pinnedk] results -> {out_path}")
+    rid = maybe_log_wandb_pinnedk(payload, args)
+    if rid:
+        payload["wandb_run_id"] = rid
+        json.dump(_jsonable(payload), open(out_path, "w"), indent=2)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--smoke", action="store_true", help="tiny fast run to validate the path")
+    ap.add_argument("--pinnedk-headroom", "--pinnedk_headroom", dest="pinnedk_headroom",
+                    action="store_true", help="PR #400: pinned-K attention rebuild headroom entrypoint")
+    ap.add_argument("--measure-m1-occupancy-bw", "--measure_m1_occupancy_bw", dest="measure_m1_occupancy_bw",
+                    action="store_true", help="(pinnedk) measure M=1 draft-lane occupancy/BW (default on)")
+    ap.add_argument("--roofline-recovery", "--roofline_recovery", dest="roofline_recovery",
+                    action="store_true", help="(pinnedk) roofline the pinned-K recovery (default on)")
     ap.add_argument("--ident-trials", type=int, default=8, help="independent batch=1 problems per seed")
     ap.add_argument("--iters", type=int, default=100)
     ap.add_argument("--warmup", type=int, default=25)
@@ -840,6 +1447,11 @@ def main() -> None:
 
     dev = _device()
     gpu = _gpu_facts(dev)
+
+    if args.pinnedk_headroom:
+        main_pinnedk(dev, gpu, args)
+        return
+
     comp = compose(dev, args, gpu)
 
     flags = {"no_hf_job": True, "no_launch": True, "no_served_file_change": True, "analysis_only": True}

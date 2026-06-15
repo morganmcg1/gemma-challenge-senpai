@@ -1,0 +1,456 @@
+{
+  "agent": "wirbel",
+  "pr": 400,
+  "kind": "attn-pinnedk-rebuild-headroom",
+  "created_at": "20260615T202318Z",
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "analysis_only": true,
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "compute_capability": "8.6",
+    "total_mem_gib": 22.06,
+    "is_a10g_80sm": true,
+    "is_sm8x": true
+  },
+  "seeds": [
+    1234,
+    2345,
+    3456
+  ],
+  "peak_mem_mib": 463.524,
+  "ladder_constants": {
+    "ceiling_500": 520.953,
+    "official_tps": 481.53,
+    "target_500": 500.0,
+    "f_attn_344": 0.09506718019009251,
+    "a10g_peak_bw_gbs": 600.0,
+    "pinned_split": 8,
+    "pinned_ctas": 64,
+    "eta_attn_decode_393": 0.030065297571591987,
+    "deployed_strict_393": 467.475218449957,
+    "ceiling_strict_393": 505.29039303418637,
+    "phi_332_m8": 0.075,
+    "breakeven_332": 0.255,
+    "ceiling_332_deployed": 473.5,
+    "bw_frac_332_m8": 0.349
+  },
+  "compose": {
+    "greedy_identity_harness_wired": true,
+    "unpack_identity": {
+      "byte_identity_by_M": {
+        "1": 1.0,
+        "8": 1.0
+      },
+      "argmax_identity_by_M": {
+        "1": 1.0,
+        "8": 1.0
+      },
+      "max_abs_diff_by_M": {
+        "1": 0.0,
+        "8": 0.0
+      },
+      "n_trials": 24,
+      "any_nan": false
+    },
+    "pinned_probe": {
+      "pinned_split_reachable": false,
+      "error": "NotImplementedError: FA2 does not support num_splits > 1"
+    },
+    "penalty_curve_M1": {
+      "110": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 66.56000018119812,
+        "penalty": 0.8783783425034977,
+        "heuristic_K": 2.0,
+        "us_per_token_unpack": 66.56000018119812,
+        "us_per_token_heuristic": 75.77600330114365
+      },
+      "128": {
+        "heuristic_us": 74.75200295448303,
+        "unpack_us": 66.56000018119812,
+        "penalty": 0.8904109261356773,
+        "heuristic_K": 2.0,
+        "us_per_token_unpack": 66.56000018119812,
+        "us_per_token_heuristic": 74.75200295448303
+      },
+      "192": {
+        "heuristic_us": 74.75200295448303,
+        "unpack_us": 66.56000018119812,
+        "penalty": 0.8904109261356773,
+        "heuristic_K": 3.0,
+        "us_per_token_unpack": 66.56000018119812,
+        "us_per_token_heuristic": 74.75200295448303
+      },
+      "256": {
+        "heuristic_us": 74.75200295448303,
+        "unpack_us": 67.58400052785873,
+        "penalty": 0.9041095603687176,
+        "heuristic_K": 4.0,
+        "us_per_token_unpack": 67.58400052785873,
+        "us_per_token_heuristic": 74.75200295448303
+      },
+      "384": {
+        "heuristic_us": 73.72800260782242,
+        "unpack_us": 76.80000364780426,
+        "penalty": 1.0416666792985372,
+        "heuristic_K": 6.0,
+        "us_per_token_unpack": 76.80000364780426,
+        "us_per_token_heuristic": 73.72800260782242
+      },
+      "503": {
+        "heuristic_us": 73.72800260782242,
+        "unpack_us": 89.08800035715103,
+        "penalty": 1.2083332954377222,
+        "heuristic_K": 8.0,
+        "us_per_token_unpack": 89.08800035715103,
+        "us_per_token_heuristic": 73.72800260782242
+      },
+      "512": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 89.08800035715103,
+        "penalty": 1.1756756291712007,
+        "heuristic_K": 8.0,
+        "us_per_token_unpack": 89.08800035715103,
+        "us_per_token_heuristic": 75.77600330114365
+      },
+      "528": {
+        "heuristic_us": 74.75200295448303,
+        "unpack_us": 94.2080020904541,
+        "penalty": 1.2602739507571181,
+        "heuristic_K": 9.0,
+        "us_per_token_unpack": 94.2080020904541,
+        "us_per_token_heuristic": 74.75200295448303
+      },
+      "560": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 95.23200243711472,
+        "penalty": 1.2567567341688688,
+        "heuristic_K": 9.0,
+        "us_per_token_unpack": 95.23200243711472,
+        "us_per_token_heuristic": 75.77600330114365
+      },
+      "592": {
+        "heuristic_us": 74.75200295448303,
+        "unpack_us": 100.35199671983719,
+        "penalty": 1.342465656484712,
+        "heuristic_K": 10.0,
+        "us_per_token_unpack": 100.35199671983719,
+        "us_per_token_heuristic": 74.75200295448303
+      },
+      "624": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 100.35199671983719,
+        "penalty": 1.3243242233431785,
+        "heuristic_K": 10.0,
+        "us_per_token_unpack": 100.35199671983719,
+        "us_per_token_heuristic": 75.77600330114365
+      },
+      "658": {
+        "heuristic_us": 74.75200295448303,
+        "unpack_us": 106.49599879980087,
+        "penalty": 1.424657461882954,
+        "heuristic_K": 6.0,
+        "us_per_token_unpack": 106.49599879980087,
+        "us_per_token_heuristic": 74.75200295448303
+      },
+      "704": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 106.49599879980087,
+        "penalty": 1.4054053283408467,
+        "heuristic_K": 6.0,
+        "us_per_token_unpack": 106.49599879980087,
+        "us_per_token_heuristic": 75.77600330114365
+      },
+      "768": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 111.61600053310394,
+        "penalty": 1.4729729158389036,
+        "heuristic_K": 6.0,
+        "us_per_token_unpack": 111.61600053310394,
+        "us_per_token_heuristic": 75.77600330114365
+      },
+      "1024": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 135.16800105571747,
+        "penalty": 1.783783720006218,
+        "heuristic_K": 8.0,
+        "us_per_token_unpack": 135.16800105571747,
+        "us_per_token_heuristic": 75.77600330114365
+      },
+      "2048": {
+        "heuristic_us": 75.77600330114365,
+        "unpack_us": 227.32800245285034,
+        "penalty": 2.9999999016762526,
+        "heuristic_K": 7.0,
+        "us_per_token_unpack": 227.32800245285034,
+        "us_per_token_heuristic": 75.77600330114365
+      }
+    },
+    "penalty_decode_band": 1.3216956053273663,
+    "eta_attn_decode_only": 0.030582694078017617,
+    "deployed_strict": 467.2405259344933,
+    "ceiling_strict": 505.0208537719745,
+    "gap_to_500": 32.75947406550671,
+    "occupancy_bw": {
+      "per_L": {
+        "128": {
+          "unpack_us": 66.56000018119812,
+          "heuristic_us": 74.75200295448303,
+          "heuristic_K": 2,
+          "unpack_ctas": 8,
+          "unpack_occupancy_frac": 0.1,
+          "heuristic_ctas": 16,
+          "heuristic_occupancy_frac": 0.2,
+          "hbm_bytes": 270336,
+          "unpack_bw_gbs": 4.061538450481624,
+          "unpack_bw_frac": 0.006769230750802707,
+          "heuristic_bw_gbs": 3.6164382132290065,
+          "heuristic_bw_frac": 0.0060273970220483435,
+          "arith_intensity_flop_per_byte": 3.878787878787879
+        },
+        "528": {
+          "unpack_us": 94.2080020904541,
+          "heuristic_us": 74.75200295448303,
+          "heuristic_K": 9,
+          "unpack_ctas": 8,
+          "unpack_occupancy_frac": 0.1,
+          "heuristic_ctas": 72,
+          "heuristic_occupancy_frac": 0.9,
+          "hbm_bytes": 1089536,
+          "unpack_bw_gbs": 11.565217134674809,
+          "unpack_bw_frac": 0.019275361891124682,
+          "heuristic_bw_gbs": 14.57534188968054,
+          "heuristic_bw_frac": 0.0242922364828009,
+          "arith_intensity_flop_per_byte": 3.969924812030075
+        },
+        "560": {
+          "unpack_us": 95.23200243711472,
+          "heuristic_us": 75.77600330114365,
+          "heuristic_K": 9,
+          "unpack_ctas": 8,
+          "unpack_occupancy_frac": 0.1,
+          "heuristic_ctas": 72,
+          "heuristic_occupancy_frac": 0.9,
+          "hbm_bytes": 1155072,
+          "unpack_bw_gbs": 12.129031947666308,
+          "unpack_bw_frac": 0.020215053246110514,
+          "heuristic_bw_gbs": 15.243242579178983,
+          "heuristic_bw_frac": 0.025405404298631636,
+          "arith_intensity_flop_per_byte": 3.971631205673759
+        },
+        "592": {
+          "unpack_us": 100.35199671983719,
+          "heuristic_us": 74.75200295448303,
+          "heuristic_K": 10,
+          "unpack_ctas": 8,
+          "unpack_occupancy_frac": 0.1,
+          "heuristic_ctas": 80,
+          "heuristic_occupancy_frac": 1.0,
+          "hbm_bytes": 1220608,
+          "unpack_bw_gbs": 12.163265703697903,
+          "unpack_bw_frac": 0.02027210950616317,
+          "heuristic_bw_gbs": 16.328766477912783,
+          "heuristic_bw_frac": 0.027214610796521307,
+          "arith_intensity_flop_per_byte": 3.9731543624161074
+        },
+        "624": {
+          "unpack_us": 100.35199671983719,
+          "heuristic_us": 75.77600330114365,
+          "heuristic_K": 10,
+          "unpack_ctas": 8,
+          "unpack_occupancy_frac": 0.1,
+          "heuristic_ctas": 80,
+          "heuristic_occupancy_frac": 1.0,
+          "hbm_bytes": 1286144,
+          "unpack_bw_gbs": 12.81632694953403,
+          "unpack_bw_frac": 0.02136054491589005,
+          "heuristic_bw_gbs": 16.972972233553904,
+          "heuristic_bw_frac": 0.02828828705592317,
+          "arith_intensity_flop_per_byte": 3.9745222929936306
+        },
+        "658": {
+          "unpack_us": 106.49599879980087,
+          "heuristic_us": 74.75200295448303,
+          "heuristic_K": 6,
+          "unpack_ctas": 8,
+          "unpack_occupancy_frac": 0.1,
+          "heuristic_ctas": 48,
+          "heuristic_occupancy_frac": 0.6,
+          "hbm_bytes": 1384448,
+          "unpack_bw_gbs": 13.000000146508684,
+          "unpack_bw_frac": 0.021666666910847808,
+          "heuristic_bw_gbs": 18.52054721320309,
+          "heuristic_bw_frac": 0.030867578688671817,
+          "arith_intensity_flop_per_byte": 3.893491124260355
+        }
+      },
+      "m1_attn_occupancy_ctas": 8,
+      "m1_attn_occupancy_frac": 0.1,
+      "m1_attn_achieved_bw_frac": 0.020557947294027247,
+      "m1_attn_achieved_bw_gbs": 12.334768376416346,
+      "m1_unpack_band_us": 99.32799935340881,
+      "m1_heuristic_band_us": 75.16160309314728,
+      "m1_heuristic_occupancy_ctas": 70.4,
+      "m1_heuristic_occupancy_frac": 0.8800000000000001,
+      "m1_heuristic_bw_frac": 0.027213623464509767,
+      "m1_heuristic_K_band_mean": 8.8,
+      "m1_arith_intensity_band": 3.9565447594747853,
+      "ridge_flop_per_byte": 104.16666666666667,
+      "workload_below_ridge": true
+    },
+    "roofline": {
+      "phi_m1_draft_lane": 0.24329893300556218,
+      "m1_unpack_penalty_occupancy_removable": true,
+      "reconciles_332_bw_floor": true,
+      "phi_332_m8_cited": 0.075,
+      "breakeven_332_cited": 0.255,
+      "m1_more_headroom_than_332_m8": true,
+      "pinned_split_fixed": 8,
+      "pinned_ctas": 64,
+      "occupancy_fill_recovered_us": 24.166396260261536,
+      "serial_depth_floor_us": 72.06334716234451,
+      "serial_depth_S_us": 27.264652191064297,
+      "pinnedk_lat_pin_us": 75.47142868622755,
+      "pinnedk_recovery_frac_roofline": 1.0,
+      "pinnedk_recovery_frac_realistic": 0.9871794871794871
+    },
+    "attn_free": {
+      "eta_after_attn_roofline": 0.0,
+      "eta_after_attn_realistic": 0.00039208582151304837,
+      "attn_free_deployed_strict_tps_roofline": 481.53,
+      "attn_free_deployed_strict_tps_realistic": 481.34127291158234,
+      "attn_free_ceiling_strict_tps_roofline": 520.953,
+      "attn_free_ceiling_strict_tps_realistic": 520.7487417150253,
+      "attn_alone_clears_500_roofline": false,
+      "attn_alone_clears_500_realistic": false,
+      "residual_gap_after_attn_roofline": 18.470000000000027,
+      "residual_gap_after_attn_realistic": 18.658727088417663,
+      "attn_lever_max_tps_gain_deployed": 14.289474065506681,
+      "attn_lever_realistic_tps_gain_deployed": 14.100746977089045
+    },
+    "marlin_proof": {
+      "available": true,
+      "geom": {
+        "name": "down_proj",
+        "size_k": 10240,
+        "size_n": 2560,
+        "group_size": 128
+      },
+      "use_atomic_add": false,
+      "use_fp32_reduce": true,
+      "deployment_guard_forces_fixed_order": true,
+      "byte_identity_by_M": {
+        "1": 1.0,
+        "8": 1.0
+      },
+      "max_abs_diff_by_M": {
+        "1": 0.0,
+        "8": 0.0
+      },
+      "fixed_order_m_invariant": true,
+      "any_nan": false,
+      "n_trials_total": 24
+    },
+    "new_reference_probe": {
+      "per_L": {
+        "528": {
+          "heuristic_K": 9,
+          "multisplit_eq_serial_bytes": false
+        },
+        "560": {
+          "heuristic_K": 9,
+          "multisplit_eq_serial_bytes": false
+        },
+        "592": {
+          "heuristic_K": 10,
+          "multisplit_eq_serial_bytes": false
+        },
+        "624": {
+          "heuristic_K": 10,
+          "multisplit_eq_serial_bytes": false
+        },
+        "658": {
+          "heuristic_K": 6,
+          "multisplit_eq_serial_bytes": false
+        }
+      },
+      "multisplit_changes_bytes_vs_serial": true
+    },
+    "m1_attn_occupancy_ctas": 8,
+    "m1_attn_occupancy_frac": 0.1,
+    "m1_attn_achieved_bw_frac": 0.020557947294027247,
+    "m1_unpack_penalty_occupancy_removable": true,
+    "phi_m1_draft_lane": 0.24329893300556218,
+    "reconciles_332_bw_floor": true,
+    "pinnedk_recovery_frac_roofline": 1.0,
+    "pinnedk_recovery_frac_realistic": 0.9871794871794871,
+    "attn_free_deployed_strict_tps_roofline": 481.53,
+    "attn_free_deployed_strict_tps_realistic": 481.34127291158234,
+    "attn_alone_clears_500_roofline": false,
+    "attn_alone_clears_500_realistic": false,
+    "residual_gap_after_attn_realistic": 18.658727088417663,
+    "pinnedk_m_invariant_byte_exact_feasible": true,
+    "pinnedk_produces_new_reference": true,
+    "n_distinct_kernel_rebuilds_attn_free": 1,
+    "attn_rebuild_is_flagged_served_file_change": true,
+    "verdict": "M=1 draft-lane attention is UNDER-occupied (8 CTAs / 80 SM = 10.0%) and far below the HBM roofline (2.06% of 600 GB/s) -> the un-pack penalty is OCCUPANCY-removable (removable=True), NOT BW-floored. This is a DISTINCT regime from #332's M=8 verify-step (BW-floored 34.9% BW, 96 CTAs > 80 SM): reconciles_332_bw_floor=True, phi_m1=0.243 > phi_332=0.075. A deterministic 64-CTA (num_splits=8) split-reduce could recover roofline 100% / realistic 98.7% of the 3.06% tax. BUT attention-free deployed strict caps at 481.53 (ideal) / 481.34 (realistic) -- BOTH < 500 (clears_500=False). The attention rebuild buys at most +14.29 TPS and leaves a residual 18.66 TPS for cb3+demand. A fixed 64-way reduction tree IS M-invariant byte-exact-feasible (feasible=True, grounded by the Marlin atomic_add=False M-invariance) but produces a NEW reference (re-capture = flagged change)."
+  },
+  "selftest": {
+    "passes": true,
+    "n_checks": 29,
+    "conditions": {
+      "a_repro_393_eta_measured": true,
+      "a_repro_393_deployed_467": true,
+      "a_repro_393_ceiling_505": true,
+      "a_ladder_roundtrip_exact": true,
+      "b_332_phi_below_breakeven": true,
+      "b_332_ceiling_below_500": true,
+      "b_332_ladder_consistent": true,
+      "b_m1_more_headroom_than_332": true,
+      "b_attn_free_exceeds_332_ceiling": true,
+      "c_m1_underoccupied": true,
+      "c_m1_far_from_bw_floor": true,
+      "c_occupancy_removable_true": true,
+      "c_reconciles_332_true": true,
+      "c_beta_realistic_from_measurement": true,
+      "d_attn_free_below_500_roofline": true,
+      "d_attn_free_below_500_realistic": true,
+      "d_residual_gap_positive": true,
+      "e_pinned_not_reachable": true,
+      "e_one_rebuild": true,
+      "e_flagged_served_change": true,
+      "f_marlin_available": true,
+      "f_marlin_fixed_order_m_invariant": true,
+      "f_feasible_iff_measured": true,
+      "f_produces_new_reference": true,
+      "f_new_reference_empirical": true,
+      "g_greedy_identity_wired": true,
+      "g_three_or_more_seeds": true,
+      "g_on_target_a10g_sm8x": true,
+      "g_guard_flags": true
+    }
+  },
+  "attn_pinnedk_headroom_self_test_passes": true,
+  "m1_attn_occupancy_frac": 0.1,
+  "m1_attn_achieved_bw_frac": 0.020557947294027247,
+  "m1_unpack_penalty_occupancy_removable": true,
+  "phi_m1_draft_lane": 0.24329893300556218,
+  "reconciles_332_bw_floor": true,
+  "pinnedk_recovery_frac_roofline": 1.0,
+  "pinnedk_recovery_frac_realistic": 0.9871794871794871,
+  "attn_free_deployed_strict_tps_roofline": 481.53,
+  "attn_free_deployed_strict_tps_realistic": 481.34127291158234,
+  "attn_alone_clears_500_roofline": false,
+  "attn_alone_clears_500_realistic": false,
+  "residual_gap_after_attn_realistic": 18.658727088417663,
+  "pinnedk_m_invariant_byte_exact_feasible": true,
+  "pinnedk_produces_new_reference": true,
+  "n_distinct_kernel_rebuilds_attn_free": 1,
+  "attn_rebuild_is_flagged_served_file_change": true,
+  "deployed_strict": 467.2405259344933,
+  "eta_attn_decode_only": 0.030582694078017617,
+  "wandb_run_id": "o7yhpkej"
+}
