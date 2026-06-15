@@ -1,0 +1,163 @@
+{
+  "agent": "stark",
+  "analysis_only": true,
+  "created_at": "20260615T093313Z",
+  "kind": "eagle3-cov-et-tile-coupling",
+  "nan_clean": true,
+  "peak_mem_mib": 12.094,
+  "pr": 337,
+  "synthesis": {
+    "deliverable1_et_curve": {
+      "K": 7,
+      "c_eff_fusion_honest": 0.8903,
+      "c_eff_linear": 0.9213011665456927,
+      "chain_law": "E[T] = 1 + sum_{d=1..K} c_eff^d   (K=7, stark #331 convention)",
+      "et_drop_from_shortfall": 0.5936369185022761,
+      "et_drop_pct": 9.713893550286626,
+      "et_fusion_0p8903": 5.517578068867642,
+      "et_linear_0p9213": 6.111214987369918,
+      "et_linear_reproduces_611": true,
+      "et_native_a1_only": 3.8259731248072115,
+      "monotone_increasing_in_c_eff": true,
+      "note": "the honest fusion c_eff=0.8903 yields E[T]=5.5176, a 9.71% drop from the linear E[T]=6.1112 at c_eff=0.9213. E[T] is strictly increasing in c_eff, so coverage shortfall maps monotonically to a lower E[T] lever."
+    },
+    "deliverable2_cov_width_tile": {
+      "a1": 0.7730729805683441,
+      "cov4_fusion_seed": 0.5165846699315655,
+      "cov4_fusion_seed_pr_rounded": 0.5165,
+      "cov_needed_equals_linear_cov4": true,
+      "cov_needed_for_0p9213": 0.6531976066516435,
+      "cov_shortfall": 0.13661293672007802,
+      "restore_geom_sensitivity": {
+        "crosses_knee_32": true,
+        "m_at_w_ceil": 43,
+        "model": "cov_W = 1 - rho^(W-1), rho from cov4_fusion (cov(W=1)=0 convention)",
+        "note": "point-estimate only; not load-bearing. Even this saturating model needs W~5.37 (M=43) > knee 32, so the lower bound (W>=5) and the estimate agree: restoration crosses the cliff. A larger W only worsens the supra-cliff case (W=7 -> M=50 would also cross the M=49 second cliff).",
+        "rho": 0.7848261640948931,
+        "w_ceil": 6,
+        "w_continuous": 5.370741167864941
+      },
+      "restore_lower_bound": {
+        "argument": "coverage is monotone in W and cov4_fusion=0.5166 < cov_needed=0.6532, so restoring c_eff=0.9213 needs W>=5; the smallest such tree (W=5) already presents M=36 > knee 32 -> the M=33 cliff is unavoidable for ANY restoration.",
+        "crosses_knee_32": true,
+        "m_min_restore": 36,
+        "w_min_restore": 5
+      },
+      "salvage_relation": "c_eff(W) = a1 + (1-a1)*cov_W   (a1=0.7731, denken #320)",
+      "tile_map": {
+        "M_W1_deployed": 8,
+        "M_W4_subcliff": 29,
+        "M_W5_widen": 36,
+        "blocks_W4": 2,
+        "blocks_W5": 3,
+        "deployed_anchor_ok": true,
+        "formula": "M = W*K + 1 ; thread_m_blocks = ceil(M/16) ; knee_Mstar=32 (cliff @ M=33)",
+        "subcliff_anchor_ok": true
+      },
+      "verdict_restoration_crosses_cliff": true
+    },
+    "deliverable3_ab_decision": {
+      "A_wins": true,
+      "lever_margin_A_minus_B": 0.2934538730752765,
+      "lever_ratio_A_over_B": 1.0561728362644272,
+      "mu_cliff": 1.1698066045772872,
+      "mu_tie_crossover": 1.1075901257930196,
+      "note": "(A) sub-cliff lever 5.5176 vs (B) supra-cliff lever 5.2241: the +16.98% cliff penalty exceeds the +10.76% E[T] gain, so STAY-SUB-CLIFF wins. They would tie at mu_tie=1.1076; the real cliff mu=1.16981 is past it. Compliant worst: A=444.99 > B=421.32.",
+      "operating_point_A_subcliff": {
+        "E_T": 5.517578068867642,
+        "compliant_central": 470.347938447151,
+        "compliant_worst": 444.9888652889661,
+        "desc": "W=4, M=29, E[T]=E[T](0.8903), step x1 (sub-cliff)",
+        "effective_lever": 5.517578068867642,
+        "step_mult": 1.0
+      },
+      "operating_point_B_supracliff": {
+        "E_T": 6.111214987369918,
+        "compliant_central": 445.33235688083255,
+        "compliant_worst": 421.32201284672794,
+        "desc": "W>=5, M>=36, E[T] restored to 6.11, step /mu (supra-cliff)",
+        "effective_lever": 5.224124195792365,
+        "step_mult": 1.1698066045772872
+      },
+      "real_mu_exceeds_tie": true,
+      "winner": "A_subcliff"
+    },
+    "deliverable4_honest_envelope": {
+      "both_corners_below_500": true,
+      "cap_subtlety_note": "deliverable scales the BANKED corners (central is cap-bound at the lambda ceiling) by the E[T] lever ratio, per the PR's lever convention. A strict re-price holding the lambda ceiling FIXED would leave central cap-bound near 521.0 (still >500), so the WORST corner (445.0) is the binding compliant-500 test either way -- and it is below 500.",
+      "central_headroom_pct": -5.930412310569795,
+      "et_611_reference": 6.111214987369918,
+      "et_honest_subcliff": 5.517578068867642,
+      "fern325_central_at_611": 520.9527323111674,
+      "fern325_worst_at_611": 492.865273281899,
+      "honest_envelope_central": 470.347938447151,
+      "honest_envelope_clears_500": false,
+      "honest_envelope_clears_500_central": false,
+      "honest_envelope_clears_500_worst": false,
+      "honest_envelope_worst": 444.9888652889661,
+      "scale_et_honest_over_611": 0.9028610644971338,
+      "worst_headroom_pct": -11.002226942206779
+    },
+    "deliverable5_verdict": {
+      "handoff_to_fern_335": "feeds fern #335's joint compliant-500 AND-gate DEMAND axis: refine its binary [c_eff >= 0.9213] coverage gate into the CONTINUOUS consequence honest_envelope = fern_envelope x E[T](c_eff_honest)/E[T](0.9213). At c_eff=0.8903 the demand axis is RED (worst 444.99 < 500) before any private-tax/identity term is applied.",
+      "honest_coverage_collapses_envelope": true,
+      "second_failure_mode_note": "this is a SECOND, independent failure mode: the binary identity/acceptance bar already fails (0.8903 < 0.9213), but here the SAME shortfall ALSO collapses the compliant-500 envelope on the E[T] LEVER axis -- the demand miss does not need the identity bar to kill compliant-500.",
+      "verdict": "ENVELOPE-COLLAPSES-ON-E[T]-AXIS",
+      "why": "the honest fusion c_eff=0.8903 (lawine #330) drops E[T] to 5.5176; restoring E[T]=6.11 needs W>=5 (M>=36 > knee 32) so the cliff (mu=1.16981) inflates the step, and the +16.98% cliff penalty exceeds the +10.76% E[T] gain -> STAY-SUB-CLIFF wins at E[T]=5.5176. Scaling fern #325's banked envelope by 0.9029 gives central 470.35 / worst 444.99 -- BOTH below 500."
+    },
+    "headline": {
+      "cov_et_tile_self_test_passes": true,
+      "et_fusion_0p8903": 5.517578068867642,
+      "et_linear_0p9213": 6.111214987369918,
+      "honest_coverage_collapses_envelope": true,
+      "honest_envelope_central": 470.347938447151,
+      "honest_envelope_clears_500": false,
+      "honest_envelope_worst": 444.9888652889661,
+      "mu_cliff": 1.1698066045772872,
+      "mu_tie_crossover": 1.1075901257930196,
+      "restoration_crosses_cliff": true,
+      "verdict": "ENVELOPE-COLLAPSES-ON-E[T]-AXIS",
+      "winner": "A_subcliff"
+    },
+    "imports": {
+      "caveats": [
+        "DERIVED, not measured: no EAGLE-3 fusion checkpoint runs here; this prices the E[T] and tile consequences the measured coverages (linear 0.6532, fusion 0.8903 c_eff) imply under stark #331's tile map. NOT a running EagleProposer.",
+        "the exact restoring width W is model-dependent; the verdict rests only on the model-free lower bound W>=5 (M>=36 > knee 32), which any monotone coverage curve satisfies. The geometric estimate (W~5.4, M~43) is a labeled sensitivity that only strengthens the supra-cliff loss.",
+        "deliverable 4 scales the banked corners by the E[T] lever ratio per the PR. The central corner is cap-bound at the lambda ceiling; a strict cap-fixed re-price leaves central >500 but the WORST corner is below 500 either way (the binding test).",
+        "0 TPS / re-pricing property: depends only on the chain law, integer node counts, the measured tile boundary, and fern #325's banked corners -- not tensor values. NOT a launch / build / served-file change / HF Job / submission."
+      ],
+      "provenance": "fern #325 (banked compliant-500 envelope: lambda ceiling 520.95, central 586.08, worst 492.87, both @E[T]=6.11) x stark #331 b48rmwjq (M=W*K+1 tile map, knee 32, mu=1.16981 from measured M=32->33 step, chain law E[T]=1+sum c^d, a1=0.7731, cov4=0.6532, a1_required_611=0.9213) x lawine #330 hfrscdai (honest fusion top-4 c_eff=0.8903) x fern #34 gua9x68j (native a1~0.7714/0.7731). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "self_test": {
+      "conditions": {
+        "01_et_0p9213_reproduces_611": true,
+        "02_et_0p8903_is_5p52": true,
+        "03_et_monotone_in_c_eff": true,
+        "04_chain_law_spotcheck": true,
+        "05_M_anchor_deployed_8": true,
+        "06_M_anchor_subcliff_29": true,
+        "07_cov_needed_equals_cov4": true,
+        "08_salvage_roundtrip": true,
+        "09_restore_crosses_cliff_lower_bound": true,
+        "10_restore_crosses_cliff_geom": true,
+        "11_mu_from_measured_tile": true,
+        "12_ab_decision_consistent": true,
+        "13_mu_tie_recovered": true,
+        "14_supracliff_matches_331": true,
+        "15_honest_envelope_scaling": true,
+        "16_both_clears_500_false": true,
+        "17_verdict_collapse": true,
+        "18_nan_clean": true
+      },
+      "cov_et_tile_self_test_passes": true,
+      "detail": {
+        "et_fusion": 5.517578068867642,
+        "et_linear": 6.111214987369918,
+        "honest_worst": 444.9888652889661,
+        "mu": 1.1698066045772872,
+        "mu_tie": 1.1075901257930196
+      },
+      "n_checks": 18
+    }
+  }
+}
