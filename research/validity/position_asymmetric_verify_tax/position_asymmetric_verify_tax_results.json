@@ -1,0 +1,307 @@
+{
+  "pr": 418,
+  "agent": "denken",
+  "kind": "position-asymmetric-verify-tax",
+  "analysis_only": true,
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "gpu_used": false,
+  "official_tps": 0,
+  "baseline_fast_frontier_tps": 481.53,
+  "baseline_fast_frontier_ppl": 2.3772,
+  "blanket_strict_base_tps": 467.475218449957,
+  "headline": "Per-position asymmetric verify precision on the M=8 linear-chain verify. The #397 uniform selective-recompute restores byte-identity by recomputing ALL M=8 rows of every flagged step (tax 2.6 TPS, EQUIV_TAX_AT_M8; #412 measuring). The shave hypothesis: recompute only flip-prone chain positions (exact), leave the rest fast. REFUTED by the strict byte-identity gate: the near-tie population (gap<=eps*=0.125) blankets ALL 7 readable chain positions (#405 j6h228xy, per-position `j`), and the fast-path perturbation ceiling (0.125) EQUALS eps* (knife edge, no proof margin), so NO row is provably down-precisionable. equiv_tax stays 2.6 -> equiv_tps_at_shaved_tax = 481.53 - 2.6 = 478.93 (== #413 equiv_tps(7)).",
+  "inputs": {
+    "mu_p_fast_52": 481.53,
+    "base_467_393": 467.475218449957,
+    "equiv_tax_at_m8_397": 2.6,
+    "equiv_tps_uniform_478p93_413": 478.92999999999995,
+    "equiv_tps_selective_band_397": [
+      476.0,
+      479.0
+    ],
+    "ladder_289": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "e_accepted_289": 2.851185944363104,
+    "e_t_289": 3.851185944363104,
+    "m_deployed": 8,
+    "k_deployed": 7,
+    "n_served_positions_405": 882,
+    "n_served_flips_381_405": 3,
+    "served_identity_381": 0.9965986394557823,
+    "flips_prompt_j_405": [
+      [
+        11,
+        7
+      ],
+      [
+        18,
+        3
+      ],
+      [
+        118,
+        3
+      ]
+    ],
+    "flip_prompts_381_405": [
+      11,
+      18,
+      118
+    ],
+    "flip_chain_positions_405": [
+      7,
+      3,
+      3
+    ],
+    "eps_star_405": 0.125,
+    "reduction_order_perturb_max_87_381": 0.125,
+    "thinnest_gap_global_87": 0.03125,
+    "neartie_by_j_405": {
+      "1": 6,
+      "2": 7,
+      "3": 7,
+      "4": 1,
+      "5": 7,
+      "6": 5,
+      "7": 7
+    },
+    "n_neartie_at_eps_405": 40,
+    "n_correct_neartie_at_eps_405": 37,
+    "n_chain": 7,
+    "target": 500.0,
+    "ppl_deployed": 2.3772,
+    "ppl_gate": 2.42,
+    "source_405_run": "j6h228xy",
+    "source_413_run": "se8mf9ax",
+    "source_397_ref": "selective recompute ~2.6 TPS @ M=8 (EQUIV_TAX_AT_M8; #412 measuring)",
+    "source_87_run": "875cujdk",
+    "source_289_run": "fi34s269",
+    "source_407_ref": "human re-scope: maximize fastest strictly-equivalent TPS",
+    "source_409_ref": "tree dimension closed negligible (+1.33, beta-fragile) -> linear chain only",
+    "artifact_405_path": "/workspace/senpai/target/research/validity/argmax_tiebreak_zero_cost_semantic/arm_heuristic_result.json",
+    "artifact_405_loaded": true
+  },
+  "reach_weights": {
+    "1": 1.0,
+    "2": 0.7292532942898975,
+    "3": 0.553909224011713,
+    "4": 0.43923865300146414,
+    "5": 0.3614055636896047,
+    "6": 0.3017276720351391,
+    "7": 0.25218155197657394
+  },
+  "accept_mass_by_p": {
+    "1": 0.7292532942898975,
+    "2": 0.553909224011713,
+    "3": 0.43923865300146414,
+    "4": 0.3614055636896047,
+    "5": 0.3017276720351391,
+    "6": 0.25218155197657394,
+    "7": 0.21346998535871156
+  },
+  "reach_consistency_residual": 0.0,
+  "flip_position_map": {
+    "granularity": "per_position",
+    "flips_prompt_j": [
+      [
+        11,
+        7
+      ],
+      [
+        18,
+        3
+      ],
+      [
+        118,
+        3
+      ]
+    ],
+    "flip_chain_positions": [
+      7,
+      3,
+      3
+    ],
+    "distinct_flip_positions": [
+      3,
+      7
+    ],
+    "n_distinct_flip_positions": 2,
+    "flip_at_lowest_reach_j7": true,
+    "reach_at_flip_positions": {
+      "3": 0.553909224011713,
+      "7": 0.25218155197657394
+    }
+  },
+  "safety_gate": {
+    "perturb_max": 0.125,
+    "eps_star": 0.125,
+    "perturb_ge_eps_knife_edge": true,
+    "has_proof_margin": false,
+    "thinnest_gap_global": 0.03125,
+    "thinnest_gap_below_perturb": true,
+    "neartie_by_j": {
+      "1": 6,
+      "2": 7,
+      "3": 7,
+      "4": 1,
+      "5": 7,
+      "6": 5,
+      "7": 7
+    },
+    "all_positions_populated": true,
+    "min_neartie_count": 1,
+    "sparable_positions": [],
+    "n_sparable_positions": 0,
+    "shave_is_byte_identity_safe": false,
+    "can_shave_m8_tax_below_2p6": false,
+    "n_protected_rows_forced": 8,
+    "shaved_equiv_tax_tps": 2.6,
+    "equiv_tps_at_shaved_tax": 478.92999999999995
+  },
+  "position_models": {
+    "uniform_expected_by_j": {
+      "1": 5.714285714285714,
+      "2": 5.714285714285714,
+      "3": 5.714285714285714,
+      "4": 5.714285714285714,
+      "5": 5.714285714285714,
+      "6": 5.714285714285714,
+      "7": 5.714285714285714
+    },
+    "concentrated_late_expected_by_j": {
+      "1": 0.0,
+      "2": 3.2209855254219577,
+      "3": 5.306996916967131,
+      "4": 6.671195415512707,
+      "5": 7.597150371879953,
+      "6": 8.307118844820678,
+      "7": 8.896552925397572
+    },
+    "uniform_sparable_positions": [],
+    "concentrated_sparable_positions": [
+      1
+    ],
+    "can_shave_uniform_model": false,
+    "can_shave_concentrated_model_naive": true,
+    "concentrated_predicts_j1_empty": true,
+    "j1_measured_populated": true,
+    "concentrated_model_refuted_by_measurement": true,
+    "measured_neartie_is_blanket_all_positions": true,
+    "can_shave_robust_across_position_models": true
+  },
+  "optimistic_gate_off": {
+    "n_protected_optimistic": 2,
+    "tax_optimistic": 0.65,
+    "equiv_tps_optimistic": 480.88,
+    "note": "GATE-OFF / NOT ACHIEVABLE: assumes only the observed-flip rows need protection and the rest are provably safe to leave fast; the Section-4 strict gate REFUTES that premise."
+  },
+  "artifact_census": {
+    "n_positions": 882,
+    "flips_prompt_j": [
+      [
+        11,
+        7
+      ],
+      [
+        18,
+        3
+      ],
+      [
+        118,
+        3
+      ]
+    ],
+    "neartie_by_j": {
+      "1": 6,
+      "2": 7,
+      "3": 7,
+      "4": 1,
+      "5": 7,
+      "6": 5,
+      "7": 7
+    },
+    "n_neartie": 40
+  },
+  "position_asymmetric_verify_tax_self_test_passes": true,
+  "can_shave_m8_tax_below_2p6": false,
+  "shave_is_byte_identity_safe": false,
+  "shaved_equiv_tax_tps": 2.6,
+  "equiv_tps_at_shaved_tax": 478.92999999999995,
+  "equiv_tps_gain_vs_uniform478p93": 0.0,
+  "flip_position_granularity": "per_position",
+  "can_shave_robust_across_position_models": true,
+  "equiv_tax_at_m8_used": 2.6,
+  "ppl_unchanged": 2.3772,
+  "self_test": {
+    "conditions": {
+      "a_mu_p_is_481p53": true,
+      "a_base467_is_393": true,
+      "a_equiv_tax_m8_is_2p6": true,
+      "a_equiv_tps_uniform_is_478p93": true,
+      "a_ladder_len_7": true,
+      "a_ladder_monotone_increasing": true,
+      "a_e_accepted_is_289": true,
+      "a_e_t_is_1_plus_accepted": true,
+      "a_m_deployed_is_kdep_plus_1": true,
+      "b_w1_is_1": true,
+      "b_reach_strictly_decreasing": true,
+      "b_accept_mass_eq_413_marginal": true,
+      "b_reach_consistency_under_1e6": true,
+      "b_w7_is_lowest_reach": true,
+      "b_w7_value_approx_0p2522": true,
+      "c_n_flips_3": true,
+      "c_n_served_882": true,
+      "c_served_identity_is_879_over_882": true,
+      "c_flip_prompts_11_18_118": true,
+      "c_flip_positions_distinct_3_and_7": true,
+      "c_flip_at_lowest_reach_j7": true,
+      "c_granularity_per_position": true,
+      "c_neartie_by_j_sums_40": true,
+      "c_correct_neartie_is_40_minus_3": true,
+      "c_neartie_blankets_all_7_positions": true,
+      "c_artifact_matches_pinned_flips": true,
+      "c_artifact_matches_pinned_neartie_by_j": true,
+      "c_artifact_n_positions_882": true,
+      "c_artifact_n_neartie_40": true,
+      "d_perturb_max_is_0p125": true,
+      "d_eps_star_is_0p125": true,
+      "d_knife_edge_perturb_ge_eps": true,
+      "d_no_proof_margin": true,
+      "d_thinnest_gap_below_perturb": true,
+      "d_no_sparable_position": true,
+      "d_shave_is_unsafe": true,
+      "d_can_shave_is_false": true,
+      "e_n_protected_forced_is_8": true,
+      "e_shaved_tax_is_full_2p6": true,
+      "e_equiv_tps_at_shaved_is_478p93": true,
+      "e_gain_vs_uniform_is_zero": true,
+      "e_equiv_tps_in_selective_band": true,
+      "e_equiv_tps_above_blanket_floor": true,
+      "f_optimistic_protects_2_rows": true,
+      "f_optimistic_tax_is_0p65": true,
+      "f_optimistic_equiv_tps_exceeds_achievable": true,
+      "f_optimistic_strictly_below_fast_frontier": true,
+      "g_uniform_model_can_shave_false": true,
+      "g_concentrated_model_refuted_by_data": true,
+      "g_measured_blanket_all_positions": true,
+      "g_can_shave_robust_true": true,
+      "h_ppl_unchanged_passes_gate": true,
+      "i_tax_m8_swap_is_one_line": true,
+      "j_no_nan_inf": true
+    },
+    "n_checks": 54,
+    "n_passed": 54,
+    "passes": true
+  },
+  "peak_mem_mib": 13.65625,
+  "wandb_run_id": "uc7jg6vs"
+}
