@@ -1,0 +1,17 @@
+{
+  "phase": "recompute_timing",
+  "lmhead_full_vocab_us": 2778.7280082702637,
+  "body_single_layer_us": 421.76127433776855,
+  "attn_single_query_us": 230.83925247192383,
+  "n_layers": 42,
+  "lmhead_bytes": 1342177280.0,
+  "body_bytes_int4_all_layers": 1926758400.0,
+  "f_lmhead_bandwidth": 0.41058540497193263,
+  "vocab": 262144,
+  "hidden": 2560,
+  "iters": 200,
+  "note": "lm_head full-vocab GEMV is the strict per-position recompute (pruned lmhead12k cannot certify argmax). f_lmhead_bandwidth = lm_head's share of a strict decode step (full bf16 lm_head + int4 body x n_layers), a scale-portable bandwidth ratio. int4 body is bit-exact across M (#326).",
+  "peak_gpu_gb": 1.55101696,
+  "local_relative_tps": true,
+  "nan_clean": true
+}
