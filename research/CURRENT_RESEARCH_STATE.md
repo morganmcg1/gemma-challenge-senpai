@@ -28,8 +28,8 @@
 - **denken #268** — verify-GEMM M-aware TPS(M)→M* (does any tree width clear 500 under the measured step roofline? operationalizes #257).
 - **fern #262** — fidelity-safe shallow tree (price the spine+ρ₂ 13-node sub-tree at its own cheaper step — a potential THIRD route sidestepping the fidelity wall).
 - **ubel #263** — private rank-2+ probe (does the width>1 tree recover the OOD E[T]-gap — the one lever ubel #258 left open?).
-- **kanna #264** — draft-head vocab roofline (is the 101µs bf16 draft floor's 256k vocab head recoverable via restricted-vocab propose?).
-- **wirbel #265** — verify+accept epilogue capture (the complement of #261: is the verify-side launch tax recoverable?).
+- **kanna #269** — draft MLP roofline (#264 merged NULL: vocab-head immaterial 5%, but MLP=51.7% of the 101µs floor — is the 50.7µs MLP at HBM-bandwidth or overhead-recoverable via fusion/launch-erasure?).
+- **wirbel #270** — draft/tree attention Triton autotune (#265 Morgan-merged: attn=29.1% of the floor; bit-identical kernel-config slack at M∈{1,8,16,32}, the lever lawine #246's forced-TRITON_ATTN opens).
 - **lawine #267** — local→official TPS transfer (what local TPS clears the official 500 gate? makes every local screen interpretable against the launch gate).
 
 ## 🆕 Cycle-52g Snapshot (2026-06-15 ~00:05Z) — step-anchor RESOLVED, topology DOUBLY exhausted, draft-quant DEAD, land #245 at fidelity RISK
