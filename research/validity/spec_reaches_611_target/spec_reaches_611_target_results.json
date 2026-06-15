@@ -1,0 +1,174 @@
+{
+  "agent": "denken",
+  "created_at": "20260615T055257Z",
+  "kind": "spec-reaches-611-target",
+  "nan_clean": true,
+  "peak_mem_mib": 31.84,
+  "pr": 304,
+  "self_test": {
+    "checks": {
+      "a_deployed_ak_reproduces_3p8512": true,
+      "a_deployed_counters_reproduce_3p8512": true,
+      "b_spec289_near_a1_only_ceiling": true,
+      "b_spec289_reconstructs_4p92": true,
+      "c_cliffkept_matches_chainproduct": true,
+      "c_cliffkept_roundtrips": true,
+      "c_max_et_cliffkept_is_1_plus_073x7": true,
+      "c_uniform_roundtrips": true,
+      "d_cliffkept_unit_or_flagged": true,
+      "d_nan_clean": true,
+      "d_uniform_unit_or_flagged": true,
+      "e_constants_imported_exact": true,
+      "f_carries_caveats": true
+    },
+    "spec_reaches_611_self_test_passes": true
+  },
+  "synthesis": {
+    "context": {
+      "e_t_max": 8,
+      "k_spec": 7,
+      "linear_cap_119": 3.8445,
+      "multiplier_faithful_295": 1.745557050577551,
+      "official_tps_217": 481.53,
+      "public_et_floor_281": 4.966,
+      "step_banked_et_290": 4.9029
+    },
+    "handoff_line": "kanna #289's per-position spec (a1>=0.73, j>=2->0.91) yields E[T] ~ 4.9196 and falls 1.19 short of wirbel #295's step-corrected 6.11 target; hitting 6.11 REQUIRES breaking the a1 cliff to ~0.92 (cliff-kept lift caps at 6.1100), so the EAGLE-3 build-spec under the heavier fusion step is a1->~0.92, strictly harder than #289 (cliff-kept lift caps at 6.1100 < 6.1112 even at b*=1.0), reconciling the numerator acceptance spec with the denominator-corrected target. 0 TPS; 6.11 is wirbel #295's step-PROFILE target (not a trained drafter); the required-acceptance is an ANALYTIC chain-product inversion (kanna #294 prices whether a1->0.92 is TRAINABLE); gate stays land #245's MEASURED >=500. NOT a launch. NOT a build. NOT open2.",
+    "step1_reproduce": {
+      "et_counters_resid_vs_297": 0.0,
+      "et_deployed_from_ak": 3.8511788392864035,
+      "et_deployed_from_counters": 3.851185944363104,
+      "et_deployed_resid_vs_297": 7.105076700320012e-06,
+      "spec289_ak": [
+        0.73,
+        0.91,
+        0.91,
+        0.91,
+        0.91,
+        0.91,
+        0.91
+      ],
+      "spec289_et": 4.91960506521293,
+      "spec289_et_reconciles_a1ceiling_resid": 0.009605065212929809
+    },
+    "step2_invert": {
+      "a_uniform_required_611": 0.9213011665456927,
+      "b_jge2_required_611_cliffkept": 1.0000792450690672,
+      "cliff_kept": {
+        "central_6p1112": {
+          "a1_fixed": 0.73,
+          "b_jge2_required": 1.0000792450690672,
+          "b_star_le_one": false,
+          "cliff_poly_needed": 7.001664366260164,
+          "cliffkept_can_reach": false,
+          "et_target": 6.1112149873699195,
+          "max_et_cliffkept": 6.109999999999999,
+          "min_a1_at_bfull": 0.7301735696242743,
+          "policy": "cliff_kept",
+          "roundtrip_et": 6.1112149873699195,
+          "roundtrip_resid": 0.0
+        },
+        "conservative_6p1245_293": {
+          "a1_fixed": 0.73,
+          "b_jge2_required": 1.0009443699995142,
+          "b_star_le_one": false,
+          "cliff_poly_needed": 7.019863013698631,
+          "cliffkept_can_reach": false,
+          "et_target": 6.1245,
+          "max_et_cliffkept": 6.109999999999999,
+          "min_a1_at_bfull": 0.7320714285714286,
+          "policy": "cliff_kept",
+          "roundtrip_et": 6.124500000000002,
+          "roundtrip_resid": 1.7763568394002505e-15
+        },
+        "lower_5p3636": {
+          "a1_fixed": 0.73,
+          "b_jge2_required": 0.946845278781439,
+          "b_star_le_one": true,
+          "cliff_poly_needed": 5.977548941076262,
+          "cliffkept_can_reach": true,
+          "et_target": 5.363610726985671,
+          "max_et_cliffkept": 6.109999999999999,
+          "min_a1_at_bfull": 0.623372960997953,
+          "policy": "cliff_kept",
+          "roundtrip_et": 5.363610726985672,
+          "roundtrip_resid": 8.881784197001252e-16
+        },
+        "upper_6p8588": {
+          "a1_fixed": 0.73,
+          "b_jge2_required": 1.0452718478530385,
+          "b_star_le_one": false,
+          "cliff_poly_needed": 8.025779791444064,
+          "cliffkept_can_reach": false,
+          "et_target": 6.858819247754167,
+          "max_et_cliffkept": 6.109999999999999,
+          "min_a1_at_bfull": 0.8369741782505953,
+          "policy": "cliff_kept",
+          "roundtrip_et": 6.858819247754167,
+          "roundtrip_resid": 0.0
+        }
+      },
+      "cliffkept_can_reach_611": false,
+      "max_et_cliffkept_deployed_0p72925": 6.104749999999999,
+      "max_et_cliffkept_spec073": 6.109999999999999,
+      "min_a1_at_bfull_611": 0.7301735696242743,
+      "targets": {
+        "central_6p1112": 6.1112149873699195,
+        "conservative_6p1245_293": 6.1245,
+        "lower_5p3636": 5.363610726985671,
+        "upper_6p8588": 6.858819247754167
+      },
+      "uniform": {
+        "central_6p1112": {
+          "a_uniform_required": 0.9213011665456927,
+          "et_target": 6.1112149873699195,
+          "feasible_in_unit": true,
+          "policy": "uniform",
+          "roundtrip_et": 6.111214987369918,
+          "roundtrip_resid": 1.7763568394002505e-15,
+          "survival_sum_needed": 5.1112149873699195
+        },
+        "conservative_6p1245_293": {
+          "a_uniform_required": 0.9219520928012865,
+          "et_target": 6.1245,
+          "feasible_in_unit": true,
+          "policy": "uniform",
+          "roundtrip_et": 6.124499999999998,
+          "roundtrip_resid": 2.6645352591003757e-15,
+          "survival_sum_needed": 5.1245
+        },
+        "lower_5p3636": {
+          "a_uniform_required": 0.8815758815002,
+          "et_target": 5.363610726985671,
+          "feasible_in_unit": true,
+          "policy": "uniform",
+          "roundtrip_et": 5.363610726985671,
+          "roundtrip_resid": 0.0,
+          "survival_sum_needed": 4.363610726985671
+        },
+        "upper_6p8588": {
+          "a_uniform_required": 0.9554948297903998,
+          "et_target": 6.858819247754167,
+          "feasible_in_unit": true,
+          "policy": "uniform",
+          "roundtrip_et": 6.858819247754166,
+          "roundtrip_resid": 8.881784197001252e-16,
+          "survival_sum_needed": 5.858819247754167
+        }
+      }
+    },
+    "step3_verdict": {
+      "a1_deployed": 0.72925,
+      "a1_lift_factor_vs_deployed": 1.2633543593358831,
+      "a1_low_quartile_297": 0.655,
+      "a1_required_for_611": 0.9213011665456927,
+      "cliffkept_can_reach_611": false,
+      "heavier_step_demands_a1_break": true,
+      "kanna289_spec_reaches_611": false,
+      "spec289_et": 4.91960506521293,
+      "spec_shortfall_vs_611": 1.1916099221569896
+    },
+    "verdict": "HEAVIER-STEP-DEMANDS-A1-CLIFF-BREAK"
+  },
+  "wandb_run_id": "dtf1ouml"
+}
