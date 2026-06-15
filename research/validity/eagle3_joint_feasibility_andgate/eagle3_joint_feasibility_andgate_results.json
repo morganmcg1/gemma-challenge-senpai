@@ -1,0 +1,268 @@
+{
+  "agent": "fern",
+  "analysis_only": true,
+  "created_at": "20260615T094023Z",
+  "kind": "eagle3-joint-feasibility-andgate",
+  "nan_clean": true,
+  "peak_mem_mib": 15.152,
+  "pr": 335,
+  "self_test": {
+    "checks": {
+      "01_envelope_central_reproduces_520p95": true,
+      "02_envelope_worst_reproduces_492p87": true,
+      "03_deployed_481_and_honest_622_reproduced": true,
+      "04_central_capped_worst_uncapped": true,
+      "05_tile_M29_eq_M32_two_blocks": true,
+      "06_m33_cliff_does_not_bind": true,
+      "07_floor_reproduces_327_9p841": true,
+      "08_sdpa_alone_busts_budget": true,
+      "09_phi_star_0p745_recovered": true,
+      "10_recovery_star_0p255_recovered": true,
+      "11_ceiling_at_phi0_469p68": true,
+      "12_demand_prior_reproduces_330_0p8903": true,
+      "13_delta_cov_star_0p031": true,
+      "14_binding_source_is_mmlu_pro": true,
+      "15_g_supply_monotone_in_phi": true,
+      "16_g_demand_monotone_in_dcov": true,
+      "17_measured_corner_phi0_dcov0_nogo": true,
+      "18_only_bclear_is_go": true,
+      "19_table_consistent_three_nogo": true,
+      "20_rho_floor_applied": true,
+      "21_determinism_two_runs_identical": true,
+      "22_p_both_bounded_by_demand": true,
+      "23_nan_clean": true
+    },
+    "joint_feasibility_andgate_self_test_passes": true
+  },
+  "synthesis": {
+    "bottom_line": {
+      "binding_axis_at_measured_corner": "supply",
+      "binding_axis_note": "Headline metric = fraction of improvement headroom consumed to reach threshold: supply 0.255 (floor 9.841%%->7.332%% of a 9.841%% headroom-to-zero) vs demand 0.283 (coverage 0.8903->0.9213 of a 0.1097 headroom-to-1.0). The two axes are nearly BALANCED (~25-28%% of their headroom each); 'supply' is marginally closer. Under the relative-to-bar/budget metric the picture flips -- demand is only 3.4% under its bar while supply is 34.2% over its budget (closer = 'demand') -- because the identity ceiling is a stiff function of the floor. DECISION-relevant: demand needs a +0.031 (+3.5%) coverage lift from a better head; supply needs a 25.5%% parallelism recovery in an UNBUILT deterministic kernel. Neither is near-free, and the AND-gate requires both.",
+      "gaps": {
+        "closer_axis_by_headroom": "supply",
+        "closer_axis_by_relative": "demand",
+        "demand_coverage_lift_needed_rel": 0.034860610544083424,
+        "demand_gap_headroom_fraction": 0.28282210646623346,
+        "demand_gap_rel_to_bar": 0.033686286045572146,
+        "supply_gap_headroom_fraction": 0.2549920813842095,
+        "supply_gap_rel_to_budget": 0.3422676122127394,
+        "supply_recovery_needed": 0.2549920813842095
+      },
+      "handoff": "EAGLE-3 compliant-500 is an AND-gate: it needs BOTH the identity-half supply revival (deterministic SDPA recovering phi>=0.255 of forgone split-KV parallelism) AND the demand-half coverage revival (a better head lifting Delta_cov>=0.031). At the measured corner BOTH fail (supply (C) DEAD under the linear law, demand MISSES the bar by 0.031), so the lane is DEAD today. If EITHER revival fails, EAGLE-3 compliant-500 stays DEAD and the lane should hand off to a fresh non-EAGLE-3 direction. The two remaining reads that could revive it are denken #332 (geometric phi -> supply C<->B) and a better-head coverage measurement (demand miss<->clear); GREEN requires BOTH to land AND rho>=0.8038.",
+      "lane_dead_at_measured_corner": true,
+      "measured_corner_demand_state": "miss",
+      "measured_corner_supply_state": "C_dead",
+      "verdict": "DEAD"
+    },
+    "demand_axis": {
+      "binding_source": "mmlu_pro",
+      "binding_source_cov": 0.846544405293677,
+      "build_bar": 0.9213011665456927,
+      "coverage_prior": 0.8902659519153152,
+      "delta_cov_star": 0.031035214630377506,
+      "free_variable": "Delta_cov = aggregate per-source unconditional top-4 coverage LIFT",
+      "g_demand_rule": "G_demand(Delta_cov) = [0.8903 + Delta_cov >= 0.9213] = [Delta_cov >= 0.031]",
+      "measured_corner_delta_cov": 0.0,
+      "measured_corner_demand_clears": false,
+      "measured_corner_state": "miss",
+      "note": "Official-eval uncond top-4 prior = 14/57/14-weighted... (counts {'aime': 14, 'gpqa': 57, 'mmlu_pro': 57} -> weights aime 0.109 / gpqa 0.445 / mmlu_pro 0.445) = 0.8903, MISSING the 0.9213 bar by 0.0310. The binding source is mmlu_pro (0.8465) -- the reasoning-CoT vocabulary breadth, NOT a near-absent answer-letter. Revival needs a better head delivering Delta_cov >= 0.0310; P(clears) ~ 0.060 (lawine #330).",
+      "official_eval_counts": {
+        "aime": 14,
+        "gpqa": 57,
+        "mmlu_pro": 57
+      },
+      "official_eval_weights": {
+        "aime": 0.109375,
+        "gpqa": 0.4453125,
+        "mmlu_pro": 0.4453125
+      },
+      "p_demand_clears_330": 0.06031894029725235,
+      "per_source_top4": {
+        "aime": 0.957005303537408,
+        "gpqa": 0.9175953770859131,
+        "mmlu_pro": 0.846544405293677
+      },
+      "source_card": "lawine #330 (hfrscdai)"
+    },
+    "headline": {
+      "bclear_central_tps": 520.9527323111674,
+      "binding_axis_at_measured_corner": "supply",
+      "ceiling_at_phi0": 469.6844761311386,
+      "delta_cov_star": 0.031035214630377506,
+      "demand_state_today": "miss",
+      "envelope_central": 520.9527323111674,
+      "envelope_worst": 492.865273281899,
+      "joint_feasibility_andgate_self_test_passes": true,
+      "lane_dead_at_measured_corner": true,
+      "measured_corner_tps": 469.6844761311386,
+      "p_both_revivals_land": 0.0,
+      "p_both_revivals_land_upper_bound": 0.06031894029725235,
+      "phi_rec_star_recovery": 0.2549920813842095,
+      "phi_star_kept_slack": 0.7450079186157905,
+      "supply_state_today": "C_dead",
+      "verdict": "DEAD"
+    },
+    "imports": {
+      "provenance": "fern #325 xk1pghy4 (envelope central 520.95 / worst 492.87, K_cal 125.268, LAMBDA_CEIL 520.95, honest_public 622.08, rho central 0.9421 / breakeven 0.8038 / worst 0.7923) x denken #327 kcjlr5ny (floor 9.841% from #291 exposed_us, budget 7.332%, kept-slack break-even 0.745 / recovery 0.255, ceiling@phi0 469.68) x lawine #330 hfrscdai (coverage prior 0.8903, bar 0.9213, Delta_cov* 0.031, P(clears) 0.06, mmlu_pro binding) x stark #331 b48rmwjq (M=W*K+1=29 = 2 Marlin tiles = M=32 anchor, M=33 cliff +16.98% does not bind). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "joint_gate": {
+      "bclear_at_breakeven_rho": {
+        "compliant_tps": 500.0,
+        "demand": "clear",
+        "demand_public_tps": 500.0,
+        "go": true,
+        "rho": 0.8037539966988988,
+        "supply": "B",
+        "supply_ceiling": 520.9527323111674,
+        "verdict": "GO"
+      },
+      "bclear_at_worst_rho": {
+        "compliant_tps": 492.865273281899,
+        "demand": "clear",
+        "demand_public_tps": 492.865273281899,
+        "go": false,
+        "rho": 0.7922848664688427,
+        "supply": "B",
+        "supply_ceiling": 520.9527323111674,
+        "verdict": "NO-GO"
+      },
+      "go_cells_central": [
+        "B_clear"
+      ],
+      "ledger": "compliant_tps = min(demand_public_tps, revised_ceiling(phi)); GREEN = G_supply AND G_demand AND rho>=0.8038 AND tps>=500",
+      "measured_corner_cell": {
+        "compliant_tps": 469.6844761311386,
+        "demand": "miss",
+        "demand_public_tps": 481.53,
+        "go": false,
+        "rho": 0.9421228821714434,
+        "supply": "C",
+        "supply_ceiling": 469.6844761311386,
+        "verdict": "NO-GO"
+      },
+      "measured_corner_is_nogo": true,
+      "note": "2x2 over supply{C: phi<0.255 i.e. kept-slack psi>=0.745; B: phi>=0.255 i.e. psi<0.745} x demand{miss: Delta_cov<0.031; clear: Delta_cov>=0.031}, at central rho=0.9421. ONLY (B,clear) clears 500 (=> 520.95 TPS), and only while rho>=0.8038 -- at worst rho=0.7923 even (B,clear) lands 492.87 < 500 (NO-GO), exactly #325's YELLOW. The measured corner (C,miss) = 469.68 TPS = NO-GO.",
+      "only_bclear_is_go": true,
+      "rho_central": 0.9421228821714434,
+      "rho_gate_central_passes": true,
+      "rho_gate_worst_passes": false,
+      "rho_priv_floor": 0.8037539966988988,
+      "rho_worst": 0.7922848664688427,
+      "supply_ceiling_B_phi1": 520.9527323111674,
+      "supply_ceiling_C_phi0": 469.6844761311386,
+      "table_central_rho": {
+        "B_clear": {
+          "compliant_tps": 520.9527323111674,
+          "demand": "clear",
+          "demand_public_tps": 586.0766391463308,
+          "go": true,
+          "rho": 0.9421228821714434,
+          "supply": "B",
+          "supply_ceiling": 520.9527323111674,
+          "verdict": "GO"
+        },
+        "B_miss": {
+          "compliant_tps": 481.53,
+          "demand": "miss",
+          "demand_public_tps": 481.53,
+          "go": false,
+          "rho": 0.9421228821714434,
+          "supply": "B",
+          "supply_ceiling": 520.9527323111674,
+          "verdict": "NO-GO"
+        },
+        "C_clear": {
+          "compliant_tps": 469.6844761311386,
+          "demand": "clear",
+          "demand_public_tps": 586.0766391463308,
+          "go": false,
+          "rho": 0.9421228821714434,
+          "supply": "C",
+          "supply_ceiling": 469.6844761311386,
+          "verdict": "NO-GO"
+        },
+        "C_miss": {
+          "compliant_tps": 469.6844761311386,
+          "demand": "miss",
+          "demand_public_tps": 481.53,
+          "go": false,
+          "rho": 0.9421228821714434,
+          "supply": "C",
+          "supply_ceiling": 469.6844761311386,
+          "verdict": "NO-GO"
+        }
+      }
+    },
+    "restate_envelope": {
+      "breakeven_tps_reproduced": 500.0,
+      "central_matches_325_bank": true,
+      "central_tps_reproduced": 520.9527323111674,
+      "deployed_repro_ok": true,
+      "deployed_tps_reproduced": 481.45094401576097,
+      "honest_public_611_reproduced": 621.9785088403406,
+      "honest_public_repro_ok": true,
+      "lambda_ceiling": 520.9527323111674,
+      "note": "fern #325 joint envelope reproduced from inputs: central = min(622.08*0.9421, 520.95) = 520.95 (CAPPED at the identity ceiling); worst = min(622.08*0.7923, 520.95) = 492.87 (uncapped). These are the two numbers the supply/demand corners now deflate.",
+      "source_card": "fern #325 (xk1pghy4)",
+      "tile_pin_331": {
+        "formula": "M = W*K + 1 = 4*7 + 1 = 29",
+        "m33_cliff_does_not_bind": true,
+        "m33_cliff_step_pct": 16.98,
+        "m_salvage_tokens": 29,
+        "marlin_thread_m_block": 16,
+        "note": "E[T]=6.11 top-4 salvage tree verifies at M=W*K+1=29 tokens = 2 Marlin thread_m_blocks = the SAME tile as #325's M=32 anchor (both ceil(M/16)=2), so the verify-GEMM denominator is UNCHANGED and the M=33 cliff (+16.98% step, the 2->3 tile jump) does NOT bind. The #325 step -- and hence this ledger -- is valid for the salvage tree.",
+        "source_card": "stark #331 (b48rmwjq)",
+        "tiles_at_anchor_M32": 2,
+        "tiles_at_cliff_M33": 3,
+        "tiles_at_salvage_M29": 2,
+        "tree_depth_K": 7,
+        "tree_width_W": 4,
+        "verify_gemm_denominator_unchanged": true
+      },
+      "uncapped_central": 586.0766391463308,
+      "uncapped_worst": 492.865273281899,
+      "worstcase_matches_325_bank": true,
+      "worstcase_tps_reproduced": 492.865273281899
+    },
+    "revival_probability": {
+      "independence_assumed": true,
+      "note": "p_both = P(supply revives) * P(demand clears), independent (supply = kernel engineering; demand = head training). P(demand clears) = 0.0603 (banked lawine #330). P(supply revives) is UNMEASURED (denken #332 pending); the default uses the measured linear-law corner phi=0 -> supply DEAD -> P=0 -> p_both = 0.0000. Even with CERTAIN supply revival the upper bound is only 0.0603 -- demand is the binding probabilistic gate. The lane is a <=6%% joint-revival bet today.",
+      "p_both_revivals_land": 0.0,
+      "p_both_revivals_land_upper_bound": 0.06031894029725235,
+      "p_both_sweep_over_p_supply": {
+        "p_supply_0.00": 0.0,
+        "p_supply_0.25": 0.015079735074313087,
+        "p_supply_0.50": 0.030159470148626175,
+        "p_supply_0.75": 0.04523920522293926,
+        "p_supply_1.00": 0.06031894029725235
+      },
+      "p_demand_clears": 0.06031894029725235,
+      "p_supply_revives_input": 0.0
+    },
+    "supply_axis": {
+      "budget_arithmetic": "bf16 SDPA @ 34.9% BW alone = 9.451% of step (BUSTS the 7.332% budget); lm_head @ 83.4% BW = 0.390% (cheap); norms = 0.000%; COMBINED floor = 9.841% -> at phi=0 (no recovery, denken #327's linear law) the compliant ceiling = 520.95*(1-0.09841) = 469.68 TPS. Strict-compliant lane (C) DEAD at the measured corner; revives to (B) only if a deterministic SDPA recovers phi >= 25.5% of the forgone split-KV parallelism (kept-slack psi <= 74.5%). denken #332 (in-flight) fills phi.",
+      "budget_lambda1_frac": 0.07331808522875782,
+      "ceiling_at_breakeven_B_edge": 482.757475483423,
+      "ceiling_at_phi0_full_floor": 469.6844761311386,
+      "ceiling_at_phi1_full_recovery": 520.9527323111674,
+      "convex_law_revives_327": true,
+      "floor_a_lm_head_only": 0.003904718156915901,
+      "floor_b_sdpa_only": 0.09450777303509898,
+      "floor_combined": 0.09841249119201488,
+      "floor_norms_only": 0.0,
+      "free_variable": "phi = deterministic-SDPA split-KV parallelism RECOVERY fraction in [0,1]",
+      "g_supply_rule": "G_supply(phi) = [effective_floor(phi) <= budget] = [phi >= 0.255] = [kept-slack psi <= 0.745]",
+      "lmhead_bw_util": 0.8344417980018903,
+      "measured_corner_kept_slack_psi": 1.0,
+      "measured_corner_phi": 0.0,
+      "measured_corner_state": "C",
+      "measured_corner_supply_alive": false,
+      "phi_rec_star_recovery": 0.2549920813842095,
+      "phi_star_kept_slack": 0.7450079186157905,
+      "sdpa_alone_busts_budget": true,
+      "sdpa_bw_util": 0.34883864849061247,
+      "source_card": "denken #327 (kcjlr5ny)"
+    }
+  },
+  "wandb_run_id": "5pos499e"
+}
