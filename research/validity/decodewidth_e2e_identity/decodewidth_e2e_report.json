@@ -1,0 +1,199 @@
+{
+  "pr": 381,
+  "leg": "decode-width e2e token-identity: M=8-verify-vs-M=1-AR at the literal 8-row decode geometry (local A10G)",
+  "imported_anchors": {
+    "int4_identity_232": 0.9927083333333333,
+    "prefill_repl_pinned_376": 0.9925551470588235,
+    "prefill_repl_heuristic_376": 0.9927083333333333,
+    "marlin_first_divergent_size_m_376": 64,
+    "marlin_bitexact_at_8_376": true,
+    "deployed_flip_362": 0.0052,
+    "served_attn_375": "TRITON_ATTN varlen paged-KV decode; M-invariant served config = VLLM_BATCH_INVARIANT=1 (num_splits=1)",
+    "official_baseline": 481.53,
+    "M_verify": 8
+  },
+  "decodewidth_e2e_token_identity_rate": {
+    "heuristic": 0.9966254218222722,
+    "pinned": 0.9988751406074241
+  },
+  "pinned_reaches_identity_1p0": false,
+  "marlin_bitexact_at_decode_width": true,
+  "residual_divergence_locus": "NON-Marlin residual at decode width (Marlin IS bit-exact at size_m=8, so unlike #376's prefill-replication RED this is NOT the body GEMM). pin_engaged(aten)=True, attn_batch_invariant=True. Candidate loci: the served TRITON_ATTN varlen paged-KV split combine not fully pinned by VLLM_BATCH_INVARIANT, or the tied bf16 lm_head reduction. Run the lm_head ablation (#376 follow-up #3). The residual is a KNIFE-EDGE NEAR-TIE, not a systematic op divergence: all 1 flip(s) had the M=1 token inside the M=8 top-5 with a worst top-1 margin 0.125 nats < 0.5 (median 0.125); a sub-ULP attention-split perturbation coin-flips the argmax. Matches #375 (attention-rebuild-gated), NOT a Marlin rebuild.",
+  "residual_is_knife_edge_near_tie": true,
+  "residual_near_tie_summary": {
+    "divergent_count": 1,
+    "n_divergent_m1_in_top5": 1,
+    "margin_vs_m1_max_divergent": 0.125,
+    "margin_vs_m1_median_divergent": 0.125,
+    "gap_top2_max_divergent": 0.125,
+    "near_tie_logprob_thresh": 0.5
+  },
+  "decodewidth_geometry_is_served_faithful": true,
+  "decodewidth_geometry_justification": "M=8 query rows computed as ONE chunk against the cached paged KV, proven by RequestOutput.num_cached_tokens==C in 1.000 of prompts (==> exactly n_verify rows go through the body GEMM -> size_m=8, the Marlin bit-exact regime), median readable width 7=K_spec, served TRITON_ATTN varlen paged-KV decode (#375). The cached-prefix prompt_logprobs rows are uninitialized torch.empty garbage (never computed) and are NOT read. FAITHFUL PROXY: the chunk is a prefill-flagged 8-row suffix, not the literal EAGLE-3 spec-verify decode step; in vLLM v1 TRITON_ATTN both are varlen-query-vs-paged-KV through the same unified kernel, and the pinned arm forces num_splits=1 so its decider is robust to the prefill/decode routing nuance.",
+  "verdict": "RED_other_residual",
+  "decodewidth_identity_self_test_passes": true,
+  "pinned_restores_identity_vs_heuristic": false,
+  "residual_flip_rate_pinned": 0.0011248593925758943,
+  "heuristic_flip_rate": 0.003374578177727794,
+  "pin_engaged_aten_mm_bitexact": true,
+  "pin_attn_is_batch_invariant": true,
+  "pinned_decodewidth_minus_prefillrepl_376": 0.006319993548600578,
+  "arms": {
+    "heuristic": {
+      "decodewidth_e2e_token_identity_rate": 0.9966254218222722,
+      "decodewidth_e2e_divergence_rate": 0.003374578177727794,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "chunk_isolated_fraction": 1.0,
+      "median_chunk_width": 7,
+      "n_computed_rows_total": 1016,
+      "expected_computed_rows_per_chunk": 8,
+      "vllm_batch_invariant_env": false,
+      "attn_is_batch_invariant": false,
+      "near_tie": {
+        "divergent_count": 3,
+        "near_tie_logprob_thresh": 0.5,
+        "residual_is_knife_edge_near_tie": true,
+        "n_divergent_m1_in_top5": 3,
+        "all_divergent_m1_in_top5": true,
+        "gap_top2_median_divergent": 0.125,
+        "gap_top2_max_divergent": 0.125,
+        "margin_vs_m1_median_divergent": 0.125,
+        "margin_vs_m1_max_divergent": 0.125,
+        "min_gap_all_positions_median": 0.5,
+        "divergent_gaps": [
+          0.125,
+          0.125,
+          0.125
+        ],
+        "divergent_margins": [
+          0.125,
+          0.125,
+          0.125
+        ]
+      },
+      "aten_mm_control": {
+        "bitexact_M1_vs_M8": false,
+        "max_abs_diff_M1_vs_M8": 1.0,
+        "batch_m": 8
+      },
+      "marlin_sizem_diag": {
+        "status": "ran",
+        "sizes_tested": [
+          1,
+          8,
+          16,
+          64
+        ],
+        "per_size": {
+          "1": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "8": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "16": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "64": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.0078125
+          }
+        },
+        "first_divergent_size_m": 64,
+        "bitexact_at_decode_width": true,
+        "decode_width": 8
+      },
+      "total_positions": 889,
+      "n_prompts": 127,
+      "peak_gpu_gb": 12.251262976
+    },
+    "pinned": {
+      "decodewidth_e2e_token_identity_rate": 0.9988751406074241,
+      "decodewidth_e2e_divergence_rate": 0.0011248593925758943,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "chunk_isolated_fraction": 1.0,
+      "median_chunk_width": 7,
+      "n_computed_rows_total": 1016,
+      "expected_computed_rows_per_chunk": 8,
+      "vllm_batch_invariant_env": true,
+      "attn_is_batch_invariant": true,
+      "near_tie": {
+        "divergent_count": 1,
+        "near_tie_logprob_thresh": 0.5,
+        "residual_is_knife_edge_near_tie": true,
+        "n_divergent_m1_in_top5": 1,
+        "all_divergent_m1_in_top5": true,
+        "gap_top2_median_divergent": 0.125,
+        "gap_top2_max_divergent": 0.125,
+        "margin_vs_m1_median_divergent": 0.125,
+        "margin_vs_m1_max_divergent": 0.125,
+        "min_gap_all_positions_median": 0.5,
+        "divergent_gaps": [
+          0.125
+        ],
+        "divergent_margins": [
+          0.125
+        ]
+      },
+      "aten_mm_control": {
+        "bitexact_M1_vs_M8": true,
+        "max_abs_diff_M1_vs_M8": 0.0,
+        "batch_m": 8
+      },
+      "marlin_sizem_diag": {
+        "status": "ran",
+        "sizes_tested": [
+          1,
+          8,
+          16,
+          64
+        ],
+        "per_size": {
+          "1": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "8": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "16": {
+            "bitexact_row0_vs_M1": true,
+            "max_abs_diff": 0.0
+          },
+          "64": {
+            "bitexact_row0_vs_M1": false,
+            "max_abs_diff": 0.0078125
+          }
+        },
+        "first_divergent_size_m": 64,
+        "bitexact_at_decode_width": true,
+        "decode_width": 8
+      },
+      "total_positions": 889,
+      "n_prompts": 127,
+      "peak_gpu_gb": 12.242743296
+    }
+  },
+  "self_test": {
+    "heuristic_controls_eq_1": true,
+    "pinned_controls_eq_1": true,
+    "pin_engaged_aten_mm_bitexact": true,
+    "pin_attn_is_batch_invariant_flag": true,
+    "heuristic_arith_consistent": true,
+    "pinned_arith_consistent": true,
+    "decodewidth_geometry_isolated": true,
+    "marlin_bitexact_at_decode_width": true
+  },
+  "C": 224,
+  "n_verify": 8,
+  "n_prompts": 127,
+  "model_dir": "/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0"
+}
