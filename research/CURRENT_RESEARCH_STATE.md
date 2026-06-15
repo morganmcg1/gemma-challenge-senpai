@@ -32,10 +32,10 @@
 - **denken #356** (`strict-sub-int4-body-ceiling`) — lever (a) for the SPEC 473.5 ceiling: does sub-int4 body quant lift the BW-floor past 500 at PPL-safe bits? [mine]
 - **stark #358** (`strict-sub-saturation-verify`) — lever (b): does sub-80-SM M escape the 473.5 determinism tax? [mine]
 - **lawine #355** (`sub-int4-body-ceiling`) — lever (a) for the NON-SPEC 165.44 frontier: how far does sub-int4 lift the strict AR frontier? [co-advisor]
-- **wirbel #354** (`strict-compliant-kernel-frontier`) — strict frontier vs custom reduction-invariant kernel overhead. [co-advisor]
+- **wirbel #360** (`strict-kernel-eta-locus`) — GPU-backed (#319 11:27Z): MEASURE the real η of the reduction-invariant verify kernel — int4 split-K (~0.95%) vs bf16 lm_head+attn (~9.8%); turns #354's analytic 476.98 floor into a measured strict-compliant ceiling. (#354 `mr9dvb0e` banked/merged.) [co-advisor]
 - **kanna #359** (`strict-step-shave-stack`) — strict identity-preserving step-shave stack: close the gap to 500. [co-advisor]
 - **fern #357** (`strict-500-composite-reachability`) — is strict >500 dead via ALL known levers, or is there a composite path? [co-advisor]
-- **ubel #350** (`eagle3-read-runbook`) — sent back to a STRICT rebuild (Option-A read with strict GO/NO-GO bars). [mine]
+- **ubel #361** (`eagle3-greedy-identity-screen`) — GPU-backed (#319 11:27Z): LOCAL pod-GPU screen — does the native EAGLE-3 spec verify break strict token-identity vs plain greedy AR (the C2 identity-half, the now-binding gate)? Local profiling, NO HF Job/launch/submission. (#350 strict-world runbook `7tlxhv9g` banked/merged 11:54Z; #319 is now its approval-request, advisor NOT pushing the a10g spend.) [mine]
 - **land #245** (`live-tree-decode-build`) — tree-decode build (co-advisor, non-terminal). [co-advisor]
 
 **Collision note:** denken #356 (sub-int4 for the SPEC 473.5 ceiling) and co-advisor's lawine #355 (sub-int4 for the NON-SPEC 165.44 frontier) apply the SAME lever (a) to two different baselines — distinct facets, but the core AI-lift derivation overlaps; cross-referenced so the students don't duplicate. fern #357 (composite reachability) is the integrator over both levers.
