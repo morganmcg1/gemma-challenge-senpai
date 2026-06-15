@@ -1,0 +1,212 @@
+{
+  "activation_hadamard_tax": {
+    "hadamard_over_weight_read_frac": 0.0011676059789267335,
+    "note": "online activation RHT only; <<1%"
+  },
+  "agent": "lawine",
+  "analysis_only": true,
+  "byte_ratio": 0.7846932941272564,
+  "cb3_microbench_self_test_passes": true,
+  "closes_383_supply_gap_floor": true,
+  "created_at": "20260615T180720Z",
+  "f_body_complement_pr": 0.8825045903509467,
+  "f_body_strict_honest": 0.76240970145034,
+  "inputs": {
+    "band_378": [
+      357.32166269999993,
+      469.6847174760462
+    ],
+    "cb3_bpw_eff": 3.2368598382749325,
+    "cb3_bpw_uniform": 3.125,
+    "f_attn_378": 0.09506718019009251,
+    "f_draft_378": 0.12009488890060672,
+    "f_lmhead_378": 0.022428229458960704,
+    "int4_bpw": 4.125,
+    "mixed_gate_ppl_372": 2.3811966031692555,
+    "ppl_gate": 2.42,
+    "step_norm_us_378": 1218.2,
+    "supply_floor_383": 17.216386736379093,
+    "supply_robust_383": 23.74874176829968
+  },
+  "kind": "cb3-kernel-realized-bw",
+  "lit_bracket_speedup": [
+    1.15,
+    1.28
+  ],
+  "no_hf_job": true,
+  "no_kernel_rebuild": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "official_tps": 0.0,
+  "pr": 388,
+  "qtip_beta_byte_proportional": 0.51,
+  "realized_body_speedup": 1.2743832622046425,
+  "realized_body_speedup_measured_floor": null,
+  "realized_body_speedup_qtip_empirical": 1.1233511704212635,
+  "realized_is_roofline_bound": true,
+  "realized_note": "ROOFLINE BOUND: no cb3/QTIP kernel in env (Marlin/AWQ/AQLM only); cb3 bounded by its nominal 0.785x byte count at int4-Marlin's measured M=1 BW-efficiency. Tight iff cb3 matches that efficiency -- literature-supported (QTIP/QuIP# L1-resident codebook, RHT folded offline; only a <<1% online activation Hadamard).",
+  "realized_strict_base_lift_tps": 38.34161969078741,
+  "roofline_formula_lift_band_upper_bound": [
+    83.82117917805022,
+    110.17951322421061
+  ],
+  "selftest": {
+    "checks": [
+      {
+        "detail": "r=0.784693294127",
+        "name": "byte_ratio_eq_372",
+        "ok": true
+      },
+      {
+        "detail": "round(r,3)=0.785",
+        "name": "byte_ratio_rounds_0p785",
+        "ok": true
+      },
+      {
+        "detail": "S=1.2743832622 1/r=1.2743832622",
+        "name": "roofline_is_inv_byte_ratio",
+        "ok": true
+      },
+      {
+        "detail": "S=1.274383",
+        "name": "roofline_gt_1",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "roofline_eq_bpw_ratio",
+        "ok": true
+      },
+      {
+        "detail": "lf=1.234582 S=1.274383",
+        "name": "lift_factor_in_1_S_complement",
+        "ok": true
+      },
+      {
+        "detail": "lf=1.196390 S=1.274383",
+        "name": "lift_factor_in_1_S_body_only",
+        "ok": true
+      },
+      {
+        "detail": "83.821",
+        "name": "band_lift_positive_off",
+        "ok": true
+      },
+      {
+        "detail": "110.180",
+        "name": "band_lift_positive_floor",
+        "ok": true
+      },
+      {
+        "detail": "cons_lift=32.647 floor=17.216",
+        "name": "supply_gate_closes_floor",
+        "ok": true
+      },
+      {
+        "detail": "tax=0.00117",
+        "name": "hadamard_tax_negligible",
+        "ok": true
+      },
+      {
+        "detail": "sum=1.000000000",
+        "name": "step_fractions_sum_1",
+        "ok": true
+      },
+      {
+        "detail": "total=3.8902B",
+        "name": "body_params_3p89B",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "nan_inf_clean",
+        "ok": true
+      },
+      {
+        "detail": "ppl=2.3811966031692555 gate=2.42",
+        "name": "ppl_372_passes",
+        "ok": true
+      }
+    ],
+    "n_checks": 15,
+    "n_passed": 15,
+    "passes": true
+  },
+  "supply_gate": {
+    "clears_floor": true,
+    "clears_robust": true,
+    "closes_383_supply_gap_floor": true,
+    "conservative_lift_tps": 32.64721137113611,
+    "supply_floor_joint_tps": 17.216386736379093,
+    "supply_robust_et_only_tps": 23.74874176829968
+  },
+  "supply_gate_strict_floor": null,
+  "translation_variants": {
+    "lit_conservative__body_only": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 51.865419701318956,
+      "delta_off_the_shelf": 39.45761340479169,
+      "f_body": 0.76240970145034,
+      "lift_factor": 1.1104260321264638,
+      "lifted_floor": 521.5501371773652,
+      "lifted_off_the_shelf": 396.7792761047916,
+      "speedup": 1.15
+    },
+    "lit_conservative__complement": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 61.09802721803487,
+      "delta_off_the_shelf": 46.48149675926271,
+      "f_body": 0.8825045903509467,
+      "lift_factor": 1.1300830641166237,
+      "lifted_floor": 530.7827446940811,
+      "lifted_off_the_shelf": 403.80315945926264,
+      "speedup": 1.15
+    },
+    "qtip_empirical__body_only": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 42.91342465320065,
+      "delta_off_the_shelf": 32.64721137113611,
+      "f_body": 0.76240970145034,
+      "lift_factor": 1.0913664487186328,
+      "lifted_floor": 512.5981421292469,
+      "lifted_off_the_shelf": 389.96887407113604,
+      "speedup": 1.1233511704212635
+    },
+    "qtip_empirical__complement": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 50.398491588686625,
+      "delta_off_the_shelf": 38.34161969078741,
+      "f_body": 0.8825045903509467,
+      "lift_factor": 1.1073028133840803,
+      "lifted_floor": 520.0832090647328,
+      "lifted_off_the_shelf": 395.66328239078734,
+      "speedup": 1.1233511704212635
+    },
+    "roofline__body_only": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 92.24122273986598,
+      "delta_off_the_shelf": 70.17428043221543,
+      "f_body": 0.76240970145034,
+      "lift_factor": 1.1963896616341796,
+      "lifted_floor": 561.9259402159122,
+      "lifted_off_the_shelf": 427.49594313221536,
+      "speedup": 1.2743832622046425
+    },
+    "roofline__complement": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 110.17951322421061,
+      "delta_off_the_shelf": 83.82117917805022,
+      "f_body": 0.8825045903509467,
+      "lift_factor": 1.2345818569875646,
+      "lifted_floor": 579.8642307002568,
+      "lifted_off_the_shelf": 441.14284187805015,
+      "speedup": 1.2743832622046425
+    }
+  }
+}
