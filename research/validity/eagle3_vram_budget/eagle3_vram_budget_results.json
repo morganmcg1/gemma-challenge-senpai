@@ -1,0 +1,241 @@
+{
+  "created_at": "20260615T054034Z",
+  "pr": 299,
+  "agent": "ubel",
+  "kind": "eagle3-vram-budget",
+  "analysis_only": true,
+  "spot_check": {
+    "ran": true,
+    "alloc_delta_bytes": 239095808,
+    "n_params": 119285760,
+    "device_total_bytes": 23684841472,
+    "device_free_at_check_bytes": 23172939776,
+    "torch_version": "2.12.0+cu130",
+    "device_name": "NVIDIA A10G"
+  },
+  "synthesis": {
+    "constants": {
+      "official_baseline": 481.53,
+      "deployed_resident_gib": 19.3,
+      "model_loading_gib": 8.85,
+      "kv_cache_gib": 9.46,
+      "cuda_graph_gib": 0.04,
+      "kv_cache_tokens": 376880,
+      "gpu_mem_util": 0.9,
+      "gpu_mem_util_effective": 0.8974,
+      "device_visible_gib": 22.058,
+      "vram_hard_gib": 24.0,
+      "vram_usable_gib": 23.0,
+      "hidden": 2560,
+      "n_layers": 42,
+      "heads": 8,
+      "kv_heads": 2,
+      "head_dim": 256,
+      "intermediate": 10240,
+      "vocab": 262144,
+      "eagle3_aux_layers": [
+        2,
+        21,
+        39
+      ],
+      "l_fuse": 3,
+      "linear_drafter_params": 78779908,
+      "k_spec": 7,
+      "m_verify": 8
+    },
+    "deployed_map": {
+      "model_loading_int4_body_plus_linear_drafter_gib": 8.85,
+      "kv_cache_gib": 9.46,
+      "cuda_graph_pool_gib": 0.04,
+      "torch_subtotal_gib": 18.35,
+      "nontorch_cuda_context_residual_gib": 0.9499999999999993,
+      "nontorch_in_plausible_band": true,
+      "reconciled_resident_gib": 19.3,
+      "anchor_284_resident_gib": 19.3,
+      "reconcile_resid_gib": 0.0,
+      "util_budget_gib": 19.794849199999998,
+      "util_budget_gap_gib": 0.4948491999999973,
+      "kv_cache_tokens": 376880
+    },
+    "net_delta": {
+      "eagle3_decoder_layer_params": 99619840,
+      "eagle3_drafter_side_params": 99622400,
+      "fusion_fc_params": 19663360,
+      "linear_drafter_params": 78779908,
+      "linear_drafter_file_bytes": 159138240,
+      "draft_positions": 512,
+      "kv_bytes_per_token_per_layer": 2048,
+      "terms_conservative_gib": {
+        "drafter_weights": 0.037352144718170166,
+        "fusion_fc": 0.03662586212158203,
+        "hidden_state_retention": 0.00732421875,
+        "extra_kv": 0.718841552734375
+      },
+      "terms_elastic_gib": {
+        "drafter_weights": 0.037352144718170166,
+        "fusion_fc": 0.03662586212158203,
+        "hidden_state_retention": 0.00732421875,
+        "extra_kv": 0.0
+      },
+      "net_delta_conservative_gib": 0.8001437783241272,
+      "net_delta_elastic_gib": 0.0813022255897522,
+      "extra_kv_hold_capacity_gib": 0.718841552734375,
+      "extra_kv_deployment_elastic_gib": 0.0,
+      "kv_token_haircut_frac": 0.07598747914739692,
+      "dominant_memory_term": "extra_kv",
+      "dominant_memory_term_elastic": "drafter_weights",
+      "eagle3_reuses_embed_lmhead": true,
+      "parametric_weight_alloc_bytes": 238571520,
+      "spot_check_ran": true,
+      "spot_check_rel_err": 0.0021976135290582882,
+      "spot_check_agrees": true,
+      "spot_device_total_gib": 22.0582275390625,
+      "spot_device_total_matches_banked": true,
+      "delta_is_parametric": false
+    },
+    "sensitivity_gib": {
+      "S0_reuse_embed_and_lmhead_PRIMARY": 0.0,
+      "S1_separate_lmhead_full_vocab": 1.25,
+      "S2_untied_separate_embed_and_lmhead": 2.5,
+      "S3_reduced_32k_vocab_lmhead": 0.15625
+    },
+    "sensitivity_fits": {
+      "S0_reuse_embed_and_lmhead_PRIMARY": {
+        "net_delta_gib": 0.8001437783241272,
+        "embed_extra_gib": 0.0,
+        "build_resident_gib": 20.100143778324128,
+        "fits_24_hard": true,
+        "fits_23_usable": true,
+        "fits_device_visible": true,
+        "headroom_vs_24_hard_gib": 3.899856221675872,
+        "headroom_vs_23_usable_gib": 2.899856221675872,
+        "headroom_vs_device_visible_gib": 1.957856221675872
+      },
+      "S1_separate_lmhead_full_vocab": {
+        "net_delta_gib": 0.8001437783241272,
+        "embed_extra_gib": 1.25,
+        "build_resident_gib": 21.350143778324128,
+        "fits_24_hard": true,
+        "fits_23_usable": true,
+        "fits_device_visible": true,
+        "headroom_vs_24_hard_gib": 2.649856221675872,
+        "headroom_vs_23_usable_gib": 1.649856221675872,
+        "headroom_vs_device_visible_gib": 0.7078562216758719
+      },
+      "S2_untied_separate_embed_and_lmhead": {
+        "net_delta_gib": 0.8001437783241272,
+        "embed_extra_gib": 2.5,
+        "build_resident_gib": 22.600143778324128,
+        "fits_24_hard": true,
+        "fits_23_usable": true,
+        "fits_device_visible": false,
+        "headroom_vs_24_hard_gib": 1.399856221675872,
+        "headroom_vs_23_usable_gib": 0.3998562216758721,
+        "headroom_vs_device_visible_gib": -0.5421437783241281
+      },
+      "S3_reduced_32k_vocab_lmhead": {
+        "net_delta_gib": 0.8001437783241272,
+        "embed_extra_gib": 0.15625,
+        "build_resident_gib": 20.256393778324128,
+        "fits_24_hard": true,
+        "fits_23_usable": true,
+        "fits_device_visible": true,
+        "headroom_vs_24_hard_gib": 3.743606221675872,
+        "headroom_vs_23_usable_gib": 2.743606221675872,
+        "headroom_vs_device_visible_gib": 1.801606221675872
+      }
+    },
+    "primary_fit": {
+      "net_delta_gib": 0.8001437783241272,
+      "embed_extra_gib": 0.0,
+      "build_resident_gib": 20.100143778324128,
+      "fits_24_hard": true,
+      "fits_23_usable": true,
+      "fits_device_visible": true,
+      "headroom_vs_24_hard_gib": 3.899856221675872,
+      "headroom_vs_23_usable_gib": 2.899856221675872,
+      "headroom_vs_device_visible_gib": 1.957856221675872
+    },
+    "elastic_fit": {
+      "net_delta_gib": 0.0813022255897522,
+      "embed_extra_gib": 0.0,
+      "build_resident_gib": 19.381302225589753,
+      "fits_24_hard": true,
+      "fits_23_usable": true,
+      "fits_device_visible": true,
+      "headroom_vs_24_hard_gib": 4.618697774410247,
+      "headroom_vs_23_usable_gib": 3.618697774410247,
+      "headroom_vs_device_visible_gib": 2.676697774410247
+    },
+    "max_drafter_policy": {
+      "fits": true,
+      "one_eagle3_decoder_layer_gib": 0.1855611801147461,
+      "headroom_23_usable_gib": 2.899856221675872,
+      "max_additional_decoder_layers_within_23": 15,
+      "max_retention_positions_within_23": 202714,
+      "note": "the build fits with 2.90 GiB of 23-usable headroom; the drafter could be ~16x larger (decoder layers) before busting 23 GiB -- size is NOT the binding constraint."
+    },
+    "s2_exceeds_device_visible": true,
+    "live_config": {
+      "read": true,
+      "source": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it/snapshots/fee6332c1abaafb77f6f9624236c63aa2f1d0187/config.json",
+      "hidden_size": 2560,
+      "num_hidden_layers": 42,
+      "dims_match_banked": true
+    },
+    "caveats": {
+      "parametric_is_the_deliverable": "the parametric net delta is the deliverable; the random-init GPU spot-check (random weight tensors, freed immediately) only VALIDATES it -- NOT a trained build.",
+      "deployed_193_is_my_284_measurement": "the deployed ~19.3 GiB basis is MY ubel #284 (u58fxtu6) reconciled measurement; the delta stacks on it.",
+      "measures_vram_not_et": "this leg prices the build's MEMORY feasibility (resident footprint vs VRAM<=24), NOT its E[T] (kanna #289/denken #297 lane) nor its step cost (wirbel #295 lane).",
+      "zero_tps": "0 TPS added; BASELINE 481.53 untouched; NOT a launch, NOT a build, NOT open2.",
+      "launch_gate_clause": "land #245: MEASURED >=500 TPS at lambda_hat >= 0.9780 AND PPL <= 2.42 AND VRAM <= 24 GiB, human-approval-gated; this leg sizes ONLY the VRAM<=24 clause.",
+      "wirbel295_module_reused": false,
+      "wirbel295_reuse_note": "wirbel #295 is a pure-CPU forward-cost analytic with NO instantiable drafter module to import; the spot-check therefore allocates raw random-init weight tensors matching the parametric param counts (orthogonal MEMORY axis)."
+    },
+    "self_test": {
+      "conditions": {
+        "a_deployed_map_reconciles_to_193": true,
+        "b_net_delta_decomposition_sums": true,
+        "c_eagle3_params_exact_and_spotcheck_ok": true,
+        "d_build_resident_identity_holds": true,
+        "e_dominant_term_is_extra_kv": true,
+        "f_fit_flags_consistent_and_fits": true,
+        "g_constants_exact_and_config_read": true,
+        "i_all_sensitivity_scenarios_fit_24": true,
+        "j_all_memory_magnitudes_nonneg": true,
+        "k_honest_caveats_carried": true
+      }
+    },
+    "eagle3_build_resident_gb": 20.100143778324128,
+    "eagle3_net_memory_delta_gb": 0.8001437783241272,
+    "eagle3_build_fits_24gb": true,
+    "fits_23_usable": true,
+    "vram_headroom_gb": 3.899856221675872,
+    "dominant_memory_term": "extra_kv",
+    "delta_is_parametric": false,
+    "verdict": "DEPLOYED resident reconciles to the #284 anchor 19.30 GiB (model 8.85 + KV 9.46 + graph 0.04 = 18.35 torch + 0.95 non-torch CUDA context; resid 0.000 GiB). Swapping the linear MTP drafter for an EAGLE-3 fusion drafter adds a NET 0.800 GiB (conservative, hold-KV-capacity): drafter_weights 0.037 (1-layer 2H-input Llama decoder 99.6M params - linear drafter 0.148 GiB), fusion_fc 0.037 ([3H->H]+bias 19.7M), hidden_retention 0.0073 (L_FUSE 3 x H 2560 x 512 positions), extra_kv 0.719 (+1 drafter attention layer at 376880 tokens -- the dominant term, though ELASTIC: in deployment it trades ~7.6% of KV tokens rather than growing resident). eagle3_build_resident = 20.10 GiB, which FITS both ceilings (24-hard headroom 3.90; 23-usable headroom 2.90) and the measured 22.058 GiB device-visible cap. EAGLE-3 reuses the target embed+lm_head (draft_dim==backbone_dim; gemma4.py:176); ALL embed/lm_head sensitivity scenarios fit 24-hard, and only the doubly-pessimistic untied-separate-full-vocab + hold-KV case (22.60 GiB) brushes the 22.058 visible cap (exceeds=True) -- unrealistic. VRAM is NOT the binding constraint. Analysis-only; BASELINE 481.53 untouched; 0 TPS added; NOT a launch/build.",
+    "handoff": "EAGLE-3 fusion drafter FITS: deployed resident 19.30 GiB + net delta 0.800 GiB (conservative, hold-KV-capacity) = 20.10 GiB build resident, 2.90 GiB under the 23-usable ceiling (3.90 under 24-hard); dominant term = extra_kv (0.719 GiB, but ELASTIC in deployment -> ~7.6% fewer KV tokens, not +resident); the weight terms (drafter 0.037 + fc 0.037 + retention 0.007) add only 0.081 GiB; EAGLE-3 reuses the target embed+lm_head (draft_dim==backbone_dim), and even the untied-separate-full-vocab-head worst case (22.60 GiB) still fits 23-usable -- VRAM is NOT the binding constraint on the human-gated build."
+  },
+  "eagle3_vram_budget_self_test_passes": true,
+  "peak_mem_mib": 18.152,
+  "nan_clean": true,
+  "greedy_ppl_safety_certificate": {
+    "analysis_only": true,
+    "served_file_changed": false,
+    "emitted_token_changed": false,
+    "hf_job_or_submission": false,
+    "is_launch": false,
+    "is_build": false,
+    "spot_check_is_random_init_weight_alloc_only": true,
+    "baseline_tps_unchanged": 481.53,
+    "tps_added_by_this_leg": 0.0
+  },
+  "primary_metric": {
+    "name": "eagle3_vram_budget_self_test_passes",
+    "value": 1
+  },
+  "test_metric": {
+    "name": "eagle3_build_fits_24gb",
+    "value": 1
+  }
+}
