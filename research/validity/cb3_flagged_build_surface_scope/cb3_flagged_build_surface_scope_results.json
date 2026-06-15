@@ -1,0 +1,208 @@
+{
+  "additive_vs_inplace_split": {
+    "additive": 6,
+    "in_place": 0,
+    "total": 6
+  },
+  "additive_vs_inplace_split_str": "additive=6,in_place=0",
+  "agent": "lawine",
+  "analysis_only": true,
+  "blast": {
+    "blast_radius": "isolated-new-kernel",
+    "blast_radius_options": [
+      "isolated-new-kernel",
+      "shared-GEMM-edit",
+      "serve-hook"
+    ],
+    "is_additive_not_inplace": true,
+    "reversible_by_config_flag": true,
+    "rollback": "Instant: serve the existing fa2sw_treeverify_kenyan submission, or repoint WEIGHTS_BUCKET back to the int4-baked checkpoint. Nothing in-tree or shared was edited, so there is no patch to revert."
+  },
+  "blast_radius": "isolated-new-kernel",
+  "cb3_build_safe_to_request": true,
+  "cb3_build_surface_bounded": true,
+  "cb3_flagged_build_scope_self_test_passes": true,
+  "cb3_produces_new_reference": true,
+  "cb3_supply_facts": {
+    "body_bytes_frac": 0.7846932941272564,
+    "cb3_bpw_eff": 3.2368598382749325,
+    "cb3_read_shrink_frac": 0.2153067058727436,
+    "deployed_tps": 481.53,
+    "f_body_strict": 0.76240970145034,
+    "int4_bpw": 4.125,
+    "strict_base_corrected": 467.48,
+    "strict_gap_to_500": 32.53
+  },
+  "created_at": "20260615T205339Z",
+  "decision_gate": "GO-TO-REQUEST: surface is bounded, additive, reversible, and identity-verifiable. The build is SAFE TO REQUEST; the GO on the realized >500 then rides on #403's PPL-safe-k, not on the build surface.",
+  "human_scope_paragraph": "APPROVAL ASK (cb3 source-build). Authorize a one-time, out-of-harness source-build of the QTIP/QuIP#-class cb3 quantizer kernel (random-Hadamard incoherence + an L1-resident K=64 dim-2 Gaussian VQ codebook, ~3.2369 effective bpw, body weight-read ratio 0.785 => -21.5% body read) from github.com/Cornell-RelaxML/qtip, delivered as a PREBUILT sm_86 wheel/.so plus an out-of-tree vLLM quant registration (@register_quantization_config(\"cb3\")). It deploys as a NEW submission directory forked from fa2sw_treeverify_kenyan with WEIGHTS_BUCKET repointed to a new cb3-baked checkpoint -- 6 files touched, ALL additive, ZERO in-place edits of any deployed or in-tree file (the shipping int4-Marlin GEMM path is untouched and is the instant rollback). The surface is bounded and reversible by config. It unlocks a realized decode lift of +33 honest / +38 realistic M=1 TPS on the corrected strict base 467.48 (closing the 32.53 strict gap to ~500-506), CONTINGENT on kanna #403 confirming a PPL-safe codebook-k that preserves the lift under the 2.42 PPL cap (headline-k is PPL-blocked per #394; the measured-floor lift is only +15.67 -> 483, which MISSES 500). Identity is verifiable but NOT inherited: cb3's RHT+VQ produces a NEW greedy reference, so the strict self-referential gate (#319) must be re-run against cb3's own M=1 AR -- a bounded ~41 GPU-min check (per-GEMM #390 + decode-width #381 + e2e self-referential #319). RESIDUAL: cb3 is necessary-not-sufficient -- it supplies the read-shrink; the strict-compliant >500 still rides on the base verify already being identity-compliant (cb3 inherits, does not fix, the verify-batch-invariance) and on #403's PPL-safe-k. No GPU compute, no HF job, and no served-file change were performed for this scope document.",
+  "identity_verify": {
+    "gpu_minutes_central": 40.8,
+    "gpu_minutes_high": 45.0,
+    "gpu_minutes_low": 18.0,
+    "harness": "TIER1 per-GEMM M=8-vs-M=1 byte-identity across body projections at real geometry (#390 strict_ceiling_corrected_rollup); TIER2 decode-width e2e identity (#381 decodewidth_e2e_identity, pass pinned_identity>=1-1e-12); TIER3 e2e SELF-REFERENTIAL gate (#319): scripts/local_validation/gen_greedy_reference.py --mode served (drafter-off M=1 AR reference) + scripts/local_validation/greedy_gate.py compare + scripts/validity/greedy_identity_interlock.py --self-referential.",
+    "one_time_build_note": "Excludes the one-time, out-of-harness cb3 codebook re-quant/calibration build (multi-GPU-hr, kanna #403) -- that is a separate cost, not the per-verify cost.",
+    "pass_criterion": "byte-exact per-GEMM at M in {1,8}; 0 divergent tokens across 128 prompts x 512 tokens vs cb3's OWN spec-off M=1 AR reference (re-keyed, not the int4 reference).",
+    "produces_new_reference": true,
+    "reference_rekey_note": "cb3's random-Hadamard incoherence + VQ codebook dequant changes the weights, so the greedy argmax stream differs from int4. The #319 gate is self-referential, so it re-keys to cb3's own M=1 AR decode (exactly like the pinned-K attention #393). Identity is VERIFIABLE but must be MEASURED on cb3, never inherited from int4.",
+    "tiers": {
+      "tier1_per_gemm_byte_exact_390_min": 1.0,
+      "tier2_decode_width_e2e_381_min": 4.0,
+      "tier3_self_referential_319_min": 35.8
+    }
+  },
+  "identity_verify_gpu_minutes": 40.8,
+  "identity_verify_harness": "TIER1 per-GEMM M=8-vs-M=1 byte-identity across body projections at real geometry (#390 strict_ceiling_corrected_rollup); TIER2 decode-width e2e identity (#381 decodewidth_e2e_identity, pass pinned_identity>=1-1e-12); TIER3 e2e SELF-REFERENTIAL gate (#319): scripts/local_validation/gen_greedy_reference.py --mode served (drafter-off M=1 AR reference) + scripts/local_validation/greedy_gate.py compare + scripts/validity/greedy_identity_interlock.py --self-referential.",
+  "is_additive_not_inplace": true,
+  "kind": "cb3-flagged-build-surface-scope",
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "pr": 404,
+  "repo_facts": {
+    "deployed::manifest": true,
+    "deployed::serve": true,
+    "deployed::sitecustomize": true,
+    "evidence::cb3_no_shipping_substitute_395": true,
+    "evidence::cb3_supply_lift_392": true,
+    "harness::decode_width_e2e_381": true,
+    "harness::per_gemm_byte_exact_390": true,
+    "harness::self_ref_compare_319": true,
+    "harness::self_ref_interlock_319": true,
+    "harness::self_ref_reference_319": true
+  },
+  "reversible_by_config_flag": true,
+  "scope": {
+    "binding_contingency": "kanna #403 PPL-safe-k (headline-k PPL-blocked per #394)",
+    "cb3_build_safe_to_request": true,
+    "cb3_build_surface_bounded": true,
+    "go_no_go": "GO-TO-REQUEST: surface is bounded, additive, reversible, and identity-verifiable. The build is SAFE TO REQUEST; the GO on the realized >500 then rides on #403's PPL-safe-k, not on the build surface.",
+    "human_scope_paragraph": "APPROVAL ASK (cb3 source-build). Authorize a one-time, out-of-harness source-build of the QTIP/QuIP#-class cb3 quantizer kernel (random-Hadamard incoherence + an L1-resident K=64 dim-2 Gaussian VQ codebook, ~3.2369 effective bpw, body weight-read ratio 0.785 => -21.5% body read) from github.com/Cornell-RelaxML/qtip, delivered as a PREBUILT sm_86 wheel/.so plus an out-of-tree vLLM quant registration (@register_quantization_config(\"cb3\")). It deploys as a NEW submission directory forked from fa2sw_treeverify_kenyan with WEIGHTS_BUCKET repointed to a new cb3-baked checkpoint -- 6 files touched, ALL additive, ZERO in-place edits of any deployed or in-tree file (the shipping int4-Marlin GEMM path is untouched and is the instant rollback). The surface is bounded and reversible by config. It unlocks a realized decode lift of +33 honest / +38 realistic M=1 TPS on the corrected strict base 467.48 (closing the 32.53 strict gap to ~500-506), CONTINGENT on kanna #403 confirming a PPL-safe codebook-k that preserves the lift under the 2.42 PPL cap (headline-k is PPL-blocked per #394; the measured-floor lift is only +15.67 -> 483, which MISSES 500). Identity is verifiable but NOT inherited: cb3's RHT+VQ produces a NEW greedy reference, so the strict self-referential gate (#319) must be re-run against cb3's own M=1 AR -- a bounded ~41 GPU-min check (per-GEMM #390 + decode-width #381 + e2e self-referential #319). RESIDUAL: cb3 is necessary-not-sufficient -- it supplies the read-shrink; the strict-compliant >500 still rides on the base verify already being identity-compliant (cb3 inherits, does not fix, the verify-batch-invariance) and on #403's PPL-safe-k. No GPU compute, no HF job, and no served-file change were performed for this scope document.",
+    "realized_lift": {
+      "clears_500_floor": false,
+      "clears_500_honest": true,
+      "clears_500_realistic": true,
+      "honest_m1_tps": 33.0,
+      "lifted_floor_tps": 483.15,
+      "lifted_honest_tps": 500.48,
+      "lifted_realistic_tps": 505.5,
+      "measured_floor_tps": 15.67,
+      "realistic_tps": 38.02,
+      "strict_base_corrected": 467.48
+    },
+    "residual_gap_after_realistic": -5.5
+  },
+  "selftest": {
+    "conditions": {
+      "a_byte_ratio_matches": true,
+      "a_cb3_is_subint4": true,
+      "a_gap_consistent": true,
+      "a_read_shrink_is_21_5pct": true,
+      "b_all_additive": true,
+      "b_categories_within_canonical": true,
+      "b_has_config_selector": true,
+      "b_has_cuda_ext": true,
+      "b_has_quant_registration": true,
+      "b_has_serve_hook": true,
+      "b_no_deployed_file_touched": true,
+      "b_no_in_tree_vllm_touched": true,
+      "b_split_total_eq_surface": true,
+      "b_surface_count_6": true,
+      "b_zero_inplace": true,
+      "c_harness_cites_319": true,
+      "c_harness_cites_390_381": true,
+      "c_minutes_bracketed": true,
+      "c_minutes_plausible": true,
+      "c_produces_new_reference": true,
+      "d_blast_radius_isolated": true,
+      "d_blast_radius_valid": true,
+      "d_is_additive_not_inplace": true,
+      "d_reversible": true,
+      "e_floor_misses_500": true,
+      "e_paragraph_cites_403": true,
+      "e_paragraph_cites_additive": true,
+      "e_paragraph_cites_qtip": true,
+      "e_paragraph_nonempty": true,
+      "e_realistic_clears_500": true,
+      "e_safe_to_request": true,
+      "e_surface_bounded": true,
+      "f_deployed::manifest": true,
+      "f_deployed::serve": true,
+      "f_deployed::sitecustomize": true,
+      "f_evidence::cb3_no_shipping_substitute_395": true,
+      "f_evidence::cb3_supply_lift_392": true,
+      "f_harness::decode_width_e2e_381": true,
+      "f_harness::per_gemm_byte_exact_390": true,
+      "f_harness::self_ref_compare_319": true,
+      "f_harness::self_ref_interlock_319": true,
+      "f_harness::self_ref_reference_319": true,
+      "g_analysis_only": true,
+      "g_no_hf_job": true,
+      "g_no_served_file_change": true,
+      "g_official_tps_zero": true
+    },
+    "n_checks": 46,
+    "passes": true
+  },
+  "served_file_surface": [
+    {
+      "category": "cuda_cpp_extension",
+      "change": "NEW prebuilt cb3 QTIP/QuIP# CUDA ext (RHT incoherence + L1-resident K=64 dim-2 Gaussian VQ dequant GEMM); HF runner cannot source-build in-harness, so the build is OUT-OF-HARNESS and the artifact is uploaded prebuilt.",
+      "classification": "additive",
+      "path": "submissions/cb3_<name>/kernels/cb3_qtip_kernel-*.whl  (prebuilt sm_86 .whl/.so)",
+      "touches_deployed_file": false,
+      "touches_in_tree_vllm": false
+    },
+    {
+      "category": "vllm_quant_registration",
+      "change": "NEW Cb3Config + Cb3LinearMethod registered via the ADDITIVE `@register_quantization_config(\"cb3\")` decorator (appends to vLLM QUANTIZATION_METHODS at import, raises on built-in collision); imported via sitecustomize. NO in-tree vLLM edit, NO string-replacement source-patch.",
+      "classification": "additive",
+      "path": "submissions/cb3_<name>/cb3_quant_patch.py",
+      "touches_deployed_file": false,
+      "touches_in_tree_vllm": false
+    },
+    {
+      "category": "served_config_selector",
+      "change": "FORK of the deployed manifest; deltas = +cb3 kernel wheel dependency, WEIGHTS_BUCKET repointed to the new cb3-baked checkpoint. The deployed manifest is untouched (new submission dir).",
+      "classification": "additive",
+      "path": "submissions/cb3_<name>/manifest.json  (fork of fa2sw_treeverify_kenyan)",
+      "touches_deployed_file": false,
+      "touches_in_tree_vllm": false
+    },
+    {
+      "category": "serve_py_hook",
+      "change": "FORK of the deployed serve stack; delta = +setup_cb3_path() so the child imports cb3_quant_patch. NO scatter hook (unlike the lm_head-scatter path), NO new vLLM source-patch -- cb3 selection is intrinsic to the checkpoint config.json (same as int4-Marlin auto-detect, no --quantization flag).",
+      "classification": "additive",
+      "path": "submissions/cb3_<name>/serve.py  (fork of fa2sw_treeverify_kenyan)",
+      "touches_deployed_file": false,
+      "touches_in_tree_vllm": false
+    },
+    {
+      "category": "vllm_quant_registration",
+      "change": "FORK of the deployed sitecustomize meta-path finder; delta = import cb3_quant_patch so the registration fires in every child import.",
+      "classification": "additive",
+      "path": "submissions/cb3_<name>/sitecustomize.py  (fork of fa2sw_treeverify_kenyan)",
+      "touches_deployed_file": false,
+      "touches_in_tree_vllm": false
+    },
+    {
+      "category": "served_config_selector",
+      "change": "NEW remote checkpoint config declaring quantization_config.quant_method \"cb3\" so vLLM auto-selects Cb3LinearMethod (no CLI flag). Separate bucket; the deployed osoi5 int4 checkpoint is untouched.",
+      "classification": "additive",
+      "path": "<cb3 bucket>/config.json  (remote, NEW cb3-baked checkpoint)",
+      "touches_deployed_file": false,
+      "touches_in_tree_vllm": false
+    }
+  ],
+  "served_file_surface_paths": [
+    "submissions/cb3_<name>/kernels/cb3_qtip_kernel-*.whl  (prebuilt sm_86 .whl/.so)",
+    "submissions/cb3_<name>/cb3_quant_patch.py",
+    "submissions/cb3_<name>/manifest.json  (fork of fa2sw_treeverify_kenyan)",
+    "submissions/cb3_<name>/serve.py  (fork of fa2sw_treeverify_kenyan)",
+    "submissions/cb3_<name>/sitecustomize.py  (fork of fa2sw_treeverify_kenyan)",
+    "<cb3 bucket>/config.json  (remote, NEW cb3-baked checkpoint)"
+  ],
+  "served_file_surface_str": "additive:cuda_cpp_extension:submissions/cb3_<name>/kernels/cb3_qtip_kernel-*.whl | additive:vllm_quant_registration:submissions/cb3_<name>/cb3_quant_patch.py | additive:served_config_selector:submissions/cb3_<name>/manifest.json | additive:serve_py_hook:submissions/cb3_<name>/serve.py | additive:vllm_quant_registration:submissions/cb3_<name>/sitecustomize.py | additive:served_config_selector:<cb3 bucket>/config.json",
+  "served_files_touched": 6,
+  "wandb_run_id": "jqhlftrc"
+}
