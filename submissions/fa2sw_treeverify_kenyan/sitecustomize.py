@@ -148,6 +148,18 @@ TREE_VERIFY_PROBE_STEPS = int(os.environ.get("TREE_VERIFY_PROBE_STEPS", "6") or 
 # the KV-redirect/slot/RoPE/metadata are correct and ALL M=16 anchor divergence is
 # int4-Marlin batch-variance (Issue #192), not a plumbing bug.
 TREE_VERIFY_ANCHOR8 = os.environ.get("TREE_VERIFY_ANCHOR8") == "1"
+# REAL-PATH M=8 control (the decisive fidelity gate, PR #245 cycle-2). Runs the
+# SAME M=8 spine verify but through the REAL request block-table + REAL KV slots
+# (no scratch-block redirect), faithful real-`_preprocess` embed + real-cm_base
+# metadata. The scratch-block anchor8 scored 0.60; if this real-KV control jumps
+# to ~1.0 the reconstruction (scratch-block redirect / separate forward) was the
+# bug and the tree path is alive; if it ALSO degrades (confident-wrong, gap>=1.0)
+# the tree verify itself diverges from linear greedy -> tree path go/no-go fails.
+# SAFE/observational: every write lands at positions >= root_position, i.e. AT OR
+# BEYOND the committed prefix [0..root_position) (never written), and is
+# overwritten by the next step's real verify before it is ever read as committed
+# KV -> greedy-identity / PPL preserved by construction (verified empirically).
+TREE_VERIFY_REAL_KV = os.environ.get("TREE_VERIFY_REAL_KV") == "1"
 TREE_VERIFY_PROBE_VERDICT = os.environ.get(
     "TREE_VERIFY_PROBE_VERDICT",
     "research/tree_verify_path/comp_verify_probe_stage2b.json",
@@ -796,6 +808,17 @@ _VERIFY_SCRATCH: dict[str, Any] = {
     "anchor8_pos_match": {},
     "anchor8_dbg_logged": 0,
     "linear_tree": None,
+    # REAL-PATH M=8 control (gated by TREE_VERIFY_REAL_KV): the SAME M=8 spine
+    # through the REAL request block-table + REAL KV slots. ~1.0 => reconstruction
+    # (scratch-block redirect) was the bug; degrade => fundamental tree divergence.
+    "anchor_realkv_rows": 0,
+    "anchor_realkv_match": 0,
+    "anchor_realkv_pos_rows": {},
+    "anchor_realkv_pos_match": {},
+    "anchor_realkv_gap_mismatch_n": 0,
+    "anchor_realkv_gap_mismatch_hist": {},
+    "anchor_realkv_dbg_logged": 0,
+    "anchor_realkv_forward_err": 0,
 }
 
 
@@ -975,6 +998,122 @@ def _run_tree_verify_scratch(
     return node_argmax, node_gap, node_top2
 
 
+def _run_tree_verify_real_kv(
+    runner: Any, spine_tokens: list, root_position: int
+) -> tuple | None:
+    """REAL-PATH M=8 LINEAR control (PR #245 cycle-2 fidelity gate).
+
+    Runs the M=len(spine_tokens) linear verify through the REAL request block-table
+    and REAL KV slots (NO scratch-block redirect), with real-`_preprocess`-faithful
+    embed and a CommonAttentionMetadata that mirrors the deployed cm_base field-for-
+    field (positions / is_prefilling / seq_lens_cpu_upper_bound). The ONLY material
+    difference from `_run_tree_verify_scratch`'s M=8 anchor is the KV location (real
+    vs scratch blocks) -- so comparing the two isolates the scratch-block redirect.
+
+    SAFE / observational: the m rows write KV to real slots for positions
+    [root_position .. root_position+m), all AT OR BEYOND the committed prefix
+    [0..root_position) (never touched). Those positions are re-processed and
+    overwritten by the next step's real verify before being read as committed KV,
+    so PPL / greedy-identity are preserved. Returns (argmax, gap, top2) or None.
+    """
+    import torch
+    from vllm.forward_context import set_forward_context
+    from vllm.v1.attention.backend import CommonAttentionMetadata
+
+    m = len(spine_tokens)
+    device = runner.device
+    groups = runner.kv_cache_config.kv_cache_groups
+    sfc = runner.vllm_config.compilation_config.static_forward_context
+    seq_len = root_position + m
+
+    attn_md: dict = {}
+    slot_map_by_layer: dict = {}
+    # KV snapshot/restore: the forward writes the m rows' K/V into REAL paged slots
+    # [root_position..+m). Those positions are uncommitted next-free territory at probe
+    # time, but to PROVE the committed prefix (and thus the deployed `tgt` we compare
+    # against) is byte-identical, we snapshot exactly those slots before the forward
+    # and restore them after reading logits. Faithful (real prefix read, real slot
+    # write during the forward) AND non-destructive.
+    restore_list: list = []
+    qsl = torch.tensor([0, m], dtype=torch.int32, device=device)
+    qsl_cpu = torch.tensor([0, m], dtype=torch.int32)
+    seq_lens_cpu = torch.tensor([seq_len], dtype=torch.int32)
+    nct_cpu = torch.tensor([root_position], dtype=torch.int32)
+    is_prefilling = torch.zeros(1, dtype=torch.bool)  # decode-extend, not prefill
+    positions = torch.tensor(
+        [root_position + i for i in range(m)], dtype=torch.long, device=device
+    )
+    for gid, grp in enumerate(groups):
+        bs = int(grp.kv_cache_spec.block_size)
+        layer_names = list(grp.layer_names)
+        # REAL block table for this request (gid), UNMODIFIED -> real prefix + the
+        # m new rows land in the real paged slots the deployed verify would use.
+        real_bt = runner.input_batch.block_table[gid].get_device_tensor(1)[0]
+        slots = []
+        for i in range(m):
+            off = root_position + i
+            phys = int(real_bt[off // bs].item())
+            slots.append(phys * bs + (off % bs))
+        slot_t = torch.tensor(slots, dtype=torch.int64, device=device)
+        bt2d = real_bt.view(1, -1).contiguous()
+        seq_lens = torch.tensor([seq_len], dtype=torch.int32, device=device)
+        cm = CommonAttentionMetadata(
+            query_start_loc=qsl,
+            query_start_loc_cpu=qsl_cpu,
+            seq_lens=seq_lens,
+            num_reqs=1,
+            num_actual_tokens=m,
+            max_query_len=m,
+            max_seq_len=seq_len,
+            block_table_tensor=bt2d,
+            slot_mapping=slot_t,
+            causal=True,
+            _seq_lens_cpu=seq_lens_cpu,
+            _num_computed_tokens_cpu=nct_cpu,
+            seq_lens_cpu_upper_bound=seq_lens_cpu,
+            is_prefilling=is_prefilling,
+            positions=positions,
+        )
+        for attn_group in runner.attn_groups[gid]:
+            builder = attn_group.get_metadata_builder()
+            md = builder.build(common_prefix_len=0, common_attn_metadata=cm)
+            for ln in attn_group.layer_names:
+                attn_md[ln] = md
+        blocks_g = slot_t // bs
+        offs_g = slot_t % bs
+        for ln in layer_names:
+            slot_map_by_layer[ln] = slot_t
+            kvc = sfc[ln].kv_cache
+            restore_list.append((kvc, blocks_g, offs_g, kvc[blocks_g, :, offs_g].clone()))
+
+    input_ids_t = torch.tensor(list(spine_tokens), dtype=torch.long, device=device)
+    inputs_embeds = runner.model.embed_input_ids(input_ids_t)
+    node_argmax = node_gap = node_top2 = None
+    try:
+        with set_forward_context(
+            attn_md, runner.vllm_config, num_tokens=m, slot_mapping=slot_map_by_layer
+        ):
+            out = runner.model(
+                input_ids=None,
+                positions=positions,
+                intermediate_tensors=None,
+                inputs_embeds=inputs_embeds,
+            )
+        hidden = out[0] if isinstance(out, tuple) else out
+        logits = runner.model.compute_logits(hidden[:m])
+        top2 = torch.topk(logits, 2, dim=-1)
+        node_argmax = [int(x) for x in top2.indices[:, 0].tolist()]
+        node_top2 = [int(x) for x in top2.indices[:, 1].tolist()]
+        node_gap = [
+            float(g) for g in (top2.values[:, 0] - top2.values[:, 1]).tolist()
+        ]
+    finally:
+        # restore the snapshotted slots unconditionally (even if the forward raised)
+        for kvc, blocks_g, offs_g, saved in restore_list:
+            kvc[blocks_g, :, offs_g] = saved
+    return node_argmax, node_gap, node_top2
+
+
 def _verify_scratch_dump() -> None:
     """Write the STAGE-2b verdict (spine ladder + E[T] + cross-step anchor)."""
     vs = _VERIFY_SCRATCH
@@ -1073,6 +1212,37 @@ def _verify_scratch_dump() -> None:
                 },
             }
             if vs["anchor8_rows"]
+            else None
+        ),
+        "anchor_realkv": (
+            {
+                "rows_compared": vs["anchor_realkv_rows"],
+                "rows_match": vs["anchor_realkv_match"],
+                "row_match_rate": round(
+                    vs["anchor_realkv_match"] / max(vs["anchor_realkv_rows"], 1), 5
+                ),
+                "forward_err": vs["anchor_realkv_forward_err"],
+                "gap_mismatch_n": vs["anchor_realkv_gap_mismatch_n"],
+                "gap_mismatch_hist": vs["anchor_realkv_gap_mismatch_hist"],
+                "confident_wrong_rate": round(
+                    vs["anchor_realkv_gap_mismatch_hist"].get("ge1.0", 0)
+                    / max(vs["anchor_realkv_gap_mismatch_n"], 1),
+                    4,
+                ),
+                "per_pos": {
+                    str(d): {
+                        "rows": vs["anchor_realkv_pos_rows"][d],
+                        "match": vs["anchor_realkv_pos_match"].get(d, 0),
+                        "rate": round(
+                            vs["anchor_realkv_pos_match"].get(d, 0)
+                            / vs["anchor_realkv_pos_rows"][d],
+                            4,
+                        ),
+                    }
+                    for d in sorted(vs["anchor_realkv_pos_rows"])
+                },
+            }
+            if vs["anchor_realkv_rows"]
             else None
         ),
         "dump_path": vs["dump_path"],
@@ -1248,6 +1418,28 @@ def _run_tree_verify_measure(
             if vs["forward_err"] <= 5:
                 print(
                     f"[anchor8] linear forward error (non-fatal): {exc!r}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+    # REAL-PATH M=8 control: SAME spine tokens as anchor8, but through the REAL
+    # request block-table + REAL KV slots (no scratch redirect). Comparing realkv
+    # vs anchor8 isolates the scratch-block reconstruction. realkv~tgt => scratch
+    # plumbing was the cycle-1 bug; realkv degrades => tree verify itself diverges.
+    if TREE_VERIFY_REAL_KV and sstash is not None and ts is not None:
+        try:
+            ml = min(8, len(tree.spine))
+            spine_draft = [int(draft_token[tree.spine[d]]) for d in range(ml)]
+            rk_out = _run_tree_verify_real_kv(runner, spine_draft, root_position)
+            if rk_out is not None:
+                sstash["scratch_realkv_argmax"] = [int(x) for x in rk_out[0]]
+                sstash["scratch_realkv_gap"] = [float(x) for x in rk_out[1]]
+                sstash["scratch_realkv_top2"] = [int(x) for x in rk_out[2]]
+        except Exception as exc:
+            vs["anchor_realkv_forward_err"] += 1
+            if vs["anchor_realkv_forward_err"] <= 5:
+                print(
+                    f"[realkv] real-path forward error (non-fatal): {exc!r}",
                     file=sys.stderr,
                     flush=True,
                 )
@@ -2292,6 +2484,60 @@ def _salvage_probe_observe(draft_token_ids: Any, target_argmax: Any) -> None:
                 print(
                     f"[anchor8-dbg] root_pos={rp} K={K} n={n8}\n"
                     f"  scratch_linear_argmax={sla[:n8]}\n"
+                    f"  deployed_tgt         ={tgt[:n8]}\n"
+                    f"  deployed_draft       ={dti[:n8]}",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
+    # REAL-PATH M=8 control: SAME spine tokens as anchor8 through the REAL block
+    # table + REAL KV slots. Beats anchor8 (~0.60) => scratch reconstruction was the
+    # cycle-1 bug, tree path alive. Stays ~0.60 with gap>=1.0 (confident-wrong, not
+    # near-ties) => the tree verify itself diverges from linear greedy => path dead.
+    rka = stash.get("scratch_realkv_argmax")
+    if rka is not None:
+        rkgap = stash.get("scratch_realkv_gap")
+        n8 = min(len(rka), K)
+        if n8 > 0:
+            vsc = _VERIFY_SCRATCH
+            mmk = False
+            for d in range(n8):
+                vsc["anchor_realkv_rows"] += 1
+                vsc["anchor_realkv_pos_rows"][d] = (
+                    vsc["anchor_realkv_pos_rows"].get(d, 0) + 1
+                )
+                if rka[d] == tgt[d]:
+                    vsc["anchor_realkv_match"] += 1
+                    vsc["anchor_realkv_pos_match"][d] = (
+                        vsc["anchor_realkv_pos_match"].get(d, 0) + 1
+                    )
+                else:
+                    mmk = True
+                    g = (
+                        float(rkgap[d])
+                        if rkgap is not None and d < len(rkgap)
+                        else None
+                    )
+                    if g is not None:
+                        vsc["anchor_realkv_gap_mismatch_n"] += 1
+                        bkt = (
+                            "lt0.05" if g < 0.05
+                            else "lt0.2" if g < 0.2
+                            else "lt1.0" if g < 1.0
+                            else "ge1.0"
+                        )
+                        h = vsc["anchor_realkv_gap_mismatch_hist"]
+                        h[bkt] = h.get(bkt, 0) + 1
+            if mmk and vsc["anchor_realkv_dbg_logged"] < 12:
+                vsc["anchor_realkv_dbg_logged"] += 1
+                rp = stash.get("scratch_root_position")
+                gaps_str = (
+                    [round(float(x), 4) for x in rkgap[:n8]] if rkgap else []
+                )
+                print(
+                    f"[realkv-dbg] root_pos={rp} K={K} n={n8}\n"
+                    f"  scratch_realkv_argmax={rka[:n8]}\n"
+                    f"  scratch_realkv_gap   ={gaps_str}\n"
                     f"  deployed_tgt         ={tgt[:n8]}\n"
                     f"  deployed_draft       ={dti[:n8]}",
                     file=sys.stderr,
