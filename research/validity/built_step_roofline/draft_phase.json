@@ -1,0 +1,113 @@
+{
+  "phase": "draft",
+  "drafter_dir": "/tmp/qat-assistant",
+  "n_gemms_per_pass": 19,
+  "draft_pass_us_eager": 359.19872283935547,
+  "draft_pass_us_graphed": 100.6822395324707,
+  "graph_captured": true,
+  "k7_chain_us_eager": 2514.3910598754883,
+  "k7_chain_us_graphed": 704.7756767272949,
+  "config": {
+    "iters": 400,
+    "warmup": 40
+  },
+  "specs": [
+    {
+      "role": "pre_projection",
+      "in": 5120,
+      "out": 256
+    },
+    {
+      "role": "layer0.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer0.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer0.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer0.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer1.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer1.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer1.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer1.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer2.q_proj",
+      "in": 256,
+      "out": 1024
+    },
+    {
+      "role": "layer2.o_proj",
+      "in": 1024,
+      "out": 256
+    },
+    {
+      "role": "layer2.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer2.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer3.q_proj",
+      "in": 256,
+      "out": 2048
+    },
+    {
+      "role": "layer3.o_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "layer3.gate_up",
+      "in": 256,
+      "out": 4096
+    },
+    {
+      "role": "layer3.down_proj",
+      "in": 2048,
+      "out": 256
+    },
+    {
+      "role": "post_projection",
+      "in": 256,
+      "out": 2560
+    },
+    {
+      "role": "centroids_sampler",
+      "in": 256,
+      "out": 2048
+    }
+  ],
+  "nan_clean": true,
+  "peak_gpu_gb": 0.048416768
+}
