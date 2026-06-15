@@ -92,6 +92,27 @@ def build_scratch(submission: Path, scratch: Path) -> Path:
     if marker not in text:
         text += (
             f"\n\n{marker}\n"
+            # Fresh-a10g vLLM 0.22.1rc1 mounts pathless `_IncludedRouter`s, so
+            # prometheus_fastapi_instrumentator.routing._get_route_name does
+            # `route.path` -> AttributeError on EVERY request -> /v1/models 500s ->
+            # the profiler server never reaches readiness (0 records, the dead-end
+            # the #86 logits path hit). Swallow that one AttributeError (the
+            # validated output-neutral guard ported from
+            # submissions/fa2sw_treeverify_kenyan/sitecustomize.py, kanna PR #177
+            # W&B bjtwr9jn: token-ids 128/128 identical, PPL byte-identical). HTTP
+            # metrics route-name lookup only; never touches greedy / PPL / tokens.
+            # Scratch-only: the committed served submission is byte-identical.
+            "try:\n"
+            "    import prometheus_fastapi_instrumentator.routing as _rp_pr  # noqa: E402\n"
+            "    _rp_orig_grn = _rp_pr._get_route_name\n"
+            "    def _rp_guarded_grn(scope, routes, _o=_rp_orig_grn):\n"
+            "        try:\n"
+            "            return _o(scope, routes)\n"
+            "        except AttributeError:\n"
+            "            return None\n"
+            "    _rp_pr._get_route_name = _rp_guarded_grn\n"
+            "except Exception:\n"
+            "    pass\n"
             "import os as _rp_os  # noqa: E402\n"
             "if _rp_os.environ.get('RANKPROBE_ENABLE') == '1':\n"
             "    try:\n"
@@ -108,7 +129,8 @@ def build_scratch(submission: Path, scratch: Path) -> Path:
 # Run
 # --------------------------------------------------------------------------- #
 def run_capture(scratch: Path, *, num_prompts: int, output_len: int, seed: int,
-                records_path: Path, log_path: Path, logits: bool = True) -> dict[str, Any]:
+                records_path: Path, log_path: Path, logits: bool = True,
+                dataset: Path | None = None) -> dict[str, Any]:
     manifest = harness.load_manifest(scratch)
     server_python = harness.ensure_server_venv(manifest["dependencies"])
     extra_env = {
@@ -125,9 +147,12 @@ def run_capture(scratch: Path, *, num_prompts: int, output_len: int, seed: int,
         "VLLM_USE_FLASHINFER_SAMPLER": "0",
         "DISABLE_LOG_STATS": "0",
     }
+    resolved_dataset = dataset or paths.EVAL_PROMPTS
     report: dict[str, Any] = {
         "submission": str(scratch),
         "num_prompts": num_prompts, "output_len": output_len, "seed": seed, "conc": 1,
+        "dataset": str(resolved_dataset),
+        "dataset_is_public_default": dataset is None,
         "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
     }
     t0 = time.time()
@@ -140,7 +165,8 @@ def run_capture(scratch: Path, *, num_prompts: int, output_len: int, seed: int,
         summary = harness.capture_decode(
             server_python, base_url=srv.base_url, model=srv.served_model_name,
             out_file=decode_out, summary_file=decode_summary,
-            num_prompts=num_prompts, output_len=output_len, seed=seed, timeout_s=4800,
+            num_prompts=num_prompts, output_len=output_len, seed=seed,
+            dataset=dataset, timeout_s=4800,
         )
         report["decode_summary"] = summary
     report["decode_wall_s"] = time.time() - t0
@@ -306,12 +332,20 @@ def log_wandb(report: dict[str, Any], name: str, group: str) -> str | None:
                 "output_len": report["run"]["output_len"],
                 "conc": 1, "seed": report["run"]["seed"], "W": a["W"],
                 "num_speculative_tokens": 7,
+                "dataset": report["run"].get("dataset"),
+                "dataset_is_public_default": report["run"].get("dataset_is_public_default"),
             },
         )
         rho = a["rho_marginal"]
         cov = a["cumulative_coverage"]
         flat: dict[str, Any] = {
             "primary/drafter_rank2_coverage": rho.get("2"),
+            # rank-2+ CUMULATIVE coverage cov_W = P(true token at draft rank 2..W |
+            # rank-1 diverged) -- the tree-recoverable share (the 0.653 public anchor).
+            # Distinct from primary/drafter_rank2_coverage above, which is the
+            # MARGINAL rho2 = P(rank==2 | miss1). cov_W + beyond_topW == 1 by partition.
+            "primary/rank2plus_coverage": cov.get(str(a["W"])),
+            "primary/beyond_topW": a["frac_true_beyond_topW"],
             "rho/rho2": rho.get("2"), "rho/rho3": rho.get("3"), "rho/rho4": rho.get("4"),
             "coverage/cov2": cov.get("2"), "coverage/cov3": cov.get("3"),
             "coverage/cov4": cov.get("4"),
@@ -358,9 +392,18 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--output-len", type=int, default=paths.OUTPUT_LEN)
     ap.add_argument("--seed", type=int, default=paths.SEED)
     ap.add_argument("--out-dir", type=Path, default=OUT_DIR)
-    ap.add_argument("--wandb-name", default="wirbel/rank-coverage")
-    ap.add_argument("--wandb-group", default="rank-coverage")
+    ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name",
+                    default="wirbel/rank-coverage")
+    ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group",
+                    default="rank-coverage")
     ap.add_argument("--no-wandb", action="store_true")
+    ap.add_argument("--dataset", type=Path, default=None,
+                    help="ShareGPT-format prompt set to profile over (default: the "
+                         "public speed-benchmark eval_prompts_sharegpt.json). Pass "
+                         "data/private_proxy_sharegpt.json to measure private-proxy "
+                         "rank coverage. ONLY the input prompt set changes; the "
+                         "drafter, target, rank-counting, and greedy-exact verify "
+                         "are identical to the public path.")
     ap.add_argument("--no-logits", action="store_true",
                     help="disable PR #86 drafter/verifier prob+entropy capture "
                          "(reverts to the #79 rank-only probe)")
@@ -370,6 +413,13 @@ def main(argv: list[str] | None = None) -> int:
                     help="skip serving; analyze an existing records JSONL")
     args = ap.parse_args(argv)
 
+    # RANKPROBE_OUTPUT is consumed by the serve subprocess, which runs with
+    # cwd=<scratch submission dir>. A RELATIVE --out-dir therefore resolves the
+    # records path against the scratch cwd (doubled path) while analyze() reads it
+    # against the repo root -> the probe writes records the analyzer never finds
+    # (silent 0-records, indistinguishable from the dead #86 logits path). Resolve
+    # to absolute so writer and reader agree regardless of the caller's cwd.
+    args.out_dir = args.out_dir.resolve()
     args.out_dir.mkdir(parents=True, exist_ok=True)
     records_path = args.out_dir / ("rankprobe_records_debug.jsonl" if args.debug
                                    else "rankprobe_records.jsonl")
@@ -391,6 +441,7 @@ def main(argv: list[str] | None = None) -> int:
         report["run"] = run_capture(
             scratch, num_prompts=num_prompts, output_len=output_len, seed=args.seed,
             records_path=records_path, log_path=log_path, logits=not args.no_logits,
+            dataset=args.dataset,
         )
     else:
         report["run"] = {"submission": "(analyze-only)", "num_prompts": None,

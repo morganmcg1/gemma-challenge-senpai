@@ -1,0 +1,130 @@
+{
+  "run": {
+    "submission": "/workspace/senpai/target/research/validity/private_rank2plus_probe/public_repro/_scratch_submission",
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "conc": 1,
+    "dataset": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+    "dataset_is_public_default": true,
+    "utc": "2026-06-15T01:15:03Z",
+    "decode_summary": {
+      "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+      "duration_s": 333.646799325943,
+      "num_completion_tokens": 65536,
+      "num_prompt_tokens": 34836,
+      "num_records": 128,
+      "output_file": "/workspace/senpai/target/research/validity/private_rank2plus_probe/public_repro/decode_rank_coverage.jsonl",
+      "output_len": 512,
+      "request_timeout_s": 180,
+      "required_request_field": "return_token_ids: true",
+      "required_response_field": "choices[0].token_ids",
+      "seed": 1,
+      "token_id_sources": {
+        "choices[0].token_ids": 128
+      },
+      "token_ids_required": true,
+      "tokenizer": "google/gemma-4-E4B-it"
+    },
+    "decode_wall_s": 433.7762475013733
+  },
+  "analysis": {
+    "n_records": 16554,
+    "n_align_bad": 0,
+    "record_shards": [
+      "rankprobe_records.jsonl.225435"
+    ],
+    "n_divergences": 12983,
+    "W": 4,
+    "per_depth_reached": [
+      16554,
+      12152,
+      9344,
+      7449,
+      6094,
+      5073,
+      4238
+    ],
+    "per_depth_accept": [
+      12152,
+      9344,
+      7449,
+      6094,
+      5073,
+      4238,
+      3571
+    ],
+    "per_depth_div_count": [
+      4402,
+      2808,
+      1895,
+      1355,
+      1021,
+      835,
+      667
+    ],
+    "conditional_rank1_acceptance_q": [
+      0.7340823970037453,
+      0.7689269256089533,
+      0.7971960616438356,
+      0.8180963887770171,
+      0.8324581555628487,
+      0.8354031145278927,
+      0.84261444077395
+    ],
+    "top1_acceptance": 0.7340823970037453,
+    "rank_fd_hist_pooled": {
+      "0": 4491,
+      "2": 5430,
+      "3": 2019,
+      "4": 1043
+    },
+    "rho_marginal": {
+      "2": 0.4182392359239005,
+      "3": 0.26731100225076126,
+      "4": 0.18847126852186483
+    },
+    "cumulative_coverage": {
+      "2": 0.4182392359239005,
+      "3": 0.5737502888392513,
+      "4": 0.6540861126087961
+    },
+    "rho2_by_depth": {
+      "0": 0.3968650613357565,
+      "1": 0.42628205128205127,
+      "2": 0.4058047493403694,
+      "3": 0.4487084870848708,
+      "4": 0.4289911851126347,
+      "5": 0.4598802395209581,
+      "6": 0.4302848575712144
+    },
+    "n_true_beyond_topW": 4491,
+    "frac_true_beyond_topW": 0.3459138873912039
+  },
+  "cross_check": {
+    "accept76_available": true,
+    "conditional76": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "conditional_measured_q": [
+      0.7340823970037453,
+      0.7689269256089533,
+      0.7971960616438356,
+      0.8180963887770171,
+      0.8324581555628487,
+      0.8354031145278927,
+      0.84261444077395
+    ],
+    "top1_76": 0.728739760479042,
+    "top1_measured": 0.7340823970037453,
+    "top1_abs_diff": 0.005342636524703348,
+    "max_abs_diff_per_depth": 0.009950515344789745
+  },
+  "wandb_run_id": "pvt1rprm"
+}
