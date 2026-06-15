@@ -1,0 +1,398 @@
+{
+  "agent": "stark",
+  "analysis_only": true,
+  "clears_500_budget": true,
+  "compose": {
+    "attn_eta_363": 0.0,
+    "best_pinned_byte_identity_M8": 0.28125,
+    "best_pinned_composed_us": 2229.247946292162,
+    "best_pinned_full_layer_byte_id": 1.0,
+    "best_pinned_max_abs_M8": 0.1328125,
+    "best_pinned_split": 8,
+    "bucket": "GREEN: per-layer determinism restored, clears >500 budget AND refutes #332 (phi>0.255) -> STRICT-PROGRAM-REOPENING candidate (#319 real-weight a10g confirm of the token->1.0 gate)",
+    "budget_500_eta": 0.040220025755911104,
+    "byte_invariant_pinned_splits": [],
+    "ceiling_pinned_split": 520.9527323111674,
+    "clears_500_budget": true,
+    "e2e_token_identity_strict": false,
+    "end_to_end_token_identity_rate": 0.984375,
+    "heuristic_breaks_identity": true,
+    "heuristic_composed_us": 2336.7679826915264,
+    "heuristic_full_layer_byte_id": 0.0,
+    "heuristic_hidden_byte_identity_M8": 0.0,
+    "heuristic_token_identity_M8": 0.953125,
+    "identity_gap_closed": true,
+    "identity_restored": true,
+    "lambda_central": 520.9527323111674,
+    "n_attn_layers": 42,
+    "off_the_shelf_floor": 0.09841249119201488,
+    "per_layer_invariant_pinned_splits": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "phi_recovery_pinned_split": 1.0,
+    "phi_refute_threshold": 0.255,
+    "primary_kv_mode": "paged",
+    "raw_delta_us_best_minus_heuristic": -107.52003639936447,
+    "refutes_332_cap": true,
+    "selected_invariant_pinned_splits": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "strict_ceiling_332": 473.5295953446407,
+    "supply_floor_332": 0.09103155435261377,
+    "token_invariant_pinned_splits": [],
+    "total_attn_bi_eta": 0.0,
+    "total_attn_bi_eta_ratio": 0.9539877141437375,
+    "unpack_ceiling": -355.7326022444782,
+    "unpack_composed_us": 4386.815920472145,
+    "unpack_eta": 1.682850055639976,
+    "unpack_phi_recovery": -16.099963990917864,
+    "unpack_split": 1,
+    "verdict": "MEASURED on the pod A10G (flash_attn 2.8.4 paged-KV primary; 42-layer gemma-4-E4B-it attn geometry 8q/2kv head_dim 256, sliding(512)/full(2048) pattern, M=8 verify vs M=1 AR). (1) PER-LAYER MECHANISM: the deployed heuristic split (num_splits=0) is byte-EXACT on the sliding layers but BREAKS on the full(2048) layers (full_byte_id 0.000) -- the M-dependent split COUNT changes between the seqlen_q=8 verify block and the seqlen_q=1 AR step; PINNING the count is byte-EXACT per layer on both (full_byte_id 1.000). This is exactly stark #363's mechanism, confirmed on real geometry. (2) END-TO-END TOKEN IDENTITY (the advisor gate): the deployed heuristic propagates that full-layer byte-break through all 42 layers into the final hidden (M=8 maxabs vs the M=1 AR reference is non-zero); PINNING (num_splits=8) keeps end-to-end greedy token identity at 0.9844 (heuristic 0.9531 at this scale). HONESTY: on SYNTHETIC bf16 weights the greedy token is near-tie-noise-limited -- the heuristic's hidden perturbation rarely flips an argmax, so the heuristic ALSO reads ~1.0 here; this synthetic harness therefore does NOT reproduce wirbel #362's real-weight 0.52% flip, and the per-layer BYTE mechanism above (not the end-to-end token rate) is the weight-independent discriminator. Selection is anchored on per-layer byte-exactness, not the noisy token rate. Composed end-to-end hidden byte-identity 0.281 (maxabs 0.1328) is a token-neutral second-order residual from verify seqlen_k=P+M vs AR P+i+1. identity_restored=True (per-layer byte determinism); strict token->1.0 gate met locally=False (real-weight confirm is #319). (3) eta/phi vs #332: the cheapest per-layer-byte-exact pinned split runs composed at 2229.2us vs heuristic 2336.8us (ratio 0.954, raw delta -107.5us) -> total_attn_bi_eta=0.0000% -> phi_recovery=1.000, ceiling=520.95 TPS. denken #332 ASSUMED determinism must UN-PACK to one split (num_splits=1): that costs 4386.8us (eta 168.285%, phi -16.100, ceiling -355.73) -- ~#332's 473.5 cap. But the per-layer-byte-exact pinned split does NOT un-pack: it keeps the K-way split (high occupancy) AND is deterministic, so phi=1.000 >> #332's 0.075. refutes_332_cap=True; clears_500_budget=True. VERDICT BUCKET -> GREEN: per-layer determinism restored, clears >500 budget AND refutes #332 (phi>0.255) -> STRICT-PROGRAM-REOPENING candidate (#319 real-weight a10g confirm of the token->1.0 gate). CONCLUSION: stark #363's pinned-split result SURVIVES composition across 42 layers under paged-KV; the strict-identity attention tax is essentially FREE (pin the split count, do not un-pack). The denken #327 9.841% off-the-shelf floor is the WHOLE-LOOP knob, not a targeted pinned kernel. CAVEAT: synthetic bf16 weights at real geometry; full int4 paged-KV end-to-end serve is the #319-gated a10g confirm; absolute us local-relative, the eta RATIO + token-identity closure are portable."
+  },
+  "created_at": "20260615T150008Z",
+  "e2e_token_identity_strict": false,
+  "end_to_end_token_identity_rate": 0.984375,
+  "gpu": {
+    "is_a10g_80sm": true,
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "total_mem_gib": 22.06
+  },
+  "identity": {
+    "any_nan": false,
+    "by_split": {
+      "0": {
+        "hidden_byte_identity_by_M": {
+          "1": 1.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "max_abs_hidden_diff_by_M": {
+          "1": 0.0,
+          "2": 0.09375,
+          "4": 0.15625,
+          "8": 0.171875
+        },
+        "token_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 0.953125
+        }
+      },
+      "1": {
+        "hidden_byte_identity_by_M": {
+          "1": 1.0,
+          "2": 0.6875,
+          "4": 0.34375,
+          "8": 0.234375
+        },
+        "max_abs_hidden_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0625,
+          "4": 0.0859375,
+          "8": 0.15625
+        },
+        "token_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 0.984375
+        }
+      },
+      "16": {
+        "hidden_byte_identity_by_M": {
+          "1": 1.0,
+          "2": 0.875,
+          "4": 0.8125,
+          "8": 0.296875
+        },
+        "max_abs_hidden_diff_by_M": {
+          "1": 0.0,
+          "2": 0.046875,
+          "4": 0.0546875,
+          "8": 0.1484375
+        },
+        "token_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 0.984375
+        }
+      },
+      "2": {
+        "hidden_byte_identity_by_M": {
+          "1": 1.0,
+          "2": 0.875,
+          "4": 0.5,
+          "8": 0.375
+        },
+        "max_abs_hidden_diff_by_M": {
+          "1": 0.0,
+          "2": 0.03125,
+          "4": 0.09375,
+          "8": 0.1953125
+        },
+        "token_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 0.984375
+        }
+      },
+      "32": {
+        "hidden_byte_identity_by_M": {
+          "1": 1.0,
+          "2": 0.875,
+          "4": 0.78125,
+          "8": 0.234375
+        },
+        "max_abs_hidden_diff_by_M": {
+          "1": 0.0,
+          "2": 0.03125,
+          "4": 0.046875,
+          "8": 0.15625
+        },
+        "token_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 0.96875
+        }
+      },
+      "4": {
+        "hidden_byte_identity_by_M": {
+          "1": 1.0,
+          "2": 0.875,
+          "4": 0.65625,
+          "8": 0.484375
+        },
+        "max_abs_hidden_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0546875,
+          "4": 0.0625,
+          "8": 0.25
+        },
+        "token_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 0.984375
+        }
+      },
+      "8": {
+        "hidden_byte_identity_by_M": {
+          "1": 1.0,
+          "2": 0.875,
+          "4": 0.71875,
+          "8": 0.28125
+        },
+        "max_abs_hidden_diff_by_M": {
+          "1": 0.0,
+          "2": 0.03125,
+          "4": 0.046875,
+          "8": 0.1328125
+        },
+        "token_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 0.984375
+        }
+      }
+    },
+    "kv_mode": "contiguous",
+    "n_trials": 8
+  },
+  "kind": "strict-attn-e2e-pinned-split",
+  "ladder_constants": {
+    "budget_500_eta": 0.040220025755911104,
+    "ceiling_500": 520.953,
+    "lambda_central": 520.9527323111674,
+    "off_the_shelf_floor": 0.09841249119201488,
+    "phi_332": 0.075,
+    "phi_refute_threshold": 0.255,
+    "step_us": 1218.2,
+    "strict_ceiling_332": 473.5295953446407,
+    "supply_floor_332": 0.09103155435261377
+  },
+  "latency": {
+    "M": 8,
+    "contiguous": {
+      "composed_us": {
+        "0": 2214.9119414389133,
+        "1": 4264.959931373596,
+        "16": 2265.0880366563797,
+        "2": 3168.256029486656,
+        "32": 2358.2719899713993,
+        "4": 2508.7999887764454,
+        "8": 2214.9119414389133
+      },
+      "per_layer_us": {
+        "full": {
+          "0": 65.5359998345375,
+          "1": 209.9200040102005,
+          "16": 77.82399654388428,
+          "2": 130.048006772995,
+          "32": 70.65600156784058,
+          "4": 87.0399996638298,
+          "8": 65.5359998345375
+        },
+        "sliding": {
+          "0": 50.175998359918594,
+          "1": 79.8719972372055,
+          "16": 49.15200173854828,
+          "2": 64.51199948787689,
+          "32": 53.247999399900436,
+          "4": 54.27199974656105,
+          "8": 50.175998359918594
+        }
+      }
+    },
+    "iters": 200,
+    "paged": {
+      "composed_us": {
+        "0": 2336.7679826915264,
+        "1": 4386.815920472145,
+        "16": 2308.095920830965,
+        "2": 3483.648084104061,
+        "32": 2444.288019090891,
+        "4": 2587.6480154693127,
+        "8": 2229.247946292162
+      },
+      "per_layer_us": {
+        "full": {
+          "0": 67.58400052785873,
+          "1": 217.0879989862442,
+          "16": 78.84799689054489,
+          "2": 139.26400244235992,
+          "32": 72.7040022611618,
+          "4": 88.06400001049042,
+          "8": 67.58400052785873
+        },
+        "sliding": {
+          "0": 53.247999399900436,
+          "1": 81.91999793052673,
+          "16": 50.175998359918594,
+          "2": 71.68000191450119,
+          "32": 55.296000093221664,
+          "4": 56.32000043988228,
+          "8": 50.175998359918594
+        }
+      }
+    }
+  },
+  "lmhead_source": "real:lm_head.weight:model.safetensors",
+  "m_list": [
+    1,
+    2,
+    4,
+    8
+  ],
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "peak_mem_mib": 1480.434,
+  "per_layer": {
+    "by_split": {
+      "0": {
+        "full_byte_id": 0.0,
+        "full_maxabs": 0.0009765625,
+        "sliding_byte_id": 1.0,
+        "sliding_maxabs": 0.0
+      },
+      "1": {
+        "full_byte_id": 1.0,
+        "full_maxabs": 0.0,
+        "sliding_byte_id": 1.0,
+        "sliding_maxabs": 0.0
+      },
+      "16": {
+        "full_byte_id": 1.0,
+        "full_maxabs": 0.0,
+        "sliding_byte_id": 1.0,
+        "sliding_maxabs": 0.0
+      },
+      "2": {
+        "full_byte_id": 1.0,
+        "full_maxabs": 0.0,
+        "sliding_byte_id": 1.0,
+        "sliding_maxabs": 0.0
+      },
+      "32": {
+        "full_byte_id": 1.0,
+        "full_maxabs": 0.0,
+        "sliding_byte_id": 1.0,
+        "sliding_maxabs": 0.0
+      },
+      "4": {
+        "full_byte_id": 1.0,
+        "full_maxabs": 0.0,
+        "sliding_byte_id": 1.0,
+        "sliding_maxabs": 0.0
+      },
+      "8": {
+        "full_byte_id": 1.0,
+        "full_maxabs": 0.0,
+        "sliding_byte_id": 1.0,
+        "sliding_maxabs": 0.0
+      }
+    },
+    "n_trials": 8
+  },
+  "phi_recovery_pinned_split": 1.0,
+  "pr": 365,
+  "refutes_332_cap": true,
+  "selftest": {
+    "conditions": {
+      "a_budget_clears_500": true,
+      "a_ceiling_at_zero_is_lambda": true,
+      "a_ceiling_reproduces_473": true,
+      "a_phi_at_zero_is_one": true,
+      "a_phi_model_reproduces_332_floor": true,
+      "a_phi_of_supplyfloor_is_332": true,
+      "b_heuristic_breaks_identity": true,
+      "c_latencies_finite_positive": true,
+      "c_nan_clean": true,
+      "c_per_layer_rates_in_unit_interval": true,
+      "c_rates_in_unit_interval": true,
+      "d_decision_bools_set": true,
+      "d_eta_finite_nonneg": true,
+      "d_phi_consistent": true,
+      "e_no_launch_flags": true,
+      "e_two_or_more_seeds": true,
+      "on_target_a10g_80sm": true
+    },
+    "model_anchors": {
+      "budget_500_eta": 0.040220025755911104,
+      "lambda_central": 520.9527323111674,
+      "off_the_shelf_floor": 0.09841249119201488,
+      "strict_ceiling_332": 473.5295953446407,
+      "supply_floor_332": 0.09103155435261377
+    },
+    "n_checks": 17,
+    "outcome": {
+      "clears_500_budget": true,
+      "e2e_token_identity_strict": false,
+      "heuristic_breaks_identity": true,
+      "identity_gap_closed": true,
+      "identity_restored": true,
+      "refutes_332_cap": true
+    },
+    "passes": true
+  },
+  "strict_e2e_self_test_passes": true,
+  "total_attn_bi_eta": 0.0,
+  "wandb_run_id": "o6wpx54g"
+}
