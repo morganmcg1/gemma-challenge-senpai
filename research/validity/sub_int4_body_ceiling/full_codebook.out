@@ -1,0 +1,83 @@
+[cb] base=google/gemma-4-E4B-it-qat-q4_0-unquantized g=128 vq_dim=2 widths=['bf16', 'int4', 'rtn3', 'cb3', 'cb3_noinc', 'cb2'] records=128(use 128) greedy K=8 G=128
+Loading weights:   0%|          | 0/2076 [00:00<?, ?it/s]Loading weights:  36%|███▋      | 755/2076 [00:00<00:00, 7549.58it/s]Loading weights:  73%|███████▎  | 1510/2076 [00:00<00:00, 6865.28it/s]Loading weights: 100%|██████████| 2076/2076 [00:00<00:00, 6963.39it/s]
+[cb] model loaded 9.4s; GPU 14.81 GiB
+[cb] snapshot 258 body linears, 3.890B params (lm_head+embed+norms kept at source precision)
+[cb] built Gaussian codebook K=64 dim=2 (0.4s)
+[cb] built Gaussian codebook K=16 dim=2 (0.1s)
+[cb]       bf16 (bf16-ref): PPL=1.9526 bpw~16.000 [105.3s]
+[cb]       int4 (RTN-int4 (gate denom)): PPL=1.9512 bpw~4.125 [105.9s]
+[cb]       rtn3 (RTN-3bit (#355 recheck)): PPL=2.2232 bpw~3.125 [107.4s]
+[cb]        cb3 (codebook-3bit +incoherence): PPL=2.0657 bpw~3.125 [112.2s]
+[cb]  cb3_noinc (codebook-3bit no-incoherence): PPL=2.3365 bpw~3.125 [113.4s]
+[cb]        cb2 (codebook-2bit +incoherence): PPL=4.2385 bpw~2.125 [108.2s]
+[cb] greedy bf16 vs int4: mismatch 850/1024 (83.01%)
+[cb] greedy rtn3 vs int4: mismatch 981/1024 (95.80%)
+[cb] greedy cb3 vs int4: mismatch 988/1024 (96.48%)
+[cb] greedy cb3_noinc vs int4: mismatch 966/1024 (94.34%)
+[cb] greedy cb2 vs int4: mismatch 967/1024 (94.43%)
+
+========================================================================================================
+CODEBOOK ~3bpw BODY MEASUREMENT (PR #367) — the last sub-int4 ceiling-lift shot
+========================================================================================================
+  base=google/gemma-4-E4B-it-qat-q4_0-unquantized  g128 vq_dim2 seed0  records=128  body=3.890B
+  int4 local-proxy PPL=1.9512046814477728  gate-transfer x2.3772/int4 -> gate <= 2.42
+--------------------------------------------------------------------------------------------------------
+       width    bpw       PPL  rel/int4  gate_ppl  <=2.42 drift!=int4  realBWlift   GO
+        bf16 16.000    1.9526     n/a       n/a      True       0.830           —    —
+        int4  4.125    1.9512     ref       ref       ref         ref           —    —
+        rtn3  3.125    2.2232   +13.94%    2.7085   False       0.958           —    —
+         cb3  3.125    2.0657    +5.87%    2.5167   False       0.965      +28.0% False
+   cb3_noinc  3.125    2.3365   +19.74%    2.8466   False       0.943      +28.0% False
+         cb2  2.125    4.2385  +117.23%    5.1639   False       0.944      +48.0% False
+--------------------------------------------------------------------------------------------------------
+  HEADLINE width = cb3
+   gate1 PPL : transfer_ppl=2.516736355882998 (rel 5.87%) <= 2.42? -> False
+   gate2 ID  : drift_vs_int4=0.96484375 (bf16 floor 0.830078125); official #319 gate SELF-referential -> selfref_ok=True (drift<=bf16floor? False)
+   gate3 BW  : realized_lift=28.0% (realized 211.7632 vs pure-BW 214.4688874921433 vs floor 165.44) > 0? -> True
+  >>> codebook_subint4_width_go = False  (any width: False [])
+========================================================================================================
+[cb] wrote /workspace/senpai/target/research/validity/sub_int4_body_ceiling/measure_codebook_results.json (elapsed 668.7s, peak 19586.5 MiB)
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run fk7iuolc
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260615_141152-fk7iuolc
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/codebook-subint4-measured
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/fk7iuolc
+wandb: updating run metadata; uploading artifact codebook_subint4_measured
+wandb: uploading artifact codebook_subint4_measured
+wandb: uploading wandb-summary.json; uploading config.yaml; uploading code/research/validity/sub_int4_body_ceiling/measure_codebook.py; uploading wandb-metadata.json; uploading requirements.txt
+wandb: 
+wandb: Run history:
+wandb:                                global_step ▁
+wandb:            summary/any_codebook_subint4_go ▁
+wandb:          summary/codebook_effective_bpw_b3 ▁
+wandb:      summary/codebook_gate_transfer_ppl_b3 ▁
+wandb:   summary/codebook_greedy_frac_mismatch_b3 ▁
+wandb:          summary/codebook_pure_bw_pred_tps ▁
+wandb: summary/codebook_realized_bw_lift_estimate ▁
+wandb:     summary/codebook_realized_tps_estimate ▁
+wandb:          summary/codebook_subint4_width_go ▁
+wandb:                 summary/effective_bpw_bf16 ▁
+wandb:                                        +51 ...
+wandb: 
+wandb: Run summary:
+wandb:                                 event/name summary
+wandb:                           event/run_prefix 
+wandb:                                global_step 0
+wandb:            summary/any_codebook_subint4_go 0
+wandb:          summary/codebook_effective_bpw_b3 3.125
+wandb:      summary/codebook_gate_transfer_ppl_b3 2.51674
+wandb:   summary/codebook_greedy_frac_mismatch_b3 0.96484
+wandb:          summary/codebook_pure_bw_pred_tps 214.46889
+wandb: summary/codebook_realized_bw_lift_estimate 0.28
+wandb:     summary/codebook_realized_tps_estimate 211.7632
+wandb:                                        +53 ...
+wandb: 
+wandb: 🚀 View run lawine/codebook-subint4-measured at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/fk7iuolc
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260615_141152-fk7iuolc/logs
+[cb] wandb logged: 60 metrics
