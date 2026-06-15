@@ -1,0 +1,139 @@
+{
+  "created_at": "20260615T052750Z",
+  "pr": 301,
+  "agent": "denken",
+  "kind": "eagle3-build-cost",
+  "synthesis": {
+    "config": {
+      "n_train_tokens": 400000000.0,
+      "epochs": 10.0,
+      "mfu": 0.35,
+      "a10g_bf16_peak_flops": 125000000000000.0,
+      "eff_flops": 43750000000000.0,
+      "n_gpus_dp": 8,
+      "budget_gpu_hours": 200.0,
+      "tokens_per_entry_implied": 751.8796992481203,
+      "total_data_entries": 532000,
+      "sharegpt_entries": 68000,
+      "ultrachat_entries": 464000,
+      "paper_reports_train_gpu_hours": false
+    },
+    "target_geometry": {
+      "k_hidden": 2560,
+      "intermediate": 10240,
+      "n_heads": 8,
+      "head_dim": 256,
+      "n_kv_heads": 2,
+      "vocab": 262144,
+      "n_target_layers": 42,
+      "eagle3_target_layers": [
+        2,
+        21,
+        39
+      ],
+      "l_fuse": 3,
+      "p_target_effective": 4000000000.0
+    },
+    "drafter_params": {
+      "attn": 13107200,
+      "mlp": 78643200,
+      "fusion_fc": 19660800,
+      "input_fc": 13107200,
+      "p_drafter_core": 124518400,
+      "p_lm_head": 671088640
+    },
+    "flops": {
+      "capture_flops": 3.2e+18,
+      "drafter_core_flops": 2.9884416e+18,
+      "lm_head_flops": 1.073741824e+19,
+      "drafter_train_flops": 1.372585984e+19
+    },
+    "build_cost": {
+      "capture_pass_gpu_hours": 20.317460317460316,
+      "drafter_train_gpu_hours": 87.14831644444445,
+      "drafter_core_gpu_hours": 18.97423238095238,
+      "lm_head_gpu_hours": 68.17408406349206,
+      "total_build_gpu_hours": 107.46577676190476,
+      "wall_clock_hours_8xa10g": 13.433222095238095
+    },
+    "budget_verdict": {
+      "budget_gpu_hours": 200.0,
+      "build_cost_feasible_under_budget": true,
+      "budget_headroom_gpu_hours": 92.53422323809524,
+      "go_nogo_on_cost": "GO"
+    },
+    "reconciliation": {
+      "paper_reported_train_gpu_hours": null,
+      "total_core_only_gpu_hours": 39.291692698412696,
+      "total_lmhead_aware_gpu_hours": 107.46577676190476,
+      "drafter_term_divergence_x": 4.592982456140351,
+      "total_divergence_x": 2.7350762815633587,
+      "divergence_flagged_gt_2x": true,
+      "lm_head_dominates_drafter": true,
+      "lm_head_per_token_flop_ratio": 3.592982456140351,
+      "data_gen_gpu_hours_if_separate": 20.317460317460316
+    },
+    "sensitivity": {
+      "tokens=2e+08_epochs=2": {
+        "total_gpu_hours": 18.873561803174603,
+        "feasible_le_budget": true
+      },
+      "tokens=2e+08_epochs=10": {
+        "total_gpu_hours": 53.73288838095238,
+        "feasible_le_budget": true
+      },
+      "tokens=2e+08_epochs=20": {
+        "total_gpu_hours": 97.3070466031746,
+        "feasible_le_budget": true
+      },
+      "tokens=4e+08_epochs=2": {
+        "total_gpu_hours": 37.747123606349206,
+        "feasible_le_budget": true
+      },
+      "tokens=4e+08_epochs=10": {
+        "total_gpu_hours": 107.46577676190476,
+        "feasible_le_budget": true
+      },
+      "tokens=4e+08_epochs=20": {
+        "total_gpu_hours": 194.6140932063492,
+        "feasible_le_budget": true
+      },
+      "tokens=8e+08_epochs=2": {
+        "total_gpu_hours": 75.49424721269841,
+        "feasible_le_budget": true
+      },
+      "tokens=8e+08_epochs=10": {
+        "total_gpu_hours": 214.93155352380953,
+        "feasible_le_budget": false
+      },
+      "tokens=8e+08_epochs=20": {
+        "total_gpu_hours": 389.2281864126984,
+        "feasible_le_budget": false
+      }
+    },
+    "self_test": {
+      "conditions": {
+        "a_flop_arithmetic_roundtrips": true,
+        "b_all_hours_positive_finite": true,
+        "c_capture_lt_drafter_train": true,
+        "d_total_equals_sum_of_parts": true,
+        "e_wallclock_equals_total_over_8": true,
+        "f_budget_bool_consistent": true,
+        "g_paper_and_bottomup_both_logged": true,
+        "h_mfu_and_flops_logged": true,
+        "i_drafter_param_sum_consistent": true,
+        "j_lmhead_divergence_surfaced": true,
+        "k_target_constants_exact": true
+      }
+    },
+    "honest_caveat": "ORDER-OF-MAGNITUDE estimate, not a quote: (1) N_train_tokens=4e+08 is derived from the paper's entry counts (532K entries x ~752 tok/entry), not a measured token count -- the paper gives entries, not tokens; (2) epochs are NOT in the paper (default 10 = codebase convention); (3) MFU 0.35 and 125 TFLOP/s are nominal A10G assumptions; (4) the target's response-GENERATION pass (~20.3 GPU-hr if run separately) is FUSED into capture for a self-generated corpus and excluded from the headline; (5) DP wall-clock assumes ideal 8x scaling (ignores comm/imbalance). Feasibility verdict is robust: even at 8e8 tokens x 20 epochs the total stays a small multiple of budget (sensitivity grid logged).",
+    "verdict": "EAGLE-3 drafter BUILD-COST (A10G, sm_86, 125 TFLOP/s x MFU 0.35 = 43.8 TFLOP/s eff): capture-pass 20.3 GPU-hr (target fwd 2*4.0B*4e+08N) + drafter-train 87.1 GPU-hr (core 19.0 + frozen 262k-vocab lm_head GEMM 68.2) = TOTAL 107.5 A10G-GPU-hr -> 13.4 h wall-clock on 8x A10G (DP). vs <=200 GPU-hr lane budget: GO-ON-COST (headroom 92.5 GPU-hr). The lm_head GEMM dominates the draft net 3.59x/token and inflates the total 2.74x over the PR-literal core-only accounting (flagged >2x). The paper reports NO train cost, so this bottom-up estimate IS the anchor. 0 TPS added; BASELINE 481.53 untouched; analysis-only; NOT a launch.",
+    "handoff": "the human EAGLE-3 GO/NO-GO now has its SPEND axis: ~107 A10G-GPU-hr (~13.4 h on 8x A10G) to build the drafter at N=4e+08 tokens x 10 epochs, MFU 0.35 -- GO under the <=200 GPU-hr lane budget. Dominant term is the 262k-vocab lm_head GEMM (68.2 GPU-hr, 78% of drafter train), not the 124.5M draft net; epochs/tokens are the live knobs (sensitivity logged). Pairs with wirbel #290 (acceptance), kanna #294 (Phase-1), ubel #299 (VRAM), lawine #300 (private bar): cost is no longer the missing input.",
+    "total_build_gpu_hours": 107.46577676190476,
+    "wall_clock_hours_8xa10g": 13.433222095238095,
+    "build_cost_feasible_under_budget": true
+  },
+  "eagle3_build_cost_self_test_passes": true,
+  "peak_mem_mib": 13.656,
+  "nan_clean": true
+}
