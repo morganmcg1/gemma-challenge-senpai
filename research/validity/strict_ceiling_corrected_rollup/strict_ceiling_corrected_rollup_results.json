@@ -1,0 +1,479 @@
+{
+  "agent": "wirbel",
+  "pr": 390,
+  "kind": "strict-ceiling-corrected-rollup",
+  "created_at": "20260615T182719Z",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "no_kernel_deploy": true,
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "compute_capability": "8.6",
+    "total_mem_gib": 22.06,
+    "is_a10g_80sm": true,
+    "is_sm8x": true
+  },
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "peak_mem_mib": 653.086,
+  "ladder_constants": {
+    "ceiling_500": 520.953,
+    "step_us": 1218.2,
+    "ratio_cal_373": 0.9668872131421857,
+    "eta_blanket_vbi_326": 0.3141,
+    "eta_floor_327": 0.09841249119201488,
+    "budget_500_eta": 0.040220518933569815,
+    "eta_attn_378": 0.02145375421979844,
+    "official_tps": 481.53,
+    "band_357": 357.32166269999993,
+    "band_469": 469.6847174760462,
+    "pin_518": 518.9188253620001,
+    "strict_floor_196": 165.44
+  },
+  "compose": {
+    "source_audit": {
+      "checked": [
+        "/tmp/osoi5-v0-baked/model.safetensors"
+      ],
+      "config": "/tmp/osoi5-v0-baked/config.json",
+      "tie_word_embeddings": false,
+      "vocab_size": 262144,
+      "hidden_size": 2560,
+      "num_hidden_layers": 37,
+      "num_attention_heads": 8,
+      "num_key_value_heads": 2,
+      "head_dim": 256,
+      "intermediate_size": 10240,
+      "quant_format": "pack-quantized",
+      "quant_method": "compressed-tensors",
+      "body_quant_group": {
+        "format": "pack-quantized",
+        "input_activations": null,
+        "output_activations": null,
+        "targets": [
+          "Linear"
+        ],
+        "weights": {
+          "actorder": null,
+          "block_structure": null,
+          "dynamic": false,
+          "group_size": 128,
+          "num_bits": 4,
+          "observer": "memoryless_minmax",
+          "observer_kwargs": {},
+          "scale_dtype": null,
+          "strategy": "group",
+          "symmetric": true,
+          "type": "int",
+          "zp_dtype": null
+        }
+      },
+      "body_quant_strategy": "group",
+      "body_quant_group_size": 128,
+      "body_is_int4_marlin": true,
+      "body_packed_example": "model.language_model.layers.0.mlp.down_proj.weight_packed",
+      "lmhead_quant_group": {
+        "format": "pack-quantized",
+        "input_activations": null,
+        "output_activations": null,
+        "targets": [
+          "re:.*lm_head$"
+        ],
+        "weights": {
+          "actorder": null,
+          "block_structure": null,
+          "dynamic": false,
+          "group_size": null,
+          "num_bits": 4,
+          "observer": "memoryless_minmax",
+          "observer_kwargs": {},
+          "scale_dtype": null,
+          "strategy": "channel",
+          "symmetric": true,
+          "type": "int",
+          "zp_dtype": null
+        }
+      },
+      "lmhead_quant_strategy": "channel",
+      "lmhead_is_int4_marlin": true,
+      "lmhead_rows_pruned": 16384
+    },
+    "body_geoms": {
+      "q_proj": {
+        "kind": "body",
+        "size_k": 2560,
+        "size_n": 2048,
+        "group_size": 128,
+        "heuristic_use_atomic_add": false,
+        "byte_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "argmax_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "max_abs_logit_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "any_nan": false,
+        "is_m_invariant_at_decode": true,
+        "forced_is_m_invariant": true,
+        "heuristic_us": 55.296000093221664,
+        "forced_det_us": 55.296000093221664,
+        "forced_vs_heuristic_ratio": 1.0
+      },
+      "k_proj": {
+        "kind": "body",
+        "size_k": 2560,
+        "size_n": 512,
+        "group_size": 128,
+        "heuristic_use_atomic_add": false,
+        "byte_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "argmax_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "max_abs_logit_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "any_nan": false,
+        "is_m_invariant_at_decode": true,
+        "forced_is_m_invariant": true,
+        "heuristic_us": 56.32000043988228,
+        "forced_det_us": 56.32000043988228,
+        "forced_vs_heuristic_ratio": 1.0
+      },
+      "v_proj": {
+        "kind": "body",
+        "size_k": 2560,
+        "size_n": 512,
+        "group_size": 128,
+        "heuristic_use_atomic_add": false,
+        "byte_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "argmax_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "max_abs_logit_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "any_nan": false,
+        "is_m_invariant_at_decode": true,
+        "forced_is_m_invariant": true,
+        "heuristic_us": 55.296000093221664,
+        "forced_det_us": 56.32000043988228,
+        "forced_vs_heuristic_ratio": 1.0185185247564794
+      },
+      "o_proj": {
+        "kind": "body",
+        "size_k": 2048,
+        "size_n": 2560,
+        "group_size": 128,
+        "heuristic_use_atomic_add": false,
+        "byte_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "argmax_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "max_abs_logit_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "any_nan": false,
+        "is_m_invariant_at_decode": true,
+        "forced_is_m_invariant": true,
+        "heuristic_us": 56.32000043988228,
+        "forced_det_us": 55.296000093221664,
+        "forced_vs_heuristic_ratio": 0.9818181758049938
+      },
+      "gate_proj": {
+        "kind": "body",
+        "size_k": 2560,
+        "size_n": 10240,
+        "group_size": 128,
+        "heuristic_use_atomic_add": false,
+        "byte_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "argmax_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "max_abs_logit_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "any_nan": false,
+        "is_m_invariant_at_decode": true,
+        "forced_is_m_invariant": true,
+        "heuristic_us": 61.43999844789505,
+        "forced_det_us": 61.43999844789505,
+        "forced_vs_heuristic_ratio": 1.0
+      },
+      "up_proj": {
+        "kind": "body",
+        "size_k": 2560,
+        "size_n": 10240,
+        "group_size": 128,
+        "heuristic_use_atomic_add": false,
+        "byte_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "argmax_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "max_abs_logit_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "any_nan": false,
+        "is_m_invariant_at_decode": true,
+        "forced_is_m_invariant": true,
+        "heuristic_us": 62.463998794555664,
+        "forced_det_us": 61.43999844789505,
+        "forced_vs_heuristic_ratio": 0.9836065515109182
+      },
+      "down_proj": {
+        "kind": "body",
+        "size_k": 10240,
+        "size_n": 2560,
+        "group_size": 128,
+        "heuristic_use_atomic_add": false,
+        "byte_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "argmax_identity_by_M": {
+          "1": 1.0,
+          "2": 1.0,
+          "4": 1.0,
+          "8": 1.0
+        },
+        "max_abs_logit_diff_by_M": {
+          "1": 0.0,
+          "2": 0.0,
+          "4": 0.0,
+          "8": 0.0
+        },
+        "any_nan": false,
+        "is_m_invariant_at_decode": true,
+        "forced_is_m_invariant": true,
+        "heuristic_us": 62.463998794555664,
+        "forced_det_us": 62.463998794555664,
+        "forced_vs_heuristic_ratio": 1.0
+      }
+    },
+    "body_byte_exact_by_geom": {
+      "q_proj": true,
+      "k_proj": true,
+      "v_proj": true,
+      "o_proj": true,
+      "gate_proj": true,
+      "up_proj": true,
+      "down_proj": true
+    },
+    "body_maxdiff_M8_by_geom": {
+      "q_proj": 0.0,
+      "k_proj": 0.0,
+      "v_proj": 0.0,
+      "o_proj": 0.0,
+      "gate_proj": 0.0,
+      "up_proj": 0.0,
+      "down_proj": 0.0
+    },
+    "body_heuristic_atomic_add_by_geom": {
+      "q_proj": false,
+      "k_proj": false,
+      "v_proj": false,
+      "o_proj": false,
+      "gate_proj": false,
+      "up_proj": false,
+      "down_proj": false
+    },
+    "body_already_strict_at_decode": true,
+    "body_any_atomic_add_active": false,
+    "small_n_geoms": [
+      "k_proj",
+      "v_proj"
+    ],
+    "small_n_strict": true,
+    "lmhead_geom": {
+      "kind": "lmhead",
+      "size_k": 2560,
+      "size_n": 16384,
+      "group_size": -1,
+      "heuristic_use_atomic_add": false,
+      "byte_identity_by_M": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      },
+      "argmax_identity_by_M": {
+        "1": 1.0,
+        "2": 1.0,
+        "4": 1.0,
+        "8": 1.0
+      },
+      "max_abs_logit_diff_by_M": {
+        "1": 0.0,
+        "2": 0.0,
+        "4": 0.0,
+        "8": 0.0
+      },
+      "any_nan": false,
+      "is_m_invariant_at_decode": true,
+      "forced_is_m_invariant": true,
+      "heuristic_us": 78.84799689054489,
+      "forced_det_us": 77.82399654388428,
+      "forced_vs_heuristic_ratio": 0.9870129821042618
+    },
+    "lmhead_already_strict_at_decode": true,
+    "body_forced_vs_heuristic_ratio_max": 1.0185185247564794,
+    "body_fixed_split_k_penalty": 1.0185185247564794,
+    "eta_body_376_int4preserving": 0.014118702930888202,
+    "eta_body_floor_pessimistic": 0.07695873697221645,
+    "eta_body_blanket_offshelf": 0.18373769420440011,
+    "eta_attn_378": 0.02145375421979844,
+    "eta_total_arm_A": 0.02145375421979844,
+    "eta_total_arm_B": 0.03557245715068664,
+    "eta_total_arm_B_pessimistic": 0.09841249119201488,
+    "shippable_strict_ceiling_corrected": 509.77660237793333,
+    "shippable_strict_tps_arm_A": 509.77660237793333,
+    "shippable_strict_tps_arm_A_deployed": 471.1993737305404,
+    "shippable_strict_tps_arm_A_deployed_divisor": 471.41634950257713,
+    "shippable_strict_tps_arm_B": 502.4214217299783,
+    "shippable_strict_tps_arm_B_deployed": 464.4007947082298,
+    "shippable_strict_tps_arm_B_pessimistic_bf16": 469.6847174760462,
+    "realized_shippable_strict_tps_decode": 471.41634950257713,
+    "clears_500": false,
+    "clears_500_ceiling_basis": true,
+    "gap_to_500_tps": 28.583650497422866,
+    "supply_alone_closes_500": false,
+    "n_distinct_kernel_rebuilds_for_strict_500": 1,
+    "n_distinct_kernel_rebuilds_arm_A": 1,
+    "n_distinct_kernel_rebuilds_arm_B": 2,
+    "measured_arm": "A",
+    "phantom_lmhead_bf16_tax_tps": 56.736236669068475,
+    "spread_510_to_518_tps": 9.142222984066791,
+    "spread_is_lmhead_bf16_tax": false,
+    "phantom_total_offshelf_tps": 152.4549396779334,
+    "band_357_minus_lmhead_phantom": 414.0578993690685,
+    "phantom_lmhead_lift_from_357_tps": 56.736236669068546,
+    "corrected_band": [
+      471.1993737305404,
+      509.77660237793333
+    ],
+    "old_band_357_469": [
+      357.32166269999993,
+      469.6847174760462
+    ],
+    "floor_lift_deployed_vs_offshelf_tps": 113.87771103054047,
+    "ceiling_lift_vs_floor_tps": 40.09188490188711,
+    "band_357_reproduced": 357.32166269999993,
+    "band_469_reproduced": 469.6847174760462,
+    "pin_518": 518.9188253620001,
+    "is_strict_byte_exact": true,
+    "bucket": "CORRECTED-LIFT: ALL int4-Marlin GEMMs (body + lm_head) are ALREADY byte-exact strict at the M=8 decode width on the A10G (atomic-add hw-disabled) -> the ONLY strict tax is the attention split pin (1 rebuild); the OLD [357.32, 469.68] bracket double-counted a phantom bf16 body+lm_head determinization. BUT the corrected SHIPPABLE (deployed-basis) ~471 still falls ~28.6 TPS short of 500 -> supply-alone does NOT close 500.",
+    "verdict": "MEASURED on the pod A10G (cc 8.6, real deployed gemma-4-E4B geometry, int4 compressed-tensors). SOURCE: body group-quantized (group_size=128, strategy=group) + lm_head channel-wise -- BOTH the SAME compressed-tensors W4A16 Marlin kernel family. MECHANISM: should_use_atomic_add_reduce returns False for EVERY body GEMM on the A10G (sm8x+bf16 native-unsupported AND default env off) -> the FIXED fp32 global-reduce. (1) BODY decode-strictness (resolves stark #381): byte-identity M=8-vs-M=1 = {'q_proj': 1.0, 'k_proj': 1.0, 'v_proj': 1.0, 'o_proj': 1.0, 'gate_proj': 1.0, 'up_proj': 1.0, 'down_proj': 1.0} (max|M8-M1| 0.000e+00) -> body_already_strict_at_decode=True. The atomic-add-ELIGIBLE small-n projections (k/v_proj n=512) are ALSO byte-exact (small_n_strict=True) -- the heuristic suggests atomic-add but the A10G guards force it off. (2) lm_head reconfirm: byte-exact=True (#384). (3) the int4-preserving #376 fixed-split-K fix is a NO-OP here (forced/heuristic ratio max 1.019) -> eta_body_376=1.4119%. ROLLUP: with body+lm_head already strict, the ONLY strict tax is the attention split pin eta_attn=2.145% -> shippable_strict_ceiling_corrected=509.78 (ceiling) / realized 471.42 (deployed, servable basis), clears_500=False, gap_to_500=28.58 TPS, n_distinct_kernel_rebuilds=1 (Arm A) / 2 (Arm B). PHANTOM DECOMP (PR step 1): the OLD off-the-shelf shippable 357.32 vs corrected 509.78 = 152.5 TPS of phantom bf16 body+lm_head over-determinization; the lm_head's slice alone = 56.7 TPS (35% steelman). The literal 510.01->518.92 spread is only 9.14 TPS (attention eval-weighting + pin headroom), 6.2x SMALLER than the 56.7 TPS phantom lm_head bf16 tax -> the spread is NOT the lm_head (the phantom lived in the 357/470 bracket, and 510.01 was the corrected shippable ceiling all along -- #378 merely MISLABELED it 'NOT shippable'). VERDICT for fern #357: the corrected attribution LIFTS the honest band from [357.32, 469.68] to [471.20, 509.78] (deployed-floor +113.9 TPS vs off-the-shelf) AND cuts the rebuild count 2->1, but supply-alone STILL does not clear 500 on the servable deployed basis (~471, gap ~29 TPS). A clean 'supply-alone <500' -- the residual hands to the cb3 body shrink (lawine #388) / demand route (#383/#386). CAVEAT: real geometry + synthetic post-RMSNorm hidden (M-invariance & latency are weight-value-independent; int4 provenance is the source audit); attention pin realizability (env vs rebuild) is ubel #389 / a flag-to-human served-config item -- the LOCAL rollup is fully within the #319 grant."
+  },
+  "selftest": {
+    "passes": true,
+    "n_checks": 21,
+    "conditions": {
+      "a_band_357": true,
+      "a_band_469": true,
+      "a_budget_500": true,
+      "b_body_int4_marlin": true,
+      "b_lmhead_int4_marlin": true,
+      "b_body_group_quant": true,
+      "c_no_body_atomic_add": true,
+      "c_body_all_byte_exact": true,
+      "c_small_n_byte_exact": true,
+      "c_body_maxdiff_zero": true,
+      "c_lmhead_byte_exact": true,
+      "d_corrected_above_old_floor": true,
+      "d_arm_A_ge_arm_B": true,
+      "d_etas_finite": true,
+      "d_eta_body_376_small": true,
+      "d_spread_not_lmhead": true,
+      "d_decision_bools": true,
+      "d_rebuilds_1_2": true,
+      "e_two_or_more_seeds": true,
+      "e_no_launch_flags": true,
+      "e_on_target_a10g_sm8x": true
+    }
+  },
+  "strict_ceiling_corrected_rollup_self_test_passes": true,
+  "realized_shippable_strict_tps_decode": 471.41634950257713,
+  "shippable_strict_ceiling_corrected": 509.77660237793333,
+  "shippable_strict_tps_arm_A": 509.77660237793333,
+  "shippable_strict_tps_arm_B": 502.4214217299783,
+  "clears_500": false,
+  "gap_to_500_tps": 28.583650497422866,
+  "supply_alone_closes_500": false,
+  "n_distinct_kernel_rebuilds_for_strict_500": 1,
+  "body_already_strict_at_decode": true,
+  "is_strict_byte_exact": true,
+  "wandb_run_id": "5y64zbjz"
+}
