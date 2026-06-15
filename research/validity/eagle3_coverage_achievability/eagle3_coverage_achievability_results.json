@@ -1,0 +1,220 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T082501Z",
+  "eagle3_coverage_achievability_analysis_only": true,
+  "kind": "eagle3-coverage-achievability",
+  "nan_clean": true,
+  "peak_mem_mib": 15.125,
+  "pr": 323,
+  "self_test": {
+    "checks": {
+      "01_reproduces_316_deployed_bar": true,
+      "02_bar_at_relaxed_a1_is_linear_frac": true,
+      "03_regime_invariant_uncond_top4_is_T": true,
+      "04_linear_spine_below_bar": true,
+      "05_salvage_identity_roundtrips_fern_top4": true,
+      "06_fern_frac_plus_cov_is_unit": true,
+      "07_per_source_reconstructs_aggregate": true,
+      "08_aggregate_misses_freeform_clears": true,
+      "09_root_tf_approx_native": true,
+      "10_root_lever_is_fusion": true,
+      "11_ttt_dominates_tau_but_not_root": true,
+      "12_bar_at_lit_band_center": true,
+      "13_central_estimate_in_bracket": true,
+      "14_bracket_straddles_bar": true,
+      "15_verdict_is_marginal": true,
+      "16_central_estimate_in_unit_interval": true,
+      "17_constants_match_banked_artifacts": true,
+      "18_caveats_carried": true
+    },
+    "coverage_bar_achievability_self_test_passes": true
+  },
+  "synthesis": {
+    "imported": {
+      "T_effective_316_304": 0.9213011665456927,
+      "a1_deployed": 0.7292532942898975,
+      "a1_relaxed_309": 0.7730729805683441,
+      "bar_frac_at_deployed_a1_316": 0.2906732816855498,
+      "bar_frac_at_relaxed_a1_316": 0.3468023933483565,
+      "fern34_gua9x68j_native_step1_top1": 0.7713541666666667,
+      "fern34_gua9x68j_tf_top1": 0.7616588114947002,
+      "fern34_gua9x68j_tf_top4": 0.8902556121072153,
+      "linear_cov4_79": 0.6531976066516435,
+      "linear_frac_79": 0.3468023933483565,
+      "lit_top4_central": 0.913,
+      "lit_top4_range": [
+        0.899,
+        0.929
+      ],
+      "provenance": "build bar lawine #316 (5lnz5jgb) on denken #304/#295/#297; measured cov_W + frac wirbel #79 (z6wi4z4v); the trained {2,21,39} fusion head fern #34 (gua9x68j, W&B-verified eval/* summary); a1-cliff envelope denken #308 (5axqa6oa); published EAGLE-3 (arXiv 2503.01840), EAGLE-1 (2401.15077), HASS (2408.15766), Medusa, KOALA (2408.08146). Achievability synthesis + per-source decomposition + verdict are this card (#323)."
+    },
+    "step1_reproduce_bar": {
+      "bar_at_relaxed_abs_diff_vs_linear_frac": 0.0,
+      "bar_by_a1": {
+        "deployed_0.72925": {
+          "a1": 0.7292532942898975,
+          "max_frac_beyond_top4": 0.2906732816855498,
+          "min_cov4": 0.7093267183144503,
+          "unconditional_top4_at_bar": 0.9213011665456927
+        },
+        "fern_native_0.7714": {
+          "a1": 0.7713541666666667,
+          "max_frac_beyond_top4": 0.3441953536042596,
+          "min_cov4": 0.6558046463957403,
+          "unconditional_top4_at_bar": 0.9213011665456927
+        },
+        "fern_tf_0.7617": {
+          "a1": 0.7616588114947002,
+          "max_frac_beyond_top4": 0.3301940128261016,
+          "min_cov4": 0.6698059871738984,
+          "unconditional_top4_at_bar": 0.9213011665456927
+        },
+        "relaxed_0.7731": {
+          "a1": 0.7730729805683441,
+          "max_frac_beyond_top4": 0.3468023933483565,
+          "min_cov4": 0.6531976066516435,
+          "unconditional_top4_at_bar": 0.9213011665456927
+        }
+      },
+      "build_bar_unconditional_top4": 0.9213011665456927,
+      "headline_abs_diff_vs_316": 0.0,
+      "linear_spine_clears_bar": false,
+      "linear_spine_cov4_79": 0.6531976066516435,
+      "linear_spine_frac_79": 0.3468023933483565,
+      "linear_spine_unconditional_top4": 0.9061043944685533,
+      "note": "salvage identity c1_eff=a1+(1-a1)*cov4_cond == unconditional top-4, so the build bar c1_eff>=T is REGIME-INVARIANT: every conditional-frac bar (0.2907@a1=0.72925, 0.3468@0.7731, 0.3443@fern native 0.7714) maps to the SAME unconditional top-4 == 0.9213. The deployed LINEAR spine sits at unconditional top-4 0.9061 (a1 0.72925, cov4 0.6532) -- 0.0152 BELOW the bar, which is exactly why #316 read linear_spine_clears=False.",
+      "regime_invariance_max_residual": 0.0,
+      "regime_invariant_identity_holds": true,
+      "reproduces_316_bar": true
+    },
+    "step2_fern34_measured": {
+      "agent": "fern",
+      "aggregate_clears_bar": false,
+      "denken308_recheck": {
+        "note": "denken #308's 'essentially achieved' paired fern native a1 0.7714 with the BORROWED linear cov4 0.6532 -> c1_eff 0.9207 ~= bar. fern's OWN aggregate cov4 (0.5395, MCQ-dragged) gives 0.8947 (MISS); its free-form aime cov4 (0.727) gives 0.9375 (CLEAR). The linear->fusion cov transfer is NOT uniform -- it is distribution-dependent.",
+        "with_borrowed_linear_cov4_optimistic": 0.9207050777708705,
+        "with_fern_aggregate_cov4_mcq_dragged": 0.8947198460292801,
+        "with_fern_freeform_aime_cov4": 0.9375264166121291
+      },
+      "fern_bar_frac_at_native_a1": 0.3441953536042596,
+      "fern_bar_frac_at_tf_a1": 0.3301940128261016,
+      "fusion_cov4_cond_aggregate": 0.5395492127020907,
+      "fusion_cov4_vs_linear_aggregate": -0.11364839394955284,
+      "fusion_frac_beyond_top4_aggregate": 0.46045078729790934,
+      "fusion_uncond_gap_to_bar": -0.031045554438477452,
+      "fusion_uncond_top4_aggregate": 0.8902556121072153,
+      "measurement_regime": "teacher-forced (feature_shift=1), 240-rec benchmark-matched reasoning holdout",
+      "native_accept_per_step_k8": 0.7791666666666667,
+      "native_step1_top1": 0.7713541666666667,
+      "native_vs_tf_root_gap": 0.009695355171966513,
+      "note": "fern #34 is the ONLY trained {2,21,39} fusion head. AGGREGATE tf top-4 = 0.8903 < bar 0.9213 (MISS by 0.0310); conditional cov4 0.5395 < linear 0.6532 -- the denken #308/#313 selection-effect YELLOW MATERIALIZED on aggregate. BUT per-source is decisive: free-form aime top-4 0.9570 (cov4 0.7268 > linear -> CLEARS), MCQ mmlu_pro 0.8465 (cov4 0.4874). The aggregate is dragged down by the MCQ answer-letter tail (pathologically low-coverage). The deployment distribution (official ShareGPT, free-form, NO MCQ letters) sits toward the aime end. fern #34 is also undertrained for this bar: K=1, hard-CE, no soft-KD, no TTT.",
+      "per_source": {
+        "aime": {
+          "clears_bar_uncond": true,
+          "cov4_cond": 0.7267670157068064,
+          "cov4_vs_linear": 0.07356940905516285,
+          "frac_beyond_top4": 0.27323298429319365,
+          "n": 26,
+          "top1": 0.8426445600123578,
+          "top4_uncond": 0.957005303537408
+        },
+        "gpqa": {
+          "clears_bar_uncond": false,
+          "cov4_cond": 0.5810223354819368,
+          "cov4_vs_linear": -0.07217527116970668,
+          "frac_beyond_top4": 0.4189776645180632,
+          "n": 107,
+          "top1": 0.8033197712129253,
+          "top4_uncond": 0.9175953770859131
+        },
+        "mmlu_pro": {
+          "clears_bar_uncond": false,
+          "cov4_cond": 0.4873957367933272,
+          "cov4_vs_linear": -0.1658018698583163,
+          "frac_beyond_top4": 0.5126042632066727,
+          "n": 107,
+          "top1": 0.7006353522181838,
+          "top4_uncond": 0.846544405293677
+        }
+      },
+      "pr": 34,
+      "recon_top1_abs_diff": 0.0001410083696747888,
+      "recon_top1_from_sources": 0.761799819864375,
+      "recon_top4_abs_diff": 6.771791309545527e-05,
+      "recon_top4_from_sources": 0.8901878941941198,
+      "source_run": "gua9x68j",
+      "tf_top1_raw_a1": 0.7616588114947002,
+      "tf_top2": 0.8410975066366266,
+      "tf_top3": 0.8724073225682961,
+      "tf_top4_uncond": 0.8902556121072153
+    },
+    "step3_literature": {
+      "ablation_eagle2_tau": 4.05,
+      "ablation_full_tau": 6.13,
+      "ablation_ttt_only_tau": 5.37,
+      "bar_sits_at_band_center": true,
+      "eagle1_root_0alpha_range": [
+        0.74,
+        0.79
+      ],
+      "eagle3_tau_range": [
+        5.84,
+        6.65
+      ],
+      "fusion_dtau": 0.7599999999999998,
+      "fusion_share_of_eagle2to3_gain": 0.36538461538461525,
+      "hass_0alpha_ttt_delta_range": [
+        -0.025,
+        0.01
+      ],
+      "lit_central_frac_at_fern_a1": 0.3650229343304018,
+      "lit_frac_band_at_fern_a1": [
+        0.2978922797409025,
+        0.4237622570962136
+      ],
+      "lit_ref_a1": 0.765,
+      "lit_top4_central": 0.913,
+      "lit_top4_central_clears_bar": false,
+      "lit_top4_range": [
+        0.899,
+        0.929
+      ],
+      "note": "EAGLE root 0-alpha ~ 0.74-0.79; EAGLE-3 tau 5.84-6.65. EAGLE-2->3 ablation: TTT +1.32 tau (63% of the gain) vs fused features +0.76 tau (37%). KEY: TTT/on-policy lifts DEPTH>=2 robustness, NOT the root (HASS 0-alpha moves [-0.025, 0.01] -- can DROP). The root-coverage lever is FUSION, which fern #34 ALREADY spent. No paper tabulates top-k coverage; the cross-paper estimate for a fully-trained head (a1~0.765) is top-4 ~ 0.913 [0.899,0.929] -- the 0.9213 bar at the BAND CENTER, no safety margin.",
+      "root_lever_is_fusion_not_ttt": true,
+      "ttt_dtau": 1.3200000000000003,
+      "ttt_share_of_eagle2to3_gain": 0.6346153846153847
+    },
+    "step4_verdict": {
+      "bracket_frac": [
+        0.27323298429319365,
+        0.46045078729790934
+      ],
+      "bracket_label": "[free-form aime (clears) .. MCQ-heavy aggregate (misses)]",
+      "bracket_midpoint": 0.3668418857955515,
+      "bracket_straddles_bar": true,
+      "caveats": "fern #34's top-4 is TEACHER-FORCED on the reasoning holdout (root tf ~= native, gap 0.0097, so the regime gap is DISTRIBUTION not tf-vs-native). The 0.9213 bar holds the deep spine at the build-uniform target (#316 step3); position-1 root coverage is necessary, NOT sufficient -- the deployed deep spine still caps E[T] at 4.91 (#316), so a root-coverage GO does not by itself build 6.11. No fusion checkpoint is deployed; the drafter BUILD stays human-gated. 0 TPS; BASELINE 481.53 unchanged.",
+      "central_estimate_misses_deployed_a1_bar_0p2907": true,
+      "central_estimate_misses_relaxed_a1_bar_0p3468": true,
+      "cov4_delta_fern_aggregate_vs_linear": -0.11364839394955284,
+      "cov4_delta_fern_aime_vs_linear": 0.07356940905516285,
+      "cov4_delta_required_over_linear_at_deployed": 0.05612911166280676,
+      "deployment_central_uncond_top4": 0.9127909591259108,
+      "freeform_aime_frac_fern34": 0.27323298429319365,
+      "fusion_max_frac_beyond_top4_estimate": 0.3659,
+      "lit_central_frac_at_fern_a1": 0.3650229343304018,
+      "measured_aggregate_frac_fern34": 0.46045078729790934,
+      "measured_aggregate_uncond_top4_fern34": 0.8902556121072153,
+      "rationale": "MARGINAL (not ACHIEVABLE-with-margin, not UNLIKELY). (1) The bar (unconditional top-4 >= 0.9213) sits at the CENTER of the published achievable band [0.899,0.929] -- no safety margin. (2) The ONLY trained fusion head (fern #34) STRADDLES it: aggregate 0.8903 MISSES by 0.031, but free-form aime 0.9570 CLEARS and gpqa 0.9176 nearly clears; the MCQ answer-letter tail (mmlu_pro 0.8465) drags the aggregate. (3) The deployment distribution (official ShareGPT, free-form) has NO MCQ-letter tokens, so its coverage sits toward the clearing aime end -- but it is UNMEASURED, the binding unknown. (4) The root-coverage lever is FUSION (already spent in fern #34); TTT (the main remaining EAGLE-3 upgrade) lifts depth>=2, not the root (HASS 0-alpha can even drop). So the path from 0.8903 -> 0.9213 is NOT reliably delivered by the standard EAGLE-3 training roadmap; the credible levers are (a) the deployment distribution being free-form, (b) soft-KD top-k calibration, (c) more root training -- all plausible, all UNTESTED on this target.",
+      "resolves_308_yellow": "Resolves denken #308's 'cov_W linear->fusion transfer' YELLOW on the ACHIEVABILITY side: the transfer is REAL on free-form text (fern aime cov4 0.727 > linear 0.653) but the MCQ-contaminated aggregate (0.5395) sits below linear -- so #308's borrowed-linear-cov 'essentially achieved' was OPTIMISTIC. ACHIEVABLE iff the deployment-distribution coverage lands toward the free-form end. (denken #320 handles the step-regime demand side.)",
+      "supporting_coverage_delta": "Bar (deployed a1) needs cov4 0.6532 -> 0.7093 (+0.0561) over the linear spine, i.e. fusion MUST beat linear's rank-coverage. fern #34: free-form aime cov4 0.7268 (+0.0736 vs linear -> BEATS, clears); aggregate cov4 0.5395 (-0.1136 vs linear -> MCQ-dragged below, misses). The linear->fusion coverage advantage IS present on free-form text but NOT on the MCQ-heavy aggregate.",
+      "verdict": "MARGINAL",
+      "what_flips_the_verdict": "ONE measurement: run the wirbel #79 RANKPROBE_W=4 probe on the fern #34 fusion head over the OFFICIAL 128 ShareGPT eval prompts (NOT the reasoning holdout it was evaluated on), native on-path. Its unconditional top-4 there flips MARGINAL -> GO (>= 0.9213) / NO-GO (< 0.9213). Zero served-file change, single GPU, greedy/PPL untouched -- same read-only scratch-probe lawine #313 pre-registered."
+    },
+    "test_metrics": {
+      "coverage_bar_achievability_self_test_passes": true,
+      "fusion_max_frac_beyond_top4_estimate": 0.3659,
+      "verdict": "MARGINAL"
+    }
+  },
+  "wandb_run_id": "ceddxj20"
+}
