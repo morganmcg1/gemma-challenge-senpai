@@ -1,0 +1,263 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260615T005859Z",
+  "kind": "verify-accept-epilogue-capture-screen",
+  "nan_clean": true,
+  "peak_mem_mib": 34.637,
+  "pr": 265,
+  "synthesis": {
+    "accounting": {
+      "actual_tps": 481.53,
+      "counterfactual_tps_hi": 509.113,
+      "counterfactual_tps_lo": 492.858,
+      "counterfactual_tps_mid": 500.0,
+      "draft_side_complement_261": {
+        "draft_eager_us_step": 0.0,
+        "draft_n_launches_counterfactual": 14,
+        "note": "#261 (egaz6m2f) closed the DRAFT side at 0 (captured in ONEGRAPH); this screen closes the VERIFY side (eager => non-zero ceiling)."
+      },
+      "eager_launch_count_step": 9,
+      "eager_launch_count_step_hi": 11,
+      "eager_launch_count_step_lo": 7,
+      "eager_launch_us_step_hi": 66.0,
+      "eager_launch_us_step_lo": 28.0,
+      "eager_launch_us_step_mid": 45.0,
+      "epilogue_launch_breakdown": {
+        "accept": 1,
+        "relocate_seed_lo_mid_hi": [
+          0,
+          2,
+          4
+        ],
+        "sampler": 6,
+        "verify_forward_excluded_compute_bound": true
+      },
+      "gap_decomposition": {
+        "epilogue_eager_us_hi": 66.0,
+        "epilogue_eager_us_lo": 28.0,
+        "epilogue_eager_us_mid": 45.0,
+        "epilogue_pct_of_gap_hi": 49.55,
+        "epilogue_pct_of_gap_lo": 21.02,
+        "epilogue_pct_of_gap_mid": 33.78,
+        "remainder_to_denken_257": "the rest of the 133.2us gap = verify-forward compute-bound launches (hidden) + CPU/Python gaps; denken #257's roofline (cpu_ms vs gpu_ms) apportions the exposed fraction (lambda)",
+        "served_minus_built_us": 133.2
+      },
+      "k_cal": 125.268,
+      "per_launch_us_hi": 6.0,
+      "per_launch_us_lo": 4.0,
+      "per_launch_us_mid": 5.0,
+      "projected_tps_gain_pct": 3.8357,
+      "projected_tps_gain_pct_hi": 5.7282,
+      "projected_tps_gain_pct_lo": 2.3525,
+      "served_tps": 481.53,
+      "step_us_built": 1085.0,
+      "step_us_served": 1218.2
+    },
+    "audit": {
+      "accept_eager": true,
+      "accept_kernel_inside_captured_drafter_loop": false,
+      "draft_argmax_embed_separately_launched": false,
+      "draft_captured": true,
+      "has_capture_graph": true,
+      "has_graph_replay": true,
+      "has_propose_onegraph": true,
+      "has_run_graph_body": true,
+      "k_spec": 7,
+      "manifest_flags": {
+        "DIXIE_FUSED_ACCEPT_PREP": "1",
+        "DIXIE_SLIM_GREEDY": "1",
+        "FUSED_SPARSE_ARGMAX": "1",
+        "LM_HEAD_PRUNE": "1",
+        "LOOPGRAPH_REQUIRE_CAPTURE": "1",
+        "ONEGRAPH": "1",
+        "OVERRIDE_GENERATION_CONFIG": "{\"temperature\":0.0,\"top_p\":1.0,\"top_k\":0}",
+        "SPECULATIVE_CONFIG": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7}",
+        "SPLITKV_VERIFY": "1"
+      },
+      "manifest_path": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan/manifest.json",
+      "onegraph_on": true,
+      "pck04_path": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan/serve_patch_pck04.py",
+      "pck04_says_main_runner_eager": true,
+      "relocate_eager": true,
+      "require_capture": true,
+      "sampler_argmax_eager": true,
+      "serve_has_speculative_config": true,
+      "serve_no_compilation_config": true,
+      "serve_no_enforce_eager": true,
+      "serve_path": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan/serve.py",
+      "sitecustomize_path": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan/sitecustomize.py",
+      "spec_method": "mtp",
+      "stages": [
+        {
+          "captured": true,
+          "eager": false,
+          "evidence": "sitecustomize.py: propose_onegraph + _run_graph_body recorded by _capture_graph(with torch.cuda.graph(graph)) -> ONE CUDAGraph, served by graph.replay(); manifest ONEGRAPH=1, LOOPGRAPH_REQUIRE_CAPTURE=1 (== #261 egaz6m2f draft_argmax_embed_separately_launched=False)",
+          "recoverable_launches": 0,
+          "stage": "(a) draft K=7 tail (embed gather + argmax x7)"
+        },
+        {
+          "captured": false,
+          "compute_bound": true,
+          "eager": true,
+          "evidence": "serve_patch_pck04.py: 'the main model runner runs execute_model eagerly' + 'Verified: ... outside any torch.cuda.graph() capture block'; serve.py main(): no --enforce-eager / --compilation-config, --speculative-config present (spec-decode target runs eager). COMPUTE-BOUND: splitkv_verify verify-attention 12-53us real compute => launches hide behind compute, EXPOSED launch-tax ~= 0 (EXCLUDED from recoverable count)",
+          "recoverable_launches": 0,
+          "stage": "(b) M=8 verify forward (target attn + lm_head)"
+        },
+        {
+          "captured": false,
+          "eager": true,
+          "evidence": "serve.py DIXIE_SMP02_FWD patches RejectionSampler.forward: logits.argmax(dim=-1) + 2 index gathers + 2 contiguous + torch.full -- eager Python AFTER the forward (sampler never in the model cudagraph in vLLM v1)",
+          "recoverable_launches": 6,
+          "stage": "(c) greedy sampler (argmax over target logits)"
+        },
+        {
+          "captured": false,
+          "eager": true,
+          "evidence": "serve.py rejection_greedy_sample_kernel / sitecustomize _dixie_fused_accept_prep_kernel (Triton) inside the same eager RejectionSampler.forward; NOT inside captured _run_graph_body",
+          "recoverable_launches": 1,
+          "stage": "(d) accept-length (compare + stop-at-first-mismatch)"
+        },
+        {
+          "captured": false,
+          "eager": true,
+          "evidence": "sitecustomize.py prepare_next_token_ids_padded (DIXIE cache-pop, ~0 GPU) + execute_model next-step input/positions/slot_mapping prep (eager runner bookkeeping)",
+          "recoverable_launches": 2,
+          "stage": "(e) KV-relocate + next-step seed"
+        }
+      ],
+      "submission": "fa2sw_precache_kenyan",
+      "verify_accept_epilogue_captured": false,
+      "verify_accept_epilogue_separately_launched": true,
+      "verify_forward_compute_bound": true,
+      "verify_forward_eager": true,
+      "vllm_version": "0.22.1rc1.dev307+g3e8afdf78"
+    },
+    "composition": {
+      "k_cal": 125.268,
+      "k_spec": 7,
+      "per_launch_us_band": [
+        4.0,
+        6.0
+      ],
+      "served_tps": 481.53,
+      "step_us_built": 1085.0,
+      "step_us_served": 1218.2
+    },
+    "handoff": "the verify+sampler+accept+KV-relocate epilogue is EAGER (verify_accept_epilogue_separately_launched=True) -- the eager complement of #261's captured draft side -- leaving ~45us of recoverable per-step epilogue launch-tax (band 28-66us, ~3.84% / +18.5 TPS off 481.53 -> 500.0, a lambda=1 CEILING; the verify FORWARD is eager-but-compute-bound so its launches are EXCLUDED), so the step's launch-overhead axis is NOT fully closed by #261 -- there is a verify-side capture lever worth <= the ceiling; denken #257's roofline apportions the exposed (realizable) fraction.",
+    "headline": {
+      "accept_eager": true,
+      "actual_tps": 481.53,
+      "baseline_tps": 481.53,
+      "capture_greedy_safe": true,
+      "counterfactual_tps_band": [
+        492.9,
+        509.1
+      ],
+      "counterfactual_tps_mid": 500.0,
+      "draft_argmax_embed_separately_launched": false,
+      "eager_launch_count_step": 9,
+      "eager_launch_us_step_band": [
+        28.0,
+        66.0
+      ],
+      "eager_launch_us_step_mid": 45.0,
+      "k_spec": 7,
+      "lambda1_ceiling_tps": 520.95,
+      "lever_class": "VERIFY-SIDE LAUNCH LEVER (eager epilogue, ceiling-bounded)",
+      "projected_tps_gain_pct": 3.8357,
+      "projected_tps_gain_pct_band": [
+        2.35,
+        5.73
+      ],
+      "relocate_eager": true,
+      "sampler_argmax_eager": true,
+      "screen_verdict": "LEVER-EXISTS-CEILING-BOUNDED",
+      "verify_accept_epilogue_captured": false,
+      "verify_accept_epilogue_separately_launched": true,
+      "verify_forward_compute_bound": true,
+      "verify_forward_eager": true
+    },
+    "nonoverlap": {
+      "denken257_built_step_roofline_this_feeds_it_the_eager_slack_number": true,
+      "fern262_shallow_tree_ubel263_private_rank_are_ET_topology_side": true,
+      "kanna264_is_draft_head_vocab_GEMV_cost_not_launch": true,
+      "land245_owns_any_live_build": true,
+      "pr255_is_verify_d2h_MATERIALIZATION_memory_axis_this_is_LAUNCH_capture": true,
+      "pr261_draft_side_is_the_direct_complement_closed_at_0": true
+    },
+    "safety": {
+      "available": true,
+      "capture_greedy_safe": true,
+      "k_spec": 7,
+      "mismatch_accept_len": 0,
+      "mismatch_argmax": 0,
+      "mismatch_tie_lowest_index": 0,
+      "n_draws": 2000,
+      "note": "cudagraph replay re-runs identical kernels with identical inputs => bit-identical; verify argmax + accept-length are deterministic index/compare ops (no float reduction reorder) => capture is latency-only, token-identical / PPL-invariant.",
+      "vocab": 262144
+    },
+    "self_test": {
+      "conditions": {
+        "a_stage_tags_sourced_from_served_files": true,
+        "b_draft_side_261_reconfirmed": true,
+        "c_launch_tax_roundtrip": true,
+        "d_projected_gain_maps_through_composition": true,
+        "e_nan_clean": true,
+        "f_baseline_and_ceiling_unchanged": true,
+        "g_capture_greedy_safe": true
+      },
+      "detail": {
+        "files_present": true,
+        "safety_mismatches": [
+          0,
+          0,
+          0
+        ],
+        "safety_n_draws": 2000
+      },
+      "verify_accept_epilogue_capture_self_test_passes": true
+    },
+    "verdict": "VERIFY-ACCEPT-EPILOGUE-EAGER-CAPTURE-LEVER-EXISTS-CEILING-BOUNDED",
+    "verdict_table": [
+      {
+        "capture_greedy_safe": true,
+        "clears_500": false,
+        "clears_520_95": false,
+        "eager_launch_count": 7,
+        "eager_launch_us": 28.0,
+        "implied_gain_pct": 2.3525,
+        "implied_tps": 492.858,
+        "per_launch_us": 4.0,
+        "scenario": "CEILING lo (count=7 x 4us) -- lambda=1, all epilogue tax exposed",
+        "step_reduction_pct_built": 2.5806,
+        "step_reduction_pct_served": 2.2985
+      },
+      {
+        "capture_greedy_safe": true,
+        "clears_500": false,
+        "clears_520_95": false,
+        "eager_launch_count": 9,
+        "eager_launch_us": 45.0,
+        "implied_gain_pct": 3.8357,
+        "implied_tps": 500.0,
+        "per_launch_us": 5.0,
+        "scenario": "CEILING mid (count=9 x 5us) -- lambda=1 central",
+        "step_reduction_pct_built": 4.1475,
+        "step_reduction_pct_served": 3.694
+      },
+      {
+        "capture_greedy_safe": true,
+        "clears_500": true,
+        "clears_520_95": false,
+        "eager_launch_count": 11,
+        "eager_launch_us": 66.0,
+        "implied_gain_pct": 5.7282,
+        "implied_tps": 509.113,
+        "per_launch_us": 6.0,
+        "scenario": "CEILING hi (count=11 x 6us) -- lambda=1, conservative upper",
+        "step_reduction_pct_built": 6.0829,
+        "step_reduction_pct_served": 5.4178
+      }
+    ]
+  }
+}
