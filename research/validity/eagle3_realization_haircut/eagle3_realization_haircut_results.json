@@ -1,0 +1,400 @@
+{
+  "agent": "stark",
+  "all_imports_match_source": true,
+  "analysis_only": true,
+  "caveats": {
+    "bridge_is_draft_side": "The denken #278 bridge (0.21471) is DRAFT-SIDE-SPECIFIC (kanna #286: verify-side bridge=1.0). It prices the batch=1 draft wall cost into the normalised step (the 4.82x/4.66x over-credit). It does NOT cover the fixed-overhead dilution that hit #298's verify-side step lever -- but that dilution is a DENOMINATOR effect and does not apply to an E[T] NUMERATOR raise.",
+    "realization_axis_only": "This card prices the WALL-REALISATION axis of the 586 projection (does a composed E[T] raise realise on the host-to-host wall). It takes the upstream numbers (E[T]=6.11 reachability, OOD private factor rho_priv_e3=0.9421) as GIVEN -- those are fern #310 / go-card #305 axes and OUT OF SCOPE here.",
+    "rho_modeled_not_measured": "rho_priv_e3=0.9421 is MODELED from the deployed linear spine's deep-position fidelity (lawine #300); a trained {2,21,39}-fusion EAGLE-3 draft may carry a different private tax. The realisation argument here is orthogonal to that modelling risk.",
+    "scope": "LOCAL CPU-only analytic robustness closer over banked MERGED constants. 0 TPS added; BASELINE 481.53 untouched; greedy/PPL untouched. NO GPU / vLLM / HF Job / submission / served-file change. Authorises NOTHING. NOT a launch.",
+    "verify_gemm_m_cliff": "The one un-modelled residual denominator risk is the verify-GEMM M-width tile cliff (flat M<=32, jump at M=33): a wider tree could push M past the cliff. This is bounded, separate from the bridge, and not a numerator dilution. The deployed M=8 convention stays sub-cliff."
+  },
+  "constants": {
+    "E_T_central": 6.1112149873699195,
+    "E_T_deployed": 3.844,
+    "K_cal": 125.268,
+    "K_cal_eagle3": 101.79332412387028,
+    "breakeven_rho_ood": 0.8037539966988988,
+    "bridge_draft": 0.2147122962556323,
+    "bridge_overcredit": 4.657395116344056,
+    "classification_298": "partial",
+    "composed_dpct_298": 1.287324774110809,
+    "eagle3_draft_norm_us": 113.0200055129188,
+    "eagle3_draft_wall_us": 1233.2343231724515,
+    "free_ceiling_realizes_on_wall_298": false,
+    "go305_private_402": 402.0,
+    "honest_public_622": 622.080888,
+    "margin_pct_310": 17.21532782926615,
+    "margin_tps_310": 86.07663914633076,
+    "new_step_us": 1202.7171244939168,
+    "official_baseline": 481.53,
+    "private_586": 586.0766391463308,
+    "private_factor_scalar": 0.804,
+    "private_verified": 460.85,
+    "provenance": "fern#310 (2u3kcnv5) private 586.08 / honest_public 622.08 / margin 86.08 (+17.2%) / rho_priv_e3 0.9421 / breakeven_rho_ood 0.8038 x wirbel#295 (c334qaqu) K_cal 125.268 / step_us 1218.2 / step_central 1499.13 / bridge_draft 0.21471 / step band [faithful 1315.74, additive 1682.52] x fern#305 (m4nmtdl9) scalar double-tax private 402.0 x stark#298 (xp974x58) step-side realization_ratio_487 0.4769 / free_ceiling_realizes False.",
+    "realized_dpct_298": 0.6139470280144962,
+    "rho_priv_e3": 0.9421228821714434,
+    "rr487_stepside": 0.47691696793341565,
+    "s3_wall_298": 454.05771252324206,
+    "step_additive_us": 1682.5238839335736,
+    "step_central_us": 1499.1305069702046,
+    "step_faithful_us": 1315.7371300068355,
+    "step_us": 1218.2
+  },
+  "created_at": "20260615T081939Z",
+  "deliverable1_decompose": {
+    "bridge_band_all_clear_500": true,
+    "bridge_band_private": {
+      "additive_1683": {
+        "clears_500": true,
+        "honest_public": 554.2747095058376,
+        "margin_tps": 22.19488683437919,
+        "private_tps": 522.1948868343792,
+        "step_us": 1682.5238839335736
+      },
+      "central_1499": {
+        "clears_500": true,
+        "honest_public": 622.080888,
+        "margin_tps": 86.07663914633076,
+        "private_tps": 586.0766391463308,
+        "step_us": 1499.1305069702046
+      },
+      "faithful_1316": {
+        "clears_500": true,
+        "honest_public": 708.7893286093326,
+        "margin_tps": 167.76664512178672,
+        "private_tps": 667.7666451217867,
+        "step_us": 1315.7371300068355
+      }
+    },
+    "bridge_discounted_draft_haircut_private_tps": 135.1558096854149,
+    "bridge_discounted_draft_haircut_public_tps": 143.45879103785512,
+    "bridge_draft": 0.2147122962556323,
+    "bridge_overcredit_x": 4.657395116344056,
+    "draft_norm_us_bridged": 113.0200055129188,
+    "draft_wall_delta_us": 1233.2343231724515,
+    "narrative": "586 = 481.53 x [E[T] numerator 1.5897] x [bridge-disc. draft 0.8127] x [OOD 0.9421]",
+    "public_numerator_only_deployed_step": 765.5396790378551,
+    "residual_unbridged_axis": "E[T] NUMERATOR (token-multiply); NOT a time-slice shrink",
+    "statement": "The bridge (denken #278, 0.21471, draft-side-specific) ALREADY discounts EAGLE-3's draft denominator INTO the 586: step 1218.2->1499 us removes 143.5 public TPS (135.2 private) before the OOD tax. The residual un-bridged part is the E[T] NUMERATOR raise. Across the banked bridge/step band [faithful 1316, central 1499, additive 1683 us] private = [667.8, 586.1, 522.2] -- ALL clear 500 (the most pessimistic banked draft-denominator corner still holds the bar).",
+    "step_haircut_factor_bridge_priced": 0.8126043692233473
+  },
+  "deliverable2_residual_breakeven": {
+    "below_stepside_4769": true,
+    "breakeven_rho_real_band": [
+      0.31263316069875624,
+      0.34995390182869685
+    ],
+    "breakeven_rho_real_conservative": 0.34995390182869685,
+    "convention_P_private_space": {
+      "anchor": "verified deployed private 460.85",
+      "breakeven_rho_real": 0.31263316069875624,
+      "formula": "460.85 + rho_real*(586.08-460.85) = 500",
+      "residual_raise_tps": 125.22663914633074
+    },
+    "convention_Q_public_space": {
+      "anchor": "deployed public 481.53, OOD tax after",
+      "breakeven_rho_real": 0.34995390182869685,
+      "formula": "(481.53 + rho_real*(622.08-481.53)) * 0.9421 = 500",
+      "residual_raise_tps": 140.550888
+    },
+    "statement": "The residual (un-bridged) E[T] raise needs to realise at only rho_real in [0.313 (private-space), 0.350 (public-space)] for 586 to hold the 500 bar -- BELOW stark #298's step-side 0.4769 and FAR below the ~1.0 a numerator raise actually realises. 586 breaches 500 only if the E[T] raise realises worse than ~35%."
+  },
+  "deliverable3_stepside_vs_etside": {
+    "double_pessimistic_additive_and_4769": 490.1064174272706,
+    "double_pessimistic_note": "additive-step (max draft denominator) AND a 47.7% numerator haircut TOGETHER give 490.1 (<500). This double-charges the draft (bridge already prices it) and mis-applies a denominator ratio to a numerator -- it is the unphysical worst-of-both corner, not the model.",
+    "etside_expected_realization": "~1.0 (numerator), denominator already bridged",
+    "literal_4769_applied_private_space": 520.5727090461601,
+    "literal_4769_applied_public_space": 516.8119677308296,
+    "private_tps_at_worstcase_realization": 516.8119677308296,
+    "statement": "Applying stark #298's literal step-side 0.4769 to the residual E[T] raise: 586 -> 520.6 (private-space) / 516.8 (public-space) -- BOTH clear 500. The 586 headline SURVIVES even the wrong, harsher 47.7% reference. The correct E[T]-side realisation is ~100% (numerator) with the draft denominator already bridged, so the real margin is far larger.",
+    "survives_4769_both": true,
+    "survives_4769_private_space": true,
+    "survives_4769_public_space": true,
+    "why_4769_is_wrong_reference": "47.7% is a STEP-SIDE / DENOMINATOR realisation ratio: a kernel-us saving is diluted by the large FIXED serving overhead that does NOT shrink (TPS=tokens/(kernel+fixed)). An E[T]-SIDE raise is a NUMERATOR multiply (TPS=E[T]/T_macrostep): the fixed overhead is AMORTISED over more tokens, not dragged through a shrinking slice, so it does NOT dilute the gain. The E[T] numerator realises at ~100%; EAGLE-3's only denominator cost (heavier draft) is already bridge-priced into step_central. Hence 47.7% over-states the E[T]-side haircut."
+  },
+  "deliverable4_headroom": {
+    "absorbable_total_haircut_frac": 0.1468692546280441,
+    "headroom_pct_over_500_bar": 17.21532782926615,
+    "headroom_tps": 86.07663914633076,
+    "ood_breakeven_rho_cross_ref": 0.8037539966988988,
+    "overall_realization_floor_on_full_586": 0.8531307453719559,
+    "statement": "Headroom 586.08 - 500 = 86.1 TPS (+17.2% over the bar). The full projection can absorb a 14.7% haircut on its value (overall realised/composed floor 0.8531) before breaching 500. Separately, on the OOD axis the projection breaks even if the private factor falls from 0.9421 to 0.8038 (banked fern #310). The realisation axis is far safer: the residual E[T] raise need only realise at ~31-35%."
+  },
+  "import_verification": [
+    {
+      "abs_err": 0.0,
+      "cited": 586.0766391463308,
+      "matches_source": true,
+      "name": "private_586",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/private_tps_at_611_perposition",
+      "source_value": 586.0766391463308
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 622.080888,
+      "matches_source": true,
+      "name": "honest_public_622",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/reconcile_honest_single_tax/honest_public_at_611",
+      "source_value": 622.080888
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 86.07663914633076,
+      "matches_source": true,
+      "name": "margin_tps_310",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/reconcile_honest_single_tax/perposition_margin_tps",
+      "source_value": 86.07663914633076
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 17.21532782926615,
+      "matches_source": true,
+      "name": "margin_pct_310",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/reconcile_honest_single_tax/perposition_margin_pct",
+      "source_value": 17.21532782926615
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.8037539966988988,
+      "matches_source": true,
+      "name": "breakeven_rho_ood",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/reconcile_honest_single_tax/breakeven_rho",
+      "source_value": 0.8037539966988988
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.9421228821714434,
+      "matches_source": true,
+      "name": "rho_priv_e3",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/rho_priv_e3",
+      "source_value": 0.9421228821714434
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 125.268,
+      "matches_source": true,
+      "name": "K_cal",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/K_cal",
+      "source_value": 125.268
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 101.79332412387028,
+      "matches_source": true,
+      "name": "K_cal_eagle3",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/K_cal_eagle3",
+      "source_value": 101.79332412387028
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1218.2,
+      "matches_source": true,
+      "name": "step_us",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/step_us",
+      "source_value": 1218.2
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1499.1305069702046,
+      "matches_source": true,
+      "name": "step_central_us",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/step_central_us",
+      "source_value": 1499.1305069702046
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 6.1112149873699195,
+      "matches_source": true,
+      "name": "E_T_central",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/E_T_central",
+      "source_value": 6.1112149873699195
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 3.844,
+      "matches_source": true,
+      "name": "E_T_deployed",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/E_T_deployed",
+      "source_value": 3.844
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 481.53,
+      "matches_source": true,
+      "name": "official_baseline",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/official_baseline",
+      "source_value": 481.53
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 460.85,
+      "matches_source": true,
+      "name": "private_verified",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/private_verified",
+      "source_value": 460.85
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.804,
+      "matches_source": true,
+      "name": "private_factor_scalar",
+      "source": "research/validity/eagle3_private_perposition_reconcile/eagle3_private_perposition_reconcile_results.json#/constants/private_factor",
+      "source_value": 0.804
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.2147122962556323,
+      "matches_source": true,
+      "name": "bridge_draft",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/bridge_draft",
+      "source_value": 0.2147122962556323
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1202.7171244939168,
+      "matches_source": true,
+      "name": "new_step_us",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/new_step_us",
+      "source_value": 1202.7171244939168
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1315.7371300068355,
+      "matches_source": true,
+      "name": "step_faithful_us",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/collapse_faithful/eagle3_step_measured_us",
+      "source_value": 1315.7371300068355
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1682.5238839335736,
+      "matches_source": true,
+      "name": "step_additive_us",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/collapse_additive/eagle3_step_measured_us",
+      "source_value": 1682.5238839335736
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1233.2343231724515,
+      "matches_source": true,
+      "name": "eagle3_draft_wall_us",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/collapse_faithful/eagle3_draft_wall_us",
+      "source_value": 1233.2343231724515
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 113.0200055129188,
+      "matches_source": true,
+      "name": "eagle3_draft_norm_us",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/collapse_faithful/eagle3_draft_norm_us",
+      "source_value": 113.0200055129188
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.47691696793341565,
+      "matches_source": true,
+      "name": "rr487_stepside",
+      "source": "research/validity/free_ceiling_wallclock_realize/ab_out/results.json#/aggregate/realization_ratio_487",
+      "source_value": 0.47691696793341565
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1.287324774110809,
+      "matches_source": true,
+      "name": "composed_dpct_298",
+      "source": "research/validity/free_ceiling_wallclock_realize/ab_out/results.json#/aggregate/composed_delta_pct",
+      "source_value": 1.287324774110809
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.6139470280144962,
+      "matches_source": true,
+      "name": "realized_dpct_298",
+      "source": "research/validity/free_ceiling_wallclock_realize/ab_out/results.json#/aggregate/realized_delta_pct_wall",
+      "source_value": 0.6139470280144962
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 454.05771252324206,
+      "matches_source": true,
+      "name": "s3_wall_298",
+      "source": "research/validity/free_ceiling_wallclock_realize/ab_out/results.json#/aggregate/s3_pooled_p50_wall_tps",
+      "source_value": 454.05771252324206
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 402.0,
+      "matches_source": true,
+      "name": "go305_private_402",
+      "source": "research/validity/eagle3_go_card/eagle3_go_card_results.json#/deterministic_card/private_at_central_tps",
+      "source_value": 402.0
+    }
+  ],
+  "kind": "eagle3_realization_haircut",
+  "nan_clean": true,
+  "peak_mem_mib": 16.617,
+  "pr": 321,
+  "primary_metric_name": "realization_haircut_survives_self_test_passes",
+  "private_tps_at_worstcase_realization": 516.8119677308296,
+  "provenance": "fern#310 (2u3kcnv5) private 586.08 / honest_public 622.08 / margin 86.08 (+17.2%) / rho_priv_e3 0.9421 / breakeven_rho_ood 0.8038 x wirbel#295 (c334qaqu) K_cal 125.268 / step_us 1218.2 / step_central 1499.13 / bridge_draft 0.21471 / step band [faithful 1315.74, additive 1682.52] x fern#305 (m4nmtdl9) scalar double-tax private 402.0 x stark#298 (xp974x58) step-side realization_ratio_487 0.4769 / free_ceiling_realizes False.",
+  "realization_haircut_survives_self_test_passes": true,
+  "reproduce": {
+    "honest_public_611": 622.080888,
+    "private_586_reproduced": 586.0766391463308,
+    "public_numerator_only_deployed_step": 765.5396790378551,
+    "reproduces_586": true,
+    "resid_honest_public": 0.0,
+    "resid_private_586": 0.0
+  },
+  "self_test": {
+    "card_valid": true,
+    "conditions": {
+      "01_imports_match_source": {
+        "max_abs_err": 0.0,
+        "mismatches": [],
+        "pass": true
+      },
+      "02_reproduces_586": {
+        "pass": true,
+        "resid_honest_public": 0.0,
+        "resid_private_586": 0.0
+      },
+      "03_bridge_haircut_signed": {
+        "haircut_public_tps": 143.45879103785512,
+        "pass": true
+      },
+      "04_residual_breakeven_below_stepside": {
+        "breakeven_rho_real_conservative": 0.34995390182869685,
+        "pass": true,
+        "stepside_4769": 0.47691696793341565
+      },
+      "05_survives_literal_4769_both": {
+        "pass": true,
+        "private_space": 520.5727090461601,
+        "public_space": 516.8119677308296
+      },
+      "06_bridge_band_all_clear": {
+        "additive_private": 522.1948868343792,
+        "pass": true
+      },
+      "07_headroom_matches_310": {
+        "headroom_tps": 86.07663914633076,
+        "pass": true
+      },
+      "08_nan_clean": {
+        "nan_paths": [],
+        "pass": true
+      },
+      "09_caveats_carried": {
+        "pass": true
+      }
+    },
+    "headline_survives_4769": true,
+    "realization_haircut_survives_self_test_passes": true
+  },
+  "test_metric_names": [
+    "private_tps_at_worstcase_realization"
+  ],
+  "wandb_run_id": "cyg2u3s2"
+}
