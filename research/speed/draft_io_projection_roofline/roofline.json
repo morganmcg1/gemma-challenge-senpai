@@ -1,0 +1,205 @@
+{
+  "config": {
+    "drafter_dir": "/tmp/qat-assistant",
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "iters": 400,
+    "warmup": 80,
+    "k": 7,
+    "A10G_HBM_GBS": 600.0,
+    "io_anchor_tol_pct": 0.25,
+    "bw_roundtrip_tol_pct": 0.2,
+    "component_sum_tol_pct": 0.25,
+    "overhead_material_ratio": 1.15,
+    "note": "isolated CUDA-graph M=1 micro-profiling of the real bf16 draft io_projection (kanna #264 bucket: pre_projection [256,5120] + post_projection [2560,256], the residual-stream in/out GEMVs -- NOT q/k/v/o) vs its HBM-bandwidth roofline; large embed_tokens GEMV as the empirical BW anchor. No serve change, no HF Job, no submission. Greedy+PPL pinned (nothing edited)."
+  },
+  "components": [
+    {
+      "component": "pre_projection_GEMV",
+      "us": 8.675839900970459,
+      "pct_of_io": 61.775429193975604,
+      "roofline_us": 4.369066666666667,
+      "overhead_ratio": 1.9857421648339368,
+      "bw_util": 0.5035900519761728
+    },
+    {
+      "component": "post_projection_GEMV",
+      "us": 5.575680136680603,
+      "pct_of_io": 39.70105919695919,
+      "roofline_us": 2.1845333333333334,
+      "overhead_ratio": 2.5523438125674147,
+      "bw_util": 0.39179674582872726
+    },
+    {
+      "component": "per_kernel_launch_floor",
+      "us": 1.8347685832289324,
+      "pct_of_io": 26.1285634576801,
+      "roofline_us": 0.0,
+      "overhead_ratio": Infinity,
+      "bw_util": 0.0
+    }
+  ],
+  "tiny_sweep": {
+    "n": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "us": [
+      4.989440143108368,
+      4.843519926071167,
+      8.49407970905304,
+      15.75935959815979,
+      30.67647933959961,
+      60.70784091949463
+    ],
+    "per_kernel_us": 1.8347685832289324,
+    "graph_base_us": 1.6467164820106426
+  },
+  "verdict": {
+    "draft_io_projection_roofline_self_test_passes": true,
+    "projected_tps_gain_pct": 0.0,
+    "slack_material": true,
+    "recoverable_material": false,
+    "io_projection_fusion_greedy_safe": true,
+    "io_projection_measured_us": 14.044159650802612,
+    "io_projection_roofline_us": 6.5536,
+    "io_overhead_ratio": 2.142968696716707,
+    "io_bw_utilization": 0.46664237397966823,
+    "io_effective_bw_gbs": 279.98542438780095,
+    "m1_under_saturates_hbm": true,
+    "intrinsic_m1_floor_us": 14.044159650802612,
+    "roofline_unreachable_at_m1": true,
+    "us_pre_projection": 8.675839900970459,
+    "us_post_projection": 5.575680136680603,
+    "pre_overhead_ratio": 1.9857421648339368,
+    "post_overhead_ratio": 2.5523438125674147,
+    "pre_bw_utilization": 0.5035900519761728,
+    "post_bw_utilization": 0.39179674582872726,
+    "pre_roofline_us": 4.369066666666667,
+    "post_roofline_us": 2.1845333333333334,
+    "io_projection_components": [
+      {
+        "name": "pre_projection",
+        "in": 5120,
+        "out": 256,
+        "shape": [
+          256,
+          5120
+        ],
+        "mib": 2.5,
+        "role": "backbone->draft input projection (run first, before layer 0)"
+      },
+      {
+        "name": "post_projection",
+        "in": 256,
+        "out": 2560,
+        "shape": [
+          2560,
+          256
+        ],
+        "mib": 1.25,
+        "role": "draft->backbone output projection (run last, after model.norm)"
+      }
+    ],
+    "draft_hidden": 256,
+    "backbone_hidden": 2560,
+    "draft_layers": 4,
+    "head_dim": 256,
+    "global_head_dim": 512,
+    "layer_types": [
+      "sliding_attention",
+      "sliding_attention",
+      "sliding_attention",
+      "full_attention"
+    ],
+    "is_qkvo": false,
+    "n_kernels_deployed": 2,
+    "io_weight_bytes": 3932160.0,
+    "io_weight_mib": 3.75,
+    "pre_weight_mib": 2.5,
+    "post_weight_mib": 1.25,
+    "io_activation_bytes": 16384.0,
+    "io_projection_roofline_us_with_act": 6.5809066666666665,
+    "per_kernel_launch_us": 1.8347685832289324,
+    "launch_total_us": 3.669537166457865,
+    "graph_base_us": 1.6467164820106426,
+    "io_anchor_us_264": 13.861546516418457,
+    "io_anchor_resid_pct": 1.3174080840680886,
+    "ref_large_gemv_mib": 128.0,
+    "ref_large_gemv_us": 276.40832901000977,
+    "ref_roofline_us": 223.69621333333333,
+    "ref_bw_gbs": 485.5777265494033,
+    "ref_bw_utilization": 0.8092962109156722,
+    "ref_resid_pct": 19.070378908432797,
+    "recoverable_io_us": 0.06,
+    "step_after_us": 1217.78,
+    "levers": [
+      {
+        "name": "L0_interkernel_scheduling",
+        "recoverable_io_us": 0.06,
+        "step_after_us": 1217.78,
+        "projected_tps": 481.696074824681,
+        "projected_tps_gain_pct": 0.034488988158787315,
+        "greedy_safe": true,
+        "lossless": true,
+        "reachable": true,
+        "note": "erase the ~60ns/node GPU-side scheduling between the pre and post launches. Does NOT touch either GEMV body (both intrinsic-M=1). Sub-0.1us -> immaterial. The two GEMVs are non-adjacent (opposite ends of the stack) so they cannot be fused into one."
+      },
+      {
+        "name": "L_bandwidth_roofline_UNREACHABLE",
+        "recoverable_io_us": 7.490559650802612,
+        "step_after_us": 1165.7660824443817,
+        "projected_tps": 503.1882938042044,
+        "projected_tps_gain_pct": 4.497807780243068,
+        "greedy_safe": true,
+        "lossless": true,
+        "reachable": false,
+        "note": "the analytic 600 GB/s floor; PHYSICALLY UNREACHABLE at M=1 (single-warp GEMV under-saturates HBM, ~31-81% of peak, Chen 2605.30571). Needs M>=16 BATCHING, not kernel surgery -> NOT a fusion lever, a different (tree/verify-shape) axis."
+      }
+    ],
+    "composition_overcredit_caveat": "any projected_tps_gain_pct is a COMPOSITION projection (cheaper draft step -> TPS via official=K_cal*(E[T]/step)*tau), NOT a measured wall-clock gain: the model-forward (~1.2182ms step) is a fraction of the ~8ms conc=1 wall step, so the composition may OVER-CREDIT draft-step cuts. CONTINGENT on stark #273's warm wall-clock verdict. Moot here: recoverable=0 -> projected gain 0.0%.",
+    "io_share_of_chain_pct": 14.330744078037963,
+    "decomp_covered_us": 93.27445228894551,
+    "decomp_covered_pct": 95.17780614916674,
+    "mlp_us_264": 50.71189244588216,
+    "attn_us_264": 28.518400192260742,
+    "head_proj_us_264": 4.9083733558654785,
+    "gemv_chain_us_264": 98.00021251042683,
+    "fp_reassociation_flag": "N/A for io_projection: the term is two NON-ADJACENT pure-linear GEMVs (pre at the start, post at the end of the pass), so there is no in-term fusion that reassociates a bf16 reduction order. (Contrast the MLP, where a split-K megakernel WOULD reassociate the down reduction -- not bit-identical, cf. lawine #246 -- and must be E[T]/PPL re-verified.) Any future adjacent-op fold (e.g. an RMSNorm into a GEMV epilogue/prologue) is elementwise on the post-reduction registers -> lossless -> E[T]+PPL unchanged, still propose-only safe.",
+    "greedy_identical_by_construction": true,
+    "ppl_pinned": 2.3772,
+    "ppl_ok": true,
+    "nan_clean": true,
+    "peak_vram_gib": 0.34939002990722656,
+    "vram_ok": true,
+    "frontier_tps": 481.53,
+    "lambda1_ceiling_tps": 520.95,
+    "k_cal": 125.268,
+    "step_us": 1218.2,
+    "k_deployed": 7,
+    "draft_share_of_step": 0.58,
+    "et_deployed": 3.3,
+    "bf16_anchor_us_254": 101.2,
+    "verdict_line": "INTRINSIC-M=1, NULL: the draft io_projection measures 14.0us at M=1 (pre 8.7us + post 5.6us) vs a 6.6us bandwidth floor -> overhead ratio 2.14x, but that is only 47% of peak HBM BW -- a single-warp M=1 GEMV UNDER-SATURATES HBM (Chen 2605.30571), so the gap is the INTRINSIC-M=1 memory-latency penalty, NOT recoverable slack (the large 128 MiB reference GEMV hits 81% of peak, IS bandwidth-bound, anchoring the model). UNLIKE the MLP (whose +4.4% came from its SEPARATE GeluAndMul companion kernel), io_projection is 2 PURE GEMVs at opposite ends of the stack with NO companion to fold and NO fuseable pair -> recoverable ~= 0 -> projected_tps_gain_pct = 0.00% off 481.53. Completes the draft decomposition: MLP+attn+io = 93.3us = 95% of the 98us GEMV chain, all intrinsic-M=1.",
+    "self_test_conditions": {
+      "a_io_anchor": true,
+      "b_bw_roundtrip": true,
+      "c_component_sum": true,
+      "d_composition": true,
+      "e_nan_clean": true,
+      "f_constants_unchanged": true
+    },
+    "handoff_line": "the draft io_projection is 14.0us (14% of the 101.2us/pass; pre 8.7us + post 5.6us), at 47% peak HBM BW so INTRINSIC-M=1 like the MLP GEMVs (the 128 MiB reference GEMV hits 81% = bandwidth-bound, anchoring the 600 GB/s model), meaning a greedy-safe fusion/launch-erasure does NOT net any TPS off 481.53 (it is 2 pure GEMVs at opposite ends of the stack with NO separable companion kernel -- unlike the MLP's GeluAndMul -- and the two cannot be fused), completing the draft decomposition (MLP+attn+io = 93.3us = 95% of the 98us GEMV chain) so the bf16 draft floor is ALL intrinsic-M=1 and the only draft lever is fewer passes (adaptive-K, ONEGRAPH-blocked) or M>=16 batching -- NOT cheaper draft passes. Hand-offs: wirbel #270 (attention, the OTHER GEMV term; together we complete the pass), denken #271 (g_d/overhead), fern #274 (portfolio: io_projection contributes 0 to the step budget), stark #273 (the wall-clock arbiter -- moot here, gain is 0).",
+    "chain_captured": {
+      "io_chain": true,
+      "pre": true,
+      "post": true,
+      "ref_large_gemv": true
+    }
+  }
+}
