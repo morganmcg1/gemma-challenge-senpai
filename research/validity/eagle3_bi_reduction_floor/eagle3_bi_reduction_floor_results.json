@@ -1,0 +1,163 @@
+{
+  "agent": "denken",
+  "created_at": "20260615T084551Z",
+  "kind": "eagle3-bi-reduction-floor",
+  "nan_clean": true,
+  "peak_mem_mib": 12.09,
+  "pr": 327,
+  "self_test": {
+    "bi_reduction_floor_self_test_passes": true,
+    "checks": {
+      "a_int4_mlp_excluded": true,
+      "a_lmhead_share_is_0p024": true,
+      "a_locus_is_lmhead_sdpa_norms": true,
+      "a_mlp_share_is_0p661": true,
+      "a_partition_exhaustive": true,
+      "a_pct_vs_us_consistent": true,
+      "a_penalty_is_measured_bwgap": true,
+      "a_sdpa_share_is_0p145": true,
+      "b_floor_roundtrips_via_exposed": true,
+      "b_penalty_monotone_in_one_minus_bwutil": true,
+      "b_sdpa_pricier_than_lmhead": true,
+      "c_floor_below_216_offtheshelf": true,
+      "c_floor_below_31p41": true,
+      "c_floor_nonneg": true,
+      "d_budget_frac_consistent": true,
+      "d_budget_imported_exact": true,
+      "e_ceiling_at_floor_below_500": true,
+      "e_ceiling_roundtrips_520p95": true,
+      "f_dead_iff_floor_gt_budget": true,
+      "f_outcome_consistent_with_floor": true,
+      "f_partition_exhaustive_grid": true,
+      "g_nan_clean": true,
+      "h_carries_caveats": true,
+      "h_constants_exact": true
+    }
+  },
+  "synthesis": {
+    "context": {
+      "E_T_built_611": 6.1112149873699195,
+      "K_cal": 125.268,
+      "m8_divergence_pct_232": 0.73,
+      "official_tps": 481.53,
+      "step_us": 1218.2,
+      "target_tps": 500.0,
+      "tau": 1.218,
+      "verify_gemm_cost_share_of_step_216": 0.606620584396473
+    },
+    "handoff_line": "the hand-written batch-invariant bf16 lm_head+attn reduction floor is 9.84% of step (vs the lambda=1 budget 7.33%), so the strict-compliant identity lane is dead -- the binding term is the bf16 SDPA @ 34.9% BW, whose above-roofline forgone-parallelism slack (9.45% of step) ALONE exceeds the entire budget. This bridges wirbel #326's config-only measurement from below (first-principles LOWER bracket) and re-scopes wirbel #216's mis-derived 0.95% int4-split-K floor UP by ~10.4x to the correct bf16 lm_head+attn locus. It feeds fern #325's joint envelope the identity-half step-inflation input (compliant ceiling 470 TPS at the floor). Dominant uncertainty: the BW-gap floor charges the FULL forgone slack; an ideal kernel recovering > 25% of the SDPA split-KV parallelism on non-reduction axes would flip the verdict to alive-needs-kernel. 0 TPS; analytic over banked numbers; BASELINE 481.53 unchanged; the custom kernel is UNBUILT + human-approval-gated. NOT a launch. NOT a build. NOT a served-file change.",
+    "step1_partition": {
+      "bf16_locus_components": [
+        "sdpa",
+        "lm_head",
+        "io_residual"
+      ],
+      "bf16_locus_step_share": 0.17160983026169516,
+      "component_bw_util": {
+        "down_proj": 0.6647319780770861,
+        "gate_up_proj": 0.7120976097656768,
+        "io_residual": null,
+        "lm_head": 0.8344417980018903,
+        "o_proj": 0.4550995466487282,
+        "qkv_proj": 0.46965007082810634,
+        "sdpa": 0.34883864849061247
+      },
+      "component_shares": {
+        "down_proj": 0.23091147361827064,
+        "gate_up_proj": 0.43044125842194997,
+        "io_residual": 0.002887403420832101,
+        "lm_head": 0.02358516890006141,
+        "o_proj": 0.06828545607119352,
+        "qkv_proj": 0.09875198162689074,
+        "sdpa": 0.14513725794080165
+      },
+      "exposed_eq_bwgap_max_resid": 0.0,
+      "int4_body_components": [
+        "gate_up_proj",
+        "down_proj",
+        "qkv_proj",
+        "o_proj"
+      ],
+      "int4_body_step_share": 0.8283901697383048,
+      "int4_mlp_excluded": true,
+      "mlp_step_share": 0.6613527320402206,
+      "partition_exhaustive": true,
+      "pct_vs_us_max_resid": 5.551115123125783e-17,
+      "source_card": "denken #291 verify_compute_hideability (measured M=8 verify, A10G)",
+      "total_verify_us": 5348.1268310546875
+    },
+    "step2_penalty_model": {
+      "floor_a_lm_head_only": 0.003904718156915901,
+      "floor_b_sdpa_only": 0.09450777303509898,
+      "floor_combined": 0.09841249119201488,
+      "floor_norms_io_residual": 0.0,
+      "floor_roundtrip_resid": 0.0,
+      "floor_via_exposed_us": 0.09841249119201488,
+      "model": "pi(u) = 1 - BW_util  (above-roofline exposed slack = forgone reduction parallelism); floor_component = step_share * pi(u) = measured exposed_us / total_us",
+      "monotone_in_one_minus_bwutil": true,
+      "per_component": [
+        {
+          "bw_util": 0.34883864849061247,
+          "component": "sdpa",
+          "floor_contribution": 0.09450777303509898,
+          "is_norms": false,
+          "penalty_pi": 0.6511613515093875,
+          "step_share": 0.14513725794080165
+        },
+        {
+          "bw_util": 0.8344417980018903,
+          "component": "lm_head",
+          "floor_contribution": 0.003904718156915901,
+          "is_norms": false,
+          "penalty_pi": 0.16555820199810967,
+          "step_share": 0.02358516890006141
+        },
+        {
+          "bw_util": null,
+          "component": "io_residual",
+          "floor_contribution": 0.0,
+          "is_norms": true,
+          "penalty_pi": 0.0,
+          "step_share": 0.002887403420832101
+        }
+      ]
+    },
+    "step3_verdict_vs_budget": {
+      "budget_lambda1_frac_213": 0.07331808522875782,
+      "budget_lambda1_pct_213": 7.331808522875782,
+      "ceiling_clears_500": false,
+      "ceiling_holds_frontier_481p53": false,
+      "compliant_ceiling_tps_at_floor": 469.6844761311386,
+      "compliant_ceiling_tps_at_zero": 520.9527323111674,
+      "first_principles_floor_overhead": 0.09841249119201488,
+      "identity_lane_alive_with_custom_kernel": false,
+      "lambda1_ceil": 520.9527323111674,
+      "operative_tps_via_1plusfloor_at_E611": 696.9509953470023,
+      "sdpa_alone_busts_budget": true
+    },
+    "step3b_sensitivity": {
+      "convex_law_revives_lane": true,
+      "custom_kernel_floor_misscoped_216": 0.009455349322572294,
+      "floor_below_216_offtheshelf_anchor": true,
+      "floor_convex_sub_optimistic": 0.06218626733504587,
+      "floor_nonneg": true,
+      "note": "the BW-gap floor charges the FULL forgone slack (pessimistic end of the ideal-kernel range); the dominant uncertainty is the SDPA penalty-law curvature -- how much split-KV parallelism an ideal deterministic kernel recovers on non-reduction axes.",
+      "offtheshelf_216_frac": 0.31410813860049375,
+      "phi_star_recovery_breakeven": 0.7450079186157905,
+      "recovery_fraction_needed_to_revive": 0.2549920813842095,
+      "rescope_lift_vs_216_misscoped": 10.408128545508049
+    },
+    "step4_three_way": {
+      "A_alive_with_existing_knobs": "floor<=budget AND #326<=budget",
+      "B_alive_needs_custom_kernel": "floor<=budget < #326 config-only",
+      "C_dead_even_with_custom_kernel": "floor>budget",
+      "c326_config_only_ceiling": null,
+      "outcome": "C_dead_even_with_custom_kernel",
+      "outcome_consistent_with_floor": true,
+      "outcome_is_dead": true,
+      "outcome_light": "RED"
+    },
+    "verdict": "IDENTITY-LANE-DEAD-AT-BWGAP-FLOOR: first-principles bf16 lm_head+attn reduction floor = 9.841% of step vs the lambda=1 budget 7.332% -> DEAD (C); binding term is the bf16 SDPA @ 34.9% BW (9.451% alone, SDPA-ALONE-BUSTS-BUDGET). Compliant ceiling caps at 469.7 TPS (< 500 and < 481.53 frontier). NOT robust: a custom kernel recovering > 25.5% of forgone split-KV parallelism flips it to alive-needs-kernel (B). 0 TPS; analytic; UNBUILT + human-gated; NOT a launch."
+  },
+  "wandb_run_id": "kcjlr5ny"
+}
