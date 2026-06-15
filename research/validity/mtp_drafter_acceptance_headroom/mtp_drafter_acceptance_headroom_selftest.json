@@ -1,0 +1,300 @@
+{
+  "pr": 399,
+  "agent": "ubel",
+  "kind": "mtp-drafter-acceptance-headroom",
+  "analysis_only": true,
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "gpu_used": false,
+  "official_tps": 0,
+  "baseline_unchanged_tps": 481.53,
+  "baseline_unchanged_ppl": 2.3772,
+  "corrected_strict_base_tps": 471.41634950257713,
+  "gap_to_500_tps": 28.583650497422866,
+  "inputs": {
+    "ladder_289": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "e_accepted_289": 2.851185944363104,
+    "e_t_289": 3.851185944363104,
+    "top4_coverage_387": 0.8902659519153152,
+    "top1_coverage_387": 0.7617,
+    "cov_budget_336": 0.031035214630377506,
+    "identity_bar_336": 0.9213011665456927,
+    "cstar_central_340": 0.9089,
+    "per_source_top4_387": {
+      "aime": 0.957005303537408,
+      "gpqa": 0.9175953770859131,
+      "mmlu_pro": 0.846544405293677
+    },
+    "official_mix_387": {
+      "aime": 0.109375,
+      "gpqa": 0.4453125,
+      "mmlu_pro": 0.4453125
+    },
+    "base_471_390": 471.41634950257713,
+    "gap_28_390": 28.583650497422866,
+    "ceiling_520_390": 520.953,
+    "shippable_ceiling_509_390": 509.77660237793333,
+    "mu_p": 481.53,
+    "k_cal": 125.26795005202914,
+    "s_central": 7.912609135742992,
+    "target": 500.0,
+    "ppl_deployed": 2.3772,
+    "ppl_gate": 2.42,
+    "head_ceiling_upper": 1.0,
+    "mc_n": 20000,
+    "mc_seed": 0,
+    "source_289_run": "fi34s269",
+    "source_387_run": "z8osvif8",
+    "source_390_run": "5y64zbjz",
+    "source_336_ref": "5lnz5jgb",
+    "deployed_spec": {
+      "method": "mtp",
+      "num_speculative_tokens": 7,
+      "verify_M": 8,
+      "scheme": "linear_chain_top1"
+    }
+  },
+  "expected_tokens_per_step": 3.851185944363104,
+  "expected_accepted_draft": 2.851185944363104,
+  "mc_lever_sweep": {
+    "numpy_available": true,
+    "n": 20000,
+    "vocab": 64,
+    "seed": 0,
+    "calibrated_top1": 0.7618,
+    "calibrated_top4": 0.8898,
+    "levers": {
+      "temperature": {
+        "rows": {
+          "T=0.25": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "T=0.5": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "T=0.7": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "T=1.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "T=1.3": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "T=2.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "T=5.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "T=10.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          }
+        },
+        "max_abs_dcov": 0.0,
+        "is_noop": true,
+        "mechanism": "monotone z/T: rank-invariant"
+      },
+      "affine_calibration": {
+        "rows": {
+          "a=0.3,b=-5.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=0.3,b=0.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=0.3,b=5.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=1.0,b=-5.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=1.0,b=0.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=1.0,b=5.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=3.0,b=-5.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=3.0,b=0.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          },
+          "a=3.0,b=5.0": {
+            "dtop1": 0.0,
+            "dtop4": 0.0
+          }
+        },
+        "max_abs_dcov": 0.0,
+        "is_noop": true,
+        "mechanism": "monotone a*z+b (a>0): rank-invariant"
+      },
+      "per_class_bias_control": {
+        "dtop1": -0.60435,
+        "dtop4": -0.5928500000000001,
+        "abs_dtop4": 0.5928500000000001,
+        "detector_fires": true,
+        "mechanism": "per-class beta: rank-CHANGING -> moves cov, BUT is a fitted (micro)retrain + overfits public + private-unstable -> EXCLUDED from deployable set"
+      }
+    },
+    "monotone_levers_max_abs_dcov": 0.0,
+    "calibration_roundtrips_top1": true,
+    "calibration_roundtrips_top4": true
+  },
+  "lever_ledger": {
+    "levers": {
+      "draft_head_temperature": {
+        "deployable": true,
+        "needs_retrain": false,
+        "needs_kernel_change": false,
+        "realized_dcov": 0.0,
+        "mechanism": "z/T monotone -> argmax & top-K set invariant (MC max|d-cov| ~ 0)",
+        "verdict": "NO-OP for greedy MTP (argmax proposal is temperature-invariant)"
+      },
+      "affine_calibration": {
+        "deployable": true,
+        "needs_retrain": false,
+        "needs_kernel_change": false,
+        "realized_dcov": 0.0,
+        "mechanism": "a*z+b (a>0) monotone -> rank/top-K set invariant",
+        "verdict": "NO-OP (monotonic rescale cannot move a rank-membership statistic)"
+      },
+      "top_k_width_tree": {
+        "deployable": false,
+        "needs_retrain": false,
+        "needs_kernel_change": true,
+        "realized_dcov": 0.0,
+        "locked_potential_dcov": 0.12856595191531517,
+        "mechanism": "verify >1 candidate/position -> tree -> verify batch M change -> CUDA-graph rebuild (#390 counts kernel rebuilds)",
+        "verdict": "EXCLUDED by no-served-kernel-change; locked +0.1286 cov is the tree/EAGLE-3 prize"
+      },
+      "per_class_logit_bias": {
+        "deployable": false,
+        "needs_retrain": true,
+        "needs_kernel_change": false,
+        "realized_dcov": 0.0,
+        "mechanism": "per-class beta changes ranks (control fires) BUT is fitted = (micro)retrain, overfits public 128, private-unstable",
+        "verdict": "EXCLUDED by no-retrain + private-transfer risk"
+      }
+    },
+    "monotone_levers_are_noops": true,
+    "best_deployable_dcov_lever": "none_deployable",
+    "realized_dcov_best_lever": 0.0,
+    "realized_tps_lift_best_lever": 0.0,
+    "frac_of_28p58_gap_covered": 0.0,
+    "dcov_lever_feeds_demand_route": false,
+    "top_k_width_locked_potential_dcov": 0.12856595191531517
+  },
+  "coverage_geometry": {
+    "top1_coverage_measured": 0.7617,
+    "top4_coverage_measured": 0.8902659519153152,
+    "head_ceiling_upper": 1.0,
+    "coverage_ceiling_gap": 0.10973404808468479,
+    "coverage_ceiling_gap_realized_bounds": [
+      0.0,
+      0.10973404808468479
+    ],
+    "harvestable_top1_to_top4_dcov": 0.12856595191531517,
+    "harvestable_exceeds_336_budget": true
+  },
+  "demand_route_fit": {
+    "required_dcov_to_close_28p58_gap": 0.02951126508713027,
+    "required_dcov_within_336_budget": true,
+    "required_frac_of_336_budget": 0.9508961171560392,
+    "full_336_budget_maps_to_tps": 30.059698406290124,
+    "full_336_budget_closes_gap": true,
+    "tps_per_unit_dcov_on_471_base": 968.5674407054839,
+    "supplied_by_cheap_lever_dcov": 0.0,
+    "must_be_supplied_by_retrain_or_tree": true
+  },
+  "deployed_mtp_acceptance_ladder_measured": [
+    0.7292532942898975,
+    0.759556697719242,
+    0.7929794882639035,
+    0.8228,
+    0.8348727920920435,
+    0.8357919254658385,
+    0.8464932652113331
+  ],
+  "top4_coverage_measured": 0.8902659519153152,
+  "coverage_ceiling_gap": 0.10973404808468479,
+  "best_deployable_dcov_lever": "none_deployable",
+  "realized_dcov_best_lever": 0.0,
+  "realized_tps_lift_best_lever": 0.0,
+  "frac_of_28p58_gap_covered": 0.0,
+  "dcov_lever_feeds_demand_route": false,
+  "self_test": {
+    "conditions": {
+      "a_ladder_len_7": true,
+      "a_ladder_in_unit": true,
+      "a_ladder_monotone_nondecreasing": true,
+      "a_et_roundtrips_289": true,
+      "a_eaccepted_roundtrips_289": true,
+      "b_top4_grounded_from_sources": true,
+      "b_mix_sums_to_1": true,
+      "b_top1_le_top4": true,
+      "b_top4_le_ceiling_le_1": true,
+      "b_per_source_in_unit": true,
+      "c_base_is_390": true,
+      "c_gap_is_28p58": true,
+      "c_base_plus_gap_is_500": true,
+      "c_ceiling_above_base": true,
+      "c_tps_for_base_et_roundtrips": true,
+      "d_secant_matches_387": true,
+      "d_full_budget_closes_gap": true,
+      "d_required_dcov_within_budget": true,
+      "d_required_dcov_positive": true,
+      "d_required_below_full_budget_tps": true,
+      "e_mc_calibration_roundtrips_top1": true,
+      "e_mc_calibration_roundtrips_top4": true,
+      "e_temperature_is_noop": true,
+      "e_affine_is_noop": true,
+      "e_monotone_max_abs_dcov_zero": true,
+      "e_per_class_control_detector_fires": true,
+      "f_best_lever_none_deployable": true,
+      "f_realized_dcov_zero": true,
+      "f_realized_tps_lift_zero": true,
+      "f_frac_of_gap_zero": true,
+      "f_does_not_feed_demand_route": true,
+      "f_monotone_levers_are_noops": true,
+      "g_ceiling_gap_is_complement_of_top4": true,
+      "g_ceiling_gap_in_0_0p11": true,
+      "g_harvestable_top1_top4_positive": true,
+      "g_harvestable_exceeds_budget": true,
+      "g_top_k_width_locked_not_deployable": true,
+      "h_ppl_deployed_passes_gate": true,
+      "i_no_nan_inf": true
+    },
+    "n_checks": 39,
+    "n_passed": 39,
+    "passes": true
+  },
+  "mtp_acceptance_headroom_self_test_passes": true
+}
