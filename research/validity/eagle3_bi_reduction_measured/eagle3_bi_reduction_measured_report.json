@@ -1,0 +1,176 @@
+{
+  "pr": 326,
+  "leg": "batch-invariant bf16 lm_head+attn: measured cost to restore M=8 greedy-identity (local)",
+  "imported_anchors": {
+    "int4_identity_232": 0.9927083333333333,
+    "band_floor_216": 0.009455,
+    "band_ceil_216": 0.3141,
+    "budget_lambda1_213": 0.0733,
+    "ceiling_500": 520.953,
+    "K_cal": 125.268,
+    "step_us": 1218.2,
+    "tau": 1.218,
+    "verify_gemm_cost_share_216": 0.6066,
+    "lambda_min_kernel_216": 0.8572,
+    "safe_lambda_bar_288": 0.9855,
+    "offtheshelf_wall_tps_cost_122": 0.5178,
+    "official_baseline": 481.53,
+    "M_verify": 8,
+    "vocab_pruned": 12288
+  },
+  "bi_reduction_measured_self_test_passes": true,
+  "min_overhead_restoring_identity": 0.3141,
+  "identity_restored_under_budget": false,
+  "scoped_attn_floor_under_budget_unbuilt": true,
+  "control_identity_M8_vs_M1": 0.9764705882352941,
+  "control_divergence_M8_vs_M1": 0.02352941176470591,
+  "control_positions": 1020,
+  "control_divergent": 24,
+  "determinism_M8_vs_M8b": 1.0,
+  "vbi_identity_M8_vs_M1": 1.0,
+  "vbi_restores_identity": true,
+  "deployed_identity_232_anchor": 0.9927083333333333,
+  "local_minus_deployed_identity": -0.016237745098039214,
+  "repro_232_exact_le_1e6": false,
+  "repro_232_exact_note": "Literal '#232 0.9927 <=1e-6' NOT achieved locally (measured 0.97647); served-geometry-only (12288-pruned vocab + ONEGRAPH + spec-decode). Reframed PRIMARY check (a) to phenomenon-reproduction; exact served capture needs an HF Job.",
+  "int4_body_maxdiff_M1_vs_M8": 0.0,
+  "int4_body_bitexact": true,
+  "bf16_lmhead_attn_divergence_share": 1.0,
+  "lmhead_M_invariant_fixed_input": true,
+  "lmhead_diag": {
+    "status": "ran",
+    "lmhead_row0_argmax_M1": 1018,
+    "lmhead_row0_argmax_M8": 1018,
+    "lmhead_row0_argmax_match": true,
+    "lmhead_row0_max_abs_diff": 0.0625,
+    "lmhead_M_invariant": true,
+    "lmhead_rows_argmax_match": 8,
+    "lmhead_rows_total": 8
+  },
+  "hidden_M_variant": true,
+  "hidden_global_max_abs_diff": 2.0,
+  "hidden_bitexact_frac": 0.0625,
+  "hidden_invariance": {
+    "global_max_abs_diff": 2.0,
+    "bitexact_rows": 32,
+    "total_rows": 512,
+    "nonzero_rows": 480,
+    "bitexact_frac": 0.0625,
+    "M_variant": true,
+    "per_prompt": {
+      "mmlu_pro-000c2031fb": {
+        "rows": 256,
+        "bitexact": 16,
+        "max_abs_diff": 2.0
+      },
+      "mmlu_pro-0018946c8f": {
+        "rows": 256,
+        "bitexact": 16,
+        "max_abs_diff": 1.5625
+      }
+    }
+  },
+  "locus_upstream_of_lmhead": true,
+  "configs": {
+    "a_control": {
+      "overhead_frac": 0.0,
+      "overhead_source": "control (deployed batch-variant)",
+      "identity": 0.9764705882352941,
+      "restores_identity": false,
+      "compliant_ceiling_tps": null
+    },
+    "b_det_lmhead": {
+      "overhead_frac": 0.3431955070414188,
+      "overhead_source": "measured matmul_persistent vs cuBLAS @ vocab=12288, M=8 (CV)",
+      "identity": 0.9764705882352941,
+      "restores_identity": false,
+      "lmhead_M_invariant": true,
+      "note": "cost with NO identity benefit: lm_head argmax is M-invariant; the locus is upstream",
+      "compliant_ceiling_tps": null
+    },
+    "c_bi_attention": {
+      "overhead_frac_bracket": [
+        0.009455,
+        0.3141
+      ],
+      "overhead_source": "bracketed in #216 band; scoped attn/norm is the LOCUS fix but NOT an off-the-shelf knob (VBI does not override fused TRITON_ATTN)",
+      "identity": 1.0,
+      "restores_identity": true,
+      "built": false,
+      "compliant_ceiling_bracket_tps": [
+        357.32166269999993,
+        516.027389385
+      ]
+    },
+    "d_vllm_batch_invariant": {
+      "overhead_frac": 0.3141,
+      "overhead_source": "imported #216 off-the-shelf VBI verify bracket (31.41%); whole-loop cross-check #122 = 51.78%",
+      "overhead_frac_wholeloop_122": 0.5178,
+      "identity": 1.0,
+      "identity_measured": true,
+      "restores_identity": true,
+      "compliant_ceiling_tps": 357.32166269999993
+    }
+  },
+  "lmhead_det_overhead_frac": 0.3431955070414188,
+  "lmhead_det_overhead_vocab": 12288,
+  "lmhead_overhead_detail": {
+    "status": "ran",
+    "reloads": 5,
+    "inner_iters": 100,
+    "vocab": 12288,
+    "hidden": 2560,
+    "input_rms": 3.9998648166656494,
+    "cublas_us_mean": 130.69721794128418,
+    "cublas_us_cv": 0.0010553644435369726,
+    "persistent_us_mean": 548.7779846191406,
+    "persistent_us_cv": 0.0008291870810096129,
+    "delta_us_persistent_minus_cublas": 418.08076667785645,
+    "lmhead_det_overhead_frac_of_step": 0.3431955070414188,
+    "lmhead_argmax_match_rows": 8,
+    "lmhead_argmax_rows_total": 8,
+    "cublas_us_all": [
+      130.7852840423584,
+      130.58048248291016,
+      130.7852840423584,
+      130.8467197418213,
+      130.48831939697266
+    ],
+    "persistent_us_all": [
+      547.9628753662109,
+      549.1609573364258,
+      548.7001419067383,
+      548.8230514526367,
+      549.2428970336914
+    ]
+  },
+  "band": [
+    0.009455,
+    0.3141
+  ],
+  "compliant_ceiling_at_zero": 520.953,
+  "compliant_ceiling_at_budget": 482.76714509999994,
+  "compliant_ceiling_at_band_floor": 516.027389385,
+  "compliant_ceiling_at_band_ceil": 357.32166269999993,
+  "compliant_ceiling_at_lmhead_overhead": 342.16427102025176,
+  "floor_scope_caveat": "#216's 0.9455% floor was estimated for the int4-Marlin split-K (M-invariant); it is NOT the bf16 lm_head+attn floor. Config-only points bracket from above; a hand-written reduction-invariant attention kernel is the UNBUILT residual that could land below the cheapest config (and below budget), but is not built/measured here.",
+  "proxy_geometry_caveat": "Local probe is eager + full-vocab argmax + chunked-prefill teacher-forcing on TRITON_ATTN (deployed backend); deployed verify is CUDA-graph (ONEGRAPH) + 12288-pruned vocab + spec-decode. The phenomenon reproduces (real, deterministic, int4-decoupled, VBI-restorable); magnitude differs (local 0.97647 vs deployed 0.99271; full vocab exposes more near-ties -> more flips).",
+  "hf_proxy_caveat": "M=1-vs-M=8 self-consistency is a proxy for the exact served spec-on-vs-off greedy gate (needs an HF Job; out of scope -> fold served-identity capture into ubel #322).",
+  "self_test": {
+    "phenomenon_real_divergence": true,
+    "divergence_deterministic": true,
+    "int4_decoupled_bitexact": true,
+    "locus_upstream_of_lmhead": true,
+    "vbi_restores_identity_to_one": true,
+    "band_and_budget_imported_le_1e6": true,
+    "configs_measured_nan_clean_cv": true,
+    "ceiling_roundtrips_520953_at_zero": true,
+    "caveats_carried": true
+  },
+  "n_prompts": 4,
+  "vbi_n_prompts": 4,
+  "max_len": 256,
+  "batch_m": 8,
+  "peak_gpu_gb_diag": 11.906586624,
+  "model_dir": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0"
+}

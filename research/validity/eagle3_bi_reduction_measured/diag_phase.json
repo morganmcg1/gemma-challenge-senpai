@@ -1,0 +1,70 @@
+{
+  "phase": "diag",
+  "model_dir": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "max_len": 256,
+  "int4_body": {
+    "status": "ran",
+    "int4_body_bitexact_M8_vs_M1": true,
+    "int4_body_maxdiff_M1_vs_M8": 0.0,
+    "per_shape": {
+      "qkv_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      },
+      "o_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      },
+      "gate_up_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      },
+      "down_proj": {
+        "bitexact_M8_vs_M1": true,
+        "max_abs_diff_M8_vs_M1": 0.0
+      }
+    }
+  },
+  "lmhead_diag": {
+    "status": "ran",
+    "lmhead_row0_argmax_M1": 1018,
+    "lmhead_row0_argmax_M8": 1018,
+    "lmhead_row0_argmax_match": true,
+    "lmhead_row0_max_abs_diff": 0.0625,
+    "lmhead_M_invariant": true,
+    "lmhead_rows_argmax_match": 8,
+    "lmhead_rows_total": 8
+  },
+  "lmhead_overhead": {
+    "status": "ran",
+    "reloads": 5,
+    "inner_iters": 100,
+    "vocab": 12288,
+    "hidden": 2560,
+    "input_rms": 3.9998648166656494,
+    "cublas_us_mean": 130.69721794128418,
+    "cublas_us_cv": 0.0010553644435369726,
+    "persistent_us_mean": 548.7779846191406,
+    "persistent_us_cv": 0.0008291870810096129,
+    "delta_us_persistent_minus_cublas": 418.08076667785645,
+    "lmhead_det_overhead_frac_of_step": 0.3431955070414188,
+    "lmhead_argmax_match_rows": 8,
+    "lmhead_argmax_rows_total": 8,
+    "cublas_us_all": [
+      130.7852840423584,
+      130.58048248291016,
+      130.7852840423584,
+      130.8467197418213,
+      130.48831939697266
+    ],
+    "persistent_us_all": [
+      547.9628753662109,
+      549.1609573364258,
+      548.7001419067383,
+      548.8230514526367,
+      549.2428970336914
+    ]
+  },
+  "captured_hidden_rms": 3.9998648166656494,
+  "peak_gpu_gb": 11.906586624
+}
