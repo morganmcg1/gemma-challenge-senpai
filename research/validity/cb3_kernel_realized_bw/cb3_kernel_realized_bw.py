@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
-"""PR #388 (lawine) -- cb3 kernel REALIZED bandwidth at M=1 decode on A10G.
+"""PR #391 (lawine) -- cb3 kernel REALIZED bandwidth at the SERVED verify width (M=8/M=4),
+extending #388's M=1-only card.
 
-THE QUESTION (the gate between #372 "PPL-feasible body-shrink" and "deployable"):
-  Does a QTIP/QuIP#-class "cb3" dequant+GEMM kernel -- Random Hadamard Transform (RHT)
-  incoherence preprocessing + an L1-resident dim-2 Gaussian VQ codebook (K=64), at the
-  #372 mixed-precision effective 3.2369 bpw -- actually read its nominal 0.785x bytes
-  FASTER than int4-Marlin (4.125 bpw, the deployed kernel) at M=1 (single-token decode,
-  the memory-bandwidth-bound regime)? Or does codebook-lookup / Hadamard-rotation dequant
-  overhead eat the byte savings so realized speedup < the 1/0.785 = 1.274x roofline?
+THE QUESTION (#388 follow-up #2, verbatim):
+  #388 measured the cb3-vs-int4-Marlin body-GEMM speedup at M=1 only = 1.1234x realistic
+  (beta=0.51), far below the 1.2744x byte roofline, BECAUSE int4-Marlin at M=1 runs at only
+  25.6% HBM efficiency (m1_is_bw_bound=False): one activation row -> launch/dequant/occupancy
+  overhead dominates, so the weight-byte shrink buys ~half its nominal value, and the strict
+  measured-floor tier (1.0582x, +15.6 TPS) only STRADDLES #383's +17.22 floor.
+  BUT the deployed stack serves MTP K=7 spec-decode (num_speculative_tokens=7): each step runs
+  the body GEMM at M=8 verify width (7 draft + 1), not M=1. At M=8 the GEMM reuses the same
+  weight matrix across 8 activation rows -> more compute per loaded weight tile -> better latency
+  hiding -> the kernel approaches BANDWIDTH-BOUND -> the weight-byte shrink captures more of its
+  roofline. So the SERVED-regime realized speedup is plausibly higher than the M=1 1.12x straddle,
+  and M=8 (not M=1) is the operating point that sets the real supply lift. M=4 is the partial-
+  accept width (some draft tokens rejected).
 
 WHAT THIS IS / IS NOT:
   * GPU RESEARCH MICROBENCH -- profiling only. NOT a served-kernel patch, NO deployed-file
@@ -15,30 +22,37 @@ WHAT THIS IS / IS NOT:
     on the single assigned A10G (CUDA_VISIBLE_DEVICES=0; the #358/#363 2nd-GPU gotcha).
   * No cb3/QTIP/QuIP#/AQLM kernel exists in this env (vLLM 0.22.0 ships only Marlin/AWQ/AQLM;
     QTIP/QuIP# are source-build-only, github.com/Cornell-RelaxML/qtip, no pip/vLLM). So the
-    honest terminal result is a ROOFLINE bound: measure int4-Marlin's realized M=1 us/GEMM +
-    effective GB/s, then bound cb3 by its nominal byte count AT THE SAME achieved BW-efficiency.
-    realized_is_roofline_bound = True. (PR #388 step 4: "the likely path", an acceptable terminal.)
+    honest terminal result is a ROOFLINE bound: measure int4-Marlin's realized us/GEMM +
+    effective GB/s at each width, then bound cb3 by its nominal byte count AT THE SAME achieved
+    BW-efficiency. realized_is_roofline_bound = True. (#388 step 4: an acceptable terminal.)
 
-METHOD:
-  (1) Microbench the 8 distinct Gemma-4-E4B body GEMM shapes at M=1 under int4-Marlin
-      (uint4b8 g128, the canonical baseline). Measure median us/GEMM, weight bytes, eff GB/s,
-      and BW-efficiency vs a measured device peak-copy bandwidth reference.
-  (2) realized_body_speedup = int4_marlin_bytes / cb3_bytes = 4.125 / 3.2369 = 1.2744 (the
-      roofline; holds iff cb3 matches Marlin's M=1 BW-efficiency -- literature-supported:
-      QTIP/QuIP# L1-resident codebook, RHT folded OFFLINE into the weights, only a cheap
-      activation-side Hadamard online). Cross-checked vs published QTIP Ampere data.
-  (3) Translate to realized_strict_base_lift_tps: apply the speedup to the body fraction of
-      the #378 served-strict step on the band [357.32, 469.68]. Report PR-spec complement
-      f_body (= 1 - f_attn - f_lmhead) AND the honest body-GEMM-only f_body.
-  (4) closes_383_supply_gap_floor: does the realized lift clear the #383 supply-side floor
-      (+17.22 joint) and robust target (+23.75)?
+KEY IDENTITY (the engine of the width-aware tiers):
+  The count-weighted "measured fixed-overhead floor" speedup = 1/(r*eff + 1-eff), where r =
+  byte_ratio (0.785) and eff = the count-weighted weight-read HBM efficiency. So beta_measured(M)
+  == eff(M) EXACTLY (proof in floor_speedup_from_eff). Thus the M=1 0.256 efficiency is literally
+  the strict byte-proportional fraction, and the M=8 question "does eff rise to >=0.5?" is the same
+  as "does the strict-floor speedup tier climb from 1.058 toward the 1.274 roofline?". The QTIP
+  realistic tier scales the same way: beta_qtip(M) = (0.51/eff_1)*eff_M (capped 1), recovering
+  #388's 0.51 at M=1 and rising with the served width.
+
+METHOD (extends #388; reuses the exact shape table + cb3 byte model + 3-tier machinery):
+  (1) Microbench the 8 distinct Gemma-4-E4B body GEMM shapes at M in {1, 8, 4} under int4-Marlin
+      (uint4b8 g128). Measure median us/GEMM, weight bytes, eff GB/s, weight-read BW-efficiency.
+      THE new number: marlin_m8_hbm_eff / marlin_m4_hbm_eff next to the M=1 0.256.
+  (2) Re-derive the 3 speedup tiers at each width: roofline 1.2744 (M-independent ceiling) /
+      QTIP-empirical beta(M) (realistic) / measured-fixed-overhead-floor (strict).
+  (3) Translate to realized_strict_base_lift_tps_m8 on #378's strict band [357.32, 469.68]
+      using f_attn=0.0951 / f_lmhead=0.0224 / draft=0.1201, exactly as #388 did for M=1.
+  (4) closes_383_robust_m8: does the STRICT (measured-floor) tier now clear #383's +17.22 floor
+      AND +23.75 robust with MORE margin than M=1's straddle -- i.e. does the served regime
+      upgrade the strict-tier straddle to a clean pass?
 
 REPRODUCE (0-GPU analytic self-test):
   cd target/ && .venv/bin/python research/validity/cb3_kernel_realized_bw/cb3_kernel_realized_bw.py --self-test
-GPU microbench (single A10G):
+GPU M=8/M=4 microbench (single A10G):
   cd target/ && CUDA_VISIBLE_DEVICES=0 .venv/bin/python \
-      research/validity/cb3_kernel_realized_bw/cb3_kernel_realized_bw.py --gpu \
-      --wandb_name lawine/cb3-kernel-realized-bw --wandb_group cb3-kernel-realized-bw
+      research/validity/cb3_kernel_realized_bw/cb3_kernel_realized_bw.py --gpu --m8 --m4 \
+      --wandb_group cb3-m8-verify-body-speedup --wandb_name lawine/cb3-m8-verify-body-speedup
 """
 from __future__ import annotations
 
@@ -57,7 +71,17 @@ from typing import Any
 A10G_SMS = 80
 A10G_HBM_PEAK_GBS = 600.0          # GA102 / A10G theoretical HBM bandwidth (datasheet)
 BW_BOUND_EFF_THRESHOLD = 0.60      # >= this Marlin-eff => treat M=1 as BW-bound (roofline tight)
+M8_BW_BOUND_THRESHOLD = 0.50       # PR #391 served-regime threshold: eff>=0.5 => M=8 is BW-bound
 TOL = 1e-6
+
+# ---- served verify widths (#391) ----------------------------------------------------- #
+# Deployed PR #52 serves MTP K=7 spec-decode (num_speculative_tokens=7): each decode step runs
+# the body GEMM at M = K+1 = 8 verify rows (7 draft + 1 bonus). M=4 is the partial-accept width
+# (~half the draft tokens accepted). M=1 is the #388 baseline (pure single-token decode).
+MTP_K = 7
+SERVED_VERIFY_WIDTH = 8            # M=8: the actually-served verify width (the #391 headline op-point)
+PARTIAL_ACCEPT_WIDTH = 4          # M=4: partial-accept width
+DEFAULT_WIDTHS = [1, 8, 4]        # M=1 always run as the #388 baseline anchor
 
 _VAL = Path(__file__).resolve().parents[1]
 ANCHOR_372 = _VAL / "sub_int4_body_ceiling" / "measure_mixed_precision_results.json"
@@ -98,6 +122,27 @@ LIT_QTIP3_OVER_MARLIN_HI = 1.28        # ~= the byte-ratio roofline (codebook do
 # gives a consistent byte-proportional fraction beta ~= 0.51. Pod-measured Marlin transfer/total
 # on the dominant MLP shapes (~0.44) corroborates. This is the literature-anchored REALISTIC tier.
 QTIP_BETA_BYTE_PROPORTIONAL = 0.51
+# #388 banked count-weighted Marlin M=1 weight-read HBM efficiency (g5lfdpgw). Used (a) as the
+# 0-GPU self-test eff_1 anchor and (b) as the QTIP ratio denominator when M=1 was not re-measured.
+# In a GPU run with M=1 in the sweep, the FRESHLY measured eff_1 is used instead (self-consistent).
+M1_MEASURED_HBM_EFF_388 = 0.25561637483960586
+
+# ---- Marlin batch-size sweep literature (arxiv 2408.11743, A10, Llama-2-7B) -- #391 prior ---- #
+# Table 2 end-to-end speedup vs FP16 is ~FLAT M=1 (2.93x) -> M=8 (2.90x): the int4 GEMM wall-clock
+# time is ~flat across M=1..8 because Marlin is ALREADY software-pipelined at M=1. Roofline
+# memory->compute crossover is M~=64 (Fig 11), so M=8 is solidly BANDWIDTH-bound as a REGIME.
+# KEY CONSEQUENCE for this card: because Marlin time is ~flat M=1->8, the weight-read EFFICIENCY
+# (wbytes/time) does NOT rise at M=8 -- the M=1 0.256 count-weighted number already sits near
+# Marlin's achievable weight-read BW (held down by small launch-bound attention GEMMs + a peak-COPY
+# reference above modest-GEMM achievable BW), NOT a latency headroom that M=8 recovers. QuIP# Table 5
+# corroborates: codebook kernels reach only 29-57% of peak at M=1, rising with matrix SIZE not batch.
+# So the honest #391 prior is: marlin_m8_hbm_eff ~= marlin_m1_hbm_eff (flat), the strict straddle
+# stands, and "M=8 is BW-bound (regime)" does NOT imply "efficiency rises". Confounder for the QTIP
+# realistic tier: QTIP/QuIP# Hadamard dequant is O(M*N) -> grows with M -> could SUPPRESS beta at
+# M=8 (no codebook paper measures batch>1), so the beta(M) rise is weakly-supported / optimistic.
+MARLIN_SPEEDUP_VS_FP16_M1 = 2.93
+MARLIN_SPEEDUP_VS_FP16_M8 = 2.90
+MARLIN_ROOFLINE_CROSSOVER_M = 64        # M < this => memory-bound regime on Ampere (Fig 11)
 
 OFFICIAL_TPS = 481.53                  # PR #52 baseline (context only; this card is 0 official TPS)
 
@@ -146,6 +191,57 @@ def qtip_empirical_speedup() -> float:
     r = byte_ratio()
     beta = QTIP_BETA_BYTE_PROPORTIONAL
     return 1.0 / (r * beta + (1.0 - beta))
+
+
+# ---- width-aware tiers (#391): same r*beta + (1-beta) engine, beta(M) driven by measured eff -- #
+def speedup_from_beta(beta: float) -> float:
+    """realized_time_ratio = r*beta + (1-beta); speedup = 1/ratio. beta in [0,1]:
+    beta=0 -> 1.0x (all fixed overhead), beta=1 -> roofline 1/r (fully byte-proportional)."""
+    r = byte_ratio()
+    beta = min(max(beta, 0.0), 1.0)
+    return 1.0 / (r * beta + (1.0 - beta))
+
+
+def floor_speedup_from_eff(eff: float) -> float:
+    """The count-weighted MEASURED fixed-overhead-floor speedup as a closed form of the measured
+    weight-read HBM efficiency `eff`. Proof that beta_measured == eff exactly:
+      per shape, cb3_fixed = r*t_transfer + t_overhead, t_transfer = wbytes/peak, t_overhead =
+      t_meas - t_transfer.  Count-weighted: 1/speedup = (r*SUM c*t_transfer + SUM c*t_overhead)
+      / SUM c*t_meas = r*B + (1-B) with B = SUM c*t_transfer / SUM c*t_meas
+      = (SUM c*wbytes / peak) / SUM c*t_meas = agg_eff_gbs/peak = count_weighted HBM eff = eff.
+    So the strict floor tier is exactly speedup_from_beta(eff)."""
+    return speedup_from_beta(eff)
+
+
+def qtip_beta_at_width(eff_m: float, eff_1: float,
+                       beta1: float = QTIP_BETA_BYTE_PROPORTIONAL) -> float:
+    """beta_qtip(M): scale the literature batch=1 QTIP beta (0.51) by the measured Marlin
+    efficiency ratio eff_M/eff_1, i.e. assume QTIP keeps the SAME kernel-quality ratio
+    (beta_qtip/beta_marlin_floor ~= 0.51/eff_1 ~= 2.0) over the strict floor at the served width
+    as it had at M=1. Recovers 0.51 at eff_M==eff_1; capped at 1.0 (the roofline). The honest
+    CONSERVATIVE alternative (QTIP gains nothing with M) holds beta fixed at 0.51 -- both reported."""
+    if eff_1 <= 0:
+        return min(max(beta1, 0.0), 1.0)
+    return min((beta1 / eff_1) * eff_m, 1.0)
+
+
+def width_speedup_tiers(eff_m: float, eff_1: float) -> dict[str, Any]:
+    """The three realized-speedup tiers at a given verify width, from the measured HBM effs.
+      * roofline      = 1/r (M-independent BW-bound ceiling)
+      * qtip_empirical= realistic: beta_qtip(M) = (0.51/eff_1)*eff_M scaled (capped 1)
+      * measured_floor= strict: beta_measured(M) = eff_M (the closed form above)
+    Also reports the conservative fixed-beta=0.51 QTIP tier (no M gain) as the lower QTIP bracket."""
+    beta_qtip = qtip_beta_at_width(eff_m, eff_1)
+    return {
+        "eff": eff_m,
+        "beta_measured_floor": eff_m,
+        "beta_qtip_scaled": beta_qtip,
+        "beta_qtip_fixed": QTIP_BETA_BYTE_PROPORTIONAL,
+        "roofline": roofline_speedup(),
+        "qtip_empirical": speedup_from_beta(beta_qtip),
+        "qtip_empirical_fixed_beta": qtip_empirical_speedup(),
+        "measured_floor": floor_speedup_from_eff(eff_m),
+    }
 
 
 def lift_factor(speedup: float, f_body: float) -> float:
@@ -245,6 +341,55 @@ def analytic_payload() -> dict[str, Any]:
     }
 
 
+def width_full_analysis(width: int, eff_m: float, eff_1: float) -> dict[str, Any]:
+    """Full #391 per-width rollup: 3 tiers -> band translations (both f_body) -> #383 gates.
+    HEADLINE realized_strict_base_lift_tps (exactly as #388): qtip_empirical x complement f_body,
+    off-the-shelf base. closes_383_robust: driven by the STRICT measured-floor tier (body-only,
+    off-the-shelf) -- this is the #391 question, whether the served width upgrades the M=1
+    measured-floor STRADDLE to a clean pass clearing both +17.22 floor and +23.75 robust."""
+    tiers = width_speedup_tiers(eff_m, eff_1)
+    f_comp = f_body_complement()
+    tier_map = (("roofline", tiers["roofline"]),
+                ("qtip_empirical", tiers["qtip_empirical"]),
+                ("qtip_fixed_beta", tiers["qtip_empirical_fixed_beta"]),
+                ("measured_floor", tiers["measured_floor"]))
+    variants: dict[str, dict[str, float]] = {}
+    for s_name, S in tier_map:
+        for fb_name, fb in (("complement", f_comp), ("body_only", F_BODY_STRICT)):
+            variants[f"{s_name}__{fb_name}"] = {"speedup": S, "f_body": fb, **translate_band(S, fb)}
+
+    headline_lift = variants["qtip_empirical__complement"]["delta_off_the_shelf"]
+    realistic_cons = variants["qtip_empirical__body_only"]["delta_off_the_shelf"]
+    strict_cons = variants["measured_floor__body_only"]["delta_off_the_shelf"]
+    gate_qtip = supply_gate(realistic_cons)
+    gate_strict = supply_gate(strict_cons)
+    return {
+        "width": width,
+        "marlin_hbm_eff": eff_m,
+        # measured-efficiency verdict (the PR's eff>=0.5 question -- "does efficiency RISE?")
+        "is_bw_bound": bool(eff_m >= M8_BW_BOUND_THRESHOLD),
+        "is_bw_bound_threshold": M8_BW_BOUND_THRESHOLD,
+        # literature REGIME verdict (Marlin Fig 11: M < ~64 is memory-bound on Ampere). Distinct
+        # from the efficiency-vs-peak-copy verdict: a kernel can be in the BW-bound regime yet sit
+        # well below peak-copy efficiency (small/medium GEMMs, launch-bound attention shapes).
+        "is_bw_bound_regime_literature": bool(width < MARLIN_ROOFLINE_CROSSOVER_M),
+        "tiers": tiers,
+        "realized_body_speedup": {  # the 3 named tiers (PR key realized_body_speedup_m8)
+            "roofline": tiers["roofline"],
+            "qtip_empirical": tiers["qtip_empirical"],
+            "measured_floor": tiers["measured_floor"],
+        },
+        "translation_variants": variants,
+        "realized_strict_base_lift_tps": headline_lift,           # qtip_empirical x complement
+        "realized_strict_base_lift_tps_measured_floor": strict_cons,
+        "supply_gate_qtip": gate_qtip,
+        "supply_gate_strict_floor": gate_strict,
+        # closes_383_robust: the STRICT-tier verdict (the #391 straddle->pass question)
+        "closes_383_robust": bool(gate_strict["clears_floor"] and gate_strict["clears_robust"]),
+        "closes_383_robust_qtip": bool(gate_qtip["clears_floor"] and gate_qtip["clears_robust"]),
+    }
+
+
 # ======================================================================================== #
 # Self-test (0-GPU): asserts the PR #388 step-5 contract.
 # ======================================================================================== #
@@ -291,6 +436,39 @@ def self_test() -> dict[str, Any]:
     chk("nan_inf_clean", nan_clean, "")
     # 10. #372 gate PPL passes (the body-shrink is PPL-feasible -- the precondition)
     chk("ppl_372_passes", MIXED_GATE_PPL <= PPL_GATE, f"ppl={MIXED_GATE_PPL} gate={PPL_GATE}")
+
+    # ---- #391 width-machinery analytic checks (0-GPU; synthetic effs) ----------------- #
+    e1 = M1_MEASURED_HBM_EFF_388
+    # 11. beta engine bounds: beta=0 -> 1.0x (all overhead), beta=1 -> roofline (fully BW-bound)
+    chk("speedup_beta0_is_1", abs(speedup_from_beta(0.0) - 1.0) < TOL, f"{speedup_from_beta(0.0):.6f}")
+    chk("speedup_beta1_is_roofline", abs(speedup_from_beta(1.0) - roofline_speedup()) < TOL, "")
+    # 12. floor speedup recovers #388's M=1 measured-floor 1.0582 from the banked eff
+    chk("floor_recovers_388_m1", abs(floor_speedup_from_eff(e1) - 1.058241282158072) < 1e-6,
+        f"floor(e1)={floor_speedup_from_eff(e1):.6f}")
+    # 13. floor speedup STRICTLY rises with efficiency (served width helps iff eff rises)
+    chk("floor_monotone_in_eff", floor_speedup_from_eff(0.50) > floor_speedup_from_eff(e1),
+        f"f(0.5)={floor_speedup_from_eff(0.50):.4f} > f(e1)={floor_speedup_from_eff(e1):.4f}")
+    # 14. qtip beta recovers the literature 0.51 at M=1 (eff_m == eff_1) and is capped at 1.0
+    chk("qtip_beta_recovers_0p51", abs(qtip_beta_at_width(e1, e1) - QTIP_BETA_BYTE_PROPORTIONAL) < 1e-9,
+        f"beta={qtip_beta_at_width(e1, e1):.6f}")
+    chk("qtip_beta_capped_1", qtip_beta_at_width(0.95, e1) == 1.0, f"{qtip_beta_at_width(0.95, e1):.4f}")
+    # 15. M=1 width_full_analysis reproduces #388: qtip headline 38.34, strict-floor STRADDLES
+    #     (closes_383_robust False), and a BW-bound eff=0.5 upgrades the strict tier to a PASS.
+    w1 = width_full_analysis(1, e1, e1)
+    chk("m1_reproduces_388_headline", abs(w1["realized_strict_base_lift_tps"] - 38.34161969078741) < 1e-4,
+        f"headline={w1['realized_strict_base_lift_tps']:.4f}")
+    chk("m1_strict_straddles_388", (not w1["closes_383_robust"]) and (not w1["is_bw_bound"]),
+        f"closes={w1['closes_383_robust']} bw_bound={w1['is_bw_bound']}")
+    w_bw = width_full_analysis(8, 0.50, e1)
+    chk("bwbound_upgrades_strict_to_pass", w_bw["closes_383_robust"] and w_bw["is_bw_bound"],
+        f"strict_lift={w_bw['realized_strict_base_lift_tps_measured_floor']:.3f} "
+        f"closes={w_bw['closes_383_robust']}")
+    # 16. strict-tier lift is monotone in eff (higher served-width eff => bigger margin over #383)
+    chk("strict_lift_monotone", (width_full_analysis(8, 0.50, e1)["realized_strict_base_lift_tps_measured_floor"]
+                                 > w1["realized_strict_base_lift_tps_measured_floor"]),
+        "")
+    # 17. all width tiers NaN/inf-clean
+    chk("width_tiers_finite", all(_finite(v) for v in _iter_numeric(width_full_analysis(8, 0.50, e1))), "")
 
     passes = all(c[1] for c in checks)
     return {
@@ -370,8 +548,11 @@ def _measure_peak_copy_gbs(dev, iters: int, warmup: int) -> dict[str, float]:
             "peak_theoretical_gbs": A10G_HBM_PEAK_GBS, "copy_eff_vs_theoretical": gbs / A10G_HBM_PEAK_GBS}
 
 
-def _build_marlin_gemm(out: int, inn: int, dev):
-    """Return a 0-arg callable running one M=1 int4-Marlin (uint4b8 g128) GEMM, + weight bytes."""
+def _build_marlin_gemm(out: int, inn: int, dev, m: int = 1):
+    """Return a 0-arg callable running one int4-Marlin (uint4b8 g128) GEMM at verify width M
+    (M activation rows over the SAME weight matrix), + weight bytes. The weight read is
+    M-independent (loaded once, reused across rows) -- that is exactly why cb3's byte shrink
+    is the same absolute saving at every M; what changes with M is how BW-bound the kernel is."""
     import torch
     from vllm import _custom_ops as ops  # noqa: F401  (ensures custom ops registered)
     from vllm.scalar_type import scalar_types
@@ -387,7 +568,7 @@ def _build_marlin_gemm(out: int, inn: int, dev):
     zp = torch.empty(0, dtype=torch.int, device=dev)
     g_idx = torch.empty(0, dtype=torch.int, device=dev)
     sort_idx = torch.empty(0, dtype=torch.int, device=dev)
-    x = torch.randn(1, K, dtype=torch.bfloat16, device=dev)
+    x = torch.randn(m, K, dtype=torch.bfloat16, device=dev)
 
     def run():
         return mu.apply_gptq_marlin_linear(
@@ -396,43 +577,49 @@ def _build_marlin_gemm(out: int, inn: int, dev):
 
     # sanity: finite + correct shape on first call
     out_t = run()
-    ok = bool(out_t.shape == (1, N) and torch.isfinite(out_t).all().item())
+    ok = bool(out_t.shape == (m, N) and torch.isfinite(out_t).all().item())
     return run, _int4_weight_bytes(out, inn), ok
 
 
-def gpu_microbench(iters: int, warmup: int) -> dict[str, Any]:
-    import torch
-    dev = _device()
-    gpu = _gpu_facts(dev)
-    peak = _measure_peak_copy_gbs(dev, iters, warmup)
-    peak_gbs = peak["peak_copy_gbs"]
-
+def microbench_at_width(m: int, dev, peak_gbs: float, iters: int, warmup: int) -> dict[str, Any]:
+    """int4-Marlin per-shape microbench at verify width M. The weight-read efficiency
+    (count_weighted_marlin_bw_eff) is the headline marlin_m{M}_hbm_eff -- same weight-byte
+    numerator as #388's M=1 0.256, new M-width denominator (median us/GEMM at M rows)."""
     per_shape: list[dict[str, Any]] = []
     tot_params = 0.0
-    tot_int4_bytes = 0.0          # count-weighted total body weight bytes (int4)
-    tot_marlin_time_us = 0.0      # count-weighted total body GEMM time
-    tot_cb3_fixed_us = 0.0        # count-weighted cb3 time under the FIXED-OVERHEAD model
+    tot_int4_bytes = 0.0          # count-weighted total body weight bytes (int4); M-independent
+    tot_total_bytes = 0.0        # count-weighted weight + act-read + out-write (BW-bound diagnostic)
+    tot_marlin_time_us = 0.0     # count-weighted total body GEMM time at width M
+    tot_cb3_fixed_us = 0.0       # count-weighted cb3 time under the FIXED-OVERHEAD model
     all_ok = True
     for sh in BODY_SHAPES:
-        run, wbytes, ok = _build_marlin_gemm(sh["out"], sh["in"], dev)
+        run, wbytes, ok = _build_marlin_gemm(sh["out"], sh["in"], dev, m)
         all_ok = all_ok and ok
         us = _time_us(run, iters, warmup)
-        gbs = wbytes / (us * 1e-6) / 1e9
-        bw_eff = gbs / peak_gbs
+        gbs = wbytes / (us * 1e-6) / 1e9                 # weight-read effective GB/s
+        bw_eff = gbs / peak_gbs                           # weight-read HBM efficiency (THE metric)
+        # total bytes moved at width M: weight (once) + M act rows in + M out rows out (bf16)
+        act_out_bytes = m * sh["in"] * 2.0 + m * sh["out"] * 2.0
+        total_bytes = wbytes + act_out_bytes
+        total_gbs = total_bytes / (us * 1e-6) / 1e9
+        total_bw_eff = total_gbs / peak_gbs               # incl act/out (secondary diagnostic)
         params = _shape_params(sh)
         cb3_bytes = wbytes * BODY_BYTES_FRAC
-        cb3_roof_us = us * BODY_BYTES_FRAC           # roofline: same BW-eff => time scales w/ bytes
-        # fixed-overhead model: only the BW-bound transfer component shrinks; launch/dequant
-        # overhead (the part that makes M=1 NOT bw-bound) is held fixed -> a measured-data FLOOR.
+        cb3_roof_us = us * BODY_BYTES_FRAC                # roofline: same BW-eff => time scales w/ bytes
+        # fixed-overhead model: only the WEIGHT transfer component shrinks (cb3 shrinks weights
+        # only); launch/dequant/act/out overhead (the part that keeps it off the roofline) is held
+        # fixed -> a measured-data FLOOR. At higher M, a BW-bound kernel has less fixed overhead
+        # relative to the (now-dominant) weight transfer, so the floor speedup climbs.
         t_transfer_us = wbytes / (peak_gbs * 1e9) * 1e6
         t_overhead_us = max(us - t_transfer_us, 0.0)
         cb3_fixed_us = BODY_BYTES_FRAC * t_transfer_us + t_overhead_us
         sp_fixed = us / cb3_fixed_us if cb3_fixed_us > 0 else 1.0
         per_shape.append({
-            "name": sh["name"], "out": sh["out"], "in": sh["in"], "count": sh["count"],
+            "name": sh["name"], "out": sh["out"], "in": sh["in"], "count": sh["count"], "m": m,
             "params": params, "int4_weight_mib": wbytes / (1024**2),
             "cb3_weight_mib": cb3_bytes / (1024**2),
             "marlin_us": us, "marlin_eff_gbs": gbs, "marlin_bw_eff": bw_eff,
+            "marlin_total_eff_gbs": total_gbs, "marlin_total_bw_eff": total_bw_eff,
             "cb3_roofline_us": cb3_roof_us,
             "transfer_us_at_peak": t_transfer_us, "overhead_us": t_overhead_us,
             "cb3_fixed_overhead_us": cb3_fixed_us, "fixed_overhead_speedup": sp_fixed,
@@ -440,30 +627,68 @@ def gpu_microbench(iters: int, warmup: int) -> dict[str, Any]:
         })
         tot_params += params
         tot_int4_bytes += sh["count"] * wbytes
+        tot_total_bytes += sh["count"] * total_bytes
         tot_marlin_time_us += sh["count"] * us
         tot_cb3_fixed_us += sh["count"] * cb3_fixed_us
 
     agg_eff_gbs = tot_int4_bytes / (tot_marlin_time_us * 1e-6) / 1e9
     agg_bw_eff = agg_eff_gbs / peak_gbs
-    bw_bound = agg_bw_eff >= BW_BOUND_EFF_THRESHOLD
-    # count-weighted measured-data floor speedup (roofline if BW-bound; < roofline if overhead-heavy)
+    agg_total_eff_gbs = tot_total_bytes / (tot_marlin_time_us * 1e-6) / 1e9
+    agg_total_bw_eff = agg_total_eff_gbs / peak_gbs
+    # BW-bound verdicts: 0.5 is the #391 served-regime threshold; 0.6 keeps #388 continuity.
+    bw_bound = agg_bw_eff >= M8_BW_BOUND_THRESHOLD
+    bw_bound_388 = agg_bw_eff >= BW_BOUND_EFF_THRESHOLD
+    # count-weighted measured-data floor speedup (== speedup_from_beta(agg_bw_eff); see proof)
     measured_floor_speedup = tot_marlin_time_us / tot_cb3_fixed_us
 
     return {
-        "gpu": gpu,
-        "peak_copy": peak,
+        "width": m,
         "per_shape": per_shape,
         "aggregate": {
+            "width": m,
             "total_body_params": tot_params,
             "total_int4_weight_gib": tot_int4_bytes / (1024**3),
             "count_weighted_marlin_eff_gbs": agg_eff_gbs,
-            "count_weighted_marlin_bw_eff": agg_bw_eff,
-            "m1_is_bw_bound": bool(bw_bound),
-            "bw_bound_threshold": BW_BOUND_EFF_THRESHOLD,
+            "count_weighted_marlin_bw_eff": agg_bw_eff,           # == marlin_m{M}_hbm_eff
+            "count_weighted_total_eff_gbs": agg_total_eff_gbs,
+            "count_weighted_total_bw_eff": agg_total_bw_eff,
+            "is_bw_bound": bool(bw_bound),
+            "is_bw_bound_388_threshold": bool(bw_bound_388),
+            "bw_bound_threshold": M8_BW_BOUND_THRESHOLD,
+            "bw_bound_threshold_388": BW_BOUND_EFF_THRESHOLD,
             "measured_floor_speedup": measured_floor_speedup,
             "roofline_speedup": roofline_speedup(),
         },
         "all_shapes_finite_ok": bool(all_ok),
+    }
+
+
+def gpu_microbench(widths: list[int], iters: int, warmup: int) -> dict[str, Any]:
+    """Sweep the body-GEMM microbench across verify widths (M=1 baseline + served M=8 / M=4).
+    Peak-copy BW and GPU facts are measured once. M=1 aggregate/per_shape are aliased to the top
+    level for #388 backward-compat; all widths live under by_width."""
+    import torch
+    dev = _device()
+    gpu = _gpu_facts(dev)
+    peak = _measure_peak_copy_gbs(dev, iters, warmup)
+    peak_gbs = peak["peak_copy_gbs"]
+
+    by_width: dict[str, Any] = {}
+    for m in widths:
+        by_width[str(m)] = microbench_at_width(m, dev, peak_gbs, iters, warmup)
+
+    base = by_width.get("1") or by_width[str(widths[0])]   # M=1 anchor (always present in practice)
+    # keep #388's "m1_is_bw_bound" key (0.6 threshold) on the M=1 aggregate for continuity
+    base["aggregate"]["m1_is_bw_bound"] = bool(base["aggregate"]["is_bw_bound_388_threshold"])
+    return {
+        "gpu": gpu,
+        "peak_copy": peak,
+        "widths": list(widths),
+        "by_width": by_width,
+        # ---- #388 backward-compat M=1 aliases ----
+        "per_shape": base["per_shape"],
+        "aggregate": base["aggregate"],
+        "all_shapes_finite_ok": bool(all(by_width[w]["all_shapes_finite_ok"] for w in by_width)),
         "peak_mem_mib": round(torch.cuda.max_memory_allocated(dev) / (1024**2), 3),
     }
 
@@ -493,6 +718,51 @@ def build_payload(args, micro: dict[str, Any] | None, st: dict[str, Any]) -> dic
         strict_cons = ap["translation_variants"]["measured_floor__body_only"]["delta_off_the_shelf"]
         supply_gate_strict_floor = supply_gate(strict_cons)
 
+    # ---- #391 width-aware analysis: M=8 served verify + M=4 partial-accept ------------- #
+    width_analysis: dict[str, Any] | None = None
+    m8 = m4 = None
+    m8_note = None
+    if micro is not None and "by_width" in micro:
+        bw = micro["by_width"]
+        eff_1 = (bw["1"]["aggregate"]["count_weighted_marlin_bw_eff"] if "1" in bw
+                 else M1_MEASURED_HBM_EFF_388)
+        width_analysis = {}
+        for w_str, blk in bw.items():
+            eff_m = blk["aggregate"]["count_weighted_marlin_bw_eff"]
+            width_analysis[w_str] = width_full_analysis(int(w_str), eff_m, eff_1)
+        m8 = width_analysis.get(str(SERVED_VERIFY_WIDTH))
+        m4 = width_analysis.get(str(PARTIAL_ACCEPT_WIDTH))
+        if m8 is not None:
+            eff8 = m8["marlin_hbm_eff"]
+            strict8 = m8["realized_strict_base_lift_tps_measured_floor"]
+            strict1 = (width_analysis.get("1", {}).get(
+                "realized_strict_base_lift_tps_measured_floor", 15.65))
+            if m8["is_bw_bound"]:
+                m8_note = (
+                    f"SERVED M=8 IS BW-BOUND: marlin_m8_hbm_eff={eff8:.3f} >= "
+                    f"{M8_BW_BOUND_THRESHOLD} (up from M=1 {eff_1:.3f}). Strict measured-floor lift "
+                    f"+{strict8:.1f} TPS clears #383 +17.22 floor AND +23.75 robust -> the served "
+                    f"regime UPGRADES the M=1 straddle (+{strict1:.1f}) to a CLEAN PASS.")
+            elif m8["closes_383_robust"]:
+                m8_note = (
+                    f"SERVED M=8 partially BW-bound: marlin_m8_hbm_eff={eff8:.3f} (< "
+                    f"{M8_BW_BOUND_THRESHOLD} but up from M=1 {eff_1:.3f}); strict measured-floor "
+                    f"lift +{strict8:.1f} TPS still clears #383 floor+robust -> straddle upgraded "
+                    f"to a pass with margin.")
+            else:
+                delta_eff = eff8 - eff_1
+                m8_note = (
+                    f"SERVED M=8 WEIGHT-READ EFFICIENCY ~FLAT: marlin_m8_hbm_eff={eff8:.3f} vs M=1 "
+                    f"{eff_1:.3f} (delta {delta_eff:+.3f}), < {M8_BW_BOUND_THRESHOLD}. This matches the "
+                    f"Marlin prior (2408.11743 Tab2: int4 GEMM time ~flat M=1->8, speedup 2.93->2.90x): "
+                    f"Marlin is ALREADY software-pipelined at M=1, so M=8 does more compute at ~flat "
+                    f"weight-read time -> efficiency does NOT rise. M=8 IS bandwidth-bound as a REGIME "
+                    f"(M<~64 crossover, Fig 11), but that does NOT add efficiency-vs-peak headroom. "
+                    f"Strict measured-floor lift +{strict8:.1f} TPS (M=1 was +{strict1:.1f}) does NOT "
+                    f"clear #383 +23.75 robust -> the supply lift does NOT improve at the served width; "
+                    f"the strict-tier STRADDLE STANDS. HONEST NEGATIVE (#388 discipline): the served "
+                    f"regime does not upgrade the M=1 straddle to a pass.")
+
     # if GPU ran, qualify the roofline with the measured M=1 BW-bound verdict
     realized_note = (
         "ROOFLINE BOUND: no cb3/QTIP kernel in env (Marlin/AWQ/AQLM only); cb3 bounded by its "
@@ -510,13 +780,13 @@ def build_payload(args, micro: dict[str, Any] | None, st: dict[str, Any]) -> dic
                     "OPTIMISTIC upper bound; literature-conservative 1.15x is the realized floor."))
 
     payload: dict[str, Any] = {
-        "agent": "lawine", "pr": 388,
+        "agent": "lawine", "pr": 391, "base_pr": 388,
         "kind": "cb3-kernel-realized-bw",
         "created_at": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
         # isolation flags (research microbench; NO served change/submission/HF job)
         "no_hf_job": True, "no_launch": True, "no_served_file_change": True,
         "no_kernel_rebuild": True, "analysis_only": True, "official_tps": 0.0,
-        # ---- analytic core ----
+        # ---- analytic core (M=1 #388 baseline) ----
         "byte_ratio": ap["byte_ratio"],
         "realized_body_speedup": S_roof,
         "realized_body_speedup_qtip_empirical": ap["realized_body_speedup_qtip_empirical"],
@@ -535,6 +805,24 @@ def build_payload(args, micro: dict[str, Any] | None, st: dict[str, Any]) -> dic
         "supply_gate_strict_floor": supply_gate_strict_floor,
         "activation_hadamard_tax": ap["activation_hadamard_tax"],
         "realized_note": realized_note,
+        # ---- #391 served-width headline (M=8 verify / M=4 partial-accept) ----
+        "served_verify_width": SERVED_VERIFY_WIDTH, "partial_accept_width": PARTIAL_ACCEPT_WIDTH,
+        "mtp_k": MTP_K,
+        "width_analysis": width_analysis,
+        "marlin_m8_hbm_eff": (m8["marlin_hbm_eff"] if m8 else None),
+        "marlin_m4_hbm_eff": (m4["marlin_hbm_eff"] if m4 else None),
+        "realized_body_speedup_m8": (m8["realized_body_speedup"] if m8 else None),    # 3 tiers
+        "realized_body_speedup_m4": (m4["realized_body_speedup"] if m4 else None),
+        "realized_strict_base_lift_tps_m8": (m8["realized_strict_base_lift_tps"] if m8 else None),
+        "realized_strict_base_lift_tps_m4": (m4["realized_strict_base_lift_tps"] if m4 else None),
+        "realized_strict_base_lift_tps_m8_measured_floor": (
+            m8["realized_strict_base_lift_tps_measured_floor"] if m8 else None),
+        "closes_383_robust_m8": (m8["closes_383_robust"] if m8 else None),
+        "closes_383_robust_m4": (m4["closes_383_robust"] if m4 else None),
+        "m8_is_bw_bound": (m8["is_bw_bound"] if m8 else None),
+        "m4_is_bw_bound": (m4["is_bw_bound"] if m4 else None),
+        "m8_note": m8_note,
+        "cb3_m8_microbench_self_test_passes": bool(st["passes"]),
         # ---- inputs (provenance) ----
         "inputs": {
             "int4_bpw": INT4_BPW, "cb3_bpw_eff": CB3_BPW_EFF, "cb3_bpw_uniform": CB3_BPW_UNIFORM,
@@ -542,6 +830,8 @@ def build_payload(args, micro: dict[str, Any] | None, st: dict[str, Any]) -> dic
             "f_attn_378": F_ATTN, "f_lmhead_378": F_LMHEAD, "f_draft_378": F_DRAFT,
             "band_378": [BAND_OFF_THE_SHELF, BAND_FLOOR], "step_norm_us_378": STEP_NORM_US,
             "supply_floor_383": SUPPLY_FLOOR_JOINT_TPS, "supply_robust_383": SUPPLY_ROBUST_ET_ONLY_TPS,
+            "mtp_k_52": MTP_K, "served_verify_width": SERVED_VERIFY_WIDTH,
+            "m1_measured_hbm_eff_388": M1_MEASURED_HBM_EFF_388,
         },
         "selftest": st,
         "cb3_microbench_self_test_passes": bool(st["passes"]),
@@ -556,7 +846,8 @@ def build_payload(args, micro: dict[str, Any] | None, st: dict[str, Any]) -> dic
 
 def print_report(p: dict[str, Any]) -> None:
     print("=" * 96)
-    print(f"PR #388 lawine -- cb3 kernel REALIZED bandwidth @ M=1 decode  ({p['created_at']})")
+    print(f"PR #391 lawine -- cb3 kernel REALIZED bandwidth @ SERVED M=8/M=4 verify "
+          f"(extends #388 M=1)  ({p['created_at']})")
     if "gpu" in p:
         g = p["gpu"]
         print(f"  GPU {g['name']} sm{g['compute_capability']} x{g['sm_count']} "
@@ -579,6 +870,28 @@ def print_report(p: dict[str, Any]) -> None:
         for s in mb["per_shape"]:
             print(f"    {s['name']:>8} [{s['out']:>5}x{s['in']:>5}] x{s['count']:<3} "
                   f"{s['marlin_us']:>7.2f}us  {s['marlin_eff_gbs']:>6.1f}GB/s  eff={s['marlin_bw_eff']:.3f}")
+        wa = p.get("width_analysis")
+        if wa and "by_width" in mb:
+            print("-" * 96)
+            print("  *** #391 SERVED-WIDTH SWEEP (marlin_m{M}_hbm_eff = weight-read efficiency) ***")
+            print(f"    {'M':>3} {'hbm_eff':>8} {'tot_eff':>8} {'bw_bound':>9} | "
+                  f"{'roofline':>9} {'qtip':>7} {'floor':>7} | "
+                  f"{'strict_lift':>11} {'closes_383':>11}")
+            for w_str in sorted(wa.keys(), key=lambda x: int(x)):
+                a = wa[w_str]; tiers = a["realized_body_speedup"]
+                aggw = mb["by_width"][w_str]["aggregate"]
+                print(f"    {a['width']:>3} {a['marlin_hbm_eff']:>8.3f} "
+                      f"{aggw['count_weighted_total_bw_eff']:>8.3f} {str(a['is_bw_bound']):>9} | "
+                      f"{tiers['roofline']:>9.3f} {tiers['qtip_empirical']:>7.3f} "
+                      f"{tiers['measured_floor']:>7.3f} | "
+                      f"+{a['realized_strict_base_lift_tps_measured_floor']:>10.1f} "
+                      f"{str(a['closes_383_robust']):>11}")
+            print("    (strict_lift = measured-floor tier, body-only, off-the-shelf base; "
+                  "closes_383 = clears +17.22 floor AND +23.75 robust)")
+            if p.get("m8_note"):
+                print("  " + "-" * 92)
+                for line in _wrap(p["m8_note"], 92):
+                    print(f"  {line}")
     print("-" * 96)
     print("  realized_strict_base_lift_tps  (apply speedup to body fraction of #378 band):")
     for k, v in p["translation_variants"].items():
@@ -600,11 +913,39 @@ def print_report(p: dict[str, Any]) -> None:
           f"of weight read (negligible)")
     ub = p["roofline_formula_lift_band_upper_bound"]
     print("-" * 96)
-    print(f"  HEADLINE realized_strict_base_lift_tps = +{p['realized_strict_base_lift_tps']:.1f} TPS "
-          f"(realistic; PR roofline-formula UPPER bound would be +{ub[0]:.1f}..+{ub[1]:.1f})")
+    print(f"  [M=1 #388 baseline] realized_strict_base_lift_tps = +{p['realized_strict_base_lift_tps']:.1f} "
+          f"TPS (realistic; PR roofline-formula UPPER bound +{ub[0]:.1f}..+{ub[1]:.1f})")
+    if p.get("marlin_m8_hbm_eff") is not None:
+        t8 = p["realized_body_speedup_m8"]
+        print("-" * 96)
+        print(f"  *** #391 HEADLINE (SERVED M=8 verify) ***")
+        print(f"    marlin_m8_hbm_eff           = {p['marlin_m8_hbm_eff']:.3f}  "
+              f"(M=1 was {p['microbench']['by_width']['1']['aggregate']['count_weighted_marlin_bw_eff']:.3f}; "
+              f"BW-bound>={M8_BW_BOUND_THRESHOLD}? {p['m8_is_bw_bound']})")
+        print(f"    realized_body_speedup_m8    = roofline {t8['roofline']:.3f}x | "
+              f"qtip {t8['qtip_empirical']:.3f}x | measured-floor {t8['measured_floor']:.3f}x")
+        print(f"    realized_strict_base_lift_tps_m8 = +{p['realized_strict_base_lift_tps_m8']:.1f} TPS "
+              f"(qtip realistic) | +{p['realized_strict_base_lift_tps_m8_measured_floor']:.1f} (strict floor)")
+        print(f"    closes_383_robust_m8 (STRICT tier) = {p['closes_383_robust_m8']}")
+        if p.get("marlin_m4_hbm_eff") is not None:
+            print(f"    [M=4 partial-accept] hbm_eff={p['marlin_m4_hbm_eff']:.3f}  "
+                  f"strict_lift=+{p['width_analysis']['4']['realized_strict_base_lift_tps_measured_floor']:.1f} "
+                  f"closes_383={p['closes_383_robust_m4']}")
     print(f"  self-test: {p['selftest']['n_passed']}/{p['selftest']['n_checks']} "
-          f"-> cb3_microbench_self_test_passes = {p['cb3_microbench_self_test_passes']}")
+          f"-> cb3_m8_microbench_self_test_passes = {p['cb3_m8_microbench_self_test_passes']}")
     print("=" * 96)
+
+
+def _wrap(text: str, width: int) -> list[str]:
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > width:
+            lines.append(cur); cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    if cur:
+        lines.append(cur)
+    return lines
 
 
 def maybe_log_wandb(payload: dict[str, Any], args) -> str | None:
@@ -622,12 +963,14 @@ def maybe_log_wandb(payload: dict[str, Any], args) -> str | None:
     run = init_wandb_run(
         job_type="analysis-gpu-microbench", agent="lawine",
         name=args.wandb_name, group=args.wandb_group,
-        tags=["cb3-kernel-realized-bw", "roofline", "marlin-m1", "qtip-quip", "sub-int4-body",
-              "pr-388"],
-        config={"pr": 388, "kind": "cb3-kernel-realized-bw",
+        tags=["cb3-kernel-realized-bw", "roofline", "marlin-m8", "served-verify", "qtip-quip",
+              "sub-int4-body", "pr-391", "pr-388-followup"],
+        config={"pr": 391, "base_pr": 388, "kind": "cb3-kernel-realized-bw",
                 "int4_bpw": INT4_BPW, "cb3_bpw_eff": CB3_BPW_EFF, "byte_ratio": byte_ratio(),
                 "band_off_the_shelf": BAND_OFF_THE_SHELF, "band_floor": BAND_FLOOR,
                 "supply_floor_383": SUPPLY_FLOOR_JOINT_TPS, "official_tps": 0.0,
+                "mtp_k": MTP_K, "served_verify_width": SERVED_VERIFY_WIDTH,
+                "partial_accept_width": PARTIAL_ACCEPT_WIDTH, "widths": str(DEFAULT_WIDTHS),
                 "analysis_only": True, "no_hf_job": True},
     )
     if run is None:
@@ -668,6 +1011,35 @@ def maybe_log_wandb(payload: dict[str, Any], args) -> str | None:
             flat[f"shape/{s['name']}/marlin_us"] = float(s["marlin_us"])
             flat[f"shape/{s['name']}/eff_gbs"] = float(s["marlin_eff_gbs"])
             flat[f"shape/{s['name']}/bw_eff"] = float(s["marlin_bw_eff"])
+        # ---- #391 per-width served sweep (M=1/M=8/M=4) ----
+        for w_str, blk in mb.get("by_width", {}).items():
+            aw = blk["aggregate"]
+            flat[f"width/m{w_str}/marlin_hbm_eff"] = float(aw["count_weighted_marlin_bw_eff"])
+            flat[f"width/m{w_str}/total_bw_eff"] = float(aw["count_weighted_total_bw_eff"])
+            flat[f"width/m{w_str}/measured_floor_speedup"] = float(aw["measured_floor_speedup"])
+            flat[f"width/m{w_str}/is_bw_bound"] = float(aw["is_bw_bound"])
+            for s in blk["per_shape"]:
+                flat[f"width/m{w_str}/shape/{s['name']}/us"] = float(s["marlin_us"])
+                flat[f"width/m{w_str}/shape/{s['name']}/bw_eff"] = float(s["marlin_bw_eff"])
+        wa = payload.get("width_analysis") or {}
+        for w_str, a in wa.items():
+            t = a["realized_body_speedup"]
+            flat[f"m8sweep/m{w_str}/roofline_speedup"] = float(t["roofline"])
+            flat[f"m8sweep/m{w_str}/qtip_speedup"] = float(t["qtip_empirical"])
+            flat[f"m8sweep/m{w_str}/measured_floor_speedup"] = float(t["measured_floor"])
+            flat[f"m8sweep/m{w_str}/strict_lift_tps"] = float(a["realized_strict_base_lift_tps_measured_floor"])
+            flat[f"m8sweep/m{w_str}/realistic_lift_tps"] = float(a["realized_strict_base_lift_tps"])
+            flat[f"m8sweep/m{w_str}/closes_383_robust"] = float(a["closes_383_robust"])
+        # explicit M=8 headline scalars
+        if payload.get("marlin_m8_hbm_eff") is not None:
+            flat["headline_m8/marlin_m8_hbm_eff"] = float(payload["marlin_m8_hbm_eff"])
+            flat["headline_m8/realized_strict_base_lift_tps_m8"] = float(payload["realized_strict_base_lift_tps_m8"])
+            flat["headline_m8/strict_floor_lift_tps_m8"] = float(payload["realized_strict_base_lift_tps_m8_measured_floor"])
+            flat["headline_m8/closes_383_robust_m8"] = float(payload["closes_383_robust_m8"])
+            flat["headline_m8/m8_is_bw_bound"] = float(payload["m8_is_bw_bound"])
+        if payload.get("marlin_m4_hbm_eff") is not None:
+            flat["headline_m4/marlin_m4_hbm_eff"] = float(payload["marlin_m4_hbm_eff"])
+            flat["headline_m4/closes_383_robust_m4"] = float(payload["closes_383_robust_m4"])
     run.log({"global_step": 0, **flat})
     log_summary(run, _jsonable(payload), step=0, run_prefix=args.wandb_name)
     log_json_artifact(run, name="cb3_kernel_realized_bw", artifact_type="analysis", data=_jsonable(payload))
@@ -691,14 +1063,19 @@ def _jsonable(o: Any) -> Any:
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--self-test", action="store_true", help="0-GPU analytic gate (PR #388 step 5)")
-    ap.add_argument("--gpu", action="store_true", help="run the int4-Marlin M=1 microbench + roofline")
+    ap.add_argument("--self-test", action="store_true", help="0-GPU analytic gate (parity + M=8 checks)")
+    ap.add_argument("--gpu", action="store_true", help="run the int4-Marlin microbench + roofline (M=1 always)")
+    ap.add_argument("--m8", action="store_true", help="add the served M=8 verify leg (#391 headline)")
+    ap.add_argument("--m4", action="store_true", help="add the M=4 partial-accept leg")
+    ap.add_argument("--widths", type=str, default=None,
+                    help="comma-separated verify widths to bench (overrides --m8/--m4; M=1 always added)")
     ap.add_argument("--smoke", action="store_true", help="tiny fast GPU run to validate the path")
     ap.add_argument("--iters", type=int, default=120)
     ap.add_argument("--warmup", type=int, default=25)
     ap.add_argument("--wandb_name", "--wandb-name", dest="wandb_name",
-                    default="lawine/cb3-kernel-realized-bw")
-    ap.add_argument("--wandb_group", "--wandb-group", dest="wandb_group", default="cb3-kernel-realized-bw")
+                    default="lawine/cb3-m8-verify-body-speedup")
+    ap.add_argument("--wandb_group", "--wandb-group", dest="wandb_group",
+                    default="cb3-m8-verify-body-speedup")
     ap.add_argument("--no-wandb", action="store_true")
     ap.add_argument("--out-dir", default=str(Path(__file__).resolve().parent))
     args = ap.parse_args()
@@ -719,7 +1096,21 @@ def main() -> None:
         args.iters = min(args.iters, 20)
         args.warmup = min(args.warmup, 5)
 
-    micro = gpu_microbench(args.iters, args.warmup)
+    # Resolve verify widths: M=1 ALWAYS (the #388 baseline anchor + the QTIP eff_1 denominator);
+    # --m8/--m4 add the served legs; --widths overrides. Dedup, keep M=1 first.
+    if args.widths:
+        widths = [int(x) for x in args.widths.split(",") if x.strip()]
+    else:
+        widths = []
+        if args.m8:
+            widths.append(SERVED_VERIFY_WIDTH)
+        if args.m4:
+            widths.append(PARTIAL_ACCEPT_WIDTH)
+    widths = [1] + [w for w in widths if w != 1]
+    seen: set[int] = set()
+    widths = [w for w in widths if not (w in seen or seen.add(w))]
+
+    micro = gpu_microbench(widths, args.iters, args.warmup)
     payload = build_payload(args, micro, st)
     print_report(payload)
 
@@ -732,25 +1123,42 @@ def main() -> None:
         payload["wandb_run_id"] = rid
         out_path.write_text(json.dumps(_jsonable(payload), indent=2, sort_keys=True))
 
+    def _f(key):
+        v = payload.get(key)
+        return float(v) if v is not None else None
+
     print("\nSENPAI-RESULT " + json.dumps({
         "terminal": True, "status": "complete", "pending_arms": False,
         "wandb_run_ids": [rid] if rid else [],
+        # ---- M=1 #388 baseline (unchanged) ----
         "realized_body_speedup": float(payload["realized_body_speedup"]),
         "realized_body_speedup_qtip_empirical": float(payload["realized_body_speedup_qtip_empirical"]),
-        "realized_body_speedup_measured_floor": (
-            float(payload["realized_body_speedup_measured_floor"])
-            if payload.get("realized_body_speedup_measured_floor") is not None else None),
         "realized_is_roofline_bound": bool(payload["realized_is_roofline_bound"]),
         "realized_strict_base_lift_tps": float(payload["realized_strict_base_lift_tps"]),
-        "closes_383_supply_gap_floor": bool(payload["closes_383_supply_gap_floor"]),
-        "closes_383_strict_floor": (
-            bool(payload["supply_gate_strict_floor"]["closes_383_supply_gap_floor"])
-            if payload.get("supply_gate_strict_floor") else None),
         "m1_is_bw_bound": bool(payload.get("m1_is_bw_bound", False)),
-        "cb3_microbench_self_test_passes": bool(st["passes"]),
+        # ---- #391 served-width headline (M=8 verify / M=4 partial-accept) ----
+        "marlin_m8_hbm_eff": _f("marlin_m8_hbm_eff"),
+        "marlin_m4_hbm_eff": _f("marlin_m4_hbm_eff"),
+        "realized_body_speedup_m8": (payload["realized_body_speedup_m8"]
+                                     if payload.get("realized_body_speedup_m8") else None),
+        "realized_strict_base_lift_tps_m8": _f("realized_strict_base_lift_tps_m8"),
+        "realized_strict_base_lift_tps_m8_measured_floor": _f("realized_strict_base_lift_tps_m8_measured_floor"),
+        "closes_383_robust_m8": (bool(payload["closes_383_robust_m8"])
+                                 if payload.get("closes_383_robust_m8") is not None else None),
+        "closes_383_robust_m4": (bool(payload["closes_383_robust_m4"])
+                                 if payload.get("closes_383_robust_m4") is not None else None),
+        "m8_is_bw_bound": (bool(payload["m8_is_bw_bound"])
+                           if payload.get("m8_is_bw_bound") is not None else None),
+        "cb3_m8_microbench_self_test_passes": bool(st["passes"]),
         "official_tps": 0.0, "no_hf_job": True,
-        "primary_metric": {"name": "realized_body_speedup", "value": float(payload["realized_body_speedup"])},
-        "test_metric": {"name": "realized_strict_base_lift_tps", "value": float(payload["realized_strict_base_lift_tps"])},
+        "primary_metric": {"name": "marlin_m8_hbm_eff",
+                           "value": _f("marlin_m8_hbm_eff")
+                           if payload.get("marlin_m8_hbm_eff") is not None
+                           else float(payload["realized_body_speedup"])},
+        "test_metric": {"name": "realized_strict_base_lift_tps_m8",
+                        "value": _f("realized_strict_base_lift_tps_m8")
+                        if payload.get("realized_strict_base_lift_tps_m8") is not None
+                        else float(payload["realized_strict_base_lift_tps"])},
     }))
 
 
