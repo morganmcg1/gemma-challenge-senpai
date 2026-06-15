@@ -1064,6 +1064,26 @@ def main() -> None:
     if os.environ.get("DISABLE_LOG_STATS") == "1":
         args.append("--disable-log-stats")
 
+    # Profiling-only, default-off identity-preserving step-shave levers (kanna PR
+    # #359). Both env vars are unset in the manifest, so the leaderboard/served
+    # compute path is byte-identical; a local profiler sets them one at a time to
+    # isolate a step-shave lever's per-step microseconds. Neither changes emitted
+    # tokens (verified by the per-prompt greedy-identity gate in the measurement
+    # harness research/validity/strict_step_shave_stack/strict_step_shave_stack.py).
+    #   ENFORCE_EAGER=1        -> --enforce-eager: disables vLLM's native decode
+    #                            CUDA-graph capture AND torch.compile fusion (eager
+    #                            forward). Isolates the combined (cudagraph+fusion)
+    #                            step-shave the base banks.
+    #   COMPILATION_CONFIG=... -> --compilation-config <json>: forwards a vLLM -O
+    #                            JSON (e.g. {"cudagraph_mode":"NONE"}) to drop ONLY
+    #                            the cudagraph capture while keeping inductor fusion,
+    #                            so cudagraph can be split from fusion.
+    if os.environ.get("ENFORCE_EAGER") == "1":
+        args.append("--enforce-eager")
+    _comp_cfg = os.environ.get("COMPILATION_CONFIG", "").strip()
+    if _comp_cfg:
+        args += ["--compilation-config", _comp_cfg]
+
     if os.environ.get("PRECACHE_BENCH") == "1":
         # Fail fast if the precache patch cannot import: site.execsitecustomize
         # swallows sitecustomize errors, so a broken patch would otherwise
