@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~04:05Z (cycle 52k)
+- **Date:** 2026-06-15 ~04:13Z (cycle 52k)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
@@ -65,7 +65,7 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 | Student | PR | Hypothesis | Owner | Status |
 |---------|-----|-----------|-------|--------|
 | wirbel  | #293 | EAGLE-3 drafter step-overhead (re-bank the 4.9029 target for the HEAVIER fusion drafter; does it eat the 0.0631 free-lever relaxation?) | me | 🔄 WIP (reseat; #290 MERGED 04:04 → honest target 4.9029, budget 1.0584 off linear family) |
-| kanna   | #289 | Per-position acceptance decay (the BUILT-raise a_k target profile to E[T]≥4.97) | me | 🔄 WIP (reseat; #286 MERGED 03:35 → bridge draft-0.21/verify-1.0, stack 493.64) |
+| kanna   | #294 | EAGLE-3 Phase-1 viability gate (the cheap-proxy GO threshold before the human-gated retrain) | Morgan | 🔄 WIP (reseat; #289 MERGED 04:11 → acceptance cliff at POSITION 1 = 45.7% of E[T] loss, feasibility asymmetry: deep-lift feasible / a_1-only ceiling-bound ⇒ BUILT raise requires non-linear drafter) |
 | fern    | #287 | Read-reduction PPL pareto | Morgan | 🔄 WIP |
 | lawine  | #292 | SAM-Decoding retrieval acceptance-lift (the one TRAINING-FREE forward E[T] lever; prompt suffix-recurrence → E[T] bracket) | me | 🔄 WIP (reseat; #288 MERGED 03:58 → τ_ppl=1.000218, safe local PPL bar 2.4185, transfer trinity COMPLETE) |
 | denken  | #291 | Verify-compute overlap-hideability (honest kernel floor in [487.7, 746.9]; is a free non-build step lane real?) | me | 🔄 WIP (reseat; #283 MERGED 03:49 → system NOT read-bound, read=38% of honest wall, verify front OPEN) |
@@ -117,7 +117,7 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 **THE PIVOT — BUILT public-E[T] raise (Plateau-Protocol bigger swing):**
 1. **Phase-1 viability (cheap, in-bounds):** EAGLE-3 architecture-adaptation sanity (2h single GPU, `SupportsEagle3` load + run for Gemma-4, no retrain, no submission). De-risk the interface before spending training.
-2. **Pre-build target (analytic):** **wirbel #290 (MERGED 04:04, `ub3kpsso`)** settled the aggregate honest step-banked target at **4.9029** public E[T] — budget **+1.0584** beyond denken #119's linear cap 3.8445 (which the deployed drafter sits AT, zero linear headroom), inside the feasibility window (4.9029 < E_T_max 8.0; 25.5% of cap→ceiling headroom), recoverable ONLY by a structurally non-linear drafter; `eagle3_sufficiency_is_build_gated`. **kanna #289** (in flight) decomposes E[T]=3.844 into the per-position a_k profile + cliff (WHERE the budget lives). **wirbel #293** (reseat) re-banks the 4.9029 target for the HEAVIER EAGLE-3 fusion drafter's draft-step overhead — does the heavier drafter eat the 0.0631 free-lever relaxation?
+2. **Pre-build target (analytic):** **wirbel #290 (MERGED 04:04, `ub3kpsso`)** settled the aggregate honest step-banked target at **4.9029** public E[T] — budget **+1.0584** beyond denken #119's linear cap 3.8445 (which the deployed drafter sits AT, zero linear headroom), inside the feasibility window (4.9029 < E_T_max 8.0; 25.5% of cap→ceiling headroom), recoverable ONLY by a structurally non-linear drafter; `eagle3_sufficiency_is_build_gated`. **kanna #289 (MERGED 04:11, `fi34s269`)** decomposed E[T]=3.844 into the per-position a_k profile: the acceptance cliff is at **POSITION 1** (forfeits 1.895 tokens = 45.7% of the loss; conditional acceptance RISES with depth = survivorship) and the BUILT-raise target now has an exact per-position spec — **lift j≥2 conditional acceptance to ≈0.91 while keeping a_1≥0.73** (deep-position lift is feasible, a_1-only is ceiling-bound at E[T]=4.910<4.966 ⇒ `built_raise_requires_nonlinear_drafter`), localizing WHERE wirbel #290's 1.0584 budget lives. **kanna #294 (reseat, Morgan)** → EAGLE-3 Phase-1 viability gate (the cheap-proxy GO threshold). **wirbel #293** (reseat) re-banks the 4.9029 target for the HEAVIER EAGLE-3 fusion drafter's draft-step overhead — does the heavier drafter eat the 0.0631 free-lever relaxation?
 3. **Ungated forward companion (analytic, in flight):** **lawine #292** screens SAM-Decoding suffix-automaton retrieval — the ONE training-free E[T] lever: measures prompt suffix-recurrence on the 128 official prompts → E[T]-lift bracket, decides STANDALONE (avoids the human gate) vs +2-4% ungated companion that stacks under EAGLE-3. Greedy-safe by construction (emission = verify argmax); armed by lawine's own **#288 transfer trinity** (τ_lo/τ_acc/τ_ppl COMPLETE → local PPL bar 2.4185, "zero PPL risk" transfers 1:1).
 4. **Full EAGLE-3 retrain (human-approval-gated):** route via `Approval request: HF job`. Companion PARD-2 CAT loss (same run). Phase-1 architecture-adaptation viability (2h single GPU) is the cheap precursor.
 5. **Composition:** any built E[T] raise stacks multiplicatively on the lossless step envelope (wirbel #285) — `official = K_cal·(E[T]/step)·τ`, E[T]-independent step levers compose cleanly.
