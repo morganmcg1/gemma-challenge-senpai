@@ -1,0 +1,308 @@
+{
+  "created_at": "20260615T065425Z",
+  "pr": 311,
+  "agent": "ubel",
+  "kind": "eagle3-capture-dispatch-risk",
+  "analysis_only": true,
+  "synthesis": {
+    "constants": {
+      "official_baseline": 481.53,
+      "k_spec": 7,
+      "m_verify_deployed": 8,
+      "vocab": 262144,
+      "max_cudagraph_capture_size_101": 16,
+      "spine_verify_tokens_101": 8,
+      "size29_crash_tokens_101": 29,
+      "valid_captured_sizes_306": [
+        8,
+        16
+      ],
+      "m_sweep": [
+        8,
+        16,
+        32
+      ],
+      "build_peak_gib_306": 20.158085215091706,
+      "m32_vram_delta_over_m8_mib_306": 12.0,
+      "imports": "ubel#306(y1lji0c6 build_peak=20.158 headroom24=3.842 capture_transient=0.0410 M32_delta=+12MiB valid_captured={8,16}) x lawine#101/#245-c1(max_capture=16 size29-crash dispatch-IndexError) x vLLM#29091/PR#23679 x served fa2sw_precache_kenyan(manifest spec-K=7 + serve.py M=8 prewarm)"
+    },
+    "deployed_config": {
+      "manifest_path": "submissions/fa2sw_precache_kenyan/manifest.json",
+      "serve_path": "submissions/fa2sw_precache_kenyan/serve.py",
+      "sitecustomize_path": "submissions/fa2sw_precache_kenyan/sitecustomize.py",
+      "k_num_speculative_tokens": 7,
+      "spec_method": "mtp",
+      "max_num_seqs": "1",
+      "max_num_batched_tokens": "512",
+      "performance_mode": "interactivity",
+      "onegraph_env": true,
+      "loopgraph_require_capture": "1",
+      "dixie_prewarm_greedy_kernel": "1",
+      "launch_flag_pins": {
+        "enforce_eager": false,
+        "compilation_config": false,
+        "cuda_graph_sizes": false,
+        "cudagraph_capture_sizes_literal": false,
+        "max_capture_size_literal": false
+      },
+      "capture_list_explicitly_pinned": false,
+      "drafter_manual_onegraph_capture": true,
+      "prewarm_verify_width": 8,
+      "prewarm_draft_k": 7,
+      "max_cudagraph_capture_size_effective": 16,
+      "capture_sizes_source": "vLLM default derivation (NOT pinned in submission); ceiling banked from lawine #101 size-29 crash + ubel #306 y1lji0c6",
+      "verify_captured_sizes_multiples_of_1pK": [
+        8,
+        16
+      ]
+    },
+    "dispatch_arithmetic": {
+      "spine_unit_1pK": 8,
+      "max_cudagraph_capture_size": 16,
+      "captured_sizes_multiples_of_1pK": [
+        8,
+        16
+      ],
+      "draft_side": {
+        "k_spec": 7,
+        "capture_mode": "manual ONEGRAPH (CUDAGraphMode.NONE), batch=1 inner, K-unrolled",
+        "routed_through_vllm_capture_list": false,
+        "per_iteration_tokens": 1,
+        "fused_draft_plus_verify_tokens": 15,
+        "dispatch_safe": true,
+        "note": "draft side is NOT subject to the vLLM capture-size list; the dispatch risk is entirely on the verify side"
+      },
+      "verify_side": {
+        "8": {
+          "m_width": 8,
+          "verify_replay_tokens": 8,
+          "is_multiple_of_1pK": true,
+          "within_capture_ceiling": true,
+          "dispatch_captured": true,
+          "dispatch_safe": true,
+          "regime": "clear"
+        },
+        "16": {
+          "m_width": 16,
+          "verify_replay_tokens": 16,
+          "is_multiple_of_1pK": true,
+          "within_capture_ceiling": true,
+          "dispatch_captured": true,
+          "dispatch_safe": true,
+          "regime": "boundary"
+        },
+        "32": {
+          "m_width": 32,
+          "verify_replay_tokens": 32,
+          "is_multiple_of_1pK": true,
+          "within_capture_ceiling": false,
+          "dispatch_captured": false,
+          "dispatch_safe": false,
+          "regime": "crash-regime(IndexError-dispatch)"
+        }
+      },
+      "safe_widths": [
+        8,
+        16
+      ],
+      "crash_widths": [
+        32
+      ],
+      "max_safe_tree_width_under_deployed_list": 16,
+      "deployed_m8_dispatch_safe": true
+    },
+    "cross_check_306": {
+      "results_file": "research/validity/eagle3_capture_peak/eagle3_capture_peak_results.json",
+      "loaded": true,
+      "tol": 1e-06,
+      "checks": {
+        "build_peak_gib": {
+          "mine": 20.158085215091706,
+          "recorded": 20.158085215091706,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "resident_floor_gib": {
+          "mine": 20.100143778324128,
+          "recorded": 20.100143778324128,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "peak_headroom_24_hard_gib": {
+          "mine": 3.841914784908294,
+          "recorded": 3.841914784908294,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "peak_headroom_23_usable_gib": {
+          "mine": 2.841914784908294,
+          "recorded": 2.841914784908294,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "capture_transient_gib": {
+          "mine": 0.041015625,
+          "recorded": 0.041015625,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "total_transient_gib": {
+          "mine": 0.057941436767578125,
+          "recorded": 0.057941436767578125,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "logit_buf_bytes_m8": {
+          "mine": 4194304.0,
+          "recorded": 4194304.0,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "logit_buf_bytes_m16": {
+          "mine": 8388608.0,
+          "recorded": 8388608.0,
+          "abs_err": 0.0,
+          "ok": true
+        },
+        "logit_buf_bytes_m32": {
+          "mine": 16777216.0,
+          "recorded": 16777216.0,
+          "abs_err": 0.0,
+          "ok": true
+        }
+      },
+      "max_abs_err": 0.0,
+      "m32_vram_delta_over_m8_mib": 12.0,
+      "m32_vram_delta_is_12mib_trivial": true,
+      "m32_blocker_is_dispatch_not_memory": true,
+      "all_within_tol": true
+    },
+    "mechanism": {
+      "precedent": "lawine #101 / #245-cycle-1 size-29 CUDA-graph capture crash",
+      "experiments_log_ref": "research/EXPERIMENTS_LOG.md (lawine #245-c1 cycle)",
+      "repo_corroboration": "research/tree_verify_path/report_descend_walk.md:87 'graph-capture is the size-29 crash -> enforce-eager'",
+      "vllm_refs": [
+        "vLLM#29091",
+        "vLLM-PR#23679"
+      ],
+      "crash_is_vram_oom": false,
+      "crash_is_capture_size_dispatch_indexerror": true,
+      "why": "at dispatch the runtime-mode lookup indexes the captured-size set for the forward's padded token-count; token-count > max_cudagraph_capture_size finds no captured graph -> IndexError. size-29 > max-16 => crash. It is a config-list correctness property, independent of allocation/VRAM bytes.",
+      "size29_over_max16": true,
+      "spine8_within_max16": true,
+      "public_corroboration": {
+        "note": "public challenge board attributes the IN-SERVE size-29 tree-verify crash to the custom star_gqa attention KERNEL (a distinct failure mode), fixed by a dense masked attn N<=32 -- NOT the cudagraph capture-size dispatch axis this leg prices. Both are size-boundary failure modes any EAGLE-3 verify width past M=8 must clear; this leg scopes ONLY the config-list dispatch correctness property (repo framing #306/#101 + report_descend_walk.md:87 'graph-capture is the size-29 crash -> enforce-eager').",
+        "refs": [
+          "openevolve 20260615-012216-024 (dense N<=32 ran 1280+ steps, no crash)",
+          "vidraft-darwin 20260614-234841-886 (star-attn CUDA crash != algorithm; fix = dense masked attn N<=32)"
+        ]
+      }
+    },
+    "mitigations": {
+      "16": {
+        "m_target": 16,
+        "current_max_cudagraph_capture_size": 16,
+        "dispatch_safe_already": true,
+        "sizes_to_add": [],
+        "new_max_cudagraph_capture_size": 16,
+        "explicit_capture_list_after_edit": [
+          1,
+          2,
+          4,
+          8,
+          16
+        ],
+        "edit_flag": "--compilation-config '{\"cudagraph_capture_sizes\": [1, 2, 4, 8, 16]}'",
+        "edit_flag_alt": "--cuda-graph-sizes 16",
+        "edit_location": "submissions/fa2sw_precache_kenyan/serve.py vLLM launch args (or manifest env)",
+        "also_required_served_change": "widening M also requires the verify prewarm shape serve.py:487-492 (torch.full((1, M))) and the tree SpecDecodeMetadata to be widened to M -- a served-file change OUT OF SCOPE for this read-only dispatch audit, flagged"
+      },
+      "32": {
+        "m_target": 32,
+        "current_max_cudagraph_capture_size": 16,
+        "dispatch_safe_already": false,
+        "sizes_to_add": [
+          24,
+          32
+        ],
+        "new_max_cudagraph_capture_size": 32,
+        "explicit_capture_list_after_edit": [
+          1,
+          2,
+          4,
+          8,
+          16,
+          24,
+          32
+        ],
+        "edit_flag": "--compilation-config '{\"cudagraph_capture_sizes\": [1, 2, 4, 8, 16, 24, 32]}'",
+        "edit_flag_alt": "--cuda-graph-sizes 32",
+        "edit_location": "submissions/fa2sw_precache_kenyan/serve.py vLLM launch args (or manifest env)",
+        "also_required_served_change": "widening M also requires the verify prewarm shape serve.py:487-492 (torch.full((1, M))) and the tree SpecDecodeMetadata to be widened to M -- a served-file change OUT OF SCOPE for this read-only dispatch audit, flagged"
+      }
+    },
+    "primary_mitigating_edit": {
+      "m_target": 32,
+      "current_max_cudagraph_capture_size": 16,
+      "dispatch_safe_already": false,
+      "sizes_to_add": [
+        24,
+        32
+      ],
+      "new_max_cudagraph_capture_size": 32,
+      "explicit_capture_list_after_edit": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        24,
+        32
+      ],
+      "edit_flag": "--compilation-config '{\"cudagraph_capture_sizes\": [1, 2, 4, 8, 16, 24, 32]}'",
+      "edit_flag_alt": "--cuda-graph-sizes 32",
+      "edit_location": "submissions/fa2sw_precache_kenyan/serve.py vLLM launch args (or manifest env)",
+      "also_required_served_change": "widening M also requires the verify prewarm shape serve.py:487-492 (torch.full((1, M))) and the tree SpecDecodeMetadata to be widened to M -- a served-file change OUT OF SCOPE for this read-only dispatch audit, flagged"
+    },
+    "max_safe_tree_width_under_deployed_list": 16,
+    "deployed_m8_dispatch_safe": true,
+    "self_test": {
+      "conditions": {
+        "a_deployed_capture_config_parsed": true,
+        "b_per_width_arithmetic_correct": true,
+        "c_m8_safe_m32_crash": true,
+        "d_imported_306_constants_exact": true,
+        "e_nan_clean": true,
+        "f_mitigating_edit_emitted": true,
+        "g_honest_caveats_carried": true
+      },
+      "passes": true
+    },
+    "verdict": "The deployed frontier launch does NOT pin `cudagraph_capture_sizes` (no --compilation-config/--cuda-graph-sizes/--enforce-eager); it inherits vLLM's default, ceiling `max_cudagraph_capture_size=16` (banked #101/#306). The verify-side dispatchable widths are the (1+K)=8-multiples within it: [8, 16]. Deployed M=8 (prewarm shape (1,8)) is dispatch-SAFE; M=16 sits AT the boundary (captured); M=32 (32 tokens > 16) falls through to lawine's IndexError CRASH regime. The M=32 blocker is the DISPATCH LIST (#306: VRAM cost only +12 MiB), fixed by ADDING [24, 32] to the list and raising the ceiling to 32 via `--compilation-config '{\"cudagraph_capture_sizes\": [1, 2, 4, 8, 16, 24, 32]}'` -- NOT by freeing memory. Draft side (K=7) is a manual ONEGRAPH capture, not list-dispatched -> safe by construction. The draft side clears; the verify tree is dispatch-safe only up to M=16 under the deployed list. Analysis-only; BASELINE 481.53 untouched; 0 TPS.",
+    "handoff": "EAGLE-3 capture-SIZE dispatch priced: deployed M=8 is dispatch-SAFE (8 in the (1+K)-multiple captured set {8,16}, ceiling 16); the verify tree is dispatch-safe only up to M=16. Widening to M=32 re-enters lawine #101's IndexError crash -- a DISPATCH-LIST blocker (VRAM cost a trivial +12 MiB per #306), fixed by ADDING [24, 32] to `cudagraph_capture_sizes` (ceiling -> 32) on the vLLM launch, NOT by freeing memory. The list is currently INHERITED (unpinned); the human GO/NO-GO for any EAGLE-3 width past M=8 must add this explicit pin AND widen the verify prewarm (serve.py:487-492) + tree metadata. Topology desirability is a separate lane.",
+    "caveats": [
+      "0 TPS / config-list property: this prices the capture-SIZE DISPATCH risk -- a `cudagraph_capture_sizes` correctness property -- NOT a runtime measurement. It does not depend on tensor VALUES, so random-init shapes (indeed, no tensors at all) transfer for the size accounting; only the integer token-counts and the list matter.",
+      "ORTHOGONAL to VRAM: #306 (y1lji0c6) already proved the EAGLE-3 build fits at runtime (peak 20.158 GiB, 3.84 under 24-hard) and that M=32 costs only +12 MiB. This leg shows the M=32 blocker is the DISPATCH list, fixed by ADDING the size to `cudagraph_capture_sizes`, not by freeing memory. The two axes are independent.",
+      "DEPLOYED list is INHERITED, not pinned: the frontier launch sets no --compilation-config / --cuda-graph-sizes / --enforce-eager, so the capture-size list is vLLM's default derivation for this max_num_seqs=1 + spec-K=7 engine. The effective ceiling (16) is the banked empirical value from lawine #101 (size-29 crash) re-confirmed by #306; this leg does not re-derive vLLM's internal default formula.",
+      "MECHANISM honesty: lawine's #101 'size-29 crash' is a capture-SIZE-LIST DISPATCH IndexError (no captured graph for batch=29 > max-16), NOT a VRAM OOM (vLLM #29091 / PR#23679; report_descend_walk.md:87). The draft side is captured by a MANUAL ONEGRAPH (CUDAGraphMode.NONE) and is NOT routed through the vLLM list -> the dispatch risk is entirely on the verify side.",
+      "TOPOLOGY is a separate lane: this prices ONLY the dispatch correctness of a given verify width M. Whether a width-M tree is DESIRABLE (its E[T]/acceptance payoff) is the topology-optimization lane, orthogonal to this list-correctness audit. Widening M also needs the verify prewarm shape (serve.py:487-492) and the tree SpecDecodeMetadata widened -- served-file changes out of scope here.",
+      "TWO size-boundary failure modes (public corroboration): the PUBLIC board (openevolve 20260615-012216, vidraft-darwin 20260614-234841) attributes the in-serve size-29 tree-verify crash to the custom star_gqa attention KERNEL, fixed by a dense masked attn at N<=32 -- a DIFFERENT axis than the cudagraph capture-size DISPATCH IndexError this leg prices (repo #306/#101 + report_descend_walk.md:87). Whether they are the same event or two distinct boundaries, BOTH must be cleared by any verify width past M=8; this leg scopes ONLY the config-list dispatch axis and does not claim to price the star_gqa kernel crash.",
+      "The launch gate is UNCHANGED and human-approval-gated (land #245: MEASURED >=500 TPS at lambda_hat>=0.9780 AND PPL<=2.42 AND VRAM<=24 GiB). This leg adds a DISPATCH-correctness sub-clause for any EAGLE-3 verify width past the deployed M=8; it is NOT a launch, NOT a build, NOT a served-file change."
+    ]
+  },
+  "capture_dispatch_risk_self_test_passes": true,
+  "max_safe_tree_width_under_deployed_list": 16,
+  "deployed_m8_dispatch_safe": true,
+  "host_peak_mem_mib": 12.109,
+  "greedy_ppl_safety_certificate": {
+    "analysis_only": true,
+    "served_file_changed": false,
+    "emitted_token_changed": false,
+    "hf_job_or_submission": false,
+    "is_launch": false,
+    "is_build": false,
+    "baseline_tps_unchanged": 481.53,
+    "tps_added_by_this_leg": 0.0
+  },
+  "nan_clean": true
+}
