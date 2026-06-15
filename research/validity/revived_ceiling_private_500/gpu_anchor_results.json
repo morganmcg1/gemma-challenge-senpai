@@ -1,0 +1,107 @@
+{
+  "kind": "gpu-anchor-deployed-linear-single-stream",
+  "pr": 373,
+  "agent": "denken",
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_deployed_tps": 481.53,
+  "e_t_realized": 3.844,
+  "served_step_wall_us": 7982.8878782215015,
+  "body_int4_gb": 1.6973824,
+  "nominal_bw_gbps": 600.0,
+  "n_quant_layers": 37,
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "compute_capability": "8.6",
+    "sm_count": 80,
+    "total_mem_gib": 22.06,
+    "is_a10g_80sm_ga102_sm86": true
+  },
+  "read_bw": {
+    "bytes_read": 1697382400,
+    "median_read_ms": 3.31059193611145,
+    "effective_read_bw_gbps": 512.7126606831854,
+    "achievable_frac_of_nominal": 0.8545211011386423,
+    "body_read_floor_local_us": 3310.5919361114507,
+    "body_read_floor_nominal_us": 2828.9706666666666
+  },
+  "fp16_gemm_envelope": {
+    "gate_up_proj": {
+      "out_features": 20480,
+      "in_features": 2560,
+      "int4_bytes_total": 969932800,
+      "int4_bytes_banked_356": 969932800,
+      "byte_match_356": true,
+      "per_layer_us_M1": 246.7840015888214,
+      "step_us_M1": 9131.008058786392,
+      "gflops_M1": 424.89626282463905,
+      "per_layer_us_M8": 244.73600089550018,
+      "step_us_M8": 9055.232033133507,
+      "gflops_M8": 3427.615050219706
+    },
+    "down_proj": {
+      "out_features": 2560,
+      "in_features": 10240,
+      "int4_bytes_total": 484966400,
+      "int4_bytes_banked_356": 484966400,
+      "byte_match_356": true,
+      "per_layer_us_M1": 133.12000036239624,
+      "step_us_M1": 4925.440013408661,
+      "gflops_M1": 393.84615277397563,
+      "per_layer_us_M8": 133.12000036239624,
+      "step_us_M8": 4925.440013408661,
+      "gflops_M8": 3150.769222191805
+    },
+    "qkv_proj": {
+      "out_features": 3072,
+      "in_features": 2560,
+      "int4_bytes_total": 145489920,
+      "int4_bytes_banked_356": 145489920,
+      "byte_match_356": true,
+      "per_layer_us_M1": 54.27199974656105,
+      "step_us_M1": 2008.0639906227589,
+      "gflops_M1": 289.81132210807556,
+      "per_layer_us_M8": 54.27199974656105,
+      "step_us_M8": 2008.0639906227589,
+      "gflops_M8": 2318.4905768646045
+    },
+    "o_proj": {
+      "out_features": 2560,
+      "in_features": 2048,
+      "int4_bytes_total": 96993280,
+      "int4_bytes_banked_356": 96993280,
+      "byte_match_356": true,
+      "per_layer_us_M1": 45.05600035190582,
+      "step_us_M1": 1667.0720130205154,
+      "gflops_M1": 232.72727090957736,
+      "per_layer_us_M8": 45.05600035190582,
+      "step_us_M8": 1667.0720130205154,
+      "gflops_M8": 1861.8181672766189
+    }
+  },
+  "byte_provenance_matches_356": true,
+  "fp16_body_step_us_M1": 17731.584075838327,
+  "fp16_body_step_us_M8": 17655.808050185442,
+  "fp16_M1_over_int4_readfloor_ratio": 5.3560162104017754,
+  "fp16_M8_over_M1_ratio": 0.9957264942980396,
+  "int4_marlin_probe": {
+    "attempted": true,
+    "callable": false,
+    "note": "int4 Marlin GEMM not directly callable with synthetic weights (ImportError); single-stream int4 kernel floor taken from read-BW (M=1 decode is HBM-read-bound, BASELINE: ~92% weight-GEMM)."
+  },
+  "reconstruction": {
+    "body_read_frac_of_served_wall": 0.41471106529545965,
+    "nonread_harness_us": 4672.295942110051,
+    "nonread_official_us": 4945.684255895216,
+    "kernel_floor_single_stream_tps": 1161.1216586587468,
+    "proxy_step_us": 8256.276192006666,
+    "local_deployed_single_stream_tps": 465.58519974435666,
+    "local_to_served_calibration_ratio": 0.9668872131421857,
+    "bw_calibration_ratio_local_over_nominal": 0.8545211011386423,
+    "residual_harness_gap_pct": 61.953572834058875,
+    "interpretation": "Pod A10G == official a10g-small silicon (GA102/80SM/cc8.6); the on-pod int4 body-read BW reproduces at 85.5% of nominal-600, confirming HARDWARE parity. The deployed 481.53 single-stream point is a SPEC-decode serve number (E[T]=3.844 tokens / 7983us step); 62% of that step is non-read serve harness (host loop + draft chain + verify-above-read + sampler) NOT reproducible on-pod without the full vLLM/FlashInfer/spec serve. So the local-vs-served gap for the LINEAR config is a HARNESS gap, not a hardware gap. Proxy single-stream TPS 465.6 (= read-floor + #344 official non-read share); 481.53 itself is taken from the HF-confirmed official record, not re-measured on-pod."
+  },
+  "present": true,
+  "peak_gpu_gb": 1.697409536
+}

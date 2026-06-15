@@ -1,0 +1,260 @@
+{
+  "pr": 373,
+  "agent": "denken",
+  "kind": "revived-ceiling-private-500-budget",
+  "analysis_only": true,
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps_expected": 0,
+  "inputs": {
+    "mu_p_public": 481.53,
+    "mu_v_private": 460.85,
+    "gap_measured": 0.04294644155088978,
+    "p_headline": 518.9188253620001,
+    "p_conservative": 509.0720037848094,
+    "lambda1_raw": 520.9527323111674,
+    "eta_floor_headline": 0.003904718156915901,
+    "eta_floor_conservative": 0.022806272763935695,
+    "rho_lb": 0.8038,
+    "rho_priv": 0.9421,
+    "k_cal": 125.26795005202914,
+    "e_t_realized": 3.844,
+    "deployed_avg_bpw": 4.125,
+    "cov_budget_336": 0.031,
+    "source_366_run": "h28xnyuy",
+    "source_344_bw_model": "94.3% body / 5.7% fixed"
+  },
+  "gpu_anchor": {
+    "present": true,
+    "local_deployed_single_stream_tps": 465.58519974435666,
+    "local_to_served_calibration_ratio": 0.9668872131421857,
+    "bw_calibration_local_over_nominal": 0.8545211011386423,
+    "effective_read_bw_gbps": 512.7126606831854,
+    "body_read_frac_of_served_wall": 0.41471106529545965,
+    "residual_harness_gap_pct": 61.953572834058875,
+    "fp16_M8_over_M1_ratio": 0.9957264942980396,
+    "byte_provenance_matches_356": true,
+    "is_a10g_80sm": true
+  },
+  "projection": {
+    "gap_measured": 0.04294644155088978,
+    "grid": {
+      "headline": {
+        "rho_priv_0p9421": {
+          "private_tps": 494.56126638495226,
+          "clears_500": false
+        },
+        "rho_lb_0p8038": {
+          "private_tps": 489.61246249891167,
+          "clears_500": false
+        },
+        "rho_1_naive_prop": {
+          "private_tps": 496.6331083589346,
+          "clears_500": false
+        }
+      },
+      "conservative": {
+        "rho_priv_0p9421": {
+          "private_tps": 485.68297662805753,
+          "clears_500": false
+        },
+        "rho_lb_0p8038": {
+          "private_tps": 482.03750303962704,
+          "clears_500": false
+        },
+        "rho_1_naive_prop": {
+          "private_tps": 487.20917272907076,
+          "clears_500": false
+        }
+      },
+      "lambda1_raw": {
+        "rho_priv_0p9421": {
+          "private_tps": 496.39511856676677,
+          "clears_500": false
+        },
+        "rho_lb_0p8038": {
+          "private_tps": 491.17710572547196,
+          "clears_500": false
+        },
+        "rho_1_naive_prop": {
+          "private_tps": 498.57966624218955,
+          "clears_500": false
+        }
+      }
+    },
+    "private_ceiling_headline": 494.56126638495226,
+    "private_ceiling_headline_naive_proportional": 496.6331083589346,
+    "clears_private_500_headline": false,
+    "private_ceiling_conservative": 482.03750303962704,
+    "private_ceiling_conservative_naive_proportional": 487.20917272907076,
+    "clears_private_500_conservative": false,
+    "absolute_optimistic_private": 498.57966624218955,
+    "absolute_optimistic_clears_500": false,
+    "gap_flip_threshold_headline": 0.03242163964356304,
+    "gap_flip_threshold_lambda1_raw": 0.03599620277049176,
+    "revived_clears_private_500": false
+  },
+  "levers": {
+    "Pstar_central_public": 524.9508699313559,
+    "Pstar_conservative_public": 532.4217660641085,
+    "residual_lift_to_private_500_tps": 5.438733615047738,
+    "residual_lift_to_private_500_tps_conservative": 17.96249696037296,
+    "residual_public_lift_central": 6.032044569355776,
+    "residual_public_lift_conservative": 23.349762279299114,
+    "residual_avg_bpw_for_mixedprec": 0.05026412678529901,
+    "residual_avg_bpw_for_mixedprec_conservative": 0.19183989229006038,
+    "residual_coverage_delta": 0.004017628663230129,
+    "residual_coverage_delta_conservative": 0.015852871084332233,
+    "lever_a_mixedprec_bodyshrink": {
+      "central": {
+        "lift_needed": 1.0116242546512892,
+        "body_bytes_frac": 0.9878147571429577,
+        "new_avg_bpw": 4.074735873214701,
+        "residual_avg_bpw": 0.05026412678529901
+      },
+      "conservative": {
+        "lift_needed": 1.045867307779057,
+        "body_bytes_frac": 0.9534933594448338,
+        "new_avg_bpw": 3.9331601077099396,
+        "residual_avg_bpw": 0.19183989229006038
+      },
+      "deployed_avg_bpw": 4.125,
+      "accessible_subint4_point": {
+        "nominal_bits": 3.5,
+        "recovery_group_size": 32,
+        "avg_bpw_with_g32_scales": 4.0,
+        "body_bytes_frac": 0.9696969696969697,
+        "bw_lift": 1.0294163521227813,
+        "private_headline": 508.32453189501274,
+        "private_conservative": 493.5574975885982,
+        "ppl_delta_bestcase": 0.1,
+        "ppl_budget": 0.0428,
+        "ppl_busts_gate": true,
+        "ppl_overshoot_x": 2.336448598130841
+      },
+      "verdict": "byte-requirement is sub-bit (0.05-0.19 avg-bpw) but PPL-INACCESSIBLE: int4 Marlin is the servable kernel floor (#132), the only sub-int4 step b3.5 busts PPL by 2.3x even optimistically (#356), and the g32 PPL-recovery scales (+0.375 bpw) erode the nominal saving (grouping-vise).",
+      "blocked_by": "ppl"
+    },
+    "lever_b_coverage_retrain": {
+      "central": {
+        "delta_et": 0.04468363487955586,
+        "residual_coverage_delta": 0.004017628663230129,
+        "frac_of_336_budget": 0.12960092462032674
+      },
+      "conservative": {
+        "delta_et": 0.17631393110269514,
+        "residual_coverage_delta": 0.015852871084332233,
+        "frac_of_336_budget": 0.5113829382042656
+      },
+      "p0_accept": 0.7730262260000382,
+      "dET_dp_at_p0": 11.121892694689883,
+      "e_t_realized": 3.844,
+      "cov_budget_336": 0.031,
+      "within_336_budget_central": true,
+      "within_336_budget_conservative": true,
+      "verdict": "FEASIBLE and CHEAPEST: residual coverage +0.0040 (central) / +0.0159 (conservative) is 13% / 51% of #336's +0.031 budget; retrain JUSTIFIED (#339 P(clear)>=0.76). Orthogonal to #366's supply revival (demand vs supply, #341). DOUBLE-INDICATED: a wider-distribution drafter also SHRINKS the public->private gap toward the ~3.6% knife-edge.",
+      "blocked_by": null,
+      "coverage_conversion_caveat": "dcoverage~=dp uses an iid depth-7 accept model; the coverage->acceptance mapping carries model uncertainty. The directly-grounded number is delta_et (K_cal-linear); the magnitude conclusion (small fraction of budget) is robust."
+    },
+    "lever_c_eta_reduction": {
+      "eta_floor_headline": 0.003904718156915901,
+      "eta_floor_conservative": 0.022806272763935695,
+      "lambda1_raw_ceiling": 520.9527323111674,
+      "private_at_eta0_central": 496.39511856676677,
+      "private_at_eta0_conservative": 491.17710572547196,
+      "private_at_eta0_naive_proportional": 498.57966624218955,
+      "eta0_clears_500_anywhere": false,
+      "verdict": "MAXED / INSUFFICIENT: eta is already near-zero (0.39% headline); driving it to ZERO yields the raw lambda=1 ceiling 520.95, which still projects to private 496.4 (central) / 498.6 (naive-proportional) < 500. No supply-side eta work can reach private-500 -> residual must come from a CEILING-RAISING lever (coverage E[T] or body bytes), not eta.",
+      "blocked_by": "physical_floor"
+    },
+    "cheapest_lever": "coverage_retrain_b",
+    "cheapest_lever_reason": "(c) eta ELIMINATED (can't reach 500 at eta=0); (a) body-shrink PPL-BLOCKED (int4 floor + b3.5 PPL bust + grouping-vise); (b) coverage FEASIBLE (within #336 budget, retrain justified) AND attacks the gap. -> (b) coverage retrain is cheapest."
+  },
+  "tornado": {
+    "central_private": 494.56126638495226,
+    "eta_floor": {
+      "low": 485.68297662805753,
+      "high": 496.39511856676677,
+      "swing": 10.712141938709237
+    },
+    "gap_gate_range": {
+      "low_g": 0.03,
+      "high_g": 0.05,
+      "low": 490.9163117548632,
+      "high": 501.25139200233406,
+      "swing": 10.335080247470842
+    },
+    "gap_program_tail": {
+      "tail_g": 0.124,
+      "tail_private": 452.6765148392213,
+      "swing": 41.88475154573098
+    },
+    "rho": {
+      "low": 489.61246249891167,
+      "high": 494.56126638495226,
+      "swing": 4.948803886040594
+    },
+    "ranked_by_swing": [
+      [
+        "public_private_gap_program_tail",
+        41.88475154573098
+      ],
+      [
+        "eta_floor",
+        10.712141938709237
+      ],
+      [
+        "public_private_gap_gate_range",
+        10.335080247470842
+      ],
+      [
+        "rho",
+        4.948803886040594
+      ]
+    ],
+    "dominant_axis": "public_private_gap_program_tail",
+    "best_case_at_measured_gap": 498.57966624218955,
+    "verdict_robust_no_go_at_measured_gap": true,
+    "verdict": "The public->private GAP dominates the shortfall MAGNITUDE (and is the ONLY verdict-flipping axis): it swings private 10.3 TPS over the gate range and 41.9 over the program tail, vs eta_floor 10.7 and rho 4.9. But at the MEASURED 4.3% gap the verdict is ROBUST NO-GO: even eta=0 + perfect rho gives 498.6 < 500. The verdict flips to GO only if the gap drops below ~3.2% (headline) -- a private-stability improvement, i.e. lever (b) again."
+  },
+  "local_deployed_single_stream_tps": 465.58519974435666,
+  "private_ceiling_headline": 494.56126638495226,
+  "private_ceiling_conservative": 482.03750303962704,
+  "clears_private_500_headline": false,
+  "clears_private_500_conservative": false,
+  "residual_lift_to_private_500_tps": 5.438733615047738,
+  "residual_avg_bpw_for_mixedprec": 0.05026412678529901,
+  "residual_coverage_delta": 0.004017628663230129,
+  "cheapest_lever": "coverage_retrain_b",
+  "dominant_axis": "public_private_gap_program_tail",
+  "revived_clears_private_500": false,
+  "primary_metric_private_ceiling_conservative": 482.03750303962704,
+  "test_metric_revived_clears_private_500": 0,
+  "self_test": {
+    "conditions": {
+      "a_rho1_is_naive_prop": true,
+      "a_anchor_recovers_mu_v": true,
+      "a_gap_is_4p3pct": true,
+      "b_regression_below_proportional": true,
+      "c_all_corners_below_500": true,
+      "c_abs_optimistic_below_500": true,
+      "d_invert_central": true,
+      "d_invert_conservative": true,
+      "e_bwlift_unit_at_frac1": true,
+      "e_et_roundtrip": true,
+      "f_eta0_cannot_reach_500": true,
+      "f_lever_a_ppl_blocked": true,
+      "f_lever_b_within_budget": true,
+      "f_cheapest_is_coverage": true,
+      "g_robust_no_go_measured_gap": true,
+      "g_swings_finite_positive": true,
+      "h_verdict_consistent": true,
+      "h_no_nan": true
+    },
+    "n_checks": 18,
+    "passes": true
+  },
+  "revived_ceiling_private_500_self_test_passes": true,
+  "wandb_run_id": "oqs8lddd"
+}
