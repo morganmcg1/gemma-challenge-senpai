@@ -1,7 +1,17 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~06:35Z (cycle 52q)
+- **Date:** 2026-06-15 ~06:48Z (cycle 52q)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
+
+## 🆕 Cycle-52q Snapshot — 4 EAGLE-3 economics cards banked; the drafter-trainability blocker may be FLIPPING GREEN
+
+**This turn (06:31, Morgan-merged, all 0-TPS bank-the-analysis): #306 VRAM runtime-peak 20.158 GiB GREEN (axis e/k fully closed, 3.84 GiB headroom) · #307 integration NOT config-only (the onegraph loopgraph is MTP-keyed, goes INERT under method:eagle3; 3 served-file touchpoints T5/T6/T7 need rewrite) · #309 M=8 tree-salvage RELAXES the required raw a1 from 0.9213→0.7731 (GREEN-YELLOW) · #305 GO card: under the conservative scalar ×0.804 the PRIVATE bar binds and projects sub-500 (P=3.9%).**
+
+**★ THE PIVOTAL SYNTHESIS (#309 × #308):** denken #308 declared the a1 target `out-of-reach` (RED) — but against the SUPERSEDED 0.9213 bar. lawine #309's M=8 salvage moved the bar to **0.7731**, which is **+0.0017** from the demonstrated in-repo {2,21,39} EAGLE-3 head (fern #34 `gua9x68j` native step-1 = **0.7714**), INSIDE the published 0.77–0.80 envelope. **The central drafter-trainability blocker may FLIP GREEN.** denken #308 SENT BACK (advisor 06:43Z) to re-issue the verdict against 0.7731, reconcile its own 0.7714, and close the salvage COST loop (the M=8 heavier verify must be NET positive after its verify-row cost).
+
+**★ THE GO/NO-GO REDUCES TO ONE CRUX:** is the conservative ×0.804 private scalar justified (#305 → sub-500), or does it double-count the private drop already inside #300's projection (ρ_priv 0.9421 → CLEARS)? → fern #310 reconciles. Hidden cost: does method:eagle3 retain the 481.53 onegraph base (wirbel #312)? **Plateau hedge — researcher-agent RETURNED (06:48Z):** of 5 fresh non-EAGLE-3 ideas, only ONE survives the advisor filter as a genuine >500 lever: **🥇 Lookahead Decoding** (training-free, ICML 2024 arXiv 2402.02057) — Jacobi-trajectory n-gram drafting that targets **E[T] directly** and is **greedy-EXACT** (emission = verify argmax preserved, unlike relaxed acceptance), no retrain, vLLM integration exists. This is the strongest plateau "bigger swing" and the **prime candidate for the next idle slot** (open question: does Gemma-4's 128-prompt output have enough n-gram regularity, and does the Jacobi step survive the bridge=0.2147 normalization?). FILTERED OUT: relaxed acceptance (PR #66) is **greedy-UNSAFE** → gated on the human greedy-identity decision (Issues #124/#192), NOT merely the PPL gate the agent assumed; drafter-quant / CUDAGraph.FULL-drafter / SplitK-verify-GEMM (#3/#4/#5) are all **step-side, which is DEFINITIVELY CLOSED <500** (487.7 ceiling) and draft savings are bridge-discounted 4.82× → deprioritized. No idle slot to assign Lookahead this turn (8/8 occupied); banked as TOP next-direction.
+
+---
 
 ## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
 
@@ -64,14 +74,14 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 | Student | PR | Hypothesis | Owner | Status |
 |---------|-----|-----------|-------|--------|
-| fern    | #310 | Does E[T]=6.11 clear PRIVATE 500 under the per-position model (not the scalar ×0.804)? (reconciles fern #305's conservative-scalar "private sub-500" with lawine #300's per-position rho_priv_e3=0.9421 / private-500-needs-E[T]≈4.19 — the GO/NO-GO literally flips on which private model) | me | 🔄 WIP (reseat; #305 MERGED 06:31 → GO-card rollup, private binding under ×0.804, axis ROLLUP CLOSED) |
-| ubel    | #311 | EAGLE-3 #101 launch risk is capture-SIZE dispatch, not VRAM — price it (audit deployed `cudagraph_capture_sizes` vs M={8,16,32} tree widths; deployed M=8 clears size-16, M=32 re-enters the IndexError regime) | me | 🔄 WIP (reseat; #306 MERGED 06:31 → runtime VRAM peak 20.158/3.84 headroom, axis (k) CLOSED at GREEN) |
-| wirbel  | #312 | Price the served-file loopgraph rewrite EAGLE-3 requires (#307 found swap_is_config_only=0; scope T5/T6/T7 in sitecustomize.py + the EAGLE-on-eager fallback TPS floor + the #272 guard co-edit — the unpriced DEPLOYMENT-cost axis) | me | 🔄 WIP (reseat; #307 MERGED 06:31 → integration is a served-file change, axis INTEGRATION-READINESS CLOSED at YELLOW) |
-| lawine  | #313 | Pre-register the read-only rank-coverage probe that flips #309's YELLOW (adapt wirbel #79's RANKPROBE for a fusion draft; derive the exact frac_true_beyond_top4 threshold that keeps the relaxed a1 demand <0.92; dry-run reproduces #79's cov₄=0.6532) | me | 🔄 WIP (reseat; #309 MERGED 06:31 → tree relaxes a1 demand 0.92→0.7731, axis TREE-SALVAGE CLOSED) |
+| denken  | #308 | EAGLE-3 a1-cliff trainability — RE-EVAL vs the #309-relaxed **0.7731** bar (is 0.92 inside the published EAGLE-3 first-token envelope or an INTRINSIC pos-1 floor? reconcile own in-repo 0.7714 + close the M=8-salvage COST loop) | me | 🔄 WIP (SENT BACK 06:43Z — original RED was vs the SUPERSEDED 0.9213 bar) |
+| fern    | #310 | Does E[T]=6.11 clear PRIVATE 500 under the per-position model (not the scalar ×0.804)? (reconciles fern #305's conservative-scalar "private sub-500" with lawine #300's per-position rho_priv_e3=0.9421 / private-500-needs-E[T]≈4.19 — the GO/NO-GO literally flips on which private model) | Morgan | 🔄 WIP (reseat; #305 MERGED 06:31 → GO-card rollup, private binding under ×0.804) |
+| ubel    | #311 | EAGLE-3 #101 launch risk is capture-SIZE dispatch, not VRAM — price it (audit deployed `cudagraph_capture_sizes` vs M={8,16,32} tree widths; deployed M=8 clears size-16, M=32 re-enters the IndexError regime) | Morgan | 🔄 WIP (reseat; #306 MERGED 06:31 → runtime VRAM peak 20.158/3.84 headroom, axis (k) CLOSED at GREEN) |
+| wirbel  | #312 | Price the served-file loopgraph rewrite EAGLE-3 requires (#307 found swap_is_config_only=0; scope T5/T6/T7 in sitecustomize.py + the EAGLE-on-eager fallback TPS floor + the #272 guard co-edit — the unpriced DEPLOYMENT-cost axis) | Morgan | 🔄 WIP (reseat; #307 MERGED 06:31 → integration is a served-file change, axis INTEGRATION-READINESS CLOSED at YELLOW) |
+| lawine  | #313 | Pre-register the read-only rank-coverage probe that flips #309's YELLOW (adapt wirbel #79's RANKPROBE for a fusion draft; derive the exact frac_true_beyond_top4 threshold that keeps the relaxed a1 demand <0.92; dry-run reproduces #79's cov₄=0.6532) | Morgan | 🔄 WIP (reseat; #309 MERGED 06:31 → tree relaxes a1 demand 0.92→0.7731, axis TREE-SALVAGE CLOSED) |
 | kanna   | #294 | EAGLE-3 Phase-1 viability gate (the cheap-proxy GO threshold before the human-gated retrain) | Morgan | 🔄 WIP |
-| denken  | #308 | EAGLE-3 a1-cliff trainability (is a1≈0.92 inside the published EAGLE-3 first-token envelope or an INTRINSIC position-1 floor? DRAFT-side; now reframed by #313's relaxed 0.7731 target) | Morgan | 🔄 WIP (reseat; #304 MERGED → heavier step DEMANDS a1: 0.73→0.92, axis (j) CLOSED — but #309 relaxes the trainable target to ~0.77) |
 | stark   | #298 | Free-ceiling wall-clock realization (does the banked 487.7 free step ceiling REALIZE on the host-to-host wall, or over-credit like static-K?) | me | 🔄 WIP |
-| land    | #245 | Tree fidelity build — Morgan banking Cycles 1-4 (terminal pending), will reseat non-tree | Morgan | 🟡 banking |
+| land    | #245 | Tree fidelity build — Morgan banking (latest marker `terminal:false, pending_arms:true` → NOT mergeable; left alone) | Morgan | 🟡 banking (non-terminal) |
 
 *(Roster shared with the parallel open2 advisor — re-survey live PR state before every assignment/merge.)*
 
