@@ -1,0 +1,427 @@
+{
+  "activation_hadamard_tax": {
+    "hadamard_over_weight_read_frac": 0.0011676059789267335,
+    "note": "online activation RHT only; <<1%"
+  },
+  "agent": "lawine",
+  "analysis_only": true,
+  "byte_ratio": 0.7846932941272564,
+  "cb3_microbench_self_test_passes": true,
+  "closes_383_supply_gap_floor": true,
+  "created_at": "20260615T180747Z",
+  "f_body_complement_pr": 0.8825045903509467,
+  "f_body_strict_honest": 0.76240970145034,
+  "gpu": {
+    "compute_capability": "8.6",
+    "is_a10g_80sm": true,
+    "is_ga102_sm86": true,
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "total_mem_gib": 22.06
+  },
+  "inputs": {
+    "band_378": [
+      357.32166269999993,
+      469.6847174760462
+    ],
+    "cb3_bpw_eff": 3.2368598382749325,
+    "cb3_bpw_uniform": 3.125,
+    "f_attn_378": 0.09506718019009251,
+    "f_draft_378": 0.12009488890060672,
+    "f_lmhead_378": 0.022428229458960704,
+    "int4_bpw": 4.125,
+    "mixed_gate_ppl_372": 2.3811966031692555,
+    "ppl_gate": 2.42,
+    "step_norm_us_378": 1218.2,
+    "supply_floor_383": 17.216386736379093,
+    "supply_robust_383": 23.74874176829968
+  },
+  "kind": "cb3-kernel-realized-bw",
+  "lit_bracket_speedup": [
+    1.15,
+    1.28
+  ],
+  "m1_is_bw_bound": false,
+  "microbench": {
+    "aggregate": {
+      "bw_bound_threshold": 0.6,
+      "count_weighted_marlin_bw_eff": 0.25561637483960586,
+      "count_weighted_marlin_eff_gbs": 120.30215424543862,
+      "m1_is_bw_bound": false,
+      "measured_floor_speedup": 1.058241282158072,
+      "roofline_speedup": 1.2743832622046425,
+      "total_body_params": 3890216960.0,
+      "total_int4_weight_gib": 1.868133544921875
+    },
+    "all_shapes_finite_ok": true,
+    "gpu": {
+      "compute_capability": "8.6",
+      "is_a10g_80sm": true,
+      "is_ga102_sm86": true,
+      "name": "NVIDIA A10G",
+      "sm_count": 80,
+      "total_mem_gib": 22.06
+    },
+    "peak_copy": {
+      "copy_eff_vs_theoretical": 0.7843925903998769,
+      "copy_us": 570.3679919242859,
+      "moved_bytes": 268435456.0,
+      "peak_copy_gbs": 470.63555423992614,
+      "peak_theoretical_gbs": 600.0
+    },
+    "peak_mem_mib": 413.294,
+    "per_shape": [
+      {
+        "cb3_fixed_overhead_us": 55.89453081782051,
+        "cb3_roofline_us": 45.800979080836896,
+        "cb3_weight_mib": 4.046074797843666,
+        "count": 7,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.0442524568896532,
+        "in": 2560,
+        "int4_weight_mib": 5.15625,
+        "marlin_bw_eff": 0.1968223104149954,
+        "marlin_eff_gbs": 92.63157714894415,
+        "marlin_us": 58.36800113320351,
+        "name": "q_full",
+        "out": 4096,
+        "overhead_us": 46.87987629586132,
+        "params": 73400320,
+        "transfer_us_at_peak": 11.488124837342184
+      },
+      {
+        "cb3_fixed_overhead_us": 58.15526632217262,
+        "cb3_roofline_us": 46.604505286045466,
+        "cb3_weight_mib": 2.023037398921833,
+        "count": 35,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.0212660905177555,
+        "in": 2560,
+        "int4_weight_mib": 2.578125,
+        "marlin_bw_eff": 0.0967144106200651,
+        "marlin_eff_gbs": 45.517240245162135,
+        "marlin_us": 59.39200147986412,
+        "name": "q_slide",
+        "out": 2048,
+        "overhead_us": 53.64793906119303,
+        "params": 183500800,
+        "transfer_us_at_peak": 5.744062418671092
+      },
+      {
+        "cb3_fixed_overhead_us": 70.03763398899483,
+        "cb3_roofline_us": 55.44329062012942,
+        "cb3_weight_mib": 1.0115186994609164,
+        "count": 8,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.0088290757929217,
+        "in": 2560,
+        "int4_weight_mib": 1.2890625,
+        "marlin_bw_eff": 0.040648085733778136,
+        "marlin_eff_gbs": 19.130434358108708,
+        "marlin_us": 70.65600156784058,
+        "name": "kv_full",
+        "out": 1024,
+        "overhead_us": 67.78397035850503,
+        "params": 20971520,
+        "transfer_us_at_peak": 2.872031209335546
+      },
+      {
+        "cb3_fixed_overhead_us": 70.3468177784177,
+        "cb3_roofline_us": 55.44329062012942,
+        "cb3_weight_mib": 0.5057593497304582,
+        "count": 40,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.004395135404657,
+        "in": 2560,
+        "int4_weight_mib": 0.64453125,
+        "marlin_bw_eff": 0.020324042866889068,
+        "marlin_eff_gbs": 9.565217179054354,
+        "marlin_us": 70.65600156784058,
+        "name": "kv_slide",
+        "out": 512,
+        "overhead_us": 69.2199859631728,
+        "params": 52428800,
+        "transfer_us_at_peak": 1.436015604667773
+      },
+      {
+        "cb3_fixed_overhead_us": 56.918531164481124,
+        "cb3_roofline_us": 46.604505286045466,
+        "cb3_weight_mib": 4.046074797843666,
+        "count": 7,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.043456327223822,
+        "in": 4096,
+        "int4_weight_mib": 5.15625,
+        "marlin_bw_eff": 0.1934288212401302,
+        "marlin_eff_gbs": 91.03448049032427,
+        "marlin_us": 59.39200147986412,
+        "name": "o_full",
+        "out": 2560,
+        "overhead_us": 47.903876642521936,
+        "params": 73400320,
+        "transfer_us_at_peak": 11.488124837342184
+      },
+      {
+        "cb3_fixed_overhead_us": 58.15526632217262,
+        "cb3_roofline_us": 46.604505286045466,
+        "cb3_weight_mib": 2.023037398921833,
+        "count": 35,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.0212660905177555,
+        "in": 2048,
+        "int4_weight_mib": 2.578125,
+        "marlin_bw_eff": 0.0967144106200651,
+        "marlin_eff_gbs": 45.517240245162135,
+        "marlin_us": 59.39200147986412,
+        "name": "o_slide",
+        "out": 2560,
+        "overhead_us": 53.64793906119303,
+        "params": 183500800,
+        "transfer_us_at_peak": 5.744062418671092
+      },
+      {
+        "cb3_fixed_overhead_us": 59.352324046080014,
+        "cb3_roofline_us": 51.42565959408657,
+        "cb3_weight_mib": 10.115186994609164,
+        "count": 84,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.104185908266315,
+        "in": 2560,
+        "int4_weight_mib": 12.890625,
+        "marlin_bw_eff": 0.4382371851481214,
+        "marlin_eff_gbs": 206.25000052073122,
+        "marlin_us": 65.5359998345375,
+        "name": "gate_up",
+        "out": 10240,
+        "overhead_us": 36.815687741182046,
+        "params": 2202009600,
+        "transfer_us_at_peak": 28.720312093355457
+      },
+      {
+        "cb3_fixed_overhead_us": 60.37632439274063,
+        "cb3_roofline_us": 52.22918579929514,
+        "cb3_weight_mib": 10.115186994609164,
+        "count": 42,
+        "finite_ok": true,
+        "fixed_overhead_speedup": 1.102418884399677,
+        "in": 10240,
+        "int4_weight_mib": 12.890625,
+        "marlin_bw_eff": 0.43149507234328977,
+        "marlin_eff_gbs": 203.0769225240812,
+        "marlin_us": 66.56000018119812,
+        "name": "down",
+        "out": 2560,
+        "overhead_us": 37.83968808784266,
+        "params": 1101004800,
+        "transfer_us_at_peak": 28.720312093355457
+      }
+    ]
+  },
+  "no_hf_job": true,
+  "no_kernel_rebuild": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "official_tps": 0.0,
+  "peak_mem_mib": 413.294,
+  "pr": 388,
+  "qtip_beta_byte_proportional": 0.51,
+  "realized_body_speedup": 1.2743832622046425,
+  "realized_body_speedup_measured_floor": 1.058241282158072,
+  "realized_body_speedup_qtip_empirical": 1.1233511704212635,
+  "realized_is_roofline_bound": true,
+  "realized_note": "ROOFLINE BOUND: no cb3/QTIP kernel in env (Marlin/AWQ/AQLM only); cb3 bounded by its nominal 0.785x byte count at int4-Marlin's measured M=1 BW-efficiency. Tight iff cb3 matches that efficiency -- literature-supported (QTIP/QuIP# L1-resident codebook, RHT folded offline; only a <<1% online activation Hadamard). Measured count-weighted Marlin M=1 BW-eff = 0.256 (peak-copy 470.6 GB/s); m1_is_bw_bound=False. NOT fully BW-bound at M=1 (launch/latency-influenced) => roofline is an OPTIMISTIC upper bound; literature-conservative 1.15x is the realized floor.",
+  "realized_strict_base_lift_tps": 38.34161969078741,
+  "roofline_formula_lift_band_upper_bound": [
+    83.82117917805022,
+    110.17951322421061
+  ],
+  "selftest": {
+    "checks": [
+      {
+        "detail": "r=0.784693294127",
+        "name": "byte_ratio_eq_372",
+        "ok": true
+      },
+      {
+        "detail": "round(r,3)=0.785",
+        "name": "byte_ratio_rounds_0p785",
+        "ok": true
+      },
+      {
+        "detail": "S=1.2743832622 1/r=1.2743832622",
+        "name": "roofline_is_inv_byte_ratio",
+        "ok": true
+      },
+      {
+        "detail": "S=1.274383",
+        "name": "roofline_gt_1",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "roofline_eq_bpw_ratio",
+        "ok": true
+      },
+      {
+        "detail": "lf=1.234582 S=1.274383",
+        "name": "lift_factor_in_1_S_complement",
+        "ok": true
+      },
+      {
+        "detail": "lf=1.196390 S=1.274383",
+        "name": "lift_factor_in_1_S_body_only",
+        "ok": true
+      },
+      {
+        "detail": "83.821",
+        "name": "band_lift_positive_off",
+        "ok": true
+      },
+      {
+        "detail": "110.180",
+        "name": "band_lift_positive_floor",
+        "ok": true
+      },
+      {
+        "detail": "cons_lift=32.647 floor=17.216",
+        "name": "supply_gate_closes_floor",
+        "ok": true
+      },
+      {
+        "detail": "tax=0.00117",
+        "name": "hadamard_tax_negligible",
+        "ok": true
+      },
+      {
+        "detail": "sum=1.000000000",
+        "name": "step_fractions_sum_1",
+        "ok": true
+      },
+      {
+        "detail": "total=3.8902B",
+        "name": "body_params_3p89B",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "nan_inf_clean",
+        "ok": true
+      },
+      {
+        "detail": "ppl=2.3811966031692555 gate=2.42",
+        "name": "ppl_372_passes",
+        "ok": true
+      }
+    ],
+    "n_checks": 15,
+    "n_passed": 15,
+    "passes": true
+  },
+  "supply_gate": {
+    "clears_floor": true,
+    "clears_robust": true,
+    "closes_383_supply_gap_floor": true,
+    "conservative_lift_tps": 32.64721137113611,
+    "supply_floor_joint_tps": 17.216386736379093,
+    "supply_robust_et_only_tps": 23.74874176829968
+  },
+  "supply_gate_strict_floor": {
+    "clears_floor": false,
+    "clears_robust": false,
+    "closes_383_supply_gap_floor": false,
+    "conservative_lift_tps": 15.64985467985781,
+    "supply_floor_joint_tps": 17.216386736379093,
+    "supply_robust_et_only_tps": 23.74874176829968
+  },
+  "translation_variants": {
+    "lit_conservative__body_only": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 51.865419701318956,
+      "delta_off_the_shelf": 39.45761340479169,
+      "f_body": 0.76240970145034,
+      "lift_factor": 1.1104260321264638,
+      "lifted_floor": 521.5501371773652,
+      "lifted_off_the_shelf": 396.7792761047916,
+      "speedup": 1.15
+    },
+    "lit_conservative__complement": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 61.09802721803487,
+      "delta_off_the_shelf": 46.48149675926271,
+      "f_body": 0.8825045903509467,
+      "lift_factor": 1.1300830641166237,
+      "lifted_floor": 530.7827446940811,
+      "lifted_off_the_shelf": 403.80315945926264,
+      "speedup": 1.15
+    },
+    "measured_floor__body_only": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 20.571094174106975,
+      "delta_off_the_shelf": 15.64985467985781,
+      "f_body": 0.76240970145034,
+      "lift_factor": 1.0437976655588248,
+      "lifted_floor": 490.2558116501532,
+      "lifted_off_the_shelf": 372.97151737985774,
+      "speedup": 1.058241282158072
+    },
+    "measured_floor__complement": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 23.976872769010754,
+      "delta_off_the_shelf": 18.24086610739306,
+      "f_body": 0.8825045903509467,
+      "lift_factor": 1.0510488672015044,
+      "lifted_floor": 493.66159024505697,
+      "lifted_off_the_shelf": 375.562528807393,
+      "speedup": 1.058241282158072
+    },
+    "qtip_empirical__body_only": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 42.91342465320065,
+      "delta_off_the_shelf": 32.64721137113611,
+      "f_body": 0.76240970145034,
+      "lift_factor": 1.0913664487186328,
+      "lifted_floor": 512.5981421292469,
+      "lifted_off_the_shelf": 389.96887407113604,
+      "speedup": 1.1233511704212635
+    },
+    "qtip_empirical__complement": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 50.398491588686625,
+      "delta_off_the_shelf": 38.34161969078741,
+      "f_body": 0.8825045903509467,
+      "lift_factor": 1.1073028133840803,
+      "lifted_floor": 520.0832090647328,
+      "lifted_off_the_shelf": 395.66328239078734,
+      "speedup": 1.1233511704212635
+    },
+    "roofline__body_only": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 92.24122273986598,
+      "delta_off_the_shelf": 70.17428043221543,
+      "f_body": 0.76240970145034,
+      "lift_factor": 1.1963896616341796,
+      "lifted_floor": 561.9259402159122,
+      "lifted_off_the_shelf": 427.49594313221536,
+      "speedup": 1.2743832622046425
+    },
+    "roofline__complement": {
+      "base_floor": 469.6847174760462,
+      "base_off_the_shelf": 357.32166269999993,
+      "delta_floor": 110.17951322421061,
+      "delta_off_the_shelf": 83.82117917805022,
+      "f_body": 0.8825045903509467,
+      "lift_factor": 1.2345818569875646,
+      "lifted_floor": 579.8642307002568,
+      "lifted_off_the_shelf": 441.14284187805015,
+      "speedup": 1.2743832622046425
+    }
+  },
+  "wandb_run_id": "g5lfdpgw"
+}
