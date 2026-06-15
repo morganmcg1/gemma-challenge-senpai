@@ -1,0 +1,161 @@
+{
+  "created_at": "20260615T113857Z",
+  "pr": 354,
+  "agent": "wirbel",
+  "kind": "strict-compliant-kernel-frontier",
+  "synthesis": {
+    "constants": {
+      "official_baseline_deployed": 481.53,
+      "target_tps": 500.0,
+      "lambda1_ceil_central": 520.953,
+      "strict_compliant_frontier_today": 165.43791973106974,
+      "eta_floor_326": 0.009455,
+      "eta_ceil_326": 0.3141,
+      "step_us": 1218.2,
+      "K_cal": 125.26795005202914,
+      "budget_lambda1_pct_213": 7.331808522875782,
+      "tps_lambda1_bothbugs_213": 536.6590426143789
+    },
+    "named_points": [
+      {
+        "point": "free_kernel_limit",
+        "eta": 0.0,
+        "step_overhead_us": 0.0,
+        "strict_compliant_tps_linear": 481.53,
+        "strict_compliant_tps_divisor_exact": 481.53,
+        "linear_minus_divisor_tps": 0.0,
+        "clears_500": false,
+        "lift_from_frontier_today_tps": 316.0920802689302,
+        "gap_to_500_tps": 18.470000000000027,
+        "note": "optimistic eta->0 (a hypothetical zero-cost identity restore) -- the upper bound of the frontier"
+      },
+      {
+        "point": "custom_kernel_floor",
+        "eta": 0.009455,
+        "step_overhead_us": 11.518081,
+        "strict_compliant_tps_linear": 476.97713385,
+        "strict_compliant_tps_divisor_exact": 477.01977799901925,
+        "linear_minus_divisor_tps": -0.042644149019281485,
+        "clears_500": false,
+        "lift_from_frontier_today_tps": 311.5392141189302,
+        "gap_to_500_tps": 23.022866150000027,
+        "note": "#216 int4-Marlin split-K first-principles floor (~0.95%): the realistic custom reduction-invariant kernel"
+      },
+      {
+        "point": "lambda1_budget_ref",
+        "eta": 0.0733,
+        "step_overhead_us": 89.29406,
+        "strict_compliant_tps_linear": 446.23385099999996,
+        "strict_compliant_tps_divisor_exact": 448.6443678375105,
+        "linear_minus_divisor_tps": -2.4105168375105563,
+        "clears_500": false,
+        "lift_from_frontier_today_tps": 280.7959312689302,
+        "gap_to_500_tps": 53.76614900000004,
+        "note": "#213 lambda=1 kernel budget (7.33%) carried as an overhead reference point"
+      },
+      {
+        "point": "offtheshelf_vbi_ceil",
+        "eta": 0.3141,
+        "step_overhead_us": 382.63662,
+        "strict_compliant_tps_linear": 330.28142699999995,
+        "strict_compliant_tps_divisor_exact": 366.4333003576592,
+        "linear_minus_divisor_tps": -36.15187335765927,
+        "clears_500": false,
+        "lift_from_frontier_today_tps": 164.8435072689302,
+        "gap_to_500_tps": 169.71857300000005,
+        "note": "#326 off-the-shelf VLLM_BATCH_INVARIANT=1 measured M=8 identity restore (31.41%)"
+      }
+    ],
+    "eta_crit": {
+      "eta_crit_500": null,
+      "linear_solved": {
+        "model": "linear",
+        "eta_solved": -0.038356904035055095,
+        "in_band_0_to_ceil": false
+      },
+      "divisor_solved": {
+        "model": "divisor",
+        "eta_solved": -0.036940000000000084,
+        "in_band_0_to_ceil": false
+      },
+      "kernel_alone_clears_500": false,
+      "tps_at_eta_zero": 481.53,
+      "search_interval": [
+        0.0,
+        0.3141
+      ],
+      "note": "strict_compliant_tps is decreasing, so its max over [0, eta_ceil] is at eta=0 (= deployed 481.53 < 500); no eta in [0, eta_ceil] reaches 500. The analytic crossing is at NEGATIVE eta (a speedup), confirming closure."
+    },
+    "frontier_lift": {
+      "strict_compliant_tps_at_floor": 476.97713385,
+      "strict_compliant_frontier_today": 165.43791973106974,
+      "strict_compliant_frontier_lift_from_165": 311.5392141189302,
+      "residual_gap_to_500_tps": 23.022866150000027,
+      "max_possible_lift_to_500": 334.56208026893023,
+      "spec_premium_restored_frac": 0.9855963928418376
+    },
+    "cross_checks": {
+      "roundtrip_326_offtheshelf_ceiling": 357.32166269999993,
+      "roundtrip_326_offtheshelf_ceiling_banked": 357.32166269999993,
+      "roundtrip_326_band_floor_ceiling": 516.027389385,
+      "roundtrip_326_band_floor_ceiling_banked": 516.027389385,
+      "roundtrip_213_divisor_clears_500": 500.0,
+      "budget_implied_213_frac": 0.07331808522875782,
+      "first_order_gap_linear_minus_divisor_at_floor_tps": -0.042644149019281485,
+      "first_order_gap_linear_minus_divisor_at_ceil_tps": -36.15187335765927,
+      "note": "the (1-eta) linear FORM round-trips both of #326's banked ceilings bit-exactly; the #213 EXACT divisor map round-trips 500. Near the realistic floor the linear/divisor gap is only -0.04 TPS, so the closure is robust under both forms; near the off-the-shelf ceil the gap widens to -36.2 TPS (still both << 500)."
+    },
+    "self_test": {
+      "conditions": {
+        "a_roundtrip_326_357_at_eta_ceil": true,
+        "b_strict_compliant_tps_monotone_decreasing": true,
+        "c_kernel_alone_clears_500_follows_481_lt_500": true,
+        "d_frontier_lift_positive_and_bounded": true,
+        "e_roundtrip_326_band_floor_516": true,
+        "f_roundtrip_213_divisor_clears_500": true,
+        "g_constants_imported_exact": true,
+        "prov_196_frontier": true,
+        "prov_326_anchors": true,
+        "prov_213_budget": true
+      }
+    },
+    "strict_compliant_tps_at_floor": 476.97713385,
+    "eta_crit_500": null,
+    "kernel_alone_clears_500": false,
+    "strict_compliant_frontier_lift_from_165": 311.5392141189302,
+    "verdict": "NECESSARY-BUT-NOT-SUFFICIENT. Under the #319 strict-lock the custom reduction-invariant kernel lifts the strict-compliant frontier from 165.44 TPS (non-spec int4 M=1 AR, #196) to 476.98 TPS at its first-principles floor eta=0.0095 (#216) -- a +311.5 TPS lift that restores almost all of the spec premium. But the deployed base 481.53 < 500, so kernel_alone_clears_500=False and eta_crit_500=None (would need eta=-0.0384 < 0, i.e. a ~3.8% SPEEDUP, not an overhead). The frontier stalls 23.0 TPS short of 500. The custom kernel is the ONLY thing that makes the fast spec path compliant, but a FASTER substrate UNDER it (sub-int4 body -- lawine's companion card) is required to close the residual ~23 TPS. Off-the-shelf VBI (eta=0.3141) is far worse: 330.28 TPS. 0 GPU, 0 TPS, baseline 481.53 UNCHANGED. Bank-the-analysis.",
+    "handoff": "the custom reduction-invariant kernel is NECESSARY (only route to a compliant fast path; lifts 165.44 -> 477 TPS, +312) but NOT SUFFICIENT alone (481.53 < 500 -> stalls 23 TPS short, eta_crit_500=None). The next lever is a sub-int4 body UNDER the kernel (lawine's companion card) to lift the 482 base above 500 before the (1-eta) kernel haircut.",
+    "provenance": {
+      "checks": {
+        "prov_196_frontier": true,
+        "prov_326_anchors": true,
+        "prov_213_budget": true
+      },
+      "detail": {
+        "f196_nonspec_official_tps_est": 165.43791973106974,
+        "f196_token_identity_rate": 1.0,
+        "f326_min_overhead_restoring_identity": 0.3141,
+        "f326_compliant_ceiling_at_band_ceil": 357.32166269999993,
+        "f326_band": [
+          0.009455,
+          0.3141
+        ],
+        "f213_budget_lambda1_pct": 7.331808522875782,
+        "f213_step_ms": 1.2182
+      }
+    }
+  },
+  "strict_compliant_kernel_frontier_self_test_passes": true,
+  "peak_mem_mib": 12.098,
+  "scope": "CPU-only analytic over banked merged *_results.json (#196 laxllfjl, #326 io4cs2ch, #213 5o7zcj8s). NO model build / training / served-file change / HF Job / submission. 0 GPU, 0 TPS. BASELINE 481.53 UNCHANGED. Bank-the-analysis.",
+  "public_evidence_used": [
+    "#319 human strict-lock (2026-06-15 10:56:17Z): 'ignore #124, we want to ensure we stick with the strict greedy token matching' -- re-opens the custom reduction-invariant kernel.",
+    "Leaderboard frontier tops at ~489.6 TPS (osoi5-...-precache-skv64-v1), BELOW 500 -- no method clears the bar yet.",
+    "lawine #196 (compliant_nonspec_floor): strict-compliant frontier today = 165.44 TPS (non-spec int4 M=1 AR, token_identity_rate=1.0).",
+    "wirbel #326 (io4cs2ch): off-the-shelf VBI restores M=8 identity at eta=0.3141 -> 357.32 TPS; custom-kernel first-principles floor ~0.9455% (#216 int4-Marlin split-K).",
+    "wirbel #213 (5o7zcj8s): lambda=1 kernel-overhead budget 7.332%, deployed step 1218.2us.",
+    "board: openevolve in-serve dense-verify confirms BOTH spec levers (drafter-side self-KV, verify-side) are closed -> the strict-compliant kernel is the lane."
+  ],
+  "nan_clean": true,
+  "wandb_run_id": "mr9dvb0e"
+}
