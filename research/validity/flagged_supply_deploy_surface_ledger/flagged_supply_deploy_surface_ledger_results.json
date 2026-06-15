@@ -1,0 +1,485 @@
+{
+  "agent": "lawine",
+  "analysis_only": true,
+  "cb3_alone_clears_500_threshold_tps": 32.52,
+  "cb3_plus_pinnedk_clears_500_threshold_tps": 18.23,
+  "cheapest_sufficient_combination": [
+    "cb3"
+  ],
+  "cheapest_sufficient_combination_clears_500": true,
+  "cheapest_sufficient_combination_total_additive_files": 6,
+  "cheapest_sufficient_combination_total_verify_gpu_min": 40.8,
+  "clears_500_under_current_floor": false,
+  "combinability": {
+    "any_two_contend_for_same_in_tree_edit": false,
+    "cb3_distinct_files": [
+      "submissions/cb3_<name>/kernels/cb3_qtip_kernel-*.whl",
+      "submissions/cb3_<name>/cb3_quant_patch.py",
+      "<cb3 bucket>/config.json"
+    ],
+    "checkpoint_collision": false,
+    "checkpoint_levers": [
+      "cb3",
+      "lmhead"
+    ],
+    "checkpoint_regions": {
+      "cb3": "body_gemm_weights",
+      "lmhead": "lm_head_rows"
+    },
+    "combinability_note": "The three levers touch THREE ORTHOGONAL subsystems -- cb3=body-GEMM quant, pinned-K=attention kernel, lm_head=lm_head rows -- so they STACK ADDITIVELY at the served-file level. ONE combined submission dir holds a single serve.py fork with three DISTINCT non-colliding additions (setup_cb3_path + pinned-K attn load + lm_head prune keepset), one manifest (+both kernel deps + bucket repoint), one sitecustomize (import all patches). cb3's body-quant checkpoint and lm_head's further-pruned checkpoint COMBINE into ONE bucket (disjoint weight regions: body GEMM vs head rows); pinned-K needs NO checkpoint. NO two levers contend for the same in-tree edit (there are NO in-tree edits). The expensive e2e identity-verify (#319 tier-3) is SHARED: one combined served stack -> one e2e self-referential capture re-keys ALL changes at once, so combined verify = single-lever + per-lever tier-1 micro, NOT the sum.",
+    "combined_checkpoint_buckets": 1,
+    "distinct_subsystems": 3,
+    "levers_stack_additively": true,
+    "lmhead_distinct_files": [
+      "submissions/lmhead_<name>/serve_patch_pck04.py",
+      "<pruned bucket>/config.json"
+    ],
+    "pinnedk_distinct_files": [
+      "submissions/pinnedk_<name>/kernels/fa2_pinnedk-*.whl",
+      "submissions/pinnedk_<name>/pinnedk_attn_patch.py"
+    ],
+    "shared_e2e_verify": true,
+    "shared_scaffold_files": [
+      "manifest",
+      "serve",
+      "sitecustomize"
+    ],
+    "subsystem_by_lever": {
+      "cb3": "body_gemm_quant",
+      "lmhead": "lmhead_rows",
+      "pinnedk_attn": "attention_kernel"
+    }
+  },
+  "created_at": "20260615T212832Z",
+  "human_ledger_paragraph": "UNIFIED FLAGGED-SUPPLY-LEVER DEPLOY-SURFACE LEDGER. Three flagged supply levers, one page. (1) cb3 body-read shrink: 6 additive files / 0 in-place, ~40.8 GPU-min verify, new reference, +33/+38 TPS contingent on #403, safe_to_request. (2) pinned-K attention rebuild: 5 additive files / 0 in-place, NO checkpoint, new reference, but buys at most +14.29 and CAPS 481.53 ALONE -> useful only STACKED. (3) lm_head: best_loadable_read_shrink_frac=0.0 -> the deployed 21 MB head is a lossy 16384-row truncation already in the base; no loadable identity-safe shrink exists, only more lossy truncation (#406-gated) -> marginal identity-safe lift 0. COMBINABILITY: the three touch three orthogonal subsystems and STACK ADDITIVELY in ONE submission dir + ONE combined checkpoint; no two contend (no in-tree edits); the expensive #319 e2e verify is SHARED. ROLL-UP: no single lever clears 500 except cb3 (contingent). The cheapest sufficient combination is {cb3} if #403 returns L>=+32.52, else {cb3, pinned-K} if L>=+18.23; below +18.23 NOTHING clears 500 (current floor +15.67 -> max stack 497.44). The whole combination stays additive + reversible. SINGLE BINDING CONTINGENCY: #403's PPL-safe-k lift magnitude (threshold +18.23 TPS). No GPU compute, no HF job, no served-file change were performed for this ledger.",
+  "kind": "flagged-supply-deploy-surface-ledger",
+  "ledger_self_test_passes": true,
+  "levers": [
+    "cb3",
+    "pinnedk_attn",
+    "lmhead"
+  ],
+  "levers_stack_additively": true,
+  "max_stack_tps_under_current_floor": 497.44,
+  "n_levers": 3,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "pr": 411,
+  "repo_facts": {
+    "deployed::lmhead_prune": true,
+    "deployed::manifest": true,
+    "deployed::serve": true,
+    "deployed::sitecustomize": true,
+    "evidence::cb3_surface_404": true,
+    "evidence::loadable_lmhead_398": true,
+    "evidence::pinnedk_headroom_400": true,
+    "harness::decode_width_e2e_381": true,
+    "harness::per_gemm_byte_exact_390": true,
+    "harness::self_ref_compare_319": true,
+    "harness::self_ref_interlock_319": true,
+    "harness::self_ref_reference_319": true
+  },
+  "rollup": {
+    "cb3_alone_clears_500_threshold_tps": 32.52,
+    "cb3_plus_pinnedk_clears_500_threshold_tps": 18.23,
+    "cheapest_sufficient_combination": [
+      "cb3"
+    ],
+    "cheapest_sufficient_combination_clears_500": true,
+    "cheapest_sufficient_combination_clears_500_under_current_floor": false,
+    "cheapest_sufficient_combination_lifted_tps": 500.48,
+    "cheapest_sufficient_combination_total_additive_files": 6,
+    "cheapest_sufficient_combination_total_verify_gpu_min": 40.8,
+    "combination_ladder_by_cb3_lift": {
+      "cb3_floor_15.67": {
+        "clears_500": false,
+        "lifted_tps": 497.44,
+        "max_stack_tps": 497.44,
+        "set": [],
+        "total_additive_files": 10,
+        "total_verify_gpu_min": 41.8
+      },
+      "cb3_honest_33.0": {
+        "clears_500": true,
+        "lifted_tps": 500.48,
+        "set": [
+          "cb3"
+        ],
+        "total_additive_files": 6,
+        "total_verify_gpu_min": 40.8
+      },
+      "cb3_realistic_38.02": {
+        "clears_500": true,
+        "lifted_tps": 505.5,
+        "set": [
+          "cb3"
+        ],
+        "total_additive_files": 6,
+        "total_verify_gpu_min": 40.8
+      }
+    },
+    "current_floor_cb3_lift": 15.67,
+    "human_ledger_paragraph": "UNIFIED FLAGGED-SUPPLY-LEVER DEPLOY-SURFACE LEDGER. Three flagged supply levers, one page. (1) cb3 body-read shrink: 6 additive files / 0 in-place, ~40.8 GPU-min verify, new reference, +33/+38 TPS contingent on #403, safe_to_request. (2) pinned-K attention rebuild: 5 additive files / 0 in-place, NO checkpoint, new reference, but buys at most +14.29 and CAPS 481.53 ALONE -> useful only STACKED. (3) lm_head: best_loadable_read_shrink_frac=0.0 -> the deployed 21 MB head is a lossy 16384-row truncation already in the base; no loadable identity-safe shrink exists, only more lossy truncation (#406-gated) -> marginal identity-safe lift 0. COMBINABILITY: the three touch three orthogonal subsystems and STACK ADDITIVELY in ONE submission dir + ONE combined checkpoint; no two contend (no in-tree edits); the expensive #319 e2e verify is SHARED. ROLL-UP: no single lever clears 500 except cb3 (contingent). The cheapest sufficient combination is {cb3} if #403 returns L>=+32.52, else {cb3, pinned-K} if L>=+18.23; below +18.23 NOTHING clears 500 (current floor +15.67 -> max stack 497.44). The whole combination stays additive + reversible. SINGLE BINDING CONTINGENCY: #403's PPL-safe-k lift magnitude (threshold +18.23 TPS). No GPU compute, no HF job, no served-file change were performed for this ledger.",
+    "max_stack_tps_under_current_floor": 497.44,
+    "single_binding_contingency": "kanna #403 PPL-safe-k LIFT MAGNITUDE. The whole >500 decision rides on a SINGLE contingency with a sharp threshold L>=+18.23 TPS: below it, NO additive combination of the three flagged levers clears 500 (pinned-K caps 481.53 alone, lm_head's loadable identity-safe shrink is 0). At the CURRENT measured floor L=+15.67 the MAX stack (467.48+15.67+14.29+0) = 497.44 MISSES 500 by 2.56. If #403 returns L in [18.23, 32.52) the cheapest sufficient combination is {cb3, pinned-K}; if L>=32.52, {cb3} alone.",
+    "strict_base_corrected": 467.48,
+    "strict_gap_to_500": 32.52,
+    "whole_combination_additive_and_reversible": true
+  },
+  "rows": [
+    {
+      "additive_vs_inplace": {
+        "additive": 6,
+        "in_place": 0,
+        "total": 6
+      },
+      "blast_radius": "isolated-new-kernel",
+      "clears_500_alone": true,
+      "contingency": "kanna #403 PPL-safe-k (headline-k PPL-blocked per #394; measured floor +15.67 -> 483.15 MISSES 500). cb3 is necessary-not-sufficient.",
+      "identity_verify_gpu_minutes": 40.8,
+      "is_additive_not_inplace": true,
+      "lever": "cb3",
+      "name": "cb3 body-read shrink",
+      "produces_new_reference": true,
+      "reversible_by_config_flag": true,
+      "safe_to_request": true,
+      "served_file_surface": [
+        {
+          "category": "cuda_cpp_extension",
+          "change": "NEW prebuilt cb3 QTIP/QuIP# CUDA ext (RHT incoherence + L1-resident K=64 dim-2 Gaussian VQ dequant GEMM); built OUT-OF-HARNESS, uploaded prebuilt.",
+          "classification": "additive",
+          "path": "submissions/cb3_<name>/kernels/cb3_qtip_kernel-*.whl  (prebuilt sm_86 .whl/.so)",
+          "scaffold_role": "kernel",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "vllm_quant_registration",
+          "change": "NEW Cb3Config + Cb3LinearMethod via the ADDITIVE @register_quantization_config(\"cb3\") decorator (appends to vLLM QUANTIZATION_METHODS at import). NO in-tree vLLM edit.",
+          "classification": "additive",
+          "path": "submissions/cb3_<name>/cb3_quant_patch.py",
+          "scaffold_role": "patch",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "FORK of the deployed manifest; deltas = +cb3 kernel dep, WEIGHTS_BUCKET -> cb3-baked checkpoint.",
+          "classification": "additive",
+          "path": "submissions/cb3_<name>/manifest.json  (fork)",
+          "scaffold_role": "manifest",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "serve_py_hook",
+          "change": "FORK of the deployed serve stack; delta = +setup_cb3_path() so the child imports cb3_quant_patch. NO new vLLM source-patch.",
+          "classification": "additive",
+          "path": "submissions/cb3_<name>/serve.py  (fork)",
+          "scaffold_role": "serve",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "vllm_quant_registration",
+          "change": "FORK of the deployed sitecustomize finder; delta = import cb3_quant_patch.",
+          "classification": "additive",
+          "path": "submissions/cb3_<name>/sitecustomize.py  (fork)",
+          "scaffold_role": "sitecustomize",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "NEW remote checkpoint config declaring quant_method \"cb3\" (vLLM auto-selects, no CLI flag). Separate bucket; the deployed int4 checkpoint is untouched.",
+          "classification": "additive",
+          "path": "<cb3 bucket>/config.json  (remote, NEW cb3-baked checkpoint)",
+          "scaffold_role": "checkpoint",
+          "subsystem": "body_gemm_quant",
+          "touches_checkpoint": true,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        }
+      ],
+      "served_files_touched": 6,
+      "subsystem": "body_gemm_quant",
+      "touches_checkpoint": true,
+      "tps_unlocked": {
+        "honest_m1": 33.0,
+        "measured_floor": 15.67,
+        "realistic": 38.02
+      },
+      "tps_unlocked_headline": 33.0,
+      "verify_harness_3tier": "TIER1 per-GEMM/-config M=1-vs-M=8 byte-identity (#390); TIER2 decode-width e2e identity (#381); TIER3 e2e SELF-REFERENTIAL gate (#319: gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).",
+      "verify_reference_rekey": "RHT+VQ dequant changes the weights -> different argmax -> #319 re-keys to cb3's OWN M=1 AR decode (never inherited from int4).",
+      "wandb_run": "jqhlftrc"
+    },
+    {
+      "additive_vs_inplace": {
+        "additive": 5,
+        "in_place": 0,
+        "total": 5
+      },
+      "blast_radius": "isolated-new-kernel",
+      "clears_500_alone": false,
+      "contingency": "CAPS 481.53 ALONE (attention-free deployed strict < deployed non-strict) -> USEFUL ONLY STACKED; cannot clear 500 by itself. The +14.29 itself is MEASURED (not contingent).",
+      "identity_verify_gpu_minutes": 40.8,
+      "is_additive_not_inplace": true,
+      "lever": "pinnedk_attn",
+      "m_invariant_byte_exact_feasible": true,
+      "n_kernel_rebuilds": 1,
+      "name": "pinned-K attention rebuild",
+      "produces_new_reference": true,
+      "reversible_by_config_flag": true,
+      "safe_to_request": true,
+      "served_file_surface": [
+        {
+          "category": "cuda_cpp_extension",
+          "change": "NEW prebuilt rebuilt-FA2 varlen kernel supporting a FIXED 64-CTA num_splits>1 deterministic split-reduce (the served kernel rejects num_splits>1 with NotImplementedError). Built OUT-OF-HARNESS, uploaded prebuilt. #400 n_distinct_kernel_rebuilds=1.",
+          "classification": "additive",
+          "path": "submissions/pinnedk_<name>/kernels/fa2_pinnedk-*.whl  (prebuilt sm_86 .whl/.so)",
+          "scaffold_role": "kernel",
+          "subsystem": "attention_kernel",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "attn_backend_patch",
+          "change": "NEW patch routing the served attention to the rebuilt fixed-64-CTA FA2 (deterministic reduction order). Imported via sitecustomize. NO in-tree vLLM edit; the shipping FA2 path is untouched.",
+          "classification": "additive",
+          "path": "submissions/pinnedk_<name>/pinnedk_attn_patch.py",
+          "scaffold_role": "patch",
+          "subsystem": "attention_kernel",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "FORK of the deployed manifest; delta = +pinned-K attn kernel dep. NO WEIGHTS_BUCKET change (weights identical; only the attention reduction order changes).",
+          "classification": "additive",
+          "path": "submissions/pinnedk_<name>/manifest.json  (fork)",
+          "scaffold_role": "manifest",
+          "subsystem": "attention_kernel",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "serve_py_hook",
+          "change": "FORK of the deployed serve stack; delta = +load the pinned-K attn kernel / select the backend.",
+          "classification": "additive",
+          "path": "submissions/pinnedk_<name>/serve.py  (fork)",
+          "scaffold_role": "serve",
+          "subsystem": "attention_kernel",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "attn_backend_patch",
+          "change": "FORK of the deployed sitecustomize finder; delta = import pinnedk_attn_patch.",
+          "classification": "additive",
+          "path": "submissions/pinnedk_<name>/sitecustomize.py  (fork)",
+          "scaffold_role": "sitecustomize",
+          "subsystem": "attention_kernel",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        }
+      ],
+      "served_files_touched": 5,
+      "subsystem": "attention_kernel",
+      "touches_checkpoint": false,
+      "tps_unlocked": {
+        "cap": 14.29,
+        "caps_at_tps": 481.53
+      },
+      "tps_unlocked_headline": 14.29,
+      "verify_harness_3tier": "TIER1 per-GEMM/-config M=1-vs-M=8 byte-identity (#390); TIER2 decode-width e2e identity (#381); TIER3 e2e SELF-REFERENTIAL gate (#319: gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).",
+      "verify_reference_rekey": "the fixed 64-CTA multi-split reduction order != the deployed num_splits=1 serial un-pack -> NEW bytes (#400 empirical new-reference probe) -> #319 re-keys to the rebuilt-attn stack's OWN M=1 AR. M-invariant byte-exact FEASIBLE (Marlin-grounded).",
+      "wandb_run": "o7yhpkej"
+    },
+    {
+      "additive_vs_inplace": {
+        "additive": 5,
+        "in_place": 0,
+        "total": 5
+      },
+      "best_loadable_read_shrink_frac": 0.0,
+      "blast_radius": "isolated-new-checkpoint",
+      "clears_500_alone": false,
+      "contingency": "best_loadable_read_shrink_frac=0.0 -> the deployed 21 MB head is a LOSSY 16384-row truncation ALREADY in the 467.48 base; the loadable identity-safe floor is int4-Marlin 336 MB (full-vocab identity COSTS ~54 roofline-TPS). The only further shrink is MORE lossy truncation; provability = land #406 (in flight).",
+      "deployed_read_mb": 21.0,
+      "identity_verify_gpu_minutes": 0.0,
+      "identity_verify_gpu_minutes_lossy_route": 40.8,
+      "int4_floor_mb": 336.07,
+      "is_additive_not_inplace": true,
+      "lever": "lmhead",
+      "loadable_lmhead_lever_exists": false,
+      "name": "lm_head read-reduction / truncation",
+      "produces_new_reference": false,
+      "produces_new_reference_lossy_route": true,
+      "reversible_by_config_flag": true,
+      "safe_to_request": false,
+      "served_file_surface": [
+        {
+          "category": "serve_py_hook",
+          "change": "FORK of the deployed PCK-04 _prune_lm_head_rows patch with a SMALLER keepset (e.g. 16384->12288 lmhead12k). Meta-tensor scatter hook (already in the deployed stack). LOSSY: cannot emit the dropped vocab rows -> byte-exact only vs its OWN pruned checkpoint, NOT full-256k AR.",
+          "classification": "additive",
+          "path": "submissions/lmhead_<name>/serve_patch_pck04.py  (fork: smaller keepset)",
+          "scaffold_role": "patch",
+          "subsystem": "lmhead_rows",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "FORK of the deployed manifest; delta = WEIGHTS_BUCKET -> further-pruned checkpoint.",
+          "classification": "additive",
+          "path": "submissions/lmhead_<name>/manifest.json  (fork)",
+          "scaffold_role": "manifest",
+          "subsystem": "lmhead_rows",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "serve_py_hook",
+          "change": "FORK of the deployed serve stack; imports the (smaller-keepset) prune patch (same mechanism as the deployed head, smaller keepset).",
+          "classification": "additive",
+          "path": "submissions/lmhead_<name>/serve.py  (fork)",
+          "scaffold_role": "serve",
+          "subsystem": "lmhead_rows",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "FORK of the deployed sitecustomize finder; delta = import the prune patch.",
+          "classification": "additive",
+          "path": "submissions/lmhead_<name>/sitecustomize.py  (fork)",
+          "scaffold_role": "sitecustomize",
+          "subsystem": "lmhead_rows",
+          "touches_checkpoint": false,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        },
+        {
+          "category": "served_config_selector",
+          "change": "NEW remote checkpoint baked with the smaller lm_head keepset. Provability of identity-safety for the further prune is land #406 (in flight). The deployed checkpoint is untouched.",
+          "classification": "additive",
+          "path": "<pruned bucket>/config.json  (remote, NEW further-pruned checkpoint)",
+          "scaffold_role": "checkpoint",
+          "subsystem": "lmhead_rows",
+          "touches_checkpoint": true,
+          "touches_deployed_file": false,
+          "touches_in_tree_vllm": false
+        }
+      ],
+      "served_files_touched": 5,
+      "subsystem": "lmhead_rows",
+      "touches_checkpoint": true,
+      "tps_unlocked": {
+        "best_loadable_read_shrink_frac": 0.0,
+        "loadable_identity_safe": 0.0
+      },
+      "tps_unlocked_headline": 0.0,
+      "verify_harness_3tier": "TIER1 per-GEMM/-config M=1-vs-M=8 byte-identity (#390); TIER2 decode-width e2e identity (#381); TIER3 e2e SELF-REFERENTIAL gate (#319: gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).",
+      "verify_reference_rekey": "best_loadable_read_shrink_frac=0.0 -> NO loadable identity-safe shrink changes anything (no new reference). The ONLY read-shrink is MORE truncation, which changes the argmax SUPPORT -> a self-referential-only (NOT full-256k) reference; its provability is land #406 (in flight).",
+      "wandb_run": "dzgbnsrp"
+    }
+  ],
+  "selftest": {
+    "conditions": {
+      "a_cb3_additive_not_inplace": true,
+      "a_cb3_new_reference": true,
+      "a_cb3_safe_to_request": true,
+      "a_cb3_six_additive": true,
+      "a_cb3_six_files": true,
+      "a_cb3_verify_40_8": true,
+      "a_cb3_zero_inplace": true,
+      "b_pinnedk_cap_14_29": true,
+      "b_pinnedk_caps_481_53": true,
+      "b_pinnedk_feasible": true,
+      "b_pinnedk_five_files": true,
+      "b_pinnedk_new_reference": true,
+      "b_pinnedk_no_checkpoint": true,
+      "b_pinnedk_no_clear_alone": true,
+      "b_pinnedk_one_rebuild": true,
+      "c_lmhead_deployed_21mb": true,
+      "c_lmhead_floor_336mb": true,
+      "c_lmhead_lever_absent": true,
+      "c_lmhead_loadable_no_new_ref": true,
+      "c_lmhead_lossy_new_ref": true,
+      "c_lmhead_shrink_zero": true,
+      "c_lmhead_tps_zero": true,
+      "d_all_reversible": true,
+      "d_all_zero_inplace": true,
+      "d_categories_canonical": true,
+      "d_no_deployed_touched": true,
+      "d_no_in_tree_touched": true,
+      "d_three_rows": true,
+      "e_no_checkpoint_collision": true,
+      "e_no_in_tree_contention": true,
+      "e_one_combined_bucket": true,
+      "e_shared_e2e_verify": true,
+      "e_stack_additively": true,
+      "e_three_subsystems": true,
+      "f_binding_is_403": true,
+      "f_cb3_alone_threshold": true,
+      "f_cb3_pinnedk_threshold": true,
+      "f_cheapest_clears_at_honest": true,
+      "f_cheapest_is_cb3_at_honest": true,
+      "f_cheapest_six_files": true,
+      "f_cheapest_verify_40_8": true,
+      "f_combined_verify_shared": true,
+      "f_floor_misses_500": true,
+      "f_max_stack_floor_below_500": true,
+      "f_whole_additive_reversible": true,
+      "g_deployed::lmhead_prune": true,
+      "g_deployed::manifest": true,
+      "g_deployed::serve": true,
+      "g_deployed::sitecustomize": true,
+      "g_evidence::cb3_surface_404": true,
+      "g_evidence::loadable_lmhead_398": true,
+      "g_evidence::pinnedk_headroom_400": true,
+      "g_harness::decode_width_e2e_381": true,
+      "g_harness::per_gemm_byte_exact_390": true,
+      "g_harness::self_ref_compare_319": true,
+      "g_harness::self_ref_interlock_319": true,
+      "g_harness::self_ref_reference_319": true,
+      "h_analysis_only": true,
+      "h_no_hf_job": true,
+      "h_no_served_file_change": true,
+      "h_official_tps_zero": true
+    },
+    "n_checks": 61,
+    "passes": true
+  },
+  "shared_baselines": {
+    "deployed_ppl": 2.3772,
+    "deployed_tps": 481.53,
+    "ppl_cap": 2.42,
+    "strict_base_corrected": 467.48,
+    "strict_gap_to_500": 32.52,
+    "target_tps": 500.0
+  },
+  "single_binding_contingency": "kanna #403 PPL-safe-k LIFT MAGNITUDE. The whole >500 decision rides on a SINGLE contingency with a sharp threshold L>=+18.23 TPS: below it, NO additive combination of the three flagged levers clears 500 (pinned-K caps 481.53 alone, lm_head's loadable identity-safe shrink is 0). At the CURRENT measured floor L=+15.67 the MAX stack (467.48+15.67+14.29+0) = 497.44 MISSES 500 by 2.56. If #403 returns L in [18.23, 32.52) the cheapest sufficient combination is {cb3, pinned-K}; if L>=32.52, {cb3} alone.",
+  "total_served_files_all_levers": 16,
+  "whole_combination_additive_and_reversible": true
+}
