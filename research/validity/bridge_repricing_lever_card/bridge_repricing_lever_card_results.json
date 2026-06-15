@@ -1,0 +1,211 @@
+{
+  "created_at": "20260615T033001Z",
+  "pr": 286,
+  "agent": "kanna",
+  "kind": "bridge-repricing-lever-card",
+  "synthesis": {
+    "constants": {
+      "official_baseline": 481.53,
+      "lambda1_ceil": 520.9527323111674,
+      "K_cal": 125.26795005202914,
+      "step_served_us": 1218.2,
+      "E_T": 3.844,
+      "tau": 1.218,
+      "bridge_draft": 0.2147122962556323,
+      "bridge_verify": 1.0,
+      "one_over_bridge_draft": 4.657395116344056
+    },
+    "bridge_derivation": {
+      "draft_k7_wall_us": 706.8555014474051,
+      "verify_m1_wall_us": 4966.783229282924,
+      "step_wall_microbuilt_us": 5673.638730730329,
+      "bridge_draft": 0.2147122962556323,
+      "one_over_bridge": 4.657395116344056,
+      "verify_b8_total_us": 9036.682913643974,
+      "verify_b8_per_seq_us": 1129.5853642054967,
+      "per_seq_amort_factor": 0.22742795730358054,
+      "step_vs_perseq_verify_ratio": 1.0784488172408564,
+      "bridge_vs_amort_resid": 0.012715661047948246
+    },
+    "draft_bridge_caveat": {
+      "assumption": "carry denken #278's bridge=0.2147 (= step_norm/(draft_b1+verify_b1)) for ALL draft-side levers.",
+      "verify_side_confirmed": "the deployed-M8 verify per-seq cost 1129.6us ~ step_norm 1218.2us (ratio 1.078), and the b8-per-seq amortization factor 0.2274 ~ bridge 0.2147 (resid 0.0127) -> a deployed-M8 verify saving is already normalized -> verify bridge = 1.0 (banked-confirmed).",
+      "draft_side_open": "the batch-8 DRAFT-chain per-seq amortization is NOT separately measured (denken #278 fu#1; denken #283 HBM-ceiling not yet landed on this branch). The draft GEMVs are intrinsic-M=1 under-saturated (kanna #269/#277): at batch=8 they would amortize the weight reads, so the TRUE draft per-seq saving is <= the bridged saving.",
+      "bound_direction": "if the draft amortizes MORE than verify, the draft bridge < 0.2147 -> the honest draft gain is EVEN SMALLER -> the draft-side card rows (and the composed stack) are UPPER BOUNDS. The closure (no step lever clears 500) is therefore robust / conservative.",
+      "verify_b8_per_seq_us": 1129.5853642054967,
+      "per_seq_amort_factor": 0.22742795730358054,
+      "bridge_vs_amort_resid": 0.012715661047948246
+    },
+    "lever_card": [
+      {
+        "lever": "draft_mlp_activation_fold",
+        "pr": 269,
+        "run": "epl52mkq",
+        "basis": "draft_b1_wall",
+        "bridge": 0.2147122962556323,
+        "disjoint_group": "draft_mlp",
+        "stack_member": true,
+        "same_lever_as": null,
+        "delta_step_raw_us": 51.24,
+        "delta_step_honest_us": 11.001858060138598,
+        "raw_composition_gain_pct": 4.390896003290612,
+        "banked_raw_gain_pct": 4.390896003290608,
+        "basis_honest_gain_pct": 0.9113547874137318,
+        "basis_honest_tps": 485.91844670783337,
+        "crosses_500_alone": false,
+        "onegraph_residual_gain_pct": null,
+        "justification": "kanna #269 folds the SEPARATE GeluAndMul companion kernel into the draft MLP gate_up epilogue. The 7.32us/pass saving is a batch=1 WALL draft-GPU-op saving (the drafter runs the K=7 chain), subtracted as an ABSOLUTE 51.24us from the NORMALIZED step -> draft-side, needs the bridge."
+      },
+      {
+        "lever": "draft_io_projection",
+        "pr": 277,
+        "run": "ahw089yi",
+        "basis": "draft_b1_wall",
+        "bridge": 0.2147122962556323,
+        "disjoint_group": "draft_io",
+        "stack_member": true,
+        "same_lever_as": null,
+        "delta_step_raw_us": 0.06,
+        "delta_step_honest_us": 0.012882737775337936,
+        "raw_composition_gain_pct": 0.0049255422201133214,
+        "banked_raw_gain_pct": 0.0,
+        "basis_honest_gain_pct": 0.0010575335753326698,
+        "basis_honest_tps": 481.53509234142524,
+        "crosses_500_alone": false,
+        "onegraph_residual_gain_pct": null,
+        "justification": "kanna #277 io_projection = 2 GEMVs at opposite ends of the 4-layer draft stack, intrinsic-M=1, NO companion kernel to fold -> NULL (0.0%). Measured at the batch=1 draft wall like the MLP -> draft-side. (Bridge irrelevant: saving is ~0.)"
+      },
+      {
+        "lever": "draft_tree_attention_autotune",
+        "pr": 270,
+        "run": "iwwcmvez",
+        "basis": "draft_b1_wall",
+        "bridge": 0.2147122962556323,
+        "disjoint_group": "draft_attn",
+        "stack_member": true,
+        "same_lever_as": null,
+        "delta_step_raw_us": 15.411217212677002,
+        "delta_step_honest_us": 3.308977835828204,
+        "raw_composition_gain_pct": 1.281290400544255,
+        "banked_raw_gain_pct": 1.281290400544255,
+        "basis_honest_gain_pct": 0.2723682845177322,
+        "basis_honest_tps": 482.84153500043817,
+        "crosses_500_alone": false,
+        "onegraph_residual_gain_pct": 0.05564302041867197,
+        "justification": "wirbel #270 autotunes the draft/tree attention Triton kernel (28.5us attn term). The 2.20us/pass bit-identical saving (x K=7 = 15.41us) is a batch=1 WALL draft saving -> draft-side, needs the bridge. NOTE: the realistic ONEGRAPH in-graph residual is only +0.056% (the 1.281% is an eager upper bound; ONEGRAPH already erased the launch slack)."
+      },
+      {
+        "lever": "verify_sdpa_num_stages2_deployed",
+        "pr": 279,
+        "run": "xme9snkv",
+        "basis": "verify_deployed_m8",
+        "bridge": 1.0,
+        "disjoint_group": "verify_sdpa",
+        "stack_member": true,
+        "same_lever_as": null,
+        "delta_step_raw_us": 15.554561614990178,
+        "delta_step_honest_us": 15.554561614990178,
+        "raw_composition_gain_pct": 1.2933622095534503,
+        "banked_raw_gain_pct": 1.2933622095534503,
+        "basis_honest_gain_pct": 1.2933622095534503,
+        "basis_honest_tps": 487.75792704766275,
+        "crosses_500_alone": false,
+        "onegraph_residual_gain_pct": null,
+        "justification": "wirbel #279 measures the verify SDPA num_stages=3->2 tune ON the deployed 3D split-KV M=8 path (realistic ctx 512), and prices it as a FRACTIONAL reduction of the verify-dominated step (saving expressed directly as a 15.55us step saving) -> ALREADY in the normalized deployed-M8 basis -> verify-side, bridge ~ 1.0 (no further discount)."
+      },
+      {
+        "lever": "verify_sdpa_num_stages2_component",
+        "pr": 280,
+        "run": "sdrerk5h",
+        "basis": "verify_deployed_m8",
+        "bridge": 1.0,
+        "disjoint_group": "verify_sdpa",
+        "stack_member": false,
+        "same_lever_as": 279,
+        "delta_step_raw_us": 14.270862893970358,
+        "delta_step_honest_us": 14.270862893970358,
+        "raw_composition_gain_pct": 1.1853573814381013,
+        "banked_raw_gain_pct": 1.1853573814381013,
+        "basis_honest_gain_pct": 1.1853573814381013,
+        "basis_honest_tps": 487.23785139883887,
+        "crosses_500_alone": false,
+        "onegraph_residual_gain_pct": null,
+        "justification": "kanna #280 prices the SAME verify SDPA num_stages=2 lever via the verify-component decomposition: SDPA is 14.51% of the M=8 verify; num_stages=2 gives 1.097x on SDPA -> 66.27us verify saving -> +1.185% composition. Deployed-M8 basis -> bridge ~ 1.0. It is the SAME physical kernel tune as wirbel #279 (verify SDPA num_stages=2) -> EXCLUDED from the composed stack to avoid double-counting."
+      }
+    ],
+    "best_single_lever": {
+      "lever": "verify_sdpa_num_stages2_deployed",
+      "pr": 279,
+      "run": "xme9snkv",
+      "basis": "verify_deployed_m8",
+      "basis_honest_tps": 487.75792704766275,
+      "basis_honest_gain_pct": 1.2933622095534503,
+      "crosses_500_alone": false
+    },
+    "composed_step_stack": {
+      "disjoint_groups_used": [
+        "draft_attn",
+        "draft_io",
+        "draft_mlp",
+        "verify_sdpa"
+      ],
+      "stack_members": [
+        "draft_mlp_activation_fold",
+        "draft_io_projection",
+        "draft_tree_attention_autotune",
+        "verify_sdpa_num_stages2_deployed"
+      ],
+      "excluded_duplicates": [
+        "verify_sdpa_num_stages2_component"
+      ],
+      "sum_delta_honest_us": 29.878280248732317,
+      "composed_new_step_us": 1188.3217197512677,
+      "composed_step_stack_basis_honest_tps": 493.6372332930038,
+      "composed_gain_pct": 2.5143258557107195,
+      "composed_step_stack_crosses_500": false,
+      "gap_to_500_tps": 6.362766706996183,
+      "gap_to_lambda1_ceiling_tps": 27.31549901816362
+    },
+    "phi_bridge_reconciliation": {
+      "bridge_denken278": {
+        "value": 0.2147122962556323,
+        "mechanism": "linear-path BATCH-NORMALIZATION: maps a batch=1 WALL ABSOLUTE saving into the NORMALIZED composition step (step_norm 1218.2us).",
+        "step_convention": "normalized composition step (1218.2us)",
+        "applies_to": "linear-path DRAFT-side ABSOLUTE savings subtracted from step_norm (kanna #269, kanna #277, wirbel #270).",
+        "verify_side_value": 1.0,
+        "verify_side_note": "deployed-M8 verify savings priced fractionally are already in this basis -> bridge = 1.0."
+      },
+      "phi_fern274": {
+        "value_served_wall": 0.6034589848288221,
+        "value_kcal_clean": 0.735133735318471,
+        "mechanism": "wall-clock FIXED-OVERHEAD absorption: phi = model_forward / wall_step is the touchable model-forward fraction of the WALL step; the (1-phi) fixed overhead is unaffected by a draft cut.",
+        "step_convention": "wall-clock step (served_wall_clock_est 9725us or kcal_clean 7982.9us) -- NOT the normalized step.",
+        "applies_to": "tree-path / static-K draft-pass CUTS in the WALL-CLOCK recompute (stark #273 A/B; fern #274's static_k4/k5, tree_width). NOT in this portfolio."
+      },
+      "verdict": "bridge (0.2147) and phi (0.603) are DIFFERENT mechanisms on DIFFERENT step conventions: bridge maps a wall saving into the NORMALIZED step; phi is the model-forward fraction WITHIN the wall step. They must NOT be stacked on the same projection. This portfolio card is in the COMPOSITION (normalized) basis, so it uses the BRIDGE only (draft 0.2147, verify 1.0). fern #274's phi-discounted numbers live in the complementary wall-clock basis; both AGREE on the bottom line (no draft lever clears 500 honestly).",
+      "double_count_flag": "DOUBLE-COUNT RISK: kanna #269 -- combining its phi-discounted WALL gain (fern's convention) with its bridge-discounted COMPOSITION gain (this card) double-discounts. Coherent rule: pick the discount matching the step you project against -- composition step -> bridge; wall-clock A/B -> phi. NEVER both."
+    },
+    "self_test": {
+      "conditions": {
+        "a_bridge_reproduces_denken278_269_repricing": true,
+        "b_verify_bridge1_reproduces_wirbel279_129": true,
+        "c_composition_roundtrips_481p53_at_delta0": true,
+        "d_every_lever_classified_with_justification": true,
+        "f_baseline_constants_imported_exact": true
+      },
+      "row_269_raw_gain_pct": 4.390896003290612,
+      "row_269_honest_gain_pct": 0.9113547874137318,
+      "denken278_model_A_gain_pct": 4.390896003290608,
+      "denken278_model_B_gain_pct": 0.9113547874137429,
+      "row_279_honest_gain_pct": 1.2933622095534503
+    },
+    "best_basis_honest_step_tps": 487.75792704766275,
+    "composed_step_stack_basis_honest_tps": 493.6372332930038,
+    "composed_step_stack_crosses_500": false,
+    "verdict": "The bridge is DRAFT-SIDE-SPECIFIC. Re-priced to ONE coherent (composition/normalized) basis: draft-side levers carry bridge=0.2147 (the 4.66x over-credit), verify-side levers carry bridge=1.0 (already deployed-M8 normalized). The re-pricing FLIPS the best lever: pre-repricing kanna #269's +4.39% (502.7 TPS) LOOKED best and the only one 'crossing 500'; basis-honest it is +0.91% (485.9 TPS, does NOT cross). The best single basis-honest step lever is the VERIFY SDPA tune at 487.8 TPS (+1.29%), and the full composed disjoint basis-honest step stack reaches 493.6 TPS (+2.51%) -- does NOT cross 500 (gap 6.4). The step side is rigorously CLOSED; no step lever or composed step stack reaches 500. BASELINE 481.53 untouched; analysis-only; NOT a launch.",
+    "handoff": "draft-side levers carry bridge~0.21 (4.7x over-credit) and verify-side levers carry bridge~1.0 (already deployed-basis), so the basis-honest best single step lever is 487.8 TPS (verify SDPA num_stages=2) and the full composed basis-honest step stack reaches 493.6 TPS (does not cross 500), rigorously closing the step-side and confirming the E[T]-raise axis (fern #281) as the sole remaining >500 path."
+  },
+  "bridge_repricing_lever_card_self_test_passes": true,
+  "peak_mem_mib": 13.625,
+  "nan_clean": true
+}
