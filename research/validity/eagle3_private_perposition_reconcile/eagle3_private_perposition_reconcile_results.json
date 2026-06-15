@@ -1,0 +1,507 @@
+{
+  "agent": "fern",
+  "all_imports_match_source": true,
+  "analysis_only": true,
+  "build_clears_private500_perposition": true,
+  "caveats": {
+    "greedy_ppl_orthogonal": "Greedy-identity / PPL compliance is orthogonal (Issue #192 lane) and OUT OF SCOPE.",
+    "reachability_conditional": "The build's E[T]=6.11 reachability is CONDITIONAL and OUT OF SCOPE (denken #304 a1-cliff break; the deep-flat ceiling is 6.105 so 6.11 needs an a1 lift). This leg prices the PRIVATE projection IF 6.11 is reached, not whether it is reachable.",
+    "reconciles_not_measures": "This leg RECONCILES the two banked private conventions onto one honest public base; it does NOT measure the fusion draft's private tax. That is the checkpoint-gated follow-up scoped by lawine's fusion-rank-coverage probe.",
+    "rho_modeled_from_linear_spine": "rho_priv_e3=0.9421 is MODELED from the deployed LINEAR spine's deep-position fidelity (lawine #300: c_1=1.0 held by the M=8 tree, c_deep=0.97135 on j>=2 calibrated to the organizer-verified 460.85). A trained {2,21,39}-fusion EAGLE-3 draft may carry a DIFFERENT deep-position private tax.",
+    "scope": "LOCAL CPU-only reconciliation over banked constants. 0 TPS added; BASELINE 481.53 untouched; greedy/PPL untouched. NO GPU / vLLM / HF Job / submission / served-file change. Authorizes NOTHING. NOT a launch."
+  },
+  "constants": {
+    "E_T_central": 6.1112149873699195,
+    "E_T_deployed": 3.844,
+    "K_cal": 125.268,
+    "K_cal_eagle3": 101.79332412387028,
+    "bracket_hi": 6.858819247754167,
+    "bracket_lo": 5.363610726985671,
+    "c_deep_300": 0.9713472759982902,
+    "collapse_bracket": {
+      "per_position": 0.9421228821714434,
+      "raw_no_recovery": 0.7797221674962985,
+      "scalar_0804": 0.804,
+      "tree_recovered": 0.955267407218773
+    },
+    "deployed_measured_priv_over_pub": 0.9570535584491102,
+    "eagle3_public_et_300": 4.96600000000002,
+    "fern_floor_public": 4.966,
+    "go305_et_private_cross": 7.601013665882984,
+    "go305_private_brackethi": 451.17793160534995,
+    "go305_private_central": 402.0,
+    "go305_public_central": 499.99999999999994,
+    "honest500_floor": 3.9914,
+    "official_baseline": 481.53,
+    "private_factor": 0.804,
+    "private_verified": 460.85,
+    "provenance": "wirbel#295 (c334qaqu) K_cal 125.268 / step_us 1218.2 / tau 1.218 / E_T_dep 3.844 / fern_floor 4.966 / corrected target 6.1112 bracket [5.3636,6.8588] x wirbel#290 honest500 3.9914 / priv_factor 0.804 x lawine#300 (8t5q6sr0) rho_priv_e3 0.9421 / c_deep 0.97135 / raw 0.7797 / tree 0.955 / etbar 4.194 x fern#305 (m4nmtdl9) scalar private 402.0/451.2 / cross 7.601 x private_verified 460.85.",
+    "public_etbar_priv500_300": 4.194301321486128,
+    "rho_deployed_tree": 0.955267407218773,
+    "rho_priv_e3": 0.9421228821714434,
+    "rho_priv_e3_raw": 0.7797221674962985,
+    "step_central_us": 1499.1305069702046,
+    "step_us": 1218.2,
+    "tau": 1.218
+  },
+  "created_at": "20260615T070007Z",
+  "import_verification": [
+    {
+      "abs_err": 0.0,
+      "cited": 481.53,
+      "matches_source": true,
+      "name": "official_baseline",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/official_baseline",
+      "source_value": 481.53
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 125.268,
+      "matches_source": true,
+      "name": "K_cal",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/K_cal",
+      "source_value": 125.268
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1218.2,
+      "matches_source": true,
+      "name": "step_us",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/step_us",
+      "source_value": 1218.2
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 1.218,
+      "matches_source": true,
+      "name": "tau",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/tau",
+      "source_value": 1.218
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 3.844,
+      "matches_source": true,
+      "name": "E_T_deployed",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/E_T_deployed",
+      "source_value": 3.844
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 4.966,
+      "matches_source": true,
+      "name": "fern_floor_public",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/constants/fern_floor_public",
+      "source_value": 4.966
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 6.1112149873699195,
+      "matches_source": true,
+      "name": "E_T_central",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/regime_bracket/corrected_central",
+      "source_value": 6.1112149873699195
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 5.363610726985671,
+      "matches_source": true,
+      "name": "bracket_lo",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/regime_bracket/bracket_lo",
+      "source_value": 5.363610726985671
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 6.858819247754167,
+      "matches_source": true,
+      "name": "bracket_hi",
+      "source": "research/validity/eagle3_step_profile/eagle3_step_profile_results.json#/synthesis/regime_bracket/bracket_hi",
+      "source_value": 6.858819247754167
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 3.9914,
+      "matches_source": true,
+      "name": "honest500_floor",
+      "source": "research/validity/eagle3_feasibility_bracket/eagle3_feasibility_bracket_results.json#/synthesis/constants/honest500_floor",
+      "source_value": 3.9914
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.804,
+      "matches_source": true,
+      "name": "private_factor",
+      "source": "research/validity/eagle3_feasibility_bracket/eagle3_feasibility_bracket_results.json#/synthesis/constants/priv_factor",
+      "source_value": 0.804
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 460.85,
+      "matches_source": true,
+      "name": "private_verified",
+      "source": "research/validity/private_bar_eagle3/private_bar_eagle3_results.json#/synthesis/imported/private_verified_tps",
+      "source_value": 460.85
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.9421228821714434,
+      "matches_source": true,
+      "name": "rho_priv_e3",
+      "source": "research/validity/private_bar_eagle3/private_bar_eagle3_results.json#/synthesis/step3_eagle3/rho_priv_e3",
+      "source_value": 0.9421228821714434
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.7797221674962985,
+      "matches_source": true,
+      "name": "rho_priv_e3_raw",
+      "source": "research/validity/private_bar_eagle3/private_bar_eagle3_results.json#/synthesis/step3_eagle3/rho_priv_e3_raw",
+      "source_value": 0.7797221674962985
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.955267407218773,
+      "matches_source": true,
+      "name": "rho_deployed_tree",
+      "source": "research/validity/private_bar_eagle3/private_bar_eagle3_results.json#/synthesis/step1_anchor/rho_deployed_tree_recovered",
+      "source_value": 0.955267407218773
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 0.9713472759982902,
+      "matches_source": true,
+      "name": "c_deep_300",
+      "source": "research/validity/private_bar_eagle3/private_bar_eagle3_results.json#/synthesis/step1_anchor/c_deep_calibrated",
+      "source_value": 0.9713472759982902
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 4.194301321486128,
+      "matches_source": true,
+      "name": "public_etbar_priv500_300",
+      "source": "research/validity/private_bar_eagle3/private_bar_eagle3_results.json#/synthesis/step2_invert/public_etbar_for_private_500",
+      "source_value": 4.194301321486128
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 4.96600000000002,
+      "matches_source": true,
+      "name": "eagle3_public_et_300",
+      "source": "research/validity/private_bar_eagle3/private_bar_eagle3_results.json#/synthesis/step3_eagle3/eagle3_public_et",
+      "source_value": 4.96600000000002
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 402.0,
+      "matches_source": true,
+      "name": "go305_private_central",
+      "source": "research/validity/eagle3_go_card/eagle3_go_card_results.json#/deterministic_card/private_at_central_tps",
+      "source_value": 402.0
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 451.17793160534995,
+      "matches_source": true,
+      "name": "go305_private_brackethi",
+      "source": "research/validity/eagle3_go_card/eagle3_go_card_results.json#/deterministic_card/private_at_bracket_hi_tps",
+      "source_value": 451.17793160534995
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 7.601013665882984,
+      "matches_source": true,
+      "name": "go305_et_private_cross",
+      "source": "research/validity/eagle3_go_card/eagle3_go_card_results.json#/deterministic_card/et_private_cross_500",
+      "source_value": 7.601013665882984
+    },
+    {
+      "abs_err": 0.0,
+      "cited": 499.99999999999994,
+      "matches_source": true,
+      "name": "go305_public_central",
+      "source": "research/validity/eagle3_go_card/eagle3_go_card_results.json#/deterministic_card/public_at_central_E_T",
+      "source_value": 499.99999999999994
+    }
+  ],
+  "kind": "eagle3_private_perposition_reconcile",
+  "nan_clean": true,
+  "peak_mem_mib": 15.176,
+  "pr": 310,
+  "primary_metric_name": "private_perposition_reconcile_self_test_passes",
+  "private_perposition_reconcile_self_test_passes": true,
+  "private_tps_at_611_perposition": 586.0766391463308,
+  "provenance": "wirbel#295 (c334qaqu) K_cal 125.268 / step_us 1218.2 / tau 1.218 / E_T_dep 3.844 / fern_floor 4.966 / corrected target 6.1112 bracket [5.3636,6.8588] x wirbel#290 honest500 3.9914 / priv_factor 0.804 x lawine#300 (8t5q6sr0) rho_priv_e3 0.9421 / c_deep 0.97135 / raw 0.7797 / tree 0.955 / etbar 4.194 x fern#305 (m4nmtdl9) scalar private 402.0/451.2 / cross 7.601 x private_verified 460.85.",
+  "reconcile_honest_single_tax": {
+    "breakeven_at_scalar_anchor": true,
+    "breakeven_rho": 0.8037539966988988,
+    "build_clears_private500_perposition": true,
+    "build_deployed_equiv_public_et": 4.965999999999999,
+    "confirms_300_private500_needs_4p19": true,
+    "go305_private_402_is_honest_x_0804_squared": 402.123039297408,
+    "go305_public_haircut_ratio": 0.8037539966988989,
+    "headline_private_tps_at_611_perposition": 586.0766391463308,
+    "honest_public_at_611": 622.080888,
+    "honest_public_definition": "K_cal * E[T] * step_us/step_central (corrected heavier step)",
+    "models": {
+      "per_position": {
+        "clears_private_500": true,
+        "cross_below_bracket_lo": true,
+        "cross_within_bracket": true,
+        "et_private_cross_500": 5.213665397303166,
+        "margin_pct": 17.21532782926615,
+        "margin_tps": 86.07663914633076,
+        "private_tps_at_611": 586.0766391463308,
+        "rho": 0.9421228821714434
+      },
+      "raw_no_recovery": {
+        "clears_private_500": false,
+        "cross_below_bracket_lo": false,
+        "cross_within_bracket": true,
+        "et_private_cross_500": 6.299568840728258,
+        "margin_pct": -2.989948330123582,
+        "margin_tps": -14.94974165061791,
+        "private_tps_at_611": 485.0502583493821,
+        "rho": 0.7797221674962985
+      },
+      "scalar_0804": {
+        "clears_private_500": true,
+        "cross_below_bracket_lo": false,
+        "cross_within_bracket": true,
+        "et_private_cross_500": 6.109345112916396,
+        "margin_pct": 0.03060679039999741,
+        "margin_tps": 0.15303395199998704,
+        "private_tps_at_611": 500.153033952,
+        "rho": 0.804
+      },
+      "tree_recovered": {
+        "clears_private_500": true,
+        "cross_below_bracket_lo": true,
+        "cross_within_bracket": true,
+        "et_private_cross_500": 5.141925112975061,
+        "margin_pct": 18.85071939202237,
+        "margin_tps": 94.25359696011185,
+        "private_tps_at_611": 594.2535969601118,
+        "rho": 0.955267407218773
+      }
+    },
+    "perposition_margin_pct": 17.21532782926615,
+    "perposition_margin_tps": 86.07663914633076,
+    "perposition_profile_recomputed_private_611": 583.9657946199267,
+    "perposition_profile_recomputed_rho_at_611": 0.9387296827224286,
+    "private500_public_etbar_300": 4.194301321486128,
+    "statement": "Honest public(6.11)=622.08 TPS (K_cal, corrected step). Apply the OOD tax ONCE: scalar 0.804 -> 500.2 (break-even), per-position 0.9421 -> 586.1 (CLEARS +17.2%), tree 0.955 -> 594.3, raw 0.7797 -> 485.1 (miss). #305's 'public 500' = honest x 0.8038 (one hidden 0.804 haircut via the fern #281 4.966 floor), so its 'private 402' = honest x 0.804^2 (double-count). Under the per-position model the build E[T]=6.11 CLEARS private 500."
+  },
+  "reproduce_300_perposition": {
+    "c1_held": 1.0,
+    "c_deep_calibrated": 0.9713472759982902,
+    "eagle3_private_et_deployed": 4.678582232863406,
+    "eagle3_public_et": 4.96600000000002,
+    "private_tps_deployed_anchor": 460.85,
+    "public_etbar_for_private_500": 4.194301321486128,
+    "reproduces_300_etbar": true,
+    "reproduces_300_rho": true,
+    "resid_c_deep": 0.0,
+    "resid_etbar": 0.0,
+    "resid_rho_priv_e3": 0.0,
+    "rho_priv_e3": 0.9421228821714434,
+    "rho_priv_e3_raw": 0.7797221674962985
+  },
+  "reproduce_305_scalar": {
+    "et_private_cross_500": 7.601013665882984,
+    "private_at_bracket_hi": 451.17793160534995,
+    "private_at_central": 402.00000000000006,
+    "private_cross_above_bracket": true,
+    "public_at_central": 500.00000000000006,
+    "reproduces_305": true,
+    "resid_et_cross": 0.0,
+    "resid_private_brackethi": 0.0,
+    "resid_private_central": 5.684341886080802e-14,
+    "resid_public_central": 1.1368683772161603e-13
+  },
+  "robustness": {
+    "breakeven_in_collapse_bracket": true,
+    "breakeven_rho": 0.8037539966988988,
+    "clears_for_rho_at_or_above": 0.8037539966988988,
+    "et_bracket_sweep_perposition": [
+      {
+        "E_T": 5.363610726985671,
+        "honest_public": 545.9797652063198,
+        "perpos_clears": true,
+        "private_perpos": 514.380030003466,
+        "private_scalar": 438.96773122588115,
+        "scalar_clears": false
+      },
+      {
+        "E_T": 5.488211437049713,
+        "honest_public": 558.6632856719332,
+        "perpos_clears": true,
+        "private_perpos": 526.3294648606101,
+        "private_scalar": 449.16528168023433,
+        "scalar_clears": false
+      },
+      {
+        "E_T": 5.612812147113754,
+        "honest_public": 571.3468061375467,
+        "perpos_clears": true,
+        "private_perpos": 538.2788997177544,
+        "private_scalar": 459.3628321345875,
+        "scalar_clears": false
+      },
+      {
+        "E_T": 5.737412857177795,
+        "honest_public": 584.03032660316,
+        "perpos_clears": true,
+        "private_perpos": 550.2283345748984,
+        "private_scalar": 469.5603825889407,
+        "scalar_clears": false
+      },
+      {
+        "E_T": 5.862013567241837,
+        "honest_public": 596.7138470687734,
+        "perpos_clears": true,
+        "private_perpos": 562.1777694320426,
+        "private_scalar": 479.7579330432938,
+        "scalar_clears": false
+      },
+      {
+        "E_T": 5.986614277305878,
+        "honest_public": 609.3973675343867,
+        "perpos_clears": true,
+        "private_perpos": 574.1272042891868,
+        "private_scalar": 489.9554834976469,
+        "scalar_clears": false
+      },
+      {
+        "E_T": 6.1112149873699195,
+        "honest_public": 622.080888,
+        "perpos_clears": true,
+        "private_perpos": 586.0766391463308,
+        "private_scalar": 500.153033952,
+        "scalar_clears": true
+      },
+      {
+        "E_T": 6.23581569743396,
+        "honest_public": 634.7644084656132,
+        "perpos_clears": true,
+        "private_perpos": 598.0260740034748,
+        "private_scalar": 510.35058440635305,
+        "scalar_clears": true
+      },
+      {
+        "E_T": 6.360416407498001,
+        "honest_public": 647.4479289312266,
+        "perpos_clears": true,
+        "private_perpos": 609.975508860619,
+        "private_scalar": 520.5481348607062,
+        "scalar_clears": true
+      },
+      {
+        "E_T": 6.485017117562043,
+        "honest_public": 660.1314493968399,
+        "perpos_clears": true,
+        "private_perpos": 621.9249437177631,
+        "private_scalar": 530.7456853150593,
+        "scalar_clears": true
+      },
+      {
+        "E_T": 6.609617827626084,
+        "honest_public": 672.8149698624533,
+        "perpos_clears": true,
+        "private_perpos": 633.8743785749073,
+        "private_scalar": 540.9432357694125,
+        "scalar_clears": true
+      },
+      {
+        "E_T": 6.734218537690126,
+        "honest_public": 685.4984903280667,
+        "perpos_clears": true,
+        "private_perpos": 645.8238134320516,
+        "private_scalar": 551.1407862237656,
+        "scalar_clears": true
+      },
+      {
+        "E_T": 6.858819247754167,
+        "honest_public": 698.1820107936801,
+        "perpos_clears": true,
+        "private_perpos": 657.7732482891956,
+        "private_scalar": 561.3383366781188,
+        "scalar_clears": true
+      }
+    ],
+    "holds_for_milder_factors_only": true,
+    "perposition_clears_whole_et_bracket": true,
+    "private_model_sweep_at_611": [
+      {
+        "clears": false,
+        "private_tps_at_611": 485.0502583493821,
+        "rho": 0.7797221674962985
+      },
+      {
+        "clears": true,
+        "private_tps_at_611": 500.153033952,
+        "rho": 0.804
+      },
+      {
+        "clears": true,
+        "private_tps_at_611": 586.0766391463308,
+        "rho": 0.9421228821714434
+      },
+      {
+        "clears": true,
+        "private_tps_at_611": 594.2535969601118,
+        "rho": 0.955267407218773
+      }
+    ],
+    "robust_across_collapse_bracket": false,
+    "statement": "Across the collapse bracket [raw 0.7797, scalar 0.804, per-pos 0.9421, tree 0.955] the build clears private-500 @ 6.11 for every model with rho >= break-even 0.8038 -- i.e. for per-position and tree-recovered (CLEAR) but NOT raw/no-tree-recovery (485, MISS). The per-position projection clears across the ENTIRE #295 E[T] bracket [5.3636, 6.8588] (cross at E[T]=5.214, below the bracket floor). The NO-GO is NOT robust: it requires both the double-count AND the no-tree-recovery worst case."
+  },
+  "self_test": {
+    "conditions": {
+      "01_imports_match_source": {
+        "max_abs_err": 0.0,
+        "mismatches": [],
+        "pass": true
+      },
+      "a_scalar_reproduces_305": {
+        "pass": true,
+        "resid_et_cross": 0.0,
+        "resid_private_brackethi": 0.0,
+        "resid_private_central": 5.684341886080802e-14
+      },
+      "b_perposition_reproduces_300_rho": {
+        "pass": true,
+        "resid_rho_priv_e3": 0.0,
+        "rho_priv_e3": 0.9421228821714434
+      },
+      "c_perposition_etbar_reproduces_419": {
+        "etbar": 4.194301321486128,
+        "pass": true,
+        "resid_etbar": 0.0
+      },
+      "d_both_maps_monotone_in_et": {
+        "pass": true,
+        "perposition_monotone": true,
+        "scalar_monotone": true
+      },
+      "e_breakeven_in_bracket": {
+        "breakeven_rho": 0.8037539966988988,
+        "in_collapse_bracket": true,
+        "near_scalar_anchor_0804": true,
+        "pass": true
+      },
+      "f_nan_clean": {
+        "nan_paths": [],
+        "pass": true
+      },
+      "g_caveats_carried": {
+        "pass": true
+      }
+    },
+    "private_perposition_reconcile_self_test_passes": true
+  },
+  "test_metric_names": [
+    "private_tps_at_611_perposition",
+    "build_clears_private500_perposition"
+  ],
+  "wandb_run_id": "2u3kcnv5"
+}
