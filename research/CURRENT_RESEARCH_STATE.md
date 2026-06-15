@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-- **Date:** 2026-06-15 ~03:42Z (cycle 52k)
+- **Date:** 2026-06-15 ~03:50Z (cycle 52k)
 - **Advisor branch:** `approval-gated-8gpu-20260613`
 
 ## 🆕 Cycle-52k Snapshot — PATH-A ANALYTICALLY CLOSED (fern #281 capstone); the sole >500 path is a BUILT drafter raise
@@ -67,7 +67,7 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 | kanna   | #289 | Per-position acceptance decay (the BUILT-raise a_k target profile to E[T]≥4.97) | me | 🔄 WIP (reseat; #286 MERGED 03:35 → bridge draft-0.21/verify-1.0, stack 493.64) |
 | fern    | #287 | Read-reduction PPL pareto | Morgan | 🔄 WIP |
 | lawine  | #288 | PPL local→official transfer (τ_ppl): safe local bar for gate | Morgan | 🔄 WIP |
-| denken  | #283 | HBM intrinsic ceiling (the physics floor under the normalized step) | Morgan | 🔄 WIP |
+| denken  | #291 | Verify-compute overlap-hideability (honest kernel floor in [487.7, 746.9]; is a free non-build step lane real?) | me | 🔄 WIP (reseat; #283 MERGED 03:49 → system NOT read-bound, read=38% of honest wall, verify front OPEN) |
 | ubel    | #284 | Decode-loop host overhead (CPU/scheduling fraction of wall) | Morgan | 🔄 WIP |
 | stark   | #273 | Static-K wall-clock (ongoing from 52i) | me | 🔄 WIP |
 | land    | #245 | Tree fidelity build — Morgan banking Cycles 1-4 (terminal pending), will reseat non-tree | Morgan | 🟡 banking |
@@ -110,7 +110,7 @@ E[T] floor for honest 500 = 3.9914 (fern #274)
 
 **Step-side consolidation — DONE this cycle (the step-side credit a built raise stacks on, now closed at the basis-honest level):**
 - wirbel #285 (lossless envelope, MERGED) + kanna #286 (bridge basis-honesty, MERGED): the FREE step ceiling is 487.7, the composed basis-honest stack is 493.64 — both <500. The step-side denominator is settled at both raw and basis-honest level.
-- denken #283 / ubel #284 (Morgan): HBM floor + host overhead — the physics under the normalized step (in flight).
+- denken #283 (MERGED 03:49, `vmxuwxm0`): the HBM-bound ceiling = **1265.6 TPS**; deployed 481.53 is only **38% of the honest 1/K_cal=7982.9µs wall** — the system is **NOT read-bound** (REFUTES the "floor>step ⇒ HBM-bound" reading of #278; that gap was composition-COMPRESSION, re-proving the 4.82× over-credit). The verify-side front is **OPEN** (bare-read-floor ceiling 1265.6, all-kernel-addressable-hides floor 746.9, both ≫500); read-reduction is non-binding (ceiling already >500). The 62% non-read slack = draft 9% + **verify-compute 26%** (denken #291 prices how much actually overlap-hides; honest floor in [487.7, 746.9]) + **host 26%** (ubel #284, Morgan, in flight). Reframes the path: E[T]-raise + non-read-slack closure, **NOT** read-floor-limited.
 - land #245 (Morgan banking): tree-fidelity proof (scratch-KV bug +0.235, tree-causal mask +0.088, tree-vs-linear delta ≈0) — the durable result; full live-integration build is OFF the critical path (g_d settled it).
 
 **THE PIVOT — BUILT public-E[T] raise (Plateau-Protocol bigger swing):**
