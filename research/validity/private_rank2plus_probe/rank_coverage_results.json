@@ -1,0 +1,130 @@
+{
+  "run": {
+    "submission": "/workspace/senpai/target/research/validity/private_rank2plus_probe/_scratch_submission",
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "conc": 1,
+    "dataset": "data/private_proxy_sharegpt.json",
+    "dataset_is_public_default": false,
+    "utc": "2026-06-15T01:01:03Z",
+    "decode_summary": {
+      "dataset_path": "data/private_proxy_sharegpt.json",
+      "duration_s": 422.03840374946594,
+      "num_completion_tokens": 65536,
+      "num_prompt_tokens": 34839,
+      "num_records": 128,
+      "output_file": "/workspace/senpai/target/research/validity/private_rank2plus_probe/decode_rank_coverage.jsonl",
+      "output_len": 512,
+      "request_timeout_s": 180,
+      "required_request_field": "return_token_ids: true",
+      "required_response_field": "choices[0].token_ids",
+      "seed": 1,
+      "token_id_sources": {
+        "choices[0].token_ids": 128
+      },
+      "token_ids_required": true,
+      "tokenizer": "google/gemma-4-E4B-it"
+    },
+    "decode_wall_s": 527.0352380275726
+  },
+  "analysis": {
+    "n_records": 20879,
+    "n_align_bad": 0,
+    "record_shards": [
+      "rankprobe_records.jsonl.218828"
+    ],
+    "n_divergences": 17677,
+    "W": 4,
+    "per_depth_reached": [
+      20879,
+      12476,
+      8626,
+      6444,
+      4954,
+      4184,
+      3591
+    ],
+    "per_depth_accept": [
+      12476,
+      8626,
+      6444,
+      4954,
+      4184,
+      3591,
+      3202
+    ],
+    "per_depth_div_count": [
+      8403,
+      3850,
+      2182,
+      1490,
+      770,
+      593,
+      389
+    ],
+    "conditional_rank1_acceptance_q": [
+      0.5975381962737679,
+      0.6914075024046169,
+      0.7470438210062601,
+      0.7687771570453135,
+      0.8445700444085588,
+      0.8582695984703633,
+      0.8916736285157337
+    ],
+    "top1_acceptance": 0.5975381962737679,
+    "rank_fd_hist_pooled": {
+      "0": 9249,
+      "2": 4918,
+      "3": 2218,
+      "4": 1292
+    },
+    "rho_marginal": {
+      "2": 0.27821462917915935,
+      "3": 0.17383807508425425,
+      "4": 0.12256901622236979
+    },
+    "cumulative_coverage": {
+      "2": 0.27821462917915935,
+      "3": 0.403688408666629,
+      "4": 0.4767777337783561
+    },
+    "rho2_by_depth": {
+      "0": 0.2476496489349042,
+      "1": 0.27766233766233767,
+      "2": 0.307974335472044,
+      "3": 0.3395973154362416,
+      "4": 0.3220779220779221,
+      "5": 0.3305227655986509,
+      "6": 0.37532133676092544
+    },
+    "n_true_beyond_topW": 9249,
+    "frac_true_beyond_topW": 0.5232222662216439
+  },
+  "cross_check": {
+    "accept76_available": true,
+    "conditional76": [
+      0.728739760479042,
+      0.7589764102641635,
+      0.7924989076194682,
+      0.821702519412012,
+      0.8342716929825772,
+      0.8352594665096346,
+      0.8472621220149911
+    ],
+    "conditional_measured_q": [
+      0.5975381962737679,
+      0.6914075024046169,
+      0.7470438210062601,
+      0.7687771570453135,
+      0.8445700444085588,
+      0.8582695984703633,
+      0.8916736285157337
+    ],
+    "top1_76": 0.728739760479042,
+    "top1_measured": 0.5975381962737679,
+    "top1_abs_diff": 0.13120156420527407,
+    "max_abs_diff_per_depth": 0.13120156420527407
+  },
+  "wandb_run_id": "he7glotf"
+}
