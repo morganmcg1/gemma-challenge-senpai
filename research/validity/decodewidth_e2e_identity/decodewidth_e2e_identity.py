@@ -103,7 +103,20 @@ OFFICIAL_BASELINE = 481.53                # #52 official TPS (this leg adds 0)
 K_SPEC = 7                               # num_speculative_tokens (manifest)
 M_VERIFY = K_SPEC + 1                    # = 8, the deployed decode-verify query width
 IDENTITY_EPS = 1e-12                     # pinned_identity >= 1 - eps treated as "== 1.0" (GREEN)
+# A token flip whose top-1-vs-M1 logprob margin is below this is a NUMERICAL near-tie: the M=8 and
+# M=1 distributions agree on the ordering except at a knife-edge where two tokens are within e^0.5
+# ~= 1.65x probability, so a sub-ULP kernel perturbation flips the argmax. Above it, a flip would be
+# a genuine systematic op-level divergence. Used to CHARACTERISE a residual, not to set the verdict.
+NEAR_TIE_LOGPROB_THRESH = 0.5
 BLOCK_SIZE = 16                          # vLLM prefix-cache block granularity (config/cache.py:45)
+# Gemma-4 is HYBRID-attention (5 sliding_attention : 1 full_attention over 42 layers, window=512).
+# The hybrid KV-cache prefix hit is the INTERSECTION across the two cache groups and EMPIRICALLY
+# commits in 32-token (=2*BLOCK_SIZE) units: a block-aligned prefix that is an ODD multiple of 16
+# (e.g. C=240) caps the hit one block short (nct=224) -> the verify chunk recomputes 16+8=24 rows
+# (size_m=24, a 2-Marlin-block tile), NOT the literal decode width. Aligning the prefix DOWN to a
+# multiple of 32 makes the whole prefix a cache hit -> exactly n_verify rows computed -> size_m=8
+# (1 Marlin block), the PR-required geometry. Measured via the C-sweep: n_computed==8 iff C%32==0.
+HYBRID_PREFIX_COMMIT = 32                # Gemma-4 hybrid prefix-cache commit granularity (measured)
 
 DEFAULT_PROXY = "google/gemma-4-E4B-it-qat-w4a16-ct"
 MODEL_CANDIDATES = [
@@ -154,7 +167,10 @@ def read_text_dims(model_dir: str) -> dict:
 
 
 def block_align(n: int) -> int:
-    return (n // BLOCK_SIZE) * BLOCK_SIZE
+    # Align DOWN to the hybrid prefix-commit granularity (32) so the whole prefix is a cache hit and
+    # the verify chunk computes EXACTLY n_verify rows (size_m=8). A bare BLOCK_SIZE (16) alignment is
+    # insufficient: odd multiples of 16 cap the hybrid hit one block short -> size_m=24 (see csweep).
+    return (n // HYBRID_PREFIX_COMMIT) * HYBRID_PREFIX_COMMIT
 
 
 # ======================================================================================
@@ -165,6 +181,12 @@ def _argmax_from_logprob_entry(entry) -> int:
     return int(max(entry.items(), key=lambda kv: getattr(kv[1], "logprob", kv[1]))[0])
 
 
+def _sorted_logprobs(entry) -> list[tuple[int, float]]:
+    """(token_id, logprob) pairs sorted by logprob descending (rank 0 first)."""
+    return sorted(((int(t), float(getattr(lp, "logprob", lp))) for t, lp in entry.items()),
+                  key=lambda kv: kv[1], reverse=True)
+
+
 def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: int,
               gpu_mem_util: float, max_batched_tokens: int, verbose_k: int) -> None:
     import torch
@@ -173,7 +195,8 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
     batch_invariant_env = os.environ.get("VLLM_BATCH_INVARIANT", "0") == "1"
     model_dir = resolve_model_dir()
     dims = read_text_dims(model_dir)
-    C = block_align(ctx_len)  # prefix length, a multiple of BLOCK_SIZE so the prefix is full blocks
+    C = block_align(ctx_len)  # prefix length, a multiple of 32 so the WHOLE prefix is a cache hit
+                              # -> verify chunk computes exactly n_verify rows (size_m=8, 1 Marlin block)
     print(f"[arm:{arm}] model={model_dir} layers={dims['num_layers']} hidden={dims['hidden']} "
           f"C(prefix)={C} n_verify={n_verify} VLLM_BATCH_INVARIANT={batch_invariant_env}", flush=True)
 
@@ -204,17 +227,31 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
 
     # Step A: greedy continuation (M=1 AR). Step B: M=8 verify chunk via prompt_logprobs with the
     # prefix-cache override that vLLM 0.22.0 otherwise auto-disables.
-    sp_gen = SamplingParams(temperature=0.0, max_tokens=n_verify)
-    sp_chunk = SamplingParams(temperature=0.0, max_tokens=1, prompt_logprobs=1,
-                              skip_reading_prefix_cache=False)
+    # detokenize=False is LOAD-BEARING: with the prefix cache-hit, vLLM allocates the prompt_logprobs
+    # tensor for the WHOLE prompt (torch.empty) but only fills the computed suffix; the cached-prefix
+    # rows stay UNINITIALIZED garbage. Detokenizing those garbage token_ids raises OverflowError
+    # ("out of range integral type conversion"). detokenize=False routes the LogprobsProcessor's
+    # tokenizer to None (output_processor.py: `if not sampling_params.detokenize: tokenizer = None`),
+    # so no detokenization is attempted and we read raw token_ids only. The engine tokenizer stays
+    # alive (needed for the multimodal gemma-4 input preprocessor), so we do NOT use skip_tokenizer_init.
+    sp_gen = SamplingParams(temperature=0.0, max_tokens=n_verify, detokenize=False)
+    sp_warm = SamplingParams(temperature=0.0, max_tokens=1, detokenize=False)
+    # prompt_logprobs=5 (not 1): we read the argmax AND the top-2 gap + the M=1 token's rank/logprob
+    # to CHARACTERISE any residual flip as a knife-edge near-tie vs a systematic op divergence.
+    sp_chunk = SamplingParams(temperature=0.0, max_tokens=1, prompt_logprobs=5,
+                              skip_reading_prefix_cache=False, detokenize=False)
 
     rows = [json.loads(l) for l in open(PROMPTS_JSONL)][:n_prompts]
     per_prompt = []
     n_match = n_total = 0
     n_det_m1 = n_det_m8 = n_within = 0
-    n_chunk_isolated = 0          # geometry control: chunk confined to the suffix
-    chunk_width_obs = []          # observed readable chunk width per prompt
-    prefix_leak_total = 0         # non-null prompt_logprobs entries in the cached prefix region
+    n_chunk_isolated = 0          # geometry control: num_cached_tokens==C (exactly n_verify rows computed)
+    chunk_width_obs = []          # observed readable chunk width per prompt (expect n_verify-1)
+    n_computed_rows_total = 0     # sum of computed query rows per chunk (expect n_verify each)
+    # near-tie characterisation of the residual (M=8 chunk top-1 vs M=1 token at flips):
+    all_div_gaps = []             # top1-vs-top2 logprob gap at every DIVERGENT position
+    all_div_margins = []          # logprob(M8 argmax) - logprob(M1 token) at flips (None if M1 outside top-5)
+    all_min_gap_per_prompt = []   # min top1-top2 gap over a prompt's suffix (typical-gap context)
 
     for ri, rec in enumerate(rows):
         src = list(rec.get("context_token_ids", [])) + list(rec.get("target_token_ids", []))
@@ -222,7 +259,19 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
             continue
         prefix = src[:C]
 
-        # ---- Step A (M=1 AR greedy continuation) + M1-vs-M1 determinism control ----
+        # ---- WARM the prefix cache first (served-faithful + control-clean) ----
+        # In real spec-decode serving the context is ALREADY in the paged KV cache when the verify
+        # step runs; the M=8 verify AND the M=1 reference both read that warm cache. We replicate that
+        # by committing the prefix once here, so Step A (M=1 AR ref), its det control, and the M=8
+        # chunk all operate on the SAME cached prefix KV. Without this, run-1 prefills the prefix as a
+        # size_m=C GEMM while run-2 reads it warm (last token recomputed at size_m=1); those two paths
+        # produce a hair-different last-token KV (the #376 Marlin M-variance) that propagates through
+        # the AR loop and flips a downstream near-tie -> a spurious det_m1<1.0 (diagnosed: two WARM AR
+        # runs are always bit-identical; only cold-vs-warm diverges, at a downstream index not 0).
+        # Warming makes det_m1 measure genuine M=1 AR reproducibility and matches the served geometry.
+        llm.generate([{"prompt_token_ids": prefix}], sp_warm, use_tqdm=False)
+
+        # ---- Step A (M=1 AR greedy continuation) + M1-vs-M1 determinism control (both warm) ----
         outA = llm.generate([{"prompt_token_ids": prefix}], sp_gen, use_tqdm=False)[0]
         cont = list(outA.outputs[0].token_ids)[:n_verify]
         outA2 = llm.generate([{"prompt_token_ids": prefix}], sp_gen, use_tqdm=False)[0]
@@ -233,24 +282,38 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
         full = prefix + cont  # length C + n_verify; positions 0..C+n_verify-1
 
         # ---- Step B (M=8 verify chunk) + M8-vs-M8 determinism control ----
+        # GEOMETRY: with the C-token prefix a cache HIT, vLLM computes ONLY the n_verify suffix rows
+        # (positions C..C+n_verify-1) -> body GEMM size_m = n_verify (the decode-verify width). The
+        # AUTHORITATIVE isolation signal is RequestOutput.num_cached_tokens == C (==> exactly n_verify
+        # rows computed). The prompt_logprobs list still spans the whole prompt, but its entries at
+        # positions <=C are uninitialized torch.empty GARBAGE (never computed); we read ONLY the real
+        # suffix positions C+1..C+n_verify-1 (rows C..C+n_verify-2; the last row predicts the stripped
+        # first-decode token, which is not a prompt-logprob position).
         def chunk_argmax(full_ids):
             out = llm.generate([{"prompt_token_ids": full_ids}], sp_chunk, use_tqdm=False)[0]
-            pls = out.prompt_logprobs  # list aligned to prompt positions; None where not computed
-            am = {}  # absolute position -> argmax token
-            for i, entry in enumerate(pls or []):
-                if entry is None:
-                    continue
-                am[i] = _argmax_from_logprob_entry(entry)
-            return am
+            nct = out.num_cached_tokens or 0
+            pls = out.prompt_logprobs or []
+            am = {}   # absolute position -> argmax token (REAL computed suffix only)
+            ent = {}  # absolute position -> [(token_id, logprob), ...] sorted rank 0 first
+            for i in range(C + 1, len(full_ids)):
+                entry = pls[i] if i < len(pls) else None
+                if entry is not None:
+                    am[i] = _argmax_from_logprob_entry(entry)
+                    ent[i] = _sorted_logprobs(entry)
+            return am, nct, ent
 
-        m8 = chunk_argmax(full)
-        m8b = chunk_argmax(full)
+        m8, nct8, ent8 = chunk_argmax(full)
+        m8b, nct8b, _ = chunk_argmax(full)
 
-        # geometry: readable chunk positions are those strictly inside the suffix (i > C)
-        suffix_pos = sorted(p for p in m8 if p > C)
-        prefix_leak = sorted(p for p in m8 if p <= C)
-        chunk_isolated = (len(prefix_leak) == 0)
-        prefix_leak_total += len(prefix_leak)
+        # geometry: cache-hit isolates the chunk to exactly n_verify computed rows (size_m=n_verify).
+        # The ROBUST size_m=8 invariant is n_computed_rows == n_verify in BOTH chunk calls (equivalent
+        # to nct==C, but stated as the body-GEMM width the PR decides on). A hybrid-cache short-commit
+        # (size_m=24) fails this and is excluded from "faithful".
+        suffix_pos = sorted(m8)
+        n_computed_rows = len(full) - nct8
+        n_computed_rows_b = len(full) - nct8b
+        chunk_isolated = (n_computed_rows == n_verify and n_computed_rows_b == n_verify)
+        n_computed_rows_total += n_computed_rows
         chunk_width_obs.append(len(suffix_pos))
         n_chunk_isolated += int(chunk_isolated)
 
@@ -262,20 +325,38 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
                             sp_chunk, use_tqdm=False)
         def _am(out):
             d = {}
-            for i, entry in enumerate(out.prompt_logprobs or []):
-                if entry is not None and i > C:
+            pls = out.prompt_logprobs or []
+            for i in range(C + 1, len(full)):
+                entry = pls[i] if i < len(pls) else None
+                if entry is not None:
                     d[i] = _argmax_from_logprob_entry(entry)
             return d
         w0, w1 = _am(outW[0]), _am(outW[1])
         within = int(bool(w0) and all(w0.get(p) == w1.get(p) for p in suffix_pos))
 
         # ---- the signal: M=8 chunk argmax vs M=1 greedy token, position by position ----
+        # Also capture, at each flip, HOW CLOSE the call was: the M=8 distribution's top1-top2 gap and
+        # the margin by which its argmax beat the M=1 token. A residual built only of sub-0.5-nat
+        # margins is a knife-edge near-tie (a kernel-perturbation coin-flip), not a systematic op bug.
         match = total = 0
+        prompt_min_gap = float("inf")
+        prompt_div_gaps = []
         for p in suffix_pos:
             m1_tok = full[p]  # the M=1 greedy continuation token at position p
             total += 1
+            sl = ent8.get(p, [])
+            gap = (sl[0][1] - sl[1][1]) if len(sl) >= 2 else float("inf")  # top1-top2 logprob gap
+            prompt_min_gap = min(prompt_min_gap, gap)
             if m8.get(p) == m1_tok:
                 match += 1
+            else:
+                prompt_div_gaps.append(gap)
+                all_div_gaps.append(gap)
+                lp_map = dict(sl)
+                top1_lp = sl[0][1] if sl else float("nan")
+                all_div_margins.append((top1_lp - lp_map[m1_tok]) if m1_tok in lp_map else None)
+        if math.isfinite(prompt_min_gap):
+            all_min_gap_per_prompt.append(prompt_min_gap)
 
         n_match += match
         n_total += total
@@ -286,10 +367,13 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
         sha = hashlib.sha256(bytes(str([m8.get(p) for p in suffix_pos]), "utf8")).hexdigest()[:16]
         per_prompt.append({
             "id": rec.get("id"), "C": C, "chunk_width": len(suffix_pos),
-            "chunk_isolated": chunk_isolated, "prefix_leak": len(prefix_leak),
+            "chunk_isolated": chunk_isolated, "num_cached_tokens": nct8,
+            "n_computed_rows": n_computed_rows,
             "argmax_match_M8_vs_M1": match, "positions": total, "sha": sha,
             "det_match_M1_vs_M1": det_m1, "det_match_M8_vs_M8": det_m8,
             "within_copy0_vs_copy1": within,
+            "min_top2_gap": (prompt_min_gap if math.isfinite(prompt_min_gap) else None),
+            "divergent_top2_gaps": [round(g, 5) for g in prompt_div_gaps if math.isfinite(g)],
         })
         if ri < verbose_k or ri == len(rows) - 1:
             print(f"[arm:{arm}] prompt {ri} id={rec.get('id')} chunk_w={len(suffix_pos)} "
@@ -304,6 +388,33 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
     within_frac = (n_within / n_total) if n_total else float("nan")
     chunk_isolated_frac = (n_chunk_isolated / n_seq) if n_seq else float("nan")
     median_chunk_width = (statistics.median(chunk_width_obs) if chunk_width_obs else float("nan"))
+
+    # ---- near-tie characterisation of the residual ----
+    margins_present = [m for m in all_div_margins if m is not None]
+    all_margins_in_top5 = (len(margins_present) == len(all_div_margins))
+    # knife-edge IFF there ARE flips, every flipped M1 token sat in the M=8 top-5, and the WORST flip
+    # margin is still below the near-tie threshold (every flip is a sub-0.5-nat coin-flip). None if no
+    # flips (identity 1.0 -> nothing to characterise).
+    if not all_div_margins:
+        residual_is_knife_edge = None
+    else:
+        residual_is_knife_edge = bool(all_margins_in_top5 and margins_present
+                                      and max(margins_present) < NEAR_TIE_LOGPROB_THRESH)
+    near_tie = {
+        "divergent_count": len(all_div_gaps),
+        "near_tie_logprob_thresh": NEAR_TIE_LOGPROB_THRESH,
+        "residual_is_knife_edge_near_tie": residual_is_knife_edge,
+        "n_divergent_m1_in_top5": len(margins_present),
+        "all_divergent_m1_in_top5": all_margins_in_top5,
+        "gap_top2_median_divergent": (statistics.median(all_div_gaps) if all_div_gaps else None),
+        "gap_top2_max_divergent": (max(all_div_gaps) if all_div_gaps else None),
+        "margin_vs_m1_median_divergent": (statistics.median(margins_present) if margins_present else None),
+        "margin_vs_m1_max_divergent": (max(margins_present) if margins_present else None),
+        "min_gap_all_positions_median": (statistics.median(all_min_gap_per_prompt)
+                                         if all_min_gap_per_prompt else None),
+        "divergent_gaps": [round(g, 5) for g in all_div_gaps if math.isfinite(g)],
+        "divergent_margins": [round(m, 5) if m is not None else None for m in all_div_margins],
+    }
 
     # ---- pin-engaged positive control: aten torch.mm row-0 bit-exactness M=1 vs M=8 ----
     aten_ctrl = aten_mm_invariance_control(torch, dims["hidden"], M_VERIFY)
@@ -332,7 +443,9 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
         "within_batch_copy0_vs_copy1": within_frac,
         "chunk_isolated_fraction": chunk_isolated_frac,
         "median_chunk_width": median_chunk_width,
-        "prefix_leak_total": prefix_leak_total,
+        "n_computed_rows_total": n_computed_rows_total,
+        "expected_computed_rows_per_chunk": n_verify,
+        "near_tie": near_tie,
         "aten_mm_control": aten_ctrl,
         "marlin_sizem_diag": marlin_diag,
         "nan_clean": bool(nan_clean), "peak_gpu_gb": peak_gb,
@@ -348,6 +461,9 @@ def phase_arm(out_path: str, arm: str, n_prompts: int, ctx_len: int, n_verify: i
           f"attn_batch_invariant={attn_is_batch_invariant}", flush=True)
     print(f"[arm:{arm}] marlin bitexact@decode(size_m=8)={marlin_diag.get('bitexact_at_decode_width')} "
           f"first_divergent_size_m={marlin_diag.get('first_divergent_size_m')}", flush=True)
+    print(f"[arm:{arm}] near-tie: {near_tie['divergent_count']} flips, knife_edge={near_tie['residual_is_knife_edge_near_tie']} "
+          f"margin_max={near_tie['margin_vs_m1_max_divergent']} gap_max={near_tie['gap_top2_max_divergent']} "
+          f"(thresh={NEAR_TIE_LOGPROB_THRESH}, m1_in_top5={near_tie['n_divergent_m1_in_top5']}/{near_tie['divergent_count']})", flush=True)
     print(f"ARM_DONE {out_path}", flush=True)
 
 
@@ -517,12 +633,28 @@ def _locus_from_diag(pinned: dict) -> str:
     marlin_be8 = md.get("bitexact_at_decode_width")
     pin_engaged = pinned.get("aten_mm_control", {}).get("bitexact_M1_vs_M8")
     pin_attn = pinned.get("attn_is_batch_invariant")
+    nt = pinned.get("near_tie", {})
+    knife = nt.get("residual_is_knife_edge_near_tie")
+    nt_clause = ""
+    if knife is True:
+        nt_clause = (f" The residual is a KNIFE-EDGE NEAR-TIE, not a systematic op divergence: all "
+                     f"{nt.get('divergent_count')} flip(s) had the M=1 token inside the M=8 top-5 with a "
+                     f"worst top-1 margin {nt.get('margin_vs_m1_max_divergent')} nats < "
+                     f"{nt.get('near_tie_logprob_thresh')} (median {nt.get('margin_vs_m1_median_divergent')}); "
+                     f"a sub-ULP attention-split perturbation coin-flips the argmax. Matches #375 "
+                     f"(attention-rebuild-gated), NOT a Marlin rebuild.")
+    elif knife is False:
+        nt_clause = (f" The residual is NOT purely a near-tie: worst flip margin "
+                     f"{nt.get('margin_vs_m1_max_divergent')} nats >= {nt.get('near_tie_logprob_thresh')} "
+                     f"(or M=1 token outside top-5 in {nt.get('divergent_count')-nt.get('n_divergent_m1_in_top5',0)} "
+                     f"flip(s)) -> a systematic component is present.")
     if marlin_be8 is True:
         return ("NON-Marlin residual at decode width (Marlin IS bit-exact at size_m=8, so unlike "
                 f"#376's prefill-replication RED this is NOT the body GEMM). pin_engaged(aten)="
                 f"{pin_engaged}, attn_batch_invariant={pin_attn}. Candidate loci: the served "
                 "TRITON_ATTN varlen paged-KV split combine not fully pinned by VLLM_BATCH_INVARIANT, "
-                "or the tied bf16 lm_head reduction. Run the lm_head ablation (#376 follow-up #3).")
+                "or the tied bf16 lm_head reduction. Run the lm_head ablation (#376 follow-up #3)."
+                + nt_clause)
     if marlin_be8 is False:
         return ("int4 Marlin body GEMM is M-variant even at size_m=8 in this build (contradicts #376 "
                 f"sweep) -> Marlin rebuild binding at decode width. pin_engaged(aten)={pin_engaged}")
@@ -554,17 +686,24 @@ def compose_and_report(arms: dict, a: argparse.Namespace) -> dict:
     median_w_ok = bool(abs((pinned.get("median_chunk_width") or 0) - (a.n_verify - 1)) <= 1)
     decodewidth_geometry_is_served_faithful = bool(geom_isolated and median_w_ok)
     geometry_justification = (
-        f"M=8 query rows computed as ONE chunk against the cached paged KV (chunk isolated to the "
-        f"suffix in {min(heuristic.get('chunk_isolated_fraction',0), pinned.get('chunk_isolated_fraction',0)):.3f} "
-        f"of prompts, median readable width {pinned.get('median_chunk_width')}=K_spec); body GEMM "
-        f"size_m=8 (Marlin bit-exact regime) + served TRITON_ATTN varlen paged-KV decode (#375). "
-        f"FAITHFUL PROXY: the chunk is a prefill-flagged 8-row suffix, not the literal EAGLE-3 "
-        f"spec-verify decode step; in vLLM v1 TRITON_ATTN both are varlen-query-vs-paged-KV through "
-        f"the same unified kernel, and the pinned arm forces num_splits=1 so its decider is robust to "
-        f"the prefill/decode routing nuance.")
+        f"M={a.n_verify} query rows computed as ONE chunk against the cached paged KV, proven by "
+        f"RequestOutput.num_cached_tokens==C in {min(heuristic.get('chunk_isolated_fraction',0), pinned.get('chunk_isolated_fraction',0)):.3f} "
+        f"of prompts (==> exactly n_verify rows go through the body GEMM -> size_m={a.n_verify}, the "
+        f"Marlin bit-exact regime), median readable width {pinned.get('median_chunk_width')}=K_spec, "
+        f"served TRITON_ATTN varlen paged-KV decode (#375). The cached-prefix prompt_logprobs rows are "
+        f"uninitialized torch.empty garbage (never computed) and are NOT read. FAITHFUL PROXY: the "
+        f"chunk is a prefill-flagged {a.n_verify}-row suffix, not the literal EAGLE-3 spec-verify "
+        f"decode step; in vLLM v1 TRITON_ATTN both are varlen-query-vs-paged-KV through the same "
+        f"unified kernel, and the pinned arm forces num_splits=1 so its decider is robust to the "
+        f"prefill/decode routing nuance.")
 
     residual_divergence_locus = ("none / identity reached" if pinned_reaches_identity_1p0
                                  else _locus_from_diag(pinned))
+
+    # near-tie characterisation of the (pinned) residual: is every remaining flip a knife-edge
+    # numerical coin-flip, or is there a systematic op-level component?
+    pinned_near_tie = pinned.get("near_tie", {})
+    residual_is_knife_edge_near_tie = pinned_near_tie.get("residual_is_knife_edge_near_tie")
 
     if pinned_reaches_identity_1p0 and decodewidth_geometry_is_served_faithful:
         verdict = "GREEN_identity_env_reachable_at_decode_width"
@@ -628,6 +767,15 @@ def compose_and_report(arms: dict, a: argparse.Namespace) -> dict:
         "pinned_reaches_identity_1p0": pinned_reaches_identity_1p0,
         "marlin_bitexact_at_decode_width": marlin_bitexact_at_decode_width,
         "residual_divergence_locus": residual_divergence_locus,
+        "residual_is_knife_edge_near_tie": residual_is_knife_edge_near_tie,
+        "residual_near_tie_summary": {
+            "divergent_count": pinned_near_tie.get("divergent_count"),
+            "n_divergent_m1_in_top5": pinned_near_tie.get("n_divergent_m1_in_top5"),
+            "margin_vs_m1_max_divergent": pinned_near_tie.get("margin_vs_m1_max_divergent"),
+            "margin_vs_m1_median_divergent": pinned_near_tie.get("margin_vs_m1_median_divergent"),
+            "gap_top2_max_divergent": pinned_near_tie.get("gap_top2_max_divergent"),
+            "near_tie_logprob_thresh": pinned_near_tie.get("near_tie_logprob_thresh"),
+        },
         "decodewidth_geometry_is_served_faithful": decodewidth_geometry_is_served_faithful,
         "decodewidth_geometry_justification": geometry_justification,
         "verdict": verdict,
@@ -651,9 +799,11 @@ def compose_and_report(arms: dict, a: argparse.Namespace) -> dict:
                 "within_batch_copy0_vs_copy1": d["within_batch_copy0_vs_copy1"],
                 "chunk_isolated_fraction": d["chunk_isolated_fraction"],
                 "median_chunk_width": d["median_chunk_width"],
-                "prefix_leak_total": d["prefix_leak_total"],
+                "n_computed_rows_total": d["n_computed_rows_total"],
+                "expected_computed_rows_per_chunk": d["expected_computed_rows_per_chunk"],
                 "vllm_batch_invariant_env": d["vllm_batch_invariant_env"],
                 "attn_is_batch_invariant": d["attn_is_batch_invariant"],
+                "near_tie": d.get("near_tie", {}),
                 "aten_mm_control": d["aten_mm_control"],
                 "marlin_sizem_diag": d["marlin_sizem_diag"],
                 "total_positions": d["total_positions"], "n_prompts": d["n_prompts"],
@@ -702,6 +852,10 @@ def _print_console(report: dict) -> None:
     print(f" marlin_bitexact_at_decode_width (size_m=8): {report['marlin_bitexact_at_decode_width']}", flush=True)
     print(f" decodewidth_geometry_is_served_faithful   : {report['decodewidth_geometry_is_served_faithful']}", flush=True)
     print(f" residual_divergence_locus                 : {report['residual_divergence_locus']}", flush=True)
+    nt = report["residual_near_tie_summary"]
+    print(f" residual_is_knife_edge_near_tie           : {report['residual_is_knife_edge_near_tie']} "
+          f"({nt['divergent_count']} flip(s), worst margin {nt['margin_vs_m1_max_divergent']} nats "
+          f"vs thresh {nt['near_tie_logprob_thresh']})", flush=True)
     print(f" pinned vs #376 prefill-repl (0.992555)    : {report['pinned_decodewidth_minus_prefillrepl_376']:+.6f}", flush=True)
     for arm in ARMS:
         d = report["arms"][arm]
@@ -761,10 +915,15 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
         "pin_engaged_aten_mm_bitexact": report["pin_engaged_aten_mm_bitexact"],
         "pin_attn_is_batch_invariant": report["pin_attn_is_batch_invariant"],
         "prefill_repl_pinned_376": PREFILL_REPL_PINNED_376,
+        "residual_is_knife_edge_near_tie": report["residual_is_knife_edge_near_tie"],
+        "residual_margin_vs_m1_max_divergent": report["residual_near_tie_summary"]["margin_vs_m1_max_divergent"],
+        "residual_margin_vs_m1_median_divergent": report["residual_near_tie_summary"]["margin_vs_m1_median_divergent"],
+        "residual_divergent_count_pinned": report["residual_near_tie_summary"]["divergent_count"],
     }
     for arm in ARMS:
         d = report["arms"][arm]
         md = d["marlin_sizem_diag"]
+        nt = d.get("near_tie", {})
         summary[f"{arm}/identity"] = d["decodewidth_e2e_token_identity_rate"]
         summary[f"{arm}/divergence"] = d["decodewidth_e2e_divergence_rate"]
         summary[f"{arm}/det_m1"] = d["determinism_M1_vs_M1"]
@@ -774,6 +933,9 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
         summary[f"{arm}/median_chunk_width"] = d["median_chunk_width"]
         summary[f"{arm}/aten_mm_bitexact"] = bool(d["aten_mm_control"].get("bitexact_M1_vs_M8"))
         summary[f"{arm}/marlin_bitexact_at_8"] = bool(md.get("bitexact_at_decode_width"))
+        summary[f"{arm}/divergent_count"] = nt.get("divergent_count")
+        summary[f"{arm}/residual_knife_edge"] = nt.get("residual_is_knife_edge_near_tie")
+        summary[f"{arm}/margin_vs_m1_max_divergent"] = nt.get("margin_vs_m1_max_divergent")
     for k, v in summary.items():
         run.summary[k] = v
     for k, v in report["self_test"].items():
@@ -808,8 +970,10 @@ def main() -> None:
     ap.add_argument("--eval-prompts", dest="n_prompts", type=int, default=128,
                     help="number of official eval prompts (alias of the card's --eval-prompts)")
     ap.add_argument("--n-prompts", dest="n_prompts", type=int, default=128)
-    ap.add_argument("--ctx-len", dest="ctx_len", type=int, default=240,
-                    help="context/prefix length (block-aligned down to a multiple of 16)")
+    ap.add_argument("--ctx-len", dest="ctx_len", type=int, default=224,
+                    help="context/prefix length (aligned down to a multiple of 32 = the Gemma-4 hybrid "
+                         "prefix-commit granularity, so the verify chunk is the literal size_m=8). "
+                         "224 is the largest faithful prefix <=240.")
     ap.add_argument("--n-verify", dest="n_verify", type=int, default=M_VERIFY,
                     help="verify-chunk width = K_spec+1 = 8")
     ap.add_argument("--gpu-mem-util", type=float, default=0.55)
