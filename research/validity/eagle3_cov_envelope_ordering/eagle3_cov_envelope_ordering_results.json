@@ -1,0 +1,161 @@
+{
+  "agent": "stark",
+  "analysis_only": true,
+  "created_at": "20260615T101043Z",
+  "kind": "eagle3-cov-envelope-ordering",
+  "nan_clean": true,
+  "peak_mem_mib": 36.125,
+  "pr": 340,
+  "synthesis": {
+    "deliverable1_envelope_map": {
+      "K": 7,
+      "anchor_roundtrip": {
+        "envelope_central_at_identity": 520.9527323111674,
+        "envelope_worst_at_identity": 492.865273281899,
+        "matches_central_anchor": true,
+        "matches_worst_anchor": true
+      },
+      "chain_law": "E[T](c) = 1 + sum_{d=1..7} c^d  (depth-7 top-4 survival product; stark #337)",
+      "e_t_at_cov_prior_0p8903": 5.517578068867642,
+      "e_t_at_identity_0p9213": 6.111214987369918,
+      "envelope_law": "envelope_X(c) = X_ANCHOR * E[T](c) / E[T](0.9213); X in {central=520.95, worst=492.87}, both anchored at E[T]=6.1112",
+      "et_reproduces_banked_identity": true,
+      "et_reproduces_banked_prior": true,
+      "honest_corner_roundtrip_337": {
+        "both_below_500": true,
+        "envelope_central_at_prior": 470.347938447151,
+        "envelope_worst_at_prior": 444.98886528896605,
+        "matches_337_central_470p35": true,
+        "matches_337_worst_444p99": true
+      },
+      "monotone_increasing": {
+        "all": true,
+        "e_t": true,
+        "envelope_central": true,
+        "envelope_worst": true
+      },
+      "worst_over_central_tile_factor": 0.9460844385926137
+    },
+    "deliverable2_inverse_solve": {
+      "c_star_central_for_500": 0.9089363308345582,
+      "c_star_worst_for_500": 0.925603648491971,
+      "central_root_valid": true,
+      "e_t_at_c_star_central": 5.865421763177991,
+      "e_t_at_c_star_worst": 6.199681047395024,
+      "e_t_target_central": 5.86542176317799,
+      "e_t_target_worst": 6.199681047395026,
+      "note": "monotone bisection on env_X(c)=500; E[T](c) strictly increasing -> unique root. c*_central solves the (cap-bound) central envelope; since 500 < cap 520.95 the root lies BELOW the bar where central scales (above the bar central is flat at the ceiling, irrelevant to a 500 crossing).",
+      "root_residual_central": 1.1368683772161603e-13,
+      "root_residual_worst": -5.684341886080802e-14,
+      "roots_in_unit_interval": true,
+      "worst_root_valid": true
+    },
+    "deliverable3_ordering": {
+      "anticipated_ordering_confirmed": true,
+      "c_star_worst_gt_c_star_central": true,
+      "identity_bar_suffices_for_central_500": true,
+      "identity_bar_suffices_for_worst_500": false,
+      "ordering_string": "c*_central < identity_bar < c*_worst",
+      "ordering_values": {
+        "c_star_central_for_500": 0.9089363308345582,
+        "c_star_worst_for_500": 0.925603648491971,
+        "identity_bar": 0.9213011665456927
+      },
+      "verdict": "identity bar is SUFFICIENT for central-500 (c*_central=0.9089 <= 0.9213) but NOT sufficient for worst-case 500 (c*_worst=0.9256 > 0.9213): clearing the strict greedy-identity bar buys central-500, while private-stable worst-500 demands a STRICTER coverage."
+    },
+    "deliverable4_headroom_shortfall": {
+      "central_500_headroom": 0.012364835711134559,
+      "extra_lift_needed_beyond_retrain": 0.004303648491970985,
+      "note": "central-500 sits 0.0124 of coverage BELOW the identity bar (the bar gives slack); worst-500 sits 0.0043 ABOVE it. lawine #336's +0.031 retrain lands the head exactly at 0.9213, so worst-500 needs 0.0043 MORE coverage than the retrain delivers (total lift 0.0353 from the honest 0.8903 prior, vs the +0.031 budget). The shortfall is small (13.9% of the retrain budget) but NONZERO: a worst-500 retrain must TARGET c*_worst, not merely the identity bar.",
+      "retrain_lift_budget_336": 0.031,
+      "total_lift_for_central_500_from_prior": 0.01863633083455818,
+      "total_lift_for_worst_500_from_prior": 0.035303648491970985,
+      "worst_500_shortfall": 0.004302481946278247,
+      "worst_500_within_retrain_budget": false,
+      "worst_shortfall_as_frac_of_retrain_budget": 0.1387897402025241
+    },
+    "deliverable5_subcliff_structure": {
+      "lever_argument": "the inverse map scales the envelope at the SUB-CLIFF W=4 point (step x1). stark #337 proved widening to restore E[T] crosses the M=32->33 cliff (mu=1.16981 > mu_tie=1.10759), a net loss -- so the ONLY lever for higher coverage is a BETTER HEAD. Hence c*_central / c*_worst are HEAD-COVERAGE targets a retrain must hit at fixed W=4, not tree-width changes.",
+      "mu_cliff": 1.1698066045772872,
+      "mu_tie": 1.1075901257930196,
+      "operating_point": "sub-cliff W=4 (M=29 <= knee 32), verify step x1",
+      "rank_coverage_map": {
+        "color_note": "c*_worst needs top-4 rank coverage 0.6722 > the deployed LINEAR spine's 0.6532: worst-500 asks for a head STRONGER than the linear spine itself.",
+        "note": "c is per-depth effective acceptance c_eff; underlying top-4 rank coverage via salvage cov=(c_eff-a1)/(1-a1), a1=0.7731 (color only, NOT the ordering axis)",
+        "rankcov_at_identity_bar": 0.6531976066516435,
+        "rankcov_for_c_star_central": 0.5987094467925725,
+        "rankcov_for_c_star_worst": 0.6721573671819405,
+        "rankcov_identity_equals_linear_cov4": true,
+        "worst_needs_rankcov_above_linear_spine": true
+      },
+      "widening_dominated": true
+    },
+    "deliverable6_decision": {
+      "binding_constraint_for_central_500": "identity_bar 0.9213 (c*_central=0.9089 <= bar) -- clearing greedy-identity IS the central-500 target",
+      "binding_constraint_for_worst_500": "c*_worst=0.9256 > identity_bar -- worst-500 needs a STRICTER coverage than greedy identity",
+      "central_500_target_coverage": 0.9213011665456927,
+      "greedy_safety": {
+        "argmax_note": "coverage/E[T] is the SPEED axis: the draft acceptance rate changes HOW FAST tokens are verified, not WHICH token is emitted -- the target model's argmax remains the emitted token, so greedy identity is invariant to c. No served file, kernel, or decode path is touched.",
+        "cov_ordering_card_is_cpu_analytic": true,
+        "greedy_identity_preserved_by_construction": true,
+        "no_gpu": true,
+        "no_model_forward": true,
+        "no_served_change": true
+      },
+      "retrain_sizing": "if the human's #319 retrain targets CENTRAL-500, set coverage target = identity bar 0.9213 (the +0.031 lawine #336 lift suffices); if it targets WORST-case (private-stable) 500, set coverage target = c*_worst=0.9256, i.e. +0.0043 beyond the identity bar and +0.0353 total from the honest 0.8903 prior (just past the +0.031 budget).",
+      "supply_caveat_fern335": "coverage is the DEMAND axis ONLY. fern #335 (5pos499e) found the binding axis is SUPPLY: EVEN at c*_worst the supply floor must still revive (phi>=0.255) -- coverage alone never reaches 500. c* is a NECESSARY demand-side target, not sufficient on its own.",
+      "worst_500_target_coverage": 0.925603648491971
+    },
+    "handoff": "the SPEED-500 envelope needs coverage c*_central=0.9089 (central) / c*_worst=0.9256 (worst), so the ordering is c*_central < 0.9213 < c*_worst -> clearing the strict identity bar buys central-500 but is NOT sufficient for worst-case 500 (shortfall 0.0043 vs lawine #336's +0.031 retrain budget, total lift 0.0353 just past it), and EVEN at c*_worst supply must still revive (fern #335, phi>=0.255) -- coverage alone never reaches 500.",
+    "headline": {
+      "anticipated_ordering_confirmed": true,
+      "c_star_central_for_500": 0.9089363308345582,
+      "c_star_worst_for_500": 0.925603648491971,
+      "central_500_headroom": 0.012364835711134559,
+      "cov_envelope_ordering_self_test_passes": true,
+      "identity_bar": 0.9213011665456927,
+      "identity_bar_suffices_for_central_500": true,
+      "identity_bar_suffices_for_worst_500": false,
+      "ordering_string": "c*_central < identity_bar < c*_worst",
+      "total_lift_for_worst_500_from_prior": 0.035303648491970985,
+      "worst_500_shortfall": 0.004302481946278247,
+      "worst_500_within_retrain_budget": false
+    },
+    "imports": {
+      "caveats": [
+        "INVERSE of stark #337: this re-prices NOTHING measured -- it inverts the SAME banked envelope map (anchors x E[T] lever ratio) to find the coverage c* at env=500. No EAGLE-3 fusion checkpoint runs here; NOT a running EagleProposer.",
+        "the central anchor is CAP-BOUND at the lambda ceiling 520.95. Above the identity bar the central envelope is FLAT at the ceiling (a higher E[T] cannot exceed the cap), so envelope_central(c) scaling is the load-bearing model ONLY below the bar -- exactly where the 500 crossing (c*_central) lies. The worst corner is uncapped and scales throughout.",
+        "c is per-depth effective acceptance c_eff (the E[T](c) axis), in the SAME units as the identity bar 0.9213 and cov prior 0.8903 and lawine #336's +0.031. The rank-cov map (D5) is color only.",
+        "DEMAND axis only: c* is a NECESSARY coverage target; fern #335's SUPPLY floor (phi>=0.255) is the complementary binding constraint -- coverage alone never reaches 500. NOT a launch / build / served-file change / HF Job / submission / open2."
+      ],
+      "provenance": "stark #337 lbuirkpt (E[T](c)=1+sum_{d=1..7} c^d chain law, anchors central 520.95 / worst 492.87 @E[T]=6.1112, honest corners 470.35/444.99 @0.8903, cliff mu=1.16981, mu_tie=1.1076) x lawine #330 hfrscdai (cov prior 0.8903, identity bar 0.9213) x lawine #336 krroookz (+0.031 retrain lift) x fern #335 5pos499e (supply floor phi>=0.255). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "self_test": {
+      "conditions": {
+        "a_anchor_roundtrip_identity": true,
+        "b_reproduce_337_honest_corners": true,
+        "c_monotone_increasing": true,
+        "d_central_root_solves_500": true,
+        "e_worst_root_solves_500": true,
+        "f_ordering_worst_gt_central": true,
+        "g_imports_exact": true,
+        "h_nan_clean": true,
+        "i_roots_valid_coverage": true,
+        "j_anticipated_ordering_confirmed": true,
+        "k_sufficiency_central_yes_worst_no": true,
+        "l_headroom_and_shortfall_positive": true,
+        "m_worst_exceeds_retrain_budget": true,
+        "n_inverse_self_consistent": true
+      },
+      "cov_envelope_ordering_self_test_passes": true,
+      "detail": {
+        "c_star_central": 0.9089363308345582,
+        "c_star_worst": 0.925603648491971,
+        "central_headroom": 0.012364835711134559,
+        "identity_bar": 0.9213011665456927,
+        "worst_shortfall": 0.004302481946278247
+      },
+      "n_checks": 14
+    }
+  }
+}
