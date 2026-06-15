@@ -1,0 +1,139 @@
+{
+  "agent": "wirbel",
+  "created_at": "20260615T074030Z",
+  "kind": "eagle3-eager-breakeven",
+  "nan_clean": true,
+  "peak_mem_mib": 12.125,
+  "pr": 314,
+  "self_test": {
+    "checks": {
+      "a_kcal_decomp_agrees": true,
+      "a_reproduces_312_floor_402p1": true,
+      "a_step_eager_matches_312": true,
+      "b_breakeven_roundtrips": true,
+      "b_breakevens_monotone_all_regimes": true,
+      "b_et500_gt_et481_headline": true,
+      "b_et_for_500_finite_positive": true,
+      "c_gap_central_computed": true,
+      "c_gap_positive_rewrite_worth_it": true,
+      "c_loopgraph_recompute_is_500": true,
+      "d_constants_295_exact": true,
+      "d_constants_304_217_exact": true,
+      "d_constants_312_exact": true,
+      "d_kcal_anchor_reproduces_481": true,
+      "e_nan_clean": true,
+      "f_carries_caveats": true
+    },
+    "eager_breakeven_self_test_passes": true
+  },
+  "synthesis": {
+    "caveats": [
+      "0 GPU, 0 TPS, NO served-file edit, NO HF Job, NO build. BASELINE 481.53 unchanged.",
+      "Eager cost is wirbel #312's BANKED ESTIMATE; the heavier own-KV EAGLE-3 drafter makes 402.1 an UPPER-bound floor -- the true eager floor is LOWER (worse).",
+      "6.11 is wirbel #295's step-profile TARGET (conditional on the fusion-step profile), NOT a trained drafter; whether a1->0.9213 (#304) is TRAINABLE is a separate lane.",
+      "The MTP-light eager curve is valid only near E[T]~3.844; extrapolating it to 6.11 yields eager>graph (absurd), so the constant-light-step break-even (4.78) is a mirage.",
+      "The gap uses #295's loopgraph(6.11)=500 for the loopgraph leg and #312's draft-ratio for the eager penalty; the penalty band [1x,3x] brackets the gap [57, 140] TPS.",
+      "This prices the eager-vs-rewrite DEPLOYMENT decision as a function of E[T]; it builds NEITHER path."
+    ],
+    "handoff_line": "DEPLOYMENT axis for the EAGLE-3 GO/NO-GO packet: crediting the build's E[T] gain does NOT let the launch skip the loopgraph rewrite. The eager break-even-500 is E[T]=4.78 ONLY under the MTP-light step (#312 headline) -- but that step belongs to the light MTP drafter (caps ~3.844); extrapolating it to 6.11 yields 639 TPS > the loopgraph's 500 (eager beating graph), which is physically absurd. The heavy EAGLE-3 drafter that ACTUALLY produces 6.11 pays a heavier step: at E[T]=6.11 the eager path nets 360 TPS (#295-reconciled, 3x penalty) to 481 (iso-decode) -- below 500 under every convention and below baseline 481.53 under the #295-reconciled gap. The rewrite is worth 140 TPS (band 57-140) at the build target. 0 TPS; eager cost is #312's banked ESTIMATE (UPPER-bound floor); 6.11 is wirbel #295's UNBUILT step-profile target; builds NEITHER path. NOT a launch. NOT a build.",
+    "step1_reproduce_312": {
+      "eager_floor_312_banked": 402.1,
+      "eager_floor_raw": 402.0591273090102,
+      "eager_floor_round1": 402.1,
+      "floor_via_kcal_decomp": 402.05912730901014,
+      "kcal_decomp_resid": 5.684341886080802e-14,
+      "repro_resid": 0.0,
+      "reproduces_312": true,
+      "step_eager_matches_312": true,
+      "step_eager_mtp_us": 13892.852121988932
+    },
+    "step2_eager_curve": {
+      "penalty_us": 2292.852121988932,
+      "regimes": {
+        "eagle_heavy_isodecode": {
+          "drafter": "EAGLE-3 (3x eager penalty), loopgraph step held = MTP decode 11600",
+          "et_for_500": 6.3582838277377425,
+          "et_for_500_reachable": true,
+          "et_for_noregret_481": 6.12340882314111,
+          "slope_tps_per_et": 78.63757163824164,
+          "step_us": 18478.556365966797,
+          "tps_at_build_target_611": 480.57110636599805,
+          "valid_regime": "consistent at high E[T] (iso-decode-step simplification of #312)"
+        },
+        "launch_count_upper": {
+          "drafter": "launch-count model (#154); UNDERCOUNTS drafter kernels ~5x",
+          "et_for_500": 4.080759445516352,
+          "et_for_500_reachable": true,
+          "et_for_noregret_481": 3.9300161915989777,
+          "slope_tps_per_et": 122.52621274928725,
+          "step_us": 11859.574921925863,
+          "tps_at_build_target_611": 748.7840276991195,
+          "valid_regime": "mild upper cross-check only"
+        },
+        "mtp_light_headline": {
+          "drafter": "MTP (light Q-only); #312 headline",
+          "et_for_500": 4.780389507650401,
+          "et_for_500_reachable": true,
+          "et_for_noregret_481": 4.603801919237795,
+          "slope_tps_per_et": 104.59398741458494,
+          "step_us": 13892.852121988932,
+          "tps_at_build_target_611": 639.1963434767922,
+          "valid_regime": "E[T] ~ 3.844 only (light drafter caps here; see absurdity flag)"
+        }
+      },
+      "verify_fixed_us": 11033.512980143229
+    },
+    "step3_breakevens": {
+      "a1_required_for_611": 0.9213011665456927,
+      "build_bracket_lower_536": 5.363610726985671,
+      "build_bracket_upper_686": 6.858819247754167,
+      "build_target_central_611": 6.1112149873699195,
+      "consistent_et_for_500_eagle_heavy_isodecode": 6.3582838277377425,
+      "consistent_et_for_500_reconciled_3x": 8.478056467500931,
+      "eager_path_et_for_481_headline_mtp_light": 4.603801919237795,
+      "eager_path_et_for_500_headline_mtp_light": 4.780389507650401,
+      "light_curve_absurd_above_mtp": true,
+      "light_tps_at_611": 639.1963434767922
+    },
+    "step4_rewrite_gap": {
+      "by_penalty": {
+        "central_3x": {
+          "eager_500_reachable": false,
+          "eager_eagle3_step_us": 24639.076919645035,
+          "eager_et_for_481": 8.164877061591447,
+          "eager_et_for_500": 8.478056467500931,
+          "eager_tps_at_611": 360.4136756340405,
+          "penalty_mult": 3.0,
+          "rewrite_gap_tps": 139.5863243659595
+        },
+        "optimistic_1x": {
+          "eager_500_reachable": true,
+          "eager_eagle3_step_us": 20053.37267566717,
+          "eager_et_for_481": 6.645270157688131,
+          "eager_et_for_500": 6.90016214741359,
+          "eager_tps_at_611": 442.8312593828397,
+          "penalty_mult": 1.0,
+          "rewrite_gap_tps": 57.168740617160324
+        }
+      },
+      "loopgraph_eagle3_step_us": 17760.520553678238,
+      "loopgraph_tps_at_611": 500.0,
+      "loopgraph_tps_recompute": 500.00000000000006
+    },
+    "verdict": "REWRITE-NOT-AVOIDABLE",
+    "verdict_fields": {
+      "eager_path_et_for_500": 4.780389507650401,
+      "eager_tps_at_611_isodecode": 480.57110636599805,
+      "eager_tps_at_611_reconciled_3x": 360.4136756340405,
+      "rewrite_avoidable_at_build_target": false,
+      "rewrite_gap_tps_central_3x": 139.5863243659595,
+      "rewrite_gap_tps_optimistic_1x": 57.168740617160324
+    }
+  },
+  "verdict": {
+    "eager_breakeven_self_test_passes": true,
+    "eager_path_et_for_500": 4.780389507650401,
+    "rewrite_avoidable_at_build_target": false
+  },
+  "wandb_run_id": "fwqbz7zf"
+}
