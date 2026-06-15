@@ -1,0 +1,209 @@
+{
+  "created_at": "20260615T120530Z",
+  "pr": 360,
+  "agent": "wirbel",
+  "kind": "strict-kernel-eta-locus",
+  "synthesis": {
+    "constants": {
+      "official_baseline_deployed": 481.53,
+      "target_tps": 500.0,
+      "step_us": 1218.2,
+      "lambda1_ceil_327": 520.9527323111674,
+      "lambda1_ceil_326_anchor": 520.953,
+      "eta_354_wrong_int4splitk": 0.009455,
+      "eta_correct_locus_327": 0.09841249119201488,
+      "eta_convex_hedge_refuted_327": 0.06218626733504587,
+      "eta_geometric_realizable_332": 0.09103155435261377,
+      "eta_vbi_upper_326": 0.3141,
+      "recovery_needed_to_revive": 0.2549920813842095,
+      "geo_recovery_available": 0.07499999999999996
+    },
+    "locus_reconciliation": {
+      "eta_kernel_correct_locus": 0.09841249119201488,
+      "correct_locus_bracket": [
+        0.09841249119201488,
+        0.3141
+      ],
+      "bracket_label": "[#327 bf16 lm_head+attn floor, #326 off-the-shelf VBI upper]",
+      "eta_354_wrong_int4splitk": 0.009455,
+      "rescope_factor_vs_354": 10.408513082180315,
+      "rescope_factor_vs_216_327": 10.408128545508049,
+      "int4_body_bitexact_326": true,
+      "bf16_lmhead_attn_divergence_share_326": 1.0,
+      "floor_is_robust": true,
+      "rationale": "#326 (io4cs2ch): int4-Marlin body bit-exact across M (maxdiff 0.0) AND bf16 lm_head+attn carries 100% of the M=8 divergence -> #216's 0.9455% (scoped to the M-invariant int4 body) is NOT the identity-divergence locus. #324 (pespixw1) originated the divergence bisection; #327 (kcjlr5ny) prices the correct bf16 lm_head+attn locus at 9.841%."
+    },
+    "named_points": [
+      {
+        "point": "wrong_int4splitk_354",
+        "eta": 0.009455,
+        "step_overhead_us": 11.518081,
+        "strict_frontier_at_deployed_linear": 476.97713385,
+        "strict_frontier_at_deployed_divisor": 477.01977799901925,
+        "base_lift_target_linear": 23.242625170991744,
+        "base_lift_target_divisor": 23.197500000000048,
+        "residual_frontier_gap_at_deployed": 23.022866150000027,
+        "clears_500_at_deployed": false,
+        "note": "#216 int4-Marlin split-K 0.95% -- the WRONG locus #354 used (int4 body is bit-exact across M, #326)"
+      },
+      {
+        "point": "convex_hedge_refuted_327",
+        "eta": 0.06218626733504587,
+        "step_overhead_us": 75.75531086755288,
+        "strict_frontier_at_deployed_linear": 451.5854466901553,
+        "strict_frontier_at_deployed_divisor": 453.33856669802975,
+        "base_lift_target_linear": 51.62491401385921,
+        "base_lift_target_divisor": 49.56313366752295,
+        "residual_frontier_gap_at_deployed": 48.41455330984468,
+        "clears_500_at_deployed": false,
+        "note": "#327 convex-sub-optimistic 6.22% -- needs >25.5% SDPA recovery; #332 shows only 7.5% -> REFUTED"
+      },
+      {
+        "point": "geometric_realizable_332",
+        "eta": 0.09103155435261377,
+        "step_overhead_us": 110.8946395123541,
+        "strict_frontier_at_deployed_linear": 437.69557563258587,
+        "strict_frontier_at_deployed_divisor": 441.3529545309309,
+        "base_lift_target_linear": 68.54410036537593,
+        "base_lift_target_divisor": 63.9857771763069,
+        "residual_frontier_gap_at_deployed": 62.30442436741413,
+        "clears_500_at_deployed": false,
+        "note": "#332 geometric-phi 9.10% -- phi_realizable>=1 pushes the realizable floor toward 9.841%"
+      },
+      {
+        "point": "correct_locus_floor_327",
+        "eta": 0.09841249119201488,
+        "step_overhead_us": 119.88609677011253,
+        "strict_frontier_at_deployed_linear": 434.14143311630903,
+        "strict_frontier_at_deployed_divisor": 438.38722143211965,
+        "base_lift_target_linear": 73.0473373247645,
+        "base_lift_target_divisor": 67.67624559600745,
+        "residual_frontier_gap_at_deployed": 65.85856688369097,
+        "clears_500_at_deployed": false,
+        "note": "#327 bf16 lm_head+attn full-slack floor 9.841% -- the CORRECT-locus eta (headline)"
+      },
+      {
+        "point": "vbi_upper_326",
+        "eta": 0.3141,
+        "step_overhead_us": 382.63662,
+        "strict_frontier_at_deployed_linear": 330.28142699999995,
+        "strict_frontier_at_deployed_divisor": 366.4333003576592,
+        "base_lift_target_linear": 247.4392374981777,
+        "base_lift_target_divisor": 175.5200000000001,
+        "residual_frontier_gap_at_deployed": 169.71857300000005,
+        "clears_500_at_deployed": false,
+        "note": "#326 off-the-shelf VLLM_BATCH_INVARIANT=1 31.41% -- config-only UPPER bracket"
+      }
+    ],
+    "reprice": {
+      "strict_frontier_at_correct_eta": 434.14143311630903,
+      "strict_frontier_at_correct_eta_divisor": 438.38722143211965,
+      "corrected_base_lift_target": 73.0473373247645,
+      "corrected_base_lift_target_divisor": 67.67624559600745,
+      "corrected_base_lift_target_bracket_linear_divisor": [
+        67.67624559600745,
+        73.0473373247645
+      ],
+      "base_lift_354_formB": 23.242625170991744,
+      "residual_gap_354_formA_banked": 23.022866150000027,
+      "harder_ask_factor_vs_354": 3.14281785243141
+    },
+    "ceiling_analysis": {
+      "lambda1_ceil": 520.9527323111674,
+      "lambda1_ceil_headroom": 39.422732311167465,
+      "ceiling_base_strict_frontier_at_correct_eta": 469.6844761311386,
+      "ceiling_base_strict_frontier_banked_327": 469.6844761311386,
+      "ceiling_base_clears_500": false,
+      "base_needed_to_clear_500": 554.5773373247645,
+      "ceiling_lift_above_lambda1_needed": 33.624605013597034,
+      "corrected_target_exceeds_ceiling_headroom": true
+    },
+    "verdict_block": {
+      "eta_locus_is_bf16_lmhead_attn": true,
+      "corrected_base_lift_target": 73.0473373247645,
+      "strict_program_reachable_within_lambda1_ceiling": false,
+      "requires_subint4_ceiling_lift": true,
+      "subint4_ceiling_lift_required_above_520953": 33.624605013597034
+    },
+    "robustness": {
+      "bracket_requires_ceiling_lift": {
+        "convex_hedge_refuted_327": true,
+        "geometric_realizable_332": true,
+        "correct_locus_floor_327": true,
+        "vbi_upper_326": true
+      },
+      "verdict_invariant_across_bracket": true,
+      "tier2_gpu_triggered": false,
+      "geo_recovery_available": 0.07499999999999996,
+      "recovery_needed_to_revive": 0.2549920813842095,
+      "phi_realizable_lower_bound": 1.0,
+      "note": "the 9.841% floor charges the FULL forgone SDPA split-KV slack; the convex hedge 6.22% would need a kernel recovering >25.5% of it, but #332 measures only 7.5% geometric recovery with phi_realizable>=1 (occupancy-saturated 3D split-KV) -> NO recovery -> the floor is robust. Across the entire [6.22%, 31.41%] bracket the corrected base-lift target exceeds the lambda=1 ceiling headroom, so the 'requires sub-int4 ceiling-lift' verdict never flips -> Tier-2 GPU measurement is NOT decision-relevant (would only refine the point estimate within [9.10%, 9.841%])."
+    },
+    "cross_checks": {
+      "roundtrip_354_at_wrong_eta": 476.97713385,
+      "roundtrip_354_at_wrong_eta_banked": 476.97713385,
+      "roundtrip_326_vbi": 357.32166269999993,
+      "roundtrip_326_vbi_banked": 357.32166269999993,
+      "roundtrip_327_ceiling_at_floor": 469.6844761311386,
+      "roundtrip_327_ceiling_at_floor_banked": 469.6844761311386
+    },
+    "self_test": {
+      "conditions": {
+        "a_roundtrip_354_476_at_wrong_eta": true,
+        "b_roundtrip_326_357_at_vbi": true,
+        "c_frontier_monotone_decreasing": true,
+        "d_corrected_target_finite_gt_354": true,
+        "e_verdict_bools_set": true,
+        "f_roundtrip_327_ceiling_469": true,
+        "g_rescope_reproduces_327": true,
+        "h_ceiling_base_misses_500_requires_lift": true,
+        "i_verdict_invariant_tier2_not_triggered": true,
+        "j_constants_imported_exact": true,
+        "prov_354_form": true,
+        "prov_326_locus": true,
+        "prov_327_floor": true,
+        "prov_332_robust": true
+      }
+    },
+    "eta_kernel_correct_locus": 0.09841249119201488,
+    "corrected_base_lift_target": 73.0473373247645,
+    "eta_locus_is_bf16_lmhead_attn": true,
+    "requires_subint4_ceiling_lift": true,
+    "verdict": "LOCUS-CORRECTED -> 500 BEYOND THE CURRENT CEILING. The identity-restoring kernel must determinize the bf16 lm_head+attn reduction, NOT the int4 body: #326 measured the int4-Marlin body BIT-EXACT across M (maxdiff 0.0) with 100% of the M=8 divergence in the bf16 lm_head+attn locus, so #354's int4-split-K eta=0.9455% is the WRONG locus. The CORRECT eta is #327's bf16 lm_head+attn first-principles floor 9.841% (10.41x larger). Re-pricing: strict-frontier@deployed = 434.14 TPS (vs #354's 476.98), corrected_base_lift_target = +73.05 TPS (vs #354's +23.24; 3.14x harder). DECISIVE: that +73.0 EXCEEDS the entire headroom to the lambda=1 ceiling (+39.42); even lifting the base to the FULL ceiling 520.95 yields only 469.68 TPS (== #327's banked 469.68) < 500. So a base-lift toward the existing ceiling CANNOT close 500; a sub-int4 CEILING-lift raising 520.95 itself by >= +33.62 TPS (to >= 554.58) is REQUIRED. The verdict is INVARIANT across the entire [6.22%, 31.41%] bracket (even the optimistic-but-refuted 6.22% needs +51.6 > +39.4), and #332 shows the geometric recovery (7.5%) is far below the 25.5% a revival needs (phi_realizable>=1) -> the floor is ROBUST. Tier-2 GPU NOT triggered: a measured eta would only refine [9.10%, 9.841%] without flipping the verdict. eta_locus_is_bf16_lmhead_attn=True. 0 GPU, 0 TPS, baseline 481.53 UNCHANGED. Bank-the-analysis.",
+    "handoff": "the strict identity kernel's eta is governed by the bf16 lm_head+attn reduction (9.841% floor, #327), NOT the int4 split-K (0.95%, #354) -- the int4 body is bit-exact across M (#326). The REAL base-lift target the sub-int4 lever (denken #356 / lawine #355) and the step-shave (kanna #359) must hit is +73.0 TPS (not #354's +23), which EXCEEDS the +39 headroom to the lambda=1 ceiling: even the full ceiling base (521) lands at 470 < 500. The strict program therefore needs a sub-int4 CEILING-lift of >= +34 TPS above 521 (a faster substrate, not a closure toward the existing ceiling). fern #357 (composite integrator) consumes this eta + target; the final strict-frontier figure still needs the approval-gated a10g path (481.53 is the a10g-scorer number).",
+    "provenance": {
+      "checks": {
+        "prov_354_form": true,
+        "prov_326_locus": true,
+        "prov_327_floor": true,
+        "prov_332_robust": true
+      },
+      "detail": {
+        "f354_strict_compliant_tps_at_floor": 476.97713385,
+        "f354_residual_gap_to_500_tps": 23.022866150000027,
+        "f326_int4_body_bitexact": true,
+        "f326_bf16_lmhead_attn_divergence_share": 1.0,
+        "f326_min_overhead_restoring_identity": 0.3141,
+        "f327_first_principles_floor_overhead": 0.09841249119201488,
+        "f327_compliant_ceiling_tps_at_floor": 469.6844761311386,
+        "f327_floor_convex_sub_optimistic": 0.06218626733504587,
+        "f332_floor_at_geometric_phi": 0.09103155435261377,
+        "f332_geo_recovery_fraction": 0.07499999999999996,
+        "f332_phi_realizable_lower_bound": 1.0
+      }
+    }
+  },
+  "strict_kernel_eta_locus_self_test_passes": true,
+  "peak_mem_mib": 12.133,
+  "scope": "CPU-only analytic over banked MERGED *_results.json (#354 mr9dvb0e, #326 io4cs2ch, #327 kcjlr5ny, #332 y5cl0ena). NO model build / training / served-file change / HF Job / submission. 0 GPU, 0 TPS. BASELINE 481.53 UNCHANGED. Bank-the-analysis.",
+  "public_evidence_used": [
+    "#319 human strict-lock (2026-06-15 10:56:17Z, strict greedy token matching) + GPU-pivot (11:27Z, use pod-GPUs where best): the strict-compliant identity kernel is the live lane.",
+    "wirbel #354 (mr9dvb0e): strict_compliant_tps = base*(1-eta); priced eta=0.9455% (int4-split-K) -> the locus this card CORRECTS.",
+    "wirbel #326 (io4cs2ch): int4-Marlin body BIT-EXACT across M (maxdiff 0.0); bf16 lm_head+attn carries 100% of the M=8 divergence -> #216's 0.9455% is the wrong (M-invariant) locus.",
+    "denken #327 (kcjlr5ny): bf16 lm_head+attn first-principles floor 9.841% (~10.4x #354); compliant ceiling at floor 469.68 TPS (< 500 even at the lambda=1 ceiling base).",
+    "denken #332 (y5cl0ena): geometric SDPA recovery 7.5% << 25.5% needed, phi_realizable>=1 -> the 9.841% floor is ROBUST, not the optimistic 6.22% hedge.",
+    "Leaderboard frontier tops below 500 -- no method clears the bar yet; the locus correction shows 500 now sits BEYOND the lambda=1 spec-model ceiling, requiring a sub-int4 ceiling-lift."
+  ],
+  "nan_clean": true,
+  "wandb_run_id": "6s9vgnw9"
+}
