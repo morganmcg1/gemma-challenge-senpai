@@ -1,0 +1,191 @@
+{
+  "agent": "fern",
+  "created_at": "20260615T110707Z",
+  "kind": "flashinfer-bi-supply-screen",
+  "nan_clean": true,
+  "peak_mem_mib": 12.094,
+  "pr": 349,
+  "self_test": {
+    "checks": {
+      "a_ai_below_ridge": true,
+      "a_ai_identity_reconstructs_788": true,
+      "a_ai_is_kv_reads_times_M": true,
+      "a_ai_reconstructs_788_le_1e6": true,
+      "a_bw_reconstructs_349_le_1e6": true,
+      "a_ceiling_332_is_473p53": true,
+      "a_ceiling_332_roundtrips_473p5": true,
+      "a_exposed_reconstructs_505": true,
+      "a_floor_at_geo_imported_exact": true,
+      "a_recovery_breakeven_is_0p255": true,
+      "b_offtheshelf_below_frontier": true,
+      "b_offtheshelf_ceiling_is_357p32": true,
+      "b_offtheshelf_internally_consistent": true,
+      "b_offtheshelf_overhead_is_0p3141": true,
+      "c_both_hypotheses_stated": true,
+      "c_bw_bound_by_low_ai": true,
+      "c_flashinfer_bounded_by_332": true,
+      "c_flashinfer_mechanism_is_forgo_split_kv": true,
+      "c_forward_sets_ai": true,
+      "c_forward_sets_bw": true,
+      "c_locus_is_forward_intrinsic": true,
+      "c_locus_label": true,
+      "c_not_reduction_ordering": true,
+      "c_slack_low_ai_not_occupancy": true,
+      "d_beats_offtheshelf": true,
+      "d_ceiling_band_ordered": true,
+      "d_ceiling_below_500": true,
+      "d_ceiling_below_frontier": true,
+      "d_ceiling_finite": true,
+      "d_flashinfer_row_below_frontier": true,
+      "d_gt500_breakeven_hits_500": true,
+      "d_moves_phi_is_false": true,
+      "d_phi_map_monotone": true,
+      "d_recovery_below_breakeven": true,
+      "d_strict_not_reopened": true,
+      "e_cuda_graph_risk_flagged": true,
+      "e_flashinfer_ampere_supported_real": true,
+      "e_handoff_carries_caveats": true,
+      "e_strict_fallback_framing": true,
+      "e_support_status_real": true,
+      "e_verdict_carries_real_vs_hypothetical": true,
+      "f_nan_clean": true
+    },
+    "flashinfer_bi_self_test_passes": true
+  },
+  "synthesis": {
+    "context": {
+      "lambda1_ceil": 520.9527323111674,
+      "official_tps": 481.53,
+      "ppl_only_supply_tax_343": 0.0,
+      "strict_500_reachable_343": false,
+      "strict_best_ceiling_343": 473.5295953446407,
+      "strict_world_caveat": "strict (gate-ON, #192) FALLBACK only. PPL-only (#124) is operative -> supply tax VANISHES (wirbel #343, supply_tax=0).",
+      "target_tps": 500.0
+    },
+    "handoff_line": "the verify-attention BW floor (34.9% BW, AI 7.88 << ridge 208, 96 CTAs > 80 SMs) is FORWARD-INTRINSIC, not a TRITON reduction-ordering artifact: AI is RECONSTRUCTED here from FLOPs(4*M*num_q_heads*ctx*head_dim*num_layers == M*kv_bytes_denken) / bytes-moved(KV reads + activations), and BOTH are set by the M=8 GQA verify FORWARD -- the 'KV reads x M candidates' memory-traffic pattern -- invariant to the KV-split count and online-softmax combine order (which set numerical determinism, not FLOPs/bytes). So the roofline x-position (AI 7.88, BW-bound) is KERNEL-INVARIANT. A FlashInfer-BI kernel -- REAL on sm_86 (vLLM routes VLLM_BATCH_INVARIANT through the FlashInfer backend, decode_fixed_split_size=2048 + disable_split_kv=True; supports_compute_capability [7.5,12.1] includes 8.6, no Hopper gate) -- restores identity via disable_split_kv (a SINGLE serial KV reduction), which FORGOES the split-KV parallelism BY CONSTRUCTION == EXACTLY denken #332's determinism tax. FlashInfer-BI is thus a concrete instance of the deterministic-schedule family #332 bounded (phi_realizable>=1, a supremum over ALL such schedules), so recovery phi stays 7.5% << the 25.5% break-even -> flashinfer_bi_moves_phi_above_breakeven = False; flashinfer_bi_restoration_ceiling = 473.5 TPS (realizable 469.7; band 469.7-473.5), BELOW the 481.53 frontier and the 500 target. FlashInfer beats off-the-shelf BI's 357.32 by SCOPING to the attention locus (avoiding the broad determinism tax on lm_head/norms/linears), NOT by escaping the floor -- better restoration cost, SAME supply cap. Integration risk is one-directional (CUDA-graph determinism not guaranteed -> may lose ONEGRAPH host-overhead elimination -> real ceiling drops BELOW 473.5). This CLOSES the strict-fallback supply axis: NO BI kernel re-opens the strict lane. It matters ONLY in the strict (gate-ON, #192) world; the human's #124 call makes PPL-only operative (wirbel #343 kklof4wr) -> supply tax VANISHES, the >500 path is a coverage retrain, not a kernel. 0 TPS; analytic over banked numbers; BASELINE 481.53 unchanged; FlashInfer-BI kernel UNBUILT + human-approval-gated. NOT a launch. NOT a build. NOT a served-file change.",
+    "step1_arithmetic_intensity": {
+      "act_bytes": 2424832,
+      "ai_below_ridge": true,
+      "ai_identity_resid": 0.0,
+      "ai_reconstructed": 7.880597014925373,
+      "ai_resid": 0.0,
+      "ai_roundtrips_332": true,
+      "ai_via_identity": 7.880597014925373,
+      "bw_resid": 5.551115123125783e-17,
+      "bw_roundtrips_332": true,
+      "bw_util_reconstructed": 0.3488386484906124,
+      "exposed_resid": 5.684341886080802e-14,
+      "exposed_us": 505.4395567122396,
+      "flops_av": 640155648,
+      "flops_qkt": 640155648,
+      "flops_total": 1280311296,
+      "flops_via_kv_identity": 1280311296,
+      "kv_bytes_denken": 160038912,
+      "kv_bytes_gqa": 40009728.0,
+      "kv_reads_times_M_structure": true,
+      "ridge_ai": 208.33333333333334,
+      "roofline_us": 270.77290666666664,
+      "source": "RECONSTRUCTED from deployed M=8 verify geometry (PR #279 / #39) -- AI and BW reproduce denken #332's MEASURED anchors from FLOPs/bytes, proving they are forward-set, not reduction-order artifacts.",
+      "total_bytes": 162463744
+    },
+    "step2_floor_locus": {
+      "adaptive_saturates_machine": true,
+      "bw_bound_by_low_ai": true,
+      "floor_is_forward_intrinsic": true,
+      "floor_is_reduction_ordering_artifact": false,
+      "forward_sets_ai": true,
+      "forward_sets_bw": true,
+      "hypothesis_A_forward_intrinsic": "floor set by bytes-moved (KV reads x M) -> roofline x-position AI 7.88 << ridge 208 -> BW-bound -> KERNEL-INDEPENDENT -> any BI kernel (TRITON, FlashInfer) inherits it -> strict CLOSED.",
+      "hypothesis_B_reduction_ordering": "floor set by TRITON_ATTN's specific reduction tree -> a different tree (FlashInfer) could re-tile to a better roofline point -> phi moves -> strict RE-OPENS.",
+      "locus": "FORWARD_INTRINSIC",
+      "slack_is_low_ai_not_occupancy": true,
+      "unpack_below_adaptive": true
+    },
+    "step3_flashinfer_status": {
+      "ampere_supported": true,
+      "bi_api": "fixed_split_size + disable_split_kv (no single deterministic=True flag)",
+      "cc_gate": [
+        7.5,
+        12.1
+      ],
+      "compute_capability": 8.6,
+      "decode_fixed_split_size": 2048,
+      "disable_split_kv": true,
+      "integration_risk": [
+        "VLLM_BATCH_INVARIANT is beta; Gemma not in vLLM's tested-model list.",
+        "FlashInfer warns CUDA-graph determinism is NOT guaranteed -> if the BI kernel cannot capture into the deployed ONEGRAPH, it ALSO loses host-overhead elimination -> real ceiling drops BELOW 473.5 (risk is one-directional).",
+        "VLLM_BATCH_INVARIANT disables some opts (e.g. custom all-reduce in TP)."
+      ],
+      "is_deterministic_schedule_bounded_by_332": true,
+      "mechanism_is_forgo_split_kv": true,
+      "real_vs_hypothetical": {
+        "cuda_graph_determinism_guaranteed": false,
+        "flashinfer_bi_api_real": true,
+        "gemma4_end_to_end_validated": false,
+        "sm86_arch_qualified_real": true,
+        "vllm_routes_bi_through_flashinfer_real": true
+      },
+      "support_status": "REAL_supported_sm86",
+      "vllm_cc_gate_source": "supports_compute_capability() L475-477 -> [7.5, 12.1]",
+      "vllm_wiring": "vllm/v1/attention/backends/flashinfer.py L315-322: VLLM_BATCH_INVARIANT -> decode_fixed_split_size=2048, prefill_fixed_split_size=4096, disable_split_kv=True"
+    },
+    "step4_verdict": {
+      "ai_roundtrip_resid": 0.0,
+      "beats_offtheshelf_restoration": true,
+      "budget_500_pct_192": 4.02200257559111,
+      "budget_lambda1_pct_213": 7.331808522875782,
+      "bw_roundtrip_resid": 5.551115123125783e-17,
+      "ceiling_332_roundtrip_resid": 0.0,
+      "ceiling_at_geo_reconstructed": 473.5295953446407,
+      "ceiling_clears_500": false,
+      "ceiling_clears_frontier": false,
+      "flashinfer_bi_moves_phi_above_breakeven": false,
+      "flashinfer_bi_realizable_ceiling": 469.6844761311386,
+      "flashinfer_bi_restoration_ceiling": 473.5295953446407,
+      "flashinfer_ceiling_band_tps": [
+        469.6844761311386,
+        473.5295953446407
+      ],
+      "flashinfer_recovery_phi": 0.07499999999999996,
+      "offtheshelf_bi_ceiling_326": 357.32166269999993,
+      "offtheshelf_bi_overhead_326": 0.3141,
+      "offtheshelf_ceiling_reconstructed": 357.3214790922297,
+      "phi_ceiling_map": [
+        {
+          "ceiling_tps": 473.5295953446407,
+          "clears_500": false,
+          "clears_noregression": false,
+          "label": "flashinfer_geometric",
+          "recovery": 0.07499999999999996
+        },
+        {
+          "ceiling_tps": 482.757475483423,
+          "clears_500": false,
+          "clears_noregression": true,
+          "label": "noregression_breakeven",
+          "recovery": 0.2549920813842095
+        },
+        {
+          "ceiling_tps": 500.0,
+          "clears_500": true,
+          "clears_noregression": true,
+          "label": "gt500_breakeven",
+          "recovery": 0.5913117809665351
+        },
+        {
+          "ceiling_tps": 520.9527323111674,
+          "clears_500": true,
+          "clears_noregression": true,
+          "label": "perfect_recovery",
+          "recovery": 1.0
+        }
+      ],
+      "recovery_needed_for_500": 0.5913117809665351,
+      "recovery_needed_to_revive": 0.2549920813842095,
+      "strict_lane_reopened": false,
+      "verdict_light": "RED"
+    },
+    "verdict": "STRICT-LANE-STAYS-CLOSED-FLASHINFER-INHERITS-THE-FLOOR: the verify-attention BW floor is FORWARD-INTRINSIC (bytes-moved: KV reads x M=8 candidates -> AI 7.88 << ridge 208 -> BW-bound at 34.9%, kernel-INDEPENDENT). AI = 7.88 is RECONSTRUCTED from FLOPs(4*M*Hq*ctx*hd*L = M*kv_bytes) / bytes-moved -- both forward-set, reduction-order-INVARIANT == kernel-INVARIANT. FlashInfer-BI is REAL on sm_86 (vLLM wires VLLM_BATCH_INVARIANT -> FlashInfer, supports_compute_capability [7.5,12.1] includes 8.6), and its determinism mechanism (disable_split_kv + fixed_split_size>ctx -> single serial KV reduction) IS the forgo-split-KV tax denken #332 priced -- a concrete instance of the deterministic-schedule family #332 bounded (phi_realizable>=1). So recovery phi stays 7.5% << the 25.5% break-even -> flashinfer_bi_moves_phi_above_breakeven = False. Inherited strict ceiling 473.5 TPS (band 469.7-473.5), BELOW the 481.53 frontier AND the 500 target. FlashInfer BEATS off-the-shelf BI's 357.32 (by scoping to the attention locus, NOT by escaping the floor). This is the supply-side CLOSURE of the STRICT fallback ONLY; PPL-only (#124, wirbel #343) is operative -> supply tax VANISHES. 0 TPS; analytic; UNBUILT + human-gated; NOT a launch."
+  },
+  "wandb_run_id": "u8vmtji0"
+}
