@@ -1,0 +1,133 @@
+{
+  "agent": "denken",
+  "created_at": "20260615T063406Z",
+  "kind": "eagle3-a1-cliff-trainability",
+  "nan_clean": true,
+  "peak_mem_mib": 25.691,
+  "pr": 308,
+  "self_test": {
+    "a1_cliff_trainability_self_test_passes": true,
+    "checks": {
+      "a_a1_deployed_is_289_minimum": true,
+      "a_demand_sensitivity_ordered": true,
+      "a_gap_vs_required_is_0p192": true,
+      "a_perfect_interior_near_cliff": true,
+      "a_profile_monotone_nondecreasing": true,
+      "a_reproduces_304_0p9213": true,
+      "a_required_exceeds_max_interior": true,
+      "a_spec_interior_demand_ge_uniform": true,
+      "b_envelope_max_below_demand": true,
+      "b_gap_exceeds_one_best_lever": true,
+      "b_inrepo_arch_lever_consistent": true,
+      "b_inrepo_in_published_band": true,
+      "b_no_method_ge_090": true,
+      "b_not_in_envelope": true,
+      "b_quoted_max_below_demand": true,
+      "b_ttt_does_not_lift_depth0": true,
+      "c_ceiling_is_stated_top1_mass": true,
+      "c_central_ceiling_is_stated_mean": true,
+      "c_demand_above_robustness_ceiling": true,
+      "c_demand_below_info_ceiling": true,
+      "c_jensen_floor_consistent": true,
+      "d_blocks_go_aligns": true,
+      "d_light_aligns": true,
+      "d_nan_clean": true,
+      "d_verdict_matches_rule": true,
+      "e_constants_imported_exact": true,
+      "f_carries_caveats": true
+    }
+  },
+  "synthesis": {
+    "context": {
+      "cliff_value_spec": 0.73,
+      "et_target_central_295": 6.1112149873699195,
+      "et_target_lower_295": 5.363610726985671,
+      "et_target_upper_295": 6.858819247754167,
+      "k_spec": 7,
+      "official_tps_217": 481.53,
+      "spec_lift_289": 0.91
+    },
+    "handoff_line": "a1~0.92 is a RED light for the >500 EAGLE-3 build: the demand sits +0.121 above the published EAGLE-3 first-token (0-alpha) envelope ~0.80 and above every demonstrated first-token acceptance (NO published spec-decode method reports 0-alpha >=0.90 on any chat target), on the ONE position the standard TTT/multi-step levers CANNOT lift (depth-0 is serve-faithful; HASS even degrades it). It is NOT information-theoretically forbidden (perfect-drafter ceiling 1.0) but exceeds the argmax-robustness ceiling ~0.90 (eval top-1 mass), so it has no demonstrated training path: a1_target_trainable=out-of-reach, a1_demand_blocks_go=True. 0 TPS; analytic + literature only; BASELINE 481.53 unchanged; the drafter BUILD stays human-gated. The single biggest residual uncertainty is the true eval-distribution top-1 mass (a STATED 0-GPU assumption): a one-GPU top-1-entropy probe on the served target would convert this RED to a hard RED or reopen it. NOT a launch. NOT a build. NOT a served-file change.",
+    "step1_anchor_cliff": {
+      "a1_demand_perfect_interior": 0.7301735696242743,
+      "a1_demand_spec_interior_0p91": 0.95192930887218,
+      "a1_demand_uniform": 0.9213011665456927,
+      "a1_deployed": 0.72925,
+      "a1_is_profile_minimum": true,
+      "a1_required_for_611": 0.9213,
+      "a1_uniform_recomputed": 0.9213011665456927,
+      "a_k_289_deployed": [
+        0.72925,
+        0.75956,
+        0.79298,
+        0.8228,
+        0.83487,
+        0.83579,
+        0.84649
+      ],
+      "gap_vs_each_interior": [
+        0.19205000000000005,
+        0.16174,
+        0.12832,
+        0.09850000000000003,
+        0.08643,
+        0.08550999999999997,
+        0.07481000000000004
+      ],
+      "gap_vs_max_interior": 0.07481000000000004,
+      "gap_vs_required": 0.19205000000000005,
+      "lift_factor_vs_deployed": 1.2633527596846075,
+      "max_interior_ak": 0.84649,
+      "profile_monotone_nondecreasing": true,
+      "realistic_a1_demand_ge_uniform": true,
+      "reproduces_304_0p9213": true,
+      "required_exceeds_all_deployed_ak": true
+    },
+    "step2_published_envelope": {
+      "a1_inrepo_eagle3_native_step1": 0.7714,
+      "a1_inrepo_eagle3_tf": 0.7617,
+      "a1_published_envelope_max": 0.8,
+      "a1_published_exact_quoted_max": 0.79,
+      "arch_lever_gain_on_a1_inrepo": 0.04215000000000002,
+      "arch_lever_gain_on_a1_published": 0.05,
+      "eagle1_table2_t0": {
+        "llama2chat_13b": 0.77,
+        "llama2chat_70b": 0.75,
+        "llama2chat_7b": 0.76,
+        "mixtral_8x7b": 0.67,
+        "vicuna_13b": 0.79,
+        "vicuna_7b": 0.79
+      },
+      "gap_above_env_max": 0.12129999999999996,
+      "gap_above_inrepo": 0.14990000000000003,
+      "gap_above_quoted_max": 0.13129999999999997,
+      "gap_in_lever_units": 2.4259999999999993,
+      "greedy_over_temp1_gain": 0.06,
+      "in_envelope": false,
+      "no_published_method_ge_090": true,
+      "ttt_lifts_depth0": false
+    },
+    "step3_ceiling": {
+      "a1_argmax_robustness_ceiling_central": 0.85,
+      "a1_info_theoretic_ceiling": 1.0,
+      "a1_theoretical_ceiling": 0.9,
+      "demand_above_robustness_ceiling": true,
+      "demand_below_info_ceiling": true,
+      "eval_top1_mass_high": 0.9,
+      "eval_top1_mass_low": 0.8,
+      "eval_top1_mass_mean": 0.85,
+      "jensen_floor_ref_prob": 0.4206629648325761,
+      "mean_nll_nats": 0.8659233245103686
+    },
+    "step4_verdict": {
+      "a1_demand_blocks_go": true,
+      "a1_deployed": 0.72925,
+      "a1_low_quartile_297": 0.655,
+      "a1_required_for_611": 0.9213,
+      "a1_target_trainable": "out-of-reach",
+      "handoff_light": "RED"
+    },
+    "verdict": "A1-OUT-OF-REACH-OF-PUBLISHED-ENVELOPE--BELOW-INFO-CEILING-NO-DEMONSTRATED-PATH"
+  },
+  "wandb_run_id": "pafqy25c"
+}
