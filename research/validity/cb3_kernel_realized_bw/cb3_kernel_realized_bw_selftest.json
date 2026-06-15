@@ -5,10 +5,14 @@
   },
   "agent": "lawine",
   "analysis_only": true,
+  "base_pr": 388,
   "byte_ratio": 0.7846932941272564,
+  "cb3_m8_microbench_self_test_passes": true,
   "cb3_microbench_self_test_passes": true,
+  "closes_383_robust_m4": null,
+  "closes_383_robust_m8": null,
   "closes_383_supply_gap_floor": true,
-  "created_at": "20260615T180720Z",
+  "created_at": "20260615T184819Z",
   "f_body_complement_pr": 0.8825045903509467,
   "f_body_strict_honest": 0.76240970145034,
   "inputs": {
@@ -22,8 +26,11 @@
     "f_draft_378": 0.12009488890060672,
     "f_lmhead_378": 0.022428229458960704,
     "int4_bpw": 4.125,
+    "m1_measured_hbm_eff_388": 0.25561637483960586,
     "mixed_gate_ppl_372": 2.3811966031692555,
+    "mtp_k_52": 7,
     "ppl_gate": 2.42,
+    "served_verify_width": 8,
     "step_norm_us_378": 1218.2,
     "supply_floor_383": 17.216386736379093,
     "supply_robust_383": 23.74874176829968
@@ -33,19 +40,31 @@
     1.15,
     1.28
   ],
+  "m4_is_bw_bound": null,
+  "m8_is_bw_bound": null,
+  "m8_note": null,
+  "marlin_m4_hbm_eff": null,
+  "marlin_m8_hbm_eff": null,
+  "mtp_k": 7,
   "no_hf_job": true,
   "no_kernel_rebuild": true,
   "no_launch": true,
   "no_served_file_change": true,
   "official_tps": 0.0,
-  "pr": 388,
+  "partial_accept_width": 4,
+  "pr": 391,
   "qtip_beta_byte_proportional": 0.51,
   "realized_body_speedup": 1.2743832622046425,
+  "realized_body_speedup_m4": null,
+  "realized_body_speedup_m8": null,
   "realized_body_speedup_measured_floor": null,
   "realized_body_speedup_qtip_empirical": 1.1233511704212635,
   "realized_is_roofline_bound": true,
   "realized_note": "ROOFLINE BOUND: no cb3/QTIP kernel in env (Marlin/AWQ/AQLM only); cb3 bounded by its nominal 0.785x byte count at int4-Marlin's measured M=1 BW-efficiency. Tight iff cb3 matches that efficiency -- literature-supported (QTIP/QuIP# L1-resident codebook, RHT folded offline; only a <<1% online activation Hadamard).",
   "realized_strict_base_lift_tps": 38.34161969078741,
+  "realized_strict_base_lift_tps_m4": null,
+  "realized_strict_base_lift_tps_m8": null,
+  "realized_strict_base_lift_tps_m8_measured_floor": null,
   "roofline_formula_lift_band_upper_bound": [
     83.82117917805022,
     110.17951322421061
@@ -126,12 +145,68 @@
         "detail": "ppl=2.3811966031692555 gate=2.42",
         "name": "ppl_372_passes",
         "ok": true
+      },
+      {
+        "detail": "1.000000",
+        "name": "speedup_beta0_is_1",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "speedup_beta1_is_roofline",
+        "ok": true
+      },
+      {
+        "detail": "floor(e1)=1.058241",
+        "name": "floor_recovers_388_m1",
+        "ok": true
+      },
+      {
+        "detail": "f(0.5)=1.1206 > f(e1)=1.0582",
+        "name": "floor_monotone_in_eff",
+        "ok": true
+      },
+      {
+        "detail": "beta=0.510000",
+        "name": "qtip_beta_recovers_0p51",
+        "ok": true
+      },
+      {
+        "detail": "1.0000",
+        "name": "qtip_beta_capped_1",
+        "ok": true
+      },
+      {
+        "detail": "headline=38.3416",
+        "name": "m1_reproduces_388_headline",
+        "ok": true
+      },
+      {
+        "detail": "closes=False bw_bound=False",
+        "name": "m1_strict_straddles_388",
+        "ok": true
+      },
+      {
+        "detail": "strict_lift=31.950 closes=True",
+        "name": "bwbound_upgrades_strict_to_pass",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "strict_lift_monotone",
+        "ok": true
+      },
+      {
+        "detail": "",
+        "name": "width_tiers_finite",
+        "ok": true
       }
     ],
-    "n_checks": 15,
-    "n_passed": 15,
+    "n_checks": 26,
+    "n_passed": 26,
     "passes": true
   },
+  "served_verify_width": 8,
   "supply_gate": {
     "clears_floor": true,
     "clears_robust": true,
@@ -208,5 +283,6 @@
       "lifted_off_the_shelf": 441.14284187805015,
       "speedup": 1.2743832622046425
     }
-  }
+  },
+  "width_analysis": null
 }
