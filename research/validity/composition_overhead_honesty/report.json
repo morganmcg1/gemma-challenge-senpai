@@ -1,0 +1,390 @@
+{
+  "pr": 274,
+  "agent": "fern",
+  "task": "composition_overhead_honesty",
+  "kind": "CPU-only analytic re-pricing (no GPU, no HF job, no submission)",
+  "composition_overhead_honesty_self_test_passes": 1,
+  "self_tests": {
+    "a_reproduces_481_53_within_1pct": true,
+    "b_phi_in_0_1_and_fixed_ge_0_both_gd_edges": true,
+    "c_nan_clean_all_corrected_finite": true,
+    "d_realization_ratios_for_every_claim": true,
+    "e_inverted_break_even_reported": true
+  },
+  "honest_corrected_static_k4_tps": 493.9569059376764,
+  "honest_corrected_static_k4_tps_band": {
+    "measured_gd": 493.9569059376764,
+    "assumed_gd": 484.10961696061855
+  },
+  "model_forward_fraction_phi": {
+    "central_measured_gd": 0.6034589848288221,
+    "assumed_gd": 0.12526795005202912,
+    "band": [
+      0.12526795005202912,
+      0.6034589848288221
+    ],
+    "central_basis": "measured g_d (denken #257 flagged assumed g_d ~9x too high), served_wall_clock_est wall"
+  },
+  "smoke_reproduce_anchor": {
+    "tps_composition_law": 481.53,
+    "tps_clean_kcal": 481.58683564416435,
+    "tps_statick7_identity": 481.53,
+    "rel_err_composition": 0.0,
+    "rel_err_clean": 0.00011803136702672736,
+    "reproduces_481_53": true
+  },
+  "step_decomposition": {
+    "wall_step_conventions_us": {
+      "served_wall_clock_est": 9724.754013249434,
+      "kcal_clean": 7982.887878221502
+    },
+    "edges": {
+      "measured": {
+        "model_forward_us": 5868.490184545517,
+        "draft_cost_us": 704.7756767272949,
+        "verify_us": 5163.714507818222,
+        "g_d_value": 0.019498025961743392,
+        "walls": {
+          "served_wall_clock_est": {
+            "fixed_overhead_us": 3856.263828703917,
+            "phi": 0.6034589848288221,
+            "fixed_overhead_ge_0": true,
+            "phi_in_0_1": true
+          },
+          "kcal_clean": {
+            "fixed_overhead_us": 2114.3976936759855,
+            "phi": 0.735133735318471,
+            "fixed_overhead_ge_0": true,
+            "phi_in_0_1": true
+          }
+        }
+      },
+      "assumed": {
+        "model_forward_us": 1218.1999999999998,
+        "draft_cost_us": 658.3654411764705,
+        "verify_us": 559.8345588235294,
+        "g_d_value": 0.168,
+        "walls": {
+          "served_wall_clock_est": {
+            "fixed_overhead_us": 8506.554013249435,
+            "phi": 0.12526795005202912,
+            "fixed_overhead_ge_0": true,
+            "phi_in_0_1": true
+          },
+          "kcal_clean": {
+            "fixed_overhead_us": 6764.687878221503,
+            "phi": 0.15260141675338187,
+            "fixed_overhead_ge_0": true,
+            "phi_in_0_1": true
+          }
+        }
+      }
+    }
+  },
+  "fixed_overhead_us": {
+    "measured_gd": 3856.263828703917,
+    "assumed_gd": 8506.554013249435
+  },
+  "repriced_portfolio": {
+    "static_k4": {
+      "composition_tps": 502.12279296537685,
+      "composition_gain": 20.592792965376873,
+      "lever": "draft_pass_cut",
+      "src": "stark#266",
+      "K": 4,
+      "M": 8,
+      "honest_corrected": {
+        "measured": 493.9569059376764,
+        "assumed": 484.10961696061855
+      },
+      "clears_500": {
+        "measured": false,
+        "assumed": false
+      },
+      "realization_ratio": {
+        "measured": 0.6034589848288229,
+        "assumed": 0.12526795005202782
+      }
+    },
+    "static_k5": {
+      "composition_tps": 500.78615614206257,
+      "composition_gain": 19.256156142062594,
+      "lever": "draft_pass_cut",
+      "src": "stark#266",
+      "K": 5,
+      "M": 8,
+      "honest_corrected": {
+        "measured": 493.15030043719435,
+        "assumed": 483.94217920579797
+      },
+      "clears_500": {
+        "measured": false,
+        "assumed": false
+      },
+      "realization_ratio": {
+        "measured": 0.6034589848288218,
+        "assumed": 0.1252679500520305
+      }
+    },
+    "tree_width": {
+      "composition_tps": 577.6,
+      "composition_gain": 96.07000000000005,
+      "lever": "et_raise",
+      "src": "denken#268",
+      "K": 7,
+      "M": 32,
+      "honest_corrected": {
+        "measured": 539.504304672505,
+        "assumed": 493.5644919614984
+      },
+      "clears_500": {
+        "measured": true,
+        "assumed": false
+      },
+      "realization_ratio": {
+        "measured": 0.6034589848288225,
+        "assumed": 0.12526795005202884
+      }
+    },
+    "private_505": {
+      "composition_tps": 505.4635557048992,
+      "composition_gain": 23.93355570489922,
+      "lever": "et_raise",
+      "src": "ubel#263",
+      "K": 7,
+      "M": 8,
+      "honest_corrected": {
+        "measured": 495.9729192290225,
+        "assumed": 484.52810746060874
+      },
+      "clears_500": {
+        "measured": false,
+        "assumed": false
+      },
+      "realization_ratio": {
+        "measured": 0.6034589848288222,
+        "assumed": 0.12526795005202881
+      }
+    }
+  },
+  "rigorous_wallstep_recompute": {
+    "measured__served_wall_clock_est": {
+      "static_k4": {
+        "tps": 398.18990191805153,
+        "delta_vs_base": -83.34009808194844,
+        "clears_500": false,
+        "wall_step_K_us": 9422.707294652022,
+        "wall_step_served_us": 9724.754013249434
+      },
+      "static_k5": {
+        "tps": 432.4125824848334,
+        "delta_vs_base": -49.11741751516655,
+        "clears_500": false,
+        "wall_step_K_us": 9523.389534184493,
+        "wall_step_served_us": 9724.754013249434
+      }
+    },
+    "measured__kcal_clean": {
+      "static_k4": {
+        "tps": 400.99463625400506,
+        "delta_vs_base": -80.53536374599491,
+        "clears_500": false,
+        "wall_step_K_us": 7680.84115962409,
+        "wall_step_served_us": 7982.887878221502
+      },
+      "static_k5": {
+        "tps": 434.4168362539418,
+        "delta_vs_base": -47.11316374605815,
+        "clears_500": false,
+        "wall_step_K_us": 7781.523399156561,
+        "wall_step_served_us": 7982.887878221502
+      }
+    },
+    "assumed__served_wall_clock_est": {
+      "static_k4": {
+        "tps": 397.3511456929634,
+        "delta_vs_base": -84.17885430703654,
+        "clears_500": false,
+        "wall_step_K_us": 9442.597395602377,
+        "wall_step_served_us": 9724.754013249434
+      },
+      "static_k5": {
+        "tps": 431.81134198792716,
+        "delta_vs_base": -49.71865801207281,
+        "clears_500": false,
+        "wall_step_K_us": 9536.649601484729,
+        "wall_step_served_us": 9724.754013249434
+      }
+    },
+    "assumed__kcal_clean": {
+      "static_k4": {
+        "tps": 399.95891334331526,
+        "delta_vs_base": -81.57108665668471,
+        "clears_500": false,
+        "wall_step_K_us": 7700.731260574444,
+        "wall_step_served_us": 7982.887878221502
+      },
+      "static_k5": {
+        "tps": 433.6778296465267,
+        "delta_vs_base": -47.8521703534733,
+        "clears_500": false,
+        "wall_step_K_us": 7794.783466456796,
+        "wall_step_served_us": 7982.887878221502
+      }
+    },
+    "static_k4_band_tps": [
+      397.3511456929634,
+      400.99463625400506
+    ],
+    "static_k4_all_below_500": true,
+    "note": "phi-discount-of-net-gain is the PR-prescribed metric and is CONSERVATIVE (generous to the claim). The rigorous wall-step recompute keeps the full E[T] penalty and phi-discounts only the step saving -> static-K is a LOSS (~397-401 TPS), not a gain. Both models agree static-K does not clear 500."
+  },
+  "inverted_break_even": {
+    "phi_discount_space": {
+      "measured": {
+        "phi": 0.6034589848288221,
+        "composition_tps_needed_to_clear_500": 512.1368854128325,
+        "composition_gain_pct_needed": 6.356174155884894
+      },
+      "assumed": {
+        "phi": 0.12526795005202912,
+        "composition_tps_needed_to_clear_500": 628.9739391107514,
+        "composition_gain_pct_needed": 30.619886426754608
+      }
+    },
+    "honest_et_real_floor": {
+      "E_T_real_needed_to_clear_500": 3.9914439391107512,
+      "E_T_real_served": 3.8444537125748504,
+      "E_T_real_gap": 0.14699022653590088,
+      "pct_rise_needed": 3.8234359814272056,
+      "note": "clean K_cal frame: honest TPS ~= K_cal*E_T_real, so clearing 500 needs E_T_real >= 3.991. Draft-pass CUTS lower E[T] (K=4->3.08), moving AWAY; only E[T]-RAISING levers can reach it. This is why the deployed path is K=7. Analog of fern #262's E[T]>=5.288 (param/grounded-step convention).",
+      "fern262_param_analog": 5.288
+    },
+    "per_lever_shortfall": {
+      "static_k4": {
+        "lever": "draft_pass_cut",
+        "E_T": 3.080339640718563,
+        "E_T_real_floor": 3.9914439391107512,
+        "E_T_shortfall": 0.9111042983921882,
+        "moves_toward_floor": false
+      },
+      "static_k5": {
+        "lever": "draft_pass_cut",
+        "E_T": 3.38082377245509,
+        "E_T_real_floor": 3.9914439391107512,
+        "E_T_shortfall": 0.6106201666556612,
+        "moves_toward_floor": false
+      },
+      "tree_width": {
+        "lever": "et_raise",
+        "E_T": null,
+        "E_T_real_floor": 3.9914439391107512,
+        "E_T_shortfall": null,
+        "moves_toward_floor": false
+      },
+      "private_505": {
+        "lever": "et_raise",
+        "E_T": 3.6406313872810236,
+        "E_T_real_floor": 3.9914439391107512,
+        "E_T_shortfall": 0.3508125518297276,
+        "moves_toward_floor": false
+      }
+    }
+  },
+  "any_draft_lever_clears_500_under_honest_composition": {
+    "measured_gd": true,
+    "assumed_gd": false,
+    "by_mechanism": {
+      "measured": {
+        "draft_pass_cut_any_clears": false,
+        "et_raise_any_clears": true,
+        "per_claim": {
+          "static_k4": false,
+          "static_k5": false,
+          "tree_width": true,
+          "private_505": false
+        }
+      },
+      "assumed": {
+        "draft_pass_cut_any_clears": false,
+        "et_raise_any_clears": false,
+        "per_claim": {
+          "static_k4": false,
+          "static_k5": false,
+          "tree_width": false,
+          "private_505": false
+        }
+      }
+    },
+    "headline": "under measured g_d only the E[T]-RAISING tree_width clears (539.5); NO draft-pass-CUTTING lever (static-K/K5) clears under EITHER g_d edge; under assumed g_d NOTHING clears."
+  },
+  "tornado": {
+    "central_honest_corrected_static_k4_tps": 493.9569059376764,
+    "ranked_swings": [
+      {
+        "input": "g_d_edge (0.0195 -> 0.168)",
+        "low_tps": 484.10961696061855,
+        "high_tps": 493.9569059376764,
+        "swing_tps": 9.847288977057872
+      },
+      {
+        "input": "draft_cost basis (graphed 100.68 -> eager 359.2 us)",
+        "low_tps": 493.9569059376764,
+        "high_tps": 497.78888306340735,
+        "swing_tps": 3.83197712573093
+      },
+      {
+        "input": "wall_step convention (9724.75us -> 7982.9us)",
+        "low_tps": 493.9569059376764,
+        "high_tps": 496.66845681327743,
+        "swing_tps": 2.711550875601006
+      },
+      {
+        "input": "E[T] band on comp_tps (+-0.5%)",
+        "low_tps": 493.894771407988,
+        "high_tps": 494.0190404673648,
+        "swing_tps": 0.12426905937678612
+      }
+    ],
+    "dominant_input": "g_d_edge (0.0195 -> 0.168)",
+    "any_input_pushes_static_k4_to_500": false,
+    "verdict_robust_static_k4_below_500": true
+  },
+  "cross_ref_stark": {
+    "measured": {
+      "phi": 0.6034589848288221,
+      "composition_gain_k4_pct": 4.276533749792718,
+      "predicted_phi_discount_wall_gain_k4_pct": 2.5807127152361096
+    },
+    "assumed": {
+      "phi": 0.12526795005202912,
+      "composition_gain_k4_pct": 4.276533749792718,
+      "predicted_phi_discount_wall_gain_k4_pct": 0.535712616164851
+    },
+    "rigorous_wallstep_prediction": {
+      "measured_local_wall_tps_k4": 398.18990191805153,
+      "measured_local_wall_tps_gain_k4_vs_k7_pct": -17.30735324526996,
+      "note": "stark measures measured_local_wall_tps_gain_k4_vs_k7_pct empirically; fern derives it. The phi-discount model predicts a small POSITIVE wall gain (+2.6% measured / +0.5% assumed) but the rigorous wall-step model predicts a NEGATIVE wall gain (~-17%, static-K LOSES). If stark measures a loss, the rigorous model is confirmed; if a small gain, the phi-discount bound holds. EITHER outcome keeps static-K below 500."
+    },
+    "discriminating_measurement": "stark's K=4-vs-K=7 wall-clock A/B: sign of the gain discriminates phi-discount (small +) vs rigorous-wallstep (-). Both agree on does-not-clear-500."
+  },
+  "anchors_used": {
+    "BASE_TPS": 481.53,
+    "K_CAL": 125.26795005202914,
+    "E_T_REAL": 3.8444537125748504,
+    "E_T_PARAM": 4.6827608,
+    "STEP_SERVED_NORM_MS": 1.2182,
+    "G_D_MEASURED": 0.019498025961743392,
+    "G_D_ASSUMED": 0.168,
+    "S_SERVED_ABS_US": 5868.490184545517,
+    "SERVED_WALL_CLOCK_EST_US": 9724.754013249434,
+    "DRAFT_PASS_US_GRAPHED": 100.6822395324707,
+    "VERIFY_US_M8": 5163.714507818222,
+    "VERIFY_US_M32": 5979.945073127746,
+    "LAMBDA1_CEIL": 520.9527323111674
+  },
+  "runtime_s": 0.00010442733764648438,
+  "wandb_run_ids": [
+    "brnmnl60"
+  ]
+}
