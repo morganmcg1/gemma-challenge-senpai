@@ -1,0 +1,375 @@
+{
+  "agent": "lawine",
+  "analysis_only": true,
+  "checklist_path": "research/validity/shippable_equivalent_go_nogo/GO_NOGO_CHECKLIST.md",
+  "created_at": "20260615T223511Z",
+  "fastest_equivalent_tps_modeled_bracket": [
+    492.08,
+    494.08
+  ],
+  "feature_flag": {
+    "default_is_strict_on_ship": true,
+    "flag_identity_note": "the flag is a pure SELECTOR between two already-validated reduction functions; it adds NO arithmetic, so it cannot itself introduce an argmax flip on EITHER path. The #319 e2e gate validates the ON binding (=strict); the OFF binding IS today's served reduction (already the deployed reference).",
+    "flag_name": "SELECTIVE_RECOMPUTE_VERIFY",
+    "flag_preserves_byte_identity_both_paths": true,
+    "flag_residual_cost_note": "startup-resolved -> exactly 0 hot-path branch; even a per-step branch is one perfectly-predicted compare against a ~ms GEMM-bound step -> < 0.01 TPS, unmeasurable.",
+    "flag_residual_cost_tps": 0.0,
+    "inplace_line_now_flag_revertible": true,
+    "off_path": {
+      "binds": "today's-served reduction (the deployed fast verify/attention path, unchanged)",
+      "byte_identical_to": "TODAY'S SERVED verify (the deployed fast path) -> the deployed 481.53 behavior",
+      "is_ship_path": false,
+      "value": "0 (rollback)"
+    },
+    "on_path": {
+      "binds": "selective-recompute reduction (fast attention everywhere + eps near-tie gate + higher-prec reduction on the ~23.6% flagged near-tie steps)",
+      "byte_identical_to": "BLANKET-STRICT (the strict reference) -> served flips 0, identity 1.0",
+      "is_ship_path": true,
+      "value": "1 (shipped default)"
+    },
+    "resolution": "resolved ONCE at serve startup (read env -> bind verify-reduction function pointer); NO per-step hot-path branch.",
+    "rollback_while_keeping_cb3": "flip SELECTIVE_RECOMPUTE_VERIFY=0 in the manifest env -> selective-recompute bypassed, cb3's additive checkpoint+kernel UNTOUCHED. A flag flip, NOT a code re-edit (this is #417's binding line de-risked).",
+    "wired_in": [
+      "submissions/fa2sw_treeverify_kenyan/splitkv_verify_patch.py",
+      "submissions/fa2sw_treeverify_kenyan/fa_sliding_patch.py",
+      "submissions/fa2sw_treeverify_kenyan/manifest.json (env declaration)"
+    ]
+  },
+  "flag_preserves_byte_identity_both_paths": true,
+  "flag_residual_cost_tps": 0.0,
+  "go_nogo_predicate_evaluates_GO_under_modeled": true,
+  "human_checklist_md": "# SHIP THE FASTEST STRICTLY-EQUIVALENT CONFIG -- HUMAN GO/NO-GO CHECKLIST\n\n_PR #419 (lawine) static-analysis handoff -- generated 20260615T223511Z. This card SHIPS NOTHING; it is\nthe one page a human reads to authorize {served-file change + leaderboard submission}._\n\n## The decision (executable predicate)\n\n```\nSHIP iff (measured_fastest_equivalent_tps > 481.53)   # kanna #416, beats the deployed non-strict #1\n         AND byte_identity_verified                    # #319 e2e gate returns identity 1.0\n         AND (ppl <= 2.42)                             # quality guardrail (unchanged 2.3772)\n         AND (completed == 128)                        # full public run\n```\n\n- Ship-breakeven (NO-GO boundary): **481.53 TPS** (the deployed non-strict #1, PR #52 `2x9fm2zx`).\n- Modeled combined TPS bracket: **[492.08, 494.08]** -> modeled margin **+10.55 .. +12.55** (central +11.55).\n- Robustness: even a ZERO-speedup selective-recompute still ships (**483.08 TPS**, +1.55) -- the predicate is robust, not knife-edge.\n\n## Every line that MUST be GREEN before approval\n\n| # | Gate | Threshold | Source |\n|---|------|-----------|--------|\n| 1 | Measured combined TPS beats breakeven | `> 481.53` | kanna #416 `fastest_equivalent_tps` |\n| 2 | Served greedy identity | `== 1.0` (flips 3/882 -> 0) | #319 e2e self-referential gate |\n| 3 | PPL | `<= 2.42` (expect 2.3772) | PPL stage |\n| 4 | Completed | `== 128` | benchmark |\n| 5 | Whole-stack reversible | re-submit prior package; cb3 by bucket flip; selrec by `SELECTIVE_RECOMPUTE_VERIFY=0` | #417 + this card |\n| 6 | Flag-revert confirmed | OFF == today's served, ON == strict, residual 0.0 TPS | this card Part 3 |\n\n## Pre-submission identity-verify CI (the byte-identity EVIDENCE)\n\n- Budget: **41.8 GPU-min** (tier3 e2e shared 35.8 + tier2 decode-width shared 4.0 + 2x tier-1 micro (cb3 new-ref + selrec byte-exact) = 41.8 (vs naive unshared 81.6).)\n- TIER1 per-GEMM/-config byte-identity micro (#390); TIER2 decode-width e2e (#381); TIER3 e2e self-referential gate (#319 gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).\n- This is measured LOCALLY on the A10G BEFORE any served-file change -- it proves byte-identity, it is not a TPS claim.\n\n## Feature-flag de-risking the one binding in-place line\n\n- `SELECTIVE_RECOMPUTE_VERIFY` -- resolved ONCE at serve startup (read env -> bind verify-reduction function pointer); NO per-step hot-path branch.\n  - **ON (=1, shipped default):** selective-recompute reduction (fast attention everywhere + eps near-tie gate + higher-prec reduction on the ~23.6% flagged near-tie steps) -> byte-identical to BLANKET-STRICT (the strict reference) -> served flips 0, identity 1.0.\n  - **OFF (=0, rollback):** today's-served reduction (the deployed fast verify/attention path, unchanged) -> byte-identical to TODAY'S SERVED verify (the deployed fast path) -> the deployed 481.53 behavior.\n  - Rollback-while-keeping-cb3: flip SELECTIVE_RECOMPUTE_VERIFY=0 in the manifest env -> selective-recompute bypassed, cb3's additive checkpoint+kernel UNTOUCHED. A flag flip, NOT a code re-edit (this is #417's binding line de-risked).\n\n## Safe operation order\n\n1. **Measure locally on the A10G** -- run the 41.8 GPU-min pre-submission verify CI; confirm ALL six GREEN lines above (especially identity `== 1.0` and the measured TPS `> 481.53`).\n2. **Human approves in GitHub** -- the gated approval issue (PR + branch + exact command + the GREEN CI evidence).\n3. **Flip served file + submit** -- deploy the equivalent submission (flag ON = strict) and submit to the leaderboard. THIS step is the human-gated action; everything above is pre-flight.\n\n_Rollback at any point = re-submit the prior package, or flip `SELECTIVE_RECOMPUTE_VERIFY=0` to keep cb3 while dropping selective-recompute._\n",
+  "inplace_line_now_flag_revertible": true,
+  "kind": "shippable-equivalent-go-nogo",
+  "modeled_margin_tps": 11.55,
+  "modeled_margin_tps_hi": 12.55,
+  "modeled_margin_tps_lo": 10.55,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "pinned_import_crosscheck": {
+    "all_present_checks_pass": true,
+    "available": {
+      "s413": true,
+      "s417": true
+    },
+    "checks": {
+      "x413_equiv_tps_7": true,
+      "x413_kstar_7": true,
+      "x417_cb3_kstar": true,
+      "x417_cb3_lift": true,
+      "x417_combined_bracket": true,
+      "x417_combined_verify_41_8": true,
+      "x417_deployed_ppl": true,
+      "x417_deployed_tps": true,
+      "x417_human_gated": true,
+      "x417_ppl_cap": true,
+      "x417_selrec_bracket": true,
+      "x417_seven_files": true,
+      "x417_strict_base": true,
+      "x417_whole_stack_reversible": true
+    },
+    "n_crosschecks": 14
+  },
+  "pr": 419,
+  "pre_submission_verify_gpu_min": 41.8,
+  "predicate": {
+    "crosscheck_413_combined_tps": 494.53,
+    "go_nogo_predicate_evaluates_GO_under_modeled": true,
+    "modeled_central_combined_tps": 493.08,
+    "modeled_margin_tps": 11.55,
+    "modeled_margin_tps_hi": 12.55,
+    "modeled_margin_tps_lo": 10.55,
+    "nogo_boundary_sweep": [
+      {
+        "combined_tps": 478.0,
+        "ship": false,
+        "verdict": "NO-GO"
+      },
+      {
+        "combined_tps": 480.0,
+        "ship": false,
+        "verdict": "NO-GO"
+      },
+      {
+        "combined_tps": 481.53,
+        "ship": false,
+        "verdict": "NO-GO"
+      },
+      {
+        "combined_tps": 481.54,
+        "ship": true,
+        "verdict": "GO"
+      },
+      {
+        "combined_tps": 483.08,
+        "ship": true,
+        "verdict": "GO"
+      },
+      {
+        "combined_tps": 492.08,
+        "ship": true,
+        "verdict": "GO"
+      },
+      {
+        "combined_tps": 494.08,
+        "ship": true,
+        "verdict": "GO"
+      }
+    ],
+    "predicate_definition": "SHIP iff (measured_fastest_equivalent_tps > 481.53) AND byte_identity_verified AND (ppl <= 2.42) AND (completed == 128)",
+    "robustness_note": "NO-GO boundary = combined TPS must measure > 481.53. Decomposed onto the pending inputs (given cb3's MEASURED +15.6), the selective-recompute input breakeven is 465.93, which is BELOW even the #393 blanket-strict floor 467.48 -> a selective-recompute with ZERO speedup over blanket-strict STILL ships (483.08, +1.55). All three independent anchors clear: #412 modeled selrec [476.48, 478.48] -> [492.08, 494.08]; #393 floor -> 483.08; #413 equiv_tps(7)=478.93 -> 494.53. The predicate is robust (>=+1.55 even worst-case), not knife-edge.",
+    "robustness_zero_speedup_margin_tps": 1.55,
+    "robustness_zero_speedup_selrec_combined_tps": 483.08,
+    "selrec_breakeven_below_blanket_floor": true,
+    "ship_breakeven_equivalent_tps": 481.53,
+    "ship_breakeven_selective_recompute_tps": 465.93,
+    "under_measured": {
+      "checks": null,
+      "ship": null,
+      "verdict": "PENDING (#412 + #416 measuring)"
+    },
+    "under_modeled_central": {
+      "checks": {
+        "byte_identity_verified": true,
+        "completed_full": true,
+        "ppl_within_cap": true,
+        "tps_beats_breakeven": true
+      },
+      "inputs": {
+        "byte_identity_verified": true,
+        "completed": 128,
+        "measured_fastest_equivalent_tps": 493.08,
+        "ppl": 2.3772
+      },
+      "ship": true,
+      "thresholds": {
+        "ppl_cap": 2.42,
+        "required_completed": 128,
+        "ship_breakeven": 481.53
+      },
+      "verdict": "GO"
+    },
+    "under_modeled_hi": {
+      "checks": {
+        "byte_identity_verified": true,
+        "completed_full": true,
+        "ppl_within_cap": true,
+        "tps_beats_breakeven": true
+      },
+      "inputs": {
+        "byte_identity_verified": true,
+        "completed": 128,
+        "measured_fastest_equivalent_tps": 494.08,
+        "ppl": 2.3772
+      },
+      "ship": true,
+      "thresholds": {
+        "ppl_cap": 2.42,
+        "required_completed": 128,
+        "ship_breakeven": 481.53
+      },
+      "verdict": "GO"
+    },
+    "under_modeled_lo": {
+      "checks": {
+        "byte_identity_verified": true,
+        "completed_full": true,
+        "ppl_within_cap": true,
+        "tps_beats_breakeven": true
+      },
+      "inputs": {
+        "byte_identity_verified": true,
+        "completed": 128,
+        "measured_fastest_equivalent_tps": 492.08,
+        "ppl": 2.3772
+      },
+      "ship": true,
+      "thresholds": {
+        "ppl_cap": 2.42,
+        "required_completed": 128,
+        "ship_breakeven": 481.53
+      },
+      "verdict": "GO"
+    }
+  },
+  "predicate_enforces_all_conjuncts": {
+    "bad_completed_is_nogo": true,
+    "bad_identity_is_nogo": true,
+    "bad_ppl_is_nogo": true,
+    "bad_tps_is_nogo": true,
+    "base_is_go": true,
+    "none_tps_is_nogo": true
+  },
+  "repo_facts": {
+    "crosscheck::s413_json": true,
+    "crosscheck::s417_json": true,
+    "deployed::attn_patch": true,
+    "deployed::manifest": true,
+    "deployed::verify_patch": true,
+    "evidence::cb3_conservative_k_403": true,
+    "evidence::deploy_surface_417": true,
+    "evidence::geometry_413": true,
+    "evidence::unified_ledger_411": true,
+    "harness::decode_width_e2e_381": true,
+    "harness::per_gemm_byte_exact_390": true,
+    "harness::self_ref_compare_319": true,
+    "harness::self_ref_interlock_319": true,
+    "harness::self_ref_reference_319": true
+  },
+  "selftest": {
+    "conditions": {
+      "a_x413_equiv_tps_7": true,
+      "a_x413_kstar_7": true,
+      "a_x417_cb3_kstar": true,
+      "a_x417_cb3_lift": true,
+      "a_x417_combined_bracket": true,
+      "a_x417_combined_verify_41_8": true,
+      "a_x417_deployed_ppl": true,
+      "a_x417_deployed_tps": true,
+      "a_x417_human_gated": true,
+      "a_x417_ppl_cap": true,
+      "a_x417_selrec_bracket": true,
+      "a_x417_seven_files": true,
+      "a_x417_strict_base": true,
+      "a_x417_whole_stack_reversible": true,
+      "a_xcheck_all_pass": true,
+      "a_xcheck_present": true,
+      "b_413_anchor_clears": true,
+      "b_breakeven_481_53": true,
+      "b_go_under_modeled": true,
+      "b_go_under_modeled_hi": true,
+      "b_go_under_modeled_lo": true,
+      "b_margin_central": true,
+      "b_margin_hi_12_55": true,
+      "b_margin_in_pr_range": true,
+      "b_margin_lo_10_55": true,
+      "b_measured_pending": true,
+      "b_predicate_def": true,
+      "b_robust_zero_speedup_ships": true,
+      "b_selrec_breakeven_465_93": true,
+      "b_selrec_breakeven_below_blanket": true,
+      "c_bad_completed_nogo": true,
+      "c_bad_identity_nogo": true,
+      "c_bad_ppl_nogo": true,
+      "c_bad_tps_nogo": true,
+      "c_base_go": true,
+      "c_none_tps_nogo": true,
+      "d_sweep_above_breakeven_go": true,
+      "d_sweep_below_breakeven_nogo": true,
+      "e_completed_128": true,
+      "e_flips_3_to_0": true,
+      "e_identity_1_0": true,
+      "e_is_identity_evidence": true,
+      "e_ppl_cap_2_42": true,
+      "e_three_tiers": true,
+      "e_verify_gpu_min_41_8": true,
+      "f_default_strict_on_ship": true,
+      "f_flag_name": true,
+      "f_inplace_now_flag_revertible": true,
+      "f_off_is_todays_served": true,
+      "f_on_is_strict": true,
+      "f_preserves_identity_both": true,
+      "f_residual_cost_zero": true,
+      "g_crosscheck::s413_json": true,
+      "g_crosscheck::s417_json": true,
+      "g_deployed::attn_patch": true,
+      "g_deployed::manifest": true,
+      "g_deployed::verify_patch": true,
+      "g_evidence::cb3_conservative_k_403": true,
+      "g_evidence::deploy_surface_417": true,
+      "g_evidence::geometry_413": true,
+      "g_evidence::unified_ledger_411": true,
+      "g_harness::decode_width_e2e_381": true,
+      "g_harness::per_gemm_byte_exact_390": true,
+      "g_harness::self_ref_compare_319": true,
+      "g_harness::self_ref_interlock_319": true,
+      "g_harness::self_ref_reference_319": true,
+      "h_analysis_only": true,
+      "h_no_hf_job": true,
+      "h_no_served_file_change": true,
+      "h_official_tps_zero": true,
+      "h_ship_human_gated": true,
+      "i_ppl_unchanged_within_cap": true,
+      "i_predicate_enforces_ppl": true
+    },
+    "n_checks": 73,
+    "passes": true
+  },
+  "shared_baselines": {
+    "cb3_kstar": 229,
+    "cb3_lift_m8": 15.6,
+    "combined_modeled_tps_bracket": [
+      492.08,
+      494.08
+    ],
+    "deployed_ppl": 2.3772,
+    "deployed_served_flips": "3/882",
+    "deployed_served_identity": 0.9966,
+    "deployed_tps": 481.53,
+    "equiv_tps_at_7_413": 478.93,
+    "ppl_cap": 2.42,
+    "required_completed": 128,
+    "selrec_modeled_tps_bracket": [
+      476.48,
+      478.48
+    ],
+    "strict_base_blanket": 467.48
+  },
+  "ship_breakeven_equivalent_tps": 481.53,
+  "ship_is_human_gated": true,
+  "shippable_equivalent_go_nogo_self_test_passes": true,
+  "verify_ci": {
+    "harness_3tier": "TIER1 per-GEMM/-config byte-identity micro (#390); TIER2 decode-width e2e (#381); TIER3 e2e self-referential gate (#319 gen_greedy_reference --mode served + greedy_gate.compare + greedy_identity_interlock).",
+    "is_byte_identity_evidence_not_tps": true,
+    "pre_submission_verify_gpu_min": 41.8,
+    "tiers": [
+      {
+        "harness": "research/validity/strict_ceiling_corrected_rollup/strict_ceiling_corrected_rollup.py",
+        "name": "per-GEMM / per-config byte-identity micro (#390) + selrec byte-exact micro + cb3 new-ref micro",
+        "proves": "the selective-recompute eps near-tie gate reduces byte-identically to blanket-strict, AND cb3's new reference is keyed; one tier-1 micro per identity-claim component.",
+        "tier": 1
+      },
+      {
+        "harness": "research/validity/decodewidth_e2e_identity/decodewidth_e2e_identity.py",
+        "name": "decode-width e2e identity (#381)",
+        "proves": "M=1 vs M=8 served decode are token-identical across decode widths on the composed stack.",
+        "tier": 2
+      },
+      {
+        "harness": [
+          "scripts/local_validation/gen_greedy_reference.py",
+          "scripts/local_validation/greedy_gate.py",
+          "scripts/validity/greedy_identity_interlock.py"
+        ],
+        "name": "e2e SELF-REFERENTIAL greedy-identity gate (#319)",
+        "proves": "the FINAL composed served stack's greedy output is byte-identical to its own served spec-OFF AR reference -> served flips 3/882 -> 0, identity -> 1.0. Change-agnostic: ONE capture both re-keys cb3 AND validates selective-recompute byte-exactness (#417 shared-e2e).",
+        "tier": 3
+      }
+    ],
+    "verify_gpu_min_breakdown": "tier3 e2e shared 35.8 + tier2 decode-width shared 4.0 + 2x tier-1 micro (cb3 new-ref + selrec byte-exact) = 41.8 (vs naive unshared 81.6).",
+    "verify_pass_thresholds": {
+      "completed": {
+        "op": "== 128",
+        "required": 128
+      },
+      "e2e_greedy_identity": {
+        "from": 0.9966,
+        "must_reach": 1.0,
+        "op": "== 1.0"
+      },
+      "ppl": {
+        "cap": 2.42,
+        "expected": 2.3772,
+        "op": "<= 2.42"
+      },
+      "served_m8_flips": {
+        "from": 3,
+        "from_denom": 882,
+        "must_reach": 0,
+        "op": "== 0"
+      }
+    }
+  },
+  "wandb_run_id": "e3r8oy2r"
+}
