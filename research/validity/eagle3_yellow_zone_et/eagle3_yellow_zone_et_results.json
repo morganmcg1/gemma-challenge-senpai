@@ -1,0 +1,273 @@
+{
+  "agent": "lawine",
+  "created_at": "20260615T074112Z",
+  "eagle3_yellow_zone_et_analysis_only": true,
+  "kind": "eagle3-yellow-zone-et",
+  "nan_clean": true,
+  "peak_mem_mib": 15.195,
+  "pr": 316,
+  "self_test": {
+    "checks": {
+      "01_reproduces_313_green_threshold": true,
+      "02_red_threshold_is_zero_cov_unit_frac": true,
+      "03_linear_demand_reproduces_309_w4": true,
+      "04_green_threshold_roundtrips_to_edge": true,
+      "05_et_monotone_decreasing_in_frac": true,
+      "06_tps_monotone_decreasing_in_frac": true,
+      "07_deployed_anchor_reproduces_ladder": true,
+      "08_deployed_convention_tps_is_baseline": true,
+      "09_deployed_deep_spine_caps_below_611": true,
+      "10_build_bar_reproduces_309_linear_frac": true,
+      "11_build_bar_reproduces_313_green_edge": true,
+      "12_build_bar_red_at_raw_a1_T_is_unit_frac": true,
+      "13_headline_max_frac_in_unit_interval": true,
+      "14_build_bar_roundtrips_611": true,
+      "15_linear_clears_bool_consistent": true,
+      "16_constants_match_banked_artifacts": true,
+      "17_caveats_carried": true
+    },
+    "yellow_zone_et_self_test_passes": true
+  },
+  "synthesis": {
+    "imported": {
+      "K_cal_269": 125.268,
+      "T_effective_304": 0.9213011665456927,
+      "a1_deployed_304": 0.72925,
+      "a1_req_309_w4": 0.7730729805683441,
+      "a_k_deployed_300": [
+        0.7292532942898975,
+        0.759556697719242,
+        0.7929794882639035,
+        0.8228,
+        0.8348727920920435,
+        0.8357919254658385,
+        0.8464932652113331
+      ],
+      "baseline_tps": 481.53,
+      "cov4_star_green_313": 0.6065058327284635,
+      "cov_W_measured_79": {
+        "2": 0.4165047789261015,
+        "3": 0.5714507731758489,
+        "4": 0.6531976066516435
+      },
+      "deployed_et_convention": 3.844,
+      "et_target_611_295": 6.1112149873699195,
+      "frac_star_green_313": 0.3934941672715365,
+      "frac_true_beyond_top4_79": 0.3468023933483565,
+      "provenance": "salvage operator + threshold lawine #313 (sw492nih) & #309 (7tkn4d9x); measured cov_W + frac wirbel #79 (z6wi4z4v); deployed ladder lawine #300 (8t5q6sr0); effective target T denken #304 (dtf1ouml); E[T]=6.11 wirbel #295 (c334qaqu); K_cal kanna #269. E[T]/TPS transfer + build bar are this card (#316).",
+      "served_step_us": 1218.2,
+      "tau": 1.218
+    },
+    "step1_reproduce_313": {
+      "cov4_star_green": 0.6065058327284635,
+      "cov4_star_green_deployed_plus_10pct": 0.6021795351734752,
+      "cov4_star_red": 0.0,
+      "cov_green_abs_diff_vs_313": 0.0,
+      "demand_linear_abs_diff_vs_309": 0.0,
+      "effective_target_T": 0.9213011665456927,
+      "frac_green_abs_diff_vs_313": 0.0,
+      "frac_star_green": 0.3934941672715365,
+      "frac_star_green_deployed_plus_10pct": 0.3978204648265248,
+      "frac_star_red": 1.0,
+      "linear_spine_cov4": 0.6531976066516435,
+      "linear_spine_frac": 0.3468023933483565,
+      "note": "#313 operator c1_eff=a1+(1-a1)*cov_W and threshold cov4*=(T-d)/(1-d), frac*=1-cov4* reproduced to <= 1e-6: GREEN d=0.80 -> cov4*=0.6065/frac*=0.3935; RED d=T -> cov*=0/frac*=1; the linear spine salvaged demand 0.7731 == #309's W4 0.7731.",
+      "reproduces_313_operator_and_threshold": true,
+      "salvaged_raw_a1_demand_at_linear": 0.7730729805683441,
+      "secondary_green_edge_deployed_plus_10pct": 0.802175
+    },
+    "step2_et_tps_curve": {
+      "curve": [
+        {
+          "a1_eff": 1.0,
+          "cov4": 1.0,
+          "et": 4.909733376164471,
+          "frac": 0.0,
+          "tps": 615.032480565371
+        },
+        {
+          "a1_eff": 0.9458506588579795,
+          "cov4": 0.8,
+          "et": 4.6980238898041975,
+          "frac": 0.2,
+          "tps": 588.5120566279923
+        },
+        {
+          "a1_eff": 0.9061043944685533,
+          "cov4": 0.6531976066516435,
+          "et": 4.542626593343002,
+          "frac": 0.3468023933483565,
+          "tps": 569.0457480948911
+        },
+        {
+          "a1_eff": 0.9025311859443631,
+          "cov4": 0.64,
+          "et": 4.528656300715979,
+          "frac": 0.36,
+          "tps": 567.2957174780893
+        },
+        {
+          "a1_eff": 0.8998237188872621,
+          "cov4": 0.63,
+          "et": 4.518070826397966,
+          "frac": 0.37,
+          "tps": 565.9696962812204
+        },
+        {
+          "a1_eff": 0.8971162518301611,
+          "cov4": 0.62,
+          "et": 4.507485352079952,
+          "frac": 0.38,
+          "tps": 564.6436750843515
+        },
+        {
+          "a1_eff": 0.8934627504950914,
+          "cov4": 0.6065058327284635,
+          "et": 4.493201135970368,
+          "frac": 0.3934941672715365,
+          "tps": 562.8543199007361
+        },
+        {
+          "a1_eff": 0.8646266471449487,
+          "cov4": 0.5,
+          "et": 4.380459660263788,
+          "frac": 0.5,
+          "tps": 548.7314207219241
+        },
+        {
+          "a1_eff": 0.8104773060029282,
+          "cov4": 0.30000000000000004,
+          "et": 4.168750173903514,
+          "frac": 0.7,
+          "tps": 522.2109967845454
+        },
+        {
+          "a1_eff": 0.7292532942898975,
+          "cov4": 0.0,
+          "et": 3.851185944363104,
+          "frac": 1.0,
+          "tps": 482.4303608784773
+        }
+      ],
+      "deep_spine_a_k_ge2": [
+        0.759556697719242,
+        0.7929794882639035,
+        0.8228,
+        0.8348727920920435,
+        0.8357919254658385,
+        0.8464932652113331
+      ],
+      "deep_spine_survival_multiplier": 3.9097333761644717,
+      "deployed_anchor_et_abs_diff_vs_ladder": 0.0,
+      "deployed_anchor_tps": 482.4303608784773,
+      "deployed_convention_tps": 481.530192,
+      "deployed_convention_tps_abs_diff_vs_baseline": 0.00019200000002683737,
+      "deployed_deep_spine_caps_below_611": true,
+      "deployed_ladder_et": 3.851185944363104,
+      "et_611_shortfall_at_cap": 1.2014816112054483,
+      "et_cap_deployed_deep_spine": 4.909733376164471,
+      "et_monotone_decreasing_in_frac": true,
+      "et_target_611": 6.1112149873699195,
+      "note": "realistic chain: raw a1 held at deployed 0.72925, deep spine at the banked deployed ladder. YELLOW band (frac 0.3468->0.3935) buys E[T] 4.5426->4.4932, deployed-loopgraph TPS 569.0->562.9. At cov4=0 (frac=1) the chain reproduces the deployed point (E[T]=3.8512, TPS=482.4). The deployed deep spine CAPS E[T] at 4.9097 (a1_eff=1), 1.201 below the 6.11 build target -- position-1 rank-coverage salvage alone cannot reach 6.11 (reproduces denken #304's 4.92 ceiling).",
+      "point_deployed_anchor_cov4_0": {
+        "a1_eff": 0.7292532942898975,
+        "cov4": 0.0,
+        "et": 3.851185944363104,
+        "frac": 1.0,
+        "tps": 482.4303608784773
+      },
+      "point_green_edge": {
+        "a1_eff": 0.8934627504950914,
+        "cov4": 0.6065058327284635,
+        "et": 4.493201135970368,
+        "frac": 0.3934941672715365,
+        "tps": 562.8543199007361
+      },
+      "point_linear": {
+        "a1_eff": 0.9061043944685533,
+        "cov4": 0.6531976066516435,
+        "et": 4.542626593343002,
+        "frac": 0.3468023933483565,
+        "tps": 569.0457480948911
+      },
+      "raw_a1_held": 0.7292532942898975,
+      "tps_cap_deployed_deep_spine": 615.032480565371,
+      "tps_monotone_decreasing_in_frac": true,
+      "yellow_band_et_span_green_to_linear": [
+        4.493201135970368,
+        4.542626593343002
+      ],
+      "yellow_band_tps_span_green_to_linear": [
+        562.8543199007361,
+        569.0457480948911
+      ]
+    },
+    "step3_build_bar": {
+      "bar_at_309_abs_diff_vs_linear_frac": 0.0,
+      "bar_at_309_w4_raw_a1": 0.3468023933483565,
+      "bar_at_green_abs_diff_vs_313_green_edge": 0.0,
+      "bar_at_green_cap_raw_a1": 0.3934941672715365,
+      "bar_at_red_raw_a1_T": 1.0,
+      "bar_by_raw_a1": {
+        "0.729253": {
+          "max_frac_clearing_611": 0.2906732816855498,
+          "min_cov4_clearing_611": 0.7093267183144503,
+          "raw_a1": 0.7292532942898975
+        },
+        "0.730000": {
+          "max_frac_clearing_611": 0.2914771609418788,
+          "min_cov4_clearing_611": 0.7085228390581212,
+          "raw_a1": 0.73
+        },
+        "0.773073": {
+          "max_frac_clearing_611": 0.3468023933483565,
+          "min_cov4_clearing_611": 0.6531976066516435,
+          "raw_a1": 0.7730729805683441
+        },
+        "0.800000": {
+          "max_frac_clearing_611": 0.3934941672715365,
+          "min_cov4_clearing_611": 0.6065058327284635,
+          "raw_a1": 0.8
+        },
+        "0.802175": {
+          "max_frac_clearing_611": 0.39782046482652483,
+          "min_cov4_clearing_611": 0.6021795351734751,
+          "raw_a1": 0.802175
+        },
+        "0.921301": {
+          "max_frac_clearing_611": 1.0,
+          "min_cov4_clearing_611": 0.0,
+          "raw_a1": 0.9213011665456927
+        }
+      },
+      "build_bar_roundtrips_611": true,
+      "build_cov4_gap_at_deployed_raw_a1": 0.05612911166280676,
+      "build_deep_spine_effective_per_position": 0.9213011665456927,
+      "build_frac_headroom_at_deployed_raw_a1": -0.05612911166280671,
+      "et_build_chain_at_headline_bar": 6.111214987369919,
+      "headline_raw_a1_deployed": 0.7292532942898975,
+      "linear_spine_clears_611_under_salvage": false,
+      "max_frac_beyond_top4_clearing_611": 0.2906732816855498,
+      "max_frac_clearing_611_formula": "(1 - T) / (1 - raw_a1)",
+      "min_cov4_clearing_611": 0.7093267183144503,
+      "note": "build bar max_frac=(1-T)/(1-raw_a1) reproduces #309's linear frac (raw a1=0.7731 -> 0.3468==0.3468) and #313's GREEN edge (raw a1=0.80 -> 0.3935==0.3935). HEADLINE at the conservative deployed raw a1 0.72925: max_frac=0.2907 (cov4>=0.7093) -- TIGHTER than the linear spine's 0.3468, so a deployed-quality fusion draft does NOT clear 6.11 at the linear spine's rank-coverage; it needs cov4 +0.0561 (to 0.7093) OR raw a1 >= 0.7731.",
+      "raw_a1_for_linear_spine_exact_clear": 0.7730729805683441,
+      "reconciliation_with_313": "this does NOT contradict #313's GREEN verdict. #313 holds the fusion draft TRAINED to the salvage demand a1_req(cov4) and reads GREEN iff a1_req <= 0.80; at the linear spine cov4 the demand is 0.7731 <= 0.80 -> GREEN, frac-headroom +0.0467 to the 0.3935 edge. THIS card's headline fixes the OTHER axis: a fusion draft no better than the deployed spine at raw rank-1 (raw a1=0.7293). The two readings bracket the unmeasured fusion draft: OPTIMISTIC (trained raw a1>=0.7731) -> linear spine clears, max_frac=0.3468..0.3935; CONSERVATIVE (deployed raw a1) -> linear spine MISSES, max_frac=0.2907 (needs better-than-linear cov4 or trained-up raw a1). #313's GREEN is contingent on training raw a1 up to >= 0.7731."
+    },
+    "step4_caveat": {
+      "caveat": "the fusion draft's cov_W is UNMEASURED -- no fusion EAGLE-3 checkpoint exists -- so this card maps the threshold -> E[T] -> TPS transfer function parameterized by the still-to-be-measured fusion frac. Step 2 holds the deep spine a_{k>=2} at banked DEPLOYED values (the realistic 'slightly-worse-than-linear' reading): under that deep spine E[T] caps at 4.9097, 1.201 below the 6.11 build target -- position-1 rank-coverage salvage ALONE cannot reach 6.11; the deep spine is the binding wall. Step 3's build bar ASSUMES the deep spine is lifted to the #297 build-uniform target (effective per-position == T); a {2,21,39}-fusion draft may shift the deep spine too (a flagged second-order axis). RED (raw a1 == T -> frac=1) stays unreachable for any positive rank-2+ transfer.",
+      "deep_spine_held_deployed_for_step2": true,
+      "deep_spine_is_second_order_axis": true,
+      "deep_spine_lifted_to_build_uniform_for_step3": true,
+      "deployed_deep_spine_is_the_binding_wall": true,
+      "fusion_checkpoint_exists": false,
+      "fusion_cov_W_measured": false,
+      "what_flips_the_verdict": "run the #79 RANKPROBE_W=4 probe on the fusion draft head; compare its measured frac_true_beyond_top4 to the 0.2907 build bar (deployed raw a1) and to #313's 0.3935 GREEN edge."
+    },
+    "test_metrics": {
+      "linear_spine_clears_611_under_salvage": false,
+      "max_frac_beyond_top4_clearing_611": 0.2906732816855498
+    }
+  },
+  "wandb_run_id": "5lnz5jgb"
+}
