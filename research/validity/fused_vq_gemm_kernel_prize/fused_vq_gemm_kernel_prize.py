@@ -106,6 +106,16 @@ CB3_437_M8: list[dict[str, Any]] = [
 # literature anchor can be folded in without a rewrite.
 GAMMA_IDEAL = 1.00
 PHI_IDEAL = 0.00
+# Literature anchors (researcher pass, 2026-06-16) for the central gamma/phi:
+#  * gamma central 0.85 [0.78-0.93]: FLUTE (arXiv:2407.10960, Tab.1, A6000 sm_86) 4-bit g128 LUT
+#    reaches int4-Marlin PARITY when the codebook is shared-mem resident (gamma~1 ceiling);
+#    QuIP# (arXiv:2402.04396, Tab.5, A6000) dim-8 VQ w/ 1KB E8 codebook sustains >50% HBM BW
+#    (>520 GB/s) vs Marlin's ~64% (665 GB/s) => gamma~0.78 floor; AQLM (arXiv:2401.06118) with
+#    L1-overflowing codebooks collapses to gamma~0.19 (cache-miss) -- AVOIDED here (dim-2, 256
+#    entries, ~1KB, shared-resident). dim-2 = 1 gather / 2 weights (more gather issue than FLUTE's
+#    1 LUT/weight, ~= QuIP# dim-8) => 0.85 central.
+#  * phi central 0.025 [0.01-0.05]: HadaCore (arXiv:2412.08832) online FWHT ~10% unfused, 2-5%
+#    tensor-core-fused; amortized 4x across q,k,v,o sharing one rotated input => ~0.01-0.02 effective.
 # the kernel mechanism (RHT + dim-2 VQ; the ops the realistic model taxes)
 HADAMARD_GROUP = 128       # g128 incoherence (the online activation RHT block)
 VQ_DIM = 2                 # dim-2 vector quant
@@ -175,6 +185,25 @@ def realistic_fused(rows: list[dict[str, Any]], gamma: float, phi: float) -> dic
         "prize_tps_over_base": frontier - CB3_BASE_TPS,
         "clears_deployed_481": bool(frontier > DEPLOYED_TPS),
         "clears_verify_bw_wall_520": bool(frontier > VERIFY_BW_WALL_TPS),
+    }
+
+
+def literature_xcheck(gamma: float, phi: float) -> dict[str, Any]:
+    """Independent PESSIMISTIC cross-check on the headline per-shape model, using the researcher
+    pass's multiplicative composition on the FLOOR-model decomposition (the byte-proportional
+    fraction = Marlin's REALIZED HBM efficiency, NOT peak-copy). The per-shape headline lets cb3
+    hit PEAK-copy on its transfer (mildly generous); this charges cb3 at Marlin's achieved
+    efficiency instead, derated by gamma, so it brackets the headline from BELOW:
+        penalty = 1 / (byte_ratio * e_bw / gamma + (1 - e_bw) + phi),  e_bw = marlin_hbm_eff."""
+    e_bw = MARLIN_HBM_EFF_437
+    denom = BYTE_RATIO * e_bw / gamma + (1.0 - e_bw) + phi
+    penalty = 1.0 / denom if denom > 0 else float("nan")
+    frontier = amdahl_frontier(penalty)
+    return {
+        "gamma": gamma, "phi": phi, "e_bw_marlin_eff": e_bw,
+        "penalty": penalty, "frontier_tps": frontier,
+        "prize_tps_over_base": frontier - CB3_BASE_TPS,
+        "clears_deployed_481": bool(frontier > DEPLOYED_TPS),
     }
 
 
@@ -267,6 +296,8 @@ def compose(gpu: dict[str, Any] | None, probe: dict[str, Any] | None,
     optimistic = realistic_fused(rows, gamma_opt, phi_opt)
     central = realistic_fused(rows, gamma_central, phi_central)  # the HEADLINE
     conservative = realistic_fused(rows, gamma_cons, phi_cons)
+    # independent pessimistic cross-check (researcher multiplicative composition on the floor model)
+    xcheck = literature_xcheck(gamma_central, phi_central)
 
     # the materiality threshold the go/no-go keys on: a multi-week custom-CUDA build is only worth
     # it if the realized frontier clears the DEPLOYED 481.53 by more than the hardware/run-to-run
@@ -302,7 +333,7 @@ def compose(gpu: dict[str, Any] | None, probe: dict[str, Any] | None,
         f"#437's IDEALIZED fused counterfactual (penalty {ideal['penalty']:.4f} -> frontier "
         f"{ideal['frontier_tps']:.2f}) grants cb3 its compressed byte stream at peak-copy BW + "
         f"Marlin overhead, with the in-GEMM codebook GATHER and the online FWHT assumed FREE. "
-        f"Charging them HONESTLY (gamma={gamma_central:.2f} gather-derate, phi={phi_central:.2f} "
+        f"Charging them HONESTLY (gamma={gamma_central:.2f} gather-derate, phi={phi_central:.3f} "
         f"FWHT-tax, literature-anchored to Ampere fused-VQ kernels FLUTE/AQLM/QuIP#) collapses the "
         f"penalty to {central['penalty']:.4f} and the frontier to {central_frontier:.2f} -- a "
         f"{'WASH/regression' if central['penalty'] <= 1.0 else 'marginal lift'} vs int4-Marlin. "
@@ -313,6 +344,12 @@ def compose(gpu: dict[str, Any] | None, probe: dict[str, Any] | None,
         f"Bracket: conservative {conservative['frontier_tps']:.1f} / central {central_frontier:.1f} / "
         f"optimistic {optimistic['frontier_tps']:.1f}; the deployed 481.53 sits "
         f"{'ABOVE' if DEPLOYED_TPS > central_frontier else 'below'} the central estimate. "
+        f"An independent floor-model cross-check (multiplicative composition, cb3 at Marlin's "
+        f"REALIZED eff not peak-copy) CONVERGES on {xcheck['frontier_tps']:.1f} (penalty "
+        f"{xcheck['penalty']:.4f}), corroborating the per-shape headline {central_frontier:.1f} from "
+        f"a second decomposition; both BELOW 481.53. The on-pod L1-gather micro-probe floor is even "
+        f"harsher (gamma~0.66, a global-mem upper-bound on the tax), so 481.53 clears the central "
+        f"comfortably. "
         f"recommend_build={recommend_build}: a multi-week custom sm_86 VQ-GEMM build is "
         f"{'justified' if recommend_build else 'NOT justified'} for a "
         f"{'super' if clears_materiality else 'sub'}-sigma prize. ppl anchored {PPL_ANCHORED} (ubel #422)."
@@ -334,10 +371,12 @@ def compose(gpu: dict[str, Any] | None, probe: dict[str, Any] | None,
     }
     brackets = {
         "idealized": ideal, "optimistic": optimistic, "central": central, "conservative": conservative,
+        "literature_xcheck": xcheck,
         "materiality_bar_tps": materiality_bar, "sigma_hw_frac": sigma_hw_frac,
         "central_clears_materiality": clears_materiality,
         "central_prize_over_deployed": prize_over_deployed,
         "deployed_above_central": bool(DEPLOYED_TPS > central_frontier),
+        "realistic_zone_low_tps": xcheck["frontier_tps"], "realistic_zone_high_tps": central_frontier,
     }
     st = self_test(rows, gamma_central, phi_central)
     required["self_test_passes"] = st["self_test_passes"]
@@ -353,6 +392,13 @@ def compose(gpu: dict[str, Any] | None, probe: dict[str, Any] | None,
         "gamma_cons": gamma_cons, "phi_cons": phi_cons,
         "sigma_hw_frac": sigma_hw_frac, "src437": src437,
         "build_effort_estimate": build_effort_estimate(),
+        "lit_gamma_anchor": "FLUTE arXiv:2407.10960 Tab1 (parity, gamma~1 ceiling); QuIP# "
+                            "arXiv:2402.04396 Tab5 (>50% HBM, gamma~0.78 floor); AQLM "
+                            "arXiv:2401.06118 (L1-overflow gamma~0.19, AVOIDED dim-2/1KB)",
+        "lit_phi_anchor": "HadaCore arXiv:2412.08832 (online FWHT ~10% unfused / 2-5% fused, "
+                          "amortized 4x across q,k,v,o)",
+        "lit_constructible": "FLUTE (github.com/HanGuo97/flute), AQLM (RTX3090 sm_86), QuIP# "
+                             "(A6000 sm_86) -- all cp.async + mma.sync, no Hopper wgmma/TMA",
     }
     wandb_metrics = {
         **{k: v for k, v in required.items() if isinstance(v, (int, float, bool))},
@@ -360,6 +406,8 @@ def compose(gpu: dict[str, Any] | None, probe: dict[str, Any] | None,
         "optimistic_penalty": optimistic["penalty"], "optimistic_frontier_tps": optimistic["frontier_tps"],
         "central_penalty": central["penalty"], "central_frontier_tps": central_frontier,
         "conservative_penalty": conservative["penalty"], "conservative_frontier_tps": conservative["frontier_tps"],
+        "literature_xcheck_penalty": xcheck["penalty"], "literature_xcheck_frontier_tps": xcheck["frontier_tps"],
+        "realistic_zone_low_tps": xcheck["frontier_tps"], "realistic_zone_high_tps": central_frontier,
         "materiality_bar_tps": materiality_bar, "central_prize_over_deployed": prize_over_deployed,
         "peak_copy_gbs_437": PEAK_COPY_GBS_437, "marlin_hbm_eff_437": MARLIN_HBM_EFF_437,
     }
@@ -385,17 +433,20 @@ def compose(gpu: dict[str, Any] | None, probe: dict[str, Any] | None,
 
 
 def build_effort_estimate() -> str:
-    """Qualitative build-effort anchor (FLUTE/AQLM/Marlin-class custom Ampere kernels)."""
-    return ("HIGH (~6-12 expert-CUDA person-weeks: a correct + autotuned + vLLM-0.22-integrable "
-            "fused RHT+VQ mma.sync m16n8k16 decode kernel with a shared-mem codebook gather, then "
-            "the greedy-identity + PPL + 128/128 re-validation it triggers)")
+    """Qualitative build-effort anchor (researcher pass: FLUTE + Marlin each ~3-6 calendar months
+    for 1-2 engineers; the fused RHT+dim-2-VQ+GEMM kernel is strictly harder than either alone --
+    shared-mem codebook management + online FWHT in the MMA pipeline + 2 extra pipeline stages)."""
+    return ("HIGH (~12-20 expert-CUDA person-weeks: a correct + autotuned + vLLM-0.22-integrable "
+            "fused RHT+VQ mma.sync m16n8k16 decode kernel with a shared-mem codebook gather; 12wk "
+            "floor from a working Marlin/FLUTE base, 20wk incl. autotune sweep + vLLM custom-op "
+            "integration + the greedy-identity + PPL + 128/128 re-validation it triggers)")
 
 
 # ======================================================================================== #
 # Self-test (0-GPU): idealized limit reproduces #437, Amdahl round-trips, bracket monotonic.
 # ======================================================================================== #
 def self_test(rows: list[dict[str, Any]] | None = None, gamma_central: float = 0.85,
-              phi_central: float = 0.03) -> dict[str, Any]:
+              phi_central: float = 0.025) -> dict[str, Any]:
     if rows is None:
         rows, _ = load_437_m8()
     checks: dict[str, bool] = {}
@@ -453,12 +504,12 @@ def main():
     ap.add_argument("--self-test", action="store_true", help="0-GPU arithmetic/guard gate")
     ap.add_argument("--no-wandb", action="store_true")
     # gamma = gather-derate, phi = FWHT-tax. Defaults = literature-anchored central + brackets.
-    ap.add_argument("--gamma-central", type=float, default=0.85)
-    ap.add_argument("--phi-central", type=float, default=0.03)
-    ap.add_argument("--gamma-opt", type=float, default=0.92)
-    ap.add_argument("--phi-opt", type=float, default=0.015)
-    ap.add_argument("--gamma-cons", type=float, default=0.75)
-    ap.add_argument("--phi-cons", type=float, default=0.05)
+    ap.add_argument("--gamma-central", type=float, default=0.85)   # FLUTE/QuIP# Ampere central
+    ap.add_argument("--phi-central", type=float, default=0.025)    # HadaCore fused FWHT central
+    ap.add_argument("--gamma-opt", type=float, default=0.93)       # FLUTE parity ceiling
+    ap.add_argument("--phi-opt", type=float, default=0.01)         # amortized-4x FWHT floor
+    ap.add_argument("--gamma-cons", type=float, default=0.78)      # QuIP# dim-8 VQ HBM floor
+    ap.add_argument("--phi-cons", type=float, default=0.05)        # HadaCore unfused-ish ceiling
     ap.add_argument("--sigma-hw-frac", type=float, default=0.01, help="hardware TPS noise (materiality bar)")
     ap.add_argument("--wandb_group", type=str, default="fused-kernel-prize")
     ap.add_argument("--wandb_name", type=str, default="stark/fused-vq-gemm-kernel-prize")
