@@ -1,0 +1,266 @@
+{
+  "pr": 495,
+  "issue": 481,
+  "author": "denken",
+  "leg": "measured drafter acceptance gap: public vs shifted private-like split",
+  "analysis_only": true,
+  "official_tps": 0,
+  "config": {
+    "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan",
+    "K_spec": 7,
+    "M_verify": 8,
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "conc": 1,
+    "greedy": true,
+    "public_dataset": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+    "shifted_dataset": "/workspace/senpai/target/research/validity/drafter_shift_measurement/shifted_reasoning_stem_128.json",
+    "decode_wall_s": 413.2186212539673,
+    "peak_gpu_gb": 18.9404296875
+  },
+  "E_accept_public": 3.856983568075117,
+  "E_accept_shifted": 3.951244439100637,
+  "a1_public": 0.7300469483568075,
+  "a1_shifted": 0.7259829265360106,
+  "Delta_measured_abs_ET": -0.09426087102551994,
+  "Delta_measured_rel_pct": -2.4439012861172893,
+  "r_accept_shifted": 1.024439012861173,
+  "r_a1": 0.9944332048371077,
+  "shift_assumption_validated": false,
+  "a1_cancellation_holds": true,
+  "public_ladder": {
+    "drafts": 17040.0,
+    "accepted": 48683.0,
+    "E_accept": 3.856983568075117,
+    "a1": 0.7300469483568075,
+    "cumulative": [
+      0.7300469483568075,
+      0.5539319248826291,
+      0.4410798122065728,
+      0.35950704225352115,
+      0.3011150234741784,
+      0.25539906103286386,
+      0.2159037558685446
+    ],
+    "conditional": [
+      0.7300469483568075,
+      0.7587620578778135,
+      0.7962707913973938,
+      0.8150612027674295,
+      0.8375775383610838,
+      0.8481777431299942,
+      0.8453584558823529
+    ]
+  },
+  "shifted_ladder": {
+    "drafts": 16634.0,
+    "accepted": 49091.0,
+    "E_accept": 3.951244439100637,
+    "a1": 0.7259829265360106,
+    "cumulative": [
+      0.7259829265360106,
+      0.5658891427197307,
+      0.464350126247445,
+      0.38703859564746906,
+      0.3150775520019238,
+      0.26361668870987137,
+      0.22928940723818686
+    ],
+    "conditional": [
+      0.7259829265360106,
+      0.7794799602517389,
+      0.8205673005418038,
+      0.8335059554634905,
+      0.8140726933830382,
+      0.8366723907651212,
+      0.8697833523375142
+    ]
+  },
+  "per_position_cumulative_ratio": [
+    0.9944332048371077,
+    1.021586078180338,
+    1.0527576039457773,
+    1.076581402192764,
+    1.0463694184589323,
+    1.0321756377794595,
+    1.0619982330357989
+  ],
+  "per_position_conditional_ratio": [
+    0.9944332048371077,
+    1.027304873983646,
+    1.0305128725138486,
+    1.0226298989983014,
+    0.9719371116087493,
+    0.9864352107113596,
+    1.0288929462823762
+  ],
+  "rho_cond_mean": 1.0088780169907696,
+  "rho_cond_cv": 0.022082354348289344,
+  "s_mult_geom": 1.0086302072135638,
+  "shift_verdict": "under-shifts (proxy milder than the modeled private shift)",
+  "shift_is_position_uniform": true,
+  "cancellation": {
+    "s_uniform": 1.0086302072135638,
+    "gap_model_uniform_pct": -2.0770727391304478,
+    "gap_arch_lifted_pct": -2.106889709327553,
+    "arch_delta_gap_pp": -0.029816970197105164,
+    "arch_closes_gap": false,
+    "a1_arch_lifted_to": 0.7721969483568075,
+    "rho_a1": 0.9944332048371077,
+    "rho_deep_mean": 1.0112854856830469,
+    "a1_overcontributes": false,
+    "mechanism": "uniform multiplicative shift s on the public conditional ladder reproduces r_accept; raising intrinsic a1 by the in-repo arch lever leaves the relative gap unchanged/worse => a1 cancels in the ratio (it is the SPEED axis, not a gap-closer), confirming #492"
+  },
+  "shifted_by_source": {
+    "gsm8k": {
+      "n": 43,
+      "E_T_aggregate": 4.281062221360729,
+      "E_T_mean": 4.398587284688147,
+      "drafts": 5159.0,
+      "accepted": 16927.0
+    },
+    "math": {
+      "n": 42,
+      "E_T_aggregate": 4.356709781729991,
+      "E_T_mean": 4.479838734714273,
+      "drafts": 4948.0,
+      "accepted": 16609.0
+    },
+    "mmlu_stem": {
+      "n": 43,
+      "E_T_aggregate": 3.383177570093458,
+      "E_T_mean": 3.6426048995572855,
+      "drafts": 6527.0,
+      "accepted": 15555.0
+    }
+  },
+  "public_E_T_distribution": {
+    "n": 128,
+    "mean": 4.019563933860473,
+    "median": 3.8582089552238807,
+    "std": 0.8429341339464157,
+    "min": 2.565,
+    "max": 6.382716049382716
+  },
+  "shifted_E_T_distribution": {
+    "n": 128,
+    "mean": 4.17128508422307,
+    "median": 4.166666666666666,
+    "std": 0.9509420557787823,
+    "min": 2.251101321585903,
+    "max": 6.95945945945946
+  },
+  "tps_public_context": 483.1566176056338,
+  "tps_shifted_context": 494.9644883972586,
+  "imported": {
+    "accept_bucket_492": 0.0366125761625703,
+    "r_accept_492": 0.9633874238374297,
+    "E_T_pub_492": 3.851185944363104,
+    "a1_pub_492": 0.7292532942898975,
+    "a_pub_ladder_492": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "delta_target_breach5": 0.033342302764780236,
+    "delta_target_breach1": 0.02644070088473472,
+    "deployed_gap_492": 0.04294644155088977,
+    "K_cal": 125.268,
+    "official": 481.53,
+    "arch_lift_a1": 0.04215000000000002
+  },
+  "_recon": {
+    "sum_drafts_public": 17040.0,
+    "block_drafts_public": 17040.0,
+    "sum_drafts_shifted": 16634.0,
+    "block_drafts_shifted": 16634.0
+  },
+  "retrain_spec": {
+    "objective": "NOT WARRANTED on this proxy: the MEASURED shifted-domain acceptance shift is non-positive (-2.444pp), so a DOMAIN-TARGETED reasoning/STEM retrain has NO acceptance deficit to close. #492's premise -- that the 3.661% gap IS a public->private reasoning/STEM shift -- is REFUTED on this format-matched proxy. The recipe below is a CONTINGENT sizing template only: it prices what closing a hypothetical POSITIVE deficit of magnitude |delta| would cost, should a heavier true-private split later measure a positive shift.",
+    "retrain_warranted": false,
+    "recipe_status": "contingent_not_warranted",
+    "measured_shift_to_close_pp": -2.4439012861172893,
+    "closure_band_pp": [
+      0.0,
+      0.0
+    ],
+    "residual_gap_band_pp": [
+      -2.4439012861172893,
+      -2.4439012861172893
+    ],
+    "delta_target_breach1_pp": 2.6440700884734722,
+    "delta_target_breach5_pp": 3.334230276478024,
+    "proxy_shift_already_within_breach1": true,
+    "residual_clears_breach1_central": true,
+    "residual_clears_breach5_central": true,
+    "residual_clears_breach1_robust": true,
+    "data_mix": {
+      "sources": [
+        "GSM8K (grade-school math)",
+        "hendrycks MATH (competition math, all levels)",
+        "MMLU-STEM (college/HS STEM MC)",
+        "+ harder private-matched science (GPQA-style) / olympiad math to match the graduate/competition private domain"
+      ],
+      "held_out_eval": "/workspace/senpai/target/research/validity/drafter_shift_measurement/shifted_reasoning_stem_128.json (the exact split measured here -> direct closure read-out)",
+      "format": "matched to the public instruction templates (MC + step-by-step math)",
+      "public_overlap": 0
+    },
+    "objective_fn": "soft-KD top-k distillation from the frozen 4B Gemma-4-E4B teacher (calibrates the MTP head's ranks on the shifted distribution); the deployed drafter is the tiny Gemma4Assistant MTP head (4 layers, hidden 256, tied vocab, ~12-25M trainable core).",
+    "token_budget_band": {
+      "lo": {
+        "n_unique": 100000000.0,
+        "epochs": 1
+      },
+      "central": {
+        "n_unique": 200000000.0,
+        "epochs": 3
+      },
+      "hi": {
+        "n_unique": 400000000.0,
+        "epochs": 6
+      }
+    },
+    "gpu_hours_A10G_band": {
+      "lo": 13.737564444444445,
+      "central": 40.057235736961445,
+      "hi": 117.86079201814059
+    },
+    "gpu_hours_A10G_central": 40.057235736961445,
+    "wall_clock_8xA10G_central_h": 5.007154467120181,
+    "flop_terms": {
+      "capture_per_unique_GFLOP": 9.34217728,
+      "headtrain_per_pass_GFLOP": 2.77435456,
+      "backbone_dominates": true,
+      "MFU": 0.35,
+      "A10G_bf16_TFLOPS": 70.0
+    },
+    "is_hours_not_weeks": true,
+    "handoff": "approval-gated cluster training issue (instructions/training-request.md); checkpoint -> repackage as submissions/<name>/ drafter; re-run THIS harness on the held-out shifted split to read realized closure before any HF draw.",
+    "note": "Cost dominated by the one-time frozen-backbone+teacher capture pass; the tiny MTP head makes head-training nearly free. Central is SAME-DAY on the 8-GPU node. Magnitude of REQUIRED closure scales with the measured shift; recipe is sized to it."
+  },
+  "self_test": {
+    "a_public_ET_reproduces_anchor": true,
+    "b_public_a1_reproduces_anchor": true,
+    "c_public_recon": true,
+    "c_shifted_recon": true,
+    "d_r_accept_sane": true,
+    "e_delta_consistent": true,
+    "f_public_cum_monotone": true,
+    "f_shifted_cum_monotone": true,
+    "g_public_chain_identity": true,
+    "g_shifted_chain_identity": true,
+    "h_residual_band_ordered": true,
+    "h_delta_targets_ordered": true,
+    "h_retrain_warranted_consistent": true,
+    "i_nan_clean": true,
+    "j_retrain_hours_not_weeks": true,
+    "k_anchors_exact": true
+  },
+  "drafter_shift_self_test_passes": true,
+  "wandb_run_id": "yex317u4"
+}
