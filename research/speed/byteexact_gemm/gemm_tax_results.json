@@ -1,0 +1,2013 @@
+{
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "cc": "8.6",
+    "is_a10g_sm86": true
+  },
+  "deployed_shapes": [
+    {
+      "name": "qkv_proj",
+      "N": 3072,
+      "K": 2560,
+      "count": 37
+    },
+    {
+      "name": "o_proj",
+      "N": 2560,
+      "K": 2048,
+      "count": 37
+    },
+    {
+      "name": "gate_up_proj",
+      "N": 20480,
+      "K": 2560,
+      "count": 37
+    },
+    {
+      "name": "down_proj",
+      "N": 2560,
+      "K": 10240,
+      "count": 37
+    },
+    {
+      "name": "lm_head_pck04",
+      "N": 16384,
+      "K": 2560,
+      "count": 1
+    }
+  ],
+  "splitk_knob_probe": {
+    "marlin_gemm_params": [
+      "a",
+      "c",
+      "b_q_weight",
+      "b_bias",
+      "b_scales",
+      "a_scales",
+      "global_scale",
+      "b_zeros",
+      "g_idx",
+      "perm",
+      "workspace",
+      "b_q_type",
+      "size_m",
+      "size_n",
+      "size_k",
+      "is_k_full",
+      "use_atomic_add",
+      "use_fp32_reduce",
+      "is_zp_float"
+    ],
+    "exposes_splitk_knob": false,
+    "matched_knob_params": [],
+    "note": "split count chosen inside compiled CUDA from (size_m,size_n,size_k,#SM); no Python knob -> pinning split SIZE needs a gptq_marlin.cu rebuild (out of scope)"
+  },
+  "census": {
+    "qkv_proj": {
+      "N": 3072,
+      "K": 2560,
+      "stack_count": 37,
+      "reduce_config": {
+        "use_atomic_add": false,
+        "use_fp32_reduce": true,
+        "atomic_add_disabled_reason": "sm_86 (<SM90) + bf16: atomicAdd unsupported -> fp32 global reduce"
+      },
+      "by_seed_scale": {
+        "s1234_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s1234_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        }
+      },
+      "total_flips_over_M1to8": 0,
+      "m_invariant_M1to8": true,
+      "boundary_probe": {
+        "16": {
+          "flips": 0,
+          "n_rows": 16,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "32": {
+          "flips": 18,
+          "n_rows": 32,
+          "max_abs_err": 0.00390625,
+          "byte_invariant": false
+        },
+        "64": {
+          "flips": 27,
+          "n_rows": 64,
+          "max_abs_err": 0.00390625,
+          "byte_invariant": false
+        },
+        "128": {
+          "flips": 50,
+          "n_rows": 128,
+          "max_abs_err": 0.00390625,
+          "byte_invariant": false
+        }
+      }
+    },
+    "o_proj": {
+      "N": 2560,
+      "K": 2048,
+      "stack_count": 37,
+      "reduce_config": {
+        "use_atomic_add": false,
+        "use_fp32_reduce": true,
+        "atomic_add_disabled_reason": "sm_86 (<SM90) + bf16: atomicAdd unsupported -> fp32 global reduce"
+      },
+      "by_seed_scale": {
+        "s1234_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s1234_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        }
+      },
+      "total_flips_over_M1to8": 0,
+      "m_invariant_M1to8": true,
+      "boundary_probe": {
+        "16": {
+          "flips": 0,
+          "n_rows": 16,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "32": {
+          "flips": 0,
+          "n_rows": 32,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "64": {
+          "flips": 0,
+          "n_rows": 64,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "128": {
+          "flips": 44,
+          "n_rows": 128,
+          "max_abs_err": 0.00390625,
+          "byte_invariant": false
+        }
+      }
+    },
+    "gate_up_proj": {
+      "N": 20480,
+      "K": 2560,
+      "stack_count": 37,
+      "reduce_config": {
+        "use_atomic_add": false,
+        "use_fp32_reduce": true,
+        "atomic_add_disabled_reason": "sm_86 (<SM90) + bf16: atomicAdd unsupported -> fp32 global reduce"
+      },
+      "by_seed_scale": {
+        "s1234_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s1234_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        }
+      },
+      "total_flips_over_M1to8": 0,
+      "m_invariant_M1to8": true,
+      "boundary_probe": {
+        "16": {
+          "flips": 0,
+          "n_rows": 16,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "32": {
+          "flips": 32,
+          "n_rows": 32,
+          "max_abs_err": 0.0078125,
+          "byte_invariant": false
+        },
+        "64": {
+          "flips": 62,
+          "n_rows": 64,
+          "max_abs_err": 0.0078125,
+          "byte_invariant": false
+        },
+        "128": {
+          "flips": 128,
+          "n_rows": 128,
+          "max_abs_err": 0.0078125,
+          "byte_invariant": false
+        }
+      }
+    },
+    "down_proj": {
+      "N": 2560,
+      "K": 10240,
+      "stack_count": 37,
+      "reduce_config": {
+        "use_atomic_add": false,
+        "use_fp32_reduce": true,
+        "atomic_add_disabled_reason": "sm_86 (<SM90) + bf16: atomicAdd unsupported -> fp32 global reduce"
+      },
+      "by_seed_scale": {
+        "s1234_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s1234_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        }
+      },
+      "total_flips_over_M1to8": 0,
+      "m_invariant_M1to8": true,
+      "boundary_probe": {
+        "16": {
+          "flips": 0,
+          "n_rows": 16,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "32": {
+          "flips": 0,
+          "n_rows": 32,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "64": {
+          "flips": 0,
+          "n_rows": 64,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "128": {
+          "flips": 112,
+          "n_rows": 128,
+          "max_abs_err": 0.0078125,
+          "byte_invariant": false
+        }
+      }
+    },
+    "lm_head_pck04": {
+      "N": 16384,
+      "K": 2560,
+      "stack_count": 1,
+      "reduce_config": {
+        "use_atomic_add": false,
+        "use_fp32_reduce": true,
+        "atomic_add_disabled_reason": "sm_86 (<SM90) + bf16: atomicAdd unsupported -> fp32 global reduce"
+      },
+      "by_seed_scale": {
+        "s1234_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s1234_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s5678_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x0.1": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        },
+        "s9012_x1.0": {
+          "1": {
+            "flips": 0,
+            "n_rows": 1,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "2": {
+            "flips": 0,
+            "n_rows": 2,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "3": {
+            "flips": 0,
+            "n_rows": 3,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "4": {
+            "flips": 0,
+            "n_rows": 4,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "5": {
+            "flips": 0,
+            "n_rows": 5,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "6": {
+            "flips": 0,
+            "n_rows": 6,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "7": {
+            "flips": 0,
+            "n_rows": 7,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          },
+          "8": {
+            "flips": 0,
+            "n_rows": 8,
+            "max_abs_err": 0.0,
+            "byte_invariant": true
+          }
+        }
+      },
+      "total_flips_over_M1to8": 0,
+      "m_invariant_M1to8": true,
+      "boundary_probe": {
+        "16": {
+          "flips": 0,
+          "n_rows": 16,
+          "max_abs_err": 0.0,
+          "byte_invariant": true
+        },
+        "32": {
+          "flips": 32,
+          "n_rows": 32,
+          "max_abs_err": 0.00390625,
+          "byte_invariant": false
+        },
+        "64": {
+          "flips": 64,
+          "n_rows": 64,
+          "max_abs_err": 0.0078125,
+          "byte_invariant": false
+        },
+        "128": {
+          "flips": 127,
+          "n_rows": 128,
+          "max_abs_err": 0.0078125,
+          "byte_invariant": false
+        }
+      }
+    }
+  },
+  "boundary": {
+    "qkv_proj": {
+      "16": {
+        "flips": 0,
+        "n_rows": 16,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "32": {
+        "flips": 18,
+        "n_rows": 32,
+        "max_abs_err": 0.00390625,
+        "byte_invariant": false
+      },
+      "64": {
+        "flips": 27,
+        "n_rows": 64,
+        "max_abs_err": 0.00390625,
+        "byte_invariant": false
+      },
+      "128": {
+        "flips": 50,
+        "n_rows": 128,
+        "max_abs_err": 0.00390625,
+        "byte_invariant": false
+      }
+    },
+    "o_proj": {
+      "16": {
+        "flips": 0,
+        "n_rows": 16,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "32": {
+        "flips": 0,
+        "n_rows": 32,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "64": {
+        "flips": 0,
+        "n_rows": 64,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "128": {
+        "flips": 44,
+        "n_rows": 128,
+        "max_abs_err": 0.00390625,
+        "byte_invariant": false
+      }
+    },
+    "gate_up_proj": {
+      "16": {
+        "flips": 0,
+        "n_rows": 16,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "32": {
+        "flips": 32,
+        "n_rows": 32,
+        "max_abs_err": 0.0078125,
+        "byte_invariant": false
+      },
+      "64": {
+        "flips": 62,
+        "n_rows": 64,
+        "max_abs_err": 0.0078125,
+        "byte_invariant": false
+      },
+      "128": {
+        "flips": 128,
+        "n_rows": 128,
+        "max_abs_err": 0.0078125,
+        "byte_invariant": false
+      }
+    },
+    "down_proj": {
+      "16": {
+        "flips": 0,
+        "n_rows": 16,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "32": {
+        "flips": 0,
+        "n_rows": 32,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "64": {
+        "flips": 0,
+        "n_rows": 64,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "128": {
+        "flips": 112,
+        "n_rows": 128,
+        "max_abs_err": 0.0078125,
+        "byte_invariant": false
+      }
+    },
+    "lm_head_pck04": {
+      "16": {
+        "flips": 0,
+        "n_rows": 16,
+        "max_abs_err": 0.0,
+        "byte_invariant": true
+      },
+      "32": {
+        "flips": 32,
+        "n_rows": 32,
+        "max_abs_err": 0.00390625,
+        "byte_invariant": false
+      },
+      "64": {
+        "flips": 64,
+        "n_rows": 64,
+        "max_abs_err": 0.0078125,
+        "byte_invariant": false
+      },
+      "128": {
+        "flips": 127,
+        "n_rows": 128,
+        "max_abs_err": 0.0078125,
+        "byte_invariant": false
+      }
+    }
+  },
+  "bf16_controls": {
+    "gate_up_proj": {
+      "shape": {
+        "N": 20480,
+        "K": 2560
+      },
+      "cublas_torch_mm": {
+        "flips": 8,
+        "max_abs_err": 0.0078125,
+        "m_invariant": false
+      },
+      "matmul_persistent_fixed_order": {
+        "flips": 0,
+        "max_abs_err": 0.0,
+        "m_invariant": true
+      }
+    },
+    "lm_head_pck04": {
+      "shape": {
+        "N": 16384,
+        "K": 2560
+      },
+      "cublas_torch_mm": {
+        "flips": 8,
+        "max_abs_err": 0.015625,
+        "m_invariant": false
+      },
+      "matmul_persistent_fixed_order": {
+        "flips": 0,
+        "max_abs_err": 0.0,
+        "m_invariant": true
+      }
+    }
+  },
+  "timing": {
+    "qkv_proj": {
+      "eager_us": 55.868,
+      "graph_us": 20.201,
+      "stack_count": 37
+    },
+    "o_proj": {
+      "eager_us": 59.007,
+      "graph_us": 17.655,
+      "stack_count": 37
+    },
+    "gate_up_proj": {
+      "eager_us": 95.884,
+      "graph_us": 76.288,
+      "stack_count": 37
+    },
+    "down_proj": {
+      "eager_us": 67.758,
+      "graph_us": 43.197,
+      "stack_count": 37
+    },
+    "lm_head_pck04": {
+      "eager_us": 86.054,
+      "graph_us": 65.492,
+      "stack_count": 1
+    }
+  },
+  "bf16_fixed_order_cost": {
+    "gate_up_proj": {
+      "cublas_us": 251.92,
+      "persistent_us": 673.248,
+      "persistent_over_cublas": 2.672
+    },
+    "lm_head_pck04": {
+      "cublas_us": 248.186,
+      "persistent_us": 642.372,
+      "persistent_over_cublas": 2.588
+    }
+  },
+  "verdict": {
+    "int4_marlin_m_invariant_M1to8": true,
+    "total_flips_int4_marlin": 0,
+    "marlin_exposes_splitk_knob": false,
+    "bf16_cublas_positive_control_flips": true,
+    "bf16_matmul_persistent_invariant": true,
+    "matmul_tax_tps_cited": 132.94,
+    "matmul_tax_source": "surgical(345.22, byte-exact attn + STOCK Marlin matmul) - full_flag(212.28, VLLM_BATCH_INVARIANT) = 132.94. Marlin GEMMs are unchanged by the flag (no quant method has a batch-invariant branch) AND are already 0-flip M-invariant -> the tax is full_flag MACHINERY (cudagraph/TF32/aten overrides), NOT a Marlin reduction-order cost recoverable by fixed-order split-K GEMM.",
+    "fixed_order_gemm_recoverable_tps": 0.0,
+    "byte_exact_gemm_ceiling_tps": 399.75,
+    "per_step_marlin_matmul_graph_us": 5887.11,
+    "ppl_anchor": 2.3767,
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true
+  },
+  "self_test": {
+    "self_test_passes": true,
+    "checks": {
+      "matmul_tax_is_133": true,
+      "surgical_minus_fullflag": true,
+      "qkv_n_3072": true,
+      "gate_up_n_20480": true,
+      "lmhead_div_64": true,
+      "census_covers_spec_width": true,
+      "all_shapes_div_minthread": true,
+      "analysis_only_guard": true
+    }
+  },
+  "self_test_passes": true,
+  "timestamp": "2026-06-16T15:42:07.260308+00:00",
+  "args": {
+    "out": "research/speed/byteexact_gemm/gemm_tax_results.json",
+    "iters": 80,
+    "warmup": 20,
+    "self_test": false,
+    "wandb": true,
+    "wandb_group": "fixed-order-gemm-byteexact",
+    "wandb_name": "denken/fixed-order-gemm-byteexact"
+  }
+}
