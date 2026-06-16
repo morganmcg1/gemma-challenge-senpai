@@ -2,6 +2,51 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-16 ~23:20Z — Cycle-57L: the head-prune knob is INNOCENT across all four organizer axes — kanna #528 (offline coverage) + ubel #527 (served MMLU-Pro/GPQA) both BANKED+MERGED; the body (37L layer-removal + int4 quant) owns the collapse → reseated kanna #539 (offline divergence locus) + ubel #538 (served 2×2 int4-vs-layers) to decompose it; fern #535 linchpin still dark
+
+**Theme:** Two more quality-fix legs closed, and they converge hard with fern #531 (AIME) + wirbel #533 (GSM8K): **widening / restoring the lm_head recovers ≈nothing; the quality collapse is body-owned.** The fix question is now fully localized to the body's two confounded knobs — **int4 re-quant vs 37L layer-removal** — which two fresh reseats decompose (offline forecast + served truth). The decisive linchpin remains **fern #535** (does the fast stack serve on the genuine base-int4 262k full body?).
+
+### kanna #528 — BANKED+MERGED — offline coverage-gap: the "free fix" is REFUTED; collapse is BAKE-BOUND, not keepset-bound
+- kanna; run [`6rpsncen`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/6rpsncen) (`analysis_only=true`, `official_tps=0`), W&B-verified.
+
+| metric | value |
+|---|---|
+| pooled coverage gap | 0.1115 |
+| Slice-B (262k→16k **bake**) | 0.0977 |
+| Slice-A (16k→12k **keepset**) | 0.0138 (**7× smaller** than bake) |
+| broad-recalib-12k held-out vs narrow ship-12k | 0.8894 vs 0.8962 (**free-fix slightly NEGATIVE**) |
+| osoi5-16k baked ceiling (k-fold) | **0.9023** (CORRECTED from PR body's 0.9068) |
+| base-int4 coverage | **0.9481** |
+| min_width_to_cover_99 | None |
+
+- **Verdict BAKE-BOUND:** 16k tops out ~90.2% held-out coverage; base-int4 reaches 94.81% → the bake costs ~4.6 pts that **no osoi5 keepset can recover**. The 262k→16k bake is ~88% of the gap; the 12k keepset only ~12%. The free-fix (broad-recalibrated 12k) is within-noise negative. Caveats noted: AIME aggregate coverage gap is small (set-membership alone can't explain 0.40→0.03 — the bake's AIME damage is path/numeric); int4 numeric drift among emittable tokens is a separate axis (→ reseated to kanna #539).
+
+### ubel #527 — BANKED+MERGED — keepset-width quality sweep: NO quality-safe ship at ANY lm_head width (demand-side MMLU-Pro/GPQA)
+- ubel; run [`5vde8ets`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/5vde8ets) (`analysis_only=true`, `official_tps=0`); W&B-verified every cell to ≤0.001.
+
+| lm_head width (37L-int4 body, full head) | MMLU-Pro (n=500) | GPQA-D (198) | gate |
+|---|---|---|---|
+| 12k (ship) | 0.300 | 0.273 | FAIL |
+| 16k (osoi5 native) | 0.308 | 0.237 | FAIL |
+| 32k | 0.348 | 0.263 | FAIL |
+| full 262k (synthesized int4(embed) proxy) | **0.374** | **0.273** | FAIL |
+| base (42L) | 0.668 | 0.444 | — |
+| gate (#483) | ≥0.60 | ≥0.42 | — |
+
+- **Verdict:** widening 12k→262k buys **+0.074 MMLU / +0.000 GPQA**. Head-width is a real but MINOR lever (~7 of ~37 MMLU pts, ZERO GPQA); the 37L+int4 body owns the rest and is non-head-recoverable. base-answer-agreement rises monotone 0.358→0.472 but plateaus — a wider head un-`-inf`s wanted tokens, but the body already corrupted the reasoning. Honest caveat (ubel's, kept): the full-262k cell is a **synthesized int4(embed) upper-bound proxy** on the osoi5 body, **not** true base-int4 (that's fern #535).
+- **This is the 4th organizer-relevant axis to refute the osoi5 ship** (after AIME #531, GSM8K #533, offline coverage #528). All four agree: **head-prune innocent, body is the bottleneck.** My 23:04Z "keep measuring / reframe as ledger" relay crossed in flight with ubel's 22:52Z terminal — superseded; ubel had already delivered the honest ledger and gone beyond it.
+
+### Interim (non-terminal, sent back with in-scope extensions)
+- **wirbel #533** ([`mo0ci0yl`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/mo0ci0yl)): GSM8K = the 3rd named axis, fires hard — ship-12k **0.252** sampled = **28.7% of base 0.878**; osoi5-16k = ship-12k (+0.6pp) → head-prune ≈free on served accuracy too. Corrected the "layer-drop" label to "osoi5-bake confound." Extension: `base_int4_floor_tps` (quality-safe ship FLOOR). True-full-head 4th GSM8K cell deferred to land #534 / fern #535.
+- **land #534**: gate-table scaffold approved (`meets_90pct_all=None` until all `base_fullhead` cells present; 16k hard-reject guard kept). Extension: reasoning-workload operative-identity census on the osoi5 ship (does operative-1.0-within-1-ULP hold on long GSM8K/AIME-length generations?).
+
+### Reseats (both feed the body-decomposition critical path; diverse method/deliverable per #481)
+- **kanna → #539 `bake-damage-locus`** (offline): per-layer hidden-state/logit divergence localization (base-bf16 → base-int4 → osoi5-37L-int4) → is the damage **concentrated or diffuse?** → re-bake feasibility forecast. Owns the mechanism/WHERE + the int4-numeric-drift axis #528 couldn't see.
+- **ubel → #538 `body-decomp-served-2x2`** (served): MMLU-Pro/GPQA 2×2 (42L/37L × bf16/int4, full head); runs the **2 missing corners** — 42L-int4 (genuine base-int4 quality, **never measured**) + 37L-bf16 (layer-removal alone). Owns the accuracy HOW-MUCH (int4-cost vs layerdrop-cost).
+
+### Linchpin watch
+- **fern #535** (base-int4 full-body + fast-kernel serve probe) **STILL DARK at ~23:20Z** — no W&B run, no comment response to the 23:04Z liveness nudge (~15 min old). Setup is legitimately heavy (262k head + fast-kernel bind). **Escalate to a pod restart next poll if still no run/comment.** `serve_ok=true` → quality-safe FAST ship candidate (the #524 trigger); `serve_ok=false` → quality-safe ship needs an osoi5 re-bake (cluster/human escalation). Roster 8/8 busy: fern #535, stark #536, lawine #537, denken #529, wirbel #533, land #534, ubel #538, kanna #539.
+
 ## 2026-06-16 ~22:35Z — Cycle-57k: lawine #532 drafter-acceptance ledger BANKED+MERGED (NO-GO-LOCAL/DEFER-TO-CLUSTER) + stark #530 CLOSED (premise blocked on fern #535, stark caught it independently) + Morgan #524 CONDITIONAL PRE-AUTHORIZATION captured + 2 diverse reseats (stark→#536 head-transplant, lawine→#537 Medusa) after a prior-art deconflict closed the supply/engine-shopping wild-cards
 
 **★★★ HUMAN DIRECTIVE (Morgan, Issue #524, 2026-06-16 22:04:52Z, verbatim):** *"i'm going to bed, you are fully 100% pre-athorized to submit all HF jobs and message board postings once we get a good faster TPS result that keeps quality within 10% of the base model."* **The #519 stand-down is SUPERSEDED by a self-serve unlock** — no fresh human round-trip needed to fire, CONDITIONAL on (1) a good faster TPS result AND (2) quality within 10% of vanilla base on GSM8K/AIME/MMLU-Pro (= the #515 ≥90% bar). Current fast ships (357/442) are quality-UNSAFE → do NOT qualify → still HOLD. Unlock probes = fern #535 / stark #536. My 22:09:53Z #524 reply (the full-head→base-int4 correction) already answered the latest human message; no new reply owed. Memory `project-human-launch-greenlight` updated. **Rigor self-bind:** do not fire on a marginal/ambiguous quality number (reputational/retro-DQ risk on the exact axis the organizer paused us on).
