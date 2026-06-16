@@ -1,0 +1,132 @@
+[reground] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[reground] submission=fa2sw_precache_kenyan server_python=/tmp/senpai-venvs/5f4c623f772358a2/bin/python
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[reground] M=8 warm discard pass
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_warm.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_warm.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_warm.summary.json
+[reground] M=8 measured rep 1/5
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_candidate_decode.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep00.summary.json
+[reground]   rep 0: wall_tps=465.217 (65536 tok / 140.87s)
+[reground] M=8 measured rep 2/5
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep01.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep01.summary.json
+[reground]   rep 1: wall_tps=465.136 (65536 tok / 140.90s)
+[reground] M=8 measured rep 3/5
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep02.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep02.summary.json
+[reground]   rep 2: wall_tps=464.700 (65536 tok / 141.03s)
+[reground] M=8 measured rep 4/5
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep03.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep03.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep03.summary.json
+[reground]   rep 3: wall_tps=465.165 (65536 tok / 140.89s)
+[reground] M=8 measured rep 5/5
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep04.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep04.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_rep04.summary.json
+[reground]   rep 4: wall_tps=464.964 (65536 tok / 140.95s)
+[reground] M=8 PPL validity pass
+[ppl] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_ppl.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.6126328853811924,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 53498.016889621984,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m8_ppl.jsonl",
+  "ppl": 2.376682786480556,
+  "prompt_logprobs": 1
+}
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 85s
+[reground] M=1 reference-mode decode (speculation OFF)
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m1_reference_decode.jsonl --summary-file /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m1_reference.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/measured/20260616T025124Z/m1_reference.summary.json
+[reground] M=1 reference: wall_tps=156.196 (65536 tok / 419.58s)
+
+============================== DEPLOY VERDICT (PR #438) ==============================
+  (PRIMARY) self_test_passes = True
+          - a_tau_lo_roundtrip: True
+          - b_measured_margin_is_deficit: True
+          - c_cb3_upside_not_robust: True
+          - d_cb3_required_threshold: True
+          - e_robustness_symmetry: True
+          - f_constants_exact: True
+          - g_nan_clean: True
+--------------------------------------------------------------------------------------
+  deployed re-ground: LOCAL wall_tps 465.036 +- 0.261 (n=5, CV 0.045%) -> OFFICIAL 481.42 +- 0.27 (drift vs banked 481.53 = -0.11)
+  greedy census M=8 vs own M=1: verdict=DIVERGENT identity(token)=0.4143 n_flips(divergent_prompts)=117/128 [banked ~3] divergent_tokens_cascaded=38384
+  measured strict-equiv floor (M=1 AR): 161.70 official (deficit vs deployed -319.72)
+  PPL deployed (measured) = 2.376682786480556 (gate <= 2.42, passes=True)
+--------------------------------------------------------------------------------------
+  best_equivalent_tps (measured) = 467.14
+  beats_deployed_481 = False  honest_margin_tps = -14.28  within_noise = False
+  IF cb3 fully realises (+15.60 -> 482.74): beats = True margin = +1.32 (cb3 must realise >= 92% to tie)
+  verdict_robust_to_cb3 = False
+
+  VERDICT: the fastest strictly-equivalent config that has actually been MEASURED (467.14 official-frame TPS) is SLOWER than the freshly re-grounded deployed non-equivalent incumbent (481.42) by -14.28 TPS (+-0.27); only the MODELLED +cb3 config (482.74) edges ahead, by +1.32 TPS — which needs cb3 to realise >= 92% of its modelled +15.60 and is NOT robust to a cb3 haircut (stark already refuted the sibling pinned-K leg).
+======================================================================================
+
+[reground] wrote /workspace/senpai/target/research/validity/deployed_incumbent_reground_margin/deployed_incumbent_reground_margin_results.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260616_031651-lbstimxo
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/deployed-incumbent-reground-margin
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/lbstimxo
+wandb: updating run metadata; uploading artifact deployed_incumbent_reground_margin_result
+wandb: uploading artifact deployed_incumbent_reground_margin_result
+wandb: uploading diff.patch; uploading wandb-metadata.json; uploading requirements.txt; uploading wandb-summary.json; uploading config.yaml (+ 1 more)
+wandb: 
+wandb: Run history:
+wandb:                            global_step ▁
+wandb:                  summary/analysis_only ▁
+wandb:             summary/beats_deployed_481 ▁
+wandb: summary/beats_deployed_481_if_cb3_full ▁
+wandb:    summary/best_equivalent_is_measured ▁
+wandb:            summary/best_equivalent_tps ▁
+wandb:   summary/cb3_required_frac_of_modeled ▁
+wandb:   summary/deployed_drift_vs_banked_481 ▁
+wandb:     summary/deployed_identity_reground ▁
+wandb: summary/deployed_local_wall_tps_cv_pct ▁
+wandb:                                    +19 ...
+wandb: 
+wandb: Run summary:
+wandb:                             event/name summary
+wandb:                       event/run_prefix 
+wandb:                            global_step 0
+wandb:                  summary/analysis_only 1
+wandb:             summary/beats_deployed_481 0
+wandb: summary/beats_deployed_481_if_cb3_full 1
+wandb:    summary/best_equivalent_is_measured 1
+wandb:            summary/best_equivalent_tps 467.14
+wandb:   summary/cb3_required_frac_of_modeled 0.91553
+wandb:   summary/deployed_drift_vs_banked_481 -0.10767
+wandb:                                    +21 ...
+wandb: 
+wandb: 🚀 View run lawine/deployed-incumbent-reground-margin at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/lbstimxo
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260616_031651-lbstimxo/logs
+[reground] wandb logged (lbstimxo): {'self_test_passes': 1, 'tau_lo': 1.0352356533046398, 'deployed_tps_reground': 481.4223261920528, 'deployed_tps_ci': 0.27041801398862897, 'deployed_identity_reground': 0.414306640625, 'deployed_n_flips': 117, 'best_equivalent_tps': 467.14, 'best_equivalent_is_measured': 1, 'beats_deployed_481': 0, 'honest_margin_tps': -14.282326192052835, 'margin_within_noise': 0, 'verdict_robust_to_cb3': 0, 'beats_deployed_481_if_cb3_full': 1, 'honest_margin_tps_if_cb3_full': 1.3176738079471875, 'cb3_required_frac_of_modeled': 0.9155337302597971, 'ppl': 2.376682786480556, 'official_tps': 0, 'analysis_only': 1, 'no_hf_job': 1, 'no_served_file_change': 1, 'nan_clean': 1, 'measured_present': 1, 'deployed_local_wall_tps_mean': 465.036462621119, 'deployed_local_wall_tps_cv_pct': 0.0452454521166383, 'deployed_drift_vs_banked_481': -0.10767380794715109, 'measured_strict_equiv_floor_official_tps': 161.6995796731182, 'ppl_passes_gate': 1, 'peak_vram_gb': 18.9404296875}
+TERMINAL_FIELDS {"analysis_only": true, "beats_deployed_481": false, "beats_deployed_481_if_cb3_full": true, "best_equivalent_is_measured": true, "best_equivalent_tps": 467.14, "best_equivalent_tps_ci": 0.0, "cb3_required_frac_of_modeled": 0.9155337302597971, "deployed_identity_reground": 0.414306640625, "deployed_n_divergent_tokens_cascaded": 38384, "deployed_n_flips": 117, "deployed_tps_ci": 0.27041801398862897, "deployed_tps_reground": 481.4223261920528, "honest_margin_tps": -14.282326192052835, "honest_margin_tps_if_cb3_full": 1.3176738079471875, "margin_within_noise": false, "measured": true, "no_hf_job": true, "no_served_file_change": true, "official_tps": 0, "ppl": 2.376682786480556, "self_test_passes": true, "verdict_robust_to_cb3": false}

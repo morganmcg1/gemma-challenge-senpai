@@ -1,0 +1,119 @@
+{
+  "kind": "census-discrepancy-analysis",
+  "pr": 438,
+  "agent": "lawine",
+  "question": "Why does the fresh LOCAL M=8-vs-own-M=1 greedy census read identity 0.4143 / 117 flips when PR #52 banked 0.9966 / 3 (same config, both 512 tok)?",
+  "same_config_evidence": {
+    "local_reground_official_tps": 481.4223261920528,
+    "banked_official_tps": 481.53,
+    "tps_drift": -0.1077,
+    "local_ppl": 2.376682786480556,
+    "banked_ppl": 2.3772,
+    "note": "TPS+PPL reproduce banked to <0.11 TPS / <0.0006 PPL -> same submission/config"
+  },
+  "methodology_sound": {
+    "prompts_sha256_match": "128/128",
+    "m8_determinism_diff_vs_rep0": {
+      "rep0": 0,
+      "rep1": 0,
+      "rep2": 0,
+      "rep3": 0,
+      "rep4": 0
+    },
+    "m8_deterministic": true,
+    "m1_spec_off_confirmed": true,
+    "verifier": "official greedy_identity, byte-exact token-id, NO tolerance"
+  },
+  "divergence_is_genuine_near_tie": {
+    "exact_identical_prompts": 11,
+    "first_div_token_min": 0,
+    "first_div_token_median": 114,
+    "first_div_token_max": 480,
+    "first_div_token_mean": 155.9,
+    "diverge_within_first_3_tokens": 3,
+    "reconverge_within_8_tokens": 11,
+    "interpretation": "sequences agree ~114 tok then flip at a near-tie; some reconverge, most cascade -> classic batch-shape (M=8 parallel-verify vs M=1 serial) fp non-associativity, NOT a bug"
+  },
+  "truncation_sweep_refutes_pure_length_artifact": [
+    {
+      "N": 16,
+      "token_identity": 0.978027,
+      "divergent_prompts": 6,
+      "divergent_tokens": 45
+    },
+    {
+      "N": 32,
+      "token_identity": 0.933594,
+      "divergent_prompts": 22,
+      "divergent_tokens": 272
+    },
+    {
+      "N": 48,
+      "token_identity": 0.898112,
+      "divergent_prompts": 25,
+      "divergent_tokens": 626
+    },
+    {
+      "N": 64,
+      "token_identity": 0.874512,
+      "divergent_prompts": 28,
+      "divergent_tokens": 1028
+    },
+    {
+      "N": 96,
+      "token_identity": 0.817464,
+      "divergent_prompts": 51,
+      "divergent_tokens": 2243
+    },
+    {
+      "N": 128,
+      "token_identity": 0.757629,
+      "divergent_prompts": 66,
+      "divergent_tokens": 3971
+    },
+    {
+      "N": 160,
+      "token_identity": 0.705078,
+      "divergent_prompts": 72,
+      "divergent_tokens": 6040
+    },
+    {
+      "N": 192,
+      "token_identity": 0.66508,
+      "divergent_prompts": 75,
+      "divergent_tokens": 8231
+    },
+    {
+      "N": 256,
+      "token_identity": 0.599243,
+      "divergent_prompts": 87,
+      "divergent_tokens": 13132
+    },
+    {
+      "N": 320,
+      "token_identity": 0.541113,
+      "divergent_prompts": 103,
+      "divergent_tokens": 18796
+    },
+    {
+      "N": 384,
+      "token_identity": 0.49176,
+      "divergent_prompts": 110,
+      "divergent_tokens": 24981
+    },
+    {
+      "N": 448,
+      "token_identity": 0.448975,
+      "divergent_prompts": 114,
+      "divergent_tokens": 31598
+    },
+    {
+      "N": 512,
+      "token_identity": 0.414307,
+      "divergent_prompts": 117,
+      "divergent_tokens": 38384
+    }
+  ],
+  "likely_root_cause": "M=8 verify processes 8 query positions/step; local vLLM v0.22.1rc1.dev307 captures cudagraph sizes [1,2] (max 2) so the size-8 verify runs EAGER while M=1 (size 1) runs in cudagraph -> divergent numerics. Flip COUNT is environment-sensitive (HF a10g/vLLM build captured 3, local AWS A10G captures 117). PPL is robust to these near-tie flips (still 2.3767).",
+  "verdict_impact": "NONE on the deploy verdict: deployed is NON-equivalent under BOTH (3 or 117 flips -> outside #407 feasible set, MORE so locally). honest_margin_tps=-14.28 holds (467.14 measured equiv < 481.42 deployed). CAVEAT for the program: local greedy-identity census is NOT an HF-faithful proxy for speculative configs."
+}
