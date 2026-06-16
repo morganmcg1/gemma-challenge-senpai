@@ -46,6 +46,65 @@ def load_manifest(submission_dir: Path, manifest_name: str = "manifest.json") ->
     return data
 
 
+def _dist_version(py: Path, dist: str) -> str | None:
+    """Installed version of ``dist`` in ``py``'s environment, or None if absent."""
+    try:
+        out = subprocess.run(
+            [str(py), "-c", f"import importlib.metadata as m; print(m.version({dist!r}))"],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+    except Exception:
+        return None
+    v = out.stdout.strip()
+    return v or None
+
+
+def ensure_serving_http_compat(py: Path) -> None:
+    """Idempotently keep the OpenAI server's HTTP layer importable.
+
+    vLLM floors ``prometheus-fastapi-instrumentator`` by lower bound only, and
+    that package reaches into Starlette router internals
+    (``_IncludedRouter.path``) that Starlette 1.x removed. When uv resolves
+    Starlette >= 1 — it can, because vLLM only floors ``fastapi>=0.115`` — the
+    instrumentator that vLLM wires unconditionally raises ``AttributeError`` on
+    the FIRST request, so ``/v1/models`` 500s, the readiness probe never passes,
+    and ``LocalServer._wait_ready`` spins to timeout. This silently breaks every
+    local serving gate (AIME/MMLU/GPQA sampling, decode, PPL, greedy identity).
+    Pinning ``fastapi<0.116`` pulls a Starlette 0.4x that still exposes the
+    attribute — the exact floor the official ``vllm/vllm-openai`` image ships.
+    This touches only the web framework: model weights, logits, sampling, PPL,
+    and greedy decode are numerically unaffected.
+
+    Cheap and idempotent: a per-venv marker short-circuits after the first pass,
+    and the pin only runs when Starlette's major version is actually >= 1.
+    """
+    venv = py.parent.parent
+    marker = venv / ".http_compat_ok"
+    if marker.exists():
+        return
+    starlette_v = _dist_version(py, "starlette")
+    major: int | None = None
+    if starlette_v:
+        try:
+            major = int(starlette_v.split(".")[0])
+        except ValueError:
+            major = None
+    if major is not None and major >= 1:
+        uv = shutil.which("uv")
+        if not uv:
+            raise RuntimeError("uv is required to repair the serving HTTP stack")
+        print(
+            f"    [http-compat] starlette {starlette_v} drops "
+            "_IncludedRouter.path that prometheus-fastapi-instrumentator needs; "
+            "pinning fastapi<0.116 (HTTP-layer only, numerics unaffected)",
+            flush=True,
+        )
+        _run([uv, "pip", "install", "--python", str(py), "fastapi>=0.115,<0.116"])
+    marker.write_text(starlette_v or "")
+
+
 def ensure_server_venv(dependencies: list[str], python: str = "3.12") -> Path:
     """Create (or reuse) a venv keyed by its dependency set; return its python.
 
@@ -60,12 +119,14 @@ def ensure_server_venv(dependencies: list[str], python: str = "3.12") -> Path:
     py = venv / "bin" / "python"
     marker = venv / ".deps_installed"
     if py.exists() and marker.exists():
+        ensure_serving_http_compat(py)
         return py
     VENV_ROOT.mkdir(parents=True, exist_ok=True)
     _run([uv, "venv", str(venv), "--python", python])
     if dependencies:
         _run([uv, "pip", "install", "--python", str(py), *dependencies])
     marker.write_text("\n".join(sorted(dependencies)))
+    ensure_serving_http_compat(py)
     return py
 
 

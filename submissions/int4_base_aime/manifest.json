@@ -1,0 +1,25 @@
+{
+  "name": "int4-base-aime",
+  "description": "Stock int4 QAT gemma-4-E4B-it served on the pinned challenge vLLM wheel (0.22.1rc1), no patches/spec/prune. Local AIME A/B base for PR #514 (downstream-quality triad). Not a leaderboard submission; never launched.",
+  "dependencies": [
+    "https://wheels.vllm.ai/3e8afdf78598afc8be999a6a049be3a5fe182e48/vllm-0.22.1rc1.dev307%2Bg3e8afdf78.cu129-cp38-abi3-manylinux_2_28_x86_64.whl",
+    "transformers==5.9.0",
+    "jinja2==3.1.6",
+    "MarkupSafe==3.0.3"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "2048",
+    "MAX_NUM_SEQS": "32",
+    "VLLM_SEED": "0",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}
