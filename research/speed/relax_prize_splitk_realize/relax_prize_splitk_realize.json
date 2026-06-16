@@ -1,0 +1,180 @@
+{
+  "config": {
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "ctx": 128,
+    "M": 8,
+    "iters": 50,
+    "warmup": 40,
+    "rounds": 21,
+    "n_distinct": 8,
+    "served_model_dir": "/tmp/osoi5-v0-baked",
+    "group_size": 128,
+    "deployed_num_layers": 37,
+    "self_built_marlin": true,
+    "smoke": false,
+    "note": "end-to-end realize of the relax-equivalence split-K prize: full 37-layer self-built g=128 int4-Marlin verify cycle (ops.marlin_gemm), CUDA-graph captured, M=8, use_fp32_reduce True(strict) vs False(relax), paired median+sigma over rounds; MEASURED recovery applied to the banked decode cycle (CYCLE_WALL_US=7903, base 467.14). No serve change, no HF Job, no submission. Token-level greedy identity/PPL in companion real-model arm."
+  },
+  "peak_bw": {
+    "bw_read_gbps": 517.5801601788328,
+    "read_us": 2074.5420837402344,
+    "bw_copy_gbps": 482.7231102936968,
+    "copy_us": 4448.686218261718,
+    "bw_bf16gemm_m8_gbps": 381.9188827226767,
+    "gemm_us": 1410.2117919921875
+  },
+  "shapes": {
+    "qkv_proj": [
+      3072,
+      2560
+    ],
+    "o_proj": [
+      2560,
+      2048
+    ],
+    "gate_up_proj": [
+      20480,
+      2560
+    ],
+    "down_proj": [
+      2560,
+      10240
+    ]
+  },
+  "medians_us": {
+    "full_strict": 4681.8304443359375,
+    "full_relax": 4697.804870605469,
+    "body_strict": 4128.174133300781,
+    "body_relax": 4136.386413574219
+  },
+  "captured": {
+    "full_strict": true,
+    "full_relax": true,
+    "body_strict": true,
+    "body_relax": true
+  },
+  "bit_exactness": {
+    "qkv_proj": {
+      "max_abs_delta": 0.0078125,
+      "byteexact": false,
+      "N": 3072,
+      "K": 2560
+    },
+    "o_proj": {
+      "max_abs_delta": 0.00390625,
+      "byteexact": false,
+      "N": 2560,
+      "K": 2048
+    },
+    "gate_up_proj": {
+      "max_abs_delta": 0.0,
+      "byteexact": true,
+      "N": 20480,
+      "K": 2560
+    },
+    "down_proj": {
+      "max_abs_delta": 0.015625,
+      "byteexact": false,
+      "N": 2560,
+      "K": 10240
+    }
+  },
+  "triton_splitk": {
+    "per_shape": {
+      "gate_up_proj": {
+        "marlin_us": 57.95839786529541,
+        "triton_best_us": 63.447041511535645,
+        "triton_best_pct_hbm": 71.98192210695343,
+        "triton_best_cfg": {
+          "BLOCK_M": 16,
+          "BLOCK_N": 128,
+          "SPLIT_K": 1,
+          "num_warps": 8,
+          "num_stages": 3,
+          "ctas": 160
+        },
+        "triton_vs_marlin_pct": -9.469971304239156,
+        "triton_faster": false
+      },
+      "down_proj": {
+        "marlin_us": 31.006720066070557,
+        "triton_best_us": 38.58432054519653,
+        "triton_best_pct_hbm": 59.271053656484305,
+        "triton_best_cfg": {
+          "BLOCK_M": 16,
+          "BLOCK_N": 64,
+          "SPLIT_K": 8,
+          "num_warps": 4,
+          "num_stages": 3,
+          "ctas": 320
+        },
+        "triton_vs_marlin_pct": -24.4385748088778,
+        "triton_faster": false
+      }
+    },
+    "best_triton_vs_marlin_pct": 0.0,
+    "best_triton_pct_hbm": 71.98192210695343,
+    "any_triton_faster_than_marlin": false,
+    "realized_triton_endtoend_tps": 467.14
+  },
+  "verdict": {
+    "relax_prize_self_test_passes": true,
+    "realized_relax_prize_tps": 466.19644751805384,
+    "realized_relax_prize_tps_sigma_lo": 466.1187756220113,
+    "realized_relax_prize_tps_sigma_hi": 466.274145304188,
+    "realized_delta_vs_base_tps": -0.943552481946142,
+    "relax_recover_frac_of_gemm": -0.0038746374804366403,
+    "relax_recover_frac_of_gemm_body": -0.0019249362820882162,
+    "relax_delta_full_us": -15.99517822265625,
+    "relax_delta_full_us_sigma": 1.319585055168031,
+    "relax_delta_body_us": -7.94647216796875,
+    "relax_delta_body_us_sigma": 0.4743792395599038,
+    "gemm_us_strict": 4128.174133300781,
+    "gemm_us_450_anchor": 4152.96,
+    "full_us_strict": 4681.8304443359375,
+    "full_us_relax": 4697.804870605469,
+    "collapse_factor_vs_450_hi": Infinity,
+    "prize_450_hi": 498.58,
+    "prize_450_lo": 479.75,
+    "prize_450_at_measured_frac": 467.14,
+    "realized_clears_deployed_481": false,
+    "relax_prize_is_material_ge2": false,
+    "relax_breaks_byteexact_n_shapes": 3,
+    "relax_prize_reduction_byteexact_all": false,
+    "reconcile_433": -5.82,
+    "reconcile_448_upperbound": 0.6416,
+    "deployed_tps": 481.53,
+    "realized_base_tps": 467.14,
+    "cycle_wall_us": 7903.0,
+    "ppl_anchor": 2.3772,
+    "peak_vram_gib": 2.5095324516296387,
+    "analysis_only": true,
+    "no_hf_job": true,
+    "no_served_file_change": true,
+    "official_tps": 0,
+    "self_test_conditions": {
+      "base_when_zero_saving": true,
+      "monotone_saving_raises_tps": true,
+      "slower_relax_lowers_tps": true,
+      "measured_frac_below_450_lo": true,
+      "prize_collapses_below_materiality_or_loud": true,
+      "body_gemm_anchor_matches_450": true,
+      "four_body_shapes": true,
+      "qkv_shape": true,
+      "gate_up_shape": true,
+      "down_shape": true,
+      "nan_clean": true,
+      "captured_full": true,
+      "constants": true,
+      "ppl_anchor": true,
+      "vram_ok": true,
+      "triton_not_faster_than_marlin": true
+    },
+    "reconcile_line": "#450 PROJECTED 498.6 TPS (+31.4) from an ASSUMED 12%-of-GEMM split-K recovery. REALIZED end-to-end, the ONLY in-wheel served split-K lever (use_fp32_reduce=False) recovers a MEASURED -0.387% of gemm_us -> realized_relax_prize_tps=466.20 (-0.94 vs 467.14 base), a xinf COLLAPSE vs the projection. This RECONCILES the three priors: stark #448's +0.64 isolated upper bound, wirbel #130's 0.0% Triton re-tile reproduced here (best split-K tile +0.00% vs Marlin -> slower, the 1-wave HBM wall holds), and stark #433's -5.82 attention split-KV (a different op). #450's +17/+31 is NOT realizable: the prize is a literature-assumed recovery the served Marlin kernel does not deliver. The relax lever also BREAKS reduction-order bit-exactness on 3/4 body shapes (greedy-UNSAFE); the token-level identity COST is measured by the companion real-model arm.",
+    "best_triton_vs_marlin_pct": 0.0,
+    "best_triton_pct_hbm": 71.98192210695343,
+    "any_triton_faster_than_marlin": false,
+    "realized_triton_endtoend_tps": 467.14
+  }
+}
