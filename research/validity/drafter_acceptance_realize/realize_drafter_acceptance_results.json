@@ -1,0 +1,285 @@
+{
+  "pr": 532,
+  "agent": "lawine",
+  "title": "Realize the drafter-acceptance headroom: E[T] 3.849 -> ceiling ~4.91, cheapest path",
+  "kind": "drafter-acceptance-realization-ledger (#502-style, PR step 4 escape hatch)",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "gpu_used": false,
+  "wandb_group": "drafter-acceptance-realize",
+  "model": "TPS = E[T]/t_step (PF>=1.0, #504); EAGLE-3 swap inflates ONLY draft_gpu: t_step_new(m) = t_step_old + draft_gpu_old*(m-1); m = wirbel #295 measured bracket",
+  "inputs": {
+    "a_ladder_a1_a7": [
+      0.7290715372907154,
+      0.759434719768749,
+      0.7934024106576444,
+      0.8215618336886993,
+      0.834712084347121,
+      0.835989117761368,
+      0.8465829846582985
+    ],
+    "ET_baseline_prometheus": 3.849256527338719,
+    "ET_baseline_serverlog": 3.844131736526946,
+    "K_spec": 7,
+    "verify_M": 8,
+    "ET_theoretical_max": 8.0,
+    "linear_cap_ET": 3.8445,
+    "eagle_deep_accept": 0.91,
+    "eagle_deep_accept_hi": 0.914,
+    "eagle_a1_optimistic": 0.8,
+    "tps_bx442_local_523": 439.70559,
+    "tps_bx442_anchor_519": 442.35,
+    "draft_gpu_ms_523": 1.554,
+    "exec_gpu_ms_523": 6.89,
+    "gap_ms_523": 2.256,
+    "ppl_bx442_523": 2.3766643358900286,
+    "mult_lo_295": 1.744676699335575,
+    "mult_central_295": 3.0,
+    "mult_hi_295": 4.161395297380165,
+    "tau_lo_267": 1.0352,
+    "priv_factor_305": 0.804,
+    "eagle3_built_head_realized_et_34": 1.78,
+    "eagle3_build_gpu_h_301": 107.46577676190476,
+    "source_runs": {
+      "et_per_pos_289": "5m17r52s/fi34s269",
+      "byteexact442_steptime_523": "i11p5e3y",
+      "eagle3_step_multiplier_295": "c334qaqu",
+      "eagle3_go_card_305": "m4nmtdl9",
+      "no_retrain_null_lever_399": "ec7i3z5t"
+    }
+  },
+  "measured_E_T_baseline": 3.849256527338719,
+  "measured_E_T_baseline_source": "PR #289 accept_calibration (W&B 5m17r52s/fi34s269); shipped kenyan-duma linear-MTP K=7 (DRAFTER_SHA256 ed159e..dd18e), 128x512 public sharegpt; REUSED measured served draw, no fresh serve",
+  "best_realized_E_T": 4.914619849955159,
+  "best_realized_E_T_is_projection_not_measured": true,
+  "best_realized_E_T_measured_today": 1.78,
+  "best_realized_E_T_band": [
+    4.914619849955159,
+    5.2954576057128
+  ],
+  "E_T_lift": 1.0653633226164398,
+  "E_T_lift_band": [
+    1.0653633226164398,
+    1.4462010783740809
+  ],
+  "cheapest_path_name": "EAGLE-3 fusion-drafter retrain (soft-KD top-k + reasoning-CoT root coverage, #336) WITH multi-step/TTT chain training (fixes the #34 K=1 collapse) + supply-side phi fix (#335 AND-gate) \u2014 a cluster training slot (~107 A10G-GPU-h, denken #301), NOT a 1-GPU local realize",
+  "projected_tps_at_realized_E_T": 414.31042988998195,
+  "projected_tps_at_realized_E_T_frame": "byteexact-442 LOCAL, realistic ceiling E[T], central regime tax",
+  "projected_tps_official": 428.89415702210925,
+  "projected_tps_private": 344.83090224577586,
+  "crosses_500": false,
+  "crosses_565": false,
+  "drafter_is_quality_safe": true,
+  "drafter_is_quality_safe_reason": "spec-dec verify is byte-exact M=8: acceptance changes ONLY E[T] (tokens/step), NOT the emitted distribution \u2014 served output == target greedy regardless of drafter quality. So self-det/PPL are invariant to the drafter and inherited from the #523 served stack (no re-serve needed).",
+  "self_det": "served r1-r2 = 1.0, attention 0/8 byte-exact microbench (#523 i11p5e3y); UNCHANGED by drafter",
+  "ppl": 2.3766643358900286,
+  "ppl_guardrail": 2.42,
+  "go_no_go": "NO-GO-LOCAL-REALIZE / DEFER-TO-CLUSTER",
+  "go_no_go_rationale": "NO-GO for a LOCAL drafter-realize in this slot. The headroom is REAL (+1.07 E[T] realistic, to ~4.91) but NOT free-500 on the byte-exact base: (1) the only path to the ceiling is an EAGLE-3 retrain, and the only BUILT head (#34, K=1) COLLAPSES past step 1 (realized E[T]~1.8 < deployed 3.85) \u2014 reaching 4.91 needs the UNBUILT multi-step/TTT + soft-KD/CoT recipe, a ~107 A10G-GPU-h CLUSTER slot; (2) folding wirbel #295's MEASURED step tax onto MY MEASURED 442-base draft fraction (0.178) collapses kanna #526's no-tax 561->414 TPS at the realistic ceiling (central regime; -147 TPS) \u2014 local crosses 500 ONLY at the joint-optimistic corner (E[T]->5.30 AND tax->1.74 lower bound); crosses_565 NEVER under any measured tax; PRIVATE (x0.804) NEVER crosses 500. Hand off the de-risked training scope (cheapest path) as the #2-priority CLUSTER slot, sequenced AFTER the supply-side realization-gap (#1, my #523).",
+  "diagnose": {
+    "et_ladder_roundtrip": 3.849256527338719,
+    "per_position_conditional_acceptance": [
+      0.7290715372907154,
+      0.759434719768749,
+      0.7934024106576444,
+      0.8215618336886993,
+      0.834712084347121,
+      0.835989117761368,
+      0.8465829846582985
+    ],
+    "deep_target_flat": 0.91,
+    "per_position_gap_to_091": [
+      0.0,
+      0.15056528023125104,
+      0.11659758934235565,
+      0.08843816631130075,
+      0.07528791565287907,
+      0.07401088223863206,
+      0.06341701534170152
+    ],
+    "first_token_a1": 0.7290715372907154,
+    "first_token_is_ceiling_bound": true,
+    "deployed_at_linear_cap": true,
+    "gap_is_deep_positions_not_first_token": true,
+    "note": "The cap is the linear-MTP TOPOLOGY (a_2..a_7 plateau ~0.83-0.85 vs the 0.91 EAGLE-3 target); a_1=0.729 is first-token ceiling-bound (cannot be lifted by acceptance work). The realizable lift is the DEEP-position coverage, which needs a wider fusion (EAGLE-3) head."
+  },
+  "screen": {
+    "leg_a_tune_existing_mtp_head": "PROVEN-CLOSED (#119 cap 3.845; #399 null-lever ec7i3z5t)",
+    "leg_b_eagle3_fusion_head": "ONLY path to the ceiling; but the only BUILT head (#34, K=1) collapses past step 1 (realized E[T]~1.8 < deployed 3.85); reaching the ceiling needs UNBUILT multi-step/TTT + soft-KD/CoT (#336) + supply phi fix (#335)",
+    "reduced_screen_run_here": "0-GPU analytic reconciliation (no train, no serve): folded wirbel #295's MEASURED step multiplier into MY MEASURED #523 442-base draft fraction to price the realized TPS on the LEGAL base",
+    "why_no_local_train": "a faithful EAGLE-3 build is ~107 A10G-GPU-h (denken #301) + the TTT recipe is unbuilt \u2014 overruns the slot (PR step-4 escape hatch triggered)"
+  },
+  "reconciliation": {
+    "t_step_old_ms": 8.754167822471212,
+    "draft_gpu_ms": 1.554,
+    "draft_frac_measured": 0.17751544538716893,
+    "kanna_notax_realistic_tps": 561.4034308709212,
+    "measured_tax_erosion_tps_at_realistic": 147.09300098093922,
+    "primary_operating_point": {
+      "mult": 3.0,
+      "t_step_ms": 11.862167822471212,
+      "tps_local": 414.31042988998195,
+      "tps_official": 428.89415702210925,
+      "tps_private": 344.83090224577586
+    },
+    "grid_local_official_private": {
+      "realistic": {
+        "notax_kanna": {
+          "mult": 1.0,
+          "t_step_ms": 8.754167822471212,
+          "tps_local": 561.4034308709212,
+          "tps_official": 581.1648316375775,
+          "tps_private": 467.25652463661237
+        },
+        "tax_lo": {
+          "mult": 1.744676699335575,
+          "t_step_ms": 9.911395413238695,
+          "tps_local": 495.8554920925342,
+          "tps_official": 513.3096054141913,
+          "tps_private": 412.7009227530098
+        },
+        "tax_central": {
+          "mult": 3.0,
+          "t_step_ms": 11.862167822471212,
+          "tps_local": 414.31042988998195,
+          "tps_official": 428.89415702210925,
+          "tps_private": 344.83090224577586
+        },
+        "tax_hi": {
+          "mult": 4.161395297380165,
+          "t_step_ms": 13.666976114599988,
+          "tps_local": 359.59818827114435,
+          "tps_official": 372.2560444982886,
+          "tps_private": 299.29385977662406
+        }
+      },
+      "realistic_hi": {
+        "notax_kanna": {
+          "mult": 1.0,
+          "t_step_ms": 8.754167822471212,
+          "tps_local": 566.5996295363284,
+          "tps_official": 586.5439364960071,
+          "tps_private": 471.5813249427897
+        },
+        "tax_lo": {
+          "mult": 1.744676699335575,
+          "t_step_ms": 9.911395413238695,
+          "tps_local": 500.444996724255,
+          "tps_official": 518.0606606089488,
+          "tps_private": 416.52077112959483
+        },
+        "tax_central": {
+          "mult": 3.0,
+          "t_step_ms": 11.862167822471212,
+          "tps_local": 418.1451754303127,
+          "tps_official": 432.86388560545964,
+          "tps_private": 348.02256402678955
+        },
+        "tax_hi": {
+          "mult": 4.161395297380165,
+          "t_step_ms": 13.666976114599988,
+          "tps_local": 362.9265320667614,
+          "tps_official": 375.70154599551137,
+          "tps_private": 302.06404298039115
+        }
+      },
+      "optimistic": {
+        "notax_kanna": {
+          "mult": 1.0,
+          "t_step_ms": 8.754167822471212,
+          "tps_local": 604.907024071415,
+          "tps_official": 626.1997513187288,
+          "tps_private": 503.46460006025796
+        },
+        "tax_lo": {
+          "mult": 1.744676699335575,
+          "t_step_ms": 9.911395413238695,
+          "tps_local": 534.2797239871626,
+          "tps_official": 553.0863702715106,
+          "tps_private": 444.6814416982946
+        },
+        "tax_central": {
+          "mult": 3.0,
+          "t_step_ms": 11.862167822471212,
+          "tps_local": 446.4156708086104,
+          "tps_official": 462.1295024210734,
+          "tps_private": 371.55211994654303
+        },
+        "tax_hi": {
+          "mult": 4.161395297380165,
+          "t_step_ms": 13.666976114599988,
+          "tps_local": 387.4637345751877,
+          "tps_official": 401.10245803223427,
+          "tps_private": 322.4863762579164
+        }
+      }
+    },
+    "crosses_500_corner": {
+      "local_any_taxed_corner": true,
+      "local_at_realistic_best_tax": false,
+      "local_joint_optimistic": true,
+      "official_at_realistic_best_tax": true,
+      "official_any_taxed_corner": true,
+      "private_any_taxed_corner": false,
+      "max_local_taxed": 534.2797239871626,
+      "max_official_taxed": 553.0863702715106,
+      "max_private_taxed": 444.6814416982946
+    },
+    "crosses_565_corner": {
+      "local_any_taxed_corner": false,
+      "notax_kanna_realistic_reaches_565": true
+    },
+    "statement": "kanna #526's 565 (no-tax) is recovered exactly at m=1.0; the MEASURED EAGLE-3 step tax (wirbel #295) erodes it to ~414 (central) / ~496 (optimistic tax) at the realistic ceiling on the byteexact-442 base. fern #305's sub-500 finding (481-base) and kanna #526's 565 (no-tax) are reconciled: the gap between them IS the measured drafter step tax, now priced on the LEGAL base."
+  },
+  "self_test": {
+    "conditions": {
+      "a_ladder_len_7": true,
+      "a_ladder_in_unit": true,
+      "a_ladder_monotone_nondecreasing": true,
+      "ladder_reproduces_baseline": true,
+      "deployed_at_linear_cap": true,
+      "gap_is_deep_not_first_token": true,
+      "ceiling_realistic_matches_kanna": true,
+      "ceiling_optimistic_matches_kanna": true,
+      "ceiling_above_baseline": true,
+      "ceiling_below_theoretical_max": true,
+      "optimistic_above_realistic": true,
+      "lift_is_ceiling_minus_baseline": true,
+      "lift_positive_above_1": true,
+      "t_step_old_roundtrips": true,
+      "draft_frac_in_measured_range": true,
+      "mult_bracket_ordered": true,
+      "t_step_increases_with_mult": true,
+      "tps_decreases_with_mult": true,
+      "tps_increases_with_et": true,
+      "notax_recovers_kanna_565ish": true,
+      "measured_tax_reduces_tps": true,
+      "tax_erosion_positive": true,
+      "crosses_500_false_at_central": true,
+      "crosses_500_true_joint_optimistic_local": true,
+      "crosses_500_false_realistic_central_local": true,
+      "crosses_565_false": true,
+      "crosses_565_false_everywhere_taxed": true,
+      "private_never_crosses_500": true,
+      "tau_lo_gt_one": true,
+      "priv_factor_lt_one": true,
+      "official_gt_local": true,
+      "private_lt_official": true,
+      "drafter_quality_safe": true,
+      "ppl_under_guardrail": true,
+      "built_head_today_not_above_deployed": true,
+      "best_realized_flagged_as_projection": true,
+      "go_no_go_is_nogo": true,
+      "no_nan_inf": true
+    },
+    "n_checks": 38,
+    "n_passed": 38,
+    "passes": true
+  },
+  "drafter_acceptance_realize_self_test_passes": true,
+  "wandb_run_id": "hpfw9e3y"
+}
