@@ -1,0 +1,224 @@
+{
+  "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan",
+  "onegraph": "1",
+  "out_dir": "/workspace/senpai/target/research/systems/drafter_kernel_tile/breakdown-og1-20260616T041112Z",
+  "timing": {
+    "drafter_gpu_ms": 1.434,
+    "drafter_gpu_ms_mean": 1.4378315412186382,
+    "exec_gpu_ms_p50": 6.53,
+    "n_draft": 279,
+    "spec_log": {
+      "intervals": 0,
+      "num_speculative_tokens": 7,
+      "total_accepted_tokens": 0,
+      "total_drafted_tokens": 0,
+      "e_accept_interval_mean": null,
+      "steady_gen_tps_mean": null,
+      "steady_gen_tps_n": 0
+    }
+  },
+  "kernel_category_pct": {
+    "elementwise_copy": 2.362315707396233,
+    "other": 2.9508538833915345,
+    "sampling": 2.922617935345904,
+    "matmul_gemm": 79.21010093282422,
+    "norm": 4.384885103836642,
+    "attention": 7.596597842764005,
+    "activation": 0.5726285944538129
+  },
+  "kernel_top": [
+    {
+      "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 148.01754599999995,
+      "pct": 32.92641523569557,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 129.3854889999995,
+      "pct": 28.78172521714086,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "kernel_unified_attention",
+      "ms": 32.28501600000001,
+      "pct": 7.18178264289746,
+      "category": "attention"
+    },
+    {
+      "name": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float>)",
+      "ms": 17.09479199999989,
+      "pct": 3.8027263319163764,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)",
+      "ms": 13.121250999999972,
+      "pct": 2.9188144953962762,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "reduce_segments",
+      "ms": 9.95353499999998,
+      "pct": 2.2141579517405905,
+      "category": "other"
+    },
+    {
+      "name": "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+      "ms": 6.949574000000001,
+      "pct": 1.5459286106202164,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "triton_red_fused_add_marlin_gemm_rms_norm_0",
+      "ms": 6.7794730000000465,
+      "pct": 1.5080897441522803,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 4, 4, 8, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 6.3700180000000035,
+      "pct": 1.417006722479072,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)",
+      "ms": 6.123452999999999,
+      "pct": 1.3621584846046955,
+      "category": "sampling"
+    },
+    {
+      "name": "triton_red_fused_add_rms_norm_2",
+      "ms": 5.25736899999998,
+      "pct": 1.169498612963581,
+      "category": "norm"
+    },
+    {
+      "name": "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+      "ms": 5.0039169999999675,
+      "pct": 1.1131183660277348,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "_sparse_argmax_blocks_kernel",
+      "ms": 4.9265970000000046,
+      "pct": 1.0959185779294862,
+      "category": "sampling"
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+      "ms": 4.524838000000001,
+      "pct": 1.0065475268874837,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 4, 16, 4, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 4.473572000000001,
+      "pct": 0.9951434356220257,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, false, true, true, false, 8, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float>)",
+      "ms": 3.3627669999999874,
+      "pct": 0.7480455228118289,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "triton_poi_fused_gelu_marlin_gemm_mul_3",
+      "ms": 3.1338380000000012,
+      "pct": 0.6971204026676798,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "triton_per_fused_add_mul_rms_norm_2",
+      "ms": 2.8021130000000403,
+      "pct": 0.623328373349346,
+      "category": "norm"
+    },
+    {
+      "name": "triton_per_fused_add_rms_norm_0",
+      "ms": 2.7510659999999865,
+      "pct": 0.6119729985038643,
+      "category": "norm"
+    },
+    {
+      "name": "triton_poi_fused_gelu_mul_slice_1",
+      "ms": 2.574197000000022,
+      "pct": 0.5726285944538129,
+      "category": "activation"
+    },
+    {
+      "name": "triton_poi_fused_6",
+      "ms": 2.162048999999999,
+      "pct": 0.48094651652933346,
+      "category": "elementwise_copy"
+    },
+    {
+      "name": "Memcpy DtoD (Device -> Device)",
+      "ms": 2.036759999999988,
+      "pct": 0.4530760528583209,
+      "category": "elementwise_copy"
+    },
+    {
+      "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, -1, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 2.0052809999999996,
+      "pct": 0.4460735679961271,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8::Params)",
+      "ms": 1.9570510000000017,
+      "pct": 0.43534483312831945,
+      "category": "matmul_gemm"
+    },
+    {
+      "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_sub_unsqueeze_view_4",
+      "ms": 1.8877609999999845,
+      "pct": 0.419931313762974,
+      "category": "norm"
+    }
+  ],
+  "kernel_error": null,
+  "trace_total_gpu_us": 449540.4219999446,
+  "sparse_argmax_us_total_window": 5609.254000000006,
+  "sparse_argmax_by_name": {
+    "_sparse_argmax_blocks_kernel": 4926.597000000004,
+    "_sparse_argmax_reduce_kernel": 682.6570000000019
+  },
+  "centroid_topk_by_name": {
+    "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)": 6123.452999999999
+  },
+  "category_us": {
+    "elementwise_copy": 10619.564,
+    "other": 13265.281000000057,
+    "sampling": 13138.349000000046,
+    "matmul_gemm": 356081.422,
+    "norm": 19711.83099999995,
+    "attention": 34149.778,
+    "activation": 2574.197000000022
+  },
+  "category_pct": {
+    "elementwise_copy": 2.362315707396233,
+    "other": 2.9508538833915345,
+    "sampling": 2.922617935345904,
+    "matmul_gemm": 79.21010093282422,
+    "norm": 4.384885103836642,
+    "attention": 7.596597842764005,
+    "activation": 0.5726285944538129
+  },
+  "E_T_used": null,
+  "sparse_argmax_calls_by_name": {
+    "_sparse_argmax_blocks_kernel": 420,
+    "_sparse_argmax_reduce_kernel": 420
+  },
+  "sparse_argmax_blocks_calls": 420,
+  "n_decode_steps_in_window": 60.0,
+  "sparse_argmax_us_per_decode_step": 93.48756666666677,
+  "sparse_argmax_pct_of_D": 6.519356113435619,
+  "sparse_argmax_us_per_call": 13.355366666666681,
+  "sparse_argmax_per_step_by_name": {
+    "_sparse_argmax_blocks_kernel": 82.10995000000007,
+    "_sparse_argmax_reduce_kernel": 11.377616666666698
+  },
+  "attribution_method": "kernel_call_count (blocks_calls/7 = decode steps); E[T] spec_log null under STEPTIME"
+}
