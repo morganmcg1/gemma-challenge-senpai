@@ -1,0 +1,37 @@
+{
+  "pr": 443,
+  "analysis_only": true,
+  "control": "cross_session_determinism",
+  "utc": "2026-06-16T03:38:45Z",
+  "comparisons": {
+    "on_a_vs_on_b_same_config": {
+      "label": "on_vs_on (same config, 2 processes)",
+      "verdict": "GREEDY_IDENTICAL",
+      "num_identical": 128,
+      "num_prompts_compared": 128,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 16384,
+      "onsets": [],
+      "onset_min": null,
+      "onset_median": null,
+      "onset_max": null,
+      "byte_exact": true
+    },
+    "off_vs_on_b": {
+      "label": "off_vs_on_b (graph flip + 2 processes)",
+      "verdict": "DIVERGENT",
+      "num_identical": 127,
+      "num_prompts_compared": 128,
+      "total_divergent_tokens": 23,
+      "total_tokens_compared": 16384,
+      "onsets": [
+        105
+      ],
+      "onset_min": 105,
+      "onset_median": 105,
+      "onset_max": 105,
+      "byte_exact": false
+    }
+  },
+  "interpretation": "on-vs-on is byte-exact -> the graph_on/off divergence is attributable to the graph flip itself"
+}

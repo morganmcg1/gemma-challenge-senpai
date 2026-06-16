@@ -1,0 +1,144 @@
+{
+  "pr": 443,
+  "analysis_only": true,
+  "is_launch": false,
+  "official_tps": 0.0,
+  "operating_point": "fa2sw_precache_kenyan precache-on single-stream greedy K=7(M=8) 128->128",
+  "anchors": {
+    "frontier_tps": 467.14,
+    "deployed_tps": 481.53,
+    "deployed_ppl": 2.3772,
+    "ppl_gate": 2.42,
+    "self_abort_gate_frac": 0.005,
+    "ubel284_host_frac": 0.005
+  },
+  "graph_on": {
+    "decode_wall_us": 7903.0,
+    "exec_cpu_us": 6352.0,
+    "host_gap_us": 1551.0,
+    "verify_gpu_us": 6441.0,
+    "drafter_gpu_us": 1426.0,
+    "gpu_busy_us": 7867.0,
+    "host_overhead_us": 36.0,
+    "host_overhead_frac": 0.004555232190307478,
+    "gpu_busy_share": 0.9954447678096925,
+    "output_tps_local": 454.02326922137604
+  },
+  "graph_off": {
+    "decode_wall_us": 7970.0,
+    "exec_cpu_us": 5617.0,
+    "host_gap_us": 2353.0,
+    "verify_gpu_us": 6441.0,
+    "drafter_gpu_us": 1494.0,
+    "gpu_busy_us": 7935.0,
+    "host_overhead_us": 35.0,
+    "host_overhead_frac": 0.00439146800501882,
+    "gpu_busy_share": 0.9956085319949812,
+    "output_tps_local": 451.2186262262326
+  },
+  "e_accept": {
+    "graph_on": 3.588145896656535,
+    "graph_off": 3.5962124510230735
+  },
+  "self_abort_gate": {
+    "host_overhead_frac_graph_on": 0.004555232190307478,
+    "gate_frac": 0.005,
+    "self_abort": true,
+    "verdict": "MEASURED-ABORT: host/CPU overhead below 0.5% gate; loop already graph-captured (ONEGRAPH); no prototype warranted"
+  },
+  "launch_overhead": {
+    "graph_on_wall_us": 7903.0,
+    "graph_off_wall_us": 7970.0,
+    "launch_overhead_us": 67.0,
+    "launch_overhead_frac_of_graphoff_wall": 0.008406524466750314,
+    "realized_delta_tps_graph_recovers": 2.8046429951434675,
+    "frontier_if_graphs_off_tps": 463.21297616060224,
+    "land444_cost_tps_if_graphs_disabled": 3.927023839397748,
+    "note": "the deployed ONEGRAPH already captures this; land #444 re-introduces this per-step cost iff a second async stream forces graphs OFF"
+  },
+  "realized_tps_contribution_of_this_pr": 0.0,
+  "crosses_deployed_481": false,
+  "equivalence": {
+    "identity_graph_on_vs_off": {
+      "checked": true,
+      "verdict": "DIVERGENT",
+      "num_prompts_compared": 128,
+      "num_identical": 127,
+      "num_divergent": 1,
+      "total_tokens_compared": 16384,
+      "total_divergent_tokens": 23,
+      "byte_exact": false
+    },
+    "ppl_graph_on": 2.3778312529803554,
+    "ppl_gate": 2.42,
+    "ppl_pass": true,
+    "attribution": "graph_flip (proven by cross_session_control), not FP noise",
+    "graph_on_is_deployed_arm": true,
+    "note": "graph_on (deployed) PPL 2.3778 passes the <=2.42 gate; the 1-prompt token difference vs the eager counterfactual is a late near-tie flip within the deployed stack's known non-equivalence (deployed identity 0.9966 = 0.34% token divergence; this card's on/off = 0.14%)."
+  },
+  "self_test": {
+    "nan_clean": true,
+    "gate_decided": true,
+    "identity_byte_exact": false,
+    "ppl_pass": true,
+    "consistent_with_ubel284_host_frac": true,
+    "self_test_passes": false
+  },
+  "primary_metric": {
+    "name": "host_overhead_frac",
+    "value": 0.004555232190307478
+  },
+  "test_metric": {
+    "name": "ppl",
+    "value": 2.3778312529803554
+  },
+  "greedy_ppl_safety_certificate": {
+    "analysis_only": true,
+    "served_file_changed": false,
+    "emitted_token_changed": false,
+    "hf_job_or_submission": false,
+    "is_launch": false,
+    "baseline_tps_unchanged": 467.14,
+    "tps_added_by_this_pr": 0.0
+  },
+  "cross_session_control": {
+    "purpose": "attribute the 1-prompt graph_on/off divergence: cross-session FP noise vs the graph flip",
+    "on_a_vs_on_b_same_config": {
+      "label": "on_vs_on (same config, 2 processes)",
+      "verdict": "GREEDY_IDENTICAL",
+      "num_identical": 128,
+      "num_prompts_compared": 128,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 16384,
+      "onsets": [],
+      "onset_min": null,
+      "onset_median": null,
+      "onset_max": null,
+      "byte_exact": true
+    },
+    "off_vs_on_b": {
+      "label": "off_vs_on_b (graph flip + 2 processes)",
+      "verdict": "DIVERGENT",
+      "num_identical": 127,
+      "num_prompts_compared": 128,
+      "total_divergent_tokens": 23,
+      "total_tokens_compared": 16384,
+      "onsets": [
+        105
+      ],
+      "onset_min": 105,
+      "onset_median": 105,
+      "onset_max": 105,
+      "byte_exact": false
+    },
+    "attribution": "graph-attributable: same-config on-vs-on is byte-exact (128/128, 0 divtok) -> the stack is deterministic cross-session; the single divergence is caused by the ONEGRAPH 1<->0 flip (captured drafter proposes marginally different tokens, e_accept 3.588 vs 3.596, flipping one near-tie verify argmax at token 105)."
+  },
+  "measurement_integrity": {
+    "nan_clean": true,
+    "gate_decided": true,
+    "consistent_with_ubel284_host_frac": true,
+    "cross_session_deterministic": true,
+    "ppl_pass": true,
+    "all_pass": true
+  }
+}
