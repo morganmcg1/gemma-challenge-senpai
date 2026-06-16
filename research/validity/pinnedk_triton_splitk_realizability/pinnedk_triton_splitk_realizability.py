@@ -286,38 +286,45 @@ def _window_for(head_dim: int):
     return (-1, -1)
 
 
-def _triton_attn(L: int, M: int, head_dim: int, mode: str, dev, q=None, kc=None, vc=None,
-                 bt=None, cu=None, sk=None):
-    """Drive the served unified_attention. mode='serial' -> 2D (use_3d False, blanket-strict
-    reference); mode='split' -> 3D split-KV (the pinned-K candidate, num_par_softmax_segments=16).
-    NOTE: the kernel FORCES 2D whenever max_seqlen_q>1 (M=8 verify), so 'split' is reachable only
-    at M=1 -- that asymmetry IS the M-invariance finding."""
-    import torch
+def _build_inputs(L: int, M: int, head_dim: int, seed: int, dev) -> dict:
+    """All decode inputs (q/out/kc/vc/bt/cu/sk) pre-allocated ONCE; reuse across timed calls so the
+    microbench measures only the kernel launch, not allocation."""
+    q, out, kc, vc, bt, cu, sk, seq_len = _triton_build_paged(L, M, head_dim, seed, dev)
+    return {"q": q, "out": out, "kc": kc, "vc": vc, "bt": bt, "cu": cu, "sk": sk,
+            "seq_len": seq_len, "head_dim": head_dim, "M": M}
+
+
+def _split_bufs(head_dim: int, M: int, dev) -> dict:
+    so, sm, se = _segm_buffers(head_dim, dev, n_tokens=M)
+    return {"softmax_segm_output": so, "softmax_segm_max": sm, "softmax_segm_expsum": se}
+
+
+def _call_unified(inp: dict, split_bufs: dict | None, mode: str):
+    """Drive the served unified_attention with PRE-ALLOCATED buffers. mode='serial' -> 2D
+    (use_3d False, the blanket-strict / un-pack reference the 482.74 ladder sits on);
+    mode='split' -> 3D split-KV (the pinned-K candidate, num_par_softmax_segments=16). The kernel
+    FORCES 2D whenever max_seqlen_q>1 (M=8 verify), so 'split' only takes the 3D path at M=1 --
+    that asymmetry IS the M-invariance finding."""
     from vllm.v1.attention.ops.triton_unified_attention import unified_attention
 
-    if q is None:
-        q, out, kc, vc, bt, cu, sk, _ = _triton_build_paged(L, M, head_dim, 7, dev)
-    else:
-        out = torch.empty(M, N_Q_HEADS, head_dim, device=dev, dtype=torch.bfloat16)
+    M = inp["M"]
+    head_dim = inp["head_dim"]
     scale = 1.0 / math.sqrt(head_dim)
-    window = _window_for(head_dim)
-
     kwargs = dict(
-        q=q, k=kc, v=vc, out=out, cu_seqlens_q=cu, max_seqlen_q=M, seqused_k=sk,
-        max_seqlen_k=int(sk.max().item()), softmax_scale=scale, causal=True,
-        window_size=window, block_table=bt, softcap=0.0,
+        q=inp["q"], k=inp["kc"], v=inp["vc"], out=inp["out"], cu_seqlens_q=inp["cu"],
+        max_seqlen_q=M, seqused_k=inp["sk"], max_seqlen_k=inp["seq_len"], softmax_scale=scale,
+        causal=True, window_size=_window_for(head_dim), block_table=inp["bt"], softcap=0.0,
         q_descale=None, k_descale=None, v_descale=None,
     )
     if mode == "split":
-        so, sm, se = _segm_buffers(head_dim, dev, n_tokens=M)
         kwargs.update(
             seq_threshold_3D=SEQ_THRESHOLD_3D,
             num_par_softmax_segments=NUM_PAR_SOFTMAX_SEGMENTS,
-            softmax_segm_output=so, softmax_segm_max=sm, softmax_segm_expsum=se,
+            **split_bufs,
         )
     # serial mode: leave seq_threshold_3D=None -> use_3d=False -> 2D single-segment
     unified_attention(**kwargs)
-    return out
+    return inp["out"]
 
 
 def _used_3d(M: int, mode: str) -> bool:
@@ -363,10 +370,13 @@ def _split_runnable_and_identity(head_dim: int, dev, n_trials: int, seeds: list[
         per_seed_maxdiff = []
         for s in seeds:
             for t in range(n_trials):
-                q, out, kc, vc, bt, cu, sk, _ = _triton_build_paged(L, M_AR, head_dim, s + 17 * t, dev)
+                # ONE input set shared by both modes (identical q/kc/vc) -> capture each output
+                # before the next call overwrites inp["out"].
+                inp = _build_inputs(L, M_AR, head_dim, s + 17 * t, dev)
+                sb = _split_bufs(head_dim, M_AR, dev)
                 try:
-                    o_serial = _triton_attn(L, M_AR, head_dim, "serial", dev, q=q, kc=kc, vc=vc, bt=bt, cu=cu, sk=sk)
-                    o_split = _triton_attn(L, M_AR, head_dim, "split", dev, q=q, kc=kc, vc=vc, bt=bt, cu=cu, sk=sk)
+                    o_serial = _call_unified(inp, None, "serial").clone()
+                    o_split = _call_unified(inp, sb, "split").clone()
                 except Exception as e:  # noqa: BLE001
                     runnable = False
                     run_err = f"{type(e).__name__}: {str(e)[:160]}"
@@ -409,25 +419,24 @@ def _m8_split_reachable(head_dim: int, dev) -> dict[str, Any]:
     """Can the SAME fixed split run at M=8 (the property pinned-K M-invariance requires)?
     The kernel forces 2D when max_seqlen_q>1, so passing split buffers at M=8 still runs 2D.
     Confirm empirically that M=8 does NOT take the 3D split path."""
-    import torch
     from vllm.v1.attention.ops import triton_unified_attention as tua
 
-    # Instrument: count reduce_segments launches by wrapping is not trivial; instead verify the
-    # documented gate by constructing the use_3d predicate exactly as the wrapper does.
+    # Verify the documented gate by constructing the use_3d predicate exactly as the wrapper does
+    # (line 923-932): with all split buffers supplied + num_seqs(1)<=threshold, the ONLY thing that
+    # forces 2D at M=8 is max_seqlen_q > 1.
     L = 256
-    q, out, kc, vc, bt, cu, sk, _ = _triton_build_paged(L, M_VERIFY, head_dim, 11, dev)
-    so, sm, se = _segm_buffers(head_dim, dev, n_tokens=M_VERIFY)
-    # Reproduce wrapper gate: use_3d requires max_seqlen_q == 1 (M=8 -> False) even with buffers.
     max_seqlen_q = M_VERIFY
     is_batch_invariant = bool(getattr(tua, "is_batch_invariant", False))
     use_3d_predicted = not (
         max_seqlen_q > 1 or is_batch_invariant
     )  # buffers + threshold satisfied here
-    # Sanity: it still runs (as 2D) at M=8
+    # Sanity: passing split buffers at M=8 still RUNS (as 2D, use_3d gate kicks it to serial).
     ran = True
     err = None
     try:
-        _triton_attn(L, M_VERIFY, head_dim, "split", dev, q=q, kc=kc, vc=vc, bt=bt, cu=cu, sk=sk)
+        inp = _build_inputs(L, M_VERIFY, head_dim, 11, dev)
+        sb = _split_bufs(head_dim, M_VERIFY, dev)
+        _call_unified(inp, sb, "split")
     except Exception as e:  # noqa: BLE001
         ran = False
         err = f"{type(e).__name__}: {str(e)[:140]}"
@@ -446,15 +455,13 @@ def _microbench(head_dim: int, dev, iters: int, warmup: int) -> dict[str, Any]:
     out: dict[str, Any] = {"head_dim": head_dim, "per_L": {}}
     penalties = []
     for L in KV_BAND_EXT:
-        q, o, kc, vc, bt, cu, sk, _ = _triton_build_paged(L, M_AR, head_dim, 7, dev)
-        serial_us = _time_call(
-            lambda: _triton_attn(L, M_AR, head_dim, "serial", dev, q=q, kc=kc, vc=vc, bt=bt, cu=cu, sk=sk),
-            iters, warmup,
-        )
-        split_us = _time_call(
-            lambda: _triton_attn(L, M_AR, head_dim, "split", dev, q=q, kc=kc, vc=vc, bt=bt, cu=cu, sk=sk),
-            iters, warmup,
-        )
+        # Pre-allocate q/out/kc/vc AND the 33MB segm scratch ONCE per L; the timed lambdas reuse
+        # them so _time_call measures only the kernel launch, not allocation (the fairness fix:
+        # the split path must not be charged for its segm-buffer alloc on every iteration).
+        inp = _build_inputs(L, M_AR, head_dim, 7, dev)
+        sb = _split_bufs(head_dim, M_AR, dev)
+        serial_us = _time_call(lambda: _call_unified(inp, None, "serial"), iters, warmup)
+        split_us = _time_call(lambda: _call_unified(inp, sb, "split"), iters, warmup)
         pen = serial_us / split_us if split_us > 0 else float("nan")
         out["per_L"][str(L)] = {
             "serial_us": serial_us, "split_us": split_us, "penalty_serial_over_split": pen,
