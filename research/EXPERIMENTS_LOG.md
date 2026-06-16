@@ -2,6 +2,22 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-16 ~18:25Z — Cycle-57d bank block: PUBLISH LIVE + quality-safety battery banked (5 PRs, all 0-TPS, BASELINE unchanged) + #516 A/B reseats
+
+**Supersedes the cycle-57c "held stark #509 open / bank #509 next cycle" note below — the publish executed and #509 is banked.** Advisor published the 375.857 ship **directly** per human #474 18:12Z (*"You publish immediately!"*): result file **`20260616-182007-770_senpai.md`**, `GET /v1/results` **456→457** (re-verified live this cycle — count 457, our file newest, no duplicates after one YAML colon-400 retry), board message **`20260616-182129-790_senpai.md`**. The missing-board-row gap the human flagged 17:36Z is **CLOSED**.
+
+**★★★ PR #499 (stark) — surgical-357 FIRE ship-of-record, BANKED.** W&B [`j7qao5e9`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/j7qao5e9). Official `summary.json:tps`=**375.857**, gate PASS, PPL **2.37673**, 128/128, total_tps 569.06, uploaded=1, operative-1.0 (1 bf16-ULP tie, 0 semantic) — the fire-time recert of the live board ship.
+
+**★★ PR #509 (stark) — surgical-vs-base model-config greedy census, BANKED.** W&B [`ljk3ffv5`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ljk3ffv5). **0 semantic flips, KL=0.0, max_abs_logit_delta=0.0, 25 bf16-ULP ties** — the model-config quality leg of the #512 dossier, now empirically CONFIRMED (was pending at compose-time).
+
+**★★ PR #510 (wirbel) — surgical-357 ship full-serve operative-identity census, BANKED.** W&B [`02h6o64s`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/02h6o64s). Reload-immune full-serve self-identity **0.99909** — the ship is operative-stable across the real serving path, not just the locus cert.
+
+**★★ PR #513 (denken) — private-quality exposure under greedy/acceptance, BANKED.** W&B [`krma4lm7`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/krma4lm7). **private_quality_exposure=0.0**, max TV 0.01135 — the spec-alive shift is a **PURE SPEED risk** with zero downstream-quality exposure under greedy.
+
+**★★ PR #517 (kanna) — cross-axis reopen-action capstone, BANKED.** W&B [`ui5a48ax`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ui5a48ax). One recommended fire (**375.857**) + a risk-keyed decision tree for the reopen rungs.
+
+**#516 (HUMAN, "no excuses just do it") A/B + reseats — ZERO idle (all 8 busy):** EXP-1 = stark #519 (split-KV `BYTEEXACT_FIXED_TPS=4`/`NUM_SEGMENTS=64` full 128×512 TPS+PPL recert vs surgical-357) + land #515 (identity leg); EXP-2 = ubel #511 (MMLU-Pro/GPQA served base-vs-ship A/B, implements the #483 MMLU-Pro≥0.60 / GPQA-Diamond≥0.42 gate). Fresh reseats: denken #520 (sampled-decoding quality-neutrality, generation_config/lewtun #31 axis), wirbel #521 (benchmark-config full-serve census), kanna #522 (reopen-rung private speed-risk). Unchanged in-flight: fern #514 (AIME), lawine #518 (literal matmul). **#481 answered** (highest-payoff = close the 357→~457 realization gap + weaponize the quality moat; not framework switches). **#483 documented** (standing MMLU-Pro≥0.60 / GPQA-Diamond≥0.42 hard pre-submission gate). **Owed to human on #516:** terminal EXP-1/EXP-2 numbers + a "which suggestion won" verdict.
+
 ## 2026-06-16 ~17:55Z — Cycle-57c bank block: ship quality-dossier + 399.75 package + model-config census (2 banked + 1 held-open, all 0-TPS, BASELINE unchanged)
 
 The quality-pivot reseats started landing terminal. Banked the two decision-grade composition cards and confirmed the surgical-vs-base model-config quality leg; held stark #509 open as the live board-publish channel for the 375.857 ship.
