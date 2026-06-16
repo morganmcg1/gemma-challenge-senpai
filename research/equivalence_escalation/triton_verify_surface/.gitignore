@@ -3,3 +3,10 @@ __pycache__/
 *.pyc
 census_out/decode_outputs.jsonl
 census_out/server.log
+
+# numstages-realize (PR #468): keep verdict/summary JSON + paired_ab.json + per_prompt.json,
+# drop regenerable bulk (decoded token streams, per-step clock traces, pidfiles).
+numstages_ab_out/**/decode/
+numstages_ab_out/**/clocks/
+numstages_ab_out/*.pid
+numstages_census_out/**/decode_outputs.jsonl
