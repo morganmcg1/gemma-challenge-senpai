@@ -1,0 +1,92 @@
+{
+  "pr": 494,
+  "census": "served-vs-served matched-config self-determinism + speed sanity",
+  "generated_utc": "2026-06-16T13:37:22.447631+00:00",
+  "submission": "fa2sw_strict_surgical357",
+  "submission_dir": "/workspace/senpai/target/submissions/fa2sw_strict_surgical357",
+  "serve_venv_wheel_stock": true,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "n_decodes": 3
+  },
+  "server_ready_s": 80.017569065094,
+  "decodes": [
+    {
+      "round": 0,
+      "warm": false,
+      "wall_tps": 354.4946580318893,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 184.8716151714325,
+      "wall_around_decode_s": 193.05665230751038,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    },
+    {
+      "round": 1,
+      "warm": true,
+      "wall_tps": 357.4614825999539,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 183.33723545074463,
+      "wall_around_decode_s": 191.70508694648743,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    },
+    {
+      "round": 2,
+      "warm": true,
+      "wall_tps": 357.40185102828985,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 183.36782479286194,
+      "wall_around_decode_s": 191.8045482635498,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    }
+  ],
+  "mechanism": {
+    "surgical_armed": true,
+    "surgical_forced_true": true,
+    "splitkv_armed": true,
+    "splitkv_redirects": 0,
+    "onegraph_captured": true,
+    "fatal_traceback": false,
+    "n_tracebacks": 1,
+    "benign_usage_tracebacks": 2,
+    "batch_invariant_mentions": 1,
+    "init_batch_invariance_ran": false
+  },
+  "lever_fired_in_packaged_stack": true,
+  "self_determinism": {
+    "label": "warm round1 vs round2 (self-determinism)",
+    "available": true,
+    "n_prompts_compared": 128,
+    "n_tokens_compared": 65536,
+    "n_tokens_matched": 65536,
+    "token_identity_rate": 1.0,
+    "n_sequences_with_any_flip": 0,
+    "first_divergences": []
+  },
+  "self_determinism_perfect_r1_r2": true,
+  "speed_sanity": {
+    "median_warm_wall_tps": 357.43166681412185,
+    "warm_wall_tps_values": [
+      357.4614825999539,
+      357.40185102828985
+    ],
+    "surgical_target_tps": 357.64,
+    "strict_floor_222": 222.0,
+    "lift_vs_222": 135.43166681412185,
+    "tps_above_222_floor": true,
+    "matmul_tax_off": true,
+    "ppl": 2.376982607605333,
+    "ppl_target": 2.3767,
+    "ppl_passes_gate": true,
+    "completion_128_128": true,
+    "num_completed_prompts": 128
+  },
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "wandb_run_id": "k8nqmc2b"
+}
