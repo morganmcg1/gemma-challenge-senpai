@@ -1,0 +1,96 @@
+{
+  "pr": 519,
+  "exp": "EXP-1 (#516)",
+  "arm": "control",
+  "submission": "fa2sw_strict_surgical357",
+  "mode": "surgical",
+  "generated_utc": "2026-06-16T19:12:29.498981+00:00",
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "n_decodes": 3,
+    "smoke": false
+  },
+  "server_ready_s": 80.02019953727722,
+  "peak_gpu_mem_mib": 21395,
+  "decodes": [
+    {
+      "round": 0,
+      "warm": false,
+      "wall_tps": 354.2295262331642,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 185.0099868774414,
+      "wall_around_decode_s": 193.5725061893463,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    },
+    {
+      "round": 1,
+      "warm": true,
+      "wall_tps": 357.03242594923483,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 183.55755734443665,
+      "wall_around_decode_s": 191.92000579833984,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    },
+    {
+      "round": 2,
+      "warm": true,
+      "wall_tps": 357.08239175789055,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 183.53187251091003,
+      "wall_around_decode_s": 192.30805349349976,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    }
+  ],
+  "median_warm_wall_tps": 357.0574088535627,
+  "warm_wall_tps_values": [
+    357.03242594923483,
+    357.08239175789055
+  ],
+  "ppl": 2.376982607605333,
+  "ppl_passes_gate": true,
+  "ppl_gate": 2.42,
+  "ppl_target": 2.37673,
+  "completion_128_128": true,
+  "num_completed_prompts": 128,
+  "self_determinism": {
+    "label": "warm round1 vs round2 (self-determinism)",
+    "available": true,
+    "n_prompts_compared": 128,
+    "n_tokens_compared": 65536,
+    "n_tokens_matched": 65536,
+    "token_identity_rate": 1.0,
+    "n_sequences_with_any_flip": 0,
+    "first_divergences": []
+  },
+  "self_determinism_rate": 1.0,
+  "self_determinism_perfect_r1_r2": true,
+  "mechanism": {
+    "mode": "surgical",
+    "splitkv_redirects": 0,
+    "onegraph_captured": true,
+    "init_batch_invariance_ran": false,
+    "fatal_traceback": false,
+    "n_tracebacks": 1,
+    "benign_usage_tracebacks": 2,
+    "batch_invariant_mentions": 1,
+    "log_readable": true,
+    "surgical_armed": true,
+    "surgical_forced_true": true,
+    "lever_fired": true,
+    "verify_path_as_expected": true,
+    "matmul_tax_off": true,
+    "mechanism_valid": true
+  },
+  "lever_fired": true,
+  "mechanism_valid": true,
+  "lift_vs_222": 135.05740885356272,
+  "tps_above_222_floor": true,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true
+}

@@ -425,16 +425,23 @@ def summarize(args: argparse.Namespace) -> dict[str, Any]:
     beats_surgical = bool(delta is not None and delta > SIGMA_HW)
     near_399 = bool(isinstance(v_tps, (int, float))
                     and abs(v_tps - SPLITKV399_TARGET_TPS) <= SIGMA_HW)
+    exceeds_399 = bool(isinstance(v_tps, (int, float))
+                       and v_tps > SPLITKV399_TARGET_TPS + SIGMA_HW)
     passes_ppl = bool(variant["ppl_passes_gate"])
     sd_ok = bool(v_sd == 1.0)
+    if near_399:
+        vs_399 = "~399.97 confirmed"
+    elif exceeds_399:
+        vs_399 = f"EXCEEDS 399.97 by {v_tps - SPLITKV399_TARGET_TPS:.2f} (split-KV scales up at full-len)"
+    else:
+        vs_399 = "short of 399.97"
 
     if beats_surgical and passes_ppl and sd_ok:
         verdict = (
             f"REAL: fixed-order split-KV beats surgical-357 at full 128x512 "
-            f"({v_tps:.2f} vs {c_tps:.2f} TPS, +{delta:.2f}, "
-            f"{'~399.97 confirmed' if near_399 else 'short of 399.97'}); "
-            f"PPL {v_ppl} <= {PPL_GATE}, self-determinism {v_sd} -> strictly-faster "
-            f"byte-exact reopen rung."
+            f"({v_tps:.2f} vs {c_tps:.2f} TPS, +{delta:.2f} = {delta / SIGMA_HW:.1f} sigma_hw; "
+            f"{vs_399}); PPL {v_ppl} <= {PPL_GATE}, self-determinism {v_sd} "
+            f"-> strictly-faster byte-exact reopen rung."
         )
     elif passes_ppl and sd_ok and not beats_surgical:
         verdict = (
@@ -471,6 +478,7 @@ def summarize(args: argparse.Namespace) -> dict[str, Any]:
         "sigma_hw": SIGMA_HW,
         "beats_surgical357_by_sigma": beats_surgical,
         "near_399_97_within_sigma": near_399,
+        "exceeds_399_97_by_sigma": exceeds_399,
         "splitkv399_self_determinism_perfect": sd_ok,
         "splitkv399_completion_128_128": bool(variant["completion_128_128"]),
         "splitkv399_mechanism_valid": bool(variant["mechanism_valid"]),

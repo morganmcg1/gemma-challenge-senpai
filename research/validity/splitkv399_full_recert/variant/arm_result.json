@@ -1,0 +1,98 @@
+{
+  "pr": 519,
+  "exp": "EXP-1 (#516)",
+  "arm": "variant",
+  "submission": "fa2sw_strict_byteexact_splitkv399",
+  "mode": "byteexact",
+  "generated_utc": "2026-06-16T19:00:00.419222+00:00",
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "n_decodes": 3,
+    "smoke": false
+  },
+  "server_ready_s": 80.01866602897644,
+  "peak_gpu_mem_mib": 21655,
+  "decodes": [
+    {
+      "round": 0,
+      "warm": false,
+      "wall_tps": 439.16239402696124,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 149.22953534126282,
+      "wall_around_decode_s": 157.4203019142151,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    },
+    {
+      "round": 1,
+      "warm": true,
+      "wall_tps": 442.45004506351324,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 148.12067651748657,
+      "wall_around_decode_s": 156.3585331439972,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    },
+    {
+      "round": 2,
+      "warm": true,
+      "wall_tps": 442.251677760431,
+      "num_completion_tokens": 65536,
+      "decode_duration_s": 148.1871144771576,
+      "wall_around_decode_s": 156.40292811393738,
+      "num_completed_prompts": 128,
+      "expected_tokens": 65536
+    }
+  ],
+  "median_warm_wall_tps": 442.3508614119721,
+  "warm_wall_tps_values": [
+    442.45004506351324,
+    442.251677760431
+  ],
+  "ppl": 2.3769812713494214,
+  "ppl_passes_gate": true,
+  "ppl_gate": 2.42,
+  "ppl_target": 2.37673,
+  "completion_128_128": true,
+  "num_completed_prompts": 128,
+  "self_determinism": {
+    "label": "warm round1 vs round2 (self-determinism)",
+    "available": true,
+    "n_prompts_compared": 128,
+    "n_tokens_compared": 65536,
+    "n_tokens_matched": 65536,
+    "token_identity_rate": 1.0,
+    "n_sequences_with_any_flip": 0,
+    "first_divergences": []
+  },
+  "self_determinism_rate": 1.0,
+  "self_determinism_perfect_r1_r2": true,
+  "mechanism": {
+    "mode": "byteexact",
+    "splitkv_redirects": 5,
+    "onegraph_captured": true,
+    "init_batch_invariance_ran": false,
+    "fatal_traceback": false,
+    "n_tracebacks": 1,
+    "benign_usage_tracebacks": 2,
+    "batch_invariant_mentions": 0,
+    "log_readable": true,
+    "byteexact_armed": true,
+    "byteexact_rejitted": true,
+    "byteexact_segments_set": true,
+    "byteexact_fail_open": false,
+    "lever_fired": true,
+    "verify_path_as_expected": true,
+    "matmul_tax_off": true,
+    "mechanism_valid": true
+  },
+  "lever_fired": true,
+  "mechanism_valid": true,
+  "lift_vs_222": 220.35086141197212,
+  "tps_above_222_floor": true,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true
+}
