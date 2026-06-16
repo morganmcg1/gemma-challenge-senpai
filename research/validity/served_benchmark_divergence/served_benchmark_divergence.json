@@ -1,0 +1,891 @@
+{
+  "pr": 529,
+  "card": "served-benchmark-divergence",
+  "generated_utc": "2026-06-16T23:30:39.148708+00:00",
+  "analysis_only": true,
+  "official_tps": 0,
+  "compose": {
+    "served_ship_has_head_prune": true,
+    "served_keepset_K": 12288,
+    "served_keepset_full_vocab": 262144,
+    "live_board_submission": "fa2sw_strict_surgical357",
+    "live_board_official_tps": 375.857,
+    "benchmark_distribution_diverges": true,
+    "cause_is_head_prune": true,
+    "max_tv_base_vs_ship": 1.0,
+    "mean_tv_base_vs_ship": 0.06614323131750212,
+    "p99_tv_base_vs_ship": 1.0,
+    "median_tv_base_vs_ship": 0.0,
+    "max_kl_base_vs_ship": 100.0,
+    "wanted_token_killed_rate": 0.06515418712168153,
+    "sampled_token_killed_rate": 0.06594061293551308,
+    "answer_bearing_mean_tv": 0.1036050441998143,
+    "answer_bearing_killed_rate": 0.1029451395572666,
+    "filler_mean_tv": 0.005276865544182647,
+    "frac_blowup": 0.06334302464134217,
+    "ship_nucleus_safe_rate": 0.9997616891473238,
+    "n_ship_unresolved": 0,
+    "blindspot": {
+      "selftest_full_vs_full_max_tv": 0.0,
+      "prune_vs_prune_max_tv": 0.0,
+      "base_vs_ship_max_tv": 1.0
+    },
+    "layer_attribution": {
+      "bake_keepset_K": 16384,
+      "bake_layer_max_tv": 1.0,
+      "bake_layer_mean_tv": 0.05638360977470036,
+      "serve_layer_max_tv": 1.0,
+      "serve_layer_mean_tv": 0.014241436314386303,
+      "killed_at_bake_rate": 0.055168962394547445,
+      "killed_at_serve_rate": 0.009985224727134074,
+      "n_killed_at_bake": 2315,
+      "n_killed_at_serve": 419,
+      "serve_share_of_kills": 0.1532553035844916,
+      "dominant_kill_layer": "bake(262k->16k)",
+      "serve_widen_recoverable_kill_rate": 0.009985224727134074,
+      "bake_nucleus_safe_rate": 0.9999285067441971,
+      "n_bake_unresolved": 0
+    },
+    "selftest": {
+      "passes": true,
+      "n_checks": 7,
+      "checks": {
+        "selftest_full_vs_full_tv0": true,
+        "prune_vs_prune_tv0": true,
+        "base_vs_ship_exceeds_controls": true,
+        "nan_clean": true,
+        "full_vocab_head": true,
+        "keepset_K_matches_ubel511": true,
+        "full_vocab_262144": true
+      }
+    },
+    "verdict": "DIVERGES -- the served 12k head-prune moves the benchmark next-token distribution: max TV=1.000, mean TV=0.066, p99 TV=1.000; wanted_token_killed_rate=0.065. Cause PINNED to the head-prune: prune-vs-prune TV=0 (the #520 geometry, blind) while base-vs-ship TV=1.000. LAYERS: serve(16k->12k) owns 15% of wanted-token kills (killed_at_serve=0.010 vs killed_at_bake=0.055); bake-layer max TV=1.000, serve-layer max TV=1.000."
+  },
+  "gpu": {
+    "phase": "gpu",
+    "model_dir": "/senpai-run/home/student-denken/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+    "full_vocab_head": true,
+    "keepset": {
+      "pruned_vocab_K": 12288,
+      "full_vocab": 262144,
+      "n_unique": 12288,
+      "source_keepset": "/workspace/models/int4-pck04-32k/pck04_keepset.json"
+    },
+    "n_prompts": 135,
+    "n_positions": 41962,
+    "n_new": 320,
+    "topk": 256,
+    "seed": 1234,
+    "gen_config": {
+      "temperature": 1.0,
+      "top_k": 64,
+      "top_p": 0.95,
+      "do_sample": true
+    },
+    "tv_base_vs_ship": {
+      "n": 41962,
+      "mean": 0.06614323131750212,
+      "median": 0.0,
+      "p90": 0.031296590614066505,
+      "p99": 1.0,
+      "max": 1.0
+    },
+    "kl_base_vs_ship": {
+      "n": 41962,
+      "mean": 9.19309268957897,
+      "median": 0.0,
+      "p90": 21.479698148652865,
+      "p99": 100.0,
+      "max": 100.0
+    },
+    "tv_by_domain": {
+      "gsm8k": {
+        "n": 13267,
+        "mean": 0.0935037972043809,
+        "median": 0.0,
+        "p90": 0.24185937100384022,
+        "p99": 1.0,
+        "max": 1.0
+      },
+      "math": {
+        "n": 14400,
+        "mean": 0.023365667589777598,
+        "median": 0.0,
+        "p90": 3.469446951953614e-17,
+        "p99": 1.0,
+        "max": 1.0
+      },
+      "mmlu": {
+        "n": 14295,
+        "mean": 0.0838420274041067,
+        "median": 0.0,
+        "p90": 0.21499949769912222,
+        "p99": 1.0,
+        "max": 1.0
+      }
+    },
+    "tv_hist": {
+      "0": 37179,
+      "0-.1": 1225,
+      ".1-.3": 592,
+      ".3-.5": 297,
+      ".5-.7": 226,
+      ".7-.9": 323,
+      ".9-1": 2120
+    },
+    "n_blowup_tv_gt_0.50": 2658,
+    "frac_blowup": 0.06334302464134217,
+    "wanted_token_killed_rate": 0.06515418712168153,
+    "sampled_token_killed_rate": 0.06594061293551308,
+    "n_killed_argmax": 2734,
+    "n_killed_sampled": 2767,
+    "tv_by_class": {
+      "digit": {
+        "n": 4499,
+        "mean_tv": 0.00028370802480168493,
+        "max_tv": 0.4378234991142019,
+        "killed_rate": 0.0
+      },
+      "alpha": {
+        "n": 21476,
+        "mean_tv": 0.1252497960833765,
+        "max_tv": 1.0,
+        "killed_rate": 0.12451108213820078
+      },
+      "filler": {
+        "n": 15987,
+        "mean_tv": 0.005276865544182647,
+        "max_tv": 1.0,
+        "killed_rate": 0.0037530493525989865
+      }
+    },
+    "answer_bearing_mean_tv": 0.1036050441998143,
+    "answer_bearing_killed_rate": 0.1029451395572666,
+    "filler_mean_tv": 0.005276865544182647,
+    "blindspot": {
+      "selftest_full_vs_full_max_tv": 0.0,
+      "prune_vs_prune_max_tv": 0.0,
+      "base_vs_ship_max_tv": 1.0
+    },
+    "layer_attribution": {
+      "bake_keepset_K": 16384,
+      "bake_full_vocab": 262144,
+      "tv_base_vs_bake": {
+        "n": 41962,
+        "mean": 0.05638360977470036,
+        "median": 0.0,
+        "p90": 0.00998925358731327,
+        "p99": 1.0,
+        "max": 1.0
+      },
+      "kl_base_vs_bake": {
+        "n": 41962,
+        "mean": 8.044559192434562,
+        "median": 0.0,
+        "p90": 6.837475221880575,
+        "p99": 100.0,
+        "max": 100.0
+      },
+      "tv_bake_vs_ship": {
+        "n": 41962,
+        "mean": 0.014241436314386303,
+        "median": 0.0,
+        "p90": 3.469446951953614e-17,
+        "p99": 0.8118960474544309,
+        "max": 1.0
+      },
+      "kl_bake_vs_ship": {
+        "n": 41962,
+        "mean": 2.4309815552090326,
+        "median": 0.0,
+        "p90": 1.1857920765301337e-17,
+        "p99": 100.0,
+        "max": 100.0
+      },
+      "tv_base_vs_bake_by_domain": {
+        "gsm8k": {
+          "n": 13267,
+          "mean": 0.0781920605383496,
+          "median": 0.0,
+          "p90": 0.025215676555092346,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "math": {
+          "n": 14400,
+          "mean": 0.02034314518543622,
+          "median": 0.0,
+          "p90": 2.7755575615628914e-17,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "mmlu": {
+          "n": 14295,
+          "mean": 0.07244866565466322,
+          "median": 0.0,
+          "p90": 0.12042057587897839,
+          "p99": 1.0,
+          "max": 1.0
+        }
+      },
+      "tv_bake_vs_ship_by_domain": {
+        "gsm8k": {
+          "n": 13267,
+          "mean": 0.023129655561661258,
+          "median": 0.0,
+          "p90": 5.551115123125783e-17,
+          "p99": 1.0,
+          "max": 1.0
+        },
+        "math": {
+          "n": 14400,
+          "mean": 0.003803440021023009,
+          "median": 0.0,
+          "p90": 6.938893903907228e-18,
+          "p99": 0.004459122236789085,
+          "max": 1.0
+        },
+        "mmlu": {
+          "n": 14295,
+          "mean": 0.016507063587617127,
+          "median": 0.0,
+          "p90": 5.551115123125783e-17,
+          "p99": 0.8743805540943792,
+          "max": 1.0
+        }
+      },
+      "n_killed_at_bake": 2315,
+      "n_killed_at_serve": 419,
+      "killed_at_bake_rate": 0.055168962394547445,
+      "killed_at_serve_rate": 0.009985224727134074,
+      "bake_nucleus_safe_rate": 0.9999285067441971,
+      "n_bake_unresolved": 0
+    },
+    "ship_support_min_in_topk": 17,
+    "n_positions_keepset_lt_topk": 1071,
+    "n_ship_unresolved": 0,
+    "ship_nucleus_safe_rate": 0.9997616891473238,
+    "n_nucleus_safe": 41952,
+    "any_nan": false,
+    "peak_mem_mib": 20507.26,
+    "elapsed_s": 2174.5,
+    "high_tv_reads": [
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 44,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " isomorphic",
+        "wanted_id": 48730,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " necessarily",
+        "ship_forced_p": 0.5804,
+        "sampled_tok": " isomorphic",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " isomorphic",
+            "id": 48730,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " necessarily",
+            "id": 12832,
+            "p": 0.5804
+          },
+          {
+            "tok": " not",
+            "id": 711,
+            "p": 0.1562
+          },
+          {
+            "tok": " is",
+            "id": 563,
+            "p": 0.1074
+          },
+          {
+            "tok": " isotopic",
+            "id": 107836,
+            "p": 0.0298
+          },
+          {
+            "tok": " [",
+            "id": 870,
+            "p": 0.0255
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 60,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " isomorphism",
+        "wanted_id": 43249,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " group",
+        "ship_forced_p": 0.7859,
+        "sampled_tok": " isomorphism",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " isomorphism",
+            "id": 43249,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " group",
+            "id": 2299,
+            "p": 0.7859
+          },
+          {
+            "tok": " non",
+            "id": 1908,
+            "p": 0.1283
+          },
+          {
+            "tok": " the",
+            "id": 506,
+            "p": 0.0731
+          },
+          {
+            "tok": " structural",
+            "id": 13718,
+            "p": 0.0127
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 105,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " Klein",
+        "wanted_id": 38220,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " cyclic",
+        "ship_forced_p": 0.4731,
+        "sampled_tok": " Klein",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " Klein",
+            "id": 38220,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " cyclic",
+            "id": 33318,
+            "p": 0.4731
+          },
+          {
+            "tok": " direct",
+            "id": 1982,
+            "p": 0.3685
+          },
+          {
+            "tok": " symmetric",
+            "id": 22506,
+            "p": 0.0772
+          },
+          {
+            "tok": " additive",
+            "id": 41124,
+            "p": 0.0468
+          },
+          {
+            "tok": " group",
+            "id": 2299,
+            "p": 0.0343
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 108,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": "group",
+        "wanted_id": 4043,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": "sided",
+        "ship_forced_p": 0.5195,
+        "sampled_tok": "group",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": "group",
+            "id": 4043,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": "sided",
+            "id": 42794,
+            "p": 0.5195
+          },
+          {
+            "tok": "sub",
+            "id": 2204,
+            "p": 0.2166
+          },
+          {
+            "tok": "order",
+            "id": 2400,
+            "p": 0.1023
+          },
+          {
+            "tok": "ring",
+            "id": 851,
+            "p": 0.0548
+          },
+          {
+            "tok": "color",
+            "id": 3001,
+            "p": 0.0236
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 262,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " isomorphic",
+        "wanted_id": 48730,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " is",
+        "ship_forced_p": 0.5325,
+        "sampled_tok": " isomorphic",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " isomorphic",
+            "id": 48730,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " is",
+            "id": 563,
+            "p": 0.5325
+          },
+          {
+            "tok": " (",
+            "id": 568,
+            "p": 0.4147
+          },
+          {
+            "tok": " a",
+            "id": 496,
+            "p": 0.0527
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 284,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " divides",
+        "wanted_id": 59529,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " must",
+        "ship_forced_p": 1.0,
+        "sampled_tok": " divides",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " divides",
+            "id": 59529,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " must",
+            "id": 1921,
+            "p": 1.0
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/anatomy/1",
+        "pos": 7,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " bone",
+        "wanted_id": 14761,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " specific",
+        "ship_forced_p": 1.0,
+        "sampled_tok": " bone",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " bone",
+            "id": 14761,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " specific",
+            "id": 3530,
+            "p": 1.0
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 191,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " Pigeon",
+        "wanted_id": 197581,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " **",
+        "ship_forced_p": 1.0,
+        "sampled_tok": " Pigeon",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " Pigeon",
+            "id": 197581,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " **",
+            "id": 5213,
+            "p": 1.0
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/anatomy/1",
+        "pos": 17,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " zyg",
+        "wanted_id": 166979,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " **",
+        "ship_forced_p": 0.9535,
+        "sampled_tok": " zyg",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " zyg",
+            "id": 166979,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " **",
+            "id": 5213,
+            "p": 0.9535
+          },
+          {
+            "tok": " *",
+            "id": 808,
+            "p": 0.0254
+          },
+          {
+            "tok": " sp",
+            "id": 892,
+            "p": 0.0211
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/anatomy/1",
+        "pos": 25,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " arch",
+        "wanted_id": 4667,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " (",
+        "ship_forced_p": 0.6353,
+        "sampled_tok": " arch",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " arch",
+            "id": 4667,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " (",
+            "id": 568,
+            "p": 0.6353
+          },
+          {
+            "tok": "arch",
+            "id": 1338,
+            "p": 0.1937
+          },
+          {
+            "tok": " process",
+            "id": 1657,
+            "p": 0.171
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 265,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " subgroup",
+        "wanted_id": 33898,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " direct",
+        "ship_forced_p": 0.7796,
+        "sampled_tok": " subgroup",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " subgroup",
+            "id": 33898,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " direct",
+            "id": 1982,
+            "p": 0.7796
+          },
+          {
+            "tok": " sub",
+            "id": 1159,
+            "p": 0.0681
+          },
+          {
+            "tok": " *",
+            "id": 808,
+            "p": 0.0413
+          },
+          {
+            "tok": " group",
+            "id": 2299,
+            "p": 0.0413
+          },
+          {
+            "tok": " proper",
+            "id": 2005,
+            "p": 0.0302
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/anatomy/1",
+        "pos": 23,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " zyg",
+        "wanted_id": 166979,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " characteristic",
+        "ship_forced_p": 0.5352,
+        "sampled_tok": " zyg",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " zyg",
+            "id": 166979,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " characteristic",
+            "id": 13629,
+            "p": 0.5352
+          },
+          {
+            "tok": " **",
+            "id": 5213,
+            "p": 0.3246
+          },
+          {
+            "tok": " structure",
+            "id": 3904,
+            "p": 0.1054
+          },
+          {
+            "tok": " \"",
+            "id": 623,
+            "p": 0.0126
+          },
+          {
+            "tok": " complete",
+            "id": 4133,
+            "p": 0.0111
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/abstract_algebra/0",
+        "pos": 292,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " divides",
+        "wanted_id": 59529,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " must",
+        "ship_forced_p": 0.2082,
+        "sampled_tok": " divides",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " divides",
+            "id": 59529,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " must",
+            "id": 1921,
+            "p": 0.2082
+          },
+          {
+            "tok": " divide",
+            "id": 19226,
+            "p": 0.1911
+          },
+          {
+            "tok": " does",
+            "id": 1677,
+            "p": 0.1753
+          },
+          {
+            "tok": " (",
+            "id": 568,
+            "p": 0.1107
+          },
+          {
+            "tok": " dividing",
+            "id": 35622,
+            "p": 0.0799
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/anatomy/1",
+        "pos": 19,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " bone",
+        "wanted_id": 14761,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " (",
+        "ship_forced_p": 0.9149,
+        "sampled_tok": " bone",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " bone",
+            "id": 14761,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " (",
+            "id": 568,
+            "p": 0.9149
+          },
+          {
+            "tok": " process",
+            "id": 1657,
+            "p": 0.0851
+          }
+        ]
+      },
+      {
+        "domain": "mmlu",
+        "prompt_id": "mmlu/anatomy/1",
+        "pos": 13,
+        "tv": 1.0,
+        "kl": 690.7755,
+        "wanted_tok": " articul",
+        "wanted_id": 70728,
+        "wanted_killed": true,
+        "wanted_base_p": 1.0,
+        "ship_forced_tok": " connects",
+        "ship_forced_p": 0.8834,
+        "sampled_tok": " articul",
+        "sampled_killed": true,
+        "base_top5": [
+          {
+            "tok": " articul",
+            "id": 70728,
+            "p": 1.0
+          }
+        ],
+        "ship_top5": [
+          {
+            "tok": " connects",
+            "id": 32407,
+            "p": 0.8834
+          },
+          {
+            "tok": " forms",
+            "id": 6667,
+            "p": 0.0931
+          },
+          {
+            "tok": "art",
+            "id": 661,
+            "p": 0.0235
+          }
+        ]
+      }
+    ]
+  },
+  "wandb_run_id": "86ro6fjv"
+}
