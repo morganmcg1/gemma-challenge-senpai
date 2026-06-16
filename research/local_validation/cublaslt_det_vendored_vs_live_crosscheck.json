@@ -1,0 +1,17 @@
+{
+  "purpose": "Prove kernel (c) in cublaslt_det_microbench.py (the verbatim-vendored matmul_persistent) is byte-identical to the LIVE vLLM 0.22.0 batch_invariant kernel, so the microbench's Triton-invariant numbers are exactly vLLM's kernel and not a faithful-copy approximation.",
+  "method": "Imported vllm.model_executor.layers.batch_invariant.matmul_persistent (live) and cublaslt_det_microbench._matmul_persistent_vendored (this script's copy) in the SAME process (same triton 3.6.0), ran both on 8 representative gemma-4-E4B-it decode shapes at M=1 bf16, asserted torch.equal.",
+  "env": {"venv": "/tmp/land-vllm-venv", "torch": "2.11.0+cu130", "triton": "3.6.0", "vllm": "0.22.0", "device": "NVIDIA A10G", "compute_capability": [8, 6]},
+  "shapes_M1_bf16": [
+    {"K": 2560, "N": 2048, "byte_identical": true, "max_abs": 0.0},
+    {"K": 2560, "N": 10240, "byte_identical": true, "max_abs": 0.0},
+    {"K": 10240, "N": 2560, "byte_identical": true, "max_abs": 0.0},
+    {"K": 2560, "N": 262144, "byte_identical": true, "max_abs": 0.0},
+    {"K": 2560, "N": 512, "byte_identical": true, "max_abs": 0.0},
+    {"K": 256, "N": 2560, "byte_identical": true, "max_abs": 0.0},
+    {"K": 2560, "N": 256, "byte_identical": true, "max_abs": 0.0},
+    {"K": 2048, "N": 2560, "byte_identical": true, "max_abs": 0.0}
+  ],
+  "all_byte_identical_vendored_vs_live": true,
+  "conclusion": "Vendored kernel == live vLLM 0.22.0 kernel, bit-for-bit, on all 8 shapes (max_abs=0). Kernel (c) timings in the microbench are vLLM's actual batch-invariant kernel."
+}

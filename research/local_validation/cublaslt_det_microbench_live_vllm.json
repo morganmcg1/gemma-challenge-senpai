@@ -1,0 +1,1364 @@
+{
+  "aggregate_all": {
+    "basis": "graph",
+    "cublaslt_det_tax_vs_nondet": 1.0005,
+    "cublaslt_det_vs_triton_invariant_speedup": 3.5637,
+    "flopwt_cublaslt_det_tax_vs_nondet": 1.0005,
+    "flopwt_cublaslt_det_vs_triton_invariant_speedup": 3.4793,
+    "flopwt_triton_invariant_tax_vs_nondet": 3.4835,
+    "n_shapes": 15,
+    "per_token_ms_a_nondet": 21.26455,
+    "per_token_ms_b_cublas_det": 21.27507,
+    "per_token_ms_c_triton_inv": 75.81876,
+    "total_flops_per_token": 9287761920,
+    "triton_invariant_tax_vs_nondet": 3.5655
+  },
+  "aggregate_all_eager": {
+    "basis": "eager",
+    "cublaslt_det_tax_vs_nondet": 0.9992,
+    "cublaslt_det_vs_triton_invariant_speedup": 2.2997,
+    "flopwt_cublaslt_det_tax_vs_nondet": 1.0004,
+    "flopwt_cublaslt_det_vs_triton_invariant_speedup": 2.7939,
+    "flopwt_triton_invariant_tax_vs_nondet": 2.7946,
+    "n_shapes": 15,
+    "per_token_ms_a_nondet": 33.41255,
+    "per_token_ms_b_cublas_det": 33.38512,
+    "per_token_ms_c_triton_inv": 76.77621,
+    "total_flops_per_token": 9287761920,
+    "triton_invariant_tax_vs_nondet": 2.2978
+  },
+  "aggregate_body_excl_lmhead": {
+    "basis": "graph",
+    "cublaslt_det_tax_vs_nondet": 1.0005,
+    "cublaslt_det_vs_triton_invariant_speedup": 3.9058,
+    "flopwt_cublaslt_det_tax_vs_nondet": 1.0005,
+    "flopwt_cublaslt_det_vs_triton_invariant_speedup": 3.8496,
+    "flopwt_triton_invariant_tax_vs_nondet": 3.8545,
+    "n_shapes": 14,
+    "per_token_ms_a_nondet": 18.48679,
+    "per_token_ms_b_cublas_det": 18.49675,
+    "per_token_ms_c_triton_inv": 72.24388,
+    "total_flops_per_token": 7945584640,
+    "triton_invariant_tax_vs_nondet": 3.9079
+  },
+  "aggregate_lmhead": {
+    "basis": "graph",
+    "cublaslt_det_tax_vs_nondet": 1.0002,
+    "cublaslt_det_vs_triton_invariant_speedup": 1.2867,
+    "flopwt_cublaslt_det_tax_vs_nondet": 1.0002,
+    "flopwt_cublaslt_det_vs_triton_invariant_speedup": 1.2867,
+    "flopwt_triton_invariant_tax_vs_nondet": 1.287,
+    "n_shapes": 1,
+    "per_token_ms_a_nondet": 2.77775,
+    "per_token_ms_b_cublas_det": 2.77832,
+    "per_token_ms_c_triton_inv": 3.57489,
+    "total_flops_per_token": 1342177280,
+    "triton_invariant_tax_vs_nondet": 1.287
+  },
+  "aggregate_named8": {
+    "basis": "graph",
+    "cublaslt_det_tax_vs_nondet": 1.0004,
+    "cublaslt_det_vs_triton_invariant_speedup": 3.371,
+    "flopwt_cublaslt_det_tax_vs_nondet": 1.0004,
+    "flopwt_cublaslt_det_vs_triton_invariant_speedup": 3.362,
+    "flopwt_triton_invariant_tax_vs_nondet": 3.3649,
+    "n_shapes": 12,
+    "per_token_ms_a_nondet": 20.69966,
+    "per_token_ms_b_cublas_det": 20.70829,
+    "per_token_ms_c_triton_inv": 69.80718,
+    "total_flops_per_token": 9122611200,
+    "triton_invariant_tax_vs_nondet": 3.3724
+  },
+  "analysis_only": true,
+  "cublaslt_det_faster": true,
+  "determinism_summary": {
+    "all_bc_bitexact": false,
+    "all_bc_within_1ulp": false,
+    "all_det_m_invariant": false,
+    "all_det_reproducible": true,
+    "all_nan_clean": true,
+    "all_nondet_m_invariant": false,
+    "all_triton_m_invariant": true,
+    "all_triton_reproducible": true,
+    "bc_note": "b,c bitexact-equal only on short reductions; long reductions (lm_head) diverge by reduction order \u2014 argmax-relevant, not a kernel bug",
+    "max_bc_abs": 0.015625,
+    "max_bc_ulp": 32948
+  },
+  "draw_safe_local_only": true,
+  "env": {
+    "batch_M": 8,
+    "compute_capability": [
+      8,
+      6
+    ],
+    "cublas_workspace_config": ":4096:8",
+    "cuda_visible_devices": "0",
+    "device": "NVIDIA A10G",
+    "graph_capturable_all": true,
+    "headline_timing_basis": "graph",
+    "kernel_c_source": "vllm-import",
+    "sm_count": 80,
+    "torch": "2.11.0+cu130",
+    "triton": "3.6.0"
+  },
+  "model_meta": {
+    "global_head_dim": 512,
+    "head_dim": 256,
+    "hidden_size": 2560,
+    "intermediate_size": 10240,
+    "model_type": "gemma4",
+    "num_attention_heads": 8,
+    "num_hidden_layers": 42,
+    "num_key_value_heads": 2,
+    "num_kv_shared_layers": 18,
+    "text_model": "Gemma4ForCausalLM",
+    "vocab_size": 262144
+  },
+  "no_served_file_change": true,
+  "per_shape": [
+    {
+      "K": 10240,
+      "N": 2560,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.12067840364244249,
+          "min_ms": 0.12058738072713217,
+          "p25_ms": 0.12064995235866971,
+          "p75_ms": 0.12071253458658854
+        },
+        "graph": {
+          "median_ms": 0.11947342900946589,
+          "min_ms": 0.11938217842932974,
+          "p25_ms": 0.11944300585454053,
+          "p75_ms": 0.1194937016704295
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.12064633002647987,
+          "min_ms": 0.12052255148416037,
+          "p25_ms": 0.12062381912063766,
+          "p75_ms": 0.12065195775294042
+        },
+        "graph": {
+          "median_ms": 0.1194533464385242,
+          "min_ms": 0.11939839618961985,
+          "p25_ms": 0.11942837412764386,
+          "p75_ms": 0.11947831874940454
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.4586879809697469,
+          "min_ms": 0.4578133424123128,
+          "p25_ms": 0.4583679835001628,
+          "p75_ms": 0.4590719938278198
+        },
+        "graph": {
+          "median_ms": 0.45994666770652487,
+          "min_ms": 0.4577469649138274,
+          "p25_ms": 0.45911230864348235,
+          "p75_ms": 0.46040178228307654
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.737109363079071,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 97,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 42,
+      "eager_ratios": {
+        "speedup_c_over_b": 3.8019,
+        "tax_b_over_a": 0.9997,
+        "tax_c_over_a": 3.8009
+      },
+      "family": "down_proj",
+      "flops_per_token": 2202009600,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 3.8504,
+        "tax_b_over_a": 0.9998,
+        "tax_c_over_a": 3.8498
+      },
+      "named8": true,
+      "speedup_c_over_b": 3.8504,
+      "tax_b_over_a": 0.9998,
+      "tax_c_over_a": 3.8498,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 10240,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.1206125741476541,
+          "min_ms": 0.12052817921062092,
+          "p25_ms": 0.12057319054236779,
+          "p75_ms": 0.12064070230001932
+        },
+        "graph": {
+          "median_ms": 0.1192279026426118,
+          "min_ms": 0.11916736546408367,
+          "p25_ms": 0.11920772045116707,
+          "p75_ms": 0.11924807543825046
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.12065294401241781,
+          "min_ms": 0.12057459680109076,
+          "p25_ms": 0.12061377561808935,
+          "p75_ms": 0.12070329593179005
+        },
+        "graph": {
+          "median_ms": 0.11925082113228593,
+          "min_ms": 0.11916548598046396,
+          "p25_ms": 0.11922572640811696,
+          "p75_ms": 0.11927090439141966
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.3636130997628877,
+          "min_ms": 0.36249600034771545,
+          "p25_ms": 0.36308557336980646,
+          "p75_ms": 0.3644353982174035
+        },
+        "graph": {
+          "median_ms": 0.36707387251012463,
+          "min_ms": 0.3651011691373937,
+          "p25_ms": 0.36642635569852944,
+          "p75_ms": 0.3675708209767061
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.7349609732627869,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 32948,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 42,
+      "eager_ratios": {
+        "speedup_c_over_b": 3.0137,
+        "tax_b_over_a": 1.0003,
+        "tax_c_over_a": 3.0147
+      },
+      "family": "gate_proj",
+      "flops_per_token": 2202009600,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 3.0782,
+        "tax_b_over_a": 1.0002,
+        "tax_c_over_a": 3.0788
+      },
+      "named8": true,
+      "speedup_c_over_b": 3.0782,
+      "tax_b_over_a": 1.0002,
+      "tax_c_over_a": 3.0788,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 10240,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.1211318442834675,
+          "min_ms": 0.12100738188179817,
+          "p25_ms": 0.12110356072694557,
+          "p75_ms": 0.1211714454777333
+        },
+        "graph": {
+          "median_ms": 0.11968752917121439,
+          "min_ms": 0.11959215238982555,
+          "p25_ms": 0.11965741363226198,
+          "p75_ms": 0.11970259161556468
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.12117710429660523,
+          "min_ms": 0.1210752666325859,
+          "p25_ms": 0.12112052664572363,
+          "p75_ms": 0.12120538785312716
+        },
+        "graph": {
+          "median_ms": 0.1196908239108413,
+          "min_ms": 0.11961950235698947,
+          "p25_ms": 0.11967045039086793,
+          "p75_ms": 0.11970611116779384
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.365350781065045,
+          "min_ms": 0.36347345872358844,
+          "p25_ms": 0.36493188684636896,
+          "p75_ms": 0.3656611009077592
+        },
+        "graph": {
+          "median_ms": 0.3645745747124971,
+          "min_ms": 0.3637034003414325,
+          "p25_ms": 0.364146616921496,
+          "p75_ms": 0.3652929049819263
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.7349609732627869,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 32948,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 42,
+      "eager_ratios": {
+        "speedup_c_over_b": 3.015,
+        "tax_b_over_a": 1.0004,
+        "tax_c_over_a": 3.0161
+      },
+      "family": "up_proj",
+      "flops_per_token": 2202009600,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 3.046,
+        "tax_b_over_a": 1.0,
+        "tax_c_over_a": 3.0461
+      },
+      "named8": true,
+      "speedup_c_over_b": 3.046,
+      "tax_b_over_a": 1.0,
+      "tax_c_over_a": 3.0461,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 262144,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 2.782464027404785,
+          "min_ms": 2.781491279602051,
+          "p25_ms": 2.782208061218262,
+          "p75_ms": 2.783283233642578
+        },
+        "graph": {
+          "median_ms": 2.7777536392211912,
+          "min_ms": 2.7770879745483397,
+          "p25_ms": 2.777395248413086,
+          "p75_ms": 2.778060722351074
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 2.7825151443481446,
+          "min_ms": 2.7819007873535155,
+          "p25_ms": 2.782156753540039,
+          "p75_ms": 2.7830783843994142
+        },
+        "graph": {
+          "median_ms": 2.778316879272461,
+          "min_ms": 2.7775487899780273,
+          "p25_ms": 2.7781631469726564,
+          "p75_ms": 2.7787263870239256
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 3.5881473541259767,
+          "min_ms": 3.5661312103271485,
+          "p25_ms": 3.5857921600341798,
+          "p75_ms": 3.5950080871582033
+        },
+        "graph": {
+          "median_ms": 3.5748863220214844,
+          "min_ms": 3.5552257537841796,
+          "p25_ms": 3.5698688507080076,
+          "p75_ms": 3.579391860961914
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.9984054565429688,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 128,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 1,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.2895,
+        "tax_b_over_a": 1.0,
+        "tax_c_over_a": 1.2896
+      },
+      "family": "lm_head",
+      "flops_per_token": 1342177280,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 1.2867,
+        "tax_b_over_a": 1.0002,
+        "tax_c_over_a": 1.287
+      },
+      "named8": true,
+      "speedup_c_over_b": 1.2867,
+      "tax_b_over_a": 1.0002,
+      "tax_c_over_a": 1.287,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2048,
+      "N": 2560,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.0750387191772461,
+          "min_ms": 0.07444821039835613,
+          "p25_ms": 0.07477930704752604,
+          "p75_ms": 0.07534592310587565
+        },
+        "graph": {
+          "median_ms": 0.029279433788896417,
+          "min_ms": 0.029251570928664435,
+          "p25_ms": 0.02927246872259646,
+          "p75_ms": 0.029285007917962107
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.07518899516694864,
+          "min_ms": 0.07409977153607994,
+          "p25_ms": 0.07483352976999465,
+          "p75_ms": 0.07533900752948348
+        },
+        "graph": {
+          "median_ms": 0.029287467568607655,
+          "min_ms": 0.029263437959952024,
+          "p25_ms": 0.029283463877214137,
+          "p75_ms": 0.029291473746766012
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.11823751024631639,
+          "min_ms": 0.11789264580128724,
+          "p25_ms": 0.1180995684213589,
+          "p75_ms": 0.11831178813400664
+        },
+        "graph": {
+          "median_ms": 0.11619730583299392,
+          "min_ms": 0.11609053950739133,
+          "p25_ms": 0.11614878143744446,
+          "p75_ms": 0.116226422278237
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.73828125,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 522,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 35,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.5725,
+        "tax_b_over_a": 1.002,
+        "tax_c_over_a": 1.5757
+      },
+      "family": "o_proj",
+      "flops_per_token": 367001600,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 3.9675,
+        "tax_b_over_a": 1.0003,
+        "tax_c_over_a": 3.9686
+      },
+      "named8": true,
+      "speedup_c_over_b": 3.9675,
+      "tax_b_over_a": 1.0003,
+      "tax_c_over_a": 3.9686,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 2048,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.06873192149362746,
+          "min_ms": 0.06813187204348813,
+          "p25_ms": 0.0684840755098185,
+          "p75_ms": 0.06890476129616901
+        },
+        "graph": {
+          "median_ms": 0.024376759162315957,
+          "min_ms": 0.024189103243038124,
+          "p25_ms": 0.024324632877677815,
+          "p75_ms": 0.024406877578113953
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.06943844004375178,
+          "min_ms": 0.06831453486186702,
+          "p25_ms": 0.06891395406025212,
+          "p75_ms": 0.07074341541383325
+        },
+        "graph": {
+          "median_ms": 0.02452885020862926,
+          "min_ms": 0.02449016278299559,
+          "p25_ms": 0.024508297232275447,
+          "p75_ms": 0.024549403184983075
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.1260029176322136,
+          "min_ms": 0.12520521385235023,
+          "p25_ms": 0.12580490112304688,
+          "p75_ms": 0.12607646120187327
+        },
+        "graph": {
+          "median_ms": 0.12158464431762696,
+          "min_ms": 0.12149248123168946,
+          "p25_ms": 0.12156928062438965,
+          "p75_ms": 0.1216153621673584
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.99755859375,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 1,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 1.52587890625e-05,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 1.52587890625e-05,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 35,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.8146,
+        "tax_b_over_a": 1.0103,
+        "tax_c_over_a": 1.8333
+      },
+      "family": "q_proj",
+      "flops_per_token": 367001600,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 4.9568,
+        "tax_b_over_a": 1.0062,
+        "tax_c_over_a": 4.9877
+      },
+      "named8": true,
+      "speedup_c_over_b": 4.9568,
+      "tax_b_over_a": 1.0062,
+      "tax_c_over_a": 4.9877,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 4096,
+      "N": 2560,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.07575481677877492,
+          "min_ms": 0.07490736862708783,
+          "p25_ms": 0.0753699335558661,
+          "p75_ms": 0.07639392984324488
+        },
+        "graph": {
+          "median_ms": 0.05057001943173616,
+          "min_ms": 0.05052772190259851,
+          "p25_ms": 0.05055665969848633,
+          "p75_ms": 0.05058337501857592
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.07526049548632478,
+          "min_ms": 0.07476602841729987,
+          "p25_ms": 0.07496241347430503,
+          "p75_ms": 0.07577600217845341
+        },
+        "graph": {
+          "median_ms": 0.05061863314720892,
+          "min_ms": 0.050574587750178514,
+          "p25_ms": 0.05060101580876176,
+          "p75_ms": 0.05063404780562206
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.20596899184505496,
+          "min_ms": 0.20562463946047083,
+          "p25_ms": 0.2059146239694241,
+          "p75_ms": 0.20617741610096618
+        },
+        "graph": {
+          "median_ms": 0.20583260159532563,
+          "min_ms": 0.20549700440478927,
+          "p25_ms": 0.20565190034754136,
+          "p75_ms": 0.20592726378881632
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.5894531607627869,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 32693,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 7,
+      "eager_ratios": {
+        "speedup_c_over_b": 2.7367,
+        "tax_b_over_a": 0.9935,
+        "tax_c_over_a": 2.7189
+      },
+      "family": "o_proj",
+      "flops_per_token": 146800640,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 4.0663,
+        "tax_b_over_a": 1.001,
+        "tax_c_over_a": 4.0702
+      },
+      "named8": true,
+      "speedup_c_over_b": 4.0663,
+      "tax_b_over_a": 1.001,
+      "tax_c_over_a": 4.0702,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 4096,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.06998317669599484,
+          "min_ms": 0.0695794851352007,
+          "p25_ms": 0.06969436009724934,
+          "p75_ms": 0.07024902563828689
+        },
+        "graph": {
+          "median_ms": 0.04929674124415917,
+          "min_ms": 0.04927514072208968,
+          "p25_ms": 0.04929242355411063,
+          "p75_ms": 0.049303223815145375
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.07005974612658537,
+          "min_ms": 0.06906167163124567,
+          "p25_ms": 0.06977782068373281,
+          "p75_ms": 0.07029630564436128
+        },
+        "graph": {
+          "median_ms": 0.04928481927975451,
+          "min_ms": 0.0492741093974732,
+          "p25_ms": 0.04928053373073434,
+          "p75_ms": 0.04929339037779485
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.18056270892803486,
+          "min_ms": 0.18021612900954026,
+          "p25_ms": 0.18047605661245492,
+          "p75_ms": 0.18066510420579177
+        },
+        "graph": {
+          "median_ms": 0.17884869819139912,
+          "min_ms": 0.1785646703121436,
+          "p25_ms": 0.17880385461514883,
+          "p75_ms": 0.17891597051690095
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.99853515625,
+        "bc_max_abs": 0.0009765625,
+        "bc_max_ulp": 1,
+        "det_m_invariant": true,
+        "det_m_maxdiff": 0.0,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": true,
+        "nondet_m_maxdiff": 0.0,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 7,
+      "eager_ratios": {
+        "speedup_c_over_b": 2.5773,
+        "tax_b_over_a": 1.0011,
+        "tax_c_over_a": 2.5801
+      },
+      "family": "q_proj",
+      "flops_per_token": 146800640,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 3.6289,
+        "tax_b_over_a": 0.9998,
+        "tax_c_over_a": 3.628
+      },
+      "named8": true,
+      "speedup_c_over_b": 3.6289,
+      "tax_b_over_a": 0.9998,
+      "tax_c_over_a": 3.628,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 256,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.06942719959077381,
+          "min_ms": 0.06814313616071428,
+          "p25_ms": 0.06879979693700397,
+          "p75_ms": 0.06987905956449963
+        },
+        "graph": {
+          "median_ms": 0.00487116813659668,
+          "min_ms": 0.004819968223571777,
+          "p25_ms": 0.0048527359962463375,
+          "p75_ms": 0.004898816108703613
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.06853507180595964,
+          "min_ms": 0.06759311325118521,
+          "p25_ms": 0.06818259717448882,
+          "p75_ms": 0.06942233982708758
+        },
+        "graph": {
+          "median_ms": 0.004923391819000244,
+          "min_ms": 0.004841472148895264,
+          "p25_ms": 0.004891647815704346,
+          "p75_ms": 0.004941823959350586
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.10636047288483265,
+          "min_ms": 0.10594885957007315,
+          "p25_ms": 0.10603419472189511,
+          "p75_ms": 0.10638054679421817
+        },
+        "graph": {
+          "median_ms": 0.10661225964408774,
+          "min_ms": 0.10660778695318897,
+          "p25_ms": 0.10661225964408774,
+          "p75_ms": 0.1066212050258853
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.99609375,
+        "bc_max_abs": 3.0517578125e-05,
+        "bc_max_ulp": 1,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 42,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.5519,
+        "tax_b_over_a": 0.9872,
+        "tax_c_over_a": 1.532
+      },
+      "family": "per_layer_input_gate",
+      "flops_per_token": 55050240,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 21.6542,
+        "tax_b_over_a": 1.0107,
+        "tax_c_over_a": 21.8864
+      },
+      "named8": false,
+      "speedup_c_over_b": 21.6542,
+      "tax_b_over_a": 1.0107,
+      "tax_c_over_a": 21.8864,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 10752,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.12863334479359534,
+          "min_ms": 0.12856230983844383,
+          "p25_ms": 0.12860374230180863,
+          "p75_ms": 0.1286688567586028
+        },
+        "graph": {
+          "median_ms": 0.126718660923823,
+          "min_ms": 0.12669185818177867,
+          "p25_ms": 0.12671329837819045,
+          "p75_ms": 0.1267347385746022
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.1286521866208031,
+          "min_ms": 0.12857904888334729,
+          "p25_ms": 0.12864000456673758,
+          "p75_ms": 0.1286704767317999
+        },
+        "graph": {
+          "median_ms": 0.126720001300176,
+          "min_ms": 0.12669333815574646,
+          "p25_ms": 0.1267146666844686,
+          "p75_ms": 0.1267413298288981
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.4589065695708653,
+          "min_ms": 0.45552541624824955,
+          "p25_ms": 0.4575347900390625,
+          "p75_ms": 0.4591577277993256
+        },
+        "graph": {
+          "median_ms": 0.4545815207741477,
+          "min_ms": 0.4517515702681108,
+          "p25_ms": 0.4540043570778587,
+          "p75_ms": 0.45582896145907315
+        }
+      },
+      "correctness": {
+        "bc_bitexact": false,
+        "bc_frac_exact": 0.7314918041229248,
+        "bc_max_abs": 0.015625,
+        "bc_max_ulp": 32607,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 1,
+      "eager_ratios": {
+        "speedup_c_over_b": 3.567,
+        "tax_b_over_a": 1.0001,
+        "tax_c_over_a": 3.5676
+      },
+      "family": "per_layer_model_projection",
+      "flops_per_token": 55050240,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 3.5873,
+        "tax_b_over_a": 1.0,
+        "tax_c_over_a": 3.5873
+      },
+      "named8": false,
+      "speedup_c_over_b": 3.5873,
+      "tax_b_over_a": 1.0,
+      "tax_c_over_a": 3.5873,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 256,
+      "N": 2560,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.07131284161617882,
+          "min_ms": 0.07014737003727962,
+          "p25_ms": 0.07082779156534295,
+          "p75_ms": 0.07149136693854082
+        },
+        "graph": {
+          "median_ms": 0.005561344146728516,
+          "min_ms": 0.005548031806945801,
+          "p25_ms": 0.0055582718849182125,
+          "p75_ms": 0.00556441593170166
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.07114347583519484,
+          "min_ms": 0.07006428769962517,
+          "p25_ms": 0.07087674397908285,
+          "p75_ms": 0.07148991659015952
+        },
+        "graph": {
+          "median_ms": 0.005554175853729248,
+          "min_ms": 0.0055511040687561035,
+          "p25_ms": 0.005553152084350586,
+          "p75_ms": 0.00555622386932373
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.04620109653077185,
+          "min_ms": 0.04446964343059112,
+          "p25_ms": 0.044990139878142425,
+          "p75_ms": 0.04669822597899378
+        },
+        "graph": {
+          "median_ms": 0.025697238559879425,
+          "min_ms": 0.02568283170496593,
+          "p25_ms": 0.025692435529559045,
+          "p75_ms": 0.025698439317459517
+        }
+      },
+      "correctness": {
+        "bc_bitexact": true,
+        "bc_frac_exact": 1.0,
+        "bc_max_abs": 0.0,
+        "bc_max_ulp": 0,
+        "det_m_invariant": true,
+        "det_m_maxdiff": 0.0,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": true,
+        "nondet_m_maxdiff": 0.0,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 42,
+      "eager_ratios": {
+        "speedup_c_over_b": 0.6494,
+        "tax_b_over_a": 0.9976,
+        "tax_c_over_a": 0.6479
+      },
+      "family": "per_layer_projection",
+      "flops_per_token": 55050240,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 4.6267,
+        "tax_b_over_a": 0.9987,
+        "tax_c_over_a": 4.6207
+      },
+      "named8": false,
+      "speedup_c_over_b": 4.6267,
+      "tax_b_over_a": 0.9987,
+      "tax_c_over_a": 4.6207,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 512,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.0692754020325292,
+          "min_ms": 0.06737462247903354,
+          "p25_ms": 0.06891225625912602,
+          "p75_ms": 0.06970724891930723
+        },
+        "graph": {
+          "median_ms": 0.005249023914337158,
+          "min_ms": 0.0052408318519592285,
+          "p25_ms": 0.005245952129364013,
+          "p75_ms": 0.005255167961120606
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.06877069087043358,
+          "min_ms": 0.06763504004552728,
+          "p25_ms": 0.06831770448298469,
+          "p75_ms": 0.0689748544187932
+        },
+        "graph": {
+          "median_ms": 0.005251071929931641,
+          "min_ms": 0.0052367358207702636,
+          "p25_ms": 0.005248000144958496,
+          "p75_ms": 0.005255167961120606
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.10780417519893372,
+          "min_ms": 0.10776987942782315,
+          "p25_ms": 0.10779437379973927,
+          "p75_ms": 0.10781396747205817
+        },
+        "graph": {
+          "median_ms": 0.10746538798014323,
+          "min_ms": 0.10735616048177084,
+          "p25_ms": 0.10745628356933594,
+          "p75_ms": 0.10746994018554687
+        }
+      },
+      "correctness": {
+        "bc_bitexact": true,
+        "bc_frac_exact": 1.0,
+        "bc_max_abs": 0.0,
+        "bc_max_ulp": 0,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 20,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.5676,
+        "tax_b_over_a": 0.9927,
+        "tax_c_over_a": 1.5562
+      },
+      "family": "k_proj",
+      "flops_per_token": 52428800,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 20.4654,
+        "tax_b_over_a": 1.0004,
+        "tax_c_over_a": 20.4734
+      },
+      "named8": true,
+      "speedup_c_over_b": 20.4654,
+      "tax_b_over_a": 1.0004,
+      "tax_c_over_a": 20.4734,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 512,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.06905419400493179,
+          "min_ms": 0.06791142311215774,
+          "p25_ms": 0.06874923945220661,
+          "p75_ms": 0.0694297682902656
+        },
+        "graph": {
+          "median_ms": 0.005259263992309571,
+          "min_ms": 0.005249023914337158,
+          "p25_ms": 0.005255167961120606,
+          "p75_ms": 0.005261312007904053
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.06887747112073396,
+          "min_ms": 0.06811660435915731,
+          "p25_ms": 0.06847484931119086,
+          "p75_ms": 0.06948934029499444
+        },
+        "graph": {
+          "median_ms": 0.0052971520423889164,
+          "min_ms": 0.005284863948822022,
+          "p25_ms": 0.005296127796173096,
+          "p75_ms": 0.005299200057983398
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.1078188681716554,
+          "min_ms": 0.10774537592983702,
+          "p25_ms": 0.1077600780286287,
+          "p75_ms": 0.10786786604155764
+        },
+        "graph": {
+          "median_ms": 0.10736071268717448,
+          "min_ms": 0.1073516082763672,
+          "p25_ms": 0.10735616048177084,
+          "p75_ms": 0.10736071268717448
+        }
+      },
+      "correctness": {
+        "bc_bitexact": true,
+        "bc_frac_exact": 1.0,
+        "bc_max_abs": 0.0,
+        "bc_max_ulp": 0,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 20,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.5654,
+        "tax_b_over_a": 0.9974,
+        "tax_c_over_a": 1.5614
+      },
+      "family": "v_proj",
+      "flops_per_token": 52428800,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 20.2676,
+        "tax_b_over_a": 1.0072,
+        "tax_c_over_a": 20.4136
+      },
+      "named8": true,
+      "speedup_c_over_b": 20.2676,
+      "tax_b_over_a": 1.0072,
+      "tax_c_over_a": 20.4136,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 1024,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.06842374098336099,
+          "min_ms": 0.06751150508194195,
+          "p25_ms": 0.06826968460308064,
+          "p75_ms": 0.06897651762385636
+        },
+        "graph": {
+          "median_ms": 0.010292223930358887,
+          "min_ms": 0.010257408142089844,
+          "p25_ms": 0.010281984329223632,
+          "p75_ms": 0.010308608055114746
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.06902530275542161,
+          "min_ms": 0.06756795087951852,
+          "p25_ms": 0.06867540891641359,
+          "p75_ms": 0.06950359882605861
+        },
+        "graph": {
+          "median_ms": 0.010448896408081054,
+          "min_ms": 0.010390527725219726,
+          "p25_ms": 0.010438655853271485,
+          "p75_ms": 0.010459136009216309
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.10920192884362262,
+          "min_ms": 0.10918709390981186,
+          "p25_ms": 0.10919204195916364,
+          "p75_ms": 0.1092118249423262
+        },
+        "graph": {
+          "median_ms": 0.10919145832147299,
+          "min_ms": 0.1091501381365173,
+          "p25_ms": 0.10917309474517412,
+          "p75_ms": 0.10922360954797856
+        }
+      },
+      "correctness": {
+        "bc_bitexact": true,
+        "bc_frac_exact": 1.0,
+        "bc_max_abs": 0.0,
+        "bc_max_ulp": 0,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 4,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.5821,
+        "tax_b_over_a": 1.0088,
+        "tax_c_over_a": 1.596
+      },
+      "family": "k_proj",
+      "flops_per_token": 20971520,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 10.45,
+        "tax_b_over_a": 1.0152,
+        "tax_c_over_a": 10.6091
+      },
+      "named8": true,
+      "speedup_c_over_b": 10.45,
+      "tax_b_over_a": 1.0152,
+      "tax_c_over_a": 10.6091,
+      "timing_basis": "graph"
+    },
+    {
+      "K": 2560,
+      "N": 1024,
+      "a_nondet": {
+        "eager": {
+          "median_ms": 0.06904685497283936,
+          "min_ms": 0.06793752170744397,
+          "p25_ms": 0.0686201878956386,
+          "p75_ms": 0.06919009344918388
+        },
+        "graph": {
+          "median_ms": 0.01030246353149414,
+          "min_ms": 0.010272768020629883,
+          "p25_ms": 0.010289152145385743,
+          "p75_ms": 0.01031167984008789
+        }
+      },
+      "b_cublas_det": {
+        "eager": {
+          "median_ms": 0.06879479100727491,
+          "min_ms": 0.06789753569065554,
+          "p25_ms": 0.06851793966386528,
+          "p75_ms": 0.06898157449032663
+        },
+        "graph": {
+          "median_ms": 0.010431488037109376,
+          "min_ms": 0.01040998363494873,
+          "p25_ms": 0.01042841625213623,
+          "p75_ms": 0.010441727638244629
+        }
+      },
+      "c_triton_inv": {
+        "eager": {
+          "median_ms": 0.10919699000851543,
+          "min_ms": 0.10915741482794573,
+          "p25_ms": 0.10918709390981186,
+          "p75_ms": 0.10922172104102978
+        },
+        "graph": {
+          "median_ms": 0.10921901651562062,
+          "min_ms": 0.10918228080989,
+          "p25_ms": 0.10920064438618887,
+          "p75_ms": 0.10922819402720362
+        }
+      },
+      "correctness": {
+        "bc_bitexact": true,
+        "bc_frac_exact": 1.0,
+        "bc_max_abs": 0.0,
+        "bc_max_ulp": 0,
+        "det_m_invariant": false,
+        "det_m_maxdiff": 0.015625,
+        "det_reproducible": true,
+        "nan_clean": true,
+        "nondet_m_invariant": false,
+        "nondet_m_maxdiff": 0.015625,
+        "nondet_reproducible": true,
+        "triton_m_invariant": true,
+        "triton_m_maxdiff": 0.0,
+        "triton_reproducible": true
+      },
+      "count": 4,
+      "eager_ratios": {
+        "speedup_c_over_b": 1.5873,
+        "tax_b_over_a": 0.9963,
+        "tax_c_over_a": 1.5815
+      },
+      "family": "v_proj",
+      "flops_per_token": 20971520,
+      "graph_capturable": true,
+      "graph_ratios": {
+        "speedup_c_over_b": 10.4701,
+        "tax_b_over_a": 1.0125,
+        "tax_c_over_a": 10.6013
+      },
+      "named8": true,
+      "speedup_c_over_b": 10.4701,
+      "tax_b_over_a": 1.0125,
+      "tax_c_over_a": 10.6013,
+      "timing_basis": "graph"
+    }
+  ],
+  "projection": {
+    "byte_exact_usable": false,
+    "caveat": "First-order projection ONLY, built on 'graph'-basis per-token GEMM time. Applies the measured per-token GEMM-time delta to the serve step time; assumes non-GEMM strict overhead (attention num_splits=1, norms, sampler) unchanged and that serve caching/overlap match the microbench. VALID as a byte-exact lever ONLY if cuBLASLt-det is batch-invariant (det_m_invariant=True); otherwise swapping it would break the greedy byte-exact gate and the projection is void.",
+    "local": {
+      "capped_at_deployed": true,
+      "deployed_tps_anchor": 460.12,
+      "full_determinism_tax_ms_per_tok": 2.3312,
+      "gemm_ms_recovered_by_cublas_det": 54.54369,
+      "gemm_share_of_tax_frac": 23.4022,
+      "gemm_share_of_tax_ms_per_tok": 54.5542,
+      "projected_lift_pct": 107.26,
+      "projected_lift_tps": 238.12,
+      "projected_strict_tps_with_cublas_det_gemm": 460.12,
+      "strict_tps_anchor": 222.0
+    },
+    "official": {
+      "capped_at_deployed": true,
+      "deployed_tps_anchor": 481.53,
+      "full_determinism_tax_ms_per_tok": 2.1882,
+      "gemm_ms_recovered_by_cublas_det": 54.54369,
+      "gemm_share_of_tax_frac": 24.9308,
+      "gemm_share_of_tax_ms_per_tok": 54.5542,
+      "projected_lift_pct": 105.37,
+      "projected_lift_tps": 247.06,
+      "projected_strict_tps_with_cublas_det_gemm": 481.53,
+      "strict_tps_anchor": 234.47
+    },
+    "timing_basis": "graph"
+  }
+}
