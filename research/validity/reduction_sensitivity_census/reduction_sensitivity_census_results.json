@@ -1,0 +1,396 @@
+{
+  "agent": "ubel",
+  "analysis_only": true,
+  "anchors": {
+    "attention_official_tax_pct": 5.1,
+    "deployed_tps": 481.53,
+    "global_tax_pct": 48.0,
+    "predicted_surgical_tps": 456.98,
+    "private_delta_pct": 4.295
+  },
+  "argmax_flip_free_op_fraction": 0.9,
+  "attention_in_must_pin": true,
+  "compose": {
+    "argmax_flip_free_op_fraction": 0.9,
+    "attention_in_must_pin": true,
+    "attention_ingest_flip_positive": true,
+    "attention_margin_flip_positive": true,
+    "drafter_in_must_pin": false,
+    "must_be_deterministic": [
+      "attention_reduction"
+    ],
+    "n_layers": 42,
+    "n_ops_must_pin": 1,
+    "n_ops_total": 10,
+    "per_op": {
+      "attention_reduction": {
+        "frac_steps_argmax_flip": 0.005242463958060288,
+        "frac_steps_bitdiff": 0.9508519003931848,
+        "free_basis": "NONE -- occupancy-dependent reduction; EMPIRICAL flip rate",
+        "kind": "flash_split_kv_reduction",
+        "max_logit_gap_at_flip": 0.5000001192092896,
+        "min_logit_gap_at_flip": 0.0
+      },
+      "down_proj": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (n>=2048 -> atomic-add off); distribution-robust",
+        "heuristic_use_atomic_add": false,
+        "kind": "int4_marlin_body",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "down_proj"
+      },
+      "gate_proj": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (n>=2048 -> atomic-add off); distribution-robust",
+        "heuristic_use_atomic_add": false,
+        "kind": "int4_marlin_body",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "gate_up_proj"
+      },
+      "k_proj": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (n>=2048 -> atomic-add off); distribution-robust",
+        "heuristic_use_atomic_add": false,
+        "kind": "int4_marlin_body",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "qkv_proj"
+      },
+      "lm_head": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (#384 maxdiff=0); distribution-robust",
+        "kind": "int4_marlin_lmhead",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "lm_head"
+      },
+      "mtp_drafter": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 1.0,
+        "free_basis": "greedy-spec acceptance invariance theorem; distribution-robust",
+        "kind": "bf16_mtp_drafter",
+        "max_logit_gap_at_flip": null
+      },
+      "o_proj": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (n>=2048 -> atomic-add off); distribution-robust",
+        "heuristic_use_atomic_add": false,
+        "kind": "int4_marlin_body",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "o_proj"
+      },
+      "q_proj": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (n>=2048 -> atomic-add off); distribution-robust",
+        "heuristic_use_atomic_add": false,
+        "kind": "int4_marlin_body",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "qkv_proj"
+      },
+      "up_proj": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (n>=2048 -> atomic-add off); distribution-robust",
+        "heuristic_use_atomic_add": false,
+        "kind": "int4_marlin_body",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "gate_up_proj"
+      },
+      "v_proj": {
+        "frac_steps_argmax_flip": 0.0,
+        "frac_steps_bitdiff": 0.0,
+        "free_basis": "kernel M-invariance (n>=2048 -> atomic-add off); distribution-robust",
+        "heuristic_use_atomic_add": false,
+        "kind": "int4_marlin_body",
+        "max_logit_gap_at_flip": null,
+        "realized_by": "qkv_proj"
+      }
+    },
+    "private_delta_pct_frame": 4.295,
+    "projected_tps_minimal_pin": 456.98,
+    "projected_tps_minimal_pin_basis": "#484 predicted_surgical_tps: pin ONLY the attention reduction (off-the-shelf BI attention, 5.10% tax), drafter+body+lm_head run fast. #363 shows a TARGETED fixed-split attention pin is ~free (could approach 481.53).",
+    "public_decode_steps": 3052,
+    "rule_of_three_attention_flip_ub": null,
+    "verdict": "CENSUS (LOCAL, analysis_only). Of 10 decode ops, n_ops_must_pin=1 (=['attention_reduction']); argmax_flip_free_op_fraction=0.900. attention_in_must_pin=True (margin-proxy flip_frac=0.00524 over 3052 public decode steps; faithful end-to-end splitkv_off identical_to_default=0.0859). drafter_in_must_pin=False (acceptance-invariance theorem; bitdiff>0 yet flip=0 -- the byte-exact!=argmax-stable poster child). int4 Marlin body (fused qkv/gate_up, o, down) + pruned lm_head are bit-identical fast-vs-invariant (M-invariant, n>=2048 atomic-off; positive control: a perturbed input flips the output bytes) -> free by KERNEL PROPERTY, not public luck. projected_tps_minimal_pin=456.98 (#484 predicted_surgical_tps: pin ONLY the attention reduction (off-the-shelf BI attention, 5.10% tax), drafter+body+lm_head run fast. #363 shows a TARGETED fixed-split attention pin is ~free (could approach 481.53).). HONESTY: the must-pin SET is kernel/theorem-grounded (distribution-robust); only attention's flip RATE is empirical -- a public flip is a LOWER bound on private (cite 4.295% private-Delta, #379), but attention is ALREADY must-pin so private can only GROW the set, never shrink below {attention}."
+  },
+  "created_at": "20260616T133307Z",
+  "drafter": {
+    "drafter_in_must_pin": false,
+    "e_accept_differs": true,
+    "e_accept_drafter_A": 4.133198789101917,
+    "e_accept_drafter_B": 2.173474801061008,
+    "emitted_equal_across_drafters": true,
+    "emitted_equals_target_argmax": true,
+    "n_positions": 4096,
+    "note": "two random drafters over a fixed target-argmax oracle emit identical sequences => drafter non-determinism is a SPEED lever only; e_accept differs but emitted tokens do not. Corroborated by greedy_determinism e_accept variance with within-config 128/128 identity.",
+    "phase": "drafter"
+  },
+  "drafter_in_must_pin": false,
+  "ingest": {
+    "atomic_on_breaks_determinism": true,
+    "atomic_on_identical_to_default_frac": 0.1116,
+    "attention_flips_end_to_end": true,
+    "available": true,
+    "default_bit_exact_run_to_run": true,
+    "default_official_128_128": true,
+    "deployed_keeps_atomic_off": true,
+    "phase": "ingest",
+    "source": "/workspace/senpai/target/research/validity/greedy_determinism/captures/report.json",
+    "splitkv_off_identical_to_default_frac": 0.0859,
+    "splitkv_off_vs_default_onset": {
+      "frac_prompts_diverged": 0.9140625,
+      "n_diverged": 117,
+      "n_prompts": 128,
+      "onset_max": 504,
+      "onset_median": 145,
+      "onset_min": 9
+    }
+  },
+  "kind": "reduction-sensitivity-census",
+  "margin": {
+    "any_nan": false,
+    "attention_frac_steps_argmax_flip": 0.005242463958060288,
+    "attention_frac_steps_bitdiff": 0.9508519003931848,
+    "attention_max_logit_gap_at_flip": 0.5000001192092896,
+    "attention_median_logit_gap_at_flip": 0.125,
+    "attention_min_logit_gap_at_flip": 0.0,
+    "det_gen_byte_identity": 1.0,
+    "det_gen_positions": 192,
+    "det_ver_argmax_identity": 1.0,
+    "det_ver_positions": 192,
+    "effective_verify_width": 8,
+    "elapsed_s": 551.7,
+    "flip_examples": [
+      {
+        "absolute_position": 273,
+        "m8_argmax": 49644,
+        "margin_m8": 0.125,
+        "prompt_index": 5,
+        "ref_tok": 138
+      },
+      {
+        "absolute_position": 168,
+        "m8_argmax": 3759,
+        "margin_m8": 0.125,
+        "prompt_index": 7,
+        "ref_tok": 600
+      },
+      {
+        "absolute_position": 263,
+        "m8_argmax": 5471,
+        "margin_m8": 0.125,
+        "prompt_index": 19,
+        "ref_tok": 818
+      },
+      {
+        "absolute_position": 174,
+        "m8_argmax": 42988,
+        "margin_m8": 0.125,
+        "prompt_index": 37,
+        "ref_tok": 23420
+      },
+      {
+        "absolute_position": 274,
+        "m8_argmax": 144433,
+        "margin_m8": 0.0625,
+        "prompt_index": 41,
+        "ref_tok": 653
+      },
+      {
+        "absolute_position": 275,
+        "m8_argmax": 236840,
+        "margin_m8": 0.125,
+        "prompt_index": 63,
+        "ref_tok": 107
+      },
+      {
+        "absolute_position": 269,
+        "m8_argmax": 236772,
+        "margin_m8": 0.0,
+        "prompt_index": 66,
+        "ref_tok": 532
+      },
+      {
+        "absolute_position": 203,
+        "m8_argmax": 236814,
+        "margin_m8": 0.125,
+        "prompt_index": 73,
+        "ref_tok": 236806
+      },
+      {
+        "absolute_position": 261,
+        "m8_argmax": 236771,
+        "margin_m8": 0.125,
+        "prompt_index": 103,
+        "ref_tok": 236748
+      },
+      {
+        "absolute_position": 264,
+        "m8_argmax": 1420,
+        "margin_m8": 0.12499994039535522,
+        "prompt_index": 103,
+        "ref_tok": 989
+      },
+      {
+        "absolute_position": 164,
+        "m8_argmax": 1657,
+        "margin_m8": 0.125,
+        "prompt_index": 107,
+        "ref_tok": 609
+      },
+      {
+        "absolute_position": 257,
+        "m8_argmax": 5896,
+        "margin_m8": 0.125,
+        "prompt_index": 116,
+        "ref_tok": 1504
+      },
+      {
+        "absolute_position": 260,
+        "m8_argmax": 10218,
+        "margin_m8": 0.125,
+        "prompt_index": 116,
+        "ref_tok": 1995
+      },
+      {
+        "absolute_position": 278,
+        "m8_argmax": 236743,
+        "margin_m8": 0.125,
+        "prompt_index": 116,
+        "ref_tok": 609
+      },
+      {
+        "absolute_position": 252,
+        "m8_argmax": 524,
+        "margin_m8": 0.5000001192092896,
+        "prompt_index": 119,
+        "ref_tok": 507
+      },
+      {
+        "absolute_position": 272,
+        "m8_argmax": 643,
+        "margin_m8": 0.125,
+        "prompt_index": 121,
+        "ref_tok": 725
+      }
+    ],
+    "margin_median": 3.0,
+    "margin_min": 0.0,
+    "margin_model_full_vocab": true,
+    "margin_p01": 0.0,
+    "margin_p05": 0.25,
+    "model_dir": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+    "n_bitdiff": 2902,
+    "n_flip": 16,
+    "n_new": 24,
+    "n_positions": 3052,
+    "n_prompts": 128,
+    "peak_mem_mib": 17812.35,
+    "phase": "margin",
+    "rule_of_three_flip_ub": null,
+    "topk": 8
+  },
+  "microbench": {
+    "all_body_lmhead_m_invariant": true,
+    "any_nan": false,
+    "atomic_runtorun_inert": true,
+    "gpu": {
+      "name": "NVIDIA A10G",
+      "sm_count": 80,
+      "total_mem_gib": 22.06
+    },
+    "harness_is_sensitive": true,
+    "n_trials": 24,
+    "peak_mem_mib": 802.69,
+    "per_gemm": {
+      "down_proj": {
+        "atomic_runtorun_byte_rate": 1.0,
+        "frac_steps_bitdiff": 0.0,
+        "harness_sensitivity_byte_rate": 0.875,
+        "heuristic_use_atomic_add": false,
+        "m_invariant_byte_rate": 1.0,
+        "max_abs_diff_vs_perrow": 0.0,
+        "size_k": 10240,
+        "size_n": 2560
+      },
+      "gate_up_proj": {
+        "atomic_runtorun_byte_rate": 1.0,
+        "frac_steps_bitdiff": 0.0,
+        "harness_sensitivity_byte_rate": 0.875,
+        "heuristic_use_atomic_add": false,
+        "m_invariant_byte_rate": 1.0,
+        "max_abs_diff_vs_perrow": 0.0,
+        "size_k": 2560,
+        "size_n": 20480
+      },
+      "lm_head": {
+        "atomic_runtorun_byte_rate": 1.0,
+        "frac_steps_bitdiff": 0.0,
+        "harness_sensitivity_byte_rate": 0.875,
+        "heuristic_use_atomic_add": false,
+        "m_invariant_byte_rate": 1.0,
+        "max_abs_diff_vs_perrow": 0.0,
+        "size_k": 2560,
+        "size_n": 16384
+      },
+      "o_proj": {
+        "atomic_runtorun_byte_rate": 1.0,
+        "frac_steps_bitdiff": 0.0,
+        "harness_sensitivity_byte_rate": 0.875,
+        "heuristic_use_atomic_add": false,
+        "m_invariant_byte_rate": 1.0,
+        "max_abs_diff_vs_perrow": 0.0,
+        "size_k": 2048,
+        "size_n": 2560
+      },
+      "qkv_proj": {
+        "atomic_runtorun_byte_rate": 1.0,
+        "frac_steps_bitdiff": 0.0,
+        "harness_sensitivity_byte_rate": 0.875,
+        "heuristic_use_atomic_add": false,
+        "m_invariant_byte_rate": 1.0,
+        "max_abs_diff_vs_perrow": 0.0,
+        "size_k": 2560,
+        "size_n": 3072
+      }
+    },
+    "phase": "microbench"
+  },
+  "must_be_deterministic": [
+    "attention_reduction"
+  ],
+  "n_ops_must_pin": 1,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "pr": 491,
+  "projected_tps_minimal_pin": 456.98,
+  "reduction_census_self_test_passes": true,
+  "selftest": {
+    "conditions": {
+      "a_margin_has_positions": true,
+      "a_margin_nan_clean": true,
+      "b_body_lmhead_m_invariant": true,
+      "b_harness_control_sensitive": true,
+      "b_micro_nan_clean": true,
+      "c_ref_regen_deterministic": true,
+      "d_drafter_emitted_invariant": true,
+      "d_drafter_not_must_pin": true,
+      "e_attention_flips_end_to_end": true,
+      "e_default_bit_exact": true,
+      "f_attention_has_bitdiff": true,
+      "f_drafter_bitdiff_but_no_flip": true,
+      "f_mustpin_subset_of_bitdiff": true,
+      "g_projected_tps_valid": true,
+      "h_no_launch_flags": true
+    },
+    "n_checks": 15,
+    "passes": true
+  },
+  "wandb_run_id": "5cappm87"
+}
