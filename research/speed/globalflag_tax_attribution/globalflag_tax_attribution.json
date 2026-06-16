@@ -1,0 +1,793 @@
+{
+  "pr": 484,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "no_hf_job": true,
+  "submission": "/workspace/senpai/target/submissions/fa2sw_precache_kenyan",
+  "server_python": "/tmp/senpai-venvs/5f4c623f772358a2/bin/python",
+  "utc": "2026-06-16T11:18:04Z",
+  "kernel_window_tokens": 512,
+  "timing_num_prompts": 8,
+  "timing_output_len": 512,
+  "banked_anchors": {
+    "deployed_tps": 481.53,
+    "global_realized_tps": 234.47,
+    "global_realized_local_tps": 221.16,
+    "wholecycle_surgical_tps": 457.55,
+    "wholecycle_attn_delta_us": 401.9,
+    "sigma_hw": 4.864
+  },
+  "arms": {
+    "deployed": {
+      "extra_env": {},
+      "kernel_raw": {
+        "category_ms": {
+          "elementwise_copy": 15.556557999999931,
+          "other": 19.711006000000637,
+          "sampling": 19.15844100000004,
+          "matmul_gemm": 528.243024999987,
+          "norm": 29.31897600000046,
+          "attention": 54.06465199999923,
+          "activation": 4.390452000000119
+        },
+        "gpu_kernel_us_total": 670443.1099999633,
+        "error": null
+      },
+      "kernel": {
+        "trace_file": "/workspace/senpai/target/research/speed/globalflag_tax_attribution/_runs/trace_deployed_kernel/rank0.1781608772115756993.pt.trace.json.gz",
+        "gpu_us_total": 670443.1099999633,
+        "by_bucket_us": {
+          "elementwise": 15556.558000000025,
+          "other": 19711.006000000125,
+          "sampling": 19158.441000000017,
+          "marlin_int4_body": 465623.01199999696,
+          "norm": 29318.976000000195,
+          "attention": 54064.65199999995,
+          "bf16_aten_gemm": 62620.012999999555,
+          "activation": 4390.4520000001185
+        },
+        "bi_triton_touched_us": 0.0,
+        "n_distinct_kernels": 80,
+        "top_kernels": [
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 223551.12099999833,
+            "pct": 33.3437867681287,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 195363.3929999986,
+            "pct": 29.139443762798802,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "kernel_unified_attention",
+            "us": 51265.161999999946,
+            "pct": 7.646459667547743,
+            "bucket": "attention",
+            "bi_triton": false
+          },
+          {
+            "name": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, false, true, true, false, 7, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float>)",
+            "us": 26514.347999999623,
+            "pct": 3.954749866845686,
+            "bucket": "bf16_aten_gemm",
+            "bi_triton": false
+          },
+          {
+            "name": "void cutlass::Kernel2<cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8>(cutlass_80_tensorop_bf16_s16816gemm_relu_bf16_64x64_32x6_tn_align8::Params)",
+            "us": 20596.708999999915,
+            "pct": 3.0721039105019727,
+            "bucket": "bf16_aten_gemm",
+            "bi_triton": false
+          },
+          {
+            "name": "reduce_segments",
+            "us": 14779.737000000065,
+            "pct": 2.204472949241118,
+            "bucket": "other",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+            "us": 10409.89500000002,
+            "pct": 1.5526887881658729,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_red_fused_add_marlin_gemm_rms_norm_0",
+            "us": 10139.892000000062,
+            "pct": 1.512416467371947,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)",
+            "us": 8926.608000000004,
+            "pct": 1.3314489875211772,
+            "bucket": "sampling",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_red_fused_add_rms_norm_2",
+            "us": 8172.168000000032,
+            "pct": 1.2189204241356852,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+            "us": 7212.77099999994,
+            "pct": 1.0758214817063798,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "_sparse_argmax_blocks_kernel",
+            "us": 7134.060000000011,
+            "pct": 1.064081335700564,
+            "bucket": "sampling",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 4, 4, 8, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 6380.853000000004,
+            "pct": 0.9517366805366011,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "std::enable_if<!(false), void>::type internal::gemvx::kernel<int, int, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, float, false, true, true, false, 8, false, cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float> >(cublasGemvParamsEx<int, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16 const>, cublasGemvTensorStridedBatched<__nv_bfloat16>, float>)",
+            "us": 5252.260000000015,
+            "pct": 0.7834012941083551,
+            "bucket": "bf16_aten_gemm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_gelu_marlin_gemm_mul_3",
+            "us": 4843.461000000006,
+            "pct": 0.7224268439421013,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+            "us": 4530.509000000004,
+            "pct": 0.6757484613422683,
+            "bucket": "bf16_aten_gemm",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 4, 16, 4, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 4472.079999999998,
+            "pct": 0.6670334787988563,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_gelu_mul_slice_1",
+            "us": 4390.4520000001185,
+            "pct": 0.6548582474060116,
+            "bucket": "activation",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_add_mul_rms_norm_2",
+            "us": 4050.8590000001154,
+            "pct": 0.6042062241493297,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_add_rms_norm_0",
+            "us": 3987.6649999999954,
+            "pct": 0.5947805176191927,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_6",
+            "us": 3201.6049999999973,
+            "pct": 0.47753567040165007,
+            "bucket": "elementwise",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, -1, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 3008.136,
+            "pct": 0.4486787849904467,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "Memcpy DtoD (Device -> Device)",
+            "us": 2903.6310000000217,
+            "pct": 0.4330913326859576,
+            "bucket": "elementwise",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_sub_unsqueeze_view_4",
+            "us": 2842.2960000000094,
+            "pct": 0.42394290546145885,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "reshape_and_cache_kernel_flash",
+            "us": 2799.4900000000043,
+            "pct": 0.417558172832913,
+            "bucket": "attention",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_5",
+            "us": 2737.864000000054,
+            "pct": 0.40836634147828055,
+            "bucket": "other",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_rms_norm_view_3",
+            "us": 2624.737000000017,
+            "pct": 0.39149287401882027,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_split_with_sizes_sub_unsqueeze_view_6",
+            "us": 2471.4140000000057,
+            "pct": 0.3686239687063293,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8::Params)",
+            "us": 1958.118000000003,
+            "pct": 0.2920632594762753,
+            "bucket": "bf16_aten_gemm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_rms_norm_split_with_sizes_view_5",
+            "us": 1938.431000000006,
+            "pct": 0.28912684329026994,
+            "bucket": "norm",
+            "bi_triton": false
+          }
+        ]
+      },
+      "timing": {
+        "verify_gpu_ms": 6.536,
+        "drafter_gpu_ms": 1.482,
+        "host_gap_ms": 1.612,
+        "exec_cpu_ms": 6.436,
+        "raw_exec_steps": 1153,
+        "e_accept": 3.601953601953602,
+        "wall_tps": 405.80020900523346,
+        "steady_gen_tps_mean": 294.2,
+        "tps_probe_tps": null,
+        "decode_summary": {
+          "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+          "duration_s": 10.093636989593506,
+          "num_completion_tokens": 4096,
+          "num_prompt_tokens": 2179,
+          "num_records": 8,
+          "output_file": "/workspace/senpai/target/research/speed/globalflag_tax_attribution/_runs/decode_deployed_timing.jsonl",
+          "output_len": 512,
+          "request_timeout_s": 180,
+          "required_request_field": "return_token_ids: true",
+          "required_response_field": "choices[0].token_ids",
+          "seed": 1,
+          "token_id_sources": {
+            "choices[0].token_ids": 8
+          },
+          "token_ids_required": true,
+          "tokenizer": "google/gemma-4-E4B-it"
+        }
+      }
+    },
+    "bi": {
+      "extra_env": {
+        "VLLM_BATCH_INVARIANT": "1"
+      },
+      "kernel_raw": {
+        "category_ms": {
+          "elementwise_copy": 15.951183999999937,
+          "other": 631.5143779999867,
+          "sampling": 19.01817700000003,
+          "matmul_gemm": 459.9714799999822,
+          "norm": 28.969169999999938,
+          "attention": 263.7958650000029,
+          "activation": 4.401776000000158
+        },
+        "gpu_kernel_us_total": 1423622.0300000377,
+        "error": null
+      },
+      "kernel": {
+        "trace_file": "/workspace/senpai/target/research/speed/globalflag_tax_attribution/_runs/trace_bi_kernel/rank0.1781609005192535368.pt.trace.json.gz",
+        "gpu_us_total": 1423622.0300000377,
+        "by_bucket_us": {
+          "elementwise": 15951.184000000005,
+          "other": 4912.816000000017,
+          "sampling": 19018.177000000018,
+          "marlin_int4_body": 459971.4799999981,
+          "norm": 28969.17000000015,
+          "attention": 263795.8650000001,
+          "bf16_aten_persistent": 626601.5619999962,
+          "activation": 4401.776000000158
+        },
+        "bi_triton_touched_us": 626601.5619999962,
+        "n_distinct_kernels": 70,
+        "top_kernels": [
+          {
+            "name": "matmul_kernel_persistent",
+            "us": 626601.5619999962,
+            "pct": 44.01460140371525,
+            "bucket": "bf16_aten_persistent",
+            "bi_triton": true
+          },
+          {
+            "name": "kernel_unified_attention",
+            "us": 260997.54700000008,
+            "pct": 18.33334561421427,
+            "bucket": "attention",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 217753.4399999988,
+            "pct": 15.295734079079475,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 194948.52499999915,
+            "pct": 13.69384014098138,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+            "us": 10407.154000000037,
+            "pct": 0.7310335033238956,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_red_fused_add_marlin_gemm_rms_norm_0",
+            "us": 10031.414000000095,
+            "pct": 0.7046402618537612,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)",
+            "us": 8935.290000000003,
+            "pct": 0.6276448250804159,
+            "bucket": "sampling",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_red_fused_add_rms_norm_2",
+            "us": 7853.159000000047,
+            "pct": 0.5516323036950923,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+            "us": 7680.466000000006,
+            "pct": 0.5395017664906325,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "_sparse_argmax_blocks_kernel",
+            "us": 6979.220000000009,
+            "pct": 0.4902438886815923,
+            "bucket": "sampling",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 4, 4, 8, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 6374.8960000000025,
+            "pct": 0.4477941381674062,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_gelu_marlin_gemm_mul_3",
+            "us": 5088.104999999995,
+            "pct": 0.35740560997077714,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 4, 16, 4, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 4476.69,
+            "pct": 0.31445776376471785,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_gelu_mul_slice_t_1",
+            "us": 4401.776000000158,
+            "pct": 0.309195552417803,
+            "bucket": "activation",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_add_rms_norm_t_0",
+            "us": 3985.8419999999983,
+            "pct": 0.2799789491877906,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_6",
+            "us": 3233.7949999999946,
+            "pct": 0.22715263826030488,
+            "bucket": "elementwise",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_add_mul_rms_norm_t_2",
+            "us": 3049.4800000000596,
+            "pct": 0.2142057326831321,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, -1, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+            "us": 3005.894000000001,
+            "pct": 0.21114410543365375,
+            "bucket": "marlin_int4_body",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_sub_unsqueeze_view_4",
+            "us": 2973.4300000000194,
+            "pct": 0.20886372487505975,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "Memcpy DtoD (Device -> Device)",
+            "us": 2907.540000000022,
+            "pct": 0.20423538964200663,
+            "bucket": "elementwise",
+            "bi_triton": false
+          },
+          {
+            "name": "reshape_and_cache_kernel_flash",
+            "us": 2798.3180000000093,
+            "pct": 0.19656326897385362,
+            "bucket": "attention",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_5",
+            "us": 2722.11400000001,
+            "pct": 0.191210443687777,
+            "bucket": "other",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_rms_norm_view_3",
+            "us": 2635.5220000000145,
+            "pct": 0.18512793033976474,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_split_with_sizes_sub_unsqueeze_view_6",
+            "us": 2274.1819999999984,
+            "pct": 0.15974619330665585,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_per_fused_rms_norm_split_with_sizes_view_5",
+            "us": 1939.6280000000086,
+            "pct": 0.13624599501315368,
+            "bucket": "norm",
+            "bi_triton": false
+          },
+          {
+            "name": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<c10::BFloat16, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<c10::BFloat16, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+            "us": 1393.13,
+            "pct": 0.09785813724728347,
+            "bucket": "sampling",
+            "bi_triton": false
+          },
+          {
+            "name": "Memcpy HtoD (Pinned -> Device)",
+            "us": 1343.242999999994,
+            "pct": 0.09435390656324406,
+            "bucket": "elementwise",
+            "bi_triton": false
+          },
+          {
+            "name": "_compute_slot_mapping_kernel",
+            "us": 1290.7960000000076,
+            "pct": 0.09066985286817832,
+            "bucket": "other",
+            "bi_triton": false
+          },
+          {
+            "name": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+            "us": 1167.588999999995,
+            "pct": 0.08201537875892269,
+            "bucket": "elementwise",
+            "bi_triton": false
+          },
+          {
+            "name": "triton_poi_fused_add_index_select_mul_rms_norm_split_sub_unsqueeze_view_3",
+            "us": 1052.1269999999993,
+            "pct": 0.07390493950139078,
+            "bucket": "norm",
+            "bi_triton": false
+          }
+        ]
+      },
+      "timing": {
+        "verify_gpu_ms": 8.04,
+        "drafter_gpu_ms": 9.24,
+        "host_gap_ms": 9.39,
+        "exec_cpu_ms": 7.932,
+        "raw_exec_steps": 1187,
+        "e_accept": 3.486005089058524,
+        "wall_tps": 195.682101276373,
+        "steady_gen_tps_mean": 134.13333333333333,
+        "tps_probe_tps": null,
+        "decode_summary": {
+          "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+          "duration_s": 20.931909322738647,
+          "num_completion_tokens": 4096,
+          "num_prompt_tokens": 2179,
+          "num_records": 8,
+          "output_file": "/workspace/senpai/target/research/speed/globalflag_tax_attribution/_runs/decode_bi_timing.jsonl",
+          "output_len": 512,
+          "request_timeout_s": 180,
+          "required_request_field": "return_token_ids: true",
+          "required_response_field": "choices[0].token_ids",
+          "seed": 1,
+          "token_id_sources": {
+            "choices[0].token_ids": 8
+          },
+          "token_ids_required": true,
+          "tokenizer": "google/gemma-4-E4B-it"
+        }
+      }
+    }
+  },
+  "microbench": {
+    "M": 8,
+    "dtype": "bfloat16",
+    "device": "NVIDIA A10G",
+    "shapes": {
+      "qkv_proj": [
+        3072,
+        2560
+      ],
+      "o_proj": [
+        2560,
+        2048
+      ],
+      "gate_up_proj": [
+        20480,
+        2560
+      ],
+      "down_proj": [
+        2560,
+        10240
+      ],
+      "lm_head": [
+        12288,
+        2560
+      ]
+    },
+    "bi_mode_active_after_enable": true,
+    "bf16_aten_mm_us_off": {
+      "qkv_proj": 36.16773756220937,
+      "o_proj": 26.241824525641277,
+      "gate_up_proj": 222.94174996204674,
+      "down_proj": 111.47820041514933,
+      "lm_head": 130.858612828888
+    },
+    "bf16_aten_mm_us_on": {
+      "qkv_proj": 190.64056250499561,
+      "o_proj": 141.18927501840517,
+      "gate_up_proj": 621.4214379724581,
+      "down_proj": 585.152700659819,
+      "lm_head": 561.737624957459
+    },
+    "bf16_aten_mm_slowdown_on_over_off": {
+      "qkv_proj": 5.271011552135085,
+      "o_proj": 5.380314729276809,
+      "gate_up_proj": 2.787371311466999,
+      "down_proj": 5.2490325326448275,
+      "lm_head": 4.292706554149345
+    },
+    "bf16_aten_mm_byte_changed_off_to_on": {
+      "qkv_proj": false,
+      "o_proj": true,
+      "gate_up_proj": true,
+      "down_proj": true,
+      "lm_head": false
+    },
+    "bf16_aten_mm_max_abs_diff_off_to_on": {
+      "qkv_proj": 0.0,
+      "o_proj": 0.5,
+      "gate_up_proj": 1.0,
+      "down_proj": 2.0,
+      "lm_head": 0.0
+    },
+    "overridden_ops": [
+      "aten::mm",
+      "aten::addmm",
+      "aten::matmul",
+      "aten::linear",
+      "aten::_log_softmax",
+      "aten::softmax",
+      "aten::_softmax",
+      "aten::mean.dim",
+      "aten::bmm"
+    ],
+    "overrides_are_aten_only": true,
+    "marlin_body_op": "torch.ops._C.marlin_gemm",
+    "marlin_op_exists_as_custom_C": true,
+    "marlin_gptq_custom_C_ops": [
+      "awq_marlin_repack",
+      "gptq_gemm",
+      "gptq_marlin_repack",
+      "marlin_gemm"
+    ],
+    "marlin_in_overridden_ops": false,
+    "mechanism": "VLLM_BATCH_INVARIANT overrides aten matmuls only; int4 Marlin body+lm_head are _C custom ops the flag cannot reach -> buckets (b)MLP (c)lm_head (d)QKV/O carry 0 added tax. The realized full-serve tax is the attention reduction (a) + the bf16-aten drafter/sampler ops rerouted to matmul_persistent + launch overhead."
+  },
+  "attribution": {
+    "window_tokens": 512,
+    "e_accept_used": 3.601953601953602,
+    "cycles_in_window": 142.14508474576272,
+    "buckets": [
+      "activation",
+      "attention",
+      "bf16_aten_gemm",
+      "bf16_aten_persistent",
+      "elementwise",
+      "marlin_int4_body",
+      "norm",
+      "other",
+      "sampling"
+    ],
+    "deployed_bucket_us": {
+      "activation": 4390.4520000001185,
+      "attention": 54064.65199999995,
+      "bf16_aten_gemm": 62620.012999999555,
+      "bf16_aten_persistent": 0.0,
+      "elementwise": 15556.558000000025,
+      "marlin_int4_body": 465623.01199999696,
+      "norm": 29318.976000000195,
+      "other": 19711.006000000125,
+      "sampling": 19158.441000000017
+    },
+    "bi_bucket_us": {
+      "activation": 4401.776000000158,
+      "attention": 263795.8650000001,
+      "bf16_aten_gemm": 0.0,
+      "bf16_aten_persistent": 626601.5619999962,
+      "elementwise": 15951.184000000005,
+      "marlin_int4_body": 459971.4799999981,
+      "norm": 28969.17000000015,
+      "other": 4912.816000000017,
+      "sampling": 19018.177000000018
+    },
+    "bucket_delta_us_window": {
+      "activation": 11.324000000039632,
+      "attention": 209731.21300000016,
+      "bf16_aten_gemm": -62620.012999999555,
+      "bf16_aten_persistent": 626601.5619999962,
+      "elementwise": 394.6259999999802,
+      "marlin_int4_body": -5651.531999998842,
+      "norm": -349.80600000004415,
+      "other": -14798.190000000108,
+      "sampling": -140.2639999999992
+    },
+    "bucket_delta_us_per_cycle": {
+      "activation": 0.07966508318098699,
+      "attention": 1475.4728478661107,
+      "bf16_aten_gemm": -440.5359011322847,
+      "bf16_aten_persistent": 4408.1831117883585,
+      "elementwise": 2.776219808836857,
+      "marlin_int4_body": -39.758898523343504,
+      "norm": -2.4609081673537903,
+      "other": -104.1062378376839,
+      "sampling": -0.9867664453601898
+    },
+    "bucket_share_of_total_positive_delta_pct": {
+      "activation": 0.0013533495775565642,
+      "attention": 25.06531689447038,
+      "bf16_aten_gemm": -7.483819157527318,
+      "bf16_aten_persistent": 74.88616736365331,
+      "elementwise": 0.04716239229874079,
+      "marlin_int4_body": -0.6754237411443897,
+      "norm": -0.04180588151935309,
+      "other": -1.7685556503913658,
+      "sampling": -0.01676317777690997
+    },
+    "attention_delta_us_window": 209731.21300000016,
+    "marlin_int4_body_delta_us_window": -5651.531999998842,
+    "bf16_aten_path_delta_us_window": 563981.5489999966,
+    "bi_triton_touched_us": {
+      "deployed": 0.0,
+      "bi": 626601.5619999962
+    },
+    "marlin_served_us": {
+      "deployed": 465623.01199999696,
+      "bi": 459971.4799999981,
+      "rel_diff": 0.012137570210981925
+    }
+  },
+  "compose": {
+    "e_accept": 3.601953601953602,
+    "deployed_cycle_us_local": 8876.174831903916,
+    "bi_cycle_us_local": 18407.169477735508,
+    "total_tax_per_cycle_us_local": 9530.994645831592,
+    "deployed_cycle_us_official": 7480.226781204914,
+    "bi_cycle_us_official": 15362.108593652074,
+    "total_tax_per_cycle_us_official": 7881.88181244716,
+    "attention_tax_us_per_cycle_measured_here": 1475.4728478661107,
+    "attention_tax_us_per_cycle_banked_wholecycle": 401.9,
+    "attention_tax_us_per_cycle_primary": 401.9,
+    "attention_share_of_tax_pct_local": 4.2167687102392,
+    "attention_share_of_tax_pct_official": 5.099036112991631,
+    "predicted_surgical_tps": 456.97737450031013,
+    "predicted_surgical_tps_measured_crosscheck": 347.95944697700753,
+    "wholecycle_surgical_tps_banked": 457.55,
+    "local_wall_tps": {
+      "deployed": 405.80020900523346,
+      "bi": 195.682101276373
+    },
+    "steptime_cycle_delta_ms": {
+      "verify_gpu_ms": 1.5039999999999996,
+      "drafter_gpu_ms": 7.758,
+      "host_gap_ms": 7.7780000000000005
+    },
+    "steptime_total_delta_ms": 17.04,
+    "steptime_verify_gpu_delta_is_attention_tax_ms": 1.5039999999999996,
+    "steptime_surgical_removable_ms": 15.536000000000001,
+    "deployed_steptime_ms": {
+      "verify_gpu_ms": 6.536,
+      "drafter_gpu_ms": 1.482,
+      "host_gap_ms": 1.612
+    },
+    "bi_steptime_ms": {
+      "verify_gpu_ms": 8.04,
+      "drafter_gpu_ms": 9.24,
+      "host_gap_ms": 9.39
+    },
+    "predicted_surgical_tps_steptime_conservative_floor": 400.9197106966314,
+    "predicted_surgical_tps_measured_crosscheck_NOTE": "the *_measured_crosscheck field uses the kernel-window attention delta, which is PREFILL-INFLATED (the 512-tok profiling window re-prefills a 644-token prompt whose in-order-reduction attention is ~the whole-prompt cost); it is superseded by the STEPTIME verify_gpu cycle delta. The conservative floor attributes the ENTIRE verify cycle delta (+1.50ms, which over-counts: most is verify-internal bf16-aten reroute surgical also avoids, not the attention reduction) to surgical -> still clears 400."
+  },
+  "verdict": {
+    "surgical_can_realize_457": true,
+    "predicted_surgical_tps": 456.97737450031013,
+    "clears_400": true,
+    "clears_450": true,
+    "attention_share_of_tax_pct": 5.099036112991631,
+    "marlin_body_untouched_by_flag": true,
+    "marlin_served_rel_diff": 0.012137570210981925,
+    "pr_premise_routes_all_matmuls_refuted": true,
+    "mechanism": "The global flag overrides aten matmuls only; the int4 Marlin body (QKV/O/gate_up/down, PR buckets b+d) and int4 lm_head (c) are _C custom ops it cannot reach -> ~0 added tax (served Marlin GPU us equal across arms; rel_diff=0.012). The attention reduction (a) is only 5.1% of the global-flag tax (~402 us of ~7882 us/cycle); the rest is bf16-aten drafter/sampler ops rerouted to matmul_persistent + launch/serialization. Surgical keeps ONLY (a) -> predicted_surgical_tps=457.0 (banked whole-cycle 457.55). The PR premise that the flag routes ALL matmuls (incl. the Marlin body) is REFUTED."
+  },
+  "wandb_run_id": "r1l881bx"
+}
