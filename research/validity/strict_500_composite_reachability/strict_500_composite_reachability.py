@@ -37,8 +37,8 @@ The map (ranked by realized TPS; PRIVATE-safety is the second axis)
   rung                 realized TPS   strict?            private-safe?            ship status
   -------------------  ------------   ----------------   ----------------------   --------------------------
   floor-lock M=1 AR    166.23 (proj)  literal-1.0*       SAFE  (Delta 0.633%)     the rung that STICKS
-  global-flag BI=1     222 / 234      operative-1.0      RISKY (Delta 4.295%)     the live #474 call
-  surgical / 2D byte   457.5 (pred)   byte-exact (locus) RISKY (Delta 4.295%)     strong PUBLIC, OBE strict
+  global-flag BI=1     222 / 234      operative-1.0      RISKY (Delta 4.295%)     superseded by surgical-357
+  surgical / 2D byte   357.6 (meas)   byte-exact e2e     RISKY (Delta 4.295%)     THE #474 SHIP (land #473)
   deployed (ref)       481.53         NON-equiv (.9966)  --                       outside the strict set
 
   * floor-lock literal-1.0 is BY CONSTRUCTION (M=1 AR, no drafter, no reassociation).  FLAG: the relayed
@@ -58,23 +58,27 @@ greedy-UNSAFE ~16% GEMM relax-prize -- which leaves the strict lane entirely (id
 escalated to the human on #407.  Verdict: strict >500 is a genuinely-new-method problem, ~3x over the
 166 private-safe floor.
 
-The two forward levers (HELD OPEN; this packet finalizes to terminal when they land)
-------------------------------------------------------------------------------------
-They attack TWO ORTHOGONAL problems; only their conjunction yields "faster AND private-safe":
+TERMINAL (advisor #357 relay 2026-06-16 14:37Z): the map is FROZEN at d3ed366 + this single pass
+------------------------------------------------------------------------------------------------
+The capstone's own gating question -- is the surgical ~457 a REAL served rung? -- is RESOLVED: lawine
+#488 (ko01dcyy) served the surgical attention-pin config e2e and measured 357.6 byte-exact (REFUTING
+the 456.98 ubel #484 prediction; honesty flag #2 vindicated).  The human ruled "357 -- go, finish it"
+(#474, 13:51Z); land #473 arms the surgical-357 fire.  So terminal = (surgical realized AND #474
+resolved) = True.  No LIVE slots remain -- every input is banked.
+
+The two forward levers below are DECOUPLED forward research in the #481 zoom-out menu (SGLang #498,
+TRT-LLM, alt spec-dec) -- they are the only paths to a FUTURE "faster AND private-safe" rung, but they
+do NOT gate this terminal map:
   * #491 (ubel) reduction-sensitivity census  -> shed the determinism speed-tax  -> a FASTER floor-lock
                 (attacks the TPS ceiling; keeps Delta safe -- the floor-lock has no drafter)
   * #492 (denken) drafter-gap feasibility      -> EAGLE-3 pulls Delta_accept <= ~3.0%  -> a private-safe
                 fast rung  (attacks the Delta gate; keeps a drafter for speed)
-  * #488 (lawine) surgical-attention realization -> is the 457.5 a REAL served rung or another mirage?
-                (serves surgical-457 e2e; resolves the predicted-vs-measured gap ubel #484 left open)
 
 PRIMARY metric  strict_frontier_map_self_test_passes  (0-GPU arithmetic-invariant integrity gate)
-TEST    metrics floor_lock_realized_tps, floor_lock_private_safe, global_flag_tps, global_flag_private_risky,
-                surgical_byte_exact_predicted_tps, multistream_realizable_tps, multistream_ceiling_unrealizable,
-                private_safety_is_delta_not_tps, strict_gt500_dead_via_known_levers, forward_levers_open,
-                live_474_call, floor_lock_literal_1p0_flag.
-LIVE slots (parameterized; default = pending):  --lawine488-surgical-served-tps, --ubel491-faster-floor-tps,
-                --denken492-eagle3-delta-pct, --human474-ruling.
+TEST    metrics floor_lock_realized_tps, floor_lock_private_safe, global_flag_tps, surgical_measured_tps,
+                surgical_byte_exact_predicted_tps (refuted), multistream_realizable_tps,
+                private_safety_is_delta_not_tps, strict_gt500_dead_via_known_levers,
+                forward_research_decoupled, human_474_ruling, terminal, floor_lock_literal_1p0_flag.
 Consume cross-student numbers ONLY as relayed by the advisor into the #357 thread.
 """
 
@@ -107,14 +111,24 @@ DELTA_GATE_PCT: float = 5.0             # private-set acceptance-gap gate (denke
 FLOOR_LOCK_TPS: float = 166.23          # projected_official_from_sglang=166.234; realizes_16170=1
 FLOOR_LOCK_PPL: float = 2.3767          # ppl/ppl, clears the gate
 FLOOR_LOCK_TARGET_TPS: float = 161.70   # the M=1 AR strict floor it realizes (>= target)
-FLOOR_LOCK_LITERAL_1P0_BY_CONSTRUCTION: bool = True   # M=1 AR, no drafter, no reassociation
-# FLAG: pavotwci logged identity vs the fa2sw_precache_kenyan reference (a DIFFERENT config) ->
-# 119/128 divergent, verdict/literal_1p0=0.  That is NOT the M=1 AR reference the strict contract
-# uses; divergence vs a different config is expected.  The literal-1.0 LABEL is therefore rendered
-# as by-construction-PENDING the served census vs the correct reference, not as a measured fact.
+FLOOR_LOCK_LITERAL_1P0_BY_CONSTRUCTION: bool = True   # M=1 AR int4 IS the strict reference computation
+# FLAG #1 (advisor terminalize relay 14:37Z resolved the POINTER, not the boolean):
+#   * The stark #485 (pavotwci) realize-run logged identity vs the `fa2sw_precache_kenyan` reference
+#     (a DIFFERENT config) -> 119/128 divergent, verdict/literal_1p0=0.  That is NOT the M=1 AR
+#     reference; divergence vs a different config is expected (stale signal, kept for the record).
+#   * The CLOSEST served census is denken #471 (`bwyhpkd7`), a DISCRIMINATING certifier (it rejects the
+#     deployed non-strict config at 0.9966 / 3 flips) that ACCEPTED the M=1 AR floor at
+#     token_identity_rate=1.0, 0 flips -- consistent with the by-construction claim.
+#   * I hold `confirmed_by_served_census=False` (by-construction-PENDING) because under launch-isolation
+#     I cannot verify whether bwyhpkd7's floor reference is the canonical M=1-AR greedy (an INDEPENDENT
+#     confirmation) or the floor config's own output (tautological self-match).  Either way it does NOT
+#     gate the freeze: the team ships surgical-357, not floor-lock.  Honest rendering = literal-1.0 by
+#     construction + bwyhpkd7 served census accepted it 1.0/0 (pointer), boolean stays pending.
 FLOOR_LOCK_RELAYRUN_VERDICT_LITERAL_1P0: int = 0      # pavotwci verdict/literal_1p0 (vs precache ref)
 FLOOR_LOCK_RELAYRUN_DIVERGENT_VS_PRECACHE: int = 119  # of 128 prompts (expected: different config)
-FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS: bool = False  # pending the correct-reference census
+FLOOR_LOCK_SERVED_CENSUS_RUN: str = "bwyhpkd7"        # denken #471 certifier: accepted floor 1.0/0 flips
+FLOOR_LOCK_SERVED_CENSUS_ACCEPTED_FLOOR: bool = True  # bwyhpkd7 accepted M=1 AR floor at 1.0, 0 flips
+FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS: bool = False  # bwyhpkd7 reference unverifiable (iso)
 
 # --- Rung 2: global-flag VLLM_BATCH_INVARIANT=1 (the #474 live call; land/ubel #470 e2e) -------- #
 GLOBAL_FLAG_TPS_LOCAL: float = 222.32       # land local full-serve
@@ -122,15 +136,22 @@ GLOBAL_FLAG_TPS_OFFICIAL: float = 234.47    # ubel #470 (ugqnytji) official; 221
 GLOBAL_FLAG_NEEDS_MANIFEST_ENV_EDIT: bool = True   # shell-prefix does NOT propagate to the HF runner
 GLOBAL_FLAG_OPERATIVE_1P0: bool = True      # operative-1.0, 0 semantic flips (denken #471 census)
 
-# --- Rung 3: surgical attention-only / 2D byte-exact frontier (ubel #484 + lawine #482) --------- #
-SURGICAL_PREDICTED_TPS: float = 456.98          # ubel #484 (r1l881bx) predicted_surgical_tps; can_realize_457=1
-SURGICAL_PREDICTED_TPS_MEASURED: float = 347.96  # ubel #484 companion "measured" variant -> realization gap
+# --- Rung 3: surgical attention-only / 2D byte-exact frontier (lawine #488 MEASURED) ------------ #
+# RESOLVED (2026-06-16, advisor terminalize relay 14:37Z): lawine #488 (ko01dcyy) SERVED the surgical
+# attention-pin config e2e and measured 357.6 TPS byte-exact -- this is the REAL served rung, and it
+# CONFIRMS honesty flag #2: the composed ~457 was OPTIMISTIC.  The surgical row headline is now the
+# MEASURED 357.6, not the 456.98 prediction.  357.6 is the human-picked #474 SHIP ("357 -- go, finish it").
+SURGICAL_MEASURED_TPS: float = 357.6            # lawine #488 (ko01dcyy) served byte-exact e2e -- THE SHIP
+SURGICAL_MEASURED_PPL: float = 2.3767           # lawine #488: PPL clears the gate, 128/128 completed
+SURGICAL_MEASURED_OVER_GLOBALFLAG_TPS: float = 135.65   # 357.6 - 221.95 (the supplanted global-flag local)
+SURGICAL_PREDICTED_TPS: float = 456.98          # ubel #484 (r1l881bx) predicted_surgical_tps -- REFUTED by #488
+SURGICAL_PREDICTED_TPS_MEASURED: float = 347.96  # ubel #484 companion "measured" variant (foreshadowed the gap)
 MULTISTREAM_REALIZABLE_TPS: float = 457.54      # lawine #482 (044xamdd) dependency_bounded_strict_tps
 MULTISTREAM_CEILING_TPS: float = 474.44         # lawine #482 ceiling_477_tps (resource-feasibility)
 SINGLE_STREAM_REALIZED_TPS: float = 457.55      # lawine #482 single_stream_realized_tps (#472)
 MULTISTREAM_GAIN_VS_SINGLE_TPS: float = -0.01   # ~0: the per-layer data dependency eats the overlap
-BYTE_EXACT_LOCUS_IDENTITY: float = 1.0000       # lawine #482 strict_identity_fraction=1, 0 flips
-SURGICAL_REALIZED_E2E: bool = False             # PENDING lawine #488 (predicted, not served e2e)
+BYTE_EXACT_LOCUS_IDENTITY: float = 1.0000       # lawine #482/#488 strict_identity_fraction=1, 0 flips
+SURGICAL_REALIZED_E2E: bool = True              # RESOLVED: lawine #488 served it e2e (357.6 measured)
 
 # --- Rung 4 (reference): deployed PR #52 -- NON-equivalent, OUTSIDE the strict feasible set ------ #
 DEPLOYED_TPS: float = 481.53
@@ -161,15 +182,12 @@ RELAX_PRIZE_IDENTITY: float = 0.730             # stark #452: out of the strict 
 RELAX_PRIZE_REALIZED_GAIN_TPS: float = -0.94    # AND ~0 TPS gain -> strictly dominated within strict
 GT500_ONLY_PATH: str = "greedy-UNSAFE ~16% GEMM relax-prize (out of strict lane; escalated to human #407)"
 
-# --- Forward levers (HELD OPEN; the only paths to faster AND private-safe) -------------------- #
-# Each is a LIVE card.  Default = pending (None / open).  When all three land the advisor relays the
-# numbers and this packet finalizes to terminal.
-FORWARD_LEVERS = {
-    "lawine488_surgical_realization": {
-        "question": "is the surgical-457 a REAL served strict rung above 222, or another mirage?",
-        "attacks": "the predicted-vs-measured realization gap (ubel #484: 456.98 pred vs 347.96 measured)",
-        "axis": "TPS-realization",
-    },
+# --- Forward research (DECOUPLED; #481 zoom-out menu, NOT capstone-gating slots) -------------- #
+# These two attack the only remaining "faster AND private-safe" problem, but they are FORWARD RESEARCH
+# in the wider #481 menu (SGLang #498, TRT-LLM, alt spec-dec) -- NOT slots this terminal capstone waits
+# on.  The capstone's own gating question (#488 surgical realization) is RESOLVED (357.6 measured), so
+# the map is TERMINAL regardless of these.  They are rendered as orthogonal forward levers, informational.
+FORWARD_RESEARCH = {
     "ubel491_reduction_sensitivity": {
         "question": "which decode matmuls MUST be deterministic? shed the rest -> a FASTER floor-lock",
         "attacks": "the determinism TPS-tax (keeps Delta safe: the floor-lock has no drafter)",
@@ -182,12 +200,21 @@ FORWARD_LEVERS = {
     },
 }
 
-# Verdict enums
-REC_FLOOR_LOCK = "FLOOR-LOCK-166-PRIVATE-SAFE"      # the rung that sticks
-REC_GLOBAL_FLAG = "GLOBAL-FLAG-222-FAST-RISKY"      # the live #474 fast-but-risky call
-VALID_LIVE_474_RULINGS = (REC_FLOOR_LOCK, REC_GLOBAL_FLAG, "PENDING")
+# --- The #474 SHIP (human ruled "357 -- go, finish it", 13:51Z; armed on land #473) ------------ #
+# land #473 re-pointed at the surgical-357 package (per advisor relay; packaged on land's branch, NOT
+# in this working tree -- launch-isolation).  This capstone CITES the ship; it does not own the trigger.
+SHIP_RUNG: str = "surgical attn-only / 2D byte-exact (357.6 measured)"
+SHIP_SUBMISSION: str = "fa2sw_strict_surgical357 (land #473 package, per advisor relay)"
+SHIP_TRIGGER: str = "land #473 (fires the draw on its next poll)"
+SHIP_PER: str = "#474 -- human ruled '357 -- go, finish it' (13:51Z)"
+SHIP_STATUS_LINE: str = "surgical-357 fire armed (land #473, per #474)"
 
-CONSUMED_CARDS = ("stark#485", "lawine#482", "denken#489", "ubel#484", "ubel#470",
+# Verdict enums
+REC_FLOOR_LOCK = "FLOOR-LOCK-166-PRIVATE-SAFE"        # the rung that sticks (private-safe)
+REC_SHIP_357 = "SHIP-SURGICAL-357-FAST-RISKY"         # the human's #474 choice (fast-risky/penalize lane)
+VALID_LIVE_474_RULINGS = (REC_FLOOR_LOCK, REC_SHIP_357, "PENDING")
+
+CONSUMED_CARDS = ("stark#485", "lawine#482", "lawine#488", "denken#489", "ubel#484", "ubel#470",
                   "denken#471", "land#473", "denken#423")
 
 
@@ -207,12 +234,14 @@ def build_rungs() -> list[dict[str, Any]]:
             "realized_tps": FLOOR_LOCK_TPS,
             "realized_provenance": "stark#485 pavotwci projected_official=166.234, realizes_16170=1",
             "strict": True,
-            "identity_label": "literal-1.0 (by construction; served census pending)",
+            "identity_label": "literal-1.0 (by construction; denken#471 bwyhpkd7 census accepted 1.0/0)",
             "identity_confirmed_by_served_census": FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS,
+            "served_census_run": FLOOR_LOCK_SERVED_CENSUS_RUN,
+            "served_census_accepted_floor": FLOOR_LOCK_SERVED_CENSUS_ACCEPTED_FLOOR,
             "delta_pct": DELTA_FLOORLOCK_PCT,
             "private_safe": True,
             "breach_frac_pct": FLOORLOCK_BREACH_FRAC_PCT,
-            "ship_status": "the strict rung that STICKS (private-safe, guaranteed honest)",
+            "ship_status": "the strict rung that STICKS (private-safe); fallback, NOT the #474 ship",
             "ppl": FLOOR_LOCK_PPL,
         },
         {
@@ -226,24 +255,25 @@ def build_rungs() -> list[dict[str, Any]]:
             "delta_pct": DELTA_SPEC_ALIVE_PCT,
             "private_safe": False,
             "breach_frac_pct": SPEC_ALIVE_BREACH_FRAC_PCT,
-            "ship_status": "the live #474 call: fast-but-private-RISKY (needs manifest env edit, gated)",
+            "ship_status": ("the original #474 call (222/234); SUPERSEDED by surgical-357 in the same "
+                            "fast-risky lane (+135 TPS, same Delta) -- not the ship"),
             "ppl": PPL_DEPLOYED,
         },
         {
-            "rung": "surgical attn-only / 2D byte-exact frontier (drafter alive)",
-            "submission": "(unpackaged; surgical attention pin)",
-            "realized_tps": SURGICAL_PREDICTED_TPS,
-            "realized_provenance": ("ubel#484 r1l881bx predicted=456.98 (measured-variant 347.96); "
-                                    "lawine#482 044xamdd realizable=457.54, ceiling 474.44 UNREALIZABLE"),
+            "rung": "surgical attn-only / 2D byte-exact (357.6 measured, drafter alive)",
+            "submission": SHIP_SUBMISSION,
+            "realized_tps": SURGICAL_MEASURED_TPS,
+            "realized_provenance": ("lawine#488 ko01dcyy SERVED e2e=357.6 byte-exact (+135.65 over the "
+                                    "221.95 global-flag), PPL 2.3767, 128/128 -- REFUTES the 456.98 "
+                                    "ubel#484 prediction (composed-vs-realized; honesty flag #2 vindicated)"),
             "strict": True,
-            "identity_label": "byte-exact at the attention locus (1.0000, 0 flips)",
-            "identity_confirmed_by_served_census": False,
+            "identity_label": "byte-exact e2e, operative-1.0 (lawine #488 served, 0 semantic flips)",
+            "identity_confirmed_by_served_census": True,
             "delta_pct": DELTA_SPEC_ALIVE_PCT,
             "private_safe": False,
             "breach_frac_pct": SPEC_ALIVE_BREACH_FRAC_PCT,
-            "ship_status": ("strong PUBLIC rung but OBE as a strict SHIP: PREDICTED not served "
-                            "(pending lawine #488) AND private-RISKY (same Delta as the 222)"),
-            "ppl": PPL_DEPLOYED,
+            "ship_status": f"THE #474 SHIP: {SHIP_STATUS_LINE}; fast-but-private-RISKY (same Delta as the 222)",
+            "ppl": SURGICAL_MEASURED_PPL,
         },
         {
             "rung": "deployed PR#52 (reference, NON-equivalent)",
@@ -304,22 +334,14 @@ def the_gt500_closure() -> dict[str, Any]:
     }
 
 
-def the_forward_program(lawine488_tps: float | None,
-                        ubel491_tps: float | None,
-                        denken492_delta_pct: float | None) -> dict[str, Any]:
-    """The two orthogonal forward levers (+ the surgical realization probe).  HELD OPEN until landed."""
-    landed = {
-        "lawine488_surgical_realization": _finite(lawine488_tps),
-        "ubel491_reduction_sensitivity": _finite(ubel491_tps),
-        "denken492_eagle3_drafter": _finite(denken492_delta_pct),
-    }
-    section_open = not all(landed.values())
-    levers = {}
-    for k, meta in FORWARD_LEVERS.items():
-        levers[k] = {**meta, "landed": landed[k]}
-    # If denken #492 lands a Delta at/under ~3.0%, a fast private-safe rung becomes feasible.
-    eagle3_yields_private_safe = (_finite(denken492_delta_pct)
-                                  and denken492_delta_pct <= 3.0)  # heuristic feasibility flag
+def the_forward_research() -> dict[str, Any]:
+    """The two orthogonal forward levers -- DECOUPLED forward research (#481 zoom-out), NOT terminal slots.
+
+    The capstone's own gating question (surgical #488 realization) is RESOLVED, so these do NOT hold the
+    map open; they are the only paths to a FUTURE "faster AND private-safe" rung, handed to the wider menu.
+    """
+    levers = {k: {**meta, "status": "forward-research (decoupled; not capstone-gating)"}
+              for k, meta in FORWARD_RESEARCH.items()}
     return {
         "levers": levers,
         "orthogonal_axes": {
@@ -327,58 +349,74 @@ def the_forward_program(lawine488_tps: float | None,
             "denken492": "drafter Delta-gate -> a PRIVATE-SAFE fast rung (keeps a drafter)",
         },
         "only_faster_and_safe_is_their_conjunction": True,
-        "lawine488_surgical_served_tps": lawine488_tps,
-        "ubel491_faster_floor_tps": ubel491_tps,
-        "denken492_eagle3_delta_pct": denken492_delta_pct,
-        "denken492_yields_fast_private_safe": bool(eagle3_yields_private_safe),
-        "section_open": section_open,
-        "n_landed": sum(1 for v in landed.values() if v),
-        "n_total": len(landed),
+        "gates_terminal": False,
+        "decoupled_to_481_menu": True,
+        "wider_menu": ["SGLang #498", "TRT-LLM", "alt spec-dec (Medusa/EAGLE-3/prompt-lookup)",
+                       "GPTQ/AWQ/SmoothQuant", "FA3 / torch.compile"],
+        "n_levers": len(levers),
     }
 
 
-def the_live_474_call(human474_ruling: str | None) -> dict[str, Any]:
-    """The live human decision: floor-lock (sticks) vs 222 (fast-risky), gated on the breach rule."""
-    ruling = (human474_ruling or "PENDING").upper()
-    if ruling not in VALID_LIVE_474_RULINGS:
-        ruling = "PENDING"
+def the_474_decision() -> dict[str, Any]:
+    """The #474 GO/NO-GO fork this capstone existed to inform -- RESOLVED (human ruled 357, 13:51Z).
+
+    Sequence: human approved 222 @10:24Z -> denken #486 reopened it on private-Delta risk -> stark #493
+    de-risked the identity axis (the realized scorer has NO token-identity gate, only {private TPS-drift
+    <= 5%, PPL <= 2.42, 128/128}) -> lawine #488 upgraded the penalize-lane number 222 -> 357.6 measured
+    -> human ruled "357 -- go, finish it".  Chose the fast-risky/PENALIZE lane (NOT floor-lock).
+    """
+    ruling = REC_SHIP_357
     return {
         "fork": {
             "FLOOR_LOCK": {
                 "fire": "senpai-strict-m1ar-161 (166.23 realized)",
                 "rationale": "a guaranteed-valid strict number that STICKS (Delta 0.633%, private-safe)",
-                "breach_rule": "pick this if a private re-draw over 5% INVALIDATES the submission",
+                "breach_rule": "would be picked if a private re-draw over 5% INVALIDATES the submission",
+                "chosen": False,
             },
-            "GLOBAL_FLAG_222": {
-                "fire": "senpai-strict-eqv (222/234 realized)",
-                "rationale": "crushes the floor on public TPS; even a breached 222 scores ~224 > 161",
-                "breach_rule": "pick this if a private re-draw over 5% only PENALIZES (scored lower)",
+            "SHIP_357": {
+                "fire": "senpai-strict-eqv / surgical-357 (357.6 measured byte-exact e2e)",
+                "rationale": "crushes the floor on public TPS (+135 over the 222); even a breach scores high",
+                "breach_rule": "chosen: human accepts the fast-risky/PENALIZE lane",
+                "chosen": True,
             },
         },
         "binding_question": ("does a private re-draw over the 5% gate INVALIDATE (waste the one shot) "
                              "or PENALIZE (scored on the lower private number)?"),
-        "advisor_recommendation": "FLOOR-LOCK unless a breach is known to be only a penalty",
+        "binding_resolution": ("the human chose the fast-risky lane -> treated as PENALIZE; the realized "
+                               "scorer has no token-identity gate (stark #493), so operative-1.0 is fine"),
+        "advisor_recommendation": "FLOOR-LOCK unless a breach is only a penalty -- human overrode to SHIP-357",
         "human_ruling": ruling,
-        "resolved": ruling != "PENDING",
-        "provenance": "#474 (10:24Z human ruled 222; 11:16Z reopened by denken #486 private-gap risk)",
+        "human_ruling_verbatim": "357 -- go, finish it",
+        "resolved": True,
+        "ship": {
+            "rung": SHIP_RUNG, "submission": SHIP_SUBMISSION, "trigger": SHIP_TRIGGER, "per": SHIP_PER,
+            "tps": SURGICAL_MEASURED_TPS, "ppl": SURGICAL_MEASURED_PPL,
+        },
+        "provenance": ("#474 (10:24Z human approved 222; 11:16Z denken #486 reopened on private-gap; "
+                       "13:51Z human ruled 357 after lawine #488 upgraded the number)"),
     }
 
 
-def build_packet(*,
-                 lawine488_surgical_tps: float | None = None,
-                 ubel491_faster_floor_tps: float | None = None,
-                 denken492_eagle3_delta_pct: float | None = None,
-                 human474_ruling: str | None = None) -> dict[str, Any]:
-    """Assemble the full strict-frontier-map packet (the JSON rollup)."""
+def build_packet() -> dict[str, Any]:
+    """Assemble the full TERMINAL strict-frontier-map packet (the JSON rollup).
+
+    All gating questions are RESOLVED and banked: surgical #488 realized (357.6 measured) and the #474
+    decision is made (human ruled 357).  terminal = (surgical realized AND #474 resolved).  The forward
+    research (#491/#492) is DECOUPLED to the #481 menu and does NOT gate this.
+    """
     rungs = build_rungs()
     principle = the_principle()
     gt500 = the_gt500_closure()
-    forward = the_forward_program(lawine488_surgical_tps, ubel491_faster_floor_tps,
-                                  denken492_eagle3_delta_pct)
-    live474 = the_live_474_call(human474_ruling)
+    forward = the_forward_research()
+    decision = the_474_decision()
 
     strict_rungs = [r for r in rungs if r["strict"]]
     private_safe_rungs = [r for r in strict_rungs if r["private_safe"]]
+
+    surgical_realized = bool(SURGICAL_REALIZED_E2E)
+    decision_resolved = bool(decision["resolved"])
+    terminal = surgical_realized and decision_resolved
 
     packet = {
         "kind": "strict-frontier-map",
@@ -391,14 +429,16 @@ def build_packet(*,
             "only_private_safe_rung": (private_safe_rungs[0]["rung"] if len(private_safe_rungs) == 1
                                        else None),
             "deployed_outside_strict_set": True,
+            "ship_status_line": SHIP_STATUS_LINE,
+            "ship_rung": SHIP_RUNG,
         },
         "B_the_principle": principle,
         "C_gt500_closure": gt500,
-        "D_forward_program": forward,
-        "E_live_474_call": live474,
+        "D_forward_research": forward,
+        "E_474_decision": decision,
         "ownership": {
             "this_packet": "the human-facing strict-frontier MAP (CPU-only synthesis)",
-            "land473": "the submission trigger",
+            "land473": "the submission trigger (surgical-357 fire armed)",
             "denken471": "the served-census identity oracle",
             "consumes_cards": list(CONSUMED_CARDS),
             "analysis_only": True,
@@ -406,7 +446,12 @@ def build_packet(*,
             "no_hf_job": True,
             "official_tps": 0,
         },
-        "terminal": not forward["section_open"],
+        "terminal_basis": {
+            "surgical_realized_e2e": surgical_realized,
+            "decision_474_resolved": decision_resolved,
+            "forward_research_gates_terminal": forward["gates_terminal"],
+        },
+        "terminal": terminal,
     }
     packet["self_test"] = _selftests(packet)
     packet["headline"] = _headline(packet)
@@ -418,12 +463,14 @@ def _headline(p: dict[str, Any]) -> dict[str, Any]:
         "floor_lock_realized_tps": FLOOR_LOCK_TPS,
         "floor_lock_private_safe": True,
         "global_flag_tps": GLOBAL_FLAG_TPS_OFFICIAL,
+        "surgical_measured_tps": SURGICAL_MEASURED_TPS,
         "surgical_byte_exact_predicted_tps": SURGICAL_PREDICTED_TPS,
         "multistream_realizable_tps": MULTISTREAM_REALIZABLE_TPS,
         "private_safety_is_delta_not_tps": True,
         "strict_gt500_dead_via_known_levers": True,
-        "forward_levers_open": p["D_forward_program"]["section_open"],
-        "live_474_call": p["E_live_474_call"]["human_ruling"],
+        "forward_research_decoupled": p["D_forward_research"]["decoupled_to_481_menu"],
+        "human_474_ruling": p["E_474_decision"]["human_ruling"],
+        "ship_status_line": SHIP_STATUS_LINE,
         "terminal": p["terminal"],
         "strict_frontier_map_self_test_passes": None,  # filled by main() after nan-check
     }
@@ -438,14 +485,14 @@ def _headline(p: dict[str, Any]) -> dict[str, Any]:
 def _selftests(p: dict[str, Any]) -> dict[str, Any]:
     pr = p["B_the_principle"]
     gt = p["C_gt500_closure"]
-    fw = p["D_forward_program"]
-    lv = p["E_live_474_call"]
+    fw = p["D_forward_research"]
+    lv = p["E_474_decision"]
     cond: dict[str, bool] = {}
 
-    # --- The map is strictly ordered by TPS: floor < global-flag < surgical < deployed. ---
+    # --- The map is strictly ordered by realized TPS: floor < global-flag < surgical(measured) < deployed. ---
     cond["a_floor_lt_globalflag"] = FLOOR_LOCK_TPS < GLOBAL_FLAG_TPS_OFFICIAL
-    cond["b_globalflag_lt_surgical"] = GLOBAL_FLAG_TPS_OFFICIAL < SURGICAL_PREDICTED_TPS
-    cond["c_surgical_lt_deployed"] = SURGICAL_PREDICTED_TPS < DEPLOYED_TPS
+    cond["b_globalflag_lt_surgical"] = GLOBAL_FLAG_TPS_OFFICIAL < SURGICAL_MEASURED_TPS
+    cond["c_surgical_lt_deployed"] = SURGICAL_MEASURED_TPS < DEPLOYED_TPS
     cond["d_floor_realizes_target"] = FLOOR_LOCK_TPS >= FLOOR_LOCK_TARGET_TPS
 
     # --- lawine #482: multi-stream CLOSES -- realizable ~= single-stream, ceiling unrealizable. ---
@@ -470,7 +517,7 @@ def _selftests(p: dict[str, Any]) -> dict[str, Any]:
         p["A_the_map"]["only_private_safe_rung"] == "floor-lock M=1 AR (no drafter)")
 
     # --- fast + byte-exact != private-safe: surgical is fast AND byte-exact AND NOT safe. ---
-    cond["r_surgical_fast"] = SURGICAL_PREDICTED_TPS > GLOBAL_FLAG_TPS_OFFICIAL
+    cond["r_surgical_fast"] = SURGICAL_MEASURED_TPS > GLOBAL_FLAG_TPS_OFFICIAL
     cond["s_surgical_byte_exact"] = math.isclose(BYTE_EXACT_LOCUS_IDENTITY, 1.0)
     cond["t_surgical_not_private_safe"] = SPEC_ALIVE_BREACH_FRAC_PCT > FLOORLOCK_BREACH_FRAC_PCT
 
@@ -481,26 +528,34 @@ def _selftests(p: dict[str, Any]) -> dict[str, Any]:
     cond["x_relax_prize_dominated"] = RELAX_PRIZE_REALIZED_GAIN_TPS <= 0.0
     cond["y_gt500_is_new_method_problem"] = bool(gt["is_genuinely_new_method_problem"])
 
-    # --- Forward section is OPEN (none of #488/#491/#492 landed) -> non-terminal. ---
-    cond["z_forward_section_open"] = bool(fw["section_open"])
-    cond["aa_no_forward_lever_landed"] = fw["n_landed"] == 0
-    cond["ab_terminal_iff_forward_closed"] = (p["terminal"] == (not fw["section_open"]))
+    # --- TERMINAL: gating questions RESOLVED; forward research DECOUPLED (does NOT gate terminal). ---
+    #     terminal <=> (surgical #488 realized e2e) AND (#474 decision resolved).  #491/#492 are forward
+    #     research in the #481 menu, not capstone slots.
+    cond["z_forward_research_decoupled"] = (
+        fw["decoupled_to_481_menu"] is True and fw["gates_terminal"] is False)
+    cond["aa_forward_research_two_levers"] = fw["n_levers"] == 2
+    cond["ab_terminal_iff_mandate_resolved"] = (
+        p["terminal"] == (bool(SURGICAL_REALIZED_E2E) and bool(lv["resolved"])))
     cond["ac_two_orthogonal_axes"] = (
         fw["orthogonal_axes"]["ubel491"] != fw["orthogonal_axes"]["denken492"])
 
-    # --- The live #474 call is well-formed (and pending until the human rules the breach rule). ---
-    cond["ad_live474_ruling_valid"] = lv["human_ruling"] in VALID_LIVE_474_RULINGS
-    cond["ae_live474_resolved_consistent"] = (lv["resolved"] == (lv["human_ruling"] != "PENDING"))
+    # --- The #474 decision is RESOLVED to the human's SHIP-357 (fast-risky lane, NOT floor-lock). ---
+    cond["ad_decision474_ruling_valid"] = lv["human_ruling"] in VALID_LIVE_474_RULINGS
+    cond["ae_decision474_resolved_consistent"] = (lv["resolved"] == (lv["human_ruling"] != "PENDING"))
 
-    # --- Honesty: the floor-lock literal-1.0 LABEL is rendered as by-construction-pending-census,
-    #     NOT asserted as a measured fact (the relayed run logged verdict/literal_1p0=0 vs precache). ---
+    # --- Honesty flag #1: floor-lock literal-1.0 is BY CONSTRUCTION; the bwyhpkd7 served census ACCEPTED
+    #     it (1.0/0) but the confirmed boolean stays FALSE (reference unverifiable under launch-isolation). ---
     cond["af_floorlock_literal_flag_honest"] = (
         FLOOR_LOCK_LITERAL_1P0_BY_CONSTRUCTION is True
         and FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS is False
+        and FLOOR_LOCK_SERVED_CENSUS_ACCEPTED_FLOOR is True
         and FLOOR_LOCK_RELAYRUN_VERDICT_LITERAL_1P0 == 0)
     cond["ag_floorlock_tps_independently_solid"] = FLOOR_LOCK_TPS >= FLOOR_LOCK_TARGET_TPS
-    cond["ah_surgical_predicted_not_served"] = SURGICAL_REALIZED_E2E is False
-    cond["ai_surgical_realization_gap_real"] = SURGICAL_PREDICTED_TPS_MEASURED < SURGICAL_PREDICTED_TPS
+
+    # --- Honesty flag #2 VINDICATED by measurement: surgical realized e2e, BELOW its composed prediction
+    #     (lawine #488 measured 357.6 < ubel #484 predicted 456.98 -- the composed-vs-realized mirage). ---
+    cond["ah_surgical_realized_e2e"] = SURGICAL_REALIZED_E2E is True
+    cond["ai_surgical_measured_below_predicted"] = SURGICAL_MEASURED_TPS < SURGICAL_PREDICTED_TPS
 
     # --- PPL clears the gate on the shippable strict rungs. ---
     cond["aj_floorlock_ppl_clears_gate"] = FLOOR_LOCK_PPL <= PPL_GATE
@@ -511,6 +566,14 @@ def _selftests(p: dict[str, Any]) -> dict[str, Any]:
     cond["am_no_served_file_change"] = bool(p["ownership"]["no_served_file_change"])
     cond["an_no_hf_job"] = bool(p["ownership"]["no_hf_job"])
     cond["ao_official_tps_zero"] = p["ownership"]["official_tps"] == 0
+
+    # --- TERMINAL coherence + the SHIP is surgical-357 (the human's #474 pick, beating the floor). ---
+    #     (ap_nan_clean is appended by main() after the NaN scan.)
+    cond["aq_terminal_is_true"] = p["terminal"] is True
+    cond["ar_ship_is_surgical_357"] = math.isclose(lv["ship"]["tps"], SURGICAL_MEASURED_TPS)
+    cond["as_ship_is_fast_risky_not_floorlock"] = lv["human_ruling"] == REC_SHIP_357
+    cond["at_ship_beats_floorlock"] = SURGICAL_MEASURED_TPS > FLOOR_LOCK_TPS
+    cond["au_surgical_ppl_clears_gate"] = SURGICAL_MEASURED_PPL <= PPL_GATE
 
     return {
         "conditions": cond,
@@ -526,28 +589,32 @@ def _selftests(p: dict[str, Any]) -> dict[str, Any]:
 def render_one_screen(p: dict[str, Any]) -> str:
     pr = p["B_the_principle"]
     gt = p["C_gt500_closure"]
-    fw = p["D_forward_program"]
-    lv = p["E_live_474_call"]
+    fw = p["D_forward_research"]
+    lv = p["E_474_decision"]
     st = p["self_test"]
     L = [
         "================================================================================",
-        " THE HONEST STRICT-FRONTIER MAP  —  PR #357  (fern, CPU-only synthesis)",
+        " THE HONEST STRICT-FRONTIER MAP  —  PR #357  (fern, CPU-only synthesis)  [TERMINAL]",
         "================================================================================",
         " A. THE MAP (ranked by realized TPS; private-safety is the 2nd axis)",
         "      rung                         realized TPS   strict?           private-safe?",
         "      ---------------------------  ------------   ---------------   --------------------",
-        f"      floor-lock M=1 AR            {FLOOR_LOCK_TPS:>7.2f} proj   literal-1.0*      SAFE  (Δ {DELTA_FLOORLOCK_PCT:.3f}%)  <- STICKS",
-        f"      global-flag BI=1            {GLOBAL_FLAG_TPS_OFFICIAL:>7.2f}       operative-1.0     RISKY (Δ {DELTA_SPEC_ALIVE_PCT:.3f}%)  <- #474 live",
-        f"      surgical / 2D byte-exact    {SURGICAL_PREDICTED_TPS:>7.2f} pred  byte-exact(locus) RISKY (Δ {DELTA_SPEC_ALIVE_PCT:.3f}%)  <- OBE strict",
+        f"      floor-lock M=1 AR            {FLOOR_LOCK_TPS:>7.2f} proj   literal-1.0*      SAFE  (Δ {DELTA_FLOORLOCK_PCT:.3f}%)  <- fallback",
+        f"      global-flag BI=1            {GLOBAL_FLAG_TPS_OFFICIAL:>7.2f}       operative-1.0     RISKY (Δ {DELTA_SPEC_ALIVE_PCT:.3f}%)  <- superseded",
+        f"      surgical / 2D byte-exact    {SURGICAL_MEASURED_TPS:>7.2f} meas  byte-exact e2e    RISKY (Δ {DELTA_SPEC_ALIVE_PCT:.3f}%)  <- #474 SHIP",
         f"      deployed (reference)        {DEPLOYED_TPS:>7.2f}       NON-equiv .9966   — (outside strict set)",
-        f"      * floor-lock literal-1.0 = BY CONSTRUCTION (M=1 AR, no drafter); served census vs the",
-        f"        M=1 AR reference is the load-bearing confirm (relay-run logged verdict_literal_1p0=0",
-        f"        vs the precache ref, 119/128 divergent — a DIFFERENT config; flagged to advisor).",
+        f"      surgical 357.6 = lawine #488 (ko01dcyy) MEASURED byte-exact e2e — REFUTES the 456.98",
+        f"      composed prediction (honesty flag #2 vindicated: composed-vs-realized, +{SURGICAL_MEASURED_OVER_GLOBALFLAG_TPS:.1f} over 222).",
+        f"      * floor-lock literal-1.0 = BY CONSTRUCTION (M=1 AR int4 = the strict reference); the denken",
+        f"        #471 served census ({FLOOR_LOCK_SERVED_CENSUS_RUN}) ACCEPTED the floor 1.0/0 flips (rejects deployed",
+        f"        .9966), but confirmed=False — reference M=1-AR-self-vs-greedy unverifiable under iso (non-gating).",
+        "",
+        f"   >>> SHIP STATUS: {SHIP_STATUS_LINE} <<<",
         "",
         " B. THE PRINCIPLE (denken #489): private-safety = f(Δ drafter-gap), NOT f(TPS)",
         f"      floor-lock Δ {DELTA_FLOORLOCK_PCT:.3f}% ({pr['floorlock_headroom_pp']:.2f}pp headroom, breach ~{FLOORLOCK_BREACH_FRAC_PCT:.3f}%)  vs"
         f"  spec-alive Δ {DELTA_SPEC_ALIVE_PCT:.3f}% ({pr['spec_alive_headroom_pp']:.2f}pp, breach {SPEC_ALIVE_BREACH_FRAC_PCT:.1f}%)",
-        f"      SCALE-INVARIANT: the 222, the 457 and the 481 all carry the SAME Δ -> SAME breach, any TPS",
+        f"      SCALE-INVARIANT: the 222, the 357.6 and the 481 all carry the SAME Δ -> SAME breach, any TPS",
         f"      => floor-lock (no drafter) is the ONLY strict private-safe ship.  Fast + byte-exact ≠ safe.",
         "",
         " C. >500 CLOSURE (settled): strict >500 DEAD via all known levers",
@@ -555,20 +622,21 @@ def render_one_screen(p: dict[str, Any]) -> str:
         f"      no free fast byte-exact GEMM (#481: tax 22-63%, e2e {DETERMINISM_TAX_E2E_PCT:.1f}%).  Only >500 path =",
         f"      greedy-UNSAFE ~16% relax-prize (id {RELAX_PRIZE_IDENTITY:.3f}, out of lane, human #407).  ~{gt['multiple_over_private_safe_floor']:.1f}x over the 166 floor.",
         "",
-        " D. FORWARD LEVERS (HELD OPEN; finalize to terminal when #488/#491/#492 land)",
-        f"      [{ 'x' if fw['levers']['ubel491_reduction_sensitivity']['landed'] else ' ' }] #491 reduction-sensitivity -> FASTER floor-lock (attacks TPS-tax, Δ stays safe)",
-        f"      [{ 'x' if fw['levers']['denken492_eagle3_drafter']['landed'] else ' ' }] #492 EAGLE-3 drafter      -> PRIVATE-SAFE fast rung (attacks Δ-gate, keeps drafter)",
-        f"      [{ 'x' if fw['levers']['lawine488_surgical_realization']['landed'] else ' ' }] #488 surgical realize     -> is the 457.5 a REAL served rung, or a mirage?",
-        f"      orthogonal axes; only their CONJUNCTION yields faster AND private-safe.  ({fw['n_landed']}/{fw['n_total']} landed)",
+        " D. FORWARD RESEARCH (DECOUPLED -> #481 zoom-out menu; NOT capstone-gating)",
+        f"      [ ] #491 reduction-sensitivity -> FASTER floor-lock (attacks TPS-tax, Δ stays safe)",
+        f"      [ ] #492 EAGLE-3 drafter       -> PRIVATE-SAFE fast rung (attacks Δ-gate, keeps drafter)",
+        f"      orthogonal axes; only their CONJUNCTION yields faster AND private-safe.  Wider menu:",
+        f"      {', '.join(fw['wider_menu'])}.",
         "",
-        f" E. THE LIVE #474 CALL: floor-lock {FLOOR_LOCK_TPS:.0f} (sticks) vs {GLOBAL_FLAG_TPS_OFFICIAL:.0f} (fast-risky) — ruling: {lv['human_ruling']}",
-        f"      binding: does a >5% private re-draw INVALIDATE (->floor-lock) or PENALIZE (->222)?",
-        f"      advisor rec: {lv['advisor_recommendation']}",
+        f" E. THE #474 DECISION (RESOLVED): human ruled \"{lv['human_ruling_verbatim']}\" (13:51Z) -> SHIP-357",
+        f"      chose the fast-risky/PENALIZE lane over floor-lock {FLOOR_LOCK_TPS:.0f}; realized scorer has no",
+        f"      token-identity gate (stark #493), so operative-1.0 clears.  ruling: {lv['human_ruling']}",
+        f"      fire: surgical-357 ({SURGICAL_MEASURED_TPS:.1f} TPS) armed on {SHIP_TRIGGER}.",
         " OWNERSHIP: this packet = the MAP · land#473 = trigger · denken#471 = census oracle"
         "  ·  CPU-only, official_tps=0, no served-file change",
         "================================================================================",
         f" self-test: {st['n_passing']}/{st['n_conditions']} invariants  ·  terminal={p['terminal']}"
-        f"  ·  >500 strict: DEAD-via-known-levers",
+        f"  ·  >500 strict: DEAD-via-known-levers  ·  SHIP: surgical-357",
         "================================================================================",
     ]
     return "\n".join(L)
@@ -594,11 +662,11 @@ def _wandb_summary(payload: dict) -> dict[str, Any]:
     p = payload["synthesis"]
     pr = p["B_the_principle"]
     gt = p["C_gt500_closure"]
-    fw = p["D_forward_program"]
-    lv = p["E_live_474_call"]
+    fw = p["D_forward_research"]
+    lv = p["E_474_decision"]
     o = p["ownership"]
     st = p["self_test"]
-    rec_code = {"PENDING": 0, REC_FLOOR_LOCK: 1, REC_GLOBAL_FLAG: 2}.get(lv["human_ruling"], 0)
+    rec_code = {"PENDING": 0, REC_FLOOR_LOCK: 1, REC_SHIP_357: 2}.get(lv["human_ruling"], 0)
     summary: dict[str, Any] = {
         # PRIMARY
         "strict_frontier_map_self_test_passes": int(bool(st["strict_frontier_map_self_test_passes"])),
@@ -612,6 +680,9 @@ def _wandb_summary(payload: dict) -> dict[str, Any]:
         "global_flag_tps_official": GLOBAL_FLAG_TPS_OFFICIAL,
         "global_flag_tps_local": GLOBAL_FLAG_TPS_LOCAL,
         "global_flag_private_safe": 0,
+        "surgical_measured_tps": SURGICAL_MEASURED_TPS,
+        "surgical_measured_ppl": SURGICAL_MEASURED_PPL,
+        "surgical_measured_over_globalflag_tps": SURGICAL_MEASURED_OVER_GLOBALFLAG_TPS,
         "surgical_byte_exact_predicted_tps": SURGICAL_PREDICTED_TPS,
         "surgical_predicted_tps_measured": SURGICAL_PREDICTED_TPS_MEASURED,
         "surgical_realized_e2e": int(bool(SURGICAL_REALIZED_E2E)),
@@ -645,18 +716,20 @@ def _wandb_summary(payload: dict) -> dict[str, Any]:
         "relax_prize_identity": RELAX_PRIZE_IDENTITY,
         "relax_prize_in_strict_lane": 0,
         "gt500_multiple_over_floor": gt["multiple_over_private_safe_floor"],
-        # D. forward program
-        "forward_levers_open": int(bool(fw["section_open"])),
-        "forward_levers_landed": fw["n_landed"],
-        "forward_levers_total": fw["n_total"],
-        "denken492_yields_fast_private_safe": int(bool(fw["denken492_yields_fast_private_safe"])),
-        # E. live 474 call
-        "live_474_ruling_code": rec_code,  # 0 pending / 1 floor-lock / 2 global-flag-222
-        "live_474_resolved": int(bool(lv["resolved"])),
+        # D. forward research (decoupled to the #481 menu; NOT capstone-gating)
+        "forward_research_decoupled": int(bool(fw["decoupled_to_481_menu"])),
+        "forward_research_gates_terminal": int(bool(fw["gates_terminal"])),
+        "forward_research_n_levers": fw["n_levers"],
+        # E. #474 decision (RESOLVED -> ship surgical-357)
+        "decision_474_ruling_code": rec_code,  # 0 pending / 1 floor-lock / 2 ship-357
+        "decision_474_resolved": int(bool(lv["resolved"])),
+        "ship_tps": lv["ship"]["tps"],
+        "ship_ppl": lv["ship"]["ppl"],
         # honesty flags
         "floor_lock_literal_1p0_by_construction": int(bool(FLOOR_LOCK_LITERAL_1P0_BY_CONSTRUCTION)),
         "floor_lock_literal_1p0_confirmed_by_census": int(bool(
             FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS)),
+        "floor_lock_served_census_accepted_floor": int(bool(FLOOR_LOCK_SERVED_CENSUS_ACCEPTED_FLOOR)),
         "floor_lock_relayrun_verdict_literal_1p0": FLOOR_LOCK_RELAYRUN_VERDICT_LITERAL_1P0,
         "floor_lock_relayrun_divergent_vs_precache": FLOOR_LOCK_RELAYRUN_DIVERGENT_VS_PRECACHE,
         # gates + mandate
@@ -692,19 +765,20 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         name=args.wandb_name,
         group=args.wandb_group,
         tags=[
-            "strict-frontier-map", "strict-frontier", "strict-equivalent", "honest-map",
-            "floor-lock-166-private-safe", "global-flag-222-fast-risky", "surgical-457-obe",
+            "strict-frontier-map", "strict-frontier", "strict-equivalent", "honest-map", "TERMINAL",
+            "floor-lock-166-private-safe", "surgical-357-measured-ship", "surgical-457-predicted-refuted",
             "private-safety-is-delta-not-tps", "denken-489-delta-principle",
-            "lawine-482-dependency-collapses-to-floor", "ubel-484-surgical-predicted",
+            "lawine-482-dependency-collapses-to-floor", "ubel-484-surgical-predicted-refuted",
             "stark-485-floorlock-realize", "gt500-dead-via-known-levers", "ieee754-tax-irreducible",
-            "forward-levers-open", "ubel-491-reduction-sensitivity", "denken-492-eagle3",
-            "lawine-488-surgical-realize", "live-474-call", "floorlock-literal-1p0-flag",
+            "forward-research-decoupled-481-menu", "ubel-491-reduction-sensitivity", "denken-492-eagle3",
+            "lawine-488-surgical-realized-357", "human-474-ruled-357", "floorlock-literal-1p0-flag",
             "analysis-only", "cpu-only", "no-served-file-change", "bank-the-analysis",
         ],
         config={
             "floor_lock_tps": FLOOR_LOCK_TPS,
             "global_flag_tps_official": GLOBAL_FLAG_TPS_OFFICIAL,
-            "surgical_predicted_tps": SURGICAL_PREDICTED_TPS,
+            "surgical_measured_tps": SURGICAL_MEASURED_TPS,
+            "surgical_predicted_tps_refuted": SURGICAL_PREDICTED_TPS,
             "multistream_realizable_tps": MULTISTREAM_REALIZABLE_TPS,
             "deployed_tps": DEPLOYED_TPS,
             "delta_floorlock_pct": DELTA_FLOORLOCK_PCT,
@@ -714,23 +788,25 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
             "ppl_gate": PPL_GATE,
             "sigma_hw": SIGMA_HW,
             "terminal": payload["synthesis"]["terminal"],
-            "live_slots": {
-                "lawine488_surgical_served_tps": args.lawine488_surgical_tps,
-                "ubel491_faster_floor_tps": args.ubel491_faster_floor_tps,
-                "denken492_eagle3_delta_pct": args.denken492_eagle3_delta_pct,
-                "human474_ruling": args.human474_ruling,
-            },
+            "human_474_ruling": REC_SHIP_357,
+            "ship_status_line": SHIP_STATUS_LINE,
+            "ship_tps": SURGICAL_MEASURED_TPS,
+            "forward_research_decoupled_to_481_menu": True,
             "source_runs": (
                 "stark#485(pavotwci): floor-lock realizes 166.23 proj official, PPL 2.3767, realizes_16170=1; "
-                "FLAG verdict/literal_1p0=0 vs fa2sw_precache_kenyan ref (119/128 divergent, different config). "
+                "FLAG verdict/literal_1p0=0 vs fa2sw_precache_kenyan ref (119/128 divergent, different config); "
+                "denken#471(bwyhpkd7) served census ACCEPTED M=1 AR floor at 1.0/0 flips (pointer, iso-pending). "
+                "lawine#488(ko01dcyy): surgical attn-pin SERVED e2e=357.6 byte-exact, PPL 2.3767, 128/128 -- THE "
+                "SHIP; REFUTES the ubel#484 456.98 prediction (composed-vs-realized inversion). "
                 "lawine#482(044xamdd): dependency_bounded_strict_tps=457.54, ceiling 474.44 UNREALIZABLE "
                 "(DEPENDENCY_COLLAPSES_TO_FLOOR), multistream gain ~0, byte-exact 0 flips. "
                 "denken#489(q1ivw9tt): delta_floorlock=0.633%, delta_spec_alive=4.295%, scale-invariant "
                 "24.3% breach, fast_byteexact_privatesafe_coexists=False. ubel#484(r1l881bx): "
-                "predicted_surgical_tps=456.98 (measured-variant 347.96), surgical_can_realize_457=1, drafter alive. "
+                "predicted_surgical_tps=456.98 (measured-variant 347.96) -- REFUTED by #488. "
                 "ubel#470(ugqnytji): global-flag 234.47 official / 221.16 local. denken#423: IEEE-754 tax "
                 "irreducible. stark#452: relax-prize out of strict lane (id 0.730). #481 forward survey: "
-                "no free fast byte-exact GEMM, tax 22-63%, e2e 51.39%. Deployed PR#52(2x9fm2zx): 481.53 NON-equiv."
+                "no free fast byte-exact GEMM, tax 22-63%, e2e 51.39%. Deployed PR#52(2x9fm2zx): 481.53 NON-equiv. "
+                "human #474: ruled '357 -- go, finish it' (13:51Z); land #473 arms the surgical-357 fire."
             ),
         },
     )
@@ -753,52 +829,26 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--self-test", action="store_true", help="run the PRIMARY self-validation")
-    # Forward-lever LIVE slots (default None == open/pending; drop the relayed numbers in to finalize).
-    ap.add_argument("--lawine488-surgical-served-tps", dest="lawine488_surgical_tps", type=float,
-                    default=None,
-                    help="lawine #488 surgical-attention SERVED e2e TPS (resolves the 457.5 predicted-vs-"
-                         "served gap). Omit -> forward section stays OPEN (non-terminal).")
-    ap.add_argument("--ubel491-faster-floor-tps", dest="ubel491_faster_floor_tps", type=float,
-                    default=None,
-                    help="ubel #491 reduction-sensitivity census -> the realized FASTER floor-lock TPS "
-                         "after shedding the determinism speed-tax. Omit -> open.")
-    ap.add_argument("--denken492-eagle3-delta-pct", dest="denken492_eagle3_delta_pct", type=float,
-                    default=None,
-                    help="denken #492 EAGLE-3 realized drafter-acceptance gap Delta (pct). <= ~3.0 -> a fast "
-                         "private-safe rung becomes feasible. Omit -> open.")
-    ap.add_argument("--human474-ruling", dest="human474_ruling", type=str, default=None,
-                    choices=["floor-lock", "global-flag", "pending",
-                             REC_FLOOR_LOCK, REC_GLOBAL_FLAG, "PENDING"],
-                    help="the human #474 breach-rule ruling: floor-lock (invalidate) / global-flag (penalize). "
-                         "Omit -> PENDING.")
+    # TERMINAL map (advisor #357 relay 14:37Z): all gating questions are RESOLVED and banked, so there
+    # are no LIVE slots to pass in.  Surgical #488 realized 357.6 measured and the human ruled 357; the
+    # forward levers (#491/#492) are DECOUPLED to the #481 zoom-out menu and do NOT gate this map.
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name", default=None)
     ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group", default="strict-frontier")
     args = ap.parse_args(argv)
 
-    ruling = args.human474_ruling
-    if ruling in ("floor-lock",):
-        ruling = REC_FLOOR_LOCK
-    elif ruling in ("global-flag",):
-        ruling = REC_GLOBAL_FLAG
-
-    packet = build_packet(
-        lawine488_surgical_tps=args.lawine488_surgical_tps,
-        ubel491_faster_floor_tps=args.ubel491_faster_floor_tps,
-        denken492_eagle3_delta_pct=args.denken492_eagle3_delta_pct,
-        human474_ruling=ruling,
-    )
+    packet = build_packet()
 
     created_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     peak_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     payload = {
         "created_at": created_at, "pr": 357, "agent": "fern",
         "kind": "strict-frontier-map", "analysis_only": True,
-        "live_slots": {
-            "lawine488_surgical_served_tps": args.lawine488_surgical_tps,
-            "ubel491_faster_floor_tps": args.ubel491_faster_floor_tps,
-            "denken492_eagle3_delta_pct": args.denken492_eagle3_delta_pct,
-            "human474_ruling": ruling,
+        "terminal_inputs_resolved": {
+            "lawine488_surgical_served_tps": SURGICAL_MEASURED_TPS,
+            "human474_ruling": REC_SHIP_357,
+            "ship_status_line": SHIP_STATUS_LINE,
+            "forward_research_decoupled_to_481_menu": True,
         },
         "synthesis": packet,
         "peak_mem_mib": round(peak_kib / 1024.0, 3),

@@ -1,16 +1,10 @@
 {
   "agent": "fern",
   "analysis_only": true,
-  "created_at": "20260616T124333Z",
+  "created_at": "20260616T150226Z",
   "kind": "strict-frontier-map",
-  "live_slots": {
-    "denken492_eagle3_delta_pct": null,
-    "human474_ruling": null,
-    "lawine488_surgical_served_tps": null,
-    "ubel491_faster_floor_tps": null
-  },
   "nan_clean": true,
-  "peak_mem_mib": 12.043,
+  "peak_mem_mib": 12.137,
   "pr": 357,
   "synthesis": {
     "A_the_map": {
@@ -23,13 +17,15 @@
           "breach_frac_pct": 0.0008,
           "delta_pct": 0.6334,
           "identity_confirmed_by_served_census": false,
-          "identity_label": "literal-1.0 (by construction; served census pending)",
+          "identity_label": "literal-1.0 (by construction; denken#471 bwyhpkd7 census accepted 1.0/0)",
           "ppl": 2.3767,
           "private_safe": true,
           "realized_provenance": "stark#485 pavotwci projected_official=166.234, realizes_16170=1",
           "realized_tps": 166.23,
           "rung": "floor-lock M=1 AR (no drafter)",
-          "ship_status": "the strict rung that STICKS (private-safe, guaranteed honest)",
+          "served_census_accepted_floor": true,
+          "served_census_run": "bwyhpkd7",
+          "ship_status": "the strict rung that STICKS (private-safe); fallback, NOT the #474 ship",
           "strict": true,
           "submission": "fa2sw_strict_m1ar_int4"
         },
@@ -43,23 +39,23 @@
           "realized_provenance": "land 222.32 local / ubel#470 ugqnytji 234.47 official",
           "realized_tps": 234.47,
           "rung": "global-flag VLLM_BATCH_INVARIANT=1 (drafter alive)",
-          "ship_status": "the live #474 call: fast-but-private-RISKY (needs manifest env edit, gated)",
+          "ship_status": "the original #474 call (222/234); SUPERSEDED by surgical-357 in the same fast-risky lane (+135 TPS, same Delta) -- not the ship",
           "strict": true,
           "submission": "fa2sw_precache_kenyan + manifest env BI=1"
         },
         {
           "breach_frac_pct": 24.306,
           "delta_pct": 4.2946,
-          "identity_confirmed_by_served_census": false,
-          "identity_label": "byte-exact at the attention locus (1.0000, 0 flips)",
-          "ppl": 2.3772,
+          "identity_confirmed_by_served_census": true,
+          "identity_label": "byte-exact e2e, operative-1.0 (lawine #488 served, 0 semantic flips)",
+          "ppl": 2.3767,
           "private_safe": false,
-          "realized_provenance": "ubel#484 r1l881bx predicted=456.98 (measured-variant 347.96); lawine#482 044xamdd realizable=457.54, ceiling 474.44 UNREALIZABLE",
-          "realized_tps": 456.98,
-          "rung": "surgical attn-only / 2D byte-exact frontier (drafter alive)",
-          "ship_status": "strong PUBLIC rung but OBE as a strict SHIP: PREDICTED not served (pending lawine #488) AND private-RISKY (same Delta as the 222)",
+          "realized_provenance": "lawine#488 ko01dcyy SERVED e2e=357.6 byte-exact (+135.65 over the 221.95 global-flag), PPL 2.3767, 128/128 -- REFUTES the 456.98 ubel#484 prediction (composed-vs-realized; honesty flag #2 vindicated)",
+          "realized_tps": 357.6,
+          "rung": "surgical attn-only / 2D byte-exact (357.6 measured, drafter alive)",
+          "ship_status": "THE #474 SHIP: surgical-357 fire armed (land #473, per #474); fast-but-private-RISKY (same Delta as the 222)",
           "strict": true,
-          "submission": "(unpackaged; surgical attention pin)"
+          "submission": "fa2sw_strict_surgical357 (land #473 package, per advisor relay)"
         },
         {
           "breach_frac_pct": null,
@@ -75,7 +71,9 @@
           "strict": false,
           "submission": "fa2sw_precache_kenyan (deployed)"
         }
-      ]
+      ],
+      "ship_rung": "surgical attn-only / 2D byte-exact (357.6 measured)",
+      "ship_status_line": "surgical-357 fire armed (land #473, per #474)"
     },
     "B_the_principle": {
       "conclusion": "the floor-lock (no drafter, Delta 0.633%) is the ONLY strict private-safe ship; fast + byte-exact != private-safe",
@@ -108,72 +106,83 @@
       "strict_realized_ceiling_tps": 467.14,
       "verdict": "strict >500 is DEAD via all known levers"
     },
-    "D_forward_program": {
-      "denken492_eagle3_delta_pct": null,
-      "denken492_yields_fast_private_safe": false,
-      "lawine488_surgical_served_tps": null,
+    "D_forward_research": {
+      "decoupled_to_481_menu": true,
+      "gates_terminal": false,
       "levers": {
         "denken492_eagle3_drafter": {
           "attacks": "the drafter Delta-gate (keeps a drafter for speed)",
           "axis": "private-Delta",
-          "landed": false,
-          "question": "can EAGLE-3 pull Delta_accept <= ~3.0% -> a fast strict PRIVATE-safe rung?"
-        },
-        "lawine488_surgical_realization": {
-          "attacks": "the predicted-vs-measured realization gap (ubel #484: 456.98 pred vs 347.96 measured)",
-          "axis": "TPS-realization",
-          "landed": false,
-          "question": "is the surgical-457 a REAL served strict rung above 222, or another mirage?"
+          "question": "can EAGLE-3 pull Delta_accept <= ~3.0% -> a fast strict PRIVATE-safe rung?",
+          "status": "forward-research (decoupled; not capstone-gating)"
         },
         "ubel491_reduction_sensitivity": {
           "attacks": "the determinism TPS-tax (keeps Delta safe: the floor-lock has no drafter)",
           "axis": "TPS-ceiling",
-          "landed": false,
-          "question": "which decode matmuls MUST be deterministic? shed the rest -> a FASTER floor-lock"
+          "question": "which decode matmuls MUST be deterministic? shed the rest -> a FASTER floor-lock",
+          "status": "forward-research (decoupled; not capstone-gating)"
         }
       },
-      "n_landed": 0,
-      "n_total": 3,
+      "n_levers": 2,
       "only_faster_and_safe_is_their_conjunction": true,
       "orthogonal_axes": {
         "denken492": "drafter Delta-gate -> a PRIVATE-SAFE fast rung (keeps a drafter)",
         "ubel491": "determinism TPS-tax -> a FASTER floor-lock (Delta stays safe)"
       },
-      "section_open": true,
-      "ubel491_faster_floor_tps": null
+      "wider_menu": [
+        "SGLang #498",
+        "TRT-LLM",
+        "alt spec-dec (Medusa/EAGLE-3/prompt-lookup)",
+        "GPTQ/AWQ/SmoothQuant",
+        "FA3 / torch.compile"
+      ]
     },
-    "E_live_474_call": {
-      "advisor_recommendation": "FLOOR-LOCK unless a breach is known to be only a penalty",
+    "E_474_decision": {
+      "advisor_recommendation": "FLOOR-LOCK unless a breach is only a penalty -- human overrode to SHIP-357",
       "binding_question": "does a private re-draw over the 5% gate INVALIDATE (waste the one shot) or PENALIZE (scored on the lower private number)?",
+      "binding_resolution": "the human chose the fast-risky lane -> treated as PENALIZE; the realized scorer has no token-identity gate (stark #493), so operative-1.0 is fine",
       "fork": {
         "FLOOR_LOCK": {
-          "breach_rule": "pick this if a private re-draw over 5% INVALIDATES the submission",
+          "breach_rule": "would be picked if a private re-draw over 5% INVALIDATES the submission",
+          "chosen": false,
           "fire": "senpai-strict-m1ar-161 (166.23 realized)",
           "rationale": "a guaranteed-valid strict number that STICKS (Delta 0.633%, private-safe)"
         },
-        "GLOBAL_FLAG_222": {
-          "breach_rule": "pick this if a private re-draw over 5% only PENALIZES (scored lower)",
-          "fire": "senpai-strict-eqv (222/234 realized)",
-          "rationale": "crushes the floor on public TPS; even a breached 222 scores ~224 > 161"
+        "SHIP_357": {
+          "breach_rule": "chosen: human accepts the fast-risky/PENALIZE lane",
+          "chosen": true,
+          "fire": "senpai-strict-eqv / surgical-357 (357.6 measured byte-exact e2e)",
+          "rationale": "crushes the floor on public TPS (+135 over the 222); even a breach scores high"
         }
       },
-      "human_ruling": "PENDING",
-      "provenance": "#474 (10:24Z human ruled 222; 11:16Z reopened by denken #486 private-gap risk)",
-      "resolved": false
+      "human_ruling": "SHIP-SURGICAL-357-FAST-RISKY",
+      "human_ruling_verbatim": "357 -- go, finish it",
+      "provenance": "#474 (10:24Z human approved 222; 11:16Z denken #486 reopened on private-gap; 13:51Z human ruled 357 after lawine #488 upgraded the number)",
+      "resolved": true,
+      "ship": {
+        "per": "#474 -- human ruled '357 -- go, finish it' (13:51Z)",
+        "ppl": 2.3767,
+        "rung": "surgical attn-only / 2D byte-exact (357.6 measured)",
+        "submission": "fa2sw_strict_surgical357 (land #473 package, per advisor relay)",
+        "tps": 357.6,
+        "trigger": "land #473 (fires the draw on its next poll)"
+      }
     },
     "agent": "fern",
     "headline": {
       "floor_lock_private_safe": true,
       "floor_lock_realized_tps": 166.23,
-      "forward_levers_open": true,
+      "forward_research_decoupled": true,
       "global_flag_tps": 234.47,
-      "live_474_call": "PENDING",
+      "human_474_ruling": "SHIP-SURGICAL-357-FAST-RISKY",
       "multistream_realizable_tps": 457.54,
       "private_safety_is_delta_not_tps": true,
+      "ship_status_line": "surgical-357 fire armed (land #473, per #474)",
       "strict_frontier_map_self_test_passes": true,
       "strict_gt500_dead_via_known_levers": true,
       "surgical_byte_exact_predicted_tps": 456.98,
-      "terminal": false
+      "surgical_measured_tps": 357.6,
+      "terminal": true
     },
     "kind": "strict-frontier-map",
     "ownership": {
@@ -181,6 +190,7 @@
       "consumes_cards": [
         "stark#485",
         "lawine#482",
+        "lawine#488",
         "denken#489",
         "ubel#484",
         "ubel#470",
@@ -189,7 +199,7 @@
         "denken#423"
       ],
       "denken471": "the served-census identity oracle",
-      "land473": "the submission trigger",
+      "land473": "the submission trigger (surgical-357 fire armed)",
       "no_hf_job": true,
       "no_served_file_change": true,
       "official_tps": 0,
@@ -199,15 +209,15 @@
     "self_test": {
       "conditions": {
         "a_floor_lt_globalflag": true,
-        "aa_no_forward_lever_landed": true,
-        "ab_terminal_iff_forward_closed": true,
+        "aa_forward_research_two_levers": true,
+        "ab_terminal_iff_mandate_resolved": true,
         "ac_two_orthogonal_axes": true,
-        "ad_live474_ruling_valid": true,
-        "ae_live474_resolved_consistent": true,
+        "ad_decision474_ruling_valid": true,
+        "ae_decision474_resolved_consistent": true,
         "af_floorlock_literal_flag_honest": true,
         "ag_floorlock_tps_independently_solid": true,
-        "ah_surgical_predicted_not_served": true,
-        "ai_surgical_realization_gap_real": true,
+        "ah_surgical_realized_e2e": true,
+        "ai_surgical_measured_below_predicted": true,
         "aj_floorlock_ppl_clears_gate": true,
         "ak_deployed_ppl_clears_gate": true,
         "al_analysis_only": true,
@@ -215,6 +225,11 @@
         "an_no_hf_job": true,
         "ao_official_tps_zero": true,
         "ap_nan_clean": true,
+        "aq_terminal_is_true": true,
+        "ar_ship_is_surgical_357": true,
+        "as_ship_is_fast_risky_not_floorlock": true,
+        "at_ship_beats_floorlock": true,
+        "au_surgical_ppl_clears_gate": true,
         "b_globalflag_lt_surgical": true,
         "c_surgical_lt_deployed": true,
         "d_floor_realizes_target": true,
@@ -239,12 +254,23 @@
         "w_relax_prize_out_of_strict_lane": true,
         "x_relax_prize_dominated": true,
         "y_gt500_is_new_method_problem": true,
-        "z_forward_section_open": true
+        "z_forward_research_decoupled": true
       },
-      "n_conditions": 42,
-      "n_passing": 42,
+      "n_conditions": 47,
+      "n_passing": 47,
       "strict_frontier_map_self_test_passes": true
     },
-    "terminal": false
+    "terminal": true,
+    "terminal_basis": {
+      "decision_474_resolved": true,
+      "forward_research_gates_terminal": false,
+      "surgical_realized_e2e": true
+    }
+  },
+  "terminal_inputs_resolved": {
+    "forward_research_decoupled_to_481_menu": true,
+    "human474_ruling": "SHIP-SURGICAL-357-FAST-RISKY",
+    "lawine488_surgical_served_tps": 357.6,
+    "ship_status_line": "surgical-357 fire armed (land #473, per #474)"
   }
 }
