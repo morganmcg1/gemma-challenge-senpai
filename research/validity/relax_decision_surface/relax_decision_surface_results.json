@@ -1,0 +1,390 @@
+{
+  "agent": "land",
+  "created_at": "20260616T063523Z",
+  "kind": "relax-decision-surface",
+  "nan_clean": true,
+  "peak_mem_mib": 12.09,
+  "pr": 462,
+  "synthesis": {
+    "banked_roundtrip": {
+      "all_roundtrip_ok": true,
+      "banked_ceiling_lcb_tps": 24.527123044997325,
+      "ceiling_self_test_passed": true,
+      "cost_ledger_self_test_passed": true,
+      "deployed_flips_str_banked": "3/882",
+      "max_roundtrip_resid": 0.0,
+      "roundtrip_resid": {
+        "ceiling_lcb_resid": 0.0,
+        "deployed_flips_resid": 0,
+        "deployed_identity_resid": 0.0,
+        "deployed_ppl_xcheck_resid": 0.0,
+        "deployed_tps_resid": 0.0,
+        "deployed_tps_xcheck_resid": 0.0,
+        "led_ceiling_gain_resid": 0.0,
+        "led_ppl_margin_resid": 0.0,
+        "led_relax_gain_resid": 0.0,
+        "ppl_anchor_resid": 0.0,
+        "ppl_cap_xcheck_resid": 0.0,
+        "ppl_gate_resid": 0.0,
+        "relax_ceiling_gain_resid": 0.0,
+        "relax_realistic_gain_resid": 0.0,
+        "relax_realistic_tps_resid": 0.0,
+        "sigma_hw_resid": 0.0,
+        "spec_ub_resid": 0.0,
+        "strict_tps_resid": 0.0,
+        "unified_ceiling_resid": 0.0
+      }
+    },
+    "constants": {
+      "best_byte_exact_lever_tps": 0.26,
+      "deployed_flips": 3,
+      "deployed_flips_str": "3/882",
+      "deployed_identity": 0.9966,
+      "deployed_tokens": 882,
+      "deployed_tps": 481.53,
+      "headroom_deployed_to_ceiling_lcb": 24.527123044997325,
+      "k_headline": 1,
+      "ppl_anchor": 2.3772,
+      "ppl_gate": 2.42,
+      "relax_ceiling_tps_gain": 29.342423044997304,
+      "relax_identity_ub": 0.9966,
+      "relax_realistic_tps": 498.57990782684584,
+      "relax_realistic_tps_gain": 17.049907826845867,
+      "sigma_hw": 4.8153,
+      "spec_ub_tps": 520.9527323111674,
+      "strict_frontier_tps": 467.14,
+      "unified_ceiling_tps": 510.8724230449973
+    },
+    "flip_count_framing": {
+      "decision_is_N_invariant_given_kind_and_ppl": true,
+      "deployed_status_quo_flips": 3,
+      "framing": "relax buys \u0394TPS = (measured gain over deployed) by moving the equivalence severity from the deployed 3-flip status quo to N flips. The deployed 3 is the status quo the human ALREADY accepted (#458 reframe) \u2014 so this is '3 -> N flips, does quality survive?', graded, not binary.",
+      "orthogonality": "flip-COUNT (equivalence) and PPL (quality) are ORTHOGONAL. The decision gate is PPL <= 2.42 AND same-KIND break; it does NOT read N. N is the severity coordinate, reported for transparency, never a gate. Conflating count with quality is the trap that sank four isolated levers (#458).",
+      "parameterized_over_N": [
+        {
+          "buys_delta_tps_realistic": 17.049907826845867,
+          "decision_gate_depends_on_N": false,
+          "delta_flips_vs_deployed_status_quo": 0,
+          "gate_is": "PPL <= 2.42 AND same-KIND break (never the count N)",
+          "relax_flips_N": 3
+        },
+        {
+          "buys_delta_tps_realistic": 17.049907826845867,
+          "decision_gate_depends_on_N": false,
+          "delta_flips_vs_deployed_status_quo": 1,
+          "gate_is": "PPL <= 2.42 AND same-KIND break (never the count N)",
+          "relax_flips_N": 4
+        },
+        {
+          "buys_delta_tps_realistic": 17.049907826845867,
+          "decision_gate_depends_on_N": false,
+          "delta_flips_vs_deployed_status_quo": 3,
+          "gate_is": "PPL <= 2.42 AND same-KIND break (never the count N)",
+          "relax_flips_N": 6
+        },
+        {
+          "buys_delta_tps_realistic": 17.049907826845867,
+          "decision_gate_depends_on_N": false,
+          "delta_flips_vs_deployed_status_quo": 7,
+          "gate_is": "PPL <= 2.42 AND same-KIND break (never the count N)",
+          "relax_flips_N": 10
+        },
+        {
+          "buys_delta_tps_realistic": 17.049907826845867,
+          "decision_gate_depends_on_N": false,
+          "delta_flips_vs_deployed_status_quo": 17,
+          "gate_is": "PPL <= 2.42 AND same-KIND break (never the count N)",
+          "relax_flips_N": 20
+        }
+      ]
+    },
+    "handoff_line": "DECISION SURFACE (for fern #357): relax-realistic +17.05 is a CI-clean (k1) GO for any human bar B <= +12.23 (ceiling +29.34 up to +24.53 == #457 banked LCB). PPL gate is the tight axis: max admissible 2.42, only 0.0428 over the deployed anchor; MOST-SENSITIVE input = stark #452 PPL. flip-count N is ORTHOGONAL (decision N-invariant; only the KIND gates). recommend(gain, ppl, same_kind, bar, k=1): GO iff PPL<=2.42 AND same-kind AND gain-k*sigma>=B; NO-GO if PPL>2.42 or new-kind; CI-AMBIGUOUS if gain clears B only within hw noise.",
+    "headline": {
+      "analysis_only": true,
+      "ceiling_ci_clean_k1_equals_banked_lcb": true,
+      "ceiling_max_ci_clean_bar_k1": 24.527123044997303,
+      "decision_flip_tps_threshold": 12.234607826845867,
+      "decision_is_N_invariant": true,
+      "decision_surface_self_test_passes": true,
+      "max_admissible_relax_ppl": 2.42,
+      "most_sensitive_pending_input": "ppl",
+      "no_served_file_change": true,
+      "official_tps": 0,
+      "ppl": 2.3772,
+      "ppl_margin_from_deployed_anchor": 0.04279999999999973,
+      "relax_realistic_ci_clean_of_threshold": true,
+      "relax_realistic_max_ci_clean_bar_k1": 12.234607826845867
+    },
+    "imports": {
+      "machinery": "round-trip of committed #457 / #458 / directive4 result JSONs; re-derives nothing",
+      "provenance": "land#457 h0uggl9i (unified ceiling 510.87 +/- 4.82, spec-UB 520.95, deployed 481.53, strict 467.14, relax-realistic 498.58, sigma_hw 4.8153, headroom LCB 24.527, ppl_anchor 2.3772, ppl_gate 2.42, relax TPS-gains +17.05/+29.34) x land#458 uhhyec0q (cost-ledger RULE this card turns into thresholds; deployed_ppl_gate_margin 0.0428) x directive4_correct_bar shared_baselines (deployed_served_identity 0.9966, deployed_served_flips 3/882, deployed_ppl 2.3772, ppl_cap 2.42 \u2014 PR #52 2x9fm2zx). relax identity/flips/PPL are stark #452 PARAMETERIZED SLOTS. All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "ppl_boundary": {
+      "deployed_ppl_anchor": 2.3772,
+      "margin_from_deployed_anchor": 0.04279999999999973,
+      "margin_pct_of_gate": 1.7685950413223028,
+      "max_admissible_relax_ppl": 2.42,
+      "note": "the PPL gate is a HARD boundary at 2.42 with only 0.0428 of headroom above the deployed anchor 2.3772 (~1.77% of the gate). A flip can be PPL-NEUTRAL (a reduction-order near-tie, like the deployed 3) or PPL-BREACHING; the count tells you NOTHING about which. PPL is the one axis that can flip GO->NO-GO outright.",
+      "rule": "relax is PPL-admissible iff stark #452's measured relax PPL <= 2.42"
+    },
+    "prewire_stark452": {
+      "live_status": "TPS clause already a CI-clean GO for any bar <= +12.23 (realistic). The live recommendation is GO-PENDING-PPL-AND-KIND: it resolves to GO the instant stark #452 reads PPL <= 2.42 with same-kind flips (at any human bar <= +12.23), and to NO-GO if PPL > 2.42 or the break is a new kind \u2014 regardless of the count N.",
+      "one_number_swap": [
+        {
+          "currently": "QUANTIFIED at the modeled +17.05 (realistic) / +29.34 (ceiling); only the human bar B is free",
+          "resolves_clause": "clause-1 tps_gain_over_deployed_ge_bar",
+          "rule": "CI-clean GO iff (gain - k*sigma_hw) >= human bar B; CI-AMBIGUOUS iff B <= gain < B + k*sigma_hw",
+          "stark452_reports": "measured relax TPS (=> gain over deployed 481.53)"
+        },
+        {
+          "currently": "PENDING \u2014 the decision-critical unknown (hard gate, thin margin)",
+          "resolves_clause": "clause-2 measured_ppl_le_gate",
+          "rule": "admissible iff measured PPL <= 2.42 (margin 0.0428 from deployed anchor 2.3772)",
+          "stark452_reports": "measured relax PPL"
+        },
+        {
+          "currently": "PROVISIONAL same-kind (FP split-K reassociation ~ deployed reduction-order near-ties); confirm via the KIND, not the count N",
+          "resolves_clause": "clause-3 same_kind_of_break_as_deployed",
+          "rule": "GO if the flips are accumulation-order near-ties (same family as the deployed 3); NO-GO if a new quality-destroying mode",
+          "stark452_reports": "measured relax flip characterization (KIND of the N flips)"
+        }
+      ],
+      "recommend_signature": "recommend(measured_gain_tps, measured_ppl, break_same_kind, human_bar_tps, k=1)",
+      "verdict_space": [
+        "GO",
+        "CI-AMBIGUOUS",
+        "NO-GO"
+      ],
+      "worked_corners": [
+        {
+          "bar": 0.26,
+          "gain": 17.049907826845867,
+          "label": "modeled gain, PPL-neutral (== deployed anchor), same-kind, ref bar +0.26",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "verdict": "GO"
+        },
+        {
+          "bar": 0.26,
+          "gain": 17.049907826845867,
+          "label": "modeled gain, PPL just breaches gate (2.43), same-kind, ref bar +0.26",
+          "ppl": 2.43,
+          "same_kind": true,
+          "verdict": "NO-GO"
+        },
+        {
+          "bar": 0.26,
+          "gain": 17.049907826845867,
+          "label": "modeled gain, PPL at gate (2.42), same-kind, ref bar +0.26",
+          "ppl": 2.42,
+          "same_kind": true,
+          "verdict": "GO"
+        },
+        {
+          "bar": 0.26,
+          "gain": 17.049907826845867,
+          "label": "modeled gain, PPL-neutral, NEW-kind break, ref bar +0.26",
+          "ppl": 2.3772,
+          "same_kind": false,
+          "verdict": "NO-GO"
+        },
+        {
+          "bar": 15.0,
+          "gain": 17.049907826845867,
+          "label": "modeled gain, PPL-neutral, same-kind, bar +15 (in [12.23 k1-clean, 17.05 point])",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "verdict": "CI-AMBIGUOUS"
+        },
+        {
+          "bar": 20.0,
+          "gain": 17.049907826845867,
+          "label": "modeled gain, PPL-neutral, same-kind, AGGRESSIVE bar +20 (> +17.05 point gain)",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "verdict": "NO-GO"
+        },
+        {
+          "bar": 20.0,
+          "gain": 29.342423044997304,
+          "label": "CEILING gain +29.34, PPL-neutral, same-kind, aggressive bar +20 (24.53 k1-clean >= 20)",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "verdict": "GO"
+        }
+      ]
+    },
+    "self_test": {
+      "conditions": {
+        "a_all_banked_numbers_roundtrip": true,
+        "b_ceiling_ci_clean_k1_equals_banked_lcb_24p527": true,
+        "c_decision_flip_threshold_correct_and_k_nested": true,
+        "d_max_admissible_relax_ppl_2p42_margin_0p0428": true,
+        "e_tornado_ppl_most_sensitive": true,
+        "f_flip_count_orthogonal_decision_N_invariant": true,
+        "g_recommend_monotone_gates": true,
+        "h_worked_corners_as_expected": true,
+        "i_ppl_anchor_preserved_within_gate": true,
+        "j_nan_clean": true
+      },
+      "decision_surface_self_test_passes": true,
+      "detail": {
+        "banked_ceiling_lcb": 24.527123044997325,
+        "ceiling_ci_clean_k1": 24.527123044997303,
+        "decision_flip_tps_threshold": 12.234607826845867,
+        "max_admissible_relax_ppl": 2.42,
+        "max_roundtrip_resid": 0.0,
+        "most_sensitive_pending_input": "ppl"
+      }
+    },
+    "tornado": {
+      "axes": [
+        {
+          "axis": "measured_ppl",
+          "can_flip_decision_in_plausible_range": true,
+          "distance_to_flip": 0.04279999999999973,
+          "flip_boundary": 2.42,
+          "nominal": 2.3772,
+          "normalized_distance_to_flip": 0.017685950413223028,
+          "rank": 1,
+          "swing": "FULL (GO<->NO-GO): a hard gate; measured PPL in [2.3772, breach] straddles 2.42",
+          "why": "razor-thin 0.0428 margin (~1.77% of the gate) and UNPREDICTABLE \u2014 flips can be PPL-neutral OR PPL-breaching, so the measurement alone decides. The single most decision-swinging pending input."
+        },
+        {
+          "axis": "measured_tps_gain",
+          "can_flip_decision_in_plausible_range": true,
+          "distance_to_flip": 11.974607826845869,
+          "flip_boundary": 5.0752999999999995,
+          "flip_boundary_note": "CI-clean flip = human bar B + k*sigma_hw; shown at ref bar B=+0.26, k=1",
+          "nominal": 17.049907826845867,
+          "normalized_distance_to_flip": 0.7023268365117666,
+          "rank": 2,
+          "swing": "CONDITIONAL: flips NO-GO only if the measured gain craters below ~+5.08 OR the human sets an aggressive bar > +12.23 (k1). Robustly GO at any modest bar.",
+          "why": "modeled +17.05 sits ~12 TPS (2.5 sigma_hw) above the CI-clean flip at the reference bar; the TPS clause is not where the decision is tight unless the human's bar B is aggressive."
+        },
+        {
+          "axis": "measured_flip_count",
+          "can_flip_decision_in_plausible_range": false,
+          "distance_to_flip": null,
+          "flip_boundary": null,
+          "nominal": 3,
+          "normalized_distance_to_flip": null,
+          "rank": 3,
+          "swing": "NONE on the COUNT: the decision is N-invariant (orthogonal). Only the KIND gates.",
+          "why": "flip-COUNT is equivalence-severity, kept ORTHOGONAL to the PPL/quality gate (#458). The count N never flips the recommendation; only the categorical KIND (same accumulation-order family vs a new quality-destroying mode) does, and that is captured by clause-3, not by N."
+        }
+      ],
+      "justified_region": {
+        "description": "relax is JUSTIFIED in the region: {measured PPL <= 2.42} AND {break is same accumulation-order KIND} AND {measured gain - k*sigma_hw >= human bar B}. It is a half-space below the PPL gate, intersected with the same-KIND categorical set, intersected with the CI-clean TPS half-space. The flip-count N does not bound the region (orthogonal).",
+        "kind_set": "break in {accumulation-order near-tie family}",
+        "n_flips": "free (does not bound the justified region)",
+        "ppl_halfspace": "measured_ppl <= 2.42",
+        "tps_halfspace_k1": "measured_gain >= human_bar_B + 4.8153"
+      },
+      "most_sensitive_pending_input": "ppl",
+      "ranked_axes_most_to_least_sensitive": [
+        "measured_ppl",
+        "measured_tps_gain",
+        "measured_flip_count"
+      ],
+      "summary": "TORNADO (most -> least decision-swinging): PPL (hard gate, 0.0428 margin, outcome-flipping) > TPS-gain (robust GO unless bar aggressive) > flip-count (orthogonal; only the KIND gates). The decision turns almost entirely on stark #452's PPL read.",
+      "tornado_rank_matches_pivotality": true
+    },
+    "tps_gain_thresholds": {
+      "bar_curve": [
+        {
+          "bar_B": 0.0,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k2": true,
+          "relax_realistic_point_go": true
+        },
+        {
+          "bar_B": 0.26,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k2": true,
+          "relax_realistic_point_go": true
+        },
+        {
+          "bar_B": 5.0,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k2": true,
+          "relax_realistic_point_go": true
+        },
+        {
+          "bar_B": 10.0,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k2": false,
+          "relax_realistic_point_go": true
+        },
+        {
+          "bar_B": 12.234608,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k2": false,
+          "relax_realistic_point_go": true
+        },
+        {
+          "bar_B": 15.0,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k2": false,
+          "relax_realistic_point_go": true
+        },
+        {
+          "bar_B": 17.049908,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k2": false,
+          "relax_realistic_point_go": false
+        },
+        {
+          "bar_B": 20.0,
+          "ceiling_ci_clean_go_k1": true,
+          "relax_realistic_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k2": false,
+          "relax_realistic_point_go": false
+        },
+        {
+          "bar_B": 25.0,
+          "ceiling_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k2": false,
+          "relax_realistic_point_go": false
+        },
+        {
+          "bar_B": 29.342423,
+          "ceiling_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k1": false,
+          "relax_realistic_ci_clean_go_k2": false,
+          "relax_realistic_point_go": false
+        }
+      ],
+      "ceiling_ci_clean_k1_equals_banked_lcb": true,
+      "ceiling_gain": 29.342423044997304,
+      "ceiling_max_ci_clean_bar": {
+        "k0": 29.342423044997304,
+        "k1": 24.527123044997303,
+        "k2": 19.711823044997303
+      },
+      "decision_flip_tps_threshold": 12.234607826845867,
+      "definition": "CI-clean GO at confidence k <=> (gain - k*sigma_hw) >= human bar B. The largest CI-clean bar is gain - k*sigma_hw. sigma_hw convention matches #457's sigma-envelope (single sigma_hw on the headroom; deployed anchor treated fixed).",
+      "headline_k": 1,
+      "note": "relax-realistic +17.05 stays a CI-clean (k=1) GO for any human bar up to +12.23 TPS; the ceiling +29.34 up to +24.53 (== #457 banked LCB). Both dwarf the best byte-exact strict lever (+0.26), so the relax move clears every plausible bar EXCEPT an aggressive >+12.23 (realistic) / >+24.53 (ceiling) one. The TPS clause is NOT where this decision is tight.",
+      "reference_strict_bar_tps": 0.26,
+      "relax_realistic_ci_clean_of_threshold": true,
+      "relax_realistic_ci_clean_of_threshold_bar": 0.26,
+      "relax_realistic_gain": 17.049907826845867,
+      "relax_realistic_max_ci_clean_bar": {
+        "k0": 17.049907826845867,
+        "k1": 12.234607826845867,
+        "k2": 7.419307826845868
+      },
+      "sigma_hw": 4.8153
+    },
+    "verdict": "RELAX-DECISION-SURFACE-FLIP@B=12.23-CIclean(k1)-PPLgate2.42(margin0.0428)-MOST-SENSITIVE=PPL-N-INVARIANT"
+  }
+}
