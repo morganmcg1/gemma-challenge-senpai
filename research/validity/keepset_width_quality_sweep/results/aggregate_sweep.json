@@ -1,0 +1,132 @@
+{
+  "pr": 527,
+  "gate_mmlu_threshold": 0.6,
+  "gate_gpqa_threshold": 0.42,
+  "base_mmlu_pro": 0.668,
+  "base_gpqa_diamond": 0.4444444444444444,
+  "dixie_substrate_mmlu": 0.33,
+  "dixie_substrate_gpqa": 0.283,
+  "anchor_surgical357_tps": 357.06,
+  "anchor_splitkv12k_tps": 442.35,
+  "per_width": [
+    {
+      "label": "12k",
+      "K": 12288,
+      "mmlu_pro": 0.3,
+      "gpqa_diamond": 0.2727272727272727,
+      "mmlu_pro_ci95": [
+        0.2598319529974384,
+        0.3401680470025616
+      ],
+      "gpqa_ci95": [
+        0.2106923262412422,
+        0.3347622192133032
+      ],
+      "mmlu_n": 500,
+      "gpqa_n": 198,
+      "mmlu_err": 0,
+      "gpqa_err": 1,
+      "gate_pass": false,
+      "mmlu_delta_vs_base": -0.36800000000000005,
+      "gpqa_delta_vs_base": -0.1717171717171717,
+      "prompt_identical_mmlu": true,
+      "prompt_identical_gpqa": true,
+      "answer_agreement_mmlu": 0.358,
+      "answer_agreement_gpqa": 0.31313131313131315,
+      "warm_median_tps": 356.7716490994684,
+      "peak_gpu_mem_mib": 19395
+    },
+    {
+      "label": "16k",
+      "K": 16384,
+      "mmlu_pro": 0.308,
+      "gpqa_diamond": 0.23737373737373738,
+      "mmlu_pro_ci95": [
+        0.2675331430031933,
+        0.3484668569968067
+      ],
+      "gpqa_ci95": [
+        0.17810909219733956,
+        0.2966383825501352
+      ],
+      "mmlu_n": 500,
+      "gpqa_n": 198,
+      "mmlu_err": 0,
+      "gpqa_err": 1,
+      "gate_pass": false,
+      "mmlu_delta_vs_base": -0.36000000000000004,
+      "gpqa_delta_vs_base": -0.20707070707070704,
+      "prompt_identical_mmlu": true,
+      "prompt_identical_gpqa": true,
+      "answer_agreement_mmlu": 0.388,
+      "answer_agreement_gpqa": 0.32323232323232326,
+      "warm_median_tps": 359.91305590780723,
+      "peak_gpu_mem_mib": 19395
+    },
+    {
+      "label": "32k",
+      "K": 32768,
+      "mmlu_pro": 0.348,
+      "gpqa_diamond": 0.26262626262626265,
+      "mmlu_pro_ci95": [
+        0.3062473073059952,
+        0.38975269269400475
+      ],
+      "gpqa_ci95": [
+        0.20132966263543858,
+        0.3239228626170867
+      ],
+      "mmlu_n": 500,
+      "gpqa_n": 198,
+      "mmlu_err": 0,
+      "gpqa_err": 1,
+      "gate_pass": false,
+      "mmlu_delta_vs_base": -0.32000000000000006,
+      "gpqa_delta_vs_base": -0.18181818181818177,
+      "prompt_identical_mmlu": true,
+      "prompt_identical_gpqa": true,
+      "answer_agreement_mmlu": 0.428,
+      "answer_agreement_gpqa": 0.29797979797979796,
+      "warm_median_tps": 353.3120391423363,
+      "peak_gpu_mem_mib": 19415
+    },
+    {
+      "label": "full_pck04",
+      "K": 262144,
+      "mmlu_pro": 0.374,
+      "gpqa_diamond": 0.2727272727272727,
+      "mmlu_pro_ci95": [
+        0.33158748396050997,
+        0.41641251603949003
+      ],
+      "gpqa_ci95": [
+        0.2106923262412422,
+        0.3347622192133032
+      ],
+      "mmlu_n": 500,
+      "gpqa_n": 198,
+      "mmlu_err": 0,
+      "gpqa_err": 1,
+      "gate_pass": false,
+      "mmlu_delta_vs_base": -0.29400000000000004,
+      "gpqa_delta_vs_base": -0.1717171717171717,
+      "prompt_identical_mmlu": true,
+      "prompt_identical_gpqa": true,
+      "answer_agreement_mmlu": 0.472,
+      "answer_agreement_gpqa": 0.29292929292929293,
+      "warm_median_tps": 337.04427564440175,
+      "peak_gpu_mem_mib": 20017
+    }
+  ],
+  "min_quality_safe_keepset": null,
+  "quality_safe_ship_exists": false,
+  "quality_safe_ship_tps": null,
+  "tps_cost_of_quality": null,
+  "tps_12k_reference": 356.7716490994684,
+  "all_prompts_identical": true,
+  "verdict": "NO QUALITY-SAFE SHIP AT ANY WIDTH. The CEILING (full/no-prune head, K=262144) scores MMLU-Pro=0.3740 / GPQA=0.2727 -- below the gate (0.6/0.42) and far below base (0.6680/0.4444). Widening the lm_head keepset 12k->full lifts MMLU-Pro only +0.0740 (12k=0.3000); the 37L layer-reduction + int4 BODY is the dominant, non-head-recoverable bottleneck. Keepset width is NOT the lever for quality.",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0
+}
