@@ -1,0 +1,27 @@
+{
+  "experiment": "served_bm4_eager_floor",
+  "pr": 442,
+  "student": "wirbel",
+  "control": "default-vs-default (eager cross-process FP-noise floor)",
+  "workload": {
+    "num_prompts": 64,
+    "output_len": 512,
+    "seed": 1
+  },
+  "floor_comparison": {
+    "n_prompts": 64,
+    "n_identical": 64,
+    "n_divergent": 0,
+    "n_prompt_token_mismatch": 0,
+    "frac_identical": 1.0,
+    "total_tokens": 32768,
+    "matched_token_prefix": 32768,
+    "frac_token_prefix_match": 1.0,
+    "byte_exact": true,
+    "first_divergence": null
+  },
+  "bm4_vs_default_frac_identical": 0.53125,
+  "default2_clean": true,
+  "interpretation": "floor=1.000 ~CLEAN -> eager path is deterministic across processes; the census bm4 divergence (0.531 identical) is REAL: bm4 breaks greedy-identity on the served 3D verify path.",
+  "elapsed_s": 161.6936857700348
+}

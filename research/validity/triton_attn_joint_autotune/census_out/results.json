@@ -1,0 +1,109 @@
+{
+  "experiment": "served_bm4_census",
+  "pr": 442,
+  "student": "wirbel",
+  "config": {
+    "block_m": 4,
+    "tile": 32,
+    "num_warps": 4,
+    "num_stages": 2
+  },
+  "workload": {
+    "num_prompts": 64,
+    "output_len": 512,
+    "seed": 1
+  },
+  "comparison": {
+    "n_prompts": 64,
+    "n_identical": 34,
+    "n_divergent": 30,
+    "n_prompt_token_mismatch": 0,
+    "frac_identical": 0.53125,
+    "total_tokens": 32768,
+    "matched_token_prefix": 27161,
+    "frac_token_prefix_match": 0.828887939453125,
+    "byte_exact": false,
+    "first_divergence": {
+      "id": "aime2026-1eaadd490a",
+      "first_divergent_token_index": 290,
+      "len_default": 512,
+      "len_bm4": 512,
+      "default_tok": 823,
+      "bm4_tok": 2532
+    }
+  },
+  "ppl_bm4": 2.376683247812501,
+  "ppl_gate": 2.42,
+  "ppl_anchor": 2.3772,
+  "ppl_ok": true,
+  "attestation": {
+    "bm4_applied": true,
+    "default_clean": true,
+    "splitkv_both": true,
+    "served_verify_is_3d": true,
+    "toggle_reverted_clean": true,
+    "bm4_forced_hits": 10,
+    "census_heads": {
+      "head256": 5,
+      "head512": 1,
+      "logged": 6
+    }
+  },
+  "verdict_byte_exact_and_ppl_pass": false,
+  "arms": {
+    "default": {
+      "label": "default",
+      "extra_env": {},
+      "server_ready_s": 80.01706957817078,
+      "decode_summary": {
+        "num_records": 64,
+        "num_completion_tokens": 32768
+      },
+      "decode_jsonl": "/workspace/senpai/target/research/validity/triton_attn_joint_autotune/census_out/default/decode_outputs.jsonl",
+      "bm4_patched": false,
+      "bm4_forced_hits": 0,
+      "bm4_hook_failed": false,
+      "splitkv": true,
+      "census_3d": [],
+      "census_heads": {
+        "head256": 0,
+        "head512": 0,
+        "logged": 0
+      }
+    },
+    "bm4": {
+      "label": "bm4",
+      "extra_env": {
+        "WIRBEL_BM4_AB": "1",
+        "WIRBEL_BM4_BLOCK_M": "4",
+        "WIRBEL_BM4_NUM_STAGES": "2"
+      },
+      "server_ready_s": 80.01324915885925,
+      "decode_summary": {
+        "num_records": 64,
+        "num_completion_tokens": 32768
+      },
+      "ppl": 2.376683247812501,
+      "ppl_num_tokens": 61797,
+      "decode_jsonl": "/workspace/senpai/target/research/validity/triton_attn_joint_autotune/census_out/bm4/decode_outputs.jsonl",
+      "bm4_patched": true,
+      "bm4_forced_hits": 10,
+      "bm4_hook_failed": false,
+      "splitkv": true,
+      "census_3d": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "census_heads": {
+        "head256": 5,
+        "head512": 1,
+        "logged": 6
+      }
+    }
+  },
+  "elapsed_s": 345.33654713630676
+}
