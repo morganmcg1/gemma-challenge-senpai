@@ -1,0 +1,434 @@
+{
+  "pr": 496,
+  "generated_utc": "2026-06-16T14:09:53.783283+00:00",
+  "submission": "fa2sw_precache_kenyan",
+  "candidate": {
+    "fixed_tps": 4,
+    "num_segments": 64,
+    "chunk_keys": 64,
+    "coverage_keys": 4096
+  },
+  "workload": {
+    "num_prompts": 32,
+    "output_len": 256,
+    "seed": 1,
+    "n_decodes": 2
+  },
+  "elapsed_s": 731.9033327102661,
+  "git": {
+    "git_commit": "ce43beb27c7a3686d3d7c5acf3c36040b7dfc4f8",
+    "git_branch": "lawine/faster-byteexact-attention",
+    "git_dirty": true
+  },
+  "arms": {
+    "deployed": {
+      "arm": "deployed",
+      "label": "(a) deployed 3D split-KV adaptive (no flag, ~464, NON-exact)",
+      "kind": "speed",
+      "extra_env": {},
+      "median_wall_tps": 426.3776915110583,
+      "wall_tps_values": [
+        335.8640336967639,
+        426.3776915110583
+      ],
+      "warm_wall_tps_values": [
+        426.3776915110583
+      ],
+      "wall_tps_n": 1,
+      "wall_tps_std": 0.0,
+      "server_ready_s": 85.01809191703796,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": null,
+      "ppl_num_records": null,
+      "num_completed_prompts": 32,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 5,
+        "graph_capture_lines": 5,
+        "onegraph_captured": true,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 0,
+        "byteexact_armed": false,
+        "byteexact_log": null,
+        "ref_mode_cleared_spec": false
+      },
+      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/control/deployed/decode_round01.jsonl",
+      "decodes": [
+        {
+          "arm": "deployed",
+          "round": 0,
+          "wall_tps": 335.8640336967639,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 24.390822410583496,
+          "wall_around_decode_s": 32.61416268348694,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        },
+        {
+          "arm": "deployed",
+          "round": 1,
+          "wall_tps": 426.3776915110583,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 19.2130126953125,
+          "wall_around_decode_s": 27.306604862213135,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        }
+      ]
+    },
+    "surgical": {
+      "arm": "surgical",
+      "label": "(b) surgical byte-exact 2D (the 357.6 ceiling)",
+      "kind": "speed",
+      "extra_env": {
+        "SURGICAL_ATTN_USE_3D_OFF": "1"
+      },
+      "median_wall_tps": 345.07276991358714,
+      "wall_tps_values": [
+        328.52203321119157,
+        345.07276991358714
+      ],
+      "warm_wall_tps_values": [
+        345.07276991358714
+      ],
+      "wall_tps_n": 1,
+      "wall_tps_std": 0.0,
+      "server_ready_s": 85.01281905174255,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": null,
+      "ppl_num_records": null,
+      "num_completed_prompts": 32,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "graph_capture_lines": 5,
+        "onegraph_captured": true,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 0,
+        "byteexact_armed": false,
+        "byteexact_log": null,
+        "ref_mode_cleared_spec": false
+      },
+      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/control/surgical/decode_round01.jsonl",
+      "decodes": [
+        {
+          "arm": "surgical",
+          "round": 0,
+          "wall_tps": 328.52203321119157,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 24.935922622680664,
+          "wall_around_decode_s": 33.465245485305786,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        },
+        {
+          "arm": "surgical",
+          "round": 1,
+          "wall_tps": 345.07276991358714,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 23.739920139312744,
+          "wall_around_decode_s": 32.814202308654785,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        }
+      ]
+    },
+    "deployed_ref": {
+      "arm": "deployed_ref",
+      "label": "(e) deployed M=1 AR reference (ref-mode, adaptive) -- control",
+      "kind": "ref",
+      "extra_env": {
+        "SENPAI_REFERENCE_MODE": "1"
+      },
+      "median_wall_tps": 156.9031150135898,
+      "wall_tps_values": [
+        155.77695632966964,
+        156.9031150135898
+      ],
+      "warm_wall_tps_values": [
+        156.9031150135898
+      ],
+      "wall_tps_n": 1,
+      "wall_tps_std": 0.0,
+      "server_ready_s": 85.01492428779602,
+      "peak_gpu_mem_mib": 19353,
+      "ppl": null,
+      "ppl_num_records": null,
+      "num_completed_prompts": 32,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 5,
+        "graph_capture_lines": 4,
+        "onegraph_captured": false,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 0,
+        "byteexact_armed": false,
+        "byteexact_log": null,
+        "ref_mode_cleared_spec": true
+      },
+      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/control/deployed_ref/decode_round01.jsonl",
+      "decodes": [
+        {
+          "arm": "deployed_ref",
+          "round": 0,
+          "wall_tps": 155.77695632966964,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 52.58800911903381,
+          "wall_around_decode_s": 60.75733518600464,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        },
+        {
+          "arm": "deployed_ref",
+          "round": 1,
+          "wall_tps": 156.9031150135898,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 52.21056318283081,
+          "wall_around_decode_s": 60.70714807510376,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        }
+      ]
+    },
+    "surgical_ref": {
+      "arm": "surgical_ref",
+      "label": "(f) surgical 2D M=1 AR reference (ref-mode, byte-exact 2D) -- ORACLE",
+      "kind": "ref",
+      "extra_env": {
+        "SURGICAL_ATTN_USE_3D_OFF": "1",
+        "SENPAI_REFERENCE_MODE": "1"
+      },
+      "median_wall_tps": 134.4596729497132,
+      "wall_tps_values": [
+        133.58839827402787,
+        134.4596729497132
+      ],
+      "warm_wall_tps_values": [
+        134.4596729497132
+      ],
+      "wall_tps_n": 1,
+      "wall_tps_std": 0.0,
+      "server_ready_s": 85.02896165847778,
+      "peak_gpu_mem_mib": 19353,
+      "ppl": null,
+      "ppl_num_records": null,
+      "num_completed_prompts": 32,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "graph_capture_lines": 4,
+        "onegraph_captured": false,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 0,
+        "byteexact_armed": false,
+        "byteexact_log": null,
+        "ref_mode_cleared_spec": true
+      },
+      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/control/surgical_ref/decode_round01.jsonl",
+      "decodes": [
+        {
+          "arm": "surgical_ref",
+          "round": 0,
+          "wall_tps": 133.58839827402787,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 61.32269048690796,
+          "wall_around_decode_s": 69.57047200202942,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        },
+        {
+          "arm": "surgical_ref",
+          "round": 1,
+          "wall_tps": 134.4596729497132,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 60.92533040046692,
+          "wall_around_decode_s": 69.32024621963501,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        }
+      ]
+    }
+  },
+  "identity_diffs": {
+    "deployed_vs_deployed_ref": {
+      "label": "deployed M=8 vs its M=1 AR reference (CONTROL; expect ~0.9966)",
+      "available": true,
+      "n_prompts_compared": 32,
+      "n_tokens_compared": 8192,
+      "n_tokens_matched": 4476,
+      "token_identity_rate": 0.54638671875,
+      "n_sequences_with_any_flip": 24,
+      "first_divergences": [
+        {
+          "prompt": "gpqa_diamond-049a3a3426",
+          "pos": 97,
+          "a": 1996,
+          "b": 11918
+        },
+        {
+          "prompt": "gpqa_diamond-123161632f",
+          "pos": 90,
+          "a": 900,
+          "b": 107
+        },
+        {
+          "prompt": "gpqa_diamond-16464cac70",
+          "pos": 119,
+          "a": 13757,
+          "b": 2258
+        },
+        {
+          "prompt": "gpqa_diamond-183797b844",
+          "pos": 157,
+          "a": 236764,
+          "b": 691
+        },
+        {
+          "prompt": "gpqa_diamond-188c5d2778",
+          "pos": 182,
+          "a": 121353,
+          "b": 68902
+        },
+        {
+          "prompt": "gpqa_diamond-1f06efeb23",
+          "pos": 87,
+          "a": 563,
+          "b": 657
+        },
+        {
+          "prompt": "gpqa_diamond-1f101bccd2",
+          "pos": 85,
+          "a": 614,
+          "b": 1156
+        },
+        {
+          "prompt": "gpqa_diamond-2662eff7a6",
+          "pos": 171,
+          "a": 11387,
+          "b": 4781
+        },
+        {
+          "prompt": "gpqa_diamond-27ae63a859",
+          "pos": 129,
+          "a": 568,
+          "b": 621
+        },
+        {
+          "prompt": "gpqa_diamond-2c52c770af",
+          "pos": 1,
+          "a": 2934,
+          "b": 2608
+        }
+      ]
+    },
+    "surgical_vs_surgical_ref": {
+      "label": "surgical 2D M=8 vs its M=1 AR reference (ORACLE: byte-exact attn + adaptive matmul; isolates matmul non-inv)",
+      "available": true,
+      "n_prompts_compared": 32,
+      "n_tokens_compared": 8192,
+      "n_tokens_matched": 5494,
+      "token_identity_rate": 0.670654296875,
+      "n_sequences_with_any_flip": 20,
+      "first_divergences": [
+        {
+          "prompt": "gpqa_diamond-123161632f",
+          "pos": 9,
+          "a": 19261,
+          "b": 1001
+        },
+        {
+          "prompt": "gpqa_diamond-183797b844",
+          "pos": 64,
+          "a": 20154,
+          "b": 82199
+        },
+        {
+          "prompt": "gpqa_diamond-188c5d2778",
+          "pos": 76,
+          "a": 1908,
+          "b": 19544
+        },
+        {
+          "prompt": "gpqa_diamond-1f06efeb23",
+          "pos": 222,
+          "a": 563,
+          "b": 568
+        },
+        {
+          "prompt": "gpqa_diamond-1f101bccd2",
+          "pos": 85,
+          "a": 614,
+          "b": 1156
+        },
+        {
+          "prompt": "gpqa_diamond-2662eff7a6",
+          "pos": 171,
+          "a": 11387,
+          "b": 4781
+        },
+        {
+          "prompt": "gpqa_diamond-27ae63a859",
+          "pos": 129,
+          "a": 568,
+          "b": 621
+        },
+        {
+          "prompt": "gpqa_diamond-2c52c770af",
+          "pos": 1,
+          "a": 2934,
+          "b": 2608
+        },
+        {
+          "prompt": "gpqa_diamond-435ccdce7c",
+          "pos": 23,
+          "a": 107,
+          "b": 669
+        },
+        {
+          "prompt": "mmlu_pro-0029a311d9",
+          "pos": 0,
+          "a": 5471,
+          "b": 818
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "candidate_scheme": "fixed-order split-KV (tiles_per_segment=4, num_par_softmax_segments=64, CHUNK=64 keys)",
+    "candidate_realized_tps": null,
+    "candidate_realized_tps_basis": "full-serve median warm wall_tps (num_completion_tokens / decode duration_s)",
+    "surgical_ceiling_tps": 345.07276991358714,
+    "deployed_ref_tps": 426.3776915110583,
+    "candidate_lift_vs_surgical_357": null,
+    "materiality_bar_tps": 2.0,
+    "sigma_hw": 4.864,
+    "lift_clears_materiality_and_sigma": false,
+    "candidate_recovery_fraction_of_deployed_minus_surgical_gap": null,
+    "candidate_operative_identity_rate": null,
+    "candidate_operative_1_0": null,
+    "deployed_control_identity_rate": 0.54638671875,
+    "gate_discriminates": false,
+    "candidate_ppl": null,
+    "candidate_ppl_passes_gate": false,
+    "candidate_completion_full": null,
+    "candidate_byteexact_armed": null,
+    "candidate_graph_capture_ok": false,
+    "fast_strict_ceiling_lifted": false,
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true
+  },
+  "wandb_run_id": null
+}
