@@ -1,0 +1,53 @@
+{
+  "agent": "ubel",
+  "card": "private_attention_flip_bound",
+  "created_at": "20260616T143716Z",
+  "ctx_token_len": {
+    "max": 900,
+    "median": 123,
+    "min": 75
+  },
+  "difficulty": "hard_ood_upper",
+  "disjoint_from_public_by_dataset": true,
+  "domain_counts": {
+    "math": 128
+  },
+  "format_counts": {
+    "freeform": 128
+  },
+  "kind": "shifted-split:hard_ood",
+  "n_records": 128,
+  "note": "HARD/OOD upper endpoint: MATH-500 level-5 (hardest tier) + AIME-2024, competition-grade freeform math. Freeform-numeric-heavy on purpose -- long numeric derivations maximize near-tie digit tokens, the attention-flip-prone regime. DISJOINT from public {mmlu_pro,gpqa_diamond,aime2026} by dataset identity and by year (AIME-2024!=AIME-2026; MATH competitions predate the public set). Committed for reproducible census.",
+  "per_source": {
+    "aime2024": 30,
+    "math500": 98
+  },
+  "plan": "hard_ood",
+  "pr": 497,
+  "public_source_datasets": [
+    "aime2026",
+    "gpqa_diamond",
+    "mmlu_pro"
+  ],
+  "sources": [
+    {
+      "config": "default",
+      "dataset": "HuggingFaceH4/MATH-500",
+      "domain": "math",
+      "kind": "freeform",
+      "split": "test",
+      "target": 98
+    },
+    {
+      "config": "default",
+      "dataset": "Maxwell-Jia/AIME_2024",
+      "domain": "math",
+      "kind": "freeform",
+      "split": "train",
+      "target": 30
+    }
+  ],
+  "target_total": 128,
+  "tokenizer_dir": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "viewer_api": "https://datasets-server.huggingface.co/rows"
+}

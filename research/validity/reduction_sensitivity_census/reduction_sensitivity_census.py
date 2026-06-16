@@ -142,6 +142,35 @@ PRIVATE_DELTA_PCT = 4.295          # ubel #379 5kpb73tb private-Delta frame (pub
 CEILING_500 = 520.953             # strict lambda=1 ceiling TPS (context only)
 GREEDY_DET_DIR = ROOT / "research" / "validity" / "greedy_determinism" / "captures"
 
+# ======================================================================================== #
+# PR #497 (ubel) -- private-attention-flip identity bound (the --shifted-split mode).
+# Reuses this margin harness ATTENTION-ONLY on a HELD-OUT reasoning/STEM split; classifies every
+# flip as a bf16-ULP tie (#488, semantically free) vs a margin-#461 knife-edge vs a TRUE semantic
+# flip, and reports the off-distribution growth of attention's must-pin COST + operative identity.
+# ======================================================================================== #
+# #491 PUBLIC anchor (5cappm87) -- the baseline this card shifts away from. The public 128 are
+# THEMSELVES reasoning/STEM (mmlu_pro 57 / gpqa_diamond 57 / aime2026 14), so the genuine private-
+# like shift is HELD-OUT problems (different source datasets), formatted identically.
+PUBLIC_ATTENTION_FLIP_RATE = 0.005242463958060288   # 16/3052 public margin-proxy flip rate
+PUBLIC_MARGIN_P05 = 0.25                            # public full-step margin p05
+PUBLIC_MARGIN_MEDIAN = 3.0                          # public full-step margin median
+PUBLIC_MAX_GAP_AT_FLIP = 0.5000001192092896        # public max top1-top2 gap at any flip
+# identity-classification thresholds (replicated EXACTLY from the merged cards)
+EPS_STAR = 0.125                  # bf16 one-ULP gap at magnitude ~1 (#488 argmax_tiebreak); ULP-tie band
+BAND_TOL = 1e-9                   # numeric slack on the band edge (#488)
+NEAR_TIE_LOGPROB_THRESH = 0.5     # margin-#461 knife-edge: a flip with ref-token margin < this is non-semantic
+# committed held-out split(s): name -> jsonl path (built by private_attention_flip_bound/build_shifted_split.py)
+SHIFTED_DIR = ROOT / "research" / "validity" / "private_attention_flip_bound"
+SHIFTED_SPLITS = {"reasoning_stem": SHIFTED_DIR / "shifted_reasoning_stem.jsonl",
+                  "hard_ood": SHIFTED_DIR / "shifted_hard_ood.jsonl"}
+# per-split provenance for honest verdict/integrity strings: (source label, bracket endpoint).
+# reasoning_stem is the EASY/mild LOWER bound (understates worst-case, per advisor 8gpu relay on
+# denken #495); hard_ood is the HARD/OOD UPPER endpoint (competition math, flip-prone freeform).
+SPLIT_META = {
+    "reasoning_stem": ("arc/aqua/gsm8k", "EASY/mild lower-bound (understates worst-case audit exposure)"),
+    "hard_ood": ("MATH-500-L5/AIME-2024", "HARD/OOD upper-endpoint (competition freeform math)"),
+}
+
 
 # ======================================================================================== #
 # small helpers
@@ -190,6 +219,27 @@ def top1_top2_margin(d: dict[int, float]) -> tuple[int, float, float]:
     top = max(d.items(), key=lambda kv: kv[1])
     margin = (s[0] - s[1]) if len(s) >= 2 else float("inf")
     return int(top[0]), float(top[1]), float(margin)
+
+
+def classify_flip(m8: dict[int, float], ref_tok: int, m8_top_lp: float, m8_gap: float) -> dict:
+    """PR #497: classify an attention-occupancy argmax flip on the deployed bf16 logit scale, exactly
+    replicating the merged criteria.
+      * ULP-tie (#488 argmax_tiebreak, semantically free): the M=8 top1-top2 gap is within one bf16
+        ULP (<= EPS_STAR) AND the M=1 reference token is one of the two tied candidates (rank<=2).
+        Picking either is a sub-ULP coin-flip -- cost-free, like the 9 ties in #488.
+      * knife-edge (margin-#461 deployed_flip_attribution): the reference token's margin BELOW the
+        M=8 winner is < NEAR_TIE_LOGPROB_THRESH (0.5 nats) AND it is in the M=8 top-5. Non-semantic.
+      * TRUE semantic: a flip that is NOT knife-edge -- the M=8 winner is meaningfully ahead.
+    Nesting is provable: ref in top2 with gap<=0.125 => margin_vs_m1<=0.125<0.5 => knife-edge. So
+    tie => knife-edge => flip, and `semantic` is disjoint from `tie`."""
+    items = sorted(m8.items(), key=lambda kv: kv[1], reverse=True)
+    ref_rank = next((i + 1 for i, (t, _) in enumerate(items) if t == ref_tok), len(items) + 1)
+    ref_lp = m8.get(ref_tok, float("-inf"))
+    margin_vs_m1 = (m8_top_lp - ref_lp) if math.isfinite(ref_lp) else float("inf")
+    is_tie = bool(math.isfinite(m8_gap) and m8_gap <= EPS_STAR + BAND_TOL and ref_rank <= 2)
+    is_knife = bool(margin_vs_m1 < NEAR_TIE_LOGPROB_THRESH and ref_rank <= 5)
+    return {"ref_rank_in_m8": ref_rank, "margin_vs_m1": margin_vs_m1,
+            "is_tie_flip": is_tie, "is_knife_edge": is_knife, "is_semantic": (not is_knife)}
 
 
 # The deployed submission bakes a PRUNED lm_head (16384 keep_ids) onto a full-vocab embedding;
@@ -269,16 +319,41 @@ def load_prompts(n_prompts: int, ctx_cap: int) -> list[dict]:
     return out
 
 
+def load_shifted_prompts(name: str, n_prompts: int, ctx_cap: int) -> list[dict]:
+    """PR #497: load the committed HELD-OUT reasoning/STEM split (no internet; built offline by
+    private_attention_flip_bound/build_shifted_split.py). Same record shape as load_prompts so
+    phase_margin is split-agnostic."""
+    path = SHIFTED_SPLITS.get(name)
+    if path is None or not Path(path).exists():
+        raise FileNotFoundError(
+            f"shifted split '{name}' not found at {path}; run build_shifted_split.py first "
+            f"(known: {sorted(SHIFTED_SPLITS)})")
+    rows = [json.loads(l) for l in open(path)][:n_prompts]
+    out = []
+    for rec in rows:
+        ctx = list(rec.get("context_token_ids", []))[:ctx_cap]
+        if len(ctx) >= 2:
+            out.append({"id": rec.get("id"), "context_token_ids": ctx,
+                        "source": rec.get("source"), "domain": rec.get("domain")})
+    return out
+
+
 def phase_margin(out_path: str, n_prompts: int, n_new: int, ctx_cap: int, verify_width: int,
-                 gpu_mem_util: float, topk: int, det_prompts: int) -> None:
+                 gpu_mem_util: float, topk: int, det_prompts: int,
+                 shifted_split: str | None = None) -> None:
     import torch
     from vllm import LLM, SamplingParams
 
     model_dir = resolve_model_dir()
     full_vocab = _margin_model_full_vocab(model_dir)
-    prompts = load_prompts(n_prompts, ctx_cap)
-    print(f"[margin] model={model_dir} full_vocab={full_vocab} prompts={len(prompts)} "
-          f"n_new={n_new} verify_width={verify_width} topk={topk}", flush=True)
+    if shifted_split:
+        prompts = load_shifted_prompts(shifted_split, n_prompts, ctx_cap)
+        split_name, split_kind = shifted_split, "shifted"
+    else:
+        prompts = load_prompts(n_prompts, ctx_cap)
+        split_name, split_kind = "public_ppl_ground_truth", "public"
+    print(f"[margin] model={model_dir} full_vocab={full_vocab} split={split_name}({split_kind}) "
+          f"prompts={len(prompts)} n_new={n_new} verify_width={verify_width} topk={topk}", flush=True)
 
     # Single, explicit engine construction -- let any failure surface its real traceback rather
     # than masking it behind a width-retry (an earlier swallow hid a vocab-shape assert).
@@ -300,6 +375,9 @@ def phase_margin(out_path: str, n_prompts: int, n_new: int, ctx_cap: int, verify
     margins_all: list[float] = []
     flip_examples: list[dict] = []
     any_nan = False
+    # PR #497 identity classification accumulators
+    n_tie_flip = n_knife_flip = n_semantic_flip = 0
+    n_margin_le_eps = n_margin_le_half = 0     # low-margin tail mass (does it thicken off-distribution?)
     t0 = time.time()
 
     for pi, pr in enumerate(prompts):
@@ -347,6 +425,11 @@ def phase_margin(out_path: str, n_prompts: int, n_new: int, ctx_cap: int, verify
                 continue
             n_pos += 1
             margins_all.append(margin_m8)
+            if math.isfinite(margin_m8):
+                if margin_m8 <= EPS_STAR + BAND_TOL:
+                    n_margin_le_eps += 1
+                if margin_m8 <= NEAR_TIE_LOGPROB_THRESH:
+                    n_margin_le_half += 1
             # bitdiff: the M=8 verify top-1 logit differs (in bits) from the M=1 AR top-1 logit
             if (math.isfinite(m8_top_lp) and math.isfinite(m1_top_lp)
                     and m8_top_lp != m1_top_lp):
@@ -355,10 +438,14 @@ def phase_margin(out_path: str, n_prompts: int, n_new: int, ctx_cap: int, verify
             if m8_arg != ref_tok:
                 n_flip += 1
                 margins_flip.append(margin_m8)
-                if len(flip_examples) < 32:
+                cls = classify_flip(m8, ref_tok, m8_top_lp, margin_m8)   # PR #497 tie/knife/semantic
+                n_tie_flip += int(cls["is_tie_flip"])
+                n_knife_flip += int(cls["is_knife_edge"])
+                n_semantic_flip += int(cls["is_semantic"])
+                if len(flip_examples) < 48:
                     flip_examples.append({"prompt_index": pi, "absolute_position": j,
                                           "ref_tok": ref_tok, "m8_argmax": m8_arg,
-                                          "margin_m8": margin_m8})
+                                          "margin_m8": margin_m8, **cls})
             # verify determinism control
             if pls_b is not None and j < len(pls_b) and pls_b[j] is not None:
                 m8b = entry_as_dict(pls_b[j])
@@ -377,8 +464,11 @@ def phase_margin(out_path: str, n_prompts: int, n_new: int, ctx_cap: int, verify
         i = min(len(xs) - 1, max(0, int(q * (len(xs) - 1))))
         return xs[i]
 
+    # PR #497 identity decomposition (rates over all decode positions). Nesting tie <= knife <= flip
+    # is enforced by classify_flip, so semantic = flip - knife and operative-identity = 1 - semantic.
+    semantic_rate = (n_semantic_flip / n_pos) if n_pos else float("nan")
     out = {
-        "phase": "margin",
+        "phase": "margin", "split_name": split_name, "split_kind": split_kind,
         "model_dir": model_dir, "margin_model_full_vocab": full_vocab,
         "effective_verify_width": effective_width,
         "n_prompts": len(prompts), "n_new": n_new, "topk": topk,
@@ -392,7 +482,16 @@ def phase_margin(out_path: str, n_prompts: int, n_new: int, ctx_cap: int, verify
         "rule_of_three_flip_ub": (_rule_of_three(n_pos) if n_flip == 0 else float("nan")),
         "margin_min": (margins_all[0] if margins_all else float("nan")),
         "margin_p01": _q(margins_all, 0.01), "margin_p05": _q(margins_all, 0.05),
-        "margin_median": _q(margins_all, 0.50),
+        "margin_p10": _q(margins_all, 0.10), "margin_p25": _q(margins_all, 0.25),
+        "margin_median": _q(margins_all, 0.50), "margin_p90": _q(margins_all, 0.90),
+        "frac_positions_margin_le_eps": (n_margin_le_eps / n_pos) if n_pos else float("nan"),
+        "frac_positions_margin_le_half": (n_margin_le_half / n_pos) if n_pos else float("nan"),
+        # identity decomposition
+        "n_tie_flip": n_tie_flip, "n_knife_flip": n_knife_flip, "n_semantic_flip": n_semantic_flip,
+        "tie_flip_rate": (n_tie_flip / n_pos) if n_pos else float("nan"),
+        "knife_flip_rate": (n_knife_flip / n_pos) if n_pos else float("nan"),
+        "semantic_flip_rate": semantic_rate,
+        "operative_identity": (1.0 - semantic_rate) if math.isfinite(semantic_rate) else float("nan"),
         "det_gen_byte_identity": (n_det_gen / det_gen_positions if det_gen_positions else float("nan")),
         "det_ver_argmax_identity": (n_det_ver / det_ver_positions if det_ver_positions else float("nan")),
         "det_gen_positions": det_gen_positions, "det_ver_positions": det_ver_positions,
@@ -403,8 +502,9 @@ def phase_margin(out_path: str, n_prompts: int, n_new: int, ctx_cap: int, verify
     }
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     json.dump(_jsonable(out), open(out_path, "w"), indent=2)
-    print(f"[margin] positions={n_pos} flips={n_flip} (frac={frac_flip:.5f}) "
-          f"bitdiff_frac={frac_bitdiff:.3f} det_gen={out['det_gen_byte_identity']}", flush=True)
+    print(f"[margin:{split_kind}] positions={n_pos} flips={n_flip} (frac={frac_flip:.5f}) "
+          f"tie={n_tie_flip} knife={n_knife_flip} semantic={n_semantic_flip} "
+          f"op_identity={out['operative_identity']} det_gen={out['det_gen_byte_identity']}", flush=True)
     print(f"MARGIN_DONE {out_path}", flush=True)
 
 
@@ -992,6 +1092,318 @@ def orchestrate(args) -> int:
     return 0 if st["passes"] else 1
 
 
+# ======================================================================================== #
+# PR #497 (ubel) -- private-attention-flip identity bound: compose / selftest / report / wandb
+# ======================================================================================== #
+SHIFTED_RESULTS_DIR = ROOT / "research" / "validity" / "private_attention_flip_bound"
+
+
+def compose_shifted(shifted: dict, public: dict | None) -> dict[str, Any]:
+    """Assemble the #497 KEY OUTPUTS: off-distribution growth of attention's must-pin COST + the
+    margin-#461 operative identity + the #488 ULP-tie vs TRUE-semantic decomposition. The must-pin
+    SET cannot shrink below {attention} on private data (attention is ALREADY must-pin, theorem-
+    grounded); only its empirical flip RATE/cost can grow -- that growth is what this bounds."""
+    priv_flip = _f(shifted.get("attention_frac_steps_argmax_flip"))
+    priv_sem = _f(shifted.get("semantic_flip_rate"))
+    priv_tie = _f(shifted.get("tie_flip_rate"))
+    priv_knife = _f(shifted.get("knife_flip_rate"))
+    op_identity = _f(shifted.get("operative_identity"))
+    n_pos = int(shifted.get("n_positions", 0) or 0)
+    n_flip = int(shifted.get("n_flip", 0) or 0)
+
+    # public anchor: the #491 const is the headline denominator (PR: "shifted / 0.00524"); the
+    # same-code public run (if present) reproduces it and gives a same-harness tie/semantic baseline.
+    pub_anchor = PUBLIC_ATTENTION_FLIP_RATE
+    pub_samecode = _f(public.get("attention_frac_steps_argmax_flip")) if public else float("nan")
+    ratio_anchor = (priv_flip / pub_anchor) if (math.isfinite(priv_flip) and pub_anchor > 0) else float("nan")
+    ratio_samecode = (priv_flip / pub_samecode) if (math.isfinite(priv_flip) and math.isfinite(pub_samecode)
+                                                    and pub_samecode > 0) else float("nan")
+
+    # margin tail: does the low-margin (logit_gap<=0.5) tail thicken off-distribution?
+    priv_p05, priv_med, priv_min = (_f(shifted.get("margin_p05")), _f(shifted.get("margin_median")),
+                                    _f(shifted.get("margin_min")))
+    priv_tail_half = _f(shifted.get("frac_positions_margin_le_half"))
+    priv_tail_eps = _f(shifted.get("frac_positions_margin_le_eps"))
+    pub_tail_half = _f(public.get("frac_positions_margin_le_half")) if public else float("nan")
+    pub_p05_samecode = _f(public.get("margin_p05")) if public else float("nan")
+
+    cost_grows = bool(math.isfinite(priv_flip) and priv_flip > pub_anchor)
+    # tail thickens if more low-margin mass than the same-code public (preferred) or than the #491 p05
+    if math.isfinite(priv_tail_half) and math.isfinite(pub_tail_half):
+        tail_thickens = bool(priv_tail_half > pub_tail_half)
+    else:
+        tail_thickens = bool(math.isfinite(priv_p05) and priv_p05 < PUBLIC_MARGIN_P05)
+
+    split_name = shifted.get("split_name")
+    src_label, endpoint_label = SPLIT_META.get(split_name, ("held-out reasoning/STEM", "shifted"))
+
+    integrity_bound = (
+        f"byte-exact greedy identity holds on private-like reasoning/STEM data [{endpoint_label}; "
+        f"src {src_label}] with operative-identity "
+        f"{op_identity:.4f}, attention-flip rate {priv_flip:.5f} ({n_flip}/{n_pos}) vs 0.524% public "
+        f"(ratio {ratio_anchor:.2f}x); of those flips tie_rate={priv_tie:.5f} semantic_rate={priv_sem:.5f}; "
+        f"the must-pin SET cannot shrink below {{attention_reduction}} on private data (attention is "
+        f"already must-pin, theorem-grounded) -- only its flip COST can grow, measured here at "
+        f"{ratio_anchor:.2f}x public.")
+
+    verdict = (
+        f"PRIVATE-ATTENTION-FLIP BOUND (LOCAL, analysis_only; #497). Held-out reasoning/STEM ({src_label}, "
+        f"DISJOINT from public mmlu_pro/gpqa/aime; {endpoint_label}), {n_pos} decode steps. "
+        f"private_attention_flip_rate={priv_flip:.5f} ({n_flip}/{n_pos}) vs public anchor "
+        f"{pub_anchor:.5f} -> ratio {ratio_anchor:.2f}x (same-code public {pub_samecode:.5f}, ratio "
+        f"{ratio_samecode:.2f}x). must_pin_cost_grows_off_distribution={cost_grows}. "
+        f"operative_identity_private={op_identity:.4f} (target 1.0): semantic_flip_rate={priv_sem:.5f}, "
+        f"tie_flip_rate={priv_tie:.5f}, knife_flip_rate={priv_knife:.5f}. low-margin tail (gap<=0.5) "
+        f"frac={priv_tail_half:.4f} vs public {pub_tail_half:.4f} -> thickens={tail_thickens}; "
+        f"margin p05={priv_p05} median={priv_med} min={priv_min} (public p05={PUBLIC_MARGIN_P05} "
+        f"median={PUBLIC_MARGIN_MEDIAN}). HONESTY: bounds the HYPOTHETICAL offline token-audit posture "
+        f"(the #493 automated scorer has NO token-identity gate), NOT the automated private gate "
+        f"(drafter-Delta / #489 axis). The must-pin SET is theorem-grounded distribution-robust; only "
+        f"attention's RATE is empirical and can only GROW the set, never shrink it below {{attention}}.")
+
+    return {
+        "split": shifted.get("split_name"), "split_kind": shifted.get("split_kind"),
+        "bracket_endpoint": endpoint_label, "src_label": src_label,
+        "n_positions": n_pos, "n_flip": n_flip,
+        # ---- the PR KEY OUTPUTS ----
+        "private_attention_flip_rate": priv_flip,
+        "public_attention_flip_rate_anchor": pub_anchor,
+        "public_attention_flip_rate_samecode": pub_samecode,
+        "public_to_private_flip_ratio": ratio_anchor,
+        "public_to_private_flip_ratio_samecode": ratio_samecode,
+        "operative_identity_private": op_identity,
+        "private_semantic_flip_rate": priv_sem,
+        "private_tie_flip_rate": priv_tie,
+        "private_knife_flip_rate": priv_knife,
+        "must_pin_cost_grows_off_distribution": cost_grows,
+        "low_margin_tail_thickens": tail_thickens,
+        "must_pin_set_cannot_shrink_below_attention": True,
+        # ---- margin tail detail ----
+        "private_margin_p05": priv_p05, "private_margin_median": priv_med, "private_margin_min": priv_min,
+        "private_frac_margin_le_half": priv_tail_half, "private_frac_margin_le_eps": priv_tail_eps,
+        "public_frac_margin_le_half_samecode": pub_tail_half, "public_margin_p05_samecode": pub_p05_samecode,
+        "public_margin_p05_anchor": PUBLIC_MARGIN_P05, "public_margin_median_anchor": PUBLIC_MARGIN_MEDIAN,
+        "rule_of_three_flip_ub": (_rule_of_three(n_pos) if n_flip == 0 else float("nan")),
+        "private_delta_pct_frame": PRIVATE_DELTA_PCT,
+        "integrity_bound": integrity_bound,
+        "verdict": verdict,
+    }
+
+
+def selftest_shifted(shifted: dict, public: dict | None, comp: dict, flags: dict,
+                     also_public: bool) -> dict[str, Any]:
+    c: dict[str, bool] = {}
+    # (a) shifted leg produced positions, NaN-clean
+    c["a_shifted_has_positions"] = bool(int(shifted.get("n_positions", 0) or 0) > 0)
+    c["a_shifted_nan_clean"] = (not bool(shifted.get("any_nan", True)))
+    # (b) determinism control: REF re-gen byte-identical -> flips attributable to attention occupancy,
+    #     not run-to-run noise (the proof that the shift is real, not measurement jitter)
+    dgi = shifted.get("det_gen_byte_identity")
+    c["b_ref_regen_deterministic"] = bool(dgi is not None and dgi >= 0.999)
+    # (c) identity nesting: tie <= knife <= flip, semantic = flip - knife (classify_flip invariant)
+    nt, nk, nf = (int(shifted.get("n_tie_flip", 0)), int(shifted.get("n_knife_flip", 0)),
+                  int(shifted.get("n_flip", 0)))
+    ns = int(shifted.get("n_semantic_flip", 0))
+    c["c_identity_nesting_consistent"] = bool(nt <= nk <= nf and ns == (nf - nk))
+    # (d) operative identity computed, in [0,1]
+    op = comp.get("operative_identity_private")
+    c["d_operative_identity_valid"] = bool(op is not None and math.isfinite(op) and 0.0 <= op <= 1.0)
+    # (e) flip rate finite and in [0,1]
+    pf = comp.get("private_attention_flip_rate")
+    c["e_flip_rate_valid"] = bool(pf is not None and math.isfinite(pf) and 0.0 <= pf <= 1.0)
+    # (f) model-load path flagged (full-vocab vs pruned head honesty, as in #491)
+    c["f_model_path_flagged"] = bool(shifted.get("margin_model_full_vocab") is not None)
+    # (g) same-code public anchor reproduces #491 (0.524%) within a generous band, if run
+    if also_public and public:
+        pub = _f(public.get("attention_frac_steps_argmax_flip"))
+        c["g_public_samecode_reproduces_491"] = bool(
+            math.isfinite(pub) and 0.5 * PUBLIC_ATTENTION_FLIP_RATE <= pub <= 2.0 * PUBLIC_ATTENTION_FLIP_RATE)
+        c["g_public_det_control"] = bool(_f(public.get("det_gen_byte_identity")) >= 0.999)
+    # (h) the must-pin SET invariant + integrity bound string present
+    c["h_set_cannot_shrink"] = bool(comp.get("must_pin_set_cannot_shrink_below_attention") is True)
+    c["h_integrity_bound_present"] = bool(isinstance(comp.get("integrity_bound"), str)
+                                          and len(comp.get("integrity_bound", "")) > 0)
+    # (i) launch flags clean
+    c["i_no_launch_flags"] = bool(flags["no_hf_job"] and flags["no_launch"] and flags["analysis_only"])
+    passes = all(c.values())
+    return {"passes": passes, "n_checks": len(c), "conditions": c}
+
+
+def print_report_shifted(payload: dict) -> None:
+    comp, st = payload["compose"], payload["selftest"]
+    sh, pub = payload["margin_shifted"], payload.get("margin_public")
+    bar = "=" * 100
+    print(bar)
+    print("PRIVATE-ATTENTION-FLIP IDENTITY BOUND -- byte-exact identity off-distribution (PR #497, ubel)")
+    print(f"  shifted split = {comp['split']} ({comp['n_positions']} decode steps, "
+          f"model full_vocab={sh.get('margin_model_full_vocab')})")
+    print("-" * 100)
+    hdr = f"  {'metric':32s} {'public(anchor)':>16s} {'public(samecode)':>17s} {'PRIVATE(shifted)':>17s}"
+    print(hdr)
+    pub_fr = (pub.get("attention_frac_steps_argmax_flip") if pub else None)
+
+    def _row(name, anchor, sc, pv):
+        def g(x):
+            return f"{x:.5f}" if isinstance(x, (int, float)) and math.isfinite(float(x)) else str(x)
+        print(f"  {name:32s} {g(anchor):>16s} {g(sc):>17s} {g(pv):>17s}")
+    _row("attention_flip_rate", PUBLIC_ATTENTION_FLIP_RATE, pub_fr, comp["private_attention_flip_rate"])
+    _row("tie_flip_rate", "~0", (pub.get("tie_flip_rate") if pub else None), comp["private_tie_flip_rate"])
+    _row("semantic_flip_rate", "~0", (pub.get("semantic_flip_rate") if pub else None),
+         comp["private_semantic_flip_rate"])
+    _row("operative_identity", 1.0, (pub.get("operative_identity") if pub else None),
+         comp["operative_identity_private"])
+    _row("margin_p05", PUBLIC_MARGIN_P05, (pub.get("margin_p05") if pub else None), comp["private_margin_p05"])
+    _row("margin_median", PUBLIC_MARGIN_MEDIAN, (pub.get("margin_median") if pub else None),
+         comp["private_margin_median"])
+    _row("frac_margin_le_0.5", "-", (pub.get("frac_positions_margin_le_half") if pub else None),
+         comp["private_frac_margin_le_half"])
+    print("-" * 100)
+    print(f"  public_to_private_flip_ratio   = {comp['public_to_private_flip_ratio']:.3f}x (anchor) / "
+          f"{comp['public_to_private_flip_ratio_samecode']} (same-code)")
+    print(f"  must_pin_cost_grows_off_dist   = {comp['must_pin_cost_grows_off_distribution']}")
+    print(f"  low_margin_tail_thickens       = {comp['low_margin_tail_thickens']}")
+    print(f"  operative_identity_private     = {comp['operative_identity_private']}  (target 1.0)")
+    print(f"  must_pin_set_cannot_shrink     = {comp['must_pin_set_cannot_shrink_below_attention']}")
+    print("-" * 100)
+    print(f"  SELF-TEST {st['passes']} ({st['n_checks']} checks): "
+          + json.dumps({k: int(v) for k, v in st["conditions"].items()}))
+    print("-" * 100)
+    print("  INTEGRITY BOUND\n   " + comp["integrity_bound"])
+    print("  VERDICT\n   " + comp["verdict"])
+    print(bar)
+
+
+def maybe_log_wandb_shifted(payload: dict, args) -> str | None:
+    if args.no_wandb:
+        return None
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
+    try:
+        from scripts.wandb_logging import (init_wandb_run, log_summary,
+                                            log_json_artifact, finish_wandb)
+    except Exception as e:  # noqa: BLE001
+        print(f"[#497] wandb helpers unavailable: {e}")
+        return None
+    comp, sh = payload["compose"], payload["margin_shifted"]
+    run = init_wandb_run(
+        job_type="analysis-private-attention-flip", agent="ubel",
+        name=args.wandb_name, group=args.wandb_group,
+        tags=["private-attention-flip-bound", "argmax-flip", "operative-identity", "ulp-tie",
+              "off-distribution", "pr-497", "identity-axis"],
+        config={"pr": 497, "kind": "private-attention-flip-identity-bound",
+                "shifted_split": comp["split"], "public_anchor_flip_rate": PUBLIC_ATTENTION_FLIP_RATE,
+                "eps_star": EPS_STAR, "near_tie_thresh": NEAR_TIE_LOGPROB_THRESH,
+                "n_positions": comp["n_positions"], "private_delta_pct": PRIVATE_DELTA_PCT},
+    )
+    if run is None:
+        print("[#497] wandb disabled (no API key / WANDB_MODE).")
+        return None
+    flat = {
+        "private/attention_flip_rate": comp["private_attention_flip_rate"],
+        "private/public_to_private_flip_ratio": comp["public_to_private_flip_ratio"],
+        "private/operative_identity": comp["operative_identity_private"],
+        "private/semantic_flip_rate": comp["private_semantic_flip_rate"],
+        "private/tie_flip_rate": comp["private_tie_flip_rate"],
+        "private/knife_flip_rate": comp["private_knife_flip_rate"],
+        "private/margin_p05": comp["private_margin_p05"],
+        "private/margin_median": comp["private_margin_median"],
+        "private/frac_margin_le_half": comp["private_frac_margin_le_half"],
+        "private/must_pin_cost_grows": float(bool(comp["must_pin_cost_grows_off_distribution"])),
+        "private/low_margin_tail_thickens": float(bool(comp["low_margin_tail_thickens"])),
+        "public/attention_flip_rate_anchor": PUBLIC_ATTENTION_FLIP_RATE,
+        "public/attention_flip_rate_samecode": comp["public_attention_flip_rate_samecode"],
+        "control/det_gen_byte_identity": _f(sh.get("det_gen_byte_identity")),
+        "control/margin_model_full_vocab": float(bool(sh.get("margin_model_full_vocab"))),
+        "selftest/private_attention_flip_self_test_passes": float(payload["selftest"]["passes"]),
+    }
+    run.log({"global_step": 0, **{k: (v if (isinstance(v, float) and math.isfinite(v)) else 0.0)
+                                  for k, v in flat.items()}})
+    log_summary(run, _jsonable(payload), step=0, run_prefix=args.wandb_name)
+    log_json_artifact(run, name="private_attention_flip_bound",
+                      artifact_type="analysis", data=_jsonable(payload))
+    finish_wandb(run)
+    rid = getattr(run, "id", None)
+    print(f"[#497] wandb logged (run {rid})")
+    return rid
+
+
+def orchestrate_shifted(args) -> int:
+    """PR #497: attention-only flip census on a HELD-OUT reasoning/STEM split + identity decomposition.
+    Skips microbench/drafter/ingest -- #491 certified body/lm_head/drafter argmax-free by kernel-
+    property/theorem (distribution-robust, cannot flip on private data)."""
+    SHIFTED_RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    sp = args.shifted_split
+    shifted_json = str(SHIFTED_RESULTS_DIR / f"_margin_shifted_{sp}.json")
+    public_json = str(SHIFTED_RESULTS_DIR / f"_margin_public_{sp}.json")
+    server_python = resolve_server_python(args.server_python)
+    print(f"[#497] server_python = {server_python}", flush=True)
+
+    common = ["--n-prompts", str(args.n_prompts), "--n-new", str(args.n_new),
+              "--ctx-cap", str(args.ctx_cap), "--verify-width", str(args.verify_width),
+              "--gpu-mem-util", str(args.gpu_mem_util), "--topk", str(args.topk),
+              "--det-prompts", str(args.det_prompts), "--seed", str(args.seed)]
+    rc_sh = run_gpu_phase(server_python, ["--phase", "margin", "--out", shifted_json,
+                          "--shifted-split", args.shifted_split] + common, timeout=args.margin_timeout)
+    shifted = json.load(open(shifted_json)) if Path(shifted_json).exists() else {
+        "phase": "margin", "error": rc_sh, "any_nan": True}
+
+    public = None
+    if args.also_public:
+        rc_pub = run_gpu_phase(server_python, ["--phase", "margin", "--out", public_json] + common,
+                               timeout=args.margin_timeout)
+        public = json.load(open(public_json)) if Path(public_json).exists() else {
+            "phase": "margin", "error": rc_pub}
+
+    comp = compose_shifted(shifted, public)
+    flags = {"no_hf_job": True, "no_launch": True, "analysis_only": True,
+             "no_served_file_change": True, "official_tps": 0}
+    st = selftest_shifted(shifted, public, comp, flags, args.also_public)
+
+    payload = {
+        "agent": "ubel", "pr": 497, "kind": "private-attention-flip-identity-bound",
+        "created_at": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+        **flags,
+        "anchors": {"public_attention_flip_rate": PUBLIC_ATTENTION_FLIP_RATE,
+                    "public_margin_p05": PUBLIC_MARGIN_P05, "public_margin_median": PUBLIC_MARGIN_MEDIAN,
+                    "deployed_tps": DEPLOYED_TPS, "private_delta_pct": PRIVATE_DELTA_PCT,
+                    "eps_star": EPS_STAR, "near_tie_thresh": NEAR_TIE_LOGPROB_THRESH},
+        "margin_shifted": shifted, "margin_public": public,
+        "compose": comp, "selftest": st,
+        "private_attention_flip_self_test_passes": bool(st["passes"]),
+        # headline KEY OUTPUTS hoisted to top level
+        "private_attention_flip_rate": comp["private_attention_flip_rate"],
+        "public_to_private_flip_ratio": comp["public_to_private_flip_ratio"],
+        "operative_identity_private": comp["operative_identity_private"],
+        "private_semantic_flip_rate": comp["private_semantic_flip_rate"],
+        "private_tie_flip_rate": comp["private_tie_flip_rate"],
+        "must_pin_cost_grows_off_distribution": comp["must_pin_cost_grows_off_distribution"],
+        "integrity_bound": comp["integrity_bound"],
+    }
+    print_report_shifted(payload)
+    out_path = SHIFTED_RESULTS_DIR / f"private_attention_flip_bound_results_{sp}.json"
+    out_path.write_text(json.dumps(_jsonable(payload), indent=2, sort_keys=True))
+    print(f"\n[#497] wrote {out_path}", flush=True)
+    rid = maybe_log_wandb_shifted(payload, args)
+    if rid:
+        payload["wandb_run_id"] = rid
+        out_path.write_text(json.dumps(_jsonable(payload), indent=2, sort_keys=True))
+    result = {"terminal": True, "status": "complete", "pending_arms": False,
+              "wandb_run_ids": ([rid] if rid else []),
+              "private_attention_flip_rate": round(_f(comp["private_attention_flip_rate"]), 6),
+              "public_to_private_flip_ratio": round(_f(comp["public_to_private_flip_ratio"]), 4),
+              "operative_identity_private": round(_f(comp["operative_identity_private"]), 6),
+              "private_semantic_flip_rate": round(_f(comp["private_semantic_flip_rate"]), 6),
+              "private_tie_flip_rate": round(_f(comp["private_tie_flip_rate"]), 6),
+              "must_pin_cost_grows_off_distribution": bool(comp["must_pin_cost_grows_off_distribution"]),
+              "primary_metric": {"name": "operative_identity_private",
+                                 "value": round(_f(comp["operative_identity_private"]), 6)},
+              "test_metric": {"name": "private_attention_flip_rate",
+                              "value": round(_f(comp["private_attention_flip_rate"]), 6)},
+              "self_test_passes": bool(st["passes"])}
+    print("SENPAI-RESULT: " + json.dumps(result), flush=True)
+    return 0 if st["passes"] else 1
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--phase", choices=["margin", "microbench"], default=None,
@@ -1020,6 +1432,14 @@ def main() -> None:
     ap.add_argument("--wandb_group", "--wandb-group", dest="wandb_group",
                     default="reduction-sensitivity-census")
     ap.add_argument("--no-wandb", action="store_true")
+    # PR #497 private-attention-flip identity bound
+    ap.add_argument("--shifted-split", "--shifted_split", dest="shifted_split", default=None,
+                    choices=sorted(SHIFTED_SPLITS), help="run ATTENTION-ONLY on a held-out reasoning/"
+                    "STEM split (PR #497); skips microbench/drafter/ingest (certified by #491)")
+    ap.add_argument("--also-public", dest="also_public", action="store_true", default=True,
+                    help="(#497 mode) also run the public split through the same code for a same-code "
+                    "anchor that reproduces #491's 0.524%")
+    ap.add_argument("--no-also-public", dest="also_public", action="store_false")
     args = ap.parse_args()
 
     if args.smoke:
@@ -1031,11 +1451,13 @@ def main() -> None:
 
     if args.phase == "margin":
         phase_margin(args.out, args.n_prompts, args.n_new, args.ctx_cap, args.verify_width,
-                     args.gpu_mem_util, args.topk, args.det_prompts)
+                     args.gpu_mem_util, args.topk, args.det_prompts, shifted_split=args.shifted_split)
         return
     if args.phase == "microbench":
         phase_microbench(args.out, args.micro_trials, args.seed)
         return
+    if args.shifted_split:
+        raise SystemExit(orchestrate_shifted(args))
     raise SystemExit(orchestrate(args))
 
 
