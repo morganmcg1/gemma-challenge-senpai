@@ -1,10 +1,19 @@
 """agent-smith: per-step timeline probe (env-gated, STEPTIME=1).
 
-Wraps two seams in the worker process with perf_counter + CUDA event pairs:
+Wraps three seams in the worker process with perf_counter + CUDA event pairs:
 
   - vllm.v1.worker.gpu_model_runner.GPUModelRunner.execute_model
       -> per step: gap_ms (CPU time since previous call returned),
          cpu_ms (call wall), gpu_ms (CUDA-event elapsed inside the call)
+  - vllm.v1.worker.gpu_model_runner.GPUModelRunner._model_forward
+      -> fwd_ms (CUDA-event elapsed inside JUST the target model forward over
+         the M verify rows, attributed to the enclosing step). This is the
+         VERIFY-FORWARD-ONLY isolation (PR #245): vLLM's own designed inspection
+         seam (its docstring: "We can inspect only this method versus the whole
+         execute_model, which has additional logic") -- the postprocess
+         (compute_logits/sample/accept) runs OUTSIDE _model_forward, and the
+         drafter runs in the separate proposer. So fwd_ms is the local analogue
+         of the served verify-forward [1.12,1.43] ms band, NOT the full step.
   - vllm.v1.spec_decode.gemma4.Gemma4Proposer.propose
       -> draft_cpu_ms / draft_gpu_ms, attributed to the enclosing step
 
@@ -15,9 +24,9 @@ finder sits in front, re-resolves the spec through the remaining finders
 (their _busy-guard pattern), and applies our patch after theirs.
 
 Output goes to stdout (=> job_logs.txt):
-  [steptime] raw i=<step> spec=<0|1> gap=.. cpu=.. gpu=.. dcpu=.. dgpu=..
-      (for a window of steps, default 40..200)
-  [steptime] agg n=.. spec=<0|1> gap p50/p90/mean=.. cpu .. gpu .. dgpu ..
+  [steptime] raw i=<step> spec=<0|1> gap=.. cpu=.. gpu=.. fwd=.. dcpu=.. dgpu=..
+      (for a window of steps, default 40..200; fwd = verify-forward-only)
+  [steptime] agg n=.. spec=<0|1> gap p50/p90/mean=.. cpu .. gpu .. fwd .. dgpu ..
       (every STEPTIME_REPORT_EVERY resolved steps, cumulative, warmup excluded)
 
 No files are written; no behavior of the served model is altered.
@@ -46,8 +55,9 @@ _state: dict[str, Any] = {
     "i": 0,                 # execute_model call index
     "last_ret": None,       # perf_counter at previous execute_model return
     "cur_draft": None,      # draft measurement of the in-flight step
+    "cur_fwd": None,        # list[(ev0, ev1)] target-forward pairs of in-flight step
     "pending": deque(),     # unresolved records (with CUDA events)
-    "agg": {},              # kind -> list of (gap, cpu, gpu, dcpu, dgpu)
+    "agg": {},              # kind -> list of (gap, cpu, gpu, fwd, dcpu, dgpu)
     "reported": 0,
 }
 
@@ -72,18 +82,24 @@ def _resolve_pending(force: bool = False) -> None:
             ev1.synchronize()
         gpu = rec["ev0"].elapsed_time(ev1)
         dgpu = rec["dev0"].elapsed_time(dev1) if dev1 is not None else 0.0
+        # Verify-forward-only: sum the target _model_forward CUDA-event pairs of
+        # this step (a single pair in steady-state decode). Earlier events are
+        # guaranteed complete once ev1 (step end) is ready / synchronized above.
+        fwd = 0.0
+        for fev0, fev1 in rec.get("fwd_evs") or ():
+            fwd += fev0.elapsed_time(fev1)
         pend.popleft()
         i = rec["i"]
         kind = rec.get("kind", "exec")
         if i >= WARMUP_SKIP:
             _state["agg"].setdefault(kind, []).append(
-                (rec["gap"], rec["cpu"], gpu, rec["dcpu"], dgpu)
+                (rec["gap"], rec["cpu"], gpu, fwd, rec["dcpu"], dgpu)
             )
         if RAW_START <= i < RAW_START + RAW_COUNT:
             print(
                 f"[steptime] raw i={i} kind={kind} gap={rec['gap']:.3f} "
-                f"cpu={rec['cpu']:.3f} gpu={gpu:.3f} dcpu={rec['dcpu']:.3f} "
-                f"dgpu={dgpu:.3f}",
+                f"cpu={rec['cpu']:.3f} gpu={gpu:.3f} fwd={fwd:.3f} "
+                f"dcpu={rec['dcpu']:.3f} dgpu={dgpu:.3f}",
                 flush=True,
             )
         done = sum(len(v) for v in _state["agg"].values())
