@@ -1,0 +1,383 @@
+{
+  "config": {
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "ctx": 128,
+    "M": 8,
+    "iters": 50,
+    "warmup": 40,
+    "rounds": 21,
+    "n_distinct": 8,
+    "served_model_dir": "/tmp/osoi5-v0-baked",
+    "group_size": 128,
+    "deployed_num_layers": 37,
+    "self_built_marlin": true,
+    "spec_bw_gbps": 600.0,
+    "ridge_ai": 208.33333333333334,
+    "smoke": false,
+    "note": "co-measured peak BW (STREAM read/copy + bf16 GEMM anchor) vs L2-cold paired-differenced SELF-BUILT g=128 int4-Marlin GEMM achieved BW at served M=8/ctx=128 (same apply_gptq_marlin_linear the deployed kernel calls; BW is value-independent). Independent isolated cross-check (ncu substitute). Exact byte model from served safetensors. No serve change, no HF Job, no submission. Greedy/PPL pinned by construction."
+  },
+  "peak_bw": {
+    "bw_read_gbps": 517.5801601788328,
+    "read_us": 2074.5420837402344,
+    "bw_copy_gbps": 482.74758304726527,
+    "copy_us": 4448.460693359375,
+    "bw_bf16gemm_m8_gbps": 381.8079588574103,
+    "gemm_us": 1410.6214904785159
+  },
+  "components": {
+    "qkv_proj": {
+      "us": 517.4478149414062,
+      "us_lo": 517.2494316098803,
+      "us_hi": 517.6461982729322,
+      "total_bytes": 156073984.0,
+      "weight_bytes": 148111360.0,
+      "scale_bytes": 4628480.0,
+      "achieved_bw_gbps": 301.6226554511071,
+      "f_vs_read": 0.5827554428417259,
+      "f_vs_copy": 0.6248040716168134,
+      "f_vs_spec": 0.5027044257518452,
+      "pct_of_full": 11.047083568452452,
+      "g_of_cycle": 0.06547485953959335,
+      "ai_flop_per_byte": 29.82993911400378
+    },
+    "o_proj": {
+      "us": 356.044921875,
+      "us_lo": 355.8406989468407,
+      "us_hi": 356.2491448031593,
+      "total_bytes": 121675776.0,
+      "weight_bytes": 115343360.0,
+      "scale_bytes": 3604480.0,
+      "achieved_bw_gbps": 341.742764815272,
+      "f_vs_read": 0.6602702172687492,
+      "f_vs_copy": 0.707911912594314,
+      "f_vs_spec": 0.56957127469212,
+      "pct_of_full": 7.6012650793039604,
+      "g_of_cycle": 0.045051869147791974,
+      "ai_flop_per_byte": 25.508651450885342
+    },
+    "gate_up_proj": {
+      "us": 2133.0123901367188,
+      "us_lo": 2132.841548007323,
+      "us_hi": 2133.1832322661144,
+      "total_bytes": 1013882880.0,
+      "weight_bytes": 969932800.0,
+      "scale_bytes": 30310400.0,
+      "achieved_bw_gbps": 475.32910952055636,
+      "f_vs_read": 0.9183681023560138,
+      "f_vs_copy": 0.9846328106297685,
+      "f_vs_spec": 0.7922151825342606,
+      "pct_of_full": 45.538053202626976,
+      "g_of_cycle": 0.26989907505209654,
+      "ai_flop_per_byte": 30.61285500747384
+    },
+    "down_proj": {
+      "us": 1146.4498901367188,
+      "us_lo": 1146.1891622964736,
+      "us_hi": 1146.710617976964,
+      "total_bytes": 507699200.0,
+      "weight_bytes": 484966400.0,
+      "scale_bytes": 15155200.0,
+      "achieved_bw_gbps": 442.84464970331567,
+      "f_vs_read": 0.855605921120132,
+      "f_vs_copy": 0.9173420339216017,
+      "f_vs_spec": 0.7380744161721928,
+      "pct_of_full": 24.475758477823682,
+      "g_of_cycle": 0.14506515122570146,
+      "ai_flop_per_byte": 30.567164179104477
+    },
+    "sdpa": {
+      "us": 518.758544921875,
+      "us_lo": 518.5415002861781,
+      "us_hi": 518.9755895575719,
+      "total_bytes": 12124160.0,
+      "weight_bytes": 0.0,
+      "scale_bytes": 0.0,
+      "achieved_bw_gbps": 23.37148972037829,
+      "f_vs_read": 0.04515530446975216,
+      "f_vs_copy": 0.04841347847429826,
+      "f_vs_spec": 0.03895248286729715,
+      "pct_of_full": 11.07506657120521,
+      "g_of_cycle": 0.06564071174514424,
+      "ai_flop_per_byte": null
+    },
+    "lm_head": {
+      "us": 37.37579345703125,
+      "us_lo": 37.21339486136375,
+      "us_hi": 37.53819205269875,
+      "total_bytes": 15990784.0,
+      "weight_bytes": 15728640,
+      "scale_bytes": 24576,
+      "achieved_bw_gbps": 427.8379807075846,
+      "f_vs_read": 0.8266120180490676,
+      "f_vs_copy": 0.8862560802623335,
+      "f_vs_spec": 0.7130633011793077,
+      "pct_of_full": 0.7979423273896654,
+      "g_of_cycle": 0.0047293171526042324,
+      "ai_flop_per_byte": 31.475409836065573
+    }
+  },
+  "byte_model": {
+    "qkv_proj": {
+      "weight_bytes": 148111360.0,
+      "scale_bytes": 4628480.0,
+      "act_bytes": 3334144.0,
+      "total_bytes": 156073984.0,
+      "out": 3072,
+      "in": 2560,
+      "ai_flop_per_byte": 29.82993911400378
+    },
+    "o_proj": {
+      "weight_bytes": 115343360.0,
+      "scale_bytes": 3604480.0,
+      "act_bytes": 2727936.0,
+      "total_bytes": 121675776.0,
+      "out": 2560,
+      "in": 2048,
+      "ai_flop_per_byte": 25.508651450885342
+    },
+    "gate_up_proj": {
+      "weight_bytes": 969932800.0,
+      "scale_bytes": 30310400.0,
+      "act_bytes": 13639680.0,
+      "total_bytes": 1013882880.0,
+      "out": 20480,
+      "in": 2560,
+      "ai_flop_per_byte": 30.61285500747384
+    },
+    "down_proj": {
+      "weight_bytes": 484966400.0,
+      "scale_bytes": 15155200.0,
+      "act_bytes": 7577600.0,
+      "total_bytes": 507699200.0,
+      "out": 2560,
+      "in": 10240,
+      "ai_flop_per_byte": 30.567164179104477
+    },
+    "ple": {
+      "weight_bytes": 24248320.0,
+      "scale_bytes": 757760.0,
+      "act_bytes": 0.0,
+      "total_bytes": 25006080.0,
+      "out": null,
+      "in": null,
+      "ai_flop_per_byte": null
+    },
+    "lm_head": {
+      "weight_bytes": 15728640,
+      "scale_bytes": 24576,
+      "act_bytes": 237568.0,
+      "total_bytes": 15990784.0,
+      "out": 12288,
+      "in": 2560,
+      "ai_flop_per_byte": 31.475409836065573
+    },
+    "sdpa": {
+      "weight_bytes": 0.0,
+      "scale_bytes": 0.0,
+      "act_bytes": 2424832.0,
+      "kv_bytes": 9699328.0,
+      "total_bytes": 12124160.0,
+      "out": null,
+      "in": null,
+      "ai_flop_per_byte": null
+    }
+  },
+  "iso_crosscheck": {
+    "qkv_proj": {
+      "us": 501.4527893066406,
+      "achieved_bw_gbps": 311.2436251791594,
+      "f_vs_read": 0.6013438093755746,
+      "f_vs_spec": 0.5187393752985989
+    },
+    "o_proj": {
+      "us": 348.2009506225586,
+      "achieved_bw_gbps": 349.44125161764305,
+      "f_vs_read": 0.6751442163024663,
+      "f_vs_spec": 0.5824020860294051
+    },
+    "gate_up_proj": {
+      "us": 2124.349365234375,
+      "achieved_bw_gbps": 477.2674855616983,
+      "f_vs_read": 0.9221131764339542,
+      "f_vs_spec": 0.7954458092694972
+    },
+    "down_proj": {
+      "us": 1129.1238403320312,
+      "achieved_bw_gbps": 449.63996141530896,
+      "f_vs_read": 0.8687349245766118,
+      "f_vs_spec": 0.7493999356921816
+    },
+    "sdpa": {
+      "us": 455.08609771728516,
+      "achieved_bw_gbps": 26.64146424339233,
+      "f_vs_read": 0.05147311719635322,
+      "f_vs_spec": 0.04440244040565389
+    },
+    "lm_head": {
+      "us": 1359.5033264160156,
+      "achieved_bw_gbps": 435.2023246311271,
+      "f_vs_read": 0.8408404303610812,
+      "f_vs_spec": 0.7253372077185452
+    }
+  },
+  "f_gemm": {
+    "read": 0.8370982178862645,
+    "copy": 0.8974989102256524,
+    "spec": 0.7221090494983137
+  },
+  "f_gemm_isolated": {
+    "read": 0.8472638770253356,
+    "copy": 0.908398070926388,
+    "spec": 0.7308782886408535
+  },
+  "f_gemm_lmhead": {
+    "read": 0.8370046858819945,
+    "copy": 0.897398629434092,
+    "spec": 0.7220283656487272
+  },
+  "f_verify": {
+    "read": 0.7641007525654571,
+    "copy": 0.8192343240937048,
+    "spec": 0.6591389831759933
+  },
+  "ceiling": {
+    "read": {
+      "saved_us": 676.5237733221147,
+      "g_gemm": 0.5254909549651833,
+      "speedup": 1.0936173803249503,
+      "tps_uncapped": 510.8724230449973,
+      "tps_capped": 510.8724230449973,
+      "binds_at_lambda1": false,
+      "clears_deployed_481": true,
+      "headroom_over_realized": 43.73242304499729,
+      "gap_to_deployed_inside": true
+    },
+    "copy": {
+      "saved_us": 425.68241503555333,
+      "g_gemm": 0.5254909549651833,
+      "speedup": 1.0569298294740783,
+      "tps_uncapped": 493.73420054052093,
+      "tps_capped": 493.73420054052093,
+      "binds_at_lambda1": false,
+      "clears_deployed_481": true,
+      "headroom_over_realized": 26.594200540520944,
+      "gap_to_deployed_inside": true
+    },
+    "spec": {
+      "saved_us": 1154.0686170898437,
+      "g_gemm": 0.5254909549651833,
+      "speedup": 1.1710002001223794,
+      "tps_uncapped": 547.0210334851682,
+      "tps_capped": 520.953,
+      "binds_at_lambda1": true,
+      "clears_deployed_481": true,
+      "headroom_over_realized": 53.81299999999999,
+      "gap_to_deployed_inside": true
+    }
+  },
+  "realistic_splitk": {
+    "lo": {
+      "recover_frac_of_gemm": 0.05,
+      "saved_us": 207.6477508544922,
+      "tps": 479.74508514667906,
+      "delta_vs_realized": 12.605085146679073,
+      "clears_deployed_481": false,
+      "greedy_safe": false
+    },
+    "hi": {
+      "recover_frac_of_gemm": 0.12,
+      "saved_us": 498.35460205078124,
+      "tps": 498.57990782684584,
+      "delta_vs_realized": 31.439907826845854,
+      "clears_deployed_481": true,
+      "greedy_safe": false
+    }
+  },
+  "full_us_measured": 4684.021911621094,
+  "sum6_us": 4709.08935546875,
+  "remainder_us": -25.06744384765625,
+  "verdict": {
+    "gemm_roofline_self_test_passes": true,
+    "max_recoverable_endtoend_tps_ceiling": 510.8724230449973,
+    "f_gemm_vs_read_peak": 0.8370982178862645,
+    "f_gemm_vs_copy_peak": 0.8974989102256524,
+    "f_gemm_vs_spec": 0.7221090494983137,
+    "f_verify_vs_read_peak": 0.7641007525654571,
+    "f_verify_vs_spec": 0.6591389831759933,
+    "achieved_gemm_bw_gbps": 433.2654296989882,
+    "achieved_verify_bw_gbps": 395.48338990559597,
+    "achieved_gemm_bw_gbps_isolated": 438.5269731845121,
+    "f_gemm_vs_read_peak_isolated": 0.8472638770253356,
+    "f_gemm_vs_spec_isolated": 0.7308782886408535,
+    "crosscheck_rel_diff": 0.01214392638983288,
+    "peak_read_gbps": 517.5801601788328,
+    "peak_copy_gbps": 482.74758304726527,
+    "peak_spec_gbps": 600.0,
+    "peak_read_frac_of_spec": 0.8626336002980547,
+    "g_gemm_of_cycle": 0.5254909549651833,
+    "ceiling_tps_read_peak": 510.8724230449973,
+    "ceiling_tps_uncapped_read": 510.8724230449973,
+    "ceiling_tps_spec": 520.953,
+    "ceiling_binds_at_lambda1": false,
+    "ceiling_clears_deployed_481": true,
+    "gap_467_to_481_inside_bw_headroom": true,
+    "realistic_splitk_tps_lo": 479.74508514667906,
+    "realistic_splitk_tps_hi": 498.57990782684584,
+    "realistic_splitk_delta_lo": 12.605085146679073,
+    "realistic_splitk_delta_hi": 31.439907826845854,
+    "realistic_splitk_greedy_safe": false,
+    "gemm_total_bytes_mb": 1799.33184,
+    "gemm_weight_scale_bytes_mb": 1772.05248,
+    "verify_total_bytes_mb": 1852.452864,
+    "gemm_us": 4152.955017089844,
+    "verify_us": 4684.021911621094,
+    "cycle_wall_us": 7903.0,
+    "greedy_identical_by_construction": true,
+    "ppl_anchor": 2.3772,
+    "ppl_ok": true,
+    "served_model_dir": "/tmp/osoi5-v0-baked",
+    "group_size": 128,
+    "self_built_marlin": true,
+    "deployed_num_layers": 37,
+    "peak_vram_gib": 2.5095324516296387,
+    "vram_ok": true,
+    "ridge_ai_flop_per_byte": 208.33333333333334,
+    "int4_gemm_compute_knee_M": 52.083333333333336,
+    "m8_bandwidth_bound": true,
+    "realized_frontier_tps": 467.14,
+    "frontier_deployed_tps": 481.53,
+    "lambda1_ceiling_tps": 520.953,
+    "self_test_conditions": {
+      "a_components_sum": true,
+      "b_f_gemm_in_unit": true,
+      "c_peak_below_spec": true,
+      "d_nan_clean": true,
+      "e_constants": true,
+      "f_ceiling_capped": true,
+      "g_byte_model_anchor": true,
+      "h_ppl_anchor": true,
+      "i_crosscheck_agrees": true
+    },
+    "captured": {
+      "full": true,
+      "no_qkv_proj": true,
+      "no_o_proj": true,
+      "no_gate_up_proj": true,
+      "no_down_proj": true,
+      "no_sdpa": true,
+      "no_lm_head": true
+    },
+    "iso_captured": {
+      "qkv_proj": true,
+      "o_proj": true,
+      "gate_up_proj": true,
+      "down_proj": true,
+      "sdpa": true,
+      "lm_head": true
+    },
+    "vllm_validate": null,
+    "handoff_line": "served int4 verify-GEMM (M=8, sm_86, depth 37) achieves 433 GB/s = 84% of measured read-peak (518 GB/s) / 72% of 600 spec -> NOT at the roofline (16% headroom vs read-peak); per-component f spreads 0.58 (small qkv/o, under-saturated) .. 0.92 (gate_up/down, near-saturated). isolated cross-check agrees (85% read-peak, 1% rel). PHYSICAL ceiling on the 4-leg kernel-tiling sweep: perfect f->1 re-tiling -> 510.9 TPS (below wall), which CLEARS the deployed 481.53 by +29.3; the +14.39 gap 467.14->481.53 is INSIDE the BW headroom -> the sweep is NOT physically capped below 481.53. BUT the recoverable slack splits ~50% small qkv/o (largest fractional headroom) / ~50% near-saturated gate_up/down (small fractional, large absolute), and BOTH need FP-reassociating re-tiling (split-K / BLOCK_K / num_warps) -> greedy-UNSAFE; realizable split-K recovers only +12.6..+31.4 TPS (5-12% of GEMM time; FP-reassoc -> E[T] drift risk). Roofline does NOT kill the sweep; greedy-safety (not physics) is the binding constraint on #442's modeled +15.86."
+  }
+}
