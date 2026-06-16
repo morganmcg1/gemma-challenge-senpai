@@ -1,0 +1,895 @@
+{
+  "aggregate": {
+    "all_gemv_reproducible": true,
+    "all_ref_self_m_invariant": true,
+    "basis": "graph_marginal",
+    "byte_exact_usable": true,
+    "gemv_m_invariant_frac": 1.0,
+    "gemv_m_invariant_n": 3,
+    "gemv_vs_triton_speedup_all": 6.0011,
+    "gemv_vs_triton_speedup_tiny_n": 8.4365,
+    "n_shapes": 3,
+    "nan_clean": true,
+    "per_token_ms_gemv_all": 1.804587,
+    "per_token_ms_gemv_tiny_n": 0.781653,
+    "per_token_ms_triton_all": 10.829483,
+    "per_token_ms_triton_tiny_n": 6.594389,
+    "primary_cfg_byte_exact_n": 3,
+    "primary_cfg_speedup_all": 3.8868,
+    "tiny_n_shapes_covered": 2,
+    "tiny_n_shapes_total": 2
+  },
+  "analysis_only": true,
+  "bitcheck_selftest": {
+    "bitcheck_flags_1ulp_diff": true,
+    "bitcheck_passes_identical": true,
+    "perturb_ulp": 1,
+    "selftest_ok": true,
+    "torch_equal_agrees_identical": true
+  },
+  "draw_safe_local_only": true,
+  "env": {
+    "batch_M": 8,
+    "compute_capability": [
+      8,
+      6
+    ],
+    "cublas_workspace_config": ":4096:8",
+    "cuda_visible_devices": "0",
+    "device": "NVIDIA A10G",
+    "graph_capturable_all": true,
+    "headline_timing_basis": "graph_marginal",
+    "kernel_c_source": "vendored",
+    "sm_count": 80,
+    "torch": "2.12.0+cu130",
+    "triton": "3.7.0"
+  },
+  "gemv_cfgs": {
+    "gemv_m16_n128_w8_s3": {
+      "BLOCK_SIZE_K": 64,
+      "BLOCK_SIZE_M": 16,
+      "BLOCK_SIZE_N": 128,
+      "GROUP_SIZE_M": 8,
+      "num_stages": 3,
+      "num_warps": 8
+    },
+    "gemv_m16_n32_w2_s3": {
+      "BLOCK_SIZE_K": 64,
+      "BLOCK_SIZE_M": 16,
+      "BLOCK_SIZE_N": 32,
+      "GROUP_SIZE_M": 8,
+      "num_stages": 3,
+      "num_warps": 2
+    },
+    "gemv_m16_n32_w4_s3": {
+      "BLOCK_SIZE_K": 64,
+      "BLOCK_SIZE_M": 16,
+      "BLOCK_SIZE_N": 32,
+      "GROUP_SIZE_M": 8,
+      "num_stages": 3,
+      "num_warps": 4
+    },
+    "gemv_m16_n64_w4_s2": {
+      "BLOCK_SIZE_K": 64,
+      "BLOCK_SIZE_M": 16,
+      "BLOCK_SIZE_N": 64,
+      "GROUP_SIZE_M": 8,
+      "num_stages": 2,
+      "num_warps": 4
+    },
+    "gemv_m16_n64_w8_s3": {
+      "BLOCK_SIZE_K": 64,
+      "BLOCK_SIZE_M": 16,
+      "BLOCK_SIZE_N": 64,
+      "GROUP_SIZE_M": 8,
+      "num_stages": 3,
+      "num_warps": 8
+    }
+  },
+  "model_meta": {
+    "selftest": true
+  },
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "per_shape": [
+    {
+      "K": 2560,
+      "N": 512,
+      "any_cand_nan": false,
+      "best_byte_exact": true,
+      "best_byte_exact_cfg": "gemv_m16_n32_w4_s3",
+      "best_speedup": 7.1719,
+      "candidates": {
+        "gemv_m16_n128_w8_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 128,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 8
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 4.6524,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05339136123657226,
+              "min_ms": 0.05258240222930908,
+              "p25_ms": 0.05315584182739258,
+              "p75_ms": 0.05379072189331055
+            },
+            "graph": {
+              "median_ms": 0.02307583928108215,
+              "min_ms": 0.023070719242095947,
+              "p25_ms": 0.023070719242095947,
+              "p75_ms": 0.02308095932006836
+            },
+            "graph_marginal": {
+              "median_ms": 0.022954667607943218,
+              "min_ms": 0.022869333624839783,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n32_w2_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 32,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 2
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 6.8764,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05328895807266236,
+              "min_ms": 0.05250048160552979,
+              "p25_ms": 0.05311488151550293,
+              "p75_ms": 0.053821439743041995
+            },
+            "graph": {
+              "median_ms": 0.0156876802444458,
+              "min_ms": 0.015667200088500977,
+              "p25_ms": 0.015667200088500977,
+              "p75_ms": 0.01581055998802185
+            },
+            "graph_marginal": {
+              "median_ms": 0.015530666957298914,
+              "min_ms": 0.015530666957298914,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n32_w4_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 32,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 4
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 7.1719,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05206527948379516,
+              "min_ms": 0.050831360816955565,
+              "p25_ms": 0.051660799980163576,
+              "p75_ms": 0.05224448204040527
+            },
+            "graph": {
+              "median_ms": 0.01499135971069336,
+              "min_ms": 0.014970879554748535,
+              "p25_ms": 0.01499135971069336,
+              "p75_ms": 0.01500159978866577
+            },
+            "graph_marginal": {
+              "median_ms": 0.014890666430195171,
+              "min_ms": 0.014848000059525171,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n64_w4_s2": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 64,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 2,
+            "num_warps": 4
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 4.5181,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05145087957382202,
+              "min_ms": 0.0506163215637207,
+              "p25_ms": 0.051097598075866696,
+              "p75_ms": 0.05215231895446777
+            },
+            "graph": {
+              "median_ms": 0.02370047926902771,
+              "min_ms": 0.023695359230041502,
+              "p25_ms": 0.023695359230041502,
+              "p75_ms": 0.023705599308013917
+            },
+            "graph_marginal": {
+              "median_ms": 0.02363733450571696,
+              "min_ms": 0.023552000522613525,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n64_w8_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 64,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 8
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 5.8756,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05281791925430298,
+              "min_ms": 0.05177343845367432,
+              "p25_ms": 0.05258240222930908,
+              "p75_ms": 0.053381118774414066
+            },
+            "graph": {
+              "median_ms": 0.018237440586090087,
+              "min_ms": 0.018227200508117675,
+              "p25_ms": 0.018237440586090087,
+              "p75_ms": 0.018247679471969605
+            },
+            "graph_marginal": {
+              "median_ms": 0.01817600056529045,
+              "min_ms": 0.018090666582187016,
+              "reps_in_graph": 12
+            }
+          }
+        }
+      },
+      "count": 20,
+      "family": "k_proj",
+      "flops_per_token": 52428800,
+      "named8": true,
+      "primary_cfg_byte_exact": true,
+      "primary_cfg_speedup": 4.5181,
+      "ref_self_m_invariant": true,
+      "ref_triton_timing": {
+        "eager": {
+          "median_ms": 0.10760191917419433,
+          "min_ms": 0.10747903823852539,
+          "p25_ms": 0.10759167671203614,
+          "p75_ms": 0.10761216163635254
+        },
+        "graph": {
+          "median_ms": 0.10686463832855225,
+          "min_ms": 0.10678272247314453,
+          "p25_ms": 0.10684415817260742,
+          "p75_ms": 0.10688511848449707
+        },
+        "graph_marginal": {
+          "median_ms": 0.10679466525713602,
+          "min_ms": 0.10666666428248088,
+          "reps_in_graph": 12
+        }
+      },
+      "timing_basis": "graph_marginal",
+      "tiny_n": true
+    },
+    {
+      "K": 2560,
+      "N": 256,
+      "any_cand_nan": false,
+      "best_byte_exact": true,
+      "best_byte_exact_cfg": "gemv_m16_n32_w4_s3",
+      "best_speedup": 9.2148,
+      "candidates": {
+        "gemv_m16_n128_w8_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 128,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 8
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 4.6074,
+          "timing": {
+            "eager": {
+              "median_ms": 0.051665918827056886,
+              "min_ms": 0.05108736038208008,
+              "p25_ms": 0.05158912181854248,
+              "p75_ms": 0.052008957862854005
+            },
+            "graph": {
+              "median_ms": 0.023060479164123536,
+              "min_ms": 0.023060479164123536,
+              "p25_ms": 0.023060479164123536,
+              "p75_ms": 0.023070719242095947
+            },
+            "graph_marginal": {
+              "median_ms": 0.023039999107519787,
+              "min_ms": 0.022869333624839783,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n32_w2_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 32,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 2
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 8.5205,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05111295938491821,
+              "min_ms": 0.05017600059509277,
+              "p25_ms": 0.05091328144073486,
+              "p75_ms": 0.051466240882873535
+            },
+            "graph": {
+              "median_ms": 0.012554240226745606,
+              "min_ms": 0.012544000148773193,
+              "p25_ms": 0.012554240226745606,
+              "p75_ms": 0.012564480304718018
+            },
+            "graph_marginal": {
+              "median_ms": 0.012458667159080505,
+              "min_ms": 0.012373333175977072,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n32_w4_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 32,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 4
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 9.2148,
+          "timing": {
+            "eager": {
+              "median_ms": 0.0516761589050293,
+              "min_ms": 0.050575361251831055,
+              "p25_ms": 0.05122047901153565,
+              "p75_ms": 0.05203968048095703
+            },
+            "graph": {
+              "median_ms": 0.011637760400772095,
+              "min_ms": 0.011612160205841065,
+              "p25_ms": 0.011632640361785889,
+              "p75_ms": 0.0116428804397583
+            },
+            "graph_marginal": {
+              "median_ms": 0.011519999553759893,
+              "min_ms": 0.011434666812419891,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n64_w4_s2": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 64,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 2,
+            "num_warps": 4
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 4.5568,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05088255882263183,
+              "min_ms": 0.050472960472106934,
+              "p25_ms": 0.05055488109588623,
+              "p75_ms": 0.0516096019744873
+            },
+            "graph": {
+              "median_ms": 0.023388159275054932,
+              "min_ms": 0.02337791919708252,
+              "p25_ms": 0.023388159275054932,
+              "p75_ms": 0.023398399353027344
+            },
+            "graph_marginal": {
+              "median_ms": 0.02329600105683009,
+              "min_ms": 0.02329600105683009,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n64_w8_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 64,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 8
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 5.8679,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05056511878967285,
+              "min_ms": 0.04981760025024414,
+              "p25_ms": 0.05046271800994873,
+              "p75_ms": 0.050923519134521485
+            },
+            "graph": {
+              "median_ms": 0.018206720352172853,
+              "min_ms": 0.01819648027420044,
+              "p25_ms": 0.018206720352172853,
+              "p75_ms": 0.018206720352172853
+            },
+            "graph_marginal": {
+              "median_ms": 0.018090666582187016,
+              "min_ms": 0.018005333840847015,
+              "reps_in_graph": 12
+            }
+          }
+        }
+      },
+      "count": 42,
+      "family": "per_layer_input_gate",
+      "flops_per_token": 55050240,
+      "named8": false,
+      "primary_cfg_byte_exact": true,
+      "primary_cfg_speedup": 4.5568,
+      "ref_self_m_invariant": true,
+      "ref_triton_timing": {
+        "eager": {
+          "median_ms": 0.1064140796661377,
+          "min_ms": 0.10640383720397949,
+          "p25_ms": 0.1064140796661377,
+          "p75_ms": 0.10651647567749023
+        },
+        "graph": {
+          "median_ms": 0.1062451171875,
+          "min_ms": 0.10622976303100586,
+          "p25_ms": 0.1062399959564209,
+          "p75_ms": 0.1062604808807373
+        },
+        "graph_marginal": {
+          "median_ms": 0.10615467031796773,
+          "min_ms": 0.1060693363348643,
+          "reps_in_graph": 12
+        }
+      },
+      "timing_basis": "graph_marginal",
+      "tiny_n": true
+    },
+    {
+      "K": 2560,
+      "N": 2048,
+      "any_cand_nan": false,
+      "best_byte_exact": true,
+      "best_byte_exact_cfg": "gemv_m16_n64_w8_s3",
+      "best_speedup": 4.1401,
+      "candidates": {
+        "gemv_m16_n128_w8_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 128,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 8
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 3.8428,
+          "timing": {
+            "eager": {
+              "median_ms": 0.050201599597930906,
+              "min_ms": 0.04941823959350586,
+              "p25_ms": 0.050042881965637206,
+              "p75_ms": 0.050647039413452145
+            },
+            "graph": {
+              "median_ms": 0.031518719196319586,
+              "min_ms": 0.031477758884429934,
+              "p25_ms": 0.03150847911834717,
+              "p75_ms": 0.03154943943023682
+            },
+            "graph_marginal": {
+              "median_ms": 0.03148799886306127,
+              "min_ms": 0.031317333380381264,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n32_w2_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 32,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 2
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 2.9267,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05032959938049317,
+              "min_ms": 0.04989952087402344,
+              "p25_ms": 0.050196480751037595,
+              "p75_ms": 0.050933761596679686
+            },
+            "graph": {
+              "median_ms": 0.04134399890899658,
+              "min_ms": 0.04131840229034424,
+              "p25_ms": 0.04133887767791748,
+              "p75_ms": 0.041369600296020506
+            },
+            "graph_marginal": {
+              "median_ms": 0.04134399940570195,
+              "min_ms": 0.04121600091457367,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n32_w4_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 32,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 4
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 2.9821,
+          "timing": {
+            "eager": {
+              "median_ms": 0.05056511878967285,
+              "min_ms": 0.049930238723754884,
+              "p25_ms": 0.05035007953643799,
+              "p75_ms": 0.05085184097290039
+            },
+            "graph": {
+              "median_ms": 0.04059648036956787,
+              "min_ms": 0.04057087898254395,
+              "p25_ms": 0.04059135913848877,
+              "p75_ms": 0.040622081756591794
+            },
+            "graph_marginal": {
+              "median_ms": 0.04057599976658821,
+              "min_ms": 0.040448000033696495,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n64_w4_s2": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 64,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 2,
+            "num_warps": 4
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 3.1723,
+          "timing": {
+            "eager": {
+              "median_ms": 0.04993023872375488,
+              "min_ms": 0.049766402244567874,
+              "p25_ms": 0.04988927841186523,
+              "p75_ms": 0.05025792121887207
+            },
+            "graph": {
+              "median_ms": 0.03812863945960998,
+              "min_ms": 0.038062078952789305,
+              "p25_ms": 0.038113279342651366,
+              "p75_ms": 0.038164479732513426
+            },
+            "graph_marginal": {
+              "median_ms": 0.03814399987459183,
+              "min_ms": 0.03797333439191183,
+              "reps_in_graph": 12
+            }
+          }
+        },
+        "gemv_m16_n64_w8_s3": {
+          "cfg": {
+            "BLOCK_SIZE_K": 64,
+            "BLOCK_SIZE_M": 16,
+            "BLOCK_SIZE_N": 64,
+            "GROUP_SIZE_M": 8,
+            "num_stages": 3,
+            "num_warps": 8
+          },
+          "graph_capturable": true,
+          "invariance": {
+            "bitexact_vs_triton_m1": true,
+            "bitexact_vs_triton_mB_row0": true,
+            "byte_exact": true,
+            "gemv_reproducible": true,
+            "max_ulp_vs_triton_m1": 0,
+            "nan_clean": true
+          },
+          "speedup_basis": "graph_marginal",
+          "speedup_vs_triton": 4.1401,
+          "timing": {
+            "eager": {
+              "median_ms": 0.0500275182723999,
+              "min_ms": 0.04928512096405029,
+              "p25_ms": 0.049930238723754884,
+              "p75_ms": 0.05050367832183838
+            },
+            "graph": {
+              "median_ms": 0.029347839355468752,
+              "min_ms": 0.029296638965606688,
+              "p25_ms": 0.029327359199523926,
+              "p75_ms": 0.029358079433441164
+            },
+            "graph_marginal": {
+              "median_ms": 0.029226666937271755,
+              "min_ms": 0.02918400118748347,
+              "reps_in_graph": 12
+            }
+          }
+        }
+      },
+      "count": 35,
+      "family": "q_proj",
+      "flops_per_token": 367001600,
+      "named8": true,
+      "primary_cfg_byte_exact": true,
+      "primary_cfg_speedup": 3.1723,
+      "ref_self_m_invariant": true,
+      "ref_triton_timing": {
+        "eager": {
+          "median_ms": 0.12412415981292725,
+          "min_ms": 0.12371968269348145,
+          "p25_ms": 0.12393471717834473,
+          "p75_ms": 0.12432383537292481
+        },
+        "graph": {
+          "median_ms": 0.12097535610198976,
+          "min_ms": 0.12090368270874023,
+          "p25_ms": 0.12094464302062988,
+          "p75_ms": 0.12102656364440918
+        },
+        "graph_marginal": {
+          "median_ms": 0.12100266416867574,
+          "min_ms": 0.12083199620246887,
+          "reps_in_graph": 12
+        }
+      },
+      "timing_basis": "graph_marginal",
+      "tiny_n": false
+    }
+  ],
+  "primary_gemv_cfg_name": "gemv_m16_n64_w4_s2",
+  "projection": {
+    "basis": "graph_marginal",
+    "caveat": "REALIZABLE e2e lift at the 399.75 byte-exact ceiling = ~0. Two independent reasons: (1) routing \u2014 in the int4 serve the named tiny-N shapes (k/v_proj, and the PLE gate) run on Marlin/torchao int4, already free + M-invariant (denken #501), NOT on Triton matmul_persistent, so there is no Triton tax to recover; (2) physics \u2014 each tiny-N family's measured per-token Triton time alone (e.g. per_layer_input_gate x42 ~= 4.5 ms) EXCEEDS the entire 2.5 ms/token step of the 399.75 serve, so they demonstrably cannot be Triton-routed there. The GEMV is a real, bit-exact, 6-9x-faster replacement for Triton matmul_persistent at M=1 tiny-N, but the byte-exact frontier already routes AROUND that kernel via int4 Marlin; the GEMV optimizes a path the frontier abandoned. 'lift_tps' under the hypothetical Triton-routed scenarios is shown for completeness and is capped at the non-strict 481.53 anchor (unphysical: premise fails the feasibility check).",
+    "deployed_anchor_tps": 481.53,
+    "headline_scenario": "tiny_n_all_triton_routed",
+    "realizable_e2e_tps_lift": 0.0,
+    "realizable_scenario": "realizable_serve_routed",
+    "scenarios": {
+      "all15_triton_routed": {
+        "anchor_tps": 399.75,
+        "frac_of_gap_to_500": 0.0,
+        "lift_pct": 0.0,
+        "lift_tps": 0.0,
+        "physically_feasible_at_anchor": false,
+        "projected_tps": 399.75,
+        "realizable_saved_ms_per_token": 0.0,
+        "saved_ms_per_token_raw": 9.024896,
+        "step_ms_per_token": 2.501563,
+        "triton_ms_per_token": 10.829483
+      },
+      "kv_proj_if_triton_routed": {
+        "anchor_tps": 399.75,
+        "frac_of_gap_to_500": 0.81576,
+        "lift_pct": 20.4578,
+        "lift_tps": 81.78,
+        "physically_feasible_at_anchor": true,
+        "projected_tps": 481.53,
+        "realizable_saved_ms_per_token": 1.83808,
+        "saved_ms_per_token_raw": 1.83808,
+        "step_ms_per_token": 2.501563,
+        "triton_ms_per_token": 2.135893
+      },
+      "ple_gate_only_triton_routed": {
+        "anchor_tps": 399.75,
+        "frac_of_gap_to_500": 0.0,
+        "lift_pct": 0.0,
+        "lift_tps": 0.0,
+        "physically_feasible_at_anchor": false,
+        "projected_tps": 399.75,
+        "realizable_saved_ms_per_token": 0.0,
+        "saved_ms_per_token_raw": 3.974656,
+        "step_ms_per_token": 2.501563,
+        "triton_ms_per_token": 4.458496
+      },
+      "realizable_serve_routed": {
+        "anchor_tps": 399.75,
+        "frac_of_gap_to_500": 0.0,
+        "lift_pct": 0.0,
+        "lift_tps": 0.0,
+        "physically_feasible_at_anchor": true,
+        "projected_tps": 399.75,
+        "realizable_saved_ms_per_token": 0.0,
+        "saved_ms_per_token_raw": 0.0,
+        "step_ms_per_token": 2.501563,
+        "triton_ms_per_token": 0
+      },
+      "tiny_n_all_triton_routed": {
+        "anchor_tps": 399.75,
+        "frac_of_gap_to_500": 0.0,
+        "lift_pct": 0.0,
+        "lift_tps": 0.0,
+        "physically_feasible_at_anchor": false,
+        "projected_tps": 399.75,
+        "realizable_saved_ms_per_token": 0.0,
+        "saved_ms_per_token_raw": 5.812736,
+        "step_ms_per_token": 2.501563,
+        "triton_ms_per_token": 6.594389
+      }
+    },
+    "serve_triton_routed_families": [],
+    "step_ms_per_token_at_399_75": 2.501563,
+    "strict_byteexact_anchor_tps": 399.75,
+    "strict_target_tps": 500.0,
+    "tiny_n_saved_ms_per_token_if_triton": 5.812736,
+    "tiny_n_triton_ms_per_token": 6.594389
+  },
+  "ref_cfg": {
+    "BLOCK_SIZE_K": 64,
+    "BLOCK_SIZE_M": 128,
+    "BLOCK_SIZE_N": 128,
+    "GROUP_SIZE_M": 8,
+    "num_stages": 3,
+    "num_warps": 8
+  }
+}
