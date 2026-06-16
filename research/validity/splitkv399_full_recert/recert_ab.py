@@ -280,7 +280,8 @@ def run_one_arm(arm: str, args: argparse.Namespace) -> dict[str, Any]:
     coverage_keys = fixed_tps * eff_segments * BYTEEXACT_TILE_SIZE  # = 64*S at T=4
 
     tag = getattr(args, "out_tag", None) or (("smoke_" + arm) if args.smoke else arm)
-    out_dir = (OUT_ROOT / tag).resolve()
+    out_root = Path(getattr(args, "out_root", None) or OUT_ROOT)
+    out_dir = (out_root / tag).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     server_log = out_dir / "server.log"
     if seg_override is not None:
@@ -625,7 +626,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="PR #525: override BYTEEXACT_NUM_SEGMENTS for the variant arm "
                          "(byte-exact segment-count occupancy sweep; FIXED_TPS held)")
     ap.add_argument("--out-tag", default=None,
-                    help="output subdir under OUT_ROOT (default: arm name); set per-S in the sweep")
+                    help="output subdir under out-root (default: arm name); set per-S in the sweep")
+    ap.add_argument("--out-root", default=None,
+                    help="root dir for arm artifacts (default: this harness dir); the "
+                         "#525 sweep points this at research/validity/splitkv_numseg_sweep")
     ap.add_argument("--wandb-name", default="stark/splitkv399-full-recert")
     ap.add_argument("--wandb-group", default="splitkv399-full-recert")
     ap.add_argument("--no-wandb", action="store_true")

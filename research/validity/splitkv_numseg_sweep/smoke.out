@@ -1,0 +1,28 @@
+
+[sweep] ===== S=48 (smoke=True) =====
+[recert] normalized CUDA_VISIBLE_DEVICES '1' -> '0' (single in-container GPU)
+[recert] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[recert] NUM_SEGMENTS override -> 48 (fixed_tps=4, coverage=3072 keys vs max_model_len 4096) tag=smoke_s48
+[recert] arm=variant submission=fa2sw_strict_byteexact_splitkv399 mode=byteexact
+[recert] workload=8x16 seed=1 n_decodes=2 ppl=False -> /workspace/senpai/target/research/validity/splitkv_numseg_sweep/smoke_s48
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'BYTEEXACT_FIXED_TPS': '4', 'BYTEEXACT_NUM_SEGMENTS': '48', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/workspace/senpai/target/research/validity/splitkv_numseg_sweep/sweep_numseg.py", line 365, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/senpai/target/research/validity/splitkv_numseg_sweep/sweep_numseg.py", line 354, in main
+    results[s] = run_one_s(s, args.smoke, args.n_decodes)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/senpai/target/research/validity/splitkv_numseg_sweep/sweep_numseg.py", line 118, in run_one_s
+    result = recert_ab.run_one_arm("variant", args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/senpai/target/research/validity/splitkv399_full_recert/recert_ab.py", line 302, in run_one_arm
+    with _GpuMemSampler() as mem, harness.LocalServer(
+  File "/workspace/senpai/target/scripts/local_validation/harness.py", line 265, in __enter__
+    self._wait_ready()
+  File "/workspace/senpai/target/scripts/local_validation/harness.py", line 235, in _wait_ready
+    raise RuntimeError(
+RuntimeError: server exited before readiness with code 1 (see /workspace/senpai/target/research/validity/splitkv_numseg_sweep/smoke_s48/server.log)
