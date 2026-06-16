@@ -1,0 +1,168 @@
+{
+  "pr": 504,
+  "agent": "kanna",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_serve": true,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "k_spec": 7,
+  "e_t_deployed": 3.8512,
+  "gpu_blocker": "Full production serve stack not brought up on pod-A10G: vLLM not importable in base env; custom cu129 wheel (vllm-0.22.1rc1.dev307+g3e8afdf78.cu129) vs pod CUDA 13.2 (driver 580.159.04); 40KB serve.py + 52KB sitecustomize + 8 custom-kernel monkeypatches (FUSED_SPARSE_ARGMAX, ONEGRAPH/LOOPGRAPH, splitkv-verify, PLE-fold, precache, surgical_attn) + multi-bucket artifact downloads (osoi5-v0-baked int4, kenyan-duma drafter ft-v1-epoch_001, dixie lmhead12k keepset, qat-assistant); none cached. Disproportionate to a cross-check that cannot beat the deployed private leaderboard anchor. SUBSTITUTED: my own #478 banked (E[T],TPS) pairs from the EXACT deployed fa2sw_precache_kenyan stack (run jb1a0lab, 10 GPU runs). PR sanctions the CPU path: 'the deployed anchor alone is enough to reconcile.'",
+  "lane_discipline": "denken #489 dalpha=4.295% is an INPUT (acceptance leg, NOT re-derived); novel contribution is the TPS-propagation leg + sigma_hw composition",
+  "analytic": {
+    "et_from_per_position": 3.8518571286617886,
+    "survival_G": [
+      0.729,
+      0.55404,
+      0.43935372,
+      0.36158811156,
+      0.30192607315259995,
+      0.25241019715557356,
+      0.21353902679361522
+    ],
+    "alpha_A_mean_accept_rate": 0.4073142857142857,
+    "elasticity_A_mean_accept": 0.7403406730369755,
+    "breach_A_pct": 3.17976319069381,
+    "alpha_B_geometric": 0.7736727448172123,
+    "elasticity_B_geometric": 2.240190516011159,
+    "elasticity_B_geometric_numcheck": 2.2401905051828157,
+    "breach_B_pct": 9.621618266267927,
+    "elasticity_C_per_position_compound": 2.204911685985663,
+    "breach_C_pct": 9.470095691308423,
+    "pf_needed_for_24pct": 5.587892898719441,
+    "elasticity_D_full_block_alpha_pow_K": 7.0,
+    "breach_D_full_block_pct": 30.065,
+    "natural_elasticity_lo": 0.7403406730369755,
+    "natural_elasticity_hi": 2.240190516011159
+  },
+  "deployed_anchor": {
+    "deployed_public_tps": 481.53,
+    "deployed_private_tps": 460.85,
+    "deployed_realized_tps_gap_pct": 4.294644155088977,
+    "denken_delta_alpha_pct": 4.295,
+    "realized_propagation_factor": 0.9999171490311938
+  },
+  "within_run_xcheck": {
+    "available": true,
+    "n_runs": 10,
+    "source_run": "jb1a0lab",
+    "submission": "fa2sw_precache_kenyan",
+    "et_mean": 3.847383180388923,
+    "et_cv_pct": 0.37001498147819617,
+    "steady_gen_tps": {
+      "slope": 211.68093650441554,
+      "r": 0.4980814270157607,
+      "elasticity": 1.9220566190003443,
+      "cv_pct": 1.4278583896222976,
+      "elasticity_ci95": [
+        -0.6596114362701412,
+        3.95441199555283
+      ]
+    },
+    "wall_tps": {
+      "slope": 12.98021042427801,
+      "r": 0.5305380961542863,
+      "elasticity": 0.10969081680481754,
+      "cv_pct": 0.0765020379169107
+    },
+    "sigma_hw_within_frac_pct": 0.0725561255067079,
+    "sigma_hw_convention_frac": 0.01
+  },
+  "bracket_context": {
+    "private_flip_ratio_easy": 0.49674479166666663,
+    "private_flip_ratio_hard": 0.37255859375,
+    "note": "#497 splits carry identity-flip rates only (not acceptance/TPS); private flip ratio <1 => stack bounded off-distribution, qualitatively consistent with a mild/linear private regime, NOT a catastrophic one"
+  },
+  "realized_propagation_factor": 0.9999171490311938,
+  "private_tps_breach_pct_reconciled": 4.294644155088977,
+  "pf_needed_for_24pct": 5.587892898719441,
+  "breach_model_verdict": "linear ~4.3%",
+  "denken_24pct_is": "worst-case-only (requires PF~5.6 / deep-block-survival accept model far outside the natural elasticity envelope [0.74, 2.24] and the realized PF~1.00)",
+  "surgical357_private_tps_mean": 341.8786721491912,
+  "surgical357_private_tps_band_68": [
+    338.45988542769925,
+    345.2974588706831
+  ],
+  "surgical357_private_tps_band_95": [
+    335.17797330424327,
+    348.5793709941391
+  ],
+  "P_private_below_95pct_public": 0.23055883245068903,
+  "band_linear": {
+    "ship_public_tps": 357.22,
+    "breach_frac": 0.04294644155088977,
+    "breach_pct": 4.294644155088977,
+    "sigma_hw_frac": 0.01,
+    "private_tps_mean": 341.8786721491912,
+    "private_tps_sigma": 3.418786721491912,
+    "private_tps_band_68": [
+      338.45988542769925,
+      345.2974588706831
+    ],
+    "private_tps_band_95": [
+      335.17797330424327,
+      348.5793709941391
+    ],
+    "threshold_095_public": 339.35900000000004,
+    "p_private_below_95pct_public": 0.23055883245068903
+  },
+  "band_linear_round357": {
+    "ship_public_tps": 357.0,
+    "breach_frac": 0.04294644155088977,
+    "breach_pct": 4.294644155088977,
+    "sigma_hw_frac": 0.01,
+    "private_tps_mean": 341.66812036633235,
+    "private_tps_sigma": 3.4166812036633236,
+    "private_tps_band_68": [
+      338.25143916266904,
+      345.08480156999565
+    ],
+    "private_tps_band_95": [
+      334.9715482604973,
+      348.3646924721674
+    ],
+    "threshold_095_public": 339.15,
+    "p_private_below_95pct_public": 0.23055883245068587
+  },
+  "band_amplified_contrast": {
+    "ship_public_tps": 357.22,
+    "breach_frac": 0.24,
+    "breach_pct": 24.0,
+    "sigma_hw_frac": 0.01,
+    "private_tps_mean": 271.48720000000003,
+    "private_tps_sigma": 2.714872,
+    "private_tps_band_68": [
+      268.772328,
+      274.20207200000004
+    ],
+    "private_tps_band_95": [
+      266.1661486573638,
+      276.80825134263625
+    ],
+    "threshold_095_public": 339.35900000000004,
+    "p_private_below_95pct_public": 1.0
+  },
+  "sigma_hw_frac": 0.01,
+  "verdict_one_line": "deployed anchor (481.53->460.85 = 4.29% TPS gap) / denken dalpha=4.295% realize a propagation factor of 1.00 (linear; natural-elasticity envelope [0.74, 2.24], all <<5.6) -> surgical-357 private TPS ~= 341.9 [95% 335.2-348.6, +-sigma_hw 1%], breach 4.29% -> denken #489's 24% is WORST-CASE-ONLY (needs PF~5.6 / deep-block-survival accept model), data-refuted as the expected outcome.",
+  "self_test": {
+    "checks": {
+      "et_reconstructs_deployed": true,
+      "elasticity_A_closed_form": true,
+      "elasticity_B_numcheck": true,
+      "natural_envelope_below_24_requirement": true,
+      "realized_pf_is_linear": true,
+      "pf_needed_for_24_is_5p6": true,
+      "band_ordered": true,
+      "linear_mean_near_342": true,
+      "amplified_mean_near_271": true,
+      "p_below_valid": true,
+      "sigma_hw_roundtrip": true,
+      "within_run_ci_excludes_24_requirement": true,
+      "nan_clean": true
+    },
+    "passes": true
+  }
+}
