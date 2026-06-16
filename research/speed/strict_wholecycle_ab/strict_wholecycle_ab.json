@@ -1,0 +1,256 @@
+{
+  "config": {
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "M": 8,
+    "head_dim_full": 512,
+    "head_dim_sliding": 256,
+    "deployed_num_layers": 37,
+    "full_attn_idx": [
+      2,
+      8,
+      14,
+      20,
+      26,
+      32,
+      36
+    ],
+    "n_full_layers": 7,
+    "KV_LENS": [
+      128,
+      384,
+      640
+    ],
+    "headline_L": 640,
+    "sliding_window": 512,
+    "iters": 50,
+    "warmup": 40,
+    "rounds": 21,
+    "n_distinct": 8,
+    "ident_trials": 8,
+    "smoke": false,
+    "served_model_dir": "/tmp/osoi5-v0-baked",
+    "group_size": 128,
+    "self_built_marlin": true,
+    "note": "whole-cycle strict A/B: full deployed M=8 verify cycle (37-layer self-built g=128 int4-Marlin body via apply_gptq_marlin_linear + per-layer attention -- 7 full-attn hd=512 served Triton unified_attention with the strict_2d (natural M=8 order-preserving, == VLLM_BATCH_INVARIANT=1) vs permissive_3d (deployed split-KV) lever, 30 sliding hd=256 sdpa -- + int4 12k lm_head), single-stream ONEGRAPH-captured, paired median+sigma over rounds. whole_cycle_strict_delta_us = whole_strict - whole_perm captures in-graph overlap; isolated #466 arm co-measured for overlap_recovery_fraction. realized via tps_from_added_us on the banked cycle (CYCLE_PERM=7666.83 <-> 481.53). No serve change, no HF Job, no submission, no kernel rebuild."
+  },
+  "peak_bw": {
+    "bw_read_gbps": 517.585261521766,
+    "read_us": 2074.5216369628906,
+    "bw_copy_gbps": 482.6897995451235,
+    "copy_us": 4448.993225097656,
+    "bw_bf16gemm_m8_gbps": 381.9244202764171,
+    "gemm_us": 1410.1913452148438
+  },
+  "per_L": {
+    "128": {
+      "median_us": {
+        "whole_perm": 4685.762634277344,
+        "whole_strict": 4752.261047363281,
+        "iso_perm": 80.89599609375,
+        "iso_strict": 159.62112426757812,
+        "body_gemm": 4126.965637207031
+      },
+      "captured": {
+        "whole_perm": true,
+        "whole_strict": true,
+        "iso_perm": true,
+        "iso_strict": true,
+        "body_gemm": true
+      },
+      "whole_delta_us": 66.53961181640625,
+      "whole_delta_sigma": 0.439556996666867,
+      "n_whole": 21,
+      "iso_delta_us": 78.68416786193848,
+      "iso_delta_sigma": 0.2533222434741587,
+      "n_iso": 21,
+      "overlap_recovery_fraction": 0.15434561202758626,
+      "whole_strict_tps": 477.3868086786735,
+      "iso_strict_tps": 476.63829119622176,
+      "body_gemm_us": 4126.965637207031
+    },
+    "384": {
+      "median_us": {
+        "whole_perm": 4843.212890625,
+        "whole_strict": 5073.8177490234375,
+        "iso_perm": 107.06944465637207,
+        "iso_strict": 359.99744415283203,
+        "body_gemm": 4126.7608642578125
+      },
+      "captured": {
+        "whole_perm": true,
+        "whole_strict": true,
+        "iso_perm": true,
+        "iso_strict": true,
+        "body_gemm": true
+      },
+      "whole_delta_us": 230.62530517578125,
+      "whole_delta_sigma": 0.5302161572835292,
+      "n_whole": 21,
+      "iso_delta_us": 252.90752410888672,
+      "iso_delta_sigma": 0.277774652418469,
+      "n_iso": 21,
+      "overlap_recovery_fraction": 0.08810421521311516,
+      "whole_strict_tps": 467.4681237593509,
+      "iso_strict_tps": 466.15289956089407,
+      "body_gemm_us": 4126.7608642578125
+    },
+    "640": {
+      "median_us": {
+        "whole_perm": 4935.311279296875,
+        "whole_strict": 5337.0880126953125,
+        "iso_perm": 134.67647552490234,
+        "iso_strict": 556.4211273193359,
+        "body_gemm": 4125.614013671875
+      },
+      "captured": {
+        "whole_perm": true,
+        "whole_strict": true,
+        "iso_perm": true,
+        "iso_strict": true,
+        "body_gemm": true
+      },
+      "whole_delta_us": 401.89971923828125,
+      "whole_delta_sigma": 0.3553497231809503,
+      "n_whole": 21,
+      "iso_delta_us": 421.76513671875,
+      "iso_delta_sigma": 0.3196762338516123,
+      "n_iso": 21,
+      "overlap_recovery_fraction": 0.04710066278834187,
+      "whole_strict_tps": 457.5452044002469,
+      "iso_strict_tps": 456.4214827627911,
+      "body_gemm_us": 4125.614013671875
+    }
+  },
+  "shapes": {
+    "qkv_proj": [
+      3072,
+      2560
+    ],
+    "o_proj": [
+      2560,
+      2048
+    ],
+    "gate_up_proj": [
+      20480,
+      2560
+    ],
+    "down_proj": [
+      2560,
+      10240
+    ],
+    "lm_head": [
+      12288,
+      2560
+    ]
+  },
+  "identity": {
+    "L": 640,
+    "head_dim": 512,
+    "per_arm": {
+      "permissive_3d": {
+        "byte_identity_min": 0.0,
+        "byte_identity_mean": 0.0,
+        "argmax_identity_min": 1.0,
+        "argmax_identity_mean": 1.0,
+        "max_abs_diff": 0.001953125
+      },
+      "strict_2d": {
+        "byte_identity_min": 1.0,
+        "byte_identity_mean": 1.0,
+        "argmax_identity_min": 1.0,
+        "argmax_identity_mean": 1.0,
+        "max_abs_diff": 0.0
+      },
+      "strict_3d_ns1": {
+        "byte_identity_min": 0.0,
+        "byte_identity_mean": 0.0,
+        "argmax_identity_min": 1.0,
+        "argmax_identity_mean": 1.0,
+        "max_abs_diff": 0.001953125
+      }
+    },
+    "any_nan": false,
+    "error": null
+  },
+  "verdict": {
+    "whole_cycle_self_test_passes": true,
+    "realized_strict_frontier_best_estimate_tps": 457.5452044002469,
+    "whole_cycle_strict_tps": 457.5452044002469,
+    "whole_cycle_strict_tps_sigma_lo": 457.52505482792225,
+    "whole_cycle_strict_tps_sigma_hi": 457.565355747439,
+    "whole_cycle_perm_tps": 481.53,
+    "whole_cycle_strict_delta_us": 401.89971923828125,
+    "whole_cycle_strict_delta_sigma": 0.3553497231809503,
+    "iso_delta_us_inharness": 421.76513671875,
+    "iso_delta_us_inharness_sigma": 0.3196762338516123,
+    "iso_delta_us_466_banked": 422.91198670864105,
+    "iso_strict_tps_inharness": 456.4214827627911,
+    "overlap_recovery_fraction": 0.04710066278834187,
+    "overlap_recovery_fraction_vs_banked": 0.04968472904702957,
+    "whole_cycle_holds_within_sigma_hw": false,
+    "composed_vs_wholecycle_drift": 9.59479559975307,
+    "realized_eta_attn_decode": 0.05242060318650358,
+    "eta_attn_composed": 0.0308044697521086,
+    "whole_cycle_strict_identity_fraction": 1.0,
+    "whole_cycle_strict_token_flips": 0,
+    "permissive_identity_fraction": 0.0,
+    "body_gemm_us": 4125.614013671875,
+    "gemm_us_450_anchor": 4152.96,
+    "whole_strict_captured_all_L": true,
+    "whole_perm_captured_all_L": true,
+    "strict_frontier_is_e2e_measurable": true,
+    "strict_frontier_collapses_to_m1": false,
+    "realized_466_lower_bound_tps": 456.3567777154584,
+    "composed_vs_466_drift": 10.78322228454158,
+    "realized_466_eta_attn_decode": 0.05516127625091883,
+    "relax_452_composed": 498.6,
+    "relax_452_realized_delta": -0.94,
+    "cycle_perm_us": 7666.827445849688,
+    "cycle_wall_us": 7903.0,
+    "composed_added_us_per_cycle": 236.17255415031195,
+    "deployed_tps": 481.53,
+    "realized_base_tps": 467.14,
+    "m1_collapse_floor_tps": 161.7,
+    "sigma_hw": 4.8153,
+    "n_full_layers_per_cycle": 7,
+    "deployed_num_layers": 37,
+    "headline_L": 640,
+    "outcome": "REALIZED_STAYS_AT_466_LOWER_BOUND",
+    "ppl": 2.3772,
+    "ppl_anchor": 2.3772,
+    "ppl_gate": 2.42,
+    "peak_vram_gib": 2.5095324516296387,
+    "lever_is_config_reachable_no_source_edit": true,
+    "no_kernel_rebuild": true,
+    "analysis_only": true,
+    "no_hf_job": true,
+    "no_served_file_change": true,
+    "official_tps": 0,
+    "self_test_conditions": {
+      "tps_zero_added_is_deployed": true,
+      "tps_composed_added_is_base": true,
+      "tps_more_added_lowers": true,
+      "constants_anchored": true,
+      "geometry_full_attn": true,
+      "body_shapes_served": true,
+      "whole_perm_captured": true,
+      "whole_strict_captured_survives": true,
+      "iso_strict_captured": true,
+      "iso_delta_reproduces_466": true,
+      "body_gemm_anchor_matches_450": true,
+      "whole_delta_positive": true,
+      "recover_frac_in_band": true,
+      "nan_clean": true,
+      "identity_ran": true,
+      "strict_byte_exact": true,
+      "strict_zero_flips": true,
+      "permissive_reproduces_nonequiv": true,
+      "ppl_anchor_ok": true,
+      "vram_ok": true,
+      "realized_above_collapse_floor": true
+    },
+    "reconcile_line": "#466's ISOLATED-locus attention Delta (+422.9 us/cycle, the 7 full-attn reductions timed ALONE) -> realized 456.36 was a CONSERVATIVE LOWER BOUND (isolation cannot hide tax under overlap). The #452-identical WHOLE-CYCLE A/B (37-layer self-built g=128 int4-Marlin body + 7 full-attn Triton reductions + 30 sliding sdpa + int4 12k lm_head, single-stream ONEGRAPH-captured) measures the strict tax UNDER in-graph overlap: whole_cycle_strict_delta_us=+401.9 (sigma 0.4) vs the in-harness isolated +421.8 (#466 banked 422.9) -> overlap_recovery_fraction=+4.7%. realized_strict_frontier_best_estimate_tps=457.55 (-9.59 vs composed 467.14; |drift|=9.59 > sigma_hw=4.8153). whole_cycle_perm_tps=481.53 (deployed-baseline anchor; calibration guards: in-harness isolated Delta reproduces #466 within 12% [True], body GEMM 4126us reproduces #450 4152.96 within 20% [True]). The M=8 strict-reduction verify attention CAPTURES+REPLAYS (survives) -> does NOT collapse to the M=1 161.70 floor. Strict 2D byte-exact: identity=1.0000 (0 flips); deployed permissive byte=0.0000 (reproduces the non-equivalence). Reconcile vs #466 (composed_vs_realized_drift +10.78, realized_eta_attn 5.52%; here 5.24%) and #452 (relax: composed 498.6 realized -0.94, held). OUTCOME=REALIZED_STAYS_AT_466_LOWER_BOUND."
+  }
+}
