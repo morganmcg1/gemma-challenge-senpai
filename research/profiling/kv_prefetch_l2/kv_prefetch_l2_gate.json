@@ -1,0 +1,150 @@
+{
+  "utc": "2026-06-16T03:19:26Z",
+  "card": "PR #445 kv-cache-l2-prefetch (analysis-only gate)",
+  "deployed_tps": 481.53,
+  "realized_frontier_tps": 467.14,
+  "arch": {
+    "n_layers": 37,
+    "n_sliding": 30,
+    "n_full": 7,
+    "pr_claimed_layers": 42,
+    "pr_claimed_l2_MB": 40.0
+  },
+  "committed_verify_fraction": {
+    "source_file": "research/profiling/frontier_decode_postsplitkv/frontier_decode_profile.json",
+    "source_utc": "2026-06-13T21:46:41Z",
+    "submission": "fa2sw_precache_kenyan",
+    "verify_gpu_ms": 6.519,
+    "verify_subsplit_ms": {
+      "body_int4_gemm": 4.8260284726847225,
+      "lmhead12k_gemm": 0.02625538666666667,
+      "attention_fa2sw": 0.6049229015248683,
+      "norm_elementwise": 0.5945910097750616,
+      "sampling": 0.23250033029123993
+    },
+    "verify_subsplit_sum_ms": 6.284298100942559,
+    "attention_ms": 0.6049229015248683,
+    "t_attn_frac_of_verify": 0.09279381830416755,
+    "t_attn_frac_of_verify_subsplit_denom": 0.09625942178556712,
+    "attn_frac_of_gpu_busy": 0.07595716995540787,
+    "verify_body_gemm_frac_of_gpu_busy": 0.6059804712060174,
+    "e_accept": 3.8467276227141483,
+    "reconstructed_decode_tps": 480.1807043707587
+  },
+  "fresh_microbench": {
+    "rep_ctx": 528,
+    "gpu": "NVIDIA A10G",
+    "l2_bytes_measured": 6291456,
+    "l2_MB_measured": 6.291456,
+    "sm_count": 80,
+    "measured_peak_gbps_copy": 481.86462668187585,
+    "deployed_3d_split_kv": {
+      "dispatch": "served",
+      "sliding_us": 12.97346999999982,
+      "full_us": 17.05057000000016,
+      "sliding_3d": true,
+      "full_3d": true,
+      "sliding_gbps": 85.87617653565434,
+      "full_gbps": 134.52688091952226,
+      "sliding_val_max_abs_err": 6.103515625e-05,
+      "full_val_max_abs_err": 6.103515625e-05,
+      "attn_us_per_cycle": 508.5580899999957,
+      "attn_ms_per_cycle": 0.5085580899999956,
+      "kv_bytes_per_cycle": 49479680,
+      "achieved_gbps_aggregate": 97.29405740060182,
+      "bandwidth_eff_vs_measured_peak": 0.201911599260916,
+      "bandwidth_eff_vs_spec_peak": 0.16215676233433635
+    },
+    "force2d_pre_splitkv": {
+      "dispatch": "force2d",
+      "sliding_us": 53.570689999999985,
+      "full_us": 64.99541999999997,
+      "sliding_3d": false,
+      "full_3d": false,
+      "sliding_gbps": 20.79704405524738,
+      "full_gbps": 35.29110204995985,
+      "sliding_val_max_abs_err": 6.103515625e-05,
+      "full_val_max_abs_err": 6.103515625e-05,
+      "attn_us_per_cycle": 2062.088639999999,
+      "attn_ms_per_cycle": 2.062088639999999,
+      "kv_bytes_per_cycle": 49479680,
+      "achieved_gbps_aggregate": 23.994933602854253,
+      "bandwidth_eff_vs_measured_peak": 0.04979600550487298,
+      "bandwidth_eff_vs_spec_peak": 0.03999155600475709
+    },
+    "splitkv_verify_speedup": 4.054775020883095
+  },
+  "cp_async_scan": {
+    "triton_cache_dir": "/senpai-run/home/student-stark/.triton/cache",
+    "n_ptx_scanned": 123,
+    "n_attn_ptx": 68,
+    "n_attn_ptx_with_cp_async": 40,
+    "kernel_already_async_loads_kv": true,
+    "sample": {
+      "file": "kernel_unified_attention.ptx",
+      "cp_async_count": 93
+    }
+  },
+  "decision": {
+    "t_attn_frac_of_verify": 0.09279381830416755,
+    "attn_frac_of_gpu_busy": 0.07595716995540787,
+    "abort_gate": 0.1,
+    "prototype_gate": 0.15,
+    "verdict": "SELF_ABORT",
+    "deployed_3d_bandwidth_eff_vs_peak": 0.201911599260916,
+    "kernel_occupancy_launch_bound": true,
+    "kv_bytes_per_cycle": 49479680,
+    "kv_MB_per_cycle": 49.47968,
+    "l2_MB_measured": 6.291456,
+    "kv_fits_in_l2": false,
+    "per_layer_kv_MB": 1.3372886486486488,
+    "prefetch_mode_forced": "one-layer-ahead (full KV exceeds 6MB L2)",
+    "optimistic_tps_ceiling": [
+      {
+        "hidden_attn_frac_f": 0.1,
+        "tps_on_467p14_base": 470.71542112429694,
+        "delta_tps": 3.575421124296952,
+        "crosses_deployed_481p53": false
+      },
+      {
+        "hidden_attn_frac_f": 0.25,
+        "tps_on_467p14_base": 476.18236623038234,
+        "delta_tps": 9.042366230382356,
+        "crosses_deployed_481p53": false
+      },
+      {
+        "hidden_attn_frac_f": 0.5,
+        "tps_on_467p14_base": 485.58170608829266,
+        "delta_tps": 18.441706088292676,
+        "crosses_deployed_481p53": true
+      },
+      {
+        "hidden_attn_frac_f": 1.0,
+        "tps_on_467p14_base": 505.539337367573,
+        "delta_tps": 38.399337367573025,
+        "crosses_deployed_481p53": true
+      }
+    ],
+    "rationale": "attention is 9.28% of the verify forward wall (7.60% of gpu_busy) on the deployed split-KV stack, BELOW the 10% self-abort gate. The split-KV verify lever (PR #43) already collapsed verify attention from 19.6% of cycle (pre-split-KV) to here. The residual kernel runs at 20% of HBM peak -> occupancy/launch-bound, not bandwidth-bound, so L2 prefetch (which targets HBM-read latency) addresses the wrong limit."
+  },
+  "self_test": {
+    "committed_frac_in_band": true,
+    "microbench_matches_served_within_2x": true,
+    "kernel_validates": true,
+    "deployed_used_3d": true,
+    "splitkv_speedup_gt_2x": true,
+    "l2_is_6mb_not_40mb": true,
+    "kv_exceeds_l2": true,
+    "gate_fires_self_abort": true,
+    "all_passed": true
+  },
+  "primary_metric": {
+    "name": "t_attn_frac_of_verify",
+    "value": 0.09279381830416755
+  },
+  "test_metric": {
+    "name": "self_test_all_passed",
+    "value": 1
+  },
+  "elapsed_s": 3.811108350753784
+}
