@@ -1,0 +1,167 @@
+{
+  "pr": 493,
+  "analysis_only": true,
+  "official_tps": 0,
+  "provenance": {
+    "harness": {
+      "scorer_path": "official/main_bucket/shared_resources/speed_benchmark/scripts/hf_bucket_single_job.py",
+      "imports_greedy_identity": false,
+      "calls_greedy_identity_compare": false,
+      "stages_present": [
+        "run_benchmark",
+        "run_decode_capture",
+        "run_ppl"
+      ],
+      "organizer_runs_greedy_identity_reference_check": false
+    },
+    "verifier": {
+      "artifact": "research/validity/precache_gate_provenance/cmpatino_verifier_20260613-230441-229.md",
+      "checked_metric_rows": [
+        "reported tps",
+        "re-run tps (private set)",
+        "re-run ppl",
+        "completed requests"
+      ],
+      "has_token_identity_row": false,
+      "verified_valid": true,
+      "deployed_was_precache_plus_spec": true,
+      "checks": {
+        "rerun_tps_drift_pct": 4.3,
+        "rerun_tps_drift_pass": true,
+        "rerun_ppl": 2.3777,
+        "rerun_ppl_pass": true,
+        "completed": 128
+      }
+    }
+  },
+  "decomposition": {
+    "reproduce": {
+      "A_cross_serve_noise": {
+        "verdict": "GREEDY_IDENTICAL",
+        "num_identical": 128,
+        "num_divergent": 0,
+        "num_prompts_compared": 128,
+        "prompt_identity": 1.0,
+        "token_identity": 1.0,
+        "total_divergent_tokens": 0,
+        "total_tokens_compared": 65536,
+        "onset_min": null,
+        "onset_median": null,
+        "onset_max": null
+      },
+      "B_precache_warm_cold": {
+        "verdict": "DIVERGENT",
+        "num_identical": 12,
+        "num_divergent": 116,
+        "num_prompts_compared": 128,
+        "prompt_identity": 0.09375,
+        "token_identity": 0.383544921875,
+        "total_divergent_tokens": 40400,
+        "total_tokens_compared": 65536,
+        "onset_min": 0,
+        "onset_median": 101,
+        "onset_max": 506
+      },
+      "C_cross_stack": {
+        "verdict": "DIVERGENT",
+        "num_identical": 10,
+        "num_divergent": 118,
+        "num_prompts_compared": 128,
+        "prompt_identity": 0.078125,
+        "token_identity": 0.3790740966796875,
+        "total_divergent_tokens": 40693,
+        "total_tokens_compared": 65536,
+        "onset_min": 0,
+        "onset_median": 117,
+        "onset_max": 487
+      },
+      "D_compound": {
+        "verdict": "DIVERGENT",
+        "num_identical": 9,
+        "num_divergent": 119,
+        "num_prompts_compared": 128,
+        "prompt_identity": 0.0703125,
+        "token_identity": 0.3788604736328125,
+        "total_divergent_tokens": 40707,
+        "total_tokens_compared": 65536,
+        "onset_min": 0,
+        "onset_median": 116,
+        "onset_max": 503
+      },
+      "reproduces_485": true,
+      "mismatches": []
+    },
+    "byte_audit": {
+      "identical_files": [
+        "detok_endonly.py",
+        "fa_sliding_patch.py",
+        "lsk_patch.py",
+        "serve_patch_pck04.py",
+        "serve_patch_precache.py",
+        "splitkv_verify_patch.py",
+        "steptime_patch.py"
+      ],
+      "differing_files": [
+        "manifest.json",
+        "serve.py",
+        "sitecustomize.py"
+      ],
+      "only_in_one": [],
+      "precache_patch_byte_identical": true,
+      "serve_py_differs": true,
+      "sitecustomize_differs": true
+    }
+  },
+  "transparency": {
+    "measured": true,
+    "deployed_warm_records": 128,
+    "basis": "measured_deployed_codepath(deployed_warm_vs_kenyan_cold)",
+    "precache_token_mutation_rate_deployed": 0.6211395263671875,
+    "prompts_identical_warm_cold_deployed": 9,
+    "comparison": {
+      "verdict": "DIVERGENT",
+      "num_identical": 9,
+      "num_divergent": 119,
+      "num_prompts_compared": 128,
+      "prompt_identity": 0.0703125,
+      "token_identity": 0.3788604736328125,
+      "total_divergent_tokens": 40707,
+      "total_tokens_compared": 65536,
+      "onset_min": 0,
+      "onset_median": 116,
+      "onset_max": 503
+    }
+  },
+  "verdicts": {
+    "organizer_reference_is_config_matched": true,
+    "organizer_runs_greedy_identity_reference_check": false,
+    "deployed_481_passed_private_gate": true,
+    "deployed_481_gate_had_token_identity_check": false,
+    "deployed_481_precache_transparent": false,
+    "precache_token_mutation_rate_deployed": 0.6211395263671875,
+    "prompts_identical_warm_cold_deployed": 9,
+    "transparency_basis": "measured_deployed_codepath(deployed_warm_vs_kenyan_cold)",
+    "floorlock_literal_1p0": true,
+    "floorlock_gate_guaranteed": true,
+    "floorlock_safety": "double(no-token-check + literal-1.0)",
+    "globalflag_gate_guaranteed": true,
+    "globalflag_safety": "single(no-token-check; spec-alive, same class as verified 481.53)",
+    "residual_gate_risk": "none",
+    "caveat": "'Guaranteed' is conditional on the REALIZED organizer gate {TPS-drift<=5%, PPL<=2.42, 128/128} with no token-identity stage (proven via harness code + cmpatino-verifier). A future organizer change adding a token-identity audit is out of scope and unknowable; under such a hypothetical, floor-lock stays safe (literal-1.0) while global-flag would share the deployed 481.53's spec-alive exposure."
+  },
+  "self_test": {
+    "passed": true,
+    "checks": {
+      "nan_clean": true,
+      "harness_no_greedy_check": true,
+      "verifier_no_token_row": true,
+      "verifier_verified_valid": true,
+      "reproduces_485": true,
+      "A_literal_1p0": true,
+      "precache_patch_byte_identical": true,
+      "serve_or_sitecustomize_differs": true,
+      "precache_mutates_tokens": true,
+      "verdicts_self_consistent": true
+    }
+  }
+}
