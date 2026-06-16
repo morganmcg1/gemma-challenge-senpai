@@ -1,0 +1,91 @@
+{
+  "pr": 485,
+  "submission": "fa2sw_strict_m1ar_int4",
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1
+  },
+  "files": {
+    "warm_candidate": {
+      "path": "research/validity/floorlock_fullserve_validate/run_full/decode_outputs.jsonl",
+      "bytes": 1081864,
+      "sha256": "fb20c8fbad47b681034d668b9f2bfa4c9f1d38e690b2eb60a280b9f079ae787c"
+    },
+    "warm_ownref": {
+      "path": "research/greedy_reference/workspace__senpai__target__submissions__fa2sw_strict_m1ar_int4__google__gemma-4-E4B-it/decode_outputs.jsonl",
+      "bytes": 1081864,
+      "sha256": "fb20c8fbad47b681034d668b9f2bfa4c9f1d38e690b2eb60a280b9f079ae787c"
+    },
+    "cold_ownref": {
+      "path": "research/validity/floorlock_fullserve_validate/own_ref_cold/decode_outputs.jsonl",
+      "bytes": 1082604,
+      "sha256": "dcb19db643648eab54854bab28c118c109be1c185f8b4e3b2506f39b88d578ca"
+    },
+    "kenyan_cold": {
+      "path": "research/greedy_reference/workspace__senpai__target__submissions__fa2sw_precache_kenyan__google__gemma-4-E4B-it/decode_outputs.jsonl",
+      "bytes": 1082970,
+      "sha256": "ac8e35765fdc57b83cc14364cd35273b7fe351f9cb0fd989189038fdde33d2b8"
+    }
+  },
+  "comparisons": {
+    "A_warm_cand_vs_warm_ownref__cross_serve_noise": {
+      "verdict": "GREEDY_IDENTICAL",
+      "num_identical": 128,
+      "num_divergent": 0,
+      "num_prompts_compared": 128,
+      "prompt_identity": 1.0,
+      "token_identity": 1.0,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 65536,
+      "onset_min": null,
+      "onset_median": null,
+      "onset_max": null
+    },
+    "B_warm_cand_vs_cold_ownref__precache_warm_cold": {
+      "verdict": "DIVERGENT",
+      "num_identical": 12,
+      "num_divergent": 116,
+      "num_prompts_compared": 128,
+      "prompt_identity": 0.09375,
+      "token_identity": 0.383544921875,
+      "total_divergent_tokens": 40400,
+      "total_tokens_compared": 65536,
+      "onset_min": 0,
+      "onset_median": 101,
+      "onset_max": 506
+    },
+    "C_cold_ownref_vs_kenyan_cold__cross_stack": {
+      "verdict": "DIVERGENT",
+      "num_identical": 10,
+      "num_divergent": 118,
+      "num_prompts_compared": 128,
+      "prompt_identity": 0.078125,
+      "token_identity": 0.3790740966796875,
+      "total_divergent_tokens": 40693,
+      "total_tokens_compared": 65536,
+      "onset_min": 0,
+      "onset_median": 117,
+      "onset_max": 487
+    },
+    "D_warm_cand_vs_kenyan_cold__original_compound": {
+      "verdict": "DIVERGENT",
+      "num_identical": 9,
+      "num_divergent": 119,
+      "num_prompts_compared": 128,
+      "prompt_identity": 0.0703125,
+      "token_identity": 0.3788604736328125,
+      "total_divergent_tokens": 40707,
+      "total_tokens_compared": 65536,
+      "onset_min": 0,
+      "onset_median": 116,
+      "onset_max": 503
+    }
+  },
+  "verdict_corrected": {
+    "floorlock_literal_1p0": true,
+    "canonical_reference": "own spec-off M=1 AR, matched precache-ON config (warm-vs-warm)",
+    "warm_candidate_byte_equal_warm_ownref": true,
+    "note": "Original run_fullserve default reference (precache_kenyan, cold, cross-stack) yielded DIVERGENT = compound of precache warm/cold (B) + cross-stack codepath (C); each a config mismatch, NOT speculation/floor-lock divergence. int4 greedy is deterministic per-config (A byte-exact)."
+  }
+}
