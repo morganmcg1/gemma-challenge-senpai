@@ -1,0 +1,393 @@
+{
+  "card": "flashinfer_byteexact",
+  "pr": 507,
+  "author": "fern",
+  "generated_utc": "2026-06-16T16:42:44.963613+00:00",
+  "model_id": "google/gemma-4-E4B-it",
+  "hardware": "A10G sm_86 24GB",
+  "gpu_used": true,
+  "gpu_model_forward": false,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "analysis_only": true,
+  "arch": {
+    "env_transformers": "5.12.0",
+    "loaded": true,
+    "model_type": "gemma4",
+    "architectures": [
+      "Gemma4ForConditionalGeneration"
+    ],
+    "num_text_layers": 42,
+    "head_dim_sliding": 256,
+    "head_dim_full": 512,
+    "mixed_head_dim": true,
+    "num_attention_heads": 8,
+    "num_key_value_heads": 2,
+    "gqa_group_size": 4,
+    "num_full_attention": 7,
+    "num_sliding_attention": 35,
+    "full_attention_idxs": [
+      5,
+      11,
+      17,
+      23,
+      29,
+      35,
+      41
+    ],
+    "sliding_window": 512,
+    "num_kv_shared_layers": 18,
+    "final_logit_softcapping": 30.0,
+    "attn_logit_softcapping": null,
+    "has_audio_config": true,
+    "has_vision_config": true
+  },
+  "versions": {
+    "flashinfer_requires_torch": "2.10.0",
+    "flashinfer_requires_cuda": "cu128",
+    "pod_torch": "2.11.0+cu130",
+    "nvcc_present": true,
+    "nvcc_release": "Cuda compilation tools, release 13.2, V13.2.51",
+    "fi_python": "/tmp/fi_probe/bin/python",
+    "fi_venv_present": true,
+    "version_skew": true
+  },
+  "venv_info": {
+    "fi_python": "/tmp/fi_probe/bin/python",
+    "built": false,
+    "present": true
+  },
+  "census": {
+    "flashinfer_import": true,
+    "flashinfer_version": "0.6.12",
+    "torch_version": "2.10.0+cu128",
+    "cuda_available": true,
+    "device_capability": [
+      8,
+      6
+    ],
+    "device_name": "NVIDIA A10G",
+    "config": {
+      "num_qo_heads": 8,
+      "num_kv_heads": 2,
+      "head_dim": 256,
+      "page_size": 16,
+      "dtype": "bfloat16",
+      "seed": 1234,
+      "census_l": [
+        2048,
+        8192,
+        32768
+      ],
+      "tps_l": [
+        2048,
+        4096,
+        8192
+      ]
+    },
+    "headdim_support": {
+      "cuda_core_d256": {
+        "ok": true,
+        "shape": [
+          1,
+          8,
+          256
+        ],
+        "nan": false
+      },
+      "cuda_core_d512": {
+        "ok": true,
+        "shape": [
+          1,
+          8,
+          512
+        ],
+        "nan": false
+      },
+      "tensor_core_d256": {
+        "ok": true,
+        "shape": [
+          1,
+          8,
+          256
+        ],
+        "nan": false
+      },
+      "tensor_core_d512": {
+        "ok": false,
+        "error": "RuntimeError: Error in function 'BatchPrefillWithPagedKVCacheDispatched' at /tmp/fi_probe/lib/python3.12/site-packages/flashinfer/data/include/flashinfer/"
+      }
+    },
+    "census": {
+      "cuda_core": {
+        "auto": {
+          "2048": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "8192": {
+            "flips": 1200,
+            "numel": 2048,
+            "max_abs": 0.0001220703125,
+            "nan": false,
+            "invariant": 0
+          },
+          "32768": {
+            "flips": 1219,
+            "numel": 2048,
+            "max_abs": 6.103515625e-05,
+            "nan": false,
+            "invariant": 0
+          }
+        },
+        "disable_split_kv": {
+          "2048": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "8192": {
+            "flips": 1200,
+            "numel": 2048,
+            "max_abs": 0.0001220703125,
+            "nan": false,
+            "invariant": 0
+          },
+          "32768": {
+            "flips": 1219,
+            "numel": 2048,
+            "max_abs": 6.103515625e-05,
+            "nan": false,
+            "invariant": 0
+          }
+        }
+      },
+      "tensor_core": {
+        "auto": {
+          "2048": {
+            "flips": 1274,
+            "numel": 2048,
+            "max_abs": 0.000244140625,
+            "nan": false,
+            "invariant": 0
+          },
+          "8192": {
+            "flips": 1292,
+            "numel": 2048,
+            "max_abs": 0.0001220703125,
+            "nan": false,
+            "invariant": 0
+          },
+          "32768": {
+            "flips": 1295,
+            "numel": 2048,
+            "max_abs": 6.103515625e-05,
+            "nan": false,
+            "invariant": 0
+          }
+        },
+        "fixed_split_512": {
+          "2048": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "8192": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "32768": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          }
+        },
+        "fixed_split_256": {
+          "2048": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "8192": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "32768": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          }
+        },
+        "disable_split_kv": {
+          "2048": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "8192": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          },
+          "32768": {
+            "flips": 0,
+            "numel": 2048,
+            "max_abs": 0.0,
+            "nan": false,
+            "invariant": 1
+          }
+        }
+      }
+    },
+    "tps": {
+      "2048": {
+        "auto": {
+          "us_per_step": 53.02271842956543,
+          "steps_per_s": 18859.840265043837
+        },
+        "fixed_split_512": {
+          "us_per_step": 65.20832061767578,
+          "steps_per_s": 15335.466249209516
+        },
+        "disable_split_kv": {
+          "us_per_step": 65.25951862335205,
+          "steps_per_s": 15323.435126322956
+        }
+      },
+      "4096": {
+        "auto": {
+          "us_per_step": 49.19295787811279,
+          "steps_per_s": 20328.11286684035
+        },
+        "fixed_split_512": {
+          "us_per_step": 130.22208213806152,
+          "steps_per_s": 7679.189148118516
+        },
+        "disable_split_kv": {
+          "us_per_step": 129.7715187072754,
+          "steps_per_s": 7705.851098619662
+        }
+      },
+      "8192": {
+        "auto": {
+          "us_per_step": 53.5807991027832,
+          "steps_per_s": 18663.402128096594
+        },
+        "fixed_split_512": {
+          "us_per_step": 253.62432479858398,
+          "steps_per_s": 3942.8394764348845
+        },
+        "disable_split_kv": {
+          "us_per_step": 250.8185577392578,
+          "steps_per_s": 3986.9458185768094
+        }
+      }
+    },
+    "peak_mem_mb": 671.097344
+  },
+  "research": {
+    "default_split_kv_batch_variant": {
+      "value": true,
+      "finding": "flashinfer decode plan() chooses the number of KV splits from an occupancy heuristic (more splits at small batch to fill SMs, fewer as batch grows) -> the merge_states reduction tree, and thus the output bytes, change with M. Default is batch-VARIANT.",
+      "citation": "SGLang deterministic-inference blog (uses flashinfer fixed_split_size to override the default non-fixed planning); flashinfer plan() API semantics."
+    },
+    "fixed_split_size_invariant": {
+      "value": true,
+      "finding": "fixed_split_size (FA2 tensor-core decode) fixes the split SIZE in pages, not the count -> deterministic softmax merge_states -> batch-size-invariant outputs. This is the first-class API form of lawine #496's split-KV trick.",
+      "citation": "flashinfer BatchDecodeWithPagedKVCacheWrapper.plan() docstring: 'will lead to deterministic softmax score reduction in the merge_states kernel, and therefore batch-size invariant outputs'."
+    },
+    "headdim_512_blocked": {
+      "value": true,
+      "finding": "FlashInfer/FA2 attention supports head_dim in {64,128,256} on sm_86; head_dim 512 (the 7 full-attention layers) has no tensor-core kernel (per-SM shared-memory budget exceeded). No fixed-split invariant path exists for those layers.",
+      "citation": "Dao-AILab/flash-attention#2427 (head_dim 512 for Gemma-4 global attn unsupported); vLLM#38918 (flashinfer 'only supports [64,128,256]')."
+    },
+    "invariance_cost": {
+      "value": "1.3-4.7x M=1 kernel slowdown (grows with KV length)",
+      "finding": "Unlike lawine's hand-rolled ~0%-cost rung, flashinfer's fixed_split_size/disable_split_kv forfeit the split-KV GPU-fill that makes M=1 decode fast, so the invariant mode is materially slower at M=1 and worsens with longer KV.",
+      "citation": "SGLang reports ~34% serve slowdown for --enable-deterministic-inference; measured here as a 1.3x (L=2048) -> 4.7x (L=8192) M=1 decode-attn slowdown."
+    },
+    "vllm_integration": {
+      "value": "manual patch + per-layer backend split required",
+      "finding": "vLLM 0.22.1rc1 predates batch-invariant wiring; using flashinfer's fixed_split_size needs a manual plan() patch, AND a per-layer backend split (flashinfer for head_dim-256 sliding layers, Triton for head_dim-512 full layers) since flashinfer cannot serve the full-attention layers.",
+      "citation": "vLLM#27433 (batch-invariant feature, newer releases); researcher pass #507."
+    }
+  },
+  "ledger": {
+    "findings": {
+      "F1_flashinfer_loads": {
+        "rank": 1,
+        "confirmed": true,
+        "live": true,
+        "evidence": "flashinfer 0.6.12 imports + runs decode on NVIDIA A10G cap [8, 6] (torch 2.10.0+cu128, isolated venv)."
+      },
+      "F2_default_split_kv_batch_variant": {
+        "rank": 2,
+        "confirmed": true,
+        "live": true,
+        "evidence": "tensor-core (GQA) auto split-KV: 1292/2048 output elements flip M=1-vs-M=8 at L=8192 (max_abs 0.0001220703125); variant at every L tested. NOT free byte-exact."
+      },
+      "F3_fixed_split_size_invariant": {
+        "rank": 3,
+        "confirmed": true,
+        "live": true,
+        "evidence": "fixed_split_size and disable_split_kv -> 0 flips at every L (byte-exact M-invariant): the first-class API form of lawine #496's split-KV trick."
+      },
+      "F4_headdim512_no_invariant_path": {
+        "rank": 4,
+        "confirmed": true,
+        "live": true,
+        "evidence": "head_dim 512 (7 full-attention layers): tensor-core decode dispatch FAILS (no kernel); fixed_split_size requires tensor core -> no byte-exact invariant flashinfer path for those layers. (cuda-core runs d512 but has no working invariant knob.)"
+      },
+      "F5_version_skew_not_clean_drop_in": {
+        "rank": 5,
+        "confirmed": true,
+        "live": true,
+        "evidence": "flashinfer-python pins torch 2.10.0+cu128; pod serves torch 2.11.0+cu130 -> not a clean drop-in to the deployed vLLM 0.22.1rc1 stack (JIT-only torch-2.11; CUDA12/13 cubin risk)."
+      }
+    },
+    "all_findings_confirmed": true,
+    "flashinfer_loads": 1,
+    "flashinfer_attn_m_invariant": 0,
+    "flashinfer_total_flips_M1vs8": 1292,
+    "flashinfer_m1_decode_tps": 20328.11286684035,
+    "vs_splitkv_399_75_cheaper_free_route": 0,
+    "fixed_split_size_invariant": 1,
+    "disable_split_kv_invariant": 1,
+    "headdim512_tensor_core_blocked": 1,
+    "headdim256_tensor_core_ok": 1,
+    "version_skew": 1,
+    "invariance_cost_ratio_m1": 2.6471691834574695,
+    "census_nan_seen": 0,
+    "feasibility_evidence_complete": 1,
+    "headline_census_L": 8192,
+    "headline_tps_L": 4096
+  },
+  "wandb_run_ids": [
+    "7me2xw6p"
+  ]
+}
