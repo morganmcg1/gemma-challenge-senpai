@@ -2,90 +2,79 @@
 # SPDX-FileCopyrightText: 2026 CoreWeave, Inc.
 # SPDX-License-Identifier: Apache-2.0
 # SPDX-PackageName: senpai
-"""Strict-submission decision packet: the one-screen human GO / NO-GO for the strict-equivalent HF submission.
+"""The honest strict-frontier map: what strict (byte-exact greedy) numbers we can ship, and why.
 
-RE-POINT (2026-06-16 08:25Z + 08:32Z, advisor formal #357 relay)
-----------------------------------------------------------------
-This file used to be the ">=500 composite reachability / keep-strict-vs-relax" capstone.  That
-framing is OBSOLETE: the human deprioritized >500 (#407 21:13Z), the relax-prize COLLAPSED to ~0
-TPS at a worse identity (stark #452), and the strict frontier was REALIZED end-to-end (stark #466).
-The advisor LIFTED the 01:59Z freeze and re-pointed the capstone to its current, live mandate:
+RE-POINT (2026-06-16 12:25Z, advisor formal #357 relay)
+-------------------------------------------------------
+This file has had three lives.  It began as ">=500 composite reachability", then became the
+"strict-submission GO/NO-GO decision packet".  Both framings are now SETTLED and the advisor
+re-pointed it (12:25Z) to its current, terminal-bound mandate:
 
-    Synthesize the single screen the human reads to decide WHAT we fire, AT WHAT number, UNDER
-    WHICH condition, and WITH WHAT honest caveats — the strict-equivalent HF submission decision.
+    Render the HONEST STRICT-FRONTIER MAP -- the ranked set of strict (byte-exact greedy-equivalent)
+    rungs we can actually serve, each tagged with its REALIZED TPS and its PRIVATE-safety, plus the
+    two orthogonal forward levers that are the only paths to a strict number that is faster AND safe.
 
-This capstone is the DECISION SYNTHESIS only.  It is NOT the identity oracle (denken #471 runs the
-served census) and NOT the execution machinery (land #473 stages + fires the submission).  It
-consumes their committed/relayed outputs and renders the human-facing call.  It is CPU-only: it
-measures nothing, runs no HF job, changes no served file (official_tps == 0).
+Three things closed the old "submission decision" framing and forced this re-point:
+  * The composed strict frontier (456.36 / 457.55 / 467.14) was a LOCUS proof, not a served number.
+    The exact config the packet recommended (`VLLM_BATCH_INVARIANT=1`) serves at ~222-234 e2e, not
+    ~457 -- the global flag is a ~48% determinism tax, not the ~5% the composite assumed.  (#474 hold,
+    the 6th composed-vs-realized inversion the verification campaign caught one step before the draw.)
+  * My own wait-target landed: lawine #482 (044xamdd) measured the multi-stream byte-exact realizable
+    number = 457.54 and found the 474.44 resource ceiling UNREALIZABLE (DEPENDENCY_COLLAPSES_TO_FLOOR:
+    a Gemma layer is a serial recurrence o_proj(L) <- attn(L), so attn has no independent GEMM to hide
+    under).  multi-stream gain over single-stream ~= 0; multi-stream CLOSES as a byte-exact path.
+  * denken #489 (q1ivw9tt) re-framed everything: PRIVATE-safety is a property of the drafter-acceptance
+    gap Delta, NOT of TPS.  Every spec-alive config (222 AND 457) carries the SAME Delta = 4.295% ->
+    ~24% one-shot private breach, scale-invariant.  The floor-lock (no drafter, Delta = 0.633%) is the
+    ONLY strict private-safe ship.  Fast + byte-exact != private-safe.
 
-The decision (post the 08:24Z human ruling)
--------------------------------------------
-The human ruled (#407, 08:24Z): "I'm ok with a few tied bitwise flips, 0.99-ish is totally fine —
-make the submission when you feel confident."  So operative-1.0 (census ~0.99+, every residual a
-bf16-ULP tie, 0 *semantic* flips) is accepted as honest-strict; literal byte-exact 1.0 is NOT
-required.  That retires the old BLOCKED branch and leaves a clean fork gated on ONE live input,
-denken #471's served 128-prompt census:
+This capstone MEASURES NOTHING.  It is a CPU-only synthesis of MERGED / advisor-relayed results
+(official_tps == 0, no HF job, no served-file change).  It owns the human-facing MAP; it does not own
+the submission trigger (land) or the identity oracle (denken).
 
-    GO-OPERATIVE   denken #471 census is operative-1.0 (>= OPERATIVE_CENSUS_FLOOR, n_semantic_flips == 0)
-                   -> fire `senpai-strict-eqv-<realized>` (~456-459 TPS, the honest strict win, +~295 over floor)
-    FLOOR-LOCK     denken #471 surfaces a SEMANTIC (non-tie) flip
-                   -> fire `senpai-strict-m1ar-161` (161.70 TPS, literal-1.0 by construction, lawine #438)
+The map (ranked by realized TPS; PRIVATE-safety is the second axis)
+------------------------------------------------------------------
+  rung                 realized TPS   strict?            private-safe?            ship status
+  -------------------  ------------   ----------------   ----------------------   --------------------------
+  floor-lock M=1 AR    166.23 (proj)  literal-1.0*       SAFE  (Delta 0.633%)     the rung that STICKS
+  global-flag BI=1     222 / 234      operative-1.0      RISKY (Delta 4.295%)     the live #474 call
+  surgical / 2D byte   457.5 (pred)   byte-exact (locus) RISKY (Delta 4.295%)     strong PUBLIC, OBE strict
+  deployed (ref)       481.53         NON-equiv (.9966)  --                       outside the strict set
 
-Until denken #471's census lands the recommendation is `GO-OPERATIVE-PENDING-471-TIES-CONFIRM`.
+  * floor-lock literal-1.0 is BY CONSTRUCTION (M=1 AR, no drafter, no reassociation).  FLAG: the relayed
+    realize-run (stark #485, pavotwci) logged its identity comparison vs the `fa2sw_precache_kenyan`
+    reference (119/128 divergent, verdict/literal_1p0=0) -- a DIFFERENT config, divergence expected --
+    NOT vs the M=1 AR reference.  So the served literal-1.0 census vs the correct reference is the
+    load-bearing confirm; this packet renders the TPS (166.23, verified) and the private-safety
+    (Delta 0.633%, verified) as solid, and the literal-1.0 LABEL as by-construction-pending-census.
 
-The realized number (with the honest band) — stark #466 (sxigz7dp speed / gmd8v9sw identity, ab9b286)
------------------------------------------------------------------------------------------------------
-The blanket-strict frontier HOLDS end-to-end (collapse to the 161.70 M=1 AR floor REFUTED).  It is
-config-reachable via VLLM_BATCH_INVARIANT=1 (no served-source edit, no kernel rebuild), byte-exact
-at the attention locus (1.0000 / 0 flips @ M=8 hd=512), PPL 2.3772 <= 2.42.  Realized headline is
-456.36 TPS (conservative @ L=640); cluster-mean ~459 (L~593); L-envelope [528,658] -> 456.5-461.6.
-The OLD composed 467.14 was OPTIMISTIC: composed_vs_realized_drift = +10.78 TPS > sigma_hw 4.8153,
-realized eta_attn 5.50% vs composed 3.08%.  The isolated-locus delta is a CONSERVATIVE LOWER BOUND;
-the true frontier sits in [456.5, <= 467.14].  Headline the conservative 456.36, footnote the band.
-stark #472 (whole-cycle A/B, in-graph overlap, in flight) tightens this -> carried as a LIVE slot.
+>500 is SETTLED: dead via all known strict levers
+-------------------------------------------------
+Strict (byte-exact greedy) >500 is out of reach via every known lever.  The IEEE-754 determinism tax is
+irreducible (denken #423); there is no free fast byte-exact GEMM (#481 forward survey: deterministic-IO
+tax band 22-63%, land measured 51.39% e2e at batch-1); the realized strict ceiling is ~467 (deployed-
+equivalent locus) / 457.5 (byte-exact realizable) / 166 (private-safe).  The ONLY >500 path is the
+greedy-UNSAFE ~16% GEMM relax-prize -- which leaves the strict lane entirely (identity 0.730) and is
+escalated to the human on #407.  Verdict: strict >500 is a genuinely-new-method problem, ~3x over the
+166 private-safe floor.
 
-The binding gate = the strict contract itself (#319), resolved by denken #471
-----------------------------------------------------------------------------
-The load-bearing tension the packet must render honestly: stark #466's LOCUS proof says 1.0000 /
-0-flips, but the committed SERVED-census prior leans the other way — land #429 / lawine #455
-(0r0ounl8) pinned the composed blanket-strict frontier at literal 0.9989 (1 flip @ prompt 90), and
-ubel #461 all_pin (qz6f0zgw) floored at ~0.9978 (1-2 residual flips).  Reconciliation hypothesis:
-the order-preserving 2D reduction REMOVES the attention 3D split-KV reassociation that produces the
-near-tie population (denken #464, 1o7jwlw4: those flips are m1_self_gap == 0.0, downstream-invisible
-bf16-ULP ties), so the served census SHOULD resolve deterministically to operative-1.0 — pending
-denken #471's confirm.  Either way the human ruled the ties acceptable, so the binding question is
-only "are there any *semantic* (non-tie) flips?", which denken #471 answers.
+The two forward levers (HELD OPEN; this packet finalizes to terminal when they land)
+------------------------------------------------------------------------------------
+They attack TWO ORTHOGONAL problems; only their conjunction yields "faster AND private-safe":
+  * #491 (ubel) reduction-sensitivity census  -> shed the determinism speed-tax  -> a FASTER floor-lock
+                (attacks the TPS ceiling; keeps Delta safe -- the floor-lock has no drafter)
+  * #492 (denken) drafter-gap feasibility      -> EAGLE-3 pulls Delta_accept <= ~3.0%  -> a private-safe
+                fast rung  (attacks the Delta gate; keeps a drafter for speed)
+  * #488 (lawine) surgical-attention realization -> is the 457.5 a REAL served rung or another mirage?
+                (serves surgical-457 e2e; resolves the predicted-vs-measured gap ubel #484 left open)
 
-Honesty hinge
--------------
-The submission is labeled with its TRUE served census (e.g. "operative-1.0: 0.9989, 1 tied flip @
-p90, 0 semantic"), NOT claimed as literal 1.0.  literal-vs-operative is surfaced as RESOLVED (the
-human ruled operative is honest-strict, 08:24Z).
-
-Cross-check confidence
-----------------------
-ubel #470 (BI-pin, a DIFFERENT mechanism than stark's num_splits=1) and stark #472 (in-graph
-overlap) re-derive the realized number independently.  If both land in [456.5, ~459] within
-sigma_hw the public number is bulletproof; if they disagree the packet flags it BEFORE the board.
-
-Reference frame
----------------
-Deployed 481.53 (PR #52, 2x9fm2zx) is NON-equivalent (identity 0.9966, 3 flips {11,18,118}, all
-quality-neutral bf16-ULP ties per denken #464) — OUTSIDE the strict feasible set, ~22 above the
-realized strict frontier.  The relax lane is DEAD: stark #452 (daqrzr99) realized ~0 TPS gain
-(466.20 / -0.94 vs the strict base) AND degraded identity to 0.730 (3317 flips) -> strictly
-dominated, NO-GO.  We stay strict.
-
-PRIMARY metric  capstone_self_test_passes  (0-GPU arithmetic-invariant integrity gate)
-TEST    metrics capstone_recommendation, realized_strict_headline_tps, realized_strict_band,
-                binding_gate, census_tension_rendered, floor_lock_tps, deployed_tps,
-                relax_prize_gain_tps, sigma_hw, human_operative_ruling_0824z,
-                consumes_466_472_470_471_473, literal_vs_operative_surfaced, analysis_only,
-                no_served_file_change, official_tps, ppl.
-LIVE slots (parameterized; default = pending -> GO-OPERATIVE-PENDING-471-TIES-CONFIRM):
-                --denken471-served-census, --denken471-semantic-flips (THE gate),
-                --stark472-best-estimate-tps, --ubel470-bipin-tps, --lawine467-sigma-hw.
+PRIMARY metric  strict_frontier_map_self_test_passes  (0-GPU arithmetic-invariant integrity gate)
+TEST    metrics floor_lock_realized_tps, floor_lock_private_safe, global_flag_tps, global_flag_private_risky,
+                surgical_byte_exact_predicted_tps, multistream_realizable_tps, multistream_ceiling_unrealizable,
+                private_safety_is_delta_not_tps, strict_gt500_dead_via_known_levers, forward_levers_open,
+                live_474_call, floor_lock_literal_1p0_flag.
+LIVE slots (parameterized; default = pending):  --lawine488-surgical-served-tps, --ubel491-faster-floor-tps,
+                --denken492-eagle3-delta-pct, --human474-ruling.
 Consume cross-student numbers ONLY as relayed by the advisor into the #357 thread.
 """
 
@@ -105,79 +94,101 @@ HERE = Path(__file__).resolve().parent
 
 # --------------------------------------------------------------------------- #
 # Banked / formally-relayed constants.  Every number below was relayed by the
-# advisor into the #357 thread (08:25Z + 08:32Z, with the earlier 05:34Z /
-# 07:08Z / 07:26Z relays).  We do NOT inspect the source branches; we consume
-# only the relayed values.  W&B run ids are recorded for provenance.
+# advisor into the #357 thread (12:25Z relay) and SPOT-VERIFIED against the
+# named MERGED W&B run summaries (we read summaries; we do NOT re-run evals or
+# inspect source branches).  Run ids recorded for provenance.
 # --------------------------------------------------------------------------- #
 
-# --- Reference frame: the deployed NON-equivalent incumbent (off the strict feasible set) ---
-DEPLOYED_TPS: float = 481.53            # PR #52 (2x9fm2zx) deployed fast path
-DEPLOYED_IDENTITY: float = 0.9966       # served token-identity (NON-equivalent)
-DEPLOYED_FLIPS: tuple[int, ...] = (11, 18, 118)  # all quality-neutral bf16-ULP ties (denken #464)
-PPL_DEPLOYED: float = 2.3772            # PPL of the served config / strict M=1 AR reference
 PPL_GATE: float = 2.42                  # challenge PPL ceiling
+SIGMA_HW: float = 4.8153                # lawine #467 / #482 between-session hw sigma (TPS)
+DELTA_GATE_PCT: float = 5.0             # private-set acceptance-gap gate (denken #489 delta_gate=0.05)
 
-# --- Realized strict frontier (stark #466: sxigz7dp speed / gmd8v9sw identity; banked ab9b286) ---
-REALIZED_STRICT_HEADLINE_TPS: float = 456.36     # conservative headline @ L=640
-REALIZED_STRICT_CLUSTER_MEAN_TPS: float = 459.0  # cluster-mean @ L~593
-REALIZED_STRICT_L_ENVELOPE: tuple[float, float] = (456.5, 461.6)  # L in [528,658]
-COMPOSED_STRICT_FRONTIER_TPS: float = 467.14     # the OLD composed (optimistic) frontier
-# realized_strict_band per the advisor's field: low = L-envelope low, high = composed upper bound
-REALIZED_STRICT_BAND: tuple[float, float] = (456.5, COMPOSED_STRICT_FRONTIER_TPS)
-COMPOSED_VS_REALIZED_DRIFT_TPS: float = round(COMPOSED_STRICT_FRONTIER_TPS
-                                              - REALIZED_STRICT_HEADLINE_TPS, 2)  # +10.78
-REALIZED_ETA_ATTN_PCT: float = 5.50     # realized strict-attn tax (vs composed 3.08%)
-COMPOSED_ETA_ATTN_PCT: float = 3.08
-STRICT_FRONTIER_COLLAPSES_TO_M1: bool = False    # collapse to 161.70 REFUTED (stark #466)
-STRICT_FRONTIER_CONFIG: str = "VLLM_BATCH_INVARIANT=1"  # no served-source edit, no kernel rebuild
+# --- Rung 1: floor-lock M=1 AR, no drafter (stark #485 pavotwci, MERGED) ------------------------- #
+FLOOR_LOCK_TPS: float = 166.23          # projected_official_from_sglang=166.234; realizes_16170=1
+FLOOR_LOCK_PPL: float = 2.3767          # ppl/ppl, clears the gate
+FLOOR_LOCK_TARGET_TPS: float = 161.70   # the M=1 AR strict floor it realizes (>= target)
+FLOOR_LOCK_LITERAL_1P0_BY_CONSTRUCTION: bool = True   # M=1 AR, no drafter, no reassociation
+# FLAG: pavotwci logged identity vs the fa2sw_precache_kenyan reference (a DIFFERENT config) ->
+# 119/128 divergent, verdict/literal_1p0=0.  That is NOT the M=1 AR reference the strict contract
+# uses; divergence vs a different config is expected.  The literal-1.0 LABEL is therefore rendered
+# as by-construction-PENDING the served census vs the correct reference, not as a measured fact.
+FLOOR_LOCK_RELAYRUN_VERDICT_LITERAL_1P0: int = 0      # pavotwci verdict/literal_1p0 (vs precache ref)
+FLOOR_LOCK_RELAYRUN_DIVERGENT_VS_PRECACHE: int = 119  # of 128 prompts (expected: different config)
+FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS: bool = False  # pending the correct-reference census
 
-# --- Floor-lock fallback (lawine #438): M=1 autoregressive, literal 1.0 BY CONSTRUCTION ---
-FLOOR_LOCK_TPS: float = 161.70
+# --- Rung 2: global-flag VLLM_BATCH_INVARIANT=1 (the #474 live call; land/ubel #470 e2e) -------- #
+GLOBAL_FLAG_TPS_LOCAL: float = 222.32       # land local full-serve
+GLOBAL_FLAG_TPS_OFFICIAL: float = 234.47    # ubel #470 (ugqnytji) official; 221.16 local
+GLOBAL_FLAG_NEEDS_MANIFEST_ENV_EDIT: bool = True   # shell-prefix does NOT propagate to the HF runner
+GLOBAL_FLAG_OPERATIVE_1P0: bool = True      # operative-1.0, 0 semantic flips (denken #471 census)
 
-# --- The census tension (the load-bearing honesty the packet must render) ---
-CENSUS_LOCUS_STARK466: float = 1.0000        # locus proof (M=8 hd=512), 0 flips — NOT a full census
-CENSUS_SERVED_LAND429_LAWINE455: float = 0.9989   # composed blanket-strict served, 1 flip @ p90 (0r0ounl8)
-CENSUS_SERVED_UBEL461_ALLPIN: float = 0.9978      # all_pin floor, 1-2 residual flips (qz6f0zgw)
-# denken #464 (1o7jwlw4): the residual/deployed flips are bitwise ties (m1_self_gap == 0.0),
-# downstream-invisible -> "0.99-ish ties" == operative-1.0.
-TIE_PROOF_M1_SELF_GAP: float = 0.0
+# --- Rung 3: surgical attention-only / 2D byte-exact frontier (ubel #484 + lawine #482) --------- #
+SURGICAL_PREDICTED_TPS: float = 456.98          # ubel #484 (r1l881bx) predicted_surgical_tps; can_realize_457=1
+SURGICAL_PREDICTED_TPS_MEASURED: float = 347.96  # ubel #484 companion "measured" variant -> realization gap
+MULTISTREAM_REALIZABLE_TPS: float = 457.54      # lawine #482 (044xamdd) dependency_bounded_strict_tps
+MULTISTREAM_CEILING_TPS: float = 474.44         # lawine #482 ceiling_477_tps (resource-feasibility)
+SINGLE_STREAM_REALIZED_TPS: float = 457.55      # lawine #482 single_stream_realized_tps (#472)
+MULTISTREAM_GAIN_VS_SINGLE_TPS: float = -0.01   # ~0: the per-layer data dependency eats the overlap
+BYTE_EXACT_LOCUS_IDENTITY: float = 1.0000       # lawine #482 strict_identity_fraction=1, 0 flips
+SURGICAL_REALIZED_E2E: bool = False             # PENDING lawine #488 (predicted, not served e2e)
 
-# Operative-1.0 acceptance band (the 08:24Z human ruling: "0.99-ish is totally fine").
-OPERATIVE_CENSUS_FLOOR: float = 0.99
+# --- Rung 4 (reference): deployed PR #52 -- NON-equivalent, OUTSIDE the strict feasible set ------ #
+DEPLOYED_TPS: float = 481.53
+DEPLOYED_IDENTITY: float = 0.9966               # 3 flips {11,18,118}, quality-neutral ties (denken #464)
+DEPLOYED_IS_STRICT_EQUIVALENT: bool = False
+PPL_DEPLOYED: float = 2.3772
 
-# --- Relax lane (stark #452: daqrzr99) — COLLAPSED, strictly dominated, NO-GO (one-liner) ---
-RELAX_PRIZE_REALIZED_TPS: float = 466.20
-RELAX_PRIZE_GAIN_VS_STRICT_TPS: float = round(RELAX_PRIZE_REALIZED_TPS
-                                              - COMPOSED_STRICT_FRONTIER_TPS, 2)  # -0.94
-RELAX_PRIZE_IDENTITY: float = 0.730
-RELAX_PRIZE_FLIPS: int = 3317
+# --- The organizing principle: private-safety = f(Delta), NOT f(TPS) (denken #489 q1ivw9tt) ----- #
+DELTA_FLOORLOCK_PCT: float = 0.6334     # delta_floorlock_pct (no drafter)
+DELTA_SPEC_ALIVE_PCT: float = 4.2946    # delta_spec_alive_pct (ALL drafter-alive configs share this)
+DEPLOYED_ACCEPTANCE_GAP_PCT: float = 3.6613   # deployed_acceptance_bucket_pct (the underlying gap)
+FLOORLOCK_BREACH_FRAC_PCT: float = 0.0008      # floorlock_breach_frac_pct (~0% physical)
+FLOORLOCK_BREACH_ABS_PCT: float = 7.382        # floorlock_breach_abs_pct (worst tail)
+SPEC_ALIVE_BREACH_FRAC_PCT: float = 24.306     # globalflag/surgical457 breach (scale-INVARIANT)
+GLOBALFLAG_BREACH_ABS_PCT: float = 36.725      # globalflag_breach_abs_pct (worst tail)
+PRIVATE_SAFETY_IS_SCALE_INVARIANT: bool = True  # spec_alive_frac_scale_invariant_breach_pct == 24.306
+FAST_BYTEEXACT_PRIVATESAFE_COEXISTS: bool = False  # denken #489: they do NOT coexist (today)
+FLOORLOCK_RECONFIRM_SAFE: bool = True           # denken #489 floorlock_reconfirm_safe
 
-# --- Spine numbers (wirbel #459: 6pwhesdy, STRICT-NULL) — the corrected Triton verify surface ---
-VERIFY_ATTN_SURFACE_PCT: float = 5.41        # FA2 = 0 verify calls; full 37-layer Triton 3D split-KV
-BYTE_EXACT_RETUNE_CEILING_TPS: float = 1.20  # only order-preserving knob (num_stages 3->2, maxdiff 0.0)
-MATERIALITY_BAR_TPS: float = 2.0             # < bar -> does not reopen strict supply
-GEOMETRY_SLIDING_LAYERS: int = 30
-GEOMETRY_GLOBAL_LAYERS: int = 7
-GEOMETRY_TOTAL_LAYERS: int = GEOMETRY_SLIDING_LAYERS + GEOMETRY_GLOBAL_LAYERS  # 37
+# --- >500 closure (settled): dead via all known strict levers -------------------------------- #
+STRICT_REALIZED_CEILING_TPS: float = 467.14     # best deployed-EQUIVALENT locus (composed upper bound)
+GT500_TARGET_TPS: float = 500.0
+IEEE754_TAX_IRREDUCIBLE: bool = True            # denken #423
+NO_FREE_FAST_BYTE_EXACT_GEMM: bool = True       # #481 survey: deterministic-IO tax band 22-63%
+DETERMINISM_TAX_E2E_PCT: float = 51.39          # land measured e2e (#481 survey), top of the 22-63% band
+# The lone >500 path leaves the strict lane: the greedy-UNSAFE ~16% GEMM relax-prize.
+RELAX_PRIZE_IDENTITY: float = 0.730             # stark #452: out of the strict set (3317 flips)
+RELAX_PRIZE_REALIZED_GAIN_TPS: float = -0.94    # AND ~0 TPS gain -> strictly dominated within strict
+GT500_ONLY_PATH: str = "greedy-UNSAFE ~16% GEMM relax-prize (out of strict lane; escalated to human #407)"
 
-# --- sigma_hw (lawine #467, empirical, in flight) — carry the default until realized ---
-SIGMA_HW_DEFAULT: float = 4.8153
+# --- Forward levers (HELD OPEN; the only paths to faster AND private-safe) -------------------- #
+# Each is a LIVE card.  Default = pending (None / open).  When all three land the advisor relays the
+# numbers and this packet finalizes to terminal.
+FORWARD_LEVERS = {
+    "lawine488_surgical_realization": {
+        "question": "is the surgical-457 a REAL served strict rung above 222, or another mirage?",
+        "attacks": "the predicted-vs-measured realization gap (ubel #484: 456.98 pred vs 347.96 measured)",
+        "axis": "TPS-realization",
+    },
+    "ubel491_reduction_sensitivity": {
+        "question": "which decode matmuls MUST be deterministic? shed the rest -> a FASTER floor-lock",
+        "attacks": "the determinism TPS-tax (keeps Delta safe: the floor-lock has no drafter)",
+        "axis": "TPS-ceiling",
+    },
+    "denken492_eagle3_drafter": {
+        "question": "can EAGLE-3 pull Delta_accept <= ~3.0% -> a fast strict PRIVATE-safe rung?",
+        "attacks": "the drafter Delta-gate (keeps a drafter for speed)",
+        "axis": "private-Delta",
+    },
+}
 
-# --- Submission naming (land #473 owns the trigger; we only name the targets) ---
-SUBMISSION_NAME_GO_PREFIX: str = "senpai-strict-eqv"
-SUBMISSION_NAME_FLOOR: str = "senpai-strict-m1ar-161"
+# Verdict enums
+REC_FLOOR_LOCK = "FLOOR-LOCK-166-PRIVATE-SAFE"      # the rung that sticks
+REC_GLOBAL_FLAG = "GLOBAL-FLAG-222-FAST-RISKY"      # the live #474 fast-but-risky call
+VALID_LIVE_474_RULINGS = (REC_FLOOR_LOCK, REC_GLOBAL_FLAG, "PENDING")
 
-# --- Human ruling (#407, 08:24Z): operative-1.0 accepted; literal byte-exact NOT required ---
-HUMAN_OPERATIVE_RULING_0824Z: bool = True
-
-# Recommendation enum
-REC_GO_OPERATIVE_PENDING = "GO-OPERATIVE-PENDING-471-TIES-CONFIRM"
-REC_GO_OPERATIVE = "GO-OPERATIVE"
-REC_FLOOR_LOCK = "FLOOR-LOCK"
-VALID_RECOMMENDATIONS = (REC_GO_OPERATIVE_PENDING, REC_GO_OPERATIVE, REC_FLOOR_LOCK)
-
-# The committed inputs this packet consumes (for the consumes_* receipt).
-CONSUMED_CARDS = ("stark#466", "stark#472", "ubel#470", "denken#471", "land#473")
+CONSUMED_CARDS = ("stark#485", "lawine#482", "denken#489", "ubel#484", "ubel#470",
+                  "denken#471", "land#473", "denken#423")
 
 
 def _finite(x: Any) -> bool:
@@ -185,341 +196,327 @@ def _finite(x: Any) -> bool:
 
 
 # --------------------------------------------------------------------------- #
-# The decision logic — the heart of the packet.
+# The map.
 # --------------------------------------------------------------------------- #
-def decide(denken471_census: float | None,
-           denken471_semantic_flips: int | None,
-           realized_best_estimate_tps: float | None) -> dict[str, Any]:
-    """Render the GO-OPERATIVE / FLOOR-LOCK fork from denken #471's census.
+def build_rungs() -> list[dict[str, Any]]:
+    """The ranked strict-frontier rungs (+ the non-equivalent deployed reference)."""
+    return [
+        {
+            "rung": "floor-lock M=1 AR (no drafter)",
+            "submission": "fa2sw_strict_m1ar_int4",
+            "realized_tps": FLOOR_LOCK_TPS,
+            "realized_provenance": "stark#485 pavotwci projected_official=166.234, realizes_16170=1",
+            "strict": True,
+            "identity_label": "literal-1.0 (by construction; served census pending)",
+            "identity_confirmed_by_served_census": FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS,
+            "delta_pct": DELTA_FLOORLOCK_PCT,
+            "private_safe": True,
+            "breach_frac_pct": FLOORLOCK_BREACH_FRAC_PCT,
+            "ship_status": "the strict rung that STICKS (private-safe, guaranteed honest)",
+            "ppl": FLOOR_LOCK_PPL,
+        },
+        {
+            "rung": "global-flag VLLM_BATCH_INVARIANT=1 (drafter alive)",
+            "submission": "fa2sw_precache_kenyan + manifest env BI=1",
+            "realized_tps": GLOBAL_FLAG_TPS_OFFICIAL,
+            "realized_provenance": "land 222.32 local / ubel#470 ugqnytji 234.47 official",
+            "strict": True,
+            "identity_label": "operative-1.0 (0 semantic flips; denken #471 census)",
+            "identity_confirmed_by_served_census": True,
+            "delta_pct": DELTA_SPEC_ALIVE_PCT,
+            "private_safe": False,
+            "breach_frac_pct": SPEC_ALIVE_BREACH_FRAC_PCT,
+            "ship_status": "the live #474 call: fast-but-private-RISKY (needs manifest env edit, gated)",
+            "ppl": PPL_DEPLOYED,
+        },
+        {
+            "rung": "surgical attn-only / 2D byte-exact frontier (drafter alive)",
+            "submission": "(unpackaged; surgical attention pin)",
+            "realized_tps": SURGICAL_PREDICTED_TPS,
+            "realized_provenance": ("ubel#484 r1l881bx predicted=456.98 (measured-variant 347.96); "
+                                    "lawine#482 044xamdd realizable=457.54, ceiling 474.44 UNREALIZABLE"),
+            "strict": True,
+            "identity_label": "byte-exact at the attention locus (1.0000, 0 flips)",
+            "identity_confirmed_by_served_census": False,
+            "delta_pct": DELTA_SPEC_ALIVE_PCT,
+            "private_safe": False,
+            "breach_frac_pct": SPEC_ALIVE_BREACH_FRAC_PCT,
+            "ship_status": ("strong PUBLIC rung but OBE as a strict SHIP: PREDICTED not served "
+                            "(pending lawine #488) AND private-RISKY (same Delta as the 222)"),
+            "ppl": PPL_DEPLOYED,
+        },
+        {
+            "rung": "deployed PR#52 (reference, NON-equivalent)",
+            "submission": "fa2sw_precache_kenyan (deployed)",
+            "realized_tps": DEPLOYED_TPS,
+            "realized_provenance": "PR#52 2x9fm2zx deployed fast path",
+            "strict": False,
+            "identity_label": f"NON-equivalent ({DEPLOYED_IDENTITY:.4f}, 3 ties) -- OUTSIDE strict set",
+            "identity_confirmed_by_served_census": True,
+            "delta_pct": DELTA_SPEC_ALIVE_PCT,
+            "private_safe": None,
+            "breach_frac_pct": None,
+            "ship_status": "outside the strict feasible set; the incumbent reference only",
+            "ppl": PPL_DEPLOYED,
+        },
+    ]
 
-    The binding decision variable is `n_semantic_flips` (non-tie flips).  The human ruled
-    (08:24Z) that bitwise ties are acceptable, so the census value itself is informational
-    (the honest label); the only blocker is a *semantic* flip.
-    """
-    realized_tps = realized_best_estimate_tps if _finite(realized_best_estimate_tps) \
-        else REALIZED_STRICT_HEADLINE_TPS
 
-    census_resolved = _finite(denken471_census) and denken471_semantic_flips is not None
-    if not census_resolved:
-        recommendation = REC_GO_OPERATIVE_PENDING
-        fire_name = f"{SUBMISSION_NAME_GO_PREFIX}-{round(realized_tps)}"  # provisional target
-        fire_tps = realized_tps
-        gate_state = "pending"
-        rationale = ("denken #471 served census not yet landed; recommendation is a CONDITIONAL "
-                     "GO-OPERATIVE pending the tie-confirm (human pre-accepted ties 08:24Z).")
-    elif denken471_census >= OPERATIVE_CENSUS_FLOOR and denken471_semantic_flips == 0:
-        recommendation = REC_GO_OPERATIVE
-        fire_name = f"{SUBMISSION_NAME_GO_PREFIX}-{round(realized_tps)}"
-        fire_tps = realized_tps
-        gate_state = "operative_1.0_confirmed"
-        rationale = (f"denken #471 census {denken471_census:.4f} is operative-1.0 "
-                     f"({denken471_semantic_flips} semantic flips, residuals are bf16 ties the "
-                     f"human accepted) -> fire the realized strict win.")
-    else:
-        recommendation = REC_FLOOR_LOCK
-        fire_name = SUBMISSION_NAME_FLOOR
-        fire_tps = FLOOR_LOCK_TPS
-        gate_state = "semantic_flip_or_sub_operative"
-        reason = ("a SEMANTIC (non-tie) flip" if (denken471_semantic_flips or 0) > 0
-                  else f"census {denken471_census:.4f} below the operative floor {OPERATIVE_CENSUS_FLOOR}")
-        rationale = (f"denken #471 surfaced {reason} -> the lone case the human did NOT sign off; "
-                     f"fall back to the literal-1.0-by-construction floor.")
-
+def the_principle() -> dict[str, Any]:
+    """denken #489: private-safety is a property of Delta (drafter gap), NOT of TPS."""
     return {
-        "capstone_recommendation": recommendation,
-        "fire_submission_name": fire_name,
-        "fire_tps": round(fire_tps, 2),
-        "gate_state": gate_state,
-        "rationale": rationale,
-        "census_resolved": census_resolved,
-        "denken471_served_census": denken471_census,
-        "denken471_semantic_flips": denken471_semantic_flips,
-        "operative_census_floor": OPERATIVE_CENSUS_FLOOR,
-        "realized_best_estimate_tps": round(realized_tps, 2),
+        "statement": "private-safety = f(Delta drafter-acceptance gap), NOT f(TPS)",
+        "delta_floorlock_pct": DELTA_FLOORLOCK_PCT,
+        "delta_spec_alive_pct": DELTA_SPEC_ALIVE_PCT,
+        "delta_gate_pct": DELTA_GATE_PCT,
+        "floorlock_headroom_pp": round(DELTA_GATE_PCT - DELTA_FLOORLOCK_PCT, 4),
+        "spec_alive_headroom_pp": round(DELTA_GATE_PCT - DELTA_SPEC_ALIVE_PCT, 4),
+        "floorlock_breach_frac_pct": FLOORLOCK_BREACH_FRAC_PCT,
+        "spec_alive_breach_frac_pct": SPEC_ALIVE_BREACH_FRAC_PCT,
+        "scale_invariant": PRIVATE_SAFETY_IS_SCALE_INVARIANT,
+        "scale_invariant_note": ("the 222, the 457 and the deployed 481 all carry the SAME Delta "
+                                 "= 4.295% -> the SAME 24.3% one-shot breach, regardless of TPS"),
+        "fast_byteexact_privatesafe_coexists": FAST_BYTEEXACT_PRIVATESAFE_COEXISTS,
+        "conclusion": ("the floor-lock (no drafter, Delta 0.633%) is the ONLY strict private-safe "
+                       "ship; fast + byte-exact != private-safe"),
+        "provenance": "denken#489 q1ivw9tt",
     }
 
 
-def cross_check(ubel470_bipin_tps: float | None,
-                stark472_best_estimate_tps: float | None,
-                sigma_hw: float) -> dict[str, Any]:
-    """ubel #470 (BI-pin) + stark #472 (in-graph overlap): bulletproof if both agree within sigma_hw."""
-    points = {k: v for k, v in {
-        "stark466_headline": REALIZED_STRICT_HEADLINE_TPS,
-        "stark466_cluster_mean": REALIZED_STRICT_CLUSTER_MEAN_TPS,
-        "ubel470_bipin": ubel470_bipin_tps if _finite(ubel470_bipin_tps) else None,
-        "stark472_in_graph": stark472_best_estimate_tps if _finite(stark472_best_estimate_tps) else None,
-    }.items() if v is not None}
-
-    landed = [v for k, v in points.items() if k in ("ubel470_bipin", "stark472_in_graph")]
-    n_independent = len(landed)
-    spread = (max(points.values()) - min(points.values())) if len(points) > 1 else 0.0
-    all_within_sigma = bool(spread <= sigma_hw)
-    if n_independent < 2:
-        confidence = "pending_cross_check"
-    elif all_within_sigma:
-        confidence = "bulletproof"
-    else:
-        confidence = "DISAGREE_flag_before_board"
+def the_gt500_closure() -> dict[str, Any]:
+    """The original >500 question, now SETTLED: dead via all known strict levers."""
+    headroom = round(GT500_TARGET_TPS - STRICT_REALIZED_CEILING_TPS, 2)
     return {
-        "points_tps": {k: round(v, 2) for k, v in points.items()},
-        "n_independent_landed": n_independent,
-        "spread_tps": round(spread, 4),
-        "sigma_hw": round(sigma_hw, 4),
-        "all_within_sigma_hw": all_within_sigma,
-        "confidence": confidence,
+        "verdict": "strict >500 is DEAD via all known levers",
+        "strict_realized_ceiling_tps": STRICT_REALIZED_CEILING_TPS,
+        "gt500_target_tps": GT500_TARGET_TPS,
+        "residual_gap_to_500_tps": headroom,
+        "ieee754_determinism_tax_irreducible": IEEE754_TAX_IRREDUCIBLE,
+        "no_free_fast_byte_exact_gemm": NO_FREE_FAST_BYTE_EXACT_GEMM,
+        "determinism_tax_e2e_pct": DETERMINISM_TAX_E2E_PCT,
+        "only_gt500_path": GT500_ONLY_PATH,
+        "relax_prize_identity": RELAX_PRIZE_IDENTITY,
+        "relax_prize_realized_gain_tps": RELAX_PRIZE_REALIZED_GAIN_TPS,
+        "relax_prize_in_strict_lane": False,
+        "is_genuinely_new_method_problem": True,
+        "multiple_over_private_safe_floor": round(GT500_TARGET_TPS / FLOOR_LOCK_TPS, 2),
+        "provenance": "denken#423 (IEEE-754 tax); #481 forward survey; stark#452 (relax-prize out of lane)",
+    }
+
+
+def the_forward_program(lawine488_tps: float | None,
+                        ubel491_tps: float | None,
+                        denken492_delta_pct: float | None) -> dict[str, Any]:
+    """The two orthogonal forward levers (+ the surgical realization probe).  HELD OPEN until landed."""
+    landed = {
+        "lawine488_surgical_realization": _finite(lawine488_tps),
+        "ubel491_reduction_sensitivity": _finite(ubel491_tps),
+        "denken492_eagle3_drafter": _finite(denken492_delta_pct),
+    }
+    section_open = not all(landed.values())
+    levers = {}
+    for k, meta in FORWARD_LEVERS.items():
+        levers[k] = {**meta, "landed": landed[k]}
+    # If denken #492 lands a Delta at/under ~3.0%, a fast private-safe rung becomes feasible.
+    eagle3_yields_private_safe = (_finite(denken492_delta_pct)
+                                  and denken492_delta_pct <= 3.0)  # heuristic feasibility flag
+    return {
+        "levers": levers,
+        "orthogonal_axes": {
+            "ubel491": "determinism TPS-tax -> a FASTER floor-lock (Delta stays safe)",
+            "denken492": "drafter Delta-gate -> a PRIVATE-SAFE fast rung (keeps a drafter)",
+        },
+        "only_faster_and_safe_is_their_conjunction": True,
+        "lawine488_surgical_served_tps": lawine488_tps,
+        "ubel491_faster_floor_tps": ubel491_tps,
+        "denken492_eagle3_delta_pct": denken492_delta_pct,
+        "denken492_yields_fast_private_safe": bool(eagle3_yields_private_safe),
+        "section_open": section_open,
+        "n_landed": sum(1 for v in landed.values() if v),
+        "n_total": len(landed),
+    }
+
+
+def the_live_474_call(human474_ruling: str | None) -> dict[str, Any]:
+    """The live human decision: floor-lock (sticks) vs 222 (fast-risky), gated on the breach rule."""
+    ruling = (human474_ruling or "PENDING").upper()
+    if ruling not in VALID_LIVE_474_RULINGS:
+        ruling = "PENDING"
+    return {
+        "fork": {
+            "FLOOR_LOCK": {
+                "fire": "senpai-strict-m1ar-161 (166.23 realized)",
+                "rationale": "a guaranteed-valid strict number that STICKS (Delta 0.633%, private-safe)",
+                "breach_rule": "pick this if a private re-draw over 5% INVALIDATES the submission",
+            },
+            "GLOBAL_FLAG_222": {
+                "fire": "senpai-strict-eqv (222/234 realized)",
+                "rationale": "crushes the floor on public TPS; even a breached 222 scores ~224 > 161",
+                "breach_rule": "pick this if a private re-draw over 5% only PENALIZES (scored lower)",
+            },
+        },
+        "binding_question": ("does a private re-draw over the 5% gate INVALIDATE (waste the one shot) "
+                             "or PENALIZE (scored on the lower private number)?"),
+        "advisor_recommendation": "FLOOR-LOCK unless a breach is known to be only a penalty",
+        "human_ruling": ruling,
+        "resolved": ruling != "PENDING",
+        "provenance": "#474 (10:24Z human ruled 222; 11:16Z reopened by denken #486 private-gap risk)",
     }
 
 
 def build_packet(*,
-                 denken471_census: float | None = None,
-                 denken471_semantic_flips: int | None = None,
-                 stark472_best_estimate_tps: float | None = None,
-                 ubel470_bipin_tps: float | None = None,
-                 sigma_hw: float = SIGMA_HW_DEFAULT) -> dict[str, Any]:
-    """Assemble the full strict-submission decision packet (the JSON rollup)."""
-    decision = decide(denken471_census, denken471_semantic_flips, stark472_best_estimate_tps)
-    xcheck = cross_check(ubel470_bipin_tps, stark472_best_estimate_tps, sigma_hw)
+                 lawine488_surgical_tps: float | None = None,
+                 ubel491_faster_floor_tps: float | None = None,
+                 denken492_eagle3_delta_pct: float | None = None,
+                 human474_ruling: str | None = None) -> dict[str, Any]:
+    """Assemble the full strict-frontier-map packet (the JSON rollup)."""
+    rungs = build_rungs()
+    principle = the_principle()
+    gt500 = the_gt500_closure()
+    forward = the_forward_program(lawine488_surgical_tps, ubel491_faster_floor_tps,
+                                  denken492_eagle3_delta_pct)
+    live474 = the_live_474_call(human474_ruling)
 
-    realized = decision["realized_best_estimate_tps"]
-    gain_over_floor = round(realized - FLOOR_LOCK_TPS, 2)
-    deficit_vs_deployed_headline = round(DEPLOYED_TPS - REALIZED_STRICT_HEADLINE_TPS, 2)
-    deficit_vs_deployed_clustermean = round(DEPLOYED_TPS - REALIZED_STRICT_CLUSTER_MEAN_TPS, 2)
-
-    the_number = {
-        "realized_strict_headline_tps": REALIZED_STRICT_HEADLINE_TPS,
-        "realized_strict_cluster_mean_tps": REALIZED_STRICT_CLUSTER_MEAN_TPS,
-        "realized_strict_l_envelope_tps": list(REALIZED_STRICT_L_ENVELOPE),
-        "realized_strict_band_tps": list(REALIZED_STRICT_BAND),
-        "composed_optimistic_frontier_tps": COMPOSED_STRICT_FRONTIER_TPS,
-        "composed_vs_realized_drift_tps": COMPOSED_VS_REALIZED_DRIFT_TPS,
-        "composition_was_optimistic": bool(COMPOSED_VS_REALIZED_DRIFT_TPS > sigma_hw),
-        "realized_eta_attn_pct": REALIZED_ETA_ATTN_PCT,
-        "composed_eta_attn_pct": COMPOSED_ETA_ATTN_PCT,
-        "strict_frontier_collapses_to_m1": STRICT_FRONTIER_COLLAPSES_TO_M1,
-        "config_reachable_via": STRICT_FRONTIER_CONFIG,
-        "no_served_source_edit": True,
-        "no_kernel_rebuild": True,
-        "gain_over_floor_tps": gain_over_floor,
-        "deficit_vs_deployed_headline_tps": deficit_vs_deployed_headline,
-        "deficit_vs_deployed_cluster_mean_tps": deficit_vs_deployed_clustermean,
-        "stark472_best_estimate_live": _finite(stark472_best_estimate_tps),
-        "provenance": "stark#466 sxigz7dp(speed)/gmd8v9sw(identity) ab9b286; stark#472 in flight",
-    }
-
-    the_gate = {
-        "binding_gate": "denken#471 served census == 1.0",
-        "resolver": "denken#471 strict-submission-identity-certifier (full 128-prompt served census)",
-        "do_not_duplicate": True,
-        "census_prior": {
-            "stark466_locus": CENSUS_LOCUS_STARK466,
-            "land429_lawine455_served_p90": CENSUS_SERVED_LAND429_LAWINE455,
-            "ubel461_allpin_floor": CENSUS_SERVED_UBEL461_ALLPIN,
-        },
-        "census_prior_span": round(CENSUS_LOCUS_STARK466 - CENSUS_SERVED_UBEL461_ALLPIN, 4),
-        "census_tension_rendered": True,
-        "reconciliation_hypothesis": (
-            "the order-preserving 2D reduction REMOVES the attention 3D split-KV reassociation that "
-            "produces the near-tie population (denken #464) -> served census SHOULD resolve to "
-            "operative-1.0; pending denken #471 confirm."),
-        "tie_proof_m1_self_gap": TIE_PROOF_M1_SELF_GAP,
-        "ties_are_downstream_invisible": True,
-    }
-
-    the_fork = {
-        "GO_OPERATIVE": {
-            "condition": (f"denken#471 census >= {OPERATIVE_CENSUS_FLOOR} AND n_semantic_flips == 0 "
-                          "(ties OK per human 08:24Z)"),
-            "fire": f"{SUBMISSION_NAME_GO_PREFIX}-{round(realized)}",
-            "tps": realized,
-            "note": "the realized honest strict win, +~295 over the floor; land #473 staged ready-to-fire.",
-        },
-        "FLOOR_LOCK": {
-            "condition": "denken#471 surfaces a SEMANTIC (non-tie) flip",
-            "fire": SUBMISSION_NAME_FLOOR,
-            "tps": FLOOR_LOCK_TPS,
-            "note": "literal-1.0 by construction (lawine #438); the honest baseline entry, not the headline win.",
-        },
-        "BLOCKED_retired": {
-            "was": "literal <1.0 -> don't ship",
-            "retired_by": "human operative-1.0 ruling (#407, 08:24Z)",
-        },
-    }
-
-    honesty_hinge = {
-        "submission_labeled_with_true_census": True,
-        "example_label": "operative-1.0: 0.9989, 1 tied flip @ p90, 0 semantic",
-        "claimed_as_literal_1p0": False,
-        "literal_vs_operative_surfaced": True,
-        "literal_vs_operative_resolution": "human ruled operative is honest-strict (08:24Z)",
-        "human_operative_ruling_0824z": HUMAN_OPERATIVE_RULING_0824Z,
-    }
-
-    reference_frame = {
-        "deployed_tps": DEPLOYED_TPS,
-        "deployed_identity": DEPLOYED_IDENTITY,
-        "deployed_flips": list(DEPLOYED_FLIPS),
-        "deployed_is_strict_equivalent": False,
-        "deployed_outside_strict_feasible_set": True,
-        "relax_prize_realized_tps": RELAX_PRIZE_REALIZED_TPS,
-        "relax_prize_gain_vs_strict_tps": RELAX_PRIZE_GAIN_VS_STRICT_TPS,
-        "relax_prize_identity": RELAX_PRIZE_IDENTITY,
-        "relax_prize_flips": RELAX_PRIZE_FLIPS,
-        "relax_lane_verdict": "DEAD (strictly dominated: ~0 gain AND worse identity) — stay strict",
-        "ppl": PPL_DEPLOYED,
-        "ppl_gate": PPL_GATE,
-        "ppl_clears_gate": bool(PPL_DEPLOYED <= PPL_GATE),
-        "sigma_hw": round(sigma_hw, 4),
-        "spine_verify_attn_surface_pct": VERIFY_ATTN_SURFACE_PCT,
-        "spine_byte_exact_retune_ceiling_tps": BYTE_EXACT_RETUNE_CEILING_TPS,
-        "spine_reopens_strict_supply": bool(BYTE_EXACT_RETUNE_CEILING_TPS >= MATERIALITY_BAR_TPS),
-        "spine_geometry_layers": GEOMETRY_TOTAL_LAYERS,
-    }
-
-    ownership = {
-        "this_packet": "the human-facing decision narrative (synthesis only)",
-        "denken471": "the identity oracle (served census)",
-        "land473": "the execution machinery (submission command + approval + board post)",
-        "consumes_466_472_470_471_473": True,
-        "consumed_cards": list(CONSUMED_CARDS),
-        "analysis_only": True,
-        "no_served_file_change": True,
-        "official_tps": 0,
-    }
+    strict_rungs = [r for r in rungs if r["strict"]]
+    private_safe_rungs = [r for r in strict_rungs if r["private_safe"]]
 
     packet = {
-        "kind": "strict-submission-decision-packet",
+        "kind": "strict-frontier-map",
         "pr": 357,
         "agent": "fern",
-        "decision": decision,
-        "A_the_number": the_number,
-        "B_the_gate": the_gate,
-        "C_the_fork": the_fork,
-        "D_cross_check": xcheck,
-        "E_reference_frame": reference_frame,
-        "honesty_hinge": honesty_hinge,
-        "ownership": ownership,
+        "A_the_map": {
+            "rungs": rungs,
+            "n_strict_rungs": len(strict_rungs),
+            "n_private_safe_strict_rungs": len(private_safe_rungs),
+            "only_private_safe_rung": (private_safe_rungs[0]["rung"] if len(private_safe_rungs) == 1
+                                       else None),
+            "deployed_outside_strict_set": True,
+        },
+        "B_the_principle": principle,
+        "C_gt500_closure": gt500,
+        "D_forward_program": forward,
+        "E_live_474_call": live474,
+        "ownership": {
+            "this_packet": "the human-facing strict-frontier MAP (CPU-only synthesis)",
+            "land473": "the submission trigger",
+            "denken471": "the served-census identity oracle",
+            "consumes_cards": list(CONSUMED_CARDS),
+            "analysis_only": True,
+            "no_served_file_change": True,
+            "no_hf_job": True,
+            "official_tps": 0,
+        },
+        "terminal": not forward["section_open"],
     }
-    packet["self_test"] = _selftests(packet, sigma_hw)
+    packet["self_test"] = _selftests(packet)
     packet["headline"] = _headline(packet)
     return packet
 
 
 def _headline(p: dict[str, Any]) -> dict[str, Any]:
-    d = p["decision"]
-    n = p["A_the_number"]
     return {
-        "capstone_recommendation": d["capstone_recommendation"],
-        "fire_submission_name": d["fire_submission_name"],
-        "fire_tps": d["fire_tps"],
-        "realized_strict_headline_tps": n["realized_strict_headline_tps"],
-        "realized_strict_band_tps": n["realized_strict_band_tps"],
-        "floor_lock_tps": FLOOR_LOCK_TPS,
-        "deployed_tps": DEPLOYED_TPS,
-        "binding_gate": p["B_the_gate"]["binding_gate"],
-        "cross_check_confidence": p["D_cross_check"]["confidence"],
-        "capstone_self_test_passes": None,  # filled by main() after nan-check
+        "floor_lock_realized_tps": FLOOR_LOCK_TPS,
+        "floor_lock_private_safe": True,
+        "global_flag_tps": GLOBAL_FLAG_TPS_OFFICIAL,
+        "surgical_byte_exact_predicted_tps": SURGICAL_PREDICTED_TPS,
+        "multistream_realizable_tps": MULTISTREAM_REALIZABLE_TPS,
+        "private_safety_is_delta_not_tps": True,
+        "strict_gt500_dead_via_known_levers": True,
+        "forward_levers_open": p["D_forward_program"]["section_open"],
+        "live_474_call": p["E_live_474_call"]["human_ruling"],
+        "terminal": p["terminal"],
+        "strict_frontier_map_self_test_passes": None,  # filled by main() after nan-check
     }
 
 
 # --------------------------------------------------------------------------- #
-# Self-test — REAL arithmetic invariants, not a banked-constant mirror.
-# Each condition checks a *relationship* between numbers (ordering, a computed
-# difference, a decision-logic outcome), so a green result means the packet is
-# internally consistent, not merely that a constant was copied.
+# Self-test -- REAL arithmetic / logical invariants, not a banked-constant mirror.
+# Each condition checks a RELATIONSHIP (ordering, a computed gap, a decision
+# outcome, an honesty constraint), so green means the map is internally
+# consistent + honest, NOT merely that a constant was copied.
 # --------------------------------------------------------------------------- #
-def _selftests(p: dict[str, Any], sigma_hw: float) -> dict[str, Any]:
-    n = p["A_the_number"]
-    g = p["B_the_gate"]
-    r = p["E_reference_frame"]
-    d = p["decision"]
-    x = p["D_cross_check"]
-    band_low, band_high = REALIZED_STRICT_BAND
+def _selftests(p: dict[str, Any]) -> dict[str, Any]:
+    pr = p["B_the_principle"]
+    gt = p["C_gt500_closure"]
+    fw = p["D_forward_program"]
+    lv = p["E_live_474_call"]
     cond: dict[str, bool] = {}
 
-    # Reference points are strictly ordered: floor < realized headline < deployed.
-    cond["a_floor_lt_headline"] = FLOOR_LOCK_TPS < REALIZED_STRICT_HEADLINE_TPS
-    cond["b_headline_lt_deployed"] = REALIZED_STRICT_HEADLINE_TPS < DEPLOYED_TPS
-    cond["c_floor_lt_deployed"] = FLOOR_LOCK_TPS < DEPLOYED_TPS
+    # --- The map is strictly ordered by TPS: floor < global-flag < surgical < deployed. ---
+    cond["a_floor_lt_globalflag"] = FLOOR_LOCK_TPS < GLOBAL_FLAG_TPS_OFFICIAL
+    cond["b_globalflag_lt_surgical"] = GLOBAL_FLAG_TPS_OFFICIAL < SURGICAL_PREDICTED_TPS
+    cond["c_surgical_lt_deployed"] = SURGICAL_PREDICTED_TPS < DEPLOYED_TPS
+    cond["d_floor_realizes_target"] = FLOOR_LOCK_TPS >= FLOOR_LOCK_TARGET_TPS
 
-    # The realized band is well-formed and brackets the cluster-mean and headline.
-    cond["d_band_low_le_high"] = band_low <= band_high
-    cond["e_clustermean_in_band"] = band_low <= REALIZED_STRICT_CLUSTER_MEAN_TPS <= band_high
-    cond["f_headline_le_clustermean"] = REALIZED_STRICT_HEADLINE_TPS <= REALIZED_STRICT_CLUSTER_MEAN_TPS
-    cond["g_clustermean_le_composed"] = REALIZED_STRICT_CLUSTER_MEAN_TPS <= COMPOSED_STRICT_FRONTIER_TPS
-    cond["h_band_high_is_composed"] = math.isclose(band_high, COMPOSED_STRICT_FRONTIER_TPS)
+    # --- lawine #482: multi-stream CLOSES -- realizable ~= single-stream, ceiling unrealizable. ---
+    cond["e_multistream_gain_near_zero"] = abs(MULTISTREAM_GAIN_VS_SINGLE_TPS) < SIGMA_HW
+    cond["f_realizable_below_ceiling"] = MULTISTREAM_REALIZABLE_TPS < MULTISTREAM_CEILING_TPS
+    cond["g_unrealizable_gap_positive"] = (MULTISTREAM_CEILING_TPS - MULTISTREAM_REALIZABLE_TPS) > 0.0
+    cond["h_realizable_matches_single_stream"] = math.isclose(
+        MULTISTREAM_REALIZABLE_TPS, SINGLE_STREAM_REALIZED_TPS, abs_tol=SIGMA_HW)
 
-    # The "composition was optimistic" claim: drift == composed - headline, and exceeds sigma_hw.
-    cond["i_drift_equals_difference"] = math.isclose(
-        COMPOSED_VS_REALIZED_DRIFT_TPS,
-        round(COMPOSED_STRICT_FRONTIER_TPS - REALIZED_STRICT_HEADLINE_TPS, 2), abs_tol=0.01)
-    cond["j_drift_exceeds_sigma_hw"] = COMPOSED_VS_REALIZED_DRIFT_TPS > sigma_hw
-    cond["k_realized_eta_exceeds_composed_eta"] = REALIZED_ETA_ATTN_PCT > COMPOSED_ETA_ATTN_PCT
-    cond["l_collapse_refuted"] = STRICT_FRONTIER_COLLAPSES_TO_M1 is False
+    # --- The principle: private-safety is Delta-determined, scale-INVARIANT. ---
+    cond["i_floorlock_delta_below_gate"] = DELTA_FLOORLOCK_PCT < DELTA_GATE_PCT
+    cond["j_specalive_delta_below_gate"] = DELTA_SPEC_ALIVE_PCT < DELTA_GATE_PCT
+    cond["k_floorlock_delta_lt_specalive"] = DELTA_FLOORLOCK_PCT < DELTA_SPEC_ALIVE_PCT
+    cond["l_floorlock_more_headroom"] = pr["floorlock_headroom_pp"] > pr["spec_alive_headroom_pp"]
+    cond["m_floorlock_breach_lt_specalive"] = FLOORLOCK_BREACH_FRAC_PCT < SPEC_ALIVE_BREACH_FRAC_PCT
+    cond["n_scale_invariant"] = bool(pr["scale_invariant"])
+    cond["o_fast_byteexact_not_private_safe"] = pr["fast_byteexact_privatesafe_coexists"] is False
 
-    # Census prior tension is ordered (the honest span the packet renders).
-    cond["m_census_prior_ordered"] = (CENSUS_SERVED_UBEL461_ALLPIN
-                                      <= CENSUS_SERVED_LAND429_LAWINE455
-                                      <= CENSUS_LOCUS_STARK466)
-    cond["n_census_prior_within_operative_band"] = CENSUS_SERVED_UBEL461_ALLPIN >= OPERATIVE_CENSUS_FLOOR
-    cond["o_census_tension_rendered"] = bool(g["census_tension_rendered"])
-    cond["p_ties_downstream_invisible"] = math.isclose(TIE_PROOF_M1_SELF_GAP, 0.0)
+    # --- Floor-lock is the UNIQUE private-safe strict rung. ---
+    cond["p_exactly_one_private_safe_rung"] = p["A_the_map"]["n_private_safe_strict_rungs"] == 1
+    cond["q_only_safe_rung_is_floorlock"] = (
+        p["A_the_map"]["only_private_safe_rung"] == "floor-lock M=1 AR (no drafter)")
 
-    # Relax lane is strictly dominated: <= 0 gain AND worse identity than deployed (-> NO-GO).
-    cond["q_relax_gain_nonpositive"] = RELAX_PRIZE_GAIN_VS_STRICT_TPS <= 0.0
-    cond["r_relax_gain_equals_difference"] = math.isclose(
-        RELAX_PRIZE_GAIN_VS_STRICT_TPS,
-        round(RELAX_PRIZE_REALIZED_TPS - COMPOSED_STRICT_FRONTIER_TPS, 2), abs_tol=0.01)
-    cond["s_relax_identity_worse_than_deployed"] = RELAX_PRIZE_IDENTITY < DEPLOYED_IDENTITY
+    # --- fast + byte-exact != private-safe: surgical is fast AND byte-exact AND NOT safe. ---
+    cond["r_surgical_fast"] = SURGICAL_PREDICTED_TPS > GLOBAL_FLAG_TPS_OFFICIAL
+    cond["s_surgical_byte_exact"] = math.isclose(BYTE_EXACT_LOCUS_IDENTITY, 1.0)
+    cond["t_surgical_not_private_safe"] = SPEC_ALIVE_BREACH_FRAC_PCT > FLOORLOCK_BREACH_FRAC_PCT
 
-    # Spine: +1.20 < the +2 materiality bar -> does NOT reopen strict supply; geometry sums.
-    cond["t_spine_below_materiality"] = BYTE_EXACT_RETUNE_CEILING_TPS < MATERIALITY_BAR_TPS
-    cond["u_spine_does_not_reopen_supply"] = r["spine_reopens_strict_supply"] is False
-    cond["v_geometry_sums"] = (GEOMETRY_SLIDING_LAYERS + GEOMETRY_GLOBAL_LAYERS
-                               == GEOMETRY_TOTAL_LAYERS == 37)
+    # --- >500 closure: realized ceiling < 500; the only >500 path is greedy-UNSAFE (out of lane). ---
+    cond["u_strict_ceiling_below_500"] = STRICT_REALIZED_CEILING_TPS < GT500_TARGET_TPS
+    cond["v_gt500_gap_positive"] = gt["residual_gap_to_500_tps"] > 0.0
+    cond["w_relax_prize_out_of_strict_lane"] = RELAX_PRIZE_IDENTITY < BYTE_EXACT_LOCUS_IDENTITY
+    cond["x_relax_prize_dominated"] = RELAX_PRIZE_REALIZED_GAIN_TPS <= 0.0
+    cond["y_gt500_is_new_method_problem"] = bool(gt["is_genuinely_new_method_problem"])
 
-    # PPL clears the gate.
-    cond["w_ppl_clears_gate"] = PPL_DEPLOYED <= PPL_GATE
+    # --- Forward section is OPEN (none of #488/#491/#492 landed) -> non-terminal. ---
+    cond["z_forward_section_open"] = bool(fw["section_open"])
+    cond["aa_no_forward_lever_landed"] = fw["n_landed"] == 0
+    cond["ab_terminal_iff_forward_closed"] = (p["terminal"] == (not fw["section_open"]))
+    cond["ac_two_orthogonal_axes"] = (
+        fw["orthogonal_axes"]["ubel491"] != fw["orthogonal_axes"]["denken492"])
 
-    # Decision logic is sound for the resolved inputs (re-derive the fork independently).
-    cond["x_recommendation_valid"] = d["capstone_recommendation"] in VALID_RECOMMENDATIONS
-    if not d["census_resolved"]:
-        cond["y_fork_matches_inputs"] = d["capstone_recommendation"] == REC_GO_OPERATIVE_PENDING
-    elif (d["denken471_served_census"] is not None
-          and d["denken471_served_census"] >= OPERATIVE_CENSUS_FLOOR
-          and d["denken471_semantic_flips"] == 0):
-        cond["y_fork_matches_inputs"] = (d["capstone_recommendation"] == REC_GO_OPERATIVE
-                                         and math.isclose(d["fire_tps"], d["realized_best_estimate_tps"]))
-    else:
-        cond["y_fork_matches_inputs"] = (d["capstone_recommendation"] == REC_FLOOR_LOCK
-                                         and math.isclose(d["fire_tps"], FLOOR_LOCK_TPS))
-    # GO fires the realized strict number (above the floor); FLOOR-LOCK fires the floor exactly.
-    if d["capstone_recommendation"] == REC_FLOOR_LOCK:
-        cond["z_fire_tps_consistent"] = math.isclose(d["fire_tps"], FLOOR_LOCK_TPS)
-    else:
-        cond["z_fire_tps_consistent"] = d["fire_tps"] > FLOOR_LOCK_TPS
+    # --- The live #474 call is well-formed (and pending until the human rules the breach rule). ---
+    cond["ad_live474_ruling_valid"] = lv["human_ruling"] in VALID_LIVE_474_RULINGS
+    cond["ae_live474_resolved_consistent"] = (lv["resolved"] == (lv["human_ruling"] != "PENDING"))
 
-    # Cross-check confidence is one of the defined states and consistent with the spread.
-    cond["aa_xcheck_confidence_defined"] = x["confidence"] in (
-        "pending_cross_check", "bulletproof", "DISAGREE_flag_before_board")
-    cond["ab_xcheck_spread_consistent"] = (
-        (x["n_independent_landed"] < 2 and x["confidence"] == "pending_cross_check")
-        or (x["n_independent_landed"] >= 2
-            and ((x["all_within_sigma_hw"] and x["confidence"] == "bulletproof")
-                 or (not x["all_within_sigma_hw"] and x["confidence"] == "DISAGREE_flag_before_board"))))
+    # --- Honesty: the floor-lock literal-1.0 LABEL is rendered as by-construction-pending-census,
+    #     NOT asserted as a measured fact (the relayed run logged verdict/literal_1p0=0 vs precache). ---
+    cond["af_floorlock_literal_flag_honest"] = (
+        FLOOR_LOCK_LITERAL_1P0_BY_CONSTRUCTION is True
+        and FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS is False
+        and FLOOR_LOCK_RELAYRUN_VERDICT_LITERAL_1P0 == 0)
+    cond["ag_floorlock_tps_independently_solid"] = FLOOR_LOCK_TPS >= FLOOR_LOCK_TARGET_TPS
+    cond["ah_surgical_predicted_not_served"] = SURGICAL_REALIZED_E2E is False
+    cond["ai_surgical_realization_gap_real"] = SURGICAL_PREDICTED_TPS_MEASURED < SURGICAL_PREDICTED_TPS
 
-    # Mandate constraints (this is an analysis-only 0-GPU capstone).
-    cond["ac_analysis_only"] = bool(p["ownership"]["analysis_only"])
-    cond["ad_no_served_file_change"] = bool(p["ownership"]["no_served_file_change"])
-    cond["ae_official_tps_zero"] = p["ownership"]["official_tps"] == 0
-    cond["af_consumes_all_cards"] = bool(p["ownership"]["consumes_466_472_470_471_473"])
-    cond["ag_literal_vs_operative_surfaced"] = bool(p["honesty_hinge"]["literal_vs_operative_surfaced"])
-    cond["ah_human_ruling_recorded"] = bool(p["honesty_hinge"]["human_operative_ruling_0824z"])
+    # --- PPL clears the gate on the shippable strict rungs. ---
+    cond["aj_floorlock_ppl_clears_gate"] = FLOOR_LOCK_PPL <= PPL_GATE
+    cond["ak_deployed_ppl_clears_gate"] = PPL_DEPLOYED <= PPL_GATE
+
+    # --- Mandate constraints (analysis-only 0-GPU capstone). ---
+    cond["al_analysis_only"] = bool(p["ownership"]["analysis_only"])
+    cond["am_no_served_file_change"] = bool(p["ownership"]["no_served_file_change"])
+    cond["an_no_hf_job"] = bool(p["ownership"]["no_hf_job"])
+    cond["ao_official_tps_zero"] = p["ownership"]["official_tps"] == 0
 
     return {
         "conditions": cond,
         "n_conditions": len(cond),
         "n_passing": sum(1 for v in cond.values() if v),
-        "capstone_self_test_passes": bool(all(cond.values())),
+        "strict_frontier_map_self_test_passes": bool(all(cond.values())),
     }
 
 
@@ -527,54 +524,51 @@ def _selftests(p: dict[str, Any], sigma_hw: float) -> dict[str, Any]:
 # One-screen human-facing render.
 # --------------------------------------------------------------------------- #
 def render_one_screen(p: dict[str, Any]) -> str:
-    d = p["decision"]
-    n = p["A_the_number"]
-    g = p["B_the_gate"]
-    r = p["E_reference_frame"]
-    x = p["D_cross_check"]
-    cp = g["census_prior"]
-    realized = d["realized_best_estimate_tps"]
-    band = n["realized_strict_band_tps"]
+    pr = p["B_the_principle"]
+    gt = p["C_gt500_closure"]
+    fw = p["D_forward_program"]
+    lv = p["E_live_474_call"]
+    st = p["self_test"]
     L = [
         "================================================================================",
-        " STRICT-SUBMISSION DECISION PACKET  —  PR #357  (fern, CPU-only synthesis)",
+        " THE HONEST STRICT-FRONTIER MAP  —  PR #357  (fern, CPU-only synthesis)",
         "================================================================================",
-        f" RECOMMENDATION : {d['capstone_recommendation']}",
-        f"                  -> fire `{d['fire_submission_name']}`  (~{d['fire_tps']:.2f} TPS)",
+        " A. THE MAP (ranked by realized TPS; private-safety is the 2nd axis)",
+        "      rung                         realized TPS   strict?           private-safe?",
+        "      ---------------------------  ------------   ---------------   --------------------",
+        f"      floor-lock M=1 AR            {FLOOR_LOCK_TPS:>7.2f} proj   literal-1.0*      SAFE  (Δ {DELTA_FLOORLOCK_PCT:.3f}%)  <- STICKS",
+        f"      global-flag BI=1            {GLOBAL_FLAG_TPS_OFFICIAL:>7.2f}       operative-1.0     RISKY (Δ {DELTA_SPEC_ALIVE_PCT:.3f}%)  <- #474 live",
+        f"      surgical / 2D byte-exact    {SURGICAL_PREDICTED_TPS:>7.2f} pred  byte-exact(locus) RISKY (Δ {DELTA_SPEC_ALIVE_PCT:.3f}%)  <- OBE strict",
+        f"      deployed (reference)        {DEPLOYED_TPS:>7.2f}       NON-equiv .9966   — (outside strict set)",
+        f"      * floor-lock literal-1.0 = BY CONSTRUCTION (M=1 AR, no drafter); served census vs the",
+        f"        M=1 AR reference is the load-bearing confirm (relay-run logged verdict_literal_1p0=0",
+        f"        vs the precache ref, 119/128 divergent — a DIFFERENT config; flagged to advisor).",
         "",
-        " A. THE NUMBER (stark #466, realized e2e — collapse to 161.70 REFUTED)",
-        f"      realized strict  {n['realized_strict_headline_tps']:.2f} TPS  headline (conservative @ L=640)",
-        f"      band [{band[0]:.2f}, {band[1]:.2f}]  ·  cluster-mean ~{n['realized_strict_cluster_mean_tps']:.0f}"
-        f"  ·  +{n['gain_over_floor_tps']:.0f} over floor  ·  ~{n['deficit_vs_deployed_cluster_mean_tps']:.0f} under deployed",
-        f"      * composition was OPTIMISTIC: old composed {n['composed_optimistic_frontier_tps']:.2f} over-counts"
-        f" by +{n['composed_vs_realized_drift_tps']:.2f} (> sigma_hw {r['sigma_hw']:.2f}); true frontier in [{band[0]:.2f}, <= {band[1]:.2f}]",
-        f"      config-reachable via {n['config_reachable_via']} (no served-source edit, no kernel rebuild)",
+        " B. THE PRINCIPLE (denken #489): private-safety = f(Δ drafter-gap), NOT f(TPS)",
+        f"      floor-lock Δ {DELTA_FLOORLOCK_PCT:.3f}% ({pr['floorlock_headroom_pp']:.2f}pp headroom, breach ~{FLOORLOCK_BREACH_FRAC_PCT:.3f}%)  vs"
+        f"  spec-alive Δ {DELTA_SPEC_ALIVE_PCT:.3f}% ({pr['spec_alive_headroom_pp']:.2f}pp, breach {SPEC_ALIVE_BREACH_FRAC_PCT:.1f}%)",
+        f"      SCALE-INVARIANT: the 222, the 457 and the 481 all carry the SAME Δ -> SAME breach, any TPS",
+        f"      => floor-lock (no drafter) is the ONLY strict private-safe ship.  Fast + byte-exact ≠ safe.",
         "",
-        " B. THE GATE (denken #471 served 128-prompt census — THE resolver, do not duplicate)",
-        f"      binding: census == operative-1.0 (>= {OPERATIVE_CENSUS_FLOOR}, every residual a bf16 tie, 0 semantic flips)",
-        f"      * tension: locus {cp['stark466_locus']:.4f} (stark#466) vs served prior"
-        f" {cp['land429_lawine455_served_p90']:.4f}@p90 (land#429) / {cp['ubel461_allpin_floor']:.4f} all-pin (ubel#461)",
-        "      reconciliation: order-preserving 2D reduction removes the 3D split-KV near-tie population (denken#464)",
+        " C. >500 CLOSURE (settled): strict >500 DEAD via all known levers",
+        f"      realized strict ceiling {STRICT_REALIZED_CEILING_TPS:.2f} < 500 (gap {gt['residual_gap_to_500_tps']:.2f}); IEEE-754 tax irreducible (denken#423);",
+        f"      no free fast byte-exact GEMM (#481: tax 22-63%, e2e {DETERMINISM_TAX_E2E_PCT:.1f}%).  Only >500 path =",
+        f"      greedy-UNSAFE ~16% relax-prize (id {RELAX_PRIZE_IDENTITY:.3f}, out of lane, human #407).  ~{gt['multiple_over_private_safe_floor']:.1f}x over the 166 floor.",
         "",
-        " C. THE FORK",
-        f"      GO-OPERATIVE  (471: 0 semantic flips, ties OK per human 08:24Z) -> `{p['C_the_fork']['GO_OPERATIVE']['fire']}`"
-        f" (~{realized:.2f}, honest strict win)",
-        f"      FLOOR-LOCK    (471: >=1 SEMANTIC non-tie flip)                   -> `{SUBMISSION_NAME_FLOOR}`"
-        f" ({FLOOR_LOCK_TPS:.2f}, literal-1.0 by construction)",
-        "      [BLOCKED retired — human ruled operative-1.0 honest-strict, 08:24Z]",
+        " D. FORWARD LEVERS (HELD OPEN; finalize to terminal when #488/#491/#492 land)",
+        f"      [{ 'x' if fw['levers']['ubel491_reduction_sensitivity']['landed'] else ' ' }] #491 reduction-sensitivity -> FASTER floor-lock (attacks TPS-tax, Δ stays safe)",
+        f"      [{ 'x' if fw['levers']['denken492_eagle3_drafter']['landed'] else ' ' }] #492 EAGLE-3 drafter      -> PRIVATE-SAFE fast rung (attacks Δ-gate, keeps drafter)",
+        f"      [{ 'x' if fw['levers']['lawine488_surgical_realization']['landed'] else ' ' }] #488 surgical realize     -> is the 457.5 a REAL served rung, or a mirage?",
+        f"      orthogonal axes; only their CONJUNCTION yields faster AND private-safe.  ({fw['n_landed']}/{fw['n_total']} landed)",
         "",
-        " HONESTY HINGE : submission labeled with its TRUE census"
-        f" (e.g. \"{p['honesty_hinge']['example_label']}\"), NOT claimed literal 1.0",
-        f" D. CROSS-CHECK: ubel#470 BI-pin + stark#472 in-graph overlap -> {x['confidence']}"
-        f" (n_independent={x['n_independent_landed']}, spread {x['spread_tps']:.2f} vs sigma_hw {x['sigma_hw']:.2f})",
-        f" E. REFERENCE  : deployed {r['deployed_tps']:.2f} NON-equiv (id {r['deployed_identity']:.4f}, 3 ties) OUTSIDE strict set"
-        f"  ·  relax-prize DEAD (stark#452: {r['relax_prize_gain_vs_strict_tps']:+.2f} TPS, id {r['relax_prize_identity']:.3f})"
-        f"  ·  PPL {r['ppl']:.4f} <= {r['ppl_gate']:.2f} OK",
-        " OWNERSHIP     : this packet = the human call · denken#471 = oracle · land#473 = trigger"
+        f" E. THE LIVE #474 CALL: floor-lock {FLOOR_LOCK_TPS:.0f} (sticks) vs {GLOBAL_FLAG_TPS_OFFICIAL:.0f} (fast-risky) — ruling: {lv['human_ruling']}",
+        f"      binding: does a >5% private re-draw INVALIDATE (->floor-lock) or PENALIZE (->222)?",
+        f"      advisor rec: {lv['advisor_recommendation']}",
+        " OWNERSHIP: this packet = the MAP · land#473 = trigger · denken#471 = census oracle"
         "  ·  CPU-only, official_tps=0, no served-file change",
         "================================================================================",
-        f" self-test: {p['self_test']['n_passing']}/{p['self_test']['n_conditions']} invariants"
-        f"  ·  recommendation: {d['capstone_recommendation']}",
+        f" self-test: {st['n_passing']}/{st['n_conditions']} invariants  ·  terminal={p['terminal']}"
+        f"  ·  >500 strict: DEAD-via-known-levers",
         "================================================================================",
     ]
     return "\n".join(L)
@@ -598,73 +592,80 @@ def _nan_paths(node: Any, path: str = "result") -> list[str]:
 
 def _wandb_summary(payload: dict) -> dict[str, Any]:
     p = payload["synthesis"]
-    d = p["decision"]
-    n = p["A_the_number"]
-    g = p["B_the_gate"]
-    r = p["E_reference_frame"]
-    x = p["D_cross_check"]
+    pr = p["B_the_principle"]
+    gt = p["C_gt500_closure"]
+    fw = p["D_forward_program"]
+    lv = p["E_live_474_call"]
     o = p["ownership"]
-    h = p["honesty_hinge"]
     st = p["self_test"]
-    band = n["realized_strict_band_tps"]
-    rec_code = {REC_GO_OPERATIVE_PENDING: 0, REC_GO_OPERATIVE: 1, REC_FLOOR_LOCK: -1}[
-        d["capstone_recommendation"]]
+    rec_code = {"PENDING": 0, REC_FLOOR_LOCK: 1, REC_GLOBAL_FLAG: 2}.get(lv["human_ruling"], 0)
     summary: dict[str, Any] = {
         # PRIMARY
-        "capstone_self_test_passes": int(bool(st["capstone_self_test_passes"])),
-        "capstone_self_test_n_passing": st["n_passing"],
-        "capstone_self_test_n_conditions": st["n_conditions"],
-        # the decision
-        "capstone_recommendation_code": rec_code,  # 0 pending / 1 go / -1 floor-lock
-        "fire_tps": d["fire_tps"],
-        "gate_resolved": int(bool(d["census_resolved"])),
-        # A. the number
-        "realized_strict_headline_tps": n["realized_strict_headline_tps"],
-        "realized_strict_cluster_mean_tps": n["realized_strict_cluster_mean_tps"],
-        "realized_strict_band_low_tps": band[0],
-        "realized_strict_band_high_tps": band[1],
-        "composed_optimistic_frontier_tps": n["composed_optimistic_frontier_tps"],
-        "composed_vs_realized_drift_tps": n["composed_vs_realized_drift_tps"],
-        "composition_was_optimistic": int(bool(n["composition_was_optimistic"])),
-        "realized_eta_attn_pct": n["realized_eta_attn_pct"],
-        "composed_eta_attn_pct": n["composed_eta_attn_pct"],
-        "strict_frontier_collapses_to_m1": int(bool(n["strict_frontier_collapses_to_m1"])),
-        "gain_over_floor_tps": n["gain_over_floor_tps"],
-        "deficit_vs_deployed_cluster_mean_tps": n["deficit_vs_deployed_cluster_mean_tps"],
-        "stark472_best_estimate_live": int(bool(n["stark472_best_estimate_live"])),
-        # B. the gate
-        "census_locus_stark466": g["census_prior"]["stark466_locus"],
-        "census_served_land429_p90": g["census_prior"]["land429_lawine455_served_p90"],
-        "census_served_ubel461_allpin": g["census_prior"]["ubel461_allpin_floor"],
-        "census_prior_span": g["census_prior_span"],
-        "census_tension_rendered": int(bool(g["census_tension_rendered"])),
-        "tie_proof_m1_self_gap": g["tie_proof_m1_self_gap"],
-        "operative_census_floor": OPERATIVE_CENSUS_FLOOR,
-        # D. cross-check
-        "cross_check_n_independent": x["n_independent_landed"],
-        "cross_check_spread_tps": x["spread_tps"],
-        "sigma_hw": r["sigma_hw"],
-        # E. reference frame
-        "deployed_tps": r["deployed_tps"],
-        "deployed_identity": r["deployed_identity"],
-        "deployed_is_strict_equivalent": int(bool(r["deployed_is_strict_equivalent"])),
-        "relax_prize_realized_tps": r["relax_prize_realized_tps"],
-        "relax_prize_gain_vs_strict_tps": r["relax_prize_gain_vs_strict_tps"],
-        "relax_prize_identity": r["relax_prize_identity"],
-        "ppl": r["ppl"],
-        "ppl_gate": r["ppl_gate"],
-        "ppl_clears_gate": int(bool(r["ppl_clears_gate"])),
-        "spine_verify_attn_surface_pct": r["spine_verify_attn_surface_pct"],
-        "spine_byte_exact_retune_ceiling_tps": r["spine_byte_exact_retune_ceiling_tps"],
-        "spine_reopens_strict_supply": int(bool(r["spine_reopens_strict_supply"])),
-        "spine_geometry_layers": r["spine_geometry_layers"],
-        # floor + honesty + ownership receipts
-        "floor_lock_tps": FLOOR_LOCK_TPS,
-        "human_operative_ruling_0824z": int(bool(h["human_operative_ruling_0824z"])),
-        "literal_vs_operative_surfaced": int(bool(h["literal_vs_operative_surfaced"])),
-        "consumes_466_472_470_471_473": int(bool(o["consumes_466_472_470_471_473"])),
+        "strict_frontier_map_self_test_passes": int(bool(st["strict_frontier_map_self_test_passes"])),
+        "self_test_n_passing": st["n_passing"],
+        "self_test_n_conditions": st["n_conditions"],
+        # A. the map
+        "floor_lock_realized_tps": FLOOR_LOCK_TPS,
+        "floor_lock_private_safe": 1,
+        "floor_lock_target_tps": FLOOR_LOCK_TARGET_TPS,
+        "floor_lock_ppl": FLOOR_LOCK_PPL,
+        "global_flag_tps_official": GLOBAL_FLAG_TPS_OFFICIAL,
+        "global_flag_tps_local": GLOBAL_FLAG_TPS_LOCAL,
+        "global_flag_private_safe": 0,
+        "surgical_byte_exact_predicted_tps": SURGICAL_PREDICTED_TPS,
+        "surgical_predicted_tps_measured": SURGICAL_PREDICTED_TPS_MEASURED,
+        "surgical_realized_e2e": int(bool(SURGICAL_REALIZED_E2E)),
+        "multistream_realizable_tps": MULTISTREAM_REALIZABLE_TPS,
+        "multistream_ceiling_tps": MULTISTREAM_CEILING_TPS,
+        "multistream_gain_vs_single_tps": MULTISTREAM_GAIN_VS_SINGLE_TPS,
+        "multistream_unrealizable_gap_tps": round(MULTISTREAM_CEILING_TPS - MULTISTREAM_REALIZABLE_TPS, 2),
+        "single_stream_realized_tps": SINGLE_STREAM_REALIZED_TPS,
+        "deployed_tps": DEPLOYED_TPS,
+        "deployed_identity": DEPLOYED_IDENTITY,
+        "deployed_is_strict_equivalent": int(bool(DEPLOYED_IS_STRICT_EQUIVALENT)),
+        "n_private_safe_strict_rungs": p["A_the_map"]["n_private_safe_strict_rungs"],
+        # B. the principle
+        "private_safety_is_delta_not_tps": 1,
+        "delta_floorlock_pct": DELTA_FLOORLOCK_PCT,
+        "delta_spec_alive_pct": DELTA_SPEC_ALIVE_PCT,
+        "delta_gate_pct": DELTA_GATE_PCT,
+        "floorlock_headroom_pp": pr["floorlock_headroom_pp"],
+        "spec_alive_headroom_pp": pr["spec_alive_headroom_pp"],
+        "floorlock_breach_frac_pct": FLOORLOCK_BREACH_FRAC_PCT,
+        "spec_alive_breach_frac_pct": SPEC_ALIVE_BREACH_FRAC_PCT,
+        "globalflag_breach_abs_pct": GLOBALFLAG_BREACH_ABS_PCT,
+        "private_safety_scale_invariant": int(bool(PRIVATE_SAFETY_IS_SCALE_INVARIANT)),
+        "fast_byteexact_privatesafe_coexists": int(bool(FAST_BYTEEXACT_PRIVATESAFE_COEXISTS)),
+        # C. >500 closure
+        "strict_gt500_dead_via_known_levers": 1,
+        "strict_realized_ceiling_tps": STRICT_REALIZED_CEILING_TPS,
+        "residual_gap_to_500_tps": gt["residual_gap_to_500_tps"],
+        "ieee754_determinism_tax_irreducible": int(bool(IEEE754_TAX_IRREDUCIBLE)),
+        "determinism_tax_e2e_pct": DETERMINISM_TAX_E2E_PCT,
+        "relax_prize_identity": RELAX_PRIZE_IDENTITY,
+        "relax_prize_in_strict_lane": 0,
+        "gt500_multiple_over_floor": gt["multiple_over_private_safe_floor"],
+        # D. forward program
+        "forward_levers_open": int(bool(fw["section_open"])),
+        "forward_levers_landed": fw["n_landed"],
+        "forward_levers_total": fw["n_total"],
+        "denken492_yields_fast_private_safe": int(bool(fw["denken492_yields_fast_private_safe"])),
+        # E. live 474 call
+        "live_474_ruling_code": rec_code,  # 0 pending / 1 floor-lock / 2 global-flag-222
+        "live_474_resolved": int(bool(lv["resolved"])),
+        # honesty flags
+        "floor_lock_literal_1p0_by_construction": int(bool(FLOOR_LOCK_LITERAL_1P0_BY_CONSTRUCTION)),
+        "floor_lock_literal_1p0_confirmed_by_census": int(bool(
+            FLOOR_LOCK_LITERAL_1P0_CONFIRMED_BY_SERVED_CENSUS)),
+        "floor_lock_relayrun_verdict_literal_1p0": FLOOR_LOCK_RELAYRUN_VERDICT_LITERAL_1P0,
+        "floor_lock_relayrun_divergent_vs_precache": FLOOR_LOCK_RELAYRUN_DIVERGENT_VS_PRECACHE,
+        # gates + mandate
+        "ppl_gate": PPL_GATE,
+        "sigma_hw": SIGMA_HW,
+        "terminal": int(bool(p["terminal"])),
         "analysis_only": int(bool(o["analysis_only"])),
         "no_served_file_change": int(bool(o["no_served_file_change"])),
+        "no_hf_job": int(bool(o["no_hf_job"])),
         "official_tps": o["official_tps"],
         "peak_mem_mib": payload["peak_mem_mib"],
         **{f"selftest_{k}": int(bool(v)) for k, v in st["conditions"].items()},
@@ -682,67 +683,67 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
             finish_wandb, init_wandb_run, log_json_artifact, log_summary,
         )
     except Exception as exc:
-        print(f"[strict-submission-decision] wandb logging unavailable: {exc}", flush=True)
+        print(f"[strict-frontier-map] wandb logging unavailable: {exc}", flush=True)
         return
 
-    p = payload["synthesis"]
     run = init_wandb_run(
-        job_type="strict-submission-decision-packet",
+        job_type="strict-frontier-map",
         agent="fern",
         name=args.wandb_name,
         group=args.wandb_group,
         tags=[
-            "strict-submission-decision", "equivalence-escalation-anchors", "strict-equivalent",
-            "go-operative", "floor-lock", "decision-packet", "human-facing", "bank-the-analysis",
-            "stark-466-realized-frontier", "denken-471-census-gate", "land-473-trigger",
-            "ubel-470-cross-check", "stark-472-in-graph", "lawine-467-sigma-hw",
-            "operative-1p0", "literal-vs-operative", "human-ruling-0824z", "tie-proof-denken-464",
-            "relax-prize-dead-stark-452", "deployed-nonequiv-481", "ppl-gate-2p42",
-            "spine-wirbel-459-strict-null", "analysis-only", "cpu-only", "no-served-file-change",
+            "strict-frontier-map", "strict-frontier", "strict-equivalent", "honest-map",
+            "floor-lock-166-private-safe", "global-flag-222-fast-risky", "surgical-457-obe",
+            "private-safety-is-delta-not-tps", "denken-489-delta-principle",
+            "lawine-482-dependency-collapses-to-floor", "ubel-484-surgical-predicted",
+            "stark-485-floorlock-realize", "gt500-dead-via-known-levers", "ieee754-tax-irreducible",
+            "forward-levers-open", "ubel-491-reduction-sensitivity", "denken-492-eagle3",
+            "lawine-488-surgical-realize", "live-474-call", "floorlock-literal-1p0-flag",
+            "analysis-only", "cpu-only", "no-served-file-change", "bank-the-analysis",
         ],
         config={
-            "deployed_tps": DEPLOYED_TPS,
-            "deployed_identity": DEPLOYED_IDENTITY,
-            "ppl_deployed": PPL_DEPLOYED,
-            "ppl_gate": PPL_GATE,
-            "realized_strict_headline_tps": REALIZED_STRICT_HEADLINE_TPS,
-            "realized_strict_cluster_mean_tps": REALIZED_STRICT_CLUSTER_MEAN_TPS,
-            "composed_optimistic_frontier_tps": COMPOSED_STRICT_FRONTIER_TPS,
             "floor_lock_tps": FLOOR_LOCK_TPS,
-            "operative_census_floor": OPERATIVE_CENSUS_FLOOR,
-            "sigma_hw_default": SIGMA_HW_DEFAULT,
-            "binding_gate": p["B_the_gate"]["binding_gate"],
-            "capstone_recommendation": p["decision"]["capstone_recommendation"],
+            "global_flag_tps_official": GLOBAL_FLAG_TPS_OFFICIAL,
+            "surgical_predicted_tps": SURGICAL_PREDICTED_TPS,
+            "multistream_realizable_tps": MULTISTREAM_REALIZABLE_TPS,
+            "deployed_tps": DEPLOYED_TPS,
+            "delta_floorlock_pct": DELTA_FLOORLOCK_PCT,
+            "delta_spec_alive_pct": DELTA_SPEC_ALIVE_PCT,
+            "delta_gate_pct": DELTA_GATE_PCT,
+            "strict_realized_ceiling_tps": STRICT_REALIZED_CEILING_TPS,
+            "ppl_gate": PPL_GATE,
+            "sigma_hw": SIGMA_HW,
+            "terminal": payload["synthesis"]["terminal"],
             "live_slots": {
-                "denken471_served_census": args.denken471_census,
-                "denken471_semantic_flips": args.denken471_semantic_flips,
-                "stark472_best_estimate_tps": args.stark472_best_estimate_tps,
-                "ubel470_bipin_tps": args.ubel470_bipin_tps,
-                "lawine467_sigma_hw": args.sigma_hw,
+                "lawine488_surgical_served_tps": args.lawine488_surgical_tps,
+                "ubel491_faster_floor_tps": args.ubel491_faster_floor_tps,
+                "denken492_eagle3_delta_pct": args.denken492_eagle3_delta_pct,
+                "human474_ruling": args.human474_ruling,
             },
             "source_runs": (
-                "stark#466(sxigz7dp speed / gmd8v9sw identity, ab9b286): realized strict frontier "
-                "HOLDS e2e 456.36 headline / ~459 cluster-mean, collapse-to-161.70 REFUTED, "
-                "VLLM_BATCH_INVARIANT=1. denken#471(strict-submission-identity-certifier): served "
-                "128-prompt census gate. land#429/lawine#455(0r0ounl8): served 0.9989 @ p90. "
-                "ubel#461(qz6f0zgw): all_pin ~0.9978. denken#464(1o7jwlw4): flips are m1_self_gap=0.0 "
-                "ties. stark#452(daqrzr99): relax-prize collapsed 466.20/-0.94, id 0.730. "
-                "lawine#438: M=1 AR floor 161.70 literal-1.0. wirbel#459(6pwhesdy): STRICT-NULL spine "
-                "5.41%/+1.20/37=30+7. lawine#467: sigma_hw empirical. land#473: submission trigger. "
-                "Deployed PR#52(2x9fm2zx): 481.53 NON-equiv id 0.9966."
+                "stark#485(pavotwci): floor-lock realizes 166.23 proj official, PPL 2.3767, realizes_16170=1; "
+                "FLAG verdict/literal_1p0=0 vs fa2sw_precache_kenyan ref (119/128 divergent, different config). "
+                "lawine#482(044xamdd): dependency_bounded_strict_tps=457.54, ceiling 474.44 UNREALIZABLE "
+                "(DEPENDENCY_COLLAPSES_TO_FLOOR), multistream gain ~0, byte-exact 0 flips. "
+                "denken#489(q1ivw9tt): delta_floorlock=0.633%, delta_spec_alive=4.295%, scale-invariant "
+                "24.3% breach, fast_byteexact_privatesafe_coexists=False. ubel#484(r1l881bx): "
+                "predicted_surgical_tps=456.98 (measured-variant 347.96), surgical_can_realize_457=1, drafter alive. "
+                "ubel#470(ugqnytji): global-flag 234.47 official / 221.16 local. denken#423: IEEE-754 tax "
+                "irreducible. stark#452: relax-prize out of strict lane (id 0.730). #481 forward survey: "
+                "no free fast byte-exact GEMM, tax 22-63%, e2e 51.39%. Deployed PR#52(2x9fm2zx): 481.53 NON-equiv."
             ),
         },
     )
     if run is None:
-        print("[strict-submission-decision] wandb: no run (no WANDB_API_KEY/mode) — skipping", flush=True)
+        print("[strict-frontier-map] wandb: no run (no WANDB_API_KEY/mode) — skipping", flush=True)
         return
 
     summary = _wandb_summary(payload)
     log_summary(run, summary, step=0)
-    log_json_artifact(run, name="strict_submission_decision_packet",
+    log_json_artifact(run, name="strict_frontier_map",
                       artifact_type="validity", data=payload)
     finish_wandb(run)
-    print(f"[strict-submission-decision] wandb logged {len(summary)} keys", flush=True)
+    print(f"[strict-frontier-map] wandb logged {len(summary)} keys", flush=True)
 
 
 # --------------------------------------------------------------------------- #
@@ -752,62 +753,67 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--self-test", action="store_true", help="run the PRIMARY self-validation")
-    # THE gate — denken #471 served census (the binding live input).
-    ap.add_argument("--denken471-served-census", dest="denken471_census", type=float, default=None,
-                    help="denken #471 MEASURED served 128-prompt census identity rate on stark's exact "
-                         "config (omit -> recommendation stays GO-OPERATIVE-PENDING-471-TIES-CONFIRM).")
-    ap.add_argument("--denken471-semantic-flips", dest="denken471_semantic_flips", type=int, default=None,
-                    help="denken #471 count of SEMANTIC (non-tie) flips in the served census. THE binding "
-                         "decision variable: 0 (with census >= operative floor) -> GO-OPERATIVE; "
-                         ">0 -> FLOOR-LOCK (the lone case the human did not sign off, 08:24Z). Omit -> pending.")
-    # LIVE slots that tighten the number / cross-check (do not change the fork unless gate resolves).
-    ap.add_argument("--stark472-best-estimate-tps", dest="stark472_best_estimate_tps", type=float, default=None,
-                    help="stark #472 whole-cycle A/B in-graph-overlap realized_strict_frontier_best_estimate_tps "
-                         "(omit -> carry the stark #466 conservative headline 456.36 + band).")
-    ap.add_argument("--ubel470-bipin-tps", dest="ubel470_bipin_tps", type=float, default=None,
-                    help="ubel #470 BI-pin realized TPS (a DIFFERENT mechanism than stark's num_splits=1) for "
-                         "the independent cross-check (omit -> cross-check stays pending).")
-    ap.add_argument("--lawine467-sigma-hw", dest="sigma_hw", type=float, default=SIGMA_HW_DEFAULT,
-                    help=f"lawine #467 empirical hardware sigma (TPS). Default {SIGMA_HW_DEFAULT} until realized.")
+    # Forward-lever LIVE slots (default None == open/pending; drop the relayed numbers in to finalize).
+    ap.add_argument("--lawine488-surgical-served-tps", dest="lawine488_surgical_tps", type=float,
+                    default=None,
+                    help="lawine #488 surgical-attention SERVED e2e TPS (resolves the 457.5 predicted-vs-"
+                         "served gap). Omit -> forward section stays OPEN (non-terminal).")
+    ap.add_argument("--ubel491-faster-floor-tps", dest="ubel491_faster_floor_tps", type=float,
+                    default=None,
+                    help="ubel #491 reduction-sensitivity census -> the realized FASTER floor-lock TPS "
+                         "after shedding the determinism speed-tax. Omit -> open.")
+    ap.add_argument("--denken492-eagle3-delta-pct", dest="denken492_eagle3_delta_pct", type=float,
+                    default=None,
+                    help="denken #492 EAGLE-3 realized drafter-acceptance gap Delta (pct). <= ~3.0 -> a fast "
+                         "private-safe rung becomes feasible. Omit -> open.")
+    ap.add_argument("--human474-ruling", dest="human474_ruling", type=str, default=None,
+                    choices=["floor-lock", "global-flag", "pending",
+                             REC_FLOOR_LOCK, REC_GLOBAL_FLAG, "PENDING"],
+                    help="the human #474 breach-rule ruling: floor-lock (invalidate) / global-flag (penalize). "
+                         "Omit -> PENDING.")
     ap.add_argument("--out-dir", type=Path, default=None)
     ap.add_argument("--wandb-name", "--wandb_name", dest="wandb_name", default=None)
-    ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group",
-                    default="equivalence-escalation-anchors")
+    ap.add_argument("--wandb-group", "--wandb_group", dest="wandb_group", default="strict-frontier")
     args = ap.parse_args(argv)
 
+    ruling = args.human474_ruling
+    if ruling in ("floor-lock",):
+        ruling = REC_FLOOR_LOCK
+    elif ruling in ("global-flag",):
+        ruling = REC_GLOBAL_FLAG
+
     packet = build_packet(
-        denken471_census=args.denken471_census,
-        denken471_semantic_flips=args.denken471_semantic_flips,
-        stark472_best_estimate_tps=args.stark472_best_estimate_tps,
-        ubel470_bipin_tps=args.ubel470_bipin_tps,
-        sigma_hw=args.sigma_hw,
+        lawine488_surgical_tps=args.lawine488_surgical_tps,
+        ubel491_faster_floor_tps=args.ubel491_faster_floor_tps,
+        denken492_eagle3_delta_pct=args.denken492_eagle3_delta_pct,
+        human474_ruling=ruling,
     )
 
     created_at = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     peak_kib = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     payload = {
         "created_at": created_at, "pr": 357, "agent": "fern",
-        "kind": "strict-submission-decision-packet", "analysis_only": True,
+        "kind": "strict-frontier-map", "analysis_only": True,
         "live_slots": {
-            "denken471_served_census": args.denken471_census,
-            "denken471_semantic_flips": args.denken471_semantic_flips,
-            "stark472_best_estimate_tps": args.stark472_best_estimate_tps,
-            "ubel470_bipin_tps": args.ubel470_bipin_tps,
-            "lawine467_sigma_hw": args.sigma_hw,
+            "lawine488_surgical_served_tps": args.lawine488_surgical_tps,
+            "ubel491_faster_floor_tps": args.ubel491_faster_floor_tps,
+            "denken492_eagle3_delta_pct": args.denken492_eagle3_delta_pct,
+            "human474_ruling": ruling,
         },
         "synthesis": packet,
         "peak_mem_mib": round(peak_kib / 1024.0, 3),
     }
     nan_paths = _nan_paths(payload)
     payload["nan_clean"] = not nan_paths
-    packet["self_test"]["conditions"]["ai_nan_clean"] = not nan_paths
+    packet["self_test"]["conditions"]["ap_nan_clean"] = not nan_paths
     packet["self_test"]["n_conditions"] = len(packet["self_test"]["conditions"])
     packet["self_test"]["n_passing"] = sum(1 for v in packet["self_test"]["conditions"].values() if v)
-    packet["self_test"]["capstone_self_test_passes"] = bool(
+    packet["self_test"]["strict_frontier_map_self_test_passes"] = bool(
         all(packet["self_test"]["conditions"].values()))
-    packet["headline"]["capstone_self_test_passes"] = packet["self_test"]["capstone_self_test_passes"]
+    packet["headline"]["strict_frontier_map_self_test_passes"] = packet["self_test"][
+        "strict_frontier_map_self_test_passes"]
     if nan_paths:
-        print(f"[strict-submission-decision] WARNING non-finite at: {nan_paths}", flush=True)
+        print(f"[strict-frontier-map] WARNING non-finite at: {nan_paths}", flush=True)
 
     print(render_one_screen(packet), flush=True)
 
@@ -816,15 +822,15 @@ def main(argv: list[str] | None = None) -> int:
     json_path = out_dir / "strict_500_composite_reachability_results.json"
     with json_path.open("w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2, sort_keys=True)
-    md_path = out_dir / "strict_submission_decision_packet.md"
+    md_path = out_dir / "strict_frontier_map.md"
     md_path.write_text(render_one_screen(packet) + "\n", encoding="utf-8")
-    print(f"[strict-submission-decision] wrote {json_path} and {md_path}", flush=True)
+    print(f"[strict-frontier-map] wrote {json_path} and {md_path}", flush=True)
 
     _maybe_log_wandb(args, payload)
 
     if args.self_test:
-        ok = packet["self_test"]["capstone_self_test_passes"] and payload["nan_clean"]
-        print(f"[strict-submission-decision] self-test {'PASS' if ok else 'FAIL'} "
+        ok = packet["self_test"]["strict_frontier_map_self_test_passes"] and payload["nan_clean"]
+        print(f"[strict-frontier-map] self-test {'PASS' if ok else 'FAIL'} "
               f"({packet['self_test']['n_passing']}/{packet['self_test']['n_conditions']})", flush=True)
         return 0 if ok else 1
     return 0

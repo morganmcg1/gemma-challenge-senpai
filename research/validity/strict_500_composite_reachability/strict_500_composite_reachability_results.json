@@ -1,208 +1,250 @@
 {
   "agent": "fern",
   "analysis_only": true,
-  "created_at": "20260616T084445Z",
-  "kind": "strict-submission-decision-packet",
+  "created_at": "20260616T124333Z",
+  "kind": "strict-frontier-map",
   "live_slots": {
-    "denken471_semantic_flips": null,
-    "denken471_served_census": null,
-    "lawine467_sigma_hw": 4.8153,
-    "stark472_best_estimate_tps": null,
-    "ubel470_bipin_tps": null
+    "denken492_eagle3_delta_pct": null,
+    "human474_ruling": null,
+    "lawine488_surgical_served_tps": null,
+    "ubel491_faster_floor_tps": null
   },
   "nan_clean": true,
-  "peak_mem_mib": 12.074,
+  "peak_mem_mib": 12.043,
   "pr": 357,
   "synthesis": {
-    "A_the_number": {
-      "composed_eta_attn_pct": 3.08,
-      "composed_optimistic_frontier_tps": 467.14,
-      "composed_vs_realized_drift_tps": 10.78,
-      "composition_was_optimistic": true,
-      "config_reachable_via": "VLLM_BATCH_INVARIANT=1",
-      "deficit_vs_deployed_cluster_mean_tps": 22.53,
-      "deficit_vs_deployed_headline_tps": 25.17,
-      "gain_over_floor_tps": 294.66,
-      "no_kernel_rebuild": true,
-      "no_served_source_edit": true,
-      "provenance": "stark#466 sxigz7dp(speed)/gmd8v9sw(identity) ab9b286; stark#472 in flight",
-      "realized_eta_attn_pct": 5.5,
-      "realized_strict_band_tps": [
-        456.5,
-        467.14
-      ],
-      "realized_strict_cluster_mean_tps": 459.0,
-      "realized_strict_headline_tps": 456.36,
-      "realized_strict_l_envelope_tps": [
-        456.5,
-        461.6
-      ],
-      "stark472_best_estimate_live": false,
-      "strict_frontier_collapses_to_m1": false
+    "A_the_map": {
+      "deployed_outside_strict_set": true,
+      "n_private_safe_strict_rungs": 1,
+      "n_strict_rungs": 3,
+      "only_private_safe_rung": "floor-lock M=1 AR (no drafter)",
+      "rungs": [
+        {
+          "breach_frac_pct": 0.0008,
+          "delta_pct": 0.6334,
+          "identity_confirmed_by_served_census": false,
+          "identity_label": "literal-1.0 (by construction; served census pending)",
+          "ppl": 2.3767,
+          "private_safe": true,
+          "realized_provenance": "stark#485 pavotwci projected_official=166.234, realizes_16170=1",
+          "realized_tps": 166.23,
+          "rung": "floor-lock M=1 AR (no drafter)",
+          "ship_status": "the strict rung that STICKS (private-safe, guaranteed honest)",
+          "strict": true,
+          "submission": "fa2sw_strict_m1ar_int4"
+        },
+        {
+          "breach_frac_pct": 24.306,
+          "delta_pct": 4.2946,
+          "identity_confirmed_by_served_census": true,
+          "identity_label": "operative-1.0 (0 semantic flips; denken #471 census)",
+          "ppl": 2.3772,
+          "private_safe": false,
+          "realized_provenance": "land 222.32 local / ubel#470 ugqnytji 234.47 official",
+          "realized_tps": 234.47,
+          "rung": "global-flag VLLM_BATCH_INVARIANT=1 (drafter alive)",
+          "ship_status": "the live #474 call: fast-but-private-RISKY (needs manifest env edit, gated)",
+          "strict": true,
+          "submission": "fa2sw_precache_kenyan + manifest env BI=1"
+        },
+        {
+          "breach_frac_pct": 24.306,
+          "delta_pct": 4.2946,
+          "identity_confirmed_by_served_census": false,
+          "identity_label": "byte-exact at the attention locus (1.0000, 0 flips)",
+          "ppl": 2.3772,
+          "private_safe": false,
+          "realized_provenance": "ubel#484 r1l881bx predicted=456.98 (measured-variant 347.96); lawine#482 044xamdd realizable=457.54, ceiling 474.44 UNREALIZABLE",
+          "realized_tps": 456.98,
+          "rung": "surgical attn-only / 2D byte-exact frontier (drafter alive)",
+          "ship_status": "strong PUBLIC rung but OBE as a strict SHIP: PREDICTED not served (pending lawine #488) AND private-RISKY (same Delta as the 222)",
+          "strict": true,
+          "submission": "(unpackaged; surgical attention pin)"
+        },
+        {
+          "breach_frac_pct": null,
+          "delta_pct": 4.2946,
+          "identity_confirmed_by_served_census": true,
+          "identity_label": "NON-equivalent (0.9966, 3 ties) -- OUTSIDE strict set",
+          "ppl": 2.3772,
+          "private_safe": null,
+          "realized_provenance": "PR#52 2x9fm2zx deployed fast path",
+          "realized_tps": 481.53,
+          "rung": "deployed PR#52 (reference, NON-equivalent)",
+          "ship_status": "outside the strict feasible set; the incumbent reference only",
+          "strict": false,
+          "submission": "fa2sw_precache_kenyan (deployed)"
+        }
+      ]
     },
-    "B_the_gate": {
-      "binding_gate": "denken#471 served census == 1.0",
-      "census_prior": {
-        "land429_lawine455_served_p90": 0.9989,
-        "stark466_locus": 1.0,
-        "ubel461_allpin_floor": 0.9978
-      },
-      "census_prior_span": 0.0022,
-      "census_tension_rendered": true,
-      "do_not_duplicate": true,
-      "reconciliation_hypothesis": "the order-preserving 2D reduction REMOVES the attention 3D split-KV reassociation that produces the near-tie population (denken #464) -> served census SHOULD resolve to operative-1.0; pending denken #471 confirm.",
-      "resolver": "denken#471 strict-submission-identity-certifier (full 128-prompt served census)",
-      "tie_proof_m1_self_gap": 0.0,
-      "ties_are_downstream_invisible": true
+    "B_the_principle": {
+      "conclusion": "the floor-lock (no drafter, Delta 0.633%) is the ONLY strict private-safe ship; fast + byte-exact != private-safe",
+      "delta_floorlock_pct": 0.6334,
+      "delta_gate_pct": 5.0,
+      "delta_spec_alive_pct": 4.2946,
+      "fast_byteexact_privatesafe_coexists": false,
+      "floorlock_breach_frac_pct": 0.0008,
+      "floorlock_headroom_pp": 4.3666,
+      "provenance": "denken#489 q1ivw9tt",
+      "scale_invariant": true,
+      "scale_invariant_note": "the 222, the 457 and the deployed 481 all carry the SAME Delta = 4.295% -> the SAME 24.3% one-shot breach, regardless of TPS",
+      "spec_alive_breach_frac_pct": 24.306,
+      "spec_alive_headroom_pp": 0.7054,
+      "statement": "private-safety = f(Delta drafter-acceptance gap), NOT f(TPS)"
     },
-    "C_the_fork": {
-      "BLOCKED_retired": {
-        "retired_by": "human operative-1.0 ruling (#407, 08:24Z)",
-        "was": "literal <1.0 -> don't ship"
-      },
-      "FLOOR_LOCK": {
-        "condition": "denken#471 surfaces a SEMANTIC (non-tie) flip",
-        "fire": "senpai-strict-m1ar-161",
-        "note": "literal-1.0 by construction (lawine #438); the honest baseline entry, not the headline win.",
-        "tps": 161.7
-      },
-      "GO_OPERATIVE": {
-        "condition": "denken#471 census >= 0.99 AND n_semantic_flips == 0 (ties OK per human 08:24Z)",
-        "fire": "senpai-strict-eqv-456",
-        "note": "the realized honest strict win, +~295 over the floor; land #473 staged ready-to-fire.",
-        "tps": 456.36
-      }
-    },
-    "D_cross_check": {
-      "all_within_sigma_hw": true,
-      "confidence": "pending_cross_check",
-      "n_independent_landed": 0,
-      "points_tps": {
-        "stark466_cluster_mean": 459.0,
-        "stark466_headline": 456.36
-      },
-      "sigma_hw": 4.8153,
-      "spread_tps": 2.64
-    },
-    "E_reference_frame": {
-      "deployed_flips": [
-        11,
-        18,
-        118
-      ],
-      "deployed_identity": 0.9966,
-      "deployed_is_strict_equivalent": false,
-      "deployed_outside_strict_feasible_set": true,
-      "deployed_tps": 481.53,
-      "ppl": 2.3772,
-      "ppl_clears_gate": true,
-      "ppl_gate": 2.42,
-      "relax_lane_verdict": "DEAD (strictly dominated: ~0 gain AND worse identity) \u2014 stay strict",
-      "relax_prize_flips": 3317,
-      "relax_prize_gain_vs_strict_tps": -0.94,
+    "C_gt500_closure": {
+      "determinism_tax_e2e_pct": 51.39,
+      "gt500_target_tps": 500.0,
+      "ieee754_determinism_tax_irreducible": true,
+      "is_genuinely_new_method_problem": true,
+      "multiple_over_private_safe_floor": 3.01,
+      "no_free_fast_byte_exact_gemm": true,
+      "only_gt500_path": "greedy-UNSAFE ~16% GEMM relax-prize (out of strict lane; escalated to human #407)",
+      "provenance": "denken#423 (IEEE-754 tax); #481 forward survey; stark#452 (relax-prize out of lane)",
       "relax_prize_identity": 0.73,
-      "relax_prize_realized_tps": 466.2,
-      "sigma_hw": 4.8153,
-      "spine_byte_exact_retune_ceiling_tps": 1.2,
-      "spine_geometry_layers": 37,
-      "spine_reopens_strict_supply": false,
-      "spine_verify_attn_surface_pct": 5.41
+      "relax_prize_in_strict_lane": false,
+      "relax_prize_realized_gain_tps": -0.94,
+      "residual_gap_to_500_tps": 32.86,
+      "strict_realized_ceiling_tps": 467.14,
+      "verdict": "strict >500 is DEAD via all known levers"
+    },
+    "D_forward_program": {
+      "denken492_eagle3_delta_pct": null,
+      "denken492_yields_fast_private_safe": false,
+      "lawine488_surgical_served_tps": null,
+      "levers": {
+        "denken492_eagle3_drafter": {
+          "attacks": "the drafter Delta-gate (keeps a drafter for speed)",
+          "axis": "private-Delta",
+          "landed": false,
+          "question": "can EAGLE-3 pull Delta_accept <= ~3.0% -> a fast strict PRIVATE-safe rung?"
+        },
+        "lawine488_surgical_realization": {
+          "attacks": "the predicted-vs-measured realization gap (ubel #484: 456.98 pred vs 347.96 measured)",
+          "axis": "TPS-realization",
+          "landed": false,
+          "question": "is the surgical-457 a REAL served strict rung above 222, or another mirage?"
+        },
+        "ubel491_reduction_sensitivity": {
+          "attacks": "the determinism TPS-tax (keeps Delta safe: the floor-lock has no drafter)",
+          "axis": "TPS-ceiling",
+          "landed": false,
+          "question": "which decode matmuls MUST be deterministic? shed the rest -> a FASTER floor-lock"
+        }
+      },
+      "n_landed": 0,
+      "n_total": 3,
+      "only_faster_and_safe_is_their_conjunction": true,
+      "orthogonal_axes": {
+        "denken492": "drafter Delta-gate -> a PRIVATE-SAFE fast rung (keeps a drafter)",
+        "ubel491": "determinism TPS-tax -> a FASTER floor-lock (Delta stays safe)"
+      },
+      "section_open": true,
+      "ubel491_faster_floor_tps": null
+    },
+    "E_live_474_call": {
+      "advisor_recommendation": "FLOOR-LOCK unless a breach is known to be only a penalty",
+      "binding_question": "does a private re-draw over the 5% gate INVALIDATE (waste the one shot) or PENALIZE (scored on the lower private number)?",
+      "fork": {
+        "FLOOR_LOCK": {
+          "breach_rule": "pick this if a private re-draw over 5% INVALIDATES the submission",
+          "fire": "senpai-strict-m1ar-161 (166.23 realized)",
+          "rationale": "a guaranteed-valid strict number that STICKS (Delta 0.633%, private-safe)"
+        },
+        "GLOBAL_FLAG_222": {
+          "breach_rule": "pick this if a private re-draw over 5% only PENALIZES (scored lower)",
+          "fire": "senpai-strict-eqv (222/234 realized)",
+          "rationale": "crushes the floor on public TPS; even a breached 222 scores ~224 > 161"
+        }
+      },
+      "human_ruling": "PENDING",
+      "provenance": "#474 (10:24Z human ruled 222; 11:16Z reopened by denken #486 private-gap risk)",
+      "resolved": false
     },
     "agent": "fern",
-    "decision": {
-      "capstone_recommendation": "GO-OPERATIVE-PENDING-471-TIES-CONFIRM",
-      "census_resolved": false,
-      "denken471_semantic_flips": null,
-      "denken471_served_census": null,
-      "fire_submission_name": "senpai-strict-eqv-456",
-      "fire_tps": 456.36,
-      "gate_state": "pending",
-      "operative_census_floor": 0.99,
-      "rationale": "denken #471 served census not yet landed; recommendation is a CONDITIONAL GO-OPERATIVE pending the tie-confirm (human pre-accepted ties 08:24Z).",
-      "realized_best_estimate_tps": 456.36
-    },
     "headline": {
-      "binding_gate": "denken#471 served census == 1.0",
-      "capstone_recommendation": "GO-OPERATIVE-PENDING-471-TIES-CONFIRM",
-      "capstone_self_test_passes": true,
-      "cross_check_confidence": "pending_cross_check",
-      "deployed_tps": 481.53,
-      "fire_submission_name": "senpai-strict-eqv-456",
-      "fire_tps": 456.36,
-      "floor_lock_tps": 161.7,
-      "realized_strict_band_tps": [
-        456.5,
-        467.14
-      ],
-      "realized_strict_headline_tps": 456.36
+      "floor_lock_private_safe": true,
+      "floor_lock_realized_tps": 166.23,
+      "forward_levers_open": true,
+      "global_flag_tps": 234.47,
+      "live_474_call": "PENDING",
+      "multistream_realizable_tps": 457.54,
+      "private_safety_is_delta_not_tps": true,
+      "strict_frontier_map_self_test_passes": true,
+      "strict_gt500_dead_via_known_levers": true,
+      "surgical_byte_exact_predicted_tps": 456.98,
+      "terminal": false
     },
-    "honesty_hinge": {
-      "claimed_as_literal_1p0": false,
-      "example_label": "operative-1.0: 0.9989, 1 tied flip @ p90, 0 semantic",
-      "human_operative_ruling_0824z": true,
-      "literal_vs_operative_resolution": "human ruled operative is honest-strict (08:24Z)",
-      "literal_vs_operative_surfaced": true,
-      "submission_labeled_with_true_census": true
-    },
-    "kind": "strict-submission-decision-packet",
+    "kind": "strict-frontier-map",
     "ownership": {
       "analysis_only": true,
-      "consumed_cards": [
-        "stark#466",
-        "stark#472",
+      "consumes_cards": [
+        "stark#485",
+        "lawine#482",
+        "denken#489",
+        "ubel#484",
         "ubel#470",
         "denken#471",
-        "land#473"
+        "land#473",
+        "denken#423"
       ],
-      "consumes_466_472_470_471_473": true,
-      "denken471": "the identity oracle (served census)",
-      "land473": "the execution machinery (submission command + approval + board post)",
+      "denken471": "the served-census identity oracle",
+      "land473": "the submission trigger",
+      "no_hf_job": true,
       "no_served_file_change": true,
       "official_tps": 0,
-      "this_packet": "the human-facing decision narrative (synthesis only)"
+      "this_packet": "the human-facing strict-frontier MAP (CPU-only synthesis)"
     },
     "pr": 357,
     "self_test": {
-      "capstone_self_test_passes": true,
       "conditions": {
-        "a_floor_lt_headline": true,
-        "aa_xcheck_confidence_defined": true,
-        "ab_xcheck_spread_consistent": true,
-        "ac_analysis_only": true,
-        "ad_no_served_file_change": true,
-        "ae_official_tps_zero": true,
-        "af_consumes_all_cards": true,
-        "ag_literal_vs_operative_surfaced": true,
-        "ah_human_ruling_recorded": true,
-        "ai_nan_clean": true,
-        "b_headline_lt_deployed": true,
-        "c_floor_lt_deployed": true,
-        "d_band_low_le_high": true,
-        "e_clustermean_in_band": true,
-        "f_headline_le_clustermean": true,
-        "g_clustermean_le_composed": true,
-        "h_band_high_is_composed": true,
-        "i_drift_equals_difference": true,
-        "j_drift_exceeds_sigma_hw": true,
-        "k_realized_eta_exceeds_composed_eta": true,
-        "l_collapse_refuted": true,
-        "m_census_prior_ordered": true,
-        "n_census_prior_within_operative_band": true,
-        "o_census_tension_rendered": true,
-        "p_ties_downstream_invisible": true,
-        "q_relax_gain_nonpositive": true,
-        "r_relax_gain_equals_difference": true,
-        "s_relax_identity_worse_than_deployed": true,
-        "t_spine_below_materiality": true,
-        "u_spine_does_not_reopen_supply": true,
-        "v_geometry_sums": true,
-        "w_ppl_clears_gate": true,
-        "x_recommendation_valid": true,
-        "y_fork_matches_inputs": true,
-        "z_fire_tps_consistent": true
+        "a_floor_lt_globalflag": true,
+        "aa_no_forward_lever_landed": true,
+        "ab_terminal_iff_forward_closed": true,
+        "ac_two_orthogonal_axes": true,
+        "ad_live474_ruling_valid": true,
+        "ae_live474_resolved_consistent": true,
+        "af_floorlock_literal_flag_honest": true,
+        "ag_floorlock_tps_independently_solid": true,
+        "ah_surgical_predicted_not_served": true,
+        "ai_surgical_realization_gap_real": true,
+        "aj_floorlock_ppl_clears_gate": true,
+        "ak_deployed_ppl_clears_gate": true,
+        "al_analysis_only": true,
+        "am_no_served_file_change": true,
+        "an_no_hf_job": true,
+        "ao_official_tps_zero": true,
+        "ap_nan_clean": true,
+        "b_globalflag_lt_surgical": true,
+        "c_surgical_lt_deployed": true,
+        "d_floor_realizes_target": true,
+        "e_multistream_gain_near_zero": true,
+        "f_realizable_below_ceiling": true,
+        "g_unrealizable_gap_positive": true,
+        "h_realizable_matches_single_stream": true,
+        "i_floorlock_delta_below_gate": true,
+        "j_specalive_delta_below_gate": true,
+        "k_floorlock_delta_lt_specalive": true,
+        "l_floorlock_more_headroom": true,
+        "m_floorlock_breach_lt_specalive": true,
+        "n_scale_invariant": true,
+        "o_fast_byteexact_not_private_safe": true,
+        "p_exactly_one_private_safe_rung": true,
+        "q_only_safe_rung_is_floorlock": true,
+        "r_surgical_fast": true,
+        "s_surgical_byte_exact": true,
+        "t_surgical_not_private_safe": true,
+        "u_strict_ceiling_below_500": true,
+        "v_gt500_gap_positive": true,
+        "w_relax_prize_out_of_strict_lane": true,
+        "x_relax_prize_dominated": true,
+        "y_gt500_is_new_method_problem": true,
+        "z_forward_section_open": true
       },
-      "n_conditions": 35,
-      "n_passing": 35
-    }
+      "n_conditions": 42,
+      "n_passing": 42,
+      "strict_frontier_map_self_test_passes": true
+    },
+    "terminal": false
   }
 }
