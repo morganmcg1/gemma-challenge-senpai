@@ -1,0 +1,413 @@
+{
+  "agent": "land",
+  "created_at": "20260616T072021Z",
+  "kind": "relax-execution-readiness",
+  "nan_clean": true,
+  "peak_mem_mib": 13.574,
+  "pr": 465,
+  "synthesis": {
+    "banked_roundtrip": {
+      "all_roundtrip_ok": true,
+      "cost_ledger_self_test_passed": true,
+      "decision_surface_self_test_passed": true,
+      "faster_int4_gemm_requires_build_banked": true,
+      "fp32off_proxy_ub_tps_banked": 0.6416254072425431,
+      "fp32reduce_off_is_byteexact_banked": false,
+      "has_byteexact_selectable_headroom_banked": false,
+      "max_roundtrip_resid": 0.0,
+      "roundtrip_resid": {
+        "audit_deployed_tps_resid": 0.0,
+        "audit_ppl_resid": 0.0,
+        "audit_proxy_ub_resid": 0.0,
+        "ceil_realistic_gain_resid": 0.0,
+        "ceil_realistic_tps_resid": 0.0,
+        "led_ceiling_gain_resid": 0.0,
+        "led_gate_margin_resid": 0.0,
+        "led_realistic_gain_resid": 0.0,
+        "surf_decision_flip_threshold_resid": 0.0,
+        "surf_max_admissible_ppl_resid": 0.0,
+        "surf_ppl_margin_resid": 0.0,
+        "surf_realistic_k1_resid": 0.0
+      },
+      "served_default_config_banked": "use_fp32_reduce=True, use_atomic_add=False, is_k_full=True, W4A16",
+      "served_kernel_banked": "MarlinLinearKernel"
+    },
+    "constants": {
+      "best_byte_exact_lever_tps": 0.26,
+      "decision_flip_tps_threshold": 12.234607826845867,
+      "deployed_flips": 3,
+      "deployed_tps": 481.53,
+      "fp32off_proxy_ub_tps": 0.6416254072425431,
+      "k_headline": 1,
+      "ppl_anchor": 2.3772,
+      "ppl_gate": 2.42,
+      "ppl_gate_margin": 0.04279999999999973,
+      "relax_ceiling_tps_gain": 29.342423044997304,
+      "relax_realistic_tps": 498.57990782684584,
+      "relax_realistic_tps_gain": 17.049907826845867,
+      "served_default_flag": "use_fp32_reduce=True",
+      "served_kernel": "MarlinLinearKernel",
+      "served_manifest": "submissions/fa2sw_precache_kenyan/manifest.json",
+      "served_submission": "submissions/fa2sw_precache_kenyan",
+      "sigma_hw": 4.8153,
+      "stark452_realized_flips": 3317,
+      "stark452_realized_identity": 0.73,
+      "stark452_realized_ppl": 2.3782,
+      "stark452_realized_same_kind": false,
+      "stark452_realized_tps": 466.2,
+      "stark452_run_ids": [
+        "daqrzr99",
+        "00ovtdnt"
+      ],
+      "strict_frontier_tps": 467.14
+    },
+    "handoff_line": "EXECUTION SKELETON (for fern #357, the 'if GO, here is the action'): the relax-prize is the int4-Marlin K-reduction split-K re-partition (+17.0..+29.3 over deployed 481.53); NO Python knob -> needs a patched-Marlin wheel BUILD (the in-tree `use_fp32_reduce=True->False` flag is only a +0.64 proxy). 10 <PENDING #452> slots. VALIDATE: (a) TPS CI-clean >= deployed+B at 1 sigma_hw [recommend clause-1]; (b) PPL <= 2.42 [clause-2]; (c) same-KIND flips [clause-3]; (d) 128/128 [precondition]. execution_verdict() = imported recommend() (GO->SHIP-READY / CI-AMBIGUOUS->HOLD / NO-GO->ROLLBACK) + 128/128 gate. ROLLBACK = single-knob byte-for-byte return to 481.53. Applying is HUMAN-GATED (Directive #3). || RESOLVED 2026-06-16: stark #452 LANDED NEGATIVE (466.20 TPS dominated, identity 0.730, cascading new-KIND; PPL 2.3782 passed). The SHIPPED execution_verdict() returns ROLLBACK (bar-invariant) \u2014 the relax lane is CLOSED. PPL alone would have waved it through; the TPS-domination + KIND clauses caught it. fern reads this as 'the gate, validated against the config that failed it.'",
+    "headline": {
+      "analysis_only": true,
+      "decision_flip_tps_threshold": 12.234607826845867,
+      "exec_skeleton_maps_to_recommend": true,
+      "fp32off_proxy_ub_tps": 0.6416254072425431,
+      "max_admissible_relax_ppl": 2.42,
+      "no_served_file_change": true,
+      "official_tps": 0,
+      "ppl": 2.3772,
+      "ppl_gate_margin": 0.04279999999999973,
+      "prize_gain_ceiling": 29.342423044997304,
+      "prize_gain_realistic": 17.049907826845867,
+      "realized_live_verdict": "ROLLBACK",
+      "realized_ppl_alone_would_pass": true,
+      "realized_relax_flips": 3317,
+      "realized_relax_gain_over_deployed": -15.33,
+      "realized_relax_identity": 0.73,
+      "realized_relax_ppl": 2.3782,
+      "realized_relax_tps": 466.2,
+      "realized_verdict_is_bar_invariant_rollback": true,
+      "relax_change_is_single_knob_reversible": true,
+      "relax_exec_self_test_passes": true,
+      "relax_exec_spec_pending_slots": 10,
+      "relax_lane_status": "CLOSED",
+      "stark452_landed": true,
+      "validation_checklist_clauses": 4
+    },
+    "imports": {
+      "machinery": "imports #462 recommend(); round-trips committed #462/#458/#457/#448 JSONs; re-derives nothing",
+      "provenance": "land#462 sb1n4aa6 (recommend() IMPORTED verbatim; decision_flip_tps_threshold 12.2346, max_admissible_relax_ppl 2.42, ppl margin 0.0428, most-sensitive ppl) x land#458 uhhyec0q (gains +17.05/+29.34, gate margin 0.0428, deployed-off-strict reframe) x land#457 h0uggl9i (= ubel #450 c5oyb7gv roofline: realistic split-K 498.58, ceiling 510.87) x stark#448 fn4iz0dz (served int4-GEMM knob audit: Marlin unique on sm86, use_fp32_reduce=True default, no byte-exact selectable headroom, prize requires build, fp32off UB +0.64) x stark#452 daqrzr99/00ovtdnt (LANDED NEGATIVE: realized relax 466.20 TPS dominated, identity 0.730, 3317 cascading new-KIND flips, PPL 2.3782 passed -> gate ROLLBACK, relax lane CLOSED). The parameterized <PENDING #452> form is KEPT alongside the realized overlay. All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "prewire_stark452": {
+      "action_space": [
+        "SHIP-READY",
+        "HOLD",
+        "ROLLBACK"
+      ],
+      "execution_verdict_signature": "execution_verdict(measured_tps, measured_ppl, flip_kind_same, completed, human_bar_tps, k=1)",
+      "handed_to_fern_357": "fern #357 presents the one-screen GO/NO-GO + this skeleton as the 'if GO, here is the exact next action'. This card does NOT duplicate the capstone verdict \u2014 it produces the execution wrapper only.",
+      "live_status": "the moment stark #452 reports (TPS, PPL, flip-kind, N, completed), each fills a slot and execution_verdict() returns the ACTION. RESOLVED 2026-06-16: stark #452 LANDED (466.20 TPS dominated, identity 0.730, cascading new-KIND) -> bar-INVARIANT ROLLBACK (see realized_stark452). The generic skeleton would resolve to SHIP-READY only on PPL <= 2.42 + same-kind + 128/128 at a human bar <= +12.23; the realized config clears NONE of {TPS, KIND}, so the gate refuses it.",
+      "one_to_one_slot_map": [
+        {
+          "drives": "validation clause-a (CI-clean gain over deployed + human bar B)",
+          "fills_slot": "measured_relax_tps",
+          "stark452_reports": "realized relax TPS"
+        },
+        {
+          "drives": "validation clause-b (hard gate PPL <= 2.42)",
+          "fills_slot": "measured_relax_ppl",
+          "stark452_reports": "realized relax PPL"
+        },
+        {
+          "drives": "validation clause-c (same accumulation-order family)",
+          "fills_slot": "measured_relax_flip_kind",
+          "stark452_reports": "realized flip characterization (KIND)"
+        },
+        {
+          "drives": "reported for transparency; ORTHOGONAL \u2014 never gates (the KIND does)",
+          "fills_slot": "measured_relax_flip_count",
+          "stark452_reports": "realized flip-count N"
+        },
+        {
+          "drives": "validation clause-d (128/128 validity precondition)",
+          "fills_slot": "completed",
+          "stark452_reports": "completed count"
+        }
+      ],
+      "worked_corners": [
+        {
+          "bar": 0.26,
+          "completed": 128,
+          "label": "modeled realistic gain, PPL-neutral (== anchor), same-kind, 128/128, ref bar +0.26",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "tps": 498.57990782684584,
+          "verdict": "SHIP-READY"
+        },
+        {
+          "bar": 0.26,
+          "completed": 128,
+          "label": "modeled realistic gain, PPL BREACH (2.43), same-kind, 128/128, ref bar +0.26",
+          "ppl": 2.43,
+          "same_kind": true,
+          "tps": 498.57990782684584,
+          "verdict": "ROLLBACK"
+        },
+        {
+          "bar": 0.26,
+          "completed": 128,
+          "label": "modeled realistic gain, PPL at gate (2.42), same-kind, 128/128, ref bar +0.26",
+          "ppl": 2.42,
+          "same_kind": true,
+          "tps": 498.57990782684584,
+          "verdict": "SHIP-READY"
+        },
+        {
+          "bar": 0.26,
+          "completed": 128,
+          "label": "modeled realistic gain, PPL-neutral, NEW-kind break, 128/128, ref bar +0.26",
+          "ppl": 2.3772,
+          "same_kind": false,
+          "tps": 498.57990782684584,
+          "verdict": "ROLLBACK"
+        },
+        {
+          "bar": 15.0,
+          "completed": 128,
+          "label": "modeled realistic gain, PPL-neutral, same-kind, 128/128, bar +15 (in [12.23 CI, 17.05 pt])",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "tps": 498.57990782684584,
+          "verdict": "HOLD"
+        },
+        {
+          "bar": 0.26,
+          "completed": 120,
+          "label": "modeled realistic gain, PPL-neutral, same-kind, ONLY 120/128 completed, ref bar +0.26",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "tps": 498.57990782684584,
+          "verdict": "ROLLBACK"
+        },
+        {
+          "bar": 20.0,
+          "completed": 128,
+          "label": "CEILING gain +29.34, PPL-neutral, same-kind, 128/128, aggressive bar +20 (24.53 CI >= 20)",
+          "ppl": 2.3772,
+          "same_kind": true,
+          "tps": 510.8724230449973,
+          "verdict": "SHIP-READY"
+        }
+      ],
+      "wraps": "#462 recommend() (imported verbatim): GO->SHIP-READY, CI-AMBIGUOUS->HOLD, NO-GO->ROLLBACK; plus the 128/128 validity precondition (< 128 -> ROLLBACK)."
+    },
+    "realized_stark452": {
+      "caught_by": [
+        "clause-a (TPS dominated; gain -15.33 <= 0 < any bar; not CI-clean of any B)",
+        "clause-c (new-KIND cascading divergence; not same-family near-ties)"
+      ],
+      "harness_clause_eval": {
+        "a_tps_ci_clean_over_bar": false,
+        "b_ppl_le_gate": true,
+        "c_flip_kind_same_family": false,
+        "d_completed_128_of_128": true
+      },
+      "harness_clauses_failed": [
+        "a_tps_ci_clean_over_bar",
+        "c_flip_kind_same_family"
+      ],
+      "hold_vs_rollback": "the gate returns the HARD ROLLBACK, strictly stronger than HOLD. HOLD (== recommend() CI-AMBIGUOUS) is IMPOSSIBLE here: CI-AMBIGUOUS requires same_kind=True, but the realized flip-KIND is cascading divergence (same_kind=False). The config also fails clause-a (gain -15.33 <= 0, dominated). Two independent hard NO-GO clauses -> ROLLBACK. Both 'HOLD' and 'ROLLBACK' sit inside the advisor's 'never SHIP-READY' envelope; the precise machine output is ROLLBACK.",
+      "interpretation": "REAL-DATA VALIDATION of the execution gate: the relax split-K re-partition was built and benchmarked (stark #452) and came back DOMINATED (466.20 < deployed 481.53, gain -15.33; < strict 467.14 too) with a cascading identity collapse (0.9966 -> 0.730, 3 -> 3317 flips). The skeleton's execution_verdict() \u2014 the exact function it ships \u2014 returns ROLLBACK, refusing to ship a dominated, identity-breaking config, INVARIANT to the human bar B (even B=0). Notably PPL (the #462 most-sensitive input) PASSED (2.3782 <= 2.42): PPL alone would have waved it through. The TPS-domination + KIND clauses are what caught it \u2014 vindicating the multi-clause design and the count-vs-KIND orthogonality (3317 flips is a count; the KIND is what gates). The relax lane is CLOSED; this card is now 'the execution gate, validated against the config that tried and failed to clear it.'",
+      "live_verdict": "ROLLBACK",
+      "live_verdict_at_bar_zero": "ROLLBACK",
+      "never_ship_ready": true,
+      "ppl_alone_would_pass": true,
+      "realized_measurement": {
+        "completed": 128,
+        "deployed_flips_for_ref": 3,
+        "deployed_identity_for_ref": 0.9966,
+        "flip_kind": "cascading free-running divergence (NOT same-family accumulation-order near-ties)",
+        "flips": 3317,
+        "gain_over_deployed_481_53": -15.33,
+        "gain_over_strict_frontier_467_14": -0.94,
+        "identity": 0.73,
+        "ppl_delta_from_anchor": 0.001,
+        "relax_ppl": 2.3782,
+        "relax_tps": 466.2,
+        "same_kind": false
+      },
+      "relax_lane_status": "CLOSED",
+      "slots_filled": {
+        "harness.clauses[0].measured_slot__tps": 466.2,
+        "harness.clauses[1].measured_slot__ppl": 2.3782,
+        "harness.clauses[2].measured_count_slot_orthogonal__N": 3317,
+        "harness.clauses[2].measured_slot__kind": "cascading divergence (same_kind=False)",
+        "harness.clauses[3].measured_slot__completed": 128,
+        "spec.knob_B.realized_kernel_artifact_ref": "stark #452 split-K wheel (daqrzr99/00ovtdnt)"
+      },
+      "stark452_landed": true,
+      "stark452_run_ids": [
+        "daqrzr99",
+        "00ovtdnt"
+      ],
+      "verdict_is_bar_invariant_rollback": true
+    },
+    "rollback_spec": {
+      "relax_change_is_single_knob_reversible": true,
+      "revert_mechanism": {
+        "byte_for_byte_return_to_deployed": true,
+        "deployed_target": "481.53 TPS / PPL 2.3772 / 128-128 (PR #52, fully version-pinned)",
+        "how": "restore the deployed config: re-point submissions/fa2sw_precache_kenyan/manifest.json dependencies[0] back to the stock vllm-0.22.1rc1.dev307+g3e8afdf78 (manifest.dependencies[0], version-pinned) (undo knob B) and restore use_fp32_reduce=True (undo the knob-A proxy). Both are a one-line manifest/flag revert.",
+        "single_knob": true,
+        "why_byte_for_byte": "the deployed config is fully specified and version-pinned (manifest dependency + env), so reverting reproduces the deployed 481.53 config exactly \u2014 no residual state."
+      },
+      "rollback_triggers_any_of": [
+        {
+          "maps_to": "validation clause-b fail (hard quality gate)",
+          "trigger": "measured PPL > 2.42"
+        },
+        {
+          "maps_to": "validation clause-c fail (new failure mode)",
+          "trigger": "new-KIND flips (not same accumulation-order family)"
+        },
+        {
+          "maps_to": "validation clause-a fail (gain below bar -> NO-GO; gain clears point-only -> HOLD)",
+          "trigger": "TPS gain NOT CI-clean of human bar B (gain - sigma_hw < B)"
+        },
+        {
+          "maps_to": "validation clause-d fail (invalid run)",
+          "trigger": "< 128/128 completion"
+        }
+      ],
+      "summary": "ROLLBACK if ANY of {PPL > 2.42; new-kind flips; TPS gain not CI-clean of B; < 128/128}. Revert is a SINGLE-KNOB, byte-for-byte return to the deployed 481.53 config (re-point the pinned wheel + restore the stock flag)."
+    },
+    "self_test": {
+      "conditions": {
+        "a_all_banked_numbers_roundtrip": true,
+        "b_parent_cards_462_458_self_tests_green": true,
+        "c_knob_surface_matches_448_audit": true,
+        "d_spec_has_proxy_and_build_prize_correctly_demoted": true,
+        "e_pending_slots_exactly_enumerated": true,
+        "f_harness_4_clauses_map_to_recommend": true,
+        "g_execution_verdict_wraps_recommend": true,
+        "h_execution_verdict_equals_recommend_on_grid": true,
+        "i_rollback_single_knob_byte_for_byte": true,
+        "j_human_gated_directive3_ppl_anchor": true,
+        "k_nan_clean": true,
+        "l_realized_stark452_bar_invariant_rollback": true
+      },
+      "detail": {
+        "max_roundtrip_resid": 0.0,
+        "pending_slot_paths": [
+          "harness.clauses[0].measured_slot",
+          "harness.clauses[1].measured_slot",
+          "harness.clauses[2].measured_count_slot_orthogonal",
+          "harness.clauses[2].measured_slot",
+          "harness.clauses[3].measured_slot",
+          "spec.knob_A_in_tree_python_proxy.exact_realized_setting",
+          "spec.knob_B_build_level_split_k_repartition.proposed_block_k",
+          "spec.knob_B_build_level_split_k_repartition.proposed_num_warps",
+          "spec.knob_B_build_level_split_k_repartition.proposed_split_k_partition",
+          "spec.knob_B_build_level_split_k_repartition.realized_kernel_artifact_ref"
+        ],
+        "realized_harness_clauses_failed": [
+          "a_tps_ci_clean_over_bar",
+          "c_flip_kind_same_family"
+        ],
+        "realized_live_verdict": "ROLLBACK",
+        "relax_change_is_single_knob_reversible": true,
+        "relax_exec_spec_pending_slots": 10,
+        "relax_lane_status": "CLOSED",
+        "validation_checklist_clauses": 4
+      },
+      "relax_exec_self_test_passes": true
+    },
+    "served_change_spec": {
+      "human_bar_B": "<HUMAN BAR B>",
+      "human_gated": {
+        "directive": "operator Directive #3 \u2014 served-file change + leaderboard submission are HUMAN-GATED actions",
+        "required_before_apply": "an `Approval request: HF job for <submission-name>` GitHub issue (PR/branch, exact command, expected metric movement / PPL risk, quota/runtime risk, local checks, artifact paths) + explicit human approval in that issue, THEN the single allowed leaderboard submission",
+        "this_card_does": "SPECIFIES the change (approval-ready); does NOT make it. analysis_only=true, no_served_file_change=true."
+      },
+      "knob_A_in_tree_python_proxy": {
+        "current_value": "use_fp32_reduce = True  (served default; stark #448 served_default_config)",
+        "exact_realized_setting": "<PENDING #452>",
+        "file": "vllm/model_executor/layers/quantization/utils/marlin_utils.py",
+        "greedy_safety": "REASSOCIATING -> breaks byte-exactness on 3/4 shapes (qkv, o_proj, down; gate_up stays bit-exact) \u2014 stark #448",
+        "lives_in": "the version-pinned served vLLM wheel: vllm-0.22.1rc1.dev307+g3e8afdf78 (manifest.dependencies[0], version-pinned)",
+        "proposed_value": "use_fp32_reduce = False  (re-orders the K-reduce accumulation)",
+        "realized_endtoend_tps_delta": 0.6416254072425431,
+        "role": "SUB-PRIZE PROXY (proves the FP-reassociation hazard; NOT the prize)",
+        "symbol": "apply_gptq_marlin_linear(..., use_fp32_reduce=<bool>) (default sourced from envs.VLLM_MARLIN_USE_FP32_REDUCE)",
+        "why_not_the_prize": "only +0.64 TPS UB (sub-bar). The ~16% BW prize is NOT cashed by the accumulation-dtype flag alone; it needs the K-reduction re-partition below (knob B)."
+      },
+      "knob_B_build_level_split_k_repartition": {
+        "build_artifact": "a PATCHED vLLM Marlin wheel (or a custom kernel shipped in the submission) realizing the re-partitioned K-reduction",
+        "current_value": "deployed in-kernel split-K geometry = f(M) auto-selection (pinned to the deployed reduction order -> identity 0.9966, 3 flips)",
+        "greedy_safety": "REASSOCIATING -> greedy-UNSAFE (realistic_splitk_greedy_safe=false, #450)",
+        "kernel_source": "Marlin int4 W4A16 CUDA kernel (csrc/quantization/gptq_marlin/*) inside the served vLLM wheel",
+        "proposed_block_k": "<PENDING #452>",
+        "proposed_num_warps": "<PENDING #452>",
+        "proposed_split_k_partition": "<PENDING #452>",
+        "realized_kernel_artifact_ref": "<PENDING #452>",
+        "requires_build": true,
+        "role": "THE PRIZE (+17.05 realistic / +29.34 ceiling) \u2014 re-partitions the K-reduction",
+        "submission_anchor_that_would_change": {
+          "current_value": "vllm-0.22.1rc1.dev307+g3e8afdf78 (manifest.dependencies[0], version-pinned)",
+          "file": "submissions/fa2sw_precache_kenyan/manifest.json",
+          "proposed_value": "re-point to the patched-Marlin wheel (<PENDING #452>)",
+          "symbol": "dependencies[0] (the pinned vLLM wheel URL)"
+        },
+        "symbol": "split-K geometry (num_splits / max_par), BLOCK_K tile, num_warps \u2014 AUTO-SELECTED in-kernel as f(M); NO exposed Python knob (stark #448 / kanna #122)"
+      },
+      "prize_location": {
+        "bw_slack": "~16% achieved-BW slack on the int4-Marlin GEMM (#450 roofline)",
+        "frac_of_verify": 0.8509,
+        "kernel": "MarlinLinearKernel",
+        "prize_gain_ceiling_over_deployed": 29.342423044997304,
+        "prize_gain_realistic_over_deployed": 17.049907826845867,
+        "prize_tps_realistic": 498.57990782684584,
+        "provenance": "ubel #450 c5oyb7gv roofline + stark #448 fn4iz0dz knob audit",
+        "reduction": "int4-Marlin W4A16 GEMM K-dim (contraction) accumulation"
+      },
+      "summary": "PRIZE = the int4-Marlin W4A16 K-reduction split-K re-partition (+17.05 realistic / +29.34 ceiling over deployed 481.53). NO Python knob \u2014 needs a kernel BUILD (patched Marlin wheel). The in-tree `use_fp32_reduce=True->False` flag is only a +0.64 sub-prize proxy. Every realized geometry value is a <PENDING #452> slot; applying is human-gated (Directive #3)."
+    },
+    "validation_harness_spec": {
+      "all_pass_means": "SHIP-READY (== recommend() GO on a valid 128/128 run)",
+      "any_fail_means": "HOLD (CI-AMBIGUOUS gain) or ROLLBACK (hard fail) \u2014 see (3)/(4)",
+      "clauses": [
+        {
+          "check": "measured relax TPS >= deployed 481.53 + human bar B, CI-CLEAN at 1 sigma_hw (gain - 4.8153 >= B)",
+          "decision_surface_anchor": "decision_flip_tps_threshold=12.2346 (largest CI-clean bar for the realistic +17.05; #462)",
+          "id": "a_tps_ci_clean_over_bar",
+          "measured_slot": "<PENDING #452>",
+          "recommend_clause": "clause-1: (measured_gain_tps - k*sigma_hw) >= human_bar_tps  (CI-clean GO)",
+          "stark452_metric": "measured_relax_tps (-> gain over deployed)"
+        },
+        {
+          "check": "measured relax PPL <= 2.42 (HARD gate; #462 most-sensitive input, margin 0.0428 from anchor 2.3772)",
+          "decision_surface_anchor": "max_admissible_relax_ppl=2.42 (the razor-thin 0.0428 margin)",
+          "id": "b_ppl_le_gate",
+          "measured_slot": "<PENDING #452>",
+          "recommend_clause": "clause-2: measured_ppl > PPL_GATE -> NO-GO  (hard quality fail)",
+          "stark452_metric": "measured_relax_ppl"
+        },
+        {
+          "check": "flip-KIND is same-family accumulation-order near-ties (the deployed reduction-order family), NOT a new quality-destroying mode",
+          "decision_surface_anchor": "#462 clause-3 / N-invariance: the count N is orthogonal; only the categorical KIND gates",
+          "id": "c_flip_kind_same_family",
+          "measured_count_slot_orthogonal": "<PENDING #452>",
+          "measured_slot": "<PENDING #452>",
+          "recommend_clause": "clause-3: not break_same_kind -> NO-GO  (new failure mode)",
+          "stark452_metric": "measured_relax_flip_kind  (the KIND, NEVER the count N \u2014 orthogonal)"
+        },
+        {
+          "check": "128/128 public prompts completed (benchmark validity precondition)",
+          "decision_surface_anchor": "challenge validity gate (128/128 completion; program.md)",
+          "id": "d_completed_128_of_128",
+          "measured_slot": "<PENDING #452>",
+          "recommend_clause": "recommend() DOMAIN PRECONDITION: gain/ppl are only defined on a valid 128/128 run; an incomplete run is invalid -> ROLLBACK (never reaches GO)",
+          "stark452_metric": "completed (== 128)"
+        }
+      ],
+      "n_clauses": 4,
+      "summary": "4-clause checklist: (a) TPS CI-clean >= deployed+B at 1 sigma_hw -> recommend clause-1; (b) PPL <= 2.42 -> clause-2; (c) same-KIND flips -> clause-3; (d) 128/128 -> recommend domain precondition. Every check maps to a #462 recommend() clause."
+    },
+    "verdict": "RELAX-EXEC-READINESS-10-PENDING452-SLOTS-SINGLE-KNOB-REVERSIBLE-4-CLAUSE-HARNESS-WRAPS-462-recommend()-HUMAN-GATED-D3 || STARK452-LANDED-NEGATIVE-RELAX-LANE-CLOSED-GATE-RETURNS-ROLLBACK-(466.20-DOMINATED,IDENTITY-0.730,CASCADING-NEW-KIND;PPL-2.3782-PASSED-BUT-TPS+KIND-REFUSED)"
+  }
+}
