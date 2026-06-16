@@ -1,0 +1,278 @@
+{
+  "pr": 461,
+  "leg": "deployed-flip attribution: per-kernel reduction-order attribution of the deployed token flips + inseparability of the +14.39 TPS (local A10G). KEY FINDING: the deployed flips are a noise-floor population of bf16-ULP knife-edge near-ties whose individual identity is session-unstable; attribution is robust only at the POPULATION level (attention dominant, lm_head/GEMM/RMSNorm = 0, ~1-2 irreducible residual).",
+  "analysis_only": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "ppl": 2.3772,
+  "imported_anchors": {
+    "frontier_deployed_tps": 481.53,
+    "realized_frontier_tps": 467.14,
+    "deployed_to_strict_gap_tps": 14.39,
+    "ppl_anchor": 2.3772,
+    "sigma_hw_tps": 4.8,
+    "stark_heuristic_identity": 0.9966254218222722,
+    "stark_pinned_identity": 0.9988751406074241,
+    "wirbel_attn_strict_headroom_tps": 0.26,
+    "pr39_attn_2d_us": 53.0,
+    "pr39_attn_3d_us": 12.0
+  },
+  "deployed_to_strict_gap_tps": 14.39,
+  "n_deployed_flips": 4,
+  "deployed_speed_inseparable_from_flips": true,
+  "partial_strict_win_found": false,
+  "partial_win_flips": [],
+  "flip_attr_self_test_passes": true,
+  "population_attribution": {
+    "deployed_divergence": 0.004499437570303688,
+    "attn_only_divergence": 0.0022497187851518996,
+    "lmhead_only_divergence": 0.004499437570303688,
+    "all_pin_divergence": 0.0022497187851518996,
+    "attn_reduces_divergence": true,
+    "lmhead_reduces_divergence": false,
+    "lmhead_identical_to_deployed": true,
+    "residual_divergence_under_all_pin": 0.0022497187851518996
+  },
+  "attribution_by_kernel": {
+    "attention": "DOMINANT near-tie lever: 2D in-order pin drops divergence 0.004499 -> 0.002250; ALSO the served speed lever (3D split-KV, greedy-unsafe) -> flip-closing inseparable from speed.",
+    "lm_head": "0 flip contribution (lmhead_only divergence == deployed, bit-identical set); in-order pin costs +microbench us for zero benefit.",
+    "gemm_marlin": "0 flip contribution (deployed == strict Marlin, bit-exact @ size_m=8).",
+    "rmsnorm": "0 flip contribution (M-invariant per-row reduction in both orders).",
+    "residual": "~1-2 irreducible knife-edge flips persist under all_pin (divergence 0.002250)."
+  },
+  "per_flip_attribution_churn_confounded": true,
+  "cross_session_flip_set": {
+    "stark_heuristic_flip_prompts": [
+      "aime2026-4d866680f9",
+      "mmlu_pro-005aa2e50a",
+      "mmlu_pro-00996c6808"
+    ],
+    "deployed_flip_prompts": [
+      "gpqa_diamond-0dbcc69ff3",
+      "gpqa_diamond-18c1c5c103",
+      "mmlu_pro-0034f38591",
+      "mmlu_pro-0122522953"
+    ],
+    "overlap": [],
+    "overlap_count": 0,
+    "flip_set_cross_session_stable": false,
+    "note": "identical geometry (889 positions), disjoint flip sets => individual flip identity is session-dependent bf16-ULP noise; the COUNT (~3-4/889) and attribution STRUCTURE are what reproduce, not the specific positions."
+  },
+  "nonmonotonic_closures": [
+    {
+      "prompt_id": "gpqa_diamond-18c1c5c103",
+      "pos": 229,
+      "closed_by_attn_only_reopened_by_all_pin": true
+    }
+  ],
+  "flip_attribution_DIAGNOSTIC_churn_confounded": [
+    {
+      "prompt_id": "gpqa_diamond-0dbcc69ff3",
+      "pos": 227,
+      "rel_pos": 3,
+      "deployed_m8_tok": 45518,
+      "m1_strict_tok": 567,
+      "margin_vs_m1": 0.25,
+      "gap_top2": 0.25,
+      "closes_in": {
+        "attn_only": false,
+        "lmhead_only": false,
+        "all_pin": false
+      },
+      "single_kernel_closers": [],
+      "attributed_kernel": "none(persists under all_pin)"
+    },
+    {
+      "prompt_id": "gpqa_diamond-18c1c5c103",
+      "pos": 229,
+      "rel_pos": 5,
+      "deployed_m8_tok": 4896,
+      "m1_strict_tok": 2214,
+      "margin_vs_m1": 0.125,
+      "gap_top2": 0.125,
+      "closes_in": {
+        "attn_only": true,
+        "lmhead_only": false,
+        "all_pin": false
+      },
+      "single_kernel_closers": [
+        "attn"
+      ],
+      "attributed_kernel": "attn"
+    },
+    {
+      "prompt_id": "mmlu_pro-0034f38591",
+      "pos": 231,
+      "rel_pos": 7,
+      "deployed_m8_tok": 236758,
+      "m1_strict_tok": 838,
+      "margin_vs_m1": 0.125,
+      "gap_top2": 0.0625,
+      "closes_in": {
+        "attn_only": true,
+        "lmhead_only": false,
+        "all_pin": true
+      },
+      "single_kernel_closers": [
+        "attn"
+      ],
+      "attributed_kernel": "attn"
+    },
+    {
+      "prompt_id": "mmlu_pro-0122522953",
+      "pos": 225,
+      "rel_pos": 1,
+      "deployed_m8_tok": 236775,
+      "m1_strict_tok": 600,
+      "margin_vs_m1": 0.125,
+      "gap_top2": 0.125,
+      "closes_in": {
+        "attn_only": true,
+        "lmhead_only": false,
+        "all_pin": true
+      },
+      "single_kernel_closers": [
+        "attn"
+      ],
+      "attributed_kernel": "attn"
+    }
+  ],
+  "flip_attribution_summary_DIAGNOSTIC": {
+    "closed_by_attention": 3,
+    "closed_by_lmhead": 0,
+    "closed_by_gemm": 0,
+    "closed_by_all_pin": 2,
+    "residual_none": 1,
+    "caveat": "per-flip closures are CHURN-CONFOUNDED (see nonmonotonic_closures + cross_session_flip_set); use population_attribution for the verdict."
+  },
+  "legacy_per_flip_cheap_closers_DIAGNOSTIC": [],
+  "per_kernel_speed_split": {
+    "deployed_to_strict_gap_tps": 14.39,
+    "attribution_basis": "population_divergence + imported_served_geometry_direction",
+    "attn_reduces_divergence": true,
+    "attn_strict_pin_costs_served_throughput": true,
+    "lmhead_reduces_divergence": false,
+    "lmhead_strict_pin_costs_throughput": true,
+    "lmhead_pin_us_delta_microbench": 428.24,
+    "gemm_flips": 0,
+    "gemm_pin_us_delta": 0.0,
+    "imported_attn_2d_vs_3d_us_pr39": [
+      53.0,
+      12.0
+    ],
+    "imported_wirbel_attn_strict_headroom_tps": 0.26,
+    "m1_ar_stepA_us_by_arm_DIAGNOSTIC_ONLY": {
+      "deployed": 387784.0,
+      "attn_only": 373829.0,
+      "lmhead_only": 391539.0,
+      "all_pin": 431658.0
+    },
+    "m1_attn_stepA_delta_us_DIAGNOSTIC_noise": -13955.2,
+    "m1_stepA_note": "M=1 AR e2e latency is occupancy-noise-dominated (attn_only<deployed but all_pin>deployed despite all_pin ALSO pinning attention) and does NOT price the served M=8 verify lever; verdict uses imported served-geometry direction."
+  },
+  "pin_cost_costs_speed": {
+    "attn": true,
+    "lmhead": true,
+    "gemm": false
+  },
+  "gemm_split_k": {
+    "gemm_flip_contribution": 0,
+    "marlin_bitexact_at_decode_width_size_m8": true,
+    "shapes_deployed_splitk_at_m8": {
+      "qkv_proj": true,
+      "o_proj": true,
+      "gate_up_proj": false,
+      "down_proj": true,
+      "lm_head": true
+    },
+    "note": "deployed and strict run the IDENTICAL Marlin (VLLM_BATCH_INVARIANT never patches the custom op); bit-exact at size_m=8 -> 0 flips."
+  },
+  "rmsnorm": {
+    "rmsnorm_is_m_invariant": true,
+    "detail": {
+      "rmsnorm_module": "language_model.model.layers.0.input_layernorm",
+      "stock_row0_bitexact_M1_vs_M8": true,
+      "stock_maxabsdiff": 0.0,
+      "batch_invariant_row0_bitexact_M1_vs_M8": true,
+      "batch_invariant_maxabsdiff": 0.0,
+      "rmsnorm_is_m_invariant": true
+    },
+    "note": "per-row hidden-dim reduction is identical for the M=1 row and its M=8 batch sibling in BOTH reduction orders -> 0 flip contribution."
+  },
+  "arm_summary": {
+    "deployed": {
+      "identity": 0.9955005624296963,
+      "divergence": 0.004499437570303688,
+      "n_flips": 4,
+      "flips_opened_vs_deployed": 0,
+      "det_m1": 1.0,
+      "det_m8": 1.0,
+      "within": 1.0,
+      "chunk_isolated": 1.0,
+      "attn_is_batch_invariant": false,
+      "aten_mm_bitexact": false,
+      "median_stepA_decode_us": 387783.7620093487,
+      "peak_gpu_gb": 12.32311552
+    },
+    "attn_only": {
+      "identity": 0.9977502812148481,
+      "divergence": 0.0022497187851518996,
+      "n_flips": 2,
+      "flips_opened_vs_deployed": 1,
+      "det_m1": 1.0,
+      "det_m8": 1.0,
+      "within": 1.0,
+      "chunk_isolated": 1.0,
+      "attn_is_batch_invariant": true,
+      "aten_mm_bitexact": false,
+      "median_stepA_decode_us": 373828.5175058991,
+      "peak_gpu_gb": 12.251262976
+    },
+    "lmhead_only": {
+      "identity": 0.9955005624296963,
+      "divergence": 0.004499437570303688,
+      "n_flips": 4,
+      "flips_opened_vs_deployed": 0,
+      "det_m1": 1.0,
+      "det_m8": 1.0,
+      "within": 1.0,
+      "chunk_isolated": 1.0,
+      "attn_is_batch_invariant": false,
+      "aten_mm_bitexact": true,
+      "median_stepA_decode_us": 391538.73451869003,
+      "peak_gpu_gb": 12.251262976
+    },
+    "all_pin": {
+      "identity": 0.9977502812148481,
+      "divergence": 0.0022497187851518996,
+      "n_flips": 2,
+      "flips_opened_vs_deployed": 0,
+      "det_m1": 1.0,
+      "det_m8": 1.0,
+      "within": 1.0,
+      "chunk_isolated": 1.0,
+      "attn_is_batch_invariant": true,
+      "aten_mm_bitexact": true,
+      "median_stepA_decode_us": 431658.32851082087,
+      "peak_gpu_gb": 12.242743296
+    }
+  },
+  "self_test": {
+    "pin_engaged_pattern_ok": true,
+    "deployed_identity_in_stark_band": true,
+    "within_session_reproducible_lmhead_eq_deployed": true,
+    "all_pin_reproduces_stark_pinned": true,
+    "all_controls_eq_1": true,
+    "geometry_isolated": true,
+    "marlin_bitexact_at_decode_width": true,
+    "rmsnorm_is_m_invariant": true,
+    "attribution_complete": true,
+    "deployed_flipcount_within_1_of_stark": true,
+    "flip_set_cross_session_stable": false,
+    "per_flip_attribution_churn_confounded": true
+  },
+  "n_prompts": 127,
+  "C": 224,
+  "n_verify": 8,
+  "model_dir": "/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0"
+}
