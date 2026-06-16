@@ -1,0 +1,223 @@
+{
+  "pr": 488,
+  "kind": "identity_census",
+  "arm": "full_flag",
+  "generated_utc": "2026-06-16T12:21:41.846066+00:00",
+  "submission": "fa2sw_precache_kenyan",
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1
+  },
+  "elapsed_s": 617.8913099765778,
+  "git": {
+    "git_commit": "250176f987154e16cf011fbf17f4236e56646b46",
+    "git_branch": "lawine/surgical-attention-realization",
+    "git_dirty": true
+  },
+  "m1ar_arm": {
+    "arm": "full_flag_m1ar",
+    "extra_env": {
+      "VLLM_BATCH_INVARIANT": "1",
+      "SENPAI_REFERENCE_MODE": "1"
+    },
+    "server_ready_s": 100.0316686630249,
+    "decode_duration_s": 507.88223361968994,
+    "wall_tps_m1ar": 129.0377880181459,
+    "num_completion_tokens": 65536,
+    "num_completed_prompts": 128,
+    "completion_full": true,
+    "decode_out": "/workspace/senpai/target/research/speed/surgical_attn_realize/census/full_flag_m1ar/decode_round00.jsonl",
+    "mechanism": {
+      "splitkv_armed": true,
+      "splitkv_redirects": 0,
+      "graph_capture_lines": 4,
+      "onegraph_captured": false,
+      "fatal_traceback": false,
+      "n_tracebacks": 1,
+      "benign_usage_tracebacks": 2,
+      "batch_invariant_mentions": 1
+    }
+  },
+  "census": {
+    "full_flag_m8_vs_full_flag_m1ar": {
+      "label": "full_flag_m8 vs full_flag_m1ar (THE GATE: served greedy vs own M=1 AR)",
+      "available": true,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 27544,
+      "token_identity_rate": 0.4202880859375,
+      "n_sequences_with_any_flip": 114,
+      "first_divergences": [
+        {
+          "prompt": "aime2026-0015ebeec9",
+          "pos": 247,
+          "a": 621,
+          "b": 236884
+        },
+        {
+          "prompt": "aime2026-0e674f51e8",
+          "pos": 331,
+          "a": 568,
+          "b": 1123
+        },
+        {
+          "prompt": "aime2026-1eaadd490a",
+          "pos": 290,
+          "a": 823,
+          "b": 2532
+        },
+        {
+          "prompt": "aime2026-2822569975",
+          "pos": 22,
+          "a": 1288,
+          "b": 532
+        },
+        {
+          "prompt": "aime2026-51697b0daa",
+          "pos": 153,
+          "a": 211104,
+          "b": 2608
+        },
+        {
+          "prompt": "aime2026-5e99c1f8e3",
+          "pos": 30,
+          "a": 5888,
+          "b": 3962
+        },
+        {
+          "prompt": "aime2026-7443669f7e",
+          "pos": 285,
+          "a": 2056,
+          "b": 1385
+        },
+        {
+          "prompt": "aime2026-77bffe9f7e",
+          "pos": 283,
+          "a": 107,
+          "b": 236795
+        },
+        {
+          "prompt": "aime2026-7968ea2f49",
+          "pos": 99,
+          "a": 2532,
+          "b": 2104
+        },
+        {
+          "prompt": "aime2026-7a1a552fa3",
+          "pos": 275,
+          "a": 3483,
+          "b": 236768
+        }
+      ],
+      "operative_1_0_pass": false,
+      "n_flipped_sequences": 114,
+      "gate": 0.99,
+      "root_positions_sample": [
+        22,
+        30,
+        99,
+        153,
+        247,
+        275,
+        283,
+        285,
+        290,
+        331
+      ],
+      "min_root_pos": 22,
+      "semantic_flip_attribution": "token-ids only; margin proof in merged #461 (attn-only residual = bf16-ULP ties)"
+    },
+    "full_flag_m1ar_vs_surgical_m8": {
+      "label": "full_flag_m1ar vs surgical_m8 (cross-config control)",
+      "available": true,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 27622,
+      "token_identity_rate": 0.421478271484375,
+      "n_sequences_with_any_flip": 114,
+      "first_divergences": [
+        {
+          "prompt": "aime2026-0015ebeec9",
+          "pos": 247,
+          "a": 236884,
+          "b": 621
+        },
+        {
+          "prompt": "aime2026-0e674f51e8",
+          "pos": 331,
+          "a": 1123,
+          "b": 568
+        },
+        {
+          "prompt": "aime2026-1eaadd490a",
+          "pos": 290,
+          "a": 2532,
+          "b": 823
+        },
+        {
+          "prompt": "aime2026-2822569975",
+          "pos": 22,
+          "a": 532,
+          "b": 1288
+        },
+        {
+          "prompt": "aime2026-51697b0daa",
+          "pos": 153,
+          "a": 2608,
+          "b": 211104
+        },
+        {
+          "prompt": "aime2026-5e99c1f8e3",
+          "pos": 30,
+          "a": 3962,
+          "b": 5888
+        },
+        {
+          "prompt": "aime2026-7443669f7e",
+          "pos": 285,
+          "a": 1385,
+          "b": 2056
+        },
+        {
+          "prompt": "aime2026-77bffe9f7e",
+          "pos": 283,
+          "a": 236795,
+          "b": 107
+        },
+        {
+          "prompt": "aime2026-7968ea2f49",
+          "pos": 99,
+          "a": 2104,
+          "b": 2532
+        },
+        {
+          "prompt": "aime2026-7a1a552fa3",
+          "pos": 275,
+          "a": 236768,
+          "b": 3483
+        }
+      ],
+      "operative_1_0_pass": false,
+      "n_flipped_sequences": 114,
+      "gate": 0.99,
+      "root_positions_sample": [
+        22,
+        30,
+        99,
+        153,
+        247,
+        275,
+        283,
+        285,
+        290,
+        331
+      ],
+      "min_root_pos": 22,
+      "semantic_flip_attribution": "token-ids only; margin proof in merged #461 (attn-only residual = bf16-ULP ties)"
+    }
+  },
+  "analysis_only": true,
+  "official_tps": 0,
+  "wandb_run_id": "aydp64yf"
+}

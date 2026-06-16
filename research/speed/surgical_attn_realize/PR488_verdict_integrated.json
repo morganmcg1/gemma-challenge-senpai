@@ -1,0 +1,97 @@
+{
+  "pr": 488,
+  "title": "Surgical attention-only realization: real rung above 222, or mirage?",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "submission": "fa2sw_precache_kenyan",
+  "workload": {"num_prompts": 128, "output_len": 512, "seed": 1, "n_decodes": 3},
+  "same_session": true,
+  "note": "All three arms served back-to-back in one pod session (shared sigma_hw). Local AWS A10G, analysis-only; NO HF job, NO submission, NO draw. Surgical lever = LOCAL serve-venv vLLM prototype edit (triton_unified_attention.py honoring SURGICAL_ATTN_USE_3D_OFF=1, one gated line), restored to stock after measurement.",
+
+  "speed": {
+    "metric": "median wall_tps over 3 back-to-back decodes (num_completion_tokens / decode duration_s); round-0 is a cold-start outlier excluded by the median",
+    "deployed_no_flag_tps": 464.69,
+    "full_flag_222floor_tps": 221.95,
+    "surgical_attn_only_tps": 357.64,
+    "surgical_wall_tps_std": 3.96,
+    "surgical_lift_vs_222": 135.70,
+    "materiality_bar_tps": 2.0,
+    "sigma_hw": 4.864,
+    "lift_clears_materiality_and_sigma": true,
+    "surgical_recovery_fraction_of_deployed_minus_222_gap": 0.559,
+    "modeled_surgical_estimate": 457.0,
+    "surgical_vs_modeled_overshoot_fraction": 0.218,
+    "landing_bucket": "partial_300plus (real rung, NOT the modeled ~457)"
+  },
+
+  "per_op_tax_decomposition": {
+    "note": "direct measurement of the 481->222 collapse, decomposed by lever (independent check on the ubel #484 per-op attribution ask). Two SEPARABLE costs, not one.",
+    "deployed_3d_splitkv_attn_plus_fast_marlin_tps": 464.69,
+    "surgical_2d_order_preserving_attn_plus_fast_marlin_tps": 357.64,
+    "full_flag_2d_attn_plus_matmul_tax_tps": 221.95,
+    "byte_exact_2d_attention_tax_tps": 107.05,
+    "matmul_tax_tps": 135.70,
+    "deployed_to_222_gap_tps": 242.74,
+    "attention_share_of_collapse": 0.441,
+    "matmul_share_of_collapse": 0.559,
+    "conclusion": "the matmul tax is ~56% of the 481->222 collapse and is SEPARABLE and identity-unnecessary (buys only 9 ULP-tie flips). The 2D order-preserving attention tax (~44%, 107 TPS) is the price of byte-exact attention on THIS route and is unavoidable here (the fast 3D split-KV attention is exactly what makes deployed non-equivalent at 0.9966)."
+  },
+
+  "quality": {
+    "deployed_ppl": 2.3767,
+    "full_flag_ppl": 2.3767,
+    "surgical_ppl": 2.3767,
+    "ppl_gate": 2.42,
+    "surgical_ppl_passes": true,
+    "deployed_completed": 128,
+    "full_flag_completed": 128,
+    "surgical_completed": 128
+  },
+
+  "mechanism": {
+    "deployed_splitkv_redirects": 5,
+    "full_flag_splitkv_redirects": 0,
+    "surgical_splitkv_redirects": 0,
+    "deployed_batch_invariant_mentions": 0,
+    "full_flag_batch_invariant_mentions": 3,
+    "surgical_batch_invariant_mentions": 0,
+    "interpretation": "surgical took the 2D order-preserving attention path (no 3D split-KV redirect) while NOT installing the global matmul tax (0 batch_invariant mentions) -- exactly the attention-only lever."
+  },
+
+  "identity": {
+    "pr_requested_gate": "surgical M=8 served vs M=1 AR must be operative-1.0 (>=0.99, all non-tie = bf16-ULP, 0 semantic flips)",
+    "pr_requested_gate_raw_token_measurable_on_this_workload": false,
+    "why_unmeasurable": "The census M=1-AR gate is confounded: (1) the global VLLM_BATCH_INVARIANT=1 config -- batch-invariant BY CONSTRUCTION -- fails the SAME gate identically (full_flag 0.4203 vs surgical 0.4415); a valid gate would pass it. (2) It diffed the cold round-0 served decode against an EAGER (ONEGRAPH-off) M=1 reference; cold-start + eager-vs-cudagraph + M=1-vs-M=8 batching each re-order bf16 reductions, and on 512-token reasoning chains a single ULP flip cascades, flooring the raw rate at the run-to-run noise level.",
+    "raw_token_noise_floor_cold_vs_warm": [0.4347, 0.4637],
+    "within_arm_warm_self_determinism_r1_vs_r2": {"deployed": 1.0, "full_flag": 1.0, "surgical": 1.0},
+    "clean_confound_free_signal": {
+      "surgical_vs_full_flag_warm_matched_round": 0.9763,
+      "surgical_vs_full_flag_flipped_sequences": 9,
+      "axis_isolated": "matmul library only (both arms share 2D order-preserving attention; surgical = fast Marlin, full_flag = batch-invariant tax)"
+    },
+    "dominant_equivalence_axis": {
+      "attention_3D_to_2D_flipped_sequences": 105,
+      "matmul_tax_flipped_sequences": 9,
+      "conclusion": "the 2D order-preserving ATTENTION (which surgical has) is the byte-equivalence-bearing component; the global flag's matmul tax refines only 9/128 sequences on top of it."
+    },
+    "margin_attribution": "merged #461: attn-only residual flips are bf16-ULP near-ties (margin 0.125-0.25), not semantic; this census reproduces that identity population in-session.",
+    "official_gate_reminder": "program.md greedy-identity gate is served-vs-served byte-exact (same serving config), NOT served-vs-M=1-AR-eager; the surgical-vs-full_flag warm comparison is the in-session analogue."
+  },
+
+  "verdict": {
+    "surgical_realizes_above_222": true,
+    "surgical_realized_tps": 357.64,
+    "is_457_a_mirage": "partially -- the rung is REAL (+135.7 over 222, 28x the sigma_hw bar) but the ~457 magnitude was a ~22% overshoot; the composed/locus harnesses (#472/#475/#466) over-estimated by ignoring served overhead. Realized surgical = 357.6, not 457.",
+    "surgical_byte_equivalent_to_same_standard_as_222_ship": true,
+    "reasoning": "surgical and the 222 global flag are operatively indistinguishable in identity (warm 0.9763, both perfectly self-deterministic, 9 residual ULP-tie flips per #461) and share the same 2D order-preserving attention. The matmul tax that costs the global flag 135 TPS (357->222) buys only 9/128 sequences of ULP-tie refinement -- no semantic identity gain. So if the 222 global-flag ship is accepted as strict byte-equivalent, surgical attention-only is strict by the identical standard, at 357.6 instead of 222.",
+    "caveat": "A definitive operative-1.0 CERTIFICATION would need the organizer's served-vs-served reference at matched config (the actual official gate) or a logit-margin census (#461-style) -- NOT a raw-token M=1-AR decode, which is unmeasurable here for ANY config including the global flag. The byte-equivalence claim rests on the warm same-config cross-arm signal + the attention-axis attribution + #461's margin proof."
+  },
+
+  "wandb_runs": {
+    "speed_3arm": "ko01dcyy",
+    "surgical_m1ar_census": "2k0sw1gz",
+    "full_flag_m1ar_census": "aydp64yf",
+    "corrected_identity_census": "scauko99"
+  }
+}

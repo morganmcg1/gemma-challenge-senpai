@@ -1,0 +1,194 @@
+{
+  "pr": 488,
+  "kind": "surgical_identity_census",
+  "generated_utc": "2026-06-16T12:08:00.858166+00:00",
+  "submission": "fa2sw_precache_kenyan",
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1
+  },
+  "elapsed_s": 603.6328327655792,
+  "git": {
+    "git_commit": "250176f987154e16cf011fbf17f4236e56646b46",
+    "git_branch": "lawine/surgical-attention-realization",
+    "git_dirty": true
+  },
+  "m1ar_arm": {
+    "arm": "surgical_m1ar",
+    "extra_env": {
+      "SURGICAL_ATTN_USE_3D_OFF": "1",
+      "SENPAI_REFERENCE_MODE": "1"
+    },
+    "server_ready_s": 85.01866388320923,
+    "decode_duration_s": 508.82558155059814,
+    "wall_tps_m1ar": 128.79855568638118,
+    "num_completion_tokens": 65536,
+    "num_completed_prompts": 128,
+    "completion_full": true,
+    "decode_out": "/workspace/senpai/target/research/speed/surgical_attn_realize/census/surgical_m1ar/decode_round00.jsonl",
+    "mechanism": {
+      "splitkv_armed": true,
+      "splitkv_redirects": 0,
+      "graph_capture_lines": 4,
+      "onegraph_captured": false,
+      "fatal_traceback": false,
+      "n_tracebacks": 1,
+      "benign_usage_tracebacks": 2,
+      "batch_invariant_mentions": 0
+    }
+  },
+  "census": {
+    "surgical_m8_vs_surgical_m1ar": {
+      "label": "surgical_m8 vs surgical_m1ar (THE GATE: expect operative-1.0)",
+      "available": true,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 28936,
+      "token_identity_rate": 0.4415283203125,
+      "n_sequences_with_any_flip": 114,
+      "first_divergences": [
+        {
+          "prompt": "aime2026-0015ebeec9",
+          "pos": 247,
+          "a": 621,
+          "b": 236884
+        },
+        {
+          "prompt": "aime2026-0e674f51e8",
+          "pos": 331,
+          "a": 568,
+          "b": 1123
+        },
+        {
+          "prompt": "aime2026-1eaadd490a",
+          "pos": 128,
+          "a": 107,
+          "b": 3792
+        },
+        {
+          "prompt": "aime2026-2822569975",
+          "pos": 22,
+          "a": 1288,
+          "b": 532
+        },
+        {
+          "prompt": "aime2026-4d866680f9",
+          "pos": 304,
+          "a": 236795,
+          "b": 2104
+        },
+        {
+          "prompt": "aime2026-5cc894a0e8",
+          "pos": 0,
+          "a": 818,
+          "b": 2094
+        },
+        {
+          "prompt": "aime2026-5e99c1f8e3",
+          "pos": 89,
+          "a": 3026,
+          "b": 669
+        },
+        {
+          "prompt": "aime2026-7443669f7e",
+          "pos": 285,
+          "a": 2056,
+          "b": 1385
+        },
+        {
+          "prompt": "aime2026-77bffe9f7e",
+          "pos": 283,
+          "a": 107,
+          "b": 236795
+        },
+        {
+          "prompt": "aime2026-7968ea2f49",
+          "pos": 99,
+          "a": 2532,
+          "b": 2104
+        }
+      ],
+      "operative_1_0_pass": false,
+      "has_semantic_flips": true,
+      "gate": 0.99
+    },
+    "surgical_m1ar_vs_full_flag_m8": {
+      "label": "surgical_m1ar vs full_flag_m8 (is the M=1 fast-Marlin ref config-stable?)",
+      "available": true,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 29247,
+      "token_identity_rate": 0.4462738037109375,
+      "n_sequences_with_any_flip": 114,
+      "first_divergences": [
+        {
+          "prompt": "aime2026-0015ebeec9",
+          "pos": 247,
+          "a": 236884,
+          "b": 621
+        },
+        {
+          "prompt": "aime2026-0e674f51e8",
+          "pos": 331,
+          "a": 1123,
+          "b": 568
+        },
+        {
+          "prompt": "aime2026-1eaadd490a",
+          "pos": 128,
+          "a": 3792,
+          "b": 107
+        },
+        {
+          "prompt": "aime2026-2822569975",
+          "pos": 22,
+          "a": 532,
+          "b": 1288
+        },
+        {
+          "prompt": "aime2026-4d866680f9",
+          "pos": 304,
+          "a": 2104,
+          "b": 236795
+        },
+        {
+          "prompt": "aime2026-5cc894a0e8",
+          "pos": 0,
+          "a": 2094,
+          "b": 818
+        },
+        {
+          "prompt": "aime2026-5e99c1f8e3",
+          "pos": 89,
+          "a": 669,
+          "b": 3026
+        },
+        {
+          "prompt": "aime2026-7443669f7e",
+          "pos": 285,
+          "a": 1385,
+          "b": 2056
+        },
+        {
+          "prompt": "aime2026-77bffe9f7e",
+          "pos": 283,
+          "a": 236795,
+          "b": 107
+        },
+        {
+          "prompt": "aime2026-7968ea2f49",
+          "pos": 99,
+          "a": 2104,
+          "b": 2532
+        }
+      ],
+      "operative_1_0_pass": false,
+      "has_semantic_flips": true,
+      "gate": 0.99
+    }
+  },
+  "analysis_only": true,
+  "official_tps": 0,
+  "wandb_run_id": "2k0sw1gz"
+}

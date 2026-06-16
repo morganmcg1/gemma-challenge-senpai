@@ -1,0 +1,80 @@
+{
+  "pr": 488,
+  "generated_utc": "2026-06-16T11:09:17.148324+00:00",
+  "submission": "fa2sw_precache_kenyan",
+  "workload": {
+    "num_prompts": 8,
+    "output_len": 16,
+    "seed": 1,
+    "n_decodes": 1
+  },
+  "elapsed_s": 103.30741381645203,
+  "git": {
+    "git_commit": "250176f987154e16cf011fbf17f4236e56646b46",
+    "git_branch": "lawine/surgical-attention-realization",
+    "git_dirty": true
+  },
+  "arms": {
+    "surgical": {
+      "arm": "surgical",
+      "label": "(c) surgical attn-only 2D order-preserving (matmul tax OFF)  <-- TEST",
+      "extra_env": {
+        "SURGICAL_ATTN_USE_3D_OFF": "1"
+      },
+      "median_wall_tps": 49.63496695060318,
+      "wall_tps_values": [
+        49.63496695060318
+      ],
+      "wall_tps_n": 1,
+      "wall_tps_std": 0.0,
+      "server_ready_s": 90.01766681671143,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": null,
+      "ppl_num_records": null,
+      "num_completed_prompts": 8,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "graph_capture_lines": 5,
+        "traceback": true,
+        "batch_invariant_mentions": 0
+      },
+      "first_decode_out": "/workspace/senpai/target/research/speed/surgical_attn_realize/smoke/surgical/decode_round00.jsonl",
+      "decodes": [
+        {
+          "arm": "surgical",
+          "round": 0,
+          "wall_tps": 49.63496695060318,
+          "num_completion_tokens": 128,
+          "decode_duration_s": 2.578827142715454,
+          "wall_around_decode_s": 12.132754564285278,
+          "num_completed_prompts": 8,
+          "expected_tokens": 128
+        }
+      ]
+    }
+  },
+  "cross_arm_token_diffs": {},
+  "verdict": {
+    "surgical_realized_tps": 49.63496695060318,
+    "full_flag_222_floor_tps": null,
+    "deployed_ref_tps": null,
+    "surgical_lift_vs_222": null,
+    "materiality_bar_tps": 2.0,
+    "sigma_hw": 4.864,
+    "lift_clears_materiality_and_sigma": false,
+    "surgical_landing_bucket": "collapses_~222",
+    "surgical_realizes_above_222": false,
+    "surgical_recovery_fraction_of_deployed": null,
+    "surgical_ppl": null,
+    "surgical_ppl_passes_gate": false,
+    "surgical_completion_full": true,
+    "surgical_no_3d_redirect": true,
+    "surgical_graph_capture_ok": false,
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true
+  },
+  "wandb_run_id": null
+}

@@ -1,0 +1,175 @@
+[surgical] normalized CUDA_VISIBLE_DEVICES '2' -> '0' (single in-container GPU)
+[surgical] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[surgical] submission=fa2sw_precache_kenyan server_python=/tmp/senpai-venvs/5f4c623f772358a2/bin/python
+[surgical] arms=['deployed', 'full_flag', 'surgical'] n_decodes=3 workload=128x512 seed=1 -> /workspace/senpai/target/research/speed/surgical_attn_realize/run
+
+[surgical] ===== ARM deployed :: (a) deployed 3D split-KV (no flag, ~481 ref) =====
+[surgical] extra_env={}
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 85s
+[surgical] deployed: server ready in 85s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round00.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round00.summary.json
+[surgical] deployed round 0: wall_tps=450.24 tok=65536/65536 dur=145.6s completed=128
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round01.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round01.summary.json
+[surgical] deployed round 1: wall_tps=465.14 tok=65536/65536 dur=140.9s completed=128
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round02.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round02.summary.json
+[surgical] deployed round 2: wall_tps=464.69 tok=65536/65536 dur=141.0s completed=128
+[ppl] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/ppl.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.6126328853811924,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 53498.016889621984,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/ppl.jsonl",
+  "ppl": 2.376682786480556,
+  "prompt_logprobs": 1
+}
+[surgical] deployed: PPL=2.376682786480556 records=128
+[surgical] ARM deployed SUMMARY: median_wall_tps=464.69 (n=3, std=8.48) PPL=2.376682786480556 completed=128 full=True peak_mem=19395MiB | splitkv_redirects=5 onegraph_captured=True fatal_traceback=False
+
+[surgical] ===== ARM full_flag :: (b) global VLLM_BATCH_INVARIANT=1 (~222 ship floor) =====
+[surgical] extra_env={'VLLM_BATCH_INVARIANT': '1'}
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 140s
+[surgical] full_flag: server ready in 140s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round00.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round00.summary.json
+[surgical] full_flag round 0: wall_tps=216.49 tok=65536/65536 dur=302.7s completed=128
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round01.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round01.summary.json
+[surgical] full_flag round 1: wall_tps=222.02 tok=65536/65536 dur=295.2s completed=128
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round02.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round02.summary.json
+[surgical] full_flag round 2: wall_tps=221.95 tok=65536/65536 dur=295.3s completed=128
+[ppl] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/ppl.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.6126167551625574,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 53497.34119518661,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/ppl.jsonl",
+  "ppl": 2.376656799740845,
+  "prompt_logprobs": 1
+}
+[surgical] full_flag: PPL=2.376656799740845 records=128
+[surgical] ARM full_flag SUMMARY: median_wall_tps=221.95 (n=3, std=3.17) PPL=2.376656799740845 completed=128 full=True peak_mem=19379MiB | splitkv_redirects=0 onegraph_captured=True fatal_traceback=False
+
+[surgical] ===== ARM surgical :: (c) surgical attn-only 2D order-preserving (matmul tax OFF)  <-- TEST =====
+[surgical] extra_env={'SURGICAL_ATTN_USE_3D_OFF': '1'}
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[surgical] surgical: server ready in 90s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round00.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round00.summary.json
+[surgical] surgical round 0: wall_tps=350.86 tok=65536/65536 dur=186.8s completed=128
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round01.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round01.summary.json
+[surgical] surgical round 1: wall_tps=357.64 tok=65536/65536 dur=183.2s completed=128
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round02.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round02.summary.json
+[surgical] surgical round 2: wall_tps=357.79 tok=65536/65536 dur=183.2s completed=128
+[ppl] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/ppl.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.6126028420663436,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 53497.82760167364,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/ppl.jsonl",
+  "ppl": 2.3766755065685943,
+  "prompt_logprobs": 1
+}
+[surgical] surgical: PPL=2.3766755065685943 records=128
+[surgical] ARM surgical SUMMARY: median_wall_tps=357.64 (n=3, std=3.96) PPL=2.3766755065685943 completed=128 full=True peak_mem=19395MiB | splitkv_redirects=0 onegraph_captured=True fatal_traceback=False
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260616_115051-ko01dcyy
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/surgical-realize
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ko01dcyy
+wandb: updating run metadata; uploading artifact surgical_attn_realize
+wandb: uploading artifact surgical_attn_realize
+wandb: uploading config.yaml
+wandb: 
+wandb: Run history:
+wandb:        arm/deployed/median_wall_tps ▁
+wandb:  arm/deployed/num_completed_prompts ▁
+wandb:       arm/deployed/peak_gpu_mem_mib ▁
+wandb:                    arm/deployed/ppl ▁
+wandb:         arm/deployed/server_ready_s ▁
+wandb:      arm/deployed/splitkv_redirects ▁
+wandb:           arm/deployed/wall_tps_std ▁
+wandb:       arm/full_flag/median_wall_tps ▁
+wandb: arm/full_flag/num_completed_prompts ▁
+wandb:      arm/full_flag/peak_gpu_mem_mib ▁
+wandb:                                 +21 ...
+wandb: 
+wandb: Run summary:
+wandb:        arm/deployed/median_wall_tps 464.69484
+wandb:  arm/deployed/num_completed_prompts 128
+wandb:       arm/deployed/peak_gpu_mem_mib 19395
+wandb:                    arm/deployed/ppl 2.37668
+wandb:         arm/deployed/server_ready_s 85.03219
+wandb:      arm/deployed/splitkv_redirects 5
+wandb:           arm/deployed/wall_tps_std 8.47532
+wandb:       arm/full_flag/median_wall_tps 221.94737
+wandb: arm/full_flag/num_completed_prompts 128
+wandb:      arm/full_flag/peak_gpu_mem_mib 19379
+wandb:                                 +31 ...
+wandb: 
+wandb: 🚀 View run lawine/surgical-realize at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ko01dcyy
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260616_115051-ko01dcyy/logs
+
+[surgical] ================= VERDICT (38.9 min) =================
+  deployed_ref_tps         = 464.6948414155412
+  full_flag_222_floor_tps  = 221.94736652369656
+  surgical_realized_tps    = 357.64409234610446
+  surgical_lift_vs_222     = 135.6967258224079  (materiality>2.0, sigma_hw 4.864)
+  surgical_landing_bucket  = partial_300+
+  surgical_recovery_frac   = 0.5590036554772285
+  surgical_ppl             = 2.3766755065685943 (gate<=2.42: True)
+  surgical_no_3d_redirect  = True
+  surgical_graph_capture_ok= True
+  >>> surgical_realizes_above_222 = True <<<
+  token-diff surgical_vs_full_flag: identity_rate=0.94769287109375 flips_seqs=15/128
+  token-diff surgical_vs_deployed: identity_rate=0.4601898193359375 flips_seqs=109/128
+[surgical] artifacts -> /workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical_realize_result.json  wandb_run_id=ko01dcyy

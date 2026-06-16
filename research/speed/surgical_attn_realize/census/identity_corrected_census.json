@@ -1,0 +1,155 @@
+{
+  "pr": 488,
+  "kind": "identity_corrected_census",
+  "generated_utc": "2026-06-16T12:36:24.524140+00:00",
+  "within_arm_warm_determinism_r1_vs_r2": {
+    "deployed": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 1.0,
+      "n_sequences_with_any_flip": 0,
+      "min_root_pos": null,
+      "median_root_pos": null
+    },
+    "full_flag": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 1.0,
+      "n_sequences_with_any_flip": 0,
+      "min_root_pos": null,
+      "median_root_pos": null
+    },
+    "surgical": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 1.0,
+      "n_sequences_with_any_flip": 0,
+      "min_root_pos": null,
+      "median_root_pos": null
+    }
+  },
+  "cold_start_signature_r0_vs_r1": {
+    "deployed": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.434722900390625,
+      "n_sequences_with_any_flip": 111,
+      "min_root_pos": 0,
+      "median_root_pos": 113
+    },
+    "full_flag": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.463653564453125,
+      "n_sequences_with_any_flip": 108,
+      "min_root_pos": 0,
+      "median_root_pos": 123
+    },
+    "surgical": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.45623779296875,
+      "n_sequences_with_any_flip": 108,
+      "min_root_pos": 0,
+      "median_root_pos": 121
+    }
+  },
+  "warm_matched_round_cross_config": {
+    "surgical_vs_full_flag_r1": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.9763031005859375,
+      "n_sequences_with_any_flip": 9,
+      "min_root_pos": 28,
+      "median_root_pos": 400
+    },
+    "surgical_vs_full_flag_r2": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.9763031005859375,
+      "n_sequences_with_any_flip": 9,
+      "min_root_pos": 28,
+      "median_root_pos": 400
+    },
+    "deployed_vs_surgical_r1": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.45635986328125,
+      "n_sequences_with_any_flip": 105,
+      "min_root_pos": 9,
+      "median_root_pos": 116
+    },
+    "deployed_vs_full_flag_r1": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.456634521484375,
+      "n_sequences_with_any_flip": 105,
+      "min_root_pos": 9,
+      "median_root_pos": 116
+    }
+  },
+  "confounded_m1ar_census": {
+    "surgical_m8cold_vs_surgical_m1ar_eager": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.4415283203125,
+      "n_sequences_with_any_flip": 114,
+      "min_root_pos": 0,
+      "median_root_pos": 131
+    },
+    "full_flag_m8cold_vs_full_flag_m1ar_eager": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.4202880859375,
+      "n_sequences_with_any_flip": 114,
+      "min_root_pos": 0,
+      "median_root_pos": 129
+    },
+    "surgical_m1ar_vs_full_flag_m1ar": {
+      "available": true,
+      "n_prompts": 128,
+      "n_tokens": 65536,
+      "token_identity_rate": 0.4301300048828125,
+      "n_sequences_with_any_flip": 115,
+      "min_root_pos": 0,
+      "median_root_pos": 125
+    }
+  },
+  "verdict": {
+    "raw_token_m1ar_gate_measurable_on_this_workload": false,
+    "reason": "the global VLLM_BATCH_INVARIANT=1 config (batch-invariant by construction) fails the same M=1-AR gate identically (0.42 vs surgical 0.44); the census used the cold round-0 decode vs an eager (ONEGRAPH-off) M=1 reference. Raw 512-token greedy decode cascades from any single ULP flip, flooring the rate at the run-to-run noise level.",
+    "all_arms_warm_self_deterministic": true,
+    "noise_floor_cold_vs_warm_range": [
+      0.434722900390625,
+      0.463653564453125
+    ],
+    "clean_signal_surgical_vs_full_flag_warm": 0.9763031005859375,
+    "matmul_tax_identity_delta_sequences": 9,
+    "attention_axis_identity_delta_sequences": 105,
+    "dominant_equivalence_axis": "attention_2D_order_preserving",
+    "surgical_matches_222ship_operative_standard": true,
+    "margin_attribution_ref": "merged #461: attn-only residual flips are bf16-ULP near-ties (margin 0.125-0.25), not semantic",
+    "official_gate_is_served_vs_served": "program.md greedy-identity gate is served-vs-served byte-exact, NOT served-vs-M=1-AR eager",
+    "gate_floor": 0.99,
+    "analysis_only": true,
+    "official_tps": 0
+  },
+  "git": {
+    "git_commit": "250176f987154e16cf011fbf17f4236e56646b46",
+    "git_branch": "lawine/surgical-attention-realization",
+    "git_dirty": true
+  },
+  "wandb_run_id": "scauko99"
+}
