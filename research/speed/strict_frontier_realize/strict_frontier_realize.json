@@ -1,0 +1,190 @@
+{
+  "config": {
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "M": 8,
+    "head_dim": 512,
+    "n_full_layers": 7,
+    "KV_LENS": [
+      128,
+      384,
+      640
+    ],
+    "headline_L": 640,
+    "iters": 50,
+    "warmup": 30,
+    "rounds": 21,
+    "ident_trials": 8,
+    "smoke": false,
+    "num_par_permissive": 16,
+    "seq_threshold_3d": 64,
+    "note": "end-to-end realize of the blanket-strict equivalence frontier 467.14: real served Triton unified_attention at M=8 verify / hd512 full layers, CUDA-graph captured, permissive 3D split-KV (max_seqlen_q->1 override, num_par=16) vs strict 2D serial (natural M=8 path; config-reachable order-preserving) + 3D num_par=1 bracket; paired median+sigma over rounds; MEASURED per-cycle attention Delta applied to the deployed cycle (CYCLE_PERM=7903*467.14/481.53). No serve change, no HF Job, no submission."
+  },
+  "per_L": {
+    "128": {
+      "median_us": {
+        "permissive_3d": 86.01599931716919,
+        "strict_2d": 164.86400365829468,
+        "strict_3d_ns1": 181.2479943037033
+      },
+      "captured": {
+        "permissive_3d": true,
+        "strict_2d": true,
+        "strict_3d_ns1": true
+      },
+      "errs": {
+        "permissive_3d": null,
+        "strict_2d": null,
+        "strict_3d_ns1": null
+      },
+      "added_us_strict_2d": 78.84800434112549,
+      "added_us_sigma_2d": 0.0,
+      "n_paired_2d": 21,
+      "added_us_strict_3d_ns1": 95.23199498653412,
+      "added_us_sigma_3d_ns1": 0.48272190494477296,
+      "realized_strict_2d_tps": 476.62820934603616,
+      "realized_strict_3d_ns1_tps": 475.62215261807813
+    },
+    "384": {
+      "median_us": {
+        "permissive_3d": 111.61600053310394,
+        "strict_2d": 365.56801199913025,
+        "strict_3d_ns1": 440.3199851512909
+      },
+      "captured": {
+        "permissive_3d": true,
+        "strict_2d": true,
+        "strict_3d_ns1": true
+      },
+      "errs": {
+        "permissive_3d": null,
+        "strict_2d": null,
+        "strict_3d_ns1": null
+      },
+      "added_us_strict_2d": 253.9520114660263,
+      "added_us_sigma_2d": 0.0,
+      "n_paired_2d": 21,
+      "added_us_strict_3d_ns1": 328.70398461818695,
+      "added_us_sigma_3d_ns1": 0.40210402947443674,
+      "realized_strict_2d_tps": 466.09142949816743,
+      "realized_strict_3d_ns1_tps": 461.7338387204572
+    },
+    "640": {
+      "median_us": {
+        "permissive_3d": 139.26400244235992,
+        "strict_2d": 562.175989151001,
+        "strict_3d_ns1": 693.2479739189148
+      },
+      "captured": {
+        "permissive_3d": true,
+        "strict_2d": true,
+        "strict_3d_ns1": true
+      },
+      "errs": {
+        "permissive_3d": null,
+        "strict_2d": null,
+        "strict_3d_ns1": null
+      },
+      "added_us_strict_2d": 422.91198670864105,
+      "added_us_sigma_2d": 0.6244556176338361,
+      "n_paired_2d": 21,
+      "added_us_strict_3d_ns1": 553.9839714765549,
+      "added_us_sigma_3d_ns1": 0.5602294143271002,
+      "realized_strict_2d_tps": 456.3567777154584,
+      "realized_strict_3d_ns1_tps": 449.0806603614722
+    }
+  },
+  "identity": {
+    "L": 640,
+    "head_dim": 512,
+    "per_arm": {
+      "permissive_3d": {
+        "byte_identity_min": 0.0,
+        "byte_identity_mean": 0.0,
+        "argmax_identity_min": 1.0,
+        "argmax_identity_mean": 1.0,
+        "max_abs_diff": 0.001953125
+      },
+      "strict_2d": {
+        "byte_identity_min": 1.0,
+        "byte_identity_mean": 1.0,
+        "argmax_identity_min": 1.0,
+        "argmax_identity_mean": 1.0,
+        "max_abs_diff": 0.0
+      },
+      "strict_3d_ns1": {
+        "byte_identity_min": 0.0,
+        "byte_identity_mean": 0.0,
+        "argmax_identity_min": 1.0,
+        "argmax_identity_mean": 1.0,
+        "max_abs_diff": 0.001953125
+      }
+    },
+    "any_nan": false,
+    "error": null
+  },
+  "verdict": {
+    "strict_frontier_realize_self_test_passes": true,
+    "realized_strict_frontier_tps": 456.3567777154584,
+    "realized_strict_frontier_tps_sigma_lo": 456.3215537678797,
+    "realized_strict_frontier_tps_sigma_hi": 456.39200710140506,
+    "realized_strict_3d_ns1_tps": 449.0806603614722,
+    "strict_frontier_is_e2e_measurable": true,
+    "strict_frontier_collapses_to_m1": false,
+    "strict_variant_identity_fraction": 1.0,
+    "strict_variant_argmax_fraction": 1.0,
+    "strict_variant_token_flips": 0,
+    "permissive_identity_fraction": 0.0,
+    "permissive_argmax_fraction": 1.0,
+    "strict_3d_ns1_identity_fraction": 0.0,
+    "composed_vs_realized_drift": 10.78322228454158,
+    "composition_holds_within_sigma_hw": false,
+    "realized_eta_attn_decode": 0.05516127625091883,
+    "eta_attn_composed": 0.0308044697521086,
+    "added_us_per_cycle_strict_2d": 422.91198670864105,
+    "added_us_per_cycle_sigma": 0.6244556176338361,
+    "added_us_per_cycle_strict_3d_ns1": 553.9839714765549,
+    "composed_added_us_per_cycle": 236.17255415031195,
+    "cycle_perm_us": 7666.827445849688,
+    "cycle_wall_us": 7903.0,
+    "deployed_tps": 481.53,
+    "realized_base_tps": 467.14,
+    "m1_collapse_floor_tps": 161.7,
+    "sigma_hw": 4.8,
+    "lever_is_config_reachable_no_source_edit": true,
+    "directive3_stop_tripped": false,
+    "strict_3d_ns1_needs_kernel_rebuild_to_deploy": true,
+    "n_full_layers_per_cycle": 7,
+    "headline_L": 640,
+    "outcome": "REALIZED_BELOW_467",
+    "ppl_anchor": 2.3772,
+    "ppl_gate": 2.42,
+    "peak_vram_gib": 0.17974519729614258,
+    "analysis_only": true,
+    "no_hf_job": true,
+    "no_served_file_change": true,
+    "official_tps": 0,
+    "self_test_conditions": {
+      "tps_zero_added_is_deployed": true,
+      "tps_composed_added_is_base": true,
+      "tps_more_added_lowers": true,
+      "tps_negative_added_raises": true,
+      "cycle_perm_below_strict": true,
+      "eta_composed_is_3pct": true,
+      "constants_anchored": true,
+      "geometry_served": true,
+      "permissive_takes_3d": true,
+      "strict_2d_takes_2d": true,
+      "permissive_captured": true,
+      "strict_captured_survives": true,
+      "nan_clean": true,
+      "identity_ran": true,
+      "strict_byte_exact_or_argmax1": true,
+      "ppl_anchor_ok": true,
+      "vram_ok": true,
+      "realized_above_collapse_floor": true
+    },
+    "reconcile_line": "The composed blanket-strict frontier 467.14 = 481.53/(1+0.0308) ASSUMES the M=8 verify attention reduction order-preserving costs +236 us/cycle (3.08% of decode; isolated priors #393 3.01%, #455 3.33%). REALIZED end-to-end on the CONFIG-reachable strict path (the kernel's NATURAL M=8 2D serial reduction; no served-source edit -- Directive #3 not tripped), the per-cycle attention Delta is +422.9 us (sigma 0.6) -> realized_strict_frontier_tps=456.36 (-10.78 vs the 467.14 base; |drift|=10.78 > sigma_hw=4.8). THE DECISIVE CUDAGRAPH QUESTION: the M=8 strict-reduction verify attention CAPTURES+REPLAYS (survives) -> strict_frontier_is_e2e_measurable=True, does NOT collapse to the M=1 161.70 floor. Occupancy-preserving 3D num_par=1 (deploy-gated, #433 needs_kernel_rebuild) brackets 449.08. Strict variant identity vs per-row canonical: byte=1.0000 argmax=1.0000 (0 flips); deployed permissive byte=0.0000 argmax=1.0000 (reproduces the non-equivalence)."
+  }
+}
