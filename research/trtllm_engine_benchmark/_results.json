@@ -1,0 +1,144 @@
+{
+  "card": "trtllm_engine_benchmark",
+  "pr": 502,
+  "author": "fern",
+  "generated_utc": "2026-06-16T15:47:36.322448+00:00",
+  "model_id": "google/gemma-4-E4B-it",
+  "hardware": "A10G sm_86 24GB",
+  "gpu_used": false,
+  "engine_built": false,
+  "checkpoint_loaded": false,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "trtllm_latest_pypi": "1.2.1",
+  "trtllm_pinned_transformers": "4.57.3",
+  "trtllm_pinned_torch": "2.9.1",
+  "arch": {
+    "env_transformers": "5.12.0",
+    "loaded": true,
+    "model_type": "gemma4",
+    "architectures": [
+      "Gemma4ForConditionalGeneration"
+    ],
+    "num_text_layers": 42,
+    "head_dim_sliding": 256,
+    "head_dim_full": 512,
+    "mixed_head_dim": true,
+    "num_full_attention": 7,
+    "num_sliding_attention": 35,
+    "full_attention_idxs": [
+      5,
+      11,
+      17,
+      23,
+      29,
+      35,
+      41
+    ],
+    "sliding_window": 512,
+    "num_kv_shared_layers": 18,
+    "ple_hidden_size_per_layer_input": 256,
+    "ple_vocab_size_per_layer_input": 262144,
+    "vocab_size": 262144,
+    "final_logit_softcapping": 30.0,
+    "rope_parameters": {
+      "full_attention": {
+        "partial_rotary_factor": 0.25,
+        "rope_theta": 1000000.0,
+        "rope_type": "proportional"
+      },
+      "sliding_attention": {
+        "rope_theta": 10000.0,
+        "rope_type": "default"
+      }
+    },
+    "has_audio_config": true,
+    "has_vision_config": true
+  },
+  "trtllm_import": {
+    "importable": false,
+    "error": "ModuleNotFoundError: No module named 'tensorrt_llm'"
+  },
+  "skew": {
+    "trtllm_pinned_transformers": "4.57.3",
+    "model_min_transformers": "5.5.0",
+    "source": "live_isolated_venv",
+    "isolated_transformers": "4.57.3",
+    "loaded_under_pinned": false,
+    "error": "The checkpoint you are trying to load has model type `gemma4` but Transformers does not recognize this architecture. This could be because of an issue with the checkpoint, or because your version of Transformers is out of date.",
+    "error_type": "ValueError",
+    "skew_blocks_build": true
+  },
+  "research": {
+    "deterministic_mode": {
+      "batch_invariant": false,
+      "finding": "TRT-LLM deterministic mode = run-to-run reproducibility, NOT batch-size invariance (M=1 vs M=8). Byte identity across batch size is a strictly different, more expensive contract (per-token isolated accumulation).",
+      "citation": "arXiv:2601.17768 'Enabling Determinism in LLM Inference'; TRT-LLM deterministic-reductions docs (run-to-run only)."
+    },
+    "speculative_decoding": {
+      "compatible_with_deployed_mtp_k7": false,
+      "model_def_free_methods": [
+        "Lookahead",
+        "NGram"
+      ],
+      "model_def_required_methods": [
+        "EAGLE-1/2/3",
+        "Medusa",
+        "ReDrafter",
+        "Draft-Target/MTP"
+      ],
+      "finding": "EAGLE/Medusa/ReDrafter/MTP-draft require a working TRT-LLM model definition for the base model (blocked by B1/B3). Only Lookahead/NGram are model-def-agnostic, and neither matches the deployed MTP K=7 lane.",
+      "citation": "nvidia.github.io/TensorRT-LLM/advanced/speculative-decoding.html"
+    },
+    "upstream_bug": {
+      "id": "NVIDIA/TensorRT-LLM#12764",
+      "status": "closed-unresolved (version skew)",
+      "trtllm_version": "1.2.0",
+      "failures": {
+        "B": "ValueError: model type `gemma4` but Transformers does not recognize this architecture (builtin runtime transformers 4.57.3)",
+        "C": "ImportError: cannot import name AutoModelForVision2Seq (after upgrading bundled transformers to 5.5.0) -> catch-22"
+      }
+    },
+    "multimodal": {
+      "trtllm_has_gemma4_audio_path": false,
+      "finding": "Serving contract forbids dropping modalities; TRT-LLM has no gemma4_audio (conformer/USM) encoder path, so a text-only TRT-LLM engine is non-compliant.",
+      "citation": "TRT-LLM supported-models multimodal matrix (audio 'Untested' for E4B)."
+    }
+  },
+  "ledger": {
+    "ledger": {
+      "B1_transformers_version_skew": {
+        "rank": 1,
+        "confirmed": true,
+        "live": true,
+        "evidence": "TRT-LLM 1.2.1 pins transformers==4.57.3 < gemma4-min 5.5.0; load under pinned -> ValueError (model type gemma4 unrecognized)."
+      },
+      "B2_head_dim_512_on_ampere": {
+        "rank": 2,
+        "confirmed": true,
+        "live": true,
+        "evidence": "full-attention global_head_dim=512 > Ampere FMHA cap 256; sliding head_dim=256 (mixed per-layer head_dim, no TRT-LLM path)."
+      },
+      "B3_ple_kvshare_perlayer_rope": {
+        "rank": 3,
+        "confirmed": true,
+        "live": true,
+        "evidence": "PLE vocab_per_layer=262144, num_kv_shared_layers=18, mixed_head_dim=True; not expressible in TRT-LLM decoder def."
+      },
+      "B4_multimodal_contract": {
+        "rank": 4,
+        "confirmed": true,
+        "live": true,
+        "evidence": "serving contract forbids dropping modalities; TRT-LLM has no gemma4_audio (conformer/USM) path -> text-only engine non-compliant."
+      }
+    },
+    "all_blockers_confirmed": true,
+    "trtllm_build_succeeded": 0,
+    "trtllm_loads_checkpoint": 0,
+    "feasibility_evidence_complete": 1
+  },
+  "wandb_run_ids": [
+    "sxi590tz"
+  ]
+}
