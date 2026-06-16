@@ -69,6 +69,14 @@ STRICT_FLOOR_222 = 222.0
 PPL_TARGET = 2.37673             # shipped surgical-357 official PPL
 PPL_GATE = 2.42
 SIGMA_HW = 4.864
+# Byte-exact split-KV coverage arithmetic (PR #525 NUM_SEGMENTS sweep). The
+# fixed-order patch makes each parallel-softmax segment cover a FIXED span of
+# FIXED_TPS*TILE_SIZE keys, so total coverage = FIXED_TPS*NUM_SEGMENTS*TILE_SIZE.
+# Coverage must be >= the longest decode KV length or the kernel silently drops
+# the tail of the context (PPL/identity break), so the sweep's low-S end is the
+# correctness bound: at FIXED_TPS=4, coverage=64*S, and S=64 -> 4096=max_model_len.
+BYTEEXACT_TILE_SIZE = 16
+BYTEEXACT_MAX_MODEL_LEN = 4096
 
 ARMS = {
     "variant": {"submission": "fa2sw_strict_byteexact_splitkv399", "mode": "byteexact"},
@@ -253,9 +261,32 @@ def run_one_arm(arm: str, args: argparse.Namespace) -> dict[str, Any]:
         print(f"[recert] {note}", flush=True)
 
     server_python = harness.ensure_server_venv(manifest["dependencies"])
-    out_dir = (OUT_ROOT / (("smoke_" + arm) if args.smoke else arm)).resolve()
+
+    # NUM_SEGMENTS sweep (PR #525): override the byte-exact segment COUNT only
+    # (the occupancy knob), holding BYTEEXACT_FIXED_TPS fixed (the byte-exact
+    # invariant) so the single moved variable is the parallel-softmax segment
+    # count. The patch reads BYTEEXACT_NUM_SEGMENTS from the process env at
+    # import time, so an extra_env override changes only the segment count;
+    # everything else stays byte-identical to the packaged #519 variant manifest.
+    extra_env: dict[str, str] = {}
+    seg_override = getattr(args, "num_segments", None)
+    if seg_override is not None:
+        if cfg["mode"] != "byteexact":
+            raise SystemExit("--num-segments only applies to the byteexact variant arm")
+        extra_env["BYTEEXACT_NUM_SEGMENTS"] = str(seg_override)
+    fixed_tps = int(env_block.get("BYTEEXACT_FIXED_TPS", 0) or 0)
+    eff_segments = (seg_override if seg_override is not None
+                    else int(env_block.get("BYTEEXACT_NUM_SEGMENTS", 0) or 0))
+    coverage_keys = fixed_tps * eff_segments * BYTEEXACT_TILE_SIZE  # = 64*S at T=4
+
+    tag = getattr(args, "out_tag", None) or (("smoke_" + arm) if args.smoke else arm)
+    out_dir = (OUT_ROOT / tag).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     server_log = out_dir / "server.log"
+    if seg_override is not None:
+        print(f"[recert] NUM_SEGMENTS override -> {seg_override} "
+              f"(fixed_tps={fixed_tps}, coverage={coverage_keys} keys vs "
+              f"max_model_len {BYTEEXACT_MAX_MODEL_LEN}) tag={tag}", flush=True)
     print(f"[recert] arm={arm} submission={submission_dir.name} mode={cfg['mode']}",
           flush=True)
     print(f"[recert] workload={args.num_prompts}x{args.output_len} seed={args.seed} "
@@ -269,6 +300,7 @@ def run_one_arm(arm: str, args: argparse.Namespace) -> dict[str, Any]:
     t0 = time.time()
     with _GpuMemSampler() as mem, harness.LocalServer(
         submission_dir, server_python=server_python, log_path=server_log,
+        extra_env=extra_env or None,
     ) as server:
         server_ready_s = time.time() - t0
         print(f"[recert] server ready in {server_ready_s:.0f}s", flush=True)
@@ -350,6 +382,11 @@ def run_one_arm(arm: str, args: argparse.Namespace) -> dict[str, Any]:
         "arm": arm,
         "submission": cfg["submission"],
         "mode": cfg["mode"],
+        "num_segments_override": seg_override,
+        "byteexact_num_segments": eff_segments,
+        "byteexact_fixed_tps": fixed_tps,
+        "coverage_keys": coverage_keys,
+        "coverage_ge_max_model_len": bool(coverage_keys >= BYTEEXACT_MAX_MODEL_LEN),
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "workload": {"num_prompts": args.num_prompts, "output_len": args.output_len,
                      "seed": args.seed, "n_decodes": args.n_decodes,
@@ -584,6 +621,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--no-ppl", dest="do_ppl", action="store_false", default=True)
     ap.add_argument("--smoke", action="store_true",
                     help="tiny serve+decode sanity (8 prompts x 16 tok, 2 decodes, no ppl)")
+    ap.add_argument("--num-segments", type=int, default=None,
+                    help="PR #525: override BYTEEXACT_NUM_SEGMENTS for the variant arm "
+                         "(byte-exact segment-count occupancy sweep; FIXED_TPS held)")
+    ap.add_argument("--out-tag", default=None,
+                    help="output subdir under OUT_ROOT (default: arm name); set per-S in the sweep")
     ap.add_argument("--wandb-name", default="stark/splitkv399-full-recert")
     ap.add_argument("--wandb-group", default="splitkv399-full-recert")
     ap.add_argument("--no-wandb", action="store_true")
