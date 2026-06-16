@@ -107,6 +107,23 @@ UBEL470_M1_XRELOAD = 0.9937485625875515                   # M=1 AR IS cross-relo
 PR461_ALLPIN_IDENTITY = 0.99775                  # population/matched, blanket VBI=1
 STARK466_LOCUS_IDENTITY = 1.0                     # surgical num_splits=1 locus proof (0 flips)
 
+# ---- PR #510 surgical-357 ship census anchors (CITE; this run measures the surgical arm) ----
+# PR #487 (wirbel, run j5vyk14b) -- the GLOBAL-FLAG 222 (VLLM_BATCH_INVARIANT=1) full-serve census this
+# surgical census is compared against. The decisive "vs_globalflag222" comparison is surgical n_semantic
+# flips vs THIS 12. (12 sub-ULP near-tie semantic flips, all m1_self_gap in 1-2 bf16 ULPs.)
+PR487_GLOBALFLAG222_FULLSERVE_CENSUS = 0.9973493   # W=8 served-geometry, 14298/14336
+PR487_GLOBALFLAG222_N_SEMANTIC = 12                # the headline number surgical is compared to
+PR487_GLOBALFLAG222_N_TIE = 26
+PR487_GLOBALFLAG222_TIE_THRESHOLD_ZERO_SEMANTIC = 0.171875   # all 12 collapse to ties at >=0.172 nat (#487)
+# stark #494 (run k8nqmc2b / margin census 5fxw18gu) -- the SURGICAL LOCUS cert this run stress-tests at
+# full serve. attn_only locus identity 0.998875 (1 residual flip, a bf16-ULP near-tie, 0 semantic); the
+# surgical attn_only divergence == the 222 all_pin divergence to 15 sig figs (matmul tax drops 0 identity).
+STARK494_SURGICAL_LOCUS_IDENTITY = 0.998875        # surgical attn_only locus (C=224, M=8 verify), 1 flip
+STARK494_SURGICAL_LOCUS_DIVERGENCE = 0.00112486    # == 222 all_pin divergence (matmul tax identity-neutral)
+
+# the shipped surgical-357 serve recipe -- the arm loads its EXACT lever (surgical_attn_patch.install()):
+SURGICAL_SUBMISSION_DIR = "submissions/fa2sw_strict_surgical357"
+
 # ======================================================================================
 # Constants (the verify geometry -- identical to #381/#405/#412/#471 for comparability)
 # ======================================================================================
@@ -221,6 +238,56 @@ def _agg(positions: list[dict]) -> dict:
 
 
 # ======================================================================================
+# Surgical-357 lever: load the SHIPPED serve recipe's exact attention pin (PR #510)
+# ======================================================================================
+def _surgical_mode(arm: str) -> bool:
+    """The surgical arm == the shipped surgical-357 config (2D order-preserving attention on the 7
+    full-attn layers, matmul tax OFF). Recognised by arm name or the ship's gating env."""
+    return arm == "surgical" or os.environ.get("SURGICAL_ATTN_USE_3D_OFF", "0") == "1"
+
+
+def _install_surgical_lever() -> dict:
+    """Install the EXACT shipped surgical-357 lever by running the submission's own
+    ``surgical_attn_patch.install()`` (not a reimplementation): it sets the module global
+    ``triton_unified_attention.is_batch_invariant=True`` (forces ``use_3d=False`` -> vLLM's byte-exact
+    2D order-preserving sequential-KV attention) WITHOUT ``VLLM_BATCH_INVARIANT=1`` -- so vLLM's
+    ``init_batch_invariance()`` never installs the SM80 persistent-matmul tax (MLP/QKV/lm_head keep the
+    fast Marlin path). This is the only compute-path difference vs the #487 ``pinned`` arm (which sets the
+    env and gets BOTH the 2D attention AND the matmul tax). Returns provenance for the report."""
+    prov = {"surgical_attn_armed": False, "matmul_tax_installed": None, "lever_source": None,
+            "vbi_env_set": os.environ.get("VLLM_BATCH_INVARIANT", "0") == "1"}
+    # the ship patch arms only when SURGICAL_ATTN_USE_3D_OFF=1; ensure it (the watchdog sets it in env too)
+    os.environ.setdefault("SURGICAL_ATTN_USE_3D_OFF", "1")
+    sub = str(Path(__file__).resolve().parents[3] / SURGICAL_SUBMISSION_DIR)
+    if sub not in sys.path:
+        sys.path.insert(0, sub)
+    try:
+        import importlib
+        import surgical_attn_patch as sap                       # the SHIPPED patch module
+        importlib.reload(sap)                                   # re-read SURGICAL_ATTN_USE_3D_OFF post-set
+        prov["surgical_attn_armed"] = bool(sap.install())
+        prov["lever_source"] = os.path.join(sub, "surgical_attn_patch.py")
+    except Exception as exc:                                    # fail-LOUD here: a silent no-op would make
+        prov["error"] = repr(exc)                               # the surgical arm secretly == heuristic
+        raise RuntimeError(f"[surgical] could not arm the shipped lever: {exc!r}") from exc
+    # cross-check the module global is actually set (the load-bearing assertion)
+    try:
+        import vllm.v1.attention.ops.triton_unified_attention as _ua
+        prov["surgical_attn_armed"] = bool(getattr(_ua, "is_batch_invariant", False))
+    except Exception:
+        pass
+    # confirm the matmul tax is NOT installed (the whole point of the surgical lever)
+    try:
+        import vllm.model_executor.layers.batch_invariant as _bi
+        prov["matmul_tax_installed"] = bool(getattr(_bi, "_batch_invariant_MODE", False))
+    except Exception:
+        prov["matmul_tax_installed"] = None
+    print(f"[surgical] armed={prov['surgical_attn_armed']} matmul_tax_installed={prov['matmul_tax_installed']} "
+          f"vbi_env_set={prov['vbi_env_set']} source={prov['lever_source']}", flush=True)
+    return prov
+
+
+# ======================================================================================
 # PHASE fullserve_census: one arm. Same-reload teacher-forced full-trajectory verify census.
 # ======================================================================================
 def phase_fullserve_census(out_path: str, arm: str, n_prompts: int, c0: int, traj_len: int,
@@ -246,6 +313,13 @@ def phase_fullserve_census(out_path: str, arm: str, n_prompts: int, c0: int, tra
         enable_prefix_caching=True, enforce_eager=True, trust_remote_code=True,
     )
     print(f"[fullserve:{arm}] vLLM load done in {time.time()-t0:.0f}s", flush=True)
+
+    # SURGICAL arm: arm the shipped surgical-357 lever AFTER load (the module is imported, the env stays
+    # unset so the matmul tax never installed) and BEFORE any generate (is_batch_invariant is read per-call).
+    surgical_prov = {"surgical_attn_armed": None, "matmul_tax_installed": None,
+                     "vbi_env_set": batch_invariant_env, "lever_source": None}
+    if _surgical_mode(arm):
+        surgical_prov = _install_surgical_lever()
 
     try:
         import vllm.v1.attention.ops.triton_unified_attention as _ua
@@ -532,6 +606,12 @@ def phase_fullserve_census(out_path: str, arm: str, n_prompts: int, c0: int, tra
     out = {
         "phase": "fullserve_census", "arm": arm, "model_dir": model_dir,
         "vllm_batch_invariant_env": batch_invariant_env, "attn_is_batch_invariant": attn_is_batch_invariant,
+        # surgical-357 lever provenance (None on non-surgical arms): proves the 2D attn is armed and the
+        # matmul tax is OFF -- i.e. this arm IS the shipped surgical config, not the global-flag pinned one.
+        "surgical_mode": _surgical_mode(arm),
+        "surgical_attn_armed": surgical_prov.get("surgical_attn_armed"),
+        "matmul_tax_installed": surgical_prov.get("matmul_tax_installed"),
+        "surgical_lever_source": surgical_prov.get("lever_source"),
         "n_prompts_run": len(per_prompt), "C": C, "traj_len": traj_len, "ignore_eos": ignore_eos,
         "G": G, "W8": M_VERIFY, "Wwide": WIDE_W, "n_windows": n_windows,
         # HEADLINE: W=8 served-geometry full-serve census
@@ -574,6 +654,80 @@ def phase_fullserve_census(out_path: str, arm: str, n_prompts: int, c0: int, tra
           f"(det={out['mean_det_prompt_secs']} nondet={out['mean_nondet_prompt_secs']}) "
           f"=> est 128-prompt full run ~{out['mean_prompt_secs']*128/60:.0f}min", flush=True)
     print(f"ARM_DONE {out_path}", flush=True)
+
+
+# ======================================================================================
+# PR #510 deliverables: tie-threshold sweep + per-flip examination + globalflag222 compare
+# ======================================================================================
+def tie_threshold_sweep(flip_details: list[dict], width: int = M_VERIFY) -> dict:
+    """0-GPU re-bucket of the served (W=8) flips at a sweep of bf16-tie tolerances on the M=1 self-gap.
+
+    A flip is currently classified 'semantic' iff the M=1 reference's OWN top-2 gap exceeds BAND_TOL (1e-9,
+    a *bitwise* tie). Each surgical semantic flip is really a near-tie whose gap is a small number of bf16
+    ULPs. At tolerance t, re-classify any flip with m1_self_gap <= t as a TIE (the M=1 winner is within t of
+    its runner-up -> the verify arbiter resolving it differently is operatively identity-1.0 at that
+    tolerance). Reports n_semantic remaining at standard thresholds and the minimal t that zeroes them --
+    the principled 'operative-1.0 at a k-ULP tie tolerance' certificate knob the human asked for."""
+    ULP = 0.0625                                          # one bf16 logit step in nats (the near-tie quantum)
+    served = [f for f in flip_details if f.get("width") == width and f.get("is_flip")]
+    sem = [f for f in served if f.get("flip_kind") == "semantic"]
+    sem_gaps = sorted(float(f["m1_self_gap"]) for f in sem if f.get("m1_self_gap") is not None)
+    thresholds = {
+        "bitwise_1e-9": BAND_TOL, "1ulp_0.0625": ULP, "2ulp_0.125": 2 * ULP,
+        "eps_star_0.125": EPS_STAR, "3ulp_0.1875": 3 * ULP,
+    }
+    buckets = {name: sum(1 for g in sem_gaps if g > t) for name, t in thresholds.items()}
+    # minimal tolerance that collapses ALL served semantic flips to ties == the max semantic gap (0 if none)
+    tie_threshold_for_zero_semantic = (max(sem_gaps) if sem_gaps else 0.0)
+    return {
+        "n_served_flips": len(served),
+        "n_semantic_bitwise": len(sem),
+        "semantic_gaps_nats": sem_gaps,
+        "semantic_gaps_in_ulps": [round(g / ULP, 3) for g in sem_gaps],
+        "n_semantic_at_threshold": buckets,
+        "tie_threshold_for_zero_semantic": tie_threshold_for_zero_semantic,
+        "tie_threshold_for_zero_semantic_ulps": (round(tie_threshold_for_zero_semantic / ULP, 3)
+                                                 if sem_gaps else 0.0),
+        "all_semantic_collapse_at_eps_star": bool(all(g <= EPS_STAR for g in sem_gaps)),
+    }
+
+
+def examine_served_flips(flip_details: list[dict], width: int = M_VERIFY) -> list[dict]:
+    """One compact record per served (W=8) flip -- the exact #487 examination columns (m1_self_gap in ULPs,
+    M=1 token in M=8 top-2, position fraction along the trajectory, kind)."""
+    ULP = 0.0625
+    out = []
+    for f in flip_details:
+        if f.get("width") != width or not f.get("is_flip"):
+            continue
+        gap = f.get("m1_self_gap")
+        out.append({
+            "prompt_idx": f.get("prompt_idx"), "pos": f.get("pos"), "k": f.get("k"),
+            "flip_kind": f.get("flip_kind"),
+            "m1_self_gap": gap, "m1_self_gap_ulps": (round(float(gap) / ULP, 3) if gap is not None else None),
+            "m1_in_m8_top2": f.get("m1_in_m8_top2"), "m1_argmax_matches_token": f.get("m1_argmax_matches_token"),
+            "m8_top1_id": f.get("m8_top1_id"), "m1_tok_id": f.get("m1_tok_id"),
+        })
+    return sorted(out, key=lambda r: (r["prompt_idx"], r["pos"]))
+
+
+def compare_vs_globalflag222(n_semantic_surgical: int) -> dict:
+    """The decisive PR #510 comparison: does the SHIPPED surgical-357 have FEWER / SAME / MORE served
+    semantic flips than the global-flag 222 config (#487's 12)?"""
+    base = PR487_GLOBALFLAG222_N_SEMANTIC
+    if n_semantic_surgical < base:
+        verdict = "fewer"
+    elif n_semantic_surgical == base:
+        verdict = "same"
+    else:
+        verdict = "more"
+    return {
+        "vs_globalflag222": verdict,
+        "surgical_n_semantic": n_semantic_surgical,
+        "globalflag222_n_semantic": base,
+        "delta_vs_globalflag222": n_semantic_surgical - base,
+        "globalflag222_census": PR487_GLOBALFLAG222_FULLSERVE_CENSUS,
+    }
 
 
 # ======================================================================================
@@ -652,10 +806,46 @@ def compose_and_report(census: dict, a: argparse.Namespace) -> dict:
         ),
     }
 
+    # ---- PR #510 surgical-357 deliverables (computed on the primary arm's served W=8 flips) ----
+    is_surgical = bool(prim.get("surgical_mode"))
+    tie_sweep = tie_threshold_sweep(prim["flip_details"], width=M_VERIFY)
+    served_flip_exam = examine_served_flips(prim["flip_details"], width=M_VERIFY)
+    vs222 = compare_vs_globalflag222(w8["n_semantic_flips"])
+    # surgical locus cross-check: the surgical attn_only locus cert this run stress-tests (stark #494).
+    # stark494 (0.998875) and denken471 (0.9988751) are equal to 15 sig figs (surgical divergence == 222
+    # all_pin divergence), so the existing locus_reproduces_denken471 check doubles as the surgical check.
+    surgical_locus_gap = (locus["token_identity_rate"] - STARK494_SURGICAL_LOCUS_IDENTITY
+                          if math.isfinite(locus["token_identity_rate"]) else float("nan"))
+    surgical_locus_reproduces_494 = bool(math.isfinite(surgical_locus_gap)
+                                         and abs(surgical_locus_gap) <= (2.0 / max(1, locus["n_positions"])))
+
     report = {
-        "pr": 487, "agent": "wirbel", "leg": "same-reload full-serve identity census harness",
+        "pr": (510 if is_surgical else 487), "agent": "wirbel",
+        "leg": ("surgical-357 ship: reload-immune full-serve operative-identity census" if is_surgical
+                else "same-reload full-serve identity census harness"),
         "analysis_only": True, "no_hf_job": True, "no_served_file_change": True, "official_tps": 0,
         "primary_arm": primary_arm,
+        # ---- PR #510 surgical-357 SHIP deliverables (KEY OUTPUTS) ----
+        "surgical_mode": is_surgical,
+        "surgical357_fullserve_census": w8["token_identity_rate"],
+        "surgical357_n_semantic_flips": w8["n_semantic_flips"],
+        "surgical357_n_tie_flips": w8["n_tie_flips"],
+        "surgical357_operative_identity_1p0": operative_1p0,
+        "surgical357_operative_identity_rate": w8["operative_identity_rate"],
+        "surgical_attn_armed": prim.get("surgical_attn_armed"),
+        "matmul_tax_installed": prim.get("matmul_tax_installed"),
+        "surgical_lever_source": prim.get("surgical_lever_source"),
+        # tie-threshold sensitivity sweep (the certificate-wording knob)
+        "tie_threshold_sweep": tie_sweep,
+        "tie_threshold_for_zero_semantic": tie_sweep["tie_threshold_for_zero_semantic"],
+        "tie_threshold_for_zero_semantic_ulps": tie_sweep["tie_threshold_for_zero_semantic_ulps"],
+        "served_flip_examination": served_flip_exam,
+        # the decisive comparison: surgical vs global-flag 222 (#487's 12)
+        **vs222,
+        # surgical locus anchor (stark #494) cross-check
+        "surgical_locus_anchor_stark494": STARK494_SURGICAL_LOCUS_IDENTITY,
+        "surgical_locus_gap_vs_stark494": surgical_locus_gap,
+        "surgical_locus_reproduces_stark494": surgical_locus_reproduces_494,
         # ---- HEADLINE deliverable == faithful W=8 served verify geometry ----
         "reloadimmune_fullserve_census": w8["token_identity_rate"],
         "n_semantic_flips": w8["n_semantic_flips"],
@@ -711,6 +901,8 @@ def compose_and_report(census: dict, a: argparse.Namespace) -> dict:
             "determinism_M8": d["determinism_M8"], "width_equivalence_rate": d["width_equivalence_rate"],
             "vllm_batch_invariant_env": d["vllm_batch_invariant_env"],
             "attn_is_batch_invariant": d["attn_is_batch_invariant"], "peak_gpu_gb": d["peak_gpu_gb"],
+            "surgical_mode": d.get("surgical_mode"), "surgical_attn_armed": d.get("surgical_attn_armed"),
+            "matmul_tax_installed": d.get("matmul_tax_installed"),
         } for arm, d in census.items()},
         "imported_anchors": {
             "denken471_locus_identity": DENKEN471_LOCUS_IDENTITY,
@@ -718,6 +910,11 @@ def compose_and_report(census: dict, a: argparse.Namespace) -> dict:
             "ubel470_served_confounded_identity": UBEL470_SERVED_CONFOUNDED_IDENTITY,
             "ubel470_m8_xreload_floor": UBEL470_M8_XRELOAD_FLOOR, "ubel470_m1_xreload": UBEL470_M1_XRELOAD,
             "pr461_allpin_identity": PR461_ALLPIN_IDENTITY, "stark466_locus_identity": STARK466_LOCUS_IDENTITY,
+            "pr487_globalflag222_fullserve_census": PR487_GLOBALFLAG222_FULLSERVE_CENSUS,
+            "pr487_globalflag222_n_semantic": PR487_GLOBALFLAG222_N_SEMANTIC,
+            "pr487_globalflag222_tie_threshold_zero_semantic": PR487_GLOBALFLAG222_TIE_THRESHOLD_ZERO_SEMANTIC,
+            "stark494_surgical_locus_identity": STARK494_SURGICAL_LOCUS_IDENTITY,
+            "stark494_surgical_locus_divergence": STARK494_SURGICAL_LOCUS_DIVERGENCE,
         },
         "verdict": verdict,
         "self_test": self_test, "self_test_n_checks": n_checks,
@@ -771,6 +968,15 @@ def build_self_test(census: dict, primary_arm: str, operative_1p0: bool) -> tupl
     if "pinned" in census:
         checks["pinned_attn_batch_invariant"] = bool(census["pinned"].get("attn_is_batch_invariant"))
         checks["pinned_vbi_env_on"] = bool(census["pinned"].get("vllm_batch_invariant_env"))
+    # the surgical (shipped 357) arm: 2D attention armed (is_batch_invariant True) AND matmul tax OFF
+    # (VBI env unset, _batch_invariant_MODE False) -- this is what makes the arm the SHIPPED config and
+    # not the global-flag pinned one. If either fails the arm is mislabelled and the result is void.
+    if "surgical" in census:
+        s = census["surgical"]
+        checks["surgical_attn_batch_invariant"] = bool(s.get("attn_is_batch_invariant"))
+        checks["surgical_attn_armed"] = bool(s.get("surgical_attn_armed"))
+        checks["surgical_vbi_env_off"] = bool(not s.get("vllm_batch_invariant_env"))
+        checks["surgical_matmul_tax_off"] = bool(s.get("matmul_tax_installed") is False)
     # cross-check: the O==C sub-census reproduces denken #471 within its 1-flip granularity
     loc = prim["locus_O224"]
     gap = (loc["token_identity_rate"] - DENKEN471_LOCUS_IDENTITY
@@ -860,7 +1066,14 @@ def _run_census_arm(a: argparse.Namespace, arm: str) -> dict:
     out_json = str(OUT_DIR / f"arm_{arm}_result.json")
     ckpt = str(OUT_DIR / f"checkpoint_{arm}.jsonl")
     hb = str(OUT_DIR / f"heartbeat_{arm}.json")
-    extra_env = {"VLLM_BATCH_INVARIANT": "1"} if arm == "pinned" else {"VLLM_BATCH_INVARIANT": "0"}
+    # pinned = global-flag strict (VBI=1: 2D attn + matmul tax). surgical = shipped 357 lever (VBI=0 +
+    # SURGICAL_ATTN_USE_3D_OFF=1: 2D attn, matmul tax OFF). heuristic = stock (VBI=0, no pin).
+    if arm == "pinned":
+        extra_env = {"VLLM_BATCH_INVARIANT": "1"}
+    elif arm == "surgical":
+        extra_env = {"VLLM_BATCH_INVARIANT": "0", "SURGICAL_ATTN_USE_3D_OFF": "1"}
+    else:
+        extra_env = {"VLLM_BATCH_INVARIANT": "0"}
     base_args = [
         "--phase", "fullserve_census", "--arm", arm, "--out", out_json,
         "--n-prompts", str(a.n_prompts), "--c0", str(a.c0), "--traj-len", str(a.traj_len),
@@ -960,7 +1173,7 @@ def _finish(report: dict, a: argparse.Namespace) -> None:
 
 
 def _print_console(r: dict) -> None:
-    print("\n========== FULL-SERVE IDENTITY CENSUS HARNESS (PR #487) ==========", flush=True)
+    print(f"\n========== FULL-SERVE IDENTITY CENSUS HARNESS (PR #{r.get('pr', 487)}) ==========", flush=True)
     print(f" VERDICT                                  : {r['verdict']}", flush=True)
     print(f" operative_identity_1p0 (PRIMARY)         : {r['operative_identity_1p0']}", flush=True)
     print(f" reloadimmune_fullserve_census (W=8)      : {r['reloadimmune_fullserve_census']:.7f}  "
@@ -997,6 +1210,23 @@ def _print_console(r: dict) -> None:
     print(f"  W=32 extension artifact (non-served)     : {wf['extension_flips_semantic']} semantic + "
           f"{wf['extension_flips_tie']} tie flips @ O+8..O+31 (prefill-span divergence, NOT an M=8 identity fail)",
           flush=True)
+    if r.get("surgical_mode"):
+        print(" --- PR #510 SURGICAL-357 SHIP deliverables ---", flush=True)
+        print(f"  surgical_attn_armed / matmul_tax_off     : {r.get('surgical_attn_armed')} / "
+              f"{r.get('matmul_tax_installed') is False}", flush=True)
+        print(f"  surgical357_fullserve_census             : {r['surgical357_fullserve_census']:.7f} "
+              f"(semantic={r['surgical357_n_semantic_flips']} tie={r['surgical357_n_tie_flips']})", flush=True)
+        print(f"  surgical357_operative_identity_1p0       : {r['surgical357_operative_identity_1p0']}", flush=True)
+        print(f"  vs_globalflag222 (#487's 12 semantic)    : {r['vs_globalflag222'].upper()} "
+              f"(surgical {r['surgical_n_semantic']} vs 222 {r['globalflag222_n_semantic']}, "
+              f"delta {r['delta_vs_globalflag222']:+d})", flush=True)
+        ts = r.get("tie_threshold_sweep", {})
+        print(f"  tie_threshold_for_zero_semantic          : {r['tie_threshold_for_zero_semantic']:.4f} nat "
+              f"({r['tie_threshold_for_zero_semantic_ulps']:.2f} ULP)  buckets={ts.get('n_semantic_at_threshold')}",
+              flush=True)
+        print(f"  surgical_locus_reproduces_stark494       : {r['surgical_locus_reproduces_stark494']} "
+              f"(gap {r['surgical_locus_gap_vs_stark494']:+.2e} vs {r['surgical_locus_anchor_stark494']:.6f})",
+              flush=True)
     print(f" SELF-TEST PASSES                         : {r['fullserve_self_test_passes']} "
           f"({sum(r['self_test'].values())}/{r['self_test_n_checks']})", flush=True)
     fails = [k for k, v in r["self_test"].items() if not v]
@@ -1012,16 +1242,26 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
     except Exception as exc:
         print(f"[wandb] helper import failed: {exc!r}; skipping", flush=True)
         return
+    _surgical = bool(report.get("surgical_mode"))
+    _notes = (
+        "PR#510 surgical-357 SHIP reload-immune full-serve operative-identity census: the M=8 surgical serve "
+        "(2D order-preserving attention, matmul tax OFF) vs its own M=1 AR, swept along the full free-running "
+        "trajectory. Stress-tests the stark #494 locus operative-1.0 cert at full-serve scale (does it survive, "
+        "or share #487's global-flag-222 blind spot?)."
+        if _surgical else
+        "PR#487 same-reload full-serve identity census: reload-immune token_identity_rate of the M=8 strict "
+        "serve vs M=1 AR, swept along the full free-running trajectory (closes the #471 locus -> #470 "
+        "reload-confounded gap)."
+    )
     run = init_wandb_run(
         job_type="local_profiling", agent="wirbel", name=a.wandb_name, group=a.wandb_group,
-        notes="PR#487 same-reload full-serve identity census: reload-immune token_identity_rate of the M=8 "
-              "strict serve vs M=1 AR, swept along the full free-running trajectory (closes the #471 locus -> "
-              "#470 reload-confounded gap).",
+        notes=_notes,
         config={
-            "pr": 487, "M_verify": M_VERIFY, "K_spec": K_SPEC, "wide_w": WIDE_W, "G": HYBRID_PREFIX_COMMIT,
+            "pr": report.get("pr", 487), "M_verify": M_VERIFY, "K_spec": K_SPEC, "wide_w": WIDE_W,
+            "G": HYBRID_PREFIX_COMMIT,
             "C": report["C"], "traj_len": report["traj_len"], "ignore_eos": report["ignore_eos"],
             "n_prompts_run": report["n_prompts_run"], "model_dir": report["model_dir"],
-            "primary_arm": report["primary_arm"], "eps_star": EPS_STAR,
+            "primary_arm": report["primary_arm"], "eps_star": EPS_STAR, "surgical_mode": _surgical,
             "analysis_only": True, "no_hf_job": True, "no_served_file_change": True, "official_tps": 0,
             **{f"anchor/{k}": v for k, v in report["imported_anchors"].items()},
         },
@@ -1045,11 +1285,26 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
         "coverage_multiple_vs_locus", "n_prompts_run", "C", "traj_len", "ignore_eos",
         "verdict", "fullserve_self_test_passes", "self_test_n_checks",
         "analysis_only", "no_hf_job", "no_served_file_change", "official_tps",
+        # ---- PR #510 surgical-357 ship KEY OUTPUTS ----
+        "surgical_mode", "surgical357_fullserve_census", "surgical357_n_semantic_flips",
+        "surgical357_n_tie_flips", "surgical357_operative_identity_1p0", "surgical357_operative_identity_rate",
+        "surgical_attn_armed", "matmul_tax_installed", "surgical_lever_source",
+        "tie_threshold_for_zero_semantic", "tie_threshold_for_zero_semantic_ulps",
+        "vs_globalflag222", "surgical_n_semantic", "globalflag222_n_semantic", "delta_vs_globalflag222",
+        "globalflag222_census", "surgical_locus_anchor_stark494", "surgical_locus_gap_vs_stark494",
+        "surgical_locus_reproduces_stark494",
     )
     for k in keys:
         run.summary[k] = report.get(k)
     for wk, wv in report["width_findings"].items():
         run.summary[f"width_findings/{wk}"] = wv
+    # PR #510 tie-threshold sweep (the certificate-wording knob) under its own namespace
+    for sk, sv in report.get("tie_threshold_sweep", {}).items():
+        if sk == "n_semantic_at_threshold":
+            for tname, tval in sv.items():
+                run.summary[f"tie_sweep/n_semantic_at_{tname}"] = tval
+        elif not isinstance(sv, list):
+            run.summary[f"tie_sweep/{sk}"] = sv
     run.summary["verdict_green"] = report["verdict"].startswith("GREEN")
     run.summary["verdict_red"] = report["verdict"].startswith("RED")
     for arm, d in report["arms"].items():
@@ -1067,7 +1322,8 @@ def main() -> None:
     ap.add_argument("--arm", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--arms", type=str, default=",".join(CENSUS_ARMS_DEFAULT),
-                    help="comma list of census arms to run (pinned=VBI1 global-flag strict; heuristic=VBI0)")
+                    help="comma list of census arms (pinned=VBI1 global-flag strict; surgical=shipped 357 "
+                         "lever VBI0+SURGICAL_ATTN_USE_3D_OFF=1 i.e. 2D attn + matmul tax OFF; heuristic=VBI0 stock)")
     ap.add_argument("--reanalyze", action="store_true",
                     help="0-GPU: recompose report + self-test from saved arm_*.json")
     ap.add_argument("--smoke", action="store_true", help="tiny run (few prompts, short traj) to validate path")
