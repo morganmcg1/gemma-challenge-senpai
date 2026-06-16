@@ -1,0 +1,236 @@
+{
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "compute_capability": "8.6",
+    "cc_tuple": [
+      8,
+      6
+    ],
+    "total_mem_gib": 22.06,
+    "is_sm86": true
+  },
+  "dispatch": {
+    "selected_per_shape": {
+      "qkv": "MarlinLinearKernel",
+      "o_proj": "MarlinLinearKernel",
+      "gate_up": "MarlinLinearKernel",
+      "down": "MarlinLinearKernel"
+    },
+    "selected_kernel": "MarlinLinearKernel",
+    "marlin_is_unique": true,
+    "cuda_kernel_priority": [
+      "CutlassW4A8LinearKernel",
+      "MacheteLinearKernel",
+      "AllSparkLinearKernel",
+      "MarlinLinearKernel",
+      "ConchLinearKernel",
+      "ExllamaLinearKernel"
+    ],
+    "per_kernel_verdict_gate_up": [
+      {
+        "kernel": "CutlassW4A8LinearKernel",
+        "min_capability": 90,
+        "can_implement": false,
+        "reason": "CUTLASS W4A8 requires compute capability of 90 (Hopper)"
+      },
+      {
+        "kernel": "MacheteLinearKernel",
+        "min_capability": 90,
+        "can_implement": false,
+        "reason": "Machete requires compute capability of 90 (Hopper)"
+      },
+      {
+        "kernel": "AllSparkLinearKernel",
+        "min_capability": 80,
+        "can_implement": false,
+        "reason": "For Ampere GPU, AllSpark does not support group_size = 128. Only group_size = -1 are supported."
+      },
+      {
+        "kernel": "MarlinLinearKernel",
+        "min_capability": 75,
+        "can_implement": true,
+        "reason": ""
+      },
+      {
+        "kernel": "ConchLinearKernel",
+        "min_capability": 80,
+        "can_implement": false,
+        "reason": "conch-triton-kernels is not installed, please install it via `pip install conch-triton-kernels` and try again!"
+      },
+      {
+        "kernel": "ExllamaLinearKernel",
+        "min_capability": 60,
+        "can_implement": false,
+        "reason": "Exllama only supports float16 activations"
+      }
+    ]
+  },
+  "machete": {
+    "machete_supported_schedules_n": 9,
+    "machete_schedules_are_tma_hopper": true,
+    "device_is_hopper_sm90": false,
+    "machete_selectable_here": false
+  },
+  "per_shape": [
+    {
+      "name": "qkv",
+      "K": 2560,
+      "N": 3072,
+      "count": 37,
+      "params_per_layer": 7864320,
+      "served_us_m8": 24.804693857828777,
+      "served_us_m1": 24.62037404378255,
+      "served_graph_us_m8": 9.495893319447836,
+      "fp32off_us_m8": 23.340373039245605,
+      "fp32off_graph_us_m8": 9.939626852671305,
+      "speedup_fp32off": 1.0627376784475977,
+      "speedup_fp32off_graph": 0.9553571235821379,
+      "m8_over_m1": 1.0074864749706258,
+      "fp32off_bitexact_vs_served": false,
+      "fp32off_max_abs_delta": 0.001953125,
+      "atomic_true_bitexact_vs_served": true,
+      "atomic_true_err": ""
+    },
+    {
+      "name": "o_proj",
+      "K": 2048,
+      "N": 2560,
+      "count": 37,
+      "params_per_layer": 5242880,
+      "served_us_m8": 24.767146110534668,
+      "served_us_m1": 24.760319391886394,
+      "served_graph_us_m8": 7.0075734456380205,
+      "fp32off_us_m8": 23.814826011657715,
+      "fp32off_graph_us_m8": 7.191893259684245,
+      "speedup_fp32off": 1.0399885390055246,
+      "speedup_fp32off_graph": 0.9743711693999312,
+      "m8_over_m1": 1.0002757120592924,
+      "fp32off_bitexact_vs_served": false,
+      "fp32off_max_abs_delta": 0.001953125,
+      "atomic_true_bitexact_vs_served": true,
+      "atomic_true_err": ""
+    },
+    {
+      "name": "gate_up",
+      "K": 2560,
+      "N": 20480,
+      "count": 37,
+      "params_per_layer": 52428800,
+      "served_us_m8": 58.8151486714681,
+      "served_us_m1": 57.70922978719076,
+      "served_graph_us_m8": 58.71615727742513,
+      "fp32off_us_m8": 58.80832036336263,
+      "fp32off_graph_us_m8": 57.917442321777344,
+      "speedup_fp32off": 1.0001161112588028,
+      "speedup_fp32off_graph": 1.0137905771323652,
+      "m8_over_m1": 1.019163639652713,
+      "fp32off_bitexact_vs_served": true,
+      "fp32off_max_abs_delta": 0.0,
+      "atomic_true_bitexact_vs_served": true,
+      "atomic_true_err": ""
+    },
+    {
+      "name": "down",
+      "K": 10240,
+      "N": 2560,
+      "count": 37,
+      "params_per_layer": 26214400,
+      "served_us_m8": 31.791785558064777,
+      "served_us_m1": 31.518719991048176,
+      "served_graph_us_m8": 31.02378527323405,
+      "fp32off_us_m8": 31.757653554280598,
+      "fp32off_graph_us_m8": 31.003306706746418,
+      "speedup_fp32off": 1.001074764661874,
+      "speedup_fp32off_graph": 1.0006605284617327,
+      "m8_over_m1": 1.008663599508297,
+      "fp32off_bitexact_vs_served": false,
+      "fp32off_max_abs_delta": 0.00390625,
+      "atomic_true_bitexact_vs_served": true,
+      "atomic_true_err": ""
+    }
+  ],
+  "required": {
+    "selected_kernel": "MarlinLinearKernel",
+    "marlin_is_unique_on_sm86": true,
+    "machete_selectable_here": false,
+    "t_body_us_m8": 5186.614645322164,
+    "t_body_us_m1": 5128.519798914592,
+    "body_m_invariance_m8_over_m1": 1.0113277999667403,
+    "body_speedup_fp32reduce_off": 1.0018023204634297,
+    "fp32reduce_off_is_byteexact": false,
+    "byteexact_safe_endtoend_tps_delta": 0.0,
+    "fp32reduce_off_upperbound_tps_delta": 0.6416254072425431,
+    "max_honest_endtoend_tps_delta": 0.0,
+    "max_honest_endtoend_tps": 467.14,
+    "has_byteexact_selectable_headroom": false,
+    "faster_int4_gemm_requires_build": true,
+    "ppl": 2.3772,
+    "self_test_passes": true
+  },
+  "verdict": "On sm_86 the served int4 W4A16 group-128 GEMM dispatches UNIQUELY to Marlin (choose_mp_linear_kernel: Cutlass/Machete=Hopper-only, AllSpark=no-g128-on-Ampere, Conch=absent, Exllama=fp16-only -> only Marlin can_implement). Marlin's tile config is auto-selected inside the kernel (NO Python knob); the only selectable lever is use_fp32_reduce (use_atomic_add is hard-off for sm8x+bf16). Measured at M=8: use_fp32_reduce=False is 1.0018x on the body (+0.18%) but BREAKS byte-exactness (per-shape bit-flip on the split-K layers). Body is M-invariant (T_body M8/M1=1.0113, reproducing #441's weight-read-bound finding). Honest Amdahl map (f_body=0.7624, base 467.14): byte-exact-safe headroom = +0.00 TPS; even the identity-BREAKING fp32_reduce=False upper bound = +0.64 TPS (BELOW the +2 bar). VERDICT: NO byte-exact selectable headroom -- served Marlin is already optimal for this shape; any faster int4 GEMM requires a kernel/source BUILD = NO-GO scope (stark #440). ppl anchored 2.3772 (byte-exact selection is PPL-neutral).",
+  "config": {
+    "agent": "stark",
+    "pr": 448,
+    "kind": "int4-gemm-kernel-config-audit",
+    "hidden": 2560,
+    "intermediate": 10240,
+    "head_dim": 256,
+    "n_q_heads": 8,
+    "n_kv_heads": 2,
+    "n_layers": 37,
+    "group_size": 128,
+    "f_body": 0.76240970145034,
+    "realized_base_tps": 467.14,
+    "deployed_tps": 481.53,
+    "materiality_tps": 2.0,
+    "served_default_config": "use_fp32_reduce=True, use_atomic_add=False, is_k_full=True, W4A16"
+  },
+  "wandb_metrics": {
+    "marlin_is_unique_on_sm86": true,
+    "machete_selectable_here": false,
+    "t_body_us_m8": 5186.614645322164,
+    "t_body_us_m1": 5128.519798914592,
+    "body_m_invariance_m8_over_m1": 1.0113277999667403,
+    "body_speedup_fp32reduce_off": 1.0018023204634297,
+    "fp32reduce_off_is_byteexact": false,
+    "byteexact_safe_endtoend_tps_delta": 0.0,
+    "fp32reduce_off_upperbound_tps_delta": 0.6416254072425431,
+    "max_honest_endtoend_tps_delta": 0.0,
+    "max_honest_endtoend_tps": 467.14,
+    "has_byteexact_selectable_headroom": false,
+    "faster_int4_gemm_requires_build": true,
+    "ppl": 2.3772,
+    "t_body_fp32off_us_m8": 5095.683399836223,
+    "t_body_graph_us_m8": 3931.0061446825666,
+    "body_speedup_fp32off_graph": 1.0018023204634297,
+    "body_speedup_fp32off_eager": 1.0178447596428113,
+    "fp32off_endtoend_tps": 467.78162540724253,
+    "deployed_tps": 481.53,
+    "realized_base_tps": 467.14,
+    "t_body_441_us_ref": 16935.9
+  },
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "timestamp": "20260616T041356Z",
+  "self_test": {
+    "self_test_passes": true,
+    "checks": {
+      "amdahl_penalty1_is_base": true,
+      "amdahl_faster_raises_tps": true,
+      "amdahl_slower_lowers_tps": true,
+      "tiny_body_speedup_subthreshold": true,
+      "onepct_body_speedup_clears": true,
+      "body_free_ceiling_finite": true,
+      "base_below_deployed": true,
+      "four_body_shapes": true,
+      "qkv_shape": true,
+      "gate_up_shape": true,
+      "down_shape": true,
+      "f_body_in_unit": true
+    }
+  },
+  "wandb_run_id": "fn4iz0dz"
+}
