@@ -908,9 +908,10 @@ LAND414_PRUNED_ROWS_GLOBALLY_REACHABLE_406: int = 245_592
 # 23:11Z + 23:35Z RE-ANCHOR — the [492.08, 494.08] selective-recompute bracket is GONE.
 #   stark #412 REFUTED the selrec leg it rested on; denken #423 CONFIRMED the 14.4-TPS
 #   attention tax as an IRREDUCIBLE byte-identity floor.  The realizable fastest strictly-
-#   equivalent config re-anchors to blanket-strict 467.14 + cb3 +15.60 = 482.74 — a knife-
-#   edge +1.21 over the NON-strict deployed 481.53, WITH the byte-identity 481.53 lacks.
-#   The terminal max-equivalent verdict is HELD until kanna #416 + stark #421 land.
+#   equivalent config re-anchors to blanket-strict 467.14 + cb3 +15.60 = 482.74.  00:36Z
+#   relay: the HEADLINE win is Bar A = +15.60 (+3.34%) over the FEASIBLE floor (the +1.21
+#   vs the infeasible non-equivalent 481.53 is a COSMETIC Bar B, superseded).
+#   The terminal max-equivalent verdict is HELD until kanna #416 + stark #429 land.
 # =================================================================================== #
 EQUIV_FRONTIER_REANCHORED_2311Z: bool = True
 
@@ -964,11 +965,11 @@ KANNA416_BUDGET_EXACT_PENDING: bool = True
 #     to close the residual bitwise-tie flip(s) at ZERO cost.  If it lands it could make the
 #     FAST non-strict 481.53 stack EQUIVALENT at true 1.0 — the biggest prize (and one of the
 #     two gates on the terminal verdict).
-STARK421_TIEBREAK_PENDING: bool = True
+STARK421_TIEBREAK_PENDING: bool = False                # RESOLVED 00:36Z — REFUTED (see STARK421_TIEBREAK_REFUTED below)
 STARK421_TIEBREAK_NO_BUILD: bool = True
-STARK421_COULD_LIFT_FAST_481_TO_TRUE_1P0: bool = True
+STARK421_COULD_LIFT_FAST_481_TO_TRUE_1P0: bool = False  # REFUTED 00:36Z (stark #421 RED): post-proc cannot fix identity
 STARK421_REFERENCE_PRESERVING: bool = True             # consistent tie-break on BOTH M=1 ref and M=8 verify
-STARK421_TARGET_TPS_IF_GREEN: float = DEPLOYED_FASTPATH_TPS  # 481.53 made equivalent at true 1.0
+STARK421_TARGET_TPS_IF_GREEN: float = DEPLOYED_FASTPATH_TPS  # 481.53 — UNREACHABLE (path-up node 1 CLOSED, stark #421 RED)
 
 # (b) denken #427 — pinned-K re-capture.  wirbel #400's pinned-K (num_splits=8) recovers ~14
 #     TPS -> ~496.7 stacked with cb3, M-invariant byte-exact (M=1==M=8 under the rebuilt
@@ -977,11 +978,12 @@ STARK421_TARGET_TPS_IF_GREEN: float = DEPLOYED_FASTPATH_TPS  # 481.53 made equiv
 #     greedy, not today's bytes) OR a human contract decision is what denken #427 resolves.
 #     Gated on the legality verdict + a flagged kernel rebuild (human-gated build).  gap_to_500
 #     ~ 3.3.
-DENKEN427_PINNEDK_LEGALITY_PENDING: bool = True
-DENKEN427_PINNEDK_RECAPTURE_TPS: float = 496.7         # ~496.7 stacked with cb3 (pinned-K num_splits=8)
-DENKEN427_PINNEDK_GAP_TO_500_TPS: float = 3.3          # 500 - 496.7
+DENKEN427_PINNEDK_LEGALITY_PENDING: bool = False       # RESOLVED 00:36Z — legal_self_referential (see 00:36Z block)
+DENKEN427_PINNEDK_ATTN_LIFT_TPS: float = 13.998        # pinned-K (FA2 num_splits=8) attn re-capture (#408 qc9bz8sv)
+DENKEN427_PINNEDK_RECAPTURE_TPS: float = 496.74        # 482.74 floor+cb3 + 13.998 pinned-K (#408); reconciled 00:36Z
+DENKEN427_PINNEDK_GAP_TO_500_TPS: float = 3.26         # 500 - 496.74
 DENKEN427_PINNEDK_NEW_REFERENCE: bool = True           # NEW reference vs today's bytes (reference-change)
-DENKEN427_PINNEDK_M_INVARIANT_BYTE_EXACT: bool = True  # M=1 == M=8 under the rebuilt kernel
+DENKEN427_PINNEDK_M_INVARIANT_BYTE_EXACT: bool = True  # M=1 == M=8 under the rebuilt kernel (#400 o7yhpkej)
 DENKEN427_PINNEDK_PPL_VALID: bool = True
 DENKEN427_PINNEDK_HUMAN_GATED_BUILD: bool = True       # flagged kernel rebuild (served-kernel change)
 
@@ -1017,9 +1019,10 @@ WIRBEL424_FUSION_REGRESSION_RISK_TPS: float = 402.0    # -16.5% regression risk 
 WIRBEL424_STACK_TPS_IF_REALISTIC_RECOVERY: float = 484.24   # 482.74 + ~1.5 realistic recovery (carry NO-GO)
 WIRBEL424_FUSION_NO_GO: bool = True
 
-# Terminal max-equivalent verdict is HELD until kanna #416 (budget-exact cb3 stack) AND
-# stark #421 (canonical tie-break verdict) land.
-TERMINAL_EQUIV_VERDICT_HELD_PENDING_416_421: bool = True
+# Terminal max-equivalent verdict was HELD until kanna #416 (budget-exact cb3 stack) AND
+# stark #421 (canonical tie-break).  SUPERSEDED 00:36Z: #421 REFUTED and DROPPED; the terminal
+# identity conjunct re-points to stark #429 (see TERMINAL_EQUIV_VERDICT_HELD_PENDING_416_429).
+TERMINAL_EQUIV_VERDICT_HELD_PENDING_416_421: bool = True   # provenance only (no longer the live gate)
 
 # Remaining parameterized refinements (measured numbers drop straight in, modeled until then):
 #   kanna #416  -> budget-exact cb3 additivity_gap_tps (TIGHTENS the 482.74 headline)  [terminal gate]
@@ -1029,6 +1032,88 @@ TERMINAL_EQUIV_VERDICT_HELD_PENDING_416_421: bool = True
 #   land   #426 -> keepset-mask acceptance lift (identity-safe, ceiling +137.97, magnitude pending)
 #   lawine #419 -> executable deploy GO/NO-GO + verify CI + feature-flag
 #   ---- STRUCK/REFUTED: selective-recompute (#397, stark #412) and drafter-fusion (+52, wirbel #424)
+
+# =================================================================================== #
+# 00:36Z ADVISOR FORMAL RELAY (GitHub #357) — THREE RESOLUTIONS that re-point which
+# feeders the terminal verdict holds on.  Consume; do NOT re-derive.
+#   1. stark #421 canonical tie-break -> REFUTED (RED): drop as a pending terminal feeder.
+#   2. the terminal IDENTITY conjunct moved to stark #429 (lawine #430 collapsed the deploy
+#      HOLD to identity-only); re-point the identity feeder #421 -> #429.
+#   3. denken #427 pinned-K legality -> legal_self_referential: bank the +13.998 pinned-K
+#      node -> 496.74 (legal under the self-referential gate; denken #431 measures the
+#      canonical leg for UNCONDITIONAL legality).
+#   4. the "+1.21 knife-edge" framing is SUPERSEDED — carry Bar A (+15.60 vs the 467.14 floor)
+#      as the headline win; +1.21-vs-481.53 is a separate cosmetic leaderboard Bar B.
+# =================================================================================== #
+EQUIV_FRONTIER_RELAY_0036Z: bool = True
+
+# (1) stark #421 — canonical tolerance tie-break REFUTED (W&B wvy2k7w7, RED).  A consistent
+#     canonical tie-break on BOTH the M=1 reference AND the M=8 verify does NOT reach 1.0 — it
+#     CLOSES 3 flips but OPENS 8 (0.9966 -> 0.9909), because eps* straddles a +-1-ULP bf16
+#     perturbation.  Logit/index post-processing CANNOT fix identity — only the attention-
+#     reduction VALUE can.  -> path-up node 1 (the FAST 481.53 made equivalent) is CLOSED; the
+#     terminal hold no longer waits on #421.
+STARK421_TIEBREAK_REFUTED: bool = True
+STARK421_WANDB: str = "wvy2k7w7"
+STARK421_FLIPS_CLOSED: int = 3
+STARK421_FLIPS_OPENED: int = 8
+STARK421_IDENTITY_AFTER: float = 0.9909                # 0.9966 -> 0.9909 (net WORSE; opens more than it closes)
+STARK421_POSTPROC_CANNOT_FIX_IDENTITY: bool = True     # only the attention-reduction VALUE can, not logit/index post-proc
+STARK421_FAST_481_EQUIVALENCE_CLOSED: bool = True      # the FAST non-equivalent 481.53 stack cannot be made byte-equivalent
+
+# (2) stark #429 — the terminal IDENTITY conjunct (NEW; replaces #421).  lawine #430 (W&B
+#     vjhef1du) collapsed the 2-conjunct deploy HOLD (margin + identity) to 1-conjunct
+#     (identity only).  That identity conjunct is now whether blanket-strict's residual ONE
+#     bitwise-tie flip is operatively 1.0 under the verify-arbiter gate.  stark #429
+#     (blanket-strict-operative-identity) is ACTIVELY MEASURING it.  green -> operative
+#     identity 1.0 (terminal identity gate passes); red -> not 1.0.  [TERMINAL gate]
+STARK429_OPERATIVE_IDENTITY_PENDING: bool = True
+STARK429_IS_TERMINAL_IDENTITY_GATE: bool = True
+STARK429_RESIDUAL_BITWISE_TIE_FLIPS: int = 1           # blanket-strict's residual 1 bitwise-tie flip
+LAWINE430_DEPLOY_HOLD_COLLAPSED_TO_IDENTITY_ONLY: bool = True   # 2-conjunct (margin+identity) -> 1-conjunct (identity)
+LAWINE430_WANDB: str = "vjhef1du"
+
+# (3) denken #427 — pinned-K legality RESOLVED POSITIVE = legal_self_referential (W&B 132fgkbk).
+#     pinned-K (FA2 num_splits=8) is M-invariant byte-exact (M=1==M=8, wirbel #400 o7yhpkej), so
+#     the submission's M=8 verify reproduces its OWN M=1 AR reference -> identity 1.0 under the
+#     operative SENPAI_REFERENCE_MODE gate (the official harness runs NO token-identity check —
+#     only TPS + 128/128 + PPL).  DECISIVE TWIST: the deployed 481.53 ITSELF FAILS self-reference
+#     (0.9966) -> pinned-K is strictly MORE equivalent than what we serve.  Bank the node:
+#     482.74 + 13.998 (pinned-K attn, #408 qc9bz8sv) = 496.74; gap_to_500 ~ 3.26.
+DENKEN427_PINNEDK_LEGAL_SELF_REFERENTIAL: bool = True
+DENKEN427_WANDB: str = "132fgkbk"
+DENKEN427_OFFICIAL_HARNESS_NO_TOKEN_IDENTITY_CHECK: bool = True  # scorer = TPS + 128/128 + PPL only
+DENKEN427_DEPLOYED_481_FAILS_SELF_REFERENCE: bool = True         # 0.9966 -> pinned-K is MORE equivalent than served
+
+# (4) denken #431 — the CANONICAL leg (NEW; pinned-K M=1 vs num_splits=1 M=1).  If BYTE-IDENTICAL
+#     -> 496.74 is UNCONDITIONALLY legal; if not -> divergences are bitwise-tie magnitude and
+#     496.74 is self-referential-ONLY (still legal under the operative scorer).  Pending.
+DENKEN431_PINNEDK_CANONICAL_PENDING: bool = True
+DENKEN431_BYTE_IDENTICAL_MAKES_UNCONDITIONAL: bool = True
+
+# (5) lawine #432 — measuring the JOINT full-stack 496.74 end-to-end (floor + cb3 + pinned-K).
+#     In-flight confirm; NOT banked into the headline scalar until it lands.
+LAWINE432_FULLSTACK_496_MEASURING: bool = True
+
+# (6) Bar A SUPERSEDES the +1.21 knife-edge framing (lawine #430).  +1.21 was a MIS-ANCHORING
+#     artifact of pricing the win against the INFEASIBLE (non-equivalent) 481.53.  The correct
+#     bar is Bar A = fastest_equivalent 482.74 - blanket-strict floor 467.14 = +15.60 (+3.34%),
+#     robustly positive across the ENTIRE [0, 14.9%] additivity-haircut band (ubel #410): worst
+#     case cb3 haircut 15.60*(1-0.149)=13.28 -> stack 480.42, STILL > the 467.14 floor.  Under
+#     Directive #4 (maximize fastest TPS that respects equivalence; forget 500) 482.74 is a
+#     COMFORTABLE equivalence-respecting win, not a knife-edge.  The +1.21-vs-481.53 is a
+#     separate COSMETIC leaderboard Bar B; 481.53's infeasibility means a negative Bar B does
+#     NOT disqualify 482.74 as the fastest LEGAL config.
+BAR_A_EQUIV_GAIN_VS_FLOOR_TPS: float = 15.60           # 482.74 - 467.14 (the cb3 lift over the floor)
+BAR_A_EQUIV_GAIN_PCT: float = 3.34                     # 15.60 / 467.14
+BAR_A_WORST_HAIRCUT_GAIN_TPS: float = 13.28            # 15.60 * (1 - 0.149) worst-case additivity haircut (ubel #410)
+BAR_A_WORST_HAIRCUT_STACK_TPS: float = 480.42          # 467.14 + 13.28 (still > floor across the whole band)
+BAR_A_ROBUSTLY_POSITIVE: bool = True                   # > 0 across the entire [0, 14.9%] haircut band
+BAR_B_COSMETIC_VS_DEPLOYED_SUPERSEDED: bool = True     # +1.21-vs-481.53 is cosmetic; 481.53 is infeasible (non-equivalent)
+
+# Terminal max-equivalent verdict is HELD until kanna #416 (budget-exact cb3 stack) AND
+# stark #429 (operative identity 1.0) land — NOT #421 (REFUTED 00:36Z).
+TERMINAL_EQUIV_VERDICT_HELD_PENDING_416_429: bool = True
 
 # --------------------------------------------------------------------------- #
 # Sub-int4 PPL LITERATURE PRIOR (Llama-2-7B wikitext-2 baseline ~5.47 PPL).
@@ -2691,8 +2776,11 @@ def composite_verdict(measured_ppl: float | None, b_star: float,
 # --------------------------------------------------------------------------- #
 def equivalent_tps_frontier_rollup(*,
                                    cb3_additivity_gap_tps: float | None = None,
-                                   stark421_tiebreak: str = "pending",
-                                   denken427_pinnedk_legality: str = "pending",
+                                   stark421_tiebreak: str = "red",
+                                   stark429_operative_identity: str = "pending",
+                                   denken427_pinnedk_legality: str = "legal_self_referential",
+                                   denken431_pinnedk_canonical: str = "pending",
+                                   lawine432_fullstack_tps: float | None = None,
                                    wirbel428_supply_ceiling_tps: float | None = None,
                                    land426_keepset_accept_tps: float | None = None,
                                    deployability_surface: str | None = None) -> dict[str, Any]:
@@ -2702,47 +2790,63 @@ def equivalent_tps_frontier_rollup(*,
     MAX TPS subject to STRICT byte-exact greedy-token-equivalence (served identity 1.0).
 
     23:11Z + 23:35Z RE-ANCHOR: the modeled [492.08, 494.08] selective-recompute bracket is
-    GONE.  stark #412 REFUTED the selrec leg it rested on (real cost 97.42 TPS, identity
-    0.9853; the disputed M=8 verify flips are exact bitwise ties -> byte-identity 1.0 under
-    M=8 verify is unreachable by ANY attention-precision lever).  denken #423 CONFIRMED the
-    14.4-TPS attention tax as an IRREDUCIBLE byte-identity floor (removable_tax_tps=0); the
-    cheapest byte-exact pin (#393) already sits AT it.  The realizable fastest strictly-
-    equivalent config re-anchors to blanket-strict 467.14 + cb3 +15.60 = 482.74 — a knife-edge
-    +1.21 over the NON-strict deployed 481.53, WITH the byte-identity guarantee 481.53 lacks.
+    GONE.  stark #412 REFUTED the selrec leg it rested on; denken #423 CONFIRMED the 14.4-TPS
+    attention tax as an IRREDUCIBLE byte-identity floor (removable_tax_tps=0).  The realizable
+    fastest strictly-equivalent config re-anchors to blanket-strict 467.14 + cb3 +15.60 = 482.74.
 
-    Realizable ladder (3 nodes, each served identity 1.0):
+    00:36Z RELAY (three resolutions; this rollup consumes them):
+      1. stark #421 canonical tie-break -> REFUTED (RED, wvy2k7w7): closes 3 flips but opens 8
+         (0.9966 -> 0.9909); logit/index post-proc CANNOT fix identity.  Path-up node 1 (the FAST
+         481.53 made equivalent) is CLOSED; it is DROPPED as a terminal feeder.
+      2. the terminal IDENTITY conjunct moves to stark #429 (lawine #430 collapsed the deploy
+         HOLD to identity-only): is blanket-strict's residual 1 bitwise-tie flip operatively 1.0
+         under the verify-arbiter gate?  [TERMINAL gate, replaces #421]
+      3. denken #427 pinned-K legality -> legal_self_referential (132fgkbk): bank the pinned-K
+         node 482.74 + 13.998 (#408) = 496.74, legal under the self-referential gate (the deployed
+         481.53 ITSELF fails self-reference at 0.9966; the official harness runs NO token-identity
+         check — TPS + 128/128 + PPL only).  denken #431 measures the CANONICAL leg for
+         UNCONDITIONAL legality (byte-identical -> unconditional; else self-referential-only).
+      4. the "+1.21 knife-edge" framing is SUPERSEDED — Bar A (= 482.74 - 467.14 = +15.60, +3.34%,
+         robust across the whole [0, 14.9%] haircut band) is the headline win; +1.21-vs-481.53 is
+         a cosmetic Bar B (481.53 is infeasible/non-equivalent).
+
+    Realizable ladder (no-build headline = nodes 0-2, each served identity 1.0):
       0  floor  blanket-strict attention 467.14  (denken #423 irreducible byte-identity floor)
       1  +cb3   body-read shrink +15.60 -> 482.74 (kanna #403; additive ubel #410; PPL-safe)
       2  lm_head truncation FREE (land #414, self-referential gate) -> 482.74
-
-    Paths UP from 482.74 are carried as parameterized BRANCHES (none banked into the headline):
-      (a) stark #421 canonical tie-break (no-build) — could lift the FAST 481.53 to true 1.0
-      (b) denken #427 pinned-K re-capture ~496.7 (reference-change; legality + build pending)
-      (c) wirbel #428 bit-identical supply ceiling (safe no-contract band above 482.74)
-      (d) land #426 keepset-mask acceptance lever (identity-safe; ceiling +137.97; mag. pending)
-    STRUCK: drafter-fusion (+52, wirbel #424) -> NO-GO.
+      3  +pinned-K attn +13.998 -> 496.74 (denken #427 legal_self_referential; BUILD-GATED; the
+         canonical-leg UNCONDITIONAL legality pends denken #431; lawine #432 measures the joint
+         full-stack e2e)
 
     Feeder inputs (CLI-resolvable):
-      cb3_additivity_gap_tps  — kanna #416 budget-exact gap that TIGHTENS the cb3 stack (the
-          read-shrink partly overlaps the verify-body re-reads).  None -> headline stays the
-          banked 482.74 point; the gap only narrows it.  [TERMINAL gate]
-      stark421_tiebreak {pending|green|red} — the no-build canonical tie-break that could lift
-          the FAST 481.53 stack to EQUIVALENT at true 1.0.  [TERMINAL gate]
-      denken427_pinnedk_legality {pending|green|red} — is the pinned-K ~496.7 re-capture a
-          LEGAL self-referentially-equivalent number (reference-change; human-gated build)?
+      cb3_additivity_gap_tps  — kanna #416 budget-exact gap that TIGHTENS the cb3 stack.  [TERMINAL gate]
+      stark429_operative_identity {pending|green|red} — blanket-strict residual-flip operative
+          identity 1.0 under the verify-arbiter gate.  [TERMINAL gate — replaces #421]
+      stark421_tiebreak {pending|green|red} — REFUTED (default red); kept for provenance, no
+          longer a terminal gate.
+      denken427_pinnedk_legality {pending|green|red|legal_self_referential} — pinned-K ~496.74
+          legality; default legal_self_referential (banks the build-gated node).
+      denken431_pinnedk_canonical {pending|byte_identical|bitwise_tie} — the canonical leg that
+          decides UNCONDITIONAL vs self-referential-only legality of the 496.74 point.
+      lawine432_fullstack_tps — MEASURED joint full-stack 496.74 e2e (in-flight confirm).
       wirbel428_supply_ceiling_tps — MEASURED bit-identical safe-band TPS above 482.74.
-      land426_keepset_accept_tps — MEASURED keepset-mask acceptance lift (ceiling +137.97;
-          identity-safe; magnitude genuinely unresolved -> carry ceiling-only).
+      land426_keepset_accept_tps — MEASURED keepset-mask acceptance lift (ceiling +137.97).
       deployability_surface {green|red|pending} — lawine #417; None -> BANKED green.
 
-    The terminal max-equivalent verdict is HELD until kanna #416 + stark #421 land.
+    The terminal max-equivalent verdict is HELD until kanna #416 + stark #429 land (NOT #421).
     """
     if deployability_surface is None:
         deployability_surface = "green" if LAWINE417_DEPLOYABLE_GREEN else "pending"
 
     gap_measured = cb3_additivity_gap_tps is not None
     stark421_green = stark421_tiebreak == "green"
-    denken427_green = denken427_pinnedk_legality == "green"
+    stark421_refuted = stark421_tiebreak == "red"                   # 00:36Z: REFUTED (default)
+    stark429_resolved = stark429_operative_identity in ("green", "red")
+    stark429_green = stark429_operative_identity == "green"
+    # denken #427 legality is POSITIVE under either "green" or the operative "legal_self_referential".
+    denken427_legal = denken427_pinnedk_legality in ("green", "legal_self_referential")
+    denken431_unconditional = denken431_pinnedk_canonical == "byte_identical"  # canonical leg -> unconditional legality
+    l432_measured = lawine432_fullstack_tps is not None
     w428_measured = wirbel428_supply_ceiling_tps is not None
     l426_measured = land426_keepset_accept_tps is not None
 
@@ -2822,17 +2926,65 @@ def equivalent_tps_frontier_rollup(*,
                  "greedy. Absolute full-vocab (261,976 rows) costs 54.07 TPS — a contingency, NOT required."),
     }
 
-    ladder = [node0, node1, node2]
+    # --- Node 3: + pinned-K attn re-capture — BUILD-GATED, legal_self_referential (denken #427) -
+    # pinned-K (FA2 num_splits=8, #408) recovers +13.998 TPS -> 496.74, M-invariant byte-exact
+    # (M=1==M=8, wirbel #400) so the submission's M=8 verify reproduces its OWN M=1 reference ->
+    # identity 1.0 under the operative self-referential gate.  The deployed 481.53 ITSELF fails
+    # self-reference (0.9966), so pinned-K is strictly MORE equivalent than what we serve.  This
+    # node is BUILD-GATED (a flagged kernel rebuild) and its UNCONDITIONAL (canonical) legality
+    # pends denken #431; lawine #432 measures the joint full-stack e2e.
+    node3_tps = node2_tps + DENKEN427_PINNEDK_ATTN_LIFT_TPS      # 482.74 + 13.998 = 496.74
+    node3 = {
+        "node": "pinnedk_attn_recapture_legal_self_referential_427",
+        "tps": node3_tps,                                        # 496.74 (build-gated)
+        "attn_lift_tps": DENKEN427_PINNEDK_ATTN_LIFT_TPS,        # +13.998 (#408 qc9bz8sv)
+        "status": ("legal_self_referential" if denken427_legal else denken427_pinnedk_legality),
+        "identity": node2["identity"],                          # 1.0 (M-invariant byte-exact, self-referential)
+        "equivalence_neutral": True,
+        "legal_self_referential": denken427_legal,
+        "unconditional_legal": denken427_legal and denken431_unconditional,
+        "unconditional_pending_denken431": denken427_legal and not denken431_unconditional,
+        "build_gated": DENKEN427_PINNEDK_HUMAN_GATED_BUILD,      # flagged kernel rebuild
+        "new_reference": DENKEN427_PINNEDK_NEW_REFERENCE,
+        "m_invariant_byte_exact": DENKEN427_PINNEDK_M_INVARIANT_BYTE_EXACT,
+        "ppl_valid": DENKEN427_PINNEDK_PPL_VALID,
+        "gap_to_500_tps": DENKEN427_PINNEDK_GAP_TO_500_TPS,      # 3.26
+        "fullstack_measured_tps": lawine432_fullstack_tps,      # lawine #432 e2e (None until it lands)
+        "source": ("denken #427 (132fgkbk) — legal_self_referential; deployed 481.53 fails self-reference "
+                   "(0.9966) so pinned-K is MORE equivalent; official harness has NO token-identity check"),
+        "gate": ("legal under the self-referential scorer (TPS + 128/128 + PPL only); BUILD-GATED; "
+                 "denken #431 measures the canonical leg for UNCONDITIONAL legality; lawine #432 e2e confirm."),
+    }
+
+    # The no-build realizable ladder is nodes 0-2 (headline 482.74); node 3 is the build-gated
+    # pinned-K extension (496.74), carried on the ladder per the 00:36Z headline-ladder framing.
+    ladder = [node0, node1, node2, node3]
 
     # --- Headline frontier numbers ------------------------------------------
     # MEASURED frontier = the highest node whose TPS is MEASURED (stand-behind-today = the floor).
     measured_nodes = [n for n in ladder if n["status"] == "measured"]
     max_equivalent_tps_measured = max((n["tps"] for n in measured_nodes), default=floor_tps)   # 467.14
-    # The realizable headline: blanket-strict floor + cb3 (additive ubel #410), lm_head free.
-    fastest_equivalent_tps = node2_tps                          # 482.74 (467.14 + 15.60, lm_head free)
-    max_equivalent_tps_modeled = fastest_equivalent_tps
+    # The NO-BUILD realizable headline: blanket-strict floor + cb3 (additive ubel #410), lm_head free.
+    fastest_equivalent_tps = node2_tps                          # 482.74 (467.14 + 15.60, lm_head free) — no build
+    max_equivalent_tps_modeled = fastest_equivalent_tps         # 482.74 (no-build headline)
+    # The BUILD-GATED pinned-K extension (legal_self_referential; unconditional pends denken #431).
+    fastest_equivalent_tps_pinnedk_selfref = node3_tps          # 496.74 (build-gated, denken #427 legal)
     naive_stacked_ceiling_tps = naive_stack_tps                 # 482.74 (floor + cb3 additive point)
-    knife_edge_margin = fastest_equivalent_tps - DEPLOYED_FASTPATH_TPS    # +1.21 over deployed-nonequiv
+
+    # --- Bar A (headline win) SUPERSEDES the +1.21 knife-edge (00:36Z / lawine #430) ----------
+    # Bar A prices the win against the FEASIBLE blanket-strict floor (467.14), not the infeasible
+    # non-equivalent 481.53.  It is robustly positive across the ENTIRE [0, 14.9%] additivity-
+    # haircut band (ubel #410): even the worst-case cb3 haircut still nets +13.28 (stack 480.42).
+    bar_a_gain_tps = fastest_equivalent_tps - floor_tps         # +15.60 (482.74 - 467.14); tracks the kanna #416 gap
+    bar_a_gain_pct = 100.0 * bar_a_gain_tps / floor_tps         # +3.34%
+    bar_a_worst_haircut_gain_tps = cb3_lift * (1.0 - UBEL410_MAX_HAIRCUT_FRAC)   # 15.60 * 0.851 = 13.28
+    bar_a_worst_haircut_stack_tps = floor_tps + bar_a_worst_haircut_gain_tps     # 480.42 (still > floor)
+    bar_a_robustly_positive = bar_a_worst_haircut_gain_tps > 0.0                 # True across the whole band
+    # Bar B (COSMETIC, superseded): the +1.21 vs the deployed NON-equivalent 481.53.  Kept for
+    # provenance only; 481.53 is infeasible (served identity 0.9966 != 1.0), so a thin/negative
+    # Bar B does NOT disqualify 482.74 as the fastest LEGAL config.
+    bar_b_cosmetic_margin_vs_deployed_tps = fastest_equivalent_tps - DEPLOYED_FASTPATH_TPS   # +1.21 (cosmetic)
+    knife_edge_margin = bar_b_cosmetic_margin_vs_deployed_tps   # back-compat alias (now Bar B / cosmetic)
     beats_deployed = fastest_equivalent_tps > DEPLOYED_FASTPATH_TPS       # True (WITH byte-identity)
 
     # --- REFUTED / STRUCK (kept for provenance; never on the headline path) -----------------
@@ -2867,34 +3019,58 @@ def equivalent_tps_frontier_rollup(*,
         },
     }
 
-    # --- PATHS UP from 482.74 — parameterized BRANCHES (none banked) ------------------------
+    # --- PATHS UP from 482.74 — parameterized BRANCHES ------------------------
+    # branch_a (stark #421) is REFUTED 00:36Z and DROPPED as a terminal gate; the terminal
+    # identity conjunct moved to stark #429 (branch_ident below).  branch_b (denken #427) is
+    # RESOLVED POSITIVE (legal_self_referential) and banks the build-gated pinned-K node.
     branch_a = {
         "branch": "stark421_canonical_tiebreak",
         "kind": "no_build_reference_preserving",
-        "status": stark421_tiebreak,
-        "is_terminal_gate": True,
-        "could_lift_fast_481_to_true_1p0": STARK421_COULD_LIFT_FAST_481_TO_TRUE_1P0,
+        "status": stark421_tiebreak,                           # "red" (REFUTED, default)
+        "is_terminal_gate": False,                             # DROPPED 00:36Z (was a terminal gate)
+        "refuted": stark421_refuted,
+        "could_lift_fast_481_to_true_1p0": STARK421_COULD_LIFT_FAST_481_TO_TRUE_1P0,  # False (refuted)
+        "fast_481_equivalence_closed": (STARK421_FAST_481_EQUIVALENCE_CLOSED if stark421_refuted else False),
+        "flips_closed": STARK421_FLIPS_CLOSED,                 # 3
+        "flips_opened": STARK421_FLIPS_OPENED,                 # 8 (net WORSE)
+        "identity_after": STARK421_IDENTITY_AFTER,             # 0.9909 (0.9966 -> 0.9909)
+        "postproc_cannot_fix_identity": STARK421_POSTPROC_CANNOT_FIX_IDENTITY,
         "reference_preserving": STARK421_REFERENCE_PRESERVING,
-        "target_tps_if_green": STARK421_TARGET_TPS_IF_GREEN,    # 481.53 at true 1.0
-        "tps_if_green": (DEPLOYED_FASTPATH_TPS if stark421_green else None),
-        "note": ("consistent canonical tolerance tie-break on BOTH the M=1 AR reference AND the M=8 verify "
-                 "(land #414 self-referential gate) -> closes the residual bitwise-tie flip(s) at ZERO cost; "
-                 "the biggest prize (would make the FAST 481.53 stack equivalent at true 1.0)."),
+        "target_tps_if_green": STARK421_TARGET_TPS_IF_GREEN,    # 481.53 — UNREACHABLE (closed)
+        "tps_if_green": (DEPLOYED_FASTPATH_TPS if stark421_green else None),  # None (not green)
+        "wandb": STARK421_WANDB,
+        "note": ("REFUTED (00:36Z, wvy2k7w7): a consistent canonical tie-break on BOTH the M=1 reference AND "
+                 "the M=8 verify closes 3 flips but OPENS 8 (0.9966 -> 0.9909) because eps* straddles a +-1-ULP "
+                 "bf16 perturbation. Logit/index post-processing CANNOT fix identity — only the attention-"
+                 "reduction VALUE can. Path-up node 1 (the FAST 481.53 made equivalent) is CLOSED."),
     }
     branch_b = {
         "branch": "denken427_pinnedk_recapture",
         "kind": "reference_change_human_gated_build",
-        "status": denken427_pinnedk_legality,
-        "recapture_tps": DENKEN427_PINNEDK_RECAPTURE_TPS,       # 496.7
-        "gap_to_500_tps": DENKEN427_PINNEDK_GAP_TO_500_TPS,     # 3.3
+        "status": denken427_pinnedk_legality,                  # "legal_self_referential" (default)
+        "legal_self_referential": denken427_legal,
+        "recapture_tps": DENKEN427_PINNEDK_RECAPTURE_TPS,       # 496.74 (= 482.74 + 13.998)
+        "attn_lift_tps": DENKEN427_PINNEDK_ATTN_LIFT_TPS,       # +13.998 (#408)
+        "gap_to_500_tps": DENKEN427_PINNEDK_GAP_TO_500_TPS,     # 3.26
         "new_reference": DENKEN427_PINNEDK_NEW_REFERENCE,
         "m_invariant_byte_exact": DENKEN427_PINNEDK_M_INVARIANT_BYTE_EXACT,
         "ppl_valid": DENKEN427_PINNEDK_PPL_VALID,
         "human_gated_build": DENKEN427_PINNEDK_HUMAN_GATED_BUILD,
-        "legal_frontier_point_if_green": (DENKEN427_PINNEDK_RECAPTURE_TPS if denken427_green else None),
-        "note": ("wirbel #400 pinned-K (num_splits=8) recovers ~14 TPS -> ~496.7 with cb3, M-invariant byte-exact "
-                 "+ PPL-valid, but a NEW reference vs today's bytes; legality (self-referential scorer) OR a human "
-                 "contract decision pending denken #427 + a flagged kernel rebuild.  gap_to_500 ~ 3.3."),
+        "deployed_481_fails_self_reference": DENKEN427_DEPLOYED_481_FAILS_SELF_REFERENCE,
+        "official_harness_no_token_identity_check": DENKEN427_OFFICIAL_HARNESS_NO_TOKEN_IDENTITY_CHECK,
+        "legal_frontier_point_if_legal": (DENKEN427_PINNEDK_RECAPTURE_TPS if denken427_legal else None),  # 496.74
+        # UNCONDITIONAL (canonical) legality pends denken #431; lawine #432 measures the joint e2e.
+        "canonical_leg_status": denken431_pinnedk_canonical,
+        "unconditional_legal": denken427_legal and denken431_unconditional,
+        "unconditional_pending_denken431": denken427_legal and not denken431_unconditional,
+        "fullstack_measured_tps_lawine432": lawine432_fullstack_tps,
+        "wandb": DENKEN427_WANDB,
+        "note": ("RESOLVED POSITIVE (00:36Z, 132fgkbk) = legal_self_referential: pinned-K (FA2 num_splits=8) is "
+                 "M-invariant byte-exact (M=1==M=8, wirbel #400) -> the submission's M=8 verify reproduces its "
+                 "OWN M=1 reference -> identity 1.0 under the operative self-referential gate (official harness "
+                 "runs NO token-identity check). The deployed 481.53 ITSELF fails self-reference (0.9966), so "
+                 "pinned-K is strictly MORE equivalent. +13.998 (#408) -> 496.74 (gap_to_500 ~3.26), BUILD-GATED; "
+                 "denken #431 measures the canonical leg for UNCONDITIONAL legality; lawine #432 confirms e2e."),
     }
     branch_c_tps = (fastest_equivalent_tps + float(wirbel428_supply_ceiling_tps)) if w428_measured else None
     branch_c = {
@@ -2925,29 +3101,55 @@ def equivalent_tps_frontier_rollup(*,
                  "+ PPL-neutral, structurally >=0, ceiling +137.97 BUT magnitude genuinely unresolved "
                  "(probe_was_live=False; expected a small fraction of the ceiling).  Carry CEILING-ONLY."),
     }
-    branches = [branch_a, branch_b, branch_c, branch_d]
 
-    # --- TERMINAL verdict — HELD until kanna #416 (budget-exact cb3) AND stark #421 (tie-break) -
-    terminal_gates_resolved = gap_measured and (stark421_tiebreak in ("green", "red"))
+    # --- TERMINAL identity gate — re-pointed #421 -> #429 (00:36Z, lawine #430 collapse) --------
+    # stark #421 (canonical tie-break) is REFUTED and DROPPED; the deploy HOLD collapsed to an
+    # identity-ONLY conjunct (lawine #430, vjhef1du), so the terminal identity feeder is now
+    # stark #429: is blanket-strict's residual 1 bitwise-tie flip operatively 1.0 under the
+    # verify-arbiter gate?  (The floor itself is byte-identity 1.0; #429 prices the one tie.)
+    branch_ident = {
+        "branch": "stark429_operative_identity_terminal_gate",
+        "kind": "terminal_identity_conjunct",
+        "status": stark429_operative_identity,                  # "pending" (default) | "green" | "red"
+        "is_terminal_gate": STARK429_IS_TERMINAL_IDENTITY_GATE,  # True
+        "resolved": stark429_resolved,
+        "green": stark429_green,
+        "residual_bitwise_tie_flips": STARK429_RESIDUAL_BITWISE_TIE_FLIPS,   # 1
+        "replaces_feeder": "stark#421",
+        "deploy_hold_collapsed_to_identity_only": LAWINE430_DEPLOY_HOLD_COLLAPSED_TO_IDENTITY_ONLY,
+        "lawine430_wandb": LAWINE430_WANDB,                     # vjhef1du
+        "note": ("TERMINAL identity gate (00:36Z): lawine #430 (vjhef1du) collapsed the 2-conjunct deploy "
+                 "HOLD to identity-ONLY, so the terminal feeder re-points #421 -> #429.  #429 asks whether "
+                 "blanket-strict's residual 1 bitwise-tie flip is operatively 1.0 under the verify-arbiter "
+                 "gate.  stark #421 (tie-break) is REFUTED and no longer a terminal gate."),
+    }
+    branches = [branch_a, branch_b, branch_c, branch_d, branch_ident]
+
+    # --- TERMINAL verdict — HELD until kanna #416 (budget-exact cb3) AND stark #429 (identity) ---
+    terminal_gates_resolved = gap_measured and stark429_resolved
     terminal_equiv_verdict = "resolved" if terminal_gates_resolved else "held"
     terminal_pending_gates = [g for g, pend in [
         ("kanna#416_cb3_additivity_gap_budget_exact", not gap_measured),
-        ("stark#421_canonical_tiebreak_verdict", stark421_tiebreak == "pending"),
+        ("stark#429_operative_identity_1p0", not stark429_resolved),
     ] if pend]
 
     pending_feeders = [f for f, pend in [
-        ("kanna#416_cb3_additivity_gap_tps_budget_exact", not gap_measured),
-        ("stark#421_canonical_tiebreak_verdict", stark421_tiebreak == "pending"),
-        ("denken#427_pinnedk_legality_verdict", denken427_pinnedk_legality == "pending"),
+        ("kanna#416_cb3_additivity_gap_tps_budget_exact", not gap_measured),       # TERMINAL
+        ("stark#429_operative_identity_1p0", not stark429_resolved),               # TERMINAL (replaces #421)
+        ("denken#431_pinnedk_canonical_leg_unconditional_vs_selfref", denken431_pinnedk_canonical == "pending"),
+        ("lawine#432_fullstack_496.74_e2e_confirm", not l432_measured),
         ("wirbel#428_bitidentical_supply_ceiling_tps", not w428_measured),
         ("land#426_keepset_acceptance_magnitude", not l426_measured),
     ] if pend]
     banked_feeders = [
         "stark#412_selrec_REFUTED+bracket[492.08,494.08]_struck",
+        "stark#421_canonical_tiebreak_REFUTED_red+fast481_equivalence_closed",
+        "lawine#430_deploy_hold_collapsed_to_identity_only",
         "denken#423_irreducible_byte_identity_floor_467.14+removable_tax_0",
         "kanna#403_cb3_+15.60_k229_ppl_safe",
-        "ubel#410_supply_x_demand_additive",
+        "ubel#410_supply_x_demand_additive+haircut_band_robust",
         "land#414_lmhead_free_self_referential+54.07_truevocab_contingency",
+        "denken#427_pinnedk_legal_self_referential+13.998_build_gated",
         "lawine#417_deployable_green",
         "denken#409_tree_leg_closed",
         "wirbel#424_drafter_fusion_+52_REFUTED_no_go",
@@ -2970,31 +3172,56 @@ def equivalent_tps_frontier_rollup(*,
         "ladder": ladder,
         "refuted": refuted,
         "branches": branches,
-        # headline frontier (re-anchored 23:11Z+23:35Z)
+        # headline frontier (re-anchored 23:11Z+23:35Z; 00:36Z Bar A supersedes the +1.21 framing)
         "max_equivalent_tps_measured": max_equivalent_tps_measured,    # 467.14 today (node 0, identity 1.0)
-        "fastest_equivalent_tps": fastest_equivalent_tps,              # 482.74 (realizable; floor + cb3)
+        "fastest_equivalent_tps": fastest_equivalent_tps,              # 482.74 (realizable no-build; floor + cb3)
         "max_equivalent_tps_modeled": max_equivalent_tps_modeled,      # 482.74 (re-anchored; was 492.08 bracket)
-        "knife_edge_margin_if_floor_reached_tps": knife_edge_margin,   # +1.21 over deployed-nonequiv 481.53
-        "modeled_beats_deployed_nonequiv": beats_deployed,             # True (482.74 > 481.53 WITH byte-identity)
+        "fastest_equivalent_tps_pinnedk_selfref": fastest_equivalent_tps_pinnedk_selfref,  # 496.74 (build-gated, #427)
         "naive_stacked_ceiling_tps": naive_stacked_ceiling_tps,        # 482.74 (floor + cb3 additive point)
         "cb3_additive_ubel410": UBEL410_SUPPLY_DEMAND_ADDITIVE,        # True (cb3 stacks cleanly on the floor)
         "frontier_identity": 1.0,                                      # every ladder node is served identity 1.0
         "equivalence_tax_vs_deployed_nonequiv_tps": DEPLOYED_FASTPATH_TPS - max_equivalent_tps_measured,
-        # selrec REFUTED / bracket STRUCK / drafter-fusion NO-GO
+        # --- Bar A (HEADLINE win vs the FEASIBLE floor) — supersedes the +1.21 knife-edge (00:36Z) -
+        "bar_a_equiv_gain_vs_floor_tps": bar_a_gain_tps,               # +15.60 (482.74 - 467.14)
+        "bar_a_equiv_gain_pct": bar_a_gain_pct,                        # +3.34%
+        "bar_a_worst_haircut_gain_tps": bar_a_worst_haircut_gain_tps,  # +13.28 (worst cb3 haircut, ubel #410)
+        "bar_a_worst_haircut_stack_tps": bar_a_worst_haircut_stack_tps,  # 480.42 (still > floor)
+        "bar_a_robustly_positive": bar_a_robustly_positive,           # True across the whole [0,14.9%] band
+        # --- Bar B (COSMETIC, superseded): the +1.21 vs the deployed NON-equivalent 481.53 ---------
+        "bar_b_cosmetic_margin_vs_deployed_tps": bar_b_cosmetic_margin_vs_deployed_tps,  # +1.21 (cosmetic)
+        "bar_b_cosmetic_vs_deployed_superseded": BAR_B_COSMETIC_VS_DEPLOYED_SUPERSEDED,  # True
+        "knife_edge_margin_if_floor_reached_tps": knife_edge_margin,   # +1.21 (back-compat alias = Bar B)
+        "modeled_beats_deployed_nonequiv": beats_deployed,             # True (482.74 > 481.53 WITH byte-identity)
+        # --- pinned-K build-gated extension (denken #427 legal_self_referential) -------------------
+        "pinnedk_legal_self_referential_427": denken427_legal,        # True (132fgkbk)
+        "pinnedk_attn_lift_tps": DENKEN427_PINNEDK_ATTN_LIFT_TPS,      # +13.998 (#408)
+        "pinnedk_recapture_tps": DENKEN427_PINNEDK_RECAPTURE_TPS,      # 496.74
+        "pinnedk_gap_to_500_tps": DENKEN427_PINNEDK_GAP_TO_500_TPS,    # 3.26
+        "pinnedk_unconditional_legal": denken427_legal and denken431_unconditional,  # pends denken #431
+        "pinnedk_unconditional_pending_denken431": denken427_legal and not denken431_unconditional,
+        "deployed_481_fails_self_reference": DENKEN427_DEPLOYED_481_FAILS_SELF_REFERENCE,  # 0.9966
+        "official_harness_no_token_identity_check": DENKEN427_OFFICIAL_HARNESS_NO_TOKEN_IDENTITY_CHECK,
+        # selrec REFUTED / bracket STRUCK / drafter-fusion NO-GO / stark #421 tie-break REFUTED
         "selrec_refuted_stark412": STARK412_SELREC_REFUTED,
         "selective_recompute_bracket_gone": SELECTIVE_RECOMPUTE_BRACKET_GONE_2311Z,
         "drafter_fusion_no_go_wirbel424": WIRBEL424_FUSION_NO_GO,
+        "stark421_tiebreak_refuted": stark421_refuted,                 # True (wvy2k7w7); fast-481 equivalence CLOSED
+        "fast_481_equivalence_closed": (STARK421_FAST_481_EQUIVALENCE_CLOSED if stark421_refuted else False),
         # land #414 lm_head ledger (FREE under the self-referential gate)
         "lmhead_truncation_free_self_referential": True,
         "lmhead_tps_cost": LAND414_LMHEAD_TRUNCATION_TPS_COST,         # 0.0
         "truevocab_lmhead_tps_cost_contingency": LAND414_TRUEVOCAB_LMHEAD_TPS_COST_CONTINGENCY,  # 54.07 (not required)
         # feeders / gates
         "cb3_additivity_gap_resolved": gap_measured,
-        "stark421_tiebreak": stark421_tiebreak,
+        "stark429_operative_identity": stark429_operative_identity,    # TERMINAL identity gate (replaces #421)
+        "stark429_resolved": stark429_resolved,
+        "stark421_tiebreak": stark421_tiebreak,                        # "red" (REFUTED; provenance only)
         "denken427_pinnedk_legality": denken427_pinnedk_legality,
+        "denken431_pinnedk_canonical": denken431_pinnedk_canonical,    # canonical leg -> unconditional vs self-ref
+        "lawine432_fullstack_tps": lawine432_fullstack_tps,           # e2e 496.74 confirm (None until lands)
         "wirbel428_supply_ceiling_resolved": w428_measured,
         "land426_keepset_magnitude_resolved": l426_measured,
-        "terminal_equiv_verdict": terminal_equiv_verdict,             # "held" until kanna #416 + stark #421
+        "terminal_equiv_verdict": terminal_equiv_verdict,             # "held" until kanna #416 + stark #429
         "terminal_pending_gates": terminal_pending_gates,
         "deployability_surface": deployability_surface,                # "green" banked (lawine #417)
         "deployability_banked_green": deployability_surface == "green",
@@ -3790,22 +4017,31 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
     bi_frontier_tree_leg_closed = (
         fr["tree_leg_closed"] is True
         and abs(DENKEN409_TREE_RELIABLE_SUPPLY_TPS) < TOL_EXACT)
-    # bj: pending-mode lists the 5 remaining in-flight feeders; banked feeders carry the 23:11Z+23:35Z
-    #     re-anchor (stark #412 refuted, denken #423 floor, wirbel #424 no-go)
+    # bj: pending-mode lists the 6 remaining in-flight feeders (kanna #416 + stark #429 terminal; denken
+    #     #431, lawine #432, wirbel #428, land #426); banked feeders carry the 00:36Z relay (stark #421
+    #     REFUTED, lawine #430 hold-collapse, denken #427 legal_self_referential) atop the re-anchor set
     bj_frontier_pending_feeders = (
-        len(fr["pending_feeders"]) == 5
+        len(fr["pending_feeders"]) == 6
         and fr["all_feeders_resolved"] is False
-        and len(fr["banked_feeders"]) >= 8
+        and len(fr["banked_feeders"]) >= 11
         and any("stark#412" in b for b in fr["banked_feeders"])
+        and any("stark#421" in b and "REFUTED" in b for b in fr["banked_feeders"])
+        and any("lawine#430" in b for b in fr["banked_feeders"])
         and any("denken#423" in b for b in fr["banked_feeders"])
-        and any("wirbel#424" in b for b in fr["banked_feeders"]))
-    # bk: knife-edge margin = +1.21 = 482.74 - 481.53; the realizable equivalent headline BEATS the
-    #     deployed-nonequiv 481.53 WITH the byte-identity guarantee 481.53 lacks
+        and any("denken#427" in b and "legal_self_referential" in b for b in fr["banked_feeders"])
+        and any("wirbel#424" in b for b in fr["banked_feeders"])
+        and any("kanna#416" in g for g in fr["pending_feeders"])
+        and any("stark#429" in g for g in fr["pending_feeders"]))
+    # bk: Bar B (COSMETIC, superseded) margin = +1.21 = 482.74 - 481.53; the back-compat knife_edge alias
+    #     still equals Bar B.  481.53 is INFEASIBLE (served identity 0.9966), so this is provenance only.
     bk_frontier_knife_edge_beats_481 = (
-        abs(fr["knife_edge_margin_if_floor_reached_tps"]
+        abs(fr["bar_b_cosmetic_margin_vs_deployed_tps"]
             - KNIFE_EDGE_MARGIN_IF_FLOOR_REACHED_TPS) < TOL_DISPLAY_TPS
         and abs(fr["knife_edge_margin_if_floor_reached_tps"]
+                - fr["bar_b_cosmetic_margin_vs_deployed_tps"]) < TOL_EXACT       # alias == Bar B
+        and abs(fr["bar_b_cosmetic_margin_vs_deployed_tps"]
                 - (FASTEST_EQUIVALENT_TPS_482 - DEPLOYED_FASTPATH_TPS)) < TOL_DISPLAY_TPS
+        and fr["bar_b_cosmetic_vs_deployed_superseded"] is True
         and fr["modeled_beats_deployed_nonequiv"] is True
         and FASTEST_EQUIVALENT_TPS_482 > DEPLOYED_FASTPATH_TPS)
     # bl: a kanna #416 additivity gap TIGHTENS node 1 NET of the gap and promotes it to measured
@@ -3865,19 +4101,20 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         and LAWINE417_DEPLOY_BINDING_INPLACE_LINES == 1
         and LAWINE417_DEPLOY_REVERSIBLE is True
         and abs(LAWINE417_DEPLOY_IDENTITY_VERIFY_GPU_MIN - 41.8) < TOL_DISPLAY_TPS)
-    # bq: paths UP are carried as 4 OPEN parameterized branches (none banked): stark #421 (no-build
-    #     tie-break, terminal gate, could lift FAST 481.53 to true 1.0), denken #427 (pinned-K ~496.7,
-    #     legality pending, gap_to_500 3.3), wirbel #428 (bit-identical safe band), land #426 (keepset
-    #     acceptance, identity-safe, ceiling +137.97, magnitude pending)
+    # bq: paths UP are carried as 5 parameterized branches (00:36Z): stark #421 (REFUTED red, DROPPED
+    #     as a terminal gate, fast-481 equivalence CLOSED), denken #427 (pinned-K 496.74 banked
+    #     legal_self_referential, gap_to_500 3.26), wirbel #428 (bit-identical safe band), land #426
+    #     (keepset, identity-safe, ceiling +137.97), stark #429 (TERMINAL identity gate, replaces #421)
     fr_branches = {b["branch"]: b for b in fr["branches"]}
     bq_frontier_branches_open = (
-        len(fr["branches"]) == 4
-        and fr_branches["stark421_canonical_tiebreak"]["status"] == "pending"
-        and fr_branches["stark421_canonical_tiebreak"]["is_terminal_gate"] is True
-        and fr_branches["stark421_canonical_tiebreak"]["could_lift_fast_481_to_true_1p0"] is True
-        and abs(fr_branches["stark421_canonical_tiebreak"]["target_tps_if_green"]
-                - DEPLOYED_FASTPATH_TPS) < TOL_DISPLAY_TPS
-        and fr_branches["denken427_pinnedk_recapture"]["status"] == "pending"
+        len(fr["branches"]) == 5
+        and fr_branches["stark421_canonical_tiebreak"]["status"] == "red"
+        and fr_branches["stark421_canonical_tiebreak"]["is_terminal_gate"] is False
+        and fr_branches["stark421_canonical_tiebreak"]["refuted"] is True
+        and fr_branches["stark421_canonical_tiebreak"]["could_lift_fast_481_to_true_1p0"] is False
+        and fr_branches["stark421_canonical_tiebreak"]["fast_481_equivalence_closed"] is True
+        and fr_branches["denken427_pinnedk_recapture"]["status"] == "legal_self_referential"
+        and fr_branches["denken427_pinnedk_recapture"]["legal_self_referential"] is True
         and abs(fr_branches["denken427_pinnedk_recapture"]["recapture_tps"]
                 - DENKEN427_PINNEDK_RECAPTURE_TPS) < TOL_DISPLAY_TPS
         and abs(fr_branches["denken427_pinnedk_recapture"]["gap_to_500_tps"]
@@ -3889,34 +4126,96 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
                 - LAND426_KEEPSET_ACCEPT_CEILING_TPS) < TOL_DISPLAY_TPS
         and fr_branches["land426_keepset_acceptance_lever"]["identity_safe"] is True
         and fr_branches["land426_keepset_acceptance_lever"]["magnitude_pending"] is True
-        and fr_branches["land426_keepset_acceptance_lever"]["probe_was_live"] is False)
-    # br: the terminal max-equivalent verdict is HELD in default mode (pending kanna #416 + stark #421);
-    #     it RESOLVES only when the cb3 additivity gap is measured AND stark #421's tie-break lands
-    fr_resolved = equivalent_tps_frontier_rollup(cb3_additivity_gap_tps=3.0, stark421_tiebreak="green")
+        and fr_branches["land426_keepset_acceptance_lever"]["probe_was_live"] is False
+        and fr_branches["stark429_operative_identity_terminal_gate"]["status"] == "pending"
+        and fr_branches["stark429_operative_identity_terminal_gate"]["is_terminal_gate"] is True)
+    # br: the terminal max-equivalent verdict is HELD in default mode (pending kanna #416 + stark #429);
+    #     it RESOLVES only when the cb3 additivity gap is measured AND stark #429's operative identity lands
+    fr_resolved = equivalent_tps_frontier_rollup(cb3_additivity_gap_tps=3.0, stark429_operative_identity="green")
     br_frontier_terminal_held = (
         fr["terminal_equiv_verdict"] == "held"
         and any("kanna#416" in g for g in fr["terminal_pending_gates"])
-        and any("stark#421" in g for g in fr["terminal_pending_gates"])
-        and TERMINAL_EQUIV_VERDICT_HELD_PENDING_416_421 is True
+        and any("stark#429" in g for g in fr["terminal_pending_gates"])
+        and not any("stark#421" in g for g in fr["terminal_pending_gates"])    # #421 DROPPED as a terminal gate
+        and TERMINAL_EQUIV_VERDICT_HELD_PENDING_416_429 is True
         and fr_resolved["terminal_equiv_verdict"] == "resolved"
         and len(fr_resolved["terminal_pending_gates"]) == 0)
-    # bs: feeding a branch verdict realizes it — stark #421 green lifts the FAST 481.53 to true 1.0;
-    #     denken #427 green banks the legal ~496.7 pinned-K point; wirbel #428 / land #426 measured add on 482.74
-    fr_s421 = equivalent_tps_frontier_rollup(stark421_tiebreak="green")
-    fr_d427 = equivalent_tps_frontier_rollup(denken427_pinnedk_legality="green")
+    # bs: feeding a verdict realizes it — stark #429 green RESOLVES the terminal identity gate; denken #427
+    #     is ALREADY legal_self_referential (banks the 496.74 point by default); wirbel #428 / land #426
+    #     measured add on 482.74; denken #431 byte_identical promotes pinned-K to UNCONDITIONAL legality
+    fr_s429 = equivalent_tps_frontier_rollup(cb3_additivity_gap_tps=3.0, stark429_operative_identity="green")
+    fr_d431 = equivalent_tps_frontier_rollup(denken431_pinnedk_canonical="byte_identical")
     fr_w428 = equivalent_tps_frontier_rollup(wirbel428_supply_ceiling_tps=4.0)
     fr_l426 = equivalent_tps_frontier_rollup(land426_keepset_accept_tps=10.0)
-    _s421b = {b["branch"]: b for b in fr_s421["branches"]}["stark421_canonical_tiebreak"]
-    _d427b = {b["branch"]: b for b in fr_d427["branches"]}["denken427_pinnedk_recapture"]
+    _d427b = {b["branch"]: b for b in fr["branches"]}["denken427_pinnedk_recapture"]
     _w428b = {b["branch"]: b for b in fr_w428["branches"]}["wirbel428_bitidentical_supply_ceiling"]
     _l426b = {b["branch"]: b for b in fr_l426["branches"]}["land426_keepset_acceptance_lever"]
     bs_frontier_branches_resolve = (
-        abs(_s421b["tps_if_green"] - DEPLOYED_FASTPATH_TPS) < TOL_DISPLAY_TPS
-        and abs(_d427b["legal_frontier_point_if_green"] - DENKEN427_PINNEDK_RECAPTURE_TPS) < TOL_DISPLAY_TPS
+        fr_s429["terminal_equiv_verdict"] == "resolved"
+        and abs(_d427b["legal_frontier_point_if_legal"] - DENKEN427_PINNEDK_RECAPTURE_TPS) < TOL_DISPLAY_TPS
+        and fr_d431["pinnedk_unconditional_legal"] is True
         and _w428b["status"] == "measured"
         and abs(_w428b["ceiling_tps_if_measured"] - (FASTEST_EQUIVALENT_TPS_482 + 4.0)) < TOL_DISPLAY_TPS
         and _l426b["status"] == "measured"
         and abs(_l426b["realized_tps_if_measured"] - (FASTEST_EQUIVALENT_TPS_482 + 10.0)) < TOL_DISPLAY_TPS)
+    # bt: Bar A (HEADLINE win) supersedes the +1.21 knife-edge — the equivalence gain is priced vs the
+    #     FEASIBLE floor 467.14, not the infeasible non-equivalent 481.53: +15.60 (+3.34%), and it is
+    #     robustly positive across the WHOLE [0,14.9%] additivity-haircut band (worst +13.28, stack 480.42)
+    bt_frontier_bar_a_supersedes_knife_edge = (
+        abs(fr["bar_a_equiv_gain_vs_floor_tps"]
+            - (FASTEST_EQUIVALENT_TPS_482 - DENKEN423_REALIZABLE_STRICT_BASE_TPS)) < TOL_DISPLAY_TPS  # +15.60
+        and abs(fr["bar_a_equiv_gain_vs_floor_tps"] - BAR_A_EQUIV_GAIN_VS_FLOOR_TPS) < TOL_DISPLAY_TPS
+        and abs(fr["bar_a_equiv_gain_pct"] - BAR_A_EQUIV_GAIN_PCT) < 0.05                              # +3.34%
+        and fr["bar_a_robustly_positive"] is True
+        and fr["bar_a_worst_haircut_gain_tps"] > 0.0
+        and abs(fr["bar_a_worst_haircut_gain_tps"] - BAR_A_WORST_HAIRCUT_GAIN_TPS) < TOL_DISPLAY_TPS   # +13.28
+        and abs(fr["bar_a_worst_haircut_stack_tps"] - BAR_A_WORST_HAIRCUT_STACK_TPS) < TOL_DISPLAY_TPS  # 480.42
+        and fr["bar_a_worst_haircut_stack_tps"] > DENKEN423_REALIZABLE_STRICT_BASE_TPS                  # still > floor
+        and fr["bar_b_cosmetic_vs_deployed_superseded"] is True)
+    # bu: stark #421 (canonical tie-break) is REFUTED (wvy2k7w7) — a consistent tie-break closes 3 flips
+    #     but OPENS 8 (0.9966 -> 0.9909); logit/index post-processing CANNOT fix identity; the FAST-481
+    #     equivalence path is CLOSED and #421 is no longer a terminal gate
+    bu_frontier_stark421_refuted = (
+        fr["stark421_tiebreak"] == "red"
+        and fr["stark421_tiebreak_refuted"] is True
+        and fr["fast_481_equivalence_closed"] is True
+        and fr_branches["stark421_canonical_tiebreak"]["flips_closed"] == STARK421_FLIPS_CLOSED       # 3
+        and fr_branches["stark421_canonical_tiebreak"]["flips_opened"] == STARK421_FLIPS_OPENED       # 8
+        and abs(fr_branches["stark421_canonical_tiebreak"]["identity_after"]
+                - STARK421_IDENTITY_AFTER) < TOL_EXACT                                                # 0.9909
+        and fr_branches["stark421_canonical_tiebreak"]["postproc_cannot_fix_identity"] is True
+        and fr_branches["stark421_canonical_tiebreak"]["tps_if_green"] is None)                       # NOT green
+    # bv: denken #427 banks pinned-K node 3 = legal_self_referential 496.74 (= 482.74 + 13.998), identity
+    #     1.0 (M-invariant byte-exact, self-referential), BUILD-GATED; the deployed 481.53 ITSELF fails
+    #     self-reference (0.9966) so pinned-K is strictly MORE equivalent; gap_to_500 3.26
+    bv_frontier_pinnedk_node3_legal_self_referential = (
+        len(fr_nodes) == 4
+        and fr_nodes[3]["node"] == "pinnedk_attn_recapture_legal_self_referential_427"
+        and abs(fr_nodes[3]["tps"] - DENKEN427_PINNEDK_RECAPTURE_TPS) < TOL_DISPLAY_TPS               # 496.74
+        and abs(fr_nodes[3]["tps"] - (FASTEST_EQUIVALENT_TPS_482 + DENKEN427_PINNEDK_ATTN_LIFT_TPS)) < TOL_DISPLAY_TPS
+        and abs(fr_nodes[3]["identity"] - 1.0) < TOL_EXACT
+        and fr_nodes[3]["legal_self_referential"] is True
+        and fr_nodes[3]["build_gated"] is True
+        and abs(fr_nodes[3]["gap_to_500_tps"] - DENKEN427_PINNEDK_GAP_TO_500_TPS) < TOL_DISPLAY_TPS   # 3.26
+        and fr["pinnedk_legal_self_referential_427"] is True
+        and abs(fr["fastest_equivalent_tps_pinnedk_selfref"] - DENKEN427_PINNEDK_RECAPTURE_TPS) < TOL_DISPLAY_TPS
+        and fr["deployed_481_fails_self_reference"] is True
+        and fr["official_harness_no_token_identity_check"] is True
+        and fr["fastest_equivalent_tps"] < fr["fastest_equivalent_tps_pinnedk_selfref"])  # 482.74 (no-build) < 496.74
+    # bw: stark #429 is the TERMINAL identity gate that REPLACES #421 (lawine #430 collapsed the deploy
+    #     HOLD to identity-only); denken #431 decides UNCONDITIONAL vs self-referential-only legality of
+    #     the 496.74 point (byte_identical -> unconditional; default pends -> self-referential-only)
+    _identb = fr_branches["stark429_operative_identity_terminal_gate"]
+    bw_frontier_stark429_terminal_denken431_canonical = (
+        _identb["is_terminal_gate"] is True
+        and _identb["replaces_feeder"] == "stark#421"
+        and _identb["residual_bitwise_tie_flips"] == STARK429_RESIDUAL_BITWISE_TIE_FLIPS             # 1
+        and _identb["deploy_hold_collapsed_to_identity_only"] is True
+        and fr["denken431_pinnedk_canonical"] == "pending"
+        and fr["pinnedk_unconditional_legal"] is False                       # default: self-referential only
+        and fr["pinnedk_unconditional_pending_denken431"] is True
+        and fr_d431["pinnedk_unconditional_legal"] is True                   # byte_identical -> unconditional
+        and fr_d431["pinnedk_unconditional_pending_denken431"] is False)
 
     # p: NaN clean (placeholder — finalized in main() after _nan_paths check)
     p_nan_clean = True
@@ -3983,16 +4282,20 @@ def _selftests(d1: dict, d2: dict, d3: dict, d4: dict, d5: dict, d6: dict, d7: d
         "bg_frontier_equivalence_tax_481_minus_467_14": bool(bg_frontier_equivalence_tax),
         "bh_frontier_all_nodes_served_identity1": bool(bh_frontier_all_nodes_identity1),
         "bi_frontier_tree_leg_closed_denken409": bool(bi_frontier_tree_leg_closed),
-        "bj_frontier_pending_feeders_5_stark412_denken423_wirbel424_banked": bool(bj_frontier_pending_feeders),
-        "bk_frontier_knife_edge_plus_1_21_beats_481": bool(bk_frontier_knife_edge_beats_481),
+        "bj_frontier_pending_feeders_6_stark421refuted_denken427legal_banked": bool(bj_frontier_pending_feeders),
+        "bk_frontier_bar_b_cosmetic_plus_1_21_vs_481_superseded": bool(bk_frontier_knife_edge_beats_481),
         "bl_frontier_cb3_additivity_gap_tightens_net": bool(bl_frontier_cb3_additivity_tightens),
         "bm_frontier_selrec_refuted_bracket_struck_stark412": bool(bm_frontier_selrec_refuted),
         "bn_frontier_drafter_fusion_no_go_wirbel424": bool(bn_frontier_drafter_fusion_no_go),
         "bo_frontier_lmhead_free_self_referential_414": bool(bo_frontier_lmhead_free_self_referential),
         "bp_frontier_deployability_banked_green_417": bool(bp_frontier_deployability_banked_green),
-        "bq_frontier_paths_up_4_open_branches": bool(bq_frontier_branches_open),
-        "br_frontier_terminal_verdict_held_pending_416_421": bool(br_frontier_terminal_held),
+        "bq_frontier_paths_up_5_branches_421refuted_427legal_429gate": bool(bq_frontier_branches_open),
+        "br_frontier_terminal_verdict_held_pending_416_429": bool(br_frontier_terminal_held),
         "bs_frontier_branches_resolve_on_feed": bool(bs_frontier_branches_resolve),
+        "bt_frontier_bar_a_plus_15_60_supersedes_knife_edge_robust": bool(bt_frontier_bar_a_supersedes_knife_edge),
+        "bu_frontier_stark421_tiebreak_refuted_fast481_closed": bool(bu_frontier_stark421_refuted),
+        "bv_frontier_pinnedk_node3_legal_self_referential_496_74": bool(bv_frontier_pinnedk_node3_legal_self_referential),
+        "bw_frontier_stark429_terminal_gate_denken431_canonical": bool(bw_frontier_stark429_terminal_denken431_canonical),
         "p_nan_clean": bool(p_nan_clean),
     }
     return {
@@ -4017,10 +4320,13 @@ def synthesize(measured_ppl: float | None, b_star: float,
                kanna403_ppl_safe_supply: str = "pending",      # SUPPLY leg (PPL-safe conservative-k re-cost)
                ubel401_tree_coverage_ceiling: str = "pending", # DEMAND leg (tree top-8/16 coverage ceiling)
                denken402_tree_net_supply: str = "pending",     # DEMAND leg (tree net after verify-M tax)
-               # RE-POINT feeders — the max-equivalent-TPS frontier ladder (23:11Z+23:35Z RE-ANCHOR)
-               cb3_additivity_gap_tps: float | None = None,     # kanna #416 budget-exact cb3 additivity gap (TIGHTENS 482.74) [terminal gate]
-               stark421_tiebreak: str = "pending",              # stark #421 canonical tie-break verdict {pending|green|red} [terminal gate]
-               denken427_pinnedk_legality: str = "pending",     # denken #427 pinned-K ~496.7 legality {pending|green|red}
+               # RE-POINT feeders — the max-equivalent-TPS frontier ladder (00:36Z relay)
+               cb3_additivity_gap_tps: float | None = None,     # kanna #416 budget-exact cb3 additivity gap (TIGHTENS 482.74) [TERMINAL gate]
+               stark429_operative_identity: str = "pending",    # stark #429 operative identity 1.0 {pending|green|red} [TERMINAL gate, replaces #421]
+               stark421_tiebreak: str = "red",                  # stark #421 canonical tie-break {pending|green|red} — REFUTED (provenance only)
+               denken427_pinnedk_legality: str = "legal_self_referential",  # denken #427 pinned-K 496.74 legality {pending|green|red|legal_self_referential}
+               denken431_pinnedk_canonical: str = "pending",    # denken #431 canonical leg {pending|byte_identical|bitwise_tie} (unconditional vs self-ref)
+               lawine432_fullstack_tps: float | None = None,    # lawine #432 measured joint full-stack 496.74 e2e
                wirbel428_supply_ceiling_tps: float | None = None,  # wirbel #428 measured bit-identical safe-band TPS above 482.74
                land426_keepset_accept_tps: float | None = None,    # land #426 measured keepset-mask acceptance lift (ceiling +137.97)
                deployability_surface: str = "green"             # lawine #417 BANKED green {green|red|pending}
@@ -4053,8 +4359,11 @@ def synthesize(measured_ppl: float | None, b_star: float,
     # 22:08Z CAPSTONE: max-equivalent-TPS frontier rollup over the equivalence ladder.
     d_frontier = equivalent_tps_frontier_rollup(
         cb3_additivity_gap_tps=cb3_additivity_gap_tps,
+        stark429_operative_identity=stark429_operative_identity,
         stark421_tiebreak=stark421_tiebreak,
         denken427_pinnedk_legality=denken427_pinnedk_legality,
+        denken431_pinnedk_canonical=denken431_pinnedk_canonical,
+        lawine432_fullstack_tps=lawine432_fullstack_tps,
         wirbel428_supply_ceiling_tps=wirbel428_supply_ceiling_tps,
         land426_keepset_accept_tps=land426_keepset_accept_tps,
         deployability_surface=deployability_surface)
@@ -4068,20 +4377,38 @@ def synthesize(measured_ppl: float | None, b_star: float,
         # frontier the live objective.  The >500 rollup is now historical_sub_result.
         # ====================================================================
         "max_equivalent_tps_measured": d_frontier["max_equivalent_tps_measured"],     # 467.14 (MEASURED, identity 1.0)
-        "fastest_equivalent_tps": d_frontier["fastest_equivalent_tps"],               # 482.74 (realizable; floor + cb3, lm_head free)
+        "fastest_equivalent_tps": d_frontier["fastest_equivalent_tps"],               # 482.74 (realizable no-build; floor + cb3, lm_head free)
         "max_equivalent_tps_modeled": d_frontier["max_equivalent_tps_modeled"],       # 482.74 (re-anchored 23:11Z; was 492.08 bracket)
-        "knife_edge_margin_if_floor_reached_tps": d_frontier["knife_edge_margin_if_floor_reached_tps"],  # +1.21 over deployed-nonequiv
+        "fastest_equivalent_tps_pinnedk_selfref": d_frontier["fastest_equivalent_tps_pinnedk_selfref"],  # 496.74 (build-gated, denken #427)
+        # Bar A (HEADLINE win vs the FEASIBLE floor) — supersedes the +1.21 knife-edge (00:36Z)
+        "bar_a_equiv_gain_vs_floor_tps": d_frontier["bar_a_equiv_gain_vs_floor_tps"],  # +15.60 (482.74 - 467.14)
+        "bar_a_equiv_gain_pct": d_frontier["bar_a_equiv_gain_pct"],                    # +3.34%
+        "bar_a_worst_haircut_gain_tps": d_frontier["bar_a_worst_haircut_gain_tps"],    # +13.28 (worst cb3 haircut)
+        "bar_a_worst_haircut_stack_tps": d_frontier["bar_a_worst_haircut_stack_tps"],  # 480.42 (still > floor)
+        "bar_a_robustly_positive": d_frontier["bar_a_robustly_positive"],             # True across [0,14.9%] band
+        # Bar B (COSMETIC, superseded): the +1.21 vs the deployed NON-equivalent 481.53
+        "bar_b_cosmetic_margin_vs_deployed_tps": d_frontier["bar_b_cosmetic_margin_vs_deployed_tps"],  # +1.21 (cosmetic)
+        "knife_edge_margin_if_floor_reached_tps": d_frontier["knife_edge_margin_if_floor_reached_tps"],  # +1.21 (back-compat alias = Bar B)
         "frontier_modeled_beats_deployed_nonequiv": d_frontier["modeled_beats_deployed_nonequiv"],  # True (482.74 > 481.53)
         "frontier_cb3_additive_ubel410": d_frontier["cb3_additive_ubel410"],          # True (cb3 stacks cleanly on the floor)
         "frontier_naive_stacked_ceiling_tps": d_frontier["naive_stacked_ceiling_tps"],  # 482.74 (floor + cb3 additive point)
         "frontier_selrec_refuted_stark412": d_frontier["selrec_refuted_stark412"],    # True (bracket [492.08,494.08] STRUCK)
         "frontier_selective_recompute_bracket_gone": d_frontier["selective_recompute_bracket_gone"],  # True
         "frontier_drafter_fusion_no_go_wirbel424": d_frontier["drafter_fusion_no_go_wirbel424"],  # True (+52 REFUTED)
+        "frontier_stark421_tiebreak_refuted": d_frontier["stark421_tiebreak_refuted"],  # True (wvy2k7w7); fast-481 equivalence CLOSED
+        # pinned-K build-gated extension (denken #427 legal_self_referential)
+        "frontier_pinnedk_legal_self_referential_427": d_frontier["pinnedk_legal_self_referential_427"],  # True (132fgkbk)
+        "frontier_pinnedk_recapture_tps": d_frontier["pinnedk_recapture_tps"],         # 496.74
+        "frontier_pinnedk_attn_lift_tps": d_frontier["pinnedk_attn_lift_tps"],         # +13.998 (#408)
+        "frontier_pinnedk_gap_to_500_tps": d_frontier["pinnedk_gap_to_500_tps"],       # 3.26
+        "frontier_pinnedk_unconditional_legal": d_frontier["pinnedk_unconditional_legal"],  # pends denken #431
+        "frontier_deployed_481_fails_self_reference": d_frontier["deployed_481_fails_self_reference"],  # 0.9966
         "frontier_lmhead_truncation_free_self_referential": d_frontier["lmhead_truncation_free_self_referential"],  # True (land #414)
         "frontier_truevocab_lmhead_tps_cost_contingency": d_frontier["truevocab_lmhead_tps_cost_contingency"],  # 54.07 (not required)
         "frontier_identity": d_frontier["frontier_identity"],                         # 1.0 (every ladder node)
         "frontier_equivalence_tax_vs_deployed_tps": d_frontier["equivalence_tax_vs_deployed_nonequiv_tps"],  # 481.53-467.14=14.39
-        "frontier_terminal_equiv_verdict": d_frontier["terminal_equiv_verdict"],      # "held" until kanna #416 + stark #421
+        "frontier_terminal_equiv_verdict": d_frontier["terminal_equiv_verdict"],      # "held" until kanna #416 + stark #429
+        "frontier_stark429_operative_identity": d_frontier["stark429_operative_identity"],  # TERMINAL identity gate (replaces #421)
         "frontier_terminal_pending_gates": d_frontier["terminal_pending_gates"],
         "frontier_deployability_surface": d_frontier["deployability_surface"],        # "green" (lawine #417 banked)
         "frontier_pending_feeders": d_frontier["pending_feeders"],
@@ -4409,17 +4736,25 @@ def _print_report(syn: dict) -> None:
     print("  (CAPSTONE) MAX-EQUIVALENT-TPS FRONTIER — ladder of strictly-equivalent configs (identity 1.0)",
           flush=True)
     print(f"      max_equivalent_tps  MEASURED={fr['max_equivalent_tps_measured']:.2f} (identity 1.0, floor)  "
-          f"fastest_equivalent={fr['fastest_equivalent_tps']:.2f} (floor + cb3, lm_head free)", flush=True)
-    print(f"      -> realizable equivalent {fr['fastest_equivalent_tps']:.2f} BEATS the non-strict deployed "
-          f"{fr['deployed_fastpath_off_ladder']['tps']:.2f} by a knife-edge "
-          f"+{fr['knife_edge_margin_if_floor_reached_tps']:.2f} WITH the byte-identity 481.53 lacks  "
-          f"[beats={fr['modeled_beats_deployed_nonequiv']}]", flush=True)
-    print(f"      deployed fast path {fr['deployed_fastpath_off_ladder']['tps']:.2f} is OFF the ladder: "
-          f"served identity {fr['deployed_fastpath_off_ladder']['served_identity']:.4f} != 1.0 "
-          f"({fr['deployed_fastpath_off_ladder']['flips'][0]}/{fr['deployed_fastpath_off_ladder']['flips'][1]} "
-          f"flips); equivalence tax vs floor {fr['equivalence_tax_vs_deployed_nonequiv_tps']:.2f} TPS", flush=True)
+          f"fastest_equivalent={fr['fastest_equivalent_tps']:.2f} (floor + cb3, lm_head free, NO build)",
+          flush=True)
+    print(f"      HEADLINE (Bar A): +{fr['bar_a_equiv_gain_vs_floor_tps']:.2f} TPS (+{fr['bar_a_equiv_gain_pct']:.2f}%) "
+          f"of STRICTLY-EQUIVALENT speed over the FEASIBLE floor {fr['max_equivalent_tps_measured']:.2f} -> "
+          f"{fr['fastest_equivalent_tps']:.2f}; robustly positive across the whole [0,14.9%] haircut band "
+          f"(worst +{fr['bar_a_worst_haircut_gain_tps']:.2f}, stack {fr['bar_a_worst_haircut_stack_tps']:.2f}) "
+          f"[robust={fr['bar_a_robustly_positive']}]", flush=True)
+    print(f"      + pinned-K BUILD-GATED extension (denken #427, legal_self_referential): "
+          f"{fr['fastest_equivalent_tps_pinnedk_selfref']:.2f} TPS (+{fr['pinnedk_attn_lift_tps']:.3f}, "
+          f"gap_to_500 {fr['pinnedk_gap_to_500_tps']:.2f}); the deployed 481.53 ITSELF fails self-reference "
+          f"(0.9966) -> pinned-K is strictly MORE equivalent", flush=True)
+    print(f"      Bar B (COSMETIC, superseded): +{fr['bar_b_cosmetic_margin_vs_deployed_tps']:.2f} vs the deployed "
+          f"NON-equivalent {fr['deployed_fastpath_off_ladder']['tps']:.2f} (served identity "
+          f"{fr['deployed_fastpath_off_ladder']['served_identity']:.4f} != 1.0, "
+          f"{fr['deployed_fastpath_off_ladder']['flips'][0]}/{fr['deployed_fastpath_off_ladder']['flips'][1]} "
+          f"flips; INFEASIBLE) -> 481.53 is off-ladder, equivalence tax vs floor "
+          f"{fr['equivalence_tax_vs_deployed_nonequiv_tps']:.2f} TPS", flush=True)
     for n in fr["ladder"]:
-        print(f"        - {n['node']:<46} {n['tps']:7.2f} TPS  [{n['status']:<8}] identity={n['identity']:.2f}",
+        print(f"        - {n['node']:<48} {n['tps']:7.2f} TPS  [{n['status']:<20}] identity={n['identity']:.2f}",
               flush=True)
     print(f"      cb3 ADDITIVE on the floor (ubel #410); lm_head truncation FREE (land #414, self-referential "
           f"gate); true-vocab head contingency {fr['truevocab_lmhead_tps_cost_contingency']:.2f} TPS (NOT required)",
@@ -4431,11 +4766,16 @@ def _print_report(syn: dict) -> None:
           f"{_sr['identity']:.4f}; M=8 flips are bitwise ties m1_self_gap={_sr['m1_self_gap']:.1f})", flush=True)
     print(f"      NO-GO:   drafter-fusion +52 (wirbel #424) — honest roofline +{_df['honest_roofline_tps']:.2f}, "
           f"regression risk to ~{_df['regression_risk_tps']:.0f} TPS (carry NO-GO)", flush=True)
-    print("      PATHS UP (open branches, none banked into the headline):", flush=True)
+    _t421 = {b["branch"]: b for b in fr["branches"]}["stark421_canonical_tiebreak"]
+    print(f"      REFUTED: canonical tie-break (stark #421) — closes {_t421['flips_closed']} flips but OPENS "
+          f"{_t421['flips_opened']} (0.9966 -> {_t421['identity_after']:.4f}); post-processing CANNOT fix "
+          f"identity -> the FAST-481 equivalence path is CLOSED, #421 DROPPED as a terminal gate", flush=True)
+    print("      PATHS UP / GATES (parameterized branches):", flush=True)
     for b in fr["branches"]:
-        print(f"        - {b['branch']:<42} [{b['status']:<11}] {b['kind']}", flush=True)
+        _tag = " [TERMINAL]" if b.get("is_terminal_gate") else ""
+        print(f"        - {b['branch']:<44} [{b['status']:<20}] {b['kind']}{_tag}", flush=True)
     print(f"      TERMINAL equiv verdict: {fr['terminal_equiv_verdict'].upper()} "
-          f"(pending {fr['terminal_pending_gates']})", flush=True)
+          f"(pending kanna #416 cb3-gap + stark #429 identity: {fr['terminal_pending_gates']})", flush=True)
     print(f"      deployability: {fr['deployability_surface']} (lawine #417 BANKED); pending feeders: "
           f"{fr['pending_feeders']}  (all_resolved={fr['all_feeders_resolved']})", flush=True)
     print(f"      {fr['tree_leg_note']}", flush=True)
@@ -4930,31 +5270,51 @@ def _maybe_log_wandb(args: Any, payload: dict) -> None:
         # PRIMARY (0-GPU self-test integrity gate)
         "strict_500_composite_reachability_self_test_passes": int(bool(
             st["strict_500_composite_reachability_self_test_passes"])),
-        # ====== CAPSTONE: max-equivalent-TPS frontier (23:11Z+23:35Z RE-ANCHOR: selrec REFUTED, bracket
-        #        [492.08,494.08] STRUCK, floor irreducible 467.14, headline 482.74, paths-up as branches) ======
+        # ====== CAPSTONE: max-equivalent-TPS frontier (00:36Z relay: Bar A +15.60 supersedes the +1.21
+        #        knife-edge; stark #421 tie-break REFUTED; denken #427 pinned-K 496.74 legal_self_referential;
+        #        terminal HELD pending kanna #416 + stark #429) ======
         "max_equivalent_tps_measured": fr["max_equivalent_tps_measured"],          # 467.14 (MEASURED, identity 1.0, floor)
-        "fastest_equivalent_tps": fr["fastest_equivalent_tps"],                    # 482.74 (realizable; floor + cb3, lm_head free)
+        "fastest_equivalent_tps": fr["fastest_equivalent_tps"],                    # 482.74 (realizable no-build; floor + cb3)
         "max_equivalent_tps_modeled": fr["max_equivalent_tps_modeled"],            # 482.74 (re-anchored; was 492.08 bracket)
-        "knife_edge_margin_if_floor_reached_tps": fr["knife_edge_margin_if_floor_reached_tps"],  # +1.21 over deployed-nonequiv
+        "fastest_equivalent_tps_pinnedk_selfref": fr["fastest_equivalent_tps_pinnedk_selfref"],  # 496.74 (build-gated #427)
+        # Bar A (HEADLINE win vs the FEASIBLE floor) — supersedes the +1.21 knife-edge (00:36Z)
+        "frontier_bar_a_equiv_gain_vs_floor_tps": fr["bar_a_equiv_gain_vs_floor_tps"],     # +15.60
+        "frontier_bar_a_equiv_gain_pct": fr["bar_a_equiv_gain_pct"],                       # +3.34%
+        "frontier_bar_a_worst_haircut_gain_tps": fr["bar_a_worst_haircut_gain_tps"],       # +13.28 (worst cb3 haircut)
+        "frontier_bar_a_worst_haircut_stack_tps": fr["bar_a_worst_haircut_stack_tps"],     # 480.42 (still > floor)
+        "frontier_bar_a_robustly_positive": int(bool(fr["bar_a_robustly_positive"])),      # 1 across [0,14.9%] band
+        # Bar B (COSMETIC, superseded): the +1.21 vs the deployed NON-equivalent 481.53
+        "knife_edge_margin_if_floor_reached_tps": fr["knife_edge_margin_if_floor_reached_tps"],  # +1.21 (alias = Bar B)
+        "frontier_bar_b_cosmetic_margin_vs_deployed_tps": fr["bar_b_cosmetic_margin_vs_deployed_tps"],  # +1.21 (cosmetic)
         "frontier_modeled_beats_deployed_nonequiv": int(bool(fr["modeled_beats_deployed_nonequiv"])),  # 1 (482.74>481.53)
         "frontier_cb3_additive_ubel410": int(bool(fr["cb3_additive_ubel410"])),    # 1 (cb3 stacks cleanly on the floor)
         "frontier_naive_stacked_ceiling_tps": fr["naive_stacked_ceiling_tps"],     # 482.74 (floor + cb3 additive point)
         "frontier_selrec_refuted_stark412": int(bool(fr["selrec_refuted_stark412"])),  # 1 (bracket [492.08,494.08] STRUCK)
         "frontier_selective_recompute_bracket_gone": int(bool(fr["selective_recompute_bracket_gone"])),  # 1
         "frontier_drafter_fusion_no_go_wirbel424": int(bool(fr["drafter_fusion_no_go_wirbel424"])),  # 1 (+52 REFUTED)
+        "frontier_stark421_tiebreak_refuted": int(bool(fr["stark421_tiebreak_refuted"])),  # 1 (wvy2k7w7); fast-481 CLOSED
+        "frontier_fast_481_equivalence_closed": int(bool(fr["fast_481_equivalence_closed"])),  # 1
+        # pinned-K build-gated extension (denken #427 legal_self_referential)
+        "frontier_pinnedk_legal_self_referential_427": int(bool(fr["pinnedk_legal_self_referential_427"])),  # 1
+        "frontier_pinnedk_recapture_tps": fr["pinnedk_recapture_tps"],             # 496.74
+        "frontier_pinnedk_attn_lift_tps": fr["pinnedk_attn_lift_tps"],             # +13.998 (#408)
+        "frontier_pinnedk_gap_to_500_tps": fr["pinnedk_gap_to_500_tps"],           # 3.26
+        "frontier_pinnedk_unconditional_legal": int(bool(fr["pinnedk_unconditional_legal"])),  # 0 until denken #431
+        "frontier_deployed_481_fails_self_reference": int(bool(fr["deployed_481_fails_self_reference"])),  # 1 (0.9966)
         "frontier_lmhead_truncation_free_self_referential": int(bool(fr["lmhead_truncation_free_self_referential"])),  # 1
         "frontier_truevocab_lmhead_tps_cost_contingency": fr["truevocab_lmhead_tps_cost_contingency"],  # 54.07 (not required)
         "frontier_identity": fr["frontier_identity"],                              # 1.0
         "frontier_equivalence_tax_vs_deployed_tps": fr["equivalence_tax_vs_deployed_nonequiv_tps"],  # 481.53-467.14=14.39
         "frontier_deployability_banked_green": int(bool(fr["deployability_banked_green"])),  # 1 (lawine #417)
-        "frontier_n_pending_feeders": len(fr["pending_feeders"]),
-        "frontier_n_banked_feeders": len(fr["banked_feeders"]),
-        "frontier_n_branches": len(fr["branches"]),                                # 4 open paths-up (none banked)
+        "frontier_n_pending_feeders": len(fr["pending_feeders"]),                  # 6 (kanna#416+stark#429 terminal +4)
+        "frontier_n_banked_feeders": len(fr["banked_feeders"]),                    # 11
+        "frontier_n_branches": len(fr["branches"]),                                # 5 (incl stark#429 terminal gate)
         "frontier_all_feeders_resolved": int(bool(fr["all_feeders_resolved"])),
         "frontier_cb3_additivity_gap_resolved": int(bool(fr["cb3_additivity_gap_resolved"])),
+        "frontier_stark429_resolved": int(bool(fr["stark429_resolved"])),         # 0 (TERMINAL identity gate pending)
         "frontier_wirbel428_supply_ceiling_resolved": int(bool(fr["wirbel428_supply_ceiling_resolved"])),
         "frontier_land426_keepset_magnitude_resolved": int(bool(fr["land426_keepset_magnitude_resolved"])),
-        "frontier_terminal_equiv_verdict_held": int(fr["terminal_equiv_verdict"] == "held"),  # 1 (pending kanna#416+stark#421)
+        "frontier_terminal_equiv_verdict_held": int(fr["terminal_equiv_verdict"] == "held"),  # 1 (pending kanna#416+stark#429)
         "frontier_n_terminal_pending_gates": len(fr["terminal_pending_gates"]),
         "frontier_tree_leg_closed": int(bool(fr["tree_leg_closed"])),
         "deployed_fastpath_tps": fr["deployed_fastpath_off_ladder"]["tps"],        # 481.53
@@ -5279,24 +5639,44 @@ def main(argv: list[str] | None = None) -> int:
                     help="denken #402 — the other DEMAND-leg tree net-supply probe (20:19Z): does the tree NET "
                          "d-cov AFTER its verify-M step-time tax on the 467.48 base? green -> net-positive tree "
                          "supply; red -> the verify-M tax eats the coverage gain. Pairs (OR) with --ubel401.")
-    # RE-POINT — the max-equivalent-TPS frontier ladder feeders (#407/#357); 23:11Z+23:35Z RE-ANCHOR.
+    # RE-POINT — the max-equivalent-TPS frontier ladder feeders (#407/#357); 00:36Z relay.
     ap.add_argument("--cb3-additivity-gap-tps", dest="cb3_additivity_gap_tps", type=float, default=None,
                     help="kanna #416 — MEASURED budget-exact additivity gap (TPS) that TIGHTENS the cb3 stack: "
                          "cb3's verify-body read-shrink partly OVERLAPS the verify-body re-reads. cb3 is ADDITIVE-"
                          "confirmed (ubel #410); omit -> headline stays the banked 482.74 point (= 467.14 floor + "
                          "15.60 cb3), the gap only narrows it. [TERMINAL gate]")
+    ap.add_argument("--stark429-operative-identity", dest="stark429_operative_identity",
+                    choices=["pending", "green", "red"], default="pending",
+                    help="stark #429 — the TERMINAL identity gate (00:36Z; REPLACES #421 after lawine #430 "
+                         "collapsed the deploy HOLD to identity-only): is blanket-strict's residual 1 bitwise-tie "
+                         "flip operatively 1.0 under the verify-arbiter gate? green -> served identity is operative "
+                         "1.0 (the headline 482.74 is a fully-legal frontier point); red -> the residual tie is a "
+                         "true flip. [TERMINAL gate]")
     ap.add_argument("--stark421-tiebreak", dest="stark421_tiebreak",
-                    choices=["pending", "green", "red"], default="pending",
-                    help="stark #421 — the NO-BUILD canonical tolerance tie-break verdict, applied consistently to "
-                         "BOTH the M=1 AR reference AND the M=8 verify (land #414 self-referential gate) to close "
-                         "the residual bitwise-tie flip(s) at ZERO cost. green -> could lift the FAST non-strict "
-                         "481.53 stack to EQUIVALENT at true 1.0 (the biggest prize). [TERMINAL gate]")
+                    choices=["pending", "green", "red"], default="red",
+                    help="stark #421 — the NO-BUILD canonical tolerance tie-break, REFUTED 00:36Z (wvy2k7w7): a "
+                         "consistent tie-break on BOTH the M=1 reference AND the M=8 verify closes 3 flips but OPENS "
+                         "8 (0.9966 -> 0.9909) because eps* straddles a +-1-ULP bf16 perturbation; logit/index "
+                         "post-processing CANNOT fix identity. Default 'red' (REFUTED); the FAST-481 equivalence "
+                         "path is CLOSED and #421 is NO LONGER a terminal gate (provenance only).")
     ap.add_argument("--denken427-pinnedk-legality", dest="denken427_pinnedk_legality",
-                    choices=["pending", "green", "red"], default="pending",
-                    help="denken #427 — is the pinned-K (wirbel #400 num_splits=8) ~496.7 re-capture a LEGAL self-"
-                         "referentially-equivalent number? M-invariant byte-exact + PPL-valid, but a NEW reference "
-                         "vs today's bytes (reference-change; human-gated kernel rebuild). gap_to_500 ~3.3. green -> "
-                         "bank ~496.7 as a legal frontier point.")
+                    choices=["pending", "green", "red", "legal_self_referential"], default="legal_self_referential",
+                    help="denken #427 — is the pinned-K (wirbel #400 num_splits=8) 496.74 re-capture a LEGAL "
+                         "equivalent number? RESOLVED POSITIVE 00:36Z (132fgkbk) = legal_self_referential: "
+                         "M-invariant byte-exact (M=1==M=8) so the submission's M=8 verify reproduces its OWN M=1 "
+                         "reference -> identity 1.0 under the operative self-referential gate (official harness runs "
+                         "NO token-identity check); the deployed 481.53 ITSELF fails self-reference (0.9966). "
+                         "+13.998 (#408) -> 496.74, BUILD-GATED. Default legal_self_referential banks the node; "
+                         "denken #431 (--denken431-pinnedk-canonical) decides UNCONDITIONAL vs self-referential-only.")
+    ap.add_argument("--denken431-pinnedk-canonical", dest="denken431_pinnedk_canonical",
+                    choices=["pending", "byte_identical", "bitwise_tie"], default="pending",
+                    help="denken #431 — the CANONICAL leg of the 496.74 pinned-K point: byte_identical -> the "
+                         "pinned-K bytes match the canonical M=1 reference -> UNCONDITIONAL legality (not just "
+                         "self-referential); bitwise_tie -> legal under the self-referential gate ONLY. Omit -> "
+                         "self-referential-only (the banked default).")
+    ap.add_argument("--lawine432-fullstack-tps", dest="lawine432_fullstack_tps", type=float, default=None,
+                    help="lawine #432 — MEASURED joint full-stack 496.74 e2e (floor + cb3 + pinned-K) confirmation. "
+                         "Omit -> in-flight (the 496.74 node carries its modeled build-gated TPS).")
     ap.add_argument("--wirbel428-supply-ceiling-tps", dest="wirbel428_supply_ceiling_tps",
                     type=float, default=None,
                     help="wirbel #428 — MEASURED bit-identical supply-ceiling TPS added ABOVE 482.74 (the SAFE "
@@ -5328,8 +5708,11 @@ def main(argv: list[str] | None = None) -> int:
                      ubel401_tree_coverage_ceiling=args.ubel401_tree_coverage_ceiling,
                      denken402_tree_net_supply=args.denken402_tree_net_supply,
                      cb3_additivity_gap_tps=args.cb3_additivity_gap_tps,
+                     stark429_operative_identity=args.stark429_operative_identity,
                      stark421_tiebreak=args.stark421_tiebreak,
                      denken427_pinnedk_legality=args.denken427_pinnedk_legality,
+                     denken431_pinnedk_canonical=args.denken431_pinnedk_canonical,
+                     lawine432_fullstack_tps=args.lawine432_fullstack_tps,
                      wirbel428_supply_ceiling_tps=args.wirbel428_supply_ceiling_tps,
                      land426_keepset_accept_tps=args.land426_keepset_accept_tps,
                      deployability_surface=args.deployability_surface)
@@ -5351,10 +5734,13 @@ def main(argv: list[str] | None = None) -> int:
         "kanna403_ppl_safe_supply": args.kanna403_ppl_safe_supply,
         "ubel401_tree_coverage_ceiling": args.ubel401_tree_coverage_ceiling,
         "denken402_tree_net_supply": args.denken402_tree_net_supply,
-        # RE-POINT frontier feeders (23:11Z+23:35Z RE-ANCHOR)
+        # RE-POINT frontier feeders (00:36Z relay)
         "cb3_additivity_gap_tps_kanna416": args.cb3_additivity_gap_tps,
+        "stark429_operative_identity": args.stark429_operative_identity,
         "stark421_tiebreak": args.stark421_tiebreak,
         "denken427_pinnedk_legality": args.denken427_pinnedk_legality,
+        "denken431_pinnedk_canonical": args.denken431_pinnedk_canonical,
+        "lawine432_fullstack_tps": args.lawine432_fullstack_tps,
         "wirbel428_supply_ceiling_tps": args.wirbel428_supply_ceiling_tps,
         "land426_keepset_accept_tps": args.land426_keepset_accept_tps,
         "deployability_surface_lawine417": args.deployability_surface,
