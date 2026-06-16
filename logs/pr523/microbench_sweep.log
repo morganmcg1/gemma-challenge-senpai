@@ -1,0 +1,77 @@
+[sweep] server_python=/tmp/senpai-venvs/5f4c623f772358a2/bin/python
+
+[sweep] ===== adaptive_nseg16 :: mode=adaptive T=4 S=16 =====
+device: NVIDIA A10G mode=adaptive nseg=16
+[verify] re-jit introspection: {"installed": false, "fixed_tps_marker": null, "kernel_has_literal": false, "kernel_has_adaptive": true, "reduce_has_literal": false, "backend_num_segments": 16}
+[verify] adaptive straddle256  base= 250 nseg=16 flips=6/8 max_abs_err=1.22e-04
+[verify] adaptive straddle512  base= 506 nseg=16 flips=6/8 max_abs_err=6.10e-05
+[verify] adaptive straddle2048 base=2042 nseg=16 flips=6/8 max_abs_err=3.05e-05
+[verify] adaptive control      base= 100 nseg=16 flips=0/8 max_abs_err=0.00e+00
+[verify] ADAPTIVE contrast (nseg=16): straddle_flips=18 (>0 demonstrates the adaptive split-KV is NOT byte-exact -> the fixed lever matters)
+[verify] wrote /workspace/senpai/target/research/speed/byteexact_realization_gap/microbench/adaptive_nseg16.json
+
+[sweep] ===== fixed_T16_S16 :: mode=fixed T=16 S=16 =====
+device: NVIDIA A10G mode=fixed nseg=16
+[byteexact] armed (BYTEEXACT_FIXED_TPS=16, BYTEEXACT_NUM_SEGMENTS=16): fixed-order 3D split-KV -> M-invariant byte-exact attention; matmul tax NOT installed
+[byteexact] fixed split-KV armed: tiles_per_segment=16 num_par_softmax_segments=16 (coverage 4096 keys)
+[byteexact] re-jitted kernel_unified_attention, reduce_segments with tiles_per_segment=16 (was adaptive cdiv)
+[byteexact] set triton_attn.NUM_PAR_SOFTMAX_SEGMENTS=16 (was 16)
+[verify] re-jit introspection: {"installed": true, "fixed_tps_marker": 16, "kernel_has_literal": true, "kernel_has_adaptive": false, "reduce_has_literal": true, "backend_num_segments": 16}
+[verify] fixed    straddle256  base= 250 nseg=16 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle512  base= 506 nseg=16 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle2048 base=2042 nseg=16 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    control      base= 100 nseg=16 flips=0/8 max_abs_err=0.00e+00
+[verify] FIXED verdict: re-jit installed=True literal_baked=True/True adaptive_gone=True backend_seg=16 straddle_flips=0 control_flips=0 (want 0/0) -> PASS=True
+[verify] wrote /workspace/senpai/target/research/speed/byteexact_realization_gap/microbench/fixed_T16_S16.json
+
+[sweep] ===== fixed_T8_S32 :: mode=fixed T=8 S=32 =====
+device: NVIDIA A10G mode=fixed nseg=32
+[byteexact] armed (BYTEEXACT_FIXED_TPS=8, BYTEEXACT_NUM_SEGMENTS=32): fixed-order 3D split-KV -> M-invariant byte-exact attention; matmul tax NOT installed
+[byteexact] fixed split-KV armed: tiles_per_segment=8 num_par_softmax_segments=32 (coverage 4096 keys)
+[byteexact] re-jitted kernel_unified_attention, reduce_segments with tiles_per_segment=8 (was adaptive cdiv)
+[byteexact] set triton_attn.NUM_PAR_SOFTMAX_SEGMENTS=32 (was 16)
+[verify] re-jit introspection: {"installed": true, "fixed_tps_marker": 8, "kernel_has_literal": true, "kernel_has_adaptive": false, "reduce_has_literal": true, "backend_num_segments": 32}
+[verify] fixed    straddle256  base= 250 nseg=32 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle512  base= 506 nseg=32 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle2048 base=2042 nseg=32 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    control      base= 100 nseg=32 flips=0/8 max_abs_err=0.00e+00
+[verify] FIXED verdict: re-jit installed=True literal_baked=True/True adaptive_gone=True backend_seg=32 straddle_flips=0 control_flips=0 (want 0/0) -> PASS=True
+[verify] wrote /workspace/senpai/target/research/speed/byteexact_realization_gap/microbench/fixed_T8_S32.json
+
+[sweep] ===== fixed_T4_S64 :: mode=fixed T=4 S=64 =====
+device: NVIDIA A10G mode=fixed nseg=64
+[byteexact] armed (BYTEEXACT_FIXED_TPS=4, BYTEEXACT_NUM_SEGMENTS=64): fixed-order 3D split-KV -> M-invariant byte-exact attention; matmul tax NOT installed
+[byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)
+[byteexact] re-jitted kernel_unified_attention, reduce_segments with tiles_per_segment=4 (was adaptive cdiv)
+[byteexact] set triton_attn.NUM_PAR_SOFTMAX_SEGMENTS=64 (was 16)
+[verify] re-jit introspection: {"installed": true, "fixed_tps_marker": 4, "kernel_has_literal": true, "kernel_has_adaptive": false, "reduce_has_literal": true, "backend_num_segments": 64}
+[verify] fixed    straddle256  base= 250 nseg=64 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle512  base= 506 nseg=64 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle2048 base=2042 nseg=64 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    control      base= 100 nseg=64 flips=0/8 max_abs_err=0.00e+00
+[verify] FIXED verdict: re-jit installed=True literal_baked=True/True adaptive_gone=True backend_seg=64 straddle_flips=0 control_flips=0 (want 0/0) -> PASS=True
+[verify] wrote /workspace/senpai/target/research/speed/byteexact_realization_gap/microbench/fixed_T4_S64.json
+
+[sweep] ===== fixed_T2_S128 :: mode=fixed T=2 S=128 =====
+device: NVIDIA A10G mode=fixed nseg=128
+[byteexact] armed (BYTEEXACT_FIXED_TPS=2, BYTEEXACT_NUM_SEGMENTS=128): fixed-order 3D split-KV -> M-invariant byte-exact attention; matmul tax NOT installed
+[byteexact] fixed split-KV armed: tiles_per_segment=2 num_par_softmax_segments=128 (coverage 4096 keys)
+[byteexact] re-jitted kernel_unified_attention, reduce_segments with tiles_per_segment=2 (was adaptive cdiv)
+[byteexact] set triton_attn.NUM_PAR_SOFTMAX_SEGMENTS=128 (was 16)
+[verify] re-jit introspection: {"installed": true, "fixed_tps_marker": 2, "kernel_has_literal": true, "kernel_has_adaptive": false, "reduce_has_literal": true, "backend_num_segments": 128}
+[verify] fixed    straddle256  base= 250 nseg=128 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle512  base= 506 nseg=128 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    straddle2048 base=2042 nseg=128 flips=0/8 max_abs_err=0.00e+00
+[verify] fixed    control      base= 100 nseg=128 flips=0/8 max_abs_err=0.00e+00
+[verify] FIXED verdict: re-jit installed=True literal_baked=True/True adaptive_gone=True backend_seg=128 straddle_flips=0 control_flips=0 (want 0/0) -> PASS=True
+[verify] wrote /workspace/senpai/target/research/speed/byteexact_realization_gap/microbench/fixed_T2_S128.json
+
+[sweep] ================= BYTE-EXACT SWEEP SUMMARY =================
+  adaptive_nseg16    mode=adaptive T= 4 S= 16 cov=1024 straddle_flips=18 control_flips=0 pass=None
+  fixed_T16_S16      mode=fixed    T=16 S= 16 cov=4096 straddle_flips=0 control_flips=0 pass=True
+  fixed_T8_S32       mode=fixed    T= 8 S= 32 cov=4096 straddle_flips=0 control_flips=0 pass=True
+  fixed_T4_S64       mode=fixed    T= 4 S= 64 cov=4096 straddle_flips=0 control_flips=0 pass=True
+  fixed_T2_S128      mode=fixed    T= 2 S=128 cov=4096 straddle_flips=0 control_flips=0 pass=True
+  ALL FIXED GEOMETRY BYTE-EXACT (0/8): True
+  adaptive contrast straddle_flips=18 (>0 => fixed lever load-bearing)
+[sweep] wrote /workspace/senpai/target/research/speed/byteexact_realization_gap/microbench/microbench_sweep_summary.json

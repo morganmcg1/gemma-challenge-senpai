@@ -1,0 +1,76 @@
+{
+  "pr": 523,
+  "generated_utc": "2026-06-16T20:43:16.159920+00:00",
+  "analysis_only": true,
+  "official_tps": 0,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "metric": "wall_tps (median, same-session)"
+  },
+  "sigma_hw": 4.864,
+  "ppl_gate": 2.42,
+  "served_local_wall_tps": {
+    "surgical_2D_byteexact_floor": 351.96546962996376,
+    "byteexact_fixed3D_splitkv": 439.7055879037966,
+    "deployed_adaptive3D_nonexact": 453.92695789982014,
+    "strict_frontier_457p5_projection": 457.5
+  },
+  "ppl": {
+    "surgical": 2.3766755065685943,
+    "byteexact": 2.3766643358900286,
+    "deployed": 2.376682786480556
+  },
+  "gap_ledger_same_session": {
+    "floor_surgical_2D_byteexact": 351.96546962996376,
+    "lever1_splitkv_geometry_BYTEEXACT_tps": 87.74011827383282,
+    "after_lever1_byteexact_fixed3D": 439.7055879037966,
+    "lever2_fixed_to_adaptive_NONEXACT_tps": 14.221369996023554,
+    "after_lever2_deployed_adaptive": 453.92695789982014,
+    "residual_projection_overshoot_tps": 3.573042100179862,
+    "top_457p5_projection_never_served": 457.5,
+    "byteexact_recoverable_fraction_of_span": 0.8313877738991136
+  },
+  "steptime_exec_gpu_ms": {
+    "surgical": 8.064,
+    "byteexact": 6.89,
+    "deployed": 6.804
+  },
+  "geometry_segment_sweep_tps": {
+    "seg2_T16_S16": 383.35256901248863,
+    "seg4_T8_S32": 415.0055160576858,
+    "seg8_T4_S64": 439.7055879037966,
+    "seg16_T2_S128": 389.596636514702
+  },
+  "geometry_sweep_best_arm": "seg8_T4_S64",
+  "geometry_all_configs_byteexact_0of8": true,
+  "geometry_adaptive_contrast_straddle_flips": 18,
+  "cudagraph_drafter_benefit_tps": 3.7701775709701337,
+  "flashinfer_sampler_local": "UNMEASURABLE_local_cuRAND_JIT_crash (works on HF a10g; not dominant)",
+  "flashinfer_sampler_tps": null,
+  "strict_frontier_457p5_provenance": {
+    "457p5_is_128x512_measured": false,
+    "established_at_workload": "single-shape microbench, KV-len 640 (headline_L), M=8 verify, hd512, n_full_layers=7; per-cycle attention added-us applied to the deployed 481.53 decode cycle. NOT a served 128x512 run.",
+    "source_artifacts": [
+      "research/speed/strict_frontier_realize/strict_frontier_realize.json (realized_strict_frontier_tps=456.36, strict_2d projection @L640)",
+      "research/speed/surgical_attn_realize/PR488_verdict_integrated.json (modeled_surgical_estimate=457.0 PROJECTION vs surgical_attn_only_tps=357.64 REALIZED; is_457_a_mirage='partially -- ~22% overshoot ... Realized surgical = 357.6, not 457')"
+    ],
+    "what_actually_serves": "byte-exact serve at full 128x512 realizes surgical 351.97 / byteexact 439.71 local; the fast NON-byte-exact deployed stack tops 453.93 same-session (465 local / 481.53 official other-session). 457.5 exceeds even the real fast stack -> a projection, not a frontier."
+  },
+  "KEY_OUTPUTS": {
+    "realization_gap_tps": 99.89999999999998,
+    "gap_largest_lever_name": "attention_splitkv_geometry_2D_inorder_to_fixed3D",
+    "gap_largest_lever_tps": 87.74011827383282,
+    "gap_largest_lever_is_byteexact": true,
+    "gap_is_kernel_overhead": true,
+    "457p5_is_128x512_measured": false
+  },
+  "census_caveat": "The +87.74 lever is byte-exact at the ATTENTION KERNEL (0/8 microbench, all geometry configs). End-to-end token census (lawine #500, #461 locus): byteexact 5 ULP-tie flips (0 semantic) vs surgical 1 -- driven by the SHARED un-taxed Marlin matmul, NOT the attention geometry. So the rung is draw-ready on speed/PPL/completion/self-determinism (r1-r2=1.0) but NOT census-tight to surgical's 1-flip bar; matching it needs the matmul tax (~135 TPS, #488), defeating the purpose.",
+  "wandb_batch_runs": {
+    "ledger": "i11p5e3y",
+    "geometry": "b0244ccu",
+    "levers": "jo0a050y"
+  },
+  "wandb_verdict_run_id": "cn4cqim9"
+}
