@@ -1,7 +1,7 @@
 {
   "pr": 496,
-  "generated_utc": "2026-06-16T13:41:25.823888+00:00",
-  "submission": "fa2sw_precache_kenyan",
+  "generated_utc": "2026-06-16T16:20:45.867145+00:00",
+  "submission": "fa2sw_strict_byteexact_splitkv399",
   "candidate": {
     "fixed_tps": 4,
     "num_segments": 64,
@@ -14,10 +14,10 @@
     "seed": 1,
     "n_decodes": 1
   },
-  "elapsed_s": 197.32671928405762,
+  "elapsed_s": 100.41081500053406,
   "git": {
-    "git_commit": "ce43beb27c7a3686d3d7c5acf3c36040b7dfc4f8",
-    "git_branch": "lawine/faster-byteexact-attention",
+    "git_commit": "1f9892a9eb23b760fa3a4d4e8ccb1471dfc44ed7",
+    "git_branch": "lawine/package-certify-byteexact-399",
     "git_dirty": true
   },
   "arms": {
@@ -29,16 +29,16 @@
         "BYTEEXACT_FIXED_TPS": "4",
         "BYTEEXACT_NUM_SEGMENTS": "64"
       },
-      "median_wall_tps": 22.79920393385503,
+      "median_wall_tps": 22.88858080168603,
       "wall_tps_values": [
-        22.79920393385503
+        22.88858080168603
       ],
       "warm_wall_tps_values": [
-        22.79920393385503
+        22.88858080168603
       ],
       "wall_tps_n": 1,
       "wall_tps_std": 0.0,
-      "server_ready_s": 85.03624081611633,
+      "server_ready_s": 85.01782035827637,
       "peak_gpu_mem_mib": 19535,
       "ppl": null,
       "ppl_num_records": null,
@@ -54,7 +54,7 @@
         "benign_usage_tracebacks": 2,
         "batch_invariant_mentions": 0,
         "byteexact_armed": true,
-        "byteexact_log": "(EngineCore pid=1149810) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
+        "byteexact_log": "(EngineCore pid=1207779) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
         "ref_mode_cleared_spec": false
       },
       "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/smoke/byteexact/decode_round00.jsonl",
@@ -62,89 +62,20 @@
         {
           "arm": "byteexact",
           "round": 0,
-          "wall_tps": 22.79920393385503,
+          "wall_tps": 22.88858080168603,
           "num_completion_tokens": 128,
-          "decode_duration_s": 5.614231109619141,
-          "wall_around_decode_s": 13.885610342025757,
-          "num_completed_prompts": 8,
-          "expected_tokens": 128
-        }
-      ]
-    },
-    "byteexact_ref": {
-      "arm": "byteexact_ref",
-      "label": "(d) byteexact M=1 AR reference (ref-mode, fixed split-KV)",
-      "kind": "ref",
-      "extra_env": {
-        "BYTEEXACT_FIXED_TPS": "4",
-        "BYTEEXACT_NUM_SEGMENTS": "64",
-        "SENPAI_REFERENCE_MODE": "1"
-      },
-      "median_wall_tps": 103.40273164410584,
-      "wall_tps_values": [
-        103.40273164410584
-      ],
-      "warm_wall_tps_values": [
-        103.40273164410584
-      ],
-      "wall_tps_n": 1,
-      "wall_tps_std": 0.0,
-      "server_ready_s": 85.01552033424377,
-      "peak_gpu_mem_mib": 19349,
-      "ppl": null,
-      "ppl_num_records": null,
-      "num_completed_prompts": 8,
-      "completion_full": true,
-      "mechanism": {
-        "splitkv_armed": true,
-        "splitkv_redirects": 0,
-        "graph_capture_lines": 4,
-        "onegraph_captured": false,
-        "fatal_traceback": false,
-        "n_tracebacks": 1,
-        "benign_usage_tracebacks": 2,
-        "batch_invariant_mentions": 0,
-        "byteexact_armed": true,
-        "byteexact_log": "(EngineCore pid=1151570) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
-        "ref_mode_cleared_spec": true
-      },
-      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/smoke/byteexact_ref/decode_round00.jsonl",
-      "decodes": [
-        {
-          "arm": "byteexact_ref",
-          "round": 0,
-          "wall_tps": 103.40273164410584,
-          "num_completion_tokens": 128,
-          "decode_duration_s": 1.2378783226013184,
-          "wall_around_decode_s": 10.731049060821533,
+          "decode_duration_s": 5.592308282852173,
+          "wall_around_decode_s": 14.036417961120605,
           "num_completed_prompts": 8,
           "expected_tokens": 128
         }
       ]
     }
   },
-  "identity_diffs": {
-    "byteexact_vs_byteexact_ref": {
-      "label": "byteexact M=8 vs its M=1 AR reference (OPERATIVE GATE; expect 1.0)",
-      "available": true,
-      "n_prompts_compared": 8,
-      "n_tokens_compared": 128,
-      "n_tokens_matched": 122,
-      "token_identity_rate": 0.953125,
-      "n_sequences_with_any_flip": 1,
-      "first_divergences": [
-        {
-          "prompt": "gpqa_diamond-123161632f",
-          "pos": 9,
-          "a": 19261,
-          "b": 1001
-        }
-      ]
-    }
-  },
+  "identity_diffs": {},
   "verdict": {
     "candidate_scheme": "fixed-order split-KV (tiles_per_segment=4, num_par_softmax_segments=64, CHUNK=64 keys)",
-    "candidate_realized_tps": 22.79920393385503,
+    "candidate_realized_tps": 22.88858080168603,
     "candidate_realized_tps_basis": "full-serve median warm wall_tps (num_completion_tokens / decode duration_s)",
     "surgical_ceiling_tps": null,
     "deployed_ref_tps": null,
@@ -153,8 +84,12 @@
     "sigma_hw": 4.864,
     "lift_clears_materiality_and_sigma": false,
     "candidate_recovery_fraction_of_deployed_minus_surgical_gap": null,
-    "candidate_operative_identity_rate": 0.953125,
-    "candidate_operative_1_0": false,
+    "candidate_operative_identity_rate": null,
+    "candidate_operative_1_0": null,
+    "gate_validity_control_rate": null,
+    "m1ar_gate_valid": false,
+    "candidate_vs_groundtruth_m8_rate": null,
+    "surgical_vs_groundtruth_m8_rate": null,
     "deployed_control_identity_rate": null,
     "gate_discriminates": false,
     "candidate_ppl": null,

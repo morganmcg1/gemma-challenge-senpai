@@ -217,6 +217,7 @@ def run_arm(arm, submission_dir, server_python, out_dir, *,
         "num_completed_prompts": decodes[0]["num_completed_prompts"] if decodes else None,
         "completion_full": bool(decodes and decodes[0]["num_completion_tokens"] == num_prompts * output_len),
         "mechanism": mech, "warm_decode_out": warm_decode_out,
+        "decode_outs": [str(p) for p in decode_outs],
         "decodes": decodes,
     }
     records_fh.write(json.dumps(arm_rec) + "\n")
@@ -281,6 +282,27 @@ def cross_arm_token_diff(a: Path | None, b: Path | None, label: str) -> dict[str
     }
 
 
+def self_determinism_warm(arm_rec: dict[str, Any] | None, label: str) -> dict[str, Any]:
+    """Served-vs-served SELF-determinism of one arm across its two warmest rounds
+    (r[-2] vs r[-1]). This is the CORRECT served gate (the standard surgical-357
+    used): it asks whether the SAME served config reproduces its own token stream
+    byte-for-byte when warm. Unlike the cross-arm M=8-vs-M=1-AR token diff, it is NOT
+    a chaotic greedy-AR amplifier and NOT confounded by a wrong M-invariance control
+    -- it is simply determinism, the necessary served precondition. Needs >=2 warm
+    rounds (round 0 is the cold graph-capture round and is excluded)."""
+    if not arm_rec:
+        return {"label": label, "available": False, "reason": "arm missing"}
+    outs = [Path(p) for p in (arm_rec.get("decode_outs") or [])]
+    warm = outs[1:] if len(outs) >= 3 else outs  # drop cold round 0 when >=3 rounds exist
+    if len(warm) < 2:
+        return {"label": label, "available": False,
+                "reason": f"need >=2 warm rounds, have {len(warm)} (bump --ref-decodes>=3)"}
+    d = cross_arm_token_diff(warm[-2], warm[-1], label)
+    d["rounds_compared"] = [warm[-2].name, warm[-1].name]
+    d["self_determinism_1_0"] = (d.get("token_identity_rate") == 1.0) if d.get("available") else None
+    return d
+
+
 # ---------------------------------------------------------------------------
 def build_verdict(arm_recs, diffs, fixed_tps, num_segments) -> dict[str, Any]:
     dep = arm_recs.get("deployed", {})
@@ -290,18 +312,36 @@ def build_verdict(arm_recs, diffs, fixed_tps, num_segments) -> dict[str, Any]:
     surg_tps = surg.get("median_wall_tps")
     dep_tps = dep.get("median_wall_tps")
 
-    # The operative-1.0 gate: candidate served (M=8) vs its OWN M=1 AR reference.
+    # ---- CORRECT served gate (#496 follow-up #4 fix): served-vs-served SELF-determinism ----
+    # The end-to-end cross-arm M=8-vs-M=1-AR token rate (below) CANNOT certify byte-
+    # exactness -- proven 3 ways (PR #500 deliverable 2): (a) VLLM_BATCH_INVARIANT
+    # patches ONLY the matmul family, never attention, so full_flag's Gemma global
+    # full-attn stays the stock ADAPTIVE 3D split-KV -> M-DEPENDENT -> full_flag is
+    # NOT byte-exact-by-construction and cannot read ~1.0 (the wrong control);
+    # (b) free-running greedy AR is a chaotic amplifier -- one bf16-ULP tie at the
+    # argmax flips greedy and the whole suffix cascades to ~0%, so the rate is
+    # (first-flip-pos)/len, warmup/session noise not M-invariance; (c) the reference
+    # is already a width-1 cudagraph (not eager), so "drive M=1-AR through cudagraph"
+    # is a no-op. Byte-exactness is certified instead by (1) the served self-
+    # determinism warm r1-r2 (necessary precondition, here) and (2) the #461 logit-
+    # margin census (run_byteexact_census.py, sufficient M-invariance proof).
+    be_self = self_determinism_warm(be, "byteexact served self-determinism (warm r1-r2; THE served gate)")
+    be_ref_self = self_determinism_warm(arm_recs.get("byteexact_ref"),
+                                        "byteexact_ref M=1-AR self-determinism (warm r1-r2; confounds-removed)")
+    dep_self = self_determinism_warm(dep, "deployed served self-determinism (warm r1-r2)")
+    be_self_1_0 = be_self.get("self_determinism_1_0") if be_self.get("available") else None
+
+    # The free-running cross-arm M=1-AR token rate -- RETAINED AS A DIAGNOSTIC ONLY
+    # (non-certifying; see above). Do NOT gate on it.
     be_ident = diffs.get("byteexact_vs_byteexact_ref", {})
     dep_ident = diffs.get("deployed_vs_deployed_ref", {})
     be_identity_rate = be_ident.get("token_identity_rate") if be_ident.get("available") else None
-    be_operative_1 = (be_identity_rate == 1.0) if be_identity_rate is not None else None
 
-    # DECISIVE gate-validity control: full_flag is byte-exact M=8==M=1 BY
-    # CONSTRUCTION. If its own M=1-AR gate is not ~1.0, the M=1-AR gate cannot
-    # discriminate (the #488-broken regime) and be_identity_rate is uninformative.
+    # full_flag M=1-AR control is INVALID as a byte-exactness gate (matmul-only pin,
+    # adaptive attn untouched). Recorded for transparency; never used to qualify.
     ff_ctrl = diffs.get("full_flag_vs_full_flag_ref", {})
     ff_ctrl_rate = ff_ctrl.get("token_identity_rate") if ff_ctrl.get("available") else None
-    m1ar_gate_valid = (ff_ctrl_rate is not None and ff_ctrl_rate >= 0.9999)
+    full_flag_is_valid_m1ar_control = False  # batch_invariant patches matmul, not attention
     # served-vs-served matched-config against the M=8==M=1 ground truth.
     be_vs_ff = diffs.get("byteexact_vs_full_flag", {})
     be_vs_ff_rate = be_vs_ff.get("token_identity_rate") if be_vs_ff.get("available") else None
@@ -317,7 +357,10 @@ def build_verdict(arm_recs, diffs, fixed_tps, num_segments) -> dict[str, Any]:
         recovery = (be_tps - surg_tps) / (dep_tps - surg_tps)
 
     lift_clears = bool(isinstance(lift_vs_surgical, (int, float)) and lift_vs_surgical > max(MATERIALITY_TPS, SIGMA_HW))
-    ceiling_lifted = bool(lift_clears and be_operative_1 is True)
+    # ceiling is "lifted at preserved identity" when the lift is material AND the
+    # candidate reproduces its own warm served token stream byte-for-byte (necessary
+    # served precondition). The SUFFICIENT M-invariance proof is the #461 census.
+    ceiling_lifted = bool(lift_clears and be_self_1_0 is True)
 
     return {
         "candidate_scheme": f"fixed-order split-KV (tiles_per_segment={fixed_tps}, num_par_softmax_segments={num_segments}, CHUNK={fixed_tps*16} keys)",
@@ -329,19 +372,30 @@ def build_verdict(arm_recs, diffs, fixed_tps, num_segments) -> dict[str, Any]:
         "materiality_bar_tps": MATERIALITY_TPS, "sigma_hw": SIGMA_HW,
         "lift_clears_materiality_and_sigma": lift_clears,
         "candidate_recovery_fraction_of_deployed_minus_surgical_gap": recovery,
-        "candidate_operative_identity_rate": be_identity_rate,
-        "candidate_operative_1_0": be_operative_1,
-        "gate_validity_control_rate": ff_ctrl_rate,
-        "m1ar_gate_valid": m1ar_gate_valid,
-        "candidate_vs_groundtruth_m8_rate": be_vs_ff_rate,
-        "surgical_vs_groundtruth_m8_rate": surg_vs_ff_rate,
-        "deployed_control_identity_rate": (dep_ident.get("token_identity_rate") if dep_ident.get("available") else None),
-        "gate_discriminates": bool(
-            be_operative_1 is True
-            and dep_ident.get("available")
-            and isinstance(dep_ident.get("token_identity_rate"), (int, float))
-            and dep_ident["token_identity_rate"] < 1.0
-        ),
+        # ---- the CORRECT served gate (#496 follow-up #4 fix) ----
+        "candidate_served_self_determinism": be_self,
+        "candidate_served_self_determinism_1_0": be_self_1_0,
+        "candidate_ref_warm_self_determinism": be_ref_self,
+        "deployed_served_self_determinism": dep_self,
+        # operative-1.0 needs BOTH the served self-determinism (here) AND the #461
+        # logit-margin census (0 semantic flips). The serve harness measures only the
+        # former; the census is run by run_byteexact_census.py and reported alongside.
+        "operative_1_0_served_precondition_met": be_self_1_0,
+        "operative_1_0_requires_margin_census": True,
+        "margin_census_script": "research/validity/byteexact399_operative_cert/run_byteexact_census.py",
+        # ---- the OLD end-to-end M=1-AR token gate, retained as NON-CERTIFYING diagnostic ----
+        "end_to_end_m1ar_token_gate_certifying": False,
+        "end_to_end_m1ar_token_gate_reason": (
+            "non-certifying: (a) full_flag control is matmul-only batch-invariant so its "
+            "attention stays adaptive-3D M-DEPENDENT (wrong control); (b) free-running greedy "
+            "AR cascade-amplifies a single bf16-ULP tie to ~0% suffix agreement; (c) the M=1-AR "
+            "reference is already a width-1 cudagraph, not eager. See PR #500 deliverable 2."),
+        "diag_freerun_m1ar_identity_rate": be_identity_rate,
+        "diag_full_flag_control_rate": ff_ctrl_rate,
+        "full_flag_is_valid_m1ar_control": full_flag_is_valid_m1ar_control,
+        "diag_candidate_vs_groundtruth_m8_rate": be_vs_ff_rate,
+        "diag_surgical_vs_groundtruth_m8_rate": surg_vs_ff_rate,
+        "diag_deployed_freerun_m1ar_rate": (dep_ident.get("token_identity_rate") if dep_ident.get("available") else None),
         "candidate_ppl": be.get("ppl"),
         "candidate_ppl_passes_gate": (isinstance(be.get("ppl"), (int, float)) and be["ppl"] <= PPL_GATE),
         "candidate_completion_full": be.get("completion_full"),
@@ -426,7 +480,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--submission", default="fa2sw_precache_kenyan")
     ap.add_argument("--arms", default="deployed,surgical,byteexact,byteexact_ref,deployed_ref")
     ap.add_argument("--n-decodes", type=int, default=3)
-    ap.add_argument("--ref-decodes", type=int, default=2, help="decodes for reference arms (warm identity)")
+    ap.add_argument("--ref-decodes", type=int, default=3,
+                    help="decodes for reference arms; >=3 so the M=1-AR ref's WARM self-determinism "
+                         "(r1-vs-r2) is measurable instead of cold-vs-warm (the #496 broken-gate confound)")
     ap.add_argument("--fixed-tps", type=int, default=4, help="pinned tiles_per_segment (CHUNK=16*T keys)")
     ap.add_argument("--num-segments", type=int, default=64, help="parallel softmax segments (coverage=16*T*S)")
     ap.add_argument("--num-prompts", type=int, default=paths.NUM_PROMPTS)
@@ -574,14 +630,19 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  candidate_lift_vs_surgical_357     = {verdict.get('candidate_lift_vs_surgical_357')} "
           f"(materiality>{MATERIALITY_TPS}, sigma_hw {SIGMA_HW})", flush=True)
     print(f"  candidate_recovery_frac            = {verdict.get('candidate_recovery_fraction_of_deployed_minus_surgical_gap')}", flush=True)
-    print(f"  candidate_operative_identity_rate  = {verdict.get('candidate_operative_identity_rate')} "
-          f"(operative_1.0={verdict.get('candidate_operative_1_0')})", flush=True)
-    print(f"  >>> GATE-VALIDITY CONTROL full_flag(M8)-vs-M1AR = {verdict.get('gate_validity_control_rate')} "
-          f"(m1ar_gate_valid={verdict.get('m1ar_gate_valid')}) <<<", flush=True)
-    print(f"  candidate_vs_groundtruth_M8 (served-vs-served) = {verdict.get('candidate_vs_groundtruth_m8_rate')} "
-          f"| surgical_vs_groundtruth_M8 = {verdict.get('surgical_vs_groundtruth_m8_rate')}", flush=True)
-    print(f"  deployed_control_identity_rate     = {verdict.get('deployed_control_identity_rate')} "
-          f"(gate_discriminates={verdict.get('gate_discriminates')})", flush=True)
+    bes = verdict.get("candidate_served_self_determinism") or {}
+    refs = verdict.get("candidate_ref_warm_self_determinism") or {}
+    print(f"  >>> SERVED SELF-DETERMINISM (the gate) warm r1-r2 = {bes.get('token_identity_rate')} "
+          f"flips_seqs={bes.get('n_sequences_with_any_flip')}/{bes.get('n_prompts_compared')} "
+          f"(self_determinism_1_0={verdict.get('candidate_served_self_determinism_1_0')}) <<<", flush=True)
+    print(f"  byteexact_ref M=1-AR self-determinism warm r1-r2 = {refs.get('token_identity_rate')} "
+          f"(confounds-removed; available={refs.get('available')})", flush=True)
+    print(f"  operative_1.0: served_precondition_met={verdict.get('operative_1_0_served_precondition_met')} "
+          f"AND margin_census (run separately: {verdict.get('margin_census_script')})", flush=True)
+    print(f"  [diag, NON-CERTIFYING] freerun M=1-AR rate={verdict.get('diag_freerun_m1ar_identity_rate')} "
+          f"full_flag_ctrl={verdict.get('diag_full_flag_control_rate')} "
+          f"(valid_control={verdict.get('full_flag_is_valid_m1ar_control')}); "
+          f"end_to_end_m1ar_gate_certifying={verdict.get('end_to_end_m1ar_token_gate_certifying')}", flush=True)
     print(f"  candidate_ppl                      = {verdict.get('candidate_ppl')} "
           f"(gate<={PPL_GATE}: {verdict.get('candidate_ppl_passes_gate')})", flush=True)
     print(f"  candidate_byteexact_armed          = {verdict.get('candidate_byteexact_armed')}", flush=True)

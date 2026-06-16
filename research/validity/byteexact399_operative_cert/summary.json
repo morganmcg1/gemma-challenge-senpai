@@ -1,0 +1,103 @@
+{
+  "pr": 500,
+  "title": "Package + serve-certify the 399.75 byte-exact split-KV as a draw-ready candidate",
+  "generated_by": "lawine",
+  "generated_utc": "2026-06-16T17:20:00+00:00",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "submission_staged_path": "submissions/fa2sw_strict_byteexact_splitkv399/",
+  "wandb_group": "byteexact-splitkv399-package",
+  "git_commit": "1f9892a9eb23b760fa3a4d4e8ccb1471dfc44ed7",
+  "git_branch": "lawine/package-certify-byteexact-399",
+
+  "tps": 444.82227295018606,
+  "ppl": 2.3766643358900286,
+  "completed": 128,
+  "run_prefix": "LOCAL analysis_only (no HF job / no run_request.json); evidence dir research/speed/byteexact_attn/serve_run + research/validity/byteexact399_operative_cert/flip_census",
+  "failure_logs": "none (0 fatal tracebacks across all arms; 2 benign usage-string tracebacks per arm, standard)",
+
+  "public_evidence_used": {
+    "byteexact_kernel_399_75": "#496 wandb 42qroec1 (fixed-order split-KV, 399.75 local TPS, PPL 2.3767, 0/8 kernel flips)",
+    "surgical_357_rung": "#488 wandb ko01dcyy / stark #494 package (357.6 byte-exact e2e, PPL 2.3767, 1 ULP flip 0 semantic)",
+    "deployed_reference": "#52 wandb 2x9fm2zx (481.53 public / 460.85 private, PPL 2.3772, identity 0.9966)"
+  },
+
+  "deliverable_1_package": {
+    "status": "complete",
+    "path": "submissions/fa2sw_strict_byteexact_splitkv399/",
+    "model_id": "google/gemma-4-E4B-it",
+    "speculative_config_kept": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7}",
+    "lever_env": {"BYTEEXACT_FIXED_TPS": "4", "BYTEEXACT_NUM_SEGMENTS": "64"},
+    "arming": "sitecustomize.py env-gated import byteexact_splitkv_patch -> if ENABLED(_FIXED_TPS>0): _arm() (meta-path finder pre-vLLM, immediate re-jit post-vLLM); STOCK-wheel, no installed-file edit",
+    "byte_faithful_to": "fa2sw_precache_kenyan (only the byteexact lever + patch file differ; VLLM_BATCH_INVARIANT NOT set -> fast Marlin matmul kept)"
+  },
+
+  "deliverable_2_harness_fix": {
+    "status": "complete",
+    "advisor_proposed_fix": "drive M=1-AR reference through cudagraph not eager",
+    "advisor_fix_is_noop": true,
+    "advisor_fix_noop_reason": "serve.py disable_speculation_for_reference_mode() only clears SPECULATIVE_CONFIG; there is no enforce_eager anywhere -> the M=1-AR ref ALREADY captures+replays a width-1 cudagraph, not eager. Confirmed by static read of serve.py + both server.logs.",
+    "full_flag_is_valid_control": false,
+    "full_flag_invalid_reason": "VLLM_BATCH_INVARIANT=1 patches ONLY the matmul family (mm/addmm/matmul/linear/bmm/_log_softmax) + NCCL/cuBLAS/TF32 env; it NEVER touches the attention kernel. So full_flag's Gemma global full-attn stays the stock ADAPTIVE 3D split-KV = M-DEPENDENT on the very axis under test -> it is structurally incapable of reading ~1.0. Wrong control.",
+    "actual_fix": "bump --ref-decodes 2->3 so the M=1-AR reference's WARM (r1-r2) self-determinism is measurable; the 2-round default only ever measured cold(r0)-vs-warm(r1), conflating cudagraph-capture/cache warmup with non-determinism.",
+    "validated_on_byte_exact_by_construction_arms": {
+      "byteexact_warm_r1_r2_identity": 1.0,
+      "byteexact_ref_warm_r1_r2_identity": 1.0,
+      "byteexact_ref_cold_r0_r1_identity": 0.62117,
+      "interpretation": "both the served candidate AND its M=1-AR reference read warm r1-r2 = 1.000000 (0/128 flipped seqs) once >=3 rounds exist. The cold r0-r1 = 0.621 is exactly the confound the 2-round harness mislabeled as ref non-determinism."
+    },
+    "free_running_greedy_gate_is_non_certifying": true,
+    "free_running_greedy_reason": "one bf16-ULP tie at the argmax flips greedy and the whole suffix cascades to ~0%; end-to-end rate (e.g. 0.3977 in the 128x512 run) ~ first-flip-position/length = warmup/session noise, does not rank by M-invariance."
+  },
+
+  "deliverable_3_operative_cert": {
+    "status": "complete_reported_honestly",
+    "part_1_served_self_determinism_warm_r1_r2": {
+      "byteexact": 1.0,
+      "byteexact_ref": 1.0,
+      "verdict": "PASS (served operative gate = 1.0)"
+    },
+    "part_2_margin_census_461_locus": {
+      "methodology": "#461 logit-margin locus: teacher-forced M=8 prompt_logprobs verify vs M=1 AR (NO greedy cascade), 127 prompts x ctx 224 x M=8 verify; same methodology surgical-357 was certified on",
+      "near_tie_threshold_nat": 0.5,
+      "arms": {
+        "deployed_adaptive_3D": {"identity": 0.9966254, "n_flips": 3, "n_ulp_near_tie": 3, "n_semantic": 0, "max_margin_nat": 0.125},
+        "byteexact_fixed_3D": {"identity": 0.9943757, "n_flips": 5, "n_ulp_near_tie": 5, "n_semantic": 0, "max_margin_nat": 0.25, "all_residual_bf16_ulp_near_ties": true},
+        "surgical_attn_only_2D": {"identity": 0.9988751, "n_flips": 1, "n_ulp_near_tie": 1, "n_semantic": 0, "max_margin_nat": 0.125}
+      },
+      "byteexact_vs_surgical_standard": "byteexact has 0 SEMANTIC flips (quality-safe; meets that bar) but 5 ULP near-tie flips vs surgical-357's 1; it does NOT match surgical's census tightness.",
+      "byteexact_closes_deployed": false,
+      "flip_overlap": "byteexact closes deployed's 1 ATTENTION-induced flip (mmlu_pro-00996c6808) but its different 3D attention output lands on 3 NEW matmul knife-edge ties (all gpqa_diamond); keeps deployed's 2 matmul-induced flips."
+    },
+    "attention_byte_exactness_reconciliation_with_496": {
+      "microbench": "raw attention-output bytes (torch.equal int16), M=8 verify row-i vs M=1 AR same abs position, synthetic Gemma global-attn shape",
+      "fixed_scheme_at_census_positions": {"base224_census_chunk": "0/8", "base250_straddle256": "0/8", "base192_seg3_start": "0/8", "base100_control": "0/8", "max_abs_err": 0.0},
+      "adaptive_scheme_at_census_positions": {"base224_census_chunk": "0/8", "base250_straddle256": "6/8", "base192_seg3_start": "0/8", "base100_control": "0/8"},
+      "conclusion": "#496 is CONFIRMED, not refuted: the byteexact attention kernel is byte-exact (0/8, exact-zero error) at the census positions INCLUDING the partial-last-segment region the census exercises. The 5 census TOKEN flips are therefore NOT attention-induced -> they come from the un-taxed fast Marlin matmul (M-dependent; byteexact deliberately keeps it for speed, exactly as surgical's attn_only does). Proven by the chain: (1) microbench attention byte-exact 0/8; (2) attn_only (M-inv 2D attn + un-taxed matmul) still has 1 flip -> matmul contributes; (3) byteexact (byte-exact 3D attn + un-taxed matmul) has 5 -> flip count is set by how byteexact's particular 3D attention output lands on the M-dependent matmul's knife-edges."
+    },
+    "verdict": "Attention byte-exactness PASS (#496 reproduced) + served self-determinism PASS (r1-r2=1.0) + 0 semantic flips (quality-safe). BUT end-to-end census is LOOSER than surgical-357 (5 ULP near-ties vs 1), because byteexact keeps the un-taxed Marlin matmul (the +42 TPS lever). To match surgical's 1-flip census tightness byteexact would ALSO need the ~48% matmul tax, defeating the purpose. Honest call: faster (+42 TPS) byte-exact-ATTENTION candidate, served-deterministic and quality-safe, but NOT census-tight to surgical's strict standard."
+  },
+
+  "deliverable_4_fire_time_recert": {
+    "status": "complete",
+    "fire_time_128x512": {"median_warm_tps": 444.82227295018606, "ppl": 2.3766643358900286, "completed": "128/128", "peak_gpu_mem_mib": 19535, "wandb": "m76qbs3l"},
+    "matched_32x256_recert_vs_496_proxy": {"median_warm_tps": 399.97443199055806, "target_399_75_band": "[394.886, 404.614]", "sigma_hw": 4.864, "delta_sigma_from_399_75": 0.046, "in_band": true, "completed": "32/32", "wandb": "feof8wtk"},
+    "ppl_gate": {"cap": 2.42, "measured": 2.3766643358900286, "passes": true},
+    "serve_log_signatures": {
+      "byteexact_armed_line": "[byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
+      "splitkv_armed": true, "splitkv_redirects": 5, "onegraph_captured": true, "batch_invariant_mentions": 0, "fatal_traceback": false
+    }
+  },
+
+  "pristine_restore_verified": {
+    "repo_venv_triton_unified_attention": "adaptive cdiv_fn intact (lines 302, 681); no baked 'tiles_per_segment = 4'",
+    "serve_venv_triton_unified_attention": "adaptive cdiv_fn intact (lines 302, 681); no baked literal",
+    "serve_venv_backend_NUM_PAR_SOFTMAX_SEGMENTS": 16,
+    "note": "the package re-jits in-memory only (inspect+exec); it never edits installed-wheel files, so 0 markers by construction"
+  },
+
+  "wandb_run_ids": ["m76qbs3l", "feof8wtk", "rvl5w50z"]
+}

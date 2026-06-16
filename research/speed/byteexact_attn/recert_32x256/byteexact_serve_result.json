@@ -1,0 +1,163 @@
+{
+  "pr": 496,
+  "generated_utc": "2026-06-16T16:59:06.343078+00:00",
+  "submission": "fa2sw_strict_byteexact_splitkv399",
+  "candidate": {
+    "fixed_tps": 4,
+    "num_segments": 64,
+    "chunk_keys": 64,
+    "coverage_keys": 4096
+  },
+  "workload": {
+    "num_prompts": 32,
+    "output_len": 256,
+    "seed": 1,
+    "n_decodes": 3
+  },
+  "elapsed_s": 172.9560649394989,
+  "git": {
+    "git_commit": "1f9892a9eb23b760fa3a4d4e8ccb1471dfc44ed7",
+    "git_branch": "lawine/package-certify-byteexact-399",
+    "git_dirty": true
+  },
+  "arms": {
+    "byteexact": {
+      "arm": "byteexact",
+      "label": "(c) byteexact fixed split-KV T=4 seg=64  <-- TEST",
+      "kind": "speed",
+      "extra_env": {
+        "BYTEEXACT_FIXED_TPS": "4",
+        "BYTEEXACT_NUM_SEGMENTS": "64"
+      },
+      "median_wall_tps": 399.97443199055806,
+      "wall_tps_values": [
+        389.6523511128277,
+        399.9831480554833,
+        399.96571592563276
+      ],
+      "warm_wall_tps_values": [
+        399.9831480554833,
+        399.96571592563276
+      ],
+      "wall_tps_n": 2,
+      "wall_tps_std": 0.012326377227836555,
+      "server_ready_s": 85.01882934570312,
+      "peak_gpu_mem_mib": 19535,
+      "ppl": null,
+      "ppl_num_records": null,
+      "num_completed_prompts": 32,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 5,
+        "graph_capture_lines": 5,
+        "onegraph_captured": true,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 0,
+        "byteexact_armed": true,
+        "byteexact_log": "(EngineCore pid=1221018) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
+        "ref_mode_cleared_spec": false
+      },
+      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/recert_32x256/byteexact/decode_round02.jsonl",
+      "decode_outs": [
+        "/workspace/senpai/target/research/speed/byteexact_attn/recert_32x256/byteexact/decode_round00.jsonl",
+        "/workspace/senpai/target/research/speed/byteexact_attn/recert_32x256/byteexact/decode_round01.jsonl",
+        "/workspace/senpai/target/research/speed/byteexact_attn/recert_32x256/byteexact/decode_round02.jsonl"
+      ],
+      "decodes": [
+        {
+          "arm": "byteexact",
+          "round": 0,
+          "wall_tps": 389.6523511128277,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 21.023869037628174,
+          "wall_around_decode_s": 29.259365797042847,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        },
+        {
+          "arm": "byteexact",
+          "round": 1,
+          "wall_tps": 399.9831480554833,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 20.480862855911255,
+          "wall_around_decode_s": 28.65791082382202,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        },
+        {
+          "arm": "byteexact",
+          "round": 2,
+          "wall_tps": 399.96571592563276,
+          "num_completion_tokens": 8192,
+          "decode_duration_s": 20.48175549507141,
+          "wall_around_decode_s": 28.657899379730225,
+          "num_completed_prompts": 32,
+          "expected_tokens": 8192
+        }
+      ]
+    }
+  },
+  "identity_diffs": {},
+  "verdict": {
+    "candidate_scheme": "fixed-order split-KV (tiles_per_segment=4, num_par_softmax_segments=64, CHUNK=64 keys)",
+    "candidate_realized_tps": 399.97443199055806,
+    "candidate_realized_tps_basis": "full-serve median warm wall_tps (num_completion_tokens / decode duration_s)",
+    "surgical_ceiling_tps": null,
+    "deployed_ref_tps": null,
+    "candidate_lift_vs_surgical_357": null,
+    "materiality_bar_tps": 2.0,
+    "sigma_hw": 4.864,
+    "lift_clears_materiality_and_sigma": false,
+    "candidate_recovery_fraction_of_deployed_minus_surgical_gap": null,
+    "candidate_served_self_determinism": {
+      "label": "byteexact served self-determinism (warm r1-r2; THE served gate)",
+      "available": true,
+      "n_prompts_compared": 32,
+      "n_tokens_compared": 8192,
+      "n_tokens_matched": 8192,
+      "token_identity_rate": 1.0,
+      "n_sequences_with_any_flip": 0,
+      "first_divergences": [],
+      "rounds_compared": [
+        "decode_round01.jsonl",
+        "decode_round02.jsonl"
+      ],
+      "self_determinism_1_0": true
+    },
+    "candidate_served_self_determinism_1_0": true,
+    "candidate_ref_warm_self_determinism": {
+      "label": "byteexact_ref M=1-AR self-determinism (warm r1-r2; confounds-removed)",
+      "available": false,
+      "reason": "arm missing"
+    },
+    "deployed_served_self_determinism": {
+      "label": "deployed served self-determinism (warm r1-r2)",
+      "available": false,
+      "reason": "arm missing"
+    },
+    "operative_1_0_served_precondition_met": true,
+    "operative_1_0_requires_margin_census": true,
+    "margin_census_script": "research/validity/byteexact399_operative_cert/run_byteexact_census.py",
+    "end_to_end_m1ar_token_gate_certifying": false,
+    "end_to_end_m1ar_token_gate_reason": "non-certifying: (a) full_flag control is matmul-only batch-invariant so its attention stays adaptive-3D M-DEPENDENT (wrong control); (b) free-running greedy AR cascade-amplifies a single bf16-ULP tie to ~0% suffix agreement; (c) the M=1-AR reference is already a width-1 cudagraph, not eager. See PR #500 deliverable 2.",
+    "diag_freerun_m1ar_identity_rate": null,
+    "diag_full_flag_control_rate": null,
+    "full_flag_is_valid_m1ar_control": false,
+    "diag_candidate_vs_groundtruth_m8_rate": null,
+    "diag_surgical_vs_groundtruth_m8_rate": null,
+    "diag_deployed_freerun_m1ar_rate": null,
+    "candidate_ppl": null,
+    "candidate_ppl_passes_gate": false,
+    "candidate_completion_full": true,
+    "candidate_byteexact_armed": true,
+    "candidate_graph_capture_ok": true,
+    "fast_strict_ceiling_lifted": false,
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true
+  },
+  "wandb_run_id": "feof8wtk"
+}
