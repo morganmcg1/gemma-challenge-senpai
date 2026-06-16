@@ -2,6 +2,27 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-16 09:39 — PR #477: Multi-stream verify-attention overlap reopens a byte-exact path past 457.5 (MERGED, banked)
+- `lawine/multistream-overlap-probe` — W&B [`w41knrqd`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/w41knrqd) (FINISHED, self-test pass, every claimed metric matches the logged summary to ≥4 sig figs, 0-TPS guards present)
+- **Hypothesis:** stark #472 proved 457.55 is the hard *single-stream* ceiling (the +401.9 µs/cycle strict verify-attention tax can't hide inside one ONEGRAPH). But is that tax bus-competing with the body GEMM, or complementary-resource? If the strict verify-attention is SM/latency-bound rather than DRAM-BW-bound, a 2nd concurrent CUDA stream could hide it under the (DRAM-BW-bound, ~86%-SM-idle) body GEMM.
+- **Result:**
+
+  | metric | value |
+  |---|---|
+  | strict verify-attention BW | **35 GB/s = 6.7% of peak** → SM/latency-bound, NOT DRAM-BW-bound |
+  | `multistream_hideable_us` | 287.29 (71% of the +401.9 µs/cycle tax @ L=640) |
+  | `overlap_fraction_strict` | 0.6449 (a 2nd stream hides **64%** of the strict tax) |
+  | `multistream_strict_tps_ceiling` | **474.44** (+16.89 over 457.55; clears σ_hw 4.864 by 3.5×; clears the refuted 467.14 composed ceiling) |
+  | KV sweep | 480.79 @ L128 / 477.58 @ L384 / 474.44 @ L640 |
+  | `strict_identity_fraction` / `strict_token_flips` | **1.0000 / 0** (byte-exact — only *where/when* reductions run changes, not their order) |
+  | symmetric GEMM‖GEMM control | 1.14× (bus-serialized) — the methodological smoking gun that the 64% overlap is real complementary-resource concurrency, not a clock illusion |
+  | `reaches_deployed_481` | False |
+  | ppl | 2.3772 (carried) |
+- **Conclusion / what it reopens:** stark #472 had closed the >467 byte-exact path for *single-stream*; #477 found the escape — the strict tax is hideable because it doesn't compete for the bus the body GEMM is starved on. The byte-exact frontier picture has a live entry above 467 again.
+- **★ TWO LOAD-BEARING CAVEATS (do NOT drop):** (1) **474 is a resource-feasibility CEILING, not a realized number** — it does NOT model the per-layer data dependency (attn(L) → o_proj(L)); a faithful served schedule must software-pipeline attn(L) under *subsequent* layers' GEMMs, and the realizable fraction is dependency-bounded, not just resource-slack-bounded. (2) It is a **gated served-file change** (two-stream graph + cross-stream event barriers, Directive #3) and still **< deployed 481.53**.
+- **Why this does NOT change the #474 GO:** #474 ships the **single-stream** config (457.55 floor / 461.80 center, config-reachable, no served change), unchanged. Multi-stream ~474 is a separate, gated, not-yet-realized future track that stays below deployed 481.53.
+- **Reseat:** lawine → **PR #482** (`lawine/dependency-bounded-overlap`) — capture a per-layer `[GEMM(L) ‖ attn(L−1)]` software-pipelined graph and measure the *realizable* (dependency-bounded) overlap fraction vs this 474 resource-ceiling. That single number decides whether multi-stream is a genuine byte-exact path above 467 (→ worth a gated served-scoping conversation with the human) or whether the layer dependency collapses it back toward 457.55. Measurement-only. Relayed to fern #357 to hold the capstone byte-exact frontier section open until #482 resolves where in [457.55, 474.44] the realizable number sits.
+
 ## 2026-06-16 09:23 — PR #475: KV-weighted strict TPS — the honest official-draw center is 461.80 (MERGED, banked)
 - `stark/kv-weighted-strict-tps` — W&B [`qkcev1pt`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/qkcev1pt) (FINISHED, 12/12 self-test, served-prompt lengths bit-match the real server capture 128/128)
 - **Hypothesis:** the L=640 worst-case headline (457.55, stark #472) is pessimistic; token-weight the per-L strict tax over the *real* served KV trajectory to get the honest expected `summary.json:tps`.
