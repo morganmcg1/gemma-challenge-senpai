@@ -1,0 +1,264 @@
+{
+  "agent": "land",
+  "created_at": "20260616T060703Z",
+  "kind": "relax-decision-cost-ledger",
+  "nan_clean": true,
+  "peak_mem_mib": 12.168,
+  "pr": 458,
+  "synthesis": {
+    "banked_roundtrip": {
+      "all_roundtrip_ok": true,
+      "ceiling_self_test_passed": true,
+      "deployed_flips_str_banked": "3/882",
+      "max_roundtrip_resid": 0.0,
+      "roundtrip_resid": {
+        "deployed_flips_resid": 0,
+        "deployed_identity_resid": 0.0,
+        "deployed_ppl_xcheck_resid": 0.0,
+        "deployed_tps_resid": 0.0,
+        "deployed_tps_xcheck_resid": 0.0,
+        "ppl_anchor_resid": 0.0,
+        "ppl_cap_xcheck_resid": 0.0,
+        "ppl_gate_resid": 0.0,
+        "relax_ceiling_gain_resid": 0.0,
+        "relax_realistic_gain_resid": 0.0,
+        "relax_realistic_tps_resid": 0.0,
+        "sigma_hw_resid": 0.0,
+        "spec_ub_resid": 0.0,
+        "strict_tps_resid": 0.0,
+        "unified_ceiling_resid": 0.0
+      }
+    },
+    "constants": {
+      "deployed_flips": 3,
+      "deployed_flips_str": "3/882",
+      "deployed_identity": 0.9966,
+      "deployed_tokens": 882,
+      "deployed_tps": 481.53,
+      "ppl_anchor": 2.3772,
+      "ppl_gate": 2.42,
+      "relax_ceiling_tps_gain": 29.342423044997304,
+      "relax_identity_ub": 0.9966,
+      "relax_realistic_tps": 498.57990782684584,
+      "relax_realistic_tps_gain": 17.049907826845867,
+      "sigma_hw": 4.8153,
+      "spec_ub_tps": 520.9527323111674,
+      "strict_flips": 0,
+      "strict_frontier_tps": 467.14,
+      "strict_identity": 1.0,
+      "unified_ceiling_tps": 510.8724230449973
+    },
+    "decision_rule": {
+      "clauses": [
+        {
+          "clause": "tps_gain_over_deployed_ge_threshold",
+          "note": "TPS-gain side re-cited from #457 (not re-derived): realistic +17.05, ceiling +29.34 over the deployed 481.53. Whether that clears the bar is the human's threshold to set",
+          "relax_ceiling_tps_gain_over_deployed": 29.342423044997304,
+          "relax_realistic_tps_gain_over_deployed": 17.049907826845867,
+          "status": "QUANTIFIED",
+          "threshold": "HUMAN-SET (not yet specified \u2014 the human's call)"
+        },
+        {
+          "available_budget_from_deployed_anchor": 0.04279999999999973,
+          "clause": "measured_ppl_le_gate",
+          "gate": 2.42,
+          "note": "relax PPL is UNMEASURED (stark #452 quality run). Available budget 0.0428 from the deployed anchor; admissible only if the measured relax PPL <= 2.42",
+          "relax_ppl_measured": null,
+          "status": "PENDING"
+        },
+        {
+          "clause": "same_kind_of_break_as_deployed",
+          "deployed_break_kind": "M=8 reduction-order near-tie flips (#405 j6h228xy)",
+          "note": "the relax-prize break is FP accumulation-order reassociation \u2014 the SAME family as the deployed reduction-order near-tie flips, NOT a new failure mode. Provisional pending stark #452's flip characterization (confirm the relax flips are accumulation-order near-ties, not a distinct quality-destroying mode)",
+          "relax_break_kind": "FP-reassociating split-K re-tiling (accumulation-order)",
+          "status": "PROVISIONAL_SAME_KIND"
+        }
+      ],
+      "clauses_resolved": 1,
+      "clauses_total": 3,
+      "fern_357_rule_verbatim": "relax is justified iff (TPS gain over deployed >= human-set threshold) AND (measured PPL <= 2.42) AND (the break is the SAME KIND already deployed \u2014 accumulation-order flips, not a new failure mode)",
+      "overall_status": "GRADED_DECISION_PENDING",
+      "relax_ceiling_tps_gain_over_deployed": 29.342423044997304,
+      "relax_realistic_tps_gain_over_deployed": 17.049907826845867,
+      "status_quo_anchor": {
+        "flips": 3,
+        "framing": "the deployed 3-flip / identity-0.9966 point is the status-quo the human IMPLICITLY ALREADY ACCEPTED when PR #52 was deployed. The relax decision is therefore GRADED \u2014 '3 flips -> N flips for +17..29 TPS, does quality survive?' \u2014 NOT the binary 'pristine-strict vs dirty-relax' the packet first framed",
+        "identity": 0.9966,
+        "point": "deployed_noneq",
+        "tps": 481.53
+      },
+      "summary": "fern #357 rule: relax justified iff (TPS gain >= human threshold) AND (measured PPL <= 2.42) AND (same-kind break). TODAY: clause-1 QUANTIFIED (+17.05 realistic / +29.34 ceiling over deployed); clause-2 PENDING (relax PPL unmeasured, stark #452); clause-3 PROVISIONAL same-kind (accumulation-order flips). Decision is graded off the deployed 3-flip status quo, not binary"
+    },
+    "handoff_line": "COST AXIS: strict 467.14 (id 1.0/0 flips/SAFE) -> deployed 481.53 (id 0.9966/3 flips/UNSAFE, PPL 2.3772, margin 0.0428) -> relax 498.58 (id/flips/PPL UNMEASURED slot, UNSAFE) -> ceiling 510.87+/-4.82. DECISION (fern #357): relax justified iff gain (+17.0..+29.3) >= human threshold AND measured PPL <= 2.42 AND same-kind break. GRADED off the deployed 3-flip status quo, not binary",
+    "headline": {
+      "analysis_only": true,
+      "axis_monotone_in_tps": true,
+      "cost_ledger_self_test_passes": true,
+      "deployed_flips": 3,
+      "deployed_identity": 0.9966,
+      "deployed_off_strict_frontier": true,
+      "deployed_ppl_gate_margin": 0.04279999999999973,
+      "flip_and_ppl_costs_kept_orthogonal": true,
+      "identity_monotone_degrading": true,
+      "no_served_file_change": true,
+      "official_tps": 0,
+      "ppl": 2.3772,
+      "relax_ceiling_tps_gain_over_deployed": 29.342423044997304,
+      "relax_realistic_flips": null,
+      "relax_realistic_identity": null,
+      "relax_realistic_ppl": null,
+      "relax_realistic_tps_gain_over_deployed": 17.049907826845867,
+      "strict_flips": 0,
+      "strict_identity": 1.0
+    },
+    "imports": {
+      "machinery": "round-trip of committed #457 / directive4 result JSONs; re-derives nothing",
+      "provenance": "land#457 h0uggl9i (unified ceiling 510.87 +/- 4.82, spec-UB 520.95, deployed 481.53, strict 467.14, relax-realistic 498.58, sigma_hw 4.8153, ppl_anchor 2.3772, ppl_gate 2.42, relax TPS-gains +17.05/+29.34) x directive4_correct_bar shared_baselines (deployed_served_identity 0.9966, deployed_served_flips 3/882, deployed_ppl 2.3772, ppl_cap 2.42 \u2014 PR #52 2x9fm2zx). Strict identity 1.0 / 0 flips PR-given (denken #423 5a6zq2yz). relax identity/flips/PPL are stark #452 PARAMETERIZED SLOTS. All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "ppl_ledger": {
+      "available_ppl_budget_from_deployed_anchor": 0.04279999999999973,
+      "deployed_ppl": 2.3772,
+      "deployed_ppl_gate_margin": 0.04279999999999973,
+      "flip_and_ppl_costs_kept_orthogonal": true,
+      "ledger": [
+        {
+          "point": "strict_frontier",
+          "ppl_gate_admissible": true,
+          "ppl_gate_margin": null,
+          "ppl_gate_margin_note": ">= 0.0428 \u2014 identity 1.0 => byte-exact greedy reference stream => PPL is the reference quality the gate (reference + 5%) is defined against; admissible by construction. Not separately measured this cycle",
+          "ppl_measured": null,
+          "ppl_status": "reference_by_construction"
+        },
+        {
+          "point": "deployed_noneq",
+          "ppl_gate_admissible": true,
+          "ppl_gate_margin": 0.04279999999999973,
+          "ppl_gate_margin_note": "measured 2.3772 <= gate 2.42 => margin 0.0428",
+          "ppl_measured": 2.3772,
+          "ppl_status": "measured"
+        },
+        {
+          "available_ppl_budget_from_deployed_anchor": 0.04279999999999973,
+          "point": "relax_realistic",
+          "ppl_gate_admissible": "unknown_pending_measurement",
+          "ppl_gate_margin": null,
+          "ppl_gate_margin_note": "UNMEASURED \u2014 stark #452 quality run to fill. Available PPL budget from the deployed anchor = 0.0428 (2.42 - 2.3772). PPL-admissible IFF measured PPL <= 2.42. Flip-count tells you NOTHING about this \u2014 flips can be PPL-neutral (near-ties) OR PPL-breaching",
+          "ppl_measured": null,
+          "ppl_status": "unmeasured_slot"
+        }
+      ],
+      "orthogonality_note": "flip-COUNT and PPL are DIFFERENT, ORTHOGONAL costs. A flip is a token-ID divergence from the greedy reference (an identity/equivalence cost); PPL is a quality cost. Flips can be PPL-NEUTRAL (reduction-order near-ties, like the deployed 3) or PPL-BREACHING (genuine quality loss). You CANNOT infer PPL-admissibility from the flip count \u2014 that conflation is the trap that sank four modeled-in-isolation levers. The ledger keeps the two in separate columns and never derives one from the other",
+      "ppl_gate": 2.42,
+      "summary": "gate PPL <= 2.42; deployed PPL 2.3772 => margin 0.0428. strict = reference-quality (admissible by construction). relax PPL UNMEASURED \u2014 admissible only if a quality run (stark #452) reads <= 2.42"
+    },
+    "self_test": {
+      "conditions": {
+        "a_all_banked_numbers_roundtrip": true,
+        "b_axis_monotone_in_tps": true,
+        "c_identity_monotone_degrading": true,
+        "d_deployed_off_strict_frontier_0p9966_lt_1": true,
+        "e_deployed_ppl_gate_margin_correct_0p0428": true,
+        "f_relax_slots_marked_unmeasured": true,
+        "g_tps_gains_recited_from_457": true,
+        "h_ppl_anchor_preserved_within_gate": true,
+        "i_flip_and_ppl_costs_orthogonal": true,
+        "j_nan_clean": true
+      },
+      "cost_ledger_self_test_passes": true,
+      "detail": {
+        "deployed_ppl_gate_margin": 0.04279999999999973,
+        "max_roundtrip_resid": 0.0,
+        "relax_ceiling_tps_gain_over_deployed": 29.342423044997304,
+        "relax_realistic_tps_gain_over_deployed": 17.049907826845867
+      }
+    },
+    "severity_axis": {
+      "axis_monotone_in_tps": true,
+      "ceiling_markers": [
+        "unified_physical_ceiling",
+        "spec_over_optimistic_ub"
+      ],
+      "deployed_off_strict_frontier": true,
+      "identity_monotone_degrading": true,
+      "operating_identity_sequence": [
+        1.0,
+        0.9966,
+        0.9966
+      ],
+      "operating_points": [
+        "strict_frontier",
+        "deployed_noneq",
+        "relax_realistic"
+      ],
+      "points": [
+        {
+          "flips": 0,
+          "greedy_safe": true,
+          "identity": 1.0,
+          "is_operating_point": true,
+          "note": "realized blanket-strict greedy-safe frontier (identity 1.0, 0 flips). PPL is the greedy-reference quality by construction (identity 1.0 => byte-exact greedy token stream); supersedes directive4's earlier 0.9989 (stark #412, 1 residual bitwise-tie flip) now that stark #429 canonicalized it",
+          "point": "strict_frontier",
+          "ppl": 2.3772,
+          "ppl_status": "reference_by_construction",
+          "source_run": "denken #423 5a6zq2yz",
+          "tps": 467.14
+        },
+        {
+          "flips": 3,
+          "greedy_safe": false,
+          "identity": 0.9966,
+          "is_operating_point": true,
+          "note": "deployed leaderboard incumbent; 3/882 M=8 reduction-order near-tie flips (#405 j6h228xy) => identity 0.9966 < 1.0. ALREADY off the strict frontier \u2014 this is the status-quo the human implicitly accepted",
+          "point": "deployed_noneq",
+          "ppl": 2.3772,
+          "ppl_status": "measured",
+          "source_run": "PR #52 2x9fm2zx",
+          "tps": 481.53
+        },
+        {
+          "flips": null,
+          "flips_slot_note": ">=3, UNMEASURED \u2014 stark #452 to fill",
+          "greedy_safe": false,
+          "identity": null,
+          "identity_slot_note": "<=0.9966, UNMEASURED \u2014 stark #452 to fill",
+          "identity_ub_for_monotone": 0.9966,
+          "is_operating_point": true,
+          "note": "realistic relax-prize (greedy-UNSAFE FP-reassociating split-K re-tiling). identity/flips/PPL are stark #452's measurement \u2014 consumed as PARAMETERIZED SLOTS here, NOT measured by this card",
+          "point": "relax_realistic",
+          "ppl": null,
+          "ppl_slot_note": "UNMEASURED \u2014 stark #452 quality run to fill",
+          "ppl_status": "unmeasured_slot",
+          "source_run": "ubel #450 c5oyb7gv",
+          "tps": 498.57990782684584
+        },
+        {
+          "flips": null,
+          "greedy_safe": null,
+          "identity": null,
+          "is_operating_point": false,
+          "note": "achieved-read-peak physical ceiling 510.87 +/- 4.82 (a supply limit, not a config)",
+          "point": "unified_physical_ceiling",
+          "ppl": null,
+          "ppl_status": "not_an_operating_point",
+          "source_run": "land #457 h0uggl9i",
+          "tps": 510.8724230449973,
+          "tps_sigma": 4.8153
+        },
+        {
+          "flips": null,
+          "greedy_safe": null,
+          "identity": null,
+          "is_operating_point": false,
+          "note": "spec-600 basis UPPER BOUND (unreachable BW); labeled UB, NOT an operating point",
+          "point": "spec_over_optimistic_ub",
+          "ppl": null,
+          "ppl_status": "not_an_operating_point",
+          "source_run": "land #436 nvsbctji (via #457)",
+          "tps": 520.9527323111674
+        }
+      ],
+      "summary": "strict 467.14 (id 1.0, 0 flips, SAFE) -> deployed 481.53 (id 0.9966, 3 flips, UNSAFE) -> relax 498.58 (id/flips UNMEASURED slot, UNSAFE) -> ceiling 510.87 +/- 4.82 -> spec-UB 520.95"
+    },
+    "verdict": "RELAX-COST-LEDGER-DEPLOYED-ALREADY-3FLIPS-id0.9966-MARGIN-0.0428-GRADED-DECISION-GAIN-+17.05..+29.34"
+  }
+}
