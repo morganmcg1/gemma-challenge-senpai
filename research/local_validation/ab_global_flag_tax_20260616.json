@@ -1,0 +1,42 @@
+{
+  "analysis_only": true,
+  "arm_a_deployed_noflag": {
+    "completed": 128,
+    "decode_duration_s": 142.43280005455017,
+    "decode_num_completion_tokens": 65536,
+    "decode_num_records": 128,
+    "dir": "research/local_validation/ab_deployed_noflag_20260616",
+    "ppl": 2.3769826736379134,
+    "tps": 460.1187365192599
+  },
+  "arm_b_strict_flag": {
+    "completed": 128,
+    "decode_duration_s": 293.03564190864563,
+    "decode_num_completion_tokens": 65536,
+    "decode_num_records": 128,
+    "dir": "research/local_validation/ab_strict_flag_20260616",
+    "ppl": 2.376899412809389,
+    "tps": 223.6451496928519
+  },
+  "both_complete_128": true,
+  "global_flag_tax_pct": 51.39,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "ppl_neutral": true,
+  "ratio_strict_over_deployed": 0.4861,
+  "reconciliation": {
+    "in_harness_strict_matches_local_deployed_noflag": true,
+    "in_harness_strict_matches_local_strict_flag": false,
+    "interpretation": "The global VLLM_BATCH_INVARIANT=1 flag costs ~51.39% locally (deployed 460.12 -> strict 223.65, ratio 0.486), reproducing PR #122's 51.78% blanket-pin cost and matching ubel #470 (234.47 official / 221.16 local). The in-harness 'strict' 457.55 (stark #472) is within 2*sigma_hw of the local DEPLOYED-no-flag 460.12, NOT the local global-flag strict 223.65 -- i.e. the 457.55 measurement does NOT carry the global-flag tax, so it was almost certainly a surgical attention-only strict change, NOT the global env flag. Firing the global-flag GO config would land the official draw near ~234 TPS (naive extrapolation), far below the ~457.5 the human approved on #474.",
+    "local_strict_in_official_band": false,
+    "naive_official_strict_extrapolation_tps": 234.05,
+    "official_band": [
+      452.73,
+      462.37
+    ],
+    "official_strict_tps_stark472": 457.55,
+    "pr122_blanket_pin_tax_pct": 51.78,
+    "ubel470_local_global_flag_tps": 221.16,
+    "ubel470_official_global_flag_tps": 234.47
+  }
+}
