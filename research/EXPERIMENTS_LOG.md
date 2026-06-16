@@ -2,6 +2,43 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-16 09:23 — PR #475: KV-weighted strict TPS — the honest official-draw center is 461.80 (MERGED, banked)
+- `stark/kv-weighted-strict-tps` — W&B [`qkcev1pt`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/qkcev1pt) (FINISHED, 12/12 self-test, served-prompt lengths bit-match the real server capture 128/128)
+- **Hypothesis:** the L=640 worst-case headline (457.55, stark #472) is pessimistic; token-weight the per-L strict tax over the *real* served KV trajectory to get the honest expected `summary.json:tps`.
+- **Result:**
+
+  | metric | value |
+  |---|---|
+  | `kv_weighted_strict_tps` | **461.80** (band [461.8, 463.6]) — token-weighted **harmonic** mean = `total_output_tokens/total_wall_clock` |
+  | `kv_trajectory_mean_L` | 527.7 (served prompts mean 272.2 / median 229; p95 492 / p99 977 / max 2427) |
+  | tokens at KV>640 | **24.2%** of 65536 decode tokens (max KV 2938 — beyond the #472 sweep) |
+  | uplift vs 457.55 worst-case | +4.26 = 0.88× σ_hw (4.864) → `materially_above_worstcase`=**False** |
+  | clean property | harmonic mean ≈ TPS at mean-KV (461.80 ≈ 461.85 under linear tax) |
+
+- **Conclusion:** **457.55 is a defensible FLOOR, ~461.8 the honest CENTER, a single official draw plausibly lands ~[457, 467].** The +4.26 uplift is sub-σ_hw, so the worst-case was only ~4 TPS pessimistic (not 10–20). The one remaining band uncertainty is the >640 *extrapolation* (24.2% of tokens) → reseated stark to **#479** to measure the tail tax at L∈{896,1280,2048}. Directly hardens the #474 number.
+
+## 2026-06-16 09:23 — PR #476: literal-1.0 is NOT config-reachable — operative-1.0 STANDS (MERGED, banked)
+- `denken/literal-1p0-tie-close` — W&B [`p68oo5tj`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/p68oo5tj) (FINISHED, self-test pass) + cross-checks the #471 oracle [`bwyhpkd7`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/bwyhpkd7)
+- **Hypothesis:** can the lone p90 bitwise-tie flip be closed to literal 1.0 by a config/env/sampler flag (no kernel rebuild)?
+- **Result — HONESTLY REFUTED its own premise:**
+
+  | metric | value |
+  |---|---|
+  | `literal_1p0_config_reachable` | **False** |
+  | `requires_kernel_rebuild` | **True** (only the #375 varlen-combine SERVED-kernel rebuild closes it — gated) |
+  | p90 flip nature | reduction-order **VALUE** artifact on the M=8 side (`p90_m8_gap`=0.125 = one bf16 ULP; M=8 strictly ranks 102643 > 22355) |
+  | M=1 AR side | bit-tied (`p90_m1_self_gap`=0.0 → breaks to lowest-index 22355) → `m1_ar_tiebreak_is_lowest_index`=True |
+  | `p90_is_pure_tiebreak` | False (no flag re-breaks a *value* gap) |
+  | certify on VBI=1 GO config | `certify_identity_rate`=0.998875, `certify_n_flips`=1, `certify_is_strict_1p0`=False, PPL 2.3772 |
+  | `literal_config_tps_cost` | **295.85** (config-reachable literal only at the M=1 AR floor 161.70; −64.6%) |
+
+- **Conclusion:** **operative-1.0 STANDS; #474 ships unchanged.** Reconciliation with #471's `all_residual_flips_bitwise_tie=true`: #471 reads the **M=1 side** (tied → quality-neutral → operative-1.0 → ships); literal needs **BOTH** sides bit-tied and the M=8 side isn't. Both fields correct — they answer different questions. literal would cost a gated kernel rebuild OR 64.6% of the speed. The strict-win **LEVER hunt is now fully closed** → reseated denken to **#480** (private re-run 5%-Δ validity gate).
+
+## 2026-06-16 09:20 — PR #454 CLOSED: relax/reassociation strict-win door SHUT on both legs
+- `kanna/relax-reassoc-stable-bw` (closed, not merged) — banked closure for the fern #357 capstone
+- **Question:** is a *bounded* split-K `use_fp32_reduce=False` reassociation BOTH provably argmax-stable AND BW-positive ("the last open strict-win lever")?
+- **Resolved SHUT by direct measurement (no card needed):** stability **NO** — stark #452 ([`00ovtdnt`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/00ovtdnt)) measured identity **0.730** (3317/12288 greedy tokens flip); speed **NO** — lawine #463 ([`8h7pjznv`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/8h7pjznv)) is a 1-wave HBM wall, #452 realized the relax lever at **−0.94 TPS**; shippability — any reassociation = served-kernel rebuild (gated, Directive #3). The door is shut independent of the stability proof. Reseated kanna to **#478** (single official-draw risk), the higher-value live-submission de-risk.
+
 ## 2026-06-16 08:50 — ★★★ SUBMISSION GO (PENDING APPROVAL #474): honest strict-equivalent ~457.5 TPS, operative-1.0 — the realized strict frontier is on the leaderboard path
 The #407 strict-submission path resolved this cycle. denken #471 + stark #472 + lawine #467 all landed terminal + W&B-verified; the binding equivalence gate (denken #471) cleared as **operative-1.0** exactly as the human ruled at #407 08:24Z ("a few tied bitwise flips, 0.99-ish is totally fine"). **Opened approval issue [#474](https://github.com/morganmcg1/gemma-challenge-senpai/issues/474)** (the audit trail per Directive #3) and posted the GO to #407 ([issuecomment-4716675898](https://github.com/morganmcg1/gemma-challenge-senpai/issues/407#issuecomment-4716675898)). **What fires on Morgan's one-word approve:** the deployed `submissions/fa2sw_precache_kenyan` stack + `VLLM_BATCH_INVARIANT=1` (no served-source edit, no kernel rebuild), labeled **operative-1.0: served census 0.9989, 1 bitwise-tie flip @ p90, 0 semantic flips, ~457.5 TPS predicted, PPL 2.3772, 128/128** — championing `token_identity_rate=1.0` strict decoding (Directive #6 rally). **land #473 is armed** (back to wip): runs the clause-3d local e2e pre-check + the board rally/GSM8K-tag now; HARD-GATED on the advisor token `GREEN-LIGHT-FIRE-474` (which posts only after Morgan approves #474) before any `--launch`. Floor-lock `submissions/fa2sw_strict_m1ar_int4` (161.70, literal-1.0 by construction) stays the fallback (only if a semantic flip ever surfaces — none did). **NOT yet fired; official_tps still 0.** denken now attempting the literal-1.0 upgrade (close the p90 tie at the value level) in parallel — if it lands we re-label as literal byte-exact. +~296 honest TPS over the 161.70 strict floor.
 
