@@ -1,0 +1,255 @@
+{
+  "pr": 441,
+  "leg": "verify-attention M-scaling -> K_opt (denken)",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "timestamp": "2026-06-16T03:16:32.342310+00:00",
+  "self_test": {
+    "self_test_passes": true,
+    "checks": {
+      "a_survival_from_ak": true,
+      "b_et_k7_matches_289": true,
+      "c_et_monotone_increasing": true,
+      "d_et_ladder_pinned": true,
+      "e_anchor_tps7_is_46714": true,
+      "f_flat_verify_small_draft_kopt7": true,
+      "g_flat_verify_large_draft_kopt_lt7": true,
+      "h_steep_verify_kopt_le7": true,
+      "i_realized_static_k_kopt7": true,
+      "j_constants_pinned": true,
+      "k_synthetic_physics_kopt7": true,
+      "l_cb3_banked_frac_and_refine": true,
+      "m_nan_clean": true
+    }
+  },
+  "measurement": {
+    "facts": {
+      "name": "NVIDIA A10G",
+      "sm_count": 80,
+      "compute_capability": "8.6",
+      "total_mem_gib": 22.06,
+      "is_a10g_sm86": true
+    },
+    "iters": 500,
+    "warmup": 200,
+    "ctx_main": 256,
+    "attn_per_M": {
+      "1": {
+        "fa2_h256_us": 33.259521484375,
+        "triton_h512_us": 11.321344375610352,
+        "triton_h256_us": 9.187328338623047,
+        "t_attn_total_us": 1243.3326625823975,
+        "captured": true
+      },
+      "4": {
+        "fa2_h256_us": 33.41312026977539,
+        "triton_h512_us": 11.966464042663574,
+        "triton_h256_us": 9.517056465148926,
+        "t_attn_total_us": 1253.2244577407837,
+        "captured": true
+      },
+      "5": {
+        "fa2_h256_us": 33.41721725463867,
+        "triton_h512_us": 12.146688461303711,
+        "triton_h256_us": 9.576448440551758,
+        "t_attn_total_us": 1254.6294231414795,
+        "captured": true
+      },
+      "6": {
+        "fa2_h256_us": 33.41721725463867,
+        "triton_h512_us": 12.16921615600586,
+        "triton_h256_us": 9.637887954711914,
+        "t_attn_total_us": 1254.7871170043945,
+        "captured": true
+      },
+      "7": {
+        "fa2_h256_us": 33.40902328491211,
+        "triton_h512_us": 12.318719863891602,
+        "triton_h256_us": 9.670656204223633,
+        "t_attn_total_us": 1255.546854019165,
+        "captured": true
+      },
+      "8": {
+        "fa2_h256_us": 33.41926574707031,
+        "triton_h512_us": 12.896256446838379,
+        "triton_h256_us": 9.971712112426758,
+        "t_attn_total_us": 1259.9480962753296,
+        "captured": true
+      }
+    },
+    "attn_ctx_sweep_us_M8": {
+      "128": 836.4769153594971,
+      "256": 1259.9480962753296,
+      "512": 2118.4163360595703
+    },
+    "body": {
+      "1": {
+        "total_us": 16857.08825290203,
+        "per_shape": {
+          "q_full": 60.416001826524734,
+          "q_slide": 60.416001826524734,
+          "kv_full": 71.68000191450119,
+          "kv_slide": 72.7040022611618,
+          "o_full": 60.416001826524734,
+          "o_slide": 60.416001826524734,
+          "gate_up": 65.5359998345375,
+          "down": 66.56000018119812
+        },
+        "ok": true
+      },
+      "8": {
+        "total_us": 16935.9362795949,
+        "per_shape": {
+          "q_full": 58.36800113320351,
+          "q_slide": 59.39200147986412,
+          "kv_full": 71.68000191450119,
+          "kv_slide": 72.7040022611618,
+          "o_full": 60.416001826524734,
+          "o_slide": 60.416001826524734,
+          "gate_up": 66.56000018119812,
+          "down": 67.58400052785873
+        },
+        "ok": true
+      }
+    },
+    "lmhead": {
+      "1": {
+        "us": 72.7040022611618,
+        "ok": true
+      },
+      "8": {
+        "us": 74.75200295448303,
+        "ok": true
+      }
+    },
+    "body_us_interp": {
+      "1": 16857.08825290203,
+      "4": 16890.88026434183,
+      "5": 16902.144268155098,
+      "6": 16913.408271968365,
+      "7": 16924.67227578163,
+      "8": 16935.9362795949
+    },
+    "lmhead_us_interp": {
+      "1": 72.7040022611618,
+      "4": 73.58171684401376,
+      "5": 73.87428837163108,
+      "6": 74.1668598992484,
+      "7": 74.45943142686572,
+      "8": 74.75200295448303
+    },
+    "t_attn_us": {
+      "1": 1243.3326625823975,
+      "4": 1253.2244577407837,
+      "5": 1254.6294231414795,
+      "6": 1254.7871170043945,
+      "7": 1255.546854019165,
+      "8": 1259.9480962753296
+    },
+    "t_verify_us": {
+      "1": 18173.12491774559,
+      "4": 18217.68643892663,
+      "5": 18230.647979668207,
+      "6": 18242.362248872007,
+      "7": 18254.67856122766,
+      "8": 18270.63637882471
+    },
+    "t_attn_frac_of_verify": 0.0689602742975928,
+    "attn_mscaling_8_over_4": 1.0053650712711646,
+    "verify_mscaling_8_over_4": 1.002906512859116,
+    "draft_attn_us_per_pass": 38.16857719421387,
+    "peak_vram_gib": 0.46921539306640625
+  },
+  "verdict": {
+    "t_attn_frac_of_verify": 0.0689602742975928,
+    "t_attn_frac_banked_cb3": 0.10804253662228563,
+    "direct_refines_banked_down": true,
+    "attn_mscaling_8_over_4": 1.0053650712711646,
+    "verify_mscaling_8_over_4": 1.002906512859116,
+    "attn_is_m_invariant": true,
+    "null_under_5pct": false,
+    "draft_amort_us_per_pass": 20.899941951245587,
+    "draft_floor_us_per_pass": 101.2,
+    "draft_attn_us_per_pass_measured": 38.16857719421387,
+    "model_amort": {
+      "et": {
+        "3": 2.7224011713030745,
+        "4": 3.083806734992679,
+        "5": 3.3855344070278184,
+        "6": 3.6377159590043924,
+        "7": 3.851185944363104
+      },
+      "t_cycle_us": {
+        "3": 18280.386264780365,
+        "4": 18314.24774747319,
+        "5": 18346.861958628233,
+        "6": 18380.078212935136,
+        "7": 18416.93597248343
+      },
+      "tps": {
+        "3": 332.68766703127056,
+        "4": 376.1560181432093,
+        "5": 412.22600480930856,
+        "6": 442.13141790897066,
+        "7": 467.14
+      },
+      "k_opt": 7,
+      "tps_at_kopt": 467.14,
+      "tps_k7": 467.14,
+      "const": 2233931.987308572
+    },
+    "model_floor": {
+      "et": {
+        "3": 2.7224011713030745,
+        "4": 3.083806734992679,
+        "5": 3.3855344070278184,
+        "6": 3.6377159590043924,
+        "7": 3.851185944363104
+      },
+      "t_cycle_us": {
+        "3": 18521.28643892663,
+        "4": 18635.447979668206,
+        "5": 18748.362248872007,
+        "6": 18861.878561227662,
+        "7": 18979.036378824712
+      },
+      "tps": {
+        "3": 338.3823493678501,
+        "4": 380.9553193499677,
+        "5": 415.7101442880106,
+        "6": 443.98732062648907,
+        "7": 467.14
+      },
+      "k_opt": 7,
+      "tps_at_kopt": 467.14,
+      "tps_k7": 467.14,
+      "const": 2302113.4741574735
+    },
+    "realized": {
+      "tps": {
+        "3": 398.67339458997236,
+        "4": 426.83063754944516,
+        "5": 450.996547277049,
+        "6": 460.3765995359575,
+        "7": 467.14
+      },
+      "k_opt": 7,
+      "tps_at_kopt": 467.14
+    },
+    "k_opt": 7,
+    "tps_at_kopt": 467.14,
+    "k_opt_floor_bracket": 7,
+    "k_opt_realized": 7,
+    "kopt_beats_k7": false,
+    "kopt_lift_tps": 0.0,
+    "kopt_beats_deployed_481": false,
+    "realized_agrees_k7": true,
+    "models_agree": true,
+    "ppl": 2.3772,
+    "ppl_ok": true,
+    "verdict_line": "verify-attention is 6.9% of verify wall time but ~M-INVARIANT (T_attn(M=8)/T_attn(M=4)=1.005; deployed 3D split-KV + FA2 are KV-reduction/KV-load bound, not query-row bound) -> K_opt=7: VALIDATES the deployed K=7 with hard data (the M-invariant verify model behind K=7 was correct); does NOT beat the deployed 481.53 (realized frontier stays 467.14). Realized wall-clock A/B (static_k) k_opt=7."
+  },
+  "wandb_run_id": "7rb089z3"
+}
