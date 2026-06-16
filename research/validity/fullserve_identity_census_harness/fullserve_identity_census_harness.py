@@ -285,6 +285,62 @@ def _install_surgical_lever() -> dict:
     print(f"[surgical] armed={prov['surgical_attn_armed']} matmul_tax_installed={prov['matmul_tax_installed']} "
           f"vbi_env_set={prov['vbi_env_set']} source={prov['lever_source']}", flush=True)
     return prov
+# Arm attention-path patches (PR #515 land: splitkv399 candidate arm)
+# ======================================================================================
+# The census worker reproduces the SERVED byte-exact split-KV attention path for the
+# splitkv399 candidate IN-PROCESS, before vLLM is imported, by installing the submission's
+# split-KV verify monkeypatch (auto-armed from the arm's extra_env, set by _run_census_arm):
+#   * splitkv399 : SPLITKV_VERIFY=1 redirects the M=8 verify read (max_seqlen_q 8->1) to
+#                  vLLM's 3D split-KV path; the local (/tmp) vLLM wheel honors env
+#                  BYTEEXACT_FIXED_TPS=T (pins tiles_per_segment -> fixed split SIZE ->
+#                  M-invariant -> byte-exact, lawine #496) and BYTEEXACT_NUM_SEGMENTS=S.
+#                  is_batch_invariant stays False so use_3d can be True.
+# The surgical comparison arm is armed separately by _install_surgical_lever() above (the
+# shipped #510 lever); this installer is splitkv399-only so the two never double-install.
+SUBMISSION_DIR = "submissions/fa2sw_strict_surgical357"
+
+
+def _install_arm_patches(arm: str) -> dict:
+    info = {"splitkv_verify_installed": False,
+            "byteexact_fixed_tps": 0, "byteexact_num_segments": 0}
+    sub = Path(__file__).resolve().parents[3] / SUBMISSION_DIR
+    if sub.is_dir() and str(sub) not in sys.path:
+        sys.path.insert(0, str(sub))
+    if os.environ.get("SPLITKV_VERIFY") == "1":
+        try:
+            import splitkv_verify_patch  # noqa: F401  -- auto-arms from env on import
+            info["splitkv_verify_installed"] = bool(splitkv_verify_patch.install())
+            info["byteexact_fixed_tps"] = int(os.environ.get("BYTEEXACT_FIXED_TPS", "0") or 0)
+            info["byteexact_num_segments"] = int(os.environ.get("BYTEEXACT_NUM_SEGMENTS", "0") or 0)
+        except Exception as exc:  # noqa: BLE001
+            print(f"[fullserve:{arm}] splitkv_verify_patch FAILED: {exc!r}", flush=True)
+    print(f"[fullserve:{arm}] arm patches: {info}", flush=True)
+    return info
+
+
+def _arm_mechanism(arm: str, install_info: dict) -> dict:
+    """Snapshot the active attention mechanism for the result JSON (post-census)."""
+    mech = dict(install_info)
+    mech["arm"] = arm
+    sk = sys.modules.get("splitkv_verify_patch")
+    if sk is not None:
+        try:
+            mech["splitkv_redirects"] = int(getattr(sk, "_stats", {}).get("redirected", 0))
+        except Exception:  # noqa: BLE001
+            mech["splitkv_redirects"] = None
+    try:
+        import vllm.v1.attention.ops.triton_unified_attention as _ua
+        mech["unified_attention_wrapped"] = bool(
+            getattr(getattr(_ua, "unified_attention", None), "_splitkv_verify_wrapped", False))
+        mech["ops_is_batch_invariant"] = bool(getattr(_ua, "is_batch_invariant", False))
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        import vllm.v1.attention.backends.triton_attn as _ta
+        mech["num_par_softmax_segments"] = int(getattr(_ta, "NUM_PAR_SOFTMAX_SEGMENTS", 0))
+    except Exception:  # noqa: BLE001
+        pass
+    return mech
 
 
 # ======================================================================================
@@ -295,6 +351,9 @@ def phase_fullserve_census(out_path: str, arm: str, n_prompts: int, c0: int, tra
                            det_check_k: int, ignore_eos: bool,
                            checkpoint: str | None = None, heartbeat: str | None = None,
                            resume: bool = False, skip_prompts: tuple = ()) -> None:
+    # Install the arm's attention-path patches BEFORE vLLM is imported (auto-arm from
+    # extra_env -> the meta-path finder patches the ops module at vLLM import time).
+    arm_install_info = _install_arm_patches(arm)
     import torch
     from vllm import LLM, SamplingParams
 
@@ -612,6 +671,8 @@ def phase_fullserve_census(out_path: str, arm: str, n_prompts: int, c0: int, tra
         "surgical_attn_armed": surgical_prov.get("surgical_attn_armed"),
         "matmul_tax_installed": surgical_prov.get("matmul_tax_installed"),
         "surgical_lever_source": surgical_prov.get("lever_source"),
+        # splitkv399 (and any arm) active-mechanism snapshot for the result JSON (PR #515).
+        "mechanism": _arm_mechanism(arm, arm_install_info),
         "n_prompts_run": len(per_prompt), "C": C, "traj_len": traj_len, "ignore_eos": ignore_eos,
         "G": G, "W8": M_VERIFY, "Wwide": WIDE_W, "n_windows": n_windows,
         # HEADLINE: W=8 served-geometry full-serve census
@@ -733,8 +794,119 @@ def compare_vs_globalflag222(n_semantic_surgical: int) -> dict:
 # ======================================================================================
 # Compose + report + self-test
 # ======================================================================================
+def _tie_threshold_sweep(w8_flips: list[dict]) -> dict:
+    """Cheap 0-GPU re-bucket of the W=8 served-geometry flips by the M=1 reference's OWN top-2 gap
+    (m1_self_gap). The harness's headline tie/semantic split uses BAND_TOL=1e-9 (a TRUE bitwise tie). This
+    sweep asks: at progressively looser tie bands, how many W=8 flips would STILL count as SEMANTIC (the
+    M=1 reference has a clear winner that wide enough to exceed the band)? A flip with m1_self_gap <= band is
+    a near-tie at that band; gap > band stays semantic. A flip whose M=1 gap is UNREADABLE (None: the verify
+    position is past the M=1 trajectory's per-step logprobs) is treated as +inf -> always semantic
+    (conservative). threshold_for_zero_semantic = the smallest band that absorbs EVERY flip as a tie (= the
+    max readable gap), or None if any flip has no readable gap (can never be certified a tie at any band)."""
+    bands = [BAND_TOL, 1e-6, 1e-4, 1e-3, 1e-2, EPS_STAR / 2, EPS_STAR]
+    gaps = [f.get("m1_self_gap") for f in w8_flips]
+    readable = [g for g in gaps if g is not None]
+    n_unreadable = sum(1 for g in gaps if g is None)
+    n_semantic_at_band = {f"{b:g}": sum(1 for g in gaps if g is None or g > b) for b in bands}
+    max_gap = max(readable) if readable else None
+    threshold = max_gap if n_unreadable == 0 else None
+    return {
+        "n_w8_flips": len(w8_flips),
+        "n_semantic_at_band": n_semantic_at_band,
+        "max_m1_self_gap_over_flips": max_gap,
+        "threshold_for_zero_semantic": threshold,
+        "all_flips_within_eps_star": bool(readable and n_unreadable == 0 and max_gap <= EPS_STAR),
+        "n_flips_without_readable_m1_gap": n_unreadable,
+    }
+
+
+def _splitkv399_extras(census: dict) -> dict:
+    """PR #515 (land) SHIP-CANDIDATE KEY OUTPUTS: the byte-exact FIXED-order split-KV 399.75 rung's
+    full-serve identity vs the surgical-357 bar. Everything is judged on the W=8 SERVED verify geometry
+    (the faithful headline -- the real M=8 serve does a width-8 forward over a decode-cached prefix)."""
+    if "splitkv399" not in census:
+        return {}
+    sk = census["splitkv399"]
+    w8 = sk["w8"]
+    w8_flips = [f for f in sk["flip_details"] if f.get("width") == M_VERIFY]
+    n_sem, n_tie, n_flips = w8["n_semantic_flips"], w8["n_tie_flips"], w8["n_flips"]
+    ident = w8["token_identity_rate"]
+    operative_1p0 = bool(math.isfinite(ident) and ident >= 0.99 and n_sem == 0)
+    literally_byteexact = bool(n_flips == 0)
+    sweep = _tie_threshold_sweep(w8_flips)
+
+    # vs surgical-357: prefer a SAME-HARNESS surgical arm (apples-to-apples: identical geometry/positions);
+    # else fall back to the imported #499/stark466 anchor (surgical num_splits=1 byte-exact, operative-1.0).
+    same_harness = "surgical" in census
+    if same_harness:
+        sw8 = census["surgical"]["w8"]
+        surg_ident, surg_sem, surg_flips = sw8["token_identity_rate"], sw8["n_semantic_flips"], sw8["n_flips"]
+        surg_operative_rate = sw8["operative_identity_rate"]
+        basis = "same-harness surgical arm (identical W=8 geometry)"
+    else:
+        surg_ident, surg_sem, surg_flips, surg_operative_rate = STARK466_LOCUS_IDENTITY, 0, 0, 1.0
+        basis = "imported anchor (surgical-357 #499 operative-1.0 / stark466 0-flip locus)"
+
+    # "cleaner" if splitkv399 has strictly fewer SEMANTIC flips (the only contract-breaking kind); for a
+    # same-harness comparison, tie-break on TOTAL flips (literal byte-exactness). Against the imported anchor
+    # we compare SEMANTIC only -- the anchor's 0-flip count is a single-window locus, so a total-flip compare
+    # vs the full-serve census would unfairly penalize splitkv399 for benign bf16 ties.
+    if n_sem != surg_sem:
+        vs_surgical = "cleaner" if n_sem < surg_sem else "worse"
+    elif same_harness and n_flips != surg_flips:
+        vs_surgical = "cleaner" if n_flips < surg_flips else "worse"
+    else:
+        vs_surgical = "same"
+
+    # examine EVERY flip: top-32 by m1_self_gap desc (the most "semantic-looking" first; None gap -> +inf top).
+    flips_sorted = sorted(w8_flips, key=lambda f: (f.get("m1_self_gap") if f.get("m1_self_gap") is not None
+                                                   else float("inf")), reverse=True)
+    examination = [{
+        "prompt_idx": f["prompt_idx"], "pos": f["pos"], "k": f["k"], "flip_kind": f["flip_kind"],
+        "m1_self_gap": f["m1_self_gap"], "m8_gap": f["m8_gap"],
+        "m1_in_m8_top2": f["m1_in_m8_top2"], "m1_in_m8_top5": f["m1_in_m8_top5"],
+        "m1_argmax_matches_token": f["m1_argmax_matches_token"],
+        "m8_top1_id": f["m8_top1_id"], "m1_tok_id": f["m1_tok_id"],
+    } for f in flips_sorted[:32]]
+
+    npos = w8["n_positions"]
+    if literally_byteexact:
+        verdict = (f"splitkv399 is LITERALLY BYTE-EXACT (0 flips / {npos} W=8 served positions); "
+                   f"{vs_surgical} than surgical-357 ({basis}).")
+    elif operative_1p0:
+        verdict = (f"splitkv399 is OPERATIVE-1.0 (identity {ident:.7f}; {n_sem} semantic + {n_tie} tie of "
+                   f"{npos}); every non-identity position is a bf16 tie, not literally byte-exact; "
+                   f"{vs_surgical} than surgical-357 ({basis}).")
+    else:
+        verdict = (f"splitkv399 shows {n_sem} SEMANTIC flip(s) (identity {ident:.7f} of {npos}); "
+                   f"NOT operative-1.0; {vs_surgical} than surgical-357 ({basis}).")
+
+    return {
+        "splitkv399_fullserve_census": ident,
+        "splitkv399_n_semantic_flips": n_sem,
+        "splitkv399_n_tie_flips": n_tie,
+        "splitkv399_n_flips": n_flips,
+        "splitkv399_operative_identity_rate": w8["operative_identity_rate"],
+        "splitkv399_operative_identity_1p0": operative_1p0,
+        "splitkv399_literally_byteexact": literally_byteexact,
+        "splitkv399_n_positions_w8": npos,
+        "splitkv399_mechanism": sk.get("mechanism", {}),
+        "vs_surgical357": vs_surgical,
+        "vs_surgical357_basis": basis,
+        "surgical_fullserve_census": surg_ident,
+        "surgical_n_semantic_flips": surg_sem,
+        "surgical_n_flips": surg_flips,
+        "surgical_operative_identity_rate": surg_operative_rate,
+        "tie_threshold_for_zero_semantic": sweep["threshold_for_zero_semantic"],
+        "tie_threshold_sweep": sweep,
+        "splitkv399_flip_examination": examination,
+        "splitkv399_one_line_verdict": verdict,
+    }
+
+
 def compose_and_report(census: dict, a: argparse.Namespace) -> dict:
-    primary_arm = "pinned" if "pinned" in census else sorted(census)[0]
+    primary_arm = ("splitkv399" if "splitkv399" in census
+                   else ("pinned" if "pinned" in census else sorted(census)[0]))
     prim = census[primary_arm]
     w8 = prim["w8"]
     w32 = prim["w32"]
@@ -806,46 +978,19 @@ def compose_and_report(census: dict, a: argparse.Namespace) -> dict:
         ),
     }
 
-    # ---- PR #510 surgical-357 deliverables (computed on the primary arm's served W=8 flips) ----
-    is_surgical = bool(prim.get("surgical_mode"))
-    tie_sweep = tie_threshold_sweep(prim["flip_details"], width=M_VERIFY)
-    served_flip_exam = examine_served_flips(prim["flip_details"], width=M_VERIFY)
-    vs222 = compare_vs_globalflag222(w8["n_semantic_flips"])
-    # surgical locus cross-check: the surgical attn_only locus cert this run stress-tests (stark #494).
-    # stark494 (0.998875) and denken471 (0.9988751) are equal to 15 sig figs (surgical divergence == 222
-    # all_pin divergence), so the existing locus_reproduces_denken471 check doubles as the surgical check.
-    surgical_locus_gap = (locus["token_identity_rate"] - STARK494_SURGICAL_LOCUS_IDENTITY
-                          if math.isfinite(locus["token_identity_rate"]) else float("nan"))
-    surgical_locus_reproduces_494 = bool(math.isfinite(surgical_locus_gap)
-                                         and abs(surgical_locus_gap) <= (2.0 / max(1, locus["n_positions"])))
-
+    # attribution: splitkv399 (#515 land) | surgical-357 (#510 wirbel) | base (#487 wirbel). The surgical
+    # KEY OUTPUTS are emitted in a conditional block after the report dict (only when surgical is primary).
+    is_surgical = primary_arm == "surgical" or bool(prim.get("surgical_mode"))
+    is_splitkv = primary_arm == "splitkv399"
     report = {
-        "pr": (510 if is_surgical else 487), "agent": "wirbel",
-        "leg": ("surgical-357 ship: reload-immune full-serve operative-identity census" if is_surgical
+        "pr": (515 if is_splitkv else 510 if is_surgical else 487),
+        "agent": ("land" if is_splitkv else "wirbel"),
+        "leg": ("splitkv399 full-serve byte-exact identity census (399.75 ship candidate vs surgical-357)"
+                if is_splitkv else
+                "surgical-357 ship: reload-immune full-serve operative-identity census" if is_surgical
                 else "same-reload full-serve identity census harness"),
         "analysis_only": True, "no_hf_job": True, "no_served_file_change": True, "official_tps": 0,
         "primary_arm": primary_arm,
-        # ---- PR #510 surgical-357 SHIP deliverables (KEY OUTPUTS) ----
-        "surgical_mode": is_surgical,
-        "surgical357_fullserve_census": w8["token_identity_rate"],
-        "surgical357_n_semantic_flips": w8["n_semantic_flips"],
-        "surgical357_n_tie_flips": w8["n_tie_flips"],
-        "surgical357_operative_identity_1p0": operative_1p0,
-        "surgical357_operative_identity_rate": w8["operative_identity_rate"],
-        "surgical_attn_armed": prim.get("surgical_attn_armed"),
-        "matmul_tax_installed": prim.get("matmul_tax_installed"),
-        "surgical_lever_source": prim.get("surgical_lever_source"),
-        # tie-threshold sensitivity sweep (the certificate-wording knob)
-        "tie_threshold_sweep": tie_sweep,
-        "tie_threshold_for_zero_semantic": tie_sweep["tie_threshold_for_zero_semantic"],
-        "tie_threshold_for_zero_semantic_ulps": tie_sweep["tie_threshold_for_zero_semantic_ulps"],
-        "served_flip_examination": served_flip_exam,
-        # the decisive comparison: surgical vs global-flag 222 (#487's 12)
-        **vs222,
-        # surgical locus anchor (stark #494) cross-check
-        "surgical_locus_anchor_stark494": STARK494_SURGICAL_LOCUS_IDENTITY,
-        "surgical_locus_gap_vs_stark494": surgical_locus_gap,
-        "surgical_locus_reproduces_stark494": surgical_locus_reproduces_494,
         # ---- HEADLINE deliverable == faithful W=8 served verify geometry ----
         "reloadimmune_fullserve_census": w8["token_identity_rate"],
         "n_semantic_flips": w8["n_semantic_flips"],
@@ -921,6 +1066,37 @@ def compose_and_report(census: dict, a: argparse.Namespace) -> dict:
         "fullserve_self_test_passes": self_test_ok(self_test),
         "model_dir": prim["model_dir"],
     }
+    # PR #510 wirbel surgical-357 KEY OUTPUTS: emitted only when surgical is the primary arm (computed on the
+    # primary arm's served W=8 flips). Preserves wirbel #510's deliverables additively under the splitkv399 rebase.
+    if is_surgical:
+        tie_sweep = tie_threshold_sweep(prim["flip_details"], width=M_VERIFY)
+        served_flip_exam = examine_served_flips(prim["flip_details"], width=M_VERIFY)
+        vs222 = compare_vs_globalflag222(w8["n_semantic_flips"])
+        surgical_locus_gap = (locus["token_identity_rate"] - STARK494_SURGICAL_LOCUS_IDENTITY
+                              if math.isfinite(locus["token_identity_rate"]) else float("nan"))
+        surgical_locus_reproduces_494 = bool(math.isfinite(surgical_locus_gap)
+                                             and abs(surgical_locus_gap) <= (2.0 / max(1, locus["n_positions"])))
+        report.update({
+            "surgical_mode": True,
+            "surgical357_fullserve_census": w8["token_identity_rate"],
+            "surgical357_n_semantic_flips": w8["n_semantic_flips"],
+            "surgical357_n_tie_flips": w8["n_tie_flips"],
+            "surgical357_operative_identity_1p0": operative_1p0,
+            "surgical357_operative_identity_rate": w8["operative_identity_rate"],
+            "surgical_attn_armed": prim.get("surgical_attn_armed"),
+            "matmul_tax_installed": prim.get("matmul_tax_installed"),
+            "surgical_lever_source": prim.get("surgical_lever_source"),
+            "tie_threshold_sweep": tie_sweep,
+            "tie_threshold_for_zero_semantic": tie_sweep["tie_threshold_for_zero_semantic"],
+            "tie_threshold_for_zero_semantic_ulps": tie_sweep["tie_threshold_for_zero_semantic_ulps"],
+            "served_flip_examination": served_flip_exam,
+            **vs222,
+            "surgical_locus_anchor_stark494": STARK494_SURGICAL_LOCUS_IDENTITY,
+            "surgical_locus_gap_vs_stark494": surgical_locus_gap,
+            "surgical_locus_reproduces_stark494": surgical_locus_reproduces_494,
+        })
+    # PR #515 land KEY OUTPUTS: ship-candidate splitkv399 vs surgical-357 (no-op when arm absent).
+    report.update(_splitkv399_extras(census))
     return report
 
 
@@ -971,7 +1147,12 @@ def build_self_test(census: dict, primary_arm: str, operative_1p0: bool) -> tupl
     # the surgical (shipped 357) arm: 2D attention armed (is_batch_invariant True) AND matmul tax OFF
     # (VBI env unset, _batch_invariant_MODE False) -- this is what makes the arm the SHIPPED config and
     # not the global-flag pinned one. If either fails the arm is mislabelled and the result is void.
-    if "surgical" in census:
+    # These lever-provenance assertions apply ONLY to a wirbel-style #510 surgical run (surgical_mode True,
+    # i.e. _install_surgical_lever() recorded surgical_attn_armed / matmul_tax_installed). A pre-#510
+    # comparison-bar surgical arm (surgical_mode absent) reaches the same 2D order-preserving byte-exact
+    # config via the SURGICAL_ATTN_USE_3D_OFF env and does not carry the lever provenance, so it is not
+    # subject to these checks (the always-on per-arm sanity checks above still cover it).
+    if "surgical" in census and census["surgical"].get("surgical_mode"):
         s = census["surgical"]
         checks["surgical_attn_batch_invariant"] = bool(s.get("attn_is_batch_invariant"))
         checks["surgical_attn_armed"] = bool(s.get("surgical_attn_armed"))
@@ -1068,9 +1249,19 @@ def _run_census_arm(a: argparse.Namespace, arm: str) -> dict:
     hb = str(OUT_DIR / f"heartbeat_{arm}.json")
     # pinned = global-flag strict (VBI=1: 2D attn + matmul tax). surgical = shipped 357 lever (VBI=0 +
     # SURGICAL_ATTN_USE_3D_OFF=1: 2D attn, matmul tax OFF). heuristic = stock (VBI=0, no pin).
+    # splitkv399 = byte-exact FIXED-order split-KV candidate (lawine #496/#500, gated TPS/segments).
     if arm == "pinned":
         extra_env = {"VLLM_BATCH_INVARIANT": "1"}
+    elif arm == "splitkv399":
+        # Candidate: byte-exact FIXED-order split-KV (lawine #496/#500 recipe, T=4 S=64),
+        # M=8 verify redirected to 3D split-KV. is_batch_invariant stays False; the local
+        # vLLM wheel honors BYTEEXACT_FIXED_TPS/_NUM_SEGMENTS (gated, default-off).
+        extra_env = {"VLLM_BATCH_INVARIANT": "0", "SPLITKV_VERIFY": "1",
+                     "SPLITKV_VERIFY_MAX_Q": "64",
+                     "BYTEEXACT_FIXED_TPS": str(a.fixed_tps),
+                     "BYTEEXACT_NUM_SEGMENTS": str(a.num_segments)}
     elif arm == "surgical":
+        # Comparison bar: 2D order-preserving byte-exact attention, fast matmul (#499 shipped rung).
         extra_env = {"VLLM_BATCH_INVARIANT": "0", "SURGICAL_ATTN_USE_3D_OFF": "1"}
     else:
         extra_env = {"VLLM_BATCH_INVARIANT": "0"}
@@ -1173,7 +1364,21 @@ def _finish(report: dict, a: argparse.Namespace) -> None:
 
 
 def _print_console(r: dict) -> None:
-    print(f"\n========== FULL-SERVE IDENTITY CENSUS HARNESS (PR #{r.get('pr', 487)}) ==========", flush=True)
+    hdr = f"PR #{r.get('pr', 487)} ({r.get('agent', 'wirbel')})"
+    print(f"\n========== FULL-SERVE IDENTITY CENSUS HARNESS ({hdr}) ==========", flush=True)
+    if "splitkv399_fullserve_census" in r:
+        print(" --- PR #515 SHIP CANDIDATE: splitkv399 (FIXED-order split-KV, 399.75 rung) ---", flush=True)
+        print(f"  splitkv399_fullserve_census (W=8)       : {r['splitkv399_fullserve_census']:.7f}  "
+              f"(semantic={r['splitkv399_n_semantic_flips']} tie={r['splitkv399_n_tie_flips']} "
+              f"of {r['splitkv399_n_positions_w8']} pos)", flush=True)
+        print(f"  splitkv399_literally_byteexact (0 flips): {r['splitkv399_literally_byteexact']}  "
+              f"(operative_1p0={r['splitkv399_operative_identity_1p0']})", flush=True)
+        print(f"  vs_surgical357                          : {r['vs_surgical357']}  "
+              f"(surgical census {r['surgical_fullserve_census']:.7f}, "
+              f"sem={r['surgical_n_semantic_flips']}; basis: {r['vs_surgical357_basis']})", flush=True)
+        print(f"  tie_threshold_for_zero_semantic         : {r['tie_threshold_for_zero_semantic']}", flush=True)
+        print(f"  VERDICT (one line)                      : {r['splitkv399_one_line_verdict']}", flush=True)
+        print("  ------------------------------------------------------------", flush=True)
     print(f" VERDICT                                  : {r['verdict']}", flush=True)
     print(f" operative_identity_1p0 (PRIMARY)         : {r['operative_identity_1p0']}", flush=True)
     print(f" reloadimmune_fullserve_census (W=8)      : {r['reloadimmune_fullserve_census']:.7f}  "
@@ -1200,7 +1405,7 @@ def _print_console(r: dict) -> None:
     print(" --- width findings (faithful read = W=8; W=32 is NOT byte-faithful) ---", flush=True)
     wf = r["width_findings"]
     print(f"  W=8 served-geometry identity (FAITHFUL)  : {r['reloadimmune_fullserve_census']:.7f} "
-          f"(0 semantic) <- HEADLINE", flush=True)
+          f"({r['n_semantic_flips']} semantic) <- HEADLINE", flush=True)
     print(f"  W=32 denser cross-read (NOT faithful)    : {r['reloadimmune_fullserve_census_fullcov']:.7f}  "
           f"(semantic={r['n_semantic_flips_fullcov']} tie={r['n_tie_flips_fullcov']} of {r['n_positions_w32']} pos)",
           flush=True)
@@ -1242,26 +1447,31 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
     except Exception as exc:
         print(f"[wandb] helper import failed: {exc!r}; skipping", flush=True)
         return
+    is_splitkv = report["primary_arm"] == "splitkv399"
     _surgical = bool(report.get("surgical_mode"))
-    _notes = (
-        "PR#510 surgical-357 SHIP reload-immune full-serve operative-identity census: the M=8 surgical serve "
-        "(2D order-preserving attention, matmul tax OFF) vs its own M=1 AR, swept along the full free-running "
-        "trajectory. Stress-tests the stark #494 locus operative-1.0 cert at full-serve scale (does it survive, "
-        "or share #487's global-flag-222 blind spot?)."
-        if _surgical else
-        "PR#487 same-reload full-serve identity census: reload-immune token_identity_rate of the M=8 strict "
-        "serve vs M=1 AR, swept along the full free-running trajectory (closes the #471 locus -> #470 "
-        "reload-confounded gap)."
-    )
+    if is_splitkv:
+        notes = ("PR#515 (land) splitkv399 full-serve byte-exact identity census: reload-immune token_identity "
+                 "of the FIXED-order split-KV M=8 verify (lawine #496/#500 399.75 rung) vs M=1 AR over the full "
+                 "free-running trajectory; ship-candidate compared to the surgical-357 bar.")
+    elif _surgical:
+        notes = ("PR#510 surgical-357 SHIP reload-immune full-serve operative-identity census: the M=8 surgical "
+                 "serve (2D order-preserving attention, matmul tax OFF) vs its own M=1 AR, swept along the full "
+                 "free-running trajectory. Stress-tests the stark #494 locus operative-1.0 cert at full-serve "
+                 "scale (does it survive, or share #487's global-flag-222 blind spot?).")
+    else:
+        notes = ("PR#487 same-reload full-serve identity census: reload-immune token_identity_rate of the M=8 "
+                 "strict serve vs M=1 AR, swept along the full free-running trajectory (closes the #471 locus -> "
+                 "#470 reload-confounded gap).")
     run = init_wandb_run(
-        job_type="local_profiling", agent="wirbel", name=a.wandb_name, group=a.wandb_group,
-        notes=_notes,
+        job_type="local_profiling", agent=report["agent"], name=a.wandb_name, group=a.wandb_group,
+        notes=notes,
         config={
-            "pr": report.get("pr", 487), "M_verify": M_VERIFY, "K_spec": K_SPEC, "wide_w": WIDE_W,
+            "pr": report["pr"], "M_verify": M_VERIFY, "K_spec": K_SPEC, "wide_w": WIDE_W,
             "G": HYBRID_PREFIX_COMMIT,
             "C": report["C"], "traj_len": report["traj_len"], "ignore_eos": report["ignore_eos"],
             "n_prompts_run": report["n_prompts_run"], "model_dir": report["model_dir"],
             "primary_arm": report["primary_arm"], "eps_star": EPS_STAR, "surgical_mode": _surgical,
+            "fixed_tps": a.fixed_tps, "num_segments": a.num_segments,
             "analysis_only": True, "no_hf_job": True, "no_served_file_change": True, "official_tps": 0,
             **{f"anchor/{k}": v for k, v in report["imported_anchors"].items()},
         },
@@ -1293,6 +1503,13 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
         "vs_globalflag222", "surgical_n_semantic", "globalflag222_n_semantic", "delta_vs_globalflag222",
         "globalflag222_census", "surgical_locus_anchor_stark494", "surgical_locus_gap_vs_stark494",
         "surgical_locus_reproduces_stark494",
+        # ---- PR #515 land KEY OUTPUTS (splitkv399 ship candidate vs surgical-357; None when arm absent) ----
+        "splitkv399_fullserve_census", "splitkv399_n_semantic_flips", "splitkv399_n_tie_flips",
+        "splitkv399_n_flips", "splitkv399_operative_identity_rate", "splitkv399_operative_identity_1p0",
+        "splitkv399_literally_byteexact", "splitkv399_n_positions_w8",
+        "vs_surgical357", "vs_surgical357_basis", "surgical_fullserve_census",
+        "surgical_n_semantic_flips", "surgical_n_flips", "surgical_operative_identity_rate",
+        "splitkv399_one_line_verdict",
     )
     for k in keys:
         run.summary[k] = report.get(k)
@@ -1305,6 +1522,15 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
                 run.summary[f"tie_sweep/n_semantic_at_{tname}"] = tval
         elif not isinstance(sv, list):
             run.summary[f"tie_sweep/{sk}"] = sv
+    # PR #515 land splitkv399 mechanism + flip examination (no-op when arm absent)
+    if "tie_threshold_sweep" in report:
+        for sk, sv in report["tie_threshold_sweep"].items():
+            run.summary[f"tie_threshold_sweep/{sk}"] = (json.dumps(sv) if isinstance(sv, dict) else sv)
+    if report.get("splitkv399_mechanism"):
+        for mk, mv in report["splitkv399_mechanism"].items():
+            run.summary[f"splitkv399_mechanism/{mk}"] = mv
+    if report.get("splitkv399_flip_examination"):
+        run.summary["splitkv399_flip_examination"] = json.dumps(report["splitkv399_flip_examination"])
     run.summary["verdict_green"] = report["verdict"].startswith("GREEN")
     run.summary["verdict_red"] = report["verdict"].startswith("RED")
     for arm, d in report["arms"].items():
@@ -1332,6 +1558,11 @@ def main() -> None:
     ap.add_argument("--traj-len", dest="traj_len", type=int, default=DEFAULT_TRAJ_LEN)
     ap.add_argument("--gpu-mem-util", dest="gpu_mem_util", type=float, default=0.55)
     ap.add_argument("--max-batched-tokens", dest="max_batched_tokens", type=int, default=8192)
+    # splitkv399 candidate config (lawine #496/#500 served recipe = T4 S64; gated, default-off in the wheel)
+    ap.add_argument("--fixed-tps", dest="fixed_tps", type=int, default=4,
+                    help="splitkv399 arm: pinned tiles_per_segment T (CHUNK=16*T keys, byte-exact split SIZE)")
+    ap.add_argument("--num-segments", dest="num_segments", type=int, default=64,
+                    help="splitkv399 arm: parallel softmax segment capacity S (coverage=16*T*S keys)")
     ap.add_argument("--verbose-k", dest="verbose_k", type=int, default=3)
     ap.add_argument("--det-check-k", dest="det_check_k", type=int, default=16)
     ap.add_argument("--ignore-eos", dest="ignore_eos", action="store_true", default=False)
