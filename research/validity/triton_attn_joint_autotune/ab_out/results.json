@@ -1,0 +1,668 @@
+{
+  "experiment": "served_bm4_wall_ab",
+  "pr": 442,
+  "student": "wirbel",
+  "question": "Does the modeled +15.86 TPS bm4 joint-autotune lift realize on the served-stack wall?",
+  "lever": "verify Triton bm4 (BLOCK_M 16->4) + num_stages 3->2",
+  "zero_tps": true,
+  "not_a_launch": true,
+  "not_a_build": true,
+  "not_a_submission": true,
+  "config": {
+    "block_m": 4,
+    "tile": 32,
+    "num_warps": 4,
+    "num_stages": 2
+  },
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seeds": [
+      1,
+      2
+    ]
+  },
+  "elapsed_s": 2858.4292316436768,
+  "aggregate": {
+    "per_seed": [
+      {
+        "seed": 1,
+        "base_median": 454.5362803169206,
+        "cand_median": 449.15816067848993,
+        "base_values": [
+          454.5362803169206,
+          454.6233870043913,
+          451.7950703559072
+        ],
+        "cand_values": [
+          449.17492882807625,
+          449.15816067848993,
+          449.06079276039486
+        ],
+        "delta_median_pct": -1.1832102015444954,
+        "verdict": "REAL",
+        "ci95_observed_pct": 0.40070470979640344,
+        "operative_threshold_pct": 0.1,
+        "base_projected_official": 481.8932305082483,
+        "cand_projected_official": 476.19142064432236,
+        "applied": {
+          "candidate_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": true,
+              "forced_hits": 10,
+              "hook_failed": false,
+              "splitkv": true,
+              "census_is_3d": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "census_heads": [
+                256,
+                512
+              ]
+            },
+            {
+              "run": "server_run01.log",
+              "patched": true,
+              "forced_hits": 10,
+              "hook_failed": false,
+              "splitkv": true,
+              "census_is_3d": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "census_heads": [
+                256,
+                512
+              ]
+            },
+            {
+              "run": "server_run02.log",
+              "patched": true,
+              "forced_hits": 10,
+              "hook_failed": false,
+              "splitkv": true,
+              "census_is_3d": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "census_heads": [
+                256,
+                512
+              ]
+            }
+          ],
+          "baseline_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run01.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run02.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            }
+          ],
+          "candidate_runs_total": 3,
+          "candidate_runs_patched": 3,
+          "candidate_runs_failed_open": 0,
+          "candidate_forced_log_hits": 30,
+          "candidate_all_runs_patched": true,
+          "baseline_unpatched": true,
+          "splitkv_all_runs": true,
+          "served_verify_is_3d": true,
+          "census_heads": [
+            256,
+            512
+          ],
+          "census_sample": [
+            {
+              "raw": "forced[1] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[2] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[3] head=512 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 512
+            },
+            {
+              "raw": "forced[4] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[5] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[6] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            }
+          ],
+          "applied_ok": true,
+          "logs_found": true
+        }
+      },
+      {
+        "seed": 2,
+        "base_median": 453.9205046474536,
+        "cand_median": 448.24439451505407,
+        "base_values": [
+          454.084534446567,
+          453.9205046474536,
+          453.67091161932507
+        ],
+        "cand_values": [
+          448.24439451505407,
+          448.29308278473576,
+          448.1958732102919
+        ],
+        "delta_median_pct": -1.2504634785793558,
+        "verdict": "REAL",
+        "ci95_observed_pct": 0.05331780356476697,
+        "operative_threshold_pct": 0.1,
+        "base_projected_official": 481.24039345325906,
+        "cand_projected_official": 475.22265808895446,
+        "applied": {
+          "candidate_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": true,
+              "forced_hits": 10,
+              "hook_failed": false,
+              "splitkv": true,
+              "census_is_3d": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "census_heads": [
+                256,
+                512
+              ]
+            },
+            {
+              "run": "server_run01.log",
+              "patched": true,
+              "forced_hits": 10,
+              "hook_failed": false,
+              "splitkv": true,
+              "census_is_3d": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "census_heads": [
+                256,
+                512
+              ]
+            },
+            {
+              "run": "server_run02.log",
+              "patched": true,
+              "forced_hits": 10,
+              "hook_failed": false,
+              "splitkv": true,
+              "census_is_3d": [
+                true,
+                true,
+                true,
+                true,
+                true,
+                true
+              ],
+              "census_heads": [
+                256,
+                512
+              ]
+            }
+          ],
+          "baseline_runs": [
+            {
+              "run": "server_run00.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run01.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            },
+            {
+              "run": "server_run02.log",
+              "patched": false,
+              "hook_failed": false,
+              "splitkv": true
+            }
+          ],
+          "candidate_runs_total": 3,
+          "candidate_runs_patched": 3,
+          "candidate_runs_failed_open": 0,
+          "candidate_forced_log_hits": 30,
+          "candidate_all_runs_patched": true,
+          "baseline_unpatched": true,
+          "splitkv_all_runs": true,
+          "served_verify_is_3d": true,
+          "census_heads": [
+            256,
+            512
+          ],
+          "census_sample": [
+            {
+              "raw": "forced[1] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[2] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[3] head=512 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 512
+            },
+            {
+              "raw": "forced[4] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[5] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            },
+            {
+              "raw": "forced[6] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+              "is_3d": true,
+              "head": 256
+            }
+          ],
+          "applied_ok": true,
+          "logs_found": true
+        }
+      }
+    ],
+    "n_base": 6,
+    "n_cand": 6,
+    "base_pooled_p50_wall_tps": 454.00251954701025,
+    "cand_pooled_p50_wall_tps": 448.67693777256534,
+    "base_pooled_values": [
+      454.5362803169206,
+      454.6233870043913,
+      451.7950703559072,
+      454.084534446567,
+      453.9205046474536,
+      453.67091161932507
+    ],
+    "cand_pooled_values": [
+      449.17492882807625,
+      449.15816067848993,
+      449.06079276039486,
+      448.24439451505407,
+      448.29308278473576,
+      448.1958732102919
+    ],
+    "realized_delta_pct_wall": -1.1730291232213017,
+    "realized_delta_ci95_pct": 0.2270112566805852,
+    "realized_delta_ci95_lo_pct": -1.400040379901887,
+    "operative_threshold_pct": 0.1,
+    "modeled_delta_pct": 3.3947901638336044,
+    "realization_ratio": -0.34553803522767534,
+    "classification": "evaporates",
+    "base_projected_official_median": 481.56681198075364,
+    "cand_projected_official_median": 475.7070393666384,
+    "cand_projected_official_lo_median": 466.3829433960111,
+    "cand_tps_on_incumbent": 475.88151286295243,
+    "crosses_481_central": false,
+    "crosses_481_ci_clean": false,
+    "delta_significant": false,
+    "reconciliation": {
+      "autotune_f_0.09507": {
+        "f_attn": 0.09507,
+        "implied_realized_S_attn": 0.889007134678492
+      },
+      "denken441_f_0.0690": {
+        "f_attn": 0.069,
+        "implied_realized_S_attn": 0.8532262391276451
+      },
+      "stark445_f_0.0928": {
+        "f_attn": 0.0928,
+        "implied_realized_S_attn": 0.8865999984448426
+      },
+      "modeled_S_attn_joint_2D_microbench": 1.5275548101236007,
+      "modeled_delta_tps": 15.8584227713323,
+      "realized_delta_tps_on_incumbent": -5.648487137047539,
+      "modeled_minus_realized_tps": 21.50690990837984,
+      "numstages_only_modeled_tps": 13.226254718079531,
+      "numstages_only_realized_ub_tps_pr428": 0.94,
+      "addressable_triton_verify_layers": "7/42 (FA_SLIDING routes 35 head-256 -> FA2)",
+      "head512_per_shape_optimum_block_m": 8,
+      "served_verify_path": "3D split-KV (SPLITKV_VERIFY=1), occupancy-saturated ~96 CTAs > 80 SMs"
+    }
+  },
+  "self_test": {
+    "served_bm4_wall_ab_self_test_passes": true,
+    "required": {
+      "constants_exact": true,
+      "candidate_actually_applied_bm4": true,
+      "served_verify_is_3d_census": true,
+      "ratio_consistent": true,
+      "all_tps_finite_positive": true,
+      "caveats_present": true,
+      "baseline_reproduces_481": true
+    },
+    "smoke": false,
+    "constants": {
+      "all_exact": true,
+      "mismatches": {},
+      "base_plus_delta_ok": true,
+      "modeled_frontier_beats_481": true
+    },
+    "caveats": {
+      "zero_tps": "This A/B adds 0 TPS and changes NO served file: it measures whether the modeled +15.86 bm4 lift realizes end-to-end. The sitecustomize hook is env-gated, reverted, and NEVER submitted. BASELINE stays 481.53.",
+      "byte_exact": "bm4 = BLOCK_M 16->4 (BLOCK_Q->1, grid dim0 recomputed) + num_stages 3->2; TILE=32/num_warps=4 held. BLOCK_M is the query-row tile/grid-grouping knob; per-row KV reduction order is TILE_SIZE-bound (unchanged) -> byte-exact, proven by the paired same-path census (NOT asserted).",
+      "served_is_3d": "The served M=8 verify runs 3D split-KV (SPLITKV_VERIFY=1), already occupancy-saturated (~96 CTAs > 80 A10G SMs); the +15.86 microbench measured the 2D verify path (occupancy-bound) -> realized < modeled is the wall-vs-microbench gap quantified."
+    },
+    "candidate_applied_per_seed": {
+      "1": {
+        "candidate_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": true,
+            "forced_hits": 10,
+            "hook_failed": false,
+            "splitkv": true,
+            "census_is_3d": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "census_heads": [
+              256,
+              512
+            ]
+          },
+          {
+            "run": "server_run01.log",
+            "patched": true,
+            "forced_hits": 10,
+            "hook_failed": false,
+            "splitkv": true,
+            "census_is_3d": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "census_heads": [
+              256,
+              512
+            ]
+          },
+          {
+            "run": "server_run02.log",
+            "patched": true,
+            "forced_hits": 10,
+            "hook_failed": false,
+            "splitkv": true,
+            "census_is_3d": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "census_heads": [
+              256,
+              512
+            ]
+          }
+        ],
+        "baseline_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run01.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run02.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          }
+        ],
+        "candidate_runs_total": 3,
+        "candidate_runs_patched": 3,
+        "candidate_runs_failed_open": 0,
+        "candidate_forced_log_hits": 30,
+        "candidate_all_runs_patched": true,
+        "baseline_unpatched": true,
+        "splitkv_all_runs": true,
+        "served_verify_is_3d": true,
+        "census_heads": [
+          256,
+          512
+        ],
+        "census_sample": [
+          {
+            "raw": "forced[1] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[2] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[3] head=512 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 512
+          },
+          {
+            "raw": "forced[4] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[5] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[6] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          }
+        ],
+        "applied_ok": true,
+        "logs_found": true
+      },
+      "2": {
+        "candidate_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": true,
+            "forced_hits": 10,
+            "hook_failed": false,
+            "splitkv": true,
+            "census_is_3d": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "census_heads": [
+              256,
+              512
+            ]
+          },
+          {
+            "run": "server_run01.log",
+            "patched": true,
+            "forced_hits": 10,
+            "hook_failed": false,
+            "splitkv": true,
+            "census_is_3d": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "census_heads": [
+              256,
+              512
+            ]
+          },
+          {
+            "run": "server_run02.log",
+            "patched": true,
+            "forced_hits": 10,
+            "hook_failed": false,
+            "splitkv": true,
+            "census_is_3d": [
+              true,
+              true,
+              true,
+              true,
+              true,
+              true
+            ],
+            "census_heads": [
+              256,
+              512
+            ]
+          }
+        ],
+        "baseline_runs": [
+          {
+            "run": "server_run00.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run01.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          },
+          {
+            "run": "server_run02.log",
+            "patched": false,
+            "hook_failed": false,
+            "splitkv": true
+          }
+        ],
+        "candidate_runs_total": 3,
+        "candidate_runs_patched": 3,
+        "candidate_runs_failed_open": 0,
+        "candidate_forced_log_hits": 30,
+        "candidate_all_runs_patched": true,
+        "baseline_unpatched": true,
+        "splitkv_all_runs": true,
+        "served_verify_is_3d": true,
+        "census_heads": [
+          256,
+          512
+        ],
+        "census_sample": [
+          {
+            "raw": "forced[1] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[2] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[3] head=512 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 512
+          },
+          {
+            "raw": "forced[4] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[5] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          },
+          {
+            "raw": "forced[6] head=256 IS_3D=True q_rows=8 grid (3, 2, 16)->(9, 2, 16) BLOCK_M 16->4 BLOCK_Q 4->1 num_stages->2",
+            "is_3d": true,
+            "head": 256
+          }
+        ],
+        "applied_ok": true,
+        "logs_found": true
+      }
+    },
+    "baseline_reproduction_err_pct": 0.007644794873355482,
+    "baseline_reproduces_481": true,
+    "ratio_consistent": true,
+    "all_tps_finite_positive": true,
+    "toggle_reverted_clean": true
+  }
+}
