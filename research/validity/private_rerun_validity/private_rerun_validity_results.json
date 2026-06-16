@@ -1,0 +1,126 @@
+{
+  "pr": 480,
+  "issue": 474,
+  "author": "denken",
+  "leg": "private re-run SPEED-validity gate (5% Delta) for the strict #474 submission",
+  "config": {
+    "delta_gate": 0.05,
+    "ppl_gate": 2.42,
+    "deployed_public_tps": 481.53,
+    "deployed_private_tps": 460.85,
+    "strict_public_tps": 461.8049190014005,
+    "dp_corners_tokens": {
+      "banked": 0.0,
+      "central": 50.0,
+      "pessimistic": 130.0
+    },
+    "imports": {
+      "strict_perL_tax": "research/speed/kv_weighted_strict_tps/kv_weighted_strict_tps.json",
+      "strict_wholecycle": "research/speed/strict_wholecycle_ab/strict_wholecycle_ab.json",
+      "deployed_gap_decomp": "research/validity/public_private_gap_decomposition/public_private_gap_decomposition_results.json",
+      "local_official_transfer": "research/systems/local_official_tps_transfer/report.json",
+      "empirical_sigma_hw": "research/empirical_sigma_hw/fresh_n10/sigma_hw.json"
+    },
+    "note": "Private re-run validity for strict #474. CPU analysis only; no kernel re-measure, no served change, no HF Job, no launch, no submission."
+  },
+  "corners": {
+    "banked": {
+      "delta_p_tokens": 0.0,
+      "local_pinned_pct": 0.0,
+      "strict_gap_pct": 4.294644155088978,
+      "strict_private_tps": 441.9720410395935,
+      "exceeds_5pct": false
+    },
+    "central": {
+      "delta_p_tokens": 50.0,
+      "local_pinned_pct": 0.41251955277007424,
+      "strict_gap_pct": 4.689447460997409,
+      "strict_private_tps": 440.1488199525282,
+      "exceeds_5pct": false
+    },
+    "pessimistic": {
+      "delta_p_tokens": 130.0,
+      "local_pinned_pct": 1.0684085714074198,
+      "strict_gap_pct": 5.317168380231985,
+      "strict_private_tps": 437.2499738699021,
+      "exceeds_5pct": true
+    }
+  },
+  "breach_grid": {
+    "central": {
+      "empirical_sigma": 2.0229763388390776e-05,
+      "convention_sigma": 0.3829159745388699
+    },
+    "pessimistic": {
+      "empirical_sigma": 0.9999861921835971,
+      "convention_sigma": 0.6195031344983206
+    }
+  },
+  "verdict": {
+    "strict_private_delta_pct": 4.689447460997409,
+    "strict_private_predicted_tps": 440.1488199525282,
+    "private_validity_breach_prob": 2.0229763388390776e-05,
+    "private_validity_breach_prob_conservative": 0.3829159745388699,
+    "local_to_public_bias": 0.9659636400734828,
+    "private_trajectory_delta_pct": 0.6333865388319535,
+    "private_validity_safe": true,
+    "ppl": 2.3772,
+    "deployed_gap_pct": 4.294644155088977,
+    "deployed_acceptance_pct": 3.66125761625703,
+    "deployed_ctxlen_pct": 0.6333865388319535,
+    "strict_gap_central_pct": 4.689447460997409,
+    "strict_local_pinned_central_pct": 0.41251955277007424,
+    "strict_breakeven_dp_tokens": 89.49705252136883,
+    "strict_margin_pct": 0.3105525390025912,
+    "deployed_margin_pct": 0.705355844911023,
+    "thin_margin_flag": true,
+    "pessimistic_corner_breaches": true,
+    "public_mean_prompt_tokens": 272.15625,
+    "private_mean_prompt_tokens_central": 322.15625,
+    "public_mean_L": 527.65625,
+    "private_mean_L_central": 577.65625,
+    "strict_public_tps": 461.8049190014005,
+    "sigma_hw_empirical_tps": 0.34937951115245053,
+    "sigma_hw_convention_tps": 4.8153,
+    "deployed_breach_prob_empirical": 0.0,
+    "deployed_breach_prob_convention": 0.2402944076015408,
+    "tau_lo": 1.0352356533046398,
+    "tau_lo_residual_spread_pct": 0.1345406365964885,
+    "ppl_private_predicted": 2.3772,
+    "ppl_private_deployed_measured": 2.3777,
+    "ppl_margin": 0.04279999999999973,
+    "ppl_clears": true,
+    "delta_gate": 0.05,
+    "ppl_gate": 2.42,
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true,
+    "no_kernel_rebuild": true,
+    "no_hf_job": true,
+    "no_launch": true,
+    "no_submission": true,
+    "self_test_passes": true,
+    "reconcile_line": "Strict #474 private re-run validity. Strict shares the MTP-K7 drafter, body B, global-layer attention, and acceptance with the deployed stack; it differs ONLY by pinning the 7 local reductions to FULL attention (stark #472/#475 added_us(L)). So strict_gap = deployed_gap(4.295%) + local_pinned (the extra L-tax over the private trajectory shift); the deployed ctxlen + acceptance buckets CANCEL out of local_pinned. Central (DP=+50 tok, ubel #379): local_pinned=0.413% -> strict_gap=4.689% (predicted private 440.15 TPS), CLEARS 5% with 0.311pp vs deployed's 0.705pp. Systematic breakeven at DP=+89.5 tok (between #379 central +50 and pessimistic +130); pessimistic +130 corner breaches (5.32%). P(breach) = P(systematic + session-noise > 5%): 0.002% (empirical sigma_hw 0.349 TPS, lawine #467) .. 38.3% (1% convention 4.815, refuted 13.8x by #467) -- STACKS with kanna #478's noise band, no double-count. Strict 461.80 is already official-anchored (kvw uses the 481.53 deployed anchor), so local_to_public_bias=0.9660 does NOT re-multiply it. PPL 2.3772 <= 2.42 (margin 0.0428; greedy-identity invariant, denken #471/#476). VERDICT: private_validity_safe=True (central, realistic noise) with a FLAG -- margin is thinner than deployed and the +130 shift corner breaches."
+  },
+  "self_test_conditions": {
+    "kvw_reproduces_banked_pub": true,
+    "local_pinned_zero_at_no_shift": true,
+    "local_pinned_monotone_in_shift": true,
+    "deployed_gap_reconstructs_4p295": true,
+    "strict_gap_ge_deployed_gap": true,
+    "strict_gap_central_clears_5pct": true,
+    "strict_gap_banked_equals_deployed": true,
+    "breakeven_between_central_and_pessimistic": true,
+    "pessimistic_corner_breaches": true,
+    "strict_pub_below_openevolve_max_verifiable": true,
+    "calibration_bias_in_unit_band": true,
+    "bias_does_not_remultiply_strict": true,
+    "ppl_clears_gate_with_margin": true,
+    "breach_prob_monotone_in_sigma": true,
+    "breach_prob_monotone_in_shift": true,
+    "threshold_is_95pct_of_pub": true,
+    "sigma_empirical_below_convention": true,
+    "nan_clean": true
+  },
+  "public_evidence_used": "openevolve board finding 20260616-062754-273 (mentions @senpai): the 5% Delta gate is actively INVALIDATING high-public entries (w256+precache 508.04->470.95 Delta 7.3% INVALID; verified 489.66 -> private ~470 Delta 3.9%); 'honest private decode ~470'; max verifiable public ~= private/0.95 ~= 495.7. Strict's 461.80 public is BELOW that mirage line (no sliding-window/precache public-only boost), so it sits in the honest regime -- bracketing strict_gap from BELOW (openevolve: removing the window mirage shrinks Delta) while this card's full-attention per-L model is the conservative UPPER bound. Deployed pair from BASELINE.md / cmpatino-verifier (20260613-230441-229)."
+}
