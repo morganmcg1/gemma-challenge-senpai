@@ -1,0 +1,407 @@
+{
+  "config": {
+    "torch": "2.11.0+cu130",
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "sms": 80,
+    "ctx": 128,
+    "M": 8,
+    "iters": 50,
+    "warmup": 40,
+    "rounds": 21,
+    "n_distinct": 8,
+    "e2e_medians": 5,
+    "served_model_dir": "/tmp/osoi5-v0-baked",
+    "group_size": 128,
+    "deployed_num_layers": 37,
+    "self_built_marlin": true,
+    "smoke": false,
+    "note": "Strict-SAFE subset of #450's 677us int4 verify-GEMM allowance. Per-shape reassociation classification (fp32_reduce byte-diff -> split-K?) + exposed-lever surface + strict-safe partition, on the SAME self-built g=128 Marlin path #450 profiled (ops.marlin_gemm; deployed defaults fp32_reduce=True, atomic_add off). No serve change, no HF Job, no submission. Greedy/PPL pinned by construction."
+  },
+  "peak_bw": {
+    "bw_read_gbps": 517.6363566376149,
+    "read_us": 2074.316864013672,
+    "bw_copy_gbps": 482.687581199309,
+    "copy_us": 4449.013671875,
+    "bw_bf16gemm_m8_gbps": 381.75254172789045,
+    "gemm_us": 1410.8262634277346
+  },
+  "components": {
+    "qkv_proj": {
+      "us": 517.1200561523438,
+      "us_lo": 516.9771498400899,
+      "us_hi": 517.2629624645976,
+      "total_bytes": 156073984.0,
+      "achieved_bw_gbps": 301.8138286131771,
+      "f_vs_read": 0.5830614962473935,
+      "f_vs_copy": 0.6252777994894251,
+      "f_vs_spec": 0.5030230476886285,
+      "pct_of_full": 11.041583232995723
+    },
+    "o_proj": {
+      "us": 356.024169921875,
+      "us_lo": 355.8410517717246,
+      "us_hi": 356.2072880720254,
+      "total_bytes": 121675776.0,
+      "achieved_bw_gbps": 341.7626843332019,
+      "f_vs_read": 0.6602370176491718,
+      "f_vs_copy": 0.7080411795224599,
+      "f_vs_spec": 0.5696044738886699,
+      "pct_of_full": 7.601852719463081
+    },
+    "gate_up_proj": {
+      "us": 2132.5003051757812,
+      "us_lo": 2132.3378963006544,
+      "us_hi": 2132.662714050908,
+      "total_bytes": 1013882880.0,
+      "achieved_bw_gbps": 475.4432520076127,
+      "f_vs_read": 0.918488908112881,
+      "f_vs_copy": 0.9849916810088698,
+      "f_vs_spec": 0.7924054200126879,
+      "pct_of_full": 45.533294123580575
+    },
+    "down_proj": {
+      "us": 1147.2897338867188,
+      "us_lo": 1147.1723694346758,
+      "us_hi": 1147.4070983387617,
+      "total_bytes": 507699200.0,
+      "achieved_bw_gbps": 442.5204767413436,
+      "f_vs_read": 0.854886777304056,
+      "f_vs_copy": 0.9167844667597118,
+      "f_vs_spec": 0.7375341279022394,
+      "pct_of_full": 24.49700981108293
+    },
+    "sdpa": {
+      "us": 518.4307861328125,
+      "us_lo": 518.2848476579653,
+      "us_hi": 518.5767246076597,
+      "total_bytes": 12124160.0,
+      "achieved_bw_gbps": 23.386265484808636,
+      "f_vs_read": 0.045178946928530396,
+      "f_vs_copy": 0.048450108094146495,
+      "f_vs_spec": 0.03897710914134773,
+      "pct_of_full": 11.069570030264838
+    },
+    "lm_head": {
+      "us": 37.3760986328125,
+      "us_lo": 37.258173484897576,
+      "us_hi": 37.494023780727424,
+      "total_bytes": 15990784.0,
+      "achieved_bw_gbps": 427.8344874112057,
+      "f_vs_read": 0.8265155295317146,
+      "f_vs_copy": 0.8863590116575765,
+      "f_vs_spec": 0.7130574790186762,
+      "pct_of_full": 0.7980570451076797
+    }
+  },
+  "byte_model": {
+    "qkv_proj": {
+      "weight_bytes": 148111360.0,
+      "scale_bytes": 4628480.0,
+      "act_bytes": 3334144.0,
+      "total_bytes": 156073984.0,
+      "out": 3072,
+      "in": 2560,
+      "ai_flop_per_byte": 29.82993911400378
+    },
+    "o_proj": {
+      "weight_bytes": 115343360.0,
+      "scale_bytes": 3604480.0,
+      "act_bytes": 2727936.0,
+      "total_bytes": 121675776.0,
+      "out": 2560,
+      "in": 2048,
+      "ai_flop_per_byte": 25.508651450885342
+    },
+    "gate_up_proj": {
+      "weight_bytes": 969932800.0,
+      "scale_bytes": 30310400.0,
+      "act_bytes": 13639680.0,
+      "total_bytes": 1013882880.0,
+      "out": 20480,
+      "in": 2560,
+      "ai_flop_per_byte": 30.61285500747384
+    },
+    "down_proj": {
+      "weight_bytes": 484966400.0,
+      "scale_bytes": 15155200.0,
+      "act_bytes": 7577600.0,
+      "total_bytes": 507699200.0,
+      "out": 2560,
+      "in": 10240,
+      "ai_flop_per_byte": 30.567164179104477
+    },
+    "ple": {
+      "weight_bytes": 24248320.0,
+      "scale_bytes": 757760.0,
+      "act_bytes": 0.0,
+      "total_bytes": 25006080.0,
+      "out": null,
+      "in": null,
+      "ai_flop_per_byte": null
+    },
+    "lm_head": {
+      "weight_bytes": 15728640,
+      "scale_bytes": 24576,
+      "act_bytes": 237568.0,
+      "total_bytes": 15990784.0,
+      "out": 12288,
+      "in": 2560,
+      "ai_flop_per_byte": 31.475409836065573
+    },
+    "sdpa": {
+      "weight_bytes": 0.0,
+      "scale_bytes": 0.0,
+      "act_bytes": 2424832.0,
+      "kv_bytes": 9699328.0,
+      "total_bytes": 12124160.0,
+      "out": null,
+      "in": null,
+      "ai_flop_per_byte": null
+    }
+  },
+  "reassociation": {
+    "qkv_proj": {
+      "N": 3072,
+      "K": 2560,
+      "deployed_reassociates_splitk": true,
+      "single_reduction_only": false,
+      "reduce_dtype_byte_noop": false,
+      "fp32T_vs_F_maxabsdiff": 0.00390625,
+      "deterministic_5x_byte_exact": true,
+      "cta_count_no_splitk_tn256": 12,
+      "cta_count_no_splitk_tn64": 48,
+      "sm_saturated_no_splitk_tn256": false,
+      "sms": 80
+    },
+    "o_proj": {
+      "N": 2560,
+      "K": 2048,
+      "deployed_reassociates_splitk": true,
+      "single_reduction_only": false,
+      "reduce_dtype_byte_noop": false,
+      "fp32T_vs_F_maxabsdiff": 0.001953125,
+      "deterministic_5x_byte_exact": true,
+      "cta_count_no_splitk_tn256": 10,
+      "cta_count_no_splitk_tn64": 40,
+      "sm_saturated_no_splitk_tn256": false,
+      "sms": 80
+    },
+    "gate_up_proj": {
+      "N": 20480,
+      "K": 2560,
+      "deployed_reassociates_splitk": false,
+      "single_reduction_only": true,
+      "reduce_dtype_byte_noop": true,
+      "fp32T_vs_F_maxabsdiff": 0.0,
+      "deterministic_5x_byte_exact": true,
+      "cta_count_no_splitk_tn256": 80,
+      "cta_count_no_splitk_tn64": 320,
+      "sm_saturated_no_splitk_tn256": true,
+      "sms": 80
+    },
+    "down_proj": {
+      "N": 2560,
+      "K": 10240,
+      "deployed_reassociates_splitk": true,
+      "single_reduction_only": false,
+      "reduce_dtype_byte_noop": false,
+      "fp32T_vs_F_maxabsdiff": 0.00390625,
+      "deterministic_5x_byte_exact": true,
+      "cta_count_no_splitk_tn256": 10,
+      "cta_count_no_splitk_tn64": 40,
+      "sm_saturated_no_splitk_tn256": false,
+      "sms": 80
+    },
+    "lm_head": {
+      "N": 12288,
+      "K": 2560,
+      "deployed_reassociates_splitk": true,
+      "single_reduction_only": false,
+      "reduce_dtype_byte_noop": false,
+      "fp32T_vs_F_maxabsdiff": 0.00390625,
+      "deterministic_5x_byte_exact": true,
+      "cta_count_no_splitk_tn256": 48,
+      "cta_count_no_splitk_tn64": 192,
+      "sm_saturated_no_splitk_tn256": false,
+      "sms": 80
+    }
+  },
+  "lever_table": [
+    {
+      "lever": "use_fp32_reduce=False",
+      "kind": "exposed",
+      "identity_preserving": false,
+      "reachable_no_rebuild": true,
+      "note": "fp16 split-K reduce -> reassociates; stark #448 +0.64 breaks 3/4 shapes. UNSAFE."
+    },
+    {
+      "lever": "use_atomic_add=True",
+      "kind": "exposed",
+      "identity_preserving": false,
+      "reachable_no_rebuild": false,
+      "note": "non-deterministic atomicAdd order; disabled on sm8x+bf16 (cap<9) AND n>=2048 AND env-gated off -> cannot even enable on A10G for these shapes. UNSAFE."
+    },
+    {
+      "lever": "split-K count change",
+      "kind": "internal-auto",
+      "identity_preserving": false,
+      "reachable_no_rebuild": false,
+      "note": "reassociates (partial-K reduce); auto-chosen by C++ on shape/sm_count; stark #433 realized -5.82. UNSAFE + not exposed. Deployed ALREADY split-Ks the occupancy-limited shapes."
+    },
+    {
+      "lever": "larger BLOCK_M",
+      "kind": "candidate-tile",
+      "identity_preserving": true,
+      "reachable_no_rebuild": false,
+      "note": "M=8 fixed (K=7 spec); BLOCK_M>=M already; no rows to add -> ~0 BW gain. Not exposed."
+    },
+    {
+      "lever": "output-block swizzle / L2 reuse",
+      "kind": "candidate-tile",
+      "identity_preserving": true,
+      "reachable_no_rebuild": false,
+      "note": "per-layer weight working set (4..40 MB) >> 6 MB A10G L2 -> every weight is a cold HBM read read ONCE; swizzle cannot manufacture reuse -> ~0 BW gain. Not exposed."
+    },
+    {
+      "lever": "epilogue fusion",
+      "kind": "candidate-tile",
+      "identity_preserving": true,
+      "reachable_no_rebuild": false,
+      "note": "scale/bias epilogue already fused in Marlin; epilogue bytes ~0.03% -> ~0 gain. Not exposed."
+    },
+    {
+      "lever": "smaller thread_n (more N-tiles, no split-K)",
+      "kind": "candidate-tile",
+      "identity_preserving": true,
+      "reachable_no_rebuild": false,
+      "note": "the ONE physically-plausible safe occupancy lever; but min thread_n=64 yields <=48 CTAs for qkv/o (N<=3072) on 80 SMs -> still under-occupied; only split-K (grid over K) fills SMs at M=8 -> the occupancy gap is split-K-only. Not exposed."
+    },
+    {
+      "lever": "num_warps (K-order-preserving)",
+      "kind": "candidate-tile",
+      "identity_preserving": true,
+      "reachable_no_rebuild": false,
+      "note": "BW-bound at M=8 -> more warps do not read HBM faster; if warps repartition K the reduction tree changes -> UNSAFE. Not exposed."
+    }
+  ],
+  "strict_safe_partition": {
+    "f_sat_single_reduction_ceiling": 0.918488908112881,
+    "f_sat_source_shapes": [
+      "gate_up_proj"
+    ],
+    "allowance_us_total": 676.8804352090226,
+    "occupancy_gap_us_total": 338.37022872229835,
+    "saturation_residual_us_total": 338.5102064867242,
+    "strict_safe_recoverable_us": 0.0,
+    "per_shape": {
+      "qkv_proj": {
+        "us": 517.1200561523438,
+        "f_vs_read": 0.5830614962473935,
+        "allowance_us": 215.6072624726221,
+        "saturation_residual_us": 42.151020413705844,
+        "occupancy_gap_us": 173.45624205891625,
+        "deployed_splitk": true
+      },
+      "o_proj": {
+        "us": 356.024169921875,
+        "f_vs_read": 0.6602370176491718,
+        "allowance_us": 120.96383376163429,
+        "saturation_residual_us": 29.01991882853723,
+        "occupancy_gap_us": 91.94391493309706,
+        "deployed_splitk": true
+      },
+      "gate_up_proj": {
+        "us": 2132.5003051757812,
+        "f_vs_read": 0.918488908112881,
+        "allowance_us": 173.82242832449248,
+        "saturation_residual_us": 173.82242832449248,
+        "occupancy_gap_us": 0.0,
+        "deployed_splitk": false
+      },
+      "down_proj": {
+        "us": 1147.2897338867188,
+        "f_vs_read": 0.854886777304056,
+        "allowance_us": 166.4869106502737,
+        "saturation_residual_us": 93.51683891998867,
+        "occupancy_gap_us": 72.97007173028503,
+        "deployed_splitk": true
+      }
+    }
+  },
+  "end_to_end": {
+    "saved_us": 0.0,
+    "speedup": 1.0,
+    "strict_safe_recoverable_tps": 467.14,
+    "delta_vs_realized": 0.0,
+    "beats_481": false
+  },
+  "e2e_full_us_series": [
+    4683.550720214844,
+    4683.263854980469,
+    4683.284606933594,
+    4683.612060546875,
+    4683.3868408203125
+  ],
+  "f_gemm_vs_read_peak": 0.8370115219758386,
+  "achieved_gemm_bw_gbps": 433.26759469927805,
+  "verdict": {
+    "strict_safe_retile_self_test_passes": true,
+    "strict_safe_headroom_frac": 0.0,
+    "strict_safe_recoverable_tps": 467.14,
+    "strict_safe_recoverable_us": 0.0,
+    "strict_safe_beats_481": false,
+    "strict_safe_identity_is_1p0": true,
+    "strict_safe_recoverable_delta_vs_realized": 0.0,
+    "n_body_shapes_deployed_splitk": 3,
+    "n_body_shapes_total": 4,
+    "f_sat_single_reduction_ceiling": 0.918488908112881,
+    "occupancy_gap_us_total": 338.37022872229835,
+    "saturation_residual_us_total": 338.5102064867242,
+    "allowance_us_total": 676.8804352090226,
+    "n_exposed_identity_preserving_levers": 0,
+    "all_shapes_deterministic_byte_exact": true,
+    "no_new_config_claimed": true,
+    "achieved_gemm_bw_gbps": 433.26759469927805,
+    "f_gemm_vs_read_peak": 0.8370115219758386,
+    "peak_read_gbps": 517.6363566376149,
+    "gemm_us": 4152.934265136719,
+    "full_us_measured": 4683.3868408203125,
+    "e2e_full_us_median_of_n": 5,
+    "analysis_only": true,
+    "no_served_file_change": true,
+    "official_tps": 0.0,
+    "greedy_identical_by_construction": true,
+    "ppl": 2.3772,
+    "ppl_anchor": 2.3772,
+    "ppl_ok": true,
+    "served_model_dir": "/tmp/osoi5-v0-baked",
+    "group_size": 128,
+    "self_built_marlin": true,
+    "deployed_num_layers": 37,
+    "M_verify": 8,
+    "sigma_hw_tps": 4.8,
+    "peak_vram_gib": 2.5095324516296387,
+    "vram_ok": true,
+    "realized_frontier_tps": 467.14,
+    "frontier_deployed_tps": 481.53,
+    "stark_splitk_realized_delta": -5.82,
+    "stark_fp32reduce_false_delta": 0.64,
+    "self_test_conditions": {
+      "a_bw_reproduces_450": true,
+      "b_peak_reproduces_450": true,
+      "c_allowance_reproduces_450": true,
+      "d_f_gemm_in_unit": true,
+      "e_some_shape_splitk_some_not": true,
+      "f_deterministic": true,
+      "g_no_exposed_safe_lever": true,
+      "h_strict_safe_frac_unit": true,
+      "i_partition_closes": true,
+      "j_nan_clean": true,
+      "k_constants": true,
+      "l_ppl_anchor": true,
+      "m_vram_ok": true
+    },
+    "handoff_line": "served int4 verify-GEMM (M=8, sm_86, depth 37) achieves 433 GB/s = 84% read-peak (518 GB/s); #450 allowance 677 us. PER-SHAPE deployed reduction: 3/4 body GEMMs (qkv/o/down) ALREADY split-K (reassociate; det/fp32) to fill SMs at M=8; gate_up (N=20480, 80+ CTAs) is the lone no-split-K shape, SM-saturated at f=0.92 (the single-reduction ceiling). EXPOSED ops.marlin_gemm re-tile knobs = {use_fp32_reduce, use_atomic_add}: BOTH identity-BREAKING (atomic_add also disabled on sm8x+bf16). Tile shape/split-K/num_warps are auto-selected in the compiled kernel -> NOT tunable without a served-kernel REBUILD (denken #447 excluded the vendored Marlin GEMM from its Triton sweep for this reason). The 677 us splits 338 us occupancy-gap (split-K-only AND already exploited by the deployed kernel) + 339 us STREAM-idealization residual (unreachable by ANY tiling). STRICT-SAFE recoverable on the deployable surface = 0 us -> strict_safe_headroom_frac=0.000, strict_safe_recoverable_tps=467.14 (no gain over realized 467.14), beats_481=False. VERDICT: the 16% headroom is ENTIRELY greedy-unsafe -- the prize REQUIRES relaxing strict equivalence (and even the unsafe lever realizes negative: stark #433 split-K -5.82). A byte-exact (no-split-K) rebuild would be SLOWER on the occupancy-limited shapes, so strict-safe recoverable is <=0 even WITH a kernel rebuild."
+  }
+}
