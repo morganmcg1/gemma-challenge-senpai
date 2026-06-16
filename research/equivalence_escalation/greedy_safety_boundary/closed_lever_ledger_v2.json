@@ -1,0 +1,176 @@
+{
+  "annex": "greedy-safety-boundary + closed-lever-annex-v2",
+  "pr": 460,
+  "supersedes_pr": 456,
+  "agent": "denken",
+  "for_decision": "relax-strict-equivalence escalation (GitHub issue #407)",
+  "date": "2026-06-16",
+  "wandb_entity": "wandb-applied-ai-team",
+  "wandb_project": "gemma-challenge-senpai",
+  "wandb_group": "equivalence-escalation-anchors",
+  "run_url_base": "https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/",
+  "model": "google/gemma-4-E4B-it",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "ppl": 2.3772,
+  "ppl_gate": 2.42,
+  "sigma_hw_tps": 4.8,
+
+  "principle": "A change to the served verify path is byte-exact (greedy-identical) IFF it preserves the order of every floating-point reduction. byte-exact <=> reduction-order-preserving. Every material bandwidth-saving lever recovers BW by REASSOCIATING a reduction, therefore is greedy-unsafe. PPL-pass != greedy-identical: a reassociating change can be PPL-neutral (teacher-forced) yet identity-breaking (free-running argmax cascade).",
+
+  "anchors": {
+    "deployed_non_equivalent": {
+      "label": "Deployed incumbent (NON-equivalent: 3/882 M=8 flips, identity 0.9966)",
+      "tps": 481.53, "ppl": 2.3772, "pr": 52, "run_id": "2x9fm2zx"
+    },
+    "realized_blanket_strict_frontier": {
+      "label": "Realized blanket-strict (byte-exact) frontier",
+      "tps": 467.14, "pr": 423, "run_id": "5a6zq2yz"
+    },
+    "verify_bw_lambda1_wall": {
+      "label": "Verify-BW lambda=1 wall (identity-free demand ceiling)",
+      "tps": 520.95, "pr": 436, "run_id": "nvsbctji"
+    },
+    "roofline_perfect_retile_ceiling": {
+      "label": "Roofline perfect-f->1 re-tile ceiling on the int4-GEMM (greedy-UNSAFE)",
+      "tps": 510.87, "pr": 450, "run_id": "c5oyb7gv"
+    },
+    "gap_realized_to_deployed_tps": 14.39,
+    "gap_in_sigma_hw": -2.99
+  },
+
+  "greedy_safety_boundary": {
+    "definition": {
+      "preserving": "Does not change the order in which the FP reduction accumulates (pipeline/scheduling knob, or no exposed knob -> stays at deployed order). Byte-exact / greedy-identical.",
+      "reassociating": "Re-partitions or re-combines an FP reduction -> different float rounding order -> can flip a low-bit argmax -> greedy-unsafe."
+    },
+    "kernels": [
+      {
+        "kernel": "int4-Marlin W4A16 GEMM",
+        "frac_of_verify": 0.8509,
+        "frac_source_run": "crrq2e1y",
+        "reduction": "K-dim (contraction) accumulation",
+        "levers": [
+          {"lever": "tile/kernel-config (no exposed num_splits/max_par knob -> deployed in-kernel order)", "class": "preserving", "run_id": "fn4iz0dz", "pr": 448, "result": "+0.00 byte-exact-safe; Marlin is the UNIQUE sm_86 int4 GEMM"},
+          {"lever": "split-K / BLOCK_K / num_warps re-tile (re-partitions K reduction)", "class": "reassociating", "run_id": "c5oyb7gv", "pr": 450, "result": "greedy-UNSAFE (realistic_splitk_greedy_safe=false); the ~16% BW slack, +12.6..+31.4 TPS unsafe"},
+          {"lever": "use_fp32_reduce=False (changes K-reduce accumulation order)", "class": "reassociating", "run_id": "fn4iz0dz", "pr": 448, "result": "breaks byte-exactness on 3/4 shapes; identity-breaking UB +0.64 < +2"}
+        ]
+      },
+      {
+        "kernel": "Triton 3D split-KV attention (head-256 sliding x35 + head-512 global x7)",
+        "frac_of_verify": 0.1419,
+        "frac_source_run": "crrq2e1y",
+        "reduction": "online-softmax segment merge (reduce_segments: max + exp-rescale + sum-PV) across the KV-partition axis",
+        "levers": [
+          {"lever": "num_stages (software-pipeline depth; accumulation order identical)", "class": "preserving", "run_id": "crrq2e1y", "pr": 447, "result": "+0.2613 byte-exact (kernel +6.11% on the tunable slice); ref #428 bit-identical supply ceiling"},
+          {"lever": "BLOCK_M / BLOCK_Q tile (BLOCK_Q 4->1 ⇒ grid 96->288 CTAs; re-partitions the split-KV reduction)", "class": "reassociating", "run_id": "grrc3zms", "pr": 442, "result": "greedy-UNSAFE: census 53.1% identical (byte_exact=0, 30/64 diverge), floor-proven REAL (cy0ijlit 100%); wall -5.65 TPS evaporates (gyw2ksvs) -- LEVER #21"}
+        ]
+      },
+      {
+        "kernel": "lm_head vocab GEMM (262144 vocab)",
+        "frac_of_verify": 0.0064,
+        "frac_source_run": "crrq2e1y",
+        "reduction": "hidden->vocab projection K-accumulation (produces logits; argmax selects token)",
+        "levers": [
+          {"lever": "full-hidden read (deployed order; verify GEMM reads full 12288 hidden)", "class": "preserving", "run_id": null, "pr": 144, "result": "pinned; candidate-restricted read 2.1x SLOWER + correctness-impossible -> no byte-exact lever, no BW headroom"},
+          {"lever": "split-K on lm_head (immaterial)", "class": "reassociating", "run_id": null, "pr": null, "result": "would reorder -> greedy-unsafe, but 0.64% of verify -> ~0 BW headroom"}
+        ]
+      },
+      {
+        "kernel": "RMSNorm (Sigma x^2 over hidden)",
+        "frac_of_verify": 0.001,
+        "frac_source_run": "estimate",
+        "reduction": "sum-of-squares over hidden (input/post-attn/pre&post-feedforward norms, Gemma q/k norms, final norm)",
+        "levers": [
+          {"lever": "deployed reduction order", "class": "preserving", "run_id": null, "pr": null, "result": "pinned; memory-trivial at bs=1, not BW-bound -> no headroom either way"},
+          {"lever": "tree-reduce reorder (immaterial)", "class": "reassociating", "run_id": null, "pr": null, "result": "greedy-unsafe but ~0 BW"}
+        ]
+      },
+      {
+        "kernel": "drafter fused-sparse-argmax (not verify; listed for completeness)",
+        "frac_of_verify": 0.0,
+        "frac_source_run": "xryqregh",
+        "reduction": "fused sparse argmax (M-invariant by construction)",
+        "levers": [
+          {"lever": "fused-sparse-argmax tile sweep", "class": "preserving", "run_id": "xryqregh", "pr": 449, "result": "+0.00 (served default wins the full 45-config grid sub-us)"}
+        ]
+      }
+    ],
+    "preserving_levers_max_realized_tps": 0.2613,
+    "preserving_levers_max_realized_run": "crrq2e1y",
+    "byte_exact_levers_all_capped_le_0p26": true,
+    "every_material_headroom_is_reassociating": true
+  },
+
+  "reduction_enumeration": {
+    "reduction_count_enumerated": 4,
+    "completeness_claim": "Every FP reduction in the served Gemma-4-E4B M=8 verify forward (+ lm_head) falls into one of these 4 families. Each is either (a) pinned to deployed order = byte-exact with NO material BW headroom, or (b) reassociable-for-BW-but-greedy-unsafe. No reduction is in class (a) with material BW headroom; no member of class (b) is greedy-safe.",
+    "families": [
+      {"id": "R1", "name": "GEMM K-reduction (W4A16 contraction accumulate)", "where": "int4-Marlin: qkv/o/gate_up/down x all layers", "frac_of_verify": 0.8509, "order": "pinned (Marlin in-kernel split-K = f(M); no Python knob)", "material_bw_headroom": true, "bw_note": "~16% achieved-BW slack (#450)", "class_a_or_b": "b", "reassoc_lever_runs": ["c5oyb7gv", "fn4iz0dz"], "pinned_run": "fn4iz0dz"},
+      {"id": "R2", "name": "Attention split-KV online-softmax merge (reduce_segments)", "where": "Triton 3D: head-256 sliding x35 + head-512 global x7", "frac_of_verify": 0.1419, "order": "pinned (deployed BLOCK_M=16 / BLOCK_Q=4 partition)", "material_bw_headroom": true, "bw_note": "byte-exact num_stages -> +0.26 only; material BW only via partition change (reassociating); FLAG-2 surface possibly larger", "class_a_or_b": "b", "reassoc_lever_runs": ["grrc3zms"], "pinned_run": "crrq2e1y"},
+      {"id": "R3", "name": "lm_head vocab GEMM K-reduction (hidden->vocab logits)", "where": "lm_head", "frac_of_verify": 0.0064, "order": "pinned (full-hidden read, #144)", "material_bw_headroom": false, "bw_note": "none: candidate-restrict 2.1x slower + correctness-impossible", "class_a_or_b": "a", "reassoc_lever_runs": [], "pinned_run": null},
+      {"id": "R4", "name": "RMSNorm Sigma x^2 (sum-of-squares over hidden)", "where": "all norms", "frac_of_verify": 0.001, "order": "pinned", "material_bw_headroom": false, "bw_note": "none: memory-trivial at bs=1", "class_a_or_b": "a", "reassoc_lever_runs": [], "pinned_run": null}
+    ]
+  },
+
+  "ppl_trap": {
+    "statement": "PPL-pass != greedy-identical.",
+    "why": "PPL is teacher-forced (conditions on ground-truth prefix; robust to sub-ULP per-logit perturbation). Greedy identity is free-running (conditions on the model's own argmax; a single flip cascades).",
+    "live_proof_pr": 442,
+    "ppl_bm4": 2.3767,
+    "ppl_gate": 2.42,
+    "ppl_passed": true,
+    "census_frac_identical": 0.53125,
+    "byte_exact_and_ppl_pass": false,
+    "census_run": "grrc3zms",
+    "lesson": "Certify greedy identity by a served same-path census, never by PPL or an a-priori byte-exact assertion. #442's a-priori assertion was wrong; only the census caught it."
+  },
+
+  "flag2_triton_attn_surface": {
+    "status": "pending-wirbel",
+    "metric": "triton_verify_attn_frac_of_verify",
+    "reseat_group": "equivalence-escalation-anchors",
+    "as_of_date": "2026-06-16",
+    "landed": false,
+    "carried_value_447_lower_bound": 0.0127,
+    "carried_value_447_run": "crrq2e1y",
+    "upper_bound_full_attention": 0.1419,
+    "upper_bound_note": "if all sliding (x35) + global (x7) route through Triton 3D split-KV in verify",
+    "robust_to_correction": true,
+    "robustness_argument": "Even at the 14.19% upper bound: (1) the byte-exact knob (num_stages) is partition-invariant -> ceiling stays #447 +0.26 (and #442's served wall A/B on the full head-256+512 surface realized -5.65: the 3D path is occupancy-saturated past 80 SMs, retiling adds CTA overhead, not speedup; deleting the whole kernel caps at +4.27). (2) The material BW of the larger surface is recoverable only by a partition change (BLOCK_M/BLOCK_Q/num_splits) = greedy-unsafe (#442 identity 0.531). The correction only enlarges the greedy-unsafe column; it does not move headroom into the byte-exact column. closed_lever_count stays 21."
+  },
+
+  "new_lever_21": {
+    "id": "supply-verify-attn-triton-tile-reassoc",
+    "axis": "supply",
+    "lever": "Triton 3D split-KV attention tile re-tile (BLOCK_M/BLOCK_Q) -- the reassociating sibling of #447 num_stages",
+    "mechanism": "Re-tile the Triton 3D split-KV attention partition (BLOCK_M 16->4, BLOCK_Q 4->1) to cash the attention BW (modeled isolated +15.86 -> 483.0).",
+    "closing_pr": 442,
+    "closing_run_id": "gyw2ksvs",
+    "supporting_run_ids": ["grrc3zms", "cy0ijlit", "e5n9a2dc"],
+    "closing_number_tps": -5.65,
+    "closing_number_text": "greedy-UNSAFE (census 53.1% identical, floor-proven REAL) AND wall -5.65 TPS (evaporates, 475.88 < 481.53)",
+    "reason_class": "physics",
+    "reason": "The BLOCK_M/BLOCK_Q partition change re-partitions the 3D split-KV online-softmax reduction -> FP-reassociation -> flipped argmax -> greedy-UNSAFE. Served greedy census = 34/64 = 53.1% identical (byte_exact=0, 30 prompts diverge, first flip @ tok 290), proven REAL not eager-FP by a 100% default-vs-default floor (cy0ijlit). The injector's a-priori byte-exact argument was EMPIRICALLY REFUTED -- #450's split-K reassociation hazard lives in the Triton attention too, not just the Marlin GEMM. Additionally wall-negative: -5.65 TPS (acceptance-drift e_accept 3.8416->3.8214 + grid 96->288 CTA overhead on the occupancy-saturated 3D path). 4th kernel-tiling strict-NULL (#447/#448/#449/#442); 5th isolated-op collapse (+15.86 isolated -> -5.65 served). PPL passed (2.3767) but byte_exact_and_ppl_pass=False -- PPL-pass != greedy-identical. num_stages-only sibling stays byte-exact +0.26 (#447)."
+  },
+
+  "verdict": {
+    "principle": "byte-exact <=> reduction-order-preserving",
+    "strict_frontier_closed": true,
+    "best_realized_byte_exact_delta_tps": 0.2613,
+    "best_realized_byte_exact_delta_pr": 447,
+    "both_axes_closed": ["supply", "demand"],
+    "only_material_headroom_is_greedy_unsafe": true,
+    "byte_exact_levers_all_capped_le_0p26": true,
+    "every_material_headroom_is_reassociating": true,
+    "closed_lever_count": 21,
+    "reduction_count_enumerated": 4,
+    "escalation_warranted": true,
+    "escalation_target": "GitHub issue #407 (relax strict equivalence)",
+    "ppl": 2.3772,
+    "ppl_ok": true
+  }
+}
