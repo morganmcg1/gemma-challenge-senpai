@@ -1,7 +1,7 @@
 {
   "pr": 496,
-  "generated_utc": "2026-06-16T14:39:20.921653+00:00",
-  "submission": "fa2sw_precache_kenyan",
+  "generated_utc": "2026-06-16T16:54:33.258201+00:00",
+  "submission": "fa2sw_strict_byteexact_splitkv399",
   "candidate": {
     "fixed_tps": 4,
     "num_segments": 64,
@@ -9,160 +9,18 @@
     "coverage_keys": 4096
   },
   "workload": {
-    "num_prompts": 32,
-    "output_len": 256,
+    "num_prompts": 128,
+    "output_len": 512,
     "seed": 1,
     "n_decodes": 3
   },
-  "elapsed_s": 1303.6218683719635,
+  "elapsed_s": 1970.2432634830475,
   "git": {
-    "git_commit": "ce43beb27c7a3686d3d7c5acf3c36040b7dfc4f8",
-    "git_branch": "lawine/faster-byteexact-attention",
+    "git_commit": "1f9892a9eb23b760fa3a4d4e8ccb1471dfc44ed7",
+    "git_branch": "lawine/package-certify-byteexact-399",
     "git_dirty": true
   },
   "arms": {
-    "deployed": {
-      "arm": "deployed",
-      "label": "(a) deployed 3D split-KV adaptive (no flag, ~464, NON-exact)",
-      "kind": "speed",
-      "extra_env": {},
-      "median_wall_tps": 426.3578971587996,
-      "wall_tps_values": [
-        405.5294810493191,
-        426.4896999967181,
-        426.2260943208811
-      ],
-      "warm_wall_tps_values": [
-        426.4896999967181,
-        426.2260943208811
-      ],
-      "wall_tps_n": 2,
-      "wall_tps_std": 0.18639736094362486,
-      "server_ready_s": 85.02029013633728,
-      "peak_gpu_mem_mib": 19395,
-      "ppl": 2.376682786480556,
-      "ppl_num_records": 128,
-      "num_completed_prompts": 32,
-      "completion_full": true,
-      "mechanism": {
-        "splitkv_armed": true,
-        "splitkv_redirects": 5,
-        "graph_capture_lines": 5,
-        "onegraph_captured": true,
-        "fatal_traceback": false,
-        "n_tracebacks": 1,
-        "benign_usage_tracebacks": 2,
-        "batch_invariant_mentions": 0,
-        "byteexact_armed": false,
-        "byteexact_log": null,
-        "ref_mode_cleared_spec": false
-      },
-      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/serve_run/deployed/decode_round02.jsonl",
-      "decodes": [
-        {
-          "arm": "deployed",
-          "round": 0,
-          "wall_tps": 405.5294810493191,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 20.200750827789307,
-          "wall_around_decode_s": 28.35776686668396,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        },
-        {
-          "arm": "deployed",
-          "round": 1,
-          "wall_tps": 426.4896999967181,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 19.207966804504395,
-          "wall_around_decode_s": 27.460805416107178,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        },
-        {
-          "arm": "deployed",
-          "round": 2,
-          "wall_tps": 426.2260943208811,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 19.21984624862671,
-          "wall_around_decode_s": 27.405640125274658,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        }
-      ]
-    },
-    "surgical": {
-      "arm": "surgical",
-      "label": "(b) surgical byte-exact 2D (the 357.6 ceiling)",
-      "kind": "speed",
-      "extra_env": {
-        "SURGICAL_ATTN_USE_3D_OFF": "1"
-      },
-      "median_wall_tps": 345.2162942964171,
-      "wall_tps_values": [
-        328.2598304488762,
-        345.1099384203073,
-        345.32265017252695
-      ],
-      "warm_wall_tps_values": [
-        345.1099384203073,
-        345.32265017252695
-      ],
-      "wall_tps_n": 2,
-      "wall_tps_std": 0.15040992243259518,
-      "server_ready_s": 85.01442241668701,
-      "peak_gpu_mem_mib": 19395,
-      "ppl": 2.3766755065685943,
-      "ppl_num_records": 128,
-      "num_completed_prompts": 32,
-      "completion_full": true,
-      "mechanism": {
-        "splitkv_armed": true,
-        "splitkv_redirects": 0,
-        "graph_capture_lines": 5,
-        "onegraph_captured": true,
-        "fatal_traceback": false,
-        "n_tracebacks": 1,
-        "benign_usage_tracebacks": 2,
-        "batch_invariant_mentions": 0,
-        "byteexact_armed": false,
-        "byteexact_log": null,
-        "ref_mode_cleared_spec": false
-      },
-      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/serve_run/surgical/decode_round02.jsonl",
-      "decodes": [
-        {
-          "arm": "surgical",
-          "round": 0,
-          "wall_tps": 328.2598304488762,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 24.955840587615967,
-          "wall_around_decode_s": 33.51616621017456,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        },
-        {
-          "arm": "surgical",
-          "round": 1,
-          "wall_tps": 345.1099384203073,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 23.73736333847046,
-          "wall_around_decode_s": 31.965237617492676,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        },
-        {
-          "arm": "surgical",
-          "round": 2,
-          "wall_tps": 345.32265017252695,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 23.72274160385132,
-          "wall_around_decode_s": 32.41550278663635,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        }
-      ]
-    },
     "byteexact": {
       "arm": "byteexact",
       "label": "(c) byteexact fixed split-KV T=4 seg=64  <-- TEST",
@@ -171,23 +29,23 @@
         "BYTEEXACT_FIXED_TPS": "4",
         "BYTEEXACT_NUM_SEGMENTS": "64"
       },
-      "median_wall_tps": 399.7475810022861,
+      "median_wall_tps": 444.82227295018606,
       "wall_tps_values": [
-        389.4926635562259,
-        399.7857705340657,
-        399.70939147050655
+        442.32660918174946,
+        444.83324180236025,
+        444.8113040980118
       ],
       "warm_wall_tps_values": [
-        399.7857705340657,
-        399.70939147050655
+        444.83324180236025,
+        444.8113040980118
       ],
       "wall_tps_n": 2,
-      "wall_tps_std": 0.054008153783359665,
-      "server_ready_s": 85.01896214485168,
+      "wall_tps_std": 0.01551229950844149,
+      "server_ready_s": 85.0220513343811,
       "peak_gpu_mem_mib": 19535,
       "ppl": 2.3766643358900286,
       "ppl_num_records": 128,
-      "num_completed_prompts": 32,
+      "num_completed_prompts": 128,
       "completion_full": true,
       "mechanism": {
         "splitkv_armed": true,
@@ -199,7 +57,7 @@
         "benign_usage_tracebacks": 2,
         "batch_invariant_mentions": 0,
         "byteexact_armed": true,
-        "byteexact_log": "(EngineCore pid=1176616) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
+        "byteexact_log": "(EngineCore pid=1209879) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
         "ref_mode_cleared_spec": false
       },
       "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/serve_run/byteexact/decode_round02.jsonl",
@@ -207,32 +65,32 @@
         {
           "arm": "byteexact",
           "round": 0,
-          "wall_tps": 389.4926635562259,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 21.032488584518433,
-          "wall_around_decode_s": 29.359337091445923,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
+          "wall_tps": 442.32660918174946,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 148.1620111465454,
+          "wall_around_decode_s": 156.50700402259827,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
         },
         {
           "arm": "byteexact",
           "round": 1,
-          "wall_tps": 399.7857705340657,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 20.49097442626953,
-          "wall_around_decode_s": 28.907782316207886,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
+          "wall_tps": 444.83324180236025,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 147.32711911201477,
+          "wall_around_decode_s": 155.8598189353943,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
         },
         {
           "arm": "byteexact",
           "round": 2,
-          "wall_tps": 399.70939147050655,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 20.494889974594116,
-          "wall_around_decode_s": 28.808639526367188,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
+          "wall_tps": 444.8113040980118,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 147.33438515663147,
+          "wall_around_decode_s": 155.91983675956726,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
         }
       ]
     },
@@ -245,21 +103,23 @@
         "BYTEEXACT_NUM_SEGMENTS": "64",
         "SENPAI_REFERENCE_MODE": "1"
       },
-      "median_wall_tps": 152.6275396060043,
+      "median_wall_tps": 153.55339136343872,
       "wall_tps_values": [
-        151.64554351443306,
-        152.6275396060043
+        152.8464769742294,
+        153.54133745340846,
+        153.56544527346895
       ],
       "warm_wall_tps_values": [
-        152.6275396060043
+        153.54133745340846,
+        153.56544527346895
       ],
-      "wall_tps_n": 1,
-      "wall_tps_std": 0.0,
-      "server_ready_s": 85.01700043678284,
+      "wall_tps_n": 2,
+      "wall_tps_std": 0.017046803044399803,
+      "server_ready_s": 85.01741743087769,
       "peak_gpu_mem_mib": 19349,
       "ppl": null,
       "ppl_num_records": null,
-      "num_completed_prompts": 32,
+      "num_completed_prompts": 128,
       "completion_full": true,
       "mechanism": {
         "splitkv_armed": true,
@@ -271,163 +131,40 @@
         "benign_usage_tracebacks": 2,
         "batch_invariant_mentions": 0,
         "byteexact_armed": true,
-        "byteexact_log": "(EngineCore pid=1179088) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
+        "byteexact_log": "(EngineCore pid=1213687) [byteexact] fixed split-KV armed: tiles_per_segment=4 num_par_softmax_segments=64 (coverage 4096 keys)",
         "ref_mode_cleared_spec": true
       },
-      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/serve_run/byteexact_ref/decode_round01.jsonl",
+      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/serve_run/byteexact_ref/decode_round02.jsonl",
       "decodes": [
         {
           "arm": "byteexact_ref",
           "round": 0,
-          "wall_tps": 151.64554351443306,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 54.020710468292236,
-          "wall_around_decode_s": 62.315871477127075,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
+          "wall_tps": 152.8464769742294,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 428.7701051235199,
+          "wall_around_decode_s": 437.50361680984497,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
         },
         {
           "arm": "byteexact_ref",
           "round": 1,
-          "wall_tps": 152.6275396060043,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 53.673144578933716,
-          "wall_around_decode_s": 61.958937883377075,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        }
-      ]
-    },
-    "full_flag": {
-      "arm": "full_flag",
-      "label": "(g) full_flag batch-invariant (M=8==M=1 BY CONSTRUCTION, ~222)",
-      "kind": "speed",
-      "extra_env": {
-        "VLLM_BATCH_INVARIANT": "1"
-      },
-      "median_wall_tps": 212.28231683041435,
-      "wall_tps_values": [
-        195.22535579864746,
-        212.19987611780655,
-        212.36475754302217
-      ],
-      "warm_wall_tps_values": [
-        212.19987611780655,
-        212.36475754302217
-      ],
-      "wall_tps_n": 2,
-      "wall_tps_std": 0.11658877386166146,
-      "server_ready_s": 100.01672863960266,
-      "peak_gpu_mem_mib": 19379,
-      "ppl": 2.376983434473497,
-      "ppl_num_records": 128,
-      "num_completed_prompts": 32,
-      "completion_full": true,
-      "mechanism": {
-        "splitkv_armed": true,
-        "splitkv_redirects": 0,
-        "graph_capture_lines": 5,
-        "onegraph_captured": true,
-        "fatal_traceback": false,
-        "n_tracebacks": 1,
-        "benign_usage_tracebacks": 2,
-        "batch_invariant_mentions": 3,
-        "byteexact_armed": false,
-        "byteexact_log": null,
-        "ref_mode_cleared_spec": false
-      },
-      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/serve_run/full_flag/decode_round02.jsonl",
-      "decodes": [
-        {
-          "arm": "full_flag",
-          "round": 0,
-          "wall_tps": 195.22535579864746,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 41.96176242828369,
-          "wall_around_decode_s": 50.34141302108765,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
+          "wall_tps": 153.54133745340846,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 426.82968044281006,
+          "wall_around_decode_s": 435.31584334373474,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
         },
         {
-          "arm": "full_flag",
-          "round": 1,
-          "wall_tps": 212.19987611780655,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 38.605112075805664,
-          "wall_around_decode_s": 46.838589906692505,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        },
-        {
-          "arm": "full_flag",
+          "arm": "byteexact_ref",
           "round": 2,
-          "wall_tps": 212.36475754302217,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 38.57513880729675,
-          "wall_around_decode_s": 46.83520793914795,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        }
-      ]
-    },
-    "full_flag_ref": {
-      "arm": "full_flag_ref",
-      "label": "(h) full_flag M=1 AR reference -- DECISIVE gate-validity control",
-      "kind": "ref",
-      "extra_env": {
-        "VLLM_BATCH_INVARIANT": "1",
-        "SENPAI_REFERENCE_MODE": "1"
-      },
-      "median_wall_tps": 134.6966329336975,
-      "wall_tps_values": [
-        133.83404044414482,
-        134.6966329336975
-      ],
-      "warm_wall_tps_values": [
-        134.6966329336975
-      ],
-      "wall_tps_n": 1,
-      "wall_tps_std": 0.0,
-      "server_ready_s": 95.01582455635071,
-      "peak_gpu_mem_mib": 19357,
-      "ppl": null,
-      "ppl_num_records": null,
-      "num_completed_prompts": 32,
-      "completion_full": true,
-      "mechanism": {
-        "splitkv_armed": true,
-        "splitkv_redirects": 0,
-        "graph_capture_lines": 4,
-        "onegraph_captured": false,
-        "fatal_traceback": false,
-        "n_tracebacks": 1,
-        "benign_usage_tracebacks": 2,
-        "batch_invariant_mentions": 1,
-        "byteexact_armed": false,
-        "byteexact_log": null,
-        "ref_mode_cleared_spec": true
-      },
-      "warm_decode_out": "/workspace/senpai/target/research/speed/byteexact_attn/serve_run/full_flag_ref/decode_round01.jsonl",
-      "decodes": [
-        {
-          "arm": "full_flag_ref",
-          "round": 0,
-          "wall_tps": 133.83404044414482,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 61.210137367248535,
-          "wall_around_decode_s": 69.42145419120789,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
-        },
-        {
-          "arm": "full_flag_ref",
-          "round": 1,
-          "wall_tps": 134.6966329336975,
-          "num_completion_tokens": 8192,
-          "decode_duration_s": 60.81814980506897,
-          "wall_around_decode_s": 69.1705071926117,
-          "num_completed_prompts": 32,
-          "expected_tokens": 8192
+          "wall_tps": 153.56544527346895,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 426.7626736164093,
+          "wall_around_decode_s": 435.1813690662384,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
         }
       ]
     }
@@ -436,447 +173,92 @@
     "byteexact_vs_byteexact_ref": {
       "label": "byteexact M=8 vs its M=1 AR reference (OPERATIVE GATE; expect 1.0)",
       "available": true,
-      "n_prompts_compared": 32,
-      "n_tokens_compared": 8192,
-      "n_tokens_matched": 4139,
-      "token_identity_rate": 0.5052490234375,
-      "n_sequences_with_any_flip": 27,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 26061,
+      "token_identity_rate": 0.3976593017578125,
+      "n_sequences_with_any_flip": 117,
       "first_divergences": [
         {
-          "prompt": "gpqa_diamond-049a3a3426",
-          "pos": 231,
-          "a": 2299,
-          "b": 77891
+          "prompt": "aime2026-0e674f51e8",
+          "pos": 12,
+          "a": 236761,
+          "b": 236787
         },
         {
-          "prompt": "gpqa_diamond-123161632f",
-          "pos": 159,
-          "a": 496,
-          "b": 600
+          "prompt": "aime2026-1eaadd490a",
+          "pos": 290,
+          "a": 823,
+          "b": 2532
         },
         {
-          "prompt": "gpqa_diamond-183797b844",
-          "pos": 115,
-          "a": 156726,
-          "b": 11404
+          "prompt": "aime2026-2822569975",
+          "pos": 22,
+          "a": 1288,
+          "b": 532
         },
         {
-          "prompt": "gpqa_diamond-188c5d2778",
-          "pos": 156,
-          "a": 28998,
-          "b": 35122
+          "prompt": "aime2026-4d866680f9",
+          "pos": 218,
+          "a": 609,
+          "b": 657
         },
         {
-          "prompt": "gpqa_diamond-1ce3d847d2",
-          "pos": 246,
-          "a": 53121,
-          "b": 568
+          "prompt": "aime2026-5e99c1f8e3",
+          "pos": 224,
+          "a": 7714,
+          "b": 3792
         },
-        {
-          "prompt": "gpqa_diamond-1f06efeb23",
-          "pos": 53,
-          "a": 18179,
-          "b": 23718
-        },
-        {
-          "prompt": "gpqa_diamond-1f101bccd2",
-          "pos": 185,
-          "a": 145300,
-          "b": 504
-        },
-        {
-          "prompt": "gpqa_diamond-2662eff7a6",
-          "pos": 171,
-          "a": 4781,
-          "b": 11387
-        },
-        {
-          "prompt": "gpqa_diamond-27ae63a859",
-          "pos": 129,
-          "a": 568,
-          "b": 621
-        },
-        {
-          "prompt": "gpqa_diamond-2c52c770af",
-          "pos": 1,
-          "a": 2934,
-          "b": 2608
-        }
-      ]
-    },
-    "byteexact_vs_deployed": {
-      "label": "byteexact vs deployed served (different configs; expect flips)",
-      "available": true,
-      "n_prompts_compared": 32,
-      "n_tokens_compared": 8192,
-      "n_tokens_matched": 4562,
-      "token_identity_rate": 0.556884765625,
-      "n_sequences_with_any_flip": 24,
-      "first_divergences": [
         {
           "prompt": "aime2026-652b177c71",
-          "pos": 113,
-          "a": 236784,
-          "b": 236795
+          "pos": 443,
+          "a": 236800,
+          "b": 236812
         },
         {
-          "prompt": "gpqa_diamond-123161632f",
-          "pos": 90,
-          "a": 107,
-          "b": 900
+          "prompt": "aime2026-7443669f7e",
+          "pos": 424,
+          "a": 4338,
+          "b": 874
         },
         {
-          "prompt": "gpqa_diamond-16464cac70",
-          "pos": 119,
-          "a": 2258,
-          "b": 13757
+          "prompt": "aime2026-77bffe9f7e",
+          "pos": 388,
+          "a": 2859,
+          "b": 10081
         },
         {
-          "prompt": "gpqa_diamond-183797b844",
-          "pos": 157,
-          "a": 691,
-          "b": 236764
+          "prompt": "aime2026-7968ea2f49",
+          "pos": 99,
+          "a": 2532,
+          "b": 2104
         },
         {
-          "prompt": "gpqa_diamond-188c5d2778",
-          "pos": 182,
-          "a": 68902,
-          "b": 121353
-        },
-        {
-          "prompt": "gpqa_diamond-1ce3d847d2",
-          "pos": 246,
-          "a": 53121,
-          "b": 568
-        },
-        {
-          "prompt": "gpqa_diamond-1f06efeb23",
-          "pos": 53,
-          "a": 18179,
-          "b": 23718
-        },
-        {
-          "prompt": "gpqa_diamond-1f101bccd2",
-          "pos": 85,
-          "a": 1156,
-          "b": 614
-        },
-        {
-          "prompt": "gpqa_diamond-2662eff7a6",
-          "pos": 171,
-          "a": 4781,
-          "b": 11387
-        },
-        {
-          "prompt": "gpqa_diamond-2c52c770af",
-          "pos": 53,
-          "a": 2433,
-          "b": 14966
-        }
-      ]
-    },
-    "full_flag_vs_full_flag_ref": {
-      "label": "full_flag M=8 vs its M=1 AR reference (DECISIVE CONTROL: byte-exact BY CONSTRUCTION; gate valid iff ~1.0)",
-      "available": true,
-      "n_prompts_compared": 32,
-      "n_tokens_compared": 8192,
-      "n_tokens_matched": 5284,
-      "token_identity_rate": 0.64501953125,
-      "n_sequences_with_any_flip": 20,
-      "first_divergences": [
-        {
-          "prompt": "gpqa_diamond-049a3a3426",
-          "pos": 113,
-          "a": 1208,
-          "b": 6641
-        },
-        {
-          "prompt": "gpqa_diamond-123161632f",
-          "pos": 28,
-          "a": 35122,
-          "b": 6608
-        },
-        {
-          "prompt": "gpqa_diamond-16464cac70",
-          "pos": 235,
-          "a": 108,
-          "b": 107
-        },
-        {
-          "prompt": "gpqa_diamond-183797b844",
-          "pos": 115,
-          "a": 156726,
-          "b": 11404
-        },
-        {
-          "prompt": "gpqa_diamond-188c5d2778",
-          "pos": 76,
-          "a": 19544,
-          "b": 1908
-        },
-        {
-          "prompt": "gpqa_diamond-1f06efeb23",
-          "pos": 179,
-          "a": 1174,
-          "b": 107
-        },
-        {
-          "prompt": "gpqa_diamond-2662eff7a6",
-          "pos": 171,
-          "a": 11387,
-          "b": 4781
-        },
-        {
-          "prompt": "gpqa_diamond-2c52c770af",
-          "pos": 149,
-          "a": 2557,
-          "b": 3715
-        },
-        {
-          "prompt": "gpqa_diamond-435ccdce7c",
-          "pos": 119,
-          "a": 684,
-          "b": 531
-        },
-        {
-          "prompt": "mmlu_pro-001de7fe6d",
-          "pos": 21,
-          "a": 11826,
-          "b": 22861
-        }
-      ]
-    },
-    "byteexact_vs_full_flag": {
-      "label": "byteexact M=8 vs full_flag M=8 ground truth (served-vs-served matched-config; flips => margin-census ULP-ties?)",
-      "available": true,
-      "n_prompts_compared": 32,
-      "n_tokens_compared": 8192,
-      "n_tokens_matched": 4701,
-      "token_identity_rate": 0.5738525390625,
-      "n_sequences_with_any_flip": 23,
-      "first_divergences": [
-        {
-          "prompt": "aime2026-652b177c71",
-          "pos": 113,
-          "a": 236784,
-          "b": 236795
-        },
-        {
-          "prompt": "gpqa_diamond-123161632f",
-          "pos": 9,
-          "a": 1001,
-          "b": 19261
-        },
-        {
-          "prompt": "gpqa_diamond-16464cac70",
-          "pos": 125,
-          "a": 1551,
-          "b": 91835
-        },
-        {
-          "prompt": "gpqa_diamond-183797b844",
-          "pos": 157,
-          "a": 691,
-          "b": 236764
-        },
-        {
-          "prompt": "gpqa_diamond-1ce3d847d2",
-          "pos": 246,
-          "a": 53121,
-          "b": 568
-        },
-        {
-          "prompt": "gpqa_diamond-1f06efeb23",
-          "pos": 53,
-          "a": 18179,
-          "b": 23718
-        },
-        {
-          "prompt": "gpqa_diamond-2662eff7a6",
-          "pos": 171,
-          "a": 4781,
-          "b": 11387
-        },
-        {
-          "prompt": "gpqa_diamond-2c52c770af",
-          "pos": 149,
-          "a": 3715,
-          "b": 2557
-        },
-        {
-          "prompt": "gpqa_diamond-339602fd0a",
-          "pos": 77,
-          "a": 607,
-          "b": 14514
-        },
-        {
-          "prompt": "gpqa_diamond-435ccdce7c",
-          "pos": 79,
-          "a": 1699,
-          "b": 61118
-        }
-      ]
-    },
-    "surgical_vs_full_flag": {
-      "label": "surgical M=8 vs full_flag M=8 ground truth (reproduces #488 0.9763 accepted-byte-exact standard)",
-      "available": true,
-      "n_prompts_compared": 32,
-      "n_tokens_compared": 8192,
-      "n_tokens_matched": 5315,
-      "token_identity_rate": 0.6488037109375,
-      "n_sequences_with_any_flip": 20,
-      "first_divergences": [
-        {
-          "prompt": "gpqa_diamond-123161632f",
-          "pos": 28,
-          "a": 6608,
-          "b": 35122
-        },
-        {
-          "prompt": "gpqa_diamond-16464cac70",
-          "pos": 125,
-          "a": 1551,
-          "b": 91835
-        },
-        {
-          "prompt": "gpqa_diamond-188c5d2778",
-          "pos": 76,
-          "a": 1908,
-          "b": 19544
-        },
-        {
-          "prompt": "gpqa_diamond-1f06efeb23",
-          "pos": 111,
-          "a": 1701,
-          "b": 669
-        },
-        {
-          "prompt": "gpqa_diamond-1f101bccd2",
-          "pos": 85,
-          "a": 614,
-          "b": 1156
-        },
-        {
-          "prompt": "gpqa_diamond-2c52c770af",
-          "pos": 53,
-          "a": 14966,
-          "b": 2433
-        },
-        {
-          "prompt": "gpqa_diamond-435ccdce7c",
-          "pos": 119,
-          "a": 531,
-          "b": 684
-        },
-        {
-          "prompt": "mmlu_pro-0029a311d9",
-          "pos": 138,
-          "a": 12316,
-          "b": 563
-        },
-        {
-          "prompt": "mmlu_pro-00473cb41c",
-          "pos": 163,
-          "a": 38882,
-          "b": 609
-        },
-        {
-          "prompt": "mmlu_pro-006f3a2112",
-          "pos": 186,
-          "a": 236743,
-          "b": 609
-        }
-      ]
-    },
-    "deployed_vs_full_flag": {
-      "label": "deployed M=8 vs full_flag M=8 ground truth (NON-exact control; expect many flips)",
-      "available": true,
-      "n_prompts_compared": 32,
-      "n_tokens_compared": 8192,
-      "n_tokens_matched": 5567,
-      "token_identity_rate": 0.6795654296875,
-      "n_sequences_with_any_flip": 17,
-      "first_divergences": [
-        {
-          "prompt": "gpqa_diamond-123161632f",
-          "pos": 9,
-          "a": 1001,
-          "b": 19261
-        },
-        {
-          "prompt": "gpqa_diamond-16464cac70",
-          "pos": 119,
-          "a": 13757,
-          "b": 2258
-        },
-        {
-          "prompt": "gpqa_diamond-188c5d2778",
-          "pos": 182,
-          "a": 121353,
-          "b": 68902
-        },
-        {
-          "prompt": "gpqa_diamond-1f101bccd2",
-          "pos": 85,
-          "a": 614,
-          "b": 1156
-        },
-        {
-          "prompt": "gpqa_diamond-2c52c770af",
-          "pos": 53,
-          "a": 14966,
-          "b": 2433
-        },
-        {
-          "prompt": "gpqa_diamond-339602fd0a",
-          "pos": 77,
-          "a": 607,
-          "b": 14514
-        },
-        {
-          "prompt": "gpqa_diamond-435ccdce7c",
-          "pos": 176,
-          "a": 506,
-          "b": 4077
-        },
-        {
-          "prompt": "mmlu_pro-0029a311d9",
-          "pos": 11,
-          "a": 5022,
-          "b": 15060
-        },
-        {
-          "prompt": "mmlu_pro-00473cb41c",
-          "pos": 114,
-          "a": 555,
-          "b": 622
-        },
-        {
-          "prompt": "mmlu_pro-0081aeb9c3",
-          "pos": 117,
-          "a": 108,
-          "b": 799
+          "prompt": "aime2026-7a1a552fa3",
+          "pos": 275,
+          "a": 236768,
+          "b": 3483
         }
       ]
     }
   },
   "verdict": {
     "candidate_scheme": "fixed-order split-KV (tiles_per_segment=4, num_par_softmax_segments=64, CHUNK=64 keys)",
-    "candidate_realized_tps": 399.7475810022861,
+    "candidate_realized_tps": 444.82227295018606,
     "candidate_realized_tps_basis": "full-serve median warm wall_tps (num_completion_tokens / decode duration_s)",
-    "surgical_ceiling_tps": 345.2162942964171,
-    "deployed_ref_tps": 426.3578971587996,
-    "candidate_lift_vs_surgical_357": 54.53128670586898,
+    "surgical_ceiling_tps": null,
+    "deployed_ref_tps": null,
+    "candidate_lift_vs_surgical_357": null,
     "materiality_bar_tps": 2.0,
     "sigma_hw": 4.864,
-    "lift_clears_materiality_and_sigma": true,
-    "candidate_recovery_fraction_of_deployed_minus_surgical_gap": 0.6720508935268998,
-    "candidate_operative_identity_rate": 0.5052490234375,
+    "lift_clears_materiality_and_sigma": false,
+    "candidate_recovery_fraction_of_deployed_minus_surgical_gap": null,
+    "candidate_operative_identity_rate": 0.3976593017578125,
     "candidate_operative_1_0": false,
-    "gate_validity_control_rate": 0.64501953125,
+    "gate_validity_control_rate": null,
     "m1ar_gate_valid": false,
-    "candidate_vs_groundtruth_m8_rate": 0.5738525390625,
-    "surgical_vs_groundtruth_m8_rate": 0.6488037109375,
+    "candidate_vs_groundtruth_m8_rate": null,
+    "surgical_vs_groundtruth_m8_rate": null,
     "deployed_control_identity_rate": null,
     "gate_discriminates": false,
     "candidate_ppl": 2.3766643358900286,
@@ -889,5 +271,5 @@
     "official_tps": 0,
     "no_served_file_change": true
   },
-  "wandb_run_id": "42qroec1"
+  "wandb_run_id": "m76qbs3l"
 }
