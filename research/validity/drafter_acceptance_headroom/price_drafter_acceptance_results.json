@@ -1,0 +1,166 @@
+{
+  "pr": 526,
+  "agent": "kanna",
+  "title": "Price the drafter-acceptance headroom (direction #3)",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "gpu_used": false,
+  "wandb_group": "drafter-acceptance-headroom",
+  "model": "TPS = E[T]/t_step at PF>=1.0 (#504); dTPS/dE[T]=TPS/E[T] for same-K lift",
+  "inputs": {
+    "ET_measured_prometheus": 3.849256527338719,
+    "ET_measured_serverlog": 3.844131736526946,
+    "a_ladder_a1_a7": [
+      0.7290715372907154,
+      0.759434719768749,
+      0.7934024106576444,
+      0.8215618336886993,
+      0.834712084347121,
+      0.835989117761368,
+      0.8465829846582985
+    ],
+    "K_spec": 7,
+    "verify_M": 8,
+    "ET_theoretical_max": 8.0,
+    "R_ea_mean_TRANSFER_RATIO": 0.88773326152767,
+    "ea_pub_draw": 4.060508965432251,
+    "ea_pri_draw": 3.5652267935340864,
+    "PF_504": 0.9999171490311938,
+    "tps_surgical357_official": 375.857,
+    "tps_splitkv442_local": 442.35,
+    "linear_cap_ET": 3.8445,
+    "eagle_deep_accept_target": 0.91,
+    "s_sweep_gpu_h": [
+      6.0,
+      8.0
+    ],
+    "s_sweep_ceiling_tps": 457.5,
+    "drafter_slot_gpu_h": [
+      15.0,
+      40.0
+    ],
+    "source_runs": {
+      "et_per_pos_289": "5m17r52s/fi34s269",
+      "transfer_ratio_522": "w71zjxot",
+      "propagation_504": "0urxqwob",
+      "no_retrain_lever_null_399": "ec7i3z5t (ubel)"
+    }
+  },
+  "measured_E_T": 3.849256527338719,
+  "measured_E_T_band": [
+    3.844131736526946,
+    3.849256527338719
+  ],
+  "measured_E_T_source": "PR #289 accept_calibration (W&B 5m17r52s/fi34s269); vLLM spec_decode_num_accepted_tokens_per_pos counters on the shipped kenyan-duma linear-MTP K=7 drafter (DRAFTER_SHA256 ed159e..dd18e), 128x512 public sharegpt; REUSED measured served draw, no fresh serve.",
+  "tps_per_accepted_token_surgical357": 97.64405082657827,
+  "tps_per_accepted_token_surgical357_per_0p1": 9.764405082657827,
+  "tps_per_accepted_token_splitkv442": 114.91829574316002,
+  "tps_per_accepted_token_splitkv442_per_0p1": 11.491829574316002,
+  "acceptance_ceiling_E_T": 4.914619849955159,
+  "acceptance_ceiling_E_T_realistic_band": [
+    4.914619849955159,
+    5.2954576057128
+  ],
+  "acceptance_ceiling_E_T_theoretical_max": 8.0,
+  "drafter_improvement_tps_upside": {
+    "surgical357_realistic": 104.02639042233193,
+    "surgical357_band": [
+      104.02639042233193,
+      141.21293160221109
+    ],
+    "splitkv442_realistic": 122.42973738235162,
+    "splitkv442_band": [
+      122.42973738235162,
+      166.1949632286695
+    ]
+  },
+  "go_no_go_drafter_slot": "NO-GO-DEFER",
+  "go_no_go_rationale": "NO-GO for the immediate next slot: #1 dominates on TPS-per-GPU-hour (~6-8 GPU-h, byte-exact, ~0 risk, already 442 of the ~457 byte-exact ceiling realized locally) AND \u2014 because dTPS/dE[T]=TPS/E[T] rises as t_step falls \u2014 banking #1 first raises the drafter slot's payoff by 18%. BUT #3 is NOT tapped: linear-MTP is at its 3.845 cap, so an EAGLE-3 retrain unlocks a realistic +1.07 E[T] -> +104/+122 TPS (surgical357/split-KV, crosses 500). It is the #2-priority slot, sequenced AFTER #1, not abandoned.",
+  "per_rung": {
+    "surgical357": {
+      "tps": 375.857,
+      "anchor": "j7qao5e9",
+      "kind": "official",
+      "t_step_ms": 10.241279335861028,
+      "dtps_per_1p0_accepted_token": 97.64405082657827,
+      "dtps_per_0p1_accepted_token": 9.764405082657827,
+      "tps_at_realistic_ceiling": 479.88339042233196,
+      "tps_at_realistic_ceiling_hi": 484.32506159095186,
+      "tps_at_optimistic_ceiling": 517.0699316022111,
+      "upside_tps_realistic": 104.02639042233193,
+      "upside_tps_realistic_hi": 108.46806159095183,
+      "upside_tps_optimistic": 141.21293160221109
+    },
+    "splitkv442": {
+      "tps": 442.35,
+      "anchor": "kwhylaeg/#519",
+      "kind": "local byte-exact",
+      "t_step_ms": 8.701834581979696,
+      "dtps_per_1p0_accepted_token": 114.91829574316002,
+      "dtps_per_0p1_accepted_token": 11.491829574316002,
+      "tps_at_realistic_ceiling": 564.7797373823516,
+      "tps_at_realistic_ceiling_hi": 570.0071862297564,
+      "tps_at_optimistic_ceiling": 608.5449632286695,
+      "upside_tps_realistic": 122.42973738235162,
+      "upside_tps_realistic_hi": 127.65718622975635,
+      "upside_tps_optimistic": 166.1949632286695
+    }
+  },
+  "et_ceiling_realistic": 4.914619849955159,
+  "et_ceiling_realistic_hi": 4.960108245111035,
+  "et_ceiling_optimistic": 5.2954576057128,
+  "delta_et_realistic": 1.0653633226164398,
+  "delta_et_optimistic": 1.4462010783740809,
+  "sequencing_factor_split_over_surg": 1.1769103675067911,
+  "et_if_rea_misread_as_acceptance": 5.4717083720334,
+  "rea_is_transfer_ratio_not_acceptance": true,
+  "deployed_at_linear_cap": true,
+  "marginal_comparison": {
+    "s_sweep_remaining_tps_442_to_457": 15.149999999999977,
+    "s_sweep_official_to_ceiling_tps": 81.64299999999997,
+    "s_sweep_tps_per_gpuh_remaining": 1.8937499999999972,
+    "s_sweep_tps_per_gpuh_official_to_ceiling": 10.205374999999997,
+    "drafter_upside_on_best_rung_tps": 122.42973738235162,
+    "drafter_tps_per_gpuh_band": [
+      3.0607434345587903,
+      8.161982492156774
+    ],
+    "verdict": "S-sweep wins immediate slot on TPS/GPU-h + certainty; drafter is larger but back-loaded & delivery-uncertain"
+  },
+  "self_test": {
+    "conditions": {
+      "a_ladder_len_7": true,
+      "a_ladder_in_unit": true,
+      "a_ladder_monotone_nondecreasing": true,
+      "et_ladder_roundtrips_prometheus": true,
+      "measured_et_between_serverlog_and_prom": true,
+      "deployed_at_or_near_linear_cap": true,
+      "dtps_identity_surgical": true,
+      "dtps_identity_splitkv": true,
+      "dtps_equals_inv_tstep_surg": true,
+      "splitkv_dtps_gt_surgical_dtps": true,
+      "sequencing_factor_eq_tps_ratio": true,
+      "upside_ratio_identity_surg": true,
+      "ceiling_above_current": true,
+      "ceiling_below_theoretical_max": true,
+      "optimistic_above_realistic": true,
+      "theoretical_max_is_8": true,
+      "rea_misread_gives_inconsistent_et": true,
+      "rea_misread_et_far_above_measured": true,
+      "ea_pri_below_ea_pub": true,
+      "pf_near_one": true,
+      "s_sweep_remaining_positive": true,
+      "drafter_upside_exceeds_s_sweep_remaining": true,
+      "go_no_go_is_defer": true,
+      "no_nan_inf": true
+    },
+    "n_checks": 24,
+    "n_passed": 24,
+    "passes": true
+  },
+  "drafter_acceptance_headroom_self_test_passes": true,
+  "wandb_run_id": "3piz86i4"
+}
