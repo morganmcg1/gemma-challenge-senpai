@@ -1,0 +1,59 @@
+[census] normalized CUDA_VISIBLE_DEVICES '2' -> '0' (single in-container GPU)
+[census] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[census] submission=fa2sw_precache_kenyan server_python=/tmp/senpai-venvs/5f4c623f772358a2/bin/python
+
+[census] ===== full_flag_m1ar (M=1 AR, VLLM_BATCH_INVARIANT=1 (2D attn + matmul tax), drafter OFF) =====
+[census] extra_env={'VLLM_BATCH_INVARIANT': '1', 'SENPAI_REFERENCE_MODE': '1'}
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/tmp/osoi5-v0-baked', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method":"mtp","model":"/tmp/qat-assistant","num_speculative_tokens":7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/tmp/osoi5-v0-baked', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '1', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '1', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '1', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '/tmp/osoi5-v0-baked/pck04_keepset.json', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '1', 'LM_HEAD_PRUNE_REQUIRE': '1', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '1', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 100s
+[census] full_flag_m1ar: server ready in 100s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/speed/surgical_attn_realize/census/full_flag_m1ar/decode_round00.jsonl --summary-file /workspace/senpai/target/research/speed/surgical_attn_realize/census/full_flag_m1ar/decode_round00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/speed/surgical_attn_realize/census/full_flag_m1ar/decode_round00.summary.json
+[census] full_flag_m1ar: M=1 AR wall_tps=129.04 tok=65536/65536 completed=128 | splitkv_redirects=0 (expect 0; drafter OFF, no verify) batch_invariant_mentions=1 (expect >=1; matmul tax ON) fatal_traceback=False
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260616_122138-aydp64yf
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/full_flag-identity-census
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/aydp64yf
+wandb: updating run metadata; uploading artifact surgical_identity_census
+wandb: uploading artifact surgical_identity_census
+wandb: 
+wandb: Run history:
+wandb:                                                             global_step ▁
+wandb:  summary/census/full_flag_m1ar_vs_surgical_m8/n_sequences_with_any_flip ▁
+wandb:         summary/census/full_flag_m1ar_vs_surgical_m8/operative_1_0_pass ▁
+wandb:        summary/census/full_flag_m1ar_vs_surgical_m8/token_identity_rate ▁
+wandb: summary/census/full_flag_m8_vs_full_flag_m1ar/n_sequences_with_any_flip ▁
+wandb:        summary/census/full_flag_m8_vs_full_flag_m1ar/operative_1_0_pass ▁
+wandb:       summary/census/full_flag_m8_vs_full_flag_m1ar/token_identity_rate ▁
+wandb:                                           summary/census/m1ar_completed ▁
+wandb:                                            summary/census/m1ar_wall_tps ▁
+wandb: 
+wandb: Run summary:
+wandb:                                                              event/name summary
+wandb:                                                        event/run_prefix 
+wandb:                                                             global_step 0
+wandb:  summary/census/full_flag_m1ar_vs_surgical_m8/n_sequences_with_any_flip 114
+wandb:         summary/census/full_flag_m1ar_vs_surgical_m8/operative_1_0_pass 0
+wandb:        summary/census/full_flag_m1ar_vs_surgical_m8/token_identity_rate 0.42148
+wandb: summary/census/full_flag_m8_vs_full_flag_m1ar/n_sequences_with_any_flip 114
+wandb:        summary/census/full_flag_m8_vs_full_flag_m1ar/operative_1_0_pass 0
+wandb:       summary/census/full_flag_m8_vs_full_flag_m1ar/token_identity_rate 0.42029
+wandb:                                           summary/census/m1ar_completed 128
+wandb:                                                                      +1 ...
+wandb: 
+wandb: 🚀 View run lawine/full_flag-identity-census at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/aydp64yf
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260616_122138-aydp64yf/logs
+
+[census] ================= IDENTITY CENSUS (10.3 min) =================
+  full_flag_m8_vs_full_flag_m1ar: identity_rate=0.420288 flips_seqs=114/128 operative_1.0_pass=False semantic_flips=None
+  full_flag_m1ar_vs_surgical_m8: identity_rate=0.421478 flips_seqs=114/128 operative_1.0_pass=False semantic_flips=None
+[census] artifacts -> /workspace/senpai/target/research/speed/surgical_attn_realize/census/full_flag_identity_census.json  wandb_run_id=aydp64yf

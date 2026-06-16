@@ -1,0 +1,374 @@
+{
+  "pr": 488,
+  "generated_utc": "2026-06-16T11:50:50.001096+00:00",
+  "submission": "fa2sw_precache_kenyan",
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "n_decodes": 3
+  },
+  "elapsed_s": 2335.3685491085052,
+  "git": {
+    "git_commit": "250176f987154e16cf011fbf17f4236e56646b46",
+    "git_branch": "lawine/surgical-attention-realization",
+    "git_dirty": true
+  },
+  "arms": {
+    "deployed": {
+      "arm": "deployed",
+      "label": "(a) deployed 3D split-KV (no flag, ~481 ref)",
+      "extra_env": {},
+      "median_wall_tps": 464.6948414155412,
+      "wall_tps_values": [
+        450.24329775692973,
+        465.14094459876526,
+        464.6948414155412
+      ],
+      "wall_tps_n": 3,
+      "wall_tps_std": 8.475317138519435,
+      "server_ready_s": 85.03218626976013,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": 2.376682786480556,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 5,
+        "graph_capture_lines": 5,
+        "onegraph_captured": true,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 0
+      },
+      "first_decode_out": "/workspace/senpai/target/research/speed/surgical_attn_realize/run/deployed/decode_round00.jsonl",
+      "decodes": [
+        {
+          "arm": "deployed",
+          "round": 0,
+          "wall_tps": 450.24329775692973,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 145.5568585395813,
+          "wall_around_decode_s": 153.9968888759613,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "arm": "deployed",
+          "round": 1,
+          "wall_tps": 465.14094459876526,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 140.8949282169342,
+          "wall_around_decode_s": 149.3499300479889,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "arm": "deployed",
+          "round": 2,
+          "wall_tps": 464.6948414155412,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 141.03018617630005,
+          "wall_around_decode_s": 149.3488311767578,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    },
+    "full_flag": {
+      "arm": "full_flag",
+      "label": "(b) global VLLM_BATCH_INVARIANT=1 (~222 ship floor)",
+      "extra_env": {
+        "VLLM_BATCH_INVARIANT": "1"
+      },
+      "median_wall_tps": 221.94736652369656,
+      "wall_tps_values": [
+        216.4921670914296,
+        222.0168142267358,
+        221.94736652369656
+      ],
+      "wall_tps_n": 3,
+      "wall_tps_std": 3.1697988842330416,
+      "server_ready_s": 140.01681756973267,
+      "peak_gpu_mem_mib": 19379,
+      "ppl": 2.376656799740845,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "graph_capture_lines": 5,
+        "onegraph_captured": true,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 3
+      },
+      "first_decode_out": "/workspace/senpai/target/research/speed/surgical_attn_realize/run/full_flag/decode_round00.jsonl",
+      "decodes": [
+        {
+          "arm": "full_flag",
+          "round": 0,
+          "wall_tps": 216.4921670914296,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 302.71764969825745,
+          "wall_around_decode_s": 311.050044298172,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "arm": "full_flag",
+          "round": 1,
+          "wall_tps": 222.0168142267358,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 295.1848499774933,
+          "wall_around_decode_s": 303.93356466293335,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "arm": "full_flag",
+          "round": 2,
+          "wall_tps": 221.94736652369656,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 295.2772138118744,
+          "wall_around_decode_s": 303.7925777435303,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    },
+    "surgical": {
+      "arm": "surgical",
+      "label": "(c) surgical attn-only 2D order-preserving (matmul tax OFF)  <-- TEST",
+      "extra_env": {
+        "SURGICAL_ATTN_USE_3D_OFF": "1"
+      },
+      "median_wall_tps": 357.64409234610446,
+      "wall_tps_values": [
+        350.8631763128291,
+        357.64409234610446,
+        357.79460425409803
+      ],
+      "wall_tps_n": 3,
+      "wall_tps_std": 3.95912804772679,
+      "server_ready_s": 90.0132908821106,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": 2.3766755065685943,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "graph_capture_lines": 5,
+        "onegraph_captured": true,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "batch_invariant_mentions": 0
+      },
+      "first_decode_out": "/workspace/senpai/target/research/speed/surgical_attn_realize/run/surgical/decode_round00.jsonl",
+      "decodes": [
+        {
+          "arm": "surgical",
+          "round": 0,
+          "wall_tps": 350.8631763128291,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 186.7850615978241,
+          "wall_around_decode_s": 195.06201434135437,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "arm": "surgical",
+          "round": 1,
+          "wall_tps": 357.64409234610446,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 183.24362516403198,
+          "wall_around_decode_s": 192.25518155097961,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "arm": "surgical",
+          "round": 2,
+          "wall_tps": 357.79460425409803,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 183.16654086112976,
+          "wall_around_decode_s": 191.65923047065735,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    }
+  },
+  "cross_arm_token_diffs": {
+    "surgical_vs_full_flag": {
+      "label": "surgical_vs_full_flag (expect identical)",
+      "available": true,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 62108,
+      "token_identity_rate": 0.94769287109375,
+      "n_sequences_with_any_flip": 15,
+      "first_divergences": [
+        {
+          "prompt": "gpqa_diamond-0c38e0dd0d",
+          "pos": 177,
+          "a": 910,
+          "b": 23637
+        },
+        {
+          "prompt": "gpqa_diamond-0caf81b8c8",
+          "pos": 19,
+          "a": 120625,
+          "b": 9945
+        },
+        {
+          "prompt": "gpqa_diamond-13e7c71f8a",
+          "pos": 130,
+          "a": 900,
+          "b": 236783
+        },
+        {
+          "prompt": "gpqa_diamond-188c5d2778",
+          "pos": 172,
+          "a": 103766,
+          "b": 1607
+        },
+        {
+          "prompt": "gpqa_diamond-2e908bfe56",
+          "pos": 132,
+          "a": 1941,
+          "b": 9254
+        },
+        {
+          "prompt": "gpqa_diamond-35cf9161cc",
+          "pos": 497,
+          "a": 518,
+          "b": 236743
+        },
+        {
+          "prompt": "gpqa_diamond-364ddb1397",
+          "pos": 352,
+          "a": 5143,
+          "b": 529
+        },
+        {
+          "prompt": "gpqa_diamond-3785b9c93c",
+          "pos": 391,
+          "a": 18271,
+          "b": 16085
+        },
+        {
+          "prompt": "mmlu_pro-00193f8f1a",
+          "pos": 289,
+          "a": 621,
+          "b": 578
+        },
+        {
+          "prompt": "mmlu_pro-00473cb41c",
+          "pos": 163,
+          "a": 38882,
+          "b": 609
+        }
+      ]
+    },
+    "surgical_vs_deployed": {
+      "label": "surgical_vs_deployed (expect deployed flips)",
+      "available": true,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 30159,
+      "token_identity_rate": 0.4601898193359375,
+      "n_sequences_with_any_flip": 109,
+      "first_divergences": [
+        {
+          "prompt": "aime2026-0015ebeec9",
+          "pos": 344,
+          "a": 609,
+          "b": 20078
+        },
+        {
+          "prompt": "aime2026-0e674f51e8",
+          "pos": 163,
+          "a": 9036,
+          "b": 236795
+        },
+        {
+          "prompt": "aime2026-2822569975",
+          "pos": 22,
+          "a": 1288,
+          "b": 532
+        },
+        {
+          "prompt": "aime2026-4d866680f9",
+          "pos": 55,
+          "a": 3931,
+          "b": 9857
+        },
+        {
+          "prompt": "aime2026-5e99c1f8e3",
+          "pos": 104,
+          "a": 1903,
+          "b": 1778
+        },
+        {
+          "prompt": "aime2026-7443669f7e",
+          "pos": 424,
+          "a": 4338,
+          "b": 874
+        },
+        {
+          "prompt": "aime2026-77bffe9f7e",
+          "pos": 397,
+          "a": 784,
+          "b": 506
+        },
+        {
+          "prompt": "aime2026-7968ea2f49",
+          "pos": 99,
+          "a": 2532,
+          "b": 2104
+        },
+        {
+          "prompt": "aime2026-7a1a552fa3",
+          "pos": 275,
+          "a": 3483,
+          "b": 236768
+        },
+        {
+          "prompt": "aime2026-8742f9e684",
+          "pos": 121,
+          "a": 236789,
+          "b": 506
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "surgical_realized_tps": 357.64409234610446,
+    "full_flag_222_floor_tps": 221.94736652369656,
+    "deployed_ref_tps": 464.6948414155412,
+    "surgical_lift_vs_222": 135.6967258224079,
+    "materiality_bar_tps": 2.0,
+    "sigma_hw": 4.864,
+    "lift_clears_materiality_and_sigma": true,
+    "surgical_landing_bucket": "partial_300+",
+    "surgical_realizes_above_222": true,
+    "surgical_recovery_fraction_of_deployed": 0.5590036554772285,
+    "surgical_ppl": 2.3766755065685943,
+    "surgical_ppl_passes_gate": true,
+    "surgical_completion_full": true,
+    "surgical_no_3d_redirect": true,
+    "surgical_graph_capture_ok": true,
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true
+  },
+  "wandb_run_id": "ko01dcyy"
+}
