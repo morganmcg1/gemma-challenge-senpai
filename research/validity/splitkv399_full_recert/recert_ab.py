@@ -77,6 +77,9 @@ SIGMA_HW = 4.864
 # correctness bound: at FIXED_TPS=4, coverage=64*S, and S=64 -> 4096=max_model_len.
 BYTEEXACT_TILE_SIZE = 16
 BYTEEXACT_MAX_MODEL_LEN = 4096
+# Full 128x512 workload longest decode KV (prompt 2427 + 512, id gpqa_diamond-1d37a7a51d);
+# active split-KV segments = ceil(WORKLOAD_MAX_KV / (FIXED_TPS*TILE_SIZE)).
+WORKLOAD_MAX_KV = 2939
 
 ARMS = {
     "variant": {"submission": "fa2sw_strict_byteexact_splitkv399", "mode": "byteexact"},
@@ -274,20 +277,36 @@ def run_one_arm(arm: str, args: argparse.Namespace) -> dict[str, Any]:
         if cfg["mode"] != "byteexact":
             raise SystemExit("--num-segments only applies to the byteexact variant arm")
         extra_env["BYTEEXACT_NUM_SEGMENTS"] = str(seg_override)
-    fixed_tps = int(env_block.get("BYTEEXACT_FIXED_TPS", 0) or 0)
+    # FIXED_TPS sweep (PR #530): override the byte-exact tiles-per-segment T (the
+    # active-segment granularity knob; active segs = ceil(seq_len/(T*TILE_SIZE))).
+    # Lower T -> smaller per-segment span -> MORE active parallel segments. Unlike
+    # the #525 NUM_SEGMENTS sweep this CHANGES the reduction order, so each T is a
+    # distinct byte-exact config that needs its own identity re-cert. The patch
+    # reads BYTEEXACT_FIXED_TPS from the process env at import (sitecustomize gates
+    # on it >0), so an extra_env override changes only T; everything else stays
+    # byte-identical to the packaged #519 variant manifest.
+    tps_override = getattr(args, "fixed_tps", None)
+    if tps_override is not None:
+        if cfg["mode"] != "byteexact":
+            raise SystemExit("--fixed-tps only applies to the byteexact variant arm")
+        extra_env["BYTEEXACT_FIXED_TPS"] = str(tps_override)
+    fixed_tps = (tps_override if tps_override is not None
+                 else int(env_block.get("BYTEEXACT_FIXED_TPS", 0) or 0))
     eff_segments = (seg_override if seg_override is not None
                     else int(env_block.get("BYTEEXACT_NUM_SEGMENTS", 0) or 0))
-    coverage_keys = fixed_tps * eff_segments * BYTEEXACT_TILE_SIZE  # = 64*S at T=4
+    coverage_keys = fixed_tps * eff_segments * BYTEEXACT_TILE_SIZE  # = T*S*TILE_SIZE
 
     tag = getattr(args, "out_tag", None) or (("smoke_" + arm) if args.smoke else arm)
     out_root = Path(getattr(args, "out_root", None) or OUT_ROOT)
     out_dir = (out_root / tag).resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
     server_log = out_dir / "server.log"
-    if seg_override is not None:
-        print(f"[recert] NUM_SEGMENTS override -> {seg_override} "
-              f"(fixed_tps={fixed_tps}, coverage={coverage_keys} keys vs "
-              f"max_model_len {BYTEEXACT_MAX_MODEL_LEN}) tag={tag}", flush=True)
+    if seg_override is not None or tps_override is not None:
+        active_max = -(-WORKLOAD_MAX_KV // (fixed_tps * BYTEEXACT_TILE_SIZE)) if fixed_tps else None
+        print(f"[recert] byteexact override -> FIXED_TPS={fixed_tps} "
+              f"NUM_SEGMENTS={eff_segments} (coverage={coverage_keys} keys vs "
+              f"max_model_len {BYTEEXACT_MAX_MODEL_LEN}; active_segments@maxKV{WORKLOAD_MAX_KV}"
+              f"={active_max}) tag={tag}", flush=True)
     print(f"[recert] arm={arm} submission={submission_dir.name} mode={cfg['mode']}",
           flush=True)
     print(f"[recert] workload={args.num_prompts}x{args.output_len} seed={args.seed} "
@@ -384,8 +403,11 @@ def run_one_arm(arm: str, args: argparse.Namespace) -> dict[str, Any]:
         "submission": cfg["submission"],
         "mode": cfg["mode"],
         "num_segments_override": seg_override,
+        "fixed_tps_override": tps_override,
         "byteexact_num_segments": eff_segments,
         "byteexact_fixed_tps": fixed_tps,
+        "active_segments_max_kv": (-(-WORKLOAD_MAX_KV // (fixed_tps * BYTEEXACT_TILE_SIZE))
+                                   if fixed_tps else None),
         "coverage_keys": coverage_keys,
         "coverage_ge_max_model_len": bool(coverage_keys >= BYTEEXACT_MAX_MODEL_LEN),
         "generated_utc": datetime.now(timezone.utc).isoformat(),
@@ -625,6 +647,10 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--num-segments", type=int, default=None,
                     help="PR #525: override BYTEEXACT_NUM_SEGMENTS for the variant arm "
                          "(byte-exact segment-count occupancy sweep; FIXED_TPS held)")
+    ap.add_argument("--fixed-tps", type=int, default=None,
+                    help="PR #530: override BYTEEXACT_FIXED_TPS (tiles-per-segment T) for "
+                         "the variant arm (active-segment granularity sweep; co-vary "
+                         "--num-segments to hold coverage T*S*16 >= workload max KV)")
     ap.add_argument("--out-tag", default=None,
                     help="output subdir under out-root (default: arm name); set per-S in the sweep")
     ap.add_argument("--out-root", default=None,
