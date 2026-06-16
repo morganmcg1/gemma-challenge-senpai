@@ -1,0 +1,249 @@
+{
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "compute_capability": "8.6",
+    "total_mem_gib": 22.06,
+    "is_a10g_80sm": true,
+    "is_sm8x": true
+  },
+  "ground_served_path": {
+    "triton_unified_attention_importable": true,
+    "triton_has_3d_reduce_segments": true,
+    "backend_num_par_softmax_segments": 16,
+    "backend_min_launch_grid_2d": 128,
+    "fa2_headdim512_runnable": false,
+    "fa2_headdim512_error": "RuntimeError: FlashAttention forward only supports head dimension at most 256",
+    "fa2_num_splits_runnable": false,
+    "fa2_num_splits_error": "NotImplementedError: FA2 does not support num_splits > 1",
+    "served_attn_is_triton": true
+  },
+  "served_attn_is_triton": true,
+  "fa2_num_splits_runnable": false,
+  "identity_sliding": {
+    "head_dim": 256,
+    "per_L": {
+      "128": {
+        "split_vs_serial_byte_identity": 0.0,
+        "argmax_identity": 1.0,
+        "max_abs_diff": 0.00390625
+      },
+      "256": {
+        "split_vs_serial_byte_identity": 0.0,
+        "argmax_identity": 1.0,
+        "max_abs_diff": 0.001953125
+      },
+      "512": {
+        "split_vs_serial_byte_identity": 0.0,
+        "argmax_identity": 1.0,
+        "max_abs_diff": 0.001953125
+      }
+    },
+    "triton_split_runnable": true,
+    "run_error": null,
+    "any_nan": false,
+    "split_vs_serial_byte_identity_min": 0.0,
+    "split_vs_serial_argmax_identity_min": 1.0,
+    "split_vs_serial_max_abs_diff": 0.00390625,
+    "split_is_byte_exact_vs_serial": false
+  },
+  "identity_full": {
+    "head_dim": 512,
+    "per_L": {
+      "128": {
+        "split_vs_serial_byte_identity": 0.0,
+        "argmax_identity": 1.0,
+        "max_abs_diff": 0.00390625
+      },
+      "256": {
+        "split_vs_serial_byte_identity": 0.0,
+        "argmax_identity": 0.0,
+        "max_abs_diff": 0.001953125
+      },
+      "512": {
+        "split_vs_serial_byte_identity": 0.0,
+        "argmax_identity": 1.0,
+        "max_abs_diff": 0.001953125
+      }
+    },
+    "triton_split_runnable": true,
+    "run_error": null,
+    "any_nan": false,
+    "split_vs_serial_byte_identity_min": 0.0,
+    "split_vs_serial_argmax_identity_min": 0.0,
+    "split_vs_serial_max_abs_diff": 0.00390625,
+    "split_is_byte_exact_vs_serial": false
+  },
+  "m8_split_sliding": {
+    "m8_split_path_runs_3d": false,
+    "m8_call_runs_as_2d": true,
+    "m8_error": null,
+    "is_batch_invariant_env": false
+  },
+  "m8_split_full": {
+    "m8_split_path_runs_3d": false,
+    "m8_call_runs_as_2d": true,
+    "m8_error": null,
+    "is_batch_invariant_env": false
+  },
+  "triton_splitk_runnable": true,
+  "triton_splitk_m_invariant": false,
+  "split_is_byte_exact_vs_serial": false,
+  "microbench_sliding": {
+    "head_dim": 256,
+    "per_L": {
+      "128": {
+        "serial_us": 94.2080020904541,
+        "split_us": 125.95200538635254,
+        "penalty_serial_over_split": 0.7479674642851059,
+        "act_segments": 9
+      },
+      "256": {
+        "serial_us": 103.42399775981903,
+        "split_us": 125.95200538635254,
+        "penalty_serial_over_split": 0.8211381584800513,
+        "act_segments": 16
+      },
+      "512": {
+        "serial_us": 126.97599828243256,
+        "split_us": 124.92799758911133,
+        "penalty_serial_over_split": 1.0163934484890818,
+        "act_segments": 16
+      },
+      "658": {
+        "serial_us": 126.97599828243256,
+        "split_us": 125.95200538635254,
+        "penalty_serial_over_split": 1.0081300245513278,
+        "act_segments": 16
+      }
+    },
+    "realized_penalty_band_mean": 0.861833023751413
+  },
+  "microbench_full": {
+    "head_dim": 512,
+    "per_L": {
+      "128": {
+        "serial_us": 96.25600278377533,
+        "split_us": 124.92799758911133,
+        "penalty_serial_over_split": 0.7704918404308512,
+        "act_segments": 9
+      },
+      "256": {
+        "serial_us": 111.61600053310394,
+        "split_us": 124.92799758911133,
+        "penalty_serial_over_split": 0.8934426444599665,
+        "act_segments": 16
+      },
+      "512": {
+        "serial_us": 139.26400244235992,
+        "split_us": 123.90399724245071,
+        "penalty_serial_over_split": 1.1239669868749538,
+        "act_segments": 16
+      },
+      "658": {
+        "serial_us": 153.60000729560852,
+        "split_us": 125.95200538635254,
+        "penalty_serial_over_split": 1.2195122008930852,
+        "act_segments": 16
+      }
+    },
+    "realized_penalty_band_mean": 0.9293004905885903
+  },
+  "realized_penalty_weighted": 0.8730776015576093,
+  "realized_penalty": 0.8730776015576093,
+  "modeled_penalty": 1.3050156272611537,
+  "recoverable_eta_attn": -0.012066154522881477,
+  "realized_pinnedk_tps_delta": -5.824815434375804,
+  "realized_pinnedk_frontier_tps": 476.9151845656242,
+  "analytic_pinnedk_tps_delta": 13.998,
+  "realized_vs_analytic_ratio": -0.4161176906969427,
+  "analytic_survives": false,
+  "flashinfer": {
+    "available": true,
+    "version": "0.6.11.post2",
+    "has_decode_module": true
+  },
+  "decode_path_menu": {
+    "fa2_num_splits_gt1": {
+      "runnable": false,
+      "note": "NotImplementedError on sm_86 (#431)"
+    },
+    "triton_unified_3d_splitkv": {
+      "runnable": true,
+      "split_knob": "num_par_softmax_segments",
+      "served_default": 16,
+      "reachable_at_m1": true,
+      "reachable_at_m8": false,
+      "byte_exact_vs_serial": false,
+      "note": "served fast decode path; force-disabled under VLLM_BATCH_INVARIANT=1"
+    },
+    "flashinfer_split_decode": {
+      "runnable": true,
+      "note": "import ok"
+    }
+  },
+  "runnable_paths": [
+    "triton_unified_3d_splitkv",
+    "flashinfer_split_decode"
+  ],
+  "best_runnable_path": "triton_unified_3d_splitkv",
+  "build_surface": {
+    "build_surface_files": 2,
+    "build_surface_file_list": [
+      "vllm/v1/attention/ops/triton_unified_attention.py (use_3d gate: fixed-seg path for M>1 + BI)",
+      "vllm/v1/attention/backends/triton_attn.py (drive the fixed-seg pin; segm buffers sized for M=8)"
+    ],
+    "build_is_additive": true,
+    "blast_radius": "attention decode reduction only; body GEMM / lm_head / sampler untouched",
+    "checkpoint_impact": "none (no weight/quant change)",
+    "ppl_risk": "PPL-neutral: a split-K reduction changes float ADD ORDER, not the math; denken (new card) owns the byte-identical-to-canonical proof",
+    "needs_kernel_rebuild": true,
+    "human_gated": true
+  },
+  "build_surface_files": 2,
+  "build_is_additive": true,
+  "pinnedk_realizable_on_sm86": true,
+  "ppl": 2.3772,
+  "ppl_is_anchored": true,
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "verdict": "served_attn_is_triton=True (FA2 hd512 runnable=False, FA2 num_splits>1 runnable=False). The Triton 3D split-KV decode RUNS on sm_86 (triton_splitk_runnable=True) -> the #431 FA2 blocker does NOT apply; pinned-K is BUILDABLE not blocked. BUT it is NOT a drop-in strict pin: split-vs-serial byte identity (M=1) = 0.0 (sliding) / 0.0 (full), and the kernel FORCES 2D at M=8 (m8_runs_split=False) -> triton_splitk_m_invariant=False (needs a fixed-segment gate edit). Realized op penalty (serial/split) = 0.8731 vs modeled 1.3050 -> realized pinned-K TPS delta = -5.825 (analytic +13.998; ratio -0.42; survives=False) -> realized frontier 476.92.",
+  "self_test": {
+    "self_test_passes": true,
+    "checks": {
+      "cb3_plus_delta_is_pinnedk_rung": true,
+      "analytic_delta_is_13998": true,
+      "pinnedk_rung_rounds_to_display": true,
+      "modeled_penalty_round_trips_to_delta": true,
+      "translate_reproduces_analytic_delta": true,
+      "translate_reproduces_analytic_frontier": true,
+      "penalty1_gives_zero_delta": true,
+      "penalty1_frontier_is_base": true,
+      "gqa_4_q_per_kv": true,
+      "served_segments_16": true,
+      "seq_threshold_3d_64": true,
+      "m8_forces_2d": true,
+      "analysis_only_guard": true,
+      "no_hf_job_guard": true,
+      "no_served_file_change_guard": true
+    }
+  },
+  "self_test_passes": true,
+  "timestamp": "20260616T011319Z",
+  "args": {
+    "seeds": [
+      1234,
+      5678,
+      9012
+    ],
+    "ident_trials": 8,
+    "iters": 50,
+    "warmup": 15,
+    "self_test": false,
+    "no_wandb": false,
+    "wandb_group": "pinnedk-triton-realizability",
+    "wandb_name": "stark/pinnedk-triton-splitk-realizability"
+  }
+}
