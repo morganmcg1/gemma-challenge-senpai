@@ -1,0 +1,741 @@
+{
+  "pr": 489,
+  "issue": 488,
+  "author": "denken",
+  "leg": "private-safe TPS threshold: crossover for a spec-alive byte-exact rung; is surgical-457 gate-safe?",
+  "config": {
+    "delta_gate": 0.05,
+    "ppl_gate": 2.42,
+    "deployed_public_tps": 481.53,
+    "deployed_private_tps": 460.85,
+    "delta_spec_alive": 0.04294644155088977,
+    "delta_floorlock": 0.006333865388319535,
+    "floorlock_public_tps": 161.7,
+    "globalflag_public_tps": 234.4667184202936,
+    "surgical457_public_tps": 457.0,
+    "sigma_oneshot_tps": 4.876531763744918,
+    "sigma_oneshot_frac": 0.010127160849261558,
+    "sigma_within_tps": 0.34937951115245053,
+    "sigma_between_tps": 4.864,
+    "sigma_convention_tps": 4.8153,
+    "sweep_lo": 150.0,
+    "sweep_hi": 500.0,
+    "sweep_step": 5.0,
+    "breach_bars": [
+      0.05,
+      0.01
+    ],
+    "imports": {
+      "deployed_gap_decomp": "research/validity/public_private_gap_decomposition/public_private_gap_decomposition_results.json",
+      "sigma_reconciliation": "research/empirical_sigma_hw/fresh_n10/reconciliation.json",
+      "sigma_fresh_n10": "research/empirical_sigma_hw/fresh_n10/sigma_hw.json",
+      "floorlock_m1_floor": "research/validity/literal_1p0_config_reachable/literal_1p0_config_reachable_results.json",
+      "globalflag_bi_pin": "research/validity/strict_frontier_realize_crosscheck/strict_frontier_realize_crosscheck_report.json"
+    },
+    "note": "Extends denken #486 (private_validity_real_candidates). CPU analysis only; no kernel re-measure, no served change, no HF Job, no launch, no submission. surgical-457 is CONDITIONAL on lawine #488 realizing ~457 byte-exact; its TPS is a PR-stated placeholder."
+  },
+  "crossover": {
+    "spec_alive": {
+      "breach_lt_5pct": {
+        "abs_crossover_tps": 1137.1821765632644,
+        "abs_in_sweep_range": false,
+        "abs_below_deployed_481": false,
+        "frac_crossover_tps": null,
+        "frac_scale_invariant_breach": 0.24305815936301173,
+        "frac_safe_at_all_tps": false
+      },
+      "breach_lt_1pct": {
+        "abs_crossover_tps": 1608.3384556634308,
+        "abs_in_sweep_range": false,
+        "abs_below_deployed_481": false,
+        "frac_crossover_tps": null,
+        "frac_scale_invariant_breach": 0.24305815936301173,
+        "frac_safe_at_all_tps": false
+      }
+    },
+    "byteexact_premise": {
+      "breach_lt_5pct": {
+        "abs_crossover_tps": 160.42361899350746,
+        "abs_in_sweep_range": true,
+        "abs_below_deployed_481": true,
+        "frac_crossover_tps": 150.0,
+        "frac_scale_invariant_breach": 3.9622453373855393e-07,
+        "frac_safe_at_all_tps": true
+      },
+      "breach_lt_1pct": {
+        "abs_crossover_tps": 226.89018605947382,
+        "abs_in_sweep_range": true,
+        "abs_below_deployed_481": true,
+        "frac_crossover_tps": 150.0,
+        "frac_scale_invariant_breach": 3.9622453373855393e-07,
+        "frac_safe_at_all_tps": true
+      }
+    }
+  },
+  "candidates": {
+    "floor_lock_161p70": {
+      "label": "floor-lock 161.70 (M=1 AR, NON-spec, literal-1.0; acceptance bucket GONE)",
+      "public_tps": 161.7,
+      "is_speculative": false,
+      "conditional_on_488": false,
+      "systematic_delta_pct": 0.6333865388319535,
+      "predicted_private_tps": 160.67581396670872,
+      "threshold_tps": 153.61499999999998,
+      "headroom_pp": 4.366613461168047,
+      "mean_clears_gate": true,
+      "sigma_hw_frac_of_tps_pct": 3.01578958796841,
+      "breach_prob_abs": 0.07382011152661327,
+      "breach_prob_frac": 8.097113547211876e-06,
+      "ppl": 2.3772,
+      "note": "systematic = ctxlen-only (no drafter)"
+    },
+    "global_flag_234p47": {
+      "label": "global-flag 234.47 (blanket BI, SPEC alive E_accept~3.87; byte-exact OUTPUT)",
+      "public_tps": 234.4667184202936,
+      "is_speculative": true,
+      "conditional_on_488": false,
+      "systematic_delta_pct": 4.294644155088977,
+      "predicted_private_tps": 224.39720720202754,
+      "threshold_tps": 222.7433824992789,
+      "headroom_pp": 0.705355844911023,
+      "mean_clears_gate": true,
+      "sigma_hw_frac_of_tps_pct": 2.0798396448759457,
+      "breach_prob_abs": 0.36725230929996866,
+      "breach_prob_frac": 0.24305815936300845,
+      "e_accept": 3.8695345142117343,
+      "ppl": 2.3770400964712857,
+      "note": "re-inherits full 4.295% (acceptance + ctxlen)"
+    },
+    "surgical_457": {
+      "label": "surgical-457 (~457, SPEC alive, byte-exact; CONDITIONAL on lawine #488 realizing)",
+      "public_tps": 457.0,
+      "is_speculative": true,
+      "conditional_on_488": true,
+      "systematic_delta_pct": 4.294644155088977,
+      "predicted_private_tps": 437.37347621124337,
+      "threshold_tps": 434.15,
+      "headroom_pp": 0.705355844911023,
+      "mean_clears_gate": true,
+      "sigma_hw_frac_of_tps_pct": 1.06707478418926,
+      "breach_prob_abs": 0.25430032341630016,
+      "breach_prob_frac": 0.24305815936301045,
+      "note": "keeps the drafter -> SAME 4.295% as deployed"
+    },
+    "deployed_481p53": {
+      "label": "deployed 481.53 (organizer-VALID spec-alive anchor; private 460.85 measured)",
+      "public_tps": 481.53,
+      "is_speculative": true,
+      "conditional_on_488": false,
+      "systematic_delta_pct": 4.294644155088977,
+      "predicted_private_tps": 460.85,
+      "threshold_tps": 457.45349999999996,
+      "headroom_pp": 0.705355844911023,
+      "mean_clears_gate": true,
+      "sigma_hw_frac_of_tps_pct": 1.0127160849261558,
+      "breach_prob_abs": 0.243058159363011,
+      "breach_prob_frac": 0.243058159363011,
+      "ppl": 2.3772,
+      "measured_private_tps": 460.85,
+      "note": "passed its single draw (mean 460.85 > gate 457.45, +0.70 sigma_oneshot)"
+    }
+  },
+  "surgical457_spec_alive_tps_floor": {
+    "breach_lt_5pct": {
+      "abs_sigma_tps_floor": 1137.1821765632644,
+      "abs_reachable_in_range": false,
+      "abs_reachable_below_deployed": false,
+      "frac_sigma_tps_floor": null,
+      "frac_reachable": false
+    },
+    "breach_lt_1pct": {
+      "abs_sigma_tps_floor": 1608.3384556634308,
+      "abs_reachable_in_range": false,
+      "abs_reachable_below_deployed": false,
+      "frac_sigma_tps_floor": null,
+      "frac_reachable": false
+    }
+  },
+  "sweep": [
+    {
+      "public_tps": 150.0,
+      "spec_alive_breach_abs": 0.41411804605193064,
+      "spec_alive_breach_frac": 0.2430581593630109,
+      "byteexact_breach_abs": 0.0620269611311447,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 155.0,
+      "spec_alive_breach_abs": 0.4113021869413761,
+      "spec_alive_breach_frac": 0.2430581593630115,
+      "byteexact_breach_abs": 0.05600263142667539,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 160.0,
+      "spec_alive_breach_abs": 0.40849088980808945,
+      "spec_alive_breach_frac": 0.24305815936301206,
+      "byteexact_breach_abs": 0.05044956681959695,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 165.0,
+      "spec_alive_breach_abs": 0.4056842940604292,
+      "spec_alive_breach_frac": 0.2430581593630125,
+      "byteexact_breach_abs": 0.04534433392597803,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 170.0,
+      "spec_alive_breach_abs": 0.40288253838224275,
+      "spec_alive_breach_frac": 0.243058159363013,
+      "byteexact_breach_abs": 0.04066313356632706,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 175.0,
+      "spec_alive_breach_abs": 0.40008576071235513,
+      "spec_alive_breach_frac": 0.24305815936301345,
+      "byteexact_breach_abs": 0.03638201023627091,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 180.0,
+      "spec_alive_breach_abs": 0.39729409822424855,
+      "spec_alive_breach_frac": 0.24305815936301384,
+      "byteexact_breach_abs": 0.03247704576430721,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 185.0,
+      "spec_alive_breach_abs": 0.39450768730593844,
+      "spec_alive_breach_frac": 0.24305815936301428,
+      "byteexact_breach_abs": 0.02892453605787848,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 190.0,
+      "spec_alive_breach_abs": 0.3917266635400478,
+      "spec_alive_breach_frac": 0.24305815936301,
+      "byteexact_breach_abs": 0.02570115018715524,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 195.0,
+      "spec_alive_breach_abs": 0.3889511616840989,
+      "spec_alive_breach_frac": 0.2430581593630105,
+      "byteexact_breach_abs": 0.02278407138708427,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 200.0,
+      "spec_alive_breach_abs": 0.3861813156509927,
+      "spec_alive_breach_frac": 0.2430581593630109,
+      "byteexact_breach_abs": 0.020151119867314715,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 205.0,
+      "spec_alive_breach_abs": 0.3834172584897266,
+      "spec_alive_breach_frac": 0.2430581593630114,
+      "byteexact_breach_abs": 0.017780857602382683,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 210.0,
+      "spec_alive_breach_abs": 0.38065912236632027,
+      "spec_alive_breach_frac": 0.24305815936301173,
+      "byteexact_breach_abs": 0.015652675527795146,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 215.0,
+      "spec_alive_breach_abs": 0.37790703854496843,
+      "spec_alive_breach_frac": 0.24305815936301217,
+      "byteexact_breach_abs": 0.013746863789159569,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 220.0,
+      "spec_alive_breach_abs": 0.37516113736942214,
+      "spec_alive_breach_frac": 0.2430581593630125,
+      "byteexact_breach_abs": 0.012044665879938632,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 225.0,
+      "spec_alive_breach_abs": 0.3724215482446038,
+      "spec_alive_breach_frac": 0.2430581593630129,
+      "byteexact_breach_abs": 0.010528317658310526,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 230.0,
+      "spec_alive_breach_abs": 0.3696883996184591,
+      "spec_alive_breach_frac": 0.24305815936301323,
+      "byteexact_breach_abs": 0.00918107235533433,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 235.0,
+      "spec_alive_breach_abs": 0.3669618189640511,
+      "spec_alive_breach_frac": 0.24305815936301356,
+      "byteexact_breach_abs": 0.007987212776200625,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 240.0,
+      "spec_alive_breach_abs": 0.36424193276189987,
+      "spec_alive_breach_frac": 0.2430581593630139,
+      "byteexact_breach_abs": 0.006932051955445329,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 245.0,
+      "spec_alive_breach_abs": 0.36152886648256977,
+      "spec_alive_breach_frac": 0.24305815936301056,
+      "byteexact_breach_abs": 0.00600192355777307,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 250.0,
+      "spec_alive_breach_abs": 0.35882274456952157,
+      "spec_alive_breach_frac": 0.24305815936301095,
+      "byteexact_breach_abs": 0.005184163321120705,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 255.0,
+      "spec_alive_breach_abs": 0.3561236904222004,
+      "spec_alive_breach_frac": 0.24305815936301128,
+      "byteexact_breach_abs": 0.004467082820625912,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 260.0,
+      "spec_alive_breach_abs": 0.3534318263794064,
+      "spec_alive_breach_frac": 0.24305815936301162,
+      "byteexact_breach_abs": 0.0038399367942648643,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 265.0,
+      "spec_alive_breach_abs": 0.3507472737029207,
+      "spec_alive_breach_frac": 0.24305815936301195,
+      "byteexact_breach_abs": 0.0032928852161904776,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 270.0,
+      "spec_alive_breach_abs": 0.3480701525613983,
+      "spec_alive_breach_frac": 0.24305815936300895,
+      "byteexact_breach_abs": 0.002816951235346088,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 275.0,
+      "spec_alive_breach_abs": 0.34540058201454776,
+      "spec_alive_breach_frac": 0.24305815936301256,
+      "byteexact_breach_abs": 0.0024039760177776426,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 280.0,
+      "spec_alive_breach_abs": 0.3427386799975508,
+      "spec_alive_breach_frac": 0.24305815936300967,
+      "byteexact_breach_abs": 0.0020465714441119665,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 285.0,
+      "spec_alive_breach_abs": 0.34008456330581716,
+      "spec_alive_breach_frac": 0.24305815936301312,
+      "byteexact_breach_abs": 0.0017380715216068765,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 290.0,
+      "spec_alive_breach_abs": 0.3374383475799545,
+      "spec_alive_breach_frac": 0.24305815936301034,
+      "byteexact_breach_abs": 0.0014724832754728912,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 295.0,
+      "spec_alive_breach_abs": 0.3348001472910924,
+      "spec_alive_breach_frac": 0.24305815936301367,
+      "byteexact_breach_abs": 0.0012444377890159508,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 300.0,
+      "spec_alive_breach_abs": 0.33217007572642565,
+      "spec_alive_breach_frac": 0.2430581593630109,
+      "byteexact_breach_abs": 0.0010491419684706127,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 305.0,
+      "spec_alive_breach_abs": 0.3295482449751169,
+      "spec_alive_breach_frac": 0.24305815936301411,
+      "byteexact_breach_abs": 0.000882331517804813,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 310.0,
+      "spec_alive_breach_abs": 0.3269347659144255,
+      "spec_alive_breach_frac": 0.2430581593630115,
+      "byteexact_breach_abs": 0.0007402255226207077,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 315.0,
+      "spec_alive_breach_abs": 0.32432974819619953,
+      "spec_alive_breach_frac": 0.24305815936301456,
+      "byteexact_breach_abs": 0.0006194829615885356,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 320.0,
+      "spec_alive_breach_abs": 0.3217333002336009,
+      "spec_alive_breach_frac": 0.24305815936301206,
+      "byteexact_breach_abs": 0.0005171613894253135,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 325.0,
+      "spec_alive_breach_abs": 0.3191455291881936,
+      "spec_alive_breach_frac": 0.24305815936300956,
+      "byteexact_breach_abs": 0.0004306779677882844,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 330.0,
+      "spec_alive_breach_abs": 0.3165665409572952,
+      "spec_alive_breach_frac": 0.2430581593630125,
+      "byteexact_breach_abs": 0.0003577729599055224,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 335.0,
+      "spec_alive_breach_abs": 0.31399644016163397,
+      "spec_alive_breach_frac": 0.24305815936301012,
+      "byteexact_breach_abs": 0.0002964757514168359,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 340.0,
+      "spec_alive_breach_abs": 0.3114353301333562,
+      "spec_alive_breach_frac": 0.243058159363013,
+      "byteexact_breach_abs": 0.0002450734136824062,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 345.0,
+      "spec_alive_breach_abs": 0.3088833129042822,
+      "spec_alive_breach_frac": 0.24305815936301067,
+      "byteexact_breach_abs": 0.00020208178651742736,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 350.0,
+      "spec_alive_breach_abs": 0.3063404891945405,
+      "spec_alive_breach_frac": 0.24305815936301345,
+      "byteexact_breach_abs": 0.00016621902461111393,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 355.0,
+      "spec_alive_breach_abs": 0.30380695840145067,
+      "spec_alive_breach_frac": 0.24305815936301123,
+      "byteexact_breach_abs": 0.0001363815253546119,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 360.0,
+      "spec_alive_breach_abs": 0.3012828185887881,
+      "spec_alive_breach_frac": 0.24305815936301384,
+      "byteexact_breach_abs": 0.00011162213496340723,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 365.0,
+      "spec_alive_breach_abs": 0.2987681664763012,
+      "spec_alive_breach_frac": 0.24305815936301167,
+      "byteexact_breach_abs": 9.113051409453954e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 370.0,
+      "spec_alive_breach_abs": 0.2962630974296131,
+      "spec_alive_breach_frac": 0.24305815936301428,
+      "byteexact_breach_abs": 7.421553308101236e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 375.0,
+      "spec_alive_breach_abs": 0.293767705450379,
+      "spec_alive_breach_frac": 0.24305815936301212,
+      "byteexact_breach_abs": 6.0289559873139e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 380.0,
+      "spec_alive_breach_abs": 0.2912820831668269,
+      "spec_alive_breach_frac": 0.24305815936301,
+      "byteexact_breach_abs": 4.885450023311977e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 385.0,
+      "spec_alive_breach_abs": 0.28880632182458116,
+      "spec_alive_breach_frac": 0.2430581593630125,
+      "byteexact_breach_abs": 3.948944914650143e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 390.0,
+      "spec_alive_breach_abs": 0.28634051127781013,
+      "spec_alive_breach_frac": 0.2430581593630105,
+      "byteexact_breach_abs": 3.183981428378502e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 395.0,
+      "spec_alive_breach_abs": 0.2838847399807407,
+      "spec_alive_breach_frac": 0.24305815936301295,
+      "byteexact_breach_abs": 2.5607776202307697e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 400.0,
+      "spec_alive_breach_abs": 0.28143909497943825,
+      "spec_alive_breach_frac": 0.2430581593630109,
+      "byteexact_breach_abs": 2.054395539075049e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 405.0,
+      "spec_alive_breach_abs": 0.27900366190397796,
+      "spec_alive_breach_frac": 0.24305815936301334,
+      "byteexact_breach_abs": 1.6440162845798856e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 410.0,
+      "spec_alive_breach_abs": 0.276578524960881,
+      "spec_alive_breach_frac": 0.2430581593630114,
+      "byteexact_breach_abs": 1.3123118290991886e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 415.0,
+      "spec_alive_breach_abs": 0.2741637669259423,
+      "spec_alive_breach_frac": 0.24305815936301367,
+      "byteexact_breach_abs": 1.0449028106707114e-05,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 420.0,
+      "spec_alive_breach_abs": 0.2717594691373246,
+      "spec_alive_breach_frac": 0.24305815936301173,
+      "byteexact_breach_abs": 8.298923287408666e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 425.0,
+      "spec_alive_breach_abs": 0.26936571148904476,
+      "spec_alive_breach_frac": 0.243058159363014,
+      "byteexact_breach_abs": 6.5746660667387324e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 430.0,
+      "spec_alive_breach_abs": 0.26698257242472706,
+      "spec_alive_breach_frac": 0.24305815936301217,
+      "byteexact_breach_abs": 5.1955420803384555e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 435.0,
+      "spec_alive_breach_abs": 0.26461012893174574,
+      "spec_alive_breach_frac": 0.24305815936301034,
+      "byteexact_breach_abs": 4.095362934442015e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 440.0,
+      "spec_alive_breach_abs": 0.26224845653565765,
+      "spec_alive_breach_frac": 0.2430581593630125,
+      "byteexact_breach_abs": 3.220011711102533e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 445.0,
+      "spec_alive_breach_abs": 0.2598976292949663,
+      "spec_alive_breach_frac": 0.24305815936301073,
+      "byteexact_breach_abs": 2.5253711874451135e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 450.0,
+      "spec_alive_breach_abs": 0.25755771979625297,
+      "spec_alive_breach_frac": 0.2430581593630129,
+      "byteexact_breach_abs": 1.9755813275845746e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 455.0,
+      "spec_alive_breach_abs": 0.2552287991495814,
+      "spec_alive_breach_frac": 0.24305815936301112,
+      "byteexact_breach_abs": 1.5415788851003143e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 460.0,
+      "spec_alive_breach_abs": 0.2529109369842917,
+      "spec_alive_breach_frac": 0.24305815936301323,
+      "byteexact_breach_abs": 1.1998777200150634e-06,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 465.0,
+      "spec_alive_breach_abs": 0.2506042014450631,
+      "spec_alive_breach_frac": 0.2430581593630115,
+      "byteexact_breach_abs": 9.315536805276636e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 470.0,
+      "spec_alive_breach_abs": 0.2483086591883657,
+      "spec_alive_breach_frac": 0.24305815936301356,
+      "byteexact_breach_abs": 7.214026399582352e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 475.0,
+      "spec_alive_breach_abs": 0.24602437537917943,
+      "spec_alive_breach_frac": 0.2430581593630119,
+      "byteexact_breach_abs": 5.572445295753958e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 480.0,
+      "spec_alive_breach_abs": 0.24375141368809983,
+      "spec_alive_breach_frac": 0.2430581593630139,
+      "byteexact_breach_abs": 4.293499963337055e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 485.0,
+      "spec_alive_breach_abs": 0.24148983628871118,
+      "spec_alive_breach_frac": 0.24305815936301223,
+      "byteexact_breach_abs": 3.299696613723313e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 490.0,
+      "spec_alive_breach_abs": 0.2392397038553397,
+      "spec_alive_breach_frac": 0.24305815936301056,
+      "byteexact_breach_abs": 2.5294890682037163e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 495.0,
+      "spec_alive_breach_abs": 0.2370010755610945,
+      "spec_alive_breach_frac": 0.2430581593630125,
+      "byteexact_breach_abs": 1.934136928394281e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    },
+    {
+      "public_tps": 500.0,
+      "spec_alive_breach_abs": 0.23477400907623164,
+      "spec_alive_breach_frac": 0.24305815936301095,
+      "byteexact_breach_abs": 1.475151490404336e-07,
+      "byteexact_breach_frac": 3.9622453373855393e-07
+    }
+  ],
+  "verdict": {
+    "spec_alive_crossover_abs_breach_lt_5pct_tps": 1137.1821765632644,
+    "spec_alive_crossover_abs_breach_lt_1pct_tps": 1608.3384556634308,
+    "spec_alive_crossover_abs_5pct_in_range": false,
+    "spec_alive_crossover_abs_5pct_above_deployed": true,
+    "spec_alive_crossover_frac_breach_lt_5pct_tps": null,
+    "spec_alive_crossover_frac_breach_lt_1pct_tps": null,
+    "spec_alive_frac_scale_invariant_breach_pct": 24.3058159363011,
+    "byteexact_premise_crossover_abs_breach_lt_5pct_tps": 160.42361899350746,
+    "byteexact_premise_crossover_abs_breach_lt_1pct_tps": 226.89018605947382,
+    "floorlock_breach_abs_pct": 7.3820111526613275,
+    "floorlock_breach_frac_pct": 0.0008097113547211876,
+    "globalflag_breach_abs_pct": 36.72523092999687,
+    "globalflag_breach_frac_pct": 24.305815936300846,
+    "surgical457_breach_abs_pct": 25.430032341630017,
+    "surgical457_breach_frac_pct": 24.305815936301045,
+    "surgical457_private_safe": false,
+    "surgical457_spec_alive_tps_floor_breach_lt_5pct_abs": 1137.1821765632644,
+    "surgical457_spec_alive_tps_floor_breach_lt_1pct_abs": 1608.3384556634308,
+    "surgical457_spec_alive_tps_floor_frac_reachable": false,
+    "deployed_breach_specalive_pct": 24.3058159363011,
+    "deployed_predicted_private_tps": 460.85,
+    "deployed_mean_clears_gate": true,
+    "floorlock_reconfirm_safe": true,
+    "floorlock_abs_sigma_flag": true,
+    "fast_byteexact_privatesafe_coexists": false,
+    "delta_spec_alive_pct": 4.294644155088977,
+    "delta_floorlock_pct": 0.6333865388319535,
+    "deployed_gap_pct": 4.294644155088977,
+    "deployed_acceptance_bucket_pct": 3.66125761625703,
+    "deployed_ctxlen_bucket_pct": 0.6333865388319535,
+    "sigma_oneshot_tps": 4.876531763744918,
+    "sigma_oneshot_frac_pct": 1.0127160849261558,
+    "delta_gate": 0.05,
+    "ppl_gate": 2.42,
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true,
+    "no_kernel_rebuild": true,
+    "no_hf_job": true,
+    "no_launch": true,
+    "no_submission": true,
+    "self_test_passes": true,
+    "reconcile_line": "Private-safe TPS threshold for a SPEC-ALIVE byte-exact rung. The crossover the PR intuits (speed flips a config gate-safe) is REAL only under the BYTE-EXACT PREMISE Delta=0: abs-sigma crossover 160 TPS (<5%) / 227 TPS (<1%), reproducing the PR's 2.41 sigma @234 / 4.95 sigma @481. But #486 proved a drafter-keeping config is NOT Delta=0 -- it re-inherits Delta=4.295% (3.661% acceptance + 0.633% ctxlen). For SPEC-ALIVE Delta=4.295%: FRACTIONAL (physical) breach is SCALE-INVARIANT 24.3% at EVERY TPS (no crossover; speed buys nothing), and ABSOLUTE-sigma breach crosses 5% only at 1137 TPS / 1% at 1608 TPS -- both ABOVE the realizable range AND above the deployed 481.53 itself. surgical-457 (spec-alive, CONDITIONAL on #488): breach 25.4% abs / 24.3% frac -> surgical457_private_safe=False. FLOOR-LOCK 161.70 (Delta=0.633%, no drafter): breach 0.0008% frac -> reconfirm_safe=True (only flag: 7.38% absolute-sigma tail). VERDICT fast_byteexact_privatesafe_coexists=False: NO realized spec-alive config below (or at) 481 clears the gate with comfortable margin. Private-safety is a property of Delta (shed the drafter -> 161.70 AR floor), NOT of TPS. The deployed-481 'safety' is the Delta=0 counterfactual; spec-honest, deployed carried the SAME 24.3% one-shot breach and won its single draw (mean 460.85 > gate 457.45). The only fast private-safe ship is the deployed-481 class; the only strict private-safe ship is floor-lock 161.70."
+  },
+  "self_test_conditions": {
+    "deployed_gap_reconstructs_4p295": true,
+    "accept_plus_ctxlen_equals_deployed_gap": true,
+    "sigma_oneshot_reconstructs_between_within": true,
+    "phinv_inverts_phi_at_5pct": true,
+    "phinv_inverts_phi_at_1pct": true,
+    "spec_alive_frac_breach_scale_invariant": true,
+    "spec_alive_frac_breach_is_material": true,
+    "spec_alive_abs_breach_monotone_decreasing": true,
+    "spec_alive_abs_crossover5_out_of_range": true,
+    "spec_alive_abs_crossover5_above_deployed": true,
+    "spec_alive_abs_crossover_monotone_in_bar": true,
+    "spec_alive_frac_no_crossover": true,
+    "abs_frac_coincide_at_deployed": true,
+    "surgical457_breach_above_gate_both": true,
+    "surgical457_private_safe_is_false": true,
+    "surgical457_inherits_spec_alive_delta": true,
+    "byteexact_premise_crossover5_in_sweep_range": true,
+    "byteexact_premise_crossover1_in_sweep_range": true,
+    "byteexact_premise_crossovers_below_deployed": true,
+    "byteexact_premise_234_clears_1pct": true,
+    "byteexact_premise_frac_safe_all_tps": true,
+    "byteexact_premise_sigma_dist_481_near_4p95": true,
+    "byteexact_premise_sigma_dist_234_near_2p41": true,
+    "floorlock_nonspec_ctxlen_only": true,
+    "floorlock_frac_safe": true,
+    "floorlock_abs_tail_flag": true,
+    "floorlock_delta_below_globalflag": true,
+    "floorlock_reconfirm_safe_true": true,
+    "deployed_pred_reproduces_460p85": true,
+    "deployed_mean_clears_gate": true,
+    "deployed_specalive_breach_is_24pct": true,
+    "no_in_range_spec_alive_safe": true,
+    "coexistence_verdict_false": true,
+    "ppl_clears_both_real_candidates": true,
+    "threshold_is_95pct_of_public": true,
+    "nan_clean": true
+  },
+  "public_evidence_used": "denken #486 (shcdordv) private_validity_real_candidates: a spec-alive byte-exact config carries the fixed deployed Delta 4.295% (3.661% acceptance + 0.633% ctxlen) because it re-inherits the drafter acceptance bucket; floor-lock 161.70 (no drafter) keeps only the 0.633% ctxlen term. ubel #379 (5kpb73tb) public->private gap decomposition is the 4.295% anchor. lawine #467 sigma_hw reconciliation: sigma_within 0.349, sigma_between 4.864, sigma_oneshot 4.876. denken #476 literal_1p0_config_reachable: literal-1.0 reachable only at the M=1 AR floor 161.70. ubel #470 (ugqnytji) strict-frontier BI-pin: blanket VLLM_BATCH_INVARIANT=1 realizes 234.47, spec ALIVE E_accept~3.87, PPL 2.3770<=2.42. lawine #488 (in flight): surgical-attention-only rung targeting ~457 byte-exact; if realized it is spec-alive -> same 4.295% Delta. Deployed pair 481.53->460.85 (Delta 4.3%) organizer cmpatino-verifier (BASELINE.md, PR #52, 2x9fm2zx)."
+}
