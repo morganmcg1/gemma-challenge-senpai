@@ -1,0 +1,44 @@
+==============================================================================
+(1) WITHIN-ARM warm determinism  (r1 vs r2 same arm; #488 saw 1.000)
+==============================================================================
+  deployed         r1-vs-r2: rate=1.000000 flipped=0/32
+  surgical         r1-vs-r2: rate=1.000000 flipped=0/32
+  byteexact        r1-vs-r2: rate=1.000000 flipped=0/32
+  full_flag        r1-vs-r2: rate=1.000000 flipped=0/32
+  byteexact_ref    r0-vs-r1: rate=0.800903 flipped=15/32  (ref arm, only 2 rounds)
+  full_flag_ref    r0-vs-r1: rate=0.770752 flipped=12/32  (ref arm, only 2 rounds)
+
+==============================================================================
+(2) CROSS-CONFIG warm (last warm round of each arm)
+==============================================================================
+  byteexact   vs surgical      rate=0.497192 flipped=25/32 prefix(min/med/max)=9/79/246
+        ^ CANDIDATE vs accepted 357.6 rung (both byte-exact attn + fast matmul, cudagraph M=8)
+        first_div_positions=[9, 11, 12, 21, 28, 44, 53, 53, 67, 73, 76, 77, 79, 79, 82, 85, 100, 108, 113, 114, 132, 157, 167, 171, 246]
+  byteexact   vs full_flag     rate=0.573853 flipped=23/32 prefix(min/med/max)=9/95/246
+        ^ candidate vs batch-inv ground truth (served-vs-served)
+        first_div_positions=[9, 11, 18, 21, 28, 44, 53, 73, 77, 79, 82, 95, 100, 108, 113, 114, 125, 149, 157, 167, 171, 232, 246]
+  surgical    vs full_flag     rate=0.648804 flipped=20/32 prefix(min/med/max)=12/110.5/222
+        ^ #488 reported 0.9763 here (both 2D attn, matmul-axis only)
+        first_div_positions=[12, 18, 28, 53, 67, 76, 85, 95, 100, 110, 111, 119, 125, 132, 138, 140, 163, 180, 186, 222]
+  deployed    vs surgical      rate=0.622314 flipped=19/32 prefix(min/med/max)=9/79/186
+        ^ #488 reported 0.4564 (attention axis: 3D adaptive vs 2D)
+        first_div_positions=[9, 11, 12, 24, 59, 67, 71, 76, 77, 79, 108, 110, 111, 114, 117, 119, 119, 160, 186]
+  byteexact   vs deployed      rate=0.556885 flipped=24/32 prefix(min/med/max)=21/87.5/246
+        ^ candidate vs fast non-exact 3D adaptive
+        first_div_positions=[21, 24, 28, 42, 44, 53, 53, 71, 73, 79, 82, 85, 90, 100, 113, 119, 130, 132, 142, 157, 166, 171, 182, 246]
+  deployed    vs full_flag     rate=0.679565 flipped=17/32 prefix(min/med/max)=9/100/232
+        ^ non-exact control
+        first_div_positions=[9, 11, 18, 24, 53, 71, 77, 85, 100, 108, 114, 117, 119, 132, 176, 182, 232]
+
+==============================================================================
+(3) CROSS-ROUND robustness: byteexact(r2) vs surgical(r1) and (r2) — pairing sanity
+==============================================================================
+  byteexact(r0) vs surgical(r0): rate=0.639282 flipped=22/32
+  byteexact(r0) vs surgical(r1): rate=0.586548 flipped=21/32
+  byteexact(r0) vs surgical(r2): rate=0.586548 flipped=21/32
+  byteexact(r1) vs surgical(r0): rate=0.598999 flipped=22/32
+  byteexact(r1) vs surgical(r1): rate=0.497192 flipped=25/32
+  byteexact(r1) vs surgical(r2): rate=0.497192 flipped=25/32
+  byteexact(r2) vs surgical(r0): rate=0.598999 flipped=22/32
+  byteexact(r2) vs surgical(r1): rate=0.497192 flipped=25/32
+  byteexact(r2) vs surgical(r2): rate=0.497192 flipped=25/32
