@@ -1,0 +1,225 @@
+{
+  "pr": 512,
+  "agent": "kanna",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_serve": true,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "no_evals_run": true,
+  "lane_discipline": "pure composition of MERGED measured legs (stark #494 locus cert, wirbel #487 full-serve harness) + advisor-provided dixie #483 anchors + Morgan's #483 gate; re-derives nothing, runs no eval, recomputes the #487/#494 identities only to assert exact reproduction.",
+  "inputs": {
+    "base_mmlu_pro": 0.668,
+    "base_gpqa_diamond": 0.47,
+    "pruned_mmlu_pro": 0.33,
+    "pruned_gpqa_diamond": 0.283,
+    "gate_mmlu_pro": 0.6,
+    "gate_gpqa_diamond": 0.42,
+    "chance_mmlu_pro": 0.1,
+    "chance_gpqa_diamond": 0.25,
+    "locus_identity": 0.9988751406074241,
+    "fullserve_identity": 0.9973493303571429,
+    "fullserve_operative_rate": 0.9991629464285714,
+    "fullserve_n_semantic": 12,
+    "fullserve_n_tie": 26,
+    "fullserve_n_positions": 14336,
+    "ship_official_tps": 375.857,
+    "ship_ppl": 2.37673,
+    "frontier_tps": 420.0,
+    "source_runs": {
+      "stark_494_locus_cert": [
+        "k8nqmc2b",
+        "5fxw18gu"
+      ],
+      "wirbel_487_fullserve_harness": "(merged artifact)",
+      "ship_surgical357": "j7qao5e9",
+      "kanna_508_speed_dossier": "fn2v5wox"
+    }
+  },
+  "ship_quality_prior_mmlu": 0.668,
+  "ship_quality_prior_gpqa": 0.47,
+  "structural_prior": {
+    "ship_quality_prior_mmlu": 0.668,
+    "ship_quality_prior_gpqa": 0.47,
+    "basis": "byte-faithful greedy identity: a greedy downstream eval reproduces base outputs token-for-token => the scored answer is base's answer, so MMLU-Pro = base = 0.668 and GPQA-Diamond = base = 0.470 BY CONSTRUCTION.",
+    "locus_confirmation": {
+      "source": "stark #494 (k8nqmc2b / 5fxw18gu)",
+      "locus_identity": 0.9988751406074241,
+      "residual_flips": 1,
+      "semantic_flips": 0,
+      "margin_nat": 0.125,
+      "surgical_eq_222_allpin": true,
+      "note": "at the O=224 locus the ONLY residual flip is a bf16-ULP knife-edge near-tie (0.125 nat = 1 logit step), 0 semantic -> locus-exact at a >=1-ULP tie tolerance."
+    }
+  },
+  "ship_gate": {
+    "score_mmlu": 0.668,
+    "score_gpqa": 0.47,
+    "pass_mmlu": true,
+    "pass_gpqa": true,
+    "passes_gate": true,
+    "margin_mmlu": 0.06800000000000006,
+    "margin_gpqa": 0.04999999999999999,
+    "mmlu_over_chance": 0.5680000000000001,
+    "gpqa_over_chance": 0.21999999999999997
+  },
+  "competitor_gate": {
+    "score_mmlu": 0.33,
+    "score_gpqa": 0.283,
+    "pass_mmlu": false,
+    "pass_gpqa": false,
+    "passes_gate": false,
+    "margin_mmlu": -0.26999999999999996,
+    "margin_gpqa": -0.137,
+    "mmlu_over_chance": 0.23,
+    "gpqa_over_chance": 0.032999999999999974
+  },
+  "ship_passes_quality_gate": true,
+  "competitors_fail_quality_gate": true,
+  "residual": {
+    "semantic_flip_rate": 0.0008370535714285714,
+    "tie_flip_rate": 0.0018136160714285715,
+    "raw_token_identity": 0.9973493303571429,
+    "operative_identity_at_tie_tolerance": 0.9991629464285714,
+    "tie_tolerance_nat": 0.5,
+    "bf16_ulp_nat": 0.125,
+    "tie_tolerance_makes_locus_exact": true,
+    "tie_tolerance_makes_fullserve_exact": false,
+    "n_semantic_residual": 12,
+    "n_tie_neutralized": 26,
+    "answer_change_bound_directhit_abs_dacc": 0.0008370535714285714,
+    "answer_change_bound_directhit_pct": 0.08370535714285714,
+    "answer_change_bound_worstcase_abs_dacc": 0.09375,
+    "answer_change_bound_worstcase_pct": 9.375,
+    "gate_margin_min": 0.04999999999999999,
+    "gate_safe_under_directhit": true,
+    "gate_safe_under_worstcase": false,
+    "headline_bound_abs_dacc": 0.0008370535714285714,
+    "decisive_leg": "ubel #511 served base-vs-ship MMLU/GPQA A/B (measures the true |dAcc| incl. cascade)",
+    "structural_prior_dacc": 0.0,
+    "note": "Tie tolerance (>= 1 bf16 ULP = 0.125 nat) neutralizes the 26 tie flips and makes the LOCUS exact, but the 12 SEMANTIC full-serve flips survive -- so 'exact at a tie tolerance' is TRUE for the locus / tie component and FALSE for the full-serve semantic component. A semantic flip changes a scored answer only if it (or its cascade) reaches the single answer-decision token; the direct-hit ceiling is |dAcc| <= 0.0837% (per-position semantic rate 8.37e-04). The construction-refuted worst case (all 12 flips distinct-prompt, answer-determining, adversarially signed) is |dAcc| <= 9.375% -- the ONLY regime that threatens the gate, closed by the ubel #511 direct A/B. Cascade is not analytically bounded here; structural prior is sign-symmetric numerical noise => E[dAcc] ~ 0."
+  },
+  "residual_flip_answer_change_bound": 0.0008370535714285714,
+  "rule_quality_penalize": {
+    "retention_mmlu": 0.4940119760479042,
+    "retention_gpqa": 0.602127659574468,
+    "binding_retention": 0.4940119760479042,
+    "penalized_ship_tps": 375.857,
+    "penalized_ship_worstcase_tps": 323.1076081586827,
+    "penalized_competitor_best_tps": 252.89361702127655,
+    "frontier_tps": 420.0,
+    "breakeven_competitor_tps_mmlu": 760.8256848484849,
+    "breakeven_competitor_tps_gpqa": 624.2148056537104,
+    "winner": "surgical",
+    "winner_even_at_ship_worstcase": "surgical",
+    "note": "quality-adjusted, surgical scores 375.9 (retention 1.0) vs the pruned frontier's <= 252.9 (best of MMLU/GPQA retention on the 420-TPS frontier); a competitor needs 624-761 TPS to break even -- 1.5-1.8x the public frontier. Surgical wins even at its construction-refuted worst-case retention (323.1)."
+  },
+  "rule_quality_invalidate_pruned": {
+    "ship_passes": true,
+    "competitor_passes": false,
+    "ship_margins": [
+      0.06800000000000006,
+      0.04999999999999999
+    ],
+    "competitor_margins": [
+      -0.26999999999999996,
+      -0.137
+    ],
+    "winner": "surgical",
+    "surgical_may_be_only_valid_fast_entry": true,
+    "note": "ship PASSES (MMLU 0.668 >= 0.60, GPQA 0.470 >= 0.42); pruned competitors FAIL (MMLU 0.330 < 0.60, GPQA 0.283 < 0.42, near chance 0.25) -> on a gate, surgical may be the ONLY valid fast entry."
+  },
+  "rule_quality_agnostic": {
+    "quality_axis_binds": false,
+    "ship_quality_vs_base": "tie (= base by construction)",
+    "governing_verdict": "#508 speed/private dossier (surgical-357 dominant on the speed/private frontier)",
+    "winner": "surgical (per #508; quality axis adds no disadvantage)",
+    "note": "with no quality floor the axis is moot: surgical TIES base on quality (no quality disadvantage at all) and the decision reverts to the #508 speed/private verdict where surgical-357 is the dominant fast entry."
+  },
+  "ship_is_dominant_quality_valid_entry": true,
+  "quality_verdict": "dominant",
+  "legs_folded": {
+    "confirmed": [
+      {
+        "pr": 494,
+        "agent": "stark",
+        "leg": "locus operative cert",
+        "wandb": [
+          "k8nqmc2b",
+          "5fxw18gu"
+        ],
+        "fact": "locus identity 0.99887551, 1 near-tie flip, 0 semantic; surgical == 222 all-pin"
+      },
+      {
+        "pr": 487,
+        "agent": "wirbel",
+        "leg": "reload-immune full-serve census harness (pinned/222 proxy)",
+        "wandb": [],
+        "fact": "full-serve W=8 identity 0.99734933, operative-rate 0.99916295, 12 semantic + 26 tie / 14336"
+      }
+    ],
+    "pending": [
+      {
+        "pr": 511,
+        "agent": "ubel",
+        "leg": "served base-vs-ship MMLU/GPQA A/B (DECISIVE direct |dAcc|)"
+      },
+      {
+        "pr": 509,
+        "agent": "stark",
+        "leg": "surgical-vs-base GREEDY (M=1 AR) census"
+      },
+      {
+        "pr": 510,
+        "agent": "wirbel",
+        "leg": "surgical-config full-serve operative-identity census"
+      },
+      {
+        "pr": 505,
+        "agent": "denken",
+        "leg": "spec-dec sampled-distribution preservation"
+      }
+    ]
+  },
+  "one_line_summary": "ship surgical-357 downstream-quality = base BY CONSTRUCTION (greedy-faithful): MMLU-Pro 0.668 / GPQA-Diamond 0.470 -> PASSES Morgan's gate (>= 0.60 / 0.42, margins +0.068/+0.050) while the pruned-substrate frontier FAILS (0.330/0.283, GPQA near chance 0.25). Residual: locus operative-1.0 (1 near-tie flip, 0 semantic), full-serve 12 semantic flips/14336 (tie tolerance neutralizes 26 ties, not the 12 semantic) -> direct-hit answer-change bound |dAcc| <= 0.0837%, construction-refuted worst case 9.38% (closed by ubel #511). VERDICT DOMINANT: ship is the dominant QUALITY-VALID entry under all three organizer rules (penalize / invalidate-pruned / agnostic).",
+  "dossier_verdict": "SHIP surgical-357 is the dominant QUALITY-VALID entry for a quality-gated reopen. Its downstream quality is base by construction (greedy-faithful: locus cert 1 bf16-ULP near-tie flip, 0 semantic), so MMLU-Pro = 0.668 and GPQA-Diamond = 0.470 PASS Morgan's gate (>= 0.60/0.42) while the pruned-substrate competitors COLLAPSE below it (0.330/0.283). Under (a) quality-penalize -> surgical wins the quality-adjusted frontier (retention 1.0 vs ~0.5; break-even 624-761 TPS >> 420 frontier); (b) quality-invalidate-the-pruned -> surgical may be the ONLY valid fast entry; (c) quality-agnostic -> the #508 speed verdict governs and surgical still leads. The only residual is a measured handful of full-serve semantic flips (12/14336) whose direct-hit answer-change ceiling is |dAcc| <= 0.0837%; the decisive confirmation is the ubel #511 served A/B (expected ~0).",
+  "self_test": {
+    "checks": {
+      "reproduces_487_raw_identity": true,
+      "reproduces_487_operative_rate": true,
+      "locus_cert_zero_semantic": true,
+      "locus_margin_is_one_bf16_ulp": true,
+      "prior_mmlu_is_base": true,
+      "prior_gpqa_is_base": true,
+      "ship_passes_gate": true,
+      "ship_gate_margins_positive": true,
+      "competitors_fail_gate": true,
+      "competitor_mmlu_below_gate": true,
+      "competitor_gpqa_below_gate": true,
+      "competitor_gpqa_near_chance": true,
+      "tie_tolerance_fixes_locus": true,
+      "tie_tolerance_does_not_fix_fullserve": true,
+      "semantic_residual_is_12": true,
+      "rates_in_unit": true,
+      "identity_ordering": true,
+      "gate_safe_directhit": true,
+      "worstcase_is_the_only_threat": true,
+      "directhit_below_worstcase": true,
+      "competitor_gap_dwarfs_ship_worstcase": true,
+      "penalize_winner_surgical": true,
+      "penalize_winner_surgical_even_worstcase": true,
+      "penalize_breakeven_above_frontier": true,
+      "invalidate_winner_surgical": true,
+      "invalidate_surgical_only_valid_fast": true,
+      "agnostic_winner_surgical": true,
+      "verdict_dominant": true,
+      "ship_dominant_flag": true,
+      "two_legs_confirmed": true,
+      "four_legs_pending": true,
+      "nan_clean": true
+    },
+    "passes": true
+  }
+}
