@@ -1,0 +1,327 @@
+{
+  "pr": 523,
+  "generated_utc": "2026-06-16T19:55:45.545240+00:00",
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "n_decodes": 3
+  },
+  "elapsed_s": 1834.4584891796112,
+  "git": {
+    "git_commit": "982ade8f3e31fc8f607506db316a67e1e45f2097",
+    "git_branch": "lawine/byteexact-realization-gap",
+    "git_dirty": true
+  },
+  "arms": {
+    "deployed": {
+      "arm": "deployed",
+      "submission": "fa2sw_precache_kenyan",
+      "label": "deployed adaptive 3D split-KV (NOT byte-exact, ~450 local ref)",
+      "extra_env": {},
+      "byte_exact_claim": false,
+      "median_wall_tps": 453.92695789982014,
+      "wall_tps_values": [
+        453.44214489797326,
+        459.2914319779105,
+        453.92695789982014
+      ],
+      "wall_tps_n": 3,
+      "wall_tps_std": 3.246197393997689,
+      "server_ready_s": 85.02080225944519,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": 2.376682786480556,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "server_error": null,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 5,
+        "byteexact_armed": false,
+        "byteexact_fixed_tps": null,
+        "byteexact_num_segments": null,
+        "surgical_armed": false,
+        "onegraph_captured": true,
+        "graph_capture_lines": 5,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "flashinfer_sampler": "flashinfer-mentioned",
+        "steptime": {
+          "draft": {
+            "n": 51905,
+            "gap_p50": 0.0,
+            "gap_mean": 0.0,
+            "cpu_p50": 0.284,
+            "cpu_mean": 0.288,
+            "gpu_p50": 1.437,
+            "gpu_mean": 1.455,
+            "dgpu_p50": 0.0,
+            "dgpu_mean": 0.0
+          },
+          "exec": {
+            "n": 52543,
+            "gap_p50": 1.584,
+            "gap_mean": 2.27,
+            "cpu_p50": 6.438,
+            "cpu_mean": 6.521,
+            "gpu_p50": 6.534,
+            "gpu_mean": 6.804,
+            "dgpu_p50": 0.0,
+            "dgpu_mean": 0.0
+          }
+        }
+      },
+      "first_decode_out": "/workspace/senpai/target/research/speed/byteexact_realization_gap/ledger/deployed/decode_round00.jsonl",
+      "decodes": [
+        {
+          "round": 0,
+          "wall_tps": 453.44214489797326,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 144.53001499176025,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 1,
+          "wall_tps": 459.2914319779105,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 142.68935894966125,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 2,
+          "wall_tps": 453.92695789982014,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 144.37565088272095,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    },
+    "surgical": {
+      "arm": "surgical",
+      "submission": "fa2sw_strict_surgical357",
+      "label": "surgical 2D order-preserving (byte-exact, no split-KV) -- the 357 floor",
+      "extra_env": {},
+      "byte_exact_claim": true,
+      "median_wall_tps": 351.96546962996376,
+      "wall_tps_values": [
+        349.93940506851345,
+        354.8497802140184,
+        351.96546962996376
+      ],
+      "wall_tps_n": 3,
+      "wall_tps_std": 2.467656419292297,
+      "server_ready_s": 85.01729941368103,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": 2.3766755065685943,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "server_error": null,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "byteexact_armed": false,
+        "byteexact_fixed_tps": null,
+        "byteexact_num_segments": null,
+        "surgical_armed": true,
+        "onegraph_captured": true,
+        "graph_capture_lines": 5,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "flashinfer_sampler": "flashinfer-mentioned",
+        "steptime": {
+          "draft": {
+            "n": 52399,
+            "gap_p50": 0.0,
+            "gap_mean": 0.0,
+            "cpu_p50": 0.289,
+            "cpu_mean": 0.294,
+            "gpu_p50": 2.645,
+            "gpu_mean": 2.557,
+            "dgpu_p50": 0.0,
+            "dgpu_mean": 0.0
+          },
+          "exec": {
+            "n": 53073,
+            "gap_p50": 2.763,
+            "gap_mean": 3.385,
+            "cpu_p50": 7.839,
+            "cpu_mean": 7.754,
+            "gpu_p50": 7.92,
+            "gpu_mean": 8.064,
+            "dgpu_p50": 0.0,
+            "dgpu_mean": 0.0
+          }
+        }
+      },
+      "first_decode_out": "/workspace/senpai/target/research/speed/byteexact_realization_gap/ledger/surgical/decode_round00.jsonl",
+      "decodes": [
+        {
+          "round": 0,
+          "wall_tps": 349.93940506851345,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 187.27813744544983,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 1,
+          "wall_tps": 354.8497802140184,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 184.68660163879395,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 2,
+          "wall_tps": 351.96546962996376,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 186.20008397102356,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    },
+    "bx_T4_S64": {
+      "arm": "bx_T4_S64",
+      "submission": "fa2sw_strict_byteexact_splitkv399",
+      "label": "byteexact fixed-3D T=4/S=64 (packaged, byte-exact) -- 8 segs @ L=512",
+      "extra_env": {},
+      "byte_exact_claim": true,
+      "median_wall_tps": 439.7055879037966,
+      "wall_tps_values": [
+        440.72587396118865,
+        439.7055879037966,
+        435.4630669147374
+      ],
+      "wall_tps_n": 3,
+      "wall_tps_std": 2.7909707388199005,
+      "server_ready_s": 85.01645255088806,
+      "peak_gpu_mem_mib": 19535,
+      "ppl": 2.3766643358900286,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "server_error": null,
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 5,
+        "byteexact_armed": true,
+        "byteexact_fixed_tps": 4,
+        "byteexact_num_segments": 64,
+        "surgical_armed": false,
+        "onegraph_captured": true,
+        "graph_capture_lines": 5,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "flashinfer_sampler": "flashinfer-mentioned",
+        "steptime": {
+          "draft": {
+            "n": 51959,
+            "gap_p50": 0.0,
+            "gap_mean": 0.0,
+            "cpu_p50": 0.284,
+            "cpu_mean": 0.29,
+            "gpu_p50": 1.551,
+            "gpu_mean": 1.554,
+            "dgpu_p50": 0.0,
+            "dgpu_mean": 0.0
+          },
+          "exec": {
+            "n": 52489,
+            "gap_p50": 1.678,
+            "gap_mean": 2.256,
+            "cpu_p50": 6.635,
+            "cpu_mean": 6.68,
+            "gpu_p50": 6.714,
+            "gpu_mean": 6.89,
+            "dgpu_p50": 0.0,
+            "dgpu_mean": 0.0
+          }
+        }
+      },
+      "first_decode_out": "/workspace/senpai/target/research/speed/byteexact_realization_gap/ledger/bx_T4_S64/decode_round00.jsonl",
+      "decodes": [
+        {
+          "round": 0,
+          "wall_tps": 440.72587396118865,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 148.70014190673828,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 1,
+          "wall_tps": 439.7055879037966,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 149.04518342018127,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 2,
+          "wall_tps": 435.4630669147374,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 150.49726366996765,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    }
+  },
+  "cross_arm_token_diffs": {
+    "bx_T4_S64_vs_surgical": {
+      "label": "bx_T4_S64_vs_surgical (expect identical)",
+      "available": true,
+      "n_prompts_compared": 128,
+      "n_tokens_compared": 65536,
+      "n_tokens_matched": 28353,
+      "token_identity_rate": 0.4326324462890625,
+      "n_sequences_with_any_flip": 114
+    }
+  },
+  "ledger": {
+    "deployed_local_tps": 453.92695789982014,
+    "surgical_local_tps": 351.96546962996376,
+    "byteexact_T4S64_local_tps": 439.7055879037966,
+    "strict_frontier_457p5_pred": 457.5,
+    "457p5_is_128x512_measured": false,
+    "delta_357_to_399_splitkv_recovery": 87.74011827383282,
+    "delta_399_to_deployed_fixed_vs_adaptive_tax": 14.221369996023554,
+    "delta_surgical_to_deployed_total_attn_tax": 101.96148826985637,
+    "steptime_exec_gpu_ms": {
+      "deployed": 6.804,
+      "surgical": 8.064,
+      "bx_T4_S64": 6.89
+    },
+    "steptime_exec_gap_ms": {
+      "deployed": 2.27,
+      "surgical": 3.385,
+      "bx_T4_S64": 2.256
+    },
+    "steptime_draft_gpu_ms": {
+      "deployed": 1.455,
+      "surgical": 2.557,
+      "bx_T4_S64": 1.554
+    },
+    "geometry_sweep_tps": {
+      "bx_T4_S64": 439.7055879037966
+    },
+    "geometry_sweep_best_arm": "bx_T4_S64",
+    "geometry_sweep_best_tps": 439.7055879037966,
+    "geometry_sweep_best_over_packaged": 0.0
+  },
+  "strict_frontier_457p5_provenance": {
+    "457p5_is_128x512_measured": false,
+    "source": "stark #466 strict_frontier_realize.json microbench projection: attention-kernel added-us applied to the deployed 481.53 decode cycle at headline KV-len 640 (realized_strict_frontier_tps=456.36). #488 surgical variant predicted 456.98.",
+    "realized_when_served": "global VLLM_BATCH_INVARIANT=1 -> 234.47 official / 221.16 local (#487); surgical attn-only realization -> 357.6 local (#488). The 457.5 over-promised the realized surgical serve by ~100 TPS."
+  },
+  "wandb_run_id": "i11p5e3y"
+}
