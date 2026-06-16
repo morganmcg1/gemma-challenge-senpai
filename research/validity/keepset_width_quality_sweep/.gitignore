@@ -1,0 +1,17 @@
+# Keep scripts + summary/result JSONs; exclude bulky reproducible artifacts & scratch.
+__pycache__/
+*.pyc
+wandb/
+# raw inspect_ai eval logs (reproducible, ~MB each)
+results/*/_inspect_logs/
+# raw per-token decode records (keep the small .summary.json)
+results/speed/*/*/decode_round*.jsonl
+results/speed/*/*/server.log
+# verbose driver/server stdout, pidfiles
+results/**/*.out
+results/**/*.log
+results/**/*.pid
+# scratch reconstruction probes + local notes (analysis captured in committed validators/JSON)
+_recon_test*.py
+_fyi_comment.md
+_pr_comment_527.md
