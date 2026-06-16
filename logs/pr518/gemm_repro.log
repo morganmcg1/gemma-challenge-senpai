@@ -1,0 +1,85 @@
+device: NVIDIA A10G cc=8.6 sms=80
+
+== census qkv_proj N=3072 K=2560 ==
+  qkv_proj: flips(M1..8)=0 invariant=True | boundary M16=0 M32=18 M64=27 M128=50
+
+== census o_proj N=2560 K=2048 ==
+  o_proj: flips(M1..8)=0 invariant=True | boundary M16=0 M32=0 M64=0 M128=44
+
+== census gate_up_proj N=20480 K=2560 ==
+  gate_up_proj: flips(M1..8)=0 invariant=True | boundary M16=0 M32=32 M64=62 M128=128
+
+== census down_proj N=2560 K=10240 ==
+  down_proj: flips(M1..8)=0 invariant=True | boundary M16=0 M32=0 M64=0 M128=112
+
+== census lm_head_pck04 N=16384 K=2560 ==
+  lm_head_pck04: flips(M1..8)=0 invariant=True | boundary M16=0 M32=32 M64=64 M128=127
+
+== bf16 controls (cuBLAS vs matmul_persistent) ==
+  gate_up_proj: cuBLAS flips=8 persistent flips=0
+  lm_head_pck04: cuBLAS flips=8 persistent flips=0
+
+== timing (marlin_gemm, deployed already-byte-exact cost) ==
+  qkv_proj         M=8 eager=53.492us graph=19.701us x37
+  o_proj           M=8 eager=55.852us graph=17.336us x37
+  gate_up_proj     M=8 eager=95.349us graph=75.829us x37
+  down_proj        M=8 eager=69.403us graph=43.432us x37
+  lm_head_pck04    M=8 eager=85.673us graph=62.013us x1
+  bf16 gate_up_proj: cuBLAS=250.0us persistent=672.6us ratio=2.69
+  bf16 lm_head_pck04: cuBLAS=246.6us persistent=636.5us ratio=2.581
+
+=========== VERDICT ===========
+  int4_marlin_m_invariant_M1to8 = True (total flips=0)
+  marlin_exposes_splitk_knob    = False
+  bf16 cuBLAS flips (control)    = True | persistent invariant = True
+  matmul_tax_tps_cited          = 132.94
+  byte_exact_gemm_ceiling_tps   = 399.75
+  per_step_marlin_matmul_graph_us = 5845.04
+  source: surgical(345.22, byte-exact attn + STOCK Marlin matmul) - full_flag(212.28, VLLM_BATCH_INVARIANT) = 132.94. Marlin GEMMs are unchanged by the flag (no quant method has a batch-invariant branch) AND are already 0-flip M-invariant -> the tax is full_flag MACHINERY (cudagraph/TF32/aten overrides), NOT a Marlin reduction-order cost recoverable by fixed-order split-K GEMM.
+
+wrote research/validity/byteexact399_literal_matmul/gemm_tax_repro.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260616_181850-j6dxoe28
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run lawine/fixed-splitk-marlin-repro
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/j6dxoe28
+wandb: Detected [openai] in use.
+wandb: Use W&B Weave for improved LLM call tracing. Install Weave with `pip install weave` then add `import weave` to the top of your script.
+wandb: For more information, check out the docs at: https://weave-docs.wandb.ai
+wandb run: j6dxoe28
+wandb: updating run metadata; uploading console lines 0-0
+wandb: uploading history steps 0-0, summary, console lines 1-3
+wandb: 
+wandb: Run history:
+wandb: bf16_cublas_positive_control_flips ▁
+wandb:   bf16_matmul_persistent_invariant ▁
+wandb:        byte_exact_gemm_ceiling_tps ▁
+wandb:              flips_M1to8/down_proj ▁
+wandb:           flips_M1to8/gate_up_proj ▁
+wandb:          flips_M1to8/lm_head_pck04 ▁
+wandb:                 flips_M1to8/o_proj ▁
+wandb:               flips_M1to8/qkv_proj ▁
+wandb:            int4_marlin_m_invariant ▁
+wandb:         marlin_exposes_splitk_knob ▁
+wandb:                                +11 ...
+wandb: 
+wandb: Run summary:
+wandb: bf16_cublas_positive_control_flips 1
+wandb:   bf16_matmul_persistent_invariant 1
+wandb:        byte_exact_gemm_ceiling_tps 399.75
+wandb:              flips_M1to8/down_proj 0
+wandb:           flips_M1to8/gate_up_proj 0
+wandb:          flips_M1to8/lm_head_pck04 0
+wandb:                 flips_M1to8/o_proj 0
+wandb:               flips_M1to8/qkv_proj 0
+wandb:            int4_marlin_m_invariant 1
+wandb:         marlin_exposes_splitk_knob 0
+wandb:                                +11 ...
+wandb: 
+wandb: 🚀 View run lawine/fixed-splitk-marlin-repro at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/j6dxoe28
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 7 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260616_181850-j6dxoe28/logs
