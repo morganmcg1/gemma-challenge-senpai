@@ -1,0 +1,424 @@
+{
+  "pr": 432,
+  "agent": "lawine",
+  "kind": "fullstack-496-joint",
+  "analysis_only": true,
+  "no_launch": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "created_at": "20260616T011337Z",
+  "headline": "JOINT 496.74 stack (blanket-strict base + pinned-K num_splits=8 + cb3 k*=229 verify-body quant): the cb3 'equivalence-neutral by construction' assumption is now DIRECTLY MEASURED. MECHANISM (reduction-order, weight-independent): cb3 PRESERVES pinned-K's M-invariance = True -- pinned attention stays byte-exact under cb3-perturbed inputs=True, cb3 body-GEMM is per-row M-invariant=True (batched-bf16 contrast breaks at 0.000), matching the plain stack=True; the deployed heuristic still breaks (full_byte_id<1). fullstack_m1_eq_m8=True (reduction-order byte-exact AND 0 confident flips). END-TO-END token identity on synthetic random weights (noise-limited, #365 caveat): plain 0.984 vs cb3 0.969 (n_divergent=2, confident-argmax flips=0, bitwise-ties=2); the injected cb3 error 0.205 is a worst-case stress >> real cb3, and 0 confident flips hold across the alpha dose-response sweep (sweep_zero_confident_flip=True) -> divergences are margin noise, not an M-dependent break. pinned-K latency eta=0.0000 (free) -> additive 496.74 carries no measurable cross-term: composed_tps=496.74, haircut=0.000%. Banked PPL (cb3 k*=229) held-out-worst 2.3780 / OOD 2.4067 <= 2.42. frontier_496_is_measured=False: the M-invariance MECHANISM is measure-confirmed (m_invariance_mechanism_measured=True) but 496.74 STAYS MODELED-additive -- served end-to-end TPS unmeasured (served_tps_measured=False, needs the #427 human-gated FA2 kernel rebuild).",
+  "inputs": {
+    "mu_p_481": 481.53,
+    "base_467_412": 467.1400155438763,
+    "attn_408": 13.998600706082982,
+    "cb3_403": 15.6,
+    "additive_model_tps": 496.7386162499593,
+    "frozen_482": 482.7400155438763,
+    "ceiling_411": 497.44,
+    "ppl_deployed": 2.3772,
+    "ppl_gate": 2.42,
+    "m_deployed": 8,
+    "k_deployed": 7,
+    "pinned_split": 8,
+    "heuristic_split": 0,
+    "eps_star_nat": 0.125,
+    "cb3_kstar": 229,
+    "cb3_m8_lift": 15.603896595803747,
+    "cb3_heldout_worst_ppl": 2.378039521957974,
+    "cb3_ood_ppl": 2.4067495469694387,
+    "cb3_phi_params": 0.8847708894878706,
+    "cb3_byte_ratio": 0.7855100873968799,
+    "cb3_banked_source": "research/validity/cb3_conservative_k_deployable_lift/cb3_conservative_k_deployable_lift_results.json",
+    "target": 500.0,
+    "src_423": "byte_identical_reduction_tax_floor (#423, transitively #400/#408/#412/#403/#411)",
+    "src_365": "strict_attn_e2e_pinned_split (#365 flash microbenchmark machinery)",
+    "src_403": "cb3_conservative_k_deployable_lift (#403 k*=229 PPL-deployable cb3)",
+    "src_427": "pinnedk_self_referential_equiv (#427 legal_self_referential; this card measures its cb3 assumption)"
+  },
+  "cb3_banked": {
+    "k_star": 229,
+    "m8_lift": 15.603896595803747,
+    "heldout_worst_ppl": 2.378039521957974,
+    "ood_ppl": 2.4067495469694387,
+    "ppl_margin_to_242": 0.013250453030561271,
+    "phi_params": 0.8847708894878706,
+    "byte_ratio": 0.7855100873968799,
+    "source": "research/validity/cb3_conservative_k_deployable_lift/cb3_conservative_k_deployable_lift_results.json"
+  },
+  "gpu_measurement": {
+    "gpu": {
+      "name": "NVIDIA A10G",
+      "sm_count": 80,
+      "total_mem_gib": 22.06,
+      "is_a10g_80sm": true
+    },
+    "lmhead_source": "real:lm_head.weight:model.safetensors",
+    "cb3_injected_rel_l2_error": 0.20530289085552583,
+    "joint_per_layer_cb3": {
+      "by_split": {
+        "0": {
+          "sliding_byte_id": 1.0,
+          "full_byte_id": 0.0,
+          "sliding_maxabs": 0.0,
+          "full_maxabs": 0.0009765625
+        },
+        "8": {
+          "sliding_byte_id": 1.0,
+          "full_byte_id": 1.0,
+          "sliding_maxabs": 0.0,
+          "full_maxabs": 0.0
+        }
+      },
+      "n_trials": 8,
+      "inputs": "cb3_projected"
+    },
+    "joint_per_layer_plain": {
+      "by_split": {
+        "8": {
+          "sliding_byte_id": 1.0,
+          "full_byte_id": 1.0,
+          "sliding_maxabs": 0.0,
+          "full_maxabs": 0.0
+        }
+      },
+      "n_trials": 8
+    },
+    "cb3_gemm": {
+      "n_trials": 8,
+      "cb3_perrow_byte_id": 1.0,
+      "cb3_perrow_maxabs": 0.0,
+      "batched_bf16_byte_id": 0.0,
+      "batched_bf16_maxabs": 0.03125
+    },
+    "end_to_end_ab": {
+      "plain_body": {
+        "kv_mode": "contiguous",
+        "n_trials": 8,
+        "by_split": {
+          "0": {
+            "token_identity_by_M": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 0.96875,
+              "8": 0.984375
+            },
+            "hidden_byte_identity_by_M": {
+              "1": 1.0,
+              "2": 0.0,
+              "4": 0.0,
+              "8": 0.0
+            },
+            "max_abs_hidden_diff_by_M": {
+              "1": 0.0,
+              "2": 0.140625,
+              "4": 0.140625,
+              "8": 0.15625
+            }
+          },
+          "8": {
+            "token_identity_by_M": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "8": 0.984375
+            },
+            "hidden_byte_identity_by_M": {
+              "1": 1.0,
+              "2": 0.6875,
+              "4": 0.65625,
+              "8": 0.375
+            },
+            "max_abs_hidden_diff_by_M": {
+              "1": 0.0,
+              "2": 0.0703125,
+              "4": 0.09375,
+              "8": 0.12109375
+            }
+          }
+        },
+        "any_nan": false
+      },
+      "cb3_body": {
+        "kv_mode": "contiguous",
+        "n_trials": 8,
+        "by_split": {
+          "0": {
+            "token_identity_by_M": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 0.9375,
+              "8": 0.9375
+            },
+            "hidden_byte_identity_by_M": {
+              "1": 1.0,
+              "2": 0.0,
+              "4": 0.0,
+              "8": 0.0
+            },
+            "max_abs_hidden_diff_by_M": {
+              "1": 0.0,
+              "2": 0.125,
+              "4": 0.109375,
+              "8": 0.203125
+            }
+          },
+          "8": {
+            "token_identity_by_M": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 0.96875,
+              "8": 0.96875
+            },
+            "hidden_byte_identity_by_M": {
+              "1": 1.0,
+              "2": 0.9375,
+              "4": 0.6875,
+              "8": 0.53125
+            },
+            "max_abs_hidden_diff_by_M": {
+              "1": 0.0,
+              "2": 0.0078125,
+              "4": 0.078125,
+              "8": 0.13671875
+            }
+          }
+        },
+        "any_nan": false
+      }
+    },
+    "divergence_classification": {
+      "split": 8,
+      "n_positions": 64,
+      "n_divergent_tokens": 2,
+      "n_confident_flips": 0,
+      "n_bitwise_ties": 2,
+      "min_confident_gap_nat": null,
+      "eps_star_nat": 0.125
+    },
+    "cb3_perturbation_sweep": {
+      "split": 8,
+      "alphas": [
+        0.0,
+        0.5,
+        1.0
+      ],
+      "rows": [
+        {
+          "alpha": 0.0,
+          "cb3_rel_l2_error": 0.0,
+          "token_identity_m8": 0.984375,
+          "hidden_byte_id_m8": 0.375,
+          "n_divergent_tokens": 1,
+          "n_confident_flips": 0,
+          "n_bitwise_ties": 1,
+          "min_confident_gap_nat": null
+        },
+        {
+          "alpha": 0.5,
+          "cb3_rel_l2_error": 0.10266960947941457,
+          "token_identity_m8": 0.984375,
+          "hidden_byte_id_m8": 0.296875,
+          "n_divergent_tokens": 1,
+          "n_confident_flips": 0,
+          "n_bitwise_ties": 1,
+          "min_confident_gap_nat": null
+        },
+        {
+          "alpha": 1.0,
+          "cb3_rel_l2_error": 0.20530289085552583,
+          "token_identity_m8": 0.96875,
+          "hidden_byte_id_m8": 0.53125,
+          "n_divergent_tokens": 2,
+          "n_confident_flips": 0,
+          "n_bitwise_ties": 2,
+          "min_confident_gap_nat": null
+        }
+      ],
+      "zero_confident_flip_across_sweep": true,
+      "alpha0_is_exact_control": true,
+      "alpha0_no_confident_flip": true,
+      "alpha0_token_identical": false
+    },
+    "latency": {
+      "M": 8,
+      "iters": 200,
+      "paged": {
+        "per_layer_us": {
+          "sliding": {
+            "0": 54.27199974656105,
+            "8": 53.247999399900436
+          },
+          "full": {
+            "0": 67.58400052785873,
+            "8": 68.60800087451935
+          }
+        },
+        "composed_us": {
+          "0": 2372.607994824648,
+          "8": 2343.9359851181507
+        }
+      },
+      "contiguous": {
+        "per_layer_us": {
+          "sliding": {
+            "0": 52.22399905323982,
+            "8": 51.19999870657921
+          },
+          "full": {
+            "0": 66.56000018119812,
+            "8": 66.56000018119812
+          }
+        },
+        "composed_us": {
+          "0": 2293.7599681317806,
+          "8": 2257.919955998659
+        }
+      }
+    }
+  },
+  "composition": {
+    "pinnedk_attn_byte_exact_cb3_inputs": true,
+    "pinnedk_attn_byte_exact_plain_inputs": true,
+    "heuristic_still_breaks_full": true,
+    "cb3_gemm_perrow_m_invariant": true,
+    "cb3_gemm_batched_bf16_byte_id": 0.0,
+    "cb3_matches_plain_attn_invariance": true,
+    "reduction_order_byte_exact": true,
+    "cb3_preserves_pinnedk_m_invariance": true,
+    "fullstack_m1_eq_m8": true,
+    "fullstack_n_divergent_tokens": 2,
+    "fullstack_n_confident_flips": 0,
+    "fullstack_n_bitwise_ties": 2,
+    "fullstack_zero_confident_flips": true,
+    "fullstack_token_identical_cb3_m8": false,
+    "e2e_token_identity_cb3_m8": 0.96875,
+    "e2e_token_identity_plain_m8": 0.984375,
+    "e2e_hidden_byte_id_cb3_m8": 0.53125,
+    "e2e_hidden_byte_id_plain_m8": 0.375,
+    "plain_e2e_no_confident_flip": true,
+    "cb3_adds_no_confident_flip_over_plain": true,
+    "sweep_zero_confident_flip": true,
+    "sweep_alpha0_is_exact_control": true,
+    "cb3_perturbation_sweep_rows": [
+      {
+        "alpha": 0.0,
+        "cb3_rel_l2_error": 0.0,
+        "token_identity_m8": 0.984375,
+        "hidden_byte_id_m8": 0.375,
+        "n_divergent_tokens": 1,
+        "n_confident_flips": 0,
+        "n_bitwise_ties": 1,
+        "min_confident_gap_nat": null
+      },
+      {
+        "alpha": 0.5,
+        "cb3_rel_l2_error": 0.10266960947941457,
+        "token_identity_m8": 0.984375,
+        "hidden_byte_id_m8": 0.296875,
+        "n_divergent_tokens": 1,
+        "n_confident_flips": 0,
+        "n_bitwise_ties": 1,
+        "min_confident_gap_nat": null
+      },
+      {
+        "alpha": 1.0,
+        "cb3_rel_l2_error": 0.20530289085552583,
+        "token_identity_m8": 0.96875,
+        "hidden_byte_id_m8": 0.53125,
+        "n_divergent_tokens": 2,
+        "n_confident_flips": 0,
+        "n_bitwise_ties": 2,
+        "min_confident_gap_nat": null
+      }
+    ],
+    "pinnedk_eta": 0.0,
+    "pinnedk_latency_free": true,
+    "pinned_composed_us": 2343.9359851181507,
+    "heuristic_composed_us": 2372.607994824648,
+    "additive_model_tps": 496.7386162499593,
+    "fullstack_measured_tps": 496.7386162499593,
+    "additive_vs_measured_haircut_pct": 0.0,
+    "haircut_within_tol": true,
+    "gap_to_500_tps": 3.261383750040693,
+    "frozen_byte_frontier_tps": 482.7400155438763,
+    "ceiling_411_tps": 497.44,
+    "fullstack_ppl": 2.378039521957974,
+    "fullstack_ppl_ood": 2.4067495469694387,
+    "ppl_within_gate": true,
+    "completed": 128,
+    "m_invariance_mechanism_measured": true,
+    "additive_496_remains_modeled": true,
+    "frontier_496_is_measured": false,
+    "served_tps_measured": false,
+    "m_invariance_leg_measured": true,
+    "cb3_injected_rel_l2_error": 0.20530289085552583
+  },
+  "self_test": {
+    "conditions": {
+      "a_mu_p_481p53": true,
+      "a_base_467": true,
+      "a_attn_408": true,
+      "a_cb3_403": true,
+      "a_additive_is_496p74": true,
+      "a_additive_sums": true,
+      "a_frozen_482p74": true,
+      "a_ceiling_411": true,
+      "a_ppl_gate_242": true,
+      "a_m_deployed_8_k_7": true,
+      "b_cb3_kstar_229": true,
+      "b_cb3_m8_lift_15p6": true,
+      "b_cb3_heldout_worst_le_gate": true,
+      "b_cb3_ood_le_gate": true,
+      "b_cb3_phi_params_high": true,
+      "c_pinned_split_8": true,
+      "c_heuristic_split_0": true,
+      "c_eps_star_0p125": true,
+      "c_cb3_body_linears": true,
+      "c_cb3_levels_subint4": true,
+      "c_no_nan_const": true,
+      "d_reduction_order_byte_exact": true,
+      "d_fullstack_m1_eq_m8": true,
+      "d_cb3_preserves_m_invariance": true,
+      "d_pinned_attn_exact_cb3": true,
+      "d_heuristic_breaks": true,
+      "d_cb3_gemm_perrow_exact": true,
+      "d_cb3_matches_plain": true,
+      "d_no_confident_flip": true,
+      "d_plain_no_confident_flip": true,
+      "d_cb3_adds_no_confident_flip": true,
+      "d_sweep_zero_confident_flip": true,
+      "d_sweep_alpha0_is_exact_control": true,
+      "d_pinnedk_eta_nonneg": true,
+      "d_haircut_within_tol": true,
+      "d_ppl_within_gate": true,
+      "d_completed_128": true,
+      "d_composed_tps_finite": true,
+      "d_mechanism_measured": true,
+      "d_additive_remains_modeled": true,
+      "d_frontier_not_overclaimed": true,
+      "d_served_tps_not_measured": true
+    },
+    "n_checks": 42,
+    "n_passed": 42,
+    "passes": true
+  },
+  "self_test_passes": true,
+  "fullstack_measured_tps": 496.7386162499593,
+  "additive_model_tps": 496.7386162499593,
+  "additive_vs_measured_haircut_pct": 0.0,
+  "fullstack_m1_eq_m8": true,
+  "fullstack_n_divergent_tokens": 2,
+  "fullstack_n_confident_flips": 0,
+  "cb3_preserves_pinnedk_m_invariance": true,
+  "m_invariance_mechanism_measured": true,
+  "additive_496_remains_modeled": true,
+  "fullstack_ppl": 2.378039521957974,
+  "completed": 128,
+  "frontier_496_is_measured": false,
+  "served_tps_measured": false,
+  "peak_mem_mib": 2043.12109375,
+  "wandb_run_id": "26onkakt"
+}
