@@ -2,23 +2,36 @@
   "config": {
     "num_prompts": 128,
     "output_len": 512,
-    "sweep_json": "research/speed/strict_wholecycle_ab/strict_wholecycle_ab.json",
+    "sweep_json": "research/speed/tail_kv_tax_lsweep/strict_wholecycle_ab_tail.json",
+    "tail_repeat_jsons": [
+      "research/speed/tail_kv_tax_lsweep/tail_run_b.json",
+      "research/speed/tail_kv_tax_lsweep/tail_run_c.json"
+    ],
     "ppl_tokens": "official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
     "real_capture": "research/greedy_reference/google__gemma-4-E4B-it/decode_outputs.jsonl",
     "sweep_Ls": [
       128,
       384,
-      640
+      640,
+      896,
+      1280,
+      2048
     ],
     "added_us_at_L": {
-      "128": 66.53961181640625,
-      "384": 230.62530517578125,
-      "640": 401.89971923828125
+      "128": 66.72393798828125,
+      "384": 231.87469482421875,
+      "640": 402.1246337890625,
+      "896": 568.3203125,
+      "1280": 844.1650390625,
+      "2048": 1347.9116821289062
     },
     "tps_at_L": {
-      "128": 477.3868086786735,
-      "384": 467.4681237593509,
-      "640": 457.5452044002469
+      "128": 477.37543035084195,
+      "384": 467.3941812527975,
+      "640": 457.5324507523018,
+      "896": 448.2988682573235,
+      "1280": 433.76931968212045,
+      "2048": 409.53014475393104
     },
     "gen_prompt_marker": [
       105,
@@ -27,7 +40,9 @@
     ],
     "interp": "piecewise_linear_added_us_edge_slope_extrap",
     "sigma_hw_between_session": 4.864,
-    "note": "KV-weighted strict TPS: token-weighted harmonic mean of #472's per-L strict tax over the official 128-prompt output_len=512 single-stream KV trajectory. CPU analysis only; no kernel re-measure, no served change, no HF Job."
+    "tail_anchor_L": 2048,
+    "tail_anchor_n_sessions": 3,
+    "note": "KV-weighted strict TPS, #479 tail-extended: token-weighted harmonic mean of the strict tax MEASURED to L=2048 (#479 extends #472's 3-point sweep to 6 points, replacing the >640 extrapolation) over the official 128-prompt output_len=512 single-stream KV trajectory. The L=2048 anchor is the mean of 2-3 fresh-process session repeats (between-session sigma). CPU analysis only; no kernel re-measure, no served change, no HF Job."
   },
   "trajectory": {
     "served_prompt_lengths_sorted": [
@@ -183,20 +198,89 @@
       "[2048,4096)": 512
     }
   },
+  "identity_per_L": {
+    "128": {
+      "strict_byte_identity_min": 1.0,
+      "strict_argmax_identity_min": 1.0,
+      "strict_token_flips": 0,
+      "permissive_byte_identity_min": 0.0,
+      "strict_max_abs_diff": 0.0,
+      "identity_error": null
+    },
+    "384": {
+      "strict_byte_identity_min": 1.0,
+      "strict_argmax_identity_min": 1.0,
+      "strict_token_flips": 0,
+      "permissive_byte_identity_min": 0.0,
+      "strict_max_abs_diff": 0.0,
+      "identity_error": null
+    },
+    "640": {
+      "strict_byte_identity_min": 1.0,
+      "strict_argmax_identity_min": 1.0,
+      "strict_token_flips": 0,
+      "permissive_byte_identity_min": 0.0,
+      "strict_max_abs_diff": 0.0,
+      "identity_error": null
+    },
+    "896": {
+      "strict_byte_identity_min": 1.0,
+      "strict_argmax_identity_min": 1.0,
+      "strict_token_flips": 0,
+      "permissive_byte_identity_min": 0.0,
+      "strict_max_abs_diff": 0.0,
+      "identity_error": null
+    },
+    "1280": {
+      "strict_byte_identity_min": 1.0,
+      "strict_argmax_identity_min": 1.0,
+      "strict_token_flips": 0,
+      "permissive_byte_identity_min": 0.0,
+      "strict_max_abs_diff": 0.0,
+      "identity_error": null
+    },
+    "2048": {
+      "strict_byte_identity_min": 1.0,
+      "strict_argmax_identity_min": 1.0,
+      "strict_token_flips": 0,
+      "permissive_byte_identity_min": 0.0,
+      "strict_max_abs_diff": 0.0,
+      "identity_error": null
+    }
+  },
   "verdict": {
-    "kv_weighted_strict_tps": 461.8049190014005,
-    "kv_weighted_strict_tps_clamp640": 463.61099705562617,
-    "predicted_official_tps_band_lo": 461.8049190014005,
-    "predicted_official_tps_band_hi": 463.61099705562617,
-    "predicted_official_tps_band": "[461.80, 463.61]",
+    "tail_kv_weighted_tps": 461.7802694303145,
+    "updated_band_low": 461.75409511626424,
+    "updated_band_high": 461.96814961152626,
+    "shift_vs_475_extrapolation": -0.019730569685521004,
+    "tail_tax_is_linear": true,
+    "tail_tax_slope_ratio": 1.0283732870721851,
+    "tail_tax_regime": "linear",
+    "head_slope_us_per_tok": 0.6550794839859009,
+    "tail_slope_us_per_tok": 0.6736662422401317,
+    "l896_tps": 448.2988682573235,
+    "l1280_tps": 433.76931968212045,
+    "l2048_tps": 409.53014475393104,
+    "l2048_tps_runA": 409.5533956928525,
+    "l2048_identity": 1.0,
+    "tail_anchor_added_mean_us": 1347.9116821289062,
+    "tail_anchor_added_sigma_between_us": 0.362748370503447,
+    "tail_anchor_n_sessions": 3,
+    "band_meas_lo": 461.75409511626424,
+    "band_meas_hi": 461.80644671188077,
+    "kv_weighted_strict_tps": 461.7802694303145,
+    "kv_weighted_strict_tps_clamp2048": 461.96814961152626,
+    "predicted_official_tps_band_lo": 461.75409511626424,
+    "predicted_official_tps_band_hi": 461.96814961152626,
+    "predicted_official_tps_band": "[461.75, 461.97]",
     "kv_trajectory_mean_L": 527.65625,
-    "tps_at_mean_kv": 461.847447620392,
-    "l128_bestcase_tps": 477.3868086786735,
-    "l640_worstcase_tps": 457.5452044002469,
+    "tps_at_mean_kv": 461.8084801595513,
+    "l128_bestcase_tps": 477.37543035084195,
+    "l640_worstcase_tps": 457.5324507523018,
     "l640_worstcase_headline": 457.55,
-    "uplift_vs_l640_worstcase": 4.259714601153576,
-    "uplift_band_lo": 4.259714601153576,
-    "uplift_band_hi": 6.065792655379255,
+    "uplift_vs_l640_worstcase": 4.247818678012663,
+    "uplift_band_lo": 4.221644363962412,
+    "uplift_band_hi": 4.435698859224431,
     "weighted_above_L640_worstcase": true,
     "materially_above_worstcase": false,
     "sigma_hw_between_session": 4.864,
@@ -223,7 +307,7 @@
     "no_kernel_rebuild": true,
     "no_hf_job": true,
     "self_test_passes": true,
-    "reconcile_line": "Official summary.json:tps = total_output_tokens/total_wall_clock over the 128 benchmark prompts at output_len=512, single-stream. The realized KV trajectory KV=served_P+i has mean 527.7 (served prompts mean 272.2, median 229, max 2427); 24.2% of decode tokens have KV>640 (beyond the #472 sweep, up to KV=2938). Token-weighted HARMONIC over #472's strict tax (piecewise-linear interp, edge-slope extrapolation): kv_weighted_strict_tps=461.80 (= tps@meanKV 461.85); clamp-@640 upper 463.61; band [461.80, 463.61]. vs L=640 worst-case 457.55 (headline 457.55) and L=128 best-case 477.39: uplift +4.26 (band +4.26..+6.07); weighted_above_worstcase=True, materially_above (>= sigma_hw 4.864)=False. Served lengths bit-match real capture (128/128). analysis_only, no served change, no HF Job."
+    "reconcile_line": "(#479) Official summary.json:tps = total_output_tokens/total_wall_clock over the 128 benchmark prompts at output_len=512, single-stream. The realized KV trajectory KV=served_P+i has mean 527.7 (served prompts mean 272.2, median 229, max 2427); 24.2% of decode tokens have KV>640 (up to KV=2938) -- the fat tail #475 had to EXTRAPOLATE. #479 MEASURES the strict tax to L=2048 (grid [128, 384, 640, 896, 1280, 2048]): tail-tax regime=linear (slope ratio 1.028, head 0.6551 vs tail 0.6737 us/tok; linear=True). L=2048 anchor = mean of 3 sessions (1347.9us, between-session sigma 0.36us) -> l2048_tps=409.53, identity 1.0000. Token-weighted HARMONIC over the MEASURED 6-point tax: tail_kv_weighted_tps=461.78 (= tps@meanKV 461.81; shift vs #475's extrapolated 461.80 = -0.02); updated band [461.75, 461.97] (was #475's wider extrapolation band -- now collapsed to the measurement sigma). vs L=640 worst-case 457.53 (headline 457.55) and L=128 best-case 477.38: uplift +4.25; weighted_above_worstcase=True, materially_above (>= sigma_hw 4.864)=False. Served lengths bit-match real capture (128/128). analysis_only, official_tps=0, no served change, no HF Job."
   },
   "self_test_conditions": {
     "served_lengths_match_real_capture": true,
@@ -234,8 +318,10 @@
     "mean_L_between_384_and_640": true,
     "harmonic_matches_mean_kv_point": true,
     "band_brackets_central": true,
-    "clamp_ge_central": true,
+    "updated_band_orders": true,
     "added_monotone_increasing": true,
+    "tail_measured_to_2048": true,
+    "kv_frac_monotone_and_anchored": true,
     "ppl_anchor_ok": true,
     "nan_clean": true
   }

@@ -147,6 +147,13 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--output", default=os.path.join(_here, "kv_weighted_strict_tps.json"))
     ap.add_argument("--selftest-output", default=os.path.join(_here, "selftest.json"))
+    ap.add_argument("--sweep-json", default=SWEEP_JSON,
+                    help="strict whole-cycle A/B sweep JSON (#479: the extended 6-point tail sweep)")
+    ap.add_argument("--tail-repeat-jsons", default=None,
+                    help="comma-separated extra sweep JSONs (#479 L=2048 session repeats) to "
+                         "give the deepest tail anchor a between-session sigma")
+    ap.add_argument("--tail-anchor-L", type=int, default=2048,
+                    help="the deepest tail L whose anchor is averaged over the session repeats")
     ap.add_argument("--wandb_project", default=os.environ.get("WANDB_PROJECT", "gemma-challenge-senpai"))
     ap.add_argument("--wandb_entity", default=os.environ.get("WANDB_ENTITY", "wandb-applied-ai-team"))
     ap.add_argument("--wandb_group", default="equivalence-escalation-anchors")
@@ -155,8 +162,8 @@ def main():
     ap.add_argument("--no-wandb", action="store_true")
     args = ap.parse_args()
 
-    # ---- (2) #472 measured per-L strict tax + the banked TPS mapping (imported exact) ----
-    sweep = json.load(open(SWEEP_JSON))
+    # ---- (2) #472/#479 measured per-L strict tax + the banked TPS mapping (imported exact) ----
+    sweep = json.load(open(args.sweep_json))
     vd = sweep["verdict"]
     DEPLOYED_TPS = float(vd["deployed_tps"])      # 481.53 (perm arm == deployed, self-tax 0)
     CYCLE_PERM_US = float(vd["cycle_perm_us"])    # 7666.83 deployed permissive cycle
@@ -164,14 +171,41 @@ def main():
     sweep_Ls = sorted(per_L)
     added_at = {L: float(per_L[L]["whole_delta_us"]) for L in sweep_Ls}
     tps_at = {L: float(per_L[L]["whole_strict_tps"]) for L in sweep_Ls}
+    # within-session sigma of each measured strict tax point (paired-diff pstdev over rounds)
+    added_sigma_within = {L: float(per_L[L].get("whole_delta_sigma", 0.0)) for L in sweep_Ls}
+
+    # ---- (#479) deepest-tail anchor: average over the L=2048 session repeats so the tail
+    # carries its own BETWEEN-session sigma, not a single draw. The central tail anchor becomes
+    # the 3-draw mean; the band propagates the between-session pstdev of that anchor. ----
+    tail_L = args.tail_anchor_L
+    tail_draws = []
+    if tail_L in added_at:
+        tail_draws.append(added_at[tail_L])              # the primary sweep's draw (run A)
+    repeat_files = [f for f in (args.tail_repeat_jsons or "").split(",") if f.strip()]
+    for rf in repeat_files:
+        rj = json.load(open(rf.strip()))
+        rpl = {int(L): d for L, d in rj["per_L"].items()}
+        if tail_L in rpl:
+            tail_draws.append(float(rpl[tail_L]["whole_delta_us"]))
+    tail_anchor_added_mean = statistics.mean(tail_draws) if tail_draws else float("nan")
+    tail_anchor_added_sigma_between = (statistics.pstdev(tail_draws)
+                                       if len(tail_draws) > 1 else 0.0)
+    tail_anchor_n_sessions = len(tail_draws)
+    if tail_L in added_at and tail_draws:
+        added_at[tail_L] = tail_anchor_added_mean        # honest central tail anchor = 3-draw mean
+        added_sigma_within[tail_L] = max(added_sigma_within.get(tail_L, 0.0),
+                                         tail_anchor_added_sigma_between)
 
     def tps_from_added(added):
         return DEPLOYED_TPS * CYCLE_PERM_US / (CYCLE_PERM_US + added)
 
     added_pw = piecewise_linear(sweep_Ls, [added_at[L] for L in sweep_Ls])
-    L_lo, L_hi = sweep_Ls[0], sweep_Ls[-1]        # 128, 640
-    l128_bestcase_tps = tps_from_added(added_pw(L_lo))
-    l640_worstcase_tps = tps_from_added(added_pw(L_hi))
+    L_lo, L_hi = sweep_Ls[0], sweep_Ls[-1]        # 128, 2048 (#479 extended; was 128,640)
+    # Bracket points pinned to fixed KV (NOT sweep endpoints): L=128 best-case, L=640 the #472
+    # deployed-faithful worst-case headline. With the #479 tail extension L_hi is now 2048, so we
+    # must evaluate the 640 worst-case explicitly rather than at the sweep endpoint.
+    l128_bestcase_tps = tps_from_added(added_pw(128))
+    l640_worstcase_tps = tps_from_added(added_pw(640))
 
     # ---- (1) realized KV trajectory: KV(j,i) = served_P_j + i, i in [0, OUTPUT_LEN) ----
     served = served_prompt_lengths()
@@ -192,26 +226,58 @@ def main():
                 n += 1
         return n / inv, n
 
-    kv_weighted_central, n_tok = harmonic(added_pw)                 # linear-extrapolated tax
+    kv_weighted_central, n_tok = harmonic(added_pw)                 # measured-tail tax (#479)
     kv_weighted_clamp, _ = harmonic(lambda L: added_pw(min(L, L_hi)))  # tax saturates > L_hi (upper)
+
+    # ---- (#479) updated band: propagate the measured per-L strict-tax sigma (within-session for
+    # head points, BETWEEN-session for the L=2048 anchor from the session repeats). Perturb every
+    # measured anchor by +/- its sigma (correlated worst case) and re-aggregate. Now that the tail
+    # is MEASURED to 2048 (not extrapolated), this measurement band REPLACES #475's wide
+    # extrapolation band -- it should be tight if the tail tax is well-determined. ----
+    added_hi = piecewise_linear(sweep_Ls, [added_at[L] + added_sigma_within[L] for L in sweep_Ls])
+    added_lo = piecewise_linear(sweep_Ls, [added_at[L] - added_sigma_within[L] for L in sweep_Ls])
+    band_meas_lo, _ = harmonic(added_hi)     # more tax -> LOWER tps bound
+    band_meas_hi, _ = harmonic(added_lo)     # less tax -> HIGHER tps bound
 
     # trajectory descriptive stats + tail coverage
     kv_sum = sum(p + i for p in P for i in range(OUTPUT_LEN))
     kv_trajectory_mean_L = kv_sum / n_tok
     tps_at_mean_kv = tps_from_added(added_pw(kv_trajectory_mean_L))
-    over_640 = sum(1 for p in P for i in range(OUTPUT_LEN) if (p + i) > L_hi)
+    over_640 = sum(1 for p in P for i in range(OUTPUT_LEN) if (p + i) > 640)   # literal 640, NOT L_hi (=2048 since #479 extended the sweep)
     over_1024 = sum(1 for p in P for i in range(OUTPUT_LEN) if (p + i) > 1024)
     frac_kv_gt_640 = over_640 / n_tok
     frac_kv_gt_1024 = over_1024 / n_tok
     kv_max = max(P) + (OUTPUT_LEN - 1)
 
     # ---- verdict ----
-    band_lo = min(kv_weighted_central, kv_weighted_clamp)
-    band_hi = max(kv_weighted_central, kv_weighted_clamp)
+    # #475's band was the model-uncertainty between linear-extrapolated and clamped-@640 tax (wide,
+    # because everything past L=640 was extrapolated). #479 MEASURES the tail to L=2048, so that
+    # extrapolation band collapses; the honest remaining uncertainty is the measurement sigma of
+    # the per-L tax (propagated above) plus the small >2048 saturation sliver (clamp@2048).
+    updated_band_low = min(band_meas_lo, kv_weighted_central)
+    updated_band_high = max(band_meas_hi, kv_weighted_clamp)
+    band_lo, band_hi = updated_band_low, updated_band_high
+    band_str = f"[{band_lo:.2f}, {band_hi:.2f}]"
+    tail_kv_weighted_tps = kv_weighted_central          # PRIMARY: the updated honest center (#479)
     uplift_vs_worst = kv_weighted_central - l640_worstcase_tps
     weighted_above_worst = bool(kv_weighted_central > l640_worstcase_tps)
     materially_above = bool(uplift_vs_worst >= SIGMA_HW_BETWEEN)
-    band_str = f"[{band_lo:.2f}, {band_hi:.2f}]"
+    # how far the tail-measured center moved from #475's extrapolated 461.80
+    shift_vs_475_extrapolation = kv_weighted_central - 461.80
+
+    # ---- (#479) harness-derived tail-tax metrics (read from the extended sweep verdict) ----
+    tail_tax_is_linear = bool(vd.get("tail_tax_is_linear", False))
+    tail_tax_slope_ratio = float(vd.get("tail_tax_slope_ratio", float("nan")))
+    tail_tax_regime = str(vd.get("tail_tax_regime", "unknown"))
+    head_slope_us_per_tok = float(vd.get("head_slope_us_per_tok", float("nan")))
+    tail_slope_us_per_tok = float(vd.get("tail_slope_us_per_tok", float("nan")))
+    l896_tps = float(vd.get("l896_tps", float("nan")))
+    l1280_tps = float(vd.get("l1280_tps", float("nan")))
+    l2048_tps_runA = float(vd.get("l2048_tps", float("nan")))
+    l2048_tps = tps_from_added(tail_anchor_added_mean)   # 3-session-mean tail anchor -> tps
+    l2048_identity = float(vd.get("l2048_identity", float("nan")))
+    if tail_L in tps_at:
+        tps_at[tail_L] = l2048_tps   # keep the per-L table consistent with the averaged anchor
 
     # ---- self-test ----
     st = {}
@@ -222,21 +288,49 @@ def main():
         abs(tps_from_added(added_at[L]) - tps_at[L]) < 0.05 for L in sweep_Ls)
     st["weighted_between_best_and_worst"] = bool(
         l640_worstcase_tps - 0.5 <= kv_weighted_central <= l128_bestcase_tps + 0.5)
-    st["mean_L_between_384_and_640"] = bool(384.0 < kv_trajectory_mean_L < float(L_hi))
+    st["mean_L_between_384_and_640"] = bool(384.0 < kv_trajectory_mean_L < 640.0)
+    # harmonic == tps@meanKV iff the tax is AFFINE in KV over the trajectory; the gap is a pure
+    # convexity (non-linearity) detector. A LARGE gap would itself flag a super-linear tail.
     st["harmonic_matches_mean_kv_point"] = bool(abs(kv_weighted_central - tps_at_mean_kv) < 0.75)
     st["band_brackets_central"] = bool(band_lo <= kv_weighted_central <= band_hi)
-    st["clamp_ge_central"] = bool(kv_weighted_clamp >= kv_weighted_central - 1e-9)
+    st["updated_band_orders"] = bool(updated_band_low <= kv_weighted_central <= updated_band_high)
     st["added_monotone_increasing"] = bool(
-        added_pw(128) < added_pw(384) < added_pw(640) < added_pw(1200))
+        added_pw(128) < added_pw(384) < added_pw(640) < added_pw(1200) < added_pw(2048))
+    st["tail_measured_to_2048"] = bool(max(sweep_Ls) >= 2048 and 896 in sweep_Ls and 1280 in sweep_Ls)
+    # KV-coverage invariant: {KV>1024} subset of {KV>640}, and the >640 fraction must match the
+    # banked 24.2% (guards the L_hi-drift bug: over_640 must threshold on literal 640, not L_hi).
+    st["kv_frac_monotone_and_anchored"] = bool(
+        frac_kv_gt_640 >= frac_kv_gt_1024 and abs(frac_kv_gt_640 - 0.242) < 0.03)
     st["ppl_anchor_ok"] = bool(PPL_ANCHOR <= PPL_GATE)
     finite = [kv_weighted_central, kv_weighted_clamp, kv_trajectory_mean_L, tps_at_mean_kv,
-              l128_bestcase_tps, l640_worstcase_tps, uplift_vs_worst]
+              l128_bestcase_tps, l640_worstcase_tps, uplift_vs_worst,
+              updated_band_low, updated_band_high]
     st["nan_clean"] = all(math.isfinite(x) for x in finite)
     self_test_passes = all(st.values())
 
     verdict = {
-        "kv_weighted_strict_tps": kv_weighted_central,             # PRIMARY (predicted official)
-        "kv_weighted_strict_tps_clamp640": kv_weighted_clamp,
+        # ---- (#479) PRIMARY: the updated honest center with the MEASURED tail (not extrapolated) ----
+        "tail_kv_weighted_tps": tail_kv_weighted_tps,              # PRIMARY (#479)
+        "updated_band_low": updated_band_low,
+        "updated_band_high": updated_band_high,
+        "shift_vs_475_extrapolation": shift_vs_475_extrapolation,  # how far the center moved from 461.80
+        "tail_tax_is_linear": tail_tax_is_linear,
+        "tail_tax_slope_ratio": tail_tax_slope_ratio,
+        "tail_tax_regime": tail_tax_regime,
+        "head_slope_us_per_tok": head_slope_us_per_tok,
+        "tail_slope_us_per_tok": tail_slope_us_per_tok,
+        "l896_tps": l896_tps,
+        "l1280_tps": l1280_tps,
+        "l2048_tps": l2048_tps,
+        "l2048_tps_runA": l2048_tps_runA,
+        "l2048_identity": l2048_identity,
+        "tail_anchor_added_mean_us": tail_anchor_added_mean,
+        "tail_anchor_added_sigma_between_us": tail_anchor_added_sigma_between,
+        "tail_anchor_n_sessions": tail_anchor_n_sessions,
+        "band_meas_lo": band_meas_lo, "band_meas_hi": band_meas_hi,
+        # ---- carried from #475 (now tail-informed) ----
+        "kv_weighted_strict_tps": kv_weighted_central,             # == tail_kv_weighted_tps
+        "kv_weighted_strict_tps_clamp2048": kv_weighted_clamp,
         "predicted_official_tps_band_lo": band_lo,
         "predicted_official_tps_band_hi": band_hi,
         "predicted_official_tps_band": band_str,
@@ -272,26 +366,33 @@ def main():
     }
 
     reconcile = (
-        f"Official summary.json:tps = total_output_tokens/total_wall_clock over the 128 "
-        f"benchmark prompts at output_len={OUTPUT_LEN}, single-stream. The realized KV "
-        f"trajectory KV=served_P+i has mean {kv_trajectory_mean_L:.1f} (served prompts "
-        f"mean {statistics.mean(P):.1f}, median {int(statistics.median(P))}, max {max(P)}); "
-        f"{100*frac_kv_gt_640:.1f}% of decode tokens have KV>{L_hi} (beyond the #472 sweep, "
-        f"up to KV={kv_max}). Token-weighted HARMONIC over #472's strict tax (piecewise-linear "
-        f"interp, edge-slope extrapolation): kv_weighted_strict_tps={kv_weighted_central:.2f} "
-        f"(= tps@meanKV {tps_at_mean_kv:.2f}); clamp-@{L_hi} upper {kv_weighted_clamp:.2f}; "
-        f"band {band_str}. vs L={L_hi} worst-case {l640_worstcase_tps:.2f} (headline 457.55) "
-        f"and L={L_lo} best-case {l128_bestcase_tps:.2f}: uplift +{uplift_vs_worst:.2f} "
-        f"(band +{band_lo-l640_worstcase_tps:.2f}..+{band_hi-l640_worstcase_tps:.2f}); "
+        f"(#479) Official summary.json:tps = total_output_tokens/total_wall_clock over the 128 "
+        f"benchmark prompts at output_len={OUTPUT_LEN}, single-stream. The realized KV trajectory "
+        f"KV=served_P+i has mean {kv_trajectory_mean_L:.1f} (served prompts mean "
+        f"{statistics.mean(P):.1f}, median {int(statistics.median(P))}, max {max(P)}); "
+        f"{100*frac_kv_gt_640:.1f}% of decode tokens have KV>640 (up to KV={kv_max}) -- the fat "
+        f"tail #475 had to EXTRAPOLATE. #479 MEASURES the strict tax to L=2048 (grid "
+        f"{sorted(sweep_Ls)}): tail-tax regime={tail_tax_regime} (slope ratio "
+        f"{tail_tax_slope_ratio:.3f}, head {head_slope_us_per_tok:.4f} vs tail "
+        f"{tail_slope_us_per_tok:.4f} us/tok; linear={tail_tax_is_linear}). L=2048 anchor = mean "
+        f"of {tail_anchor_n_sessions} sessions ({tail_anchor_added_mean:.1f}us, between-session "
+        f"sigma {tail_anchor_added_sigma_between:.2f}us) -> l2048_tps={l2048_tps:.2f}, identity "
+        f"{l2048_identity:.4f}. Token-weighted HARMONIC over the MEASURED 6-point tax: "
+        f"tail_kv_weighted_tps={tail_kv_weighted_tps:.2f} (= tps@meanKV {tps_at_mean_kv:.2f}; "
+        f"shift vs #475's extrapolated 461.80 = {shift_vs_475_extrapolation:+.2f}); updated band "
+        f"{band_str} (was #475's wider extrapolation band -- now collapsed to the measurement "
+        f"sigma). vs L=640 worst-case {l640_worstcase_tps:.2f} (headline 457.55) and L=128 "
+        f"best-case {l128_bestcase_tps:.2f}: uplift +{uplift_vs_worst:.2f}; "
         f"weighted_above_worstcase={weighted_above_worst}, materially_above (>= sigma_hw "
         f"{SIGMA_HW_BETWEEN})={materially_above}. Served lengths bit-match real capture "
-        f"({n_validated}/{NUM_PROMPTS}). analysis_only, no served change, no HF Job.")
+        f"({n_validated}/{NUM_PROMPTS}). analysis_only, official_tps=0, no served change, no HF Job.")
     verdict["reconcile_line"] = reconcile
 
     payload = {
         "config": {
             "num_prompts": NUM_PROMPTS, "output_len": OUTPUT_LEN,
-            "sweep_json": os.path.relpath(SWEEP_JSON, _root),
+            "sweep_json": os.path.relpath(args.sweep_json, _root),
+            "tail_repeat_jsons": [os.path.relpath(f.strip(), _root) for f in repeat_files],
             "ppl_tokens": os.path.relpath(PPL_TOKENS, _root),
             "real_capture": os.path.relpath(REAL_CAPTURE, _root),
             "sweep_Ls": sweep_Ls, "added_us_at_L": {str(L): added_at[L] for L in sweep_Ls},
@@ -299,16 +400,20 @@ def main():
             "gen_prompt_marker": list(GEN_PROMPT_MARKER),
             "interp": "piecewise_linear_added_us_edge_slope_extrap",
             "sigma_hw_between_session": SIGMA_HW_BETWEEN,
-            "note": "KV-weighted strict TPS: token-weighted harmonic mean of #472's per-L "
-                    "strict tax over the official 128-prompt output_len=512 single-stream KV "
-                    "trajectory. CPU analysis only; no kernel re-measure, no served change, "
-                    "no HF Job.",
+            "tail_anchor_L": tail_L, "tail_anchor_n_sessions": tail_anchor_n_sessions,
+            "note": "KV-weighted strict TPS, #479 tail-extended: token-weighted harmonic mean of "
+                    "the strict tax MEASURED to L=2048 (#479 extends #472's 3-point sweep to 6 "
+                    "points, replacing the >640 extrapolation) over the official 128-prompt "
+                    "output_len=512 single-stream KV trajectory. The L=2048 anchor is the mean of "
+                    "2-3 fresh-process session repeats (between-session sigma). CPU analysis only; "
+                    "no kernel re-measure, no served change, no HF Job.",
         },
         "trajectory": {
             "served_prompt_lengths_sorted": P,
             "served_prompt_hist": _hist(P),
             "kv_hist": _kv_hist(P, OUTPUT_LEN),
         },
+        "identity_per_L": sweep.get("identity_per_L", {}),
         "verdict": verdict,
         "self_test_conditions": st,
     }
@@ -318,9 +423,13 @@ def main():
     json.dump({"self_test_passes": self_test_passes, "checks": st},
               open(args.selftest_output, "w"), indent=2)
 
-    print(f"[kvw] kv_weighted_strict_tps={kv_weighted_central:.2f} band {band_str} "
-          f"| meanKV={kv_trajectory_mean_L:.1f} | worst(L640)={l640_worstcase_tps:.2f} "
-          f"best(L128)={l128_bestcase_tps:.2f}", flush=True)
+    print(f"[kvw] tail_kv_weighted_tps={tail_kv_weighted_tps:.2f} band {band_str} "
+          f"(shift vs #475 461.80 = {shift_vs_475_extrapolation:+.2f}) | meanKV={kv_trajectory_mean_L:.1f} "
+          f"| worst(L640)={l640_worstcase_tps:.2f} best(L128)={l128_bestcase_tps:.2f}", flush=True)
+    print(f"[kvw] TAIL-TAX: regime={tail_tax_regime} slope_ratio={tail_tax_slope_ratio:.3f} "
+          f"linear={tail_tax_is_linear} | l896={l896_tps:.2f} l1280={l1280_tps:.2f} "
+          f"l2048={l2048_tps:.2f}(n={tail_anchor_n_sessions},sig={tail_anchor_added_sigma_between:.2f}us) "
+          f"id@2048={l2048_identity:.4f}", flush=True)
     print(f"[kvw] uplift_vs_worst=+{uplift_vs_worst:.2f} (sigma_hw={SIGMA_HW_BETWEEN}) "
           f"above_worst={weighted_above_worst} materially_above={materially_above} "
           f"| kv>640: {100*frac_kv_gt_640:.1f}% of tokens (max KV {kv_max})", flush=True)
@@ -362,9 +471,13 @@ def _log_wandb(args, payload):
     run.summary.update({k: v for k, v in vd.items() if isinstance(v, (int, float, bool, str))})
 
     cfg = payload["config"]
-    t = wandb.Table(columns=["L", "added_us", "strict_tps"])
+    idpl = payload.get("identity_per_L", {})
+    t = wandb.Table(columns=["L", "added_us", "strict_tps", "strict_byte_identity", "strict_token_flips"])
     for L in cfg["sweep_Ls"]:
-        t.add_data(L, cfg["added_us_at_L"][str(L)], cfg["tps_at_L"][str(L)])
+        idl = idpl.get(str(L), {})
+        t.add_data(L, cfg["added_us_at_L"][str(L)], cfg["tps_at_L"][str(L)],
+                   idl.get("strict_byte_identity_min", float("nan")),
+                   idl.get("strict_token_flips", -1))
     run.log({"per_L_strict_tax": t})
 
     kvh = payload["trajectory"]["kv_hist"]
