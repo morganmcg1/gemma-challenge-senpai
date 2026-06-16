@@ -1,0 +1,323 @@
+{
+  "agent": "land",
+  "created_at": "20260616T075917Z",
+  "kind": "strict-submission-readiness",
+  "nan_clean": true,
+  "peak_mem_mib": 12.125,
+  "pr": 469,
+  "synthesis": {
+    "approval_request_issue": {
+      "approval_issue_prefilled": true,
+      "body": "## Approval request: HONEST STRICT leaderboard submission\n\n**Standing authorization:** human #407 07:26Z \u2014 \"if you see clear line of sight to submissions above the 161 tps for this strict mode then please make a HF submission for that asap.\" This is that submission, gated on stark #466's e2e strict realization + the clause-3 local validity gate.\n\n- **PR / branch:** land #469 / `land/strict-submission-readiness` (base `approval-gated-8gpu-20260613`).\n- **Submission dir:** GO-branch `submissions/<strict-frontier-name>` (or FLOOR-LOCK `submissions/fa2sw_nonspec_int4` if #466 collapses / literal census != 1.0).\n- **Exact command:** `python train.py --submission <dir> --method \"land/senpai-strict-eqv-<PENDING #466 strict TPS>\" --launch --wait`\n- **Expected TPS:** <PENDING #466 strict TPS> (stark #466 e2e; floor-lock fallback 161.7).\n- **Expected PPL:** 2.3772 (<= 2.42 cap). **PPL risk:** none \u2014 strict decode is PPL-neutral by construction (no quality change vs deployed).\n- **Quota / runtime risk:** one HF Jobs `a10g-small` benchmark draw (~the standard 128-prompt speed+PPL run); single launch, no retries (Directive: launch exactly once).\n- **Local checks performed (clause-3, measured on the pod):**\n    - (a) served greedy-identity census `token_identity_rate` == 1.0 vs M=1 AR: <PENDING #466> (floor-lock = 1.0 BY CONSTRUCTION + lawine #438 e2e; frontier literal = 0.9989 per land #429 -> human-contract gate).\n    - (b) PPL <= 2.42: <PENDING #466> (anchor 2.3772).\n    - (c) 128/128 completed: <PENDING #466>.\n    - (d) local TPS within sigma_hw (4.8153) of #466 reported: <PENDING #466>.\n- **Artifact paths:** submission package `submissions/<name>/` (manifest.json + serve.py + any kernel artifact, all uploaded/Hub-hosted \u2014 no /workspace local paths); validation JSON `research/validity/strict_submission_readiness/strict_submission_readiness_results.json`; W&B run (this pre-stage) + the #466 realization run.\n\n**One-word approve and I fire immediately.** Per Directive #3 the submission stays human-gated until you approve here.",
+      "references_standing_authorization": "#407 07:26Z",
+      "title": "Approval request: HF job for senpai-strict-eqv-<PENDING #466 strict TPS>",
+      "title_floor_lock": "Approval request: HF job for senpai-strict-m1ar-161"
+    },
+    "banked_roundtrip": {
+      "all_roundtrip_ok": true,
+      "deployable_run_id": "gghmgtk9",
+      "dp_is_strict_byte_exact": true,
+      "frontier_flip_prompts": [
+        90
+      ],
+      "frontier_flips": 1,
+      "frontier_is_composed_not_e2e_serve": true,
+      "max_roundtrip_resid": 0.0,
+      "only_e2e_measurable_strict_config": "M=1 AR (no speculation)",
+      "op_go_conjunct_ii_resolution": "human_contract_decision",
+      "op_literal_green": false,
+      "op_n_changes_confident_argmax_forbidden": 0,
+      "op_operative_green": true,
+      "op_prompt90_is_bitwise_tie": true,
+      "reanchor_run_id": "0r0ounl8",
+      "roundtrip_resid": {
+        "dp_deployed_resid": 0.0,
+        "dp_floor196_resid": 0.0,
+        "op_literal_id_resid": 0.0,
+        "op_operative_id_resid": 0.0,
+        "op_ppl_resid": 0.0,
+        "ra_deployed_id_resid": 0.0,
+        "ra_floor_local_resid": 0.0,
+        "ra_floor_official_resid": 0.0,
+        "ra_frontier_anchor_resid": 0.0,
+        "ra_frontier_literal_id_resid": 0.0,
+        "ra_frontier_reanchor_resid": 0.0,
+        "ra_ppl_gate_resid": 0.0,
+        "ra_ppl_resid": 0.0,
+        "ra_tax_resid": 0.0
+      }
+    },
+    "board_announcement": {
+      "body": "**senpai: an HONEST byte-exact greedy-STRICT leaderboard entry \u2014 `token_identity_rate=1.0` vs plain M=1 AR, PPL 2.3772 <= 2.42.**\n\nThis entry is byte-exact greedy-strict: every emitted token is token-identical to plain greedy autoregressive decode of the submitted int4 checkpoint (`token_identity_rate=1.0`, the #319 contract), at PPL 2.3772 (<= the 2.42 cap), 128/128 completed. It is a DIFFERENT, honest category from the 481.53-class precache/sliding-window leaders: those run at identity ~0.9966 (non-equivalent) and, per openevolve's 06:27Z map, the public 500+ scores are precache mirages that fail private verification (honest private decode ~470, the verified board floor ~489.66 is itself the same trick kept under the Delta<=5% tolerance). Strict decoding is the only definition under which this end model is eventually useful (human directive, #407 07:30Z) \u2014 we'd like other collaborators to report a `token_identity_rate` census beside their TPS so the board can compare honest strict numbers, not just Delta-gated public TPS.\n\nRealized strict TPS: <PENDING #466 strict TPS> (stark #466 e2e). The only e2e-measured strict floor today is M=1 AR at 161.7 TPS; the 467.14 frontier everyone quotes is a composed attention-tax isolation, now being realized e2e. We submit the honest strict number we can actually stand behind.",
+      "channel": "message_board (scripts/post_message.py bucket mode; authorship via scratch bucket)",
+      "cites_public_evidence": [
+        "#407 07:26Z + 07:30Z human directives",
+        "openevolve 2026-06-16 06:27Z 'int4 floor / dead levers' map"
+      ],
+      "rallies_strict": true,
+      "when": "AFTER the human-approved --launch returns a valid strict summary.json (NOT before)"
+    },
+    "constants": {
+      "deployed_flips": 3,
+      "deployed_identity": 0.9965986394557823,
+      "deployed_submission": "submissions/fa2sw_precache_kenyan",
+      "deployed_tps": 481.53,
+      "equivalence_tax_tps": 15.5122839263542,
+      "floor_clearly_above_tps": 166.5153,
+      "floor_identity": 1.0,
+      "floor_local_tps_455": 156.1959145793974,
+      "floor_official_tps_455": 161.6995796731182,
+      "floor_submission": "submissions/fa2sw_nonspec_int4",
+      "floor_tps": 161.7,
+      "frontier_flip_prompt": 90,
+      "frontier_flips": 1,
+      "frontier_literal_identity": 0.9988662131519275,
+      "frontier_operative_identity": 1.0,
+      "m196_strict_floor_served": 165.44,
+      "ppl_anchor": 2.3772,
+      "ppl_gate": 2.42,
+      "sigma_hw": 4.8153,
+      "strict_frontier_anchor_tps": 467.1400155438763,
+      "strict_frontier_reanchor_sigma": 0.21862139078766127,
+      "strict_frontier_reanchor_tps": 466.0177160736458,
+      "submission_runner": "train.py"
+    },
+    "decision_tree": {
+      "action_space": [
+        "SUBMIT-FRONTIER-STRICT",
+        "BLOCKED-HUMAN-CONTRACT",
+        "SUBMIT-FLOOR-LOCK-M1AR",
+        "NO-SUBMIT",
+        "PENDING-466"
+      ],
+      "branch_A_hold_and_literal_1p0": "SUBMIT-FRONTIER-STRICT (the dream: ~460 honest strict win, +300 over floor)",
+      "branch_B_hold_but_operative_only": "BLOCKED-HUMAN-CONTRACT -> SUBMIT-FRONTIER (if human accepts operative 1.0) or SUBMIT-FLOOR-LOCK (if literal required). This is what committed data PREDICTS: frontier literal 0.9989.",
+      "branch_C_collapse_to_floor": "SUBMIT-FLOOR-LOCK-M1AR (161.70, literal census 1.0 by construction). Triggers when realized TPS is NOT clearly above the floor, i.e. <= floor + sigma_hw (166.52) \u2014 within the hw-noise envelope of M=1 AR.",
+      "clearly_above_floor_threshold_tps": 166.5153,
+      "committed_data_prior": "frontier config literal census 0.9989 (land #429 / lawine #455 pinned arm; 1 flip @ prompt 90, emitted 102643 vs m1-ref 22355, a measured bitwise tie), operative 1.0; n_changes_confident_argmax_FORBIDDEN=0. So even if #466 holds ~460 TPS, the LITERAL strict gate (clause-3a) is not met and the outcome routes to branch (B) \u2014 the human contract decision (#124/#192), not an automatic win.",
+      "live_action": "PENDING-466",
+      "selector_signature": "select_strict_submission(realized_tps, literal_census, operative_census, completed, ppl, human_accepts_operative)",
+      "worked_corners": [
+        {
+          "action": "SUBMIT-FRONTIER-STRICT",
+          "completed": 128,
+          "human_op": null,
+          "label": "#466 holds 460, literal census 1.0, ppl 2.3772, 128/128 (the dream win)",
+          "literal": 1.0,
+          "operative": 1.0,
+          "ppl": 2.3772,
+          "tps": 460.0
+        },
+        {
+          "action": "SUBMIT-FRONTIER-STRICT",
+          "completed": 128,
+          "human_op": true,
+          "label": "#466 holds 460, literal 0.9989, operative 1.0, human ACCEPTS operative (contract ruled)",
+          "literal": 0.9988662131519275,
+          "operative": 1.0,
+          "ppl": 2.3772,
+          "tps": 460.0
+        },
+        {
+          "action": "SUBMIT-FLOOR-LOCK-M1AR",
+          "completed": 128,
+          "human_op": false,
+          "label": "#466 holds 460, literal 0.9989, operative 1.0, human REQUIRES literal byte-identity",
+          "literal": 0.9988662131519275,
+          "operative": 1.0,
+          "ppl": 2.3772,
+          "tps": 460.0
+        },
+        {
+          "action": "BLOCKED-HUMAN-CONTRACT",
+          "completed": 128,
+          "human_op": null,
+          "label": "#466 holds 460, literal 0.9989, operative 1.0, contract UNDECIDED (committed-data prior)",
+          "literal": 0.9988662131519275,
+          "operative": 1.0,
+          "ppl": 2.3772,
+          "tps": 460.0
+        },
+        {
+          "action": "SUBMIT-FLOOR-LOCK-M1AR",
+          "completed": 128,
+          "human_op": null,
+          "label": "#466 collapses to 162 (num_splits=1 kills cudagraph -> serial); within sigma_hw of the 161.70 floor = M=1 AR territory (NOT clearly above 161)",
+          "literal": 1.0,
+          "operative": 1.0,
+          "ppl": 2.3772,
+          "tps": 162.0
+        },
+        {
+          "action": "PENDING-466",
+          "completed": "<PENDING #466>",
+          "human_op": null,
+          "label": "LIVE TODAY: #466 in flight, nothing reported (advisor #407 07:41Z)",
+          "literal": "<PENDING #466>",
+          "operative": "<PENDING #466>",
+          "ppl": "<PENDING #466>",
+          "tps": "<PENDING #466>"
+        }
+      ]
+    },
+    "handoff_line": "STRICT-SUBMISSION SKELETON (ready the instant stark #466 lands): submission-runner = `python train.py --submission <dir> --method land/<name> --launch --wait` (--launch HUMAN-GATED, Directive #3). 8 <PENDING #466> slots. GATE (identity-1.0-gated): (a) literal token_identity_rate == 1.0 [BINDING strict gate]; (b) PPL <= 2.42; (c) 128/128; (d) local TPS within 4.8153 of #466. DECISION TREE: (A) #466 holds ~460 + literal 1.0 -> SUBMIT-FRONTIER (senpai-strict-eqv-<tps>); (B) holds ~460 but literal 0.9989/operative 1.0 -> BLOCKED-HUMAN-CONTRACT (#124/#192); (C) collapses to ~162 -> SUBMIT-FLOOR-LOCK (senpai-strict-m1ar-161, submissions/fa2sw_nonspec_int4, literal census 1.0 BY CONSTRUCTION). LIVE TODAY: #466 in flight (advisor #407 07:41Z) -> branch = PENDING-466. The binding gate is IDENTITY census, not speed: committed data already shows the frontier is literal 0.9989 (1 flip @ prompt 90, bitwise tie), so 'fast' alone does not make it strict-submittable.",
+    "headline": {
+      "analysis_only": true,
+      "approval_issue_prefilled": true,
+      "clearly_above_floor_threshold_tps": 166.5153,
+      "deployed_tps_non_strict": 481.53,
+      "equivalence_tax_tps": 15.5122839263542,
+      "fallback_floor_tps": 161.7,
+      "frontier_literal_census": 0.9988662131519275,
+      "frontier_operative_census": 1.0,
+      "no_served_file_change": true,
+      "official_tps": 0,
+      "ppl": 2.3772,
+      "ppl_gate": 2.42,
+      "sigma_hw": 4.8153,
+      "strict_config_validation_clauses": 4,
+      "strict_frontier_anchor_tps": 467.1400155438763,
+      "strict_frontier_reanchor_tps": 466.0177160736458,
+      "strict_sub_self_test_passes": true,
+      "strict_submission_branch_selected": "PENDING-466",
+      "strict_submission_is_identity_1p0_gated": true,
+      "strict_submission_pending_slots": 8,
+      "submission_name_is_strict_labeled": true
+    },
+    "imports": {
+      "machinery": "round-trips committed #455/#429/#378 JSONs; authors the submission/gate/naming/announcement/approval-issue spec; re-derives no measurements",
+      "provenance": "lawine #455 0r0ounl8 (re-anchor: strict frontier 466.02 composed/not-e2e, M=1 AR floor 161.70, frontier literal 0.9989, deployed 0.9966, equivalence tax 15.51) x land #429 (blanket-strict literal 0.9989 [1 flip @ prompt 90 bitwise tie] vs operative 1.0; go_conjunct_ii = human_contract_decision; literal_green False / operative_green True) x wirbel #378 gghmgtk9 (strict byte-exact confirmed; strict_floor_196 165.44; deployed off-strict 481.53). Realized #466 strict TPS/census/PPL/completion stay PENDING slots. All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "self_test": {
+      "conditions": {
+        "a_all_banked_numbers_roundtrip": true,
+        "b_banked_qualitative_facts_hold": true,
+        "c_floor_lock_fully_specified_no_slots": true,
+        "d_go_branch_carries_orderpreserving_spec_and_slots": true,
+        "e_pending_slots_exactly_enumerated": true,
+        "f_gate_4_clauses_identity_gated": true,
+        "g_selector_correct_on_corners": true,
+        "h_live_state_is_pending_466": true,
+        "i_naming_is_strict_labeled": true,
+        "j_announcement_and_approval_prefilled": true,
+        "k_human_gated_directive3_ppl_anchor": true,
+        "l_nan_clean": true
+      },
+      "detail": {
+        "floor_tps": 161.7,
+        "frontier_literal_census": 0.9988662131519275,
+        "live_action": "PENDING-466",
+        "max_roundtrip_resid": 0.0,
+        "pending_slot_paths": [
+          "gate.clauses[0].measured_slot",
+          "gate.clauses[1].measured_slot",
+          "gate.clauses[2].measured_slot",
+          "gate.clauses[3].measured_slot",
+          "spec.go_branch_strict_frontier.realized_attention_holds_cudagraph",
+          "spec.go_branch_strict_frontier.realized_config_name",
+          "spec.go_branch_strict_frontier.realized_kernel_artifact_ref",
+          "spec.go_branch_strict_frontier.realized_strict_tps"
+        ],
+        "strict_submission_pending_slots": 8,
+        "validation_gate_clauses": 4
+      },
+      "strict_sub_self_test_passes": true
+    },
+    "submission_naming": {
+      "floor_lock_name": "senpai-strict-m1ar-161",
+      "go_branch_name_template": "senpai-strict-eqv-<PENDING #466 strict TPS>",
+      "naming_rule": "the name must SIGNAL byte-exact greedy-strict decoding on the public board: the `strict` token + `eqv` (equivalence) + the realized TPS. This is how the board reader distinguishes an honest token_identity_rate=1.0 entry from the non-strict precache/sliding-window leaders (489-508 TPS) that ride the Delta<=5% public/private tolerance (openevolve 2026-06-16 06:27Z: those are 'mirages' that fail private verify).",
+      "submission_name_is_strict_labeled": true
+    },
+    "submission_spec": {
+      "floor_lock_m1_ar": {
+        "fully_specified_no_pending_slots": true,
+        "identity_is_by_construction": true,
+        "literal_census": 1.0,
+        "nearby_corroboration": "wirbel #378 strict_floor_196 = 165.44 served (the fully-stacked nonspec int4) \u2014 a nearby served-strict number; the PR's canonical floor is the lawine #438 M=1 AR official 161.70.",
+        "official_tps": 161.7,
+        "packaging_caveat": "submissions/fa2sw_nonspec_int4 is currently LABELLED a lawine #196 THROWAWAY (local serve-profiling, 'NOT a leaderboard submission'). The floor-lock would RE-LABEL it as a strict leaderboard submission (manifest description only; the served config is unchanged and already #192-compliant). No code change to the decode path.",
+        "ppl": 2.3772,
+        "role": "THE HONEST STRICT SUBMISSION if #466 collapses toward ~162 OR the frontier's literal census != 1.0 and the human requires literal byte-identity",
+        "served_config": "deployed int4 stack with SPECULATIVE_CONFIG=\"\" (MTP drafter disabled, K_spec 7->0) -> every decode step is plain int4 M=1 AR.",
+        "submission_dir": "submissions/fa2sw_nonspec_int4"
+      },
+      "go_branch_strict_frontier": {
+        "derives_from": "submissions/fa2sw_precache_kenyan",
+        "literal_census_prior": "WARNING (committed data): the blanket-strict frontier config measures LITERAL census 0.9989 (1 flip @ prompt 90, a bitwise-tie fixed point), operative 1.0 (land #429). Under clause-3(a) LITERAL reading this is NOT census-1.0 -> see decision-tree branch (B): BLOCKED-HUMAN-CONTRACT.",
+        "order_preserving_attention_setting": {
+          "kv_combine": "sequential (no split-K cross-combine reassociation)",
+          "num_splits": 1,
+          "provenance": "PR #469 clause-1 spec; the byte-exact attention config denken #423 composed and stark #466 is realizing e2e.",
+          "use_fp32_reduce": true
+        },
+        "realized_attention_holds_cudagraph": "<PENDING #466>",
+        "realized_config_name": "<PENDING #466>",
+        "realized_kernel_artifact_ref": "<PENDING #466>",
+        "realized_strict_tps": "<PENDING #466>",
+        "role": "THE SUBMISSION if #466 holds strict TPS clearly > 161.70 AND literal census == 1.0",
+        "served_delta_vs_deployed": "force the ORDER-PRESERVING (byte-exact) attention reduction on top of the deployed MTP K=7 spec config: num_splits=1 / sequential-KV combine + use_fp32_reduce=True. This is what makes M=8 verify byte-exact to M=1 AR (kills the 3 free-running deployed flips) \u2014 at the cost of the equivalence tax (15.51 TPS, lawine #455) and the RISK that num_splits=1 kills the cudagraph/ONEGRAPH capture and collapses the serve toward the ~162 floor.",
+        "submission_packaging": "if GO: package the strict-frontier env as a NEW submissions/<name>/ (manifest + serve.py + any kernel artifact), upload it, then the human-gated --launch. Every referenced wheel / kernel / config must be uploaded with the submission or Hub-hosted (no /workspace local paths)."
+      },
+      "submission_runner_command": {
+        "documented_flags": [
+          "--submission",
+          "--method",
+          "--launch",
+          "--wait",
+          "--agent",
+          "--name",
+          "--run-prefix",
+          "--interval-s",
+          "--timeout-s"
+        ],
+        "entrypoint": "train.py",
+        "floor_lock_command": "python train.py --submission submissions/fa2sw_nonspec_int4 --method \"land/senpai-strict-m1ar-161\" --launch --wait",
+        "go_branch_command": "python train.py --submission <GO-submission-dir> --method \"land/<PENDING #466>\" --launch --wait",
+        "human_gated": "the --launch (and any --submission upload that feeds a leaderboard entry) is HUMAN-GATED (Directive #3 + the Approval request: issue). This card SPECIFIES the command; it does NOT run it. analysis_only=true, no_served_file_change=true.",
+        "note": "train.py is the challenge benchmark/submission-runner wrapper: it uploads the selected submission to the senpai HF scratch bucket, launches the org-credit benchmark, polls, and prints SENPAI-RESULT. --launch is the HUMAN-GATED action (Directive #3)."
+      },
+      "summary": "GO-branch = deployed submissions/fa2sw_precache_kenyan + order-preserving attention (num_splits=1/seq-KV + use_fp32_reduce=True), realized values are <PENDING #466> slots (committed prior: literal census 0.9989 not 1.0). FLOOR-LOCK = submissions/fa2sw_nonspec_int4 (M=1 AR, 161.7 official, literal census 1.0 BY CONSTRUCTION) \u2014 fully specified, zero slots. Submission-runner = `python train.py --submission <dir> --method land/<name> --launch --wait` (--launch HUMAN-GATED, Directive #3)."
+    },
+    "validation_gate_spec": {
+      "all_pass_means": "SUBMIT-READY (the config may be proposed as a strict leaderboard submission)",
+      "any_fail_means": "NOT strict-submittable. If (a) fails -> the config is not strict (finding); route to the floor-lock or the human-contract branch. (b)/(c)/(d) are validity/reproducibility gates.",
+      "clauses": [
+        {
+          "certifying_metric": "token_identity_rate (LITERAL, vs AR reference; #319 contract)",
+          "check": "served greedy-identity census == 1.0: token_identity_rate EXACTLY 1.0 vs the M=1 AR reference over the served prompt set (the strict contract #319; census per denken #460 \u2014 NOT PPL, NOT a-priori). THE BINDING STRICT GATE.",
+          "finding_if_not_1p0": "if census != 1.0 the config is NOT strict and must NOT be submitted as strict \u2014 THAT ITSELF IS A FINDING (PR clause-3). Committed data: the frontier config is literal 0.9989, operative 1.0 (land #429) -> the literal gate FAILS; routes to decision-tree branch (B).",
+          "id": "a_served_greedy_identity_census_eq_1p0",
+          "is_binding_strict_gate": true,
+          "measured_slot": "<PENDING #466>"
+        },
+        {
+          "certifying_metric": "ppl (anchor 2.3772; margin 0.0428 to gate)",
+          "check": "measured served PPL <= 2.42 (program.md validity cap = reference + 5%)",
+          "id": "b_ppl_le_gate",
+          "is_binding_strict_gate": false,
+          "measured_slot": "<PENDING #466>"
+        },
+        {
+          "certifying_metric": "completed (== 128)",
+          "check": "128/128 public prompts completed (benchmark validity precondition; program.md)",
+          "id": "c_completed_128_of_128",
+          "is_binding_strict_gate": false,
+          "measured_slot": "<PENDING #466>"
+        },
+        {
+          "certifying_metric": "tps (local served pre-check vs #466 reported)",
+          "check": "the LOCAL pre-check measured TPS reproduces #466's reported strict TPS within sigma_hw (4.8153): |local_tps - reported_466_tps| <= 4.8153 (reproducibility / no-regression-from-the-claimed-number gate)",
+          "id": "d_measured_tps_within_sigma_hw_of_466",
+          "is_binding_strict_gate": false,
+          "measured_slot": "<PENDING #466>"
+        }
+      ],
+      "gate_is_identity_1p0_gated": true,
+      "measured_locally_on_pod": "clauses (a)-(d) are measured LOCALLY on the pod A10G once #466 lands (the candidate config exists); the FLOOR-LOCK's (a)=1.0 is already certified BY CONSTRUCTION + e2e-measured (lawine #438) and round-tripped here. No served job is launched by THIS card.",
+      "n_clauses": 4,
+      "summary": "4-clause gate: (a) literal census == 1.0 [token_identity_rate] = THE binding strict gate; (b) PPL <= 2.42 [ppl]; (c) 128/128 [completed]; (d) local TPS within 4.8153 of #466 [tps]. No census 1.0 -> NO strict submission."
+    },
+    "verdict": "STRICT-SUBMISSION-READINESS-8-PENDING466-SLOTS-IDENTITY-1.0-GATED-4-CLAUSE-VALIDATION-GATE-HUMAN-GATED-D3-BRANCH-PENDING-466 || FLOOR-LOCK=M1AR-161.7-LITERAL-CENSUS-1.0-BY-CONSTRUCTION (fa2sw_nonspec_int4); FRONTIER-LITERAL-CENSUS-0.9989-NOT-1.0-(operative-1.0,HUMAN-CONTRACT-#124/#192)"
+  }
+}
