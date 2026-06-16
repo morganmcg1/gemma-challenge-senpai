@@ -2,6 +2,35 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-16 ~23:45Z — Cycle-57M: denken #529 (per-position divergence) BANKED+MERGED → 5th lens, audits the LIVE 375.857 submission + localizes 85% of the collapse to the BAKE layer; fern #535 linchpin turned — serve_ok=TRUE but a NEW fast-kernel quality axis surfaced → reseated denken #540 to measure it
+
+**Theme:** The head question is now fully closed (denken #529 is the 5th converging lens), and the linchpin (fern #535) turned with a twist: the fast kernels **do** serve on the genuine native-262k base-int4 head (`serve_ok=TRUE`, no re-bake needed) — but they appear to carry their **own** ~0.10 AIME tax, separate from the head-prune and the body. That potential third quality axis is the new critical-path question; denken #540 measures its per-position mechanism (offline companion to fern's served AIME), the #528↔#529 bridge pattern again.
+
+### denken #529 — BANKED+MERGED (b354ec12) — served-benchmark divergence: audits the live submission, pins the mechanism, localizes to the bake layer
+- denken; runs [`86ro6fjv`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/86ro6fjv) (3-arm, terminal) + [`a281z17b`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/a281z17b) (2-arm, superseded); `analysis_only=true`, `official_tps=0`; W&B-verified all 10 headlines + 7/7 self-test + both control TV=0 checks.
+
+| measurement | value |
+|---|---|
+| mean TV base│ship (pooled, 41 962 positions) | **0.0661** (gsm8k 0.0935 / math 0.0234 / mmlu 0.0838) |
+| `wanted_token_killed_rate` | **0.0652** (6.5% of positions −inf the base-argmax) |
+| answer-token mean TV / killed | 0.1036 / 0.103 — **~20× TV, ~27× kill** vs filler (0.0053 / 0.0038); digits ≈untouched |
+| blind-spot proof | `prune²` (12k vs 12k, #520 geometry) TV=**0** ≪ base│ship TV=**1.0** |
+| **layer split (per fern #531)** | **bake (262k→16k) = 84.7% of kills (0.0552)** · serve (16k→12k) = 15.3% (0.0100) |
+| live-submission audit | 375.857 board row sets `LM_HEAD_PRUNE=1` **AND** `LM_HEAD_PRUNE_REQUIRE=1` → **refuses to start without the prune** |
+
+- **Three results in one card:** (1) **AUDIT** — the live 375.857 leaderboard submission provably inherits the full prune (manifest requires it); our shipped row is quality-broken at the head by construction. (2) **MECHANISM** — bimodal TV: 88.6% untouched, 6.5% hard-kill the wanted token, ~27× concentrated on answer-bearing **content words** (digits untouched) → a *vocabulary* hole on reasoning words = why concept-heavy MMLU-Pro/GPQA collapse harder than arithmetic, and why the model stays *fluent-but-wrong*. (3) **BLIND-SPOT PROOF** — `prune²` TV=0 explains why #520/operative-census never saw it (common-mode mask cancels), with zero quant confound (both arms one forward pass on the full-262k int4 head).
+- **Convergence + fix sharpening:** 5th organizer-relevant lens (after AIME fern #531 / GSM8K wirbel #533 / coverage kanna #528 / MMLU-GPQA ubel #527) — all say *the bake-layer head-prune owns it; widening can't rescue it.* A 12k→16k serve-widen recovers **only 15% of kills**; the 85% bake-hole needs the native-262k path (fern #535).
+
+### fern #535 — PRELIM (terminal pending n≈90 AIME) — the linchpin turned: serve_ok=TRUE, but a third quality axis
+- fern; W&B run pending (logging after last control). `analysis_only=true`, `official_tps=0`, no fire.
+- **`serve_ok=TRUE` / `rebake_required=FALSE`** — the full fast stack (surgical 2D attn + MTP K=7 + split-KV + onegraph + PLE fold) binds cleanly on the **stock base-int4 native 262k head** (`w4a16-ct`, no bake/no prune), `kernel_incompat_detail=null`, **PPL 2.006** (byte-exact target forward). **Kills the cluster-escalation branch** — no re-bake needed for feasibility. Checkpoint recipe (for #534/#533/#536 reuse): `LOCAL_MODEL_DIR=`w4a16-ct snapshot, `LM_HEAD_PRUNE=0`, `PCK04_KEEPSET=""`.
+- **But the clean YES broke:** AIME-greedy n=30 = **0.167 (62.5% of base 0.267, below the 0.240 gate)** — **not collapsed** (categorically off osoi5's 0.033/extract-fail-0.300) but **below the quality bar**. Δ=0.10 = 1.24 se (within 2se at n=30 — can't reject safety, point estimate misses). **Invariant** across conc=32 / conc=1 spec-on / conc=1 spec-off (M=1 AR) → isolates a **pure fast-kernel numerical tax on long-chain reasoning** (only delta vs plain `--dtype auto` base = {surgical attn + split-KV + PLE fold + bf16}). **TPS 253.78 = 71.7% of the same-pod osoi5 ship (353.73)** — the native-262k head costs ~100 TPS (head-width price; ties ubel #527).
+- **Disposition:** approved n≈90 apples-to-apples AIME resolution (binding measurement for the whole fire decision); **NO fire** (#524 two-gate met on neither — slow TPS + AIME below bar); gate verdict held to Morgan #524 until terminal. The kernel-tax is the new critical-path question.
+
+### Reseat (denken → #540)
+- **denken → #540** `fast-kernel-numerics-tax` — measure per-position TV(plain-base │ fast-kernel-base) on the **native 262k head** (both arms same body+head, only delta = kernels; no `-inf` mask) → is the fast-kernel tax **real-concentrated / real-diffuse / negligible**, and does it corroborate fern's 0.10 AIME drop (or is that n=30 noise)? Reuses the #529 divergence harness. SECONDARY: per-component attribution (surgical/split-KV/PLE/bf16). LOCAL/analysis_only, `--wandb_group fast-kernel-divergence`.
+- **Roster 8/8, zero idle:** fern #535 · stark #536 · lawine #537 · kanna #539 · ubel #538 · wirbel #533 · land #534 · **denken #540**.
+
 ## 2026-06-16 ~23:20Z — Cycle-57L: the head-prune knob is INNOCENT across all four organizer axes — kanna #528 (offline coverage) + ubel #527 (served MMLU-Pro/GPQA) both BANKED+MERGED; the body (37L layer-removal + int4 quant) owns the collapse → reseated kanna #539 (offline divergence locus) + ubel #538 (served 2×2 int4-vs-layers) to decompose it; fern #535 linchpin still dark
 
 **Theme:** Two more quality-fix legs closed, and they converge hard with fern #531 (AIME) + wirbel #533 (GSM8K): **widening / restoring the lm_head recovers ≈nothing; the quality collapse is body-owned.** The fix question is now fully localized to the body's two confounded knobs — **int4 re-quant vs 37L layer-removal** — which two fresh reseats decompose (offline forecast + served truth). The decisive linchpin remains **fern #535** (does the fast stack serve on the genuine base-int4 262k full body?).
