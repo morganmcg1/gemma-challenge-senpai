@@ -1,0 +1,203 @@
+{
+  "agent": "land",
+  "created_at": "20260616T054031Z",
+  "kind": "unified-absolute-ceiling",
+  "nan_clean": true,
+  "peak_mem_mib": 12.137,
+  "pr": 457,
+  "synthesis": {
+    "banked_roundtrip": {
+      "all_roundtrip_ok": true,
+      "max_roundtrip_resid": 0.0,
+      "ppl_ok_banked": true,
+      "roofline_greedy_safe_relax": false,
+      "roundtrip_resid": {
+        "ceil_readpeak_eq_maxrecoverable": 0.0,
+        "ceil_readpeak_resid": 0.0,
+        "ceil_spec_rounded_resid": 0.0,
+        "demand_capped_resid": 0.0,
+        "demand_raw_resid": 0.0,
+        "deployed_resid": 0.0,
+        "peak_frac_resid": 0.0,
+        "peak_read_resid": 0.0,
+        "peak_spec_resid": 0.0,
+        "ppl_resid": 0.0,
+        "relax_hi_resid": 0.0,
+        "relax_lo_resid": 0.0,
+        "sigma_hw_resid": 0.0,
+        "strict_resid": 0.0,
+        "verify_bw_wall_resid": 0.0
+      }
+    },
+    "constants": {
+      "ceil_readpeak": 510.8724230449973,
+      "ceil_spec": 520.9527323111674,
+      "demand_capped": 520.9527323111674,
+      "demand_raw": 551.7124657582939,
+      "deployed_tps": 481.53,
+      "peak_read_frac_of_spec": 0.8626336002980547,
+      "peak_read_gbps": 517.5801601788328,
+      "peak_spec_gbps": 600.0,
+      "ppl_anchor": 2.3772,
+      "ppl_gate": 2.42,
+      "relax_optimistic": 510.8724230449973,
+      "relax_realistic_hi": 498.57990782684584,
+      "sigma_hw": 4.8153,
+      "strict_frontier_tps": 467.14
+    },
+    "handoff_line": "strict best = 467.14 (deployed 481.53 via 3 flips); relax-prize ~= +17..+29 TPS (greedy-unsafe); absolute physical ceiling = 510.87 +/- 4.82 (achieved-read-peak basis; spec-basis 520.95 is an over-optimistic upper bound)",
+    "headline": {
+      "analysis_only": true,
+      "demand_raw_tps": 551.7124657582939,
+      "headroom_deployed_to_ceiling_tps": 29.342423044997304,
+      "headroom_strict_to_ceiling_tps": 43.73242304499729,
+      "no_served_file_change": true,
+      "official_tps": 0,
+      "ppl": 2.3772,
+      "relax_prize_optimistic_tps": 510.8724230449973,
+      "relax_prize_realistic_tps": 498.57990782684584,
+      "relax_prize_sits_below_unified_ceiling": true,
+      "sigma_hw_tps": 4.8153,
+      "spec_basis_ceiling_is_over_optimistic": true,
+      "spec_basis_ceiling_tps": 520.9527323111674,
+      "unified_absolute_ceiling_tps": 510.8724230449973,
+      "unified_basis": "measured_read_peak_517p58_gbps",
+      "unified_ceiling_self_test_passes": true
+    },
+    "imports": {
+      "machinery": "round-trip of committed #450/#451 result JSONs; re-derives nothing",
+      "provenance": "land#436 nvsbctji (spec-BW lambda=1 wall 520.95) x ubel#450 c5oyb7gv (achieved-read-peak ceiling 510.87, measured read peak 517.58, relax-prize 498.6/510.87 greedy-unsafe) x land#451 c675zor8 (demand-oracle raw 551.71->capped 520.95, sigma_hw 4.8153) x PR#52 2x9fm2zx (deployed 481.53) x denken#423 5a6zq2yz (strict frontier 467.14). All run-ids in wandb-applied-ai-team/gemma-challenge-senpai."
+    },
+    "reconcile": {
+      "ceilings": [
+        {
+          "basis": "spec_600_gbps_datasheet_peak",
+          "denominator_gbps": 600.0,
+          "name": "spec_bw_lambda1_wall",
+          "provenance": "#436 nvsbctji (== #450 ceiling_tps_spec 520.953, #451 verify_bw_wall_tps)",
+          "realizable": false,
+          "role": "over_optimistic_upper_bound",
+          "tps": 520.9527323111674,
+          "why": "assumes the int4 verify-GEMM reaches the GA102 DATASHEET 600 GB/s at lambda=1; measured achievable read peak is only 517.58 GB/s = 86.26% of spec, so this over-states the bandwidth the hardware can deliver by ~16%"
+        },
+        {
+          "basis": "measured_read_peak_517p58_gbps",
+          "denominator_gbps": 517.5801601788328,
+          "name": "achieved_read_peak_recoverable",
+          "provenance": "#450 c5oyb7gv ceiling_tps_read_peak / max_recoverable_endtoend_tps_ceiling",
+          "realizable": true,
+          "role": "unified_absolute_ceiling",
+          "tps": 510.8724230449973,
+          "why": "perfect-f->1 re-tiling limit against the MEASURED read peak (the realizable HBM read ceiling); bounded by a measured bandwidth -> the defensible achievable ceiling"
+        },
+        {
+          "basis": "demand_side_ET_oracle_supply_capped",
+          "denominator_gbps": null,
+          "name": "demand_oracle_raw_capped",
+          "provenance": "#451 c675zor8 optimistic_ceiling_raw_tps -> capped at verify_bw_wall_tps",
+          "realizable": false,
+          "role": "demand_exceeds_supply_reduces_to_wall",
+          "tps_capped": 520.9527323111674,
+          "tps_raw": 551.7124657582939,
+          "why": "demand-side oracle: what a maximally-accepting bigger drafter would yield if supply were unlimited. 551.71 EXCEEDS supply, so it is capped at the supply wall (#451 capped at the spec wall 520.95; on the achievable basis it caps at 510.87). It adds NO headroom -> it CONFIRMS supply (bandwidth) binds, not demand"
+        }
+      ],
+      "demand_capped_achievable_basis_tps": 510.8724230449973,
+      "demand_capped_spec_basis_tps": 520.9527323111674,
+      "demand_exceeds_supply": true,
+      "demand_raw_tps": 551.7124657582939,
+      "irreducible_hbm_floor_note": "each verify pass reads ~1772 MB of int4 weight+scale once (the irreducible HBM read floor); the ceiling is a SUPPLY ceiling set by the read-BW denominator, which is why all three numbers are the same ceiling at different bases",
+      "ordering_ok": true,
+      "spec_basis_ceiling_is_over_optimistic": true,
+      "spec_basis_ceiling_tps": 520.9527323111674,
+      "spec_over_unified_pct": 1.9731558822626631,
+      "spec_over_unified_tps": 10.080309266170161,
+      "summary": "unified absolute ceiling = 510.87 TPS (achieved-read-peak basis); the spec-600 basis 520.95 is an OVER-OPTIMISTIC upper bound (+10.08, assumes unreachable BW); the demand-oracle raw 551.71 exceeds supply and reduces to the supply wall when capped",
+      "unified_absolute_ceiling_tps": 510.8724230449973,
+      "unified_basis": "measured_read_peak_517p58_gbps"
+    },
+    "relax_prize": {
+      "axis": [
+        {
+          "greedy_safe": true,
+          "note": "denken #423 5a6zq2yz \u2014 blanket-strict greedy-safe realized best",
+          "point": "realized_strict_frontier",
+          "tps": 467.14
+        },
+        {
+          "greedy_safe": false,
+          "note": "PR #52 2x9fm2zx \u2014 non-equivalent deployed (3 token flips)",
+          "point": "deployed_noneq_3flips",
+          "tps": 481.53
+        },
+        {
+          "greedy_safe": false,
+          "note": "#450 realistic split-K hi (greedy-UNSAFE re-tiling)",
+          "point": "relax_prize_realistic",
+          "tps": 498.57990782684584
+        },
+        {
+          "greedy_safe": null,
+          "note": "achieved-read-peak basis == relax-prize optimistic edge (perfect-f)",
+          "point": "unified_absolute_ceiling",
+          "tps": 510.8724230449973
+        },
+        {
+          "greedy_safe": null,
+          "note": "spec-600 basis \u2014 over-optimistic upper bound (unreachable BW)",
+          "point": "spec_over_optimistic_ub",
+          "tps": 520.9527323111674
+        }
+      ],
+      "axis_monotone": true,
+      "capstone_one_line": "strict best = 467.14 (deployed 481.53 via 3 flips); relax-prize ~= +17..+29 TPS (greedy-unsafe); absolute physical ceiling = 510.87 +/- 4.82 (achieved-read-peak basis; spec-basis 520.95 is an over-optimistic upper bound)",
+      "optimistic_edge_is_unified_ceiling": true,
+      "relax_prize_greedy_safe": false,
+      "relax_prize_optimistic_at_or_below_unified": true,
+      "relax_prize_optimistic_tps": 510.8724230449973,
+      "relax_prize_over_deployed_hi_tps": 29.342423044997304,
+      "relax_prize_over_deployed_lo_tps": 17.049907826845867,
+      "relax_prize_over_strict_hi_tps": 43.73242304499729,
+      "relax_prize_over_strict_lo_tps": 31.439907826845854,
+      "relax_prize_realistic_below_unified": true,
+      "relax_prize_realistic_tps": 498.57990782684584,
+      "relax_prize_sits_below_unified_ceiling": true
+    },
+    "self_test": {
+      "conditions": {
+        "a_all_banked_numbers_roundtrip": true,
+        "b_supply_axis_ordering_and_demand_cap": true,
+        "c_spec_basis_over_optimistic_measured_lt_spec": true,
+        "d_unified_equals_achieved_read_peak": true,
+        "e_sigma_hw_and_headrooms_positive": true,
+        "f_relax_prize_at_or_below_unified_ceiling": true,
+        "g_operating_points_below_unified_ceiling": true,
+        "h_ppl_anchor_preserved_within_gate": true,
+        "i_nan_clean": true
+      },
+      "detail": {
+        "max_roundtrip_resid": 0.0,
+        "peak_read_frac_check": 0.8626336002980547,
+        "sigma_pct": 1.0
+      },
+      "unified_ceiling_self_test_passes": true
+    },
+    "sigma_envelope": {
+      "both_headrooms_multi_sigma_positive": true,
+      "headroom_deployed_to_ceiling_lcb_tps": 24.527123044997325,
+      "headroom_deployed_to_ceiling_sigma": 6.09358150997805,
+      "headroom_deployed_to_ceiling_tps": 29.342423044997304,
+      "headroom_deployed_to_spec_ub_tps": 39.422732311167465,
+      "headroom_strict_to_ceiling_lcb_tps": 38.91712304499731,
+      "headroom_strict_to_ceiling_sigma": 9.081972679790935,
+      "headroom_strict_to_ceiling_tps": 43.73242304499729,
+      "headroom_strict_to_spec_ub_tps": 53.81273231116745,
+      "note": "unified ceiling 510.87 +/- 4.82 (1% of deployed) = [506.06, 515.69]; deployed->ceiling +29.34 (6.1sigma), strict->ceiling +43.73 (9.1sigma) \u2014 both robustly positive, so real physical room exists above each operating point even at the 1-sigma-pessimistic ceiling (+24.53 over deployed, +38.92 over strict)",
+      "sigma_hw_pct_of_deployed": 1.0,
+      "sigma_hw_tps": 4.8153,
+      "unified_ceiling_band_hi_tps": 515.6877230449973,
+      "unified_ceiling_band_lo_tps": 506.0571230449973
+    },
+    "verdict": "UNIFIED-ABSOLUTE-CEILING-510.87-ACHIEVED-READ-PEAK-BASIS-SPEC-520.95-OVER-OPTIMISTIC-UB"
+  }
+}
