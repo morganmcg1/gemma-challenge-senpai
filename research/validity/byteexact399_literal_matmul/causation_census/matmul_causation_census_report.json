@@ -1,0 +1,281 @@
+{
+  "pr": 518,
+  "task": 1,
+  "generated_by": "lawine",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "candidate_path": "submissions/fa2sw_strict_byteexact_splitkv399/",
+  "methodology": "#461 logit-margin locus (teacher-forced M=8 prompt_logprobs vs M=1 AR, no greedy cascade); enforce_eager (no cudagraph confound); same locus surgical-357 + #500 byteexact were certified on",
+  "mechanism_note": "enable_batch_invariant_mode() patches aten mm/addmm/matmul/linear/bmm/softmax/mean only; it does NOT touch triton_unified_attention.is_batch_invariant. int4 production matmuls go through torch.ops._C.marlin_gemm (custom op, NOT aten::mm) so the tax cannot touch them.",
+  "candidate": {
+    "fixed_tps": 4,
+    "num_segments": 64
+  },
+  "arms": {
+    "byteexact": {
+      "identity": 0.9943757030371203,
+      "divergence": 0.0056242969628796935,
+      "n_flips": 5,
+      "n_ulp_near_tie": 5,
+      "n_semantic": 0,
+      "max_margin_nat": 0.25,
+      "min_gap_top2_nat": 0.125,
+      "attn_is_batch_invariant": false,
+      "aten_mm_bitexact_M1_vs_M8": false,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "chunk_isolated_fraction": 1.0,
+      "median_chunk_width": 7,
+      "pin_flags": {
+        "arm": "byteexact",
+        "attn_pin_requested": false,
+        "lmhead_pin_requested": false,
+        "rms_env_set": false,
+        "byteexact_installed": true,
+        "matmul_tax_installed_inproc": false,
+        "byteexact_fixed_tps_marker": 4,
+        "backend_num_par_softmax_segments": 64
+      },
+      "flip_ids": [
+        "aime2026-4d866680f9",
+        "gpqa_diamond-051eba2501",
+        "gpqa_diamond-2e6a2497fe",
+        "gpqa_diamond-42da82ad5c",
+        "mmlu_pro-005aa2e50a"
+      ],
+      "flips": [
+        {
+          "id": "mmlu_pro-005aa2e50a",
+          "pos": 231,
+          "rel_pos": 7,
+          "m8_tok": 236743,
+          "m1_tok": 621,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        },
+        {
+          "id": "gpqa_diamond-051eba2501",
+          "pos": 231,
+          "rel_pos": 7,
+          "m8_tok": 236778,
+          "m1_tok": 236770,
+          "margin_vs_m1": 0.25,
+          "gap_top2": 0.25
+        },
+        {
+          "id": "gpqa_diamond-2e6a2497fe",
+          "pos": 229,
+          "rel_pos": 5,
+          "m8_tok": 621,
+          "m1_tok": 236785,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        },
+        {
+          "id": "gpqa_diamond-42da82ad5c",
+          "pos": 225,
+          "rel_pos": 1,
+          "m8_tok": 236743,
+          "m1_tok": 107,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        },
+        {
+          "id": "aime2026-4d866680f9",
+          "pos": 227,
+          "rel_pos": 3,
+          "m8_tok": 8291,
+          "m1_tok": 6481,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        }
+      ]
+    },
+    "byteexact_bi": {
+      "identity": 0.9943757030371203,
+      "divergence": 0.0056242969628796935,
+      "n_flips": 5,
+      "n_ulp_near_tie": 5,
+      "n_semantic": 0,
+      "max_margin_nat": 0.25,
+      "min_gap_top2_nat": 0.125,
+      "attn_is_batch_invariant": false,
+      "aten_mm_bitexact_M1_vs_M8": true,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "chunk_isolated_fraction": 1.0,
+      "median_chunk_width": 7,
+      "pin_flags": {
+        "arm": "byteexact_bi",
+        "attn_pin_requested": false,
+        "lmhead_pin_requested": true,
+        "rms_env_set": false,
+        "byteexact_installed": true,
+        "matmul_tax_installed_inproc": true,
+        "byteexact_fixed_tps_marker": 4,
+        "backend_num_par_softmax_segments": 64
+      },
+      "flip_ids": [
+        "aime2026-4d866680f9",
+        "gpqa_diamond-051eba2501",
+        "gpqa_diamond-2e6a2497fe",
+        "gpqa_diamond-42da82ad5c",
+        "mmlu_pro-005aa2e50a"
+      ],
+      "flips": [
+        {
+          "id": "mmlu_pro-005aa2e50a",
+          "pos": 231,
+          "rel_pos": 7,
+          "m8_tok": 236743,
+          "m1_tok": 621,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        },
+        {
+          "id": "gpqa_diamond-051eba2501",
+          "pos": 231,
+          "rel_pos": 7,
+          "m8_tok": 236778,
+          "m1_tok": 236770,
+          "margin_vs_m1": 0.25,
+          "gap_top2": 0.25
+        },
+        {
+          "id": "gpqa_diamond-2e6a2497fe",
+          "pos": 229,
+          "rel_pos": 5,
+          "m8_tok": 621,
+          "m1_tok": 236785,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        },
+        {
+          "id": "gpqa_diamond-42da82ad5c",
+          "pos": 225,
+          "rel_pos": 1,
+          "m8_tok": 236743,
+          "m1_tok": 107,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        },
+        {
+          "id": "aime2026-4d866680f9",
+          "pos": 227,
+          "rel_pos": 3,
+          "m8_tok": 8291,
+          "m1_tok": 6481,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        }
+      ]
+    },
+    "byteexact_fullenv": {
+      "identity": 0.9988751406074241,
+      "divergence": 0.0011248593925758943,
+      "n_flips": 1,
+      "n_ulp_near_tie": 1,
+      "n_semantic": 0,
+      "max_margin_nat": 0.125,
+      "min_gap_top2_nat": 0.125,
+      "attn_is_batch_invariant": true,
+      "aten_mm_bitexact_M1_vs_M8": true,
+      "determinism_M1_vs_M1": 1.0,
+      "determinism_M8_vs_M8": 1.0,
+      "within_batch_copy0_vs_copy1": 1.0,
+      "chunk_isolated_fraction": 1.0,
+      "median_chunk_width": 7,
+      "pin_flags": {
+        "arm": "byteexact_fullenv",
+        "attn_pin_requested": true,
+        "lmhead_pin_requested": true,
+        "rms_env_set": true,
+        "byteexact_installed": true,
+        "matmul_tax_installed_inproc": false,
+        "byteexact_fixed_tps_marker": 4,
+        "backend_num_par_softmax_segments": 64
+      },
+      "flip_ids": [
+        "gpqa_diamond-21b950759e"
+      ],
+      "flips": [
+        {
+          "id": "gpqa_diamond-21b950759e",
+          "pos": 227,
+          "rel_pos": 3,
+          "m8_tok": 102643,
+          "m1_tok": 22355,
+          "margin_vs_m1": 0.125,
+          "gap_top2": 0.125
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "available": true,
+    "byteexact_n_flips": 5,
+    "byteexact_bi_n_flips": 5,
+    "byteexact_bi_attn_is_batch_invariant": false,
+    "byteexact_bi_aten_mm_bitexact": true,
+    "matmul_tax_zeros_byteexact_flips": false,
+    "matmul_tax_reduces_byteexact_flips": false,
+    "matmul_tax_inert_on_byteexact": true,
+    "matmul_causation_confirmed": false,
+    "byteexact_semantic": 0,
+    "byteexact_bi_semantic": 0,
+    "byteexact_fullenv_n_flips": 1,
+    "byteexact_fullenv_attn_is_batch_invariant": true,
+    "byteexact_fullenv_aten_mm_bitexact": true,
+    "fullenv_reverts_attn_to_2d": true,
+    "fullenv_flip_reduction_is_attn_reversion": true
+  },
+  "summary": {
+    "tps": 0,
+    "ppl": 2.3766643358900286,
+    "completed": 128,
+    "run_prefix": "LOCAL analysis_only (no HF job / no run_request.json / no --launch). Evidence: research/validity/byteexact399_literal_matmul/causation_census/ (3-arm #461 margin census) + gemm_tax_repro.json (#501 microbench repro, wandb j6dxoe28)",
+    "failure_logs": "none (0 tracebacks, 0 fatal markers, 3/3 ARM_DONE across all arms)",
+    "ppl_note": "ppl 2.3767 is the byteexact-399 anchor (#496/#500); int4 quant/precache/lm_head-prune all UNCHANGED -> PPL identical, not re-measured in this analysis-only flip census",
+    "wandb_run_ids": {
+      "task1_census": "61mg3e6k",
+      "task2_microbench": "j6dxoe28"
+    }
+  },
+  "tps_cost_of_full_tax": {
+    "headline_matmul_tax_tps": 132.94,
+    "source": "#501 microbench (reproduced first-party, wandb j6dxoe28): surgical(345.22, 2D byte-exact attn + STOCK Marlin) - full_flag(212.28, VLLM_BATCH_INVARIANT=1) = 132.94",
+    "byteexact_full_env_tps_cost_est": "~188 (byteexact 399.75 -> ~212 full_flag); decomposes as -42 (3D->2D in-order attn give-up, = surgical 357.6) + -133 (full matmul-tax machinery: cudagraph/TF32/aten overrides)",
+    "census_stepA_diagnostic_us": {
+      "byteexact": 373629,
+      "byteexact_bi": 379555,
+      "byteexact_fullenv": 425656,
+      "note": "M=1 AR eager stepA latency, DIAGNOSTIC ONLY (#461: occupancy-noise-dominated, does NOT price the served M=8 verify lever). Corroborates that the aten-tax ALONE (byteexact_bi, attn kept) is near-free at M=1 (+1.6%); the big jump (+13.9%) appears only in fullenv, which also reverts attn->2D + TF32-off -> confirms the tax cost is full_flag MACHINERY, not a Marlin reduction-order cost"
+    },
+    "fixed_order_gemm_recoverable_tps": 0.0,
+    "fixed_order_gemm_recoverable_reason": "int4 Marlin is already 0-flip M-invariant at M<=8 (microbench, all 5 deployed shapes); a fixed-split-K Marlin recovers 0 flips because there are 0 matmul-induced flips to recover. Marlin has no split-K Python knob; pinning split-SIZE needs a gptq_marlin.cu rebuild (out of scope). A forced bf16 fixed-order GEMM costs 2.6-2.7x (persistent_over_cublas)."
+  },
+  "reconciliation_with_500": {
+    "pr500_claim": "byteexact's 5 census flips are 'matmul-induced' -- they come from the un-taxed fast Marlin matmul (M-dependent), with the count set by how byteexact's 3D attention output lands on the M-dependent matmul knife-edges",
+    "pr518_correction": "REFUTED. The 5 flips are an ATTENTION-reduction-order effect of the specific 3D fixed-order scheme, NOT matmul-induced.",
+    "decisive_controls": {
+      "matmul_held_inert_attn_varies": "byteexact_bi -> byteexact_fullenv both have aten_mm_bitexact=True (matmul tax ON in both); the ONLY difference is the attention scheme (3D fixed-order vs 2D in-order) -> flips 5 -> 1. The attention scheme moves the flip count.",
+      "attn_held_matmul_varies": "byteexact -> byteexact_bi both keep the 3D fixed-order attention (attn_is_batch_invariant=False); the ONLY difference is the aten matmul tax (off vs on) -> flips 5 -> 5, IDENTICAL flip set. The matmul tax moves the flip count by 0.",
+      "marlin_m_invariant": "microbench (j6dxoe28): int4 Marlin is 0-flip M-invariant at M<=8 on all 5 deployed shapes -> the production matmul is not the M-dependent reducer either."
+    },
+    "why_500_was_imprecise": "#500 over-relied on the 4-position #496 attention microbench reading 0/8 to conclude 'attention byte-exact -> flips must be matmul'. The 4 synthetic probe positions are necessary-but-not-sufficient: the e2e census exercises the full position distribution, where byteexact's 3D fixed-order reduction tree still differs from M=1-AR by 1 ULP at 5 positions (all near-ties, max margin 0.25 nat, 0 semantic). The matmul tax being inert + Marlin being M-invariant leave the attention scheme as the sole flip lever.",
+    "canonical_agreement": "matches #461 (lmhead_only matmul tax divergence == deployed, 0 flip reduction; only attn 2D pin reduces flips) and #501 (Marlin M-invariant, no split-K knob). This census reproduces that pattern first-party on the byteexact base."
+  },
+  "literal_rung_verdict": {
+    "byteexact_is_operative_not_literal": true,
+    "no_cheap_m_invariant_matmul_lever": true,
+    "reason": "There is no configuration that is BOTH literal (census <=1 flip) AND faster than surgical-357. (a) The matmul is not the flip source (tax inert 5->5; Marlin M-invariant). (b) The only <=1-flip config is byteexact_fullenv = revert attention to 2D in-order = surgical's exact attention scheme, which gives up byteexact's entire +42 TPS 3D-parallelism lever AND (with the full env tax) drops to ~212 < surgical 357.6. So 'literal byteexact' is strictly slower than the existing surgical-357 literal rung.",
+    "byteexact_quality_safety": "0 semantic flips (all 5 are bf16-ULP near-ties, max margin 0.25 nat); served self-determinism r1-r2=1.0 (#500); PPL 2.3767 <= 2.42. Quality-safe under the official PPL+completion gate.",
+    "fullenv_1_flip_not_a_subset": "byteexact_fullenv's single flip (gpqa_diamond-21b950759e) is NOT one of byteexact's 5 -- the 2D in-order scheme closes byteexact's 5 but opens 1 different knife-edge (churn, exactly as #461 flagged). 2D in-order is tighter (1<5) but they are different flips; this is inherent argmax-near-tie churn, not a clean subset closure.",
+    "honest_floor": "byteexact-399 stays a faster (+42 over surgical) byte-exact-ATTENTION + served-deterministic + quality-safe OPERATIVE candidate; it is NOT census-tight (literal). Fine under the quality framing. The literal/strict-byte-equivalent frontier rung remains surgical-357 (357.6, 1 flip). No fixed-split-K matmul lever closes the gap because the gap is not in the matmul."
+  }
+}
