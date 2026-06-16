@@ -1,0 +1,36 @@
+{
+  "submission": "fa2sw_precache_kenyan",
+  "config": {
+    "method": "mtp",
+    "num_speculative_tokens": 7,
+    "max_num_seqs": 1,
+    "decode_output_len": 128,
+    "hardware": "A10G sm_86 (LOCAL exploratory)"
+  },
+  "drafter_D_ms": {
+    "p10": 1.385,
+    "p50": 1.433,
+    "p90": 1.451,
+    "mean": 1.4258,
+    "n": 280,
+    "source": "Gemma4Proposer.propose (onegraph K=7 replay), CUDA-event gpu, decode-only"
+  },
+  "verify_V_ms": {
+    "p10": 6.396,
+    "p50": 6.445,
+    "p90": 6.539,
+    "mean": 6.2366,
+    "n": 283,
+    "source": "GPUModelRunner.execute_model, CUDA-event gpu, decode-only (<10ms, prefill excluded)"
+  },
+  "inter_verify_gap_ms_p50": 1.541,
+  "D_over_V_p50": 0.2223,
+  "self_abort_threshold": 0.05,
+  "self_abort_gate_trips": false,
+  "sync_cycle_ms_DplusV_p50": 7.878,
+  "best_overlap_cycle_ms_maxDV_p50": 6.445,
+  "theoretical_prize_pct": 18.19,
+  "realized_async_delta_pct_byte_exact": 0.0,
+  "verdict": "byte-exact overlap = 0 (wait_event(verify_done) re-serializes draft after verify); realized-NULL",
+  "wandb_run_id": "0syyqxag"
+}
