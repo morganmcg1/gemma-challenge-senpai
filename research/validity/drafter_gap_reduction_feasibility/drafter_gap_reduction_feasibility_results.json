@@ -1,0 +1,295 @@
+{
+  "pr": 492,
+  "issue": 481,
+  "author": "denken",
+  "leg": "drafter-gap-reduction feasibility: can a drafter lever pull the spec-alive breach <5%? (#481 Dir 4)",
+  "config": {
+    "delta_gate": 0.05,
+    "ppl_gate": 2.42,
+    "deployed_public_tps": 481.53,
+    "deployed_private_tps": 460.85,
+    "deployed_gap": 0.04294644155088977,
+    "accept_bucket": 0.0366125761625703,
+    "ctxlen_bucket": 0.006333865388319535,
+    "r_accept": 0.9633874238374297,
+    "E_T_pub_decomp": 3.851185944363104,
+    "E_T_max": 8.0,
+    "K_cal": 125.268,
+    "a_pub": [
+      0.7292532942898975,
+      0.759556697719242,
+      0.7929794882639035,
+      0.8228,
+      0.8348727920920435,
+      0.8357919254658385,
+      0.8464932652113331
+    ],
+    "a1_deployed": 0.7292532942898975,
+    "sigma_oneshot_tps": 4.876531763744918,
+    "sigma_oneshot_frac": 0.010127160849261558,
+    "arch_lift_a1_inrepo": 0.04215000000000002,
+    "a1_inrepo_native": 0.7714,
+    "a1_robustness_ceiling": 0.85,
+    "eagle3_dense_a1_conservative": 0.8893195559667377,
+    "eagle3_dense_a1_central": 0.91,
+    "eagle3_fusion_layers": [
+      2,
+      21,
+      39
+    ],
+    "e_accept_bi": 3.8695345142117343,
+    "lit_close_arch_alone": [
+      0.1,
+      0.25
+    ],
+    "lit_close_wider_mix": [
+      0.25,
+      0.5
+    ],
+    "lit_close_domain_tgt": [
+      0.6,
+      0.8
+    ],
+    "lit_irreducible_floor": [
+      0.2,
+      0.4
+    ],
+    "cov_combo_central": 0.0385,
+    "cov_feasibility_verdict": "REACHABLE-MARGINAL",
+    "cov_baseline_336": 0.8903,
+    "cov_bar_336": 0.9213,
+    "s_mult_calibrated": 0.9841167486594844,
+    "d_add_calibrated": 0.01227996727048114,
+    "arch_lift_applied": 0.04215000000000002,
+    "imports": {
+      "gap_decomp_379": "research/validity/public_private_gap_decomposition/public_private_gap_decomposition_results.json",
+      "sigma_recon_467": "research/empirical_sigma_hw/fresh_n10/reconciliation.json",
+      "breach_model_489": "research/validity/private_safe_tps_threshold/private_safe_tps_threshold_results.json",
+      "per_position_289": "research/validity/per_position_acceptance_decay/per_position_acceptance_decay_results.json",
+      "a1_cliff_308": "research/validity/eagle3_a1_cliff_trainability/eagle3_a1_cliff_trainability_results.json",
+      "a1_lit_gap_342": "research/validity/eagle3_a1_cliff_lit_gap/eagle3_a1_cliff_lit_gap_results.json",
+      "coverage_336": "research/validity/eagle3_head_coverage_lift_target/eagle3_head_coverage_lift_target_results.json",
+      "build_cost_301": "research/validity/eagle3_build_cost/eagle3_build_cost_results.json",
+      "crosscheck_470": "research/validity/strict_frontier_realize_crosscheck/strict_frontier_realize_crosscheck_report.json"
+    },
+    "note": "Extends denken #489 (q1ivw9tt). CPU analysis + literature synthesis only; no kernel re-measure, no served change, no HF Job, no launch, no submission, no drafter training. Literature closure bands are SambaNova arXiv:2503.07807 / EAGLE-3 arXiv:2503.01840 priors, NOT measurements on our drafter."
+  },
+  "levers": {
+    "eagle3_arch_fusion_alone": {
+      "close_frac_band": [
+        0.1,
+        0.25
+      ],
+      "reduction_pp_band": [
+        0.366125761625703,
+        0.9153144040642575
+      ],
+      "channel": "raises intrinsic a_1 (0.729 -> ~0.77-0.91 envelope); SATURATION test shows ~0 gap effect",
+      "arch_change": true,
+      "needs_new_data": false,
+      "lit": "EAGLE-3 arXiv:2503.01840 (in-dist tau only, no OOD a_1 arm); SambaNova arch-alone 10-25%"
+    },
+    "wider_distribution_data_mix": {
+      "close_frac_band": [
+        0.25,
+        0.5
+      ],
+      "reduction_pp_band": [
+        0.9153144040642575,
+        1.830628808128515
+      ],
+      "channel": "shift-reduction: generic reasoning/STEM data mix (#336 'more_reasoning_root_data')",
+      "arch_change": false,
+      "needs_new_data": true,
+      "lit": "SambaNova arXiv:2503.07807 mild-domain rows 25-50%; #336 combo central +0.0385 cov"
+    },
+    "domain_targeted_fine_tune": {
+      "close_frac_band": [
+        0.6,
+        0.8
+      ],
+      "reduction_pp_band": [
+        2.196754569754218,
+        2.929006093005624
+      ],
+      "channel": "shift-reduction: drafter retrained on PRIVATE-distribution-like data",
+      "arch_change": false,
+      "needs_new_data": true,
+      "lit": "SambaNova arXiv:2503.07807 distillation Biology/Chinese rows 60-80%"
+    },
+    "coverage_retrain_379_optimistic": {
+      "close_frac_band": [
+        0.8611827887844181,
+        0.8611827887844181
+      ],
+      "reduction_pp_band": [
+        3.15301204442642,
+        3.15301204442642
+      ],
+      "channel": "ubel #379 max-coverage-retrain model (assumes FULL public->private transfer)",
+      "arch_change": false,
+      "needs_new_data": true,
+      "lit": "#379 coverage_map (above the literature high end -> OPTIMISTIC ceiling, not central)"
+    }
+  },
+  "lever_gate": {
+    "eagle3_arch_fusion_alone": {
+      "breach5": {
+        "low_closes": false,
+        "high_closes": false,
+        "central_closes": false
+      },
+      "breach1": {
+        "low_closes": false,
+        "high_closes": false,
+        "central_closes": false
+      }
+    },
+    "wider_distribution_data_mix": {
+      "breach5": {
+        "low_closes": false,
+        "high_closes": true,
+        "central_closes": true
+      },
+      "breach1": {
+        "low_closes": false,
+        "high_closes": true,
+        "central_closes": false
+      }
+    },
+    "domain_targeted_fine_tune": {
+      "breach5": {
+        "low_closes": true,
+        "high_closes": true,
+        "central_closes": true
+      },
+      "breach1": {
+        "low_closes": true,
+        "high_closes": true,
+        "central_closes": true
+      }
+    },
+    "coverage_retrain_379_optimistic": {
+      "breach5": {
+        "low_closes": true,
+        "high_closes": true,
+        "central_closes": true
+      },
+      "breach1": {
+        "low_closes": true,
+        "high_closes": true,
+        "central_closes": true
+      }
+    }
+  },
+  "saturation_test": {
+    "s_mult": 0.9841167486594844,
+    "d_add": 0.01227996727048114,
+    "arch_lift_applied": 0.04215000000000002,
+    "gap_mult_base_pct": 3.661257616257041,
+    "gap_mult_lift_pct": 4.044420440257346,
+    "gap_add_base_pct": 3.66125761625703,
+    "gap_add_lift_pct": 3.8305480618395005,
+    "saturation_delta_mult_pp": 0.3831628240003049,
+    "saturation_delta_add_pp": 0.16929044558247064,
+    "sign_ambiguous": false,
+    "lift_worsens_under_both": true,
+    "intrinsic_best_close_pp": -0.16929044558247064,
+    "intrinsic_lift_closes_gap": false
+  },
+  "verdict": {
+    "accept_bucket_pct": 3.66125761625703,
+    "ctxlen_bucket_pct": 0.6333865388319535,
+    "deployed_gap_pct": 4.294644155088977,
+    "specalive_breach_pct": 24.305815936301173,
+    "intrinsic_public_token_deficit": 4.148814055636896,
+    "a1_deployed": 0.7292532942898975,
+    "saturation_delta_mult_pp": 0.3831628240003049,
+    "saturation_delta_add_pp": 0.16929044558247064,
+    "saturation_abs_max_pp": 0.3831628240003049,
+    "intrinsic_best_close_pp": -0.16929044558247064,
+    "saturation_lift_worsens_under_both": true,
+    "intrinsic_lift_closes_gap": false,
+    "attackable_gap_pp": 2.5628803313799207,
+    "attackable_gap_pp_lo": 2.196754569754218,
+    "attackable_gap_pp_hi": 2.929006093005624,
+    "attackable_gap_pp_379_optimistic": 3.15301204442642,
+    "irreducible_floor_pp_lo": 0.732251523251406,
+    "irreducible_floor_pp_hi": 1.464503046502812,
+    "delta_accept_target_breach5": 0.033342302764780236,
+    "delta_accept_target_breach1": 0.02644070088473472,
+    "delta_accept_target_breach5_pct": 3.334230276478024,
+    "delta_accept_target_breach1_pct": 2.6440700884734722,
+    "accept_target_breach5_pct": 2.7008437376460703,
+    "accept_target_breach1_pct": 2.0106835496415187,
+    "reduce_pp_breach5": 0.9604138786109596,
+    "reduce_pp_breach1": 1.650574066615511,
+    "reduce_relbucket_breach5": 0.2623180281951337,
+    "reduce_relbucket_breach1": 0.4508216136680715,
+    "reduce_relattack_breach5": 0.3747400402787625,
+    "reduce_relattack_breach1": 0.6440308766686736,
+    "eagle3_plausible_reduction_pp_lo": 0.9153144040642575,
+    "eagle3_plausible_reduction_pp_hi": 2.929006093005624,
+    "eagle3_arch_alone_closes_breach5": false,
+    "eagle3_closes_gate": true,
+    "eagle3_closes_gate_breach1": true,
+    "domain_tgt_robust_breach5": true,
+    "domain_tgt_robust_breach1": true,
+    "cheapest_lever_that_closes": "wider-distribution-training",
+    "fast_private_safe_strict_path_exists": true,
+    "floorlock_remains_only_measured_safe": true,
+    "floorlock_tps": 161.7,
+    "verdict_band": "GREEN: domain-targeted retrain robustly closes breach<1% (conditional on private-like data)",
+    "delta_gate": 0.05,
+    "ppl_gate": 2.42,
+    "sigma_oneshot_frac_pct": 1.0127160849261558,
+    "eagle3_fusion_layers": "[2, 21, 39]",
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true,
+    "no_kernel_rebuild": true,
+    "no_hf_job": true,
+    "no_launch": true,
+    "no_submission": true,
+    "no_drafter_training": true,
+    "gpu_used": false,
+    "tps_added_by_this_card": 0,
+    "self_test_passes": true,
+    "reconcile_line": "Drafter-gap-reduction feasibility (#481 Dir-4 analytic leg). #489 fixed the breach at 24.31% for ANY spec-alive config (Delta=4.295%); closing it needs the 3.661% ACCEPTANCE bucket itself. INVERTING #489: breach<5% <=> Delta<=3.334% <=> reduce acceptance 0.960pp (26.2% of bucket); breach<1% <=> Delta<=2.644% <=> reduce 1.651pp (45.1%). MECHANISM: the gap is a RATIO -- raising INTRINSIC a_1 (EAGLE-3 arch fusion, the cliff 0.729->~0.77-0.91) does NOT close it: under BOTH shift models it mildly WORSENS (mult +0.383pp / add +0.169pp; longer chains compound a fixed per-position shift) -> a_1 is the SPEED axis, NOT a gap-closer. Only SHIFT-REDUCTION closes it. LITERATURE (SambaNova 2503.07807, mild-shift): arch-alone 10-25% (0.37-0.92pp -> MISSES breach<5%), wider data-mix 25-50%, DOMAIN-TARGETED 60-80% (2.20-2.93pp -> CLEARS both bars). VERDICT fast_private_safe_strict_path_exists=True: a fast spec-alive config CAN be made private-safe, but ONLY by a wider-distribution-training drafter retrain, NOT by EAGLE-3 architecture alone and NOT by any public-TPS speed. HONESTY: analytic over literature priors (no published EAGLE-3 OOD a_1 exists); GO only justifies GPU spend to TRAIN + measure E_accept on a held-out shifted split. Floor-lock 161.70 stays the only MEASURED strict private-safe ship."
+  },
+  "self_test_conditions": {
+    "reproduces_489_specalive_breach_24p31": true,
+    "accept_plus_ctxlen_equals_gap": true,
+    "accept_bucket_is_3p661": true,
+    "ctxlen_bucket_is_0p633": true,
+    "inversion_breach5_roundtrips": true,
+    "inversion_breach1_roundtrips": true,
+    "delta_targets_ordered": true,
+    "delta_target_breach5_refines_3p0": true,
+    "delta_target_breach1_refines_2p7": true,
+    "reduce_breach5_is_0p96pp": true,
+    "reduce_breach1_is_1p65pp": true,
+    "reduce_breach1_gt_breach5": true,
+    "accept_targets_below_bucket": true,
+    "chain_et_reproduces_289": true,
+    "a1_is_profile_minimum": true,
+    "mult_shift_reproduces_r_accept": true,
+    "add_shift_reproduces_r_accept": true,
+    "saturation_effect_is_small": true,
+    "saturation_lift_does_not_close": true,
+    "saturation_lift_worsens_under_both": true,
+    "intrinsic_lift_not_reliable_closer": true,
+    "attackable_band_ordered": true,
+    "closure_fracs_in_unit": true,
+    "domain_tgt_plus_floor_spans_unit": true,
+    "arch_alone_misses_breach5": true,
+    "domain_tgt_closes_breach5": true,
+    "cheapest_closer_is_data_lever": true,
+    "path_exists_consistent": true,
+    "ctxlen_below_breach5_target": true,
+    "spec_alive_eaccept_gt1": true,
+    "ppl_anchor_within_gate": true,
+    "nan_clean": true
+  },
+  "public_evidence_used": "denken #489 (q1ivw9tt) private_safe_tps_threshold: spec-alive Delta=4.295% -> scale-invariant 24.31% fractional breach; floor-lock 161.70 the only strict private-safe ship. ubel #379 (5kpb73tb) public_private_gap_decomposition: Delta=3.661% acceptance + 0.633% ctxlen; coverage_map max-retrain residual 1.142%. kanna #289 (fi34s269) per_position_acceptance_decay: a_1=0.729 cliff, E[T]=3.851, deeper a_k 0.76-0.85. denken #308 (5axqa6oa) / #342 (ph8eza1w) eagle3_a1_cliff: arch lever +0.042 on a_1, in-repo native 0.7714, published dense a_1 0.889-0.93, robustness ceiling 0.85. lawine #336 (krroookz) eagle3_head_coverage_lift_target: soft-KD+reasoning-data combo central +0.0385 cov, REACHABLE-MARGINAL, private-tax robustness flagged a SEPARATE gate (fern #325). denken #301 eagle3_build_cost: {2,21,39} fusion geometry. ubel #470 (ugqnytji) E_accept~3.87 spec-alive, PPL 2.3770<=2.42. lawine #467 sigma_hw: sigma_oneshot 4.876 (1.013% fractional). LITERATURE: SambaNova arXiv:2503.07807 (only direct OOD draft-head adaptation study) domain-targeted closes 60-80% of an OOD acceptance drop, generic mix 25-50%, arch-alone 10-25%, floor 20-40%; EAGLE-3 arXiv:2503.01840 Table-2 arch ablation (in-distribution tau only, NO published OOD a_1 arm)."
+}
