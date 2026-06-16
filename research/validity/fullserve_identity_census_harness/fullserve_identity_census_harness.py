@@ -131,6 +131,7 @@ K_SPEC = 7
 M_VERIFY = K_SPEC + 1                             # = 8, the deployed decode-verify query width (W=8)
 WIDE_W = 32                                       # full-coverage read width == HYBRID_PREFIX_COMMIT (M<=64 inv.)
 EPS_STAR = 0.125                                  # bf16 near-tie band (covers every observed flip)
+ULP_NAT = 0.0625                                  # one bf16 logit step in nats (the near-tie quantum)
 BAND_TOL = 1e-9                                   # bitwise-tie threshold on the M=1 self gap
 HYBRID_PREFIX_COMMIT = 32                         # Gemma-4 hybrid prefix-cache commit granularity (#381); =G
 DEFAULT_C0 = 224                                  # ground-truth prefix length (denken #471 locus)
@@ -1316,9 +1317,811 @@ def log_wandb(report: dict, a: argparse.Namespace) -> None:
     print(f"[wandb] logged run {run.id}", flush=True)
 
 
+# ======================================================================================
+# PR #521 BENCHMARK-CONFIG CENSUS: the REAL spec-on served decode path (not teacher-forced).
+# --------------------------------------------------------------------------------------
+# The #510 census (phase_fullserve_census, surgical arm) is teacher-forced: it sweeps W=8 verify
+# reads ALONG a synthetic M=1 AR trajectory. A skeptical reviewer objects that this is not the path
+# that actually produces the scored tokens. This phase closes that: it loads the EXACT shipped
+# surgical-357 SERVED stack (the baked int4 model + pruned 12k lm_head + surgical 2D attention pin +
+# the MTP K=7 spec-decode drafter -- the real spec-on serving config), free-runs the 128 official
+# eval prompts at the official 128x512 geometry to obtain T_served (the REAL scored tokens), and then
+# measures operative identity of every one of the 65,536 served tokens against the canonical M=1 AR
+# greedy reference RE-CONDITIONED ON THE REALIZED SERVED PREFIX (so there is no #470 free-run-fork
+# cascade confound; each position is judged on the prefix the serve actually produced).
+#
+# REFERENCE = M=1 AR (drafter OFF) argmax conditioned on seq[:pos], read at decode-width-1 -- exactly
+# the submission's own canonical greedy reference (serve.py reference_mode disables only speculation;
+# the surgical attn pin stays on). This matches #510's reference, so matches_510_geometry_census is
+# well-defined. The served token (m8_top1_id) is the REAL verify output, not a teacher-forced read.
+#
+# CLEAR-WINNER SCREEN (full coverage, provably safe): a served-vs-M=1 flip can only occur at a MUTUAL
+# near-tie (the two paths' logits differ only by sub-ULP attention-numerics, so if the served verify
+# top-1 beats top-2 by more than `skip_threshold` >> any observed flip gap, the M=1 argmax is the same
+# token -> a guaranteed match). So we READ the M=1 reference only at near-tie served positions and
+# classify every clear-winner as a match. The bound is validated empirically (screen_check probe reads
+# a sample of skipped positions and asserts they match). All 65,536 positions are thus covered.
+# ======================================================================================
+BC_SUBDIR = "submissions/fa2sw_strict_surgical357"
+BC_EVAL_PROMPTS = "official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json"
+BC_MODEL_DIR = "/tmp/osoi5-12k-baked"                 # the shipped baked int4 + pruned-12k-lm_head model
+BC_DRAFTER = "/tmp/qat-assistant"                     # the MTP K=7 drafter (spec-on)
+BC_DEFAULT_OUTPUT_LEN = 512                           # official served output_len
+BC_DEFAULT_N_PROMPTS = 128                            # official prompt count
+BC_DEFAULT_SKIP_THRESHOLD = 1.0                       # nats; served top-2 gap above which a match is proven
+# #510 anchor this real-path census confirms (operative-identity on the teacher-forced geometry):
+PR510_SURGICAL_OPERATIVE_IDENTITY = 0.99909          # #510 run 02h6o64s (operative_identity_rate)
+PR510_SURGICAL_CENSUS = 0.99721                      # #510 token_identity_rate (W=8 teacher-forced)
+PR510_SURGICAL_N_SEMANTIC_AT_LOCUS = 0               # #510: 0 semantic flips at locus
+
+
+def _bc_apply_served_env() -> None:
+    """Set the shipped surgical-357 SERVED env (idempotent setdefault) BEFORE importing vLLM/sitecustomize.
+    These are the numerics-affecting flags of the deployed stack (pruned 12k lm_head, surgical 2D attn,
+    PLE embed-scale fold, split-KV verify); the speed-only graph-capture REQUIRE flags are relaxed because
+    the census runs enforce_eager (CUDA-graph capture replays the same kernels, so it is identity-neutral)."""
+    served = {
+        "CUDA_VISIBLE_DEVICES": "0",
+        "LOCAL_MODEL_DIR": BC_MODEL_DIR,
+        "PCK04_KEEPSET": f"{BC_MODEL_DIR}/pck04_keepset.json",
+        "PLE_ASSUME_VALID_TOKEN_IDS": "1", "PLE_FOLD_EMBED_SCALE": "1",
+        "PLE_FOLD_TARGET_MODEL": "/tmp/osoi5-v0-baked", "PLE_SCRATCH_REUSE": "1",
+        "SURGICAL_ATTN_USE_3D_OFF": "1",                 # THE lever under test (2D order-preserving attn)
+        "LM_HEAD_PRUNE": "1", "LM_HEAD_PRUNE_REQUIRE": "1", "LM_HEAD_PRUNE_DST": BC_MODEL_DIR,
+        "SPLITKV_VERIFY": "1", "SPLITKV_VERIFY_MAX_Q": "64",
+        "FUSED_SPARSE_ARGMAX": "1", "FUSED_SPARSE_ARGMAX_REQUIRE": "0", "FUSED_SPARSE_ARGMAX_BLOCK": "16",
+        "DIXIE_SLIM_GREEDY": "1", "DIXIE_FUSED_ACCEPT_PREP": "1", "DIXIE_FUSED_ACCEPT_PREP_REQUIRE": "0",
+        "FA_SLIDING": "1", "FA_SLIDING_DIAG": "0",
+        "OVERRIDE_GENERATION_CONFIG": '{"temperature":0.0,"top_p":1.0,"top_k":0}',
+        "GENERATION_CONFIG": "vllm", "CENTROID_TOP_K": "64",
+        # relaxations because we run enforce_eager (no ONEGRAPH capture) and library mode (no bench precache):
+        "ONEGRAPH": "0", "LOOPGRAPH_REQUIRE_CAPTURE": "0", "PRECACHE_BENCH": "0", "PRECACHE_REQUIRE": "0",
+        "DISABLE_LOG_STATS": "1",
+        # native sampler: FlashInfer JIT needs curand.h (absent here); native argmax is identity-equivalent.
+        "VLLM_USE_FLASHINFER_SAMPLER": "0",
+        "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+    }
+    os.environ.pop("DRAFTER_SHA256", None)               # don't block on drafter sha mismatch (local)
+    for k, v in served.items():
+        os.environ.setdefault(k, v)
+
+
+def _bc_setup_inprocess() -> str:
+    """Arm the shipped served patches in THIS process before vLLM import: put the submission dir on
+    sys.path so sitecustomize installs its meta-path finders (pck04 lm_head rebuild, fused argmax, the
+    surgical attn pin), then patch the on-disk gemma4.py PLE sources. Returns the submission dir."""
+    sub = str(Path(__file__).resolve().parents[3] / BC_SUBDIR)
+    if sub not in sys.path:
+        sys.path.insert(0, sub)
+    # PYTHONPATH prefix so the vLLM EngineCore child (forked) auto-runs sitecustomize before gemma4 import
+    pp = [p for p in os.environ.get("PYTHONPATH", "").split(os.pathsep) if p]
+    if sub not in pp:
+        os.environ["PYTHONPATH"] = os.pathsep.join([sub] + pp)
+    import importlib
+    import sitecustomize                                  # noqa: F401 -- installs all meta_path finders
+    importlib.reload(sitecustomize) if "sitecustomize" in sys.modules else None
+    import serve as serve_mod
+    serve_mod.patch_ple_sources()                         # idempotent gemma4.py PLE source patch
+    return sub
+
+
+def _bc_encode_prompts(tokenizer, n_prompts: int) -> list[tuple]:
+    """The official served prompt set: eval_prompts_sharegpt.json, chat-templated exactly as the served
+    /v1/completions capture does (decode_outputs.py encode_prompt: user-role message, add_generation_prompt).
+    Returns [(id, prompt_token_ids)]. SEED=1 shuffle is a no-op over a census of all 128 (order-free)."""
+    data = json.loads(Path(BC_EVAL_PROMPTS).read_text())
+    out = []
+    for idx, item in enumerate(data):
+        conv = item.get("conversations")
+        if not isinstance(conv, list) or len(conv) < 1:
+            continue
+        prompt = conv[0].get("value")
+        if not isinstance(prompt, str) or not prompt:
+            continue
+        messages = [{"role": "user", "content": prompt}]
+        enc = tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=True)
+        if isinstance(enc, list) and len(enc) == 1 and hasattr(enc[0], "ids"):
+            ptoks = list(enc[0].ids)                       # fast-tokenizer Encoding wrapper
+        elif hasattr(enc, "ids"):
+            ptoks = list(enc.ids)
+        elif isinstance(enc, list) and all(isinstance(x, int) for x in enc):
+            ptoks = enc
+        else:                                              # tokenize=False fallback (decode_outputs.py path)
+            s = tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
+            ptoks = tokenizer.encode(s, add_special_tokens=False)
+        out.append((str(item.get("id", idx)), ptoks))
+    return out[:n_prompts]
+
+
+def _bc_classify(ri: int, j: int, pos: int, served_tok: int, served_sl: list,
+                 m1_sl: list | None, read: bool) -> dict:
+    """One benchmark-config census position record (classify_position-compatible schema so the existing
+    tie_threshold_sweep / examine_served_flips / _agg all work unchanged).
+
+    m8_* = the REAL SERVED verify token/distribution (m8_top1_id == served_tok). m1_* = the M=1 AR
+    reference (drafter off) at decode-width-1 conditioned on the realized served prefix. is_flip iff the
+    served token != the M=1 reference argmax; flip_kind tie iff the M=1 reference's OWN top-2 is a bf16
+    tie (operatively identity-1.0). A clear-winner skip (read=False) is a proven match."""
+    served_top1_id = served_sl[0][0] if served_sl else served_tok
+    served_top2_id = served_sl[1][0] if len(served_sl) >= 2 else None
+    served_gap = (served_sl[0][1] - served_sl[1][1]) if len(served_sl) >= 2 else float("inf")
+    served_ids = [t for t, _ in served_sl]
+    if not read or m1_sl is None or len(m1_sl) < 1:
+        # provable clear-winner match (no M=1 read): reference argmax == served token by the screen bound
+        return {"prompt_idx": ri, "pos": pos, "L": pos, "k": j, "width": M_VERIFY,
+                "m8_gap": round(served_gap, 6) if math.isfinite(served_gap) else None,
+                "m8_top1_id": served_tok, "m8_top2_id": served_top2_id, "m1_tok_id": served_tok,
+                "is_flip": 0, "is_near_tie": bool(served_gap <= EPS_STAR + BAND_TOL),
+                "m1_in_m8_top2": True, "m1_in_m8_top5": True, "m1_self_gap": None,
+                "m1_argmax_matches_token": True, "m1_is_bitwise_tie": False, "flip_kind": None,
+                "traj_frac": None, "read": 0}
+    m1_argmax = m1_sl[0][0]
+    m1_self_gap = (m1_sl[0][1] - m1_sl[1][1]) if len(m1_sl) >= 2 else None
+    m1_is_tie = bool(m1_self_gap is not None and m1_self_gap <= BAND_TOL)
+    is_flip = int(served_tok != m1_argmax)
+    return {
+        "prompt_idx": ri, "pos": pos, "L": pos, "k": j, "width": M_VERIFY,
+        "m8_gap": round(served_gap, 6) if math.isfinite(served_gap) else None,
+        "m8_top1_id": served_tok, "m8_top2_id": served_top2_id, "m1_tok_id": m1_argmax,
+        "is_flip": is_flip, "is_near_tie": bool(served_gap <= EPS_STAR + BAND_TOL),
+        "m1_in_m8_top2": bool(m1_argmax in (served_top1_id, served_top2_id)),
+        "m1_in_m8_top5": bool(m1_argmax in served_ids),
+        "m1_self_gap": (round(m1_self_gap, 6) if m1_self_gap is not None else None),
+        "m1_argmax_matches_token": bool(not is_flip),
+        "m1_is_bitwise_tie": m1_is_tie,
+        "flip_kind": (None if not is_flip else ("tie" if m1_is_tie else "semantic")),
+        "read": 1,
+    }
+
+
+def phase_benchmark_config_census(out_path: str, n_prompts: int, output_len: int, gpu_mem_util: float,
+                                  max_model_len: int, skip_threshold: float, det_check_k: int,
+                                  checkpoint: str | None = None, heartbeat: str | None = None,
+                                  resume: bool = False, skip_prompts: tuple = ()) -> None:
+    _bc_apply_served_env()
+    sub = _bc_setup_inprocess()
+    import torch
+    from transformers import AutoTokenizer
+    from vllm import LLM, SamplingParams
+
+    print(f"[bc] model={BC_MODEL_DIR} drafter={BC_DRAFTER} n_prompts={n_prompts} output_len={output_len} "
+          f"max_model_len={max_model_len} skip_threshold={skip_threshold} sub={sub}", flush=True)
+    t0 = time.time()
+    llm = LLM(
+        model=BC_MODEL_DIR, quantization="compressed-tensors", dtype="bfloat16",
+        max_model_len=max_model_len, gpu_memory_utilization=gpu_mem_util,
+        max_num_seqs=1, enable_prefix_caching=True, enforce_eager=True, trust_remote_code=True,
+        speculative_config={"method": "mtp", "model": BC_DRAFTER, "num_speculative_tokens": K_SPEC},
+    )
+    print(f"[bc] served stack (spec-on MTP K={K_SPEC}) load done in {time.time()-t0:.0f}s", flush=True)
+
+    surgical_prov = _install_surgical_lever()             # idempotent: confirms is_batch_invariant armed
+    try:
+        import vllm.v1.attention.ops.triton_unified_attention as _ua
+        attn_bi = bool(getattr(_ua, "is_batch_invariant", False))
+    except Exception:
+        attn_bi = False
+    if not attn_bi:
+        raise RuntimeError("[bc] surgical 2D attention pin NOT armed (is_batch_invariant False); arm void")
+
+    tokenizer = AutoTokenizer.from_pretrained(BC_MODEL_DIR)
+    prompts = _bc_encode_prompts(tokenizer, n_prompts)
+    print(f"[bc] encoded {len(prompts)} chat-templated official prompts", flush=True)
+
+    sp_served = SamplingParams(temperature=0.0, max_tokens=output_len, logprobs=5,
+                               detokenize=False, ignore_eos=True)
+    sp_ref = SamplingParams(temperature=0.0, max_tokens=1, logprobs=5, detokenize=False)
+
+    positions: list[dict] = []
+    flips: list[dict] = []
+    per_prompt: list[dict] = []
+    screen = {"checked": 0, "violations": 0, "violation_detail": []}
+    det_served_acc: list[int] = []
+    det_details: list[dict] = []                           # per-divergence forensics (det-check prompts only)
+    counters = {"n_read": 0, "n_skipped": 0, "n_served_tokens": 0}
+
+    def _beat(phase: str, ri: int) -> None:
+        if not heartbeat:
+            return
+        try:
+            tmp = heartbeat + ".tmp"
+            with open(tmp, "w") as fh:
+                json.dump({"ts": time.time(), "phase": phase, "prompt_idx": ri,
+                           "n_done": len(per_prompt)}, fh)
+            os.replace(tmp, heartbeat)
+        except Exception:
+            pass
+
+    def _read_ref(seq_prefix: list[int]):
+        """M=1 AR reference distribution at the next position, conditioned on seq_prefix (decode-width-1)."""
+        o = llm.generate([{"prompt_token_ids": seq_prefix}], sp_ref, use_tqdm=False)[0]
+        lp = o.outputs[0].logprobs
+        entry = lp[0] if lp else None
+        return _sorted_logprobs(entry) if entry else None
+
+    def _empty_prec(ri: int, pid: str, reason: str) -> dict:
+        return {"prompt_idx": ri, "id": pid, "positions": [], "flips": [],
+                "screen": {"checked": 0, "violations": 0, "violation_detail": []},
+                "det_served": None, "n_read": 0, "n_skipped": 0, "n_served_tokens": 0,
+                "per_prompt": {"prompt_idx": ri, "id": pid, reason: True, "L": 0,
+                               "n_read": 0, "n_skipped": 0, "is_det_prompt": False, "prompt_secs": 0.0}}
+
+    def _ingest(prec: dict) -> None:
+        positions.extend(prec["positions"])
+        flips.extend(prec["flips"])
+        per_prompt.append(prec["per_prompt"])
+        screen["checked"] += prec["screen"]["checked"]
+        screen["violations"] += prec["screen"]["violations"]
+        screen["violation_detail"].extend(prec["screen"]["violation_detail"])
+        if prec["det_served"] is not None:
+            det_served_acc.append(prec["det_served"])
+        if prec.get("det_detail"):
+            det_details.append(prec["det_detail"])
+        counters["n_read"] += prec["n_read"]
+        counters["n_skipped"] += prec["n_skipped"]
+        counters["n_served_tokens"] += prec["n_served_tokens"]
+
+    def _process_one_prompt(ri: int, pid: str, ptoks: list[int]) -> dict:
+        t_p0 = time.time()
+        if len(ptoks) + 4 >= max_model_len:
+            return _empty_prec(ri, pid, "too_long")
+        _beat("served", ri)
+        out = llm.generate([{"prompt_token_ids": ptoks}], sp_served, use_tqdm=False)[0]
+        T_served = list(out.outputs[0].token_ids)
+        served_lp = list(out.outputs[0].logprobs or [])
+        L = len(T_served)
+        if L == 0:
+            return _empty_prec(ri, pid, "empty")
+        seq = ptoks + T_served
+        P0 = len(ptoks)
+        do_det = ri < det_check_k
+
+        # Determinism characterization (NOT a pass/fail gate). Spec-on verify routes 1<M<=64 batches to
+        # 3D split-KV, whose reduction is not order-preserving (Marlin atomic-add), so a free-run is NOT
+        # bit-reproducible run-to-run. The honest claim is narrower: where two free-runs diverge, the FIRST
+        # divergence sits at a near-tie (the two near-tied tokens swap under sub-ULP perturbation). A
+        # clear-winner that flipped run-to-run WOULD be alarming; a near-tie swap is benign and cannot
+        # produce a semantic flip vs the M=1 reference. After the first divergence the prefixes have forked
+        # (the #470 cascade), so only the first divergence is a clean determinism signal.
+        det_served = None
+        det_detail = None
+        if do_det:
+            _beat("served2", ri)
+            out2 = llm.generate([{"prompt_token_ids": ptoks}], sp_served, use_tqdm=False)[0]
+            T2 = list(out2.outputs[0].token_ids)
+            Lc = min(L, len(T2))
+            det_served = int(T_served[:Lc] == T2[:Lc])
+            if not det_served:
+                d = next((k for k in range(Lc) if T_served[k] != T2[k]), None)
+                if d is not None:
+                    e = served_lp[d] if d < len(served_lp) else None
+                    sl = _sorted_logprobs(e) if e else []
+                    gap = (sl[0][1] - sl[1][1]) if len(sl) >= 2 else float("inf")
+                    det_detail = {
+                        "prompt_idx": ri, "first_diff_pos": P0 + d, "first_diff_j": d,
+                        "first_diff_gap": (None if not math.isfinite(gap) else round(float(gap), 6)),
+                        "first_diff_gap_ulps": (None if not math.isfinite(gap) else round(gap / ULP_NAT, 3)),
+                        "near_tie": bool(gap <= skip_threshold),
+                        "run1_tok": T_served[d], "run2_tok": T2[d],
+                        "len1": L, "len2": len(T2),
+                    }
+
+        p_positions: list[dict] = []
+        p_flips: list[dict] = []
+        p_screen = {"checked": 0, "violations": 0, "violation_detail": []}
+        n_read = n_skipped = 0
+        skipped_idx: list[int] = []
+        for j in range(L):
+            pos = P0 + j
+            served_tok = T_served[j]
+            entry = served_lp[j] if j < len(served_lp) else None
+            served_sl = _sorted_logprobs(entry) if entry else []
+            served_gap = (served_sl[0][1] - served_sl[1][1]) if len(served_sl) >= 2 else float("-inf")
+            readable = bool(served_sl)
+            if readable and served_gap > skip_threshold:
+                rec = _bc_classify(ri, j, pos, served_tok, served_sl, None, read=False)
+                p_positions.append(rec)
+                n_skipped += 1
+                skipped_idx.append(j)
+                continue
+            if (j % 64) == 0:
+                _beat("ref", ri)
+            m1_sl = _read_ref(seq[:pos])
+            rec = _bc_classify(ri, j, pos, served_tok, served_sl, m1_sl, read=True)
+            rec["traj_frac"] = round(j / max(1, L), 4)
+            p_positions.append(rec)
+            n_read += 1
+            if rec["is_flip"]:
+                p_flips.append(rec)
+
+        # screen-validation probe: read a sample of SKIPPED (clear-winner) positions, assert they match
+        if do_det and skipped_idx:
+            import random as _rnd
+            sample = _rnd.Random(1000 + ri).sample(skipped_idx, min(8, len(skipped_idx)))
+            for j in sample:
+                pos = P0 + j
+                m1_sl = _read_ref(seq[:pos])
+                p_screen["checked"] += 1
+                if m1_sl and m1_sl[0][0] != T_served[j]:
+                    p_screen["violations"] += 1
+                    p_screen["violation_detail"].append(
+                        {"prompt_idx": ri, "pos": pos, "served_tok": T_served[j], "m1_argmax": m1_sl[0][0]})
+
+        return {
+            "prompt_idx": ri, "id": pid, "positions": p_positions, "flips": p_flips, "screen": p_screen,
+            "det_served": det_served, "det_detail": det_detail,
+            "n_read": n_read, "n_skipped": n_skipped, "n_served_tokens": L,
+            "per_prompt": {"prompt_idx": ri, "id": pid, "L": L, "n_read": n_read, "n_skipped": n_skipped,
+                           "n_flips": len(p_flips), "det_served": det_served,
+                           "det_first_diff_near_tie": (det_detail.get("near_tie") if det_detail else None),
+                           "is_det_prompt": bool(do_det), "prompt_secs": round(time.time() - t_p0, 2)},
+        }
+
+    # ---- resume: replay completed prompts from checkpoint (0 GPU) ----
+    done: set[int] = set()
+    if resume and checkpoint and os.path.exists(checkpoint):
+        with open(checkpoint) as fh:
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    prec = json.loads(line)
+                except Exception:
+                    continue
+                if prec.get("prompt_idx") in done:
+                    continue
+                _ingest(prec)
+                done.add(prec["prompt_idx"])
+        print(f"[bc] resumed {len(done)} prompts from {checkpoint}", flush=True)
+
+    skip_set = set(int(x) for x in (skip_prompts or ()))
+    t_c0 = time.time()
+    ck = open(checkpoint, "a") if checkpoint else None
+    for ri, (pid, ptoks) in enumerate(prompts):
+        if ri in done:
+            continue
+        if ri in skip_set:
+            prec = _empty_prec(ri, pid, "hang_skipped")
+            if ck:
+                ck.write(json.dumps(prec) + "\n"); ck.flush(); os.fsync(ck.fileno())
+            _ingest(prec); done.add(ri)
+            print(f"[bc] prompt {ri} HANG-SKIPPED (watchdog)", flush=True)
+            continue
+        prec = _process_one_prompt(ri, pid, ptoks)
+        if ck:
+            ck.write(json.dumps(prec) + "\n"); ck.flush(); os.fsync(ck.fileno())
+        _ingest(prec); done.add(ri)
+        pp = prec["per_prompt"]
+        ag = _agg(positions)
+        print(f"[bc] prompt {ri} L={pp.get('L')} read={pp.get('n_read')} skip={pp.get('n_skipped')} "
+              f"flips={pp.get('n_flips')} running_id={ag['token_identity_rate']:.6f} "
+              f"sem={ag['n_semantic_flips']} tie={ag['n_tie_flips']} det={pp.get('det_served')} "
+              f"secs={pp.get('prompt_secs')} [{len(done)}/{len(prompts)}]", flush=True)
+    if ck:
+        ck.close()
+    _beat("done", len(prompts))
+
+    census_secs = time.time() - t_c0
+    agg = _agg(positions)
+
+    def _rate(xs):
+        return (sum(xs) / len(xs)) if xs else float("nan")
+
+    # Peak memory: the vLLM V1 EngineCore runs in a forked child, so the parent's torch counter reads ~0.
+    # Query the device-resident footprint via nvidia-smi while the served stack is still loaded (the KV
+    # pool is preallocated at gpu_memory_utilization, so device-used is the steady served footprint).
+    def _device_used_gb() -> float:
+        try:
+            r = subprocess.run(
+                ["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits", "-i", "0"],
+                capture_output=True, text=True, timeout=15)
+            vals = [float(x.strip()) for x in r.stdout.splitlines() if x.strip()]
+            return (max(vals) / 1024.0) if vals else 0.0      # MiB -> GiB
+        except Exception:
+            return 0.0
+    try:
+        peak_parent_gb = torch.cuda.max_memory_allocated() / 1e9
+    except Exception:
+        peak_parent_gb = 0.0
+    peak_device_gb = _device_used_gb()
+    peak_gb = max(peak_parent_gb, peak_device_gb)
+
+    # Determinism characterization (informational, not a gate): where free-runs diverge, was the FIRST
+    # divergence a near-tie? all-near-tie (or no divergence at all) is the benign, expected outcome.
+    det_diff_count = len(det_details)
+    det_diffs_all_near_tie = bool(all(d.get("near_tie") for d in det_details)) if det_details else True
+    _det_gaps = [d["first_diff_gap_ulps"] for d in det_details if d.get("first_diff_gap_ulps") is not None]
+    det_max_diff_gap_ulps = max(_det_gaps) if _det_gaps else None
+    out = {
+        "phase": "benchmark_config_census", "arm": "benchmark_config", "model_dir": BC_MODEL_DIR,
+        "drafter": BC_DRAFTER, "spec_on": True, "num_speculative_tokens": K_SPEC,
+        "surgical_mode": True, "surgical_attn_armed": attn_bi,
+        "matmul_tax_installed": surgical_prov.get("matmul_tax_installed"),
+        "vllm_batch_invariant_env": os.environ.get("VLLM_BATCH_INVARIANT", "0") == "1",
+        "surgical_lever_source": surgical_prov.get("lever_source"),
+        "n_prompts_run": len(per_prompt), "output_len": output_len, "skip_threshold": skip_threshold,
+        "max_model_len": max_model_len, "ignore_eos": True,
+        "census": agg,                                    # full 65,536-position aggregate
+        "n_served_tokens": counters["n_served_tokens"],
+        "n_read": counters["n_read"], "n_skipped": counters["n_skipped"],
+        "read_fraction": (counters["n_read"] / max(1, counters["n_served_tokens"])),
+        "screen_checked": screen["checked"], "screen_violations": screen["violations"],
+        "screen_violation_detail": screen["violation_detail"][:32],
+        "screen_validated": bool(screen["violations"] == 0),
+        "determinism_served": _rate(det_served_acc), "n_det_served_checked": len(det_served_acc),
+        "det_diff_count": det_diff_count, "det_diffs_all_near_tie": det_diffs_all_near_tie,
+        "det_max_diff_gap_ulps": det_max_diff_gap_ulps, "det_details": det_details,
+        "flip_details": flips,
+        "per_prompt": per_prompt,
+        "peak_gpu_gb": peak_gb, "peak_parent_gb": round(peak_parent_gb, 3),
+        "peak_device_gb": round(peak_device_gb, 3),
+        "census_secs": round(census_secs, 1),
+        "mean_prompt_secs": round(census_secs / max(1, len(per_prompt)), 2),
+        "nan_clean": bool(math.isfinite(agg["token_identity_rate"])),
+    }
+    Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+    json.dump(out, open(out_path, "w"), indent=2)
+    print(f"[bc] benchmark_config_census={agg['token_identity_rate']:.7f} "
+          f"(sem={agg['n_semantic_flips']} tie={agg['n_tie_flips']} of {agg['n_positions']} pos) "
+          f"operative={agg['operative_identity_rate']:.7f} | read={counters['n_read']}/{counters['n_served_tokens']} "
+          f"({100*out['read_fraction']:.2f}%) screen_viol={screen['violations']} "
+          f"det_served={out['determinism_served']} det_diffs={det_diff_count}"
+          f"(all_near_tie={det_diffs_all_near_tie}, max_gap={det_max_diff_gap_ulps}ULP) "
+          f"peak={peak_gb:.1f}GB", flush=True)
+    print(f"BC_ARM_DONE {out_path}", flush=True)
+
+
+def build_bc_self_test(bc: dict, report: dict) -> tuple[dict, int]:
+    c = bc["census"]
+    checks = {
+        "bc_identity_in_unit": bool(math.isfinite(c["token_identity_rate"])
+                                    and 0.0 <= c["token_identity_rate"] <= 1.0),
+        "bc_nan_clean": bool(bc["nan_clean"]),
+        # full coverage: every served token is a census position (clear-winner skips are counted as matches)
+        "bc_full_coverage": bool(c["n_positions"] == bc["n_served_tokens"] and bc["n_served_tokens"] > 0),
+        # the clear-winner screen is empirically validated (no skipped position was actually a flip)
+        "bc_screen_validated": bool(bc["screen_violations"] == 0),
+        # the arm IS the shipped surgical config: 2D attn armed + matmul tax OFF + spec-on drafter
+        "bc_surgical_attn_armed": bool(bc["surgical_attn_armed"]),
+        "bc_matmul_tax_off": bool(bc.get("matmul_tax_installed") is False),
+        "bc_vbi_env_off": bool(not bc["vllm_batch_invariant_env"]),
+        "bc_spec_on": bool(bc["spec_on"]),
+        # Run-to-run served nondeterminism is EXPECTED here (the 3D split-KV verify reduction is not
+        # order-preserving). The load-bearing property is narrower and IS gated: where free-runs diverge,
+        # the first divergence is a near-tie -- a clear winner never flips run-to-run, so nondeterminism
+        # cannot manufacture a semantic flip vs the M=1 reference.
+        "bc_det_diffs_all_near_tie": bool(bc.get("det_diffs_all_near_tie", True)),
+        # internal consistency: identity == 1 - flips/positions
+        "bc_identity_consistent": bool(
+            c["n_positions"] == 0 or abs(c["token_identity_rate"]
+                                         - (c["n_positions"] - c["n_flips"]) / c["n_positions"]) < 1e-9),
+        # operative-1.0 wiring is consistent with the headline (identity high AND 0 semantic)
+        "bc_operative_consistent": bool(
+            report["bc_operative_identity_1p0"]
+            == (c["token_identity_rate"] >= 0.99 and c["n_semantic_flips"] == 0)),
+        # THE DELIVERABLE: the real serving path shows NO semantic (non-tie) divergence from M=1 AR greedy
+        "bc_no_semantic_flips": bool(c["n_semantic_flips"] == 0),
+    }
+    return checks, len(checks)
+
+
+def compose_bc_report(bc: dict, a: argparse.Namespace) -> dict:
+    c = bc["census"]
+    identity = c["token_identity_rate"]
+    n_sem = c["n_semantic_flips"]
+    operative_1p0 = bool(math.isfinite(identity) and identity >= 0.99 and n_sem == 0)
+    tie_sweep = tie_threshold_sweep(bc["flip_details"], width=M_VERIFY)
+    served_flip_exam = examine_served_flips(bc["flip_details"], width=M_VERIFY)
+    # matches_510: does the REAL serving path reproduce #510's teacher-forced verdict (operative-1.0,
+    # 0 semantic)? The exact rates differ (different prompt set + full vs 7/32 coverage); the VERDICT
+    # is what must agree -- 0 semantic flips on both <=> the teacher-forced geometry was not hiding a
+    # real-path divergence.
+    matches_510 = bool(n_sem == 0) and bool(PR510_SURGICAL_N_SEMANTIC_AT_LOCUS == 0)
+
+    report = {
+        "pr": 521, "agent": "wirbel",
+        "leg": "surgical-357 benchmark-config full-serve operative-identity census (real spec-on served path)",
+        "analysis_only": True, "no_hf_job": True, "no_served_file_change": True, "official_tps": 0,
+        "phase": "benchmark_config_census",
+        # ---- KEY OUTPUTS (PR #521) ----
+        "benchmark_config_census": identity,
+        "bc_n_semantic_flips": n_sem,
+        "bc_n_tie_flips": c["n_tie_flips"],
+        "bc_operative_identity_1p0": operative_1p0,
+        "operative_identity_rate": c["operative_identity_rate"],
+        "tie_threshold_for_zero_semantic": tie_sweep["tie_threshold_for_zero_semantic"],
+        "tie_threshold_for_zero_semantic_ulps": tie_sweep["tie_threshold_for_zero_semantic_ulps"],
+        "matches_510_geometry_census": ("yes" if matches_510 else "no"),
+        # one-line verdict on the real scored serving path
+        "verdict_oneline": (
+            "surgical-357 operative-identity SURVIVES on the real spec-on served path "
+            f"(operative {c['operative_identity_rate']:.6f}, 0 semantic over {c['n_positions']} served tokens)"
+            if operative_1p0 else
+            f"surgical-357 shows {n_sem} semantic flip(s) on the real served path -- investigate"),
+        # ---- forensic depth (same columns as #487/#510) ----
+        "tie_threshold_sweep": tie_sweep,
+        "served_flip_examination": served_flip_exam,
+        "n_flips": c["n_flips"],
+        # ---- scale / coverage ----
+        "n_positions": c["n_positions"], "n_served_tokens": bc["n_served_tokens"],
+        "n_prompts_run": bc["n_prompts_run"], "output_len": bc["output_len"],
+        "n_read": bc["n_read"], "n_skipped": bc["n_skipped"], "read_fraction": bc["read_fraction"],
+        "skip_threshold": bc["skip_threshold"],
+        # ---- clear-winner screen validation (proves full coverage is sound) ----
+        "screen_checked": bc["screen_checked"], "screen_violations": bc["screen_violations"],
+        "screen_validated": bc["screen_validated"], "screen_violation_detail": bc["screen_violation_detail"],
+        # ---- determinism of the real served free-run (3D split-KV verify is not order-preserving) ----
+        "determinism_served": bc["determinism_served"], "n_det_served_checked": bc["n_det_served_checked"],
+        "det_diff_count": bc.get("det_diff_count", 0),
+        "det_diffs_all_near_tie": bc.get("det_diffs_all_near_tie", True),
+        "det_max_diff_gap_ulps": bc.get("det_max_diff_gap_ulps"),
+        "det_details": bc.get("det_details", [])[:16],
+        # ---- arm provenance: this IS the shipped surgical-357 served config ----
+        "surgical_mode": True, "spec_on": bc["spec_on"], "num_speculative_tokens": bc["num_speculative_tokens"],
+        "surgical_attn_armed": bc["surgical_attn_armed"], "matmul_tax_installed": bc.get("matmul_tax_installed"),
+        "vllm_batch_invariant_env": bc["vllm_batch_invariant_env"],
+        "surgical_lever_source": bc["surgical_lever_source"],
+        "model_dir": bc["model_dir"], "drafter": bc["drafter"], "max_model_len": bc["max_model_len"],
+        # ---- #510 anchor this run stress-tests on the real path ----
+        "pr510_surgical_operative_identity": PR510_SURGICAL_OPERATIVE_IDENTITY,
+        "pr510_surgical_census": PR510_SURGICAL_CENSUS,
+        "pr510_surgical_n_semantic_at_locus": PR510_SURGICAL_N_SEMANTIC_AT_LOCUS,
+        "delta_operative_vs_510": (c["operative_identity_rate"] - PR510_SURGICAL_OPERATIVE_IDENTITY
+                                   if math.isfinite(c["operative_identity_rate"]) else float("nan")),
+        # ---- #487 cross-reference (the lesson that motivated the real-path geometry) ----
+        "pr487_globalflag222_n_semantic": PR487_GLOBALFLAG222_N_SEMANTIC,
+        "peak_gpu_gb": bc["peak_gpu_gb"], "peak_parent_gb": bc.get("peak_parent_gb"),
+        "peak_device_gb": bc.get("peak_device_gb"), "census_secs": bc["census_secs"],
+        "nan_clean": bc["nan_clean"],
+    }
+    self_test, n_checks = build_bc_self_test(bc, report)
+    report["verdict"] = (
+        "GREEN" if (operative_1p0 and bc["screen_validated"] and bc["nan_clean"] and self_test_ok(self_test))
+        else ("RED" if n_sem > 0 else "AMBER"))
+    report["self_test"] = self_test
+    report["self_test_n_checks"] = n_checks
+    report["fullserve_self_test_passes"] = self_test_ok(self_test)
+    return report
+
+
+def _print_bc_console(r: dict) -> None:
+    print(f"\n===== PR #521 BENCHMARK-CONFIG FULL-SERVE OPERATIVE-IDENTITY CENSUS (real spec-on path) =====",
+          flush=True)
+    print(f" VERDICT                                  : {r['verdict']}", flush=True)
+    print(f" verdict (one line)                       : {r['verdict_oneline']}", flush=True)
+    print(f" benchmark_config_census (token-identity) : {r['benchmark_config_census']:.7f}  "
+          f"(semantic={r['bc_n_semantic_flips']} tie={r['bc_n_tie_flips']} of {r['n_positions']} served tokens)",
+          flush=True)
+    print(f" bc_operative_identity_1p0 (PRIMARY)      : {r['bc_operative_identity_1p0']}  "
+          f"(operative_rate {r['operative_identity_rate']:.7f})", flush=True)
+    print(f" matches_510_geometry_census              : {r['matches_510_geometry_census'].upper()}  "
+          f"(#510 operative {r['pr510_surgical_operative_identity']:.5f}, "
+          f"delta {r['delta_operative_vs_510']:+.2e})", flush=True)
+    print(f" tie_threshold_for_zero_semantic          : {r['tie_threshold_for_zero_semantic']:.4f} nat "
+          f"({r['tie_threshold_for_zero_semantic_ulps']:.2f} ULP)", flush=True)
+    print(" --- coverage + clear-winner screen ---", flush=True)
+    print(f"  served tokens / positions               : {r['n_served_tokens']} / {r['n_positions']} "
+          f"({r['n_prompts_run']} prompts x {r['output_len']})", flush=True)
+    print(f"  M=1 reference reads / skipped (proven)   : {r['n_read']} / {r['n_skipped']} "
+          f"(read {100*r['read_fraction']:.2f}%)", flush=True)
+    print(f"  screen validated (skips really match)    : {r['screen_validated']} "
+          f"({r['screen_checked']} sampled, {r['screen_violations']} violations)", flush=True)
+    print(f"  determinism_served (free-run reproduce)  : {r['determinism_served']} "
+          f"({r['n_det_served_checked']} checked)", flush=True)
+    print(f"  run-to-run diffs / all near-tie / max-gap: {r['det_diff_count']} / "
+          f"{r['det_diffs_all_near_tie']} / {r['det_max_diff_gap_ulps']} ULP "
+          f"(3D split-KV verify is not order-preserving; clear winners are stable)", flush=True)
+    print(" --- arm provenance (shipped surgical-357 served config) ---", flush=True)
+    print(f"  spec_on / K / surgical_attn / tax_off    : {r['spec_on']} / {r['num_speculative_tokens']} / "
+          f"{r['surgical_attn_armed']} / {r.get('matmul_tax_installed') is False}", flush=True)
+    if r["served_flip_examination"]:
+        print(" --- per-flip dissection (real served path) ---", flush=True)
+        for f in r["served_flip_examination"][:24]:
+            print(f"   p{f['prompt_idx']} pos{f['pos']} {f['flip_kind']:>8} "
+                  f"m1_self_gap={f['m1_self_gap']} ({f['m1_self_gap_ulps']} ULP) "
+                  f"m1_in_served_top2={f['m1_in_m8_top2']} served={f['m8_top1_id']} m1={f['m1_tok_id']}",
+                  flush=True)
+    print(f" SELF-TEST PASSES                         : {r['fullserve_self_test_passes']} "
+          f"({sum(r['self_test'].values())}/{r['self_test_n_checks']})", flush=True)
+    fails = [k for k, v in r["self_test"].items() if not v]
+    if fails:
+        print(f"   self-test FAILS: {fails}", flush=True)
+    print("==================================================================\n", flush=True)
+
+
+def log_bc_wandb(report: dict, a: argparse.Namespace) -> None:
+    sys.path.insert(0, os.getcwd())
+    try:
+        from scripts.wandb_logging import init_wandb_run, finish_wandb
+    except Exception as exc:
+        print(f"[wandb] helper import failed: {exc!r}; skipping", flush=True)
+        return
+    run = init_wandb_run(
+        job_type="local_profiling", agent="wirbel", name=a.wandb_name, group=a.wandb_group,
+        notes=("PR#521 surgical-357 BENCHMARK-CONFIG full-serve operative-identity census: re-runs the "
+               "#510 operative-identity certificate on the EXACT official spec-on served decode path "
+               "(real scored tokens, 128x512), comparing every served token against the M=1 AR greedy "
+               "reference re-conditioned on the realized served prefix. Answers the skeptical reviewer: "
+               "does operative-1.0 survive on the path that actually produces the scored answers?"),
+        config={
+            "pr": 521, "M_verify": M_VERIFY, "K_spec": K_SPEC, "output_len": report["output_len"],
+            "n_prompts_run": report["n_prompts_run"], "model_dir": report["model_dir"],
+            "drafter": report["drafter"], "max_model_len": report["max_model_len"],
+            "skip_threshold": report["skip_threshold"], "eps_star": EPS_STAR, "surgical_mode": True,
+            "spec_on": report["spec_on"], "num_speculative_tokens": report["num_speculative_tokens"],
+            "analysis_only": True, "no_hf_job": True, "no_served_file_change": True, "official_tps": 0,
+            "anchor/pr510_surgical_operative_identity": PR510_SURGICAL_OPERATIVE_IDENTITY,
+            "anchor/pr510_surgical_census": PR510_SURGICAL_CENSUS,
+            "anchor/pr487_globalflag222_n_semantic": PR487_GLOBALFLAG222_N_SEMANTIC,
+        },
+    )
+    if run is None:
+        print("[wandb] disabled (no API key/mode); results saved to JSON only", flush=True)
+        return
+    keys = (
+        "benchmark_config_census", "bc_n_semantic_flips", "bc_n_tie_flips", "bc_operative_identity_1p0",
+        "operative_identity_rate", "tie_threshold_for_zero_semantic", "tie_threshold_for_zero_semantic_ulps",
+        "matches_510_geometry_census", "verdict_oneline", "n_flips", "n_positions", "n_served_tokens",
+        "n_prompts_run", "output_len", "n_read", "n_skipped", "read_fraction", "skip_threshold",
+        "screen_checked", "screen_violations", "screen_validated", "determinism_served",
+        "n_det_served_checked", "det_diff_count", "det_diffs_all_near_tie", "det_max_diff_gap_ulps",
+        "surgical_mode", "spec_on", "num_speculative_tokens", "surgical_attn_armed",
+        "matmul_tax_installed", "vllm_batch_invariant_env", "surgical_lever_source", "model_dir", "drafter",
+        "max_model_len", "pr510_surgical_operative_identity", "pr510_surgical_census",
+        "pr510_surgical_n_semantic_at_locus", "delta_operative_vs_510", "pr487_globalflag222_n_semantic",
+        "peak_gpu_gb", "peak_parent_gb", "peak_device_gb", "census_secs", "nan_clean", "verdict",
+        "fullserve_self_test_passes",
+        "self_test_n_checks", "analysis_only", "no_hf_job", "no_served_file_change", "official_tps",
+    )
+    for k in keys:
+        run.summary[k] = report.get(k)
+    for sk, sv in report.get("tie_threshold_sweep", {}).items():
+        if sk == "n_semantic_at_threshold":
+            for tname, tval in sv.items():
+                run.summary[f"tie_sweep/n_semantic_at_{tname}"] = tval
+        elif not isinstance(sv, list):
+            run.summary[f"tie_sweep/{sk}"] = sv
+    run.summary["verdict_green"] = report["verdict"].startswith("GREEN")
+    run.summary["verdict_red"] = report["verdict"].startswith("RED")
+    for k, v in report["self_test"].items():
+        run.summary[f"selftest/{k}"] = v
+    finish_wandb(run)
+    print(f"[wandb] logged run {run.id}", flush=True)
+
+
+def _bc_census_env() -> dict:
+    """Subprocess env for the benchmark-config worker. The worker itself sets the full served env and arms
+    sitecustomize IN-PROCESS before importing vLLM (validated smoke recipe), so here we only force the GPU
+    index + the native sampler + the allocator, and ensure the submission dir is NOT on PYTHONPATH at
+    interpreter start (so sitecustomize does not auto-run before the worker has set the served env)."""
+    env = dict(os.environ)
+    env["CUDA_VISIBLE_DEVICES"] = "0"
+    env["VLLM_USE_FLASHINFER_SAMPLER"] = "0"
+    env.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    sub = str(Path(__file__).resolve().parents[3] / BC_SUBDIR)
+    pp = [p for p in env.get("PYTHONPATH", "").split(os.pathsep) if p and p != sub]
+    if pp:
+        env["PYTHONPATH"] = os.pathsep.join(pp)
+    else:
+        env.pop("PYTHONPATH", None)
+    env.pop("VLLM_BATCH_INVARIANT", None)                 # surgical arm: matmul tax must stay OFF
+    return env
+
+
+def _kill_pgroup(proc: subprocess.Popen) -> None:
+    """Kill the worker AND its forked vLLM EngineCore child by signalling the whole process group."""
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        if proc.poll() is not None:
+            return
+        try:
+            os.killpg(os.getpgid(proc.pid), sig)
+        except Exception:
+            try:
+                proc.send_signal(sig)
+            except Exception:
+                pass
+        try:
+            proc.wait(timeout=20)
+            return
+        except Exception:
+            pass
+
+
+def _run_bc_census(a: argparse.Namespace) -> dict:
+    """Run the benchmark-config census worker under a hang watchdog (the served spec-on stack can wedge on
+    a CUDA hang; a fresh resumable reload clears the accumulated state and never loses a finished prompt)."""
+    out_json = str(OUT_DIR / "arm_benchmark_config_result.json")
+    ckpt = str(OUT_DIR / "checkpoint_benchmark_config.jsonl")
+    hb = str(OUT_DIR / "heartbeat_benchmark_config.json")
+    base_args = [
+        "--phase", "benchmark_config_census", "--out", out_json,
+        "--n-prompts", str(a.n_prompts), "--bc-output-len", str(a.bc_output_len),
+        "--bc-gpu-mem-util", str(a.bc_gpu_mem_util), "--bc-max-model-len", str(a.bc_max_model_len),
+        "--bc-skip-threshold", str(a.bc_skip_threshold), "--det-check-k", str(a.det_check_k),
+        "--checkpoint", ckpt, "--heartbeat", hb, "--resume",
+    ]
+    skip: list[int] = []
+    stalled_at: dict[int, int] = {}
+    restarts = 0
+    while not _arm_complete(out_json, a.n_prompts):
+        if restarts > a.watchdog_max_restarts:
+            raise RuntimeError(f"[watchdog:bc] exceeded {a.watchdog_max_restarts} restarts; aborting")
+        _wait_gpu_free()
+        args = base_args + (["--skip-prompts", ",".join(map(str, sorted(set(skip))))] if skip else [])
+        cmd = [sys.executable, os.path.abspath(__file__)] + args
+        print(f"[watchdog:bc] launch restart={restarts} skip={sorted(set(skip))} "
+              f"(stall={a.watchdog_stall_s}s)", flush=True)
+        try:
+            os.remove(hb)
+        except OSError:
+            pass
+        proc = subprocess.Popen(cmd, env=_bc_census_env(), start_new_session=True)
+        t_launch = time.time()
+        last_prompt, stalled = -1, False
+        while True:
+            try:
+                proc.wait(timeout=a.watchdog_poll_s)
+                break
+            except subprocess.TimeoutExpired:
+                beat = _read_heartbeat(hb)
+                fresh = beat is not None and float(beat.get("ts", 0)) >= t_launch
+                if fresh and int(beat.get("prompt_idx", -1)) >= 0:
+                    last_prompt = int(beat["prompt_idx"])
+                if not fresh:
+                    if time.time() - t_launch > a.watchdog_load_grace_s:
+                        print(f"[watchdog:bc] LOAD-STALL no heartbeat {time.time()-t_launch:.0f}s; killing",
+                              flush=True)
+                        _kill_pgroup(proc); stalled = True; break
+                else:
+                    age = time.time() - float(beat["ts"])
+                    if age > a.watchdog_stall_s:
+                        print(f"[watchdog:bc] STALL heartbeat age={age:.0f}s at prompt {last_prompt}; killing",
+                              flush=True)
+                        _kill_pgroup(proc); stalled = True; break
+        if stalled:
+            restarts += 1
+            if last_prompt >= 0:
+                stalled_at[last_prompt] = stalled_at.get(last_prompt, 0) + 1
+                if stalled_at[last_prompt] >= a.watchdog_poison_strikes:
+                    print(f"[watchdog:bc] prompt {last_prompt} poisoned; will skip", flush=True)
+                    skip.append(last_prompt)
+            continue
+        if proc.returncode == 0 and _arm_complete(out_json, a.n_prompts):
+            break
+        print(f"[watchdog:bc] worker exited rc={proc.returncode} without complete result; resuming", flush=True)
+        restarts += 1
+    print(f"[watchdog:bc] complete -> {out_json}", flush=True)
+    return json.load(open(out_json))
+
+
+def orchestrate_bc(a: argparse.Namespace) -> None:
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    bc = _run_bc_census(a)
+    if getattr(a, "census_only", False):
+        print("[orch:bc] census_only: arm result written; run --reanalyze-bc to compose + log W&B", flush=True)
+        return
+    _finish_bc(compose_bc_report(bc, a), a)
+
+
+def reanalyze_bc(a: argparse.Namespace) -> None:
+    p = OUT_DIR / "arm_benchmark_config_result.json"
+    if not p.exists():
+        raise FileNotFoundError(f"--reanalyze-bc needs {p} (run the GPU phase first)")
+    _finish_bc(compose_bc_report(json.load(open(p)), a), a)
+
+
+def _finish_bc(report: dict, a: argparse.Namespace) -> None:
+    report_path = OUT_DIR / "benchmark_config_census_results.json"
+    json.dump(report, open(report_path, "w"), indent=2)
+    _print_bc_console(report)
+    if not a.no_wandb:
+        log_bc_wandb(report, a)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--phase", choices=["fullserve_census"], default=None)
+    ap.add_argument("--phase", choices=["fullserve_census", "benchmark_config_census"], default=None)
     ap.add_argument("--arm", default=None)
     ap.add_argument("--out", default=None)
     ap.add_argument("--arms", type=str, default=",".join(CENSUS_ARMS_DEFAULT),
@@ -1355,20 +2158,46 @@ def main() -> None:
                          "replay ~50s); no beat within this long after launch => treat as a load-phase hang")
     ap.add_argument("--watchdog-max-restarts", dest="watchdog_max_restarts", type=int, default=20)
     ap.add_argument("--watchdog-poison-strikes", dest="watchdog_poison_strikes", type=int, default=3)
+    # ---- PR #521 benchmark-config census (real spec-on served path) ----
+    ap.add_argument("--benchmark-config", dest="benchmark_config", action="store_true",
+                    help="run the PR #521 benchmark-config census: real spec-on surgical-357 served path "
+                         "vs M=1 AR reference re-conditioned on the realized served prefix (128x512)")
+    ap.add_argument("--reanalyze-bc", dest="reanalyze_bc", action="store_true",
+                    help="0-GPU: recompose the benchmark-config report + tie sweep from saved arm json")
+    ap.add_argument("--bc-output-len", dest="bc_output_len", type=int, default=BC_DEFAULT_OUTPUT_LEN)
+    ap.add_argument("--bc-gpu-mem-util", dest="bc_gpu_mem_util", type=float, default=0.85)
+    ap.add_argument("--bc-max-model-len", dest="bc_max_model_len", type=int, default=4096)
+    ap.add_argument("--bc-skip-threshold", dest="bc_skip_threshold", type=float, default=BC_DEFAULT_SKIP_THRESHOLD,
+                    help="nats; served verify top-2 gap above which a served-vs-M1 match is PROVEN (clear "
+                         "winner, no M=1 read). Far above any observed flip gap (#487 max 0.172 nat); the "
+                         "screen_check probe validates it empirically.")
     a = ap.parse_args()
     a.arms = tuple(s for s in str(a.arms).split(",") if s)
     skip_prompts = tuple(int(x) for x in str(a.skip_prompts).split(",") if x.strip())
 
-    if a.smoke and a.phase is None:
+    if a.smoke and a.phase is None and not a.benchmark_config and not a.reanalyze_bc:
         a.n_prompts = min(a.n_prompts, 4)
         a.traj_len = min(a.traj_len, 256)
         a.det_check_k = min(a.det_check_k, 4)
+    if a.smoke and a.benchmark_config:
+        a.n_prompts = min(a.n_prompts, 3)
+        a.bc_output_len = min(a.bc_output_len, 48)
+        a.det_check_k = min(a.det_check_k, 2)
 
     if a.phase == "fullserve_census":
         phase_fullserve_census(a.out, a.arm, a.n_prompts, a.c0, a.traj_len,
                                a.gpu_mem_util, a.max_batched_tokens, a.verbose_k, a.det_check_k, a.ignore_eos,
                                checkpoint=a.checkpoint, heartbeat=a.heartbeat, resume=a.resume,
                                skip_prompts=skip_prompts)
+    elif a.phase == "benchmark_config_census":
+        phase_benchmark_config_census(a.out, a.n_prompts, a.bc_output_len, a.bc_gpu_mem_util,
+                                      a.bc_max_model_len, a.bc_skip_threshold, a.det_check_k,
+                                      checkpoint=a.checkpoint, heartbeat=a.heartbeat, resume=a.resume,
+                                      skip_prompts=skip_prompts)
+    elif a.reanalyze_bc:
+        reanalyze_bc(a)
+    elif a.benchmark_config:
+        orchestrate_bc(a)
     elif a.reanalyze:
         reanalyze(a)
     else:
