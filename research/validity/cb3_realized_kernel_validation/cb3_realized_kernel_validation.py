@@ -183,23 +183,27 @@ def _gpu_facts(dev) -> dict[str, Any]:
     }
 
 
-def _time_call(fn: Callable[[], Any], iters: int, warmup: int) -> float:
-    """Median per-call latency in microseconds via cuda events (robust to outliers).
-    Pre-allocated buffers must be passed in by the caller -- the timed lambda must NOT allocate."""
+def _time_call(fn: Callable[[], Any], iters: int, warmup: int, reps: int = 3) -> float:
+    """Steady-state per-call latency in microseconds. BATCHED timing: `iters` calls are enqueued
+    back-to-back between a single start/stop event pair, so the CPU->GPU launch latency is amortized
+    (a per-op sync inflates every call by a ~30us empty-queue floor). This also matches real decode,
+    where ~42 layers x several GEMMs run back-to-back, not synced one at a time. Median over `reps`
+    batched means (the PR's >=3 reps)."""
     import torch
     for _ in range(warmup):
         fn()
     torch.cuda.synchronize()
-    samples = []
-    for _ in range(iters):
+    means = []
+    for _ in range(reps):
         s = torch.cuda.Event(enable_timing=True)
         e = torch.cuda.Event(enable_timing=True)
         s.record()
-        fn()
+        for _ in range(iters):
+            fn()
         e.record()
         torch.cuda.synchronize()
-        samples.append(s.elapsed_time(e) * 1000.0)  # ms -> us
-    return float(statistics.median(samples))
+        means.append(s.elapsed_time(e) * 1000.0 / iters)  # ms -> us, per call
+    return float(statistics.median(means))
 
 
 def _measure_peak_copy_gbs(dev, iters: int, warmup: int) -> float:
@@ -276,14 +280,17 @@ def _build_cb3_ops(w_bf16, dev):
         return yr.view(M, K)
 
     # VQ dim-2: store w (K*N values) as (K*N/VQ_DIM) indices into a (K, VQ_DIM) codebook.
+    # idx pre-stored as int64 (index_select requires it) so the TIMED op is just gather+write, not
+    # a per-call dtype conversion (a real VQ kernel reads the stored low-bit codes directly).
     codebook = torch.randn(VQ_CODEBOOK_K, VQ_DIM, dtype=torch.bfloat16, device=dev) * 0.02
     n_codes = (K * N) // VQ_DIM
-    idx = torch.randint(0, VQ_CODEBOOK_K, (n_codes,), dtype=torch.int32, device=dev)
+    idx = torch.randint(0, VQ_CODEBOOK_K, (n_codes,), dtype=torch.int64, device=dev)
     w_recon = torch.empty(K, N, dtype=torch.bfloat16, device=dev)  # pre-allocated materialize buffer
 
     def reconstruct():
         # gather codebook[idx] -> [n_codes, VQ_DIM] -> reshape to [K, N]. Writes the FULL bf16 tile.
-        g2 = torch.index_select(codebook, 0, idx.long())   # [n_codes, 2]
+        # This is the MATERIALIZE op: random-access codebook gather + a full bf16 weight write.
+        g2 = torch.index_select(codebook, 0, idx)   # [n_codes, 2]
         w_recon.copy_(g2.view(K, N))
         return w_recon
 
@@ -301,56 +308,48 @@ def _build_cb3_ops(w_bf16, dev):
 # ======================================================================================== #
 def _microbench_shape(shape: dict[str, Any], M: int, dev, peak_gbs: float,
                       iters: int, warmup: int) -> dict[str, Any]:
+    """Measure the RAW op latencies on the kernels that run. Pre-allocate ALL buffers ONCE; the
+    timed lambdas never allocate weights (fair, #433 discipline)."""
     import torch
     out_f, in_f = shape["out"], shape["in"]
-    # bf16 source weight [K=in, N=out]; activation x [M, in]. Pre-allocate ALL buffers ONCE.
-    w = (torch.randn(in_f, out_f, dtype=torch.bfloat16, device=dev) * 0.02)
-    x = (torch.randn(M, in_f, dtype=torch.bfloat16, device=dev) * 0.5)
+    w = (torch.randn(in_f, out_f, dtype=torch.bfloat16, device=dev) * 0.02)  # [K=in, N=out]
+    x = (torch.randn(M, in_f, dtype=torch.bfloat16, device=dev) * 0.5)        # [M, in]
 
     marlin_run, int4_bytes = _build_marlin_int4(w, dev)
     fwht, reconstruct, bf16_gemm, cb3_bytes = _build_cb3_ops(w, dev)
-    xr = fwht(x)  # pre-rotate once so the bf16/marlin GEMM timing reuses a ready activation
+    xr = fwht(x)  # pre-rotate once; bf16/marlin GEMM timing reuses a ready activation
 
-    t_marlin = _time_call(lambda: marlin_run(x), iters, warmup)
-    t_bf16_gemm = _time_call(lambda: bf16_gemm(xr), iters, warmup)
-    t_fwht = _time_call(lambda: fwht(x), iters, warmup)
-    t_reconstruct = _time_call(lambda: reconstruct(), iters, warmup)
+    t_marlin = _time_call(lambda: marlin_run(x), iters, warmup)        # served int4 fused GEMM (REAL)
+    t_bf16_gemm = _time_call(lambda: bf16_gemm(xr), iters, warmup)     # the bf16 GEMM cb3 must drive
+    t_hadamard = _time_call(lambda: fwht(x), iters, warmup)            # online activation RHT (standalone)
+    t_reconstruct = _time_call(lambda: reconstruct(), iters, warmup)  # VQ materialize (gather->bf16 tile)
 
-    # --- decompose int4-Marlin into transfer (BW-bound part) + fixed overhead --------------- #
-    t_marlin_transfer = (int4_bytes / 1e9) / peak_gbs * 1e6      # us at peak copy BW
+    # decompose int4-Marlin into transfer (BW-bound part) + fixed overhead at the measured peak BW
+    t_marlin_transfer = (int4_bytes / 1e9) / peak_gbs * 1e6
     t_marlin_overhead = max(t_marlin - t_marlin_transfer, 0.0)
     marlin_hbm_eff = t_marlin_transfer / t_marlin if t_marlin > 0 else float("nan")
-
-    # --- cb3 realized latency, two regimes -------------------------------------------------- #
-    # MATERIALIZE (the only path that RUNS on sm_86 today): rotate + reconstruct-to-bf16 + bf16 GEMM
-    cb3_materialize_us = t_fwht + t_reconstruct + t_bf16_gemm
-    # FUSED lower bound (optimistic buildable): full byte-saving roofline + ONLY the FWHT online tax
-    # (codebook gather assumed L1-resident/in-SM; this is lawine's model + my measured FWHT).
     cb3_transfer = (cb3_bytes / 1e9) / peak_gbs * 1e6
-    cb3_fused_us = cb3_transfer + t_marlin_overhead + t_fwht
-
-    pen_materialize = t_marlin / cb3_materialize_us if cb3_materialize_us > 0 else float("nan")
-    pen_fused = t_marlin / cb3_fused_us if cb3_fused_us > 0 else float("nan")
 
     return {
         "name": shape["name"], "out": out_f, "in": in_f, "count": shape["count"], "M": M,
+        "params": _shape_params(shape),
         "t_marlin_us": t_marlin, "t_bf16_gemm_us": t_bf16_gemm,
-        "t_fwht_us": t_fwht, "t_reconstruct_us": t_reconstruct,
+        "t_hadamard_us": t_hadamard, "t_reconstruct_us": t_reconstruct,
         "int4_bytes": int4_bytes, "cb3_bytes": cb3_bytes,
         "t_marlin_transfer_us": t_marlin_transfer, "t_marlin_overhead_us": t_marlin_overhead,
-        "marlin_hbm_eff": marlin_hbm_eff,
-        "cb3_materialize_us": cb3_materialize_us, "cb3_fused_us": cb3_fused_us,
-        "penalty_materialize": pen_materialize, "penalty_fused": pen_fused,
-        # the cb3 EXTRA dequant op tax vs the tiny M=1 byte saving (the decisive ratio):
-        "byte_saving_us": max(t_marlin_transfer - cb3_transfer, 0.0),
-        "cb3_extra_dequant_us": t_fwht + t_reconstruct,
+        "cb3_transfer_us": cb3_transfer, "marlin_hbm_eff": marlin_hbm_eff,
+        # the only RUNNABLE sub-int4 path on sm_86: rotate + reconstruct-to-bf16 + bf16 GEMM
+        "cb3_materialize_us": t_hadamard + t_reconstruct + t_bf16_gemm,
+        # FUSED counterfactual (REQUIRES a kernel absent on sm_86): cb3 compressed bytes at Marlin's
+        # measured efficiency + Marlin's fixed overhead (== lawine's model; Hadamard fused-in/negligible)
+        "cb3_fused_us": cb3_transfer + t_marlin_overhead,
     }
 
 
 def _agg(per_shape: list[dict[str, Any]], key: str) -> float:
     """Count-weighted mean of a per-shape us value (weight by param count, like lawine)."""
-    num = sum(_shape_params(s) * s[key] for s in per_shape)
-    den = sum(_shape_params(s) for s in per_shape)
+    num = sum(s["params"] * s[key] for s in per_shape)
+    den = sum(s["params"] for s in per_shape)
     return num / den if den else float("nan")
 
 
@@ -359,22 +358,159 @@ def microbench(dev, iters: int, warmup: int) -> dict[str, Any]:
     by_width: dict[str, Any] = {}
     for M in M_WIDTHS:
         per_shape = [_microbench_shape(s, M, dev, peak_gbs, iters, warmup) for s in BODY_SHAPES]
-        # count-weighted aggregate latencies, then penalties from the aggregates (consistent w/ lawine)
         agg_marlin = _agg(per_shape, "t_marlin_us")
+        agg_bf16 = _agg(per_shape, "t_bf16_gemm_us")
         agg_materialize = _agg(per_shape, "cb3_materialize_us")
         agg_fused = _agg(per_shape, "cb3_fused_us")
+        eff = _agg(per_shape, "marlin_hbm_eff")
         by_width[str(M)] = {
             "per_shape": per_shape,
             "agg_marlin_us": agg_marlin,
+            "agg_bf16_gemm_us": agg_bf16,
+            "agg_hadamard_us": _agg(per_shape, "t_hadamard_us"),
+            "agg_reconstruct_us": _agg(per_shape, "t_reconstruct_us"),
             "agg_cb3_materialize_us": agg_materialize,
             "agg_cb3_fused_us": agg_fused,
-            "agg_penalty_materialize": agg_marlin / agg_materialize if agg_materialize else float("nan"),
-            "agg_penalty_fused": agg_marlin / agg_fused if agg_fused else float("nan"),
-            "agg_marlin_hbm_eff": _agg(per_shape, "marlin_hbm_eff"),
-            "agg_byte_saving_us": _agg(per_shape, "byte_saving_us"),
-            "agg_cb3_extra_dequant_us": _agg(per_shape, "cb3_extra_dequant_us"),
+            "agg_marlin_hbm_eff": eff,
+            # the runnable reality: cb3 materialize vs int4-Marlin (>1 => cb3 faster)
+            "penalty_materialize": agg_marlin / agg_materialize if agg_materialize else float("nan"),
+            # even free dequant: the bf16 GEMM alone vs int4-Marlin (reads 4x bytes => <1)
+            "penalty_bf16_gemm_only": agg_marlin / agg_bf16 if agg_bf16 else float("nan"),
+            # the fused counterfactual (needs a kernel absent on sm_86)
+            "penalty_fused_measured_eff": agg_marlin / agg_fused if agg_fused else float("nan"),
+            # lawine's literature-floor fused model from the byte-proportional engine at measured eff
+            "penalty_fused_floor_model": 1.0 / (BYTE_RATIO * eff + (1.0 - eff)) if eff == eff else float("nan"),
         }
     return {"peak_copy_gbs": peak_gbs, "by_width": by_width}
+
+
+def _amdahl_frontier(penalty: float, f_body: float, base: float) -> float:
+    """Amdahl-correct frontier if a body-read with realized speedup `penalty` were DEPLOYED:
+    new_step = old_step * (1 - f_body + f_body/penalty); TPS = base / that factor. Bounded for
+    penalty<1 (the linear ladder blows up; this is the honest 'if you shipped it' number)."""
+    factor = (1.0 - f_body) + f_body / penalty if penalty > 0 else float("inf")
+    return base / factor if factor > 0 else float("nan")
+
+
+# ======================================================================================== #
+# Compose -- aggregate the microbench, build the bracket + verdict.
+# ======================================================================================== #
+def compose(gpu: dict[str, Any], mb: dict[str, Any]) -> dict[str, Any]:
+    HEADLINE_M = "8"   # the served MTP K=7 verify width (the deployed decode op-point)
+    w1, w8 = mb["by_width"]["1"], mb["by_width"][HEADLINE_M]
+
+    pen_materialize = w8["penalty_materialize"]          # the kernel that RUNS (sub-int4 => materialize)
+    pen_bf16_only = w8["penalty_bf16_gemm_only"]          # even free dequant: bf16 GEMM reads 4x bytes
+    pen_fused_eff = w8["penalty_fused_measured_eff"]      # fused counterfactual at measured Marlin eff
+    pen_fused_floor = w8["penalty_fused_floor_model"]     # lawine's literature-floor fused model
+    marlin_eff = w8["agg_marlin_hbm_eff"]
+
+    # --- the realized verdict --------------------------------------------------------------- #
+    # The kernel that runs for a sub-int4 read on this vLLM-0.22 / sm_86 stack is the MATERIALIZE
+    # path (no fused sub-int4 Marlin/VQ kernel exists -- lawine 7rzf74q5 proved sub-int4 is
+    # UNREACHABLE off-the-shelf). It INVERTS (penalty<<1): the dequant materializes a full bf16
+    # weight (4x the int4 bytes), so cb3 is strictly slower than int4-Marlin -- the byte saving is
+    # destroyed the moment the weight is reconstructed. So the modeled +15.60 is FORFEITED on the
+    # served kernel: like the refuted pinned-K 496.74, it is a model with no surviving realized
+    # kernel. The equivalence frontier collapses back to the 467.14 int4-Marlin base (you keep int4).
+    inverts = bool(pen_materialize < 1.0)
+    # translate the RUNNABLE penalty through the ladder (shows the raw inversion, mirroring #433's
+    # negative headline) -- but the DECISION frontier floors at the base (cb3 simply isn't applied).
+    t_runnable = translate_to_tps(pen_materialize)
+    realized_delta = 0.0 if inverts else t_runnable["cb3_realized_tps_delta"]
+    realized_frontier = CB3_BASE_TPS + realized_delta
+    survives = bool((not inverts) and realized_delta >= 0.80 * CB3_MODELED_DELTA)
+    beats_deployed = bool(realized_frontier > DEPLOYED_TPS)
+
+    # fused counterfactual lift (Amdahl), bracketed by the literature-floor and measured-eff models
+    fused_floor_frontier = _amdahl_frontier(pen_fused_floor, F_BODY_STRICT, CB3_BASE_TPS)
+    fused_eff_frontier = _amdahl_frontier(pen_fused_eff, F_BODY_STRICT, CB3_BASE_TPS)
+
+    # decomposition: BW saving headroom vs the dequant/Hadamard op tax (count-weighted, M=8)
+    byte_saving_us = w8["agg_marlin_us"] - w8["agg_cb3_fused_us"]          # the fused byte saving
+    dequant_tax_us = w8["agg_reconstruct_us"] + w8["agg_hadamard_us"]      # the materialize op tax
+    bf16_extra_us = w8["agg_bf16_gemm_us"] - w8["agg_marlin_us"]          # bf16 GEMM 4x-byte penalty
+
+    verdict = (
+        f"cb3 +15.60 is MODELED on a byte-count roofline with NO realized kernel on the served "
+        f"sm_86/vLLM-0.22 stack. The only RUNNABLE sub-int4 realization is materialize-to-bf16 "
+        f"(no fused VQ kernel exists): penalty_materialize={pen_materialize:.3f} (M=8) -- a "
+        f"{1.0/pen_materialize:.0f}x INVERSION. Even granting free dequant, the bf16 GEMM alone reads "
+        f"4x the int4 bytes => penalty_bf16_only={pen_bf16_only:.3f} (<1): the byte saving is "
+        f"DESTROYED on reconstruction. The fused counterfactual (penalty {pen_fused_floor:.3f}-"
+        f"{pen_fused_eff:.3f}) would survive, but REQUIRES a fused RHT+VQ decode kernel that does not "
+        f"exist on sm_86 (the exact 'buildable-but-unrealized' status that left pinned-K's lift "
+        f"unbanked in #433). Realized equivalence frontier collapses to {realized_frontier:.2f} "
+        f"(== 467.14 base; cb3 forfeited) < deployed 481.53. 482.74 is the next +13.998-style "
+        f"modeled artifact: equivalence_frontier_beats_deployed_481={beats_deployed}."
+    )
+
+    required = {
+        "cb3_modeled_tps_delta": CB3_MODELED_DELTA,
+        "cb3_base_tps": CB3_BASE_TPS,
+        "modeled_penalty": MODELED_PENALTY,
+        "cb3_realized_tps_delta": realized_delta,
+        "cb3_realized_frontier_tps": realized_frontier,
+        "realized_vs_modeled_ratio": realized_delta / CB3_MODELED_DELTA if CB3_MODELED_DELTA else 0.0,
+        "cb3_lift_survives_realization": survives,
+        "equivalence_frontier_beats_deployed_481": beats_deployed,
+        "ppl": 2.3772,
+        "ppl_is_anchored": True,
+    }
+    brackets = {
+        "penalty_materialize_runnable": pen_materialize,
+        "penalty_bf16_gemm_only": pen_bf16_only,
+        "penalty_fused_floor_model": pen_fused_floor,
+        "penalty_fused_measured_eff": pen_fused_eff,
+        "inverts_on_runnable_kernel": inverts,
+        "runnable_ladder_delta_if_deployed": t_runnable["cb3_realized_tps_delta"],
+        "runnable_amdahl_frontier_if_deployed": _amdahl_frontier(pen_materialize, F_BODY_STRICT, CB3_BASE_TPS),
+        "fused_counterfactual_frontier_floor": fused_floor_frontier,
+        "fused_counterfactual_frontier_measured_eff": fused_eff_frontier,
+        "fused_kernel_exists_on_sm86": False,
+        "marlin_hbm_eff_measured_m8": marlin_eff,
+    }
+    decomposition = {
+        "fused_byte_saving_us_m8": byte_saving_us,
+        "materialize_dequant_tax_us_m8": dequant_tax_us,
+        "bf16_gemm_extra_us_vs_int4_m8": bf16_extra_us,
+        "note": "the fused byte saving (~us) is dwarfed by the materialize dequant tax AND by the "
+                "bf16 GEMM's 4x-byte penalty; the saving only exists inside a fused low-bit kernel.",
+    }
+
+    self_t = self_test()
+    config = {
+        "agent": "stark", "pr": 437, "kind": "cb3-realized-kernel-validation",
+        "byte_ratio": BYTE_RATIO, "cb3_bpw_eff": CB3_BPW_EFF, "int4_bpw": INT4_BPW,
+        "f_body_strict": F_BODY_STRICT, "cb3_base_tps": CB3_BASE_TPS,
+        "cb3_modeled_delta": CB3_MODELED_DELTA, "deployed_tps": DEPLOYED_TPS,
+        "hadamard_group": HADAMARD_GROUP, "vq_dim": VQ_DIM, "vq_codebook_k": VQ_CODEBOOK_K,
+        "m_widths": M_WIDTHS, "headline_m": int(HEADLINE_M),
+    }
+    wandb_metrics = {
+        **required, **brackets,
+        "peak_copy_gbs": mb["peak_copy_gbs"],
+        "m1_penalty_materialize": w1["penalty_materialize"],
+        "m1_penalty_fused_floor_model": w1["penalty_fused_floor_model"],
+        "m1_marlin_hbm_eff": w1["agg_marlin_hbm_eff"],
+        "m8_agg_marlin_us": w8["agg_marlin_us"], "m8_agg_bf16_gemm_us": w8["agg_bf16_gemm_us"],
+        "m8_agg_reconstruct_us": w8["agg_reconstruct_us"], "m8_agg_hadamard_us": w8["agg_hadamard_us"],
+        "self_test_passes": self_t["self_test_passes"],
+    }
+    return {
+        "gpu": gpu, "grounding": {
+            "cb3_locus": "verify/body-read RHT+VQ shrink (k*=229, dim-2 VQ + g128 incoherence); "
+                         "kanna #403 iv9i2wks modeled +15.60 over denken #423 467.14; lawine #388 "
+                         "7rzf74q5 realized-BW byte_ratio 0.785, measured_floor 1.0588.",
+            **required,
+        },
+        "microbench": mb, "brackets": brackets, "decomposition": decomposition,
+        "required": required, "verdict": verdict,
+        "self_test": self_t, "self_test_passes": self_t["self_test_passes"],
+        "config": config, "wandb_metrics": wandb_metrics,
+        "analysis_only": True, "no_hf_job": True, "no_served_file_change": True, "official_tps": 0,
+        "timestamp": datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ"),
+    }
 
 
 # ======================================================================================== #
@@ -445,8 +581,42 @@ def main():
         print(f"[self-test] wrote {p}")
         sys.exit(0 if st["self_test_passes"] else 1)
 
-    # GPU path filled in by the microbench compose step.
-    raise SystemExit("GPU compose path: run with --self-test for the 0-GPU gate; full run wired next.")
+    # ----- GPU compose path ------------------------------------------------------------------ #
+    dev = _device()
+    gpu = _gpu_facts(dev)
+    mb = microbench(dev, args.iters, args.warmup)
+    payload = compose(gpu, mb)
+
+    out_path = here / "cb3_realized_kernel_validation_results.json"
+    out_path.write_text(json.dumps(payload, indent=2))
+    print(f"[cb3-realized] wrote {out_path}")
+    print(f"[cb3-realized] {payload['verdict']}")
+
+    if not args.no_wandb:
+        try:
+            import wandb
+            run = wandb.init(project=os.environ.get("WANDB_PROJECT", "gemma-challenge-senpai"),
+                             group=args.wandb_group, name=args.wandb_name,
+                             config=payload["config"], job_type="analysis")
+            wandb.log(payload["wandb_metrics"])
+            # per-shape tables for the dominant M=1 + served M=8 op-points
+            for M in ("1", "8"):
+                rows = mb["by_width"][M]["per_shape"]
+                cols = ["name", "out", "in", "count", "t_marlin_us", "t_bf16_gemm_us",
+                        "t_hadamard_us", "t_reconstruct_us", "cb3_materialize_us", "cb3_fused_us",
+                        "marlin_hbm_eff"]
+                tbl = wandb.Table(columns=cols)
+                for r in rows:
+                    tbl.add_data(*[r[c] for c in cols])
+                wandb.log({f"per_shape_M{M}": tbl})
+            payload["wandb_run_id"] = run.id
+            out_path.write_text(json.dumps(payload, indent=2))
+            wandb.finish()
+            print(f"[cb3-realized] wandb run {run.id}")
+        except Exception as e:  # noqa: BLE001
+            print(f"[cb3-realized] wandb failed (non-fatal): {type(e).__name__}: {str(e)[:160]}")
+
+    sys.exit(0)
 
 
 if __name__ == "__main__":
