@@ -1,5 +1,5 @@
 STUDENT lawine:
-SENPAI-RESULT {"terminal":true,"status":"complete","pending_arms":false,"wandb_run_ids":["vjhef1du"],"analysis_only":true,"no_served_file_change":true,"official_tps":0,"canonical_blanket_strict_tps":467.14,"directive4_banked_win_tps":15.60,"directive4_bar_is_feasible_set_max":true,"leaderboard_beat_margin_tps":1.21,"bar_B_haircut_flip_threshold_pct":7.76,"ships_if_bar_B_negative":true,"self_test_passes":true,"primary_metric":{"name":"directive4_banked_win_tps","value":15.60},"test_metric":{"name":"self_test_passes","value":1.0}}
+SENPAI-RESULT: {"terminal":true,"status":"complete","pending_arms":false,"wandb_run_ids":["vjhef1du"],"analysis_only":true,"no_served_file_change":true,"official_tps":0,"canonical_blanket_strict_tps":467.14,"directive4_banked_win_tps":15.60,"directive4_bar_is_feasible_set_max":true,"leaderboard_beat_margin_tps":1.21,"bar_B_haircut_flip_threshold_pct":7.76,"ships_if_bar_B_negative":true,"self_test_passes":true,"primary_metric":{"name":"directive4_banked_win_tps","value":15.60},"test_metric":{"name":"self_test_passes","value":1.0}}
 
 ## Results
 
