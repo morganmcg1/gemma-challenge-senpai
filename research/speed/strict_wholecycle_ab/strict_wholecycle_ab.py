@@ -310,7 +310,13 @@ def main():
           f"bf16gemm@M8={peak['bw_bf16gemm_m8_gbps']:.0f} GB/s", flush=True)
 
     # ---- (1) whole-cycle A/B + isolated #466 reproduction, swept over L ------------------
+    # Per-L identity is probed INSIDE the sweep (#479): the tie-only strict census must hold
+    # 1.0000 / 0 semantic flips deep in the tail (L>640), not just at the L=640 headline -- a
+    # degradation into semantic flips at long KV would be a submission-relevant finding.
+    seeds = [1234] if args.smoke else [1234, 5678, 9012]
     per_L = {}
+    ident_per_L = {}
+    ident_headline = None
     for L in Ls:
         runners, NK, keep = build_all(dims, num_layers, full_set, L, min(SLIDING_WINDOW, L),
                                       M_VERIFY, dev, n_distinct)
@@ -319,6 +325,20 @@ def main():
         d_whole, s_whole, n_whole = _paired(series, "whole_strict", "whole_perm")
         d_iso, s_iso, n_iso = _paired(series, "iso_strict", "iso_perm")
         recover = ((d_iso - d_whole) / d_iso) if (math.isfinite(d_iso) and d_iso != 0) else float("nan")
+        # strict identity at THIS L (locus M-invariance, #466 probe) -- order-preserving 2D vs
+        # the per-row M=1 sequential canonical; deployed permissive 3D reproduces non-equivalence.
+        identL = sfr.identity_probe(L, HEAD_DIM_FULL, dev, ident_trials, seeds)
+        iaL = identL.get("per_arm", {})
+        sb = float(iaL.get("strict_2d", {}).get("byte_identity_min", float("nan")))
+        sa = float(iaL.get("strict_2d", {}).get("argmax_identity_min", float("nan")))
+        sflips = int(round((1.0 - (sa if math.isfinite(sa) else 1.0)) * M_VERIFY))
+        pb = float(iaL.get("permissive_3d", {}).get("byte_identity_min", float("nan")))
+        sdiff = float(iaL.get("strict_2d", {}).get("max_abs_diff", float("nan")))
+        if L == args.L:
+            ident_headline = identL
+        ident_per_L[L] = {"strict_byte_identity_min": sb, "strict_argmax_identity_min": sa,
+                          "strict_token_flips": sflips, "permissive_byte_identity_min": pb,
+                          "strict_max_abs_diff": sdiff, "identity_error": identL.get("error")}
         per_L[L] = {
             "median_us": med, "captured": captured,
             "whole_delta_us": d_whole, "whole_delta_sigma": s_whole, "n_whole": n_whole,
@@ -327,11 +347,14 @@ def main():
             "whole_strict_tps": tps_from_added_us(d_whole),
             "iso_strict_tps": tps_from_added_us(d_iso),
             "body_gemm_us": med["body_gemm"],
+            "strict_byte_identity_min": sb, "strict_argmax_identity_min": sa,
+            "strict_token_flips": sflips, "permissive_byte_identity_min": pb,
         }
         print(f"[wc] L={L}: whole_perm={med['whole_perm']:.1f} whole_strict={med['whole_strict']:.1f} "
               f"body_gemm={med['body_gemm']:.1f} | whole_d={d_whole:+.2f}(s{s_whole:.2f}) "
               f"iso_d={d_iso:+.2f}(s{s_iso:.2f}) recover={recover*100:+.1f}% "
-              f"-> {tps_from_added_us(d_whole):.2f} TPS | cap={captured}", flush=True)
+              f"-> {tps_from_added_us(d_whole):.2f} TPS | strict_id={sb:.4f}/{sflips}flips "
+              f"perm_id={pb:.4f} | cap={captured}", flush=True)
         del runners, keep
         gc.collect()
         torch.cuda.empty_cache()
@@ -366,9 +389,57 @@ def main():
     whole_perm_captured_all_L = all(per_L[L]["captured"]["whole_perm"] for L in Ls)
     iso_strict_captured_all_L = all(per_L[L]["captured"]["iso_strict"] for L in Ls)
 
+    # ---- (#479) tail-tax linearity fit: does the strict tax stay linear-in-KV past L=640? -----
+    # #475's honest center 461.80 assumed the >640 tail tax is LINEAR (slope ~= the 128->640
+    # slope). The strict 2D reduction is serial O(KV) while the deployed permissive 3D path
+    # parallelizes over num_par=16 segments (sub-linear in KV), so the DELTA could grow SUPER-
+    # linearly in the tail -> a honest center below 461.80. Fit head-slope (L<=640) vs tail-slope
+    # (L>=640) by least squares on whole_delta_us(L) and report the ratio. The 640 anchor is
+    # shared by both fits. tail_tax_is_linear := tail/head slope ratio within +/-15% of 1.
+    def _lsq_slope(pts):
+        if len(pts) < 2:
+            return float("nan")
+        xb = sum(x for x, _ in pts) / len(pts)
+        yb = sum(y for _, y in pts) / len(pts)
+        num = sum((x - xb) * (y - yb) for x, y in pts)
+        den = sum((x - xb) ** 2 for x, _ in pts)
+        return num / den if den else float("nan")
+
+    L_DIV = 640
+    head_pts = [(L, per_L[L]["whole_delta_us"]) for L in Ls if L <= L_DIV]
+    tail_pts = [(L, per_L[L]["whole_delta_us"]) for L in Ls if L >= L_DIV]
+    head_slope_us_per_tok = _lsq_slope(head_pts)
+    tail_slope_us_per_tok = _lsq_slope(tail_pts)
+    have_tail = len(tail_pts) >= 2 and math.isfinite(head_slope_us_per_tok) and head_slope_us_per_tok != 0
+    tail_tax_slope_ratio = (tail_slope_us_per_tok / head_slope_us_per_tok) if have_tail else float("nan")
+    tail_tax_is_linear = bool(have_tail and abs(tail_tax_slope_ratio - 1.0) <= 0.15)
+    if not have_tail:
+        tail_tax_regime = "head_only"
+    elif tail_tax_slope_ratio > 1.15:
+        tail_tax_regime = "super_linear"
+    elif tail_tax_slope_ratio < 0.85:
+        tail_tax_regime = "sub_linear"
+    else:
+        tail_tax_regime = "linear"
+    # endpoint slopes (transparent cross-check of the LSQ fit, robust to the 3-pt head)
+    head_slope_endpoint = ((per_L[L_DIV]["whole_delta_us"] - per_L[min(Ls)]["whole_delta_us"])
+                           / (L_DIV - min(Ls))) if (L_DIV in per_L and min(Ls) < L_DIV) else float("nan")
+    L_tail_max = max(Ls)
+    tail_slope_endpoint = ((per_L[L_tail_max]["whole_delta_us"] - per_L[L_DIV]["whole_delta_us"])
+                           / (L_tail_max - L_DIV)) if (L_DIV in per_L and L_tail_max > L_DIV) else float("nan")
+    tail_strict_tps_l896 = per_L[896]["whole_strict_tps"] if 896 in per_L else float("nan")
+    tail_strict_tps_l1280 = per_L[1280]["whole_strict_tps"] if 1280 in per_L else float("nan")
+    tail_strict_tps_l2048 = per_L[2048]["whole_strict_tps"] if 2048 in per_L else float("nan")
+    tail_identity_l2048 = ident_per_L.get(2048, {}).get("strict_byte_identity_min", float("nan"))
+    print(f"[wc] TAIL-TAX FIT: head_slope={head_slope_us_per_tok:.4f} tail_slope={tail_slope_us_per_tok:.4f} "
+          f"us/tok | ratio={tail_tax_slope_ratio:.3f} regime={tail_tax_regime} linear={tail_tax_is_linear} "
+          f"| l896={tail_strict_tps_l896:.2f} l1280={tail_strict_tps_l1280:.2f} l2048={tail_strict_tps_l2048:.2f} "
+          f"id@2048={tail_identity_l2048:.4f}", flush=True)
+
     # ---- (4) identity re-confirm on the strict 2D attention (locus M-invariance, #466) ----
-    seeds = [1234] if args.smoke else [1234, 5678, 9012]
-    ident = sfr.identity_probe(args.L, HEAD_DIM_FULL, dev, ident_trials, seeds)
+    # Headline identity = the args.L probe already run inside the per-L sweep (#479).
+    ident = ident_headline if ident_headline is not None else sfr.identity_probe(
+        args.L, HEAD_DIM_FULL, dev, ident_trials, seeds)
     iarm = ident.get("per_arm", {})
     whole_cycle_strict_identity_fraction = float(iarm.get("strict_2d", {}).get("byte_identity_min", float("nan")))
     strict_argmax_fraction = float(iarm.get("strict_2d", {}).get("argmax_identity_min", float("nan")))
@@ -412,6 +483,13 @@ def main():
     st["strict_byte_exact"] = bool(math.isfinite(whole_cycle_strict_identity_fraction)
                                    and whole_cycle_strict_identity_fraction >= 0.999)
     st["strict_zero_flips"] = bool(whole_cycle_strict_token_flips == 0)
+    # (#479) strict 2D is order-preserving by construction at ANY KV; confirm the byte-exact
+    # tie-only census does NOT degrade into semantic flips deep in the tail (L>640).
+    st["tail_strict_byte_exact_all_L"] = bool(all(
+        math.isfinite(ident_per_L[L]["strict_byte_identity_min"])
+        and ident_per_L[L]["strict_byte_identity_min"] >= 0.999 for L in ident_per_L))
+    st["tail_strict_zero_flips_all_L"] = bool(all(
+        ident_per_L[L]["strict_token_flips"] == 0 for L in ident_per_L))
     st["permissive_reproduces_nonequiv"] = bool(math.isfinite(permissive_identity_fraction)
                                                 and permissive_identity_fraction < 0.999)
     st["ppl_anchor_ok"] = bool(PPL_ANCHOR <= PPL_GATE)
@@ -489,6 +567,19 @@ def main():
         "m1_collapse_floor_tps": M1_COLLAPSE_TPS, "sigma_hw": SIGMA_HW,
         "n_full_layers_per_cycle": len(full_set), "deployed_num_layers": num_layers,
         "headline_L": args.L,
+        # ---- (#479) tail-tax linearity fit ----
+        "tail_tax_is_linear": tail_tax_is_linear,
+        "tail_tax_slope_ratio": tail_tax_slope_ratio,
+        "tail_tax_regime": tail_tax_regime,
+        "head_slope_us_per_tok": head_slope_us_per_tok,
+        "tail_slope_us_per_tok": tail_slope_us_per_tok,
+        "head_slope_endpoint_us_per_tok": head_slope_endpoint,
+        "tail_slope_endpoint_us_per_tok": tail_slope_endpoint,
+        "l896_tps": tail_strict_tps_l896,
+        "l1280_tps": tail_strict_tps_l1280,
+        "l2048_tps": tail_strict_tps_l2048,
+        "l2048_identity": tail_identity_l2048,
+        "sweep_Ls": list(Ls),
         "outcome": outcome,
         "ppl": PPL_ANCHOR, "ppl_anchor": PPL_ANCHOR, "ppl_gate": PPL_GATE,
         "peak_vram_gib": peak_vram_gib,
@@ -521,6 +612,7 @@ def main():
                            "submission, no kernel rebuild."},
         "peak_bw": peak,
         "per_L": {str(L): per_L[L] for L in per_L},
+        "identity_per_L": {str(L): ident_per_L[L] for L in ident_per_L},
         "shapes": {c: list(NK[c]) for c in NK},
         "identity": ident,
         "verdict": verdict,
