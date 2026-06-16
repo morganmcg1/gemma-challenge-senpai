@@ -1,0 +1,192 @@
+{
+  "pr": 508,
+  "agent": "kanna",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_serve": true,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "lane_discipline": "pure composition of my own #504 (propagation/breach) and #478 (sigma_hw + floor-lock single-draw risk) outputs; re-derives nothing -- recomputes the #504 surgical band only to assert exact reproduction.",
+  "inputs": {
+    "ship_public_tps": 357.22,
+    "breach_frac": 0.04294644155088977,
+    "realized_propagation_factor": 0.9999171490311938,
+    "sigma_hw_frac": 0.01,
+    "sigma_hw_between_frac": 0.009623,
+    "sigma_hw_within_frac": 0.000726,
+    "sigma_hw_oneshot_frac_measured": 0.010128,
+    "sigma_hw_between_tps_at_481": 4.864,
+    "floorlock_tps": 166.23,
+    "floorlock_tps_478_prior": 161.7,
+    "denken_worstcase_breach_frac": 0.24,
+    "sigma_hw_provenance_note": "composition uses the scale-invariant 1.00%% fractional one-shot convention (#478 mssuss3f, between-allocation dominated 13.9x). PR's 'sigma_hw 4.864' is the directly-measured between-leg in TPS (frantic-penguin 3 official draws, measured on a ~505-mean pool: 4.864/0.009623~505), kept as provenance only -- not composed with, since fractional sigma scales with the operating point (1%% of the 341.9 surgical private mean = 3.42 TPS, NOT 4.864).",
+    "source_runs": {
+      "kanna_504_propagation": "0urxqwob",
+      "kanna_478_sigma_hw_and_floorlock_risk": "mssuss3f",
+      "ship_surgical357": "j7qao5e9",
+      "floorlock_stark485": "pavotwci"
+    }
+  },
+  "surgical357_private_mean": 341.8786721491912,
+  "surgical357_private_band_68": [
+    338.45988542769925,
+    345.2974588706831
+  ],
+  "surgical357_private_95band": [
+    335.17797330424327,
+    348.5793709941391
+  ],
+  "P_private_below_95pct": 0.23055883245068903,
+  "P_surgical_below_floorlock": 0.0,
+  "band_surgical": {
+    "public_tps": 357.22,
+    "breach_frac": 0.04294644155088977,
+    "breach_pct": 4.294644155088977,
+    "sigma_hw_frac": 0.01,
+    "private_tps_mean": 341.8786721491912,
+    "private_tps_sigma": 3.418786721491912,
+    "private_tps_band_68": [
+      338.45988542769925,
+      345.2974588706831
+    ],
+    "private_tps_band_95": [
+      335.17797330424327,
+      348.5793709941391
+    ],
+    "threshold_095_public": 339.35900000000004,
+    "p_private_below_95pct_public": 0.23055883245068903
+  },
+  "band_surgical_round357": {
+    "public_tps": 357.0,
+    "breach_frac": 0.043,
+    "breach_pct": 4.3,
+    "sigma_hw_frac": 0.01,
+    "private_tps_mean": 341.649,
+    "private_tps_sigma": 3.41649,
+    "private_tps_band_68": [
+      338.23251,
+      345.06549
+    ],
+    "private_tps_band_95": [
+      334.95280264645874,
+      348.34519735354127
+    ],
+    "threshold_095_public": 339.15,
+    "p_private_below_95pct_public": 0.2322514174707921
+  },
+  "band_floorlock": {
+    "public_tps": 166.23,
+    "breach_frac": 0.0,
+    "sigma_hw_frac": 0.01,
+    "private_tps_mean": 166.23,
+    "private_tps_sigma": 1.6622999999999999,
+    "private_tps_band_68": [
+      164.5677,
+      167.89229999999998
+    ],
+    "private_tps_band_95": [
+      162.97195186849905,
+      169.48804813150093
+    ],
+    "threshold_095_public": 157.9185,
+    "p_private_below_95pct_public": 2.8665157186802404e-07,
+    "abs_sigma_tps_481conv": 4.63376319,
+    "abs_model_band95_lo": 157.14799103471256
+  },
+  "portfolio": {
+    "expected_private_gap_tps": 175.64867214919119,
+    "expected_private_gap_pct": 105.66604833615544,
+    "downside_gap_surg95lo_vs_floor_mean_tps": 168.94797330424328,
+    "downside_gap_surg95lo_vs_floor_95hi_tps": 165.68992517274233,
+    "worstcase24_mean_tps": 271.48720000000003,
+    "worstcase24_95lo_tps": 266.1661486573638,
+    "worstcase24_downside_gap_vs_floor_95hi_tps": 96.67810052586287,
+    "P_surgical_below_floorlock_point": 0.0,
+    "P_surgical_below_floorlock_conv": 0.0,
+    "band_worstcase24": {
+      "public_tps": 357.22,
+      "breach_frac": 0.24,
+      "breach_pct": 24.0,
+      "sigma_hw_frac": 0.01,
+      "private_tps_mean": 271.48720000000003,
+      "private_tps_sigma": 2.714872,
+      "private_tps_band_68": [
+        268.772328,
+        274.20207200000004
+      ],
+      "private_tps_band_95": [
+        266.1661486573638,
+        276.80825134263625
+      ],
+      "threshold_095_public": 339.35900000000004,
+      "p_private_below_95pct_public": 1.0
+    },
+    "rule_penalize_breach": {
+      "surgical_score_mean": 341.8786721491912,
+      "surgical_score_95lo": 335.17797330424327,
+      "surgical_score_worstcase24_95lo": 266.1661486573638,
+      "floorlock_score": 166.23,
+      "winner": "surgical",
+      "margin_expected_tps": 175.64867214919119,
+      "margin_worstcase24_tps": 99.93614865736382,
+      "note": "surgical dominates by +175.6 TPS (+106%) in expectation and across the entire band; even the refuted 24% worst-case 95%-downside (266.2) beats floor-lock (166.23)."
+    },
+    "rule_invalidate_speed_threshold": {
+      "threshold_tps": 339.35900000000004,
+      "P_surgical_invalidate": 0.23055883245068903,
+      "E_surgical_given_valid_tps": 343.229675854919,
+      "E_surgical_score_tps": 264.0950425273804,
+      "P_floorlock_invalidate": 2.8665157186802404e-07,
+      "floorlock_score": 166.23,
+      "winner_expected_value": "surgical",
+      "winner_maximin": "floor-lock",
+      "note": "risk-neutral picks surgical (E=264.1 > 166.23); maximin/guaranteed-floor picks floor-lock (surgical carries a 23.1% chance of a 0 wipe-out; floor-lock's 166.23 is guaranteed)."
+    },
+    "rule_invalidate_literal_identity": {
+      "surgical_classification": "operative-1.0 (spec-alive; diverges from plain greedy off-public)",
+      "surgical_score": 0.0,
+      "floorlock_classification": "literal-1.0 (M=1 AR; greedy-identical by construction)",
+      "floorlock_score": 166.23,
+      "winner": "floor-lock",
+      "margin_tps": 166.23,
+      "note": "under a LITERAL private-identity rule surgical is invalidated -> 0; floor-lock is the only guaranteed-valid option -> floor-lock dominates outright."
+    },
+    "portfolio_verdict": "bracketed",
+    "portfolio_verdict_long": "BRACKETED. On raw TPS surgical-357 dominates floor-lock under every plausible private draw (P(surgical < floor-lock) ~ 0; even the 24% worst-case 95%-downside 266 >> floor-lock best-case 169) -- floor-lock is NEVER a speed case, only an invalidation-insurance case. So the decision forks on the organizer's private VALIDITY rule: (a) penalize-breach OR (b1) speed-threshold-invalidate with an expected-value objective -> SHIP surgical-357 (+176 TPS / +106% expected; E=264 even after the 23% speed-invalidate tail). (b2) literal-greedy-identity private rule OR a maximin/guaranteed-floor objective -> KEEP floor-lock-166.23 (surgical is operative-1.0 and risks a 0; floor-lock's 166 is guaranteed)."
+  },
+  "portfolio_verdict": "bracketed",
+  "one_line_summary": "surgical-357 private TPS ~= 341.9 [95% 335.2-348.6, +-sigma_hw 1%], breach 4.29% (linear, PF 1.00 #504); P(private<0.95xpublic)=0.231; P(private<floor-lock 166.23)~0e+00 -> surgical DOMINATES floor-lock on raw TPS by +176 (+106%) under every draw (even 24% worst-case 95%-downside 266 >> 166.23). VERDICT BRACKETED: ship surgical under penalize/speed-invalidate(E-value); keep floor-lock-166.23 under a literal private-identity rule or maximin objective (surgical operative-1.0 risks a 0).",
+  "dossier_verdict": "SHIP surgical-357 as primary for the reopen; hold floor-lock-166.23 (submissions/fa2sw_strict_m1ar_int4, literal-1.0) as the pre-staged fallback to swap in IFF the organizer's reopen rules invalidate on literal private greedy identity (or the objective is maximin/guaranteed-floor). Expected private outcome 341.9 TPS [95% 335.2-348.6]; mild 4.3% breach; zero realistic risk of dropping below the floor-lock fallback on raw speed (P ~ 0e+00).",
+  "self_test": {
+    "checks": {
+      "reproduces_504_mean": true,
+      "reproduces_504_band95_lo": true,
+      "reproduces_504_band95_hi": true,
+      "reproduces_504_p_below": true,
+      "surg_band_ordered": true,
+      "floor_band_ordered": true,
+      "surg_mean_near_342": true,
+      "floor_mean_is_166": true,
+      "floor_zero_breach": true,
+      "P_private_below_95pct_valid": true,
+      "P_private_below_95pct_near_0p23": true,
+      "P_surgical_below_floorlock_valid": true,
+      "P_surgical_below_floorlock_approx_zero": true,
+      "surg95lo_beats_floor95hi": true,
+      "worstcase24_95lo_beats_floor95hi": true,
+      "penalize_winner_surgical": true,
+      "speed_rule_p_invalidate_matches_p_below": true,
+      "speed_rule_E_surgical_above_floor": true,
+      "speed_rule_E_given_valid_ge_mean": true,
+      "speed_rule_E_score_discounted": true,
+      "literal_rule_winner_floorlock": true,
+      "verdict_bracketed": true,
+      "sigma_hw_convention_roundtrip": true,
+      "sigma_hw_oneshot_tps_roundtrip": true,
+      "nan_clean": true
+    },
+    "passes": true
+  }
+}
