@@ -1,0 +1,141 @@
+{
+  "experiment": "verify_surface_census",
+  "pr": 459,
+  "student": "wirbel",
+  "question": "How many head-256 sliding layers route the Triton 3D split-KV kernel at the served M=8 verify (vs FA2)? -> sizes the true Triton verify surface.",
+  "analysis_only": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "geometry": {
+    "n_global_head512": 7,
+    "n_sliding_head256": 30,
+    "n_total": 37,
+    "sliding_window": 512
+  },
+  "workload": {
+    "num_prompts": 8,
+    "output_len": 256,
+    "seed": 1
+  },
+  "attestation": {
+    "census_installed": true,
+    "census_wrapped_triton": true,
+    "census_wrapped_fa2": false,
+    "census_hook_failed": false,
+    "splitkv": true,
+    "server_ready_s": 80.01888298988342,
+    "decode_summary": {
+      "num_records": 8,
+      "num_completion_tokens": 2048
+    }
+  },
+  "census_raw": {
+    "triton_calls": 721,
+    "fa2_calls": 0,
+    "verify_calls": 224,
+    "wrapped_triton": true,
+    "wrapped_fa2": false,
+    "fa2_wrap_error": null,
+    "counts_by_m": {
+      "triton": {
+        "256": {
+          "8": 177,
+          "256": 33,
+          "1": 342
+        },
+        "512": {
+          "8": 47,
+          "256": 8,
+          "1": 114
+        }
+      }
+    },
+    "served_per_call_us": {},
+    "per_process": [
+      {
+        "file": "wirbel_verify_census.870996.json",
+        "pid": 870996,
+        "triton_calls": 0,
+        "verify_calls": 0,
+        "wrapped_triton": false
+      },
+      {
+        "file": "wirbel_verify_census.871223.json",
+        "pid": 871223,
+        "triton_calls": 0,
+        "verify_calls": 0,
+        "wrapped_triton": false
+      },
+      {
+        "file": "wirbel_verify_census.871224.json",
+        "pid": 871224,
+        "triton_calls": 0,
+        "verify_calls": 0,
+        "wrapped_triton": false
+      },
+      {
+        "file": "wirbel_verify_census.871505.json",
+        "pid": 871505,
+        "triton_calls": 0,
+        "verify_calls": 0,
+        "wrapped_triton": false
+      },
+      {
+        "file": "wirbel_verify_census.871506.json",
+        "pid": 871506,
+        "triton_calls": 721,
+        "verify_calls": 224,
+        "wrapped_triton": true
+      },
+      {
+        "file": "wirbel_verify_census.871838.json",
+        "pid": 871838,
+        "triton_calls": 0,
+        "verify_calls": 0,
+        "wrapped_triton": false
+      }
+    ]
+  },
+  "derived": {
+    "verify_M": 8,
+    "verify_clock_layers_global": 7,
+    "triton_h512_M_count": 47,
+    "triton_h256_M_count": 177,
+    "fa2_h256_M_count": 0,
+    "fa2_h512_M_count": 0,
+    "n_forwards": 6.714285714285714,
+    "forwards_are_whole": false,
+    "n256_physical_full_surface": 30,
+    "n512_triton_per_forward": 7.0,
+    "n256_triton_per_forward": 26.361702127659573,
+    "n256_fa2_per_forward": 0.0,
+    "n256_triton_round": 26,
+    "n256_fa2_round": 0,
+    "n512_residual": 0.0,
+    "n256_triton_residual": 0.3617021276595729,
+    "n256_fa2_residual": 0.0,
+    "head256_sliding_routes_triton": true,
+    "sliding_completeness_sum": 26,
+    "sliding_layers_expected": 30,
+    "served_h512_per_call_us": null,
+    "served_h256_per_call_us": null,
+    "served_fa2_h256_per_call_us": null
+  },
+  "self_test": {
+    "passes": true,
+    "checks": {
+      "census_installed": true,
+      "wrapped_triton": true,
+      "hook_did_not_fail": true,
+      "splitkv_present": true,
+      "verify_clock_found": true,
+      "head256_routes_triton": true,
+      "forwards_observed": true,
+      "sliding_surface_substantial": true
+    },
+    "toggle_reverted_clean": true
+  },
+  "toggle_reverted_clean": true,
+  "elapsed_s": 95.2032425403595,
+  "ppl_anchor": 2.3772
+}

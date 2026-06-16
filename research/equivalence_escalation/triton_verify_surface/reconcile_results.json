@@ -1,0 +1,93 @@
+{
+  "experiment": "verify_surface_reconcile",
+  "pr": 459,
+  "student": "wirbel",
+  "analysis_only": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "ppl": 2.3772,
+  "n256": 30,
+  "n256_source": "cli_override",
+  "head256_sliding_routes_triton": true,
+  "geometry": {
+    "n_global_head512": 7,
+    "n_sliding_head256": 30,
+    "n_total": 37
+  },
+  "microbench": {
+    "s512": 0.6656,
+    "s256": 0.549547,
+    "deployed_us_512": 10.752,
+    "deployed_us_256": 8.16128,
+    "best_num_stages_512": 2,
+    "best_num_stages_256": 2,
+    "speedup_pct_512": 6.186551,
+    "speedup_pct_256": 6.722341,
+    "tps_per_us": 0.056663,
+    "cycle_us": 8244.179356,
+    "realized_tps_k7": 467.14,
+    "control_reproduces_447": true
+  },
+  "census_derived": {
+    "verify_M": 8,
+    "n_forwards": 6.714285714285714,
+    "n512_triton_per_forward": 7.0,
+    "n256_triton_per_forward": 26.361702127659573,
+    "n256_fa2_per_forward": 0.0,
+    "n256_triton_round": 26,
+    "n256_fa2_round": 0,
+    "sliding_completeness_sum": 26,
+    "head256_sliding_routes_triton": true,
+    "served_h512_per_call_us": null,
+    "served_h256_per_call_us": null
+  },
+  "reconciliation": {
+    "T_verify_us_anchor_447": 5911.459832,
+    "triton_verify_attn_total_us": 320.1024,
+    "triton_h512_global_total_us": 75.26400000000001,
+    "triton_h256_sliding_total_us": 244.83839999999998,
+    "triton_h512_each_us": 10.752,
+    "triton_h256_each_us": 8.16128,
+    "triton_verify_attn_frac_of_verify": 0.05414946715314161,
+    "frac_447_head512_only": 0.012739964262688743,
+    "undercount_pp": 4.1409502890452865,
+    "surface_ratio_vs_447": 4.2503625627685615,
+    "triton_surface_larger_than_447": true,
+    "n447_undercounted_head256_layers": 30,
+    "h256_was_misattributed_to_fa2_us": 654.43839,
+    "fa2_h256_each_447": 21.814613
+  },
+  "ceiling": {
+    "n256_triton_layers": 30,
+    "n512_triton_layers": 7,
+    "saving_us_256": 0.549547,
+    "saving_us_512": 0.6656,
+    "total_byte_exact_saving_us": 21.145609999999998,
+    "byte_exact_full_surface_ceiling_tps_delta": 1.1981736994299998,
+    "head512_only_ceiling_us": 4.6592,
+    "head512_only_ceiling_tps_delta": 0.2640042496,
+    "full_surface_minus_head512_only_tps": 0.9341694498299998,
+    "tps_per_us": 0.056663
+  },
+  "byte_exact_full_surface_ceiling_tps_delta": 1.1981736994299998,
+  "materiality_tps": 2.0,
+  "reopens_strict_supply": false,
+  "verdict": "STRICT-NULL",
+  "byte_exact_kernel_change": "num_stages 3 -> 2 (cp.async pipeline depth) on the Triton kernel_unified_attention 3D split-KV launch; maxdiff == 0.0 exactly. NOT bm4/TILE/num_warps (greedy-unsafe). DO NOT DEPLOY (analysis-only).",
+  "self_test": {
+    "passes": true,
+    "n_pass": 8,
+    "n_total": 8,
+    "checks": {
+      "a_447_anchor_127pct": true,
+      "b_head512_only_447_0p26": true,
+      "c_monotone_in_n256": true,
+      "d_physical_max_under_2tps": true,
+      "e_reopen_needs_35us": true,
+      "f_both_heads_s2": true,
+      "g_control_reproduces_447": true,
+      "h_savings_pos_finite": true
+    }
+  },
+  "wandb_run_id": "6pwhesdy"
+}
