@@ -2,6 +2,39 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-16 10:25Z — ★★★★★★ THE STRICT SHIP DECISION: human approved the honest measured 222, fire ARMED (GREEN-LIGHT-FIRE-222)
+**The headline event of the cycle.** The ~457.5 config the human approved on #474 (09:35Z) was caught NOT to realize: land's clause-3d pre-check came back **222.32 TPS** (OUT of band), all three stark frontier numbers (456.36/457.55/461.80) were confirmed **composed / isolated-locus — never a full e2e serve**, AND the `VLLM_BATCH_INVARIANT=1` shell prefix doesn't even propagate to the remote runner. I escalated the honest correction with 3 options. The human **re-ruled on #474 (10:24:05Z), verbatim:** *"I approve the 222 TPS value — we need to start putting real, strict improvement numbers on the board and work from there instead of waiting endlessly for fantasy aspirational TPS that is constantly delayed. Submit the 222 TPS HF job and post on the board when its ready."* → **shipping the global-flag strict config (~222 local / ~234 official, operative-1.0).** Fire armed on land #473 (`GREEN-LIGHT-FIRE-222`, [issuecomment-4717772769](https://github.com/morganmcg1/gemma-challenge-senpai/pull/473#issuecomment-4717772769)) with the Blocker-1 fix (manifest `env` edit, now authorized by the submit approval) + a fast clause-3d pre-check at the ~222 band before the single draw. Honest board label: operative-1.0 census **0.998875**, 0 semantic flips, byte-exact greedy-equivalent to the base model · PPL 2.3767 · 128/128. The human **CLOSED #407** (10:25Z). Forward question reseated to **lawine #488**: does surgical-attention-only (pin just the 7 attention reductions, leave MLP/QKV/lm_head fast) realize meaningfully above 222 byte-exact, or is it a 6th composed mirage? This is the next honest rung to build from.
+
+## 2026-06-16 ~10:00Z — PR #482: Dependency-bounded multi-stream overlap — within-verify overlap CLOSED (MERGED, banked)
+- `lawine/dependency-bounded-overlap` — W&B [`044xamdd`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/044xamdd)
+- **Hypothesis:** #477 found a 64% resource-slack overlap of the strict verify-attention under the body GEMM (resource-ceiling 474.44). But that ignored the per-layer data dependency attn(L)→o_proj(L). Does the REALIZABLE (dependency-bounded) overlap clear 467, or collapse to the 457.55 single-stream floor?
+- **Result:** `realizable_overlap_fraction` = **−0.0013** (vs #477's 0.6449 resource-slack) · `dependency_bounded_strict_tps` = 457.54 · `ceiling_discount` = 17.43 (the unrealizable gap to 474.44) · multi-stream = **+23.3 µs/cycle SLOWER** if deployed · `strict_identity` 1.0000 / 0 flips · 20/20 self-tests, reproduced 2×.
+- **Conclusion:** **#477's 474.44 was a resource-ceiling fiction.** A Gemma decoder layer is a strict serial recurrence (qkv→attn→o_proj→mlp), so there is ~0 exactness-preserving attn‖GEMM overlap WITHIN a verify forward → multi-stream within-verify is CLOSED. The only byte-exact 2nd-stream left is drafter(N+1)‖verify(N) IF independent (lawine's follow-up). Clean rigorous NEGATIVE.
+
+## 2026-06-16 ~09:10Z — PR #470: Global-flag strict full-serve cross-check — THE REALIZATION ANCHOR (MERGED, banked)
+- `ubel/globalflag-fullserve` — W&B [`ugqnytji`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ugqnytji)
+- **Hypothesis:** does the global `VLLM_BATCH_INVARIANT=1` strict config realize the composed ~457.5 on a real full serve?
+- **Result:** full-serve strict TPS = **234.47 official / 221.16 local** (NOT ~457.5) · identity census 0.4085 (reload-CONFOUNDED — M=8 reload floor 0.6431, M=1 AR 0.9937; the same-reload census harness doesn't exist → wirbel #487 builds it). Reproduces #122's 51.78% blanket-pin cost.
+- **Conclusion:** **the decisive anchor that the global flag is a ~48% tax (ALL matmuls through `matmul_persistent`), not ~5%.** Recommends "submit the surgical config, not blanket BI." Cross-confirmed by land's independent 222.32. **This is the number the human chose to ship (222/234).**
+
+## 2026-06-16 — PR #468: num_stages verify-attention microbench — surface exhausted (MERGED, banked)
+- `wirbel/numstages-realize` — W&B [`91wb8mln`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/91wb8mln)
+- **Hypothesis:** the last of 6 Triton verify-attention microbench leads — does `num_stages` tuning realize a material byte-exact lift?
+- **Result:** `numstages_realized_tps_delta` = **+1.105** (PPL 2.3772) — IMMATERIAL (<+2 bar, <σ_hw 4.864).
+- **Conclusion:** the Triton verify-attention microbench surface is EXHAUSTED (6/6 leads immaterial). Program pivots off microbench tuning to the realization question.
+
+## 2026-06-16 — PR #479: Tail-KV tax L-sweep — 461.78 composed center (MERGED, banked)
+- `stark/tail-kv-tax` — W&B [`s65xe80t`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/s65xe80t)
+- **Hypothesis:** tighten the 461.80 KV-weighted center by measuring the tail-KV tax at L>640.
+- **Result:** `tail_kv_weighted_tps` = **461.78** (PPL 2.3772), tail-linearity confirmed.
+- **Conclusion:** **COMPOSED / isolated-locus, NOT a full e2e serve** — same composed-vs-served caveat as the rest of the 457-461 family; superseded as a ship number by the realized 222-234. Valid as a tail-linearity characterization only.
+
+## 2026-06-16 — PR #480: Private-validity 5%-gate prediction (predicated on the defunct-457 config) (MERGED, banked)
+- `denken/private-rerun` — W&B [`3oudivg1`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/3oudivg1)
+- **Hypothesis:** does the strict #474 submission clear the organizer's 5% private-delta gate?
+- **Result:** `strict_private_delta` = **4.689%** / 440.15 private predicted — but **predicated on the now-defunct composed-457 config** (thin 0.311pp headroom).
+- **Conclusion:** the CPU-analytic model is sound but the INPUT config is defunct (457 never realizes). Re-run on the REAL candidates (floor-lock 161.70 + global-flag 222-234) reseated to **denken #486** — directly de-risks the 222 fire's private validity.
+
 ## 2026-06-16 09:39 — PR #477: Multi-stream verify-attention overlap reopens a byte-exact path past 457.5 (MERGED, banked)
 - `lawine/multistream-overlap-probe` — W&B [`w41knrqd`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/w41knrqd) (FINISHED, self-test pass, every claimed metric matches the logged summary to ≥4 sig figs, 0-TPS guards present)
 - **Hypothesis:** stark #472 proved 457.55 is the hard *single-stream* ceiling (the +401.9 µs/cycle strict verify-attention tax can't hide inside one ONEGRAPH). But is that tax bus-competing with the body GEMM, or complementary-resource? If the strict verify-attention is SM/latency-bound rather than DRAM-BW-bound, a 2nd concurrent CUDA stream could hide it under the (DRAM-BW-bound, ~86%-SM-idle) body GEMM.
