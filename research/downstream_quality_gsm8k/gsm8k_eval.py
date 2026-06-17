@@ -433,7 +433,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--n", type=int, default=500, help="number of test items (seeded subset; -1 = full 1319)")
     ap.add_argument("--n-shot", type=int, default=8)
     ap.add_argument("--limit", type=int, default=None, help="cap items (smoke); overrides --n when smaller")
-    ap.add_argument("--seed", type=int, default=1234, help="seed for subset + fewshot + sampler")
+    ap.add_argument("--seed", type=int, default=1234, help="seed for subset + fewshot (+ sampler unless --sampling-seed given)")
+    ap.add_argument("--sampling-seed", type=int, default=None,
+                    help="per-request decode RNG seed (vLLM SamplingParams.seed). Distinct from --seed "
+                         "(which fixes the test subset + few-shot). Vary across runs to estimate decode "
+                         "variance with a BYTE-IDENTICAL benchmark (PR #590 multi-seed CI). Default=None "
+                         "-> falls back to --seed (back-compat with prior single-seed runs).")
     ap.add_argument("--top-p", type=float, default=0.95)
     ap.add_argument("--top-k", type=int, default=64)
     ap.add_argument("--max-tokens", type=int, default=512)
@@ -489,13 +494,18 @@ def main(argv: list[str] | None = None) -> int:
     print(f"[gsm8k] {len(problems)} test items (seed={args.seed}); {len(exemplars)}-shot "
           f"fewshot_sig={','.join(fewshot_sig)}", flush=True)
 
+    # Decode RNG seed: --sampling-seed if given, else --seed (back-compat). The
+    # subset/few-shot stay tied to --seed so the benchmark is byte-identical across
+    # sampling seeds; only the per-request sampler RNG moves (PR #590 multi-seed CI).
+    req_seed = args.sampling_seed if args.sampling_seed is not None else args.seed
+
     def _sampling(regime: str) -> dict[str, Any]:
         if regime == "greedy":
             return {"temperature": 0.0, "top_p": 1.0, "top_k": -1,
-                    "max_tokens": args.max_tokens, "seed": args.seed,
+                    "max_tokens": args.max_tokens, "seed": req_seed,
                     "enable_thinking": args.enable_thinking, "min_tokens": args.min_tokens}
         return {"temperature": 1.0, "top_p": args.top_p, "top_k": args.top_k,
-                "max_tokens": args.max_tokens, "seed": args.seed,
+                "max_tokens": args.max_tokens, "seed": req_seed,
                 "enable_thinking": args.enable_thinking, "min_tokens": args.min_tokens}
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
@@ -521,6 +531,7 @@ def main(argv: list[str] | None = None) -> int:
                 "n_shot": args.n_shot,
                 "fewshot_sig": fewshot_sig,
                 "seed": args.seed,
+                "sampling_seed": req_seed,
                 "n_requested": n_items,
                 "item_ids": [p["id"] for p in problems],
                 "sampling": s,
@@ -529,7 +540,8 @@ def main(argv: list[str] | None = None) -> int:
                 "created_at": time.strftime("%Y%m%dT%H%M%SZ", time.gmtime()),
                 **res,
             }
-            out_path = args.out_dir / f"{args.label}_{regime}.json"
+            seed_tag = "" if args.sampling_seed is None else f"_s{req_seed}"
+            out_path = args.out_dir / f"{args.label}_{regime}{seed_tag}.json"
             out_path.write_text(json.dumps(out, indent=2))
             print(
                 f"[gsm8k] DONE arm={args.label} regime={regime} acc={res['accuracy']:.4f} "
