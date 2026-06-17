@@ -1,0 +1,134 @@
+{
+  "pr": 599,
+  "agent": "wirbel",
+  "card": "cold-start C1 disambiguation (Q2): isolate the prefix-cache leg of C1 by re-running the #588 R=3 census with enable_prefix_caching=False; compare to #588 stock (prefix ON) as the 2-config factorial baseline.",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "no_submission": true,
+  "official_tps": 0,
+  "arm": "base_fullhead prefix_caching=OFF (DIAGNOSTIC toggle)",
+  "diagnostic_toggle": "--no-enable-prefix-caching",
+  "serve_geometry": "MAX_NUM_SEQS=1 (deployed served geometry), spec-OFF, greedy temp=0",
+  "serve_env": {
+    "FA_SLIDING": "1",
+    "SURGICAL_ATTN_USE_3D_OFF": "1",
+    "PLE_FOLD_EMBED_SCALE": "1",
+    "PLE_FOLD_TARGET_MODEL": "/tmp/gemma4-e4b-qat-w4a16-ct"
+  },
+  "enable_prefix_caching": false,
+  "official_decode_harness": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py",
+  "official_verifier": "/workspace/senpai/target/official/main_bucket/shared_resources/gemma_greedy_identity_verifier_flowian-powers/check_greedy_identity.py",
+  "prompt_suite": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+  "num_prompts": 128,
+  "output_len": 512,
+  "seed": 1,
+  "r_passes": 3,
+  "eps_star_nat": 0.125,
+  "ulp_nat": 0.0625,
+  "model_dir": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "build": "vllm-0.22.1rc1.dev307+g3e8afdf78",
+  "server_startup_s": 90.0,
+  "peak_gpu_gb": 19.1123046875,
+  "passes": [
+    {
+      "tag": "poff_a",
+      "path": "/workspace/senpai/target/research/validity/operative_identity/decode_poff_a.jsonl",
+      "num_records": 128,
+      "num_completion_tokens": 65536,
+      "wall_s": 793.5
+    },
+    {
+      "tag": "poff_b",
+      "path": "/workspace/senpai/target/research/validity/operative_identity/decode_poff_b.jsonl",
+      "num_records": 128,
+      "num_completion_tokens": 65536,
+      "wall_s": 793.6
+    },
+    {
+      "tag": "poff_c",
+      "path": "/workspace/senpai/target/research/validity/operative_identity/decode_poff_c.jsonl",
+      "num_records": 128,
+      "num_completion_tokens": 65536,
+      "wall_s": 793.8
+    }
+  ],
+  "pairwise_literal": {
+    "a_vs_b": {
+      "pair": "a_vs_b",
+      "verdict": "GREEDY_IDENTICAL",
+      "num_identical": 128,
+      "num_prompts_compared": 128,
+      "num_divergent": 0,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 1.0
+    },
+    "a_vs_c": {
+      "pair": "a_vs_c",
+      "verdict": "GREEDY_IDENTICAL",
+      "num_identical": 128,
+      "num_prompts_compared": 128,
+      "num_divergent": 0,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 1.0
+    },
+    "b_vs_c": {
+      "pair": "b_vs_c",
+      "verdict": "GREEDY_IDENTICAL",
+      "num_identical": 128,
+      "num_prompts_compared": 128,
+      "num_divergent": 0,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 1.0
+    }
+  },
+  "pairwise_operative": {
+    "a_vs_b": {
+      "pair": "a_vs_b",
+      "n_prompts_compared": 128,
+      "n_divergent_prompts": 0,
+      "n_first_div_near_tie": 0,
+      "n_first_div_semantic": 0,
+      "all_first_div_near_tie": true,
+      "max_first_div_gap": null,
+      "max_first_div_gap_ulps": null,
+      "eps_star": 0.125
+    },
+    "a_vs_c": {
+      "pair": "a_vs_c",
+      "n_prompts_compared": 128,
+      "n_divergent_prompts": 0,
+      "n_first_div_near_tie": 0,
+      "n_first_div_semantic": 0,
+      "all_first_div_near_tie": true,
+      "max_first_div_gap": null,
+      "max_first_div_gap_ulps": null,
+      "eps_star": 0.125
+    },
+    "b_vs_c": {
+      "pair": "b_vs_c",
+      "n_prompts_compared": 128,
+      "n_divergent_prompts": 0,
+      "n_first_div_near_tie": 0,
+      "n_first_div_semantic": 0,
+      "all_first_div_near_tie": true,
+      "max_first_div_gap": null,
+      "max_first_div_gap_ulps": null,
+      "eps_star": 0.125
+    }
+  },
+  "verdicts": {
+    "prefix_caching_off_collapses_C1": true,
+    "warmup_pass_collapses_C1": true,
+    "combined_prefix_off_plus_warmup_identical": true,
+    "all_three_passes_byte_identical": true,
+    "warm_warm_pair": "b_vs_c",
+    "cold_warm_pairs": [
+      "a_vs_b",
+      "a_vs_c"
+    ]
+  }
+}
