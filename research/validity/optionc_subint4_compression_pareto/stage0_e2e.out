@@ -10,3 +10,26 @@ DeprecationWarning: Sparsity support has been removed from compressed-tensors. P
 === b_mixed_w4_w3_mlp: mixed w4/w3: MLP -> w3 g128, attn/embed/lm_head stay int4 ===
   [A in-proc] gate=CompressedTensorsWNA16.__init__ (num_bits gate via get_scheme)
   [A in-proc] load_ok=False ValueError: Unsupported num_bits = 3. Supported num_bits = dict_keys([4, 8])
+  [B e2e] rc=1 load_ok=False timed_out=False
+  [B e2e] tail: (EngineCore pid=1453235)     raise e
+(EngineCore pid=1453235)     raise ValueError(
+(EngineCore pid=1453235) ValueError: Unsupported num_bits = 3 for WNA8O8Int; supported = [2, 4, 8]
+Traceback (most recent call last):
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+=== c_uniform_w3a16: uniform w3a16 (group_0 num_bits 4 -> 3) ===
+  [A in-proc] gate=CompressedTensorsWNA16.__init__ (num_bits gate via get_scheme)
+  [A in-proc] load_ok=False ValueError: Unsupported num_bits = 3. Supported num_bits = dict_keys([4, 8])
+  [B e2e] rc=1 load_ok=False timed_out=False
+  [B e2e] tail: (EngineCore pid=1454547)     raise e
+(EngineCore pid=1454547)     raise ValueError(
+(EngineCore pid=1454547) ValueError: Unsupported num_bits = 3 for WNA8O8Int; supported = [2, 4, 8]
+Traceback (most recent call last):
+    raise RuntimeError(
+RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+
+==========================================================================================
+STAGE0_VERDICT ALL THREE sub-int4 variants are LOAD-BLOCKED in the mandated vLLM dev307: (a) sparsity support REMOVED from compressed-tensors (non-empty sparsity_config raises at engine init); (b)/(c) WNA16 supports only num_bits in {4,8} on Ampere (num_bits=3 raises at scheme construction). No loadable sub-int4 config exists in this engine -> option C cannot reach Stage 1; 126.378 stands as the quality-safe ceiling for the weight-compression lever.
+==========================================================================================
+wrote /workspace/senpai/target/research/validity/optionc_subint4_compression_pareto/stage0_feasibility.json

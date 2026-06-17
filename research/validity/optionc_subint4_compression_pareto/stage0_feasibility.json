@@ -13,6 +13,13 @@
         "error_type": "DeprecationWarning",
         "error_msg": "Sparsity support has been removed from compressed-tensors. Please use a model without sparsity configuration."
       },
+      "endtoend": {
+        "probe_dir": "/workspace/senpai/target/research/validity/optionc_subint4_compression_pareto/probe_a_24sparse_int4_mlp",
+        "rc": 1,
+        "load_ok": false,
+        "tail": "Traceback (most recent call last):\n    raise DeprecationWarning(\nDeprecationWarning: Sparsity support has been removed from compressed-tensors. Please use a model without sparsity configuration.",
+        "timed_out": false
+      },
       "load_ok": false
     },
     "b_mixed_w4_w3_mlp": {
@@ -23,6 +30,13 @@
         "error_type": "ValueError",
         "error_msg": "Unsupported num_bits = 3. Supported num_bits = dict_keys([4, 8])"
       },
+      "endtoend": {
+        "probe_dir": "/workspace/senpai/target/research/validity/optionc_subint4_compression_pareto/probe_b_mixed_w4_w3_mlp",
+        "rc": 1,
+        "load_ok": false,
+        "tail": "(EngineCore pid=1453235)     raise e\n(EngineCore pid=1453235)     raise ValueError(\n(EngineCore pid=1453235) ValueError: Unsupported num_bits = 3 for WNA8O8Int; supported = [2, 4, 8]\nTraceback (most recent call last):\n    raise RuntimeError(\nRuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}",
+        "timed_out": false
+      },
       "load_ok": false
     },
     "c_uniform_w3a16": {
@@ -32,6 +46,13 @@
         "load_ok": false,
         "error_type": "ValueError",
         "error_msg": "Unsupported num_bits = 3. Supported num_bits = dict_keys([4, 8])"
+      },
+      "endtoend": {
+        "probe_dir": "/workspace/senpai/target/research/validity/optionc_subint4_compression_pareto/probe_c_uniform_w3a16",
+        "rc": 1,
+        "load_ok": false,
+        "tail": "(EngineCore pid=1454547)     raise e\n(EngineCore pid=1454547)     raise ValueError(\n(EngineCore pid=1454547) ValueError: Unsupported num_bits = 3 for WNA8O8Int; supported = [2, 4, 8]\nTraceback (most recent call last):\n    raise RuntimeError(\nRuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}",
+        "timed_out": false
       },
       "load_ok": false
     }
