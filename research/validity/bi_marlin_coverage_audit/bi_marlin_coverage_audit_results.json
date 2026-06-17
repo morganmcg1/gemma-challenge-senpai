@@ -1,0 +1,260 @@
+{
+  "pr": 617,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_build": true,
+  "vllm_version": "0.22.0",
+  "ts": "2026-06-17T20:11:20.153956+00:00",
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "compute_capability": "8.6",
+    "cc_tuple": [
+      8,
+      6
+    ],
+    "is_sm86": true,
+    "is_sm80_family": true
+  },
+  "dispatch": {
+    "selected_per_shape": {
+      "qkv": "MarlinLinearKernel",
+      "o_proj": "MarlinLinearKernel",
+      "gate_up": "MarlinLinearKernel",
+      "down": "MarlinLinearKernel"
+    },
+    "marlin_is_unique": true
+  },
+  "bi_runtime_proof": {
+    "marlin_gemm_op_namespace": "torch.ops._C.marlin_gemm",
+    "marlin_gemm_in_C": true,
+    "bi_patches_only_aten": true,
+    "bi_patched_ops": [
+      "aten::mm",
+      "aten::addmm",
+      "aten::matmul",
+      "aten::linear",
+      "aten::bmm",
+      "aten::_log_softmax",
+      "aten::softmax",
+      "aten::_softmax",
+      "aten::mean.dim"
+    ],
+    "marlin_gemm_in_bi_patched_ops": false,
+    "bi_mode_enabled": true,
+    "marlin_gemm_bitexact_before_vs_after_BI": true,
+    "marlin_gemm_maxdiff_before_vs_after_BI": 0.0,
+    "aten_mm_changed_by_BI": true,
+    "aten_mm_maxdiff_before_vs_after_BI": 0.001953125,
+    "proof_BI_active_marlin_untouched": true
+  },
+  "m_sweep": {
+    "per_shape": {
+      "qkv": {
+        "K": 2560,
+        "N": 3072,
+        "group_size": 128,
+        "per_M": {
+          "1": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "2": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "4": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "7": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "8": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "16": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "32": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "64": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "128": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          }
+        },
+        "first_divergent_M": null,
+        "m8_bitexact_vs_m1": true,
+        "m7_bitexact_vs_m1": true
+      },
+      "o_proj": {
+        "K": 2048,
+        "N": 2560,
+        "group_size": 128,
+        "per_M": {
+          "1": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "2": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "4": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "7": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "8": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "16": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "32": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "64": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "128": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          }
+        },
+        "first_divergent_M": null,
+        "m8_bitexact_vs_m1": true,
+        "m7_bitexact_vs_m1": true
+      },
+      "gate_up": {
+        "K": 2560,
+        "N": 20480,
+        "group_size": 128,
+        "per_M": {
+          "1": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "2": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "4": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "7": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "8": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "16": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "32": {
+            "maxdiff_row0_vs_m1": 0.0009765625,
+            "bitexact_row0_vs_m1": false
+          },
+          "64": {
+            "maxdiff_row0_vs_m1": 0.0009765625,
+            "bitexact_row0_vs_m1": false
+          },
+          "128": {
+            "maxdiff_row0_vs_m1": 0.0009765625,
+            "bitexact_row0_vs_m1": false
+          }
+        },
+        "first_divergent_M": 32,
+        "m8_bitexact_vs_m1": true,
+        "m7_bitexact_vs_m1": true
+      },
+      "down": {
+        "K": 10240,
+        "N": 2560,
+        "group_size": 128,
+        "per_M": {
+          "1": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "2": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "4": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "7": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "8": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "16": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "32": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "64": {
+            "maxdiff_row0_vs_m1": 0.0,
+            "bitexact_row0_vs_m1": true
+          },
+          "128": {
+            "maxdiff_row0_vs_m1": 0.000244140625,
+            "bitexact_row0_vs_m1": false
+          }
+        },
+        "first_divergent_M": 128,
+        "m8_bitexact_vs_m1": true,
+        "m7_bitexact_vs_m1": true
+      }
+    },
+    "M_list": [
+      1,
+      2,
+      4,
+      7,
+      8,
+      16,
+      32,
+      64,
+      128
+    ],
+    "any_shape_diverges_at_verify_width": false,
+    "min_first_divergent_M": 32
+  },
+  "verdict": {
+    "coverage_verdict": "MARLIN_OUTSIDE_BI__REQUIRES_CUSTOM_KERNEL",
+    "marlin_outside_bi": true,
+    "marlin_m_dependent_at_verify_width": false,
+    "marlin_is_the_607_cause": false
+  },
+  "wandb_run_id": "fa1f9vm1"
+}
