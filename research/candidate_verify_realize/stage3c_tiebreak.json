@@ -1,0 +1,19 @@
+{
+  "pr": 560,
+  "stage": "3c",
+  "n_positions": 60000,
+  "containment_rate_at_K8": 1.0,
+  "identity_vs_served_bf16": {
+    "B_posTB": 0.99545,
+    "B_vocTB": 1.0,
+    "C_posTB": 0.99545,
+    "C_vocTB": 1.0
+  },
+  "mismatch_vs_served_bf16": {
+    "B_posTB": 273,
+    "B_vocTB": 0,
+    "C_posTB": 273,
+    "C_vocTB": 0
+  },
+  "note": "B=cheap bf16 bmm recompute; C=exact served-logit gather (upper bound). posTB=shortlist-position tie-break; vocTB=lowest-vocab-index tie-break (server-matched)."
+}
