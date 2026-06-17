@@ -1,0 +1,145 @@
+{
+  "pr": 550,
+  "stage": 1,
+  "analysis_only": true,
+  "official_tps": 0,
+  "model_dir": "/senpai-run/home/student-denken/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "device": "NVIDIA A10G",
+  "sm": "86",
+  "A10G_HBM_GBS": 600.0,
+  "current_kernels": {
+    "body_linear_name": "language_model.model.layers.0.self_attn.qkv_proj",
+    "body_kernel": {
+      "linear_class": "QKVParallelLinear",
+      "quant_method": "CompressedTensorsLinearMethod",
+      "weight_bytes": 4423696,
+      "weight_tensors": {
+        "weight_packed": {
+          "shape": [
+            160,
+            6144
+          ],
+          "dtype": "torch.int32",
+          "elt": 4
+        },
+        "weight_scale": {
+          "shape": [
+            80,
+            3072
+          ],
+          "dtype": "torch.bfloat16",
+          "elt": 2
+        },
+        "weight_shape": {
+          "shape": [
+            2
+          ],
+          "dtype": "torch.int64",
+          "elt": 8
+        },
+        "weight_g_idx": {
+          "shape": [
+            0
+          ],
+          "dtype": "torch.int32",
+          "elt": 4
+        },
+        "g_idx_sort_indices": {
+          "shape": [
+            0
+          ],
+          "dtype": "torch.int32",
+          "elt": 4
+        },
+        "weight_zero_point": {
+          "shape": [
+            0
+          ],
+          "dtype": "torch.int32",
+          "elt": 4
+        }
+      }
+    },
+    "lm_head": {
+      "class": "ParallelLMHead",
+      "quant_method": "UnquantizedEmbeddingMethod",
+      "weight_shape": [
+        262144,
+        2560
+      ],
+      "weight_dtype": "torch.bfloat16",
+      "weight_bytes": 1342177280,
+      "rows": 262144,
+      "num_embeddings": 262144,
+      "embedding_dim": 2560
+    },
+    "lm_head_rows": 262144,
+    "attention": {
+      "module": "language_model.model.layers.0.self_attn.attn",
+      "attn_class": "Attention",
+      "impl_class": "TritonAttentionImpl",
+      "backend": "AttentionBackendEnum.TRITON_ATTN"
+    },
+    "env_VLLM_ATTENTION_BACKEND": "<unset/default>"
+  },
+  "lm_head_full_rows": 262144,
+  "lm_head_full_ok": true,
+  "head_roofline": {
+    "weight_shape": [
+      262144,
+      2560
+    ],
+    "weight_dtype": "torch.bfloat16",
+    "weight_bytes": 1342177280,
+    "weight_GB": 1.34217728,
+    "floor_us": 2236.9621333333334,
+    "measured_us": 2779.1359424591064,
+    "measured_min_us": 2776.063919067383,
+    "overhead_pct": 24.23705797459661,
+    "out_dtype": "torch.bfloat16",
+    "bw_realized_GBs": 482.94768870225903
+  },
+  "body_roofline": {
+    "in_dim": 2560,
+    "out_shape": [
+      1,
+      3072
+    ],
+    "weight_bytes": 4423696,
+    "floor_us": 7.372826666666667,
+    "measured_us": 62.463998794555664,
+    "measured_min_us": 60.416001826524734,
+    "overhead_pct": 747.2191415669928
+  },
+  "base_fullhead_m1ar_tps": {
+    "per_prompt": [
+      {
+        "n": 256,
+        "dt": 11.829336781986058,
+        "tps": 21.641111815316794
+      },
+      {
+        "n": 256,
+        "dt": 11.890862542029936,
+        "tps": 21.52913626703965
+      },
+      {
+        "n": 256,
+        "dt": 11.886147681972943,
+        "tps": 21.537676196658815
+      },
+      {
+        "n": 256,
+        "dt": 11.88685054902453,
+        "tps": 21.53640267825258
+      }
+    ],
+    "median_tps": 21.537039437455697,
+    "mean_tps": 21.56108173931696,
+    "n_prompts": 4
+  },
+  "base_fullhead_m1ar_tps_caveat": "eager + spec-off; overhead-bound across 42 layers, NOT the graphed+spec-on served 253.78 regime. Per-op roofline is the regime-invariant kernel-cost truth.",
+  "self_det": 1.0,
+  "peak_vram_gib": 18.496636390686035,
+  "self_test_passes": true
+}
