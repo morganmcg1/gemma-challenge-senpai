@@ -1,0 +1,11 @@
+[arm:smoke] normalized CUDA_VISIBLE_DEVICES '2' -> '0' (single in-container GPU)
+[arm:smoke] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[arm:smoke] serve: /tmp/senpai-venvs/20f658587e8a6643/bin/python -m vllm.entrypoints.openai.api_server --model /workspace/senpai/target/submissions/int4_g128_lmhead/model --served-model-name gemma-4-e4b-it --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 4096 --gpu-memory-utilization 0.90 --trust-remote-code --no-enable-log-requests --max-num-batched-tokens 512
+[arm:smoke] extra_env: []
+[arm:smoke] ready in 180s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/deterministic_gate_parity/smoke/decode_outputs.jsonl --summary-file research/deterministic_gate_parity/smoke/decode_summary.json --tokenizer /workspace/senpai/target/submissions/int4_g128_lmhead/model --num-prompts 2 --output-len 8 --seed 1
+decode_records=2
+decode_completion_tokens=16
+decode_summary_file=research/deterministic_gate_parity/smoke/decode_summary.json
+[arm:smoke] wall_tps=6.196 official_proj=6.414 (16 tok / 2.6s)
+[arm:smoke] wrote research/deterministic_gate_parity/smoke/arm_result.json

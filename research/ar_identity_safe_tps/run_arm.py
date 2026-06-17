@@ -83,6 +83,10 @@ def main() -> int:
                     help="extra vLLM CLI token; repeat for multi-token flags")
     ap.add_argument("--extra-env", action="append", default=[],
                     help="KEY=VALUE env override; repeatable")
+    ap.add_argument("--with-ppl", action="store_true",
+                    help="also run the official PPL scorer on the same live "
+                         "server after decode (opt-in; default off keeps the "
+                         "decode-only #601 behaviour)")
     args = ap.parse_args()
 
     out_dir = args.out_dir
@@ -137,6 +141,15 @@ def main() -> int:
                   f"official_proj={wall_tps*1.03524:.3f} "
                   f"({summary['num_completion_tokens']} tok / {summary['duration_s']:.1f}s)",
                   flush=True)
+            if args.with_ppl:
+                ppl_summary = harness.run_ppl(
+                    Path(py), base_url=base_url, model="gemma-4-e4b-it",
+                    out_file=out_dir / "ppl_results.jsonl",
+                    summary_file=out_dir / "ppl_summary.json",
+                )
+                result["ppl"] = ppl_summary.get("ppl")
+                result["ppl_summary"] = ppl_summary
+                print(f"[arm:{args.arm_name}] ppl={result['ppl']}", flush=True)
         finally:
             try:
                 os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
