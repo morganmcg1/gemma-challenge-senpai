@@ -1,0 +1,4528 @@
+{
+  "pr": 607,
+  "smoke": false,
+  "config": {
+    "model_dir": "/workspace/gemma_build/int4_g128_lmhead",
+    "drafter": "/tmp/qat-assistant",
+    "k": 7,
+    "vllm_version": "0.22.0",
+    "transformers_version": "5.9.0",
+    "batch_invariant": 1,
+    "max_num_seqs": 1,
+    "seed": 1,
+    "num_prompts": 128,
+    "output_len": 512,
+    "passes": [
+      "a",
+      "b"
+    ],
+    "scored_pass": "b",
+    "cudagraph": "ON(operative)",
+    "deterministic_gate": "0.22.0 cross-start = 128/128 (lawine #601 ivbje4oz)"
+  },
+  "arms": {
+    "ref": {
+      "arm": "ref",
+      "files": {
+        "a": "/workspace/senpai/target/research/specdec_verify_identity_census/decode_ref_a.jsonl",
+        "b": "/workspace/senpai/target/research/specdec_verify_identity_census/decode_ref_b.jsonl"
+      },
+      "env": {
+        "MODEL_ID": "/workspace/gemma_build/int4_g128_lmhead",
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "VLLM_BATCH_INVARIANT": "1",
+        "MAX_NUM_SEQS": "1",
+        "MAX_MODEL_LEN": "4096",
+        "GPU_MEMORY_UTILIZATION": "0.90",
+        "MAX_NUM_BATCHED_TOKENS": "512",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0",
+        "SENPAI_REFERENCE_MODE": "1",
+        "NUM_SPECULATIVE_TOKENS": "0"
+      },
+      "serve_ready_s": 115.13532876968384,
+      "model_id": "/workspace/gemma_build/int4_g128_lmhead",
+      "served_model_name": "gemma-4-e4b-it",
+      "peak_vram_gb": 18.8759765625,
+      "log_path": "/workspace/senpai/target/research/specdec_verify_identity_census/server_ref.log",
+      "plumbing": {
+        "Speculative": false,
+        "speculative_config": true,
+        "SENPAI_REFERENCE_MODE active": false,
+        "Overriding": true,
+        "MarlinLinearKernel": true,
+        "TRITON_ATTN": true,
+        "num_speculative_tokens": false
+      }
+    },
+    "ref2": {
+      "arm": "ref2",
+      "files": {
+        "a": "/workspace/senpai/target/research/specdec_verify_identity_census/decode_ref2_a.jsonl",
+        "b": "/workspace/senpai/target/research/specdec_verify_identity_census/decode_ref2_b.jsonl"
+      },
+      "env": {
+        "MODEL_ID": "/workspace/gemma_build/int4_g128_lmhead",
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "VLLM_BATCH_INVARIANT": "1",
+        "MAX_NUM_SEQS": "1",
+        "MAX_MODEL_LEN": "4096",
+        "GPU_MEMORY_UTILIZATION": "0.90",
+        "MAX_NUM_BATCHED_TOKENS": "512",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0",
+        "SENPAI_REFERENCE_MODE": "1",
+        "NUM_SPECULATIVE_TOKENS": "0"
+      },
+      "serve_ready_s": 115.1443498134613,
+      "model_id": "/workspace/gemma_build/int4_g128_lmhead",
+      "served_model_name": "gemma-4-e4b-it",
+      "peak_vram_gb": 18.8759765625,
+      "log_path": "/workspace/senpai/target/research/specdec_verify_identity_census/server_ref2.log",
+      "plumbing": {
+        "Speculative": false,
+        "speculative_config": true,
+        "SENPAI_REFERENCE_MODE active": false,
+        "Overriding": true,
+        "MarlinLinearKernel": true,
+        "TRITON_ATTN": true,
+        "num_speculative_tokens": false
+      }
+    },
+    "cand": {
+      "arm": "cand",
+      "files": {
+        "a": "/workspace/senpai/target/research/specdec_verify_identity_census/decode_cand_a.jsonl",
+        "b": "/workspace/senpai/target/research/specdec_verify_identity_census/decode_cand_b.jsonl"
+      },
+      "env": {
+        "MODEL_ID": "/workspace/gemma_build/int4_g128_lmhead",
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "VLLM_BATCH_INVARIANT": "1",
+        "MAX_NUM_SEQS": "1",
+        "MAX_MODEL_LEN": "4096",
+        "GPU_MEMORY_UTILIZATION": "0.90",
+        "MAX_NUM_BATCHED_TOKENS": "512",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0",
+        "NUM_SPECULATIVE_TOKENS": "7"
+      },
+      "serve_ready_s": 115.14504075050354,
+      "model_id": "/workspace/gemma_build/int4_g128_lmhead",
+      "served_model_name": "gemma-4-e4b-it",
+      "tps_probe": {
+        "decode_tps_single_stream": 398.5444110623075,
+        "naive_tps": 391.37186551576644,
+        "ttft_s_approx": 0.02605295181274414,
+        "decode_tokens": 512,
+        "wall_1tok_s": 0.02605295181274414,
+        "wall_ntok_s": 1.3082187175750732,
+        "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+      },
+      "peak_vram_gb": 19.4697265625,
+      "log_path": "/workspace/senpai/target/research/specdec_verify_identity_census/server_cand.log",
+      "plumbing": {
+        "Speculative": true,
+        "speculative_config": true,
+        "SENPAI_REFERENCE_MODE active": false,
+        "Overriding": true,
+        "MarlinLinearKernel": true,
+        "TRITON_ATTN": true,
+        "num_speculative_tokens": true
+      }
+    }
+  },
+  "comparisons": {
+    "ref_vs_ref2_CROSS_START_FLOOR": {
+      "verdict": "GREEDY_IDENTICAL",
+      "num_prompts_compared": 128,
+      "num_identical": 128,
+      "num_divergent": 0,
+      "freerun_seq_exact": 1.0,
+      "total_tokens_compared": 65536,
+      "total_divergent_tokens": 0,
+      "freerun_token_identity": 1.0,
+      "onset_min": null,
+      "onset_median": null,
+      "onset_max": null,
+      "divergent_keys": [],
+      "_per_prompt": [
+        {
+          "key": "aime2026-0015ebeec9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-0e674f51e8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-1eaadd490a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-2822569975",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-4d866680f9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-51697b0daa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-5cc894a0e8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-5e99c1f8e3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-652b177c71",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7443669f7e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-77bffe9f7e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7968ea2f49",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7a1a552fa3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-8742f9e684",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-019eb0f05f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-025e20e6e9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-03946dc24e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-045347c35e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-049a3a3426",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-051eba2501",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-083aa35723",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-089a55e5a3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-0c1cc6cb8c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-0c38e0dd0d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-0caf81b8c8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-0dbcc69ff3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1054cb147f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-11464d18e1",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-123161632f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-126561d6b5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-13e7c71f8a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-145b51d1c8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-14a2ed1ddc",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-16464cac70",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-16bcf4c712",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-17f96c74be",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-183797b844",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-188c5d2778",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-18c1c5c103",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-19d5ec504b",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1a5b0ea82d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1ce3d847d2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1d37a7a51d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f06efeb23",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f101bccd2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-20c95dcf30",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-20d48d5f0a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-21b950759e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-229ffbdb77",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2413c551ec",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-254c10ac4f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2662eff7a6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-27ae63a859",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-28fc44d6ca",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-29e6a1db07",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-29ffae74d2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2c52c770af",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2c9af2ef64",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2d7be3cbb3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2e6a2497fe",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2e908bfe56",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-32bdeb2d67",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-339602fd0a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-35cf9161cc",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-364ddb1397",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-3785b9c93c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-40b2b50a3c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-415ea17892",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-41b609bbf5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-42da82ad5c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-435ccdce7c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-000c2031fb",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0018946c8f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00193f8f1a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-001c076309",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-001de7fe6d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0021813419",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00283ccffa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0029a311d9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0034f38591",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00473cb41c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0051ec2069",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-005aa2e50a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0061c6b397",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006afecaed",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006f3a2112",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-007967631e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0080dcd4f5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0081aeb9c3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00996c6808",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-009a805a5c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a1016454",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a31c2d18",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a3fcc287",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a66b167b",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00aa833125",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00ace67f1c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00af7f3a6e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00be15d2e6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c0d4c77c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c4a9d20a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00ca4f358b",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00cc01bdee",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00cc0cfe85",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00df6227d5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00ebfcaa67",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00f43b26ac",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00ff96e757",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0100cdf2db",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0103bcb5b1",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-01067be999",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0115478516",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-011f1fbfc3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0122522953",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0126e0f8a7",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-012ddc1ffc",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-012eaca73b",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-012f0d5c8d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0135836ee0",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-01370cf98d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-013ba75cb2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0141cfa289",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0151fb8117",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-016fd5e6ff",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0171f1222a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0171fd441d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0177a31370",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-017bdb86b2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        }
+      ]
+    },
+    "ref_vs_cand_SPEC_VERDICT": {
+      "verdict": "DIVERGENT",
+      "num_prompts_compared": 128,
+      "num_identical": 27,
+      "num_divergent": 101,
+      "freerun_seq_exact": 0.2109375,
+      "total_tokens_compared": 65536,
+      "total_divergent_tokens": 31048,
+      "freerun_token_identity": 0.5262451171875,
+      "onset_min": 0,
+      "onset_median": 136,
+      "onset_max": 495,
+      "divergent_keys": [
+        "aime2026-0e674f51e8",
+        "aime2026-2822569975",
+        "aime2026-4d866680f9",
+        "aime2026-51697b0daa",
+        "aime2026-5cc894a0e8",
+        "aime2026-7443669f7e",
+        "aime2026-7968ea2f49",
+        "aime2026-8742f9e684",
+        "gpqa_diamond-025e20e6e9",
+        "gpqa_diamond-03946dc24e",
+        "gpqa_diamond-045347c35e",
+        "gpqa_diamond-049a3a3426",
+        "gpqa_diamond-051eba2501",
+        "gpqa_diamond-083aa35723",
+        "gpqa_diamond-089a55e5a3",
+        "gpqa_diamond-0c1cc6cb8c",
+        "gpqa_diamond-0c38e0dd0d",
+        "gpqa_diamond-0caf81b8c8",
+        "gpqa_diamond-0dbcc69ff3",
+        "gpqa_diamond-1054cb147f",
+        "gpqa_diamond-11464d18e1",
+        "gpqa_diamond-123161632f",
+        "gpqa_diamond-126561d6b5",
+        "gpqa_diamond-13e7c71f8a",
+        "gpqa_diamond-14a2ed1ddc",
+        "gpqa_diamond-16464cac70",
+        "gpqa_diamond-16bcf4c712",
+        "gpqa_diamond-17f96c74be",
+        "gpqa_diamond-183797b844",
+        "gpqa_diamond-188c5d2778",
+        "gpqa_diamond-19d5ec504b",
+        "gpqa_diamond-1a5b0ea82d",
+        "gpqa_diamond-1f101bccd2",
+        "gpqa_diamond-20c95dcf30",
+        "gpqa_diamond-20d48d5f0a",
+        "gpqa_diamond-21b950759e",
+        "gpqa_diamond-2413c551ec",
+        "gpqa_diamond-254c10ac4f",
+        "gpqa_diamond-27ae63a859",
+        "gpqa_diamond-29e6a1db07",
+        "gpqa_diamond-29ffae74d2",
+        "gpqa_diamond-2c52c770af",
+        "gpqa_diamond-2c9af2ef64",
+        "gpqa_diamond-2d7be3cbb3",
+        "gpqa_diamond-2e6a2497fe",
+        "gpqa_diamond-32bdeb2d67",
+        "gpqa_diamond-339602fd0a",
+        "gpqa_diamond-35cf9161cc",
+        "gpqa_diamond-364ddb1397",
+        "gpqa_diamond-3785b9c93c",
+        "gpqa_diamond-40b2b50a3c",
+        "gpqa_diamond-415ea17892",
+        "gpqa_diamond-41b609bbf5",
+        "gpqa_diamond-42da82ad5c",
+        "gpqa_diamond-435ccdce7c",
+        "mmlu_pro-000c2031fb",
+        "mmlu_pro-0018946c8f",
+        "mmlu_pro-001c076309",
+        "mmlu_pro-001de7fe6d",
+        "mmlu_pro-0021813419",
+        "mmlu_pro-00283ccffa",
+        "mmlu_pro-0029a311d9",
+        "mmlu_pro-0034f38591",
+        "mmlu_pro-00473cb41c",
+        "mmlu_pro-0051ec2069",
+        "mmlu_pro-005aa2e50a",
+        "mmlu_pro-0061c6b397",
+        "mmlu_pro-006afecaed",
+        "mmlu_pro-006f3a2112",
+        "mmlu_pro-007967631e",
+        "mmlu_pro-0081aeb9c3",
+        "mmlu_pro-00996c6808",
+        "mmlu_pro-00a1016454",
+        "mmlu_pro-00a31c2d18",
+        "mmlu_pro-00a3fcc287",
+        "mmlu_pro-00a66b167b",
+        "mmlu_pro-00aa833125",
+        "mmlu_pro-00ace67f1c",
+        "mmlu_pro-00af7f3a6e",
+        "mmlu_pro-00c4a9d20a",
+        "mmlu_pro-00ca4f358b",
+        "mmlu_pro-00cc01bdee",
+        "mmlu_pro-00df6227d5",
+        "mmlu_pro-00f43b26ac",
+        "mmlu_pro-00ff96e757",
+        "mmlu_pro-0100cdf2db",
+        "mmlu_pro-0103bcb5b1",
+        "mmlu_pro-01067be999",
+        "mmlu_pro-0115478516",
+        "mmlu_pro-011f1fbfc3",
+        "mmlu_pro-0122522953",
+        "mmlu_pro-0126e0f8a7",
+        "mmlu_pro-012ddc1ffc",
+        "mmlu_pro-012eaca73b",
+        "mmlu_pro-01370cf98d",
+        "mmlu_pro-0141cfa289",
+        "mmlu_pro-0151fb8117",
+        "mmlu_pro-016fd5e6ff",
+        "mmlu_pro-0171f1222a",
+        "mmlu_pro-0171fd441d",
+        "mmlu_pro-0177a31370"
+      ],
+      "_per_prompt": [
+        {
+          "key": "aime2026-0015ebeec9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-0e674f51e8",
+          "identical": false,
+          "first_divergence_index": 424,
+          "num_divergent_tokens": 88
+        },
+        {
+          "key": "aime2026-1eaadd490a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-2822569975",
+          "identical": false,
+          "first_divergence_index": 302,
+          "num_divergent_tokens": 1
+        },
+        {
+          "key": "aime2026-4d866680f9",
+          "identical": false,
+          "first_divergence_index": 2,
+          "num_divergent_tokens": 348
+        },
+        {
+          "key": "aime2026-51697b0daa",
+          "identical": false,
+          "first_divergence_index": 149,
+          "num_divergent_tokens": 316
+        },
+        {
+          "key": "aime2026-5cc894a0e8",
+          "identical": false,
+          "first_divergence_index": 155,
+          "num_divergent_tokens": 2
+        },
+        {
+          "key": "aime2026-5e99c1f8e3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-652b177c71",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7443669f7e",
+          "identical": false,
+          "first_divergence_index": 106,
+          "num_divergent_tokens": 402
+        },
+        {
+          "key": "aime2026-77bffe9f7e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7968ea2f49",
+          "identical": false,
+          "first_divergence_index": 39,
+          "num_divergent_tokens": 461
+        },
+        {
+          "key": "aime2026-7a1a552fa3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-8742f9e684",
+          "identical": false,
+          "first_divergence_index": 77,
+          "num_divergent_tokens": 427
+        },
+        {
+          "key": "gpqa_diamond-019eb0f05f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-025e20e6e9",
+          "identical": false,
+          "first_divergence_index": 108,
+          "num_divergent_tokens": 144
+        },
+        {
+          "key": "gpqa_diamond-03946dc24e",
+          "identical": false,
+          "first_divergence_index": 42,
+          "num_divergent_tokens": 466
+        },
+        {
+          "key": "gpqa_diamond-045347c35e",
+          "identical": false,
+          "first_divergence_index": 134,
+          "num_divergent_tokens": 372
+        },
+        {
+          "key": "gpqa_diamond-049a3a3426",
+          "identical": false,
+          "first_divergence_index": 495,
+          "num_divergent_tokens": 17
+        },
+        {
+          "key": "gpqa_diamond-051eba2501",
+          "identical": false,
+          "first_divergence_index": 42,
+          "num_divergent_tokens": 448
+        },
+        {
+          "key": "gpqa_diamond-083aa35723",
+          "identical": false,
+          "first_divergence_index": 391,
+          "num_divergent_tokens": 115
+        },
+        {
+          "key": "gpqa_diamond-089a55e5a3",
+          "identical": false,
+          "first_divergence_index": 101,
+          "num_divergent_tokens": 403
+        },
+        {
+          "key": "gpqa_diamond-0c1cc6cb8c",
+          "identical": false,
+          "first_divergence_index": 53,
+          "num_divergent_tokens": 449
+        },
+        {
+          "key": "gpqa_diamond-0c38e0dd0d",
+          "identical": false,
+          "first_divergence_index": 203,
+          "num_divergent_tokens": 308
+        },
+        {
+          "key": "gpqa_diamond-0caf81b8c8",
+          "identical": false,
+          "first_divergence_index": 288,
+          "num_divergent_tokens": 223
+        },
+        {
+          "key": "gpqa_diamond-0dbcc69ff3",
+          "identical": false,
+          "first_divergence_index": 314,
+          "num_divergent_tokens": 198
+        },
+        {
+          "key": "gpqa_diamond-1054cb147f",
+          "identical": false,
+          "first_divergence_index": 339,
+          "num_divergent_tokens": 172
+        },
+        {
+          "key": "gpqa_diamond-11464d18e1",
+          "identical": false,
+          "first_divergence_index": 201,
+          "num_divergent_tokens": 309
+        },
+        {
+          "key": "gpqa_diamond-123161632f",
+          "identical": false,
+          "first_divergence_index": 450,
+          "num_divergent_tokens": 62
+        },
+        {
+          "key": "gpqa_diamond-126561d6b5",
+          "identical": false,
+          "first_divergence_index": 200,
+          "num_divergent_tokens": 285
+        },
+        {
+          "key": "gpqa_diamond-13e7c71f8a",
+          "identical": false,
+          "first_divergence_index": 17,
+          "num_divergent_tokens": 490
+        },
+        {
+          "key": "gpqa_diamond-145b51d1c8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-14a2ed1ddc",
+          "identical": false,
+          "first_divergence_index": 92,
+          "num_divergent_tokens": 386
+        },
+        {
+          "key": "gpqa_diamond-16464cac70",
+          "identical": false,
+          "first_divergence_index": 83,
+          "num_divergent_tokens": 420
+        },
+        {
+          "key": "gpqa_diamond-16bcf4c712",
+          "identical": false,
+          "first_divergence_index": 435,
+          "num_divergent_tokens": 76
+        },
+        {
+          "key": "gpqa_diamond-17f96c74be",
+          "identical": false,
+          "first_divergence_index": 109,
+          "num_divergent_tokens": 401
+        },
+        {
+          "key": "gpqa_diamond-183797b844",
+          "identical": false,
+          "first_divergence_index": 233,
+          "num_divergent_tokens": 278
+        },
+        {
+          "key": "gpqa_diamond-188c5d2778",
+          "identical": false,
+          "first_divergence_index": 141,
+          "num_divergent_tokens": 337
+        },
+        {
+          "key": "gpqa_diamond-18c1c5c103",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-19d5ec504b",
+          "identical": false,
+          "first_divergence_index": 327,
+          "num_divergent_tokens": 183
+        },
+        {
+          "key": "gpqa_diamond-1a5b0ea82d",
+          "identical": false,
+          "first_divergence_index": 41,
+          "num_divergent_tokens": 468
+        },
+        {
+          "key": "gpqa_diamond-1ce3d847d2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1d37a7a51d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f06efeb23",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f101bccd2",
+          "identical": false,
+          "first_divergence_index": 39,
+          "num_divergent_tokens": 102
+        },
+        {
+          "key": "gpqa_diamond-20c95dcf30",
+          "identical": false,
+          "first_divergence_index": 203,
+          "num_divergent_tokens": 305
+        },
+        {
+          "key": "gpqa_diamond-20d48d5f0a",
+          "identical": false,
+          "first_divergence_index": 237,
+          "num_divergent_tokens": 274
+        },
+        {
+          "key": "gpqa_diamond-21b950759e",
+          "identical": false,
+          "first_divergence_index": 101,
+          "num_divergent_tokens": 406
+        },
+        {
+          "key": "gpqa_diamond-229ffbdb77",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2413c551ec",
+          "identical": false,
+          "first_divergence_index": 126,
+          "num_divergent_tokens": 368
+        },
+        {
+          "key": "gpqa_diamond-254c10ac4f",
+          "identical": false,
+          "first_divergence_index": 137,
+          "num_divergent_tokens": 374
+        },
+        {
+          "key": "gpqa_diamond-2662eff7a6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-27ae63a859",
+          "identical": false,
+          "first_divergence_index": 163,
+          "num_divergent_tokens": 347
+        },
+        {
+          "key": "gpqa_diamond-28fc44d6ca",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-29e6a1db07",
+          "identical": false,
+          "first_divergence_index": 89,
+          "num_divergent_tokens": 407
+        },
+        {
+          "key": "gpqa_diamond-29ffae74d2",
+          "identical": false,
+          "first_divergence_index": 126,
+          "num_divergent_tokens": 383
+        },
+        {
+          "key": "gpqa_diamond-2c52c770af",
+          "identical": false,
+          "first_divergence_index": 79,
+          "num_divergent_tokens": 430
+        },
+        {
+          "key": "gpqa_diamond-2c9af2ef64",
+          "identical": false,
+          "first_divergence_index": 319,
+          "num_divergent_tokens": 192
+        },
+        {
+          "key": "gpqa_diamond-2d7be3cbb3",
+          "identical": false,
+          "first_divergence_index": 213,
+          "num_divergent_tokens": 296
+        },
+        {
+          "key": "gpqa_diamond-2e6a2497fe",
+          "identical": false,
+          "first_divergence_index": 0,
+          "num_divergent_tokens": 500
+        },
+        {
+          "key": "gpqa_diamond-2e908bfe56",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-32bdeb2d67",
+          "identical": false,
+          "first_divergence_index": 105,
+          "num_divergent_tokens": 407
+        },
+        {
+          "key": "gpqa_diamond-339602fd0a",
+          "identical": false,
+          "first_divergence_index": 146,
+          "num_divergent_tokens": 356
+        },
+        {
+          "key": "gpqa_diamond-35cf9161cc",
+          "identical": false,
+          "first_divergence_index": 234,
+          "num_divergent_tokens": 273
+        },
+        {
+          "key": "gpqa_diamond-364ddb1397",
+          "identical": false,
+          "first_divergence_index": 79,
+          "num_divergent_tokens": 421
+        },
+        {
+          "key": "gpqa_diamond-3785b9c93c",
+          "identical": false,
+          "first_divergence_index": 75,
+          "num_divergent_tokens": 430
+        },
+        {
+          "key": "gpqa_diamond-40b2b50a3c",
+          "identical": false,
+          "first_divergence_index": 381,
+          "num_divergent_tokens": 128
+        },
+        {
+          "key": "gpqa_diamond-415ea17892",
+          "identical": false,
+          "first_divergence_index": 25,
+          "num_divergent_tokens": 476
+        },
+        {
+          "key": "gpqa_diamond-41b609bbf5",
+          "identical": false,
+          "first_divergence_index": 221,
+          "num_divergent_tokens": 288
+        },
+        {
+          "key": "gpqa_diamond-42da82ad5c",
+          "identical": false,
+          "first_divergence_index": 127,
+          "num_divergent_tokens": 376
+        },
+        {
+          "key": "gpqa_diamond-435ccdce7c",
+          "identical": false,
+          "first_divergence_index": 319,
+          "num_divergent_tokens": 193
+        },
+        {
+          "key": "mmlu_pro-000c2031fb",
+          "identical": false,
+          "first_divergence_index": 130,
+          "num_divergent_tokens": 379
+        },
+        {
+          "key": "mmlu_pro-0018946c8f",
+          "identical": false,
+          "first_divergence_index": 318,
+          "num_divergent_tokens": 180
+        },
+        {
+          "key": "mmlu_pro-00193f8f1a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-001c076309",
+          "identical": false,
+          "first_divergence_index": 43,
+          "num_divergent_tokens": 440
+        },
+        {
+          "key": "mmlu_pro-001de7fe6d",
+          "identical": false,
+          "first_divergence_index": 259,
+          "num_divergent_tokens": 249
+        },
+        {
+          "key": "mmlu_pro-0021813419",
+          "identical": false,
+          "first_divergence_index": 8,
+          "num_divergent_tokens": 455
+        },
+        {
+          "key": "mmlu_pro-00283ccffa",
+          "identical": false,
+          "first_divergence_index": 248,
+          "num_divergent_tokens": 263
+        },
+        {
+          "key": "mmlu_pro-0029a311d9",
+          "identical": false,
+          "first_divergence_index": 6,
+          "num_divergent_tokens": 503
+        },
+        {
+          "key": "mmlu_pro-0034f38591",
+          "identical": false,
+          "first_divergence_index": 395,
+          "num_divergent_tokens": 115
+        },
+        {
+          "key": "mmlu_pro-00473cb41c",
+          "identical": false,
+          "first_divergence_index": 124,
+          "num_divergent_tokens": 384
+        },
+        {
+          "key": "mmlu_pro-0051ec2069",
+          "identical": false,
+          "first_divergence_index": 425,
+          "num_divergent_tokens": 69
+        },
+        {
+          "key": "mmlu_pro-005aa2e50a",
+          "identical": false,
+          "first_divergence_index": 138,
+          "num_divergent_tokens": 367
+        },
+        {
+          "key": "mmlu_pro-0061c6b397",
+          "identical": false,
+          "first_divergence_index": 207,
+          "num_divergent_tokens": 302
+        },
+        {
+          "key": "mmlu_pro-006afecaed",
+          "identical": false,
+          "first_divergence_index": 273,
+          "num_divergent_tokens": 237
+        },
+        {
+          "key": "mmlu_pro-006f3a2112",
+          "identical": false,
+          "first_divergence_index": 184,
+          "num_divergent_tokens": 3
+        },
+        {
+          "key": "mmlu_pro-007967631e",
+          "identical": false,
+          "first_divergence_index": 18,
+          "num_divergent_tokens": 480
+        },
+        {
+          "key": "mmlu_pro-0080dcd4f5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0081aeb9c3",
+          "identical": false,
+          "first_divergence_index": 48,
+          "num_divergent_tokens": 261
+        },
+        {
+          "key": "mmlu_pro-00996c6808",
+          "identical": false,
+          "first_divergence_index": 56,
+          "num_divergent_tokens": 439
+        },
+        {
+          "key": "mmlu_pro-009a805a5c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a1016454",
+          "identical": false,
+          "first_divergence_index": 246,
+          "num_divergent_tokens": 262
+        },
+        {
+          "key": "mmlu_pro-00a31c2d18",
+          "identical": false,
+          "first_divergence_index": 47,
+          "num_divergent_tokens": 464
+        },
+        {
+          "key": "mmlu_pro-00a3fcc287",
+          "identical": false,
+          "first_divergence_index": 421,
+          "num_divergent_tokens": 88
+        },
+        {
+          "key": "mmlu_pro-00a66b167b",
+          "identical": false,
+          "first_divergence_index": 108,
+          "num_divergent_tokens": 399
+        },
+        {
+          "key": "mmlu_pro-00aa833125",
+          "identical": false,
+          "first_divergence_index": 73,
+          "num_divergent_tokens": 413
+        },
+        {
+          "key": "mmlu_pro-00ace67f1c",
+          "identical": false,
+          "first_divergence_index": 125,
+          "num_divergent_tokens": 368
+        },
+        {
+          "key": "mmlu_pro-00af7f3a6e",
+          "identical": false,
+          "first_divergence_index": 48,
+          "num_divergent_tokens": 445
+        },
+        {
+          "key": "mmlu_pro-00be15d2e6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c0d4c77c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c4a9d20a",
+          "identical": false,
+          "first_divergence_index": 419,
+          "num_divergent_tokens": 89
+        },
+        {
+          "key": "mmlu_pro-00ca4f358b",
+          "identical": false,
+          "first_divergence_index": 211,
+          "num_divergent_tokens": 299
+        },
+        {
+          "key": "mmlu_pro-00cc01bdee",
+          "identical": false,
+          "first_divergence_index": 73,
+          "num_divergent_tokens": 408
+        },
+        {
+          "key": "mmlu_pro-00cc0cfe85",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00df6227d5",
+          "identical": false,
+          "first_divergence_index": 126,
+          "num_divergent_tokens": 351
+        },
+        {
+          "key": "mmlu_pro-00ebfcaa67",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00f43b26ac",
+          "identical": false,
+          "first_divergence_index": 193,
+          "num_divergent_tokens": 277
+        },
+        {
+          "key": "mmlu_pro-00ff96e757",
+          "identical": false,
+          "first_divergence_index": 54,
+          "num_divergent_tokens": 452
+        },
+        {
+          "key": "mmlu_pro-0100cdf2db",
+          "identical": false,
+          "first_divergence_index": 430,
+          "num_divergent_tokens": 82
+        },
+        {
+          "key": "mmlu_pro-0103bcb5b1",
+          "identical": false,
+          "first_divergence_index": 136,
+          "num_divergent_tokens": 367
+        },
+        {
+          "key": "mmlu_pro-01067be999",
+          "identical": false,
+          "first_divergence_index": 385,
+          "num_divergent_tokens": 127
+        },
+        {
+          "key": "mmlu_pro-0115478516",
+          "identical": false,
+          "first_divergence_index": 22,
+          "num_divergent_tokens": 473
+        },
+        {
+          "key": "mmlu_pro-011f1fbfc3",
+          "identical": false,
+          "first_divergence_index": 67,
+          "num_divergent_tokens": 443
+        },
+        {
+          "key": "mmlu_pro-0122522953",
+          "identical": false,
+          "first_divergence_index": 4,
+          "num_divergent_tokens": 500
+        },
+        {
+          "key": "mmlu_pro-0126e0f8a7",
+          "identical": false,
+          "first_divergence_index": 41,
+          "num_divergent_tokens": 458
+        },
+        {
+          "key": "mmlu_pro-012ddc1ffc",
+          "identical": false,
+          "first_divergence_index": 148,
+          "num_divergent_tokens": 88
+        },
+        {
+          "key": "mmlu_pro-012eaca73b",
+          "identical": false,
+          "first_divergence_index": 321,
+          "num_divergent_tokens": 185
+        },
+        {
+          "key": "mmlu_pro-012f0d5c8d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0135836ee0",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-01370cf98d",
+          "identical": false,
+          "first_divergence_index": 450,
+          "num_divergent_tokens": 61
+        },
+        {
+          "key": "mmlu_pro-013ba75cb2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0141cfa289",
+          "identical": false,
+          "first_divergence_index": 477,
+          "num_divergent_tokens": 35
+        },
+        {
+          "key": "mmlu_pro-0151fb8117",
+          "identical": false,
+          "first_divergence_index": 0,
+          "num_divergent_tokens": 501
+        },
+        {
+          "key": "mmlu_pro-016fd5e6ff",
+          "identical": false,
+          "first_divergence_index": 176,
+          "num_divergent_tokens": 336
+        },
+        {
+          "key": "mmlu_pro-0171f1222a",
+          "identical": false,
+          "first_divergence_index": 187,
+          "num_divergent_tokens": 324
+        },
+        {
+          "key": "mmlu_pro-0171fd441d",
+          "identical": false,
+          "first_divergence_index": 33,
+          "num_divergent_tokens": 464
+        },
+        {
+          "key": "mmlu_pro-0177a31370",
+          "identical": false,
+          "first_divergence_index": 130,
+          "num_divergent_tokens": 376
+        },
+        {
+          "key": "mmlu_pro-017bdb86b2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        }
+      ]
+    }
+  },
+  "within_instance": {
+    "ref": {
+      "verdict": "DIVERGENT",
+      "num_prompts_compared": 128,
+      "num_identical": 60,
+      "num_divergent": 68,
+      "freerun_seq_exact": 0.46875,
+      "total_tokens_compared": 65536,
+      "total_divergent_tokens": 21250,
+      "freerun_token_identity": 0.675750732421875,
+      "onset_min": 0,
+      "onset_median": 156,
+      "onset_max": 443,
+      "divergent_keys": [
+        "aime2026-2822569975",
+        "aime2026-5e99c1f8e3",
+        "aime2026-7443669f7e",
+        "gpqa_diamond-025e20e6e9",
+        "gpqa_diamond-03946dc24e",
+        "gpqa_diamond-045347c35e",
+        "gpqa_diamond-049a3a3426",
+        "gpqa_diamond-051eba2501",
+        "gpqa_diamond-083aa35723",
+        "gpqa_diamond-0c1cc6cb8c",
+        "gpqa_diamond-0c38e0dd0d",
+        "gpqa_diamond-0caf81b8c8",
+        "gpqa_diamond-0dbcc69ff3",
+        "gpqa_diamond-1054cb147f",
+        "gpqa_diamond-126561d6b5",
+        "gpqa_diamond-13e7c71f8a",
+        "gpqa_diamond-145b51d1c8",
+        "gpqa_diamond-14a2ed1ddc",
+        "gpqa_diamond-16464cac70",
+        "gpqa_diamond-16bcf4c712",
+        "gpqa_diamond-17f96c74be",
+        "gpqa_diamond-183797b844",
+        "gpqa_diamond-188c5d2778",
+        "gpqa_diamond-18c1c5c103",
+        "gpqa_diamond-19d5ec504b",
+        "gpqa_diamond-1a5b0ea82d",
+        "gpqa_diamond-1f06efeb23",
+        "gpqa_diamond-1f101bccd2",
+        "gpqa_diamond-20c95dcf30",
+        "gpqa_diamond-20d48d5f0a",
+        "gpqa_diamond-21b950759e",
+        "gpqa_diamond-229ffbdb77",
+        "gpqa_diamond-2413c551ec",
+        "gpqa_diamond-254c10ac4f",
+        "gpqa_diamond-2662eff7a6",
+        "gpqa_diamond-27ae63a859",
+        "gpqa_diamond-28fc44d6ca",
+        "gpqa_diamond-29e6a1db07",
+        "gpqa_diamond-29ffae74d2",
+        "gpqa_diamond-2c9af2ef64",
+        "gpqa_diamond-2d7be3cbb3",
+        "gpqa_diamond-2e6a2497fe",
+        "gpqa_diamond-2e908bfe56",
+        "gpqa_diamond-32bdeb2d67",
+        "gpqa_diamond-339602fd0a",
+        "gpqa_diamond-35cf9161cc",
+        "gpqa_diamond-364ddb1397",
+        "gpqa_diamond-3785b9c93c",
+        "gpqa_diamond-40b2b50a3c",
+        "gpqa_diamond-415ea17892",
+        "gpqa_diamond-41b609bbf5",
+        "gpqa_diamond-42da82ad5c",
+        "gpqa_diamond-435ccdce7c",
+        "mmlu_pro-0034f38591",
+        "mmlu_pro-005aa2e50a",
+        "mmlu_pro-006f3a2112",
+        "mmlu_pro-00a31c2d18",
+        "mmlu_pro-00a66b167b",
+        "mmlu_pro-00aa833125",
+        "mmlu_pro-00c4a9d20a",
+        "mmlu_pro-00f43b26ac",
+        "mmlu_pro-00ff96e757",
+        "mmlu_pro-0100cdf2db",
+        "mmlu_pro-011f1fbfc3",
+        "mmlu_pro-012eaca73b",
+        "mmlu_pro-013ba75cb2",
+        "mmlu_pro-0171f1222a",
+        "mmlu_pro-0171fd441d"
+      ],
+      "_per_prompt": [
+        {
+          "key": "aime2026-0015ebeec9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-0e674f51e8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-1eaadd490a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-2822569975",
+          "identical": false,
+          "first_divergence_index": 302,
+          "num_divergent_tokens": 1
+        },
+        {
+          "key": "aime2026-4d866680f9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-51697b0daa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-5cc894a0e8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-5e99c1f8e3",
+          "identical": false,
+          "first_divergence_index": 68,
+          "num_divergent_tokens": 431
+        },
+        {
+          "key": "aime2026-652b177c71",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7443669f7e",
+          "identical": false,
+          "first_divergence_index": 437,
+          "num_divergent_tokens": 75
+        },
+        {
+          "key": "aime2026-77bffe9f7e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7968ea2f49",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7a1a552fa3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-8742f9e684",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-019eb0f05f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-025e20e6e9",
+          "identical": false,
+          "first_divergence_index": 107,
+          "num_divergent_tokens": 399
+        },
+        {
+          "key": "gpqa_diamond-03946dc24e",
+          "identical": false,
+          "first_divergence_index": 42,
+          "num_divergent_tokens": 466
+        },
+        {
+          "key": "gpqa_diamond-045347c35e",
+          "identical": false,
+          "first_divergence_index": 166,
+          "num_divergent_tokens": 344
+        },
+        {
+          "key": "gpqa_diamond-049a3a3426",
+          "identical": false,
+          "first_divergence_index": 181,
+          "num_divergent_tokens": 329
+        },
+        {
+          "key": "gpqa_diamond-051eba2501",
+          "identical": false,
+          "first_divergence_index": 42,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "gpqa_diamond-083aa35723",
+          "identical": false,
+          "first_divergence_index": 391,
+          "num_divergent_tokens": 117
+        },
+        {
+          "key": "gpqa_diamond-089a55e5a3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-0c1cc6cb8c",
+          "identical": false,
+          "first_divergence_index": 53,
+          "num_divergent_tokens": 450
+        },
+        {
+          "key": "gpqa_diamond-0c38e0dd0d",
+          "identical": false,
+          "first_divergence_index": 220,
+          "num_divergent_tokens": 291
+        },
+        {
+          "key": "gpqa_diamond-0caf81b8c8",
+          "identical": false,
+          "first_divergence_index": 288,
+          "num_divergent_tokens": 221
+        },
+        {
+          "key": "gpqa_diamond-0dbcc69ff3",
+          "identical": false,
+          "first_divergence_index": 140,
+          "num_divergent_tokens": 369
+        },
+        {
+          "key": "gpqa_diamond-1054cb147f",
+          "identical": false,
+          "first_divergence_index": 2,
+          "num_divergent_tokens": 483
+        },
+        {
+          "key": "gpqa_diamond-11464d18e1",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-123161632f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-126561d6b5",
+          "identical": false,
+          "first_divergence_index": 200,
+          "num_divergent_tokens": 295
+        },
+        {
+          "key": "gpqa_diamond-13e7c71f8a",
+          "identical": false,
+          "first_divergence_index": 372,
+          "num_divergent_tokens": 135
+        },
+        {
+          "key": "gpqa_diamond-145b51d1c8",
+          "identical": false,
+          "first_divergence_index": 111,
+          "num_divergent_tokens": 1
+        },
+        {
+          "key": "gpqa_diamond-14a2ed1ddc",
+          "identical": false,
+          "first_divergence_index": 89,
+          "num_divergent_tokens": 410
+        },
+        {
+          "key": "gpqa_diamond-16464cac70",
+          "identical": false,
+          "first_divergence_index": 80,
+          "num_divergent_tokens": 427
+        },
+        {
+          "key": "gpqa_diamond-16bcf4c712",
+          "identical": false,
+          "first_divergence_index": 315,
+          "num_divergent_tokens": 194
+        },
+        {
+          "key": "gpqa_diamond-17f96c74be",
+          "identical": false,
+          "first_divergence_index": 50,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "gpqa_diamond-183797b844",
+          "identical": false,
+          "first_divergence_index": 356,
+          "num_divergent_tokens": 152
+        },
+        {
+          "key": "gpqa_diamond-188c5d2778",
+          "identical": false,
+          "first_divergence_index": 31,
+          "num_divergent_tokens": 476
+        },
+        {
+          "key": "gpqa_diamond-18c1c5c103",
+          "identical": false,
+          "first_divergence_index": 120,
+          "num_divergent_tokens": 392
+        },
+        {
+          "key": "gpqa_diamond-19d5ec504b",
+          "identical": false,
+          "first_divergence_index": 327,
+          "num_divergent_tokens": 183
+        },
+        {
+          "key": "gpqa_diamond-1a5b0ea82d",
+          "identical": false,
+          "first_divergence_index": 398,
+          "num_divergent_tokens": 113
+        },
+        {
+          "key": "gpqa_diamond-1ce3d847d2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1d37a7a51d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f06efeb23",
+          "identical": false,
+          "first_divergence_index": 236,
+          "num_divergent_tokens": 2
+        },
+        {
+          "key": "gpqa_diamond-1f101bccd2",
+          "identical": false,
+          "first_divergence_index": 118,
+          "num_divergent_tokens": 385
+        },
+        {
+          "key": "gpqa_diamond-20c95dcf30",
+          "identical": false,
+          "first_divergence_index": 337,
+          "num_divergent_tokens": 174
+        },
+        {
+          "key": "gpqa_diamond-20d48d5f0a",
+          "identical": false,
+          "first_divergence_index": 30,
+          "num_divergent_tokens": 470
+        },
+        {
+          "key": "gpqa_diamond-21b950759e",
+          "identical": false,
+          "first_divergence_index": 163,
+          "num_divergent_tokens": 340
+        },
+        {
+          "key": "gpqa_diamond-229ffbdb77",
+          "identical": false,
+          "first_divergence_index": 216,
+          "num_divergent_tokens": 290
+        },
+        {
+          "key": "gpqa_diamond-2413c551ec",
+          "identical": false,
+          "first_divergence_index": 82,
+          "num_divergent_tokens": 424
+        },
+        {
+          "key": "gpqa_diamond-254c10ac4f",
+          "identical": false,
+          "first_divergence_index": 24,
+          "num_divergent_tokens": 483
+        },
+        {
+          "key": "gpqa_diamond-2662eff7a6",
+          "identical": false,
+          "first_divergence_index": 336,
+          "num_divergent_tokens": 164
+        },
+        {
+          "key": "gpqa_diamond-27ae63a859",
+          "identical": false,
+          "first_divergence_index": 0,
+          "num_divergent_tokens": 506
+        },
+        {
+          "key": "gpqa_diamond-28fc44d6ca",
+          "identical": false,
+          "first_divergence_index": 301,
+          "num_divergent_tokens": 204
+        },
+        {
+          "key": "gpqa_diamond-29e6a1db07",
+          "identical": false,
+          "first_divergence_index": 89,
+          "num_divergent_tokens": 407
+        },
+        {
+          "key": "gpqa_diamond-29ffae74d2",
+          "identical": false,
+          "first_divergence_index": 56,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "gpqa_diamond-2c52c770af",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2c9af2ef64",
+          "identical": false,
+          "first_divergence_index": 319,
+          "num_divergent_tokens": 181
+        },
+        {
+          "key": "gpqa_diamond-2d7be3cbb3",
+          "identical": false,
+          "first_divergence_index": 213,
+          "num_divergent_tokens": 296
+        },
+        {
+          "key": "gpqa_diamond-2e6a2497fe",
+          "identical": false,
+          "first_divergence_index": 105,
+          "num_divergent_tokens": 390
+        },
+        {
+          "key": "gpqa_diamond-2e908bfe56",
+          "identical": false,
+          "first_divergence_index": 88,
+          "num_divergent_tokens": 420
+        },
+        {
+          "key": "gpqa_diamond-32bdeb2d67",
+          "identical": false,
+          "first_divergence_index": 105,
+          "num_divergent_tokens": 406
+        },
+        {
+          "key": "gpqa_diamond-339602fd0a",
+          "identical": false,
+          "first_divergence_index": 146,
+          "num_divergent_tokens": 359
+        },
+        {
+          "key": "gpqa_diamond-35cf9161cc",
+          "identical": false,
+          "first_divergence_index": 234,
+          "num_divergent_tokens": 272
+        },
+        {
+          "key": "gpqa_diamond-364ddb1397",
+          "identical": false,
+          "first_divergence_index": 270,
+          "num_divergent_tokens": 241
+        },
+        {
+          "key": "gpqa_diamond-3785b9c93c",
+          "identical": false,
+          "first_divergence_index": 149,
+          "num_divergent_tokens": 345
+        },
+        {
+          "key": "gpqa_diamond-40b2b50a3c",
+          "identical": false,
+          "first_divergence_index": 58,
+          "num_divergent_tokens": 417
+        },
+        {
+          "key": "gpqa_diamond-415ea17892",
+          "identical": false,
+          "first_divergence_index": 25,
+          "num_divergent_tokens": 473
+        },
+        {
+          "key": "gpqa_diamond-41b609bbf5",
+          "identical": false,
+          "first_divergence_index": 221,
+          "num_divergent_tokens": 290
+        },
+        {
+          "key": "gpqa_diamond-42da82ad5c",
+          "identical": false,
+          "first_divergence_index": 77,
+          "num_divergent_tokens": 377
+        },
+        {
+          "key": "gpqa_diamond-435ccdce7c",
+          "identical": false,
+          "first_divergence_index": 319,
+          "num_divergent_tokens": 191
+        },
+        {
+          "key": "mmlu_pro-000c2031fb",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0018946c8f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00193f8f1a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-001c076309",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-001de7fe6d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0021813419",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00283ccffa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0029a311d9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0034f38591",
+          "identical": false,
+          "first_divergence_index": 443,
+          "num_divergent_tokens": 68
+        },
+        {
+          "key": "mmlu_pro-00473cb41c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0051ec2069",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-005aa2e50a",
+          "identical": false,
+          "first_divergence_index": 138,
+          "num_divergent_tokens": 373
+        },
+        {
+          "key": "mmlu_pro-0061c6b397",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006afecaed",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006f3a2112",
+          "identical": false,
+          "first_divergence_index": 184,
+          "num_divergent_tokens": 146
+        },
+        {
+          "key": "mmlu_pro-007967631e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0080dcd4f5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0081aeb9c3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00996c6808",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-009a805a5c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a1016454",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a31c2d18",
+          "identical": false,
+          "first_divergence_index": 47,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "mmlu_pro-00a3fcc287",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a66b167b",
+          "identical": false,
+          "first_divergence_index": 219,
+          "num_divergent_tokens": 288
+        },
+        {
+          "key": "mmlu_pro-00aa833125",
+          "identical": false,
+          "first_divergence_index": 73,
+          "num_divergent_tokens": 425
+        },
+        {
+          "key": "mmlu_pro-00ace67f1c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00af7f3a6e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00be15d2e6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c0d4c77c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c4a9d20a",
+          "identical": false,
+          "first_divergence_index": 258,
+          "num_divergent_tokens": 252
+        },
+        {
+          "key": "mmlu_pro-00ca4f358b",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00cc01bdee",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00cc0cfe85",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00df6227d5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00ebfcaa67",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00f43b26ac",
+          "identical": false,
+          "first_divergence_index": 182,
+          "num_divergent_tokens": 303
+        },
+        {
+          "key": "mmlu_pro-00ff96e757",
+          "identical": false,
+          "first_divergence_index": 54,
+          "num_divergent_tokens": 455
+        },
+        {
+          "key": "mmlu_pro-0100cdf2db",
+          "identical": false,
+          "first_divergence_index": 29,
+          "num_divergent_tokens": 461
+        },
+        {
+          "key": "mmlu_pro-0103bcb5b1",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-01067be999",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0115478516",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-011f1fbfc3",
+          "identical": false,
+          "first_divergence_index": 67,
+          "num_divergent_tokens": 443
+        },
+        {
+          "key": "mmlu_pro-0122522953",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0126e0f8a7",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-012ddc1ffc",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-012eaca73b",
+          "identical": false,
+          "first_divergence_index": 275,
+          "num_divergent_tokens": 229
+        },
+        {
+          "key": "mmlu_pro-012f0d5c8d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0135836ee0",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-01370cf98d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-013ba75cb2",
+          "identical": false,
+          "first_divergence_index": 355,
+          "num_divergent_tokens": 152
+        },
+        {
+          "key": "mmlu_pro-0141cfa289",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0151fb8117",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-016fd5e6ff",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0171f1222a",
+          "identical": false,
+          "first_divergence_index": 187,
+          "num_divergent_tokens": 324
+        },
+        {
+          "key": "mmlu_pro-0171fd441d",
+          "identical": false,
+          "first_divergence_index": 254,
+          "num_divergent_tokens": 254
+        },
+        {
+          "key": "mmlu_pro-0177a31370",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-017bdb86b2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        }
+      ]
+    },
+    "ref2": {
+      "verdict": "DIVERGENT",
+      "num_prompts_compared": 128,
+      "num_identical": 60,
+      "num_divergent": 68,
+      "freerun_seq_exact": 0.46875,
+      "total_tokens_compared": 65536,
+      "total_divergent_tokens": 21250,
+      "freerun_token_identity": 0.675750732421875,
+      "onset_min": 0,
+      "onset_median": 156,
+      "onset_max": 443,
+      "divergent_keys": [
+        "aime2026-2822569975",
+        "aime2026-5e99c1f8e3",
+        "aime2026-7443669f7e",
+        "gpqa_diamond-025e20e6e9",
+        "gpqa_diamond-03946dc24e",
+        "gpqa_diamond-045347c35e",
+        "gpqa_diamond-049a3a3426",
+        "gpqa_diamond-051eba2501",
+        "gpqa_diamond-083aa35723",
+        "gpqa_diamond-0c1cc6cb8c",
+        "gpqa_diamond-0c38e0dd0d",
+        "gpqa_diamond-0caf81b8c8",
+        "gpqa_diamond-0dbcc69ff3",
+        "gpqa_diamond-1054cb147f",
+        "gpqa_diamond-126561d6b5",
+        "gpqa_diamond-13e7c71f8a",
+        "gpqa_diamond-145b51d1c8",
+        "gpqa_diamond-14a2ed1ddc",
+        "gpqa_diamond-16464cac70",
+        "gpqa_diamond-16bcf4c712",
+        "gpqa_diamond-17f96c74be",
+        "gpqa_diamond-183797b844",
+        "gpqa_diamond-188c5d2778",
+        "gpqa_diamond-18c1c5c103",
+        "gpqa_diamond-19d5ec504b",
+        "gpqa_diamond-1a5b0ea82d",
+        "gpqa_diamond-1f06efeb23",
+        "gpqa_diamond-1f101bccd2",
+        "gpqa_diamond-20c95dcf30",
+        "gpqa_diamond-20d48d5f0a",
+        "gpqa_diamond-21b950759e",
+        "gpqa_diamond-229ffbdb77",
+        "gpqa_diamond-2413c551ec",
+        "gpqa_diamond-254c10ac4f",
+        "gpqa_diamond-2662eff7a6",
+        "gpqa_diamond-27ae63a859",
+        "gpqa_diamond-28fc44d6ca",
+        "gpqa_diamond-29e6a1db07",
+        "gpqa_diamond-29ffae74d2",
+        "gpqa_diamond-2c9af2ef64",
+        "gpqa_diamond-2d7be3cbb3",
+        "gpqa_diamond-2e6a2497fe",
+        "gpqa_diamond-2e908bfe56",
+        "gpqa_diamond-32bdeb2d67",
+        "gpqa_diamond-339602fd0a",
+        "gpqa_diamond-35cf9161cc",
+        "gpqa_diamond-364ddb1397",
+        "gpqa_diamond-3785b9c93c",
+        "gpqa_diamond-40b2b50a3c",
+        "gpqa_diamond-415ea17892",
+        "gpqa_diamond-41b609bbf5",
+        "gpqa_diamond-42da82ad5c",
+        "gpqa_diamond-435ccdce7c",
+        "mmlu_pro-0034f38591",
+        "mmlu_pro-005aa2e50a",
+        "mmlu_pro-006f3a2112",
+        "mmlu_pro-00a31c2d18",
+        "mmlu_pro-00a66b167b",
+        "mmlu_pro-00aa833125",
+        "mmlu_pro-00c4a9d20a",
+        "mmlu_pro-00f43b26ac",
+        "mmlu_pro-00ff96e757",
+        "mmlu_pro-0100cdf2db",
+        "mmlu_pro-011f1fbfc3",
+        "mmlu_pro-012eaca73b",
+        "mmlu_pro-013ba75cb2",
+        "mmlu_pro-0171f1222a",
+        "mmlu_pro-0171fd441d"
+      ],
+      "_per_prompt": [
+        {
+          "key": "aime2026-0015ebeec9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-0e674f51e8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-1eaadd490a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-2822569975",
+          "identical": false,
+          "first_divergence_index": 302,
+          "num_divergent_tokens": 1
+        },
+        {
+          "key": "aime2026-4d866680f9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-51697b0daa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-5cc894a0e8",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-5e99c1f8e3",
+          "identical": false,
+          "first_divergence_index": 68,
+          "num_divergent_tokens": 431
+        },
+        {
+          "key": "aime2026-652b177c71",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7443669f7e",
+          "identical": false,
+          "first_divergence_index": 437,
+          "num_divergent_tokens": 75
+        },
+        {
+          "key": "aime2026-77bffe9f7e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7968ea2f49",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7a1a552fa3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-8742f9e684",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-019eb0f05f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-025e20e6e9",
+          "identical": false,
+          "first_divergence_index": 107,
+          "num_divergent_tokens": 399
+        },
+        {
+          "key": "gpqa_diamond-03946dc24e",
+          "identical": false,
+          "first_divergence_index": 42,
+          "num_divergent_tokens": 466
+        },
+        {
+          "key": "gpqa_diamond-045347c35e",
+          "identical": false,
+          "first_divergence_index": 166,
+          "num_divergent_tokens": 344
+        },
+        {
+          "key": "gpqa_diamond-049a3a3426",
+          "identical": false,
+          "first_divergence_index": 181,
+          "num_divergent_tokens": 329
+        },
+        {
+          "key": "gpqa_diamond-051eba2501",
+          "identical": false,
+          "first_divergence_index": 42,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "gpqa_diamond-083aa35723",
+          "identical": false,
+          "first_divergence_index": 391,
+          "num_divergent_tokens": 117
+        },
+        {
+          "key": "gpqa_diamond-089a55e5a3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-0c1cc6cb8c",
+          "identical": false,
+          "first_divergence_index": 53,
+          "num_divergent_tokens": 450
+        },
+        {
+          "key": "gpqa_diamond-0c38e0dd0d",
+          "identical": false,
+          "first_divergence_index": 220,
+          "num_divergent_tokens": 291
+        },
+        {
+          "key": "gpqa_diamond-0caf81b8c8",
+          "identical": false,
+          "first_divergence_index": 288,
+          "num_divergent_tokens": 221
+        },
+        {
+          "key": "gpqa_diamond-0dbcc69ff3",
+          "identical": false,
+          "first_divergence_index": 140,
+          "num_divergent_tokens": 369
+        },
+        {
+          "key": "gpqa_diamond-1054cb147f",
+          "identical": false,
+          "first_divergence_index": 2,
+          "num_divergent_tokens": 483
+        },
+        {
+          "key": "gpqa_diamond-11464d18e1",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-123161632f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-126561d6b5",
+          "identical": false,
+          "first_divergence_index": 200,
+          "num_divergent_tokens": 295
+        },
+        {
+          "key": "gpqa_diamond-13e7c71f8a",
+          "identical": false,
+          "first_divergence_index": 372,
+          "num_divergent_tokens": 135
+        },
+        {
+          "key": "gpqa_diamond-145b51d1c8",
+          "identical": false,
+          "first_divergence_index": 111,
+          "num_divergent_tokens": 1
+        },
+        {
+          "key": "gpqa_diamond-14a2ed1ddc",
+          "identical": false,
+          "first_divergence_index": 89,
+          "num_divergent_tokens": 410
+        },
+        {
+          "key": "gpqa_diamond-16464cac70",
+          "identical": false,
+          "first_divergence_index": 80,
+          "num_divergent_tokens": 427
+        },
+        {
+          "key": "gpqa_diamond-16bcf4c712",
+          "identical": false,
+          "first_divergence_index": 315,
+          "num_divergent_tokens": 194
+        },
+        {
+          "key": "gpqa_diamond-17f96c74be",
+          "identical": false,
+          "first_divergence_index": 50,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "gpqa_diamond-183797b844",
+          "identical": false,
+          "first_divergence_index": 356,
+          "num_divergent_tokens": 152
+        },
+        {
+          "key": "gpqa_diamond-188c5d2778",
+          "identical": false,
+          "first_divergence_index": 31,
+          "num_divergent_tokens": 476
+        },
+        {
+          "key": "gpqa_diamond-18c1c5c103",
+          "identical": false,
+          "first_divergence_index": 120,
+          "num_divergent_tokens": 392
+        },
+        {
+          "key": "gpqa_diamond-19d5ec504b",
+          "identical": false,
+          "first_divergence_index": 327,
+          "num_divergent_tokens": 183
+        },
+        {
+          "key": "gpqa_diamond-1a5b0ea82d",
+          "identical": false,
+          "first_divergence_index": 398,
+          "num_divergent_tokens": 113
+        },
+        {
+          "key": "gpqa_diamond-1ce3d847d2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1d37a7a51d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f06efeb23",
+          "identical": false,
+          "first_divergence_index": 236,
+          "num_divergent_tokens": 2
+        },
+        {
+          "key": "gpqa_diamond-1f101bccd2",
+          "identical": false,
+          "first_divergence_index": 118,
+          "num_divergent_tokens": 385
+        },
+        {
+          "key": "gpqa_diamond-20c95dcf30",
+          "identical": false,
+          "first_divergence_index": 337,
+          "num_divergent_tokens": 174
+        },
+        {
+          "key": "gpqa_diamond-20d48d5f0a",
+          "identical": false,
+          "first_divergence_index": 30,
+          "num_divergent_tokens": 470
+        },
+        {
+          "key": "gpqa_diamond-21b950759e",
+          "identical": false,
+          "first_divergence_index": 163,
+          "num_divergent_tokens": 340
+        },
+        {
+          "key": "gpqa_diamond-229ffbdb77",
+          "identical": false,
+          "first_divergence_index": 216,
+          "num_divergent_tokens": 290
+        },
+        {
+          "key": "gpqa_diamond-2413c551ec",
+          "identical": false,
+          "first_divergence_index": 82,
+          "num_divergent_tokens": 424
+        },
+        {
+          "key": "gpqa_diamond-254c10ac4f",
+          "identical": false,
+          "first_divergence_index": 24,
+          "num_divergent_tokens": 483
+        },
+        {
+          "key": "gpqa_diamond-2662eff7a6",
+          "identical": false,
+          "first_divergence_index": 336,
+          "num_divergent_tokens": 164
+        },
+        {
+          "key": "gpqa_diamond-27ae63a859",
+          "identical": false,
+          "first_divergence_index": 0,
+          "num_divergent_tokens": 506
+        },
+        {
+          "key": "gpqa_diamond-28fc44d6ca",
+          "identical": false,
+          "first_divergence_index": 301,
+          "num_divergent_tokens": 204
+        },
+        {
+          "key": "gpqa_diamond-29e6a1db07",
+          "identical": false,
+          "first_divergence_index": 89,
+          "num_divergent_tokens": 407
+        },
+        {
+          "key": "gpqa_diamond-29ffae74d2",
+          "identical": false,
+          "first_divergence_index": 56,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "gpqa_diamond-2c52c770af",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2c9af2ef64",
+          "identical": false,
+          "first_divergence_index": 319,
+          "num_divergent_tokens": 181
+        },
+        {
+          "key": "gpqa_diamond-2d7be3cbb3",
+          "identical": false,
+          "first_divergence_index": 213,
+          "num_divergent_tokens": 296
+        },
+        {
+          "key": "gpqa_diamond-2e6a2497fe",
+          "identical": false,
+          "first_divergence_index": 105,
+          "num_divergent_tokens": 390
+        },
+        {
+          "key": "gpqa_diamond-2e908bfe56",
+          "identical": false,
+          "first_divergence_index": 88,
+          "num_divergent_tokens": 420
+        },
+        {
+          "key": "gpqa_diamond-32bdeb2d67",
+          "identical": false,
+          "first_divergence_index": 105,
+          "num_divergent_tokens": 406
+        },
+        {
+          "key": "gpqa_diamond-339602fd0a",
+          "identical": false,
+          "first_divergence_index": 146,
+          "num_divergent_tokens": 359
+        },
+        {
+          "key": "gpqa_diamond-35cf9161cc",
+          "identical": false,
+          "first_divergence_index": 234,
+          "num_divergent_tokens": 272
+        },
+        {
+          "key": "gpqa_diamond-364ddb1397",
+          "identical": false,
+          "first_divergence_index": 270,
+          "num_divergent_tokens": 241
+        },
+        {
+          "key": "gpqa_diamond-3785b9c93c",
+          "identical": false,
+          "first_divergence_index": 149,
+          "num_divergent_tokens": 345
+        },
+        {
+          "key": "gpqa_diamond-40b2b50a3c",
+          "identical": false,
+          "first_divergence_index": 58,
+          "num_divergent_tokens": 417
+        },
+        {
+          "key": "gpqa_diamond-415ea17892",
+          "identical": false,
+          "first_divergence_index": 25,
+          "num_divergent_tokens": 473
+        },
+        {
+          "key": "gpqa_diamond-41b609bbf5",
+          "identical": false,
+          "first_divergence_index": 221,
+          "num_divergent_tokens": 290
+        },
+        {
+          "key": "gpqa_diamond-42da82ad5c",
+          "identical": false,
+          "first_divergence_index": 77,
+          "num_divergent_tokens": 377
+        },
+        {
+          "key": "gpqa_diamond-435ccdce7c",
+          "identical": false,
+          "first_divergence_index": 319,
+          "num_divergent_tokens": 191
+        },
+        {
+          "key": "mmlu_pro-000c2031fb",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0018946c8f",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00193f8f1a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-001c076309",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-001de7fe6d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0021813419",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00283ccffa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0029a311d9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0034f38591",
+          "identical": false,
+          "first_divergence_index": 443,
+          "num_divergent_tokens": 68
+        },
+        {
+          "key": "mmlu_pro-00473cb41c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0051ec2069",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-005aa2e50a",
+          "identical": false,
+          "first_divergence_index": 138,
+          "num_divergent_tokens": 373
+        },
+        {
+          "key": "mmlu_pro-0061c6b397",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006afecaed",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006f3a2112",
+          "identical": false,
+          "first_divergence_index": 184,
+          "num_divergent_tokens": 146
+        },
+        {
+          "key": "mmlu_pro-007967631e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0080dcd4f5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0081aeb9c3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00996c6808",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-009a805a5c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a1016454",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a31c2d18",
+          "identical": false,
+          "first_divergence_index": 47,
+          "num_divergent_tokens": 454
+        },
+        {
+          "key": "mmlu_pro-00a3fcc287",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a66b167b",
+          "identical": false,
+          "first_divergence_index": 219,
+          "num_divergent_tokens": 288
+        },
+        {
+          "key": "mmlu_pro-00aa833125",
+          "identical": false,
+          "first_divergence_index": 73,
+          "num_divergent_tokens": 425
+        },
+        {
+          "key": "mmlu_pro-00ace67f1c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00af7f3a6e",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00be15d2e6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c0d4c77c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c4a9d20a",
+          "identical": false,
+          "first_divergence_index": 258,
+          "num_divergent_tokens": 252
+        },
+        {
+          "key": "mmlu_pro-00ca4f358b",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00cc01bdee",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00cc0cfe85",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00df6227d5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00ebfcaa67",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00f43b26ac",
+          "identical": false,
+          "first_divergence_index": 182,
+          "num_divergent_tokens": 303
+        },
+        {
+          "key": "mmlu_pro-00ff96e757",
+          "identical": false,
+          "first_divergence_index": 54,
+          "num_divergent_tokens": 455
+        },
+        {
+          "key": "mmlu_pro-0100cdf2db",
+          "identical": false,
+          "first_divergence_index": 29,
+          "num_divergent_tokens": 461
+        },
+        {
+          "key": "mmlu_pro-0103bcb5b1",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-01067be999",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0115478516",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-011f1fbfc3",
+          "identical": false,
+          "first_divergence_index": 67,
+          "num_divergent_tokens": 443
+        },
+        {
+          "key": "mmlu_pro-0122522953",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0126e0f8a7",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-012ddc1ffc",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-012eaca73b",
+          "identical": false,
+          "first_divergence_index": 275,
+          "num_divergent_tokens": 229
+        },
+        {
+          "key": "mmlu_pro-012f0d5c8d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0135836ee0",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-01370cf98d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-013ba75cb2",
+          "identical": false,
+          "first_divergence_index": 355,
+          "num_divergent_tokens": 152
+        },
+        {
+          "key": "mmlu_pro-0141cfa289",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0151fb8117",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-016fd5e6ff",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0171f1222a",
+          "identical": false,
+          "first_divergence_index": 187,
+          "num_divergent_tokens": 324
+        },
+        {
+          "key": "mmlu_pro-0171fd441d",
+          "identical": false,
+          "first_divergence_index": 254,
+          "num_divergent_tokens": 254
+        },
+        {
+          "key": "mmlu_pro-0177a31370",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-017bdb86b2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        }
+      ]
+    },
+    "cand": {
+      "verdict": "DIVERGENT",
+      "num_prompts_compared": 128,
+      "num_identical": 30,
+      "num_divergent": 98,
+      "freerun_seq_exact": 0.234375,
+      "total_tokens_compared": 65536,
+      "total_divergent_tokens": 32729,
+      "freerun_token_identity": 0.5005950927734375,
+      "onset_min": 0,
+      "onset_median": 115,
+      "onset_max": 491,
+      "divergent_keys": [
+        "aime2026-0e674f51e8",
+        "aime2026-4d866680f9",
+        "aime2026-5cc894a0e8",
+        "aime2026-5e99c1f8e3",
+        "aime2026-7443669f7e",
+        "aime2026-77bffe9f7e",
+        "aime2026-8742f9e684",
+        "gpqa_diamond-019eb0f05f",
+        "gpqa_diamond-025e20e6e9",
+        "gpqa_diamond-03946dc24e",
+        "gpqa_diamond-045347c35e",
+        "gpqa_diamond-049a3a3426",
+        "gpqa_diamond-051eba2501",
+        "gpqa_diamond-083aa35723",
+        "gpqa_diamond-089a55e5a3",
+        "gpqa_diamond-0c1cc6cb8c",
+        "gpqa_diamond-0c38e0dd0d",
+        "gpqa_diamond-0caf81b8c8",
+        "gpqa_diamond-0dbcc69ff3",
+        "gpqa_diamond-1054cb147f",
+        "gpqa_diamond-11464d18e1",
+        "gpqa_diamond-123161632f",
+        "gpqa_diamond-126561d6b5",
+        "gpqa_diamond-145b51d1c8",
+        "gpqa_diamond-14a2ed1ddc",
+        "gpqa_diamond-16464cac70",
+        "gpqa_diamond-16bcf4c712",
+        "gpqa_diamond-17f96c74be",
+        "gpqa_diamond-183797b844",
+        "gpqa_diamond-188c5d2778",
+        "gpqa_diamond-18c1c5c103",
+        "gpqa_diamond-19d5ec504b",
+        "gpqa_diamond-1a5b0ea82d",
+        "gpqa_diamond-1f101bccd2",
+        "gpqa_diamond-20c95dcf30",
+        "gpqa_diamond-20d48d5f0a",
+        "gpqa_diamond-21b950759e",
+        "gpqa_diamond-229ffbdb77",
+        "gpqa_diamond-2413c551ec",
+        "gpqa_diamond-254c10ac4f",
+        "gpqa_diamond-27ae63a859",
+        "gpqa_diamond-29e6a1db07",
+        "gpqa_diamond-29ffae74d2",
+        "gpqa_diamond-2c52c770af",
+        "gpqa_diamond-2c9af2ef64",
+        "gpqa_diamond-2e6a2497fe",
+        "gpqa_diamond-2e908bfe56",
+        "gpqa_diamond-32bdeb2d67",
+        "gpqa_diamond-339602fd0a",
+        "gpqa_diamond-3785b9c93c",
+        "gpqa_diamond-40b2b50a3c",
+        "gpqa_diamond-415ea17892",
+        "gpqa_diamond-41b609bbf5",
+        "gpqa_diamond-42da82ad5c",
+        "gpqa_diamond-435ccdce7c",
+        "mmlu_pro-000c2031fb",
+        "mmlu_pro-0018946c8f",
+        "mmlu_pro-00193f8f1a",
+        "mmlu_pro-001c076309",
+        "mmlu_pro-001de7fe6d",
+        "mmlu_pro-0021813419",
+        "mmlu_pro-0029a311d9",
+        "mmlu_pro-0034f38591",
+        "mmlu_pro-00473cb41c",
+        "mmlu_pro-005aa2e50a",
+        "mmlu_pro-006f3a2112",
+        "mmlu_pro-007967631e",
+        "mmlu_pro-0081aeb9c3",
+        "mmlu_pro-00996c6808",
+        "mmlu_pro-009a805a5c",
+        "mmlu_pro-00a31c2d18",
+        "mmlu_pro-00a66b167b",
+        "mmlu_pro-00aa833125",
+        "mmlu_pro-00ace67f1c",
+        "mmlu_pro-00af7f3a6e",
+        "mmlu_pro-00c4a9d20a",
+        "mmlu_pro-00ca4f358b",
+        "mmlu_pro-00cc01bdee",
+        "mmlu_pro-00df6227d5",
+        "mmlu_pro-00ebfcaa67",
+        "mmlu_pro-00f43b26ac",
+        "mmlu_pro-00ff96e757",
+        "mmlu_pro-0100cdf2db",
+        "mmlu_pro-0103bcb5b1",
+        "mmlu_pro-01067be999",
+        "mmlu_pro-0115478516",
+        "mmlu_pro-011f1fbfc3",
+        "mmlu_pro-0122522953",
+        "mmlu_pro-0126e0f8a7",
+        "mmlu_pro-012ddc1ffc",
+        "mmlu_pro-012eaca73b",
+        "mmlu_pro-012f0d5c8d",
+        "mmlu_pro-0135836ee0",
+        "mmlu_pro-0151fb8117",
+        "mmlu_pro-016fd5e6ff",
+        "mmlu_pro-0171f1222a",
+        "mmlu_pro-0171fd441d",
+        "mmlu_pro-0177a31370"
+      ],
+      "_per_prompt": [
+        {
+          "key": "aime2026-0015ebeec9",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-0e674f51e8",
+          "identical": false,
+          "first_divergence_index": 193,
+          "num_divergent_tokens": 312
+        },
+        {
+          "key": "aime2026-1eaadd490a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-2822569975",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-4d866680f9",
+          "identical": false,
+          "first_divergence_index": 2,
+          "num_divergent_tokens": 348
+        },
+        {
+          "key": "aime2026-51697b0daa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-5cc894a0e8",
+          "identical": false,
+          "first_divergence_index": 155,
+          "num_divergent_tokens": 351
+        },
+        {
+          "key": "aime2026-5e99c1f8e3",
+          "identical": false,
+          "first_divergence_index": 68,
+          "num_divergent_tokens": 433
+        },
+        {
+          "key": "aime2026-652b177c71",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7443669f7e",
+          "identical": false,
+          "first_divergence_index": 106,
+          "num_divergent_tokens": 401
+        },
+        {
+          "key": "aime2026-77bffe9f7e",
+          "identical": false,
+          "first_divergence_index": 146,
+          "num_divergent_tokens": 344
+        },
+        {
+          "key": "aime2026-7968ea2f49",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-7a1a552fa3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "aime2026-8742f9e684",
+          "identical": false,
+          "first_divergence_index": 77,
+          "num_divergent_tokens": 427
+        },
+        {
+          "key": "gpqa_diamond-019eb0f05f",
+          "identical": false,
+          "first_divergence_index": 173,
+          "num_divergent_tokens": 326
+        },
+        {
+          "key": "gpqa_diamond-025e20e6e9",
+          "identical": false,
+          "first_divergence_index": 37,
+          "num_divergent_tokens": 470
+        },
+        {
+          "key": "gpqa_diamond-03946dc24e",
+          "identical": false,
+          "first_divergence_index": 42,
+          "num_divergent_tokens": 466
+        },
+        {
+          "key": "gpqa_diamond-045347c35e",
+          "identical": false,
+          "first_divergence_index": 111,
+          "num_divergent_tokens": 399
+        },
+        {
+          "key": "gpqa_diamond-049a3a3426",
+          "identical": false,
+          "first_divergence_index": 427,
+          "num_divergent_tokens": 85
+        },
+        {
+          "key": "gpqa_diamond-051eba2501",
+          "identical": false,
+          "first_divergence_index": 36,
+          "num_divergent_tokens": 108
+        },
+        {
+          "key": "gpqa_diamond-083aa35723",
+          "identical": false,
+          "first_divergence_index": 391,
+          "num_divergent_tokens": 117
+        },
+        {
+          "key": "gpqa_diamond-089a55e5a3",
+          "identical": false,
+          "first_divergence_index": 101,
+          "num_divergent_tokens": 403
+        },
+        {
+          "key": "gpqa_diamond-0c1cc6cb8c",
+          "identical": false,
+          "first_divergence_index": 128,
+          "num_divergent_tokens": 369
+        },
+        {
+          "key": "gpqa_diamond-0c38e0dd0d",
+          "identical": false,
+          "first_divergence_index": 26,
+          "num_divergent_tokens": 484
+        },
+        {
+          "key": "gpqa_diamond-0caf81b8c8",
+          "identical": false,
+          "first_divergence_index": 64,
+          "num_divergent_tokens": 427
+        },
+        {
+          "key": "gpqa_diamond-0dbcc69ff3",
+          "identical": false,
+          "first_divergence_index": 235,
+          "num_divergent_tokens": 274
+        },
+        {
+          "key": "gpqa_diamond-1054cb147f",
+          "identical": false,
+          "first_divergence_index": 2,
+          "num_divergent_tokens": 489
+        },
+        {
+          "key": "gpqa_diamond-11464d18e1",
+          "identical": false,
+          "first_divergence_index": 201,
+          "num_divergent_tokens": 307
+        },
+        {
+          "key": "gpqa_diamond-123161632f",
+          "identical": false,
+          "first_divergence_index": 329,
+          "num_divergent_tokens": 176
+        },
+        {
+          "key": "gpqa_diamond-126561d6b5",
+          "identical": false,
+          "first_divergence_index": 350,
+          "num_divergent_tokens": 162
+        },
+        {
+          "key": "gpqa_diamond-13e7c71f8a",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-145b51d1c8",
+          "identical": false,
+          "first_divergence_index": 100,
+          "num_divergent_tokens": 411
+        },
+        {
+          "key": "gpqa_diamond-14a2ed1ddc",
+          "identical": false,
+          "first_divergence_index": 92,
+          "num_divergent_tokens": 382
+        },
+        {
+          "key": "gpqa_diamond-16464cac70",
+          "identical": false,
+          "first_divergence_index": 110,
+          "num_divergent_tokens": 333
+        },
+        {
+          "key": "gpqa_diamond-16bcf4c712",
+          "identical": false,
+          "first_divergence_index": 435,
+          "num_divergent_tokens": 76
+        },
+        {
+          "key": "gpqa_diamond-17f96c74be",
+          "identical": false,
+          "first_divergence_index": 282,
+          "num_divergent_tokens": 230
+        },
+        {
+          "key": "gpqa_diamond-183797b844",
+          "identical": false,
+          "first_divergence_index": 100,
+          "num_divergent_tokens": 396
+        },
+        {
+          "key": "gpqa_diamond-188c5d2778",
+          "identical": false,
+          "first_divergence_index": 31,
+          "num_divergent_tokens": 460
+        },
+        {
+          "key": "gpqa_diamond-18c1c5c103",
+          "identical": false,
+          "first_divergence_index": 120,
+          "num_divergent_tokens": 388
+        },
+        {
+          "key": "gpqa_diamond-19d5ec504b",
+          "identical": false,
+          "first_divergence_index": 327,
+          "num_divergent_tokens": 183
+        },
+        {
+          "key": "gpqa_diamond-1a5b0ea82d",
+          "identical": false,
+          "first_divergence_index": 41,
+          "num_divergent_tokens": 468
+        },
+        {
+          "key": "gpqa_diamond-1ce3d847d2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1d37a7a51d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f06efeb23",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-1f101bccd2",
+          "identical": false,
+          "first_divergence_index": 39,
+          "num_divergent_tokens": 295
+        },
+        {
+          "key": "gpqa_diamond-20c95dcf30",
+          "identical": false,
+          "first_divergence_index": 203,
+          "num_divergent_tokens": 306
+        },
+        {
+          "key": "gpqa_diamond-20d48d5f0a",
+          "identical": false,
+          "first_divergence_index": 491,
+          "num_divergent_tokens": 21
+        },
+        {
+          "key": "gpqa_diamond-21b950759e",
+          "identical": false,
+          "first_divergence_index": 101,
+          "num_divergent_tokens": 373
+        },
+        {
+          "key": "gpqa_diamond-229ffbdb77",
+          "identical": false,
+          "first_divergence_index": 50,
+          "num_divergent_tokens": 457
+        },
+        {
+          "key": "gpqa_diamond-2413c551ec",
+          "identical": false,
+          "first_divergence_index": 126,
+          "num_divergent_tokens": 362
+        },
+        {
+          "key": "gpqa_diamond-254c10ac4f",
+          "identical": false,
+          "first_divergence_index": 159,
+          "num_divergent_tokens": 351
+        },
+        {
+          "key": "gpqa_diamond-2662eff7a6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-27ae63a859",
+          "identical": false,
+          "first_divergence_index": 0,
+          "num_divergent_tokens": 502
+        },
+        {
+          "key": "gpqa_diamond-28fc44d6ca",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-29e6a1db07",
+          "identical": false,
+          "first_divergence_index": 89,
+          "num_divergent_tokens": 414
+        },
+        {
+          "key": "gpqa_diamond-29ffae74d2",
+          "identical": false,
+          "first_divergence_index": 56,
+          "num_divergent_tokens": 451
+        },
+        {
+          "key": "gpqa_diamond-2c52c770af",
+          "identical": false,
+          "first_divergence_index": 390,
+          "num_divergent_tokens": 119
+        },
+        {
+          "key": "gpqa_diamond-2c9af2ef64",
+          "identical": false,
+          "first_divergence_index": 319,
+          "num_divergent_tokens": 192
+        },
+        {
+          "key": "gpqa_diamond-2d7be3cbb3",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-2e6a2497fe",
+          "identical": false,
+          "first_divergence_index": 106,
+          "num_divergent_tokens": 402
+        },
+        {
+          "key": "gpqa_diamond-2e908bfe56",
+          "identical": false,
+          "first_divergence_index": 189,
+          "num_divergent_tokens": 179
+        },
+        {
+          "key": "gpqa_diamond-32bdeb2d67",
+          "identical": false,
+          "first_divergence_index": 105,
+          "num_divergent_tokens": 407
+        },
+        {
+          "key": "gpqa_diamond-339602fd0a",
+          "identical": false,
+          "first_divergence_index": 146,
+          "num_divergent_tokens": 356
+        },
+        {
+          "key": "gpqa_diamond-35cf9161cc",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-364ddb1397",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "gpqa_diamond-3785b9c93c",
+          "identical": false,
+          "first_divergence_index": 75,
+          "num_divergent_tokens": 432
+        },
+        {
+          "key": "gpqa_diamond-40b2b50a3c",
+          "identical": false,
+          "first_divergence_index": 139,
+          "num_divergent_tokens": 1
+        },
+        {
+          "key": "gpqa_diamond-415ea17892",
+          "identical": false,
+          "first_divergence_index": 16,
+          "num_divergent_tokens": 486
+        },
+        {
+          "key": "gpqa_diamond-41b609bbf5",
+          "identical": false,
+          "first_divergence_index": 72,
+          "num_divergent_tokens": 434
+        },
+        {
+          "key": "gpqa_diamond-42da82ad5c",
+          "identical": false,
+          "first_divergence_index": 133,
+          "num_divergent_tokens": 310
+        },
+        {
+          "key": "gpqa_diamond-435ccdce7c",
+          "identical": false,
+          "first_divergence_index": 284,
+          "num_divergent_tokens": 223
+        },
+        {
+          "key": "mmlu_pro-000c2031fb",
+          "identical": false,
+          "first_divergence_index": 147,
+          "num_divergent_tokens": 363
+        },
+        {
+          "key": "mmlu_pro-0018946c8f",
+          "identical": false,
+          "first_divergence_index": 318,
+          "num_divergent_tokens": 180
+        },
+        {
+          "key": "mmlu_pro-00193f8f1a",
+          "identical": false,
+          "first_divergence_index": 255,
+          "num_divergent_tokens": 257
+        },
+        {
+          "key": "mmlu_pro-001c076309",
+          "identical": false,
+          "first_divergence_index": 43,
+          "num_divergent_tokens": 433
+        },
+        {
+          "key": "mmlu_pro-001de7fe6d",
+          "identical": false,
+          "first_divergence_index": 485,
+          "num_divergent_tokens": 12
+        },
+        {
+          "key": "mmlu_pro-0021813419",
+          "identical": false,
+          "first_divergence_index": 8,
+          "num_divergent_tokens": 455
+        },
+        {
+          "key": "mmlu_pro-00283ccffa",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0029a311d9",
+          "identical": false,
+          "first_divergence_index": 62,
+          "num_divergent_tokens": 445
+        },
+        {
+          "key": "mmlu_pro-0034f38591",
+          "identical": false,
+          "first_divergence_index": 439,
+          "num_divergent_tokens": 72
+        },
+        {
+          "key": "mmlu_pro-00473cb41c",
+          "identical": false,
+          "first_divergence_index": 148,
+          "num_divergent_tokens": 359
+        },
+        {
+          "key": "mmlu_pro-0051ec2069",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-005aa2e50a",
+          "identical": false,
+          "first_divergence_index": 138,
+          "num_divergent_tokens": 368
+        },
+        {
+          "key": "mmlu_pro-0061c6b397",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006afecaed",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-006f3a2112",
+          "identical": false,
+          "first_divergence_index": 357,
+          "num_divergent_tokens": 155
+        },
+        {
+          "key": "mmlu_pro-007967631e",
+          "identical": false,
+          "first_divergence_index": 18,
+          "num_divergent_tokens": 480
+        },
+        {
+          "key": "mmlu_pro-0080dcd4f5",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0081aeb9c3",
+          "identical": false,
+          "first_divergence_index": 48,
+          "num_divergent_tokens": 412
+        },
+        {
+          "key": "mmlu_pro-00996c6808",
+          "identical": false,
+          "first_divergence_index": 56,
+          "num_divergent_tokens": 415
+        },
+        {
+          "key": "mmlu_pro-009a805a5c",
+          "identical": false,
+          "first_divergence_index": 394,
+          "num_divergent_tokens": 106
+        },
+        {
+          "key": "mmlu_pro-00a1016454",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a31c2d18",
+          "identical": false,
+          "first_divergence_index": 47,
+          "num_divergent_tokens": 465
+        },
+        {
+          "key": "mmlu_pro-00a3fcc287",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00a66b167b",
+          "identical": false,
+          "first_divergence_index": 108,
+          "num_divergent_tokens": 377
+        },
+        {
+          "key": "mmlu_pro-00aa833125",
+          "identical": false,
+          "first_divergence_index": 73,
+          "num_divergent_tokens": 407
+        },
+        {
+          "key": "mmlu_pro-00ace67f1c",
+          "identical": false,
+          "first_divergence_index": 125,
+          "num_divergent_tokens": 379
+        },
+        {
+          "key": "mmlu_pro-00af7f3a6e",
+          "identical": false,
+          "first_divergence_index": 199,
+          "num_divergent_tokens": 311
+        },
+        {
+          "key": "mmlu_pro-00be15d2e6",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c0d4c77c",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00c4a9d20a",
+          "identical": false,
+          "first_divergence_index": 45,
+          "num_divergent_tokens": 459
+        },
+        {
+          "key": "mmlu_pro-00ca4f358b",
+          "identical": false,
+          "first_divergence_index": 211,
+          "num_divergent_tokens": 299
+        },
+        {
+          "key": "mmlu_pro-00cc01bdee",
+          "identical": false,
+          "first_divergence_index": 73,
+          "num_divergent_tokens": 395
+        },
+        {
+          "key": "mmlu_pro-00cc0cfe85",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-00df6227d5",
+          "identical": false,
+          "first_divergence_index": 170,
+          "num_divergent_tokens": 299
+        },
+        {
+          "key": "mmlu_pro-00ebfcaa67",
+          "identical": false,
+          "first_divergence_index": 30,
+          "num_divergent_tokens": 474
+        },
+        {
+          "key": "mmlu_pro-00f43b26ac",
+          "identical": false,
+          "first_divergence_index": 182,
+          "num_divergent_tokens": 276
+        },
+        {
+          "key": "mmlu_pro-00ff96e757",
+          "identical": false,
+          "first_divergence_index": 359,
+          "num_divergent_tokens": 153
+        },
+        {
+          "key": "mmlu_pro-0100cdf2db",
+          "identical": false,
+          "first_divergence_index": 29,
+          "num_divergent_tokens": 461
+        },
+        {
+          "key": "mmlu_pro-0103bcb5b1",
+          "identical": false,
+          "first_divergence_index": 159,
+          "num_divergent_tokens": 339
+        },
+        {
+          "key": "mmlu_pro-01067be999",
+          "identical": false,
+          "first_divergence_index": 276,
+          "num_divergent_tokens": 128
+        },
+        {
+          "key": "mmlu_pro-0115478516",
+          "identical": false,
+          "first_divergence_index": 22,
+          "num_divergent_tokens": 473
+        },
+        {
+          "key": "mmlu_pro-011f1fbfc3",
+          "identical": false,
+          "first_divergence_index": 67,
+          "num_divergent_tokens": 443
+        },
+        {
+          "key": "mmlu_pro-0122522953",
+          "identical": false,
+          "first_divergence_index": 4,
+          "num_divergent_tokens": 496
+        },
+        {
+          "key": "mmlu_pro-0126e0f8a7",
+          "identical": false,
+          "first_divergence_index": 41,
+          "num_divergent_tokens": 464
+        },
+        {
+          "key": "mmlu_pro-012ddc1ffc",
+          "identical": false,
+          "first_divergence_index": 148,
+          "num_divergent_tokens": 279
+        },
+        {
+          "key": "mmlu_pro-012eaca73b",
+          "identical": false,
+          "first_divergence_index": 321,
+          "num_divergent_tokens": 185
+        },
+        {
+          "key": "mmlu_pro-012f0d5c8d",
+          "identical": false,
+          "first_divergence_index": 139,
+          "num_divergent_tokens": 342
+        },
+        {
+          "key": "mmlu_pro-0135836ee0",
+          "identical": false,
+          "first_divergence_index": 136,
+          "num_divergent_tokens": 369
+        },
+        {
+          "key": "mmlu_pro-01370cf98d",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-013ba75cb2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0141cfa289",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        },
+        {
+          "key": "mmlu_pro-0151fb8117",
+          "identical": false,
+          "first_divergence_index": 234,
+          "num_divergent_tokens": 273
+        },
+        {
+          "key": "mmlu_pro-016fd5e6ff",
+          "identical": false,
+          "first_divergence_index": 73,
+          "num_divergent_tokens": 433
+        },
+        {
+          "key": "mmlu_pro-0171f1222a",
+          "identical": false,
+          "first_divergence_index": 96,
+          "num_divergent_tokens": 396
+        },
+        {
+          "key": "mmlu_pro-0171fd441d",
+          "identical": false,
+          "first_divergence_index": 145,
+          "num_divergent_tokens": 364
+        },
+        {
+          "key": "mmlu_pro-0177a31370",
+          "identical": false,
+          "first_divergence_index": 110,
+          "num_divergent_tokens": 400
+        },
+        {
+          "key": "mmlu_pro-017bdb86b2",
+          "identical": true,
+          "first_divergence_index": null,
+          "num_divergent_tokens": 0
+        }
+      ]
+    }
+  },
+  "chaos_crosstab": {
+    "n_chaotic_floor": 0,
+    "n_stable_floor": 128,
+    "chaotic_floor_keys": [],
+    "cand_n_divergent": 101,
+    "cand_n_divergent_on_stable": 101,
+    "cand_n_divergent_on_chaotic": 0,
+    "cand_divergent_on_stable_keys": [
+      "aime2026-0e674f51e8",
+      "aime2026-2822569975",
+      "aime2026-4d866680f9",
+      "aime2026-51697b0daa",
+      "aime2026-5cc894a0e8",
+      "aime2026-7443669f7e",
+      "aime2026-7968ea2f49",
+      "aime2026-8742f9e684",
+      "gpqa_diamond-025e20e6e9",
+      "gpqa_diamond-03946dc24e",
+      "gpqa_diamond-045347c35e",
+      "gpqa_diamond-049a3a3426",
+      "gpqa_diamond-051eba2501",
+      "gpqa_diamond-083aa35723",
+      "gpqa_diamond-089a55e5a3",
+      "gpqa_diamond-0c1cc6cb8c",
+      "gpqa_diamond-0c38e0dd0d",
+      "gpqa_diamond-0caf81b8c8",
+      "gpqa_diamond-0dbcc69ff3",
+      "gpqa_diamond-1054cb147f",
+      "gpqa_diamond-11464d18e1",
+      "gpqa_diamond-123161632f",
+      "gpqa_diamond-126561d6b5",
+      "gpqa_diamond-13e7c71f8a",
+      "gpqa_diamond-14a2ed1ddc",
+      "gpqa_diamond-16464cac70",
+      "gpqa_diamond-16bcf4c712",
+      "gpqa_diamond-17f96c74be",
+      "gpqa_diamond-183797b844",
+      "gpqa_diamond-188c5d2778",
+      "gpqa_diamond-19d5ec504b",
+      "gpqa_diamond-1a5b0ea82d",
+      "gpqa_diamond-1f101bccd2",
+      "gpqa_diamond-20c95dcf30",
+      "gpqa_diamond-20d48d5f0a",
+      "gpqa_diamond-21b950759e",
+      "gpqa_diamond-2413c551ec",
+      "gpqa_diamond-254c10ac4f",
+      "gpqa_diamond-27ae63a859",
+      "gpqa_diamond-29e6a1db07",
+      "gpqa_diamond-29ffae74d2",
+      "gpqa_diamond-2c52c770af",
+      "gpqa_diamond-2c9af2ef64",
+      "gpqa_diamond-2d7be3cbb3",
+      "gpqa_diamond-2e6a2497fe",
+      "gpqa_diamond-32bdeb2d67",
+      "gpqa_diamond-339602fd0a",
+      "gpqa_diamond-35cf9161cc",
+      "gpqa_diamond-364ddb1397",
+      "gpqa_diamond-3785b9c93c",
+      "gpqa_diamond-40b2b50a3c",
+      "gpqa_diamond-415ea17892",
+      "gpqa_diamond-41b609bbf5",
+      "gpqa_diamond-42da82ad5c",
+      "gpqa_diamond-435ccdce7c",
+      "mmlu_pro-000c2031fb",
+      "mmlu_pro-0018946c8f",
+      "mmlu_pro-001c076309",
+      "mmlu_pro-001de7fe6d",
+      "mmlu_pro-0021813419",
+      "mmlu_pro-00283ccffa",
+      "mmlu_pro-0029a311d9",
+      "mmlu_pro-0034f38591",
+      "mmlu_pro-00473cb41c",
+      "mmlu_pro-0051ec2069",
+      "mmlu_pro-005aa2e50a",
+      "mmlu_pro-0061c6b397",
+      "mmlu_pro-006afecaed",
+      "mmlu_pro-006f3a2112",
+      "mmlu_pro-007967631e",
+      "mmlu_pro-0081aeb9c3",
+      "mmlu_pro-00996c6808",
+      "mmlu_pro-00a1016454",
+      "mmlu_pro-00a31c2d18",
+      "mmlu_pro-00a3fcc287",
+      "mmlu_pro-00a66b167b",
+      "mmlu_pro-00aa833125",
+      "mmlu_pro-00ace67f1c",
+      "mmlu_pro-00af7f3a6e",
+      "mmlu_pro-00c4a9d20a",
+      "mmlu_pro-00ca4f358b",
+      "mmlu_pro-00cc01bdee",
+      "mmlu_pro-00df6227d5",
+      "mmlu_pro-00f43b26ac",
+      "mmlu_pro-00ff96e757",
+      "mmlu_pro-0100cdf2db",
+      "mmlu_pro-0103bcb5b1",
+      "mmlu_pro-01067be999",
+      "mmlu_pro-0115478516",
+      "mmlu_pro-011f1fbfc3",
+      "mmlu_pro-0122522953",
+      "mmlu_pro-0126e0f8a7",
+      "mmlu_pro-012ddc1ffc",
+      "mmlu_pro-012eaca73b",
+      "mmlu_pro-01370cf98d",
+      "mmlu_pro-0141cfa289",
+      "mmlu_pro-0151fb8117",
+      "mmlu_pro-016fd5e6ff",
+      "mmlu_pro-0171f1222a",
+      "mmlu_pro-0171fd441d",
+      "mmlu_pro-0177a31370"
+    ],
+    "cand_divergence_subset_of_floor": false,
+    "structural_divergent_tokens_on_stable": 31048
+  },
+  "verdict": {
+    "pr607_verdict": "SPEC_STRUCTURALLY_BREAKS_319",
+    "cross_start_floor_clean": true,
+    "cross_start_floor_seq_exact": 1.0,
+    "cross_start_floor_divergent_tokens": 0,
+    "within_instance_clean": false,
+    "cand_warm_seq_exact": 0.2109375,
+    "cand_warm_token_identity": 0.5262451171875,
+    "cand_warm_divergent_tokens": 31048,
+    "cand_warm_verdict": "DIVERGENT",
+    "structural_break_above_floor": true,
+    "structural_divergent_prompts_on_stable": 101,
+    "structural_divergent_tokens_on_stable": 31048,
+    "fern597_seq_exact_anchor": 0.3125,
+    "kanna19_int4_flip_per_tok_anchor": 0.00376,
+    "passes_strict_319": false
+  },
+  "cand_local_tps": 398.5444110623075,
+  "cand_official_proxy_tps": 412.49346544948827,
+  "peak_vram_gb": 19.4697265625
+}
