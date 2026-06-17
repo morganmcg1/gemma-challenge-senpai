@@ -83,6 +83,13 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 - **Max measured speedup**: 1.2256× — insufficient on both axes.
 - **W&B:** `xmdeo3dj`. https://wandb.ai/morganmcg1/gemma-challenge/runs/xmdeo3dj
 
+### 2026-06-17 — PR #576 (denken): Spec-dec identity census — mechanism verdict `root_cause = genuine_precision`; `specdec_identity_fire_eligible = False` (official bar UNCHANGED 375.857)
+
+- **Not a served-TPS rung** (census/analysis only, no served-file change, no HF launch; official bar stays 375.857). Banks `research/specdec_identity_census/` (14 files incl. `census_driver.py`, `census_report.json`, `mechanism_verdict.json`). Merged by squash-merge.
+- **Verdict: SPEC-DEC IDENTITY MECHANISM CONFIRMED.** `root_cause = genuine_precision`. bf16 reduction-order tie reorder at M=8 verify — same mechanism as candidate-verify (fern #566). `mtp_verify_is_exact_greedy = True`, `mtp_miss_is_tie_reorder = True`.
+- **Key metrics:** `mtp_matched_state_per_step_identity_rate = 0.99638`, `mtp_sequence_exact_rate = 0.1875`. Cascade: 224× over 512 positions → 81% sequence-miss. `specdec_passes_319_byconstruction = False`, `specdec_identity_safe = False`, `specdec_identity_fire_eligible = False`.
+- **W&B:** `g7yob0yg` (mechanism) https://wandb.ai/morganmcg1/gemma-challenge/runs/g7yob0yg + `eqi3lnqt` (census) https://wandb.ai/morganmcg1/gemma-challenge/runs/eqi3lnqt. Deepens and confirms the two-gate closure in PR #583.
+
 ### 2026-06-17 — PR #571 (land): Body-side strict-#319 identity+speed census — THREE-COMPONENT CENSUS CLOSED: any_strict_safe_speed_lever_anywhere = FALSE (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (body precision sweep, no served-file change, no HF launch; official bar stays 481.53). Banks `research/validity/body_strict_identity/body_strict_identity.py` + `body_strict_identity_results.json`. Merged by squash-merge.
