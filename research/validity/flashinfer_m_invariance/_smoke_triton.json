@@ -1,0 +1,99 @@
+{
+  "tag": "smoke_triton",
+  "model": "/tmp/gemma4-e4b-qat-w4a16-ct",
+  "env": {
+    "VLLM_ATTENTION_BACKEND": "<unset>",
+    "VLLM_USE_FLASHINFER_SAMPLER": "0"
+  },
+  "widths": [
+    1,
+    8,
+    16
+  ],
+  "repeats": 2,
+  "decode_len": 8,
+  "tps_len": 16,
+  "load_ok": true,
+  "load_s": 157.74,
+  "resolved_attention_backend": "AttentionBackendEnum.TRITON_ATTN",
+  "m_invariance": {
+    "self_determinism": {
+      "1": {
+        "identical_frac": 1.0,
+        "first_divergence": null,
+        "len": 8
+      },
+      "8": {
+        "identical_frac": 1.0,
+        "first_divergence": null,
+        "len": 8
+      },
+      "16": {
+        "identical_frac": 1.0,
+        "first_divergence": null,
+        "len": 8
+      }
+    },
+    "cross_width": {
+      "M1_vs_M8": {
+        "flip_rate": 0.0,
+        "first_divergence": null,
+        "n_flips": 0
+      },
+      "M1_vs_M16": {
+        "flip_rate": 0.0,
+        "first_divergence": null,
+        "n_flips": 0
+      },
+      "M8_vs_M16": {
+        "flip_rate": 0.0,
+        "first_divergence": null,
+        "n_flips": 0
+      }
+    },
+    "byte_exact_m_invariant": true,
+    "self_det_min": 1.0,
+    "target_ids_head": {
+      "1": [
+        8291,
+        563,
+        506,
+        2918,
+        236772,
+        2003,
+        236772,
+        9340
+      ],
+      "8": [
+        8291,
+        563,
+        506,
+        2918,
+        236772,
+        2003,
+        236772,
+        9340
+      ],
+      "16": [
+        8291,
+        563,
+        506,
+        2918,
+        236772,
+        2003,
+        236772,
+        9340
+      ]
+    }
+  },
+  "tps": {
+    "decode_tps_warm_median": 97.9455,
+    "total_tps_warm_median": 84.3548,
+    "prefill_s": 0.03653,
+    "decode_tps_runs": [
+      98.2497,
+      97.5506,
+      97.9455
+    ]
+  }
+}
