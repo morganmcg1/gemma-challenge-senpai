@@ -1,0 +1,25 @@
+[arm:dev307_ppl2] normalized CUDA_VISIBLE_DEVICES '2' -> '0' (single in-container GPU)
+[arm:dev307_ppl2] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[arm:dev307_ppl2] serve: /tmp/senpai-venvs/5f4c623f772358a2/bin/python -m vllm.entrypoints.openai.api_server --model /workspace/senpai/target/submissions/int4_g128_lmhead/model --served-model-name gemma-4-e4b-it --host 127.0.0.1 --port 8000 --dtype bfloat16 --max-model-len 4096 --gpu-memory-utilization 0.90 --trust-remote-code --no-enable-log-requests --max-num-batched-tokens 512
+[arm:dev307_ppl2] extra_env: []
+[arm:dev307_ppl2] ready in 95s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/deterministic_gate_parity/dev307_ppl2/decode_outputs.jsonl --summary-file research/deterministic_gate_parity/dev307_ppl2/decode_summary.json --tokenizer /workspace/senpai/target/submissions/int4_g128_lmhead/model --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=research/deterministic_gate_parity/dev307_ppl2/decode_summary.json
+[arm:dev307_ppl2] wall_tps=127.098 official_proj=131.577 (65536 tok / 515.6s)
+[ppl] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file research/deterministic_gate_parity/dev307_ppl2/ppl_results.jsonl --summary-file research/deterministic_gate_parity/dev307_ppl2/ppl_summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 3.1658256489744545,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 59671.196283819096,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "research/deterministic_gate_parity/dev307_ppl2/ppl_results.jsonl",
+  "ppl": 2.6263635576851043,
+  "prompt_logprobs": 1
+}
+[arm:dev307_ppl2] ppl=2.6263635576851043
+[arm:dev307_ppl2] wrote research/deterministic_gate_parity/dev307_ppl2/arm_result.json
