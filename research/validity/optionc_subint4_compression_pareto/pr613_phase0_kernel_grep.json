@@ -1,0 +1,62 @@
+{
+  "pr": 613,
+  "phase": 0,
+  "task": "decisive kernel grep: does dev307 vLLM carry the sparse-Marlin (2:4) path?",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_fire": true,
+  "engine": "vllm-dev307 (0.22.1rc1.dev307+g3e8afdf78)",
+  "vllm_path": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm",
+  "gpu": "1x A10G (sm_86, 23028 MiB), CUDA_VISIBLE_DEVICES=0",
+  "kernel_present": false,
+  "evidence": {
+    "1_python_scheme_class": {
+      "check": "ls vllm/.../compressed_tensors/schemes/",
+      "found": [
+        "compressed_tensors_scheme.py",
+        "compressed_tensors_w4a4_mxfp4.py",
+        "compressed_tensors_w4a4_nvfp4.py",
+        "compressed_tensors_w4a8_fp8.py",
+        "compressed_tensors_w4a8_int.py",
+        "compressed_tensors_w8a16_fp8.py",
+        "compressed_tensors_w8a8_fp8.py",
+        "compressed_tensors_w8a8_int8.py",
+        "compressed_tensors_w8a8_mxfp8.py",
+        "compressed_tensors_wNa16.py",
+        "compressed_tensors_wNa8o8.py"
+      ],
+      "sparse_24_scheme_present": false,
+      "note": "NO compressed_tensors_w4a16_24.py / W4A16Sparse24 / CompressedTensors24 scheme class. Only dense W/A schemes remain."
+    },
+    "2_compiled_custom_op": {
+      "check": "vllm._custom_ops marlin fns + direct getattr(torch.ops._C, 'gptq_marlin_24_gemm')",
+      "marlin_fns_in_custom_ops": [
+        "_awq_marlin_repack_fake", "_gptq_marlin_repack_fake", "_marlin_gemm_fake",
+        "awq_marlin_moe_repack", "awq_marlin_repack", "gptq_marlin_moe_repack",
+        "gptq_marlin_repack", "marlin_gemm", "marlin_int4_fp8_preprocess",
+        "moe_wna16_marlin_gemm", "moe_wna16_marlin_gemm_fake"
+      ],
+      "dense_marlin_gemm_present": true,
+      "sparse_gptq_marlin_24_gemm_present": false,
+      "any_24_or_sparse_op": [],
+      "note": "Dense marlin_gemm (the live 126.378 WNA16 baseline path) IS present. The 2:4 sparse op gptq_marlin_24_gemm is NOT compiled into this build."
+    },
+    "3_kernel_files": {
+      "check": "find vllm -iname '*24*' (non-pycache)",
+      "found_only": "unrelated fp8 block-shape tuning JSONs (N=24576 dims) for H100/H200/MI325X etc.",
+      "marlin_24_file_present": false
+    },
+    "4_config_parser_active_rejection": {
+      "file": "vllm/model_executor/layers/quantization/compressed_tensors/compressed_tensors.py",
+      "method": "_parse_sparsity_config",
+      "lines": "288-293",
+      "behavior": "raise DeprecationWarning('Sparsity support has been removed from compressed-tensors. Please use a model without sparsity configuration.') on any non-empty sparse_scheme_map",
+      "note": "vLLM-VENDORED parser (not just the external compressed-tensors pip pkg) actively rejects any checkpoint carrying a sparsity_config BEFORE kernel dispatch."
+    }
+  },
+  "pr611_corroboration": "PR #611 stage0 end-to-end already load-failed all three sub-int4 variants at exactly this parser ('Sparsity support has been removed...'). This grep is the direct kernel-level confirmation of that inference: scheme class gone, compiled op gone, parser rejects.",
+  "dense_path_intact": "WNA16 (compressed_tensors_wNa16.py + marlin_utils.marlin_gemm) — the int4 g128 126.378 baseline path — is fully present and unaffected. Only the sparse-2:4 path was removed.",
+  "other_subint4_schemes_in_dev307": "The only sub-int4-byte schemes present are W4A4 mxfp4/nvfp4 — both require Blackwell (sm_100); not runnable on A10G sm_86 (consistent with #611 map). No Ampere-viable sub-int4 weight-compression path exists.",
+  "optionc_verdict": "kernel_present=false. The sparse-Marlin path (gptq_marlin_24_gemm + W4A16Sparse24/CompressedTensors24) is FULLY REMOVED from vLLM dev307 — Python scheme class, compiled CUDA op, and config parser all gone/rejecting — while dense WNA16->Marlin (the 126.378 baseline) is intact. Option-C approach (a) 2:4-sparse W4A16 is DEAD on this stack. With every other sub-int4/mixed format already closed (#611) and the W4A4 fp4 schemes Blackwell-only, this CLOSES option C: 126.378 TPS stands as the quality-safe AR ceiling for the weight-compression lever. NO BUILD per PR instructions.",
+  "decision": "terminal — do not build, do not serve, no HF Job, no fire."
+}
