@@ -1,0 +1,314 @@
+{
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "compute_capability": "8.6",
+    "is_sm86": true,
+    "total_mem_gib": 22.06
+  },
+  "peak_bw": {
+    "bw_read_gbps": 517.8869143358689,
+    "read_us": 2073.3132934570317,
+    "bw_copy_gbps": 480.3129548842733,
+    "copy_us": 4471.009216308594
+  },
+  "byte_model_note": "weight+scale summed over 37 layers from served safetensors; act at width M",
+  "m_sweep": {
+    "1": {
+      "M": 1,
+      "body_us": 4069.580688476562,
+      "body_us_ci": 0.1582960179274166,
+      "body_ms": 4.069580688476562,
+      "total_bytes": 1775462400.0,
+      "ws_bytes": 1772052480.0,
+      "act_bytes": 3409920.0,
+      "achieved_bw_gbps": 436.2764952731875,
+      "f_vs_read": 0.8424165260724197,
+      "f_vs_copy": 0.9083171520499671,
+      "f_vs_spec": 0.7271274921219791,
+      "ai_flop_per_byte": 3.698949016156115
+    },
+    "2": {
+      "M": 2,
+      "body_us": 4080.1074218749995,
+      "body_us_ci": 0.4324625612884699,
+      "body_ms": 4.080107421875,
+      "total_bytes": 1778872320.0,
+      "ws_bytes": 1772052480.0,
+      "act_bytes": 6819840.0,
+      "achieved_bw_gbps": 435.98663860240356,
+      "f_vs_read": 0.8418568350225779,
+      "f_vs_copy": 0.9077136774448448,
+      "f_vs_spec": 0.7266443976706726,
+      "ai_flop_per_byte": 7.3811655685257325
+    },
+    "4": {
+      "M": 4,
+      "body_us": 4095.8975219726562,
+      "body_us_ci": 0.22789273117841005,
+      "body_ms": 4.095897521972656,
+      "total_bytes": 1785692160.0,
+      "ws_bytes": 1772052480.0,
+      "act_bytes": 13639680.0,
+      "achieved_bw_gbps": 435.9709075777802,
+      "f_vs_read": 0.8418264596178556,
+      "f_vs_copy": 0.9076809258305829,
+      "f_vs_spec": 0.7266181792963003,
+      "ai_flop_per_byte": 14.69587513248757
+    },
+    "8": {
+      "M": 8,
+      "body_us": 4127.252502441406,
+      "body_us_ci": 0.25263476585163464,
+      "body_ms": 4.127252502441406,
+      "total_bytes": 1799331840.0,
+      "ws_bytes": 1772052480.0,
+      "act_bytes": 27279360.0,
+      "achieved_bw_gbps": 435.96359537867767,
+      "f_vs_read": 0.8418123403209586,
+      "f_vs_copy": 0.9076657020082225,
+      "f_vs_spec": 0.7266059922977961,
+      "ai_flop_per_byte": 29.12965243786686
+    },
+    "16": {
+      "M": 16,
+      "body_us": 4325.10986328125,
+      "body_us_ci": 0.1938037279394083,
+      "body_ms": 4.32510986328125,
+      "total_bytes": 1826611200.0,
+      "ws_bytes": 1772052480.0,
+      "act_bytes": 54558720.0,
+      "achieved_bw_gbps": 422.32712179344253,
+      "f_vs_read": 0.815481353366553,
+      "f_vs_copy": 0.8792748925441707,
+      "f_vs_spec": 0.7038785363224043,
+      "ai_flop_per_byte": 57.23972752899331
+    },
+    "32": {
+      "M": 32,
+      "body_us": 4708.085632324219,
+      "body_us_ci": 0.20620792767378254,
+      "body_ms": 4.708085632324218,
+      "total_bytes": 1881169920.0,
+      "ws_bytes": 1772052480.0,
+      "act_bytes": 109117440.0,
+      "achieved_bw_gbps": 399.5615345405966,
+      "f_vs_read": 0.7715227465304637,
+      "f_vs_copy": 0.8318774883697797,
+      "f_vs_spec": 0.6659358909009944,
+      "ai_flop_per_byte": 110.61686009294762
+    },
+    "64": {
+      "M": 64,
+      "body_us": 8304.332885742188,
+      "body_us_ci": 1.0552456056397796,
+      "body_ms": 8.304332885742188,
+      "total_bytes": 1990287360.0,
+      "ws_bytes": 1772052480.0,
+      "act_bytes": 218234880.0,
+      "achieved_bw_gbps": 239.66854260107385,
+      "f_vs_read": 0.46278161499489034,
+      "f_vs_copy": 0.49898413141660863,
+      "f_vs_spec": 0.39944757100178974,
+      "ai_flop_per_byte": 207.30346981444887
+    }
+  },
+  "per_component_m1": {
+    "qkv_proj": {
+      "us": 500.654067993164,
+      "total_bytes": 153156608.0,
+      "achieved_bw_gbps": 305.91304014350135,
+      "f_vs_read": 0.5906946703525036,
+      "f_vs_spec": 0.5098550669058356,
+      "pct_of_body_ws": 0.08619374523264683
+    },
+    "o_proj": {
+      "us": 350.3923034667969,
+      "total_bytes": 119288832.0,
+      "achieved_bw_gbps": 340.4436422254457,
+      "f_vs_read": 0.6573706204993149,
+      "f_vs_spec": 0.5674060703757429,
+      "pct_of_body_ws": 0.06712433257055683
+    },
+    "gate_up_proj": {
+      "us": 2083.041229248047,
+      "total_bytes": 1001948160.0,
+      "achieved_bw_gbps": 481.0025581498891,
+      "f_vs_read": 0.9287791308006309,
+      "f_vs_spec": 0.8016709302498152,
+      "pct_of_body_ws": 0.5644546147978642
+    },
+    "down_proj": {
+      "us": 1116.078109741211,
+      "total_bytes": 501068800.0,
+      "achieved_bw_gbps": 448.95495720831286,
+      "f_vs_read": 0.8668976658428347,
+      "f_vs_spec": 0.7482582620138548,
+      "pct_of_body_ws": 0.2822273073989321
+    }
+  },
+  "dispatch": {
+    "selected_per_shape": {
+      "qkv": "MarlinLinearKernel",
+      "o_proj": "MarlinLinearKernel",
+      "gate_up": "MarlinLinearKernel",
+      "down": "MarlinLinearKernel"
+    },
+    "selected_kernel": "MarlinLinearKernel",
+    "marlin_is_unique": true,
+    "cuda_kernel_priority": [
+      "CutlassW4A8LinearKernel",
+      "MacheteLinearKernel",
+      "AllSparkLinearKernel",
+      "MarlinLinearKernel",
+      "ConchLinearKernel",
+      "ExllamaLinearKernel"
+    ],
+    "per_kernel_verdict_gate_up": [
+      {
+        "kernel": "CutlassW4A8LinearKernel",
+        "min_capability": 90,
+        "can_implement": false,
+        "reason": "CUTLASS W4A8 requires compute capability of 90 (Hopper)"
+      },
+      {
+        "kernel": "MacheteLinearKernel",
+        "min_capability": 90,
+        "can_implement": false,
+        "reason": "Machete requires compute capability of 90 (Hopper)"
+      },
+      {
+        "kernel": "AllSparkLinearKernel",
+        "min_capability": 80,
+        "can_implement": false,
+        "reason": "For Ampere GPU, AllSpark does not support group_size = 128. Only group_size = -1 are supported."
+      },
+      {
+        "kernel": "MarlinLinearKernel",
+        "min_capability": 75,
+        "can_implement": true,
+        "reason": ""
+      },
+      {
+        "kernel": "ConchLinearKernel",
+        "min_capability": 80,
+        "can_implement": false,
+        "reason": "conch-triton-kernels is not installed, please install it via `pip install conch-triton-kernels` and try again!"
+      },
+      {
+        "kernel": "ExllamaLinearKernel",
+        "min_capability": 60,
+        "can_implement": false,
+        "reason": "Exllama only supports float16 activations"
+      }
+    ]
+  },
+  "machete": {
+    "machete_supported_schedules_n": 9,
+    "machete_schedules_are_tma_hopper": true,
+    "device_is_hopper_sm90": false,
+    "machete_selectable_here": false
+  },
+  "fp32_reduce_m1": [
+    {
+      "name": "qkv_proj",
+      "K": 2560,
+      "N": 3072,
+      "served_us_m1": 23.879680633544922,
+      "fp32off_us_m1": 22.568960189819336,
+      "speedup_fp32off_m1": 1.0580762442177927,
+      "fp32off_bitexact_vs_served_m1": false,
+      "fp32off_max_abs_delta_m1": 0.001953125
+    },
+    {
+      "name": "o_proj",
+      "K": 2048,
+      "N": 2560,
+      "served_us_m1": 24.330239295959473,
+      "fp32off_us_m1": 23.03999900817871,
+      "speedup_fp32off_m1": 1.056000014901162,
+      "fp32off_bitexact_vs_served_m1": false,
+      "fp32off_max_abs_delta_m1": 0.001953125
+    },
+    {
+      "name": "gate_up_proj",
+      "K": 2560,
+      "N": 20480,
+      "served_us_m1": 58.40896129608154,
+      "fp32off_us_m1": 58.30656051635742,
+      "speedup_fp32off_m1": 1.0017562479902307,
+      "fp32off_bitexact_vs_served_m1": true,
+      "fp32off_max_abs_delta_m1": 0.0
+    },
+    {
+      "name": "down_proj",
+      "K": 10240,
+      "N": 2560,
+      "served_us_m1": 31.784958839416504,
+      "fp32off_us_m1": 31.66208028793335,
+      "speedup_fp32off_m1": 1.0038809373978494,
+      "fp32off_bitexact_vs_served_m1": false,
+      "fp32off_max_abs_delta_m1": 0.00390625
+    }
+  ],
+  "headline": {
+    "body_gemv_bw_saturated": false,
+    "m1_body_achieved_bw_gbps": 436.2764952731875,
+    "m1_f_vs_read_peak": 0.8424165260724197,
+    "m1_f_vs_copy_peak": 0.9083171520499671,
+    "m1_f_vs_600_spec": 0.7271274921219791,
+    "peak_read_gbps": 517.8869143358689,
+    "peak_copy_gbps": 480.3129548842733,
+    "m1_body_us": 4069.580688476562,
+    "m1_body_ms": 4.069580688476562,
+    "m1_body_ws_bytes": 1772052480.0,
+    "m1_body_total_bytes": 1775462400.0,
+    "bw_floor_us_read_peak": 3428.282026157831,
+    "bw_floor_us_600_spec": 2959.1040000000003,
+    "body_gemv_headroom_ms_vs_read_peak": 0.6412986623187312,
+    "body_gemv_headroom_ms_vs_600_spec": 1.1104766884765618,
+    "body_gemv_headroom_tps_vs_read_peak": 9.507509957707,
+    "m_invariance_max_over_m1": 2.0405868617513256,
+    "m_invariance_m8_over_m1": 1.014171438872842,
+    "marlin_is_unique_on_sm86": true,
+    "machete_selectable_here": false,
+    "fp32off_body_speedup_m1": 1.0208459219123653,
+    "fp32off_all_bitexact_m1": false,
+    "byte_identical_body_gemv_lever_exists": false,
+    "ai_flop_per_byte_m1": 3.698949016156115,
+    "ref_official_tps": 126.378,
+    "plus10_target_tps": 136.4,
+    "official_tps": 0,
+    "analysis_only": true,
+    "no_hf_job": true,
+    "no_served_file_change": true
+  },
+  "verdict": "M=1 AR body Marlin W4A16 GEMV achieves 436.3 GB/s = 84.2% of measured read-peak (517.9) / 72.7% of 600 spec. body_gemv_bw_saturated(>= 90% read-peak)=False. Body time is M-INVARIANT (Mmax/M1=2.041, M8/M1=1.014) and AI~3.7 flop/byte << A10G ridge 208 -> the GEMV is weight-read-BANDWIDTH-bound at M=1, NOT a latency-bound regime with a free tiling fix. PHASE-2 (byte-identical recovery): on sm_86 only Marlin can_implement (marlin_unique=True; Machete/Cutlass-W4A8=Hopper sm_90-only, machete_selectable_here=False; AllSpark no-g128 on Ampere; Conch absent; Exllama fp16-only). The one selectable Marlin knob use_fp32_reduce=False is 1.0208x at M=1 but BREAKS byte-exactness -> byte_identical_body_gemv_lever_exists=False. The 84%->100% read-peak residual is NOT byte-identically recoverable (no alt W4A16 backend on sm_86; the only knob/any retile changes the reduction order -> breaks #319). VERDICT: the AR body GEMV is a FIXED Marlin M=1 reference -> the +10-over-126.378 hunt belongs to lawine's attention/graph/scheduler axis (#601). Converges with lawine #591's 0.0 reclaimable from a fresh M=1 bandwidth axis.",
+  "n_distinct": 8,
+  "timestamp": "20260617T163656Z",
+  "self_test": {
+    "self_test_passes": true,
+    "checks": {
+      "weight_bytes_near_int4_floor": true,
+      "body_ws_gt_1p5GB": true,
+      "m1_act_small_vs_ws": true,
+      "ai_well_below_ridge": true,
+      "floor_positive": true,
+      "sat_threshold_is_0p9": true
+    },
+    "body_ws_bytes": 1772052480.0,
+    "body_act_bytes_m1": 3409920.0
+  },
+  "config": {
+    "agent": "stark",
+    "pr": 602,
+    "kind": "int4-body-gemv-bw-saturation",
+    "hidden": 2560,
+    "intermediate": 10240,
+    "n_layers": 37,
+    "group_size": 128,
+    "n_distinct": 8,
+    "ref_official_tps": 126.378
+  },
+  "wandb_run_id": "ymss9maz"
+}
