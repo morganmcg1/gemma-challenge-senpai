@@ -1,0 +1,191 @@
+{
+  "utc": "2026-06-17T13:36:44Z",
+  "card": "PR #592 kv-prefetch-overlap-bound (analysis-only)",
+  "analysis_only": true,
+  "official_tps": 0,
+  "gpu": "NVIDIA A10G (sm_86, ~600 GB/s HBM, 6.29 MB L2, 80 SM, no H20 async-copy/TMA)",
+  "frame_note": "base_fullhead anchor 252.69 = MTP-K7 SERVED (E[T]=3.844); NOT spec-OFF. The PR body's 'spec-OFF' phrasing is an error -- flagged. #569 measured base_fullhead AR M=1 = 97.01 TPS, so 252.69 cannot be the no-spec rate. The overlap SAVINGS is a per-cycle KV-read time (cache read once per cycle, M-invariant), so the bound is frame-robust.",
+  "anchors": {
+    "ANCHOR_252_mtp_served": 252.69,
+    "E_T": 3.844,
+    "SHIP_375": 375.857,
+    "SHIP_481": 481.53
+  },
+  "pr569_split_us": {
+    "decode_step_us": 10308.23,
+    "body_gemv_us": 6728.12,
+    "head_gemv_us": 2775.75,
+    "attn_us": 405.77,
+    "fixed_overhead_us": 398.59,
+    "host_nonkernel_us": 41.54,
+    "ar_m1_tps": 97.01,
+    "head_eff_gbps": 500.95
+  },
+  "pr445_kv_geometry": {
+    "kv_bytes_per_cycle": 49479680,
+    "attn_us_per_cycle": 508.5580899999957,
+    "achieved_kv_gbps": 97.29405740060182,
+    "bandwidth_eff_vs_peak": 0.201911599260916,
+    "per_layer_kv_MB": 1.3372886486486488,
+    "l2_MB": 6.291456,
+    "kv_fits_in_l2": false,
+    "cp_async_deployed": true,
+    "n_layers": 37,
+    "measured_peak_gbps_copy": 481.86462668187585
+  },
+  "geometry": {
+    "vocab_size": 262144,
+    "hidden_size": 2560,
+    "n_layers_base": 42,
+    "n_kv_heads": 2,
+    "head_dim": 256,
+    "global_head_dim": 512,
+    "sliding_window": 512,
+    "n_full_layers": 7,
+    "n_sliding_layers": 35,
+    "num_kv_shared_layers": 18,
+    "kv_dtype_bytes": 2,
+    "rep_ctx": 528
+  },
+  "split_decomposition_us": {
+    "lm_head_bf16_262k": 2775.75,
+    "mlp_proj_body_int4": 6728.12,
+    "attention_kernel_full": 405.77,
+    "kv_read_bandwidth_limited": 108.79958143482943,
+    "attention_compute_hideable": 296.9704185651706,
+    "fixed_overhead": 398.59,
+    "split_sum_us": 10308.23,
+    "split_closure_us": 0.0
+  },
+  "microbench": {
+    "read_bw": {
+      "ran": true,
+      "bytes_read": 1342177280,
+      "median_ms": 2.599936008453369,
+      "effective_read_bw_gbps": 516.2347364073873,
+      "achievable_frac_of_nominal": 0.8603912273456455
+    },
+    "lm_head_m1": {
+      "ran": true,
+      "M": 1,
+      "wall_us": 2650.1119136810303,
+      "weight_bytes": 1342177280,
+      "weight_GB": 1.34217728,
+      "eff_gbps": 506.46060382246395
+    },
+    "lm_head_m8": {
+      "ran": true,
+      "M": 8,
+      "wall_us": 2676.7361164093018,
+      "weight_bytes": 1342177280,
+      "weight_GB": 1.34217728,
+      "eff_gbps": 501.4230845438956
+    },
+    "kv_read_sweep": {
+      "ran": true,
+      "rows": [
+        {
+          "ctx": 128,
+          "kv_bytes": 12845056,
+          "read_us": 38.91199827194214,
+          "eff_gbps": 330.10527781766604
+        },
+        {
+          "ctx": 256,
+          "kv_bytes": 25690112,
+          "read_us": 57.34400078654289,
+          "eff_gbps": 447.9999938551337
+        },
+        {
+          "ctx": 384,
+          "kv_bytes": 38535168,
+          "read_us": 81.91999793052673,
+          "eff_gbps": 470.4000118833038
+        },
+        {
+          "ctx": 512,
+          "kv_bytes": 51380224,
+          "read_us": 106.49599879980087,
+          "eff_gbps": 482.46154389883117
+        },
+        {
+          "ctx": 528,
+          "kv_bytes": 51838976,
+          "read_us": 107.51999914646149,
+          "eff_gbps": 482.13333716070844
+        },
+        {
+          "ctx": 1024,
+          "kv_bytes": 66060288,
+          "read_us": 141.31200313568115,
+          "eff_gbps": 467.4782504963291
+        }
+      ]
+    }
+  },
+  "bound": {
+    "achievable_read_bw_gbps": 516.2347364073873,
+    "kv_bytes_geometric": 51838976,
+    "kv_bytes_445_scaled": 56166123,
+    "kv_bytes_used": 56166123,
+    "kv_MB_used": 56.16612324324324,
+    "kv_read_us_bandwidth_limited": 108.79958143482943,
+    "attn_kv_wall_us_occbound": 577.2821562162113,
+    "head_bytes": 1342177280,
+    "head_GB": 1.34217728,
+    "head_read_over_kv_read_ratio": 23.896562598549355,
+    "attn_compute_us": 296.9704185651706,
+    "hideable_compute_us": 7025.090418565171,
+    "exposed_kv_us_after_overlap": 0.0,
+    "served_cycle_us": 15212.31548537734,
+    "new_cycle_roofline_us": 15103.51590394251,
+    "prefetch_overlap_bound_tps": 254.51027591506625,
+    "bound_generous_tps": 262.65741345054636,
+    "bound_realistic_tps": 252.69,
+    "savings_us_roofline": 108.79958143482872,
+    "delta_tps_roofline": 1.8202759150662473,
+    "delta_tps_pct_roofline": 0.7203592999589407,
+    "ar_m1_new_step_us": 10199.43041856517,
+    "ar_m1_bound_tps": 98.04469063093794,
+    "kv_frac_of_served_cycle": 0.007152072381052823,
+    "kv_frac_of_ar_step": 0.010554632699777695,
+    "ship_cycle_us": 10227.293891027703,
+    "need_hide_us_to_reach_ship": 4985.021594349637,
+    "ctx_tokens_for_kv_alone_to_reach_ship": 25644.145694597202,
+    "prefetch_can_reach_ship": false,
+    "prefetch_beats_252": true
+  },
+  "verdict": {
+    "prefetch_overlap_bound_tps": 254.51027591506625,
+    "bound_generous_tps": 262.65741345054636,
+    "bound_realistic_tps": 252.69,
+    "prefetch_can_reach_ship": false,
+    "prefetch_beats_252": true,
+    "kv_is_bottleneck": false,
+    "lm_head_is_bottleneck": true,
+    "head_read_over_kv_read_ratio": 23.896562598549355,
+    "kv_frac_of_served_cycle": 0.007152072381052823,
+    "realistic_gain_pct": 0.0,
+    "summary": "KV read is ~0.72% of the served cycle and the 262k bf16 lm_head reads 24x more bytes than the whole KV cache. Even a PERFECT-overlap roofline reaches 254.5 TPS (over-generous 262.7); ship needs 375.9. cp.async is already deployed + the attn kernel is occupancy-bound at 20% peak -> realistic prefetch gain ~0. NO FIRE."
+  },
+  "self_test": {
+    "bound_below_ship": true,
+    "head_read_over_kv_gt_10x": true,
+    "kv_frac_lt_5pct": true,
+    "read_bw_in_band": true,
+    "lm_head_matches_569": true,
+    "split_closure_ok": true,
+    "nan_clean": true,
+    "all_passed": true
+  },
+  "primary_metric": {
+    "name": "prefetch_overlap_bound_tps",
+    "value": 254.51027591506625
+  },
+  "test_metric": {
+    "name": "self_test_all_passed",
+    "value": 1
+  },
+  "elapsed_s": 2.1981544494628906,
+  "peak_vram_GiB": 1.2618789672851562
+}
