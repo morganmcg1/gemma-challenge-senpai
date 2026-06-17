@@ -1,0 +1,205 @@
+{
+  "model": "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+  "mode": "graphs_on",
+  "graph_tps": 129.25496737092251,
+  "tps_tokens": 256,
+  "tps_wall_s": 1.980581521987915,
+  "profile_tokens": 64,
+  "profile_wall_s": 1.098576545715332,
+  "gpu_busy_ms": 547.0635919999984,
+  "gpu_busy_share_of_wall_pct": 49.79749423321076,
+  "gpu_busy_per_token_ms": 8.547868624999975,
+  "category_ms": {
+    "matmul_gemm": 494.590822000001,
+    "attention": 17.924480000001438,
+    "norm": 11.596188999999017,
+    "other": 8.728537999997606,
+    "elementwise_copy": 13.054884999999002,
+    "sampling_lmhead": 1.16867800000016
+  },
+  "category_pct": {
+    "matmul_gemm": 90.40828694006791,
+    "attention": 3.2764892897499727,
+    "norm": 2.1197149964969793,
+    "other": 1.5955252968100337,
+    "elementwise_copy": 2.3863560271433744,
+    "sampling_lmhead": 0.21362744973168737
+  },
+  "top_kernels": [
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 236.69555900000003,
+      "count": 5419,
+      "pct": 43.26655300431704,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 171.22989700000278,
+      "count": 10584,
+      "pct": 31.299815872229214,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "_C::marlin_gemm",
+      "ms": 50.252069999999854,
+      "count": 317,
+      "pct": 9.185782189650814,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "kernel_unified_attention",
+      "ms": 15.12350300000094,
+      "count": 2688,
+      "pct": 2.7644872042592414,
+      "category": "attention"
+    },
+    {
+      "kernel": "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+      "ms": 9.381459000000275,
+      "count": 2624,
+      "pct": 1.714875407025862,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_red_fused_add_marlin_gemm_rms_norm_0",
+      "ms": 9.014569999999319,
+      "count": 2688,
+      "pct": 1.647810260420208,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_red_fused_add_rms_norm_2",
+      "ms": 7.1438649999987645,
+      "count": 2688,
+      "pct": 1.3058564131240495,
+      "category": "norm"
+    },
+    {
+      "kernel": "reduce_segments",
+      "ms": 6.623061999997459,
+      "count": 2646,
+      "pct": 1.210656694550691,
+      "category": "other"
+    },
+    {
+      "kernel": "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+      "ms": 5.742495999998202,
+      "count": 2688,
+      "pct": 1.0496944201686553,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_poi_fused_gelu_marlin_gemm_mul_3",
+      "ms": 4.5612350000010595,
+      "count": 2688,
+      "pct": 0.8337668722068919,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 2, 4, 8, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 4.231274999999952,
+      "count": 203,
+      "pct": 0.7734521291265101,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_poi_fused_6",
+      "ms": 2.814761000000144,
+      "count": 1472,
+      "pct": 0.5145217194421069,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 2, 16, 4, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 2.7917199999999864,
+      "count": 50,
+      "pct": 0.5103099604551996,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "reshape_and_cache_kernel_flash",
+      "ms": 2.469936000000489,
+      "count": 1536,
+      "pct": 0.45148974198240854,
+      "category": "attention"
+    },
+    {
+      "kernel": "triton_per_fused_5",
+      "ms": 2.4418399999994653,
+      "count": 1472,
+      "pct": 0.44635395879159007,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "triton_poi_fused_add_index_select_mul_rms_norm_split_split_with_sizes_sub_unsqueeze_view_6",
+      "ms": 2.1756140000005324,
+      "count": 1152,
+      "pct": 0.3976894152372214,
+      "category": "norm"
+    },
+    {
+      "kernel": "aten::copy_",
+      "ms": 1.9037110000000947,
+      "count": 1664,
+      "pct": 0.34798714954514837,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "triton_per_fused_rms_norm_split_with_sizes_view_5",
+      "ms": 1.6865260000001945,
+      "count": 1152,
+      "pct": 0.30828701172279793,
+      "category": "norm"
+    },
+    {
+      "kernel": "_compute_slot_mapping_kernel",
+      "ms": 0.9899209999999093,
+      "count": 384,
+      "pct": 0.1809517237988508,
+      "category": "other"
+    },
+    {
+      "kernel": "aten::argmax",
+      "ms": 0.6182130000002071,
+      "count": 64,
+      "pct": 0.1130056923985921,
+      "category": "sampling_lmhead"
+    },
+    {
+      "kernel": "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+      "ms": 0.5504649999999528,
+      "count": 64,
+      "pct": 0.10062175733309528,
+      "category": "sampling_lmhead"
+    },
+    {
+      "kernel": "aten::index",
+      "ms": 0.5207999999998246,
+      "count": 128,
+      "pct": 0.09519917019077119,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "Memcpy HtoD (Pinned -> Device)",
+      "ms": 0.5146879999997372,
+      "count": 769,
+      "pct": 0.09408193261739463,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "void at::native::unrolled_elementwise_kernel<at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, 4, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1> >(int, at::native::direct_copy_kernel_cuda(at::TensorIteratorBase&)::{lambda()#3}::operator()() const::{lambda()#4}::operator()() const::{lambda(long)#1}, std::array<char*, 2ul>, TrivialOffsetCalculator<1, unsigned int>, TrivialOffsetCalculator<1, unsigned int>, at::native::memory::LoadWithCast<1>, at::native::memory::StoreWithCast<1>)",
+      "ms": 0.4852389999996376,
+      "count": 256,
+      "pct": 0.08869882900188301,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "aten::gather",
+      "ms": 0.40016500000003724,
+      "count": 65,
+      "pct": 0.07314780326306898,
+      "category": "other"
+    }
+  ]
+}

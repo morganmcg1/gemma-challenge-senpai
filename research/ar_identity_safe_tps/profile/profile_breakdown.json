@@ -1,0 +1,238 @@
+{
+  "model": "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+  "mode": "enforce_eager (graphs off)",
+  "gen_tokens": 256,
+  "eager_wall_s": 33.376609325408936,
+  "eager_tps": 7.670042139514525,
+  "total_cuda_ms": 4381.820091999411,
+  "category_ms": {
+    "matmul_marlin": 3338.6634499999777,
+    "norm": 371.48074400059073,
+    "attention": 244.1799929998114,
+    "other": 163.21267999962586,
+    "elementwise_copy": 137.18827499961318,
+    "activation": 122.60280199982014,
+    "sampling_lmhead": 4.4921479999714355
+  },
+  "category_pct": {
+    "matmul_marlin": 76.19353099630698,
+    "norm": 8.477772619621296,
+    "attention": 5.572570025082724,
+    "other": 3.7247690816341215,
+    "elementwise_copy": 3.1308513841109025,
+    "activation": 2.797988037520657,
+    "sampling_lmhead": 0.10251785572332073
+  },
+  "top_kernels": [
+    {
+      "kernel": "_C::marlin_gemm",
+      "cuda_ms": 1669.3838849999886,
+      "count": 65024,
+      "pct": 38.09795587107854,
+      "category": "matmul_marlin"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "cuda_ms": 959.5700050001495,
+      "count": 21931,
+      "pct": 21.8988909825894,
+      "category": "matmul_marlin"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "cuda_ms": 702.6295409998398,
+      "count": 42840,
+      "pct": 16.03510701598048,
+      "category": "matmul_marlin"
+    },
+    {
+      "kernel": "_C::rms_norm",
+      "cuda_ms": 185.7464680002957,
+      "count": 77312,
+      "pct": 4.239025430081958,
+      "category": "norm"
+    },
+    {
+      "kernel": "void vllm::rms_norm_kernel<c10::BFloat16, 8, 2>(c10::BFloat16*, c10::BFloat16 const*, long, long, long, long, long, c10::BFloat16 const*, float, int, int)",
+      "cuda_ms": 132.56942600030837,
+      "count": 54016,
+      "pct": 3.0254420130657933,
+      "category": "norm"
+    },
+    {
+      "kernel": "vllm::unified_attention_with_output",
+      "cuda_ms": 100.64279299982672,
+      "count": 10752,
+      "pct": 2.2968262248736857,
+      "category": "attention"
+    },
+    {
+      "kernel": "kernel_unified_attention",
+      "cuda_ms": 71.57259099989368,
+      "count": 10752,
+      "pct": 1.6333986676124657,
+      "category": "attention"
+    },
+    {
+      "kernel": "aten::add",
+      "cuda_ms": 55.80926299978244,
+      "count": 33024,
+      "pct": 1.2736548244343107,
+      "category": "other"
+    },
+    {
+      "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::CUDAFunctor_add<c10::BFloat16>, std::array<char*, 3ul> >(int, at::native::CUDAFunctor_add<c10::BFloat16>, std::array<char*, 3ul>)",
+      "cuda_ms": 55.434211999758205,
+      "count": 32512,
+      "pct": 1.2650955729782998,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "void vllm::rms_norm_kernel<c10::BFloat16, 8, 3>(c10::BFloat16*, c10::BFloat16 const*, long, long, long, long, long, c10::BFloat16 const*, float, int, int)",
+      "cuda_ms": 53.16484999998669,
+      "count": 23296,
+      "pct": 1.2133051764735447,
+      "category": "norm"
+    },
+    {
+      "kernel": "_C::gelu_tanh_and_mul",
+      "cuda_ms": 41.30704199995881,
+      "count": 10752,
+      "pct": 0.9426914189238322,
+      "category": "activation"
+    },
+    {
+      "kernel": "void vllm::act_and_mul_kernel<c10::BFloat16, __nv_bfloat162, &(c10::BFloat16 vllm::gelu_tanh_kernel<c10::BFloat16>(c10::BFloat16 const&)), &(__nv_bfloat162 vllm::packed_gelu_tanh_kernel<__nv_bfloat162>(__nv_bfloat162 const&)), true, true, false, false>(c10::BFloat16*, c10::BFloat16 const*, int, float)",
+      "cuda_ms": 41.30704199995881,
+      "count": 10752,
+      "pct": 0.9426914189238322,
+      "category": "activation"
+    },
+    {
+      "kernel": "aten::mul",
+      "cuda_ms": 33.132275000035314,
+      "count": 11776,
+      "pct": 0.7561304276396514,
+      "category": "other"
+    },
+    {
+      "kernel": "void at::native::elementwise_kernel<128, 4, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1}>(int, at::native::gpu_kernel_impl_nocast<at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::binary_internal::MulFunctor<float> > >(at::TensorIteratorBase&, at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::binary_internal::MulFunctor<float> > const&)::{lambda(int)#1})",
+      "cuda_ms": 32.84523100003005,
+      "count": 11562,
+      "pct": 0.7495796338147438,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "_C::rotary_embedding",
+      "cuda_ms": 30.763482000035903,
+      "count": 10752,
+      "pct": 0.7020708599197332,
+      "category": "attention"
+    },
+    {
+      "kernel": "void vllm::rotary_embedding_kernel<c10::BFloat16, c10::BFloat16, true>(long const*, c10::BFloat16*, c10::BFloat16*, c10::BFloat16 const*, int, long, long, long, int, int, int, long, bool)",
+      "cuda_ms": 30.763482000035903,
+      "count": 10752,
+      "pct": 0.7020708599197332,
+      "category": "attention"
+    },
+    {
+      "kernel": "reduce_segments",
+      "cuda_ms": 29.052089999933305,
+      "count": 10710,
+      "pct": 0.6630142130430765,
+      "category": "other"
+    },
+    {
+      "kernel": "aten::gelu",
+      "cuda_ms": 19.994358999951263,
+      "count": 10752,
+      "pct": 0.45630259983649624,
+      "category": "activation"
+    },
+    {
+      "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::GeluCUDAKernelImpl(at::TensorIteratorBase&, at::native::GeluType)::{lambda()#1}::operator()() const::{lambda()#4}::operator()() const::{lambda(c10::BFloat16)#1}, std::array<char*, 2ul> >(int, at::native::GeluCUDAKernelImpl(at::TensorIteratorBase&, at::native::GeluType)::{lambda()#1}::operator()() const::{lambda()#4}::operator()() const::{lambda(c10::BFloat16)#1}, std::array<char*, 2ul>)",
+      "cuda_ms": 19.994358999951263,
+      "count": 10752,
+      "pct": 0.45630259983649624,
+      "category": "activation"
+    },
+    {
+      "kernel": "aten::mul_",
+      "cuda_ms": 18.09842799991449,
+      "count": 10752,
+      "pct": 0.41303448384290553,
+      "category": "other"
+    },
+    {
+      "kernel": "void at::native::vectorized_elementwise_kernel<4, at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul> >(int, at::native::BinaryFunctor<c10::BFloat16, c10::BFloat16, c10::BFloat16, at::native::binary_internal::MulFunctor<float> >, std::array<char*, 3ul>)",
+      "cuda_ms": 17.934554999914674,
+      "count": 10710,
+      "pct": 0.40929464522426784,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "vllm::unified_kv_cache_update",
+      "cuda_ms": 10.447723000018469,
+      "count": 6144,
+      "pct": 0.23843340850744982,
+      "category": "other"
+    },
+    {
+      "kernel": "reshape_and_cache_kernel_flash",
+      "cuda_ms": 10.437645000019186,
+      "count": 6144,
+      "pct": 0.2382034127571067,
+      "category": "attention"
+    },
+    {
+      "kernel": "aten::copy_",
+      "cuda_ms": 6.714858999959472,
+      "count": 6656,
+      "pct": 0.15324360331953985,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 2, 4, 8, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "cuda_ms": 4.218474999999914,
+      "count": 203,
+      "pct": 0.09627220906906374,
+      "category": "matmul_marlin"
+    },
+    {
+      "kernel": "_compute_slot_mapping_kernel",
+      "cuda_ms": 3.9909950000106047,
+      "count": 1536,
+      "pct": 0.0910807590502769,
+      "category": "other"
+    },
+    {
+      "kernel": "aten::to",
+      "cuda_ms": 3.788804999960837,
+      "count": 2816,
+      "pct": 0.08646646645485659,
+      "category": "other"
+    },
+    {
+      "kernel": "aten::_to_copy",
+      "cuda_ms": 3.788804999960837,
+      "count": 2048,
+      "pct": 0.08646646645485659,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 2, 16, 4, false, 4, 8, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "cuda_ms": 2.861544000000027,
+      "count": 50,
+      "pct": 0.06530491758949221,
+      "category": "matmul_marlin"
+    },
+    {
+      "kernel": "aten::index",
+      "cuda_ms": 2.593892000009551,
+      "count": 512,
+      "pct": 0.05919667958859457,
+      "category": "elementwise_copy"
+    }
+  ]
+}
