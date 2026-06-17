@@ -171,6 +171,19 @@ def main() -> int:
             n_scored += 1
             if correct:
                 n_correct += 1
+        # PR #548: additive empty/EOS-rate instrumentation (no scoring change).
+        # An immediate first-token-EOS yields an empty completion -> the choice
+        # scorer extracts no answer -> scored incorrect. Recording the raw
+        # completion length separates a recoverable EOS-artifact empty from a
+        # genuine wrong answer; `empty` is gated on err is None so a request
+        # error is not miscounted as an EOS empty. Reads the sample output only.
+        comp = ""
+        try:
+            out_obj = getattr(s, "output", None)
+            comp = (out_obj.completion if out_obj is not None else "") or ""
+        except Exception:
+            comp = ""
+        is_empty = bool(err is None and not comp.strip())
         tgt = s.target if isinstance(s.target, str) else json.dumps(s.target)
         per_sample.append(
             {
@@ -180,11 +193,15 @@ def main() -> int:
                 "value": val,
                 "correct": bool(correct),
                 "error": err,
+                "empty": is_empty,
+                "completion_chars": len(comp),
                 "prompt_sha": prompt_sha.get(sid),
             }
         )
 
     accuracy = (n_correct / n_scored) if n_scored else float("nan")
+    n_empty = sum(1 for r in per_sample if r["empty"])
+    empty_rate = (n_empty / len(per_sample)) if per_sample else float("nan")
 
     out = {
         "task": args.task,
@@ -198,6 +215,8 @@ def main() -> int:
         "n_scored": n_scored,
         "n_correct": n_correct,
         "n_error": n_error,
+        "n_empty": n_empty,
+        "empty_rate": empty_rate,
         "accuracy": accuracy,
         "max_tokens": args.max_tokens,
         "base_url": args.base_url,
@@ -209,7 +228,8 @@ def main() -> int:
 
     print(
         f"[run_eval] task={args.task} arm={args.arm} acc={accuracy:.4f} "
-        f"scored={n_scored} correct={n_correct} err={n_error} -> {args.out}",
+        f"scored={n_scored} correct={n_correct} err={n_error} "
+        f"empty={n_empty} empty_rate={empty_rate:.4f} -> {args.out}",
         flush=True,
     )
     # NaN guard: a NaN accuracy means nothing scored -> a hard failure to surface.
