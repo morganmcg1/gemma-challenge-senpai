@@ -1,0 +1,130 @@
+{
+  "agent": "lawine",
+  "alt_framework_fixed_overhead_ms": null,
+  "alt_framework_head_bw_GBs": null,
+  "alt_framework_quality_safe_tps": 311.25,
+  "analysis_only": true,
+  "argmax_identity_rate": null,
+  "checkpoint_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "cited": {
+    "a10g_hbm_peak_GBs": 600.0,
+    "base_fullhead_tps": 252.31,
+    "corrected_quality_safe_ceiling_tps": 311.25,
+    "fixed_overhead_floor_ms_554": 0.573,
+    "head_bw_pct_of_peak": 80.5,
+    "head_gemv_bw_GBs_550": 482.9
+  },
+  "feasibility_evidence_complete": 1,
+  "framework_infeasible_reason": "install-too-big-for-disk+downgrades-serve-torch+attention-identity-flip",
+  "framework_moves_ceiling": false,
+  "framework_serves_byte_identical": false,
+  "framework_tried": "SGLang",
+  "generated_utc": "2026-06-17T04:24:24.245402+00:00",
+  "gpu_model_forward": 0,
+  "gpu_serve": 0,
+  "hardware": "A10G sm_86 23GB / 600 GB/s HBM",
+  "install_feasibility": {
+    "dep_resolution_error": null,
+    "downgrades_serve_torch": true,
+    "free_disk_gb": 3.33,
+    "heavy_download_gb": 4.21,
+    "heavy_wheels_mb": {
+      "flashinfer-cubin": 150.7,
+      "flashinfer-python": 7.6,
+      "nvidia-cublas-cu12": 594.3,
+      "nvidia-cuda-nvrtc-cu12": 88.0,
+      "nvidia-cudnn-cu12": 706.8,
+      "nvidia-cufft-cu12": 193.1,
+      "nvidia-cusolver-cu12": 267.5,
+      "nvidia-cusparse-cu12": 288.2,
+      "nvidia-cusparselt-cu12": 287.2,
+      "sgl-kernel": 626.6,
+      "sglang": 5.2,
+      "torch": 899.7,
+      "torchao": 5.7,
+      "torchaudio": 2.1,
+      "torchvision": 8.0,
+      "triton": 170.5,
+      "xgrammar": 8.9
+    },
+    "install_fits_free_disk": false,
+    "install_infeasible_in_box": true,
+    "n_packages_would_download": 76,
+    "n_packages_would_install": 164,
+    "pod_serve_torch": "2.11.0+cu130",
+    "pod_serve_vllm": "0.22.0",
+    "resolved_flashinfer": "0.6.3",
+    "resolved_sgl_kernel": "0.3.21",
+    "resolved_torch": "2.9.1",
+    "sglang_resolved_version": "0.5.9"
+  },
+  "kind": "framework-zoomout-ceiling",
+  "lever_portable_to_vllm": null,
+  "model_id": "google/gemma-4-E4B-it",
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_served_file_change": true,
+  "no_submission": true,
+  "official_tps": 0,
+  "one_line_verdict": "framework-robust NO-FIRE: no alternate framework serves THIS w4a16/sm_86 het-head-dim checkpoint byte-identically (SGLang install-infeasible in-box + FlashInfer-default flips identity / Triton lacks sliding-window; corroborated on-branch by SGLang #498, TRT-LLM #502, FlashInfer #507, and the public llama.cpp datapoint at 97.76 TPS with a DIFFERENT GGUF quant), so neither ceiling term is framework-movable -- the 0.573 ms fixed-overhead floor is engine-independent (#498) and the 482.9 GB/s head wall is the HBM hardware limit realized by Marlin (the only w4a16 kernel on sm_86, which alt-framework GEMVs lose to). alt_framework_quality_safe_tps stays = 311.25.",
+  "peak_gpu_mib": 0,
+  "pr": 558,
+  "primary_metric": {
+    "name": "alt_framework_quality_safe_tps",
+    "value": 311.25
+  },
+  "prior_probes": {
+    "flashinfer_507": {
+      "default_m_invariant": 0,
+      "free_byte_exact": false,
+      "loads": 1,
+      "pr": 507,
+      "wandb": "7me2xw6p"
+    },
+    "sglang_498": {
+      "default_is_byte_exact": false,
+      "engine_independent_tax": true,
+      "pr": 498,
+      "sglang_decode_tps": null,
+      "sglang_uninstallable": true,
+      "status": "BLOCKED: SGLang uninstallable (pod CUDA12.9 vs sgl-kernel CUDA13; '0.22.1rc1' is the vLLM version); vLLM forces TRITON_ATTN for Gemma-4; flashinfer decode unsupported at global head_dim=512 on sm_86. See engine_decode_tps_triton_vanilla for the realized on-A10G anchor and determinism_tax_pct for the attention-kernel tax.",
+      "vllm_forced_triton": true,
+      "wandb": "djwaqs7o"
+    },
+    "trtllm_502": {
+      "build_succeeded": null,
+      "loads_checkpoint": null,
+      "pr": 502,
+      "structurally_blocked": true
+    }
+  },
+  "public_llamacpp": {
+    "byte_identical_to_vllm_w4a16_ref": false,
+    "gemv_loses_to_marlin_at_verify_shape": true,
+    "note": "only non-vLLM framework on the board; 97.76 TPS << base_fullhead 252.31 and << vLLM frontier; GGUF q4_0 (PPL 1.982) != served w4a16-ct (PPL 2.006) so it is NOT byte-identical to the served vLLM bf16-head argmax reference.",
+    "ppl": 1.982,
+    "quant": "gguf-q4_0",
+    "tps": 97.76
+  },
+  "self_det": true,
+  "selftest": {
+    "checks": {
+      "a_free_disk_measured": true,
+      "b_dep_resolution_ok": true,
+      "c_sglang_needs_own_torch": true,
+      "d_install_exceeds_free_disk": true,
+      "e_prior_498_corroborates_uninstallable": true,
+      "f_resolved_backend_is_flashinfer": true,
+      "g_stage1_not_byte_identical": true,
+      "h_stage2_no_ceiling_move": true,
+      "i_no_launch_flags": true,
+      "j_primary_metric_is_corrected_ceiling": true
+    },
+    "n_checks": 10,
+    "passes": true
+  },
+  "verdict_class": "framework-robust-NO-FIRE",
+  "wandb_run_ids": [
+    "rdbnjwxz"
+  ]
+}
