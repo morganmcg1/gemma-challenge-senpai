@@ -746,3 +746,28 @@ _Last updated: 2026-06-17 (**PR #571 BANK-MERGED — THREE-COMPONENT CENSUS CLOS
 - **Tests:** 32 new CPU-only/mocked tests in `test_official_gate.py` (truth table PASS/FAIL/INCOMPLETE, three-valued aggregation, weight-tier selection); 46 total passing.
 - **Smoke (fa2sw, 8 prompts):** `official_gate = PASS`, PPL 2.3767 ✓, 8/8 complete, all modalities loaded.
 - **Follow-ups queued:** (a) stage audio/video sample inputs for functional probe; (b) wire `official_gate` into HF-launch preflight; (c) make INCOMPLETE blocking in launch path.
+
+### 2026-06-17 — PR #612: Gen-budget truncation fix for GPQA-D evaluation (Option B) ✓ MERGED — ANALYSIS-ONLY
+
+- **Status:** MERGED. analysis_only=true, official_tps=0. No TPS change. Identifies and corrects a generation-budget truncation artifact that was masking true GPQA-D accuracy for Option B.
+- **Primary metric (validity):** `gpqa_diamond_acc_gb6144` = **0.4764** on dev307 + Option B (spec, MTP-K7). This **marginally passes** the quality gate threshold of ≥0.471 (90% of base 0.5236).
+- **W&B run:** fern PR #612, group `gpqa-gen-budget`
+- **Key finding:** Prior GPQA FAIL at 0.4141 (Option B) was a truncation artifact. `--max-tokens 3072` caused ~12.8% of GPQA CoT items to cut off before emitting `ANSWER:`, scoring wrong. Raising to gb6144 (`--max-tokens 6144`) drives truncation to 0% and lifts accuracy to 0.4764.
+- **P53 artifact:** At gb6144, item with 2049 input tokens is rejected (2049+6144 > 8192 ctx limit), scored wrong in all seeds — config artifact, not a quality signal.
+- **Implication:** Option B GPQA-D gate now MARGINALLY PASSES (0.4764 ≥ 0.471). Remaining quality panel needed: MMLU-Pro (≥0.605), AIME (≥0.090), GSM8K (≥0.807) on dev307 + spec stack.
+
+### 2026-06-17 — PR #621: Spec-#319 trigger localized: RECOVERABLE (attention-3D-splitKV config mismatch under BI=0 reference) ✓ MERGED — ANALYSIS-ONLY
+
+- **Status:** MERGED as a **validity-infrastructure closure — NOT a TPS change.** analysis_only=true, official_tps=0. Localizes the root cause of the 47% spec-#319 break (wirbel #607) to a **recoverable reference-side config mismatch**, not a kernel defect.
+- **Primary metric:** `spec_verify_vs_ar_maxdiff_under_BI` = **0.0** (bit-exact at verify width under BI=1). No official TPS measurement.
+- **W&B run:** `4jv01n87`, group `spec-identity-trigger-localize`
+- **VERDICT: `SPEC_TRIGGER_RECOVERABLE__attention_3D_splitKV__VLLM_BATCH_INVARIANT`**
+- **Key findings:**
+  - **Probe 1 (Marlin M-sweep incl. lm_head N=262144):** All shapes bit-exact at M=7/8. First divergence at M=32 (1 bf16-ULP). Marlin fully exonerated.
+  - **Probe 2 (TRITON_ATTN attention):** verify(2D) vs AR(2D, BI=1) = maxdiff **0.0 (8/8 rows bit-exact)**. verify(2D) vs AR(3D, BI=0) = 3.05e-5 to 6.10e-5 (~1 ULP). **The BI guard is load-bearing.**
+  - **Probe 3 (greedy argmax):** Row-independent, bit-exact.
+  - **Probe 4 (rms_norm, fused_add_rms_norm, rotary_embedding):** All bit-exact M=8 vs M=1.
+  - **Inductive conclusion:** Every op byte-identical at verify width → full spec output == AR output within-stack under BI=1.
+- **Root cause of #607 break:** Reference AR decode ran the 3D split-KV attention path (BI=0, `is_batch_invariant=False`), NOT the 2D path used during spec-verify. Under `VLLM_BATCH_INVARIANT=1` (already pinned in submission serve.py), both sides use the 2D path → byte-exact.
+- **Implication for Option B:** #319 kernel-defect blocker removed. Recommended next gate: re-run #607 identity test with BI=1 pinned on BOTH sides (reference + served). If 0/N breaks confirmed, Option B (~427 TPS) becomes #319-compliant as served.
+- **Artifacts:** `research/validity/spec_identity_trigger_localize/` — PLAN.md, _pr_comment.md, spec_trigger_localize.py (582 lines), spec_trigger_localize_results_all.json (428 lines), run_id.txt (`4jv01n87`).
