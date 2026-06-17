@@ -1,0 +1,113 @@
+{
+  "pr": 595,
+  "config": "int4_g128_lmhead",
+  "config_desc": "int4_g128 body + untied int4-g128 lm_head (embed_tokens bf16)",
+  "submission_substrate": "submissions/fa2sw_strict_surgical357",
+  "model_dir": "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+  "speculative_config": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7}",
+  "spec_drafter": "mtp_k7",
+  "num_prompts": 128,
+  "output_len": 512,
+  "smoke": false,
+  "analysis_only": true,
+  "official_tps": 0,
+  "tau_lo": 1.03524,
+  "sigma_hw": 4.864,
+  "utc": "2026-06-17T14:19:13Z",
+  "arm_spec_on": {
+    "tag": "int4_g128_lmhead_specon",
+    "config": "int4_g128_lmhead",
+    "spec_on": true,
+    "serve_overrides": {
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "PRECACHE_DATASET": "/tmp/senpai_aime_no_precache.json",
+      "MAX_NUM_SEQS": "1",
+      "MAX_NUM_BATCHED_TOKENS": "512",
+      "LOCAL_MODEL_DIR": "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+      "PLE_FOLD_TARGET_MODEL": "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "PCK04_KEEPSET": "",
+      "DISABLE_LOG_STATS": "0"
+    },
+    "serve_ok": true,
+    "error": null,
+    "served_model_name": "gemma-4-e4b-it",
+    "self_test_text": " The Capital of France is The",
+    "tps_runs": [
+      333.2514632839714,
+      341.39468977878624
+    ],
+    "warm_median_tps": 337.32307653137883,
+    "tps_run_std": 4.071613247407413,
+    "decode_files": [
+      "/workspace/senpai/target/research/submission_headtohead/decode_int4_g128_lmhead_specon_r1.jsonl",
+      "/workspace/senpai/target/research/submission_headtohead/decode_int4_g128_lmhead_specon_r2.jsonl"
+    ],
+    "spec_metrics": {
+      "num_drafts": 30908.0,
+      "num_accepted_tokens": 100546.0,
+      "num_draft_tokens": 216356.0,
+      "e_accept_mean_acceptance_length": 4.253073637893102,
+      "draft_acceptance_rate": 0.4647248054133003
+    },
+    "peak_gpu_mib": 19407,
+    "spec_log": {
+      "intervals": 40,
+      "num_speculative_tokens": 7,
+      "total_accepted_tokens": 98586,
+      "total_drafted_tokens": 212002,
+      "e_accept_interval_mean": 4.217499999999999,
+      "steady_gen_tps_mean": 321.27,
+      "steady_gen_tps_n": 40,
+      "e_accept_exact": 4.255167404081094,
+      "draft_acceptance_rate": 0.46502391486872763
+    },
+    "server_log": "/workspace/senpai/target/research/submission_headtohead/server_int4_g128_lmhead_specon.log"
+  },
+  "arm_spec_off": {
+    "tag": "int4_g128_lmhead_specoff",
+    "config": "int4_g128_lmhead",
+    "spec_on": false,
+    "serve_overrides": {
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "PRECACHE_DATASET": "/tmp/senpai_aime_no_precache.json",
+      "MAX_NUM_SEQS": "1",
+      "MAX_NUM_BATCHED_TOKENS": "512",
+      "LOCAL_MODEL_DIR": "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+      "PLE_FOLD_TARGET_MODEL": "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "PCK04_KEEPSET": "",
+      "DISABLE_LOG_STATS": "0",
+      "SENPAI_REFERENCE_MODE": "1"
+    },
+    "serve_ok": true,
+    "error": null,
+    "served_model_name": "gemma-4-e4b-it",
+    "self_test_text": " The Capital of France is The",
+    "tps_runs": [
+      106.45812701743812,
+      106.8596456093381
+    ],
+    "warm_median_tps": 106.65888631338811,
+    "tps_run_std": 0.2007592959499931,
+    "decode_files": [
+      "/workspace/senpai/target/research/submission_headtohead/decode_int4_g128_lmhead_specoff_r1.jsonl",
+      "/workspace/senpai/target/research/submission_headtohead/decode_int4_g128_lmhead_specoff_r2.jsonl"
+    ],
+    "peak_gpu_mib": 19345,
+    "server_log": "/workspace/senpai/target/research/submission_headtohead/server_int4_g128_lmhead_specoff.log"
+  },
+  "spec_on_tps_local": 337.32307653137883,
+  "spec_off_tps_local": 106.65888631338811,
+  "spec_on_tps_official_proj": 349.2103417483446,
+  "spec_off_tps_official_proj": 110.4175454670719,
+  "acceptance_length": 4.255167404081094,
+  "acceptance_length_source": "server_log_exact",
+  "spec_lift_x": 3.1626345276121373
+}
