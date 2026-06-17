@@ -1,0 +1,90 @@
+{
+  "schema": "base_fullhead_tps_ceiling_decomposition_v1",
+  "analysis_only": true,
+  "official_tps": 0,
+  "pr": 544,
+  "anchors": {
+    "bfh_tps_anchor": 253.78,
+    "bfh_tps_measured": 252.306,
+    "bfh_ppl_measured": 2.0057,
+    "osoi5_tps_anchor": 353.73,
+    "osoi5_tps_measured": 350.763,
+    "osoi5_ppl_measured": 2.3767,
+    "unsafe_frontier_local": 442.0,
+    "tau_lo": 1.03524
+  },
+  "gap": {
+    "gap_tps_anchor": 99.95,
+    "gap_tps_measured": 98.46,
+    "exec_gpu_gap_ms": 4.286,
+    "t_cycle_gap_ms": 4.293,
+    "host_gap_delta_ms": 0.074,
+    "draft_gpu_delta_ms": 0.026,
+    "et_delta": 0.0154
+  },
+  "microbench_head": {
+    "h262k_bf16_ms_m8": 2.6982,
+    "h12k_int4_ms_m8": 0.057,
+    "h262k_int4_ms_m8": 0.7022,
+    "matmul262k_bf16_ms_m8": 2.6819,
+    "argmax262k_ms_m8": 0.0317,
+    "eff_hbm_gbps": 500.5,
+    "head_intrinsic_delta_ms": 2.641,
+    "head_intrinsic_pct_of_exec_gap": 61.6
+  },
+  "decomposition_4way": {
+    "c1_body_5layer_ms": 0.762,
+    "c1_body_5layer_ms_range": [
+      0.46,
+      1.064
+    ],
+    "c1_body_5layer_pct": 17.8,
+    "c1_body_5layer_tps_irreducible": 23.1,
+    "c1_per_layer_ms_central": 0.1524,
+    "c2_head_verify_tax_ms": 3.524,
+    "c2_head_verify_tax_ms_range": [
+      3.222,
+      3.826
+    ],
+    "c2_head_verify_tax_pct": 82.2,
+    "c2_head_verify_tax_pct_range": [
+      75.2,
+      89.3
+    ],
+    "c2_head_tax_tps_if_free": 76.6,
+    "c2_cost_is_logits_matmul_not_argmax": true,
+    "c3_et_delta": 0.0154,
+    "c3_et_is_gap_driver": false,
+    "c3_et_tps_mitigant": 1.42,
+    "c4_residual_ms": 0.1
+  },
+  "crosscheck": {
+    "method": "hold E[T]=base; remove head then +5L -> must land on osoi5",
+    "base_tps": 252.3,
+    "tps_after_remove_head": 328.9,
+    "tps_after_remove_head_and_5L": 352.0,
+    "osoi5_target_tps": 350.8,
+    "abs_recovery_error_tps": 1.19
+  },
+  "ceiling_model": {
+    "lever": "quantize the FULL 262k head (int4/fp8) -- keeps all tokens; argmax reduction is already cheap (~0.03 ms), the cost is the dense weight read, so only lower-precision head weights help identity-safely",
+    "int4_head_saves_ms": 1.996,
+    "fp8_head_saves_ms": 1.341,
+    "recoverable_tps_int4": 38.3,
+    "recoverable_tps_fp8": 24.5,
+    "base_fullhead_optimized_tps_ceiling": 292.1,
+    "base_fullhead_optimized_tps_ceiling_fp8_conservative": 278.3,
+    "base_fullhead_optimized_official_proj": 302.4,
+    "base_fullhead_irreducible_floor": 292.1,
+    "base_fullhead_irreducible_5layer_tps": 23.1,
+    "irreducible_deficit_vs_unsafe_ship_tps": 61.6,
+    "int4_head_byte_exact_risk": "int4 head perturbs logits -> may flip greedy near-ties (byte-exactness NOT guaranteed); fp8 lower-risk; this ceiling is an UPPER bound"
+  },
+  "topline": {
+    "quality_safe_ship_can_beat_442": false,
+    "even_free_head_beats_442": false,
+    "free_head_tps_upper_bound": 328.9,
+    "argmax_tax_is_dominant_gap_driver": true,
+    "head_tax_pct_central": 82.2
+  }
+}
