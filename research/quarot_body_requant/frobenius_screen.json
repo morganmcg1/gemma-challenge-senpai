@@ -1,0 +1,102 @@
+{
+  "pr": 625,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "source": "dequant(google/gemma-4-E4B-it-qat-w4a16-ct g32 QAT)",
+  "quantizer": "compressed-tensors g128 symmetric int4 minmax (== build_quant.py)",
+  "device": "cuda",
+  "faithfulness_vs_shipped_g128": {
+    "model.language_model.layers.0.self_attn.q_proj": {
+      "codes_exact_match": false,
+      "frac_int32_equal": 0.6399
+    },
+    "model.language_model.layers.0.mlp.gate_proj": {
+      "codes_exact_match": false,
+      "frac_int32_equal": 0.6462
+    }
+  },
+  "per_type": {
+    "down_proj": {
+      "n": 42,
+      "rel_naive": 0.10172622012712146,
+      "rel_had_g128blk": 0.11061054166414339,
+      "rel_randorth_full": 0.11072248845089624,
+      "rel_extra": null
+    },
+    "gate_proj": {
+      "n": 42,
+      "rel_naive": 0.10106558254386239,
+      "rel_had_g128blk": 0.11063168109164528,
+      "rel_randorth_full": 0.11069844350037601,
+      "rel_extra": null
+    },
+    "k_proj": {
+      "n": 24,
+      "rel_naive": 0.1098970232144778,
+      "rel_had_g128blk": 0.11045174151952712,
+      "rel_randorth_full": 0.11068642934419859,
+      "rel_extra": null
+    },
+    "o_proj": {
+      "n": 42,
+      "rel_naive": 0.09288520956555284,
+      "rel_had_g128blk": 0.11078875540832363,
+      "rel_randorth_full": 0.11070938189463303,
+      "rel_extra": 0.11074915651312185
+    },
+    "per_layer_input_gate": {
+      "n": 42,
+      "rel_naive": 0.11988872861969964,
+      "rel_had_g128blk": 0.10999511518356635,
+      "rel_randorth_full": 0.11066970077858014,
+      "rel_extra": null
+    },
+    "per_layer_model_projection": {
+      "n": 1,
+      "rel_naive": 0.10311880476542258,
+      "rel_had_g128blk": 0.11059554361181402,
+      "rel_randorth_full": 0.11071929925660685,
+      "rel_extra": null
+    },
+    "per_layer_projection": {
+      "n": 42,
+      "rel_naive": 0.10226276518582839,
+      "rel_had_g128blk": 0.11031365367362508,
+      "rel_randorth_full": 0.11058968617087912,
+      "rel_extra": null
+    },
+    "q_proj": {
+      "n": 42,
+      "rel_naive": 0.1014745624862624,
+      "rel_had_g128blk": 0.11061536375219556,
+      "rel_randorth_full": 0.11073941596219804,
+      "rel_extra": null
+    },
+    "up_proj": {
+      "n": 42,
+      "rel_naive": 0.10044130396313092,
+      "rel_had_g128blk": 0.1106477501034078,
+      "rel_randorth_full": 0.11071511037510022,
+      "rel_extra": null
+    },
+    "v_proj": {
+      "n": 24,
+      "rel_naive": 0.10664037464175628,
+      "rel_had_g128blk": 0.11043933349466793,
+      "rel_randorth_full": 0.11069676114013603,
+      "rel_extra": 0.12660374922210657
+    }
+  },
+  "global": {
+    "global_rel_naive": 0.10078657666416334,
+    "global_rel_had_g128blk": 0.11061499873956102,
+    "global_rel_randorth_full": 0.11070160178775157,
+    "sse_reduction_had_g128blk": -0.20454394596119863,
+    "sse_reduction_randorth_full": -0.2064308150975318,
+    "sse_reduction_r2_oproj_only": -0.02916082415947341
+  },
+  "n_language_modules": 343,
+  "seconds": 15.3,
+  "note": "had_g128blk = group-aligned 128-Hadamard on input dim (online-servable only); randorth_full = QuaRot-R1 incoherence ceiling (NOT offline-foldable on sandwich-norm gemma4); r2_head256 on o_proj = the ONLY exactly-offline-foldable rotation."
+}
