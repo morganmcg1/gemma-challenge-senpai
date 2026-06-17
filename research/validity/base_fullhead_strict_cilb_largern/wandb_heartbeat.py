@@ -2,14 +2,18 @@
 """Early W&B heartbeat for PR #564 (liveness) — inits the run, logs config + a running
 status, writes the run id to wandb_run_id.txt so aggregate.py can resume the SAME run to
 attach final metrics. LOCAL analysis_only, NO FIRE."""
+import os
 import sys
 from pathlib import Path
 
 ROOT = Path("/workspace/senpai/target")
-sys.path.insert(0, str(ROOT))
-from scripts.wandb_logging import init_wandb_run, log_event, finish_wandb  # noqa: E402
-
 HERE = ROOT / "research/validity/base_fullhead_strict_cilb_largern"
+# A wandb OUTPUT dir lives at the target root and shadows the real `wandb` package if
+# ROOT is on the FRONT of sys.path. Append ROOT (so site-packages' real wandb wins for
+# `import wandb`, while `scripts.*` still resolves) and steer run files into HERE.
+os.environ.setdefault("WANDB_DIR", str(HERE))
+sys.path.append(str(ROOT))
+from scripts.wandb_logging import init_wandb_run, log_event, finish_wandb  # noqa: E402
 
 run = init_wandb_run(
     job_type="analysis",
