@@ -1,0 +1,236 @@
+{
+  "schema": "base_fullhead_strict319_reference_pin_v1",
+  "pr": 585,
+  "agent": "wirbel",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "wandb_group": "strict319-reference-pin",
+  "created_at": "20260617T121826Z",
+  "canonical_reference_is_bf16": true,
+  "canonical_reference_matches_int4qat": false,
+  "base_fullhead_strict319_byte_exact": false,
+  "base_fullhead_strict319_flip_rate": 0.06756591796875,
+  "base_fullhead_free_running_seq_exact_rate": 0.0,
+  "strict319_reference_verdict": "bf16_referenced_int4_unsatisfiable",
+  "base_fullhead_is_quality_safe_319_anchor": true,
+  "self_det": true,
+  "provenance": {
+    "canonical_reference_is_bf16": true,
+    "served_meta_model_id": "google/gemma-4-E4B-it",
+    "served_meta_served_via": "plain-baseline:/workspace/senpai/target/submissions/vllm_baseline (MODEL_ID=google/gemma-4-E4B-it)",
+    "served_meta_reference_kind": "served_spec_off",
+    "served_log_dtype": "bfloat16",
+    "served_log_quantization": "None",
+    "served_log_model": "google/gemma-4-E4B-it",
+    "offline_meta_dtype": "bfloat16",
+    "offline_meta_quantization": null,
+    "served_vs_offline_bf16": {
+      "n_prompts": 128,
+      "seq_exact": 102,
+      "seq_exact_rate": 0.796875,
+      "free_running_pos_flip_rate": 0.1404876708984375
+    }
+  },
+  "free_running": {
+    "byte_exact": false,
+    "n_prompts": 128,
+    "n_prompts_identical": 0,
+    "n_prompts_divergent": 128,
+    "seq_exact_rate": 0.0,
+    "n_positions": 65536,
+    "free_running_divergent_tokens": 61944,
+    "free_running_cascade_flip_rate": 0.9451904296875,
+    "first_divergences_top5": [
+      {
+        "id": "gpqa_diamond-019eb0f05f",
+        "first_divergence_index": 0,
+        "ref_token": 5471,
+        "cand_token": 818
+      },
+      {
+        "id": "gpqa_diamond-025e20e6e9",
+        "first_divergence_index": 0,
+        "ref_token": 5471,
+        "cand_token": 8291
+      },
+      {
+        "id": "gpqa_diamond-0c38e0dd0d",
+        "first_divergence_index": 0,
+        "ref_token": 5471,
+        "cand_token": 8291
+      },
+      {
+        "id": "gpqa_diamond-126561d6b5",
+        "first_divergence_index": 0,
+        "ref_token": 5471,
+        "cand_token": 8291
+      },
+      {
+        "id": "gpqa_diamond-145b51d1c8",
+        "first_divergence_index": 0,
+        "ref_token": 5471,
+        "cand_token": 8291
+      }
+    ],
+    "median_first_divergence_index": 7.5
+  },
+  "teacher_forced": {
+    "n_positions": 65536,
+    "n_flips": 4428,
+    "flip_rate": 0.06756591796875,
+    "byte_exact": false,
+    "first_flips_top5": [
+      {
+        "id": "mmlu_pro-006f3a2112",
+        "first_flip_index": 0
+      },
+      {
+        "id": "mmlu_pro-012f0d5c8d",
+        "first_flip_index": 0
+      },
+      {
+        "id": "mmlu_pro-00ff96e757",
+        "first_flip_index": 0
+      },
+      {
+        "id": "gpqa_diamond-435ccdce7c",
+        "first_flip_index": 0
+      },
+      {
+        "id": "mmlu_pro-0151fb8117",
+        "first_flip_index": 0
+      }
+    ]
+  },
+  "self_det_detail": {
+    "self_det": true,
+    "n_checked": 8,
+    "n_identical": 8,
+    "method": "steady-state warm-vs-warm free-running re-run (diag_determinism.py)",
+    "teacher_forced_self_consistency_rate": 1.0,
+    "teacher_forced_self_consistent": true,
+    "teacher_forced_self_consistency_positions": 12288,
+    "cold_vs_warm_census": {
+      "self_det": false,
+      "n_checked": 8,
+      "n_identical": 1,
+      "note": "first-8 Phase-A captures are COLD (pre/under ONEGRAPH+LOOPGRAPH graph warmup); compared vs a warm re-run -> warmup-transient ULP flip cascades. NOT decode non-determinism."
+    }
+  },
+  "base_fullhead_n_positions": 65536,
+  "pr571_body_flip_int4g32": 0.10902948878868177,
+  "pr571_body_flip_int4g128": 0.1374490570715758,
+  "pr578_int4g128lmhead_flip": 0.162,
+  "flip_rate_delta_vs_pr571_int4g32": -0.041464,
+  "base_fullhead_anchor_tps": 252.68841839917962,
+  "reference_jsonl": "/workspace/senpai/target/research/greedy_reference/google__gemma-4-E4B-it/decode_outputs.jsonl",
+  "reference_kind": "served_spec_off (canonical official greedy; decode_outputs.jsonl)",
+  "meta": {
+    "n_records": 128,
+    "output_len": 512,
+    "model": "gemma-4-e4b-it",
+    "elapsed_s": 941.3,
+    "submission": "/workspace/senpai/target/submissions/fa2sw_strict_surgical357",
+    "stock_qat_snapshot": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+    "smoke": false,
+    "serve_env": {
+      "LOCAL_MODEL_DIR": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_TARGET_MODEL": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "LM_HEAD_FULL_REQUIRE": "1",
+      "PCK04_KEEPSET": "",
+      "SENPAI_REFERENCE_MODE": "1",
+      "FUSED_SPARSE_ARGMAX": "0",
+      "FUSED_SPARSE_ARGMAX_REQUIRE": "0",
+      "LOOPGRAPH_REQUIRE_CAPTURE": "0",
+      "DIXIE_FUSED_ACCEPT_PREP": "0",
+      "DIXIE_FUSED_ACCEPT_PREP_REQUIRE": "0",
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "VLLM_USE_FLASHINFER_SAMPLER": "0",
+      "MAX_NUM_SEQS": "1"
+    }
+  },
+  "verdict": "PROVENANCE: canonical_reference_is_bf16=True (served load dtype=bfloat16 quant=None, model_id=google/gemma-4-E4B-it; offline sibling dtype=bfloat16 quant=None). ANCHOR: base_fullhead (stock int4_g32 body + full 262k BF16 head) strict-#319 vs that canonical reference over 65536 positions -> teacher-forced flip_rate=0.06756591796875 (free-running seq_exact 0/128). vs land #571 stock int4_g32 BODY-only 0.109029 (delta -0.041464; base_fullhead is LOWER -- its 262k head is the full native BF16 head so ALL divergence is int4-body-driven, and the surgical operative-identity numeric path tracks bf16 more closely at near-ties than a naive int4 serve; 0.06756591796875 is base_fullhead's OWN irreducible int4-body-vs-bf16 floor). self_det=True (8/8 re-captured byte-identical). VERDICT=bf16_referenced_int4_unsatisfiable: base_fullhead FAILS a literal-bf16 strict-#319 (byte_exact=False); since the int4 body is irreducible, NO int4 config can pass literal-bf16 strict-#319, so the live contract is the operative/int4-referenced identity (#407), under which base_fullhead is by construction the quality-safe identity anchor (is_anchor=True).",
+  "determinism_diag": {
+    "schema": "base_fullhead_strict319_determinism_diag_v1",
+    "pr": 585,
+    "agent": "wirbel",
+    "analysis_only": true,
+    "n_tf_prompts": 24,
+    "n_fr_prompts": 8,
+    "teacher_forced_reproducibility": {
+      "n_positions": 12288,
+      "n_disagree": 0,
+      "tf_self_consistency_rate": 1.0,
+      "tf_self_consistent": true,
+      "disagree_examples": []
+    },
+    "free_running_self_divergence": {
+      "n_prompts": 8,
+      "n_self_identical": 8,
+      "median_first_self_divergence": null,
+      "min_first_self_divergence": null,
+      "max_first_self_divergence": null,
+      "per_prompt": [
+        {
+          "id": "gpqa_diamond-123161632f",
+          "first_self_divergence": null
+        },
+        {
+          "id": "gpqa_diamond-1ce3d847d2",
+          "first_self_divergence": null
+        },
+        {
+          "id": "gpqa_diamond-27ae63a859",
+          "first_self_divergence": null
+        },
+        {
+          "id": "gpqa_diamond-435ccdce7c",
+          "first_self_divergence": null
+        },
+        {
+          "id": "mmlu_pro-006f3a2112",
+          "first_self_divergence": null
+        },
+        {
+          "id": "mmlu_pro-0081aeb9c3",
+          "first_self_divergence": null
+        },
+        {
+          "id": "mmlu_pro-00ff96e757",
+          "first_self_divergence": null
+        },
+        {
+          "id": "mmlu_pro-012f0d5c8d",
+          "first_self_divergence": null
+        }
+      ]
+    },
+    "serve_env": {
+      "LOCAL_MODEL_DIR": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_TARGET_MODEL": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "LM_HEAD_FULL_REQUIRE": "1",
+      "PCK04_KEEPSET": "",
+      "SENPAI_REFERENCE_MODE": "1",
+      "FUSED_SPARSE_ARGMAX": "0",
+      "FUSED_SPARSE_ARGMAX_REQUIRE": "0",
+      "LOOPGRAPH_REQUIRE_CAPTURE": "0",
+      "DIXIE_FUSED_ACCEPT_PREP": "0",
+      "DIXIE_FUSED_ACCEPT_PREP_REQUIRE": "0",
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "VLLM_USE_FLASHINFER_SAMPLER": "0",
+      "MAX_NUM_SEQS": "1"
+    }
+  },
+  "self_det_corrected_from_diag": true
+}
