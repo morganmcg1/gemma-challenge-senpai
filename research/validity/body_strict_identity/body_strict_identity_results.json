@@ -1,0 +1,287 @@
+{
+  "schema": "body_strict_identity_v1",
+  "pr": 571,
+  "agent": "land",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "wandb_group": "body-strict-identity-census",
+  "created_at": "20260617T083035Z",
+  "body_strict_safe_lever_exists": false,
+  "body_argmax_flip_rate_heldout": {
+    "int4_g32": 0.005285412262156448,
+    "int4_g128": 0.007992333682401058,
+    "fp8_e4m3": 0.001333702159609571,
+    "int8": 0.0010669617276876568
+  },
+  "body_argmax_flip_rate_ood": {
+    "int4_g32": 0.0036255065045851993,
+    "int4_g128": 0.00565152484538281,
+    "fp8_e4m3": 0.001492855619535082,
+    "int8": 0.0008530603540200469
+  },
+  "body_argmax_flip_rate_official128": {
+    "int4_g32": 0.10902948878868177,
+    "int4_g128": 0.1374490570715758,
+    "fp8_e4m3": 0.018300714363194026,
+    "int8": 0.011405017587900764
+  },
+  "body_tps_int4g32": 252.69,
+  "body_tps_int4g128": 259.07,
+  "body_tps_fp8": 205.48,
+  "body_tps_int8": 205.48,
+  "body_tps_bf16": 143.99,
+  "body_gib_int4g32": 2.081,
+  "body_gib_int4g128": 1.908,
+  "body_gib_fp8": 3.7,
+  "body_gib_int8": 3.7,
+  "body_gib_bf16": 7.4,
+  "all_three_components_censused": true,
+  "any_strict_safe_speed_lever_anywhere": false,
+  "body_flip_is_near_tie_concentrated": false,
+  "self_det": true,
+  "primary_metric": {
+    "name": "body_strict_safe_ceiling_tps",
+    "value": 252.69
+  },
+  "int4_g32_is_byte_exact": false,
+  "body_lever_verdict": {
+    "body_strict_safe_lever_exists": false,
+    "body_strict_safe_precision": null,
+    "body_strict_safe_ceiling_tps": 252.69,
+    "served_int4_g32_anchor_tps": 252.69,
+    "per_precision": {
+      "int4_g128": {
+        "byte_exact": false,
+        "body_tps": 259.07,
+        "faster_than_int4_g32": true
+      },
+      "int4_g32": {
+        "byte_exact": false,
+        "body_tps": 252.69,
+        "faster_than_int4_g32": false
+      },
+      "fp8_e4m3": {
+        "byte_exact": false,
+        "body_tps": 205.48,
+        "faster_than_int4_g32": false
+      },
+      "int8": {
+        "byte_exact": false,
+        "body_tps": 205.48,
+        "faster_than_int4_g32": false
+      },
+      "bf16": {
+        "byte_exact": true,
+        "body_tps": 143.99,
+        "faster_than_int4_g32": false
+      }
+    }
+  },
+  "component_map": {
+    "head": {
+      "pr": 556,
+      "run": "uipo4rxv",
+      "strict_safe_lever_exists": false,
+      "ceiling_tps": 252.31,
+      "note": "int4-head FLIPS vs bf16; no faster byte-exact head realization"
+    },
+    "attention": {
+      "pr": 562,
+      "run": "am7kltht",
+      "strict_safe_lever_exists": false,
+      "note": "byte-identical census CLOSED; no faster legal attention realization"
+    },
+    "body": {
+      "pr": 571,
+      "strict_safe_lever_exists": false,
+      "ceiling_tps": 252.69,
+      "note": "see body_strict_safe_lever_exists"
+    }
+  },
+  "flip_rate": {
+    "int4_g32": {
+      "heldout": 0.005285412262156448,
+      "ood": 0.0036255065045851993,
+      "official": 0.10902948878868177
+    },
+    "int4_g128": {
+      "heldout": 0.007992333682401058,
+      "ood": 0.00565152484538281,
+      "official": 0.1374490570715758
+    },
+    "fp8_e4m3": {
+      "heldout": 0.001333702159609571,
+      "ood": 0.001492855619535082,
+      "official": 0.018300714363194026
+    },
+    "int8": {
+      "heldout": 0.0010669617276876568,
+      "ood": 0.0008530603540200469,
+      "official": 0.011405017587900764
+    }
+  },
+  "flip_counts": {
+    "int4_g32": {
+      "heldout": 535,
+      "ood": 34,
+      "official": 7036
+    },
+    "int4_g128": {
+      "heldout": 809,
+      "ood": 53,
+      "official": 8870
+    },
+    "fp8_e4m3": {
+      "heldout": 135,
+      "ood": 14,
+      "official": 1181
+    },
+    "int8": {
+      "heldout": 108,
+      "ood": 8,
+      "official": 736
+    }
+  },
+  "corpora_positions": {
+    "heldout": 101222,
+    "ood": 9378,
+    "official": 64533
+  },
+  "ref_reproduction_rate": {
+    "heldout": 0.999347984790802,
+    "ood": 0.999360203742981,
+    "official": 0.9931042790412903
+  },
+  "stage3_locus": {
+    "n_positions": 64533,
+    "n_flips": 7036,
+    "flip_rate": 0.10902948878868177,
+    "flip_margin_percentiles": {
+      "p0": 0.00023651123046875,
+      "p50": 0.755803108215332,
+      "p90": 2.4114036560058594,
+      "p99": 5.36733989715576,
+      "p100": 17.442007064819336
+    },
+    "nonflip_margin_percentiles": {
+      "p0": 0.0001010894775390625,
+      "p50": 8.976581573486328,
+      "p90": 18.10205421447754,
+      "p99": 22.433816070556645,
+      "p100": 31.80781364440918
+    },
+    "flip_margin_mean": 1.0823863139540177,
+    "nonflip_margin_mean": 9.42152935551679,
+    "flip_margin_median": 0.755803108215332,
+    "nonflip_margin_median": 8.976581573486328,
+    "near_tie_verify_recoverability": {
+      "0.02": {
+        "verify_frac_of_positions": 0.0034401004137418066,
+        "flips_caught_frac": 0.01961341671404207
+      },
+      "0.05": {
+        "verify_frac_of_positions": 0.00815086854787473,
+        "flips_caught_frac": 0.045906765207504266
+      },
+      "0.1": {
+        "verify_frac_of_positions": 0.015139541010025879,
+        "flips_caught_frac": 0.0851335986355884
+      },
+      "0.2": {
+        "verify_frac_of_positions": 0.03017061038538422,
+        "flips_caught_frac": 0.1630187606594656
+      },
+      "0.5": {
+        "verify_frac_of_positions": 0.0724900438535323,
+        "flips_caught_frac": 0.3641273450824332
+      },
+      "1.0": {
+        "verify_frac_of_positions": 0.13287775246772968,
+        "flips_caught_frac": 0.6016202387720295
+      },
+      "2.0": {
+        "verify_frac_of_positions": 0.23133900485023168,
+        "flips_caught_frac": 0.8497725980670836
+      }
+    },
+    "int4_flip_is_near_tie_concentrated": false,
+    "near_tie_band_delta_catch90": null,
+    "verify_frac_at_catch90": null,
+    "flip_caught_at_margin_0.05": 0.045906765207504266,
+    "verify_frac_at_margin_0.05": 0.00815086854787473,
+    "margin_separation_ratio": 11.876878350874492
+  },
+  "stage3_locus_heldout": {
+    "n_positions": 101222,
+    "n_flips": 535,
+    "flip_rate": 0.005285412262156448,
+    "flip_margin_percentiles": {
+      "p0": 0.009531021118164062,
+      "p50": 1.4823341369628906,
+      "p90": 5.368806457519532,
+      "p99": 10.2627314376831,
+      "p100": 14.679224014282227
+    },
+    "nonflip_margin_percentiles": {
+      "p0": 0.005820274353027344,
+      "p50": 8.648685455322266,
+      "p90": 14.53901119232178,
+      "p99": 18.463352851867675,
+      "p100": 23.664228439331055
+    },
+    "flip_margin_mean": 2.321929881728698,
+    "nonflip_margin_mean": 9.746398592769076,
+    "flip_margin_median": 1.4823341369628906,
+    "nonflip_margin_median": 8.648685455322266,
+    "near_tie_verify_recoverability": {
+      "0.02": {
+        "verify_frac_of_positions": 8.891347730730473e-05,
+        "flips_caught_frac": 0.011214953271028037
+      },
+      "0.05": {
+        "verify_frac_of_positions": 0.00019758550512734386,
+        "flips_caught_frac": 0.022429906542056073
+      },
+      "0.1": {
+        "verify_frac_of_positions": 0.0003852917349983205,
+        "flips_caught_frac": 0.048598130841121495
+      },
+      "0.2": {
+        "verify_frac_of_positions": 0.0007409456442275395,
+        "flips_caught_frac": 0.08785046728971962
+      },
+      "0.5": {
+        "verify_frac_of_positions": 0.0018671830234533995,
+        "flips_caught_frac": 0.21682242990654205
+      },
+      "1.0": {
+        "verify_frac_of_positions": 0.0035170219912667206,
+        "flips_caught_frac": 0.38317757009345793
+      },
+      "2.0": {
+        "verify_frac_of_positions": 0.00675742427535516,
+        "flips_caught_frac": 0.5981308411214953
+      }
+    },
+    "int4_flip_is_near_tie_concentrated": false,
+    "near_tie_band_delta_catch90": null,
+    "verify_frac_at_catch90": null,
+    "flip_caught_at_margin_0.05": 0.022429906542056073,
+    "verify_frac_at_margin_0.05": 0.00019758550512734386,
+    "margin_separation_ratio": 5.834504677226347
+  },
+  "locus_split": "official",
+  "served_anchor_tps": 252.69,
+  "lawine_b_et": 3.8194082146962955,
+  "eff_hbm_gbps": 500.5,
+  "body_params": 3972792320,
+  "body_modules": 343,
+  "sigma_hw": 4.864,
+  "peak_gpu_gib": 19.79,
+  "peak_mem_mib": 16211.2,
+  "elapsed_s": 430.8,
+  "verdict": "Q (PR #571): is there a BODY precision BOTH #319-byte-exact AND faster than the served int4_g32 body? NO. The deployed int4_g32 body itself FLIPS the greedy argmax vs the bf16 body (heldout=0.005285412262156448, ood=0.0036255065045851993, official=0.10902948878868177; is_byte_exact=False). The ONLY precision that can be faster than int4_g32 is the coarser int4_g128 (fewer group scales), which flips at least as much; every byte-exact candidate (bf16, and int8/fp8 where exact) reads >=2x the body bytes and is strictly slower. body_strict_safe_lever_exists=False -> the body sits on the speed floor with NO faster byte-exact realization. Per-component census COMPLETE: HEAD #556 (lever=False, 252.31), ATTENTION #562 (byte-identical, no faster legal realization), BODY #571 (lever=False). all_three_components_censused=True, any_strict_safe_speed_lever_anywhere=False. This reconciles stark #536's collapse_locus=BODY with the legality picture: the body that collapses quality when baked/pruned is also the body with no faster byte-exact realization -- NO-FIRE is firmed from the last un-censused component. int4_g32 body flips are near-tie concentrated=False (flip-margin median 0.755803108215332 vs non-flip median 8.976581573486328, ~11.876878350874492x separation). "
+}
