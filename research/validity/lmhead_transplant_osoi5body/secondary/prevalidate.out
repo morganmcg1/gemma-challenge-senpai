@@ -1,0 +1,24 @@
+[prevalidate] starting server: /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py (log: research/validity/lmhead_transplant_osoi5body/secondary/serve.log)
+[prevalidate] waiting for http://127.0.0.1:8000/v1/models ...
+[prevalidate] endpoint ready
+[prevalidate] running: /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file research/validity/lmhead_transplant_osoi5body/secondary/ppl_results.jsonl --summary-file research/validity/lmhead_transplant_osoi5body/secondary/ppl_summary.json --request-timeout-s 180
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.6540824100550418,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 54204.496144562596,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "research/validity/lmhead_transplant_osoi5body/secondary/ppl_results.jsonl",
+  "ppl": 2.4040095432039115,
+  "prompt_logprobs": 1
+}
+[prevalidate] running: /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/validity/lmhead_transplant_osoi5body/secondary/decode_outputs.jsonl --summary-file research/validity/lmhead_transplant_osoi5body/secondary/decode_summary.json --num-prompts 16 --output-len 512 --request-timeout-s 180
+decode_records=16
+decode_completion_tokens=8192
+decode_summary_file=research/validity/lmhead_transplant_osoi5body/secondary/decode_summary.json
+
+[prevalidate] LOCAL pre-validation summary
+SENPAI-LOCAL tps=95.1637 ppl=2.4040 completed=128 decode_sample=16 submission=transplant_osoi5_basehead (exploratory; not official a10g-small)
+[prevalidate] artifacts in research/validity/lmhead_transplant_osoi5body/secondary
