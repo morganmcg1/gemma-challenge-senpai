@@ -103,6 +103,23 @@ def main() -> int:
     ap.add_argument("--model", default="gemma-4-e4b-it")
     ap.add_argument("--max-tokens", type=int, default=2048)
     ap.add_argument("--max-connections", type=int, default=16)
+    # Decode protocol (PR #563): default = GREEDY (backwards-identical to #547/#511).
+    # The lewtun #31 mandated downstream protocol is the generation_config.json
+    # sampling params (gemma-4-E4B-it: do_sample=true temp=1.0 top_p=0.95 top_k=64).
+    # temperature/top_p go through GenerateConfig (standard OpenAI fields the
+    # OpenAICompatibleAPI forwards explicitly). top_k is NOT a standard OpenAI field
+    # -> forward via extra_body so vLLM's SamplingParams picks it up (same mechanism
+    # the existing min_tokens passthrough uses). --sampling-seed is the per-request
+    # RNG seed (distinct from --seed, which builds the byte-identical dataset): vary
+    # it across runs to estimate sampling variance while prompts stay fixed.
+    ap.add_argument("--temperature", type=float, default=0.0)
+    ap.add_argument("--top-p", type=float, default=1.0)
+    ap.add_argument("--top-k", type=int, default=0,
+                    help="vLLM top_k (0=disabled). Forwarded via extra_body. Set 64 for "
+                         "the gemma-4-E4B-it generation_config protocol.")
+    ap.add_argument("--sampling-seed", type=int, default=0,
+                    help="per-request sampling RNG seed (vLLM SamplingParams.seed). "
+                         "Distinct from --seed (dataset construction). Vary for seed-CI.")
     ap.add_argument("--min-tokens", type=int, default=0,
                     help="request-level min_tokens EOS-guard (0=off, identical to prior). "
                          "Forwarded as extra_body so vLLM masks EOS until N tokens are emitted "
@@ -137,18 +154,23 @@ def main() -> int:
     # forces the canonical /v1/chat/completions path (what dixie's harness used).
     # min_tokens is a vLLM SamplingParams extension (not a standard OpenAI field):
     # forward it via extra_body so the server masks EOS until N tokens are emitted.
-    extra_body = {"min_tokens": args.min_tokens} if args.min_tokens and args.min_tokens > 0 else None
+    extra_body = {}
+    if args.min_tokens and args.min_tokens > 0:
+        extra_body["min_tokens"] = args.min_tokens
+    if args.top_k and args.top_k > 0:
+        extra_body["top_k"] = args.top_k
+    extra_body = extra_body or None
     model = get_model(
         f"openai-api/local/{args.model}",
         base_url=args.base_url,
         api_key=os.environ["OPENAI_API_KEY"],
         responses_api=False,
         config=GenerateConfig(
-            temperature=0.0,
-            top_p=1.0,
+            temperature=args.temperature,
+            top_p=args.top_p,
             max_tokens=args.max_tokens,
             max_connections=args.max_connections,
-            seed=0,
+            seed=args.sampling_seed,
             extra_body=extra_body,
         ),
     )
@@ -237,6 +259,11 @@ def main() -> int:
         "accuracy": accuracy,
         "max_tokens": args.max_tokens,
         "min_tokens": args.min_tokens or None,
+        "temperature": args.temperature,
+        "top_p": args.top_p,
+        "top_k": args.top_k or None,
+        "sampling_seed": args.sampling_seed,
+        "decode": ("greedy" if args.temperature == 0.0 else "sampling"),
         "base_url": args.base_url,
         "eval_log": getattr(log, "location", None),
         "per_sample": sorted(per_sample, key=lambda r: r["id"]),

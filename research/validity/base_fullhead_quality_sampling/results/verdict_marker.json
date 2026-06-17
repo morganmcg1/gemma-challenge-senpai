@@ -1,0 +1,149 @@
+{
+  "pr": 563,
+  "analysis_only": true,
+  "official_tps": 0,
+  "engine": "vllm-0.22.1rc1.dev307",
+  "decode_protocol": {
+    "do_sample": true,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64,
+    "source": "gemma-4-E4B-it/generation_config.json (lewtun #31)"
+  },
+  "per_task": {
+    "mmlu_pro": {
+      "int4_sampled": {
+        "mean": 0.6313333333333334,
+        "n": 3,
+        "sd": 0.005773502691896263,
+        "ci95": 0.014343333333333349,
+        "lo": 0.61699,
+        "hi": 0.6456766666666668,
+        "vals": [
+          0.628,
+          0.638,
+          0.628
+        ]
+      },
+      "fp16_sampled": {
+        "mean": 0.6726666666666667,
+        "n": 3,
+        "sd": 0.011015141094572214,
+        "ci95": 0.027365335891314138,
+        "lo": 0.6453013307753526,
+        "hi": 0.7000320025579809,
+        "vals": [
+          0.678,
+          0.68,
+          0.66
+        ]
+      },
+      "int4_greedy": 0.656,
+      "fp16_greedy": 0.678,
+      "fp16_arm_degenerate": false,
+      "sampled_ratio_fresh": {
+        "ratio": 0.9385530227948464,
+        "ci95": 0.04373266743861567,
+        "lo": 0.8948203553562307,
+        "hi": 0.9822856902334621
+      },
+      "greedy_ratio_fresh": 0.967551622418879,
+      "sampled_ratio_vs_documented_anchor": 0.9451097804391219,
+      "documented_anchor_greedy": 0.668,
+      "int4_sampled_minus_greedy_abs": -0.024666666666666615,
+      "greedy_vs_sampled_ratio_delta": -0.028998599624032617
+    },
+    "gpqa": {
+      "int4_sampled": {
+        "mean": 0.48484848484848486,
+        "n": 3,
+        "sd": 0.046288643383392336,
+        "ci95": 0.11499664536879735,
+        "lo": 0.3698518394796875,
+        "hi": 0.5998451302172823,
+        "vals": [
+          0.47474747474747475,
+          0.5353535353535354,
+          0.4444444444444444
+        ]
+      },
+      "fp16_sampled": {
+        "mean": 0.5235690235690236,
+        "n": 3,
+        "sd": 0.02491354980967802,
+        "ci95": 0.06189368369714031,
+        "lo": 0.46167533987188325,
+        "hi": 0.5854627072661639,
+        "vals": [
+          0.5353535353535354,
+          0.5404040404040404,
+          0.494949494949495
+        ]
+      },
+      "int4_greedy": 0.4595959595959596,
+      "fp16_greedy": 0.5252525252525253,
+      "fp16_arm_degenerate": false,
+      "sampled_ratio_fresh": {
+        "ratio": 0.9260450160771705,
+        "ci95": 0.24540961955528154,
+        "lo": 0.680635396521889,
+        "hi": 1.171454635632452
+      },
+      "greedy_ratio_fresh": 0.875,
+      "sampled_ratio_vs_documented_anchor": 1.0315925209542232,
+      "documented_anchor_greedy": 0.47,
+      "int4_sampled_minus_greedy_abs": 0.02525252525252525,
+      "greedy_vs_sampled_ratio_delta": 0.05104501607717049
+    }
+  },
+  "verdict": {
+    "mmlu_pro_sampled_ratio": 0.9385530227948464,
+    "mmlu_pro_ratio_basis": "fresh_both_arms_sampled",
+    "gpqa_sampled_ratio": 0.9260450160771705,
+    "gpqa_ratio_basis": "fresh_both_arms_sampled",
+    "gate_rel": 0.9,
+    "gate_holds_under_sampling": true,
+    "gate_holds_under_sampling_cilb": false,
+    "mmlu_pro_greedy_vs_sampled_ratio_delta": -0.028998599624032617,
+    "gpqa_greedy_vs_sampled_ratio_delta": 0.05104501607717049
+  },
+  "key_outputs": {
+    "gen_config_do_sample": true,
+    "gen_config_temperature": 1.0,
+    "gen_config_top_p": 0.95,
+    "gen_config_top_k": 64,
+    "gen_config_is_greedy": false,
+    "mmlu_pro_base_fullhead_sampled": {
+      "mean": 0.6313333333333334,
+      "ci95": 0.014343333333333349,
+      "n": 3
+    },
+    "mmlu_pro_vanilla_sampled": {
+      "mean": 0.6726666666666667,
+      "ci95": 0.027365335891314138,
+      "n": 3
+    },
+    "gpqa_base_fullhead_sampled": {
+      "mean": 0.48484848484848486,
+      "ci95": 0.11499664536879735,
+      "n": 3
+    },
+    "gpqa_vanilla_sampled": {
+      "mean": 0.5235690235690236,
+      "ci95": 0.06189368369714031,
+      "n": 3
+    },
+    "mmlu_pro_sampled_ratio": 0.9385530227948464,
+    "mmlu_pro_sampled_ratio_basis": "fresh_both_arms_sampled",
+    "gpqa_sampled_ratio": 0.9260450160771705,
+    "gpqa_sampled_ratio_basis": "fresh_both_arms_sampled",
+    "gate_holds_under_sampling": true,
+    "gate_holds_under_sampling_cilb": false,
+    "mmlu_pro_greedy_vs_sampled_ratio_delta": -0.028998599624032617,
+    "gpqa_greedy_vs_sampled_ratio_delta": 0.05104501607717049,
+    "primary_metric_name": "mmlu_pro_sampled_ratio",
+    "primary_metric": 0.9385530227948464,
+    "self_det": true,
+    "peak_gpu_gb": 20.26
+  }
+}

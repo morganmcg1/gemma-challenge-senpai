@@ -1,0 +1,17 @@
+{
+  "purpose": "PR #563 confirmatory: prove the min_tokens=8 EOS-guard (wirbel #541) is a mechanical no-op on these CoT tasks. The full sampled sweep ran WITHOUT it; empty_rate=0 across all 16 sweep cells means the guard (which only masks EOS to rescue immediate-EOS empties) cannot have changed any cell. This re-runs the seed-0 MMLU-Pro + GPQA cells on BOTH arms WITH --min-tokens 8.",
+  "protocol": {"temperature": 1.0, "top_p": 0.95, "top_k": 64, "sampling_seed": 0, "dataset_seed": 12345, "min_tokens": 8},
+  "cells": {
+    "fp16_mmlu_pro": {"sampled_no_guard": 0.6780, "sampled_mt8": 0.6700, "delta": -0.0080, "correct_no_guard": 339, "correct_mt8": 335, "n": 500, "empty_rate_no_guard": 0.0, "empty_rate_mt8": 0.0},
+    "fp16_gpqa":     {"sampled_no_guard": 0.5354, "sampled_mt8": 0.5303, "delta": -0.0051, "correct_no_guard": 106, "correct_mt8": 105, "n": 198, "empty_rate_no_guard": 0.0, "empty_rate_mt8": 0.0},
+    "int4_mmlu_pro": {"sampled_no_guard": 0.6280, "sampled_mt8": 0.6360, "delta": 0.0080,  "correct_no_guard": 314, "correct_mt8": 318, "n": 500, "empty_rate_no_guard": 0.0, "empty_rate_mt8": 0.0},
+    "int4_gpqa":     {"sampled_no_guard": 0.4747, "sampled_mt8": 0.4848, "delta": 0.0101,  "correct_no_guard": 94,  "correct_mt8": 96,  "n": 198, "empty_rate_no_guard": 0.0, "empty_rate_mt8": 0.0}
+  },
+  "verdict": {
+    "guard_is_noop": true,
+    "empty_rate_all_cells": 0.0,
+    "max_abs_delta_questions": 4,
+    "delta_sign": "mixed (2 up, 2 down)",
+    "interpretation": "min_tokens=8 never fired (empty_rate=0 everywhere). The +-1..4-question cell deltas are vLLM continuous-batching run-to-run nondeterminism (separate server instance/batch schedule -> FP reduction-order token flips), NOT a guard effect. The 3-seed-sweep verdict (gate_holds_under_sampling=true) is unaffected."
+  }
+}
