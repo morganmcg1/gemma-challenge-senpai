@@ -1,0 +1,144 @@
+{
+  "verdict": {
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_served_file_change": true,
+    "no_hf_job": true,
+    "pr": 554,
+    "bfh_tps": 252.30599912117162,
+    "bfh_et": 3.8194082146962955,
+    "bfh_tcycle_ms": 15.137999999999998,
+    "eff_hbm_gbps": 500.4658421444743,
+    "head_matmul_m8_measured_ms": 2.6784768104553223,
+    "head_matmul_m1_measured_ms": 2.6460671424865723,
+    "head_eff_gbps": 501.09721867326505,
+    "lawine544_head_matmul_m8_ms": 2.698240041732788,
+    "lawine544_served_head_tax_ms": 3.524,
+    "lawine544_free_head_tps": 328.9,
+    "sdpa_launch_floor_ms": 0.5727232009172439,
+    "sdpa_realized_at_bench_ms": 0.5742762689789137,
+    "weight_read_ms": 7.014745751592272,
+    "head_read_ms": 2.6818559169769287,
+    "body_read_ms": 4.332889834615344,
+    "kv_read_ms": 0.08845672226161697,
+    "m1_step_roofline_full_ms": 7.1121725485762,
+    "m1_step_roofline_freed_ms": 4.430316631599271,
+    "fixed_overhead_ms_per_step": 0.5727232009172439,
+    "fixed_overhead_frac_at_full_head": 0.08052718026813038,
+    "fixed_overhead_frac_at_freed_head": 0.12927364984080164,
+    "fixed_overhead_frac_growth": 0.04874646957267126,
+    "tcycle_freed_head_ms": 12.459523189544676,
+    "tps_freed_head_only": 306.54529524061775,
+    "tcycle_freed_head_kv_ms": 12.271246280848539,
+    "fixed_overhead_bounded_ceiling_tps": 311.2485991465399,
+    "ceiling_vs_lawine544_328": -17.651400853460075,
+    "corrected_quality_safe_hard_ceiling": 311.2485991465399,
+    "head_overcredit_ms": 0.8455231895446778,
+    "ceiling_low_head_only": 306.54529524061775,
+    "ceiling_high_lawine544": 328.9,
+    "fixed_overhead_attackable_frac": 0.0,
+    "attackable_tps_ceiling": 311.2485991465399,
+    "tps_if_floor_eliminated_infeasible": 326.48635973958574,
+    "fused_attention_identity_safe": true,
+    "fused_attention_feasible": false,
+    "n_sdpa_launches_per_step": 42,
+    "quality_safe_ship_can_beat_442": false,
+    "fixed_floor_caps_below_328": true,
+    "primary_metric_name": "fixed_overhead_bounded_ceiling_tps",
+    "primary_metric_value": 311.2485991465399,
+    "_floor_at": {
+      "256": 0.5390336155891419,
+      "512": 0.5734399855136871,
+      "528": 0.5727232009172439,
+      "1024": 0.574156790971756,
+      "2048": 0.5727232009172439,
+      "2938": 0.5720064163208007
+    },
+    "_realized_sdpa_at": {
+      "256": 0.5392725437879562,
+      "512": 0.5732010573148727,
+      "528": 0.5742762689789137,
+      "1024": 0.5846698611974717,
+      "2048": 0.6074880048632623,
+      "2938": 0.6778538823127747
+    }
+  },
+  "self_test": {
+    "head_matmul_reproduces_544": true,
+    "eff_bw_reproduces_served": true,
+    "sdpa_floor_in_range": true,
+    "local_sdpa_is_flat_floor": true,
+    "fixed_frac_grows_when_freed": true,
+    "full_head_frac_near_8pct": true,
+    "ceiling_below_328": true,
+    "ceiling_above_int4_292": true,
+    "still_below_unsafe_442": true,
+    "head_overcredit_positive": true,
+    "nan_clean": true,
+    "self_test_passes": true
+  },
+  "microbench": {
+    "device": "NVIDIA A10G",
+    "sm_count": 80,
+    "torch": "2.11.0+cu130",
+    "warmup": 20,
+    "repeats": 20,
+    "reps_in_graph": 30,
+    "per_L": {
+      "256": {
+        "global_layer_ms": 0.012868266304334004,
+        "local_layer_ms": 0.012834133704503377,
+        "local_kv_len": 256,
+        "total_sdpa_realized_ms": 0.5392725437879562,
+        "sdpa_launch_floor_ms": 0.5390336155891419,
+        "kv_bandwidth_ms": 0.043999198637902734
+      },
+      "512": {
+        "global_layer_ms": 0.013619200388590495,
+        "local_layer_ms": 0.013653332988421122,
+        "local_kv_len": 512,
+        "total_sdpa_realized_ms": 0.5732010573148727,
+        "sdpa_launch_floor_ms": 0.5734399855136871,
+        "kv_bandwidth_ms": 0.08799839727580547
+      },
+      "528": {
+        "global_layer_ms": 0.013858133554458618,
+        "local_layer_ms": 0.013636266688505809,
+        "local_kv_len": 512,
+        "total_sdpa_realized_ms": 0.5742762689789137,
+        "sdpa_launch_floor_ms": 0.5727232009172439,
+        "kv_bandwidth_ms": 0.08845672226161697
+      },
+      "1024": {
+        "global_layer_ms": 0.015172266960144044,
+        "local_layer_ms": 0.013670399785041809,
+        "local_kv_len": 512,
+        "total_sdpa_realized_ms": 0.5846698611974717,
+        "sdpa_launch_floor_ms": 0.574156790971756,
+        "kv_bandwidth_ms": 0.10266479682177305
+      },
+      "2048": {
+        "global_layer_ms": 0.018602667252222697,
+        "local_layer_ms": 0.013636266688505809,
+        "local_kv_len": 512,
+        "total_sdpa_realized_ms": 0.6074880048632623,
+        "sdpa_launch_floor_ms": 0.5727232009172439,
+        "kv_bandwidth_ms": 0.13199759591370822
+      },
+      "2938": {
+        "global_layer_ms": 0.02874026695887248,
+        "local_layer_ms": 0.013619200388590495,
+        "local_kv_len": 512,
+        "total_sdpa_realized_ms": 0.6778538823127747,
+        "sdpa_launch_floor_ms": 0.5720064163208007,
+        "kv_bandwidth_ms": 0.15749192324947214
+      }
+    },
+    "head_matmul_ms": {
+      "1": 2.6460671424865723,
+      "8": 2.6784768104553223
+    },
+    "head_eff_gbps": 501.09721867326505,
+    "peak_gib": 3.8503808975219727
+  }
+}
