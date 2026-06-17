@@ -13,8 +13,12 @@ asserts is identical across arms.
 One arm (one server) at a time -- the int4 model + KV cache fills the A10G.
 
 Usage:
-  run_eval.py --task {mmlu_pro,gpqa_diamond} --arm {base,ship} --out results.json \
-      [--n 250] [--seed 12345] [--limit 5] [--max-tokens 2048]
+  run_eval.py --task {mmlu_pro,gpqa_diamond,gpqa_main} --arm {base,ship} --out results.json \
+      [--n 250] [--seed 12345] [--limit 5] [--max-tokens 2048] [--gpqa-split main]
+
+PR #598 adds an additive gpqa_main task (GPQA-Main n=448 / Extended n=546, the
+larger instrument) sourced from the ungated Wanfq/gpqa mirror with a pinned
+SHA256; the existing gpqa_diamond path is untouched.
 """
 import argparse
 import hashlib
@@ -39,7 +43,11 @@ from inspect_evals.mmlu_pro.mmlu_pro import (  # noqa: E402
     USER_PROMPT_TEMPLATE as MMLU_USER_PROMPT_TEMPLATE,
     mmlu_pro,
 )
-from inspect_evals.gpqa.gpqa import get_gpqa_diamond_dataset  # noqa: E402
+from inspect_evals.gpqa.gpqa import (  # noqa: E402
+    get_gpqa_diamond_dataset,
+    record_to_sample as _gpqa_record_to_sample,
+)
+from inspect_evals.utils import load_csv_dataset  # noqa: E402
 
 
 def _sample_prompt_sha(sample) -> str:
@@ -91,9 +99,68 @@ def build_gpqa_diamond_task(seed: int) -> Task:
     )
 
 
+# PR #598: additive larger-instrument GPQA loader. inspect_evals ships only the
+# Diamond (n=198) loader; GPQA-Main (n=448) / Extended (n=546) live in the gated
+# Idavidrein/gpqa repo. We source them from the ungated Wanfq/gpqa mirror, which
+# carries the verbatim original CSVs (full 78-col schema incl. Canary String).
+# Proven faithful: Wanfq's gpqa_diamond.csv is a 198/198 model-visible match to
+# the canonical openaipublic gpqa_diamond.csv this harness uses for Diamond. The
+# pinned content SHA256 guards against the mirror changing under us. Main/Extended
+# reuse inspect_evals' own record_to_sample (correct-answer-first, target="A") and
+# the identical seed-shuffle as Diamond, so base and ship arms see byte-identical
+# prompts (asserted downstream via prompt_sha).
+GPQA_MIRROR_REPO = "Wanfq/gpqa"
+GPQA_SPLIT_FILE = {"main": "gpqa_main.csv", "extended": "gpqa_extended.csv"}
+GPQA_SPLIT_SHA256 = {
+    "main": "acdeeac8f622267f2cd727d7d474202ea08dec80f7d3c3593b3ef8644f19b8e3",
+    "extended": "0926ee24949d02ed6748eb75a2611546c34479e30ddc42efd01d6f1681aaa48a",
+}
+
+
+def build_gpqa_main_task(seed: int, split: str = "main") -> Task:
+    """GPQA-Main (n=448) / Extended (n=546) under the SAME construction as the
+    Diamond path: load with shuffle_choices=False (correct answer at index 0),
+    then a deterministic seeded choice-shuffle (removes position bias; identical
+    --seed -> identical layout across arms). Additive: does not touch
+    build_gpqa_diamond_task."""
+    import hashlib
+
+    from huggingface_hub import hf_hub_download
+
+    fn = GPQA_SPLIT_FILE[split]
+    path = hf_hub_download(
+        repo_id=GPQA_MIRROR_REPO, filename=fn, repo_type="dataset",
+        token=os.environ.get("HF_TOKEN") or None,
+    )
+    got = hashlib.sha256(open(path, "rb").read()).hexdigest()
+    want = GPQA_SPLIT_SHA256[split]
+    if got != want:
+        raise RuntimeError(
+            f"gpqa_{split} mirror SHA256 mismatch: got {got} want {want} "
+            f"({GPQA_MIRROR_REPO}/{fn} changed -- re-validate before trusting)."
+        )
+    ds = load_csv_dataset(
+        path, "gpqa", sample_fields=_gpqa_record_to_sample, shuffle_choices=False
+    )
+    ds.shuffle_choices(seed=seed)
+    samples = list(ds)
+    samples.sort(key=lambda s: str(s.id))  # stable, arm-independent order
+    ds2 = MemoryDataset(samples=samples, name=f"gpqa_{split}")
+    return Task(
+        dataset=ds2,
+        solver=multiple_choice(cot=True, shuffle=False),
+        scorer=choice(),
+        epochs=1,  # decode stochasticity is driven by --sampling-seed, not epochs
+    )
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--task", required=True, choices=["mmlu_pro", "gpqa_diamond"])
+    ap.add_argument("--task", required=True,
+                    choices=["mmlu_pro", "gpqa_diamond", "gpqa_main"])
+    ap.add_argument("--gpqa-split", default="main", choices=["main", "extended"],
+                    help="for --task gpqa_main: larger GPQA instrument "
+                         "(main n=448 default; extended n=546 fallback).")
     ap.add_argument("--arm", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--n", type=int, default=250, help="MMLU-Pro subset size")
@@ -133,8 +200,10 @@ def main() -> int:
 
     if args.task == "mmlu_pro":
         task = build_mmlu_pro_task(args.n, args.seed)
-    else:
+    elif args.task == "gpqa_diamond":
         task = build_gpqa_diamond_task(args.seed)
+    else:  # gpqa_main (larger instrument; split selects main/extended)
+        task = build_gpqa_main_task(args.seed, args.gpqa_split)
 
     if args.ids_file:
         keep = {str(x) for x in json.load(open(args.ids_file))}
