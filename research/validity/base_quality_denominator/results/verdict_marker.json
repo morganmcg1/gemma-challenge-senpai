@@ -1,0 +1,136 @@
+{
+  "pr": 581,
+  "analysis_only": true,
+  "official_tps": 0,
+  "engine": "vllm-0.22.1rc1.dev307",
+  "decode_protocol": {
+    "do_sample": true,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64,
+    "min_tokens_guard": 8,
+    "source": "gemma-4-E4B-it/generation_config.json (lewtun #31)"
+  },
+  "model_unquantized_base": "google/gemma-4-E4B-it (bf16)",
+  "gate_rel": 0.9,
+  "per_task": {
+    "mmlupro": {
+      "cited": 0.668,
+      "measured_base": 0.6726666666666667,
+      "measured_ci95": 0.027365335891314138,
+      "measured_lo": 0.6453013307753526,
+      "measured_hi": 0.7000320025579809,
+      "measured_n_seeds": 3,
+      "measured_vals": [
+        0.678,
+        0.68,
+        0.66
+      ],
+      "greedy_anchor": 0.678,
+      "cited_match": true,
+      "cited_verdict": "confirm",
+      "cited_within_ci95": true,
+      "rel_diff_measured_vs_cited": 0.006986027944111838,
+      "gate_bar_90_measured": 0.6054,
+      "gate_bar_90_cited": 0.6012000000000001,
+      "gate_bar_90_shift": 0.0041999999999999815,
+      "source": "PR#563 fp16 vanilla-base, run_eval.py, n=500/seed, 3 seeds, mandated sampling",
+      "mt8_seed0": 0.67
+    },
+    "gpqa": {
+      "cited": 0.47,
+      "measured_base": 0.5235690235690236,
+      "measured_ci95": 0.06189368369714031,
+      "measured_lo": 0.46167533987188325,
+      "measured_hi": 0.5854627072661639,
+      "measured_n_seeds": 3,
+      "measured_vals": [
+        0.5353535353535354,
+        0.5404040404040404,
+        0.494949494949495
+      ],
+      "greedy_anchor": 0.5252525252525253,
+      "cited_match": false,
+      "cited_verdict": "within-CI-but-off",
+      "cited_within_ci95": true,
+      "rel_diff_measured_vs_cited": 0.11397664589153958,
+      "gate_bar_90_measured": 0.47121212121212125,
+      "gate_bar_90_cited": 0.423,
+      "gate_bar_90_shift": 0.04821212121212126,
+      "source": "PR#563 fp16 vanilla-base, run_eval.py, GPQA-Diamond n=198, 3 seeds, mandated sampling",
+      "mt8_seed0": 0.5303
+    },
+    "gsm8k": {
+      "cited": 0.92,
+      "measured_base": 0.8966666666666666,
+      "measured_ci95": 0.033821081203559714,
+      "measured_lo": 0.8628455854631069,
+      "measured_hi": 0.9304877478702264,
+      "measured_n_seeds": 3,
+      "measured_vals": [
+        0.912,
+        0.892,
+        0.886
+      ],
+      "greedy_anchor": 0.904,
+      "cited_match": true,
+      "cited_verdict": "confirm",
+      "cited_within_ci95": true,
+      "rel_diff_measured_vs_cited": -0.025362318840579812,
+      "gate_bar_90_measured": 0.8069999999999999,
+      "gate_bar_90_cited": 0.8280000000000001,
+      "gate_bar_90_shift": -0.02100000000000013,
+      "source": "PR#581 bf16 unquantized base, gsm8k_eval.py, 8-shot CoT n=500, mt8 sampled 3 seeds",
+      "mt8_seed1234": 0.912,
+      "noguard_sampled_s1234": 0.906,
+      "mt8_noop_delta_s1234": 0.006000000000000005,
+      "per_seed": [
+        {
+          "seed": 1234,
+          "acc": 0.912,
+          "n": 500,
+          "n_correct": 456,
+          "strict_rate": 0.964,
+          "extract_fail_rate": 0.0,
+          "truncation_rate": 0.04
+        },
+        {
+          "seed": 1235,
+          "acc": 0.892,
+          "n": 500,
+          "n_correct": 446,
+          "strict_rate": 0.938,
+          "extract_fail_rate": 0.0,
+          "truncation_rate": 0.068
+        },
+        {
+          "seed": 1236,
+          "acc": 0.886,
+          "n": 500,
+          "n_correct": 443,
+          "strict_rate": 0.92,
+          "extract_fail_rate": 0.0,
+          "truncation_rate": 0.08
+        }
+      ]
+    }
+  },
+  "deliverables": {
+    "unquantized_base_mmlupro": 0.6726666666666667,
+    "cited_match_mmlupro": true,
+    "cited_verdict_mmlupro": "confirm",
+    "gate_bar_90_mmlupro": 0.6054,
+    "gate_bar_90_mmlupro_cited": 0.6012000000000001,
+    "unquantized_base_gpqa": 0.5235690235690236,
+    "cited_match_gpqa": false,
+    "cited_verdict_gpqa": "within-CI-but-off",
+    "gate_bar_90_gpqa": 0.47121212121212125,
+    "gate_bar_90_gpqa_cited": 0.423,
+    "unquantized_base_gsm8k": 0.8966666666666666,
+    "cited_match_gsm8k": true,
+    "cited_verdict_gsm8k": "confirm",
+    "gate_bar_90_gsm8k": 0.8069999999999999,
+    "gate_bar_90_gsm8k_cited": 0.8280000000000001
+  },
+  "peak_gpu_gb": 20.3
+}
