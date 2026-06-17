@@ -1,0 +1,183 @@
+{
+  "schema": "lmhead_int8_readreduction_v2",
+  "pr": 593,
+  "agent": "stark",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "wandb_group": "lmhead-int8-readreduction",
+  "smoke": false,
+  "reference": "operative #407 int4-referenced: bf16-head argmax(h_INT4body) == served base_fullhead emission",
+  "operative_band": 0.125,
+  "census": {
+    "official": {
+      "n_positions": 24576,
+      "ref_reproduction_rate": 0.9942219853401184,
+      "flip_rate": {
+        "int8": 0.001220703125,
+        "fp8_e4m3": 0.00341796875
+      },
+      "flip_counts": {
+        "int8": 30,
+        "fp8_e4m3": 84
+      }
+    },
+    "heldout": {
+      "n_positions": 50768,
+      "ref_reproduction_rate": 0.9985817670822144,
+      "flip_rate": {
+        "int8": 0.00019697447210841474,
+        "fp8_e4m3": 0.0006697132051686101
+      },
+      "flip_counts": {
+        "int8": 10,
+        "fp8_e4m3": 34
+      }
+    }
+  },
+  "operative": {
+    "official": {
+      "int8": {
+        "n_positions": 24576,
+        "n_flips": 30,
+        "strict_flip_rate": 0.001220703125,
+        "flip_margin_max": 0.08549690246582031,
+        "flip_margin_mean": 0.011947886149088541,
+        "flip_margin_p50": 0.006840705871582031,
+        "flip_margin_p90": 0.02671298980712891,
+        "flip_margin_p99": 0.06892896652221685,
+        "nonflip_margin_p50": 6.080929756164551,
+        "confident_flips_by_band": {
+          "0": 30,
+          "0.0625": 1,
+          "0.125": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "1": 0
+        },
+        "confident_flips_at_operative_band": 0
+      },
+      "fp8_e4m3": {
+        "n_positions": 24576,
+        "n_flips": 84,
+        "strict_flip_rate": 0.00341796875,
+        "flip_margin_max": 0.16802024841308594,
+        "flip_margin_mean": 0.03600299926031204,
+        "flip_margin_p50": 0.023273468017578125,
+        "flip_margin_p90": 0.08412647247314453,
+        "flip_margin_p99": 0.16243349075317384,
+        "nonflip_margin_p50": 6.105926513671875,
+        "confident_flips_by_band": {
+          "0": 84,
+          "0.0625": 16,
+          "0.125": 4,
+          "0.25": 0,
+          "0.5": 0,
+          "1": 0
+        },
+        "confident_flips_at_operative_band": 4
+      }
+    },
+    "heldout": {
+      "int8": {
+        "n_positions": 50768,
+        "n_flips": 10,
+        "strict_flip_rate": 0.00019697447210841474,
+        "flip_margin_max": 0.03976631164550781,
+        "flip_margin_mean": 0.013005542755126952,
+        "flip_margin_p50": 0.009757041931152344,
+        "flip_margin_p90": 0.025137329101562494,
+        "flip_margin_p99": 0.03830341339111328,
+        "nonflip_margin_p50": 9.513023376464844,
+        "confident_flips_by_band": {
+          "0": 10,
+          "0.0625": 0,
+          "0.125": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "1": 0
+        },
+        "confident_flips_at_operative_band": 0
+      },
+      "fp8_e4m3": {
+        "n_positions": 50768,
+        "n_flips": 34,
+        "strict_flip_rate": 0.0006697132051686101,
+        "flip_margin_max": 0.12132072448730469,
+        "flip_margin_mean": 0.04094322989968693,
+        "flip_margin_p50": 0.038626670837402344,
+        "flip_margin_p90": 0.08089637756347656,
+        "flip_margin_p99": 0.10901798248291023,
+        "nonflip_margin_p50": 9.514873504638672,
+        "confident_flips_by_band": {
+          "0": 34,
+          "0.0625": 9,
+          "0.125": 0,
+          "0.25": 0,
+          "0.5": 0,
+          "1": 0
+        },
+        "confident_flips_at_operative_band": 0
+      }
+    }
+  },
+  "ppl": {
+    "bf16_head": 2.0062898766017425,
+    "int8_head": 2.0063257595579014,
+    "delta_int8_minus_bf16": 3.588295615886139e-05,
+    "n_seqs": 128
+  },
+  "free_running": {
+    "n_prompts": 24,
+    "n_prompts_identical": 21,
+    "n_prompts_divergent": 3,
+    "free_running_prompt_identity_rate": 0.875,
+    "first_divergence_indices": [
+      53,
+      38,
+      81
+    ],
+    "median_first_divergence_index": 53.0
+  },
+  "microbench": {
+    "bf16_matmul_argmax_ms": 2.790701389312744,
+    "bf16_gemv_halfvocab_ms": 1.4028000831604004,
+    "int8_dequant_matmul_ms": 29.10027503967285,
+    "head_bytes_bf16_gib": 1.25,
+    "head_bytes_int8_gib": 0.625,
+    "gemv_halfvocab_over_full_ratio": 0.5026693606605696,
+    "hbm_read_ratio_int8_over_bf16": 0.5026693606605696,
+    "read_reduction_theoretical_int8_over_bf16": 0.5,
+    "note": "read-reduction proxy = SAME bf16 GEMV kernel at half-vocab (0.67 GiB) vs full (1.34 GiB); ratio ~0.5 confirms read-bound byte-linear scaling. eager int8_dequant_matmul is a non-fused UPPER BOUND (materializes bf16 W) -- realizing 2x needs a fused int8 GEMV (Marlin-int8). safe_head_tps uses the lawine spec-served projection (land #556 int8_tps_if_safe = 276.52)."
+  },
+  "topk_gather": {
+    "static_freq_shortlist_is_the_prune": true,
+    "static_freq_shortlist_note": "the only cheap static top-K is the 12k freq shortlist == the shipped prune (375.857) which collapses AIME/quality: no candidate-set guarantee -> confident flips.",
+    "exact_hierarchical_argmax_reads_all_rows": true,
+    "exact_hierarchical_note": "a guaranteed-correct hierarchical/cluster argmax that still reads every row yields NO HBM saving; a Cauchy-Schwarz norm bound is direction-blind and rarely prunes enough rows to beat 0.5.",
+    "lowrank_sketch_then_verify_sub_half_possible": true,
+    "lowrank_sketch_note": "a V x r sketch shortlist (r~256, K~64) COULD go sub-0.5 read, but its operative-safety hinges on an UNPROVEN shortlist-contains-argmax guarantee -> a follow-up recall/miss-margin card.",
+    "best_realized_safe_read_fraction": 0.5,
+    "best_realized_safe_read_fraction_note": "int8 is the concrete realized read-cut: reads all 262k rows at 1 byte = 0.5 fraction, no shortlist guarantee needed."
+  },
+  "int8_head_strict_flip_rate_official": 0.001220703125,
+  "int8_head_confident_flips_operative_band_total": 0,
+  "int8_head_identity_safe": true,
+  "anchor_frame": "MTP-K7 spec-ON served (wirbel #553 83jiwjr9); spec-OFF AR M=1 = 97.0 (#569)",
+  "spec_served_anchor_tps": 252.69,
+  "safe_head_tps": 276.52,
+  "int8_head_tps_gain": 23.83,
+  "int8_head_tps_gain_exceeds_sigma_hw": true,
+  "free_head_ceiling_tps": 311.27,
+  "ship_tps": 375.857,
+  "headroom_to_free_head_ceiling": 34.75,
+  "gap_safe_head_to_ship": 99.34,
+  "int8_head_is_ship_reacher": false,
+  "ppl_int8_within_gate": true,
+  "operative_safe_head_read_reduction_exists": true,
+  "peak_gpu_gib_modelload": 20.5,
+  "peak_gpu_gib": 20.5,
+  "elapsed_s": 1573.4
+}
