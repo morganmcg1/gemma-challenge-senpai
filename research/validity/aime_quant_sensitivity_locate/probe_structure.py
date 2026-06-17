@@ -70,12 +70,12 @@ def main():
         print("quant cfg keys:", list(qc.keys()) if isinstance(qc, dict) else qc, flush=True)
 
     print("\nLoading int4 (CPU, bf16) ...", flush=True)
-    m4 = AutoModelForCausalLM.from_pretrained(INT4, dtype=torch.bfloat16, device_map="cpu", trust_remote_code=True)
+    m4 = AutoModelForCausalLM.from_pretrained(INT4, dtype=torch.bfloat16, trust_remote_code=True)
     describe("INT4", m4)
     del m4
 
     print("\nLoading bf16 base (CPU, bf16) ...", flush=True)
-    mb = AutoModelForCausalLM.from_pretrained(BF16, dtype=torch.bfloat16, device_map="cpu", trust_remote_code=True)
+    mb = AutoModelForCausalLM.from_pretrained(BF16, dtype=torch.bfloat16, trust_remote_code=True)
     describe("BF16", mb)
     del mb
     return 0
