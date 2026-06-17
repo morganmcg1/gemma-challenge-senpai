@@ -1,0 +1,114 @@
+{
+  "pr": 596,
+  "analysis_only": true,
+  "official_tps": 0,
+  "configs_measured": [
+    "base_specoff",
+    "base_mtp"
+  ],
+  "per_config": {
+    "base_specoff": {
+      "config_label": "base_fullhead spec-OFF M=1 AR (#319 reference)",
+      "spec_mode": "OFF_M1_AR",
+      "n_servers_ok": 2,
+      "served_argmax_determinism_rate": 1.0,
+      "warm_xproc_matched_state_rate": 1.0,
+      "warm_xproc_allN_sequence_exact": 1.0,
+      "warm_xproc_all_pairs_identical": true,
+      "cold_xproc_matched_state_rate": 1.0,
+      "cold_xproc_allN_sequence_exact": 1.0,
+      "cold_xproc_all_pairs_identical": true,
+      "within_coldwarm_matched_state_rate": 0.9981753996271469,
+      "within_coldwarm_all_servers_identical": false,
+      "literally_bit_exact_all_pairs": true,
+      "all_flips_near_tie": true,
+      "tie_miss_margin_p90": null,
+      "tie_control_margin_p10": 1.5624999850988388,
+      "n_real_response_divergent_prompts": 0,
+      "any_real_response_divergence": false,
+      "operative_identity_bit_stable": true,
+      "matched_state_trials": 32768,
+      "peak_vram_gb": 19.33
+    },
+    "base_mtp": {
+      "config_label": "base_fullhead spec-ON MTP-K7 (served stack)",
+      "spec_mode": "ON_MTP_K7",
+      "n_servers_ok": 2,
+      "served_argmax_determinism_rate": 1.0,
+      "warm_xproc_matched_state_rate": 1.0,
+      "warm_xproc_allN_sequence_exact": 1.0,
+      "warm_xproc_all_pairs_identical": true,
+      "cold_xproc_matched_state_rate": 1.0,
+      "cold_xproc_allN_sequence_exact": 1.0,
+      "cold_xproc_all_pairs_identical": true,
+      "within_coldwarm_matched_state_rate": 0.9967094591463133,
+      "within_coldwarm_all_servers_identical": false,
+      "literally_bit_exact_all_pairs": true,
+      "all_flips_near_tie": true,
+      "tie_miss_margin_p90": null,
+      "tie_control_margin_p10": 0.5624999850988388,
+      "n_real_response_divergent_prompts": 0,
+      "any_real_response_divergence": false,
+      "operative_identity_bit_stable": true,
+      "matched_state_trials": 32768,
+      "peak_vram_gb": 19.39
+    }
+  },
+  "inheritance_bridge": {
+    "available": true,
+    "base_specoff_warm_rate": 1.0,
+    "base_mtp_warm_rate": 1.0,
+    "warm_rate_abs_diff": 0.0,
+    "tolerance": 0.005,
+    "base_specoff_cold_all_pairs_identical": true,
+    "base_mtp_cold_all_pairs_identical": true,
+    "spec_inherits_decode_determinism": true
+  },
+  "load_bearing_int4g128_mtp": {
+    "available": true,
+    "route": "structural_projection",
+    "reason_no_direct": "int4_g128 model/ weights absent + unquantized bf16 source not cached (only LFS-pointer/tokenizer blobs); launch isolation forbids fern #597's baked weights.",
+    "substrate_config": "base_specoff (int4-g32 body Marlin + bf16 head, M=1 AR)",
+    "substrate_warm_rate": 1.0,
+    "substrate_warm_all_pairs_identical": true,
+    "substrate_bit_exact": true,
+    "int4_body_marlin_argmax_proven_deterministic": true,
+    "unmeasured_kernel": "untied int4 lm_head Marlin GEMV (same Marlin family as proven int4 body GEMVs)",
+    "inheritance_bridge_holds": true,
+    "projection_holds": true,
+    "projected_int4g128_mtp_determinism_rate": 1.0,
+    "residual_uncertainty": "only the int4-head Marlin GEMV is not directly run; its warm determinism is projected from the same-family int4-body Marlin GEMVs measured bit-exact in base_specoff. A larger near-tie density (int4 head compresses logit range) would raise the cold->warm transient flip count but NOT the warm run-to-run rate, which is kernel-deterministic.",
+    "note": "STRUCTURAL projection: int4_g128+MTP-K7 warm determinism = 1.0, from base_specoff substrate bit-exactness + base_mtp inheritance; a direct int4 build is confirmatory-only and gated on a ~15 GB gated-HF source download."
+  },
+  "verdicts": {
+    "operative_identity_bit_stable": true,
+    "per_config_operative_identity_bit_stable": {
+      "base_specoff": true,
+      "base_mtp": true
+    },
+    "int4g128_mtp_bit_stable": true,
+    "int4g128_mtp_determinism_route": "structural_projection",
+    "int4g128_substrate_directly_measured": false,
+    "int4g128_substrate_bit_stable_direct": null,
+    "gpqa_seedswing_is_sampling_not_nondeterminism": true
+  },
+  "gpqa_attribution": {
+    "decode_nondeterminism_component": 0.0,
+    "eval_uses_sampling": true,
+    "generation_config": {
+      "do_sample": true,
+      "temperature": 1.0,
+      "top_k": 64,
+      "top_p": 0.95
+    },
+    "gpqa_seedswing_is_sampling_not_nondeterminism": true,
+    "greedy_decode_determinism_rate": 1.0,
+    "pooled_accuracy": 0.47474747474747475,
+    "sampling_sigma_diff_problems_moment": 9.94,
+    "sampling_sigma_diff_problems_worstcase": 9.95,
+    "swing_abs_accuracy": 0.010099999999999998,
+    "swing_in_sampling_sigma": 0.201,
+    "swing_problems": 2
+  },
+  "meta_wandb_run_id": "fyw6cvas"
+}
