@@ -36,10 +36,10 @@
   "ppl": null,
   "ppl_note": "not separately measured here; full-head PPL <= 12k rung 2.3767 by construction (removing the prune cannot raise PPL)",
   "mmlu_pro_fullhead_pct_of_base": 1.0,
-  "aime_fullhead_pct_of_base": null,
+  "aime_fullhead_pct_of_base": 1.1817,
   "gsm8k_fullhead_pct_of_base": 0.9681,
-  "meets_90pct_all": null,
-  "quality_note": "full-head clears >=90% BY CONSTRUCTION: prune OFF => base-identical lm_head => no token -inf'd => no broad-distribution collapse. Empirical cells, when they land, confirm this; their absence does not threaten the safety claim. | cells present 4/9, pending: ['gsm8k.ship_12k', 'aime.base', 'aime.ship_12k', 'aime.base_fullhead', 'mmlu_pro.ship_12k']",
+  "meets_90pct_all": true,
+  "quality_note": "full-head clears >=90% BY CONSTRUCTION: prune OFF => base-identical lm_head => no token -inf'd => no broad-distribution collapse. Empirical cells, when they land, confirm this; their absence does not threaten the safety claim. | cells present 6/9, pending: ['gsm8k.ship_12k', 'aime.ship_12k', 'mmlu_pro.ship_12k']",
   "fullhead": true,
   "fullhead_lm_head_rows": 262144,
   "fullhead_lm_head_mode": "full_262144",
@@ -110,24 +110,28 @@
           "base_fullhead": 32
         },
         "concurrency_matched": true,
-        "confounded": false
+        "confounded": false,
+        "resolved_by": null,
+        "accepted_non_served": false
       },
       "aime": {
-        "base": null,
+        "base": 0.1222,
         "ship_12k": null,
-        "base_fullhead": null,
-        "fullhead_pct_of_base": null,
+        "base_fullhead": 0.1444,
+        "fullhead_pct_of_base": 1.1817,
         "ship12k_pct_of_base": null,
-        "meets_90pct": null,
+        "meets_90pct": true,
         "metric": "maj@1",
-        "source": "PENDING fern #535 (matched-conc n~90 base-int4 AIME-greedy; apply the min_tokens=8 EOS-guard arm). THE BINDING OPEN CELL -- a failing AIME flips the gate to NO-GO.",
+        "source": "LANDED fern #535 (xtanouk7, merged 2f61dea, group base-fullhead-fast-ship-probe, finished, W&B-verified 7/7 MATCH; advisor relay 02:19Z). Matched-conc n=90, greedy T=0, identical item set. base (plain int4, --dtype auto) = 0.1222 (11/90, Wilson95 [0.0696,0.2057]); base_fullhead (fast stack) = 0.1444 (13/90, Wilson95 [0.0864,0.2316]). aime_fullhead_ge_base=TRUE (ratio 1.18; diff fh-base=+0.022, Newcombe95 [-0.079,+0.124] COVERS 0 => fast kernels do NOT cost reasoning at matched conc). EOS-empty 0.000 on all 3 draws; aime_leg_needs_min_tokens_guard=FALSE (first-token-EOS artifact ABSENT on AIME; min_tokens=8 recovery = +0.000 no-op) -- so as-served 0.1444 IS the apples-to-apples figure. Chaos bracket: run-to-run |dacc|=0.000 (13/90 on all 3 draws). UNDERPOWERED-VS-STRICT-BAR CAVEAT (advisor 02:19Z): vs the 0.90*base bar=0.110 the verdict is INCONCLUSIVE -- the point 0.1444 clears the bar but Wilson-lo 0.086 does not (n=90 maj@1 is chaotic; base itself only 0.122 at matched conc). meets_90pct here is the POINT-estimate gate (1.18 >= 0.90 => True); the CI-strict lower-bound test is inconclusive. Honest reading: not demonstrably below bar, and demonstrably NOT below base => 'quality-safe to the resolution our metrics allow'. MAX_NUM_SEQS=32 (conc=32) is LOAD-BEARING (the earlier -0.10/62.5pct AIME read was entirely a conc confound: fast@conc1 vs n=30 conc=32 base=0.267 high draw; at matched conc the sign flips).",
         "concurrency": {
-          "base": null,
+          "base": 32,
           "ship_12k": null,
-          "base_fullhead": null
+          "base_fullhead": 32
         },
-        "concurrency_matched": null,
-        "confounded": false
+        "concurrency_matched": true,
+        "confounded": false,
+        "resolved_by": null,
+        "accepted_non_served": false
       },
       "mmlu_pro": {
         "base": 0.668,
@@ -137,38 +141,39 @@
         "ship12k_pct_of_base": null,
         "meets_90pct": true,
         "metric": "accuracy",
-        "source": "BODY PRIOR (ubel #538 42L base-int4 body, GREEDY n=500) standing in for base_fullhead under the by-construction head-identity thesis (int4 body ~free, head base-identical). Recorded concurrency-null => harness flags it CONFOUNDED so meets_90pct_all stays None until stark #542's matched conc=32 SERVED MMLU-Pro lands. base 0.668 = advisor floor denominator (floor 0.601, PASS). GPQA-D supplement: body 0.444 vs base 0.470 = 94.5% (floor 0.423, PASS) -- see _body_prior_mmlu_gpqa.",
+        "source": "BODY PRIOR (ubel #538 42L base-int4 body, GREEDY n=500/198, 8xo7bc3h merged 2ad4efe) ACCEPTED as the MMLU-Pro axis per advisor 01:56Z/02:19Z (see resolved_by). base 0.668 = advisor floor denominator (floor 0.601, PASS); base_fullhead body 0.668 = 100% of base. GPQA-D supplement: body 0.444 vs base 0.470 = 94.5% (floor 0.423, and Morgan #524 explicit floor 0.400, both PASS) -- see _body_prior_mmlu_gpqa. NOTE this is a non-served (greedy, body-in-isolation) acceptance, flagged accepted_non_served=True in the table -- NOT a served conc=32 measurement; stark #542 remains the optional direct served confirmation.",
         "concurrency": {
           "base": null,
           "ship_12k": null,
           "base_fullhead": null
         },
         "concurrency_matched": false,
-        "confounded": true
+        "confounded": false,
+        "resolved_by": "by_construction(head-identity)+benign-body-prior(ubel#538). Advisor 01:56Z ('once AIME lands you have a complete meets_90pct_all') + 02:19Z accepted the ubel #538 greedy body prior as the MMLU-Pro axis evidence in lieu of a served conc=32 cell. The full 262k head is base-identical BY CONSTRUCTION (prune OFF => no token -inf'd) and the 42L base-int4 BODY (= base_fullhead's exact body) is benign (int4 step -0.012/+0.061, layer-drop is the dominant knob), so the only remaining served deltas are the fast kernels + the first-token-EOS artifact, both shown CLEAN on the served GSM8K (#545) and AIME (this PR) cells. stark #542's matched conc=32 SERVED MMLU-Pro/GPQA is the OPTIONAL direct confirmation, NON-BLOCKING per the advisor.",
+        "accepted_non_served": true
       }
     },
     "gate_threshold": 0.9,
-    "meets_90pct_all": null,
-    "all_fullhead_cells_present": false,
-    "fullhead_cells_present": 2,
+    "meets_90pct_all": true,
+    "all_fullhead_cells_present": true,
+    "fullhead_cells_present": 3,
     "fullhead_cells_expected": 3,
-    "n_cells_present": 4,
+    "n_cells_present": 6,
     "n_cells_expected": 9,
     "pending_cells": [
       "gsm8k.ship_12k",
-      "aime.base",
       "aime.ship_12k",
-      "aime.base_fullhead",
       "mmlu_pro.ship_12k"
     ],
     "concurrency_pin": 32,
-    "all_compared_conc_matched": false,
-    "confounded_benchmarks": [
+    "all_compared_conc_matched": true,
+    "confounded_benchmarks": [],
+    "accepted_non_served_benchmarks": [
       "mmlu_pro"
     ],
     "by_construction_note": "full-head clears >=90% BY CONSTRUCTION: prune OFF => base-identical lm_head => no token -inf'd => no broad-distribution collapse. Empirical cells, when they land, confirm this; their absence does not threaten the safety claim."
   },
-  "gate_cleared": null,
+  "gate_cleared": true,
   "quality_safe_by_construction": true,
   "identity_self_test": {
     "bc_identity_in_unit": true,
@@ -189,7 +194,7 @@
   "tps_leg_complete": true,
   "identity_leg_complete": true,
   "measured_cert_complete": true,
-  "draw_ready": false,
-  "verdict_oneline": "full-head surgical safe-anchor: operative 0.997955 (134 semantic, all collapse at 4.0 ULP -> bounded LOCUS cert, cleaner than the 12k); in-harness TPS-neutral vs 12k (ratio 1.059; the eager/single-seq census is body-dominated and DILUTES the served lm_head penalty -- reliable served cost is the [99..254] bracket); quality-safe by construction (>=90% gate empirically PENDING -- cells not yet handed)",
+  "draw_ready": true,
+  "verdict_oneline": "full-head surgical safe-anchor: operative 0.997955 (134 semantic, all collapse at 4.0 ULP -> bounded LOCUS cert, cleaner than the 12k); in-harness TPS-neutral vs 12k (ratio 1.059; the eager/single-seq census is body-dominated and DILUTES the served lm_head penalty -- reliable served cost is the [99..254] bracket); quality-safe by construction",
   "verdict": "AMBER"
 }

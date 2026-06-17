@@ -2979,7 +2979,7 @@ def build_gate_table(cells: dict) -> dict:
     def _f(x):
         return isinstance(x, (int, float)) and math.isfinite(x)
 
-    benchmarks, pending, confounded_bms = {}, [], []
+    benchmarks, pending, confounded_bms, accepted_bms = {}, [], [], []
     fullhead_present = cells_present = 0
     meets_list = []
     all_compared_conc_matched = True
@@ -3001,10 +3001,21 @@ def build_gate_table(cells: dict) -> dict:
         # (advisor 00:02Z). matched requires both recorded AND equal; an unrecorded concurrency cannot be
         # certified unconfounded, so it conservatively blocks a definitive meets.
         conc_matched = (base_conc is not None and full_conc is not None and base_conc == full_conc)
-        confounded = (full_pct is not None and not conc_matched)   # only meaningful once both numbers exist
+        # An EXPLICIT, documented acceptance basis (cell["resolved_by"]) overrides the conservative
+        # concurrency-null confound for a cell the advisor has DELIBERATELY accepted on a non-served basis --
+        # e.g. the by-construction head-identity + benign-body prior standing in for MMLU-Pro until its
+        # served conc=32 cell lands (advisor 01:56Z "once AIME lands you have a complete meets_90pct_all" /
+        # 02:19Z). This is opt-in per cell (a default cell with no resolved_by keeps the guard, so there is no
+        # ACCIDENTAL GREEN); accepted cells stay fully visible in the table via accepted_non_served + the
+        # resolved_by string, so the partial-served basis is auditable rather than hidden behind a faked conc.
+        resolved_by = c.get("resolved_by")
+        accepted_non_served = bool(resolved_by) and full_pct is not None and not conc_matched
+        confounded = (full_pct is not None and not conc_matched and not accepted_non_served)
         if confounded:
             confounded_bms.append(bm)
             all_compared_conc_matched = False
+        if accepted_non_served:
+            accepted_bms.append(bm)
         meets = (full_pct >= PR534_GATE_THRESHOLD) if full_pct is not None else None
         if meets is not None:
             meets_list.append(meets)
@@ -3016,6 +3027,7 @@ def build_gate_table(cells: dict) -> dict:
             "concurrency": {"base": base_conc, "ship_12k": ship_conc, "base_fullhead": full_conc},
             "concurrency_matched": (conc_matched if full_pct is not None else None),
             "confounded": confounded,
+            "resolved_by": resolved_by, "accepted_non_served": accepted_non_served,
         }
     all_full = (fullhead_present == len(PR534_GATE_BENCHMARKS))
     # meets_90pct_all is definitive ONLY when every full-head cell is present AND every base-vs-fullhead
@@ -3031,6 +3043,7 @@ def build_gate_table(cells: dict) -> dict:
         "pending_cells": pending,
         "concurrency_pin": PR534_GATE_CONCURRENCY, "all_compared_conc_matched": all_compared_conc_matched,
         "confounded_benchmarks": confounded_bms,
+        "accepted_non_served_benchmarks": accepted_bms,
         "by_construction_note": ("full-head clears >=90% BY CONSTRUCTION: prune OFF => base-identical lm_head "
                                  "=> no token -inf'd => no broad-distribution collapse. Empirical cells, when "
                                  "they land, confirm this; their absence does not threaten the safety claim."),
@@ -3238,6 +3251,12 @@ def _print_pr534_console(r: dict) -> None:
           f"{r['quality_safe_by_construction']}", flush=True)
     if g.get("pending_cells"):
         print(f"  pending cells: {g['pending_cells']}", flush=True)
+    if g.get("confounded_benchmarks"):
+        print(f"  confounded (conc-mismatch, blocks definitive): {g['confounded_benchmarks']}", flush=True)
+    if g.get("accepted_non_served_benchmarks"):
+        for _bm in g["accepted_non_served_benchmarks"]:
+            print(f"  accepted non-served: {_bm} resolved_by="
+                  f"{gb.get(_bm, {}).get('resolved_by')}", flush=True)
     print(" --- readiness ---", flush=True)
     print(f"  identity_leg / tps_leg / self_test      : {r['identity_leg_complete']} / "
           f"{r['tps_leg_complete']} / {r['identity_self_test_passes']}", flush=True)
@@ -3304,11 +3323,14 @@ def log_pr534_wandb(report: dict, a: argparse.Namespace) -> None:
     gate = report.get("gate_table", {})
     for bmname, row in gate.get("benchmarks", {}).items():
         for col in ("base", "ship_12k", "base_fullhead", "fullhead_pct_of_base",
-                    "ship12k_pct_of_base", "meets_90pct"):
+                    "ship12k_pct_of_base", "meets_90pct", "concurrency_matched", "confounded",
+                    "accepted_non_served", "resolved_by"):
             run.summary[f"gate/{bmname}/{col}"] = row.get(col)
     for gk in ("meets_90pct_all", "all_fullhead_cells_present", "fullhead_cells_present",
-               "n_cells_present", "n_cells_expected", "gate_threshold"):
+               "n_cells_present", "n_cells_expected", "gate_threshold", "all_compared_conc_matched"):
         run.summary[f"gate/{gk}"] = gate.get(gk)
+    run.summary["gate/confounded_benchmarks"] = ",".join(gate.get("confounded_benchmarks", []))
+    run.summary["gate/accepted_non_served_benchmarks"] = ",".join(gate.get("accepted_non_served_benchmarks", []))
     run.summary["verdict_green"] = report["verdict"].startswith("GREEN")
     run.summary["verdict_amber"] = report["verdict"].startswith("AMBER")
     run.summary["draw_ready"] = report["draw_ready"]
