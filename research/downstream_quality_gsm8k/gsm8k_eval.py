@@ -247,6 +247,7 @@ def chat_completion(
     seed: int,
     enable_thinking: bool,
     timeout_s: int,
+    min_tokens: int | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "model": model,
@@ -259,6 +260,13 @@ def chat_completion(
         "stream": False,
         "top_k": top_k,  # vLLM extension
     }
+    if min_tokens is not None:
+        # vLLM extension: forbid EOS/stop until >= min_tokens generated. Used to
+        # guard the base_fullhead first-token-EOS pathology (PR #541): the surgical
+        # kernels tip a spurious end-of-turn token to win the position-0 argmax on
+        # ~10-15% of GSM8K prompts; min_tokens lets us measure whether the reasoning
+        # underneath is intact (it is) without any served-file change.
+        payload["min_tokens"] = min_tokens
     if enable_thinking:
         payload["chat_template_kwargs"] = {"enable_thinking": True}
     body = json.dumps(payload).encode()
@@ -287,6 +295,7 @@ def eval_endpoint(
     concurrency: int,
     request_timeout_s: int,
     save_text: bool = False,
+    min_tokens: int | None = None,
 ) -> dict[str, Any]:
     t0 = time.time()
     results: dict[int, dict[str, Any]] = {}
@@ -304,6 +313,7 @@ def eval_endpoint(
             seed=seed,
             enable_thinking=enable_thinking,
             timeout_s=request_timeout_s,
+            min_tokens=min_tokens,
         )
         choice = (resp.get("choices") or [{}])[0]
         text = choice.get("message", {}).get("content") or ""
@@ -427,6 +437,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--top-p", type=float, default=0.95)
     ap.add_argument("--top-k", type=int, default=64)
     ap.add_argument("--max-tokens", type=int, default=512)
+    ap.add_argument("--min-tokens", type=int, default=None,
+                    help="vLLM min_tokens: forbid EOS until N tokens generated "
+                         "(PR #541 first-token-EOS guard; default None = unset, byte-identical to #533)")
     ap.add_argument("--enable-thinking", action="store_true", help="enable Gemma thinking channel (default off)")
     ap.add_argument("--concurrency", type=int, default=32, help="in-flight requests (exploit server batching)")
     ap.add_argument("--max-num-seqs", type=int, default=32, help="server decode concurrency override")
@@ -480,10 +493,10 @@ def main(argv: list[str] | None = None) -> int:
         if regime == "greedy":
             return {"temperature": 0.0, "top_p": 1.0, "top_k": -1,
                     "max_tokens": args.max_tokens, "seed": args.seed,
-                    "enable_thinking": args.enable_thinking}
+                    "enable_thinking": args.enable_thinking, "min_tokens": args.min_tokens}
         return {"temperature": 1.0, "top_p": args.top_p, "top_k": args.top_k,
                 "max_tokens": args.max_tokens, "seed": args.seed,
-                "enable_thinking": args.enable_thinking}
+                "enable_thinking": args.enable_thinking, "min_tokens": args.min_tokens}
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -497,7 +510,7 @@ def main(argv: list[str] | None = None) -> int:
                 max_tokens=s["max_tokens"], seed=s["seed"],
                 enable_thinking=s["enable_thinking"],
                 concurrency=args.concurrency, request_timeout_s=args.request_timeout_s,
-                save_text=args.save_text,
+                save_text=args.save_text, min_tokens=s["min_tokens"],
             )
             out = {
                 "label": args.label,
