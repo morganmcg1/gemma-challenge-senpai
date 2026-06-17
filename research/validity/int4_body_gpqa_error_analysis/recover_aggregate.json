@@ -1,0 +1,77 @@
+{
+  "pr": 619,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "knob": "max_tokens 3072 -> 6144 (max_model_len 6144->8960)",
+  "rerun_scope": "per-seed truncated-union cells, both arms, all re-run seeds",
+  "overlay_cells_base": 239,
+  "overlay_cells_int4": 313,
+  "recovery_base": {
+    "truncated_cells_rerun": 239,
+    "recovered_wrong_to_right": 88,
+    "recovery_rate": 0.3682008368200837,
+    "still_truncated_at_6144": 5,
+    "nontruncated_rerun_cells": 170,
+    "nontruncated_flips_determinism_witness": 51
+  },
+  "recovery_int4": {
+    "truncated_cells_rerun": 313,
+    "recovered_wrong_to_right": 111,
+    "recovery_rate": 0.3546325878594249,
+    "still_truncated_at_6144": 5,
+    "nontruncated_rerun_cells": 96,
+    "nontruncated_flips_determinism_witness": 21
+  },
+  "BEFORE_3072": {
+    "base_mean_acc": 0.4816964285714286,
+    "int4_mean_acc": 0.44687499999999997,
+    "deficit": 0.034821428571428614,
+    "base_per_seed": [
+      0.5044642857142857,
+      0.48214285714285715,
+      0.4955357142857143,
+      0.48214285714285715,
+      0.44419642857142855
+    ],
+    "int4_per_seed": [
+      0.4419642857142857,
+      0.41294642857142855,
+      0.453125,
+      0.453125,
+      0.4732142857142857
+    ],
+    "mcnemar_shared": 2240,
+    "n01_base_right_int4_wrong": 309,
+    "n10_base_wrong_int4_right": 231,
+    "mcnemar_p_exact": 0.0009043979366335723
+  },
+  "AFTER_6144": {
+    "base_mean_acc": 0.5209821428571428,
+    "int4_mean_acc": 0.49642857142857144,
+    "deficit": 0.024553571428571397,
+    "base_per_seed": [
+      0.5357142857142857,
+      0.5133928571428571,
+      0.5379464285714286,
+      0.5178571428571429,
+      0.5
+    ],
+    "int4_per_seed": [
+      0.5022321428571429,
+      0.46875,
+      0.49330357142857145,
+      0.4955357142857143,
+      0.5223214285714286
+    ],
+    "mcnemar_shared": 2240,
+    "n01_base_right_int4_wrong": 309,
+    "n10_base_wrong_int4_right": 254,
+    "mcnemar_p_exact": 0.022771854407879186
+  },
+  "deficit_before": 0.034821428571428614,
+  "deficit_after": 0.024553571428571397,
+  "deficit_shrink": 0.010267857142857217,
+  "deficit_shrink_pct": 29.487179487179667,
+  "mcnemar_p_after_gt_0p05": false
+}
