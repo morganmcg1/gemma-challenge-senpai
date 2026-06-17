@@ -1,0 +1,17 @@
+# Keep: build/aggregate/eval scripts, carve meta JSONs, result JSONs, smoke
+# self-tests, aggregate_pareto.json. Exclude: bulky reproducible logs, pids,
+# wandb run dir, inspect logs, and local draft PR-comment markdown.
+__pycache__/
+*.pyc
+wandb/
+# raw inspect_ai eval logs (reproducible, ~MB each)
+_inspect_logs/
+# verbose driver / server / chain stdout (progress bars; result JSONs hold the numbers)
+_run_*.log
+_server_*.log
+_chain_*.log
+# background-process pidfiles
+*.pid
+# local drafts of posted PR comments (the comments themselves live on the PR)
+_pr_comment.md
+_liveness_comment.md
