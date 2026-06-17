@@ -271,15 +271,25 @@ def _gsm8k_reconfirm(base_url: str, out_dir: Path, *, n: int, label: str) -> dic
 def run_measurement(args: argparse.Namespace) -> dict[str, Any]:
     from scripts.local_validation import harness, paths  # noqa: E402
 
+    # PR #541: optionally profile a DIFFERENT submission with extra serve-env
+    # overrides (the base_fullhead fast-upper anchor = surgical kernels on the stock
+    # 262k-head base-int4). Default stays the int4_base_aime base-int4 floor.
+    submission = args.submission or SUBMISSION
+    label = args.label or submission.name
+    serve_env: dict[str, str] = {}
+    for kv in args.serve_env:
+        k, _, v = kv.partition("=")
+        serve_env[k.strip()] = v
+
     for note in paths.prepare_local_gpu_env():
         print(f"[floor] {note}", flush=True)
-    manifest = harness.load_manifest(SUBMISSION)
+    manifest = harness.load_manifest(submission)
     server_python = args.server_python or harness.ensure_server_venv(manifest["dependencies"])
 
     num_prompts = 4 if args.smoke else NUM_PROMPTS
     output_len = 32 if args.smoke else OUTPUT_LEN
     OUT_ROOT.mkdir(parents=True, exist_ok=True)
-    log_path = OUT_ROOT / "server_base_floor.log"
+    log_path = OUT_ROOT / f"server_{label}_floor.log"
 
     # Pin the worker subprocess to the SERVER venv (mirror harness._participant_env).
     worker_env = os.environ.copy()
@@ -307,7 +317,9 @@ def run_measurement(args: argparse.Namespace) -> dict[str, Any]:
             stop.wait(2.0)
 
     measured: dict[str, Any] = {
-        "submission": str(SUBMISSION),
+        "submission": str(submission),
+        "label": label,
+        "serve_env": serve_env,
         "num_prompts": num_prompts,
         "output_len": output_len,
         "concurrency": 1,
@@ -318,15 +330,16 @@ def run_measurement(args: argparse.Namespace) -> dict[str, Any]:
     sampler.start()
     try:
         with harness.LocalServer(
-            SUBMISSION, server_python=server_python, port=args.port,
+            submission, server_python=server_python, port=args.port,
             startup_timeout_s=1800, log_path=log_path,
+            extra_env=serve_env,
         ) as srv:
             measured["model_id"] = srv.model_id
             measured["served_model_name"] = srv.served_model_name
             print(f"[floor] warming server ({srv.base_url})", flush=True)
             _warm_server(srv.base_url, srv.served_model_name, n=WARMUP_REQUESTS)
 
-            pass_file = OUT_ROOT / ("smoke_pass.json" if args.smoke else "floor_pass.json")
+            pass_file = OUT_ROOT / ("smoke_pass.json" if args.smoke else f"{label}_floor_pass.json")
             summary = _run_decode_pass(
                 server_python, worker_env, base_url=srv.base_url, model=srv.served_model_name,
                 out_file=pass_file, num_prompts=num_prompts, output_len=output_len,
@@ -402,7 +415,9 @@ def log_wandb(report: dict[str, Any], args: argparse.Namespace) -> str | None:
         tags=["base-int4-floor", "quality-safe-floor", "local-a10g", "tps-floor", "analysis-only"],
         notes="PR #533 ext: base-int4 standard-serve warm-median TPS floor + GSM8K(base) re-confirm",
         config={
-            "submission": str(SUBMISSION),
+            "submission": report["measured"].get("submission", str(SUBMISSION)),
+            "label": report["measured"].get("label"),
+            "serve_env": report["measured"].get("serve_env", {}),
             "num_prompts": report["measured"]["num_prompts"],
             "output_len": report["measured"]["output_len"],
             "concurrency": 1, "seed": SEED, "warmup_requests": WARMUP_REQUESTS,
@@ -450,6 +465,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--smoke", action="store_true", help="4x32 plumbing check, no GSM8K")
     ap.add_argument("--no-gsm8k", action="store_true", help="skip the GSM8K re-confirm")
     ap.add_argument("--gsm8k-n", type=int, default=500, help="GSM8K re-confirm item count")
+    ap.add_argument("--submission", type=Path, default=None,
+                    help="submission dir to profile (default: int4_base_aime base-int4 floor). "
+                         "PR #541 reuses this for the base_fullhead fast-upper anchor.")
+    ap.add_argument("--serve-env", action="append", default=[], metavar="KEY=VAL",
+                    help="extra serve env override for the submission (repeatable), e.g. LM_HEAD_PRUNE=0")
+    ap.add_argument("--label", default=None, help="output/report name suffix (default: derived from submission)")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--server-python", type=Path, default=None)
     ap.add_argument("--request-timeout-s", type=int, default=300)
@@ -479,7 +500,15 @@ def main(argv: list[str] | None = None) -> int:
     OUT_ROOT.mkdir(parents=True, exist_ok=True)
     if not args.no_wandb and not args.smoke:
         report["wandb_run_id"] = log_wandb(report, args)
-    out_name = "smoke_report.json" if args.smoke else "report.json"
+    # Default base-int4 floor keeps the canonical report.json (PR #533). A
+    # non-default submission (PR #541 base_fullhead anchor) writes a label-specific
+    # report so it never clobbers the banked floor artifact.
+    if args.smoke:
+        out_name = "smoke_report.json"
+    elif args.submission is not None:
+        out_name = f"report_{report['measured'].get('label') or 'custom'}.json"
+    else:
+        out_name = "report.json"
     (OUT_ROOT / out_name).write_text(json.dumps(report, indent=2, sort_keys=True))
     _print_summary(report)
     print(f"[floor] report: {OUT_ROOT / out_name}", flush=True)
