@@ -46,7 +46,9 @@ def _extract_columns(task: str, path: str) -> dict[str, list[int]]:
             # answers is the list of k extracted ints (None = extract fail = wrong).
             col = [int(a is not None and a == gold) for a in pp["answers"]]
             out[str(pp["id"])] = col
-    elif task in ("mmlu_pro", "gsm8k"):
+    elif task in ("mmlu_pro", "gsm8k", "gpqa", "gpqa_diamond"):
+        # GPQA-Diamond (run_eval.py --task gpqa_diamond) emits the same per_sample
+        # schema as mmlu_pro: one decode realization per file, {id, correct, ...}.
         key = "per_sample" if "per_sample" in d else "per_problem"
         for rec in d[key]:
             out[str(rec["id"])] = [int(bool(rec["correct"]))]
@@ -88,7 +90,8 @@ def _wilson(k: int, n: int, z: float = 1.959963984540054) -> tuple[float, float]
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--task", required=True, choices=["aime", "mmlu_pro", "gsm8k"])
+    ap.add_argument("--task", required=True,
+                    choices=["aime", "mmlu_pro", "gsm8k", "gpqa", "gpqa_diamond"])
     ap.add_argument("--label", required=True)
     ap.add_argument("--bar", type=float, required=True, help="gate bar to clear")
     ap.add_argument("--inputs", nargs="+", required=True, help="per-seed result jsons")

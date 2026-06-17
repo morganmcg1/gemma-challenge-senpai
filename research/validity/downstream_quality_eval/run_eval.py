@@ -308,6 +308,12 @@ def main() -> int:
         is_length_trunc = bool(
             err is None and stop_reason in ("max_tokens", "model_length")
         )
+        # PR #614: same finish_reason signal under the #614 field names so the
+        # gpqa_bar_validity audit (finish_length_rate + the 2048-from-4096 derivation)
+        # stays reproducible. output_tokens aliases completion_tokens (same usage
+        # field); is_truncated is ungated on err to match the #614 committed numbers.
+        output_tokens = completion_tokens
+        is_truncated = bool(stop_reason in ("max_tokens", "model_length"))
         tgt = s.target if isinstance(s.target, str) else json.dumps(s.target)
         per_sample.append(
             {
@@ -322,6 +328,8 @@ def main() -> int:
                 "stop_reason": stop_reason,
                 "completion_tokens": completion_tokens,
                 "length_truncated": is_length_trunc,
+                "output_tokens": output_tokens,
+                "truncated": is_truncated,
                 "prompt_sha": prompt_sha.get(sid),
             }
         )
@@ -351,6 +359,22 @@ def main() -> int:
     from collections import Counter
     stop_reason_counts = dict(Counter(r["stop_reason"] for r in per_sample))
 
+    # PR #614: finish_reason=length truncation audit under the #614 field names.
+    # n_length counts items cut at THIS cap; _len_rate_at(C) derives a SMALLER cap C's
+    # rate by thresholding output_tokens (a completion that emitted >C tokens here
+    # would have been cut at cap C), so one 4096 run yields both 4096 and 2048 rates.
+    n_length = sum(1 for r in per_sample if r["truncated"])
+    finish_length_rate = (n_length / len(per_sample)) if per_sample else float("nan")
+
+    def _len_rate_at(cap: int):
+        have = [r for r in per_sample if r["output_tokens"] is not None]
+        if not have:
+            return None, None
+        n = sum(1 for r in have if r["output_tokens"] > cap)
+        return n, n / len(have)
+
+    n_length_at_2048, finish_length_rate_at_2048 = _len_rate_at(2048)
+
     out = {
         "task": args.task,
         "arm": args.arm,
@@ -374,6 +398,10 @@ def main() -> int:
         "completion_tokens_p50": ctok_p50,
         "completion_tokens_p95": ctok_p95,
         "completion_tokens_max": ctok_max,
+        "n_length": n_length,
+        "finish_length_rate": finish_length_rate,
+        "n_length_at_2048": n_length_at_2048,
+        "finish_length_rate_at_2048": finish_length_rate_at_2048,
         "accuracy": accuracy,
         "max_tokens": args.max_tokens,
         "min_tokens": args.min_tokens or None,
@@ -391,12 +419,14 @@ def main() -> int:
 
     _ctok_mean_s = f"{ctok_mean:.0f}" if ctok_mean is not None else "na"
     _ctok_p95_s = f"{ctok_p95}" if ctok_p95 is not None else "na"
+    _flr2048 = finish_length_rate_at_2048 if finish_length_rate_at_2048 is not None else float("nan")
     print(
         f"[run_eval] task={args.task} arm={args.arm} acc={accuracy:.4f} "
         f"scored={n_scored} correct={n_correct} err={n_error} "
         f"empty={n_empty} empty_rate={empty_rate:.4f} "
         f"len_trunc={n_len_trunc} (max_tok={n_stop_max_tokens} model_len={n_stop_model_length}) "
         f"len_stop_rate={length_stop_rate:.4f} ctok_mean={_ctok_mean_s} ctok_p95={_ctok_p95_s} "
+        f"len@2048={_flr2048:.4f} "
         f"-> {args.out}",
         flush=True,
     )
