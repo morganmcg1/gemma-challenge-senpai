@@ -1,0 +1,12 @@
+
+=== a_24sparse_int4_mlp: 2:4 structured-sparse int4 on MLP gate/up/down (sparsity_config + w4a16) ===
+  [A in-proc] gate=CompressedTensorsConfig.from_config (_parse_sparsity_config)
+  [A in-proc] load_ok=False DeprecationWarning: Sparsity support has been removed from compressed-tensors. Please use a model without sparsity configuration.
+  [B e2e] rc=1 load_ok=False timed_out=False
+  [B e2e] tail: Traceback (most recent call last):
+    raise DeprecationWarning(
+DeprecationWarning: Sparsity support has been removed from compressed-tensors. Please use a model without sparsity configuration.
+
+=== b_mixed_w4_w3_mlp: mixed w4/w3: MLP -> w3 g128, attn/embed/lm_head stay int4 ===
+  [A in-proc] gate=CompressedTensorsWNA16.__init__ (num_bits gate via get_scheme)
+  [A in-proc] load_ok=False ValueError: Unsupported num_bits = 3. Supported num_bits = dict_keys([4, 8])

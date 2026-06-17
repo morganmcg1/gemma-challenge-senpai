@@ -1,0 +1,41 @@
+{
+  "pr": 611,
+  "stage": 0,
+  "analysis_only": true,
+  "official_tps": 0,
+  "engine": "vllm-dev307 (0.22.1rc1.dev307+g3e8afdf78)",
+  "variants": {
+    "a_24sparse_int4_mlp": {
+      "description": "2:4 structured-sparse int4 on MLP gate/up/down (sparsity_config + w4a16)",
+      "inprocess": {
+        "gate": "CompressedTensorsConfig.from_config (_parse_sparsity_config)",
+        "load_ok": false,
+        "error_type": "DeprecationWarning",
+        "error_msg": "Sparsity support has been removed from compressed-tensors. Please use a model without sparsity configuration."
+      },
+      "load_ok": false
+    },
+    "b_mixed_w4_w3_mlp": {
+      "description": "mixed w4/w3: MLP -> w3 g128, attn/embed/lm_head stay int4",
+      "inprocess": {
+        "gate": "CompressedTensorsWNA16.__init__ (num_bits gate via get_scheme)",
+        "load_ok": false,
+        "error_type": "ValueError",
+        "error_msg": "Unsupported num_bits = 3. Supported num_bits = dict_keys([4, 8])"
+      },
+      "load_ok": false
+    },
+    "c_uniform_w3a16": {
+      "description": "uniform w3a16 (group_0 num_bits 4 -> 3)",
+      "inprocess": {
+        "gate": "CompressedTensorsWNA16.__init__ (num_bits gate via get_scheme)",
+        "load_ok": false,
+        "error_type": "ValueError",
+        "error_msg": "Unsupported num_bits = 3. Supported num_bits = dict_keys([4, 8])"
+      },
+      "load_ok": false
+    }
+  },
+  "any_variant_loads": false,
+  "optionc_stage0_verdict": "ALL THREE sub-int4 variants are LOAD-BLOCKED in the mandated vLLM dev307: (a) sparsity support REMOVED from compressed-tensors (non-empty sparsity_config raises at engine init); (b)/(c) WNA16 supports only num_bits in {4,8} on Ampere (num_bits=3 raises at scheme construction). No loadable sub-int4 config exists in this engine -> option C cannot reach Stage 1; 126.378 stands as the quality-safe ceiling for the weight-compression lever."
+}
