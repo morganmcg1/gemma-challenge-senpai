@@ -1,0 +1,200 @@
+{
+  "schema": "base_fullhead_serve_measure_v1",
+  "analysis_only": true,
+  "official_tps": 0,
+  "qat_snapshot": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "k_spec": 7,
+  "ppl_gate": 2.42,
+  "num_prompts": 128,
+  "output_len": 512,
+  "seed": 1,
+  "n_decodes": 2,
+  "smoke": false,
+  "elapsed_s": 1207.114149093628,
+  "anchors": {
+    "bfh_tps": 253.78,
+    "bfh_ppl": 2.006,
+    "osoi5_tps": 353.73,
+    "unsafe_frontier_local": 442.0
+  },
+  "arms": {
+    "base_fullhead": {
+      "arm": "base_fullhead",
+      "submission": "fa2sw_strict_surgical357",
+      "label": "full 42L int4 body + FULL 262k bf16 lm_head (fern #535 recipe)",
+      "extra_env": {
+        "LOCAL_MODEL_DIR": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+        "PLE_FOLD_TARGET_MODEL": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+        "LM_HEAD_PRUNE": "0",
+        "LM_HEAD_PRUNE_REQUIRE": "0",
+        "PCK04_KEEPSET": ""
+      },
+      "tps_anchor": 253.78,
+      "median_wall_tps": 252.30599912117162,
+      "wall_tps_values": [
+        251.61111720295727,
+        253.00088103938597
+      ],
+      "wall_tps_n": 2,
+      "wall_tps_std": 0.9827114329865649,
+      "server_ready_s": 85.01780724525452,
+      "peak_gpu_mem_mib": 19411,
+      "ppl": 2.005659683202687,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "server_error": null,
+      "steptime_exec": {
+        "n": 34716,
+        "gap_p50": 2.796,
+        "gap_mean": 3.207,
+        "cpu_p50": 12.164,
+        "cpu_mean": 11.931,
+        "gpu_p50": 12.239,
+        "gpu_mean": 12.214,
+        "dgpu_p50": 0.0,
+        "dgpu_mean": 0.0
+      },
+      "steptime_draft": {
+        "n": 34404,
+        "gap_p50": 0.0,
+        "gap_mean": 0.0,
+        "cpu_p50": 0.286,
+        "cpu_mean": 0.291,
+        "gpu_p50": 2.664,
+        "gpu_mean": 2.582,
+        "dgpu_p50": 0.0,
+        "dgpu_mean": 0.0
+      },
+      "t_cycle_ms": 15.137999999999998,
+      "e_t_steptime": 3.8194082146962955,
+      "etp_metrics": {
+        "metrics_accepted_delta": 0.0,
+        "metrics_draft_delta": 0.0,
+        "metrics_available": false,
+        "accept_rate": null,
+        "e_t_metrics": null
+      },
+      "spec_counters_pre": {},
+      "spec_counters_post": {},
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "byteexact_armed": false,
+        "byteexact_fixed_tps": null,
+        "byteexact_num_segments": null,
+        "surgical_armed": true,
+        "onegraph_captured": true,
+        "graph_capture_lines": 5,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "flashinfer_sampler": "flashinfer-mentioned"
+      },
+      "decodes": [
+        {
+          "round": 0,
+          "wall_tps": 251.61111720295727,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 260.46543860435486,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 1,
+          "wall_tps": 253.00088103938597,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 259.0346710681915,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    },
+    "osoi5_ship": {
+      "arm": "osoi5_ship",
+      "submission": "fa2sw_strict_surgical357",
+      "label": "37L baked body + 16k int4 pruned head (unsafe osoi5 ship)",
+      "extra_env": {},
+      "tps_anchor": 353.73,
+      "median_wall_tps": 350.7633117479405,
+      "wall_tps_values": [
+        349.2525889961976,
+        352.2740344996835
+      ],
+      "wall_tps_n": 2,
+      "wall_tps_std": 2.1364846045005175,
+      "server_ready_s": 145.01974487304688,
+      "peak_gpu_mem_mib": 19395,
+      "ppl": 2.3766755065685943,
+      "ppl_num_records": 128,
+      "num_completed_prompts": 128,
+      "completion_full": true,
+      "server_error": null,
+      "steptime_exec": {
+        "n": 34973,
+        "gap_p50": 2.763,
+        "gap_mean": 3.133,
+        "cpu_p50": 7.836,
+        "cpu_mean": 7.712,
+        "gpu_p50": 7.92,
+        "gpu_mean": 7.928,
+        "dgpu_p50": 0.0,
+        "dgpu_mean": 0.0
+      },
+      "steptime_draft": {
+        "n": 34659,
+        "gap_p50": 0.0,
+        "gap_mean": 0.0,
+        "cpu_p50": 0.294,
+        "cpu_mean": 0.3,
+        "gpu_p50": 2.643,
+        "gpu_mean": 2.556,
+        "dgpu_p50": 0.0,
+        "dgpu_mean": 0.0
+      },
+      "t_cycle_ms": 10.844999999999999,
+      "e_t_steptime": 3.8040281159064144,
+      "etp_metrics": {
+        "metrics_accepted_delta": 0.0,
+        "metrics_draft_delta": 0.0,
+        "metrics_available": false,
+        "accept_rate": null,
+        "e_t_metrics": null
+      },
+      "spec_counters_pre": {},
+      "spec_counters_post": {},
+      "mechanism": {
+        "splitkv_armed": true,
+        "splitkv_redirects": 0,
+        "byteexact_armed": false,
+        "byteexact_fixed_tps": null,
+        "byteexact_num_segments": null,
+        "surgical_armed": true,
+        "onegraph_captured": true,
+        "graph_capture_lines": 5,
+        "fatal_traceback": false,
+        "n_tracebacks": 1,
+        "benign_usage_tracebacks": 2,
+        "flashinfer_sampler": "flashinfer-mentioned"
+      },
+      "decodes": [
+        {
+          "round": 0,
+          "wall_tps": 349.2525889961976,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 187.64642572402954,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        },
+        {
+          "round": 1,
+          "wall_tps": 352.2740344996835,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 186.03698706626892,
+          "num_completed_prompts": 128,
+          "expected_tokens": 65536
+        }
+      ]
+    }
+  }
+}
