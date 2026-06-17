@@ -69,3 +69,12 @@ research/validity/splitkv_numseg_sweep/sweep.pid
 # .json, drop the bulky raw decode token streams and per-token PPL logprob dumps.
 research/validity/base_fullhead_tps_ceiling/**/decode_round*.jsonl
 research/validity/base_fullhead_tps_ceiling/**/ppl.jsonl
+
+# int4_g128_lmhead downstream-quality gate (PR #579, analysis-only): same
+# convention -- keep the per-seed result JSONs + agg579_summary.json + the
+# serve/eval/aggregate scripts; drop the bulky inspect_ai .eval transcript logs
+# (20M, regenerable -- the slim per-problem records are logged as W&B artifacts and
+# the accuracies live in results/*.json), plus transient pidfiles and the done-marker.
+research/validity/int4g128_quality_gate/results/_inspect_logs/
+research/validity/int4g128_quality_gate/*.pid
+research/validity/int4g128_quality_gate/_panel_done
