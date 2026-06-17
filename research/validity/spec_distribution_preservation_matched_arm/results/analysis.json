@@ -1,0 +1,187 @@
+{
+  "analysis_only": true,
+  "official_tps": 0,
+  "design": "matched-arm paired (spec=int4+MTP-K7 ON, ar=int4 spec OFF, same body)",
+  "stack": "vllm==0.22.0",
+  "sampling": {
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 64,
+    "min_tokens": 8,
+    "gpqa_max_tokens": 4096,
+    "gsm8k_max_tokens": 512,
+    "max_model_len": 6144
+  },
+  "gpqa_diamond": {
+    "label": "gpqa_diamond",
+    "seeds_paired": [
+      12345,
+      23456,
+      34567,
+      45678,
+      56789
+    ],
+    "n_paired_units": 990,
+    "n_prompt_sha_mismatch": 0,
+    "n_id_asymmetry": 0,
+    "errors": {
+      "n_spec_errored": 5,
+      "n_ar_errored": 5,
+      "symmetric": true,
+      "n_errored_units_either_arm": 5,
+      "errored_unit_examples": [
+        [
+          12345,
+          "recnTTKdBzfuoZ7w7"
+        ],
+        [
+          23456,
+          "recnTTKdBzfuoZ7w7"
+        ],
+        [
+          34567,
+          "recnTTKdBzfuoZ7w7"
+        ],
+        [
+          45678,
+          "recnTTKdBzfuoZ7w7"
+        ],
+        [
+          56789,
+          "recnTTKdBzfuoZ7w7"
+        ]
+      ]
+    },
+    "mcnemar_seeditem": {
+      "b": 120,
+      "c": 128,
+      "n_discordant": 248,
+      "p_exact": 0.6567680752327194,
+      "chi2_cc": 0.1975806451612903,
+      "p_chi2_cc": 0.6566808075579459
+    },
+    "cluster_bootstrap": {
+      "n_clusters": 198,
+      "n_units": 990,
+      "spec_acc": 0.4626262626262626,
+      "spec_ci95": [
+        0.4101010101010101,
+        0.5141414141414141
+      ],
+      "ar_acc": 0.4707070707070707,
+      "ar_ci95": [
+        0.41919191919191917,
+        0.5222222222222223
+      ],
+      "delta": -0.008080808080808077,
+      "delta_ci95": [
+        -0.04040404040404044,
+        0.024242424242424288
+      ],
+      "delta_se_boot": 0.01672624712116113
+    },
+    "cluster_level_paired_diff": {
+      "n_clusters": 198,
+      "mean_paired_diff": -0.00808080808080808,
+      "se": 0.016752639900202912,
+      "ci95": [
+        -0.04091598228520579,
+        0.024754366123589628
+      ],
+      "n_clusters_spec_better": 53,
+      "n_clusters_ar_better": 59,
+      "n_clusters_tied": 86
+    },
+    "truncation": {
+      "spec": {
+        "finish_length_rate": 0.028282828282828285,
+        "n_truncated_length": 28,
+        "empty_rate": 0.0,
+        "no_answer_rate": 0.0,
+        "n_per_sample": 990
+      },
+      "ar": {
+        "finish_length_rate": 0.03333333333333333,
+        "n_truncated_length": 33,
+        "empty_rate": 0.0,
+        "no_answer_rate": 0.0,
+        "n_per_sample": 990
+      }
+    },
+    "verdict": "SPEC_DISTRIBUTION_PRESERVING"
+  },
+  "gsm8k": {
+    "label": "gsm8k",
+    "seeds_paired": [
+      1234,
+      2345,
+      3456,
+      4567,
+      5678
+    ],
+    "n_paired_units": 2500,
+    "n_prompt_sha_mismatch": 0,
+    "n_id_asymmetry": 0,
+    "errors": {
+      "n_spec_errored": 0,
+      "n_ar_errored": 0,
+      "symmetric": true,
+      "n_errored_units_either_arm": 0,
+      "errored_unit_examples": []
+    },
+    "mcnemar_seeditem": {
+      "b": 104,
+      "c": 96,
+      "n_discordant": 200,
+      "p_exact": 0.6207289280968307,
+      "chi2_cc": 0.245,
+      "p_chi2_cc": 0.6206179464376897
+    },
+    "cluster_bootstrap": {
+      "n_clusters": 500,
+      "n_units": 2500,
+      "spec_acc": 0.8792,
+      "spec_ci95": [
+        0.8548,
+        0.9016099999999998
+      ],
+      "ar_acc": 0.876,
+      "ar_ci95": [
+        0.8508,
+        0.8992
+      ],
+      "delta": 0.0031999999999999806,
+      "delta_ci95": [
+        -0.007600000000000051,
+        0.014000000000000012
+      ],
+      "delta_se_boot": 0.0055358547668088185
+    },
+    "cluster_level_paired_diff": {
+      "n_clusters": 500,
+      "mean_paired_diff": 0.0032,
+      "se": 0.005517282012150839,
+      "ci95": [
+        -0.0076138727438156435,
+        0.014013872743815643
+      ],
+      "n_clusters_spec_better": 44,
+      "n_clusters_ar_better": 38,
+      "n_clusters_tied": 418
+    },
+    "truncation": {
+      "spec": {
+        "finish_length_rate": 0.0896,
+        "n_truncated_length": 224,
+        "n_items": 2500
+      },
+      "ar": {
+        "finish_length_rate": 0.084,
+        "n_truncated_length": 210,
+        "n_items": 2500
+      }
+    },
+    "verdict": "SPEC_DISTRIBUTION_PRESERVING"
+  },
+  "headline_verdict": "SPEC_DISTRIBUTION_PRESERVING"
+}

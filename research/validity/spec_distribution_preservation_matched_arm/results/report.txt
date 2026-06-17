@@ -1,0 +1,24 @@
+MATCHED-ARM SPEC-vs-AR DISTRIBUTION PRESERVATION (PR #620)
+
+=== GPQA-Diamond [PRIMARY] (n=990 paired units, 198 question-clusters) ===
+  prompt_sha gate: PASS (byte-identical prompts across arms)
+  serving errors: spec=5 ar=5 -> SYMMETRIC (pairs as (0,0); delta unaffected)
+  spec acc = 0.4626  CI95 [0.4101010101010101, 0.5141414141414141]
+  ar   acc = 0.4707  CI95 [0.41919191919191917, 0.5222222222222223]
+  PAIRED delta (spec-ar) = -0.0081  cluster-boot CI95 [-0.0404, 0.0242]
+  McNemar (seed,item-level; anti-conservative): b(spec>ar)=120 c(ar>spec)=128 p_exact=0.6568
+  cluster-level paired-diff: mean=-0.0081 CI95 [-0.0409, 0.0248] (spec-better 53 / ar-better 59 / tied 86)
+  truncation(finish=length): spec=0.028282828282828285 ar=0.03333333333333333
+  VERDICT: SPEC_DISTRIBUTION_PRESERVING
+
+=== GSM8K [secondary] (n=2500 paired units, 500 question-clusters) ===
+  prompt_sha gate: PASS (byte-identical prompts across arms)
+  spec acc = 0.8792  CI95 [0.8548, 0.9016099999999998]
+  ar   acc = 0.8760  CI95 [0.8508, 0.8992]
+  PAIRED delta (spec-ar) = +0.0032  cluster-boot CI95 [-0.0076, 0.014]
+  McNemar (seed,item-level; anti-conservative): b(spec>ar)=104 c(ar>spec)=96 p_exact=0.6207
+  cluster-level paired-diff: mean=+0.0032 CI95 [-0.0076, 0.014] (spec-better 44 / ar-better 38 / tied 418)
+  truncation(finish=length): spec=0.0896 ar=0.084
+  VERDICT: SPEC_DISTRIBUTION_PRESERVING
+
+HEADLINE VERDICT (GPQA-D): SPEC_DISTRIBUTION_PRESERVING
