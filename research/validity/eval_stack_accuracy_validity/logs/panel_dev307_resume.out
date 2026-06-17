@@ -1,0 +1,28 @@
+[panel:dev307] START mode=full 2026-06-17T21:07:13Z gpqa_seeds=1 2 3 4 5 mmlu_seeds=1 2 3 gsm_seeds=1 2 3
+[panel:dev307] gpqa s1 SKIP (complete)
+[panel:dev307] gpqa s2 SKIP (complete)
+[panel:dev307] gpqa s3 21:07:13Z
+[panel:dev307]   gpqa s3 OK wall=474s [run_eval] task=gpqa_diamond arm=ship_dev307 acc=0.1667 scored=198 correct=33 err=1 empty=0 empty_rate=0.0000 -> research/validity/eval_stack_accuracy_validity/runs/gpqa_dev307_s3.json
+[panel:dev307] gpqa s4 21:15:07Z
+[panel:dev307]   gpqa s4 OK wall=446s [run_eval] task=gpqa_diamond arm=ship_dev307 acc=0.1970 scored=198 correct=39 err=1 empty=0 empty_rate=0.0000 -> research/validity/eval_stack_accuracy_validity/runs/gpqa_dev307_s4.json
+[panel:dev307] gpqa s5 21:22:33Z
+[panel:dev307]   gpqa s5 OK wall=445s [run_eval] task=gpqa_diamond arm=ship_dev307 acc=0.1667 scored=198 correct=33 err=1 empty=0 empty_rate=0.0000 -> research/validity/eval_stack_accuracy_validity/runs/gpqa_dev307_s5.json
+[panel:dev307] mmlu s1 21:29:58Z
+[panel:dev307]   mmlu s1 OK wall=394s [run_eval] task=mmlu_pro arm=ship_dev307 acc=0.3000 scored=200 correct=60 err=0 empty=0 empty_rate=0.0000 -> research/validity/eval_stack_accuracy_validity/runs/mmlu_dev307_s1.json
+[panel:dev307] mmlu s2 21:36:32Z
+[panel:dev307]   mmlu s2 OK wall=406s [run_eval] task=mmlu_pro arm=ship_dev307 acc=0.3050 scored=200 correct=61 err=0 empty=0 empty_rate=0.0000 -> research/validity/eval_stack_accuracy_validity/runs/mmlu_dev307_s2.json
+[panel:dev307] mmlu s3 21:43:18Z
+[panel:dev307]   mmlu s3 OK wall=433s [run_eval] task=mmlu_pro arm=ship_dev307 acc=0.2300 scored=200 correct=46 err=0 empty=0 empty_rate=0.0000 -> research/validity/eval_stack_accuracy_validity/runs/mmlu_dev307_s3.json
+[panel:dev307] gsm8k s1 21:50:31Z
+[panel:dev307]   gsm8k s1 OK wall=55s [gsm8k] DONE arm=gsm8k_dev307 regime=sampled acc=0.6950 (139/200) strict=0.715 extract_fail=0.080 trunc=0.155 wall=52s -> research/validity/eval_stack_accuracy_validity/runs/gsm8k_dev307_sampled_s1.json
+[panel:dev307] gsm8k s2 21:51:26Z
+[panel:dev307]   gsm8k s2 FAIL
+    full = _load_split("test", n=None)
+  File "/workspace/senpai/target/research/downstream_quality_gsm8k/gsm8k_eval.py", line 91, in _load_split
+    data = _rows_api(GSM8K_DATASET, GSM8K_CONFIG, split, offset, page)
+  File "/workspace/senpai/target/research/downstream_quality_gsm8k/gsm8k_eval.py", line 81, in _rows_api
+    raise RuntimeError(f"datasets-server /rows failed after retries: {last_err!r}")
+RuntimeError: datasets-server /rows failed after retries: <HTTPError 429: 'Too Many Requests'>
+[panel:dev307] gsm8k s3 21:51:56Z
+[panel:dev307]   gsm8k s3 OK wall=54s [gsm8k] DONE arm=gsm8k_dev307 regime=sampled acc=0.7500 (150/200) strict=0.880 extract_fail=0.010 trunc=0.065 wall=45s -> research/validity/eval_stack_accuracy_validity/runs/gsm8k_dev307_sampled_s3.json
+[panel:dev307] DONE wall=2737s 2026-06-17T21:52:50Z fail=1
