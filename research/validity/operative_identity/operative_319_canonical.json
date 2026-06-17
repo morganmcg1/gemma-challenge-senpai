@@ -1,0 +1,130 @@
+{
+  "pr": 588,
+  "agent": "wirbel",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "no_submission": true,
+  "official_tps": 0,
+  "arm": "base_fullhead (stock int4 native-262k head + FA_SLIDING + SURGICAL_ATTN_USE_3D_OFF 2D attn + PLE fold)",
+  "serve_geometry": "MAX_NUM_SEQS=1 (deployed served geometry), spec-OFF, greedy temp=0",
+  "canonical_predicate": "WARM steady-state free-running greedy decode is byte-identical (official check_greedy_identity.py GREEDY_IDENTICAL, ZERO tolerance) to the same int4 checkpoint's plain greedy AR decode over the official 128x512 sharegpt suite (seed=1, ignore_eos). Robustness fallback: operative near-tie envelope eps_star=0.25 nat (4 ULP) absorbs the first-pass cold-start transient.",
+  "base_fullhead_passes_operative_319": true,
+  "pass_basis": "warm steady-state self-determinism (b_vs_c) is LITERALLY GREEDY_IDENTICAL (128/128, 0 divergent tokens); the first-pass cold-start transient (a vs warm) is a PPL-neutral near-tie envelope bounded at <=4 ULP.",
+  "passes_literal_warm_steady_state": true,
+  "passes_operative_4ulp_including_cold_start": true,
+  "steady_state_literal": {
+    "pair": "b_vs_c",
+    "verdict": "GREEDY_IDENTICAL",
+    "num_identical": 128,
+    "num_prompts_compared": 128,
+    "num_divergent": 0,
+    "total_divergent_tokens": 0,
+    "total_tokens_compared": 65536,
+    "self_determinism_token_rate": 1.0
+  },
+  "cold_start_pairs": [
+    {
+      "pair": "a_vs_b",
+      "verdict": "DIVERGENT",
+      "num_identical": 61,
+      "num_prompts_compared": 128,
+      "num_divergent": 67,
+      "total_divergent_tokens": 21815,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 0.6671295166015625
+    },
+    {
+      "pair": "a_vs_c",
+      "verdict": "DIVERGENT",
+      "num_identical": 61,
+      "num_prompts_compared": 128,
+      "num_divergent": 67,
+      "total_divergent_tokens": 21815,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 0.6671295166015625
+    }
+  ],
+  "all_three_pair_verdicts": {
+    "a_vs_b": {
+      "pair": "a_vs_b",
+      "verdict": "DIVERGENT",
+      "num_identical": 61,
+      "num_prompts_compared": 128,
+      "num_divergent": 67,
+      "total_divergent_tokens": 21815,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 0.6671295166015625
+    },
+    "a_vs_c": {
+      "pair": "a_vs_c",
+      "verdict": "DIVERGENT",
+      "num_identical": 61,
+      "num_prompts_compared": 128,
+      "num_divergent": 67,
+      "total_divergent_tokens": 21815,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 0.6671295166015625
+    },
+    "b_vs_c": {
+      "pair": "b_vs_c",
+      "verdict": "GREEDY_IDENTICAL",
+      "num_identical": 128,
+      "num_prompts_compared": 128,
+      "num_divergent": 0,
+      "total_divergent_tokens": 0,
+      "total_tokens_compared": 65536,
+      "self_determinism_token_rate": 1.0
+    }
+  },
+  "cold_start_transient": {
+    "present": true,
+    "confined_to_first_pass": true,
+    "warm_warm_pair_byte_identical": true,
+    "cold_start_pairs_physically_identical": true,
+    "n_divergent_prompts_vs_warm_per_pair": 67,
+    "gap_ladder_ulps_per_pair": {
+      "0": 24,
+      "2": 38,
+      "4": 5
+    },
+    "max_first_div_gap_ulps": 4.0,
+    "max_first_div_gap_nat": 0.25,
+    "all_first_div_within_4ulp": true,
+    "n_first_div_above_2ulp_across_pairs": 5,
+    "interpretation": "Same 5 prompts flip identically in a_vs_b and a_vs_c; b==c at all of them (a is the lone cold-start dissenter). PPL-neutral near-tie cold-start transient, NOT a steady-state contract violation.",
+    "mechanism_candidates": [
+      "lazy Triton-JIT / FlashInfer-autotune kernel-config settling on first inference",
+      "prefix-cache cold-prefill numerics (enable_prefix_caching=True)"
+    ],
+    "mechanism_evidence_server_log": "(EngineCore pid=1444287) WARNING 06-17 13:54:36 [jit_monitor.py:103] Triton kernel JIT compilation during inference: _compute_slot_mapping_kernel. This causes a latency spike; consider extending warmup to cover this shape/config."
+  },
+  "eps_star_cold_start_envelope_nat": 0.25,
+  "eps_star_cold_start_envelope_ulps": 4.0,
+  "ulp_nat": 0.0625,
+  "census_stable_under_canonical_operative": true,
+  "census_restamp": {
+    "#556_head": "int4 head (290.63 TPS) vs base_fullhead's bf16 262k head (252.31 TPS): flip margins vs bf16 head median ~2.5 ULP but TAIL p90=5.85/p99=7.49/p100=7.78 ULP -- the semantic tail exceeds the 4-ULP cold-start floor (and >> 0 at warm steady-state) => fails the zero-semantic operative bar. Source: int4_head_strict_identity_results.json. NO-FIRE stable.",
+    "#571_body": "int4_g32 body (base_fullhead's body, 252.69 TPS) flips vs bf16 body at margin median 0.7558 nat=12.1 ULP (ood/official median 1.482 nat=23.7 ULP), near_tie_concentrated=False, ~11.9x flip/nonflip separation; the only faster body int4_g128 (259.07 TPS) flips >= g32 => dominantly SEMANTIC (>> 4 ULP). bf16 body exact but slower (143.99 TPS). Source: body_strict_identity_results.json. NO-FIRE stable.",
+    "#562_attention": "reordered kernels (seg32/tile_alt) bitwise_rate=0, argmax_rate=1.0 on a 24-draw op-probe (<=2 ULP perturbation, within the cold-start envelope). OPERATIVE-PERMISSIVE residual: a 24-draw single-position probe does NOT certify zero semantic flips over the 128x512 free-running census. NO FIRE opened (certifying it is a speed-lever experiment, out of this card's scope).",
+    "#583_specdec_fern": "specdec_two_gate_closed; binding failure is SPEED (best 1.09 ngram / 1.005 mtp << 1.437 needed). Verify is identity-preserving; tolerance inert. NO-FIRE stable.",
+    "#584_specdec_lawine": "any_measured_drafter_clears_ship=False (speed-bound). Identity-preserving verify; tolerance inert. NO-FIRE stable."
+  },
+  "build": "vllm-0.22.1rc1.dev307+g3e8afdf78",
+  "model_dir": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "peak_gpu_gb": 19.1318359375,
+  "server_startup_s": 90.0,
+  "num_prompts": 128,
+  "output_len": 512,
+  "r_passes": 3,
+  "seed": 1,
+  "source_artifacts": {
+    "driver_remeasure": "/workspace/senpai/target/research/validity/operative_identity/operative_319_remeasure.json",
+    "decode_passes": [
+      "decode_a.jsonl",
+      "decode_b.jsonl",
+      "decode_c.jsonl"
+    ],
+    "server_log": "/workspace/senpai/target/research/validity/operative_identity/server_base_fullhead_m1.log"
+  }
+}
