@@ -12,7 +12,10 @@ SEEDS="${3:-0 1 2}"            # sampling seeds
 PORT="${4:-8000}"
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
-RES="$HERE/results"; mkdir -p "$RES"
+# PR #610: optional output-dir override so the de-biased 6144 sweep can write to a
+# separate dir (results_6144/) without clobbering the committed 4096 baseline that
+# the debias-delta + truncation audit compare against. Defaults to results/ (#579).
+RES="${RES_DIR:-$HERE/results}"; mkdir -p "$RES"
 EVAL_PY="/workspace/senpai/target/.venv/bin/python"
 RUN_EVAL="/workspace/senpai/target/research/validity/downstream_quality_eval/run_eval.py"
 BASE_URL="http://127.0.0.1:${PORT}/v1"
