@@ -56,12 +56,19 @@ AIME_REGISTRY: dict[str, dict[str, str]] = {
         "answer_col": "Answer",
     },
     # opencompass/AIME2025 ships two configs (AIME2025-I / -II), 15 problems each.
+    # AIME2025-I has been server-side 500-down on the HF datasets-server since at
+    # least PR #535; the canonical 15 Part-I problems are recovered from the
+    # yentinglin/aime_2025 mirror. Validity (ubel #567 cross-check): the mirror's
+    # Part-I answers are byte-identical to MathArena/aime_2025_I, and its Part-II
+    # answers are byte-identical to the (working) canonical opencompass AIME2025-II
+    # below -> the mirror faithfully reproduces the canonical 2025 set. Original
+    # broken source kept on record: opencompass/AIME2025 / AIME2025-I / test.
     "2025-I": {
-        "dataset": "opencompass/AIME2025",
-        "config": "AIME2025-I",
-        "split": "test",
+        "dataset": "yentinglin/aime_2025",
+        "config": "part1",
+        "split": "train",
         "id_col": "",
-        "problem_col": "question",
+        "problem_col": "problem",
         "answer_col": "answer",
     },
     "2025-II": {
@@ -512,6 +519,13 @@ def main(argv: list[str] | None = None) -> int:
             print(f"[aime] {note}", flush=True)
         manifest = harness.load_manifest(args.submission)
         server_python = args.server_python or harness.ensure_server_venv(manifest["dependencies"])
+        # ensure_server_venv is the only other caller of the HTTP-stack repair, and
+        # the `or` above short-circuits it whenever --server-python supplies a
+        # pre-built venv. Without this, a user-pointed venv resolving Starlette>=1
+        # makes prometheus-fastapi-instrumentator 500 on /v1/models, so readiness
+        # never passes and the eval hangs to timeout on stock-vLLM submissions.
+        # Idempotent (per-venv marker); HTTP-layer only, numerics unaffected.
+        harness.ensure_serving_http_compat(Path(server_python))
         overrides = local_serve_overrides(args.max_num_seqs)
         for kv in args.serve_env:
             if "=" not in kv:
