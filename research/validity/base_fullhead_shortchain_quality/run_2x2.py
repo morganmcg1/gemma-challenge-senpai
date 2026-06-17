@@ -14,8 +14,21 @@ byte-identical item set:
 
 Both servers: greedy temp=0, VLLM_USE_FLASHINFER_SAMPLER=0, same challenge vLLM
 wheel. base_fullhead keeps its recipe MAX_NUM_SEQS=1 (deterministic single-stream
-via MTP); plain base uses MAX_NUM_SEQS=32 so conc=32 genuinely batches (the vanilla
-served regime). Hard-reject guard: raise if lm_head rows < 262144.
+via MTP). plain base is served at MAX_NUM_SEQS=16 — the EXACT ubel #511 reference
+serve (start_server.sh base arm) that produced the banked base anchors (MMLU 0.668,
+GPQA 0.470). This is the fair quality denominator.
+
+  WHY NOT seqs=32: an initial seqs=32 base run craters to MMLU 0.404 / GPQA 0.278 —
+  the vanilla int4 base, batched 32-wide, drops into greedy repetition-loop
+  degeneration (40% of MMLU completions hit max_tokens with "stimulus stimulus..."
+  /token-loop tails, up to 17713 chars) from batch-variant int4 numerics. That is a
+  serve pathology, NOT base reasoning quality, and base_fullhead's surgical 2D
+  batch-INVARIANT attention is immune to it — so binding the >=90%-of-base gate to a
+  seqs=32 base would spuriously inflate base_fullhead (0.636/0.404 = 158%). seqs=16
+  reproduces the documented anchor and keeps "only the fast kernels differ". The
+  seqs=32 cells are preserved (base_*.seqs32.json) as a batch-robustness finding.
+
+Hard-reject guard: raise if lm_head rows < 262144.
 """
 from __future__ import annotations
 
@@ -103,8 +116,13 @@ def wait_ready(base_url: str, proc: subprocess.Popen, timeout_s: int = 1200) -> 
     raise RuntimeError(f"endpoint not ready at {base_url}")
 
 
-def start_base_server(server_python: Path, log_path: Path, max_num_seqs: int = 32) -> subprocess.Popen:
-    """Vanilla vLLM on the stock ckpt — NO fast stack (PYTHONPATH excludes the submission)."""
+def start_base_server(server_python: Path, log_path: Path, max_num_seqs: int = 16) -> subprocess.Popen:
+    """Vanilla vLLM on the stock ckpt — NO fast stack (PYTHONPATH excludes the submission).
+
+    max_num_seqs=16 reproduces the ubel #511 reference serve (start_server.sh base
+    arm, banked anchors). seqs=32 induces batch-variant repetition-loop degeneration
+    that is a serve artifact, not base quality — see module docstring.
+    """
     env = dict(os.environ)
     env["CUDA_VISIBLE_DEVICES"] = "0"
     env.pop("NVIDIA_VISIBLE_DEVICES", None)
@@ -191,7 +209,7 @@ def main() -> int:
     if "base" in arms and not args.smoke:
         log = HERE / "server_base.log"
         wait_gpu_free()  # ensure fullhead arm fully released the GPU before base serve
-        proc = start_base_server(server_python, log, max_num_seqs=32)
+        proc = start_base_server(server_python, log, max_num_seqs=16)  # ubel #511 anchor serve
         try:
             wait_ready(base_url, proc)
             print("[driver] plain base ready", flush=True)

@@ -43,16 +43,25 @@ def _read_eval_samples(eval_log_path: str) -> dict:
     """
     import subprocess
 
+    # NOTE: a sample whose request errored can carry an output with an EMPTY
+    # choices list; `o.completion` then does choices[0] -> IndexError. Such items
+    # are bucketed as `errored` by classify_eval (they have per_sample.error set),
+    # so their log-derived fields are unused — we just must not crash the bulk read.
     code = (
         "import json,sys\n"
         "from inspect_ai.log import read_eval_log\n"
         "log=read_eval_log(sys.argv[1])\n"
         "out={}\n"
         "for s in (log.samples or []):\n"
-        "    o=s.output\n"
-        "    comp=(o.completion or '') if o else ''\n"
-        "    out[str(s.id)]={'comp_len':len(comp),'comp_stripped_len':len(comp.strip()),"
+        "    try:\n"
+        "        o=s.output\n"
+        "        comp=(o.completion or '') if o else ''\n"
+        "        rec={'comp_len':len(comp),'comp_stripped_len':len(comp.strip()),"
         "'stop_reason':getattr(o,'stop_reason',None)}\n"
+        "    except Exception as e:\n"
+        "        rec={'comp_len':0,'comp_stripped_len':0,'stop_reason':None,"
+        "'read_error':type(e).__name__}\n"
+        "    out[str(s.id)]=rec\n"
         "json.dump(out,sys.stdout)\n"
     )
     res = subprocess.run([str(EVAL_PY), "-c", code, eval_log_path],
