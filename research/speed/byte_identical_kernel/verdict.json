@@ -1,0 +1,60 @@
+{
+  "pr": 550,
+  "analysis_only": true,
+  "official_tps": 0,
+  "hardware": "NVIDIA A10G sm_86",
+  "current_kernels": {
+    "int4_body_gemm": "MarlinLinearKernel (CompressedTensorsWNA16, w4a16 group_size=32)",
+    "bf16_262k_head": "bf16 dense ParallelLMHead / UnquantizedEmbeddingMethod [262144x2560] (cuBLAS GEMM at M=1, bf16 in/out)",
+    "attention": "TritonAttentionImpl / AttentionBackendEnum.TRITON_ATTN (FORCED by vLLM for heterogeneous head_dim 256/512)"
+  },
+  "axes": {
+    "int4_body_gemm": {
+      "dispatched_kernel": "MarlinLinearKernel (CompressedTensorsWNA16, w4a16 group_size=32)",
+      "faster_byte_identical_alt_on_sm86": false,
+      "argmax_identity_rate": 1.0,
+      "tps_delta_vs_253": 0.0,
+      "why": "Marlin is the ONLY w4a16 kernel dispatchable on sm_86: Machete is Hopper-only (sm_90 wgmma+TMA; vLLM choose_mp_linear_kernel gates capability>=90), Marlin24 needs 2:4-sparse weights, ExLlamaV2 needs GPTQ format. The deployed Marlin matmul is already M-invariant/byte-exact (#501 census: 0 flips M=1-vs-M=8; fp32 global-reduce since atomic-add+bf16 is unsupported pre-SM90) and exposes no Python split-K knob. VLLM_MARLIN_USE_ATOMIC_ADD is unsupported for bf16 on sm_86 AND would change reduction order (break identity). At M=1 a single proj is launch-bound (62.5us vs 7.4us byte floor) -> flat-in-M (#18); the served stack's CUDA graphs (ONEGRAPH) already amortize that launch overhead -- it is not a kernel-swap lever.",
+      "measured_us_m1": 62.463998794555664,
+      "byte_floor_us": 7.372826666666667
+    },
+    "bf16_262k_head": {
+      "dispatched_kernel": "bf16 dense ParallelLMHead / UnquantizedEmbeddingMethod [262144x2560] (cuBLAS GEMM at M=1, bf16 in/out)",
+      "faster_byte_identical_alt_on_sm86": false,
+      "argmax_identity_rate": 1.0,
+      "tps_delta_vs_253": 0.0,
+      "why": "Bandwidth-bound: reads the 1.342 GB head weight once per token. Measured 2779us vs 2237us @600GB/s floor = 483 GB/s realized = 80.5% of the A10G 600 GB/s peak (i.e. AT the practical HBM ceiling; real achievable BW is ~80-85% of peak). A GEMV-vs-GEMM swap is bandwidth-equal at M=1 (both read the matrix once) AND changes the K=2560 reduction tiling -> changes bf16 rounding -> breaks identity. The only head speedups move fewer BYTES: lower precision (lawine #544's tested lever, +38 TPS -> 292.1 ceiling) or row-prune (quality-unsafe 12k head) -- neither is a kernel lever; both change the argmax bits.",
+      "measured_us_m1": 2779.1359424591064,
+      "byte_floor_us": 2236.9621333333334,
+      "bw_realized_GBs": 482.94768870225903,
+      "pct_of_peak_bw": 80.4912814503765
+    },
+    "attention": {
+      "dispatched_kernel": "TritonAttentionImpl / AttentionBackendEnum.TRITON_ATTN (FORCED by vLLM for heterogeneous head_dim 256/512)",
+      "faster_byte_identical_alt_on_sm86": false,
+      "argmax_identity_rate": 0.0,
+      "tps_delta_vs_253": 0.0,
+      "why": "vLLM FORCES TRITON_ATTN here ('Gemma4 has heterogeneous head dimensions head_dim=256/global_head_dim=512; Forcing TRITON_ATTN to prevent mixed-backend numerical divergence') -- so FlashAttention is both identity-risky AND prevented by vLLM for correctness. FlashInfer (fern #507, same A10G sm_86 box): (a) version-skewed -- JIT-only on torch-2.11+cu130, CUDA-13 cubin risk -> not a clean drop-in to the serve stack; (b) default split-KV decode is batch-VARIANT (1292/2048 flips M=1-vs-M=8 @L=8192) -> argmax_identity<1.0, fails #319 gate; (c) the invariant fixed_split_size knob is 1.2-4.7x SLOWER at M=1; (d) head_dim-512 full-attn layers have NO tensor-core/fixed-split path on Ampere. The served split-KV (lawine #496) already reproduces FlashInfer's byte-exact primitive, faster."
+    }
+  },
+  "kernel_lever_is_green": false,
+  "fastest_byte_identical_tps": 253.78,
+  "tps_delta_vs_253": 0.0,
+  "stacked_ceiling_tps": null,
+  "stage2_reached": false,
+  "lm_head_full_ok": true,
+  "lm_head_full_rows": 262144,
+  "self_det": 1.0,
+  "base_fullhead_m1ar_eager_tps": 21.537039437455697,
+  "head_measured_us": 2779.1359424591064,
+  "head_floor_us": 2236.9621333333334,
+  "head_bw_realized_GBs": 482.94768870225903,
+  "head_pct_of_peak_bw": 80.4912814503765,
+  "body_measured_us": 62.463998794555664,
+  "body_floor_us": 7.372826666666667,
+  "peak_vram_gib": 18.496636390686035,
+  "self_test_passes": true,
+  "primary_metric_name": "fastest_byte_identical_tps",
+  "primary_metric_value": 253.78,
+  "verdict": "NO-GO: the current fast stack (Marlin int4 body + bf16 dense 262k head + vLLM-forced TritonAttention) is already the fastest byte-identical kernel set on A10G sm_86. The dominant byte-read ops are HBM-bandwidth-bound at ~80% of peak; every faster alternative (atomic-add Marlin, GEMV head, FlashInfer/FlashAttention) changes reduction order and breaks the #319 byte-identity gate, or is not dispatchable on sm_86. This HARDENS lawine #544's 292.1 precision-lever ceiling as KERNEL-ROBUST: at M=1 kernel selection is not a free TPS lever; the only identity-preserving lever is bytes-read (precision)."
+}
