@@ -1,0 +1,22 @@
+{
+  "_doc": "PR#534 quality-gate cells for the >=90%-of-base gate table. Pass this file to the harness via --gate-cells. Each benchmark has three roles: base = vanilla gemma-4-E4B-it, ship_12k = the live 12k-head surgical-357 ship, base_fullhead = the corrected base-int4 native-262k-head ship served from google/gemma-4-E4B-it-qat-w4a16-ct (fern #535 serve_ok PPL 2.006 byte-exact). The gate compares base_fullhead/base >= 0.90. Cells are EXTERNAL measurements handed to this card via PR#534 (isolation forbids pulling them from ubel/fern/wirbel branches). Leave a cell null until its number lands; the scaffold composes a partial-but-honest table at any time. Full-head clears >=90% BY CONSTRUCTION (prune OFF => base-identical head => no token -inf'd); these cells are the empirical confirmation.",
+  "_concurrency_rule": "Advisor 00:02Z: the served protocol is concurrency=32 and the metric is concurrency-DOMINATED (the unchanged stock base swings 0.100 @ conc=1 -> 0.267 @ conc=32). Record the concurrency each role was measured at; build_gate_table refuses a definitive meets_90pct for any benchmark whose base vs base_fullhead concurrencies disagree or are unrecorded. Compare like-for-like at conc=32.",
+  "_sources": {
+    "gsm8k.base": "vanilla gemma-4-E4B-it GSM8K (matched-concurrency base, wirbel #541 harness)",
+    "gsm8k.ship_12k": "live 12k-head ship GSM8K (wirbel #533 mo0ci0yl)",
+    "gsm8k.base_fullhead": "wirbel #541 GSM8K leg on the #535 base-int4 full-head (n=500, seed=1234, sampled+greedy)",
+    "aime.base": "vanilla gemma-4-E4B-it AIME (matched-concurrency base, fern #535)",
+    "aime.ship_12k": "12k-head ship AIME (fern #514)",
+    "aime.base_fullhead": "fern #535 base-int4 AIME-greedy (matched-concurrency n~90; the n=30 number was concurrency-confounded)",
+    "mmlu_pro.base": "vanilla gemma-4-E4B-it MMLU-Pro",
+    "mmlu_pro.ship_12k": "12k-head ship MMLU-Pro (ubel #511)",
+    "mmlu_pro.base_fullhead": "ubel #527 K=full / base-int4 head -- DEFERRED/CONDITIONAL: only measured if GSM8K AND AIME both clear >=90%"
+  },
+  "gsm8k":    {"base": 0.878, "ship_12k": null, "base_fullhead": 0.854, "metric": "exact_match",
+               "source": "wirbel #541 (bfvbueb1/f4u9yf9z, merged 92ac360): n=500 seed=1234 conc=32 sampled-primary. base_fullhead=0.854 is the min_tokens=8 gate arm (advisor 01:08Z): the as-served 0.762 is depressed by ~10.4% first-token-EOS empties (completion_tokens=1, content='') -- a SERVING artifact, not reasoning loss; min_tokens=8 recovers 45/52. Request-level floor; served-by-default confirm pending wirbel #545.",
+               "concurrency": {"base": 32, "ship_12k": null, "base_fullhead": 32}},
+  "aime":     {"base": null, "ship_12k": null, "base_fullhead": null, "metric": "maj@1", "source": null,
+               "concurrency": {"base": null, "ship_12k": null, "base_fullhead": null}},
+  "mmlu_pro": {"base": null, "ship_12k": null, "base_fullhead": null, "metric": "accuracy", "source": null,
+               "concurrency": {"base": null, "ship_12k": null, "base_fullhead": null}}
+}
