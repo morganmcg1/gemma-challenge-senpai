@@ -217,12 +217,28 @@ def main() -> int:
         # genuine wrong answer; `empty` is gated on err is None so a request
         # error is not miscounted as an EOS empty. Reads the sample output only.
         comp = ""
+        stop_reason = None
+        completion_tokens = None
         try:
             out_obj = getattr(s, "output", None)
-            comp = (out_obj.completion if out_obj is not None else "") or ""
+            if out_obj is not None:
+                comp = out_obj.completion or ""
+                choices = getattr(out_obj, "choices", None)
+                if choices:
+                    stop_reason = getattr(choices[0], "stop_reason", None)
+                usage = getattr(out_obj, "usage", None)
+                if usage is not None:
+                    completion_tokens = getattr(usage, "output_tokens", None)
         except Exception:
-            comp = ""
+            comp = comp or ""
         is_empty = bool(err is None and not comp.strip())
+        # PR #612: length-truncation diagnostic (#605 logged only empty/chars, never
+        # finish_reason). inspect_ai maps vLLM's max_tokens cap -> 'max_tokens' and a
+        # context cap -> 'model_length'; either means the generation was cut off
+        # before the model emitted its final answer. Additive only -- no scoring change.
+        is_length_trunc = bool(
+            err is None and stop_reason in ("max_tokens", "model_length")
+        )
         tgt = s.target if isinstance(s.target, str) else json.dumps(s.target)
         per_sample.append(
             {
@@ -234,6 +250,9 @@ def main() -> int:
                 "error": err,
                 "empty": is_empty,
                 "completion_chars": len(comp),
+                "stop_reason": stop_reason,
+                "completion_tokens": completion_tokens,
+                "length_truncated": is_length_trunc,
                 "prompt_sha": prompt_sha.get(sid),
             }
         )
@@ -241,6 +260,27 @@ def main() -> int:
     accuracy = (n_correct / n_scored) if n_scored else float("nan")
     n_empty = sum(1 for r in per_sample if r["empty"])
     empty_rate = (n_empty / len(per_sample)) if per_sample else float("nan")
+
+    # PR #612: aggregate length-truncation diagnostics (the decisive evidence #605
+    # lacked). If the model is running out of generation room before answering, a
+    # high length_stop_rate at a tight max_tokens that collapses at a generous one
+    # is the truncation smoking gun.
+    n_len_trunc = sum(1 for r in per_sample if r["length_truncated"])
+    n_stop_max_tokens = sum(1 for r in per_sample if r["stop_reason"] == "max_tokens")
+    n_stop_model_length = sum(1 for r in per_sample if r["stop_reason"] == "model_length")
+    length_stop_rate = (n_len_trunc / len(per_sample)) if per_sample else float("nan")
+    _ctoks = sorted(r["completion_tokens"] for r in per_sample
+                    if isinstance(r["completion_tokens"], (int, float)))
+    if _ctoks:
+        _n = len(_ctoks)
+        ctok_mean = sum(_ctoks) / _n
+        ctok_p50 = _ctoks[_n // 2]
+        ctok_p95 = _ctoks[min(int(0.95 * _n), _n - 1)]
+        ctok_max = _ctoks[-1]
+    else:
+        ctok_mean = ctok_p50 = ctok_p95 = ctok_max = None
+    from collections import Counter
+    stop_reason_counts = dict(Counter(r["stop_reason"] for r in per_sample))
 
     out = {
         "task": args.task,
@@ -256,6 +296,15 @@ def main() -> int:
         "n_error": n_error,
         "n_empty": n_empty,
         "empty_rate": empty_rate,
+        "n_length_truncated": n_len_trunc,
+        "n_stop_max_tokens": n_stop_max_tokens,
+        "n_stop_model_length": n_stop_model_length,
+        "length_stop_rate": length_stop_rate,
+        "stop_reason_counts": stop_reason_counts,
+        "completion_tokens_mean": ctok_mean,
+        "completion_tokens_p50": ctok_p50,
+        "completion_tokens_p95": ctok_p95,
+        "completion_tokens_max": ctok_max,
         "accuracy": accuracy,
         "max_tokens": args.max_tokens,
         "min_tokens": args.min_tokens or None,
@@ -271,10 +320,15 @@ def main() -> int:
     with open(args.out, "w") as f:
         json.dump(out, f, indent=2)
 
+    _ctok_mean_s = f"{ctok_mean:.0f}" if ctok_mean is not None else "na"
+    _ctok_p95_s = f"{ctok_p95}" if ctok_p95 is not None else "na"
     print(
         f"[run_eval] task={args.task} arm={args.arm} acc={accuracy:.4f} "
         f"scored={n_scored} correct={n_correct} err={n_error} "
-        f"empty={n_empty} empty_rate={empty_rate:.4f} -> {args.out}",
+        f"empty={n_empty} empty_rate={empty_rate:.4f} "
+        f"len_trunc={n_len_trunc} (max_tok={n_stop_max_tokens} model_len={n_stop_model_length}) "
+        f"len_stop_rate={length_stop_rate:.4f} ctok_mean={_ctok_mean_s} ctok_p95={_ctok_p95_s} "
+        f"-> {args.out}",
         flush=True,
     )
     # NaN guard: a NaN accuracy means nothing scored -> a hard failure to surface.
