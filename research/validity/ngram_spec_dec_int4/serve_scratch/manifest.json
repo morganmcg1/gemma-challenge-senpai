@@ -1,0 +1,22 @@
+{
+  "name": "int4-g128-lmhead-ngram-scratch",
+  "description": "PR #609 LOCAL analysis-only scratch serve: byte-identical to int4_g128_lmhead serve flags + an opt-in SPECULATIVE_CONFIG hook for draft-free ngram/prompt-lookup spec-decode. NOT a submission. MODEL_ID is overridden by the driver to the rebuilt /workspace/gemma_build/int4_g128_lmhead checkpoint.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "model",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve_ngram.py"
+  ],
+  "env": {
+    "MODEL_ID": "model",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

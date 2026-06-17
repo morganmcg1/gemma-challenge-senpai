@@ -1,0 +1,75 @@
+{
+  "label": "dbg_ng_max3_k5",
+  "spec_config": {
+    "method": "ngram",
+    "num_speculative_tokens": 5,
+    "prompt_lookup_max": 3,
+    "prompt_lookup_min": 2
+  },
+  "num_prompts": 2,
+  "output_len": 32,
+  "seed": 1,
+  "utc": "2026-06-17T18:23:16Z",
+  "boot_s": 170.02692794799805,
+  "decode_wall_s": 13.835922956466675,
+  "decode_summary": {
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+    "duration_s": 5.392141103744507,
+    "num_completion_tokens": 64,
+    "num_prompt_tokens": 644,
+    "num_records": 2,
+    "output_file": "/workspace/senpai/target/research/validity/ngram_spec_dec_int4/_sweep/_debug/decode_dbg_ng_max3_k5.jsonl",
+    "output_len": 32,
+    "request_timeout_s": 180,
+    "required_request_field": "return_token_ids: true",
+    "required_response_field": "choices[0].token_ids",
+    "seed": 1,
+    "token_id_sources": {
+      "choices[0].token_ids": 2
+    },
+    "token_ids_required": true,
+    "tokenizer": "google/gemma-4-E4B-it"
+  },
+  "gpu_mem_used_mib": 20737.0,
+  "prom_spec": {
+    "num_drafts": 8.0,
+    "num_accepted_tokens": 7.0,
+    "num_draft_tokens": 40.0,
+    "e_accept_mean_acceptance_length": 1.875,
+    "draft_acceptance_rate": 0.175
+  },
+  "tps_probe": {
+    "decode_tps_single_stream": 409.9634594855657,
+    "naive_tps": 399.91486692743115,
+    "ttft_s_approx": 0.018129587173461914,
+    "decode_tokens": 256,
+    "wall_1tok_s": 0.018129587173461914,
+    "wall_ntok_s": 0.6401362419128418,
+    "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+  },
+  "spec_log": {
+    "intervals": 0,
+    "num_speculative_tokens": 5,
+    "total_accepted_tokens": 0,
+    "total_drafted_tokens": 0,
+    "e_accept_interval_mean": null,
+    "steady_gen_tps_mean": null,
+    "steady_gen_tps_n": 0
+  },
+  "completion_shas": [
+    {
+      "index": 0,
+      "id": "mmlu_pro-006f3a2112",
+      "dataset_index": 14,
+      "completion_token_sha256": "bcdf97067b89104ecc0e49012016f78bc6017436ce4d1e2f9df683e25220da5c",
+      "num_completion_tokens": 32
+    },
+    {
+      "index": 1,
+      "id": "mmlu_pro-012f0d5c8d",
+      "dataset_index": 46,
+      "completion_token_sha256": "c9a36eb660f189988bda318c79b499fad2a28a0fc3b216c1eab9f4f260d47300",
+      "num_completion_tokens": 32
+    }
+  ]
+}
