@@ -1,0 +1,113 @@
+{
+  "pr": 595,
+  "config": "base_fullhead",
+  "config_desc": "stock int4_g32 body + native 262k bf16 lm_head (NO bake, NO prune)",
+  "submission_substrate": "submissions/fa2sw_strict_surgical357",
+  "model_dir": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "speculative_config": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7}",
+  "spec_drafter": "mtp_k7",
+  "num_prompts": 128,
+  "output_len": 512,
+  "smoke": false,
+  "analysis_only": true,
+  "official_tps": 0,
+  "tau_lo": 1.03524,
+  "sigma_hw": 4.864,
+  "utc": "2026-06-17T14:51:30Z",
+  "arm_spec_on": {
+    "tag": "base_fullhead_specon",
+    "config": "base_fullhead",
+    "spec_on": true,
+    "serve_overrides": {
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "PRECACHE_DATASET": "/tmp/senpai_aime_no_precache.json",
+      "MAX_NUM_SEQS": "1",
+      "MAX_NUM_BATCHED_TOKENS": "512",
+      "LOCAL_MODEL_DIR": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_TARGET_MODEL": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "PCK04_KEEPSET": "",
+      "DISABLE_LOG_STATS": "0"
+    },
+    "serve_ok": true,
+    "error": null,
+    "served_model_name": "gemma-4-e4b-it",
+    "self_test_text": " France is France is France is",
+    "tps_runs": [
+      252.3560743964629,
+      255.64593738278398
+    ],
+    "warm_median_tps": 254.00100588962346,
+    "tps_run_std": 1.6449314931605414,
+    "decode_files": [
+      "/workspace/senpai/target/research/submission_headtohead/decode_base_fullhead_specon_r1.jsonl",
+      "/workspace/senpai/target/research/submission_headtohead/decode_base_fullhead_specon_r2.jsonl"
+    ],
+    "spec_metrics": {
+      "num_drafts": 34060.0,
+      "num_accepted_tokens": 97322.0,
+      "num_draft_tokens": 238420.0,
+      "e_accept_mean_acceptance_length": 3.8573693482090428,
+      "draft_acceptance_rate": 0.4081956211727204
+    },
+    "peak_gpu_mib": 19411,
+    "spec_log": {
+      "intervals": 53,
+      "num_speculative_tokens": 7,
+      "total_accepted_tokens": 96290,
+      "total_drafted_tokens": 236446,
+      "e_accept_interval_mean": 3.859433962264151,
+      "steady_gen_tps_mean": 244.8566037735849,
+      "steady_gen_tps_n": 53,
+      "e_accept_exact": 3.850672035052401,
+      "draft_acceptance_rate": 0.407238862150343
+    },
+    "server_log": "/workspace/senpai/target/research/submission_headtohead/server_base_fullhead_specon.log"
+  },
+  "arm_spec_off": {
+    "tag": "base_fullhead_specoff",
+    "config": "base_fullhead",
+    "spec_on": false,
+    "serve_overrides": {
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "PRECACHE_DATASET": "/tmp/senpai_aime_no_precache.json",
+      "MAX_NUM_SEQS": "1",
+      "MAX_NUM_BATCHED_TOKENS": "512",
+      "LOCAL_MODEL_DIR": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_TARGET_MODEL": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "PCK04_KEEPSET": "",
+      "DISABLE_LOG_STATS": "0",
+      "SENPAI_REFERENCE_MODE": "1"
+    },
+    "serve_ok": true,
+    "error": null,
+    "served_model_name": "gemma-4-e4b-it",
+    "self_test_text": " France is France is France is",
+    "tps_runs": [
+      83.36779747989755,
+      83.71716427007648
+    ],
+    "warm_median_tps": 83.542480874987,
+    "tps_run_std": 0.17468339508946684,
+    "decode_files": [
+      "/workspace/senpai/target/research/submission_headtohead/decode_base_fullhead_specoff_r1.jsonl",
+      "/workspace/senpai/target/research/submission_headtohead/decode_base_fullhead_specoff_r2.jsonl"
+    ],
+    "peak_gpu_mib": 19329,
+    "server_log": "/workspace/senpai/target/research/submission_headtohead/server_base_fullhead_specoff.log"
+  },
+  "spec_on_tps_local": 254.00100588962346,
+  "spec_off_tps_local": 83.542480874987,
+  "spec_on_tps_official_proj": 262.9520013371738,
+  "spec_off_tps_official_proj": 86.48651790102154,
+  "acceptance_length": 3.850672035052401,
+  "acceptance_length_source": "server_log_exact",
+  "spec_lift_x": 3.0403814111016243
+}

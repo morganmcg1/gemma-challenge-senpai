@@ -1,0 +1,99 @@
+{
+  "pr": 595,
+  "analysis_only": true,
+  "official_tps": 0,
+  "recipe": "fa2sw_strict_surgical357 substrate (onegraph/fa-sliding/surgical-attn/fused-argmax/MTP-K7), bake+prune OFF; only the checkpoint differs",
+  "tau_lo": 1.03524,
+  "sigma_hw": 4.864,
+  "base_fullhead_source": "lawine #595 same-session probe",
+  "four_tps_local": {
+    "base_fullhead_spec_off_ar": 83.542480874987,
+    "base_fullhead_spec_on_mtp_k7": 254.00100588962346,
+    "int4_g128_lmhead_spec_off_ar": 106.65888631338811,
+    "int4_g128_lmhead_spec_on_mtp_k7": 337.32307653137883
+  },
+  "four_tps_official_proj": {
+    "base_fullhead_spec_off_ar": 86.48651790102154,
+    "base_fullhead_spec_on_mtp_k7": 262.9520013371738,
+    "int4_g128_lmhead_spec_off_ar": 110.4175454670719,
+    "int4_g128_lmhead_spec_on_mtp_k7": 349.2103417483446
+  },
+  "tps_runs": {
+    "base_fullhead_spec_on": [
+      252.3560743964629,
+      255.64593738278398
+    ],
+    "base_fullhead_spec_off": [
+      83.36779747989755,
+      83.71716427007648
+    ],
+    "int4_g128_spec_on": [
+      333.2514632839714,
+      341.39468977878624
+    ],
+    "int4_g128_spec_off": [
+      106.45812701743812,
+      106.8596456093381
+    ]
+  },
+  "acceptance_length": {
+    "base_fullhead": 3.850672035052401,
+    "int4_g128_lmhead": 4.255167404081094
+  },
+  "head_read_decomposition": {
+    "bf16_head_bytes": 1342177280,
+    "bf16_head_gb": 1.34217728,
+    "int4_head_weight_bytes": 335544320.0,
+    "int4_head_scale_bytes": 10485760,
+    "int4_head_bytes": 346030080.0,
+    "int4_head_gb": 0.34603008,
+    "int4_over_bf16_ratio": 0.2578125,
+    "bf16_read_ms": 2.6789965668662674,
+    "int4_read_ms": 0.6906788023952095,
+    "head_read_savings_ms": 1.988317764471058,
+    "hbm_bw_gbs": 501.0
+  },
+  "int4_head_read_savings_tps": 16.641452943630128,
+  "int4_head_read_savings_tps_clean_ar_basis": 23.18378290629998,
+  "measured_ar_frame_delta_tps": 23.116405438401102,
+  "body_g128_scale_residual_tps": 6.4749524947709745,
+  "verdict_g128lmhead_faster_than_base_fullhead_same_frame": {
+    "AR_spec_off": {
+      "g128lmhead_faster": true,
+      "int4_g128_tps": 106.65888631338811,
+      "base_fullhead_tps": 83.542480874987,
+      "delta_tps": 23.116405438401102,
+      "delta_sigma_hw": 4.752550460197595
+    },
+    "spec_on_mtp_k7": {
+      "g128lmhead_faster": true,
+      "int4_g128_tps": 337.32307653137883,
+      "base_fullhead_tps": 254.00100588962346,
+      "delta_tps": 83.32207064175537,
+      "delta_sigma_hw": 17.13035991812405,
+      "int4_g128_e_t": 4.255167404081094,
+      "base_fullhead_e_t": 3.850672035052401
+    }
+  },
+  "locate_official_126378": {
+    "official_126378": 126.378,
+    "official_126378_ppl": 2.0057,
+    "frame": "spec-OFF AR (M=1)",
+    "why_not_spec": "int4_g128_lmhead submission manifest carries NO SPECULATIVE_CONFIG (plain serve.py, vllm 0.22.0) -> no drafter -> cannot be a spec-ON number",
+    "magnitude_bracket": "126.378 is bracketed in the AR band: just ABOVE our surgical357 int4_g128 AR floor (~110.4 official-proj) and FAR BELOW any spec rate (int4_g128 spec-ON ~349, base spec ~263). >2x below spec => AR, not spec.",
+    "surgical357_int4_ar_local": 106.65888631338811,
+    "surgical357_int4_ar_official_proj": 110.4175454670719,
+    "base_clean_ar_local_591": 97.01,
+    "base_surgical357_ar_local": 83.542480874987,
+    "surgical357_refmode_ar_overhead_factor": 0.8611739086175343,
+    "int4_g128_implied_clean_ar_local": 123.85290037944891,
+    "int4_g128_implied_clean_ar_official_proj": 128.2174765888207,
+    "implied_clean_ar_vs_126378_err": 1.8394765888206877,
+    "reproduces_126378_within_8": true,
+    "note": "surgical357 is the faster stack in the SPEC frame but carries M=1-AR overhead from its verify-oriented kernels; int4_g128's OWN plain serve.py is faster for pure AR, so 126.378 sits ABOVE our surgical357 AR floor (g_off*tau). Applying base_fullhead's measured surgical-refmode AR overhead factor to int4_g128's surgical AR recovers its clean-serve AR, which x_tau reproduces the official 126.378 -> 126.378 IS the AR-frame number."
+  },
+  "ship_tps": 375.857,
+  "peak_gpu_mib": 19411,
+  "utc": "2026-06-17T15:30:47Z",
+  "wandb_run_id": "8grrygq0"
+}
