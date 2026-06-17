@@ -1,0 +1,102 @@
+{
+  "pr": 588,
+  "agent": "wirbel",
+  "leg": "canonical operative-#319 predicate (free-running greedy sequence match to the served int4 base_fullhead's own plain greedy AR decode, official 128x512 suite, zero tolerance) -- base_fullhead self-determinism at the SERVED M=1 geometry",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "no_submission": true,
+  "official_tps": 0,
+  "arm": "base_fullhead",
+  "serve_geometry": "MAX_NUM_SEQS=1 (deployed served geometry), spec-OFF, greedy temp=0",
+  "serve_env": {
+    "FA_SLIDING": "1",
+    "SURGICAL_ATTN_USE_3D_OFF": "1",
+    "PLE_FOLD_EMBED_SCALE": "1",
+    "PLE_FOLD_TARGET_MODEL": "/tmp/gemma4-e4b-qat-w4a16-ct"
+  },
+  "predicate": "free-running greedy completion_token_ids byte-identical to the same checkpoint's plain greedy AR decode, official check_greedy_identity.py verdict GREEDY_IDENTICAL, zero tie tolerance",
+  "official_decode_harness": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py",
+  "official_verifier": "/workspace/senpai/target/official/main_bucket/shared_resources/gemma_greedy_identity_verifier_flowian-powers/check_greedy_identity.py",
+  "prompt_suite": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+  "num_prompts": 3,
+  "output_len": 24,
+  "seed": 1,
+  "r_passes": 2,
+  "model_dir": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "build": "vllm-0.22.1rc1.dev307+g3e8afdf78",
+  "server_startup_s": 90.0,
+  "passes": [
+    {
+      "tag": "a",
+      "path": "/workspace/senpai/target/research/validity/operative_identity/decode_a.jsonl",
+      "num_records": 3,
+      "num_completion_tokens": 72,
+      "wall_s": 9.0
+    },
+    {
+      "tag": "b",
+      "path": "/workspace/senpai/target/research/validity/operative_identity/decode_b.jsonl",
+      "num_records": 3,
+      "num_completion_tokens": 72,
+      "wall_s": 8.9
+    }
+  ],
+  "peak_gpu_gb": 18.8662109375,
+  "comparisons": [
+    {
+      "pair": "a_vs_b",
+      "verdict": "DIVERGENT",
+      "num_prompts_compared": 3,
+      "num_identical": 2,
+      "num_divergent": 1,
+      "total_tokens_compared": 72,
+      "total_divergent_tokens": 15,
+      "missing_in_candidate": [],
+      "missing_in_reference": [],
+      "integrity_failures": []
+    }
+  ],
+  "operative_classification": [
+    {
+      "pair": "a_vs_b",
+      "n_prompts_compared": 3,
+      "n_divergent_prompts": 1,
+      "n_first_div_near_tie": 1,
+      "n_first_div_semantic": 0,
+      "all_first_div_near_tie": true,
+      "max_first_div_gap": 0.0,
+      "max_first_div_gap_ulps": 0.0,
+      "eps_star": 0.125,
+      "details": [
+        {
+          "id": "gpqa_diamond-123161632f",
+          "first_div_idx": 4,
+          "kind": "tie",
+          "gap": 0.0,
+          "gap_ulps": 0.0,
+          "near_tie": true,
+          "ref_tok": 13842,
+          "cand_tok": 563,
+          "n_top": 20
+        }
+      ]
+    }
+  ],
+  "base_fullhead_passes_operative_319": true,
+  "literal_self_determinism": false,
+  "operative_self_determinism": true,
+  "margin": {
+    "operative_pass": true,
+    "n_semantic_first_divergences": 0,
+    "n_near_tie_first_divergences": 1,
+    "eps_star": 0.125,
+    "max_first_div_gap_ulps": 0.0,
+    "literal_all_pairwise_GREEDY_IDENTICAL": false,
+    "literal_total_divergent_tokens": 15,
+    "literal_total_tokens_compared": 72,
+    "literal_self_determinism_token_rate": 0.7916666666666666,
+    "n_pairwise_comparisons": 1,
+    "tokens_per_pass": 72
+  }
+}
