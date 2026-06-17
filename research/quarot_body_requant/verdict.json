@@ -1,0 +1,52 @@
+{
+  "pr": 625,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "wandb_group": "quarot-body-requant-recovery",
+  "verdict": "DEFICIT_IRREDUCIBLE_AT_4BIT",
+  "rotation_recovers_reasoning": false,
+
+  "gate": "frobenius_weight_error_prescreen",
+  "gate_outcome": "NO_GO",
+  "gate_rationale": "Cheapest, most-upstream mechanism gate (PR step: 'cheap go/no-go FIRST ... if it doesn't move, STOP'). Orthogonal rotation preserves the Frobenius norm, so naive-quant vs rotated-quant of the SAME bf16 master weights is an apples-to-apples test of the PR's posited mechanism ('outlier-concentrated quantization error'). A served GPQA probe was NOT built because (a) the only offline/zero-TPS-foldable rotation is R2 (V->O), and (b) R2 INCREASES int4 weight error on both matrices it touches (o_proj, v_proj) -> a served rotated checkpoint has strictly-worse reasoning-path weights and cannot recover GPQA. There is no zero-TPS rotation that reduces error to probe.",
+
+  "source": "google/gemma-4-E4B-it-qat-q4_0-unquantized (TRUE bf16 QAT master)",
+  "faithfulness_vs_shipped_int4_g128": {
+    "frac_int32_word_match": [0.965021, 0.965167, 0.968772],
+    "note": "96.5% int32-word match (vs 0.640 for the g32-dequant alternative) confirms this IS the source family build_quant.py used as --src qat_unq. Residual 3.5% is bf16 source-rounding drift in the deleted local qat_unq vs the public snapshot; quant path is byte-identical to build_quant.py. The rotation comparison is INTERNAL to this source, so faithfulness < 1.0 does not affect the +/- sign of the result."
+  },
+
+  "int4_incoherent_floor": 0.1107,
+  "global_rel_naive_qat": 0.09919,
+  "global_rel_rotated_hadamard_g128": 0.11063,
+  "global_rel_rotated_randorth_full": 0.11071,
+  "sse_reduction_full_rotation_NOT_zerotps": -0.24392,
+  "sse_reduction_best_zerotps_rotation_R2_oproj": -0.03307,
+
+  "mechanism": "The int4 group-symmetric incoherent floor ~= 0.1107 (16 levels on a maximally-incoherent/Gaussian weight). A dense Hadamard/random rotation drives ANY weight TOWARD that floor. QAT already conditioned every reasoning-path matrix BELOW the floor (q/k/v/o/gate/up/down naive 0.091-0.109 < 0.1107; global 0.0992), so rotation can only climb back UP -> error increases. The single matrix type that rotation HELPS is per_layer_input_gate (naive 0.1193 > floor -> had 0.1100), the only above-floor type -- a MatFormer PLE gate, not on the reasoning path and not offline-foldable. QAT and QuaRot/QuIP# incoherence processing are SUBSTITUTES; QAT already exhausted (and exceeded) the incoherence headroom.",
+
+  "architectural_finding": "QuaRot R1 (residual-stream rotation -- the rotation that touches the reasoning-path q/k/v/gate/up/down and could in principle reduce their error) is NOT offline-foldable on Gemma-4-E4B. Gemma uses SANDWICH norms: post_attention_layernorm and post_feedforward_layernorm normalize the BLOCK OUTPUT before the residual add, and their learnable (1+gamma) diagonal sits between the rotation and the residual stream with NO subsequent linear to fold gamma into. A dense rotation Q does not commute with a per-channel diagonal, so R1 cannot be made computation-invariant offline. R1 would require ONLINE Hadamard on activations (QuaRot R3/R4) -> nonzero TPS + Marlin kernel changes, violating the PR's zero-TPS premise and out of scope. The ONLY offline/zero-TPS-foldable rotation is R2 (per-head V->O, cancels through the V-linear attention), which the screen measured as error-INCREASING.",
+
+  "r2_zerotps_detail": {
+    "o_proj_naive": 0.09086, "o_proj_R2_head256": 0.11076,
+    "v_proj_naive": 0.10520, "v_proj_Vout_head256": 0.12676
+  },
+
+  "gpqa_deficit_targeted": {
+    "instrument": "gpqa_main", "n_items": 448, "K_seeds": 5,
+    "source_run_reused": "#598 n4ro7bzk (NO new eval pass)",
+    "base_bf16_body_mean_acc": 0.48170,
+    "int4_body_mean_acc": 0.44688,
+    "raw_deficit_mt3072": 0.03482,
+    "residual_deficit_after_truncation_fix_mt6144": 0.0246,
+    "genuine_reasoning_n01_cells": 236,
+    "note": "0.0246 = land #619 FUNDAMENTAL_PRECISION_LOSS residual (deficit after raising max_tokens to 6144 removes the 73 truncation n01 cells). This residual is the recovery target. The weight screen shows the only zero-TPS rotation widens, not narrows, the weight error that drives it."
+  },
+
+  "gpqa_probe_naive_int4": 0.44688,
+  "gpqa_probe_rotated_requant": null,
+  "deficit_closed_frac": 0.0,
+
+  "conclusion": "ROTATION CANNOT RECOVER the GPQA reasoning deficit at zero TPS. The cheap, decisive mechanism gate fails: the only offline-foldable rotation (R2) increases int4 weight error on the matrices it touches, and the rotation that could help the reasoning path (R1) is architecturally non-foldable on Gemma's sandwich norms (would cost TPS). QAT already drove the body below the int4 incoherent floor, exhausting the headroom QuaRot exploits. Confirms land #619's FUNDAMENTAL_PRECISION_LOSS verdict against a strong, principled recovery method."
+}

@@ -1,0 +1,105 @@
+{
+  "pr": 625,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "source": "google/gemma-4-E4B-it-qat-q4_0-unquantized (TRUE bf16 QAT master == build_quant.py qat_unq)",
+  "quantizer": "compressed-tensors g128 symmetric int4 minmax (== build_quant.py)",
+  "device": "cuda",
+  "faithfulness_vs_shipped_g128": {
+    "model.language_model.layers.0.self_attn.q_proj": {
+      "codes_exact_match": false,
+      "frac_int32_equal": 0.965021
+    },
+    "model.language_model.layers.0.mlp.gate_proj": {
+      "codes_exact_match": false,
+      "frac_int32_equal": 0.965167
+    },
+    "model.language_model.layers.20.mlp.down_proj": {
+      "codes_exact_match": false,
+      "frac_int32_equal": 0.968772
+    }
+  },
+  "per_type": {
+    "down_proj": {
+      "n": 42,
+      "rel_naive": 0.10003296530604568,
+      "rel_had_g128blk": 0.11062555559014839,
+      "rel_randorth_full": 0.11072302002381042,
+      "rel_extra": null
+    },
+    "gate_proj": {
+      "n": 42,
+      "rel_naive": 0.0995158270518603,
+      "rel_had_g128blk": 0.11064390500337144,
+      "rel_randorth_full": 0.11070099248588448,
+      "rel_extra": null
+    },
+    "k_proj": {
+      "n": 24,
+      "rel_naive": 0.10901827999498738,
+      "rel_had_g128blk": 0.1104467773989475,
+      "rel_randorth_full": 0.11069425555084457,
+      "rel_extra": null
+    },
+    "o_proj": {
+      "n": 42,
+      "rel_naive": 0.09085509842054089,
+      "rel_had_g128blk": 0.11080494758343712,
+      "rel_randorth_full": 0.1107146794830068,
+      "rel_extra": 0.11076027521122013
+    },
+    "per_layer_input_gate": {
+      "n": 42,
+      "rel_naive": 0.11926914821373466,
+      "rel_had_g128blk": 0.10999983645696682,
+      "rel_randorth_full": 0.11067483494508815,
+      "rel_extra": null
+    },
+    "per_layer_model_projection": {
+      "n": 1,
+      "rel_naive": 0.10238065111510296,
+      "rel_had_g128blk": 0.11059910205558397,
+      "rel_randorth_full": 0.1107227371447291,
+      "rel_extra": null
+    },
+    "per_layer_projection": {
+      "n": 42,
+      "rel_naive": 0.1006189675260879,
+      "rel_had_g128blk": 0.11034592850057087,
+      "rel_randorth_full": 0.1106321643171879,
+      "rel_extra": null
+    },
+    "q_proj": {
+      "n": 42,
+      "rel_naive": 0.1000614084805779,
+      "rel_had_g128blk": 0.11062857239962601,
+      "rel_randorth_full": 0.11073919819028477,
+      "rel_extra": null
+    },
+    "up_proj": {
+      "n": 42,
+      "rel_naive": 0.09875026203252797,
+      "rel_had_g128blk": 0.11066375303794466,
+      "rel_randorth_full": 0.1107147689773209,
+      "rel_extra": null
+    },
+    "v_proj": {
+      "n": 24,
+      "rel_naive": 0.1051999811378108,
+      "rel_had_g128blk": 0.11045037945999558,
+      "rel_randorth_full": 0.11070369870894255,
+      "rel_extra": 0.1267562540283909
+    }
+  },
+  "global": {
+    "global_rel_naive": 0.09919211817679285,
+    "global_rel_had_g128blk": 0.1106301550697688,
+    "global_rel_randorth_full": 0.11070645083177794,
+    "sse_reduction_had_g128blk": -0.24392075303995764,
+    "sse_reduction_randorth_full": -0.24563707726374262,
+    "sse_reduction_r2_oproj_only": -0.03307474812330424
+  },
+  "n_language_modules": 343,
+  "seconds": 14.8
+}
