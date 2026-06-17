@@ -1,0 +1,209 @@
+{
+  "pr": 570,
+  "card": "quality-safe-ceiling-reconcile",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "peak_gpu_gib": 0.0,
+  "baseline_official_1_tps": 481.53,
+  "ship_official_tps": 375.857,
+  "gate_tps": 500.0,
+  "tau_lo": 1.0352356533046398,
+  "reconciled_ceilings": {
+    "candidate_verify": {
+      "ceiling": "candidate-verify",
+      "role": "identity-safe head lever (cheap int4 top-8 nominator -> exact bf16 verify -> re-argmax; identity 1.0 IFF vocab-index tie-break). Realized; SUPERSEDES the 305.4 projection #561 carried.",
+      "served_tps_local": 291.36223894548687,
+      "official_proxy": 301.6285777830337,
+      "official_proxy_method": "local*tau_lo",
+      "#319_status": "PASS",
+      "gap_to_ship": 84.49476105451316,
+      "gap_to_500_gate": 208.63776105451313,
+      "source_pr": "fern #560",
+      "source_wandb": "ufv4nk21"
+    },
+    "plain_int4_head": {
+      "ceiling": "plain-int4-head",
+      "role": "PPL-safe (ppl delta -0.003) but BREAKS #319 (~0.76% greedy flip). THE CORRECTION: realized +46.6 (1.217x), ceiling corrects UPWARD from the superseded 292.1 projection.",
+      "served_tps_local": 299.28668280432635,
+      "official_proxy": 309.8322445983153,
+      "official_proxy_method": "source-banked (local*tau_lo)",
+      "#319_status": "FAIL",
+      "gap_to_ship": 76.57031719567368,
+      "gap_to_500_gate": 200.71331719567365,
+      "source_pr": "wirbel #553",
+      "source_wandb": "bo43du3w"
+    },
+    "magically_free_floor": {
+      "ceiling": "magically-free-floor",
+      "role": "body+overhead floor, head bytes -> 0 (UNREALIZABLE upper bound). UNCHANGED by the #553 correction.",
+      "served_tps_local": 311.2485991465399,
+      "official_proxy": 322.2156468776222,
+      "official_proxy_method": "local*tau_lo",
+      "#319_status": "N/A",
+      "gap_to_ship": 64.60840085346013,
+      "gap_to_500_gate": 188.7514008534601,
+      "source_pr": "lawine #554",
+      "source_wandb": "fi8vr1nb"
+    }
+  },
+  "loosest_ceiling": "magically-free-floor",
+  "gap_to_ship_min": 64.60840085346013,
+  "gap_to_500_min": 188.7514008534601,
+  "correction": {
+    "superseded_544_ceiling_tps": 292.1,
+    "corrected_plain_int4_head_tps": 299.28668280432635,
+    "correction_delta_tps": 7.186682804326324,
+    "correction_delta_sigma_hw": 1.4775252475999845,
+    "correction_is_upward": true,
+    "realized_gain_tps": 46.59826440514672,
+    "realized_vs_544_projection": 1.2166648669751103,
+    "lawine544_ceiling_confirmed": false,
+    "correction_changes_conjunction": false,
+    "conjunction_flip_needs_tps_over_corrected": 76.57031719567368,
+    "note": "plain-int4-head corrects UPWARD 292.1->299.29 (+7.19 = +1.48 sigma_hw ceiling-space); candidate-verify corrects DOWNWARD 305.4-proj->291.36-realized. Both remain << the 375.857 ship -> conjunction UNCHANGED."
+  },
+  "two_gate_satisfiable": false,
+  "fire_decision": "NO-FIRE",
+  "any_ceiling_clears_ship": false,
+  "any_ceiling_clears_gate": false,
+  "grounding": {
+    "candidate_verify": {
+      "loaded": true,
+      "pr": "fern #560",
+      "wandb": "ufv4nk21",
+      "group": "candidate-verify-realize",
+      "path": "research/candidate_verify_realize/stage2_reproject.json",
+      "checks": {
+        "cv_realized_quality_safe_tps": true,
+        "cv_realized_tps_gain": true,
+        "argmax_identity_rate": true,
+        "identity_hard_gate_pass": true
+      },
+      "all_match": true
+    },
+    "plain_int4_head": {
+      "loaded": true,
+      "pr": "wirbel #553",
+      "wandb": "bo43du3w",
+      "group": "realized-anchor-tps",
+      "path": "research/realized_anchor_tps/summary.json",
+      "checks": {
+        "precision_head_served_tps": true,
+        "precision_head_implied_official_tps": true,
+        "realized_precision_gain": true,
+        "realized_vs_lawine38": true,
+        "ppl_delta_int4_minus_bf16": true,
+        "precision_head_argmax_flip_rate": true,
+        "precision_head_strict_identity": true,
+        "ppl_quality_safe": true,
+        "lawine544_ceiling_confirmed": true,
+        "anchor_served_tps": true,
+        "tau_lo": true
+      },
+      "all_match": true
+    },
+    "magically_free_floor": {
+      "loaded": true,
+      "pr": "lawine #554",
+      "wandb": "fi8vr1nb",
+      "group": "fixed-overhead-ceiling",
+      "path": "research/speed/fixed_overhead_ceiling/fixed_overhead_ceiling.json",
+      "checks": {
+        "verdict.fixed_overhead_bounded_ceiling_tps": true,
+        "verdict.corrected_quality_safe_hard_ceiling": true,
+        "verdict.quality_safe_ship_can_beat_442": true
+      },
+      "all_match": true
+    },
+    "capstone_561": {
+      "loaded": true,
+      "pr": "lawine #561",
+      "wandb": "v74ad5jb",
+      "group": "two-gate-fire-decision",
+      "path": "research/two_gate_fire_decision/two_gate_fire_decision.json",
+      "checks": {
+        "stage2_gaps.base_fullhead_quality_safe_ceiling_tps": true,
+        "stage2_gaps.base_fullhead_quality_safe_ceiling_tps_strict": true,
+        "stage1_truth_table.two_gate_satisfiable": true
+      },
+      "all_match": true
+    },
+    "all_grounded": true
+  },
+  "sources": {
+    "candidate_verify": {
+      "pr": "fern #560",
+      "wandb": "ufv4nk21",
+      "group": "candidate-verify-realize",
+      "merged": "3b85e85",
+      "path": "research/candidate_verify_realize/stage2_reproject.json"
+    },
+    "plain_int4_head": {
+      "pr": "wirbel #553",
+      "wandb": "bo43du3w",
+      "group": "realized-anchor-tps",
+      "merged": "578594c",
+      "path": "research/realized_anchor_tps/summary.json"
+    },
+    "magically_free_floor": {
+      "pr": "lawine #554",
+      "wandb": "fi8vr1nb",
+      "group": "fixed-overhead-ceiling",
+      "merged": "(carried by #561)",
+      "path": "research/speed/fixed_overhead_ceiling/fixed_overhead_ceiling.json"
+    },
+    "capstone_561": {
+      "pr": "lawine #561",
+      "wandb": "v74ad5jb",
+      "group": "two-gate-fire-decision",
+      "merged": "3bd83e1",
+      "path": "research/two_gate_fire_decision/two_gate_fire_decision.json"
+    }
+  },
+  "self_tests": {
+    "all_numbers_grounded_against_sources": true,
+    "source_candidate_verify_matches": true,
+    "source_plain_int4_head_matches": true,
+    "source_magically_free_floor_matches": true,
+    "source_capstone_561_matches": true,
+    "correction_is_upward": true,
+    "corrected_above_superseded_292": true,
+    "correction_delta_is_7_19": true,
+    "correction_sigma_is_1_48": true,
+    "plain_realized_over_realizes_544": true,
+    "ordering_cv_lt_plain_lt_floor": true,
+    "candidate_verify_below_ship": true,
+    "plain_int4_head_below_ship": true,
+    "loosest_floor_below_ship": true,
+    "loosest_floor_below_gate": true,
+    "gap_to_ship_min_from_loosest": true,
+    "gap_to_ship_min_is_64_61": true,
+    "gap_to_500_min_is_188_75": true,
+    "gap_to_ship_min_matches_capstone": true,
+    "no_ceiling_clears_ship": true,
+    "no_ceiling_clears_gate": true,
+    "two_gate_unsatisfiable": true,
+    "fire_is_nofire": true,
+    "correction_does_not_change_conjunction": true,
+    "candidate_verify_is_319_pass": true,
+    "plain_int4_head_is_319_fail": true,
+    "plain_int4_head_is_ppl_safe": true,
+    "official_proxy_above_local": true,
+    "loosest_official_proxy_below_ship": true,
+    "plain_official_proxy_matches_source": true,
+    "nan_clean": true,
+    "self_test_passes": true
+  },
+  "self_det": true,
+  "quality_safe_319_safe_ceiling_tps": 291.36223894548687,
+  "quality_safe_ppl_only_ceiling_tps": 299.28668280432635,
+  "magically_free_floor_tps": 311.2485991465399,
+  "self_tests_passed": 32,
+  "self_tests_total": 32,
+  "primary_metric_name": "quality_safe_ppl_only_ceiling_tps",
+  "primary_metric_value": 299.28668280432635,
+  "wandb_run_id": "d595j39x"
+}
