@@ -1,0 +1,216 @@
+{
+  "analysis_only": true,
+  "anchors": {
+    "base_fullhead_tps": 252.49,
+    "observed_prune_gain_tps": 101.24000000000001,
+    "osoi5_pruned_tps": 353.73
+  },
+  "attribution": {
+    "draft_cpu_ms": 0.285,
+    "draft_gpu_ms": 2.565,
+    "eacc_wall_estimate": 3.9381317654192243,
+    "exec_cpu_ms": 11.936,
+    "exec_gap_ms": 2.935,
+    "exec_gpu_ms": 12.272,
+    "go": true,
+    "gpu_per_step_ms": 14.837,
+    "head_attributable_tps": 62.463507422464275,
+    "head_byte_frac": 0.3800766425318463,
+    "head_gemm_ms": 2.8382,
+    "head_gpu_frac": 0.19129204016984566,
+    "head_read_floor_ms": 2.2369621333333334,
+    "head_time_frac": 0.19085468361239996,
+    "tps_ceiling_readbound": 427.18113904183923,
+    "tps_measured": 264.8195659618872,
+    "wall_per_step_ms": 14.871
+  },
+  "byte_info": {
+    "body_read_bytes": 2189155956,
+    "head_byte_frac": 0.3800766425318463,
+    "head_bytes": 1342177280,
+    "head_gb": 1.34217728,
+    "n_head_tensors": 1,
+    "per_decode_read_bytes": 3531333236,
+    "per_decode_read_gb": 3.531333236,
+    "total_checkpoint_bytes": 11513497412
+  },
+  "created_at": "20260617T033756Z",
+  "measured_A": {
+    "label": "passA",
+    "log_path": "/workspace/senpai/target/research/fullhead_candidate_verify/server_passA.log",
+    "model_id": "google/gemma-4-E4B-it",
+    "num_prompts": 128,
+    "output_len": 512,
+    "parsed_log": {
+      "agg_decode_calls": 16000,
+      "agg_decode_head_ms_mean": 2.8382,
+      "agg_decode_head_ms_sum": 45410.8,
+      "decode_head_ms_mean": 2.8382,
+      "decode_head_ms_sum": 45410.8,
+      "decode_verify_calls": 16000,
+      "fullhead_finder_registered": true,
+      "fullhead_shim_ran": true,
+      "fullhead_wrapped": true,
+      "hidden_rows": 0,
+      "lmhead_full_verified": true,
+      "m_hist": {
+        "1": 133,
+        "8": 15933
+      },
+      "prefill_calls": 0,
+      "prefill_head_ms_mean": NaN,
+      "steptime": {
+        "draft": {
+          "_n": 16821.0,
+          "cpu": 0.285,
+          "dcpu": 0.0,
+          "dgpu": 0.0,
+          "gap": 0.0,
+          "gpu": 2.565
+        },
+        "exec": {
+          "_n": 16971.0,
+          "cpu": 11.936,
+          "dcpu": 0.0,
+          "dgpu": 0.0,
+          "gap": 2.935,
+          "gpu": 12.272
+        }
+      },
+      "steptime_exec_active": true,
+      "steptime_propose_active": true
+    },
+    "peak_vram_gb": 18.9560546875,
+    "served_model_name": "gemma-4-e4b-it",
+    "tps": {
+      "T_request_warm_s": 250.38334803463658,
+      "T_wall_s": 259.5964430728927,
+      "all_full_length": true,
+      "completion_tokens_max": 512,
+      "completion_tokens_median": 512,
+      "completion_tokens_min": 512,
+      "completion_tokens_total": 65536,
+      "mean_request_cold_ms": 2258.211410502554,
+      "mean_request_warm_ms": 2019.220548666424,
+      "num_records": 128,
+      "num_warm_records": 124,
+      "output_len": 512,
+      "wall_tps": 252.45338196563034,
+      "warm_aggregate_tps": 253.56318820058848,
+      "warm_mean_tps": 267.8291495147377,
+      "warm_median_tps": 264.8195659618872,
+      "warm_tps_max": 473.53262546555067,
+      "warm_tps_min": 157.5655080705763,
+      "warm_tps_p10": 195.47959723622162,
+      "warm_tps_p90": 344.87705474717063,
+      "warmup_discarded": 4,
+      "warmup_drag_ms_per_req": 238.99086183612985
+    }
+  },
+  "measured_B": {
+    "dump_exists": false,
+    "dump_path": "/tmp/fullhead_hidden_fern.pt",
+    "hidden_rows": 60000,
+    "label": "passB_dump",
+    "log_path": "/workspace/senpai/target/research/fullhead_candidate_verify/server_passB_dump.log",
+    "model_id": "google/gemma-4-E4B-it",
+    "num_prompts": 128,
+    "output_len": 512,
+    "parsed_log": {
+      "agg_decode_calls": 16000,
+      "agg_decode_head_ms_mean": 2.8371,
+      "agg_decode_head_ms_sum": 45393.5,
+      "decode_head_ms_mean": 2.8371,
+      "decode_head_ms_sum": 45393.5,
+      "decode_verify_calls": 16000,
+      "fullhead_finder_registered": true,
+      "fullhead_shim_ran": true,
+      "fullhead_wrapped": true,
+      "hidden_rows": 60000,
+      "lmhead_full_verified": true,
+      "m_hist": {
+        "1": 133,
+        "8": 15933
+      },
+      "prefill_calls": 0,
+      "prefill_head_ms_mean": NaN,
+      "steptime": {
+        "draft": {
+          "_n": 16821.0,
+          "cpu": 0.297,
+          "dcpu": 0.0,
+          "dgpu": 0.0,
+          "gap": 0.0,
+          "gpu": 2.664
+        },
+        "exec": {
+          "_n": 16971.0,
+          "cpu": 13.131,
+          "dcpu": 0.0,
+          "dgpu": 0.0,
+          "gap": 2.154,
+          "gpu": 12.391
+        }
+      },
+      "steptime_exec_active": true,
+      "steptime_propose_active": true
+    },
+    "peak_vram_gb": 18.9560546875,
+    "served_model_name": "gemma-4-e4b-it",
+    "tps": {
+      "T_request_warm_s": 256.9956912333146,
+      "T_wall_s": 266.68316766503267,
+      "all_full_length": true,
+      "completion_tokens_max": 512,
+      "completion_tokens_median": 512,
+      "completion_tokens_min": 512,
+      "completion_tokens_total": 65536,
+      "mean_request_cold_ms": 2375.7472137367586,
+      "mean_request_warm_ms": 2072.5458970428595,
+      "num_records": 128,
+      "num_warm_records": 124,
+      "output_len": 512,
+      "wall_tps": 245.74479362085754,
+      "warm_aggregate_tps": 247.0391612222096,
+      "warm_mean_tps": 261.17461980968653,
+      "warm_median_tps": 257.7908315459155,
+      "warm_tps_max": 464.63951240478644,
+      "warm_tps_min": 157.52006581380638,
+      "warm_tps_p10": 189.77762208326837,
+      "warm_tps_p90": 344.8743646606612,
+      "warmup_discarded": 4,
+      "warmup_drag_ms_per_req": 303.2013166938991
+    }
+  },
+  "microbench": {
+    "device": "NVIDIA A10G",
+    "head_bytes": 1342177280,
+    "hidden": 2560,
+    "per_M": {
+      "1": {
+        "achieved_read_gbps": 483.08829999576005,
+        "head_gemm_ms": 2.7783270263671875
+      },
+      "8": {
+        "achieved_read_gbps": 479.3472522514805,
+        "head_gemm_ms": 2.8000103759765627
+      }
+    },
+    "read_floor_ms": 2.2369621333333334,
+    "vocab": 262144
+  },
+  "model_dir": "/senpai-run/home/student-fern/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "official_tps": 0,
+  "plumbing": {
+    "fullhead_wrapped": true,
+    "has_decode_head_ms": true,
+    "has_exec_steptime": true,
+    "lmhead_full_verified": true,
+    "steptime_exec_active": true
+  },
+  "pr": 549,
+  "stage": 1,
+  "submission": "/workspace/senpai/target/submissions/fa2sw_strict_surgical357",
+  "tps_delta": 0.0,
+  "wandb_run_id": "eu4s18dy"
+}
