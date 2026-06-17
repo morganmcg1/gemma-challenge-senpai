@@ -1,0 +1,57 @@
+{
+  "trace": "research/ar_logits_tail/trace/offline_trace.json",
+  "n_steady_steps": 95,
+  "window_wall_ms": 7046.020325195313,
+  "step_ms_mean": 74.16863500205592,
+  "decode_only_tps_from_trace": 13.482788242931536,
+  "gpu_busy_ms_step": 8.666433768503289,
+  "gpu_idle_ms_step": 65.50220123355263,
+  "gpu_busy_frac": 0.116847691322121,
+  "gpu_idle_frac": 0.883152308677879,
+  "idle_breakdown_pct_of_step": {
+    "a_launch_api": 0.10582915303477786,
+    "b_host_sync": 1.3406975278613243e-05,
+    "c_inter_kernel_bubble": 0.7773094716109383
+  },
+  "busy_component_ms_step": {
+    "gemm_quant": 6.519233347368206,
+    "norm": 0.7390239052631956,
+    "attention": 0.5205165473684316,
+    "elementwise_copy": 0.4951560736842587,
+    "activation": 0.2440179052631444,
+    "embed_rope": 0.12345293684210423,
+    "kv_cache_write": 0.016480063157894714,
+    "sampling": 0.008543284210526313
+  },
+  "busy_component_pct_of_step": {
+    "gemm_quant": 0.08789744272882326,
+    "norm": 0.009964102821127963,
+    "attention": 0.007018014385110405,
+    "elementwise_copy": 0.006676084488686265,
+    "activation": 0.003290041744146705,
+    "embed_rope": 0.0016644898054100925,
+    "kv_cache_write": 0.00022219720178803204,
+    "sampling": 0.0001151872919097068
+  },
+  "busy_component_count_per_step": {
+    "sampling": 1.0,
+    "elementwise_copy": 259.22105263157897,
+    "kv_cache_write": 6.0,
+    "gemm_quant": 254.0,
+    "norm": 302.0,
+    "embed_rope": 42.0,
+    "attention": 108.0,
+    "activation": 84.0
+  },
+  "TAIL": {
+    "sampling_gpu_ms_step": 0.008543284210526313,
+    "sampling_gpu_pct_of_step": 0.0001151872919097068,
+    "host_idle_ms_step": 65.50220123355263,
+    "host_idle_pct_of_step": 0.883152308677879,
+    "tail_upper_bound_ms_step": 65.51074451776316,
+    "tail_upper_bound_pct_of_step": 0.8832674959697887,
+    "note": "tail_upper_bound = sampling-GPU + ALL host-idle. Idle includes lawine's scheduler/graph bubbles, so this OVER-attributes to my tail. detok+output(HTTP/JSON) run in the front-end process, off the EngineCore GPU stream -> not on this critical path."
+  },
+  "n_gaps": 100340,
+  "median_gap_us": 54.625
+}
