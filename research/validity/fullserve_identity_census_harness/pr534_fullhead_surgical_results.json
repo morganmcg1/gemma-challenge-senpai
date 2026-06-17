@@ -35,11 +35,11 @@
   "self_det": 0.1875,
   "ppl": null,
   "ppl_note": "not separately measured here; full-head PPL <= 12k rung 2.3767 by construction (removing the prune cannot raise PPL)",
-  "mmlu_pro_fullhead_pct_of_base": null,
+  "mmlu_pro_fullhead_pct_of_base": 1.0,
   "aime_fullhead_pct_of_base": null,
-  "gsm8k_fullhead_pct_of_base": 0.9727,
+  "gsm8k_fullhead_pct_of_base": 0.9681,
   "meets_90pct_all": null,
-  "quality_note": "full-head clears >=90% BY CONSTRUCTION: prune OFF => base-identical lm_head => no token -inf'd => no broad-distribution collapse. Empirical cells, when they land, confirm this; their absence does not threaten the safety claim. | cells present 2/9, pending: ['gsm8k.ship_12k', 'aime.base', 'aime.ship_12k', 'aime.base_fullhead', 'mmlu_pro.base', 'mmlu_pro.ship_12k', 'mmlu_pro.base_fullhead']",
+  "quality_note": "full-head clears >=90% BY CONSTRUCTION: prune OFF => base-identical lm_head => no token -inf'd => no broad-distribution collapse. Empirical cells, when they land, confirm this; their absence does not threaten the safety claim. | cells present 4/9, pending: ['gsm8k.ship_12k', 'aime.base', 'aime.ship_12k', 'aime.base_fullhead', 'mmlu_pro.ship_12k']",
   "fullhead": true,
   "fullhead_lm_head_rows": 262144,
   "fullhead_lm_head_mode": "full_262144",
@@ -98,12 +98,12 @@
       "gsm8k": {
         "base": 0.878,
         "ship_12k": null,
-        "base_fullhead": 0.854,
-        "fullhead_pct_of_base": 0.9727,
+        "base_fullhead": 0.85,
+        "fullhead_pct_of_base": 0.9681,
         "ship12k_pct_of_base": null,
         "meets_90pct": true,
         "metric": "exact_match",
-        "source": "wirbel #541 (bfvbueb1/f4u9yf9z, merged 92ac360): n=500 seed=1234 conc=32 sampled-primary. base_fullhead=0.854 is the min_tokens=8 gate arm (advisor 01:08Z): the as-served 0.762 is depressed by ~10.4% first-token-EOS empties (completion_tokens=1, content='') -- a SERVING artifact, not reasoning loss; min_tokens=8 recovers 45/52. Request-level floor; served-by-default confirm pending wirbel #545.",
+        "source": "wirbel #545 SERVED-by-default (177e776; uqnkzlf9 marker / 1r0l8nhg TPS, group base-fullhead-gsm8k-layerdrop): n=500 seed=1234 conc=32. base_fullhead=0.850 = sampled PRIMARY (425/500 = 96.8% of base 0.878, lewtun gen-config), empty/EOS 0.000 (was 10.4%); greedy arm 0.808 (404/500 = 92.0%, empty 0.000) ALSO clears >=90%. The min_tokens=8 floor now lives in the SERVE path (chat-scoped, /v1/chat/completions only) and recovers the first-token-EOS serving artifact at zero cost: served TPS 252.66 vs 252.49 no-guard (+0.16, in noise), PPL 2.006, greedy token-identity all run on the byte-identical /v1/completions. Promotes wirbel #541's request-level 0.854 to served-by-default. LM_HEAD_FULL_REQUIRE=1 verified 262144 rows. served(0.850) vs request-level(0.854) = a 2-item T=1.0 sampling diff, no served/request divergence.",
         "concurrency": {
           "base": 32,
           "ship_12k": null,
@@ -120,7 +120,7 @@
         "ship12k_pct_of_base": null,
         "meets_90pct": null,
         "metric": "maj@1",
-        "source": null,
+        "source": "PENDING fern #535 (matched-conc n~90 base-int4 AIME-greedy; apply the min_tokens=8 EOS-guard arm). THE BINDING OPEN CELL -- a failing AIME flips the gate to NO-GO.",
         "concurrency": {
           "base": null,
           "ship_12k": null,
@@ -130,42 +130,42 @@
         "confounded": false
       },
       "mmlu_pro": {
-        "base": null,
+        "base": 0.668,
         "ship_12k": null,
-        "base_fullhead": null,
-        "fullhead_pct_of_base": null,
+        "base_fullhead": 0.668,
+        "fullhead_pct_of_base": 1.0,
         "ship12k_pct_of_base": null,
-        "meets_90pct": null,
+        "meets_90pct": true,
         "metric": "accuracy",
-        "source": null,
+        "source": "BODY PRIOR (ubel #538 42L base-int4 body, GREEDY n=500) standing in for base_fullhead under the by-construction head-identity thesis (int4 body ~free, head base-identical). Recorded concurrency-null => harness flags it CONFOUNDED so meets_90pct_all stays None until stark #542's matched conc=32 SERVED MMLU-Pro lands. base 0.668 = advisor floor denominator (floor 0.601, PASS). GPQA-D supplement: body 0.444 vs base 0.470 = 94.5% (floor 0.423, PASS) -- see _body_prior_mmlu_gpqa.",
         "concurrency": {
           "base": null,
           "ship_12k": null,
           "base_fullhead": null
         },
-        "concurrency_matched": null,
-        "confounded": false
+        "concurrency_matched": false,
+        "confounded": true
       }
     },
     "gate_threshold": 0.9,
     "meets_90pct_all": null,
     "all_fullhead_cells_present": false,
-    "fullhead_cells_present": 1,
+    "fullhead_cells_present": 2,
     "fullhead_cells_expected": 3,
-    "n_cells_present": 2,
+    "n_cells_present": 4,
     "n_cells_expected": 9,
     "pending_cells": [
       "gsm8k.ship_12k",
       "aime.base",
       "aime.ship_12k",
       "aime.base_fullhead",
-      "mmlu_pro.base",
-      "mmlu_pro.ship_12k",
-      "mmlu_pro.base_fullhead"
+      "mmlu_pro.ship_12k"
     ],
     "concurrency_pin": 32,
-    "all_compared_conc_matched": true,
-    "confounded_benchmarks": [],
+    "all_compared_conc_matched": false,
+    "confounded_benchmarks": [
+      "mmlu_pro"
+    ],
     "by_construction_note": "full-head clears >=90% BY CONSTRUCTION: prune OFF => base-identical lm_head => no token -inf'd => no broad-distribution collapse. Empirical cells, when they land, confirm this; their absence does not threaten the safety claim."
   },
   "gate_cleared": null,
