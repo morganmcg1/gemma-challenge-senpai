@@ -6,11 +6,22 @@ Runs probe_one.py in 3 fresh subprocesses (env must be set before vLLM import):
   default_triton  VLLM_USE_FLASHINFER_SAMPLER=0, attention force-pinned TRITON
                   -> the 252.69 no-spec base_fullhead anchor stack.
   fi_sampler_on   VLLM_USE_FLASHINFER_SAMPLER=1, attention still TRITON
-                  -> the literal PR "FlashInfer ON" knob. Proven a no-op at
-                     greedy (sampler.py:266 returns argmax before topk_topp).
-  fi_attention    VLLM_ATTENTION_BACKEND=FLASHINFER + sampler=1
+                  -> the literal PR "FlashInfer ON" knob. Proven (a) a no-op at
+                     greedy (sampler.py:266 returns argmax before topk_topp) AND
+                     (b) a HARD CRASH on this build: the warmup forward exercises
+                     the top-k/top-p path, which JIT-compiles the flashinfer
+                     sampling kernel -> sampling.cuh #include <curand.h> missing
+                     on this CUDA box -> EngineCore init fails. Kept to document
+                     that the literal PR instruction is unrunnable here.
+  fi_attention    PROBE_ATTN_BACKEND=FLASHINFER + sampler=0
                   -> the only FlashInfer lever that touches the forward
-                     (reduction) path. The real M-invariance test.
+                     (reduction) path, and the real M-invariance test. NOTE: in
+                     this vLLM build (0.22.0 dev307) the legacy
+                     VLLM_ATTENTION_BACKEND env var is REMOVED (logged as
+                     "Unknown vLLM environment variable" and ignored). The
+                     backend is now an engine arg: probe_one passes
+                     LLM(attention_backend=...). Sampler is kept OFF so the
+                     curand sampler-JIT crash cannot mask the attention test.
 
 Computes the PR deliverables and logs ONE W&B run, then prints SENPAI-RESULT.
 The FlashInfer config used for the headline deliverables is fi_attention if it
@@ -35,7 +46,7 @@ CONFIGS = [
     ("fi_sampler_on", {"VLLM_USE_FLASHINFER_SAMPLER": "1"}),
     (
         "fi_attention",
-        {"VLLM_USE_FLASHINFER_SAMPLER": "1", "VLLM_ATTENTION_BACKEND": "FLASHINFER"},
+        {"VLLM_USE_FLASHINFER_SAMPLER": "0", "PROBE_ATTN_BACKEND": "FLASHINFER"},
     ),
 ]
 
@@ -50,11 +61,13 @@ def run_one(tag, extra_env):
     env["PROBE_TAG"] = tag
     env.setdefault("PROBE_N", "400")
     env.setdefault("PROBE_TPS_N", "512")
-    # ensure a clean attention env unless the config sets it
+    # ensure a clean attention env unless the config sets it (legacy env is dead
+    # on this build, but pop it so a stray host value cannot leak in)
     env.pop("VLLM_ATTENTION_BACKEND", None)
+    env.pop("PROBE_ATTN_BACKEND", None)
     env.update(extra_env)
     log = HERE / f"_result_{tag}.log"
-    print(f"\n=== [{tag}] launch (attn={extra_env.get('VLLM_ATTENTION_BACKEND','<force-pin>')} "
+    print(f"\n=== [{tag}] launch (attn={extra_env.get('PROBE_ATTN_BACKEND','<force-pin>')} "
           f"fi_sampler={extra_env.get('VLLM_USE_FLASHINFER_SAMPLER')}) ===", flush=True)
     t0 = time.perf_counter()
     with open(log, "w") as lf:
@@ -183,7 +196,7 @@ def _log_wandb(deliver, results):
         config={"pr": 582, "analysis_only": True, "official_tps": 0,
                 "checkpoint": "google/gemma-4-E4B-it-qat-w4a16-ct",
                 "stack": "base_fullhead_no_spec", "default_tps_anchor": DEFAULT_TPS_ANCHOR,
-                "widths": [1, 8, 16], "decode_len": 200, "tps_len": 512},
+                "widths": [1, 8, 16], "decode_len": 400, "tps_len": 512},
     )
     if run is None:
         print("[wandb] disabled (no key); JSON only")
@@ -197,6 +210,12 @@ def _log_wandb(deliver, results):
         cw = mi.get("cross_width") or {}
         run.summary[f"{tag}/load_ok"] = bool(r.get("load_ok"))
         run.summary[f"{tag}/resolved_backend"] = str(r.get("resolved_attention_backend"))
+        # capture WHY a leg failed (e.g. curand sampler JIT, or FlashInfer
+        # attention "Unsupported max_mma_kv" kernel-dispatch on Gemma4 head dims)
+        if r.get("error"):
+            run.summary[f"{tag}/error"] = str(r.get("error"))[:300]
+        run.summary[f"{tag}/subprocess_rc"] = r.get("_subprocess_rc")
+        run.summary[f"{tag}/wall_s"] = r.get("_wall_s")
         if "byte_exact_m_invariant" in mi:
             run.summary[f"{tag}/byte_exact_m_invariant"] = bool(mi["byte_exact_m_invariant"])
             run.summary[f"{tag}/self_det_min"] = mi.get("self_det_min")

@@ -39,6 +39,10 @@ OUT = os.environ["PROBE_OUT"]
 TAG = os.environ.get("PROBE_TAG", "unknown")
 N = int(os.environ.get("PROBE_N", "200"))
 TPS_N = int(os.environ.get("PROBE_TPS_N", "512"))
+# In this vLLM build (0.22.0 dev307) the legacy VLLM_ATTENTION_BACKEND env var
+# is REMOVED (logged as "Unknown vLLM environment variable"); the backend is now
+# an engine arg. Pass it via PROBE_ATTN_BACKEND so it reaches LLM(attention_backend=).
+ATTN_BACKEND = os.environ.get("PROBE_ATTN_BACKEND", "").strip() or None
 WIDTHS = [1, 8, 16]
 REPEATS = 2
 
@@ -77,6 +81,7 @@ result = {
     "tag": TAG,
     "model": MODEL,
     "env": {
+        "PROBE_ATTN_BACKEND": ATTN_BACKEND or "<unset>",
         "VLLM_ATTENTION_BACKEND": os.environ.get("VLLM_ATTENTION_BACKEND", "<unset>"),
         "VLLM_USE_FLASHINFER_SAMPLER": os.environ.get(
             "VLLM_USE_FLASHINFER_SAMPLER", "<unset>"
@@ -99,7 +104,7 @@ try:
     from vllm import LLM, SamplingParams
 
     t0 = time.perf_counter()
-    llm = LLM(
+    llm_kwargs = dict(
         model=MODEL,
         dtype="bfloat16",
         max_model_len=2048,
@@ -111,6 +116,12 @@ try:
         seed=0,
         disable_log_stats=True,
     )
+    if ATTN_BACKEND:
+        # Explicit backend bypasses the Gemma4 TRITON force-pin (config.py guard
+        # `attention_config.backend is None`). This is the ONLY FlashInfer lever
+        # that touches the forward/reduction path.
+        llm_kwargs["attention_backend"] = ATTN_BACKEND
+    llm = LLM(**llm_kwargs)
     result["load_ok"] = True
     result["load_s"] = round(time.perf_counter() - t0, 2)
 
