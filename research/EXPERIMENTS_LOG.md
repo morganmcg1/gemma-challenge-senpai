@@ -20,10 +20,16 @@
 - **lawine → #584 `specdec-achievable-pareto`** (empirical corroboration): sweep the draft-free ngram drafter (`num_speculative_tokens ∈ {3,5,7,10}` × depth {2,3,4}) to MEASURE whether a tuned cheap-verify drafter can occupy the upper-left corner (acceptance ≥ 2.68 at ngram cost) → empirical `any_measured_drafter_clears_ship`, de-risking fern's analytic envelope.
 - **denken #576** (refocused): MTP per-step-0.4777 mechanism root-cause (`mtp_verify_is_exact_greedy?` / `mtp_miss_is_tie_reorder?` / `root_cause`); liveness-flagged (silent since 07:57Z, 0 comments — escalate next cycle if still no W&B run, per the kanna-pod-liveness rule applied to denken).
 
-### Roster (8/8 seated, 0 idle) — SPEED axis closed, pivoting to quality-satisfiability + fresh research
+### wirbel #578 — BANKED+MERGED (review-ready landed mid-cycle) — int4_g128_lmhead FAILS strict #319
+- wirbel; run [`1bv52dj6`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/1bv52dj6), group `int4g128lmhead-characterization`, finished, NaN-clean (W&B-verified: flip 0.16206, byte_exact=false, tps 131.131, analysis_only=1, official_tps=0 — all match). Served `int4_g128_lmhead` greedy (spec-OFF) vs the canonical bf16 reference (`decode_outputs.jsonl`, 128×512 = 65,536 positions).
+- **VERDICT FAIL:** `int4g128lmhead_byte_exact_vs_official=false`, teacher-forced flip **0.16206** (10,621/65,536), free-running **128/128 prompts diverge** (median first-div pos 2, cascade 0.9716). Served TPS 131.131 (≈ official 126.378). **The new number:** 0.16206 is **+2.46 pp above** land #571's int4_g128 BODY-only 0.13745 — the contribution of the untied int4 lm_head re-quant #571 didn't cover. **Confirms the #524 HOLD:** the "GREEDY_IDENTICAL 128/128" tag was served-vs-bundled-spec_ON (kernel-matched), NOT #319 vs canonical bf16 → int4_g128_lmhead is NOT an output-neutral submission. (Doc-note follow-up adopted; routed to wirbel's reseat.)
+- **→ exposed a load-bearing ambiguity → wirbel reseated #585:** the canonical reference is named for the **bf16** base, and the served **int4_g32 body itself flips 10.9% vs bf16** (#571) — so does base_fullhead (the quality-safe anchor, int4 body) ALSO fail strict-#319-vs-bf16, or is the reference actually int4-QAT-referenced? **wirbel #585 `strict319-reference-pin`** resolves whether the quality-safe anchor satisfies the live contract + which reference "strict #319" actually uses (bf16-strict ⇒ int4-unsatisfiable ⇒ operative/#407 lane; or int4-QAT-referenced ⇒ base_fullhead passes).
+
+### Roster (8/8 seated, 0 idle) — SPEED axis closed, pivoting to quality-satisfiability + identity-foundation + fresh research
 - **Spec-dec CLOSURE (3):** fern #583 (analytic two-gate closure), lawine #584 (empirical Pareto), denken #576 (MTP mechanism).
 - **Quality denominator grounding (2):** ubel #580 (unquantized vanilla-base AIME), land #581 (unquantized MMLU-Pro/GPQA/GSM8K).
-- **int4_g128_lmhead characterization (2):** wirbel #578 (#319 census on Morgan's submission target), kanna #579 (4 downstream evals on it).
+- **int4_g128_lmhead quality (1):** kanna #579 (4 downstream evals on Morgan's submission target). [wirbel #578 identity leg BANKED FAIL → reseated #585.]
+- **Identity-foundation (1):** wirbel #585 (strict-#319 reference pin: does base_fullhead itself pass; bf16 vs int4-QAT reference).
 - **Wild-card (1):** stark #582 (FlashInfer determinism).
 - **Background:** researcher-agent (plateau protocol → `RESEARCH_IDEAS_2026-06-17_10:30.md`, fresh bold directions for next-cycle reseats once spec-dec closure lands).
 
