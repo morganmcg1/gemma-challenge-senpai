@@ -1,0 +1,113 @@
+{
+  "k": 5,
+  "model_id": "/workspace/gemma_build/int4_g128_lmhead",
+  "drafter": "/tmp/qat-assistant",
+  "batch_invariant": 1,
+  "decode_tokens": 512,
+  "repeats": 3,
+  "accept_tokens": 512,
+  "tau_lo": 1.035,
+  "serve_ready_s": 110.02084350585938,
+  "tps_runs": [
+    {
+      "decode_tps_single_stream": 371.66143249117056,
+      "naive_tps": 361.5359287798259,
+      "ttft_s_approx": 0.041272878646850586,
+      "decode_tokens": 512,
+      "wall_1tok_s": 0.041272878646850586,
+      "wall_ntok_s": 1.41618013381958,
+      "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+    },
+    {
+      "decode_tps_single_stream": 371.65331213189745,
+      "naive_tps": 361.56861664898514,
+      "ttft_s_approx": 0.04111480712890625,
+      "decode_tokens": 512,
+      "wall_1tok_s": 0.04111480712890625,
+      "wall_ntok_s": 1.4160521030426025,
+      "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+    },
+    {
+      "decode_tps_single_stream": 371.78624708426577,
+      "naive_tps": 361.74122377103487,
+      "ttft_s_approx": 0.040930747985839844,
+      "decode_tokens": 512,
+      "wall_1tok_s": 0.040930747985839844,
+      "wall_ntok_s": 1.4153764247894287,
+      "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+    }
+  ],
+  "local_decode_tps_runs": [
+    371.65331213189745,
+    371.66143249117056,
+    371.78624708426577
+  ],
+  "local_decode_tps_single_stream": 371.66143249117056,
+  "local_decode_tps_min": 371.65331213189745,
+  "local_decode_tps_max": 371.78624708426577,
+  "official_proxy_tps": 384.6695826283615,
+  "beats_126_378": true,
+  "prom_m0": {
+    "num_drafts": 296.0,
+    "num_accepted_tokens": 1287.0,
+    "num_draft_tokens": 1480.0,
+    "e_accept_mean_acceptance_length": 5.347972972972973,
+    "draft_acceptance_rate": 0.8695945945945946
+  },
+  "prom_m1": {
+    "num_drafts": 387.0,
+    "num_accepted_tokens": 1711.0,
+    "num_draft_tokens": 1935.0,
+    "e_accept_mean_acceptance_length": 5.421188630490956,
+    "draft_acceptance_rate": 0.8842377260981912
+  },
+  "acceptance_probe": {
+    "delta_num_drafts": 91.0,
+    "delta_num_accepted_tokens": 424.0,
+    "delta_num_draft_tokens": 455.0,
+    "served_k": 5,
+    "accepted_draft_tokens_per_step": 4.65934065934066,
+    "e_accept_mean_acceptance_length": 5.65934065934066,
+    "draft_acceptance_rate": 0.9318681318681319,
+    "source": "prometheus_bracket_delta"
+  },
+  "prom_real_m0": {
+    "num_drafts": 387.0,
+    "num_accepted_tokens": 1711.0,
+    "num_draft_tokens": 1935.0,
+    "e_accept_mean_acceptance_length": 5.421188630490956,
+    "draft_acceptance_rate": 0.8842377260981912
+  },
+  "prom_real_m1": {
+    "num_drafts": 896.0,
+    "num_accepted_tokens": 3258.0,
+    "num_draft_tokens": 4480.0,
+    "e_accept_mean_acceptance_length": 4.636160714285714,
+    "draft_acceptance_rate": 0.7272321428571429
+  },
+  "acceptance_realistic": {
+    "delta_num_drafts": 509.0,
+    "delta_num_accepted_tokens": 1547.0,
+    "delta_num_draft_tokens": 2545.0,
+    "served_k": 5,
+    "accepted_draft_tokens_per_step": 3.0392927308447937,
+    "e_accept_mean_acceptance_length": 4.039292730844794,
+    "draft_acceptance_rate": 0.6078585461689587,
+    "source": "prometheus_bracket_delta",
+    "n_prompts": 8,
+    "tokens_per_prompt": 256
+  },
+  "spec_log_wholerun": {
+    "intervals": 1,
+    "num_speculative_tokens": 5,
+    "total_accepted_tokens": 1501,
+    "total_drafted_tokens": 1725,
+    "e_accept_interval_mean": 5.35,
+    "steady_gen_tps_mean": 134.1,
+    "steady_gen_tps_n": 1,
+    "e_accept_exact": 5.350724637681159,
+    "draft_acceptance_rate": 0.8701449275362318
+  },
+  "peak_vram_gb": 19.4658203125,
+  "server_log": "research/mtp_k_sweep_speed/runs/server_k5.log"
+}
