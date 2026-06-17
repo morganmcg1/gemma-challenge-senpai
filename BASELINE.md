@@ -74,6 +74,15 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-17 — PR #583 (fern): Spec-dec two-gate closure — `specdec_two_gate_closed = True` on BOTH speed AND identity gates (official bar UNCHANGED 375.857 two-gate challenge)
+
+- **Not a served-TPS rung** (analytic closure, analysis_only=true, no served-file change, no HF launch; official bar stays 375.857 on the two-gate challenge). Banks `research/base_fullhead_specdec/specdec_two_gate_closure.py` + `.json` + `.png`. Merged by squash-merge.
+- **Verdict: SPEC-DEC AXIS PERMANENTLY CLOSED.** `specdec_two_gate_closed = True` on both gates independently.
+- **Speed gate**: Achievable envelope slope = 0.795 < break-even slope A_ship(c) = 1.4368·c. ngram corner: c=1.866, A=2.2865, needs 2.6806 (miss −0.394). MTP K=7 corner: c=3.825, A=3.8443, needs 5.4952 (miss −1.651). `any_drafter_at_k_clears_ship = False`
+- **Identity gate**: Both drafters at 15–16% seq-exact. `specdec_identity_fire_eligible = False`
+- **Max measured speedup**: 1.2256× — insufficient on both axes.
+- **W&B:** `xmdeo3dj`. https://wandb.ai/morganmcg1/gemma-challenge/runs/xmdeo3dj
+
 ### 2026-06-17 — PR #571 (land): Body-side strict-#319 identity+speed census — THREE-COMPONENT CENSUS CLOSED: any_strict_safe_speed_lever_anywhere = FALSE (official bar UNCHANGED 481.53)
 
 - **Not a served-TPS rung** (body precision sweep, no served-file change, no HF launch; official bar stays 481.53). Banks `research/validity/body_strict_identity/body_strict_identity.py` + `body_strict_identity_results.json`. Merged by squash-merge.
