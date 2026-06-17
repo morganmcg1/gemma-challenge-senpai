@@ -103,6 +103,14 @@ def main() -> int:
     ap.add_argument("--model", default="gemma-4-e4b-it")
     ap.add_argument("--max-tokens", type=int, default=2048)
     ap.add_argument("--max-connections", type=int, default=16)
+    ap.add_argument("--min-tokens", type=int, default=0,
+                    help="request-level min_tokens EOS-guard (0=off, identical to prior). "
+                         "Forwarded as extra_body so vLLM masks EOS until N tokens are emitted "
+                         "-- mirrors wirbel #541's GSM8K min_tokens passthrough; no served-file change.")
+    ap.add_argument("--ids-file", default=None,
+                    help="optional JSON list of sample ids: build the dataset from --seed as "
+                         "usual (so prompts stay byte-identical) then keep only these ids. Used "
+                         "to re-run just the zeroed subset under min_tokens without re-scoring all.")
     ap.add_argument("--log-dir", default=None)
     args = ap.parse_args()
 
@@ -110,6 +118,11 @@ def main() -> int:
         task = build_mmlu_pro_task(args.n, args.seed)
     else:
         task = build_gpqa_diamond_task(args.seed)
+
+    if args.ids_file:
+        keep = {str(x) for x in json.load(open(args.ids_file))}
+        task.dataset = task.dataset.filter(lambda s: str(s.id) in keep)
+        print(f"[run_eval] ids-file: kept {len(task.dataset)}/{len(keep)} requested ids", flush=True)
 
     # Record prompt hashes for the full constructed dataset (pre-limit), keyed by id.
     prompt_sha = {str(s.id): _sample_prompt_sha(s) for s in task.dataset}
@@ -122,6 +135,9 @@ def main() -> int:
     # the local model as gpt-5/o-series and silently STRIPS `temperature` from the
     # request. OpenAICompatibleAPI sends temperature=0 explicitly. responses_api=False
     # forces the canonical /v1/chat/completions path (what dixie's harness used).
+    # min_tokens is a vLLM SamplingParams extension (not a standard OpenAI field):
+    # forward it via extra_body so the server masks EOS until N tokens are emitted.
+    extra_body = {"min_tokens": args.min_tokens} if args.min_tokens and args.min_tokens > 0 else None
     model = get_model(
         f"openai-api/local/{args.model}",
         base_url=args.base_url,
@@ -133,6 +149,7 @@ def main() -> int:
             max_tokens=args.max_tokens,
             max_connections=args.max_connections,
             seed=0,
+            extra_body=extra_body,
         ),
     )
 
@@ -219,6 +236,7 @@ def main() -> int:
         "empty_rate": empty_rate,
         "accuracy": accuracy,
         "max_tokens": args.max_tokens,
+        "min_tokens": args.min_tokens or None,
         "base_url": args.base_url,
         "eval_log": getattr(log, "location", None),
         "per_sample": sorted(per_sample, key=lambda r: r["id"]),
