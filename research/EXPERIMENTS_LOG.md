@@ -2,6 +2,45 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-17 ~00:05Z — Cycle-57N: BOTH linchpins terminal — wirbel #533 (GSM8K gate 3-arm + base-int4 quality-safe-ship FLOOR) BANKED+MERGED; fern #535 `serve_ok=TRUE` feasibility UNLOCK (cluster re-bake branch DEAD) + AIME concurrency-confound reframing → sent back for matched-conc n≈90; quality-safe ship now BRACKETED [~99 implied-official floor … 253.78 fast-upper]
+
+**Theme:** The two linchpin terminals landed and resolved the feasibility half of the whole quality-safe-ship question. (1) **GSM8K joins the convergence as the 4th served axis** — ship-12k = 28.7% of base, FAILS hard; and osoi5-16k ≡ ship-12k confirms the **head-prune innocent a 3rd time** (now on GSM8K, after kanna #528 coverage + fern #531 AIME). (2) **fern #535 turned the linchpin: the fast kernels DO serve on the stock native-262k base-int4 head** (`serve_ok=TRUE`, `rebake_required=FALSE`, PPL 2.006 byte-exact) — **the `serve_ok=false` cluster-re-bake escalation branch is dead.** But the clean quality-YES did NOT materialize: the n=30 AIME metric is **concurrency-confounded** (base itself swings 0.100@conc1→0.267@conc32), base_fullhead conc-stable 0.167 sits inside that band — so my prior "fast kernels cost ~0.10 AIME" read (cycle-57M) is SUPERSEDED; we can't adjudicate the bar at n=30. Sent fern back for the binding matched-conc n≈90. The new strategic question is sharp: **can a fast ship be quality-safe at ALL** — wirbel #541 (base_fullhead GSM8K + layer-drop sweep) + denken #540 (offline kernel-TV) attack it directly. NO FIRE (#524 two-gate met on neither — slow 253.78 TPS + quality unresolved).
+
+### wirbel #533 — BANKED+MERGED (4d6241b3) — GSM8K base-quality gate (3-arm) + base-int4 quality-safe-ship TPS FLOOR
+- wirbel; runs [`mo0ci0yl`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/mo0ci0yl) (3-arm gate) + [`b9j1z40d`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/b9j1z40d) (floor); `analysis_only=true`, `official_tps=0`; W&B-verified both (floor 95.78, GSM8K reconfirm 0.878, all match to rounding).
+
+| GSM8K (n=500, seed=1234, 8-shot CoT) | head | sampled acc | greedy acc | % of base | ≥90% gate |
+|---|---|---|---|---|---|
+| **base** (denominator) | 262k | **0.878** | 0.896 | — | — |
+| **ship-12k** (live served) | 12k | **0.252** | 0.208 | **28.7%** | ❌ |
+| **osoi5-16k** (`LM_HEAD_PRUNE=0`) | 16k | **0.252** | 0.214 | **28.7%** | ❌ |
+
+- **Head-prune innocent (3rd confirmation):** osoi5-16k ≡ ship-12k to +0.6pp (net +3/500 churn) → the 16k→12k prune recovers **nothing** on GSM8K. Triangulates kanna #528 (Slice keepset 1.38%) + fern #531 (`delta_prune=0.000`). bs=1↔bs=32 96%-agreement rules out a batching artifact.
+- **Attribution correction (banked):** the −68.2pp `base→osoi5-16k` step is the **osoi5 BAKE (int4 re-quant + surgical layer-removal + 262k→16k head bake), NOT layer-drop alone** — de-confounding it is a 3-probe job (fern #535 base_fullhead, stark #536 transplant, kanna #539 offline body decomp).
+- **NEW — `base_int4_floor_tps` = 95.78** local (~99 implied official): the quality-safe-ship TPS FLOOR (no surgical/no fast kernels, quality=base, GSM8K reconfirm 0.878 on the same serve). Peak VRAM 19.20 GiB.
+
+### fern #535 — TERMINAL (whh42dgd), sent back to wip for matched-conc n≈90 — base-int4 full-head × fast-stack feasibility probe
+- fern; run [`whh42dgd`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/whh42dgd); `analysis_only=true`, `official_tps=0`; W&B-verified (serve_ok=True, rebake_required=False, TPS 253.78, AIME 0.16667, PPL 2.00566 all match).
+
+| key output | value |
+|---|---|
+| **`serve_ok`** | **TRUE** ✅ — fast stack (surgical 2D attn + MTP K=7 + split-KV + onegraph + PLE fold) binds + serves on stock base-int4 native 262k head |
+| **`rebake_required`** | **FALSE** — kernels substrate-agnostic; `serve_ok=false` cluster-escalation branch does NOT fire |
+| served PPL | **2.006** (gate ≤2.42 ✅; base int4 plain 2.019) — target forward byte-exact |
+| warm-median TPS @128×512 conc=1 | **253.78** (= 71.7% of osoi5 ship 353.73; 2.65× the 95.78 floor) |
+| AIME-2024 greedy maj@1 (n=30, seed=1234) | **0.1667** conc-STABLE (conc=32 / conc=1 spec-on / conc=1 spec-off all 0.1667) |
+| `quality_safe_fast_ship_exists` | **FALSE / inconclusive at n=30** (concurrency-confounded, see below) |
+
+- **The 2×2 that reframes the metric:** plain stock base = 0.100@conc1 / **0.267@conc32**; base_fullhead = 0.167 at BOTH. The *unchanged* base swings 0.167 (>2se) from concurrency alone, and base_fullhead sits inside that band → the n=30 AIME maj@1 metric **cannot adjudicate the ≥90% bar**. At matched conc the "fast kernels cost AIME" sign flips (conc=1: fast 0.167 > plain 0.100). **NOT the osoi5 collapse** (base_fullhead extract_fail 0.067 vs osoi5 0.300).
+- **Checkpoint recipe (the corrected full-head target for the fleet):** stock public `google/gemma-4-E4B-it-qat-w4a16-ct` + {LM_HEAD_PRUNE=0, LM_HEAD_PRUNE_REQUIRE=0, PCK04_KEEPSET="", LOCAL_MODEL_DIR/PLE_FOLD_TARGET_MODEL=snapshot} — **no baked bucket to sync.** Relayed to wirbel #541 + land #534.
+- **Disposition:** sent back to wip for the binding measurement — matched-conc (conc=32) AIME at n≈90, both base + base_fullhead on the identical set, Wilson CIs. Cross-checks: wirbel #541 (served GSM8K, tighter CIs) + denken #540 (offline per-position TV, no conc confound).
+
+### Reseats + roster (8/8 busy, zero idle)
+- **wirbel → #541** `base-fullhead-gsm8k-layerdrop`: PRIMARY = base_fullhead GSM8K cell (de-confounds the −68.2pp, tests wirbel's own falsifiable prediction, closes the 4th gate cell land #534 needs); SECONDARY (conditional on FAIL) = layer-drop sensitivity sweep (does a *lighter* reduction buy back GSM8K above the 95.78 floor → the first quality-safe *fast* ship?).
+- **fern #535** → back to wip (matched-conc n≈90 AIME).
+- **#524 interim verdict posted** (feasibility YES, quality pending, NO FIRE); **land #534 relay** (corrected no-bucket handoff + pin-concurrency rule + floor/fast bracket cell).
+- Roster: fern #535 (n≈90 AIME) · wirbel #541 (base_fullhead GSM8K + layer-drop) · stark #536 (head-transplant) · lawine #537 (Medusa) · kanna #539 (offline bake-locus) · ubel #538 (served body-decomp 2×2) · land #534 (gate-table assembly) · denken #540 (offline kernel-TV).
+
 ## 2026-06-16 ~23:45Z — Cycle-57M: denken #529 (per-position divergence) BANKED+MERGED → 5th lens, audits the LIVE 375.857 submission + localizes 85% of the collapse to the BAKE layer; fern #535 linchpin turned — serve_ok=TRUE but a NEW fast-kernel quality axis surfaced → reseated denken #540 to measure it
 
 **Theme:** The head question is now fully closed (denken #529 is the 5th converging lens), and the linchpin (fern #535) turned with a twist: the fast kernels **do** serve on the genuine native-262k base-int4 head (`serve_ok=TRUE`, no re-bake needed) — but they appear to carry their **own** ~0.10 AIME tax, separate from the head-prune and the body. That potential third quality axis is the new critical-path question; denken #540 measures its per-position mechanism (offline companion to fern's served AIME), the #528↔#529 bridge pattern again.
