@@ -1,0 +1,135 @@
+{
+  "pr": 538,
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "gate_mmlu_threshold": 0.6,
+  "gate_gpqa_threshold": 0.42,
+  "base_int4_mmlu_pro": 0.668,
+  "base_int4_gpqa": 0.4444444444444444,
+  "bf16_37L_mmlu_pro": 0.448,
+  "bf16_37L_gpqa": 0.29797979797979796,
+  "bf16_42L_mmlu_pro": 0.656,
+  "bf16_42L_gpqa": 0.5050505050505051,
+  "int4_37L_mmlu_pro": 0.374,
+  "int4_37L_gpqa": 0.2727272727272727,
+  "int4_cost_fullbody_mmlu": -0.01200000000000001,
+  "int4_cost_fullbody_gpqa": 0.06060606060606066,
+  "layerdrop_cost_bf16_mmlu": 0.20800000000000002,
+  "layerdrop_cost_bf16_gpqa": 0.20707070707070713,
+  "interaction_mmlu": 0.08600000000000008,
+  "interaction_gpqa": -0.03535353535353536,
+  "dominant_body_knob_mmlu": "layer-removal",
+  "dominant_body_knob_gpqa": "layer-removal",
+  "base_int4_clears_gate": true,
+  "verdict": "FULL-HEAD body 2x2: int4-on-42L costs MMLU -0.012/GPQA +0.061; layerdrop(-5L)@bf16 costs MMLU +0.208/GPQA +0.207; interaction MMLU +0.086/GPQA -0.035. Dominant knob MMLU=layer-removal, GPQA=layer-removal. base_int4 (42L) CLEARS the gate (0.668/0.444 vs 0.6/0.42).",
+  "prompt_identical_all4_mmlu": true,
+  "prompt_identical_all4_gpqa": true,
+  "mmlu_detail": {
+    "task": "mmlu_pro",
+    "gate_threshold": 0.6,
+    "corner_42L_bf16": 0.656,
+    "corner_42L_int4": 0.668,
+    "corner_37L_bf16": 0.448,
+    "corner_37L_int4": 0.374,
+    "ci95_42L_bf16": [
+      0.6143608159926255,
+      0.6976391840073746
+    ],
+    "ci95_37L_bf16": [
+      0.4044107280721506,
+      0.4915892719278494
+    ],
+    "ci95_42L_int4": [
+      0.6267210784637002,
+      0.7092789215362999
+    ],
+    "ci95_37L_int4": [
+      0.33158748396050997,
+      0.41641251603949003
+    ],
+    "int4_cost_fullbody": -0.01200000000000001,
+    "layerdrop_cost_bf16": 0.20800000000000002,
+    "int4_cost_reducedbody": 0.07400000000000001,
+    "layerdrop_cost_int4": 0.29400000000000004,
+    "interaction": 0.08600000000000008,
+    "dominant_body_knob": "layer-removal",
+    "gate_pass_42L_bf16": true,
+    "gate_pass_42L_int4": true,
+    "gate_pass_37L_bf16": false,
+    "gate_pass_37L_int4": false,
+    "n_42L_bf16": 500,
+    "n_37L_bf16": 500,
+    "n_42L_int4": 500,
+    "n_37L_int4": 500,
+    "err_42L_bf16": 0,
+    "err_37L_bf16": 0,
+    "prompt_identical_all4": true,
+    "prompt_mismatch": 0
+  },
+  "gpqa_detail": {
+    "task": "gpqa_diamond",
+    "gate_threshold": 0.42,
+    "corner_42L_bf16": 0.5050505050505051,
+    "corner_42L_int4": 0.4444444444444444,
+    "corner_37L_bf16": 0.29797979797979796,
+    "corner_37L_int4": 0.2727272727272727,
+    "ci95_42L_bf16": [
+      0.4354084907810284,
+      0.5746925193199818
+    ],
+    "ci95_37L_bf16": [
+      0.2342721323623718,
+      0.36168746359722415
+    ],
+    "ci95_42L_int4": [
+      0.3752301231510607,
+      0.5136587657378282
+    ],
+    "ci95_37L_int4": [
+      0.2106923262412422,
+      0.3347622192133032
+    ],
+    "int4_cost_fullbody": 0.06060606060606066,
+    "layerdrop_cost_bf16": 0.20707070707070713,
+    "int4_cost_reducedbody": 0.02525252525252525,
+    "layerdrop_cost_int4": 0.1717171717171717,
+    "interaction": -0.03535353535353536,
+    "dominant_body_knob": "layer-removal",
+    "gate_pass_42L_bf16": true,
+    "gate_pass_42L_int4": true,
+    "gate_pass_37L_bf16": false,
+    "gate_pass_37L_int4": false,
+    "n_42L_bf16": 198,
+    "n_37L_bf16": 198,
+    "n_42L_int4": 198,
+    "n_37L_int4": 198,
+    "err_42L_bf16": 1,
+    "err_37L_bf16": 1,
+    "prompt_identical_all4": true,
+    "prompt_mismatch": 0
+  },
+  "corner_sources": {
+    "42L_bf16": {
+      "mmlu": "bf16_42L_mmlu_pro.json",
+      "gpqa": "bf16_42L_gpqa.json",
+      "note": "RUN this PR: stock bf16 snapshot, 42L, full tied bf16 head"
+    },
+    "42L_int4": {
+      "mmlu": "../downstream_quality_eval/base_mmlu_pro.json",
+      "gpqa": "../downstream_quality_eval/base_gpqa.json",
+      "note": "CITE #511/#527 base: stock int4 QAT, 42L, full tied head (genuine)"
+    },
+    "37L_bf16": {
+      "mmlu": "bf16_37L_mmlu_pro.json",
+      "gpqa": "bf16_37L_gpqa.json",
+      "note": "RUN this PR: build_37L_bf16.py carve of stock bf16 to osoi5 geometry, full tied bf16 head"
+    },
+    "37L_int4": {
+      "mmlu": "../keepset_width_quality_sweep/results/full_pck04/ship_mmlu_pro.json",
+      "gpqa": "../keepset_width_quality_sweep/results/full_pck04/ship_gpqa.json",
+      "note": "CITE #527 full_pck04: osoi5 int4 body + SYNTHESIZED full-262k int4 head (proxy, tail cos~0.990)"
+    }
+  }
+}
