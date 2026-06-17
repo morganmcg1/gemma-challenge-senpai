@@ -74,6 +74,20 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 
 ## Merge history
 
+### 2026-06-17 — PR #584 (lawine): Spec-dec achievable Pareto — empirical measurement; `any_measured_drafter_clears_ship = False`; anchor-inflation bug fixed (official bar UNCHANGED 375.857)
+
+- **Not a served-TPS rung** (measurement-only, no served-file change, no HF launch; official bar stays 375.857). Banks `research/specdec_achievable_pareto/` (15 files incl. `pareto_driver.py`, `pareto_report.json`, 14 measured raw JSONs, `resynth.py`, `validate_acceptance.py`). Merged by squash-merge.
+- **Verdict: SPEC-DEC UPPER-LEFT CORNER EMPIRICALLY EMPTY.** 15 measured (drafter, K) points; no point projects official TPS ≥ ship (375.857). `any_measured_drafter_clears_ship = False`.
+- **Anchor-inflation bug FIXED:** `build_pareto` in `pareto_driver.py` was double-counting the MTP speedup by multiplying the already-MTP-served 252.69 anchor by the no-spec→MTP speedup ratio. Fixed by using the clean realized frame only for verdicts. Previous inflated best: 320.24 TPS; corrected: 109.79 TPS (ngram).
+- **Honest break-even acceptance: 4.95** (not the previously-cited 2.68 — that was anchor-inflated). The 252.69 baseline is MTP-K7-served, not no-spec (`anchor_252_is_mtp_not_nospec = True`).
+- **Best measured Pareto points (clean realized frame):**
+  - ngram K10: e_accept=2.271, proj official=109.5 TPS — clears ship? **False** (gap −266.4)
+  - MTP K3: e_accept=2.797, proj official=224.4 TPS — False
+  - MTP K5: e_accept=3.405, proj official=258.3 TPS — False
+  - MTP K7: e_accept=3.844, proj official=262.9 TPS — False (best, gap −113.0)
+- **Confirms and empirically corroborates PR #583 analytic closure** (`specdec_two_gate_closed = True`). The achievable envelope peaks at MTP-K7 (3.844 acceptance), still 1.1 short of the honest break-even 4.95.
+- **W&B:** `gd5s78ze` https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/gd5s78ze
+
 ### 2026-06-17 — PR #583 (fern): Spec-dec two-gate closure — `specdec_two_gate_closed = True` on BOTH speed AND identity gates (official bar UNCHANGED 375.857 two-gate challenge)
 
 - **Not a served-TPS rung** (analytic closure, analysis_only=true, no served-file change, no HF launch; official bar stays 375.857 on the two-gate challenge). Banks `research/base_fullhead_specdec/specdec_two_gate_closure.py` + `.json` + `.png`. Merged by squash-merge.
