@@ -1,0 +1,242 @@
+{
+  "pr": 594,
+  "card": "submission-basis-reconciliation",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_fire": true,
+  "peak_gpu_gib": 0.0,
+  "int4_g128_official_tps": 126.378,
+  "bf16_baseline_official_tps": 44.018,
+  "ship_official_tps": 375.857,
+  "public_1_official_tps": 481.53,
+  "ppl_cap": 2.42,
+  "tau_lo": 1.0352356533046398,
+  "official_benchmark_mechanism": {
+    "harness_runs_submitter_serve_command": true,
+    "tps_metric": "summary.json:tps = result['output_throughput'] (output_tokens/wall @ conc=1)",
+    "fixed_ar_no_spec_harness": false,
+    "spec_dec_in_frame": true,
+    "proof": "official leaderboard frontier 484-508 TPS are all spec-dec stacks (K7 drafters + split-KV/tree verify); impossible under fixed-AR (bf16 AR 44.018; int4 AR 126.378).",
+    "source": "official/main_bucket/shared_resources/speed_benchmark/{README.md,scripts/hf_bucket_single_job.py}"
+  },
+  "headtohead_table": {
+    "int4_g128_lmhead": {
+      "official_basis_tps": 126.378,
+      "official_basis_status": "REALIZED (job 6a2d5a96 / run 905tbujn)",
+      "local_spec_served_tps": null,
+      "clean_ar_tps": 126.378,
+      "ppl": 2.0057,
+      "quality_gates": {
+        "per_gate": {
+          "mmlu_pro": true,
+          "gpqa_d": true,
+          "aime": true,
+          "gsm8k": true
+        },
+        "all_pass": true
+      },
+      "served_byte_exact_identity": true,
+      "identity_status": "PASS (served byte-exact)",
+      "spec_off": true
+    },
+    "base_fullhead__ar_nospec": {
+      "official_basis_tps": 86.38006291173915,
+      "official_basis_status": "UNREALIZED (proxy = local 83.44 * tau_lo)",
+      "local_spec_served_tps": null,
+      "clean_ar_tps": 83.44,
+      "ppl": 2.0057,
+      "quality_gates": {
+        "per_gate": {
+          "mmlu_pro": true,
+          "gpqa_d": true,
+          "aime": true,
+          "gsm8k": true
+        },
+        "all_pass": true
+      },
+      "served_byte_exact_identity": true,
+      "identity_status": "PASS (full head, no spec) \u2014 but SLOW",
+      "spec_off": true
+    },
+    "base_fullhead__mtp_k7_spec": {
+      "official_basis_tps": 262.9395035828455,
+      "official_basis_status": "UNREALIZED (proxy = local 253.99 * tau_lo)",
+      "local_spec_served_tps": 253.99,
+      "clean_ar_tps": 83.44,
+      "e_accept_exact": 3.844,
+      "ppl": 2.0057,
+      "quality_gates": {
+        "per_gate": {
+          "mmlu_pro": true,
+          "gpqa_d": true,
+          "aime": true,
+          "gsm8k": true
+        },
+        "all_pass": true
+      },
+      "served_byte_exact_identity": null,
+      "identity_status": "UNMEASURED (full-head exact verify -> plausibly exact; must measure free-run)",
+      "spec_off": false
+    },
+    "base_fullhead__candidate_verify": {
+      "official_basis_tps": 309.82787719721955,
+      "official_basis_status": "UNREALIZED (proxy = local 299.28 * tau_lo)",
+      "local_spec_served_tps": 299.2824640536662,
+      "clean_ar_tps": 83.44,
+      "ppl": 2.0057,
+      "quality_gates": {
+        "per_gate": {
+          "mmlu_pro": true,
+          "gpqa_d": true,
+          "aime": true,
+          "gsm8k": true
+        },
+        "all_pass": true
+      },
+      "served_byte_exact_identity": false,
+      "served_freerun_token_identity": 0.44940185546875,
+      "served_freerun_seq_exact": 0.140625,
+      "perstep_identity": 0.9940561590489855,
+      "identity_status": "FAIL (served free-run 0.449; per-step 0.994 cascades, #566)",
+      "spec_off": false
+    }
+  },
+  "official_basis_is_spec_frame": true,
+  "base_fullhead_official_beats_g128lmhead": false,
+  "base_fullhead_official_tps_estimate": {
+    "identity_safe_served_official_proxy": 86.38006291173915,
+    "identity_safe_beats_126": false,
+    "fast_projection_official_proxy_mtp_k7": 262.9395035828455,
+    "fast_projection_official_proxy_cand_verify": 309.82787719721955,
+    "fast_projection_is_served_identity_validated": false,
+    "note": "identity-safe served (AR no-spec) ~86 < 126.378; the >126.378 fast projections (MTP-K7 ~263 / cand-verify ~310) are UNREALIZED and not served-identity-validated (cand-verify REFUTED 0.449; MTP-K7 UNMEASURED)."
+  },
+  "ledger_correction": {
+    "loose_claim": "base_fullhead 252.69 ships clean",
+    "corrected": "252.69 is a LOCAL MTP-K7 spec figure (wirbel #553 / lawine wndiyzxk 253.99), NOT an official submittable number; base_fullhead has never been officially served. It does NOT 'ship clean' without a SERVED free-running greedy identity == 1.0 proof (per-step 0.994 is not enough).",
+    "int4_g128_is_best_valid_official_quality_safe": true
+  },
+  "go_no_go": {
+    "autonomous_fire": "NO",
+    "swap_best_submission": "NO-GO (int4_g128_lmhead@126.378 stays)",
+    "human_approval_candidate": "base_fullhead + MTP-K7 (full-head exact verify)",
+    "human_approval_preconditions": [
+      "SERVED FREE-RUNNING greedy identity == 1.0 (free-run, not per-step \u2014 the #566 lesson)",
+      "remote-loadable packaged serve.py with the MTP drafter (Hub-hosted / in-submission)",
+      "PPL <= 2.42 on a real serve (the 252.69/253.99 figures were never PPL-validated served)"
+    ],
+    "apples_to_apples_note": "spec-dec is official-in-frame -> int4_g128_lmhead can ALSO be MTP-drafted; the int4 head is a cheaper verify substrate than the full bf16 head, so int4_g128+MTP would likely DOMINATE base_fullhead+MTP. Prefer int4_g128+MTP for a quality-safe spec slot.",
+    "verdict_label": "NO-GO swap (int4_g128_lmhead@126.378 remains the best VALID official quality-safe submission); CONDITIONAL human-approval GO-flag for base_fullhead+MTP-K7 gated on 3 served preconditions; NO autonomous fire."
+  },
+  "grounding": {
+    "base_fullhead_ar_specdec_report": {
+      "loaded": true,
+      "pr": "wirbel #573",
+      "wandb": "(specdec axis)",
+      "path": "research/base_fullhead_specdec/specdec_report.json",
+      "checks": {
+        "acceptance_models.0.ref_warm_aggregate_tps": true,
+        "acceptance_models.0.k": true,
+        "analysis_only": true
+      },
+      "all_match": true
+    },
+    "cv_served_report": {
+      "loaded": true,
+      "pr": "fern #566",
+      "wandb": "(served-cv-realize)",
+      "path": "research/candidate_verify_realize/served_cv_report.json",
+      "checks": {
+        "cvsp.tps.warm_median_tps": true,
+        "ref.tps.warm_median_tps": true,
+        "audit.identity_rate": true,
+        "identity.token_identity_rate": true,
+        "identity.sequence_exact_rate": true,
+        "identity.n_sequences_byte_exact": true,
+        "official_tps": true
+      },
+      "all_match": true
+    },
+    "cv_stage3_identity": {
+      "loaded": true,
+      "pr": "fern #560/#566",
+      "wandb": "ufv4nk21",
+      "path": "research/candidate_verify_realize/stage3_realized_identity.json",
+      "checks": {
+        "argmax_identity_rate": true,
+        "identity_hard_gate_pass": true,
+        "official_tps": true
+      },
+      "all_match": true
+    },
+    "cv_stage3c_tiebreak": {
+      "loaded": true,
+      "pr": "fern #560",
+      "wandb": "ufv4nk21",
+      "path": "research/candidate_verify_realize/stage3c_tiebreak.json",
+      "checks": {
+        "identity_vs_served_bf16.C_vocTB": true,
+        "identity_vs_served_bf16.C_posTB": true,
+        "containment_rate_at_K8": true
+      },
+      "all_match": true
+    },
+    "all_grounded": true
+  },
+  "sources": {
+    "base_fullhead_ar_specdec_report": {
+      "path": "research/base_fullhead_specdec/specdec_report.json",
+      "pr": "wirbel #573",
+      "wandb": "(specdec axis)"
+    },
+    "cv_served_report": {
+      "path": "research/candidate_verify_realize/served_cv_report.json",
+      "pr": "fern #566",
+      "wandb": "(served-cv-realize)"
+    },
+    "cv_stage3_identity": {
+      "path": "research/candidate_verify_realize/stage3_realized_identity.json",
+      "pr": "fern #560/#566",
+      "wandb": "ufv4nk21"
+    },
+    "cv_stage3c_tiebreak": {
+      "path": "research/candidate_verify_realize/stage3c_tiebreak.json",
+      "pr": "fern #560",
+      "wandb": "ufv4nk21"
+    }
+  },
+  "self_tests": {
+    "all_numbers_grounded_against_sources": true,
+    "src_ar_specdec_report_matches": true,
+    "src_cv_served_report_matches": true,
+    "src_cv_stage3_identity_matches": true,
+    "src_cv_stage3c_tiebreak_matches": true,
+    "frontier_exceeds_int4_ar_ceiling": true,
+    "ship_exceeds_int4_ar_ceiling": true,
+    "official_basis_is_spec_frame_true": true,
+    "int4_g128_realized": true,
+    "int4_g128_gates_all_pass": true,
+    "int4_g128_identity_pass": true,
+    "bf_ar_proxy_below_126": true,
+    "cv_freerun_identity_fails": true,
+    "cv_perstep_looks_clean_but_cascades": true,
+    "cv_hard_gate_fails": true,
+    "cv_voctb_exact_offline_only": true,
+    "mtp_spec_proxy_exceeds_126": true,
+    "mtp_spec_identity_unmeasured": true,
+    "three_x_gap_is_specdec_not_hw": true,
+    "tau_lo_is_small_hw_gap": true,
+    "base_fullhead_does_not_officially_beat": true,
+    "no_base_fullhead_form_realized_beats": true,
+    "nan_clean": true,
+    "self_test_passes": true
+  },
+  "self_det": true,
+  "self_tests_passed": 24,
+  "self_tests_total": 24,
+  "primary_metric_name": "base_fullhead_official_beats_g128lmhead",
+  "primary_metric_value": 0
+}
