@@ -1,0 +1,148 @@
+{
+  "pr": 572,
+  "submission": "submissions/fa2sw_strict_surgical357",
+  "substrate": "base_fullhead (stock base-int4 + native 262k head, NO bake, NO prune)",
+  "model_snapshot": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "speculative_config": "{\"method\":\"mtp\",\"model\":\"/tmp/qat-assistant\",\"num_speculative_tokens\":7}",
+  "spec_drafter": "mtp_k7",
+  "num_prompts": 4,
+  "output_len": 32,
+  "analysis_only": true,
+  "official_tps": 0,
+  "utc": "2026-06-17T08:48:33Z",
+  "arm_spec_on": {
+    "tag": "specon_smoke",
+    "spec_on": true,
+    "serve_overrides": {
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "PRECACHE_DATASET": "/tmp/senpai_aime_no_precache.json",
+      "MAX_NUM_SEQS": "1",
+      "MAX_NUM_BATCHED_TOKENS": "512",
+      "LOCAL_MODEL_DIR": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_TARGET_MODEL": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "PCK04_KEEPSET": "",
+      "DISABLE_LOG_STATS": "0"
+    },
+    "serve_ok": true,
+    "error": null,
+    "served_model_name": "gemma-4-e4b-it",
+    "self_test_text": " France is France is France is",
+    "tps_runs": [
+      146.70612343383615,
+      190.23040492322693
+    ],
+    "warm_median_tps": 168.46826417853154,
+    "decode_files": [
+      "/workspace/senpai/target/research/base_fullhead_specdec_ceiling/decode_specon_smoke_r1.jsonl",
+      "/workspace/senpai/target/research/base_fullhead_specdec_ceiling/decode_specon_smoke_r2.jsonl"
+    ],
+    "selfdet_sequences": 4,
+    "selfdet_sequences_identical": 3,
+    "selfdet_self_det": 0.75,
+    "spec_metrics": {
+      "num_drafts": 62.0,
+      "num_accepted_tokens": 230.0,
+      "num_draft_tokens": 434.0,
+      "e_accept_mean_acceptance_length": 4.709677419354838,
+      "draft_acceptance_rate": 0.5299539170506913
+    },
+    "peak_gpu_mib": 19409,
+    "spec_log": {
+      "intervals": 2,
+      "num_speculative_tokens": 7,
+      "total_accepted_tokens": 230,
+      "total_drafted_tokens": 434,
+      "e_accept_interval_mean": 4.705,
+      "steady_gen_tps_mean": 12.05,
+      "steady_gen_tps_n": 2,
+      "e_accept_exact": 4.709677419354838,
+      "draft_acceptance_rate": 0.5299539170506913
+    },
+    "server_log": "/workspace/senpai/target/research/base_fullhead_specdec_ceiling/server_specon_smoke.log"
+  },
+  "arm_spec_off": {
+    "tag": "specoff_smoke",
+    "spec_on": false,
+    "serve_overrides": {
+      "PRECACHE_BENCH": "0",
+      "PRECACHE_REQUIRE": "0",
+      "PRECACHE_DATASET": "/tmp/senpai_aime_no_precache.json",
+      "MAX_NUM_SEQS": "1",
+      "MAX_NUM_BATCHED_TOKENS": "512",
+      "LOCAL_MODEL_DIR": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_TARGET_MODEL": "/senpai-run/home/student-lawine/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+      "PLE_FOLD_EMBED_SCALE": "1",
+      "LM_HEAD_PRUNE": "0",
+      "LM_HEAD_PRUNE_REQUIRE": "0",
+      "PCK04_KEEPSET": "",
+      "DISABLE_LOG_STATS": "0",
+      "SENPAI_REFERENCE_MODE": "1"
+    },
+    "serve_ok": true,
+    "error": null,
+    "served_model_name": "gemma-4-e4b-it",
+    "self_test_text": " France is France is France is",
+    "tps_runs": [
+      73.04965454989028
+    ],
+    "warm_median_tps": 73.04965454989028,
+    "decode_files": [
+      "/workspace/senpai/target/research/base_fullhead_specdec_ceiling/decode_specoff_smoke_r1.jsonl"
+    ],
+    "peak_gpu_mib": 19329,
+    "server_log": "/workspace/senpai/target/research/base_fullhead_specdec_ceiling/server_specoff_smoke.log"
+  },
+  "acceptance_length": 4.709677419354838,
+  "acceptance_length_source": "server_log_exact",
+  "acceptance_detail": {
+    "server_log_e_accept_exact": 4.709677419354838,
+    "server_log_e_accept_interval_mean": 4.705,
+    "server_log_draft_acceptance_rate": 0.5299539170506913,
+    "prometheus_e_accept": 4.709677419354838,
+    "prometheus_draft_acceptance_rate": 0.5299539170506913,
+    "num_speculative_tokens": 7,
+    "total_accepted_tokens": 230,
+    "total_drafted_tokens": 434,
+    "steady_gen_tps_mean": 12.05
+  },
+  "greedy_identity": {
+    "sequences_compared": 4,
+    "sequences_identical": 2,
+    "greedy_identity_seq_frac": 0.5,
+    "greedy_identity_vs_base_fullhead": false,
+    "per_step_argmax_total": 128,
+    "per_step_argmax_match": 78,
+    "per_step_argmax_identity": 0.609375,
+    "num_divergent_seqs": 2,
+    "onset_abs_min": 5,
+    "onset_abs_median": 9,
+    "onset_frac_min": 0.15625,
+    "onset_frac_median": 0.28125,
+    "onset_frac_mean": 0.21875,
+    "onset_signature_late_spread": true
+  },
+  "greedy_identity_vs_base_fullhead": false,
+  "base_fullhead_spec_tps": 168.46826417853154,
+  "base_fullhead_nospec_tps_local": 73.04965454989028,
+  "spec_lift_over_nospec_local": 95.41860962864126,
+  "official_projected_tps": 174.40508580818297,
+  "gates": {
+    "exceeds_ship": false,
+    "gap_to_ship": 207.3887358214685,
+    "beats_capstone_floor": false,
+    "ship_flip_tps": 375.857,
+    "capstone_floor_tps": 311.25,
+    "exceeds_ship_official_proj": false,
+    "gap_to_ship_official_proj": 201.45191419181705,
+    "ship_flip_local_equiv": 363.06267145782624,
+    "unit_note": "ship 375.857 is OFFICIAL; floor 311.25 and anchors 252.69/291.36 are LOCAL; measured TPS is LOCAL. Verdict is robust on either basis (clean miss)."
+  },
+  "quality_gate_passes_by_construction": true,
+  "self_det": 0.75,
+  "self_det_nospec": null,
+  "nan_clean": true
+}
