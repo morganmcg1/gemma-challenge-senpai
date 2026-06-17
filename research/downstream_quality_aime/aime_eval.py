@@ -72,6 +72,20 @@ AIME_REGISTRY: dict[str, dict[str, str]] = {
         "problem_col": "question",
         "answer_col": "answer",
     },
+    # The curated AIMO-validation AIME set: 90 problems = AIME 2022 + 2023 + 2024
+    # (30 each, I+II). One reachable dataset that triples n for a power-bearing
+    # Wilson-CI comparison (PR #535 matched-conc arm); opencompass AIME2025-I is
+    # server-side 500-down, so 2022 substitutes to reach n=90 with 2023/2024 present.
+    # `url_col` lets load_aime tag each problem with its real contest year.
+    "aimo-2022-2024": {
+        "dataset": "AI-MO/aimo-validation-aime",
+        "config": "default",
+        "split": "train",
+        "id_col": "id",
+        "problem_col": "problem",
+        "answer_col": "answer",
+        "url_col": "url",
+    },
 }
 
 
@@ -85,9 +99,22 @@ def _rows_api(dataset: str, config: str, split: str, length: int = 100) -> list[
     tok = os.environ.get("HF_TOKEN")
     if tok:
         req.add_header("Authorization", f"Bearer {tok}")
-    with urllib.request.urlopen(req, timeout=60) as r:
-        data = json.load(r)
-    return [row["row"] for row in data.get("rows", [])]
+    # The datasets-server intermittently returns 429/500/503; retry with backoff so a
+    # transient blip at run start doesn't waste a served GPU slot.
+    last_exc: Exception | None = None
+    for attempt in range(5):
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                data = json.load(r)
+            return [row["row"] for row in data.get("rows", [])]
+        except urllib.error.HTTPError as exc:
+            if exc.code not in (429, 500, 502, 503):
+                raise
+            last_exc = exc
+        except urllib.error.URLError as exc:
+            last_exc = exc
+        time.sleep(5 * (attempt + 1))
+    raise RuntimeError(f"datasets-server unreachable after retries for {dataset}/{config}/{split}") from last_exc
 
 
 def load_aime(years: list[str], limit: int | None = None) -> list[dict[str, Any]]:
@@ -95,16 +122,24 @@ def load_aime(years: list[str], limit: int | None = None) -> list[dict[str, Any]
     for year in years:
         spec = AIME_REGISTRY[year]
         rows = _rows_api(spec["dataset"], spec["config"], spec["split"])
+        url_col = spec.get("url_col")
         for i, row in enumerate(rows):
             ans_raw = row[spec["answer_col"]]
             ans = _to_int(ans_raw)
             if ans is None:
                 continue  # AIME answers are integers 0-999; skip anything malformed
-            pid = str(row[spec["id_col"]]) if spec["id_col"] else f"{year}-{i+1:02d}"
+            # Multi-year datasets (e.g. AIMO-validation) carry the real contest year
+            # in a url; tag each problem with it so per-year breakdowns stay honest.
+            row_year = year
+            if url_col:
+                m = re.search(r"(\d{4})_AIME", str(row.get(url_col, "")))
+                if m:
+                    row_year = m.group(1)
+            pid = f"{row_year}-{row[spec['id_col']]}" if spec["id_col"] else f"{year}-{i+1:02d}"
             problems.append(
                 {
                     "id": pid,
-                    "year": year,
+                    "year": row_year,
                     "problem": str(row[spec["problem_col"]]),
                     "answer": ans,
                 }
@@ -216,6 +251,7 @@ def chat_completion(
     seed: int,
     enable_thinking: bool,
     timeout_s: int,
+    min_tokens: int | None = None,
 ) -> dict[str, Any]:
     payload: dict[str, Any] = {
         "model": model,
@@ -229,6 +265,11 @@ def chat_completion(
         # vLLM extension: top_k lives outside the OpenAI schema.
         "top_k": top_k,
     }
+    if min_tokens is not None:
+        # vLLM extension: forces >= min_tokens before EOS may be emitted. Default
+        # None leaves the request byte-identical; used only to probe whether a
+        # first-token-EOS serving artifact is depressing scores (no served change).
+        payload["min_tokens"] = min_tokens
     if enable_thinking:
         payload["chat_template_kwargs"] = {"enable_thinking": True}
     body = json.dumps(payload).encode()
@@ -256,6 +297,7 @@ def eval_endpoint(
     enable_thinking: bool,
     request_timeout_s: int,
     save_text: bool = False,
+    min_tokens: int | None = None,
 ) -> dict[str, Any]:
     per_problem: list[dict[str, Any]] = []
     n_correct_maj = 0
@@ -277,6 +319,7 @@ def eval_endpoint(
             seed=seed,
             enable_thinking=enable_thinking,
             timeout_s=request_timeout_s,
+            min_tokens=min_tokens,
         )
         texts = [c.get("message", {}).get("content") or "" for c in resp.get("choices", [])]
         finish = [c.get("finish_reason") for c in resp.get("choices", [])]
@@ -396,6 +439,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--top-p", type=float, default=0.95)
     ap.add_argument("--top-k", type=int, default=64)
     ap.add_argument("--max-tokens", type=int, default=3072)
+    ap.add_argument("--min-tokens", type=int, default=None,
+                    help="vLLM request-level min_tokens (default None = identical request). "
+                         "Probes whether a first-token-EOS serving artifact depresses scores.")
     ap.add_argument("--seed", type=int, default=1234)
     ap.add_argument("--no-thinking", action="store_true", help="disable enable_thinking chat-template kwarg")
     ap.add_argument("--max-num-seqs", type=int, default=32, help="decode concurrency override for serving")
@@ -423,6 +469,7 @@ def main(argv: list[str] | None = None) -> int:
         "top_p": args.top_p,
         "top_k": args.top_k,
         "max_tokens": args.max_tokens,
+        "min_tokens": args.min_tokens,
         "seed": args.seed,
         "enable_thinking": not args.no_thinking,
     }
@@ -450,6 +497,7 @@ def main(argv: list[str] | None = None) -> int:
             enable_thinking=not args.no_thinking,
             request_timeout_s=args.request_timeout_s,
             save_text=args.save_text,
+            min_tokens=args.min_tokens,
         )
 
     if args.base_url:
