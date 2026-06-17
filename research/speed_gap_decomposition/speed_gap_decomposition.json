@@ -1,0 +1,252 @@
+{
+  "verdict": {
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_hf_job": true,
+    "no_submission": true,
+    "no_served_file_change": true,
+    "pr": 591,
+    "agent": "lawine",
+    "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "substrate": "base_fullhead (stock int4_g32 body + full bf16 262k tied head, NO bake/prune)",
+    "spec_served_anchor_tps": 252.69,
+    "ship_tps": 375.857,
+    "gap_to_ship_tps": 123.16700000000003,
+    "gap_to_ship_pct": 0.48742332502275526,
+    "spec_lift_x": 2.604786007432267,
+    "head_microbench_source": "fresh_microbench",
+    "head_matmul_m1_ms": 2.6475008010864256,
+    "head_matmul_m8_ms": 2.679244804382324,
+    "head_eff_gbps": 500.95358132435643,
+    "head_m8_over_m1": 1.0119901770314375,
+    "tps_gap_by_component": {
+      "lm_head_matmul_hbm_read": 306.56419158470663,
+      "int4_decoder_body": 454.15743371187136,
+      "attention_kv_cache_read": 259.25518304150864,
+      "sampler_decode_loop": 259.12897792846536,
+      "_draft_spec_residual_drafter_domain": 370.5203648275907
+    },
+    "free_head_floor_reproduced_tps": 311.2680798080384,
+    "free_head_floor_anchor_569_tps": 311.2485991465399,
+    "free_head_floor_repro_err": 6.258875237325557e-05,
+    "gap_to_ship_free_head": 64.58892019196162,
+    "free_body_tps": 454.15743371187136,
+    "only_body_closes_gap": true,
+    "head_alone_misses_ship": true,
+    "closing_forward_components": [
+      "body"
+    ],
+    "reclaimable_safe_tps_headroom": 0.0,
+    "all_components_censused_lever_false": true,
+    "reduction_needed_ms": 4.976134677027977,
+    "body_dominates_not_head": true,
+    "verdict": "Only the int4 decoder body, if made free, closes the 252.69->375.857 gap (free-body -> 454.2 TPS); the lm_head -- the PR's hypothesised dominant lever -- does NOT (free-head -> 311.3, still 64.6 short = #569 gap_to_ship). But the body is identity-LOCKED at int4_g32 (#571). Head #556, attention #562, body #571 all lever=False -> reclaimable_safe_tps_headroom = 0. The 252.69 anchor sits on the operative-identity-safe floor; the other ~half of the gap is the draft + spec-loop residual (drafter domain)."
+  },
+  "bases": {
+    "spec_served_anchor_tps": 252.69,
+    "spec_foc_anchor_tps": 252.30599912117162,
+    "spec_tcycle_ms": 15.137999999999998,
+    "spec_e_t": 3.8194082146962955,
+    "clean_ar_m1_graph_tps": 97.00988844342552,
+    "clean_ar_m1_step_ms": 10.308227501809597,
+    "clean_default_backend_tps": 96.6,
+    "served_nospec_ar_tps": 83.44107113115673,
+    "ship_target_tps": 375.857,
+    "ship_tcycle_ms": 10.161865322972021,
+    "spec_lift_x": 2.604786007432267,
+    "spec_lift_is_token_amortization": true,
+    "anchor_is_spec_on_not_nospec": true,
+    "proof": "#554/#569 hardcode E[T]=3.8194 for 252.69; my #572 measured same stack spec-ON 253.99 vs no-spec 83.44; bf16 262k head physics caps AR M=1 ~110 TPS"
+  },
+  "decomposition": {
+    "spec_tcycle_ms": 15.137999999999998,
+    "spec_e_t": 3.8194082146962955,
+    "target_forward_ms": 10.308227501809597,
+    "tcycle_ship_ms": 10.161865322972021,
+    "reduction_needed_ms": 4.976134677027977,
+    "time_partition": {
+      "body": {
+        "per_cycle_ms": 6.728122871093588,
+        "frac_of_tcycle": 0.44445256117674653
+      },
+      "head": {
+        "per_cycle_ms": 2.7757492421875103,
+        "frac_of_tcycle": 0.18336300978910758
+      },
+      "attn_kv": {
+        "per_cycle_ms": 0.4057652578124905,
+        "frac_of_tcycle": 0.02680441655519161
+      },
+      "sampler_overhead": {
+        "per_cycle_ms": 0.39859013071600746,
+        "frac_of_tcycle": 0.02633043537561154
+      },
+      "draft_spec_residual": {
+        "per_cycle_ms": 4.829772498190401,
+        "frac_of_tcycle": 0.3190495771033427
+      }
+    },
+    "time_partition_closure_err": 0.0,
+    "free_component": {
+      "body": {
+        "per_cycle_ms": 6.728122871093588,
+        "free_component_tps": 454.15743371187136,
+        "marginal_gain_tps": 201.46743371187137,
+        "closes_gap_to_ship": true,
+        "time_exceeds_reduction_needed": true
+      },
+      "head_trace": {
+        "per_cycle_ms": 2.7757492421875103,
+        "free_component_tps": 308.95734842480607,
+        "marginal_gain_tps": 56.26734842480607,
+        "closes_gap_to_ship": false,
+        "time_exceeds_reduction_needed": false
+      },
+      "head_microbench_m8": {
+        "per_cycle_ms": 2.679244804382324,
+        "free_component_tps": 306.56419158470663,
+        "marginal_gain_tps": 53.87419158470664,
+        "closes_gap_to_ship": false,
+        "time_exceeds_reduction_needed": false
+      },
+      "head_microbench_m8_plus_kv": {
+        "per_cycle_ms": 2.679244804382324,
+        "free_component_tps": 311.2680798080384,
+        "marginal_gain_tps": 58.57807980803841,
+        "closes_gap_to_ship": false,
+        "time_exceeds_reduction_needed": false
+      },
+      "attn_kv": {
+        "per_cycle_ms": 0.4057652578124905,
+        "free_component_tps": 259.25518304150864,
+        "marginal_gain_tps": 6.5651830415086465,
+        "closes_gap_to_ship": false,
+        "time_exceeds_reduction_needed": false
+      },
+      "sampler_overhead": {
+        "per_cycle_ms": 0.39859013071600746,
+        "free_component_tps": 259.12897792846536,
+        "marginal_gain_tps": 6.438977928465363,
+        "closes_gap_to_ship": false,
+        "time_exceeds_reduction_needed": false
+      },
+      "draft_spec_residual": {
+        "per_cycle_ms": 4.829772498190401,
+        "free_component_tps": 370.5203648275907,
+        "marginal_gain_tps": 117.8303648275907,
+        "closes_gap_to_ship": false,
+        "time_exceeds_reduction_needed": false
+      }
+    },
+    "tps_gap_by_component": {
+      "lm_head_matmul_hbm_read": 306.56419158470663,
+      "int4_decoder_body": 454.15743371187136,
+      "attention_kv_cache_read": 259.25518304150864,
+      "sampler_decode_loop": 259.12897792846536,
+      "_draft_spec_residual_drafter_domain": 370.5203648275907
+    },
+    "free_head_floor_reproduced_tps": 311.2680798080384,
+    "free_head_floor_repro_err": 6.258875237325557e-05,
+    "closing_forward_components": [
+      "body"
+    ],
+    "only_body_closes_gap": true,
+    "head_alone_misses_ship": true
+  },
+  "safe_headroom": {
+    "per_component": {
+      "lm_head": {
+        "free_component_tps": 311.2680798080384,
+        "operative_safe_reduction_tps": 0.0,
+        "closure_card": {
+          "pr": 556,
+          "run": "uipo4rxv",
+          "lever_exists": false,
+          "ceiling_tps": 252.31,
+          "note": "int4/int8 head FLIPS greedy argmax vs bf16; no faster byte-exact head"
+        },
+        "reason": "int4/int8 head flips greedy argmax vs bf16 (#556 lever=False); the only byte-exact head is the deployed bf16 one -> no faster byte-exact head. Even fully-free head reaches only 311.27 < ship."
+      },
+      "attention_kv": {
+        "free_component_tps": 259.25518304150864,
+        "operative_safe_reduction_tps": 0.0,
+        "closure_card": {
+          "pr": 562,
+          "run": "am7kltht",
+          "lever_exists": false,
+          "note": "byte-identical attention census CLOSED; no faster legal realization"
+        },
+        "reason": "byte-identical attention census closed (#562); no faster legal realization. Free-attn marginal anyway (+6.6 TPS)."
+      },
+      "int4_body": {
+        "free_component_tps": 454.15743371187136,
+        "operative_safe_reduction_tps": 0.0,
+        "closure_card": {
+          "pr": 571,
+          "lever_exists": false,
+          "ceiling_tps": 252.69,
+          "note": "int4_g32 is the byte-exact-relative floor; int4_g128 faster but flips MORE; every byte-exact alt (bf16/int8/fp8) reads >=2x bytes -> slower"
+        },
+        "reason": "int4_g32 IS the byte-exact-relative speed floor (#571 lever=False): the only faster precision (int4_g128) flips MORE; every byte-exact alt reads >=2x bytes -> slower. The ONE component that could close the gap is identity-LOCKED."
+      },
+      "sampler_overhead": {
+        "free_component_tps": 259.12897792846536,
+        "operative_safe_reduction_tps": 0.0,
+        "closure_card": {
+          "pr": 569,
+          "reducible": false,
+          "note": "fixed overhead already runs cudagraph ON (ONEGRAPH); host residual <0.5% and not byte-safely removable"
+        },
+        "reason": "fixed overhead already runs cudagraph ON (#569 reducible=False); host residual <0.5% and not byte-safely removable."
+      }
+    },
+    "reclaimable_safe_tps_headroom": 0.0,
+    "all_components_censused_lever_false": true,
+    "verdict": "Only the int4 decoder body, if made free, closes the 252.69->375.857 gap (free-body -> 454.2 TPS); the lm_head -- the PR's hypothesised dominant lever -- does NOT (free-head -> 311.3, still 64.6 short = #569 gap_to_ship). But the body is identity-LOCKED at int4_g32 (#571). Head #556, attention #562, body #571 all lever=False -> reclaimable_safe_tps_headroom = 0. The 252.69 anchor sits on the operative-identity-safe floor; the other ~half of the gap is the draft + spec-loop residual (drafter domain)."
+  },
+  "handoffs": {
+    "denken_attn_mlp_kv": {
+      "attn_kv_per_cycle_ms": 0.4057652578124905,
+      "attn_kv_frac_of_tcycle": 0.02680441655519161,
+      "kv_read_saving_ms": 0.1882769086961371,
+      "free_attn_kv_tps": 259.25518304150864,
+      "free_kv_only_tps": 255.48354249571457,
+      "kv_prefetch_ceiling_gain_tps": 2.7935424957145756,
+      "note": "attention+KV is 2.7% of t_cycle; KV-prefetch can hide at most the KV-read (~0.19 ms/cycle) -> +2.8 TPS ceiling. MLP/down-proj reads are INSIDE the int4 body (6.73 ms). Marginal axis."
+    },
+    "stark_int8_head": {
+      "head_bytes_bf16_gb": 1.34217728,
+      "head_bytes_int8_gb": 0.67108864,
+      "head_read_ms_bf16_m8": 2.679244804382324,
+      "head_read_ms_int8_m8_est": 1.339622402191162,
+      "head_eff_gbps": 500.95358132435643,
+      "free_head_int8_tps_est": 276.8012534533634,
+      "free_head_int8_gain_tps": 24.111253453363418,
+      "operative_safe": false,
+      "note": "int8 head halves the 1.342 GB read -> ~+24 TPS, BUT #556 shows int8/int4 head FLIPS greedy identity (lever=False) -> NOT operative-safe; and even a FULLY-free head reaches only 311.27 < ship 375.857."
+    }
+  },
+  "head_microbench": {
+    "head_matmul_m1_ms": 2.6475008010864256,
+    "head_matmul_m8_ms": 2.679244804382324,
+    "head_eff_gbps": 500.95358132435643,
+    "peak_gib": 2.5238418579101562,
+    "source": "fresh_microbench"
+  },
+  "self_test": {
+    "free_head_floor_reproduces_569": true,
+    "gap_to_ship_free_head_matches_569": true,
+    "time_partition_closes": true,
+    "body_dominates_not_head": true,
+    "only_body_closes_gap": true,
+    "head_alone_misses_ship": true,
+    "free_body_clears_ship": true,
+    "reclaimable_safe_headroom_zero": true,
+    "spec_lift_is_token_amortization": true,
+    "head_microbench_agrees_569": true,
+    "head_matmul_m_invariant_walltime": true,
+    "nan_clean": true,
+    "self_test_passes": true
+  },
+  "elapsed_s": 3.414263963699341
+}
