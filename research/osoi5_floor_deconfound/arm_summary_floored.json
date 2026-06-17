@@ -1,0 +1,51 @@
+{
+  "pr": 548,
+  "arm": "floored",
+  "floor_on": true,
+  "analysis_only": true,
+  "official_tps": 0,
+  "limit": 0,
+  "axes": [
+    "mmlu_pro",
+    "gsm8k",
+    "gpqa_d"
+  ],
+  "overrides": {
+    "PRECACHE_BENCH": "0",
+    "PRECACHE_REQUIRE": "0",
+    "PRECACHE_DATASET": "/tmp/senpai_gsm8k_no_precache.json",
+    "MAX_NUM_SEQS": "32",
+    "MIN_TOKENS_FLOOR": "8"
+  },
+  "results": {
+    "mmlu_pro": {
+      "axis": "mmlu_pro",
+      "rc": 0,
+      "out": "/workspace/senpai/target/research/osoi5_floor_deconfound/osoi5_floored_mmlu_pro.json"
+    },
+    "gsm8k": {
+      "axis": "gsm8k",
+      "rc": 0,
+      "out": "/workspace/senpai/target/research/osoi5_floor_deconfound/osoi5_floored_sampled.json"
+    },
+    "gpqa_d": {
+      "axis": "gpqa_diamond",
+      "rc": 0,
+      "out": "/workspace/senpai/target/research/osoi5_floor_deconfound/osoi5_floored_gpqa_diamond.json"
+    }
+  },
+  "guard": {
+    "arm": "floored",
+    "floor_on": true,
+    "served_dir": "/tmp/osoi5-12k-baked",
+    "lm_head_rows": 12288,
+    "num_hidden_layers": 37,
+    "quant_method": "compressed-tensors",
+    "floor_active_in_log": true,
+    "is_12k_pruned_head": true,
+    "is_baked_body": true,
+    "passed": true
+  },
+  "peak_vram_gb": 19.185,
+  "wall_s": 542.2
+}
