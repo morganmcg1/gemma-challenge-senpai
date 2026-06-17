@@ -1,0 +1,87 @@
+{
+  "pr": 545,
+  "analysis_only": true,
+  "official_tps": 0,
+  "marker": {
+    "served_mintokens_gsm8k_acc": 0.85,
+    "served_gate_pass": true,
+    "served_empty_rate": 0.0,
+    "served_tps": 252.6553,
+    "tps_delta_vs_noguard": 0.1648,
+    "ppl": 2.006,
+    "ppl_unchanged": true,
+    "greedy_identity_unchanged": true,
+    "base_fullhead_gsm8k_quality_safe_served": true
+  },
+  "gsm8k": {
+    "n_problems": 500,
+    "n_shot": 8,
+    "seed": 1234,
+    "client_min_tokens": null,
+    "server_min_tokens_floor": 8,
+    "sampled": {
+      "accuracy": 0.85,
+      "gate_threshold": 0.7902,
+      "gate_pass": true,
+      "pct_of_base": 0.9681,
+      "empty_rate": 0.0,
+      "extract_fail_rate": 0.0,
+      "truncation_rate": 0.034
+    },
+    "greedy": {
+      "accuracy": 0.808,
+      "gate_threshold": 0.8064,
+      "gate_pass": true,
+      "pct_of_base": 0.9018,
+      "empty_rate": 0.0,
+      "extract_fail_rate": 0.0,
+      "truncation_rate": 0.028
+    },
+    "noguard_541": {
+      "sampled_acc": 0.762,
+      "sampled_empty_rate": 0.104,
+      "greedy_acc": 0.756,
+      "greedy_empty_rate": 0.148
+    },
+    "recovery": {
+      "sampled_acc_delta": 0.088,
+      "sampled_empty_delta": -0.104,
+      "greedy_acc_delta": 0.052
+    }
+  },
+  "tps": {
+    "served_tps_warm_median": 252.6553,
+    "served_tps_warm_aggregate": 251.8766,
+    "noguard_tps_warm_median": 252.49052873786857,
+    "noguard_tps_warm_aggregate": 251.82733643849258,
+    "delta_vs_noguard": 0.1648,
+    "delta_vs_noguard_pct": 0.0653,
+    "all_full_length": true,
+    "free": true,
+    "peak_vram_gb": 18.9561,
+    "wandb_run_id": "1r0l8nhg"
+  },
+  "ppl_greedy_by_construction": {
+    "ppl": 2.006,
+    "ppl_source": "fern #535 (base-int4 full head, /v1/completions prompt_logprobs)",
+    "ppl_unchanged": true,
+    "greedy_identity_unchanged": true,
+    "basis": "min_tokens floor patch is scoped to ChatCompletionRequest.to_sampling_params (/v1/chat/completions); the /v1/completions path that carries TPS, PPL (prompt_logprobs) and the greedy-identity decode audit is byte-identical to the no-floor build -- so PPL and greedy-identity cannot move.",
+    "endpoint_scoping": {
+      "chat_protocol_patched": true,
+      "completion_protocol_raw": true,
+      "completion_protocol_untouched": true,
+      "scoping_airtight": true,
+      "chat_protocol_path": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm/entrypoints/openai/chat_completion/protocol.py",
+      "completion_protocol_path": "/tmp/senpai-venvs/5f4c623f772358a2/lib/python3.12/site-packages/vllm/entrypoints/openai/completion/protocol.py"
+    }
+  },
+  "public_evidence_used": {
+    "base_acc_sampled": 0.878,
+    "base_acc_greedy": 0.896,
+    "gate_frac": 0.9,
+    "noguard_floor_run": "56qyjxm1",
+    "gsm8k_gate_541": "bfvbueb1",
+    "ppl_anchor": "fern #535"
+  }
+}

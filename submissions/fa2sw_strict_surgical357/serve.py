@@ -717,6 +717,59 @@ def _lmhead_prune_phase() -> None:
         print(f"{message}; serving osoi5 substrate unchanged", flush=True)
 
 
+FULL_LM_HEAD_ROWS = 262144
+
+
+def _assert_full_lm_head() -> None:
+    """Hard-reject guard (PR #545): when LM_HEAD_FULL_REQUIRE=1, refuse to serve
+    unless lm_head carries the complete 262,144-row vocabulary.
+
+    Protects the base_fullhead quality-safe arm: serving it means LM_HEAD_PRUNE=0
+    so no row is -inf'd, and the GSM8K recovery is meaningless if a pruned head
+    silently fell back into place. Runs after _lmhead_prune_phase so it inspects
+    the dir that will actually be served (LOCAL_MODEL_DIR)."""
+    if os.environ.get("LM_HEAD_FULL_REQUIRE") != "1":
+        return
+    if os.environ.get("LM_HEAD_PRUNE") == "1":
+        raise RuntimeError(
+            "LM_HEAD_FULL_REQUIRE=1 is incompatible with LM_HEAD_PRUNE=1: the "
+            "prune phase would row-slice lm_head below full vocab"
+        )
+    from safetensors import safe_open
+
+    st_files = sorted(glob.glob(os.path.join(LOCAL_MODEL_DIR, "*.safetensors")))
+    if not st_files:
+        raise RuntimeError(
+            f"LM_HEAD_FULL_REQUIRE=1 but no safetensors found under {LOCAL_MODEL_DIR}"
+        )
+    rows: int | None = None
+    for st_path in st_files:
+        with safe_open(st_path, framework="pt", device="cpu") as handle:
+            keys = set(handle.keys())
+            if "lm_head.weight" in keys:
+                rows = int(handle.get_slice("lm_head.weight").get_shape()[0])
+            elif "lm_head.weight_packed" in keys:
+                rows = int(handle.get_slice("lm_head.weight_packed").get_shape()[0])
+            elif "lm_head.weight_shape" in keys:
+                rows = int(handle.get_tensor("lm_head.weight_shape")[0].item())
+        if rows is not None:
+            break
+    if rows is None:
+        raise RuntimeError(
+            "LM_HEAD_FULL_REQUIRE=1 but no lm_head tensor found under "
+            f"{LOCAL_MODEL_DIR} (checked lm_head.weight / weight_packed / weight_shape)"
+        )
+    if rows < FULL_LM_HEAD_ROWS:
+        raise RuntimeError(
+            f"LM_HEAD_FULL_REQUIRE=1 but served lm_head has {rows} rows "
+            f"(< full vocab {FULL_LM_HEAD_ROWS}); refusing to serve a pruned head"
+        )
+    print(
+        f"[lmhead-full] verified full lm_head: {rows} rows (>= {FULL_LM_HEAD_ROWS})",
+        flush=True,
+    )
+
+
 def ensure_drafter() -> None:
     config_path = os.path.join(LOCAL_DRAFTER_DIR, "config.json")
     if not os.path.exists(config_path):
@@ -952,6 +1005,69 @@ def patch_feopt_api_router_sources() -> None:
     print("[feopt] patched api_router for orjson JSON response", flush=True)
 
 
+# PR #545: serve-stack min_tokens floor on the CHAT endpoint only. The
+# base_fullhead full-vocab head emits a spurious immediate first-token-EOS on
+# ~10% of GSM8K chat prompts (PR #541); a request-level min_tokens=8 recovers it
+# (0.762 -> 0.854). This bakes that guard into the served stack so the recovery
+# holds by default, without a request flag. Scope is deliberately the chat
+# endpoint: /v1/completions (the scored speed benchmark + ignore_eos greedy
+# decode-identity audit + teacher-forced PPL) goes through
+# CompletionRequest.to_sampling_params, which is left untouched -- so TPS, PPL,
+# and greedy token-identity are unchanged BY CONSTRUCTION, not by argument.
+MIN_TOKENS_FLOOR_OLD = "            min_tokens=self.min_tokens,\n"
+
+MIN_TOKENS_FLOOR_NEW = """            # PR #545 serve-stack min_tokens floor (chat endpoint only). When
+            # MIN_TOKENS_FLOOR is set and the client did NOT send min_tokens,
+            # default it to the floor so an immediate first-token-EOS cannot
+            # truncate a chat response. A floor, not an override: an explicit
+            # request min_tokens (including 0) is always honored.
+            min_tokens=(
+                max(
+                    self.min_tokens,
+                    int(__import__("os").environ["MIN_TOKENS_FLOOR"]),
+                )
+                if (
+                    __import__("os").environ.get("MIN_TOKENS_FLOOR")
+                    and "min_tokens" not in self.model_fields_set
+                )
+                else self.min_tokens
+            ),
+"""
+
+
+def patch_min_tokens_floor_source(
+    source: str, protocol_path: pathlib.Path
+) -> tuple[str, bool]:
+    return replace_required(
+        source,
+        model_path=protocol_path,
+        label="min_tokens chat serve-floor",
+        old=MIN_TOKENS_FLOOR_OLD,
+        new=MIN_TOKENS_FLOOR_NEW,
+        marker="PR #545 serve-stack min_tokens floor",
+    )
+
+
+def patch_min_tokens_floor_sources() -> None:
+    """Install the chat-endpoint min_tokens floor (PR #545). Inert unless
+    MIN_TOKENS_FLOOR is set, so other submissions reusing this serve.py are
+    unaffected. Only ChatCompletionRequest.to_sampling_params is touched;
+    /v1/completions (speed TPS, ignore_eos decode audit, PPL) is left alone."""
+    if not os.environ.get("MIN_TOKENS_FLOOR"):
+        return
+    floor = os.environ["MIN_TOKENS_FLOOR"]
+    if not floor.isdigit():
+        raise RuntimeError(
+            f"MIN_TOKENS_FLOOR must be a non-negative integer, got {floor!r}"
+        )
+    purelib = pathlib.Path(sysconfig.get_paths()["purelib"])
+    protocol_path = (
+        purelib / "vllm" / "entrypoints" / "openai" / "chat_completion" / "protocol.py"
+    )
+    patch_file(protocol_path, patch_min_tokens_floor_source)
+    print(f"[min-tokens] chat-endpoint min_tokens floor active: {floor}", flush=True)
+
+
 def setup_sitecustomize_path() -> None:
     """Expose this package's sitecustomize.py to the vLLM child process."""
     package_dir = str(pathlib.Path(__file__).resolve().parent)
@@ -1013,11 +1129,13 @@ def main() -> None:
     ensure_benchmark_jinja2()
     ensure_weights()
     _lmhead_prune_phase()
+    _assert_full_lm_head()
     setup_ld_preload()
     ensure_drafter()
     patch_ple_sources()
     patch_smp02_sources()
     patch_feopt_api_router_sources()
+    patch_min_tokens_floor_sources()
     setup_sitecustomize_path()
 
     args = [
