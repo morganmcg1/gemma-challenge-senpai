@@ -1,0 +1,142 @@
+{
+  "pr": 565,
+  "card": "depth-drop-fire-region-feasibility",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "no_hf_job": true,
+  "peak_gpu_gib": 0.0,
+  "model": {
+    "name": "gemma-4-E4B-it",
+    "n_layers": 42,
+    "vllm": "0.22.1rc1",
+    "gpu": "A10G sm_86"
+  },
+  "stage1_tps_curve": {
+    "k_cycle": 3819.4082146962955,
+    "bfh_tcycle_ms": 15.137999999999998,
+    "et": 3.8194082146962955,
+    "plm_central_ms_per_layer": 0.3142,
+    "plm_conservative_ms_per_layer": 0.11680031036982351,
+    "tps_per_layer_dropped": 5.347788348727875,
+    "layers_to_clear_ship_tps": 7,
+    "layers_to_clear_ship_tps_real": 6.713497638053844,
+    "layers_to_clear_ship_tps_conservative": 19,
+    "layers_to_clear_strict": 10,
+    "layers_to_clear_strict_conservative": 25,
+    "layers_to_clear_ship_tps_puredrop_fullhead": 16,
+    "layers_to_clear_ship_tps_puredrop_fullhead_cons": 43,
+    "framing_note": "PRIMARY = composed-with-magically-free-head (the registered #561 +64.61-over-311.25 bar, the MOST generous to a fire). PHYSICAL (full-head, can't free the head) needs even more layers. Every bracket >> the quality cliff."
+  },
+  "stage2_quality_curve": {
+    "anchor_mmlu_int4_42L": 0.668,
+    "drop5_mmlu_int4_37L": 0.374,
+    "mmlu_gate_floor": 0.601,
+    "layers_to_breach_quality_gate": 2,
+    "layers_to_breach_quality_gate_real": 1.139455782312926,
+    "max_quality_safe_drop": 1,
+    "max_quality_safe_drop_optimistic": 2,
+    "puredrop_milder_than_osoi5": true,
+    "puredrop_5L_minus_headprune": 0.248,
+    "osoi5_mmlu_moat": 0.274,
+    "dominant_body_knob": "layer-removal",
+    "bake_separation_note": "PURE int4 layer-drop (#538 raw-ablate, no bake/head-prune) 0.668->0.374 at 5L sits ABOVE osoi5's 0.274 collapse \u2014 the ~0.10 gap is the 12k head-prune (#547 -0.126) osoi5 also applied; the bake is ~neutral. puredrop_milder=True but it does NOT open a window: the pure drop still craters below 0.601 by ~2 layers."
+  },
+  "stage3_verdict": {
+    "depth_drop_fire_region_analytically_empty": true,
+    "identity_survives_any_layer_drop": false,
+    "identity_safe_drop_count": 0,
+    "depth_drop_can_fire": false,
+    "max_quality_safe_drop_tps": 263.2331845603115,
+    "max_quality_safe_drop_tps_freehead": 328.0476373701581,
+    "identity_safe_drop_tps": 252.30599912117162,
+    "verdict": "depth-drop fire-region ANALYTICALLY EMPTY \u2014 #546 confirms, not discovers: clearing the +64.6 TPS bar needs >= 7 dropped layers even granting a magically-free head AND the largest per-layer saving (0.314 ms/layer); the int4 MMLU-Pro gate (0.601) breaks at <= 2 PURE-DROP layers (#538: 0.668->0.374 at 5L, layer-removal dominant); the quality cliff precedes the TPS bar by many layers, and every dropped block breaks #319 identity. The best quality-safe drop (~2 layers) yields ~263 TPS (full head), << the 375.857 ship.",
+    "two_ended_pin": "ANALYTICAL end (this card): fire-region empty by construction. EMPIRICAL end (ubel #546, in flight): served depth Pareto. The sub-bar window (~2-layer drop -> ~263 TPS full head, << 375.857 ship) is the precise thing #546 must confirm."
+  },
+  "provenance": {
+    "#561": {
+      "wandb": "v74ad5jb",
+      "group": "two-gate-fire-decision",
+      "what": "PARENT capstone: depth_drop_conjunction_plausible=False (asserted); registered bar gap_to_current_ship_tps=64.61 over 311.25 / 83.757 over 292.1. This card upgrades the assertion to a proof."
+    },
+    "#554": {
+      "wandb": "fi8vr1nb",
+      "group": "fixed-overhead-ceiling",
+      "what": "TPS basis: bfh_tps 252.31 / tcycle 15.138 ms / E[T] 3.819; magically-free ceiling 311.25 (tcycle 12.271); osoi5 body-side served reduction 1.571 ms (5 layers) = direct-head-matmul-corrected -> per-layer ~0.314 ms; body weight-read 4.333 ms; 42-launch SDPA floor 0.573 ms."
+    },
+    "#538": {
+      "wandb": "8xo7bc3h",
+      "group": "served-body-2x2",
+      "what": "QUALITY basis: served body 2x2, greedy byte-identical. int4 42L 0.668 -> 37L 0.374; bf16 42L 0.656 -> 37L 0.448; layerdrop_cost_bf16 +0.208 (dominant) vs int4_cost_fullbody -0.012 (~free); dominant_body_knob=layer-removal; base_int4_clears_gate=True. PURE drop (raw-ablate, no bake/head-prune)."
+    },
+    "#548": {
+      "wandb": "uc9fnfrn",
+      "group": "osoi5-floor-deconfound",
+      "what": "the moat: shipped osoi5 (5-drop+12k-head+bake) MMLU-Pro 0.262 floored / 0.274 as-served; moat_is_genuine=True; first-token-EOS 0.0 (not an EOS artifact). Bake-separation reference."
+    },
+    "#547": {
+      "wandb": "r11skm0y",
+      "group": "base-fullhead-headwidth-sweep",
+      "what": "head/body split of the osoi5 collapse: head 31% / body 69%; 12k head-prune on INTACT body 0.676->0.550 (-0.126). Lets us subtract the head-prune from osoi5 to isolate the pure body-drop."
+    },
+    "#539": {
+      "wandb": "(kanna)",
+      "group": "offline-drop-set",
+      "what": "offline drop-set Pareto: single-layer block-influence predictor rho=0.761; passers cluster late-sharpening L36-39; raw-ablate no-heal = NECESSARY-not-sufficient; contiguity hurts. Bake-damage / which-layers locus."
+    },
+    "#543": {
+      "wandb": "(kanna)",
+      "group": "offline-drop-set",
+      "what": "reconciles #539: BI good as single-layer predictor, blind to composition (fails k>=5); drop=3 likely fails the offline screen. The most-generous quality-safe drop locus."
+    },
+    "#546": {
+      "wandb": "(ubel, in-flight)",
+      "group": "served-depth-pareto",
+      "what": "the EMPIRICAL complement: served depth Pareto (TPS + quality at reduced depth), max_quality_safe_drop_count. This card pre-adjudicates it from the analytical end (two-ended pin)."
+    },
+    "#544": {
+      "wandb": "d44b61gj",
+      "group": "base-fullhead-tps-ceiling",
+      "what": "strict int4 precision ceiling 292.1; the 328.9 free-head pre-correction (#554 corrects to 311.25)."
+    },
+    "#515": {
+      "wandb": "(Morgan)",
+      "group": "\u2014",
+      "what": ">=90%-of-vanilla-base downstream quality gate; explicit MMLU-Pro floor 0.601 (= 0.90 * 0.668 anchor)."
+    },
+    "#319": {
+      "wandb": "(program)",
+      "group": "\u2014",
+      "what": "strict byte-identical greedy-identity HARD gate (argmax_identity_rate=1.0)."
+    }
+  },
+  "self_tests": {
+    "k_cycle_matches_et": true,
+    "magfree_tcycle_consistent": true,
+    "anchor_below_magfree": true,
+    "magfree_below_ship": true,
+    "plm_central_above_conservative": true,
+    "tps_per_layer_positive": true,
+    "clear_A_central_ge_7": true,
+    "clear_A_cons_ge_clear_A_central": true,
+    "clear_B_ge_clear_A": true,
+    "clear_strict_ge_clear_A": true,
+    "breach_le_3": true,
+    "drop5_int4_below_gate": true,
+    "puredrop_milder_than_osoi5": true,
+    "puredrop_minus_headprune_near_osoi5": true,
+    "layer_removal_dominant": true,
+    "tps_layers_exceed_quality_layers": true,
+    "region_empty_true": true,
+    "identity_breaks": true,
+    "cannot_fire": true,
+    "max_qsafe_drop_tps_below_ship": true,
+    "max_qsafe_freehead_below_ship": true,
+    "nan_clean": true,
+    "self_test_passes": true
+  },
+  "self_det": true,
+  "primary_metric_name": "max_quality_safe_drop_tps",
+  "primary_metric_value": 263.2331845603115,
+  "wandb_run_id": "8hsee4mo"
+}
