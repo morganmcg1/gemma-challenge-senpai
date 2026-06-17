@@ -1,0 +1,113 @@
+{
+  "schema": "int4g128lmhead_served_strict319_v1",
+  "pr": 578,
+  "agent": "wirbel",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "wandb_group": "int4g128lmhead-characterization",
+  "created_at": "20260617T103925Z",
+  "int4g128lmhead_byte_exact_vs_official": false,
+  "int4g128lmhead_flip_rate_official": 0.1620635986328125,
+  "int4g128lmhead_n_positions": 65536,
+  "int4g128lmhead_served_tps_local": 131.131,
+  "int4g128lmhead_identity_verdict": "FAIL",
+  "free_running": {
+    "byte_exact": false,
+    "n_prompts": 128,
+    "n_prompts_identical": 0,
+    "n_prompts_divergent": 128,
+    "n_positions": 65536,
+    "free_running_divergent_tokens": 63678,
+    "free_running_cascade_flip_rate": 0.971649169921875,
+    "first_divergences_top5": [
+      {
+        "id": "aime2026-0e674f51e8",
+        "first_divergence_index": 0,
+        "ref_token": 6481,
+        "cand_token": 15607
+      },
+      {
+        "id": "aime2026-1eaadd490a",
+        "first_divergence_index": 0,
+        "ref_token": 8291,
+        "cand_token": 818
+      },
+      {
+        "id": "aime2026-51697b0daa",
+        "first_divergence_index": 0,
+        "ref_token": 6481,
+        "cand_token": 2094
+      },
+      {
+        "id": "gpqa_diamond-019eb0f05f",
+        "first_divergence_index": 0,
+        "ref_token": 5471,
+        "cand_token": 818
+      },
+      {
+        "id": "gpqa_diamond-025e20e6e9",
+        "first_divergence_index": 0,
+        "ref_token": 5471,
+        "cand_token": 8291
+      }
+    ],
+    "median_first_divergence_index": 2.0
+  },
+  "teacher_forced": {
+    "n_positions": 65536,
+    "n_flips": 10621,
+    "flip_rate": 0.1620635986328125,
+    "byte_exact": false,
+    "first_flips_top5": [
+      {
+        "id": "mmlu_pro-006f3a2112",
+        "first_flip_index": 0
+      },
+      {
+        "id": "mmlu_pro-012f0d5c8d",
+        "first_flip_index": 0
+      },
+      {
+        "id": "mmlu_pro-00ff96e757",
+        "first_flip_index": 0
+      },
+      {
+        "id": "gpqa_diamond-435ccdce7c",
+        "first_flip_index": 0
+      },
+      {
+        "id": "mmlu_pro-001de7fe6d",
+        "first_flip_index": 0
+      }
+    ]
+  },
+  "tps": {
+    "served_tps_local_median": 131.131,
+    "served_tps_local_mean": 131.13,
+    "served_tps_local_trials": [
+      131.138,
+      131.125,
+      131.131,
+      131.144,
+      131.112
+    ],
+    "tps_method": "streaming inter-token, single-stream, 200 tok, warm-median of 5"
+  },
+  "pr571_body_flip_official128_int4g128": 0.1374490570715758,
+  "pr571_body_flip_official128_int4g32": 0.10902948878868177,
+  "flip_rate_delta_vs_pr571_body": 0.024615,
+  "official_a10g_tps": 126.378,
+  "reference_kind": "served_spec_off (canonical official greedy; in-repo decode_outputs.jsonl)",
+  "meta": {
+    "n_records": 128,
+    "output_len": 512,
+    "base_url": "http://localhost:8000",
+    "model": "gemma-4-e4b-it",
+    "elapsed_s": 553.0,
+    "reference_jsonl": "/workspace/senpai/target/research/greedy_reference/google__gemma-4-E4B-it/decode_outputs.jsonl"
+  },
+  "verdict": "int4_g128_lmhead SERVED strict-#319 identity vs the canonical official greedy reference (bf16 plain baseline, spec_off, 65536 positions). VERDICT=FAIL. byte_exact=False (free-running 128/128 prompts diverge; teacher-forced 10621/65536 positions flip). Teacher-forced per-position flip_rate=0.1620635986328125 vs land #571 int4_g128 BODY-only 0.137449 (delta +0.024615); the untied int4 g128 lm_head re-quant adds flips on top of the body, as predicted -- no precision can REMOVE the body argmax flips. Free-running greedy cascades after a median first-divergence at position 2.0 -> cascade flip rate 0.971649169921875. Served single-stream decode tps_local=131.131 (official a10g 126.378). int4_g128_lmhead FAILS the strict #319 byte-exact greedy contract; it is NOT an output-neutral submission."
+}
