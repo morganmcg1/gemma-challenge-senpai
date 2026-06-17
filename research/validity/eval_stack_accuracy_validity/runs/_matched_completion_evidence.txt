@@ -1,0 +1,48 @@
+PR#615 matched-completion evidence (GPQA s1): v0220-terminates / dev307-truncates = 93 /198
+of those, dev307 completions with >20 trailing \text{} repetitions: 7
+
+===== v0220 | id=rec0wZvZgiz320KRs | stop=stop | out_tokens=1026 | score=C | chars=2723 loopcount=0 =====
+HEAD: Here is the step-by-step derivation:
+
+1.  **Identify the initial state ($\psi$):**
+    The particle is in the state:
+    $$|\psi\rangle = 0.5|\uparrow\rangle + \frac{\sqrt{3}}{2}|\downarrow\rangle$$
+
+2.  **Identify the operator ($O$):**
+    The operator whose expectation value we seek is:
+    $$O = 
+...TAIL: 5...$$
+    $$\langle O \rangle = -5 + 4.330125...$$
+    $$\langle O \rangle = -0.669875...$$
+
+9.  **Rounding:**
+    Rounding the result to one decimal place gives $-0.7$.
+
+10. **Compare with options:**
+    A) -0.7
+    B) 0.85
+    C) 1.65
+    D) -1.4
+
+The calculated value matches option A.
+
+ANSWER: A
+
+===== dev307 | id=rec0wZvZgiz320KRs | stop=max_tokens | out_tokens=4096 | score=I | chars=12990 loopcount=974 =====
+HEAD: Here is a step-bystep derivation:
+
+1.  **Identify the given state vector:**
+    The spin-half particle is in the state $|\psi\rangle$:
+    $$|\psi\rangle = \frac{1}{2}|\uparrow\rangle + \frac{\sqrt{3}}{2}|\downarrow\rangle$$
+
+2.  **Identify the operator:**
+    The operator whose expectation value we
+...TAIL: ext{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\text{}\
+
+--- dev307 truncation-mode taxonomy (GPQA s1, 93 v0220-stop/dev307-trunc qs) ---
+compression-ratio mean: dev307=0.158 (min 0.011) vs v0220=0.359 (min 0.279) on SAME 93 qs
+highly-repetitive (cr<0.12, degenerate loops): 49/93 (53%)
+moderately repetitive (0.12-0.20): 17/93
+coherent-but-long (budget-starved, recoverable by more tokens): 27/93 (29%)
+=> ~71% of dev307 truncations are repetition degeneracy, NOT budget starvation
+=> ubel-#590-style "re-run at more tokens" debias CANNOT rescue dev307; the model loops regardless
