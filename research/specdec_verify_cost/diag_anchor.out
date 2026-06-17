@@ -1,0 +1,73 @@
+[diag] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.92', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'MIN_TOKENS_FLOOR': '8', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '0', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '0', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '0', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '0', 'LM_HEAD_PRUNE_REQUIRE': '0', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'SURGICAL_ATTN_USE_3D_OFF': '1', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '0', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 80s
+[diag] [nospec] warming (http://127.0.0.1:8000)
+[diag] [nospec] decode 16x256
+[worker] 1/16 req_ms=3007.3 comp=256 prompt=256
+[worker] 2/16 req_ms=3132.6 comp=256 prompt=388
+[worker] 3/16 req_ms=3182.1 comp=256 prompt=457
+[worker] 4/16 req_ms=2971.1 comp=256 prompt=231
+[worker] 5/16 req_ms=3082.2 comp=256 prompt=328
+[worker] 6/16 req_ms=2892.2 comp=256 prompt=159
+[worker] 7/16 req_ms=2906.1 comp=256 prompt=171
+[worker] 8/16 req_ms=2923.5 comp=256 prompt=189
+[worker] 9/16 req_ms=3117.7 comp=256 prompt=370
+[worker] 10/16 req_ms=2956.7 comp=256 prompt=219
+[worker] 11/16 req_ms=2913.8 comp=256 prompt=177
+[worker] 12/16 req_ms=2976.6 comp=256 prompt=231
+[worker] 13/16 req_ms=2896.0 comp=256 prompt=161
+[worker] 14/16 req_ms=2925.6 comp=256 prompt=184
+[worker] 15/16 req_ms=2918.1 comp=256 prompt=182
+[worker] 16/16 req_ms=2889.7 comp=256 prompt=160
+[diag] >>> nospec: warm_median_tps=87.64823463078264 peak=19.34GB spec=''
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.92', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method": "mtp", "model": "/tmp/qat-assistant", "num_speculative_tokens": 7}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'MIN_TOKENS_FLOOR': '8', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '0', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '0', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '0', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '0', 'LM_HEAD_PRUNE_REQUIRE': '0', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'SURGICAL_ATTN_USE_3D_OFF': '1', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '0', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 85s
+[diag] [mtp] warming (http://127.0.0.1:8000)
+[diag] [mtp] decode 16x256
+[worker] 1/16 req_ms=888.0 comp=256 prompt=256
+[worker] 2/16 req_ms=1552.5 comp=256 prompt=388
+[worker] 3/16 req_ms=1084.7 comp=256 prompt=457
+[worker] 4/16 req_ms=1269.5 comp=256 prompt=231
+[worker] 5/16 req_ms=1090.0 comp=256 prompt=328
+[worker] 6/16 req_ms=1090.5 comp=256 prompt=159
+[worker] 7/16 req_ms=737.5 comp=256 prompt=171
+[worker] 8/16 req_ms=1004.9 comp=256 prompt=189
+[worker] 9/16 req_ms=809.0 comp=256 prompt=370
+[worker] 10/16 req_ms=1362.1 comp=256 prompt=219
+[worker] 11/16 req_ms=709.5 comp=256 prompt=177
+[worker] 12/16 req_ms=962.6 comp=256 prompt=231
+[worker] 13/16 req_ms=1033.0 comp=256 prompt=161
+[worker] 14/16 req_ms=582.0 comp=256 prompt=184
+[worker] 15/16 req_ms=1166.2 comp=256 prompt=182
+[worker] 16/16 req_ms=1123.6 comp=256 prompt=160
+[diag] >>> mtp: warm_median_tps=251.28281887984974 peak=19.39GB spec='{"method": "mtp", "model": "/tmp/qat-assistant", "num_specul'
+[serve] /tmp/senpai-venvs/5f4c623f772358a2/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it env={'WEIGHTS_BUCKET': 'hf://buckets/gemma-challenge/gemma-chiku-inu/weights/osoi5-v0-baked', 'LOCAL_MODEL_DIR': '/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.92', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PERFORMANCE_MODE': 'interactivity', 'CENTROID_TOP_K': '64', 'SPECULATIVE_CONFIG': '{"method": "ngram", "num_speculative_tokens": 7, "prompt_lookup_max": 4, "prompt_lookup_min": 1}', 'GENERATION_CONFIG': 'vllm', 'OVERRIDE_GENERATION_CONFIG': '{"temperature":0.0,"top_p":1.0,"top_k":0}', 'MIN_TOKENS_FLOOR': '8', 'DISABLE_LOG_STATS': '1', 'PLE_ASSUME_VALID_TOKEN_IDS': '1', 'PLE_FOLD_EMBED_SCALE': '1', 'PLE_FOLD_TARGET_MODEL': '/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', 'PLE_SCRATCH_REUSE': '1', 'FUSED_SPARSE_ARGMAX': '1', 'FUSED_SPARSE_ARGMAX_REQUIRE': '0', 'FUSED_SPARSE_ARGMAX_BLOCK': '16', 'LOOPGRAPH_REQUIRE_CAPTURE': '0', 'LOOPGRAPH_WARMUP_CALLS': '20', 'LOOPGRAPH_PINGPONG_SLOTS': '3', 'UVICORN_LOG_LEVEL': 'warning', 'PATCH_BENCH_JINJA2': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'max_split_size_mb:512,expandable_segments:True', 'LD_PRELOAD': '/usr/lib/x86_64-linux-gnu/libtcmalloc_minimal.so.4', 'DIXIE_SLIM_GREEDY': '1', 'DIXIE_FUSED_ACCEPT_PREP': '1', 'DIXIE_FUSED_ACCEPT_PREP_REQUIRE': '0', 'DIXIE_PREWARM_GREEDY_KERNEL': '1', 'ONEGRAPH': '1', 'PCK04_KEEPSET': '', 'DRAFTER_BUCKET': 'hf://buckets/gemma-challenge/gemma-kenyan-duma/weights/drafter-ft/ft-v1-epoch_001', 'DRAFTER_SHA256': 'ed159e334999fd6b5f2d0dbad026346d4efac89eb7c6f55c5cdb042eca5dd18e', 'FEOPT_ORJSON': '1', 'FASTRENDER': '1', 'DETOK_ENDONLY': '1', 'LM_HEAD_PRUNE': '0', 'LM_HEAD_PRUNE_REQUIRE': '0', 'LM_HEAD_PRUNE_DST': '/tmp/osoi5-12k-baked', 'LM_HEAD_KEEPSET_BUCKET': 'hf://buckets/gemma-challenge/gemma-dixie-flatline/weights/int4-pck04c-12k', 'FA_SLIDING': '1', 'FA_SLIDING_DIAG': '0', 'SPLITKV_VERIFY': '1', 'SPLITKV_VERIFY_MAX_Q': '64', 'SURGICAL_ATTN_USE_3D_OFF': '1', 'PRECACHE_BENCH': '1', 'PRECACHE_REQUIRE': '0', 'PRECACHE_MAX_TOKENS': '4', 'PRECACHE_DATASET': '/harness/data/eval_prompts_sharegpt.json'}
+[serve] ready at http://127.0.0.1:8000 in 80s
+[diag] [ngram7] warming (http://127.0.0.1:8000)
+[diag] [ngram7] decode 16x256
+[worker] 1/16 req_ms=2936.0 comp=256 prompt=256
+[worker] 2/16 req_ms=3166.6 comp=256 prompt=388
+[worker] 3/16 req_ms=2854.4 comp=256 prompt=457
+[worker] 4/16 req_ms=2746.3 comp=256 prompt=231
+[worker] 5/16 req_ms=2396.6 comp=256 prompt=328
+[worker] 6/16 req_ms=2776.5 comp=256 prompt=159
+[worker] 7/16 req_ms=2313.2 comp=256 prompt=171
+[worker] 8/16 req_ms=2654.5 comp=256 prompt=189
+[worker] 9/16 req_ms=2550.0 comp=256 prompt=370
+[worker] 10/16 req_ms=3027.1 comp=256 prompt=219
+[worker] 11/16 req_ms=1953.4 comp=256 prompt=177
+[worker] 12/16 req_ms=2438.7 comp=256 prompt=231
+[worker] 13/16 req_ms=2534.1 comp=256 prompt=161
+[worker] 14/16 req_ms=2291.0 comp=256 prompt=184
+[worker] 15/16 req_ms=2943.6 comp=256 prompt=182
+[worker] 16/16 req_ms=2390.0 comp=256 prompt=160
+[diag] >>> ngram7: warm_median_tps=102.99893928924499 peak=19.33GB spec='{"method": "ngram", "num_speculative_tokens": 7, "prompt_loo'
+
+===== ANCHOR DIAGNOSTIC =====
+    nospec: warm_median_tps=87.64823463078264
+       mtp: warm_median_tps=251.28281887984974
+    ngram7: warm_median_tps=102.99893928924499
+  (252.69 = wirbel #553 base_fullhead anchor)
