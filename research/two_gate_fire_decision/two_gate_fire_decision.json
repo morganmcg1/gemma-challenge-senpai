@@ -1,0 +1,246 @@
+{
+  "pr": 561,
+  "card": "two-gate-fire-decision-capstone",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "no_hf_job": true,
+  "peak_gpu_gib": 0.0,
+  "stage1_truth_table": {
+    "quality_gate_base_fullhead": "PASS",
+    "speed_gate_base_fullhead": "FAIL",
+    "quality_gate_osoi5": "FAIL",
+    "speed_gate_osoi5": "PASS",
+    "two_gate_satisfiable": false,
+    "fire_decision": "NO-FIRE",
+    "cells": {
+      "base_fullhead": {
+        "quality": "PASS",
+        "speed": "FAIL"
+      },
+      "osoi5": {
+        "quality": "FAIL",
+        "speed": "PASS"
+      }
+    }
+  },
+  "stage2_gaps": {
+    "base_fullhead_quality_safe_ceiling_tps": 311.2485991465399,
+    "base_fullhead_quality_safe_ceiling_tps_magfree": 311.2485991465399,
+    "base_fullhead_quality_safe_ceiling_tps_strict": 292.1,
+    "candidate_verify_realized_central_tps": 305.4179473236596,
+    "candidate_verify_realized_band": [
+      293.79708405168066,
+      309.01272414399165
+    ],
+    "gap_to_current_ship_tps": 64.60840085346013,
+    "gap_to_current_ship_tps_magfree": 64.60840085346013,
+    "gap_to_current_ship_tps_strict": 83.757,
+    "gap_to_current_ship_tps_candverify": 70.43905267634045,
+    "gap_to_official_1_tps": 170.28140085346007,
+    "gap_to_official_1_tps_magfree": 170.28140085346007,
+    "gap_to_official_1_tps_strict": 189.42999999999995,
+    "gap_to_live_public_1_tps_magfree": 197.3834903021708
+  },
+  "stage3_pass_fail_bars": {
+    "candidate_verify_can_fire": false,
+    "candidate_verify_best_case_tps": 309.01272414399165,
+    "candidate_verify_pass_bar_tps": 375.857,
+    "depth_drop_pass_bar_tps": 64.60840085346013,
+    "depth_drop_pass_bar_tps_strict": 83.757,
+    "depth_drop_conjunction_plausible": false,
+    "head_width_lever_open": false
+  },
+  "stage4_verdict": {
+    "verdict": "NO-FIRE",
+    "verdict_flip_condition": "A served config measured above 375.857 TPS at #319 argmax_identity_rate=1.0 AND downstream quality >= 90% of vanilla base on all four axes. The hardware-rooted ceiling (denken #550 HBM byte-rate wall + lawine #554 fixed-overhead floor) caps base_fullhead at 311.25 magically-free, so no quality-safe config can reach it; and no quality-passing config has ever produced a TPS above the ship. The condition is provably unsatisfiable for base_fullhead and empirically unobserved for any quality-PASS config."
+  },
+  "inputs": {
+    "base_fullhead_anchor_tps": 252.31,
+    "base_fullhead_anchor_tps_fast_proxy": 253.78,
+    "ceiling_544_free_head_tps": 328.9,
+    "candverify_gain_central": 40.5983813617724,
+    "candverify_gain_band": [
+      28.977518089793477,
+      44.19315818210447
+    ],
+    "candverify_greedy_identity_rate": 1.0,
+    "current_ship_official_tps": 375.857,
+    "osoi5_fast_local_tps": 350.76,
+    "osoi5_fast_official_tps": 375.857,
+    "official_1_tps": 481.53,
+    "live_public_1_tps": 508.6320894487107,
+    "morgan_quality_gate_frac": 0.9
+  },
+  "quality_legs": {
+    "mmlu_pro": {
+      "frac_of_anchor": 0.952,
+      "pr": "stark #542",
+      "wandb": "92pcnx6a",
+      "abs": 0.636,
+      "anchor_abs": 0.668,
+      "note": "ubel #538 anchor 0.668; stark tight-CI 95.2%"
+    },
+    "gpqa_diamond": {
+      "frac_of_anchor": 0.999,
+      "pr": "stark #542",
+      "wandb": "92pcnx6a",
+      "abs": 0.4697,
+      "anchor_abs": 0.47,
+      "note": "ubel #538 anchor 0.444/0.470; stark tight-CI 99.9%"
+    },
+    "gsm8k": {
+      "frac_of_anchor": 0.973,
+      "pr": "wirbel #541/#545",
+      "wandb": "uqnkzlf9",
+      "abs": 0.973,
+      "anchor_abs": 1.0,
+      "note": "97.3% w/ min_tokens=8 EOS guard; as-served 86.8% recoverable"
+    },
+    "aime": {
+      "frac_of_anchor": 1.1817,
+      "pr": "fern #514/#535",
+      "wandb": "xtanouk7",
+      "abs": 0.1444,
+      "anchor_abs": 0.1222,
+      "note": "maj@1 0.1444 = 118.17% of base anchor 0.1222"
+    }
+  },
+  "framework_legs": {
+    "sglang": "denken #498 + lawine #558",
+    "trt_llm": "fern #502",
+    "flashinfer_standalone": "fern #507"
+  },
+  "provenance": {
+    "#544": {
+      "wandb": "d44b61gj",
+      "group": "base-fullhead-tps-ceiling",
+      "what": "252.31->350.76 gap (82.2% head verify-tax / 17.8% +5 body); precision +38.3->292.1; free-head 328.9; quality_safe_ship_can_beat_442=FALSE"
+    },
+    "#551": {
+      "wandb": "5rnkxttp",
+      "group": "kv-read-fp8-lever",
+      "what": "KV-read 1.09% of decode bytes; base_fullhead weight-read-bound; ceiling KV-robust"
+    },
+    "#554": {
+      "wandb": "fi8vr1nb",
+      "group": "fixed-overhead-ceiling",
+      "what": "42-launch SDPA fixed-overhead floor 0.573ms -> corrected magically-free ceiling 311.25 (-17.65 vs 328.9)"
+    },
+    "#550": {
+      "wandb": "5aobahij",
+      "group": "faster-byte-identical-kernel",
+      "what": "Marlin ONLY w4a16 kernel on sm_86; head GEMV 482.9 GB/s = 80.5% A10G peak; vLLM FORCES Triton for head_dim 256/512; kernel-robust"
+    },
+    "#552": {
+      "wandb": "e4s81mih",
+      "group": "lossless-head-prune-tps",
+      "what": "provably-lossless head-prune keeps all 262,144 rows -> +0 TPS; EXACT-head lever structurally zero"
+    },
+    "#549": {
+      "wandb": "p9ga96xo",
+      "group": "fullhead-candidate-verify",
+      "what": "cheap-candidate+full-verify head lever: +40.6 (band +29..+44) -> realized 305.4 (band 293.8..309), identity-safe by construction"
+    },
+    "#560": {
+      "wandb": "in-flight",
+      "group": "fullhead-candidate-verify",
+      "what": "served realization of #549's candidate-verify lever (converting [+28,+44] projection to a measured number) \u2014 IN FLIGHT; verdict holds either realization"
+    },
+    "#535": {
+      "wandb": "xtanouk7",
+      "group": "base-fullhead-fast-ship-probe",
+      "what": "AIME maj@1 0.1444 >= base 0.1222 (118.17%), matched conc=32 n=90"
+    },
+    "#542": {
+      "wandb": "92pcnx6a",
+      "group": "base-fullhead-shortchain-quality",
+      "what": "MMLU-Pro 0.636 (95.2% of anchor) + GPQA-D 0.4697 (99.9%), tight-CI third leg"
+    },
+    "#541": {
+      "wandb": "uqnkzlf9",
+      "group": "base-fullhead-gsm8k-layerdrop",
+      "what": "GSM8K 97.3% with min_tokens=8 first-token-EOS guard; as-served 86.8% recoverable artifact"
+    },
+    "#538": {
+      "wandb": "(ubel)",
+      "group": "\u2014",
+      "what": "MMLU-Pro 0.668 / GPQA-D 0.444 base_fullhead anchor"
+    },
+    "#534": {
+      "wandb": "ivpk7g7z",
+      "group": "fullhead-surgical-safe-anchor",
+      "what": "complete base_fullhead gate-table 3/3 PASS, draw_ready=True; 253.78 = 71.7% of unsafe ship"
+    },
+    "#547": {
+      "wandb": "(kanna)",
+      "group": "\u2014",
+      "what": "head-WIDTH lever CLOSED: fast_quality_safe_ship_exists=FALSE (12k fails MMLU-Pro 0.550; 32k safe-min width, modest TPS)"
+    },
+    "#553": {
+      "wandb": "(wirbel)",
+      "group": "realized-anchor-tps",
+      "what": "base_fullhead served-TPS anchor 252.31 vs 253.78"
+    },
+    "#558": {
+      "wandb": "(lawine)",
+      "group": "framework-zoomout-ceiling",
+      "what": "framework leg: SGLang/FlashInfer/TRT-LLM do not serve byte-identically AND faster"
+    },
+    "#502": {
+      "wandb": "(fern)",
+      "group": "\u2014",
+      "what": "framework leg: TRT-LLM closed"
+    },
+    "#507": {
+      "wandb": "(fern)",
+      "group": "\u2014",
+      "what": "framework leg: FlashInfer-standalone flips identity 1292/2048 -> 0.0"
+    },
+    "#498": {
+      "wandb": "(denken)",
+      "group": "\u2014",
+      "what": "framework leg: SGLang closed"
+    },
+    "#515": {
+      "wandb": "(Morgan)",
+      "group": "\u2014",
+      "what": ">=90%-of-vanilla-base downstream quality gate"
+    },
+    "#524": {
+      "wandb": "(Morgan)",
+      "group": "\u2014",
+      "what": "two-gate pre-authorization: 'a good faster TPS result that keeps quality within 10% of the base model'"
+    },
+    "#319": {
+      "wandb": "(program)",
+      "group": "\u2014",
+      "what": "strict greedy-identity HARD gate (argmax_identity_rate=1.0)"
+    }
+  },
+  "self_tests": {
+    "ceiling_magfree_below_ship": true,
+    "ceiling_strict_below_magfree": true,
+    "candverify_best_below_magfree": true,
+    "candverify_best_below_ship": true,
+    "gap_to_ship_positive": true,
+    "gap_to_official1_positive": true,
+    "live_gap_wider_than_registered": true,
+    "two_gate_unsatisfiable": true,
+    "no_pass_pass_cell": true,
+    "fire_is_nofire": true,
+    "depth_drop_bar_equals_ship_gap": true,
+    "candidate_verify_cannot_fire": true,
+    "depth_drop_not_plausible": true,
+    "head_width_closed": true,
+    "all_open_levers_fail_bar": true,
+    "quality_legs_all_ge_90pct": true,
+    "anchor_below_ceiling": true,
+    "nan_clean": true,
+    "self_test_passes": true
+  },
+  "self_det": true,
+  "primary_metric_name": "base_fullhead_quality_safe_ceiling_tps",
+  "primary_metric_value": 311.2485991465399,
+  "wandb_run_id": "v74ad5jb"
+}
