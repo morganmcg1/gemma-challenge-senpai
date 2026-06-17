@@ -1,0 +1,69 @@
+{
+  "pr": 547,
+  "analysis_only": true,
+  "official_tps": 0,
+  "engine": "vllm-0.22.1rc1.dev307 (v0.22.0 craters this int4 model; see note)",
+  "control_substrate": "intact base-int4 body (42L, no drop/no bake), full BF16 tied head",
+  "quality_by_head_width": {
+    "262k": {
+      "mmlu_pro": 0.676,
+      "gpqa_d": 0.4696969696969697,
+      "gsm8k_asserved": 0.826,
+      "gsm8k_guarded": 0.828,
+      "empty_rate_asserved": 0.0,
+      "empty_rate_guarded": 0.0
+    },
+    "12k": {
+      "mmlu_pro": 0.55,
+      "gpqa_d": 0.41414141414141414,
+      "gsm8k_asserved": 0.59,
+      "gsm8k_guarded": 0.556,
+      "empty_rate_asserved": 0.0,
+      "empty_rate_guarded": 0.0
+    },
+    "32k": {
+      "mmlu_pro": 0.638,
+      "gpqa_d": 0.5303030303030303,
+      "gsm8k_asserved": 0.772,
+      "gsm8k_guarded": 0.77,
+      "empty_rate_asserved": 0.0,
+      "empty_rate_guarded": 0.0
+    }
+  },
+  "tps_by_head_width": {
+    "262k": {
+      "tps_median_per_req": 96.67152684748444,
+      "tps_end_to_end": 96.66797389021411
+    },
+    "12k": {
+      "tps_median_per_req": 129.8580287746377,
+      "tps_end_to_end": 129.8418028846731
+    },
+    "32k": {
+      "tps_median_per_req": 125.58903488654504,
+      "tps_end_to_end": 125.56567203918028
+    }
+  },
+  "gate_floors": {
+    "mmlu_pro": 0.601,
+    "gpqa_d": 0.4,
+    "gsm8k_rel_to_base": 0.9,
+    "fast_tps": 300.0
+  },
+  "head_prune_innocent_on_intact_body": false,
+  "head_prune_cost_mmlu_pro_12k": 0.126,
+  "collapse_is_100pct_body": false,
+  "min_quality_safe_head_width": "32k",
+  "tps_at_min_safe_width": 125.58903488654504,
+  "fast_quality_safe_ship_exists": false,
+  "tps_stack": "ISOLATED head-prune on vanilla vLLM v0221 + compute_logits slice(pruned)/off(262k), single-stream MAX_NUM_SEQS=1. This is NOT the fa2sw_strict_surgical357 frontier stack (fa2sw+onegraph+16k-keyed MTP drafter), so the ~300 TPS bar (frontier-contextual: fern base_fullhead=253.78, osoi5=353.73) is not directly comparable. fast_quality_safe_ship_exists here is computed on isolated TPS and is therefore a LOWER-BOUND verdict on speed; the isolated lever is +30% full->32k (96.7->125.6), which extrapolates 253.78*1.30~=330 on the intact-body frontier (UNVERIFIED). Frontier-stack TPS at 32k is the follow-up that settles the speed half.",
+  "quality_stack": "vanilla vLLM v0.22.1rc1.dev307 + compute_logits mask(pruned)/off(262k), greedy; reproduces ubel #538 control (0.668/0.444 -> measured 0.676/0.4697), so head-width QUALITY is apples-to-apples with the cited control.",
+  "answer_tokens_in_12k_keepset": true,
+  "collapse_decomposition": {
+    "control_intact_fullhead_mmlu": 0.676,
+    "intact_12k_mmlu": 0.55,
+    "osoi5_ship_mmlu": 0.274,
+    "head_share_of_total_drop": 0.313,
+    "body_share_of_total_drop": 0.687
+  }
+}
