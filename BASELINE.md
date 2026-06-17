@@ -83,6 +83,20 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 - **Max measured speedup**: 1.2256× — insufficient on both axes.
 - **W&B:** `xmdeo3dj`. https://wandb.ai/morganmcg1/gemma-challenge/runs/xmdeo3dj
 
+### 2026-06-17 — PR #581 (land): Quality gate denominator grounding — GPQA bar RAISED to ≥0.471; all 4 gates re-anchored to harness measurements (official bar UNCHANGED 375.857)
+
+- **Not a served-TPS rung** (analysis_only=true, no served-file change, no HF launch; official bar stays 375.857). Banks `research/validity/base_quality_denominator/` (8 files incl. results JSONs, `run_gsm8k_cached.py`, `serve_clean.sh`). Merged by squash-merge.
+- **Corrected gate table (authoritative post-#581 + #580):** MMLU-Pro harness base=0.6727 → gate ≥0.605 (was 0.601, +0.004); GPQA-Diamond harness base=0.5236 → gate ≥0.471 (was 0.423, **+0.048 RAISED**); GSM8K harness base=0.8967 → gate ≥0.807 (was 0.828, −0.021); AIME gate ≥0.090 (from PR #580).
+- **Critical: GPQA gate RAISED by 0.048 points.** Cited base GPQA 0.470 was an underestimate — measured harness value is 0.5236. int4 base_fullhead GPQA=0.4798 clears ≥0.471 by only 0.009 — must be confirmed by kanna #579. Engine validated: int4 control reproduces committed reference within ~1 pt.
+- **W&B:** `qi24h8zx` https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/qi24h8zx
+
+### 2026-06-17 — PR #580 (ubel): Unquantized base AIME denominator grounding — harness base=0.100 (REFUTES cited 0.400); gate corrected to ≥0.090 (official bar UNCHANGED 375.857)
+
+- **Not a served-TPS rung** (analysis_only=true, no served-file change, no HF launch; official bar stays 375.857). Banks `research/validity/base_fullhead_aime_n60/` (3 files) + `submissions/bf16_base_aime/` (2 files). Merged by squash-merge.
+- **Verdict: 0.400 AIME denominator OFFICIALLY REFUTED for gate purposes.** Unquantized base AIME on served harness (min_tokens=8, 3072-token cap, n=60) = 0.1000 (6/60), Wilson 95% CI [0.047, 0.201]. The 0.400 figure reflects a different protocol (extended thinking + large token budget + full context) — not the served harness.
+- **Mechanism:** 72% truncation rate at 3072-token cap explains the gap (not quantization). int4 quant tax ≈ −0.0167 (≈ 0). Best int4 base_fullhead AIME = 0.1167 — clears corrected gate (≥0.090). `aime_gate_achievable_by_any_int4 = true`.
+- **W&B:** `yokbmy9i` https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/yokbmy9i
+
 ### 2026-06-17 — PR #576 (denken): Spec-dec identity census — mechanism verdict `root_cause = genuine_precision`; `specdec_identity_fire_eligible = False` (official bar UNCHANGED 375.857)
 
 - **Not a served-TPS rung** (census/analysis only, no served-file change, no HF launch; official bar stays 375.857). Banks `research/specdec_identity_census/` (14 files incl. `census_driver.py`, `census_report.json`, `mechanism_verdict.json`). Merged by squash-merge.
