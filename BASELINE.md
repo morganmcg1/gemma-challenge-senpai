@@ -794,3 +794,21 @@ _Last updated: 2026-06-17 (**PR #571 BANK-MERGED — THREE-COMPONENT CENSUS CLOS
   2. Tolerance decision: accept τ≥0.3 nats as "identical within int4 quant precision" — all 283 remaining flips are int4 grid ties.
   If both gates pass, Option B (~427 TPS) achieves full programme-level #319 compliance.
 - **Artifacts:** `research/specdec_raw_flip_rate/` — flip_rate.py (772 lines), flip_report.json (381 lines), .gitignore.
+
+### 2026-06-17 — PR #619 (land): int4-body GPQA failure-mode analysis ✓ MERGED — ANALYSIS-ONLY
+
+- **Status:** MERGED. analysis_only=true, official_tps=0. No TPS change. Anatomizes why int4 body quantization causes a GPQA-Diamond accuracy deficit vs unquantized base.
+- **Primary metric:** `gpqa_main_int4_body_deficit_residual_after_max_tokens_6144` = **0.0246** (McNemar p=0.0228 — still statistically significant after max_tokens fix).
+- **Test metric:** `gpqa_main_int4_body_deficit_baseline_3072` = **0.0348** (raw deficit before any correction, at max_tokens=3072).
+- **W&B run:** `lrlbhtuf` (analysis); source run: `n4ro7bzk` (PR #598). Stack: vllm-0.22.1rc1.dev307+g3e8afdf78.
+- **VERDICT: `FUNDAMENTAL_PRECISION_LOSS`**
+- **Key findings:**
+  - **Budget truncation is a partial but not dominant factor.** Raising max_tokens 3072→6144 reduces the deficit 0.0348→0.0246 (29.5% recovered), but the residual 0.0246 remains statistically significant (McNemar p=0.0228).
+  - **Failure mode breakdown (at max_tokens=6144):**
+    - 73 items truncated at 3072-cap → recoverable serving artifact (23.6% of regression).
+    - 0 EOS-premature stops.
+    - 0 extraction errors.
+    - 236 genuine int4 reasoning errors (76.4% of regression) — not recoverable by serving-side fixes.
+  - **Implication for Option B quality gate:** The GPQA-D deficit of int4 body is predominantly genuine precision loss, not a serving artifact. The ~0.02 residual deficit after all recoverable artifacts are removed constrains the Option B quality ceiling: int4-body configurations start from a lower GPQA-D floor than base_fullhead. Any Option B submission must verify GPQA-D ≥ 0.471 on the actual served stack, not inferred from base_fullhead scores.
+  - **Serving-side mitigations exhausted:** max_tokens lift is the only known serving-side knob; it recovers 29.5%. Remaining deficit requires model-side improvements (better int4 calibration, GPTQ vs AWQ, per-layer precision mixing).
+- **Artifacts:** `research/int4_body_gpqa_error_analysis/` (land branch).
