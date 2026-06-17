@@ -72,6 +72,19 @@ AIME_REGISTRY: dict[str, dict[str, str]] = {
         "problem_col": "question",
         "answer_col": "answer",
     },
+    # Full AIME-2025 (parts I+II, 30 problems) via the SAME mirror the canonical
+    # inspect_evals `aime2025` task uses (math-ai/aime25, split=test). opencompass's
+    # per-part configs (AIME2025-I above) are persistently server-side 500-down on the
+    # datasets-server /rows API; this single reachable config restores the full set, so
+    # `--years 2024,2025` yields the canonical 60 = 2024(30) + 2025(30).
+    "2025": {
+        "dataset": "math-ai/aime25",
+        "config": "default",
+        "split": "test",
+        "id_col": "id",
+        "problem_col": "problem",
+        "answer_col": "answer",
+    },
     # The curated AIMO-validation AIME set: 90 problems = AIME 2022 + 2023 + 2024
     # (30 each, I+II). One reachable dataset that triples n for a power-bearing
     # Wilson-CI comparison (PR #535 matched-conc arm); opencompass AIME2025-I is
