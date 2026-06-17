@@ -1,0 +1,189 @@
+{
+  "pr": 549,
+  "stage": 3,
+  "analysis_only": true,
+  "official_tps": 0,
+  "created_at": "20260617T035038Z",
+  "method": "read_bound_projection",
+  "realized_tps_is_served_measured": false,
+  "identity_basis": "offline_stage2_60000_positions_miss_at_Ksafe_eq_0",
+  "realized_tps_basis": "read_bound_projection_from_measured_achieved_bw",
+  "measured_anchors": {
+    "tps_measured_warm_median_m1": 264.8195659618872,
+    "base_fullhead_pr_anchor_tps": 253.78,
+    "osoi5_tps_class": 353.73,
+    "head_gemm_ms_m8": 2.8382,
+    "head_bytes": 1342177280.0,
+    "achieved_bw_gbps": 472.89735748009304,
+    "wall_per_step_ms": 14.871,
+    "eacc": 3.9381317654192243,
+    "head_byte_frac": 0.3800766425318463,
+    "head_time_frac": 0.19085468361239996,
+    "head_attributable_tps": 62.463507422464275,
+    "tps_ceiling_readbound": 427.18113904183923,
+    "peak_vram_gb": 18.9560546875
+  },
+  "schemes": {
+    "fp8_e4m3": {
+      "new_head_read_bytes": 671797248.0,
+      "new_head_read_gb": 0.671797248,
+      "old_head_gemm_ms": 2.8382,
+      "scenarios": {
+        "optimistic": {
+          "assumed_bw_gbps": 472.89735748009304,
+          "topk_overhead_ms": 0.0,
+          "new_head_gemm_ms": 1.4205984393310545,
+          "head_savings_ms": 1.4176015606689456,
+          "new_wall_per_step_ms": 13.453398439331055,
+          "projected_tps": 292.72393761163596,
+          "quality_free_tps_gain": 27.904371649748782,
+          "wall_speedup_x": 1.1053712611769961
+        },
+        "central": {
+          "assumed_bw_gbps": 472.89735748009304,
+          "topk_overhead_ms": 0.15,
+          "new_head_gemm_ms": 1.5705984393310544,
+          "head_savings_ms": 1.2676015606689457,
+          "new_wall_per_step_ms": 13.603398439331055,
+          "projected_tps": 289.49617134149617,
+          "quality_free_tps_gain": 24.676605379608986,
+          "wall_speedup_x": 1.0931827121231685
+        },
+        "pessimistic": {
+          "assumed_bw_gbps": 300.0,
+          "topk_overhead_ms": 0.25,
+          "new_head_gemm_ms": 2.48932416,
+          "head_savings_ms": 0.34887584000000027,
+          "new_wall_per_step_ms": 14.52212416,
+          "projected_tps": 271.18152427497387,
+          "quality_free_tps_gain": 6.361958313086689,
+          "wall_speedup_x": 1.024023747225695
+        }
+      },
+      "K_safe": 4,
+      "candidate_kind": "fp8",
+      "served_head_read_gb": 0.671633408,
+      "head_read_frac_of_full": 0.5004058837890625,
+      "miss_rate_at_Ksafe": 0.0,
+      "hw_supported_on_a10g": false
+    },
+    "int4_g128": {
+      "new_head_read_bytes": 346398720.0,
+      "new_head_read_gb": 0.34639872,
+      "old_head_gemm_ms": 2.8382,
+      "scenarios": {
+        "optimistic": {
+          "assumed_bw_gbps": 472.89735748009304,
+          "topk_overhead_ms": 0.0,
+          "new_head_gemm_ms": 0.7325029724121094,
+          "head_savings_ms": 2.105697027587891,
+          "new_wall_per_step_ms": 12.76530297241211,
+          "projected_tps": 308.5028043541282,
+          "quality_free_tps_gain": 43.68323839224104,
+          "wall_speedup_x": 1.1649547239214488
+        },
+        "central": {
+          "assumed_bw_gbps": 472.89735748009304,
+          "topk_overhead_ms": 0.15,
+          "new_head_gemm_ms": 0.8825029724121094,
+          "head_savings_ms": 1.9556970275878907,
+          "new_wall_per_step_ms": 12.91530297241211,
+          "projected_tps": 304.91981286318395,
+          "quality_free_tps_gain": 40.10024690129677,
+          "wall_speedup_x": 1.1514247890092382
+        },
+        "pessimistic": {
+          "assumed_bw_gbps": 300.0,
+          "topk_overhead_ms": 0.25,
+          "new_head_gemm_ms": 1.4046624,
+          "head_savings_ms": 1.4335376,
+          "new_wall_per_step_ms": 13.437462400000001,
+          "projected_tps": 293.0710909687252,
+          "quality_free_tps_gain": 28.251525006837994,
+          "wall_speedup_x": 1.1066821664185642
+        }
+      },
+      "K_safe": 8,
+      "candidate_kind": "int4",
+      "served_head_read_gb": 0.34607104,
+      "head_read_frac_of_full": 0.257843017578125,
+      "miss_rate_at_Ksafe": 0.0,
+      "hw_supported_on_a10g": true
+    },
+    "int4_perrow": {
+      "new_head_read_bytes": 336437248.0,
+      "new_head_read_gb": 0.336437248,
+      "old_head_gemm_ms": 2.8382,
+      "scenarios": {
+        "optimistic": {
+          "assumed_bw_gbps": 472.89735748009304,
+          "topk_overhead_ms": 0.0,
+          "new_head_gemm_ms": 0.7114382067871093,
+          "head_savings_ms": 2.1267617932128906,
+          "new_wall_per_step_ms": 12.74423820678711,
+          "projected_tps": 309.01272414399165,
+          "quality_free_tps_gain": 44.19315818210447,
+          "wall_speedup_x": 1.1668802606090851
+        },
+        "central": {
+          "assumed_bw_gbps": 472.89735748009304,
+          "topk_overhead_ms": 0.15,
+          "new_head_gemm_ms": 0.8614382067871094,
+          "head_savings_ms": 1.9767617932128907,
+          "new_wall_per_step_ms": 12.89423820678711,
+          "projected_tps": 305.4179473236596,
+          "quality_free_tps_gain": 40.5983813617724,
+          "wall_speedup_x": 1.1533058224542794
+        },
+        "pessimistic": {
+          "assumed_bw_gbps": 300.0,
+          "topk_overhead_ms": 0.25,
+          "new_head_gemm_ms": 1.3714574933333334,
+          "head_savings_ms": 1.4667425066666666,
+          "new_wall_per_step_ms": 13.404257493333334,
+          "projected_tps": 293.79708405168066,
+          "quality_free_tps_gain": 28.977518089793477,
+          "wall_speedup_x": 1.1094236295741227
+        }
+      },
+      "K_safe": 8,
+      "candidate_kind": "int4",
+      "served_head_read_gb": 0.336109568,
+      "head_read_frac_of_full": 0.250421142578125,
+      "miss_rate_at_Ksafe": 0.0,
+      "hw_supported_on_a10g": true
+    }
+  },
+  "winner": "int4_perrow",
+  "winner_K_safe": 8,
+  "winner_head_read_frac_of_full": 0.250421142578125,
+  "gates": {
+    "head_slice_material": true,
+    "Ksafe_small": true,
+    "greedy_identity_offline_1p0": true,
+    "material_uplift": true
+  },
+  "head_byte_frac": 0.3800766425318463,
+  "head_time_frac": 0.19085468361239996,
+  "head_attributable_tps": 62.463507422464275,
+  "K_safe_int4": 8,
+  "K_safe_int4_perrow": 8,
+  "K_safe_fp8": 4,
+  "realized_tps_candidate_verify": 305.4179473236596,
+  "realized_tps_band": [
+    293.79708405168066,
+    309.01272414399165
+  ],
+  "greedy_identity_rate": 1.0,
+  "candidate_verify_is_green": true,
+  "quality_free_tps_gain": 40.5983813617724,
+  "quality_free_tps_gain_band": [
+    28.977518089793477,
+    44.19315818210447
+  ],
+  "quality_free_tps_gain_frac_of_amdahl_ceiling": 0.6499535975011813,
+  "self_det": 1.0,
+  "primary_metric": 40.5983813617724,
+  "green_caveat": "All three GREEN gates pass on MEASURED offline evidence (Stage-1 head slice, Stage-2 K_safe + zero offline miss). realized_tps is a read-bound PROJECTION from the measured achieved BW (472.9 GB/s); it is NOT a served measurement. The served Marlin-int4-nominator prototype is the confirming follow-up and would require a real candidate-verify kernel.",
+  "wandb_run_id": "p9ga96xo"
+}
