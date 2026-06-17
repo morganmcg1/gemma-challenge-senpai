@@ -1,0 +1,125 @@
+{
+  "schema": "realized_anchor_tps_v1",
+  "pr": 553,
+  "analysis_only": true,
+  "official_tps": 0,
+  "wandb_group": "realized-anchor-tps",
+  "primary_metric": {
+    "name": "anchor_served_tps",
+    "value": 252.68841839917962
+  },
+  "hardware_sigma_tps": 4.864,
+  "tau_lo": 1.0352356533046398,
+  "anchor_served_tps": 252.68841839917962,
+  "anchor_served_tps_wandb": "83jiwjr9",
+  "anchor_implied_official_tps": 261.5920599039909,
+  "anchor_reconcile": {
+    "lawine544_derived_anchor": 252.306,
+    "resid_vs_lawine": 0.3824183991796133,
+    "resid_vs_lawine_sigma": 0.0786222037787034,
+    "fern535_faststack_proxy": 253.78,
+    "resid_vs_fern": -1.0915816008203763,
+    "resid_vs_fern_sigma": -0.2244205593791892,
+    "true_surgical_path_served_tps": 252.68841839917962,
+    "note": "252.69 is the true surgical-path served number; lawine's 252.31 derived anchor is accurate (+0.38, <1 sigma_hw); fern's 253.78 is a fast-stack proxy (-1.09, <1 sigma_hw). Both reconcile within noise."
+  },
+  "anchor_reproducibility_tps": [
+    252.491,
+    252.655,
+    252.68841839917962
+  ],
+  "precision_head_served_tps": 299.28668280432635,
+  "precision_head_served_tps_wandb": "bo43du3w",
+  "precision_head_implied_official_tps": 309.8322445983153,
+  "realized_precision_gain": 46.59826440514672,
+  "realized_precision_gain_pct": 18.440997296335922,
+  "realized_vs_lawine38": 1.2166648669751103,
+  "realized_minus_projected_tps": 8.298264405146725,
+  "realized_minus_projected_sigma": 1.706057649084442,
+  "lawine544_projection": {
+    "recoverable_tps_int4": 38.3,
+    "int4_head_saves_ms": 1.996,
+    "optimized_tps_ceiling": 292.1,
+    "lawine_run_id": "d44b61gj",
+    "byte_exact_risk_caveat": "int4 head perturbs logits -> may flip greedy near-ties (byte-exactness NOT guaranteed); fp8 lower-risk; this ceiling is an UPPER bound"
+  },
+  "lawine544_ceiling_confirmed": false,
+  "ceiling_reconcile": {
+    "realized_bracket_tps": [
+      252.68841839917962,
+      299.28668280432635
+    ],
+    "lawine_bracket_tps": [
+      252.306,
+      292.1
+    ],
+    "low_end_resid_sigma": 0.0786222037787034,
+    "high_end_resid_tps": 7.186682804326324,
+    "high_end_resid_sigma": 1.4775252475999845,
+    "low_end_within_sigma": true,
+    "high_end_within_sigma": false,
+    "verdict": "LEVER CONFIRMED + OVER-REALIZES: low anchor end within 1 sigma_hw, but realized ceiling 299.29 is +7.19 TPS (+1.48 sigma_hw) above lawine's 292.1, outside the sigma_hw band -> ceiling CORRECTS UPWARD to 299.29. Likely cause: lawine's static weight-read model fixes E[T]/acceptance and prices only the dense-weight-read delta (1.996 ms); the live MTP spec-decode serve realizes a larger per-step wall saving from the int4 Marlin GEMV. Split NOT re-derived (per PR)."
+  },
+  "precision_head_strict_identity": false,
+  "precision_head_argmax_flip_rate": 0.0076297049847405905,
+  "precision_head_argmax_flip_rate_source": "freerun_censored_hazard",
+  "identity_detail": {
+    "freerun_strict_identity": false,
+    "freerun_n_identical_prompts": 2,
+    "freerun_n_prompts": 32,
+    "freerun_first_divergence_median": 49.5,
+    "freerun_censored_hazard_flip_rate": 0.0076297049847405905,
+    "tf_int4_argmax_flip_rate": 0.01123046875,
+    "tf_bf16_selfcheck_argmax_flip_rate": 0.00433349609375,
+    "tf_int4_attributable_excess": 0.00689697265625,
+    "tf_selfcheck_clean": false,
+    "interpretation": "int4 head is NOT byte-exact greedy-identical (fails #319 strict gate). Headline uses free-run censored hazard (0.763%) because the teacher-forced readout has a 0.433% bf16-on-bf16 self-check floor (spec-decode/numeric path mismatch, tf_selfcheck_clean=False). int4-attributable teacher-forced excess = 0.690%, consistent with the 0.763% free-run hazard. Both arms are run-to-run non-deterministic (self_det_bf16=0.344), so 0.763% is an UPPER bound on int4-attributable divergence. CONFIRMS lawine #544's int4_head_byte_exact_risk caveat empirically."
+  },
+  "self_det": 0.125,
+  "self_det_int4": 0.125,
+  "self_det_bf16": 0.34375,
+  "ppl": 2.0026670676783858,
+  "ppl_bf16_anchor": 2.005661728135843,
+  "ppl_delta_int4_minus_bf16": -0.002994660457457332,
+  "ppl_quality_safe": true,
+  "floor_invariant_tps": true,
+  "floor_invariant_proof": "serve.py patch_min_tokens_floor_sources() (L1051-1068) patches ONLY chat_completion/protocol.py ChatCompletionRequest.to_sampling_params; /v1/completions (CompletionRequest.to_sampling_params) is untouched. All TPS/PPL/identity measurements use /v1/completions -> min_tokens floor (#545) is a no-op on every metric here, BY CONSTRUCTION.",
+  "unsafe_frontier_local": 442.0,
+  "official_gate_tps": 500.0,
+  "structural_verdict": "NO-FIRE. (1) The plain int4 full head over-realizes lawine #544's +38 speed (realized +46.6, 1.217x; served 299.29 local / ~309.8 official) -> lawine's +38 SPEED is real and then-some on a served path. (2) BUT a plain precision-dropped head BREAKS #319 byte-exact identity (this card: served greedy flips 0.76% free-run / ~0.69-1.12% int4-attributable; fern #549 offline 2.12%) -> 299.29 is the realized SPEED CEILING, not a strict-shippable number. (3) The identity-safe realization of the same +38 is fern #549 candidate-verify (K_safe=8, identity 1.0), which this card names but does not build. (4) Even the speed ceiling 299.29 local / ~309.8 official is far below the 442 unsafe-frontier and 500 official gate. No ship, no submission.",
+  "peak_vram_gb": 18.9560546875,
+  "public_evidence": {
+    "lawine_pr544_run": "d44b61gj",
+    "fern_pr535_anchor_tps": 253.78,
+    "land_pr534_run": "ivpk7g7z",
+    "note": "Citations are reconciliation targets supplied in the PR #553 body; not independent inspection of other students' branches.",
+    "fern_pr549_runs": [
+      "tpmiseyd",
+      "p9ga96xo"
+    ],
+    "fern_pr549_offline_int4_miss_at1": 0.0212,
+    "fern_pr549_offline_fp8_miss_at1": 0.0064
+  },
+  "wandb_run_ids": [
+    "83jiwjr9",
+    "bo43du3w"
+  ],
+  "created_at": "20260617T060224Z",
+  "precision_head_role": "REALIZED SPEED CEILING / upper-bound on the head lever -- NOT a strict-shippable number. A plain int4 full head realizes lawine's +38 speed (over-realizes, 1.217x) but breaks #319 byte-exact identity (greedy flips ~1-2%). The identity-SAFE realization of the same +38 is fern #549's candidate-verify (K_safe=8), which this card does NOT build.",
+  "fern549_reconcile": {
+    "fern_pr": 549,
+    "fern_runs": [
+      "tpmiseyd",
+      "p9ga96xo"
+    ],
+    "fern_offline_whole_head_int4_miss_at1": 0.0212,
+    "fern_offline_whole_head_fp8_miss_at1": 0.0064,
+    "fern_offline_positions": 60000,
+    "this_card_served_int4_freerun_censored_hazard": 0.0076297049847405905,
+    "this_card_served_int4_teacherforced_raw": 0.01123046875,
+    "this_card_served_int4_attributable": 0.00689697265625,
+    "this_card_positions": 16384,
+    "agreement": "CONFIRMS fern #549 on a SERVED decode path (not just offline): the plain int4 full head IS identity-breaking, flipping the greedy token at the ~1% level. This card's served int4-attributable rate (0.69%-1.12%) is somewhat BELOW fern's clean offline 2.12%, attributable to (a) free-run censored-hazard undercounting (stops at first divergence; both arms non-deterministic, self_det_bf16=0.344, so the reference itself moves), (b) a 0.43% spec-decode teacher-force readout floor (prompt_logprobs rank-1 vs actual generated token) that blurs the served count, and (c) a smaller/different held-out stream (16,384 vs 60,000). fern's offline 2.12% is the authoritative per-position rate; this card confirms the EFFECT is real on the actual served path. Direction + order-of-magnitude match -> plain int4 head FAILS #319.",
+    "identity_safe_path": "fern #549 candidate-verify K_safe=8: cheap int4 nominator top-8 -> exact fp verify of those 8 rows -> re-argmax => identity 1.0 AND captures the +38 speed. Heavier kernel lift (fern's local experimental decode path); NOT built in this card."
+  }
+}
