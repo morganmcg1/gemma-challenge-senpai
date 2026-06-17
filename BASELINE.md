@@ -771,3 +771,26 @@ _Last updated: 2026-06-17 (**PR #571 BANK-MERGED — THREE-COMPONENT CENSUS CLOS
 - **Root cause of #607 break:** Reference AR decode ran the 3D split-KV attention path (BI=0, `is_batch_invariant=False`), NOT the 2D path used during spec-verify. Under `VLLM_BATCH_INVARIANT=1` (already pinned in submission serve.py), both sides use the 2D path → byte-exact.
 - **Implication for Option B:** #319 kernel-defect blocker removed. Recommended next gate: re-run #607 identity test with BI=1 pinned on BOTH sides (reference + served). If 0/N breaks confirmed, Option B (~427 TPS) becomes #319-compliant as served.
 - **Artifacts:** `research/validity/spec_identity_trigger_localize/` — PLAN.md, _pr_comment.md, spec_trigger_localize.py (582 lines), spec_trigger_localize_results_all.json (428 lines), run_id.txt (`4jv01n87`).
+
+### 2026-06-17 — PR #616: Spec raw flip-rate measurement (int4 Marlin M-dep under BI=1) ✓ MERGED — ANALYSIS-ONLY
+
+- **Status:** MERGED as a **characterization artifact — NOT a TPS change.** analysis_only=true, official_tps=0. Measures the raw structural flip-rate of Option B spec-verify vs M=1 AR under `VLLM_BATCH_INVARIANT=1`, characterizing the int4 Marlin GEMM M-dependence that BI=1 does NOT cover.
+- **Primary metric:** `raw_structural_flip_rate_m8_vs_m1` = **0.004318** (0.4318%; 283 flips / 65,536 tokens, 128 prompts × 512 tokens each).
+- **Test metric:** `residual_flip_rate_after_0.3nat_tolerance` = **0.0** (100% rescued at τ=0.3 nats).
+- **W&B run:** `o43uchtn`, group `specdec-raw-flip-rate`
+- **VERDICT: `MIDDLE_BAND_TOLERANCE_DEPENDENT`**
+- **Key findings:**
+  - **Scope:** 106/128 prompts have ≥1 flip; median token-onset position 125. Flips are sparse (~2.2/prompt mean) but widespread.
+  - **Gap distribution (bimodal):** ~50% of flips at gap ≈ 0.0 nats (logit ties), ~49% at gap ≈ 0.125 nats (~1 int4 quant step), ~1% at gap ≈ 0.25 nats, 100% < 0.5 nats. **All flips are int4 quantization-grid tie-breaks** — not random divergence.
+  - **Cluster-bootstrap CI:** [0.3738%, 0.4944%] (95%). Cross-validates #607 cascade (onset ratio 1.18 — consistent with flip accumulation).
+  - **Tolerance ladder:**
+    - τ = 0.0 nats → 0.3174% residual (raw flip rate minus zero-gap ties)
+    - τ = 0.2 nats → 0.0153% residual
+    - **τ = 0.3 nats → 0.0% residual (100% rescued)**
+  - **BI=1 scope boundary:** BI=1 fixes the attention-side divergence (stark #621). The 0.43% raw flips survive BI=1 because they originate in the int4 Marlin GEMM's reduction-order tie-breaks (M-dependent kernel), which is upstream of the attention path. These are two orthogonal divergence sources.
+  - **Policy framing:** The remaining #319 question is now a **tolerance-policy decision**, not a kernel defect. The spec-verify output is always within 0.3 nats of the AR logit for every flip — whether that qualifies as "token-identical" depends on how the programme defines tolerance for quantization tie-breaks.
+- **Implication for Option B:** Kernel-level blocker removed. Two-part gate for #319 compliance:
+  1. Re-run #607 identity test with BI=1 pinned on both sides (stark #621 recommended action) → expected 0 attention-path breaks.
+  2. Tolerance decision: accept τ≥0.3 nats as "identical within int4 quant precision" — all 283 remaining flips are int4 grid ties.
+  If both gates pass, Option B (~427 TPS) achieves full programme-level #319 compliance.
+- **Artifacts:** `research/specdec_raw_flip_rate/` — flip_rate.py (772 lines), flip_report.json (381 lines), .gitignore.
