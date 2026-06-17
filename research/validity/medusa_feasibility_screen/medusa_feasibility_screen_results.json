@@ -1,0 +1,754 @@
+{
+  "pr": 537,
+  "agent": "lawine",
+  "title": "Medusa feasibility: a locally-realizable quality-safe drafter win?",
+  "kind": "medusa-feasibility-screen (analysis + A10G head-forward microbench; PR step 1+3+4)",
+  "analysis_only": true,
+  "no_hf_job": true,
+  "no_launch": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "official_tps": 0,
+  "gpu_used_for": "head-forward draft-tax microbench only (random weights at deployed shapes, no model load)",
+  "wandb_group": "medusa-feasibility",
+  "model": "draft-REPLACEMENT step model (generalizes #532's draft-MULTIPLIER): t_step_medusa = (t_step_old - draft_gpu_linear) + medusa_tax; TPS = E[T]/t_step. medusa_tax MEASURED by A10G microbench at hidden=2560, Vdraft in {12288,262144}.",
+  "inputs": {
+    "tps_bx442_local_523": 439.70559,
+    "et_baseline_mtp_526": 3.849256527338719,
+    "draft_gpu_linear_ms_523": 1.554,
+    "exec_gpu_ms_523": 6.89,
+    "t_step_old_ms": 8.754167822471212,
+    "ppl_bx442_523": 2.3766643358900286,
+    "tau_lo_267": 1.0352,
+    "priv_factor_305": 0.804,
+    "hidden": 2560,
+    "vocab_full": 262144,
+    "vocab_keepset": 12288,
+    "softcap": 30.0,
+    "mtp_ladder": [
+      0.7290715372907154,
+      0.759434719768749,
+      0.7934024106576444,
+      0.8215618336886993,
+      0.834712084347121,
+      0.835989117761368,
+      0.8465829846582985
+    ],
+    "medusa_ladders": {
+      "pessimistic": [
+        0.72,
+        0.62,
+        0.53,
+        0.45,
+        0.38
+      ],
+      "central": [
+        0.76,
+        0.66,
+        0.57,
+        0.49,
+        0.42
+      ],
+      "optimistic": [
+        0.79,
+        0.7,
+        0.61,
+        0.53,
+        0.46
+      ]
+    },
+    "tree_mult": {
+      "none": 1.0,
+      "lo": 1.2,
+      "central": 1.27,
+      "hi": 1.35
+    },
+    "source_runs": {
+      "byteexact442_steptime_523": "i11p5e3y",
+      "et_per_pos_526_289": "3piz86i4/5m17r52s",
+      "mtp_ladder_532": "hpfw9e3y",
+      "quality_safe_505": "bg03bq0d",
+      "local_official_267": "nzqnd154"
+    },
+    "literature": {
+      "medusa": "arxiv:2401.10774",
+      "clover_perhead_acc": "arxiv:2405.00263",
+      "eagle": "arxiv:2401.15077"
+    }
+  },
+  "medusa_heads_K": 5,
+  "medusa_heads_K_band": [
+    4,
+    5
+  ],
+  "best_realized_E_T_medusa": 1.6545384615384615,
+  "best_realized_E_T_medusa_is_projection_not_measured": false,
+  "best_realized_E_T_medusa_band": [
+    1.5153846153846153,
+    1.7044336390317159
+  ],
+  "E_T_vs_mtp": -2.1947180658002576,
+  "E_T_vs_mtp_band": [
+    -0.6312655739467181,
+    -0.2284259894387186
+  ],
+  "medusa_draft_step_tax": 0.5299199819564819,
+  "medusa_draft_step_tax_source": "measured_microbench_a10g",
+  "medusa_draft_step_tax_band_ms": [
+    0.3850240111351013,
+    3.210239887237549
+  ],
+  "medusa_draft_step_tax_vs_eagle3": "Medusa 0.53 ms (one parallel head-forward) vs EAGLE-3 chain tax ~3.11 ms extra (m=3 central, #532/#295): Medusa draft is REPLACEMENT-cheaper, EAGLE-3 is MULTIPLIER-dearer",
+  "projected_tps_medusa": 214.03876688059913,
+  "projected_tps_medusa_official": 221.5729314747962,
+  "projected_tps_medusa_private": 178.14463690573615,
+  "projected_tps_medusa_frame": "byteexact-442 LOCAL; MEASURED free-run realized E[T] (tree-central); primary measured 12k tax",
+  "beats_442": false,
+  "crosses_500": false,
+  "headline_et_case": "measured_tree",
+  "et_floor_to_beat_442": 3.4166988095570403,
+  "et_floor_to_cross_500": 3.8650439022138467,
+  "et_central_vs_floor_442": -0.1987078561650395,
+  "et_optimistic_vs_floor_442": 0.20413172834296,
+  "drafter_is_quality_safe": true,
+  "drafter_is_quality_safe_reason": "spec-dec verify is byte-exact M=8: Medusa acceptance changes ONLY E[T] (tokens/step), NOT the emitted distribution \u2014 served output == target greedy regardless of head quality. self-det/PPL invariant to the drafter, inherited from MY #523 served stack (no re-serve).",
+  "self_det": "served r1-r2 = 1.0, attention 0/8 byte-exact microbench (#523 i11p5e3y); UNCHANGED by drafter",
+  "ppl": 2.3766643358900286,
+  "ppl_guardrail": 2.42,
+  "medusa_train_gpu_h": 0.019483883380889893,
+  "go_no_go": "NO-GO-LOCAL-REALIZE \u2014 the MEASURED free-run realized E[T]=1.65 (tree-central; single-candidate 1.52) sits FAR below the break-even E[T]=3.42 needed to beat 442 at the measured 0.530 ms tax -> 214 TPS local (-228 vs 442; crosses_500=False). Medusa's structural advantage over #532's EAGLE-3 is REAL and confirmed \u2014 the parallel draft is ~3x CHEAPER than the serial linear-MTP draft, dropping the step 12% \u2014 but the E[T] REALIZATION gap dominates: a cheap on-pod train (free-run greedy on 80 workload seqs, frozen backbone, tied head, early-stopped) realizes head-1 acc 0.33 and decays, landing ~1.9x UNDER the literature CEILING E[T]=3.22 \u2014 and that ceiling is itself only MARGINAL (< 3.42). Same capability-unbuilt-locally barrier #532 found for EAGLE-3 (head collapse): a beat-442 Medusa needs a proper large-corpus cluster train, and even then central E[T] does not clear 442. Quality-safe by construction (byte-exact M=8 verify => output==greedy; PPL 2.3767, self-det r1-r2=1.0, drafter-invariant). Reference-trajectory cross-check (biased low) corroborates: E[T]_sc 1.43.",
+  "go_no_go_rationale": "MEASUREMENT-DRIVEN verdict (supersedes the analytic projection): NO-GO-LOCAL-REALIZE \u2014 the MEASURED free-run realized E[T]=1.65 (tree-central; single-candidate 1.52) sits FAR below the break-even E[T]=3.42 needed to beat 442 at the measured 0.530 ms tax -> 214 TPS local (-228 vs 442; crosses_500=False). Medusa's structural advantage over #532's EAGLE-3 is REAL and confirmed \u2014 the parallel draft is ~3x CHEAPER than the serial linear-MTP draft, dropping the step 12% \u2014 but the E[T] REALIZATION gap dominates: a cheap on-pod train (free-run greedy on 80 workload seqs, frozen backbone, tied head, early-stopped) realizes head-1 acc 0.33 and decays, landing ~1.9x UNDER the literature CEILING E[T]=3.22 \u2014 and that ceiling is itself only MARGINAL (< 3.42). Same capability-unbuilt-locally barrier #532 found for EAGLE-3 (head collapse): a beat-442 Medusa needs a proper large-corpus cluster train, and even then central E[T] does not clear 442. Quality-safe by construction (byte-exact M=8 verify => output==greedy; PPL 2.3767, self-det r1-r2=1.0, drafter-invariant). Reference-trajectory cross-check (biased low) corroborates: E[T]_sc 1.43. || ANALYTIC-CEILING context: Medusa REVERSES the #532 EAGLE-3 tradeoff but lands MARGINAL, not a clean win. Mechanism: the parallel head draft is ~3x CHEAPER than the deployed serial linear-MTP drafter (measured tax 0.530 ms vs draft_gpu 1.554 ms), so the step drops 12% (8.75->7.73 ms) \u2014 the OPPOSITE sign of EAGLE-3's step INFLATION. BUT independent heads decay with depth (vs the MTP chain's conditioned increase), so E[T] drops 16% (MTP 3.85 -> Medusa central 3.22), and the cheaper step does NOT quite over-compensate at central: 416 TPS local (-26 vs 442). The verdict is a knife-edge E[T] race: at the measured 0.530 ms tax, Medusa beats 442 iff realized E[T] >= 3.42 and crosses 500 iff E[T] >= 3.87. The literature-anchored band is central 3.22 (just UNDER 442) / optimistic 3.62 (clears 442, approaches 500). So realized E[T] is THE deciding uncertainty \u2014 a cheap local Medusa-1 train (frozen backbone, tied 12288 lm_head, train only ResBlocks; plausibly IN-SLOT, unlike EAGLE-3's ~107 GPU-h cluster) would resolve it. Quality-safe by construction (byte-exact verify => output==greedy; PPL 2.3767, r1-r2=1.0 inherited from #523, drafter-invariant). HAPPY ACCIDENT: the base's existing 12288 lm_head-prune voids Medusa's usual reduced-vocab penalty (target restricted to the same keepset the head drafts over) AND gives the cheapest tax (int4-tied reuse).",
+  "diagnose": {
+    "et_mtp_roundtrip": 3.849256527338719,
+    "mtp_ladder_shape": "INCREASING (autoregressive chain conditioning)",
+    "medusa_ladder_shape": "DECAYING (independent heads from same h_t)",
+    "medusa_ladders_et": {
+      "pessimistic": {
+        "ladder_a1_aK": [
+          0.72,
+          0.62,
+          0.53,
+          0.45,
+          0.38
+        ],
+        "K": 5,
+        "et_single_candidate": 2.549915632,
+        "et_tree_lo": 2.8598987584,
+        "et_tree_central": 2.96839285264,
+        "et_tree_hi": 3.0923861032
+      },
+      "central": {
+        "ladder_a1_aK": [
+          0.76,
+          0.66,
+          0.57,
+          0.49,
+          0.42
+        ],
+        "K": 5,
+        "et_single_candidate": 2.7464495696000006,
+        "et_tree_lo": 3.0957394835200005,
+        "et_tree_central": 3.217990953392001,
+        "et_tree_hi": 3.357706918960001
+      },
+      "optimistic": {
+        "ladder_a1_aK": [
+          0.79,
+          0.7,
+          0.61,
+          0.53,
+          0.46
+        ],
+        "K": 5,
+        "et_single_candidate": 2.941355954,
+        "et_tree_lo": 3.3296271448,
+        "et_tree_central": 3.46552206158,
+        "et_tree_hi": 3.6208305379000003
+      }
+    },
+    "et_medusa_central": 3.217990953392001,
+    "et_medusa_band": [
+      2.8598987584,
+      3.6208305379000003
+    ],
+    "e_t_vs_mtp_central": -0.6312655739467181,
+    "medusa_loses_on_et_wins_on_step": true,
+    "keepset_voids_reduced_vocab_penalty": "byteexact-442 base lm_head pruned to 12288 (LM_HEAD_PRUNE=1, int4-pck04c-12k); target greedy restricted to keepset => Medusa head over same keepset has no coverage loss"
+  },
+  "microbench": {
+    "gpu": "NVIDIA A10G",
+    "dtype": "bf16",
+    "warmup": 30,
+    "iters": 200,
+    "by_k": {
+      "4": {
+        "resblock_only_ms": 0.2585600018501282,
+        "shared_batched_12k_ms": 0.4679679870605469,
+        "shared_batched_fullvocab_ms": 3.1385600566864014,
+        "per_head_12k_ms": 1.0915839672088623,
+        "per_head_fullvocab_ms": 11.668479919433594,
+        "shared_batched_12k_graphed_ms": 0.347135990858078,
+        "analytic_proj_read_bf16_12k_ms": 0.1048576,
+        "analytic_proj_read_int4_12k_ms": 0.0262144,
+        "est_int4_tied_shared_ms": 0.28477440185012814,
+        "peak_mem_gb": 2.79970304
+      },
+      "5": {
+        "resblock_only_ms": 0.317440003156662,
+        "shared_batched_12k_ms": 0.5299199819564819,
+        "shared_batched_fullvocab_ms": 3.210239887237549,
+        "per_head_12k_ms": 1.3670400381088257,
+        "per_head_fullvocab_ms": 14.57203197479248,
+        "shared_batched_12k_graphed_ms": 0.3850240111351013,
+        "analytic_proj_read_bf16_12k_ms": 0.1048576,
+        "analytic_proj_read_int4_12k_ms": 0.0262144,
+        "est_int4_tied_shared_ms": 0.34365440315666196,
+        "peak_mem_gb": 2.829871104
+      }
+    }
+  },
+  "tax_by_k": {
+    "4": {
+      "source": "measured_microbench_a10g",
+      "primary_ms": 0.4679679870605469,
+      "optimistic_ms": 0.347135990858078,
+      "conservative_ms": 3.1385600566864014,
+      "worst_ms": 11.668479919433594,
+      "int4_tied_ms": 0.28477440185012814
+    },
+    "5": {
+      "source": "measured_microbench_a10g",
+      "primary_ms": 0.5299199819564819,
+      "optimistic_ms": 0.3850240111351013,
+      "conservative_ms": 3.210239887237549,
+      "worst_ms": 14.57203197479248,
+      "int4_tied_ms": 0.34365440315666196
+    }
+  },
+  "breakeven_tax": {
+    "pessimistic": {
+      "et_used": 2.96839285264,
+      "max_tax_ms_for_442": -0.48434688889655053,
+      "max_tax_ms_for_500": -1.2633821171912114
+    },
+    "central": {
+      "et_used": 3.217990953392001,
+      "max_tax_ms_for_442": 0.08035469651521598,
+      "max_tax_ms_for_500": -0.76418591568721
+    },
+    "optimistic": {
+      "et_used": 3.46552206158,
+      "max_tax_ms_for_442": 0.6403798281622732,
+      "max_tax_ms_for_500": -0.26912369931121116
+    }
+  },
+  "breakeven_tax_singlecand": {
+    "pessimistic": {
+      "et_used": 2.549915632,
+      "max_tax_ms_for_442": -1.431127931068497
+    },
+    "central": {
+      "et_used": 2.7464495696000006,
+      "max_tax_ms_for_442": -0.9864810134214359
+    },
+    "optimistic": {
+      "et_used": 2.941355954,
+      "max_tax_ms_for_442": -0.5455163428332019
+    }
+  },
+  "reconciliation": {
+    "exec_plus_overhead_ms": 7.200167822471212,
+    "t_step_old_ms": 8.754167822471212,
+    "draft_gpu_linear_removed_ms": 1.554,
+    "step_reduction_pct": 11.698199518345891,
+    "et_reduction_pct": 16.399675351935027,
+    "primary_operating_point": {
+      "tax_ms": 0.5299199819564819,
+      "t_step_ms": 7.7300878044276935,
+      "tps_local": 416.294230390084,
+      "tps_official": 430.94778729981493,
+      "tps_private": 346.48202098905125,
+      "beats_442": false,
+      "crosses_500_local": false,
+      "crosses_500_official": false
+    },
+    "grid_et_x_tax": {
+      "pessimistic_singlecand": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 338.01374896367867,
+          "tps_official": 349.9118329272001,
+          "tps_private": 281.3291136734689,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 329.8689091913602,
+          "tps_official": 341.48029479489605,
+          "tps_private": 274.55015701509643,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 336.1702232371445,
+          "tps_official": 348.00341509509195,
+          "tps_private": 279.79474573645393,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 244.93907473210152,
+          "tps_official": 253.56093016267147,
+          "tps_private": 203.86298785078787,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      },
+      "pessimistic_tree": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 393.48658595847814,
+          "tps_official": 407.3373137842165,
+          "tps_private": 327.4992002825101,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 384.0050627807544,
+          "tps_official": 397.52204099063687,
+          "tps_private": 319.60772095647206,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 391.3405115858096,
+          "tps_official": 405.1156975936301,
+          "tps_private": 325.7130208652786,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 285.13704125840076,
+          "tps_official": 295.17386511069645,
+          "tps_private": 237.31978754899995,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      },
+      "central_singlecand": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 364.06605132737116,
+          "tps_official": 376.88117633409456,
+          "tps_private": 303.012465772612,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 355.29345061602925,
+          "tps_official": 367.7997800777134,
+          "tps_private": 295.7110231824816,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 362.0804364408837,
+          "tps_official": 374.8256678036028,
+          "tps_private": 301.35983691409666,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 263.8176761356482,
+          "tps_official": 273.104058335623,
+          "tps_private": 219.5756629018409,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      },
+      "central_tree": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 426.57300996036753,
+          "tps_official": 441.58837991097244,
+          "tps_private": 355.0370574484219,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 416.294230390084,
+          "tps_official": 430.94778729981493,
+          "tps_private": 346.48202098905125,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 424.2464823545584,
+          "tps_official": 439.1799585334388,
+          "tps_private": 353.10068666088483,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 309.112865040905,
+          "tps_official": 319.9936378903448,
+          "tps_private": 257.27488486383726,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      },
+      "optimistic_tree": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 459.385435914294,
+          "tps_official": 475.5558032584771,
+          "tps_private": 382.3468658198156,
+          "beats_442": true,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 448.3160022574381,
+          "tps_official": 464.09672553689984,
+          "tps_private": 373.1337673316675,
+          "beats_442": true,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 456.87994945967614,
+          "tps_official": 472.9621236806567,
+          "tps_private": 380.26154743924803,
+          "beats_442": true,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 332.89013823618546,
+          "tps_official": 344.6078711020992,
+          "tps_private": 277.06472836608776,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      },
+      "optimistic_tree_hi": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 479.9729407195353,
+          "tps_official": 496.8679882328629,
+          "tps_private": 399.4818625392218,
+          "beats_442": true,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 468.4074268633839,
+          "tps_official": 484.89536828897496,
+          "tps_private": 389.8558761043359,
+          "beats_442": true,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 477.355170090472,
+          "tps_official": 494.1580720776565,
+          "tps_private": 397.3030899504359,
+          "beats_442": true,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 347.80871593753324,
+          "tps_official": 360.05158273853436,
+          "tps_private": 289.48147252178165,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      },
+      "measured_singlecand": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 200.87756180634142,
+          "tps_official": 207.94845198192462,
+          "tps_private": 167.1905553934674,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 196.0371801361199,
+          "tps_official": 202.9376888769113,
+          "tps_private": 163.1619018570367,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 199.78197633323916,
+          "tps_official": 206.81430190016914,
+          "tps_private": 166.27869872773599,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 145.56438687520043,
+          "tps_official": 150.68825329320748,
+          "tps_private": 121.15335564773882,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      },
+      "measured_tree": {
+        "int4_tied": {
+          "tax_ms": 0.34365440315666196,
+          "t_step_ms": 7.543822225627873,
+          "tps_local": 219.32362826865977,
+          "tps_official": 227.0438199837166,
+          "tps_private": 182.54323126690815,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "primary_12k_eager": {
+          "tax_ms": 0.5299199819564819,
+          "t_step_ms": 7.7300878044276935,
+          "tps_local": 214.03876688059913,
+          "tps_official": 221.5729314747962,
+          "tps_private": 178.14463690573615,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "optimistic_graphed": {
+          "tax_ms": 0.3850240111351013,
+          "t_step_ms": 7.585191833606313,
+          "tps_local": 218.12743801784978,
+          "tps_official": 225.80552383607807,
+          "tps_private": 181.54764116420677,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        },
+        "conservative_fullvocab": {
+          "tax_ms": 3.210239887237549,
+          "t_step_ms": 10.41040770970876,
+          "tps_local": 158.93118768013636,
+          "tps_official": 164.52556548647715,
+          "tps_private": 132.27855465112765,
+          "beats_442": false,
+          "crosses_500_local": false,
+          "crosses_500_official": false
+        }
+      }
+    },
+    "max_local_any": 479.9729407195353,
+    "max_local_realistic_tax": 479.9729407195353,
+    "beats_442_across_central_optimistic_band": false,
+    "statement": "The draft-replacement model recovers the #532 EAGLE-3 case as the m>1 multiplier limit; Medusa is the m<1 limit (cheaper draft). The SAME measured 442-base decomposition that made EAGLE-3 NET-NEGATIVE makes Medusa NET-POSITIVE \u2014 the sign of (medusa_tax - draft_gpu_linear) flips the verdict."
+  },
+  "eagle3_contrast_532": {
+    "eagle3_projected_tps_central": 414.0,
+    "eagle3_build_gpu_h": 107.46577676190476,
+    "medusa_vs_eagle3_local": -199.96123311940087
+  },
+  "e_t_ceiling_literature_central": 3.217990953392001,
+  "e_t_ceiling_literature_band": [
+    2.8598987584,
+    3.6208305379000003
+  ],
+  "realized_vs_ceiling_gap": 1.5634524918535393,
+  "medusa_train": {
+    "trajectory": "freerun_base_greedy",
+    "capture_ckpt": "/tmp/osoi5-v0-baked",
+    "capture_keepset_16k_vs_deployed_12k": "captured on osoi5-v0 16k-head pre-prune base; deployed 442 base further prunes head to 12k (12k subset of 16k) -> base greedy near-identical, E[T] backbone-driven transfers (if anything 12k is marginally MORE predictable). Tax priced at deployed Vdraft=12288.",
+    "n_train_seq": 80,
+    "n_eval_seq": 40,
+    "n_new_freerun": 96,
+    "epochs": 60,
+    "weight_decay": 0.003,
+    "best_ep": 7,
+    "early_stop_best": true,
+    "measured_a_ladder_top1": [
+      0.3274725377559662,
+      0.1804945170879364,
+      0.10824176669120789,
+      0.0813186839222908,
+      0.0535714328289032
+    ],
+    "measured_a_ladder_top3": [
+      0.4969780445098877,
+      0.33269232511520386,
+      0.21181319653987885,
+      0.1815934181213379,
+      0.11538462340831757
+    ],
+    "measured_et_singlecand_direct": 1.5153846153846153,
+    "measured_et_tree_central": 1.6545384615384615,
+    "measured_et_tree_lo": 1.6184615384615384,
+    "measured_et_tree_hi": 1.6957692307692307,
+    "measured_et_top3_dense_bracket": 1.7044336390317159,
+    "realized_projection_at_measured_tax": {
+      "singlecand": {
+        "tax_ms": 0.5299199819564819,
+        "t_step_ms": 7.7300878044276935,
+        "tps_local": 196.0371801361199,
+        "tps_official": 202.9376888769113,
+        "tps_private": 163.1619018570367,
+        "beats_442": false,
+        "crosses_500_local": false,
+        "crosses_500_official": false
+      },
+      "tree_central": {
+        "tax_ms": 0.5299199819564819,
+        "t_step_ms": 7.7300878044276935,
+        "tps_local": 214.03876688059913,
+        "tps_official": 221.5729314747962,
+        "tps_private": 178.14463690573615,
+        "beats_442": false,
+        "crosses_500_local": false,
+        "crosses_500_official": false
+      },
+      "tree_lo": {
+        "tax_ms": 0.5299199819564819,
+        "t_step_ms": 7.7300878044276935,
+        "tps_local": 209.37168883573415,
+        "tps_official": 216.74157228275197,
+        "tps_private": 174.2602241153326,
+        "beats_442": false,
+        "crosses_500_local": false,
+        "crosses_500_official": false
+      },
+      "tree_hi": {
+        "tax_ms": 0.5299199819564819,
+        "t_step_ms": 7.7300878044276935,
+        "tps_local": 219.37257036044483,
+        "tps_official": 227.09448483713246,
+        "tps_private": 182.58396580905452,
+        "beats_442": false,
+        "crosses_500_local": false,
+        "crosses_500_official": false
+      }
+    },
+    "reference_trajectory_crosscheck": {
+      "trajectory": "ppl_reference (external text -> biased LOW vs deployment)",
+      "et_singlecand": 1.4301792828685258,
+      "et_tree_central": 1.5463276892430278,
+      "a_ladder_top1": [
+        0.3033864498138428,
+        0.1417330652475357,
+        0.08127490431070328,
+        0.057968128472566605,
+        0.04053784906864166
+      ],
+      "gpu_h_total": 0.07576392703586154
+    },
+    "gpu_h_total_freerun": 0.019483883380889893
+  },
+  "self_test": {
+    "conditions": {
+      "mtp_ladder_increasing": true,
+      "medusa_central_decreasing": true,
+      "medusa_ladders_in_unit": true,
+      "pess_below_central_below_opt": true,
+      "mtp_ladder_reproduces_3849": true,
+      "et_medusa_central_below_mtp": true,
+      "tree_lifts_above_singlecand": true,
+      "et_vs_mtp_negative": true,
+      "et_band_brackets_central": true,
+      "exec_plus_overhead_is_7_2": true,
+      "t_step_old_roundtrips": true,
+      "medusa_tax_below_linear_draft": true,
+      "medusa_step_below_baseline": true,
+      "step_reduction_positive": true,
+      "baseline_roundtrips_to_4397": true,
+      "beats_442_iff_central_clears_floor": true,
+      "et_floor_442_in_plausible_range": true,
+      "primary_tps_matches_grid": true,
+      "breakeven_increases_with_et": true,
+      "tps_decreases_with_tax": true,
+      "tps_increases_with_et": true,
+      "crosses_500_false_at_pessimistic": true,
+      "tau_lo_gt_one": true,
+      "priv_factor_lt_one": true,
+      "official_gt_local": true,
+      "drafter_quality_safe": true,
+      "ppl_under_guardrail": true,
+      "best_et_flag_consistent": true,
+      "verdict_present": true,
+      "no_nan_inf": true
+    },
+    "n_checks": 30,
+    "n_passed": 30,
+    "passes": true
+  },
+  "wandb_run_id": "b5jis46x"
+}
