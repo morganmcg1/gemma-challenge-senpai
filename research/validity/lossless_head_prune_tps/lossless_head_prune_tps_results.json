@@ -1,0 +1,389 @@
+{
+  "schema": "lossless_head_prune_tps_v1",
+  "pr": 552,
+  "agent": "land",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "no_submission": true,
+  "no_served_file_change": true,
+  "wandb_group": "lossless-head-prune-tps",
+  "created_at": "20260617T033049Z",
+  "provable_keep_rows": 262144,
+  "provable_prune_frac": 0.0,
+  "provable_prune_served_tps": 252.31,
+  "provable_prune_tps_gain": 0.0,
+  "empirical_keep_rows": 16384,
+  "empirical_prune_served_tps": 301.25,
+  "empirical_argmax_flip_rate": 0.09206,
+  "strict_identity_preserved": true,
+  "lossless_head_lever_is_green": false,
+  "beats_lawine_38": false,
+  "self_det": true,
+  "primary_metric": {
+    "name": "provable_prune_served_tps",
+    "value": 252.31
+  },
+  "lawine_floor_tps": 252.30599912117162,
+  "fern_floor_tps": 253.78,
+  "lawine_free_head_ceiling_tps": 328.9,
+  "lawine_int4_ceiling_tps": 292.1,
+  "lawine_int4_recover_tps": 38.3,
+  "xcheck_int4_full_recover_reproduced": 38.02,
+  "xcheck_matches_lawine_38": true,
+  "peak_gpu_mib": 2576.2,
+  "peak_mem_mib": 7019.5,
+  "verdict": "STRICT/PROVABLE TIER (PRIMARY): provably_unreachable_rows=0 -> provable_keep_rows=262144 (prune_frac=0). The attainable post-RMSNorm hidden state is a CENTERED full-dimensional ellipsoid; only zero-norm rows are provably-never-argmax and the gemma-4-E4B head has none, so a strict-identity prune keeps ALL 262144 rows and recovers +0.0 TPS (served 252.31, == the base_fullhead FLOOR, bottom of lawine's [252.30599912117162..328.9] bracket). #319 strict identity preserved BY CONSTRUCTION. lossless_head_lever_is_green=False; beats_lawine_38=False. DECISIVE NO-GO that HARDENS lawine #544: the full head is irreducible at strict identity; precision (int4 +38.3 / fp8 +24.5) is the only head lever -- and even that is not byte-exact. EMPIRICAL TIER (SECONDARY): the deployed 16k frequency cut buys +48.94 TPS (served 301.25) -- nominally > lawine's +38 -- but CLIPS the full-vocab greedy argmax on 0.01019 official / 0.09206 held-out / 0.1516 OOD positions => argmax-flip > 0 => FAILS #319 (quality-safe-but-not-strict, and worse identity risk than int4's near-tie jitter: a prune systematically removes heavy-tail tokens). To drive held-out flip ~0 you keep ~261,976 rows -> +~0 TPS. The empirical TPS/identity tradeoff is a CLIFF: rows you can prune cheaply are reachable; rows safe to prune are ~none.",
+  "stage1_provability": {
+    "vocab": 262144,
+    "hidden": 2560,
+    "lmhead_weight_path": "/senpai-run/home/student-land/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0/model.safetensors",
+    "lmhead_dtype": "bf16",
+    "norm_min": 0.9658042788505554,
+    "norm_max": 0.9901337027549744,
+    "norm_mean": 0.9832373261451721,
+    "norm_std": 0.002057461766526103,
+    "kept_norm_min": 0.9663695096969604,
+    "kept_norm_max": 0.9891639947891235,
+    "pruned_norm_min": 0.9658042788505554,
+    "pruned_norm_max": 0.9901337027549744,
+    "norm_bands_overlap": true,
+    "c_min": 0.6640625,
+    "c_max": 14.75,
+    "max_achievable_logit_kept": 453.1579895019531,
+    "max_achievable_logit_pruned": 453.186767578125,
+    "provably_unreachable_rows": 0,
+    "provable_keep_rows": 262144,
+    "provable_prune_count": 0,
+    "provable_prune_frac": 0.0,
+    "strict_identity_preserved": true,
+    "deployed_pruned_rows": 245760,
+    "provably_reachable_pruned_separation": 245592,
+    "provably_reachable_pruned_normball": 29,
+    "deployed_pruned_provably_reachable_frac": 0.99931640625,
+    "peak_gpu_mib_stage1": 1096.25048828125,
+    "bound_basis": "centered full-dimensional ellipsoid E={h: sum_i (h_i/(1+gamma_i))^2 <= hidden}; row r provably-never-argmax IFF w_r in conv(kept) in the (1+gamma)-weighted metric; E centered => no kept row pairwise-dominates a nonzero-norm row => only ||w_r||<=0.001 rows qualify; the gemma-4-E4B head has 0 such rows."
+  },
+  "stage2_microbench_tps": {
+    "M_verify": 8,
+    "eff_hbm_gbps": 500.3,
+    "matmul262k_bf16_ms_m8": 2.6829,
+    "argmax262k_ms_m8": 0.0297,
+    "rows_meas": {
+      "262144": {
+        "matmul_bf16_ms_m8": 2.68287992477417,
+        "head_bf16_ms_m8": 2.7013120651245117,
+        "argmax_ms_m8": 0.02969600073993206,
+        "matmul_bf16_ms_m1": 2.6470398902893066,
+        "head_bf16_ms_m1": 2.65830397605896,
+        "argmax_ms_m1": 0.028672000393271446
+      },
+      "131072": {
+        "matmul_bf16_ms_m8": 1.3537280559539795,
+        "head_bf16_ms_m8": 1.3670400381088257,
+        "argmax_ms_m8": 0.02969600073993206,
+        "matmul_bf16_ms_m1": 1.3260799646377563,
+        "head_bf16_ms_m1": 1.3383680582046509,
+        "argmax_ms_m1": 0.02969600073993206
+      },
+      "65536": {
+        "matmul_bf16_ms_m8": 0.6952959895133972,
+        "head_bf16_ms_m8": 0.7147520184516907,
+        "argmax_ms_m8": 0.02969600073993206,
+        "matmul_bf16_ms_m1": 0.6727679967880249,
+        "head_bf16_ms_m1": 0.6952959895133972,
+        "argmax_ms_m1": 0.02969600073993206
+      },
+      "32768": {
+        "matmul_bf16_ms_m8": 0.3604480028152466,
+        "head_bf16_ms_m8": 0.37273600697517395,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.3461120128631592,
+        "head_bf16_ms_m1": 0.35942399501800537,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "16384": {
+        "matmul_bf16_ms_m8": 0.22323200106620789,
+        "head_bf16_ms_m8": 0.2314240038394928,
+        "argmax_ms_m8": 0.02457600086927414,
+        "matmul_bf16_ms_m1": 0.18636800348758698,
+        "head_bf16_ms_m1": 0.1945600062608719,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "12288": {
+        "matmul_bf16_ms_m8": 0.13209599256515503,
+        "head_bf16_ms_m8": 0.14028799533843994,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.13209599256515503,
+        "head_bf16_ms_m1": 0.14028799533843994,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "8192": {
+        "matmul_bf16_ms_m8": 0.09011200070381165,
+        "head_bf16_ms_m8": 0.09728000313043594,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.09932799637317657,
+        "head_bf16_ms_m1": 0.10751999914646149,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "6006": {
+        "matmul_bf16_ms_m8": 0.07680000364780426,
+        "head_bf16_ms_m8": 0.09216000139713287,
+        "argmax_ms_m8": 0.026623999699950218,
+        "matmul_bf16_ms_m1": 0.07884799689054489,
+        "head_bf16_ms_m1": 0.08396799862384796,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "4096": {
+        "matmul_bf16_ms_m8": 0.04915200173854828,
+        "head_bf16_ms_m8": 0.06143999844789505,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.048128001391887665,
+        "head_bf16_ms_m1": 0.05939200147986412,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "2048": {
+        "matmul_bf16_ms_m8": 0.04505600035190582,
+        "head_bf16_ms_m8": 0.05734400078654289,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.04608000069856644,
+        "head_bf16_ms_m1": 0.05632000043988228,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "1024": {
+        "matmul_bf16_ms_m8": 0.03891199827194214,
+        "head_bf16_ms_m8": 0.05734400078654289,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.03891199827194214,
+        "head_bf16_ms_m1": 0.05734400078654289,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "512": {
+        "matmul_bf16_ms_m8": 0.03891199827194214,
+        "head_bf16_ms_m8": 0.05734400078654289,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.03276799991726875,
+        "head_bf16_ms_m1": 0.050175998359918594,
+        "argmax_ms_m1": 0.025599999353289604
+      },
+      "256": {
+        "matmul_bf16_ms_m8": 0.03891199827194214,
+        "head_bf16_ms_m8": 0.05734400078654289,
+        "argmax_ms_m8": 0.025599999353289604,
+        "matmul_bf16_ms_m1": 0.03788800165057182,
+        "head_bf16_ms_m1": 0.055296000093221664,
+        "argmax_ms_m1": 0.025599999353289604
+      }
+    },
+    "tps_curve": [
+      {
+        "rows": 262144,
+        "matmul_bf16_ms_m8": 2.6829,
+        "save_ms": 0.0,
+        "served_tps_bf16_pruned": 252.31,
+        "tps_gain_vs_floor": 0.0,
+        "frac_of_252_328_bracket": 0.0
+      },
+      {
+        "rows": 131072,
+        "matmul_bf16_ms_m8": 1.3537,
+        "save_ms": 1.3292,
+        "served_tps_bf16_pruned": 276.59,
+        "tps_gain_vs_floor": 24.29,
+        "frac_of_252_328_bracket": 0.317
+      },
+      {
+        "rows": 65536,
+        "matmul_bf16_ms_m8": 0.6953,
+        "save_ms": 1.9876,
+        "served_tps_bf16_pruned": 290.44,
+        "tps_gain_vs_floor": 38.13,
+        "frac_of_252_328_bracket": 0.498
+      },
+      {
+        "rows": 32768,
+        "matmul_bf16_ms_m8": 0.3604,
+        "save_ms": 2.3224,
+        "served_tps_bf16_pruned": 298.03,
+        "tps_gain_vs_floor": 45.72,
+        "frac_of_252_328_bracket": 0.597
+      },
+      {
+        "rows": 16384,
+        "matmul_bf16_ms_m8": 0.2232,
+        "save_ms": 2.4596,
+        "served_tps_bf16_pruned": 301.25,
+        "tps_gain_vs_floor": 48.95,
+        "frac_of_252_328_bracket": 0.639
+      },
+      {
+        "rows": 12288,
+        "matmul_bf16_ms_m8": 0.1321,
+        "save_ms": 2.5508,
+        "served_tps_bf16_pruned": 303.44,
+        "tps_gain_vs_floor": 51.13,
+        "frac_of_252_328_bracket": 0.668
+      },
+      {
+        "rows": 8192,
+        "matmul_bf16_ms_m8": 0.0901,
+        "save_ms": 2.5928,
+        "served_tps_bf16_pruned": 304.45,
+        "tps_gain_vs_floor": 52.14,
+        "frac_of_252_328_bracket": 0.681
+      },
+      {
+        "rows": 6006,
+        "matmul_bf16_ms_m8": 0.0768,
+        "save_ms": 2.6061,
+        "served_tps_bf16_pruned": 304.77,
+        "tps_gain_vs_floor": 52.47,
+        "frac_of_252_328_bracket": 0.685
+      },
+      {
+        "rows": 4096,
+        "matmul_bf16_ms_m8": 0.0492,
+        "save_ms": 2.6337,
+        "served_tps_bf16_pruned": 305.45,
+        "tps_gain_vs_floor": 53.14,
+        "frac_of_252_328_bracket": 0.694
+      },
+      {
+        "rows": 2048,
+        "matmul_bf16_ms_m8": 0.0451,
+        "save_ms": 2.6378,
+        "served_tps_bf16_pruned": 305.55,
+        "tps_gain_vs_floor": 53.24,
+        "frac_of_252_328_bracket": 0.695
+      },
+      {
+        "rows": 1024,
+        "matmul_bf16_ms_m8": 0.0389,
+        "save_ms": 2.644,
+        "served_tps_bf16_pruned": 305.7,
+        "tps_gain_vs_floor": 53.39,
+        "frac_of_252_328_bracket": 0.697
+      },
+      {
+        "rows": 512,
+        "matmul_bf16_ms_m8": 0.0389,
+        "save_ms": 2.644,
+        "served_tps_bf16_pruned": 305.7,
+        "tps_gain_vs_floor": 53.39,
+        "frac_of_252_328_bracket": 0.697
+      },
+      {
+        "rows": 256,
+        "matmul_bf16_ms_m8": 0.0389,
+        "save_ms": 2.644,
+        "served_tps_bf16_pruned": 305.7,
+        "tps_gain_vs_floor": 53.39,
+        "frac_of_252_328_bracket": 0.697
+      }
+    ],
+    "provable_prune_served_tps": 252.31,
+    "provable_prune_tps_gain": 0.0,
+    "xcheck_int4_full_recover_tps": 38.02,
+    "xcheck_int4_full_ceiling_tps": 290.33,
+    "xcheck_matches_lawine_38": true,
+    "peak_gpu_mib_stage2": 2576.1689453125
+  },
+  "stage3_empirical": {
+    "heldout_corpus": {
+      "prompts": 274,
+      "positions": 64602,
+      "distinct_reachable_rows": 251,
+      "distinct_ids_outside_16k_keepset": 96,
+      "reference_model": "google/gemma-4-E4B-it (full bf16, full-vocab greedy)"
+    },
+    "official128_corpus": {
+      "positions": 65536,
+      "distinct_reachable_rows": 6006,
+      "ids_outside_16k_keepset": 548
+    },
+    "ood_corpus": {
+      "prompts": 24,
+      "positions": 983,
+      "distinct_reachable_rows": 93
+    },
+    "official_split_distinct_build_ids": 4071,
+    "flip_vs_prune_depth_officialsplit": [
+      {
+        "keep_rows_top_freq": 256,
+        "heldout_split_flip_rate": 0.30896,
+        "served_tps_bf16": 305.7
+      },
+      {
+        "keep_rows_top_freq": 512,
+        "heldout_split_flip_rate": 0.25412,
+        "served_tps_bf16": 305.7
+      },
+      {
+        "keep_rows_top_freq": 1024,
+        "heldout_split_flip_rate": 0.20291,
+        "served_tps_bf16": 305.7
+      },
+      {
+        "keep_rows_top_freq": 2048,
+        "heldout_split_flip_rate": 0.15894,
+        "served_tps_bf16": 305.55
+      },
+      {
+        "keep_rows_top_freq": 4096,
+        "heldout_split_flip_rate": 0.12503,
+        "served_tps_bf16": 305.45
+      },
+      {
+        "keep_rows_top_freq": 6006,
+        "heldout_split_flip_rate": 0.12503,
+        "served_tps_bf16": 304.77
+      },
+      {
+        "keep_rows_top_freq": 8192,
+        "heldout_split_flip_rate": 0.12503,
+        "served_tps_bf16": 304.45
+      },
+      {
+        "keep_rows_top_freq": 12288,
+        "heldout_split_flip_rate": 0.12503,
+        "served_tps_bf16": 303.44
+      },
+      {
+        "keep_rows_top_freq": 16384,
+        "heldout_split_flip_rate": 0.12503,
+        "served_tps_bf16": 301.25
+      },
+      {
+        "keep_rows_top_freq": 32768,
+        "heldout_split_flip_rate": 0.12503,
+        "served_tps_bf16": 298.03
+      },
+      {
+        "keep_rows_top_freq": 65536,
+        "heldout_split_flip_rate": 0.12503,
+        "served_tps_bf16": 290.44
+      }
+    ],
+    "operating_point_material_tps": {
+      "empirical_keep_rows": 16384,
+      "empirical_prune_served_tps": 301.25,
+      "empirical_prune_tps_gain": 48.94,
+      "flip_official_bf16": 0.01019,
+      "flip_heldout_274p": 0.09206,
+      "flip_ood_24p": 0.15158,
+      "fails_319": true,
+      "note": "deployed osoi5-v0 16k frequency cut; the natural 'empirically-never-argmax+margin' head"
+    },
+    "operating_point_flip_safe": {
+      "empirical_keep_rows_flipsafe": 261976,
+      "empirical_flipsafe_served_tps": 252.33,
+      "empirical_flipsafe_tps_gain": 0.03,
+      "flip_heldout_274p": 0.0,
+      "source": "truevocab #414 min_identity_safe_keepset_size (held-out flips -> 0 with margin)"
+    },
+    "empirical_keep_rows": 16384,
+    "empirical_prune_served_tps": 301.25,
+    "empirical_prune_tps_gain": 48.94,
+    "empirical_argmax_flip_rate": 0.09206
+  }
+}
