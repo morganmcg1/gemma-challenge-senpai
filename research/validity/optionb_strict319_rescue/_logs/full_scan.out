@@ -1,0 +1,120 @@
+[orch] launching: --phase scan --n-prompts 128 --ctx-len 224 --traj-len 512 --gpu-mem-util 0.55 --max-batched-tokens 8192 --verbose-k 5 --out research/validity/optionb_strict319_rescue/scan_result.json (BI=1)
+[scan] model=/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0 hidden=2560 layers=42 lmhead_int4=False C=224 traj_len=512 VLLM_BATCH_INVARIANT=True
+INFO 06-18 02:45:12 [utils.py:278] non-default args: {'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 1024, 'enable_prefix_caching': True, 'gpu_memory_utilization': 0.55, 'max_num_batched_tokens': 8192, 'max_num_seqs': 16, 'disable_log_stats': True, 'quantization': 'compressed-tensors', 'enforce_eager': True, 'model': '/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0'}
+WARNING 06-18 02:45:12 [envs.py:2057] Unknown vLLM environment variable detected: VLLM_ATTENTION_BACKEND
+WARNING 06-18 02:45:12 [arg_utils.py:1552] The global random seed is set to 0. Since VLLM_ENABLE_V1_MULTIPROCESSING is set to False, this may affect the random state of the Python process that launched vLLM.
+INFO 06-18 02:45:12 [model.py:617] Resolved architecture: Gemma4ForConditionalGeneration
+INFO 06-18 02:45:12 [model.py:1752] Using max model len 1024
+INFO 06-18 02:45:14 [scheduler.py:239] Chunked prefill is enabled with max_num_batched_tokens=8192.
+INFO 06-18 02:45:14 [config.py:100] Gemma4 model has heterogeneous head dimensions (head_dim=256, global_head_dim=512). Forcing TRITON_ATTN backend to prevent mixed-backend numerical divergence.
+INFO 06-18 02:45:14 [vllm.py:977] Asynchronous scheduling is enabled.
+WARNING 06-18 02:45:14 [vllm.py:1033] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 06-18 02:45:14 [vllm.py:1058] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 06-18 02:45:14 [kernel.py:270] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 06-18 02:45:14 [vllm.py:1234] Cudagraph is disabled under eager mode
+INFO 06-18 02:45:14 [compilation.py:312] Enabled custom fusions: norm_quant, act_quant
+INFO 06-18 02:45:49 [core.py:112] Initializing a V1 LLM engine (v0.22.0) with config: model='/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', speculative_config=None, tokenizer='/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=1024, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=compressed-tensors, quantization_config=None, enforce_eager=True, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=/senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.NONE: 0>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['all'], 'ir_enable_torch_wrap': False, 'splitting_ops': [], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.NONE: 0>, 'cudagraph_num_of_warmups': 0, 'cudagraph_capture_sizes': [], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': True, 'fuse_act_quant': True, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 0, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native']), enable_flashinfer_autotune=True, moe_backend='auto', linear_backend='auto')
+/workspace/senpai/target/.venv/lib/python3.11/site-packages/torch/library.py:363: UserWarning: Warning only once for all operators,  other operators may also be overridden.
+  Overriding a previously registered kernel for the same operator and the same dispatch key
+  operator: aten::mm(Tensor self, Tensor mat2) -> Tensor
+    registered at /pytorch/build/aten/src/ATen/RegisterSchema.cpp:6
+  dispatch key: CUDA
+  previous kernel: registered at /pytorch/aten/src/ATen/LegacyBatchingRegistrations.cpp:1076
+       new kernel: registered at /workspace/senpai/target/.venv/lib/python3.11/site-packages/vllm/model_executor/layers/batch_invariant.py:913 (Triggered internally at /pytorch/aten/src/ATen/core/dispatch/OperatorEntry.cpp:208.)
+  self.m.impl(
+[W618 02:45:50.272822964 Context.cpp:541] Warning: torch.backends.cuda.preferred_blas_library is an experimental feature. If you see any error or unexpected behavior when this flag is set please file an issue on GitHub. (function operator())
+INFO 06-18 02:45:50 [parallel_state.py:1422] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://172.17.0.7:46853 backend=nccl
+INFO 06-18 02:45:50 [parallel_state.py:1735] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+INFO 06-18 02:45:50 [topk_topp_sampler.py:70] FlashInfer top-p/top-k sampling disabled via VLLM_USE_FLASHINFER_SAMPLER=0; using PyTorch-native sampler.
+INFO 06-18 02:45:50 [gpu_model_runner.py:5037] Starting to load model /senpai-run/home/student-stark/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0...
+WARNING 06-18 02:45:51 [vllm.py:1033] Enforce eager set, disabling torch.compile and CUDAGraphs. This is equivalent to setting -cc.mode=none -cc.cudagraph_mode=none
+WARNING 06-18 02:45:51 [vllm.py:1058] Inductor compilation was disabled by user settings, optimizations settings that are only active during inductor compilation will be ignored.
+INFO 06-18 02:45:51 [kernel.py:270] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['vllm_c', 'native'], fused_add_rms_norm=['vllm_c', 'native'])
+INFO 06-18 02:45:51 [vllm.py:1234] Cudagraph is disabled under eager mode
+INFO 06-18 02:45:51 [compressed_tensors_wNa16.py:112] Using MarlinLinearKernel for CompressedTensorsWNA16
+INFO 06-18 02:45:51 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.
+INFO 06-18 02:45:51 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.
+INFO 06-18 02:45:52 [weight_utils.py:922] Filesystem type for checkpoints: EXT4. Checkpoint size: 10.72 GiB. Available RAM: 704.40 GiB.
+INFO 06-18 02:45:52 [weight_utils.py:945] Auto-prefetch is disabled because the filesystem (EXT4) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.57s/it]
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:01<00:00,  1.57s/it]
+
+INFO 06-18 02:45:54 [default_loader.py:397] Loading weights took 1.82 seconds
+INFO 06-18 02:45:55 [gpu_model_runner.py:5132] Model loading took 9.85 GiB memory and 3.237472 seconds
+INFO 06-18 02:45:55 [gpu_model_runner.py:6136] Encoder cache will be initialized with a budget of 8192 tokens, and profiled with 3 video items of the maximum feature size.
+INFO 06-18 02:45:57 [marlin_utils.py:437] Marlin kernel can achieve better performance for small size_n with experimental use_atomic_add feature. You can consider set environment variable VLLM_MARLIN_USE_ATOMIC_ADD to 1 if possible.
+INFO 06-18 02:45:59 [gpu_worker.py:466] Available KV cache memory: 0.71 GiB
+INFO 06-18 02:45:59 [kv_cache_utils.py:1733] GPU KV cache size: 12,945 tokens
+INFO 06-18 02:45:59 [kv_cache_utils.py:1734] Maximum concurrency for 1,024 tokens per request: 12.64x
+INFO 06-18 02:45:59 [jit_monitor.py:54] Kernel JIT monitor activated — Triton JIT compilations during inference will be logged as warnings.
+INFO 06-18 02:45:59 [core.py:309] init engine (profile, create kv cache, warmup model) took 4.66 s
+[scan] vLLM load done in 48s
+WARNING 06-18 02:46:00 [jit_monitor.py:103] Triton kernel JIT compilation during inference: _compute_slot_mapping_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+WARNING 06-18 02:46:00 [jit_monitor.py:103] Triton kernel JIT compilation during inference: kernel_unified_attention. This causes a latency spike; consider extending warmup to cover this shape/config.
+WARNING 06-18 02:46:00 [jit_monitor.py:103] Triton kernel JIT compilation during inference: matmul_kernel_persistent. This causes a latency spike; consider extending warmup to cover this shape/config.
+WARNING 06-18 02:46:27 [jit_monitor.py:103] Triton kernel JIT compilation during inference: _log_softmax_kernel. This causes a latency spike; consider extending warmup to cover this shape/config.
+[scan] prompt 0 id=mmlu_pro-000c2031fb pos=112 break=0/112 (0.00000) len(R)=512 n_off=16 cum_pos=112 elapsed=29s
+[scan] prompt 1 id=mmlu_pro-0018946c8f pos=112 break=0/112 (0.00000) len(R)=512 n_off=16 cum_pos=224 elapsed=58s
+[scan] prompt 2 id=mmlu_pro-00193f8f1a pos=112 break=0/112 (0.00000) len(R)=512 n_off=16 cum_pos=336 elapsed=86s
+[scan] prompt 3 id=mmlu_pro-001c076309 pos=112 break=0/112 (0.00000) len(R)=512 n_off=16 cum_pos=448 elapsed=115s
+[scan] prompt 4 id=mmlu_pro-001de7fe6d pos=112 break=0/112 (0.00000) len(R)=512 n_off=16 cum_pos=560 elapsed=144s
+[scan] prompt 127 id=aime2026-8742f9e684 pos=112 break=0/112 (0.00000) len(R)=512 n_off=16 cum_pos=14035 elapsed=3610s
+[scan] unrescued_break_rate=0.001140 (16/14035)  chunk_isolated=1.0000 attn_bi=True peak=12.2GB
+[scan]   tau_flag=0.2   flag_trigger_rate=0.03570 rescued_break_rate=0.000071 (rescued_breaks=1)
+[scan]   tau_flag=0.25  flag_trigger_rate=0.03684 rescued_break_rate=0.000071 (rescued_breaks=1)
+[scan]   tau_flag=0.3   flag_trigger_rate=0.05529 rescued_break_rate=0.000000 (rescued_breaks=0)
+[scan]   tau_flag=0.5   flag_trigger_rate=0.07802 rescued_break_rate=0.000000 (rescued_breaks=0)
+[scan]   tau_flag=0.75  flag_trigger_rate=0.11820 rescued_break_rate=0.000000 (rescued_breaks=0)
+[scan]   tau_flag=1.0   flag_trigger_rate=0.15383 rescued_break_rate=0.000000 (rescued_breaks=0)
+SCAN_DONE research/validity/optionb_strict319_rescue/scan_result.json
+[rank0]:[W618 03:46:10.355851128 ProcessGroupNCCL.cpp:1575] Warning: WARNING: destroy_process_group() was not called before program exit, which can leak resources. For more info, please see https://pytorch.org/docs/stable/distributed.html#shutdown (function operator())
+
+========== OPTION-B STRICT-#319 RESCUE (PR #636) ==========
+ VERDICT                          : STRICT_319_RESCUED__TPS_VIABLE
+ rescued_break_rate (teacher_forced_scan): 0.0
+ unrescued_break_rate (scan)      : 0.001140 (16/14035)
+ min_tau_flag_for_zero_breaks     : 0.5 (fine sweep: 0.3)
+ flag_trigger_rate @ min_tau      : 0.07802
+ rescued_wall_tps (PROJECTED)     : 139.204  (beats 126.378 = True)
+ ftr breakeven vs 126.378         : 0.1702
+ tau_flag frontier:
+   tau=0.2   flag_trigger_rate=0.03570  rescued_breaks=1 (rate 0.000071)
+   tau=0.25  flag_trigger_rate=0.03684  rescued_breaks=1 (rate 0.000071)
+   tau=0.3   flag_trigger_rate=0.05529  rescued_breaks=0 (rate 0.000000)
+   tau=0.5   flag_trigger_rate=0.07802  rescued_breaks=0 (rate 0.000000)
+   tau=0.75  flag_trigger_rate=0.11820  rescued_breaks=0 (rate 0.000000)
+   tau=1.0   flag_trigger_rate=0.15383  rescued_breaks=0 (rate 0.000000)
+ controls: attn_bi=True aten_mm_bitexact=True chunk_isolated=1.0000 lmhead_int4=False
+===========================================================
+
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run ukiyyuca
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260618_034612-ukiyyuca
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stark/optionb-strict319-rescue
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ukiyyuca
+wandb: updating run metadata; uploading summary
+wandb: uploading summary
+wandb: 
+wandb: Run summary:
+wandb: aten_mm_bitexact_M1_vs_M8 True
+wandb:   attn_is_batch_invariant True
+wandb:   chunk_isolated_fraction 1
+wandb:         flag_trigger_rate 0.07802
+wandb:          flip_gap_max_nat 0.25
+wandb:       flip_margin_max_nat 0.25
+wandb:      ftr_breakeven_vs_126 0.17015
+wandb:               ftr_tau_0p2 0.0357
+wandb:              ftr_tau_0p25 0.03684
+wandb:               ftr_tau_0p3 0.05529
+wandb:                       +27 ...
+wandb: 
+wandb: 🚀 View run stark/optionb-strict319-rescue at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ukiyyuca
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260618_034612-ukiyyuca/logs
+[wandb] logged run ukiyyuca
