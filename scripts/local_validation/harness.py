@@ -122,6 +122,11 @@ def ensure_server_venv(dependencies: list[str], python: str = "3.12") -> Path:
         ensure_serving_http_compat(py)
         return py
     VENV_ROOT.mkdir(parents=True, exist_ok=True)
+    if venv.exists():
+        # A previous build was interrupted after `uv venv` succeeded but before
+        # the dependency install wrote the marker, leaving a wedged venv that
+        # `uv venv` refuses to recreate (exit 2). Clear it for a clean rebuild.
+        shutil.rmtree(venv, ignore_errors=True)
     _run([uv, "venv", str(venv), "--python", python])
     if dependencies:
         _run([uv, "pip", "install", "--python", str(py), *dependencies])
