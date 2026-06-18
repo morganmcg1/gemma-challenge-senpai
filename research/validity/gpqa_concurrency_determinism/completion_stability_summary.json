@@ -1,47 +1,92 @@
 {
-  "pr": 618,
+  "pr": 631,
+  "engine": "vllm-0.22.1rc1.dev307",
   "metric": "completion_chars (byte-proxy) + answer",
   "arms": {
-    "conc16": {
+    "conc1": {
       "n_repeats": 3,
       "n_common": 198,
       "completion_chars_flips_pairwise": {
-        "0v1": 185,
-        "0v2": 187,
-        "1v2": 187
+        "0v1": 1,
+        "0v2": 1,
+        "1v2": 0
       },
-      "completion_chars_unstable_union": 190,
-      "completion_chars_unstable_frac": 0.9596,
+      "completion_chars_unstable_union": 1,
+      "completion_chars_unstable_frac": 0.0051,
       "answer_flips_pairwise": {
-        "0v1": 89,
-        "0v2": 97,
-        "1v2": 71
+        "0v1": 1,
+        "0v2": 1,
+        "1v2": 0
       },
-      "answer_unstable_union": 120,
-      "answer_unstable_frac": 0.6061,
-      "byte_stable_but_answer_stable_gap": 70,
+      "answer_unstable_union": 1,
+      "answer_unstable_frac": 0.0051,
+      "byte_stable_but_answer_stable_gap": 0,
       "completion_deterministic": false,
       "per_rep": [
         {
           "rep": 0,
-          "accuracy": 0.20707070707070707,
-          "median_chars": 7675.0,
-          "max_chars": 31714,
-          "n_long": 22
+          "accuracy": 0.41919191919191917,
+          "median_chars": 5933.5,
+          "max_chars": 11185,
+          "n_long": 0
         },
         {
           "rep": 1,
-          "accuracy": 0.1717171717171717,
-          "median_chars": 7918.5,
-          "max_chars": 29775,
-          "n_long": 30
+          "accuracy": 0.41414141414141414,
+          "median_chars": 5895.0,
+          "max_chars": 11185,
+          "n_long": 0
         },
         {
           "rep": 2,
-          "accuracy": 0.20202020202020202,
-          "median_chars": 7688.0,
-          "max_chars": 30629,
-          "n_long": 29
+          "accuracy": 0.41414141414141414,
+          "median_chars": 5895.0,
+          "max_chars": 11185,
+          "n_long": 0
+        }
+      ],
+      "loop_char_threshold": 12000
+    },
+    "conc16": {
+      "n_repeats": 3,
+      "n_common": 198,
+      "completion_chars_flips_pairwise": {
+        "0v1": 189,
+        "0v2": 191,
+        "1v2": 184
+      },
+      "completion_chars_unstable_union": 192,
+      "completion_chars_unstable_frac": 0.9697,
+      "answer_flips_pairwise": {
+        "0v1": 67,
+        "0v2": 66,
+        "1v2": 54
+      },
+      "answer_unstable_union": 85,
+      "answer_unstable_frac": 0.4293,
+      "byte_stable_but_answer_stable_gap": 107,
+      "completion_deterministic": false,
+      "per_rep": [
+        {
+          "rep": 0,
+          "accuracy": 0.4797979797979798,
+          "median_chars": 5926.0,
+          "max_chars": 11751,
+          "n_long": 0
+        },
+        {
+          "rep": 1,
+          "accuracy": 0.45454545454545453,
+          "median_chars": 5572.0,
+          "max_chars": 10891,
+          "n_long": 0
+        },
+        {
+          "rep": 2,
+          "accuracy": 0.43434343434343436,
+          "median_chars": 6008.5,
+          "max_chars": 11442,
+          "n_long": 0
         }
       ],
       "loop_char_threshold": 12000

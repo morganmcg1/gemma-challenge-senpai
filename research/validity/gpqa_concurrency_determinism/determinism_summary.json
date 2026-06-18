@@ -1,6 +1,6 @@
 {
-  "pr": 618,
-  "engine": "vllm-0.22.0",
+  "pr": 631,
+  "engine": "vllm-0.22.1rc1.dev307",
   "checkpoint": "/workspace/gemma_build/int4_g128_lmhead",
   "model_len": 6144,
   "max_num_seqs": 16,
@@ -12,7 +12,16 @@
   "n_dataset": 198,
   "gate_bar": 0.47124,
   "gate_base_ref": 0.5236,
-  "anchor_610": {
+  "anchor_618": {
+    "run": "h26sg3ct",
+    "engine": "vllm-0.22.0",
+    "conc1_acc": 0.21212,
+    "conc1_deterministic": true,
+    "conc16_mean": 0.1936,
+    "conc16_answer_unstable": 120,
+    "verdict": "deterministic-but-cratered (~45% loop-to-cap)"
+  },
+  "anchor_610_615": {
     "run": "gho8wxxs",
     "engine": "vllm-0.22.1rc1.dev307",
     "conc16_greedy_runs": [
@@ -20,53 +29,54 @@
       0.4394
     ],
     "conc16_answer_flips": 64,
-    "sampled_10seed_mean": 0.4414
+    "healthy_acc_615": 0.486,
+    "finish_length_rate_615": 0.031
   },
   "analysis": {
     "per_run": {
       "conc1_rep0": {
-        "accuracy": 0.21212121212121213,
-        "n_correct": 42,
+        "accuracy": 0.41919191919191917,
+        "n_correct": 83,
         "n_scored": 198,
         "n_error": 0,
         "n_empty": 0,
         "empty_rate": 0.0
       },
       "conc1_rep1": {
-        "accuracy": 0.21212121212121213,
-        "n_correct": 42,
+        "accuracy": 0.41414141414141414,
+        "n_correct": 82,
         "n_scored": 198,
         "n_error": 0,
         "n_empty": 0,
         "empty_rate": 0.0
       },
       "conc1_rep2": {
-        "accuracy": 0.21212121212121213,
-        "n_correct": 42,
+        "accuracy": 0.41414141414141414,
+        "n_correct": 82,
         "n_scored": 198,
         "n_error": 0,
         "n_empty": 0,
         "empty_rate": 0.0
       },
       "conc16_rep0": {
-        "accuracy": 0.20707070707070707,
-        "n_correct": 41,
+        "accuracy": 0.4797979797979798,
+        "n_correct": 95,
         "n_scored": 198,
         "n_error": 0,
         "n_empty": 0,
         "empty_rate": 0.0
       },
       "conc16_rep1": {
-        "accuracy": 0.1717171717171717,
-        "n_correct": 34,
+        "accuracy": 0.45454545454545453,
+        "n_correct": 90,
         "n_scored": 198,
         "n_error": 0,
         "n_empty": 0,
         "empty_rate": 0.0
       },
       "conc16_rep2": {
-        "accuracy": 0.20202020202020202,
-        "n_correct": 40,
+        "accuracy": 0.43434343434343436,
+        "n_correct": 86,
         "n_scored": 198,
         "n_error": 0,
         "n_empty": 0,
@@ -77,97 +87,73 @@
       "conc16": {
         "n_repeats": 3,
         "accuracy_stats": {
-          "mean": 0.19360269360269358,
-          "sd": 0.019120903521213047,
+          "mean": 0.45622895622895615,
+          "sd": 0.02277398865062066,
           "n": 3,
-          "min": 0.1717171717171717,
-          "max": 0.20707070707070707,
-          "spread": 0.03535353535353536,
+          "min": 0.43434343434343436,
+          "max": 0.4797979797979798,
+          "spread": 0.045454545454545414,
           "vals": [
-            0.20707070707070707,
-            0.1717171717171717,
-            0.20202020202020202
+            0.4797979797979798,
+            0.45454545454545453,
+            0.43434343434343436
           ]
         },
         "answer_flips_pairwise": {
-          "0v1": 89,
-          "0v2": 97,
-          "1v2": 71
+          "0v1": 67,
+          "0v2": 66,
+          "1v2": 54
         },
-        "answer_flips_max_pairwise": 97,
-        "n_answer_unstable_union": 120,
+        "answer_flips_max_pairwise": 67,
+        "n_answer_unstable_union": 85,
         "answer_unstable_ids": [
-          "rec06pnAkLOr2t2mp",
           "rec0Arme2jcXQZnAW",
-          "rec0yTRmO1o1xCA6H",
-          "rec1oj2DveQWl9Rpw",
+          "rec0wZvZgiz320KRs",
           "rec2ZTsqazBZ3LTWZ",
-          "rec2fsnzUuvNtUYK8",
           "rec32C1ZEapBnCC0E",
-          "rec47oNPXudlTIk4y",
-          "rec4L69T0Y1AS4AFS",
-          "rec4UqStf9WUVif1f",
-          "rec5eA17Qr1ucNLUf",
+          "rec4JrWy7Il8ho5vk",
+          "rec5rjeLsEq5Fg7Oj",
           "rec6sE2CRtD4drtHg",
-          "rec8nshandHARTkrg",
+          "rec7C06XOB2h298ue",
+          "rec7qmSnbud4FHSqL",
           "rec9GugrngvsQR99A",
-          "rec9W28HgpEUeUN8k",
           "recA1i5ZAh0Uzclxp",
+          "recBGxVySx1pkrO1i",
           "recBXlqrZUCR897It",
           "recBhnXrUyTJ6WHIR",
           "recBtVK8rBVtIlXDq",
           "recCJJOeBGERaHYax",
-          "recD8oX1KevFbl7bL",
-          "recDDxpS9s8cwkqfq",
-          "recE2ihVfqEK4R9d0",
+          "recDj2Y2BbtV02Wv5",
           "recFaL6j8UMhutXrc",
-          "recG1ljJQcVy6CbSl",
-          "recGFKDUd8qgz81Zl",
-          "recGee5m84dg5FZkc",
-          "recHVUd2DkoKfedJZ",
-          "recI1ls9OXdxatHQn",
+          "recGFNRVl1qBZGwyU",
+          "recIDiDKKrN61Auyr",
           "recIMcQfaQNa6vzsT",
           "recINSFEYLCyyd08m",
           "recIOlKBsOeEcgkA1",
-          "recIj8lR4tuDgrHou",
           "recIlghoOw5VbY4Zh",
           "recJZ3QEfRKjYw9a7",
-          "recJpyGtGIsxulevT",
-          "recK9F5aqdaybl8bb",
           "recKcjTwONILZqHAX",
           "recKm6LNWykGapmCr",
+          "recKv4hFyNpViUXnL",
           "recL9MFV5zmdlle5T",
           "recLAgwx9vbgB5EHk",
+          "recLB0EkQ54bYVhnd",
           "recLSzwBUS3olCjhl",
           "recLrRirj7iXoB0rU",
-          "recN4DY9Q5V03glmQ",
-          "recNAiPUKOulQbKVP",
-          "recNFJjE5PPTqVJGv",
           "recNuT2oSnO86bxOx",
-          "recOYsaYs6RmtlTDy",
+          "recO3hvCWRGiG0odN",
           "recOvqPKUtyy9ISA1",
-          "recPL4ZPpVYxgMu57",
-          "recPSTGXK3P39yNYT",
-          "recPzW1WqRnPs57D6",
-          "recQiWOxhkXRz9NVE",
-          "recReg13iV2HwJTaA",
           "recRgabRzMaEoBRcM",
-          "recS48OsU6kVadBPW",
-          "recSBcGLPatKb3Ygu",
-          "recUBgVlkKzcRPDdK",
-          "recUc29lMDBEvurYo",
-          "recVEXvhYxAhELVqB",
-          "recWPMm91mGDLXONm",
-          "recWxGU8Q4YReJ1tb",
-          "recWzUUYBN0NuXO2k",
+          "recUOePh79cp4T2Bg",
+          "recVE8cUNHpHZIAvL",
+          "recXsYa3i2UhGF5fe",
           "recXvQ6gWAmyakrpD",
           "recYCMJWH7IpcdqwE",
           "recYOzCsevNz61Lyn",
-          "recYt8xx80OTyDsL0",
           "recZ13cwgDQf9jRd9",
           "recZSGUkn56v9kEp1",
-          "recZdZxsN0AxDx0pB",
-          "reca44yABeO2fx7UB",
+          "recZt4x514UQNnsgy",
+          "recakFKZioXUuldcd",
           "recb2M22zaD3tL6Qc",
           "recb4cGsC6BJUCU3V",
           "recb80OwMgNnceA9t",
@@ -175,173 +161,304 @@
           "reccVBrYdwsB84fGy",
           "reccVFW11Elovnf8T",
           "recclFbsjbaiVVnnV",
-          "receYQxnUBvxPcvbQ",
-          "receo3UUzRvWCqyfA",
-          "recf6ayQmL1SxKbvW",
           "recfTlTMjZBuOducT",
           "recgC4GJ8wUemlUQD",
-          "recgXxEgllSGEpELP",
           "rechKl68Uc6H7vU0N",
           "rechgQucGlrnt8KRV",
-          "recihePFulRgNKsIn",
+          "rechtUKxC6G67H7Pr",
           "reciuppdQde4FGX1z",
+          "recixxJmdux0d8LZQ",
           "recjJ54TXc04enRkZ",
-          "recjgMJaMxz4ESDF2",
+          "reck1zKeCssmN82Ga",
           "reckEnrOPFT9Ru7tW",
-          "reckYqR92oJkqJXkE",
-          "reckl6PkaEMWM50yZ",
+          "recmI7EiLv72PxmYK",
           "recmkvk6EFAmqyMxR",
-          "recmwwQJnx7ll7bqL",
           "recn3NhOhqAPLda16",
           "recnGEpF1srQpaqWq",
-          "recnawZPumSCLMVgp",
           "reco8WSc71p8zAv4q",
-          "recoiTJPGUmzAkief",
           "recooG6bivTUJpDBz",
-          "recpki12iG9RUGrz9",
           "recqFDvYKKRmbnoUb",
-          "recqGD3fxPCI59vPQ",
           "recr3VHM4zYf6dMFY",
           "recrNbtgTNoabJJi6",
-          "recrs0kUo7Ua1xhKO",
           "recs3PLPUEMiqg4P8",
           "rect4iLrSfUwkNTno",
-          "rectXfsCM1dj4Kv2c",
-          "rectlyG9pCAAuWhoB",
           "recuYEkVjdVUwA3c0",
           "recuyeuT5rQ6qDt8F",
           "recv7GsQg3f0fvB1f",
-          "recvlnu8BuLmXZhSX",
+          "recvZlMbpPz0yLDle",
+          "recw4rROcnHKNZhtK",
           "recxTy0x7M6T9ikc0",
-          "recxsX66ktJ1Lwt4f",
-          "recyPffUDqC2k7ZZO",
+          "recyrk6XBVwugG5u8",
+          "recywRj5a8EEjj2Ib",
           "reczQ4I0VpENdMtIj",
-          "reczjcMtrB1YGS2fO"
+          "reczUoM8JsxU6pYxr"
         ],
         "score_flips_pairwise": {
-          "0v1": 41,
-          "0v2": 43,
-          "1v2": 26
+          "0v1": 35,
+          "0v2": 37,
+          "1v2": 34
         },
-        "n_score_unstable_union": 55,
+        "n_score_unstable_union": 53,
         "score_unstable_ids": [
-          "rec06pnAkLOr2t2mp",
-          "rec2fsnzUuvNtUYK8",
-          "rec47oNPXudlTIk4y",
-          "rec4L69T0Y1AS4AFS",
-          "rec4UqStf9WUVif1f",
+          "rec0Arme2jcXQZnAW",
+          "rec0wZvZgiz320KRs",
+          "rec32C1ZEapBnCC0E",
           "rec6sE2CRtD4drtHg",
+          "rec7C06XOB2h298ue",
           "rec9GugrngvsQR99A",
+          "recBXlqrZUCR897It",
           "recBhnXrUyTJ6WHIR",
           "recBtVK8rBVtIlXDq",
-          "recDDxpS9s8cwkqfq",
-          "recE2ihVfqEK4R9d0",
-          "recG1ljJQcVy6CbSl",
-          "recGFKDUd8qgz81Zl",
-          "recHVUd2DkoKfedJZ",
-          "recIj8lR4tuDgrHou",
-          "recJpyGtGIsxulevT",
-          "recKcjTwONILZqHAX",
+          "recCJJOeBGERaHYax",
+          "recDj2Y2BbtV02Wv5",
+          "recIDiDKKrN61Auyr",
+          "recIMcQfaQNa6vzsT",
+          "recINSFEYLCyyd08m",
+          "recIOlKBsOeEcgkA1",
+          "recKm6LNWykGapmCr",
+          "recKv4hFyNpViUXnL",
+          "recL9MFV5zmdlle5T",
           "recLAgwx9vbgB5EHk",
+          "recLB0EkQ54bYVhnd",
+          "recLSzwBUS3olCjhl",
           "recLrRirj7iXoB0rU",
-          "recN4DY9Q5V03glmQ",
-          "recNFJjE5PPTqVJGv",
           "recNuT2oSnO86bxOx",
-          "recOYsaYs6RmtlTDy",
-          "recOvqPKUtyy9ISA1",
-          "recPL4ZPpVYxgMu57",
-          "recPSTGXK3P39yNYT",
-          "recPzW1WqRnPs57D6",
-          "recQiWOxhkXRz9NVE",
-          "recReg13iV2HwJTaA",
-          "recS48OsU6kVadBPW",
-          "recSBcGLPatKb3Ygu",
-          "recUBgVlkKzcRPDdK",
-          "recWPMm91mGDLXONm",
-          "recYt8xx80OTyDsL0",
+          "recO3hvCWRGiG0odN",
+          "recRgabRzMaEoBRcM",
+          "recXsYa3i2UhGF5fe",
+          "recYOzCsevNz61Lyn",
           "recZSGUkn56v9kEp1",
           "recb2M22zaD3tL6Qc",
-          "reccVBrYdwsB84fGy",
+          "recb4cGsC6BJUCU3V",
+          "recb80OwMgNnceA9t",
+          "reccOKzFNmyqeJ6ry",
+          "reccVFW11Elovnf8T",
           "recgC4GJ8wUemlUQD",
-          "recihePFulRgNKsIn",
-          "reciuppdQde4FGX1z",
-          "recjJ54TXc04enRkZ",
-          "recjgMJaMxz4ESDF2",
-          "reckYqR92oJkqJXkE",
-          "reckl6PkaEMWM50yZ",
-          "recmwwQJnx7ll7bqL",
-          "recnawZPumSCLMVgp",
-          "recoiTJPGUmzAkief",
+          "rechKl68Uc6H7vU0N",
+          "rechgQucGlrnt8KRV",
+          "rechtUKxC6G67H7Pr",
+          "recixxJmdux0d8LZQ",
+          "reck1zKeCssmN82Ga",
+          "reckEnrOPFT9Ru7tW",
+          "recmI7EiLv72PxmYK",
+          "recmkvk6EFAmqyMxR",
           "recooG6bivTUJpDBz",
-          "recpki12iG9RUGrz9",
           "recqFDvYKKRmbnoUb",
-          "recrs0kUo7Ua1xhKO",
+          "recs3PLPUEMiqg4P8",
+          "recuYEkVjdVUwA3c0",
           "recv7GsQg3f0fvB1f",
-          "recvlnu8BuLmXZhSX",
-          "recxsX66ktJ1Lwt4f",
-          "reczQ4I0VpENdMtIj"
+          "recvZlMbpPz0yLDle",
+          "recw4rROcnHKNZhtK",
+          "recyrk6XBVwugG5u8",
+          "recywRj5a8EEjj2Ib",
+          "reczQ4I0VpENdMtIj",
+          "reczUoM8JsxU6pYxr"
         ],
-        "deterministic": false
+        "completion_chars_flips_pairwise": {
+          "0v1": 189,
+          "0v2": 191,
+          "1v2": 184
+        },
+        "n_completion_chars_unstable_union": 192,
+        "byte_identical": false,
+        "deterministic": false,
+        "wall_times_s": [
+          285.5,
+          278.2,
+          277.6
+        ],
+        "wall_time_spread_s": 7.9,
+        "finish_length": {
+          "finish_length_rate_mean": 0.11111111111111112,
+          "finish_length_rate_per_rep": [
+            0.09090909090909091,
+            0.1111111111111111,
+            0.13131313131313133
+          ],
+          "n_length_per_rep": [
+            18,
+            22,
+            26
+          ],
+          "n_length_mean": 22.0,
+          "ctok_p50_per_rep": [
+            1920,
+            1725,
+            1727
+          ],
+          "ctok_max_per_rep": [
+            3072,
+            3072,
+            3072
+          ],
+          "stop_reason_counts_per_rep": [
+            {
+              "stop": 180,
+              "max_tokens": 18
+            },
+            {
+              "stop": 176,
+              "max_tokens": 22
+            },
+            {
+              "stop": 172,
+              "max_tokens": 26
+            }
+          ]
+        }
       },
       "conc1": {
         "n_repeats": 3,
         "accuracy_stats": {
-          "mean": 0.21212121212121213,
-          "sd": 0.0,
+          "mean": 0.4158249158249158,
+          "sd": 0.002915910450452642,
           "n": 3,
-          "min": 0.21212121212121213,
-          "max": 0.21212121212121213,
-          "spread": 0.0,
+          "min": 0.41414141414141414,
+          "max": 0.41919191919191917,
+          "spread": 0.0050505050505050275,
           "vals": [
-            0.21212121212121213,
-            0.21212121212121213,
-            0.21212121212121213
+            0.41919191919191917,
+            0.41414141414141414,
+            0.41414141414141414
           ]
         },
         "answer_flips_pairwise": {
-          "0v1": 0,
-          "0v2": 0,
+          "0v1": 1,
+          "0v2": 1,
           "1v2": 0
         },
-        "answer_flips_max_pairwise": 0,
-        "n_answer_unstable_union": 0,
-        "answer_unstable_ids": [],
+        "answer_flips_max_pairwise": 1,
+        "n_answer_unstable_union": 1,
+        "answer_unstable_ids": [
+          "rec9GugrngvsQR99A"
+        ],
         "score_flips_pairwise": {
-          "0v1": 0,
-          "0v2": 0,
+          "0v1": 1,
+          "0v2": 1,
           "1v2": 0
         },
-        "n_score_unstable_union": 0,
-        "score_unstable_ids": [],
-        "deterministic": true
+        "n_score_unstable_union": 1,
+        "score_unstable_ids": [
+          "rec9GugrngvsQR99A"
+        ],
+        "completion_chars_flips_pairwise": {
+          "0v1": 1,
+          "0v2": 1,
+          "1v2": 0
+        },
+        "n_completion_chars_unstable_union": 1,
+        "byte_identical": false,
+        "deterministic": false,
+        "wall_times_s": [
+          2979.5,
+          2971.4,
+          2971.4
+        ],
+        "wall_time_spread_s": 8.1,
+        "finish_length": {
+          "finish_length_rate_mean": 0.13131313131313133,
+          "finish_length_rate_per_rep": [
+            0.13131313131313133,
+            0.13131313131313133,
+            0.13131313131313133
+          ],
+          "n_length_per_rep": [
+            26,
+            26,
+            26
+          ],
+          "n_length_mean": 26.0,
+          "ctok_p50_per_rep": [
+            1836,
+            1836,
+            1836
+          ],
+          "ctok_max_per_rep": [
+            3072,
+            3072,
+            3072
+          ],
+          "stop_reason_counts_per_rep": [
+            {
+              "stop": 172,
+              "max_tokens": 26
+            },
+            {
+              "stop": 172,
+              "max_tokens": 26
+            },
+            {
+              "stop": 172,
+              "max_tokens": 26
+            }
+          ]
+        }
       }
     },
     "mean_compare": {
-      "conc1_mean": 0.21212121212121213,
-      "conc16_mean": 0.19360269360269358,
-      "delta_conc1_minus_conc16": 0.018518518518518545,
-      "conc1_spread": 0.0,
-      "conc16_spread": 0.03535353535353536,
-      "max_within_arm_spread": 0.03535353535353536,
+      "conc1_mean": 0.4158249158249158,
+      "conc16_mean": 0.45622895622895615,
+      "delta_conc1_minus_conc16": -0.04040404040404033,
+      "conc1_spread": 0.0050505050505050275,
+      "conc16_spread": 0.045454545454545414,
+      "max_within_arm_spread": 0.045454545454545414,
       "abs_delta_le_spread": true
+    },
+    "finish_length_overall": {
+      "mean_rate": 0.12121212121212122,
+      "worst_rate": 0.13131313131313133,
+      "per_arm_mean": {
+        "conc16": 0.11111111111111112,
+        "conc1": 0.13131313131313133
+      },
+      "healthy_threshold": 0.1,
+      "health_anchor_615": 0.031,
+      "healthy_generation": false
     }
   },
   "verdict": {
-    "substrate_for_gate_reads": "conc1",
-    "headline": "conc=1 is run-to-run DETERMINISTIC; conc=16 carries batch-composition jitter -> take GPQA gate reads at --max-connections 1",
-    "conc1_deterministic": true,
+    "VERDICT": "DEV307_HEALTHY_BUT_NONDETERMINISTIC",
+    "headline": "dev307+conc=1 is generation-HEALTHY (acc 0.416, near #615's 0.486 -- int4 NOT degenerate, unlike 0.22.0) but NOT byte-clean: NEAR-deterministic (1/198 -- an isolated FP-path flip, a ~99% collapse from conc=16's 85/198), NOT bimodal. No engine gives BOTH perfect determinism AND health (0.22.0 conc=1 was deterministic-but-cratered; dev307 conc=1 is healthy-but-1/198). clean_gate_operating_point=NONE; conc=1 is the BEST point -- needs only a 1-item CI band (vs conc=16's 85). finish_length elevated to ~0.13 (worst arm-rep) vs #615's 0.031 anchor -- a config caveat (tighter max_tokens=3072), NOT a 0.22.0-style crater (acc stays healthy).",
+    "dev307_conc1_deterministic": false,
+    "dev307_conc1_byte_identical": false,
+    "dev307_conc1_answer_unstable_union": 1,
+    "dev307_conc1_near_deterministic": true,
+    "dev307_conc16_union_unstable": 85,
+    "dev307_healthy_generation": true,
+    "dev307_accuracy_healthy": true,
+    "dev307_finish_length_elevated": true,
+    "dev307_healthy_generation_finish_length_strict": false,
+    "dev307_conc1_acc": 0.4158249158249158,
+    "clean_gate_operating_point": "NONE",
+    "finish_length_rate_overall_mean": 0.12121212121212122,
+    "finish_length_rate_worst_arm_rep": 0.13131313131313133,
+    "finish_length_rate_per_arm": {
+      "conc16": 0.11111111111111112,
+      "conc1": 0.13131313131313133
+    },
     "conc16_has_jitter": true,
-    "no_resolved_systematic_shift": true,
-    "no_resolved_systematic_shift_criterion": "abs_delta_le_spread (heuristic, n=3 underpowered)",
-    "sampled_mean_0p4414_robustness": "indirect_underpowered_recommend_dev307_crosscheck",
+    "conc16_vs_610_flips": {
+      "dev307_conc16_unstable": 85,
+      "anchor_610_flips": 64,
+      "anchor_618_0p22p0_conc16_unstable": 120
+    },
+    "mean_compare": {
+      "conc1_mean": 0.4158249158249158,
+      "conc16_mean": 0.45622895622895615,
+      "delta_conc1_minus_conc16": -0.04040404040404033,
+      "conc1_spread": 0.0050505050505050275,
+      "conc16_spread": 0.045454545454545414,
+      "max_within_arm_spread": 0.045454545454545414,
+      "abs_delta_le_spread": true
+    },
     "caveats": [
-      "vLLM 0.22.0 craters this int4_g128_lmhead build (mean 0.194, below 4-way chance) via repetition-loop degeneration (~45% of items loop to the 3072-tok cap); accuracy magnitude is NOT comparable to #610's dev307 greedy 0.4697 / base 0.5236.",
-      "conc=16 jitter magnitude (120/198 answer-unstable) is amplified vs #610's 64 by the loop-vs-parse degeneration boundary; the conc=1-deterministic / conc=16-jitter DIRECTION is engine-robust, the magnitude is 0.22.0-specific.",
-      "mean-unbiasedness is power-limited (n=3) and regime-confounded: all 3 conc=16 reps fall below the conc=1 deterministic value and the loop-absorbing mechanism predicts a mild downward bias under jitter; one-sample t of conc16 vs the conc1 point ~ -1.68, p~0.24.",
-      "greedy was measured here; the 0.4414 anchor is a 10-seed SAMPLED mean, so its robustness to concurrency is inferred from greedy determinism, not directly measured."
+      "conc=1 serial decode has a fixed reduction order, so determinism there is engine-robust IN PRINCIPLE; dev307 realizes it only ~99% (1/198 residual FP-path flip), NOT 100% the way 0.22.0 conc=1 did (0/198). So no engine is byte-clean+healthy.",
+      "TWO health axes: accuracy (ground truth for non-degeneracy; dev307 ~0.42 HEALTHY, vs 0.22.0 0.2121 cratered) and finish_length (#615 anchor 0.031; dev307 here ~0.11-0.13 ELEVATED but acc-healthy). Elevation is config-driven (max_tokens=3072 vs the 4096 accuracy floor), the config-effect the card anticipated -- not a crater.",
+      "n=3 per arm: determinism (0 vs >0 flips) is decisive at this n, but the mean-bias comparison (abs_delta_le_spread) stays an underpowered heuristic.",
+      "conc=16 union 85/198 corroborates lawine #610's 64/198 'non-faithful' finding (same order of magnitude; n=3 sampling of the unstable set) and is far below 0.22.0's 120/198."
     ]
   },
-  "peak_gpu_gb": 19.11,
+  "peak_gpu_gb": 20.31,
   "analysis_only": true,
   "official_tps": 0
 }

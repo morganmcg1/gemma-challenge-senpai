@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PR #618 supplement: completion-length (byte-proxy) determinism per arm.
+"""PR #631 supplement: completion-length (byte-proxy) determinism per arm on dev307.
 
 The main sweep (run_sweep.py) measures determinism at the *parsed-answer* level
 (`n_answer_unstable_union`). That under-counts engine nondeterminism: two reps
@@ -26,7 +26,10 @@ HERE = Path(__file__).resolve().parent
 RES = HERE / "results"
 CONCS = [1, 16]
 REPEATS = 3
-LOOP_CHAR_THRESHOLD = 12000  # ~loop-to-cap proxy; 0.22.0 loops run ~25-32k chars
+LOOP_CHAR_THRESHOLD = 12000  # ~loop-to-cap proxy; 0.22.0 loops ran ~25-32k chars (#618).
+# On healthy dev307 (#615) loops should be rare -> n_long ~ 0. finish_length_rate
+# (recorded natively by run_eval.py now) is the authoritative crater detector; this
+# char-proxy is a coarser byte-level cross-check kept for #618 side-by-side.
 
 
 def load(conc: int, rep: int) -> dict | None:
@@ -53,7 +56,8 @@ def _union_unstable(maps: list[dict], common: set[str]) -> list[str]:
 
 
 def main() -> int:
-    out: dict = {"pr": 618, "metric": "completion_chars (byte-proxy) + answer", "arms": {}}
+    out: dict = {"pr": 631, "engine": "vllm-0.22.1rc1.dev307",
+                 "metric": "completion_chars (byte-proxy) + answer", "arms": {}}
     for conc in CONCS:
         reps = [d for r in range(REPEATS) if (d := load(conc, r)) is not None]
         if len(reps) < 2:
