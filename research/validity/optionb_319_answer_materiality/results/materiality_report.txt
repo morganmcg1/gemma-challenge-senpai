@@ -1,6 +1,18 @@
 GREEDY ANSWER-MATERIALITY: option-B spec vs AR, same int4 body (PR #626)
 stack=vllm==0.22.0  GREEDY matched-arm paired (spec=int4+MTP-K7 ON M=8, ar=int4 spec OFF M=1, same body, MAX_NUM_SEQS=1 serial)
 
+=== AIME  (n_clean=60 / common=60) ===
+  prompt_sha gate: PASS   serving errors: spec=0 ar=0 (symmetric=True)
+  (a) TOKEN div: official=DIVERGENT  divergent-items 57/60 (cascade 95.000%)
+      per-step HAZARD (un-cascaded) = 0.1047%  [#616 anchor ~0.43%]  onset median=713
+  (b) ANSWER div rate = 58.3333% (35/60)   [HEADLINE]
+  (c) spec acc=0.3833 ar acc=0.4000  net delta(spec-ar)=-0.0167 CI95=[-0.0833, 0.05]  contains0=True
+      McNemar: b(spec>ar)=2 c(ar>spec)=3 p_exact=1.0000
+  (d) flips<0.5nat=1.0 (rescued@tau0.3=1.0, probed=57, outside_topk=0)
+      gap median=0.125 p90=0.125 max=0.25
+  large-margin answer flips: NONE
+  --> aime verdict: RESIDUAL_ANSWER_IMMATERIAL
+
 === GPQA  (n_clean=198 / common=198) ===
   prompt_sha gate: PASS   serving errors: spec=0 ar=0 (symmetric=True)
   (a) TOKEN div: official=DIVERGENT  divergent-items 196/198 (cascade 98.990%)
@@ -25,6 +37,21 @@ stack=vllm==0.22.0  GREEDY matched-arm paired (spec=int4+MTP-K7 ON M=8, ar=int4 
   large-margin answer flips: NONE
   --> gsm8k verdict: RESIDUAL_ANSWER_IMMATERIAL
 
-POOLED: token_div_rate_greedy(hazard)=0.2182% [#616 ~0.43%]  frac_flips<0.5nat=1.0 (probed=357, outside_topk=0)  large-margin-answer-flips=0
+POOLED: token_div_rate_greedy(hazard)=0.1899% [#616 ~0.43%]  frac_flips<0.5nat=1.0 (probed=414, outside_topk=0)  large-margin-answer-flips=0
 
 HEADLINE VERDICT: RESIDUAL_ANSWER_IMMATERIAL
+
+================================================================
+PR #637 MATERIALITY PACKET  (AIME greedy leg + tightened GPQA net-Δ CI)
+  legs present: aime=True gpqa=True  (GPQA CI half-width target ≤0.04)
+  [AIME]  answer_div=0.5833333333333334  net Δ=-0.016666666666666663 CI95=[-0.08333333333333337, 0.050000000000000044] (∋0=True, hw=0.06666666666666671)
+          flips<0.5nat=1.0  !! LARGE-MARGIN ANSWER FLIPS = 0 (DECISIVE; target 0)  n_clean=60
+  [AIME quality]  optionb_aime(all-60)=0.3833 (clears 0.42 bar=False)  AR-base=0.4000  spec/AR=95.833%
+          2024-only: optionb=0.4333 AR=0.4333  vs ubel base 0.4667 -> pct_of_base=92.851% (clears 0.42 bar=True)
+  [GPQA]  net Δ=-0.010101010101010055
+          UNITS CI95 (±4pp target)=[-0.07070707070707072, 0.0505050505050505] (∋0=True, hw=0.06060606060606061 -> target_met=False)
+          BY-QUESTION CI95 (honest)=[-0.07070707070707072, 0.0505050505050505] (∋0=True, hw=0.06060606060606061)
+          n_units=198 n_questions=198 multi_shuffle=False  large-margin-flips=0
+          (est n_units to hit ±4pp half-width target ≈ 455)
+
+PACKET #637 VERDICT: AIME_IMMATERIAL_HOLDS__GPQA_CI_OPTIONAL

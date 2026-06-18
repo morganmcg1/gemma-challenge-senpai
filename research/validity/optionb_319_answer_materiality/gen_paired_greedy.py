@@ -80,14 +80,19 @@ DRAFTER = "/tmp/qat-assistant"
 PORT = 8000
 MODEL = "gemma-4-e4b-it"
 
+# MAX_MODEL_LEN is overridable via --max-model-len (main() sets the module global).
+# Leg-2 GPQA stays at 6144 to pool byte-for-byte with the #626-banked 198; Leg-1 AIME
+# uses the PR #637 literal gb6144 = (--max-model-len 8192, max_tokens 6144) so long math
+# CoT gets the full 6144 generation budget regardless of prompt length.
 MAX_MODEL_LEN = 6144
-# gb6144 (#612 clean budget): fill the 6144 context with generation room. The OUTPUT
-# budget is clamped per item to MAX_MODEL_LEN - prompt_len - CONTEXT_MARGIN so a long CoT
-# uses the whole remaining context (fern #612: 0% GPQA truncation), without vLLM's
+# gb6144 (#612 clean budget): fill the context with generation room. The OUTPUT budget is
+# clamped per item to MAX_MODEL_LEN - prompt_len - CONTEXT_MARGIN so a long CoT uses the
+# whole remaining context (fern #612: 0% GPQA truncation), without vLLM's
 # prompt+max_tokens>max_model_len 400. A flat max_tokens=MAX_MODEL_LEN leaves no prompt
 # room and 400s every item — the clamp is what makes "gb6144" actually mean gb6144.
 GPQA_MAX_TOKENS = 6144   # intent: fill context (clamped below); long-CoT room
 GSM8K_MAX_TOKENS = 512   # faithful GSM8K gate protocol (#533); answers are short, fits
+AIME_MAX_TOKENS = 6144   # PR #637 Leg 1: full gen budget for long math CoT (clamped below)
 MIN_TOKENS = 8           # #541 first-token-EOS guard
 CONTEXT_MARGIN = 8       # headroom so prompt+max_tokens stays < MAX_MODEL_LEN
 N_LOGPROBS = 20          # decode-step top-k for the gap probe (#616 near-tie character)
@@ -345,6 +350,12 @@ def gen_arm(arm: str, kind: str, items: list[dict], srv, max_tokens: int) -> Non
                 })
                 if kind == "gpqa":
                     rec["target"] = it["target"]; rec["n_choices"] = it["n_choices"]
+                    # carry the underlying question + shuffle seed for the by-question
+                    # cluster-bootstrap sensitivity (PR #637 multi-shuffle pool).
+                    rec["base_qid"] = it.get("base_qid", it["id"])
+                    rec["shuffle_seed"] = it.get("shuffle_seed")
+                elif kind == "aime":
+                    rec["gold"] = it.get("gold"); rec["year"] = it.get("year")
                 else:
                     rec["gold"] = it.get("gold")
             except Exception as exc:  # noqa: BLE001
@@ -469,13 +480,23 @@ def serve_arm(arm: str, eval_items: dict[str, list[dict]], evals: list[str],
 
 
 def main() -> int:
+    global MAX_MODEL_LEN
     ap = argparse.ArgumentParser()
     ap.add_argument("--arms", default="spec,ar")
     ap.add_argument("--evals", default="gpqa,gsm8k")
     ap.add_argument("--mode", default="full", choices=["smoke", "full"])
     ap.add_argument("--no-probe", action="store_true", help="skip the logit-gap probe")
+    ap.add_argument("--max-model-len", type=int, default=MAX_MODEL_LEN,
+                    help="server context (per-arm boot). Keep 6144 for GPQA to pool with "
+                         "the #626 banked 198; 8192 for the AIME leg (PR #637 gb6144).")
+    ap.add_argument("--gpqa-shuffle-seeds", default="",
+                    help="comma list of EXTRA GPQA choice-shuffle seeds beyond the primary "
+                         f"{evalsets.GPQA_SEED} (PR #637 Leg 2 n-extension). Empty = #626 behavior.")
+    ap.add_argument("--aime-years", default=",".join(evalsets.AIME_YEARS_DEFAULT),
+                    help="comma list from {2024,2025-I,2025-II,2025,...} for the AIME leg.")
     args = ap.parse_args()
     RES.mkdir(parents=True, exist_ok=True)
+    MAX_MODEL_LEN = int(args.max_model_len)
     smoke = args.mode == "smoke"
     evals = [e.strip() for e in args.evals.split(",") if e.strip()]
     arms = [a.strip() for a in args.arms.split(",") if a.strip()]
@@ -483,11 +504,24 @@ def main() -> int:
     for note in paths.prepare_local_gpu_env():
         print(f"[gpu] {note}", flush=True)
 
-    print("[gen] building eval sets (tokenize once, shared across arms)...", flush=True)
+    print(f"[gen] building eval sets (tokenize once, shared across arms) "
+          f"max_model_len={MAX_MODEL_LEN}...", flush=True)
     tok = evalsets.load_tokenizer()
     eval_items: dict[str, list[dict]] = {}
+    gpqa_seeds: list[int] = [evalsets.GPQA_SEED] + [
+        int(s) for s in args.gpqa_shuffle_seeds.split(",") if s.strip()
+    ]
     if "gpqa" in evals:
-        eval_items["gpqa"] = evalsets.build_gpqa_items(tok, limit=4 if smoke else 0)
+        eval_items["gpqa"] = evalsets.build_gpqa_items_multi(
+            tok, seeds=gpqa_seeds, limit=4 if smoke else 0)
+        nseeds = len(gpqa_seeds)
+        print(f"[gen] gpqa shuffle seeds={gpqa_seeds} "
+              f"({nseeds} permutation{'s' if nseeds != 1 else ''} pooled)", flush=True)
+    if "aime" in evals:
+        years = [y.strip() for y in args.aime_years.split(",") if y.strip()]
+        eval_items["aime"] = evalsets.build_aime_items(
+            tok, years=years, limit=4 if smoke else 0)
+        print(f"[gen] aime years={years}", flush=True)
     if "gsm8k" in evals:
         gs, sig = evalsets.build_gsm8k_items(tok, limit=16 if smoke else 0)
         eval_items["gsm8k"] = gs
@@ -499,6 +533,7 @@ def main() -> int:
     max_tokens_by_kind = {
         "gpqa": (256 if smoke else GPQA_MAX_TOKENS),
         "gsm8k": (256 if smoke else GSM8K_MAX_TOKENS),
+        "aime": (256 if smoke else AIME_MAX_TOKENS),
     }
 
     meta: dict[str, Any] = {"peaks": {}}
@@ -506,11 +541,34 @@ def main() -> int:
     for arm in arms:
         m = serve_arm(arm, eval_items, evals, max_tokens_by_kind, do_probe, tok)
         meta["peaks"][arm] = m["peak_vram_gb"]
-    (RES / "gen_meta.json").write_text(json.dumps({
-        "arms": arms, "evals": evals, "mode": args.mode,
+    # Provenance MERGES across invocations: the AIME leg (max_model_len=8192) and the
+    # GPQA leg (6144) run separately, so accumulate a per-eval config map instead of
+    # letting the second invocation clobber the first. Each eval records the budget it
+    # was actually generated under.
+    meta_path = RES / "gen_meta.json"
+    prev: dict[str, Any] = {}
+    if meta_path.exists():
+        try:
+            prev = json.loads(meta_path.read_text())
+        except (ValueError, OSError):
+            prev = {}
+    per_eval_cfg: dict[str, Any] = dict(prev.get("per_eval_config", {}))
+    for k in evals:
+        per_eval_cfg[k] = {
+            "max_model_len": MAX_MODEL_LEN,
+            "max_tokens": max_tokens_by_kind.get(k),
+            **({"gpqa_shuffle_seeds": gpqa_seeds} if k == "gpqa" else {}),
+            **({"aime_years": args.aime_years} if k == "aime" else {}),
+        }
+    peaks = dict(prev.get("peaks", {})); peaks.update(meta["peaks"])
+    meta_path.write_text(json.dumps({
+        "arms": arms, "evals": sorted(set(prev.get("evals", [])) | set(evals)),
+        "mode": args.mode, "last_invocation_evals": evals,
         "max_tokens_by_kind": max_tokens_by_kind, "max_model_len": MAX_MODEL_LEN,
+        "per_eval_config": per_eval_cfg,
+        "gpqa_shuffle_seeds": gpqa_seeds, "aime_years": args.aime_years,
         "min_tokens": MIN_TOKENS, "max_num_seqs": 1, "batch_invariant": 1,
-        "peaks": meta["peaks"], "analysis_only": True, "official_tps": 0,
+        "peaks": peaks, "analysis_only": True, "official_tps": 0,
     }, indent=2))
     print(f"[gen] ALL ARMS COMPLETE {time.strftime('%H:%M:%S')}", flush=True)
     return 0
