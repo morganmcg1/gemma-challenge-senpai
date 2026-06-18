@@ -1,0 +1,109 @@
+{
+  "pr": 662,
+  "analysis_only": true,
+  "official_tps": 0,
+  "anchors": {
+    "bf16_base": 0.4667,
+    "bar_0p90": 0.42,
+    "official_g32": 0.4167
+  },
+  "cells": {
+    "shipped_g128": {
+      "arm": "shipped_g128",
+      "n": 60,
+      "n_correct": 25,
+      "maj1_acc": 0.4166666666666667,
+      "wilson95": [
+        0.30064278558341617,
+        0.5427191897735989
+      ],
+      "pct_of_bf16_base": 0.892793371902007,
+      "clears_0p420": false
+    },
+    "our_g128_bf16head": {
+      "arm": "our_g128_bf16head",
+      "n": 60,
+      "n_correct": 23,
+      "maj1_acc": 0.38333333333333336,
+      "wilson95": [
+        0.27088272374082023,
+        0.5098240417590008
+      ],
+      "pct_of_bf16_base": 0.8213699021498465,
+      "clears_0p420": false
+    },
+    "our_g128_int8head": {
+      "arm": "our_g128_int8head",
+      "n": 60,
+      "n_correct": 25,
+      "maj1_acc": 0.4166666666666667,
+      "wilson95": [
+        0.30064278558341617,
+        0.5427191897735989
+      ],
+      "pct_of_bf16_base": 0.892793371902007,
+      "clears_0p420": false
+    }
+  },
+  "headline_delta_head_bf16head_minus_shipped": {
+    "arm1": "our_g128_bf16head",
+    "arm2": "shipped_g128",
+    "n_paired": 60,
+    "table": {
+      "both_correct": 20,
+      "our_g128_bf16head_only": 3,
+      "shipped_g128_only": 5,
+      "both_wrong": 32
+    },
+    "delta_acc": -0.033333333333333326,
+    "newcombe95": [
+      -0.12278318645811812,
+      0.057232805428938174
+    ],
+    "mcnemar_b": 3,
+    "mcnemar_c": 5,
+    "mcnemar_exact_p": 0.7265625,
+    "significant_0p05": false
+  },
+  "calibration_residual_officialg32_minus_bf16head": 0.033366666666666656,
+  "int8head_minus_shipped": {
+    "arm1": "our_g128_int8head",
+    "arm2": "shipped_g128",
+    "n_paired": 60,
+    "table": {
+      "both_correct": 21,
+      "our_g128_int8head_only": 4,
+      "shipped_g128_only": 4,
+      "both_wrong": 31
+    },
+    "delta_acc": 0.0,
+    "newcombe95": [
+      -0.09013039043399548,
+      0.0901303904339955
+    ],
+    "mcnemar_b": 4,
+    "mcnemar_c": 4,
+    "mcnemar_exact_p": 1.0,
+    "significant_0p05": false
+  },
+  "bf16head_minus_int8head": {
+    "arm1": "our_g128_bf16head",
+    "arm2": "our_g128_int8head",
+    "n_paired": 60,
+    "table": {
+      "both_correct": 22,
+      "our_g128_bf16head_only": 1,
+      "our_g128_int8head_only": 3,
+      "both_wrong": 34
+    },
+    "delta_acc": -0.033333333333333326,
+    "newcombe95": [
+      -0.09704299232337062,
+      0.03085744674382143
+    ],
+    "mcnemar_b": 1,
+    "mcnemar_c": 3,
+    "mcnemar_exact_p": 0.625,
+    "significant_0p05": false
+  }
+}

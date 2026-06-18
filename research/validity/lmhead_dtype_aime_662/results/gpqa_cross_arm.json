@@ -1,0 +1,69 @@
+{
+  "per_arm": {
+    "shipped_g128": {
+      "n": 198,
+      "n_correct": 67,
+      "acc": 0.3383838383838384,
+      "wilson95": [
+        0.27611171338667023,
+        0.4068077404562868
+      ]
+    },
+    "our_g128_int8head": {
+      "n": 198,
+      "n_correct": 65,
+      "acc": 0.3282828282828283,
+      "wilson95": [
+        0.2666857037039899,
+        0.3964162160041519
+      ]
+    },
+    "our_g128_bf16head": {
+      "n": 198,
+      "n_correct": 69,
+      "acc": 0.3484848484848485,
+      "wilson95": [
+        0.28557020747932144,
+        0.41716678049845074
+      ]
+    }
+  },
+  "pairwise": {
+    "shipped_g128__vs__our_g128_int8head": {
+      "n_paired": 198,
+      "delta_acc": 0.01010101010101011,
+      "newcombe95": [
+        -0.053794995298253295,
+        0.07388300207934277
+      ],
+      "mcnemar_b": 22,
+      "mcnemar_c": 20,
+      "mcnemar_exact_p": 0.8776143287523155,
+      "significant_0p05": false
+    },
+    "shipped_g128__vs__our_g128_bf16head": {
+      "n_paired": 198,
+      "delta_acc": -0.01010101010101011,
+      "newcombe95": [
+        -0.07532800677812328,
+        0.055254239739777014
+      ],
+      "mcnemar_b": 21,
+      "mcnemar_c": 23,
+      "mcnemar_exact_p": 0.880395821280672,
+      "significant_0p05": false
+    },
+    "our_g128_int8head__vs__our_g128_bf16head": {
+      "n_paired": 198,
+      "delta_acc": -0.02020202020202022,
+      "newcombe95": [
+        -0.07585555498366972,
+        0.035607256048312934
+      ],
+      "mcnemar_b": 14,
+      "mcnemar_c": 18,
+      "mcnemar_exact_p": 0.5966148958541453,
+      "significant_0p05": false
+    }
+  }
+}
