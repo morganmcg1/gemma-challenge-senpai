@@ -1,0 +1,1023 @@
+{
+  "phase": "gemm_width_microbench",
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm_count": 80,
+    "cap": [
+      8,
+      6
+    ],
+    "total_mem_gib": 22.06
+  },
+  "n_trials": 8,
+  "verify_M": 6,
+  "M_list": [
+    1,
+    2,
+    4,
+    6,
+    8
+  ],
+  "canonical_pad_M": 8,
+  "group_sizes": [
+    128,
+    -1
+  ],
+  "knobs": {
+    "deployed": [
+      false,
+      true
+    ],
+    "atomic_on": [
+      true,
+      true
+    ],
+    "fp16_reduce": [
+      false,
+      false
+    ],
+    "atomic_fp16": [
+      true,
+      false
+    ]
+  },
+  "any_nan": false,
+  "results": {
+    "g128": {
+      "qkv_proj": {
+        "size_k": 2560,
+        "size_n": 3072,
+        "group_size": 128,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "o_proj": {
+        "size_k": 2048,
+        "size_n": 2560,
+        "group_size": 128,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "gate_up_proj": {
+        "size_k": 2560,
+        "size_n": 20480,
+        "group_size": 128,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "down_proj": {
+        "size_k": 10240,
+        "size_n": 2560,
+        "group_size": 128,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "lm_head": {
+        "size_k": 2560,
+        "size_n": 16384,
+        "group_size": 128,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      }
+    },
+    "g-1": {
+      "qkv_proj": {
+        "size_k": 2560,
+        "size_n": 3072,
+        "group_size": -1,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "o_proj": {
+        "size_k": 2048,
+        "size_n": 2560,
+        "group_size": -1,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "gate_up_proj": {
+        "size_k": 2560,
+        "size_n": 20480,
+        "group_size": -1,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "down_proj": {
+        "size_k": 10240,
+        "size_n": 2560,
+        "group_size": -1,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      },
+      "lm_head": {
+        "size_k": 2560,
+        "size_n": 16384,
+        "group_size": -1,
+        "heuristic_use_atomic_add_at_M6": false,
+        "knobs": {
+          "deployed": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_on": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": true,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "fp16_reduce": {
+            "use_atomic_add": false,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          },
+          "atomic_fp16": {
+            "use_atomic_add": true,
+            "use_fp32_reduce": false,
+            "m_invariant_byte_rate": {
+              "1": 1.0,
+              "2": 1.0,
+              "4": 1.0,
+              "6": 1.0,
+              "8": 1.0
+            },
+            "max_abs_diff_vs_perrow": {
+              "1": 0.0,
+              "2": 0.0,
+              "4": 0.0,
+              "6": 0.0,
+              "8": 0.0
+            },
+            "harness_sensitivity_byte_rate": 0.875,
+            "run_to_run_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_byte_rate": 1.0,
+            "pad_to_canonical_M1_vs_M6_maxdiff": 0.0
+          }
+        }
+      }
+    }
+  },
+  "elapsed_s": 8.8,
+  "peak_mem_mib": 803.63,
+  "derived": {
+    "marlin_gemm_is_m_invariant_as_deployed": true,
+    "deployed_min_byte_rate_M6": 1.0,
+    "deployed_max_abs_diff_M6": 0.0,
+    "verify_gemm_byte_identical_achievable": 1,
+    "winning_config": "deployed",
+    "pad_to_canonical_recovers_identity": true,
+    "harness_positive_control_valid": true,
+    "note": "verify_gemm_byte_identical_achievable=1 means a config (incl. the deployed one, i.e. no change) makes the int4 verify-GEMM byte-identical to AR-width at M=6 for ALL deployed shapes. This is necessary but NOT sufficient for lossless verify: if the GEMM is already invariant, the greedy break is sourced elsewhere (attention reduction, #491) and verify_gemm_byte_identical_achievable=1 carries zero TPS cost but does not by itself fix greedy identity."
+  }
+}

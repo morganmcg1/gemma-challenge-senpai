@@ -1,0 +1,70 @@
+{
+  "phase": "verify_break_fullforward",
+  "model_dir": "/senpai-run/home/student-land/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+  "margin_model_full_vocab": true,
+  "verify_width": 6,
+  "n_prompts": 64,
+  "n_new": 48,
+  "topk": 8,
+  "near_tie_threshold": 0.5,
+  "n_positions": 3072,
+  "n_flip": 5,
+  "n_bitdiff": 2751,
+  "fullforward_frac_steps_argmax_break": 0.0016276041666666667,
+  "fullforward_frac_steps_bitdiff": 0.8955078125,
+  "fullforward_seq_break_rate": 0.078125,
+  "n_prompts_with_flip": 5,
+  "near_tie_n_positions": 249,
+  "near_tie_n_flip": 5,
+  "near_tie_break_rate": 0.020080321285140562,
+  "ar_vs_ar_token_identity": 1.0,
+  "ar_vs_ar_positions": 768,
+  "max_m1_margin_at_break": 0.125,
+  "min_m1_margin_at_break": 0.0,
+  "flip_examples": [
+    {
+      "prompt_index": 7,
+      "absolute_position": 170,
+      "ref_tok": 886,
+      "verify_argmax": 5026,
+      "m1_margin": 0.0,
+      "near_tie": true
+    },
+    {
+      "prompt_index": 16,
+      "absolute_position": 276,
+      "ref_tok": 791,
+      "verify_argmax": 725,
+      "m1_margin": 0.125,
+      "near_tie": true
+    },
+    {
+      "prompt_index": 29,
+      "absolute_position": 244,
+      "ref_tok": 815,
+      "verify_argmax": 8150,
+      "m1_margin": 0.0,
+      "near_tie": true
+    },
+    {
+      "prompt_index": 40,
+      "absolute_position": 235,
+      "ref_tok": 236761,
+      "verify_argmax": 6131,
+      "m1_margin": 0.125,
+      "near_tie": true
+    },
+    {
+      "prompt_index": 45,
+      "absolute_position": 275,
+      "ref_tok": 2866,
+      "verify_argmax": 236792,
+      "m1_margin": 0.125,
+      "near_tie": true
+    }
+  ],
+  "any_nan": false,
+  "peak_mem_mib": 0.0,
+  "elapsed_s": 524.5,
+  "interpretation": "Leg A: g=128 Marlin GEMMs byte-identical M=1 vs M=6 (maxdiff=0, all knobs). So a nonzero fullforward break here is NOT the GEMM -- it is the M-dependent flash split-KV attention reduction. AR-vs-AR identity confirms the M=1 reference is deterministic (the break is a width effect, not run-to-run noise)."
+}
