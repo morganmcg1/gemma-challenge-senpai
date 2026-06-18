@@ -1,0 +1,19 @@
+τ=0.3-nat TOLERANCE-#319 ANSWER DOSSIER (PR #641) — Option-B (int4+spec) vs strict int4-AR
+source: denken #626 (W&B bj8d88gf) on-branch paired greedy streams; reused, not re-run
+design: GREEDY matched-arm paired (spec=int4+MTP-K7 ON M=8, ar=int4 spec OFF M=1, same int4 body, vllm==0.22.0, BI=1, MAX_NUM_SEQS=1 serial)
+
+bench                    n_q             tok_div   ans_diffs(strict)  grade_flips(strict)   choice_resid@τ0.3    grade_resid@τ0.3      net_Δ(spec-ar)             verdict
+gpqa                     198                 196          59 (29.8%)                  38                   1                   0  -0.0101[-0.071,+0.051]  TOLERANCE_RESCUES_ALL
+gsm8k                    500                 161           27 (5.4%)                  13                   0                   0  -0.0020[-0.016,+0.012]  TOLERANCE_RESCUES_ALL
+POOLED                   698                 357                  86                  51                   1                   0  -0.0043[-0.024,+0.016]  TOLERANCE_ANSWER_SAFE_GRADED
+
+SCOPED OUT (no paired int4-AR stream; needs net-new harness + fresh gen — flag for routing):
+  - mmlu_pro: no paired int4-AR greedy stream on branch; #626 harness builds only gpqa/gsm8k items. Option-B-only greedy gb6144: 0.664 (0p22) / 0.664 (dev307).
+  - aime: no paired int4-AR greedy stream on branch; long free-form maj@1 reasoning has the largest cascade surface. Option-B-only greedy maj@1 gb6144: 0.3667 (0p22) / 0.400 (dev307).
+
+τ=0.3 choice-residual [gpqa] recK9F5aqdaybl8bb: gold=B spec=A(✗) ar=C(✗) root_gap=0.375 nat  grade_changed=False
+
+PRIMARY total_answer_diffs_at_tau0p3 (extracted-choice survivors) = 1
+DECISION grade-flip survivors @τ0.3 (accuracy-moving)            = 0
+TEST net_graded_delta_pooled (spec-ar)                          = -0.00430 CI95 [-0.024355300859598916, 0.015759312320916874]
+VERDICT (graded) = TOLERANCE_ANSWER_SAFE_GRADED
