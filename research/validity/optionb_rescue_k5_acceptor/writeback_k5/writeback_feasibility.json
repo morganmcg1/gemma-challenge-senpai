@@ -1,0 +1,62 @@
+{
+  "pr": 687,
+  "leg": "writeback_feasibility_gate",
+  "phase": "phase0_feasibility",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "fires": false,
+  "submission": "int4_mtp_batchinv",
+  "vllm_version": "0.22.0",
+  "writeback_feasible_local": false,
+  "verdict": "WRITEBACK_INFEASIBLE_LOCAL",
+  "findings": [
+    {
+      "id": "dummy_run_is_a_profiling_stub",
+      "claim": "_fire()'s _dummy_run(1,...) cannot recover a real verified token: it runs the model on shared DUMMY input_ids/positions with dummy attention metadata and slot_mapping filled with -1 (no real KV read/write), and returns hidden_states for those garbage inputs.",
+      "evidence": "vllm/v1/worker/gpu_model_runner.py:5701-5705 (slot_mapping.fill_(-1), 'Dummy runs have no real slot assignments'); :5777 input_ids = self.input_ids.gpu[:n] (shared dummy buffer); :5785 dummy positions; :5907 returns hidden_states for the dummy batch. _fire discards it: vllm_recompute_acceptor_patch.py:731-745.",
+      "blocks": "Recovering the target-verified token id (part a) via the as-implemented fire path is structurally impossible -- it is a cost/capture stub."
+    },
+    {
+      "id": "no_single_position_real_recompute_primitive",
+      "claim": "There is no exposed primitive to run a REAL width-1 target forward at a specific flagged sequence position (real token id + real per-request KV context + real attention metadata) mid-sample_tokens. The real forward path is execute_model(scheduler_output) -> _prepare_inputs, which is scheduler-driven over the whole step batch; recomputing one ad-hoc position requires hand-reconstructing CommonAttentionMetadata + slot mapping + forward_context, i.e. reimplementing a slice of _prepare_inputs.",
+      "evidence": "vllm/v1/worker/gpu_model_runner.py:3955 execute_model / :4298 sets execute_model_state; _prepare_inputs builds the batch tensors; no public recompute_one(req_id,pos)->logits method exists on GPUModelRunner.",
+      "blocks": "Sourcing the M=1 correction token through the available surface."
+    },
+    {
+      "id": "post_hook_is_post_commit",
+      "claim": "The patch wraps the WHOLE sample_tokens and runs its logic AFTER orig_sample_tokens, which has already (1) run the rejection sampler (_sample -> emitted tokens), (2) committed state via _update_states_after_model_execute, (3) run the drafter to propose the NEXT step's drafts on those emitted tokens, and (4) committed the tokens to CPU structures in _bookkeeping_sync (input_batch.token_ids_cpu, num_tokens_no_spec, req_state.output_token_ids.extend). Substituting a token at the post-hook would require rolling back all four; the wrap surface exposes no such rollback, and mutating the GPU sampled_token_ids tensor post-hoc is vacuous because the CPU commit already happened.",
+      "evidence": "vllm/v1/worker/gpu_model_runner.py:4364 _sample; :4366 _update_states_after_model_execute; :4386-4399/4428 propose_draft_token_ids; :4489 _bookkeeping_sync -> :3629 token_ids_cpu write, :3631 num_tokens_no_spec write, :3635 output_token_ids.extend. Patch post-hook: vllm_recompute_acceptor_patch.py:761 output = orig_sample_tokens(...) then :816-819 _fire AFTER.",
+      "blocks": "Substituting the token into the emitted stream while keeping KV/state consistent (part b + consistency)."
+    },
+    {
+      "id": "writeback_is_vacuous_under_BI1",
+      "claim": "Even setting implementability aside, under VLLM_BATCH_INVARIANT=1 the M=1 recompute argmax provably EQUALS the width-M verify argmax already emitted by the greedy rejection sampler: #669 measured draft_break=0 over 25,154 pre-fork draft positions at tau=0.27, and the only 2 residual divergences are prefill pos-0 exact-tie artifacts that have NO draft row and are structurally outside the acceptor (a write-back cannot reach them). So a correcting write-back would be a measurement of a no-op at every flaggable position.",
+      "evidence": "The greedy rejection sampler already STORES the target argmax at the first-reject position (vllm/v1/worker/gpu/spec_decode/rejection_sampler_utils.py:96-107, temp==0 greedy path uses target_local_argmax) -- so the emitted token IS the width-M verify argmax. Under VLLM_BATCH_INVARIANT=1 the M=1 recompute returns the identical argmax. Empirical confirmation in matched_identity.json: draft_break_count_at_tau(0.27)=0, ar_vs_ar_floor pos0=0, spec_vs_ar pos0=2 (both prefill exact-tie), confident_genuine_pos0_flips=0.",
+      "blocks": "The premise of a measurable correction: there is nothing to correct at draft positions, so the 140.2 composition cannot be split from the un-rescued ceiling by a local write-back serve."
+    }
+  ],
+  "baseline_669": {
+    "ar_rung_local": 126.75,
+    "ar_rung_official_locked": 126.378,
+    "plus10_bar_official": 136.378,
+    "unrescued_k5_ceiling_local": 159.3,
+    "pre_fork_flag_rate_per_emit_tau027": 0.0419,
+    "correcting_rescue_tps_local": 140.264,
+    "correcting_rescue_official_equiv": 139.852,
+    "correcting_clears_plus10_by": 3.474,
+    "dummy_tau_gate_tps_local": 124.975,
+    "dummy_tau_gate_official_equiv": 124.61,
+    "dummy_tau_realized_fire_rate_per_emit": 0.11251,
+    "per_fire_cost_ms": 19.903,
+    "ar_vs_ar_floor_pos0": 0,
+    "spec_vs_ar_pos0": 2,
+    "draft_break_count_at_tau027": 0,
+    "prefork_draft_positions": 25154,
+    "confident_genuine_pos0_flips": 0,
+    "strict_literal_holds": 0
+  },
+  "boundary": "LOCAL basis only. official-equiv conversion (x126.378/126.75) is the assumed-equal-tax map; only the gated official benchmark resolves it. A measured-or-projected local HOLDS is a SURFACE + approval trigger, not a fire; fire stays quality-blocked by int4-body AIME (ubel/fern).",
+  "ts": 1781821302.7126625,
+  "wandb_run_id": "oaz4mzal"
+}
