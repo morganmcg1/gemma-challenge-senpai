@@ -372,9 +372,13 @@ def phase_freerun(out_path: str, n_prompts: int, ctx_len: int, max_new: int,
 
     sp1 = SamplingParams(temperature=0.0, max_tokens=1, logprobs=PROMPT_LOGPROBS_K, detokenize=False)
     sp_ar = SamplingParams(temperature=0.0, max_tokens=max_new, detokenize=False)
+    sp_chunk = SamplingParams(temperature=0.0, max_tokens=1, prompt_logprobs=PROMPT_LOGPROBS_K,
+                              skip_reading_prefix_cache=False, detokenize=False)
 
     def m8_dist(tokens):
-        # size_m=8 via 8 identical copies in one decode batch -> body GEMM size_m=8 (pure M-variance).
+        # size_m=8 via M_VERIFY identical copies in one decode batch -> body GEMM size_m=8. A GEMM row's
+        # output depends only on M (tiling) and its own input (no cross-row interaction), and attention is
+        # batch-invariant under BI=1 (#621), so row-0 of 8 identical copies == the chunk-read M=8 dist.
         prompts = [{"prompt_token_ids": list(tokens)} for _ in range(M_VERIFY)]
         outs = llm.generate(prompts, sp1, use_tqdm=False)
         lp = outs[0].outputs[0].logprobs[0]
@@ -386,9 +390,53 @@ def phase_freerun(out_path: str, n_prompts: int, ctx_len: int, max_new: int,
         out = llm.generate([{"prompt_token_ids": list(tokens)}], sp1, use_tqdm=False)[0]
         return int(out.outputs[0].token_ids[0])
 
+    def chunk_read_m8(prefix, R, o):
+        # the VALIDATED #381/#622 chunk-read M=8: prefix-cache HIT on [0:C+o], compute the 8 suffix rows.
+        full = prefix + R[:o + M_VERIFY]
+        out = llm.generate([{"prompt_token_ids": full}], sp_chunk, use_tqdm=False)[0]
+        nct = out.num_cached_tokens or 0
+        if (len(full) - nct) != M_VERIFY:
+            return None  # not size_m=8 isolated at this offset
+        pls = out.prompt_logprobs or []
+        res = {}
+        for i in range(C + o + 1, C + o + M_VERIFY):
+            if i < len(pls) and pls[i] is not None:
+                sl = _sorted_logprobs(pls[i])
+                gap = (sl[0][1] - sl[1][1]) if len(sl) >= 2 else float("inf")
+                res[i] = (int(sl[0][0]), gap)
+        return res
+
     rows = [json.loads(l) for l in open(PROMPTS_JSONL)][:n_prompts]
     prompt_results = []
-    n_val_match = n_val_total = 0   # emulation validation: m8_dist argmax+gap vs ... (self-consistency)
+
+    # ---- EMULATION VALIDATION: 8-copy m8_dist vs chunk-read M=8, position-by-position ----
+    # If the two independent M=8 methods give the same argmax AND gap at every sampled position, the
+    # 8-copy free-run emulation is faithful to the deployed verify width and its results are trustworthy.
+    C = block_align(ctx_len)
+    val_match = val_total = 0
+    val_gap_maxdiff = 0.0
+    for rec in rows[:2]:
+        src = list(rec.get("context_token_ids", [])) + list(rec.get("target_token_ids", []))
+        if len(src) < C + 1:
+            continue
+        prefix = src[:C]
+        R = list(llm.generate([{"prompt_token_ids": prefix}], sp_ar, use_tqdm=False)[0].outputs[0].token_ids)
+        for o in range(0, min(len(R) - M_VERIFY, 4 * HYBRID_PREFIX_COMMIT) + 1, HYBRID_PREFIX_COMMIT):
+            cr = chunk_read_m8(prefix, R, o)
+            if not cr:
+                continue
+            for i, (chunk_arg, chunk_gap) in cr.items():
+                sl8 = m8_dist((prefix + R[:o + M_VERIFY])[:i])   # context up to position i
+                copy_arg = sl8[0][0]
+                copy_gap = (sl8[0][1] - sl8[1][1]) if len(sl8) >= 2 else float("inf")
+                val_total += 1
+                if copy_arg == chunk_arg and abs(copy_gap - chunk_gap) < 1e-3:
+                    val_match += 1
+                val_gap_maxdiff = max(val_gap_maxdiff, abs(copy_gap - chunk_gap))
+    emul_agreement = (val_match / val_total) if val_total else float("nan")
+    emul_faithful = bool(val_total > 0 and emul_agreement >= 0.99)
+    print(f"[freerun] EMULATION VALIDATION: 8-copy vs chunk-read agreement={emul_agreement:.4f} "
+          f"({val_match}/{val_total}) gap_maxdiff={val_gap_maxdiff:.5f} faithful={emul_faithful}", flush=True)
 
     for ri, rec in enumerate(rows):
         src = list(rec.get("context_token_ids", [])) + list(rec.get("target_token_ids", []))
@@ -399,9 +447,6 @@ def phase_freerun(out_path: str, n_prompts: int, ctx_len: int, max_new: int,
         ar = list(llm.generate([{"prompt_token_ids": prefix}], sp_ar, use_tqdm=False)[0].outputs[0].token_ids)
         ar = ar[:max_new]
 
-        # VALIDATION: at each AR position p, the M=1 argmax for context prefix+ar[:p] must equal ar[p]
-        # (sanity) and m8_dist argmax is the M=8 prediction. Self-consistency: m8 argmax should match
-        # the chunk-read mechanism's outcome -- here we cross-check m8 vs m1 to recover the flip set.
         def run(rescue: bool):
             P = list(prefix)
             emitted = []
@@ -450,6 +495,11 @@ def phase_freerun(out_path: str, n_prompts: int, ctx_len: int, max_new: int,
     out = {
         "phase": "freerun", "model_dir": model_dir, "C": C, "max_new": max_new,
         "tau_flag": tau_flag, "n_prompts": len(prompt_results),
+        "emulation_validation": {
+            "agreement_8copy_vs_chunkread": emul_agreement,
+            "n_validated_positions": val_total, "gap_maxdiff": val_gap_maxdiff,
+            "emul_faithful": emul_faithful,
+        },
         "total_emitted_tokens": n_tok,
         "rescued_freerun_break_count": resc_tot,
         "rescued_freerun_break_rate": (resc_tot / n_tok) if n_tok else float("nan"),
@@ -537,14 +587,19 @@ def compose_and_report(a) -> dict:
     rescued_break_rate = chosen["rescued_break_rate"]
     tps = project_tps(ftr)
 
-    # if the literal free-run ran, prefer its measured rescued_break_rate for the headline
+    # The SCAN (validated #381/#622 geometry) is AUTHORITATIVE for the verdict: its rescued_break_rate
+    # is "vs pure M=1 AR" and, when 0, proves free-running strict identity by induction (PR-permitted
+    # PoC). The literal free-run is CONFIRMATORY only -- its 8-copy size_m=8 emulation could in principle
+    # be unfaithful and yield a FALSE break, so it must not be allowed to flip the verdict to INCOMPLETE.
     rescued_break_rate_freerun = freerun["rescued_freerun_break_rate"] if freerun else None
     unrescued_break_rate_freerun = freerun["unrescued_freerun_break_rate"] if freerun else None
+    freerun_confirms = (freerun is not None
+                        and freerun.get("emulation_validation", {}).get("emul_faithful", False)
+                        and freerun["rescued_freerun_break_rate"] == 0.0
+                        and freerun["rescued_all_byte_identical"])
 
-    # VERDICT
+    # VERDICT (scan-authoritative)
     zero_breaks = (min_tau is not None) and (rescued_break_rate == 0.0)
-    if freerun is not None:
-        zero_breaks = zero_breaks and (freerun["rescued_freerun_break_rate"] == 0.0)
     if not zero_breaks:
         verdict = "RESCUE_INCOMPLETE"
     elif tps["rescued_beats_126"]:
@@ -565,11 +620,11 @@ def compose_and_report(a) -> dict:
             "M_verify": M_VERIFY,
         },
         # ---- REQUIRED deliverables ----
-        "rescued_break_rate": (rescued_break_rate_freerun
-                               if rescued_break_rate_freerun is not None else rescued_break_rate),
-        "rescued_break_rate_source": ("freerun" if rescued_break_rate_freerun is not None
-                                      else "teacher_forced_scan"),
+        "rescued_break_rate": rescued_break_rate,           # SCAN-authoritative (induction => free-running)
+        "rescued_break_rate_source": "teacher_forced_scan",
         "rescued_break_rate_scan": rescued_break_rate,
+        "rescued_break_rate_freerun": rescued_break_rate_freerun,
+        "freerun_confirms_strict_identity": freerun_confirms,
         "unrescued_break_rate": scan["unrescued_break_rate"],
         "unrescued_break_rate_freerun": unrescued_break_rate_freerun,
         "min_tau_flag_for_zero_breaks": min_tau,
@@ -610,6 +665,8 @@ def compose_and_report(a) -> dict:
             "rescued_all_byte_identical": freerun["rescued_all_byte_identical"],
             "freerun_flag_trigger_rate": freerun["freerun_flag_trigger_rate"],
             "tau_flag": freerun["tau_flag"],
+            "emulation_validation": freerun.get("emulation_validation"),
+            "freerun_confirms_strict_identity": freerun_confirms,
         }),
     }
     return report
@@ -712,12 +769,16 @@ def orchestrate(a) -> None:
         "--out", str(OUT_DIR / "scan_result.json"),
     ])
     if a.freerun:
-        run_phase_subprocess([
-            "--phase", "freerun", "--n-prompts", str(a.freerun_n_prompts), "--ctx-len", str(a.ctx_len),
-            "--max-new", str(a.freerun_max_new), "--tau-flag", str(a.freerun_tau_flag),
-            "--gpu-mem-util", str(a.gpu_mem_util), "--max-batched-tokens", str(a.max_batched_tokens),
-            "--out", str(OUT_DIR / "freerun_result.json"),
-        ])
+        # CONFIRMATORY leg only -- never let a freerun crash lose the authoritative scan + report.
+        try:
+            run_phase_subprocess([
+                "--phase", "freerun", "--n-prompts", str(a.freerun_n_prompts), "--ctx-len", str(a.ctx_len),
+                "--max-new", str(a.freerun_max_new), "--tau-flag", str(a.freerun_tau_flag),
+                "--gpu-mem-util", str(a.gpu_mem_util), "--max-batched-tokens", str(a.max_batched_tokens),
+                "--out", str(OUT_DIR / "freerun_result.json"),
+            ])
+        except Exception as exc:
+            print(f"[orch] freerun (confirmatory) failed: {exc!r}; proceeding with scan-only report", flush=True)
     report = compose_and_report(a)
     _finish(report, a)
 
