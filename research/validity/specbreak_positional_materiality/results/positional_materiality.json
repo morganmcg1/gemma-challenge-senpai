@@ -1,0 +1,274 @@
+{
+  "pr": 685,
+  "analysis_only": true,
+  "official_tps": 0,
+  "fires": 0,
+  "break_definition": "first-divergence token index between AR and spec completion_token_ids (strict-#319 byte-identity); primary arm = suffix6 (#678 best cell, 42/128 = 0.328)",
+  "decode_budget": {
+    "max_tokens": 512,
+    "ignore_eos": true,
+    "note": "SPEED-harness decode; fixed 512 tokens, no natural EOS"
+  },
+  "reference_626_quality_budget": {
+    "budget_max_tokens": {
+      "gpqa": 6144,
+      "aime": 6144,
+      "gsm8k": 512,
+      "mmlu_pro": null
+    },
+    "median_completion_tok": {
+      "gpqa": 1843,
+      "aime": 3783
+    },
+    "commit_rate": {
+      "gpqa": 0.99,
+      "aime": 1.0
+    },
+    "note": "team #626 instrument; gpqa/aime answer commits at median 1843/3783 tok"
+  },
+  "arms": {
+    "suffix6": {
+      "arm": "suffix6",
+      "n_total": 128,
+      "n_break": 42,
+      "break_rate": 0.328125,
+      "n_committed_total": 10,
+      "commit_rate_512tok": 0.078125,
+      "n_post_commit": 2,
+      "n_pre_commit": 3,
+      "n_no_commit_break": 37,
+      "definitely_safe_prompts": 2,
+      "postcommit_break_frac": 0.047619047619047616,
+      "material_breakrate_upper_literal": 0.0234375,
+      "material_breakrate_upper": 0.3125,
+      "n_both_committed_break": 4,
+      "n_real_flip": 0,
+      "n_status_change": 1,
+      "n_both_same": 4,
+      "n_both_none": 37,
+      "material_breakrate_lower_observed": 0.0,
+      "answer_preserved_where_both_commit": 1.0,
+      "onset_median": 365,
+      "onset_min": 33,
+      "onset_max": 508,
+      "per_source": {
+        "mmlu_pro": {
+          "n_total": 57,
+          "n_break": 20,
+          "n_post_commit": 2,
+          "n_pre_commit": 3,
+          "n_no_commit": 15,
+          "n_committed_any": 10,
+          "postcommit_break_frac": 0.1,
+          "material_breakrate_upper": 0.3157894736842105
+        },
+        "gpqa_diamond": {
+          "n_total": 57,
+          "n_break": 19,
+          "n_post_commit": 0,
+          "n_pre_commit": 0,
+          "n_no_commit": 19,
+          "n_committed_any": 0,
+          "postcommit_break_frac": 0.0,
+          "material_breakrate_upper": 0.3333333333333333
+        },
+        "aime2026": {
+          "n_total": 14,
+          "n_break": 3,
+          "n_post_commit": 0,
+          "n_pre_commit": 0,
+          "n_no_commit": 3,
+          "n_committed_any": 0,
+          "postcommit_break_frac": 0.0,
+          "material_breakrate_upper": 0.21428571428571427
+        }
+      },
+      "committed_break_detail": [
+        {
+          "id": "mmlu_pro-0051ec2069",
+          "src": "mmlu_pro",
+          "D": 456,
+          "C": 509,
+          "pos_class": "pre_commit",
+          "ar_answer": "I",
+          "spec_answer": "I",
+          "answer_changed": false
+        },
+        {
+          "id": "mmlu_pro-00cc01bdee",
+          "src": "mmlu_pro",
+          "D": 485,
+          "C": 479,
+          "pos_class": "post_commit",
+          "ar_answer": "I",
+          "spec_answer": "I",
+          "answer_changed": false
+        },
+        {
+          "id": "mmlu_pro-0126e0f8a7",
+          "src": "mmlu_pro",
+          "D": 441,
+          "C": 501,
+          "pos_class": "pre_commit",
+          "ar_answer": "H",
+          "spec_answer": "H",
+          "answer_changed": false
+        },
+        {
+          "id": "mmlu_pro-013ba75cb2",
+          "src": "mmlu_pro",
+          "D": 355,
+          "C": 430,
+          "pos_class": "pre_commit",
+          "ar_answer": "G",
+          "spec_answer": null,
+          "answer_changed": true
+        },
+        {
+          "id": "mmlu_pro-0141cfa289",
+          "src": "mmlu_pro",
+          "D": 467,
+          "C": 465,
+          "pos_class": "post_commit",
+          "ar_answer": "I",
+          "spec_answer": "I",
+          "answer_changed": false
+        }
+      ],
+      "verdict": "SPECBREAK_MATERIAL",
+      "verdict_detail": "INSTRUMENT_LIMITED_INDETERMINATE: 512-tok speed decode truncates 37/42 break-prompts before answer-commit; positional mechanism non-informative; observed real-flip rate ~0; defer magnitude to wirbel #682 (6144-tok end-to-end retention)"
+    },
+    "ngram5": {
+      "arm": "ngram5",
+      "n_total": 128,
+      "n_break": 49,
+      "break_rate": 0.3828125,
+      "n_committed_total": 10,
+      "commit_rate_512tok": 0.078125,
+      "n_post_commit": 2,
+      "n_pre_commit": 5,
+      "n_no_commit_break": 42,
+      "definitely_safe_prompts": 2,
+      "postcommit_break_frac": 0.04081632653061224,
+      "material_breakrate_upper_literal": 0.0390625,
+      "material_breakrate_upper": 0.3671875,
+      "n_both_committed_break": 5,
+      "n_real_flip": 0,
+      "n_status_change": 2,
+      "n_both_same": 5,
+      "n_both_none": 42,
+      "material_breakrate_lower_observed": 0.0,
+      "answer_preserved_where_both_commit": 1.0,
+      "onset_median": 381,
+      "onset_min": 41,
+      "onset_max": 508,
+      "per_source": {
+        "mmlu_pro": {
+          "n_total": 57,
+          "n_break": 20,
+          "n_post_commit": 2,
+          "n_pre_commit": 5,
+          "n_no_commit": 13,
+          "n_committed_any": 10,
+          "postcommit_break_frac": 0.1,
+          "material_breakrate_upper": 0.3157894736842105
+        },
+        "gpqa_diamond": {
+          "n_total": 57,
+          "n_break": 24,
+          "n_post_commit": 0,
+          "n_pre_commit": 0,
+          "n_no_commit": 24,
+          "n_committed_any": 0,
+          "postcommit_break_frac": 0.0,
+          "material_breakrate_upper": 0.42105263157894735
+        },
+        "aime2026": {
+          "n_total": 14,
+          "n_break": 5,
+          "n_post_commit": 0,
+          "n_pre_commit": 0,
+          "n_no_commit": 5,
+          "n_committed_any": 0,
+          "postcommit_break_frac": 0.0,
+          "material_breakrate_upper": 0.35714285714285715
+        }
+      },
+      "committed_break_detail": [
+        {
+          "id": "mmlu_pro-001c076309",
+          "src": "mmlu_pro",
+          "D": 321,
+          "C": 470,
+          "pos_class": "pre_commit",
+          "ar_answer": "A",
+          "spec_answer": "A",
+          "answer_changed": false
+        },
+        {
+          "id": "mmlu_pro-0051ec2069",
+          "src": "mmlu_pro",
+          "D": 491,
+          "C": 509,
+          "pos_class": "pre_commit",
+          "ar_answer": "I",
+          "spec_answer": "I",
+          "answer_changed": false
+        },
+        {
+          "id": "mmlu_pro-00aa833125",
+          "src": "mmlu_pro",
+          "D": 108,
+          "C": 470,
+          "pos_class": "pre_commit",
+          "ar_answer": "H",
+          "spec_answer": null,
+          "answer_changed": true
+        },
+        {
+          "id": "mmlu_pro-00cc01bdee",
+          "src": "mmlu_pro",
+          "D": 485,
+          "C": 479,
+          "pos_class": "post_commit",
+          "ar_answer": "I",
+          "spec_answer": "I",
+          "answer_changed": false
+        },
+        {
+          "id": "mmlu_pro-0126e0f8a7",
+          "src": "mmlu_pro",
+          "D": 41,
+          "C": 501,
+          "pos_class": "pre_commit",
+          "ar_answer": "H",
+          "spec_answer": "H",
+          "answer_changed": false
+        },
+        {
+          "id": "mmlu_pro-013ba75cb2",
+          "src": "mmlu_pro",
+          "D": 355,
+          "C": 430,
+          "pos_class": "pre_commit",
+          "ar_answer": "G",
+          "spec_answer": null,
+          "answer_changed": true
+        },
+        {
+          "id": "mmlu_pro-0141cfa289",
+          "src": "mmlu_pro",
+          "D": 467,
+          "C": 465,
+          "pos_class": "post_commit",
+          "ar_answer": "I",
+          "spec_answer": "I",
+          "answer_changed": false
+        }
+      ],
+      "verdict": "SPECBREAK_MATERIAL",
+      "verdict_detail": "INSTRUMENT_LIMITED_INDETERMINATE: 512-tok speed decode truncates 42/49 break-prompts before answer-commit; positional mechanism non-informative; observed real-flip rate ~0; defer magnitude to wirbel #682 (6144-tok end-to-end retention)"
+    }
+  },
+  "headline_verdict": "SPECBREAK_MATERIAL"
+}

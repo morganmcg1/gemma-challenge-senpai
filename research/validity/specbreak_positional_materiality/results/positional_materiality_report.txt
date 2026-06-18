@@ -1,0 +1,65 @@
+==============================================================================
+PR #685 — onset-vs-answer-commit positional materiality (analysis-only)
+==============================================================================
+break_definition: first-divergence token index between AR and spec completion_token_ids (strict-#319 byte-identity); primary arm = suffix6 (#678 best cell, 42/128 = 0.328)
+decode budget: max_tokens=512 ignore_eos=True (SPEED decode)
+REFERENCE quality budget (#626): gpqa/aime max_tokens=6144; natural completion median gpqa=1843 aime=3783 tok; commit_rate ~99-100%
+
+--- arm=suffix6 [PRIMARY] -------------------------------------------
+  break_rate = 0.3281 (42/128)  onset median=365 [33..508]
+  COMMIT-RATE @512tok = 0.0781 (10/128)  <-- 512-tok truncation: most prompts never reach the ANSWER line
+  break positional decomposition (of 42 break-prompts):
+     POST-commit (provably immaterial) = 2
+     PRE-commit  (could change answer)  = 3
+     no_commit   (truncated < answer)   = 37
+     definitely_safe (ALL div post)     = 2
+  postcommit_break_frac = 0.0476  (provable score-immaterial LOWER bound)
+  material_breakrate_upper = 0.3125  (pre+no_commit / 128; vs 0.328 token break-rate -> UN-tightened)
+    [literal pre/128 = 0.0234]
+  DIRECT answer-change taxonomy (of 42 breaks): real_flip=0 status_chg=1 both_same=4 both_none=37
+     material_breakrate_lower_observed = 0.0000 (real letter-flips/128)
+     answer preserved where BOTH commit = 4/4 (1.0)
+  per-source (n_break post/pre/no_commit | postcommit_frac | mat_upper):
+     mmlu_pro       brk=20  2/3/15  pcf=0.1     mat_up=0.3158  committed=10/57
+     gpqa_diamond   brk=19  0/0/19  pcf=0.0     mat_up=0.3333  committed=0/57
+     aime2026       brk= 3  0/0/3  pcf=0.0     mat_up=0.2143  committed=0/14
+  committed break-prompts (id | D | C | class | ar->spec | changed):
+     mmlu_pro-0051ec2069    D= 456 C= 509 pre_commit  I->I changed=False
+     mmlu_pro-00cc01bdee    D= 485 C= 479 post_commit I->I changed=False
+     mmlu_pro-0126e0f8a7    D= 441 C= 501 pre_commit  H->H changed=False
+     mmlu_pro-013ba75cb2    D= 355 C= 430 pre_commit  G->None changed=True
+     mmlu_pro-0141cfa289    D= 467 C= 465 post_commit I->I changed=False
+  VERDICT[suffix6]: SPECBREAK_MATERIAL
+    detail: INSTRUMENT_LIMITED_INDETERMINATE: 512-tok speed decode truncates 37/42 break-prompts before answer-commit; positional mechanism non-informative; observed real-flip rate ~0; defer magnitude to wirbel #682 (6144-tok end-to-end retention)
+
+--- arm=ngram5 [sensitivity] -------------------------------------------
+  break_rate = 0.3828 (49/128)  onset median=381 [41..508]
+  COMMIT-RATE @512tok = 0.0781 (10/128)  <-- 512-tok truncation: most prompts never reach the ANSWER line
+  break positional decomposition (of 49 break-prompts):
+     POST-commit (provably immaterial) = 2
+     PRE-commit  (could change answer)  = 5
+     no_commit   (truncated < answer)   = 42
+     definitely_safe (ALL div post)     = 2
+  postcommit_break_frac = 0.0408  (provable score-immaterial LOWER bound)
+  material_breakrate_upper = 0.3672  (pre+no_commit / 128; vs 0.328 token break-rate -> UN-tightened)
+    [literal pre/128 = 0.0391]
+  DIRECT answer-change taxonomy (of 49 breaks): real_flip=0 status_chg=2 both_same=5 both_none=42
+     material_breakrate_lower_observed = 0.0000 (real letter-flips/128)
+     answer preserved where BOTH commit = 5/5 (1.0)
+  per-source (n_break post/pre/no_commit | postcommit_frac | mat_upper):
+     mmlu_pro       brk=20  2/5/13  pcf=0.1     mat_up=0.3158  committed=10/57
+     gpqa_diamond   brk=24  0/0/24  pcf=0.0     mat_up=0.4211  committed=0/57
+     aime2026       brk= 5  0/0/5  pcf=0.0     mat_up=0.3571  committed=0/14
+  committed break-prompts (id | D | C | class | ar->spec | changed):
+     mmlu_pro-001c076309    D= 321 C= 470 pre_commit  A->A changed=False
+     mmlu_pro-0051ec2069    D= 491 C= 509 pre_commit  I->I changed=False
+     mmlu_pro-00aa833125    D= 108 C= 470 pre_commit  H->None changed=True
+     mmlu_pro-00cc01bdee    D= 485 C= 479 post_commit I->I changed=False
+     mmlu_pro-0126e0f8a7    D=  41 C= 501 pre_commit  H->H changed=False
+     mmlu_pro-013ba75cb2    D= 355 C= 430 pre_commit  G->None changed=True
+     mmlu_pro-0141cfa289    D= 467 C= 465 post_commit I->I changed=False
+  VERDICT[ngram5]: SPECBREAK_MATERIAL
+    detail: INSTRUMENT_LIMITED_INDETERMINATE: 512-tok speed decode truncates 42/49 break-prompts before answer-commit; positional mechanism non-informative; observed real-flip rate ~0; defer magnitude to wirbel #682 (6144-tok end-to-end retention)
+
+HEADLINE VERDICT: SPECBREAK_MATERIAL
+  INSTRUMENT_LIMITED_INDETERMINATE: 512-tok speed decode truncates 37/42 break-prompts before answer-commit; positional mechanism non-informative; observed real-flip rate ~0; defer magnitude to wirbel #682 (6144-tok end-to-end retention)
