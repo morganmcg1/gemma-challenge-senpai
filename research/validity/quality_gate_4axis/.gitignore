@@ -1,0 +1,17 @@
+# PR #661 -- keep the harness (.sh/.py) + result/aggregate JSONs + pairing
+# manifests; exclude bulky reproducible artifacts & per-run scratch.
+__pycache__/
+*.pyc
+wandb/
+# raw inspect_ai eval logs (reproducible from the served panel, ~MB each)
+results/_inspect_logs/
+# served-vLLM server logs + verbose eval-client stdout (the result JSONs hold the numbers)
+*.log
+*.out
+# transient per-run process artifacts (watchdog/chain bookkeeping)
+*.pid
+*.status
+*.WATCHDOG_FIRED
+*.DONE
+# local draft of the posted PR comment (the comment itself lives on the PR)
+_results_comment.md
