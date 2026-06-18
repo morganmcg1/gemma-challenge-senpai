@@ -1,0 +1,44 @@
+{
+  "kind": "zoomout-ar-speed-roofline",
+  "pr": 630,
+  "hardware": "A10G sm_86 / 600 GB/s HBM",
+  "bytes_per_token_GB": {
+    "base_int4_g32_bf16head": 3.5989,
+    "int4_g128_lmhead": 2.4165,
+    "components_int4_head": {
+      "body_int4_packed": 1.9864,
+      "body_scale_g128": 0.0621,
+      "head_int4": 0.3355,
+      "head_int4_scale": 0.0105,
+      "kv_nominal": 0.022
+    },
+    "head_read_saving_bf16_to_int4_GB": 0.9961
+  },
+  "effective_decode_bw_GBs": {
+    "base_int4_local_95.78": 344.7,
+    "base_int4_official_99": 356.3,
+    "int4_head_official_126.378": 305.4,
+    "int4_head_pct_of_peak": 50.9
+  },
+  "two_term_fit_official_anchors": {
+    "bw_marginal_GBs": 540.3,
+    "bw_marginal_pct_of_peak": 90.1,
+    "c_fixed_ms_per_token": 3.441,
+    "c_fixed_pct_of_token_time_at_126": 43.5
+  },
+  "plus10_tps_headroom": {
+    "target_tps": 136.378,
+    "A_bandwidth_eff_gain_needed_pct": 7.91,
+    "B_fixed_overhead_cut_needed_ms": 0.58,
+    "B_fixed_overhead_cut_needed_pct": 16.9,
+    "C_bytes_cut_needed_GB": 0.1772,
+    "C_bytes_cut_needed_pct": 7.3
+  },
+  "knob_verdict": {
+    "marlin_only_w4a16_kernel_sm86": true,
+    "cuda_graph_already_on_stock": true,
+    "attention_pinned_to_only_byteexact_path": true,
+    "splitk_refuted": "-5.82 @ #433",
+    "byteexact_knob_can_supply_plus10": false
+  }
+}
