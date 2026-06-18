@@ -1,0 +1,854 @@
+{
+  "runner": "paired_tps_ab",
+  "pr": 82,
+  "metric": "wall_tps",
+  "baseline": {
+    "submission": "int4_mtp_batchinv",
+    "label": "k7",
+    "override_env": {
+      "VLLM_BATCH_INVARIANT": "1",
+      "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+      "DRAFTER_MODEL": "/tmp/qat-assistant",
+      "NUM_SPECULATIVE_TOKENS": "7"
+    },
+    "describe": "int4_mtp_batchinv[DRAFTER_MODEL=/tmp/qat-assistant,MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct,NUM_SPECULATIVE_TOKENS=7,VLLM_BATCH_INVARIANT=1]"
+  },
+  "candidate": {
+    "submission": "int4_mtp_batchinv",
+    "label": "k5",
+    "override_env": {
+      "VLLM_BATCH_INVARIANT": "1",
+      "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+      "DRAFTER_MODEL": "/tmp/qat-assistant",
+      "NUM_SPECULATIVE_TOKENS": "5"
+    },
+    "describe": "int4_mtp_batchinv[DRAFTER_MODEL=/tmp/qat-assistant,MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct,NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]"
+  },
+  "n": 3,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1
+  },
+  "reused_baseline_from": "/workspace/senpai/target/research/walltps_ab/optionb_bi1_stock_int4/ksweep/k3/paired_ab.json",
+  "elapsed_s": 1542.447416305542,
+  "git": {
+    "git_commit": "4fcb02910def469ad51d215c1f56b11dfcadb537",
+    "git_branch": "land/optionb-bi1-k-sweep",
+    "git_dirty": true
+  },
+  "arms": {
+    "baseline": {
+      "n": 3,
+      "wall_tps": {
+        "n": 3,
+        "mean": 152.25574001135794,
+        "std": 0.09348203610280766,
+        "cv_pct": 0.06139803733891025,
+        "min": 152.14786102091279,
+        "max": 152.31291735143887,
+        "range_pct": 0.10840729585221007,
+        "median": 152.30644166172218,
+        "p25": 152.14786102091279,
+        "p75": 152.30644166172218,
+        "values": [
+          152.30644166172218,
+          152.14786102091279,
+          152.31291735143887
+        ]
+      },
+      "steady_gen_tps_mean": {
+        "n": 3,
+        "mean": 150.26976744186047,
+        "std": 1.4795212854773747,
+        "cv_pct": 0.9845768118659017,
+        "min": 148.56279069767442,
+        "max": 151.18372093023254,
+        "range_pct": 1.7441500557137444,
+        "median": 151.06279069767442,
+        "p25": 148.56279069767442,
+        "p75": 151.06279069767442,
+        "values": [
+          148.56279069767442,
+          151.06279069767442,
+          151.18372093023254
+        ]
+      },
+      "e_accept_exact": {
+        "n": 3,
+        "mean": 3.8253840567120236,
+        "std": 0.003789104012612096,
+        "cv_pct": 0.09905159734128471,
+        "min": 3.821020019065777,
+        "max": 3.827837536001881,
+        "range_pct": 0.17821784257562248,
+        "median": 3.827294615068413,
+        "p25": 3.821020019065777,
+        "p75": 3.827294615068413,
+        "values": [
+          3.821020019065777,
+          3.827837536001881,
+          3.827294615068413
+        ]
+      },
+      "server_ready_s": {
+        "n": 3,
+        "mean": 123.35837721824646,
+        "std": 2.8803510607177807,
+        "cv_pct": 2.3349456483379676,
+        "min": 120.03243446350098,
+        "max": 125.02225804328918,
+        "range_pct": 4.044981534541573,
+        "median": 125.02043914794922,
+        "p25": 120.03243446350098,
+        "p75": 125.02043914794922,
+        "values": [
+          120.03243446350098,
+          125.02225804328918,
+          125.02043914794922
+        ]
+      },
+      "records": [
+        {
+          "run_idx": 0,
+          "t_start_utc": "2026-06-18T01:19:43.030881+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 430.2904019355774,
+          "wall_around_decode_s": 438.9220356941223,
+          "wall_tps": 152.30644166172218,
+          "steady_gen_tps_mean": 148.56279069767442,
+          "steady_gen_tps_mean_nonzero": 148.56279069767442,
+          "steady_gen_tps_n": 43,
+          "gen_tps_series": [
+            12.4,
+            131.0,
+            128.5,
+            152.8,
+            161.5,
+            169.6,
+            163.8,
+            141.9,
+            136.4,
+            157.8,
+            163.4,
+            132.4,
+            153.0,
+            149.5,
+            188.0,
+            149.2,
+            153.3,
+            157.5,
+            143.3,
+            152.3,
+            111.5,
+            126.2,
+            133.9,
+            175.1,
+            166.8,
+            152.6,
+            149.0,
+            142.9,
+            170.9,
+            144.3,
+            166.3,
+            172.0,
+            156.3,
+            144.9,
+            168.0,
+            134.7,
+            156.0,
+            154.1,
+            183.8,
+            142.7,
+            144.4,
+            173.8,
+            120.4
+          ],
+          "e_accept_exact": 3.821020019065777,
+          "e_accept_interval_mean": 3.82046511627907,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47348,
+          "total_drafted_tokens": 117488,
+          "intervals": 43,
+          "clock": {
+            "n_samples": 1765,
+            "n_load_samples": 1719,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 50.6300283286119,
+              "min": 36.0,
+              "max": 55.0
+            },
+            "power_w_load": {
+              "mean": 144.9885514834206,
+              "min": 82.0,
+              "max": 166.26
+            },
+            "util_pct": {
+              "mean": 97.2498583569405,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 120.03243446350098,
+          "arm": "k7",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "VLLM_BATCH_INVARIANT": "1",
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7"
+          }
+        },
+        {
+          "run_idx": 1,
+          "t_start_utc": "2026-06-18T01:29:10.805958+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 430.7388849258423,
+          "wall_around_decode_s": 438.8934414386749,
+          "wall_tps": 152.14786102091279,
+          "steady_gen_tps_mean": 151.06279069767442,
+          "steady_gen_tps_mean_nonzero": 151.06279069767442,
+          "steady_gen_tps_n": 43,
+          "gen_tps_series": [
+            92.6,
+            137.6,
+            145.4,
+            149.9,
+            190.9,
+            140.4,
+            166.9,
+            134.4,
+            147.7,
+            157.3,
+            145.3,
+            129.3,
+            152.7,
+            192.3,
+            176.6,
+            148.6,
+            133.2,
+            141.6,
+            164.7,
+            127.9,
+            124.6,
+            136.8,
+            148.4,
+            175.7,
+            134.3,
+            173.5,
+            146.6,
+            132.1,
+            168.4,
+            138.6,
+            194.7,
+            160.8,
+            152.2,
+            150.3,
+            156.3,
+            146.5,
+            167.2,
+            168.3,
+            154.4,
+            123.5,
+            174.9,
+            153.2,
+            139.1
+          ],
+          "e_accept_exact": 3.827837536001881,
+          "e_accept_interval_mean": 3.824651162790698,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 48110,
+          "total_drafted_tokens": 119091,
+          "intervals": 43,
+          "clock": {
+            "n_samples": 1765,
+            "n_load_samples": 1721,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 50.61813031161473,
+              "min": 37.0,
+              "max": 54.0
+            },
+            "power_w_load": {
+              "mean": 145.16708309122603,
+              "min": 76.62,
+              "max": 178.32
+            },
+            "util_pct": {
+              "mean": 97.36940509915014,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 125.02225804328918,
+          "arm": "k7",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "VLLM_BATCH_INVARIANT": "1",
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7"
+          }
+        },
+        {
+          "run_idx": 2,
+          "t_start_utc": "2026-06-18T01:38:38.698061+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 430.27210783958435,
+          "wall_around_decode_s": 438.44684505462646,
+          "wall_tps": 152.31291735143887,
+          "steady_gen_tps_mean": 151.18372093023254,
+          "steady_gen_tps_mean_nonzero": 151.18372093023254,
+          "steady_gen_tps_n": 43,
+          "gen_tps_series": [
+            92.0,
+            138.1,
+            144.7,
+            150.7,
+            190.9,
+            140.5,
+            167.1,
+            134.4,
+            148.1,
+            158.6,
+            144.4,
+            130.3,
+            151.2,
+            193.9,
+            175.2,
+            149.7,
+            132.4,
+            141.8,
+            166.2,
+            126.4,
+            126.1,
+            137.2,
+            148.4,
+            174.6,
+            135.0,
+            174.0,
+            145.2,
+            136.3,
+            169.2,
+            137.6,
+            192.2,
+            161.3,
+            152.7,
+            150.8,
+            157.1,
+            144.5,
+            167.4,
+            169.6,
+            154.8,
+            123.9,
+            177.2,
+            147.7,
+            141.5
+          ],
+          "e_accept_exact": 3.827294615068413,
+          "e_accept_interval_mean": 3.823720930232558,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 48146,
+          "total_drafted_tokens": 119203,
+          "intervals": 43,
+          "clock": {
+            "n_samples": 1763,
+            "n_load_samples": 1721,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 50.404991491775384,
+              "min": 37.0,
+              "max": 55.0
+            },
+            "power_w_load": {
+              "mean": 145.576682161534,
+              "min": 65.33,
+              "max": 182.1
+            },
+            "util_pct": {
+              "mean": 97.36812251843449,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 125.02043914794922,
+          "arm": "k7",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "VLLM_BATCH_INVARIANT": "1",
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7"
+          }
+        }
+      ]
+    },
+    "candidate": {
+      "n": 3,
+      "wall_tps": {
+        "n": 3,
+        "mean": 172.74491495249353,
+        "std": 0.016717221490963344,
+        "cv_pct": 0.009677402947323072,
+        "min": 172.72989457119237,
+        "max": 172.76292545759435,
+        "range_pct": 0.0191211917358366,
+        "median": 172.7419248286939,
+        "p25": 172.72989457119237,
+        "p75": 172.7419248286939,
+        "values": [
+          172.76292545759435,
+          172.72989457119237,
+          172.7419248286939
+        ]
+      },
+      "steady_gen_tps_mean": {
+        "n": 3,
+        "mean": 169.68070175438598,
+        "std": 2.4120920181391132,
+        "cv_pct": 1.4215476440158963,
+        "min": 168.18157894736842,
+        "max": 172.46315789473684,
+        "range_pct": 2.5233152050290504,
+        "median": 168.39736842105265,
+        "p25": 168.18157894736842,
+        "p75": 168.39736842105265,
+        "values": [
+          168.18157894736842,
+          172.46315789473684,
+          168.39736842105265
+        ]
+      },
+      "e_accept_exact": {
+        "n": 3,
+        "mean": 3.4741068549689316,
+        "std": 0.005670682919678327,
+        "cv_pct": 0.16322707263789787,
+        "min": 3.4699480181936324,
+        "max": 3.4805663078636195,
+        "range_pct": 0.30564084851909606,
+        "median": 3.471806238849543,
+        "p25": 3.4699480181936324,
+        "p75": 3.471806238849543,
+        "values": [
+          3.4699480181936324,
+          3.4805663078636195,
+          3.471806238849543
+        ]
+      },
+      "server_ready_s": {
+        "n": 3,
+        "mean": 121.69137795766194,
+        "std": 2.884372195649489,
+        "cv_pct": 2.370235462904365,
+        "min": 120.0226263999939,
+        "max": 125.02196168899536,
+        "range_pct": 4.10820829947443,
+        "median": 120.02954578399658,
+        "p25": 120.0226263999939,
+        "p75": 120.02954578399658,
+        "values": [
+          120.02954578399658,
+          125.02196168899536,
+          120.0226263999939
+        ]
+      },
+      "records": [
+        {
+          "run_idx": 0,
+          "t_start_utc": "2026-06-18T02:41:04.340080+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 379.34064745903015,
+          "wall_around_decode_s": 388.32219672203064,
+          "wall_tps": 172.76292545759435,
+          "steady_gen_tps_mean": 168.18157894736842,
+          "steady_gen_tps_mean_nonzero": 168.18157894736842,
+          "steady_gen_tps_n": 38,
+          "gen_tps_series": [
+            11.5,
+            150.1,
+            137.0,
+            180.9,
+            178.6,
+            181.2,
+            183.3,
+            155.6,
+            162.2,
+            189.8,
+            142.9,
+            179.2,
+            191.8,
+            201.9,
+            164.4,
+            163.1,
+            165.3,
+            172.3,
+            146.3,
+            162.8,
+            160.4,
+            182.8,
+            171.0,
+            166.4,
+            173.3,
+            197.7,
+            156.0,
+            191.9,
+            174.9,
+            182.7,
+            186.7,
+            167.6,
+            200.8,
+            181.6,
+            175.6,
+            141.4,
+            199.7,
+            160.2
+          ],
+          "e_accept_exact": 3.4699480181936324,
+          "e_accept_interval_mean": 3.4676315789473686,
+          "num_speculative_tokens": 5,
+          "total_accepted_tokens": 45615,
+          "total_drafted_tokens": 92340,
+          "intervals": 38,
+          "clock": {
+            "n_samples": 1563,
+            "n_load_samples": 1517,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 50.67754318618042,
+              "min": 36.0,
+              "max": 54.0
+            },
+            "power_w_load": {
+              "mean": 156.28185234014504,
+              "min": 68.16,
+              "max": 187.95
+            },
+            "util_pct": {
+              "mean": 96.86052463211772,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 120.02954578399658,
+          "arm": "k5",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "VLLM_BATCH_INVARIANT": "1",
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "5"
+          }
+        },
+        {
+          "run_idx": 1,
+          "t_start_utc": "2026-06-18T02:49:41.708848+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 379.41318821907043,
+          "wall_around_decode_s": 388.3574364185333,
+          "wall_tps": 172.72989457119237,
+          "steady_gen_tps_mean": 172.46315789473684,
+          "steady_gen_tps_mean_nonzero": 172.46315789473684,
+          "steady_gen_tps_n": 38,
+          "gen_tps_series": [
+            153.6,
+            138.9,
+            175.8,
+            171.9,
+            188.3,
+            180.0,
+            156.3,
+            161.4,
+            193.8,
+            145.8,
+            178.2,
+            182.9,
+            201.2,
+            167.9,
+            164.0,
+            154.7,
+            183.0,
+            144.7,
+            160.2,
+            164.0,
+            187.8,
+            160.3,
+            177.2,
+            173.9,
+            196.9,
+            151.9,
+            188.8,
+            180.1,
+            175.2,
+            182.8,
+            175.6,
+            194.1,
+            178.7,
+            185.3,
+            144.2,
+            191.2,
+            169.6,
+            173.4
+          ],
+          "e_accept_exact": 3.4805663078636195,
+          "e_accept_interval_mean": 3.4836842105263157,
+          "num_speculative_tokens": 5,
+          "total_accepted_tokens": 46781,
+          "total_drafted_tokens": 94295,
+          "intervals": 38,
+          "clock": {
+            "n_samples": 1563,
+            "n_load_samples": 1517,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 50.64299424184261,
+              "min": 36.0,
+              "max": 55.0
+            },
+            "power_w_load": {
+              "mean": 156.05640079103495,
+              "min": 72.15,
+              "max": 187.79
+            },
+            "util_pct": {
+              "mean": 96.77543186180422,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 125.02196168899536,
+          "arm": "k5",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "VLLM_BATCH_INVARIANT": "1",
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "5"
+          }
+        },
+        {
+          "run_idx": 2,
+          "t_start_utc": "2026-06-18T02:58:14.418636+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 379.38676476478577,
+          "wall_around_decode_s": 388.15968585014343,
+          "wall_tps": 172.7419248286939,
+          "steady_gen_tps_mean": 168.39736842105265,
+          "steady_gen_tps_mean_nonzero": 168.39736842105265,
+          "steady_gen_tps_n": 38,
+          "gen_tps_series": [
+            18.6,
+            148.2,
+            140.4,
+            176.8,
+            186.5,
+            176.0,
+            178.8,
+            158.8,
+            164.2,
+            186.0,
+            146.1,
+            173.8,
+            199.8,
+            198.8,
+            159.1,
+            169.0,
+            168.7,
+            165.2,
+            148.7,
+            160.5,
+            158.8,
+            188.3,
+            167.4,
+            168.4,
+            172.7,
+            193.0,
+            156.2,
+            199.5,
+            172.3,
+            180.5,
+            188.7,
+            173.1,
+            197.0,
+            184.2,
+            169.7,
+            144.5,
+            196.1,
+            164.7
+          ],
+          "e_accept_exact": 3.471806238849543,
+          "e_accept_interval_mean": 3.4718421052631583,
+          "num_speculative_tokens": 5,
+          "total_accepted_tokens": 45721,
+          "total_drafted_tokens": 92485,
+          "intervals": 38,
+          "clock": {
+            "n_samples": 1562,
+            "n_load_samples": 1516,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 50.655569782330346,
+              "min": 36.0,
+              "max": 55.0
+            },
+            "power_w_load": {
+              "mean": 157.4451253298153,
+              "min": 72.79,
+              "max": 195.45
+            },
+            "util_pct": {
+              "mean": 96.87131882202304,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 120.0226263999939,
+          "arm": "k5",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "VLLM_BATCH_INVARIANT": "1",
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "5"
+          }
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "metric": "wall_tps",
+    "n_per_arm": 3,
+    "baseline_median_wall_tps": 152.30644166172218,
+    "candidate_median_wall_tps": 172.7419248286939,
+    "baseline_mean_wall_tps": 152.25574001135794,
+    "candidate_mean_wall_tps": 172.74491495249353,
+    "delta_median_tps": 20.43548316697172,
+    "delta_median_pct": 13.417346596777325,
+    "delta_mean_pct": 13.457078819890233,
+    "operative_threshold_pct": 0.1,
+    "raw_mde_detect_pct": 0.05601063623728935,
+    "raw_mde_powered_pct": 0.08006196633719043,
+    "floor_cv_pct": 0.035,
+    "se_diff_floor_tps": 0.04352519110452253,
+    "se_diff_observed_tps": 0.054828084556197296,
+    "ci95_observed_pct": 0.07055582805575362,
+    "observed_significant": true,
+    "median_se_baseline_tps": 0.069845881266989,
+    "median_se_candidate_tps": 0.012223149887601975,
+    "baseline_cv_pct": 0.06139803733891025,
+    "candidate_cv_pct": 0.009677402947323072,
+    "floor_exceeded": false,
+    "verdict": "REAL",
+    "human_verdict": "A=152.31 B=172.74 \u0394=+13.417% [REAL] (op@N3=0.10%, raw-powered-MDE=0.080%)"
+  },
+  "projection": null
+}
