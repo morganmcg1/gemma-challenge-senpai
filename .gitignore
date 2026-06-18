@@ -87,3 +87,18 @@ research/validity/int4_mtp_spec_quality_panel/**/_inspect_logs/
 research/validity/int4_mtp_spec_quality_panel/*.pid
 research/validity/int4_mtp_spec_quality_panel/*.nohup
 research/validity/int4_mtp_spec_quality_panel/serve.ready
+
+# spec-break quality-materiality census (PR #682, wirbel, analysis-only): keep the
+# per-arm result JSONs (results/{ar,spec}/*.json), the token_break.json diff + token
+# *.summary.json, rollup.json, and the serve/eval/rollup/probe scripts; drop the bulky
+# inspect_ai .eval transcript logs, the raw 128x512 token-id decode dumps (token_*.jsonl,
+# regenerable; the break-rate lives in token_break.json), the partial-capture backup, the
+# serve logs (covered by research/**/*.log), and transient pid/out/ready/nohup markers.
+research/validity/specbreak_quality_materiality/results/**/_inspect_logs/
+research/validity/specbreak_quality_materiality/results/token_*.jsonl
+research/validity/specbreak_quality_materiality/results/token_ar.jsonl.partial*
+research/validity/specbreak_quality_materiality/_smoke/
+research/validity/specbreak_quality_materiality/*.pid
+research/validity/specbreak_quality_materiality/*.out
+research/validity/specbreak_quality_materiality/*.nohup
+research/validity/specbreak_quality_materiality/*.ready
