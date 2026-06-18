@@ -131,6 +131,17 @@ def main() -> None:
     if os.environ.get("ENFORCE_EAGER", "0") == "1":
         args += ["--enforce-eager"]
 
+    # Optional serving-config knob for local serving-robustness sweeps (PR #671).
+    # COMPILATION_CONFIG is a JSON string forwarded verbatim to vLLM's
+    # --compilation-config, e.g. '{"cudagraph_mode":"PIECEWISE"}' or
+    # '{"cudagraph_capture_sizes":[1,2,4,8,16,32]}'. Unset -> flag omitted -> the
+    # engine keeps its stock cudagraph defaults, so the shipped serving path and
+    # its greedy/PPL numerics are byte-for-byte unchanged. It never touches model
+    # weights, logits, or sampling — only which graph shapes the engine captures.
+    compilation_config = os.environ.get("COMPILATION_CONFIG")
+    if compilation_config:
+        args += ["--compilation-config", compilation_config]
+
     # Ship the attention-group num_heads backport (see sitecustomize.py /
     # vllm_attn_group_patch.py) into every server process. We pin vllm==0.22.0
     # to match the official vllm/vllm-openai image, which predates the upstream

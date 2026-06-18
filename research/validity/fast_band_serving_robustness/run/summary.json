@@ -1,0 +1,568 @@
+{
+  "summary": {
+    "verdict": "BAND_ROBUST",
+    "fragile_knob": null,
+    "analysis_only": true,
+    "official_tps": 0,
+    "calibration": {
+      "cal_g128_ar_wall_tps": 127.272,
+      "cal_g128_ar_delta_pct": 0.262,
+      "cal_spec_ar_m1_wall_tps": 78.511,
+      "cal_spec_ar_m1_delta_pct": 0.014,
+      "worst_anchor_abs_pct": 0.262,
+      "calibrated_clean": true,
+      "uncalibrated": false
+    },
+    "robustness_table": [
+      {
+        "cell": "c0_native_fullpiece",
+        "sampler": "native",
+        "cudagraph_requested": "FULL_AND_PIECEWISE(stock-default)",
+        "cudagraph_resolved": "FULL_AND_PIECEWISE",
+        "compilation_resolved": "VLLM_COMPILE",
+        "attn_backend": "TRITON_ATTN",
+        "wall_tps": 172.163,
+        "band": "fast_170",
+        "n_reps": 4,
+        "n_servers": 2,
+        "per_round": {
+          "r1": 172.16,
+          "r2": 172.173
+        },
+        "spread_pct": 2.299,
+        "served_ok": true,
+        "full_length": true,
+        "acceptance_rate": 0.447994,
+        "flashinfer_sampler_crash": false,
+        "error": null,
+        "delta_vs_665_k6_pct": -0.01
+      },
+      {
+        "cell": "c1_native_piecewise",
+        "sampler": "native",
+        "cudagraph_requested": "PIECEWISE",
+        "cudagraph_resolved": "PIECEWISE",
+        "compilation_resolved": "VLLM_COMPILE",
+        "attn_backend": "TRITON_ATTN",
+        "wall_tps": 170.04,
+        "band": "fast_170",
+        "n_reps": 4,
+        "n_servers": 2,
+        "per_round": {
+          "r1": 170.04,
+          "r2": 170.054
+        },
+        "spread_pct": 2.292,
+        "served_ok": true,
+        "full_length": true,
+        "acceptance_rate": 0.447994,
+        "flashinfer_sampler_crash": false,
+        "error": null,
+        "delta_vs_665_k6_pct": -1.243
+      },
+      {
+        "cell": "c2_native_altcapture",
+        "sampler": "native",
+        "cudagraph_requested": "FULL_AND_PIECEWISE+altsizes[1,2,4,8,16,32]",
+        "cudagraph_resolved": "FULL_AND_PIECEWISE",
+        "compilation_resolved": "VLLM_COMPILE",
+        "attn_backend": "TRITON_ATTN",
+        "wall_tps": 171.654,
+        "band": "fast_170",
+        "n_reps": 4,
+        "n_servers": 2,
+        "per_round": {
+          "r1": 171.757,
+          "r2": 171.532
+        },
+        "spread_pct": 2.416,
+        "served_ok": true,
+        "full_length": true,
+        "acceptance_rate": 0.447994,
+        "flashinfer_sampler_crash": false,
+        "error": null,
+        "delta_vs_665_k6_pct": -0.305
+      },
+      {
+        "cell": "c3_flashinfer_fullpiece",
+        "sampler": "flashinfer",
+        "cudagraph_requested": "FULL_AND_PIECEWISE(stock-default)",
+        "cudagraph_resolved": "FULL_AND_PIECEWISE",
+        "compilation_resolved": "VLLM_COMPILE",
+        "attn_backend": "TRITON_ATTN",
+        "wall_tps": 172.141,
+        "band": "fast_170",
+        "n_reps": 4,
+        "n_servers": 2,
+        "per_round": {
+          "r1": null,
+          "r3": 172.155,
+          "r4": 172.141
+        },
+        "spread_pct": 2.269,
+        "served_ok": false,
+        "full_length": null,
+        "acceptance_rate": 0.447994,
+        "flashinfer_sampler_crash": true,
+        "error": "server exited before readiness with code 1 (see /workspace/senpai/target/research/validity/fast_band_serving_robustness/run/r1/c3_flashinfer_fullpiece/server.log)",
+        "delta_vs_665_k6_pct": -0.023
+      }
+    ],
+    "native_cells_all_fast": true,
+    "flashinfer_enabled": true,
+    "flashinfer_band": "fast_170",
+    "flashinfer_initial_crash_prefix": true,
+    "flashinfer_n_servers_ok": 2,
+    "attn_probe": {
+      "requested": "FLASH_ATTN",
+      "resolved": "TRITON_ATTN",
+      "override_honored": false,
+      "triton_forced": true,
+      "served_ok": true
+    },
+    "band_thresholds": {
+      "slow_155_at_or_below": 160.391,
+      "fast_170_at_or_above": 165.349,
+      "stark_k6": 155.58,
+      "land_k6": 170.16,
+      "ref_665_k6": 172.18
+    },
+    "anchors": {
+      "cal_g128_ar": 126.94,
+      "cal_spec_ar_m1": 78.5
+    },
+    "primary_metric": {
+      "name": "c0_native_fullpiece_k6_walltps",
+      "value": 172.163
+    },
+    "test_metric": {
+      "name": "verdict",
+      "value": "BAND_ROBUST"
+    },
+    "wandb_run_id": "e8i9tqos"
+  },
+  "merged": {
+    "cal_g128_ar": {
+      "name": "cal_g128_ar",
+      "kind": "cal_ar",
+      "K": null,
+      "sampler": "native",
+      "cudagraph_requested": "default",
+      "compilation_config": null,
+      "rounds": [
+        "r1"
+      ],
+      "rep_wall_tps_all": [
+        126.77958047530538,
+        127.76356498497012
+      ],
+      "per_round": {
+        "r1": 127.272
+      },
+      "served_ok_all": [
+        true
+      ],
+      "attn_backend": "TRITON_ATTN",
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "compilation_mode": "VLLM_COMPILE",
+      "cudagraph_capture_sizes": "[1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512]",
+      "flashinfer_sampler_crash": false,
+      "flashinfer_sampler_disabled": true,
+      "attn_patch_failed": false,
+      "resolved_env": {
+        "COMPILATION_CONFIG": null,
+        "DRAFTER_MODEL": null,
+        "MAX_NUM_SEQS": null,
+        "MODEL_ID": "/workspace/gemma_build/int4_g128_lmhead",
+        "NUM_SPECULATIVE_TOKENS": null,
+        "VLLM_ATTENTION_BACKEND": null,
+        "VLLM_BATCH_INVARIANT": null,
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      },
+      "full_length": true,
+      "metrics": {},
+      "error": null,
+      "ready_s": 100.0,
+      "gpu_mem_used_mib": 20373,
+      "attn_override_requested": null,
+      "attn_override_honored": null,
+      "attn_triton_forced": null,
+      "wall_tps": 127.272,
+      "n_reps": 2,
+      "n_servers": 1,
+      "wall_tps_min": 126.78,
+      "wall_tps_max": 127.764,
+      "wall_tps_spread_pct": 0.776,
+      "band": null
+    },
+    "c0_native_fullpiece": {
+      "name": "c0_native_fullpiece",
+      "kind": "k6",
+      "K": 6,
+      "sampler": "native",
+      "cudagraph_requested": "FULL_AND_PIECEWISE(stock-default)",
+      "compilation_config": null,
+      "rounds": [
+        "r1",
+        "r2"
+      ],
+      "rep_wall_tps_all": [
+        170.21258533165144,
+        174.10763570292704,
+        170.21922562408085,
+        174.1261110664559
+      ],
+      "per_round": {
+        "r1": 172.16,
+        "r2": 172.173
+      },
+      "served_ok_all": [
+        true,
+        true
+      ],
+      "attn_backend": "TRITON_ATTN",
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "compilation_mode": "VLLM_COMPILE",
+      "cudagraph_capture_sizes": "[1, 2, 4, 8]",
+      "flashinfer_sampler_crash": false,
+      "flashinfer_sampler_disabled": true,
+      "attn_patch_failed": false,
+      "resolved_env": {
+        "COMPILATION_CONFIG": null,
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "MAX_NUM_SEQS": "1",
+        "NUM_SPECULATIVE_TOKENS": "6",
+        "VLLM_ATTENTION_BACKEND": null,
+        "VLLM_BATCH_INVARIANT": "1",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      },
+      "full_length": true,
+      "metrics": {
+        "vllm:spec_decode_num_drafts_total": 35595.0,
+        "vllm:spec_decode_num_drafts_created": 1781804503.8801522,
+        "vllm:spec_decode_num_draft_tokens_total": 213570.0,
+        "vllm:spec_decode_num_draft_tokens_created": 1781804503.8801975,
+        "vllm:spec_decode_num_accepted_tokens_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_created": 1781804503.880217,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_created": 10690827023.281511
+      },
+      "error": null,
+      "ready_s": 125.0,
+      "gpu_mem_used_mib": 19933,
+      "attn_override_requested": null,
+      "attn_override_honored": null,
+      "attn_triton_forced": null,
+      "wall_tps": 172.163,
+      "n_reps": 4,
+      "n_servers": 2,
+      "wall_tps_min": 170.213,
+      "wall_tps_max": 174.126,
+      "wall_tps_spread_pct": 2.299,
+      "band": "fast_170"
+    },
+    "c1_native_piecewise": {
+      "name": "c1_native_piecewise",
+      "kind": "k6",
+      "K": 6,
+      "sampler": "native",
+      "cudagraph_requested": "PIECEWISE",
+      "compilation_config": "{\"cudagraph_mode\":\"PIECEWISE\"}",
+      "rounds": [
+        "r1",
+        "r2"
+      ],
+      "rep_wall_tps_all": [
+        168.14337467668335,
+        171.93592916437981,
+        168.12714059077146,
+        171.9814058529736
+      ],
+      "per_round": {
+        "r1": 170.04,
+        "r2": 170.054
+      },
+      "served_ok_all": [
+        true,
+        true
+      ],
+      "attn_backend": "TRITON_ATTN",
+      "cudagraph_mode": "PIECEWISE",
+      "compilation_mode": "VLLM_COMPILE",
+      "cudagraph_capture_sizes": "[1, 2, 4, 8]",
+      "flashinfer_sampler_crash": false,
+      "flashinfer_sampler_disabled": true,
+      "attn_patch_failed": false,
+      "resolved_env": {
+        "COMPILATION_CONFIG": "{\"cudagraph_mode\":\"PIECEWISE\"}",
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "MAX_NUM_SEQS": "1",
+        "NUM_SPECULATIVE_TOKENS": "6",
+        "VLLM_ATTENTION_BACKEND": null,
+        "VLLM_BATCH_INVARIANT": "1",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      },
+      "full_length": true,
+      "metrics": {
+        "vllm:spec_decode_num_drafts_total": 35595.0,
+        "vllm:spec_decode_num_drafts_created": 1781805409.5792284,
+        "vllm:spec_decode_num_draft_tokens_total": 213570.0,
+        "vllm:spec_decode_num_draft_tokens_created": 1781805409.579258,
+        "vllm:spec_decode_num_accepted_tokens_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_created": 1781805409.579276,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_created": 10690832457.475878
+      },
+      "error": null,
+      "ready_s": 125.0,
+      "gpu_mem_used_mib": 20053,
+      "attn_override_requested": null,
+      "attn_override_honored": null,
+      "attn_triton_forced": null,
+      "wall_tps": 170.04,
+      "n_reps": 4,
+      "n_servers": 2,
+      "wall_tps_min": 168.127,
+      "wall_tps_max": 171.981,
+      "wall_tps_spread_pct": 2.292,
+      "band": "fast_170"
+    },
+    "c2_native_altcapture": {
+      "name": "c2_native_altcapture",
+      "kind": "k6",
+      "K": 6,
+      "sampler": "native",
+      "cudagraph_requested": "FULL_AND_PIECEWISE+altsizes[1,2,4,8,16,32]",
+      "compilation_config": "{\"cudagraph_capture_sizes\":[1,2,4,8,16,32]}",
+      "rounds": [
+        "r1",
+        "r2"
+      ],
+      "rep_wall_tps_all": [
+        169.82970020068,
+        173.6834480627037,
+        169.5865175441315,
+        173.47742912684168
+      ],
+      "per_round": {
+        "r1": 171.757,
+        "r2": 171.532
+      },
+      "served_ok_all": [
+        true,
+        true
+      ],
+      "attn_backend": "TRITON_ATTN",
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "compilation_mode": "VLLM_COMPILE",
+      "cudagraph_capture_sizes": "[1, 2, 4, 8, 16, 32]",
+      "flashinfer_sampler_crash": false,
+      "flashinfer_sampler_disabled": true,
+      "attn_patch_failed": false,
+      "resolved_env": {
+        "COMPILATION_CONFIG": "{\"cudagraph_capture_sizes\":[1,2,4,8,16,32]}",
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "MAX_NUM_SEQS": "1",
+        "NUM_SPECULATIVE_TOKENS": "6",
+        "VLLM_ATTENTION_BACKEND": null,
+        "VLLM_BATCH_INVARIANT": "1",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      },
+      "full_length": true,
+      "metrics": {
+        "vllm:spec_decode_num_drafts_total": 35595.0,
+        "vllm:spec_decode_num_drafts_created": 1781806326.499332,
+        "vllm:spec_decode_num_draft_tokens_total": 213570.0,
+        "vllm:spec_decode_num_draft_tokens_created": 1781806326.49936,
+        "vllm:spec_decode_num_accepted_tokens_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_created": 1781806326.499376,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_created": 10690837958.996464
+      },
+      "error": null,
+      "ready_s": 130.0,
+      "gpu_mem_used_mib": 19955,
+      "attn_override_requested": null,
+      "attn_override_honored": null,
+      "attn_triton_forced": null,
+      "wall_tps": 171.654,
+      "n_reps": 4,
+      "n_servers": 2,
+      "wall_tps_min": 169.587,
+      "wall_tps_max": 173.683,
+      "wall_tps_spread_pct": 2.416,
+      "band": "fast_170"
+    },
+    "c3_flashinfer_fullpiece": {
+      "name": "c3_flashinfer_fullpiece",
+      "kind": "k6",
+      "K": 6,
+      "sampler": "flashinfer",
+      "cudagraph_requested": "FULL_AND_PIECEWISE(stock-default)",
+      "compilation_config": null,
+      "rounds": [
+        "r1",
+        "r3",
+        "r4"
+      ],
+      "rep_wall_tps_all": [
+        170.22375664193456,
+        174.0860357916205,
+        170.2623003893619,
+        174.02061941121994
+      ],
+      "per_round": {
+        "r1": null,
+        "r3": 172.155,
+        "r4": 172.141
+      },
+      "served_ok_all": [
+        false,
+        true,
+        true
+      ],
+      "attn_backend": "TRITON_ATTN",
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "compilation_mode": "VLLM_COMPILE",
+      "cudagraph_capture_sizes": "[1, 2, 4, 8]",
+      "flashinfer_sampler_crash": true,
+      "flashinfer_sampler_disabled": false,
+      "attn_patch_failed": false,
+      "resolved_env": {},
+      "full_length": null,
+      "metrics": {
+        "vllm:spec_decode_num_drafts_total": 35595.0,
+        "vllm:spec_decode_num_drafts_created": 1781810442.3819165,
+        "vllm:spec_decode_num_draft_tokens_total": 213570.0,
+        "vllm:spec_decode_num_draft_tokens_created": 1781810442.3819468,
+        "vllm:spec_decode_num_accepted_tokens_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_created": 1781810442.381964,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_total": 95678.0,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_created": 10690862654.292
+      },
+      "error": "server exited before readiness with code 1 (see /workspace/senpai/target/research/validity/fast_band_serving_robustness/run/r1/c3_flashinfer_fullpiece/server.log)",
+      "ready_s": null,
+      "gpu_mem_used_mib": null,
+      "attn_override_requested": null,
+      "attn_override_honored": null,
+      "attn_triton_forced": null,
+      "wall_tps": 172.141,
+      "n_reps": 4,
+      "n_servers": 2,
+      "wall_tps_min": 170.224,
+      "wall_tps_max": 174.086,
+      "wall_tps_spread_pct": 2.269,
+      "band": "fast_170"
+    },
+    "cal_spec_ar_m1": {
+      "name": "cal_spec_ar_m1",
+      "kind": "cal_spec_ar",
+      "K": null,
+      "sampler": "native",
+      "cudagraph_requested": "default",
+      "compilation_config": null,
+      "rounds": [
+        "r3"
+      ],
+      "rep_wall_tps_all": [
+        78.39331344845331,
+        78.62938720898713
+      ],
+      "per_round": {
+        "r3": 78.511
+      },
+      "served_ok_all": [
+        true
+      ],
+      "attn_backend": "TRITON_ATTN",
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "compilation_mode": "VLLM_COMPILE",
+      "cudagraph_capture_sizes": "[1, 2]",
+      "flashinfer_sampler_crash": false,
+      "flashinfer_sampler_disabled": true,
+      "attn_patch_failed": false,
+      "resolved_env": {
+        "COMPILATION_CONFIG": null,
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "MAX_NUM_SEQS": "1",
+        "NUM_SPECULATIVE_TOKENS": "0",
+        "VLLM_ATTENTION_BACKEND": null,
+        "VLLM_BATCH_INVARIANT": "1",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      },
+      "full_length": true,
+      "metrics": {},
+      "error": null,
+      "ready_s": 125.0,
+      "gpu_mem_used_mib": 19313,
+      "attn_override_requested": null,
+      "attn_override_honored": null,
+      "attn_triton_forced": null,
+      "wall_tps": 78.511,
+      "n_reps": 2,
+      "n_servers": 1,
+      "wall_tps_min": 78.393,
+      "wall_tps_max": 78.629,
+      "wall_tps_spread_pct": 0.301,
+      "band": null
+    },
+    "attn_probe_flash_attn": {
+      "name": "attn_probe_flash_attn",
+      "kind": "k6",
+      "K": 6,
+      "sampler": "native",
+      "cudagraph_requested": "FULL_AND_PIECEWISE(stock-default)",
+      "compilation_config": null,
+      "rounds": [
+        "rprobe"
+      ],
+      "rep_wall_tps_all": [],
+      "per_round": {
+        "rprobe": null
+      },
+      "served_ok_all": [
+        true
+      ],
+      "attn_backend": "TRITON_ATTN",
+      "cudagraph_mode": "FULL_AND_PIECEWISE",
+      "compilation_mode": "VLLM_COMPILE",
+      "cudagraph_capture_sizes": "[1, 2, 4, 8]",
+      "flashinfer_sampler_crash": false,
+      "flashinfer_sampler_disabled": true,
+      "attn_patch_failed": false,
+      "resolved_env": {
+        "COMPILATION_CONFIG": null,
+        "DRAFTER_MODEL": "/tmp/qat-assistant",
+        "MAX_NUM_SEQS": "1",
+        "NUM_SPECULATIVE_TOKENS": "6",
+        "VLLM_ATTENTION_BACKEND": "FLASH_ATTN",
+        "VLLM_BATCH_INVARIANT": "1",
+        "VLLM_USE_FLASHINFER_SAMPLER": "0"
+      },
+      "full_length": null,
+      "metrics": {
+        "vllm:spec_decode_num_drafts_total": 0.0,
+        "vllm:spec_decode_num_drafts_created": 1781802962.211159,
+        "vllm:spec_decode_num_draft_tokens_total": 0.0,
+        "vllm:spec_decode_num_draft_tokens_created": 1781802962.2112079,
+        "vllm:spec_decode_num_accepted_tokens_total": 0.0,
+        "vllm:spec_decode_num_accepted_tokens_created": 1781802962.211225,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_total": 0.0,
+        "vllm:spec_decode_num_accepted_tokens_per_pos_created": 10690817773.267557
+      },
+      "error": null,
+      "ready_s": 125.0,
+      "gpu_mem_used_mib": 19891,
+      "attn_override_requested": "FLASH_ATTN",
+      "attn_override_honored": false,
+      "attn_triton_forced": true,
+      "wall_tps": null,
+      "n_reps": 0,
+      "n_servers": 0,
+      "wall_tps_min": null,
+      "wall_tps_max": null,
+      "wall_tps_spread_pct": 0.0,
+      "band": null
+    }
+  }
+}
