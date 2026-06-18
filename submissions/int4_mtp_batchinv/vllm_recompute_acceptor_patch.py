@@ -47,6 +47,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 
 _PATCH_FLAG = "_optionb_recompute_acceptor_patch_applied"
 
@@ -57,7 +58,38 @@ _REQUIRE_FIRE_ENV = "SENPAI_RECOMPUTE_REQUIRE_FIRE"
 _CUDAGRAPH_ENV = "SENPAI_RECOMPUTE_CUDAGRAPH"
 _STAT_DIR_ENV = "SENPAI_RECOMPUTE_STAT_DIR"
 
+# PR #669 Item 2 -- LIVE-trajectory de-teacher-force identity certificate.
+#   SENPAI_LIVECERT_REF_JSONL=<R_served decode jsonl>  (the SENPAI_REFERENCE_MODE=1
+#     served M=1-AR trajectory; prompts keyed by sha256(",".join prompt_token_ids)).
+#   SENPAI_LIVECERT_STAT_DIR=<dir>  (per-PID cert sidecar JSON; read-only otherwise).
+# When set, the wrapper records -- READ ONLY, the emitted stream is UNCHANGED -- the
+# per-position verify gap + de-teacher-forced flip (verify-argmax != R_served token)
+# along the LIVE K-spec trajectory, partitioned PRE-FORK (on R_served) vs GLOBAL (all
+# positions), so the min break-free flag predicate is MEASURED on the live loop, not
+# reconstructed offline. flips can only occur at draft-verify rows (the bonus row's
+# argmax shares R_served's context under BI=1, so it is never a flip on-trajectory).
+_LIVECERT_REF_ENV = "SENPAI_LIVECERT_REF_JSONL"
+_LIVECERT_STAT_DIR_ENV = "SENPAI_LIVECERT_STAT_DIR"
+_LIVECERT_NPROMPTS_ENV = "SENPAI_LIVECERT_N_PROMPTS"
+# When >0, the recorder writes a per-step alignment trace (req 0 only) to stderr for the
+# first N decode steps -- used to validate the emitted<->R_served pos alignment. 0 = off.
+try:
+    _LIVECERT_DBG = int(os.environ.get("SENPAI_LIVECERT_DEBUG_STEPS", "0") or "0")
+except (TypeError, ValueError):
+    _LIVECERT_DBG = 0
+
+# tau-flag sweep for the live cert: loose -> tight. The min break-free tau gives the
+# min_safe_live_flag_rate. Includes the offline scan's points (0.2,0.25,0.3,0.5,...)
+# plus finer steps around the offline flip_gap_max (0.25) to localize the knee.
+_LIVECERT_TAU_SWEEP = (
+    0.1, 0.15, 0.2, 0.22, 0.25, 0.27, 0.28, 0.3, 0.35, 0.4, 0.5, 0.75, 1.0,
+)
+
 _LOG_EVERY = int(os.environ.get("SENPAI_RECOMPUTE_LOG_EVERY", "4096"))
+
+
+def _livecert_ref_path() -> str:
+    return os.environ.get(_LIVECERT_REF_ENV, "") or ""
 
 
 def _rate() -> float:
@@ -98,6 +130,73 @@ def _write_stat(kind: str, payload: dict) -> None:
         os.replace(tmp, path)
     except Exception:
         pass
+
+
+def _write_livecert_stat(kind: str, payload: dict) -> None:
+    """Dump the live-cert sidecar JSON to ``$SENPAI_LIVECERT_STAT_DIR`` (no-op when
+    unset). Written at every progress boundary AND at exit so the final file holds the
+    run totals even though there is no clean per-serve teardown hook."""
+    stat_dir = os.environ.get(_LIVECERT_STAT_DIR_ENV, "")
+    if not stat_dir:
+        return
+    try:
+        os.makedirs(stat_dir, exist_ok=True)
+        pid = os.getpid()
+        path = os.path.join(stat_dir, f"livecert_{kind}_{pid}.json")
+        tmp = path + ".tmp"
+        with open(tmp, "w") as fh:
+            json.dump({"pid": pid, **payload}, fh)
+        os.replace(tmp, path)
+    except Exception:
+        pass
+
+
+def _hash_tokens(token_ids) -> str:
+    """sha256 of the comma-joined token ids -- byte-identical to the harness keying
+    (``check_greedy_identity.sha256_tokens`` / the reference jsonl ``prompt_token_sha256``)."""
+    import hashlib
+
+    return hashlib.sha256(
+        ",".join(str(int(t)) for t in token_ids).encode("ascii")
+    ).hexdigest()
+
+
+def _load_ref_index(ref_jsonl: str, n_prompts: int) -> dict[str, list]:
+    """Map ``prompt_token_sha256 -> R_served completion_token_ids`` from the served
+    M=1-AR reference decode jsonl. Uses the stored ``prompt_token_sha256`` when present
+    (verified equal to ``_hash_tokens(prompt_token_ids)``), else recomputes it."""
+    index: dict[str, list] = {}
+    if not ref_jsonl or not os.path.exists(ref_jsonl):
+        return index
+    with open(ref_jsonl) as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                r = json.loads(line)
+            except Exception:
+                continue
+            pids = r.get("prompt_token_ids") or []
+            comp = r.get("completion_token_ids") or []
+            if not pids or not comp:
+                continue
+            key = r.get("prompt_token_sha256") or _hash_tokens(pids)
+            index[key] = list(comp)
+            if n_prompts and len(index) >= n_prompts:
+                break
+    return index
+
+
+def _gaps_at(logits, idx_tensor, torch) -> list:
+    """top1-top2 verify gap for every row selected by ``idx_tensor`` (indices into the
+    gathered sampled logits ``ems[1]``), returned as a CPU python list. Used only in
+    livecert mode (analysis), so the one ``.tolist()`` sync per step is acceptable."""
+    if idx_tensor is None or idx_tensor.numel() == 0:
+        return []
+    rows = logits.index_select(0, idx_tensor)
+    top2 = torch.topk(rows, 2, dim=-1).values
+    return (top2[:, 0] - top2[:, 1]).tolist()
 
 
 def _count_emitted(output, torch) -> int:
@@ -155,6 +254,318 @@ def _gap_flag_count(self, ems, tau: float, torch) -> tuple[int, int]:
         return 0, 0
 
 
+def _count_positions(ems, torch) -> int:
+    """Number of spec verify (draft-aligned) positions this step -- ``.numel()`` on the
+    index tensor, a SHAPE read, NO device sync. This drives RATE-mode firing
+    (``floor(carry + rate*positions)``) so the recompute count tracks the verify
+    positions the acceptor actually guards, with zero per-step sync (PR #669 Item 1)."""
+    try:
+        sdm = ems[2] if ems is not None else None
+        if sdm is None:
+            return 0
+        tli = getattr(sdm, "target_logits_indices", None)
+        if tli is None:
+            return 0
+        return int(tli.numel())
+    except Exception:
+        return 0
+
+
+def _accumulate_emitted(self, output, torch) -> None:
+    """Advance the emitted-token accumulators WITHOUT a per-step ``.item()`` sync
+    (PR #669 Item 1). Emitted count is now pure logging -- neither RATE (per-position)
+    nor TAU (gap-mask) firing keys off it -- so we never block the stream to read it:
+
+      * async tensor output -> enqueue a GPU reduction into ``self._rc_emitted_gpu``
+        (a 0-dim device tensor); materialized once at each log boundary / at exit.
+      * sync list output -> ``sum(len(x))`` is already host-side, add to a python int.
+
+    A run is consistently one shape, so only one accumulator advances."""
+    stids = getattr(output, "sampled_token_ids", None)
+    if stids is None:
+        stids = getattr(output, "_sampled_token_ids", None)
+    if stids is None:
+        return
+    if isinstance(stids, torch.Tensor):
+        if stids.numel() == 0:
+            return
+        contrib = (stids >= 0).sum()  # GPU scalar; no sync
+        prev = getattr(self, "_rc_emitted_gpu", None)
+        self._rc_emitted_gpu = contrib if prev is None else prev + contrib
+    else:
+        try:
+            self._rc_emitted_cpu = getattr(self, "_rc_emitted_cpu", 0) + int(
+                sum(len(x) for x in stids)
+            )
+        except TypeError:
+            pass
+
+
+def _materialize_emitted(self) -> int:
+    """Realize the emitted total (single ``.item()`` -- only at log boundaries / exit)."""
+    total = int(getattr(self, "_rc_emitted_cpu", 0))
+    g = getattr(self, "_rc_emitted_gpu", None)
+    if g is not None:
+        try:
+            total += int(g.item())
+        except Exception:
+            pass
+    return total
+
+
+def _emitted_rows(output, torch) -> list[list[int]]:
+    """Per-request emitted token-id lists (input-batch req order), unifying both output
+    shapes. async ``_sampled_token_ids`` ``[num_reqs, max_spec+1]`` is ``-1``-padded
+    (valid ids are the contiguous non-(-1) prefix); sync ``sampled_token_ids`` is
+    already the clean ``list[list[int]]``. Used only in livecert mode."""
+    stids = getattr(output, "sampled_token_ids", None)
+    if stids is not None and not isinstance(stids, torch.Tensor):
+        return [[int(t) for t in row] for row in stids]
+    stids = getattr(output, "_sampled_token_ids", None)
+    if stids is None or not isinstance(stids, torch.Tensor) or stids.numel() == 0:
+        return []
+    rows: list[list[int]] = []
+    for row in stids.tolist():
+        valid: list[int] = []
+        for t in row:
+            if t == -1:
+                break
+            valid.append(int(t))
+        rows.append(valid)
+    return rows
+
+
+def _livecert_record(self, ems, output, torch) -> None:
+    """PR #669 Item 2 -- LIVE de-teacher-force recorder (READ ONLY; emitted stream
+    UNCHANGED). For every active request, walk this step's emitted tokens (== the live
+    verify argmaxes at the accepted/corrected positions) IN ORDER and compare each to
+    the served M=1-AR reference R_served at the same output position:
+
+      flip(pos)       = emitted_tok != R_served[pos]          (the live fork signal)
+      flag(pos, tau)  = verify_gap(pos) < tau                 (acceptor would recompute)
+      break(pos, tau) = flip AND gap >= tau                   (flag MISSED -> identity lost)
+
+    Positions are partitioned PRE-FORK (recorded only while the request's live stream
+    is still byte-identical to R_served; recording stops at the first flip, which is
+    itself the last on-trajectory measurement) vs GLOBAL (all draft rows every step,
+    forked or not -> reproduces the un-rescued cost-probe per-verify-position flag rate).
+    The min tau with zero pre-fork breaks gives ``min_safe_live_flag_rate``."""
+    lc = getattr(self, "_lc", None)
+    if lc is None:
+        return
+    try:
+        req_ids = list(self.input_batch.req_ids)
+    except Exception:
+        return
+    rows = _emitted_rows(output, torch)
+    if not rows:
+        return
+    taus = _LIVECERT_TAU_SWEEP
+
+    # A pure-prefill step samples the first token but carries NO SpecDecodeMetadata
+    # (ems[2] is None). It still EMITS one token per active request, which advances the
+    # true output position -- so it MUST be walked to keep ``pos[rid]`` aligned with
+    # R_served; skipping it desyncs every later comparison by one (the off-by-one that
+    # made all requests fork at position 0). Only the gap-based flag/break accounting is
+    # spec-only; the prefill bonus is a no-gap emit position.
+    logits = ems[1] if ems is not None else None
+    sdm = ems[2] if ems is not None else None
+    num_draft = getattr(sdm, "num_draft_tokens", None) if sdm is not None else None
+    has_spec = logits is not None and num_draft is not None
+    if has_spec:
+        gaps_draft = _gaps_at(logits, getattr(sdm, "target_logits_indices", None), torch)
+        gaps_bonus = _gaps_at(logits, getattr(sdm, "bonus_logits_indices", None), torch)
+        # ---- GLOBAL: every draft-verify row this step (un-partitioned) ----
+        lc["global_draft_positions"] += len(gaps_draft)
+        gfd = lc["global_flag_draft"]
+        for g in gaps_draft:
+            for t in taus:
+                if g < t:
+                    gfd[t] += 1
+    else:
+        gaps_draft = []
+        gaps_bonus = []
+
+    # ---- PRE-FORK: per request, emitted tokens until first divergence ----
+    n = min(len(req_ids), len(rows))
+    off = 0
+    pos = lc["pos"]
+    forked = lc["forked"]
+    refmap = lc["ref"]
+    pfe = lc["prefork_flag_emit"]
+    pfd = lc["prefork_flag_draft"]
+    pbk = lc["prefork_break"]
+    step = lc["step"] = lc.get("step", 0) + 1
+    for i in range(n):
+        D_i = int(num_draft[i]) if has_spec else 0
+        draft_off, off = off, off + D_i
+        rid = req_ids[i]
+        if rid in forked:
+            continue
+        if rid not in refmap:
+            lc["n_reqs_seen"] += 1
+            ref = None
+            req = self.requests.get(rid) if hasattr(self.requests, "get") else None
+            pids = getattr(req, "prompt_token_ids", None) if req is not None else None
+            if pids:
+                ref = lc["ref_index"].get(_hash_tokens(pids))
+            refmap[rid] = ref
+            if ref is not None:
+                lc["n_matched"] += 1
+            pos[rid] = 0
+        ref = refmap[rid]
+        if ref is None:
+            continue
+        emitted_i = rows[i]
+        if not emitted_i:
+            continue
+        draft_gaps_i = gaps_draft[draft_off:draft_off + D_i] if has_spec else []
+        bonus_g = gaps_bonus[i] if (has_spec and i < len(gaps_bonus)) else None
+        base = pos[rid]
+        if _LIVECERT_DBG and i == 0 and step <= _LIVECERT_DBG:
+            sys.stderr.write(
+                "[SENPAI_DIAG livecert] step=%d rid=%s spec=%s D=%d base=%d "
+                "emit[:4]=%s ref[base:base+4]=%s\n"
+                % (step, rid, has_spec, D_i, base, emitted_i[:4],
+                   [int(x) for x in ref[base:base + 4]])
+            )
+            sys.stderr.flush()
+        forked_here = exhausted = False
+        consumed = 0
+        for j, tok in enumerate(emitted_i):
+            rpos = base + j
+            if rpos >= len(ref):
+                exhausted = True
+                break
+            if has_spec and j < D_i:
+                g = draft_gaps_i[j]
+                is_draft_row = True
+            elif has_spec:
+                g = bonus_g
+                is_draft_row = False
+            else:
+                g = None  # prefill bonus: no spec metadata, no gap
+                is_draft_row = False
+            is_flip = tok != int(ref[rpos])
+            lc["prefork_emit_positions"] += 1
+            if g is not None:
+                for t in taus:
+                    if g < t:
+                        pfe[t] += 1
+                if is_draft_row:
+                    lc["prefork_draft_positions"] += 1
+                    for t in taus:
+                        if g < t:
+                            pfd[t] += 1
+            consumed += 1
+            if is_flip:
+                # A no-gap (prefill) flip is un-flaggable -> breaks at every tau.
+                lc["flip_gaps"].append(float(g) if g is not None else float("inf"))
+                if g is None:
+                    lc["n_prefill_flips"] += 1
+                pbd = lc["prefork_break_draftonly"]
+                for t in taus:
+                    if g is None or g >= t:
+                        pbk[t] += 1
+                    # draft-only: a no-gap flip is NOT a draft-position break (the
+                    # acceptor cannot recompute a position that has no draft row).
+                    if g is not None and g >= t:
+                        pbd[t] += 1
+                if len(lc["flip_records"]) < 2000:
+                    lc["flip_records"].append({
+                        "rid": str(rid), "rpos": rpos, "step": step,
+                        "gap": (float(g) if g is not None else None),
+                        "has_spec": bool(has_spec), "is_draft_row": bool(is_draft_row),
+                        "emit_tok": int(tok), "ref_tok": int(ref[rpos]),
+                    })
+                forked_here = True
+                break
+        if forked_here or exhausted:
+            forked.add(rid)
+            if forked_here:
+                lc["n_forked"] += 1
+        else:
+            pos[rid] = base + consumed
+
+
+def _livecert_summary(self) -> dict:
+    """Compose the cert from the run accumulators: per-tau flag/break rates (pre-fork &
+    global), the min break-free tau (-> min_safe_live_flag_rate), rule-of-three UB."""
+    lc = getattr(self, "_lc", None)
+    if lc is None:
+        return {}
+    taus = _LIVECERT_TAU_SWEEP
+    pe = lc["prefork_emit_positions"]
+    pd = lc["prefork_draft_positions"]
+    gd = lc["global_draft_positions"]
+    per_tau = {}
+    min_safe = None
+    min_safe_draftonly = None
+    pbd = lc.get("prefork_break_draftonly", {})
+    for t in taus:
+        brk = lc["prefork_break"][t]
+        brk_do = pbd.get(t, 0)
+        per_tau[f"{t:g}"] = {
+            "tau": t,
+            "prefork_break_count": brk,
+            "prefork_break_count_draftonly": brk_do,
+            "prefork_break_rate_over_draft": (brk / pd) if pd else None,
+            "prefork_break_rate_draftonly_over_draft": (brk_do / pd) if pd else None,
+            "prefork_flag_rate_per_emit": (lc["prefork_flag_emit"][t] / pe) if pe else None,
+            "prefork_flag_rate_per_draft": (lc["prefork_flag_draft"][t] / pd) if pd else None,
+            "global_flag_rate_per_draft": (lc["global_flag_draft"][t] / gd) if gd else None,
+        }
+        if brk == 0 and min_safe is None:
+            min_safe = t
+        if brk_do == 0 and min_safe_draftonly is None:
+            min_safe_draftonly = t
+    flip_gaps = lc["flip_gaps"]
+    finite_gaps = [g for g in flip_gaps if g != float("inf")]
+    summary = {
+        "ref_jsonl": _livecert_ref_path(),
+        "n_reqs_seen": lc["n_reqs_seen"],
+        "n_matched": lc["n_matched"],
+        "n_forked": lc["n_forked"],
+        "prefork_emit_positions": pe,
+        "prefork_draft_positions": pd,
+        "global_draft_positions": gd,
+        "n_flips_prefork": len(flip_gaps),
+        "n_prefill_flips": lc.get("n_prefill_flips", 0),
+        "n_draft_flips": len(flip_gaps) - lc.get("n_prefill_flips", 0),
+        "flip_gap_max": max(flip_gaps) if flip_gaps else 0.0,
+        "flip_gap_max_finite": max(finite_gaps) if finite_gaps else 0.0,
+        "flip_gap_min": min(flip_gaps) if flip_gaps else None,
+        "per_tau": per_tau,
+        "min_safe_tau": min_safe,
+        "min_safe_live_flag_rate_per_draft": (
+            (lc["prefork_flag_draft"][min_safe] / pd) if (min_safe and pd) else None
+        ),
+        "min_safe_live_flag_rate_per_emit": (
+            (lc["prefork_flag_emit"][min_safe] / pe) if (min_safe and pe) else None
+        ),
+        "served_rescued_break_rate_at_min_safe": (
+            (lc["prefork_break"][min_safe] / pd) if (min_safe and pd) else None
+        ),
+        # ---- draft-only partition (excludes structurally-unflaggable prefill flips) ----
+        "min_safe_tau_draftonly": min_safe_draftonly,
+        "min_safe_live_flag_rate_per_draft_draftonly": (
+            (lc["prefork_flag_draft"][min_safe_draftonly] / pd)
+            if (min_safe_draftonly and pd) else None
+        ),
+        "min_safe_live_flag_rate_per_emit_draftonly": (
+            (lc["prefork_flag_emit"][min_safe_draftonly] / pe)
+            if (min_safe_draftonly and pe) else None
+        ),
+        "served_rescued_break_rate_at_min_safe_draftonly": (
+            (pbd.get(min_safe_draftonly, 0) / pd)
+            if (min_safe_draftonly and pd) else None
+        ),
+        "rule_of_three_ub_over_draft": (3.0 / pd) if pd else None,
+        "flip_records": lc.get("flip_records", []),
+    }
+    return summary
+
+
 def apply(gmr) -> bool:
     """Wrap ``gmr.GPUModelRunner.sample_tokens`` to fire recompute forwards.
 
@@ -167,7 +578,9 @@ def apply(gmr) -> bool:
 
     rate = _rate()
     tau = _tau()
-    if rate <= 0.0 and tau <= 0.0:
+    livecert_ref = _livecert_ref_path()
+    livecert = bool(livecert_ref)
+    if rate <= 0.0 and tau <= 0.0 and not livecert:
         # No-op: shipped serve path. Do not wrap.
         return False
 
@@ -178,13 +591,33 @@ def apply(gmr) -> bool:
     target_only = _flag(_TARGET_ONLY_ENV, True)
     require_fire = _flag(_REQUIRE_FIRE_ENV, True)
     use_cudagraph = _flag(_CUDAGRAPH_ENV, False)
-    mode_name = "TAU(real-gap)" if tau > 0.0 else "RATE(inject)"
+    if livecert:
+        mode_name = "LIVECERT(de-teacher-force)"
+    elif tau > 0.0:
+        mode_name = "TAU(real-gap)"
+    else:
+        mode_name = "RATE(inject,per-position)"
+
+    # Pre-load the served M=1-AR reference index (prompt_token_sha256 -> R_served) once,
+    # in the worker that owns the gap tensors. Stashed on the class so the wrapper can
+    # lazily seed a per-runner ``self._lc`` accumulator on first use.
+    livecert_ref_index: dict[str, list] = {}
+    if livecert:
+        try:
+            n_prompts = int(os.environ.get(_LIVECERT_NPROMPTS_ENV, "0") or "0")
+        except (TypeError, ValueError):
+            n_prompts = 0
+        livecert_ref_index = _load_ref_index(livecert_ref, n_prompts)
+        logger.warning(
+            "[recompute-acceptor] LIVECERT ref=%s prompts_indexed=%d taus=%s",
+            livecert_ref, len(livecert_ref_index), _LIVECERT_TAU_SWEEP,
+        )
 
     logger.warning(
         "[recompute-acceptor] APPLY wrapping GPUModelRunner.sample_tokens mode=%s "
-        "rate=%.6f tau=%.6f target_only=%s require_fire=%s cudagraph=%s (mode=%s) "
-        "log_every=%d",
-        mode_name, rate, tau, target_only, require_fire, use_cudagraph,
+        "rate=%.6f tau=%.6f livecert=%s target_only=%s require_fire=%s cudagraph=%s "
+        "(mode=%s) log_every=%d",
+        mode_name, rate, tau, livecert, target_only, require_fire, use_cudagraph,
         "None/dispatcher" if use_cudagraph else "NONE/eager", _LOG_EVERY,
     )
 
@@ -231,6 +664,70 @@ def apply(gmr) -> bool:
         except Exception:
             logger.exception("[recompute-acceptor] dispatch resolve failed")
 
+    # Live-cert runners are tracked so an atexit hook can flush the final summary even
+    # for the trailing < _LOG_EVERY positions after the last progress boundary.
+    _lc_runners: list = []
+    _lc_atexit_registered = {"v": False}
+
+    def _lc_flush_all() -> None:
+        for r in _lc_runners:
+            try:
+                _write_livecert_stat("summary", _livecert_summary(r))
+            except Exception:
+                pass
+
+    def _livecert_init(self) -> None:
+        if getattr(self, "_lc", None) is not None:
+            return
+        self._lc = {
+            "ref_index": livecert_ref_index,
+            "pos": {}, "forked": set(), "ref": {},
+            "global_draft_positions": 0,
+            "global_flag_draft": {t: 0 for t in _LIVECERT_TAU_SWEEP},
+            "prefork_emit_positions": 0, "prefork_draft_positions": 0,
+            "prefork_flag_emit": {t: 0 for t in _LIVECERT_TAU_SWEEP},
+            "prefork_flag_draft": {t: 0 for t in _LIVECERT_TAU_SWEEP},
+            "prefork_break": {t: 0 for t in _LIVECERT_TAU_SWEEP},
+            # break accounting that EXCLUDES no-gap (prefill, output-pos-0) flips, which
+            # are structurally un-flaggable by a gap predicate (no draft row exists for
+            # the prefill token) and hence outside the recompute-acceptor's domain. The
+            # draft-only min-safe tau is the acceptor's true reducibility; the prefill
+            # flips are reported separately (PR #669 Item-2 partition).
+            "prefork_break_draftonly": {t: 0 for t in _LIVECERT_TAU_SWEEP},
+            "n_prefill_flips": 0,
+            "flip_records": [],
+            "flip_gaps": [], "n_forked": 0, "n_reqs_seen": 0, "n_matched": 0,
+            "step": 0,
+        }
+        _lc_runners.append(self)
+        if not _lc_atexit_registered["v"]:
+            import atexit
+
+            atexit.register(_lc_flush_all)
+            # LocalServer terminates the serve process group with SIGTERM (not a clean
+            # interpreter exit), so atexit alone never fires for a short run that has
+            # not crossed a _LOG_EVERY boundary. Chain a SIGTERM handler that flushes
+            # the final composed cert, then defer to the previous handler so vLLM's
+            # graceful shutdown is preserved. signal.signal only works on the main
+            # thread; fall back to atexit-only otherwise.
+            try:
+                import signal
+
+                _prev_sigterm = signal.getsignal(signal.SIGTERM)
+
+                def _lc_sigterm(signum, frame, _prev=_prev_sigterm):
+                    _lc_flush_all()
+                    if callable(_prev):
+                        _prev(signum, frame)
+                    elif _prev == signal.SIG_DFL:
+                        signal.signal(signal.SIGTERM, signal.SIG_DFL)
+                        os.kill(os.getpid(), signum)
+
+                signal.signal(signal.SIGTERM, _lc_sigterm)
+            except (ValueError, OSError, RuntimeError):
+                pass
+            _lc_atexit_registered["v"] = True
+
     def _fire(self, n: int) -> int:
         if n <= 0:
             return 0
@@ -248,51 +745,67 @@ def apply(gmr) -> bool:
         return fired
 
     def sample_tokens(self, grammar_output):
-        # Peek the ephemeral verify state BEFORE the original consumes/clears it.
+        # Peek the ephemeral verify state BEFORE the original consumes/clears it. Our
+        # local ``ems`` keeps the 10-tuple (and its logits tensor) alive across the
+        # original call even though it nulls ``self.execute_model_state``.
         ems = self.execute_model_state
-        flagged = positions = 0
+        # ``positions`` is a SHAPE read (sync-free) and drives BOTH the progress gate
+        # and RATE-mode per-position firing -- no ``.item()`` in the hot path (Item 1).
+        positions = _count_positions(ems, torch)
+        flagged = 0
         if tau > 0.0 and ems is not None:
-            flagged, positions = _gap_flag_count(self, ems, tau, torch)
+            # TAU firing is intrinsically gap-mask-driven, so its ``.item()`` stays;
+            # the EMITTED ``.item()`` (pure logging) is what Item 1 removes.
+            flagged, _ = _gap_flag_count(self, ems, tau, torch)
 
         output = orig_sample_tokens(self, grammar_output)
 
-        n_emitted = _count_emitted(output, torch)
+        # Emitted advances SYNC-FREE (materialized only at log boundaries / exit).
+        _accumulate_emitted(self, output, torch)
 
-        # First real spec step: resolve the cudagraph dispatch + first-call diag.
-        if not getattr(self, "_recompute_diag_done", False) and (
-            n_emitted > 0 or positions > 0
-        ):
+        # Live-cert de-teacher-force (read-only; emitted stream unchanged).
+        if livecert:
+            _livecert_init(self)
+            _livecert_record(self, ems, output, torch)
+
+        # First real step: resolve the cudagraph dispatch + first-call diag (firing
+        # modes only -- livecert never fires, so dispatch replay is irrelevant there).
+        if not getattr(self, "_recompute_diag_done", False) and positions > 0:
             self._recompute_diag_done = True
-            _resolve_dispatch(self)
+            if not livecert:
+                _resolve_dispatch(self)
             logger.warning(
-                "[recompute-acceptor] FIRST-CALL output_type=%s n_emitted=%d "
-                "positions=%d flagged=%d rate=%.6f tau=%.6f",
-                type(output).__name__, n_emitted, positions, flagged, rate, tau,
+                "[recompute-acceptor] FIRST-CALL output_type=%s positions=%d "
+                "flagged=%d rate=%.6f tau=%.6f livecert=%s",
+                type(output).__name__, positions, flagged, rate, tau, livecert,
             )
             _write_stat(
                 "firstcall",
                 {
                     "output_type": type(output).__name__,
-                    "n_emitted": n_emitted,
                     "positions": positions,
                     "flagged": flagged,
                     "rate": rate,
                     "tau": tau,
+                    "livecert": livecert,
                 },
             )
 
-        # Decide how many recompute forwards to fire this step.
+        # Decide how many recompute forwards to fire this step. RATE mode now fires
+        # ``floor(carry + rate*positions)`` -- PER VERIFY-POSITION, the unit the real
+        # acceptor guards -- so the recompute count is exact and the firing decision is
+        # sync-free (no emitted ``.item()``). r=0 reproduces the un-rescued K-spec
+        # ceiling with the patch loaded (the Item-1 measurement, not a projection).
         if tau > 0.0:
             n_fire = flagged
-        else:
-            acc = getattr(self, "_recompute_acc", 0.0) + rate * n_emitted
+        elif rate > 0.0:
+            acc = getattr(self, "_recompute_acc", 0.0) + rate * positions
             n_fire = int(acc)
             self._recompute_acc = acc - n_fire
+        else:
+            n_fire = 0
 
-        # Accumulators.
-        self._recompute_emitted_total = (
-            getattr(self, "_recompute_emitted_total", 0) + n_emitted
-        )
+        # Accumulators (positions/flagged/fired are cheap ints; emitted is lazy).
         self._recompute_positions_total = (
             getattr(self, "_recompute_positions_total", 0) + positions
         )
@@ -305,16 +818,13 @@ def apply(gmr) -> bool:
                 self, "_recompute_fired_total", 0
             ) + _fire(self, n_fire)
 
-        # Periodic progress log + sidecar stat. Gate on whichever counter advances
-        # for the active mode: TAU mode reads ``positions`` every step (a robust,
-        # sync-free per-step count) while ``emitted`` may lag on async outputs; RATE
-        # mode keys off ``emitted``. ``max`` keeps logging alive if either is stuck.
+        # Periodic progress log + sidecar stat, gated on positions (sync-free, advances
+        # every decode step). Emitted is materialized HERE only (one ``.item()``).
         last = getattr(self, "_recompute_last_log", 0)
-        emitted_total = self._recompute_emitted_total
         pos_total = self._recompute_positions_total
-        progress_counter = max(emitted_total, pos_total)
-        if progress_counter - last >= _LOG_EVERY:
-            self._recompute_last_log = progress_counter
+        if pos_total - last >= _LOG_EVERY:
+            self._recompute_last_log = pos_total
+            emitted_total = _materialize_emitted(self)
             flagged_total = self._recompute_flagged_total
             fired_total = getattr(self, "_recompute_fired_total", 0)
             realized_fire_rate = (fired_total / emitted_total) if emitted_total else 0.0
@@ -340,6 +850,8 @@ def apply(gmr) -> bool:
                     "realized_flag_rate": realized_flag_rate,
                 },
             )
+            if livecert:
+                _write_livecert_stat("summary", _livecert_summary(self))
 
         return output
 

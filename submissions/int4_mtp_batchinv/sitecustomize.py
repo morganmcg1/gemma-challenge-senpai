@@ -27,6 +27,16 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 def _apply(module) -> None:
     if _HERE not in sys.path:
         sys.path.insert(0, _HERE)
+    sys.stderr.write(
+        "[SENPAI_DIAG sitecustomize._apply] pid=%d RATE=%r TAU=%r LIVECERT=%r\n"
+        % (
+            os.getpid(),
+            os.environ.get("SENPAI_RECOMPUTE_RATE"),
+            os.environ.get("SENPAI_ACCEPTOR_TAU"),
+            os.environ.get("SENPAI_LIVECERT_REF_JSONL"),
+        )
+    )
+    sys.stderr.flush()
     try:
         import vllm_attn_group_patch
 
@@ -38,17 +48,31 @@ def _apply(module) -> None:
             "failed to apply attention-group num_heads patch"
         )
 
-    # Recompute-acceptor patch (PR #642 cost probe / #663 real gap-flag acceptor).
-    # Only loaded when explicitly enabled via env, so the shipped serve path is
-    # byte-identical when neither lever is set. ``apply()`` self-gates too.
-    if os.environ.get("SENPAI_RECOMPUTE_RATE") or os.environ.get("SENPAI_ACCEPTOR_TAU"):
+    # Recompute-acceptor patch (PR #642 cost probe / #663 real gap-flag acceptor /
+    # #669 live-trajectory identity cert). Only loaded when explicitly enabled via env,
+    # so the shipped serve path is byte-identical when no lever is set. ``apply()``
+    # self-gates too.
+    if (
+        os.environ.get("SENPAI_RECOMPUTE_RATE")
+        or os.environ.get("SENPAI_ACCEPTOR_TAU")
+        or os.environ.get("SENPAI_LIVECERT_REF_JSONL")
+    ):
         try:
             import vllm_recompute_acceptor_patch
 
-            vllm_recompute_acceptor_patch.apply(module)
+            applied = vllm_recompute_acceptor_patch.apply(module)
+            sys.stderr.write(
+                "[SENPAI_DIAG recompute.apply] returned %r\n" % (applied,)
+            )
+            sys.stderr.flush()
         except Exception:
             import logging
+            import traceback
 
+            sys.stderr.write(
+                "[SENPAI_DIAG recompute.apply] EXCEPTION:\n" + traceback.format_exc()
+            )
+            sys.stderr.flush()
             logging.getLogger("int4_mtp_drafter.patch").exception(
                 "failed to apply recompute-acceptor patch"
             )

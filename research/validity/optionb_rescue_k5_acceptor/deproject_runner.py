@@ -155,15 +155,255 @@ def read_acceptor_stats(stat_dir: Path) -> dict[str, Any]:
     return out
 
 
+def read_livecert_summary(stat_dir: Path) -> dict[str, Any]:
+    """Read the live-cert sidecars (one per worker PID) and return the dominant one
+    (most pre-fork draft positions). The patch writes the COMPOSED cert summary at every
+    progress boundary + at exit, so the file already holds per-tau flag/break rates, the
+    min break-free tau, position counts and the rule-of-three UB."""
+    best: dict[str, Any] = {}
+    best_n = -1
+    if stat_dir.exists():
+        for p in sorted(stat_dir.glob("livecert_summary_*.json")):
+            try:
+                d = json.loads(p.read_text())
+            except Exception:
+                continue
+            n = int(d.get("prefork_draft_positions", 0) or 0)
+            if n > best_n:
+                best_n, best = n, d
+    return best
+
+
+def _run_one(arm: ArmSpec, n: int, rargs, server_python: Path, out_dir: Path,
+             fh) -> dict[str, Any]:
+    """Run a single arm with N fresh serves; return its per-arm stat dict."""
+    rargs_n = SimpleNamespace(**{**vars(rargs), "n": n})
+    recs = run_arm(arm, rargs_n, server_python, out_dir, fh)
+    st = arm_stats(recs)
+    return {
+        "label": arm.label, "override_env": arm.override_env,
+        "wall_tps_median": median_wall_tps(st),
+        "wall_tps_cv_pct": (st.get("wall_tps") or {}).get("cv_pct"),
+        "wall_tps_values": (st.get("wall_tps") or {}).get("values"),
+        "e_accept_exact_mean": (st.get("e_accept_exact") or {}).get("mean"),
+        "n": (st.get("wall_tps") or {}).get("n"),
+    }
+
+
+def run_livecert(a, extra: dict[str, str], out_dir: Path, server_python: Path,
+                 rargs) -> dict[str, Any]:
+    """PR #669 -- LIVE de-teacher-force identity cert + Item-3 efficient-acceptor speed.
+
+    Phase A: SENPAI_REFERENCE_MODE=1 arm -> served M=1-AR trajectory R_served jsonl
+             (skipped if --ref-jsonl reuses an existing one).
+    Phase B: instrumented live K-spec arm (SENPAI_LIVECERT_REF_JSONL) -> the patch
+             records the per-position verify gap + de-teacher-forced flip along the LIVE
+             trajectory, partitioned pre-fork vs global, and writes the cert summary
+             (min_safe flag rate, served_rescued_break_rate, position count, RoT UB).
+    Phase C (unless --cert-only): per-position RATE arms at {0, min_safe, 2*min_safe} ->
+             efficient_acceptor_tps (the Item-1 sync-strip makes this a measurement);
+             r=0 is the un-rescued ceiling. Item-4 decisive: official-equiv vs 126.378
+             (+10 bar 136.378)."""
+    sub = a.submission
+    records_path = out_dir / "records.jsonl"
+    per_arm: dict[str, dict[str, Any]] = {}
+    with open(records_path, "w") as fh:
+        # ---- Phase A: R_served ----
+        if a.ref_jsonl is not None:
+            ref_jsonl = a.ref_jsonl.resolve()
+            print(f"[livecert] reusing R_served: {ref_jsonl}", flush=True)
+        else:
+            ref_arm = ArmSpec("ref_d", sub, {"SENPAI_REFERENCE_MODE": "1", **extra})
+            per_arm["ref_d"] = _run_one(ref_arm, 1, rargs, server_python, out_dir, fh)
+            ref_jsonl = out_dir / "ref_d" / "decode" / "run00.jsonl"
+            print(f"[livecert] R_served generated: {ref_jsonl} "
+                  f"(ar wall_tps={per_arm['ref_d']['wall_tps_median']})", flush=True)
+        if not ref_jsonl.exists():
+            raise SystemExit(f"[livecert] R_served jsonl missing: {ref_jsonl}")
+
+        # ---- Phase B: instrumented live cert arm ----
+        stat_dir = (out_dir / "livecert_stat").resolve()
+        lc_env = {
+            **extra,
+            "SENPAI_LIVECERT_REF_JSONL": str(ref_jsonl),
+            "SENPAI_LIVECERT_STAT_DIR": str(stat_dir),
+            "SENPAI_LIVECERT_N_PROMPTS": str(a.num_prompts),
+            # Write the composed cert sidecar frequently so a short run (which never
+            # crosses a big boundary) still leaves a summary on disk; the SIGTERM/atexit
+            # flush writes the final authoritative one. JSON dump of a small dict is cheap.
+            "SENPAI_RECOMPUTE_LOG_EVERY": "512",
+        }
+        lc_arm = ArmSpec("livecert", sub, lc_env)
+        per_arm["livecert"] = _run_one(lc_arm, 1, rargs, server_python, out_dir, fh)
+        cert = read_livecert_summary(stat_dir)
+        if not cert:
+            raise SystemExit(f"[livecert] no cert summary written to {stat_dir}")
+        min_safe_draft = cert.get("min_safe_live_flag_rate_per_draft")
+        min_safe_emit = cert.get("min_safe_live_flag_rate_per_emit")
+        # Draft-only partition (PR #669): the acceptor recomputes DRAFT positions; no-gap
+        # prefill (output-pos-0) flips are structurally un-flaggable (no draft row) and
+        # are reported separately. The efficient-acceptor rate is set by the draft-only
+        # min-safe tau (the strict one is None whenever any prefill flip occurs, which
+        # would spuriously gate off the whole speed leg).
+        min_safe_draft_do = cert.get("min_safe_live_flag_rate_per_draft_draftonly")
+        min_safe_emit_do = cert.get("min_safe_live_flag_rate_per_emit_draftonly")
+        eff_min_safe_draft = min_safe_draft_do if min_safe_draft_do else min_safe_draft
+        print(f"[livecert] CERT: min_safe_tau(strict)={cert.get('min_safe_tau')} "
+              f"min_safe_tau(draftonly)={cert.get('min_safe_tau_draftonly')} "
+              f"flag_rate_do(per_draft)={min_safe_draft_do} (per_emit)={min_safe_emit_do} "
+              f"break_rate_do={cert.get('served_rescued_break_rate_at_min_safe_draftonly')} "
+              f"n_prefill_flips={cert.get('n_prefill_flips')} "
+              f"n_draft_flips={cert.get('n_draft_flips')} "
+              f"prefork_draft_positions={cert.get('prefork_draft_positions')} "
+              f"RoT_UB={cert.get('rule_of_three_ub_over_draft')} "
+              f"flip_gap_max={cert.get('flip_gap_max')} "
+              f"flip_gap_max_finite={cert.get('flip_gap_max_finite')} "
+              f"matched={cert.get('n_matched')}/{cert.get('n_reqs_seen')}", flush=True)
+
+        # ---- Phase C: efficient-acceptor speed at the min-safe per-position rate ----
+        speed: dict[str, Any] = {}
+        if not a.cert_only and eff_min_safe_draft and eff_min_safe_draft > 0:
+            if a.speed_rates:
+                rates = [float(x) for x in a.speed_rates.split(",") if x.strip() != ""]
+            else:
+                rates = [0.0, round(eff_min_safe_draft, 6),
+                         round(2 * eff_min_safe_draft, 6)]
+            rate_to_tps: dict[float, float] = {}
+            for r in rates:
+                lbl = f"r{r:g}".replace(".", "p").replace("-", "m")
+                env = {**extra}
+                if r > 0:
+                    env["SENPAI_RECOMPUTE_RATE"] = repr(r)
+                    env["SENPAI_RECOMPUTE_STAT_DIR"] = str(
+                        (out_dir / f"speed_stat_{lbl}").resolve())
+                arm = ArmSpec(f"speed_{lbl}", sub, env)
+                per_arm[arm.label] = _run_one(arm, a.n, rargs, server_python, out_dir, fh)
+                rate_to_tps[r] = per_arm[arm.label]["wall_tps_median"]
+                print(f"[livecert] speed r={r}: wall_tps="
+                      f"{per_arm[arm.label]['wall_tps_median']}", flush=True)
+            fit = fit_additive_cost(rate_to_tps)
+            unrescued = rate_to_tps.get(0.0)
+            eff_rate = round(eff_min_safe_draft, 6)
+            eff_tps = rate_to_tps.get(eff_rate)
+            ratio_ar = (eff_tps / a.ar_rung_local) if eff_tps else None
+            official_equiv = (ratio_ar * LOCKED_319_AR_TPS) if ratio_ar else None
+            speed = {
+                "rate_to_wall_tps": {str(k): v for k, v in sorted(rate_to_tps.items())},
+                "additive_cost_fit": fit,
+                "unrescued_ceiling_local": unrescued,
+                "unrescued_k5_anchor": a.unrescued_k5_local,
+                "efficient_acceptor_rate_per_draft": eff_rate,
+                "efficient_acceptor_rate_basis": (
+                    "draftonly" if min_safe_draft_do else "strict"),
+                "efficient_acceptor_flag_rate_per_emit": (
+                    min_safe_emit_do if min_safe_draft_do else min_safe_emit),
+                "efficient_acceptor_tps": eff_tps,
+                "ar_rung_local": a.ar_rung_local,
+                "ar_rung_official": LOCKED_319_AR_TPS,
+                "acceptor_over_ar_ratio": ratio_ar,
+                "official_equiv_tps": official_equiv,
+                "clears_rung_by_tps": (official_equiv - LOCKED_319_AR_TPS)
+                                      if official_equiv else None,
+                "clears_plus10_bar": (official_equiv >= LOCKED_319_AR_TPS + 10.0)
+                                     if official_equiv else None,
+                "acceptor_over_unrescued": (eff_tps / unrescued)
+                                           if (eff_tps and unrescued) else None,
+            }
+            print(f"[livecert] SPEED: eff_acceptor_tps={eff_tps} "
+                  f"unrescued={unrescued} official_equiv={official_equiv} "
+                  f"clears_+10={speed.get('clears_plus10_bar')}", flush=True)
+
+        verdict = _livecert_verdict(cert, speed, a)
+        result = {
+            "pr": 669, "leg": "livecert", "analysis_only": True,
+            "official_tps": 0, "no_hf_job": True,
+            "submission": sub, "extra_env": extra,
+            "n": a.n, "live_tau_scan": bool(a.live_tau_scan),
+            "workload": {"num_prompts": a.num_prompts, "output_len": a.output_len,
+                         "seed": a.seed},
+            "ref_jsonl": str(ref_jsonl),
+            "cert": cert,
+            "speed": speed,
+            "verdict": verdict,
+            "arms": per_arm,
+            "anchors": {"locked_ar_tps": LOCKED_319_AR_TPS,
+                        "ar_rung_local": a.ar_rung_local,
+                        "unrescued_k5_local": a.unrescued_k5_local,
+                        "plus10_bar_official": LOCKED_319_AR_TPS + 10.0},
+        }
+        result_path = out_dir / "livecert.json"
+        result_path.write_text(json.dumps(result, indent=2, default=str))
+        print(f"[livecert] verdict={verdict['verdict']} -> {result_path}", flush=True)
+    return result
+
+
+def _livecert_verdict(cert: dict, speed: dict, a) -> dict[str, Any]:
+    """Map the cert + speed numbers onto the PR's three verdicts.
+
+    Reducibility is decided on the DRAFT-ONLY partition: the recompute-acceptor flags
+    and recomputes draft (verify) positions, so the relevant question is the min
+    break-free flag rate over draft positions vs the un-rescued live realized rate
+    (~0.1126/emit per the cost probe). No-gap prefill (output-pos-0) flips are
+    structurally outside the acceptor's domain and are surfaced as a separate identity
+    caveat (n_prefill_flips), not folded into reducibility. If reducible, the speed
+    decides HOLDS (official-equiv >= +10 bar) vs MARGINAL (clears the rung but not +10)
+    vs below-rung (reducible but eroded)."""
+    # draft-only flag rate / break (acceptor domain); fall back to strict if the
+    # partition is absent (older cert summaries).
+    flag_emit_do = cert.get("min_safe_live_flag_rate_per_emit_draftonly")
+    flag_emit_strict = cert.get("min_safe_live_flag_rate_per_emit")
+    flag_emit = flag_emit_do if flag_emit_do is not None else flag_emit_strict
+    break_rate = cert.get("served_rescued_break_rate_at_min_safe_draftonly")
+    if break_rate is None:
+        break_rate = cert.get("served_rescued_break_rate_at_min_safe")
+    n_prefill_flips = cert.get("n_prefill_flips")
+    LIVE_UNRESCUED_FIRE_PER_EMIT = 0.1126  # cost-probe realized fire/emit (#663 full_k5)
+    reducible = (
+        flag_emit is not None
+        and flag_emit < 0.75 * LIVE_UNRESCUED_FIRE_PER_EMIT
+        and (break_rate == 0 or break_rate is None or break_rate == 0.0)
+    )
+    official_equiv = speed.get("official_equiv_tps")
+    plus10 = LOCKED_319_AR_TPS + 10.0
+    if not reducible:
+        v = "LIVE_FLAG_IRREDUCIBLE"
+    elif official_equiv is None:
+        v = "LIVE_FLAG_REDUCIBLE_CERT_ONLY"
+    elif official_equiv >= plus10:
+        v = "LIVE_FLAG_REDUCIBLE_HOLDS"
+    elif official_equiv >= LOCKED_319_AR_TPS:
+        v = "LIVE_FLAG_REDUCIBLE_MARGINAL"
+    else:
+        v = "LIVE_FLAG_REDUCIBLE_BELOW_RUNG"
+    return {
+        "verdict": v,
+        "reducible": reducible,
+        "reducibility_basis": "draftonly" if flag_emit_do is not None else "strict",
+        "min_safe_flag_rate_per_emit": flag_emit,
+        "min_safe_flag_rate_per_emit_strict": flag_emit_strict,
+        "n_prefill_flips": n_prefill_flips,
+        "live_unrescued_fire_per_emit": LIVE_UNRESCUED_FIRE_PER_EMIT,
+        "served_rescued_break_rate": break_rate,
+        "official_equiv_tps": official_equiv,
+        "plus10_bar": plus10,
+        "rung": LOCKED_319_AR_TPS,
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--submission", default="int4_mtp_batchinv")
-    ap.add_argument("--mode", choices=["reference", "rate", "tau"], required=True,
+    ap.add_argument("--mode", choices=["reference", "rate", "tau", "livecert"],
+                    required=True,
                     help="reference: one SENPAI_REFERENCE_MODE=1 arm (d / R_served). "
                          "rate: one SENPAI_RECOMPUTE_RATE arm per --rates value. "
                          "tau: #663 REAL gap-flag acceptor -- one un-rescued arm + one "
-                         "SENPAI_ACCEPTOR_TAU arm per --taus value (data-driven firing).")
+                         "SENPAI_ACCEPTOR_TAU arm per --taus value (data-driven firing). "
+                         "livecert: PR #669 -- LIVE de-teacher-force identity cert "
+                         "(ref arm -> R_served, instrumented live arm -> min_safe flag "
+                         "rate + break_rate, then per-position rate arms -> efficient "
+                         "acceptor TPS at the min-safe rate).")
     ap.add_argument("--rates", default="0.0,0.05,0.10,0.20",
                     help="comma rates for --mode rate (slope sweep). r=0 == un-rescued ceiling.")
     ap.add_argument("--taus", default="0.3",
@@ -181,6 +421,21 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--ar-rung-local", type=float, default=126.75,
                     help="arm (b): local AR rung wall_tps (#642 6uepftr6 = 126.75). "
                          "acceptor_over_ar_ratio = arm(a)/this; official-equiv = ratio*126.378")
+    # ---- livecert mode ----
+    ap.add_argument("--live-tau-scan", action="store_true",
+                    help="livecert: sweep the flag predicate loose->tight on the live "
+                         "loop (the patch sweeps an internal tau grid; this flag is the "
+                         "explicit opt-in and is recorded in the result).")
+    ap.add_argument("--ref-jsonl", type=Path, default=None,
+                    help="livecert: reuse an existing R_served decode jsonl instead of "
+                         "generating one (default: run a SENPAI_REFERENCE_MODE=1 arm).")
+    ap.add_argument("--cert-only", action="store_true",
+                    help="livecert: stop after the cert (skip the Item-3 speed rate arms).")
+    ap.add_argument("--speed-rates", default=None,
+                    help="livecert: comma per-position fire rates for the Item-3 speed "
+                         "arms (default: 0.0,<min_safe_per_draft>,<2x>).")
+    ap.add_argument("--unrescued-k5-local", type=float, default=159.333,
+                    help="livecert: K=5 un-rescued ceiling anchor (full_k5 tau-mode).")
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--wandb-name", default=None)
     ap.add_argument("--wandb-group", default="optionb-rescue-deproject-stark")
@@ -193,6 +448,26 @@ def main(argv: list[str] | None = None) -> int:
     extra = parse_env(a.extra_env)
     out_dir = a.out_dir.resolve()
     out_dir.mkdir(parents=True, exist_ok=True)
+
+    sub_dir = (ROOT / "submissions" / a.submission).resolve()
+    if not sub_dir.exists():
+        raise SystemExit(f"submission not found: {sub_dir}")
+
+    # ---- PR #669 livecert mode: dedicated orchestration (ref -> live cert -> speed) ----
+    if a.mode == "livecert":
+        manifest = harness.load_manifest(sub_dir)
+        server_python = harness.ensure_server_venv(manifest["dependencies"])
+        rargs = build_args(a)
+        print(f"[livecert] submission={a.submission} extra_env={extra} "
+              f"workload={a.num_prompts}x{a.output_len} cert_only={a.cert_only} -> {out_dir}",
+              flush=True)
+        t0 = time.time()
+        result = run_livecert(a, extra, out_dir, server_python, rargs)
+        result["elapsed_s"] = time.time() - t0
+        print(f"[livecert] ===== done in {result['elapsed_s']/60:.1f} min =====", flush=True)
+        if not a.no_wandb:
+            _log_wandb_livecert(a, result)
+        return 0
 
     # Build arms.
     arms: list[ArmSpec] = []
@@ -395,6 +670,118 @@ def _log_wandb(a, result: dict[str, Any]) -> None:
         run.summary[k] = v
     finish_wandb(run)
     print(f"[wandb] logged run {run.id}", flush=True)
+
+
+def _log_wandb_livecert(a, result: dict[str, Any]) -> None:
+    """PR #669 -- log the LIVE cert + speed as EXPLICIT, machine-checkable W&B summary
+    scalars (in #663 the break_rate was prose-only; here served_rescued_break_rate, the
+    pre-fork position count and the rule-of-three UB are logged scalars)."""
+    try:
+        from scripts.wandb_logging import init_wandb_run, finish_wandb
+    except Exception as exc:
+        print(f"[wandb] import failed: {exc!r}; JSON only", flush=True)
+        return
+    extra_env = result["extra_env"]
+    cert = result.get("cert") or {}
+    speed = result.get("speed") or {}
+    verdict = result.get("verdict") or {}
+    run = init_wandb_run(
+        job_type="local_profiling", agent="stark",
+        name=a.wandb_name or "stark/k5-livecert", group=a.wandb_group,
+        notes="PR#669 K=5 LIVE de-teacher-force identity cert + efficient-acceptor "
+              "speed (Item-1 sync strip, per-position firing). analysis_only.",
+        config={"pr": 669, "harness_lineage_pr": 642, "mode": "livecert",
+                "submission": a.submission, "extra_env": extra_env, "n": a.n,
+                "num_prompts": a.num_prompts, "output_len": a.output_len,
+                "num_speculative_tokens": extra_env.get("NUM_SPECULATIVE_TOKENS"),
+                "live_tau_scan": bool(a.live_tau_scan),
+                "ref_jsonl": result.get("ref_jsonl"),
+                "analysis_only": True, "official_tps": 0},
+    )
+    if run is None:
+        print("[wandb] disabled; JSON only", flush=True)
+        return
+    summary: dict[str, Any] = {"analysis_only": 1, "official_tps": 0}
+    # ---- REQUIRED machine-checkable cert scalars (Item 2) ----
+    summary["cert/served_rescued_break_rate"] = cert.get(
+        "served_rescued_break_rate_at_min_safe")
+    summary["cert/prefork_draft_positions"] = cert.get("prefork_draft_positions")
+    summary["cert/prefork_emit_positions"] = cert.get("prefork_emit_positions")
+    summary["cert/rule_of_three_ub"] = cert.get("rule_of_three_ub_over_draft")
+    summary["cert/min_safe_tau"] = cert.get("min_safe_tau")
+    summary["cert/min_safe_live_flag_rate_per_draft"] = cert.get(
+        "min_safe_live_flag_rate_per_draft")
+    summary["cert/min_safe_live_flag_rate_per_emit"] = cert.get(
+        "min_safe_live_flag_rate_per_emit")
+    summary["cert/n_flips_prefork"] = cert.get("n_flips_prefork")
+    summary["cert/flip_gap_max"] = cert.get("flip_gap_max")
+    summary["cert/n_matched"] = cert.get("n_matched")
+    summary["cert/n_forked"] = cert.get("n_forked")
+    summary["cert/n_reqs_seen"] = cert.get("n_reqs_seen")
+    summary["cert/global_draft_positions"] = cert.get("global_draft_positions")
+    # ---- draft-only partition scalars (PR #669: prefill flips are un-flaggable and
+    # reported separately from the acceptor-domain draft-only min-safe flag rate) ----
+    summary["cert/n_prefill_flips"] = cert.get("n_prefill_flips")
+    summary["cert/n_draft_flips"] = cert.get("n_draft_flips")
+    summary["cert/flip_gap_max_finite"] = cert.get("flip_gap_max_finite")
+    summary["cert/min_safe_tau_draftonly"] = cert.get("min_safe_tau_draftonly")
+    summary["cert/min_safe_live_flag_rate_per_draft_draftonly"] = cert.get(
+        "min_safe_live_flag_rate_per_draft_draftonly")
+    summary["cert/min_safe_live_flag_rate_per_emit_draftonly"] = cert.get(
+        "min_safe_live_flag_rate_per_emit_draftonly")
+    summary["cert/served_rescued_break_rate_draftonly"] = cert.get(
+        "served_rescued_break_rate_at_min_safe_draftonly")
+    # per-tau curves -> scalars (flag rates pre-fork & global, break rate)
+    for tk, s in (cert.get("per_tau") or {}).items():
+        for key in ("prefork_flag_rate_per_emit", "prefork_flag_rate_per_draft",
+                    "global_flag_rate_per_draft", "prefork_break_rate_over_draft",
+                    "prefork_break_count", "prefork_break_count_draftonly",
+                    "prefork_break_rate_draftonly_over_draft"):
+            v = s.get(key)
+            if isinstance(v, (int, float)):
+                summary[f"cert/tau{tk}/{key}"] = v
+    # ---- speed (Items 3-4) ----
+    for key in ("efficient_acceptor_tps", "unrescued_ceiling_local",
+                "efficient_acceptor_rate_per_draft", "acceptor_over_ar_ratio",
+                "official_equiv_tps", "clears_rung_by_tps", "acceptor_over_unrescued",
+                "ar_rung_local"):
+        v = speed.get(key)
+        if isinstance(v, (int, float)):
+            summary[f"speed/{key}"] = v
+    if speed.get("clears_plus10_bar") is not None:
+        summary["speed/clears_plus10_bar"] = int(bool(speed["clears_plus10_bar"]))
+    fit = speed.get("additive_cost_fit")
+    if fit:
+        summary["speed/fit_C_sec_per_recompute"] = fit.get("C_sec_per_recompute")
+        summary["speed/fit_tps0"] = fit.get("tps0_fit")
+        summary["speed/fit_r2"] = fit.get("r2")
+    # ---- verdict + per-arm wall_tps ----
+    summary["verdict"] = verdict.get("verdict")
+    summary["verdict/reducible"] = int(bool(verdict.get("reducible")))
+    if verdict.get("reducibility_basis") is not None:
+        summary["verdict/reducibility_basis"] = verdict.get("reducibility_basis")
+    if isinstance(verdict.get("n_prefill_flips"), (int, float)):
+        summary["verdict/n_prefill_flips"] = verdict.get("n_prefill_flips")
+    if isinstance(verdict.get("min_safe_flag_rate_per_emit"), (int, float)):
+        summary["verdict/min_safe_flag_rate_per_emit"] = verdict.get(
+            "min_safe_flag_rate_per_emit")
+    if speed.get("efficient_acceptor_rate_basis") is not None:
+        summary["speed/efficient_acceptor_rate_basis"] = speed.get(
+            "efficient_acceptor_rate_basis")
+    if isinstance(speed.get("efficient_acceptor_flag_rate_per_emit"), (int, float)):
+        summary["speed/efficient_acceptor_flag_rate_per_emit"] = speed.get(
+            "efficient_acceptor_flag_rate_per_emit")
+    for lbl, info in result["arms"].items():
+        if isinstance(info.get("wall_tps_median"), (int, float)):
+            summary[f"arm/{lbl}/wall_tps"] = info["wall_tps_median"]
+        if isinstance(info.get("e_accept_exact_mean"), (int, float)):
+            summary[f"arm/{lbl}/e_accept"] = info["e_accept_exact_mean"]
+    for k, v in summary.items():
+        if v is not None:
+            run.summary[k] = v
+    finish_wandb(run)
+    print(f"[wandb] logged livecert run {run.id} verdict={verdict.get('verdict')}",
+          flush=True)
 
 
 if __name__ == "__main__":
