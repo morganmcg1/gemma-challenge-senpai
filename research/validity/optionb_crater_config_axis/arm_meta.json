@@ -1,0 +1,11 @@
+{
+  "H_anchor615":   {"serve": "H_mml6144_seqs32", "conc": 32, "axis": "anchor_healthy",        "prompt": "seed12345", "note": "reproduce #615 greedy healthy anchor (~0.465)"},
+  "H_conc1":       {"serve": "H_mml6144_seqs32", "conc": 1,  "axis": "concurrency",            "prompt": "seed12345", "note": "single-stream flip 32->1 (submission is single-stream)"},
+  "H_conc16":      {"serve": "H_mml6144_seqs32", "conc": 16, "axis": "concurrency",            "prompt": "seed12345", "note": "kanna conc=16"},
+  "H_mt3072":      {"serve": "H_mml6144_seqs32", "conc": 32, "axis": "max_tokens",             "prompt": "seed12345", "note": "kanna 3072 cap, max_tokens flip"},
+  "H_mt2048":      {"serve": "H_mml6144_seqs32", "conc": 32, "axis": "max_tokens",             "prompt": "seed12345", "note": "2048 cap (truncation regime, not loop crater)"},
+  "H_min8":        {"serve": "H_mml6144_seqs32", "conc": 32, "axis": "min_tokens",             "prompt": "seed12345", "note": "EOS-guard 0->8 (#541)"},
+  "H_conc1_mt3072":{"serve": "H_mml6144_seqs32", "conc": 1,  "axis": "concurrency+max_tokens", "prompt": "seed12345", "note": "kanna's EXACT client cfg (greedy conc1 mt3072) on healthy server"},
+  "sub_conc1_mt3072":{"serve": "submission_serve.py_mml4096_batch512", "conc": 1, "axis": "submission_config", "prompt": "seed12345", "note": "DECISIVE: exact submission serve config single-stream, mt=3072 = highest cap that fits mml=4096 (not truncation-dominated)"},
+  "sub_conc1_mt4096":{"serve": "submission_serve.py_mml4096_batch512", "conc": 1, "axis": "submission_config", "prompt": "seed12345", "note": "STRUCTURAL: mandated mt>=4096 UNRUNNABLE at mml=4096 (prompt+4096>4096 -> 100% HTTP-400/null)"}
+}
