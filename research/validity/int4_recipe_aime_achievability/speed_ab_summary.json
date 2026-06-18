@@ -1,0 +1,191 @@
+{
+  "summary": {
+    "official_anchor_tps": 126.378,
+    "anchor_cell": "g128_int4head",
+    "anchor_local_wall_tps": 127.12791445460499,
+    "anchor_ppl": 2.0190133619612727,
+    "variants": {
+      "g64_int4head": {
+        "body": "g64",
+        "local_wall_tps": 123.62461217249869,
+        "delta_pct_vs_anchor_local": -2.7557301613386165,
+        "official_proj_tps": 122.89536333670348,
+        "beats_anchor": false,
+        "ppl": 2.040617650908067
+      },
+      "g32_int4head": {
+        "body": "g32",
+        "local_wall_tps": 119.92616194693942,
+        "delta_pct_vs_anchor_local": -5.6649655101808385,
+        "official_proj_tps": 119.21872988754366,
+        "beats_anchor": false,
+        "ppl": 2.006824682369857
+      }
+    },
+    "any_variant_beats_anchor": false,
+    "workload": {
+      "num_prompts": 8,
+      "output_len": 512,
+      "reps": 3,
+      "warmups": 1
+    }
+  },
+  "records": [
+    {
+      "name": "g128_int4head",
+      "model": "/workspace/gemma_build/int4_g128_lmhead",
+      "body": "g128",
+      "head": "int4-untied",
+      "note": "LOCKED rung (PR #4): g128 body + int4-untied lm_head",
+      "flags": {
+        "--model": "/workspace/gemma_build/int4_g128_lmhead",
+        "--served-model-name": "gemma-4-e4b-it",
+        "--host": "127.0.0.1",
+        "--port": "8000",
+        "--dtype": "bfloat16",
+        "--max-model-len": "4096",
+        "--gpu-memory-utilization": "0.90",
+        "--max-num-batched-tokens": "512",
+        "--trust-remote-code": null,
+        "--no-enable-log-requests": null
+      },
+      "t_start_utc": "2026-06-18T22:09:37.545530+00:00",
+      "served_ok": true,
+      "error": null,
+      "rep_wall_tps": [
+        127.18992802090965,
+        127.10511164497144,
+        127.12791445460499
+      ],
+      "wall_tps": 127.12791445460499,
+      "wall_tps_cv_pct": 0.028187859693292232,
+      "ready_s": 171.0,
+      "gpu_mem_used_mib": 20333,
+      "rep0_completion_counts": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "full_length": true,
+      "selfconsist_n_captures": 0,
+      "selfconsist_seeds": [],
+      "passes_strict_319": null,
+      "strict_319_n_const": null,
+      "strict_319_n_total": null,
+      "ppl": 2.0190133619612727,
+      "ppl_error": null,
+      "gpu_mem_used_before_mib": 0,
+      "wall_tps_min": 127.10511164497144,
+      "wall_tps_max": 127.18992802090965
+    },
+    {
+      "name": "g64_int4head",
+      "model": "/workspace/gemma_build/int4_g64body_lmhead",
+      "body": "g64",
+      "head": "int4-untied",
+      "note": "PR#679 g64 body + int4 g128 untied head (everything-else-fixed)",
+      "flags": {
+        "--model": "/workspace/gemma_build/int4_g64body_lmhead",
+        "--served-model-name": "gemma-4-e4b-it",
+        "--host": "127.0.0.1",
+        "--port": "8000",
+        "--dtype": "bfloat16",
+        "--max-model-len": "4096",
+        "--gpu-memory-utilization": "0.90",
+        "--max-num-batched-tokens": "512",
+        "--trust-remote-code": null,
+        "--no-enable-log-requests": null
+      },
+      "t_start_utc": "2026-06-18T22:15:40.582535+00:00",
+      "served_ok": true,
+      "error": null,
+      "rep_wall_tps": [
+        123.56045887337925,
+        123.62461217249869,
+        123.63798860964482
+      ],
+      "wall_tps": 123.62461217249869,
+      "wall_tps_cv_pct": 0.027375775354258686,
+      "ready_s": 165.0,
+      "gpu_mem_used_mib": 20369,
+      "rep0_completion_counts": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "full_length": true,
+      "selfconsist_n_captures": 0,
+      "selfconsist_seeds": [],
+      "passes_strict_319": null,
+      "strict_319_n_const": null,
+      "strict_319_n_total": null,
+      "ppl": 2.040617650908067,
+      "ppl_error": null,
+      "gpu_mem_used_before_mib": 0,
+      "wall_tps_min": 123.56045887337925,
+      "wall_tps_max": 123.63798860964482
+    },
+    {
+      "name": "g32_int4head",
+      "model": "/workspace/gemma_build/int4_g32body_lmhead",
+      "body": "g32",
+      "head": "int4-untied",
+      "note": "PR#679 g32 body + int4 g128 untied head (everything-else-fixed)",
+      "flags": {
+        "--model": "/workspace/gemma_build/int4_g32body_lmhead",
+        "--served-model-name": "gemma-4-e4b-it",
+        "--host": "127.0.0.1",
+        "--port": "8000",
+        "--dtype": "bfloat16",
+        "--max-model-len": "4096",
+        "--gpu-memory-utilization": "0.90",
+        "--max-num-batched-tokens": "512",
+        "--trust-remote-code": null,
+        "--no-enable-log-requests": null
+      },
+      "t_start_utc": "2026-06-18T22:21:43.329408+00:00",
+      "served_ok": true,
+      "error": null,
+      "rep_wall_tps": [
+        119.92286028223536,
+        119.92616194693942,
+        119.9263938404665
+      ],
+      "wall_tps": 119.92616194693942,
+      "wall_tps_cv_pct": 0.0013457200217211003,
+      "ready_s": 171.0,
+      "gpu_mem_used_mib": 20359,
+      "rep0_completion_counts": [
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512,
+        512
+      ],
+      "full_length": true,
+      "selfconsist_n_captures": 0,
+      "selfconsist_seeds": [],
+      "passes_strict_319": null,
+      "strict_319_n_const": null,
+      "strict_319_n_total": null,
+      "ppl": 2.006824682369857,
+      "ppl_error": null,
+      "gpu_mem_used_before_mib": 0,
+      "wall_tps_min": 119.92286028223536,
+      "wall_tps_max": 119.9263938404665
+    }
+  ]
+}

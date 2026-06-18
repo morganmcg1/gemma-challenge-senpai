@@ -1,0 +1,167 @@
+{
+  "bar": 0.42,
+  "bf16_ref": 0.4833,
+  "anchor_tps": 126.378,
+  "arms": {
+    "g128": {
+      "n_sessions": 4,
+      "accs": [
+        0.3333333333333333,
+        0.3333333333333333,
+        0.3,
+        0.43333333333333335
+      ],
+      "mean": 0.35,
+      "min": 0.3,
+      "max": 0.43333333333333335,
+      "std": 0.057735026918962595,
+      "se": 0.028867513459481298,
+      "t975": 3.182,
+      "upper95": 0.44185642782806944,
+      "lower95": 0.2581435721719305,
+      "clears_bar_mean": false,
+      "confidently_clears": false,
+      "confidently_fails": false,
+      "clears_bar_upper95": true,
+      "files": [
+        "g128_session0.json",
+        "g128_session1.json",
+        "g128_session2.json",
+        "g128_session3.json"
+      ],
+      "extract_fail_rate_max": 0.0
+    },
+    "g64": {
+      "n_sessions": 4,
+      "accs": [
+        0.45,
+        0.4666666666666667,
+        0.35,
+        0.5166666666666667
+      ],
+      "mean": 0.44583333333333336,
+      "min": 0.35,
+      "max": 0.5166666666666667,
+      "std": 0.06988747569671738,
+      "se": 0.03494373784835869,
+      "t975": 3.182,
+      "upper95": 0.5570243071668107,
+      "lower95": 0.334642359499856,
+      "clears_bar_mean": true,
+      "confidently_clears": false,
+      "confidently_fails": false,
+      "clears_bar_upper95": true,
+      "files": [
+        "g64_session0.json",
+        "g64_session1.json",
+        "g64_session2.json",
+        "g64_session3.json"
+      ],
+      "extract_fail_rate_max": 0.0,
+      "build_meta": {
+        "body_group_size": 64,
+        "head_group_size": 128,
+        "body_rel_err_min": 0.07788144052028656,
+        "body_rel_err_mean": 0.08485769017792304,
+        "body_rel_err_max": 0.11830209940671921,
+        "lm_head_rel_err": 0.10042138397693634,
+        "n_quant": 343,
+        "n_copy": 1733,
+        "src": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-q4_0-unquantized/snapshots/dfc5b925ddb1d41aaf1fe9679abdcfb0805e1aa6",
+        "build_secs": 49.2
+      }
+    },
+    "g32": {
+      "n_sessions": 4,
+      "accs": [
+        0.4166666666666667,
+        0.4666666666666667,
+        0.45,
+        0.4166666666666667
+      ],
+      "mean": 0.4375,
+      "min": 0.4166666666666667,
+      "max": 0.4666666666666667,
+      "std": 0.024999999999999994,
+      "se": 0.012499999999999997,
+      "t975": 3.182,
+      "upper95": 0.477275,
+      "lower95": 0.397725,
+      "clears_bar_mean": true,
+      "confidently_clears": false,
+      "confidently_fails": false,
+      "clears_bar_upper95": true,
+      "files": [
+        "g32_session0.json",
+        "g32_session1.json",
+        "g32_session2.json",
+        "g32_session3.json"
+      ],
+      "extract_fail_rate_max": 0.0,
+      "build_meta": {
+        "body_group_size": 32,
+        "head_group_size": 128,
+        "body_rel_err_min": 0.06661128252744675,
+        "body_rel_err_mean": 0.06668906778357814,
+        "body_rel_err_max": 0.06672980636358261,
+        "lm_head_rel_err": 0.10042138397693634,
+        "n_quant": 343,
+        "n_copy": 1733,
+        "src": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-q4_0-unquantized/snapshots/dfc5b925ddb1d41aaf1fe9679abdcfb0805e1aa6",
+        "build_secs": 49.7
+      }
+    }
+  },
+  "traffic": {
+    "g128": {
+      "group_size": 128,
+      "packed_bpw": 0.5,
+      "scale_bpw": 0.015625,
+      "total_bpw": 0.515625,
+      "scale_mb": 62.07,
+      "bpw_delta_vs_g128": 0.0,
+      "bpw_pct_vs_g128": 0.0
+    },
+    "g64": {
+      "group_size": 64,
+      "packed_bpw": 0.5,
+      "scale_bpw": 0.03125,
+      "total_bpw": 0.53125,
+      "scale_mb": 124.15,
+      "bpw_delta_vs_g128": 0.015625,
+      "bpw_pct_vs_g128": 3.0303030303030276
+    },
+    "g32": {
+      "group_size": 32,
+      "packed_bpw": 0.5,
+      "scale_bpw": 0.0625,
+      "total_bpw": 0.5625,
+      "scale_mb": 248.3,
+      "bpw_delta_vs_g128": 0.046875,
+      "bpw_pct_vs_g128": 9.090909090909083
+    }
+  },
+  "contrasts_vs_g128": {
+    "g64": {
+      "delta": 0.09583333333333338,
+      "se_delta": 0.04532546908911313,
+      "t": 2.1143373749738403,
+      "dof": 5.793631334569473,
+      "lift_over_2se": true
+    },
+    "g32": {
+      "delta": 0.08750000000000002,
+      "se_delta": 0.0314576434802948,
+      "t": 2.781517949836592,
+      "dof": 4.086792452830188,
+      "lift_over_2se": true
+    }
+  },
+  "best_arm": "g64",
+  "int4_recipe_aime_best": 0.5570243071668107,
+  "best_mean": 0.44583333333333336,
+  "best_lower95": 0.334642359499856,
+  "quality_clears_central": true,
+  "best_confidently_clears": false,
+  "verdict_provisional": "INT4_RECIPE_CLEARS_AIME(quality-leg; speed pending)"
+}
