@@ -1,0 +1,75 @@
+{
+  "pr": 639,
+  "student": "lawine",
+  "verdict": "RECIPE_RECOVERS_GPQA",
+  "verdict_detail": "int4 GPQA deficit is NOT fundamental to 4-bit; the lever is GROUP SIZE (g128->g32), not the untied head (Arm2~Arm1 tie) and not the observer (MSE 15.7% lower weight-err but GPQA flat). Recovery costs ~4x scales / ~8% local batched throughput.",
+  "protocol": "GPQA-Diamond sampled (T=1/top_p0.95/top_k64), 10-seed pooled n=1980 @ gb6144, vLLM 0.22.0 BI=1, ubel #628 harness, MODEL_ID repoint only",
+  "analysis_only": true,
+  "official_tps": 0,
+  "anchors": {
+    "bf16_base": 0.5404,
+    "recalibrated_0p9_bar": 0.4864,
+    "optionb_int4_spec": 0.4652,
+    "live_g128_minmax_ar_ubel638": 0.499,
+    "shipped_g128_aime_ubel638": 0.35
+  },
+  "arms": {
+    "arm1_official_g32": {
+      "wandb": "r98w09by",
+      "recipe": "google/gemma-4-E4B-it-qat-w4a16-ct (g32, tied bf16 head, minmax)",
+      "gpqa_sampled": 0.5055555555555555,
+      "ci95": [
+        0.48354362527811007,
+        0.5275459697782693
+      ],
+      "fl_rate": 0.0030303030303030303,
+      "pct_of_base": 0.9355210132412205,
+      "clears_bar": true,
+      "body_rel_err": null
+    },
+    "arm2_ours_g32": {
+      "wandb": "k7bxh4tw",
+      "recipe": "ours g32 (untied int4 head g32, minmax)",
+      "gpqa_sampled": 0.5151515151515151,
+      "ci95": [
+        0.4931297321540079,
+        0.5371146179997545
+      ],
+      "fl_rate": 0.0025252525252525255,
+      "pct_of_base": 0.9532781553506942,
+      "clears_bar": true,
+      "body_rel_err": 0.0667
+    },
+    "arm3_ours_g128_mse": {
+      "wandb": "r3xptcvu",
+      "recipe": "ours g128 + MSE observer (untied head g128)",
+      "gpqa_sampled": 0.4868686868686869,
+      "ci95": [
+        0.46489916155383243,
+        0.5088890683129071
+      ],
+      "fl_rate": 0.0,
+      "pct_of_base": 0.9009413154490875,
+      "clears_bar": true,
+      "body_rel_err": 0.0863
+    }
+  },
+  "rel_err_ladder": {
+    "g128_minmax_live": 0.1021,
+    "g128_mse": 0.0863,
+    "g32": 0.0667,
+    "mse_per_module_improvement_pct": 15.74,
+    "modules_mse_strictly_helps": "343/343"
+  },
+  "deltas": {
+    "ours_g32_minus_official_g32_head_axis": 0.0096,
+    "ours_g32_minus_g128mse_groupsize_axis": 0.0283,
+    "stderr": 0.0112
+  },
+  "local_batched_tps_peak": {
+    "g32": "1048-1081 tok/s",
+    "g128_mse": "1140-1193 tok/s",
+    "note": "directional only, n=16 concurrency, NOT official/single-stream TPS"
+  },
+  "peak_gpu_mem_gb": 19.6
+}
