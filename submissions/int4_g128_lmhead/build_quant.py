@@ -52,28 +52,63 @@ ASSET_FILES = [
 ]
 
 
-def make_qargs(group_size: int) -> QuantizationArgs:
+def make_qargs(group_size: int, observer: str = "minmax") -> QuantizationArgs:
     if group_size == -1:
         return QuantizationArgs(
             num_bits=4, type="int", strategy="channel", symmetric=True,
-            observer="minmax",
+            observer=observer,
         )
     return QuantizationArgs(
         num_bits=4, type="int", strategy="group", group_size=group_size,
-        symmetric=True, observer="minmax",
+        symmetric=True, observer=observer,
     )
 
 
-def quantize_weight(w: torch.Tensor, group_size: int):
+def _mse_clipped_symmetric(w: torch.Tensor, group_size: int,
+                           n_grid: int = 40, max_shrink: float = 0.45):
+    """MSE *observer*: pick the symmetric clip per (channel/group) that minimizes
+    int4 round-trip MSE, instead of the raw amin/amax (minmax observer).
+
+    compressed_tensors 0.15.0.1 ships NO observer implementation -- the `observer`
+    field is metadata only, and calculate_qparams derives scale = max_abs/7.5 from
+    whatever min/max it is handed. So a genuine MSE observer must compute the clipped
+    max here. Grid includes ratio=1.0 (== minmax), so MSE error <= minmax error always.
+    Returns (min_vals, max_vals) shaped exactly like the minmax amin/amax branch.
+    """
+    out_dim, in_dim = w.shape
+    if group_size == -1:
+        wg = w.unsqueeze(1)                       # (out_dim, 1, in_dim)
+    else:
+        ng = in_dim // group_size
+        wg = w.reshape(out_dim, ng, group_size)   # (out_dim, ng, gs)
+    amax = wg.abs().amax(dim=-1)                   # (out_dim, ng) symmetric magnitude
+    best_max = amax.clone()
+    best_err = torch.full_like(amax, float("inf"))
+    for i in range(n_grid):
+        ratio = 1.0 - max_shrink * i / (n_grid - 1)   # 1.0 .. (1-max_shrink)
+        cand = amax * ratio
+        scale = (cand / 7.5).clamp_min(1e-12).unsqueeze(-1)
+        q = torch.clamp(torch.round(wg / scale), -8, 7)
+        err = ((wg - q * scale) ** 2).mean(dim=-1)
+        better = err < best_err
+        best_err = torch.where(better, err, best_err)
+        best_max = torch.where(better, cand, best_max)
+    return -best_max, best_max                    # symmetric: max(|min|,|max|) = best_max
+
+
+def quantize_weight(w: torch.Tensor, group_size: int, observer: str = "minmax"):
     """Return (weight_packed[int32], weight_scale[bf16], weight_shape[int64])."""
     w = w.to(torch.float32)
     out_dim, in_dim = w.shape
-    qargs = make_qargs(group_size)
-    if group_size == -1:
+    qargs = make_qargs(group_size, observer)
+    if group_size != -1:
+        assert in_dim % group_size == 0, f"in_dim {in_dim} not divisible by {group_size}"
+    if observer == "mse":
+        min_vals, max_vals = _mse_clipped_symmetric(w, group_size)
+    elif group_size == -1:
         min_vals = w.amin(dim=-1, keepdim=True)
         max_vals = w.amax(dim=-1, keepdim=True)
     else:
-        assert in_dim % group_size == 0, f"in_dim {in_dim} not divisible by {group_size}"
         ng = in_dim // group_size
         wg = w.reshape(out_dim, ng, group_size)
         min_vals = wg.amin(dim=-1)
@@ -119,11 +154,12 @@ def verify_official_module_set(token: str | None, expected: set[str]) -> None:
     print(f"[verify] live official module set matches saved list ({len(live)} modules)")
 
 
-def build_quant_config(group_size: int, head_group_size: int, token: str | None) -> dict:
+def build_quant_config(group_size: int, head_group_size: int, token: str | None,
+                       observer: str = "minmax") -> dict:
     qc = fetch_official_quant_config(token)
     # delta 1: bump body group_size
     qc["config_groups"]["group_0"]["weights"]["group_size"] = group_size
-    qc["config_groups"]["group_0"]["weights"]["observer"] = "minmax"
+    qc["config_groups"]["group_0"]["weights"]["observer"] = observer
     # delta 2: untie + quantize lm_head -> its own group + drop from ignore
     head_weights = dict(qc["config_groups"]["group_0"]["weights"])
     head_weights["group_size"] = head_group_size if head_group_size != -1 else None
@@ -151,6 +187,10 @@ def main() -> None:
     ap.add_argument("--group-size", type=int, default=128)
     ap.add_argument("--head-group-size", type=int, default=128,
                     help="128 for g128 head, -1 for channel-wise head")
+    ap.add_argument("--observer", choices=["minmax", "mse"], default="minmax",
+                    help="scale-selection observer: minmax (raw amin/amax, the live "
+                         "recipe) or mse (per-group clip-search minimizing int4 "
+                         "round-trip MSE; zero on-disk-format/speed cost)")
     ap.add_argument("--no-verify-official", action="store_true",
                     help="skip live re-derivation of the official module set")
     args = ap.parse_args()
@@ -181,7 +221,7 @@ def main() -> None:
                 embed_weight = t
             if name in quant_weight_names:
                 base = name[: -len(".weight")]
-                packed, scale, shape, rel = quantize_weight(t, args.group_size)
+                packed, scale, shape, rel = quantize_weight(t, args.group_size, args.observer)
                 tensors[base + ".weight_packed"] = packed
                 tensors[base + ".weight_scale"] = scale
                 tensors[base + ".weight_shape"] = shape
@@ -197,7 +237,7 @@ def main() -> None:
     assert embed_weight is not None, "embed_tokens.weight not found"
 
     # untie + quantize lm_head from the (bf16) input embedding
-    packed, scale, shape, rel = quantize_weight(embed_weight, args.head_group_size)
+    packed, scale, shape, rel = quantize_weight(embed_weight, args.head_group_size, args.observer)
     tensors["lm_head.weight_packed"] = packed
     tensors["lm_head.weight_scale"] = scale
     tensors["lm_head.weight_shape"] = shape
@@ -216,7 +256,7 @@ def main() -> None:
     cfg["tie_word_embeddings"] = False
     cfg["text_config"]["tie_word_embeddings"] = False
     cfg["quantization_config"] = build_quant_config(
-        args.group_size, args.head_group_size, token
+        args.group_size, args.head_group_size, token, args.observer
     )
     json.dump(cfg, open(out / "config.json", "w"), indent=2)
     print("[write] wrote config.json (tie_word_embeddings=false, g128 + lm_head group)")
