@@ -1,0 +1,82 @@
+{
+  "pr": 660,
+  "analysis_only": true,
+  "official_tps": 0,
+  "cross_val": {
+    "stark_unrescued_k6": 155.58,
+    "stark_ar_ref": 77.89,
+    "land_ar_ref_A": 77.962,
+    "source": "#658 xval artifact (own)"
+  },
+  "ppl_unchanged": 2.0055,
+  "rows": [
+    {
+      "K": 6,
+      "fire_rate": 0.072823,
+      "server_ready_s": 120.0,
+      "num_completion_tokens": 65536,
+      "duration_s": 385.0,
+      "mean_ttft_s": 0.085,
+      "defs": {
+        "full_e2e_nonstream": 170.22,
+        "steady_gen_meter": 169.84,
+        "stream_full_e2e": 168.9,
+        "stream_steady": 175.2,
+        "cold_job_wall": 129.77
+      },
+      "named_axis_delta_pct": -0.2232405122782255,
+      "residual_vs_stark_pct": {
+        "full_e2e_nonstream": 9.4099498650212,
+        "steady_gen_meter": 9.165702532459179,
+        "stream_full_e2e": 8.561511762437327,
+        "stream_steady": 12.610875433860377,
+        "cold_job_wall": -16.58953593006813
+      },
+      "gap_residual_after_def_match_pct": 8.561511762437327,
+      "rescued_full_e2e": 146.86803343458493,
+      "rescued_steady": 146.5850571698,
+      "reproduces_632_full_e2e": true,
+      "gen_meter_n": 114,
+      "espec_mean": 3.66
+    },
+    {
+      "K": 5,
+      "fire_rate": 0.072739,
+      "server_ready_s": 118.0,
+      "num_completion_tokens": 65536,
+      "duration_s": 379.4,
+      "mean_ttft_s": 0.084,
+      "defs": {
+        "full_e2e_nonstream": 172.74,
+        "steady_gen_meter": 172.02,
+        "stream_full_e2e": 171.5,
+        "stream_steady": 178.0,
+        "cold_job_wall": 131.5
+      },
+      "named_axis_delta_pct": -0.41681139284473706,
+      "residual_vs_stark_pct": {
+        "full_e2e_nonstream": 11.029695333590432,
+        "steady_gen_meter": 10.566910913999227,
+        "stream_full_e2e": 10.232677722072236,
+        "stream_steady": 14.410592621159521,
+        "cold_job_wall": -15.4775678107726
+      },
+      "gap_residual_after_def_match_pct": 10.232677722072236,
+      "rescued_full_e2e": 148.7640766897385,
+      "rescued_steady": 148.22976567027519,
+      "reproduces_632_full_e2e": true,
+      "gen_meter_n": 114,
+      "espec_mean": 3.47
+    }
+  ],
+  "decision": {
+    "verdict": "GAP_IS_REAL",
+    "named_axis_full_vs_steady_delta_pct": 0.2232405122782255,
+    "named_axis_below_2pct": true,
+    "any_decode_window_def_matches_stark": false,
+    "gap_residual_after_def_match_pct": 8.561511762437327,
+    "boot_inclusive_explains_gap": false,
+    "cold_job_wall_residual_vs_stark_pct": -16.58953593006813,
+    "primary_rescued_k6_reconciled": 146.86803343458493
+  }
+}

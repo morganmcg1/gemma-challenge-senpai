@@ -1,0 +1,119 @@
+{
+  "pr": 660,
+  "analysis_only": true,
+  "official_tps": 0,
+  "stack": "int4_mtp_batchinv",
+  "config": {
+    "batch_invariant": 1,
+    "max_num_seqs": 1,
+    "greedy": true,
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "vllm": "0.22.0"
+  },
+  "cross_val": {
+    "stark_unrescued_k6": 155.58,
+    "stark_ar_ref": 77.89,
+    "land_ar_ref_A": 77.962,
+    "stark_definition_source": "advisor PR #660 + committed research state; method='3 wall-TPS acceptor/AR/un-rescued, ratio x 126.378'; exact denominator windowing in stark's out-of-scope branch NOT inspected"
+  },
+  "ppl_unchanged": 2.0055,
+  "k6_native_vllm_meters": {
+    "gen_throughput_mean": 168.46103896103895,
+    "gen_throughput_n": 77,
+    "accepted_throughput_mean": 121.04782051282051,
+    "drafted_throughput_mean": 273.6065384615385,
+    "spec_acceptance_length_mean": 3.656923076923077,
+    "no_native_meter_equals_stark": true
+  },
+  "ar_agreement_diagnostic": {
+    "ar_rungs_agree_pct": 0.0924380536654291,
+    "ar_decode_s": 840.6146584233344,
+    "boot_s": 120.02,
+    "ar_if_boot_included_tps": 68.2215652176891,
+    "ar_if_boot_included_delta_pct": -12.493823634989994,
+    "k6_gap_implied_extra_s_over_128req": 36.088741466437455,
+    "k6_gap_implied_per_request_s": 0.2819432927065426,
+    "ar_if_that_per_request_applied_tps": 74.75276131955215,
+    "ar_if_that_per_request_applied_delta_pct": -4.1164139971368785,
+    "conclusion": "AR-agreement (0.09%) pins boot+per-request+prefill EQUAL between harnesses (each would force AR to disagree by 4-13%); the 9.4% K6 gap is therefore localized to the speculative per-step component (draft forwards + verify and/or acceptance length) -> a REAL spec-path difference, NOT a wall_tps windowing definition."
+  },
+  "rows": [
+    {
+      "K": 6,
+      "provenance": "fresh_rerun_complete",
+      "server_ready_s": 120.02316808700562,
+      "duration_s": 385.1481831073761,
+      "mean_ttft_s": 0.06391381969069698,
+      "espec_mean": 3.656923076923077,
+      "fire_rate": 0.072823,
+      "defs": {
+        "full_e2e_nonstream": 170.1578843531221,
+        "steady_gen_meter": 168.46103896103895,
+        "stream_full_e2e": 171.35944471547438,
+        "stream_steady": 174.76313169122432,
+        "cold_job_wall": 129.73023874978773
+      },
+      "named_axis_full_vs_steady_spread_pct": -0.9972182003401994,
+      "residual_vs_stark_pct": {
+        "full_e2e_nonstream": 9.370024651704654,
+        "steady_gen_meter": 8.279366860161293,
+        "stream_full_e2e": 10.142334950169925,
+        "stream_steady": 12.330075646756846,
+        "cold_job_wall": -16.6150927177094
+      },
+      "gap_residual_after_def_match_pct": 8.279366860161293,
+      "rescued_full_e2e": 146.82178935484797,
+      "rescued_steady": 145.55672242821822
+    },
+    {
+      "K": 5,
+      "provenance": "earlier_session_complete (re-run cut off 115/128)",
+      "server_ready_s": 118.0,
+      "duration_s": 379.4,
+      "mean_ttft_s": 0.084,
+      "espec_mean": 3.47,
+      "fire_rate": 0.072739,
+      "defs": {
+        "full_e2e_nonstream": 172.74,
+        "steady_gen_meter": 172.02,
+        "stream_full_e2e": 171.5,
+        "stream_steady": 178.0,
+        "cold_job_wall": 131.5
+      },
+      "named_axis_full_vs_steady_spread_pct": -0.41681139284473706,
+      "residual_vs_stark_pct": {
+        "full_e2e_nonstream": 11.029695333590432,
+        "steady_gen_meter": 10.566910913999227,
+        "stream_full_e2e": 10.232677722072236,
+        "stream_steady": 14.410592621159521,
+        "cold_job_wall": -15.4775678107726
+      },
+      "gap_residual_after_def_match_pct": 10.232677722072236,
+      "rescued_full_e2e": 148.7640766897385,
+      "rescued_steady": 148.22976567027519
+    }
+  ],
+  "decision": {
+    "verdict": "GAP_IS_REAL",
+    "named_axis_full_vs_steady_spread_pct": 0.9972182003401994,
+    "named_axis_explains_9p4_gap": false,
+    "any_decode_window_def_reaches_stark": false,
+    "gap_residual_after_def_match_pct": 8.279366860161293,
+    "no_native_vllm_meter_equals_stark": true,
+    "ar_agreement_rules_out_boot_and_per_request": true,
+    "spec_path_is_the_locus": true,
+    "rescued_k6_stark_basis": 135.82328005861396,
+    "rescued_k6_my_full_basis": 146.82178935484797,
+    "rescued_k6_my_steady_basis": 145.55672242821822,
+    "rescued_k6_band_low_high": [
+      135.82328005861396,
+      146.82178935484797
+    ],
+    "rescued_band_spread_pct": 8.09766138138296,
+    "official_tps": 0,
+    "fires": false,
+    "note": "LOCAL served wall-TPS only; NOT comparable to the 126.378 OFFICIAL anchor (different measurement plane). analysis_only -> does NOT trigger #481 fire."
+  }
+}
