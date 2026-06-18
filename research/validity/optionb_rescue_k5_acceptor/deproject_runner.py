@@ -119,15 +119,55 @@ def predict_acceptor_tps(tps0: float, cost_per_recompute: float, ftr: float) -> 
     return 1.0 / (1.0 / tps0 + cost_per_recompute * ftr)
 
 
+def read_acceptor_stats(stat_dir: Path) -> dict[str, Any]:
+    """Aggregate the recompute-acceptor sidecar JSONs a tau-mode arm wrote (one set
+    per serve PID). Returns the run-summed realized firing/flag rate (the live, data-
+    driven rate the gap-gate actually fired at) and the cudagraph dispatch resolution
+    (whether a width-1 recompute replays a captured graph or falls to eager)."""
+    out: dict[str, Any] = {"stat_dir": str(stat_dir)}
+    if not stat_dir.exists():
+        return out
+    emitted = positions = flagged = fired = 0
+    dispatch = None
+    for p in sorted(stat_dir.glob("recompute_progress_*.json")):
+        try:
+            d = json.loads(p.read_text())
+        except Exception:
+            continue
+        emitted += int(d.get("emitted_total", 0))
+        positions += int(d.get("positions_total", 0))
+        flagged += int(d.get("flagged_total", 0))
+        fired += int(d.get("fired_total", 0))
+    for p in sorted(stat_dir.glob("recompute_dispatch_resolve_*.json")):
+        try:
+            dispatch = json.loads(p.read_text())
+            break
+        except Exception:
+            continue
+    out.update({
+        "emitted_total": emitted, "positions_total": positions,
+        "flagged_total": flagged, "fired_total": fired,
+        "realized_flag_rate": (flagged / positions) if positions else None,
+        "realized_fire_rate": (fired / emitted) if emitted else None,
+        "dispatch_resolve": dispatch,
+        "is_captured_replay": (dispatch or {}).get("is_captured_replay"),
+    })
+    return out
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--submission", default="int4_mtp_batchinv")
-    ap.add_argument("--mode", choices=["reference", "rate"], required=True,
+    ap.add_argument("--mode", choices=["reference", "rate", "tau"], required=True,
                     help="reference: one SENPAI_REFERENCE_MODE=1 arm (d / R_served). "
-                         "rate: one SENPAI_RECOMPUTE_RATE arm per --rates value.")
+                         "rate: one SENPAI_RECOMPUTE_RATE arm per --rates value. "
+                         "tau: #663 REAL gap-flag acceptor -- one un-rescued arm + one "
+                         "SENPAI_ACCEPTOR_TAU arm per --taus value (data-driven firing).")
     ap.add_argument("--rates", default="0.0,0.05,0.10,0.20",
                     help="comma rates for --mode rate (slope sweep). r=0 == un-rescued ceiling.")
+    ap.add_argument("--taus", default="0.3",
+                    help="comma tau-flag thresholds for --mode tau (real gap-gated acceptor).")
     ap.add_argument("--extra-env", action="append", default=[],
                     help="KEY=VALUE applied to every arm (e.g. NUM_SPECULATIVE_TOKENS=5 for K=5)")
     ap.add_argument("--n", type=int, default=3, help="fresh serves per arm (median-of-N)")
@@ -138,6 +178,9 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--settle-s", type=float, default=2.5)
     ap.add_argument("--ftr", type=float, default=None,
                     help="flag_trigger_rate (from the identity scan) -> predict arm (a) tps")
+    ap.add_argument("--ar-rung-local", type=float, default=126.75,
+                    help="arm (b): local AR rung wall_tps (#642 6uepftr6 = 126.75). "
+                         "acceptor_over_ar_ratio = arm(a)/this; official-equiv = ratio*126.378")
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--wandb-name", default=None)
     ap.add_argument("--wandb-group", default="optionb-rescue-deproject-stark")
@@ -155,6 +198,16 @@ def main(argv: list[str] | None = None) -> int:
     arms: list[ArmSpec] = []
     if a.mode == "reference":
         arms.append(ArmSpec("ref_d", a.submission, {"SENPAI_REFERENCE_MODE": "1", **extra}))
+    elif a.mode == "tau":
+        taus = [float(x) for x in a.taus.split(",") if x.strip() != ""]
+        # Arm (c): un-rescued ceiling -- acceptor OFF, otherwise identical stack.
+        arms.append(ArmSpec("unrescued", a.submission, {**extra}))
+        # Arm (a): the REAL gap-flag acceptor -- firing emerges from live verify gaps.
+        for t in taus:
+            lbl = f"tau{t:g}".replace(".", "p")
+            env = {**extra, "SENPAI_ACCEPTOR_TAU": repr(t),
+                   "SENPAI_RECOMPUTE_STAT_DIR": str((out_dir / f"stat_{lbl}").resolve())}
+            arms.append(ArmSpec(lbl, a.submission, env))
     else:
         rates = [float(x) for x in a.rates.split(",") if x.strip() != ""]
         for r in rates:
@@ -197,6 +250,14 @@ def main(argv: list[str] | None = None) -> int:
                 rate_to_tps[float(eval(arm.override_env["SENPAI_RECOMPUTE_RATE"]))] = med
             elif a.mode == "rate":
                 rate_to_tps[0.0] = med
+            if a.mode == "tau" and "SENPAI_ACCEPTOR_TAU" in arm.override_env:
+                stat_dir = Path(arm.override_env["SENPAI_RECOMPUTE_STAT_DIR"])
+                acc_stats = read_acceptor_stats(stat_dir)
+                per_arm[arm.label]["acceptor_stats"] = acc_stats
+                print(f"[deproject] arm {arm.label}: realized_flag_rate="
+                      f"{acc_stats.get('realized_flag_rate')} fired="
+                      f"{acc_stats.get('fired_total')} captured_replay="
+                      f"{acc_stats.get('is_captured_replay')}", flush=True)
             print(f"[deproject] arm {arm.label}: median wall_tps={med:.3f} "
                   f"cv={per_arm[arm.label]['wall_tps_cv_pct']} E[accept]={ea}", flush=True)
     elapsed = time.time() - t0
@@ -210,6 +271,31 @@ def main(argv: list[str] | None = None) -> int:
                 fit["tps0_fit"], fit["C_sec_per_recompute"], a.ftr),
         }
 
+    tau_summary = None
+    if a.mode == "tau":
+        unrescued_tps = (per_arm.get("unrescued") or {}).get("wall_tps_median")
+        tau_summary = {"unrescued_ceiling": unrescued_tps,
+                       "ar_rung_local": a.ar_rung_local,
+                       "ar_rung_official": LOCKED_319_AR_TPS, "arms": {}}
+        for lbl, info in per_arm.items():
+            if "SENPAI_ACCEPTOR_TAU" not in info.get("override_env", {}):
+                continue
+            a_tps = info["wall_tps_median"]
+            ratio_ar = (a_tps / a.ar_rung_local) if a_tps else None
+            tau_summary["arms"][lbl] = {
+                "acceptor_walltps_real_live": a_tps,
+                "acceptor_K5_over_ar_ratio": ratio_ar,
+                "official_equiv_tps": (ratio_ar * LOCKED_319_AR_TPS) if ratio_ar else None,
+                "clears_rung_by_tps": (ratio_ar * LOCKED_319_AR_TPS - LOCKED_319_AR_TPS)
+                                      if ratio_ar else None,
+                "acceptor_over_unrescued": (a_tps / unrescued_tps)
+                                           if (a_tps and unrescued_tps) else None,
+                "realized_flag_rate": (info.get("acceptor_stats") or {}).get(
+                    "realized_flag_rate"),
+                "is_captured_replay": (info.get("acceptor_stats") or {}).get(
+                    "is_captured_replay"),
+            }
+
     result = {
         "pr": 642, "leg": f"deproject-{a.mode}", "analysis_only": True,
         "official_tps": 0, "no_hf_job": True,
@@ -221,6 +307,7 @@ def main(argv: list[str] | None = None) -> int:
         "rate_to_wall_tps": {str(k): v for k, v in sorted(rate_to_tps.items())},
         "additive_cost_fit": fit,
         "acceptor_prediction": acceptor_pred,
+        "tau_summary": tau_summary,
         "anchors": {"locked_ar_tps": LOCKED_319_AR_TPS,
                     "stark_636_unrescued_ceiling": STARK_636_UNRESCUED_CEILING,
                     "stark_636_projected": STARK_636_PROJECTED},
@@ -238,6 +325,16 @@ def main(argv: list[str] | None = None) -> int:
     if acceptor_pred:
         print(f"  acceptor @ ftr={acceptor_pred['ftr']}: "
               f"wall_tps_from_slope={acceptor_pred['wall_tps_from_slope']:.3f}", flush=True)
+    if tau_summary:
+        print(f"  [tau] un-rescued ceiling (c)={tau_summary['unrescued_ceiling']} "
+              f"AR rung local (b)={tau_summary['ar_rung_local']}", flush=True)
+        for lbl, s in tau_summary["arms"].items():
+            print(f"  [tau] {lbl}: acceptor(a)={s['acceptor_walltps_real_live']} "
+                  f"ratio(a/b)={s['acceptor_K5_over_ar_ratio']} "
+                  f"official_equiv={s['official_equiv_tps']} "
+                  f"clears_rung_by={s['clears_rung_by_tps']} TPS | "
+                  f"realized_flag_rate={s['realized_flag_rate']} "
+                  f"captured_replay={s['is_captured_replay']}", flush=True)
     print(f"[deproject] artifacts -> {result_path}", flush=True)
 
     if not a.no_wandb:
@@ -278,6 +375,18 @@ def _log_wandb(a, result: dict[str, Any]) -> None:
     if ap_:
         summary["acceptor/ftr"] = ap_["ftr"]
         summary["acceptor/wall_tps_from_slope"] = ap_["wall_tps_from_slope"]
+    ts = result.get("tau_summary")
+    if ts:
+        if isinstance(ts.get("unrescued_ceiling"), (int, float)):
+            summary["tau/unrescued_ceiling"] = ts["unrescued_ceiling"]
+        for lbl, s in ts.get("arms", {}).items():
+            for key in ("acceptor_walltps_real_live", "acceptor_K5_over_ar_ratio",
+                        "official_equiv_tps", "clears_rung_by_tps",
+                        "acceptor_over_unrescued", "realized_flag_rate"):
+                if isinstance(s.get(key), (int, float)):
+                    summary[f"tau/{lbl}/{key}"] = s[key]
+            if s.get("is_captured_replay") is not None:
+                summary[f"tau/{lbl}/is_captured_replay"] = int(bool(s["is_captured_replay"]))
     for k, v in summary.items():
         run.summary[k] = v
     finish_wandb(run)
