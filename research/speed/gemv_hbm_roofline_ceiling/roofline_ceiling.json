@@ -1,0 +1,311 @@
+{
+  "gpu": {
+    "name": "NVIDIA A10G",
+    "sm": "sm_86",
+    "torch": "2.11.0+cu130"
+  },
+  "peak_bw": {
+    "bw_read_gbps": 517.6874999276387,
+    "read_us": 2074.1119384765625,
+    "bw_copy_gbps": 480.2337605490309,
+    "copy_us": 4471.746520996094,
+    "bw_memcpy_dtod_gbps": 480.167796137627
+  },
+  "byte_model": {
+    "body_bytes": 2034278400.0,
+    "lm_head_bytes": 346030080.0,
+    "full_gemv_bytes": 2380308480.0,
+    "component_layers": {
+      "mlp.down_proj": 42,
+      "mlp.gate_proj": 42,
+      "mlp.up_proj": 42,
+      "per_layer_input_gate": 42,
+      "per_layer_projection": 42,
+      "self_attn.k_proj": 24,
+      "self_attn.o_proj": 42,
+      "self_attn.q_proj": 42,
+      "self_attn.v_proj": 24
+    },
+    "mapped_mb": {
+      "qkv_proj": 170.31168,
+      "o_proj": 132.46464,
+      "gate_up_proj": 1135.4112,
+      "down_proj": 567.7056,
+      "ple_proj": 28.38528,
+      "lm_head": 346.03008
+    },
+    "per_component_mb": {
+      "mlp.down_proj": 567.7056,
+      "mlp.gate_proj": 567.7056,
+      "mlp.up_proj": 567.7056,
+      "per_layer_input_gate": 14.19264,
+      "per_layer_projection": 14.19264,
+      "self_attn.k_proj": 18.92352,
+      "self_attn.o_proj": 132.46464,
+      "self_attn.q_proj": 132.46464,
+      "self_attn.v_proj": 18.92352
+    }
+  },
+  "int4_per_shape": {
+    "qkv_proj": {
+      "us": 13.547885985601516,
+      "weight_bytes": 3932160.0,
+      "scale_bytes": 122880.0,
+      "act_bytes": 11264.0,
+      "total_bytes": 4066304.0,
+      "achieved_bw_gbps": 300.14306322931895,
+      "series_cv": 0.00023000233025395015,
+      "f_vs_read": 0.5797765317325073,
+      "f_vs_spec": 0.5002384387155316,
+      "n_distinct": 8
+    },
+    "o_proj": {
+      "us": 9.283657301039923,
+      "weight_bytes": 2621440.0,
+      "scale_bytes": 81920.0,
+      "act_bytes": 9216.0,
+      "total_bytes": 2712576.0,
+      "achieved_bw_gbps": 292.1882951987194,
+      "series_cv": 0.0004169436143209766,
+      "f_vs_read": 0.5644105666827206,
+      "f_vs_spec": 0.4869804919978657,
+      "n_distinct": 8
+    },
+    "gate_up_proj": {
+      "us": 56.373028528122674,
+      "weight_bytes": 26214400.0,
+      "scale_bytes": 819200.0,
+      "act_bytes": 46080.0,
+      "total_bytes": 27079680.0,
+      "achieved_bw_gbps": 480.3658896291305,
+      "series_cv": 6.990960416819252e-05,
+      "f_vs_read": 0.9279070669009297,
+      "f_vs_spec": 0.8006098160485509,
+      "n_distinct": 2
+    },
+    "down_proj": {
+      "us": 30.1116943359375,
+      "weight_bytes": 13107200.0,
+      "scale_bytes": 409600.0,
+      "act_bytes": 25600.0,
+      "total_bytes": 13542400.0,
+      "achieved_bw_gbps": 449.7388904428905,
+      "series_cv": 9.54806089051386e-05,
+      "f_vs_read": 0.8687458949767073,
+      "f_vs_spec": 0.7495648174048175,
+      "n_distinct": 3
+    },
+    "ple_proj": {
+      "us": 4.219733249573481,
+      "weight_bytes": 327680.0,
+      "scale_bytes": 10240.0,
+      "act_bytes": 5632.0,
+      "total_bytes": 343552.0,
+      "achieved_bw_gbps": 81.41557290018874,
+      "series_cv": 0.00022042839858346257,
+      "f_vs_read": 0.15726779748703387,
+      "f_vs_spec": 0.13569262150031455,
+      "n_distinct": 8
+    },
+    "lm_head": {
+      "us": 741.2223815917969,
+      "weight_bytes": 335544320.0,
+      "scale_bytes": 10485760.0,
+      "act_bytes": 529408.0,
+      "total_bytes": 346559488.0,
+      "achieved_bw_gbps": 467.55129986192986,
+      "series_cv": 0.04307978410397703,
+      "f_vs_read": 0.9031535432616844,
+      "f_vs_spec": 0.7792521664365498,
+      "n_distinct": 2
+    }
+  },
+  "bf16_per_shape": {
+    "qkv_proj": {
+      "us": 37.54666646321615,
+      "weight_bytes": 15728640.0,
+      "act_bytes": 11264.0,
+      "total_bytes": 15739904.0,
+      "achieved_bw_gbps": 419.209093180619,
+      "series_cv": 0.00020053367603025112,
+      "f_vs_read": 0.8097724848276522
+    },
+    "o_proj": {
+      "us": 29.41927682785761,
+      "weight_bytes": 10485760.0,
+      "act_bytes": 9216.0,
+      "total_bytes": 10494976.0,
+      "achieved_bw_gbps": 356.7380687638838,
+      "series_cv": 0.00015364415158085364,
+      "f_vs_read": 0.6890992516020725
+    },
+    "gate_up_proj": {
+      "us": 226.55634198869978,
+      "weight_bytes": 104857600.0,
+      "act_bytes": 46080.0,
+      "total_bytes": 104903680.0,
+      "achieved_bw_gbps": 463.03572470830414,
+      "series_cv": 7.427856943780454e-05,
+      "f_vs_read": 0.8944309545295692
+    },
+    "down_proj": {
+      "us": 119.19847215924943,
+      "weight_bytes": 52428800.0,
+      "act_bytes": 25600.0,
+      "total_bytes": 52454400.0,
+      "achieved_bw_gbps": 440.0593317162724,
+      "series_cv": 8.552092904241931e-05,
+      "f_vs_read": 0.850048208190816
+    },
+    "ple_proj": {
+      "us": 6.36099066053118,
+      "weight_bytes": 1310720.0,
+      "act_bytes": 5632.0,
+      "total_bytes": 1316352.0,
+      "achieved_bw_gbps": 206.9413508445675,
+      "series_cv": 0.0003225834694936809,
+      "f_vs_read": 0.3997418343566212
+    },
+    "lm_head": {
+      "us": 2778.6239624023438,
+      "weight_bytes": 1342177280.0,
+      "act_bytes": 529408.0,
+      "total_bytes": 1342706688.0,
+      "achieved_bw_gbps": 483.22720388516416,
+      "series_cv": 7.366009537710568e-05,
+      "f_vs_read": 0.9334341740001617
+    }
+  },
+  "m_sweep_gate_up": {
+    "gate_up_proj": {
+      "1": {
+        "M": 1,
+        "us": 56.33401870727539,
+        "bw": 480.69853032698217,
+        "f_vs_read": 0.9285496180498336
+      },
+      "2": {
+        "M": 2,
+        "us": 56.51748748052688,
+        "bw": 479.9533951212214,
+        "f_vs_read": 0.9271102647607066
+      },
+      "4": {
+        "M": 4,
+        "us": 56.86917986188617,
+        "bw": 478.6058119020194,
+        "f_vs_read": 0.9245071823617877
+      },
+      "8": {
+        "M": 8,
+        "us": 57.44335083734422,
+        "bw": 477.03066761533114,
+        "f_vs_read": 0.9214645276967467
+      }
+    }
+  },
+  "aggregate": {
+    "body_us": 4995.374210522998,
+    "lm_head_us": 740.0900823122175,
+    "full_us": 5735.464292835215,
+    "body_achieved_bw_gbps": 407.23243430185755,
+    "full_achieved_bw_gbps": 415.01583105896054,
+    "body_achieved_bw_gbps_bf16": 436.82862657822994,
+    "body_pct_of_read_peak": 78.66375648606152,
+    "gemv_achieved_bw_gbps": 415.01583105896054,
+    "gemv_pct_of_hbm_peak": 80.16724976302704,
+    "gemv_pct_of_spec": 69.16930517649342,
+    "dequant_alu_tax_frac": 0.0677524101572865,
+    "m_invariance_m8_over_m1": 1.0196920467512387,
+    "dominant_bytes_gb": 2.04914688,
+    "dominant_frac_of_full": 0.8608745031232254,
+    "dominant_achieved_bw_gbps": 469.33883789105784,
+    "dominant_pct_of_read_peak": 90.66064719674729,
+    "dominant_achieved_bw_gbps_bf16": 459.6302814194745,
+    "dominant_dequant_alu_tax_frac": -0.02112253448924295
+  },
+  "inloop_reconcile": {
+    "d674_matmul_bucket_us": 6919.9059492186625,
+    "inloop_bucket_bw_gbps": 343.9798889562602,
+    "inloop_bucket_pct_of_read_peak": 66.4454693235477,
+    "inloop_bucket_pct_of_spec": 57.32998149271003,
+    "isolated_full_gemv_us": 5735.464292835215,
+    "iso_vs_inloop_gap_us": 1184.4416563834475,
+    "iso_vs_inloop_gap_frac_of_bucket": 0.17116441539457405
+  },
+  "ceiling": {
+    "stark_tax": 0.87,
+    "full_gemv_floor_us_at_read_peak": 4597.96398470644,
+    "saved_us_if_kernel_hit_peak": 1137.500308128775,
+    "local_tps_now": 122.86606388747026,
+    "local_tps_ceiling": 142.82768807120365,
+    "speedup_if_kernel_hit_peak": 1.1624665391903146,
+    "official_equiv_tps_now": 106.89347558209913,
+    "official_equiv_tps_ceiling": 124.26008862194718,
+    "official_equiv_tps_ceiling_live_basis": 146.9101962897936,
+    "ref_official_tps": 126.378,
+    "plus10_bar": 136.378,
+    "ceiling_clears_ref_tax_basis": false,
+    "ceiling_clears_plus10_tax_basis": false,
+    "ceiling_clears_plus10_live_basis": true,
+    "headroom_is_byte_identical": false
+  },
+  "verdict": {
+    "verdict": "GEMV_AT_HBM_WALL",
+    "gemv_achieved_bw_gbps": 415.01583105896054,
+    "gemv_pct_of_hbm_peak": 80.16724976302704,
+    "body_pct_of_read_peak": 78.66375648606152,
+    "dequant_alu_tax_frac": 0.0677524101572865,
+    "headroom_margin_pct_below_peak": 21.336243513938484,
+    "official_equiv_tps_ceiling": 124.26008862194718,
+    "analysis_only": true,
+    "official_tps": 0,
+    "fires": false,
+    "no_served_file_change": true,
+    "no_hf_job": true,
+    "ref_official_tps": 126.378
+  },
+  "anchors": {
+    "d674": {
+      "gpu_busy_us": 8161.866273437305,
+      "clean_wall_us": 8138.943890282619,
+      "matmul_us": 6919.9059492186625,
+      "attn_us": 903.4943359374225,
+      "norm_us": 175.36125781246608,
+      "sampling_us": 14.871394531239364,
+      "other_us": 148.23333593751414,
+      "local_tps": 122.86606388747026,
+      "local_ar_anchor_ref": 126.94
+    },
+    "stark602_body_bw": 436.3,
+    "stark602_read_peak": 517.9,
+    "gemm_roofline_read_peak": 517.6
+  },
+  "args": {
+    "M": 1,
+    "m_sweep": "1,2,4,8",
+    "iters": 40,
+    "warmup": 30,
+    "rounds": 15,
+    "calls": 42,
+    "smoke": false,
+    "wandb_name": "denken/gemv-hbm-roofline-ceiling",
+    "wandb_group": "gemv-hbm-roofline-denken",
+    "no_wandb": false
+  },
+  "timestamp": "20260618T190942Z",
+  "self_test": {
+    "passes": true,
+    "checks": {
+      "byte_model_body_gt_1p5GB": true,
+      "lm_head_near_int4_floor": true,
+      "read_peak_below_spec": true,
+      "gemv_pct_in_unit": true,
+      "body_pct_in_unit": true,
+      "dequant_tax_finite": true,
+      "ceiling_above_now": true,
+      "official_tps_zero": true
+    }
+  },
+  "wandb_run_id": "vwiqwzvk"
+}
