@@ -1,0 +1,43 @@
+ALL-START 2026-06-17T23:33:05Z
+[stage 1/4] greedy panel 23:33:05
+  greedy panel rc=0 00:01:39
+[stage 2/4] GPQA 10 seeds gb6144 00:01:39
+  gpqa 10-seed rc=0 01:10:42
+[stage 3/4] pool GPQA 01:10:42
+  seed=12345 acc=0.4949 (98/198) err=1 empty_rate=0.0 len_stop_rate=0.005050505050505051 len_trunc=1 ctok(mean/p95/max)=1951.0050761421319/3856/6144
+  seed=23456 acc=0.4697 (93/198) err=1 empty_rate=0.0 len_stop_rate=0.0 len_trunc=0 ctok(mean/p95/max)=1953.1370558375634/3850/5881
+  seed=34567 acc=0.4495 (89/198) err=1 empty_rate=0.0 len_stop_rate=0.0 len_trunc=0 ctok(mean/p95/max)=1917.0812182741117/3814/4848
+  seed=45678 acc=0.4495 (89/198) err=1 empty_rate=0.0 len_stop_rate=0.0 len_trunc=0 ctok(mean/p95/max)=1952.1928934010152/3575/5725
+  seed=56789 acc=0.5051 (100/198) err=1 empty_rate=0.0 len_stop_rate=0.005050505050505051 len_trunc=1 ctok(mean/p95/max)=1935.751269035533/3580/6144
+  seed=67890 acc=0.4747 (94/198) err=1 empty_rate=0.0 len_stop_rate=0.0 len_trunc=0 ctok(mean/p95/max)=1885.9035532994924/3554/5183
+  seed=78901 acc=0.4646 (92/198) err=1 empty_rate=0.0 len_stop_rate=0.0 len_trunc=0 ctok(mean/p95/max)=1971.761421319797/3595/6015
+  seed=89012 acc=0.4596 (91/198) err=1 empty_rate=0.0 len_stop_rate=0.0 len_trunc=0 ctok(mean/p95/max)=1953.7106598984772/3305/6120
+  seed=90123 acc=0.4495 (89/198) err=1 empty_rate=0.0 len_stop_rate=0.010101010101010102 len_trunc=2 ctok(mean/p95/max)=1963.3857868020305/3885/6144
+  seed=13579 acc=0.4343 (86/198) err=1 empty_rate=0.0 len_stop_rate=0.0 len_trunc=0 ctok(mean/p95/max)=1938.7208121827412/3599/4983
+
+  POOLED 0p22gb6144 acc=0.4652 (921/1980) stderr=0.0112
+  95% CI normal [0.4432, 0.4871] | wilson [0.4433, 0.4872]  bar=0.471
+  length_stop_rate(pooled)=0.0020  (4/1980)  ctok_mean~1942.2649746192892
+  de-confounded (excl 10 request-err/overflow): acc=0.4675 (921/1970) wilson[0.4456,0.4896] -> FAIL
+  retro-trunc (frac of NATURAL ctok > cap, from de-biased run):
+    @cap 2048: 0.4020  (792/1970)
+    @cap 3072: 0.1091  (215/1970)
+    @cap 4096: 0.0269  (53/1970)
+  -> FAIL  (margin -0.0058 = -0.52 sigma)
+  pool rc=0 01:10:42
+[stage 4/4] rollup + verdict 01:10:42
+========================================================================
+OPTION-B QUALITY PANEL @ vLLM 0.22.0  (vs #624 dev307 baseline)
+========================================================================
+  mmlu_pro       : acc=0.6640 (bar 0.605, PASS)  finish_len=0.000  [dev307 acc=0.664 fl=0.002]
+  gsm8k          : acc=0.9260 (bar 0.807, PASS)  finish_len=0.000  [dev307 acc=0.928 fl=0.0]
+  aime           : acc=0.3667 (bar 0.09, PASS)  finish_len=0.200  [dev307 acc=0.4 fl=0.15]
+Traceback (most recent call last):
+  File "/workspace/senpai/target/research/validity/int4_mtp_spec_quality_panel/rollup_0p22.py", line 212, in <module>
+    main()
+  File "/workspace/senpai/target/research/validity/int4_mtp_spec_quality_panel/rollup_0p22.py", line 202, in main
+    f"[dev307 acc={gl['dev307_acc']} fl={gl['dev307_fl']}]{extra}")
+                                         ~~^^^^^^^^^^^^^
+KeyError: 'dev307_fl'
+  rollup rc=1 01:10:42
+ALL-DONE 2026-06-18T01:10:42Z
