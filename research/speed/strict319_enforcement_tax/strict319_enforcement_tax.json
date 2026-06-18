@@ -1,0 +1,425 @@
+{
+  "anchors": {
+    "ref_official_tps": 126.378,
+    "plus10_bar": 136.378,
+    "local_to_official": 0.87,
+    "plus10_local": 156.75632183908044,
+    "kstar": 5,
+    "estar": 3.4741,
+    "tstep_strict_k5_ms": 20.111156388918364,
+    "t_ar_deployed_ms": 8.138943890282619,
+    "enforcement_tax_base_ms": 4.841056109717382,
+    "bi_axis_physical": "attention_split_kv_reduction_pin",
+    "verify_gemm_byte_identical_achievable": 1,
+    "blanket_bi_ar_tps_drop": 0.16,
+    "targeted_attn_pin_tps_drop": 0.051,
+    "land680_run": "5iy1mhe4"
+  },
+  "decomposition": {
+    "source": "measured_hybrid",
+    "tstep_raw_ms": 12.435733059631216,
+    "tstep_bi_ms": 17.115609566342776,
+    "bi_tax_ms": 4.67987650671156,
+    "bi_tax_frac_of_enforcement": 0.96670569409797,
+    "rescue_r0_ms": 2.9955468225755872,
+    "rescue_r0_frac_of_enforcement": 0.6187796122756498,
+    "identity_resid_ms": 0.0,
+    "measured_relatives": {
+      "spec_time_inflation_eval_decode": 1.3763249407389855,
+      "spec_time_inflation_probe": 1.3812882814567295,
+      "spec_bi_tps_drop": 0.2734273931975153,
+      "ar_time_inflation_eval_decode": 1.2267504619788836,
+      "ar_time_inflation_probe": 1.1222892666191477,
+      "ar_bi_tps_drop": 0.18483829352964753,
+      "ar_basis": "measured_graph_eval_decode_E1"
+    },
+    "measured_arms_eval_decode_ms": {
+      "spec_raw": 15.120264046899301,
+      "spec_bi": 20.810396518306494,
+      "ar_raw": 10.497229814063758,
+      "ar_bi": 12.877481523901224
+    },
+    "measured_arms_probe_ms": {
+      "spec_raw": 6.636290357905403,
+      "spec_bi": 9.166630103719019
+    },
+    "e_accept_measured": {
+      "spec_raw": 3.0417246175243395,
+      "spec_bi": 2.9863294600136703
+    },
+    "ar_base": {
+      "bi_tax_base_ms": 1.845509287141796,
+      "ar_time_inflation": 1.2267504619788836,
+      "ar_bi_tps_drop": 0.18483829352964753,
+      "basis": "measured_graph_relative_on_677_AR_8.14ms"
+    },
+    "base": {
+      "source": "measured_graph",
+      "bi_tax_base_ms": 1.845509287141796,
+      "bi_tax_base_frac_of_enforcement": 0.38122038772435046,
+      "rescue_base_ms": 2.995546822575586,
+      "rescue_base_frac_of_enforcement": 0.6187796122756496,
+      "band_eager_lo_ms": 0.7644268158158094,
+      "band_lawine_hi_ms": 1.5502750267204988
+    }
+  },
+  "decision_table": {
+    "e_accept": 3.33,
+    "stock_raw_tstep_ms": 13.608003059193603,
+    "bi_tax_ms": 4.67987650671156,
+    "bi_tax_cheap_attn_pin_ms": 1.4917106365143096,
+    "rescue_r0_ms": 2.9955468225755872,
+    "S0_status_quo": {
+      "tstep_ms": 21.283426388480752,
+      "official_tps": 136.12,
+      "margin_over_plus10": -0.25799999999998136,
+      "clears_plus10": false
+    },
+    "S1_width_inv_only": {
+      "tstep_ms": 16.60354988176919,
+      "official_tps": 174.48678268380638,
+      "margin_over_plus10": 38.108782683806396,
+      "clears_plus10": true
+    },
+    "S1_cheap_attn_pin": {
+      "tstep_ms": 18.0952605182835,
+      "official_tps": 160.10269634265626,
+      "margin_over_plus10": 23.724696342656273,
+      "clears_plus10": true
+    },
+    "S2_cheaper_rescue_only": {
+      "r_ms=0": {
+        "tstep_ms": 18.287879565905165,
+        "official_tps": 158.41639756864873,
+        "margin_over_plus10": 22.038397568648747,
+        "clears_plus10": true
+      },
+      "r_ms=1.5": {
+        "tstep_ms": 19.787879565905165,
+        "official_tps": 146.40780435068697,
+        "margin_over_plus10": 10.029804350686987,
+        "clears_plus10": true
+      },
+      "r_ms=3": {
+        "tstep_ms": 21.287879565905165,
+        "official_tps": 136.09152527525654,
+        "margin_over_plus10": -0.28647472474344227,
+        "clears_plus10": false
+      }
+    },
+    "S3_both": {
+      "r_ms=0": {
+        "tstep_ms": 13.608003059193603,
+        "official_tps": 212.89677753582745,
+        "margin_over_plus10": 76.51877753582747,
+        "clears_plus10": true
+      },
+      "r_ms=1.5": {
+        "tstep_ms": 15.108003059193603,
+        "official_tps": 191.75929397479445,
+        "margin_over_plus10": 55.38129397479446,
+        "clears_plus10": true
+      },
+      "r_ms=3": {
+        "tstep_ms": 16.608003059193603,
+        "official_tps": 174.43999676988668,
+        "margin_over_plus10": 38.06199676988669,
+        "clears_plus10": true
+      }
+    }
+  },
+  "threshold": {
+    "stock_raw_tstep_ms": 13.608003059193603,
+    "tstep_budget_for_plus10_ms": 21.24316238689525,
+    "bi_tax_cheap_attn_pin_ms": 1.4917106365143096,
+    "rescue_tax_ms_for_stock_clears": 6.143448691187338,
+    "rescue_tax_ms_for_stock_clears_bi_free": 7.635159327701647,
+    "rescue_tax_ms_for_stock_clears_blanket_bi": 2.955282820990087,
+    "stock_clears_at_zero_rescue": true,
+    "stock_clears_at_zero_rescue_cheap_pin": true
+  },
+  "verdict": {
+    "verdict": "STRICT319_TAX_DECOMPOSED|BI_REMOVAL_SUFFICIENT",
+    "bi_removal_sufficient": true,
+    "bi_removal_sufficient_cheap_pin": true,
+    "s1_width_inv_only_official": 174.48678268380638,
+    "s1_margin_over_plus10": 38.108782683806396,
+    "s1_cheap_attn_pin_official": 160.10269634265626,
+    "s1_cheap_attn_pin_margin_over_plus10": 23.724696342656273,
+    "rescue_bound": false
+  },
+  "measurement": {
+    "ar_bi0": {
+      "label": "ar_bi0",
+      "k": 0,
+      "bi": 0,
+      "e_accept": 1.0,
+      "decode_tps_single_stream": 97.83883389707465,
+      "tstep_probe_ms": 10.220890419155943,
+      "decode_tps_summary": 95.26322827192381,
+      "tstep_decode_ms": 10.497229814063758,
+      "num_completion_tokens": 4096,
+      "duration_s": 42.99665331840515,
+      "steptime": {
+        "raw_exec_steps": 0,
+        "raw_draft_steps": 0,
+        "exec": {
+          "gap": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "dgpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "draft": {
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "stat": "p50_steady_state",
+        "verify_gpu_ms": NaN,
+        "drafter_gpu_ms": NaN,
+        "host_gap_ms": NaN,
+        "exec_cpu_ms": NaN,
+        "verify_gpu_ms_mean": NaN,
+        "drafter_gpu_ms_mean": NaN,
+        "host_gap_ms_mean": NaN,
+        "exec_cpu_ms_mean": NaN,
+        "host_gap_outliers_gt3x": 0
+      },
+      "boot_decode_wall_s": 167.293359041214,
+      "server_log": "/tmp/strict319_tax_arms/server_ar_bi0_timing.log"
+    },
+    "ar_bi1": {
+      "label": "ar_bi1",
+      "k": 0,
+      "bi": 1,
+      "e_accept": 1.0,
+      "decode_tps_single_stream": 87.17791108508976,
+      "tstep_probe_ms": 11.470795612709196,
+      "decode_tps_summary": 77.65493572201613,
+      "tstep_decode_ms": 12.877481523901224,
+      "num_completion_tokens": 4096,
+      "duration_s": 52.746164321899414,
+      "steptime": {
+        "raw_exec_steps": 0,
+        "raw_draft_steps": 0,
+        "exec": {
+          "gap": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "dgpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "draft": {
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "stat": "p50_steady_state",
+        "verify_gpu_ms": NaN,
+        "drafter_gpu_ms": NaN,
+        "host_gap_ms": NaN,
+        "exec_cpu_ms": NaN,
+        "verify_gpu_ms_mean": NaN,
+        "drafter_gpu_ms_mean": NaN,
+        "host_gap_ms_mean": NaN,
+        "exec_cpu_ms_mean": NaN,
+        "host_gap_outliers_gt3x": 0
+      },
+      "boot_decode_wall_s": 192.70707654953003,
+      "server_log": "/tmp/strict319_tax_arms/server_ar_bi1_timing.log"
+    },
+    "spec_bi0": {
+      "label": "spec_bi0",
+      "k": 5,
+      "bi": 0,
+      "e_accept": 3.0417246175243395,
+      "decode_tps_single_stream": 458.34712670474414,
+      "tstep_probe_ms": 6.636290357905403,
+      "decode_tps_summary": 201.16874996955514,
+      "tstep_decode_ms": 15.120264046899301,
+      "num_completion_tokens": 4096,
+      "duration_s": 20.36101531982422,
+      "steptime": {
+        "raw_exec_steps": 0,
+        "raw_draft_steps": 0,
+        "exec": {
+          "gap": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "dgpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "draft": {
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "stat": "p50_steady_state",
+        "verify_gpu_ms": NaN,
+        "drafter_gpu_ms": NaN,
+        "host_gap_ms": NaN,
+        "exec_cpu_ms": NaN,
+        "verify_gpu_ms_mean": NaN,
+        "drafter_gpu_ms_mean": NaN,
+        "host_gap_ms_mean": NaN,
+        "exec_cpu_ms_mean": NaN,
+        "host_gap_outliers_gt3x": 0
+      },
+      "boot_decode_wall_s": 142.29905009269714,
+      "server_log": "/tmp/strict319_tax_arms/server_spec_bi0_timing.log"
+    },
+    "spec_bi1": {
+      "label": "spec_bi1",
+      "k": 5,
+      "bi": 1,
+      "e_accept": 2.9863294600136703,
+      "decode_tps_single_stream": 325.78269508246854,
+      "tstep_probe_ms": 9.166630103719019,
+      "decode_tps_summary": 143.50180484964116,
+      "tstep_decode_ms": 20.810396518306494,
+      "num_completion_tokens": 4096,
+      "duration_s": 28.543195009231567,
+      "steptime": {
+        "raw_exec_steps": 0,
+        "raw_draft_steps": 0,
+        "exec": {
+          "gap": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "dgpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "draft": {
+          "cpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          },
+          "gpu": {
+            "n": 0,
+            "mean": NaN,
+            "p50": NaN,
+            "p90": NaN
+          }
+        },
+        "stat": "p50_steady_state",
+        "verify_gpu_ms": NaN,
+        "drafter_gpu_ms": NaN,
+        "host_gap_ms": NaN,
+        "exec_cpu_ms": NaN,
+        "verify_gpu_ms_mean": NaN,
+        "drafter_gpu_ms_mean": NaN,
+        "host_gap_ms_mean": NaN,
+        "exec_cpu_ms_mean": NaN,
+        "host_gap_outliers_gt3x": 0
+      },
+      "boot_decode_wall_s": 195.50136470794678,
+      "server_log": "/tmp/strict319_tax_arms/server_spec_bi1_timing.log"
+    }
+  }
+}
