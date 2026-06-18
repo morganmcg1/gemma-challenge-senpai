@@ -1,0 +1,336 @@
+{
+  "baseline_official_tps": 126.378,
+  "local_ar_anchor_wirbel665": 126.94,
+  "stark_tax_local_to_official": 0.87,
+  "analysis_only": true,
+  "official_tps": 0,
+  "anchor_wall_tps_median_of_base": 127.09843543099127,
+  "n_base_reps": 3,
+  "base_reps_wall_tps": [
+    127.0832820990277,
+    127.09843543099127,
+    127.11809494174395
+  ],
+  "base_max_wall_tps": 127.11809494174395,
+  "base_min_wall_tps": 127.0832820990277,
+  "base_spread_wall_tps": 0.03481284271624929,
+  "base_spread_frac": 0.0002739045732404086,
+  "base_pstdev_wall_tps": 0.0142519154682182,
+  "arms": {
+    "atomicadd1": {
+      "arm": "atomicadd1",
+      "status": "ok",
+      "extra_env": [
+        "VLLM_MARLIN_USE_ATOMIC_ADD=1"
+      ],
+      "active_kernel": "MarlinLinearKernel",
+      "kernel_log_hits": 1,
+      "machete_in_log": false,
+      "wall_tps": 126.4233568076576,
+      "duration_s": 518.3852229118347,
+      "ready_s": 160.02530217170715,
+      "num_completion_tokens": 65536,
+      "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/atomicadd1/decode_outputs.jsonl",
+      "identity": {
+        "verdict": "DIVERGENT",
+        "identity_pass": false,
+        "num_prompts_compared": 128,
+        "num_divergent": 116,
+        "break_rate": 0.90625,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 42783,
+        "token_break_rate": 0.6528167724609375,
+        "first_divergence_index": 11
+      },
+      "delta_wall_tps_vs_anchor": -0.6750786233336754,
+      "official_equiv_delta": -0.5873184023002976
+    },
+    "base1": {
+      "arm": "base1",
+      "status": "ok",
+      "extra_env": [],
+      "active_kernel": "MarlinLinearKernel",
+      "kernel_log_hits": 1,
+      "machete_in_log": false,
+      "wall_tps": 127.0832820990277,
+      "duration_s": 515.6933226585388,
+      "ready_s": 105.01937580108643,
+      "num_completion_tokens": 65536,
+      "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/base1/decode_outputs.jsonl",
+      "identity": {
+        "verdict": "REFERENCE",
+        "identity_pass": true,
+        "break_rate": 0.0,
+        "token_break_rate": 0.0,
+        "num_divergent": 0,
+        "first_divergence_index": null
+      },
+      "delta_wall_tps_vs_anchor": -0.015153331963574601,
+      "official_equiv_delta": -0.013183398808309902
+    },
+    "base2": {
+      "arm": "base2",
+      "status": "ok",
+      "extra_env": [],
+      "active_kernel": "MarlinLinearKernel",
+      "kernel_log_hits": 1,
+      "machete_in_log": false,
+      "wall_tps": 127.09843543099127,
+      "duration_s": 515.6318390369415,
+      "ready_s": 95.01929235458374,
+      "num_completion_tokens": 65536,
+      "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/base2/decode_outputs.jsonl",
+      "identity": {
+        "verdict": "GREEDY_IDENTICAL",
+        "identity_pass": true,
+        "num_prompts_compared": 128,
+        "num_divergent": 0,
+        "break_rate": 0.0,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 0,
+        "token_break_rate": 0.0,
+        "first_divergence_index": null
+      },
+      "delta_wall_tps_vs_anchor": 0.0,
+      "official_equiv_delta": 0.0
+    },
+    "base3": {
+      "arm": "base3",
+      "status": "ok",
+      "extra_env": [],
+      "active_kernel": "MarlinLinearKernel",
+      "kernel_log_hits": 1,
+      "machete_in_log": false,
+      "wall_tps": 127.11809494174395,
+      "duration_s": 515.552093744278,
+      "ready_s": 95.01744794845581,
+      "num_completion_tokens": 65536,
+      "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/base3/decode_outputs.jsonl",
+      "identity": {
+        "verdict": "GREEDY_IDENTICAL",
+        "identity_pass": true,
+        "num_prompts_compared": 128,
+        "num_divergent": 0,
+        "break_rate": 0.0,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 0,
+        "token_break_rate": 0.0,
+        "first_divergence_index": null
+      },
+      "delta_wall_tps_vs_anchor": 0.01965951075267469,
+      "official_equiv_delta": 0.017103774354826982
+    },
+    "baseBI1": {
+      "arm": "baseBI1",
+      "status": "ok",
+      "extra_env": [
+        "VLLM_BATCH_INVARIANT=1"
+      ],
+      "active_kernel": "MarlinLinearKernel",
+      "kernel_log_hits": 1,
+      "machete_in_log": false,
+      "wall_tps": 106.32358329109381,
+      "duration_s": 616.3825368881226,
+      "ready_s": 130.02327251434326,
+      "num_completion_tokens": 65536,
+      "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/baseBI1/decode_outputs.jsonl",
+      "identity": {
+        "verdict": "DIVERGENT",
+        "identity_pass": false,
+        "num_prompts_compared": 128,
+        "num_divergent": 112,
+        "break_rate": 0.875,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 40669,
+        "token_break_rate": 0.6205596923828125,
+        "first_divergence_index": 11
+      },
+      "delta_wall_tps_vs_anchor": -20.77485213989746,
+      "official_equiv_delta": -18.07412136171079
+    },
+    "humming1": {
+      "arm": "humming1",
+      "extra_env": [],
+      "active_kernel": "HummingLinearKernel",
+      "kernel_log_hits": 1,
+      "machete_in_log": false,
+      "wall_tps": null,
+      "duration_s": null,
+      "ready_s": null,
+      "num_completion_tokens": null,
+      "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/humming1/decode_outputs.jsonl",
+      "status": "load_crash",
+      "reason": "ParallelLMHead has no attribute 'input_size' in prepare_humming_layer -> hard crash loading the int4 lm_head",
+      "identity": null
+    },
+    "triton1": {
+      "arm": "triton1",
+      "extra_env": [],
+      "active_kernel": "TritonW4A16LinearKernel",
+      "kernel_log_hits": 1,
+      "machete_in_log": false,
+      "wall_tps": null,
+      "duration_s": null,
+      "ready_s": null,
+      "num_completion_tokens": null,
+      "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/triton1/decode_outputs.jsonl",
+      "status": "decode_timeout",
+      "partial_prompts": 115,
+      "partial_completion_tokens": 58880,
+      "timeout_s": 3600,
+      "partial_wall_tps_upper_bound": 16.355555555555554,
+      "reason": "decode did not finish within harness timeout 3600s; flushed 115 prompts / 58880 tok -> wall_tps <= 16.356",
+      "identity": {
+        "verdict": "INCOMPARABLE",
+        "identity_pass": false,
+        "num_prompts_compared": 115,
+        "num_divergent": 98,
+        "break_rate": 0.8521739130434782,
+        "total_tokens_compared": 58880,
+        "total_divergent_tokens": 35479,
+        "token_break_rate": 0.6025645380434783,
+        "first_divergence_index": 120
+      }
+    }
+  },
+  "faster_bar_wall_tps": 127.24519337717494,
+  "best_byteident_kernel_walltps": 127.09843543099127,
+  "best_byteident_kernel": "MarlinLinearKernel",
+  "verdict": "ALREADY_OPTIMAL",
+  "verdict_detail": "no loadable kernel/knob beats the fastest base rep (base_max=127.118) at M=1; Marlin is the fastest byte-identical option. Alts: atomic-add inert (within noise), BI=1 -16%, Humming load-crash, Triton no M=1 path (timeout).",
+  "mde_wall_tps": 0.12709843543099128,
+  "break_rate_same_marlin_kernel": {
+    "base2": 0.0,
+    "base3": 0.0,
+    "baseBI1": 0.875,
+    "atomicadd1": 0.90625
+  },
+  "break_rate_noise_floor": 0.90625,
+  "disqualified_arms": {
+    "humming1": {
+      "status": "load_crash",
+      "active_kernel": "HummingLinearKernel",
+      "reason": "ParallelLMHead has no attribute 'input_size' in prepare_humming_layer -> hard crash loading the int4 lm_head",
+      "partial_wall_tps_upper_bound": null
+    },
+    "triton1": {
+      "status": "decode_timeout",
+      "active_kernel": "TritonW4A16LinearKernel",
+      "reason": "decode did not finish within harness timeout 3600s; flushed 115 prompts / 58880 tok -> wall_tps <= 16.356",
+      "partial_wall_tps_upper_bound": 16.355555555555554
+    }
+  },
+  "n_disqualified": 2,
+  "weight_footprint": {
+    "W_bytes_per_token": 2395626964,
+    "W_GB_per_token": 2.395626964,
+    "components": {
+      "int4_body_text_decoder_GB": 2.049596868,
+      "int4_lm_head_GB": 0.346030096
+    },
+    "excluded_GB": {
+      "embed_tokens": 6.979321856,
+      "vision_tower": 0.338662272,
+      "audio_tower": 0.617514496
+    },
+    "note": "W_bytes_per_token = text_decoder + lm_head + other_textstack; on-disk == HBM read bytes (packed int4 read as stored). M=1 text decode."
+  },
+  "bandwidth": {
+    "basis": "achieved GB/s = W_GB_per_token * wall_tps (1e9 GB). conc=1 server-log generation throughput == wall_tps -> decode-step basis.",
+    "denken676_anchor": {
+      "gemv_isolated_gbps": 469.3,
+      "read_peak_gbps": 517.7,
+      "pct_read_peak": 90.6509561522117,
+      "a10g_spec_gbps": 600.0,
+      "source": "denken #676 / W&B vwiqwzvk, relayed by advisor (cross-read #666)"
+    },
+    "per_candidate": {
+      "atomicadd1": {
+        "wall_tps": 126.4233568076576,
+        "achieved_gbps": 302.86320244781746,
+        "pct_read_peak": 58.50168098277331,
+        "pct_a10g_spec": 50.47720040796958,
+        "active_kernel": "MarlinLinearKernel",
+        "status": "ok"
+      },
+      "base1": {
+        "wall_tps": 127.0832820990277,
+        "achieved_gbps": 304.4441372700493,
+        "pct_read_peak": 58.80705761445804,
+        "pct_a10g_spec": 50.74068954500821,
+        "active_kernel": "MarlinLinearKernel",
+        "status": "ok"
+      },
+      "base2": {
+        "wall_tps": 127.09843543099127,
+        "achieved_gbps": 304.48043900069564,
+        "pct_read_peak": 58.814069731639094,
+        "pct_a10g_spec": 50.746739833449276,
+        "active_kernel": "MarlinLinearKernel",
+        "status": "ok"
+      },
+      "base3": {
+        "wall_tps": 127.11809494174395,
+        "achieved_gbps": 304.5275358547538,
+        "pct_read_peak": 58.82316705712841,
+        "pct_a10g_spec": 50.75458930912563,
+        "active_kernel": "MarlinLinearKernel",
+        "status": "ok"
+      },
+      "baseBI1": {
+        "wall_tps": 106.32358329109381,
+        "achieved_gbps": 254.71164304124417,
+        "pct_read_peak": 49.20062643253702,
+        "pct_a10g_spec": 42.45194050687403,
+        "active_kernel": "MarlinLinearKernel",
+        "status": "ok"
+      },
+      "humming1": {
+        "wall_tps": null,
+        "achieved_gbps": null,
+        "active_kernel": "HummingLinearKernel",
+        "status": "load_crash"
+      },
+      "triton1": {
+        "wall_tps": null,
+        "tps_upper_bound": 16.355555555555554,
+        "achieved_gbps_upper_bound": 39.181809900088886,
+        "pct_read_peak_upper_bound": 7.5684392312321584,
+        "active_kernel": "TritonW4A16LinearKernel",
+        "status": "decode_timeout"
+      },
+      "v0220_a": {
+        "wall_tps": 127.0179917933193,
+        "achieved_gbps": 304.2877260532064,
+        "pct_read_peak": 58.77684490114089,
+        "pct_a10g_spec": 50.71462100886773,
+        "active_kernel": "MarlinLinearKernel",
+        "status": "ok_shipvenv_0.22.0"
+      },
+      "v0220_b": {
+        "wall_tps": 126.9595480872252,
+        "achieved_gbps": 304.1477167350113,
+        "pct_read_peak": 58.749800412403175,
+        "pct_a10g_spec": 50.69128612250188,
+        "active_kernel": "MarlinLinearKernel",
+        "status": "ok_shipvenv_0.22.0"
+      }
+    },
+    "marlin_median_gbps": 304.48043900069564,
+    "marlin_pct_read_peak": 58.814069731639094,
+    "marlin_vs_triton_speedup": 7.77096412281876,
+    "implied_gemv_wall_share": 0.648797014704231,
+    "crosscheck_note": "Marlin wall/decode-step bandwidth 304.5 GB/s (58.8% of 517.7 read-peak) is a strict lower bound on denken's GEMV-isolated 469.3 GB/s; ratio 0.649 => the weight GEMV occupies 64.9% of M=1 per-token time, the rest attention/sampler/host/PLE-gather. Consistent, not contradictory. No byte-identical kernel/knob raises achieved bandwidth above Marlin; Triton is 7.8x slower. Selection-side confirmation of 'byte-identically realizable headroom ~= 0'."
+  },
+  "v0220_ship_control": {
+    "vllm_version": "0.22.0 (ship; venv 20f658587e8a6643)",
+    "wall_tps": {
+      "v0220_a": 127.0179917933193,
+      "v0220_b": 126.9595480872252
+    },
+    "ship_self_break_rate": 0.0,
+    "ship_env_deterministic": true,
+    "crossversion_dev307_vs_0220_break_rate": 1.0,
+    "interpretation": "On the SHIP vLLM 0.22.0 venv two fresh-server reps are byte-identical (break_rate=0.0) => #319 holds in production and the dev307 0.906 break_rate between provably-identical Marlin runs is a LOCAL dev307 autotune artifact (#601), not a kernel-induced identity break and not a ship-gate risk. Cross-version dev307-vs-0.22.0 diverges (expected: different vLLM numerics). Ship anchor 127.018/126.960 reproduces the dev307 127.098 wall_tps."
+  }
+}

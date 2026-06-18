@@ -1,0 +1,36 @@
+{
+  "arm": "atomicadd1",
+  "extra_flag": [],
+  "extra_env": [
+    "VLLM_MARLIN_USE_ATOMIC_ADD=1"
+  ],
+  "cmd": [
+    "/tmp/senpai-venvs/5f4c623f772358a2/bin/python",
+    "-m",
+    "vllm.entrypoints.openai.api_server",
+    "--model",
+    "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+    "--served-model-name",
+    "gemma-4-e4b-it",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8000",
+    "--dtype",
+    "bfloat16",
+    "--max-model-len",
+    "4096",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--trust-remote-code",
+    "--no-enable-log-requests",
+    "--max-num-batched-tokens",
+    "512"
+  ],
+  "ready_s": 160.02530217170715,
+  "num_completion_tokens": 65536,
+  "duration_s": 518.3852229118347,
+  "wall_tps": 126.4233568076576,
+  "tau_official_proj": 130.87851590155944,
+  "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/atomicadd1/decode_outputs.jsonl"
+}

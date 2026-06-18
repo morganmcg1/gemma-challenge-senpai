@@ -1,0 +1,331 @@
+{
+  "device_capability": 86,
+  "vllm_disabled_kernels": "",
+  "candidate_priority": [
+    "CutlassW4A8LinearKernel",
+    "MacheteLinearKernel",
+    "AllSparkLinearKernel",
+    "MarlinLinearKernel",
+    "HummingLinearKernel",
+    "ConchLinearKernel",
+    "ExllamaLinearKernel",
+    "TritonW4A16LinearKernel"
+  ],
+  "layers": {
+    "qkv_proj": {
+      "in_features": 2560,
+      "out_features": 3072,
+      "chosen_kernel": "MarlinLinearKernel",
+      "candidates": [
+        {
+          "kernel": "CutlassW4A8LinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "CUTLASS W4A8 requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "MacheteLinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "Machete requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "AllSparkLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "For Ampere GPU, AllSpark does not support group_size = 128. Only group_size = -1 are supported."
+        },
+        {
+          "kernel": "MarlinLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "HummingLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "ConchLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "conch-triton-kernels is not installed, please install it via `pip install conch-triton-kernels` and try again!"
+        },
+        {
+          "kernel": "ExllamaLinearKernel",
+          "min_capability": 60,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "Exllama only supports float16 activations"
+        },
+        {
+          "kernel": "TritonW4A16LinearKernel",
+          "min_capability": 0,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        }
+      ]
+    },
+    "o_proj": {
+      "in_features": 2048,
+      "out_features": 2560,
+      "chosen_kernel": "MarlinLinearKernel",
+      "candidates": [
+        {
+          "kernel": "CutlassW4A8LinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "CUTLASS W4A8 requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "MacheteLinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "Machete requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "AllSparkLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "For Ampere GPU, AllSpark does not support group_size = 128. Only group_size = -1 are supported."
+        },
+        {
+          "kernel": "MarlinLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "HummingLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "ConchLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "conch-triton-kernels is not installed, please install it via `pip install conch-triton-kernels` and try again!"
+        },
+        {
+          "kernel": "ExllamaLinearKernel",
+          "min_capability": 60,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "Exllama only supports float16 activations"
+        },
+        {
+          "kernel": "TritonW4A16LinearKernel",
+          "min_capability": 0,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        }
+      ]
+    },
+    "gate_up_proj": {
+      "in_features": 2560,
+      "out_features": 20480,
+      "chosen_kernel": "MarlinLinearKernel",
+      "candidates": [
+        {
+          "kernel": "CutlassW4A8LinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "CUTLASS W4A8 requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "MacheteLinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "Machete requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "AllSparkLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "For Ampere GPU, AllSpark does not support group_size = 128. Only group_size = -1 are supported."
+        },
+        {
+          "kernel": "MarlinLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "HummingLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "ConchLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "conch-triton-kernels is not installed, please install it via `pip install conch-triton-kernels` and try again!"
+        },
+        {
+          "kernel": "ExllamaLinearKernel",
+          "min_capability": 60,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "Exllama only supports float16 activations"
+        },
+        {
+          "kernel": "TritonW4A16LinearKernel",
+          "min_capability": 0,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        }
+      ]
+    },
+    "down_proj": {
+      "in_features": 10240,
+      "out_features": 2560,
+      "chosen_kernel": "MarlinLinearKernel",
+      "candidates": [
+        {
+          "kernel": "CutlassW4A8LinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "CUTLASS W4A8 requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "MacheteLinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "Machete requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "AllSparkLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "For Ampere GPU, AllSpark does not support group_size = 128. Only group_size = -1 are supported."
+        },
+        {
+          "kernel": "MarlinLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "HummingLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "ConchLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "conch-triton-kernels is not installed, please install it via `pip install conch-triton-kernels` and try again!"
+        },
+        {
+          "kernel": "ExllamaLinearKernel",
+          "min_capability": 60,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "Exllama only supports float16 activations"
+        },
+        {
+          "kernel": "TritonW4A16LinearKernel",
+          "min_capability": 0,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        }
+      ]
+    },
+    "lm_head": {
+      "in_features": 2560,
+      "out_features": 262144,
+      "chosen_kernel": "MarlinLinearKernel",
+      "candidates": [
+        {
+          "kernel": "CutlassW4A8LinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "CUTLASS W4A8 requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "MacheteLinearKernel",
+          "min_capability": 90,
+          "capability_ok": false,
+          "can_implement": false,
+          "reason": "Machete requires compute capability of 90 (Hopper)"
+        },
+        {
+          "kernel": "AllSparkLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "For Ampere GPU, AllSpark does not support group_size = 128. Only group_size = -1 are supported."
+        },
+        {
+          "kernel": "MarlinLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "HummingLinearKernel",
+          "min_capability": 75,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        },
+        {
+          "kernel": "ConchLinearKernel",
+          "min_capability": 80,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "conch-triton-kernels is not installed, please install it via `pip install conch-triton-kernels` and try again!"
+        },
+        {
+          "kernel": "ExllamaLinearKernel",
+          "min_capability": 60,
+          "capability_ok": true,
+          "can_implement": false,
+          "reason": "Exllama only supports float16 activations"
+        },
+        {
+          "kernel": "TritonW4A16LinearKernel",
+          "min_capability": 0,
+          "capability_ok": true,
+          "can_implement": true,
+          "reason": null
+        }
+      ]
+    }
+  }
+}

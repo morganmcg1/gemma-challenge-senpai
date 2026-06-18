@@ -1,0 +1,36 @@
+{
+  "arm": "baseBI1",
+  "extra_flag": [],
+  "extra_env": [
+    "VLLM_BATCH_INVARIANT=1"
+  ],
+  "cmd": [
+    "/tmp/senpai-venvs/5f4c623f772358a2/bin/python",
+    "-m",
+    "vllm.entrypoints.openai.api_server",
+    "--model",
+    "/workspace/senpai/target/submissions/int4_g128_lmhead/model",
+    "--served-model-name",
+    "gemma-4-e4b-it",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "8000",
+    "--dtype",
+    "bfloat16",
+    "--max-model-len",
+    "4096",
+    "--gpu-memory-utilization",
+    "0.90",
+    "--trust-remote-code",
+    "--no-enable-log-requests",
+    "--max-num-batched-tokens",
+    "512"
+  ],
+  "ready_s": 130.02327251434326,
+  "num_completion_tokens": 65536,
+  "duration_s": 616.3825368881226,
+  "wall_tps": 106.32358329109381,
+  "tau_official_proj": 110.07042636627195,
+  "decode_jsonl": "/workspace/senpai/target/research/int4_gemv_kernel_audit/arms/baseBI1/decode_outputs.jsonl"
+}
