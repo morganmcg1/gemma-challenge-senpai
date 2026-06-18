@@ -1,0 +1,818 @@
+{
+  "runner": "paired_tps_ab",
+  "pr": 82,
+  "metric": "wall_tps",
+  "baseline": {
+    "submission": "int4_mtp_batchinv",
+    "label": "no_bi",
+    "override_env": {
+      "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+      "DRAFTER_MODEL": "/tmp/qat-assistant",
+      "NUM_SPECULATIVE_TOKENS": "7",
+      "VLLM_BATCH_INVARIANT": "0"
+    },
+    "describe": "int4_mtp_batchinv[DRAFTER_MODEL=/tmp/qat-assistant,MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct,NUM_SPECULATIVE_TOKENS=7,VLLM_BATCH_INVARIANT=0]"
+  },
+  "candidate": {
+    "submission": "int4_mtp_batchinv",
+    "label": "bi1",
+    "override_env": {
+      "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+      "DRAFTER_MODEL": "/tmp/qat-assistant",
+      "NUM_SPECULATIVE_TOKENS": "7",
+      "VLLM_BATCH_INVARIANT": "1"
+    },
+    "describe": "int4_mtp_batchinv[DRAFTER_MODEL=/tmp/qat-assistant,MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct,NUM_SPECULATIVE_TOKENS=7,VLLM_BATCH_INVARIANT=1]"
+  },
+  "n": 3,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1
+  },
+  "reused_baseline_from": null,
+  "elapsed_s": 3037.44420003891,
+  "git": {
+    "git_commit": "652efe4d3c990295943670523227b677cb3058bd",
+    "git_branch": "land/optionb-bi1-speed-cost",
+    "git_dirty": true
+  },
+  "arms": {
+    "baseline": {
+      "n": 3,
+      "wall_tps": {
+        "n": 3,
+        "mean": 252.8492861350585,
+        "std": 2.0451594982546655,
+        "cv_pct": 0.8088452728168871,
+        "min": 250.48830755864384,
+        "max": 254.07463625902028,
+        "range_pct": 1.418366156058996,
+        "median": 253.98491458751133,
+        "p25": 250.48830755864384,
+        "p75": 253.98491458751133,
+        "values": [
+          250.48830755864384,
+          254.07463625902028,
+          253.98491458751133
+        ]
+      },
+      "steady_gen_tps_mean": {
+        "n": 3,
+        "mean": 245.27051282051283,
+        "std": 0.5748981558035747,
+        "cv_pct": 0.23439350666024864,
+        "min": 244.8807692307692,
+        "max": 245.93076923076922,
+        "range_pct": 0.4280987502025544,
+        "median": 245.0,
+        "p25": 244.8807692307692,
+        "p75": 245.0,
+        "values": [
+          245.93076923076922,
+          244.8807692307692,
+          245.0
+        ]
+      },
+      "e_accept_exact": {
+        "n": 3,
+        "mean": 3.8068223999649575,
+        "std": 0.014582285351713568,
+        "cv_pct": 0.3830566235989313,
+        "min": 3.7982211680996145,
+        "max": 3.8236592495376724,
+        "range_pct": 0.6682234883952581,
+        "median": 3.7985867822575856,
+        "p25": 3.7982211680996145,
+        "p75": 3.7985867822575856,
+        "values": [
+          3.8236592495376724,
+          3.7985867822575856,
+          3.7982211680996145
+        ]
+      },
+      "server_ready_s": {
+        "n": 3,
+        "mean": 145.02622906366983,
+        "std": 51.97278470162001,
+        "cv_pct": 35.836817268966406,
+        "min": 115.01943898200989,
+        "max": 205.03923153877258,
+        "range_pct": 62.07138745725916,
+        "median": 115.02001667022705,
+        "p25": 115.01943898200989,
+        "p75": 115.02001667022705,
+        "values": [
+          205.03923153877258,
+          115.01943898200989,
+          115.02001667022705
+        ]
+      },
+      "records": [
+        {
+          "run_idx": 0,
+          "t_start_utc": "2026-06-17T23:06:17.755970+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 261.63297057151794,
+          "wall_around_decode_s": 271.6172122955322,
+          "wall_tps": 250.48830755864384,
+          "steady_gen_tps_mean": 245.93076923076922,
+          "steady_gen_tps_mean_nonzero": 245.93076923076922,
+          "steady_gen_tps_n": 26,
+          "gen_tps_series": [
+            20.8,
+            218.4,
+            239.0,
+            278.2,
+            281.5,
+            234.7,
+            260.5,
+            224.8,
+            271.4,
+            277.7,
+            261.9,
+            268.9,
+            223.4,
+            216.6,
+            287.0,
+            254.0,
+            248.9,
+            263.4,
+            270.2,
+            257.5,
+            241.3,
+            262.0,
+            256.0,
+            287.1,
+            236.8,
+            252.2
+          ],
+          "e_accept_exact": 3.8236592495376724,
+          "e_accept_interval_mean": 3.819230769230769,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47333,
+          "total_drafted_tokens": 117341,
+          "intervals": 26,
+          "clock": {
+            "n_samples": 1096,
+            "n_load_samples": 1027,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 55.31934306569343,
+              "min": 40.0,
+              "max": 60.0
+            },
+            "power_w_load": {
+              "mean": 169.50841285296983,
+              "min": 66.48,
+              "max": 201.64
+            },
+            "util_pct": {
+              "mean": 93.11770072992701,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 205.03923153877258,
+          "arm": "no_bi",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7",
+            "VLLM_BATCH_INVARIANT": "0"
+          }
+        },
+        {
+          "run_idx": 1,
+          "t_start_utc": "2026-06-17T23:12:48.219498+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 257.9399540424347,
+          "wall_around_decode_s": 267.1231334209442,
+          "wall_tps": 254.07463625902028,
+          "steady_gen_tps_mean": 244.8807692307692,
+          "steady_gen_tps_mean_nonzero": 244.8807692307692,
+          "steady_gen_tps_n": 26,
+          "gen_tps_series": [
+            20.3,
+            215.0,
+            244.8,
+            278.2,
+            269.2,
+            235.8,
+            266.8,
+            223.7,
+            253.3,
+            280.0,
+            260.0,
+            264.4,
+            194.7,
+            246.4,
+            265.6,
+            235.4,
+            265.0,
+            262.6,
+            265.0,
+            264.2,
+            249.2,
+            255.9,
+            270.2,
+            283.7,
+            227.8,
+            269.7
+          ],
+          "e_accept_exact": 3.7985867822575856,
+          "e_accept_interval_mean": 3.805769230769231,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47131,
+          "total_drafted_tokens": 117887,
+          "intervals": 26,
+          "clock": {
+            "n_samples": 1078,
+            "n_load_samples": 1032,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 55.795918367346935,
+              "min": 40.0,
+              "max": 60.0
+            },
+            "power_w_load": {
+              "mean": 169.59930232558142,
+              "min": 77.39,
+              "max": 192.92
+            },
+            "util_pct": {
+              "mean": 95.21892393320965,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 115.01943898200989,
+          "arm": "no_bi",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7",
+            "VLLM_BATCH_INVARIANT": "0"
+          }
+        },
+        {
+          "run_idx": 2,
+          "t_start_utc": "2026-06-17T23:19:14.386949+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 258.0310728549957,
+          "wall_around_decode_s": 266.62739515304565,
+          "wall_tps": 253.98491458751133,
+          "steady_gen_tps_mean": 245.0,
+          "steady_gen_tps_mean_nonzero": 245.0,
+          "steady_gen_tps_n": 26,
+          "gen_tps_series": [
+            26.5,
+            214.7,
+            241.1,
+            280.2,
+            273.3,
+            235.9,
+            265.0,
+            231.9,
+            249.7,
+            282.8,
+            255.0,
+            258.7,
+            198.8,
+            242.5,
+            267.9,
+            242.0,
+            258.1,
+            258.3,
+            268.1,
+            270.2,
+            249.2,
+            255.8,
+            262.0,
+            287.2,
+            229.3,
+            265.8
+          ],
+          "e_accept_exact": 3.7982211680996145,
+          "e_accept_interval_mean": 3.798076923076923,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47192,
+          "total_drafted_tokens": 118055,
+          "intervals": 26,
+          "clock": {
+            "n_samples": 1076,
+            "n_load_samples": 1032,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 55.680297397769515,
+              "min": 40.0,
+              "max": 60.0
+            },
+            "power_w_load": {
+              "mean": 169.75387596899225,
+              "min": 69.34,
+              "max": 199.93
+            },
+            "util_pct": {
+              "mean": 95.43959107806691,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 115.02001667022705,
+          "arm": "no_bi",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7",
+            "VLLM_BATCH_INVARIANT": "0"
+          }
+        }
+      ]
+    },
+    "candidate": {
+      "n": 3,
+      "wall_tps": {
+        "n": 3,
+        "mean": 151.74575852139242,
+        "std": 0.9739215280934981,
+        "cv_pct": 0.6418113676345024,
+        "min": 150.62133917692907,
+        "max": 152.32482038135802,
+        "range_pct": 1.1225890074474831,
+        "median": 152.2911160058902,
+        "p25": 150.62133917692907,
+        "p75": 152.2911160058902,
+        "values": [
+          150.62133917692907,
+          152.2911160058902,
+          152.32482038135802
+        ]
+      },
+      "steady_gen_tps_mean": {
+        "n": 3,
+        "mean": 151.28527131782946,
+        "std": 1.554228575453342,
+        "cv_pct": 1.0273495641146206,
+        "min": 149.51162790697674,
+        "max": 152.4093023255814,
+        "range_pct": 1.9153711351827754,
+        "median": 151.93488372093023,
+        "p25": 149.51162790697674,
+        "p75": 151.93488372093023,
+        "values": [
+          149.51162790697674,
+          152.4093023255814,
+          151.93488372093023
+        ]
+      },
+      "e_accept_exact": {
+        "n": 3,
+        "mean": 3.825089863727133,
+        "std": 0.016575575330863263,
+        "cv_pct": 0.4333381939087876,
+        "min": 3.8061525743977325,
+        "max": 3.8369635036496352,
+        "range_pct": 0.8054955661062789,
+        "median": 3.8321535131340316,
+        "p25": 3.8061525743977325,
+        "p75": 3.8321535131340316,
+        "values": [
+          3.8061525743977325,
+          3.8369635036496352,
+          3.8321535131340316
+        ]
+      },
+      "server_ready_s": {
+        "n": 3,
+        "mean": 150.02632451057434,
+        "std": 25.98231401676328,
+        "cv_pct": 17.318503337014008,
+        "min": 135.0242772102356,
+        "max": 180.02811646461487,
+        "range_pct": 29.99729507551007,
+        "median": 135.02657985687256,
+        "p25": 135.0242772102356,
+        "p75": 135.02657985687256,
+        "values": [
+          180.02811646461487,
+          135.0242772102356,
+          135.02657985687256
+        ]
+      },
+      "records": [
+        {
+          "run_idx": 0,
+          "t_start_utc": "2026-06-17T23:26:45.169255+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 435.1043508052826,
+          "wall_around_decode_s": 444.3986966609955,
+          "wall_tps": 150.62133917692907,
+          "steady_gen_tps_mean": 149.51162790697674,
+          "steady_gen_tps_mean_nonzero": 149.51162790697674,
+          "steady_gen_tps_n": 43,
+          "gen_tps_series": [
+            70.3,
+            141.0,
+            129.5,
+            151.2,
+            156.7,
+            165.7,
+            157.2,
+            153.8,
+            137.1,
+            153.3,
+            153.3,
+            130.9,
+            149.3,
+            143.8,
+            184.2,
+            155.4,
+            143.6,
+            157.2,
+            151.0,
+            141.3,
+            110.3,
+            138.1,
+            150.7,
+            173.7,
+            141.5,
+            164.4,
+            146.0,
+            143.4,
+            182.1,
+            124.3,
+            176.0,
+            173.8,
+            144.5,
+            141.9,
+            175.4,
+            128.7,
+            169.3,
+            140.7,
+            182.6,
+            142.5,
+            135.6,
+            177.5,
+            140.2
+          ],
+          "e_accept_exact": 3.8061525743977325,
+          "e_accept_interval_mean": 3.8025581395348835,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 47525,
+          "total_drafted_tokens": 118552,
+          "intervals": 43,
+          "clock": {
+            "n_samples": 1786,
+            "n_load_samples": 1731,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 53.702127659574465,
+              "min": 40.0,
+              "max": 58.0
+            },
+            "power_w_load": {
+              "mean": 148.71112651646447,
+              "min": 66.83,
+              "max": 185.38
+            },
+            "util_pct": {
+              "mean": 96.58678611422172,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 180.02811646461487,
+          "arm": "bi1",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7",
+            "VLLM_BATCH_INVARIANT": "1"
+          }
+        },
+        {
+          "run_idx": 1,
+          "t_start_utc": "2026-06-17T23:36:28.668912+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 430.3337037563324,
+          "wall_around_decode_s": 439.44763135910034,
+          "wall_tps": 152.2911160058902,
+          "steady_gen_tps_mean": 152.4093023255814,
+          "steady_gen_tps_mean_nonzero": 152.4093023255814,
+          "steady_gen_tps_n": 43,
+          "gen_tps_series": [
+            130.7,
+            132.4,
+            143.4,
+            168.6,
+            174.7,
+            150.9,
+            152.9,
+            140.6,
+            147.6,
+            169.2,
+            127.4,
+            148.8,
+            148.0,
+            190.2,
+            162.3,
+            151.5,
+            143.2,
+            139.7,
+            159.8,
+            121.1,
+            126.2,
+            138.5,
+            157.3,
+            172.5,
+            146.7,
+            160.5,
+            140.1,
+            154.3,
+            164.3,
+            150.6,
+            179.2,
+            159.8,
+            146.7,
+            166.3,
+            139.1,
+            153.1,
+            156.3,
+            179.0,
+            146.5,
+            138.2,
+            174.5,
+            130.8,
+            170.1
+          ],
+          "e_accept_exact": 3.8369635036496352,
+          "e_accept_interval_mean": 3.8393023255813956,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 48583,
+          "total_drafted_tokens": 119875,
+          "intervals": 43,
+          "clock": {
+            "n_samples": 1767,
+            "n_load_samples": 1721,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 53.69949066213922,
+              "min": 40.0,
+              "max": 58.0
+            },
+            "power_w_load": {
+              "mean": 147.5095409645555,
+              "min": 67.75,
+              "max": 183.5
+            },
+            "util_pct": {
+              "mean": 97.15393322014714,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 135.0242772102356,
+          "arm": "bi1",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7",
+            "VLLM_BATCH_INVARIANT": "1"
+          }
+        },
+        {
+          "run_idx": 2,
+          "t_start_utc": "2026-06-17T23:46:07.173148+00:00",
+          "seed": 1,
+          "num_prompts": 128,
+          "output_len": 512,
+          "num_completion_tokens": 65536,
+          "decode_duration_s": 430.2384853363037,
+          "wall_around_decode_s": 438.9059281349182,
+          "wall_tps": 152.32482038135802,
+          "steady_gen_tps_mean": 151.93488372093023,
+          "steady_gen_tps_mean_nonzero": 151.93488372093023,
+          "steady_gen_tps_n": 43,
+          "gen_tps_series": [
+            115.1,
+            133.9,
+            149.2,
+            161.3,
+            177.1,
+            142.7,
+            162.5,
+            135.8,
+            147.7,
+            176.8,
+            128.2,
+            138.1,
+            144.4,
+            195.9,
+            168.6,
+            148.0,
+            143.0,
+            138.9,
+            159.9,
+            127.0,
+            125.8,
+            139.3,
+            152.3,
+            172.6,
+            142.9,
+            168.2,
+            140.3,
+            147.0,
+            169.2,
+            149.0,
+            176.1,
+            164.8,
+            148.3,
+            156.6,
+            148.5,
+            144.1,
+            164.9,
+            177.5,
+            149.7,
+            134.7,
+            175.6,
+            133.9,
+            157.8
+          ],
+          "e_accept_exact": 3.8321535131340316,
+          "e_accept_interval_mean": 3.8332558139534885,
+          "num_speculative_tokens": 7,
+          "total_accepted_tokens": 48410,
+          "total_drafted_tokens": 119651,
+          "intervals": 43,
+          "clock": {
+            "n_samples": 1765,
+            "n_load_samples": 1719,
+            "sm_clock_mhz": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "sm_clock_mhz_load": {
+              "mean": 1710.0,
+              "min": 1710.0,
+              "max": 1710.0
+            },
+            "mem_clock_mhz_load": {
+              "mean": 6251.0,
+              "min": 6251.0,
+              "max": 6251.0
+            },
+            "temp_c": {
+              "mean": 53.378470254957506,
+              "min": 40.0,
+              "max": 57.0
+            },
+            "power_w_load": {
+              "mean": 148.11662012798138,
+              "min": 84.96,
+              "max": 173.82
+            },
+            "util_pct": {
+              "mean": 97.24589235127479,
+              "min": 0.0,
+              "max": 100.0
+            }
+          },
+          "log_offset_start": 0,
+          "server_ready_s": 135.02657985687256,
+          "arm": "bi1",
+          "submission": "int4_mtp_batchinv",
+          "override_env": {
+            "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+            "DRAFTER_MODEL": "/tmp/qat-assistant",
+            "NUM_SPECULATIVE_TOKENS": "7",
+            "VLLM_BATCH_INVARIANT": "1"
+          }
+        }
+      ]
+    }
+  },
+  "verdict": {
+    "metric": "wall_tps",
+    "n_per_arm": 3,
+    "baseline_median_wall_tps": 253.98491458751133,
+    "candidate_median_wall_tps": 152.2911160058902,
+    "baseline_mean_wall_tps": 252.8492861350585,
+    "candidate_mean_wall_tps": 151.74575852139242,
+    "delta_median_tps": -101.69379858162114,
+    "delta_median_pct": -40.03930656542289,
+    "delta_mean_pct": -39.985688375509994,
+    "operative_threshold_pct": 0.1,
+    "raw_mde_detect_pct": 0.05601063623728934,
+    "raw_mde_powered_pct": 0.08006196633719041,
+    "floor_cv_pct": 0.035,
+    "se_diff_floor_tps": 0.07258223502877324,
+    "se_diff_observed_tps": 1.3078226837235047,
+    "ci95_observed_pct": 1.0092274035357822,
+    "observed_significant": true,
+    "median_se_baseline_tps": 1.5583008553688202,
+    "median_se_candidate_tps": 0.7359462269827066,
+    "baseline_cv_pct": 0.8088452728168871,
+    "candidate_cv_pct": 0.6418113676345024,
+    "floor_exceeded": true,
+    "verdict": "REAL",
+    "human_verdict": "A=253.98 B=152.29 \u0394=-40.039% [REAL] (op@N3=0.10%, raw-powered-MDE=0.080%)"
+  },
+  "projection": null
+}

@@ -1,0 +1,209 @@
+{
+  "utc": "2026-06-18T00:03:32Z",
+  "gpu": "NVIDIA A10G",
+  "purpose": "BI=1 attention num_splits=1 attribution (PR #623)",
+  "kernel": "vllm.v1.attention.ops.triton_unified_attention.unified_attention",
+  "n_iter": 200,
+  "target_cycle_layers": {
+    "sliding": 30,
+    "full": 7
+  },
+  "ops": [
+    {
+      "ctx": 256,
+      "layer_type": "sliding",
+      "M": 1,
+      "served_3d_used": true,
+      "served_us": 8.430925000000059,
+      "force2d_us": 26.937555000000078,
+      "bi1_attn_delta_us": 18.50663000000002,
+      "split_kv_speedup": 3.1950889137312797,
+      "served_gbps": 63.157957163655986,
+      "force2d_gbps": 19.767198619176778,
+      "validation_max_abs_err": 0.0001220703125
+    },
+    {
+      "ctx": 256,
+      "layer_type": "sliding",
+      "M": 8,
+      "served_3d_used": false,
+      "served_us": 27.185859999999984,
+      "force2d_us": 27.18139000000005,
+      "bi1_attn_delta_us": -0.004469999999933805,
+      "split_kv_speedup": 0.9998355762885583,
+      "served_gbps": 21.69598460376094,
+      "force2d_gbps": 21.69955252472368,
+      "validation_max_abs_err": null
+    },
+    {
+      "ctx": 256,
+      "layer_type": "full",
+      "M": 1,
+      "served_3d_used": true,
+      "served_us": 10.812070000000027,
+      "force2d_us": 33.05040999999998,
+      "bi1_attn_delta_us": 22.23833999999995,
+      "split_kv_speedup": 3.0568068834182442,
+      "served_gbps": 98.49732752377642,
+      "force2d_gbps": 32.22229315763407,
+      "validation_max_abs_err": 0.0001220703125
+    },
+    {
+      "ctx": 256,
+      "layer_type": "full",
+      "M": 8,
+      "served_3d_used": false,
+      "served_us": 33.586680000000044,
+      "force2d_us": 33.587300000000006,
+      "bi1_attn_delta_us": 0.0006199999999623174,
+      "split_kv_speedup": 1.0000184596989032,
+      "served_gbps": 35.12249498908491,
+      "force2d_gbps": 35.12184665037082,
+      "validation_max_abs_err": null
+    },
+    {
+      "ctx": 512,
+      "layer_type": "sliding",
+      "M": 1,
+      "served_3d_used": true,
+      "served_us": 10.759965000000038,
+      "force2d_us": 50.390810000000016,
+      "bi1_attn_delta_us": 39.63084499999998,
+      "split_kv_speedup": 4.683176014048358,
+      "served_gbps": 98.21295887114839,
+      "force2d_gbps": 20.971443007167373,
+      "validation_max_abs_err": 6.103515625e-05
+    },
+    {
+      "ctx": 512,
+      "layer_type": "sliding",
+      "M": 8,
+      "served_3d_used": false,
+      "served_us": 50.64134999999996,
+      "force2d_us": 50.654759999999996,
+      "bi1_attn_delta_us": 0.013410000000035893,
+      "split_kv_speedup": 1.0002648033672095,
+      "served_gbps": 22.000045417430634,
+      "force2d_gbps": 21.99422127357824,
+      "validation_max_abs_err": null
+    },
+    {
+      "ctx": 512,
+      "layer_type": "full",
+      "M": 1,
+      "served_3d_used": true,
+      "served_us": 14.156214999999882,
+      "force2d_us": 60.91593000000002,
+      "bi1_attn_delta_us": 46.759715000000135,
+      "split_kv_speedup": 4.303122692047311,
+      "served_gbps": 149.30092542392282,
+      "force2d_gbps": 34.69594899068272,
+      "validation_max_abs_err": 6.103515625e-05
+    },
+    {
+      "ctx": 512,
+      "layer_type": "full",
+      "M": 8,
+      "served_3d_used": false,
+      "served_us": 61.513949999999994,
+      "force2d_us": 61.49924000000003,
+      "bi1_attn_delta_us": -0.014709999999965362,
+      "split_kv_speedup": 0.9997608672504372,
+      "served_gbps": 36.22306810081291,
+      "force2d_gbps": 36.231732294577924,
+      "validation_max_abs_err": null
+    },
+    {
+      "ctx": 1024,
+      "layer_type": "sliding",
+      "M": 1,
+      "served_3d_used": true,
+      "served_us": 13.93318500000002,
+      "force2d_us": 50.419765,
+      "bi1_attn_delta_us": 36.486579999999975,
+      "split_kv_speedup": 3.618681945298216,
+      "served_gbps": 75.8454007464911,
+      "force2d_gbps": 20.95939955293326,
+      "validation_max_abs_err": 6.103515625e-05
+    },
+    {
+      "ctx": 1024,
+      "layer_type": "sliding",
+      "M": 8,
+      "served_3d_used": false,
+      "served_us": 53.584085000000044,
+      "force2d_us": 53.65611000000002,
+      "bi1_attn_delta_us": 0.07202499999997514,
+      "split_kv_speedup": 1.0013441491069592,
+      "served_gbps": 20.791845190600885,
+      "force2d_gbps": 20.763935365422498,
+      "validation_max_abs_err": null
+    },
+    {
+      "ctx": 1024,
+      "layer_type": "full",
+      "M": 1,
+      "served_3d_used": true,
+      "served_us": 19.62261999999998,
+      "force2d_us": 116.96676999999991,
+      "bi1_attn_delta_us": 97.34414999999993,
+      "split_kv_speedup": 5.960813082045111,
+      "served_gbps": 214.58337367792907,
+      "force2d_gbps": 35.999010659181266,
+      "validation_max_abs_err": 6.103515625e-05
+    },
+    {
+      "ctx": 1024,
+      "layer_type": "full",
+      "M": 8,
+      "served_3d_used": false,
+      "served_us": 117.71307499999995,
+      "force2d_us": 117.71844999999992,
+      "bi1_attn_delta_us": 0.005374999999972374,
+      "split_kv_speedup": 1.000045661877408,
+      "served_gbps": 36.74507695937773,
+      "force2d_gbps": 36.7433991867885,
+      "validation_max_abs_err": null
+    }
+  ],
+  "target_cycle_attn_us": {
+    "ctx256_M1": {
+      "served_3d_cycle_us": 328.612240000002,
+      "force2d_cycle_us": 1039.4795200000021,
+      "bi1_attn_cycle_delta_us": 710.8672800000002,
+      "bi1_attn_cycle_delta_ms": 0.7108672800000002
+    },
+    "ctx256_M8": {
+      "served_3d_cycle_us": 1050.6825599999997,
+      "force2d_cycle_us": 1050.5528000000015,
+      "bi1_attn_cycle_delta_us": -0.12975999999821397,
+      "bi1_attn_cycle_delta_ms": -0.00012975999999821397
+    },
+    "ctx512_M1": {
+      "served_3d_cycle_us": 421.89245500000027,
+      "force2d_cycle_us": 1938.1358100000007,
+      "bi1_attn_cycle_delta_us": 1516.2433550000005,
+      "bi1_attn_cycle_delta_ms": 1.5162433550000005
+    },
+    "ctx512_M8": {
+      "served_3d_cycle_us": 1949.8381499999987,
+      "force2d_cycle_us": 1950.13748,
+      "bi1_attn_cycle_delta_us": 0.29933000000141874,
+      "bi1_attn_cycle_delta_ms": 0.00029933000000141873
+    },
+    "ctx1024_M1": {
+      "served_3d_cycle_us": 555.3538900000004,
+      "force2d_cycle_us": 2331.3603399999993,
+      "bi1_attn_cycle_delta_us": 1776.006449999999,
+      "bi1_attn_cycle_delta_ms": 1.776006449999999
+    },
+    "ctx1024_M8": {
+      "served_3d_cycle_us": 2431.514075000001,
+      "force2d_cycle_us": 2433.71245,
+      "bi1_attn_cycle_delta_us": 2.1983749999990323,
+      "bi1_attn_cycle_delta_ms": 0.0021983749999990323
+    }
+  },
+  "interpretation": "BI=1 forces attention 2D (num_splits=1). The served TRITON_ATTN kernel already runs 2D for max_seqlen_q>1 (line 929), so the M=8 spec-verify attention is identical in both arms (\u0394~0). Only the M=1 forwards (the gemma4_assistant MTP draft head, 4 attn layers) lose 3D split-KV under BI=1. Compare bi1_attn_cycle_delta_ms@M8 (target verify) ~0 vs the A/B measured per-step forward delta to isolate the deterministic-GEMM tax.",
+  "elapsed_s": 6.863852262496948
+}
