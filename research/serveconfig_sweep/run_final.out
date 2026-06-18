@@ -1,0 +1,250 @@
+[sweep] normalized CUDA_VISIBLE_DEVICES '6' -> '0' (single in-container GPU)
+[sweep] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[sweep] checkpoint=/workspace/gemma_build/int4_g128_lmhead
+[sweep] workload=8x512 seed=1 warmups=1 reps=3 -> /workspace/senpai/target/research/serveconfig_sweep/run_final
+[sweep] plan: ['config-0', 'enforce_eager', 'max_num_seqs_1', 'block_size_32', 'no_prefix_caching', 'cudagraph_sizes_min', 'max_model_len_2048', 'flashinfer_sampler', 'mbt_2048']
+[sweep] server_python=/tmp/senpai-venvs/20f658587e8a6643/bin/python
+
+[sweep] === config-0 [anchor] (t+0.0min) ===
+  exact shipped manifest serve flags (inductor VLLM_COMPILE + FULL_AND_PIECEWISE cudagraph + prefix/chunked-prefill)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/rep2.summary.json
+[ppl] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/ppl.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.178292347673466,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43408.70003562842,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/serveconfig_sweep/run_final/config-0/ppl.jsonl",
+  "ppl": 2.0186727651041663,
+  "prompt_logprobs": 1
+}
+  wall_tps=127.683 reps=[127.68, 127.69, 127.68] cv=0.002% delta=0.000% official_proj=126.378 #319=True (n_match=8/8) ready=96.000s mem=20333MiB
+
+[sweep] === enforce_eager [bound] (t+4.7min) ===
+  disable cudagraph+compile; SLOWER bound -> quantifies the graph/compile savings already baked into config-0
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/enforce_eager/rep2.summary.json
+  wall_tps=22.358 reps=[22.28, 22.51, 22.36] cv=0.419% delta=-82.489% official_proj=22.129 #319=False (n_match=0/8) ready=87.000s mem=20499MiB
+
+[sweep] === max_num_seqs_1 [win_candidate] (t+19.0min) ===
+  match single-stream exactly (default ~256); free -- scheduler/batch bookkeeping only, no numerics
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_num_seqs_1/rep2.summary.json
+  wall_tps=126.994 reps=[126.99, 126.97, 127.02] cv=0.019% delta=-0.540% official_proj=125.696 #319=False (n_match=0/8) ready=90.000s mem=19325MiB
+
+[sweep] === block_size_32 [win_candidate] (t+23.3min) ===
+  larger KV paging block (default 16); free -- same attention math, fewer page-table ops
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/block_size_32/rep2.summary.json
+  wall_tps=127.247 reps=[127.21, 127.25, 127.25] cv=0.014% delta=-0.342% official_proj=125.946 #319=False (n_match=1/8) ready=162.000s mem=20333MiB
+
+[sweep] === no_prefix_caching [win_candidate] (t+28.8min) ===
+  drop prefix-cache hashing (distinct prompts never reuse); free -- decode path unchanged
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/no_prefix_caching/rep2.summary.json
+  wall_tps=126.527 reps=[126.53, 126.53, 126.49] cv=0.014% delta=-0.905% official_proj=125.234 #319=False (n_match=1/8) ready=99.000s mem=20333MiB
+
+[sweep] === cudagraph_sizes_min [win_candidate] (t+33.2min) ===
+  tighter cudagraph capture set (default ladder 1..512); free -- M=1 replays only the bs=1 graph; probes 'tighter capture set' (O3==O2 so no -O headroom; config-0 already captures a FULL bs=1 decode graph)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/cudagraph_sizes_min/rep2.summary.json
+  wall_tps=127.199 reps=[127.2, 127.24, 127.17] cv=0.023% delta=-0.379% official_proj=125.899 #319=False (n_match=2/8) ready=153.000s mem=20457MiB
+
+[sweep] === max_model_len_2048 [win_candidate] (t+38.6min) ===
+  smaller KV reservation (>= 512-out workload fits); free -- decode weight reads unchanged
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/max_model_len_2048/rep2.summary.json
+  wall_tps=127.340 reps=[127.29, 127.34, 127.36] cv=0.024% delta=-0.269% official_proj=126.038 #319=False (n_match=2/8) ready=168.000s mem=20333MiB
+
+[sweep] === flashinfer_sampler [win_candidate] (t+44.2min) ===
+  flashinfer sampler backend; temp=0 greedy is argmax so byte-exact expected; MAY FAIL (cuRAND JIT missing in container)
+  [arm:flashinfer_sampler] ERROR: server exited early rc=1 (see /workspace/senpai/target/research/serveconfig_sweep/run_final/flashinfer_sampler/server.log)
+  wall_tps=None reps=[] cv=None% delta=None% official_proj=None #319=None (n_match=None/None) ready=Nones mem=NoneMiB
+
+[sweep] === mbt_2048 [numerics_detector] (t+46.7min) ===
+  prefill chunk size 512->2048; check_greedy_identity warns argmax near-ties CASCADE -> expect #319 FAIL (Arm-B)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/warm0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/warm0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/warm0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep0.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep0.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep0.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep1.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep1.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep1.summary.json
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep2.jsonl --summary-file /workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep2.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 512 --seed 1
+decode_records=8
+decode_completion_tokens=4096
+decode_summary_file=/workspace/senpai/target/research/serveconfig_sweep/run_final/mbt_2048/rep2.summary.json
+  wall_tps=127.422 reps=[127.42, 127.23, 127.44] cv=0.075% delta=-0.205% official_proj=126.119 #319=False (n_match=1/8) ready=177.000s mem=20375MiB
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run qn6who60
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260618_052148-qn6who60
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run wirbel/serveconfig-sweep
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/qn6who60
+wandb: updating run metadata; uploading artifact serveconfig_sweep
+wandb: uploading artifact serveconfig_sweep
+wandb: uploading history steps 0-9, summary
+wandb: 
+wandb: Run history:
+wandb:                             arm/delta_pct █▁██████
+wandb:                      arm/gpu_mem_used_mib ▇█▁▇▇█▇▇
+wandb:                               arm/n_match █▁▁▂▂▃▃▂
+wandb:                     arm/official_proj_tps █▁██████
+wandb:                     arm/passes_strict_319 █▁▁▁▁▁▁▁▁
+wandb:                               arm/ready_s ▂▁▁▇▂▆▇█
+wandb:                              arm/wall_tps █▁██████
+wandb:                       arm/wall_tps_cv_pct ▁█▁▁▁▁▁▂
+wandb:                               global_step ▁▂▃▃▄▅▆▆▇█
+wandb: summary/verdict/best_arm_a_local_wall_tps ▁
+wandb:                                        +7 ...
+wandb: 
+wandb: Run summary:
+wandb:         arm/delta_pct -0.205
+wandb:  arm/gpu_mem_used_mib 20375
+wandb:           arm/n_match 1
+wandb: arm/official_proj_tps 126.119
+wandb: arm/passes_strict_319 0
+wandb:           arm/ready_s 177
+wandb:          arm/wall_tps 127.42153
+wandb:   arm/wall_tps_cv_pct 0.07511
+wandb:       event/arm_class numerics_detector
+wandb:        event/arm_name mbt_2048
+wandb:                   +12 ...
+wandb: 
+wandb: 🚀 View run wirbel/serveconfig-sweep at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/qn6who60
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 4 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260618_052148-qn6who60/logs
+
+[sweep] ===================== VERDICT =====================
+  VERDICT: SERVECONFIG_FLAT
+  config-0 wall_tps        = 127.683
+  best win-candidate       = None
+  best_arm_a_local_wall_tps= 127.683
+  best_arm_a_official_proj = 126.378 (anchor 126.378)
+  best_delta_pct           = 0.000%  (win threshold 2.0%)
+  gate_spread_pct          = 0.914%
+  fire_candidates          = []
+  elapsed                  = 52.39 min  arms_run=9
+
+  per-arm:
+    config-0             [anchor          ] tps= 127.683 d=  0.000% proj= 126.378 #319= True ready=96.000s
+    enforce_eager        [bound           ] tps=  22.358 d=-82.489% proj=  22.129 #319=False ready=87.000s
+    max_num_seqs_1       [win_candidate   ] tps= 126.994 d= -0.540% proj= 125.696 #319=False ready=90.000s
+    block_size_32        [win_candidate   ] tps= 127.247 d= -0.342% proj= 125.946 #319=False ready=162.000s
+    no_prefix_caching    [win_candidate   ] tps= 126.527 d= -0.905% proj= 125.234 #319=False ready=99.000s
+    cudagraph_sizes_min  [win_candidate   ] tps= 127.199 d= -0.379% proj= 125.899 #319=False ready=153.000s
+    max_model_len_2048   [win_candidate   ] tps= 127.340 d= -0.269% proj= 126.038 #319=False ready=168.000s
+    flashinfer_sampler   [win_candidate   ] tps=    None d=   None% proj=    None #319= None ready=Nones
+    mbt_2048             [numerics_detector] tps= 127.422 d= -0.205% proj= 126.119 #319=False ready=177.000s
+[sweep] artifacts -> /workspace/senpai/target/research/serveconfig_sweep/run_final/summary.json
