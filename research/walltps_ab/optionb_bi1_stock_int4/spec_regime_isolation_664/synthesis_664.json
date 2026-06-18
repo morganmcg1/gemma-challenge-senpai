@@ -1,0 +1,167 @@
+{
+  "pr": 664,
+  "analysis_only": true,
+  "official_tps": 0,
+  "fires": false,
+  "stack": "int4_mtp_batchinv",
+  "scope": "FULL: cross-student stark #642/#663 reads authorized (human issue #666, 2026-06-18)",
+  "baseline_k6_median_wall_tps": 169.9497235044773,
+  "discriminator": {
+    "land_k6_espec": 3.6573820864780973,
+    "stark_k6_espec": 3.33324213626396,
+    "espec_delta": 0.32413995021413733,
+    "espec_ratio": 1.0972446455922482,
+    "walltps_ratio": 1.0941064399895732,
+    "step_rate_land_per_s": 46.53858644192203,
+    "step_rate_stark_per_s": 46.672072222989186,
+    "step_rate_ratio": 0.997139921698154,
+    "espec_key_parity": "both `e_accept_exact` via scripts/profiler/paired_tps_ab.py (identical defn)",
+    "reading": "ACCEPTANCE: stark espec 3.333 < land espec 3.657; step-rate identical (46.5 vs 46.7/s) => per-step latency equal, gap is drafter acceptance"
+  },
+  "drafter_attribution": {
+    "differing_field": "DRAFTER_MODEL",
+    "land_value": "/tmp/qat-assistant",
+    "stark_value": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "land_espec": 3.6573820864780973,
+    "stark_espec": 3.33324213626396,
+    "identical_fields": [
+      "MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct",
+      "NUM_SPECULATIVE_TOKENS=6",
+      "VLLM_BATCH_INVARIANT=1",
+      "vllm==0.22.0",
+      "MAX_NUM_SEQS=1",
+      "workload=128x512 seed=1",
+      "runner=paired_tps_ab.py"
+    ],
+    "land_drafter_kind": "local-only gemma4_assistant (QAT-matched); NOT on Hub, NOT in submission",
+    "stark_drafter_kind": "stock manifest default (Hub model id)",
+    "official_harness_realizes": "stark ~155 regime (shipped submission uses the stock Hub drafter)",
+    "note": "NOT a per-step latency knob -> Step-2 'pin to stark's values' latency A/B is moot; the own-config knob sweep (below) corroborates no identity-safe latency mover exists."
+  },
+  "ratio_stability": {
+    "ar_rung_local": 126.75181166586952,
+    "scaling_local_to_official": 0.9970508376885774,
+    "stark_regime_stock_drafter": {
+      "unrescued_k6": 155.5693177204223,
+      "rescued_k6_MEASURED": 135.27,
+      "official_equiv": 134.87106681413385,
+      "pct_over_locked": 6.72036811322687,
+      "clears_plus10_bar": false
+    },
+    "land_regime_better_drafter": {
+      "unrescued_k6": 170.20939238269807,
+      "rescued_k6_PROJECTED_taxratio": 147.98961632348355,
+      "rescued_k6_additive_xcheck": 146.88347609279657,
+      "official_equiv": 147.55317092454044,
+      "official_equiv_additive": 146.45029288093295,
+      "pct_over_locked": 16.75542493514729,
+      "clears_plus10_bar": true,
+      "shippability": "requires /tmp/qat-assistant published to Hub + manifest repoint"
+    },
+    "verdict": "PROPAGATES",
+    "propagated_delta_pct": 9.403131753887454,
+    "reading": "the 9.4% un-rescued delta PROPAGATES to the rescued official-equiv (~135 stock vs ~147 better-drafter); it does NOT cancel because the AR-rung denominator is drafter-independent. The drafter is the lever that flips +6.7% -> clears +10 bar."
+  },
+  "knob_attribution": [
+    {
+      "label": "eager1",
+      "baseline_median": 169.9497235044773,
+      "candidate_median": 45.09815278497249,
+      "delta_pct": -73.46382691597354,
+      "verdict": "REAL",
+      "op_threshold_pct": 0.1,
+      "candidate_cv_pct": null,
+      "candidate_e_accept": 3.7206786608972897,
+      "identity_vs_baseline": {
+        "n_compared": 128,
+        "n_match": 18,
+        "byte_identical": false,
+        "n_divergent_prompts": 110
+      },
+      "identity_safe": false,
+      "n_runs": 1,
+      "source": "records.jsonl(fallback,N=1)"
+    },
+    {
+      "label": "flashattn",
+      "baseline_median": 169.9497235044773,
+      "candidate_median": 170.191402216445,
+      "delta_pct": 0.14220600480195955,
+      "verdict": "REAL",
+      "op_threshold_pct": 0.1,
+      "candidate_cv_pct": 0.010102965226932869,
+      "candidate_e_accept": 3.658929980215024,
+      "identity_vs_baseline": {
+        "n_compared": 128,
+        "n_match": 128,
+        "byte_identical": true,
+        "n_divergent_prompts": 0
+      },
+      "identity_safe": true
+    }
+  ],
+  "k_definition_sensitivity": {
+    "k6_median": 170.20939238269807,
+    "k6_e_accept": 3.6573820864780973,
+    "k7_median": 152.30644166172218,
+    "k7_e_accept": 3.8253840567120236,
+    "k7_minus_k6_pct": -10.518192016526902,
+    "k7_vs_stark155_pct": -2.097377623371679
+  },
+  "identity_regate": {
+    "break_rate_bi1_both_sides": 0.0010030090270812437,
+    "residual_after_tau_0p3nat": 0.0,
+    "attention_path_break_count": 0,
+    "tau_ladder": [
+      {
+        "tau": 0.0,
+        "surviving_flips": 6,
+        "rate": 0.0010030090270812437
+      },
+      {
+        "tau": 0.2,
+        "surviving_flips": 0,
+        "rate": 0.0
+      },
+      {
+        "tau": 0.3,
+        "surviving_flips": 0,
+        "rate": 0.0
+      }
+    ],
+    "verdict": "ATTENTION_RECOVERED_RESIDUAL_IS_INT4_TIES",
+    "n_prompts": 64,
+    "total_positions": 5982
+  },
+  "spec_fire_rate": 0.0727386474609375,
+  "break_rate_tau0p3": 0.0,
+  "ppl_spec": 2.005501029415618,
+  "ppl_gate": 2.42,
+  "ppl_passes": true,
+  "knob_boot_fail": [
+    {
+      "knob": "sampler1",
+      "land_value": "VLLM_USE_FLASHINFER_SAMPLER=1",
+      "stark_value": "UNKNOWN (not read; issue #666 pending)",
+      "verdict": "BOOT_FAIL",
+      "reason": "VLLM_USE_FLASHINFER_SAMPLER=1 makes vLLM 'Using FlashInfer for top-p & top-k sampling', which JIT-compiles the FlashInfer sampling kernel via ninja; the ninja build returns non-zero exit status 1 in this container -> EngineCore initialization fails and the server never reaches readiness (RuntimeError: server exited before readiness with code 1). The #664 baseline pins VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler) for exactly this reason.",
+      "greedy_relevance": "none -- the FlashInfer sampler path affects top-p / top-k sampling only; under greedy temp=0 argmax decoding it cannot change token outputs. This knob is both non-bootable in-container AND greedy-moot, so it is not a viable shippable latency lever.",
+      "identity_safe": false,
+      "is_real_mover": false,
+      "server_log": "sampler/sampler1/server_run00.log",
+      "ts_utc": "2026-06-18T13:25Z"
+    }
+  ],
+  "shippable_identity_safe_speedup_exists": false,
+  "material_speedup_threshold_pct": 1.0,
+  "identity_safe_speedup_movers": [
+    {
+      "label": "flashattn",
+      "delta_pct": 0.14220600480195955,
+      "is_material": false
+    }
+  ],
+  "identity_safe_slowdown_movers": [],
+  "verdict": "REGIME_IS_ACCEPTANCE",
+  "verdict_reason": "The land-170 vs stark-155 un-rescued K6 gap is ACCEPTANCE, not a per-step latency config knob. Both are NUM_SPECULATIVE_TOKENS=6 on the same int4_mtp_batchinv stack measured by the same paired_tps_ab.py runner logging the same e_accept_exact key; the only differing spec-path field is DRAFTER_MODEL (land /tmp/qat-assistant espec 3.657 vs stark stock-Hub q4_0-unquantized espec 3.333). The +9.7%% espec gap tracks the +9.4%% wall_tps gap and the per-step rate is identical (46.5 vs 46.7 steps/s), so there is no latency component. The OFFICIAL submission ships the stock Hub drafter -> the harness realizes stark's ~155/rescued-~135 regime; land's 170 needs the LOCAL-only drafter. Own-config knob sweep (sampler BOOT_FAIL+greedy-moot; eager -73%% wall_tps + id-break 18/128, disqualified; flashattn FLASH_ATTN byte-identical 128/128 but only +0.142%% = ~0.24 TPS within run-to-run/hardware noise, immaterial <1%%) finds NO MATERIAL identity-safe latency mover, corroborating acceptance."
+}

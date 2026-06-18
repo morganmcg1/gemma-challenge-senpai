@@ -1,0 +1,12 @@
+{
+  "knob": "sampler1",
+  "land_value": "VLLM_USE_FLASHINFER_SAMPLER=1",
+  "stark_value": "UNKNOWN (not read; issue #666 pending)",
+  "verdict": "BOOT_FAIL",
+  "reason": "VLLM_USE_FLASHINFER_SAMPLER=1 makes vLLM 'Using FlashInfer for top-p & top-k sampling', which JIT-compiles the FlashInfer sampling kernel via ninja; the ninja build returns non-zero exit status 1 in this container -> EngineCore initialization fails and the server never reaches readiness (RuntimeError: server exited before readiness with code 1). The #664 baseline pins VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler) for exactly this reason.",
+  "greedy_relevance": "none -- the FlashInfer sampler path affects top-p / top-k sampling only; under greedy temp=0 argmax decoding it cannot change token outputs. This knob is both non-bootable in-container AND greedy-moot, so it is not a viable shippable latency lever.",
+  "identity_safe": false,
+  "is_real_mover": false,
+  "server_log": "sampler/sampler1/server_run00.log",
+  "ts_utc": "2026-06-18T13:25Z"
+}
