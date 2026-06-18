@@ -1,0 +1,249 @@
+{
+  "card": "corner_c_gpqa_headbody (PR #652)",
+  "engine": "vllm==0.22.0",
+  "config": {
+    "max_model_len": 8192,
+    "max_tokens": 6144,
+    "min_tokens": 8,
+    "max_num_seqs": 16,
+    "max_connections": 16,
+    "vllm_batch_invariant": 1,
+    "flashinfer_sampler": 0,
+    "model": "g128_bf16head (W4A16 g128 body + TIED bf16 lm_head, AR no-spec, PPL 2.0171)",
+    "gpqa_sampled": "10-seed n=1980 dseed12345 sseeds0..9 T=1/top_p=0.95/top_k=64",
+    "conc_note": "seqs=16/conc=16 matches corner D's server byte-for-byte (only the checkpoint differs), so C-D is a single-variable lm_head contrast. conc16 vs conc1 is NOT bit-identical under BI=1 (token streams drift -- prefix-cache/reduction-order), but scored GPQA answers are conc-invariant (smoke: 8/8 identical answers, 4/4 correct at c1 and c16)"
+  },
+  "verdict": "RECIPE_EFFECT_IS_SMALL_AR",
+  "verdict_reason": "C=0.4753 is statistically indistinguishable from BOTH A=0.5056 (p=0.056) and D=0.4990 (p=0.135); all three AR corners cluster ~0.50, recipe barely moves AR-GPQA.",
+  "corner_c": {
+    "ppl": 2.0171,
+    "gpqa_sampled": {
+      "accuracy": 0.47525252525252526,
+      "n_scored": 1980,
+      "n_correct": 941,
+      "ci95_lo": 0.4533248341522813,
+      "ci95_hi": 0.4972760605965738,
+      "finish_length_rate": 0.0015151515151515152,
+      "empty_rate": 0.0,
+      "per_seed": [
+        {
+          "sampling_seed": 0,
+          "n_scored": 198,
+          "n_correct": 98,
+          "n_error": 1,
+          "accuracy": 0.494949494949495
+        },
+        {
+          "sampling_seed": 1,
+          "n_scored": 198,
+          "n_correct": 81,
+          "n_error": 1,
+          "accuracy": 0.4090909090909091
+        },
+        {
+          "sampling_seed": 2,
+          "n_scored": 198,
+          "n_correct": 100,
+          "n_error": 1,
+          "accuracy": 0.5050505050505051
+        },
+        {
+          "sampling_seed": 3,
+          "n_scored": 198,
+          "n_correct": 103,
+          "n_error": 1,
+          "accuracy": 0.5202020202020202
+        },
+        {
+          "sampling_seed": 4,
+          "n_scored": 198,
+          "n_correct": 103,
+          "n_error": 1,
+          "accuracy": 0.5202020202020202
+        },
+        {
+          "sampling_seed": 5,
+          "n_scored": 198,
+          "n_correct": 95,
+          "n_error": 1,
+          "accuracy": 0.4797979797979798
+        },
+        {
+          "sampling_seed": 6,
+          "n_scored": 198,
+          "n_correct": 91,
+          "n_error": 1,
+          "accuracy": 0.4595959595959596
+        },
+        {
+          "sampling_seed": 7,
+          "n_scored": 198,
+          "n_correct": 80,
+          "n_error": 1,
+          "accuracy": 0.40404040404040403
+        },
+        {
+          "sampling_seed": 8,
+          "n_scored": 198,
+          "n_correct": 92,
+          "n_error": 1,
+          "accuracy": 0.46464646464646464
+        },
+        {
+          "sampling_seed": 9,
+          "n_scored": 198,
+          "n_correct": 98,
+          "n_error": 1,
+          "accuracy": 0.494949494949495
+        }
+      ]
+    },
+    "gpqa_greedy": {
+      "accuracy": 0.48484848484848486,
+      "n_correct": 96,
+      "n_scored": 198,
+      "ci95_lo": 0.4161883249275926,
+      "ci95_hi": 0.5540853946624226,
+      "finish_length_rate": 0.0,
+      "empty_rate": 0.0,
+      "ctok_p95": 3816,
+      "ctok_mean": 1979.7868020304568
+    },
+    "pct_of_base": 87.94,
+    "base": 0.5404,
+    "bar_90pct": 0.4864,
+    "clears_bar": false
+  },
+  "two_by_two": {
+    "A_g32_bf16tied": 0.5056,
+    "B_g32_int4untied": 0.52,
+    "C_g128_bf16tied": 0.47525252525252526,
+    "D_g128_int4untied": 0.498989898989899,
+    "ppl_C": 2.0171,
+    "ppl_D": 2.0197
+  },
+  "contrasts": {
+    "head_effect_at_g128_C_minus_D": {
+      "C": 0.47525252525252526,
+      "D": 0.498989898989899,
+      "diff": -0.023737373737373724,
+      "z": -1.4942538221006978,
+      "p_two_sided": 0.13510928978175363,
+      "D_source": "ubel #638 u13z29hs (pooled here)",
+      "D_acc_pooled": 0.498989898989899
+    },
+    "body_effect_at_bf16head_A_minus_C": {
+      "A": 0.5056,
+      "C": 0.47525252525252526,
+      "diff": 0.030303030303030276,
+      "z": 1.9072764641847233,
+      "p_two_sided": 0.056484796300785574,
+      "A_source": "lawine #639 r98w09by (point 0.5056, n~1980 reconstructed)"
+    },
+    "xcheck_head_effect_at_g32_A_minus_B_provisional": {
+      "A": 0.5056,
+      "B": 0.52,
+      "diff": -0.0144,
+      "note": "B in flight @9/10 seeds; provisional"
+    },
+    "xcheck_body_effect_at_int4_B_minus_D_provisional": {
+      "B": 0.52,
+      "D": 0.498989898989899,
+      "diff": 0.021,
+      "note": "B provisional"
+    }
+  },
+  "ar_vs_spec_gap": {
+    "int4_AR_D": 0.499,
+    "optionb_spec_629": 0.4652,
+    "gap_AR_minus_spec": 0.0338,
+    "note": "int4-AR 0.4990 vs Option-B-WITH-SPEC 0.4652; the spec effect, NOT the body/head recipe. 0.4652 is the WRONG denominator for the 2x2."
+  },
+  "corner_d_pooled": {
+    "n_seeds": 10,
+    "n_scored": 1980,
+    "n_correct": 988,
+    "n_error": 10,
+    "n_samples": 1980,
+    "accuracy": 0.498989898989899,
+    "ci95_lo": 0.4769893719639853,
+    "ci95_hi": 0.520994338025764,
+    "finish_length_rate": 0.000505050505050505,
+    "empty_rate": 0.0,
+    "per_seed": [
+      {
+        "sampling_seed": 0,
+        "n_scored": 198,
+        "n_correct": 107,
+        "n_error": 1,
+        "accuracy": 0.5404040404040404
+      },
+      {
+        "sampling_seed": 1,
+        "n_scored": 198,
+        "n_correct": 89,
+        "n_error": 1,
+        "accuracy": 0.4494949494949495
+      },
+      {
+        "sampling_seed": 2,
+        "n_scored": 198,
+        "n_correct": 97,
+        "n_error": 1,
+        "accuracy": 0.4898989898989899
+      },
+      {
+        "sampling_seed": 3,
+        "n_scored": 198,
+        "n_correct": 103,
+        "n_error": 1,
+        "accuracy": 0.5202020202020202
+      },
+      {
+        "sampling_seed": 4,
+        "n_scored": 198,
+        "n_correct": 97,
+        "n_error": 1,
+        "accuracy": 0.4898989898989899
+      },
+      {
+        "sampling_seed": 5,
+        "n_scored": 198,
+        "n_correct": 104,
+        "n_error": 1,
+        "accuracy": 0.5252525252525253
+      },
+      {
+        "sampling_seed": 6,
+        "n_scored": 198,
+        "n_correct": 101,
+        "n_error": 1,
+        "accuracy": 0.51010101010101
+      },
+      {
+        "sampling_seed": 7,
+        "n_scored": 198,
+        "n_correct": 91,
+        "n_error": 1,
+        "accuracy": 0.4595959595959596
+      },
+      {
+        "sampling_seed": 8,
+        "n_scored": 198,
+        "n_correct": 95,
+        "n_error": 1,
+        "accuracy": 0.4797979797979798
+      },
+      {
+        "sampling_seed": 9,
+        "n_scored": 198,
+        "n_correct": 104,
+        "n_error": 1,
+        "accuracy": 0.5252525252525253
+      }
+    ]
+  },
+  "wandb_run_ids": [
+    "1rp6aanq"
+  ]
+}
