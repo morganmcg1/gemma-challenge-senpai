@@ -1,0 +1,208 @@
+{
+  "card": "optionb_denom_0p22_gb6144",
+  "engine": "vllm==0.22.0",
+  "config": {
+    "max_model_len": 8192,
+    "max_tokens": 6144,
+    "min_tokens": 8,
+    "max_num_seqs": 16,
+    "vllm_batch_invariant": 1,
+    "model": "google/gemma-4-E4B-it (bf16, full 262k head, snapshot fee6332c)",
+    "gpqa_sampled": "T=1/top_p=0.95/top_k=64"
+  },
+  "verdict": "DENOMINATORS_VALID_ON_0p22",
+  "crater_gates": [],
+  "material_shift_gates": [],
+  "bar_clears": {
+    "mmlu_pro": {
+      "acc": 0.718,
+      "bar": 0.605,
+      "clears": true,
+      "margin": 0.113
+    },
+    "gpqa_diamond": {
+      "acc": 0.5404040404040404,
+      "bar": 0.471,
+      "clears": true,
+      "margin": 0.0694
+    },
+    "gsm8k": {
+      "acc": 0.928,
+      "bar": 0.807,
+      "clears": true,
+      "margin": 0.121
+    },
+    "aime": {
+      "acc": 0.4666666666666667,
+      "bar": 0.09,
+      "clears": true,
+      "margin": 0.3767
+    }
+  },
+  "base_aime_gb6144": 0.4666666666666667,
+  "aime_anchor_caveat": {
+    "dev307_anchor_acc": 0.1,
+    "dev307_anchor_budget": "unknown (not gb6144)",
+    "base_aime_gb6144": 0.4666666666666667,
+    "delta_is_budget_effect": true,
+    "excluded_from_stack_shift_verdict": true,
+    "note": "base_aime_gb6144 is the budget-matched AIME anchor (PR #628 deliverable); its large delta vs the 0.100 dev307 anchor is a budget effect (gb6144 vs an unknown/shorter budget) and is excluded from the stack-shift verdict. AIME still clears its bar and is below the crater threshold."
+  },
+  "dev307_finish_len_ref": 0.035,
+  "rows": [
+    {
+      "gate": "mmlu_pro",
+      "decode": "greedy",
+      "accuracy_0p22": 0.718,
+      "n": 500,
+      "se": 0.0201,
+      "dev307_anchor": 0.678,
+      "delta_vs_dev307": 0.04,
+      "material_shift": false,
+      "anchor_budget_comparable": true,
+      "counts_toward_verdict_shift": false,
+      "finish_length_rate": 0.0,
+      "crater": false,
+      "empty_rate": 0.0,
+      "extract_fail_rate": null,
+      "ctok_p95": 2545,
+      "max_tokens": 6144
+    },
+    {
+      "gate": "gpqa_greedy",
+      "decode": "greedy",
+      "accuracy_0p22": 0.4898989898989899,
+      "n": 198,
+      "se": 0.0355,
+      "dev307_anchor": 0.5051,
+      "delta_vs_dev307": -0.0152,
+      "material_shift": false,
+      "anchor_budget_comparable": true,
+      "counts_toward_verdict_shift": false,
+      "finish_length_rate": 0.0,
+      "crater": false,
+      "empty_rate": 0.0,
+      "extract_fail_rate": null,
+      "ctok_p95": 3504,
+      "max_tokens": 6144
+    },
+    {
+      "gate": "gpqa_sampled",
+      "decode": "sampling",
+      "accuracy_0p22": 0.5404040404040404,
+      "n": 198,
+      "se": 0.0354,
+      "dev307_anchor": 0.5313,
+      "delta_vs_dev307": 0.0091,
+      "material_shift": false,
+      "anchor_budget_comparable": true,
+      "counts_toward_verdict_shift": false,
+      "finish_length_rate": 0.0,
+      "crater": false,
+      "empty_rate": 0.0,
+      "extract_fail_rate": null,
+      "ctok_p95": 4078,
+      "max_tokens": 6144
+    },
+    {
+      "gate": "gsm8k",
+      "decode": "greedy",
+      "accuracy_0p22": 0.928,
+      "n": 500,
+      "se": 0.0116,
+      "dev307_anchor": 0.904,
+      "delta_vs_dev307": 0.024,
+      "material_shift": false,
+      "anchor_budget_comparable": true,
+      "counts_toward_verdict_shift": false,
+      "finish_length_rate": 0.0,
+      "crater": false,
+      "empty_rate": null,
+      "extract_fail_rate": 0.0,
+      "ctok_p95": null,
+      "max_tokens": null
+    },
+    {
+      "gate": "aime",
+      "decode": "greedy",
+      "accuracy_0p22": 0.4666666666666667,
+      "n": 60,
+      "se": 0.0644,
+      "dev307_anchor": 0.1,
+      "delta_vs_dev307": 0.3667,
+      "material_shift": true,
+      "anchor_budget_comparable": false,
+      "counts_toward_verdict_shift": false,
+      "finish_length_rate": 0.13333333333333333,
+      "crater": false,
+      "empty_rate": null,
+      "extract_fail_rate": 0.0,
+      "ctok_p95": null,
+      "max_tokens": null
+    }
+  ],
+  "gates_raw": {
+    "mmlu_pro": {
+      "accuracy": 0.718,
+      "finish_length_rate": 0.0,
+      "n_scored": 500,
+      "n_samples": 500,
+      "empty_rate": 0.0,
+      "ctok_p95": 2545,
+      "decode": "greedy",
+      "max_tokens": 6144
+    },
+    "gpqa_greedy": {
+      "accuracy": 0.4898989898989899,
+      "finish_length_rate": 0.0,
+      "n_scored": 198,
+      "n_samples": 198,
+      "empty_rate": 0.0,
+      "ctok_p95": 3504,
+      "decode": "greedy",
+      "max_tokens": 6144,
+      "temperature": 0.0,
+      "top_k": null
+    },
+    "gpqa_sampled": {
+      "accuracy": 0.5404040404040404,
+      "finish_length_rate": 0.0,
+      "n_scored": 198,
+      "n_samples": 198,
+      "empty_rate": 0.0,
+      "ctok_p95": 4078,
+      "decode": "sampling",
+      "max_tokens": 6144,
+      "temperature": 1.0,
+      "top_k": 64
+    },
+    "gsm8k": {
+      "accuracy": 0.928,
+      "finish_length_rate": 0.0,
+      "n_correct": 464,
+      "n_samples": 500,
+      "extract_fail_rate": 0.0,
+      "decode": "greedy",
+      "max_tokens": null
+    },
+    "aime": {
+      "accuracy": 0.4666666666666667,
+      "finish_length_rate": 0.13333333333333333,
+      "n_correct": 28,
+      "n_samples": 60,
+      "extract_fail_rate": 0.0,
+      "n_length_samples": 8,
+      "n_total_samples": 60,
+      "decode": "greedy",
+      "max_tokens": null
+    }
+  },
+  "wandb_run_ids": [
+    "367i9s0t",
+    "g3cig1xo",
+    "ilg4z6e9",
+    "4cxd1gfx",
+    "zoszxnb0",
+    "x5oolfq7"
+  ]
+}

@@ -318,14 +318,16 @@ def eval_endpoint(
     request_timeout_s: int,
     save_text: bool = False,
     min_tokens: int | None = None,
+    client_concurrency: int = 1,
 ) -> dict[str, Any]:
-    per_problem: list[dict[str, Any]] = []
-    n_correct_maj = 0
-    pass_rates: list[float] = []
-    extract_fail = 0
-    total_samples = 0
-    t0 = time.time()
-    for idx, prob in enumerate(problems):
+    # Per-problem unit of work. Identical regardless of how it is dispatched, so
+    # the score does not depend on client_concurrency. This is sound here only
+    # because the served stack is batch-invariant (VLLM_BATCH_INVARIANT=1): a
+    # request's greedy/sampled tokens do not depend on what else is in its batch,
+    # so issuing the 60 problems sequentially or via a thread pool yields the same
+    # completions. The other 3 gates in this panel run concurrency 16 for the same
+    # reason; AIME (maj@k, custom harness) just lacked a client-side knob.
+    def _eval_one(idx: int, prob: dict[str, Any]) -> tuple[int, dict[str, Any], str]:
         messages = build_messages(prob["problem"])
         resp = chat_completion(
             base_url,
@@ -344,38 +346,60 @@ def eval_endpoint(
         texts = [c.get("message", {}).get("content") or "" for c in resp.get("choices", [])]
         finish = [c.get("finish_reason") for c in resp.get("choices", [])]
         answers = [extract_answer(t) for t in texts]
-        total_samples += len(answers)
-        extract_fail += sum(1 for a in answers if a is None)
         maj, counts = majority_vote(answers)
         gold = prob["answer"]
         correct_samples = sum(1 for a in answers if a == gold)
         pass_rate = correct_samples / len(answers) if answers else 0.0
-        pass_rates.append(pass_rate)
         maj_correct = maj is not None and maj == gold
-        n_correct_maj += int(maj_correct)
-        per_problem.append(
-            {
-                "id": prob["id"],
-                "year": prob["year"],
-                "gold": gold,
-                "answers": answers,
-                "answer_counts": counts,
-                "maj_answer": maj,
-                "maj_correct": maj_correct,
-                "correct_samples": correct_samples,
-                "k": len(answers),
-                "pass_rate": pass_rate,
-                "finish_reasons": finish,
-                "sample_chars": [len(t) for t in texts],
-                **({"texts": texts} if save_text else {}),
-            }
-        )
-        print(
+        rec = {
+            "id": prob["id"],
+            "year": prob["year"],
+            "gold": gold,
+            "answers": answers,
+            "answer_counts": counts,
+            "maj_answer": maj,
+            "maj_correct": maj_correct,
+            "correct_samples": correct_samples,
+            "k": len(answers),
+            "pass_rate": pass_rate,
+            "finish_reasons": finish,
+            "sample_chars": [len(t) for t in texts],
+            **({"texts": texts} if save_text else {}),
+        }
+        line = (
             f"[aime] {idx+1}/{len(problems)} id={prob['id']} gold={gold} "
             f"maj={maj} ({'OK' if maj_correct else 'x'}) pass={correct_samples}/{len(answers)} "
-            f"counts={counts}",
-            flush=True,
+            f"counts={counts}"
         )
+        return idx, rec, line
+
+    t0 = time.time()
+    results: list[dict[str, Any] | None] = [None] * len(problems)
+    if client_concurrency <= 1:
+        for idx, prob in enumerate(problems):
+            i, rec, line = _eval_one(idx, prob)
+            results[i] = rec
+            print(line, flush=True)
+    else:
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        with ThreadPoolExecutor(max_workers=client_concurrency) as ex:
+            futs = {ex.submit(_eval_one, idx, prob): idx for idx, prob in enumerate(problems)}
+            done = 0
+            for fut in as_completed(futs):
+                i, rec, line = fut.result()
+                results[i] = rec
+                done += 1
+                print(f"{line}  [{done}/{len(problems)} returned]", flush=True)
+
+    # Accumulate after collection. All aggregates are order-independent sums, and
+    # per_problem is reassembled in problem order, so the output is identical to
+    # the sequential path for any client_concurrency.
+    per_problem: list[dict[str, Any]] = [r for r in results if r is not None]
+    n_correct_maj = sum(int(r["maj_correct"]) for r in per_problem)
+    pass_rates = [r["pass_rate"] for r in per_problem]
+    extract_fail = sum(1 for r in per_problem for a in r["answers"] if a is None)
+    total_samples = sum(r["k"] for r in per_problem)
     n = len(problems)
     return {
         "n_problems": n,
@@ -386,6 +410,7 @@ def eval_endpoint(
         "extract_fail_rate": extract_fail / total_samples if total_samples else 0.0,
         "total_samples": total_samples,
         "wall_s": time.time() - t0,
+        "client_concurrency": client_concurrency,
         "per_problem": per_problem,
     }
 
@@ -465,6 +490,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--seed", type=int, default=1234)
     ap.add_argument("--no-thinking", action="store_true", help="disable enable_thinking chat-template kwarg")
     ap.add_argument("--max-num-seqs", type=int, default=32, help="decode concurrency override for serving")
+    ap.add_argument("--client-concurrency", type=int, default=1,
+                    help="issue this many problem requests in parallel from the client "
+                         "(default 1 = sequential). Safe to raise only on a batch-invariant "
+                         "stack (VLLM_BATCH_INVARIANT=1), where per-request decode is unchanged "
+                         "by batch size; the score is identical to sequential.")
     ap.add_argument("--save-text", action="store_true", help="persist raw completion text per problem (diagnostics)")
     ap.add_argument("--serve-env", action="append", default=[], metavar="KEY=VAL", help="extra env override for the served submission (repeatable); e.g. SENPAI_REFERENCE_MODE=1 to ablate spec-dec")
     ap.add_argument("--request-timeout-s", type=int, default=1200)
@@ -518,6 +548,7 @@ def main(argv: list[str] | None = None) -> int:
             request_timeout_s=args.request_timeout_s,
             save_text=args.save_text,
             min_tokens=args.min_tokens,
+            client_concurrency=args.client_concurrency,
         )
 
     if args.base_url:
