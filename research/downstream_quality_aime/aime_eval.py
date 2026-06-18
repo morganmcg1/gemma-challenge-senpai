@@ -345,6 +345,13 @@ def eval_endpoint(
         )
         texts = [c.get("message", {}).get("content") or "" for c in resp.get("choices", [])]
         finish = [c.get("finish_reason") for c in resp.get("choices", [])]
+        # PR #650: additive token-usage capture for the AIME budget->truncation split.
+        # vLLM returns one OpenAI `usage` block per request (summed over the k choices),
+        # so `completion_tokens` is per-sample only when k=1 (the greedy + 10-seed
+        # sampled budget runs all use k=1). No sampling/scoring change; existing
+        # aggregators ignore the new fields. Lets us compute ctok p50/p95 and derive
+        # the finish_length_rate at ANY smaller cap by thresholding output_tokens.
+        usage = resp.get("usage") or {}
         answers = [extract_answer(t) for t in texts]
         maj, counts = majority_vote(answers)
         gold = prob["answer"]
@@ -364,6 +371,8 @@ def eval_endpoint(
             "pass_rate": pass_rate,
             "finish_reasons": finish,
             "sample_chars": [len(t) for t in texts],
+            "completion_tokens": usage.get("completion_tokens"),
+            "prompt_tokens": usage.get("prompt_tokens"),
             **({"texts": texts} if save_text else {}),
         }
         line = (

@@ -1,0 +1,58 @@
+{
+  "label": "smoke_int4ar",
+  "model": "gemma-4-e4b-it",
+  "years": [
+    "2024"
+  ],
+  "k": 1,
+  "sampling": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "top_k": -1,
+    "max_tokens": 12288,
+    "min_tokens": 8,
+    "seed": 1234,
+    "enable_thinking": false
+  },
+  "max_num_seqs": 32,
+  "created_at": "20260618T061414Z",
+  "base_url": "http://127.0.0.1:8000",
+  "n_problems": 1,
+  "maj_k": 1,
+  "maj_k_accuracy": 1.0,
+  "n_correct_maj": 1,
+  "mean_pass_rate": 1.0,
+  "extract_fail_rate": 0.0,
+  "total_samples": 1,
+  "wall_s": 19.975939512252808,
+  "client_concurrency": 1,
+  "per_problem": [
+    {
+      "id": "2024-2024-II-4",
+      "year": "2024",
+      "gold": 33,
+      "answers": [
+        33
+      ],
+      "answer_counts": {
+        "33": 1
+      },
+      "maj_answer": 33,
+      "maj_correct": true,
+      "correct_samples": 1,
+      "k": 1,
+      "pass_rate": 1.0,
+      "finish_reasons": [
+        "stop"
+      ],
+      "sample_chars": [
+        3634
+      ],
+      "completion_tokens": 1987,
+      "prompt_tokens": 195,
+      "texts": [
+        "The given system of equations is:\n1) $\\log_2\\left(\\frac{x}{yz}\\right) = \\frac{1}{2}$\n2) $\\log_2\\left(\\frac{y}{xz}\\right) = \\frac{1}{3}$\n3) $\\log_2\\left(\\frac{z}{xy}\\right) = \\frac{1}{4}$\n\nWe convert these logarithmic equations into exponential equations:\n1) $\\frac{x}{yz} = 2^{1/2} = \\sqrt{2}$\n2) $\\frac{y}{xz} = 2^{1/3}$\n3) $\\frac{z}{xy} = 2^{1/4}$\n\nWe can rewrite these equations by isolating the ratios of the variables:\n1) $x = \\sqrt{2} yz$\n2) $y = 2^{1/3} xz$\n3) $z = 2^{1/4} xy$\n\nWe want to find the value of $\\left|\\log_2(x^4y^3z^2)\\right|$. Since $x, y, z$ are positive real numbers, the argument of the logarithm is positive, so we just need to find $\\log_2(x^4y^3z^2)$.\n\nLet's express $x, y, z$ in terms of each other using the equations.\n\nFrom (1), $x = \\sqrt{2} yz$.\nSubstitute this into (2):\n$y = 2^{1/3} (\\sqrt{2} yz) z$\n$y = 2^{1/3} \\sqrt{2} y z^2$\nSince $y > 0$, we can divide by $y$:\n$1 = 2^{1/3} \\cdot 2^{1/2} z^2$\n$1 = 2^{1/3 + 1/2} z^2$\n$1 = 2^{2/6 + 3/6} z^2$\n$1 = 2^{5/6} z^2$\n$z^2 = 2^{-5/6}$\n$z = (2^{-5/6})^{1/2} = 2^{-5/12}$ (since $z>0$)\n\nNow substitute $z$ into the expression for $x$ from (1):\n$x = \\sqrt{2} y z = 2^{1/2} y \\cdot 2^{-5/12}$\n$x = 2^{1/2 - 5/12} y$\n$x = 2^{6/12 - 5/12} y$\n$x = 2^{1/12} y$\n\nNow substitute $x$ and $z$ into (3) to find $y$:\n$z = 2^{1/4} xy$\n$2^{-5/12} = 2^{1/4} (2^{1/12} y) y$\n$2^{-5/12} = 2^{1/4 + 1/12} y^2$\n$2^{-5/12} = 2^{3/12 + 1/12} y^2$\n$2^{-5/12} = 2^{4/12} y^2$\n$2^{-5/12} = 2^{1/3} y^2$\n\nSolve for $y^2$:\n$y^2 = 2^{-5/12} \\cdot 2^{-1/3}$\n$y^2 = 2^{-5/12 - 4/12}$\n$y^2 = 2^{-9/12}$\n$y^2 = 2^{-3/4}$\n$y = (2^{-3/4})^{1/2} = 2^{-3/8}$ (since $y>0$)\n\nWe have found $y$ and $z$. Now we find $x$:\n$x = 2^{1/12} y = 2^{1/12} \\cdot 2^{-3/8}$\n$x = 2^{1/12 - 3/8}$\n$x = 2^{2/24 - 9/24}$\n$x = 2^{-7/24}$\n\nLet's verify these values using equation (2):\n$\\frac{y}{xz} = \\frac{2^{-3/8}}{2^{-7/24} \\cdot 2^{-5/12}} = 2^{-3/8 - (-7/24 - 5/12)}$\nExponent of 2: $-\\frac{3}{8} + \\frac{7}{24} + \\frac{5}{12}$\nCommon denominator is 24:\n$-\\frac{9}{24} + \\frac{7}{24} + \\frac{10}{24} = \\frac{-9 + 7 + 10}{24} = \\frac{8}{24} = \\frac{1}{3}$.\nThis matches equation (2), so the values are correct.\n\nWe need to calculate $\\log_2(x^4y^3z^2)$.\n$\\log_2(x^4y^3z^2) = 4 \\log_2(x) + 3 \\log_2(y) + 2 \\log_2(z)$.\n\nWe have:\n$\\log_2(x) = -\\frac{7}{24}$\n$\\log_2(y) = -\\frac{3}{8}$\n$\\log_2(z) = -\\frac{5}{12}$\n\nSubstitute these values:\n$4 \\log_2(x) = 4 \\left(-\\frac{7}{24}\\right) = -\\frac{7}{6}$\n$3 \\log_2(y) = 3 \\left(-\\frac{3}{8}\\right) = -\\frac{9}{8}$\n$2 \\log_2(z) = 2 \\left(-\\frac{5}{12}\\right) = -\\frac{5}{6}$\n\nSumming these up:\n$\\log_2(x^4y^3z^2) = -\\frac{7}{6} - \\frac{9}{8} - \\frac{5}{6}$\n$\\log_2(x^4y^3z^2) = \\left(-\\frac{7}{6} - \\frac{5}{6}\\right) - \\frac{9}{8}$\n$\\log_2(x^4y^3z^2) = -\\frac{12}{6} - \\frac{9}{8}$\n$\\log_2(x^4y^3z^2) = -2 - \\frac{9}{8}$\n$\\log_2(x^4y^3z^2) = -\\frac{16}{8} - \\frac{9}{8}$\n$\\log_2(x^4y^3z^2) = -\\frac{25}{8}$\n\nThe problem asks for the value of $\\left|\\log_2(x^4y^3z^2)\\right|$.\n$\\left|\\log_2(x^4y^3z^2)\\right| = \\left|-\\frac{25}{8}\\right| = \\frac{25}{8}$.\n\nThis is in the form $\\frac{m}{n}$, where $m=25$ and $n=8$.\n$m$ and $n$ are positive integers.\nWe check if $m$ and $n$ are relatively prime: $\\text{gcd}(25, 8) = 1$. Yes, they are.\n\nWe need to find $m+n$.\n$m+n = 25 + 8 = 33$.\n\nFinal check of the calculation:\n$x = 2^{-7/24}$, $y = 2^{-3/8} = 2^{-9/24}$, $z = 2^{-5/12} = 2^{-10/24}$.\n$4 \\log_2(x) = 4(-7/24) = -7/6$.\n$3 \\log_2(y) = 3(-3/8) = -9/8$.\n$2 \\log_2(z) = 2(-5/12) = -5/6$.\nSum: $-7/6 - 5/6 - 9/8 = -12/6 - 9/8 = -2 - 9/8 = -16/8 - 9/8 = -25/8$.\nThe result is correct.\n\nThe value is $\\frac{25}{8}$. $m=25, n=8$. $m+n=33$.\n\nFinal Answer: 33\n\n\\boxed{33}"
+      ]
+    }
+  ]
+}
