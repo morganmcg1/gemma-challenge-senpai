@@ -25,9 +25,9 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def _apply(module) -> None:
+    if _HERE not in sys.path:
+        sys.path.insert(0, _HERE)
     try:
-        if _HERE not in sys.path:
-            sys.path.insert(0, _HERE)
         import vllm_attn_group_patch
 
         vllm_attn_group_patch.apply(module)
@@ -37,6 +37,21 @@ def _apply(module) -> None:
         logging.getLogger("int4_mtp_drafter.patch").exception(
             "failed to apply attention-group num_heads patch"
         )
+
+    # Recompute-acceptor patch (PR #642 cost probe / #663 real gap-flag acceptor).
+    # Only loaded when explicitly enabled via env, so the shipped serve path is
+    # byte-identical when neither lever is set. ``apply()`` self-gates too.
+    if os.environ.get("SENPAI_RECOMPUTE_RATE") or os.environ.get("SENPAI_ACCEPTOR_TAU"):
+        try:
+            import vllm_recompute_acceptor_patch
+
+            vllm_recompute_acceptor_patch.apply(module)
+        except Exception:
+            import logging
+
+            logging.getLogger("int4_mtp_drafter.patch").exception(
+                "failed to apply recompute-acceptor patch"
+            )
 
 
 if _TARGET in sys.modules:
