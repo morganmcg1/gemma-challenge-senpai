@@ -1,0 +1,105 @@
+{
+  "pr": 641,
+  "analysis_only": true,
+  "official_tps": 0,
+  "tau_nat": 0.3,
+  "source": "denken #626 (W&B bj8d88gf) on-branch paired greedy streams; reused, not re-run",
+  "design": "GREEDY matched-arm paired (spec=int4+MTP-K7 ON M=8, ar=int4 spec OFF M=1, same int4 body, vllm==0.22.0, BI=1, MAX_NUM_SEQS=1 serial)",
+  "measured": {
+    "gpqa": {
+      "kind": "gpqa",
+      "n_questions": 198,
+      "n_prompt_sha_mismatch": 0,
+      "n_token_divergent_items": 196,
+      "n_answer_diffs_choice_strict": 59,
+      "answer_div_rate_strict": 0.29797979797979796,
+      "n_grade_flips_strict": 38,
+      "n_choice_residual_tau0p3": 1,
+      "n_grade_residual_tau0p3": 0,
+      "n_choice_residual_0p5nat": 0,
+      "n_grade_residual_0p5nat": 0,
+      "n_choice_rescued_tau0p3": 58,
+      "n_grade_rescued_tau0p3": 38,
+      "spec_acc": 0.4696969696969697,
+      "ar_acc": 0.4797979797979798,
+      "net_graded_delta_spec_minus_ar": -0.010101010101010055,
+      "net_graded_delta_ci95": [
+        -0.07070707070707072,
+        0.05050505050505055
+      ],
+      "net_delta_ci_contains_0": true,
+      "mcnemar_b_spec_better": 18,
+      "mcnemar_c_ar_better": 20,
+      "mcnemar_p_exact": 0.8714146793645341,
+      "choice_residual_tau0p3_detail": [
+        {
+          "id": "recK9F5aqdaybl8bb",
+          "gold": "B",
+          "spec_answer": "A",
+          "ar_answer": "C",
+          "spec_correct": false,
+          "ar_correct": false,
+          "root_gap_nat": 0.375,
+          "spec_outside_topk": false,
+          "first_div_index": 257,
+          "grade_changed": false
+        }
+      ],
+      "grade_residual_tau0p3_detail": [],
+      "verdict": "TOLERANCE_RESCUES_ALL"
+    },
+    "gsm8k": {
+      "kind": "gsm8k",
+      "n_questions": 500,
+      "n_prompt_sha_mismatch": 0,
+      "n_token_divergent_items": 161,
+      "n_answer_diffs_choice_strict": 27,
+      "answer_div_rate_strict": 0.054,
+      "n_grade_flips_strict": 13,
+      "n_choice_residual_tau0p3": 0,
+      "n_grade_residual_tau0p3": 0,
+      "n_choice_residual_0p5nat": 0,
+      "n_grade_residual_0p5nat": 0,
+      "n_choice_rescued_tau0p3": 27,
+      "n_grade_rescued_tau0p3": 13,
+      "spec_acc": 0.886,
+      "ar_acc": 0.888,
+      "net_graded_delta_spec_minus_ar": -0.0020000000000000018,
+      "net_graded_delta_ci95": [
+        -0.016000000000000014,
+        0.01200000000000001
+      ],
+      "net_delta_ci_contains_0": true,
+      "mcnemar_b_spec_better": 6,
+      "mcnemar_c_ar_better": 7,
+      "mcnemar_p_exact": 1.0,
+      "choice_residual_tau0p3_detail": [],
+      "grade_residual_tau0p3_detail": [],
+      "verdict": "TOLERANCE_RESCUES_ALL"
+    }
+  },
+  "scoped_out": {
+    "mmlu_pro": "no paired int4-AR greedy stream on branch; #626 harness builds only gpqa/gsm8k items. Option-B-only greedy gb6144: 0.664 (0p22) / 0.664 (dev307).",
+    "aime": "no paired int4-AR greedy stream on branch; long free-form maj@1 reasoning has the largest cascade surface. Option-B-only greedy maj@1 gb6144: 0.3667 (0p22) / 0.400 (dev307)."
+  },
+  "pooled": {
+    "n_questions": 698,
+    "n_token_divergent_items": 357,
+    "n_answer_diffs_choice_strict": 86,
+    "n_grade_flips_strict": 51,
+    "total_choice_residual_tau0p3": 1,
+    "total_grade_residual_tau0p3": 0,
+    "total_choice_residual_0p5nat": 0,
+    "total_grade_residual_0p5nat": 0,
+    "net_graded_delta_pooled": -0.004297994269340966,
+    "net_graded_delta_pooled_ci95": [
+      -0.024355300859598916,
+      0.015759312320916874
+    ],
+    "net_delta_pooled_ci_contains_0": true
+  },
+  "primary_metric_total_answer_diffs_at_tau0p3": 1,
+  "decision_grade_residual_tau0p3": 0,
+  "net_graded_delta_pooled": -0.004297994269340966,
+  "verdict_graded": "TOLERANCE_ANSWER_SAFE_GRADED"
+}
