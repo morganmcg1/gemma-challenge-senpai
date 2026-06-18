@@ -1,0 +1,352 @@
+{
+  "pr": 692,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "instrument": "gpqa_diamond",
+  "n_items": 198,
+  "domain_counts": {
+    "Physics": 86,
+    "Chemistry": 93,
+    "Biology": 19
+  },
+  "gate": {
+    "bar": 0.471,
+    "base_sampled_3seed": 0.5236,
+    "base_greedy": 0.5253
+  },
+  "counts": {
+    "fp16_greedy": [
+      104,
+      198
+    ],
+    "int4_served_greedy": [
+      91,
+      198
+    ],
+    "head262k_body_greedy": [
+      93,
+      198
+    ],
+    "int4_served_sampled_3seed": [
+      288,
+      594
+    ],
+    "fp16_sampled_3seed": [
+      311,
+      594
+    ],
+    "body_isolated_sampled_10seed": [
+      964,
+      1980
+    ]
+  },
+  "decode_basis_table": {
+    "greedy_mt3072": {
+      "base": 0.5253,
+      "int4_served": 0.4596,
+      "int4_body_isolated": 0.4697,
+      "pct_served": 87.49,
+      "pct_body": 89.42,
+      "clears_90_served": false,
+      "clears_90_body": false
+    },
+    "sampled_mt3072_GATE": {
+      "base_3seed": 0.5236,
+      "int4_served_3seed": 0.4848,
+      "int4_body_10seed": 0.4869,
+      "pct_served": 92.59,
+      "pct_body": 92.98,
+      "clears_90_served": true,
+      "clears_90_body": true,
+      "bar": 0.471
+    }
+  },
+  "per_subject_mcnemar": {
+    "greedy_body_isolated_fp16_vs_head262k": {
+      "Physics": {
+        "n_items": 86,
+        "b_base_right_int4_wrong": 13,
+        "c_base_wrong_int4_right": 6,
+        "net": 7,
+        "mcnemar_p": 0.1671,
+        "base_acc": 0.686,
+        "int4_acc": 0.6047,
+        "acc_delta": -0.0814
+      },
+      "Chemistry": {
+        "n_items": 93,
+        "b_base_right_int4_wrong": 10,
+        "c_base_wrong_int4_right": 7,
+        "net": 3,
+        "mcnemar_p": 0.6291,
+        "base_acc": 0.3763,
+        "int4_acc": 0.3441,
+        "acc_delta": -0.0323
+      },
+      "Biology": {
+        "n_items": 19,
+        "b_base_right_int4_wrong": 2,
+        "c_base_wrong_int4_right": 1,
+        "net": 1,
+        "mcnemar_p": 1.0,
+        "base_acc": 0.5263,
+        "int4_acc": 0.4737,
+        "acc_delta": -0.0526
+      },
+      "ALL": {
+        "n_items": 198,
+        "b_base_right_int4_wrong": 25,
+        "c_base_wrong_int4_right": 14,
+        "net": 11,
+        "mcnemar_p": 0.1081,
+        "base_acc": 0.5253,
+        "int4_acc": 0.4697,
+        "acc_delta": -0.0556
+      }
+    },
+    "greedy_served_fp16_vs_int4": {
+      "Physics": {
+        "n_items": 86,
+        "b_base_right_int4_wrong": 11,
+        "c_base_wrong_int4_right": 7,
+        "net": 4,
+        "mcnemar_p": 0.4807,
+        "base_acc": 0.686,
+        "int4_acc": 0.6395,
+        "acc_delta": -0.0465
+      },
+      "Chemistry": {
+        "n_items": 93,
+        "b_base_right_int4_wrong": 18,
+        "c_base_wrong_int4_right": 8,
+        "net": 10,
+        "mcnemar_p": 0.0755,
+        "base_acc": 0.3763,
+        "int4_acc": 0.2688,
+        "acc_delta": -0.1075
+      },
+      "Biology": {
+        "n_items": 19,
+        "b_base_right_int4_wrong": 2,
+        "c_base_wrong_int4_right": 3,
+        "net": -1,
+        "mcnemar_p": 1.0,
+        "base_acc": 0.5263,
+        "int4_acc": 0.5789,
+        "acc_delta": 0.0526
+      },
+      "ALL": {
+        "n_items": 198,
+        "b_base_right_int4_wrong": 31,
+        "c_base_wrong_int4_right": 18,
+        "net": 13,
+        "mcnemar_p": 0.0854,
+        "base_acc": 0.5253,
+        "int4_acc": 0.4596,
+        "acc_delta": -0.0657
+      }
+    },
+    "sampled_gate_fp16_vs_int4_3seed": {
+      "Chemistry": {
+        "n_items": 279,
+        "b_base_right_int4_wrong": 40,
+        "c_base_wrong_int4_right": 31,
+        "net": 9,
+        "mcnemar_p": 0.3425,
+        "base_acc": 0.362,
+        "int4_acc": 0.3297,
+        "acc_delta": -0.0323
+      },
+      "Physics": {
+        "n_items": 258,
+        "b_base_right_int4_wrong": 35,
+        "c_base_wrong_int4_right": 21,
+        "net": 14,
+        "mcnemar_p": 0.0814,
+        "base_acc": 0.6899,
+        "int4_acc": 0.6357,
+        "acc_delta": -0.0543
+      },
+      "Biology": {
+        "n_items": 57,
+        "b_base_right_int4_wrong": 5,
+        "c_base_wrong_int4_right": 5,
+        "net": 0,
+        "mcnemar_p": 1.0,
+        "base_acc": 0.5614,
+        "int4_acc": 0.5614,
+        "acc_delta": 0.0
+      },
+      "ALL": {
+        "n_items": 594,
+        "b_base_right_int4_wrong": 80,
+        "c_base_wrong_int4_right": 57,
+        "net": 23,
+        "mcnemar_p": 0.0598,
+        "base_acc": 0.5236,
+        "int4_acc": 0.4848,
+        "acc_delta": -0.0387
+      }
+    }
+  },
+  "per_question_type_greedy_body": {
+    "q_len_short_tertile": {
+      "n_items": 67,
+      "b": 10,
+      "c": 5,
+      "net": 5,
+      "mcnemar_p": 0.3018,
+      "base_acc": 0.5075,
+      "int4_acc": 0.4328
+    },
+    "q_len_mid_tertile": {
+      "n_items": 66,
+      "b": 5,
+      "c": 2,
+      "net": 3,
+      "mcnemar_p": 0.4531,
+      "base_acc": 0.5152,
+      "int4_acc": 0.4697
+    },
+    "q_len_long_tertile": {
+      "n_items": 65,
+      "b": 10,
+      "c": 7,
+      "net": 3,
+      "mcnemar_p": 0.6291,
+      "base_acc": 0.5538,
+      "int4_acc": 0.5077
+    },
+    "calc_heavy": {
+      "n_items": 135,
+      "b": 21,
+      "c": 10,
+      "net": 11,
+      "mcnemar_p": 0.0708,
+      "base_acc": 0.5333,
+      "int4_acc": 0.4519
+    },
+    "non_calc": {
+      "n_items": 63,
+      "b": 4,
+      "c": 4,
+      "net": 0,
+      "mcnemar_p": 1.0,
+      "base_acc": 0.5079,
+      "int4_acc": 0.5079
+    },
+    "base_cot_long_ge_median": null,
+    "base_cot_DEEP_above_median": {
+      "n_items": 99,
+      "b": 11,
+      "c": 11,
+      "net": 0,
+      "mcnemar_p": 1.0,
+      "base_acc": 0.2828,
+      "int4_acc": 0.2828
+    },
+    "base_cot_SHALLOW_below_median": {
+      "n_items": 99,
+      "b": 14,
+      "c": 3,
+      "net": 11,
+      "mcnemar_p": 0.0127,
+      "base_acc": 0.7677,
+      "int4_acc": 0.6566
+    }
+  },
+  "verbosity_on_b_cells_greedy_served": {
+    "n_b_cells_with_chars": 31,
+    "n_b_cells_by_domain": {
+      "Chemistry": 18,
+      "Physics": 11,
+      "Biology": 2
+    },
+    "base_chars_median": 5000,
+    "var_chars_median": 7010,
+    "base_chars_mean": 5931,
+    "var_chars_mean": 7058,
+    "var_more_verbose_frac": 0.742
+  },
+  "truncation_rates_gb6144": {
+    "base": {
+      "n": 198,
+      "truncated": 0,
+      "trunc_rate": 0.0,
+      "pct_truncated_wrong": null,
+      "mt": 6144,
+      "n_seeds": 1
+    },
+    "int4_served": {
+      "n": 1980,
+      "truncated": 1,
+      "trunc_rate": 0.0005,
+      "pct_truncated_wrong": 100.0,
+      "mt": 6144,
+      "n_seeds": 10
+    },
+    "mt3072_chars_proxy": {
+      "base_greedy": {
+        "n_with_chars": 198,
+        "chars_p50": 5078,
+        "chars_p95": 9918,
+        "chars_max": 11460,
+        "approx_cap_chars": 11059,
+        "n_near_cap_ge92pct": 8,
+        "near_cap_rate": 0.0404
+      },
+      "int4_served_greedy": {
+        "n_with_chars": 198,
+        "chars_p50": 5565,
+        "chars_p95": 10159,
+        "chars_max": 10870,
+        "approx_cap_chars": 11059,
+        "n_near_cap_ge92pct": 9,
+        "near_cap_rate": 0.0455
+      }
+    }
+  },
+  "sampled_gate_wilson_ci": {
+    "int4_served_3seed": {
+      "acc": 0.4848,
+      "n": 594,
+      "wilson95": [
+        0.4449,
+        0.525
+      ],
+      "clears_bar_point": true,
+      "wilson_lo_ge_bar": false
+    },
+    "int4_body_10seed": {
+      "acc": 0.4869,
+      "n": 1980,
+      "wilson95": [
+        0.4649,
+        0.5089
+      ],
+      "clears_bar_point": true,
+      "wilson_lo_ge_bar": false
+    }
+  },
+  "aime_skill_axis": {
+    "available": true,
+    "task": "aime_maj1",
+    "decode": "greedy",
+    "mt": 6144,
+    "n_items": 60,
+    "base_acc": 0.4667,
+    "int4_acc": 0.35,
+    "pct_of_base": 75.0,
+    "b_base_right_int4_wrong": 9,
+    "c_base_wrong_int4_right": 2,
+    "net": 7,
+    "mcnemar_p": 0.0654,
+    "note": "AIME is 100% multi-step quantitative; shares the calculation-precision skill axis with the gpqa calc-heavy locus. ids do NOT overlap gpqa (different datasets) -> correlation is at the SKILL level, not item level."
+  },
+  "verdict": "GPQA_GAP_CONCENTRATED",
+  "verdict_reason": "Loss has clean STRUCTURE: calc_heavy net 11 (p=0.0708) vs non_calc net 0 (p=1.00); shallow-CoT net 11 (p=0.0127, SIGNIFICANT) vs deep-CoT net 0 (p=1.00, floor base_acc=0.28). Locus = quantitative-precision on items base solves with short confident CoT; SAME skill axis as AIME (int4 75.0% of base). RIDER: on the gate-faithful #31 SAMPLED decode the int4-body clears 90% (92.98% body, 92.59% served) -- the literal 0.4697<0.471 FAILURE is GREEDY-decode-specific, not the gate protocol.",
+  "wandb_run_ids": [
+    "p4dtjiv4"
+  ]
+}
