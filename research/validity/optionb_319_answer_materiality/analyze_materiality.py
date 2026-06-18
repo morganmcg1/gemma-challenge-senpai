@@ -80,6 +80,23 @@ _spec.loader.exec_module(gi)
 NEARTIE_NATS = 0.5
 TAU_RESCUE = 0.3  # #616 rescued 100% of int4-grid flips at tau=0.3
 
+# PR #637 Leg 2 target: tighten the GPQA paired net-Δ CI half-width to this (±4pp) so
+# the GPQA leg is as decisive as GSM8K (which is already ±1.4pp at n=500).
+GPQA_CI_HALFWIDTH_TARGET = 0.04
+
+
+def _base_qid(iid: str) -> str:
+    """Underlying question id, stripping the PR #637 multi-shuffle "#s<seed>" tag. For
+    single-shuffle ids (AIME/GSM8K/the #626 primary GPQA seed) this is the id itself, so
+    by-question clustering reduces to per-item clustering and reproduces #626 exactly."""
+    return iid.split("#s", 1)[0]
+
+
+def _ci_halfwidth(ci: list[float] | None) -> float | None:
+    if not ci or len(ci) != 2 or ci[0] != ci[0] or ci[1] != ci[1]:
+        return None
+    return (float(ci[1]) - float(ci[0])) / 2.0
+
 
 # --------------------------------------------------------------------------- IO
 def load_jsonl(path: Path) -> dict[str, dict]:
@@ -182,6 +199,55 @@ def flip_character(kind: str, gaps: dict[str, dict]) -> dict[str, Any]:
     }
 
 
+# ------------------------------------------------------------- (e) absolute AIME quality
+# PR #637 advisor re-prioritization (2026-06-18): AIME is the 4th bar of the Reading-A
+# quality panel. Beyond materiality (is the spec-vs-AR break large-margin?) the advisor
+# needs the ABSOLUTE Option-B AIME maj@1 number + %-of-base vs the ubel #628 int4 base
+# and the Reading-A bar. Constants are the advisor-named scalars from the PR comment.
+AIME_BASE_UBEL = 0.4667  # ubel #628 int4 base, AIME-2024 n=30 (=14/30), gb6144 greedy
+AIME_BAR = 0.420         # Reading-A AIME quality bar (advisor PR #637 comment)
+
+
+def aime_quality(spec: dict[str, dict], ar: dict[str, dict], clean: list[str]) -> dict[str, Any]:
+    """Absolute Option-B (spec) AIME maj@1 accuracy + paired AR base, year-stratified.
+
+    The ubel #628 base 0.4667 the advisor names is AIME-2024-only (n=30, 14/30), so the
+    apples-to-apples ``pct_of_base`` denominator is the 2024 stratum; we also report the
+    full-mix (2024+2025-I+2025-II) number and the honest paired-AR ratio (denominator-
+    independent: spec vs the SAME-config int4 AR arm on the SAME items)."""
+    from collections import defaultdict
+    yrs: dict[str, dict[str, int]] = defaultdict(lambda: {"spec": 0, "ar": 0, "n": 0})
+    s_all = a_all = n_all = 0
+    for iid in clean:
+        s, a = spec[iid], ar[iid]
+        y = str(s.get("year"))
+        sc = 1 if s.get("correct") else 0
+        ac = 1 if a.get("correct") else 0
+        yrs[y]["spec"] += sc; yrs[y]["ar"] += ac; yrs[y]["n"] += 1
+        s_all += sc; a_all += ac; n_all += 1
+    optionb_all = (s_all / n_all) if n_all else float("nan")
+    ar_all = (a_all / n_all) if n_all else float("nan")
+    y24 = yrs.get("2024")
+    optionb_2024 = (y24["spec"] / y24["n"]) if (y24 and y24["n"]) else None
+    ar_2024 = (y24["ar"] / y24["n"]) if (y24 and y24["n"]) else None
+    return {
+        "ubel_base_2024": AIME_BASE_UBEL, "bar": AIME_BAR,
+        "optionb_aime_all": optionb_all, "ar_base_aime_all": ar_all, "n_all": n_all,
+        "optionb_aime_2024": optionb_2024, "ar_base_aime_2024": ar_2024,
+        "n_2024": (y24["n"] if y24 else 0),
+        # %-of-base: apples-to-apples is 2024-vs-ubel; full-mix-vs-ubel + paired-AR also shown.
+        "pct_of_base_aime_2024_vs_ubel": (optionb_2024 / AIME_BASE_UBEL) if optionb_2024 is not None else None,
+        "pct_of_base_aime_all_vs_ubel": (optionb_all / AIME_BASE_UBEL),
+        "pct_of_base_aime_all_vs_paired_ar": (optionb_all / ar_all) if ar_all else None,
+        "pct_of_base_aime_2024_vs_paired_ar": (optionb_2024 / ar_2024) if (ar_2024 and optionb_2024 is not None) else None,
+        "optionb_aime_2024_clears_bar": (optionb_2024 is not None and optionb_2024 >= AIME_BAR),
+        "optionb_aime_all_clears_bar": (optionb_all >= AIME_BAR),
+        "ar_base_aime_all_clears_bar": (ar_all >= AIME_BAR),
+        "by_year": {y: {"spec_acc": v["spec"] / v["n"], "ar_acc": v["ar"] / v["n"], "n": v["n"]}
+                    for y, v in sorted(yrs.items())},
+    }
+
+
 # --------------------------------------------------------------------------- pairing
 def pair_eval(kind: str) -> dict[str, Any]:
     spec = load_jsonl(_arm_path("spec", kind))
@@ -194,7 +260,8 @@ def pair_eval(kind: str) -> dict[str, Any]:
     ar_err: set[str] = set()
     clean: list[str] = []
     answer_div_ids: list[str] = []
-    cluster_ids: list[str] = []
+    inst_ids: list[str] = []     # per (question,shuffle) instance
+    base_qids: list[str] = []    # underlying question (multi-shuffle reps collapse here)
     spec_c: list[int] = []
     ar_c: list[int] = []
 
@@ -212,7 +279,8 @@ def pair_eval(kind: str) -> dict[str, Any]:
         if s.get("error") or a.get("error"):
             continue
         clean.append(iid)
-        cluster_ids.append(iid)
+        inst_ids.append(iid)
+        base_qids.append(str(s.get("base_qid") or _base_qid(iid)))
         spec_c.append(1 if s.get("correct") else 0)
         ar_c.append(1 if a.get("correct") else 0)
         if s.get("answer") != a.get("answer"):
@@ -221,14 +289,26 @@ def pair_eval(kind: str) -> dict[str, Any]:
     clean_set = set(clean)
     tok = token_divergence(kind, clean_set)
     fc = flip_character(kind, gaps)
+    aime_q = aime_quality(spec, ar, clean) if kind == "aime" else None
 
     # (c) net quality consequence on clean pairs.
+    #   PRIMARY (cb) clusters by underlying QUESTION (base_qid): for the PR #637 GPQA
+    #   multi-shuffle pool this is the honest unit — it resamples the 198 questions, each
+    #   carrying its shuffle-reps, so two permutations of one question are NOT treated as
+    #   independent (no pseudo-replication). For single-shuffle evals base_qid==iid, so
+    #   this reproduces #626 byte-for-byte. SECONDARY (cb_inst) clusters by (question,
+    #   shuffle) instance — the optimistic "n≈400 independent units" view; reported as a
+    #   sensitivity bound. The true CI sits between them.
+    n_units = len(spec_c)
+    n_questions = len(set(base_qids))
+    multi_shuffle = n_units > n_questions
+    spec_a, ar_a = np.array(spec_c), np.array(ar_c)
+    bq_a, inst_a = np.array(base_qids), np.array(inst_ids)
     pairs = list(zip(spec_c, ar_c))
     mc = mcnemar(pairs)
-    cb = (cluster_bootstrap(np.array(cluster_ids), np.array(spec_c), np.array(ar_c))
-          if spec_c else {})
-    cl = (cluster_level_paired_diff(np.array(cluster_ids), np.array(spec_c), np.array(ar_c))
-          if spec_c else {})
+    cb = cluster_bootstrap(bq_a, spec_a, ar_a) if spec_c else {}
+    cb_inst = (cluster_bootstrap(inst_a, spec_a, ar_a) if (spec_c and multi_shuffle) else cb)
+    cl = cluster_level_paired_diff(bq_a, spec_a, ar_a) if spec_c else {}
 
     # (b) headline answer divergence.
     n_clean = len(clean)
@@ -252,6 +332,10 @@ def pair_eval(kind: str) -> dict[str, Any]:
 
     delta_ci = cb.get("delta_ci95")
     delta_ci_contains_0 = bool(delta_ci and delta_ci[0] <= 0.0 <= delta_ci[1])
+    delta_ci_hw = _ci_halfwidth(delta_ci)
+    delta_ci_inst = cb_inst.get("delta_ci95")
+    delta_ci_inst_hw = _ci_halfwidth(delta_ci_inst)
+    delta_ci_inst_contains_0 = bool(delta_ci_inst and delta_ci_inst[0] <= 0.0 <= delta_ci_inst[1])
 
     return {
         "kind": kind,
@@ -273,15 +357,25 @@ def pair_eval(kind: str) -> dict[str, Any]:
         },
         "net_quality": {
             "mcnemar": mc,
-            "cluster_bootstrap": cb,
+            "cluster_bootstrap": cb,                 # PRIMARY: by-question (honest)
+            "cluster_bootstrap_inst": cb_inst,       # SECONDARY: per (q,shuffle) instance
             "cluster_level_paired_diff": cl,
             "net_graded_delta_spec_minus_ar": cb.get("delta"),
             "net_graded_delta_ci95": delta_ci,
+            "net_graded_delta_ci95_halfwidth": delta_ci_hw,
             "delta_ci_contains_0": delta_ci_contains_0,
+            # per-instance sensitivity (optimistic n≈units view)
+            "net_graded_delta_ci95_inst": delta_ci_inst,
+            "net_graded_delta_ci95_inst_halfwidth": delta_ci_inst_hw,
+            "delta_ci_inst_contains_0": delta_ci_inst_contains_0,
+            "n_units": n_units,
+            "n_questions": n_questions,
+            "multi_shuffle": multi_shuffle,
         },
         "flip_character": fc,
         "large_margin_answer_flips": large_margin_answer_flips,
         "n_large_margin_answer_flips": len(large_margin_answer_flips),
+        "aime_quality": aime_q,
     }
 
 
@@ -294,6 +388,131 @@ def verdict_for(ev: dict[str, Any]) -> dict[str, Any]:
         "delta_ci_contains_0": delta0,
         "n_large_margin_answer_flips": n_large,
         "verdict": "RESIDUAL_ANSWER_IMMATERIAL" if immaterial else "RESIDUAL_FLIPS_ANSWERS",
+    }
+
+
+def _packet_637(evals: dict[str, Any]) -> dict[str, Any] | None:
+    """PR #637 packet verdict.
+
+    Two legs:
+      * AIME (Leg 1) — the decisive metric is ``aime_n_large_margin_answer_flips``
+        (target 0). AIME answers are confident integers, so a tie-flip reaching the
+        boxed answer is a LARGE-margin answer flip by construction — the exact event
+        #626's verdict says never happens. One such flip is a counterexample (fire-
+        blocker).
+      * GPQA (Leg 2) — tighten the net-Δ CI half-width to <= 0.04 (±4pp) while still
+        ∋0. The honest (by-question) half-width is the gate; a structural flip or a CI
+        that shifts off 0 fails the leg.
+
+    Returns None when neither #637 leg is present (a #626-only gpqa,gsm8k run)."""
+    aime = evals.get("aime")
+    gpqa = evals.get("gpqa")
+    if aime is None and gpqa is None:
+        return None
+    decisive: dict[str, Any] = {}
+
+    aime_ok = aime is not None
+    if aime is not None:
+        anq = aime["net_quality"]
+        a_nlarge = aime["n_large_margin_answer_flips"]
+        a_ci0 = anq["delta_ci_contains_0"]
+        decisive.update({
+            "aime_answer_div_rate": aime["answer_divergence"]["answer_div_rate"],
+            "aime_n_large_margin_answer_flips": a_nlarge,
+            "aime_frac_flips_under_0p5nat": aime["flip_character"]["frac_flips_under_0p5nat"],
+            "aime_net_delta": anq["net_graded_delta_spec_minus_ar"],
+            "aime_net_delta_ci95": anq["net_graded_delta_ci95"],
+            "aime_net_delta_ci_halfwidth": anq["net_graded_delta_ci95_halfwidth"],
+            "aime_net_delta_ci_contains_0": a_ci0,
+            "aime_n_clean_pairs": aime["n_clean_pairs"],
+        })
+        # advisor re-prioritization: absolute Option-B AIME quality + %-of-base vs the bar.
+        aq = aime.get("aime_quality") or {}
+        if aq:
+            decisive.update({
+                "optionb_aime": aq.get("optionb_aime_all"),
+                "optionb_aime_2024": aq.get("optionb_aime_2024"),
+                "ar_base_aime": aq.get("ar_base_aime_all"),
+                "ar_base_aime_2024": aq.get("ar_base_aime_2024"),
+                "pct_of_base_aime": aq.get("pct_of_base_aime_2024_vs_ubel"),     # apples-to-apples (2024 vs ubel 0.4667)
+                "pct_of_base_aime_all_vs_ubel": aq.get("pct_of_base_aime_all_vs_ubel"),
+                "pct_of_base_aime_vs_paired_ar": aq.get("pct_of_base_aime_all_vs_paired_ar"),
+                "aime_bar": aq.get("bar"),
+                "aime_base_ubel": aq.get("ubel_base_2024"),
+                "optionb_aime_2024_clears_bar": aq.get("optionb_aime_2024_clears_bar"),
+                "optionb_aime_all_clears_bar": aq.get("optionb_aime_all_clears_bar"),
+            })
+        aime_ok = (a_nlarge == 0 and a_ci0)
+
+    gpqa_ok = gpqa is not None
+    if gpqa is not None:
+        gnq = gpqa["net_quality"]
+        # PR-DECISIVE half-width = the per-instance (units) CI: the PR's "tighten to ±4pp
+        # by bringing paired n to ~400" mechanism is 1/sqrt(units) scaling, which only the
+        # units view responds to (by-question keeps 198 fixed clusters → its half-width is
+        # heterogeneity-floored and ~insensitive to added shuffles). We still report the
+        # by-question (honest, conservative) CI and use IT for the no-shift (∋0) gate so a
+        # "SHIFTS" call is never raised on anti-conservative grounds.
+        g_hw_units = gnq["net_graded_delta_ci95_inst_halfwidth"]
+        g_hw_byq = gnq["net_graded_delta_ci95_halfwidth"]
+        g_ci0_byq = gnq["delta_ci_contains_0"]              # honest no-shift gate
+        g_ci0_units = gnq.get("delta_ci_inst_contains_0", g_ci0_byq)
+        g_nlarge = gpqa["n_large_margin_answer_flips"]
+        hw_ok = (g_hw_units is not None and g_hw_units <= GPQA_CI_HALFWIDTH_TARGET)
+        decisive.update({
+            "gpqa_net_delta": gnq["net_graded_delta_spec_minus_ar"],
+            "gpqa_net_delta_ci95": gnq["net_graded_delta_ci95_inst"],       # the ±4pp target CI
+            "gpqa_net_delta_ci_halfwidth": g_hw_units,                      # PR-decisive
+            "gpqa_ci_halfwidth_target_met": hw_ok,
+            "gpqa_net_delta_ci_contains_0": g_ci0_units,
+            "gpqa_net_delta_ci95_byquestion": gnq["net_graded_delta_ci95"],  # honest companion
+            "gpqa_net_delta_ci_byq_halfwidth": g_hw_byq,
+            "gpqa_net_delta_ci_byq_contains_0": g_ci0_byq,
+            "gpqa_n_large_margin_answer_flips": g_nlarge,
+            "gpqa_n_units": gnq["n_units"],
+            "gpqa_n_questions": gnq["n_questions"],
+            "gpqa_multi_shuffle": gnq.get("multi_shuffle", False),
+        })
+        gpqa_ok = (g_ci0_byq and hw_ok and g_nlarge == 0)
+        if g_hw_units is not None and not hw_ok:
+            # n-needed (units 1/sqrt(n) scaling) to hit the ±4pp half-width target.
+            factor = (g_hw_units / GPQA_CI_HALFWIDTH_TARGET) ** 2
+            decisive["gpqa_n_units_needed_est"] = int(math.ceil(gnq["n_units"] * factor))
+
+    a_flip = aime is not None and decisive.get("aime_n_large_margin_answer_flips", 0) >= 1
+    # A GENUINE GPQA materiality problem = a structural flip or a net-Δ CI that SHIFTS off 0
+    # (these falsify immateriality). Distinct from the CI merely being WIDE (∋0, 0 flips but
+    # half-width > ±4pp): under the advisor's 2026-06-18 re-prioritization the GPQA-CI
+    # tightening is OPTIONAL polish (the identity leg it de-risked is closed natively by
+    # stark #636 / fern #641), and adding shuffle-seeds cannot tighten the honest by-question
+    # CI anyway (heterogeneity-floored at GPQA-Diamond's 198 fixed questions), so wide-only
+    # must NOT mask a passing AIME load-bearing leg.
+    g_problem = gpqa is not None and (
+        decisive.get("gpqa_n_large_margin_answer_flips", 0) >= 1
+        or not decisive.get("gpqa_net_delta_ci_byq_contains_0", True)  # honest no-shift gate
+    )
+    g_wide_only = (gpqa is not None and not g_problem
+                   and (decisive.get("gpqa_net_delta_ci_halfwidth") or 1.0) > GPQA_CI_HALFWIDTH_TARGET)
+    if a_flip:
+        verdict = "AIME_LARGE_MARGIN_FLIP_FOUND"
+    elif g_problem:
+        verdict = "GPQA_CI_STILL_WIDE_OR_SHIFTS"
+    elif aime is not None and aime_ok and gpqa is not None and gpqa_ok:
+        verdict = "MATERIALITY_PACKET_COMPLETE__IMMATERIAL_HOLDS"
+    elif aime is not None and aime_ok:
+        # load-bearing AIME leg passes (0 large-margin flips, net-Δ ∋0); GPQA-CI either
+        # absent or wide-only (optional polish, not tightened to ±4pp). No fire-blocker.
+        verdict = "AIME_IMMATERIAL_HOLDS__GPQA_CI_OPTIONAL"
+    else:
+        verdict = "PACKET_637_PARTIAL"  # one leg missing or AIME CI not ∋0 yet
+    return {
+        "verdict": verdict,
+        "decisive": decisive,
+        "ci_halfwidth_target": GPQA_CI_HALFWIDTH_TARGET,
+        "legs_present": {"aime": aime is not None, "gpqa": gpqa is not None},
+        "aime_leg_pass": bool(aime is not None and aime_ok and not a_flip),
+        "gpqa_ci_tightened": bool(gpqa is not None and gpqa_ok),
+        "gpqa_ci_wide_only": bool(g_wide_only),
     }
 
 
@@ -372,6 +591,11 @@ def main() -> int:
         "n_large_margin_answer_flips_total": pool_large_margin,
     }
 
+    # ---- PR #637 materiality packet: AIME greedy leg + tightened GPQA net-Δ CI ----
+    packet = _packet_637(result["evals"])
+    if packet is not None:
+        result["packet_637"] = packet
+
     # terminal SENPAI metrics (PR #626): pull the per-eval + pooled headline numbers up.
     terminal: dict[str, Any] = {
         "verdict": result["headline_verdict"],
@@ -384,7 +608,13 @@ def main() -> int:
         terminal[f"answer_div_rate_{kind}"] = ev["answer_divergence"]["answer_div_rate"]
         terminal[f"net_graded_delta_spec_minus_ar_{kind}"] = ev["net_quality"]["net_graded_delta_spec_minus_ar"]
         terminal[f"net_graded_delta_ci95_{kind}"] = ev["net_quality"]["net_graded_delta_ci95"]
+        terminal[f"net_graded_delta_ci95_halfwidth_{kind}"] = ev["net_quality"]["net_graded_delta_ci95_halfwidth"]
+        terminal[f"n_large_margin_answer_flips_{kind}"] = ev["n_large_margin_answer_flips"]
         terminal[f"frac_flips_under_0p5nat_{kind}"] = ev["flip_character"]["frac_flips_under_0p5nat"]
+    if packet is not None:
+        terminal["packet_637_verdict"] = packet["verdict"]
+        for k, v in packet["decisive"].items():
+            terminal[f"packet637/{k}"] = v
     result["terminal_metrics"] = terminal
 
     (RES / "materiality_analysis.json").write_text(json.dumps(result, indent=2, default=str))
@@ -431,6 +661,53 @@ def main() -> int:
                  f"(probed={pl['n_divergent_probed']}, outside_topk={pl['n_spec_tok_outside_topk']})  "
                  f"large-margin-answer-flips={pl['n_large_margin_answer_flips_total']}")
     lines.append(f"\nHEADLINE VERDICT: {result['headline_verdict']}")
+
+    if packet is not None:
+        d = packet["decisive"]
+        lines.append("\n" + "=" * 64)
+        lines.append("PR #637 MATERIALITY PACKET  (AIME greedy leg + tightened GPQA net-Δ CI)")
+        lines.append(f"  legs present: aime={packet['legs_present']['aime']} "
+                     f"gpqa={packet['legs_present']['gpqa']}  "
+                     f"(GPQA CI half-width target ≤{packet['ci_halfwidth_target']})")
+        if packet["legs_present"]["aime"]:
+            lines.append(
+                f"  [AIME]  answer_div={d.get('aime_answer_div_rate')!r}  "
+                f"net Δ={d.get('aime_net_delta')!r} CI95={d.get('aime_net_delta_ci95')!r} "
+                f"(∋0={d.get('aime_net_delta_ci_contains_0')}, hw={d.get('aime_net_delta_ci_halfwidth')!r})")
+            lines.append(
+                f"          flips<0.5nat={d.get('aime_frac_flips_under_0p5nat')!r}  "
+                f"!! LARGE-MARGIN ANSWER FLIPS = {d.get('aime_n_large_margin_answer_flips')} "
+                f"(DECISIVE; target 0)  n_clean={d.get('aime_n_clean_pairs')}")
+            if d.get("optionb_aime") is not None:
+                lines.append(
+                    f"  [AIME quality]  optionb_aime(all-{d.get('aime_n_clean_pairs')})="
+                    f"{d.get('optionb_aime'):.4f} (clears {d.get('aime_bar')} bar="
+                    f"{d.get('optionb_aime_all_clears_bar')})  AR-base={d.get('ar_base_aime'):.4f}  "
+                    f"spec/AR={d.get('pct_of_base_aime_vs_paired_ar'):.3%}")
+                lines.append(
+                    f"          2024-only: optionb={d.get('optionb_aime_2024'):.4f} "
+                    f"AR={d.get('ar_base_aime_2024'):.4f}  vs ubel base {d.get('aime_base_ubel')} "
+                    f"-> pct_of_base={d.get('pct_of_base_aime'):.3%} "
+                    f"(clears {d.get('aime_bar')} bar={d.get('optionb_aime_2024_clears_bar')})")
+        if packet["legs_present"]["gpqa"]:
+            lines.append(
+                f"  [GPQA]  net Δ={d.get('gpqa_net_delta')!r}")
+            lines.append(
+                f"          UNITS CI95 (±4pp target)={d.get('gpqa_net_delta_ci95')!r} "
+                f"(∋0={d.get('gpqa_net_delta_ci_contains_0')}, hw={d.get('gpqa_net_delta_ci_halfwidth')!r} "
+                f"-> target_met={d.get('gpqa_ci_halfwidth_target_met')})")
+            lines.append(
+                f"          BY-QUESTION CI95 (honest)={d.get('gpqa_net_delta_ci95_byquestion')!r} "
+                f"(∋0={d.get('gpqa_net_delta_ci_byq_contains_0')}, hw={d.get('gpqa_net_delta_ci_byq_halfwidth')!r})")
+            lines.append(
+                f"          n_units={d.get('gpqa_n_units')} n_questions={d.get('gpqa_n_questions')} "
+                f"multi_shuffle={d.get('gpqa_multi_shuffle')}  "
+                f"large-margin-flips={d.get('gpqa_n_large_margin_answer_flips')}")
+            if d.get("gpqa_n_units_needed_est") is not None:
+                lines.append(f"          (est n_units to hit ±4pp half-width target ≈ "
+                             f"{d['gpqa_n_units_needed_est']})")
+        lines.append(f"\nPACKET #637 VERDICT: {packet['verdict']}")
+
     rep = "\n".join(lines)
     (RES / "materiality_report.txt").write_text(rep + "\n")
     print(rep, flush=True)
@@ -447,18 +724,33 @@ def main() -> int:
 def _log_wandb(result: dict[str, Any], *, name: str | None, group: str | None) -> None:
     from scripts import wandb_logging as wl
 
+    # PR #637 extends the #626 packet with the AIME greedy leg + the GPQA multi-shuffle
+    # net-Δ CI tightening. When that packet is present, stamp the record as #637 so the
+    # materiality-packet metrics are discoverable under the right PR/tags.
+    packet = result.get("packet_637")
+    pr_num = 637 if packet is not None else 626
     cfg = {
-        "pr": 626, "stack": result["stack"], "design": result["design"],
+        "pr": pr_num, "stack": result["stack"], "design": result["design"],
         "analysis_only": True, "official_tps": 0,
         **{f"decoding/{k}": v for k, v in result["decoding"].items()
            if isinstance(v, (int, float, str))},
     }
+    if packet is not None:
+        cfg["packet_637_verdict"] = packet["verdict"]
+        cfg["gpqa_ci_halfwidth_target"] = packet["ci_halfwidth_target"]
+    tags = ["specdec", "greedy-identity", "answer-materiality", "int4-mtp", "option-b"]
+    tags += (["pr637", "pr626", "materiality-packet", "aime", "gpqa-multishuffle"]
+             if packet is not None else ["pr626"])
+    notes = ("PR637 materiality packet: AIME greedy large-margin-flip leg + GPQA "
+             "multi-shuffle net-Δ CI tightening (extends #626)." if packet is not None
+             else "PR626 greedy matched-arm: do residual int4-Marlin spec flips change a graded answer?")
     run = wl.init_wandb_run(
         job_type="optionb-319-answer-materiality", agent="denken",
-        name=name or "denken/optionb-319-residual-answer-materiality",
+        name=name or ("denken/optionb-materiality-packet" if packet is not None
+                      else "denken/optionb-319-residual-answer-materiality"),
         group=group or "optionb-319-residual-answer-materiality",
-        notes="PR626 greedy matched-arm: do residual int4-Marlin spec flips change a graded answer?",
-        tags=["pr626", "specdec", "greedy-identity", "answer-materiality", "int4-mtp", "option-b"],
+        notes=notes,
+        tags=tags,
         config=cfg,
     )
     if run is None:
@@ -471,6 +763,8 @@ def _log_wandb(result: dict[str, Any], *, name: str | None, group: str | None) -
         metrics.update(wl.flatten_numeric(f"{kind}/net", ev["net_quality"]))
         metrics.update(wl.flatten_numeric(f"{kind}/flip", ev["flip_character"]))
         metrics[f"{kind}/n_large_margin_answer_flips"] = ev["n_large_margin_answer_flips"]
+        if ev.get("aime_quality"):
+            metrics.update(wl.flatten_numeric(f"{kind}/quality", ev["aime_quality"]))
     metrics.update(wl.flatten_numeric("pooled", result["pooled"]))
     metrics.update(wl.flatten_numeric("terminal", result["terminal_metrics"]))
     metrics["analysis_only"] = 1
@@ -479,10 +773,14 @@ def _log_wandb(result: dict[str, Any], *, name: str | None, group: str | None) -
     for k, v in metrics.items():
         run.summary[k] = v
     run.summary["headline_verdict"] = result["headline_verdict"]
+    if packet is not None:
+        run.summary["packet_637_verdict"] = packet["verdict"]
     run.summary["analysis_only"] = True
     run.summary["official_tps"] = 0
-    wl.log_json_artifact(run, name="pr626_materiality_report", artifact_type="answer-materiality",
-                         data=result)
+    wl.log_json_artifact(
+        run,
+        name=("pr637_materiality_packet" if packet is not None else "pr626_materiality_report"),
+        artifact_type="answer-materiality", data=result)
     wl.finish_wandb(run)
     print("[analyze] wandb logged", flush=True)
 

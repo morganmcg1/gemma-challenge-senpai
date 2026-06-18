@@ -88,7 +88,22 @@ def encode_chat_prompt(tok, prompt_text: str) -> list[int]:
 # --------------------------------------------------------------------------- #
 # GPQA-Diamond
 # --------------------------------------------------------------------------- #
-def build_gpqa_items(tok, seed: int = GPQA_SEED, limit: int = 0) -> list[dict[str, Any]]:
+def build_gpqa_items(
+    tok, seed: int = GPQA_SEED, limit: int = 0, id_suffix: str = ""
+) -> list[dict[str, Any]]:
+    """GPQA-Diamond items at one choice-shuffle ``seed``.
+
+    The choice-shuffle (which option is labelled A/B/C/D) is seeded, so a *different*
+    seed yields a genuinely different prompt for the same underlying question — a
+    distinct, non-degenerate paired-greedy evaluation instance (greedy is invariant to
+    the *sampling* seed, but NOT to the choice order, since the model has position bias
+    and the rendered letters change). This is the GPQA multi-permutation lever PR #637
+    Leg 2 uses to extend n past the 198 unique Diamond questions: each (question, seed)
+    is its own paired unit. ``id_suffix`` keeps the primary seed's ids byte-identical to
+    the #626-banked file (id_suffix="") while tagging extra seeds (e.g. "#s23456") so
+    they coexist in one jsonl; ``base_qid`` carries the underlying question for the
+    by-question cluster-bootstrap sensitivity (avoids treating two shuffles of one
+    question as fully independent)."""
     from inspect_evals.gpqa.gpqa import get_gpqa_diamond_dataset
     import inspect_ai.solver._multiple_choice as mc
     from inspect_ai.solver._task_state import Choices
@@ -109,7 +124,9 @@ def build_gpqa_items(tok, seed: int = GPQA_SEED, limit: int = 0) -> list[dict[st
         ids = encode_chat_prompt(tok, prompt_text)
         items.append(
             {
-                "id": str(s.id),
+                "id": f"{s.id}{id_suffix}",
+                "base_qid": str(s.id),
+                "shuffle_seed": seed,
                 "kind": "gpqa",
                 "prompt_text": prompt_text,
                 "prompt_token_ids": ids,
@@ -119,6 +136,44 @@ def build_gpqa_items(tok, seed: int = GPQA_SEED, limit: int = 0) -> list[dict[st
             }
         )
     return items
+
+
+def build_gpqa_items_multi(
+    tok, seeds: list[int], limit: int = 0
+) -> list[dict[str, Any]]:
+    """Pool GPQA-Diamond across multiple choice-shuffle seeds (PR #637 Leg 2).
+
+    The FIRST seed gets id_suffix="" so it reuses the #626-banked ``gpqa_*.jsonl``
+    (id == question id, no regeneration); subsequent seeds are suffixed "#s<seed>".
+    The generation driver is idempotent by id, so the banked primary-seed items are
+    skipped and only the new shuffle instances are generated.
+
+    DEDUP BY PROMPT: two distinct seeds can land the SAME choice permutation for a
+    question (≈1/24 per 4-choice item → ~8/198 collisions per added seed). A colliding
+    shuffle yields a prompt byte-identical to an earlier seed's, so under greedy it would
+    produce an EXACT-duplicate paired unit — pseudo-replication that anti-conservatively
+    tightens the per-instance CI (the ±4pp gate) and wastes GPU regenerating a known
+    completion. We therefore drop any item whose ``prompt_sha256`` already appeared in the
+    pool, keeping the earliest seed (primary wins). Every pooled unit is thus a genuinely
+    distinct prompt; ``base_qid`` still groups a question's surviving shuffles for the
+    honest by-question cluster bootstrap."""
+    out: list[dict[str, Any]] = []
+    seen_sha: set[str] = set()
+    n_collision = 0
+    for i, sd in enumerate(seeds):
+        suffix = "" if i == 0 else f"#s{sd}"
+        for it in build_gpqa_items(tok, seed=sd, limit=limit, id_suffix=suffix):
+            sha = it["prompt_sha256"]
+            if sha in seen_sha:
+                n_collision += 1
+                continue
+            seen_sha.add(sha)
+            out.append(it)
+    if n_collision:
+        print(f"[gen] gpqa multi-shuffle: dropped {n_collision} duplicate-prompt "
+              f"collision(s) across {len(seeds)} seeds -> {len(out)} distinct units",
+              flush=True)
+    return out
 
 
 # inspect_ai parse_answers (single-answer) — verbatim regex from
@@ -192,10 +247,66 @@ def score_gsm8k(text: str, gold: float | None) -> tuple[float | None, str, bool]
     return pred, mode, bool(is_correct(pred, gold))
 
 
+# --------------------------------------------------------------------------- #
+# AIME (greedy maj@1, no-think) — PR #637 Leg 1
+# --------------------------------------------------------------------------- #
+# AIME answers are confident integers, so a tie-flip that reaches the boxed answer is
+# a LARGE-margin answer flip by construction — exactly the decisive event #626's
+# `n_large_margin_answer_flips=0` verdict says never happens. We mirror the existing
+# downstream_quality_aime instrument (same dataset registry, same boxed-int extractor)
+# but pre-tokenize the no-think prompt onto the canonical greedy-identity completions
+# path (return_token_ids) so the token-divergence + gap probe machinery applies.
+AIME_YEARS_DEFAULT = ("2024", "2025-I", "2025-II")  # 30 + 15 + 15 = 60
+
+
+def build_aime_items(
+    tok, years: tuple[str, ...] | list[str] = AIME_YEARS_DEFAULT, limit: int = 0
+) -> list[dict[str, Any]]:
+    from research.downstream_quality_aime.aime_eval import (
+        AIME_INSTRUCTION,
+        load_aime,
+    )
+
+    problems = load_aime(list(years), limit=(limit or None))
+    items: list[dict[str, Any]] = []
+    for p in problems:
+        # build_messages(problem) == single user turn {problem}\n\n{INSTRUCTION}; the
+        # greedy-identity encode_chat_prompt wraps that in the chat template with NO
+        # enable_thinking kwarg -> Gemma's default no-think render (the gate config).
+        prompt_text = f"{p['problem']}\n\n{AIME_INSTRUCTION}"
+        ids = encode_chat_prompt(tok, prompt_text)
+        items.append(
+            {
+                "id": str(p["id"]),
+                "kind": "aime",
+                "year": p.get("year"),
+                "prompt_text": prompt_text,
+                "prompt_token_ids": ids,
+                "prompt_sha256": sha256_tokens(ids),
+                "gold": int(p["answer"]),
+            }
+        )
+    return items
+
+
+def score_aime(text: str, gold: int | None) -> tuple[int | None, bool]:
+    """(extracted_int|None, correct). Mirrors downstream_quality_aime: last boxed
+    integer (else last 0-999 int), integer-match against gold."""
+    from research.downstream_quality_aime.aime_eval import extract_answer
+
+    pred = extract_answer(text or "")
+    return pred, bool(pred is not None and gold is not None and pred == gold)
+
+
 def score_item(item: dict[str, Any], text: str) -> dict[str, Any]:
     if item["kind"] == "gpqa":
         ans, correct = score_gpqa(text, item["target"], item["n_choices"])
         return {"answer": ans, "correct": correct, "extract_mode": None}
+    if item["kind"] == "aime":
+        pred, correct = score_aime(text, item.get("gold"))
+        # canonical string so divergence compares integer values, not repr noise.
+        ans = None if pred is None else str(int(pred))
+        return {"answer": ans, "correct": correct, "extract_mode": "boxed_int"}
     pred, mode, correct = score_gsm8k(text, item.get("gold"))
     # normalize the numeric answer to a canonical string so divergence compares
     # exact values, not float repr noise.
