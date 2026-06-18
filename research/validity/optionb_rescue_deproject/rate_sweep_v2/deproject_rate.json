@@ -1,0 +1,124 @@
+{
+  "pr": 642,
+  "leg": "deproject-rate",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "submission": "int4_mtp_batchinv",
+  "extra_env": {
+    "SENPAI_RECOMPUTE_STAT_DIR": "/workspace/senpai/target/research/validity/optionb_rescue_deproject/rate_sweep_v2_stat"
+  },
+  "n": 2,
+  "workload": {
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1
+  },
+  "elapsed_s": 5715.191052675247,
+  "arms": {
+    "r0": {
+      "label": "r0",
+      "override_env": {
+        "SENPAI_RECOMPUTE_STAT_DIR": "/workspace/senpai/target/research/validity/optionb_rescue_deproject/rate_sweep_v2_stat"
+      },
+      "wall_tps_median": 155.45577219402043,
+      "wall_tps_cv_pct": 0.12062631900619211,
+      "wall_tps_values": [
+        155.32317512334487,
+        155.58836926469596
+      ],
+      "e_accept_exact_mean": 3.3284919285993526,
+      "n": 2
+    },
+    "r0p05437": {
+      "label": "r0p05437",
+      "override_env": {
+        "SENPAI_RECOMPUTE_STAT_DIR": "/workspace/senpai/target/research/validity/optionb_rescue_deproject/rate_sweep_v2_stat",
+        "SENPAI_RECOMPUTE_RATE": "0.05437"
+      },
+      "wall_tps_median": 120.2497675159095,
+      "wall_tps_cv_pct": 0.5009925884862034,
+      "wall_tps_values": [
+        119.82377639338365,
+        120.67575863843535
+      ],
+      "e_accept_exact_mean": 3.3242444821892274,
+      "n": 2
+    },
+    "r0p0727": {
+      "label": "r0p0727",
+      "override_env": {
+        "SENPAI_RECOMPUTE_STAT_DIR": "/workspace/senpai/target/research/validity/optionb_rescue_deproject/rate_sweep_v2_stat",
+        "SENPAI_RECOMPUTE_RATE": "0.0727"
+      },
+      "wall_tps_median": 114.74057555420714,
+      "wall_tps_cv_pct": 0.10075505388037213,
+      "wall_tps_values": [
+        114.82232199745881,
+        114.65882911095545
+      ],
+      "e_accept_exact_mean": 3.332493809984303,
+      "n": 2
+    },
+    "r0p2": {
+      "label": "r0p2",
+      "override_env": {
+        "SENPAI_RECOMPUTE_STAT_DIR": "/workspace/senpai/target/research/validity/optionb_rescue_deproject/rate_sweep_v2_stat",
+        "SENPAI_RECOMPUTE_RATE": "0.2"
+      },
+      "wall_tps_median": 86.76962904503594,
+      "wall_tps_cv_pct": 0.9421460555520305,
+      "wall_tps_values": [
+        87.3476864609846,
+        86.19157162908729
+      ],
+      "e_accept_exact_mean": 3.326078115119963,
+      "n": 2
+    }
+  },
+  "rate_to_wall_tps": {
+    "0.0": 155.45577219402043,
+    "0.05437": 120.2497675159095,
+    "0.0727": 114.74057555420714,
+    "0.2": 86.76962904503594
+  },
+  "additive_cost_fit": {
+    "model": "1/wall_tps = 1/tps0 + C*rate",
+    "C_sec_per_recompute": 0.02464229116070477,
+    "intercept_inv_tps0": 0.006732262633936545,
+    "tps0_fit": 148.53847129479433,
+    "r2": 0.9845813450748218,
+    "points": [
+      {
+        "rate": 0.0,
+        "wall_tps": 155.45577219402043,
+        "inv_wall_tps": 0.006432697775621514
+      },
+      {
+        "rate": 0.05437,
+        "wall_tps": 120.2497675159095,
+        "inv_wall_tps": 0.00831602439370784
+      },
+      {
+        "rate": 0.0727,
+        "wall_tps": 114.74057555420714,
+        "inv_wall_tps": 0.008715312740675314
+      },
+      {
+        "rate": 0.2,
+        "wall_tps": 86.76962904503594,
+        "inv_wall_tps": 0.01152476979567322
+      }
+    ],
+    "C_over_636_assumption": 3.1142434723075474
+  },
+  "acceptor_prediction": {
+    "ftr": 0.0727,
+    "wall_tps_from_slope": 117.31915590523441
+  },
+  "anchors": {
+    "locked_ar_tps": 126.378,
+    "stark_636_unrescued_ceiling": 152.291,
+    "stark_636_projected": 139.2
+  }
+}

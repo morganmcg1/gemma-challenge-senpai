@@ -25,9 +25,9 @@ _HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def _apply(module) -> None:
+    if _HERE not in sys.path:
+        sys.path.insert(0, _HERE)
     try:
-        if _HERE not in sys.path:
-            sys.path.insert(0, _HERE)
         import vllm_attn_group_patch
 
         vllm_attn_group_patch.apply(module)
@@ -36,6 +36,20 @@ def _apply(module) -> None:
 
         logging.getLogger("int4_mtp_drafter.patch").exception(
             "failed to apply attention-group num_heads patch"
+        )
+    # PR #642 de-projection: env-gated (SENPAI_RECOMPUTE_RATE) recompute-acceptor
+    # SPEED probe. No-op when the env var is unset/0, so the shipped serving path
+    # is untouched; a separate try/except so a failure here never breaks the
+    # load-bearing attention-group patch above.
+    try:
+        import vllm_recompute_acceptor_patch
+
+        vllm_recompute_acceptor_patch.apply(module)
+    except Exception:
+        import logging
+
+        logging.getLogger("int4_mtp_drafter.patch").exception(
+            "failed to apply recompute-acceptor SPEED patch"
         )
 
 

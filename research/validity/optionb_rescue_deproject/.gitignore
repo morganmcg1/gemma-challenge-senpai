@@ -1,0 +1,16 @@
+# PR #642 de-projection: keep code + small aggregate result JSONs; ignore scratch.
+*.out
+*.pid
+*.sh
+_result_comment.md
+_chain_*
+_captured_chain*
+# smoke runs and sidecar recompute-stat dirs (reproducible scratch)
+_smoke*/
+*_stat/
+# large per-prompt decode outputs — metrics live in W&B + the *.summary.json/aggregates
+**/decode/
+# raw per-step clock samples — reproducible; medians/values live in the aggregate JSONs
+**/clocks/
+# per-arm raw records (reproducible from the serves)
+records.jsonl

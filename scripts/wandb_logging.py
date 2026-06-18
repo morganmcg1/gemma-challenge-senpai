@@ -109,6 +109,11 @@ def init_wandb_run(
         import wandb
     except ImportError:
         return None
+    # A local ``wandb/`` run-data dir on sys.path (or a venv missing the package)
+    # makes ``import wandb`` resolve to a namespace package with no ``init`` —
+    # degrade gracefully instead of crashing an otherwise compute-complete run.
+    if not hasattr(wandb, "init"):
+        return None
 
     run_config = {
         "agent_id": agent,
