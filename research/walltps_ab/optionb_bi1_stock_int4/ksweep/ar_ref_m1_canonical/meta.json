@@ -1,0 +1,25 @@
+{
+  "kind": "canonical_single_seq_M1_decode_oracle",
+  "purpose": "PR#654 batch-M-stable ar_ref; do NOT overwrite ar_ref_bi1",
+  "num_records": 128,
+  "output_len": 512,
+  "num_completion_tokens": 65536,
+  "capture_wall_s": 870.6937441825867,
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "ref_env": {
+    "VLLM_BATCH_INVARIANT": "1",
+    "VLLM_USE_FLASHINFER_SAMPLER": "0",
+    "SENPAI_REFERENCE_MODE": "1",
+    "MAX_NUM_SEQS": "1"
+  },
+  "request": {
+    "temperature": 0.0,
+    "add_special_tokens": false,
+    "ignore_eos": true,
+    "one_request_at_a_time": true
+  },
+  "served_via": "submission:submissions/int4_mtp_batchinv [spec-off, MAX_NUM_SEQS=1]",
+  "prompt_source": "/workspace/senpai/target/research/walltps_ab/optionb_bi1_stock_int4/ksweep/k5/k5/decode/run00.jsonl",
+  "supersedes_for_canonical_reference": "ar_ref_bi1/decode_outputs.jsonl"
+}
