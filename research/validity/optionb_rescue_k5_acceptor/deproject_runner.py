@@ -348,18 +348,22 @@ def _log_wandb(a, result: dict[str, Any]) -> None:
     except Exception as exc:
         print(f"[wandb] import failed: {exc!r}; JSON only", flush=True)
         return
+    extra_env = result["extra_env"]
     run = init_wandb_run(
         job_type="local_profiling", agent="stark",
         name=a.wandb_name or f"stark/deproject-{a.mode}", group=a.wandb_group,
-        notes=f"PR#642 de-project #636 recompute acceptor ({a.mode}): real served wall_tps cost",
-        config={"pr": 642, "mode": a.mode, "submission": a.submission,
-                "extra_env": result["extra_env"], "n": a.n,
-                "num_prompts": a.num_prompts, "output_len": a.output_len},
+        notes=f"PR#663 K=5 real gap-flag recompute acceptor ({a.mode}): live served "
+              f"wall_tps (harness lineage #642 de-projection)",
+        config={"pr": 663, "harness_lineage_pr": 642, "mode": a.mode,
+                "submission": a.submission, "extra_env": extra_env, "n": a.n,
+                "num_prompts": a.num_prompts, "output_len": a.output_len,
+                "num_speculative_tokens": extra_env.get("NUM_SPECULATIVE_TOKENS"),
+                "analysis_only": True, "official_tps": 0},
     )
     if run is None:
         print("[wandb] disabled; JSON only", flush=True)
         return
-    summary: dict[str, Any] = {}
+    summary: dict[str, Any] = {"analysis_only": 1, "official_tps": 0}
     for lbl, info in result["arms"].items():
         if isinstance(info.get("wall_tps_median"), (int, float)):
             summary[f"arm/{lbl}/wall_tps"] = info["wall_tps_median"]
