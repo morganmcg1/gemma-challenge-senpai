@@ -1,0 +1,413 @@
+{
+  "pr": 736,
+  "analysis_only": true,
+  "official_tps": 0,
+  "device": "NVIDIA A10G",
+  "M_sweep": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    12,
+    16
+  ],
+  "note": "FUSED shapes are the real served GEMMs (vLLM fuses qkv & gate_up). SEP k/v (N=512) are checkpoint-only, never served.",
+  "results": [
+    {
+      "name": "qkv_proj.FUSED(served)",
+      "size_k": 2560,
+      "size_n": 3072,
+      "use_atomic_add": false,
+      "any_divergence_vs_m1": false,
+      "per_m": {
+        "2": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "3": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "4": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "5": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "6": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "7": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "8": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "12": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "16": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      "distinct8_total_bitdiff_vs_own_m1": 0,
+      "distinct8_n_elem": 24576
+    },
+    {
+      "name": "gate_up_proj.FUSED(served)",
+      "size_k": 2560,
+      "size_n": 20480,
+      "use_atomic_add": false,
+      "any_divergence_vs_m1": false,
+      "per_m": {
+        "2": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "3": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "4": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "5": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "6": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "7": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "8": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "12": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "16": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      "distinct8_total_bitdiff_vs_own_m1": 0,
+      "distinct8_n_elem": 163840
+    },
+    {
+      "name": "o_proj(served)",
+      "size_k": 2048,
+      "size_n": 2560,
+      "use_atomic_add": false,
+      "any_divergence_vs_m1": false,
+      "per_m": {
+        "2": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "3": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "4": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "5": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "6": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "7": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "8": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "12": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "16": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      "distinct8_total_bitdiff_vs_own_m1": 0,
+      "distinct8_n_elem": 20480
+    },
+    {
+      "name": "down_proj(served)",
+      "size_k": 10240,
+      "size_n": 2560,
+      "use_atomic_add": false,
+      "any_divergence_vs_m1": false,
+      "per_m": {
+        "2": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "3": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "4": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "5": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "6": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "7": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "8": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "12": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "16": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      "distinct8_total_bitdiff_vs_own_m1": 0,
+      "distinct8_n_elem": 20480
+    },
+    {
+      "name": "lm_head(served)",
+      "size_k": 2560,
+      "size_n": 262144,
+      "use_atomic_add": false,
+      "any_divergence_vs_m1": false,
+      "per_m": {
+        "2": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "3": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "4": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "5": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "6": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "7": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "8": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "12": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "16": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      "distinct8_total_bitdiff_vs_own_m1": 0,
+      "distinct8_n_elem": 2097152
+    },
+    {
+      "name": "k_proj.SEP(N=512,unserved)",
+      "size_k": 2560,
+      "size_n": 512,
+      "use_atomic_add": false,
+      "any_divergence_vs_m1": false,
+      "per_m": {
+        "2": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "3": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "4": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "5": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "6": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "7": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "8": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "12": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "16": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      "distinct8_total_bitdiff_vs_own_m1": 0,
+      "distinct8_n_elem": 4096
+    },
+    {
+      "name": "v_proj.SEP(N=512,unserved)",
+      "size_k": 2560,
+      "size_n": 512,
+      "use_atomic_add": false,
+      "any_divergence_vs_m1": false,
+      "per_m": {
+        "2": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "3": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "4": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "5": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "6": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "7": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "8": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "12": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        },
+        "16": {
+          "n_bitdiff": 0,
+          "frac": 0.0,
+          "max_abs": 0.0
+        }
+      },
+      "distinct8_total_bitdiff_vs_own_m1": 0,
+      "distinct8_n_elem": 4096
+    }
+  ]
+}

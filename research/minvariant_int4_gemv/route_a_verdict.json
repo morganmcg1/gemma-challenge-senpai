@@ -1,0 +1,77 @@
+{
+  "pr": 736,
+  "analysis_only": true,
+  "official_tps": 0,
+  "group": "wirbel-minvariant-int4-gemv",
+  "device": "NVIDIA A10G",
+  "vllm": "0.22.0",
+  "anchor_submission": "int4_g128_lmhead",
+  "anchor_official_tps": 126.378,
+  "anchor_ppl": 2.019,
+  "anchor_wandb": "905tbujn",
+  "job1_locus": {
+    "gemv_is_m_dependent": false,
+    "max_bitdiff_any_served_shape_M_1to16": 0,
+    "faithfulness_median_relerr_vs_fp32dequant": {
+      "down_proj.L0": 0.002186354249715805,
+      "q_proj.L0": 0.0019862158223986626
+    },
+    "m1_run2run_bitexact": true,
+    "distinct_rows_verify_bitexact": true,
+    "attention_m_invariant_under_BI": true,
+    "attention_evidence": "triton_unified_attention use_3d=False for both AR-decode (is_batch_invariant) and K+1 verify (max_seqlen_q>1); same 2D single-segment TILE_SIZE_PREFILL reduction.",
+    "conclusion": "int4 Marlin GEMV is NOT the M-dependence locus; bit-exact M-invariant across all served shapes. Corrects the prior 'M-dependent Marlin GEMM' attribution (#607/#616 inference)."
+  },
+  "job2_buildability": {
+    "m_invariant_gemv_already_exists_as_stock_kernel": true,
+    "cheap_python_knob_to_alter_reduction_schedule": false,
+    "strict_clean_lever_go_nogo": "NO-GO",
+    "go_nogo_binary": 0,
+    "reason": "The stock int4 Marlin GEMV is already maximally M-invariant (bit-exact) AND is not the divergence source; making it 'more invariant' cannot remove a divergence it does not cause."
+  },
+  "job3_overhead": {
+    "pct_added_by_m_invariant_gemv": 0.0,
+    "reason": "no kernel change is made; the stock kernel IS the M-invariant GEMV.",
+    "stock_kernel_m_flat_ratio_t_m7_over_t_m1": {
+      "qkv_proj": 0.988,
+      "o_proj": 0.9852,
+      "gate_up_proj": 1.0074,
+      "down_proj": 0.9976,
+      "lm_head": 1.0186
+    },
+    "memory_or_launch_bound_at_M_le_8": true
+  },
+  "job4_net_official_equiv": {
+    "route_a_strict_clean_official_equiv_tps": 0.0,
+    "margin_over_anchor_strict_clean_tps": 0.0,
+    "speed_preserved_not_clean_anchored_official_equiv": {
+      "5": 265.44989484913486,
+      "6": 260.57800525491706
+    },
+    "existing_divergent_spec_pct_over_anchor": {
+      "5": 110.04438656185008,
+      "6": 106.18937256082313
+    },
+    "note": "route (a) makes NO change, so 'overhead 0%' preserves the EXISTING spec speed (~260 TPS anchored at K=6) -- but that speed is strict-DIVERGENT, and route (a) cannot confer strict-cleanness. So the route-(a) STRICT-CLEAN official-equiv is 0 (no such config)."
+  },
+  "divergence_characterization": {
+    "onset_gap_median_nat": 0.0,
+    "onset_gap_max_nat": 0.25,
+    "frac_onset_le_0p3nat": 1.0,
+    "confident_genuine_flips_at_tau0p3": 0,
+    "nature": "sub-ULP argmax tie-break at exact int4-grid logit ties; benign; 100% rescued at tau=0.3 (downstream-quality-neutral)."
+  },
+  "route_split": {
+    "route_a_minvariant_gemv": "REFUTED (GEMV already invariant; not the locus).",
+    "route_b_tree_verify_at_m1": "remains the strict-clean lever (re-decode accepted prefix at M=1 -> byte-exact by construction) at a speed cost denken #733 quantifies.",
+    "third_option": "since the divergence is benign exact-tie tie-breaks (0 confident flips @ tau=0.3), relaxing strict #319 to a tau-tolerance / downstream-quality gate keeps the full spec speed with no kernel work."
+  },
+  "primary_metric": {
+    "name": "route_a_strict_clean_official_equiv_tps",
+    "value": 0.0
+  },
+  "test_metric": {
+    "name": "buildability_go_nogo",
+    "value": 0
+  }
+}
