@@ -1,0 +1,3514 @@
+{
+  "verdict": "SERVED_RESIDUAL_DIVERGENCE",
+  "reframe": {
+    "literal_served_byteexact": false,
+    "self_consistent_not_byteexact": false,
+    "predominantly_benign_ulp_marginal_confident_tail": true,
+    "confident_flip_frac": 0.028,
+    "confident_flips_all_marginal_3ulp": true,
+    "ppl_bi_neutral": true,
+    "residual_class": "predominantly_benign_ulp_marginal_confident_tail",
+    "named_residual_subop": "MIXED, CUDA-graph-capture-dominant: disabling CUDA graphs removes 81% of the per-token flip hazard (84/128 eager vs 21/128 captured), so capture asymmetry (graph-captured M=1 decode vs non-captured M=K+1 verify taking different attention reduction orders) is the DOMINANT contributor, with a residual M=K adaptive split-KV verify reduction (num_splits>1 at served seq-len, which plain BI=1 does not align) -- NOT the GEMM (land #680). #743's offline byte-exactness held because the prompt_logprobs M=1-shaped proxy avoids BOTH the capture asymmetry and the M=K verify shape.",
+    "bi1_necessary_not_sufficient_for_literal_byteexact": true,
+    "honest_read": "BI=1 batched-verify served spec is NOT 128/128 byte-exact (21/128). PPL is BI-neutral (delta 0.0010%) and the residual is predominantly benign bf16-ULP ties (104/107 onsets at <=2 ULP), BUT it does NOT clear the strict tau=0.3 self-consistency gate: 3/107 confident genuine flips, all at the minimal super-threshold gap (max 0.375 nat = 3 ULP), so the pass is tau-sensitive (0 confident at tau>=0.4). Unlike lawine's publishable-config clean pass (0 confident), the K=6 fire-config served residual keeps a small genuinely-confident tail. BI=1 is necessary but not sufficient for literal served byte-exactness; the num_splits=1 verify fix (land #743; routed to lawine #755) is needed to close even this marginal tail."
+  },
+  "self_consistency": {
+    "tau": 0.3,
+    "n_diverging": 107,
+    "n_probed": 107,
+    "n_len_divergence_only": 0,
+    "confident_genuine_flips": 3,
+    "max_gap_nat": 0.375,
+    "gap_nat_histogram": {
+      "0.0": 39,
+      "0.125": 52,
+      "0.25": 13,
+      "0.375": 3
+    },
+    "frac_pair_is_model_top2": 0.9626168224299065,
+    "self_consistent_pass": false,
+    "confident_records": [
+      {
+        "id": "gpqa_diamond-18c1c5c103",
+        "dataset_index": 81,
+        "first_div": 154,
+        "ref_tok": 236756,
+        "cur_tok": 236766,
+        "top1_logprob": -0.5509410500526428,
+        "top2_logprob": -0.9259410500526428,
+        "gap_nat": 0.375,
+        "confident": true,
+        "ref_rank": 1,
+        "cur_rank": 0,
+        "ref_logprob": -0.9259410500526428,
+        "cur_logprob": -0.5509410500526428,
+        "pair_is_model_top2": true
+      },
+      {
+        "id": "mmlu_pro-00f43b26ac",
+        "dataset_index": 35,
+        "first_div": 98,
+        "ref_tok": 236829,
+        "cur_tok": 140,
+        "top1_logprob": -0.5367536544799805,
+        "top2_logprob": -0.9117536544799805,
+        "gap_nat": 0.375,
+        "confident": true,
+        "ref_rank": 0,
+        "cur_rank": 1,
+        "ref_logprob": -0.5367536544799805,
+        "cur_logprob": -0.9117536544799805,
+        "pair_is_model_top2": true
+      },
+      {
+        "id": "mmlu_pro-012ddc1ffc",
+        "dataset_index": 44,
+        "first_div": 241,
+        "ref_tok": 173908,
+        "cur_tok": 1,
+        "top1_logprob": -1.1058332920074463,
+        "top2_logprob": -1.4808332920074463,
+        "gap_nat": 0.375,
+        "confident": true,
+        "ref_rank": 0,
+        "cur_rank": 2,
+        "ref_logprob": -1.1058332920074463,
+        "cur_logprob": -1.4808332920074463,
+        "pair_is_model_top2": false
+      }
+    ]
+  },
+  "ppl": {
+    "ppl_bi1": 2.0064123648501617,
+    "ppl_bi0": 2.0063921084589826,
+    "ppl_abs_delta_pct_bi1_vs_bi0": 0.001,
+    "ppl_neutral_bi": true,
+    "num_tokens": 61797,
+    "deployed_pruned_head_anchor": 2.019,
+    "note": "absolute PPL is on the loadable full-vocab QAT proxy google/gemma-4-E4B-it-qat-w4a16-ct (NOT the deployed pruned-16k int4_g128_lmhead), so it brackets -- not exactly hits -- 2.019; the load-bearing claim is BI=1 vs BI=0 PPL parity (quality-neutral reduction order, spec-decode does not enter teacher-forced scoring)"
+  },
+  "primary_metric": {
+    "name": "served_spec_bi1_greedy_identity",
+    "value": 0.1640625,
+    "n_match": 21,
+    "n_total": 128
+  },
+  "test_metric": {
+    "name": "served_spec_bi1_tps",
+    "value": 82.26
+  },
+  "bi1_identity": {
+    "n_total": 128,
+    "n_match": 21,
+    "frac": 0.1640625,
+    "n_diverge": 107,
+    "per_token_flip_hazard": 0.003833339304266829,
+    "first_div_min": 0,
+    "first_div_median": 125,
+    "first_div_max": 479,
+    "diverging": [
+      {
+        "id": "aime2026-0015ebeec9",
+        "index": 87,
+        "first_div_pos": 84,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 22241,
+        "ref_tok": 121353
+      },
+      {
+        "id": "aime2026-0e674f51e8",
+        "index": 90,
+        "first_div_pos": 477,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236761,
+        "ref_tok": 236764
+      },
+      {
+        "id": "aime2026-1eaadd490a",
+        "index": 54,
+        "first_div_pos": 23,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 532,
+        "ref_tok": 573
+      },
+      {
+        "id": "aime2026-4d866680f9",
+        "index": 104,
+        "first_div_pos": 229,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 5612,
+        "ref_tok": 107
+      },
+      {
+        "id": "aime2026-51697b0daa",
+        "index": 80,
+        "first_div_pos": 322,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 600,
+        "ref_tok": 18024
+      },
+      {
+        "id": "aime2026-5cc894a0e8",
+        "index": 67,
+        "first_div_pos": 218,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1288,
+        "ref_tok": 2145
+      },
+      {
+        "id": "aime2026-7443669f7e",
+        "index": 118,
+        "first_div_pos": 288,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236783,
+        "ref_tok": 823
+      },
+      {
+        "id": "aime2026-77bffe9f7e",
+        "index": 17,
+        "first_div_pos": 377,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1005,
+        "ref_tok": 109359
+      },
+      {
+        "id": "aime2026-7a1a552fa3",
+        "index": 53,
+        "first_div_pos": 272,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2104,
+        "ref_tok": 621
+      },
+      {
+        "id": "gpqa_diamond-019eb0f05f",
+        "index": 117,
+        "first_div_pos": 31,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1908,
+        "ref_tok": 52801
+      },
+      {
+        "id": "gpqa_diamond-025e20e6e9",
+        "index": 74,
+        "first_div_pos": 61,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236747,
+        "ref_tok": 5129
+      },
+      {
+        "id": "gpqa_diamond-045347c35e",
+        "index": 116,
+        "first_div_pos": 15,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236764,
+        "ref_tok": 568
+      },
+      {
+        "id": "gpqa_diamond-049a3a3426",
+        "index": 25,
+        "first_div_pos": 16,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236787,
+        "ref_tok": 236761
+      },
+      {
+        "id": "gpqa_diamond-051eba2501",
+        "index": 110,
+        "first_div_pos": 201,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 621,
+        "ref_tok": 236785
+      },
+      {
+        "id": "gpqa_diamond-083aa35723",
+        "index": 119,
+        "first_div_pos": 20,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1626,
+        "ref_tok": 1698
+      },
+      {
+        "id": "gpqa_diamond-089a55e5a3",
+        "index": 65,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 38201,
+        "ref_tok": 3465
+      },
+      {
+        "id": "gpqa_diamond-0c1cc6cb8c",
+        "index": 57,
+        "first_div_pos": 76,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 496,
+        "ref_tok": 614
+      },
+      {
+        "id": "gpqa_diamond-0c38e0dd0d",
+        "index": 47,
+        "first_div_pos": 143,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3495,
+        "ref_tok": 1292
+      },
+      {
+        "id": "gpqa_diamond-0caf81b8c8",
+        "index": 83,
+        "first_div_pos": 395,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 893,
+        "ref_tok": 500
+      },
+      {
+        "id": "gpqa_diamond-0dbcc69ff3",
+        "index": 60,
+        "first_div_pos": 0,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 8291,
+        "ref_tok": 818
+      },
+      {
+        "id": "gpqa_diamond-1054cb147f",
+        "index": 89,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3465,
+        "ref_tok": 38201
+      },
+      {
+        "id": "gpqa_diamond-11464d18e1",
+        "index": 79,
+        "first_div_pos": 67,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3904,
+        "ref_tok": 6608
+      },
+      {
+        "id": "gpqa_diamond-123161632f",
+        "index": 2,
+        "first_div_pos": 164,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 607,
+        "ref_tok": 236764
+      },
+      {
+        "id": "gpqa_diamond-13e7c71f8a",
+        "index": 68,
+        "first_div_pos": 155,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 568,
+        "ref_tok": 53121
+      },
+      {
+        "id": "gpqa_diamond-145b51d1c8",
+        "index": 33,
+        "first_div_pos": 37,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 139,
+        "ref_tok": 669
+      },
+      {
+        "id": "gpqa_diamond-14a2ed1ddc",
+        "index": 96,
+        "first_div_pos": 50,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 532,
+        "ref_tok": 6131
+      },
+      {
+        "id": "gpqa_diamond-16464cac70",
+        "index": 11,
+        "first_div_pos": 206,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 609,
+        "ref_tok": 1531
+      },
+      {
+        "id": "gpqa_diamond-17f96c74be",
+        "index": 76,
+        "first_div_pos": 44,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 874,
+        "ref_tok": 18446
+      },
+      {
+        "id": "gpqa_diamond-183797b844",
+        "index": 23,
+        "first_div_pos": 139,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 779,
+        "ref_tok": 4787
+      },
+      {
+        "id": "gpqa_diamond-188c5d2778",
+        "index": 15,
+        "first_div_pos": 479,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2721,
+        "ref_tok": 24638
+      },
+      {
+        "id": "gpqa_diamond-18c1c5c103",
+        "index": 59,
+        "first_div_pos": 154,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236766,
+        "ref_tok": 236756
+      },
+      {
+        "id": "gpqa_diamond-1a5b0ea82d",
+        "index": 115,
+        "first_div_pos": 269,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 532,
+        "ref_tok": 19209
+      },
+      {
+        "id": "gpqa_diamond-1d37a7a51d",
+        "index": 64,
+        "first_div_pos": 367,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 7501,
+        "ref_tok": 83462
+      },
+      {
+        "id": "gpqa_diamond-1f06efeb23",
+        "index": 27,
+        "first_div_pos": 431,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 21343
+      },
+      {
+        "id": "gpqa_diamond-1f101bccd2",
+        "index": 14,
+        "first_div_pos": 116,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 563,
+        "ref_tok": 699
+      },
+      {
+        "id": "gpqa_diamond-20c95dcf30",
+        "index": 32,
+        "first_div_pos": 36,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 77891,
+        "ref_tok": 10483
+      },
+      {
+        "id": "gpqa_diamond-20d48d5f0a",
+        "index": 101,
+        "first_div_pos": 63,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 7075,
+        "ref_tok": 32637
+      },
+      {
+        "id": "gpqa_diamond-21b950759e",
+        "index": 51,
+        "first_div_pos": 21,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1546,
+        "ref_tok": 2390
+      },
+      {
+        "id": "gpqa_diamond-229ffbdb77",
+        "index": 84,
+        "first_div_pos": 15,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236747,
+        "ref_tok": 236800
+      },
+      {
+        "id": "gpqa_diamond-2413c551ec",
+        "index": 98,
+        "first_div_pos": 10,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4716,
+        "ref_tok": 13571
+      },
+      {
+        "id": "gpqa_diamond-254c10ac4f",
+        "index": 91,
+        "first_div_pos": 143,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 9904,
+        "ref_tok": 51508
+      },
+      {
+        "id": "gpqa_diamond-2662eff7a6",
+        "index": 12,
+        "first_div_pos": 84,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 568,
+        "ref_tok": 107
+      },
+      {
+        "id": "gpqa_diamond-27ae63a859",
+        "index": 4,
+        "first_div_pos": 104,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 131910,
+        "ref_tok": 21343
+      },
+      {
+        "id": "gpqa_diamond-28fc44d6ca",
+        "index": 40,
+        "first_div_pos": 170,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236743,
+        "ref_tok": 609
+      },
+      {
+        "id": "gpqa_diamond-29e6a1db07",
+        "index": 123,
+        "first_div_pos": 45,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1883,
+        "ref_tok": 11165
+      },
+      {
+        "id": "gpqa_diamond-29ffae74d2",
+        "index": 103,
+        "first_div_pos": 41,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 15152,
+        "ref_tok": 77613
+      },
+      {
+        "id": "gpqa_diamond-2c52c770af",
+        "index": 10,
+        "first_div_pos": 56,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 549,
+        "ref_tok": 621
+      },
+      {
+        "id": "gpqa_diamond-2c9af2ef64",
+        "index": 113,
+        "first_div_pos": 329,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1018,
+        "ref_tok": 2595
+      },
+      {
+        "id": "gpqa_diamond-2d7be3cbb3",
+        "index": 45,
+        "first_div_pos": 255,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 692,
+        "ref_tok": 44877
+      },
+      {
+        "id": "gpqa_diamond-2e6a2497fe",
+        "index": 124,
+        "first_div_pos": 402,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2754,
+        "ref_tok": 659
+      },
+      {
+        "id": "gpqa_diamond-32bdeb2d67",
+        "index": 78,
+        "first_div_pos": 190,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 568,
+        "ref_tok": 653
+      },
+      {
+        "id": "gpqa_diamond-339602fd0a",
+        "index": 24,
+        "first_div_pos": 122,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236800,
+        "ref_tok": 236778
+      },
+      {
+        "id": "gpqa_diamond-35cf9161cc",
+        "index": 108,
+        "first_div_pos": 52,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 7032,
+        "ref_tok": 174290
+      },
+      {
+        "id": "gpqa_diamond-3785b9c93c",
+        "index": 125,
+        "first_div_pos": 2,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 496
+      },
+      {
+        "id": "gpqa_diamond-40b2b50a3c",
+        "index": 93,
+        "first_div_pos": 121,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6112,
+        "ref_tok": 3224
+      },
+      {
+        "id": "gpqa_diamond-415ea17892",
+        "index": 26,
+        "first_div_pos": 79,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13366,
+        "ref_tok": 4314
+      },
+      {
+        "id": "gpqa_diamond-41b609bbf5",
+        "index": 70,
+        "first_div_pos": 165,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236787,
+        "ref_tok": 532
+      },
+      {
+        "id": "gpqa_diamond-42da82ad5c",
+        "index": 48,
+        "first_div_pos": 224,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 56820,
+        "ref_tok": 138951
+      },
+      {
+        "id": "gpqa_diamond-435ccdce7c",
+        "index": 5,
+        "first_div_pos": 195,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 573,
+        "ref_tok": 236761
+      },
+      {
+        "id": "mmlu_pro-000c2031fb",
+        "index": 102,
+        "first_div_pos": 60,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1573,
+        "ref_tok": 43880
+      },
+      {
+        "id": "mmlu_pro-0018946c8f",
+        "index": 88,
+        "first_div_pos": 369,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 684,
+        "ref_tok": 528
+      },
+      {
+        "id": "mmlu_pro-00193f8f1a",
+        "index": 92,
+        "first_div_pos": 176,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 17772,
+        "ref_tok": 15621
+      },
+      {
+        "id": "mmlu_pro-001c076309",
+        "index": 109,
+        "first_div_pos": 44,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6412,
+        "ref_tok": 10916
+      },
+      {
+        "id": "mmlu_pro-001de7fe6d",
+        "index": 8,
+        "first_div_pos": 105,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 9873,
+        "ref_tok": 578
+      },
+      {
+        "id": "mmlu_pro-0021813419",
+        "index": 41,
+        "first_div_pos": 116,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 12457,
+        "ref_tok": 8249
+      },
+      {
+        "id": "mmlu_pro-00283ccffa",
+        "index": 38,
+        "first_div_pos": 13,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236884,
+        "ref_tok": 236779
+      },
+      {
+        "id": "mmlu_pro-0029a311d9",
+        "index": 18,
+        "first_div_pos": 189,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236789,
+        "ref_tok": 5181
+      },
+      {
+        "id": "mmlu_pro-0034f38591",
+        "index": 122,
+        "first_div_pos": 36,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1804,
+        "ref_tok": 116833
+      },
+      {
+        "id": "mmlu_pro-00473cb41c",
+        "index": 29,
+        "first_div_pos": 52,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 609,
+        "ref_tok": 236787
+      },
+      {
+        "id": "mmlu_pro-0051ec2069",
+        "index": 37,
+        "first_div_pos": 276,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 106,
+        "ref_tok": 236787
+      },
+      {
+        "id": "mmlu_pro-005aa2e50a",
+        "index": 46,
+        "first_div_pos": 188,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 62886,
+        "ref_tok": 132094
+      },
+      {
+        "id": "mmlu_pro-006afecaed",
+        "index": 95,
+        "first_div_pos": 446,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2165,
+        "ref_tok": 7350
+      },
+      {
+        "id": "mmlu_pro-006f3a2112",
+        "index": 0,
+        "first_div_pos": 375,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1847,
+        "ref_tok": 23093
+      },
+      {
+        "id": "mmlu_pro-007967631e",
+        "index": 120,
+        "first_div_pos": 137,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1882,
+        "ref_tok": 10081
+      },
+      {
+        "id": "mmlu_pro-0081aeb9c3",
+        "index": 7,
+        "first_div_pos": 244,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 5143
+      },
+      {
+        "id": "mmlu_pro-00996c6808",
+        "index": 61,
+        "first_div_pos": 103,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236800,
+        "ref_tok": 236812
+      },
+      {
+        "id": "mmlu_pro-009a805a5c",
+        "index": 62,
+        "first_div_pos": 463,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 7132,
+        "ref_tok": 236764
+      },
+      {
+        "id": "mmlu_pro-00a1016454",
+        "index": 22,
+        "first_div_pos": 133,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4077,
+        "ref_tok": 45755
+      },
+      {
+        "id": "mmlu_pro-00a31c2d18",
+        "index": 20,
+        "first_div_pos": 128,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 990,
+        "ref_tok": 4716
+      },
+      {
+        "id": "mmlu_pro-00a3fcc287",
+        "index": 28,
+        "first_div_pos": 148,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 44281,
+        "ref_tok": 2803
+      },
+      {
+        "id": "mmlu_pro-00a66b167b",
+        "index": 69,
+        "first_div_pos": 125,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 107,
+        "ref_tok": 5978
+      },
+      {
+        "id": "mmlu_pro-00aa833125",
+        "index": 63,
+        "first_div_pos": 379,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6595,
+        "ref_tok": 5557
+      },
+      {
+        "id": "mmlu_pro-00ace67f1c",
+        "index": 55,
+        "first_div_pos": 108,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3819,
+        "ref_tok": 13336
+      },
+      {
+        "id": "mmlu_pro-00af7f3a6e",
+        "index": 112,
+        "first_div_pos": 41,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 496,
+        "ref_tok": 506
+      },
+      {
+        "id": "mmlu_pro-00be15d2e6",
+        "index": 86,
+        "first_div_pos": 259,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 14864,
+        "ref_tok": 506
+      },
+      {
+        "id": "mmlu_pro-00c0d4c77c",
+        "index": 82,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 609,
+        "ref_tok": 874
+      },
+      {
+        "id": "mmlu_pro-00ca4f358b",
+        "index": 52,
+        "first_div_pos": 194,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3165,
+        "ref_tok": 6220
+      },
+      {
+        "id": "mmlu_pro-00cc01bdee",
+        "index": 58,
+        "first_div_pos": 110,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236764,
+        "ref_tok": 7728
+      },
+      {
+        "id": "mmlu_pro-00df6227d5",
+        "index": 36,
+        "first_div_pos": 43,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 8798,
+        "ref_tok": 41399
+      },
+      {
+        "id": "mmlu_pro-00f43b26ac",
+        "index": 44,
+        "first_div_pos": 98,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 140,
+        "ref_tok": 236829
+      },
+      {
+        "id": "mmlu_pro-00ff96e757",
+        "index": 3,
+        "first_div_pos": 91,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 232965,
+        "ref_tok": 2217
+      },
+      {
+        "id": "mmlu_pro-0100cdf2db",
+        "index": 73,
+        "first_div_pos": 108,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4077,
+        "ref_tok": 506
+      },
+      {
+        "id": "mmlu_pro-0103bcb5b1",
+        "index": 16,
+        "first_div_pos": 81,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 108,
+        "ref_tok": 5612
+      },
+      {
+        "id": "mmlu_pro-01067be999",
+        "index": 30,
+        "first_div_pos": 103,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 53121,
+        "ref_tok": 699
+      },
+      {
+        "id": "mmlu_pro-011f1fbfc3",
+        "index": 21,
+        "first_div_pos": 58,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236828,
+        "ref_tok": 236800
+      },
+      {
+        "id": "mmlu_pro-0122522953",
+        "index": 66,
+        "first_div_pos": 45,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4135,
+        "ref_tok": 3756
+      },
+      {
+        "id": "mmlu_pro-012ddc1ffc",
+        "index": 77,
+        "first_div_pos": 241,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1,
+        "ref_tok": 173908
+      },
+      {
+        "id": "mmlu_pro-012f0d5c8d",
+        "index": 1,
+        "first_div_pos": 153,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1602,
+        "ref_tok": 13874
+      },
+      {
+        "id": "mmlu_pro-0135836ee0",
+        "index": 50,
+        "first_div_pos": 77,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 1091
+      },
+      {
+        "id": "mmlu_pro-01370cf98d",
+        "index": 114,
+        "first_div_pos": 230,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 692,
+        "ref_tok": 609
+      },
+      {
+        "id": "mmlu_pro-0141cfa289",
+        "index": 34,
+        "first_div_pos": 427,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1,
+        "ref_tok": 173908
+      },
+      {
+        "id": "mmlu_pro-0151fb8117",
+        "index": 9,
+        "first_div_pos": 465,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2089,
+        "ref_tok": 624
+      },
+      {
+        "id": "mmlu_pro-016fd5e6ff",
+        "index": 31,
+        "first_div_pos": 84,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 568,
+        "ref_tok": 528
+      },
+      {
+        "id": "mmlu_pro-0171f1222a",
+        "index": 71,
+        "first_div_pos": 186,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 59542,
+        "ref_tok": 5888
+      },
+      {
+        "id": "mmlu_pro-0171fd441d",
+        "index": 85,
+        "first_div_pos": 235,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3956,
+        "ref_tok": 1698
+      },
+      {
+        "id": "mmlu_pro-0177a31370",
+        "index": 106,
+        "first_div_pos": 397,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4661,
+        "ref_tok": 2100
+      },
+      {
+        "id": "mmlu_pro-017bdb86b2",
+        "index": 81,
+        "first_div_pos": 148,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236795,
+        "ref_tok": 105999
+      }
+    ]
+  },
+  "bi0_control_identity": {
+    "n_total": 128,
+    "n_match": 24,
+    "frac": 0.1875,
+    "n_diverge": 104,
+    "per_token_flip_hazard": 0.0034233048057932852,
+    "first_div_min": 0,
+    "first_div_median": 136,
+    "first_div_max": 509,
+    "diverging": [
+      {
+        "id": "aime2026-0015ebeec9",
+        "index": 87,
+        "first_div_pos": 84,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 9100,
+        "ref_tok": 121353
+      },
+      {
+        "id": "aime2026-0e674f51e8",
+        "index": 90,
+        "first_div_pos": 413,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 20946,
+        "ref_tok": 3225
+      },
+      {
+        "id": "aime2026-2822569975",
+        "index": 100,
+        "first_div_pos": 437,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4348,
+        "ref_tok": 154745
+      },
+      {
+        "id": "aime2026-4d866680f9",
+        "index": 104,
+        "first_div_pos": 2,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236796,
+        "ref_tok": 236753
+      },
+      {
+        "id": "aime2026-51697b0daa",
+        "index": 80,
+        "first_div_pos": 454,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2104,
+        "ref_tok": 236795
+      },
+      {
+        "id": "aime2026-5cc894a0e8",
+        "index": 67,
+        "first_div_pos": 473,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6492,
+        "ref_tok": 8514
+      },
+      {
+        "id": "aime2026-5e99c1f8e3",
+        "index": 56,
+        "first_div_pos": 39,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 532,
+        "ref_tok": 22516
+      },
+      {
+        "id": "aime2026-7443669f7e",
+        "index": 118,
+        "first_div_pos": 257,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 32176,
+        "ref_tok": 6535
+      },
+      {
+        "id": "aime2026-77bffe9f7e",
+        "index": 17,
+        "first_div_pos": 111,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236795,
+        "ref_tok": 578
+      },
+      {
+        "id": "aime2026-7a1a552fa3",
+        "index": 53,
+        "first_div_pos": 272,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2104,
+        "ref_tok": 621
+      },
+      {
+        "id": "aime2026-8742f9e684",
+        "index": 99,
+        "first_div_pos": 509,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3498,
+        "ref_tok": 1447
+      },
+      {
+        "id": "gpqa_diamond-019eb0f05f",
+        "index": 117,
+        "first_div_pos": 31,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 52801,
+        "ref_tok": 1908
+      },
+      {
+        "id": "gpqa_diamond-025e20e6e9",
+        "index": 74,
+        "first_div_pos": 300,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13629,
+        "ref_tok": 496
+      },
+      {
+        "id": "gpqa_diamond-03946dc24e",
+        "index": 39,
+        "first_div_pos": 173,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 139,
+        "ref_tok": 609
+      },
+      {
+        "id": "gpqa_diamond-045347c35e",
+        "index": 116,
+        "first_div_pos": 265,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 21753,
+        "ref_tok": 39251
+      },
+      {
+        "id": "gpqa_diamond-049a3a3426",
+        "index": 25,
+        "first_div_pos": 16,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236787,
+        "ref_tok": 236761
+      },
+      {
+        "id": "gpqa_diamond-083aa35723",
+        "index": 119,
+        "first_div_pos": 131,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 528,
+        "ref_tok": 573
+      },
+      {
+        "id": "gpqa_diamond-089a55e5a3",
+        "index": 65,
+        "first_div_pos": 27,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 37919,
+        "ref_tok": 506
+      },
+      {
+        "id": "gpqa_diamond-0c1cc6cb8c",
+        "index": 57,
+        "first_div_pos": 348,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 531,
+        "ref_tok": 653
+      },
+      {
+        "id": "gpqa_diamond-0c38e0dd0d",
+        "index": 47,
+        "first_div_pos": 52,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 23298,
+        "ref_tok": 8487
+      },
+      {
+        "id": "gpqa_diamond-0caf81b8c8",
+        "index": 83,
+        "first_div_pos": 395,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 893,
+        "ref_tok": 500
+      },
+      {
+        "id": "gpqa_diamond-0dbcc69ff3",
+        "index": 60,
+        "first_div_pos": 0,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 818,
+        "ref_tok": 8291
+      },
+      {
+        "id": "gpqa_diamond-11464d18e1",
+        "index": 79,
+        "first_div_pos": 67,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6608,
+        "ref_tok": 3904
+      },
+      {
+        "id": "gpqa_diamond-123161632f",
+        "index": 2,
+        "first_div_pos": 136,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236769,
+        "ref_tok": 4020
+      },
+      {
+        "id": "gpqa_diamond-126561d6b5",
+        "index": 126,
+        "first_div_pos": 217,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6953,
+        "ref_tok": 94396
+      },
+      {
+        "id": "gpqa_diamond-145b51d1c8",
+        "index": 33,
+        "first_div_pos": 37,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 669,
+        "ref_tok": 139
+      },
+      {
+        "id": "gpqa_diamond-14a2ed1ddc",
+        "index": 96,
+        "first_div_pos": 185,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2338,
+        "ref_tok": 506
+      },
+      {
+        "id": "gpqa_diamond-16bcf4c712",
+        "index": 105,
+        "first_div_pos": 14,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236787,
+        "ref_tok": 529
+      },
+      {
+        "id": "gpqa_diamond-17f96c74be",
+        "index": 76,
+        "first_div_pos": 81,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236768,
+        "ref_tok": 7620
+      },
+      {
+        "id": "gpqa_diamond-183797b844",
+        "index": 23,
+        "first_div_pos": 213,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1354,
+        "ref_tok": 11711
+      },
+      {
+        "id": "gpqa_diamond-188c5d2778",
+        "index": 15,
+        "first_div_pos": 31,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6145,
+        "ref_tok": 5065
+      },
+      {
+        "id": "gpqa_diamond-1d37a7a51d",
+        "index": 64,
+        "first_div_pos": 14,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 30304,
+        "ref_tok": 3821
+      },
+      {
+        "id": "gpqa_diamond-1f06efeb23",
+        "index": 27,
+        "first_div_pos": 10,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 529,
+        "ref_tok": 573
+      },
+      {
+        "id": "gpqa_diamond-1f101bccd2",
+        "index": 14,
+        "first_div_pos": 326,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236764,
+        "ref_tok": 815
+      },
+      {
+        "id": "gpqa_diamond-20c95dcf30",
+        "index": 32,
+        "first_div_pos": 36,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 77891,
+        "ref_tok": 10483
+      },
+      {
+        "id": "gpqa_diamond-20d48d5f0a",
+        "index": 101,
+        "first_div_pos": 433,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 573,
+        "ref_tok": 6185
+      },
+      {
+        "id": "gpqa_diamond-229ffbdb77",
+        "index": 84,
+        "first_div_pos": 231,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 496,
+        "ref_tok": 609
+      },
+      {
+        "id": "gpqa_diamond-2413c551ec",
+        "index": 98,
+        "first_div_pos": 107,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1288,
+        "ref_tok": 14785
+      },
+      {
+        "id": "gpqa_diamond-254c10ac4f",
+        "index": 91,
+        "first_div_pos": 143,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 51508,
+        "ref_tok": 9904
+      },
+      {
+        "id": "gpqa_diamond-27ae63a859",
+        "index": 4,
+        "first_div_pos": 104,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 131910,
+        "ref_tok": 21343
+      },
+      {
+        "id": "gpqa_diamond-29e6a1db07",
+        "index": 123,
+        "first_div_pos": 45,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 11165,
+        "ref_tok": 1883
+      },
+      {
+        "id": "gpqa_diamond-29ffae74d2",
+        "index": 103,
+        "first_div_pos": 135,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13074,
+        "ref_tok": 12205
+      },
+      {
+        "id": "gpqa_diamond-2c52c770af",
+        "index": 10,
+        "first_div_pos": 439,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3401,
+        "ref_tok": 4515
+      },
+      {
+        "id": "gpqa_diamond-2c9af2ef64",
+        "index": 113,
+        "first_div_pos": 274,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1458,
+        "ref_tok": 1883
+      },
+      {
+        "id": "gpqa_diamond-2e6a2497fe",
+        "index": 124,
+        "first_div_pos": 420,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 20218,
+        "ref_tok": 1941
+      },
+      {
+        "id": "gpqa_diamond-32bdeb2d67",
+        "index": 78,
+        "first_div_pos": 86,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 10167,
+        "ref_tok": 837
+      },
+      {
+        "id": "gpqa_diamond-339602fd0a",
+        "index": 24,
+        "first_div_pos": 122,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236778,
+        "ref_tok": 236800
+      },
+      {
+        "id": "gpqa_diamond-35cf9161cc",
+        "index": 108,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3465,
+        "ref_tok": 38201
+      },
+      {
+        "id": "gpqa_diamond-364ddb1397",
+        "index": 35,
+        "first_div_pos": 76,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2314,
+        "ref_tok": 29232
+      },
+      {
+        "id": "gpqa_diamond-3785b9c93c",
+        "index": 125,
+        "first_div_pos": 450,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 531,
+        "ref_tok": 236761
+      },
+      {
+        "id": "gpqa_diamond-40b2b50a3c",
+        "index": 93,
+        "first_div_pos": 188,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 10615,
+        "ref_tok": 19544
+      },
+      {
+        "id": "gpqa_diamond-415ea17892",
+        "index": 26,
+        "first_div_pos": 272,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 9866,
+        "ref_tok": 4314
+      },
+      {
+        "id": "gpqa_diamond-41b609bbf5",
+        "index": 70,
+        "first_div_pos": 165,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236787,
+        "ref_tok": 532
+      },
+      {
+        "id": "gpqa_diamond-435ccdce7c",
+        "index": 5,
+        "first_div_pos": 377,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 61807,
+        "ref_tok": 69489
+      },
+      {
+        "id": "mmlu_pro-000c2031fb",
+        "index": 102,
+        "first_div_pos": 0,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 8291,
+        "ref_tok": 5471
+      },
+      {
+        "id": "mmlu_pro-00193f8f1a",
+        "index": 92,
+        "first_div_pos": 176,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 15621,
+        "ref_tok": 17772
+      },
+      {
+        "id": "mmlu_pro-001c076309",
+        "index": 109,
+        "first_div_pos": 51,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 37249,
+        "ref_tok": 225060
+      },
+      {
+        "id": "mmlu_pro-001de7fe6d",
+        "index": 8,
+        "first_div_pos": 173,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236795,
+        "ref_tok": 2104
+      },
+      {
+        "id": "mmlu_pro-0021813419",
+        "index": 41,
+        "first_div_pos": 47,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1646,
+        "ref_tok": 65057
+      },
+      {
+        "id": "mmlu_pro-00283ccffa",
+        "index": 38,
+        "first_div_pos": 13,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236779,
+        "ref_tok": 236884
+      },
+      {
+        "id": "mmlu_pro-0029a311d9",
+        "index": 18,
+        "first_div_pos": 377,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1894,
+        "ref_tok": 8595
+      },
+      {
+        "id": "mmlu_pro-0034f38591",
+        "index": 122,
+        "first_div_pos": 36,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1804,
+        "ref_tok": 116833
+      },
+      {
+        "id": "mmlu_pro-00473cb41c",
+        "index": 29,
+        "first_div_pos": 52,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 609,
+        "ref_tok": 236787
+      },
+      {
+        "id": "mmlu_pro-006afecaed",
+        "index": 95,
+        "first_div_pos": 27,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1651,
+        "ref_tok": 6984
+      },
+      {
+        "id": "mmlu_pro-006f3a2112",
+        "index": 0,
+        "first_div_pos": 83,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4077,
+        "ref_tok": 21940
+      },
+      {
+        "id": "mmlu_pro-007967631e",
+        "index": 120,
+        "first_div_pos": 377,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 795,
+        "ref_tok": 15741
+      },
+      {
+        "id": "mmlu_pro-0080dcd4f5",
+        "index": 19,
+        "first_div_pos": 262,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 9873,
+        "ref_tok": 818
+      },
+      {
+        "id": "mmlu_pro-0081aeb9c3",
+        "index": 7,
+        "first_div_pos": 298,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 711,
+        "ref_tok": 496
+      },
+      {
+        "id": "mmlu_pro-00996c6808",
+        "index": 61,
+        "first_div_pos": 44,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2849,
+        "ref_tok": 573
+      },
+      {
+        "id": "mmlu_pro-009a805a5c",
+        "index": 62,
+        "first_div_pos": 143,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 108,
+        "ref_tok": 107
+      },
+      {
+        "id": "mmlu_pro-00a1016454",
+        "index": 22,
+        "first_div_pos": 133,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4077,
+        "ref_tok": 45755
+      },
+      {
+        "id": "mmlu_pro-00a31c2d18",
+        "index": 20,
+        "first_div_pos": 45,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 17202,
+        "ref_tok": 496
+      },
+      {
+        "id": "mmlu_pro-00a3fcc287",
+        "index": 28,
+        "first_div_pos": 17,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 5663,
+        "ref_tok": 2238
+      },
+      {
+        "id": "mmlu_pro-00a66b167b",
+        "index": 69,
+        "first_div_pos": 69,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 17096
+      },
+      {
+        "id": "mmlu_pro-00aa833125",
+        "index": 63,
+        "first_div_pos": 20,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 28404,
+        "ref_tok": 563
+      },
+      {
+        "id": "mmlu_pro-00ace67f1c",
+        "index": 55,
+        "first_div_pos": 108,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13336,
+        "ref_tok": 3819
+      },
+      {
+        "id": "mmlu_pro-00af7f3a6e",
+        "index": 112,
+        "first_div_pos": 97,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3715,
+        "ref_tok": 2311
+      },
+      {
+        "id": "mmlu_pro-00be15d2e6",
+        "index": 86,
+        "first_div_pos": 0,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 8291,
+        "ref_tok": 818
+      },
+      {
+        "id": "mmlu_pro-00c0d4c77c",
+        "index": 82,
+        "first_div_pos": 170,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2500,
+        "ref_tok": 236795
+      },
+      {
+        "id": "mmlu_pro-00c4a9d20a",
+        "index": 97,
+        "first_div_pos": 346,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 32451,
+        "ref_tok": 12126
+      },
+      {
+        "id": "mmlu_pro-00ca4f358b",
+        "index": 52,
+        "first_div_pos": 71,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 17202,
+        "ref_tok": 5676
+      },
+      {
+        "id": "mmlu_pro-00cc01bdee",
+        "index": 58,
+        "first_div_pos": 160,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 10684,
+        "ref_tok": 3731
+      },
+      {
+        "id": "mmlu_pro-00df6227d5",
+        "index": 36,
+        "first_div_pos": 193,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 919,
+        "ref_tok": 2963
+      },
+      {
+        "id": "mmlu_pro-00ebfcaa67",
+        "index": 127,
+        "first_div_pos": 485,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6047,
+        "ref_tok": 57362
+      },
+      {
+        "id": "mmlu_pro-00f43b26ac",
+        "index": 44,
+        "first_div_pos": 136,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 659,
+        "ref_tok": 3014
+      },
+      {
+        "id": "mmlu_pro-00ff96e757",
+        "index": 3,
+        "first_div_pos": 50,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236744,
+        "ref_tok": 74860
+      },
+      {
+        "id": "mmlu_pro-0100cdf2db",
+        "index": 73,
+        "first_div_pos": 143,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 23420,
+        "ref_tok": 4338
+      },
+      {
+        "id": "mmlu_pro-0103bcb5b1",
+        "index": 16,
+        "first_div_pos": 81,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 108,
+        "ref_tok": 5612
+      },
+      {
+        "id": "mmlu_pro-01067be999",
+        "index": 30,
+        "first_div_pos": 326,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236743,
+        "ref_tok": 1156
+      },
+      {
+        "id": "mmlu_pro-0115478516",
+        "index": 94,
+        "first_div_pos": 85,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3292,
+        "ref_tok": 7834
+      },
+      {
+        "id": "mmlu_pro-011f1fbfc3",
+        "index": 21,
+        "first_div_pos": 315,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 532,
+        "ref_tok": 837
+      },
+      {
+        "id": "mmlu_pro-0122522953",
+        "index": 66,
+        "first_div_pos": 6,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3495,
+        "ref_tok": 52491
+      },
+      {
+        "id": "mmlu_pro-0126e0f8a7",
+        "index": 43,
+        "first_div_pos": 504,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6422,
+        "ref_tok": 1262
+      },
+      {
+        "id": "mmlu_pro-012ddc1ffc",
+        "index": 77,
+        "first_div_pos": 241,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 173908,
+        "ref_tok": 1
+      },
+      {
+        "id": "mmlu_pro-012eaca73b",
+        "index": 42,
+        "first_div_pos": 65,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236780,
+        "ref_tok": 10192
+      },
+      {
+        "id": "mmlu_pro-012f0d5c8d",
+        "index": 1,
+        "first_div_pos": 181,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 669,
+        "ref_tok": 3763
+      },
+      {
+        "id": "mmlu_pro-0135836ee0",
+        "index": 50,
+        "first_div_pos": 142,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2098,
+        "ref_tok": 4248
+      },
+      {
+        "id": "mmlu_pro-0141cfa289",
+        "index": 34,
+        "first_div_pos": 411,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 106,
+        "ref_tok": 1
+      },
+      {
+        "id": "mmlu_pro-0151fb8117",
+        "index": 9,
+        "first_div_pos": 95,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2721,
+        "ref_tok": 236761
+      },
+      {
+        "id": "mmlu_pro-016fd5e6ff",
+        "index": 31,
+        "first_div_pos": 79,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 653,
+        "ref_tok": 568
+      },
+      {
+        "id": "mmlu_pro-0171f1222a",
+        "index": 71,
+        "first_div_pos": 376,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236761,
+        "ref_tok": 3571
+      },
+      {
+        "id": "mmlu_pro-0171fd441d",
+        "index": 85,
+        "first_div_pos": 142,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 672,
+        "ref_tok": 625
+      },
+      {
+        "id": "mmlu_pro-0177a31370",
+        "index": 106,
+        "first_div_pos": 396,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236829,
+        "ref_tok": 1018
+      },
+      {
+        "id": "mmlu_pro-017bdb86b2",
+        "index": 81,
+        "first_div_pos": 14,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 22241,
+        "ref_tok": 32814
+      }
+    ]
+  },
+  "ar_bi_xcheck_identity": {
+    "n_total": 128,
+    "n_match": 18,
+    "frac": 0.140625,
+    "n_diverge": 110,
+    "per_token_flip_hazard": 0.004158318527199184,
+    "first_div_min": 0,
+    "first_div_median": 122,
+    "first_div_max": 499,
+    "diverging": [
+      {
+        "id": "aime2026-0015ebeec9",
+        "index": 87,
+        "first_div_pos": 126,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 563,
+        "ref_tok": 609
+      },
+      {
+        "id": "aime2026-1eaadd490a",
+        "index": 54,
+        "first_div_pos": 23,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 573,
+        "ref_tok": 532
+      },
+      {
+        "id": "aime2026-2822569975",
+        "index": 100,
+        "first_div_pos": 437,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4348,
+        "ref_tok": 154745
+      },
+      {
+        "id": "aime2026-4d866680f9",
+        "index": 104,
+        "first_div_pos": 229,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 107,
+        "ref_tok": 5612
+      },
+      {
+        "id": "aime2026-51697b0daa",
+        "index": 80,
+        "first_div_pos": 306,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 43916,
+        "ref_tok": 818
+      },
+      {
+        "id": "aime2026-5cc894a0e8",
+        "index": 67,
+        "first_div_pos": 231,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 14491,
+        "ref_tok": 3498
+      },
+      {
+        "id": "aime2026-5e99c1f8e3",
+        "index": 56,
+        "first_div_pos": 39,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 532,
+        "ref_tok": 22516
+      },
+      {
+        "id": "aime2026-7443669f7e",
+        "index": 118,
+        "first_div_pos": 288,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 823,
+        "ref_tok": 236783
+      },
+      {
+        "id": "aime2026-77bffe9f7e",
+        "index": 17,
+        "first_div_pos": 111,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236795,
+        "ref_tok": 578
+      },
+      {
+        "id": "aime2026-7968ea2f49",
+        "index": 49,
+        "first_div_pos": 86,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3756,
+        "ref_tok": 70785
+      },
+      {
+        "id": "gpqa_diamond-019eb0f05f",
+        "index": 117,
+        "first_div_pos": 31,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 52801,
+        "ref_tok": 1908
+      },
+      {
+        "id": "gpqa_diamond-025e20e6e9",
+        "index": 74,
+        "first_div_pos": 61,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 5129,
+        "ref_tok": 236747
+      },
+      {
+        "id": "gpqa_diamond-045347c35e",
+        "index": 116,
+        "first_div_pos": 265,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 21753,
+        "ref_tok": 39251
+      },
+      {
+        "id": "gpqa_diamond-049a3a3426",
+        "index": 25,
+        "first_div_pos": 400,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 874,
+        "ref_tok": 21724
+      },
+      {
+        "id": "gpqa_diamond-051eba2501",
+        "index": 110,
+        "first_div_pos": 201,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236785,
+        "ref_tok": 621
+      },
+      {
+        "id": "gpqa_diamond-083aa35723",
+        "index": 119,
+        "first_div_pos": 27,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 53121,
+        "ref_tok": 568
+      },
+      {
+        "id": "gpqa_diamond-089a55e5a3",
+        "index": 65,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3465,
+        "ref_tok": 38201
+      },
+      {
+        "id": "gpqa_diamond-0c1cc6cb8c",
+        "index": 57,
+        "first_div_pos": 4,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 8376,
+        "ref_tok": 1076
+      },
+      {
+        "id": "gpqa_diamond-0c38e0dd0d",
+        "index": 47,
+        "first_div_pos": 52,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 23298,
+        "ref_tok": 8487
+      },
+      {
+        "id": "gpqa_diamond-0dbcc69ff3",
+        "index": 60,
+        "first_div_pos": 0,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 818,
+        "ref_tok": 8291
+      },
+      {
+        "id": "gpqa_diamond-1054cb147f",
+        "index": 89,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 38201,
+        "ref_tok": 3465
+      },
+      {
+        "id": "gpqa_diamond-11464d18e1",
+        "index": 79,
+        "first_div_pos": 67,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6608,
+        "ref_tok": 3904
+      },
+      {
+        "id": "gpqa_diamond-123161632f",
+        "index": 2,
+        "first_div_pos": 4,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13842,
+        "ref_tok": 563
+      },
+      {
+        "id": "gpqa_diamond-126561d6b5",
+        "index": 126,
+        "first_div_pos": 142,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 44157,
+        "ref_tok": 35727
+      },
+      {
+        "id": "gpqa_diamond-13e7c71f8a",
+        "index": 68,
+        "first_div_pos": 155,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 53121,
+        "ref_tok": 568
+      },
+      {
+        "id": "gpqa_diamond-145b51d1c8",
+        "index": 33,
+        "first_div_pos": 37,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 669,
+        "ref_tok": 139
+      },
+      {
+        "id": "gpqa_diamond-14a2ed1ddc",
+        "index": 96,
+        "first_div_pos": 22,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 16995,
+        "ref_tok": 119767
+      },
+      {
+        "id": "gpqa_diamond-16464cac70",
+        "index": 11,
+        "first_div_pos": 238,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13757,
+        "ref_tok": 5065
+      },
+      {
+        "id": "gpqa_diamond-16bcf4c712",
+        "index": 105,
+        "first_div_pos": 14,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236787,
+        "ref_tok": 529
+      },
+      {
+        "id": "gpqa_diamond-17f96c74be",
+        "index": 76,
+        "first_div_pos": 106,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 528,
+        "ref_tok": 1724
+      },
+      {
+        "id": "gpqa_diamond-183797b844",
+        "index": 23,
+        "first_div_pos": 139,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4787,
+        "ref_tok": 779
+      },
+      {
+        "id": "gpqa_diamond-188c5d2778",
+        "index": 15,
+        "first_div_pos": 31,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6145,
+        "ref_tok": 5065
+      },
+      {
+        "id": "gpqa_diamond-18c1c5c103",
+        "index": 59,
+        "first_div_pos": 206,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 15082,
+        "ref_tok": 89642
+      },
+      {
+        "id": "gpqa_diamond-1a5b0ea82d",
+        "index": 115,
+        "first_div_pos": 169,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 9767,
+        "ref_tok": 3292
+      },
+      {
+        "id": "gpqa_diamond-1d37a7a51d",
+        "index": 64,
+        "first_div_pos": 369,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 12853,
+        "ref_tok": 15195
+      },
+      {
+        "id": "gpqa_diamond-1f101bccd2",
+        "index": 14,
+        "first_div_pos": 75,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 9113,
+        "ref_tok": 5830
+      },
+      {
+        "id": "gpqa_diamond-20c95dcf30",
+        "index": 32,
+        "first_div_pos": 330,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 14285,
+        "ref_tok": 11325
+      },
+      {
+        "id": "gpqa_diamond-20d48d5f0a",
+        "index": 101,
+        "first_div_pos": 433,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 573,
+        "ref_tok": 6185
+      },
+      {
+        "id": "gpqa_diamond-21b950759e",
+        "index": 51,
+        "first_div_pos": 21,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2390,
+        "ref_tok": 1546
+      },
+      {
+        "id": "gpqa_diamond-229ffbdb77",
+        "index": 84,
+        "first_div_pos": 15,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236800,
+        "ref_tok": 236747
+      },
+      {
+        "id": "gpqa_diamond-2413c551ec",
+        "index": 98,
+        "first_div_pos": 116,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 910
+      },
+      {
+        "id": "gpqa_diamond-254c10ac4f",
+        "index": 91,
+        "first_div_pos": 143,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 51508,
+        "ref_tok": 9904
+      },
+      {
+        "id": "gpqa_diamond-27ae63a859",
+        "index": 4,
+        "first_div_pos": 128,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 837,
+        "ref_tok": 52726
+      },
+      {
+        "id": "gpqa_diamond-28fc44d6ca",
+        "index": 40,
+        "first_div_pos": 170,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 609,
+        "ref_tok": 236743
+      },
+      {
+        "id": "gpqa_diamond-29e6a1db07",
+        "index": 123,
+        "first_div_pos": 45,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 11165,
+        "ref_tok": 1883
+      },
+      {
+        "id": "gpqa_diamond-29ffae74d2",
+        "index": 103,
+        "first_div_pos": 41,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 77613,
+        "ref_tok": 15152
+      },
+      {
+        "id": "gpqa_diamond-2c52c770af",
+        "index": 10,
+        "first_div_pos": 56,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 621,
+        "ref_tok": 549
+      },
+      {
+        "id": "gpqa_diamond-2c9af2ef64",
+        "index": 113,
+        "first_div_pos": 326,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 40424,
+        "ref_tok": 29329
+      },
+      {
+        "id": "gpqa_diamond-2d7be3cbb3",
+        "index": 45,
+        "first_div_pos": 346,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 5213,
+        "ref_tok": 134792
+      },
+      {
+        "id": "gpqa_diamond-2e6a2497fe",
+        "index": 124,
+        "first_div_pos": 24,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236764,
+        "ref_tok": 528
+      },
+      {
+        "id": "gpqa_diamond-32bdeb2d67",
+        "index": 78,
+        "first_div_pos": 198,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 563,
+        "ref_tok": 740
+      },
+      {
+        "id": "gpqa_diamond-339602fd0a",
+        "index": 24,
+        "first_div_pos": 122,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236778,
+        "ref_tok": 236800
+      },
+      {
+        "id": "gpqa_diamond-35cf9161cc",
+        "index": 108,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3465,
+        "ref_tok": 38201
+      },
+      {
+        "id": "gpqa_diamond-364ddb1397",
+        "index": 35,
+        "first_div_pos": 76,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2314,
+        "ref_tok": 29232
+      },
+      {
+        "id": "gpqa_diamond-3785b9c93c",
+        "index": 125,
+        "first_div_pos": 2,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 496,
+        "ref_tok": 506
+      },
+      {
+        "id": "gpqa_diamond-40b2b50a3c",
+        "index": 93,
+        "first_div_pos": 121,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3224,
+        "ref_tok": 6112
+      },
+      {
+        "id": "gpqa_diamond-415ea17892",
+        "index": 26,
+        "first_div_pos": 79,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4314,
+        "ref_tok": 13366
+      },
+      {
+        "id": "gpqa_diamond-41b609bbf5",
+        "index": 70,
+        "first_div_pos": 321,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 653,
+        "ref_tok": 5645
+      },
+      {
+        "id": "gpqa_diamond-42da82ad5c",
+        "index": 48,
+        "first_div_pos": 138,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4068,
+        "ref_tok": 3847
+      },
+      {
+        "id": "gpqa_diamond-435ccdce7c",
+        "index": 5,
+        "first_div_pos": 195,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236761,
+        "ref_tok": 573
+      },
+      {
+        "id": "mmlu_pro-000c2031fb",
+        "index": 102,
+        "first_div_pos": 322,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 496
+      },
+      {
+        "id": "mmlu_pro-0018946c8f",
+        "index": 88,
+        "first_div_pos": 369,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 528,
+        "ref_tok": 684
+      },
+      {
+        "id": "mmlu_pro-00193f8f1a",
+        "index": 92,
+        "first_div_pos": 176,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 15621,
+        "ref_tok": 17772
+      },
+      {
+        "id": "mmlu_pro-001c076309",
+        "index": 109,
+        "first_div_pos": 39,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 914,
+        "ref_tok": 506
+      },
+      {
+        "id": "mmlu_pro-001de7fe6d",
+        "index": 8,
+        "first_div_pos": 105,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 578,
+        "ref_tok": 9873
+      },
+      {
+        "id": "mmlu_pro-0021813419",
+        "index": 41,
+        "first_div_pos": 116,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 8249,
+        "ref_tok": 12457
+      },
+      {
+        "id": "mmlu_pro-00283ccffa",
+        "index": 38,
+        "first_div_pos": 13,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236779,
+        "ref_tok": 236884
+      },
+      {
+        "id": "mmlu_pro-0029a311d9",
+        "index": 18,
+        "first_div_pos": 189,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 5181,
+        "ref_tok": 236789
+      },
+      {
+        "id": "mmlu_pro-0034f38591",
+        "index": 122,
+        "first_div_pos": 229,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 30755,
+        "ref_tok": 4940
+      },
+      {
+        "id": "mmlu_pro-00473cb41c",
+        "index": 29,
+        "first_div_pos": 323,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 6481,
+        "ref_tok": 10081
+      },
+      {
+        "id": "mmlu_pro-0051ec2069",
+        "index": 37,
+        "first_div_pos": 150,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 563,
+        "ref_tok": 531
+      },
+      {
+        "id": "mmlu_pro-005aa2e50a",
+        "index": 46,
+        "first_div_pos": 188,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 132094,
+        "ref_tok": 62886
+      },
+      {
+        "id": "mmlu_pro-006afecaed",
+        "index": 95,
+        "first_div_pos": 334,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2324,
+        "ref_tok": 2165
+      },
+      {
+        "id": "mmlu_pro-006f3a2112",
+        "index": 0,
+        "first_div_pos": 83,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4077,
+        "ref_tok": 21940
+      },
+      {
+        "id": "mmlu_pro-007967631e",
+        "index": 120,
+        "first_div_pos": 137,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 10081,
+        "ref_tok": 1882
+      },
+      {
+        "id": "mmlu_pro-0081aeb9c3",
+        "index": 7,
+        "first_div_pos": 244,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 5143,
+        "ref_tok": 506
+      },
+      {
+        "id": "mmlu_pro-00996c6808",
+        "index": 61,
+        "first_div_pos": 103,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236812,
+        "ref_tok": 236800
+      },
+      {
+        "id": "mmlu_pro-009a805a5c",
+        "index": 62,
+        "first_div_pos": 463,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236764,
+        "ref_tok": 7132
+      },
+      {
+        "id": "mmlu_pro-00a1016454",
+        "index": 22,
+        "first_div_pos": 347,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2084,
+        "ref_tok": 845
+      },
+      {
+        "id": "mmlu_pro-00a31c2d18",
+        "index": 20,
+        "first_div_pos": 128,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4716,
+        "ref_tok": 990
+      },
+      {
+        "id": "mmlu_pro-00a3fcc287",
+        "index": 28,
+        "first_div_pos": 181,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1807,
+        "ref_tok": 157684
+      },
+      {
+        "id": "mmlu_pro-00a66b167b",
+        "index": 69,
+        "first_div_pos": 94,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 669,
+        "ref_tok": 5978
+      },
+      {
+        "id": "mmlu_pro-00aa833125",
+        "index": 63,
+        "first_div_pos": 20,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 28404,
+        "ref_tok": 563
+      },
+      {
+        "id": "mmlu_pro-00ace67f1c",
+        "index": 55,
+        "first_div_pos": 108,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13336,
+        "ref_tok": 3819
+      },
+      {
+        "id": "mmlu_pro-00af7f3a6e",
+        "index": 112,
+        "first_div_pos": 315,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 4512,
+        "ref_tok": 26285
+      },
+      {
+        "id": "mmlu_pro-00be15d2e6",
+        "index": 86,
+        "first_div_pos": 201,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 13148,
+        "ref_tok": 1800
+      },
+      {
+        "id": "mmlu_pro-00c0d4c77c",
+        "index": 82,
+        "first_div_pos": 8,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 874,
+        "ref_tok": 609
+      },
+      {
+        "id": "mmlu_pro-00c4a9d20a",
+        "index": 97,
+        "first_div_pos": 480,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 10929,
+        "ref_tok": 9832
+      },
+      {
+        "id": "mmlu_pro-00ca4f358b",
+        "index": 52,
+        "first_div_pos": 71,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 17202,
+        "ref_tok": 5676
+      },
+      {
+        "id": "mmlu_pro-00cc01bdee",
+        "index": 58,
+        "first_div_pos": 110,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 7728,
+        "ref_tok": 236764
+      },
+      {
+        "id": "mmlu_pro-00df6227d5",
+        "index": 36,
+        "first_div_pos": 120,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 901,
+        "ref_tok": 573
+      },
+      {
+        "id": "mmlu_pro-00f43b26ac",
+        "index": 44,
+        "first_div_pos": 499,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 107,
+        "ref_tok": 1
+      },
+      {
+        "id": "mmlu_pro-00ff96e757",
+        "index": 3,
+        "first_div_pos": 91,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 2217,
+        "ref_tok": 232965
+      },
+      {
+        "id": "mmlu_pro-0100cdf2db",
+        "index": 73,
+        "first_div_pos": 108,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 506,
+        "ref_tok": 4077
+      },
+      {
+        "id": "mmlu_pro-0103bcb5b1",
+        "index": 16,
+        "first_div_pos": 109,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 7248,
+        "ref_tok": 5254
+      },
+      {
+        "id": "mmlu_pro-01067be999",
+        "index": 30,
+        "first_div_pos": 42,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 563,
+        "ref_tok": 21500
+      },
+      {
+        "id": "mmlu_pro-0115478516",
+        "index": 94,
+        "first_div_pos": 9,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 236787,
+        "ref_tok": 531
+      },
+      {
+        "id": "mmlu_pro-011f1fbfc3",
+        "index": 21,
+        "first_div_pos": 29,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 34915,
+        "ref_tok": 156708
+      },
+      {
+        "id": "mmlu_pro-0122522953",
+        "index": 66,
+        "first_div_pos": 266,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 808,
+        "ref_tok": 3165
+      },
+      {
+        "id": "mmlu_pro-012ddc1ffc",
+        "index": 77,
+        "first_div_pos": 241,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 173908,
+        "ref_tok": 1
+      },
+      {
+        "id": "mmlu_pro-012eaca73b",
+        "index": 42,
+        "first_div_pos": 127,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3136,
+        "ref_tok": 2142
+      },
+      {
+        "id": "mmlu_pro-012f0d5c8d",
+        "index": 1,
+        "first_div_pos": 181,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 669,
+        "ref_tok": 3763
+      },
+      {
+        "id": "mmlu_pro-0135836ee0",
+        "index": 50,
+        "first_div_pos": 77,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1091,
+        "ref_tok": 506
+      },
+      {
+        "id": "mmlu_pro-01370cf98d",
+        "index": 114,
+        "first_div_pos": 230,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 609,
+        "ref_tok": 692
+      },
+      {
+        "id": "mmlu_pro-0141cfa289",
+        "index": 34,
+        "first_div_pos": 427,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 173908,
+        "ref_tok": 1
+      },
+      {
+        "id": "mmlu_pro-0151fb8117",
+        "index": 9,
+        "first_div_pos": 3,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1003,
+        "ref_tok": 573
+      },
+      {
+        "id": "mmlu_pro-016fd5e6ff",
+        "index": 31,
+        "first_div_pos": 79,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 653,
+        "ref_tok": 568
+      },
+      {
+        "id": "mmlu_pro-0171f1222a",
+        "index": 71,
+        "first_div_pos": 60,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 3904,
+        "ref_tok": 4135
+      },
+      {
+        "id": "mmlu_pro-0171fd441d",
+        "index": 85,
+        "first_div_pos": 235,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 1698,
+        "ref_tok": 3956
+      },
+      {
+        "id": "mmlu_pro-0177a31370",
+        "index": 106,
+        "first_div_pos": 497,
+        "len_spec": 512,
+        "len_ref": 512,
+        "spec_tok": 577,
+        "ref_tok": 735
+      }
+    ]
+  },
+  "determinism_control": {
+    "identity": {
+      "n_total": 128,
+      "n_match": 128,
+      "frac": 1.0,
+      "n_diverge": 0,
+      "per_token_flip_hazard": 0.0,
+      "first_div_min": null,
+      "first_div_median": null,
+      "first_div_max": null,
+      "diverging": []
+    },
+    "deterministic": true,
+    "tps_rep": 78.2863,
+    "floor_frac": 1.0
+  },
+  "eager_mechanism": {
+    "identity": {
+      "n_total": 128,
+      "n_match": 84,
+      "frac": 0.65625,
+      "n_diverge": 44,
+      "per_token_flip_hazard": 0.0007292616226071103,
+      "first_div_min": 126,
+      "first_div_median": 413,
+      "first_div_max": 511,
+      "diverging": [
+        {
+          "id": "gpqa_diamond-019eb0f05f",
+          "index": 117,
+          "first_div_pos": 383,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 69703,
+          "ref_tok": 10996
+        },
+        {
+          "id": "gpqa_diamond-03946dc24e",
+          "index": 39,
+          "first_div_pos": 393,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 740,
+          "ref_tok": 1161
+        },
+        {
+          "id": "gpqa_diamond-083aa35723",
+          "index": 119,
+          "first_div_pos": 353,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 1456,
+          "ref_tok": 236764
+        },
+        {
+          "id": "gpqa_diamond-089a55e5a3",
+          "index": 65,
+          "first_div_pos": 319,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 1314,
+          "ref_tok": 236769
+        },
+        {
+          "id": "gpqa_diamond-0c38e0dd0d",
+          "index": 47,
+          "first_div_pos": 397,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 16783,
+          "ref_tok": 19142
+        },
+        {
+          "id": "gpqa_diamond-1054cb147f",
+          "index": 89,
+          "first_div_pos": 407,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 3292,
+          "ref_tok": 31836
+        },
+        {
+          "id": "gpqa_diamond-11464d18e1",
+          "index": 79,
+          "first_div_pos": 461,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 31084,
+          "ref_tok": 202642
+        },
+        {
+          "id": "gpqa_diamond-123161632f",
+          "index": 2,
+          "first_div_pos": 269,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 657,
+          "ref_tok": 77891
+        },
+        {
+          "id": "gpqa_diamond-126561d6b5",
+          "index": 126,
+          "first_div_pos": 476,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 33720,
+          "ref_tok": 8376
+        },
+        {
+          "id": "gpqa_diamond-145b51d1c8",
+          "index": 33,
+          "first_div_pos": 320,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 192915,
+          "ref_tok": 563
+        },
+        {
+          "id": "gpqa_diamond-14a2ed1ddc",
+          "index": 96,
+          "first_div_pos": 470,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 107,
+          "ref_tok": 1637
+        },
+        {
+          "id": "gpqa_diamond-16464cac70",
+          "index": 11,
+          "first_div_pos": 378,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 609,
+          "ref_tok": 506
+        },
+        {
+          "id": "gpqa_diamond-17f96c74be",
+          "index": 76,
+          "first_div_pos": 488,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 623,
+          "ref_tok": 3538
+        },
+        {
+          "id": "gpqa_diamond-183797b844",
+          "index": 23,
+          "first_div_pos": 438,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 79363,
+          "ref_tok": 87602
+        },
+        {
+          "id": "gpqa_diamond-18c1c5c103",
+          "index": 59,
+          "first_div_pos": 454,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 506,
+          "ref_tok": 31637
+        },
+        {
+          "id": "gpqa_diamond-1d37a7a51d",
+          "index": 64,
+          "first_div_pos": 284,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 10139,
+          "ref_tok": 35717
+        },
+        {
+          "id": "gpqa_diamond-20d48d5f0a",
+          "index": 101,
+          "first_div_pos": 431,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 16746,
+          "ref_tok": 607
+        },
+        {
+          "id": "gpqa_diamond-2c52c770af",
+          "index": 10,
+          "first_div_pos": 439,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 4515,
+          "ref_tok": 3401
+        },
+        {
+          "id": "gpqa_diamond-2e6a2497fe",
+          "index": 124,
+          "first_div_pos": 126,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 529,
+          "ref_tok": 8299
+        },
+        {
+          "id": "gpqa_diamond-32bdeb2d67",
+          "index": 78,
+          "first_div_pos": 432,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 496,
+          "ref_tok": 506
+        },
+        {
+          "id": "gpqa_diamond-3785b9c93c",
+          "index": 125,
+          "first_div_pos": 469,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 34390,
+          "ref_tok": 18520
+        },
+        {
+          "id": "gpqa_diamond-415ea17892",
+          "index": 26,
+          "first_div_pos": 495,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 16085,
+          "ref_tok": 4191
+        },
+        {
+          "id": "gpqa_diamond-41b609bbf5",
+          "index": 70,
+          "first_div_pos": 435,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 2678,
+          "ref_tok": 608
+        },
+        {
+          "id": "gpqa_diamond-42da82ad5c",
+          "index": 48,
+          "first_div_pos": 224,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 138951,
+          "ref_tok": 56820
+        },
+        {
+          "id": "mmlu_pro-000c2031fb",
+          "index": 102,
+          "first_div_pos": 468,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 653,
+          "ref_tok": 236786
+        },
+        {
+          "id": "mmlu_pro-001de7fe6d",
+          "index": 8,
+          "first_div_pos": 511,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 609,
+          "ref_tok": 9441
+        },
+        {
+          "id": "mmlu_pro-0021813419",
+          "index": 41,
+          "first_div_pos": 286,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 75096,
+          "ref_tok": 28507
+        },
+        {
+          "id": "mmlu_pro-00473cb41c",
+          "index": 29,
+          "first_div_pos": 169,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 1174,
+          "ref_tok": 108
+        },
+        {
+          "id": "mmlu_pro-006afecaed",
+          "index": 95,
+          "first_div_pos": 334,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 2165,
+          "ref_tok": 2324
+        },
+        {
+          "id": "mmlu_pro-006f3a2112",
+          "index": 0,
+          "first_div_pos": 502,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 1590,
+          "ref_tok": 573
+        },
+        {
+          "id": "mmlu_pro-009a805a5c",
+          "index": 62,
+          "first_div_pos": 487,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 506,
+          "ref_tok": 7132
+        },
+        {
+          "id": "mmlu_pro-00a1016454",
+          "index": 22,
+          "first_div_pos": 408,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 506,
+          "ref_tok": 1800
+        },
+        {
+          "id": "mmlu_pro-00a66b167b",
+          "index": 69,
+          "first_div_pos": 396,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 8665,
+          "ref_tok": 1594
+        },
+        {
+          "id": "mmlu_pro-00aa833125",
+          "index": 63,
+          "first_div_pos": 510,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 106,
+          "ref_tok": 1
+        },
+        {
+          "id": "mmlu_pro-00be15d2e6",
+          "index": 86,
+          "first_div_pos": 413,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 993,
+          "ref_tok": 506
+        },
+        {
+          "id": "mmlu_pro-00c0d4c77c",
+          "index": 82,
+          "first_div_pos": 441,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 236812,
+          "ref_tok": 236770
+        },
+        {
+          "id": "mmlu_pro-00c4a9d20a",
+          "index": 97,
+          "first_div_pos": 341,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 6131,
+          "ref_tok": 568
+        },
+        {
+          "id": "mmlu_pro-00ca4f358b",
+          "index": 52,
+          "first_div_pos": 372,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 15517,
+          "ref_tok": 563
+        },
+        {
+          "id": "mmlu_pro-00df6227d5",
+          "index": 36,
+          "first_div_pos": 345,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 88803,
+          "ref_tok": 3495
+        },
+        {
+          "id": "mmlu_pro-00ff96e757",
+          "index": 3,
+          "first_div_pos": 465,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 5467,
+          "ref_tok": 506
+        },
+        {
+          "id": "mmlu_pro-013ba75cb2",
+          "index": 107,
+          "first_div_pos": 400,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 563,
+          "ref_tok": 236764
+        },
+        {
+          "id": "mmlu_pro-0141cfa289",
+          "index": 34,
+          "first_div_pos": 424,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 1,
+          "ref_tok": 106
+        },
+        {
+          "id": "mmlu_pro-0177a31370",
+          "index": 106,
+          "first_div_pos": 249,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 6192,
+          "ref_tok": 2744
+        },
+        {
+          "id": "mmlu_pro-017bdb86b2",
+          "index": 81,
+          "first_div_pos": 465,
+          "len_spec": 512,
+          "len_ref": 512,
+          "spec_tok": 106,
+          "ref_tok": 1
+        }
+      ]
+    },
+    "transfers_eager": false,
+    "tps_spec": 23.7828,
+    "tps_arref": 19.9928,
+    "cudagraph_spec_hazard": 0.003833339304266829,
+    "eager_spec_hazard": 0.0007292616226071103,
+    "cudagraph_capture_hazard_share": 0.8098,
+    "mechanism": "MIXED_CUDAGRAPH_DOMINANT_VERIFY_RESIDUAL"
+  },
+  "tps": {
+    "bi1_spec": 82.26,
+    "bi0_spec": 88.3544,
+    "bi1_arref": 78.261,
+    "bi0_arref": 95.2821,
+    "decode_tax_pct_bi1_vs_bi0": 6.898,
+    "bi1_spec_clears_126378": false,
+    "bi0_spec_clears_126378": false,
+    "locked_tps": 126.378
+  },
+  "arms": {
+    "bi1_arref": {
+      "tag": "bi1_spec0",
+      "bi": 1,
+      "spec": 0,
+      "output_tps": 78.261,
+      "n_prompts": 128,
+      "output_len": 512,
+      "peak_gpu_mem_mib": 19513,
+      "backend_line": "(EngineCore pid=1273537) INFO 06-19 16:07:44 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.",
+      "spec_line": ""
+    },
+    "bi1_spec": {
+      "tag": "bi1_spec1",
+      "bi": 1,
+      "spec": 1,
+      "output_tps": 82.26,
+      "n_prompts": 128,
+      "output_len": 512,
+      "peak_gpu_mem_mib": 19543,
+      "backend_line": "(EngineCore pid=1286160) INFO 06-19 16:37:46 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.",
+      "spec_line": "(EngineCore pid=1286160) INFO 06-19 16:37:28 [core.py:112] Initializing a V1 LLM engine (v0.22.0) with config: model='/senpai-run/home/student-land/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', speculative_config=SpeculativeConfig(method='ngram', model=None, num_spec_tokens=6), tokenizer='/senpai-run/home/student-land/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=True, quantization=compressed-tensors, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=gemma-4-e4b-it, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::plamo2_mamba_mixer', 'vllm::qwen_gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::kda_attention', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 8, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, moe_backend='auto', linear_backend='auto')"
+    },
+    "bi0_arref": {
+      "tag": "bi0_spec0",
+      "bi": 0,
+      "spec": 0,
+      "output_tps": 95.2821,
+      "n_prompts": 128,
+      "output_len": 512,
+      "peak_gpu_mem_mib": 19489,
+      "backend_line": "(EngineCore pid=1280575) INFO 06-19 16:23:38 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.",
+      "spec_line": ""
+    },
+    "bi0_spec": {
+      "tag": "bi0_spec1",
+      "bi": 0,
+      "spec": 1,
+      "output_tps": 88.3544,
+      "n_prompts": 128,
+      "output_len": 512,
+      "peak_gpu_mem_mib": 19537,
+      "backend_line": "(EngineCore pid=1291834) INFO 06-19 16:52:58 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.",
+      "spec_line": "(EngineCore pid=1291834) INFO 06-19 16:52:40 [core.py:112] Initializing a V1 LLM engine (v0.22.0) with config: model='/senpai-run/home/student-land/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', speculative_config=SpeculativeConfig(method='ngram', model=None, num_spec_tokens=6), tokenizer='/senpai-run/home/student-land/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=True, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=compressed-tensors, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False), seed=0, served_model_name=gemma-4-e4b-it, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::plamo2_mamba_mixer', 'vllm::qwen_gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::kda_attention', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'size_asserts': False, 'alignment_asserts': False, 'scalar_asserts': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False}, 'max_cudagraph_capture_size': 8, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, moe_backend='auto', linear_backend='auto')"
+    }
+  }
+}
