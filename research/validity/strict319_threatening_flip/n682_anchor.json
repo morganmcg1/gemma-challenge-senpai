@@ -1,0 +1,28 @@
+{
+  "_doc": "Authorized cross-read (#666) of wirbel #682 (run ezvgx3et, wirbel/specbreak-VERDICT) -- AGGREGATE retention only. #694 reconciles its targeted enriched-subset flip directionality against this aggregate symmetric-reshuffle claim. NOT a fire, does NOT relax #319.",
+  "run_id": "ezvgx3et",
+  "run_name": "wirbel/specbreak-VERDICT",
+  "group": "specbreak-quality-materiality-wirbel",
+  "aggregate_end_to_end_retention": {
+    "aime": 1.0,
+    "gpqa_diamond": 0.9569892473118279,
+    "mmlu_pro": 0.9857142857142857,
+    "gsm8k": 0.9928825622775801,
+    "worst_leg": "gpqa_diamond",
+    "worst_retention": 0.9569892473118279,
+    "worst_retention_ci95_lo": 0.7728558319432081
+  },
+  "break_geometry": {
+    "specbreak_token_break_rate": 0.5170135498046875,
+    "specbreak_seq_divergence_rate": 0.828125,
+    "median_first_break_position": 140
+  },
+  "combined_bodybreak_ratio": {
+    "aime": 3.333333333333333,
+    "gpqa_diamond": 0.8584701098070083,
+    "mmlu_pro": 1.0257172588077894,
+    "gsm8k": 1.0371361659417866
+  },
+  "break_caused_new_515_gate_failures": 0,
+  "reconciliation_logic": "#682 is aggregate over ALL breaks (~128 prompts); high retention (worst 0.957 gpqa) with high token_break_rate (0.517) => most token-level breaks heal at the answer level, net quality ~= preserved (symmetric reshuffle, R2W ~= W2R, zero new 515-gate failures). #694 deliberately enriches for the answer-THREATENING tail (content-forks incl. seq_ratio 0.0, + sharpest gpqa/aime heals), so #694 flip rate is an UPPER-tail probe, expected >= #682 aggregate. Consistency test: even on the worst forks, if answers mostly PRESERVE, or if flips are BENIGN/net-neutral (R2W ~= W2R), that corroborates #682. A large net-R2W excess on the enriched subset that #682's aggregate retention cannot accommodate would be the only inconsistency."
+}

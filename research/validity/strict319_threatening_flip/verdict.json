@@ -1,0 +1,63 @@
+{
+  "verdict": "THREATENING_FLIPS_SCORE_NEUTRAL",
+  "one_line": "On the MOST answer-threatening strict-#319 subset (16 hand-picked content-forks + sharpest gpqa/aime heals), re-decoded at full 6144-tok natural EOS, ZERO flips damage the score: flip_r2w_count=0. The 4 real both-commit flips are 2 W2R (spec FIXED an AR error) + 2 BENIGN (both wrong). Corroborates wirbel #682's aggregate net-neutral / symmetric-reshuffle claim.",
+
+  "counts": {
+    "n_flagged": 16,
+    "n_both_commit": 13,
+    "preserved_count": 9,
+    "flip_count_both_commit": 4,
+    "flip_r2w_count": 0,
+    "flip_w2r_count": 2,
+    "flip_benign_count": 2,
+    "no_commit_count": 3,
+    "threatening_answer_flip_frac_literal": 0.3125,
+    "threatening_answer_flip_frac_both_commit": 0.3077
+  },
+
+  "flips_detail": [
+    {"id": "gpqa_diamond-0dbcc69ff3", "topic": "oscillating spheroid charge radiation", "spec_method": "suffix6", "gold": "B", "ar": "C", "spec": "B", "direction": "W2R", "note": "spec correct; AR's naive-dipole C is wrong (spheroid is a higher multipole, lambda^-6)"},
+    {"id": "gpqa_diamond-35cf9161cc", "topic": "transit+occultation max orbital period", "spec_method": "ngram5", "gold": "B", "ar": "A", "spec": "B", "direction": "W2R", "note": "spec correct; AR wrong"},
+    {"id": "gpqa_diamond-14a2ed1ddc", "topic": "Substance X isotope chemistry (n=p vs N=Z heal)", "spec_method": "suffix6", "gold": "A", "ar": "C", "spec": "B", "direction": "BENIGN", "note": "both wrong, different wrong answers"},
+    {"id": "mmlu_pro-00193f8f1a", "topic": "compressible air-duct flow velocity + mass flow", "spec_method": "suffix6", "gold": "I", "ar": "H", "spec": "J", "direction": "BENIGN", "note": "both wrong, adjacent wrong answers"}
+  ],
+
+  "no_commit_detail": [
+    {"id": "aime2026-5e99c1f8e3", "spec_method": "ngram5", "ar": "None@6144(length)", "spec": "num:37", "why": "AR did not emit ANSWER within 6144 tok (finish=length); spec committed. Asymmetric-commit instrument artifact, NOT a semantic flip. Leaks into the literal spec!=AR frac (the +1 over the 4 both-commit flips)."},
+    {"id": "aime2026-8742f9e684", "spec_method": "suffix6", "ar": "None@6144(length)", "spec": "None@6144(length)", "why": "both arms hit the 6144 cap before ANSWER -- hard AIME needing >6144 tok of reasoning (#685: aime median 3783 but tail is long)"},
+    {"id": "aime2026-1eaadd490a", "spec_method": "suffix6", "ar": "None@6144(length)", "spec": "None@6144(length)", "why": "same instrument limit"}
+  ],
+
+  "gold_provenance": {
+    "all_question_match_ratio": 1.0,
+    "gpqa_diamond": "inspect_evals.gpqa.get_gpqa_diamond_dataset(shuffle_choices=False) -- canonical openaipublic CSV (the #643/#598 harness gold), choices[0]=correct; gated Idavidrein repo unreachable from this token, canonical source used instead",
+    "mmlu_pro": "TIGER-Lab/MMLU-Pro test split via datasets-server /search, options[answer_index]=correct",
+    "letter_mapping": "gold matched by TEXT to THIS prompt's option lettering (the #694 eval set shuffles option order independently of source), so gold letter is comparable to #689's extracted ANSWER letter",
+    "audit_file": "gold_audit.json",
+    "hand_adjudication_used": false,
+    "hand_adjudication_note": "explicitly avoided -- my naive dipole physics gave C for gpqa-0dbcc69ff3 but authoritative gold is B; the spec stack was right and I was wrong, which is exactly why only canonical gold is trusted"
+  },
+
+  "reconciliation_682": {
+    "reconciliation_consistent": 1,
+    "n682_run": "ezvgx3et (wirbel/specbreak-VERDICT)",
+    "n682_worst_leg_retention_gpqa": 0.9569892473118279,
+    "n682_aime_retention": 1.0,
+    "n682_mmlu_retention": 0.9857142857142857,
+    "n682_break_caused_new_515_gate_failures": 0,
+    "n682_token_break_rate": 0.5170135498046875,
+    "logic": "#682 aggregates over ALL breaks (~128 prompts): high end-to-end retention (worst 0.957 gpqa) despite high token_break_rate (0.517) => most token-level breaks heal at the answer level with net-neutral direction (R2W ~= W2R) and ZERO new 515-gate failures. #694 is the UPPER-TAIL probe: it enriches for exactly the answer-threatening forks/heals, so its flip rate (~0.31) is far above the aggregate -- yet even here flip_r2w_count=0 and net direction favors spec (+2 W2R, 0 R2W). The enriched upper tail showing zero score damage is the strongest possible corroboration of #682's aggregate net-neutrality; no inconsistency."
+  },
+
+  "caveats": [
+    "TINY, deliberately NON-representative subset (16 prompts hand-picked as the worst forks/heals) -- this measures the UPPER TAIL of answer threat, not a population flip rate. The +2 W2R net is NOT a claim that spec improves accuracy; it is evidence the worst-case forks are not score-damaging.",
+    "3/16 are NO_COMMIT (all AIME) because the answer needs >6144 reasoning tokens -- an instrument limit, not a null result. 1 of these (5e99c1f8e3) inflates the literal spec!=AR frac to 0.3125 vs the both-commit 0.3077.",
+    "Single greedy decode per arm (temp=0, deterministic); no seed variance. The flip set is the specific tie-breaks of this served stack (#4 int4_g128_lmhead + BI + TRITON_ATTN).",
+    "Gold resolved only for the 4 flips (PRESERVED contribute 0 to R2W by construction). PRESERVED answer-correctness was not graded."
+  ],
+
+  "boundary": "analysis_only: a measured flip count is a strict-#319 policy SURFACE for the human's relaxation decision, NOT a fire and does NOT relax #319. No HF Job, no submission, no served-file change, official_tps=0.",
+
+  "n682_aggregate_flip_frac": 0.043,
+  "reconciliation_consistent": 1
+}
