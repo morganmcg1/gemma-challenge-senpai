@@ -1,0 +1,111 @@
+{
+  "pr": 729,
+  "lever": "fp8_int8_kv_cache_decode",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "no_hf_job": true,
+  "stack": {
+    "checkpoint": "int4_g128_lmhead (compressed-tensors w4a16)",
+    "gpu": "A10G (sm_86, Ampere)",
+    "vllm": "0.22.0",
+    "attn_backend": "TRITON_ATTN (forced by heterogeneous head dims)"
+  },
+  "feasibility": {
+    "fp8_e4m3": {
+      "runnable": false,
+      "reason": "Triton on sm_86 (A10G/Ampere) cannot emit fp8e4nv (e4m3); the KV write/quant kernel store dtype is unsupported.",
+      "layer": "hardware/triton_codegen",
+      "compiled_fails": true,
+      "eager_fails": true,
+      "supported_fp8_dtypes_on_sm86": [
+        "fp8e4b15",
+        "fp8e5"
+      ],
+      "error_signature": "type fp8e4nv not supported in this architecture",
+      "eager_error_line": "[rank0]: ValueError(\"type fp8e4nv not supported in this architecture. The supported fp8 dtypes are ('fp8e4b15', 'fp8e5')\")"
+    },
+    "fp8_e5m2": {
+      "runnable": false,
+      "reason": "vLLM 0.22.0 hard-blocks fp8_e5m2 KV for quantized checkpoints at attention.py:_init_kv_cache_quant (should_load_quant_weights True for the compressed-tensors int4 checkpoint). Note: e5m2 (=fp8e5) IS in sm_86's supported list -- this is a SOFTWARE guard, not a hardware limit.",
+      "layer": "vllm_init_guard",
+      "init_fails": true,
+      "error_signature": "fp8_e5m2 kv-cache is not supported with fp8 checkpoints",
+      "error_line": "[rank0]:     raise ValueError(\"fp8_e5m2 kv-cache is not supported with fp8 checkpoints.\")"
+    },
+    "int8": {
+      "runnable": false,
+      "reason": "int8 is not an accepted kv_cache_dtype value in vLLM 0.22.0 (only auto / fp8 / fp8_e5m2).",
+      "layer": "vllm_unsupported_enum"
+    },
+    "auto_bf16": {
+      "runnable": true,
+      "reason": "default bf16 KV; measured baseline."
+    },
+    "any_kv_dtype_reduction_runnable_on_stack": false
+  },
+  "roofline_even_if_runnable": {
+    "basis": "int4_head_corrected_step_bytes",
+    "decode_weight_read_gib": 2.2314488887786865,
+    "scored_output_len": 512,
+    "deployed_max_model_len": 4096,
+    "kv_read_frac_at_512": 0.01801581758324938,
+    "fp8_uplift_pct_at_512_optimistic": 0.9089788779889064,
+    "fp8_uplift_pct_at_2048_optimistic": 1.3572995339460538,
+    "fp8_uplift_pct_at_8192_optimistic": 3.1107362346537966,
+    "kv_material_crossover_10pct_position": 16384,
+    "crossover_beyond_deployed_cap": true,
+    "note": "OPTIMISTIC pure-HBM upper bound; realized lever would be smaller (fixed/compute overhead floor + fp8 dequant cost)."
+  },
+  "baseline_validation": {
+    "auto_bf16_kv": {
+      "tps": {
+        "512": 122.02713520594466,
+        "2048": 124.42975851157814,
+        "8192": 112.77188442260926
+      },
+      "ppl": 2.01893762759581,
+      "ppl_records": 128,
+      "ppl_safe": true,
+      "peak_gib": 18.890700817108154,
+      "load_s": 127.03816938400269,
+      "n_greedy_freerun": 32,
+      "n_matched_state_records": 128
+    },
+    "anchor": {
+      "submission": "int4_g128_lmhead",
+      "official_tps": 126.378,
+      "ppl": 2.019,
+      "wandb": "905tbujn",
+      "scored_output_len": 512
+    },
+    "ppl_reproduces_anchor": true,
+    "tps_512_near_official": true,
+    "sliding_window_pin": true,
+    "comparator_self_test_auto_vs_auto": {
+      "greedy_gate": "GREEDY_IDENTICAL",
+      "flips": 0,
+      "delta_pct_at_512": 0.0,
+      "self_test_passes": true,
+      "note": "degenerate identity check -- proves byte_compare/matched_state are correctly wired; NOT an fp8 result."
+    }
+  },
+  "kv_lever_is_green_for_official": false,
+  "verdict": "INFEASIBLE_AND_IMMATERIAL",
+  "verdict_plain": "fp8-KV and int8-KV are NOT a usable decode-speed lever for this submission: no KV-dtype reduction variant is runnable on the locked stack (fp8/e4m3 blocked by sm_86 Triton; fp8_e5m2 blocked by a vLLM 0.22.0 guard for quantized checkpoints; int8 not supported). Even if one ran, at the only scored output length (512) KV is 1.8% of step bytes -> at most +0.9% on an optimistic HBM roofline; the KV-bound regime (>=10% of step bytes) starts near 16384 tokens, ~4x beyond the deployed max_model_len of 4096. The lever neither runs nor would pay where the leaderboard scores.",
+  "crossover_length_material_fp8_win": 16384,
+  "crossover_reachable_in_deployed_cap": false,
+  "material_even_optimistic_at_512": false,
+  "self_test": {
+    "no_kv_dtype_reduction_runnable": true,
+    "e4m3_fails_compiled_and_eager": true,
+    "e5m2_init_blocked": true,
+    "auto_ppl_safe": true,
+    "auto_ppl_reproduces_anchor": true,
+    "comparator_self_test_passes": true,
+    "comparator_identity_zero_flips": true,
+    "scored_point_immaterial_even_optimistic": true,
+    "crossover_beyond_deployed_cap": true,
+    "self_test_passes": true
+  }
+}

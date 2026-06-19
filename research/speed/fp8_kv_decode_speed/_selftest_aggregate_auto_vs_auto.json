@@ -1,0 +1,98 @@
+{
+  "pr": 729,
+  "lever": "fp8_kv_cache_decode",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_served_file_change": true,
+  "no_hf_job": true,
+  "anchor": {
+    "submission": "int4_g128_lmhead",
+    "official_tps": 126.378,
+    "ppl": 2.019,
+    "wandb": "905tbujn",
+    "scored_output_len": 512
+  },
+  "int8_kv_supported_in_vllm_0_22": false,
+  "tps_table": {
+    "512": {
+      "auto_bf16": 122.02713520594466,
+      "fp8_e4m3": 122.02713520594466,
+      "delta_fp8_minus_auto": 0.0,
+      "delta_pct": 0.0,
+      "reachable_in_deployed_cap": true
+    },
+    "2048": {
+      "auto_bf16": 124.42975851157814,
+      "fp8_e4m3": 124.42975851157814,
+      "delta_fp8_minus_auto": 0.0,
+      "delta_pct": 0.0,
+      "reachable_in_deployed_cap": true
+    },
+    "8192": {
+      "auto_bf16": 112.77188442260926,
+      "fp8_e4m3": 112.77188442260926,
+      "delta_fp8_minus_auto": 0.0,
+      "delta_pct": 0.0,
+      "reachable_in_deployed_cap": false
+    }
+  },
+  "scored_point_512": {
+    "auto_bf16_tps": 122.02713520594466,
+    "fp8_e4m3_tps": 122.02713520594466,
+    "delta_tps": 0.0,
+    "delta_pct": 0.0,
+    "fp8_material_at_512": false
+  },
+  "crossover_length_material_fp8_win": null,
+  "ppl": {
+    "auto_bf16": 2.01893762759581,
+    "fp8_e4m3": 2.01893762759581,
+    "cap": 2.42,
+    "ppl_safe": true
+  },
+  "matched_state_self_consistency": {
+    "n_positions": 61797,
+    "flips": 0,
+    "flip_rate": 0.0,
+    "confident_genuine_flips": 0,
+    "confident_genuine_flip_rate": 0.0,
+    "confident_genuine_flip_rate_among_confident": 0.0,
+    "near_tie_flips": 0,
+    "frac_flips_that_are_near_tie": null,
+    "confident_positions": 58672,
+    "max_flip_gap": 0.0,
+    "tau": 0.3
+  },
+  "freerun_served_gate": {
+    "verdict": "GREEDY_IDENTICAL",
+    "num_prompts": 32,
+    "num_identical": 32,
+    "num_divergent": 0,
+    "total_tokens": 16384,
+    "total_divergent_tokens": 0,
+    "token_identical_frac": 1.0,
+    "first_divergence_index_mean": null,
+    "first_divergence_index_min": null
+  },
+  "peak_gib": {
+    "auto_bf16": 18.890700817108154,
+    "fp8_e4m3": 18.890700817108154
+  },
+  "load_s": {
+    "auto_bf16": 127.03816938400269,
+    "fp8_e4m3": 127.03816938400269
+  },
+  "primary_metric_name": "fp8kv_tps_delta_pct_at_512",
+  "primary_metric_value": 0.0,
+  "kv_lever_is_green_for_official": false,
+  "self_test": {
+    "ppl_finite": true,
+    "tps_positive": true,
+    "matched_positions_match": true,
+    "gate_well_defined": true,
+    "flip_rate_in_unit": true,
+    "confident_le_total_flips": true,
+    "ppl_records_128": true,
+    "self_test_passes": true
+  }
+}
