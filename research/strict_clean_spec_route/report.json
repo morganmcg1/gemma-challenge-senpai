@@ -1,0 +1,85 @@
+{
+  "pr": 733,
+  "analysis_only": true,
+  "official_tps": 0,
+  "anchor_official_bar": 126.378,
+  "transfer": {
+    "anchored_x": 1.1919893709725076,
+    "floor_x": 1.0352,
+    "ar_base_local_bi1": 106.02275748221821
+  },
+  "instruction1_locus": {
+    "pure_M_flip_rate_BI1": 0.0043182373046875,
+    "pure_M_flip_rate_ci95": [
+      0.0037384033203125,
+      0.00494384765625
+    ],
+    "frac_flips_neartie_lt_0.5nat": 1.0,
+    "gap_at_flips_p99_nat": 0.2500001308124542,
+    "gap_at_flips_median_nat": 4.868011475034351e-07,
+    "M1_vs_M1_floor": 0.0,
+    "ar2_vs_ar1_seq_exact_728": 1.0,
+    "note": "BI=1 leaves attention invariant (TRITON_ATTN single-segment, BASELINE #122); the sole residual M-variant reduction is the int4 Marlin GEMM (split-K = f(M), no exposed knob). land #680's 'ATTENTION not GEMM' was the no-BI / non-single-segment regime."
+  },
+  "instruction2_routeb": [
+    {
+      "k": 5,
+      "ar_tps_local": 106.02275748221821,
+      "spec_tps_local": 222.69485056948324,
+      "spec_speedup_x": 2.1004438656185007,
+      "E_block_len_tokens": 3.362,
+      "E_extra_M1_passes_per_block": 3.362,
+      "routeb_strict_local": 71.82676423817735,
+      "routeb_strict_official_anchored_x1.192": 85.61673952325562,
+      "routeb_strict_official_floor_x1.0352": 74.35506633936119,
+      "beats_126378_strict": false,
+      "margin_vs_126378_anchored": -40.76126047674438,
+      "overlap_optimistic_ceiling_official": 126.378,
+      "_nonstrict_selective_official_anchored_bracket": [
+        243.38,
+        263.06
+      ],
+      "_nonstrict_note": "selective re-decode is NOT byte-exact (drifted M=K+1 KV at ties) -> still tau-dependent; shown only to size the gap the strict requirement gives up."
+    },
+    {
+      "k": 6,
+      "ar_tps_local": 106.02275748221821,
+      "spec_tps_local": 218.6076584242689,
+      "spec_speedup_x": 2.0618937256082313,
+      "E_block_len_tokens": 3.3,
+      "E_extra_M1_passes_per_block": 3.3,
+      "routeb_strict_local": 71.39622665409247,
+      "routeb_strict_official_anchored_x1.192": 85.10354329922227,
+      "routeb_strict_official_floor_x1.0352": 73.90937383231652,
+      "beats_126378_strict": false,
+      "margin_vs_126378_anchored": -41.27445670077773,
+      "overlap_optimistic_ceiling_official": 126.378,
+      "_nonstrict_selective_official_anchored_bracket": [
+        239.27,
+        258.28
+      ],
+      "_nonstrict_note": "selective re-decode is NOT byte-exact (drifted M=K+1 KV at ties) -> still tau-dependent; shown only to size the gap the strict requirement gives up."
+    }
+  ],
+  "headline": {
+    "best_strict_routeb_official_anchored": 85.61673952325562,
+    "best_strict_routeb_k": 5,
+    "beats_126378": false,
+    "shortfall_vs_126378": 40.76126047674438,
+    "overlap_optimistic_ceiling_only_ties": 126.378
+  },
+  "instruction3_routea": {
+    "kernel": "M-invariant (fixed-split-K) int4 Marlin/Machete GEMV",
+    "buildable_in_scope": false,
+    "prior": "BASELINE #122: marlin_gemm split-K=f(M), no exposed num_splits/max_par knob, no batch-invariant Marlin in pinned vllm==0.22.0 wheel; stark #722 SPARSE_INT4_KERNEL_ABSENT; land #506 M=1 BI-GEMV prior.",
+    "overhead_if_built": "verify stays ~1 AR-pass-time at conc=1 (HBM-bound, weight-load dominates) -> spec speedup preserved (official-equiv ~226-265, byte-exact). BUILD is the blocker: from-scratch CUDA kernel, out-of-scope.",
+    "verdict": "GO-on-value, NO-GO-on-in-scope-buildability"
+  },
+  "instruction4_verdict": {
+    "strict_clean_route_beats_126378": false,
+    "routeb_reason": "strict byte-exactness forces a full M=1 re-decode -> route_b = 1/(1/spec+1/ar) < ar = 126.378 for any K; best ~85.6 official, fails by ~40.8.",
+    "routea_reason": "the only route that keeps the speedup AND is byte-exact, but the M-invariant int4 GEMV kernel is absent and out-of-scope to build this cycle.",
+    "consequence": "no strict-clean spec fire beats 126.378 buildable now; the #730 tau=0.3 gamble stands; strict-byte-exact tolerance-dependence is irreducible without route (a)'s kernel.",
+    "primary_metric_strict_clean_net_official_equiv": 85.61673952325562
+  }
+}
