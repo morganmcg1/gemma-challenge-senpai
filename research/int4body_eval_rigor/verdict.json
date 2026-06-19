@@ -1,0 +1,218 @@
+{
+  "pr": 693,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": 1,
+  "fires": false,
+  "model": "int4_g128_lmhead (shipped: int4 g128 body + int4 lm_head)",
+  "serve_stack": "vllm 0.22.0, eval MAX_MODEL_LEN=6144 (gpqa@4096 truncation-clean), MAX_NUM_BATCHED_TOKENS=512",
+  "gates": {
+    "aime_2024": 0.42,
+    "gpqa_diamond": 0.471
+  },
+  "gate_basis": {
+    "aime": "ubel #672/#650: 12288 max_tokens / 60 problems (2024+2025) / min_tokens=8",
+    "gpqa": "bars #614: 4096 max_tokens / 6144 mml / seed 12345 / n=198"
+  },
+  "references": {
+    "aime_base_bf16_greedy": 0.4833,
+    "aime_base_for_gate": 0.4667,
+    "aime_int4_greedy_band_upper95": 0.38832,
+    "aime_int4_greedy_band": [
+      0.35,
+      0.3833
+    ],
+    "aime_int4_greedy_band_mean": 0.3667,
+    "aime_int4_sampled12288": 0.3467,
+    "aime_int4_sampled12288_ci": [
+      0.2951,
+      0.4022
+    ],
+    "aime_base_local3072_sampled": 0.4,
+    "gpqa_base_greedy_4096": 0.5051,
+    "gpqa_base_sampled_mean_4096": 0.5313,
+    "gpqa_base515_denominator": 0.5236,
+    "gpqa_int4_greedy_wirbel682": 0.4697,
+    "gpqa_finish_len_rate_2048": 0.373,
+    "gpqa_finish_len_rate_4096": 0.035
+  },
+  "rows": [
+    {
+      "bench": "aime_2024",
+      "basis": "greedy",
+      "metric": "maj@1",
+      "k_correct": 8,
+      "n": 30,
+      "point": 0.2667,
+      "wilson_lo": 0.1418,
+      "wilson_hi": 0.4445,
+      "gate": 0.42,
+      "verdict": "AMBIGUOUS_POINT_UNDER",
+      "mean_pass_rate": 0.2667,
+      "extract_fail_rate": 0.0,
+      "sampling": {
+        "temperature": 0.0,
+        "top_p": 1.0,
+        "top_k": 0,
+        "max_tokens": 3072,
+        "min_tokens": null,
+        "seed": 1234,
+        "enable_thinking": false
+      }
+    },
+    {
+      "bench": "aime_2024",
+      "basis": "sampled_31",
+      "metric": "maj@8",
+      "k_correct": 9,
+      "n": 30,
+      "point": 0.3,
+      "wilson_lo": 0.1666,
+      "wilson_hi": 0.4788,
+      "gate": 0.42,
+      "verdict": "AMBIGUOUS_POINT_UNDER",
+      "mean_pass_rate": 0.2667,
+      "extract_fail_rate": 0.0,
+      "sampling": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 64,
+        "max_tokens": 3072,
+        "min_tokens": null,
+        "seed": 1234,
+        "enable_thinking": false
+      }
+    },
+    {
+      "bench": "aime_2024",
+      "basis": "sampled_31_mintok8",
+      "metric": "maj@8",
+      "k_correct": 11,
+      "n": 30,
+      "point": 0.3667,
+      "wilson_lo": 0.2187,
+      "wilson_hi": 0.5449,
+      "gate": 0.42,
+      "verdict": "AMBIGUOUS_POINT_UNDER",
+      "mean_pass_rate": 0.3,
+      "extract_fail_rate": 0.0,
+      "sampling": {
+        "temperature": 1.0,
+        "top_p": 0.95,
+        "top_k": 64,
+        "max_tokens": 3072,
+        "min_tokens": 8,
+        "seed": 1234,
+        "enable_thinking": false
+      }
+    },
+    {
+      "bench": "gpqa_diamond",
+      "basis": "greedy",
+      "metric": "accuracy",
+      "k_correct": 97,
+      "n": 198,
+      "point": 0.4899,
+      "wilson_lo": 0.4211,
+      "wilson_hi": 0.5591,
+      "gate": 0.471,
+      "verdict": "AMBIGUOUS_POINT_OVER",
+      "finish_length_rate": 0.0505,
+      "n_length_truncated": 10,
+      "n_error": 1,
+      "decode": "greedy",
+      "min_tokens": null
+    },
+    {
+      "bench": "gpqa_diamond",
+      "basis": "sampled_31",
+      "metric": "accuracy",
+      "k_correct": 94,
+      "n": 198,
+      "point": 0.4747,
+      "wilson_lo": 0.4063,
+      "wilson_hi": 0.5441,
+      "gate": 0.471,
+      "verdict": "AMBIGUOUS_POINT_OVER",
+      "finish_length_rate": 0.0101,
+      "n_length_truncated": 2,
+      "n_error": 1,
+      "decode": "sampling",
+      "min_tokens": null
+    },
+    {
+      "bench": "gpqa_diamond",
+      "basis": "sampled_31_mintok8",
+      "metric": "accuracy",
+      "k_correct": 91,
+      "n": 198,
+      "point": 0.4596,
+      "wilson_lo": 0.3916,
+      "wilson_hi": 0.5291,
+      "gate": 0.471,
+      "verdict": "AMBIGUOUS_POINT_UNDER",
+      "finish_length_rate": 0.0404,
+      "n_length_truncated": 8,
+      "n_error": 1,
+      "decode": "sampling",
+      "min_tokens": 8
+    }
+  ],
+  "aime_leg": {
+    "leg_verdict": "CONFIRMED_REAL",
+    "compliant_point_gatebasis": 0.3467,
+    "compliant_ci_gatebasis": [
+      0.2951,
+      0.4022
+    ],
+    "greedy_band_upper95_gatebasis": 0.38832,
+    "gate": 0.42,
+    "compliant_clears": false,
+    "compliant_upper95_below_gate": true,
+    "local_corroboration": {
+      "greedy_point_3072_30": 0.2667,
+      "compliant_point_3072_30": 0.3667,
+      "compliant_basis_arm": "sampled_31_mintok8",
+      "greedy_to_compliant_move": 0.1,
+      "note": "3072/2024-only basis (heavy truncation); corroborates no-recovery, NOT the gate comparison"
+    }
+  },
+  "gpqa_leg": {
+    "leg_verdict": "NOT_RECOVERED",
+    "gate_position": "TIE_POINT_OVER",
+    "point": 0.4747,
+    "wilson": [
+      0.4063,
+      0.5441
+    ],
+    "basis_arm": "sampled_31",
+    "best_compliant_point": 0.4747,
+    "best_compliant_arm": "sampled_31",
+    "pure31_point": 0.4747,
+    "guard_point": 0.4596,
+    "greedy_point": 0.4899,
+    "greedy_to_compliant_move": -0.0152,
+    "improves_vs_greedy": false,
+    "ci_separated_up": false,
+    "gate": 0.471,
+    "vs_base_sampled": -0.0566
+  },
+  "aime_compliant": 0.3467,
+  "aime_compliant_wilson": [
+    0.2951,
+    0.4022
+  ],
+  "aime_compliant_verdict": "CONFIRMED_REAL",
+  "aime_compliant_basis": "gate-basis #31-sampled maj@8 (12288 max_tokens / 60 problems), banked advisor-branch commit 1b00c31 (ubel #650/#672); my on-server local re-measure (3072/30 maj@8) corroborates at 0.30 vs base 0.40 (~75%)",
+  "aime_greedy_to_compliant_delta": -0.02,
+  "aime_local_greedy_to_compliant_move": 0.1,
+  "gpqa_compliant": 0.4747,
+  "gpqa_compliant_wilson": [
+    0.4063,
+    0.5441
+  ],
+  "gpqa_compliant_basis": "sampled_31",
+  "gpqa_compliant_verdict": "NOT_RECOVERED",
+  "gpqa_greedy_to_compliant_delta": -0.0152,
+  "verdict": "GAP_CONFIRMED_REAL"
+}
