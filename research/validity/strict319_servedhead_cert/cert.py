@@ -91,10 +91,12 @@ def build_pinned_serve(pin: str) -> Path:
     return serve_copy
 
 
-def arm_env(pin: str, num_spec: int, proof_dir: Path) -> dict:
+def arm_env(pin: str, num_spec: int, proof_dir: Path, localize_mdep: bool = False) -> dict:
     """Extra serve env for one arm. Pin is applied identically to ref and candidate;
-    only NUM_SPECULATIVE_TOKENS differs between arms."""
-    return {
+    only NUM_SPECULATIVE_TOKENS differs between arms. ``localize_mdep`` turns on the
+    served-head M=1-vs-M=batch argmax probe (cand arms only; the M=1 ref has no verify
+    batch to compare against)."""
+    env = {
         "STARK_PIN_MODE": pin,
         "STARK_PIN_PROOF_DIR": str(proof_dir),
         "NUM_SPECULATIVE_TOKENS": str(num_spec),
@@ -102,6 +104,9 @@ def arm_env(pin: str, num_spec: int, proof_dir: Path) -> dict:
         # batch-invariance ON. Overrides the manifest's VLLM_BATCH_INVARIANT=1.
         "VLLM_BATCH_INVARIANT": "1" if pin == "bi1" else "0",
     }
+    if localize_mdep:
+        env["STARK_LOCALIZE_MDEP"] = "1"
+    return env
 
 
 def run_arm(
@@ -117,6 +122,7 @@ def run_arm(
     seed: int,
     tmp_dir: Path,
     measure_tps: bool,
+    localize_mdep: bool = False,
 ) -> dict:
     """Boot the pinned serve for one arm, capture 128xL greedy tokens, return paths+proof."""
     proof_dir = tmp_dir / f"_pinproof_{pin}_{label}"
@@ -124,7 +130,7 @@ def run_arm(
     out_file = tmp_dir / f"{pin}_{label}_decode.jsonl"
     summary_file = tmp_dir / f"{pin}_{label}_summary.json"
     log_path = tmp_dir / f"{pin}_{label}_serve.log"
-    extra_env = arm_env(pin, num_spec, proof_dir)
+    extra_env = arm_env(pin, num_spec, proof_dir, localize_mdep=localize_mdep)
     served_name = json.loads((serve_copy / "manifest.json").read_text())["served_model_name"]
 
     t0 = time.time()
@@ -197,7 +203,59 @@ def read_proof(proof_dir: Path) -> dict:
     proof["verify_kernel_2d"] = (bool(verify) and all(not b["use_3d_split_kv"] for b in verify)) or None
     proof["observed_decode_branch"] = decode[0] if decode else None
     proof["observed_verify_branch"] = verify[0] if verify else None
+    proof["mdep"] = read_mdep_proof(proof_dir)
     return proof
+
+
+def read_mdep_proof(proof_dir: Path) -> dict | None:
+    """Aggregate the served-head M-dependence probe files (PR #705).
+
+    One small JSON per worker pid (``mdep_summary_<pid>.json``); sum the counters
+    across pids and derive the position-0 and all-position head M-dependence rates.
+    Returns None when the probe was not active (no files)."""
+    files = glob.glob(str(proof_dir / "mdep_summary_*.json"))
+    if not files:
+        return None
+    agg = {
+        "n_logits_calls": 0, "n_verify_calls": 0,
+        "n_pos0_cmp": 0, "n_pos0_flip": 0,
+        "n_allpos_cmp": 0, "n_allpos_flip": 0,
+    }
+    m_hist: dict = {}
+    vocab_hist: dict = {}
+    flip_margins: list = []
+    nonflip_margins: list = []
+    flip_examples: list = []
+    meta: dict = {}
+    for fp in files:
+        try:
+            rec = json.loads(Path(fp).read_text())
+        except (OSError, ValueError):
+            continue
+        for k in agg:
+            agg[k] += int(rec.get(k) or 0)
+        for mk, mv in (rec.get("m_hist") or {}).items():
+            m_hist[str(mk)] = m_hist.get(str(mk), 0) + int(mv)
+        for vk, vv in (rec.get("vocab_hist") or {}).items():
+            vocab_hist[str(vk)] = vocab_hist.get(str(vk), 0) + int(vv)
+        flip_margins += rec.get("pos0_flip_margins") or []
+        nonflip_margins += rec.get("pos0_nonflip_margins") or []
+        flip_examples += rec.get("pos0_flip_examples") or []
+        for mk in ("head_org_vocab_size", "head_vocab_size", "head_quant_method",
+                   "head_soft_cap", "head_scale", "serve_env_VLLM_BATCH_INVARIANT"):
+            if meta.get(mk) is None and rec.get(mk) is not None:
+                meta[mk] = rec.get(mk)
+    n0, na = agg["n_pos0_cmp"], agg["n_allpos_cmp"]
+    out = dict(agg)
+    out.update(meta)
+    out["m_hist"] = m_hist
+    out["vocab_hist"] = vocab_hist
+    out["head_mdep_rate_pos0"] = (agg["n_pos0_flip"] / n0) if n0 else None
+    out["head_mdep_rate_allpos"] = (agg["n_allpos_flip"] / na) if na else None
+    out["pos0_flip_margins"] = flip_margins[:96]
+    out["pos0_nonflip_margins"] = nonflip_margins[:96]
+    out["pos0_flip_examples"] = flip_examples[:32]
+    return out
 
 
 def compare_streams(reference: Path, candidate: Path, output_len: int) -> dict:
@@ -224,6 +282,257 @@ def compare_streams(reference: Path, candidate: Path, output_len: int) -> dict:
     }
 
 
+def mdep_result_fields(mdep: dict | None, break_rate: float | None) -> dict:
+    """Derive the PR #705 served-head M-dependence scalars from the cand probe.
+
+    ``mdep_break_fraction`` = of the served per-step break, the fraction the STATIC
+    head M=1-vs-M=batch argmax flip (on byte-identical hidden) can account for. ~0
+    means the head is M-invariant at matched KV (cause (b) loop mechanics); high means
+    the head/sampler itself is M-dependent (cause (a), potentially fixable)."""
+    if not mdep:
+        return {"localize_mdep_active": False, "mdep_break_fraction": None}
+    rate0 = mdep.get("head_mdep_rate_pos0")
+    ratea = mdep.get("head_mdep_rate_allpos")
+    frac = None
+    if rate0 is not None and break_rate not in (None, 0) and break_rate == break_rate:
+        frac = max(0.0, min(1.0, rate0 / break_rate))
+    margins = mdep.get("pos0_flip_margins") or []
+    ovs = mdep.get("head_org_vocab_size")
+    return {
+        "localize_mdep_active": True,
+        "head_vocab_size": mdep.get("head_vocab_size"),
+        "head_org_vocab_size": ovs,
+        "head_quant_method": mdep.get("head_quant_method"),
+        "head_soft_cap": mdep.get("head_soft_cap"),
+        # The PR frames this as a "pruned-16k head"; record what the served head
+        # ACTUALLY is (ground truth from the live forward) so the framing is checked.
+        "head_is_pruned_16k": (isinstance(ovs, int) and ovs <= 100000),
+        "head_mdep_n_verify_calls": mdep.get("n_verify_calls"),
+        "head_mdep_n_pos0_cmp": mdep.get("n_pos0_cmp"),
+        "head_mdep_n_pos0_flip": mdep.get("n_pos0_flip"),
+        "head_mdep_n_allpos_cmp": mdep.get("n_allpos_cmp"),
+        "head_mdep_n_allpos_flip": mdep.get("n_allpos_flip"),
+        "head_mdep_rate_pos0": rate0,
+        "head_mdep_rate_allpos": ratea,
+        "head_mdep_m_hist": mdep.get("m_hist"),
+        "head_mdep_vocab_hist": mdep.get("vocab_hist"),
+        "mdep_break_fraction": frac,
+        "pos0_flip_margin_min": (min(margins) if margins else None),
+        "pos0_flip_examples": mdep.get("pos0_flip_examples"),
+    }
+
+
+def _linfit_slope(xs: list, ys: list) -> float | None:
+    """OLS slope of ys vs xs, ignoring None/NaN ys."""
+    pairs = [(x, y) for x, y in zip(xs, ys) if y is not None and y == y]
+    n = len(pairs)
+    if n < 2:
+        return None
+    sx = sum(x for x, _ in pairs)
+    sy = sum(y for _, y in pairs)
+    sxx = sum(x * x for x, _ in pairs)
+    sxy = sum(x * y for x, y in pairs)
+    denom = n * sxx - sx * sx
+    return ((n * sxy - sx * sy) / denom) if denom else None
+
+
+def kscan_verdict(frac, slope, rel_k_change):
+    """Pick the PR #705 verdict from the head share (primary) + K-scaling (corroborating)."""
+    scales = rel_k_change is not None and rel_k_change > 0.15
+    flat = rel_k_change is not None and abs(rel_k_change) <= 0.15
+    if frac is None:
+        return "SERVED_SPEC_INCONCLUSIVE", "head probe or break_rate unavailable"
+    if frac >= 0.5:
+        return ("SERVED_SPEC_MDEP_FIXABLE",
+                f"static head M-dependence accounts for {frac:.3f} of served break; "
+                f"flat_in_K={flat} (slope={slope})")
+    if frac <= 0.1:
+        return ("SERVED_SPEC_STRUCTURAL_DEAD",
+                f"static head M=1-vs-M=batch argmax agrees ({frac:.3f} of break); "
+                f"break scales_with_K={scales} (slope={slope}) -> loop/attention-width mechanics")
+    return ("SERVED_SPEC_MIXED",
+            f"head accounts for {frac:.3f} of break; scales_with_K={scales} (slope={slope})")
+
+
+def run_kscan(args, serve_copy: Path, server_python: Path, tmp_dir: Path) -> int:
+    """PR #705 combined run: ONE shared AR ref vs spec(K) cand arms; the deployed width
+    (largest K) carries the head M-dependence probe. One W&B run with all scalars."""
+    k_list = sorted({int(x) for x in str(args.k_scan).split(",") if x.strip()})
+    if not k_list:
+        raise ValueError("--k-scan must list at least one K")
+    localize_k = max(k_list)
+
+    # #690 control: the AR path is byte-identical across boots, so a SINGLE ref decode
+    # is the correct shared baseline for every K (removes ref boot-noise as a variable).
+    ref = run_arm(
+        serve_copy, server_python, label="ref", pin=args.pin, num_spec=0,
+        port=args.port, num_prompts=args.num_prompts, output_len=args.output_len,
+        seed=args.seed, tmp_dir=tmp_dir, measure_tps=False,
+    )
+
+    arms: list[dict] = []
+    for idx, K in enumerate(k_list):
+        do_localize = bool(args.localize_mdep and K == localize_k)
+        # No TPS probe here: #705 mandates official_tps=0 and TPS is not a deliverable,
+        # AND the localize probe runs an extra lm_head matmul per verify call that would
+        # deflate a co-measured TPS. Deployed served TPS is already on record (#690 cert).
+        cand = run_arm(
+            serve_copy, server_python, label=f"candK{K}", pin=args.pin, num_spec=K,
+            port=args.port + 1 + idx, num_prompts=args.num_prompts,
+            output_len=args.output_len, seed=args.seed, tmp_dir=tmp_dir,
+            measure_tps=False, localize_mdep=do_localize,
+        )
+        cmp = compare_streams(Path(ref["out_file"]), Path(cand["out_file"]), args.output_len)
+        cp = cand.get("proof", {})
+        br = cmp["break_rate"]
+        print(f"[kscan] K={K} break_rate={br:.4f} seq_div={cmp['seq_divergence_rate']:.4f} "
+              f"verdict={cmp['verdict']} localize={do_localize}", flush=True)
+        arms.append({
+            "K": K,
+            "break_rate": br,
+            "seq_divergence_rate": cmp["seq_divergence_rate"],
+            "greedy_verdict": cmp["verdict"],
+            "first_div_median": cmp["first_div_median"],
+            "num_divergent": cmp["num_divergent"],
+            "total_divergent_tokens": cmp["total_divergent_tokens"],
+            "total_tokens_compared": cmp["total_tokens_compared"],
+            "onset_line": cmp["onset_line"],
+            "is_batch_invariant_at_import": cp.get("is_batch_invariant_at_import"),
+            "observed_verify_branch": cp.get("observed_verify_branch"),
+            "observed_decode_branch": cp.get("observed_decode_branch"),
+            "localize_mdep": do_localize,
+            "mdep": cp.get("mdep") if do_localize else None,
+            "tps": cand.get("tps") if K == localize_k else None,
+            "boot_s": cand.get("boot_s"),
+        })
+
+    result = aggregate_kscan(args, ref.get("proof", {}), arms, localize_k)
+    out_summary = CERT_DIR / "results" / f"localize_kscan_{args.pin}.json"
+    out_summary.parent.mkdir(parents=True, exist_ok=True)
+    out_summary.write_text(json.dumps(result, indent=2, default=str))
+    print(json.dumps(result, indent=2, default=str), flush=True)
+    print(f"[kscan] wrote {out_summary}", flush=True)
+    print(f"[kscan] VERDICT={result['verdict']} mdep_break_fraction={result.get('mdep_break_fraction')} "
+          f"break_K6={result.get('break_rate_K6')} slope={result.get('k_slope')}", flush=True)
+    if not args.no_wandb:
+        log_wandb_kscan(args, result)
+    return 0
+
+
+def aggregate_kscan(args, ref_proof: dict, arms: list, localize_k: int) -> dict:
+    by_k = {a["K"]: a for a in arms}
+    ks = sorted(by_k)
+    break_by_k = {k: by_k[k]["break_rate"] for k in ks}
+    slope = _linfit_slope(ks, [break_by_k[k] for k in ks])
+    lo, hi = break_by_k[ks[0]], break_by_k[ks[-1]]
+    rel_k_change = ((hi - lo) / hi) if (hi not in (None, 0) and lo is not None) else None
+
+    dep = by_k[localize_k]
+    break_dep = dep["break_rate"]
+    mdep_fields = mdep_result_fields(dep.get("mdep"), break_dep)
+    frac = mdep_fields.get("mdep_break_fraction")
+    verdict, verdict_reason = kscan_verdict(frac, slope, rel_k_change)
+    pin_active = bool(
+        (args.pin == "bi1" and dep.get("is_batch_invariant_at_import"))
+        or args.pin in ("fixed2d", "none")
+    )
+    serve_bi = (dep.get("mdep") or {}).get("serve_env_VLLM_BATCH_INVARIANT")
+
+    result = {
+        "design": "k-scan: ONE shared AR ref vs spec(K) cand arms, same pinned stack",
+        "pin": args.pin,
+        "k_scan": ks,
+        "localize_k": localize_k,
+        "num_prompts": args.num_prompts,
+        "output_len": args.output_len,
+        "seed": args.seed,
+        "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+        "analysis_only": True,
+        "official_tps": 0,
+        "no_hf_job": 1,
+        "fires": False,
+        "break_rate_K1": break_by_k.get(1),
+        "break_rate_K3": break_by_k.get(3),
+        "break_rate_K6": break_by_k.get(6),
+        "break_rate_by_k": {str(k): v for k, v in break_by_k.items()},
+        "k_slope": slope,
+        "rel_k_change": rel_k_change,
+        "mdep_break_fraction": frac,
+        "verdict": verdict,
+        "verdict_reason": verdict_reason,
+        "pin_active": pin_active,
+        "is_batch_invariant_cand": dep.get("is_batch_invariant_at_import"),
+        "serve_env_VLLM_BATCH_INVARIANT_cand": serve_bi,
+        "observed_verify_branch_cand": dep.get("observed_verify_branch"),
+        "ar_rung_local": args.ar_rung_local,
+        "official_anchor": OFFICIAL_ANCHOR,
+        "plus10_bar": PLUS10_BAR,
+        "arms": arms,
+    }
+    result.update(mdep_fields)
+    tps_block = dep.get("tps") or {}
+    result["servedhead_local_tps"] = tps_block.get("decode_tps_single_stream")
+    return result
+
+
+def log_wandb_kscan(args, result: dict) -> None:
+    try:
+        import wandb
+    except Exception as exc:  # noqa: BLE001
+        print(f"[wandb] unavailable: {exc}", flush=True)
+        return
+    entity = os.environ.get("WANDB_ENTITY", "wandb-applied-ai-team")
+    project = os.environ.get("WANDB_PROJECT", "gemma-challenge-senpai")
+    config = {
+        "design": result["design"],
+        "submission": "int4_mtp_batchinv",
+        "model_id": result["model_id"],
+        "drafter": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+        "served_head_actual_vocab": result.get("head_org_vocab_size"),
+        "served_head_quant_method": result.get("head_quant_method"),
+        "pin": args.pin,
+        "k_scan": result["k_scan"],
+        "localize_k": result["localize_k"],
+        "vllm_batch_invariant": 1 if args.pin == "bi1" else 0,
+        "vllm_version": "0.22.0",
+        "num_prompts": args.num_prompts,
+        "output_len": args.output_len,
+        "seed": args.seed,
+        "analysis_only": True,
+        "official_tps": 0,
+        "no_hf_job": 1,
+        "fires": False,
+        "claim_axis": "served-spec break localization: head M-dependence (a) vs loop mechanics (b)",
+        "ar_rung_local": args.ar_rung_local,
+    }
+    run = wandb.init(
+        project=project, entity=entity, group=args.wandb_group,
+        name=f"stark/servedspec-localize-{args.pin}", job_type="servedspec-loop-localization",
+        config=config, reinit=True,
+    )
+    scalars = {k: v for k, v in result.items() if isinstance(v, (int, float, bool)) and v is not None}
+    for k in ("mdep_break_fraction", "break_rate_K1", "break_rate_K3", "break_rate_K6",
+              "k_slope", "rel_k_change", "head_mdep_rate_pos0", "head_mdep_rate_allpos",
+              "pin_active", "servedhead_local_tps"):
+        if result.get(k) is not None:
+            scalars[f"summary/{k}"] = result[k]
+    run.log(scalars)
+    # Verdict + guards as explicit summary fields (machine-checkable, PR contract).
+    run.summary["verdict"] = result["verdict"]
+    run.summary["verdict_reason"] = result["verdict_reason"]
+    run.summary["analysis_only"] = True
+    run.summary["official_tps"] = 0
+    run.summary["no_hf_job"] = 1
+    run.summary["fires"] = False
+    run.summary["serve_env_VLLM_BATCH_INVARIANT"] = result.get("serve_env_VLLM_BATCH_INVARIANT_cand")
+    run.summary["is_batch_invariant"] = result.get("is_batch_invariant_cand")
+    run.summary["head_org_vocab_size"] = result.get("head_org_vocab_size")
+    run.summary["head_quant_method"] = result.get("head_quant_method")
+    print(f"[wandb] run {run.id} ({run.name})", flush=True)
+    run.finish()
+    result["wandb_run_id"] = run.id
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--pin", choices=["fixed2d", "bi1", "none"], required=True)
@@ -237,6 +546,17 @@ def main() -> int:
     ap.add_argument("--wandb-group", default="strict319-servedhead-cert-stark")
     ap.add_argument("--no-wandb", action="store_true")
     ap.add_argument("--smoke", action="store_true", help="tiny: 2 prompts x 16 tokens")
+    ap.add_argument(
+        "--localize-mdep", action="store_true",
+        help="PR #705: probe the served-head M=1-vs-M=batch argmax on identical hidden "
+             "(cand arm) to separate fixable head M-dependence (a) from loop mechanics (b).",
+    )
+    ap.add_argument(
+        "--k-scan", default=None,
+        help="PR #705 step 2: comma list of NUM_SPECULATIVE_TOKENS to sweep against ONE "
+             "shared AR ref (e.g. '1,3,6'); reports break_rate vs K + slope. The largest "
+             "K (deployed width) carries the --localize-mdep head probe.",
+    )
     args = ap.parse_args()
 
     if args.smoke:
@@ -254,6 +574,11 @@ def main() -> int:
     server_python = harness.ensure_server_venv(manifest["dependencies"])
     print(f"[venv] {server_python}", flush=True)
 
+    if args.k_scan:
+        rc = run_kscan(args, serve_copy, server_python, tmp_dir)
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        return rc
+
     # Reference arm: plain M=1 AR (spec OFF), same pin. Candidate arm: spec ON.
     ref = run_arm(
         serve_copy, server_python, label="ref", pin=args.pin, num_spec=0,
@@ -264,6 +589,7 @@ def main() -> int:
         serve_copy, server_python, label="cand", pin=args.pin, num_spec=args.num_spec,
         port=args.port + 1, num_prompts=args.num_prompts, output_len=args.output_len,
         seed=args.seed, tmp_dir=tmp_dir, measure_tps=True,
+        localize_mdep=args.localize_mdep,
     )
 
     cmp = compare_streams(Path(ref["out_file"]), Path(cand["out_file"]), args.output_len)
@@ -335,6 +661,7 @@ def main() -> int:
         "cand_boot_s": cand.get("boot_s"),
         "onset_line": cmp["onset_line"],
     }
+    result.update(mdep_result_fields(cand_proof.get("mdep"), cmp["break_rate"]))
 
     out_summary = CERT_DIR / "results" / f"cert_{args.pin}.json"
     out_summary.parent.mkdir(parents=True, exist_ok=True)
@@ -364,7 +691,11 @@ def log_wandb(args, result: dict) -> None:
         "submission": "int4_mtp_batchinv",
         "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
         "drafter": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
-        "served_head": "pruned-16k lm_head (deployed)",
+        # Ground truth from the live served forward, NOT an asserted label. The PR
+        # frames the deployed spec head as "pruned-16k"; the probe records what the
+        # served head ACTUALLY is so the framing is checked rather than assumed.
+        "served_head_actual_vocab": result.get("head_org_vocab_size"),
+        "served_head_quant_method": result.get("head_quant_method"),
         "pin": args.pin,
         "num_speculative_tokens": args.num_spec,
         "vllm_batch_invariant": 1 if args.pin == "bi1" else 0,
