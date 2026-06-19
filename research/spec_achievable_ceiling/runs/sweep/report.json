@@ -1,0 +1,411 @@
+{
+  "pr": 728,
+  "analysis_only": true,
+  "official_tps": 0,
+  "smoke": false,
+  "config": {
+    "model_dir": "/workspace/gemma_build/int4_g128_lmhead",
+    "drafter": "/tmp/qat-assistant",
+    "ks": [
+      5,
+      6,
+      7
+    ],
+    "vllm_version": "0.22.0",
+    "transformers_version": "5.9.0",
+    "batch_invariant": 1,
+    "max_num_seqs": 1,
+    "max_num_batched_tokens": 512,
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "tau_gate_nats": 0.3,
+    "tau_lo": 1.0352,
+    "prompt_logprobs": 20,
+    "anchor_tps": 126.378,
+    "anchor_ppl": 2.019,
+    "comfort_bar": 150.0,
+    "method": "deployed serve (drafter ON, K) free-run greedy vs config's OWN served-AR (drafter OFF, SENPAI_REFERENCE_MODE=1, BI=1); wall_tps=tokens/decode_s; strict greedy_gate + tau-rescued onset-gap (confident_genuine_flips)."
+  },
+  "engine_coherence_tf_argmax_vs_freerun": 0.9923248291015625,
+  "ar_reference": {
+    "wall_tps_local": 106.02275748221821,
+    "ppl": 2.0189025477916,
+    "records": 128
+  },
+  "results": [
+    {
+      "k": 5,
+      "wall_tps_local": 222.69485056948324,
+      "official_equiv_tps": 230.53370930952903,
+      "beats_anchor_126": true,
+      "clears_comfort_150": true,
+      "records": 128,
+      "completion_tokens": 65536,
+      "complete_128_128": true,
+      "ppl": null,
+      "strict_verdict": "DIVERGENT",
+      "strict_seq_exact": 0.171875,
+      "strict_token_identity": 0.484710693359375,
+      "strict_num_divergent": 106,
+      "onset": {
+        "onset_min": 0,
+        "onset_median": 129,
+        "onset_max": 498,
+        "num_divergent": 106
+      },
+      "confident_genuine_flips_at_0.3": 0,
+      "self_consistent_tau03": true,
+      "rescue": {
+        "num_divergent_prompts": 106,
+        "num_identical_prompts": 22,
+        "onset_gap_min": 0.0,
+        "onset_gap_median": 0.0,
+        "onset_gap_max": 0.25,
+        "onset_gap_frac_le_0.125": 0.9528301886792453,
+        "onset_gap_frac_le_0.3": 1.0,
+        "num_onset_outside_topk": 0,
+        "tau_sweep": {
+          "tau_0.05": {
+            "confident_genuine_flips": 27,
+            "rescued_divergent": 79
+          },
+          "tau_0.1": {
+            "confident_genuine_flips": 27,
+            "rescued_divergent": 79
+          },
+          "tau_0.125": {
+            "confident_genuine_flips": 5,
+            "rescued_divergent": 101
+          },
+          "tau_0.2": {
+            "confident_genuine_flips": 5,
+            "rescued_divergent": 101
+          },
+          "tau_0.3": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 106
+          },
+          "tau_0.5": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 106
+          },
+          "tau_1.0": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 106
+          }
+        },
+        "confident_genuine_flips_at_gate": 0
+      },
+      "peak_vram_gb": 19.4658203125,
+      "serve_ready_s": 110.0320177078247,
+      "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/sweep/spec_k5.server.log",
+      "official_equiv_flat_tau_lo": 230.53370930952903,
+      "official_equiv_anchored": 265.44989484913486,
+      "official_equiv_bracket": [
+        230.53,
+        265.45
+      ]
+    },
+    {
+      "k": 6,
+      "wall_tps_local": 218.6076584242689,
+      "official_equiv_tps": 226.30264800080315,
+      "beats_anchor_126": true,
+      "clears_comfort_150": true,
+      "records": 128,
+      "completion_tokens": 65536,
+      "complete_128_128": true,
+      "ppl": 2.0189025477916,
+      "strict_verdict": "DIVERGENT",
+      "strict_seq_exact": 0.203125,
+      "strict_token_identity": 0.4844512939453125,
+      "strict_num_divergent": 102,
+      "onset": {
+        "onset_min": 0,
+        "onset_median": 127,
+        "onset_max": 486,
+        "num_divergent": 102
+      },
+      "confident_genuine_flips_at_0.3": 0,
+      "self_consistent_tau03": true,
+      "rescue": {
+        "num_divergent_prompts": 102,
+        "num_identical_prompts": 26,
+        "onset_gap_min": 0.0,
+        "onset_gap_median": 0.0,
+        "onset_gap_max": 0.25,
+        "onset_gap_frac_le_0.125": 0.9607843137254902,
+        "onset_gap_frac_le_0.3": 1.0,
+        "num_onset_outside_topk": 0,
+        "tau_sweep": {
+          "tau_0.05": {
+            "confident_genuine_flips": 22,
+            "rescued_divergent": 80
+          },
+          "tau_0.1": {
+            "confident_genuine_flips": 22,
+            "rescued_divergent": 80
+          },
+          "tau_0.125": {
+            "confident_genuine_flips": 4,
+            "rescued_divergent": 98
+          },
+          "tau_0.2": {
+            "confident_genuine_flips": 4,
+            "rescued_divergent": 98
+          },
+          "tau_0.3": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 102
+          },
+          "tau_0.5": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 102
+          },
+          "tau_1.0": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 102
+          }
+        },
+        "confident_genuine_flips_at_gate": 0
+      },
+      "peak_vram_gb": 20.9697265625,
+      "serve_ready_s": 105.03152179718018,
+      "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/sweep/spec_k6.server.log",
+      "official_equiv_flat_tau_lo": 226.30264800080315,
+      "official_equiv_anchored": 260.57800525491706,
+      "official_equiv_bracket": [
+        226.3,
+        260.58
+      ]
+    },
+    {
+      "k": 7,
+      "wall_tps_local": 212.3722588531318,
+      "official_equiv_tps": 219.84776236476202,
+      "beats_anchor_126": true,
+      "clears_comfort_150": true,
+      "records": 128,
+      "completion_tokens": 65536,
+      "complete_128_128": true,
+      "ppl": null,
+      "strict_verdict": "DIVERGENT",
+      "strict_seq_exact": 0.1796875,
+      "strict_token_identity": 0.4810028076171875,
+      "strict_num_divergent": 105,
+      "onset": {
+        "onset_min": 0,
+        "onset_median": 128,
+        "onset_max": 486,
+        "num_divergent": 105
+      },
+      "confident_genuine_flips_at_0.3": 0,
+      "self_consistent_tau03": true,
+      "rescue": {
+        "num_divergent_prompts": 105,
+        "num_identical_prompts": 23,
+        "onset_gap_min": 0.0,
+        "onset_gap_median": 0.0,
+        "onset_gap_max": 0.25,
+        "onset_gap_frac_le_0.125": 0.9619047619047619,
+        "onset_gap_frac_le_0.3": 1.0,
+        "num_onset_outside_topk": 0,
+        "tau_sweep": {
+          "tau_0.05": {
+            "confident_genuine_flips": 24,
+            "rescued_divergent": 81
+          },
+          "tau_0.1": {
+            "confident_genuine_flips": 24,
+            "rescued_divergent": 81
+          },
+          "tau_0.125": {
+            "confident_genuine_flips": 4,
+            "rescued_divergent": 101
+          },
+          "tau_0.2": {
+            "confident_genuine_flips": 4,
+            "rescued_divergent": 101
+          },
+          "tau_0.3": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 105
+          },
+          "tau_0.5": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 105
+          },
+          "tau_1.0": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 105
+          }
+        },
+        "confident_genuine_flips_at_gate": 0
+      },
+      "peak_vram_gb": 19.4697265625,
+      "serve_ready_s": 110.05227756500244,
+      "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/sweep/spec_k7.server.log",
+      "official_equiv_flat_tau_lo": 219.84776236476202,
+      "official_equiv_anchored": 253.14547524235513,
+      "official_equiv_bracket": [
+        219.85,
+        253.15
+      ]
+    }
+  ],
+  "fastest_self_consistent": {
+    "k": 5,
+    "wall_tps_local": 222.69485056948324,
+    "official_equiv_tps": 230.53370930952903,
+    "beats_anchor_126": true,
+    "clears_comfort_150": true,
+    "records": 128,
+    "completion_tokens": 65536,
+    "complete_128_128": true,
+    "ppl": null,
+    "strict_verdict": "DIVERGENT",
+    "strict_seq_exact": 0.171875,
+    "strict_token_identity": 0.484710693359375,
+    "strict_num_divergent": 106,
+    "onset": {
+      "onset_min": 0,
+      "onset_median": 129,
+      "onset_max": 498,
+      "num_divergent": 106
+    },
+    "confident_genuine_flips_at_0.3": 0,
+    "self_consistent_tau03": true,
+    "rescue": {
+      "num_divergent_prompts": 106,
+      "num_identical_prompts": 22,
+      "onset_gap_min": 0.0,
+      "onset_gap_median": 0.0,
+      "onset_gap_max": 0.25,
+      "onset_gap_frac_le_0.125": 0.9528301886792453,
+      "onset_gap_frac_le_0.3": 1.0,
+      "num_onset_outside_topk": 0,
+      "tau_sweep": {
+        "tau_0.05": {
+          "confident_genuine_flips": 27,
+          "rescued_divergent": 79
+        },
+        "tau_0.1": {
+          "confident_genuine_flips": 27,
+          "rescued_divergent": 79
+        },
+        "tau_0.125": {
+          "confident_genuine_flips": 5,
+          "rescued_divergent": 101
+        },
+        "tau_0.2": {
+          "confident_genuine_flips": 5,
+          "rescued_divergent": 101
+        },
+        "tau_0.3": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 106
+        },
+        "tau_0.5": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 106
+        },
+        "tau_1.0": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 106
+        }
+      },
+      "confident_genuine_flips_at_gate": 0
+    },
+    "peak_vram_gb": 19.4658203125,
+    "serve_ready_s": 110.0320177078247,
+    "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/sweep/spec_k5.server.log",
+    "official_equiv_flat_tau_lo": 230.53370930952903,
+    "official_equiv_anchored": 265.44989484913486,
+    "official_equiv_bracket": [
+      230.53,
+      265.45
+    ]
+  },
+  "fastest_any": {
+    "k": 5,
+    "wall_tps_local": 222.69485056948324,
+    "official_equiv_tps": 230.53370930952903,
+    "beats_anchor_126": true,
+    "clears_comfort_150": true,
+    "records": 128,
+    "completion_tokens": 65536,
+    "complete_128_128": true,
+    "ppl": null,
+    "strict_verdict": "DIVERGENT",
+    "strict_seq_exact": 0.171875,
+    "strict_token_identity": 0.484710693359375,
+    "strict_num_divergent": 106,
+    "onset": {
+      "onset_min": 0,
+      "onset_median": 129,
+      "onset_max": 498,
+      "num_divergent": 106
+    },
+    "confident_genuine_flips_at_0.3": 0,
+    "self_consistent_tau03": true,
+    "rescue": {
+      "num_divergent_prompts": 106,
+      "num_identical_prompts": 22,
+      "onset_gap_min": 0.0,
+      "onset_gap_median": 0.0,
+      "onset_gap_max": 0.25,
+      "onset_gap_frac_le_0.125": 0.9528301886792453,
+      "onset_gap_frac_le_0.3": 1.0,
+      "num_onset_outside_topk": 0,
+      "tau_sweep": {
+        "tau_0.05": {
+          "confident_genuine_flips": 27,
+          "rescued_divergent": 79
+        },
+        "tau_0.1": {
+          "confident_genuine_flips": 27,
+          "rescued_divergent": 79
+        },
+        "tau_0.125": {
+          "confident_genuine_flips": 5,
+          "rescued_divergent": 101
+        },
+        "tau_0.2": {
+          "confident_genuine_flips": 5,
+          "rescued_divergent": 101
+        },
+        "tau_0.3": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 106
+        },
+        "tau_0.5": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 106
+        },
+        "tau_1.0": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 106
+        }
+      },
+      "confident_genuine_flips_at_gate": 0
+    },
+    "peak_vram_gb": 19.4658203125,
+    "serve_ready_s": 110.0320177078247,
+    "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/sweep/spec_k5.server.log",
+    "official_equiv_flat_tau_lo": 230.53370930952903,
+    "official_equiv_anchored": 265.44989484913486,
+    "official_equiv_bracket": [
+      230.53,
+      265.45
+    ]
+  },
+  "transfer_model": {
+    "ar_base_local_bi1": 106.02275748221821,
+    "anchor_official": 126.378,
+    "tau_lo_flat": 1.0352,
+    "ratio_anchored": 1.1919893709725076,
+    "bi_tax_vs_noBI_127_08": 0.8342796242000756,
+    "note": "official_equiv_flat = wall_tps*1.0352 is the CONSERVATIVE floor (carries the BI=1 tax). official_equiv_anchored = wall_tps*(126.378/ar_base_local) is the base-anchored estimate (ship without BI). Both are projections; no HF job fired."
+  }
+}
