@@ -36,7 +36,10 @@ def main() -> int:
     ap.add_argument("--bi1", type=Path, required=True, help="BI=1 fix arm report json")
     ap.add_argument("--wandb-name", default="lawine/served-divergence-locus")
     ap.add_argument("--wandb-group", default="fire_bi_tax_750")
-    ap.add_argument("--wandb-project", default=os.environ.get("WANDB_PROJECT", "senpai"))
+    ap.add_argument("--wandb-project",
+                    default=os.environ.get("WANDB_PROJECT", "gemma-challenge-senpai"))
+    ap.add_argument("--wandb-entity",
+                    default=os.environ.get("WANDB_ENTITY", "wandb-applied-ai-team"))
     ap.add_argument("--no-wandb", action="store_true")
     ap.add_argument("--out", type=Path, default=Path(__file__).resolve().parent
                     / "runs" / "locus_census" / "verdict.json")
@@ -117,8 +120,9 @@ def main() -> int:
             "ctx_cap": bi0["config"]["ctx_cap"], "attn_backend": "TRITON_ATTN",
             "enforce_eager": True, "n_layers": bi0["config"]["n_layers"],
         }
-        run = wandb.init(project=args.wandb_project, name=args.wandb_name,
-                         group=args.wandb_group, config=cfg, job_type="analysis")
+        run = wandb.init(project=args.wandb_project, entity=args.wandb_entity,
+                         name=args.wandb_name, group=args.wandb_group,
+                         config=cfg, job_type="analysis")
         wandb.log({
             "top_op_divergence_share": top_share,
             "literal_strict_achievable_targeted": literal_strict_achievable_targeted,
