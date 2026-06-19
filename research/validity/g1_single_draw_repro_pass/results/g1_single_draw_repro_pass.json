@@ -1,0 +1,185 @@
+{
+  "pr": 756,
+  "student": "kanna",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "fires": 0,
+  "sign_convention": "delta_stock<0 => private FASTER; P(DQ)=P(delta_stock>+5%)=private >5% SLOWER = reproduction-FAIL side; R_systematic = 1 - delta_stock/100.",
+  "systematic_leg_754": {
+    "source_report": "/workspace/senpai/target/research/validity/deltastock_measure/749faithful-20260619T160229Z/report.json",
+    "draws": 50000,
+    "K": 6,
+    "seed": 730,
+    "n_windows_per_subset": {
+      "public": 77,
+      "knowledge_mmlupro": 72,
+      "gpqa_diamond": 69,
+      "reasoning_math": 95
+    },
+    "point_central_pct": -7.729,
+    "boot_mean_pct": -7.4605,
+    "boot_se_pct": 6.0472,
+    "boot_ci95_pct": [
+      -19.931,
+      3.675
+    ],
+    "p_dq_repro_check": 0.0137,
+    "epubfix_se_pct": 2.8779,
+    "delta_stock_pct_by_tps_corners": {
+      "public": 0.0,
+      "knowledge_mmlupro": -8.77,
+      "gpqa_diamond": -12.336,
+      "reasoning_math": 19.593
+    }
+  },
+  "sigma_hw": {
+    "canonical_frac": 0.01,
+    "cross_frac_frantic_penguin": 0.009623,
+    "oneshot_meas_frac": 0.010128,
+    "within_frac_159": 0.000726,
+    "absolute_tps_bound": 4.8153,
+    "absolute_frac_at_160tps": 0.030095624999999997,
+    "sigma_hw_pct_159": 0.9623777540506017,
+    "frantic_penguin_draws": [
+      489.63,
+      483.8,
+      480.41
+    ],
+    "provenance": {
+      "same_hardware_a10g_sm86": true,
+      "within_basis": "measured n=12 fresh-server local A10G sm_86 (#159), ~0.011%",
+      "cross_basis": "frantic-penguin 3 same-submission OFFICIAL a10g-small draws 489.63/483.80/480.41, CV 0.962% (#159) -- the dominant term",
+      "same_config_as_fire": false,
+      "config_note": "cross measured on the split-KV/K7 ~485 TPS frontier, NOT int4_mtp_batchinv; #478 establishes sigma_hw is a MULTIPLICATIVE clock/bandwidth draw -> the ~1% FRACTIONAL model transfers across configs (a model assumption, not a direct fire-config measurement). Absolute-TPS (3% at ~160 TPS) is the conservative loose bound.",
+      "common_mode_with_delta_stock": false,
+      "common_mode_note": "sigma_hw is hardware-allocation scatter; the #754 delta_stock common-mode noise is public-anchor PROMPT sampling -> independent sources -> quadrature, no double-count."
+    }
+  },
+  "arm_a_systematic_ratio": {
+    "r_systematic_mean": 1.07461,
+    "r_systematic_p5": 0.9789,
+    "r_systematic_p50": 1.07236,
+    "p_dq_systematic_only": 0.0137,
+    "systematic_only_pass_0p9863": 0.9863
+  },
+  "arm_b_single_draw_pass": {
+    "p_g1_single_draw_pass": 0.98504,
+    "p_within_pm5pct_two_sided": 0.34082,
+    "p_faster_than_plus5pct": 0.64422,
+    "systematic_only_pass": 0.9863,
+    "sigma_hw_moves_pass_by": -0.00126,
+    "r_realized": {
+      "mean": 1.07453,
+      "p1": 0.94093,
+      "p5": 0.97739,
+      "p50": 1.07248,
+      "std": 0.06145
+    },
+    "gate_literal_epubfixed": {
+      "p_g1_single_draw_pass": 1.0,
+      "p_within_pm5pct_two_sided": 0.2097,
+      "note": "public anchor held fixed (the gate divides by the fixed official-128 public TPS); removes common-mode noise -> upper reading on p_g1."
+    },
+    "sym_normal_crosscheck": {
+      "point_central_pct": -7.729,
+      "boot_se_pct": 6.0472,
+      "sigma_hw_delta_pp": 1.0773,
+      "sigma_total_pp": 6.1424,
+      "p_g1_pass_symnormal": 0.98088,
+      "p_dq_symnormal": 0.01912
+    }
+  },
+  "arm_c_invert_margin": {
+    "r05_single_draw": 0.97739,
+    "repro_margin_pp_at_95": 2.7393,
+    "g1_margin_tps_at_95": 2.9231,
+    "required_reported_tps_at_95": 129.3011,
+    "bar_tps": 126.378,
+    "margin_definition": "reported number must beat the 126.378 bar by g1_margin_tps_at_95 so the 95%-worst single private draw (R_05) still clears the bar: reported* = bar/R_05.",
+    "repro_headroom_by_reported": [
+      {
+        "reported_tps": 126.378,
+        "worst_case_private_tps_at_95": 123.521,
+        "repro_headroom_tps_at_95": 3.462,
+        "clears_bar_at_95": false
+      },
+      {
+        "reported_tps": 150.0,
+        "worst_case_private_tps_at_95": 146.609,
+        "repro_headroom_tps_at_95": 4.109,
+        "clears_bar_at_95": true
+      },
+      {
+        "reported_tps": 157.0,
+        "worst_case_private_tps_at_95": 153.451,
+        "repro_headroom_tps_at_95": 4.301,
+        "clears_bar_at_95": true
+      },
+      {
+        "reported_tps": 167.8,
+        "worst_case_private_tps_at_95": 164.007,
+        "repro_headroom_tps_at_95": 4.597,
+        "clears_bar_at_95": true
+      }
+    ]
+  },
+  "sigma_hw_robustness_sweep": {
+    "cross_cv_159_0p962pct": {
+      "sigma_hw_frac": 0.009623,
+      "p_g1_single_draw_pass": 0.98512,
+      "p_within_pm5pct_two_sided": 0.3406,
+      "r05": 0.97745,
+      "g1_margin_tps_at_95": 2.9153
+    },
+    "canonical_1pct_478": {
+      "sigma_hw_frac": 0.01,
+      "p_g1_single_draw_pass": 0.98504,
+      "p_within_pm5pct_two_sided": 0.34082,
+      "r05": 0.97739,
+      "g1_margin_tps_at_95": 2.9231
+    },
+    "oneshot_meas_478": {
+      "sigma_hw_frac": 0.010128,
+      "p_g1_single_draw_pass": 0.98498,
+      "p_within_pm5pct_two_sided": 0.34072,
+      "r05": 0.97737,
+      "g1_margin_tps_at_95": 2.9257
+    },
+    "absolute_bound_3pct_at_160tps": {
+      "sigma_hw_frac": 0.030095624999999997,
+      "p_g1_single_draw_pass": 0.97206,
+      "p_within_pm5pct_two_sided": 0.34454,
+      "r05": 0.96614,
+      "g1_margin_tps_at_95": 4.4298
+    }
+  },
+  "honesty_carry_forward": {
+    "central_ci95_pct": [
+      -19.931,
+      3.675
+    ],
+    "boot_se_pct": 6.0472,
+    "common_mode_public_anchor_se_pct": 5.318,
+    "epub_fixed_se_pct": 2.8779,
+    "common_mode_note": "the 6.05% systematic SE is dominated by the shared official-128 public-anchor sampling noise (5.32pp common-mode); the gate-literal e_pub-fixed SE is 2.88pp -> p_g1 even higher.",
+    "window_block_bootstrap_conservatism": "the ~10s spec-log window block bootstrap is conservative vs an i.i.d.-prompt resample.",
+    "sigma_hw_provenance": {
+      "same_hardware_a10g_sm86": true,
+      "within_basis": "measured n=12 fresh-server local A10G sm_86 (#159), ~0.011%",
+      "cross_basis": "frantic-penguin 3 same-submission OFFICIAL a10g-small draws 489.63/483.80/480.41, CV 0.962% (#159) -- the dominant term",
+      "same_config_as_fire": false,
+      "config_note": "cross measured on the split-KV/K7 ~485 TPS frontier, NOT int4_mtp_batchinv; #478 establishes sigma_hw is a MULTIPLICATIVE clock/bandwidth draw -> the ~1% FRACTIONAL model transfers across configs (a model assumption, not a direct fire-config measurement). Absolute-TPS (3% at ~160 TPS) is the conservative loose bound.",
+      "common_mode_with_delta_stock": false,
+      "common_mode_note": "sigma_hw is hardware-allocation scatter; the #754 delta_stock common-mode noise is public-anchor PROMPT sampling -> independent sources -> quadrature, no double-count."
+    },
+    "no_double_count": "sigma_hw (hardware-allocation) and delta_stock common-mode (prompt sampling) are independent -> added in quadrature, not double-counted."
+  },
+  "decision": {
+    "primary_metric_p_g1_single_draw_pass": 0.98504,
+    "test_metric_g1_margin_tps_at_95": 2.9231,
+    "g1_safe_single_draw": true,
+    "verdict": "SINGLE_DRAW_G1_SAFE"
+  },
+  "headline": "On a single private reproduction draw, the int4_mtp_batchinv fire has P(G1-pass)=98.5%, clearing the 5% reproduction rule; the 95%-worst draw still runs at 97.7% of reported, so the official number need only beat the 126.378 bar by 2.9 TPS to clear G1 at 95% confidence."
+}
