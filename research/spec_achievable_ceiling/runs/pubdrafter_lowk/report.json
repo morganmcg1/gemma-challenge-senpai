@@ -1,0 +1,422 @@
+{
+  "pr": 744,
+  "analysis_only": true,
+  "official_tps": 0,
+  "smoke": false,
+  "config": {
+    "model_dir": "/workspace/gemma_build/int4_g128_lmhead",
+    "drafter": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "drafter_publishable": true,
+    "ks": [
+      2,
+      3
+    ],
+    "vllm_version": "0.22.0",
+    "transformers_version": "5.9.0",
+    "batch_invariant": 1,
+    "max_num_seqs": 1,
+    "max_num_batched_tokens": 512,
+    "num_prompts": 128,
+    "output_len": 512,
+    "seed": 1,
+    "tau_gate_nats": 0.3,
+    "tau_lo_floor": 1.0352,
+    "anchor_tps": 126.378,
+    "ppl_gate": 2.42,
+    "ref_provenance": "reused:/workspace/senpai/target/research/spec_achievable_ceiling/runs/sweep",
+    "method": "publishable stock-Hub MTP drafter K-sweep; DEPLOYED serve free-run greedy vs config's OWN served-AR (drafter OFF); wall_tps=tokens/decode_s; official-equiv bracket [wall*1.0352 floor, wall*(126.378/ar_local) anchored]; acceptance from vLLM SpecDecoding metrics; strict greedy_gate + tau=0.3 onset-gap headroom."
+  },
+  "transfer_model": {
+    "ar_base_local_bi1": 106.02275748221821,
+    "anchor_official": 126.378,
+    "ratio_anchored": 1.1919893709725076,
+    "tau_lo_floor": 1.0352
+  },
+  "baselines": {
+    "pub_k5_734_bracket": [
+      201.31,
+      231.8
+    ],
+    "nonpub_k5_728_anchored": 265.45,
+    "anchor_bar": 126.378
+  },
+  "ar_reference": {
+    "wall_tps_local": 106.02275748221821,
+    "ppl": 2.0189025477916,
+    "records": 128,
+    "provenance": "reused:/workspace/senpai/target/research/spec_achievable_ceiling/runs/sweep"
+  },
+  "results": [
+    {
+      "k": 2,
+      "wall_tps_local": 186.86106691154808,
+      "official_equiv_floor": 193.44,
+      "official_equiv_anchored": 222.74,
+      "official_equiv_bracket": [
+        193.44,
+        222.74
+      ],
+      "beats_anchor_126": true,
+      "beats_floor_126": true,
+      "acceptance": {
+        "windows": 36,
+        "sum_accepted": 37374,
+        "sum_drafted": 56252,
+        "avg_draft_acceptance_rate": 0.6644,
+        "mean_acceptance_length_ET": 2.3288,
+        "mean_acceptance_length_logged": 2.3314,
+        "per_position_acceptance": [
+          0.7495,
+          0.5825
+        ]
+      },
+      "records": 128,
+      "completion_tokens": 65536,
+      "complete_128_128": true,
+      "ppl": 2.0189025477916,
+      "ppl_ok": true,
+      "strict_verdict": "DIVERGENT",
+      "strict_seq_exact": 0.15625,
+      "strict_token_identity": 0.47637939453125,
+      "strict_num_divergent": 108,
+      "onset": {
+        "onset_min": 0,
+        "onset_median": 133,
+        "onset_max": 498,
+        "num_divergent": 108
+      },
+      "tau03": {
+        "confident_genuine_flips_at_0.3": 0,
+        "self_consistent_tau03": true,
+        "num_surviving_flips": 108,
+        "worst_surviving_onset_gap": 0.25,
+        "headroom_nat": 0.05,
+        "num_onset_outside_topk": 0
+      },
+      "self_consistent_tau03": true,
+      "rescue": {
+        "num_divergent_prompts": 108,
+        "num_identical_prompts": 20,
+        "onset_gap_min": 0.0,
+        "onset_gap_median": 0.0,
+        "onset_gap_max": 0.25,
+        "onset_gap_frac_le_0.125": 0.9537037037037037,
+        "onset_gap_frac_le_0.3": 1.0,
+        "num_onset_outside_topk": 0,
+        "tau_sweep": {
+          "tau_0.05": {
+            "confident_genuine_flips": 25,
+            "rescued_divergent": 83
+          },
+          "tau_0.1": {
+            "confident_genuine_flips": 25,
+            "rescued_divergent": 83
+          },
+          "tau_0.125": {
+            "confident_genuine_flips": 5,
+            "rescued_divergent": 103
+          },
+          "tau_0.2": {
+            "confident_genuine_flips": 5,
+            "rescued_divergent": 103
+          },
+          "tau_0.3": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 108
+          },
+          "tau_0.5": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 108
+          },
+          "tau_1.0": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 108
+          }
+        },
+        "confident_genuine_flips_at_gate": 0
+      },
+      "peak_vram_gb": 20.7373046875,
+      "serve_ready_s": 110.03155994415283,
+      "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/pubdrafter_lowk/spec_k2.server.log"
+    },
+    {
+      "k": 3,
+      "wall_tps_local": 197.228203368253,
+      "official_equiv_floor": 204.17,
+      "official_equiv_anchored": 235.09,
+      "official_equiv_bracket": [
+        204.17,
+        235.09
+      ],
+      "beats_anchor_126": true,
+      "beats_floor_126": true,
+      "acceptance": {
+        "windows": 34,
+        "sum_accepted": 41613,
+        "sum_drafted": 71781,
+        "avg_draft_acceptance_rate": 0.57972,
+        "mean_acceptance_length_ET": 2.7392,
+        "mean_acceptance_length_logged": 2.7512,
+        "per_position_acceptance": [
+          0.7359,
+          0.5652,
+          0.4504
+        ]
+      },
+      "records": 128,
+      "completion_tokens": 65536,
+      "complete_128_128": true,
+      "ppl": 2.0189025477916,
+      "ppl_ok": true,
+      "strict_verdict": "DIVERGENT",
+      "strict_seq_exact": 0.1796875,
+      "strict_token_identity": 0.488067626953125,
+      "strict_num_divergent": 105,
+      "onset": {
+        "onset_min": 0,
+        "onset_median": 128,
+        "onset_max": 486,
+        "num_divergent": 105
+      },
+      "tau03": {
+        "confident_genuine_flips_at_0.3": 0,
+        "self_consistent_tau03": true,
+        "num_surviving_flips": 105,
+        "worst_surviving_onset_gap": 0.25,
+        "headroom_nat": 0.05,
+        "num_onset_outside_topk": 0
+      },
+      "self_consistent_tau03": true,
+      "rescue": {
+        "num_divergent_prompts": 105,
+        "num_identical_prompts": 23,
+        "onset_gap_min": 0.0,
+        "onset_gap_median": 0.0,
+        "onset_gap_max": 0.25,
+        "onset_gap_frac_le_0.125": 0.9619047619047619,
+        "onset_gap_frac_le_0.3": 1.0,
+        "num_onset_outside_topk": 0,
+        "tau_sweep": {
+          "tau_0.05": {
+            "confident_genuine_flips": 25,
+            "rescued_divergent": 80
+          },
+          "tau_0.1": {
+            "confident_genuine_flips": 25,
+            "rescued_divergent": 80
+          },
+          "tau_0.125": {
+            "confident_genuine_flips": 4,
+            "rescued_divergent": 101
+          },
+          "tau_0.2": {
+            "confident_genuine_flips": 4,
+            "rescued_divergent": 101
+          },
+          "tau_0.3": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 105
+          },
+          "tau_0.5": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 105
+          },
+          "tau_1.0": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 105
+          }
+        },
+        "confident_genuine_flips_at_gate": 0
+      },
+      "peak_vram_gb": 20.7236328125,
+      "serve_ready_s": 110.03008818626404,
+      "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/pubdrafter_lowk/spec_k3.server.log"
+    }
+  ],
+  "fastest_self_consistent": {
+    "k": 3,
+    "wall_tps_local": 197.228203368253,
+    "official_equiv_floor": 204.17,
+    "official_equiv_anchored": 235.09,
+    "official_equiv_bracket": [
+      204.17,
+      235.09
+    ],
+    "beats_anchor_126": true,
+    "beats_floor_126": true,
+    "acceptance": {
+      "windows": 34,
+      "sum_accepted": 41613,
+      "sum_drafted": 71781,
+      "avg_draft_acceptance_rate": 0.57972,
+      "mean_acceptance_length_ET": 2.7392,
+      "mean_acceptance_length_logged": 2.7512,
+      "per_position_acceptance": [
+        0.7359,
+        0.5652,
+        0.4504
+      ]
+    },
+    "records": 128,
+    "completion_tokens": 65536,
+    "complete_128_128": true,
+    "ppl": 2.0189025477916,
+    "ppl_ok": true,
+    "strict_verdict": "DIVERGENT",
+    "strict_seq_exact": 0.1796875,
+    "strict_token_identity": 0.488067626953125,
+    "strict_num_divergent": 105,
+    "onset": {
+      "onset_min": 0,
+      "onset_median": 128,
+      "onset_max": 486,
+      "num_divergent": 105
+    },
+    "tau03": {
+      "confident_genuine_flips_at_0.3": 0,
+      "self_consistent_tau03": true,
+      "num_surviving_flips": 105,
+      "worst_surviving_onset_gap": 0.25,
+      "headroom_nat": 0.05,
+      "num_onset_outside_topk": 0
+    },
+    "self_consistent_tau03": true,
+    "rescue": {
+      "num_divergent_prompts": 105,
+      "num_identical_prompts": 23,
+      "onset_gap_min": 0.0,
+      "onset_gap_median": 0.0,
+      "onset_gap_max": 0.25,
+      "onset_gap_frac_le_0.125": 0.9619047619047619,
+      "onset_gap_frac_le_0.3": 1.0,
+      "num_onset_outside_topk": 0,
+      "tau_sweep": {
+        "tau_0.05": {
+          "confident_genuine_flips": 25,
+          "rescued_divergent": 80
+        },
+        "tau_0.1": {
+          "confident_genuine_flips": 25,
+          "rescued_divergent": 80
+        },
+        "tau_0.125": {
+          "confident_genuine_flips": 4,
+          "rescued_divergent": 101
+        },
+        "tau_0.2": {
+          "confident_genuine_flips": 4,
+          "rescued_divergent": 101
+        },
+        "tau_0.3": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 105
+        },
+        "tau_0.5": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 105
+        },
+        "tau_1.0": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 105
+        }
+      },
+      "confident_genuine_flips_at_gate": 0
+    },
+    "peak_vram_gb": 20.7236328125,
+    "serve_ready_s": 110.03008818626404,
+    "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/pubdrafter_lowk/spec_k3.server.log"
+  },
+  "fastest_any": {
+    "k": 3,
+    "wall_tps_local": 197.228203368253,
+    "official_equiv_floor": 204.17,
+    "official_equiv_anchored": 235.09,
+    "official_equiv_bracket": [
+      204.17,
+      235.09
+    ],
+    "beats_anchor_126": true,
+    "beats_floor_126": true,
+    "acceptance": {
+      "windows": 34,
+      "sum_accepted": 41613,
+      "sum_drafted": 71781,
+      "avg_draft_acceptance_rate": 0.57972,
+      "mean_acceptance_length_ET": 2.7392,
+      "mean_acceptance_length_logged": 2.7512,
+      "per_position_acceptance": [
+        0.7359,
+        0.5652,
+        0.4504
+      ]
+    },
+    "records": 128,
+    "completion_tokens": 65536,
+    "complete_128_128": true,
+    "ppl": 2.0189025477916,
+    "ppl_ok": true,
+    "strict_verdict": "DIVERGENT",
+    "strict_seq_exact": 0.1796875,
+    "strict_token_identity": 0.488067626953125,
+    "strict_num_divergent": 105,
+    "onset": {
+      "onset_min": 0,
+      "onset_median": 128,
+      "onset_max": 486,
+      "num_divergent": 105
+    },
+    "tau03": {
+      "confident_genuine_flips_at_0.3": 0,
+      "self_consistent_tau03": true,
+      "num_surviving_flips": 105,
+      "worst_surviving_onset_gap": 0.25,
+      "headroom_nat": 0.05,
+      "num_onset_outside_topk": 0
+    },
+    "self_consistent_tau03": true,
+    "rescue": {
+      "num_divergent_prompts": 105,
+      "num_identical_prompts": 23,
+      "onset_gap_min": 0.0,
+      "onset_gap_median": 0.0,
+      "onset_gap_max": 0.25,
+      "onset_gap_frac_le_0.125": 0.9619047619047619,
+      "onset_gap_frac_le_0.3": 1.0,
+      "num_onset_outside_topk": 0,
+      "tau_sweep": {
+        "tau_0.05": {
+          "confident_genuine_flips": 25,
+          "rescued_divergent": 80
+        },
+        "tau_0.1": {
+          "confident_genuine_flips": 25,
+          "rescued_divergent": 80
+        },
+        "tau_0.125": {
+          "confident_genuine_flips": 4,
+          "rescued_divergent": 101
+        },
+        "tau_0.2": {
+          "confident_genuine_flips": 4,
+          "rescued_divergent": 101
+        },
+        "tau_0.3": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 105
+        },
+        "tau_0.5": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 105
+        },
+        "tau_1.0": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 105
+        }
+      },
+      "confident_genuine_flips_at_gate": 0
+    },
+    "peak_vram_gb": 20.7236328125,
+    "serve_ready_s": 110.03008818626404,
+    "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/pubdrafter_lowk/spec_k3.server.log"
+  }
+}
