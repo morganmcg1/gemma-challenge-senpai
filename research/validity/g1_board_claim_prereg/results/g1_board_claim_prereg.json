@@ -1,0 +1,179 @@
+{
+  "pr": 758,
+  "student": "kanna",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "fires": 0,
+  "reused_756_byte_identical": true,
+  "repro_anchors_756": {
+    "p_fire_repro": 0.98504,
+    "p_fire_expected": 0.98504,
+    "r05_repro": 0.97739,
+    "r05_expected": 0.97739,
+    "g1_margin_repro": 2.9231,
+    "g1_margin_expected": 2.9231
+  },
+  "sign_convention": "delta_stock<0 => private FASTER; G1 fail = private >5% SLOWER; R = private/reported = 1 - delta_stock/100, folded with multiplicative sigma_hw.",
+  "systematic_leg_754": {
+    "source_report": "/workspace/senpai/target/research/validity/deltastock_measure/749faithful-20260619T160229Z/report.json",
+    "draws": 50000,
+    "K": 6,
+    "seed": 730,
+    "n_windows_per_subset": {
+      "public": 77,
+      "knowledge_mmlupro": 72,
+      "gpqa_diamond": 69,
+      "reasoning_math": 95
+    },
+    "point_central_pct": -7.729,
+    "boot_mean_pct": -7.4605,
+    "boot_se_pct": 6.0472,
+    "boot_ci95_pct": [
+      -19.931,
+      3.675
+    ],
+    "p_dq_repro_check": 0.0137,
+    "epubfix_se_pct": 2.8779,
+    "delta_stock_pct_by_tps_corners": {
+      "public": 0.0,
+      "knowledge_mmlupro": -8.77,
+      "gpqa_diamond": -12.336,
+      "reasoning_math": 19.593
+    }
+  },
+  "sigma_hw_canonical_frac": 0.01,
+  "deliverable_1_parametric_official_tps_table": {
+    "bar_tps": 126.378,
+    "p_g1_pass_invariant": 0.98504,
+    "r05_invariant": 0.97739,
+    "scale_free_note": "P(G1-pass) and R_05 do not depend on the official number (the gate is the ratio rule private>=0.95*reported); only the TPS-denominated columns scale. This invariance is why the claim can be committed before the official summary.json:tps lands.",
+    "grid": [
+      {
+        "official_tps": 130.0,
+        "p_g1_pass": 0.98504,
+        "r05_worst_single_draw_ratio": 0.97739,
+        "worst_private_tps_at_95": 127.061,
+        "margin_over_126378_bar_tps": 0.683,
+        "speedup_x_over_bar": 1.0287,
+        "worst_draw_clears_bar": true
+      },
+      {
+        "official_tps": 140.0,
+        "p_g1_pass": 0.98504,
+        "r05_worst_single_draw_ratio": 0.97739,
+        "worst_private_tps_at_95": 136.835,
+        "margin_over_126378_bar_tps": 10.457,
+        "speedup_x_over_bar": 1.1078,
+        "worst_draw_clears_bar": true
+      },
+      {
+        "official_tps": 150.0,
+        "p_g1_pass": 0.98504,
+        "r05_worst_single_draw_ratio": 0.97739,
+        "worst_private_tps_at_95": 146.608,
+        "margin_over_126378_bar_tps": 20.23,
+        "speedup_x_over_bar": 1.1869,
+        "worst_draw_clears_bar": true
+      },
+      {
+        "official_tps": 157.0,
+        "p_g1_pass": 0.98504,
+        "r05_worst_single_draw_ratio": 0.97739,
+        "worst_private_tps_at_95": 153.45,
+        "margin_over_126378_bar_tps": 27.072,
+        "speedup_x_over_bar": 1.2423,
+        "worst_draw_clears_bar": true
+      },
+      {
+        "official_tps": 168.0,
+        "p_g1_pass": 0.98504,
+        "r05_worst_single_draw_ratio": 0.97739,
+        "worst_private_tps_at_95": 164.202,
+        "margin_over_126378_bar_tps": 37.824,
+        "speedup_x_over_bar": 1.3293,
+        "worst_draw_clears_bar": true
+      },
+      {
+        "official_tps": 180.0,
+        "p_g1_pass": 0.98504,
+        "r05_worst_single_draw_ratio": 0.97739,
+        "worst_private_tps_at_95": 175.93,
+        "margin_over_126378_bar_tps": 49.552,
+        "speedup_x_over_bar": 1.4243,
+        "worst_draw_clears_bar": true
+      }
+    ]
+  },
+  "deliverable_2_joint_position_survival": {
+    "marginals": {
+      "p_fire_clears_g1": 0.98504,
+      "p_126378_clears_g1_conservative": 0.98308,
+      "p_126378_clears_g1_deterministic": 1.0,
+      "p_126378_deterministic_analytic": 0.9999997,
+      "note_126_det": "non-spec greedy carries no acceptance gap -> delta_stock~=0; P = Phi(0.05/sigma_hw) -> sigma_hw alone never yields a 5% miss"
+    },
+    "correlation": {
+      "rho_realized_ratio_conservative": 0.7515,
+      "rho_systematic_delta_conservative": 0.7744,
+      "common_mode_se_pp": 5.318,
+      "common_mode_variance_fraction": 0.7734,
+      "note": "the two submissions share the official-128 public-anchor sampling noise (5.32 of 6.05 pp SE, #754) -> positively correlated survivals; rho built from the bootstrap common-mode leg, not assumed."
+    },
+    "joint_conservative_126_as_fire_deltastock": {
+      "p_position_survives_independence_ceiling": 0.99975,
+      "p_position_survives_independence_sim": 0.99974,
+      "p_position_survives_common_mode_correlated": 0.9958,
+      "p_position_survives_comonotonic_floor": 0.98504,
+      "p_position_survives_correlated_bvn_xcheck": 0.99224
+    },
+    "joint_deterministic_126_physical": {
+      "p_position_survives_independence": 1.0,
+      "p_position_survives_correlated": 1.0,
+      "note": "the 126.378 is a near-certain deterministic backstop whose failure mode (sigma_hw) is independent of the fire's delta_stock-driven failure -> position survival ~= 1.0 physically."
+    }
+  },
+  "deliverable_2_joint_at_absolute_3pct_sigma_hw": {
+    "p_position_survives_independence_ceiling": 0.99918,
+    "p_position_survives_independence_sim": 0.99926,
+    "p_position_survives_common_mode_correlated": 0.99336,
+    "p_position_survives_comonotonic_floor": 0.97206,
+    "p_position_survives_correlated_bvn_xcheck": 0.99224
+  },
+  "deliverable_3_one_sided_vs_two_sided": {
+    "g1_rule_scored": "private_TPS >= 0.95 * reported_TPS  (one-sided, 5% slow-side tolerance)",
+    "p_g1_pass_one_sided": 0.98504,
+    "p_within_two_sided_pm5pct": 0.34082,
+    "p_faster_than_plus5pct": 0.64422,
+    "p_slower_than_minus5pct_fail": 0.01496,
+    "partition_check": 1.0,
+    "paragraph": "Scoring against the one-sided G1 reproduction rule (private TPS >= 0.95 x reported TPS), the fire passes with probability 98.5%. A naive two-sided +/-5% reading would call only 34.1% of single private draws a 'match' -- but that is a measurement artifact, not a risk: 64.4% of draws land MORE than 5% FASTER than reported (private prompts have a favorable acceptance profile, central -7.7%), and being faster is NOT a reproduction failure. Only 1.5% of draws fall on the >5%-slower side that G1 actually penalizes. The one-sided rule is the organizer's reproduction rule; we score against private >= 0.95 x reported and flag that if the published rule were two-sided or used a different tolerance, the claim would have to be restated.",
+    "organizer_rule_flag": "scored against private>=0.95*reported (one-sided). If the organizer's published G1 rule differs (two-sided band, or tolerance != 5%), restate before quoting."
+  },
+  "test_metric_g1_margin_tps_at_95": 2.9231,
+  "honesty_carry_forward": {
+    "central_ci95_pct": [
+      -19.931,
+      3.675
+    ],
+    "ci95_upper_touches_positive": true,
+    "boot_se_pct": 6.0472,
+    "common_mode_public_anchor_se_pct": 5.318,
+    "gate_literal_epub_fixed_p_dq": 0.0,
+    "gate_literal_note": "the gate divides by the FIXED official-128 public TPS -> e_pub-fixed reading gives P(DQ)=0; we headline the conservative full-bootstrap (common-mode carried).",
+    "sigma_hw_transfer_assumption": "cross measured on the split-KV/K7 ~485 TPS frontier, NOT int4_mtp_batchinv; #478 establishes sigma_hw is a MULTIPLICATIVE clock/bandwidth draw -> the ~1% FRACTIONAL model transfers across configs (a model assumption, not a direct fire-config measurement). Absolute-TPS (3% at ~160 TPS) is the conservative loose bound.",
+    "sigma_hw_absolute_corner_is_conservative": true,
+    "no_double_count_with_500_portfolio": "#228 publish_first_lambda_floor and #253 two_path_500_portfolio combine the REACH probabilities of two speculative ~500-TPS build paths (P_A/P_B, lambda-floor); this card combines the REPRODUCTION-survival of two FINISHED submissions (126.378 live + int4 fire) at 126-168 TPS. Different op-point, different event (reach vs reproduce), different objects (build paths vs submissions); no shared term is reused -> no double-count."
+  },
+  "decision": {
+    "primary_metric_p_position_survives_g1": 0.9958,
+    "p_position_survives_floor_comonotonic": 0.98504,
+    "p_position_survives_ceiling_independence": 0.99975,
+    "p_position_survives_physical_deterministic_126": 1.0,
+    "test_metric_g1_margin_tps_at_95": 2.9231,
+    "g1_margin_reconfirms_756": true,
+    "honest_headline_reading": "common_mode_correlated",
+    "verdict": "POSITION_G1_SAFE_PREREGISTERED"
+  },
+  "headline": "Our leaderboard position survives the organizer's private G1 rerun with probability >= 98.5% (pre-registered before the official number; ~99.6% under the realistic common-mode model, ~100.0% physical), and at any fire official TPS in 150-168 the 95%-worst single private draw clears the 126.378 bar by 20.2-37.8 TPS."
+}
