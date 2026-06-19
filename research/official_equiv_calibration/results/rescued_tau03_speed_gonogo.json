@@ -1,0 +1,338 @@
+{
+  "pr": 732,
+  "student": "kanna",
+  "card": "SPEED go/no-go for the strict-safe rescued tau=0.3 fallback (#725 haircut model)",
+  "guard_flags": {
+    "analysis_only": 1,
+    "official_tps": 0,
+    "no_hf_job": 1,
+    "fires": 0
+  },
+  "bar_official": 126.378,
+  "bar_config": "int4_g128_lmhead PR#4 (pure-AR; private==public; no haircut on the bar)",
+  "inputs": {
+    "rescued_tau03_local_captured_tps": 135.27,
+    "ar_rung_local_captured_tps": 126.75,
+    "official_equiv_public_meter_matched": 134.87299455621303,
+    "input_source": "advisor-branch CURRENT_RESEARCH_STATE.md / land #664 REGIME_IS_ACCEPTANCE (W&B 4fbu9b3o) / PR #732 body '~135 local'; serve path land#720/denken is out of kanna isolation scope -> consumed like #725 consumed stark K=5",
+    "freshly_measured": false,
+    "fresh_measure_blocker": "rescued serve path = land#720/denken; not on advisor branch; kanna isolation scope precludes cross-read. Consumed consolidated capture exactly as #725 consumed stark's K=5 wall_tps."
+  },
+  "pair_accounting": {
+    "n_clean_meter_matched_pairs": 1,
+    "the_meter_matched_pair": {
+      "config": "int4_g128_lmhead (the AR rung / locked bar itself)",
+      "local_captured_graph": 126.75,
+      "official": 126.378,
+      "transfer": 0.9970650887573964,
+      "meter": "captured-graph (== rescued config's input meter)",
+      "note": "int4 precision + captured-graph meter + literal bar -> tighter than #725's bf16 flagship"
+    },
+    "fit_possible": false,
+    "honest_statement": "One clean meter-matched pair (the AR rung, captured-graph, int4). Cannot FIT a line; we BRACKET with the PR pessimism band [0.87,0.99] and report break-evens. The single_stream int4 points (0.9863/0.9603) are cross-meter and push the verdict MORE negative, not less."
+  },
+  "transfer_points": {
+    "T_meter_matched_capturedgraph": 0.9970650887573964,
+    "T_definitional_ceiling": 1.0,
+    "T_int4_single_stream_match_CROSSMETER": 0.9863263872629361,
+    "T_int4_single_stream_pessimistic_CROSSMETER": 0.9603191489361702,
+    "T_stark_tax_0p870": 0.87,
+    "T_advisor_0p880": 0.88
+  },
+  "pr_sensitivity_band": [
+    0.87,
+    0.99
+  ],
+  "measured_anchored_band": [
+    0.9603191489361702,
+    1.0
+  ],
+  "haircut_band": {
+    "lo": 0.04,
+    "hi": 0.09,
+    "bar_haircut": 0.0,
+    "note": "applied to candidate only; bar is pure-AR. rescued is identity-clean but still a drafter stack -> speed is haircut-prone"
+  },
+  "deterministic_grid": {
+    "T_meter_matched_capturedgraph": {
+      "worst_haircut_9pct": {
+        "name": "T_meter_matched_capturedgraph/h9",
+        "local": 135.27,
+        "mult": 0.9970650887573964,
+        "haircut": 0.09,
+        "official_equiv_private": 122.73442504615386,
+        "margin_pct": -2.8830769230769104,
+        "clears": false
+      },
+      "best_haircut_4pct": {
+        "name": "T_meter_matched_capturedgraph/h4",
+        "local": 135.27,
+        "mult": 0.9970650887573964,
+        "haircut": 0.04,
+        "official_equiv_private": 129.4780747739645,
+        "margin_pct": 2.4530177514792806,
+        "clears": true
+      },
+      "no_haircut": {
+        "name": "T_meter_matched_capturedgraph/h0",
+        "local": 135.27,
+        "mult": 0.9970650887573964,
+        "haircut": 0.0,
+        "official_equiv_private": 134.87299455621303,
+        "margin_pct": 6.7218934911242645,
+        "clears": true
+      }
+    },
+    "T_definitional_ceiling": {
+      "worst_haircut_9pct": {
+        "name": "T_definitional_ceiling/h9",
+        "local": 135.27,
+        "mult": 1.0,
+        "haircut": 0.09,
+        "official_equiv_private": 123.09570000000001,
+        "margin_pct": -2.5972083748753705,
+        "clears": false
+      },
+      "best_haircut_4pct": {
+        "name": "T_definitional_ceiling/h4",
+        "local": 135.27,
+        "mult": 1.0,
+        "haircut": 0.04,
+        "official_equiv_private": 129.85920000000002,
+        "margin_pct": 2.7545933627688424,
+        "clears": true
+      },
+      "no_haircut": {
+        "name": "T_definitional_ceiling/h0",
+        "local": 135.27,
+        "mult": 1.0,
+        "haircut": 0.0,
+        "official_equiv_private": 135.27,
+        "margin_pct": 7.036034752884213,
+        "clears": true
+      }
+    },
+    "T_int4_single_stream_match_CROSSMETER": {
+      "worst_haircut_9pct": {
+        "name": "T_int4_single_stream_match_CROSSMETER/h9",
+        "local": 135.27,
+        "mult": 0.9863263872629361,
+        "haircut": 0.09,
+        "official_equiv_private": 121.41253706860222,
+        "margin_pct": -3.9290564270662465,
+        "clears": false
+      },
+      "best_haircut_4pct": {
+        "name": "T_int4_single_stream_match_CROSSMETER/h4",
+        "local": 135.27,
+        "mult": 0.9863263872629361,
+        "haircut": 0.04,
+        "official_equiv_private": 128.0835555888551,
+        "margin_pct": 1.349566846171868,
+        "clears": true
+      },
+      "no_haircut": {
+        "name": "T_int4_single_stream_match_CROSSMETER/h0",
+        "local": 135.27,
+        "mult": 0.9863263872629361,
+        "haircut": 0.0,
+        "official_equiv_private": 133.42037040505738,
+        "margin_pct": 5.572465464762377,
+        "clears": true
+      }
+    },
+    "T_int4_single_stream_pessimistic_CROSSMETER": {
+      "worst_haircut_9pct": {
+        "name": "T_int4_single_stream_pessimistic_CROSSMETER/h9",
+        "local": 135.27,
+        "mult": 0.9603191489361702,
+        "haircut": 0.09,
+        "official_equiv_private": 118.21115786170213,
+        "margin_pct": -6.462234042553183,
+        "clears": false
+      },
+      "best_haircut_4pct": {
+        "name": "T_int4_single_stream_pessimistic_CROSSMETER/h4",
+        "local": 135.27,
+        "mult": 0.9603191489361702,
+        "haircut": 0.04,
+        "official_equiv_private": 124.70627642553191,
+        "margin_pct": -1.3227963525835884,
+        "clears": false
+      },
+      "no_haircut": {
+        "name": "T_int4_single_stream_pessimistic_CROSSMETER/h0",
+        "local": 135.27,
+        "mult": 0.9603191489361702,
+        "haircut": 0.0,
+        "official_equiv_private": 129.90237127659574,
+        "margin_pct": 2.7887537993920963,
+        "clears": true
+      }
+    },
+    "T_stark_tax_0p870": {
+      "worst_haircut_9pct": {
+        "name": "T_stark_tax_0p870/h9",
+        "local": 135.27,
+        "mult": 0.87,
+        "haircut": 0.09,
+        "official_equiv_private": 107.09325900000002,
+        "margin_pct": -15.25957128614156,
+        "clears": false
+      },
+      "best_haircut_4pct": {
+        "name": "T_stark_tax_0p870/h4",
+        "local": 135.27,
+        "mult": 0.87,
+        "haircut": 0.04,
+        "official_equiv_private": 112.97750400000001,
+        "margin_pct": -10.60350377439111,
+        "clears": false
+      },
+      "no_haircut": {
+        "name": "T_stark_tax_0p870/h0",
+        "local": 135.27,
+        "mult": 0.87,
+        "haircut": 0.0,
+        "official_equiv_private": 117.68490000000001,
+        "margin_pct": -6.87864976499073,
+        "clears": false
+      }
+    },
+    "T_advisor_0p880": {
+      "worst_haircut_9pct": {
+        "name": "T_advisor_0p880/h9",
+        "local": 135.27,
+        "mult": 0.88,
+        "haircut": 0.09,
+        "official_equiv_private": 108.32421600000002,
+        "margin_pct": -14.285543369890307,
+        "clears": false
+      },
+      "best_haircut_4pct": {
+        "name": "T_advisor_0p880/h4",
+        "local": 135.27,
+        "mult": 0.88,
+        "haircut": 0.04,
+        "official_equiv_private": 114.27609600000001,
+        "margin_pct": -9.575957840763415,
+        "clears": false
+      },
+      "no_haircut": {
+        "name": "T_advisor_0p880/h0",
+        "local": 135.27,
+        "mult": 0.88,
+        "haircut": 0.0,
+        "official_equiv_private": 119.03760000000001,
+        "margin_pct": -5.8082894174618875,
+        "clears": false
+      }
+    }
+  },
+  "monte_carlo": {
+    "pr_band_0p87_0p99": {
+      "mult_band": [
+        0.87,
+        0.99
+      ],
+      "haircut_band": [
+        0.04,
+        0.09
+      ],
+      "p_clears_bar": 0.023245,
+      "official_equiv_public_p50": 125.8175372026023,
+      "official_equiv_private_p05": 110.05526645632946,
+      "official_equiv_private_p50": 117.61893074654617,
+      "official_equiv_private_p95": 125.37839311373511
+    },
+    "measured_anchored_0p9603_1p0": {
+      "mult_band": [
+        0.9603191489361702,
+        1.0
+      ],
+      "haircut_band": [
+        0.04,
+        0.09
+      ],
+      "p_clears_bar": 0.1748975,
+      "official_equiv_public_p50": 132.57897909805354,
+      "official_equiv_private_p05": 119.98217821314248,
+      "official_equiv_private_p50": 123.9457899676093,
+      "official_equiv_private_p95": 127.99589836643682
+    }
+  },
+  "breakeven": {
+    "transfer_at_worst_9pct_haircut": 1.0266646194789906,
+    "transfer_at_best_4pct_haircut": 0.9731925038811265,
+    "transfer_no_haircut": 0.9342648037258815,
+    "max_survivable_haircut_at_meter_matched_T": 0.06298514082945228,
+    "max_survivable_haircut_at_definitional_T": 0.0657351962741185
+  },
+  "private_repro_gate_SEPARATE_risk": {
+    "gate_threshold_pct": 5.0,
+    "haircut_band_straddles_gate": true,
+    "p_drift_exceeds_gate_naive_uniform": 0.7999999999999999,
+    "interpretation": "Even setting the SPEED bar aside, the rescued config -- like any drafter stack -- straddles the 5% private-repro gate. But the SPEED bar is the binding failure here, not this gate."
+  },
+  "honesty_caveats": {
+    "n_clean_meter_matched_pairs": 1,
+    "private_drift_prior": "rescued tau=0.3 private E_accept drift is UNMEASURED in-scope; we use the documented 4-9% band (kanna #44 drafter-collapse prior). The recompute acceptor is STRICTER (lower base accept) -> drift direction on private prompts is unknown; band may be optimistic or pessimistic.",
+    "input_not_freshly_measured": true,
+    "thinnest_clearing_corner_margin_pct": 1.7270474291411597,
+    "input_sensitivity": "verdict robust: NO-GO holds for L in [130,138] (breakeven-at-9%-haircut transfer stays >1.0 for any L<=138.9)."
+  },
+  "verdict": {
+    "bucket": "c_NOGO",
+    "headline": "NO-GO",
+    "p_clears_126378_after_haircut_pr_band": 0.023245,
+    "p_clears_126378_after_haircut_measured_anchored": 0.1748975,
+    "worst_measured_anchored_corner_margin_pct": -6.462234042553183,
+    "worst_measured_anchored_corner": {
+      "name": "MAlo_0p9603/h9",
+      "local": 135.27,
+      "mult": 0.9603191489361702,
+      "haircut": 0.09,
+      "official_equiv_private": 118.21115786170213,
+      "margin_pct": -6.462234042553183,
+      "clears": false
+    },
+    "meter_matched_clean_anchor_worst_haircut_corner": {
+      "name": "T_meter_matched_capturedgraph/h9",
+      "local": 135.27,
+      "mult": 0.9970650887573964,
+      "haircut": 0.09,
+      "official_equiv_private": 122.73442504615386,
+      "margin_pct": -2.8830769230769104,
+      "clears": false
+    },
+    "thinnest_clearing_corner": {
+      "name": "PRhi_0p99/h4",
+      "local": 135.27,
+      "mult": 0.99,
+      "haircut": 0.04,
+      "official_equiv_private": 128.560608,
+      "margin_pct": 1.7270474291411597,
+      "clears": true
+    },
+    "worst_pr_band_corner": {
+      "name": "PRlo_0p87/h9",
+      "local": 135.27,
+      "mult": 0.87,
+      "haircut": 0.09,
+      "official_equiv_private": 107.09325900000002,
+      "margin_pct": -15.25957128614156,
+      "clears": false
+    },
+    "central_meter_matched_mid_haircut_corner": {
+      "name": "mm/h6p5",
+      "local": 135.27,
+      "mult": 0.9970650887573964,
+      "haircut": 0.065,
+      "official_equiv_private": 126.10624991005919,
+      "margin_pct": -0.21502958579879827,
+      "clears": false
+    },
+    "max_survivable_haircut_at_meter_matched_T_pct": 6.298514082945228,
+    "one_number_for_the_advisor": "NO-GO (speed). The rescued tau=0.3 is identity-clean by construction (land #720) but FAILS the speed bar after the private haircut. At the CLEANEST anchor -- the captured-graph meter-matched transfer T=0.9971 (int4 + same meter + the literal bar, a tighter anchor than #725's bf16 flagship) -- official-equiv PUBLIC is 134.87 (+6.7%), but the worst documented 9% haircut drops it to 122.73 (-2.88%, BELOW 126.378) and even the mid 6.5% haircut lands at 126.11 (-0.22%). It survives a haircut of only 6.3% at the meter-matched transfer -- INSIDE the 4-9% band. To clear after the FULL 9% haircut the transfer must exceed 1.0267, i.e. ABOVE the definitional 1.0 ceiling -- impossible. P(clears)=0.023 over the PR pessimism band [0.87,0.99] and only 0.175 even over the favorable measured-anchored band [0.960,1.0]. The config clears ONLY in a thin sliver (transfer ~definitional AND haircut ~4%, thinnest corner +1.7%). Contrast #725's un-rescued stack: P=1.00, worst corner +9.95%. The ~22% rescue tax (172.7->135.3 local) converts a comfortable GO into a NO-GO. Do not spend a fire on the rescued tau=0.3 for speed."
+  }
+}
