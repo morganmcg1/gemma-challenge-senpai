@@ -1,0 +1,19 @@
+{
+  "name": "int4-fakequant-g32",
+  "description": "PR #713 LOCAL analysis server: bf16 qat-unquantized master + IN-MEMORY int4 fake-quant (g32 on FQ_G32_LAYERS decoder layers, g128 elsewhere). No disk write, no leaderboard submission, never launched. AIME g32-on-locus necessity test vs int8 (#659).",
+  "dependencies": [],
+  "model_id": "/workspace/gemma_build/fqg32_master_view",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MAX_MODEL_LEN": "8192",
+    "MAX_NUM_SEQS": "1",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "2048",
+    "VLLM_SEED": "0"
+  }
+}

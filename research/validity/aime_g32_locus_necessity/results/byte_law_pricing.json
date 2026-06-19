@@ -1,0 +1,19 @@
+{
+  "note": "Analytic decode byte-law TPS pricing for PR #713 g32-on-locus. The bf16 fakequant substrate is NOT a speed proxy (both g32/g128 run bf16 GEMM at the same speed); speed is priced from int4 read-bytes/token. Marlin int4 GEMV is identical for g32 vs g128 except the fp16 (16-bit) per-group scale read: g128=4+16/128=4.125 b/w, g32=4+16/32=4.5 b/w (+0.375 b/w on upgraded modules). Decode is weight-read-bound at conc1. Denominator B0 = int4-g128 body(343 mod, 3972.8M) + lm_head(671.1M); PLE embed_tokens_per_layer (gathered, not full-read) and vision/audio towers excluded.",
+  "anchor_tps": 126.378,
+  "B0_read_MB_per_token": 2394.5,
+  "L14_27_body_pct_of_B0": 28.4,
+  "g32_bits_per_weight": 4.5,
+  "g128_bits_per_weight": 4.125,
+  "prices": {
+    "full_g32_all_42_layers": {"tps": 117.317, "delta": -9.061, "pct_bytes": 7.72, "note": "within-mandate full-g32, ships AIME 0.438 (#31)"},
+    "g32_L14_27_full_locus_118mod": {"tps": 123.198, "delta": -3.180, "pct_bytes": 2.58},
+    "g32_top8_sublocus": {"tps": 124.500, "delta": -1.878, "pct_bytes": 1.51, "layers": [14,15,16,17,18,19,22,23]},
+    "g32_top6_sublocus": {"tps": 124.948, "delta": -1.430, "pct_bytes": 1.14, "layers": [14,15,16,17,18,23]},
+    "g32_L23_only_peak": {"tps": 126.116, "delta": -0.262, "pct_bytes": 0.21}
+  },
+  "int8_L14_27_byte_law_upper": {"tps": 99.094, "delta": -27.284, "note": "pure byte-law overestimates; #659 measured -16% via real W8A16 Marlin kernel"},
+  "land708_subset_ref": "48-module {PLE:40,k:3,q:3,v:2} measured <=0.2 TPS; consistent with L23-only -0.26 (PLE-dominated subset is cheap)",
+  "verdict_speed": "g32-on-L14-27 carries a REAL but SMALL tax ~-3.18 TPS (-2.6%) -> ~123.2 TPS, still below locked 126.378 (NOT a standalone fire), but ~6x cheaper than int8-on-locus (-16%) AND fully within int4-QAT mandate. Cheapest sub-loci approach the land#708 <=0.2 regime (L23-only -0.26).",
+  "analysis_only": true, "official_tps": 0, "no_hf_job": 1, "fires": 0
+}
