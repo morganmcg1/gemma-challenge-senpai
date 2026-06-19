@@ -1,0 +1,25 @@
+{
+  "name": "int4-mtp-batchinv",
+  "description": "int4 W4A16 Gemma-4-E4B target + QAT-matched gemma4_assistant MTP drafter (speculative decoding), with vLLM batch-invariant kernels (VLLM_BATCH_INVARIANT=1) enabled so the M=K+1 spec-verify forward is numerically batch-invariant with the M=1 AR forward -> greedy-token-identical spec decode.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "VLLM_BATCH_INVARIANT": "1",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "pr": 742,
+  "task": "analysis-only: is the runner /v1/models 500 (prometheus _IncludedRouter .path) dodgeable from the submission side?",
+  "analysis_only": 1,
+  "no_hf_job": 1,
+  "fires": 0,
+  "wandb_group": "fire-runner-dodge-denken",
+  "root_cause": {
+    "symptom": "remote benchmark job 6a3558d73093dba73ce2a3e1 ERRORED: GET /v1/models -> HTTP 500, AttributeError: '_IncludedRouter' object has no attribute 'path'; harness wait_for_models never passed; job aborted. No summary.json -> no official tps/ppl.",
+    "mechanism": "vLLM 0.22.0 pins fastapi[standard]>=0.115.0 and prometheus-fastapi-instrumentator>=7.0.0 by LOWER BOUND ONLY (verified in vllm-0.22.0 METADATA). A fresh runner resolve on 2026-06-19 floats fastapi to 0.137.2 / starlette to 1.3.1. fastapi 0.137's include_router() appends a pathless _IncludedRouter (a starlette BaseRoute subclass with NO .path) to app.routes instead of copying sub-routes inline. prometheus_fastapi_instrumentator 8.0.0 routing._get_route_name does `route.path` on every matched route -> AttributeError on the _IncludedRouter -> 500 on EVERY request.",
+    "why_local_passed_but_runner_failed": "The local serve venv is dep-hash-cached and was built earlier with fastapi 0.115.14 / starlette 0.46.2 (pre-_IncludedRouter); the harness ensure_serving_http_compat() also auto-pins fastapi<0.116 locally. The official runner builds /tmp/server-venv FRESH from manifest deps and has NO such auto-pin, so it drew the drifted fastapi 0.137/starlette 1.3.1.",
+    "not_the_submission": "100% web-layer. The model loaded, EngineCore ran, the OpenAI API server came up; only the prometheus metrics middleware on /v1/models broke. vllm==0.22.0 + transformers==5.9.0 is the SAME pin as the live 126.378 bar (int4_g128_lmhead) and int4_qat, which benchmarked fine. The int4_mtp_batchinv ship-along patch (sitecustomize/vllm_attn_group_patch) touches only vllm.v1.worker.gpu_model_runner, nothing in the FastAPI/routing/prometheus path."
+  },
+  "server_venv_influenceable": {
+    "verdict": "YES — submission-influenceable",
+    "evidence": "official/main_bucket/.../hf_bucket_single_job.py:107-115,397 build /tmp/server-venv via create_venv(server_venv, python, manifest['dependencies']) -> uv venv + uv pip install <deps>. The local harness ensure_server_venv() does the identical thing. So a pin added to the manifest 'dependencies' list IS installed by the runner. (transitive fastapi/starlette/prometheus are NOT pinned by any submission today -> they float.)"
+  },
+  "prometheus_dodge_found": 1,
+  "dodge_paths": {
+    "path_a_manifest_pin": {
+      "viable": true,
+      "patch": "add 'fastapi>=0.115,<0.116' to submissions/int4_mtp_batchinv/manifest.json dependencies",
+      "why": "Pulls starlette 0.46.2 (still has _IncludedRouter.path) -> the pathless route is never created -> root-cause fix. This is the EXACT pin the harness's own ensure_serving_http_compat() applies and calls 'the exact floor the official vllm/vllm-openai image ships'. Restores the web stack of the live 126.378 bar + the int4_mtp_batchinv PASS run.",
+      "proof": "repro_path_a_pinned.json: fastapi 0.115.14 / starlette 0.46.2 -> stack_has_IncludedRouter=false -> GET /v1/models = 200",
+      "runner_honored": true,
+      "tradeoff": "changes the dependency resolution (one new variable for the one-shot fire), but to a known-good, battle-tested stack; eliminates not just this prometheus symptom but any other starlette-1.x/vllm-0.22.0 incompatibility."
+    },
+    "path_b_sitecustomize_guard": {
+      "viable": true,
+      "patch": "wrap prometheus_fastapi_instrumentator.routing._get_route_name to return None on AttributeError (3-arg-safe: def g(scope, routes, route_name=None)); add to submissions/int4_mtp_batchinv/sitecustomize.py (auto-loaded in the api_server process via serve.py PYTHONPATH)",
+      "why": "Version-agnostic runtime patch; suppresses the prometheus route-name crash regardless of resolved versions. Returns None route-name only for the unlabelable route; byte-verbatim no-op on normal routes. This is the repo's already-validated pattern (kanna PR #177 self-test; ported in sibling submissions; W&B bjtwr9jn).",
+      "proof": "repro_guard_buggy.json: fastapi 0.137.2 / starlette 1.3.1 + guard -> GET /v1/models = 200; guard_unit_proof.json: unpatched raises the exact AttributeError, guard returns None on pathless, guard byte-no-op on normal route (all_pass=true) against the REAL local prometheus 8.0.0.",
+      "runner_honored": true,
+      "tradeoff": "band-aid: leaves starlette 1.x in place (only the one known symptom is patched). The runner log shows vllm 0.22.0 was otherwise fine on starlette 1.3.1, so this is low-risk."
+    }
+  },
+  "output_neutrality": "Both dodges touch ONLY the prometheus metrics-middleware route-name lookup. Model weights, logits, sampling, PPL, completion, modalities, and greedy decode are numerically unaffected (harness ensure_serving_http_compat comment + PR #177 token-identity-rate=1.0 design + guard_unit_proof byte-no-op on normal routes).",
+  "reproduction": {
+    "unpatched_buggy_500": "repro_unpatched_buggy.json",
+    "guard_buggy_200": "repro_guard_buggy.json",
+    "path_a_pinned_200": "repro_path_a_pinned.json",
+    "guard_unit_proof": "guard_unit_proof.json",
+    "script": "repro_included_router.py (CPU-only; web-layer is independent of vllm/torch/model)"
+  },
+  "recommendation": "Both dodges work and are runner-honored. Recommend path (a) manifest pin 'fastapi>=0.115,<0.116' as the primary fix (root cause; restores the exact official vllm/vllm-openai image stack the live bar + the PASS run used) and/or path (b) guard as a version-agnostic runtime safety net. Both are output-neutral. HOLD the re-fire for the advisor's explicit go.",
+  "official_gate_repass": {
+    "verdict": 1,
+    "prior_pass": "research/_localrun/validate-int4_mtp_batchinv-20260619T144222Z/evidence.json (W&B ox5qtjfk): official_gate=PASS, ppl=2.0055150113084133, 128/128, all 4 modalities True, tps 352.16 — ran on fastapi 0.115.14 = path (a)'s exact fixed stack.",
+    "fresh_run": "research/_localrun/validate-staging_guard_b-20260619T161512Z/evidence.json (W&B vib85ldt): official_gate=PASS (ppl_ok+completion_ok+modalities_ok all True), ppl=2.0055150113084133, completed=128/128, all 4 modalities True, greedy=NO_REFERENCE (not a gate component), tps=351.86. Guard (path b) applied via staging sitecustomize.py.",
+    "output_neutral_proof": "ppl 2.0055150113084133 is BYTE-IDENTICAL to the no-guard prior PASS (ox5qtjfk) -> the guard changed nothing in the numeric path; same logits/tokens. tps 351.86 vs 352.16 = run-to-run jitter (~0.08%).",
+    "local_stack_note": "the re-validation ran on the harness-auto-pinned good stack (fastapi 0.115.14, no _IncludedRouter), so the guard is a no-op here and the 500 is masked locally; it confirms the guard stays output-neutral through the FULL served gate (not just the unit repro). The guard's actual 500->200 fix on the DRIFTED stack (fastapi 0.137.2) is proven separately in repro_guard_buggy.json.",
+    "findings_wandb": "9lxinip8 (group fire-runner-dodge-denken): prometheus_dodge_found=1, official_gate_repass=1, analysis_only=1, no_hf_job=1, fires=0."
+  },
+  "runner_honors_manifest_pin_proof": "official/main_bucket/shared_resources/speed_benchmark/scripts/hf_bucket_single_job.py:397 server_python=create_venv(server_venv, args.python, manifest['dependencies']) -> :115 uv pip install --python <py> *dependencies. NO ensure_serving_http_compat / fastapi auto-pin in the runner path (unlike the local harness.py:64-105) -> the runner installs manifest deps verbatim, so path (a) 'fastapi>=0.115,<0.116' IS honored remotely; and the absence of the local auto-pin is exactly WHY local PASSed (0.115.14) but the runner 500'd (floated to 0.137)."
+}
