@@ -1,0 +1,74 @@
+{
+  "analysis_only": 1,
+  "official_tps": 0,
+  "no_hf_job": 1,
+  "fires": 0,
+  "comparison": "A=fake_quant(qat_unq.weight,int4-g32)  B=dequant(w4a16-ct packed g32)",
+  "n_modules": 343,
+  "rel_err_all": {
+    "n": 343,
+    "min": 0.0019406771752983332,
+    "max": 0.005978526547551155,
+    "mean": 0.00283763847862297,
+    "median": 0.0028184198308736086
+  },
+  "rel_err_locus_L14_27": {
+    "n": 118,
+    "min": 0.0021045980975031853,
+    "max": 0.005978526547551155,
+    "mean": 0.0028445994643241925,
+    "median": 0.0028248662129044533
+  },
+  "identity_threshold": 0.01,
+  "substrate_is_master": true,
+  "worst_modules": [
+    {
+      "mod": "model.language_model.layers.19.per_layer_projection",
+      "layer": 19,
+      "rel_err": 0.005978526547551155,
+      "in_locus": true
+    },
+    {
+      "mod": "model.language_model.layers.21.per_layer_projection",
+      "layer": 21,
+      "rel_err": 0.004446620121598244,
+      "in_locus": true
+    },
+    {
+      "mod": "model.language_model.layers.7.per_layer_projection",
+      "layer": 7,
+      "rel_err": 0.004228480625897646,
+      "in_locus": false
+    },
+    {
+      "mod": "model.language_model.layers.31.per_layer_projection",
+      "layer": 31,
+      "rel_err": 0.003941038623452187,
+      "in_locus": false
+    },
+    {
+      "mod": "model.language_model.layers.2.per_layer_projection",
+      "layer": 2,
+      "rel_err": 0.003893457818776369,
+      "in_locus": false
+    },
+    {
+      "mod": "model.language_model.layers.40.per_layer_input_gate",
+      "layer": 40,
+      "rel_err": 0.003878443967550993,
+      "in_locus": false
+    },
+    {
+      "mod": "model.language_model.layers.4.per_layer_projection",
+      "layer": 4,
+      "rel_err": 0.0037004065234214067,
+      "in_locus": false
+    },
+    {
+      "mod": "model.language_model.layers.22.per_layer_projection",
+      "layer": 22,
+      "rel_err": 0.0035461941733956337,
+      "in_locus": true
+    }
+  ]
+}
