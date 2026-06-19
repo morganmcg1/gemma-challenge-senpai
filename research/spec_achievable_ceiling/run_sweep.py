@@ -67,7 +67,9 @@ K_GRID = [5, 6, 7]
 TAU_GATE = 0.3                       # nats; the self-consistency confident-miss threshold (#654)
 TAU_GRID = [0.05, 0.1, 0.125, 0.2, 0.3, 0.5, 1.0]  # 0.125 ~= 1 int4 quantum
 PROMPT_LOGPROBS = 20
-TAU_LO = 1.0352                      # banked local->official scalar (project_local_official_tps_transfer)
+TAU_LO = 1.0352                      # banked local->official FLOOR scalar (project_local_official_tps_transfer)
+ANCHORED_MULT = 1.192                # anchored local->official scalar: 126.378 official / 106.02 local-AR-BI1
+                                     # (optimistic: assumes the spec stack shares the AR config's local->official ratio)
 
 ANCHOR_TPS = 126.378                 # locked int4_g128_lmhead official TPS (the bar to beat)
 ANCHOR_PPL = 2.019
@@ -373,6 +375,7 @@ def classify_onsets(ref_rows: dict[int, dict[str, Any]], cand_rows: dict[int, di
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--ks", default="5,6,7", help="comma list of K (num_speculative_tokens)")
+    ap.add_argument("--pr", type=int, default=728, help="PR number for report/wandb labeling")
     ap.add_argument("--num-prompts", type=int, default=paths.NUM_PROMPTS)
     ap.add_argument("--output-len", type=int, default=paths.OUTPUT_LEN)
     ap.add_argument("--model-id", default=MODEL_DIR)
@@ -482,6 +485,7 @@ def main() -> int:
 
         wt = cand_info.get("wall_tps")
         official_equiv = wt * TAU_LO if isinstance(wt, (int, float)) else None
+        official_equiv_anchored = wt * ANCHORED_MULT if isinstance(wt, (int, float)) else None
         records = cand_info.get("num_records")
         comp_tokens = cand_info.get("num_completion_tokens")
         complete = (records == num_prompts) and (comp_tokens == num_prompts * args.output_len)
@@ -492,6 +496,8 @@ def main() -> int:
             "k": K,
             "wall_tps_local": wt,
             "official_equiv_tps": official_equiv,
+            "official_equiv_floor_tps": official_equiv,
+            "official_equiv_anchored_tps": official_equiv_anchored,
             "beats_anchor_126": (official_equiv > ANCHOR_TPS) if official_equiv else None,
             "clears_comfort_150": (official_equiv > COMFORT_BAR) if official_equiv else None,
             "records": records, "completion_tokens": comp_tokens, "complete_128_128": complete,
@@ -511,7 +517,7 @@ def main() -> int:
         (run_dir / f"{label}.rescue.json").write_text(json.dumps(rescue, indent=2, default=str))
         results.append(res)
 
-        print(f"[ceil] K={K}: wall_tps={wt:.2f} official_equiv={official_equiv:.2f} "
+        print(f"[ceil] K={K}: wall_tps={wt:.2f} official_equiv=[{official_equiv:.2f}floor/{official_equiv_anchored:.2f}anch] "
               f"(>126:{res['beats_anchor_126']} >150:{res['clears_comfort_150']}) | "
               f"strict={report.verdict} seq_exact={seq_exact:.4f} | "
               f"confident_genuine_flips@0.3={cgf} self_consistent={self_consistent} | "
@@ -525,7 +531,7 @@ def main() -> int:
                       key=lambda r: r["wall_tps_local"], default=None)
 
     report_obj = {
-        "pr": 728,
+        "pr": args.pr,
         "analysis_only": True,
         "official_tps": 0,
         "smoke": args.smoke,
@@ -534,7 +540,8 @@ def main() -> int:
             "vllm_version": vllm_ver, "transformers_version": tf_ver,
             "batch_invariant": 1, "max_num_seqs": 1, "max_num_batched_tokens": 512,
             "num_prompts": num_prompts, "output_len": args.output_len, "seed": paths.SEED,
-            "tau_gate_nats": TAU_GATE, "tau_lo": TAU_LO, "prompt_logprobs": PROMPT_LOGPROBS,
+            "tau_gate_nats": TAU_GATE, "tau_lo": TAU_LO, "anchored_mult": ANCHORED_MULT,
+            "prompt_logprobs": PROMPT_LOGPROBS,
             "anchor_tps": ANCHOR_TPS, "anchor_ppl": ANCHOR_PPL, "comfort_bar": COMFORT_BAR,
             "method": "deployed serve (drafter ON, K) free-run greedy vs config's OWN served-AR "
                       "(drafter OFF, SENPAI_REFERENCE_MODE=1, BI=1); wall_tps=tokens/decode_s; "
@@ -555,13 +562,15 @@ def main() -> int:
           f"vllm={vllm_ver} BI=1 conc=1 {num_prompts}x{args.output_len}", flush=True)
     print(f"  AR ref wall_tps={ar_tps} ppl={ar_ppl} engine_coherence={coherence}", flush=True)
     for r in results:
-        print(f"  K={r['k']:>1} | wall_tps={r['wall_tps_local']} -> official_equiv={r['official_equiv_tps']} "
+        print(f"  K={r['k']:>1} | wall_tps={r['wall_tps_local']} -> official_equiv=[{r['official_equiv_floor_tps']} floor / "
+              f"{r['official_equiv_anchored_tps']} anch] "
               f"| strict={r['strict_verdict']} seq_exact={r['strict_seq_exact']:.3f} "
               f"| cgf@0.3={r['confident_genuine_flips_at_0.3']} self_consistent={r['self_consistent_tau03']} "
               f"| ppl={r['ppl']} 128/128={r['complete_128_128']}", flush=True)
     if fastest_sc:
         print(f"  >>> FASTEST SELF-CONSISTENT: K={fastest_sc['k']} "
-              f"official_equiv={fastest_sc['official_equiv_tps']:.2f} "
+              f"official_equiv=[{fastest_sc['official_equiv_floor_tps']:.2f} floor / "
+              f"{fastest_sc['official_equiv_anchored_tps']:.2f} anch] "
               f"(>126:{fastest_sc['beats_anchor_126']} >150:{fastest_sc['clears_comfort_150']})", flush=True)
     else:
         print("  >>> NO self-consistent config at tau=0.3 (all have confident genuine flips)", flush=True)
@@ -583,10 +592,12 @@ def _log_wandb(report: dict[str, Any], *, name: str, group: str) -> None:
     except ImportError:
         print("[ceil] wandb_logging unavailable — skipping", flush=True)
         return
+    pr = report.get("pr", 728)
     run = wl.init_wandb_run(
         job_type="spec-achievable-ceiling", agent="lawine", name=name, group=group,
-        notes="PR728 deployed spec K-sweep: served wall_tps + tau=0.3-rescued self-consistency",
-        tags=["pr728", "specdec", "achievable-ceiling", "self-consistency", "int4-mtp", "k-sweep"],
+        notes=f"PR{pr} deployed spec K-sweep: served wall_tps + tau=0.3-rescued self-consistency "
+              f"(drafter={report['config'].get('drafter')})",
+        tags=[f"pr{pr}", "specdec", "achievable-ceiling", "self-consistency", "int4-mtp", "k-sweep"],
         config=report["config"],
     )
     if run is None:
@@ -596,6 +607,8 @@ def _log_wandb(report: dict[str, Any], *, name: str, group: str) -> None:
         m = {
             f"k{r['k']}/wall_tps_local": r.get("wall_tps_local"),
             f"k{r['k']}/official_equiv_tps": r.get("official_equiv_tps"),
+            f"k{r['k']}/official_equiv_floor_tps": r.get("official_equiv_floor_tps"),
+            f"k{r['k']}/official_equiv_anchored_tps": r.get("official_equiv_anchored_tps"),
             f"k{r['k']}/strict_seq_exact": r.get("strict_seq_exact"),
             f"k{r['k']}/confident_genuine_flips_0.3": r.get("confident_genuine_flips_at_0.3"),
             f"k{r['k']}/self_consistent": 1 if r.get("self_consistent_tau03") else 0,
@@ -606,10 +619,13 @@ def _log_wandb(report: dict[str, Any], *, name: str, group: str) -> None:
     fsc = report.get("fastest_self_consistent")
     run.summary["fastest_self_consistent_k"] = fsc["k"] if fsc else None
     run.summary["fastest_self_consistent_official_equiv"] = fsc["official_equiv_tps"] if fsc else None
+    run.summary["fastest_self_consistent_official_equiv_anchored"] = fsc.get("official_equiv_anchored_tps") if fsc else None
+    run.summary["drafter"] = report["config"].get("drafter")
+    run.summary["pr"] = report.get("pr")
     run.summary["engine_coherence"] = report.get("engine_coherence_tf_argmax_vs_freerun")
     run.summary["analysis_only"] = True
     run.summary["official_tps"] = 0
-    wl.log_json_artifact(run, name="pr728_ceiling_report", artifact_type="achievable-ceiling", data=report)
+    wl.log_json_artifact(run, name=f"pr{pr}_ceiling_report", artifact_type="achievable-ceiling", data=report)
     wl.finish_wandb(run)
     print("[ceil] wandb logged", flush=True)
 

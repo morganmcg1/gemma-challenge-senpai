@@ -1,0 +1,237 @@
+{
+  "pr": 728,
+  "analysis_only": true,
+  "official_tps": 0,
+  "smoke": true,
+  "config": {
+    "model_dir": "/workspace/gemma_build/int4_g128_lmhead",
+    "drafter": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "ks": [
+      6
+    ],
+    "vllm_version": "0.22.0",
+    "transformers_version": "5.9.0",
+    "batch_invariant": 1,
+    "max_num_seqs": 1,
+    "max_num_batched_tokens": 512,
+    "num_prompts": 4,
+    "output_len": 512,
+    "seed": 1,
+    "tau_gate_nats": 0.3,
+    "tau_lo": 1.0352,
+    "prompt_logprobs": 20,
+    "anchor_tps": 126.378,
+    "anchor_ppl": 2.019,
+    "comfort_bar": 150.0,
+    "method": "deployed serve (drafter ON, K) free-run greedy vs config's OWN served-AR (drafter OFF, SENPAI_REFERENCE_MODE=1, BI=1); wall_tps=tokens/decode_s; strict greedy_gate + tau-rescued onset-gap (confident_genuine_flips)."
+  },
+  "engine_coherence_tf_argmax_vs_freerun": 0.99267578125,
+  "ar_reference": {
+    "wall_tps_local": 103.37232567950703,
+    "ppl": null,
+    "records": 4
+  },
+  "results": [
+    {
+      "k": 6,
+      "wall_tps_local": 180.22766582456273,
+      "official_equiv_tps": 186.57167966158732,
+      "beats_anchor_126": true,
+      "clears_comfort_150": true,
+      "records": 4,
+      "completion_tokens": 2048,
+      "complete_128_128": true,
+      "ppl": null,
+      "strict_verdict": "DIVERGENT",
+      "strict_seq_exact": 0.0,
+      "strict_token_identity": 0.4736328125,
+      "strict_num_divergent": 4,
+      "onset": {
+        "onset_min": 100,
+        "onset_median": 234,
+        "onset_max": 357,
+        "num_divergent": 4
+      },
+      "confident_genuine_flips_at_0.3": 0,
+      "self_consistent_tau03": true,
+      "rescue": {
+        "num_divergent_prompts": 4,
+        "num_identical_prompts": 0,
+        "onset_gap_min": 0.0,
+        "onset_gap_median": 0.0,
+        "onset_gap_max": 0.0,
+        "onset_gap_frac_le_0.125": 1.0,
+        "onset_gap_frac_le_0.3": 1.0,
+        "num_onset_outside_topk": 0,
+        "tau_sweep": {
+          "tau_0.05": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 4
+          },
+          "tau_0.1": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 4
+          },
+          "tau_0.125": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 4
+          },
+          "tau_0.2": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 4
+          },
+          "tau_0.3": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 4
+          },
+          "tau_0.5": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 4
+          },
+          "tau_1.0": {
+            "confident_genuine_flips": 0,
+            "rescued_divergent": 4
+          }
+        },
+        "confident_genuine_flips_at_gate": 0
+      },
+      "peak_vram_gb": 19.2314453125,
+      "serve_ready_s": 110.02386784553528,
+      "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/pubdrafter_smoke/spec_k6.server.log"
+    }
+  ],
+  "fastest_self_consistent": {
+    "k": 6,
+    "wall_tps_local": 180.22766582456273,
+    "official_equiv_tps": 186.57167966158732,
+    "beats_anchor_126": true,
+    "clears_comfort_150": true,
+    "records": 4,
+    "completion_tokens": 2048,
+    "complete_128_128": true,
+    "ppl": null,
+    "strict_verdict": "DIVERGENT",
+    "strict_seq_exact": 0.0,
+    "strict_token_identity": 0.4736328125,
+    "strict_num_divergent": 4,
+    "onset": {
+      "onset_min": 100,
+      "onset_median": 234,
+      "onset_max": 357,
+      "num_divergent": 4
+    },
+    "confident_genuine_flips_at_0.3": 0,
+    "self_consistent_tau03": true,
+    "rescue": {
+      "num_divergent_prompts": 4,
+      "num_identical_prompts": 0,
+      "onset_gap_min": 0.0,
+      "onset_gap_median": 0.0,
+      "onset_gap_max": 0.0,
+      "onset_gap_frac_le_0.125": 1.0,
+      "onset_gap_frac_le_0.3": 1.0,
+      "num_onset_outside_topk": 0,
+      "tau_sweep": {
+        "tau_0.05": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.1": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.125": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.2": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.3": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.5": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_1.0": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        }
+      },
+      "confident_genuine_flips_at_gate": 0
+    },
+    "peak_vram_gb": 19.2314453125,
+    "serve_ready_s": 110.02386784553528,
+    "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/pubdrafter_smoke/spec_k6.server.log"
+  },
+  "fastest_any": {
+    "k": 6,
+    "wall_tps_local": 180.22766582456273,
+    "official_equiv_tps": 186.57167966158732,
+    "beats_anchor_126": true,
+    "clears_comfort_150": true,
+    "records": 4,
+    "completion_tokens": 2048,
+    "complete_128_128": true,
+    "ppl": null,
+    "strict_verdict": "DIVERGENT",
+    "strict_seq_exact": 0.0,
+    "strict_token_identity": 0.4736328125,
+    "strict_num_divergent": 4,
+    "onset": {
+      "onset_min": 100,
+      "onset_median": 234,
+      "onset_max": 357,
+      "num_divergent": 4
+    },
+    "confident_genuine_flips_at_0.3": 0,
+    "self_consistent_tau03": true,
+    "rescue": {
+      "num_divergent_prompts": 4,
+      "num_identical_prompts": 0,
+      "onset_gap_min": 0.0,
+      "onset_gap_median": 0.0,
+      "onset_gap_max": 0.0,
+      "onset_gap_frac_le_0.125": 1.0,
+      "onset_gap_frac_le_0.3": 1.0,
+      "num_onset_outside_topk": 0,
+      "tau_sweep": {
+        "tau_0.05": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.1": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.125": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.2": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.3": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_0.5": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        },
+        "tau_1.0": {
+          "confident_genuine_flips": 0,
+          "rescued_divergent": 4
+        }
+      },
+      "confident_genuine_flips_at_gate": 0
+    },
+    "peak_vram_gb": 19.2314453125,
+    "serve_ready_s": 110.02386784553528,
+    "server_log": "/workspace/senpai/target/research/spec_achievable_ceiling/runs/pubdrafter_smoke/spec_k6.server.log"
+  }
+}
