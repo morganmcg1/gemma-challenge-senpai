@@ -1,0 +1,163 @@
+{
+  "pr": 736,
+  "analysis_only": true,
+  "official_tps": 0,
+  "device": "NVIDIA A10G",
+  "capability": [
+    8,
+    6
+  ],
+  "model": "/workspace/gemma_build/int4_g128_lmhead/model.safetensors",
+  "wtype": "uint4b8",
+  "group_size": 128,
+  "ks": [
+    5,
+    6
+  ],
+  "verify_ms": [
+    6,
+    7
+  ],
+  "use_fp32_reduce": true,
+  "faithful_repack": "ops.gptq_marlin_repack + marlin_permute_scales (production path)",
+  "results": [
+    {
+      "name": "down_proj.L0",
+      "size_k": 10240,
+      "size_n": 2560,
+      "act_rms": 1.0,
+      "use_atomic_add": false,
+      "m1_run2run_bitexact": true,
+      "faithfulness": {
+        "mean_abs_kernel": 0.7957650423049927,
+        "mean_abs_ref": 0.7958330512046814,
+        "median_relerr_vs_fp32dequant": 0.002186354249715805,
+        "mean_abs_err_vs_fp32dequant": 0.001728439936414361,
+        "rel_l2_vs_fp32dequant": 0.00228967540897429
+      },
+      "per_m": {
+        "6": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 0,
+          "frac_bitdiff_vs_m1": 0.0,
+          "max_abs_diff_vs_m1": 0.0,
+          "mean_abs_diff_vs_m1": 0.0,
+          "rel_max_diff_vs_m1": 0.0,
+          "row0_run2run_bitexact": true,
+          "cross_row_max_abs": 0.0
+        },
+        "7": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 0,
+          "frac_bitdiff_vs_m1": 0.0,
+          "max_abs_diff_vs_m1": 0.0,
+          "mean_abs_diff_vs_m1": 0.0,
+          "rel_max_diff_vs_m1": 0.0,
+          "row0_run2run_bitexact": true,
+          "cross_row_max_abs": 0.0
+        }
+      },
+      "load_s": 0.47333431243896484
+    },
+    {
+      "name": "q_proj.L0",
+      "size_k": 2560,
+      "size_n": 2048,
+      "act_rms": 1.0,
+      "use_atomic_add": false,
+      "m1_run2run_bitexact": true,
+      "faithfulness": {
+        "mean_abs_kernel": 0.8416476249694824,
+        "mean_abs_ref": 0.8416959047317505,
+        "median_relerr_vs_fp32dequant": 0.0019862158223986626,
+        "mean_abs_err_vs_fp32dequant": 0.0016723586013540626,
+        "rel_l2_vs_fp32dequant": 0.0021010064519941807
+      },
+      "per_m": {
+        "6": {
+          "n_elem": 2048,
+          "n_bitdiff_vs_m1": 0,
+          "frac_bitdiff_vs_m1": 0.0,
+          "max_abs_diff_vs_m1": 0.0,
+          "mean_abs_diff_vs_m1": 0.0,
+          "rel_max_diff_vs_m1": 0.0,
+          "row0_run2run_bitexact": true,
+          "cross_row_max_abs": 0.0
+        },
+        "7": {
+          "n_elem": 2048,
+          "n_bitdiff_vs_m1": 0,
+          "frac_bitdiff_vs_m1": 0.0,
+          "max_abs_diff_vs_m1": 0.0,
+          "mean_abs_diff_vs_m1": 0.0,
+          "rel_max_diff_vs_m1": 0.0,
+          "row0_run2run_bitexact": true,
+          "cross_row_max_abs": 0.0
+        }
+      },
+      "load_s": 0.008472681045532227
+    },
+    {
+      "name": "lm_head",
+      "size_k": 2560,
+      "size_n": 262144,
+      "act_rms": 1.0,
+      "use_atomic_add": false,
+      "m1_run2run_bitexact": true,
+      "faithfulness": null,
+      "per_m": {
+        "6": {
+          "n_elem": 262144,
+          "n_bitdiff_vs_m1": 0,
+          "frac_bitdiff_vs_m1": 0.0,
+          "max_abs_diff_vs_m1": 0.0,
+          "mean_abs_diff_vs_m1": 0.0,
+          "rel_max_diff_vs_m1": 0.0,
+          "row0_run2run_bitexact": true,
+          "cross_row_max_abs": 0.0
+        },
+        "7": {
+          "n_elem": 262144,
+          "n_bitdiff_vs_m1": 0,
+          "frac_bitdiff_vs_m1": 0.0,
+          "max_abs_diff_vs_m1": 0.0,
+          "mean_abs_diff_vs_m1": 0.0,
+          "rel_max_diff_vs_m1": 0.0,
+          "row0_run2run_bitexact": true,
+          "cross_row_max_abs": 0.0
+        }
+      },
+      "load_s": 0.07592105865478516
+    },
+    {
+      "name": "lm_head.tie_flips",
+      "size_k": 2560,
+      "size_n": 262144,
+      "act_rms": 1.0,
+      "per_m": {
+        "6": {
+          "n_act": 256,
+          "n_flips": 0,
+          "flip_rate": 0.0,
+          "max_abs_diff_vs_m1_nat": 0.0,
+          "max_gap_among_flips_nat": null,
+          "min_gap_overall_nat": 0.0,
+          "median_gap_overall_nat": 0.125,
+          "all_flips_within_2maxd": true,
+          "flips": []
+        },
+        "7": {
+          "n_act": 256,
+          "n_flips": 0,
+          "flip_rate": 0.0,
+          "max_abs_diff_vs_m1_nat": 0.0,
+          "max_gap_among_flips_nat": null,
+          "min_gap_overall_nat": 0.0,
+          "median_gap_overall_nat": 0.125,
+          "all_flips_within_2maxd": true,
+          "flips": []
+        }
+      }
+    }
+  ]
+}

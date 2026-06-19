@@ -1,0 +1,405 @@
+{
+  "pr": 736,
+  "analysis_only": true,
+  "official_tps": 0,
+  "device": "NVIDIA A10G",
+  "capability": [
+    8,
+    6
+  ],
+  "a10g_peak_bw_gbps": 600.0,
+  "group_size": 128,
+  "wtype": "uint4b8",
+  "ks": [
+    5,
+    6
+  ],
+  "verify_ms": [
+    6,
+    7,
+    8
+  ],
+  "use_fp32_reduce": true,
+  "results": [
+    {
+      "name": "qkv_proj",
+      "size_k": 2560,
+      "size_n": 3072,
+      "use_atomic_add": false,
+      "weight_read_bytes": 4055040,
+      "mem_floor_s": 6.7584e-06,
+      "locus": {
+        "1": {
+          "n_elem": 3072,
+          "n_bitdiff_vs_m1": 452,
+          "frac_bitdiff_vs_m1": 0.14713541666666666,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": 0.0
+        },
+        "6": {
+          "n_elem": 3072,
+          "n_bitdiff_vs_m1": 452,
+          "frac_bitdiff_vs_m1": 0.14713541666666666,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "7": {
+          "n_elem": 3072,
+          "n_bitdiff_vs_m1": 452,
+          "frac_bitdiff_vs_m1": 0.14713541666666666,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "8": {
+          "n_elem": 3072,
+          "n_bitdiff_vs_m1": 452,
+          "frac_bitdiff_vs_m1": 0.14713541666666666,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        }
+      },
+      "timings": {
+        "1": {
+          "median_s": 5.52625278942287e-05,
+          "achieved_bw_gbps": 73.37775079274803,
+          "bw_util_vs_peak": 0.12229625132124672,
+          "t_over_memfloor": 8.176865514652683
+        },
+        "6": {
+          "median_s": 5.4721953347325325e-05,
+          "achieved_bw_gbps": 74.10261790660658,
+          "bw_util_vs_peak": 0.12350436317767764,
+          "t_over_memfloor": 8.09687993420415
+        },
+        "7": {
+          "median_s": 5.460198735818267e-05,
+          "achieved_bw_gbps": 74.26542871781224,
+          "bw_util_vs_peak": 0.12377571452968707,
+          "t_over_memfloor": 8.079129284768978
+        },
+        "8": {
+          "median_s": 5.383248208090663e-05,
+          "achieved_bw_gbps": 75.32701155977807,
+          "bw_util_vs_peak": 0.1255450192662968,
+          "t_over_memfloor": 7.965270194262936
+        }
+      }
+    },
+    {
+      "name": "o_proj",
+      "size_k": 2048,
+      "size_n": 2560,
+      "use_atomic_add": false,
+      "weight_read_bytes": 2703360,
+      "mem_floor_s": 4.5056e-06,
+      "locus": {
+        "1": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 317,
+          "frac_bitdiff_vs_m1": 0.123828125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": 0.0
+        },
+        "6": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 317,
+          "frac_bitdiff_vs_m1": 0.123828125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "7": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 317,
+          "frac_bitdiff_vs_m1": 0.123828125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "8": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 317,
+          "frac_bitdiff_vs_m1": 0.123828125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        }
+      },
+      "timings": {
+        "1": {
+          "median_s": 5.561194848269224e-05,
+          "achieved_bw_gbps": 48.61113616332558,
+          "bw_util_vs_peak": 0.0810185602722093,
+          "t_over_memfloor": 12.342850781847533
+        },
+        "6": {
+          "median_s": 5.4752512369304895e-05,
+          "achieved_bw_gbps": 49.37417267295199,
+          "bw_util_vs_peak": 0.08229028778825333,
+          "t_over_memfloor": 12.152102354693026
+        },
+        "7": {
+          "median_s": 5.478697130456567e-05,
+          "achieved_bw_gbps": 49.34311818355098,
+          "bw_util_vs_peak": 0.0822385303059183,
+          "t_over_memfloor": 12.159750378321572
+        },
+        "8": {
+          "median_s": 5.5042561143636703e-05,
+          "achieved_bw_gbps": 49.11399367746403,
+          "bw_util_vs_peak": 0.08185665612910671,
+          "t_over_memfloor": 12.216477526552891
+        }
+      }
+    },
+    {
+      "name": "gate_up_proj",
+      "size_k": 2560,
+      "size_n": 20480,
+      "use_atomic_add": false,
+      "weight_read_bytes": 27033600,
+      "mem_floor_s": 4.5056e-05,
+      "locus": {
+        "1": {
+          "n_elem": 20480,
+          "n_bitdiff_vs_m1": 3089,
+          "frac_bitdiff_vs_m1": 0.150830078125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": 0.0
+        },
+        "6": {
+          "n_elem": 20480,
+          "n_bitdiff_vs_m1": 3089,
+          "frac_bitdiff_vs_m1": 0.150830078125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "7": {
+          "n_elem": 20480,
+          "n_bitdiff_vs_m1": 3089,
+          "frac_bitdiff_vs_m1": 0.150830078125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "8": {
+          "n_elem": 20480,
+          "n_bitdiff_vs_m1": 3089,
+          "frac_bitdiff_vs_m1": 0.150830078125,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        }
+      },
+      "timings": {
+        "1": {
+          "median_s": 9.620899800211191e-05,
+          "achieved_bw_gbps": 280.98827096615827,
+          "bw_util_vs_peak": 0.4683137849435971,
+          "t_over_memfloor": 2.1353204457144868
+        },
+        "6": {
+          "median_s": 9.672401938587427e-05,
+          "achieved_bw_gbps": 279.492107251573,
+          "bw_util_vs_peak": 0.4658201787526216,
+          "t_over_memfloor": 2.1467511404890423
+        },
+        "7": {
+          "median_s": 9.691901504993439e-05,
+          "achieved_bw_gbps": 278.92978468747145,
+          "bw_util_vs_peak": 0.4648829744791191,
+          "t_over_memfloor": 2.1510789916977626
+        },
+        "8": {
+          "median_s": 9.72989946603775e-05,
+          "achieved_bw_gbps": 277.84048637255586,
+          "bw_util_vs_peak": 0.4630674772875931,
+          "t_over_memfloor": 2.1595124880232937
+        }
+      }
+    },
+    {
+      "name": "down_proj",
+      "size_k": 10240,
+      "size_n": 2560,
+      "use_atomic_add": false,
+      "weight_read_bytes": 13516800,
+      "mem_floor_s": 2.2528e-05,
+      "locus": {
+        "1": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 1001,
+          "frac_bitdiff_vs_m1": 0.391015625,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": 0.0
+        },
+        "6": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 1001,
+          "frac_bitdiff_vs_m1": 0.391015625,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "7": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 1001,
+          "frac_bitdiff_vs_m1": 0.391015625,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "8": {
+          "n_elem": 2560,
+          "n_bitdiff_vs_m1": 1001,
+          "frac_bitdiff_vs_m1": 0.391015625,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        }
+      },
+      "timings": {
+        "1": {
+          "median_s": 6.991799455136061e-05,
+          "achieved_bw_gbps": 193.3236227201966,
+          "bw_util_vs_peak": 0.3222060378669943,
+          "t_over_memfloor": 3.1036041615483225
+        },
+        "6": {
+          "median_s": 6.989302346482873e-05,
+          "achieved_bw_gbps": 193.3926925739858,
+          "bw_util_vs_peak": 0.3223211542899764,
+          "t_over_memfloor": 3.1024957148805368
+        },
+        "7": {
+          "median_s": 6.975303404033184e-05,
+          "achieved_bw_gbps": 193.78081808146814,
+          "bw_util_vs_peak": 0.32296803013578024,
+          "t_over_memfloor": 3.096281695682344
+        },
+        "8": {
+          "median_s": 6.989296525716782e-05,
+          "achieved_bw_gbps": 193.39285363363226,
+          "bw_util_vs_peak": 0.3223214227227204,
+          "t_over_memfloor": 3.1024931310887705
+        }
+      }
+    },
+    {
+      "name": "lm_head",
+      "size_k": 2560,
+      "size_n": 262144,
+      "use_atomic_add": false,
+      "weight_read_bytes": 346030080,
+      "mem_floor_s": 0.0005767168,
+      "locus": {
+        "1": {
+          "n_elem": 262144,
+          "n_bitdiff_vs_m1": 40223,
+          "frac_bitdiff_vs_m1": 0.15343856811523438,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": 0.0
+        },
+        "6": {
+          "n_elem": 262144,
+          "n_bitdiff_vs_m1": 40223,
+          "frac_bitdiff_vs_m1": 0.15343856811523438,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "7": {
+          "n_elem": 262144,
+          "n_bitdiff_vs_m1": 40223,
+          "frac_bitdiff_vs_m1": 0.15343856811523438,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        },
+        "8": {
+          "n_elem": 262144,
+          "n_bitdiff_vs_m1": 40223,
+          "frac_bitdiff_vs_m1": 0.15343856811523438,
+          "max_abs_diff_vs_m1": NaN,
+          "mean_abs_diff_vs_m1": NaN,
+          "rel_diff_vs_m1": NaN,
+          "row_run_to_run_bitexact": false,
+          "cross_row_max_abs": NaN
+        }
+      },
+      "timings": {
+        "1": {
+          "median_s": 0.0007173149497248232,
+          "achieved_bw_gbps": 482.3963032315781,
+          "bw_util_vs_peak": 0.8039938387192969,
+          "t_over_memfloor": 1.2437906260487352
+        },
+        "6": {
+          "median_s": 0.0007290454814210534,
+          "achieved_bw_gbps": 474.6344210590526,
+          "bw_util_vs_peak": 0.7910573684317543,
+          "t_over_memfloor": 1.264130820224161
+        },
+        "7": {
+          "median_s": 0.0007306555053219199,
+          "achieved_bw_gbps": 473.5885482003484,
+          "bw_util_vs_peak": 0.7893142470005806,
+          "t_over_memfloor": 1.266922526484264
+        },
+        "8": {
+          "median_s": 0.0007324009784497321,
+          "achieved_bw_gbps": 472.4598821979176,
+          "bw_util_vs_peak": 0.7874331369965293,
+          "t_over_memfloor": 1.269949095378758
+        }
+      }
+    }
+  ]
+}
