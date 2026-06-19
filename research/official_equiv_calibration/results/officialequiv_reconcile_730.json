@@ -1,0 +1,235 @@
+{
+  "pr": 735,
+  "student": "kanna",
+  "card": "reconcile #730 official-equiv into ONE defensible number + P(clears 126.378)",
+  "guard_flags": {
+    "analysis_only": 1,
+    "official_tps": 0,
+    "no_hf_job": 1,
+    "fires": 0
+  },
+  "bar_official": 126.378,
+  "bar_config": "int4_g128_lmhead PR#4 (pure-AR; private==public; no haircut on the bar)",
+  "inputs": {
+    "local_k6_wall_tps": 170.20939238269807,
+    "local_k5_wall_tps": 172.7419248286939,
+    "k6_e_accept_exact": 3.6584624049563503,
+    "k6_num_spec": "6",
+    "k6_drafter": "/tmp/qat-assistant",
+    "k6_model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "k6_branch": "land/optionb-bi1-k-sweep",
+    "k6_pr": 82,
+    "T_flagship_bf16": 1.0601865051833779,
+    "ar_base_728_local_bi1": 106.02275748221821,
+    "ratio_728_anchored": 1.1919893709725076,
+    "ar_728_model_id": "/workspace/gemma_build/int4_g128_lmhead"
+  },
+  "authoritative_transfer_rule": {
+    "central": 0.9863263872629361,
+    "band": [
+      0.9603191489361702,
+      1.0
+    ],
+    "members": {
+      "T_int4_match": 0.9863263872629361,
+      "T_int4_pess": 0.9603191489361702,
+      "T_definition": 1.0,
+      "T_int4_captured_732": 0.9971
+    },
+    "rejected": {
+      "T_flagship_bf16": 1.0601865051833779,
+      "T_advisor": 0.879874213836478,
+      "T_728_anchored": 1.1919893709725076
+    },
+    "rule": "int4 same-precision anchor; reject bf16(wrong precision)/advisor(below data)/x1.192(cross-checkpoint)."
+  },
+  "haircut_band": {
+    "lo": 0.04,
+    "hi": 0.09,
+    "bar_haircut": 0.0
+  },
+  "grid_k6": {
+    "central_T0986": {
+      "h0": {
+        "name": "k6/T_int4_match/h0",
+        "local": 170.20939238269807,
+        "mult": 0.9863263872629361,
+        "haircut": 0.0,
+        "official_equiv_private": 167.8820150670461,
+        "margin_pct": 32.84117098470152,
+        "clears": true
+      },
+      "h4_best": {
+        "name": "k6/T_int4_match/h4",
+        "local": 170.20939238269807,
+        "mult": 0.9863263872629361,
+        "haircut": 0.04,
+        "official_equiv_private": 161.16673446436425,
+        "margin_pct": 27.527524145313475,
+        "clears": true
+      },
+      "h65_mid": {
+        "name": "k6/T_int4_match/h6.5",
+        "local": 170.20939238269807,
+        "mult": 0.9863263872629361,
+        "haircut": 0.065,
+        "official_equiv_private": 156.9696840876881,
+        "margin_pct": 24.206494870695927,
+        "clears": true
+      },
+      "h9_worst": {
+        "name": "k6/T_int4_match/h9",
+        "local": 170.20939238269807,
+        "mult": 0.9863263872629361,
+        "haircut": 0.09,
+        "official_equiv_private": 152.77263371101196,
+        "margin_pct": 20.8854655960784,
+        "clears": true
+      }
+    },
+    "floor_T0960": {
+      "h9_worst": {
+        "name": "k6/T_int4_pess/h9",
+        "local": 170.20939238269807,
+        "mult": 0.9603191489361702,
+        "haircut": 0.09,
+        "official_equiv_private": 148.7443583388447,
+        "margin_pct": 17.697984094418896,
+        "clears": true
+      }
+    },
+    "ceiling_T1000": {
+      "h4_best": {
+        "name": "k6/T_def/h4",
+        "local": 170.20939238269807,
+        "mult": 1.0,
+        "haircut": 0.04,
+        "official_equiv_private": 163.40101668739015,
+        "margin_pct": 29.295460196703658,
+        "clears": true
+      },
+      "h9_worst": {
+        "name": "k6/T_def/h9",
+        "local": 170.20939238269807,
+        "mult": 1.0,
+        "haircut": 0.09,
+        "official_equiv_private": 154.89054706825524,
+        "margin_pct": 22.56132164479201,
+        "clears": true
+      }
+    },
+    "rejected_advisor_T0880": {
+      "h9_worst": {
+        "name": "k6/T_advisor/h9",
+        "local": 170.20939238269807,
+        "mult": 0.879874213836478,
+        "haircut": 0.09,
+        "official_equiv_private": 136.28419833238308,
+        "margin_pct": 7.838546528971091,
+        "clears": true
+      }
+    }
+  },
+  "monte_carlo_authoritative_int4_band": {
+    "mult_band": [
+      0.9603191489361702,
+      1.0
+    ],
+    "haircut_band": [
+      0.04,
+      0.09
+    ],
+    "p_clears_bar": 1.0,
+    "official_equiv_public_p50": 166.84168853376025,
+    "official_equiv_private_p05": 150.98900726233268,
+    "official_equiv_private_p50": 155.9785916201696,
+    "official_equiv_private_p95": 161.06262390384848
+  },
+  "monte_carlo_725compat_band": {
+    "mult_band": [
+      0.9603191489361702,
+      1.0601865051833779
+    ],
+    "haircut_band": [
+      0.04,
+      0.09
+    ],
+    "p_clears_bar": 1.0,
+    "official_equiv_public_p50": 171.94683089371094,
+    "official_equiv_private_p05": 152.3063462981999,
+    "official_equiv_private_p50": 160.7299312540202,
+    "official_equiv_private_p95": 169.41638796494314
+  },
+  "breakeven": {
+    "k6_at_worst_9pct_haircut": 0.8159180943709193,
+    "k6_at_mid_6p5pct_haircut": 0.7941021025428198,
+    "k6_no_haircut": 0.7424854658775366
+  },
+  "reconciliation": {
+    "packet_725_139p9": {
+      "official_equiv": 139.9,
+      "local_used": 159.0,
+      "transfer_used": 0.8799,
+      "what_drives_it": "advisor back-of-envelope: low verbal local (159, provenance TBD) x transfer 0.880 (BELOW every measured int4 pair). Doubly conservative.",
+      "authoritative_for_730": false,
+      "reason": "uses an unverified 159 local and a transfer below all int4 data; not the int4-anchored central."
+    },
+    "fn_732_147p55": {
+      "official_equiv": 147.55,
+      "local_used": "~170 (fast /tmp/qat-assistant)",
+      "transfer_used": "~0.87 ('stark tax')",
+      "what_drives_it": "CURRENT_RESEARCH_STATE.md cycle-58DG: '147.55 (fast /tmp/qat-assistant, provenance-suspect)' via stark-tax 0.870. It is the FAST drafter (not the stock-Hub ship drafter) under a pessimistic transfer.",
+      "authoritative_for_730": false,
+      "reason": "fast-drafter proxy + sub-measured transfer; provenance-suspect by its own label."
+    },
+    "anchored_728_x1p192": {
+      "official_equiv_if_applied_to_L6": 202.887786559865,
+      "official_equiv_if_applied_to_L5": 205.90653831713502,
+      "local_used": "170.21 (K=6) or 172.74 (K=5)",
+      "transfer_used": 1.192,
+      "what_drives_it": "126.378/106.02 is #728's faithful-engine AR-base ratio on checkpoint /workspace/gemma_build/int4_g128_lmhead, a DIFFERENT model+engine than land's google/gemma-4-E4B-it-qat-w4a16-ct on PR#82. Cross-checkpoint.",
+      "authoritative_for_730": false,
+      "reason": "INVALID: the x1.192 cancels #728's local->official gap for ITS substrate/checkpoint; land's 170.21 already embeds a different local clock. Over-count."
+    },
+    "THIS_authoritative": {
+      "official_equiv_public": 167.8820150670461,
+      "official_equiv_private_mid_6p5": 156.9696840876881,
+      "local_used": "170.21 (TRUE K=6, NUM_SPEC=6)",
+      "transfer_used": 0.9863,
+      "what_drives_it": "int4 same-precision transfer 0.986 (band 0.960-1.000) on the TRUE K=6 local; carries #725's 4-9% haircut.",
+      "authoritative_for_730": true,
+      "reason": "int4-precision-anchored, correct K, correct base model; rejects bf16/advisor/x1.192. This is the defensible decision number."
+    }
+  },
+  "provenance_flags": {
+    "K_mismatch": {
+      "packet_says": "K=6, 172.7 local",
+      "reality": "172.74 is K=5 (NUM_SPEC=5); TRUE K=6 (NUM_SPEC=6) = 170.21",
+      "impact": "use 170.21, not 172.74. ~1.5% lower; also the conservative/correct K."
+    },
+    "DRAFTER_mismatch": {
+      "packet_says": "stock-Hub drafter google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+      "reality": "every optionb measurement used DRAFTER_MODEL=/tmp/qat-assistant (the FAST drafter; CURRENT_RESEARCH_STATE.md labels it 'fast, provenance-suspect' and distinct from the 'shippable stock-Hub drafter'). The submission MANIFEST ships the stock-Hub id, and /tmp/qat-assistant is a LOCAL path unavailable on the HF runner.",
+      "impact": "170.21 is an UPPER BOUND on the literal stock-Hub un-rescued K=6 local, which is UNMEASURED on-branch. The fired config (stock-Hub drafter) would likely be slower. GO still robust (see margins) but the point estimate is provenance-thin."
+    },
+    "SUBSTRATE_gap": {
+      "fact": "no drafter-off AR arm in the optionb k-sweep (all arms spec K in 3..7); land's 170.21 has NO same-substrate AR base. #728's AR base 106.02 is on a different checkpoint (/workspace/gemma_build/int4_g128_lmhead) + engine.",
+      "impact": "speedup-ratio form unavailable in-branch; bounded via int4 transfer points. x1.192 anchored form is invalid (cross-checkpoint)."
+    }
+  },
+  "private_repro_gate_SEPARATE_risk": {
+    "gate_threshold_pct": 5.0,
+    "haircut_band_straddles_gate": true,
+    "interpretation": "clearing the 126.378 BAR is comfortable; the SEPARATE 5% private-repro validity gate (drafter stacks drift most, kanna#44) is the real residual risk -- a stack can beat the bar yet be DQ'd."
+  },
+  "verdict": {
+    "one_number_official_equiv_public": 167.9,
+    "one_number_official_equiv_private_central": 157.0,
+    "p_clears_126378_after_haircut": 1.0,
+    "worst_defensible_corner_margin_pct": 17.7,
+    "worst_defensible_corner_official_equiv": 148.7,
+    "breakeven_transfer_at_9pct_haircut": 0.8159,
+    "is_upper_bound_for_stock_ship_drafter": true,
+    "headline": "GO (comfortable), but the number is an UPPER BOUND. Authoritative int4-anchored official-equiv for the MEASURED K=6 config (fast /tmp/qat-assistant proxy on the ship base model w4a16-ct) = 167.9 public / ~157.0 private (mid-haircut). P(clears 126.378 after 4-9% haircut) = 1.00 over the int4 band [0.960,1.000]; worst defensible corner = 148.7 TPS (+17.7%, T=0.960 x 9% haircut). The fire fails ONLY if the true land-substrate->official int4 transfer drops below 0.816 -- far under every measured int4 pair and under the advisor's own 0.880 (which still clears at +7.8%). CAVEAT: the #730 submission SHIPS the stock-Hub drafter, never locally speed-measured; 170.21 (fast proxy) bounds it from ABOVE. Even the slower stock projections (147.55) clear post-9%-haircut (+6.2%). Reconciles the scattered 139.9/147.55/x1.192: 139.9 = advisor 0.880 floor, 147.55 = fast-proxy stark-tax, x1.192 = INVALID cross-checkpoint."
+  }
+}
