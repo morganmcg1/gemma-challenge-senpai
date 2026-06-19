@@ -1,0 +1,342 @@
+{
+  "completion_tokens_bi0": 256,
+  "completion_tokens_bi1": 256,
+  "total_device_ms_per_tok_bi0": 2.24673,
+  "total_device_ms_per_tok_bi1": 3.3399,
+  "total_device_ms_per_tok_added": 1.09317,
+  "profiled_device_bi_tax_pct": 0.3273,
+  "total_added_ms_per_tok_positive": 1.09317,
+  "total_added_ms_per_tok_net": 1.09317,
+  "bi_tax_top_op_family": "matmul_gemm",
+  "bi_tax_top_op_share": 0.886,
+  "matmul_subsplit_bi0": {
+    "gemm_int4_body_ms": 263.0976,
+    "gemm_bf16_ms": 148.6305
+  },
+  "matmul_subsplit_bi1": {
+    "gemm_int4_body_ms": 263.2809,
+    "gemm_bf16_ms": 396.3997
+  },
+  "gemm_int4_body_added_ms_per_tok": 0.00072,
+  "gemm_bf16_added_ms_per_tok": 0.96785,
+  "ledger": [
+    {
+      "family": "matmul_gemm",
+      "bi0_ms_per_tok": 1.60831,
+      "bi1_ms_per_tok": 2.57688,
+      "added_ms_per_tok": 0.96856,
+      "share_of_total_added": 0.886
+    },
+    {
+      "family": "attention",
+      "bi0_ms_per_tok": 0.40409,
+      "bi1_ms_per_tok": 0.52536,
+      "added_ms_per_tok": 0.12128,
+      "share_of_total_added": 0.1109
+    },
+    {
+      "family": "norm_elementwise",
+      "bi0_ms_per_tok": 0.17698,
+      "bi1_ms_per_tok": 0.17906,
+      "added_ms_per_tok": 0.00207,
+      "share_of_total_added": 0.0019
+    },
+    {
+      "family": "other_movement",
+      "bi0_ms_per_tok": 0.02523,
+      "bi1_ms_per_tok": 0.02639,
+      "added_ms_per_tok": 0.00117,
+      "share_of_total_added": 0.0011
+    },
+    {
+      "family": "sampling_lmhead",
+      "bi0_ms_per_tok": 0.02269,
+      "bi1_ms_per_tok": 0.02278,
+      "added_ms_per_tok": 9e-05,
+      "share_of_total_added": 0.0001
+    },
+    {
+      "family": "other",
+      "bi0_ms_per_tok": 0.00943,
+      "bi1_ms_per_tok": 0.00943,
+      "added_ms_per_tok": -1e-05,
+      "share_of_total_added": -0.0
+    }
+  ],
+  "top_kernels_bi0": {
+    "other_movement": [
+      [
+        "Memcpy DtoD (Device -> Device)",
+        2.9458
+      ],
+      [
+        "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+        2.6462
+      ],
+      [
+        "Memcpy HtoD (Pinned -> Device)",
+        0.539
+      ],
+      [
+        "Memcpy DtoH (Device -> Pinned)",
+        0.1237
+      ],
+      [
+        "Memcpy HtoD (Pageable -> Device)",
+        0.104
+      ],
+      [
+        "Memset (Device)",
+        0.0992
+      ]
+    ],
+    "norm_elementwise": [
+      [
+        "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+        6.0371
+      ],
+      [
+        "triton_red_fused_add_marlin_gemm_rms_norm_0",
+        5.798
+      ],
+      [
+        "triton_red_fused_add_rms_norm_2",
+        4.5076
+      ],
+      [
+        "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+        4.4088
+      ],
+      [
+        "triton_poi_fused_gelu_marlin_gemm_mul_3",
+        3.0682
+      ],
+      [
+        "triton_poi_fused_6",
+        1.9036
+      ]
+    ],
+    "other": [
+      [
+        "void at::native::bitonicSortKVInPlace<-2, -1, 16, 16, c10::BFloat16, long, at::native::GTOp<c10::BFloat16, true>, unsigned int>(at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, unsigned int, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, at::native::GTOp<c10::BFloat16, true>)",
+        1.2625
+      ],
+      [
+        "_compute_slot_mapping_kernel",
+        0.683
+      ],
+      [
+        "void at::native::(anonymous namespace)::indexSelectSmallIndex<c10::BFloat16, long, unsigned int, 2, 2, -2>(at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, at::cuda::detail::TensorInfo<long const, unsigned int>, int, int, unsigned int, long)",
+        0.215
+      ],
+      [
+        "void at::native::(anonymous namespace)::CatArrayBatchedCopy_alignedK_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+        0.105
+      ],
+      [
+        "eagle_prepare_next_token_padded_kernel",
+        0.0855
+      ],
+      [
+        "eagle_prepare_inputs_padded_kernel",
+        0.0639
+      ]
+    ],
+    "matmul_gemm": [
+      [
+        "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        132.9296
+      ],
+      [
+        "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        120.697
+      ],
+      [
+        "ampere_bf16_s16816gemm_bf16_64x64_ldg8_f2f_stages_64x6_tn",
+        111.8675
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+        10.2555
+      ],
+      [
+        "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8::Params)",
+        5.9474
+      ],
+      [
+        "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 3, 4, 8, false, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        5.5063
+      ]
+    ],
+    "attention": [
+      [
+        "kernel_unified_attention",
+        99.5497
+      ],
+      [
+        "reduce_segments",
+        2.2811
+      ],
+      [
+        "reshape_and_cache_kernel_flash",
+        1.6158
+      ]
+    ],
+    "sampling_lmhead": [
+      [
+        "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)",
+        3.5095
+      ],
+      [
+        "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<c10::BFloat16, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<c10::BFloat16, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+        1.1985
+      ],
+      [
+        "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+        0.9876
+      ],
+      [
+        "rejection_greedy_sample_kernel",
+        0.1126
+      ]
+    ]
+  },
+  "top_kernels_bi1": {
+    "other_movement": [
+      [
+        "Memcpy DtoD (Device -> Device)",
+        3.0434
+      ],
+      [
+        "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+        2.6375
+      ],
+      [
+        "Memcpy HtoD (Pinned -> Device)",
+        0.6224
+      ],
+      [
+        "Memcpy HtoD (Pageable -> Device)",
+        0.2231
+      ],
+      [
+        "Memcpy DtoH (Device -> Pinned)",
+        0.1311
+      ],
+      [
+        "Memset (Device)",
+        0.099
+      ]
+    ],
+    "norm_elementwise": [
+      [
+        "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+        6.0357
+      ],
+      [
+        "triton_red_fused_add_marlin_gemm_rms_norm_0",
+        5.8135
+      ],
+      [
+        "triton_red_fused_add_rms_norm_2",
+        4.9273
+      ],
+      [
+        "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+        3.6201
+      ],
+      [
+        "triton_poi_fused_gelu_marlin_gemm_mul_3",
+        3.3441
+      ],
+      [
+        "triton_poi_fused_gelu_mul_slice_t_1",
+        1.9407
+      ]
+    ],
+    "other": [
+      [
+        "void at::native::bitonicSortKVInPlace<-2, -1, 16, 16, c10::BFloat16, long, at::native::GTOp<c10::BFloat16, true>, unsigned int>(at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, unsigned int, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, at::native::GTOp<c10::BFloat16, true>)",
+        1.262
+      ],
+      [
+        "_compute_slot_mapping_kernel",
+        0.6823
+      ],
+      [
+        "void at::native::(anonymous namespace)::indexSelectSmallIndex<c10::BFloat16, long, unsigned int, 2, 2, -2>(at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, at::cuda::detail::TensorInfo<long const, unsigned int>, int, int, unsigned int, long)",
+        0.2139
+      ],
+      [
+        "void at::native::(anonymous namespace)::CatArrayBatchedCopy_alignedK_contig<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 2, 128, 1, 16>(at::native::(anonymous namespace)::OpaqueType<8u>*, at::native::(anonymous namespace)::CatArrInputTensorMetadata<at::native::(anonymous namespace)::OpaqueType<8u>, unsigned int, 128, 1>, at::native::(anonymous namespace)::TensorSizeStride<unsigned int, 4u>, int, unsigned int)",
+        0.1071
+      ],
+      [
+        "eagle_prepare_next_token_padded_kernel",
+        0.0846
+      ],
+      [
+        "eagle_prepare_inputs_padded_kernel",
+        0.0639
+      ]
+    ],
+    "matmul_gemm": [
+      [
+        "matmul_kernel_persistent",
+        393.318
+      ],
+      [
+        "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        133.087
+      ],
+      [
+        "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        120.7215
+      ],
+      [
+        "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 3, 4, 8, false, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        5.511
+      ],
+      [
+        "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 3, 16, 4, false, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+        3.9614
+      ],
+      [
+        "bmm_kernel",
+        3.0817
+      ]
+    ],
+    "attention": [
+      [
+        "kernel_unified_attention",
+        132.8782
+      ],
+      [
+        "reshape_and_cache_kernel_flash",
+        1.6151
+      ]
+    ],
+    "sampling_lmhead": [
+      [
+        "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)",
+        3.5022
+      ],
+      [
+        "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<c10::BFloat16, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<c10::BFloat16, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+        1.2303
+      ],
+      [
+        "void at::native::reduce_kernel<512, 1, at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4> >(at::native::ReduceOp<float, at::native::ArgMaxOps<float>, unsigned int, long, 4, 4>)",
+        0.9872
+      ],
+      [
+        "rejection_greedy_sample_kernel",
+        0.1124
+      ]
+    ]
+  },
+  "decode_tps_proxy_bi0": 338.5296223162949,
+  "decode_tps_proxy_bi1": 282.0883931860061,
+  "prompt_tokens_bi0": 328,
+  "prompt_tokens_bi1": 328
+}

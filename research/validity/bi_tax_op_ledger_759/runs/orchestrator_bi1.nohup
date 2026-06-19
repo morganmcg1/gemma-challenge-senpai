@@ -1,0 +1,30 @@
+[20:07:19] STAGE 0: clearing leftover api_server on :8000
+[20:07:32] STAGE 0 done (gpu_used=0 MiB)
+[20:07:32] ARM BI=1: boot prof server
+[20:07:32]   booted pid=2482055
+[20:09:39]   ready; gpu_used=19637 MiB
+[20:09:39]   driving profile (warmup=3, prompt~200, gen=256) ...
+[20:09:56]   profile done
+[20:10:04]   torn down (gpu_used=0 MiB)
+[20:10:04] ARM_DONE: BI=1
+[20:10:04] PARSE: building ledger
+==============================================================================
+PR #759  BATCH-INVARIANCE TAX  per-kernel-family ledger (ms / output tok)
+==============================================================================
+family                       BI0       BI1     added    share
+matmul_gemm               1.6083    2.5769    0.9686    88.6%
+attention                 0.4041    0.5254    0.1213    11.1%
+norm_elementwise          0.1770    0.1791    0.0021     0.2%
+other_movement            0.0252    0.0264    0.0012     0.1%
+sampling_lmhead           0.0227    0.0228    0.0001     0.0%
+other                     0.0094    0.0094   -0.0000    -0.0%
+------------------------------------------------------------------------------
+TOTAL device              2.2467    3.3399    1.0932
+profiled device BI tax pct = 0.3273
+TOP family = matmul_gemm  share = 88.6%
+------------------------------------------------------------------------------
+GEMM subsplit control (int4 Marlin body NOT BI-overridden -> should cancel):
+  int4 body ms: BI0=263.10 BI1=263.28  added/tok=+0.00072
+  bf16 GEMM ms: BI0=148.63 BI1=396.40  added/tok=+0.96785
+==============================================================================
+[20:10:07] ALL DONE
