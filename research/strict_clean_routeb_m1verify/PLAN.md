@@ -31,9 +31,40 @@ Per spec step: drafter proposes K, then verify.
 **Prior (to be measured, not assumed):** route-b removes the batched-verify amortization
 that is the entire spec speedup, so net_TPS collapses toward the target's M=1 AR rate
 minus drafter waste. Risk: it is then **dominated by the existing byte-exact M=1 AR
-floor-lock** (`fa2sw_strict_m1ar_int4`, 161.70 local) — byte-exact AND faster, no drafter.
-The honest deliverable is the measured net-TPS K-sweep + the byte-exactness tax, and
-whether route-b is a useful submission or a dominated one.
+ceiling**. The honest deliverable is the measured net-TPS K-sweep + the byte-exactness
+tax, and whether route-b is a useful submission or a dominated one.
+
+> **DE-PROJECTION CORRECTION (#642).** An earlier draft of this plan cited
+> `fa2sw_strict_m1ar_int4 = 161.70 local` as the byte-exact M=1 AR floor-lock. That is
+> WRONG: that submission's manifest says **"modeled 161.70 OFFICIAL TPS (lawine #438)"** —
+> a *modeled official* projection for the heavily-approximated dixie-flatline stack
+> (lm_head-prune to 12k vocab, FA-sliding, fused sparse argmax), which is byte-exact
+> *within-stack* but NOT vs the canonical reference. The **genuine byte-exact static AR
+> ceiling is MEASURED**: `int4_g128_lmhead` (the bar's own config) AR ≈ **126.4 local**
+> ≈ the 126.378 bar (`research/ar_identity_safe_tps`, same pod). That — not 161.70 — is
+> route-b's most-charitable ceiling, and it sits AT the bar (consistent with denken #740:
+> static byte-exact is exhausted at the bar). Route-b ≤ this ceiling, so route-b < bar.
+
+## Result (MEASURED, 2026-06-19)
+
+**Verdict: route-b CANNOT be both byte-exact (G1-immune) AND clear 126.378.** Its M=1
+single-query verify provides zero weight-read amortization → `route_b_tps ≤ plain
+byte-exact AR`. The genuine byte-exact AR ceiling ≈ 126.4 ≈ the bar (denken #740), so
+route-b lands below the bar by the no-amortization + drafter tax. Only the **non**-byte-exact
+batched verify clears the bar (measured 28/128 greedy identity at K=2 — the very G1 DQ
+source route-b exists to remove). G1-immunity and clearing the bar are mutually exclusive.
+
+Measured anchors (local warm-steady, MAX_NUM_SEQS=1, temp=0, 128×512 sharegpt):
+- `int4_g128_lmhead` plain byte-exact AR = **126.4 local** ≈ bar (the byte-exact ceiling).
+- `int4_mtp_batchinv` M=1 AR ref, fast-kernel (batchinv-OFF, route-b's true ceiling on this
+  base) = **95.034 local** / 98.383 official-proj, PPL 2.0058 (W&B `w1owpt54`).
+- `int4_mtp_batchinv` M=1 AR ref, batchinv-ON = 77.843 local, PPL 2.0055 (W&B `a5vcnqy5`).
+- Batched-spec K-sweep (the non-byte-exact reference): K=2 144.85 … K=4 161.13 (best) …
+  K=6 156.40 local — all clear the bar locally, K=6 PPL 2.0055.
+- Byte-exactness of batched verify vs M=1 AR ref: K=2 **28/128**, K=3 23/128, K=4 28/128
+  identical (onset min=0) → non-byte-exact even with `VLLM_BATCH_INVARIANT=1`.
+- Route-b net-TPS (fast-kernel-anchored, bounded by 95.034): K=2 upper 73.2 / drafter-incl
+  62.5 … K=6 45.5 — all far below the bar. Verdict run W&B `8dl148ds`.
 
 ## Measurement plan (real served wall_tps, not projection — #642 de-projected)
 Base submission: `int4_mtp_batchinv` (int4 W4A16 target + MTP drafter, K=NUM_SPECULATIVE_TOKENS).
