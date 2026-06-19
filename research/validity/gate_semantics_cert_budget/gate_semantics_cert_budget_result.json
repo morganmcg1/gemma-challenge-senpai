@@ -1,0 +1,400 @@
+{
+  "schema": "gate_semantics_cert_budget/v1",
+  "generated_at": "2026-06-19T05:57:46.990980+00:00",
+  "analysis_only": 1,
+  "official_tps": 0,
+  "no_hf_job": 1,
+  "fires": 0,
+  "synthesis": {
+    "verdict": "POINT_GATE_LANE1_ALIVE",
+    "gate_readings": {
+      "point_reading": {
+        "name": "POINT-clearance",
+        "decision_rule": "served config CLEARS the AIME leg IFF point estimate p_hat >= 0.420",
+        "evidence_required": "a single point estimate of AIME accuracy at the eval budget (the #31 basis, greedy, ~30-60 unique problems). The CI is reported as an HONESTY CAVEAT (flags whether the point is robust) but does NOT gate.",
+        "this_is": "the lawine #703 AS-APPLIED operational rule (gate on the point, CI as a flag)",
+        "one_shot_implication": "the POINT is the unbiased best estimate of true quality; for a single irreversible decision under a flat-ish prior the Bayes/expected-utility-optimal action gates on the posterior mean (~the point), NOT a conservative bound. A lower-confidence-bound rule is a type-I-error-control device for a REPEATED certification regime, not the optimal rule for one irreversible board post."
+      },
+      "ci_reading": {
+        "name": "CI-certification",
+        "decision_rule": "served config CLEARS IFF Wilson/CP LOWER bound >= 0.420 at the eval budget",
+        "evidence_required": "enough draws n that the 95% lower confidence bound clears -- a certification at 95% confidence. For a margin m=p-0.420 this needs n ~ z^2 p(1-p)/m^2 draws (best case: observe exactly p), or the larger 95%-power n to PLAN for it.",
+        "this_is": "the denken #710/#714 certification rule (the stricter standard)",
+        "one_shot_implication": "guarantees (at 95%) the served model is above the floor -- the risk-averse / do-no-harm reading. Appropriate when you make the call REPEATEDLY and want a long-run type-I-error guarantee; for a single shot it is conservative, and on AIME it is UNACHIEVABLE at any near-bar margin (see the budget frontier)."
+      }
+    },
+    "asapplied_reconcile": {
+      "asapplied_gate_is_point": 1,
+      "aime_fails_on_wilson_hi": 1,
+      "gpqa_point_passes": 1,
+      "gpqa_ci_straddles_gate": 1,
+      "pass_awarded_with_ci_lo_below_gate": 1,
+      "legs_failing_under_point_rule": 1,
+      "legs_failing_under_ci_rule": 2,
+      "ci_rule_would_collapse_panel": 1,
+      "operative_rule": "FAIL if even Wilson-HI < gate (decisive level failure, AIME 0.4022<0.420); PASS if point >= gate (GPQA-D 0.4747) with a CI-lo straddle recorded as an HONESTY CAVEAT, not a fail. => the as-applied gate is POINT-based.",
+      "adjudication": "asapplied_gate_is_point=1. The program gated PASS on the point and used the CI as a caveat (GPQA-D point-PASS with CI-lo 0.406<gate). Applying the CI rule uniformly would ALSO fail GPQA-D -> the panel collapses; the recorded 1-leg failure is only consistent with the POINT rule."
+    },
+    "cert_budget": {
+      "lanes": {
+        "full_g32": {
+          "name": "full_g32 (Lane 1, within-mandate)",
+          "point": 0.438,
+          "margin": 0.018,
+          "min_n_point_clears": 2889,
+          "min_n_power95_stable": 9851,
+          "min_n_power95_first_cross": 9772,
+          "normal_n_point_clears": 2918.5,
+          "normal_n_power95": 9816.8,
+          "point_clears_le_edge_feasible": 0,
+          "point_clears_le_greedy_pool": 0
+        },
+        "full_g64": {
+          "name": "full_g64 (xcheck)",
+          "point": 0.4458,
+          "margin": 0.0258,
+          "min_n_point_clears": 1406,
+          "min_n_power95_stable": 4808,
+          "min_n_power95_first_cross": 4753,
+          "normal_n_point_clears": 1425.8,
+          "normal_n_power95": 4786.4,
+          "point_clears_le_edge_feasible": 1,
+          "point_clears_le_greedy_pool": 0
+        },
+        "route_b": {
+          "name": "route_b (Lane 1 fused-block point)",
+          "point": 0.42131,
+          "margin": 0.00131,
+          "min_n_point_clears": 545295,
+          "min_n_power95_stable": null,
+          "min_n_power95_first_cross": null,
+          "normal_n_point_clears": 545759.5,
+          "normal_n_power95": 1845314.3,
+          "point_clears_le_edge_feasible": 0,
+          "point_clears_le_greedy_pool": 0
+        },
+        "int8_locus": {
+          "name": "int8_locus (Lane 2, human-mandate)",
+          "point": 0.45,
+          "margin": 0.03,
+          "min_n_point_clears": 1040,
+          "min_n_power95_stable": 3566,
+          "min_n_power95_first_cross": 3518,
+          "normal_n_point_clears": 1056.4,
+          "normal_n_power95": 3542.9,
+          "point_clears_le_edge_feasible": 1,
+          "point_clears_le_greedy_pool": 0
+        }
+      },
+      "frontier": [
+        {
+          "p": 0.42,
+          "margin": 0.0,
+          "n_point_clears": null,
+          "n_power95": null,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.422,
+          "margin": 0.002,
+          "n_point_clears": 233945,
+          "n_power95": null,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.424,
+          "margin": 0.004,
+          "n_point_clears": 58487,
+          "n_power95": 198285,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.426,
+          "margin": 0.006,
+          "n_point_clears": 25994,
+          "n_power95": 88217,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.428,
+          "margin": 0.008,
+          "n_point_clears": 14622,
+          "n_power95": 49664,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.43,
+          "margin": 0.01,
+          "n_point_clears": 9358,
+          "n_power95": 31807,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.432,
+          "margin": 0.012,
+          "n_point_clears": 6499,
+          "n_power95": 22118,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.434,
+          "margin": 0.014,
+          "n_point_clears": 4775,
+          "n_power95": 16260,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.436,
+          "margin": 0.016,
+          "n_point_clears": 3656,
+          "n_power95": 12463,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.438,
+          "margin": 0.018,
+          "n_point_clears": 2889,
+          "n_power95": 9851,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.44,
+          "margin": 0.02,
+          "n_point_clears": 2340,
+          "n_power95": 7986,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.442,
+          "margin": 0.022,
+          "n_point_clears": 1934,
+          "n_power95": 6607,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.444,
+          "margin": 0.024,
+          "n_point_clears": 1625,
+          "n_power95": 5565,
+          "le_edge_feasible": 0,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.446,
+          "margin": 0.026,
+          "n_point_clears": 1385,
+          "n_power95": 4738,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.448,
+          "margin": 0.028,
+          "n_point_clears": 1194,
+          "n_power95": 4092,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.45,
+          "margin": 0.03,
+          "n_point_clears": 1040,
+          "n_power95": 3566,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.452,
+          "margin": 0.032,
+          "n_point_clears": 914,
+          "n_power95": 3141,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.454,
+          "margin": 0.034,
+          "n_point_clears": 810,
+          "n_power95": 2782,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.456,
+          "margin": 0.036,
+          "n_point_clears": 723,
+          "n_power95": 2484,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.458,
+          "margin": 0.038,
+          "n_point_clears": 649,
+          "n_power95": 2235,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.46,
+          "margin": 0.04,
+          "n_point_clears": 585,
+          "n_power95": 2019,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.462,
+          "margin": 0.042,
+          "n_point_clears": 531,
+          "n_power95": 1829,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.464,
+          "margin": 0.044,
+          "n_point_clears": 484,
+          "n_power95": 1669,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.466,
+          "margin": 0.046,
+          "n_point_clears": 443,
+          "n_power95": 1530,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.468,
+          "margin": 0.048,
+          "n_point_clears": 407,
+          "n_power95": 1403,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        },
+        {
+          "p": 0.47,
+          "margin": 0.05,
+          "n_point_clears": 375,
+          "n_power95": 1290,
+          "le_edge_feasible": 1,
+          "le_greedy_pool": 0
+        }
+      ],
+      "smallest_p_edge_feasible_point_clears": 0.446,
+      "smallest_p_greedy_feasible_point_clears": null,
+      "edge_feasible_budget": 1500,
+      "instrument_cap": {
+        "greedy_is_deterministic": 1,
+        "aime2024_pool": 30,
+        "fleet31_pool": 60,
+        "greedy_pool_cap": 60,
+        "int8_pointclears_over_greedy_cap": 17.3,
+        "int8_sampled_point": 0.41,
+        "int8_sampled_below_gate": 1,
+        "note": "On the GREEDY basis (kanna #699: int4/int8 SAMPLED decode is engine-fragile on 0.22.0), AIME yields ONE deterministic draw per problem -> n is capped at the problem pool (~30-60), NOT by compute. int8's 1040 point-clears budget is ~17x the 60-problem cap; full-g32's 2889 is ~48x. CI-certification cannot be reached by reseeding (greedy has no seed variance). Sampled draws cannot backfill n either: int8 SAMPLED point 0.410 < gate -> draws whose own point is sub-gate cannot certify >=0.420. => the CI reading is OPERATIONALLY IMPOSSIBLE on the AIME instrument for BOTH lanes; only an expanded ~1000+ comparable-difficulty math pool could make int8 edge-feasible."
+      }
+    },
+    "two_world": {
+      "point_world": {
+        "full_g32": {
+          "point": 0.438,
+          "clears": 1
+        },
+        "route_b": {
+          "point": 0.42131,
+          "clears": 1
+        },
+        "int8_locus": {
+          "point": 0.45,
+          "clears": 1
+        },
+        "selective_g32": {
+          "point": null,
+          "clears": "IFF measured point >= 0.420 (ubel #702 pending)"
+        },
+        "lane1_alive_on_point": 1
+      },
+      "ci_world": {
+        "full_g32": {
+          "n_point_clears": 2889,
+          "n_power95": 9851,
+          "edge_feasible": 0
+        },
+        "route_b": {
+          "n_point_clears": 545295,
+          "n_power95": null,
+          "edge_feasible": 0
+        },
+        "int8_locus": {
+          "n_point_clears": 1040,
+          "n_power95": 3566,
+          "edge_feasible": 1
+        },
+        "int8_only_edge_feasible_among_lanes": 1,
+        "any_lane_greedy_pool_feasible": 0
+      },
+      "int8_only_edge_feasible": 1,
+      "decision_sentence": "Under the CI reading, the int8-locus's larger margin (0.030 vs full-g32's 0.018) makes it the ONLY recovery config that is both point-clean (greedy 0.450) AND edge-feasible to CI-certify on the point-clears budget (n=1040 <= 1500; full-g32 needs 2889, route_b ~545k). HOWEVER, on the strict greedy AIME instrument (pool <=60) even int8's 1040 is ~17x over-budget, and int8 SAMPLED (0.410) is sub-gate -> the CI reading is reachable for NO lane without an expanded ~1000+ comparable-difficulty math pool. int8 is 'the least-infeasible', and the only one that becomes feasible if the pool is expanded."
+    },
+    "downstream_note": {
+      "if_point_gate": "POINT_GATE_LANE1_ALIVE: the four Lane-1 measurement cards (ubel #702 selective-g32, fern #713 g32-locus, stark #711 shape, land #712 strict-#319 identity) remain FIRE-RELEVANT on their points -- full-g32's 0.438 point clears the bar the gate actually applies, and selective-g32 clears IFF its measured point >= 0.420. denken #710/#714 DEAD bounds ONLY the stricter CI-certification standard the fire-gate does NOT require -> do NOT over-kill Lane 1; the points are decision-grade.",
+      "if_ci_gate": "CI_GATE_INT8_ONLY: Lane 1 is dead (full-g32 n>=2889, route_b ~545k -- infeasible) and only Lane 2 (int8-locus, margin 0.030, point-clears n=1040) is even edge-feasible -> the int8/mandate ruling becomes strictly LOAD-BEARING. (And note even int8 is greedy-pool-infeasible at n<=60; CI-certification needs an expanded math pool.)",
+      "instrument_caveat": "The greedy/sampled split is itself a reason the CI reading is hazardous on this engine: greedy caps n at the problem pool, and sampled (the only way to grow n) is engine-broken for int4 (kanna #699) and sub-gate for int8 (0.410)."
+    },
+    "recommendation": {
+      "recommended_standard": "POINT-clearance with a margin preference and the CI as risk disclosure",
+      "rationale": "(1) DECISION THEORY: a one-shot irreversible leaderboard post is a single expected-utility decision, not a repeated-certification regime. The EU-optimal action gates on the posterior mean (~the point); a conservative lower-bound rule is a frequentist type-I-error-rate control device justified by REPETITION, which a single board post does not have. (2) CONSISTENCY: the program's own four-leg panel (#703) is point-gated -- GPQA-D only point-passes (CI-lo 0.406<gate). Switching to the CI rule now would retroactively FAIL GPQA-D and collapse the panel, not just AIME. (3) FEASIBILITY: CI-certification of AIME at a near-bar margin is unachievable at any realistic AIME budget (full-g32 2889 / int8 1040 vs a greedy pool <=60); a standard no config can meet is not an operable fire-gate.",
+      "margin_preference": "BUT the irreversibility argues for the largest-margin point among clearing configs: a thin point (full-g32 0.438, P(true<0.420 | n=60) ~ 30-40%) carries a real, uncertified probability of being sub-floor. Among point-clearing recovery configs prefer maximum margin (int8 0.450 > full-g32 0.438) and report the Wilson CI as the honest risk flag. Functionally: gate on the point, size a margin to the false-fire/missed-fire loss asymmetry, disclose the CI.",
+      "human_call": "The human makes the final int8-mandate call. If the fire-gate is POINT (recommended), Lane 1 (full-g32) is alive and the int8 question is margin/robustness, not pass/fail. If the human elects the conservative CI standard for the irreversible post, Lane 1 is dead and int8 is the only (edge-feasible, pool-expansion-contingent) certifiable config -> the int8-mandate ruling becomes load-bearing."
+    },
+    "self_test": {
+      "gate_semantics_self_test_passes": true,
+      "conditions": {
+        "fullg32_pointclears_2889": true,
+        "routeb_pointclears_545295": true,
+        "fullg32_power_band_contains_9828": true,
+        "fullg32_power_normal_near_9828": true,
+        "int8_pointclears_is_1040": true,
+        "int8_power95_computed": true,
+        "boundary_full_g32": true,
+        "boundary_int8_locus": true,
+        "boundary_route_b": true,
+        "frontier_monotone_decreasing": true,
+        "margin_zero_unresolvable": true,
+        "asapplied_gate_is_point": true,
+        "ci_rule_would_collapse_panel": true,
+        "greedy_cap_below_int8_budget": true,
+        "int8_sampled_below_gate": true,
+        "int8_edge_feasible": true,
+        "fullg32_not_edge_feasible": true,
+        "analysis_only_guard": true
+      },
+      "n_conditions": 18,
+      "n_passing": 18
+    },
+    "primary_int8_certify_n_pointclears": 1040,
+    "test_asapplied_gate_is_point": 1,
+    "fullg32_pointclears": 2889,
+    "fullg32_power95_stable": 9851,
+    "fullg32_power95_banked_714": 9828,
+    "routeb_pointclears": 545295,
+    "int8_power95_stable": 3566
+  },
+  "peak_mem_mib": 10.59
+}
