@@ -1,0 +1,138 @@
+{
+  "all_modalities_loaded": true,
+  "completed": 8,
+  "created_at": "20260619T182456Z",
+  "failures": [],
+  "greedy_onset": {
+    "num_divergent": 6,
+    "num_identical": 2,
+    "onset_max": 326,
+    "onset_median": 174,
+    "onset_min": 4,
+    "onsets": [
+      4,
+      104,
+      153,
+      195,
+      300,
+      326
+    ]
+  },
+  "greedy_reference_kind": "served_spec_off",
+  "greedy_verdict": "DIVERGENT",
+  "modalities_loaded": {
+    "audio": true,
+    "image": true,
+    "text": true,
+    "video": true
+  },
+  "modalities_method": {
+    "audio": "presence",
+    "image": "functional",
+    "text": "functional",
+    "video": "presence"
+  },
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "num_prompts": 8,
+  "official_gate": "PASS",
+  "official_gate_completion_ok": true,
+  "official_gate_modalities_ok": true,
+  "official_gate_pass": true,
+  "official_gate_ppl_ok": true,
+  "out_dir": "research/validity/bi_detax_surgical_attn/recover_eager_smoke8/validate",
+  "output_len": 512,
+  "ppl": 2.0063921084589826,
+  "ppl_cap": 2.42,
+  "reference_model_id": "/workspace/senpai/target/submissions/int4_mtp_bi0_surgattn::google/gemma-4-E4B-it-qat-w4a16-ct",
+  "reference_num_records": 8,
+  "served_model_name": "gemma-4-e4b-it",
+  "stages": {
+    "decode": {
+      "num_records": 8
+    },
+    "greedy": {
+      "divergence_onset": {
+        "num_divergent": 6,
+        "num_identical": 2,
+        "onset_max": 326,
+        "onset_median": 174,
+        "onset_min": 4,
+        "onsets": [
+          4,
+          104,
+          153,
+          195,
+          300,
+          326
+        ]
+      },
+      "num_divergent": 6,
+      "num_identical": 2,
+      "num_prompts_compared": 8,
+      "reference": "/workspace/senpai/target/research/greedy_reference/workspace__senpai__target__submissions__int4_mtp_bi0_surgattn__google__gemma-4-E4B-it-qat-w4a16-ct/decode_outputs.jsonl",
+      "reference_kind": "served_spec_off",
+      "total_divergent_tokens": 1955,
+      "verdict": "DIVERGENT"
+    },
+    "modalities": {
+      "all_modalities_loaded": true,
+      "detail": {
+        "audio": {
+          "config_signal": true,
+          "functional_probe_fallback": "functional audio probe skipped \u2014 no staged sample at probe_inputs/",
+          "method": "presence",
+          "nonzero_tensor": "model.audio_tower.subsample_conv_projection.layer0.conv.weight",
+          "num_tensors": 752
+        },
+        "image": {
+          "method": "functional",
+          "sample": "**Gradient of vibrant colors.**",
+          "status": 200
+        },
+        "text": {
+          "method": "functional",
+          "sample": "France is France is France is France is",
+          "status": 200
+        },
+        "video": {
+          "config_signal": true,
+          "functional_probe_fallback": "functional video probe skipped \u2014 no staged sample at probe_inputs/",
+          "method": "presence",
+          "nonzero_tensor": "model.vision_tower.encoder.layers.0.self_attn.k_proj.linear.weight",
+          "note": "no separate video tower; shares vision_tower + video_token_id",
+          "num_tensors": 659
+        }
+      },
+      "modalities_loaded": {
+        "audio": true,
+        "image": true,
+        "text": true,
+        "video": true
+      },
+      "modalities_method": {
+        "audio": "presence",
+        "image": "functional",
+        "text": "functional",
+        "video": "presence"
+      },
+      "served_checkpoint_dir": "/senpai-run/home/student-wirbel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0"
+    },
+    "ppl": {
+      "num_records": 128,
+      "num_tokens": 61797,
+      "ppl": 2.0063921084589826
+    },
+    "tps": {
+      "decode_tokens": 256,
+      "decode_tps_single_stream": 95.73422245693494,
+      "naive_tps": 93.65458217527126,
+      "note": "exploratory A10G single-stream probe; not the official a10g-small TPS",
+      "ttft_s_approx": 0.0698244571685791,
+      "wall_1tok_s": 0.0698244571685791,
+      "wall_ntok_s": 2.7334487438201904
+    }
+  },
+  "submission": "submissions/int4_mtp_bi0_surgattn",
+  "submission_name": "int4_mtp_bi0_surgattn",
+  "tps_single_stream_a10g": 95.73422245693494
+}
