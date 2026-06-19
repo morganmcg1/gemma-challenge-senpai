@@ -1,0 +1,156 @@
+{
+  "card": "partial_bi_identity_pareto_760",
+  "analysis_only": 1,
+  "official_tps": 0,
+  "no_hf_job": 1,
+  "fires": 0,
+  "anchoring": {
+    "method": "fern #750 official-anchoring (merged compute_projection.py)",
+    "ANCHOR_OFFICIAL_int4qat": 95.463,
+    "local_int4_qat_nospec_ourmeter": 95.2821,
+    "R_int4_pod_to_official": 1.001899,
+    "fern_local_int4_qat_sglang": 95.19,
+    "meter_agreement_pct": 0.0968,
+    "fire_stack_scale": 2.41228,
+    "FERN_BI0_ANCHORED": 229.847,
+    "FERN_BI1_ANCHORED": 156.949,
+    "note": "bare api_server proxy sits at the int4_qat baseline (~95 local), not the fire stack (~229); ABSOLUTE tps does not transfer, the RELATIVE BI/coverage cost does (land #748). anchored_tps_fire = official-anchored local PREDICTION via the transferable relative cost on fern's realized BI=0->BI=1 axis."
+  },
+  "determinism_floor": {
+    "k": 128,
+    "n": 128,
+    "ok": true
+  },
+  "ar_only_bi_xcheck": {
+    "k": 18,
+    "n": 128
+  },
+  "rungs_realizable": [
+    {
+      "rung": "R0  zero-BI (deployed)",
+      "bi_op_families": [],
+      "attention_split_pinned": false,
+      "cudagraph_capture_symmetric": false,
+      "deployable": true,
+      "realizable_with_current_toggles": true,
+      "source": "land #748 (mine)",
+      "identity_k": 24,
+      "identity_n": 128,
+      "identity_frac": 0.1875,
+      "per_token_flip_hazard": 0.0034233048057932852,
+      "local_tps_spec": 88.3544,
+      "anchored_tps_fire": 213.14,
+      "anchored_tps_literal_int4qat": 88.52
+    },
+    {
+      "rung": "R1  GEMM+reduction BI [route-b cheap]",
+      "bi_op_families": [
+        "aten::mm",
+        "aten::addmm",
+        "aten::matmul",
+        "aten::linear",
+        "aten::bmm",
+        "aten::_log_softmax",
+        "aten::softmax",
+        "aten::mean.dim"
+      ],
+      "attention_split_pinned": false,
+      "cudagraph_capture_symmetric": false,
+      "deployable": true,
+      "realizable_with_current_toggles": true,
+      "source": "land #748 (mine)",
+      "identity_k": 21,
+      "identity_n": 128,
+      "identity_frac": 0.1641,
+      "per_token_flip_hazard": 0.003833339304266829,
+      "local_tps_spec": 82.26,
+      "anchored_tps_fire": 198.43,
+      "anchored_tps_literal_int4qat": 82.42
+    },
+    {
+      "rung": "R2  GEMM+reduction BI + capture-sym [EAGER PROBE, non-deployable]",
+      "bi_op_families": [
+        "aten::mm",
+        "aten::addmm",
+        "aten::matmul",
+        "aten::linear",
+        "aten::bmm",
+        "aten::_log_softmax",
+        "aten::softmax",
+        "aten::mean.dim"
+      ],
+      "attention_split_pinned": false,
+      "cudagraph_capture_symmetric": true,
+      "deployable": false,
+      "realizable_with_current_toggles": true,
+      "source": "land #748 (mine)",
+      "identity_k": 84,
+      "identity_n": 128,
+      "identity_frac": 0.6562,
+      "per_token_flip_hazard": 0.0007292616226071103,
+      "local_tps_spec": 23.7828,
+      "anchored_tps_fire": 57.37,
+      "anchored_tps_literal_int4qat": 23.83
+    }
+  ],
+  "rungs_given_anchors": [
+    {
+      "rung": "G1  attention-split only (num_splits=1)",
+      "bi_op_families": [
+        "attention num_splits=1 (no aten GEMM/reduction overrides)"
+      ],
+      "attention_split_pinned": true,
+      "cudagraph_capture_symmetric": false,
+      "deployable": true,
+      "realizable_with_current_toggles": false,
+      "source": "lawine #755 (PR-body curve point)",
+      "identity_k": 24,
+      "identity_n": 128,
+      "identity_frac": 0.1875,
+      "per_token_flip_hazard": null,
+      "local_tps_spec": null,
+      "anchored_tps_fire": 235.99,
+      "anchored_tps_literal_int4qat": null
+    },
+    {
+      "rung": "G2  FULL BI (fire stack)",
+      "bi_op_families": [
+        "aten::mm",
+        "aten::addmm",
+        "aten::matmul",
+        "aten::linear",
+        "aten::bmm",
+        "aten::_log_softmax",
+        "aten::softmax",
+        "aten::mean.dim",
+        "attention num_splits=1",
+        "capture-aligned verify"
+      ],
+      "attention_split_pinned": true,
+      "cudagraph_capture_symmetric": true,
+      "deployable": true,
+      "realizable_with_current_toggles": false,
+      "source": "fern #750 (PR-body sweep target)",
+      "identity_k": 128,
+      "identity_n": 128,
+      "identity_frac": 1.0,
+      "per_token_flip_hazard": null,
+      "local_tps_spec": null,
+      "anchored_tps_fire": 156.949,
+      "anchored_tps_literal_int4qat": null
+    }
+  ],
+  "verdict": {
+    "full_bi_necessary": 1,
+    "min_strict_bi_tps": 156.95,
+    "strict_rung": "G2  FULL BI (fire stack)",
+    "max_realizable_identity": "84/128 (R2  GEMM+reduction BI + capture-sym [EAGER PROBE, non-deployable])",
+    "max_deployable_realizable_identity": "24/128 (R0  zero-BI (deployed))",
+    "n_realizable_rungs_hitting_128": 0,
+    "n_deployable_realizable_hitting_128": 0
+  },
+  "not_realizable_out_of_scope": {
+    "per_op_family_BI_subsets": "vLLM 0.22.0 enable_batch_invariant_mode() registers all op families (mm/addmm/matmul/linear/bmm/log_softmax/softmax/mean) in ONE monolithic call gated by a single VLLM_BATCH_INVARIANT bool; there is NO per-family env toggle, so 'matmul-only' / 'matmul+attention' / 'matmul+reduction' as separate rungs require patching enable_batch_invariant_mode -> OUT OF SCOPE.",
+    "attention_split_BI_under_available_backend": "ARCHITECTURALLY FORCED to TRITON_ATTN. Boot-log proof (runs/boot_FLASHINFER.log, config.py:100): 'Gemma4 model has heterogeneous head dimensions (head_dim=256, global_head_dim=512). Forcing TRITON_ATTN backend to prevent mixed-backend numerical divergence.' -- requesting VLLM_ATTENTION_BACKEND=FLASHINFER (or any FA backend) is SILENTLY overridden to TRITON_ATTN for Gemma-4. And under TRITON_ATTN the parallel softmax-segment reduction is fixed at NUM_PAR_SOFTMAX_SEGMENTS=16 UNCONDITIONALLY -- VLLM_BATCH_INVARIANT never appears in triton_attn.py, so BI does NOT pin the attention split. The FA/flashinfer backends whose BI path sets num_splits=1 / disable_split_kv (flash_attn.py, flashinfer.py:559) are unreachable for this model. So an attention-split-coverage rung needs a different model, or a patch to the forced-backend logic / the TRITON segment count -> OUT OF SCOPE. (flashinfer 0.6.11 IS installed and boots, but is overridden to TRITON_ATTN, so a flashinfer-request arm reproduces R1=21/128 -- redundant, not run.)"
+  }
+}
