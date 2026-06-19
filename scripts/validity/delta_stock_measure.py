@@ -59,7 +59,8 @@ SUBMISSION = REPO / "submissions" / "int4_mtp_batchinv"
 # name -> (dataset path, kind). "public" is the anchor; the rest are shifts.
 SUBSETS: dict[str, tuple[Path, str]] = {
     "public": (paths.EVAL_PROMPTS, "anchor:mmlu_pro+gpqa+aime (official 128)"),
-    "knowledge_mmlupro": (REPO / "data/deltastock_knowledge_mmlupro.json", "same-family held-out MCQ"),
+    "knowledge_mmlupro": (REPO / "data/deltastock_knowledge_mmlupro.json", "same-family held-out MMLU-Pro MCQ"),
+    "gpqa_diamond": (REPO / "data/deltastock_gpqa_diamond.json", "same-family held-out GPQA-D MCQ (harder MCQ half, #749)"),
     "reasoning_math": (REPO / "data/deltastock_reasoning_math.json", "AIME2024+gsm8k free-response"),
     "chat_casual": (REPO / "data/private_proxy_native_casual.json", "ShareGPT pure-chat (worst-corner dir)"),
     "code": (REPO / "data/private_proxy_native_code.json", "ShareGPT code-heavy"),
@@ -319,7 +320,7 @@ def log_to_wandb(report: dict[str, Any], *, wandb_name: str, wandb_group: str,
     }
     run = init_wandb_run(
         job_type="deltastock-measure", agent="senpai", name=wandb_name,
-        tags=["deltastock-measure", wandb_group],
+        group=wandb_group, tags=["deltastock-measure", wandb_group],
         config={"submission": report["submission"], "num_prompts": report["num_prompts"],
                 "max_tokens": report["max_tokens"], "wandb_group": wandb_group,
                 "smoke": report["smoke"], **report["config"]})
