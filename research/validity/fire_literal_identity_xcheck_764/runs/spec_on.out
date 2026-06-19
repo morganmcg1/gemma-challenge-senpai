@@ -1,0 +1,28 @@
+[arm spec_on] kind=spec_on_fire_candidate reference_mode=0 n_prompts=128 output_len=512 port=8033
+[arm spec_on] serve argv: /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/submissions/int4_mtp_batchinv/serve.py
+[arm spec_on] BI=1 num_spec=6 REFERENCE_MODE=<unset> drafter=google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant
+[arm spec_on] healthy after 105s
+  [8/128] comp=512 cum_tps=138.93 (30s)
+  [16/128] comp=512 cum_tps=153.40 (54s)
+  [24/128] comp=512 cum_tps=150.31 (82s)
+  [32/128] comp=512 cum_tps=152.50 (108s)
+  [40/128] comp=512 cum_tps=150.07 (137s)
+  [48/128] comp=512 cum_tps=152.46 (161s)
+  [56/128] comp=512 cum_tps=153.12 (187s)
+  [64/128] comp=512 cum_tps=151.59 (216s)
+  [72/128] comp=512 cum_tps=152.75 (241s)
+  [80/128] comp=512 cum_tps=152.10 (269s)
+  [88/128] comp=512 cum_tps=153.45 (294s)
+  [96/128] comp=512 cum_tps=154.01 (319s)
+  [104/128] comp=512 cum_tps=154.89 (344s)
+  [112/128] comp=512 cum_tps=156.02 (368s)
+  [120/128] comp=512 cum_tps=155.86 (394s)
+  [128/128] comp=512 cum_tps=156.59 (419s)
+
+========================================================================
+[ARM spec_on] kind=spec_on_fire_candidate output_tps=156.5864 comp_tok=65536 gen_s=418.5 peak_mem=19677MiB boot=105s
+  backend_line: (EngineCore pid=1366464) INFO 06-19 20:51:53 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.
+  spec_line:    (APIServer pid=1365977) INFO 06-19 20:50:54 [utils.py:278] non-default args: {'host': '127.0.0.1', 'port': 8033, 'model': 'google/gemma-4-E4B-it-qat-w4a16-ct', 'trust_remote_code': True, 'dtype': 'bfloat16', 'max_model_len': 4096, 'served_model_name': ['gemma-4-e4b-it'], 'gpu_memory_utilization': 0.9, 'max_num_batched_tokens': 512, 'max_num_seqs': 1, 'speculative_config': {'model': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'num_speculative_tokens': 6}}
+  refmode_line: 
+  -> /workspace/senpai/target/research/validity/fire_literal_identity_xcheck_764/runs/spec_on/decode_outputs.jsonl
+========================================================================

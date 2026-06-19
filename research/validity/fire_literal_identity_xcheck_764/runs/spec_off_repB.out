@@ -1,0 +1,16 @@
+[arm spec_off_repB] kind=spec_off_M1_AR_reference reference_mode=1 n_prompts=32 output_len=512 port=8033
+[arm spec_off_repB] serve argv: /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/submissions/int4_mtp_batchinv/serve.py
+[arm spec_off_repB] BI=1 num_spec=6 REFERENCE_MODE=1 drafter=google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant
+[arm spec_off_repB] healthy after 105s
+  [8/32] comp=512 cum_tps=77.66 (53s)
+  [16/32] comp=512 cum_tps=78.19 (105s)
+  [24/32] comp=512 cum_tps=78.24 (157s)
+  [32/32] comp=512 cum_tps=78.22 (210s)
+
+========================================================================
+[ARM spec_off_repB] kind=spec_off_M1_AR_reference output_tps=78.2225 comp_tok=16384 gen_s=209.5 peak_mem=19313MiB boot=105s
+  backend_line: (EngineCore pid=1371134) INFO 06-19 21:00:47 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.
+  spec_line:    [serve] SENPAI_REFERENCE_MODE active: forcing num_speculative_tokens=0 (M=1 AR greedy reference, drafter OFF)
+  refmode_line: [serve] SENPAI_REFERENCE_MODE active: forcing num_speculative_tokens=0 (M=1 AR greedy reference, drafter OFF)
+  -> /workspace/senpai/target/research/validity/fire_literal_identity_xcheck_764/runs/spec_off_repB/decode_outputs.jsonl
+========================================================================
