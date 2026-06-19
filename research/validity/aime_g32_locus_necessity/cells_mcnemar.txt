@@ -1,0 +1,16 @@
+# PR #713 McNemar phase — paired SAMPLED cells (cell|g32_layers|decode|seed|extra)
+# Load-bearing recovery test: g32-L14-27 vs int4-N=0, SAME seeds, conc8 (parity-gated,
+# batch-position-independent per-request seed). Pair-interleaved: anchor+variant adjacent
+# per seed so a partial run yields COMPLETE seed-pairs. First 3 seeds (12345/23456/34567)
+# match #659 — if greedy is decisive, 3 pairs suffice; else run all 5.
+# Analyze with: mcnemar_g32.py --variant fqg32_L14-27 --anchor fqg32_N0 --seeds <done>
+fqg32_N0_s12345||sampled|12345|
+fqg32_L14-27_s12345|14-27|sampled|12345|
+fqg32_N0_s23456||sampled|23456|
+fqg32_L14-27_s23456|14-27|sampled|23456|
+fqg32_N0_s34567||sampled|34567|
+fqg32_L14-27_s34567|14-27|sampled|34567|
+fqg32_N0_s45678||sampled|45678|
+fqg32_L14-27_s45678|14-27|sampled|45678|
+fqg32_N0_s56789||sampled|56789|
+fqg32_L14-27_s56789|14-27|sampled|56789|

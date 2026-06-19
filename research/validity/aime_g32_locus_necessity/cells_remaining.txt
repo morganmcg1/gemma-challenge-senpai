@@ -1,0 +1,18 @@
+# PR #713 remaining work — McNemar (priority) then bf16-base control finish.
+# Pair-interleaved McNemar so COMPLETE seed-pairs accumulate (3-seed analysis valid
+# early; extend to 5 only if borderline). bf16_base LAST: engine-faithfulness control
+# is already qualitatively passed at 35/60 (advisor 09:19Z), so finishing it 35->60
+# yields a clean 60/60 control number without delaying the load-bearing paired seeds.
+# Resume is idempotent per-item (eval_g32.py skips done ids).
+# fields: cell|g32_layers|decode|seed|extra
+fqg32_N0_s12345||sampled|12345|
+fqg32_L14-27_s12345|14-27|sampled|12345|
+fqg32_N0_s23456||sampled|23456|
+fqg32_L14-27_s23456|14-27|sampled|23456|
+fqg32_N0_s34567||sampled|34567|
+fqg32_L14-27_s34567|14-27|sampled|34567|
+fqg32_N0_s45678||sampled|45678|
+fqg32_L14-27_s45678|14-27|sampled|45678|
+fqg32_N0_s56789||sampled|56789|
+fqg32_L14-27_s56789|14-27|sampled|56789|
+fqbf16_base||greedy|0|--base
