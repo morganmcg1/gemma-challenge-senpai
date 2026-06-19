@@ -1,0 +1,89 @@
+{
+  "pr": 729,
+  "basis": "int4_head_corrected_step_bytes",
+  "weight_read_gib": 2.2314488887786865,
+  "note": "OPTIMISTIC pure-HBM roofline upper bound; realized lever is smaller.",
+  "scored_output_len": 512,
+  "deployed_max_model_len": 4096,
+  "rows": {
+    "256": {
+      "L": 256,
+      "kv_bytes_bf16_MB": 22.020096,
+      "kv_read_frac_bf16": 0.009089788779889064,
+      "roofline_tps_bf16": 206.39757383185488,
+      "roofline_tps_fp8": 207.33991183396063,
+      "fp8_uplift_pct_roofline_optimistic": 0.4565644763215349,
+      "reachable_in_deployed_cap": true
+    },
+    "512": {
+      "L": 512,
+      "kv_bytes_bf16_MB": 44.040192,
+      "kv_read_frac_bf16": 0.01801581758324938,
+      "roofline_tps_bf16": 204.5383633119649,
+      "roofline_tps_fp8": 206.39757383185488,
+      "fp8_uplift_pct_roofline_optimistic": 0.9089788779889064,
+      "reachable_in_deployed_cap": true
+    },
+    "1024": {
+      "L": 1024,
+      "kv_bytes_bf16_MB": 51.380224,
+      "kv_read_frac_bf16": 0.020955532006791892,
+      "roofline_tps_bf16": 203.92604756639338,
+      "roofline_tps_fp8": 206.0853617636784,
+      "fp8_uplift_pct_roofline_optimistic": 1.058871205053883,
+      "reachable_in_deployed_cap": true
+    },
+    "2048": {
+      "L": 2048,
+      "kv_bytes_bf16_MB": 66.060288,
+      "kv_read_frac_bf16": 0.026782472307117344,
+      "roofline_tps_bf16": 202.71234896158296,
+      "roofline_tps_fp8": 205.46376272928964,
+      "fp8_uplift_pct_roofline_optimistic": 1.3572995339460538,
+      "reachable_in_deployed_cap": true
+    },
+    "4096": {
+      "L": 4096,
+      "kv_bytes_bf16_MB": 95.420416,
+      "kv_read_frac_bf16": 0.03823072078990867,
+      "roofline_tps_bf16": 200.32778304963932,
+      "roofline_tps_fp8": 204.23174648784544,
+      "fp8_uplift_pct_roofline_optimistic": 1.9487878210276752,
+      "reachable_in_deployed_cap": false
+    },
+    "8192": {
+      "L": 8192,
+      "kv_bytes_bf16_MB": 154.140672,
+      "kv_read_frac_bf16": 0.06033777564296607,
+      "roofline_tps_bf16": 195.72308482918146,
+      "roofline_tps_fp8": 201.811513748545,
+      "fp8_uplift_pct_roofline_optimistic": 3.1107362346537966,
+      "reachable_in_deployed_cap": false
+    },
+    "16384": {
+      "L": 16384,
+      "kv_bytes_bf16_MB": 271.581184,
+      "kv_read_frac_bf16": 0.10163699502587616,
+      "roofline_tps_bf16": 187.12083349978354,
+      "roofline_tps_fp8": 197.13914884506946,
+      "fp8_uplift_pct_roofline_optimistic": 5.353928345609619,
+      "reachable_in_deployed_cap": false
+    },
+    "32768": {
+      "L": 32768,
+      "kv_bytes_bf16_MB": 506.462208,
+      "kv_read_frac_bf16": 0.17422453001832428,
+      "roofline_tps_bf16": 172.00151093832875,
+      "roofline_tps_fp8": 188.4147462448436,
+      "fp8_uplift_pct_roofline_optimistic": 9.54249484029232,
+      "reachable_in_deployed_cap": false
+    }
+  },
+  "fp8_uplift_pct_at_512_optimistic": 0.9089788779889064,
+  "fp8_uplift_pct_at_2048_optimistic": 1.3572995339460538,
+  "fp8_uplift_pct_at_8192_optimistic": 3.1107362346537966,
+  "kv_read_frac_at_512": 0.01801581758324938,
+  "kv_material_crossover_10pct_position": 16384,
+  "crossover_beyond_deployed_cap": true,
+  "crossover_beyond_8192": true
+}
