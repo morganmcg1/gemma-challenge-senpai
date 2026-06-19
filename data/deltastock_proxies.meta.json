@@ -1,11 +1,18 @@
 {
-  "purpose": "PR #739 delta_stock same-family held-out reasoning/knowledge proxies",
+  "purpose": "PR #739/#749 delta_stock same-family held-out MCQ/math proxies",
   "public_composition": "57 mmlu_pro + 57 gpqa_diamond + 14 aime2026 (MCQ/math)",
   "knowledge_mmlupro": {
     "n": 128,
     "source": "TIGER-Lab/MMLU-Pro test",
     "template": "official public MMLU-Pro MCQ",
     "dedup": "vs public question text"
+  },
+  "gpqa_diamond": {
+    "n": 128,
+    "source": "inspect_evals get_gpqa_diamond_dataset (openaipublic CSV n=198)",
+    "template": "official public GPQA-Diamond 4-option ANSWER:$LETTER",
+    "dedup": "vs public 57 GPQA-D question stems (disjoint held-out)",
+    "added_by": "PR #749 to remove the MMLU-Pro-proxy optimism bias on the MCQ half"
   },
   "reasoning_math": {
     "n": 128,
