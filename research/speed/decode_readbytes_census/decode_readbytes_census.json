@@ -1,0 +1,266 @@
+{
+  "config": {
+    "device": "NVIDIA A10G",
+    "sm": "86",
+    "torch": "2.11.0+cu130",
+    "model_dir": "/workspace/gemma_build/int4_g128_lmhead",
+    "ctx": 528,
+    "bench_output_len": 512,
+    "bench_mean_ctx": 528,
+    "bench_max_ctx": 2938,
+    "iters": 60,
+    "warmup": 30,
+    "n_distinct": 8,
+    "smoke": false,
+    "ref_official_tps": 126.378,
+    "plus5_bar": 132.6969,
+    "note": "analysis-only; no serve change, no HF Job. greedy/PPL pinned by construction (profiling cannot change emitted tokens). Marlin BW value-independent -> self-built g=128 weights faithful."
+  },
+  "peak_bw": {
+    "bw_read_gbps": 517.1258146570025,
+    "bw_copy_gbps": 482.6808931756333,
+    "read_us": 2076.364771525065,
+    "copy_us": 4449.0753173828125
+  },
+  "int4_gemv": {
+    "loop_us": 6521.7193603515625,
+    "measured_bytes": 2351923200.0,
+    "achieved_bw_gbps": 360.62931721631395
+  },
+  "sdpa_kv": {
+    "256": {
+      "us": 1552.4181365966795,
+      "kv_bytes": 22020096.0,
+      "achieved_bw_gbps": 14.184384658294451
+    },
+    "512": {
+      "us": 1524.9579111735025,
+      "kv_bytes": 44040192.0,
+      "achieved_bw_gbps": 28.879611481283245
+    },
+    "528": {
+      "us": 1539.8571014404295,
+      "kv_bytes": 44269568.0,
+      "achieved_bw_gbps": 28.749140396591923
+    },
+    "1024": {
+      "us": 1512.7552032470703,
+      "kv_bytes": 51380224.0,
+      "achieved_bw_gbps": 33.964665194814295
+    },
+    "2048": {
+      "us": 1502.9589335123699,
+      "kv_bytes": 66060288.0,
+      "achieved_bw_gbps": 43.953488366857165
+    },
+    "4096": {
+      "us": 1525.5381266276042,
+      "kv_bytes": 95420416.0,
+      "achieved_bw_gbps": 62.54869303787178
+    }
+  },
+  "served_weight_bytes": {
+    "lm_head": {
+      "weight_bytes": 335544320.0,
+      "scale_bytes": 10485760.0,
+      "n": 1,
+      "total_bytes": 346030080.0
+    },
+    "down_proj": {
+      "weight_bytes": 550502400.0,
+      "scale_bytes": 17203200.0,
+      "n": 42,
+      "total_bytes": 567705600.0
+    },
+    "gate_up_proj": {
+      "weight_bytes": 1101004800.0,
+      "scale_bytes": 34406400.0,
+      "n": 84,
+      "total_bytes": 1135411200.0
+    },
+    "ple": {
+      "weight_bytes": 27525120.0,
+      "scale_bytes": 860160.0,
+      "n": 84,
+      "total_bytes": 28385280.0
+    },
+    "qkv_proj": {
+      "weight_bytes": 165150720.0,
+      "scale_bytes": 5160960.0,
+      "n": 90,
+      "total_bytes": 170311680.0
+    },
+    "o_proj": {
+      "weight_bytes": 128450560.0,
+      "scale_bytes": 4014080.0,
+      "n": 42,
+      "total_bytes": 132464640.0
+    }
+  },
+  "extras": {
+    "norm_bytes": 1120256.0,
+    "norm_n": 278,
+    "embed_table_bytes": 6979321856.0
+  },
+  "ledger": {
+    "gate_up_proj": {
+      "bytes": 1135411200.0,
+      "dtype": "int4(g128)+bf16scale",
+      "class": "weight_int4",
+      "frac": 0.4672233625165338,
+      "reduction_class": "at_floor",
+      "byte_exact_reducible": false,
+      "why": "int4 0.5B/param floor; lower bits change numerics"
+    },
+    "down_proj": {
+      "bytes": 567705600.0,
+      "dtype": "int4(g128)+bf16scale",
+      "class": "weight_int4",
+      "frac": 0.2336116812582669,
+      "reduction_class": "at_floor",
+      "byte_exact_reducible": false,
+      "why": "int4 0.5B/param floor"
+    },
+    "lm_head": {
+      "bytes": 346030080.0,
+      "dtype": "int4(g128)+bf16scale",
+      "class": "weight_int4",
+      "frac": 0.1423918819098008,
+      "reduction_class": "residual_reducible",
+      "byte_exact_reducible": false,
+      "why": "full-vocab int4 read; top-k truncation (ubel #14) reduces bytes but argmax can fall outside top-k -> only EMPIRICALLY greedy-id"
+    },
+    "qkv_proj": {
+      "bytes": 170311680.0,
+      "dtype": "int4(g128)+bf16scale",
+      "class": "weight_int4",
+      "frac": 0.07008350437748007,
+      "reduction_class": "at_floor",
+      "byte_exact_reducible": false,
+      "why": "int4 0.5B/param floor"
+    },
+    "o_proj": {
+      "bytes": 132464640.0,
+      "dtype": "int4(g128)+bf16scale",
+      "class": "weight_int4",
+      "frac": 0.05450939229359561,
+      "reduction_class": "at_floor",
+      "byte_exact_reducible": false,
+      "why": "int4 0.5B/param floor"
+    },
+    "ple": {
+      "bytes": 28385280.0,
+      "dtype": "int4(g128)+bf16scale",
+      "class": "weight_int4",
+      "frac": 0.011680584062913345,
+      "reduction_class": "at_floor",
+      "byte_exact_reducible": false,
+      "why": "int4 0.5B/param floor (MatFormer PLE proj)"
+    },
+    "kv_cache": {
+      "bytes": 44269568.0,
+      "dtype": "bf16",
+      "class": "kv",
+      "frac": 0.01821699171024061,
+      "reduction_class": "residual_reducible",
+      "byte_exact_reducible": false,
+      "why": "bf16 -> fp8 halves KV read, but fp8 KV is lossy -> not byte-exact; and KV is a small slice of step bytes at output_len=512"
+    },
+    "activations": {
+      "bytes": 4400128.0,
+      "dtype": "bf16",
+      "class": "act",
+      "frac": 0.0018106590807481474,
+      "reduction_class": "at_floor",
+      "byte_exact_reducible": false,
+      "why": "M=1 intrinsic x/y traffic; not a weight lever"
+    },
+    "norms": {
+      "bytes": 1120256.0,
+      "dtype": "bf16",
+      "class": "norm",
+      "frac": 0.00046098697564311684,
+      "reduction_class": "residual_reducible",
+      "byte_exact_reducible": false,
+      "why": "bf16 -> fp8 not byte-exact; immaterial"
+    },
+    "embed_gather": {
+      "bytes": 26624.0,
+      "dtype": "bf16",
+      "class": "embed",
+      "frac": 1.095581477762435e-05,
+      "reduction_class": "at_floor",
+      "byte_exact_reducible": false,
+      "why": "gathered 1 row/token; already negligible"
+    }
+  },
+  "ledger_total_bytes": 2430125056.0,
+  "weight_frac": 0.9795004064185905,
+  "kv_frac": 0.01821699171024061,
+  "levers": {
+    "lmhead_top12k": {
+      "saved_bytes": 329809920.0,
+      "tps_ceiling": 146.22298295295818,
+      "byte_exact": false,
+      "is_byte_reduction": true,
+      "overlaps": "ubel #14",
+      "note": "lmhead12k top-12k head (byte reduction, EMPIRICALLY greedy-id, not byte-exact)"
+    },
+    "kv_fp8": {
+      "saved_bytes": 22134784.0,
+      "tps_ceiling": 127.5396947812786,
+      "byte_exact": false,
+      "is_byte_reduction": true,
+      "overlaps": null,
+      "note": "fp8 KV-cache: lossy attention -> breaks greedy/PPL identity"
+    },
+    "norms_fp8": {
+      "saved_bytes": 560128.0,
+      "tps_ceiling": 126.40713602166718,
+      "byte_exact": false,
+      "is_byte_reduction": true,
+      "overlaps": null,
+      "note": "immaterial + not byte-exact"
+    },
+    "gemv_bw_efficiency_wirbel736": {
+      "saved_bytes": 0.0,
+      "tps_ceiling": 169.99476554738135,
+      "byte_exact": false,
+      "is_byte_reduction": false,
+      "overlaps": "wirbel #736",
+      "achieved_bw_frac_of_peak": 0.6973724903977401,
+      "matmul_time_fraction": 0.8478314138691497,
+      "note": "M-invariant int4 GEMV (BW-efficiency, NOT a byte reduction); OPTIMISTIC f->1 bound; peak BW needs greedy-UNSAFE split-K re-tiling -> NOT byte-identical (kernel roofline)"
+    }
+  },
+  "largest_strict_clean_lever_tps_ceiling": 126.378,
+  "largest_byte_reduction_lever": {
+    "name": "lmhead_top12k",
+    "saved_bytes": 329809920.0,
+    "tps_ceiling": 146.22298295295818,
+    "byte_exact": false,
+    "is_byte_reduction": true,
+    "overlaps": "ubel #14",
+    "note": "lmhead12k top-12k head (byte reduction, EMPIRICALLY greedy-id, not byte-exact)"
+  },
+  "byte_exact_byte_reduction_levers_count": 0,
+  "clears_plus5_bar": false,
+  "verdict": "AT_STRICT_CLEAN_BYTE_FLOOR: 98.0% of decode read bytes are int4 weights already at the 0.5-B/param floor; KV is 1.82%. NO byte-EXACT byte-reduction lever exists -- every candidate that reduces read bytes breaks greedy/PPL identity: lm_head top-12k (~146 TPS / +16%) is the already-known ubel #14 and is only EMPIRICALLY greedy-id (argmax can fall outside top-k), KV->fp8 (~128 TPS / +0.9%) is lossy AND immaterial, norms->fp8 is lossy AND ~0. The one byte-shape-preserving speed axis, wirbel #736's M-invariant GEMV (optimistic f->1 BW-efficiency ceiling ~170 TPS), is NOT byte-identical -- peak BW needs greedy-UNSAFE split-K re-tiling (kernel roofline). So no G1-immune, byte-exact lever clears the +5% bar 132.70: largest_strict_clean_lever_tps_ceiling = 126.378 (the floor itself). The static un-gambled axis is exhausted; material headroom requires the G1-gated spec-dec #730.",
+  "self_test": {
+    "passes": true,
+    "checks": {
+      "weights_dominant": true,
+      "weight_total_matches_roofline": true,
+      "gemv_bw_physical": true,
+      "gemv_near_int4_floor": true,
+      "kv_small_slice": true,
+      "no_byteexact_byte_reduction_lever": true,
+      "ledger_sums": true,
+      "nan_clean": true,
+      "official_tps_zero": true
+    }
+  },
+  "peak_vram_gib": 10.71714735031128,
+  "analysis_only": true,
+  "official_tps": 0
+}
