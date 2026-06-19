@@ -1,0 +1,44 @@
+{
+  "pr": 720,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "fires": false,
+  "what": "Independent re-derivation of stark #642/#727 local->official-equiv projection (advisor deliverable 2). Cross-read under #666.",
+  "anchors": {
+    "ar_rung_local_tps": 126.75,
+    "ar_rung_official_tps_LOCKED": 126.378,
+    "official_over_local_ratio": 0.997046,
+    "ratio_formula": "126.378 / 126.75",
+    "plus10_bar_official": 136.378,
+    "w4a16ct_m1_recompute_forward_tps": 77.89
+  },
+  "the_0p870_claim": {
+    "advisor_framing": "official-equiv 134.87 projected via a 'stark tax 0.870' ratio",
+    "verdict": "MISATTRIBUTED",
+    "what_0p870_actually_is": "acceptor_over_unrescued_ratio (a/c) = rescued_local 135.27 / unrescued_K6_ceiling ~155.5 = 0.870 (captured). A description of the rescue tax as the fraction of the un-rescued ceiling retained, NOT the local->official map.",
+    "source": "stark #642 optionb_rescue_deproject/_result_comment.md L26,L44; test_metric acceptor_over_ar_ratio_captured=1.067",
+    "also_0p870_elsewhere": "conditional_p_sglang proxy in descent_vs_bothbugs_private/results.json:59 = 0.8702 (an acceptance-probability proxy) -- coincidental same value, also not a TPS tax",
+    "real_local_to_official_ratio": 0.997046,
+    "ratio_confirmed_on_two_pairs": [
+      {"local": 135.27, "x_ratio": 134.870, "stark_reported": 134.87, "match": true},
+      {"local": 140.264, "x_ratio": 139.852, "stark_reported": 139.852, "match": true}
+    ]
+  },
+  "projection_table_official_equiv": {
+    "K6_deproject_captured_rescue": {"local": 135.27, "official_equiv": 134.87, "vs_rung": "+6.7% clears rung", "vs_plus10_bar": "MISSES (134.87 < 136.378 by -1.508)", "basis": "projection/composition, captured-graph-replay assumption"},
+    "K6_deproject_eager_floor": {"local": 120.25, "official_equiv": 119.9, "vs_rung": "-5.1% BELOW rung", "basis": "eager floor -- injected recompute does NOT replay captured cudagraph"},
+    "K5_correcting_rescue": {"local": 140.264, "official_equiv": 139.852, "vs_plus10_bar": "CLEARS by +3.474", "basis": "NON-INSTANTIABLE projection -- stark #727 WRITEBACK_INFEASIBLE_LOCAL (no write-back surface on vLLM 0.22.0)"},
+    "K5_real_dummy_tau_gate": {"local": 124.975, "official_equiv": 124.61, "vs_rung": "BELOW rung", "basis": "the only LOCALLY-INSTANTIABLE rescue arm; non-correcting, over-fires 11.25%/emit"},
+    "K5_unrescued_ceiling": {"local": 159.30, "official_equiv": 158.83, "vs_plus10_bar": "clears big", "basis": "REAL measured local, but NOT strict-128/128 clean (#654 int4 batch-shape ties at prefill+decode)"},
+    "fast_drafter_plateau_147p55": {"local": 147.55, "official_equiv": 147.12, "basis": "recurring local served clock plateau (fast unquantized-assistant drafter), the advisor's '147.55 fast drafter'"}
+  },
+  "ci_on_134p87": {
+    "verdict": "NOT a tight sampling CI -- the load-bearing uncertainty is a bimodal captured-vs-eager bracket",
+    "bracket_official_equiv": [119.9, 134.87],
+    "bracket_meaning": "119.9 if the width-1 recompute forward falls to eager (no cudagraph replay) -> BELOW rung; 134.87 if it cleanly replays the captured graph -> clears rung. Point estimate sits at the optimistic captured end.",
+    "rescue_tax_ci_ms_per_step": [2.705, 2.748],
+    "superseding_finding": "stark #727: the correcting rescue that 134.87/139.852 model is non-instantiable on vLLM 0.22.0 (only the _dummy_run profiling stub + post-commit hook exist). So 134.87 is a COMPOSITION (un-rescued ceiling x modeled retained fraction), not a measured rescued serve. Only the gated official benchmark resolves the assumed-equal-tax map."
+  },
+  "deliverable2_answer": "The 0.870 'tax' is misattributed: it is acceptor_over_unrescued_ratio (retained fraction of the un-rescued ceiling), not the local->official projection multiplier. The real map is x0.99705 (AR-rung anchor, assumed-equal-tax), sound only modulo the gated official benchmark. 134.87 has no tight CI -- it is the optimistic (captured-graph) end of a [119.9, 134.87] bracket that straddles the rung, and stark #727 shows the underlying correcting rescue is non-instantiable, so 134.87 is a projection/composition not a measured serve."
+}

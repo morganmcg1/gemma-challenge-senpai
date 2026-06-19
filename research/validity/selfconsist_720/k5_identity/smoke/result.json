@@ -1,0 +1,82 @@
+{
+  "pr": 720,
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "fires": false,
+  "config": "int4_mtp_batchinv",
+  "substrate": "vllm-0.22.0-enforce-eager-cc1-bi1",
+  "num_prompts": 4,
+  "output_len": 64,
+  "seed": 1,
+  "legs": [
+    "ar_a",
+    "spec"
+  ],
+  "legs_meta": {
+    "ar_a": {
+      "label": "ar_a",
+      "reference_mode": true,
+      "num_spec": 0,
+      "venv": "20f658587e8a6643",
+      "enforce_eager": true,
+      "bi": true,
+      "num_prompts": 4,
+      "output_len": 64,
+      "seed": 1,
+      "cudagraph_captured": false,
+      "decode_wall_s": 21.0,
+      "tps": null,
+      "num_records": 4,
+      "gpu_used_mib_peak": 19435
+    },
+    "spec": {
+      "label": "spec",
+      "reference_mode": false,
+      "num_spec": 5,
+      "venv": "20f658587e8a6643",
+      "enforce_eager": true,
+      "bi": true,
+      "num_prompts": 4,
+      "output_len": 64,
+      "seed": 1,
+      "cudagraph_captured": false,
+      "decode_wall_s": 16.2,
+      "tps": null,
+      "num_records": 4,
+      "gpu_used_mib_peak": 19815
+    }
+  },
+  "spec_vs_ar": {
+    "n_total": 4,
+    "n_seq_match": 3,
+    "n_seq_mismatch": 1,
+    "strict_holds": false,
+    "n_first_div_pos0": 0,
+    "n_first_div_postprefill": 1,
+    "postprefill_dataset_indices": [
+      46
+    ],
+    "divergence_detail": [
+      {
+        "dataset_index": 46,
+        "id": "mmlu_pro-012f0d5c8d",
+        "first_div": 9,
+        "ref_tok": 529,
+        "cur_tok": 531,
+        "known_tie_prompt": false
+      }
+    ]
+  },
+  "verdict": "K5_DRAFT_DIRTY",
+  "floor_clean": false,
+  "strict_literal_holds": false,
+  "all_residual_flips_known_ties": false,
+  "residual_flips_not_known_ties": [
+    {
+      "dataset_index": 46,
+      "id": "mmlu_pro-012f0d5c8d",
+      "first_div": 9
+    }
+  ]
+}

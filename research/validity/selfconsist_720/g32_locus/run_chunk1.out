@@ -1,0 +1,21 @@
+[serve] 20f658587e8a6643 eager=True bi=True cvd=0 -> g32_locus
+[serve] ready in 90s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8127 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/validity/selfconsist_720/g32_locus/ar_ref.jsonl --summary-file research/validity/selfconsist_720/g32_locus/ar_ref.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=research/validity/selfconsist_720/g32_locus/ar_ref.summary.json
+[serve] 5f4c623f772358a2 eager=False bi=True cvd=0 -> g32_locus
+[serve] ready in 120s
+[decode] /tmp/senpai-venvs/5f4c623f772358a2/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8127 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/validity/selfconsist_720/g32_locus/dev307_fast.jsonl --summary-file research/validity/selfconsist_720/g32_locus/dev307_fast.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=research/validity/selfconsist_720/g32_locus/dev307_fast.summary.json
+
+===== RESULT =====
+{
+  "label": "g32_locus",
+  "verdict": "RECOVERY_319_DEV307_DIVERGES_FLOOR_PENDING"
+}
+  dev307_vs_ar: 0/128 match (mismatch 128)
+  leg ar_ref: tps=None wall=3299.4s cudagraph=False health=True
+  leg dev307_fast: tps=None wall=635.8s cudagraph=True health=True
