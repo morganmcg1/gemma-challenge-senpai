@@ -1,0 +1,233 @@
+{
+  "pr": 761,
+  "phase": "served_divergence_locus",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": 1,
+  "fires": 0,
+  "deployed_ckpt": "/workspace/gemma_build/int4_g128_lmhead",
+  "ckpt_lm_head": "int4_g128_marlin_full_vocab_262144",
+  "hub_ckpt_lm_head_for_contrast": "bf16 (gemma-4-E4B-it-qat-w4a16-ct, #743 probe)",
+  "config": {
+    "k": 4,
+    "verify_width": 5,
+    "batch_invariant": 0,
+    "attn_backend": "TRITON_ATTN",
+    "enforce_eager": true,
+    "n_prompts": 48,
+    "n_new": 48,
+    "ctx_cap": 128,
+    "n_layers": 42
+  },
+  "phase1_forward_ab": {
+    "n_gen_positions": 2304,
+    "n_decode_rows_stored": 2256,
+    "e2e_positions": 2304,
+    "e2e_argmax_flips": 10,
+    "e2e_argmax_flip_rate": 0.004340277777777778,
+    "n_positions_with_intermediate_divergence": 55,
+    "first_div_by_family_intermediate": {
+      "attn": 55
+    },
+    "first_div_by_op_intermediate": {
+      "attn_out": 55
+    },
+    "shape_mismatch_ops": {},
+    "flips_upstream_of_head": 10,
+    "flips_head_only": 0,
+    "flip_sample": [
+      {
+        "prompt": 0,
+        "pos": 158,
+        "gen_idx": 30,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.00390625
+        }
+      },
+      {
+        "prompt": 9,
+        "pos": 129,
+        "gen_idx": 1,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.015625
+        }
+      },
+      {
+        "prompt": 14,
+        "pos": 161,
+        "gen_idx": 33,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.0078125
+        }
+      },
+      {
+        "prompt": 17,
+        "pos": 147,
+        "gen_idx": 19,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.0625
+        }
+      },
+      {
+        "prompt": 18,
+        "pos": 141,
+        "gen_idx": 13,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.015625
+        }
+      },
+      {
+        "prompt": 27,
+        "pos": 159,
+        "gen_idx": 31,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.0625
+        }
+      },
+      {
+        "prompt": 31,
+        "pos": 155,
+        "gen_idx": 27,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.015625
+        }
+      },
+      {
+        "prompt": 36,
+        "pos": 167,
+        "gen_idx": 39,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.015625
+        }
+      },
+      {
+        "prompt": 36,
+        "pos": 174,
+        "gen_idx": 46,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.00390625
+        }
+      },
+      {
+        "prompt": 41,
+        "pos": 172,
+        "gen_idx": 44,
+        "first_div": {
+          "op": "attn_out",
+          "family": "attn",
+          "layer": 0,
+          "max_abs": 0.00390625
+        }
+      }
+    ]
+  },
+  "phase2_microbench": {
+    "lm_head": {
+      "family": "matmul",
+      "subop": "matmul_lmhead",
+      "M": 5,
+      "n_pos": 64,
+      "n_divergent": 0,
+      "frac_divergent": 0.0,
+      "n_argmax_flip": 0,
+      "n_tie_within_gap": 0
+    },
+    "oproj": {
+      "family": "matmul",
+      "subop": "matmul_oproj",
+      "M": 5,
+      "in_dim": 2048,
+      "divergent_M1_vs_MK": false,
+      "max_abs": 0.0
+    },
+    "mlp_down": {
+      "family": "matmul",
+      "subop": "matmul_mlp_down",
+      "M": 5,
+      "in_dim": 10240,
+      "divergent_M1_vs_MK": false,
+      "max_abs": 0.0
+    },
+    "qkv": {
+      "family": "matmul",
+      "subop": "matmul_qkv",
+      "M": 5,
+      "in_dim": 2560,
+      "divergent_M1_vs_MK": false,
+      "max_abs": 0.0
+    },
+    "mlp_gateup": {
+      "family": "matmul",
+      "subop": "matmul_mlp_gateup",
+      "M": 5,
+      "in_dim": 2560,
+      "divergent_M1_vs_MK": false,
+      "max_abs": 0.0
+    }
+  },
+  "targeted_fix_probe": {
+    "atomic_add_off": {
+      "n_div_of_M": 0,
+      "M": 5
+    },
+    "atomic_add_on": {
+      "n_div_of_M": 0,
+      "M": 5
+    }
+  },
+  "attribution": {
+    "total_divergent_positions": 55,
+    "first_div_by_family": {
+      "attn": 55
+    },
+    "first_div_family_share": {
+      "attn": 1.0
+    },
+    "first_div_by_op_ranked": [
+      [
+        "attn_out",
+        55
+      ]
+    ],
+    "top_op_family": "attn",
+    "top_op_divergence_share": 1.0
+  },
+  "verdict": {
+    "lm_head_int4_marlin_M_dependent": false,
+    "intermediate_marlin_M_dependent": false,
+    "marlin_M_invariant_incl_lm_head": true,
+    "attention_reduction_is_locus": true,
+    "atomic_add_inert_on_head": true,
+    "byte_exact_this_arm": false,
+    "literal_strict_achievable_targeted": 0
+  },
+  "peak_mem_gb": 18.49,
+  "elapsed_s": 414.5
+}

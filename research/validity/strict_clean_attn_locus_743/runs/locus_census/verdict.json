@@ -1,0 +1,62 @@
+{
+  "pr": 761,
+  "phase": "served_divergence_locus_verdict",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": 1,
+  "fires": 0,
+  "deployed_ckpt": "/workspace/gemma_build/int4_g128_lmhead",
+  "strict_reference": "spec-off in-process M=1 greedy-AR decode of the DEPLOYED int4 ckpt (the #755 strict reference); divergence = M=K+1 verify activation != M=1 decode activation, ULP (torch.equal)",
+  "primary_metric": {
+    "name": "top_op_divergence_share",
+    "value": 1.0
+  },
+  "test_metric": {
+    "name": "literal_strict_achievable_targeted",
+    "value": 1
+  },
+  "locus": {
+    "top_op_family": "attn",
+    "top_op_divergence_share": 1.0,
+    "first_div_by_op_ranked": [
+      [
+        "attn_out",
+        55
+      ]
+    ],
+    "first_div_by_family": {
+      "attn": 55
+    },
+    "total_divergent_positions_bi0": 55,
+    "attention_reduction_is_locus": true
+  },
+  "fix_arm_bi1": {
+    "total_divergent_positions": 0,
+    "e2e_argmax_flips": 0,
+    "byte_exact": true
+  },
+  "marlin_microbench": {
+    "bi0_lm_head": {
+      "family": "matmul",
+      "subop": "matmul_lmhead",
+      "M": 5,
+      "n_pos": 64,
+      "n_divergent": 0,
+      "frac_divergent": 0.0,
+      "n_argmax_flip": 0,
+      "n_tie_within_gap": 0
+    },
+    "bi1_lm_head": {
+      "family": "matmul",
+      "subop": "matmul_lmhead",
+      "M": 5,
+      "n_pos": 64,
+      "n_divergent": 0,
+      "frac_divergent": 0.0,
+      "n_argmax_flip": 0,
+      "n_tie_within_gap": 0
+    },
+    "marlin_M_invariant_incl_lm_head_both_arms": true
+  },
+  "verdict_text": "LOCUS = attention split-KV reduction (attn_out): 100.0% of first-divergences in the divergence-open (BI=0) arm. The int4 Marlin GEMMs INCLUDING the full-vocab lm_head are M-invariant in BOTH arms (controlled microbench, 0 divergent) -> NOT the locus. The single targeted fix VLLM_BATCH_INVARIANT=1 (a current toggle, no vLLM patch) routes M=1 decode off the 3D split onto use_3d=False -> num_splits=1 for both M -> the BI=1 arm is byte-exact (0 divergent positions). literal_strict_achievable_targeted=1."
+}
