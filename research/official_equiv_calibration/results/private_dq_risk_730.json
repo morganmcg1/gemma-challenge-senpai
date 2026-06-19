@@ -1,0 +1,965 @@
+{
+  "pr": 737,
+  "student": "kanna",
+  "card": "quantify the #730 private-DQ risk: acceptance-drift budget delta_max + P(DQ)",
+  "guard_flags": {
+    "analysis_only": 1,
+    "official_tps": 0,
+    "no_hf_job": 1,
+    "fires": 0
+  },
+  "bar_official": 126.378,
+  "inputs": {
+    "local_k6_wall_tps": 170.20939238269807,
+    "e_accept_exact_median": 3.6584624049563503,
+    "e_accept_exact_mean": 3.6573820864780973,
+    "num_spec": 6,
+    "accepted_per_step": 2.6584624049563503,
+    "accept_rate_per_token": 0.4430770674927251,
+    "central_optimistic_public": 167.88,
+    "rec_total_accepted": 46923,
+    "rec_total_drafted": 106032
+  },
+  "acceptance_tps_model": {
+    "e_accept_is_block_efficiency": true,
+    "evidence": "e_accept_exact 3.6585 == accepted/step 2.6585 + 1 bonus",
+    "model": "h == delta (LINEAR); TPS proportional to e_accept_exact",
+    "pr_faithful_and_conservative": true
+  },
+  "gate_resolution": {
+    "G1_repro_5pct": "BINDING (BASELINE.md 36-37,40; flagship 4.3% PASS / #44 12.4% FAIL)",
+    "G2_bar_126378": "PR step-1 literal; NON-binding (3.7-4.9x looser, never trips first)",
+    "discrepancy_flag": "PR step-1 equates DQ with below-bar; the contract DQs at the 5% repro gap long before. I lead with G1; happy to collapse to the bar reading on an advisor ruling."
+  },
+  "step1_budgets": {
+    "G1_repro_5pct_BINDING": {
+      "delta_max": 0.05,
+      "central_dependent": false,
+      "note": "5% TPS drop relative to own public; transfer+central cancel."
+    },
+    "G2_bar_NONbinding": {
+      "delta_max_optimistic_167p9": 0.24721229449606863,
+      "delta_max_honeststock_mid_155": 0.18465806451612898,
+      "delta_max_honeststock_lo_150": 0.15747999999999995,
+      "delta_max_honeststock_hi_160": 0.21013749999999998,
+      "central_dependent": true,
+      "cushioned_alpha_optimistic": 0.3402029999637006,
+      "cushioned_alpha_honeststock_155": 0.25411854068154643,
+      "note": "PR step-1 literal (private official-equiv < 126.378). 3.7-4.9x looser than G1."
+    }
+  },
+  "step2_p_dq_prior": {
+    "G1_repro_at_prior_BINDING": 0.7999999999999999,
+    "G2_bar_at_prior_NONbinding": 0.0,
+    "_prior": "delta_stock ~ U[4%,9%] (BASELINE.md documented band; == #725)",
+    "G1_repro_if_drift_eq_flagship_4p3pct": 0.0,
+    "G1_repro_if_drift_eq_priorcenter_6p5pct": 1.0,
+    "G1_repro_if_drift_eq_44proxy_12p4pct": 1.0
+  },
+  "step3_curve": [
+    {
+      "delta_stock": 0.0,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 2.8665157186802404e-07,
+      "p_dq_repro_sigma2pct": 0.006209665325776159,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0025,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 1.0170832425715481e-06,
+      "p_dq_repro_sigma2pct": 0.008774475095738365,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.005,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 3.3976731247387093e-06,
+      "p_dq_repro_sigma2pct": 0.012224472655044727,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0075,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 1.0688525774960045e-05,
+      "p_dq_repro_sigma2pct": 0.01679330644844884,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.01,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 3.167124183311998e-05,
+      "p_dq_repro_sigma2pct": 0.02275013194817921,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0125,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 8.841728520081471e-05,
+      "p_dq_repro_sigma2pct": 0.030396361765261393,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.015,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.0002326290790355401,
+      "p_dq_repro_sigma2pct": 0.040059156863817114,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0175,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.0005770250423907664,
+      "p_dq_repro_sigma2pct": 0.05208127941521956,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.02,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.0013498980316301035,
+      "p_dq_repro_sigma2pct": 0.06680720126885809,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0225,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.0029797632350545555,
+      "p_dq_repro_sigma2pct": 0.08456572235133569,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.025,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.006209665325776159,
+      "p_dq_repro_sigma2pct": 0.1056497736668553,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0275,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.012224472655044727,
+      "p_dq_repro_sigma2pct": 0.13029451713680884,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.03,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.02275013194817921,
+      "p_dq_repro_sigma2pct": 0.15865525393145702,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0325,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.040059156863817114,
+      "p_dq_repro_sigma2pct": 0.19078695285251063,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.035,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.06680720126885809,
+      "p_dq_repro_sigma2pct": 0.2266273523768682,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0375,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.10564977366685518,
+      "p_dq_repro_sigma2pct": 0.2659855290487005,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.04,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.15865525393145702,
+      "p_dq_repro_sigma2pct": 0.3085375387259869,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0425,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.2266273523768682,
+      "p_dq_repro_sigma2pct": 0.35383023332727626,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.045,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.30853753872598677,
+      "p_dq_repro_sigma2pct": 0.4012936743170762,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0475,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.4012936743170762,
+      "p_dq_repro_sigma2pct": 0.4502617751698871,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.05,
+      "p_dq_repro_hard": 0.0,
+      "p_dq_repro_sigma1pct": 0.5,
+      "p_dq_repro_sigma2pct": 0.5,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0525,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.5987063256829235,
+      "p_dq_repro_sigma2pct": 0.5497382248301128,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.055,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.691462461274013,
+      "p_dq_repro_sigma2pct": 0.5987063256829237,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0575,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.7733726476231317,
+      "p_dq_repro_sigma2pct": 0.6461697666727237,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.06,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.8413447460685428,
+      "p_dq_repro_sigma2pct": 0.691462461274013,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0625,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.8943502263331446,
+      "p_dq_repro_sigma2pct": 0.7340144709512995,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.065,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9331927987311419,
+      "p_dq_repro_sigma2pct": 0.7733726476231317,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0675,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9599408431361829,
+      "p_dq_repro_sigma2pct": 0.8092130471474894,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.07,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9772498680518208,
+      "p_dq_repro_sigma2pct": 0.841344746068543,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0725,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9877755273449553,
+      "p_dq_repro_sigma2pct": 0.869705482863191,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.075,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9937903346742238,
+      "p_dq_repro_sigma2pct": 0.8943502263331446,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0775,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9970202367649454,
+      "p_dq_repro_sigma2pct": 0.9154342776486643,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.08,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9986501019683699,
+      "p_dq_repro_sigma2pct": 0.9331927987311419,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0825,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9994229749576092,
+      "p_dq_repro_sigma2pct": 0.9479187205847804,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.085,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9997673709209645,
+      "p_dq_repro_sigma2pct": 0.9599408431361829,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0875,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999115827147992,
+      "p_dq_repro_sigma2pct": 0.9696036382347386,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.09,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999683287581669,
+      "p_dq_repro_sigma2pct": 0.9772498680518208,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0925,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999893114742251,
+      "p_dq_repro_sigma2pct": 0.9832066935515511,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.095,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999966023268753,
+      "p_dq_repro_sigma2pct": 0.9877755273449553,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.0975,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999989829167575,
+      "p_dq_repro_sigma2pct": 0.9912255249042616,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999997133484282,
+      "p_dq_repro_sigma2pct": 0.9937903346742238,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1025,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999239503948,
+      "p_dq_repro_sigma2pct": 0.9956675516369875,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.105,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999810104375,
+      "p_dq_repro_sigma2pct": 0.9970202367649454,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1075,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999955378276,
+      "p_dq_repro_sigma2pct": 0.997979862510054,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.11,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999990134123,
+      "p_dq_repro_sigma2pct": 0.9986501019683699,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1125,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999997947737,
+      "p_dq_repro_sigma2pct": 0.9991109747008915,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.115,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.99999999995984,
+      "p_dq_repro_sigma2pct": 0.9994229749576092,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1175,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999999926077,
+      "p_dq_repro_sigma2pct": 0.9996309215457249,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.12,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999999987201,
+      "p_dq_repro_sigma2pct": 0.9997673709209645,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1225,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999999997916,
+      "p_dq_repro_sigma2pct": 0.9998555192741188,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.125,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.999999999999968,
+      "p_dq_repro_sigma2pct": 0.9999115827147992,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1275,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999999999953,
+      "p_dq_repro_sigma2pct": 0.999946687650249,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.13,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 0.9999999999999993,
+      "p_dq_repro_sigma2pct": 0.9999683287581669,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1325,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999814632621538,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.135,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999893114742251,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1375,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999939283760887,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.14,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999966023268753,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1425,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999981270079945,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.145,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999989829167575,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1475,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999994559577244,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.15,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999997133484282,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1525,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999998512311268,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.155,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999239503948,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1575,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.999999961708659,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.16,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999810104375,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1625,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999907246013,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.165,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999955378276,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1675,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999978857832,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.17,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999990134123,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1725,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.999999999546582,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.175,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999997947737,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1775,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999085185,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.18,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.99999999995984,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1825,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999826377,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.185,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999926077,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1875,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999969005,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.19,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999987201,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1925,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999994795,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.195,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999997916,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.1975,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999999178,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.2,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.999999999999968,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.2025,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999999878,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.205,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999999953,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.2075,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999999982,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.21,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999999993,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.2125,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 0.9999999999999998,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.215,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.2175,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.22,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.2225,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.225,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.0
+    },
+    {
+      "delta_stock": 0.2275,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.0204825
+    },
+    {
+      "delta_stock": 0.23,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.09955
+    },
+    {
+      "delta_stock": 0.2325,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.178475
+    },
+    {
+      "delta_stock": 0.235,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.2582425
+    },
+    {
+      "delta_stock": 0.2375,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.3380475
+    },
+    {
+      "delta_stock": 0.24,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.4181475
+    },
+    {
+      "delta_stock": 0.2425,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.49953
+    },
+    {
+      "delta_stock": 0.245,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.5821425
+    },
+    {
+      "delta_stock": 0.2475,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.6648625
+    },
+    {
+      "delta_stock": 0.25,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.74757
+    },
+    {
+      "delta_stock": 0.2525,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.8307775
+    },
+    {
+      "delta_stock": 0.255,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.9147075
+    },
+    {
+      "delta_stock": 0.2575,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 0.99947
+    },
+    {
+      "delta_stock": 0.26,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2625,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.265,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2675,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.27,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2725,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.275,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2775,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.28,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2825,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.285,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2875,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.29,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2925,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.295,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.2975,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    },
+    {
+      "delta_stock": 0.3,
+      "p_dq_repro_hard": 1.0,
+      "p_dq_repro_sigma1pct": 1.0,
+      "p_dq_repro_sigma2pct": 1.0,
+      "p_dq_bar_optimistic": 1.0
+    }
+  ],
+  "step3_coinflips": {
+    "coinflip_repro_gate_delta": 0.05,
+    "coinflip_bar_optimistic_delta": 0.2424851164868027,
+    "coinflip_bar_honeststock_delta": 0.18465806451612898
+  },
+  "step4_sensitivity": {
+    "binding_gate_G1": {
+      "delta_max_moves_with_central": 0.0,
+      "delta_max_moves_with_drift_prior": 0.0,
+      "p_dq_swing_over_central": 0.0,
+      "p_dq_swing_over_drift": 1.0,
+      "load_bearing_assumption": "THE DRIFT (delta_stock). The central choice -- the whole object #735 reconciled -- does NOT touch the binding private-DQ risk. delta_max is pinned at the 5% gate; only where delta_stock truly falls moves P(DQ)."
+    },
+    "nonbinding_gate_G2": {
+      "delta_max_central_swing_167p9_vs_155": 0.06255422997993965,
+      "p_dq_swing_over_central": 0.0,
+      "load_bearing_assumption": "central choice (but G2 never binds, so moot)."
+    },
+    "dominant_term": "GATE CHOICE (G1 vs G2) >> drift (within G1) >> central. The decision hinges on the 5% repro gate, NOT on the 167.9-vs-155 central #735 settled."
+  },
+  "step5_two_risk_ranking": {
+    "risk_a_identity_gate_roll": {
+      "what": "organizer strict greedy-identity handling of benign int4 ties.",
+      "status": "LOW / already-favorable. BASELINE.md L49 + kanna #38: the official HF-Jobs gate = PPL + completion + modalities, and NEVER compares served tokens to a greedy-AR reference -> spec stacks are leaderboard-legal (the whole ~420 frontier ships MTP spec). The int4 strict-tie concern is an INTERNAL pre-flight, not the official gate. Fire buys little NEW info here.",
+      "residual": "small"
+    },
+    "risk_b_private_dq_gate": {
+      "what": "5% private-repro TPS gap for the un-rescued stock-Hub drafter.",
+      "status": "HIGH / live / UNMEASURED. Budget is only 5%; the documented drift band's CENTER (6.5%) already EXCEEDS the gate; naive P(DQ)=0.80. The one favorable anchor (flagship 4.3%) is a WIDE-trained stack; the #730 stock-Hub drafter is NOT wide-trained (BASELINE.md L38) so is, if anything, MORE drift-prone. Its private E_accept drift has never been measured on-branch.",
+      "residual": "dominant"
+    },
+    "verdict": "RISK (b) PRIVATE-DQ DOMINATES (a) IDENTITY-ROLL. The identity gate is known-favorable (#38); the binding private-repro gate is the live, material, unmeasured risk at naive P(DQ)=0.80.",
+    "fire_now": "NO -- not on the binding gate. The SPEED leg (P(clears bar)=1.00, #735) and the IDENTITY leg (#38 no-token-check) are both settled-favorable, but they are NOT the binding constraint. The dominant residual risk (5% private-repro) sits at naive 0.80 and is UNMEASURED for the stock drafter. Recommend: HOLD the fire until lawine #734 pins delta_stock; fire only if delta_stock < ~3.5% (comfortable margin under the 5% gate), else the human must knowingly accept ~80% DQ odds."
+  },
+  "anchors": {
+    "drift_flagship_4p3pct_PASS": 0.043,
+    "drift_priorcenter_6p5pct": 0.065,
+    "drift_44proxy_12p4pct_FAIL": 0.124,
+    "breakeven_transfer_735": 0.8159
+  },
+  "verdict": {
+    "primary_metric_name": "p_dq_private_gate_at_prior",
+    "primary_metric_value": 0.8,
+    "test_metric_name": "accept_drift_budget_delta_max",
+    "test_metric_value": 0.05,
+    "binding_gate": "G1 5% TPS-reproduction gap (BASELINE.md 36-37; flagship 4.3% PASS, #44 12.4% FAIL)",
+    "delta_max_binding_repro": 0.05,
+    "delta_max_bar_optimistic_167p9": 0.2472,
+    "delta_max_bar_honeststock_155": 0.1847,
+    "p_dq_binding_repro_at_prior": 0.8,
+    "p_dq_bar_at_prior_nonbinding": 0.0,
+    "coinflip_delta_repro": 0.05,
+    "coinflip_delta_bar_optimistic": 0.2425,
+    "two_risk_ranking": "RISK (b) PRIVATE-DQ DOMINATES (a) IDENTITY-ROLL. The identity gate is known-favorable (#38); the binding private-repro gate is the live, material, unmeasured risk at naive P(DQ)=0.80.",
+    "fire_now": "NO -- not on the binding gate. The SPEED leg (P(clears bar)=1.00, #735) and the IDENTITY leg (#38 no-token-check) are both settled-favorable, but they are NOT the binding constraint. The dominant residual risk (5% private-repro) sits at naive 0.80 and is UNMEASURED for the stock drafter. Recommend: HOLD the fire until lawine #734 pins delta_stock; fire only if delta_stock < ~3.5% (comfortable margin under the 5% gate), else the human must knowingly accept ~80% DQ odds.",
+    "headline": "PRIVATE-DQ DOMINATES and the fire is NOT clear on the binding gate. The operative validity rule is the 5% TPS-REPRODUCTION gap (BASELINE.md), NOT the 126.378 bar the PR step-1 names -- it trips at a 5% acceptance-drift budget vs the bar's 18.5-24.7% (3.7-4.9x looser, never binds). At the documented 4-9% drift prior, P(DQ on the 5% gate) = 0.80 (the band's 6.5% CENTER already exceeds the 5% gate); P(DQ on the bar) = 0.00. delta_max for the binding gate is CENTRAL-INVARIANT, so #735's 167.9-vs-155 reconciliation does NOT touch this risk -- the load-bearing unknown is the stock drafter's true private drift, UNMEASURED on-branch. Of the two risks the fire buys info on, the identity-gate roll is known-favorable (#38: official gate has no token-identity check) while the private-repro DQ is live at ~0.80. RECOMMEND HOLD until lawine #734 pins delta_stock < ~3.5%."
+  }
+}
