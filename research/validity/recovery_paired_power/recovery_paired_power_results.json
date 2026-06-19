@@ -1,0 +1,253 @@
+{
+  "inputs": {
+    "floor": 0.3467,
+    "ceiling": 0.438,
+    "gate": 0.42,
+    "lift": 0.09129999999999999,
+    "routeB_point": 0.42131,
+    "routeB_cum_energy": 0.8172,
+    "routeA_point": 0.402,
+    "gate_to_ceiling_margin": 0.018,
+    "gate_to_routeB_margin": 0.00131,
+    "int4_anchors": {
+      "g128_ladder": 0.347,
+      "fern_n60_greedy": 0.4,
+      "fern_sampled_n300": 0.3467
+    },
+    "z_ci": 1.959963984540054,
+    "z_power": 1.6448536269514722,
+    "upstream": "710=66rhys58, fern659=nmjvtfov-group, ubel679/lawine693 anchors"
+  },
+  "read1": {
+    "estimand": "pi_recovery >= 0.420  (absolute one-sample proportion bar)",
+    "test_statistic": "one-sample Wilson/Clopper-Pearson lower bound vs gate",
+    "min_n_point_full_g32_0438": 2889,
+    "min_n_point_routeB_0.4213": 545295,
+    "min_n95_power_full_g32_0438": 9828,
+    "min_n80_power_full_g32_0438": 5966,
+    "wilson_lo_0438_n1000": 0.40754465643825316,
+    "wilson_lo_0438_n300": 0.382991770978095,
+    "pairing_can_help": false,
+    "why": "Read 1 lower bound uses the recovery arm's own proportion variance p(1-p)/n; there is no second arm in the estimand, so the McNemar / paired-bootstrap variance reduction (which acts only on the DIFFERENCE) does not enter. Pairing is therefore invariant to Read 1."
+  },
+  "read2": {
+    "estimand_2a_lift": "delta = pi_recovery - pi_int4 > 0  (paired McNemar)",
+    "estimand_2b_gate": "pi_recovery >= 0.420 via pi_recovery = int4_pinned + delta, needs LB(delta) >= 0.420 - int4_pinned  ==  detect lift with margin = recovery_point - gate = 0.018 (INVARIANT)",
+    "lift_full_g32_vs_g128": 0.09100000000000003,
+    "lift_full_g32_vs_n60": 0.03799999999999998,
+    "margin_invariance_check": {
+      "vs_g128": 0.018,
+      "vs_n60": 0.018
+    }
+  },
+  "frontier": {
+    "n_concordance": [
+      {
+        "psi": 0.02,
+        "liftgt0_n95_vs_g128": 19,
+        "liftgt0_n95_vs_n60": 167,
+        "gate_margin_point_vs_g128": 139,
+        "gate_margin_point_vs_n60": 221,
+        "gate_margin_n95_vs_g128": 471,
+        "gate_margin_n95_vs_n60": 745,
+        "arith_rescue_le1000": true
+      },
+      {
+        "psi": 0.05,
+        "liftgt0_n95_vs_g128": 66,
+        "liftgt0_n95_vs_n60": 437,
+        "gate_margin_point_vs_g128": 495,
+        "gate_margin_point_vs_n60": 576,
+        "gate_margin_n95_vs_g128": 1674,
+        "gate_margin_n95_vs_n60": 1948,
+        "arith_rescue_le1000": true
+      },
+      {
+        "psi": 0.08,
+        "liftgt0_n95_vs_g128": 113,
+        "liftgt0_n95_vs_n60": 707,
+        "gate_margin_point_vs_g128": 851,
+        "gate_margin_point_vs_n60": 932,
+        "gate_margin_n95_vs_g128": 2877,
+        "gate_margin_n95_vs_n60": 3151,
+        "arith_rescue_le1000": true
+      },
+      {
+        "psi": 0.1,
+        "liftgt0_n95_vs_g128": 144,
+        "liftgt0_n95_vs_n60": 887,
+        "gate_margin_point_vs_g128": 1088,
+        "gate_margin_point_vs_n60": 1169,
+        "gate_margin_n95_vs_g128": 3679,
+        "gate_margin_n95_vs_n60": 3953,
+        "arith_rescue_le1000": false
+      },
+      {
+        "psi": 0.12,
+        "liftgt0_n95_vs_g128": 176,
+        "liftgt0_n95_vs_n60": 1067,
+        "gate_margin_point_vs_g128": 1325,
+        "gate_margin_point_vs_n60": 1406,
+        "gate_margin_n95_vs_g128": 4481,
+        "gate_margin_n95_vs_n60": 4755,
+        "arith_rescue_le1000": false
+      },
+      {
+        "psi": 0.15,
+        "liftgt0_n95_vs_g128": 223,
+        "liftgt0_n95_vs_n60": 1337,
+        "gate_margin_point_vs_g128": 1681,
+        "gate_margin_point_vs_n60": 1762,
+        "gate_margin_n95_vs_g128": 5684,
+        "gate_margin_n95_vs_n60": 5959,
+        "arith_rescue_le1000": false
+      },
+      {
+        "psi": 0.2,
+        "liftgt0_n95_vs_g128": 301,
+        "liftgt0_n95_vs_n60": 1787,
+        "gate_margin_point_vs_g128": 2274,
+        "gate_margin_point_vs_n60": 2355,
+        "gate_margin_n95_vs_g128": 7690,
+        "gate_margin_n95_vs_n60": 7964,
+        "arith_rescue_le1000": false
+      },
+      {
+        "psi": 0.2167,
+        "liftgt0_n95_vs_g128": 328,
+        "liftgt0_n95_vs_n60": 1938,
+        "gate_margin_point_vs_g128": 2472,
+        "gate_margin_point_vs_n60": 2553,
+        "gate_margin_n95_vs_g128": 8360,
+        "gate_margin_n95_vs_n60": 8634,
+        "arith_rescue_le1000": false
+      },
+      {
+        "psi": 0.246,
+        "liftgt0_n95_vs_g128": 374,
+        "liftgt0_n95_vs_n60": 2201,
+        "gate_margin_point_vs_g128": 2819,
+        "gate_margin_point_vs_n60": 2900,
+        "gate_margin_n95_vs_g128": 9535,
+        "gate_margin_n95_vs_n60": 9809,
+        "arith_rescue_le1000": false
+      }
+    ],
+    "psi_where_arith_point_le1000_vs_n60": 0.0858,
+    "psi_where_arith_point_le1000_vs_g128": 0.0926,
+    "routeB_paired_gate_margin": {
+      "margin": 0.00131,
+      "point_vs_n60_psi0.10": 222832,
+      "note": "Route B point 0.4213: gate margin 0.0013; even paired n explodes."
+    },
+    "bootstrap_check": {
+      "delta": 0.03799999999999998,
+      "psi": 0.1,
+      "n": 1000,
+      "boot_mean": 0.03807,
+      "boot_se": 0.009986,
+      "analytic_se": 0.009928,
+      "agree": true
+    }
+  },
+  "combined_budget": {
+    "vs_g128_psi0.10": {
+      "h4": 0.01038600000000001,
+      "hd": 0.007614000000000006,
+      "n4": 8070,
+      "np": 6078,
+      "total_n": 14147,
+      "slack": 0.018000000000000016,
+      "note": "pinning int4 to <<slack is itself a one-sample absolute int4 measurement; the int4 term dominates and the total stays in the absolute-bar class"
+    },
+    "vs_n60_psi0.10": {
+      "h4": 0.010350000000000008,
+      "hd": 0.0076500000000000075,
+      "n4": 8607,
+      "np": 6470,
+      "total_n": 15076,
+      "slack": 0.018000000000000016,
+      "note": "pinning int4 to <<slack is itself a one-sample absolute int4 measurement; the int4 term dominates and the total stays in the absolute-bar class"
+    },
+    "one_sample_point_2889": 2889,
+    "collapses_to_absolute_bar_class": true,
+    "interpretation": "when int4's absolute level is NOT a free constant but must be certified, the int4 one-sample term dominates and total n stays >= the absolute-bar class -> the cheap paired rescue evaporates."
+  },
+  "fern_empirical": {
+    "n": 300,
+    "int8_correct": 123,
+    "int8_acc": 0.41,
+    "int4_correct": 104,
+    "int4_acc": 0.3466666666666667,
+    "marginal_lift": 0.06333333333333334,
+    "b_minus_c": 19,
+    "banked_mcnemar_p": 0.0248,
+    "backed_out_m_b_plus_c": 65,
+    "backed_out_b": 42,
+    "backed_out_c": 23,
+    "backed_out_exact_p": 0.02481197457155283,
+    "empirical_discordance_psi": 0.21666666666666667,
+    "per_item_vectors_logged": false,
+    "note": "per-item vectors NOT in W&B (only per-seed correct counts); psi reconstructed from b-c=19 and exact p=0.0248. int8-vs-int4 is a LARGER perturbation than g32-vs-int4, so this psi is an UPPER reference for the within-mandate pair (g32 likely more concordant).",
+    "mcnemar_power_lift_gt0_n300": 0.6181
+  },
+  "self_test": {
+    "a_min_n_point_0438_2889": true,
+    "b_min_n95_power_near9851": true,
+    "c_wilson_lo_0438_n1000_4075": true,
+    "d_routeB_point_4213": true,
+    "e_wilson_24_60": true,
+    "f_fern_lift_0633": true,
+    "g_fern_int4_sampled_eq_floor": true,
+    "h_fern_backout_p_close": true,
+    "i_fern_psi_in_range": true,
+    "j_margin_invariant_0018": true,
+    "k_bootstrap_matches_analytic": true,
+    "l_arith_rescue_le1000_at_psi05": true,
+    "m_combined_budget_collapses": true,
+    "n_marginal_identity": true,
+    "o_verdict_is_dead": true,
+    "p_read2_illegit": true,
+    "q_primary_is_2889": true,
+    "r_fern_lift_power_reasonable": true,
+    "passes": true
+  },
+  "legitimacy": {
+    "read2_legitimate": false,
+    "reasons": {
+      "r1_marginal_variance_one_sample_bound": true,
+      "r1_detail": "p_recovery = p_int4_comeasured + delta_hat is an algebraic identity on the SAME items; co-measuring int4 cannot reduce Var(p_recovery)=pR(1-pR)/n. Pairing reduces only Var(delta).",
+      "r2_no_banked_anchor_pinned": true,
+      "r2_detail": {
+        "int4_n60_halfwidth": 0.1203,
+        "int4_n300_halfwidth": 0.0535,
+        "margin_needed": 0.018
+      },
+      "r3_pinning_cost_relocates": true,
+      "r3_detail": {
+        "n_to_pin_int4_to_half_margin": 10747
+      },
+      "r4_external_anchor_bias_prone": true,
+      "r4_detail": "kanna #699: int4 SAMPLED decode degenerates on vLLM 0.22.0; an external pinned int4 is distribution-mismatched, a ~0.018 engine/seed bias consumes the whole margin, breaking the variance-only Read-2 coverage.",
+      "r5_lift_is_weaker_estimand": true,
+      "r5_detail": "fern p=0.0248 certifies delta!=0, NOT pi_recovery>=0.420.",
+      "r5_empirical_psi": 0.2167,
+      "r5_empirical_psi_high": true
+    },
+    "ruling": "Read 2 is ILLEGITIMATE as a gate certification: the 0.420 bar is an absolute property of the recovery arm whose variance is one-sample-bound; the pinned-anchor maneuver either co-measures int4 (algebraic identity -> no gain) or imports an unpinned, distribution-mismatched external level (broken coverage). The paired n to PROVE the gate equals the one-sample n=2889; pairing is invariant for the absolute bar."
+  },
+  "verdict": "PAIRING_INVARIANT_DEAD",
+  "primary_metric": {
+    "paired_n_to_prove_gate_95pct": 2889
+  },
+  "test_metric": {
+    "read2_legitimate": 0
+  },
+  "constraints": {
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_hf_job": 1,
+    "fires": 0
+  },
+  "peak_mem_mib": 10.640625
+}
