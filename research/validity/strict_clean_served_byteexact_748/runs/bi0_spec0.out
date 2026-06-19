@@ -1,0 +1,27 @@
+[arm bi0_spec0] bi=0 spec=0 n_prompts=128 output_len=512 port=8020
+[arm bi0_spec0] server argv: /tmp/senpai-venvs/20f658587e8a6643/bin/python -m vllm.entrypoints.openai.api_server --model google/gemma-4-E4B-it-qat-w4a16-ct --served-model-name gemma-4-e4b-it --quantization compressed-tensors --dtype bfloat16 --max-model-len 4096 --max-num-seqs 1 --gpu-memory-utilization 0.9 --trust-remote-code --no-enable-log-requests --host 127.0.0.1 --port 8020
+[arm bi0_spec0] env BI=0 BACKEND=TRITON_ATTN
+[arm bi0_spec0] healthy after 150s
+  [8/128] comp=512 cum_tps=90.66 (45s)
+  [16/128] comp=512 cum_tps=93.23 (88s)
+  [24/128] comp=512 cum_tps=94.08 (131s)
+  [32/128] comp=512 cum_tps=94.49 (174s)
+  [40/128] comp=512 cum_tps=94.74 (216s)
+  [48/128] comp=512 cum_tps=94.91 (259s)
+  [56/128] comp=512 cum_tps=94.98 (302s)
+  [64/128] comp=512 cum_tps=95.08 (345s)
+  [72/128] comp=512 cum_tps=94.99 (388s)
+  [80/128] comp=512 cum_tps=95.06 (431s)
+  [88/128] comp=512 cum_tps=95.13 (474s)
+  [96/128] comp=512 cum_tps=95.18 (517s)
+  [104/128] comp=512 cum_tps=95.23 (559s)
+  [112/128] comp=512 cum_tps=95.23 (602s)
+  [120/128] comp=512 cum_tps=95.28 (645s)
+  [128/128] comp=512 cum_tps=95.28 (688s)
+
+========================================================================
+[ARM bi0_spec0] output_tps=95.2821  comp_tok=65536  gen_s=687.8  peak_mem=19489MiB
+  backend_line: (EngineCore pid=1280575) INFO 06-19 16:23:38 [cuda.py:318] Using AttentionBackendEnum.TRITON_ATTN backend.
+  spec_line:    
+  -> /workspace/senpai/target/research/validity/strict_clean_served_byteexact_748/runs/bi0_spec0/decode_outputs.jsonl
+========================================================================
