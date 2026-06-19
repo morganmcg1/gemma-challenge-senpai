@@ -1,0 +1,546 @@
+{
+  "inputs": {
+    "floor": 0.3467,
+    "ceiling": 0.438,
+    "gate": 0.42,
+    "lift": 0.09129999999999999,
+    "fstar_linear": 0.8028477546549834,
+    "fstar_concave": 0.6445645171545483,
+    "fstar_convex": 0.896017720056352,
+    "top48_cum_energy": 0.7995517037970844,
+    "top48_composition": {
+      "k_proj": 3,
+      "per_layer_input_gate": 40,
+      "q_proj": 3,
+      "v_proj": 2
+    },
+    "n_plig_top40": 40,
+    "attn_top_layers": [
+      0,
+      1,
+      18,
+      40,
+      41
+    ],
+    "tps_anchor": 126.75,
+    "step_anchor_us": 7889.546351084813,
+    "official_tps_locked": 126.378,
+    "energy_by_proj": {
+      "per_layer_input_gate": 0.608987,
+      "q_proj": 0.198684,
+      "k_proj": 0.077901,
+      "v_proj": 0.073364,
+      "per_layer_projection": 0.020294,
+      "down_proj": 0.011007,
+      "gate_proj": 0.0037,
+      "up_proj": 0.003574,
+      "o_proj": 0.002218,
+      "per_layer_model_projection": 0.00027
+    },
+    "total_energy_modules": 343
+  },
+  "named_sets": {
+    "routeA_40plig": {
+      "n_units": 40,
+      "n_modules": 40,
+      "cum_energy": 0.6055487176463555,
+      "delta_us": 8.095979690551758,
+      "tps_opbench": 126.62006686517333,
+      "dtps_vs_anchor": -0.1299331348266719,
+      "speed_free": false,
+      "point": {
+        "linear": 0.40198659792111224,
+        "concave": 0.417746930899213,
+        "convex": 0.3801787284741592
+      },
+      "wilson_lo": {
+        "linear": {
+          "300": {
+            "point": 0.40198659792111224,
+            "wilson_lo": 0.3480821291700725,
+            "clears": false,
+            "point_clears": false
+          },
+          "1000": {
+            "point": 0.40198659792111224,
+            "wilson_lo": 0.37202904784347496,
+            "clears": false,
+            "point_clears": false
+          }
+        },
+        "concave": {
+          "300": {
+            "point": 0.417746930899213,
+            "wilson_lo": 0.3633225649188013,
+            "clears": false,
+            "point_clears": false
+          },
+          "1000": {
+            "point": 0.417746930899213,
+            "wilson_lo": 0.3875510641596688,
+            "clears": false,
+            "point_clears": false
+          }
+        },
+        "convex": {
+          "300": {
+            "point": 0.3801787284741592,
+            "wilson_lo": 0.3270903209990585,
+            "clears": false,
+            "point_clears": false
+          },
+          "1000": {
+            "point": 0.3801787284741592,
+            "wilson_lo": 0.35060463041176854,
+            "clears": false,
+            "point_clears": false
+          }
+        }
+      },
+      "incidental_energy": 0,
+      "targeted_energy_covered": 0.6055487176463555
+    },
+    "routeB_40plig_plus_wholeqkv": {
+      "n_units": 45,
+      "n_modules": 51,
+      "cum_energy": 0.8172440912301883,
+      "delta_us": 11.693145888192314,
+      "tps_opbench": 126.5624210458503,
+      "dtps_vs_anchor": -0.18757895414969994,
+      "speed_free": false,
+      "point": {
+        "linear": 0.4213143855293162,
+        "concave": 0.4292366185327856,
+        "convex": 0.4076781656946049
+      },
+      "wilson_lo": {
+        "linear": {
+          "300": {
+            "point": 0.4213143855293162,
+            "wilson_lo": 0.3667803440464984,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.4213143855293162,
+            "wilson_lo": 0.39106902034901936,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "concave": {
+          "300": {
+            "point": 0.4292366185327856,
+            "wilson_lo": 0.374469494832,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.4292366185327856,
+            "wilson_lo": 0.3988871479527417,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "convex": {
+          "300": {
+            "point": 0.4076781656946049,
+            "wilson_lo": 0.3535792581196559,
+            "clears": false,
+            "point_clears": false
+          },
+          "1000": {
+            "point": 0.4076781656946049,
+            "wilson_lo": 0.37763083823672494,
+            "clears": false,
+            "point_clears": false
+          }
+        }
+      },
+      "incidental_energy": 0.017692387433103862,
+      "targeted_energy_covered": 0.7995517037970844
+    },
+    "max_speed_free_greedy": {
+      "n_units": 14,
+      "n_modules": 20,
+      "cum_energy": 0.6941951298793306,
+      "delta_us": 6.201802151543753,
+      "tps_opbench": 126.650442819673,
+      "dtps_vs_anchor": -0.09955718032699679,
+      "speed_free": true,
+      "point": {
+        "linear": 0.4100800153579829,
+        "concave": 0.4227696746554357,
+        "convex": 0.3906980979931889
+      },
+      "wilson_lo": {
+        "linear": {
+          "300": {
+            "point": 0.4100800153579829,
+            "wilson_lo": 0.35590132907924266,
+            "clears": false,
+            "point_clears": false
+          },
+          "1000": {
+            "point": 0.4100800153579829,
+            "wilson_lo": 0.37999606498230865,
+            "clears": false,
+            "point_clears": false
+          }
+        },
+        "concave": {
+          "300": {
+            "point": 0.4227696746554357,
+            "wilson_lo": 0.36819173548971823,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.4227696746554357,
+            "wilson_lo": 0.39250458530056304,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "convex": {
+          "300": {
+            "point": 0.3906980979931889,
+            "wilson_lo": 0.3372018786565584,
+            "clears": false,
+            "point_clears": false
+          },
+          "1000": {
+            "point": 0.3906980979931889,
+            "wilson_lo": 0.3609311641647069,
+            "clears": false,
+            "point_clears": false
+          }
+        }
+      },
+      "incidental_energy": 0.04010929991373957,
+      "targeted_energy_covered": 0.6540858299655911,
+      "unit_kinds": {
+        "plig": 7,
+        "qkv": 7
+      }
+    },
+    "allplig_allqkv": {
+      "n_units": 84,
+      "n_modules": 132,
+      "cum_energy": 0.9589366262339863,
+      "delta_us": 38.465947764260406,
+      "tps_opbench": 126.1350212770447,
+      "dtps_vs_anchor": -0.6149787229552999,
+      "speed_free": false,
+      "point": {
+        "linear": 0.43425091397516297,
+        "concave": 0.43610580767451507,
+        "convex": 0.4306557780710447
+      },
+      "wilson_lo": {
+        "linear": {
+          "300": {
+            "point": 0.43425091397516297,
+            "wilson_lo": 0.3793436904429745,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.43425091397516297,
+            "wilson_lo": 0.403839674730118,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "concave": {
+          "300": {
+            "point": 0.43610580767451507,
+            "wilson_lo": 0.38114821108219643,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.43610580767451507,
+            "wilson_lo": 0.40567252551688104,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "convex": {
+          "300": {
+            "point": 0.4306557780710447,
+            "wilson_lo": 0.3758484203262695,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.4306557780710447,
+            "wilson_lo": 0.40028850208187905,
+            "clears": false,
+            "point_clears": true
+          }
+        }
+      },
+      "incidental_energy": 0.15938492243690205,
+      "targeted_energy_covered": 0.7995517037970844
+    },
+    "full_g32_all_units": {
+      "n_units": 253,
+      "n_modules": 343,
+      "cum_energy": 1.0000000000000004,
+      "delta_us": 369.52556838308055,
+      "tps_opbench": 121.0789795452498,
+      "dtps_vs_anchor": -5.671020454750206,
+      "speed_free": false,
+      "point": {
+        "linear": 0.43800000000000006,
+        "concave": 0.438,
+        "convex": 0.43800000000000006
+      },
+      "wilson_lo": {
+        "linear": {
+          "300": {
+            "point": 0.43800000000000006,
+            "wilson_lo": 0.38299177097809506,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.43800000000000006,
+            "wilson_lo": 0.4075446564382532,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "concave": {
+          "300": {
+            "point": 0.438,
+            "wilson_lo": 0.382991770978095,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.438,
+            "wilson_lo": 0.40754465643825316,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "convex": {
+          "300": {
+            "point": 0.43800000000000006,
+            "wilson_lo": 0.38299177097809506,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.43800000000000006,
+            "wilson_lo": 0.4075446564382532,
+            "clears": false,
+            "point_clears": true
+          }
+        }
+      },
+      "incidental_energy": 0.20044829620291604,
+      "targeted_energy_covered": 0.7995517037970844
+    }
+  },
+  "frontier": {
+    "routeB_incidental": {
+      "modules": [
+        "L1.q_proj",
+        "L18.q_proj",
+        "L18.v_proj"
+      ],
+      "incidental_energy": 0.017692387433103862,
+      "routeB_cum_energy": 0.8172440912301883,
+      "knife_edge_gap_energy": 0.003296050857898969,
+      "crosses_point_gate_linear": true
+    },
+    "cheapest_point_clear_linear": {
+      "n_units": 35,
+      "n_modules": 41,
+      "cum_energy": 0.8043975552629927,
+      "delta_us": 10.452191489083427,
+      "tps_opbench": 126.58230183346214,
+      "dtps_vs_anchor": -0.16769816653786052,
+      "speed_free": false,
+      "point": {
+        "linear": 0.42014149679551127,
+        "concave": 0.4285853384766173,
+        "convex": 0.40577616047716414
+      },
+      "wilson_lo": {
+        "linear": {
+          "300": {
+            "point": 0.42014149679551127,
+            "wilson_lo": 0.36564318974386617,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.42014149679551127,
+            "wilson_lo": 0.3899122254882305,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "concave": {
+          "300": {
+            "point": 0.4285853384766173,
+            "wilson_lo": 0.3738368331874778,
+            "clears": false,
+            "point_clears": true
+          },
+          "1000": {
+            "point": 0.4285853384766173,
+            "wilson_lo": 0.3982441247748064,
+            "clears": false,
+            "point_clears": true
+          }
+        },
+        "convex": {
+          "300": {
+            "point": 0.40577616047716414,
+            "wilson_lo": 0.3517413855317343,
+            "clears": false,
+            "point_clears": false
+          },
+          "1000": {
+            "point": 0.40577616047716414,
+            "wilson_lo": 0.375758365598771,
+            "clears": false,
+            "point_clears": false
+          }
+        }
+      },
+      "unit_kinds": {
+        "plig": 28,
+        "qkv": 7
+      }
+    },
+    "max_realizable_wilson_lo": {
+      "n300": {
+        "linear": 0.38299177097809506,
+        "concave": 0.382991770978095,
+        "convex": 0.38299177097809506
+      },
+      "n1000": {
+        "linear": 0.4075446564382532,
+        "concave": 0.40754465643825316,
+        "convex": 0.4075446564382532
+      },
+      "argmax_set": "full_g32_all_units",
+      "argmax_point_linear": 0.43800000000000006,
+      "any_realizable_clears_n300": false,
+      "any_realizable_clears_n1000": false
+    },
+    "best_speed_free": {
+      "cum_energy": 0.6941951298793306,
+      "tps": 126.650442819673,
+      "dtps": -0.09955718032699679,
+      "point": {
+        "linear": 0.4100800153579829,
+        "concave": 0.4227696746554357,
+        "convex": 0.3906980979931889
+      },
+      "wilson_lo_n300": {
+        "linear": 0.35590132907924266,
+        "concave": 0.36819173548971823,
+        "convex": 0.3372018786565584
+      },
+      "wilson_lo_n1000": {
+        "linear": 0.37999606498230865,
+        "concave": 0.39250458530056304,
+        "convex": 0.3609311641647069
+      }
+    },
+    "budget_to_prove": {
+      "min_n_point_0438_ceiling": 2889,
+      "min_n_point_best_sf_linear": null,
+      "min_n95_power_0438": 9828,
+      "min_n80_power_0438": 5966,
+      "note": "even observing the 0.438 ceiling, Wilson-lo clears only at n>=min_n_point_0438; selective sets predict <0.438 so need >= that."
+    },
+    "shape_sensitivity": [
+      {
+        "shape": "linear",
+        "fstar": 0.8028477546549834,
+        "routeB_point": 0.4213143855293162,
+        "routeB_point_clears": true,
+        "max_realizable_point": 0.43800000000000006,
+        "max_realizable_wilson_lo_n1000": 0.4075446564382532,
+        "max_realizable_clears_n1000": false
+      },
+      {
+        "shape": "concave",
+        "fstar": 0.6445645171545483,
+        "routeB_point": 0.4292366185327856,
+        "routeB_point_clears": true,
+        "max_realizable_point": 0.438,
+        "max_realizable_wilson_lo_n1000": 0.40754465643825316,
+        "max_realizable_clears_n1000": false
+      },
+      {
+        "shape": "convex",
+        "fstar": 0.896017720056352,
+        "routeB_point": 0.4076781656946049,
+        "routeB_point_clears": false,
+        "max_realizable_point": 0.43800000000000006,
+        "max_realizable_wilson_lo_n1000": 0.4075446564382532,
+        "max_realizable_clears_n1000": false
+      }
+    ],
+    "speed_validation": {
+      "model": "TPS = 1e6/(step_anchor_us + sum iso delta_us); additive, conservatively over-taxes vs measured (sub-additive ops).",
+      "measured_708": {
+        "anchor_g128": 126.75,
+        "mix_40plig": 126.68192659611461,
+        "mix_wholeqkv3": 126.70625252799202,
+        "mix_wholeqkv8": 126.63823588250145,
+        "fakequant48_ideal": 126.57725460169034,
+        "full_g32": 121.26668851597728
+      },
+      "additive_vs_measured": {
+        "routeA_40plig_additive": 126.62006686517333,
+        "routeA_40plig_measured": 126.68192659611461,
+        "full_g32_additive": 121.0789795452498,
+        "full_g32_measured": 121.26668851597728
+      },
+      "all_selective_sets_subnoise_vs_aime_band": true,
+      "speed_is_binding_constraint": false
+    }
+  },
+  "self_test": {
+    "a_wilson_24_60": true,
+    "b_wilson_50_100": true,
+    "c_fstar_linear_8028": true,
+    "d_top48_energy_7996": true,
+    "e_selective48_point_4197": true,
+    "f_shape_concave_4283": true,
+    "g_shape_convex_4051": true,
+    "h_min_n_point_0438_2889": true,
+    "i_min_n95_power_near9851": true,
+    "j_energy_sums_to_one": true,
+    "k_full_point_is_ceiling": true,
+    "l_routeA_lt_top48": true,
+    "m_routeB_ge_top48": true,
+    "n_units_partition_modules": true,
+    "passes": true
+  },
+  "verdict": "REALIZABLE_RECOVERY_DEAD",
+  "primary_metric": {
+    "max_realizable_predicted_wilson_lo_n1000": 0.4075446564382532
+  },
+  "test_metric": {
+    "routeB_realized_cum_energy": 0.8172440912301883,
+    "best_speed_free_realized_cum_energy": 0.6941951298793306
+  },
+  "constraints": {
+    "analysis_only": true,
+    "official_tps": 0,
+    "no_hf_job": 1,
+    "fires": 0
+  },
+  "peak_mem_mib": 12.09375
+}
