@@ -1,0 +1,62 @@
+{
+  "atomic_add_env": "0",
+  "per_shape": {
+    "qkv_full": {
+      "det_g128": true,
+      "det_g32": true,
+      "g128_vs_g32_differ": true,
+      "max_abs_g128_minus_g32": 0.431396484375
+    },
+    "o_proj": {
+      "det_g128": true,
+      "det_g32": true,
+      "g128_vs_g32_differ": true,
+      "max_abs_g128_minus_g32": 0.376953125
+    },
+    "gate_up_proj": {
+      "det_g128": true,
+      "det_g32": true,
+      "g128_vs_g32_differ": true,
+      "max_abs_g128_minus_g32": 0.47607421875
+    },
+    "down_proj": {
+      "det_g128": true,
+      "det_g32": true,
+      "g128_vs_g32_differ": true,
+      "max_abs_g128_minus_g32": 0.884765625
+    },
+    "per_layer_input_gate": {
+      "det_g128": true,
+      "det_g32": true,
+      "g128_vs_g32_differ": true,
+      "max_abs_g128_minus_g32": 0.36962890625
+    }
+  },
+  "interleave": {
+    "mixed_grid_sequence_deterministic": true,
+    "seq": [
+      [
+        "gate_up_proj",
+        128
+      ],
+      [
+        "per_layer_input_gate",
+        32
+      ],
+      [
+        "qkv_full",
+        128
+      ],
+      [
+        "o_proj",
+        32
+      ],
+      [
+        "down_proj",
+        128
+      ]
+    ]
+  },
+  "all_deterministic": true,
+  "verdict": "MIXED_GRID_DETERMINISTIC"
+}
