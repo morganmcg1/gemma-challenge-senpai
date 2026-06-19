@@ -1,0 +1,797 @@
+{
+  "utc": "2026-06-19T01:29:10Z",
+  "gpu": "NVIDIA A10G",
+  "sm_count": 80,
+  "kernel": "vllm.v1.attention.ops.triton_unified_attention.unified_attention",
+  "vllm_batch_invariant_env": "0",
+  "drafter_geometry": {
+    "n_q_heads": 4,
+    "n_kv_heads": 2,
+    "layer_types": [
+      "sliding",
+      "sliding",
+      "sliding",
+      "full"
+    ],
+    "n_sliding": 3,
+    "n_full": 1,
+    "head_dim": {
+      "sliding": 256,
+      "full": 512
+    },
+    "sliding_window": 512
+  },
+  "arms": {
+    "blanket_2d": {
+      "M": 1,
+      "thr": null,
+      "S": null,
+      "expect_3d": false
+    },
+    "fixed2d": {
+      "M": 1,
+      "thr": 0,
+      "S": null,
+      "expect_3d": false
+    },
+    "split3d_s1": {
+      "M": 1,
+      "thr": 64,
+      "S": 1,
+      "expect_3d": true
+    },
+    "split3d_s2": {
+      "M": 1,
+      "thr": 64,
+      "S": 2,
+      "expect_3d": true
+    },
+    "split3d_s4": {
+      "M": 1,
+      "thr": 64,
+      "S": 4,
+      "expect_3d": true
+    },
+    "split3d_s8": {
+      "M": 1,
+      "thr": 64,
+      "S": 8,
+      "expect_3d": true
+    },
+    "split3d_s16": {
+      "M": 1,
+      "thr": 64,
+      "S": 16,
+      "expect_3d": true
+    },
+    "split3d_s32": {
+      "M": 1,
+      "thr": 64,
+      "S": 32,
+      "expect_3d": true
+    }
+  },
+  "fixed_split_counts": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32
+  ],
+  "n_iter": 300,
+  "ctx_sweep": [
+    256,
+    512,
+    1024
+  ],
+  "rep_ctx": 512,
+  "per_ctx": [
+    {
+      "ctx": 256,
+      "layers": {
+        "sliding": {
+          "device_us": {
+            "blanket_2d": 27.22116666666665,
+            "fixed2d": 27.21703666666665,
+            "split3d_s1": 32.8850666666667,
+            "split3d_s2": 19.404903333333436,
+            "split3d_s4": 12.482523333333363,
+            "split3d_s8": 9.270076666666725,
+            "split3d_s16": 8.283279999999989,
+            "split3d_s32": 8.626003333333236
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 19.410777152583478,
+            "fixed2d": 19.413722605853135,
+            "split3d_s1": 16.067597045061977,
+            "split3d_s2": 27.229406450706215,
+            "split3d_s4": 42.329902848168686,
+            "split3d_s8": 56.99888134689969,
+            "split3d_s16": 63.789223592586595,
+            "split3d_s32": 61.25478736579892
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "split3d_s1": true,
+            "split3d_s2": true,
+            "split3d_s4": true,
+            "split3d_s8": true,
+            "split3d_s16": true,
+            "split3d_s32": true
+          },
+          "byte_identity": {
+            "blanket_2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "fixed2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "split3d_s1": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s2": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s4": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            },
+            "split3d_s8": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            },
+            "split3d_s16": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            },
+            "split3d_s32": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            }
+          },
+          "sdpa_validation": {
+            "max_abs_err": 0.0001220703125,
+            "ref_abs_mean": 0.0048828125
+          }
+        },
+        "full": {
+          "device_us": {
+            "blanket_2d": 34.30022999999999,
+            "fixed2d": 34.3028033333334,
+            "split3d_s1": 41.89681000000003,
+            "split3d_s2": 24.074446666666798,
+            "split3d_s4": 15.34974333333326,
+            "split3d_s8": 11.642233333333298,
+            "split3d_s16": 10.819403333333355,
+            "split3d_s32": 11.531346666666707
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 30.809356088865886,
+            "fixed2d": 30.807044827531527,
+            "split3d_s1": 25.223113645167718,
+            "split3d_s2": 43.895837550575514,
+            "split3d_s4": 68.84597201733918,
+            "split3d_s8": 90.77021304617983,
+            "split3d_s16": 97.67340836108934,
+            "split3d_s32": 91.64306915295204
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "split3d_s1": true,
+            "split3d_s2": true,
+            "split3d_s4": true,
+            "split3d_s8": true,
+            "split3d_s16": true,
+            "split3d_s32": true
+          },
+          "byte_identity": {
+            "blanket_2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "fixed2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "split3d_s1": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s2": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            },
+            "split3d_s4": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            },
+            "split3d_s8": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            },
+            "split3d_s16": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            },
+            "split3d_s32": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 0.0001220703125,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 0.0001220703125
+            }
+          },
+          "sdpa_validation": {
+            "max_abs_err": 0.0001220703125,
+            "ref_abs_mean": 0.0050048828125
+          }
+        }
+      }
+    },
+    {
+      "ctx": 512,
+      "layers": {
+        "sliding": {
+          "device_us": {
+            "blanket_2d": 50.883466666666685,
+            "fixed2d": 50.8869666666666,
+            "split3d_s1": 60.94346333333337,
+            "split3d_s2": 33.478439999999885,
+            "split3d_s4": 19.63039333333342,
+            "split3d_s8": 12.932069999999971,
+            "split3d_s16": 10.500933333333323,
+            "split3d_s32": 9.966109999999912
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 20.687898623259414,
+            "fixed2d": 20.68647571185552,
+            "split3d_s1": 17.27292711020306,
+            "split3d_s2": 31.443281108677816,
+            "split3d_s4": 53.624600491957985,
+            "split3d_s8": 81.40011614536593,
+            "split3d_s16": 100.2455654735453,
+            "split3d_s32": 105.62516367971148
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "split3d_s1": true,
+            "split3d_s2": true,
+            "split3d_s4": true,
+            "split3d_s8": true,
+            "split3d_s16": true,
+            "split3d_s32": true
+          },
+          "byte_identity": {
+            "blanket_2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "fixed2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "split3d_s1": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s2": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s4": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s8": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s16": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s32": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            }
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.003448486328125
+          }
+        },
+        "full": {
+          "device_us": {
+            "blanket_2d": 63.39107666666667,
+            "fixed2d": 63.391423333333336,
+            "split3d_s1": 77.94870333333337,
+            "split3d_s2": 42.29536000000001,
+            "split3d_s4": 24.547790000000017,
+            "split3d_s8": 16.502490000000073,
+            "split3d_s16": 14.135383333333047,
+            "split3d_s32": 13.90610666666651
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 33.21199308651381,
+            "fixed2d": 33.21181146114036,
+            "split3d_s1": 27.00935243267462,
+            "split3d_s2": 49.777185960824056,
+            "split3d_s4": 85.76511368233143,
+            "split3d_s8": 127.5773534781715,
+            "split3d_s16": 148.94141533716518,
+            "split3d_s32": 151.39708406283071
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "split3d_s1": true,
+            "split3d_s2": true,
+            "split3d_s4": true,
+            "split3d_s8": true,
+            "split3d_s16": true,
+            "split3d_s32": true
+          },
+          "byte_identity": {
+            "blanket_2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "fixed2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "split3d_s1": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s2": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s4": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s8": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s16": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s32": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            }
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.0034942626953125
+          }
+        }
+      }
+    },
+    {
+      "ctx": 1024,
+      "layers": {
+        "sliding": {
+          "device_us": {
+            "blanket_2d": 50.83922000000006,
+            "fixed2d": 50.83964666666672,
+            "split3d_s1": 60.894130000000004,
+            "split3d_s2": 61.43501999999993,
+            "split3d_s4": 33.486040000000024,
+            "split3d_s8": 19.583456666666702,
+            "split3d_s16": 13.312963333333313,
+            "split3d_s32": 11.03700000000004
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 20.70590382779277,
+            "fixed2d": 20.70573005555898,
+            "split3d_s1": 17.286920759028824,
+            "split3d_s2": 17.134722182885287,
+            "split3d_s4": 31.436144733745742,
+            "split3d_s8": 53.753125299466106,
+            "split3d_s16": 79.0712010273697,
+            "split3d_s32": 95.37664220349698
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "split3d_s1": true,
+            "split3d_s2": true,
+            "split3d_s4": true,
+            "split3d_s8": true,
+            "split3d_s16": true,
+            "split3d_s32": true
+          },
+          "byte_identity": {
+            "blanket_2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "fixed2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "split3d_s1": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 3.0517578125e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 3.0517578125e-05
+            },
+            "split3d_s2": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 3.0517578125e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 3.0517578125e-05
+            },
+            "split3d_s4": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s8": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s16": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s32": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            }
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.003448486328125
+          }
+        },
+        "full": {
+          "device_us": {
+            "blanket_2d": 122.05566333333343,
+            "fixed2d": 122.05863333333328,
+            "split3d_s1": 150.0855766666666,
+            "split3d_s2": 78.58331999999986,
+            "split3d_s4": 42.92015000000007,
+            "split3d_s8": 25.98151000000018,
+            "split3d_s16": 19.50736999999995,
+            "split3d_s32": 18.328929999999847
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 34.43097915516631,
+            "fixed2d": 34.4301413610235,
+            "split3d_s1": 28.000665309322535,
+            "split3d_s2": 53.47821904190364,
+            "split3d_s4": 97.9142896751291,
+            "split3d_s8": 161.74949031060822,
+            "split3d_s16": 215.43119344124867,
+            "split3d_s32": 229.28212394286166
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "split3d_s1": true,
+            "split3d_s2": true,
+            "split3d_s4": true,
+            "split3d_s8": true,
+            "split3d_s16": true,
+            "split3d_s32": true
+          },
+          "byte_identity": {
+            "blanket_2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "fixed2d": {
+              "repro_run_to_run": true,
+              "eq_verify_row": true,
+              "maxdiff_vs_verify_row": 0.0,
+              "eq_blanket": true,
+              "maxdiff_vs_blanket": 0.0
+            },
+            "split3d_s1": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 3.0517578125e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 3.0517578125e-05
+            },
+            "split3d_s2": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 3.0517578125e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 3.0517578125e-05
+            },
+            "split3d_s4": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 3.0517578125e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 3.0517578125e-05
+            },
+            "split3d_s8": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 3.0517578125e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 3.0517578125e-05
+            },
+            "split3d_s16": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            },
+            "split3d_s32": {
+              "repro_run_to_run": true,
+              "eq_verify_row": false,
+              "maxdiff_vs_verify_row": 6.103515625e-05,
+              "eq_blanket": false,
+              "maxdiff_vs_blanket": 6.103515625e-05
+            }
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.00244140625
+          }
+        }
+      }
+    }
+  ],
+  "kernel_is_batch_invariant_at_import": false,
+  "elapsed_s": 11.04692006111145,
+  "summary": {
+    "rep_ctx": 512,
+    "drafter_forward_us_per_arm": {
+      "blanket_2d": 216.0414766666667,
+      "fixed2d": 216.05232333333313,
+      "split3d_s1": 260.7790933333335,
+      "split3d_s2": 142.73067999999967,
+      "split3d_s4": 83.43897000000028,
+      "split3d_s8": 55.29869999999999,
+      "split3d_s16": 45.63818333333302,
+      "split3d_s32": 43.80443666666625
+    },
+    "blanket_us": 216.0414766666667,
+    "floor_us_s16": 45.63818333333302,
+    "fixed_split_byte_identical_feasible": 0,
+    "split_byte_identical": {
+      "1": {
+        "byte_identical_all_ctx": false,
+        "max_maxdiff_vs_verify": 6.103515625e-05
+      },
+      "2": {
+        "byte_identical_all_ctx": false,
+        "max_maxdiff_vs_verify": 0.0001220703125
+      },
+      "4": {
+        "byte_identical_all_ctx": false,
+        "max_maxdiff_vs_verify": 0.0001220703125
+      },
+      "8": {
+        "byte_identical_all_ctx": false,
+        "max_maxdiff_vs_verify": 0.0001220703125
+      },
+      "16": {
+        "byte_identical_all_ctx": false,
+        "max_maxdiff_vs_verify": 0.0001220703125
+      },
+      "32": {
+        "byte_identical_all_ctx": false,
+        "max_maxdiff_vs_verify": 0.0001220703125
+      }
+    },
+    "split_occupancy_recovers": {
+      "1": false,
+      "2": true,
+      "4": true,
+      "8": true,
+      "16": true,
+      "32": true
+    },
+    "feasible_counts": [],
+    "blanket_closes_319": true,
+    "fixed2d_closes_319": true,
+    "fixed_split_realized_official_equiv": 136.7113019161869,
+    "fixed_split_occupancy_recovery_frac": {
+      "1": -0.26253962462540836,
+      "2": 0.43021936508738967,
+      "4": 0.7781686848462289,
+      "8": 0.9433079227654972,
+      "16": 1.0,
+      "32": 1.0107612161173416
+    },
+    "fixed_split_overhead_frac_measured": 0.041862121880959856,
+    "fixed_split_overhead_frac_literature": [
+      0.244,
+      0.46
+    ],
+    "deeper_kernel_hypothetical_official_equiv": [
+      164.15451243026146,
+      166.35782932519248
+    ],
+    "map_byte_identical": {
+      "retained_fraction": 1.0,
+      "stock_raw_tstep_ms": 13.606812656565694,
+      "rescue_r0_ms": 2.996613731915059,
+      "bi_tax_ms": 4.68,
+      "drafter_attn_ms_683": 4.040547945205479,
+      "verify_attn_ms_683": 0.5473972602739726,
+      "realized_step_ms": 21.191371593960202,
+      "realized_official_equiv": 136.7113019161869,
+      "realized_blanket_official_equiv": 136.7113019161869,
+      "realized_drafter_free_official_equiv": 168.91900117055604,
+      "margin_over_plus10": 0.33330191618691174,
+      "clears_plus10": true,
+      "gap_to_s1prime_683": -23.388698083813097,
+      "gap_to_land684": -50.6386980838131,
+      "blanket_reproduces_pr688_cheap_pin": true
+    },
+    "ceiling_table": {
+      "config_136_71": {
+        "official_equiv": 136.71070470778648,
+        "what": "blanket==fixed2d S=1 serial 2D pin (banked #698)",
+        "byte_identical_to_verify": true,
+        "reachable": true
+      },
+      "fixed_split_byte_identical": {
+        "official_equiv": 136.7113019161869,
+        "what": "NO occupancy-recovering fixed count is byte-identical -> stays at S=1 pin",
+        "byte_identical_to_verify": false,
+        "reachable": true,
+        "best_count": null
+      },
+      "deeper_kernel_hypothetical": {
+        "official_equiv_lo": 164.15451243026146,
+        "official_equiv_hi": 166.35782932519248,
+        "what": "from-scratch both-sides common multi-split kernel @ 24%-46% fixed-split overhead vs dynamic-3D; CHANGES the verify reduction -> re-opens verify greedy-identity vs the AR reference",
+        "byte_identical_to_deployed_2d_verify": false,
+        "reachable": "needs from-scratch kernel + verify re-validation"
+      },
+      "drafter_free_168_92": {
+        "official_equiv": 168.91900117055604,
+        "what": "drafter attn fully free (retained=0) \u2014 UNREACHABLE under strict-#319",
+        "byte_identical_to_verify": false,
+        "reachable": false
+      }
+    },
+    "verdict": {
+      "primary": "FIXED_SPLIT_BREAKS_319",
+      "secondary_lane": "FIXED_SPLIT_NEEDS_DEEPER_KERNEL",
+      "fixed_split_byte_identical_feasible": 0,
+      "hard_ceiling_official_equiv": 136.71070470778648,
+      "headroom_proven_unreachable_official": 32.207699254369146,
+      "rule": "feasible & realized>=158 -> COMFORTABLE; feasible & <158 -> MARGINAL; !feasible -> BREAKS_319 (deeper both-sides kernel = NEEDS_DEEPER_KERNEL)"
+    }
+  },
+  "wandb_run_id": "j7q2oupr"
+}
