@@ -1,0 +1,25 @@
+{
+  "name": "int4-mtp-bi0-surgattn",
+  "description": "int4 W4A16 Gemma-4-E4B target + QAT-matched gemma4_assistant MTP drafter (speculative decoding), run under VLLM_BATCH_INVARIANT=0 (fast kernels) with a surgical force-2D TRITON_ATTN patch: the attention single-pass path is byte-exact between the M=1 AR decode and the M=K spec-verify forwards (M- and seq_len-invariant), so greedy-token identity holds without paying the global batch-invariant 'BI-tax' on every GEMM/RMSNorm/softmax.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}
