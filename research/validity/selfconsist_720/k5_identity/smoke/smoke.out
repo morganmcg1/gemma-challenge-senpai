@@ -1,0 +1,30 @@
+[serve] ar_a: ref_mode=True num_spec=0 eager=1 bi=1 cc=1 -> google/gemma-4-E4B-it-qat-w4a16-ct
+[serve] ar_a ready in 105s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8129 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/validity/selfconsist_720/k5_identity/smoke/ar_a.jsonl --summary-file research/validity/selfconsist_720/k5_identity/smoke/ar_a.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 4 --output-len 64 --seed 1
+decode_records=4
+decode_completion_tokens=256
+decode_summary_file=research/validity/selfconsist_720/k5_identity/smoke/ar_a.summary.json
+[serve] spec: ref_mode=False num_spec=5 eager=1 bi=1 cc=1 -> google/gemma-4-E4B-it-qat-w4a16-ct
+[serve] spec ready in 95s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8129 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file research/validity/selfconsist_720/k5_identity/smoke/spec.jsonl --summary-file research/validity/selfconsist_720/k5_identity/smoke/spec.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 4 --output-len 64 --seed 1
+decode_records=4
+decode_completion_tokens=256
+decode_summary_file=research/validity/selfconsist_720/k5_identity/smoke/spec.summary.json
+
+===== K5 IDENTITY RESULT =====
+{
+  "verdict": "K5_DRAFT_DIRTY",
+  "strict_literal_holds": false,
+  "floor_clean": false,
+  "all_residual_flips_known_ties": false,
+  "residual_flips_not_known_ties": [
+    {
+      "dataset_index": 46,
+      "id": "mmlu_pro-012f0d5c8d",
+      "first_div": 9
+    }
+  ]
+}
+  spec_vs_ar: seq 3/4 match (mismatch 1; first_div pos0=0 postprefill=1)
+  leg ar_a: tps=None wall=21.0s recs=4 health=None
+  leg spec: tps=None wall=16.2s recs=4 health=None

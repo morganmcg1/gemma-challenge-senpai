@@ -1,0 +1,444 @@
+[serve] ar_a: ref_mode=True num_spec=0 eager=1 bi=1 cc=1 -> google/gemma-4-E4B-it-qat-w4a16-ct
+[serve] ar_a ready in 95s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8129 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/selfconsist_720/k5_identity/ar_a.jsonl --summary-file /workspace/senpai/target/research/validity/selfconsist_720/k5_identity/ar_a.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 256 --seed 1
+decode_records=128
+decode_completion_tokens=32768
+decode_summary_file=/workspace/senpai/target/research/validity/selfconsist_720/k5_identity/ar_a.summary.json
+[serve] ar_b: ref_mode=True num_spec=0 eager=1 bi=1 cc=1 -> google/gemma-4-E4B-it-qat-w4a16-ct
+[serve] ar_b ready in 95s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8129 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/selfconsist_720/k5_identity/ar_b.jsonl --summary-file /workspace/senpai/target/research/validity/selfconsist_720/k5_identity/ar_b.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 256 --seed 1
+decode_records=128
+decode_completion_tokens=32768
+decode_summary_file=/workspace/senpai/target/research/validity/selfconsist_720/k5_identity/ar_b.summary.json
+[serve] spec: ref_mode=False num_spec=5 eager=1 bi=1 cc=1 -> google/gemma-4-E4B-it-qat-w4a16-ct
+[serve] spec ready in 95s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8129 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/validity/selfconsist_720/k5_identity/spec.jsonl --summary-file /workspace/senpai/target/research/validity/selfconsist_720/k5_identity/spec.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 256 --seed 1
+decode_records=128
+decode_completion_tokens=32768
+decode_summary_file=/workspace/senpai/target/research/validity/selfconsist_720/k5_identity/spec.summary.json
+[serve] gap_probe: ref_mode=True num_spec=0 eager=1 bi=1 cc=1 -> google/gemma-4-E4B-it-qat-w4a16-ct
+[serve] gap_probe ready in 95s
+
+===== K5 IDENTITY RESULT =====
+{
+  "verdict": "K5_DRAFT_DIRTY",
+  "strict_literal_holds": false,
+  "floor_clean": true,
+  "all_residual_flips_known_ties": false,
+  "residual_flips_not_known_ties": [
+    {
+      "dataset_index": 0,
+      "id": "mmlu_pro-000c2031fb",
+      "first_div": 22
+    },
+    {
+      "dataset_index": 2,
+      "id": "mmlu_pro-00193f8f1a",
+      "first_div": 175
+    },
+    {
+      "dataset_index": 3,
+      "id": "mmlu_pro-001c076309",
+      "first_div": 108
+    },
+    {
+      "dataset_index": 6,
+      "id": "mmlu_pro-00283ccffa",
+      "first_div": 146
+    },
+    {
+      "dataset_index": 7,
+      "id": "mmlu_pro-0029a311d9",
+      "first_div": 77
+    },
+    {
+      "dataset_index": 8,
+      "id": "mmlu_pro-0034f38591",
+      "first_div": 36
+    },
+    {
+      "dataset_index": 9,
+      "id": "mmlu_pro-00473cb41c",
+      "first_div": 169
+    },
+    {
+      "dataset_index": 11,
+      "id": "mmlu_pro-005aa2e50a",
+      "first_div": 140
+    },
+    {
+      "dataset_index": 13,
+      "id": "mmlu_pro-006afecaed",
+      "first_div": 27
+    },
+    {
+      "dataset_index": 15,
+      "id": "mmlu_pro-007967631e",
+      "first_div": 95
+    },
+    {
+      "dataset_index": 17,
+      "id": "mmlu_pro-0081aeb9c3",
+      "first_div": 119
+    },
+    {
+      "dataset_index": 18,
+      "id": "mmlu_pro-00996c6808",
+      "first_div": 44
+    },
+    {
+      "dataset_index": 21,
+      "id": "mmlu_pro-00a31c2d18",
+      "first_div": 69
+    },
+    {
+      "dataset_index": 22,
+      "id": "mmlu_pro-00a3fcc287",
+      "first_div": 87
+    },
+    {
+      "dataset_index": 23,
+      "id": "mmlu_pro-00a66b167b",
+      "first_div": 69
+    },
+    {
+      "dataset_index": 24,
+      "id": "mmlu_pro-00aa833125",
+      "first_div": 20
+    },
+    {
+      "dataset_index": 26,
+      "id": "mmlu_pro-00af7f3a6e",
+      "first_div": 41
+    },
+    {
+      "dataset_index": 27,
+      "id": "mmlu_pro-00be15d2e6",
+      "first_div": 0
+    },
+    {
+      "dataset_index": 28,
+      "id": "mmlu_pro-00c0d4c77c",
+      "first_div": 8
+    },
+    {
+      "dataset_index": 30,
+      "id": "mmlu_pro-00ca4f358b",
+      "first_div": 194
+    },
+    {
+      "dataset_index": 31,
+      "id": "mmlu_pro-00cc01bdee",
+      "first_div": 66
+    },
+    {
+      "dataset_index": 33,
+      "id": "mmlu_pro-00df6227d5",
+      "first_div": 43
+    },
+    {
+      "dataset_index": 35,
+      "id": "mmlu_pro-00f43b26ac",
+      "first_div": 133
+    },
+    {
+      "dataset_index": 36,
+      "id": "mmlu_pro-00ff96e757",
+      "first_div": 123
+    },
+    {
+      "dataset_index": 38,
+      "id": "mmlu_pro-0103bcb5b1",
+      "first_div": 186
+    },
+    {
+      "dataset_index": 39,
+      "id": "mmlu_pro-01067be999",
+      "first_div": 19
+    },
+    {
+      "dataset_index": 42,
+      "id": "mmlu_pro-0122522953",
+      "first_div": 6
+    },
+    {
+      "dataset_index": 43,
+      "id": "mmlu_pro-0126e0f8a7",
+      "first_div": 127
+    },
+    {
+      "dataset_index": 44,
+      "id": "mmlu_pro-012ddc1ffc",
+      "first_div": 24
+    },
+    {
+      "dataset_index": 46,
+      "id": "mmlu_pro-012f0d5c8d",
+      "first_div": 9
+    },
+    {
+      "dataset_index": 47,
+      "id": "mmlu_pro-0135836ee0",
+      "first_div": 177
+    },
+    {
+      "dataset_index": 48,
+      "id": "mmlu_pro-01370cf98d",
+      "first_div": 225
+    },
+    {
+      "dataset_index": 51,
+      "id": "mmlu_pro-0151fb8117",
+      "first_div": 3
+    },
+    {
+      "dataset_index": 52,
+      "id": "mmlu_pro-016fd5e6ff",
+      "first_div": 88
+    },
+    {
+      "dataset_index": 53,
+      "id": "mmlu_pro-0171f1222a",
+      "first_div": 47
+    },
+    {
+      "dataset_index": 54,
+      "id": "mmlu_pro-0171fd441d",
+      "first_div": 235
+    },
+    {
+      "dataset_index": 56,
+      "id": "mmlu_pro-017bdb86b2",
+      "first_div": 225
+    },
+    {
+      "dataset_index": 58,
+      "id": "gpqa_diamond-025e20e6e9",
+      "first_div": 49
+    },
+    {
+      "dataset_index": 60,
+      "id": "gpqa_diamond-045347c35e",
+      "first_div": 51
+    },
+    {
+      "dataset_index": 61,
+      "id": "gpqa_diamond-049a3a3426",
+      "first_div": 230
+    },
+    {
+      "dataset_index": 63,
+      "id": "gpqa_diamond-083aa35723",
+      "first_div": 27
+    },
+    {
+      "dataset_index": 64,
+      "id": "gpqa_diamond-089a55e5a3",
+      "first_div": 8
+    },
+    {
+      "dataset_index": 66,
+      "id": "gpqa_diamond-0c38e0dd0d",
+      "first_div": 52
+    },
+    {
+      "dataset_index": 67,
+      "id": "gpqa_diamond-0caf81b8c8",
+      "first_div": 191
+    },
+    {
+      "dataset_index": 68,
+      "id": "gpqa_diamond-0dbcc69ff3",
+      "first_div": 83
+    },
+    {
+      "dataset_index": 70,
+      "id": "gpqa_diamond-11464d18e1",
+      "first_div": 221
+    },
+    {
+      "dataset_index": 71,
+      "id": "gpqa_diamond-123161632f",
+      "first_div": 173
+    },
+    {
+      "dataset_index": 72,
+      "id": "gpqa_diamond-126561d6b5",
+      "first_div": 93
+    },
+    {
+      "dataset_index": 73,
+      "id": "gpqa_diamond-13e7c71f8a",
+      "first_div": 122
+    },
+    {
+      "dataset_index": 75,
+      "id": "gpqa_diamond-14a2ed1ddc",
+      "first_div": 22
+    },
+    {
+      "dataset_index": 76,
+      "id": "gpqa_diamond-16464cac70",
+      "first_div": 206
+    },
+    {
+      "dataset_index": 77,
+      "id": "gpqa_diamond-16bcf4c712",
+      "first_div": 33
+    },
+    {
+      "dataset_index": 79,
+      "id": "gpqa_diamond-183797b844",
+      "first_div": 194
+    },
+    {
+      "dataset_index": 80,
+      "id": "gpqa_diamond-188c5d2778",
+      "first_div": 60
+    },
+    {
+      "dataset_index": 81,
+      "id": "gpqa_diamond-18c1c5c103",
+      "first_div": 15
+    },
+    {
+      "dataset_index": 83,
+      "id": "gpqa_diamond-1a5b0ea82d",
+      "first_div": 31
+    },
+    {
+      "dataset_index": 87,
+      "id": "gpqa_diamond-1f101bccd2",
+      "first_div": 75
+    },
+    {
+      "dataset_index": 89,
+      "id": "gpqa_diamond-20d48d5f0a",
+      "first_div": 2
+    },
+    {
+      "dataset_index": 92,
+      "id": "gpqa_diamond-2413c551ec",
+      "first_div": 107
+    },
+    {
+      "dataset_index": 93,
+      "id": "gpqa_diamond-254c10ac4f",
+      "first_div": 71
+    },
+    {
+      "dataset_index": 94,
+      "id": "gpqa_diamond-2662eff7a6",
+      "first_div": 35
+    },
+    {
+      "dataset_index": 95,
+      "id": "gpqa_diamond-27ae63a859",
+      "first_div": 104
+    },
+    {
+      "dataset_index": 97,
+      "id": "gpqa_diamond-29e6a1db07",
+      "first_div": 220
+    },
+    {
+      "dataset_index": 98,
+      "id": "gpqa_diamond-29ffae74d2",
+      "first_div": 30
+    },
+    {
+      "dataset_index": 102,
+      "id": "gpqa_diamond-2e6a2497fe",
+      "first_div": 24
+    },
+    {
+      "dataset_index": 104,
+      "id": "gpqa_diamond-32bdeb2d67",
+      "first_div": 84
+    },
+    {
+      "dataset_index": 105,
+      "id": "gpqa_diamond-339602fd0a",
+      "first_div": 122
+    },
+    {
+      "dataset_index": 106,
+      "id": "gpqa_diamond-35cf9161cc",
+      "first_div": 104
+    },
+    {
+      "dataset_index": 107,
+      "id": "gpqa_diamond-364ddb1397",
+      "first_div": 76
+    },
+    {
+      "dataset_index": 108,
+      "id": "gpqa_diamond-3785b9c93c",
+      "first_div": 138
+    },
+    {
+      "dataset_index": 109,
+      "id": "gpqa_diamond-40b2b50a3c",
+      "first_div": 188
+    },
+    {
+      "dataset_index": 110,
+      "id": "gpqa_diamond-415ea17892",
+      "first_div": 45
+    },
+    {
+      "dataset_index": 111,
+      "id": "gpqa_diamond-41b609bbf5",
+      "first_div": 215
+    },
+    {
+      "dataset_index": 112,
+      "id": "gpqa_diamond-42da82ad5c",
+      "first_div": 138
+    },
+    {
+      "dataset_index": 113,
+      "id": "gpqa_diamond-435ccdce7c",
+      "first_div": 162
+    },
+    {
+      "dataset_index": 114,
+      "id": "aime2026-0015ebeec9",
+      "first_div": 84
+    },
+    {
+      "dataset_index": 116,
+      "id": "aime2026-1eaadd490a",
+      "first_div": 64
+    },
+    {
+      "dataset_index": 117,
+      "id": "aime2026-2822569975",
+      "first_div": 30
+    },
+    {
+      "dataset_index": 119,
+      "id": "aime2026-51697b0daa",
+      "first_div": 231
+    },
+    {
+      "dataset_index": 120,
+      "id": "aime2026-5cc894a0e8",
+      "first_div": 168
+    },
+    {
+      "dataset_index": 125,
+      "id": "aime2026-7968ea2f49",
+      "first_div": 4
+    }
+  ],
+  "confident_genuine_flips": 0,
+  "gap_tau": 0.3,
+  "max_residual_gap_nat": 0.25
+}
+  gap_probe: probed=81 confident@0.3=0 max_gap=0.25
+  floor_ab: seq 128/128 match (mismatch 0; first_div pos0=0 postprefill=0)
+  spec_vs_ar: seq 47/128 match (mismatch 81; first_div pos0=1 postprefill=80)
+  leg ar_a: tps=None wall=1645.2s recs=128 health=True
+  leg ar_b: tps=None wall=1675.2s recs=128 health=True
+  leg spec: tps=None wall=822.4s recs=128 health=True
