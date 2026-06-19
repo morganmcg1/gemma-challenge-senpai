@@ -1,0 +1,42 @@
+{
+  "label": "ref",
+  "extra_env": {
+    "MODEL_ID": "/workspace/gemma_build/int4_g128_lmhead",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "VLLM_BATCH_INVARIANT": "1",
+    "MAX_NUM_SEQS": "1",
+    "VLLM_USE_FLASHINFER_SAMPLER": "0",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "ENFORCE_EAGER": "1",
+    "SENPAI_REFERENCE_MODE": "1",
+    "NUM_SPECULATIVE_TOKENS": "0"
+  },
+  "serve_ready_s": 80.10052013397217,
+  "decode_summary": {
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+    "duration_s": 1230.259621143341,
+    "num_completion_tokens": 24576,
+    "num_prompt_tokens": 11705,
+    "num_records": 48,
+    "output_file": "/workspace/senpai/target/research/validity/strict_clean_attn_locus_743/runs/strict_census_eager/ref.jsonl",
+    "output_len": 512,
+    "request_timeout_s": 180,
+    "required_request_field": "return_token_ids: true",
+    "required_response_field": "choices[0].token_ids",
+    "seed": 1,
+    "token_id_sources": {
+      "choices[0].token_ids": 48
+    },
+    "token_ids_required": true,
+    "tokenizer": "google/gemma-4-E4B-it"
+  },
+  "wall_tps": 19.976271331379884,
+  "num_records": 48,
+  "num_completion_tokens": 24576,
+  "base_dist_positions": 24576,
+  "peak_vram_gb": 20.4521484375,
+  "server_log": "/workspace/senpai/target/research/validity/strict_clean_attn_locus_743/runs/strict_census_eager/ref.server.log",
+  "capture_wall_s": 1341.0120787620544
+}

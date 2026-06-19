@@ -1,0 +1,41 @@
+{
+  "label": "probe_spec_k4",
+  "extra_env": {
+    "MODEL_ID": "/workspace/gemma_build/int4_g128_lmhead",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "VLLM_BATCH_INVARIANT": "1",
+    "MAX_NUM_SEQS": "1",
+    "VLLM_USE_FLASHINFER_SAMPLER": "0",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "NUM_SPECULATIVE_TOKENS": "4",
+    "SENPAI_PR755_DIR": "/workspace/senpai/target/research/validity/strict_clean_attn_locus_743",
+    "SENPAI_NUMSPLITS_PROBE": "/workspace/senpai/target/research/validity/strict_clean_attn_locus_743/runs/numsplits_probe/probe_spec_k4.numsplits.json"
+  },
+  "serve_ready_s": 105.01652908325195,
+  "decode_summary": {
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+    "duration_s": 1.2089428901672363,
+    "num_completion_tokens": 192,
+    "num_prompt_tokens": 644,
+    "num_records": 2,
+    "output_file": "/workspace/senpai/target/research/validity/strict_clean_attn_locus_743/runs/numsplits_probe/probe_spec_k4.jsonl",
+    "output_len": 96,
+    "request_timeout_s": 180,
+    "required_request_field": "return_token_ids: true",
+    "required_response_field": "choices[0].token_ids",
+    "seed": 1,
+    "token_id_sources": {
+      "choices[0].token_ids": 2
+    },
+    "token_ids_required": true,
+    "tokenizer": "google/gemma-4-E4B-it"
+  },
+  "wall_tps": 158.8164350538015,
+  "num_records": 2,
+  "num_completion_tokens": 192,
+  "peak_vram_gb": 19.2294921875,
+  "server_log": "/workspace/senpai/target/research/validity/strict_clean_attn_locus_743/runs/numsplits_probe/probe_spec_k4.server.log",
+  "capture_wall_s": 116.41776132583618
+}

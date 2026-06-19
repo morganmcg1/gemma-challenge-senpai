@@ -1,0 +1,12 @@
+# PR #755 served num_splits=1 / strict-identity (analysis-only). Keep the harness
+# scripts, the aggregate report.json, the per-arm summary/info/rescue JSONs, the
+# decode_outputs.jsonl census evidence, and the server.log (carries the
+# [pr755-force]/[pr755-probe] firing proof). Drop the bulky regenerable
+# teacher-forced base-distribution dump (~15 MB, fully summarized into the report's
+# rescue block), the intermediate ppl jsonl, the per-pid probe shards (the worker
+# value is in report.json + server.log), __pycache__, and transient pids.
+runs/**/ref.base_dist.json
+runs/**/*.ppl.jsonl
+runs/**/*.numsplits.json.pid*.json
+__pycache__/
+*.pid
