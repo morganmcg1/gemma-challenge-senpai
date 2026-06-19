@@ -1,0 +1,237 @@
+{
+  "timestamp": "20260619T140431Z",
+  "submission": "/workspace/senpai/target/submissions/int4_mtp_batchinv",
+  "smoke": false,
+  "num_prompts": 128,
+  "max_tokens": 256,
+  "server_python": "/tmp/senpai-venvs/20f658587e8a6643/bin/python",
+  "config": {
+    "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "drafter": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "num_speculative_tokens": 6,
+    "VLLM_BATCH_INVARIANT": 1,
+    "enforce_eager": true,
+    "max_num_seqs": 1
+  },
+  "e_accept_public": 3.5497952144858806,
+  "tps_public_local": 42.14475839807239,
+  "delta_stock_pct_by_eaccept": {
+    "public": 0.0,
+    "knowledge_mmlupro": -9.093,
+    "reasoning_math": 19.712,
+    "chat_casual": -13.329,
+    "code": 7.706,
+    "multilingual": -13.903
+  },
+  "delta_stock_pct_by_tps": {
+    "public": 0.0,
+    "knowledge_mmlupro": -8.84,
+    "reasoning_math": 19.357,
+    "chat_casual": -11.946,
+    "code": 7.966,
+    "multilingual": -13.187
+  },
+  "aggregate": {
+    "empirical_frac_gt5": 0.4,
+    "mean_delta": -1.7814,
+    "std_delta": 13.309521022185585,
+    "gaussian_tail_p_gt5": 0.3051956593555552,
+    "n_shifted_subsets": 5,
+    "worst_corner_delta": 19.712,
+    "min_delta": -13.903
+  },
+  "spec_log_xcheck": {
+    "intervals": 468,
+    "num_speculative_tokens": 6,
+    "total_accepted_tokens": 141847,
+    "total_drafted_tokens": 334110,
+    "e_accept_interval_mean": 3.571346153846154,
+    "steady_gen_tps_mean": 41.96089743589744,
+    "steady_gen_tps_n": 468,
+    "e_accept_exact": 3.5473107659154173,
+    "draft_acceptance_rate": 0.4245517943192362
+  },
+  "subsets": {
+    "public": {
+      "n_prompts": 128,
+      "errors": 0,
+      "max_tokens": 256,
+      "wall_s": 777.5,
+      "total_output_tokens": 32768,
+      "tps_local": 42.14475839807239,
+      "e_accept": 3.5497952144858806,
+      "accept_rate": 0.4249658690809801,
+      "delta_num_drafts": 9278.0,
+      "delta_num_accepted_tokens": 23657.0,
+      "delta_num_draft_tokens": 55668.0,
+      "counters_before": {
+        "num_drafts": 0.0,
+        "num_accepted_tokens": 0.0,
+        "num_draft_tokens": 0.0
+      },
+      "counters_after": {
+        "num_drafts": 9278.0,
+        "num_accepted_tokens": 23657.0,
+        "num_draft_tokens": 55668.0,
+        "e_accept_mean_acceptance_length": 3.5497952144858806,
+        "draft_acceptance_rate": 0.4249658690809801
+      },
+      "kind": "anchor:mmlu_pro+gpqa+aime (official 128)",
+      "dataset": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json"
+    },
+    "knowledge_mmlupro": {
+      "n_prompts": 128,
+      "errors": 0,
+      "max_tokens": 256,
+      "wall_s": 714.4,
+      "total_output_tokens": 32768,
+      "tps_local": 45.870411095590114,
+      "e_accept": 3.8725859632595383,
+      "accept_rate": 0.47876432720992307,
+      "delta_num_drafts": 8492.0,
+      "delta_num_accepted_tokens": 24394.0,
+      "delta_num_draft_tokens": 50952.0,
+      "counters_before": {
+        "num_drafts": 9278.0,
+        "num_accepted_tokens": 23657.0,
+        "num_draft_tokens": 55668.0,
+        "e_accept_mean_acceptance_length": 3.5497952144858806,
+        "draft_acceptance_rate": 0.4249658690809801
+      },
+      "counters_after": {
+        "num_drafts": 17770.0,
+        "num_accepted_tokens": 48051.0,
+        "num_draft_tokens": 106620.0,
+        "e_accept_mean_acceptance_length": 3.7040517726505344,
+        "draft_acceptance_rate": 0.4506752954417558
+      },
+      "kind": "same-family held-out MCQ",
+      "dataset": "/workspace/senpai/target/data/deltastock_knowledge_mmlupro.json"
+    },
+    "reasoning_math": {
+      "n_prompts": 128,
+      "errors": 0,
+      "max_tokens": 256,
+      "wall_s": 964.1,
+      "total_output_tokens": 32768,
+      "tps_local": 33.98680551835164,
+      "e_accept": 2.850051975051975,
+      "accept_rate": 0.30834199584199584,
+      "delta_num_drafts": 11544.0,
+      "delta_num_accepted_tokens": 21357.0,
+      "delta_num_draft_tokens": 69264.0,
+      "counters_before": {
+        "num_drafts": 17770.0,
+        "num_accepted_tokens": 48051.0,
+        "num_draft_tokens": 106620.0,
+        "e_accept_mean_acceptance_length": 3.7040517726505344,
+        "draft_acceptance_rate": 0.4506752954417558
+      },
+      "counters_after": {
+        "num_drafts": 29314.0,
+        "num_accepted_tokens": 69408.0,
+        "num_draft_tokens": 175884.0,
+        "e_accept_mean_acceptance_length": 3.367742375656683,
+        "draft_acceptance_rate": 0.3946237292761138
+      },
+      "kind": "AIME2024+gsm8k free-response",
+      "dataset": "/workspace/senpai/target/data/deltastock_reasoning_math.json"
+    },
+    "chat_casual": {
+      "n_prompts": 128,
+      "errors": 0,
+      "max_tokens": 256,
+      "wall_s": 694.5,
+      "total_output_tokens": 32768,
+      "tps_local": 47.179379494314226,
+      "e_accept": 4.022935220202513,
+      "accept_rate": 0.5038225367004189,
+      "delta_num_drafts": 8197.0,
+      "delta_num_accepted_tokens": 24779.0,
+      "delta_num_draft_tokens": 49182.0,
+      "counters_before": {
+        "num_drafts": 29314.0,
+        "num_accepted_tokens": 69408.0,
+        "num_draft_tokens": 175884.0,
+        "e_accept_mean_acceptance_length": 3.367742375656683,
+        "draft_acceptance_rate": 0.3946237292761138
+      },
+      "counters_after": {
+        "num_drafts": 37511.0,
+        "num_accepted_tokens": 94187.0,
+        "num_draft_tokens": 225066.0,
+        "e_accept_mean_acceptance_length": 3.5109167977393296,
+        "draft_acceptance_rate": 0.41848613295655496
+      },
+      "kind": "ShareGPT pure-chat (worst-corner dir)",
+      "dataset": "/workspace/senpai/target/data/private_proxy_native_casual.json"
+    },
+    "code": {
+      "n_prompts": 128,
+      "errors": 0,
+      "max_tokens": 256,
+      "wall_s": 844.8,
+      "total_output_tokens": 32768,
+      "tps_local": 38.78732638493371,
+      "e_accept": 3.2762425447316104,
+      "accept_rate": 0.3793737574552684,
+      "delta_num_drafts": 10060.0,
+      "delta_num_accepted_tokens": 22899.0,
+      "delta_num_draft_tokens": 60360.0,
+      "counters_before": {
+        "num_drafts": 37511.0,
+        "num_accepted_tokens": 94187.0,
+        "num_draft_tokens": 225066.0,
+        "e_accept_mean_acceptance_length": 3.5109167977393296,
+        "draft_acceptance_rate": 0.41848613295655496
+      },
+      "counters_after": {
+        "num_drafts": 47571.0,
+        "num_accepted_tokens": 117086.0,
+        "num_draft_tokens": 285426.0,
+        "e_accept_mean_acceptance_length": 3.4612894410460155,
+        "draft_acceptance_rate": 0.4102149068410026
+      },
+      "kind": "ShareGPT code-heavy",
+      "dataset": "/workspace/senpai/target/data/private_proxy_native_code.json"
+    },
+    "multilingual": {
+      "n_prompts": 128,
+      "errors": 0,
+      "max_tokens": 256,
+      "wall_s": 686.9,
+      "total_output_tokens": 32768,
+      "tps_local": 47.7025633397708,
+      "e_accept": 4.043339472068753,
+      "accept_rate": 0.5072232453447924,
+      "delta_num_drafts": 8145.0,
+      "delta_num_accepted_tokens": 24788.0,
+      "delta_num_draft_tokens": 48870.0,
+      "counters_before": {
+        "num_drafts": 47571.0,
+        "num_accepted_tokens": 117086.0,
+        "num_draft_tokens": 285426.0,
+        "e_accept_mean_acceptance_length": 3.4612894410460155,
+        "draft_acceptance_rate": 0.4102149068410026
+      },
+      "counters_after": {
+        "num_drafts": 55716.0,
+        "num_accepted_tokens": 141874.0,
+        "num_draft_tokens": 334296.0,
+        "e_accept_mean_acceptance_length": 3.5463780601622514,
+        "draft_acceptance_rate": 0.42439634336037524
+      },
+      "kind": "non-latin script",
+      "dataset": "/workspace/senpai/target/data/private_proxy_native_multilingual.json"
+    }
+  },
+  "anchors": {
+    "flagship_52_valid_pct": 4.3,
+    "kanna_44_chat_upper_pct": 12.4,
+    "honest_band_pct": [
+      4,
+      9
+    ],
+    "g1_threshold_pct": 5.0
+  }
+}

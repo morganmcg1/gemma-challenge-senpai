@@ -1,0 +1,113 @@
+{
+  "timestamp": "20260619T140054Z",
+  "submission": "/workspace/senpai/target/submissions/int4_mtp_batchinv",
+  "smoke": true,
+  "num_prompts": 4,
+  "max_tokens": 32,
+  "server_python": "/tmp/senpai-venvs/20f658587e8a6643/bin/python",
+  "config": {
+    "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "drafter": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "num_speculative_tokens": 6,
+    "VLLM_BATCH_INVARIANT": 1,
+    "enforce_eager": true,
+    "max_num_seqs": 1
+  },
+  "e_accept_public": 3.58974358974359,
+  "tps_public_local": 24.579873235334798,
+  "delta_stock_pct_by_eaccept": {
+    "public": 0.0,
+    "chat_casual": 11.246
+  },
+  "delta_stock_pct_by_tps": {
+    "public": 0.0,
+    "chat_casual": -20.162
+  },
+  "aggregate": {
+    "empirical_frac_gt5": 1.0,
+    "mean_delta": 11.246,
+    "std_delta": 0.0,
+    "gaussian_tail_p_gt5": 1.0,
+    "n_shifted_subsets": 1,
+    "worst_corner_delta": 11.246,
+    "min_delta": 11.246
+  },
+  "spec_log_xcheck": {
+    "intervals": 1,
+    "num_speculative_tokens": 6,
+    "total_accepted_tokens": 189,
+    "total_drafted_tokens": 480,
+    "e_accept_interval_mean": 3.36,
+    "steady_gen_tps_mean": 14.8,
+    "steady_gen_tps_n": 1,
+    "e_accept_exact": 3.3625,
+    "draft_acceptance_rate": 0.39375
+  },
+  "subsets": {
+    "public": {
+      "n_prompts": 4,
+      "errors": 0,
+      "max_tokens": 32,
+      "wall_s": 5.2,
+      "total_output_tokens": 128,
+      "tps_local": 24.579873235334798,
+      "e_accept": 3.58974358974359,
+      "accept_rate": 0.43162393162393164,
+      "delta_num_drafts": 39.0,
+      "delta_num_accepted_tokens": 101.0,
+      "delta_num_draft_tokens": 234.0,
+      "counters_before": {
+        "num_drafts": 0.0,
+        "num_accepted_tokens": 0.0,
+        "num_draft_tokens": 0.0
+      },
+      "counters_after": {
+        "num_drafts": 39.0,
+        "num_accepted_tokens": 101.0,
+        "num_draft_tokens": 234.0,
+        "e_accept_mean_acceptance_length": 3.58974358974359,
+        "draft_acceptance_rate": 0.43162393162393164
+      },
+      "kind": "anchor:mmlu_pro+gpqa+aime (official 128)",
+      "dataset": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json"
+    },
+    "chat_casual": {
+      "n_prompts": 4,
+      "errors": 0,
+      "max_tokens": 32,
+      "wall_s": 4.3,
+      "total_output_tokens": 128,
+      "tps_local": 29.535569513657762,
+      "e_accept": 3.186046511627907,
+      "accept_rate": 0.3643410852713178,
+      "delta_num_drafts": 43.0,
+      "delta_num_accepted_tokens": 94.0,
+      "delta_num_draft_tokens": 258.0,
+      "counters_before": {
+        "num_drafts": 39.0,
+        "num_accepted_tokens": 101.0,
+        "num_draft_tokens": 234.0,
+        "e_accept_mean_acceptance_length": 3.58974358974359,
+        "draft_acceptance_rate": 0.43162393162393164
+      },
+      "counters_after": {
+        "num_drafts": 82.0,
+        "num_accepted_tokens": 195.0,
+        "num_draft_tokens": 492.0,
+        "e_accept_mean_acceptance_length": 3.3780487804878048,
+        "draft_acceptance_rate": 0.39634146341463417
+      },
+      "kind": "ShareGPT pure-chat (worst-corner dir)",
+      "dataset": "/workspace/senpai/target/data/private_proxy_native_casual.json"
+    }
+  },
+  "anchors": {
+    "flagship_52_valid_pct": 4.3,
+    "kanna_44_chat_upper_pct": 12.4,
+    "honest_band_pct": [
+      4,
+      9
+    ],
+    "g1_threshold_pct": 5.0
+  }
+}
