@@ -1,0 +1,36 @@
+[ab] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[ab] baseline=int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0] candidate=int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1] n=1 workload=2x16 seed=1 -> /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke
+
+[ab:baseline_unpinned] === run 1/1 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 165s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke/baseline_unpinned/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke/baseline_unpinned/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 2 --output-len 16 --seed 1
+decode_records=2
+decode_completion_tokens=32
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke/baseline_unpinned/decode/run00.summary.json
+[ab:baseline_unpinned] run 00: wall_tps=5.667 steady=None E[accept]=None ready=165s sm=1710.0
+
+[ab:bi1_pinned] === run 1/1 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 120s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke/bi1_pinned/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke/bi1_pinned/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 2 --output-len 16 --seed 1
+decode_records=2
+decode_completion_tokens=32
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke/bi1_pinned/decode/run00.summary.json
+[ab:bi1_pinned] run 00: wall_tps=58.132 steady=1.9 E[accept]=3.6666666666666665 ready=120s sm=1710.0
+
+[ab] ===== PAIRED wall_tps A/B — 5.3 min =====
+  A baseline   int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0]
+     wall_tps  n=1 median=5.667 mean=5.667 std=0.000 CV=0.000% range=5.67..5.67
+  B candidate  int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]
+     wall_tps  n=1 median=58.132 mean=58.132 std=0.000 CV=0.000% range=58.13..58.13
+     E[accept] mean=3.6667 CV=0.000%
+  ---- verdict: raw-powered-MDE=0.139% op-threshold=0.20% observed-CI95=±0.000%
+
+  >>> A=5.67 B=58.13 Δ=+925.819% [REAL] (op@N1=0.20%, raw-powered-MDE=0.139%)
+
+[ab] artifacts -> /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/smoke/paired_ab.json

@@ -1,0 +1,229 @@
+=== [697] Run A: core pin A/B (unpinned vs bi1), N=3, 128x512 ===
+[ab] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[ab] baseline=int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0] candidate=int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1] n=3 workload=128x512 seed=1 -> /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core
+
+[ab:unpinned_k5] === run 1/3 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 110s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run00.summary.json
+[ab:unpinned_k5] run 00: wall_tps=225.340 steady=218.27333333333334 E[accept]=3.1927605332295417 ready=110s sm=1710.0
+
+[ab:unpinned_k5] === run 2/3 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 105s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run01.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run01.summary.json
+[ab:unpinned_k5] run 01: wall_tps=225.327 steady=224.6551724137931 E[accept]=3.1872130506984466 ready=105s sm=1710.0
+
+[ab:unpinned_k5] === run 3/3 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 105s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run02.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/unpinned_k5/decode/run02.summary.json
+[ab:unpinned_k5] run 02: wall_tps=225.391 steady=225.20689655172413 E[accept]=3.1897308367466355 ready=105s sm=1710.0
+
+[ab:bi1_pinned_k5] === run 1/3 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 125s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run00.summary.json
+[ab:bi1_pinned_k5] run 00: wall_tps=159.734 steady=158.96341463414635 E[accept]=3.1971693031000537 ready=125s sm=1710.0
+
+[ab:bi1_pinned_k5] === run 2/3 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 125s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run01.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run01.summary.json
+[ab:bi1_pinned_k5] run 01: wall_tps=159.952 steady=158.76829268292684 E[accept]=3.1960688201558747 ready=125s sm=1710.0
+
+[ab:bi1_pinned_k5] === run 3/3 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 125s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run02.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/bi1_pinned_k5/decode/run02.summary.json
+[ab:bi1_pinned_k5] run 02: wall_tps=159.788 steady=158.55609756097562 E[accept]=3.1958869146952 ready=125s sm=1710.0
+
+[ab] ===== PAIRED wall_tps A/B — 47.9 min =====
+  A baseline   int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=0]
+     wall_tps  n=3 median=225.340 mean=225.353 std=0.034 CV=0.015% range=225.33..225.39
+     E[accept] mean=3.1899 CV=0.087%
+  B candidate  int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]
+     wall_tps  n=3 median=159.788 mean=159.825 std=0.113 CV=0.071% range=159.73..159.95
+     E[accept] mean=3.1964 CV=0.022%
+  ---- verdict: raw-powered-MDE=0.080% op-threshold=0.10% observed-CI95=±0.059%
+
+  >>> A=225.34 B=159.79 Δ=-29.090% [REAL] (op@N3=0.10%, raw-powered-MDE=0.080%)
+
+[ab] artifacts -> /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/core/paired_ab.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260619_011817-gkv90epe
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run land/pin-realization-unpinned-vs-bi1
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/gkv90epe
+wandb: updating run metadata; uploading artifact paired_ab_bi1_pinned_k5
+wandb: uploading artifact paired_ab_bi1_pinned_k5
+wandb: uploading code/scripts/profiler/paired_tps_ab.py; uploading wandb-metadata.json; uploading requirements.txt; uploading wandb-summary.json; uploading config.yaml
+wandb: 
+wandb: Run history:
+wandb:         baseline/e_accept_exact █▁▄
+wandb:         baseline/server_ready_s █▁▁
+wandb:    baseline/steady_gen_tps_mean ▁▇█
+wandb:               baseline/wall_tps ▂▁█
+wandb:        candidate/e_accept_exact █▂▁
+wandb:        candidate/server_ready_s █▁▃
+wandb:   candidate/steady_gen_tps_mean █▅▁
+wandb:              candidate/wall_tps ▁█▃
+wandb:                     global_step ▁▂▃▅▆▇█
+wandb: summary/verdict/baseline_cv_pct ▁
+wandb:                             +19 ...
+wandb: 
+wandb: Run summary:
+wandb:       baseline/e_accept_exact 3.18973
+wandb:       baseline/server_ready_s 105.0201
+wandb:  baseline/steady_gen_tps_mean 225.2069
+wandb:             baseline/wall_tps 225.39081
+wandb:      candidate/e_accept_exact 3.19589
+wandb:      candidate/server_ready_s 125.02403
+wandb: candidate/steady_gen_tps_mean 158.5561
+wandb:            candidate/wall_tps 159.78773
+wandb:                    event/name summary
+wandb:              event/run_prefix 
+wandb:                           +23 ...
+wandb: 
+wandb: 🚀 View run land/pin-realization-unpinned-vs-bi1 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/gkv90epe
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260619_011817-gkv90epe/logs
+=== [697] Run A exit=0 ===
+=== [697] Run B: AR anchor (K=0) vs bi1 cross-check, N=2, 128x512 ===
+[ab] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[ab] baseline=int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=0] candidate=int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1] n=2 workload=128x512 seed=1 -> /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor
+
+[ab:ar_m1] === run 1/2 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=0]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '0', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 120s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/ar_m1/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/ar_m1/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/ar_m1/decode/run00.summary.json
+[ab:ar_m1] run 00: wall_tps=77.961 steady=77.74404761904762 E[accept]=None ready=120s sm=1710.0
+
+[ab:ar_m1] === run 2/2 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=0]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '0', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 120s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/ar_m1/decode/run01.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/ar_m1/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/ar_m1/decode/run01.summary.json
+[ab:ar_m1] run 01: wall_tps=77.969 steady=77.90595238095239 E[accept]=None ready=120s sm=1710.0
+
+[ab:bi1_pinned_k5_xcheck] === run 1/2 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 125s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/bi1_pinned_k5_xcheck/decode/run00.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/bi1_pinned_k5_xcheck/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/bi1_pinned_k5_xcheck/decode/run00.summary.json
+[ab:bi1_pinned_k5_xcheck] run 00: wall_tps=159.918 steady=159.8439024390244 E[accept]=3.20282006245121 ready=125s sm=1710.0
+
+[ab:bi1_pinned_k5_xcheck] === run 2/2 (int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]) ===
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '1', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '5', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 125s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/bi1_pinned_k5_xcheck/decode/run01.jsonl --summary-file /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/bi1_pinned_k5_xcheck/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/bi1_pinned_k5_xcheck/decode/run01.summary.json
+[ab:bi1_pinned_k5_xcheck] run 01: wall_tps=159.963 steady=158.73170731707316 E[accept]=3.196430322643915 ready=125s sm=1710.0
+
+[ab] ===== PAIRED wall_tps A/B — 50.7 min =====
+  A baseline   int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=0]
+     wall_tps  n=2 median=77.965 mean=77.965 std=0.006 CV=0.007% range=77.96..77.97
+  B candidate  int4_mtp_batchinv[NUM_SPECULATIVE_TOKENS=5,VLLM_BATCH_INVARIANT=1]
+     wall_tps  n=2 median=159.940 mean=159.940 std=0.032 CV=0.020% range=159.92..159.96
+     E[accept] mean=3.1996 CV=0.141%
+  ---- verdict: raw-powered-MDE=0.098% op-threshold=0.15% observed-CI95=±0.057%
+
+  >>> A=77.96 B=159.94 Δ=+105.144% [REAL] (op@N2=0.15%, raw-powered-MDE=0.098%)
+
+[ab] artifacts -> /workspace/senpai/target/research/walltps_ab/pin_served_realization_697/anchor/paired_ab.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run f4fkl7dv
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260619_020902-f4fkl7dv
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run land/pin-realization-ar-anchor
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/f4fkl7dv
+wandb: updating run metadata; uploading artifact paired_ab_bi1_pinned_k5_xcheck
+wandb: uploading artifact paired_ab_bi1_pinned_k5_xcheck
+wandb: uploading history steps 0-4, summary
+wandb: 
+wandb: Run history:
+wandb:                baseline/server_ready_s █▁
+wandb:           baseline/steady_gen_tps_mean ▁█
+wandb:                      baseline/wall_tps ▁█
+wandb:               candidate/e_accept_exact █▁
+wandb:               candidate/server_ready_s ▁█
+wandb:          candidate/steady_gen_tps_mean █▁
+wandb:                     candidate/wall_tps ▁█
+wandb:                            global_step ▁▃▅▆█
+wandb:        summary/verdict/baseline_cv_pct ▁
+wandb: summary/verdict/baseline_mean_wall_tps ▁
+wandb:                                    +18 ...
+wandb: 
+wandb: Run summary:
+wandb:       baseline/server_ready_s 120.0228
+wandb:  baseline/steady_gen_tps_mean 77.90595
+wandb:             baseline/wall_tps 77.96867
+wandb:      candidate/e_accept_exact 3.19643
+wandb:      candidate/server_ready_s 125.02349
+wandb: candidate/steady_gen_tps_mean 158.73171
+wandb:            candidate/wall_tps 159.96266
+wandb:                    event/name summary
+wandb:              event/run_prefix 
+wandb:                   global_step 4
+wandb:                           +22 ...
+wandb: 
+wandb: 🚀 View run land/pin-realization-ar-anchor at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/f4fkl7dv
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260619_020902-f4fkl7dv/logs
+=== [697] Run B exit=0 ===
+=== [697] ALL DONE rcA=0 rcB=0 ===
