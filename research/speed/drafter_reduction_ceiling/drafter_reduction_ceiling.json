@@ -1,0 +1,349 @@
+{
+  "utc": "2026-06-19T00:50:17Z",
+  "gpu": "NVIDIA A10G",
+  "sm_count": 80,
+  "kernel": "vllm.v1.attention.ops.triton_unified_attention.unified_attention",
+  "vllm_batch_invariant_env": "0",
+  "drafter_geometry": {
+    "n_q_heads": 4,
+    "n_kv_heads": 2,
+    "layer_types": [
+      "sliding",
+      "sliding",
+      "sliding",
+      "full"
+    ],
+    "n_sliding": 3,
+    "n_full": 1,
+    "head_dim": {
+      "sliding": 256,
+      "full": 512
+    },
+    "sliding_window": 512
+  },
+  "arms": {
+    "blanket_2d": null,
+    "fixed2d": 0,
+    "served_3d": 64
+  },
+  "arm_expect_3d": {
+    "blanket_2d": false,
+    "fixed2d": false,
+    "served_3d": true
+  },
+  "n_iter": 300,
+  "ctx_sweep": [
+    256,
+    512,
+    1024
+  ],
+  "rep_ctx": 512,
+  "per_ctx": [
+    {
+      "ctx": 256,
+      "layers": {
+        "sliding": {
+          "device_us": {
+            "blanket_2d": 27.317116666666607,
+            "fixed2d": 27.312799999999964,
+            "served_3d": 8.279570000000092
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 19.34259777294704,
+            "fixed2d": 19.345654784569895,
+            "served_3d": 63.817806963404394
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "served_3d": true
+          },
+          "split_kv_speedup_blanket_over_3d": 3.2993400220864495,
+          "fixed2d_vs_blanket_us_ratio": 0.9998419794182777,
+          "byte_identity": {
+            "repro_run_to_run": {
+              "blanket_2d": true,
+              "fixed2d": true,
+              "served_3d": true
+            },
+            "fixed2d_eq_blanket": true,
+            "served3d_eq_blanket": false,
+            "served3d_vs_blanket_maxdiff": 6.103515625e-05,
+            "fixed2d_eq_verify_row": true,
+            "served3d_eq_verify_row": false,
+            "fixed2d_vs_verify_row_maxdiff": 0.0
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.005096435546875
+          }
+        },
+        "full": {
+          "device_us": {
+            "blanket_2d": 34.31695000000009,
+            "fixed2d": 34.31437666666658,
+            "served_3d": 10.794239999999991
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 30.794345068544764,
+            "fixed2d": 30.796654424632393,
+            "served_3d": 97.90110281038783
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "served_3d": true
+          },
+          "split_kv_speedup_blanket_over_3d": 3.1791909388711126,
+          "fixed2d_vs_blanket_us_ratio": 0.9999250127609386,
+          "byte_identity": {
+            "repro_run_to_run": {
+              "blanket_2d": true,
+              "fixed2d": true,
+              "served_3d": true
+            },
+            "fixed2d_eq_blanket": true,
+            "served3d_eq_blanket": false,
+            "served3d_vs_blanket_maxdiff": 6.103515625e-05,
+            "fixed2d_eq_verify_row": true,
+            "served3d_eq_verify_row": false,
+            "fixed2d_vs_verify_row_maxdiff": 0.0
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.004913330078125
+          }
+        }
+      }
+    },
+    {
+      "ctx": 512,
+      "layers": {
+        "sliding": {
+          "device_us": {
+            "blanket_2d": 50.837253333333344,
+            "fixed2d": 50.838473333333276,
+            "served_3d": 10.464749999999876
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 20.706704846891803,
+            "fixed2d": 20.706207936220505,
+            "served_3d": 100.5921785040266
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "served_3d": true
+          },
+          "split_kv_speedup_blanket_over_3d": 4.857952013505717,
+          "fixed2d_vs_blanket_us_ratio": 1.0000239981493872,
+          "byte_identity": {
+            "repro_run_to_run": {
+              "blanket_2d": true,
+              "fixed2d": true,
+              "served_3d": true
+            },
+            "fixed2d_eq_blanket": true,
+            "served3d_eq_blanket": false,
+            "served3d_vs_blanket_maxdiff": 6.103515625e-05,
+            "fixed2d_eq_verify_row": true,
+            "served3d_eq_verify_row": false,
+            "fixed2d_vs_verify_row_maxdiff": 0.0
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.0034637451171875
+          }
+        },
+        "full": {
+          "device_us": {
+            "blanket_2d": 63.5090600000001,
+            "fixed2d": 63.50930666666673,
+            "served_3d": 14.110950000000145
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 33.150293832092565,
+            "fixed2d": 33.15016507816804,
+            "served_3d": 149.19930975589725
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "served_3d": true
+          },
+          "split_kv_speedup_blanket_over_3d": 4.500693433113961,
+          "fixed2d_vs_blanket_us_ratio": 1.0000038839602827,
+          "byte_identity": {
+            "repro_run_to_run": {
+              "blanket_2d": true,
+              "fixed2d": true,
+              "served_3d": true
+            },
+            "fixed2d_eq_blanket": true,
+            "served3d_eq_blanket": false,
+            "served3d_vs_blanket_maxdiff": 6.103515625e-05,
+            "fixed2d_eq_verify_row": true,
+            "served3d_eq_verify_row": false,
+            "fixed2d_vs_verify_row_maxdiff": 0.0
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.0035858154296875
+          }
+        }
+      }
+    },
+    {
+      "ctx": 1024,
+      "layers": {
+        "sliding": {
+          "device_us": {
+            "blanket_2d": 50.83899666666674,
+            "fixed2d": 50.83543666666665,
+            "served_3d": 13.259226666666782
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 20.705994787859346,
+            "fixed2d": 20.70744482638129,
+            "served_3d": 79.39165883983108
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "served_3d": true
+          },
+          "split_kv_speedup_blanket_over_3d": 3.834235430522818,
+          "fixed2d_vs_blanket_us_ratio": 0.9999299750145852,
+          "byte_identity": {
+            "repro_run_to_run": {
+              "blanket_2d": true,
+              "fixed2d": true,
+              "served_3d": true
+            },
+            "fixed2d_eq_blanket": true,
+            "served3d_eq_blanket": false,
+            "served3d_vs_blanket_maxdiff": 6.103515625e-05,
+            "fixed2d_eq_verify_row": true,
+            "served3d_eq_verify_row": false,
+            "fixed2d_vs_verify_row_maxdiff": 0.0
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.0035400390625
+          }
+        },
+        "full": {
+          "device_us": {
+            "blanket_2d": 122.05568000000002,
+            "fixed2d": 122.05451000000001,
+            "served_3d": 19.563843333333438
+          },
+          "achieved_gbps_total": {
+            "blanket_2d": 34.430974453626405,
+            "fixed2d": 34.43130450484788,
+            "served_3d": 214.80932597940338
+          },
+          "used_3d_predicted": {
+            "blanket_2d": false,
+            "fixed2d": false,
+            "served_3d": true
+          },
+          "split_kv_speedup_blanket_over_3d": 6.238839573614764,
+          "fixed2d_vs_blanket_us_ratio": 0.9999904142109567,
+          "byte_identity": {
+            "repro_run_to_run": {
+              "blanket_2d": true,
+              "fixed2d": true,
+              "served_3d": true
+            },
+            "fixed2d_eq_blanket": true,
+            "served3d_eq_blanket": false,
+            "served3d_vs_blanket_maxdiff": 3.0517578125e-05,
+            "fixed2d_eq_verify_row": true,
+            "served3d_eq_verify_row": false,
+            "fixed2d_vs_verify_row_maxdiff": 0.0
+          },
+          "sdpa_validation": {
+            "max_abs_err": 6.103515625e-05,
+            "ref_abs_mean": 0.0025482177734375
+          }
+        }
+      }
+    }
+  ],
+  "kernel_is_batch_invariant_at_import": false,
+  "elapsed_s": 3.681521415710449,
+  "summary": {
+    "rep_ctx": 512,
+    "drafter_forward_us_per_arm": {
+      "blanket_2d": 216.02082000000013,
+      "fixed2d": 216.02472666666657,
+      "served_3d": 45.505199999999775
+    },
+    "cost_table": {
+      "reduction_option": {
+        "blanket_num_splits_1": {
+          "thr": null,
+          "path": "2D",
+          "drafter_forward_us": 216.02082000000013,
+          "drafter_m1_attn_pin_ms_server": 0.9832000000000001,
+          "closes_319": true
+        },
+        "fixed2d_MLGS2D_0": {
+          "thr": 0,
+          "path": "2D (degenerate at num_seqs=1)",
+          "drafter_forward_us": 216.02472666666657,
+          "drafter_m1_attn_pin_ms_server": 0.9832225259988877,
+          "closes_319": true
+        },
+        "unpinned_autotuned_3d": {
+          "thr": 64,
+          "path": "3D split-KV (break floor)",
+          "drafter_forward_us": 45.505199999999775,
+          "drafter_m1_attn_pin_ms_server": 0.0,
+          "closes_319": false
+        }
+      },
+      "blanket_pin_us": 170.51562000000035,
+      "fixed2d_pin_us": 170.5195266666668,
+      "retained_fraction": 1.000022910902042
+    },
+    "fixed2d_drafter_m1_attn_pin_ms": 0.9832225259988877,
+    "blanket_drafter_m1_attn_pin_ms": 0.9832000000000001,
+    "fixed2d_drafter_attn_pin_ms_ksummed": 4.916112629994439,
+    "blanket_drafter_attn_pin_ms_ksummed": 4.916,
+    "retained_fraction": 1.000022910902042,
+    "fixed2d_closes_319": true,
+    "served_3d_breaks_319": true,
+    "mapping": {
+      "retained_fraction": 1.000022910902042,
+      "stock_raw_tstep_ms": 13.606812656565694,
+      "rescue_r0_ms": 2.996613731915059,
+      "bi_tax_ms": 4.68,
+      "drafter_attn_ms_683": 4.040547945205479,
+      "verify_attn_ms_683": 0.5473972602739726,
+      "realized_fixed2d_step_ms": 21.191464166558372,
+      "realized_fixed2d_official_equiv": 136.71070470778648,
+      "realized_blanket_official_equiv": 136.7113019161869,
+      "realized_drafter_free_official_equiv": 168.91900117055604,
+      "headroom_recovered_official": -0.000597208400421323,
+      "headroom_available_official": 32.207699254369146,
+      "margin_over_plus10": 0.3327047077864904,
+      "clears_plus10": true,
+      "gap_to_s1prime_683": -23.389295292213518,
+      "gap_to_land684": -50.63929529221352,
+      "blanket_reproduces_pr688_cheap_pin": true
+    },
+    "realized_fixed2d_official_equiv": 136.71070470778648,
+    "verdict": {
+      "primary": "FIXED2D_DEGENERATE_ON_M1",
+      "no_config_reachable_cheap_reduction": true,
+      "corollary": "NO_CONFIG_REACHABLE_CHEAP_REDUCTION",
+      "retained_fraction": 1.000022910902042,
+      "fixed2d_closes_319": true,
+      "served_3d_breaks_319": true,
+      "rule": "closes_319 & retained>=0.85 -> DEGENERATE; closes_319 & retained<=0.5 -> CHEAPER; !closes_319 -> BREAKS_319"
+    }
+  },
+  "wandb_run_id": "nov6tc53"
+}
