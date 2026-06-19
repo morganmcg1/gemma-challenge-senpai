@@ -102,7 +102,9 @@ def _bvn_p_both_below(a: float, b: float, rho: float, *, n: int = 4000) -> float
     pdf = np.exp(-0.5 * xs * xs) / sqrt(2.0 * np.pi)
     denom = sqrt(1.0 - rho * rho)
     cdf = 0.5 * (1.0 + np.vectorize(erf)((b - rho * xs) / (denom * sqrt(2.0))))
-    trapz = getattr(np, "trapezoid", np.trapz)  # np>=2.0 renamed trapz->trapezoid
+    # np>=2.0 renamed trapz->trapezoid and REMOVED np.trapz; reference np.trapz lazily
+    # (the getattr-default form evaluated np.trapz eagerly -> AttributeError on np>=2.0).
+    trapz = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
     return float(trapz(pdf * cdf, xs))
 
 
