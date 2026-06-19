@@ -1,60 +1,136 @@
 {
-  "fire": {
-    "gsm8k": {
-      "acc": 0.8666666666666667,
-      "n_correct": 260,
-      "n": 300,
-      "min_tokens": 8
+  "arms": {
+    "fire": {
+      "gsm8k": {
+        "acc": 0.8666666666666667,
+        "n_correct": 260,
+        "n": 300,
+        "min_tokens": 8
+      },
+      "mmlu_pro": {
+        "acc": 0.632,
+        "n_correct": 158,
+        "n": 250,
+        "min_tokens": 8,
+        "empty_rate": 0.0
+      },
+      "aime": {
+        "maj_k_acc": 0.36666666666666664,
+        "mean_pass_rate": 0.3125,
+        "n_correct_maj": 11,
+        "n": 30,
+        "k": 8,
+        "min_tokens": 8
+      }
     },
-    "mmlu_pro": {
-      "acc": 0.632,
-      "n_correct": 158,
-      "n": 250,
-      "min_tokens": 8,
-      "empty_rate": 0.0
+    "base": {
+      "gsm8k": {
+        "acc": 0.8766666666666667,
+        "n_correct": 263,
+        "n": 300,
+        "min_tokens": 8
+      },
+      "mmlu_pro": {
+        "acc": 0.628,
+        "n_correct": 157,
+        "n": 250,
+        "min_tokens": 8,
+        "empty_rate": 0.0
+      },
+      "aime": {
+        "maj_k_acc": 0.36666666666666664,
+        "mean_pass_rate": 0.30833333333333335,
+        "n_correct_maj": 11,
+        "n": 30,
+        "k": 8,
+        "min_tokens": 8
+      }
     },
-    "aime": {
-      "maj_k_acc": 0.36666666666666664,
-      "mean_pass_rate": 0.3125,
-      "n_correct_maj": 11,
-      "n": 30,
-      "k": 8,
-      "min_tokens": 8
+    "bf16": {
+      "gsm8k": {
+        "acc": 0.8933333333333333,
+        "n_correct": 268,
+        "n": 300,
+        "min_tokens": 8
+      },
+      "mmlu_pro": {
+        "acc": 0.644,
+        "n_correct": 161,
+        "n": 250,
+        "min_tokens": 8,
+        "empty_rate": 0.0
+      },
+      "aime": {
+        "maj_k_acc": 0.4,
+        "mean_pass_rate": 0.3541666666666667,
+        "n_correct_maj": 12,
+        "n": 30,
+        "k": 8,
+        "min_tokens": 8
+      }
     }
   },
-  "base": {
+  "per_task": {
     "gsm8k": {
-      "acc": 0.8766666666666667,
-      "n_correct": 263,
-      "n": 300,
-      "min_tokens": 8
+      "fire": 0.8666666666666667,
+      "base": 0.8766666666666667,
+      "bf16": 0.8933333333333333,
+      "specdec_factor": 98.85931558935361,
+      "int4_quant_factor": 98.13432835820896,
+      "fire_pct_of_bf16": 97.01492537313433,
+      "product_check": 97.01492537313433
     },
     "mmlu_pro": {
-      "acc": 0.628,
-      "n_correct": 157,
-      "n": 250,
-      "min_tokens": 8,
-      "empty_rate": 0.0
+      "fire": 0.632,
+      "base": 0.628,
+      "bf16": 0.644,
+      "specdec_factor": 100.63694267515923,
+      "int4_quant_factor": 97.51552795031056,
+      "fire_pct_of_bf16": 98.13664596273293,
+      "product_check": 98.13664596273291
     },
-    "aime": {
-      "maj_k_acc": 0.36666666666666664,
-      "mean_pass_rate": 0.30833333333333335,
-      "n_correct_maj": 11,
-      "n": 30,
-      "k": 8,
-      "min_tokens": 8
+    "aime_maj_k": {
+      "fire": 0.36666666666666664,
+      "base": 0.36666666666666664,
+      "bf16": 0.4,
+      "specdec_factor": 100.0,
+      "int4_quant_factor": 91.66666666666666,
+      "fire_pct_of_bf16": 91.66666666666666,
+      "product_check": 91.66666666666666
+    },
+    "aime_mean_pass_rate": {
+      "fire": 0.3125,
+      "base": 0.30833333333333335,
+      "bf16": 0.3541666666666667,
+      "specdec_factor": 101.35135135135134,
+      "int4_quant_factor": 87.05882352941177,
+      "fire_pct_of_bf16": 88.23529411764706,
+      "product_check": 88.23529411764704
     }
   },
-  "pct_of_base": {
-    "gsm8k": 98.85931558935361,
-    "mmlu_pro": 100.63694267515923,
-    "aime_maj_k": 100.0,
-    "aime_mean_pass_rate": 101.35135135135134
+  "headline_panel_mean": {
+    "specdec_factor_panel_mean": 100.21190240396605,
+    "int4_quant_factor_panel_mean": 93.5938366261495,
+    "fire_pct_of_bf16_panel_mean": 93.76338303004525,
+    "product_of_panel_means": 93.79216421592437
+  },
+  "primary_metric": {
+    "name": "fire_pct_of_bf16_panel_mean",
+    "value": 93.76338303004525
+  },
+  "denominator": {
+    "bf16_model_id": "google/gemma-4-E4B-it",
+    "why": "google/gemma-4-E4B-it is the original full-precision instruct model Google released; the int4-QAT submission (google/gemma-4-E4B-it-qat-w4a16-ct) descends from it. It is the denominator a skeptical blog reader means by 'the original model', so fire_pct_of_bf16 = '% of the original full-precision model'.",
+    "alternative": "google/gemma-4-E4B-it-qat-q4_0-unquantized -- the QAT bf16 checkpoint the W4A16 was *directly* quantized from. Against it, int4_quant_factor would isolate W4A16 rounding ALONE; against the plain -it it bundles QAT adaptation + W4A16 (the headline 'int4-QAT quantization' cost)."
   },
   "protocol": {
     "decode": "sampled generation_config.json (T=1.0, top_p=0.95, top_k=64)",
     "eos_guard": "min_tokens=8 (#541)",
-    "base_denominator": "same submission, drafter OFF (SENPAI_REFERENCE_MODE=1) -> isolates the speculative drafter on an identical int4 W4A16 / vLLM 0.22.0 stack"
-  },
-  "headline_panel_mean_pct_of_base": 100.21190240396605
+    "stack": "vLLM 0.22.0 api_server, dtype=bf16, VLLM_BATCH_INVARIANT=1, native torch sampler; one arm at a time on the A10G.",
+    "arms": {
+      "fire": "int4 W4A16 target + MTP drafter ON (num_spec_tokens=6).",
+      "base": "same int4 submission, drafter OFF (SENPAI_REFERENCE_MODE=1).",
+      "bf16": "MODEL_ID=google/gemma-4-E4B-it, drafter OFF, native bf16 (no Marlin)."
+    }
+  }
 }

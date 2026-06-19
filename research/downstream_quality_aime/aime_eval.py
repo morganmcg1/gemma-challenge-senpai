@@ -299,8 +299,26 @@ def chat_completion(
         headers={"Content-Type": "application/json"},
         method="POST",
     )
-    with urllib.request.urlopen(req, timeout=timeout_s) as r:
-        return json.loads(r.read().decode())
+    # Retry transient connection/timeout errors with the SAME request. The seed is
+    # fixed and the stack is batch-invariant (VLLM_BATCH_INVARIANT=1), so a retried
+    # request returns the identical completion -- retry is score-neutral, it only
+    # adds resilience. Without it a single dropped connection or one over-the-timeout
+    # request crashes the entire maj@k run after many minutes (observed on the slow
+    # native-bf16 arm, PR #757). HTTP *status* errors (4xx/5xx) are a real server-side
+    # problem and are NOT retried (re-raised immediately).
+    last_exc: Exception | None = None
+    for attempt in range(4):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout_s) as r:
+                return json.loads(r.read().decode())
+        except urllib.error.HTTPError:
+            raise
+        except (TimeoutError, urllib.error.URLError, ConnectionError) as exc:
+            last_exc = exc
+            if attempt == 3:
+                raise
+            time.sleep(2.0 * (attempt + 1))
+    raise last_exc  # unreachable; satisfies type-checkers
 
 
 def eval_endpoint(

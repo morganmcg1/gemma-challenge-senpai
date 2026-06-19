@@ -1,27 +1,36 @@
 #!/usr/bin/env python3
-"""Served quality dossier for the as-fired int4+MTP-spec-dec fire (PR #753).
+"""Served quality dossier for the as-fired int4+MTP-spec-dec fire (PR #753/#757).
 
-Serves ONE arm of submissions/int4_mtp_batchinv on the local A10G through the
-real serve.py / vLLM 0.22.0 api_server, then runs the MMLU-Pro / GSM8K / AIME
-panel against the live endpoint under the lewtun #31 downstream sampling
-protocol (generation_config.json: T=1.0, top_p=0.95, top_k=64) + the #541
-min_tokens=8 EOS-guard.
+Serves ONE arm on the local A10G through the real serve.py / vLLM 0.22.0
+api_server, then runs the MMLU-Pro / GSM8K / AIME panel against the live endpoint
+under the lewtun #31 downstream sampling protocol (generation_config.json:
+T=1.0, top_p=0.95, top_k=64) + the #541 min_tokens=8 EOS-guard.
 
-Two arms, identical stack / checkpoint / kernels -- the ONLY difference is the
-speculative drafter, so the base is a perfectly-matched denominator for "%-of-
-base reasoning retained by the spec-dec fire":
+Three arms, identical eval knobs / vLLM 0.22.0 stack / dtype=bf16:
 
-  * --arm fire  : as-fired (drafter ON, NUM_SPECULATIVE_TOKENS=6).
-  * --arm base  : SENPAI_REFERENCE_MODE=1 forces num_speculative_tokens=0
-                  (drafter OFF, plain int4 M=1 AR) on the SAME submission.
+  * --arm fire  : submissions/int4_mtp_batchinv as-fired (int4 W4A16 target,
+                  drafter ON, NUM_SPECULATIVE_TOKENS=6).
+  * --arm base  : SAME int4 submission, SENPAI_REFERENCE_MODE=1 forces
+                  num_speculative_tokens=0 (drafter OFF, plain int4 M=1 AR).
+  * --arm bf16  : full-precision bf16 denominator -- MODEL_ID overridden to the
+                  original released instruct model (google/gemma-4-E4B-it,
+                  --bf16-model), drafter OFF, served through the SAME serve.py
+                  (native bf16, no Marlin). This is the "% of the original
+                  full-precision model" denominator the blog wants.
 
-One server load drives all three evals via --base-url (the int4 target + KV
-cache fills the A10G, so one arm at a time). MAX_NUM_SEQS is raised for eval
-tractability; VLLM_BATCH_INVARIANT=1 (set by the manifest) + per-request seeds
-keep each request's decode batch-invariant, so the score is unchanged by batch
-size and the fire/base arms are matched. VLLM_USE_FLASHINFER_SAMPLER=0 selects
-the torch-native top-k/top-p sampler (this box's CUDA toolkit ships no curand.h
-for the flashinfer JIT sampler; native sampling is numerically standard).
+fire/base differ ONLY in the speculative drafter (specdec_factor = fire/base);
+base/bf16 differ ONLY in W4A16+QAT quantization (int4_quant_factor = base/bf16);
+the product gives fire_pct_of_bf16 = the complete %-of-original retained by the
+fast submission.
+
+One server load drives all three evals via --base-url, so one arm at a time (the
+16 GB bf16 weights need more KV headroom than the ~4 GB int4 target -- use
+--gpu-mem-util / a smaller --max-num-seqs if the bf16 arm OOMs). MAX_NUM_SEQS is
+raised for eval tractability; VLLM_BATCH_INVARIANT=1 (set by the manifest) +
+per-request seeds keep each request's decode batch-invariant, so the score is
+unchanged by batch size and the arms are matched. VLLM_USE_FLASHINFER_SAMPLER=0
+selects the torch-native top-k/top-p sampler (this box's CUDA toolkit ships no
+curand.h for the flashinfer JIT sampler; native sampling is numerically standard).
 """
 from __future__ import annotations
 
@@ -73,12 +82,30 @@ def run(cmd: list[str], log: Path) -> int:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--arm", required=True, choices=["fire", "base"])
+    ap.add_argument("--arm", required=True, choices=["fire", "base", "bf16"])
     ap.add_argument("--smoke", action="store_true", help="tiny limits to de-risk the stack")
     ap.add_argument("--max-num-seqs", type=int, default=16)
+    ap.add_argument("--bf16-model", default="google/gemma-4-E4B-it",
+                    help="full-precision bf16 denominator for --arm bf16: the original "
+                         "released instruct model the int4-QAT submission descends from")
+    ap.add_argument("--gpu-mem-util", default=None,
+                    help="override GPU_MEMORY_UTILIZATION (e.g. 0.92); the 16 GB bf16 "
+                         "weights need more KV headroom than the ~4 GB int4 target")
     ap.add_argument("--mmlu-n", type=int, default=250)
     ap.add_argument("--gsm8k-n", type=int, default=300)
     ap.add_argument("--aime-years", default="2024")
+    ap.add_argument("--aime-client-concurrency", type=int, default=None,
+                    help="client_concurrency for the AIME phase (default: --max-num-seqs). "
+                         "AIME issues n=k samples PER request, so client_concurrency*k decode "
+                         "sequences compete for MAX_NUM_SEQS server slots. On a slow arm "
+                         "(native bf16, no Marlin) client_concurrency=max_num_seqs over-"
+                         "subscribes k-fold (16*8=128 seqs for 16 slots) and a single request's "
+                         "wait can exceed --aime-request-timeout-s. Set 2 so 2*8=16 == "
+                         "max_num_seqs (exactly fills the server, ~1-wave per-request latency). "
+                         "Score is client_concurrency-invariant (VLLM_BATCH_INVARIANT=1), so "
+                         "this is a pure dispatch knob -- the arm stays matched to fire/base.")
+    ap.add_argument("--aime-request-timeout-s", type=int, default=1200,
+                    help="per-request client timeout for the AIME phase; slow arms need headroom.")
     ap.add_argument("--tasks", default="gsm8k,mmlu,aime",
                     help="comma list subset of {gsm8k,mmlu,aime}; AIME last (most expensive)")
     ap.add_argument("--outdir", default=str(ROOT / "research/fire_served_quality_dossier"))
@@ -104,6 +131,16 @@ def main() -> int:
     }
     if args.arm == "base":
         extra_env["SENPAI_REFERENCE_MODE"] = "1"  # drafter OFF -> matched denominator
+    if args.arm == "bf16":
+        # Full-precision bf16 denominator: serve the original released instruct
+        # model through the SAME vLLM 0.22.0 api_server / serve.py / dtype=bf16
+        # stack, drafter OFF. Overriding MODEL_ID is enough -- the bf16 checkpoint
+        # carries no quantization_config, so vLLM loads native bf16 (no Marlin);
+        # the spec-decode attn-group patch is a no-op with the drafter off.
+        extra_env["SENPAI_REFERENCE_MODE"] = "1"  # drafter OFF
+        extra_env["MODEL_ID"] = args.bf16_model
+    if args.gpu_mem_util:
+        extra_env["GPU_MEMORY_UTILIZATION"] = str(args.gpu_mem_util)
 
     server_log = outdir / f"server_{tag}.log"
     print(f"[dossier] arm={args.arm} smoke={args.smoke} extra_env={extra_env}", flush=True)
@@ -146,13 +183,15 @@ def main() -> int:
             ], outdir / f"_eval_mmlu_{tag}.log")
 
         if "aime" in tasks:
+            aime_cc = args.aime_client_concurrency or args.max_num_seqs
             rcs["aime"] = run([
                 EVAL_PY, str(AIME), "--base-url", base, "--model", "gemma-4-e4b-it",
                 "--label", tag, "--years", args.aime_years, "--k", "8",
                 "--temperature", "1.0", "--top-p", "0.95", "--top-k", "64",
                 "--max-tokens", "3072", "--min-tokens", "8", "--seed", "1234",
                 "--no-thinking", "--max-num-seqs", str(args.max_num_seqs),
-                "--client-concurrency", str(args.max_num_seqs),
+                "--client-concurrency", str(aime_cc),
+                "--request-timeout-s", str(args.aime_request_timeout_s),
                 "--out", str(outdir / f"{tag}_aime.json"), *limit_aime,
             ], outdir / f"_eval_aime_{tag}.log")
 
