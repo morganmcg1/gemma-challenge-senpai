@@ -28,8 +28,13 @@ int4-body AIME/GPQA gap, ubel #672/#679, wirbel #682).
 
 Pin tiers (triton_unified_attention 2D/3D selector, vllm 0.22.0):
     use_3d = not (... or max_seqlen_q>1 or num_seqs>seq_threshold_3D or is_batch_invariant)
-  - fixed2d: MIN_LAUNCH_GRID_SIZE_2D=0 -> seq_threshold_3D=0 -> M=1 decode (num_seqs=1>0)
-    flips to the 2D single-pass path; VLLM_BATCH_INVARIANT=0 (attention-only, faster tier).
+  - fixed2d: override seq_threshold_3D=0 at the unified_attention call site so the M=1
+    decode (num_seqs>=1 > 0) takes the 2D single-pass path, matching the M>=2 verify
+    forward; VLLM_BATCH_INVARIANT=0 (attention-only, faster tier). NOTE: land #684's
+    MIN_LAUNCH_GRID_SIZE_2D=0 module patch alone does NOT reach the deployed decode --
+    the builder rounds seq_threshold_3D to the nearest cudagraph capture size (>=1), so
+    the num_seqs=1 decode stayed on 3D split-KV (PR #690 first cut: threshold 7, break
+    53.78% ~= un-pinned). The call-site override (_stark_pin.py) is the robust pin.
   - bi1: VLLM_BATCH_INVARIANT=1 -> is_batch_invariant forces 2D unconditionally for every
     forward (the byte-identical floor tier; also pins marlin/layernorm/etc).
   - none: control (no pin) -> reproduces the unpinned break.
@@ -272,8 +277,18 @@ def main() -> int:
 
     cand_proof = cand.get("proof", {})
     ref_proof = ref.get("proof", {})
+    # pin_active is the lawine #681 "pin reached the forward" gate. For fixed2d the
+    # authoritative evidence is the OBSERVED branch: the M=1 decode AND M>=2 verify
+    # forwards must both have taken 2D single-pass on BOTH arms (the constant being
+    # patched to 0 is necessary but NOT sufficient -- the builder's cudagraph rounding
+    # defeated it in the first cut). For bi1 it is the import-time is_batch_invariant.
     pin_active = bool(
-        (args.pin == "fixed2d" and cand_proof.get("min_launch_after") == 0)
+        (
+            args.pin == "fixed2d"
+            and cand_proof.get("decode_kernel_2d") is True
+            and cand_proof.get("verify_kernel_2d") is True
+            and ref_proof.get("decode_kernel_2d") is True
+        )
         or (args.pin == "bi1" and cand_proof.get("is_batch_invariant_at_import"))
         or (args.pin == "none")
     )

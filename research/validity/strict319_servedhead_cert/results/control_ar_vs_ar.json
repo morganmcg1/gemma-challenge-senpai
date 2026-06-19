@@ -1,0 +1,14 @@
+{
+  "control": "AR-vs-AR determinism (two independent bi1 boots, spec OFF)",
+  "purpose": "rule out boot-to-boot nondeterminism as the source of the spec-vs-AR break",
+  "method": "raw completion_token_ids diff, two separate vLLM boots, VLLM_BATCH_INVARIANT=1, num_spec=0, seed=1",
+  "boot_a": "bi1 run (1781827641) AR ref, 128 prompts",
+  "boot_b": "bi1 run (1781831667) AR ref (clean full run, auto-pruned tmp)",
+  "overlap_prompts": 82,
+  "tokens_compared": 41984,
+  "divergent_tokens": 0,
+  "divergent_prompts": 0,
+  "break_rate": 0.0,
+  "conclusion": "AR path is byte-identical across boots -> the 49.91% spec-vs-AR break is a REAL spec divergence, not nondeterminism",
+  "ref_fingerprint_file": "control_ar_bi1_ref_fingerprint.json (id -> completion_token_sha256 for boot_a; reproduce by re-serving --pin bi1 spec-off and matching shas)"
+}
