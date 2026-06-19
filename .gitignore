@@ -87,3 +87,11 @@ research/validity/int4_mtp_spec_quality_panel/**/_inspect_logs/
 research/validity/int4_mtp_spec_quality_panel/*.pid
 research/validity/int4_mtp_spec_quality_panel/*.nohup
 research/validity/int4_mtp_spec_quality_panel/serve.ready
+
+# int4-body #515 gate panel (PR #703, analysis-only): keep the per-seed result
+# JSONs (runs/), CI summaries, panel.json + scripts; drop the bulky inspect_ai
+# .eval transcripts (74M, regenerable -- slim per-problem records are in runs/ +
+# summaries/ and logged as W&B artifacts), serve logs (covered by **/*.log), and
+# transient pidfiles.
+research/int4body_gate_panel/logs/**/*.eval
+research/int4body_gate_panel/logs/*.pid
