@@ -51,6 +51,7 @@ early-warning; firfir-cast known-invalid reads 7.2%). Run it before any spec-sta
 ## Current local baseline in this repo
 - **OFFICIAL FRONTIER (a10g-small HF-Job confirmed — NEW PUBLIC #1) — `submissions/fa2sw_precache_kenyan` (PR #52 launch, lawine; stack from #43) — official a10g-small tps=481.53, ppl=2.3772, 128/128 VALID, all modalities loaded** (job
   `6a2dce05871c005b5352c0b9`, run `results/senpai/fa2sw-precache-kenyan-20260613T213911Z`, W&B `2x9fm2zx`/`fwo8rs05`). Linear MTP K=7 (M=8 verify) + 3D split-KV. **New public #1** vs rock-ai 459.72 (+4.74%); **+13.4%** over the ~424.5 frontier-repro baseline. **The official bar all submissions must beat is now 481.53 TPS.** Private re-run gate: **VERIFIED VALID 2026-06-13 23:04Z** (organizer re-run 460.85 private TPS, Δ 4.3% ≤ 5%, PPL 2.3777, 128/128; kanna #44 chat-proxy 12.4% was a safe upper bound, real drift 4.3%) — public #1 confirmed AND private stability certified.
+- **BEST QUALITY-SAFE NON-STRICT RUNG (SHIPPED 2026-06-20) — `submissions/int4_mtp_bi0_surgattn` (PR #770, #769-approved) — official a10g-small tps=218.02, ppl=2.0058, 128/128 VALID, all modalities** (job `6a3656ef3093dba73ce2ac88`, W&B [`s63tb03x`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/s63tb03x)). int4 + MTP spec-decode K=6 + VLLM_BATCH_INVARIANT=0 + surgical 2D-attn (surgattn). Panel-mean quality = 97.5% of int4 base (MMLU-Pro 0.644 / GSM8K 0.867 / AIME 10/30; GPQA not measured). **+72.5% (+1.7×) over the prior quality-safe rung (int4_g128_lmhead@126.378).** Board post `20260620-093241-798_senpai.md`.
 - **BEST GREEDY-BIT-IDENTICAL AR RUNG (a10g-small HF-Job confirmed) — `submissions/int4_g128_lmhead` (PR #4, lawine) — official a10g-small tps=126.378, ppl=2.019, 128/128 VALID** (job
   `6a2d5a96234ca64b60121aa5`, W&B `905tbujn`). int4 g128 + untied int4 lm_head re-quant, all modalities loaded, greedy-valid (GREEDY_IDENTICAL
   128/128 served-vs-served), same-path OK (gap 0.0000). **2.87× over bf16. 1.32× over PR #3 int4 base.** The strongest rung that *also* passes a strict M=1 greedy-identity bar (the spec frontier above does not — leaderboard-legal per #38, but a different validity class).
@@ -812,3 +813,16 @@ _Last updated: 2026-06-17 (**PR #571 BANK-MERGED — THREE-COMPONENT CENSUS CLOS
   - **Implication for Option B quality gate:** The GPQA-D deficit of int4 body is predominantly genuine precision loss, not a serving artifact. The ~0.02 residual deficit after all recoverable artifacts are removed constrains the Option B quality ceiling: int4-body configurations start from a lower GPQA-D floor than base_fullhead. Any Option B submission must verify GPQA-D ≥ 0.471 on the actual served stack, not inferred from base_fullhead scores.
   - **Serving-side mitigations exhausted:** max_tokens lift is the only known serving-side knob; it recovers 29.5%. Remaining deficit requires model-side improvements (better int4 calibration, GPTQ vs AWQ, per-layer precision mixing).
 - **Artifacts:** `research/int4_body_gpqa_error_analysis/` (land branch).
+
+### 2026-06-20 09:32 UTC — PR #770 (denken/OPERATOR): FIRE bi0 `int4_mtp_bi0_surgattn` — SHIPPED 218.02 TPS / PPL 2.0058 / 128/128 VALID (quality-safe HF submission, human-approved #769)
+
+- **Status:** MERGED. New quality-safe submission bar = **218.02 official TPS.** Supersedes int4_g128_lmhead (126.378) as the quality-safe rung.
+- **Official a10g-small output TPS:** 218.01862859655077
+- **PPL:** 2.005836820420235 (gate ≤ 2.42 ✅)
+- **completed:** 128/128 ✅ | total_tps 330.09 | mean e2e latency 2.35 s
+- **W&B run:** [`s63tb03x`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/s63tb03x) · job `6a3656ef3093dba73ce2ac88`
+- **Config:** int4 W4A16 Marlin + MTP spec-decode (NUM_SPECULATIVE_TOKENS=6) + VLLM_BATCH_INVARIANT=0 + surgical 2D-attn force (surgattn patch, sitecustomize.py). Guard-only serve fix (kanna #177 prometheus route-name guard; fastapi pin proven incompatible with vLLM 0.22.0, dropped #770 commit a8449eb). MAX_NUM_SEQS=1.
+- **Quality panel (wirbel #762, W&B `cfk7flim`):** MMLU-Pro 0.644 / GSM8K 0.867 / AIME 10/30 — panel-mean **97.5% of int4 base** (well inside the ≤10% degradation bar). GPQA not measured for this arm.
+- **Delta vs prior quality-safe:** +72.5% (+1.725×) over int4_g128_lmhead (126.378); +61.1 TPS over int4_mtp_batchinv (~157 strict byte-exact). Drops the strict BI tax (~31%) without measurable quality cost.
+- **Board post:** `20260620-093241-798_senpai.md` (competition message board, 2026-06-20 09:32 UTC). Reported to human on issue #769 (comment 4757176948).
+- **Execution note:** Denken's pod was dead (no container, dead pidfile, worktree on stale #742). OPERATOR executed the fire from #770 head `a8449eb`. Advisor verified all metrics independently against W&B s63tb03x.
