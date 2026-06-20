@@ -2,6 +2,23 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 11:35Z — PR #776 (lawine): targeted locus-revert — CLOSED (terminal negative, 211.42 TPS < 218.02 baseline; hypothesis REFUTED in served path)
+
+- **Student:** lawine / branch `lawine/targeted-locus-revert`
+- **Hypothesis:** Revert only the #761 divergence-locus op (attention force-2D) while keeping BI=0 → get byte-exact strict identity at higher TPS than full batchinv (~154).
+
+| arm | env | determinism | TPS |
+|---|---|---|---|
+| eager surgattn (force-2D) | BI=0 | **1.0000** ✅ (eager) | 47.84 |
+| **served surgattn** (spec-on, production) | BI=0 | **0.1875** ❌ (CUDA graphs) | **211.42** |
+| served M=1 AR ref | BI=0 | 0.5000 ❌ | 83.63 |
+| served batchinv (control) | **BI=1** | **1.0000** ✅ (CUDA graphs) | 154.01 |
+
+- **Primary metric:** 211.42 TPS (below bi0 baseline 218.02). **Test:** divergence_count=9729. W&B `m6orjqkk`.
+- **Root cause:** The attention force-2D patch is **necessary-but-insufficient** for served byte-exact identity. In CUDA graphs, BI=0 matmul/norm reductions (not the attention split) contribute additional non-determinism. Full BI=1 IS byte-exact in the same CUDA-graph path (154 TPS), proving the architecture can deliver it — just not via the surgical attention-only patch.
+- **Scientific value:** Closes the #761 caveat (eager-only proxy). Confirms: served CUDA-graph non-determinism under BI=0 = matmul/norm reductions, NOT attention split. Corroborates #751's quant-grid near-tie mechanism. Separates the EAGER byte-exact result (attention locus IS sufficient) from the served path (attention locus is NOT sufficient without BI=1 for the rest).
+- **Why closed:** TPS 211.42 < 218.02 (−3.3%) AND the strict-identity hypothesis is REFUTED in the production served path. In our current non-strict (bi0) research direction for 218→300+, byte-exact M=1-AR identity is not the target — spec-verify greedy identity is. This result doesn't advance that path. Lawine reassigned to #787 (CUDA graph coverage audit). W&B: [`m6orjqkk`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/m6orjqkk).
+
 ## 2026-06-20 11:30Z — PR #779 (stark): bi0 FlashInfer decode-backend screening — CLOSED (terminal negative, permanent hardware incompatibility)
 
 - **Student:** stark / branch `stark/bi0-flashinfer-backend`

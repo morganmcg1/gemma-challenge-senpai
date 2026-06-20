@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~11:30Z) — BI0 SHIPPED @218 + QUALITY PANEL COMPLETE; PRECACHE/FP8/FLASHINFER KILLED; profiler-driven private-stable 218→300 decomposition, all 8 zero-idle — authoritative; cycle-58/59 below is historical
+## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~11:40Z) — BI0 SHIPPED @218 + QUALITY PANEL COMPLETE; PRECACHE/FP8/FLASHINFER/LOCUS-REVERT KILLED; all 8 zero-idle — authoritative; cycle-58/59 below is historical
 
 ### What shipped (2026-06-20 09:32Z)
 - `int4_mtp_bi0_surgattn` FIRED + OFFICIAL: **218.02 TPS / PPL 2.0058 / 128/128 VALID** (W&B `s63tb03x`, job `6a3656ef3093dba73ce2ac88`). Human-approved #769. +72.5% over int4_g128_lmhead@126.378. Config: int4 W4A16 + MTP K=6 + VLLM_BATCH_INVARIANT=0 + surgattn + prometheus guard.
@@ -26,10 +26,10 @@ Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submi
 | MTP draft-acceptance tuning @ fixed K=6 (draft quality) | med | none | denken #783 | in-flight |
 | MTP K-depth sweep {0,2,4,6,8} (draft depth) | med | low | fern #774 | **blocked** (leaked GPU ctx → reap #780) |
 | LOOPGRAPH + fused-argmax (drafter dispatch ~0.5%) | low | none | kanna #771 | port in-flight (capture-first gate) |
-| surgattn 2D vs 3D attn overhead | low | none (greedy-identity) | wirbel #785 | NEW |
-| MTP drafter GEMM format probe | low | none | stark #786 | NEW |
-| targeted locus revert | — | none | lawine #776 | in-flight |
-| ~~FlashInfer~~ / ~~fp8-KV~~ / ~~precache~~ / ~~osoi5~~ | — | killed/dead | #779, #777, #775/#778, #772 | CLOSED |
+| surgattn 2D vs 3D attn overhead | low | none (greedy-identity) | wirbel #785 | in-flight |
+| MTP drafter GEMM format probe | low | none | stark #786 | in-flight |
+| CUDA graph coverage audit (verify-pass M=7 shape) | low | none | lawine #787 | NEW |
+| ~~locus-revert~~ / ~~FlashInfer~~ / ~~fp8-KV~~ / ~~precache~~ / ~~osoi5~~ | — | killed/dead | #776, #779, #777, #775/#778, #772 | CLOSED |
 
 ### Key constraints
 - **Quality gate (Morgan):** MMLU-Pro ≥ 0.572, GPQA ≥ 0.471, GSM8K ≥ 0.807, AIME ≥ 0.090. Greedy-identity to the bi0 control is the quality proof for numerics-neutral levers.
@@ -38,12 +38,11 @@ Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submi
 - **No autonomous HF launch.** Open approval issue; fire only after human approves.
 - **Private-stable mandate:** any fire MUST be prompt-agnostic — Δ TPS ≤ 5% private re-run gate. Precache / prompt-replay is permanently OFF (program.md:325).
 
-### Fleet status (2026-06-20 ~11:30Z) — all 8 assigned, zero-idle
-- **In-flight:** kanna #771 (loopgraph port), ubel #781 (Marlin GEMM), land #782 (ngram), denken #783 (MTP-accept — pod on old branch as of 08:27Z, watch for #783 pickup), lawine #776 (locus-revert).
-- **New this cycle:** wirbel #785 (surgattn overhead check), stark #786 (drafter GEMM format — GPU has ~19.6 GiB co-tenant, check nvidia-smi first).
-- **GPU-blocked:** fern #774 (leaked ~20.4 GB ctx, reap requested #780).
-- **CLOSED this cycle:** #779 (stark FlashInfer — permanent head_dim=512 incompatibility), #773 (wirbel GPQA panel — MERGED as evidence archive, GPQA 0.4970 ✓).
-- **Next:** watch ubel #781 / land #782 / denken #783 / kanna #771 results; resume fern #774 the instant GPU is reaped. Run the full quality panel + private-Δ≤5% check on any 300+ candidate before proposing a fire.
+### Fleet status (2026-06-20 ~11:40Z) — all 8 assigned, zero-idle
+- **In-flight:** kanna #771 (loopgraph port), ubel #781 (Marlin GEMM), land #782 (ngram), denken #783 (MTP-accept — pod on old branch as of 08:27Z, watch for #783 pickup), wirbel #785 (surgattn overhead), stark #786 (drafter GEMM format — co-tenant 19.6 GiB, check nvidia-smi first), lawine #787 (CUDA graph audit).
+- **GPU-blocked:** fern #774 (CYCLING GPU — oscillates 0↔20437 MiB from external respawner; re-opened #780 with cycling evidence; fern is on HOLD until operator confirms stably-clear GPU >3 min).
+- **CLOSED this cycle (dead-ends confirmed):** #776 (lawine locus-revert — attention locus necessary-but-insufficient in served CUDA graphs; 211 TPS < 218 baseline), #779 (stark FlashInfer — head_dim=512 permanent), #773 (GPQA panel MERGED), #777 (fp8-KV hw-dead), #775/#778 (precache mirage), #772 (osoi5 collapse).
+- **Next:** watch ubel #781 / land #782 / denken #783 / kanna #771 results; resume fern #774 the instant operator confirms cycling GPU stopped. Run the full quality panel + private-Δ≤5% check on any 300+ candidate before proposing a fire.
 
 ---
 
