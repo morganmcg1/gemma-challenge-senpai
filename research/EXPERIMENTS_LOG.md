@@ -2,6 +2,21 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 11:13Z — PR #773 (wirbel): bi0 GPQA-Diamond panel — MERGED as evidence archive ★ bi0 full quality panel COMPLETE
+
+- **Student:** wirbel / branch `wirbel/bi0-gpqa-panel`
+- **Hypothesis:** Measure GPQA-Diamond for the shipped bi0 rung (`int4_mtp_bi0_surgattn`) — Morgan's one missing quality number. Local/analysis-only, no HF Job, no TPS change.
+
+| metric | value | base | retained | gate | verdict |
+|---|---|---|---|---|---|
+| GPQA-Diamond (primary) | **0.4970** | 0.5236 bf16 / 0.4798 int4 | 94.9% bf16 / 103.6% int4 | ≥ 0.471 | **PASS** |
+| MMLU-Pro (sanity, n=100) | 0.5700 | 0.668 (#762) | confounded by 16% trunc @ 2048 tok | — | truncation artifact |
+| W&B | `kredc30c` (group `bi0-gpqa-panel`) | — | — | — | — |
+
+- **Results commentary:** Pooled GPQA 0.4970 from 990 samples (198 items × 5 choice-shuffle seeds, max_tokens=6144). Wilson-95% CI [0.4659, 0.5281]. Per-seed: 0.5303/0.4949/0.4899/0.5000/0.4697 — 4/5 seeds clear the bf16-base bar. Honest thin-margin caveat under the strictest (bf16-base) framing: worst seed 0.4697 and pooled lower bound 0.4659 graze ~0.5pp below the 0.4712 gate. Comfortable pass vs the int4-base denominator (+3.6pp). Bi0 is an int4 submission so the int4-base framing is scientifically correct; the bf16-base framing also passes at the point-estimate level.
+- **MMLU-Pro 0.57 vs 0.644 in #762:** truncation artifact (16% of MMLU items hit 2048-token ceiling; Gemma-4-E4B is verbose, 44% of GPQA items exceed 2048 tokens). NOT a quality regression.
+- **Conclusion:** bi0 quality panel is now COMPLETE on all 4 Morgan axes (MMLU-Pro 0.644 / GSM8K 0.867 / AIME 10/30 / GPQA 0.4970) — all PASS the ≤10% degradation bar. Reported to Morgan on the board (senpai 11:13Z) folded into the dhruv-mishra validation-contract answer. Merged to advisor branch as a reusable evidence archive (panel harness in `research/validity/bi0_gpqa_panel/` for re-use on future 300+ candidates). W&B run: [`kredc30c`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/kredc30c).
+
 ## 2026-06-20 10:50Z — Cycle 60 dispositions: #777 + #772 CLOSED (two private-stable dead-ends confirmed); #771/#774 redirected; #780 outage RETRACTED
 
 - **#777 (ubel) — fp8-KV — CLOSED (negative, hardware-blocked).** Terminal SENPAI-RESULT (`terminal:true`, run `s63tb03x` = bf16 fallback == bi0, zero fp8 delta). fp8-KV is **untestable on A10G sm_86** — a serve-time hardware wall at three independent layers: **L1** vLLM init guard (`CompressedTensorsKVCacheMethod` mis-fires on a W4A16 ckpt with no `kv_cache_scheme` — ubel shipped a correct narrow relaxation that clears it); **L2** attn-forward `assert kv_cache_dtype in {fp8,fp8_e4m3,nvfp4}` rejects `fp8_e5m2`; **L3** Triton sm_86 cannot compile `fp8e4nv` (only `fp8e4b15`/`fp8e5`). Root cause: the two fp8 dtypes Triton emits on sm_86 are exactly the two vLLM's attn refuses; the two it accepts need Ada/Hopper/Blackwell. Re-confirms BASELINE.md dead-end (wirbel #141) + adds the mechanism. `int8_per_token_head` declined (separate path, likely also no sm_86 kernel, lower-EV). Cleanup of `submissions/int4_mtp_bi0_fp8kv/` folded into ubel's next card. Evidence `research/validity/bi0_fp8kv/findings.json`.
