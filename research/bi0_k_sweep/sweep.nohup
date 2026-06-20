@@ -1,0 +1,488 @@
+[ksweep] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[ksweep] === launching child for K=0: /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/scripts/profiler/bi0_k_sweep.py --k 0 --submission int4_mtp_bi0_surgattn --n 3 --num-prompts 128 --output-len 512 --seed 1 --warmup-prompts 8 --warmup-len 128 --wandb-group bi0-k-sweep ===
+
+[ksweep] ===== K=0 (int4_mtp_bi0_surgattn) — serve env override NUM_SPECULATIVE_TOKENS=0, VLLM_BATCH_INVARIANT=0, MAX_NUM_SEQS=1 =====
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '0', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 160s
+[ksweep:k0] warmup decode 8x128 (discarded)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k0/warmup.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k0/warmup.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 128 --seed 1
+decode_records=8
+decode_completion_tokens=1024
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k0/warmup.summary.json
+[ksweep:k0] timed rep 1/3 (offset=16653)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k0/decode/run00.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k0/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k0/decode/run00.summary.json
+[ksweep:k0] rep 00: wall_tps=83.456 E[accept]=— draft_accept=— fp=ea3d9910123a
+[ksweep:k0] timed rep 2/3 (offset=47415)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k0/decode/run01.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k0/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k0/decode/run01.summary.json
+[ksweep:k0] rep 01: wall_tps=83.699 E[accept]=— draft_accept=— fp=88b48381d624
+[ksweep:k0] timed rep 3/3 (offset=78344)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k0/decode/run02.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k0/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k0/decode/run02.summary.json
+[ksweep:k0] rep 02: wall_tps=83.703 E[accept]=— draft_accept=— fp=88b48381d624
+[ppl] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/bi0_k_sweep/k0/ppl.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k0/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.1590188258181935,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43004.61878868422,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/bi0_k_sweep/k0/ppl.jsonl",
+  "ppl": 2.0055160306938853,
+  "prompt_logprobs": 1
+}
+[ksweep:k0] wall_tps median=83.699 CV=0.169% E[accept]=— ppl=2.006 intra_k_identical=False peak_mem=19307MiB -> /workspace/senpai/target/research/bi0_k_sweep/k0/arm.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_125419-e8lhdwkw
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fern/bi0-ksweep-k0
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/e8lhdwkw
+wandb: updating run metadata; uploading artifact bi0_ksweep_k0
+wandb: uploading artifact bi0_ksweep_k0
+wandb: uploading history steps 0-3, summary
+wandb: 
+wandb: Run history:
+wandb:               global_step ▁▃▆█
+wandb:     rep/decode_duration_s █▁▁
+wandb:     rep/sm_clock_mhz_load ▁▁▁
+wandb:              rep/wall_tps ▁██
+wandb:                 summary/K ▁
+wandb: summary/intra_k_identical ▁
+wandb:  summary/peak_gpu_mem_mib ▁
+wandb:               summary/ppl ▁
+wandb:    summary/ppl_within_bar ▁
+wandb:    summary/server_ready_s ▁
+wandb:                        +6 ...
+wandb: 
+wandb: Run summary:
+wandb:                event/name summary
+wandb:          event/run_prefix 
+wandb:               fingerprint ea3d9910123abbf847f7...
+wandb:               global_step 3
+wandb:     rep/decode_duration_s 782.9578
+wandb:     rep/sm_clock_mhz_load 1710
+wandb:              rep/wall_tps 83.70311
+wandb:                 summary/K 0
+wandb: summary/intra_k_identical 0
+wandb:  summary/peak_gpu_mem_mib 19307
+wandb:                        +9 ...
+wandb: 
+wandb: 🚀 View run fern/bi0-ksweep-k0 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/e8lhdwkw
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_125419-e8lhdwkw/logs
+[ksweep] === launching child for K=2: /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/scripts/profiler/bi0_k_sweep.py --k 2 --submission int4_mtp_bi0_surgattn --n 3 --num-prompts 128 --output-len 512 --seed 1 --warmup-prompts 8 --warmup-len 128 --wandb-group bi0-k-sweep ===
+
+[ksweep] ===== K=2 (int4_mtp_bi0_surgattn) — serve env override NUM_SPECULATIVE_TOKENS=2, VLLM_BATCH_INVARIANT=0, MAX_NUM_SEQS=1 =====
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '2', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 165s
+[ksweep:k2] warmup decode 8x128 (discarded)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k2/warmup.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k2/warmup.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 128 --seed 1
+decode_records=8
+decode_completion_tokens=1024
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k2/warmup.summary.json
+[ksweep:k2] timed rep 1/3 (offset=22092)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k2/decode/run00.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k2/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k2/decode/run00.summary.json
+[ksweep:k2] rep 00: wall_tps=174.614 E[accept]=2.312 draft_accept=0.656 fp=04029777472b
+[ksweep:k2] timed rep 2/3 (offset=55265)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k2/decode/run01.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k2/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k2/decode/run01.summary.json
+[ksweep:k2] rep 01: wall_tps=175.703 E[accept]=2.315 draft_accept=0.658 fp=41dfe2a29ef3
+[ksweep:k2] timed rep 3/3 (offset=88426)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k2/decode/run02.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k2/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k2/decode/run02.summary.json
+[ksweep:k2] rep 02: wall_tps=175.525 E[accept]=2.314 draft_accept=0.657 fp=41dfe2a29ef3
+[ppl] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/bi0_k_sweep/k2/ppl.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k2/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.1590188258181935,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43004.61878868422,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/bi0_k_sweep/k2/ppl.jsonl",
+  "ppl": 2.0055160306938853,
+  "prompt_logprobs": 1
+}
+[ksweep:k2] wall_tps median=175.525 CV=0.333% E[accept]=2.314 ppl=2.006 intra_k_identical=False peak_mem=19675MiB -> /workspace/senpai/target/research/bi0_k_sweep/k2/arm.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: setting up run ud1iunbm
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_131711-ud1iunbm
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fern/bi0-ksweep-k2
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ud1iunbm
+wandb: updating run metadata; uploading artifact bi0_ksweep_k2
+wandb: uploading artifact bi0_ksweep_k2
+wandb: 
+wandb: Run history:
+wandb:                          global_step ▁▃▆█
+wandb:                rep/decode_duration_s █▁▂
+wandb:            rep/draft_acceptance_rate ▁█▆
+wandb:                   rep/e_accept_exact ▁█▆
+wandb:                rep/sm_clock_mhz_load ▁▁▁
+wandb:                         rep/wall_tps ▁█▇
+wandb:                            summary/K ▁
+wandb: summary/draft_acceptance_rate/cv_pct ▁
+wandb:    summary/draft_acceptance_rate/max ▁
+wandb:   summary/draft_acceptance_rate/mean ▁
+wandb:                                  +24 ...
+wandb: 
+wandb: Run summary:
+wandb:                event/name summary
+wandb:          event/run_prefix 
+wandb:               fingerprint 04029777472b263ae5c7...
+wandb:               global_step 3
+wandb:     rep/decode_duration_s 373.37197
+wandb: rep/draft_acceptance_rate 0.65714
+wandb:        rep/e_accept_exact 2.31427
+wandb:     rep/sm_clock_mhz_load 1710
+wandb:              rep/wall_tps 175.52469
+wandb:                 summary/K 2
+wandb:                       +27 ...
+wandb: 
+wandb: 🚀 View run fern/bi0-ksweep-k2 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ud1iunbm
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_131711-ud1iunbm/logs
+[ksweep] === launching child for K=4: /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/scripts/profiler/bi0_k_sweep.py --k 4 --submission int4_mtp_bi0_surgattn --n 3 --num-prompts 128 --output-len 512 --seed 1 --warmup-prompts 8 --warmup-len 128 --wandb-group bi0-k-sweep ===
+
+[ksweep] ===== K=4 (int4_mtp_bi0_surgattn) — serve env override NUM_SPECULATIVE_TOKENS=4, VLLM_BATCH_INVARIANT=0, MAX_NUM_SEQS=1 =====
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '4', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 110s
+[ksweep:k4] warmup decode 8x128 (discarded)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k4/warmup.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k4/warmup.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 128 --seed 1
+decode_records=8
+decode_completion_tokens=1024
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k4/warmup.summary.json
+[ksweep:k4] timed rep 1/3 (offset=22058)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k4/decode/run00.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k4/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k4/decode/run00.summary.json
+[ksweep:k4] rep 00: wall_tps=208.683 E[accept]=2.980 draft_accept=0.495 fp=0a6b36bc57e4
+[ksweep:k4] timed rep 2/3 (offset=52417)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k4/decode/run01.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k4/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k4/decode/run01.summary.json
+[ksweep:k4] rep 01: wall_tps=211.076 E[accept]=2.992 draft_accept=0.498 fp=5a769f2370eb
+[ksweep:k4] timed rep 3/3 (offset=81880)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k4/decode/run02.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k4/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k4/decode/run02.summary.json
+[ksweep:k4] rep 02: wall_tps=211.040 E[accept]=2.994 draft_accept=0.498 fp=5a769f2370eb
+[ppl] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/bi0_k_sweep/k4/ppl.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k4/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.159233499456369,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43008.92257219653,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/bi0_k_sweep/k4/ppl.jsonl",
+  "ppl": 2.0056557074968437,
+  "prompt_logprobs": 1
+}
+[ksweep:k4] wall_tps median=211.040 CV=0.652% E[accept]=2.989 ppl=2.006 intra_k_identical=False peak_mem=19673MiB -> /workspace/senpai/target/research/bi0_k_sweep/k4/arm.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_133556-r2j5hfvn
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fern/bi0-ksweep-k4
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/r2j5hfvn
+wandb: updating run metadata; uploading artifact bi0_ksweep_k4
+wandb: uploading artifact bi0_ksweep_k4
+wandb: 
+wandb: Run history:
+wandb:                          global_step ▁▃▆█
+wandb:                rep/decode_duration_s █▁▁
+wandb:            rep/draft_acceptance_rate ▁▇█
+wandb:                   rep/e_accept_exact ▁▇█
+wandb:                rep/sm_clock_mhz_load ▁▁▁
+wandb:                         rep/wall_tps ▁██
+wandb:                            summary/K ▁
+wandb: summary/draft_acceptance_rate/cv_pct ▁
+wandb:    summary/draft_acceptance_rate/max ▁
+wandb:   summary/draft_acceptance_rate/mean ▁
+wandb:                                  +24 ...
+wandb: 
+wandb: Run summary:
+wandb:                event/name summary
+wandb:          event/run_prefix 
+wandb:               fingerprint 0a6b36bc57e4e6c8049f...
+wandb:               global_step 3
+wandb:     rep/decode_duration_s 310.53877
+wandb: rep/draft_acceptance_rate 0.49848
+wandb:        rep/e_accept_exact 2.99394
+wandb:     rep/sm_clock_mhz_load 1710
+wandb:              rep/wall_tps 211.03967
+wandb:                 summary/K 4
+wandb:                       +27 ...
+wandb: 
+wandb: 🚀 View run fern/bi0-ksweep-k4 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/r2j5hfvn
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_133556-r2j5hfvn/logs
+[ksweep] === launching child for K=6: /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/scripts/profiler/bi0_k_sweep.py --k 6 --submission int4_mtp_bi0_surgattn --n 3 --num-prompts 128 --output-len 512 --seed 1 --warmup-prompts 8 --warmup-len 128 --wandb-group bi0-k-sweep ===
+
+[ksweep] ===== K=6 (int4_mtp_bi0_surgattn) — serve env override NUM_SPECULATIVE_TOKENS=6, VLLM_BATCH_INVARIANT=0, MAX_NUM_SEQS=1 =====
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 110s
+[ksweep:k6] warmup decode 8x128 (discarded)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k6/warmup.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k6/warmup.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 128 --seed 1
+decode_records=8
+decode_completion_tokens=1024
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k6/warmup.summary.json
+[ksweep:k6] timed rep 1/3 (offset=22058)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k6/decode/run00.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k6/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k6/decode/run00.summary.json
+[ksweep:k6] rep 00: wall_tps=218.523 E[accept]=3.329 draft_accept=0.388 fp=b4d3cf0dc162
+[ksweep:k6] timed rep 2/3 (offset=51720)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k6/decode/run01.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k6/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k6/decode/run01.summary.json
+[ksweep:k6] rep 01: wall_tps=220.493 E[accept]=3.351 draft_accept=0.392 fp=aa83e16affc0
+[ksweep:k6] timed rep 3/3 (offset=81375)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k6/decode/run02.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k6/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k6/decode/run02.summary.json
+[ksweep:k6] rep 02: wall_tps=220.472 E[accept]=3.352 draft_accept=0.392 fp=aa83e16affc0
+[ppl] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/bi0_k_sweep/k6/ppl.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k6/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.159233499456369,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43008.92257219653,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/bi0_k_sweep/k6/ppl.jsonl",
+  "ppl": 2.0056557074968437,
+  "prompt_logprobs": 1
+}
+[ksweep:k6] wall_tps median=220.472 CV=0.515% E[accept]=3.344 ppl=2.006 intra_k_identical=False peak_mem=19673MiB -> /workspace/senpai/target/research/bi0_k_sweep/k6/arm.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_135402-az782ipg
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fern/bi0-ksweep-k6
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/az782ipg
+wandb: updating run metadata; uploading artifact bi0_ksweep_k6
+wandb: uploading artifact bi0_ksweep_k6
+wandb: 
+wandb: Run history:
+wandb:                          global_step ▁▃▆█
+wandb:                rep/decode_duration_s █▁▁
+wandb:            rep/draft_acceptance_rate ▁██
+wandb:                   rep/e_accept_exact ▁██
+wandb:                rep/sm_clock_mhz_load ▁▁▁
+wandb:                         rep/wall_tps ▁██
+wandb:                            summary/K ▁
+wandb: summary/draft_acceptance_rate/cv_pct ▁
+wandb:    summary/draft_acceptance_rate/max ▁
+wandb:   summary/draft_acceptance_rate/mean ▁
+wandb:                                  +24 ...
+wandb: 
+wandb: Run summary:
+wandb:                event/name summary
+wandb:          event/run_prefix 
+wandb:               fingerprint b4d3cf0dc162bb8e3d27...
+wandb:               global_step 3
+wandb:     rep/decode_duration_s 297.25348
+wandb: rep/draft_acceptance_rate 0.39194
+wandb:        rep/e_accept_exact 3.35162
+wandb:     rep/sm_clock_mhz_load 1710
+wandb:              rep/wall_tps 220.47177
+wandb:                 summary/K 6
+wandb:                       +27 ...
+wandb: 
+wandb: 🚀 View run fern/bi0-ksweep-k6 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/az782ipg
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_135402-az782ipg/logs
+[ksweep] === launching child for K=8: /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/scripts/profiler/bi0_k_sweep.py --k 8 --submission int4_mtp_bi0_surgattn --n 3 --num-prompts 128 --output-len 512 --seed 1 --warmup-prompts 8 --warmup-len 128 --wandb-group bi0-k-sweep ===
+
+[ksweep] ===== K=8 (int4_mtp_bi0_surgattn) — serve env override NUM_SPECULATIVE_TOKENS=8, VLLM_BATCH_INVARIANT=0, MAX_NUM_SEQS=1 =====
+[noise] preflight: GPU free (0 MiB used)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '8', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 170s
+[ksweep:k8] warmup decode 8x128 (discarded)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k8/warmup.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k8/warmup.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 128 --seed 1
+decode_records=8
+decode_completion_tokens=1024
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k8/warmup.summary.json
+[ksweep:k8] timed rep 1/3 (offset=22100)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k8/decode/run00.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k8/decode/run00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k8/decode/run00.summary.json
+[ksweep:k8] rep 00: wall_tps=214.010 E[accept]=3.513 draft_accept=0.314 fp=ee6974e28236
+[ksweep:k8] timed rep 2/3 (offset=52789)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k8/decode/run01.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k8/decode/run01.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k8/decode/run01.summary.json
+[ksweep:k8] rep 01: wall_tps=216.114 E[accept]=3.542 draft_accept=0.318 fp=a3fdbc473675
+[ksweep:k8] timed rep 3/3 (offset=83471)
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_k_sweep/k8/decode/run02.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k8/decode/run02.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_k_sweep/k8/decode/run02.summary.json
+[ksweep:k8] rep 02: wall_tps=216.122 E[accept]=3.538 draft_accept=0.317 fp=a3fdbc473675
+[ppl] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/bi0_k_sweep/k8/ppl.jsonl --summary-file /workspace/senpai/target/research/bi0_k_sweep/k8/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.159233499456369,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43008.92257219653,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/bi0_k_sweep/k8/ppl.jsonl",
+  "ppl": 2.0056557074968437,
+  "prompt_logprobs": 1
+}
+[ksweep:k8] wall_tps median=216.114 CV=0.565% E[accept]=3.531 ppl=2.006 intra_k_identical=False peak_mem=19669MiB -> /workspace/senpai/target/research/bi0_k_sweep/k8/arm.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_141329-0m9u5ci4
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fern/bi0-ksweep-k8
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/0m9u5ci4
+wandb: updating run metadata; uploading artifact bi0_ksweep_k8
+wandb: uploading artifact bi0_ksweep_k8
+wandb: uploading history steps 0-3, summary
+wandb: 
+wandb: Run history:
+wandb:                          global_step ▁▃▆█
+wandb:                rep/decode_duration_s █▁▁
+wandb:            rep/draft_acceptance_rate ▁█▇
+wandb:                   rep/e_accept_exact ▁█▇
+wandb:                rep/sm_clock_mhz_load ▁▁▁
+wandb:                         rep/wall_tps ▁██
+wandb:                            summary/K ▁
+wandb: summary/draft_acceptance_rate/cv_pct ▁
+wandb:    summary/draft_acceptance_rate/max ▁
+wandb:   summary/draft_acceptance_rate/mean ▁
+wandb:                                  +24 ...
+wandb: 
+wandb: Run summary:
+wandb:                event/name summary
+wandb:          event/run_prefix 
+wandb:               fingerprint ee6974e282361a49dca9...
+wandb:               global_step 3
+wandb:     rep/decode_duration_s 303.23589
+wandb: rep/draft_acceptance_rate 0.31722
+wandb:        rep/e_accept_exact 3.53775
+wandb:     rep/sm_clock_mhz_load 1710
+wandb:              rep/wall_tps 216.12217
+wandb:                 summary/K 8
+wandb:                       +27 ...
+wandb: 
+wandb: 🚀 View run fern/bi0-ksweep-k8 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/0m9u5ci4
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_141329-0m9u5ci4/logs
+[ksweep] k-list complete; banked K=[0, 2, 4, 6, 8]. Running analyze...
+
+[ksweep] ===== TPS vs K (median wall_tps) =====
+  K   wall_tps     CV%  E[accept]  draft_acc  prom_E_T     PPL  identical        tier
+-------------------------------------------------------------------------------------
+  0      83.70   0.169          —          —         —  2.0055        ref strict-safe
+  2     175.52   0.333      2.314      0.657     2.315  2.0055         NO   candidate
+      first divergence @ prompt index 0
+  4     211.04   0.652      2.989      0.497     2.990  2.0057         NO   candidate
+      first divergence @ prompt index 0
+  6     220.47   0.515      3.344      0.391     3.347  2.0057         NO   candidate
+      first divergence @ prompt index 0
+  8     216.11   0.565      3.531      0.316     3.537  2.0057         NO   candidate
+      first divergence @ prompt index 0
+
+  >>> best STRICT quality-safe (byte-identical + PPL<=bar) K=0 wall_tps=83.70 ppl=2.0055 -62.04% vs K=6
+  >>> best #784 CANDIDATE (PPL<=bar, identity optional) K=6 wall_tps=220.47 ppl=2.0057 [DRIFTED (needs 5%-band task-quality check)] +0.00% vs K=6
+[ksweep:analyze] summary -> /workspace/senpai/target/research/bi0_k_sweep/summary.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_141334-62cpnzk3
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fern/bi0-ksweep-rollup
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/62cpnzk3
+wandb: updating run metadata; uploading artifact bi0_ksweep_summary
+wandb: uploading artifact bi0_ksweep_summary
+wandb: 
+wandb: Run history:
+wandb:                                   K ▁▃▅▆█
+wandb:          draft_acceptance_rate_mean █▅▃▁
+wandb:                 e_accept_exact_mean ▁▅▇█
+wandb:                         global_step ▁▃▅▆█▅
+wandb:                    greedy_identical █▁▁▁▁
+wandb:                                 ppl ▁▁███
+wandb:                            prom_E_T ▁▅▇█
+wandb:        summary/all_greedy_identical ▁
+wandb: summary/baseline_k6_wall_tps_median ▁
+wandb:                      summary/best_K ▁
+wandb:                                  +7 ...
+wandb: 
+wandb: Run summary:
+wandb:                            K 8
+wandb:   draft_acceptance_rate_mean 0.31635
+wandb:          e_accept_exact_mean 3.53079
+wandb:                   event/name summary
+wandb:             event/run_prefix 
+wandb:                  global_step 5
+wandb:             greedy_identical 0
+wandb:                          ppl 2.00566
+wandb:                     prom_E_T 3.53731
+wandb: summary/all_greedy_identical 0
+wandb:                           +9 ...
+wandb: 
+wandb: 🚀 View run fern/bi0-ksweep-rollup at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/62cpnzk3
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_141334-62cpnzk3/logs
