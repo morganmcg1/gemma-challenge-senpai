@@ -1,0 +1,162 @@
+[gpu-env] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[oracle] rates=[0.56, 0.7, 0.85, 1.0] k=6 np=128 ol=512 out=/workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep
+
+===== imposed rate 0.56 (rates_list=[0.56]*6) =====
+[serve] /workspace/senpai/target/.venv/bin/python serve.py
+[serve] MODEL_ID=gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head env={'MODEL_ID': 'gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 115s
+[decode] /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.56.jsonl --summary-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.56.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.56.summary.json
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: WARNING Using a boolean value for 'reinit' is deprecated. Use 'return_previous' or 'finish_previous' instead.
+wandb: setting up run myk4s0ft
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_184354-myk4s0ft
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stark/accept-oracle-r0.56
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/myk4s0ft
+wandb: updating run metadata; uploading summary
+wandb: 
+wandb: Run summary:
+wandb:                               boot_s 115.02141
+wandb:                        decode_wall_s 210.62583
+wandb:                      decode_wall_tps 323.28909
+wandb:       draft_acceptance_rate_measured 0.55921
+wandb:              e_accept_exact_from_log 4.35524
+wandb: e_accept_mean_acceptance_length_prom 4.3532
+wandb:       imposed_mean_acceptance_length 4.36
+wandb:                          num_records 128
+wandb:                       steady_gen_tps 309.95714
+wandb:                     steady_gen_tps_n 21
+wandb: 
+wandb: 🚀 View run stark/accept-oracle-r0.56 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/myk4s0ft
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_184354-myk4s0ft/logs
+[wandb] logged run myk4s0ft (stark/accept-oracle-r0.56)
+[oracle] rate=0.56  steady_gen_tps=309.95714285714286  e_accept=4.35524215007983  wall_tps=323.2890881388948
+
+===== imposed rate 0.7 (rates_list=[0.7]*6) =====
+[serve] /workspace/senpai/target/.venv/bin/python serve.py
+[serve] MODEL_ID=gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head env={'MODEL_ID': 'gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 115s
+[decode] /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.70.jsonl --summary-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.70.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.70.summary.json
+wandb: setting up run lip0l3qq
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_184852-lip0l3qq
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stark/accept-oracle-r0.70
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/lip0l3qq
+wandb: updating run metadata; uploading summary
+wandb: 
+wandb: Run summary:
+wandb:                               boot_s 115.03078
+wandb:                        decode_wall_s 179.59564
+wandb:                      decode_wall_tps 381.82793
+wandb:       draft_acceptance_rate_measured 0.70027
+wandb:              e_accept_exact_from_log 5.20162
+wandb: e_accept_mean_acceptance_length_prom 5.19995
+wandb:       imposed_mean_acceptance_length 5.2
+wandb:                          num_records 128
+wandb:                       steady_gen_tps 362.36667
+wandb:                     steady_gen_tps_n 18
+wandb: 
+wandb: 🚀 View run stark/accept-oracle-r0.70 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/lip0l3qq
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_184852-lip0l3qq/logs
+[wandb] logged run lip0l3qq (stark/accept-oracle-r0.70)
+[oracle] rate=0.7  steady_gen_tps=362.3666666666667  e_accept=5.2016167379933425  wall_tps=381.8279321105212
+
+===== imposed rate 0.85 (rates_list=[0.85]*6) =====
+[serve] /workspace/senpai/target/.venv/bin/python serve.py
+[serve] MODEL_ID=gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head env={'MODEL_ID': 'gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 120s
+[decode] /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.85.jsonl --summary-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.85.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r0.85.summary.json
+wandb: setting up run jpuid3t5
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_185330-jpuid3t5
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stark/accept-oracle-r0.85
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/jpuid3t5
+wandb: updating run metadata; uploading summary
+wandb: uploading summary
+wandb: 
+wandb: Run summary:
+wandb:                               boot_s 120.03147
+wandb:                        decode_wall_s 155.10199
+wandb:                      decode_wall_tps 445.27012
+wandb:       draft_acceptance_rate_measured 0.85186
+wandb:              e_accept_exact_from_log 6.11113
+wandb: e_accept_mean_acceptance_length_prom 6.10696
+wandb:       imposed_mean_acceptance_length 6.1
+wandb:                          num_records 128
+wandb:                       steady_gen_tps 421.28667
+wandb:                     steady_gen_tps_n 15
+wandb: 
+wandb: 🚀 View run stark/accept-oracle-r0.85 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/jpuid3t5
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_185330-jpuid3t5/logs
+[wandb] logged run jpuid3t5 (stark/accept-oracle-r0.85)
+[oracle] rate=0.85  steady_gen_tps=421.2866666666667  e_accept=6.111132364192808  wall_tps=445.27011810644933
+
+===== imposed rate 1.0 (rates_list=[1.0]*6) =====
+[serve] /workspace/senpai/target/.venv/bin/python serve.py
+[serve] MODEL_ID=gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head env={'MODEL_ID': 'gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 115s
+[decode] /workspace/senpai/target/.venv/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r1.00.jsonl --summary-file /workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r1.00.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/lenient_spec_acceptance_813/runs/sweep/decode_r1.00.summary.json
+wandb: setting up run j60r68os
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_185745-j60r68os
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run stark/accept-oracle-r1.00
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/j60r68os
+wandb: updating run metadata; uploading summary
+wandb: uploading summary
+wandb: 
+wandb: Run summary:
+wandb:                               boot_s 115.03963
+wandb:                        decode_wall_s 137.161
+wandb:                      decode_wall_tps 506.8387
+wandb:       draft_acceptance_rate_measured 1
+wandb:              e_accept_exact_from_log 7
+wandb: e_accept_mean_acceptance_length_prom 7
+wandb:       imposed_mean_acceptance_length 7
+wandb:                          num_records 128
+wandb:                       steady_gen_tps 471.09231
+wandb:                     steady_gen_tps_n 13
+wandb: 
+wandb: 🚀 View run stark/accept-oracle-r1.00 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/j60r68os
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 6 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_185745-j60r68os/logs
+[wandb] logged run j60r68os (stark/accept-oracle-r1.00)
+[oracle] rate=1.0  steady_gen_tps=471.09230769230766  e_accept=7.0  wall_tps=506.83869587433924
+
+========== ACCEPT-ORACLE CEILING ==========
+  rate mean_acc_len  steady_tps  e_accept  wall_tps
+  0.56         4.36      309.96     4.355    323.29
+  0.70         5.20      362.37     5.202    381.83
+  0.85         6.10      421.29     6.111    445.27
+  1.00         7.00      471.09     7.000    506.84
+
+anchor(r=0.56) steady_tps = 309.96
+ceiling(r=1.00) steady_tps = 471.09  (+52.0% over anchor)
+VERDICT: GREENLIGHT custom-kernel top-k-match PR
