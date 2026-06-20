@@ -1,0 +1,123 @@
+
+===== wheel identity =====
+vllm.__version__ = 0.22.1rc1.dev307+g3e8afdf78
+
+===== registered speculative methods =====
+SpeculativeMethod members: ['custom_class', 'deepseek_mtp', 'dflash', 'draft_model', 'eagle', 'eagle3', 'ernie_mtp', 'exaone4_5_mtp', 'exaone_moe_mtp', 'extract_hidden_states', 'gemma4_mtp', 'glm4_moe_lite_mtp', 'glm4_moe_mtp', 'glm_ocr_mtp', 'hy_v3_mtp', 'longcat_flash_mtp', 'medusa', 'mimo_mtp', 'mimo_v2_mtp', 'mlp_speculator', 'mtp', 'nemotron_h_mtp', 'ngram', 'ngram_gpu', 'pangu_ultra_moe_mtp', 'qwen3_5_mtp', 'qwen3_next_mtp', 'step3p5_mtp', 'suffix']
+MTPModelTypes: ['deepseek_mtp', 'mimo_mtp', 'mimo_v2_mtp', 'glm4_moe_mtp', 'glm4_moe_lite_mtp', 'glm_ocr_mtp', 'ernie_mtp', 'nemotron_h_mtp', 'exaone_moe_mtp', 'exaone4_5_mtp', 'qwen3_next_mtp', 'qwen3_5_mtp', 'longcat_flash_mtp', 'mtp', 'pangu_ultra_moe_mtp', 'step3p5_mtp', 'hy_v3_mtp', 'gemma4_mtp']
+methods whose name contains 'tree': []
+
+===== SpeculativeConfig fields (topology surface) =====
+  attention_backend: vllm.v1.attention.backends.registry.AttentionBackendEnum | None
+  code_revision: str | None
+  disable_padded_drafter_batch: <class 'bool'>
+  draft_load_config: vllm.config.load.LoadConfig | None
+  draft_model_config: typing.Annotated[vllm.config.model.ModelConfig, SkipValidation()]
+  draft_parallel_config: typing.Annotated[vllm.config.parallel.ParallelConfig, SkipValidation()]
+  draft_sample_method: typing.Literal['greedy', 'probabilistic']
+  draft_tensor_parallel_size: int | None
+  enforce_eager: bool | None
+  max_model_len: int | None
+  method: typing.Optional[typing.Literal['ngram', 'medusa', 'mlp_speculator', 'draft_model', 'suffix', 'custom_class', 'eagle', 'eagle3', 'extract_hidden_states', 'deepseek_mtp', 'mimo_mtp', 'mimo_v2_mtp', 'glm4_moe_mtp', 'glm4_moe_lite_mtp', 'glm_ocr_mtp', 'ernie_mtp', 'nemotron_h_mtp', 'exaone_moe_mtp', 'exaone4_5_mtp', 'qwen3_next_mtp', 'qwen3_5_mtp', 'longcat_flash_mtp', 'mtp', 'pangu_ultra_moe_mtp', 'step3p5_mtp', 'hy_v3_mtp', 'gemma4_mtp', 'dflash', 'ngram_gpu']]
+  model: str | None
+  moe_backend: typing.Optional[typing.Literal['auto', 'triton', 'deep_gemm', 'deep_gemm_mega_moe', 'cutlass', 'flashinfer_trtllm', 'flashinfer_cutlass', 'flashinfer_cutedsl', 'flashinfer_b12x', 'marlin', 'humming', 'triton_unfused', 'aiter', 'emulation']]
+  num_speculative_tokens: <class 'int'>
+  parallel_drafting: <class 'bool'>
+  prompt_lookup_max: int | None
+  prompt_lookup_min: int | None
+  quantization: typing.Union[typing.Literal['awq', 'fp8', 'fbgemm_fp8', 'fp_quant', 'modelopt', 'modelopt_fp4', 'modelopt_mxfp8', 'modelopt_mixed', 'gguf', 'auto_gptq', 'gptq', 'gptq_marlin', 'awq_marlin', 'humming', 'compressed-tensors', 'bitsandbytes', 'experts_int8', 'quark', 'moe_wna16', 'torchao', 'inc', 'mxfp4', 'gpt_oss_mxfp4', 'deepseek_v4_fp8', 'online', 'fp8_per_tensor', 'fp8_per_block', 'fp8_per_channel', 'int8_per_channel_weight_only', 'mxfp8'], str, NoneType]
+  rejection_sample_method: typing.Literal['standard', 'synthetic']
+  revision: str | None
+  suffix_decoding_max_cached_requests: <class 'int'>
+  suffix_decoding_max_spec_factor: <class 'float'>
+  suffix_decoding_max_tree_depth: <class 'int'>
+  suffix_decoding_min_token_prob: <class 'float'>
+  synthetic_acceptance_length: float | None
+  synthetic_acceptance_rates: list[float] | None
+  target_model_config: typing.Annotated[vllm.config.model.ModelConfig, SkipValidation()]
+  target_parallel_config: typing.Annotated[vllm.config.parallel.ParallelConfig, SkipValidation()]
+  tensor_parallel_size: int | None
+  use_local_argmax_reduction: <class 'bool'>
+
+fields matching tree/branch/candidate/topology terms:
+  {'suffix_decoding_max_tree_depth': "<class 'int'>"}
+  candidate-tree (verify-path) topology fields: {}  <-- NONE
+
+===== rejection probe: num_speculative_tokens = [1, 2, 2] (a tree topology) =====
+REJECTED by ValidationError:
+    1 validation error for SpeculativeConfig
+    num_speculative_tokens
+      Input should be a valid integer [type=int_type, input_value=[1, 2, 2], input_type=list]
+        For further information visit https://errors.pydantic.dev/2.13/v/int_type
+
+===== rejection probe: tree_choices=[[0],[0,0]] kwarg =====
+REJECTED by ValidationError:
+    1 validation error for SpeculativeConfig
+    tree_choices
+      Unexpected keyword argument [type=unexpected_keyword_argument, input_value=[[0], [0, 0]], input_type=list]
+        For further information visit https://errors.pydantic.dev/2.13/v/unexpected_keyword_argument
+
+===== gemma4_mtp proposer class + chain semantics =====
+Gemma4Proposer base classes: ['Gemma4Proposer', 'SpecDecodeBaseProposer', 'object']
+EagleProposer base classes: ['EagleProposer', 'SpecDecodeBaseProposer', 'object']
+base propose() returns [-1, num_speculative_tokens] (rank-2 chain): True
+base propose() builds chain via torch.stack(list, dim=1): True
+
+===== verify kernel contract (rejection_sample) =====
+rejection_sample asserts draft_token_ids.ndim == 1 (flat chain): True
+
+===== VERDICT =====
+single_chain_only = True
+verdict = RED
+
+--- JSON ---
+{
+  "vllm_version": "0.22.1rc1.dev307+g3e8afdf78",
+  "speculative_methods": [
+    "custom_class",
+    "deepseek_mtp",
+    "dflash",
+    "draft_model",
+    "eagle",
+    "eagle3",
+    "ernie_mtp",
+    "exaone4_5_mtp",
+    "exaone_moe_mtp",
+    "extract_hidden_states",
+    "gemma4_mtp",
+    "glm4_moe_lite_mtp",
+    "glm4_moe_mtp",
+    "glm_ocr_mtp",
+    "hy_v3_mtp",
+    "longcat_flash_mtp",
+    "medusa",
+    "mimo_mtp",
+    "mimo_v2_mtp",
+    "mlp_speculator",
+    "mtp",
+    "nemotron_h_mtp",
+    "ngram",
+    "ngram_gpu",
+    "pangu_ultra_moe_mtp",
+    "qwen3_5_mtp",
+    "qwen3_next_mtp",
+    "step3p5_mtp",
+    "suffix"
+  ],
+  "tree_named_methods": [],
+  "num_speculative_tokens_type": "<class 'int'>",
+  "topology_fields": {
+    "suffix_decoding_max_tree_depth": "<class 'int'>"
+  },
+  "candidate_tree_topology_fields": {},
+  "tree_topology_rejected": true,
+  "tree_topology_reject_exc": "ValidationError",
+  "tree_choices_rejected": true,
+  "tree_choices_reject_exc": "ValidationError",
+  "gemma4_proposer_base": true,
+  "eagle_proposer_base": true,
+  "propose_returns_linear_chain": true,
+  "verify_asserts_1d_chain": true,
+  "single_chain_only": true,
+  "verdict": "RED"
+}
