@@ -2,6 +2,50 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 13:40Z — PR #789 (stark): drafter CUDA-graph capture — CLOSED (clean null: 6× M=1 proposer passes already PIECEWISE-captured; whole drafter-dispatch family now jointly closed with kanna #771)
+
+- **Student:** stark / branch `stark/bi0-drafter-cudagraph`
+- **Hypothesis:** Are bi0's 6× M=1 MTP-drafter proposer passes eager (a recoverable ~16%-of-GPU-busy launch slice), or do they dispatch to the size-1 captured graph?
+
+| probe | result |
+|---|---|
+| dispatch-mode (n=1000 steady-state) | **PIECEWISE 993 / NONE 7** (the 7 NONE = large prompt-prefill shapes only) |
+| realized capture set | **{7}** only — `adjust_cudagraph_sizes_for_spec_decode` rounds [1,2,4,8] UP to multiples of `uniform_decode_query_len=7`, drops >max → no size-1 graph realized |
+| proposer vs verifier | proposer **PIECEWISE@7** (`llm_base_proposer.py:380` hard-codes PIECEWISE-or-NONE), verifier **FULL@7** |
+| draft p50 | cpu 5.596 ms ≫ gpu 2.482 ms (launch-bound) |
+
+- **Primary:** decode_path_piecewise_frac 1.0. **Test:** draft_cpu_over_gpu_p50 2.255. W&B [`xn7opsy8`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/xn7opsy8) (group `bi0-drafter-cudagraph`).
+- **Verdict — clean null, sharpened mechanism:** the proposer passes are NOT eager (PIECEWISE-captured), so there is no eager-GEMM slice for a config-capture to recover; FULL/whole-loop proposer capture (the only thing that could collapse the residual per-pass eager-attention launches) is hard-disabled in vLLM 0.22.0 with no config knob. The `cpu 5.6 ≫ gpu 2.5` gap is real launch overhead but **not config-recoverable**.
+- **★ Cross-PR synthesis (closes the lever from BOTH sides):** stark's own follow-up predicted kanna's whole-loop LOOPGRAPH (#771) would recover the gap. **kanna #771 landed simultaneously and measured loopgraph at +0.037% — a clean null** (W&B [`wjeykst8`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/wjeykst8)). So whole-loop capture does NOT move TPS either → the drafter `cpu−gpu` gap is most consistent with **async-launch-queue depth hidden behind GPU compute, not serialized wall-clock latency.** The **entire drafter-dispatch / launch-overhead family is now jointly closed** (config-capture: #789; whole-loop-capture: #771). The live amortization lever remains the verify GEMM via acceptance (fern #774, lawine #792). bi0 unchanged. → stark reassigned **#794** (surgattn split-KV byte-identical-numerics question).
+
+## 2026-06-20 13:40Z — PR #782 (land): ngram/prompt-lookup drafter vs MTP — CLOSED (clean null: ngram 2.4× slower; MTP is the better acceptance lever for general chat)
+
+- **Student:** land / branch `land/bi0-ngram-spec`
+- **Hypothesis:** An ngram/prompt-lookup drafter (zero-GPU-cost proposer) could raise accepted-tokens-per-weight-read over the MTP head → higher TPS.
+
+| cell | wall_tps | tps/control | E[T] tok/step | accept_rate | PPL |
+|---|---|---|---|---|---|
+| **control_mtp_k6** (bi0) | **218.11** | 1.000 | **3.343** | 0.390 | 2.00565 |
+| ngram_k5_plm3 (best ngram) | 89.91 | **0.412** | 2.161 | 0.233 | 2.00566 |
+
+- **Primary:** wall_tps_best_ngram 89.91. **Test:** ppl 2.0057. W&B group `bi0-ngram-spec`: control [`7m8eyv0f`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/7m8eyv0f), best ngram [`rv1v3lxi`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/rv1v3lxi).
+- **Verdict — clean null:** ngram fails Gate 1 by ~2.4× (89.91 vs 218.11). Control reproduces official bi0 (218.11 local ↔ 218.02 official, PPL 2.00565 ↔ 2.0058) so the regression is real. Mechanism: ngram E[T]=1.99–2.17 vs MTP 3.34 — suffix n-gram matching only hits on repetitive/structured spans; general chat misses, and raising num_spec 3→5 *lowers* accept_rate (0.33→0.23, miss-dominated). bi0's learned MTP head is the better drafter here. Variant B (stacked ngram+MTP) architecturally unsupported (single-`method` `SpeculativeConfig` in 0.22.0). The acceptance lever points at MTP **depth** (fern #774) not drafter family.
+- **★ Eval-rigor flag → recorded as DURABLE finding (no dedicated reconciliation PR per #784):** the strict byte-exact greedy gate flags ALL int4 spec arms — **including shipped bi0** — as ~53% divergent vs a plain-AR M=1 reference, because the M=K+1 batched verify forward has a different float-reduction order than M=1 sequential AR and breaks argmax ties. land proved the drafter swap adds zero divergence (ngram-vs-control ≈ control-vs-R in rate+onset; ngram-vs-R *lower* than control-vs-R). **Standing rule for all int4 spec arms: read the greedy gate tie-tolerantly (the standard bi0 cleared); certify quality via the panel, not byte-identity-to-AR.** Under #784 this de-risks rather than blocks. bi0 unchanged. → land reassigned **#793** (drafter-only-3D byte-identical attribution).
+
+## 2026-06-20 13:40Z — PR #771 (kanna): LOOPGRAPH + FUSED_SPARSE_ARGMAX on plain int4 bi0 — SENT BACK (marginal; fused-argmax owns 100% of a byte-exact +1.95% → bounded N≥5 confirmation)
+
+- **Student:** kanna / branch `kanna/bi0-loopgraph-sparseargmax`
+- **Hypothesis:** Port fa2sw's loopgraph (whole-loop drafter capture) + fused-sparse-argmax centroid kernel onto plain int4 bi0 (greedy-identity-safe, prompt-agnostic dispatch levers).
+
+| arm | TPS median | Δ vs control | greedy / quality |
+|---|---|---|---|
+| bi0 control | 175.64 (local) | — | reference |
+| loopgraph_only (ONEGRAPH) | 175.70 | **+0.037% (clean NULL)** | byte-exact |
+| loopgraph_fused | 179.13 | **+1.99%** (≈1.8σ at CV 1.13%, N=2) | 126/128 byte-exact (2 answer-immaterial BI=0 near-ties); fused-argmax exactly argmax-preserving; PPL bit-identical |
+
+- **Primary:** local_output_tps_delta_pct_vs_bi0 1.99. **Test:** greedy_stabilized_divergent_prompts 2. W&B group `bi0-loopgraph`: matrix [`wjeykst8`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/wjeykst8), refined-identity [`slbb9j7k`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/slbb9j7k).
+- **Disposition — SENT BACK (not closed):** capture-feasibility passed (rules out the real incompatibility null); loopgraph/onegraph is a clean null (stock already PIECEWISE-graphs the draft loop — cross-confirms stark #789); the entire +1.95% is the **fused-sparse-argmax centroid kernel, which is byte-EXACT argmax-preserving** (loopgraph_only ≡ loopgraph_fused 128/128). At N=2/1.8σ it's under-powered. Per #784 (byte-identical quality-keeping variants worth escalating) + the compounding principle, sent back for **ONE bounded confirmation**: drop the loopgraph subsystem entirely (kanna's own follow-up #1), isolate fused-only, N≥5 reps to settle >2σ-vs-noise. If >2σ + byte-exact → fire-eligible stackable lever (HF approval); if folds into noise → clean close. Capped to one run, local only.
+
 ## 2026-06-20 13:15Z — PR #785 (wirbel): surgattn 2D-vs-3D overhead check — CLOSED (#779 answered: surgattn load-bearing for greedy identity; +6.69% non-identical → re-gate #791)
 
 - **Student:** wirbel / branch `wirbel/surgattn-overhead-check`
