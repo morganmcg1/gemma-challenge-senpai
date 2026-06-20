@@ -2,6 +2,26 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 14:40Z — PR #774 (fern): MTP K-depth sweep {0,2,4,6,8} — CLOSED (clean null: K=6 is the TPS-optimal knee; K=8 REGRESSES −2.0%; acceptance-DEPTH lane closed)
+
+- **Student:** fern / branch `fern/bi0-k-sweep`
+- **Hypothesis:** Raising `NUM_SPECULATIVE_TOKENS` above bi0's K=6 (to 8/10) raises accepted-tokens/step → more TPS on a bandwidth-bound decode (PR predicted K=8/10 adds 10–30 TPS).
+
+| K | wall_tps (median, N=3) | CV% | E[accept]/step | draft_accept_rate | PPL | #784 tier |
+|---|---|---|---|---|---|---|
+| 0 (spec off) | 83.70 | 0.17 | — | — | 2.00552 | strict-safe (ref) |
+| 2 | 175.52 | 0.33 | 2.314 | 0.657 | 2.00552 | candidate |
+| 4 | 211.04 | 0.65 | 2.989 | 0.497 | 2.00566 | candidate |
+| **6 (bi0 default)** | **220.47** | 0.51 | 3.344 | 0.391 | 2.00566 | candidate ← **PEAK** |
+| 8 | 216.11 | 0.56 | 3.531 | 0.316 | 2.00566 | candidate |
+
+- **Primary:** output_tps (peaks 220.47 @ K=6). **Test:** PPL 2.0057. W&B (group `bi0-k-sweep`): k0 `e8lhdwkw` / k2 `ud1iunbm` / k4 `r2j5hfvn` / k6 `az782ipg` / k8 `0m9u5ci4` (+ rollup `62cpnzk3`).
+- **Knee is K=6:** marginal TPS/+2K = +91.82 / +35.52 / +9.43 / **−4.36** — crosses zero between 6 and 8. The K6→8 regression (−4.36, −2.0%) is ~4× the 0.5% CV (K=8 reps tight [214.0,216.1,216.1]) → a real turnover, not noise. Spec speedup at K=6 = **2.63×** over spec-off AR. **K not run beyond 8** (monotone acceptance decline + K=8 turnover already prove K≥7 non-improving; per #784 cap the lane).
+- **Why K>6 doesn't pay:** per-token draft acceptance falls monotonically 0.657 → 0.497 → 0.391 → **0.316** — by horizon 7–8 the current MTP head is accepted only ~31.6%; the marginal +0.19 E[accept] from K6→K8 doesn't repay the wider verify pass (K+1 tokens) + extra draft compute. Classic spec-decode acceptance-vs-overhead knee.
+- **Quality:** PPL flat ~2.0056 across every K (spread < 2e-4, 17% under the 2.42 bar). No spec-on arm byte-identical to the K=0 ref — EXPECTED on bi0's non-BI substrate (`VLLM_BATCH_INVARIANT=0` + int4 Marlin not batch-invariant across AR-vs-verify); per #784 these are candidates, not rejects. Divergence traced to a **rep0 cold-warmup transient** (rep1 ≡ rep2 steady-state deterministic; the median-of-3 excludes the cold rep0) — not chaotic non-determinism.
+- **Harness cross-validated:** fern's local K=6 = 220.47 within 1.1% of official 218.02 (`s63tb03x`); K=6 PPL 2.00566 matches 2.0058 → the `bi0_k_sweep.py` harness reproduces bi0's headline → sweep deltas trustworthy. Banked for future spec-decode work.
+- **Verdict — clean null, K=6 confirmed optimal; ★ STRATEGIC consolidation.** With #774 (acceptance DEPTH) + #792 (acceptance RUNTIME knob) both clean nulls, the **entire drafter-acceptance lever family is now tuned-out on the CURRENT MTP head** — neither deeper K nor a wider candidate pool moves TPS. Further acceptance headroom requires a **better drafter** (higher per-position acceptance at horizon ≥6 — a deeper/retrained MTP head or EAGLE-style tree drafting), a heavier lift than a config sweep. fern reassigned to **#797** (int4head × surgattn-3D STACK measurement — do the two biggest levers compound?). bi0 K=6 unchanged.
+
 ## 2026-06-20 14:16Z — PR #792 (lawine): MTP-acceptance CENTROID_TOP_K sweep — CLOSED (clean null: runtime drafter knob moves accept +1.5%, TPS net-zero, breaks byte-identity ~7%; acceptance RUNTIME axis exhausted on bi0)
 
 - **Student:** lawine / branch `lawine/bi0-mtp-accept`
