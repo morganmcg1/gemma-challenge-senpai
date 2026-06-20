@@ -1,0 +1,125 @@
+{
+  "timestamp": "20260620T165039Z",
+  "submission": "submissions/int4_mtp_bi0_int4head",
+  "num_prompts": 128,
+  "smoke": false,
+  "tps": {
+    "leaderboard_public": 218.38497186996784,
+    "private_rerun": 174.3354893715188
+  },
+  "headline_public_to_private_gap_pct": 20.17056490712981,
+  "e_accept": {
+    "public": 3.3436848792884373,
+    "private": 2.655795344325897,
+    "delta": 0.6878895349625402
+  },
+  "ppl": {
+    "public": 2.005654959921054,
+    "private": 2.005654959921054
+  },
+  "ppl_cap": 2.42,
+  "verdict_5pct_rule": "WOULD-FAIL (>5% private TPS drop -> INVALID)",
+  "public_evidence_band": "honest stacks 4-9%; firfir-cast cap 7.2%; kenyan-duma claimed precache ~1% to private",
+  "scenarios": {
+    "leaderboard": {
+      "label": "leaderboard",
+      "precache_mode": "public",
+      "dataset": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+      "num_prompts": 128,
+      "serve_ready_s": 105.1,
+      "bench": {
+        "tps": 218.38497186996784,
+        "total_tps": 330.6431648075209,
+        "completed": 128,
+        "duration_s": 300.0939095709473,
+        "total_input_tokens": 33688,
+        "total_output_tokens": 65536,
+        "mean_e2e_latency_ms": 2344.2846995912987,
+        "request_throughput_req_s": 0.42653314818353094
+      },
+      "acceptance": {
+        "delta_num_drafts": 19675.0,
+        "delta_num_accepted_tokens": 46112.0,
+        "delta_num_draft_tokens": 118050.0,
+        "e_accept": 3.3436848792884373,
+        "accepted_per_step": 2.3436848792884373,
+        "accept_rate": 0.39061414654807286
+      },
+      "counters_before": {
+        "num_drafts": 0.0,
+        "num_accepted_tokens": 0.0,
+        "num_draft_tokens": 0.0
+      },
+      "counters_after": {
+        "num_drafts": 19675.0,
+        "num_accepted_tokens": 46112.0,
+        "num_draft_tokens": 118050.0,
+        "e_accept_mean_acceptance_length": 3.3436848792884373,
+        "draft_acceptance_rate": 0.39061414654807286
+      },
+      "ppl": 2.005654959921054,
+      "ppl_num_tokens": 61797,
+      "spec_log_xcheck": {
+        "intervals": 31,
+        "num_speculative_tokens": 6,
+        "total_accepted_tokens": 46112,
+        "total_drafted_tokens": 118050,
+        "e_accept_interval_mean": 3.3603225806451613,
+        "steady_gen_tps_mean": 198.93333333333334,
+        "steady_gen_tps_n": 33,
+        "e_accept_exact": 3.3436848792884373,
+        "draft_acceptance_rate": 0.39061414654807286
+      }
+    },
+    "private_rerun": {
+      "label": "private_rerun",
+      "precache_mode": "off",
+      "dataset": "/workspace/senpai/target/data/private_proxy_sharegpt.json",
+      "num_prompts": 128,
+      "serve_ready_s": 110.1,
+      "bench": {
+        "tps": 174.3354893715188,
+        "total_tps": 263.94791049057324,
+        "completed": 128,
+        "duration_s": 375.91886905103456,
+        "total_input_tokens": 33687,
+        "total_output_tokens": 65536,
+        "mean_e2e_latency_ms": 2936.659218470595,
+        "request_throughput_req_s": 0.34049900267874766
+      },
+      "acceptance": {
+        "delta_num_drafts": 24744.0,
+        "delta_num_accepted_tokens": 40971.0,
+        "delta_num_draft_tokens": 148464.0,
+        "e_accept": 2.655795344325897,
+        "accepted_per_step": 1.6557953443258973,
+        "accept_rate": 0.2759658907209829
+      },
+      "counters_before": {
+        "num_drafts": 0.0,
+        "num_accepted_tokens": 0.0,
+        "num_draft_tokens": 0.0
+      },
+      "counters_after": {
+        "num_drafts": 24744.0,
+        "num_accepted_tokens": 40971.0,
+        "num_draft_tokens": 148464.0,
+        "e_accept_mean_acceptance_length": 2.655795344325897,
+        "draft_acceptance_rate": 0.2759658907209829
+      },
+      "ppl": 2.005654959921054,
+      "ppl_num_tokens": 61797,
+      "spec_log_xcheck": {
+        "intervals": 38,
+        "num_speculative_tokens": 6,
+        "total_accepted_tokens": 40971,
+        "total_drafted_tokens": 148464,
+        "e_accept_interval_mean": 2.656315789473684,
+        "steady_gen_tps_mean": 164.405,
+        "steady_gen_tps_n": 40,
+        "e_accept_exact": 2.655795344325897,
+        "draft_acceptance_rate": 0.2759658907209829
+      }
+    }
+  }
+}

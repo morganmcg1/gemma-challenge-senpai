@@ -1,0 +1,31 @@
+{
+  "name": "int4head_startupq",
+  "description": "TOKEN-FREE serve-path variant of int4-mtp-bi0-int4head (PR #801 Track 2). Identical to the shipped int4head submission EXCEPT the target model source: instead of pulling the PRIVATE pre-built Hub repo (which 401'd on the token-less HF runner), serve.py quantizes the PUBLIC base google/gemma-4-E4B-it-qat-w4a16-ct lm_head to int4 W4A16 group_size=32 at startup via build_lmhead_quant.py. The built lm_head is byte-identical to the validated int4head (proven), so PPL/greedy/modalities are unchanged; only the source + auth requirement change. LOCAL VALIDATION ONLY — no HF job.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "LMHEAD_QUANT_AT_STARTUP": "1",
+    "LMHEAD_QUANT_BITS": "4",
+    "LMHEAD_QUANT_GROUP_SIZE": "32",
+    "LMHEAD_QUANT_BASE_REV": "ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0",
+    "LMHEAD_QUANT_OUT": "/tmp/int4head_startupq",
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

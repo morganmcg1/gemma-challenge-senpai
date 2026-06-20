@@ -22,7 +22,10 @@ from __future__ import annotations
 
 import json
 import os
+import subprocess
 import sys
+import time
+from pathlib import Path
 
 
 # Reference-mode contract env var. Mirrors
@@ -63,8 +66,90 @@ def reference_mode_num_spec(num_spec: int) -> int:
     return 0
 
 
+def maybe_quant_lmhead_at_startup(model_id: str) -> str:
+    """Token-free serve path: quantize the PUBLIC base's bf16 lm_head to int4 at
+    startup instead of pulling a pre-built PRIVATE checkpoint.
+
+    When ``LMHEAD_QUANT_AT_STARTUP=1``, resolve ``MODEL_ID`` (a public Hub base
+    such as ``google/gemma-4-E4B-it-qat-w4a16-ct``, or a local snapshot dir) to a
+    local dir, run the sibling ``build_lmhead_quant.py --num-bits <bits>
+    --head-group-size <gs>`` against it, and return the freshly built checkpoint
+    dir for vLLM to serve. The on-disk build is byte-identical to the validated
+    int4head checkpoint (same deterministic builder, same source snapshot), so
+    PPL / greedy / modality behaviour is unchanged; only the model SOURCE changes:
+    a public base + an on-disk startup quant, with NO private-repo auth — which
+    is exactly the runner-side 401 the pre-built private path hit.
+
+    Unset / ``0`` -> return ``model_id`` unchanged (the default Hub-pointed path,
+    byte-for-byte the shipped behaviour). Idempotent: a completed build is reused
+    via a ``.startupq_done`` marker so a server restart never rebuilds.
+
+    Env knobs (all optional): ``LMHEAD_QUANT_BITS`` (default 4),
+    ``LMHEAD_QUANT_GROUP_SIZE`` (default 32), ``LMHEAD_QUANT_OUT`` (default
+    ``/tmp/int4head_startupq``), ``LMHEAD_QUANT_BASE_REV`` (pin the base Hub
+    revision for a deterministic, reproducible build).
+    """
+    if os.environ.get("LMHEAD_QUANT_AT_STARTUP", "0") != "1":
+        return model_id
+
+    bits = os.environ.get("LMHEAD_QUANT_BITS", "4")
+    group_size = os.environ.get("LMHEAD_QUANT_GROUP_SIZE", "32")
+    out_dir = os.environ.get("LMHEAD_QUANT_OUT", "/tmp/int4head_startupq")
+    base_rev = os.environ.get("LMHEAD_QUANT_BASE_REV") or None
+    here = os.path.dirname(os.path.abspath(__file__))
+    builder = os.path.join(here, "build_lmhead_quant.py")
+
+    done_marker = os.path.join(out_dir, ".startupq_done")
+    if os.path.exists(done_marker) and os.path.exists(os.path.join(out_dir, "model.safetensors")):
+        print(f"[serve] startup lm_head int4: reusing existing build at {out_dir}", flush=True)
+        return out_dir
+
+    # Resolve MODEL_ID to a local checkpoint dir: an existing dir is used as-is;
+    # a Hub id is materialized with snapshot_download (no token needed for the
+    # public base — the whole point of this path).
+    if os.path.isdir(model_id):
+        src = model_id
+    else:
+        from huggingface_hub import snapshot_download
+
+        print(
+            f"[serve] startup lm_head int4: resolving base {model_id}"
+            f"{(' @ ' + base_rev) if base_rev else ''} ...",
+            flush=True,
+        )
+        src = snapshot_download(model_id, revision=base_rev)
+
+    t0 = time.time()
+    print(
+        f"[serve] startup lm_head int4 quant: src={src} out={out_dir} "
+        f"num_bits={bits} head_group_size={group_size}",
+        flush=True,
+    )
+    subprocess.run(
+        [
+            sys.executable,
+            builder,
+            "--src", src,
+            "--out", out_dir,
+            "--num-bits", str(bits),
+            "--head-group-size", str(group_size),
+        ],
+        check=True,
+    )
+    Path(done_marker).write_text(
+        f"num_bits={bits} head_group_size={group_size} src={src} rev={base_rev}\n"
+    )
+    print(
+        f"[serve] startup lm_head int4 quant complete in {time.time() - t0:.1f}s "
+        f"-> serving {out_dir}",
+        flush=True,
+    )
+    return out_dir
+
+
 def main() -> None:
     model_id = os.environ.get("MODEL_ID", "google/gemma-4-E4B-it-qat-w4a16-ct")
+    model_id = maybe_quant_lmhead_at_startup(model_id)
     served_model_name = os.environ.get("SERVED_MODEL_NAME", "gemma-4-e4b-it")
     host = os.environ.get("HOST", "0.0.0.0")
     port = os.environ.get("PORT", "8000")
