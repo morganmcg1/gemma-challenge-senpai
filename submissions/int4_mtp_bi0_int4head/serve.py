@@ -126,6 +126,21 @@ def main() -> None:
         }
         if spec_method:
             spec_config["method"] = spec_method
+        # PROFILING-ONLY acceptance-oracle knobs (PR #813). Default OFF: when none
+        # of these env vars is set the spec_config is byte-identical to the shipped
+        # submission, so the leaderboard serving path is untouched. vLLM's
+        # rejection_sample_method='synthetic' IMPOSES a chosen accept rate in the
+        # greedy branch (emits garbage tokens) so TPS-vs-accept-rate is a faithful
+        # speed ceiling for "what if E_accept were higher". NEVER ship synthetic.
+        rejection_method = os.environ.get("REJECTION_SAMPLE_METHOD")
+        if rejection_method:
+            spec_config["rejection_sample_method"] = rejection_method
+        synth_rates = os.environ.get("SYNTHETIC_ACCEPTANCE_RATES")
+        if synth_rates:
+            spec_config["synthetic_acceptance_rates"] = json.loads(synth_rates)
+        synth_len = os.environ.get("SYNTHETIC_ACCEPTANCE_LENGTH")
+        if synth_len:
+            spec_config["synthetic_acceptance_length"] = float(synth_len)
         args += ["--speculative-config", json.dumps(spec_config)]
 
     if os.environ.get("ENFORCE_EAGER", "0") == "1":
