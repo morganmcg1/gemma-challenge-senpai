@@ -1,41 +1,49 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~10:55Z) — BI0 SHIPPED @218 (quality-safe baseline); PRECACHE KILLED (mirage); "OUTAGE" RETRACTED (fleet alive); profiler-driven private-stable 218→300 decomposition, all 8 zero-idle — authoritative; cycle-58/59 below is historical
+## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~11:30Z) — BI0 SHIPPED @218 + QUALITY PANEL COMPLETE; PRECACHE/FP8/FLASHINFER KILLED; profiler-driven private-stable 218→300 decomposition, all 8 zero-idle — authoritative; cycle-58/59 below is historical
 
 ### What shipped (2026-06-20 09:32Z)
-- `int4_mtp_bi0_surgattn` FIRED + OFFICIAL: **218.02 TPS / PPL 2.0058 / 128/128 VALID** (W&B `s63tb03x`, job `6a3656ef3093dba73ce2ac88`). Human-approved #769. Competition board posted `20260620-093241-798_senpai.md`. **+72.5% over the prior quality-safe submission** (int4_g128_lmhead@126.378). Config: int4 W4A16 + MTP K=6 + VLLM_BATCH_INVARIANT=0 + surgattn + prometheus guard. Quality-safe: MMLU-Pro 0.644/GSM8K 0.867/AIME 10/30, panel-mean **97.5% of int4 base** (GPQA still the one missing number → wirbel #773).
+- `int4_mtp_bi0_surgattn` FIRED + OFFICIAL: **218.02 TPS / PPL 2.0058 / 128/128 VALID** (W&B `s63tb03x`, job `6a3656ef3093dba73ce2ac88`). Human-approved #769. +72.5% over int4_g128_lmhead@126.378. Config: int4 W4A16 + MTP K=6 + VLLM_BATCH_INVARIANT=0 + surgattn + prometheus guard.
+- **★ bi0 quality panel NOW COMPLETE (all 4 Morgan axes):** MMLU-Pro **0.644** / GSM8K **0.867** / AIME **10/30** / GPQA-Diamond **0.4970** (#773 wirbel, W&B `kredc30c`, pooled 990 samples). All axes pass the ≤10% degradation bar. Reported to Morgan + dhruv-mishra on board `20260620-111347-905_senpai.md`. **The quality panel requirement for any 300+ candidate is: same bar (all 4 axes ≥90% of base).**
 
 ### Current research focus: reach a quality-safe 300+ via PRIVATE-STABLE levers, decomposed by the PROFILER
 
-Morgan's question (board 08:19Z): "For 300+ TPS submissions, what are AIME/MMLU/GPQA? We want ≤10% degradation vs base." **Answered on the board 10:34Z:** NO verified quality-safe 300+ exists — every 300+ seen is disqualified, EITHER quality-collapsed (osoi5-v0-baked: MMLU-Pro 0.274 / GPQA 0.232 / AIME 0.033 — collapse locus = BODY, weights-level; land #772 CLOSED, confirmed) OR a precache mirage (fa2sw "481" replays the exact 128 public eval prompts into the prefix cache in the untimed warmup → fails program.md:325 + the official `cmpatino-verifier` private-Δ≤5% gate; #775/#778 CLOSED). So the real target = whatever **PRIVATE-STABLE (prompt-agnostic)** levers reach.
+Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submission." **Status:** bi0 quality panel is complete and PASSES. dhruv-mishra's question ("separate validation other than perplexity?") answered on board 11:13Z — YES: full validity contract = PPL + 128/128 + greedy-identity + 4-modalities + cmpatino private Δ≤5%; PLUS our internal quality panel. The real target = PRIVATE-STABLE prompt-agnostic levers that beat 218 TPS with the same quality gates.
 
-**★ PROFILER REALITY (BASELINE.md) drives the decomposition:** decode at conc=1 is **memory-bandwidth-bound — ~92% weight-GEMM, attn ~2.6%, sampling ~0.2%.** So only two lever FAMILIES have real headroom, both quality-safe: **(1) the int4 W4A16 GEMM kernel itself** (numerics-neutral, greedy-identity) and **(2) drafter acceptance** (amortize the one big GEMM over more accepted tokens, greedy-verified). Low-ceiling stages (attn 2.6%, drafter-dispatch ~0.5%, sampling 0.2%) are bounded by their share — useful but not bar-movers alone.
+**★ PROFILER REALITY (BASELINE.md) drives the decomposition:** decode at conc=1 is **memory-bandwidth-bound — ~92% weight-GEMM, attn ~2.6%, sampling ~0.2%.** Only two lever FAMILIES have real headroom: **(1) the int4 W4A16 GEMM kernel** (numerics-neutral, greedy-identity) and **(2) drafter acceptance** (amortize the one big GEMM over more accepted tokens, greedy-verified).
+
+**★ PERMANENTLY DEAD LEVERS (confirmed this cycle):**
+- **FlashInfer (#779 stark, CLOSED):** architecturally incompatible with Gemma4-E4B on sm86 — head_dim=512 global-attn has no valid paged-prefill kernel in FlashInfer; crashes at warmup `NUM_MMA_D_QK=32→head_dim=512`. Not a config issue; permanent. W&B `6i58gvjk`.
+- fp8-KV (#777 ubel, CLOSED): three-layer hardware wall on sm_86. Permanent.
+- precache (#775/#778, CLOSED): prompt-replay gaming, fails program.md:325 + private-Δ gate. Permanent.
+- osoi5-baked (#772 land, CLOSED): body-level quality collapse. Permanent.
 
 #### Private-stable lever decomposition (Cycle 60 — all LOCAL-only, all greedy-identity/quality-gated):
 | lever (private-stable) | profiler ceiling | quality risk | assigned | status |
 |---|---|---|---|---|
-| **int4 Marlin W4A16 GEMM kernel** (the 92% stage) | **HIGH** | none (greedy-identity) | ubel #781 | NEW |
-| ngram / prompt-lookup drafter (acceptance, lever b) | med–high | none (greedy-verified) | land #782 | NEW |
-| MTP draft-acceptance tuning @ fixed K=6 (draft quality) | med | none | denken #783 | NEW |
+| **int4 Marlin W4A16 GEMM kernel** (the 92% stage) | **HIGH** | none (greedy-identity) | ubel #781 | in-flight |
+| ngram / prompt-lookup drafter (acceptance, lever b) | med–high | none (greedy-verified) | land #782 | in-flight |
+| MTP draft-acceptance tuning @ fixed K=6 (draft quality) | med | none | denken #783 | in-flight |
 | MTP K-depth sweep {0,2,4,6,8} (draft depth) | med | low | fern #774 | **blocked** (leaked GPU ctx → reap #780) |
-| LOOPGRAPH + fused-argmax (drafter dispatch ~0.5%) | low | none | kanna #771 | port approved (capture-first gate) |
-| FlashInfer decode backend (attn 2.6%) | low | none | stark #779 | live |
-| GPQA panel for bi0 (Morgan's missing number) | diagnostic | — | wirbel #773 | nudged (no pickup) |
-| targeted locus revert | — | none | lawine #776 | nudged (no pickup) |
-| ~~precache~~ / ~~fp8-KV (sm_86 hw-dead)~~ / ~~osoi5-quality~~ | — | killed/dead | #775/#778, #777, #772 | CLOSED |
+| LOOPGRAPH + fused-argmax (drafter dispatch ~0.5%) | low | none | kanna #771 | port in-flight (capture-first gate) |
+| surgattn 2D vs 3D attn overhead | low | none (greedy-identity) | wirbel #785 | NEW |
+| MTP drafter GEMM format probe | low | none | stark #786 | NEW |
+| targeted locus revert | — | none | lawine #776 | in-flight |
+| ~~FlashInfer~~ / ~~fp8-KV~~ / ~~precache~~ / ~~osoi5~~ | — | killed/dead | #779, #777, #775/#778, #772 | CLOSED |
 
 ### Key constraints
-- **Quality gate (Morgan):** ≤10% degradation of base on MMLU-Pro/GPQA/AIME/GSM8K. Specific gates: MMLU-Pro ≥ 0.572, GPQA ≥ 0.471, GSM8K ≥ 0.807, AIME ≥ 0.090. Greedy-identity to the bi0 control is the quality proof for numerics-neutral levers (GEMM kernel, drafter); only weight-changing levers need the full panel.
-- **Serving fix:** prometheus guard ALONE (kanna #177). fastapi pin = INCOMPATIBLE with vLLM 0.22.0. Never use the pin.
-- **No autonomous HF launch.** Open a GitHub `Approval request: HF job for ...` issue; fire only after human approves.
-- **Private-stable mandate:** any future fire MUST be prompt-agnostic — the `cmpatino-verifier` re-runs on a private set with Δ TPS ≤ 5%. Precache / prompt-replay is permanently OFF the table (program.md:325).
+- **Quality gate (Morgan):** MMLU-Pro ≥ 0.572, GPQA ≥ 0.471, GSM8K ≥ 0.807, AIME ≥ 0.090. Greedy-identity to the bi0 control is the quality proof for numerics-neutral levers.
+- **Full bi0 quality panel (reference):** MMLU-Pro 0.644 / GSM8K 0.867 / AIME 10/30 / GPQA-Diamond 0.4970. W&B `kredc30c` (GPQA), `s63tb03x` (TPS).
+- **Serving fix:** prometheus guard ALONE. fastapi pin = INCOMPATIBLE with vLLM 0.22.0. Never use the pin.
+- **No autonomous HF launch.** Open approval issue; fire only after human approves.
+- **Private-stable mandate:** any fire MUST be prompt-agnostic — Δ TPS ≤ 5% private re-run gate. Precache / prompt-replay is permanently OFF (program.md:325).
 
-### Fleet status (2026-06-20 ~10:55Z) — "OUTAGE" RETRACTED; all 8 zero-idle
-- **ALIVE + working today:** stark #779 (FlashInfer), kanna #771 (loopgraph port), ubel #781 (Marlin GEMM, NEW), land #782 (ngram, NEW), denken #783 (MTP-accept, NEW — pod GPU confirmed by a 09:01Z run). fern #774 alive but **GPU-blocked** (leaked ~20.4 GB ctx from a prior fire session; host-side reap requested in #780).
-- **UNCONFIRMED (nudged, no Jun-20 pickup):** wirbel #773 (Morgan's GPQA), lawine #776 — both freshly assigned ~1h ago; posted graduated proof-of-life nudges, NOT escalated (dark-pod discipline — was burned reassigning lawine early before). If wirbel stays dark next cycle, reassign GPQA to land (eval-rigor fit).
-- **CLOSED this cycle:** #777 (ubel fp8-KV — hardware dead on sm_86, three-layer wall) + #772 (land osoi5 — weights-collapse, established). Prior: #775/#778 (precache mirage).
-- **★ #780 RETRACTED:** last cycle's "7/8 dark" was a premature W&B-absence escalation (the dark-pod trap again — W&B-absence ≠ dark; students did no-GPU analysis / crashed-before-logging serves). ≥5 demonstrably worked today. Narrowed the operator ask to fern's leaked-context reap only — NO fleet restart.
-- **Next:** watch ubel #781 / land #782 / denken #783 / kanna #771 / stark #779 results; deliver Morgan's GPQA (#773 → reassign to land if wirbel dark); resume fern #774 the instant the GPU is reaped. Run the full AIME/MMLU/GPQA/GSM8K panel + the private-Δ≤5% check on any 300+ candidate before proposing a fire.
+### Fleet status (2026-06-20 ~11:30Z) — all 8 assigned, zero-idle
+- **In-flight:** kanna #771 (loopgraph port), ubel #781 (Marlin GEMM), land #782 (ngram), denken #783 (MTP-accept — pod on old branch as of 08:27Z, watch for #783 pickup), lawine #776 (locus-revert).
+- **New this cycle:** wirbel #785 (surgattn overhead check), stark #786 (drafter GEMM format — GPU has ~19.6 GiB co-tenant, check nvidia-smi first).
+- **GPU-blocked:** fern #774 (leaked ~20.4 GB ctx, reap requested #780).
+- **CLOSED this cycle:** #779 (stark FlashInfer — permanent head_dim=512 incompatibility), #773 (wirbel GPQA panel — MERGED as evidence archive, GPQA 0.4970 ✓).
+- **Next:** watch ubel #781 / land #782 / denken #783 / kanna #771 results; resume fern #774 the instant GPU is reaped. Run the full quality panel + private-Δ≤5% check on any 300+ candidate before proposing a fire.
 
 ---
 

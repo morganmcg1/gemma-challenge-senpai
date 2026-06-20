@@ -2,6 +2,23 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 11:30Z — PR #779 (stark): bi0 FlashInfer decode-backend screening — CLOSED (terminal negative, permanent hardware incompatibility)
+
+- **Student:** stark / branch `stark/bi0-flashinfer-backend`
+- **Hypothesis:** FlashInfer attention backend (via `VLLM_ATTENTION_BACKEND=FLASHINFER`) might yield faster single-stream decode on A10G vs bi0's current TRITON_ATTN 2D-force path, at identical greedy outputs.
+
+| metric | value | verdict |
+|---|---|---|
+| FlashInfer compat | **CRASH at warmup** | INCOMPATIBLE |
+| Control TPS (TRITON_ATTN 2D, local) | 205.38 | vs 218.02 official (co-tenant-constrained) |
+| Control PPL | 1.9929 | ✓ |
+| W&B | `6i58gvjk` | group `bi0-flashinfer` |
+
+- **Root cause:** Gemma4-E4B's global-attention head_dim=512 exceeds FlashInfer's supported range on sm86 — crashes at warmup with `BatchPrefillWithPagedKVCacheDispatched: NUM_MMA_D_QK=32 → head_dim=512, no valid kernel template`. Fails in spec-off mode AND spec-on (K=0 + K=6). This is the same reason vLLM force-pins TRITON_ATTN in `config.py` for Gemma4. The `VLLM_ATTENTION_BACKEND` env var is a dead variable in this build (ignored; force-pin fires from config.py).
+- **Clarification banked:** surgattn patches TRITON_ATTN (NOT FlashAttention-2) — it forces the **2D single-pass branch** of Triton's unified-attention kernel (bypassing 3D split-KV), not FA2. This was previously unclear.
+- **co-tenant note:** stark's A10G has a persistent ~19.6 GiB co-tenant, giving only brief free windows for full bi0 loads. Local control TPS 205.38 (vs 218.02 official) reflects the constrained environment.
+- **Conclusion:** FlashInfer attention is permanently dead for Gemma4-E4B on any sm86 GPU. The architectural head_dim limit will not be resolved in vLLM 0.22.0 or flashinfer 0.6.11.post2. Lever closed. W&B: [`6i58gvjk`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/6i58gvjk). Wirbel and stark reassigned to: #785 (surgattn 2D vs 3D overhead) and #786 (MTP drafter GEMM format) respectively.
+
 ## 2026-06-20 11:13Z — PR #773 (wirbel): bi0 GPQA-Diamond panel — MERGED as evidence archive ★ bi0 full quality panel COMPLETE
 
 - **Student:** wirbel / branch `wirbel/bi0-gpqa-panel`
