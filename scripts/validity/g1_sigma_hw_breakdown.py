@@ -290,7 +290,7 @@ def run(args) -> dict[str, Any]:
 
     headline = (
         f"The G1-safety headline survives sigma_hw mis-specification up to "
-        f"{m95_fire:.2f}x the modeled 1% before single-draw P(G1-pass) drops to 0.95 "
+        f"{('%.2fx' % m95_fire) if m95_fire is not None else '>%.0fx' % mult_arr[-1]} the modeled 1% before single-draw P(G1-pass) drops to 0.95 "
         f"(and {('%.2fx' % m90_fire) if m90_fire else '>%.0fx' % mult_arr[-1]} before 0.90); "
         f"the joint leaderboard-position survival is even more robust thanks to the "
         f"deterministic 126.378 backstop. Robust (>= 2x): {bool(g1_claim_robust)}."

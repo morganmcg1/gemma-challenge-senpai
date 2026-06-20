@@ -1,0 +1,164 @@
+{
+  "pr": 766,
+  "student": "kanna",
+  "analysis_only": true,
+  "official_tps": 0,
+  "no_hf_job": true,
+  "fires": 0,
+  "reused_756_763_byte_identical": true,
+  "repro_anchors": {
+    "p_fire_1x": 0.98504,
+    "p_fire_expected_756": 0.98504,
+    "r05_1x": 0.97739,
+    "r05_expected_756": 0.97739,
+    "sweep_m95_recomputed": 4.72,
+    "sweep_m95_expected_763": 4.72,
+    "sweep_m90_recomputed": 7.2437,
+    "sweep_m90_expected_763": 7.2437
+  },
+  "modeled_sigma_hw": {
+    "modeled_frac": 0.01,
+    "modeled_pct": 1.0,
+    "cross_bound_frac_159": 0.009623,
+    "cross_bound_pct_159": 0.9623,
+    "provenance": "modeled 1% = #159 cross-allocation frantic-penguin 3-draw 0.9623% (NON-fire ~485 TPS frontier) -> #478 1% multiplicative; the value PR #766 replaces with a MEASURED fire-config CV."
+  },
+  "measured_sigma_hw": {
+    "artifact": "/workspace/senpai/target/research/validity/g1_sigma_measured/fresh_n12/noise_floor_fresh.json",
+    "metric": "wall_tps",
+    "n": 12,
+    "mean_tps": 156.3967806203563,
+    "std_tps": 0.02410190826546446,
+    "measured_sigma_hw_pct": 0.015410744498616234,
+    "measured_sigma_hw_frac": 0.00015410744498616235,
+    "min_tps": 156.33658312574485,
+    "max_tps": 156.42890873203112,
+    "range_pct": 0.05903293272409558,
+    "median_tps": 156.3945773537638,
+    "values_tps": [
+      156.33658312574485,
+      156.3954136092635,
+      156.3916926858537,
+      156.42674705636202,
+      156.38266005940042,
+      156.41605314660995,
+      156.39103967169248,
+      156.3937410982641,
+      156.3904859619541,
+      156.42890873203112,
+      156.39898458801957,
+      156.40905770907995
+    ],
+    "mode": "fresh",
+    "submission": "int4_mtp_batchinv",
+    "workload": {
+      "num_prompts": 128,
+      "output_len": 512,
+      "seed": 1
+    },
+    "n_runs_artifact": 12,
+    "elapsed_s": null
+  },
+  "step1_measured": {
+    "measured_sigma_hw_pct": 0.01541,
+    "measured_sigma_hw_frac": 0.00015410744498616235,
+    "mean_tps": 156.3967806203563,
+    "std_tps": 0.02410190826546446,
+    "n": 12,
+    "min_tps": 156.33658312574485,
+    "max_tps": 156.42890873203112,
+    "measured_over_modeled_ratio": 0.01541,
+    "material_diff_from_modeled_1pct": true,
+    "isolation_note": "fresh-serve N-run wall_tps CV = the directly-measurable WITHIN-allocation sigma_hw on ONE A10G; cross-allocation scatter (which physical card) is BOUNDED-not-measured (#159), one pod cannot capture it."
+  },
+  "step2_g1_at_measured": {
+    "sigma_hw_frac": 0.00015410744498616235,
+    "sigma_hw_pct": 0.01541,
+    "p_g1_single_draw_pass": 0.98634,
+    "r05": 0.97893,
+    "worst_priv_tps_fire_anchor": 153.692,
+    "worst_priv_tps_stress_anchor": 127.261,
+    "margin_over_bar_fire_anchor": 27.314,
+    "g1_margin_tps_at_95": 2.7205,
+    "clears_bar_at_95_fire_anchor": true,
+    "fire_p_g1_at_measured_sigma": 0.98634,
+    "worst_priv_tps_at_measured_sigma": 153.692,
+    "headroom_multiple_measured_basis": 306.28,
+    "breakdown_mult_at_095_modeled_basis": 4.72,
+    "headroom_note": "headroom_multiple_measured_basis = 4.72 (modeled-basis breakdown) / (measured/modeled): how many x the MEASURED sigma_hw before the one-sided 5% gate's fire single-draw P(G1-pass) hits 0.95."
+  },
+  "step2b_grounded_conservative": {
+    "grounded_sigma_hw_pct": 0.96242,
+    "grounded_sigma_hw_frac": 0.009624233897022669,
+    "grounded_over_modeled_ratio": 0.96242,
+    "definition": "hypot(measured_within, cross_bound_159=0.9623%)",
+    "grounded_p_g1_single_draw_pass": 0.98512,
+    "grounded_r05": 0.97745,
+    "grounded_worst_priv_tps_fire_anchor": 153.46,
+    "grounded_worst_priv_tps_stress_anchor": 127.069,
+    "grounded_margin_over_bar_fire_anchor": 27.082,
+    "grounded_g1_margin_tps_at_95": 2.9153,
+    "grounded_clears_bar_at_95_fire_anchor": true,
+    "headroom_multiple_grounded_basis": 4.904
+  },
+  "step3_on_modeled_curve": {
+    "sweep_grid": {
+      "lo": 0.5,
+      "hi": 20.0,
+      "step": 0.05,
+      "n_points": 391
+    },
+    "fire_breakdown_mult_at_095": {
+      "crossed": true,
+      "below_grid": false,
+      "mult": 4.72,
+      "bracket": [
+        4.7,
+        4.75
+      ],
+      "note": "crosses 0.95 between 4.700x and 4.750x"
+    },
+    "fire_breakdown_mult_at_090": {
+      "crossed": true,
+      "below_grid": false,
+      "mult": 7.2437,
+      "bracket": [
+        7.2,
+        7.25
+      ],
+      "note": "crosses 0.9 between 7.200x and 7.250x"
+    },
+    "measured_point": {
+      "multiple_of_modeled": 0.01541,
+      "in_swept_grid": false,
+      "nearest_swept_mult": 0.5,
+      "p_g1_at_nearest": 0.98582,
+      "below_breakdown_4p72": true,
+      "in_safe_region_p_ge_095": true
+    },
+    "grounded_point": {
+      "multiple_of_modeled": 0.96242,
+      "in_swept_grid": true,
+      "nearest_swept_mult": 0.95,
+      "p_g1_at_nearest": 0.98512,
+      "below_breakdown_4p72": true,
+      "in_safe_region_p_ge_095": true
+    }
+  },
+  "honesty_carry_forward": {
+    "framing": "EMPIRICAL GROUNDING of kanna's own modeled G1 card: the directly-measured fire-config fresh-serve CV replaces the assumed within component; the cross-allocation term stays bounded-not-measured.",
+    "within_vs_cross": "sigma_hw = hypot(within, cross); measured = within only (one pod); cross bounded at 0.9623% (#159).",
+    "does_not_change_scorer": "grounds OUR internal G1-safety confidence; the organizer's identity-blind scorer + the locked int4_g128_lmhead@126.378 baseline are untouched.",
+    "engine_and_sampling": "served vLLM 0.22.0 + MTP drafter K=6, VLLM_BATCH_INVARIANT=1; greedy tau=0 (per #319); fresh server per repeat, canonical 128x512 conc=1 official decode, seed 1."
+  },
+  "decision": {
+    "primary_metric_measured_sigma_hw_pct": 0.01541,
+    "test_metric_g1_empirically_grounded": 1,
+    "fire_p_g1_at_measured_sigma": 0.98634,
+    "worst_priv_tps_at_measured_sigma": 153.692,
+    "headroom_multiple_measured_basis": 306.28,
+    "headroom_multiple_grounded_basis": 4.904,
+    "verdict": "G1_EMPIRICALLY_GROUNDED"
+  },
+  "headline": "Measured fire-config (int4_mtp_batchinv, BI=1) run-to-run TPS CV = 0.0154% over N=12 fresh-serve {'num_prompts': 128, 'output_len': 512, 'seed': 1} draws (mean 156.40 TPS, std 0.0241); that is 0.015x the modeled 1%. Folded with the bounded cross-allocation term (#159 0.9623%) the conservative grounded sigma_hw = 0.9624% (0.962x modeled). At the measured sigma the fire single-draw P(G1-pass) = 0.98634 and the 95%-worst private TPS @157 = 153.69 (clears the 126.378 bar by +27.31); the gate's 4.72x breakdown is 4.90x away on the grounded basis. G1 leg empirically grounded: True."
+}
