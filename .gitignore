@@ -97,3 +97,13 @@ research/validity/bi0_gpqa_panel/results/_inspect_logs/
 research/validity/bi0_gpqa_panel/*.out
 research/validity/bi0_gpqa_panel/*.pid
 research/validity/bi0_gpqa_panel/*.nohup
+
+# bi0 MTP draft-acceptance sweep (PR #792, analysis-only): same convention -- keep
+# the sweep/finalize/repeat_det/analyze scripts, the consolidated sweep_report.json
+# + sweep_partial.json, the *.summary.json metric files, and determinism_control.json
+# (the drafter-induced-vs-nondeterminism verdict); drop the bulky raw decode token
+# streams (decode_*.jsonl, ~1.1M each), the per-token PPL logprob dumps (ppl_*.jsonl),
+# and transient pidfiles. The server/sweep logs are already covered by research/**/*.log.
+research/bi0_mtp_accept/decode_*.jsonl
+research/bi0_mtp_accept/ppl_*.jsonl
+research/bi0_mtp_accept/*.pid
