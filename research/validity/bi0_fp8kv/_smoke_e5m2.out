@@ -1,0 +1,56 @@
+[smoke] booting fp8_e5m2 server -> /workspace/senpai/target/research/validity/bi0_fp8kv/_smoke_e5m2_server.log
+[smoke] server pid=2785882
+[smoke] SERVER EXITED EARLY
+[smoke] NOT READY -- last 40 log lines:
+(APIServer pid=2785882)                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/senpai-run/home/student-ubel/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 210, in __aenter__
+(APIServer pid=2785882)     return await anext(self.gen)
+(APIServer pid=2785882)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 100, in build_async_engine_client
+(APIServer pid=2785882)     async with build_async_engine_client_from_engine_args(
+(APIServer pid=2785882)                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/senpai-run/home/student-ubel/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 210, in __aenter__
+(APIServer pid=2785882)     return await anext(self.gen)
+(APIServer pid=2785882)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 136, in build_async_engine_client_from_engine_args
+(APIServer pid=2785882)     async_llm = AsyncLLM.from_vllm_config(
+(APIServer pid=2785882)                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 217, in from_vllm_config
+(APIServer pid=2785882)     return cls(
+(APIServer pid=2785882)            ^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 146, in __init__
+(APIServer pid=2785882)     self.engine_core = EngineCoreClient.make_async_mp_client(
+(APIServer pid=2785882)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=2785882)     return func(*args, **kwargs)
+(APIServer pid=2785882)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 131, in make_async_mp_client
+(APIServer pid=2785882)     return AsyncMPClient(*client_args)
+(APIServer pid=2785882)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=2785882)     return func(*args, **kwargs)
+(APIServer pid=2785882)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 932, in __init__
+(APIServer pid=2785882)     super().__init__(
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 567, in __init__
+(APIServer pid=2785882)     with launch_core_engines(
+(APIServer pid=2785882)          ^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2785882)   File "/senpai-run/home/student-ubel/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 144, in __exit__
+(APIServer pid=2785882)     next(self.gen)
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1150, in launch_core_engines
+(APIServer pid=2785882)     wait_for_engine_startup(
+(APIServer pid=2785882)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1209, in wait_for_engine_startup
+(APIServer pid=2785882)     raise RuntimeError(
+(APIServer pid=2785882) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[smoke] killing server pid=2785882
+[smoke] === signal grep ===
+[serve] KV cache dtype: fp8_e5m2 (fp8 paged KV)
+(APIServer pid=2785882) [int4_mtp_fp8kv] _init_kv_cache_quant wrapped: relaxing the fp8_e5m2 KV guard for weight-only compressed-tensors checkpoints (kv_cache_scheme=None)
+[int4_mtp_fp8kv] _init_kv_cache_quant wrapped: relaxing the fp8_e5m2 KV guard for weight-only compressed-tensors checkpoints (kv_cache_scheme=None)
+(EngineCore pid=2786478) [int4_mtp_force2d] unified_attention wrapped: forcing 2D single-pass attention (use_3d=False) for decode and verify under BI=0
+(EngineCore pid=2786478) ERROR 06-20 10:36:05 [core.py:1165] Traceback (most recent call last):
+(EngineCore pid=2786478) ERROR 06-20 10:36:05 [core.py:1165]     raise e.with_traceback(None) from e.__cause__  # User compiler error
+(EngineCore pid=2786478) Traceback (most recent call last):
+(EngineCore pid=2786478)     raise e.with_traceback(None) from e.__cause__  # User compiler error
+(APIServer pid=2785882) Traceback (most recent call last):
+[smoke] DONE rc=0

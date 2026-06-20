@@ -1,0 +1,26 @@
+{
+  "name": "int4-mtp-bi0-fp8kv",
+  "description": "NEGATIVE RESULT (PR #777): fp8 KV cache is not serviceable on A10G/sm_86 for the int4-compressed-tensors + force-2D-TRITON_ATTN + torch.compile stack. Built as int4_mtp_bi0_surgattn + --kv-cache-dtype, but no fp8 dtype boots: fp8_e5m2 is rejected by vLLM's _init_kv_cache_quant guard (relaxed here by vllm_fp8kv_e5m2_guard_patch.py) then by the attention-forward assert kv_cache_dtype in {fp8,fp8_e4m3,nvfp4}; fp8_e4m3/fp8 pass vLLM but fail Triton compile (fp8e4nv unsupported on sm_86, supported set is fp8e4b15/fp8e5); int8 is not a valid vLLM CacheDType. The two Ampere-compilable Triton fp8 dtypes are exactly the two the attention kernel refuses. KV_CACHE_DTYPE defaults to 'auto' => default bf16 KV == the exact bi0 surgattn 218.02-TPS baseline (the only runnable config); fp8_e5m2/fp8_e4m3 remain selectable only to reproduce the three-layer wall. Re-confirms the prior fp8-KV dead-end (wirbel #141; BASELINE.md). Everything else byte-for-byte bi0 surgattn: VLLM_BATCH_INVARIANT=0, force-2D TRITON_ATTN patch, gemma4_assistant MTP drafter NUM_SPECULATIVE_TOKENS=6, int4 W4A16 weights, all modalities.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "KV_CACHE_DTYPE": "auto",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}

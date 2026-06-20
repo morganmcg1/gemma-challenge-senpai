@@ -1,0 +1,77 @@
+[smoke] booting fp8_e4m3 server -> /workspace/senpai/target/research/validity/bi0_fp8kv/_smoke_e4m3_server.log
+[smoke] server pid=2783292
+[smoke] SERVER EXITED EARLY (rc check)
+[smoke] NOT READY -- dumping last 40 log lines:
+(APIServer pid=2783292)                ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/senpai-run/home/student-ubel/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 210, in __aenter__
+(APIServer pid=2783292)     return await anext(self.gen)
+(APIServer pid=2783292)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 100, in build_async_engine_client
+(APIServer pid=2783292)     async with build_async_engine_client_from_engine_args(
+(APIServer pid=2783292)                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/senpai-run/home/student-ubel/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 210, in __aenter__
+(APIServer pid=2783292)     return await anext(self.gen)
+(APIServer pid=2783292)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/entrypoints/openai/api_server.py", line 136, in build_async_engine_client_from_engine_args
+(APIServer pid=2783292)     async_llm = AsyncLLM.from_vllm_config(
+(APIServer pid=2783292)                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 217, in from_vllm_config
+(APIServer pid=2783292)     return cls(
+(APIServer pid=2783292)            ^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/async_llm.py", line 146, in __init__
+(APIServer pid=2783292)     self.engine_core = EngineCoreClient.make_async_mp_client(
+(APIServer pid=2783292)                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=2783292)     return func(*args, **kwargs)
+(APIServer pid=2783292)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 131, in make_async_mp_client
+(APIServer pid=2783292)     return AsyncMPClient(*client_args)
+(APIServer pid=2783292)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/tracing/otel.py", line 178, in sync_wrapper
+(APIServer pid=2783292)     return func(*args, **kwargs)
+(APIServer pid=2783292)            ^^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 932, in __init__
+(APIServer pid=2783292)     super().__init__(
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/core_client.py", line 567, in __init__
+(APIServer pid=2783292)     with launch_core_engines(
+(APIServer pid=2783292)          ^^^^^^^^^^^^^^^^^^^^
+(APIServer pid=2783292)   File "/senpai-run/home/student-ubel/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/contextlib.py", line 144, in __exit__
+(APIServer pid=2783292)     next(self.gen)
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1150, in launch_core_engines
+(APIServer pid=2783292)     wait_for_engine_startup(
+(APIServer pid=2783292)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/vllm/v1/engine/utils.py", line 1209, in wait_for_engine_startup
+(APIServer pid=2783292)     raise RuntimeError(
+(APIServer pid=2783292) RuntimeError: Engine core initialization failed. See root cause above. Failed core proc(s): {}
+[smoke] killing server pid=2783292
+[smoke] === signal grep ===
+(EngineCore pid=2783983)     mb_compiled_graph = fx_codegen_and_compile(
+(EngineCore pid=2783983)                         ^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/compile_fx.py", line 1798, in fx_codegen_and_compile
+(EngineCore pid=2783983)     return scheme.codegen_and_compile(gm, example_inputs, inputs_to_check, graph_kwargs)
+(EngineCore pid=2783983)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/compile_fx.py", line 1570, in codegen_and_compile
+(EngineCore pid=2783983)     compiled_module = graph.compile_to_module()
+(EngineCore pid=2783983)                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/graph.py", line 2499, in compile_to_module
+(EngineCore pid=2783983)     return self._compile_to_module()
+(EngineCore pid=2783983)            ^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/graph.py", line 2505, in _compile_to_module
+(EngineCore pid=2783983)     self.codegen_with_cpp_wrapper() if self.cpp_wrapper else self.codegen()
+(EngineCore pid=2783983)                                                              ^^^^^^^^^^^^^^
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/graph.py", line 2448, in codegen
+(EngineCore pid=2783983)     result = self.wrapper_code.generate(self.is_inference)
+(EngineCore pid=2783983)              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/codegen/wrapper.py", line 1787, in generate
+(EngineCore pid=2783983)     return self._generate(is_inference)
+(EngineCore pid=2783983)            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/codegen/wrapper.py", line 1854, in _generate
+(EngineCore pid=2783983)     self.generate_and_run_autotune_block()
+(EngineCore pid=2783983)   File "/tmp/senpai-venvs/20f658587e8a6643/lib/python3.12/site-packages/torch/_inductor/codegen/wrapper.py", line 1942, in generate_and_run_autotune_block
+(EngineCore pid=2783983)     raise RuntimeError(f"Failed to run autotuning code block: {e}") from e
+(EngineCore pid=2783983) torch._inductor.exc.InductorError: RuntimeError: Failed to run autotuning code block: at 1:0:
+(EngineCore pid=2783983) def triton_per_fused__to_copy_add_cat_clamp_index_select_mul_reciprocal_rms_norm_split_split_with_sizes_sub_unsqueeze_view_1(in_ptr0, in_ptr1, in_ptr2, in_ptr3, in_ptr4, out_ptr2, xnumel, r0_numel, XBLOCK : tl.constexpr):
+(EngineCore pid=2783983) ^
+(EngineCore pid=2783983) ValueError("type fp8e4nv not supported in this architecture. The supported fp8 dtypes are ('fp8e4b15', 'fp8e5')")
+(APIServer pid=2783292) Traceback (most recent call last):
+(APIServer pid=2783292)     self.engine_core = EngineCoreClient.make_async_mp_client(
+[smoke] DONE rc=0

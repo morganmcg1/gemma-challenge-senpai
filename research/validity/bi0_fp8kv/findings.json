@@ -1,0 +1,64 @@
+{
+  "pr": 777,
+  "branch": "ubel/bi0-fp8-kv",
+  "hypothesis": "Add --kv-cache-dtype fp8 to int4_mtp_bi0_surgattn to halve KV read bandwidth for free TPS at PPL<=2.42.",
+  "verdict": "NEGATIVE / UNTESTABLE-ON-HARDWARE",
+  "summary": "No fp8 KV dtype is serviceable on A10G (Ampere/sm_86) for the int4-compressed-tensors + force-2D-TRITON_ATTN + torch.compile stack. Re-confirms the prior fp8-KV dead-end (wirbel #141; BASELINE.md 'rejected by A10G + Gemma4 attn') with a precise three-layer root cause.",
+  "hardware": "NVIDIA A10G, Ampere sm_86, 23028 MiB, no native fp8 tensor cores",
+  "stack": "vllm==0.22.0, transformers==5.9.0, target=google/gemma-4-E4B-it-qat-w4a16-ct (compressed-tensors W4A16), TRITON_ATTN backend (force-selected for Gemma4 heterogeneous head dims), torch.compile/inductor + cudagraph, MTP drafter K=6, VLLM_BATCH_INVARIANT=0",
+  "three_layer_block": [
+    {
+      "layer": 1,
+      "name": "vLLM init guard (fp8_e5m2)",
+      "site": "vllm/model_executor/layers/attention/attention.py:_init_kv_cache_quant (~L163-168)",
+      "mechanism": "CompressedTensorsConfig.get_quant_method returns CompressedTensorsKVCacheMethod for EVERY Attention layer (compressed_tensors.py:181-182), so should_load_quant_weights=True even though the W4A16 checkpoint has kv_cache_scheme=None; the guard then raises ValueError: 'fp8_e5m2 kv-cache is not supported with fp8 checkpoints'.",
+      "blocks": ["fp8_e5m2"],
+      "status": "RELAXED by submissions/int4_mtp_bi0_fp8kv/vllm_fp8kv_e5m2_guard_patch.py (only when kv_cache_scheme is None). This is a legitimate narrowing of an over-broad guard; it gets e5m2 past layer 1 but layers 2-3 still block."
+    },
+    {
+      "layer": 2,
+      "name": "attention-forward dtype assert (rejects e5m2)",
+      "site": "vllm/model_executor/layers/attention/attention.py:467",
+      "code": "assert self.kv_cache_dtype in {\"fp8\", \"fp8_e4m3\", \"nvfp4\"}",
+      "mechanism": "When the fp8 KV path activates query_quant, the forward asserts the dtype is e4m3/nvfp4-class. fp8_e5m2 is not in the set -> torch._dynamo.exc.Unsupported: Data-dependent assertion failed (cannot compile partial graph). The kernel implements only e4m3/nvfp4 dequant. This is BASELINE.md's 'rejected by Gemma4 attn'. Not patchable without rewriting the attention impl.",
+      "blocks": ["fp8_e5m2"]
+    },
+    {
+      "layer": 3,
+      "name": "Triton sm_86 fp8 compile",
+      "site": "inductor autotuning of fused KV-store/RMSNorm kernel (triton_per_fused__to_copy_..._rms_norm_...)",
+      "error": "ValueError(\"type fp8e4nv not supported in this architecture. The supported fp8 dtypes are ('fp8e4b15', 'fp8e5')\")",
+      "mechanism": "fp8_e4m3 (and bare 'fp8' which aliases to fp8_e4m3 per torch_utils.py:64) maps to Triton fp8e4nv, unsupported on sm_86. This is BASELINE.md's 'rejected by A10G'.",
+      "blocks": ["fp8_e4m3", "fp8"]
+    }
+  ],
+  "exhaustive_dtype_table": {
+    "fp8_e5m2": "past layer1 (patched) -> DEAD at layer2 (kernel assert). Would compile in Triton (fp8e5) if it reached layer3.",
+    "fp8_e4m3": "ok layer1, ok layer2 -> DEAD at layer3 (Triton fp8e4nv unsupported on sm_86)",
+    "fp8": "aliases to fp8_e4m3 -> DEAD at layer3",
+    "nvfp4": "needs Blackwell fp4 hardware -> DEAD",
+    "int8": "NOT a valid vLLM CacheDType literal (only int8_per_token_head exists, a different unsupported path)"
+  },
+  "key_fact": "The two Ampere-compilable Triton fp8 dtypes (fp8e4b15, fp8e5) are exactly the two the vLLM attention forward does NOT accept; the two it accepts (fp8_e4m3, nvfp4) require Ada/Hopper/Blackwell. No fp8 dtype clears all three layers.",
+  "shipped_config": "KV_CACHE_DTYPE=auto => default bf16 KV == byte-for-byte int4_mtp_bi0_surgattn (the only config that boots on A10G).",
+  "baseline_bi0_surgattn": {
+    "submission": "int4_mtp_bi0_surgattn",
+    "pr": 770,
+    "official_a10g_small_tps": 218.02,
+    "ppl": 2.0058,
+    "completion": "128/128 VALID",
+    "mmlu_pro": 0.644,
+    "wandb_run_id": "s63tb03x"
+  },
+  "fp8kv_measured": {
+    "output_tps": null,
+    "ppl": null,
+    "note": "Not measurable: no fp8 KV config boots on A10G."
+  },
+  "evidence_logs": [
+    "research/validity/bi0_fp8kv/_smoke_e4m3.out (+ _smoke_e4m3_server.log): layer-3 Triton fp8e4nv error",
+    "research/validity/bi0_fp8kv/_smoke_e5m2.out (+ _smoke_e5m2_server.log): guard relaxed (layer1 passed), layer-2 kernel assert kv_cache_dtype in {fp8,fp8_e4m3,nvfp4}",
+    "research/validity/bi0_fp8kv/_smoke_auto.out (+ _smoke_auto_server.log): default bf16 boots OK (= bi0)"
+  ],
+  "recommendation": "Close the fp8-KV lever for sm_86 (already in BASELINE.md confirmed-dead-ends). A bootable fp8 path would require either (a) a new sm_86 fp8 attention kernel that dequants e5m2 (none in vLLM 0.22.0), or (b) Ada/Hopper/Blackwell hardware. Neither is in scope for this challenge's A10G target."
+}
