@@ -1,6 +1,12 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~11:40Z) — BI0 SHIPPED @218 + QUALITY PANEL COMPLETE; PRECACHE/FP8/FLASHINFER/LOCUS-REVERT KILLED; all 8 zero-idle — authoritative; cycle-58/59 below is historical
+## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~11:55Z) — BI0 SHIPPED @218 + QUALITY PANEL COMPLETE; #784 LOOSENS THE GATE (byte-identity NOT sacred → quality-in-5%-band); MARLIN-KERNEL/PRECACHE/FP8/FLASHINFER/LOCUS-REVERT KILLED; all 8 zero-idle — authoritative; cycle-58/59 below is historical
+
+### ★ NEW GOVERNING HUMAN DIRECTIVE — Issue #784 (2026-06-20 11:24Z, morganmcg1)
+**"Push hard on faster TPS within quality guardrails."** Operating target: optimize TPS aggressively; **maintain quality within 5% of the base model on AIME/MMLU/GPQA**; **byte-identical outputs are NOT sacred for this phase** — a non-byte-identical variant that keeps quality inside the 5% band is **worth testing and escalating**. Cadence: pick 2–4 variants, local speed smoke each, cheap quality evidence, keep winners + discard losers fast, **cap analysis per lane** (don't over-analyze a small hypothesis). Prefer local A10G profiling. **Do NOT launch HF benchmark/submission jobs without explicit human approval** (open an Approval-request issue first). → **I have relaxed every in-flight card's "greedy-token-identical MUST match" hard gate to "quality-in-5%-band"** (PPL ≤ 2.42 + 128/128 + all-4-modalities + AIME/MMLU/GPQA within 5%). ACK posted on #784.
+
+### ★ COMPETITIVE BAR (public board, cmpatino-verifier 11:18Z)
+A competitor (`sparkgemma-s46b`) had **506.63 TPS re-run private at 490.72 (Δ 3.1%), PPL 2.3931 — VERIFIED VALID.** The frontier is being pushed by aggressive, *non*-byte-identical configs that sit inside the PPL≤2.42 bar. Our shipped bi0 = 218.02 → large headroom; the old byte-identity constraint was leaving TPS on the table (validates #784). NOTE: this is the public leaderboard scoreboard, not an in-scope branch — do NOT inspect/borrow sparkgemma's config; use the number only to calibrate urgency.
 
 ### What shipped (2026-06-20 09:32Z)
 - `int4_mtp_bi0_surgattn` FIRED + OFFICIAL: **218.02 TPS / PPL 2.0058 / 128/128 VALID** (W&B `s63tb03x`, job `6a3656ef3093dba73ce2ac88`). Human-approved #769. +72.5% over int4_g128_lmhead@126.378. Config: int4 W4A16 + MTP K=6 + VLLM_BATCH_INVARIANT=0 + surgattn + prometheus guard.
@@ -12,24 +18,25 @@ Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submi
 
 **★ PROFILER REALITY (BASELINE.md) drives the decomposition:** decode at conc=1 is **memory-bandwidth-bound — ~92% weight-GEMM, attn ~2.6%, sampling ~0.2%.** Only two lever FAMILIES have real headroom: **(1) the int4 W4A16 GEMM kernel** (numerics-neutral, greedy-identity) and **(2) drafter acceptance** (amortize the one big GEMM over more accepted tokens, greedy-verified).
 
-**★ PERMANENTLY DEAD LEVERS (confirmed this cycle):**
+**★ PERMANENTLY DEAD LEVERS (confirmed):**
+- **int4 Marlin W4A16 kernel-SWAP (#781 ubel, CLOSED 11:55Z):** no numerics-equivalent faster W4A16 kernel exists on sm_86 — Marlin is the SOLE servable kernel (Cutlass/Machete need sm_90, AllSpark W8-only, Conch absent, Exllama rejects bf16); its `atomic_add` toggle is hw-gated off (Ampere no bf16 atomicAdd); no tunable tile/thread/split; CLI rejects quant-method mismatch. **★ The 58% M=1 HBM figure is a RED HERRING — deployed serving runs at M=7 (~79% of peak); spec already amortizes the M=1 dequant slack (13.29ms single-stream → 218.49 deployed = 2.9×).** Kernel-schedule lever closed; the body GEMM is at the wall where it runs. W&B `uaq6btet`.
 - **FlashInfer (#779 stark, CLOSED):** architecturally incompatible with Gemma4-E4B on sm86 — head_dim=512 global-attn has no valid paged-prefill kernel in FlashInfer; crashes at warmup `NUM_MMA_D_QK=32→head_dim=512`. Not a config issue; permanent. W&B `6i58gvjk`.
 - fp8-KV (#777 ubel, CLOSED): three-layer hardware wall on sm_86. Permanent.
 - precache (#775/#778, CLOSED): prompt-replay gaming, fails program.md:325 + private-Δ gate. Permanent.
 - osoi5-baked (#772 land, CLOSED): body-level quality collapse. Permanent.
 
 #### Private-stable lever decomposition (Cycle 60 — all LOCAL-only, all greedy-identity/quality-gated):
-| lever (private-stable) | profiler ceiling | quality risk | assigned | status |
+| lever | profiler ceiling | quality risk | assigned | status |
 |---|---|---|---|---|
-| **int4 Marlin W4A16 GEMM kernel** (the 92% stage) | **HIGH** | none (greedy-identity) | ubel #781 | in-flight |
-| ngram / prompt-lookup drafter (acceptance, lever b) | med–high | none (greedy-verified) | land #782 | in-flight |
-| MTP draft-acceptance tuning @ fixed K=6 (draft quality) | med | none | denken #783 | in-flight |
-| MTP K-depth sweep {0,2,4,6,8} (draft depth) | med | low | fern #774 | **blocked** (leaked GPU ctx → reap #780) |
+| **fewer-weight-bytes: int8/int4 lm_head GEMV** (1.342 GB/tok, NOT spec-amortized — the one un-amortized read) | **HIGH** | med (argmax flips → 5%-band gate) | ubel #788 | **NEW** (from #781 diagnostic) |
+| ngram / prompt-lookup drafter (acceptance, lever b) | med–high | low (5%-band) | land #782 | in-flight |
+| MTP draft-acceptance tuning @ fixed K=6 (draft quality) | med | low | denken #783 | in-flight (watch pickup) |
+| MTP K-depth sweep {0,2,4,6,8} (draft depth) | med | low | fern #774 | **BLOCKED** (leaked GPU ctx → reap #780) |
 | LOOPGRAPH + fused-argmax (drafter dispatch ~0.5%) | low | none | kanna #771 | port in-flight (capture-first gate) |
-| surgattn 2D vs 3D attn overhead | low | none (greedy-identity) | wirbel #785 | in-flight |
-| MTP drafter GEMM format probe | low | none | stark #786 | in-flight |
-| CUDA graph coverage audit (verify-pass M=7 shape) | low | none | lawine #787 | NEW |
-| ~~locus-revert~~ / ~~FlashInfer~~ / ~~fp8-KV~~ / ~~precache~~ / ~~osoi5~~ | — | killed/dead | #776, #779, #777, #775/#778, #772 | CLOSED |
+| surgattn 2D vs 3D attn overhead | low | low (5%-band; 3D now allowed if faster) | wirbel #785 | **BLOCKED** (same leaked-ctx as fern → #780) |
+| MTP drafter GEMM format probe | low | none | stark #786 | in-flight (co-tenant 19.6 GiB) |
+| CUDA graph coverage audit (verify-pass M=7 shape) | low | none | lawine #787 | in-flight |
+| ~~Marlin kernel-swap~~ / ~~locus-revert~~ / ~~FlashInfer~~ / ~~fp8-KV~~ / ~~precache~~ / ~~osoi5~~ | — | killed/dead | #781, #776, #779, #777, #775/#778, #772 | CLOSED |
 
 ### Key constraints
 - **Quality gate (Morgan):** MMLU-Pro ≥ 0.572, GPQA ≥ 0.471, GSM8K ≥ 0.807, AIME ≥ 0.090. Greedy-identity to the bi0 control is the quality proof for numerics-neutral levers.
@@ -38,11 +45,11 @@ Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submi
 - **No autonomous HF launch.** Open approval issue; fire only after human approves.
 - **Private-stable mandate:** any fire MUST be prompt-agnostic — Δ TPS ≤ 5% private re-run gate. Precache / prompt-replay is permanently OFF (program.md:325).
 
-### Fleet status (2026-06-20 ~11:40Z) — all 8 assigned, zero-idle
-- **In-flight:** kanna #771 (loopgraph port), ubel #781 (Marlin GEMM), land #782 (ngram), denken #783 (MTP-accept — pod on old branch as of 08:27Z, watch for #783 pickup), wirbel #785 (surgattn overhead), stark #786 (drafter GEMM format — co-tenant 19.6 GiB, check nvidia-smi first), lawine #787 (CUDA graph audit).
-- **GPU-blocked:** fern #774 (CYCLING GPU — oscillates 0↔20437 MiB from external respawner; re-opened #780 with cycling evidence; fern is on HOLD until operator confirms stably-clear GPU >3 min).
-- **CLOSED this cycle (dead-ends confirmed):** #776 (lawine locus-revert — attention locus necessary-but-insufficient in served CUDA graphs; 211 TPS < 218 baseline), #779 (stark FlashInfer — head_dim=512 permanent), #773 (GPQA panel MERGED), #777 (fp8-KV hw-dead), #775/#778 (precache mirage), #772 (osoi5 collapse).
-- **Next:** watch ubel #781 / land #782 / denken #783 / kanna #771 results; resume fern #774 the instant operator confirms cycling GPU stopped. Run the full quality panel + private-Δ≤5% check on any 300+ candidate before proposing a fire.
+### Fleet status (2026-06-20 ~11:55Z) — all 8 assigned, zero-idle
+- **In-flight (healthy GPU):** kanna #771 (loopgraph port), ubel #788 (lm_head fewer-weight-bytes — NEW from #781 diagnostic; pod healthy), land #782 (ngram), denken #783 (MTP-accept — pod was on old branch 08:27Z, watch for #783 pickup), stark #786 (drafter GEMM format — co-tenant 19.6 GiB, check nvidia-smi first), lawine #787 (CUDA graph audit).
+- **★ GPU-BLOCKED — 2-pod orphaned-context leak (escalated #780):** fern #774 + wirbel #785 BOTH show the identical `20437 MiB / 23028 MiB @ 0% util` orphaned-`EngineCore` context (≈0.90×23028 = a prior serve session), no in-namespace PID, cross-namespace. fern's latest read corrects the earlier "cycling respawner" framing → it's a STABLY-occupied dead leaked context (0% util). Both on HOLD until operator reaps + confirms `0 MiB stable >3 min`. Both drivers pre-validated; they run the instant the GPU is clear. NOT a fleet restart — a narrow 2-pod reap.
+- **CLOSED (dead-ends confirmed):** #781 (ubel Marlin kernel-swap — no servable alt kernel on sm_86; 58% M=1 BW is spec-amortized red herring), #776 (lawine locus-revert — attention locus necessary-but-insufficient in served CUDA graphs; 211<218), #779 (stark FlashInfer — head_dim=512 permanent), #773 (GPQA panel MERGED), #777 (fp8-KV hw-dead), #775/#778 (precache mirage), #772 (osoi5 collapse).
+- **Next:** watch land #782 / denken #783 / kanna #771 / lawine #787 / stark #786 / ubel #788 results; resume fern #774 + wirbel #785 the instant operator confirms stably-clear GPUs. **Gate per #784: quality-in-5%-band, NOT byte-identity.** Run the full quality panel before proposing any fire; no HF launch without an explicit human approval issue.
 
 ---
 

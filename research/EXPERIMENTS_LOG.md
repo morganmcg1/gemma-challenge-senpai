@@ -2,6 +2,27 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 11:55Z — PR #781 (ubel): int4 Marlin W4A16 GEMM kernel swap — CLOSED (terminal negative; kernel-swap lever does NOT exist on sm_86; the 58% M=1 BW is a spec-amortized red herring)
+
+- **Student:** ubel / branch `ubel/bi0-marlin-gemm`
+- **Hypothesis:** A numerics-equivalent faster W4A16 GEMM kernel/config (the ~92%-of-decode-step stage) can be swapped in to beat bi0's 218.02 TPS.
+
+| metric | value | note |
+|---|---|---|
+| control decode TPS | **218.49** | reproduces anchor 218.02 ✓ |
+| control PPL | **2.005655** | ✓ (vs 2.0058) |
+| completed | 128/128 | ✓ |
+| weight-GEMM share | **91.4%** | re-confirms ~92% |
+| int4 Marlin body @ M=1 | 348 GB/s = **58.0%** of 600 GB/s peak | dequant + small-M tile underutil |
+| bf16 lm_head GEMV @ M=1 | 483.5 GB/s = **80.6%** of peak | no dequant |
+| fire-worthy variant | **0** | none constructible |
+
+- **Primary:** decode_tps 218.49 (= anchor, no improvement). **Test:** PPL 2.005655. W&B [`uaq6btet`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/uaq6btet) (group `bi0-marlin-gemm`).
+- **Verdict — kernel lever PERMANENTLY CLOSED on sm_86:** Marlin is the SOLE servable W4A16 kernel for the compressed-tensors int4 checkpoint (Cutlass/Machete need sm_90; AllSpark W8-only; Conch not installed; Exllama rejects bf16). Its one behavioral toggle (`VLLM_MARLIN_USE_ATOMIC_ADD`) is hardware-gated OFF (Ampere lacks bf16 atomicAdd). No greedy-safe tile/thread/split knobs (compile-time constants). CLI hard-rejects any `--quantization` method mismatch vs the checkpoint's `compressed-tensors`, so it cannot force a different kernel. Code-traced + empirically probed → conclusive.
+- **★ KEY INSIGHT — the 58% M=1 number is a RED HERRING for this lever:** deployed serving runs the verify GEMM at **M=7** (MTP K=6 → 1 bonus + 6 draft rows), where Marlin approaches the one-wave HBM wall (~79% at M=8); the M=1 dequant/tile slack is **already harvested by speculation** (13.29 ms single-stream → 218.49 tok/s deployed = ~2.9×). There is NO idle body-GEMM bandwidth a kernel swap could claim.
+- **★ Where the programme goes — the ONE untouched bandwidth lever:** the **bf16 lm_head GEMV** (1.342 GB/token, ~31% of the M=1 weight read) runs once per ACCEPTED token and is **NOT amortized by speculation** (unlike the body). Quantizing it (int8→int4) is the cleanest fewer-weight-bytes win. Caveat (ubel/memory): lm_head quant historically risks argmax instability + vocab-prune certs fired 0% — any arm carries its own quality proof (but per #784 byte-identity is no longer the hard gate → quality-in-5%-band suffices). → **reassigned ubel to #788 (lm_head fewer-weight-bytes).** Drafter-acceptance (fern #774 / land #782 / denken #783) is the compounding other axis.
+- **Why closed:** original kernel-swap hypothesis REFUTED (no servable alternative kernel exists); control = anchor (no improvement). Terminal negative. Also folded in #777 cleanup (stray untracked fp8kv dir deleted; tree clean). W&B: [`uaq6btet`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/uaq6btet).
+
 ## 2026-06-20 11:35Z — PR #776 (lawine): targeted locus-revert — CLOSED (terminal negative, 211.42 TPS < 218.02 baseline; hypothesis REFUTED in served path)
 
 - **Student:** lawine / branch `lawine/targeted-locus-revert`
