@@ -98,6 +98,14 @@ _install_hook(
     "vllm.v1.attention.backends.triton_attn",
     _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
 )
+# Top-k-match spec-decode accept-branch (PR #816). Relaxes the greedy rejection
+# sampler's exact-argmax accept test to "draft in topk(target_logits, K)" behind
+# the TOPK_ACCEPT_K env var. With TOPK_ACCEPT_K unset (or <=1) it never rebinds
+# rejection_sample, so the leaderboard serving path stays byte-identical.
+_install_hook(
+    "vllm.v1.sample.rejection_sampler",
+    _make_applier("vllm_topk_accept_patch", "top-k match accept patch"),
+)
 
 # --- Output-neutral prometheus _IncludedRouter / missing-`.path` startup-500 guard ---
 # vLLM 0.22.0 floors ``fastapi>=0.115`` and ``prometheus-fastapi-instrumentator>=7.0.0``
