@@ -1,0 +1,84 @@
+[measure] normalized CUDA_VISIBLE_DEVICES '6' -> '0' (single in-container GPU)
+[measure] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
+[measure] candidate=int4head prompts=128 output_len=512 reps=3
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'MODEL_ID': 'google/gemma-4-E4B-it-qat-w4a16-ct', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[measure] --- rep 0 ---
+[measure] rep0 wall_tps loopclock=254.07 tight=255.47 tot_tokens=65536
+[measure] --- rep 1 ---
+[measure] rep1 wall_tps loopclock=256.14 tight=257.52 tot_tokens=65536
+[measure] --- rep 2 ---
+[measure] rep2 wall_tps loopclock=256.14 tight=257.51 tot_tokens=65536
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/official.jsonl --summary-file /workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/official.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/official.summary.json
+[measure] official capture_decode wall_tps=256.67
+[ppl] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/ppl.jsonl --summary-file /workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/ppl.summary.json
+{
+  "base_url": "http://127.0.0.1:8000",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.156881210864734,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 42920.56695087117,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/ppl.jsonl",
+  "ppl": 2.002790126143006,
+  "prompt_logprobs": 1
+}
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.2
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_230055-cj6d4278
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run wirbel/firecand-faithful-int4head
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/cj6d4278
+wandb: updating run metadata; uploading artifact firecand_faithful_int4head
+wandb: uploading artifact firecand_faithful_int4head
+wandb: 
+wandb: Run history:
+wandb:                                  global_step ▁
+wandb:  summary/faithful/agg_wall_tps_from_meanwall ▁
+wandb: summary/faithful/agg_wall_tps_loopclock_mean ▁
+wandb:  summary/faithful/agg_wall_tps_loopclock_std ▁
+wandb:     summary/faithful/agg_wall_tps_tight_mean ▁
+wandb:             summary/faithful/bootstrap_hi_95 ▁
+wandb:             summary/faithful/bootstrap_lo_95 ▁
+wandb:            summary/faithful/bootstrap_median ▁
+wandb:           summary/faithful/clears_250_robust ▁
+wandb:    summary/faithful/conservative_lower_bound ▁
+wandb:                                          +18 ...
+wandb: 
+wandb: Run summary:
+wandb:                                   event/name summary
+wandb:                             event/run_prefix 
+wandb:                                  global_step 0
+wandb:  summary/faithful/agg_wall_tps_from_meanwall 256.83118
+wandb: summary/faithful/agg_wall_tps_loopclock_mean 255.44706
+wandb:  summary/faithful/agg_wall_tps_loopclock_std 0.97566
+wandb:     summary/faithful/agg_wall_tps_tight_mean 256.8348
+wandb:             summary/faithful/bootstrap_hi_95 265.71553
+wandb:             summary/faithful/bootstrap_lo_95 248.71524
+wandb:            summary/faithful/bootstrap_median 256.91885
+wandb:                                          +20 ...
+wandb: 
+wandb: 🚀 View run wirbel/firecand-faithful-int4head at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/cj6d4278
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 0 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_230055-cj6d4278/logs
+
+[measure] ===== RESULT =====
+  candidate=int4head served=True error=None
+  agg_wall_tps loopclock mean=255.44706134252934 std=0.9756610417689261 reps=[254.0672684206885, 256.13752548896684, 256.1363901179327]
+  agg_wall_tps tight   mean=256.83479822661513 (scrape_overhead=0.54%)
+  official_crosscheck wall_tps=256.67373501913386
+  bootstrap_ci_95={'lo': 248.7152430342787, 'hi': 265.7155251957273, 'median': 256.9188456940552, 'iters': 10000, 'alpha': 0.05}
+  conservative_lower_bound=248.7152430342787 (bootstrap_p2.5) clears_250=False
+  per_prompt_tps_dist={'n': 128, 'mean': 266.6657713899681, 'std': 52.378700034003344, 'min': 181.1056992352432, 'median': 264.87844796749926, 'max': 411.6050010915522}
+  per_prompt_e_accept_dist={'n': 128, 'mean': 3.517858396038758, 'std': 0.7025839261905616, 'min': 2.3463492063492066, 'median': 3.5142655235610225, 'max': 5.34375}
+  probe (prefill-excl) decode_tps=603.7575932057003 naive_tps=550.4163840020997  headline=256.74 (prefill-EXCLUDED single-stream probe_tps (#814 caveat))
+  ppl=2.002790126143006 (cap 2.42)  mem=19693MiB ready=90.1s wandb=cj6d4278

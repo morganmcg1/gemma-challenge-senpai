@@ -1,0 +1,17 @@
+[measure] normalized CUDA_VISIBLE_DEVICES '6' -> '0' (single in-container GPU)
+[measure] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[transformers] PyTorch was not found. Models won't be available and only tokenizers, configuration and file/data utilities can be used.
+[measure] candidate=int4head prompts=128 output_len=512 reps=3
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'MODEL_ID': 'google/gemma-4-E4B-it-qat-w4a16-ct', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 280s
+[measure] --- rep 0 ---
+[measure] rep0 wall_tps loopclock=256.82 tight=258.27 tot_tokens=65536
+[measure] --- rep 1 ---
+[measure] rep1 wall_tps loopclock=256.43 tight=257.90 tot_tokens=65536
+[measure] --- rep 2 ---
+[measure] rep2 wall_tps loopclock=256.44 tight=257.88 tot_tokens=65536
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/official.jsonl --summary-file /workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/official.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/bi0_firecand_tps_faithful/runs/int4head/official.summary.json
