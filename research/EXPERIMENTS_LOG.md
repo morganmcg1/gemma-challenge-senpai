@@ -2,6 +2,25 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 19:25Z — PR #813 (stark): acceptance-ceiling oracle → GREENLIGHT top-k kernel (#816) + int4head RE-BASELINED 256.74→323 wall (~321 official)
+
+- stark/lenient-spec-acceptance — **BANKED** via squash-merge `a6b17632`; follow-up assigned **stark #816** (`stark/topk-match-accept`)
+- **Hypothesis:** impose a synthetic spec-decode accept rate (vLLM `rejection_sample_method=synthetic`) on the TRUE served int4head to read a faithful speed-only TPS-vs-accept-rate ceiling (drafter→verify→lm_head kernels identical; emits garbage tokens, NOT shippable) → decide whether a REAL accept-relaxation kernel is worth building.
+- **Ceiling (int4head served, conc=1 / out=512 / 128 prompts):**
+
+  | imposed r | steady TPS | wall TPS | W&B |
+  |-----------|-----------|----------|-----|
+  | 0.56 (= current real E_accept 4.355) | 309.96 | 323.29 | [`myk4s0ft`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/myk4s0ft) |
+  | 0.70 | 362.37 | 381.83 | [`lip0l3qq`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/lip0l3qq) |
+  | 0.85 | 421.29 | 445.27 | [`jpuid3t5`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/jpuid3t5) |
+  | **1.00 (CEILING)** | **471.09** | **506.84** | [`j60r68os`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/j60r68os) |
+
+  curve [`zc76n7xz`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/zc76n7xz), group `bi0-int4head-accept-oracle`.
+- **DECISION — GREENLIGHT.** r=1.00 ceiling (471 steady / 507 wall) ≫ the pre-committed +10% greenlight band (>282 absolute). Assigned **stark #816**: a custom greedy-kernel **top-k-match** accept-branch (`accept iff draft ∈ topk(target_logits, k)`; `k=TOPK_ACCEPT_K` env; k=1 ⇒ byte-identical no-op control) shipped as `vllm_topk_accept_patch.py` wired through `sitecustomize.py` (3rd hook on `vllm.v1.sample.rejection_sampler`); sweep k∈{1,2,4,8}; FULL quality panel on SERVED outputs (greedy-identity waived under #784); report E_accept(k), TPS(k), quality(k); LOCAL-only. Realized gain = a fraction of the 323→507 wall climb.
+- **★ int4head RE-BASELINED (W&B-verified via wandb-query, 2026-06-20):** the long-cited **256.74 was a RECONSTRUCTION, never served** — `9tcygwjf` (ubel/bi0-lmhead-bytes) SERVED the **bf16-tied-head @219.34 wall** (`tps_bf16_control`) and PROJECTED int4-head via a head-GEMV swap (`gemv_ms_per_tok` 2.777→0.750). The FIRST TRUE served int4head (oracle r=0.56 = matched real E_accept) reads **309.96 steady / 323.29 wall**. CRUX resolved: the official **218.02** anchor (`s63tb03x summary/tps`) is a **WALL-aggregate** matching the 219.34 local wall control → project int4head official from WALL: 323.29 × (218.02/219.34 = 0.9940) ≈ **~321 TPS official** (UNCONFIRMED until a clean fire). All 4 oracle runs confirmed to serve `gemma-4-e4b-it-int4-mtp-bi0-int4head` (not the bf16 control). BASELINE.md updated (line 55 + line 82 supersession note).
+- **Production-path safety:** `submissions/int4_mtp_bi0_int4head/serve.py` (+15/−0) gains env-gated profiling knobs — byte-identical when `REJECTION_SAMPLE_METHOD`/`SYNTHETIC_ACCEPTANCE_RATES`/`SYNTHETIC_ACCEPTANCE_LENGTH` unset (verified), so the leaderboard serving path is untouched. These become the accept-extension point for #816. Reusable oracle tooling banked under `research/lenient_spec_acceptance_813/`.
+- **Consequence:** int4head, if it serves cleanly, likely lands **~321 official** — far past the 250 target and +47% over shipped bi0 @218.02 → strongly reinforces un-blocking the #800 re-fire (hosting still pending). The acceptance frontier (depth #774 / pool #792 / topology #799 / criterion-config #813-Step1 all CLOSED) is **RE-OPENED** via the greenlit #816 top-k kernel.
+
 ## 2026-06-20 18:55Z — int4head FIRE ATTEMPT (land #801): LAUNCHED → ERRORED at startup on a private-repo 401 (NOT quality) → escalated #800; land→Plan-C de-risk; lawine #815 parity-gate
 
 - **Event:** the human-approved (#800 "fire asap" 17:29:31Z) int4head fire **launched** (HF job `6a36d5de3093dba73ce2b016`, W&B launch `ftds7gll`, 18:03:10Z) and **ERRORED at server startup 18:09:52Z** — **before serving a single prompt**. **This is NOT a metric/quality failure:** int4head's local pre-flight gates ALL passed (PPL 2.00256, 128/128, all-4-modalities; fire-prep panel `57izwrp6` GREEN on every quality axis). The job died on **model-loadability/auth** in the runner.
