@@ -1,11 +1,11 @@
 {
   "name": "int4-mtp-bi0-int4head",
-  "description": "bi0 (int4 W4A16 body + QAT-matched gemma4_assistant MTP drafter, VLLM_BATCH_INVARIANT=0, surgical force-2D TRITON_ATTN patch) with ONE delta: the bf16 lm_head is untied from embed_tokens and quantized to int4 W4A16 group_size=32 (-> Marlin on Ampere, same kernel config as the int4 body). The int4 body is byte-identical to google/gemma-4-E4B-it-qat-w4a16-ct; embed_tokens stays bf16. Cuts the lm_head per-token GEMV read 3.56x (1.342 GB -> 0.378 GB; bf16-scale overhead trims the nominal 4x); the lm_head fires once per ACCEPTED token (not per draft row), so the saving is NOT amortized by speculation and flows to decode TPS. model_id is a LOCAL build path (submissions/int4_mtp_bi0_int4head/build_lmhead_quant.py --num-bits 4 --head-group-size 32); publish to a Hub repo before any HF Job.",
+  "description": "bi0 (int4 W4A16 body + QAT-matched gemma4_assistant MTP drafter, VLLM_BATCH_INVARIANT=0, surgical force-2D TRITON_ATTN patch) with ONE delta: the bf16 lm_head is untied from embed_tokens and quantized to int4 W4A16 group_size=32 (-> Marlin on Ampere, same kernel config as the int4 body). The int4 body is byte-identical to google/gemma-4-E4B-it-qat-w4a16-ct; embed_tokens stays bf16. Cuts the lm_head per-token GEMV read 3.56x (1.342 GB -> 0.378 GB; bf16-scale overhead trims the nominal 4x); the lm_head fires once per ACCEPTED token (not per draft row), so the saving is NOT amortized by speculation and flows to decode TPS. Published to PRIVATE Hub repo gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head (revision ad42984507e18772c79457853f3dbf308b1dcbce); rebuild deterministically with submissions/int4_mtp_bi0_int4head/build_lmhead_quant.py --num-bits 4 --head-group-size 32 against the official google/gemma-4-E4B-it-qat-w4a16-ct snapshot.",
   "dependencies": [
     "vllm==0.22.0",
     "transformers==5.9.0"
   ],
-  "model_id": "/workspace/gemma_build/bi0_int4head_g32",
+  "model_id": "gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head",
   "served_model_name": "gemma-4-e4b-it",
   "port": 8000,
   "serve": [
@@ -13,6 +13,7 @@
     "serve.py"
   ],
   "env": {
+    "MODEL_ID": "gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head",
     "VLLM_BATCH_INVARIANT": "0",
     "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
     "NUM_SPECULATIVE_TOKENS": "6",
