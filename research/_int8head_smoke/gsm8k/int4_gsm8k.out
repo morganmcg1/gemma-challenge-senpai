@@ -1,0 +1,17 @@
+[gsm8k] 200 test items (seed=1234); 8-shot fewshot_sig=52:5.0,28:8.0,38:9.0,23:5.0,12:85.0,45:99.0,26:400.0,25:110.0
+[gsm8k] normalized CUDA_VISIBLE_DEVICES '4' -> '0' (single in-container GPU)
+[gsm8k] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[gsm8k] serving /workspace/senpai/target/submissions/int4_mtp_bi0_int4head (overrides={'PRECACHE_BENCH': '0', 'PRECACHE_REQUIRE': '0', 'PRECACHE_DATASET': '/tmp/senpai_gsm8k_no_precache.json', 'MAX_NUM_SEQS': '32'}; log: research/_int8head_smoke/gsm8k/server_int4head.log)
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=/workspace/gemma_build/bi0_int4head_g32 env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '32', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8023 in 180s
+[gsm8k] === arm=int4head regime=greedy sampling={'temperature': 0.0, 'top_p': 1.0, 'top_k': -1, 'max_tokens': 512, 'seed': 1234, 'enable_thinking': False, 'min_tokens': None} ===
+[gsm8k] 25/200 running_acc=1.0000
+[gsm8k] 50/200 running_acc=0.9200
+[gsm8k] 75/200 running_acc=0.9333
+[gsm8k] 100/200 running_acc=0.9300
+[gsm8k] 125/200 running_acc=0.9280
+[gsm8k] 150/200 running_acc=0.9267
+[gsm8k] 175/200 running_acc=0.9200
+[gsm8k] 200/200 running_acc=0.9150
+[gsm8k] DONE arm=int4head regime=greedy acc=0.9150 (183/200) strict=0.955 extract_fail=0.000 trunc=0.050 wall=36s -> research/_int8head_smoke/gsm8k/int4head_greedy.json

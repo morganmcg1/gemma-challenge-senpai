@@ -1,0 +1,10 @@
+{
+  "gate": "all-4-modalities",
+  "tier": "presence",
+  "submission": "submissions/int4_mtp_bi0_int8head",
+  "served_checkpoint_dir": "/workspace/gemma_build/bi0_int8head_ch",
+  "all_modalities_loaded": true,
+  "modalities_loaded": {"text": true, "image": true, "audio": true, "video": true},
+  "note": "Presence tier is sufficient: the ONLY tensor changed vs bi0 is lm_head.weight (now int8 packed). vision_tower/embed_vision/audio_tower/embed_audio are byte-identical to bi0 (2762 tensors copied byte-identical at build), so all non-text towers are unchanged by construction; text-tower function is independently confirmed by smoke/prevalidate/GSM8K. Functional text decode already validated (prevalidate 128/128, PPL 2.0051).",
+  "tensor_counts": {"text": 1354, "image": 659, "audio": 752, "video": 659}
+}

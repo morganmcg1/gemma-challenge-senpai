@@ -1,0 +1,15 @@
+[prof] model=/workspace/gemma_build/bi0_int4head_g32 out=/workspace/senpai/target/research/_int8head_smoke/profile_int4head 13:25:49
+[profile] normalized CUDA_VISIBLE_DEVICES '4' -> '0' (single in-container GPU)
+[profile] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[profile:eager] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/gemma_decode_profiler_claudecode/profile_eager.py (model=/workspace/gemma_build/bi0_int4head_g32) -> /workspace/senpai/target/research/_int8head_smoke/profile_int4head
+[profile:eager] done in 256s -> /workspace/senpai/target/research/_int8head_smoke/profile_int4head/profile_breakdown.json
+  eager TPS: 8.11 tok/s (absolute eager-inflated)
+    matmul_marlin       77.5%
+    norm                 7.9%
+    attention            5.2%
+    other                3.6%
+    elementwise_copy     3.0%
+    activation           2.6%
+    sampling_lmhead      0.1%
+[profile] artifacts in /workspace/senpai/target/research/_int8head_smoke/profile_int4head
+[prof] done rc=0 13:30:06
