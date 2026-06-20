@@ -1,0 +1,26 @@
+{
+  "name": "int4-mtp-bi0-int4head-pledequant",
+  "description": "int4head (int4 W4A16 body byte-identical to google/gemma-4-E4B-it-qat-w4a16-ct + untied int4 g32 lm_head + QAT-matched gemma4_assistant MTP drafter, VLLM_BATCH_INVARIANT=0, force-2D TRITON_ATTN patch) with ONE additional delta: the 42 per_layer_input_gate projections (2560->256, N=256 narrow output) are de-quantized back to bf16 so vLLM serves them via cuBLAS (UnquantizedLinearMethod) instead of int4-Marlin (CompressedTensorsWNA16). stark's #798 measured int4-Marlin at 20.8us vs bf16-cuBLAS 5.8us at N=256 (int4 3.6x SLOWER) -- the only 1 of 11 body GEMM shapes where int4 loses; its sibling per_layer_projection (N=2560) stays int4. The PLE gate fires once per accepted token (not per draft row), so the saving is NOT amortized by speculation and flows to decode TPS (projected +5.3%, 256.74->~270.4 local). bf16 source = DEQUANT of the existing int4 per_layer_input_gate (packed+scales -> bf16): reconstructs the EXACT served values for a clean kernel-isolation A/B + guaranteed quality-neutrality (google/gemma-4-E4B-it bf16 measured 16-27% rel-divergent from the QAT int4 parent, so it is NOT the higher-precision superset of these weights). MODEL_ID points at the published private Hub repo gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head-pledequant (rev f5a0dfd1caa52b429b6a0e973b53d2aac8e14a22; byte-identical to the locally-validated build at /workspace/gemma_build/bi0_int4head_pledequant); rebuild deterministically with submissions/int4_mtp_bi0_int4head/build_lmhead_quant.py --num-bits 4 --head-group-size 32 --dequant-ple against the official google/gemma-4-E4B-it-qat-w4a16-ct snapshot.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head-pledequant",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MODEL_ID": "gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head-pledequant",
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}
