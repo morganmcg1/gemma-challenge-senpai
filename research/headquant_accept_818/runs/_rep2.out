@@ -1,0 +1,126 @@
+[env] normalized CUDA_VISIBLE_DEVICES '4' -> '0' (single in-container GPU)
+[env] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[sweep] server_python=/tmp/senpai-venvs/20f658587e8a6643/bin/python
+[sweep] base=/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0
+[sweep] arms=['bf16_head', 'int4_g32'] workload=128x512 (full_rep2)
+[sweep] drafter=google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant K=6
+
+##### ARM bf16_head (head bf16) #####
+
+===== variant: frontier (extra_env={'MODEL_ID': '/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0'}) prompts=128 output_len=512 =====
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0 env={'MODEL_ID': '/senpai-run/home/student-ubel/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/bf16_head/decode_frontier.jsonl --summary-file /workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/bf16_head/decode_frontier.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/bf16_head/decode_frontier.summary.json
+
+========== FRONTIER DECODE PROFILE ==========
+E_accept                = 3.332 tokens/cycle
+cycle wall              = 0.000 ms (GPU-busy 0.000 ms, host 0.000 ms)
+  drafter_forward                  0.0% of GPU-busy
+  verify_body_int4_gemm            0.0% of GPU-busy
+  verify_lmhead12k_gemm            0.0% of GPU-busy
+  verify_attention_fa2sw           0.0% of GPU-busy
+  verify_norm_elementwise          0.0% of GPU-busy
+  sampling                         0.0% of GPU-busy
+primary frontier_verify_body_gemm_frac = 0.0000
+next lever: drafter_forward (0.0% of GPU-busy)
+artifacts -> /workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/bf16_head
+wandb: [wandb.login()] Loaded credentials for https://api.wandb.ai from WANDB_API_KEY.
+wandb: Currently logged in as: morg (wandb-applied-ai-team) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.27.0
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_211934-xtazaes2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run ubel/headquant-bf16_head-rep2
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/xtazaes2
+wandb: updating run metadata; uploading artifact run-xtazaes2-per_position_acceptance
+wandb: uploading artifact run-xtazaes2-per_position_acceptance
+wandb: uploading history steps 0-0, summary
+wandb: 
+wandb: Run summary:
+wandb:     accept_rate/pos_1 0.69823
+wandb:     accept_rate/pos_2 0.50193
+wandb:     accept_rate/pos_3 0.38875
+wandb:     accept_rate/pos_4 0.30735
+wandb:     accept_rate/pos_5 0.24732
+wandb:     accept_rate/pos_6 0.19519
+wandb:         decode_wall_s 309.36507
+wandb: draft_acceptance_rate 0.38979
+wandb:              e_accept 3.3323
+wandb:       e_accept_source server_log_counters_...
+wandb:                    +4 ...
+wandb: 
+wandb: 🚀 View run ubel/headquant-bf16_head-rep2 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/xtazaes2
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 1 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_211934-xtazaes2/logs
+[wandb] bf16_head -> run xtazaes2
+[sweep] bf16_head: E_accept=3.3323 (server_log_counters_exact)  r=0.38979229989868286  steady_tps=211.20  wall_tps=211.84  per_pos=['0.698', '0.502', '0.389', '0.307', '0.247', '0.195']  sum_pp=2.3387537993920975  (406s)
+
+##### ARM int4_g32 (head int4 g32) #####
+[build] g32 -> /workspace/gemma_build/headq_g32
+[build] g32 done in 22.3s  body=g32/4b head=g32/4b tie=False
+
+===== variant: frontier (extra_env={'MODEL_ID': '/workspace/gemma_build/headq_g32'}) prompts=128 output_len=512 =====
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=/workspace/gemma_build/headq_g32 env={'MODEL_ID': '/workspace/gemma_build/headq_g32', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 95s
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/int4_g32/decode_frontier.jsonl --summary-file /workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/int4_g32/decode_frontier.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/int4_g32/decode_frontier.summary.json
+
+========== FRONTIER DECODE PROFILE ==========
+E_accept                = 3.370 tokens/cycle
+cycle wall              = 0.000 ms (GPU-busy 0.000 ms, host 0.000 ms)
+  drafter_forward                  0.0% of GPU-busy
+  verify_body_int4_gemm            0.0% of GPU-busy
+  verify_lmhead12k_gemm            0.0% of GPU-busy
+  verify_attention_fa2sw           0.0% of GPU-busy
+  verify_norm_elementwise          0.0% of GPU-busy
+  sampling                         0.0% of GPU-busy
+primary frontier_verify_body_gemm_frac = 0.0000
+next lever: drafter_forward (0.0% of GPU-busy)
+artifacts -> /workspace/senpai/target/research/headquant_accept_818/runs/full_rep2/int4_g32
+wandb: setting up run 45rxjwkk
+wandb: Tracking run with wandb version 0.27.0
+wandb: Run data is saved locally in /workspace/senpai/target/wandb/run-20260620_212603-45rxjwkk
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run ubel/headquant-int4_g32-rep2
+wandb: ⭐️ View project at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: 🚀 View run at https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/45rxjwkk
+wandb: updating run metadata; uploading artifact run-45rxjwkk-per_position_acceptance
+wandb: uploading artifact run-45rxjwkk-per_position_acceptance
+wandb: 
+wandb: Run summary:
+wandb:     accept_rate/pos_1 0.70646
+wandb:     accept_rate/pos_2 0.51436
+wandb:     accept_rate/pos_3 0.39309
+wandb:     accept_rate/pos_4 0.31245
+wandb:     accept_rate/pos_5 0.25476
+wandb:     accept_rate/pos_6 0.2053
+wandb:         decode_wall_s 265.87987
+wandb: draft_acceptance_rate 0.39773
+wandb:              e_accept 3.36956
+wandb:       e_accept_source server_log_counters_...
+wandb:                    +4 ...
+wandb: 
+wandb: 🚀 View run ubel/headquant-int4_g32-rep2 at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/45rxjwkk
+wandb: ⭐️ View project at: https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai
+wandb: Synced 5 W&B file(s), 1 media file(s), 2 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260620_212603-45rxjwkk/logs
+[wandb] int4_g32 -> run 45rxjwkk
+[sweep] int4_g32: E_accept=3.3696 (server_log_counters_exact)  r=0.3977348605475371  steady_tps=245.20  wall_tps=246.49  per_pos=['0.706', '0.514', '0.393', '0.312', '0.255', '0.205']  sum_pp=2.3864091632852227  (388s)
+[sweep] freed /workspace/gemma_build/headq_g32
+
+==============================================================================
+HEAD-PRECISION x E_accept SWEEP (full_rep2)
+==============================================================================
+arm          head        E_accept       r  steady_tps  wall_tps
+bf16_head    bf16          3.3323  0.3898      211.20    211.84
+int4_g32     int4_g32      3.3696  0.3977      245.20    246.49
+
+[sweep] summary -> /workspace/senpai/target/research/headquant_accept_818/runs/sweep_summary_full_rep2.json
