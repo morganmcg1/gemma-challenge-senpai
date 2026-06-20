@@ -1,0 +1,184 @@
+{
+  "experiment": "AdaEDL entropy-gated draft early-stop (#822)",
+  "local_exploratory": true,
+  "hardware": "A10G (local), single-stream HTTP-serial decode proxy; NOT official a10g-small",
+  "decode_config": {
+    "num_prompts": 16,
+    "output_len": 512,
+    "temperature": 0.0,
+    "ignore_eos": true,
+    "reps_per_point": 3
+  },
+  "ppl": {
+    "value": 2.0027791427646484,
+    "n_records": 128,
+    "n_tokens": 61797,
+    "note": "drafter-independent (prefill scoring); == shipped int4head 2.0027"
+  },
+  "premise_step1": {
+    "n_records": 2457,
+    "K": 6,
+    "E_accept": 2.3557183557183556,
+    "per_position_accept_rate": {
+      "1": 0.7098087098087098,
+      "2": 0.5205535205535206,
+      "3": 0.3894993894993895,
+      "4": 0.3024013024013024,
+      "5": 0.24216524216524216,
+      "6": 0.19129019129019129
+    },
+    "meanH_accepted": 0.19938157826537664,
+    "meanH_reject_point": 1.1254564222445897,
+    "entropy_separation": 0.9260748439792131,
+    "premise_holds": true
+  },
+  "counterfactual_offline": {
+    "2.477": {
+      "fwd_per_step": 5.442409442409442,
+      "fwd_saved": 0.557590557590558,
+      "real_acc": 2.346357346357346,
+      "acc_loss": 0.009361009361009476,
+      "acc_loss_pct": 0.39737387698687426,
+      "stop_rate": 0.17785917785917785
+    },
+    "1.449": {
+      "fwd_per_step": 4.475783475783476,
+      "fwd_saved": 1.5242165242165244,
+      "real_acc": 2.284086284086284,
+      "acc_loss": 0.07163207163207153,
+      "acc_loss_pct": 3.0407740152038656,
+      "stop_rate": 0.44607244607244606
+    },
+    "0.727": {
+      "fwd_per_step": 3.371998371998372,
+      "fwd_saved": 2.628001628001628,
+      "real_acc": 2.0895400895400895,
+      "acc_loss": 0.2661782661782661,
+      "acc_loss_pct": 11.299239806496198,
+      "stop_rate": 0.6857956857956858
+    },
+    "0.402": {
+      "fwd_per_step": 2.748066748066748,
+      "fwd_saved": 3.251933251933252,
+      "real_acc": 1.8913308913308913,
+      "acc_loss": 0.46438746438746437,
+      "acc_loss_pct": 19.713199723565996,
+      "stop_rate": 0.8103378103378104
+    }
+  },
+  "tps_table": {
+    "unpatched_ship": {
+      "thresh": null,
+      "tps_mean": 248.98568852655524,
+      "tps_std": 3.214552111329938,
+      "tps_list": [
+        244.43963964968916,
+        251.2685933264221,
+        251.2488326035545
+      ]
+    },
+    "patched_inf_life1": {
+      "thresh": "inf",
+      "tps_mean": 171.9868218531614,
+      "tps_std": 0.5821705203406011,
+      "tps_list": [
+        171.16396792103777,
+        172.4220674447501,
+        172.3744301936963
+      ]
+    },
+    "patched_inf_life2": {
+      "thresh": "inf",
+      "tps_mean": 172.6766938117212,
+      "tps_std": 0.6691563965150565,
+      "tps_list": [
+        171.7360296561792,
+        173.23657271721012,
+        173.05747906177433
+      ],
+      "pct_vs_ship": -30.647944131413556
+    },
+    "tau2477": {
+      "thresh": 2.477,
+      "tps_mean": 178.76257792480192,
+      "tps_std": 0.3054803576550912,
+      "tps_list": [
+        179.18453035395237,
+        178.63187925391196,
+        178.4713241665414
+      ],
+      "pct_vs_ship": -28.20367347911395,
+      "pct_vs_patched_inf": 3.524438636586637
+    },
+    "tau1449": {
+      "thresh": 1.449,
+      "tps_mean": 186.02015899827128,
+      "tps_std": 0.11116302996229878,
+      "tps_list": [
+        186.1150908302184,
+        186.08121399875154,
+        185.86417216584394
+      ],
+      "pct_vs_ship": -25.288814751121105,
+      "pct_vs_patched_inf": 7.727426841458514
+    },
+    "tau0727": {
+      "thresh": 0.727,
+      "tps_mean": 190.71492697074137,
+      "tps_std": 0.03923400294234671,
+      "tps_list": [
+        190.67456100136027,
+        190.70214176064874,
+        190.76807815021513
+      ],
+      "pct_vs_ship": -23.403257392281432,
+      "pct_vs_patched_inf": 10.446246543663982
+    },
+    "tau0402": {
+      "thresh": 0.402,
+      "tps_mean": 188.65606237788126,
+      "tps_std": 0.05149234673872478,
+      "tps_list": [
+        188.70628323828225,
+        188.67662022490282,
+        188.58528367045872
+      ],
+      "pct_vs_ship": -24.230158169207225,
+      "pct_vs_patched_inf": 9.253923163240096
+    }
+  },
+  "greedy_identity_noise_floor_relative": {
+    "noise_floor_inf_rep0_vs_rep1": {
+      "prompts": 16,
+      "exact": 2,
+      "positionwise_agree_pct": 44.9951171875
+    },
+    "earlystop_inf_vs_tau2477": {
+      "prompts": 16,
+      "exact": 2,
+      "positionwise_agree_pct": 44.9951171875
+    },
+    "earlystop_inf_vs_tau1449": {
+      "prompts": 16,
+      "exact": 2,
+      "positionwise_agree_pct": 44.9951171875
+    },
+    "earlystop_inf_vs_tau0727": {
+      "prompts": 16,
+      "exact": 2,
+      "positionwise_agree_pct": 44.98291015625
+    },
+    "earlystop_inf_vs_tau0402": {
+      "prompts": 16,
+      "exact": 2,
+      "positionwise_agree_pct": 45.166015625
+    }
+  },
+  "best_tau": {
+    "name": "tau0727",
+    "thresh": 0.727,
+    "tps_mean": 190.71492697074137,
+    "pct_vs_ship": -23.403257392281432
+  },
+  "verdict": "NEGATIVE: lever real (+10.4% vs eager-entropy baseline) but entropy machinery (de-graphed centroid selection + per-position H<->D sync) costs -30.6% vs ship; best early-stop nets -23.4% vs ship. No fire."
+}

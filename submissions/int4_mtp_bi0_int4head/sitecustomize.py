@@ -98,6 +98,12 @@ _install_hook(
     "vllm.v1.attention.backends.triton_attn",
     _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
 )
+# AdaEDL entropy-gated draft early-stop. No-op unless DRAFT_STOP_ENTROPY is set,
+# so the shipped submission stays byte-identical when the env is unset.
+_install_hook(
+    "vllm.v1.spec_decode.gemma4",
+    _make_applier("adaedl_earlystop_patch", "AdaEDL entropy-gated draft early-stop"),
+)
 
 # --- Output-neutral prometheus _IncludedRouter / missing-`.path` startup-500 guard ---
 # vLLM 0.22.0 floors ``fastapi>=0.115`` and ``prometheus-fastapi-instrumentator>=7.0.0``
