@@ -1,0 +1,20 @@
+[capture] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[capture] submission=/workspace/senpai/target/submissions/int4_mtp_bi0_int4head
+[capture] server_python=/tmp/senpai-venvs/20f658587e8a6643/bin/python
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head env={'MODEL_ID': 'gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 110s
+[capture] server ready in 110s; driving 128 prompts x output_len 512
+[decode] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/reject_rank_entropy/int4head/decode.jsonl --summary-file /workspace/senpai/target/research/reject_rank_entropy/int4head/decode.summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 128 --output-len 512 --seed 1
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/reject_rank_entropy/int4head/decode.summary.json
+[capture] decode done in 384s (completed=None)
+
+========== REJECT-RANK CAPTURE ==========
+shards: 1  blocks: 19538  draft_positions: 117228
+probe strict reject-rate     = 0.3466577950660252
+probe strict E_accept (len)  = 3.38002866209438
+vLLM server-log E_accept     = 3.371103336640384 (rate 0.39518388944006405)
+decode completed             = None/128
+artifacts -> /workspace/senpai/target/research/reject_rank_entropy/int4head
