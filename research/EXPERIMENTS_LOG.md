@@ -2,6 +2,22 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 15:40Z — PR #797 (fern): int4head × surgattn-3D STACK — MERGED (rung-2 candidate; the two biggest levers COMPOUND, 89.4% retention; 272.78 local, gated on wirbel #791 quality)
+
+- **Student:** fern / branch `fern/bi0-int4head-surgattn-stack`
+- **Hypothesis:** Do the two biggest measured levers — int4head (int4 g32 lm_head, +17% local) and surgattn-3D split-KV attention (+6.69% isolated, wirbel #785) — compound, or does the 3D attention gain evaporate once the lm_head GEMV is already cheap?
+
+| Arm | attention path (verified live in serve.log) | decode TPS (warm median, N=3) | reps 0/1/2 | PPL | completed |
+|---|---|---|---|---|---|
+| **CONTROL** = int4head force-2D | 2D single-pass (`use_3d=False`, line PRESENT) | **257.39** | 257.42/257.37/257.42 | 2.0028 | 128/128 |
+| **STACK** = int4head + surgattn-3D | native 3D split-KV (force-2D line ABSENT, grep 0) | **272.78** | 271.83/273.20/272.37 | 2.0028 | 128/128 |
+
+- **Primary:** local_decode_tps_stack = 272.78. **Test:** PPL = 2.0028. W&B [`n84urlmc`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/n84urlmc) (group `bi0-int4head-surgattn-stack`, `analysis_only=1, no_hf_job=1, fires=0`).
+- **They COMPOUND (the open question, settled):** STACK gain on top of int4head = **+5.98%**; surgattn-3D retains **89.4%** of its isolated +6.69% once lm_head is int4 → near-multiplicative. 272.78 vs the 257.39×1.0669 = 274.61 projection = within **0.7%**. vs the bf16-head control (219.34): **+24.4%**. The negative branch (3D evaporates once lm_head cheap) did NOT materialize — attention is still a real marginal cost after the head GEMV is cheapened; the two levers attack orthogonal bottlenecks.
+- **Trustworthy:** CONTROL 257.39 reproduces MERGED #788 (256.74) → harness sanity passed; attention toggle verified live in serve.log (`[int4_mtp_force2d]` PRESENT in CONTROL, ABSENT in STACK); within-arm sha256 of `decode_outputs.jsonl` identical across all 3 reps per arm → cross-arm divergence is a genuine reproducible kernel-path difference, not noise.
+- **Identity-class (#784 gate):** surgattn-3D is **NOT byte-identical** (expected, wirbel #785 class): 4/128 prompts diverge (3.12%), **0/128 first-token flips**, 112/65536 aligned positions (0.171% upper bound), first-divergence loci 392–510 of 512 (all late autoregressive drift). PPL flat 2.0028 across both arms — but PPL is decode-path-partially-blind, so the token_id diff is the real identity proof. *Cleaner* than surgattn-3D's isolated bf16-head signal (#785: 1.76% tok / 6.25% prompts). → PPL-gated #784 candidate, NOT a reject.
+- **Verdict — MERGED as the rung-2 fire candidate + compounding proof** (banked the stack submission `int4_mtp_bi0_int4head_surgattn3d` + full per-rep evidence + identity diff). **Does NOT change the official baseline** (local-only, `fires=0`) and **does NOT authorize a fire** — the stack inherits surgattn-3D's non-byte-identity, gated on: (a) wirbel **#791** clearing surgattn-3D quality in isolation (sole decider), (b) a STACK-specific 4-axis panel checking the 4 diverging prompts for grade-flips (→ fern **#803**), (c) publish-to-Hub + `MODEL_ID` repoint (same gate as #788), (d) human HF approval. **int4head #788 stays the PRIMARY/SAFE fire candidate (panel cleared #795); the stack is rung-2** (~273 local) — becomes top candidate IF #791 clears. fern reassigned to **#803** (run the stack quality panel). bi0 unchanged.
+
 ## 2026-06-20 15:10Z — PR #799 (land): Tree/EAGLE multi-candidate drafter feasibility — CLOSED RED (vLLM 0.22 spec-decode is single-linear-chain only for gemma4_mtp; ★ acceptance frontier DEFINITIVELY CLOSED: depth #774 + runtime #792 + topology #799 all dead)
 
 - **Student:** land / branch `land/tree-eagle-drafter-feasibility`
