@@ -64,6 +64,26 @@ from wirbel #807 (W4A8 activations) and fern #808 (2:4 pruning).
   int4head; 4-axis quality (MMLU-Pro, GSM8K, AIME, GPQA-Diamond).
 - Report bytes-saved → measured TPS vs bandwidth-bound prediction.
 
+## STEP 2 SERVE KILL-GATE — VERIFIED FAIL (sub-4-bit does NOT serve on sm_86)
+Verified in the installed vLLM 0.22.0 (`.venv/lib/python3.11/site-packages/vllm`):
+1. **compressed-tensors WNA16** (`.../quantization/compressed_tensors/schemes/compressed_tensors_wNa16.py`):
+   `WNA16_SUPPORTED_TYPES_MAP = {4: uint4b8, 8: uint8b128}` (L35); `__init__` raises
+   `ValueError("Unsupported num_bits = {3|2}. Supported num_bits = dict_keys([4, 8])")`
+   (L66-70) — at SCHEME CONSTRUCTION during model load, BEFORE `create_weights`/kernel
+   dispatch. A W3/W2 compressed-tensors body fails to LOAD. NOT a silent dense fallback.
+2. **Marlin type system** (`.../quantization/utils/marlin_utils.py`
+   `query_marlin_supported_quant_types`, L75-83): on Ampere (cap≥75) the only integer
+   weight types are `uint4`/`uint4b8` (4-bit) and `uint8b128` (8-bit). No uint3/uint2
+   exists. (float4_e2m1f is a 4-bit FLOAT, still not sub-4-bit int.) All Marlin-backed
+   paths — compressed-tensors, auto_gptq, awq_marlin — funnel through this.
+3. **Machete** (sub-4-bit-capable on Hopper) is gated to sm_90 and group_size∈{-1,64,128}
+   — excluded on A10G (sm_86, g32) on both grounds.
+Conclusion: there is NO sub-4-bit weight-only kernel on sm_86 under vLLM 0.22.0.
+The W3/W2 SERVE-LANE IS CLOSED. Step 3 (PPL/TPS/quality on a served variant) is dead.
+Do NOT hand-roll a kernel (PR + program rule). Even a hypothetical dense-bf16 fallback
+would READ MORE bytes, inverting the bandwidth premise.
+Step-1 offline map (recon + PPL) STANDS as the reusable deliverable.
+
 ## Cap (#784)
 If Step 1 shows no layer tolerates sub-W4 in budget, OR Step 2 finds no serving
 kernel → summarize negative and stop; don't over-instrument.
