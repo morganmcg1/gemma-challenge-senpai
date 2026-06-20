@@ -1,0 +1,125 @@
+{
+  "verdict": "INCONCLUSIVE",
+  "reason": "spec-ON NOT self-deterministic run-to-run (min byte-identical 0.1875); served nondeterminism (PR #38) makes the gate verdict unstable \u2014 pin a reproducible --config (e.g. fa_sliding_off) and re-run",
+  "config": "default",
+  "mode": "self_referential",
+  "identity_min_threshold": 0.999,
+  "spec_on_self_determinism": {
+    "label": "spec_on",
+    "num_runs": 2,
+    "checkable": true,
+    "min_byte_identical_frac": 0.1875,
+    "deterministic": false,
+    "num_divergent_pairs": 26,
+    "onsets": [
+      9,
+      16,
+      22,
+      45,
+      58,
+      75,
+      79,
+      79,
+      83,
+      89,
+      94,
+      101,
+      110,
+      122,
+      129,
+      139,
+      146,
+      173,
+      173,
+      230,
+      243,
+      244,
+      304,
+      305,
+      356,
+      422
+    ]
+  },
+  "spec_off_ar_self_determinism": {
+    "label": "spec_off_ar",
+    "num_runs": 2,
+    "checkable": true,
+    "min_byte_identical_frac": 0.5,
+    "deterministic": false,
+    "num_divergent_pairs": 16,
+    "onsets": [
+      21,
+      79,
+      83,
+      84,
+      104,
+      110,
+      133,
+      153,
+      157,
+      168,
+      172,
+      261,
+      264,
+      501,
+      510,
+      510
+    ]
+  },
+  "self_consistency_gate": {
+    "reference_dir": "research/validity/targeted_locus_revert/served_interlock/default__specoff/run_00",
+    "reference_kind": "unknown",
+    "num_spec_runs": 2,
+    "per_run": [
+      {
+        "spec_run_idx": 0,
+        "verdict": "DIVERGENT",
+        "num_identical": 5,
+        "num_divergent": 27,
+        "total_tokens_compared": 16384,
+        "total_divergent_tokens": 9729,
+        "token_div_frac": 0.59381103515625,
+        "onset_min": 3,
+        "onset_median": 99,
+        "onset_max": 501
+      },
+      {
+        "spec_run_idx": 1,
+        "verdict": "DIVERGENT",
+        "num_identical": 4,
+        "num_divergent": 28,
+        "total_tokens_compared": 16384,
+        "total_divergent_tokens": 8768,
+        "token_div_frac": 0.53515625,
+        "onset_min": 3,
+        "onset_median": 149,
+        "onset_max": 511
+      }
+    ],
+    "all_greedy_identical": false,
+    "num_divergent_runs": 2,
+    "num_incomparable_runs": 0,
+    "onset_min": 3,
+    "onset_median": 123,
+    "onset_max": 511,
+    "onset_signature": "late/stochastic (FP-reduction near-tie flips)"
+  },
+  "self_referential_gate_confirmed": "inconclusive",
+  "primary_metric": {
+    "name": "self_referential_divergent_runs",
+    "value": 2
+  },
+  "batch_invariant_self_divergence_tokens": 9729,
+  "batch_invariant_wall_tps": 211.41635896317305,
+  "batch_invariant_tps_cost_pct": 53.46716344149663,
+  "tps_ref": 454.338,
+  "spec_on_wall_tps": {
+    "median_wall_tps": 211.41635896317305,
+    "per_run_wall_tps": [
+      206.2457627075151,
+      216.586955218831
+    ],
+    "n": 2
+  },
+  "batch_invariance_gate": "INCONCLUSIVE"
+}

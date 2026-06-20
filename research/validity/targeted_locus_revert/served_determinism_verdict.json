@@ -1,0 +1,71 @@
+{
+  "pr": 776,
+  "experiment": "targeted-locus-revert",
+  "arms": {
+    "eager_surgattn": {
+      "label": "surgattn force-2D, ENFORCE_EAGER (no CUDA graphs)",
+      "root": "eager_screen/default",
+      "n_runs": 2,
+      "median_wall_tps": 47.84,
+      "per_run_wall_tps": [
+        47.48,
+        48.21
+      ],
+      "min_byte_identical_frac": 1.0,
+      "self_deterministic": true,
+      "num_divergent_pairs": 0,
+      "onset_min": null,
+      "onset_median": null
+    },
+    "served_surgattn": {
+      "label": "surgattn force-2D, SERVED (CUDA graphs + inductor)",
+      "root": "served_interlock/default",
+      "n_runs": 2,
+      "median_wall_tps": 211.42,
+      "per_run_wall_tps": [
+        206.25,
+        216.59
+      ],
+      "min_byte_identical_frac": 0.1875,
+      "self_deterministic": false,
+      "num_divergent_pairs": 26,
+      "onset_min": 9,
+      "onset_median": 116
+    },
+    "served_surgattn_specoff": {
+      "label": "surgattn force-2D M=1 AR ref, SERVED",
+      "root": "served_interlock/default__specoff",
+      "n_runs": 2,
+      "median_wall_tps": 83.63,
+      "per_run_wall_tps": [
+        83.45,
+        83.8
+      ],
+      "min_byte_identical_frac": 0.5,
+      "self_deterministic": false,
+      "num_divergent_pairs": 16,
+      "onset_min": 21,
+      "onset_median": 155
+    },
+    "served_batchinv": {
+      "label": "int4_mtp_batchinv BI=1, SERVED (CUDA graphs)",
+      "root": "batchinv_served/default",
+      "n_runs": 2,
+      "median_wall_tps": 154.01,
+      "per_run_wall_tps": [
+        154.03,
+        153.98
+      ],
+      "min_byte_identical_frac": 1.0,
+      "self_deterministic": true,
+      "num_divergent_pairs": 0,
+      "onset_min": null,
+      "onset_median": null
+    }
+  },
+  "verdict": "REFUTED_SERVED",
+  "eager_self_deterministic": true,
+  "served_self_deterministic": false,
+  "batchinv_self_deterministic": true,
+  "finding": "force-2D restores byte-exact run-to-run determinism in EAGER (min_frac=1.0, confirming #761's M-invariance locus) but NOT in the SERVED CUDA-graph path (spec-on min_frac=0.1875 => 26/32 prompts diverge run-to-run, M=1 AR ref min_frac=0.5 => 16/32). DECISIVE CONTRAST: full BI=1 batchinv IS served self-deterministic (min_frac=1.0, 0/32 divergent, 154.01 TPS) on the SAME CUDA-graph/inductor path. So the served run-to-run nondeterminism is NOT the compilation layer (batchinv shares it and reproduces) -- it is the BI=0 fast-path reductions (matmul/norm) that global batch-invariance freezes but the attention-only force-2D patch leaves untouched. The #761 attention locus is necessary-but-insufficient for served byte-exactness: the surgical revert recovers the speed (211.42 vs 154.01 TPS) but forfeits the byte-exact property, so it is NOT a strict-quality-safe replacement for batchinv."
+}
