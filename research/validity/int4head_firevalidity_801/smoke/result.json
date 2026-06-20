@@ -1,0 +1,54 @@
+{
+  "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_int4head",
+  "num_prompts": 2,
+  "output_len": 32,
+  "seed": 1,
+  "ppl_cap": 2.42,
+  "peak_gpu_mem_mib": 19691,
+  "specoff_ref": {
+    "label": "specoff_ref",
+    "extra_env": {
+      "SENPAI_REFERENCE_MODE": "1"
+    },
+    "reference_kind": "served_spec_off",
+    "serve_ready_s": 140.2,
+    "model_id": "/workspace/gemma_build/bi0_int4head_g32",
+    "served_model_name": "gemma-4-e4b-it",
+    "num_records": 2,
+    "num_completion_tokens": 64,
+    "decode_outputs": "research/validity/int4head_firevalidity_801/smoke/specoff_ref/decode_outputs.jsonl"
+  },
+  "specon_cand": {
+    "label": "specon_cand",
+    "extra_env": {},
+    "reference_kind": "served_spec_on",
+    "serve_ready_s": 155.2,
+    "model_id": "/workspace/gemma_build/bi0_int4head_g32",
+    "served_model_name": "gemma-4-e4b-it",
+    "num_records": 2,
+    "num_completion_tokens": 64,
+    "decode_outputs": "research/validity/int4head_firevalidity_801/smoke/specon_cand/decode_outputs.jsonl"
+  },
+  "greedy": {
+    "verdict": "GREEDY_IDENTICAL",
+    "num_prompts_compared": 2,
+    "num_identical": 2,
+    "num_divergent": 0,
+    "total_tokens_compared": 64,
+    "total_divergent_tokens": 0,
+    "flip_rate_per_token": 0.0,
+    "onset": {
+      "num_identical": 2,
+      "num_divergent": 0,
+      "onsets": []
+    },
+    "divergent_prompts": []
+  },
+  "sanity": {
+    "ppl": null,
+    "ppl_pass": false,
+    "specoff_records": 2,
+    "specon_records": 2,
+    "completions_128": true
+  }
+}
