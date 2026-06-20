@@ -1,0 +1,30 @@
+[prof] model=/workspace/gemma_build/bi0_int8head_ch out=/workspace/senpai/target/research/_int8head_smoke/profile_int8head 12:48:07
+[profile] normalized CUDA_VISIBLE_DEVICES '4' -> '0' (single in-container GPU)
+[profile] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[profile:eager] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/gemma_decode_profiler_claudecode/profile_eager.py (model=/workspace/gemma_build/bi0_int8head_ch) -> /workspace/senpai/target/research/_int8head_smoke/profile_int8head
+[profile:eager] done in 253s -> /workspace/senpai/target/research/_int8head_smoke/profile_int8head/profile_breakdown.json
+  eager TPS: 8.40 tok/s (absolute eager-inflated)
+    matmul_marlin       79.1%
+    norm                 7.3%
+    attention            4.9%
+    other                3.4%
+    elementwise_copy     2.8%
+    activation           2.4%
+    sampling_lmhead      0.1%
+[profile] artifacts in /workspace/senpai/target/research/_int8head_smoke/profile_int8head
+[prof] done rc=0 12:52:20
+[prof] model=google/gemma-4-E4B-it-qat-w4a16-ct out=/workspace/senpai/target/research/_int8head_smoke/profile_bf16head 12:52:20
+[profile] normalized CUDA_VISIBLE_DEVICES '4' -> '0' (single in-container GPU)
+[profile] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[profile:eager] /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/gemma_decode_profiler_claudecode/profile_eager.py (model=google/gemma-4-E4B-it-qat-w4a16-ct) -> /workspace/senpai/target/research/_int8head_smoke/profile_bf16head
+[profile:eager] done in 264s -> /workspace/senpai/target/research/_int8head_smoke/profile_bf16head/profile_breakdown.json
+  eager TPS: 7.95 tok/s (absolute eager-inflated)
+    matmul_marlin       75.3%
+    other               12.3%
+    norm                 5.2%
+    attention            3.4%
+    elementwise_copy     2.0%
+    activation           1.7%
+    sampling_lmhead      0.1%
+[profile] artifacts in /workspace/senpai/target/research/_int8head_smoke/profile_bf16head
+[prof] done rc=0 12:56:45

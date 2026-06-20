@@ -1,0 +1,26 @@
+[run] submission=int4_mtp_bi0_surgattn port=8011 out=/workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control 12:30:27
+[prevalidate] starting server: /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py (log: /workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control/serve.log)
+[prevalidate] waiting for http://127.0.0.1:8011/v1/models ...
+[prevalidate] endpoint ready
+[prevalidate] running: /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/ppl_endpoint.py --base-url http://127.0.0.1:8011 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl --output-file /workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control/ppl_results.jsonl --summary-file /workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control/ppl_summary.json --request-timeout-s 180
+{
+  "base_url": "http://127.0.0.1:8011",
+  "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+  "mean_record_ppl": 2.1592328519003208,
+  "model": "gemma-4-e4b-it",
+  "neg_log_likelihood": 43008.89953835801,
+  "num_records": 128,
+  "num_tokens": 61797,
+  "output_file": "/workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control/ppl_results.jsonl",
+  "ppl": 2.005654959921054,
+  "prompt_logprobs": 1
+}
+[prevalidate] running: /tmp/senpai-venvs/20f658587e8a6643/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8011 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control/decode_outputs.jsonl --summary-file /workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control/decode_summary.json --num-prompts 128 --output-len 512 --request-timeout-s 180
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control/decode_summary.json
+
+[prevalidate] LOCAL pre-validation summary
+SENPAI-LOCAL tps=219.3358 ppl=2.0057 completed=128 decode_sample=128 submission=int4_mtp_bi0_surgattn (exploratory; not official a10g-small)
+[prevalidate] artifacts in /workspace/senpai/target/research/_int8head_smoke/prevalidate_bf16_control
+[run] done rc=0 12:37:47

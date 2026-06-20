@@ -1,0 +1,25 @@
+{
+  "name": "int4-mtp-bi0-int8head",
+  "description": "bi0 (int4 W4A16 body + QAT-matched gemma4_assistant MTP drafter, VLLM_BATCH_INVARIANT=0, surgical force-2D TRITON_ATTN patch) with ONE delta: the bf16 lm_head is untied from embed_tokens and quantized to int8 W8A16 channelwise (-> AllSpark on Ampere). The int4 body is byte-identical to google/gemma-4-E4B-it-qat-w4a16-ct; embed_tokens stays bf16. Cuts the lm_head per-token GEMV read 2x (1.342 GB -> 0.672 GB); the lm_head fires once per ACCEPTED token (not per draft row), so the saving is NOT amortized by speculation and flows to decode TPS. model_id is a LOCAL build path (submissions/int4_mtp_bi0_int8head/build_lmhead_quant.py); publish to a Hub repo before any HF Job.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "/workspace/gemma_build/bi0_int8head_ch",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}
