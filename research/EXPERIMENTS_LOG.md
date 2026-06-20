@@ -2,6 +2,41 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 14:52Z — PR #794 (stark): Byte-identical split-KV — CLOSED (clean null: the surgattn +5.35% IS the parallel KV-reduction reassociation; no precision/order knob keeps the speedup; → wirbel #791 sole decider)
+
+- **Student:** stark / branch `stark/bi0-surgattn-attrib-combine`
+- **Hypothesis:** The surgattn-OFF 3D split-KV path is ~+5–6.69% faster on M=1 (wirbel #785); its ~3-4/128 greedy divergence from the 2D force-2D control might be recoverable to byte-identity via (a) forcing an fp32 accumulator or (b) a deterministic cross-segment combine order — shipping the speedup quality-free.
+
+| metric | 2D control (surgattn ON) | 3D (surgattn OFF) | delta |
+|---|---|---|---|
+| **decode-wall TPS** (128×512, official-comparable) | **218.30** (≈ bi0 official 218.02 ✓) | **229.97** | **+5.35%** |
+| probe TPS (256-tok single stream) | 506.17 (CV 0.14%) | 512.90 (CV 0.04%) | +1.33% (Δ=9.0σ) |
+| PPL (61,797 tok) | 2.0055 | 2.0055 | **bit-identical** |
+| completed | 128/128 | 128/128 | — |
+| greedy vs 2D control | — | **124/128 identical, 4 divergent** | onsets [373,382,472,509] (73–99% of 512) |
+
+- **Primary:** decode_wall_tps_3d = 229.97. **Test:** greedy_divergent_prompts_3d_vs_2d_of_128 = 4. W&B [`kcojzw20`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/kcojzw20) (group `bi0-surgattn-attrib`). Toggle `VLLM_SURGATTN=1` (force-2D) vs `VLLM_SURGATTN=0` (3D) on shipped `submissions/int4_mtp_bi0_surgattn`.
+- **Both recovery levers structurally closed at the source:** (a) **fp32 accumulator = no-op** — `triton_attn.py:185-204` already allocates all three split-KV scratch buffers (`softmax_segm_{output,max,expsum}`) as fp32; only narrowing cast is the final fp32→bf16 store, *identical to 2D*. A forced-bf16-partials control diverges MORE in 8/8 microbench configs → fp32 is already optimal, no precision knob exists. (b) **deterministic-combine = removes the win** — serializing the cross-segment combine to reproduce the 2D order un-splits the KV dim, killing the occupancy recovery (the 1.38×–9.13× M=1 kernel speedup) that IS the +5.35%. You cannot parallelize a reduction without re-associating it.
+- **Divergence = pure reduction reassociation, fp32-epsilon:** even comparing in fp32 before any bf16 cast, 2D vs 3D differ in ≥99.9% of elements in 7/8 configs, max abs only 2.63e-5. Two inherent sources: cross-segment combine order `((a+b)+c)+d` vs `(a+b)+(c+d)`, and `TILE_SIZE_DECODE`=16 (3D) vs `TILE_SIZE_PREFILL`=32 (2D). **Not a quality regression:** 3D is as close to (or closer than) the SDPA reference than 2D in 6/8 configs.
+- **The 4/128 is the config effect, not noise (determinism control):** two extra serve sessions, all 6 pairwise greedy-compares — same-config run-to-run (2d_a-vs-2d_b, 3d_a-vs-3d_b) = **0 divergent**; every 2D-vs-3D pairing = **4**, identical onsets. Noise floor is literally 0, so the reproducible 4/128 is NOT byte-identical and NOT tie-tolerant-equivalent to bi0's zero-divergence band.
+- **★ Methodology landmine flagged (constraint, logged to research state):** running the *official* `greedy_gate` against the cached LOCAL spec-off reference (`research/greedy_reference/…int4_mtp_bi0_surgattn…`, Jun-19) reads ~99/128 DIVERGENT for the **shipped bi0 itself** (2d:99, 3d:100, identical patterns) — a stale/cross-job spec-off reference, NOT a bi0 bug (bi0 passes the official *within-job* gate). Anyone gating a bi0-derived submission via `greedy_gate --model-id` must regenerate the reference WITHIN-JOB first.
+- **Verdict — clean null; byte-identical route for surgattn-3D is DEAD.** Reconciles with land #793 (same phenomenon, caller-gate angle): surgattn-3D's +5–6.69% is intrinsically non-byte-identical. **Under #784 byte-identity is not sacred** → the lever ships *only* via a quality gate, which is now **wirbel #791's** sole decision. stark reassigned to **#798** (post-int4head decode re-profile — find the new bottleneck after lm_head dropped to 0.378 GB/tok). bi0 unchanged.
+
+## 2026-06-20 14:30Z — PR #793 (land): Drafter-only-3D byte-identical share — CLOSED (clean null: caller-gating recovers only a byte-identical subset; residual ~3/128 is irreducible drafter ULP-flip cascade; → wirbel #791)
+
+- **Student:** land / branch `land/bi0-surgattn-drafter-3d`
+- **Hypothesis:** Gate the 3D split-KV path by a drafter-vs-main forward distinction so the main (verify) path stays byte-identical to the 2D control while the drafter rides the faster 3D path — recovering a byte-identical *share* of the surgattn +6.69%.
+
+| arm | divergent / 128 | locus | PPL |
+|---|---|---|---|
+| caller-gated 3D vs 2D control | **3** (125/128 identical) | gpqa 1, mmlu_pro 2, aime 0 | bit-identical |
+
+- **Primary/Test:** byte-identical share recovered = partial only; residual 3/128 irreducible. W&B (group `bi0-surgattn-attrib`, land's run). PPL bit-identical to 2D control.
+- **Why only partial:** the residual ~3/128 divergence is the **drafter ULP-flip cascade** via the same #792 verify-GEMM near-tie mechanism — on bi0's non-BI stack (`VLLM_BATCH_INVARIANT=0`, int4 Marlin not batch-invariant) the drafter's 3D-vs-2D ULP differences propagate into verify-GEMM argmax flips at deep/late token indices, concentrated in GPQA/MMLU-Pro reasoning, **zero on AIME** — answer-immaterial late near-ties. Caller-gating cannot null this without removing the drafter's 3D path (= removing the speedup share).
+- **Reconciliation with stark #794:** land's 3 divergent (caller-gate angle) and stark's 4 divergent (combine-mechanism angle) are the **same phenomenon from two directions** — both ~3-4/128, reasoning-only, PPL bit-identical, zero on AIME, late onsets. Together they establish surgattn-3D's +5–6.69% is intrinsically non-byte-identical.
+- **Declined follow-up:** the BI-verify-GEMM line (a fixed-split-K int4 Marlin / batch-invariant verify) costs far more than the +5% it would unlock (kanna #122 closed it: 51.78% TPS cost, still 58.57% self-divergent) — under #784 the quality-gate route (#791) is strictly preferred.
+- **Verdict — clean null (byte-identical subset insufficient).** Converges with #794 on **wirbel #791** as the sole decider for whether surgattn-3D ships via a quality gate. land reassigned to **#799** (tree/EAGLE multi-candidate drafter feasibility — the next acceptance frontier now that depth #774 + runtime #792 are tuned-out). Acknowledged land's wandb-shadow fix. bi0 unchanged.
+
 ## 2026-06-20 14:40Z — PR #774 (fern): MTP K-depth sweep {0,2,4,6,8} — CLOSED (clean null: K=6 is the TPS-optimal knee; K=8 REGRESSES −2.0%; acceptance-DEPTH lane closed)
 
 - **Student:** fern / branch `fern/bi0-k-sweep`
