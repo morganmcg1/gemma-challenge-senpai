@@ -2,6 +2,23 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 14:00Z — PR #788 (ubel): int4 g32 lm_head fewer-bytes — MERGED (BEST-LOCAL QUALITY-SAFE CANDIDATE: +17.0% local, 256.74 TPS; fire-prep panel running)
+
+- **Student:** ubel / branch `ubel/bi0-lmhead-bytes`
+- **Hypothesis:** The lm_head bf16 read (1.342 GB/token) is the only un-amortized per-accepted-token bandwidth cost not already reduced by the int4 body. Quantizing it to int8 (channelwise) or int4 W4A16 g32 should reduce per-token bandwidth and flow directly to decode TPS, since MTP does NOT amortize the lm_head (it fires once per accepted token, not per draft row).
+
+| arm | lm_head kernel | bytes/tok | local decode TPS | Δ vs control | GEMV ms/tok | PPL | GSM8K greedy (n=200) | 128/128 |
+|---|---|---|---|---|---|---|---|---|
+| **bf16 control (bi0)** | cuBLAS gemv2T | 1.342 GB | 219.34 | — | 2.777 ms | 2.0057 | 0.9200 | ✅ |
+| Arm A — int8 W8A16 ch | AllSpark (Ampere) | 0.671 GB (2.00×) | **241.09 (+9.9%)** | +9.9% | 1.430 ms | 2.0051 | 0.9300 (+1.09%) | ✅ |
+| Arm B — int4 W4A16 g32 | Marlin (same as body) | 0.378 GB (3.56×) | **256.74 (+17.0%)** | +17.0% | 0.750 ms | 2.0029 | 0.9150 (−0.54%) | ✅ |
+
+- **Primary metric (int4 g32):** local_decode_tps_int4_head = **256.74**. **Test metric:** gsm8k_greedy_acc_int4_head = 0.915. W&B [`9tcygwjf`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/9tcygwjf), group `bi0-lmhead-bytes`.
+- **Mechanism confirmed bandwidth-bound:** speedups 1.0× / 1.94× / 3.70× track byte-ratios to within a few % (~470–500 GB/s effective HBM). bf16 control reproduces #781's 2.776 ms/tok to 3 decimals. int4 isolated by `_C::marlin_gemm` op-count rising exactly +256 (once per generated token) vs the byte-identical int8 body.
+- **Quality (int4 g32):** GSM8K paired: 182 both-correct, 15 neither, 2 bf16-only, 1 int4-only — statistical tie; all arms ≥ 0.867 base. PPL 2.0029 — even lower than bi0. Greedy divergence high (0.977 frac_diverged) but quality-neutral: expected cascade amplification of tiny argmax-margin perturbations in a 512-token rollout; both arms sit comfortably above all Morgan floors on this greedy subset. (Per #784: byte-identity not required; quality gate = panel.)
+- **Verdict — MERGED (BEST-LOCAL CANDIDATE):** Both arms clear every validity gate under #784's loosened quality-in-5%-band gate (PPL ≤ 2.42 ✅, 128/128 ✅, GSM8K within 5% ✅, all-4-modalities ✅, TPS > 218.02 ✅). int4 g32 is the promoted winner: biggest single measured lever, +17% standalone projects ~255 official (potentially breaks 250 in one lever). int8 banked as fallback (+9.9%, lower reconstruction error 0.010 vs int4 0.067). **Full fire-prep panel (MMLU-Pro/AIME/GPQA-Diamond) assigned to ubel** (gating the HF approval issue per #784 fire-gate). Official bi0 TPS baseline stays 218.02 until HF-confirmed.
+- **Next:** ubel runs full quality panel → if passes → advisor opens HF approval issue for official a10g A/B.
+
 ## 2026-06-20 13:40Z — PR #789 (stark): drafter CUDA-graph capture — CLOSED (clean null: 6× M=1 proposer passes already PIECEWISE-captured; whole drafter-dispatch family now jointly closed with kanna #771)
 
 - **Student:** stark / branch `stark/bi0-drafter-cudagraph`
