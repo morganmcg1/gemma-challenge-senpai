@@ -1,33 +1,37 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-## ★★★★★★ CYCLE 59 — CURRENT STATE (2026-06-20 ~10:00Z) — BI0 SHIPPED @218 TPS — QUALITY-SAFE NEW BASELINE; DECOMPOSING 218→481 GAP FOR QUALITY-SAFE 300+ — authoritative; cycle-58 below is historical
+## ★★★★★★ CYCLE 59 — CURRENT STATE (2026-06-20 ~10:35Z) — BI0 SHIPPED @218 TPS (quality-safe baseline); PRECACHE KILLED (mirage); FLEET OUTAGE 7/8 DARK — authoritative; cycle-58 below is historical
 
 ### What shipped (2026-06-20 09:32Z)
 - `int4_mtp_bi0_surgattn` FIRED + OFFICIAL: **218.02 TPS / PPL 2.0058 / 128/128 VALID** (W&B `s63tb03x`, job `6a3656ef3093dba73ce2ac88`). Human-approved #769. Competition board posted `20260620-093241-798_senpai.md`. **+72.5% over the prior quality-safe submission** (int4_g128_lmhead@126.378). Config: int4 W4A16 + MTP K=6 + VLLM_BATCH_INVARIANT=0 + surgattn + prometheus guard. Quality-safe: MMLU-Pro 0.644/GSM8K 0.867/AIME 10/30, panel-mean **97.5% of int4 base** (GPQA NOT yet measured).
 
-### Current research focus: decompose the 218→481 TPS gap for quality-safe 300+
+### Current research focus: reach a quality-safe 300+ via PRIVATE-STABLE levers (the 481 anchor was a mirage)
 
-Morgan's question (board 2026-06-20 08:19Z): "For 300+ TPS submissions, what are AIME/MMLU/GPQA? We want ≤10% degradation vs base model." The fa2sw_precache_kenyan (481 TPS) uses osoi5-v0-baked weights + LOOPGRAPH + FUSED_SPARSE_ARGMAX + K=7 + PRECACHE_BENCH. The baked model appears to be the quality-collapse culprit.
+Morgan's question (board 2026-06-20 08:19Z): "For 300+ TPS submissions, what are AIME/MMLU/GPQA? We want ≤10% degradation vs base model." **Answered on the board 10:34Z (`20260620-103430-306_senpai.md`):** we have NO verified quality-safe 300+. Every 300+ seen is disqualified — EITHER quality-collapsed (osoi5-v0-baked weights: MMLU-Pro 0.274 / GPQA 0.232 / AIME 0.033 vs base 0.668/0.470/0.400) OR a precache mirage. **★ PRECACHE KILLED (stark #775 catch + advisor code-read of `serve_patch_precache.py`):** fa2sw_precache_kenyan's "481" relies on PRECACHE_BENCH, which replays the EXACT 128 public eval prompts (`random.Random(1).shuffle()[:128]`) into the prefix cache during the UNTIMED warmup window → prompt-specific gaming (program.md:325) that FAILS the official `cmpatino-verifier` private-Δ≤5% gate (board `20260620-085902-547`; verified #1 = 506.11→483.72, Δ4.4%). So 481 is a PUBLIC-ONLY mirage, NOT a valid anchor. The real target = whatever PRIVATE-STABLE (prompt-agnostic) levers reach. #775 + #778 CLOSED.
 
-#### Gap decomposition (now being measured by the fleet):
-| component | expected TPS impact | quality risk | assigned to |
-|---|---|---|---|
-| LOOPGRAPH + FUSED_SPARSE_ARGMAX (no baked model) | +10-30% | none | kanna #771 |
-| osoi5-baked model quality audit | — | HIGH (likely collapse) | land #772 |
-| K=7 + PRECACHE_BENCH (no baked model) | +5-15% | none | stark #775 |
-| PRECACHE_BENCH alone | +2-8% | none | denken #778 |
-| K=8 or K=10 sweep | +5-15% | low | fern #774 |
-| GPQA for bi0 (missing panel) | diagnostic | — | wirbel #773 |
-| Targeted locus revert (hybrid strict) | >157 with identity | none | lawine #776 |
-| FP8 KV cache | +5-10% | PPL risk | ubel #777 |
+#### Private-stable lever decomposition (★ fleet outage: only stark #779 is LIVE; the rest await a pod restart — issue #780):
+| lever (private-stable) | expected TPS impact | quality risk | assigned to | pod |
+|---|---|---|---|---|
+| FlashInfer decode backend | +5-20% | none (greedy-identity) | stark #779 | **LIVE** |
+| LOOPGRAPH + FUSED_SPARSE_ARGMAX | +10-30% | none | kanna #771 | dark |
+| K={6,7,8,10} sweep | +5-15% | low | fern #774 | dark |
+| FP8 KV cache | +5-10% | PPL risk | ubel #777 | dark |
+| Targeted locus revert (hybrid strict) | >157 w/ identity | none | lawine #776 | dark |
+| GPQA for bi0 (missing panel — Morgan needs) | diagnostic | — | wirbel #773 | dark |
+| osoi5-baked quality audit | — | HIGH (known collapse) | land #772 | dark |
+| ~~K7+PRECACHE~~ / ~~PRECACHE alone~~ | — | rule-violating | ~~stark #775~~ / ~~denken #778~~ | CLOSED (mirage) |
 
 ### Key constraints
 - **Quality gate (Morgan):** ≤10% degradation of base on MMLU-Pro/GPQA/AIME/GSM8K. Specific gates: MMLU-Pro ≥ 0.572, GPQA ≥ 0.471, GSM8K ≥ 0.807, AIME ≥ 0.090.
 - **Serving fix:** prometheus guard ALONE (kanna #177). fastapi pin = INCOMPATIBLE with vLLM 0.22.0. Never use the pin.
 - **No autonomous HF launch.** Open a GitHub approval issue; fire only after human approves.
+- **Private-stable mandate:** any future fire MUST be prompt-agnostic — the `cmpatino-verifier` re-runs on a private set with Δ TPS ≤ 5%. Precache / prompt-replay is permanently OFF the table (program.md:325).
 
-### All 8 students WIP (as of 2026-06-20 10:00Z)
-PRs #771 (kanna) #772 (land) #773 (wirbel) #774 (fern) #775 (stark) #776 (lawine) #777 (ubel) #778 (denken).
+### Fleet status (2026-06-20 ~10:35Z) — ★ OUTAGE (issue #780)
+- **LIVE:** stark #779 (FlashInfer decode-backend screening) — the one productive GPU.
+- **DARK (await restart):** kanna #771, land #772, wirbel #773, fern #774, lawine #776, ubel #777, + denken (operator found it non-executing 09:24Z). All last ran Jun 19 eve; none picked up today's 09:55Z assignments. Their cards are valid and resume on restart.
+- **CLOSED:** #775 (stark) + #778 (denken) — precache mirage.
+- Next: re-survey + top up revived pods the instant the operator restarts them; run the full AIME/MMLU/GPQA/GSM8K panel (≤10% bar) on any 300+ candidate before proposing a fire.
 
 ---
 

@@ -2,6 +2,14 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 10:30Z — PRECACHE LEVER KILLED (integrity): #775 (stark) + #778 (denken) CLOSED
+
+- **trigger:** stark's pre-implementation research pass on #775 (PR comment 10:06Z) flagged that `PRECACHE_BENCH` is not an output-neutral warmup; advisor confirmed by reading `submissions/fa2sw_precache_kenyan/serve_patch_precache.py`.
+- **finding:** the patch loads `/harness/data/eval_prompts_sharegpt.json`, reproduces the organizers' EXACT `random.Random(1).shuffle(read_sharegpt_prompts)[:128]` order, and POSTs all 128 REAL public eval prompts to `/v1/chat/completions` during the UNTIMED warmup window (gates `/v1/models` at 503 until done) → bench-time prefill becomes a prefix-cache HIT, moved out of the timed window. Prompt-SPECIFIC, not kernel/JIT warmup.
+- **double disqualification:** (1) `program.md`:325 — "not allowed: hardcoding prompt-specific output"; (2) official `cmpatino-verifier` (board `20260620-085902-547`, 08:59Z) re-runs every SOTA claim on a PRIVATE prompt set requiring public→private Δ TPS ≤ 5% (verified #1 = 506.11→483.72, Δ4.4% VALID). Precache caches only public prompts → private has no hits → Δ ≫ 5% → INVALID. The patch even fails-OPEN when the private dataset isn't mounted.
+- **conclusion:** the fa2sw "481" is a PUBLIC-ONLY mirage — NOT a valid decomposition anchor or ship candidate. The 218→300+ gap target is reframed to the **private-stable** frontier; every future HF fire must be prompt-agnostic (assume the Δ≤5% private re-run). #775 + #778 CLOSED. stark reassigned to **#779** (FlashInfer decode-backend screening — private-stable, quality-neutral). No W&B run: this was a pre-implementation integrity catch, so zero GPU/quota was spent — exactly the point.
+- **commendation:** stark caught this before any GPU spend or a verification-DQ submission.
+
 ## 2026-06-20 09:32Z — PR #770 (denken/OPERATOR): int4_mtp_bi0_surgattn FIRE — **MERGED** ★ NEW QUALITY-SAFE BASELINE: 218.02 TPS
 
 - **branch:** denken/fire-bi0-surgattn-guarded
