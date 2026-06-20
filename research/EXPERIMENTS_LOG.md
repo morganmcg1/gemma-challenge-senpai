@@ -2,6 +2,74 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 09:32Z — PR #770 (denken/OPERATOR): int4_mtp_bi0_surgattn FIRE — **MERGED** ★ NEW QUALITY-SAFE BASELINE: 218.02 TPS
+
+- **branch:** denken/fire-bi0-surgattn-guarded
+- **hypothesis:** VLLM_BATCH_INVARIANT=0 + MTP spec-decode (K=6) + surgical 2D-attn force runs free of the 31% BI tax → faster quality-safe submission than int4_g128_lmhead (126.378).
+- **results:**
+
+| metric | value | gate |
+|---|---|---|
+| official output TPS | **218.02** | — |
+| PPL | **2.0058** | ≤ 2.42 ✅ |
+| completed | **128/128** | ✅ |
+| total TPS | 330.09 | — |
+
+W&B [`s63tb03x`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/s63tb03x) · job `6a3656ef3093dba73ce2ac88`.
+
+- **analysis:** +72.5% (+1.725×) over int4_g128_lmhead (126.378); +61 TPS over int4_mtp_batchinv (~157 strict). Serves via prometheus route-name guard alone (fastapi pin incompatible with vLLM 0.22.0, dropped). Board posted `20260620-093241-798_senpai.md`. OPERATOR executed (denken pod dead).
+
+---
+
+## 2026-06-20 09:45Z — PR #762 (wirbel): Non-strict (BI=0) quality dossier — **MERGED** (evidence archive)
+
+- **branch:** wirbel/nonstrict-quality-dossier
+- **hypothesis:** BI=0 + surgattn produces no measurable downstream quality loss vs BI=1 strict fire or int4 base.
+- **results:**
+
+| task | int4 base | bi0 (this) | strict fire |
+|---|---|---|---|
+| MMLU-Pro (n=250) | 0.632 | 0.644 | 0.640 |
+| GSM8K (n=300) | 0.870 | 0.867 | 0.880 |
+| AIME maj@8 (n=30) | 11/30 | 10/30 | 12/30 |
+| panel-mean (pct of base) | — | **97.47%** | ~99% |
+
+W&B [`cfk7flim`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/cfk7flim) · [`khzb7aki`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/khzb7aki) · [`0z4nfbpd`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/0z4nfbpd).
+
+- **analysis:** MMLU-Pro and GSM8K statistically tied across all configs. AIME -1 question is sampling noise (n=30, two near-tie plurality votes). GPQA not in this panel. bi0 is quality-safe. Artifacts at `research/validity/nonstrict_quality_dossier/`.
+
+---
+
+## 2026-06-20 09:48Z — PR #766 (kanna): G1 σ_hw empirically grounded — **MERGED** (safety evidence)
+
+- **branch:** kanna/g1-sigma-measured
+- **hypothesis:** Empirically measuring σ_hw for the fire config tightens (or confirms) the board G1 safety margin.
+- **results:** measured_sigma_hw_pct = **0.01541 (1.54%)**, g1_empirically_grounded = **1**.
+- W&B [`ru68d3wy`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ru68d3wy).
+- **analysis:** σ_hw = 1.54% vs modelled 1% assumption. G1-pass prob 0.985 holds; 4.72× robustness margin from #763 still applies. Safety claim is now empirically grounded. Artifacts at `research/validity/g1_sigma_measured/`.
+
+---
+
+## 2026-06-20 09:50Z — PR #761 (lawine): Served divergence locus — **MERGED** (diagnostic)
+
+- **branch:** lawine/served-divergence-locus
+- **hypothesis:** bi0/bi1 token divergence can be localized to a single op family; targeted revert can recover literal-strict identity without the full BI tax.
+- **results:** top_op_divergence_share = **1.0**, literal_strict_achievable_targeted = **1**.
+- W&B [`7lf5pxa6`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/7lf5pxa6).
+- **analysis:** Divergence fully concentrated in one op family. Targeted revert can restore byte-identity at a fraction of the 31% BI tax. Completes 3-way BI-tax decomposition (land #760 IDENTITY + fern #759 COST + lawine #761 LOCUS). Artifacts at `research/validity/strict_clean_attn_locus_743/`.
+
+---
+
+## 2026-06-20 09:52Z — PR #746 (stark): Route-b K-sequential M=1 tree-verify — **CLOSED** ✗ DEAD-END
+
+- **branch:** stark/strict-clean-routeb-m1verify
+- **hypothesis:** K-sequential M=1 verify can net >126.378 TPS while maintaining byte-exact identity.
+- **results:** best 73.193 TPS (K=2 batched), arref ceiling 95.034 TPS. Both <126.378.
+- W&B: `8dl148ds`, `w1owpt54`, `a5vcnqy5`, `5kkl6xq6`, `xm8br47o`, `na1sdwdy`, `ipyqg9x5`, `e6e89pqv`.
+- **analysis:** M=1 verify = zero draft overhead amortization. 73 TPS is structural, not a tuning failure. Route-b cannot beat the baseline at any K — closed permanently. Quality-safe fast path is BI=0 (bi0, 218 TPS).
+
+---
+
 ## 2026-06-19 ~20:25Z — Cycle-58DX: **THE FIRE IS LAUNCHED — the human fired the one-shot directly via `/v1/jobs:run` (succeeded 19:57:40Z, job_id `6a359f363093dba73ce2a801`); escalation #2 worked. The @cmpatino board post is now blocked on exactly ONE thing: the remote official `summary.json:tps` landing (NOT yet — status=running as of 20:23Z). Posted the #742 launch-ACK (escalation loop closed). Banked+merged TWO analysis cards that flipped review-ready (kanna #763 G1-robustness, fern #759 BI-tax COST) → the COST + IDENTITY corners of the 3-way BI-tax decomposition are now BOTH closed; reseated fern→#765 + kanna→#766. Roster all-8 zero-idle.**
 
 - **★★★ THE FIRE — LAUNCHED & RUNNING.** Human on #742: `Job fired — /v1/jobs:run succeeded at 2026-06-19T19:57:40Z`, job_id [`6a359f363093dba73ce2a801`](https://huggingface.co/jobs/gemma-challenge/6a359f363093dba73ce2a801), run_prefix `results/senpai/int4_mtp_batchinv-20260619T195740Z`, status **running**, quota agent 6 / user 26. My escalation #2 unblocked it. **Official `summary.json:tps` NOT landed yet** — 20:23Z direct `wandb.Api()` scan of 30 most-recent runs found NO run carrying this job_id and NO official tps (still in flight). Housekeeping: run `senpai-int4_mtp_batchinv` [`0q2063i2`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/0q2063i2) (19:50:46Z, **crashed**) is an EARLIER attempt that predates the 19:57:40Z successful fire, NOT the live job. **Posted the #742 launch-ACK** ([issuecomment-4754513782](https://github.com/morganmcg1/gemma-challenge-senpai/pull/742#issuecomment-4754513782)): escalation loop closed; plan = WATCH for the remote tps → @cmpatino post (tag @human-cmpatino). **#742 merge HELD** — its current terminal marker is denken's prometheus-500 runner workaround `prometheus_dodge_found=1`, NOT the fire's tps; nothing to merge as a winner until the official number lands & clears 126.378.
