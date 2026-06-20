@@ -2,6 +2,28 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 16:49Z — PR #806 (stark): Non-GEMM verify-step attribution — NO LEVER (kernel side exhausted; decode is body-MLP-GEMM-bound) → MERGED (research tooling banked) + reassign stark #810
+
+- **Student:** stark / branch `stark/nongemm-verify-attrib` → **MERGED** (squash 38a03ee; 3 files under `research/bi0_int4head_nongemm_attrib/`, purely additive — banked so #807/#808/#810 can reuse the synthetic non-GEMM microbench, like the #798 harness)
+- **Hypothesis:** split the unattributed **#798 "verify non-GEMM 3.28 ms (26.4%)"** residual of the int4head conc=1 decode cycle into kernel classes (attention / ~250 RMSNorms / RoPE / KV-write / sampling) — is any of it a real fusable/launch-bound lever, or is it irreducible? Microbench-friendly (value-independent at conc=1).
+- **Result (terminal, W&B `azlgrinu`, group `bi0-int4head-nongemm-attrib`):**
+
+  | kernel class | count/step | realizable (fused) ms | %HBM-BW | share of non-GEMM |
+  |---|---|---|---|---|
+  | RMSNorm (all) | **302** | 4.269 | ≤1% | 58.7% |
+  | attention (force-2D) | 42 | 2.379 | 3–6% | **32.7%** |
+  | elementwise resid/scale | ~168 | 0.221 | 6% | 3.0% |
+  | RoPE | 42 | 0.217 | 2–5% | 3.0% |
+  | KV-write | 24 | 0.125 | 1–2% | 1.7% |
+  | sampling (softcap+argmax) | 1 | 0.065 | 28% | 0.9% |
+  | **SUM (upper bound)** | — | **7.276** | — | 100% |
+
+  - **Lever ladder:** eager **60.0** → graphed **8.91** → fused **7.28** ms/step. Launch lever (eager→graphed) **51.1 ms** + fusion lever (graphed→fused) **1.64 ms** = **52.7 ms/step ALREADY HARVESTED** by the shipped FULL@7 CUDA-graph (ENFORCE_EAGER=0) + torch.compile (Inductor). This vLLM has NO hand-written `_C` norm/rope kernel → `forward_native` (pure PyTorch), Inductor-fused.
+  - **Calibration caveat (honest):** SUM(fused)=7.28 > 3.28 ms (#798) because per-op isolation can't capture full-model cross-op fusion + synthetic paged-KV attention over-costs vs real cached-KV flash → per-class numbers are **UPPER BOUNDS**. Per-class **ranking** + the **verdict** are robust regardless.
+- **VERDICT — NO non-GEMM lever exists.** The 52.7 ms/step launch+fusion lever is fully harvested; the residual is fixed-floor/count-bound tiny kernels (~302 architecturally-required RMSNorm reductions at the ~14 µs reduction floor + 42 launch-free attention). Reducing it needs fewer *kernels* (Inductor already maxed) or fewer *architectural ops* (Gemma4 sandwich + q/k/v + PLE norms are fixed). **Decode is definitively body-MLP-GEMM-bound (#798); the kernel/non-GEMM side is exhausted.**
+- **Knock-ons:** (1) **closes researcher idea #2** (non-GEMM RMSNorm+RoPE+KV megafusion Triton kernel, projected +8–12%) — already harvested, DEAD. (2) **Attention = 32.7% (~1.07 ms) caps surgattn-3D's non-GEMM headroom** at a fraction of 1.07 ms (already launch-free Triton flash at 3–6% BW near its small-shape floor) — moot now (#791 quality-dead) but confirms the lever was bandwidth-thin. (3) Handed to lawine #809: sampling kernel is tiny (0.065 ms) → that lane's lever is the per-token host↔device **sync stall**, NOT the kernel GPU time (which #806's microbench can't see).
+- **Disposition:** clean, well-executed terminal NEGATIVE + valuable closure. Not a TPS winner (primary metric is a diagnostic %), so merge-winner N/A → squash-merged to bank the reusable microbench + verdict. stark idle → reassigned **#810** (per-layer body-MLP precision-sensitivity map → mixed-precision viability, researcher idea #4 — the last fat lever is reading fewer body-MLP weight bytes on the bandwidth-bound wall).
+
 ## 2026-06-20 16:32Z — PR #791 (wirbel): surgattn-3D-on-M=1 +5.51% — QUALITY-KILLED on GPQA → CLOSED (surgattn-3D DEAD; STACK dead by inheritance) + ★ int4head FIRE EXECUTING (human-approved #800)
 
 - **Student:** wirbel / branch `wirbel/bi0-surgattn-3d-qualregate`
