@@ -2,6 +2,23 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 18:25Z — PR #807 (wirbel): W4A8 body activation-quant viability — clean NEGATIVE (−16.68% decode) → BANKED (squash-merge) for harness fix + corollaries
+
+- **Student:** wirbel / branch `wirbel/w4a8-body-viability` → **BANKED** (squash-merge `ff6708e`; not a TPS winner — a refuted lever, but merged for a load-bearing shared-harness fix + reusable corollaries + a ready W4A8 reference submission). W&B `t2msgab0` (group `w4a8-body-viability`).
+- **Hypothesis:** the body is near HBM-bandwidth-bound, so halving bf16→int8 *activation* reads (W4A16→W4A8, weights unchanged) yields a large decode-TPS gain. Newly worth testing under #784 (quality-in-band, not byte-identity).
+- **Result (terminal, >100σ controlled A/B; same `w4a16-ct` checkpoint + MTP K=6, ONLY variable = `VLLM_MARLIN_INPUT_DTYPE`):**
+
+| Arm | local single-stream decode TPS (mean±std, n=5) | PPL | 128/128 |
+|---|---|---|---|
+| **W4A16** control (bf16 acts, env unset) | **507.12 ± 0.39** | 2.0057 | ✅ |
+| **W4A8** (int8 acts, env=`int8`) | **422.52 ± 0.63** | 2.0105 | ✅ |
+| **Δ** | **−84.60 = −16.68%** | +0.0048 | — |
+
+  - (TPS numbers are local single-stream `probe_tps`, NOT official a10g — the transferable result is the **Δ = −16.68%** measured identically both arms. Serves genuinely: int8-act greedy output differs from W4A16, not a silent fallback. Used the `w4a16-ct` base [bf16-tied lm_head] so the GLOBAL `VLLM_MARLIN_INPUT_DTYPE` toggle isolates the BODY; Δ is orthogonal to head quant → transfers to int4head, and being negative cannot be rescued by composing.)
+- **VERDICT — activation-precision is a clean NEGATIVE speed lever for single-stream decode on sm_86** (refuted by physics + measurement). At M=1 (or M≈7 verify) the body is **weight-read-bound**: int8 acts save <0.6% of bytes moved (activation tensor M×K vs weight K×N; ratio ≈ 4M/N ≪ 1 at M≈1) and ADD a per-token `marlin_quant_input` kernel on every body layer with no compute payoff (decode is memory-bound → int8 tensor cores give nothing). **Do NOT re-propose body/head int8/fp8 *activation* quant for low-batch decode TPS on sm_86.**
+- **★ Banked corollaries (why merged, not closed):** (1) **A W4A8 Marlin path DOES serve on Ampere sm_86** (`VLLM_MARLIN_INPUT_DTYPE=int8`, choices `int8|fp8`, `envs.py:161`; NO requant — official int4 weights serve as W4A8 via runtime per-token int8 act-quant). Rules W4A8 IN on sm_86 (unlike Cutlass/Machete sm_90 walls #781/#779) — the right tool IF a future lever becomes compute-bound (heavy prefill / high concurrency); `submissions/int4_mtp_bi0_w4a8body/` banked as the ready reference. (2) **int8 MoE-act quant is quality-safe for Gemma-4-E4B** (PPL 2.0105, no outlier collapse) — a clean speed/physics negative, not a quality negative. (3) **Harness fix** (`scripts/local_validation/harness.py`: `extra_env` `None` ⇒ unset a manifest-baked key) — load-bearing for any same-checkpoint A/B that must drop a baked env var; backward-compatible.
+- **Disposition:** BANKED (squash `ff6708e`). wirbel reassigned **#???** (body int4 group-size coarsening g32→g128 — fewer SCALE-byte HBM reads at the SAME W4 bits; the bf16 g32 group-scale is ~12.5% of body weight bytes, g128 cuts it ~4× → ~9% fewer body bytes on the dominant 47.6% verify-GEMM; newly legal under #784's 5% band; orthogonal to W3/W2 [#810 bits, kernel-blocked] / 2:4 [#808] / W4A8 [activation] / channelwise-lm_head [#796]).
+
 ## 2026-06-20 18:15Z — PR #813 (stark): lenient/typical spec ACCEPTANCE criterion — Step-1 VIABILITY NULL (no config knob) → SENT BACK for the synthetic-acceptance ceiling ORACLE
 
 - **Student:** stark / branch `stark/lenient-spec-acceptance` → **status:review → SENT BACK to status:wip** (request-changes; the config sub-approach is dead but one cheap high-VoI ceiling probe remains before the acceptance axis is fully dispositioned).
