@@ -1,0 +1,27 @@
+{
+  "name": "int4-mtp-bi0-w4a8body",
+  "description": "PR #807 W4A8-body probe. bi0 (int4 W4A16 body + QAT-matched gemma4_assistant MTP drafter, VLLM_BATCH_INVARIANT=0, surgical force-2D TRITON_ATTN patch) with ONE delta vs the int4 body base: VLLM_MARLIN_INPUT_DTYPE=int8 flips every gptq-Marlin int4 layer (the whole transformer body) from W4A16 (bf16 activations) to W4A8-INT8 (per-token int8-quantized activations) at runtime. NO requantization or new checkpoint: the SAME official google/gemma-4-E4B-it-qat-w4a16-ct uint4b8 weights serve as W4A8 just by setting the env var; weights stay int4, activations are dynamically int8-quantized per-token per-layer inside ops.marlin_gemm. The bf16 lm_head is TIED to embed_tokens (not quantized) so the env toggle touches the body only; the int4-head lever (submissions/int4_mtp_bi0_int4head) is orthogonal and composes on top. The W4A16 control is the identical serve with the env var ABSENT, giving a same-checkpoint one-variable A/B. PHYSICS: at M=1-8 decode the body GEMM is weight-read-bound (int4 weights unchanged); halving bf16->int8 activation bytes trims <0.6% of GEMM read traffic and adds a per-token int8-quant kernel, so the lever is expected ~0 or NEGATIVE for low-batch decode TPS -- the probe MEASURES it.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "MODEL_ID": "google/gemma-4-E4B-it-qat-w4a16-ct",
+    "VLLM_MARLIN_INPUT_DTYPE": "int8",
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}
