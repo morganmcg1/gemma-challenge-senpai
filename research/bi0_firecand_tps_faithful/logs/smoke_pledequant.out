@@ -1,0 +1,20 @@
+[measure] normalized CUDA_VISIBLE_DEVICES '6' -> '0' (single in-container GPU)
+[measure] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[measure] candidate=pledequant prompts=2 output_len=16 reps=1
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'MODEL_ID': 'google/gemma-4-E4B-it-qat-w4a16-ct', 'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 180s
+[measure] --- rep 0 ---
+[measure] rep0 wall_tps loopclock=122.38 tight=155.36 tot_tokens=32
+
+[measure] ===== RESULT =====
+  candidate=pledequant served=True error=None
+  agg_wall_tps loopclock mean=122.37612467221754 std=0.0 reps=[122.37612467221754]
+  agg_wall_tps tight   mean=155.36293405008462 (scrape_overhead=21.232%)
+  official_crosscheck wall_tps=None
+  bootstrap_ci_95={'lo': 133.56752130628104, 'hi': 185.6584998782728, 'median': 155.36293405008462, 'iters': 10000, 'alpha': 0.05}
+  conservative_lower_bound=122.37612467221754 (rep_mean_minus_2std_loopclock) clears_250=False
+  per_prompt_tps_dist={'n': 2, 'mean': 159.6130105922769, 'std': 26.045489285995885, 'min': 133.56752130628104, 'median': 159.6130105922769, 'max': 185.6584998782728}
+  per_prompt_e_accept_dist={'n': 2, 'mean': 4.875, 'std': 0.125, 'min': 4.75, 'median': 4.875, 'max': 5.0}
+  probe (prefill-excl) decode_tps=634.5075621398239 naive_tps=575.2048650247066  headline=265.61 (local headline (#805); basis unconfirmed)
+  ppl=None (cap 2.42)  mem=20515MiB ready=180.1s wandb=None
