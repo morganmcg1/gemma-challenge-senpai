@@ -60,7 +60,7 @@ def _run(cmd: list[str], log: Path, timeout_s: int) -> int:
 def task_mmlu_pro(base_url, out_dir, k, *, n, seed, max_tokens) -> dict[str, Any]:
     out = out_dir / f"mmlu_pro_k{k}.json"
     rc = _run(
-        ["uv", "run", "python", str(RUN_EVAL), "--task", "mmlu_pro",
+        [str(SERVER_PY), str(RUN_EVAL), "--task", "mmlu_pro",
          "--arm", f"k{k}", "--out", str(out), "--base-url", f"{base_url}/v1",
          "--n", str(n), "--seed", str(seed), "--max-tokens", str(max_tokens)],
         out_dir / f"mmlu_pro_k{k}.log", timeout_s=5400,
@@ -73,7 +73,7 @@ def task_mmlu_pro(base_url, out_dir, k, *, n, seed, max_tokens) -> dict[str, Any
 def task_gpqa(base_url, out_dir, k, *, seed, max_tokens) -> dict[str, Any]:
     out = out_dir / f"gpqa_diamond_k{k}.json"
     rc = _run(
-        ["uv", "run", "python", str(RUN_EVAL), "--task", "gpqa_diamond",
+        [str(SERVER_PY), str(RUN_EVAL), "--task", "gpqa_diamond",
          "--arm", f"k{k}", "--out", str(out), "--base-url", f"{base_url}/v1",
          "--seed", str(seed), "--max-tokens", str(max_tokens)],
         out_dir / f"gpqa_diamond_k{k}.log", timeout_s=5400,
@@ -92,7 +92,7 @@ def task_aime(base_url, out_dir, k, *, maj_k, temperature, limit, max_tokens) ->
     # final \boxed{}, collapsing greedy maj@1 from the #795 ref 0.300 -> 0.100 (the
     # extractor then falls back to a stray intermediate integer). This bug sank the
     # first k=1 panel; --no-thinking restores the reference.
-    cmd = ["uv", "run", "python", str(AIME_EVAL), "--base-url", base_url,
+    cmd = [str(SERVER_PY), str(AIME_EVAL), "--base-url", base_url,
            "--k", str(maj_k), "--temperature", str(temperature),
            "--max-tokens", str(max_tokens), "--years", "2024",
            "--no-thinking", "--min-tokens", "8", "--seed", "1234",
@@ -105,15 +105,16 @@ def task_aime(base_url, out_dir, k, *, maj_k, temperature, limit, max_tokens) ->
         cmd += ["--limit", str(limit)]
     rc = _run(cmd, out_dir / f"aime_{tag}_k{k}.log", timeout_s=5400)
     d = json.loads(out.read_text()) if out.exists() else {}
-    # aime_eval reports maj@k accuracy; field name resolved leniently.
-    acc = d.get("maj_at_k_accuracy") or d.get("accuracy") or d.get("maj_accuracy")
+    # aime_eval reports maj@k accuracy under "maj_k_accuracy"; resolve leniently.
+    acc = (d.get("maj_k_accuracy") or d.get("maj_at_k_accuracy")
+           or d.get("accuracy") or d.get("maj_accuracy"))
     return {"rc": rc, "accuracy": acc, "out": str(out), "raw_keys": list(d.keys())[:12]}
 
 
 def task_gsm8k(base_url, out_dir, k, *, n, max_tokens) -> dict[str, Any]:
     label = f"k{k}"
     rc = _run(
-        ["uv", "run", "python", str(GSM8K_EVAL), "--base-url", base_url,
+        [str(SERVER_PY), str(GSM8K_EVAL), "--base-url", base_url,
          "--regimes", "greedy", "--n", str(n), "--label", label,
          "--out-dir", str(out_dir), "--max-tokens", str(max_tokens),
          "--concurrency", "32"],
