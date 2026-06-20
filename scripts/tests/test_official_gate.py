@@ -654,6 +654,252 @@ def test_preflight_picks_latest_and_folds_hyphen_underscore():
 
 
 # --------------------------------------------------------------------------- #
+# TOKEN-LESS RUNNER-FETCH PRE-FIRE PROBE (PR #819)
+# --------------------------------------------------------------------------- #
+# The HF-Job runner serves the model with NO HF token, so a private/gated/missing
+# model_id 401s at server startup AFTER the official PPL/completion/modalities gate
+# passes in a credentialed local env (the int4head fire, job 6a36d5de). These pins
+# are network-free: the model_info call is injected, so they assert the resolution
+# (mirrors serve.py incl. Plan-A) and the block/allow/skip policy without the Hub.
+SUBMISSIONS = REPO_ROOT / "submissions"
+PRIVATE_INT4HEAD = "gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head"  # 401 token-less
+PUBLIC_BASE = "google/gemma-4-E4B-it-qat-w4a16-ct"  # bi0's public base; anon-fetchable
+PLAN_A_BASE_REV = "ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0"  # the Plan-A GREEN rev
+
+
+def _repo_error(cls, status, msg):
+    """Build a real huggingface_hub HTTP error carrying ``status`` (needs httpx)."""
+    import httpx
+
+    req = httpx.Request("GET", "https://huggingface.co/api/models/x")
+    return cls(msg, response=httpx.Response(status_code=status, request=req))
+
+
+def _fake_model_info(*, raises=None, sha="deadbeefcafe"):
+    """A ``model_info`` stand-in that asserts ``token=False`` then returns/raises."""
+
+    def _mi(repo_id, revision=None, token=None):
+        assert token is False, "probe must call model_info with token=False (runner is token-less)"
+        if raises is not None:
+            raise raises
+        return type("Info", (), {"sha": sha})()
+
+    return _mi
+
+
+def _write_launch_evidence(root, name, model_id, sub_path):
+    d = root / f"validate-{name}-x"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / "evidence.json").write_text(
+        json.dumps(
+            {
+                "submission_name": name,
+                "submission": sub_path,
+                "num_prompts": 128,
+                "ppl": 2.0,
+                "completed": 128,
+                "all_modalities_loaded": True,
+                "created_at": "20260620T120000Z",
+                "model_id": model_id,
+            }
+        )
+    )
+
+
+def test_resolve_runner_fetch_target_mirrors_serve_py():
+    # int4head: manifest env MODEL_ID is the PRIVATE repo, no Plan-A -> the runner
+    # serves it directly from the Hub (and 401s token-less).
+    t = vs.resolve_runner_fetch_target(SUBMISSIONS / "int4_mtp_bi0_int4head")
+    assert t["model_id"] == PRIVATE_INT4HEAD
+    assert t["plan_a_startup_quant"] is False and t["revision"] is None
+    assert t["is_local"] is False
+    # surgattn (the shipped public bi0): manifest model_id IS the public base.
+    t2 = vs.resolve_runner_fetch_target(SUBMISSIONS / "int4_mtp_bi0_surgattn")
+    assert t2["model_id"] == PUBLIC_BASE and t2["is_local"] is False
+
+
+def test_resolve_runner_fetch_target_plan_a_public_base():
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp) / "plan_a"
+        d.mkdir()
+        (d / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "name": "plan-a",
+                    "serve": ["python", "serve.py"],
+                    "dependencies": [],
+                    "model_id": PUBLIC_BASE,
+                    "env": {
+                        "MODEL_ID": PUBLIC_BASE,
+                        "LMHEAD_QUANT_AT_STARTUP": "1",
+                        "LMHEAD_QUANT_BASE_REV": PLAN_A_BASE_REV,
+                    },
+                }
+            )
+        )
+        t = vs.resolve_runner_fetch_target(d)
+        # Plan-A snapshot_downloads the SAME public base (+rev pin) anonymously.
+        assert t["model_id"] == PUBLIC_BASE
+        assert t["plan_a_startup_quant"] is True
+        assert t["revision"] == PLAN_A_BASE_REV
+        assert t["is_local"] is False
+
+
+def test_resolve_runner_fetch_target_local_bundle_is_not_probed():
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp) / "bundled"
+        (d / "model").mkdir(parents=True)  # bundled checkpoint inside the submission
+        (d / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "name": "bundled",
+                    "serve": ["python", "serve.py"],
+                    "dependencies": [],
+                    "model_id": "model",
+                    "env": {"MODEL_ID": "model"},
+                }
+            )
+        )
+        t = vs.resolve_runner_fetch_target(d)
+        assert t["is_local"] is True  # served from local files; no anonymous Hub fetch
+
+
+def test_probe_blocks_private_401_and_gated_403():
+    from huggingface_hub.utils import GatedRepoError, RepositoryNotFoundError
+
+    r = vs.probe_token_less_fetch(
+        PRIVATE_INT4HEAD,
+        model_info_fn=_fake_model_info(
+            raises=_repo_error(RepositoryNotFoundError, 401, "401 Client Error. Repository Not Found")
+        ),
+    )
+    assert r["blocking"] is True and r["reachable"] is False
+    assert r["status"] == "blocked_unauthorized_401"
+    g = vs.probe_token_less_fetch(
+        "org/gated",
+        model_info_fn=_fake_model_info(raises=_repo_error(GatedRepoError, 403, "403 gated repo")),
+    )
+    assert g["blocking"] is True and g["status"] == "blocked_gated_403"
+
+
+def test_probe_offline_is_non_blocking():
+    import requests
+
+    r = vs.probe_token_less_fetch(
+        PUBLIC_BASE,
+        model_info_fn=_fake_model_info(raises=requests.exceptions.ConnectionError("no route to host")),
+    )
+    # No network is NOT an auth failure: inconclusive, must not false-RED a launch.
+    assert r["blocking"] is False and r["reachable"] is None
+    assert r["status"] == "skipped_unreachable"
+
+
+def test_probe_reachable_is_allowed_and_token_false():
+    r = vs.probe_token_less_fetch(
+        PUBLIC_BASE, revision=PLAN_A_BASE_REV, model_info_fn=_fake_model_info(sha="ef0a4c43726b")
+    )
+    assert r["reachable"] is True and r["blocking"] is False
+    assert r["status"] == "reachable_token_less"
+
+
+def test_launch_blocked_on_private_repo_401():
+    """The int4head fire reproduction: official gate PASS, but the private repo
+    401s token-less -> enforce_launch_gate must BLOCK (it did not, pre-#819)."""
+    from huggingface_hub.utils import RepositoryNotFoundError
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_launch_evidence(
+            root, "int4_mtp_bi0_int4head", PRIVATE_INT4HEAD, str(SUBMISSIONS / "int4_mtp_bi0_int4head")
+        )
+        try:
+            vs.enforce_launch_gate(
+                "int4_mtp_bi0_int4head",
+                localrun_root=root,
+                model_info_fn=_fake_model_info(
+                    raises=_repo_error(RepositoryNotFoundError, 401, "401 Client Error. Repository Not Found")
+                ),
+            )
+            raise AssertionError("private-repo 401 must block the launch")
+        except RuntimeError as exc:
+            assert "TOKEN-LESS" in str(exc) and PRIVATE_INT4HEAD in str(exc)
+
+
+def test_launch_allowed_on_public_base_and_plan_a():
+    # bi0 public base (surgattn manifest): reachable token-less -> launch allowed.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_launch_evidence(
+            root, "int4_mtp_bi0_surgattn", PUBLIC_BASE, str(SUBMISSIONS / "int4_mtp_bi0_surgattn")
+        )
+        gate = vs.enforce_launch_gate(
+            "int4_mtp_bi0_surgattn", localrun_root=root, model_info_fn=_fake_model_info(sha="ef0a4c43726b")
+        )
+        probe = gate["runner_fetch_probe"]
+        assert probe["reachable"] is True and probe["status"] == "reachable_token_less"
+        assert probe["source"] == "manifest" and probe["model_id"] == PUBLIC_BASE
+    # Plan-A public-base path: the runner anonymously snapshot_downloads the public
+    # base (+rev) -> GREEN even though the byte-identical int4head repo is private.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        sub = Path(tmp) / "plan_a"
+        sub.mkdir()
+        (sub / "manifest.json").write_text(
+            json.dumps(
+                {
+                    "name": "plan-a",
+                    "serve": ["python", "serve.py"],
+                    "dependencies": [],
+                    "model_id": PUBLIC_BASE,
+                    "env": {
+                        "MODEL_ID": PUBLIC_BASE,
+                        "LMHEAD_QUANT_AT_STARTUP": "1",
+                        "LMHEAD_QUANT_BASE_REV": PLAN_A_BASE_REV,
+                    },
+                }
+            )
+        )
+        _write_launch_evidence(root, "plan_a", PUBLIC_BASE, str(sub))
+        gate = vs.enforce_launch_gate(
+            "plan_a", localrun_root=root, model_info_fn=_fake_model_info(sha="ef0a4c43726b")
+        )
+        probe = gate["runner_fetch_probe"]
+        assert probe["reachable"] is True and probe["revision"] == PLAN_A_BASE_REV
+
+
+def test_launch_not_blocked_when_offline():
+    import requests
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_launch_evidence(
+            root, "int4_mtp_bi0_surgattn", PUBLIC_BASE, str(SUBMISSIONS / "int4_mtp_bi0_surgattn")
+        )
+        gate = vs.enforce_launch_gate(
+            "int4_mtp_bi0_surgattn",
+            localrun_root=root,
+            model_info_fn=_fake_model_info(raises=requests.exceptions.ConnectionError("offline box")),
+        )
+        # Offline must not wedge a legitimately public launch.
+        assert gate["runner_fetch_probe"]["blocking"] is False
+        assert gate["runner_fetch_probe"]["status"] == "skipped_unreachable"
+
+
+def test_launch_skips_probe_for_local_model_path():
+    # No loadable manifest + an ABSOLUTE local model_id -> evidence fallback marks
+    # is_local, the Hub probe is skipped, and the launch is allowed.
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        _write_launch_evidence(root, "localsub", "/abs/local/model", "submissions/does_not_exist")
+        gate = vs.enforce_launch_gate(
+            "localsub",
+            localrun_root=root,
+            model_info_fn=_fake_model_info(raises=AssertionError("must NOT probe a local path")),
+        )
+        assert gate["runner_fetch_probe"]["status"] == "skipped_local_path"
+
+
+# --------------------------------------------------------------------------- #
 # no-pytest fallback runner
 # --------------------------------------------------------------------------- #
 def _main() -> int:

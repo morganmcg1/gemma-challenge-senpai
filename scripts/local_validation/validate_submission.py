@@ -26,11 +26,20 @@ path consumes the same verdict through ``run_official_gate_preflight`` /
 ``enforce_launch_gate``: a job is launched ONLY when the gate is PASS, and both
 FAIL and INCOMPLETE block (an unmeasured component is exactly when a submission
 must not spend HF-Jobs quota).
+
+``enforce_launch_gate`` adds a second hard pre-fire block (#819): a cheap,
+always-on token-less Hub probe of the EXACT model the runner will anonymously
+fetch. The official quality gate runs in a credentialed local env and is blind to
+model LOADABILITY, so a private/gated/missing ``model_id`` 401s at server startup
+AFTER the gate passes (the int4head fire). The probe raises on an auth/visibility
+failure and only warns on a no-network/transient error (never false-RED a public
+launch from an offline box).
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import time
 from pathlib import Path
 
@@ -174,6 +183,11 @@ def run_official_gate_preflight(
         "modalities_method": ev.get("modalities_method"),
         "evidence_path": str(path),
         "evidence_created_at": created or None,
+        # The served model id captured at validation time and the submission dir
+        # the evidence came from — consumed by the token-less runner-fetch probe in
+        # enforce_launch_gate (PR #819) to resolve what the runner anonymously pulls.
+        "model_id": ev.get("model_id"),
+        "evidence_submission": ev.get("submission"),
     }
     # Launch-sufficiency: a sub-128 smoke (even a PASS) cannot authorize the
     # official 128-prompt run — downgrade to INCOMPLETE.
@@ -194,16 +208,194 @@ def run_official_gate_preflight(
     return result
 
 
+# --------------------------------------------------------------------------- #
+# TOKEN-LESS RUNNER-FETCH PRE-FIRE PROBE (PR #819)
+# --------------------------------------------------------------------------- #
+# The official gate above runs in a CREDENTIALED local env with a warm HF cache,
+# so it is structurally blind to model LOADABILITY on the runner. The HF-Job vLLM
+# subprocess inherits NO HF token, so a private / gated / missing ``model_id``
+# 401s at server startup AFTER PPL / completion / modalities have all passed —
+# exactly how the int4head fire (job 6a36d5de) died. ``enforce_launch_gate``
+# therefore resolves the EXACT model the runner will anonymously fetch (mirroring
+# serve.py, including the ``LMHEAD_QUANT_AT_STARTUP=1`` public-base Plan-A path)
+# and requires it to be token-less reachable. An AUTH/visibility failure
+# (401/403/404, private/gated/missing) BLOCKS; a no-network / offline / transient
+# error is inconclusive and only WARNS + skips — it must never false-RED a launch
+# whose model is in fact public, just because the local box is offline.
+
+
+def resolve_runner_fetch_target(submission_dir, *, manifest: dict | None = None) -> dict:
+    """The model the HF runner ANONYMOUSLY fetches from the Hub, mirroring serve.py.
+
+    serve.py computes ``model_id = MODEL_ID env or default`` then
+    ``maybe_quant_lmhead_at_startup(model_id)``. Under the token-free Plan-A path
+    (``LMHEAD_QUANT_AT_STARTUP=1``) the runner ``snapshot_download``s that SAME base
+    ``model_id`` (optionally pinned to ``LMHEAD_QUANT_BASE_REV``) and quant-builds it
+    on disk, so the Hub-fetch target is still the base ``model_id`` — only a revision
+    pin is added. A ``model_id`` that resolves to a local path (absolute, or a path
+    that exists inside the submission) is served from disk: no anonymous Hub fetch,
+    so the token-less probe is N/A (``is_local=True``). The Plan-A flag/revision are
+    read from the MANIFEST env (what ships in the package and what the runner sees).
+    """
+    submission_dir = Path(submission_dir)
+    manifest = manifest if manifest is not None else harness.load_manifest(submission_dir)
+    model_id = harness.serve_model_id(manifest, submission_dir)
+    env_block = manifest.get("env") or {}
+    plan_a = str(env_block.get("LMHEAD_QUANT_AT_STARTUP", "0")) == "1"
+    revision = (env_block.get("LMHEAD_QUANT_BASE_REV") or None) if plan_a else None
+    resolved = harness.resolve_model_id(model_id, submission_dir)
+    is_local = os.path.isabs(resolved) or resolved != model_id
+    return {
+        "model_id": model_id,
+        "revision": revision,
+        "plan_a_startup_quant": plan_a,
+        "is_local": is_local,
+        "resolved_path": resolved if is_local else None,
+    }
+
+
+def _short(exc, n: int = 160) -> str:
+    head = (str(exc).splitlines() or [""])[0].strip()
+    return (head or type(exc).__name__)[:n]
+
+
+def _classify_probe_exception(exc) -> dict:
+    """Map a ``model_info(token=False)`` exception to a probe verdict.
+
+    AUTH/visibility failures — the token-less runner WILL hit them — BLOCK; a
+    no-network / offline / transient error is inconclusive and must NOT block
+    (instruction: distinguish auth failure from no-network, cite which).
+    """
+    from huggingface_hub.utils import GatedRepoError, RepositoryNotFoundError
+
+    status = getattr(getattr(exc, "response", None), "status_code", None)
+    # Gated (403) is a RepositoryNotFoundError subclass, so check it first.
+    if isinstance(exc, GatedRepoError) or status == 403:
+        return {
+            "reachable": False,
+            "blocking": True,
+            "status": "blocked_gated_403",
+            "detail": f"gated repo — token-less access denied (403): {_short(exc)}",
+        }
+    if isinstance(exc, RepositoryNotFoundError) or status in (401, 404):
+        return {
+            "reachable": False,
+            "blocking": True,
+            "status": f"blocked_unauthorized_{status or 'private'}",
+            "detail": f"private/missing repo — token-less {status or '401'}: {_short(exc)}",
+        }
+    # No network, DNS failure, timeout, offline pin, transient 5xx, or anything
+    # else: inconclusive, so WARN + skip rather than false-RED a public launch.
+    return {
+        "reachable": None,
+        "blocking": False,
+        "status": "skipped_unreachable",
+        "detail": f"Hub unreachable, NOT an auth failure ({type(exc).__name__}): {_short(exc)}",
+    }
+
+
+def probe_token_less_fetch(model_id, *, revision: str | None = None, model_info_fn=None) -> dict:
+    """Probe whether ``model_id`` is anonymously fetchable — the runner's posture.
+
+    Calls ``HfApi().model_info(model_id, revision=revision, token=False)``;
+    ``token=False`` forces the anonymous fetch the sandboxed runner performs,
+    regardless of any ambient local credential or warm cache. ``model_info_fn`` is
+    injectable for tests. Returns ``reachable`` (True/False/None), ``blocking``
+    (bool), ``status``, ``detail``, and ``elapsed_s``.
+    """
+    result = {"model_id": model_id, "revision": revision, "token_less": True}
+    if model_info_fn is None:
+        try:
+            from huggingface_hub import HfApi
+        except Exception as exc:  # pragma: no cover - hub client missing
+            result.update(
+                {
+                    "reachable": None,
+                    "blocking": False,
+                    "status": "skipped_no_hub_client",
+                    "detail": f"huggingface_hub unavailable ({type(exc).__name__}): {_short(exc)}",
+                }
+            )
+            return result
+        model_info_fn = HfApi().model_info
+    t0 = time.time()
+    try:
+        info = model_info_fn(model_id, revision=revision, token=False)
+    except Exception as exc:
+        result.update(_classify_probe_exception(exc))
+    else:
+        result.update(
+            {
+                "reachable": True,
+                "blocking": False,
+                "status": "reachable_token_less",
+                "detail": f"anonymously fetchable (sha={getattr(info, 'sha', None)})",
+            }
+        )
+    result["elapsed_s"] = round(time.time() - t0, 3)
+    return result
+
+
+def _resolve_launch_fetch_target(gate: dict) -> dict:
+    """Resolve the runner's anonymous Hub-fetch target for ``enforce_launch_gate``.
+
+    Prefers the submission MANIFEST (mirrors serve.py exactly, incl. the Plan-A
+    revision pin); falls back to the served ``model_id`` recorded in the validation
+    evidence when the manifest is not loadable in this checkout — the SAME
+    pre-transform ``MODEL_ID`` the runner fetches, minus only the Plan-A rev pin.
+    """
+    sub_path = gate.get("evidence_submission")
+    if sub_path:
+        d = Path(sub_path)
+        if not d.is_absolute():
+            d = paths.ROOT / sub_path
+        if (d / "manifest.json").exists():
+            try:
+                target = resolve_runner_fetch_target(d)
+                target["source"] = "manifest"
+                return target
+            except Exception:
+                pass
+    model_id = gate.get("model_id")
+    if not model_id:
+        return {"model_id": None, "revision": None, "plan_a_startup_quant": None,
+                "is_local": False, "resolved_path": None, "source": "none"}
+    is_local = os.path.isabs(model_id)
+    return {"model_id": model_id, "revision": None, "plan_a_startup_quant": None,
+            "is_local": is_local, "resolved_path": model_id if is_local else None,
+            "source": "evidence"}
+
+
+def runner_fetch_pre_fire_probe(gate: dict, *, model_info_fn=None) -> dict:
+    """Resolve the runner's fetch target and probe its token-less reachability."""
+    target = _resolve_launch_fetch_target(gate)
+    if target.get("model_id") is None:
+        return {**target, "reachable": None, "blocking": False, "status": "skipped_no_model_id",
+                "detail": "no served model_id in evidence and no loadable manifest"}
+    if target.get("is_local"):
+        return {**target, "reachable": None, "blocking": False, "status": "skipped_local_path",
+                "detail": f"served from local files ({target.get('resolved_path')}); no anonymous Hub fetch"}
+    probe = probe_token_less_fetch(
+        target["model_id"], revision=target.get("revision"), model_info_fn=model_info_fn
+    )
+    return {**target, **probe}
+
+
 def enforce_launch_gate(
     submission,
     *,
     num_prompts: int = OFFICIAL_NUM_PROMPTS,
     localrun_root: Path | None = None,
+    model_info_fn=None,
 ) -> dict:
-    """Run the preflight and raise RuntimeError unless the gate is PASS.
+    """Run the preflight and raise RuntimeError unless the gate is PASS *and* the
+    served model is anonymously fetchable.
 
-    The single chokepoint the HF-launch path calls before submitting a job: FAIL
-    and INCOMPLETE both raise (blocking the launch); PASS returns the gate dict.
+    The single chokepoint the HF-launch path calls before submitting a job. Two
+    hard blocks: (1) the official quality gate — FAIL and INCOMPLETE both raise;
+    (2) the token-less runner-fetch probe — a private/gated/missing model_id
+    raises (the int4head 401 class), while a no-network/transient probe error only
+    warns. PASS on both returns the gate dict (with ``runner_fetch_probe`` attached).
     """
     gate = run_official_gate_preflight(submission, num_prompts=num_prompts, localrun_root=localrun_root)
     if not check_launch_eligibility(gate["official_gate"]):
@@ -214,6 +406,31 @@ def enforce_launch_gate(
             f"all_modalities_loaded={gate.get('all_modalities_loaded')} "
             f"evidence={gate.get('evidence_path')}. "
             f"{gate.get('reason') or 'Fix the gate failures and re-run full-protocol local validation before launching.'}"
+        )
+
+    probe = runner_fetch_pre_fire_probe(gate, model_info_fn=model_info_fn)
+    gate["runner_fetch_probe"] = probe
+    if probe.get("blocking"):
+        rev = probe.get("revision")
+        rev_note = f" @ {rev}" if rev else ""
+        raise RuntimeError(
+            f"HF launch blocked: the runner serves TOKEN-LESS but model_id "
+            f"'{probe.get('model_id')}'{rev_note} is NOT anonymously fetchable "
+            f"({probe.get('status')}: {probe.get('detail')}). The official gate passed in a "
+            f"credentialed local env, but the sandboxed HF-Job runner gets NO HF token — this "
+            f"is the private-repo 401 the int4head fire (job 6a36d5de) hit at server startup. "
+            f"Publish the model public/ungated, or serve the public base via the "
+            f"LMHEAD_QUANT_AT_STARTUP=1 Plan-A path, before launching."
+        )
+    if probe.get("reachable") is None:
+        # Non-blocking inconclusive (no network / local path / no client): surface
+        # loudly so the operator knows the loadability check did NOT actually run.
+        print(
+            f"[launch-gate] WARN token-less runner-fetch probe inconclusive for model_id "
+            f"'{probe.get('model_id')}': {probe.get('status')} ({probe.get('detail')}). "
+            f"Loadability NOT confirmed — run runner_env_parity_gate --require-loadable "
+            f"as the one-shot pre-fire confirmation.",
+            flush=True,
         )
     return gate
 
