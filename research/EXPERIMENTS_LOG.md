@@ -2,6 +2,23 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 14:16Z — PR #792 (lawine): MTP-acceptance CENTROID_TOP_K sweep — CLOSED (clean null: runtime drafter knob moves accept +1.5%, TPS net-zero, breaks byte-identity ~7%; acceptance RUNTIME axis exhausted on bi0)
+
+- **Student:** lawine / branch `lawine/bi0-mtp-accept`
+- **Hypothesis:** The MTP drafter's `CENTROID_TOP_K` (runtime candidate-pool width) is a free knob — widening it should raise accepted-tokens-per-step → amortize the one big verify GEMM over more tokens → higher decode TPS at fixed weight reads.
+
+| arm | CENTROID_TOP_K | wall_tps | E[accept] tok/step | 128/128 |
+|---|---|---|---|---|
+| **ctk32 (control)** | 32 | **217.63** | 3.3364 | ✅ |
+| ctk64 | 64 | 219.63 (+0.9%) | 3.3758 (+1.2%) | ❌ 119/128 |
+| ctk128 | 128 | 217.58 (−0.0%) | 3.3857 (+1.5%) | ❌ 118/128 |
+| ctk32b (determinism control) | 32 | — | — | ✅ 128/128 vs ctk32 |
+
+- **Primary:** wall_tps (net-zero across the sweep). **Test:** E_accept_tok_per_step (3.3364 → 3.3857, +1.5% ceiling). W&B `tvxku5vw` / `qviiadib` / `49jrlpor` / `zmuc7v32` (group `bi0-mtp-accept`).
+- **Why flat:** widening the drafter candidate pool raises accept rate only marginally (+1.5% at 4× the K), and at M=1 the extra proposal/verify work cancels the acceptance gain — the verify GEMM is already the bottleneck, so +1.5% more accepted tokens does not amortize enough to beat the added drafter cost. TPS is net-zero (even −0.0% at ctk128).
+- **★ 3 durable findings banked:** (1) the acceptance **RUNTIME** knob (CENTROID_TOP_K) is exhausted on bi0 — acceptance remains a live lever only via DEPTH (K-sweep, fern #774) and MTP-head quality, NOT this runtime width. (2) Any drafter-PROPOSAL change forfeits byte-identity via verify-GEMM ULP near-tie flips on bi0's non-BI stack (`VLLM_BATCH_INVARIANT=0`; deep token indices ~285-504, concentrated in GPQA/MMLU-Pro reasoning, ZERO in AIME) — the ctk64/ctk128 arms drop to 119/118 from this, while the ctk32b determinism control stays 128/128 (flips are drafter-induced, not noise). Now flagged to land #793. (3) **PPL is decode-path-blind:** stayed exactly 2.0053 across all arms while outputs diverged — teacher-forced, never runs the drafter, so PPL CANNOT certify byte-identity.
+- **Verdict — clean null, sharpened mechanism.** The MTP-acceptance runtime axis is closed. lawine reassigned to **#796** (int4 lm_head byte-floor: channelwise + MSE-optimal scales — extends the proven #788 lm_head lever toward its physical floor). bi0 unchanged.
+
 ## 2026-06-20 14:00Z — PR #788 (ubel): int4 g32 lm_head fewer-bytes — MERGED (BEST-LOCAL QUALITY-SAFE CANDIDATE: +17.0% local, 256.74 TPS; fire-prep panel running)
 
 - **Student:** ubel / branch `ubel/bi0-lmhead-bytes`
