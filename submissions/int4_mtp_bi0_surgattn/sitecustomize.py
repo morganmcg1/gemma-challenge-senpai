@@ -98,3 +98,38 @@ _install_hook(
     "vllm.v1.attention.backends.triton_attn",
     _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
 )
+
+# --- Output-neutral prometheus _IncludedRouter / missing-`.path` startup-500 guard ---
+# vLLM 0.22.0 floors ``fastapi>=0.115`` and ``prometheus-fastapi-instrumentator>=7.0.0``
+# by lower bound only. A fresh runner resolve pulls ``fastapi>=0.118`` / ``starlette>=1``,
+# whose ``include_router`` appends a pathless ``_IncludedRouter`` route to ``app.routes``.
+# The instrumentator's ``_get_route_name`` does ``route.path`` on it -> AttributeError ->
+# HTTP 500 on EVERY request -> ``/v1/models`` never becomes ready -> the benchmark job
+# aborts in ``wait_for_models``. This wraps ``_get_route_name`` to return None on that
+# AttributeError (the metric route-name label is simply dropped for the unlabelable
+# route) and is a byte-verbatim no-op on any normal path-bearing route. It touches ONLY
+# the prometheus metrics-middleware route lookup: model weights, logits, sampling, PPL,
+# and greedy decode are numerically unaffected. Validated output-neutral in this repo
+# (kanna PR #177; W&B bjtwr9jn). Eager import is safe -- the instrumentator is a
+# lightweight pure-Python dep (no torch/GPU) always present in the serve venv. The
+# 3-arg signature matches prometheus_fastapi_instrumentator 8.x's
+# ``_get_route_name(scope, routes, route_name=None)`` so the in-module recursion through
+# Mount sub-routes also stays guarded.
+try:
+    import prometheus_fastapi_instrumentator.routing as _prom_routing
+
+    _prom_orig_get_route_name = _prom_routing._get_route_name
+
+    def _prom_guarded_get_route_name(scope, routes, route_name=None):
+        try:
+            return _prom_orig_get_route_name(scope, routes, route_name)
+        except AttributeError:
+            return None
+
+    _prom_routing._get_route_name = _prom_guarded_get_route_name
+except Exception:
+    import logging as _logging
+
+    _logging.getLogger("int4_mtp_drafter.prometheus_guard").exception(
+        "failed to apply prometheus _IncludedRouter route-name guard"
+    )
