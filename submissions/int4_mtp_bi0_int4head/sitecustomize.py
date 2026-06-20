@@ -99,6 +99,19 @@ _install_hook(
     _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
 )
 
+# --- PROFILING-ONLY reject-rank + verifier-entropy probe (PR #820) ---
+# Gated by REJECTRANK_ENABLE=1. Default OFF -> this hook is never installed, so the
+# shipped serving path is byte-for-byte unchanged (mirrors serve.py's OFF-by-default
+# acceptance-oracle knobs). When ON, it wraps RejectionSampler.forward to LOG the
+# rank/prob/entropy of each draft token in the verifier's logits and calls the
+# original forward unchanged -> emitted greedy tokens stay identical. Drives the
+# viability gate for top-k / FLy entropy-gated acceptance (stark #816).
+if os.environ.get("REJECTRANK_ENABLE") == "1":
+    _install_hook(
+        "vllm.v1.sample.rejection_sampler",
+        _make_applier("vllm_rejectrank_patch", "reject-rank+entropy probe"),
+    )
+
 # --- Output-neutral prometheus _IncludedRouter / missing-`.path` startup-500 guard ---
 # vLLM 0.22.0 floors ``fastapi>=0.115`` and ``prometheus-fastapi-instrumentator>=7.0.0``
 # by lower bound only. A fresh runner resolve pulls ``fastapi>=0.118`` / ``starlette>=1``,
