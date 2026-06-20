@@ -1,0 +1,32 @@
+{
+  "arm": "drafter_only_3d",
+  "created_at": "20260620T135247Z",
+  "decode_tokens": 256,
+  "dispatch_check": {
+    "drafter_allowed_gate": true,
+    "drafter_forced_2d": true,
+    "drafter_segm_present": true,
+    "expected": "force-2D on main-model; allow gate on drafter-proposer with segm buffers PRESENT (3D engageable)",
+    "main_allowed_gate": false,
+    "main_forced_2d": true,
+    "ok": true,
+    "proposer_scope_marker_installed": true
+  },
+  "dispatch_lines": [
+    "(EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] unified_attention wrapped: force-2D gated on forward type (drafter-proposer vs main-model) under BI=0",
+    "(EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] proposer scope marker installed on SpecDecodeBaseProposer.{propose,dummy_run}",
+    "(EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] forcing 2D (use_3d=False) on main-model forward",
+    "(EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] allowing gate choice on drafter-proposer forward (segm buffers PRESENT -> gate may pick 3D)"
+  ],
+  "failures": [],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "num_prompts": 1,
+  "out_dir": "/workspace/senpai/target/research/surgattn_attrib_793/drafter_only_3d",
+  "output_len": 24,
+  "served_model_name": "gemma-4-e4b-it",
+  "server_log": "/workspace/senpai/target/research/surgattn_attrib_793/drafter_only_3d/server.log",
+  "server_python": "/tmp/senpai-venvs/20f658587e8a6643/bin/python",
+  "smoke": true,
+  "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_surgattn_attrib",
+  "tps_reps_requested": 6
+}

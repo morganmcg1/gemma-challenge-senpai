@@ -1,0 +1,12 @@
+[surgattn-attrib] normalized CUDA_VISIBLE_DEVICES '7' -> '0' (single in-container GPU)
+[surgattn-attrib] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+
+===== ARM drafter_only_3d (smoke=True) =====
+[serve] /tmp/senpai-venvs/20f658587e8a6643/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 110s
+[drafter_only_3d] dispatch_ok=True :: force-2D on main-model; allow gate on drafter-proposer with segm buffers PRESENT (3D engageable)
+    (EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] unified_attention wrapped: force-2D gated on forward type (drafter-proposer vs main-model) under BI=0
+    (EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] proposer scope marker installed on SpecDecodeBaseProposer.{propose,dummy_run}
+    (EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] forcing 2D (use_3d=False) on main-model forward
+    (EngineCore pid=1531471) [surgattn-attrib arm=drafter_only_3d] allowing gate choice on drafter-proposer forward (segm buffers PRESENT -> gate may pick 3D)

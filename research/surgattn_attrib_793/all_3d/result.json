@@ -1,0 +1,114 @@
+{
+  "arm": "all_3d",
+  "completed": 128,
+  "created_at": "20260620T142016Z",
+  "decode_summary": {
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+    "duration_s": 284.87779927253723,
+    "num_completion_tokens": 65536,
+    "num_prompt_tokens": 34836,
+    "num_records": 128,
+    "output_file": "/workspace/senpai/target/research/surgattn_attrib_793/all_3d/decode_outputs.jsonl",
+    "output_len": 512,
+    "request_timeout_s": 180,
+    "required_request_field": "return_token_ids: true",
+    "required_response_field": "choices[0].token_ids",
+    "seed": 1,
+    "token_id_sources": {
+      "choices[0].token_ids": 128
+    },
+    "token_ids_required": true,
+    "tokenizer": "google/gemma-4-E4B-it"
+  },
+  "decode_tokens": 256,
+  "decode_wall_s": 292.92363142967224,
+  "dispatch_check": {
+    "drafter_allowed_gate": true,
+    "drafter_forced_2d": false,
+    "drafter_segm_present": true,
+    "expected": "allow gate choice on BOTH forward types (surgattn OFF)",
+    "main_allowed_gate": true,
+    "main_forced_2d": false,
+    "ok": true,
+    "proposer_scope_marker_installed": true
+  },
+  "dispatch_lines": [
+    "(EngineCore pid=1542920) [surgattn-attrib arm=all_3d] unified_attention wrapped: force-2D gated on forward type (drafter-proposer vs main-model) under BI=0",
+    "(EngineCore pid=1542920) [surgattn-attrib arm=all_3d] proposer scope marker installed on SpecDecodeBaseProposer.{propose,dummy_run}",
+    "(EngineCore pid=1542920) [surgattn-attrib arm=all_3d] allowing gate choice on main-model forward (segm buffers PRESENT -> gate may pick 3D)",
+    "(EngineCore pid=1542920) [surgattn-attrib arm=all_3d] allowing gate choice on drafter-proposer forward (segm buffers PRESENT -> gate may pick 3D)"
+  ],
+  "failures": [],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "num_prompts": 128,
+  "out_dir": "/workspace/senpai/target/research/surgattn_attrib_793/all_3d",
+  "output_len": 512,
+  "ppl": 2.005654959921054,
+  "ppl_summary": {
+    "base_url": "http://127.0.0.1:8000",
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+    "mean_record_ppl": 2.1592328519003208,
+    "model": "gemma-4-e4b-it",
+    "neg_log_likelihood": 43008.89953835801,
+    "num_records": 128,
+    "num_tokens": 61797,
+    "output_file": "/workspace/senpai/target/research/surgattn_attrib_793/all_3d/ppl_results.jsonl",
+    "ppl": 2.005654959921054,
+    "prompt_logprobs": 1
+  },
+  "served_model_name": "gemma-4-e4b-it",
+  "server_log": "/workspace/senpai/target/research/surgattn_attrib_793/all_3d/server.log",
+  "server_python": "/tmp/senpai-venvs/20f658587e8a6643/bin/python",
+  "smoke": false,
+  "spec_log_after_decode": {
+    "draft_acceptance_rate": 0.388410830611857,
+    "e_accept_exact": 3.330464983671142,
+    "e_accept_interval_mean": 3.3203448275862066,
+    "intervals": 29,
+    "num_speculative_tokens": 6,
+    "steady_gen_tps_mean": 221.11724137931034,
+    "steady_gen_tps_n": 29,
+    "total_accepted_tokens": 44957,
+    "total_drafted_tokens": 115746
+  },
+  "spec_log_full": {
+    "draft_acceptance_rate": 0.39647492254877337,
+    "e_accept_exact": 3.37884953529264,
+    "e_accept_interval_mean": 3.488709677419355,
+    "intervals": 31,
+    "num_speculative_tokens": 6,
+    "steady_gen_tps_mean": 210.109375,
+    "steady_gen_tps_n": 32,
+    "total_accepted_tokens": 47351,
+    "total_drafted_tokens": 119430
+  },
+  "spec_metrics": {
+    "draft_acceptance_rate": 0.39647492254877337,
+    "e_accept_mean_acceptance_length": 3.37884953529264,
+    "num_accepted_tokens": 47351.0,
+    "num_draft_tokens": 119430.0,
+    "num_drafts": 19905.0
+  },
+  "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_surgattn_attrib",
+  "tps_probe_cv": 0.0016848196425991743,
+  "tps_probe_mean": 515.5733157297351,
+  "tps_probe_median": 515.0122258807305,
+  "tps_probe_n_kept": 5,
+  "tps_probe_reps_all": [
+    514.451139414153,
+    515.0122258807305,
+    516.3451436505404,
+    514.8347259005958,
+    514.7938389207281,
+    516.8806442960804
+  ],
+  "tps_probe_reps_kept": [
+    515.0122258807305,
+    516.3451436505404,
+    514.8347259005958,
+    514.7938389207281,
+    516.8806442960804
+  ],
+  "tps_probe_stdev": 0.9711780436486365,
+  "tps_reps_requested": 6
+}
