@@ -2,6 +2,24 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 16:32Z — PR #791 (wirbel): surgattn-3D-on-M=1 +5.51% — QUALITY-KILLED on GPQA → CLOSED (surgattn-3D DEAD; STACK dead by inheritance) + ★ int4head FIRE EXECUTING (human-approved #800)
+
+- **Student:** wirbel / branch `wirbel/bi0-surgattn-3d-qualregate`
+- **Hypothesis:** the `VLLM_SURGATTN=0` 3D-on-M=1 path (+5.51% local decode, PPL-blind, byte-identity already dead per #793/#794) — does it hold the #784 5% quality band? It was the SOLE surviving route to ship surgattn-3D.
+- **Result — QUALITY FAIL on GPQA-Diamond → keep force-2D ON:**
+
+| Axis | bi0 #773 ref | 5%-band floor | Variant (3D) | Control (force-2D, same harness) | verdict |
+|---|---|---|---|---|---|
+| MMLU-Pro (n=100) | 0.644 | ≥0.612 | 0.64 | 0.62 | ✅ PASS |
+| GSM8K (n=300) | 0.867 | ≥0.824 | 0.8933 | 0.90 | ✅ PASS |
+| GPQA-Diamond (n=198) | 0.4970 | ≥0.472 | **0.4646** | **0.5101** | ❌ FAIL |
+| AIME-2024 maj@8 (n=30) | 10/30 | ≥8/30 | 9/30 | — | ✅ PASS |
+| speed A/B (3 reps/arm) | — | >control | **229.19** | 217.22 | +5.51% (≈15× stdev, real) |
+
+- **Why it's a real fail, not noise:** the same-harness force-2D control reproduced GPQA **0.5101** (ABOVE the #773 anchor 0.497), so the variant's 0.4646 is a real, reproducible variant effect (stark #794 determinism-noise=0), not a shared harness/seed gap. Flip-level: divergences ARE benign near-tie argmax flips (McNemar p=0.21 n.s., extraction intact — as predicted) — but on long GPQA reasoning chains (ctok 1920, p95 pins the 3072 cap) those flips cascade into different trajectories → 63/198 different finals, net −9 (~⅓ truncation-driven). The *aggregate score* lands below band → hard all-axes gate not cleared.
+- **Verdict — CLOSED (clean quality-kill).** surgattn-3D is now DEAD as a ship candidate from all 3 angles: byte-identity (#793/#794) + quality-band (this PR). **Knock-on: the STACK (int4head × surgattn-3D, #797, 272.78 local) is quality-dead by inheritance** — its only delta over int4head is the now-killed surgattn-3D component (mechanism is head-precision-independent) → **fern #803 (STACK quality panel) + lawine #804 (STACK private-stability) CLOSED as moot.** Open thread (NOT chased per #784 "don't over-sweep a failing axis"): the GPQA deficit is ~⅓ truncation; a higher official maxtok than 3072 could move it (excl-truncation net −2, n.s.) — flagged only. W&B variant [`padmkhm7`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/padmkhm7) / control [`w93pznll`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/w93pznll) / comparison [`f9lrcxm1`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/f9lrcxm1).
+- **★ FIRE STATUS — int4head EXECUTING.** Human approved on **#800** ("Human: fire when ready", 16:31Z). Driven via **land #801**: sync the repointed manifest (land's branch predates #802 → STALE local-build `model_id`) → serve-verify-from-Hub → `private_gap_probe.py` → **FIRE on pass, no further round-trip**. int4head = +17% local (~255 official projected), quality-GREEN all axes (#795). wirbel + fern + lawine freed → reassigning to fresh frontier work (researcher-agent hypotheses, `RESEARCH_IDEAS_2026-06-20_16:40.md`).
+
 ## 2026-06-20 16:02Z — PR #802 (ubel): int4head FIRE BLOCKER — publish int4 g32 → private Hub + repoint MODEL_ID + serve-verify-from-Hub — MERGED (✅ pre-fire packaging GREEN; fire now 1 step from ready)
 
 - **Student:** ubel / branch `ubel/int4head-publish-hub-repoint`
