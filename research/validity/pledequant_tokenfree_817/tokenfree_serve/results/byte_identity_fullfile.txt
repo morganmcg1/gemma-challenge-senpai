@@ -1,0 +1,14 @@
+FULL-CHECKPOINT byte-identity (token-free PLE-dequant startup-quant vs validated #805 build):
+
+model.safetensors:
+cdeedf04d070124cd9c2f3543a4e5a34a6248e3e164a1da00ca61873d686f571  /workspace/gemma_build/pledq_startupq/model.safetensors  (built by build_lmhead_quant.py --num-bits 4 --head-group-size 32 --dequant-ple from PUBLIC base google/gemma-4-E4B-it-qat-w4a16-ct @ ef0a4c43, serve-venv python)
+cdeedf04d070124cd9c2f3543a4e5a34a6248e3e164a1da00ca61873d686f571  hf://gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head-pledequant @ f5a0dfd1 (validated #805 artifact: 265.61 TPS / PPL 2.0031 / GSM8K 0.925; LFS sha256)
+both 10588727556 bytes  (= int4head 10549172060 + 39555496, the 42 per_layer_input_gate int4->bf16 delta)
+
+config.json              IDENTICAL  0306b1be0d407553… (tie=false, lm_head dropped from ignore, +group_1, +re:.*per_layer_input_gate in ignore)
+tokenizer.json           IDENTICAL  cc8d3a0ce36466cc…
+generation_config.json   IDENTICAL  70110aa886fa7ee2…
+chat_template.jinja      IDENTICAL  33204f1acb5bd000…
+
+VERDICT: BYTE-IDENTITY PASS — the ENTIRE served checkpoint (int4 body + int4 g32 lm_head + 42 bf16 PLE gates + bf16 towers + config + tokenizer) is bit-for-bit identical to the validated #805 PLE-dequant artifact. Quality (PPL 2.0031, 128/128, all-4 modalities, GSM8K 0.925) is identical by construction; the ONLY changed variable is the model SOURCE (public base + on-disk startup quant vs private Hub repo), which removes the runner-side 401 auth dependency.
+build telemetry: lm_head rel_err=0.06743 packed=(262144,320) scale=(262144,80); ple-dequant 42 gates -> bf16 shape=(256,2560) bf16-store rel mean=0.00137 max=0.00143.

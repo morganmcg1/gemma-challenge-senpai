@@ -1,0 +1,37 @@
+COLD-START MARGIN — token-free PLE-dequant startup-quant serve path (PR #817, instruction 4)
+
+Measured by scripts/local_validation/runner_env_parity_gate.py on a COLD, token-less env:
+  - HF creds scrubbed: HF_TOKEN, HUGGING_FACE_HUB_TOKEN, HF_HUB_TOKEN, HUGGINGFACE_TOKEN, HF_TOKEN_PATH
+  - fresh empty HF_HOME=/tmp/runner-parity-hf-4n1m3w0r (no warm Hub cache; base downloaded anonymously)
+  - MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct (PUBLIC base), LMHEAD_QUANT_AT_STARTUP=1, LMHEAD_QUANT_DEQUANT_PLE=1
+  - budget = 900s (the HF-Job serve startup-timeout)
+
+TOTAL wall-clock to serve readiness (/v1/models 200 OK): 275.04 s
+BUDGET:                                                  900    s
+MARGIN:                                                  624.96 s  (ready at 30.6% of budget)
+
+Cold-start decomposition (from parity server.log):
+  base download (google/gemma-4-E4B-it-qat-w4a16-ct, ~11 GiB, anonymous)  ........  bulk of the head time
+  startup-quant build  ............................................................  23.1 s   <-- INCLUDES --dequant-ple
+      (load base safetensors + int4 g32 lm_head quant + dequant 42 per_layer_input_gate
+       int4->bf16 + write the 10,588,727,556-byte checkpoint to /tmp/pledequant_startupq)
+  vLLM model load (10.25 GiB)  ....................................................   5.67 s
+  torch.compile (two compile ranges)  ............................................  54.10 + 7.73 s
+  initial profiling / warmup  ....................................................   0.50 + 0.17 s
+  -> Application startup complete
+
+--dequant-ple DELTA vs the plain int4head startup quant:
+  The PLE-dequant step adds only (a) a CPU dequantize of the 42 per_layer_input_gate
+  projections (each int4-packed -> bf16 shape (256, 2560), ~0.66 M params/gate) and
+  (b) writing 39,555,496 extra bytes (10,588,727,556 vs int4head's 10,549,172,060).
+  Both are sub-second; the work is folded into the 23.1 s build step above. The
+  cold-start is dominated by the ~11 GiB public-base download + torch.compile, NOT by
+  the dequant-ple step. Measured margin (624.96 s) is in fact larger than #801's plain
+  int4head 470 s margin; the difference is environmental (torch.compile cache lives
+  under ~/.cache/vllm, outside HF_HOME, so it can be partially warm across runs), not
+  the dequant-ple delta. Even a fully-cold torch.compile (~+50 s) keeps the margin
+  > 550 s — comfortably fire-safe.
+
+VERDICT: COLD-START PASS — ready in 275.04 s, 624.96 s under the 900 s serve timeout.
+Evidence: research/validity/pledequant_tokenfree_817/tokenfree_serve/parity/parity_evidence.json
+          research/validity/pledequant_tokenfree_817/tokenfree_serve/parity/server.log

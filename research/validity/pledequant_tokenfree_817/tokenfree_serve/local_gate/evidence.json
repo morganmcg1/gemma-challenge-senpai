@@ -1,0 +1,99 @@
+{
+  "all_modalities_loaded": true,
+  "completed": 128,
+  "created_at": "20260620T204208Z",
+  "failures": [
+    "greedy reference missing: /workspace/senpai/target/research/greedy_reference/workspace___val_pledq_tokenfree__google__gemma-4-E4B-it-qat-w4a16-ct/decode_outputs.jsonl \u2014 generate it for THIS submission with gen_greedy_reference --mode served --submission /workspace/_val_pledq_tokenfree [--spec-off] --num-prompts 128"
+  ],
+  "greedy_verdict": "NO_REFERENCE",
+  "modalities_loaded": {
+    "audio": true,
+    "image": true,
+    "text": true,
+    "video": true
+  },
+  "modalities_method": {
+    "audio": "presence",
+    "image": "functional",
+    "text": "functional",
+    "video": "presence"
+  },
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "num_prompts": 128,
+  "official_gate": "PASS",
+  "official_gate_completion_ok": true,
+  "official_gate_modalities_ok": true,
+  "official_gate_pass": true,
+  "official_gate_ppl_ok": true,
+  "out_dir": "research/validity/pledequant_tokenfree_817/tokenfree_serve/local_gate",
+  "output_len": 512,
+  "ppl": 2.0027301529602326,
+  "ppl_cap": 2.42,
+  "reference_model_id": "/workspace/_val_pledq_tokenfree::google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "stages": {
+    "decode": {
+      "num_records": 128
+    },
+    "modalities": {
+      "all_modalities_loaded": true,
+      "detail": {
+        "audio": {
+          "config_signal": true,
+          "functional_probe_fallback": "functional audio probe skipped \u2014 no staged sample at probe_inputs/",
+          "method": "presence",
+          "nonzero_tensor": "model.audio_tower.subsample_conv_projection.layer0.conv.weight",
+          "num_tensors": 752
+        },
+        "image": {
+          "method": "functional",
+          "sample": "**Gradient of vibrant colors.**",
+          "status": 200
+        },
+        "text": {
+          "method": "functional",
+          "sample": "France is France is France is France is",
+          "status": 200
+        },
+        "video": {
+          "config_signal": true,
+          "functional_probe_fallback": "functional video probe skipped \u2014 no staged sample at probe_inputs/",
+          "method": "presence",
+          "nonzero_tensor": "model.vision_tower.encoder.layers.0.self_attn.k_proj.linear.weight",
+          "note": "no separate video tower; shares vision_tower + video_token_id",
+          "num_tensors": 659
+        }
+      },
+      "modalities_loaded": {
+        "audio": true,
+        "image": true,
+        "text": true,
+        "video": true
+      },
+      "modalities_method": {
+        "audio": "presence",
+        "image": "functional",
+        "text": "functional",
+        "video": "presence"
+      },
+      "served_checkpoint_dir": "/senpai-run/home/student-land/.cache/huggingface/hub/models--google--gemma-4-E4B-it-qat-w4a16-ct/snapshots/ef0a4c43726bde42a3ca04fd300397c0b8b3c3f0"
+    },
+    "ppl": {
+      "num_records": 128,
+      "num_tokens": 61797,
+      "ppl": 2.0027301529602326
+    },
+    "tps": {
+      "decode_tokens": 256,
+      "decode_tps_single_stream": 634.3720796159417,
+      "naive_tps": 573.3959471344937,
+      "note": "exploratory A10G single-stream probe; not the official a10g-small TPS",
+      "ttft_s_approx": 0.04449057579040527,
+      "wall_1tok_s": 0.04449057579040527,
+      "wall_ntok_s": 0.44646286964416504
+    }
+  },
+  "submission": "/workspace/_val_pledq_tokenfree",
+  "submission_name": "_val_pledq_tokenfree",
+  "tps_single_stream_a10g": 634.3720796159417
+}
