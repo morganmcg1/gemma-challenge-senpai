@@ -49,6 +49,7 @@ that were already 2D.
 from __future__ import annotations
 
 import functools
+import os
 import sys
 
 # Marker set on the backend module once patched, so apply() is idempotent across
@@ -58,15 +59,41 @@ _PATCH_FLAG = "_int4_mtp_force2d_attn_patch_applied"
 # runs against an already-wrapped binding.
 _WRAPPER_FLAG = "_int4_mtp_force2d_wrapper"
 
+# A/B toggle (PR #794, surgattn-combine attribution). The shipped submission
+# forces 2D for byte-exact greedy identity; this is the DEFAULT. Setting
+# ``VLLM_SURGATTN=0`` (or off/false/no) disables the force, leaving vanilla vLLM
+# dispatch so the M=1 decode/drafter forwards take the 3D split-KV path (the
+# surgattn-OFF +6.69% arm). It exists ONLY to measure the 2D-vs-3D delta on the
+# bi0 stack; the shipped leaderboard path is unchanged (toggle absent => force-2D).
+_SURGATTN_ENV = "VLLM_SURGATTN"
+
+
+def _surgattn_enabled() -> bool:
+    return os.environ.get(_SURGATTN_ENV, "1").strip().lower() not in (
+        "0", "off", "false", "no", ""
+    )
+
 
 def apply(triton_attn) -> bool:
     """Rebind ``triton_attn.unified_attention`` to the force-2D wrapper.
 
     ``triton_attn`` is the imported ``vllm.v1.attention.backends.triton_attn``
     module. Returns ``True`` if the patch was applied, ``False`` if it was
-    already present.
+    already present or intentionally disabled via ``VLLM_SURGATTN=0``.
     """
     if getattr(triton_attn, _PATCH_FLAG, False):
+        return False
+
+    if not _surgattn_enabled():
+        # surgattn OFF: leave vanilla unified_attention untouched so M=1 forwards
+        # take the 3D split-KV path. Mark the module so we don't re-evaluate.
+        setattr(triton_attn, _PATCH_FLAG, True)
+        print(
+            "[int4_mtp_force2d] VLLM_SURGATTN=0: force-2D DISABLED — M=1 forwards "
+            "use vanilla 3D split-KV (surgattn-OFF A/B arm; NOT byte-identical)",
+            file=sys.stderr,
+            flush=True,
+        )
         return False
 
     orig = triton_attn.unified_attention

@@ -1,0 +1,123 @@
+{
+  "smoke": true,
+  "num_prompts": 4,
+  "output_len": 32,
+  "arms": {
+    "2d": {
+      "arm": "2d",
+      "VLLM_SURGATTN": "1",
+      "serve_ready_s": 115.0,
+      "decode_summary": {
+        "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+        "duration_s": 1.2042319774627686,
+        "num_completion_tokens": 128,
+        "num_prompt_tokens": 1332,
+        "num_records": 4,
+        "output_file": "/workspace/senpai/target/research/bi0_surgattn_attrib_combine/e2e/decode_2d.jsonl",
+        "output_len": 32,
+        "request_timeout_s": 180,
+        "required_request_field": "return_token_ids: true",
+        "required_response_field": "choices[0].token_ids",
+        "seed": 1,
+        "token_id_sources": {
+          "choices[0].token_ids": 4
+        },
+        "token_ids_required": true,
+        "tokenizer": "google/gemma-4-E4B-it"
+      },
+      "ppl_summary": {
+        "base_url": "http://127.0.0.1:8000",
+        "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+        "mean_record_ppl": 2.1587149640521512,
+        "model": "gemma-4-e4b-it",
+        "neg_log_likelihood": 43004.21532829425,
+        "num_records": 128,
+        "num_tokens": 61797,
+        "output_file": "/workspace/senpai/target/research/bi0_surgattn_attrib_combine/e2e/ppl_2d.jsonl",
+        "ppl": 2.0055029371191413,
+        "prompt_logprobs": 1
+      },
+      "tps_reps_raw": [
+        346.22133936892556,
+        345.29179601711274
+      ],
+      "tps_reps_kept": [
+        345.29179601711274
+      ],
+      "tps_median": 345.29179601711274,
+      "tps_mean": 345.29179601711274,
+      "tps_std": 0.0,
+      "tps_cv": 0.0,
+      "arm_wall_s": 153.2,
+      "log_force2d_wrapped": true,
+      "log_surgattn_disabled": false
+    },
+    "3d": {
+      "arm": "3d",
+      "VLLM_SURGATTN": "0",
+      "serve_ready_s": 120.0,
+      "decode_summary": {
+        "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+        "duration_s": 2.8753304481506348,
+        "num_completion_tokens": 128,
+        "num_prompt_tokens": 1332,
+        "num_records": 4,
+        "output_file": "/workspace/senpai/target/research/bi0_surgattn_attrib_combine/e2e/decode_3d.jsonl",
+        "output_len": 32,
+        "request_timeout_s": 180,
+        "required_request_field": "return_token_ids: true",
+        "required_response_field": "choices[0].token_ids",
+        "seed": 1,
+        "token_id_sources": {
+          "choices[0].token_ids": 4
+        },
+        "token_ids_required": true,
+        "tokenizer": "google/gemma-4-E4B-it"
+      },
+      "ppl_summary": {
+        "base_url": "http://127.0.0.1:8000",
+        "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+        "mean_record_ppl": 2.1587149640521512,
+        "model": "gemma-4-e4b-it",
+        "neg_log_likelihood": 43004.21532829425,
+        "num_records": 128,
+        "num_tokens": 61797,
+        "output_file": "/workspace/senpai/target/research/bi0_surgattn_attrib_combine/e2e/ppl_3d.jsonl",
+        "ppl": 2.0055029371191413,
+        "prompt_logprobs": 1
+      },
+      "tps_reps_raw": [
+        338.6476433067933,
+        345.55516458750805
+      ],
+      "tps_reps_kept": [
+        345.55516458750805
+      ],
+      "tps_median": 345.55516458750805,
+      "tps_mean": 345.55516458750805,
+      "tps_std": 0.0,
+      "tps_cv": 0.0,
+      "arm_wall_s": 160.4,
+      "log_force2d_wrapped": false,
+      "log_surgattn_disabled": true
+    }
+  },
+  "greedy_compare": {
+    "verdict": "GREEDY_IDENTICAL",
+    "num_identical": 4,
+    "num_divergent": 0,
+    "onset_min": null,
+    "onset_median": null,
+    "onset_max": null,
+    "onsets": [],
+    "output_len": 32
+  },
+  "tps_delta": {
+    "tps_2d_median": 345.29179601711274,
+    "tps_3d_median": 345.55516458750805,
+    "delta": 0.2633685703953006,
+    "pct": 0.07627420443613667,
+    "pooled_sigma": 0.0,
+    "delta_in_sigma": Infinity
+  }
+}

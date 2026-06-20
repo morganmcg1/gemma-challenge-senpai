@@ -45,18 +45,44 @@ With fp32 partials, 3D still ≠ 2D bit-for-bit because the reduction is re-asso
    `TILE_SIZE_DECODE` (L962 vs L965). For the global-attention layers these are
    32 vs 16 → different online-softmax rescale boundaries even within a segment.
 
-## Working hypothesis (to be tested, not yet concluded)
+## VERDICT — CONFIRMED CLEAN NULL (W&B kcojzw20)
 
-The +6.69% appears mathematically inseparable from the reassociation: the occupancy
-win IS the parallel (re-associated) reduction, and the partials are already fp32 so
-there is no precision lever to pull. config (a) = no-op; config (b) "deterministic
-combine order" cannot reproduce the 2D sequential association without serializing the
-combine (= removing the split = removing the win). Expected outcome: CLEAN NULL that
-hands wirbel #791 the quality-gate decision. MUST confirm with:
-- runtime assertion that 3D is taken on M=1 and buffers are fp32,
-- microbenchmark: 2D vs 3D output diff on identical M=1 inputs (expect fp32-epsilon),
-  + bf16-buffer control showing fp32 is already the best accumulator,
-- end-to-end greedy-compare + TPS (N>=5) reproducing wirbel's anchor.
+The +5.35% IS mathematically inseparable from the reassociation. The occupancy win
+IS the parallel (re-associated) reduction; partials are already fp32 so there is no
+precision lever; deterministic combine order requires serializing (= removing the
+split = removing the win). Confirmed on three independent legs:
+
+**Microbench (isolated M=1 attention, 8 layer/ctx configs):**
+- 3D kernel is 1.38x-9.13x faster than 2D (2D bandwidth-starved ~20-37 GB/s; 3D
+  recovers occupancy 49-337 GB/s). All 8 configs selected the 3D path.
+- config (a) no-op CONFIRMED: forced-bf16 partials diverge from 2D MORE than fp32 in
+  8/8 configs -> fp32 is already the optimal (and in-use) accumulator.
+- pure reassociation CONFIRMED: 2D-vs-3D differ in fp32 (pre-bf16-cast) at >=99.9%
+  of elements in 7/8 configs, max abs only 2.63e-5. NOT a quality regression: 3D is
+  as-close-or-closer to SDPA than 2D in 6/8 (equally-valid roundings).
+
+**E2E (within-lineage 2D control, 128x512):**
+- decode-wall TPS 218.30 (2D, == bi0 official 218.02) -> 229.97 (3D) = +5.35%
+  (reconciles wirbel #785's +6.69%). Probe TPS (256-tok) +1.33% @ 9.0sigma — a
+  short-context underestimate (3D win grows with KV length).
+- PPL bit-identical (2.0055, NLL equal; prefill teacher-forcing never hits M=1).
+- greedy 3D-vs-2D: 124/128 identical, 4 divergent, onsets [373,382,472,509]
+  (73-99% into the 512-tok output = deep near-tie flips).
+
+**Determinism control (the clincher):** same-config run-to-run noise band is EXACTLY
+0 (2d_a-vs-2d_b = 0 divergent; 3d_a-vs-3d_b = 0). The 4/128 is identical across all
+four cross-config pairings -> purely the 2D-vs-3D reassociation, not session noise.
+Since the band bi0 clears is literally 0, the reproducible 4/128 is neither
+byte-identical nor tie-tolerant-equivalent. Byte-identical route is DEAD; hands
+wirbel #791 the quality-gate decision.
+
+## Methodology note — local spec-off reference looks stale (NOT a 2D-vs-3D finding)
+Official `greedy_gate` vs the cached local spec-off reference reads ~99/128 divergent
+for BOTH spec-on arms equally (2d:99, 3d:100; token-0 matches 127/128; onsets spread
+0-481). Since both spec-on arms are mutually bit-reproducible yet both diverge equally
+from that one Jun-19 reference, this is cross-job spec-on-vs-spec-off int4
+nondeterminism against a stale reference (consistent with the gate being within-job),
+not specific to either arm. Regenerate within-job before trusting it. Not a bi0 bug.
 
 ## Baselines (PR body)
 - bi0 control (2D forced): official TPS 218.02, PPL 2.0058, 128/128. W&B s63tb03x.
