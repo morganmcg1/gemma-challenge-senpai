@@ -1,0 +1,31 @@
+# PR #789 cgprobe evidence — extracted from server.log (control bi0 config, local A10G, 2026-06-20)
+# vLLM 0.22.0; gitignore drops *.log, so the decisive lines are preserved here.
+
+## Engine config census (capture sizes + mode):
+num_spec_tokens=6
+enforce_eager=False
+'cudagraph_capture_sizes': [1, 2, 4, 8]
+'max_cudagraph_capture_size': 8
+
+## Captured-graph census (what was actually captured):
+86:(EngineCore pid=189163) INFO 06-20 12:57:16 [gemma4.py:137] Gemma4 MTP: captured centroids CUDA graphs for sizes [1, 2, 4, 8, 16, 32, 64].
+101:(EngineCore pid=189163) INFO 06-20 12:57:28 [gpu_model_runner.py:6279] Profiling CUDA graph memory: PIECEWISE=1 (largest=7), FULL=1 (largest=7)
+107:(EngineCore pid=189163) Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/1 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 1/1 [00:00<00:00, 13.55it/s]
+108:(EngineCore pid=189163) Capturing CUDA graphs (decode, FULL):   0%|          | 0/1 [00:00<?, ?it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 1/1 [00:00<00:00, 14.17it/s]
+
+## cgprobe dispatch-mode + timing (decisive):
+256:(EngineCore pid=189163) [cgprobe] agg dispatch n=200 mode_counts={'PIECEWISE': 199, 'NONE': 1} shapes={'7->7:PIECEWISE': 99, '1->7:PIECEWISE': 100, '356->356:NONE': 1}
+257:(EngineCore pid=189163) [cgprobe] agg timing kind=draft n=62 cpu p50=5.577 p90=5.661 mean=5.591 | gpu p50=2.635 p90=2.780 mean=2.651
+258:(EngineCore pid=189163) [cgprobe] agg timing kind=exec n=62 cpu p50=8.198 p90=8.589 mean=8.217 | gpu p50=12.138 p90=12.387 mean=12.189
+261:(EngineCore pid=189163) [cgprobe] agg dispatch n=400 mode_counts={'PIECEWISE': 397, 'NONE': 3} shapes={'7->7:PIECEWISE': 197, '1->7:PIECEWISE': 200, '356->356:NONE': 1, '457->457:NONE': 1, '199->199:NONE': 1}
+262:(EngineCore pid=189163) [cgprobe] agg timing kind=draft n=162 cpu p50=5.580 p90=5.687 mean=5.683 | gpu p50=2.776 p90=2.842 mean=2.734
+263:(EngineCore pid=189163) [cgprobe] agg timing kind=exec n=164 cpu p50=8.510 p90=8.744 mean=8.375 | gpu p50=12.385 p90=12.477 mean=12.535
+265:(EngineCore pid=189163) [cgprobe] agg dispatch n=600 mode_counts={'PIECEWISE': 596, 'NONE': 4} shapes={'7->7:PIECEWISE': 296, '1->7:PIECEWISE': 300, '356->356:NONE': 1, '457->457:NONE': 1, '199->199:NONE': 1, '328->328:NONE': 1}
+266:(EngineCore pid=189163) [cgprobe] agg timing kind=draft n=262 cpu p50=5.583 p90=5.691 mean=5.670 | gpu p50=2.633 p90=2.824 mean=2.590
+267:(EngineCore pid=189163) [cgprobe] agg timing kind=exec n=266 cpu p50=8.154 p90=8.702 mean=8.169 | gpu p50=12.134 p90=12.460 mean=12.491
+269:(EngineCore pid=189163) [cgprobe] agg dispatch n=800 mode_counts={'PIECEWISE': 795, 'NONE': 5} shapes={'7->7:PIECEWISE': 395, '1->7:PIECEWISE': 400, '356->356:NONE': 1, '457->457:NONE': 1, '199->199:NONE': 1, '328->328:NONE': 1, '159->159:NONE': 1}
+270:(EngineCore pid=189163) [cgprobe] agg timing kind=draft n=362 cpu p50=5.598 p90=5.723 mean=5.693 | gpu p50=2.626 p90=2.808 mean=2.535
+271:(EngineCore pid=189163) [cgprobe] agg timing kind=exec n=368 cpu p50=7.969 p90=8.661 mean=7.966 | gpu p50=12.128 p90=12.438 mean=12.290
+274:(EngineCore pid=189163) [cgprobe] agg dispatch n=1000 mode_counts={'PIECEWISE': 993, 'NONE': 7} shapes={'7->7:PIECEWISE': 493, '1->7:PIECEWISE': 500, '356->356:NONE': 1, '457->457:NONE': 1, '199->199:NONE': 1, '328->328:NONE': 1, '159->159:NONE': 1, '171->171:NONE': 1, '157->157:NONE': 1}
+275:(EngineCore pid=189163) [cgprobe] agg timing kind=draft n=462 cpu p50=5.596 p90=5.718 mean=5.681 | gpu p50=2.482 p90=2.803 mean=2.464
+276:(EngineCore pid=189163) [cgprobe] agg timing kind=exec n=472 cpu p50=7.631 p90=8.635 mean=7.767 | gpu p50=11.874 p90=12.432 mean=12.118

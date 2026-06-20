@@ -1,0 +1,12 @@
+[env] normalized CUDA_VISIBLE_DEVICES '1' -> '0' (single in-container GPU)
+[env] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+[serve] /senpai-run/home/student-stark/.venvs/vllm022/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 115s
+[probe] ready in 115s; driving decode
+[decode] /senpai-run/home/student-stark/.venvs/vllm022/bin/python /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --dataset-path /workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json --output-file /workspace/senpai/target/research/bi0_drafter_cudagraph/runs/control_probe/decode_outputs.jsonl --summary-file /workspace/senpai/target/research/bi0_drafter_cudagraph/runs/control_probe/decode_summary.json --tokenizer google/gemma-4-E4B-it --num-prompts 8 --output-len 192 --seed 1
+decode_records=8
+decode_completion_tokens=1536
+decode_summary_file=/workspace/senpai/target/research/bi0_drafter_cudagraph/runs/control_probe/decode_summary.json
+[probe] decode summary: {'dataset_path': '/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json', 'duration_s': 8.724497556686401, 'num_completion_tokens': 1536, 'num_prompt_tokens': 2179, 'num_records': 8, 'output_file': '/workspace/senpai/target/research/bi0_drafter_cudagraph/runs/control_probe/decode_outputs.jsonl', 'output_len': 192, 'request_timeout_s': 180, 'required_request_field': 'return_token_ids: true', 'required_response_field': 'choices[0].token_ids', 'seed': 1, 'token_id_sources': {'choices[0].token_ids': 8}, 'token_ids_required': True, 'tokenizer': 'google/gemma-4-E4B-it'}
+[probe] server stopped; see server.log for [cgprobe] lines
