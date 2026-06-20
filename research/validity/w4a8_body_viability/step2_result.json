@@ -1,0 +1,110 @@
+{
+  "step": 2,
+  "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_w4a8body",
+  "num_prompts": 128,
+  "tps_reps": 5,
+  "arms": {
+    "w4a16": {
+      "extra_env": {
+        "VLLM_MARLIN_INPUT_DTYPE": null
+      },
+      "tps": {
+        "decode_tps_single_stream": 506.54813793221035,
+        "naive_tps": 465.5062444426043,
+        "ttft_s_approx": 0.04653167724609375,
+        "decode_tokens": 256,
+        "wall_1tok_s": 0.04653167724609375,
+        "wall_ntok_s": 0.5499389171600342,
+        "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+      },
+      "tps_summary": {
+        "mean": 507.1207318151666,
+        "std": 0.3898438650272635,
+        "min": 506.54813793221035,
+        "max": 507.6999012177136,
+        "n": 5,
+        "reps": [
+          506.54813793221035,
+          507.29654968297154,
+          507.6999012177136,
+          507.1861311739877,
+          506.8729390689497
+        ]
+      },
+      "gpu_mem_used_mib": 19651.0,
+      "ppl_summary": {
+        "base_url": "http://127.0.0.1:8000",
+        "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+        "mean_record_ppl": 2.159233499456369,
+        "model": "gemma-4-e4b-it",
+        "neg_log_likelihood": 43008.92257219653,
+        "num_records": 128,
+        "num_tokens": 61797,
+        "output_file": "/workspace/senpai/target/research/validity/w4a8_body_viability/step2_w4a16/ppl_results.jsonl",
+        "ppl": 2.0056557074968437,
+        "prompt_logprobs": 1
+      },
+      "ppl": 2.0056557074968437,
+      "ppl_completed": null,
+      "elapsed_s": 33.70308709144592
+    },
+    "w4a8": {
+      "extra_env": {
+        "VLLM_MARLIN_INPUT_DTYPE": "int8"
+      },
+      "tps": {
+        "decode_tps_single_stream": 423.50920888668554,
+        "naive_tps": 388.1979070595615,
+        "ttft_s_approx": 0.05734539031982422,
+        "decode_tokens": 256,
+        "wall_1tok_s": 0.05734539031982422,
+        "wall_ntok_s": 0.6594574451446533,
+        "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+      },
+      "tps_summary": {
+        "mean": 422.51719400727325,
+        "std": 0.6283585055891404,
+        "min": 421.70994899488056,
+        "max": 423.50920888668554,
+        "n": 5,
+        "reps": [
+          423.50920888668554,
+          421.70994899488056,
+          422.50874903858346,
+          422.8307886204864,
+          422.0272744957304
+        ]
+      },
+      "gpu_mem_used_mib": 19679.0,
+      "ppl_summary": {
+        "base_url": "http://127.0.0.1:8000",
+        "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+        "mean_record_ppl": 2.1660568679904126,
+        "model": "gemma-4-e4b-it",
+        "neg_log_likelihood": 43157.00223179442,
+        "num_records": 128,
+        "num_tokens": 61797,
+        "output_file": "/workspace/senpai/target/research/validity/w4a8_body_viability/step2_w4a8/ppl_results.jsonl",
+        "ppl": 2.010467477239201,
+        "prompt_logprobs": 1
+      },
+      "ppl": 2.010467477239201,
+      "ppl_completed": null,
+      "elapsed_s": 32.24661207199097
+    }
+  },
+  "delta": {
+    "tps_w4a16_mean": 507.1207318151666,
+    "tps_w4a8_mean": 422.51719400727325,
+    "tps_w4a16_std": 0.3898438650272635,
+    "tps_w4a8_std": 0.6283585055891404,
+    "tps_pct_change": -16.683115577836272,
+    "tps_abs_delta": -84.60353780789336,
+    "ppl_w4a16": 2.0056557074968437,
+    "ppl_w4a8": 2.010467477239201,
+    "ppl_delta": 0.004811769742357086,
+    "ppl_gate_2p42_w4a8": true,
+    "ppl_completed_w4a8": null,
+    "int4head_base_tps_ref": 256.74
+  }
+}

@@ -267,7 +267,7 @@ class LocalServer:
         startup_timeout_s: int = 1200,
         manifest_name: str = "manifest.json",
         log_path: Path | None = None,
-        extra_env: dict[str, str] | None = None,
+        extra_env: dict[str, str | None] | None = None,
     ) -> None:
         self.submission_dir = Path(submission_dir)
         self.server_python = Path(server_python)
@@ -279,7 +279,13 @@ class LocalServer:
         self.extra_env = extra_env or {}
         self.proc: subprocess.Popen | None = None
         env = _participant_env(self.manifest, self.submission_dir, self.server_python.parent.parent, port)
-        env.update(self.extra_env)
+        # A None value means "unset this key" (e.g. delete a manifest-baked env var
+        # for a controlled A/B); plain dict.update cannot express deletion.
+        for _k, _v in self.extra_env.items():
+            if _v is None:
+                env.pop(_k, None)
+            else:
+                env[_k] = _v
         self.env = env
         self.served_model_name = env["SERVED_MODEL_NAME"]
         self.model_id = env["MODEL_ID"]
@@ -315,7 +321,7 @@ class LocalServer:
     def __enter__(self) -> "LocalServer":
         serve_cmd = _build_serve_command(self.manifest["serve"], self.submission_dir, self.server_python)
         print(f"[serve] {' '.join(serve_cmd)}", flush=True)
-        print(f"[serve] MODEL_ID={self.model_id} env={ {k: self.env[k] for k in self.manifest.get('env', {})} }", flush=True)
+        print(f"[serve] MODEL_ID={self.model_id} env={ {k: self.env.get(k, '<unset>') for k in self.manifest.get('env', {})} }", flush=True)
         log = open(self.log_path, "w") if self.log_path else subprocess.DEVNULL
         self._log_handle = log
         t0 = time.time()
