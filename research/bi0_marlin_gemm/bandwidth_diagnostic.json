@@ -1,0 +1,31 @@
+{
+  "stack": "vllm==0.22.0, torch 2.11.0+cu130, A10G sm_86, 600 GB/s peak HBM",
+  "model": "google/gemma-4-E4B-it-qat-w4a16-ct (compressed-tensors W4A16, group_size=32)",
+  "profile_mode": "conc=1 single-stream decode (spec OFF, M=1) — the canonical BASELINE.md decode profile",
+  "profiler": "official gemma_decode_profiler_claudecode (torch.profiler, graph+eager cross-validated)",
+  "gemm_share_pct_of_gpu_busy": 91.4,
+  "gemm_share_note": "reconciles BASELINE 'weight-GEMM ~92%'; raw matmul_gemm cat=72.5% undercounts because category_ms denominator double-counts host ops aten::mm(177.7ms) + _C::marlin_gemm(7.4ms); dedup GPU-busy=665.76ms, GEMM device work=608.6ms -> 91.4%",
+  "per_token_device_ms": {
+    "int4_marlin_body": 6.29,
+    "bf16_lmhead_gemv": 2.776,
+    "cross_validated": "graph(6.277/2.776) vs eager(6.293/2.776) agree"
+  },
+  "bytes_per_token_GB": {
+    "int4_marlin_body": 2.18825,
+    "bf16_lmhead": 1.34218,
+    "source": "exact safetensors header parse of language_model int4 weight_packed+weight_scale (42 layers) and lm_head"
+  },
+  "achieved_hbm_bandwidth": {
+    "int4_marlin_body_GBs": 348.0,
+    "int4_marlin_body_pct_peak": 58.0,
+    "bf16_lmhead_GBs": 483.5,
+    "bf16_lmhead_pct_peak": 80.6,
+    "combined_weight_gemm_GBs": 389.6,
+    "combined_weight_gemm_pct_peak": 64.9
+  },
+  "interpretation": {
+    "m1_marlin_58pct": "int4 Marlin at conc=1 (M=1) is BW-bound but not BW-saturated: dequant (4-bit unpack + group-scale) + thread_m_blocks=1 tile underutilization leave ~22pts vs the bf16 GEMV streaming ceiling (80.6%) on the same HBM",
+    "serving_is_M7_not_M1": "bi0 SERVES with NUM_SPECULATIVE_TOKENS=6 -> verify GEMM runs at M=7, NOT M=1. The conc=1 profile (and its 58%) is the spec-OFF greedy-reference path. At M>=7 the weight read amortizes over more compute and Marlin approaches the sm_86 one-wave HBM wall (~79-83%, established M-independent-above-ridge; my prior #108/#117/#130 measured 79.4% at M=8 = 95% of the 83.6% one-wave achievable wall).",
+    "lever_status": "see knob inventory: no numerics-equivalent faster W4A16 kernel/config is exposed on sm_86 (atomic_add HW-gated off for sm8x+bf16; fp32_reduce on by default and not env-exposed; tile config auto-selected; machete sm_90-only)"
+  }
+}
