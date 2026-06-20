@@ -114,6 +114,18 @@ def main() -> None:
     if quantization:
         args += ["--quantization", quantization]
 
+    # Optional CUDA-graph capture-size override (config-only, byte-exact: selects
+    # which decode batch shapes get a captured graph vs the eager fallback; never
+    # touches kernel math, logits, or sampling). Unset for the shipped submission
+    # -> vLLM's default capture-size selection (the conc=1 M=7 spec-verify path is
+    # already captured as a dedicated uniform-decode graph). Set e.g.
+    # CUDAGRAPH_CAPTURE_SIZES="1 8" (space- or comma-separated ints) to pin the set.
+    cudagraph_capture_sizes = os.environ.get("CUDAGRAPH_CAPTURE_SIZES")
+    if cudagraph_capture_sizes:
+        sizes = cudagraph_capture_sizes.replace(",", " ").split()
+        if sizes:
+            args += ["--cudagraph-capture-sizes", *sizes]
+
     # Speculative decoding with the gemma4_assistant MTP drafter. vLLM's
     # speculative config rewrites model_type gemma4_assistant -> gemma4_mtp
     # (Gemma4MTPModel) and sets num_kv_shared_layers=0 so the draft attention

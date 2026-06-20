@@ -1,0 +1,120 @@
+[sweep] control rep0 port 8033: waiting for server ...
+[sweep] control rep0: ready in 95.0s; decoding 128 prompts
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/serve_config_sweep/control_rep0/decode_summary.json
+SENPAI-SWEEP label=control rep=0 ok=True tps=253.997 ppl=None parity=d4fe3816bb97 completion_toks=65536 dur=258.02s wall=362.7s
+[sweep] control rep1 port 8033: waiting for server ...
+[sweep] control rep1: ready in 95.0s; decoding 128 prompts
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/serve_config_sweep/control_rep1/decode_summary.json
+SENPAI-SWEEP label=control rep=1 ok=True tps=254.262 ppl=None parity=d4fe3816bb97 completion_toks=65536 dur=257.75s wall=362.2s
+[sweep] control rep2 port 8033: waiting for server ...
+[sweep] control rep2: ready in 95.0s; decoding 128 prompts
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/serve_config_sweep/control_rep2/decode_summary.json
+SENPAI-SWEEP label=control rep=2 ok=True tps=254.1955 ppl=None parity=d4fe3816bb97 completion_toks=65536 dur=257.82s wall=362.5s
+[sweep] maxlen2048 rep0 port 8033: waiting for server ...
+[sweep] maxlen2048 rep0: ready in 155.0s; decoding 128 prompts
+Traceback (most recent call last):
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 135, in post_json
+    with urllib.request.urlopen(request, timeout=timeout_s) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 400: Bad Request
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 331, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 260, in main
+    response = request_decode(
+               ^^^^^^^^^^^^^^^
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 228, in request_decode
+    return post_json(f"{base_url.rstrip('/')}/v1/completions", payload, timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 139, in post_json
+    raise RuntimeError(f"HTTP {exc.code} from {url}: {error_body}") from exc
+RuntimeError: HTTP 400 from http://127.0.0.1:8033/v1/completions: {"error":{"message":"This model's maximum context length is 2048 tokens. However, you requested 512 output tokens and your prompt contains 2427 input tokens, for a total of 2939 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=2427)","type":"BadRequestError","param":"input_tokens","code":400}}
+[sweep] maxlen2048 rep0 FAILED: decode stage failed rc=1
+SENPAI-SWEEP label=maxlen2048 rep=0 ok=False tps=None ppl=None parity= completion_toks=None dur=Nones wall=300.1s
+[sweep] maxlen1024 rep0 port 8033: waiting for server ...
+[sweep] maxlen1024 rep0: ready in 155.0s; decoding 128 prompts
+Traceback (most recent call last):
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 135, in post_json
+    with urllib.request.urlopen(request, timeout=timeout_s) as response:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 215, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 521, in open
+    response = meth(req, response)
+               ^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 630, in http_response
+    response = self.parent.error(
+               ^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 559, in error
+    return self._call_chain(*args)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 492, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/senpai-run/home/student-fern/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/urllib/request.py", line 639, in http_error_default
+    raise HTTPError(req.full_url, code, msg, hdrs, fp)
+urllib.error.HTTPError: HTTP Error 400: Bad Request
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 331, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 260, in main
+    response = request_decode(
+               ^^^^^^^^^^^^^^^
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 228, in request_decode
+    return post_json(f"{base_url.rstrip('/')}/v1/completions", payload, timeout_s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/scripts/decode_outputs.py", line 139, in post_json
+    raise RuntimeError(f"HTTP {exc.code} from {url}: {error_body}") from exc
+RuntimeError: HTTP 400 from http://127.0.0.1:8033/v1/completions: {"error":{"message":"This model's maximum context length is 1024 tokens. However, you requested 512 output tokens and your prompt contains 542 input tokens, for a total of 1054 tokens. Please reduce the length of the input prompt or the number of requested output tokens. (parameter=input_tokens, value=542)","type":"BadRequestError","param":"input_tokens","code":400}}
+[sweep] maxlen1024 rep0 FAILED: decode stage failed rc=1
+SENPAI-SWEEP label=maxlen1024 rep=0 ok=False tps=None ppl=None parity= completion_toks=None dur=Nones wall=247.2s
+[sweep] batched2048 rep0 port 8033: waiting for server ...
+[sweep] batched2048 rep0: ready in 165.0s; decoding 128 prompts
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/serve_config_sweep/batched2048_rep0/decode_summary.json
+SENPAI-SWEEP label=batched2048 rep=0 ok=True tps=252.5379 ppl=None parity=c363a3894768 completion_toks=65536 dur=259.51s wall=434.7s
+[sweep] gpumem095 rep0 port 8033: waiting for server ...
+[sweep] gpumem095 rep0: ready in 95.0s; decoding 128 prompts
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/serve_config_sweep/gpumem095_rep0/decode_summary.json
+SENPAI-SWEEP label=gpumem095 rep=0 ok=True tps=253.8869 ppl=None parity=d4fe3816bb97 completion_toks=65536 dur=258.13s wall=363.3s
+[sweep] cgsizes_1_8 rep0 port 8033: waiting for server ...
+[sweep] cgsizes_1_8 rep0: ready in 155.0s; decoding 128 prompts
+decode_records=128
+decode_completion_tokens=65536
+decode_summary_file=/workspace/senpai/target/research/serve_config_sweep/cgsizes_1_8_rep0/decode_summary.json
+SENPAI-SWEEP label=cgsizes_1_8 rep=0 ok=True tps=254.0061 ppl=None parity=36732b573bab completion_toks=65536 dur=258.01s wall=423.4s
