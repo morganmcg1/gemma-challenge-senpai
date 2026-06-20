@@ -1,0 +1,178 @@
+{
+  "summary": {
+    "out_dir": "/workspace/senpai/target/research/validity/bi0_loopgraph_matrix/run_20260620_112858",
+    "workload": {
+      "num_prompts": 128,
+      "output_len": 512,
+      "seed": 1,
+      "warmup_prompts": 8
+    },
+    "tps_median_by_config": {
+      "control": 175.63785296803255,
+      "loopgraph_fused": 179.13253733471714,
+      "loopgraph_only": 175.7036613482913
+    },
+    "tps_delta_pct_vs_control": {
+      "control": 0.0,
+      "loopgraph_fused": 1.99,
+      "loopgraph_only": 0.037
+    },
+    "ppl_by_config": {
+      "control": 2.523403987549849,
+      "loopgraph_fused": 2.523403987549849,
+      "loopgraph_only": null
+    },
+    "comparisons": {
+      "control_rep0_vs_rep1": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 22,
+        "num_divergent": 106,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 38913,
+        "onset_min": 0,
+        "onset_median": 104,
+        "onset_max": 497
+      },
+      "control_rep0_vs_rep2": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 22,
+        "num_divergent": 106,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 38913,
+        "onset_min": 0,
+        "onset_median": 104,
+        "onset_max": 497
+      },
+      "control_vs_loopgraph_only": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 121,
+        "num_divergent": 7,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 880,
+        "onset_min": 275,
+        "onset_median": 389,
+        "onset_max": 502
+      },
+      "control_vs_loopgraph_fused": {
+        "verdict": "DIVERGENT",
+        "num_prompts_compared": 128,
+        "num_identical": 121,
+        "num_divergent": 7,
+        "total_tokens_compared": 65536,
+        "total_divergent_tokens": 880,
+        "onset_min": 275,
+        "onset_median": 389,
+        "onset_max": 502
+      }
+    },
+    "elapsed_min": 46.16,
+    "git": {
+      "git_commit": "22a6fb39ee134eb56ca758063f7c85ec7b374029",
+      "git_branch": "kanna/bi0-loopgraph-sparseargmax",
+      "git_dirty": true
+    },
+    "wandb_run_id": "wjeykst8"
+  },
+  "records": [
+    {
+      "name": "control",
+      "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_surgattn",
+      "extra_env": {},
+      "reps": 3,
+      "t_start_utc": "2026-06-20T11:28:58.937320+00:00",
+      "served_ok": true,
+      "error": null,
+      "rep_tps": [
+        171.52158992100115,
+        175.63785296803255,
+        175.74148736721946
+      ],
+      "tps_median": 175.63785296803255,
+      "rep_jsonl": [
+        "/workspace/senpai/target/research/validity/bi0_loopgraph_matrix/run_20260620_112858/control/rep0.jsonl",
+        "/workspace/senpai/target/research/validity/bi0_loopgraph_matrix/run_20260620_112858/control/rep1.jsonl",
+        "/workspace/senpai/target/research/validity/bi0_loopgraph_matrix/run_20260620_112858/control/rep2.jsonl"
+      ],
+      "ppl": 2.523403987549849,
+      "num_completion_tokens": 65536,
+      "decode_num_records": 128,
+      "gpu_mem_used_mib": 19671,
+      "markers": {},
+      "ready_s": 110.0,
+      "gpu_mem_used_before_mib": 0,
+      "tps_min": 171.52158992100115,
+      "tps_max": 175.74148736721946,
+      "tps_mean": 174.3003100854177,
+      "tps_cv_pct": 1.127540924261768,
+      "ppl_num_records": 128
+    },
+    {
+      "name": "loopgraph_fused",
+      "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_loopgraph",
+      "extra_env": {},
+      "reps": 2,
+      "t_start_utc": "2026-06-20T11:51:04.559733+00:00",
+      "served_ok": true,
+      "error": null,
+      "rep_tps": [
+        177.17047871918749,
+        181.0945959502468
+      ],
+      "tps_median": 179.13253733471714,
+      "rep_jsonl": [
+        "/workspace/senpai/target/research/validity/bi0_loopgraph_matrix/run_20260620_112858/loopgraph_fused/rep0.jsonl",
+        "/workspace/senpai/target/research/validity/bi0_loopgraph_matrix/run_20260620_112858/loopgraph_fused/rep1.jsonl"
+      ],
+      "ppl": 2.523403987549849,
+      "num_completion_tokens": 65536,
+      "decode_num_records": 128,
+      "gpu_mem_used_mib": 19353,
+      "markers": {
+        "[bi0-onegraph] captured": true,
+        "[bi0-fused-sparse-argmax] patched": true
+      },
+      "ready_s": 110.0,
+      "gpu_mem_used_before_mib": 0,
+      "tps_min": 177.17047871918749,
+      "tps_max": 181.0945959502468,
+      "tps_mean": 179.13253733471714,
+      "tps_cv_pct": 1.0953111281304873,
+      "ppl_num_records": 128
+    },
+    {
+      "name": "loopgraph_only",
+      "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_loopgraph",
+      "extra_env": {
+        "FUSED_SPARSE_ARGMAX": "0",
+        "FUSED_SPARSE_ARGMAX_REQUIRE": "0"
+      },
+      "reps": 1,
+      "t_start_utc": "2026-06-20T12:06:22.877251+00:00",
+      "served_ok": true,
+      "error": null,
+      "rep_tps": [
+        175.7036613482913
+      ],
+      "tps_median": 175.7036613482913,
+      "rep_jsonl": [
+        "/workspace/senpai/target/research/validity/bi0_loopgraph_matrix/run_20260620_112858/loopgraph_only/rep0.jsonl"
+      ],
+      "ppl": null,
+      "num_completion_tokens": 65536,
+      "decode_num_records": 128,
+      "gpu_mem_used_mib": 19695,
+      "markers": {
+        "[bi0-onegraph] captured": true
+      },
+      "ready_s": 110.0,
+      "gpu_mem_used_before_mib": 0,
+      "tps_min": 175.7036613482913,
+      "tps_max": 175.7036613482913,
+      "tps_mean": 175.7036613482913,
+      "tps_cv_pct": 0.0
+    }
+  ]
+}

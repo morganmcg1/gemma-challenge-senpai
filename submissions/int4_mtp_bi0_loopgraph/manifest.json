@@ -1,0 +1,32 @@
+{
+  "name": "int4-mtp-bi0-loopgraph",
+  "description": "bi0 (int4 W4A16 Gemma-4-E4B target + QAT-matched gemma4_assistant MTP drafter, VLLM_BATCH_INVARIANT=0 + surgical force-2D TRITON_ATTN patch) PLUS the fa2sw loopgraph (onegraph) CUDA-graph draft replay and fused Triton sparse-argmax, ported onto plain int4 on stock vllm==0.22.0. Both added patches are drafter-only / argmax-preserving (they change how the K-step draft loop is dispatched and how the centroid top-token is computed, never the verifier's emitted token at T=0), so greedy identity / PPL are unchanged vs bi0; only acceptance rate / TPS can move. NOT the osoi5-baked model; plain w4a16-ct weights, same as bi0.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
+    "ONEGRAPH": "1",
+    "LOOPGRAPH_REQUIRE_CAPTURE": "1",
+    "LOOPGRAPH_WARMUP_CALLS": "20",
+    "LOOPGRAPH_PINGPONG_SLOTS": "1",
+    "FUSED_SPARSE_ARGMAX": "1",
+    "FUSED_SPARSE_ARGMAX_REQUIRE": "1",
+    "FUSED_SPARSE_ARGMAX_BLOCK": "16"
+  }
+}

@@ -87,3 +87,15 @@ research/validity/int4_mtp_spec_quality_panel/**/_inspect_logs/
 research/validity/int4_mtp_spec_quality_panel/*.pid
 research/validity/int4_mtp_spec_quality_panel/*.nohup
 research/validity/int4_mtp_spec_quality_panel/serve.ready
+
+# bi0-loopgraph matrix (PR #771, LOCAL analysis-only): keep summary.json + records.jsonl
+# + the lean *.summary.json + the analysis scripts (compare_streams.py /
+# log_refined_identity.py); drop the bulky raw decode token streams, warmup dumps,
+# per-token PPL logprob dumps, and server logs. The computed TPS deltas, the greedy-
+# identity decomposition (stabilized control byte-exact across launches; variant 2/128;
+# fused==loopgraph_only byte-exact), and PPL bit-identity (NLL 57199.846 both arms) live
+# in summary.json + W&B wjeykst8 (raw matrix) / slbb9j7k (refined identity).
+research/validity/bi0_loopgraph_matrix/**/rep*.jsonl
+research/validity/bi0_loopgraph_matrix/**/warmup.jsonl
+research/validity/bi0_loopgraph_matrix/**/ppl.jsonl
+research/validity/bi0_loopgraph_matrix/**/server.log
