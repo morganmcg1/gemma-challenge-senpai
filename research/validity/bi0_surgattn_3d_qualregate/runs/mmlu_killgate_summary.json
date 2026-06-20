@@ -1,0 +1,52 @@
+{
+  "task": "mmlu_pro",
+  "n": 100,
+  "seed": 12345,
+  "max_tokens": 2048,
+  "sampling": "T=1.0/top_p=0.95/top_k=64/sampling-seed=0",
+  "served_config": "MAX_NUM_SEQS=1 (every decode M=1)",
+  "arms": {
+    "variant": {
+      "arm": "variant",
+      "extra_env": {
+        "VLLM_SURGATTN": "0"
+      },
+      "toggle_proven": true,
+      "mmlu_out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/mmlu_variant_n100_s12345_t2048.json",
+      "accuracy": 0.64,
+      "n_scored": 100,
+      "n_correct": 64,
+      "n_error": 0,
+      "n_empty": 0,
+      "length_stop_rate": 0.12,
+      "ctok_mean": 1046.28,
+      "finish_length_rate": 0.12,
+      "wall_s": 570.2
+    },
+    "control": {
+      "arm": "control",
+      "extra_env": {},
+      "toggle_proven": true,
+      "mmlu_out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/mmlu_control_n100_s12345_t2048.json",
+      "accuracy": 0.62,
+      "n_scored": 100,
+      "n_correct": 62,
+      "n_error": 0,
+      "n_empty": 0,
+      "length_stop_rate": 0.16,
+      "ctok_mean": 1035.94,
+      "finish_length_rate": 0.16,
+      "wall_s": 595.4
+    }
+  },
+  "paired": {
+    "n_paired": 100,
+    "prompt_sha_mismatch": 0,
+    "same_answer_text": 88,
+    "answer_flip": 12,
+    "control_right_variant_wrong": 1,
+    "variant_right_control_wrong": 3,
+    "net_variant_minus_control_correct": 2
+  },
+  "delta_variant_minus_control": 0.02
+}

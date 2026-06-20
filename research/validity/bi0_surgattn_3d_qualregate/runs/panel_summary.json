@@ -1,0 +1,63 @@
+{
+  "served_config": "MAX_MODEL_LEN=4096 MAX_NUM_SEQS=1 (every n=1 decode M=1)",
+  "sampling": "T=1.0/top_p=0.95/top_k=64",
+  "gsm8k_n": 300,
+  "gpqa_seed": 12345,
+  "gpqa_maxtok": 3072,
+  "aime_k": 8,
+  "arms": {
+    "variant": {
+      "arm": "variant",
+      "extra_env": {
+        "VLLM_SURGATTN": "0"
+      },
+      "tasks": {
+        "gsm8k": {
+          "accuracy": 0.8933333333333333,
+          "n": 300,
+          "n_correct": 268,
+          "trunc": 0.08333333333333333,
+          "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gsm8k_variant_sampled_s0.json"
+        },
+        "gpqa_diamond": {
+          "accuracy": 0.46464646464646464,
+          "n": 198,
+          "n_correct": 92,
+          "n_error": 1,
+          "trunc": 0.15656565656565657,
+          "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_variant_s12345_t3072.json"
+        },
+        "aime": {
+          "maj_k_accuracy": 0.3,
+          "n": 30,
+          "n_correct_maj": 9,
+          "k": 8,
+          "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/aime_variant_2024_k8.json"
+        }
+      },
+      "toggle_proven": true
+    },
+    "control": {
+      "arm": "control",
+      "extra_env": {},
+      "tasks": {
+        "gsm8k": {
+          "accuracy": 0.9,
+          "n": 300,
+          "n_correct": 270,
+          "trunc": 0.07666666666666666,
+          "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gsm8k_control_sampled_s0.json"
+        },
+        "gpqa_diamond": {
+          "accuracy": 0.51010101010101,
+          "n": 198,
+          "n_correct": 101,
+          "n_error": 1,
+          "trunc": 0.11616161616161616,
+          "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_control_s12345_t3072.json"
+        }
+      },
+      "toggle_proven": true
+    }
+  }
+}

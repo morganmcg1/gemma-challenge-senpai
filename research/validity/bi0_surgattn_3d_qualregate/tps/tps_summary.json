@@ -1,0 +1,80 @@
+{
+  "served_config": "MAX_MODEL_LEN=4096 MAX_NUM_SEQS=1 (every decode M=1)",
+  "benchmark": "decode_outputs.py num_prompts=32 output_len=512 seed=1",
+  "anchors_785": {
+    "variant": 224.55,
+    "control": 210.48,
+    "delta_pct": 6.69
+  },
+  "arms": {
+    "control": {
+      "arm": "control",
+      "extra_env": {},
+      "reps": [
+        {
+          "rep": 0,
+          "tps": 216.32649905961475,
+          "duration_s": 75.73736953735352,
+          "num_completion_tokens": 16384,
+          "num_records": 32
+        },
+        {
+          "rep": 1,
+          "tps": 217.6167128881392,
+          "duration_s": 75.28833508491516,
+          "num_completion_tokens": 16384,
+          "num_records": 32
+        },
+        {
+          "rep": 2,
+          "tps": 217.7148093598641,
+          "duration_s": 75.25441217422485,
+          "num_completion_tokens": 16384,
+          "num_records": 32
+        }
+      ],
+      "toggle_proven": true,
+      "tps_mean": 217.21934043587268,
+      "tps_min": 216.32649905961475,
+      "tps_max": 217.7148093598641,
+      "tps_stdev": 0.7747774014578891
+    },
+    "variant": {
+      "arm": "variant",
+      "extra_env": {
+        "VLLM_SURGATTN": "0"
+      },
+      "reps": [
+        {
+          "rep": 0,
+          "tps": 228.29204051115627,
+          "duration_s": 71.76772332191467,
+          "num_completion_tokens": 16384,
+          "num_records": 32
+        },
+        {
+          "rep": 1,
+          "tps": 229.6803924072592,
+          "duration_s": 71.33390808105469,
+          "num_completion_tokens": 16384,
+          "num_records": 32
+        },
+        {
+          "rep": 2,
+          "tps": 229.600348936384,
+          "duration_s": 71.35877656936646,
+          "num_completion_tokens": 16384,
+          "num_records": 32
+        }
+      ],
+      "toggle_proven": true,
+      "tps_mean": 229.19092728493317,
+      "tps_min": 228.29204051115627,
+      "tps_max": 229.6803924072592,
+      "tps_stdev": 0.7794868910768801
+    }
+  },
+  "ab_delta_pct": 5.5112895679723,
+  "variant_mean_tps": 229.19092728493317,
+  "control_mean_tps": 217.21934043587268
+}

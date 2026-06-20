@@ -94,10 +94,29 @@ _install_hook(
     "vllm.v1.worker.gpu_model_runner",
     _make_applier("vllm_attn_group_patch", "attention-group num_heads patch"),
 )
-_install_hook(
-    "vllm.v1.attention.backends.triton_attn",
-    _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
-)
+
+# VLLM_SURGATTN toggle (audit tooling, PR #785/#791). Default (unset or any value
+# other than "0") installs the force-2D attention patch -- byte-identical to the
+# shipped bi0 submission. Setting VLLM_SURGATTN=0 SKIPS the patch so the TRITON_ATTN
+# kernel launch gate is free to select the 3D split-KV path on the M=1 decode
+# forwards (and M=K verify), which is faster on a single stream but breaks the
+# strict M=1-vs-M=K byte-exact greedy identity the force-2D patch exists to recover.
+# The attention-group num_heads patch above is unrelated (MTP drafter head dedup)
+# and is always installed. This gate touches ONLY whether force-2D is applied;
+# nothing else about the served path changes.
+if os.environ.get("VLLM_SURGATTN", "1") != "0":
+    _install_hook(
+        "vllm.v1.attention.backends.triton_attn",
+        _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
+    )
+else:
+    print(
+        "[int4_mtp_surgattn] VLLM_SURGATTN=0: force-2D attention patch DISABLED -- "
+        "TRITON_ATTN kernel gate may select the 3D split-KV path on M=1 decode "
+        "(greedy byte-identity NOT guaranteed; see PR #785/#791)",
+        file=sys.stderr,
+        flush=True,
+    )
 
 # --- Output-neutral prometheus _IncludedRouter / missing-`.path` startup-500 guard ---
 # vLLM 0.22.0 floors ``fastapi>=0.115`` and ``prometheus-fastapi-instrumentator>=7.0.0``

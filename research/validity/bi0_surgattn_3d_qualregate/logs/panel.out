@@ -1,0 +1,1682 @@
+[env] normalized CUDA_VISIBLE_DEVICES '6' -> '0' (single in-container GPU)
+[env] set VLLM_USE_FLASHINFER_SAMPLER=0 (PyTorch-native sampler; avoids cuRAND JIT in this container — does not affect greedy/PPL)
+
+===== ARM variant  extra_env={'VLLM_SURGATTN': '0'} =====
+[serve] /workspace/senpai/target/.venvs/vllm022/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[variant] toggle proven: present='[int4_mtp_surgattn] VLLM_SURGATTN=0' absent='[int4_mtp_force2d] unified_attention wrapped'
+
+[variant/gsm8k] $ /tmp/eval-serve-venv/bin/python /workspace/senpai/target/research/downstream_quality_gsm8k/gsm8k_eval.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --label gsm8k_variant --regimes sampled --n 300 --n-shot 8 --seed 1234 --sampling-seed 0 --top-p 0.95 --top-k 64 --max-tokens 512 --min-tokens 8 --concurrency 16 --out-dir /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs
+[gsm8k] 300 test items (seed=1234); 8-shot fewshot_sig=52:5.0,28:8.0,38:9.0,23:5.0,12:85.0,45:99.0,26:400.0,25:110.0
+[gsm8k] === arm=gsm8k_variant regime=sampled sampling={'temperature': 1.0, 'top_p': 0.95, 'top_k': 64, 'max_tokens': 512, 'seed': 0, 'enable_thinking': False, 'min_tokens': 8} ===
+[gsm8k] 25/300 running_acc=0.9600
+[gsm8k] 50/300 running_acc=0.9200
+[gsm8k] 75/300 running_acc=0.9333
+[gsm8k] 100/300 running_acc=0.9200
+[gsm8k] 125/300 running_acc=0.9200
+[gsm8k] 150/300 running_acc=0.9200
+[gsm8k] 175/300 running_acc=0.9143
+[gsm8k] 200/300 running_acc=0.9200
+[gsm8k] 225/300 running_acc=0.9111
+[gsm8k] 250/300 running_acc=0.9040
+[gsm8k] 275/300 running_acc=0.8982
+[gsm8k] 300/300 running_acc=0.8933
+[gsm8k] DONE arm=gsm8k_variant regime=sampled acc=0.8933 (268/300) strict=0.923 extract_fail=0.000 trunc=0.083 wall=333s -> /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gsm8k_variant_sampled_s0.json
+[variant/gsm8k] OK wall=336s
+
+[variant/gpqa] $ /tmp/eval-serve-venv/bin/python /workspace/senpai/target/research/validity/downstream_quality_eval/run_eval.py --task gpqa_diamond --arm int4_mtp_bi0_surgattn --out /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_variant_s12345_t3072.json --base-url http://127.0.0.1:8000/v1 --model gemma-4-e4b-it --seed 12345 --temperature 1.0 --top-p 0.95 --top-k 64 --max-tokens 3072 --sampling-seed 0 --max-connections 16
+---------------------------------------------------------                       
+task (198 samples): openai-api/local/gemma-4-e4b-it                             
+fail_on_error: 0.1, retry_on_error: 2, score_on_error: True, dataset:           
+gpqa_diamond                                                                    
+---------------------------------------------------------                       
+                                                                                
+multiple_... | Steps:   1/198   0% | Samples:   0/198 | accuracy:  n/a | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   2/198   1% | Samples:   2/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   3/198   1% | Samples:   3/198 | accuracy: 0.67 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   4/198   2% | Samples:   4/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   5/198   2% | Samples:   5/198 | accuracy: 0.40 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   6/198   3% | Samples:   5/198 | accuracy: 0.40 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   7/198   3% | Samples:   7/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   8/198   4% | Samples:   7/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   9/198   4% | Samples:   8/198 | accuracy: 0.62 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  10/198   5% | Samples:  10/198 | accuracy: 0.60 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  11/198   5% | Samples:  10/198 | accuracy: 0.60 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  12/198   6% | Samples:  12/198 | accuracy: 0.67 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  13/198   6% | Samples:  13/198 | accuracy: 0.69 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  14/198   7% | Samples:  14/198 | accuracy: 0.71 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  15/198   7% | Samples:  15/198 | accuracy: 0.73 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  16/198   8% | Samples:  16/198 | accuracy: 0.75 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  17/198   8% | Samples:  16/198 | accuracy: 0.75 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  18/198   9% | Samples:  18/198 | accuracy: 0.72 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  19/198   9% | Samples:  18/198 | accuracy: 0.72 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  20/198  10% | Samples:  19/198 | accuracy: 0.68 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  21/198  10% | Samples:  21/198 | accuracy: 0.62 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  22/198  11% | Samples:  22/198 | accuracy: 0.64 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  23/198  11% | Samples:  22/198 | accuracy: 0.64 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  24/198  12% | Samples:  23/198 | accuracy: 0.61 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  25/198  12% | Samples:  25/198 | accuracy: 0.60 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  26/198  13% | Samples:  25/198 | accuracy: 0.60 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  27/198  13% | Samples:  27/198 | accuracy: 0.59 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  28/198  14% | Samples:  28/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  29/198  14% | Samples:  28/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  30/198  15% | Samples:  29/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  31/198  15% | Samples:  31/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  32/198  16% | Samples:  31/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  33/198  16% | Samples:  33/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  34/198  17% | Samples:  33/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  35/198  17% | Samples:  35/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  36/198  18% | Samples:  35/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  37/198  18% | Samples:  36/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  38/198  19% | Samples:  38/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  39/198  19% | Samples:  38/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  40/198  20% | Samples:  40/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  41/198  20% | Samples:  41/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  42/198  21% | Samples:  41/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  43/198  21% | Samples:  42/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  44/198  22% | Samples:  43/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  45/198  22% | Samples:  45/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  46/198  23% | Samples:  45/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  47/198  23% | Samples:  46/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  48/198  24% | Samples:  47/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  49/198  24% | Samples:  49/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  50/198  25% | Samples:  50/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  51/198  25% | Samples:  51/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  52/198  26% | Samples:  52/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  53/198  26% | Samples:  53/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  54/198  27% | Samples:  53/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  55/198  27% | Samples:  55/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  56/198  28% | Samples:  55/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  57/198  28% | Samples:  56/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  58/198  29% | Samples:  57/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  59/198  29% | Samples:  58/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  60/198  30% | Samples:  60/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  61/198  30% | Samples:  60/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  62/198  31% | Samples:  61/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  63/198  31% | Samples:  63/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  64/198  32% | Samples:  63/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  65/198  32% | Samples:  64/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  66/198  33% | Samples:  65/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  67/198  33% | Samples:  66/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  68/198  34% | Samples:  67/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  69/198  34% | Samples:  68/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  70/198  35% | Samples:  70/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  71/198  35% | Samples:  70/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  72/198  36% | Samples:  72/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  73/198  36% | Samples:  73/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  74/198  37% | Samples:  73/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  75/198  37% | Samples:  74/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  76/198  38% | Samples:  75/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  77/198  38% | Samples:  76/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  78/198  39% | Samples:  77/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  79/198  39% | Samples:  78/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  80/198  40% | Samples:  80/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  81/198  40% | Samples:  81/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  82/198  41% | Samples:  81/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  83/198  41% | Samples:  82/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  84/198  42% | Samples:  84/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  85/198  42% | Samples:  84/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  86/198  43% | Samples:  86/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  87/198  43% | Samples:  87/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  88/198  44% | Samples:  87/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  89/198  44% | Samples:  88/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  90/198  45% | Samples:  89/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  91/198  45% | Samples:  91/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  92/198  46% | Samples:  91/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  93/198  46% | Samples:  92/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  94/198  47% | Samples:  94/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  95/198  47% | Samples:  94/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  96/198  48% | Samples:  95/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  97/198  48% | Samples:  97/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  98/198  49% | Samples:  97/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  99/198  50% | Samples:  98/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 100/198  50% | Samples:  99/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 101/198  51% | Samples: 100/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 102/198  51% | Samples: 102/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 103/198  52% | Samples: 102/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 104/198  52% | Samples: 103/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 105/198  53% | Samples: 104/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 106/198  53% | Samples: 106/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 107/198  54% | Samples: 106/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 108/198  54% | Samples: 108/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 109/198  55% | Samples: 108/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 110/198  55% | Samples: 109/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 111/198  56% | Samples: 111/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 112/198  56% | Samples: 111/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 113/198  57% | Samples: 112/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 114/198  57% | Samples: 113/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 115/198  58% | Samples: 114/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 116/198  58% | Samples: 116/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 117/198  59% | Samples: 116/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 118/198  59% | Samples: 117/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 119/198  60% | Samples: 118/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 120/198  60% | Samples: 120/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 121/198  61% | Samples: 120/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 122/198  61% | Samples: 122/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 123/198  62% | Samples: 122/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 124/198  62% | Samples: 123/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 125/198  63% | Samples: 124/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 126/198  63% | Samples: 125/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 127/198  64% | Samples: 126/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 128/198  64% | Samples: 128/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 129/198  65% | Samples: 128/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 130/198  65% | Samples: 130/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 131/198  66% | Samples: 131/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 132/198  66% | Samples: 131/198 | accuracy: 0.50 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 133/198  67% | Samples: 133/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 134/198  67% | Samples: 133/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 135/198  68% | Samples: 135/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 136/198  68% | Samples: 136/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 137/198  69% | Samples: 136/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 138/198  69% | Samples: 138/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 139/198  70% | Samples: 138/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 140/198  70% | Samples: 140/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 141/198  71% | Samples: 140/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+[06/20/26 14:27:49] WARNING  sample=recnTTKdBzfuoZ7w7                run.py:1128
+                             Sample error (id: recnTTKdBzfuoZ7w7,               
+                             epoch: 1):                                         
+                             RuntimeError('\nRequest:\n{\n                      
+                             "messages": [\n    {\n      "role":                
+                             "user",\n      "content": "Answer the              
+                             following multiple choice question. The            
+                             last line of your response should be of            
+                             the following format: \'ANSWER:                    
+                             $LETTER\' (without quotes) where LETTER            
+                             is one of A,B,C,D. Think step by step              
+                             before answering.\\n\\nCongratulations,            
+                             you just landed your dream job at one              
+                             of the top structural biology labs at              
+                             Stanford University in California.                 
+                             Without further ado, the Principal                 
+                             Investigator explains that the priority            
+                             of the moment is to produce in E. coli             
+                             BL21 then purify as quickly as possible            
+                             the Human P53 protein.\\n\\nThe amino              
+                             acid sequence of this protein is as                
+                             follows:\\nMEEPQSDPSVEPPLSQETFSDLWKLLPE            
+                             NNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMP            
+                             EAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGS            
+                             YGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQL            
+                             WVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSD            
+                             SDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPP            
+                             EVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSG            
+                             NLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPP            
+                             GSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEM            
+                             FRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSR            
+                             HKKLMFKTEGPDSD\\n\\nYou are given 4                
+                             plasmids containing 4 different                    
+                             sequences, which one are you going to              
+                             use?\\n\\n\\nA)                                    
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCG            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nB)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCCCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCCTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCC            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nC)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCCGC            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGCCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGCGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGCGCGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA\\nD)                                  
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCAGA            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGTCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGAGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGAGAGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA"\n    }\n  ],\n  "tools":             
+                             null,\n  "tool_choice": null,\n                    
+                             "extra_headers": {\n    "x-irid":                  
+                             "TkgLPAwhoa3t4YEe7MyjMG"\n  },\n                   
+                             "model": "gemma-4-e4b-it",\n                       
+                             "max_tokens": 3072,\n  "seed": 0,\n                
+                             "temperature": 1.0,\n  "top_p": 0.95,\n            
+                             "extra_body": {\n    "top_k": 64\n                 
+                             }\n}\n\nBadRequestError(\'Error code:              
+                             400 - {\\\'error\\\': {\\\'message\\\':            
+                             "This model\\\'s maximum context length            
+                             is 4096 tokens. However, you requested             
+                             3072 output tokens and your prompt                 
+                             contains at least 1025 input tokens,               
+                             for a total of at least 4097 tokens.               
+                             Please reduce the length of the input              
+                             prompt or the number of requested                  
+                             output tokens. (parameter=input_tokens,            
+                             value=1025)", \\\'type\\\':                        
+                             \\\'BadRequestError\\\', \\\'param\\\':            
+                             \\\'input_tokens\\\', \\\'code\\\':                
+                             400}}\')')). Sample will be retried.               
+multiple_... | Steps: 142/198  71% | Samples: 142/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 143/198  72% | Samples: 142/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 144/198  72% | Samples: 143/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 145/198  73% | Samples: 144/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 146/198  73% | Samples: 146/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 147/198  74% | Samples: 146/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 148/198  74% | Samples: 147/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 149/198  75% | Samples: 148/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 150/198  75% | Samples: 150/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 151/198  76% | Samples: 150/198 | accuracy: 0.49 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 152/198  76% | Samples: 151/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 153/198  77% | Samples: 153/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 154/198  77% | Samples: 153/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 155/198  78% | Samples: 155/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 156/198  78% | Samples: 155/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 157/198  79% | Samples: 156/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 158/198  79% | Samples: 157/198 | accuracy: 0.48 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 159/198  80% | Samples: 159/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 160/198  80% | Samples: 159/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 161/198  81% | Samples: 160/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 162/198  81% | Samples: 161/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 163/198  82% | Samples: 163/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 164/198  82% | Samples: 164/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 165/198  83% | Samples: 165/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 166/198  83% | Samples: 165/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 167/198  84% | Samples: 166/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 168/198  84% | Samples: 168/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 169/198  85% | Samples: 168/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 170/198  85% | Samples: 169/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 171/198  86% | Samples: 171/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 172/198  86% | Samples: 172/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 173/198  87% | Samples: 172/198 | accuracy: 0.47 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 174/198  87% | Samples: 174/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 175/198  88% | Samples: 174/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 176/198  88% | Samples: 175/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 177/198  89% | Samples: 176/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 178/198  89% | Samples: 177/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 179/198  90% | Samples: 179/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 180/198  90% | Samples: 179/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 181/198  91% | Samples: 181/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 182/198  91% | Samples: 181/198 | accuracy: 0.46 | openai-api: 16/16 | HTTP retries: 0
+[06/20/26 14:35:41] WARNING  sample=recnTTKdBzfuoZ7w7                run.py:1128
+                             Sample error (id: recnTTKdBzfuoZ7w7,               
+                             epoch: 1):                                         
+                             RuntimeError('\nRequest:\n{\n                      
+                             "messages": [\n    {\n      "role":                
+                             "user",\n      "content": "Answer the              
+                             following multiple choice question. The            
+                             last line of your response should be of            
+                             the following format: \'ANSWER:                    
+                             $LETTER\' (without quotes) where LETTER            
+                             is one of A,B,C,D. Think step by step              
+                             before answering.\\n\\nCongratulations,            
+                             you just landed your dream job at one              
+                             of the top structural biology labs at              
+                             Stanford University in California.                 
+                             Without further ado, the Principal                 
+                             Investigator explains that the priority            
+                             of the moment is to produce in E. coli             
+                             BL21 then purify as quickly as possible            
+                             the Human P53 protein.\\n\\nThe amino              
+                             acid sequence of this protein is as                
+                             follows:\\nMEEPQSDPSVEPPLSQETFSDLWKLLPE            
+                             NNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMP            
+                             EAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGS            
+                             YGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQL            
+                             WVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSD            
+                             SDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPP            
+                             EVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSG            
+                             NLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPP            
+                             GSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEM            
+                             FRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSR            
+                             HKKLMFKTEGPDSD\\n\\nYou are given 4                
+                             plasmids containing 4 different                    
+                             sequences, which one are you going to              
+                             use?\\n\\n\\nA)                                    
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCG            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nB)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCCCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCCTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCC            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nC)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCCGC            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGCCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGCGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGCGCGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA\\nD)                                  
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCAGA            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGTCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGAGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGAGAGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA"\n    }\n  ],\n  "tools":             
+                             null,\n  "tool_choice": null,\n                    
+                             "extra_headers": {\n    "x-irid":                  
+                             "oSQBno5ySYE4ncMAk7uvPp"\n  },\n                   
+                             "model": "gemma-4-e4b-it",\n                       
+                             "max_tokens": 3072,\n  "seed": 0,\n                
+                             "temperature": 1.0,\n  "top_p": 0.95,\n            
+                             "extra_body": {\n    "top_k": 64\n                 
+                             }\n}\n\nBadRequestError(\'Error code:              
+                             400 - {\\\'error\\\': {\\\'message\\\':            
+                             "This model\\\'s maximum context length            
+                             is 4096 tokens. However, you requested             
+                             3072 output tokens and your prompt                 
+                             contains at least 1025 input tokens,               
+                             for a total of at least 4097 tokens.               
+                             Please reduce the length of the input              
+                             prompt or the number of requested                  
+                             output tokens. (parameter=input_tokens,            
+                             value=1025)", \\\'type\\\':                        
+                             \\\'BadRequestError\\\', \\\'param\\\':            
+                             \\\'input_tokens\\\', \\\'code\\\':                
+                             400}}\')')). Sample will be retried.               
+                    WARNING  sample=recnTTKdBzfuoZ7w7                run.py:1128
+                             Sample error (id: recnTTKdBzfuoZ7w7,               
+                             epoch: 1):                                         
+                             RuntimeError('\nRequest:\n{\n                      
+                             "messages": [\n    {\n      "role":                
+                             "user",\n      "content": "Answer the              
+                             following multiple choice question. The            
+                             last line of your response should be of            
+                             the following format: \'ANSWER:                    
+                             $LETTER\' (without quotes) where LETTER            
+                             is one of A,B,C,D. Think step by step              
+                             before answering.\\n\\nCongratulations,            
+                             you just landed your dream job at one              
+                             of the top structural biology labs at              
+                             Stanford University in California.                 
+                             Without further ado, the Principal                 
+                             Investigator explains that the priority            
+                             of the moment is to produce in E. coli             
+                             BL21 then purify as quickly as possible            
+                             the Human P53 protein.\\n\\nThe amino              
+                             acid sequence of this protein is as                
+                             follows:\\nMEEPQSDPSVEPPLSQETFSDLWKLLPE            
+                             NNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMP            
+                             EAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGS            
+                             YGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQL            
+                             WVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSD            
+                             SDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPP            
+                             EVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSG            
+                             NLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPP            
+                             GSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEM            
+                             FRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSR            
+                             HKKLMFKTEGPDSD\\n\\nYou are given 4                
+                             plasmids containing 4 different                    
+                             sequences, which one are you going to              
+                             use?\\n\\n\\nA)                                    
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCG            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nB)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCCCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCCTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCC            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nC)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCCGC            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGCCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGCGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGCGCGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA\\nD)                                  
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCAGA            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGTCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGAGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGAGAGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA"\n    }\n  ],\n  "tools":             
+                             null,\n  "tool_choice": null,\n                    
+                             "extra_headers": {\n    "x-irid":                  
+                             "PzxGC6rEhMeMiiy3swdPzt"\n  },\n                   
+                             "model": "gemma-4-e4b-it",\n                       
+                             "max_tokens": 3072,\n  "seed": 0,\n                
+                             "temperature": 1.0,\n  "top_p": 0.95,\n            
+                             "extra_body": {\n    "top_k": 64\n                 
+                             }\n}\n\nBadRequestError(\'Error code:              
+                             400 - {\\\'error\\\': {\\\'message\\\':            
+                             "This model\\\'s maximum context length            
+                             is 4096 tokens. However, you requested             
+                             3072 output tokens and your prompt                 
+                             contains at least 1025 input tokens,               
+                             for a total of at least 4097 tokens.               
+                             Please reduce the length of the input              
+                             prompt or the number of requested                  
+                             output tokens. (parameter=input_tokens,            
+                             value=1025)", \\\'type\\\':                        
+                             \\\'BadRequestError\\\', \\\'param\\\':            
+                             \\\'input_tokens\\\', \\\'code\\\':                
+                             400}}\')')). Sample will be scored.                
+multiple_... | Steps: 184/198  92% | Samples: 183/198 | accuracy: 0.46 | openai-api: 14/16 | HTTP retries: 0
+multiple_... | Steps: 185/198  93% | Samples: 184/198 | accuracy: 0.47 | openai-api: 13/16 | HTTP retries: 0
+multiple_... | Steps: 186/198  93% | Samples: 184/198 | accuracy: 0.47 | openai-api: 12/16 | HTTP retries: 0
+multiple_... | Steps: 187/198  94% | Samples: 186/198 | accuracy: 0.47 | openai-api: 11/16 | HTTP retries: 0
+multiple_... | Steps: 188/198  94% | Samples: 187/198 | accuracy: 0.47 | openai-api: 10/16 | HTTP retries: 0
+multiple_... | Steps: 189/198  95% | Samples: 187/198 | accuracy: 0.47 | openai-api:  9/16 | HTTP retries: 0
+multiple_... | Steps: 190/198  95% | Samples: 189/198 | accuracy: 0.47 | openai-api:  8/16 | HTTP retries: 0
+multiple_... | Steps: 191/198  96% | Samples: 189/198 | accuracy: 0.47 | openai-api:  7/16 | HTTP retries: 0
+multiple_... | Steps: 192/198  96% | Samples: 190/198 | accuracy: 0.47 | openai-api:  6/16 | HTTP retries: 0
+multiple_... | Steps: 193/198  97% | Samples: 191/198 | accuracy: 0.47 | openai-api:  5/16 | HTTP retries: 0
+multiple_... | Steps: 194/198  97% | Samples: 193/198 | accuracy: 0.47 | openai-api:  4/16 | HTTP retries: 0
+multiple_... | Steps: 195/198  98% | Samples: 193/198 | accuracy: 0.47 | openai-api:  3/16 | HTTP retries: 0
+multiple_... | Steps: 196/198  98% | Samples: 195/198 | accuracy: 0.47 | openai-api:  2/16 | HTTP retries: 0
+multiple_... | Steps: 197/198  99% | Samples: 196/198 | accuracy: 0.47 | openai-api:  1/16 | HTTP retries: 0
+multiple_... | Steps: 198/198 100% | Samples: 197/198 | accuracy: 0.47 | openai-api:  0/16 | HTTP retries: 0
+
+---------------------------------------------------------                       
+task (198 samples): openai-api/local/gemma-4-e4b-it                             
+fail_on_error: 0.1, retry_on_error: 2, score_on_error: True, dataset:           
+gpqa_diamond                                                                    
+                                                                                
+total time:                          0:35:29                                    
+openai-api/local/gemma-4-e4b-it      427,800 tokens [I: 49,465, O: 378,335]     
+choice                                                                          
+accuracy  0.467                                                                 
+stderr    0.036                                                                 
+                                                                                
+WARNING: 1 of 198 executed samples (0%) had errors.                             
+Log:                                                                            
+research/validity/bi0_surgattn_3d_qualregate/runs/_inspect_logs/2026-06-20T14-0…
+---------------------------------------------------------                       
+                                                                                
+[run_eval] task=gpqa_diamond arm=int4_mtp_bi0_surgattn acc=0.4646 scored=198 correct=92 err=1 empty=0 empty_rate=0.0000 len_trunc=31 (max_tok=31 model_len=0) len_stop_rate=0.1566 ctok_mean=1920 ctok_p95=3072 len@2048=0.4365 -> /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_variant_s12345_t3072.json
+[variant/gpqa] OK wall=2135s
+
+[variant/aime] $ /tmp/eval-serve-venv/bin/python /workspace/senpai/target/research/downstream_quality_aime/aime_eval.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --years 2024 --k 8 --temperature 1.0 --top-p 0.95 --top-k 64 --max-tokens 3072 --min-tokens 8 --no-thinking --seed 1234 --save-text --label aime_variant --out /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/aime_variant_2024_k8.json
+[aime] loaded 30 problems from years=['2024']
+[aime] 1/30 id=2024-2024-II-4 gold=33 maj=33 (OK) pass=7/8 counts={'33': 7, '4': 1}
+[aime] 2/30 id=2024-2024-II-12 gold=23 maj=2 (x) pass=0/8 counts={'0': 1, '1': 2, '2': 4, '4': 1}
+[aime] 3/30 id=2024-2024-I-4 gold=116 maj=116 (OK) pass=8/8 counts={'116': 8}
+[aime] 4/30 id=2024-2024-I-3 gold=809 maj=5 (x) pass=3/8 counts={'8': 1, '809': 3, '5': 3, '2': 1}
+[aime] 5/30 id=2024-2024-I-8 gold=197 maj=1 (x) pass=0/8 counts={'1': 3, '34': 2, '2': 1, '357': 1, '8': 1}
+[aime] 6/30 id=2024-2024-I-12 gold=385 maj=1 (x) pass=0/8 counts={'3': 2, '1': 4, '4': 2}
+[aime] 7/30 id=2024-2024-I-11 gold=371 maj=2 (x) pass=0/8 counts={'2': 2, '7': 2, '8': 1, '1': 1, '3': 1, '4': 1}
+[aime] 8/30 id=2024-2024-II-11 gold=601 maj=2 (x) pass=0/8 counts={'0': 1, '2': 2, '3': 1, '30': 1, '10': 1, '100': 2}
+[aime] 9/30 id=2024-2024-I-2 gold=25 maj=25 (OK) pass=7/8 counts={'25': 7, '1': 1}
+[aime] 10/30 id=2024-2024-II-6 gold=55 maj=55 (OK) pass=3/8 counts={'7': 1, '49': 1, '2': 2, '55': 3, '60': 1}
+[aime] 11/30 id=2024-2024-I-7 gold=540 maj=540 (OK) pass=6/8 counts={'540': 6, '5': 1, '108': 1}
+[aime] 12/30 id=2024-2024-II-3 gold=45 maj=45 (OK) pass=3/8 counts={'2': 1, '45': 3, '11': 2, '0': 1, '12': 1}
+[aime] 13/30 id=2024-2024-I-1 gold=204 maj=204 (OK) pass=8/8 counts={'204': 8}
+[aime] 14/30 id=2024-2024-II-7 gold=699 maj=7 (x) pass=0/8 counts={'6': 2, '7': 4, '694': 1, '1': 1}
+[aime] 15/30 id=2024-2024-I-6 gold=294 maj=294 (OK) pass=6/8 counts={'294': 6, '2': 1, '588': 1}
+[aime] 16/30 id=2024-2024-I-13 gold=110 maj=4 (x) pass=0/8 counts={'4': 3, '8': 1, '289': 2, '155': 1, '179': 1}
+[aime] 17/30 id=2024-2024-I-15 gold=721 maj=2 (x) pass=1/8 counts={'1': 1, '3': 1, '2': 4, '16': 1, '721': 1}
+[aime] 18/30 id=2024-2024-II-15 gold=315 maj=1 (x) pass=0/8 counts={'2': 1, '1': 1, '90': 1, '3': 1, '5': 1, '480': 1, '100': 1, '116': 1}
+[aime] 19/30 id=2024-2024-II-10 gold=468 maj=2 (x) pass=0/8 counts={'8': 1, '2': 4, '0': 1, '3': 1, '13': 1}
+[aime] 20/30 id=2024-2024-II-9 gold=902 maj=2 (x) pass=0/8 counts={'25': 1, '21': 1, '3': 1, '2': 2, '1': 1, '5': 1, '12': 1}
+[aime] 21/30 id=2024-2024-II-14 gold=211 maj=1 (x) pass=0/8 counts={'5': 1, '2': 1, '3': 2, '1': 2, '0': 1, '15': 1}
+[aime] 22/30 id=2024-2024-II-5 gold=80 maj=0 (x) pass=0/8 counts={'1': 1, '3': 1, '200': 1, '370': 1, '0': 1, '20': 1, '300': 1, '2': 1}
+[aime] 23/30 id=2024-2024-I-9 gold=480 maj=11 (x) pass=0/8 counts={'0': 2, '6': 1, '11': 3, '88': 1, '72': 1}
+[aime] 24/30 id=2024-2024-II-2 gold=236 maj=9 (x) pass=2/8 counts={'236': 2, '5': 1, '9': 3, '6': 1, '4': 1}
+[aime] 25/30 id=2024-2024-II-1 gold=73 maj=73 (OK) pass=7/8 counts={'73': 7, '1': 1}
+[aime] 26/30 id=2024-2024-I-10 gold=113 maj=0 (x) pass=0/8 counts={'14': 1, '10': 1, '19': 1, '2': 1, '17': 1, '6': 1, '0': 1, '7': 1}
+[aime] 27/30 id=2024-2024-II-8 gold=127 maj=11 (x) pass=0/8 counts={'121': 1, '11': 3, '7': 1, '9': 1, '2': 1, '1': 1}
+[aime] 28/30 id=2024-2024-I-14 gold=104 maj=2 (x) pass=0/8 counts={'70': 1, '6': 1, '210': 1, '4': 1, '8': 1, '2': 2, '3': 1}
+[aime] 29/30 id=2024-2024-I-5 gold=104 maj=1 (x) pass=0/8 counts={'1': 3, '0': 2, '256': 1, '17': 1, '2': 1}
+[aime] 30/30 id=2024-2024-II-13 gold=321 maj=13 (x) pass=0/8 counts={'13': 3, '0': 1, '2': 1, '4': 1, '1': 2}
+[aime] wrote /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/aime_variant_2024_k8.json
+[aime] DONE label=aime_variant maj@8=0.3000 (9/30) mean_pass_rate=0.2542 extract_fail_rate=0.000
+[variant/aime] OK wall=2958s
+
+===== ARM control  extra_env={} =====
+[serve] /workspace/senpai/target/.venvs/vllm022/bin/python serve.py
+[serve] MODEL_ID=google/gemma-4-E4B-it-qat-w4a16-ct env={'VLLM_BATCH_INVARIANT': '0', 'DRAFTER_MODEL': 'google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant', 'NUM_SPECULATIVE_TOKENS': '6', 'MAX_MODEL_LEN': '4096', 'GPU_MEMORY_UTILIZATION': '0.90', 'MAX_NUM_BATCHED_TOKENS': '512', 'MAX_NUM_SEQS': '1', 'PYTORCH_CUDA_ALLOC_CONF': 'expandable_segments:True'}
+[serve] ready at http://127.0.0.1:8000 in 90s
+[control] toggle proven: present='[int4_mtp_force2d] unified_attention wrapped' absent='[int4_mtp_surgattn] VLLM_SURGATTN=0'
+
+[control/gsm8k] $ /tmp/eval-serve-venv/bin/python /workspace/senpai/target/research/downstream_quality_gsm8k/gsm8k_eval.py --base-url http://127.0.0.1:8000 --model gemma-4-e4b-it --label gsm8k_control --regimes sampled --n 300 --n-shot 8 --seed 1234 --sampling-seed 0 --top-p 0.95 --top-k 64 --max-tokens 512 --min-tokens 8 --concurrency 16 --out-dir /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs
+[gsm8k] 300 test items (seed=1234); 8-shot fewshot_sig=52:5.0,28:8.0,38:9.0,23:5.0,12:85.0,45:99.0,26:400.0,25:110.0
+[gsm8k] === arm=gsm8k_control regime=sampled sampling={'temperature': 1.0, 'top_p': 0.95, 'top_k': 64, 'max_tokens': 512, 'seed': 0, 'enable_thinking': False, 'min_tokens': 8} ===
+[gsm8k] 25/300 running_acc=0.9600
+[gsm8k] 50/300 running_acc=0.9200
+[gsm8k] 75/300 running_acc=0.9200
+[gsm8k] 100/300 running_acc=0.9100
+[gsm8k] 125/300 running_acc=0.9120
+[gsm8k] 150/300 running_acc=0.9133
+[gsm8k] 175/300 running_acc=0.9086
+[gsm8k] 200/300 running_acc=0.9150
+[gsm8k] 225/300 running_acc=0.9067
+[gsm8k] 250/300 running_acc=0.9000
+[gsm8k] 275/300 running_acc=0.9018
+[gsm8k] 300/300 running_acc=0.9000
+[gsm8k] DONE arm=gsm8k_control regime=sampled acc=0.9000 (270/300) strict=0.930 extract_fail=0.000 trunc=0.077 wall=358s -> /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gsm8k_control_sampled_s0.json
+[control/gsm8k] OK wall=363s
+
+[control/gpqa] $ /tmp/eval-serve-venv/bin/python /workspace/senpai/target/research/validity/downstream_quality_eval/run_eval.py --task gpqa_diamond --arm int4_mtp_bi0_surgattn --out /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_control_s12345_t3072.json --base-url http://127.0.0.1:8000/v1 --model gemma-4-e4b-it --seed 12345 --temperature 1.0 --top-p 0.95 --top-k 64 --max-tokens 3072 --sampling-seed 0 --max-connections 16
+---------------------------------------------------------                       
+task (198 samples): openai-api/local/gemma-4-e4b-it                             
+fail_on_error: 0.1, retry_on_error: 2, score_on_error: True, dataset:           
+gpqa_diamond                                                                    
+---------------------------------------------------------                       
+                                                                                
+multiple_... | Steps:   1/198   0% | Samples:   0/198 | accuracy:  n/a | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   2/198   1% | Samples:   2/198 | accuracy: 1.00 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   3/198   1% | Samples:   3/198 | accuracy: 1.00 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   4/198   2% | Samples:   3/198 | accuracy: 1.00 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   5/198   2% | Samples:   4/198 | accuracy: 1.00 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   6/198   3% | Samples:   6/198 | accuracy: 0.83 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   7/198   3% | Samples:   6/198 | accuracy: 0.83 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   8/198   4% | Samples:   8/198 | accuracy: 0.88 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:   9/198   4% | Samples:   8/198 | accuracy: 0.88 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  10/198   5% | Samples:  10/198 | accuracy: 0.90 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  11/198   5% | Samples:  10/198 | accuracy: 0.90 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  12/198   6% | Samples:  12/198 | accuracy: 0.83 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  13/198   6% | Samples:  12/198 | accuracy: 0.83 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  14/198   7% | Samples:  14/198 | accuracy: 0.79 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  15/198   7% | Samples:  14/198 | accuracy: 0.79 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  16/198   8% | Samples:  16/198 | accuracy: 0.75 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  17/198   8% | Samples:  16/198 | accuracy: 0.75 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  18/198   9% | Samples:  18/198 | accuracy: 0.78 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  19/198   9% | Samples:  19/198 | accuracy: 0.79 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  20/198  10% | Samples:  19/198 | accuracy: 0.79 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  21/198  10% | Samples:  21/198 | accuracy: 0.76 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  22/198  11% | Samples:  21/198 | accuracy: 0.76 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  23/198  11% | Samples:  22/198 | accuracy: 0.77 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  24/198  12% | Samples:  23/198 | accuracy: 0.74 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  25/198  12% | Samples:  25/198 | accuracy: 0.72 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  26/198  13% | Samples:  26/198 | accuracy: 0.73 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  27/198  13% | Samples:  26/198 | accuracy: 0.73 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  28/198  14% | Samples:  28/198 | accuracy: 0.71 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  29/198  14% | Samples:  28/198 | accuracy: 0.71 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  30/198  15% | Samples:  29/198 | accuracy: 0.69 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  31/198  15% | Samples:  31/198 | accuracy: 0.65 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  32/198  16% | Samples:  31/198 | accuracy: 0.65 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  33/198  16% | Samples:  32/198 | accuracy: 0.66 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  34/198  17% | Samples:  34/198 | accuracy: 0.62 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  35/198  17% | Samples:  34/198 | accuracy: 0.62 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  36/198  18% | Samples:  35/198 | accuracy: 0.63 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  37/198  18% | Samples:  36/198 | accuracy: 0.61 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  38/198  19% | Samples:  37/198 | accuracy: 0.62 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  39/198  19% | Samples:  38/198 | accuracy: 0.61 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  40/198  20% | Samples:  40/198 | accuracy: 0.60 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  41/198  20% | Samples:  41/198 | accuracy: 0.61 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  42/198  21% | Samples:  41/198 | accuracy: 0.61 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  43/198  21% | Samples:  42/198 | accuracy: 0.60 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  44/198  22% | Samples:  44/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  45/198  22% | Samples:  45/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  46/198  23% | Samples:  45/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  47/198  23% | Samples:  46/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  48/198  24% | Samples:  47/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  50/198  25% | Samples:  50/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  51/198  25% | Samples:  51/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  52/198  26% | Samples:  52/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  53/198  26% | Samples:  52/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  54/198  27% | Samples:  53/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  55/198  27% | Samples:  54/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  56/198  28% | Samples:  55/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  57/198  28% | Samples:  56/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  58/198  29% | Samples:  57/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  59/198  29% | Samples:  58/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  60/198  30% | Samples:  60/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  61/198  30% | Samples:  60/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  62/198  31% | Samples:  62/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  63/198  31% | Samples:  62/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  64/198  32% | Samples:  63/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  65/198  32% | Samples:  64/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  66/198  33% | Samples:  65/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  67/198  33% | Samples:  67/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  68/198  34% | Samples:  67/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  69/198  34% | Samples:  68/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  70/198  35% | Samples:  70/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  71/198  35% | Samples:  70/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  72/198  36% | Samples:  72/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  73/198  36% | Samples:  73/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  74/198  37% | Samples:  73/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  75/198  37% | Samples:  74/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  76/198  38% | Samples:  75/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  77/198  38% | Samples:  76/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  78/198  39% | Samples:  77/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  79/198  39% | Samples:  78/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  80/198  40% | Samples:  79/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  81/198  40% | Samples:  81/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  82/198  41% | Samples:  82/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  83/198  41% | Samples:  82/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  84/198  42% | Samples:  84/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  85/198  42% | Samples:  84/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  86/198  43% | Samples:  86/198 | accuracy: 0.57 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  87/198  43% | Samples:  87/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  88/198  44% | Samples:  87/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  89/198  44% | Samples:  88/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  90/198  45% | Samples:  89/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  91/198  45% | Samples:  91/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  92/198  46% | Samples:  92/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  93/198  46% | Samples:  92/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  94/198  47% | Samples:  94/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  95/198  47% | Samples:  94/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  96/198  48% | Samples:  95/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  97/198  48% | Samples:  96/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  98/198  49% | Samples:  97/198 | accuracy: 0.56 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps:  99/198  50% | Samples:  98/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 100/198  50% | Samples:  99/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 101/198  51% | Samples: 100/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 102/198  51% | Samples: 102/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 103/198  52% | Samples: 102/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 104/198  52% | Samples: 103/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 105/198  53% | Samples: 105/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 106/198  53% | Samples: 106/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 107/198  54% | Samples: 106/198 | accuracy: 0.55 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 108/198  54% | Samples: 108/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 109/198  55% | Samples: 108/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 110/198  55% | Samples: 110/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 111/198  56% | Samples: 111/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 112/198  56% | Samples: 111/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 113/198  57% | Samples: 112/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 114/198  57% | Samples: 113/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 115/198  58% | Samples: 114/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 116/198  58% | Samples: 115/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 117/198  59% | Samples: 117/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 118/198  59% | Samples: 117/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 119/198  60% | Samples: 118/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 120/198  60% | Samples: 120/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 121/198  61% | Samples: 120/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 122/198  61% | Samples: 122/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 123/198  62% | Samples: 122/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 124/198  62% | Samples: 123/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 125/198  63% | Samples: 124/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 126/198  63% | Samples: 125/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 127/198  64% | Samples: 126/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 128/198  64% | Samples: 128/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 129/198  65% | Samples: 128/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 130/198  65% | Samples: 130/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 131/198  66% | Samples: 130/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 132/198  66% | Samples: 131/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 133/198  67% | Samples: 133/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 134/198  67% | Samples: 133/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 135/198  68% | Samples: 135/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 136/198  68% | Samples: 135/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 137/198  69% | Samples: 136/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 138/198  69% | Samples: 138/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 139/198  70% | Samples: 138/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 140/198  70% | Samples: 140/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 141/198  71% | Samples: 140/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+[06/20/26 16:01:27] WARNING  sample=recnTTKdBzfuoZ7w7                run.py:1128
+                             Sample error (id: recnTTKdBzfuoZ7w7,               
+                             epoch: 1):                                         
+                             RuntimeError('\nRequest:\n{\n                      
+                             "messages": [\n    {\n      "role":                
+                             "user",\n      "content": "Answer the              
+                             following multiple choice question. The            
+                             last line of your response should be of            
+                             the following format: \'ANSWER:                    
+                             $LETTER\' (without quotes) where LETTER            
+                             is one of A,B,C,D. Think step by step              
+                             before answering.\\n\\nCongratulations,            
+                             you just landed your dream job at one              
+                             of the top structural biology labs at              
+                             Stanford University in California.                 
+                             Without further ado, the Principal                 
+                             Investigator explains that the priority            
+                             of the moment is to produce in E. coli             
+                             BL21 then purify as quickly as possible            
+                             the Human P53 protein.\\n\\nThe amino              
+                             acid sequence of this protein is as                
+                             follows:\\nMEEPQSDPSVEPPLSQETFSDLWKLLPE            
+                             NNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMP            
+                             EAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGS            
+                             YGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQL            
+                             WVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSD            
+                             SDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPP            
+                             EVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSG            
+                             NLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPP            
+                             GSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEM            
+                             FRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSR            
+                             HKKLMFKTEGPDSD\\n\\nYou are given 4                
+                             plasmids containing 4 different                    
+                             sequences, which one are you going to              
+                             use?\\n\\n\\nA)                                    
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCG            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nB)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCCCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCCTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCC            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nC)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCCGC            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGCCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGCGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGCGCGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA\\nD)                                  
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCAGA            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGTCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGAGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGAGAGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA"\n    }\n  ],\n  "tools":             
+                             null,\n  "tool_choice": null,\n                    
+                             "extra_headers": {\n    "x-irid":                  
+                             "kWv96JKjxxqrXkKBbRCCMG"\n  },\n                   
+                             "model": "gemma-4-e4b-it",\n                       
+                             "max_tokens": 3072,\n  "seed": 0,\n                
+                             "temperature": 1.0,\n  "top_p": 0.95,\n            
+                             "extra_body": {\n    "top_k": 64\n                 
+                             }\n}\n\nBadRequestError(\'Error code:              
+                             400 - {\\\'error\\\': {\\\'message\\\':            
+                             "This model\\\'s maximum context length            
+                             is 4096 tokens. However, you requested             
+                             3072 output tokens and your prompt                 
+                             contains at least 1025 input tokens,               
+                             for a total of at least 4097 tokens.               
+                             Please reduce the length of the input              
+                             prompt or the number of requested                  
+                             output tokens. (parameter=input_tokens,            
+                             value=1025)", \\\'type\\\':                        
+                             \\\'BadRequestError\\\', \\\'param\\\':            
+                             \\\'input_tokens\\\', \\\'code\\\':                
+                             400}}\')')). Sample will be retried.               
+multiple_... | Steps: 142/198  71% | Samples: 142/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 143/198  72% | Samples: 142/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 144/198  72% | Samples: 143/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 145/198  73% | Samples: 144/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 146/198  73% | Samples: 146/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 147/198  74% | Samples: 146/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 148/198  74% | Samples: 147/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 149/198  75% | Samples: 148/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 150/198  75% | Samples: 150/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 151/198  76% | Samples: 150/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 152/198  76% | Samples: 151/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 153/198  77% | Samples: 152/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 154/198  77% | Samples: 154/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 155/198  78% | Samples: 155/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 156/198  78% | Samples: 155/198 | accuracy: 0.54 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 157/198  79% | Samples: 156/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 158/198  79% | Samples: 157/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 159/198  80% | Samples: 158/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 160/198  80% | Samples: 159/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 161/198  81% | Samples: 160/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 162/198  81% | Samples: 161/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 163/198  82% | Samples: 162/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 164/198  82% | Samples: 164/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 165/198  83% | Samples: 165/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 166/198  83% | Samples: 165/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 167/198  84% | Samples: 166/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 168/198  84% | Samples: 168/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 169/198  85% | Samples: 168/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 170/198  85% | Samples: 169/198 | accuracy: 0.53 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 171/198  86% | Samples: 171/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 172/198  86% | Samples: 172/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 173/198  87% | Samples: 172/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 174/198  87% | Samples: 173/198 | accuracy: 0.52 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 175/198  88% | Samples: 175/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 176/198  88% | Samples: 175/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 177/198  89% | Samples: 176/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 178/198  89% | Samples: 177/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 179/198  90% | Samples: 179/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 180/198  90% | Samples: 179/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 181/198  91% | Samples: 181/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+multiple_... | Steps: 182/198  91% | Samples: 181/198 | accuracy: 0.51 | openai-api: 16/16 | HTTP retries: 0
+[06/20/26 16:10:01] WARNING  sample=recnTTKdBzfuoZ7w7                run.py:1128
+                             Sample error (id: recnTTKdBzfuoZ7w7,               
+                             epoch: 1):                                         
+                             RuntimeError('\nRequest:\n{\n                      
+                             "messages": [\n    {\n      "role":                
+                             "user",\n      "content": "Answer the              
+                             following multiple choice question. The            
+                             last line of your response should be of            
+                             the following format: \'ANSWER:                    
+                             $LETTER\' (without quotes) where LETTER            
+                             is one of A,B,C,D. Think step by step              
+                             before answering.\\n\\nCongratulations,            
+                             you just landed your dream job at one              
+                             of the top structural biology labs at              
+                             Stanford University in California.                 
+                             Without further ado, the Principal                 
+                             Investigator explains that the priority            
+                             of the moment is to produce in E. coli             
+                             BL21 then purify as quickly as possible            
+                             the Human P53 protein.\\n\\nThe amino              
+                             acid sequence of this protein is as                
+                             follows:\\nMEEPQSDPSVEPPLSQETFSDLWKLLPE            
+                             NNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMP            
+                             EAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGS            
+                             YGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQL            
+                             WVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSD            
+                             SDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPP            
+                             EVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSG            
+                             NLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPP            
+                             GSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEM            
+                             FRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSR            
+                             HKKLMFKTEGPDSD\\n\\nYou are given 4                
+                             plasmids containing 4 different                    
+                             sequences, which one are you going to              
+                             use?\\n\\n\\nA)                                    
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCG            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nB)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCCCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCCTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCC            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nC)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCCGC            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGCCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGCGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGCGCGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA\\nD)                                  
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCAGA            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGTCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGAGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGAGAGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA"\n    }\n  ],\n  "tools":             
+                             null,\n  "tool_choice": null,\n                    
+                             "extra_headers": {\n    "x-irid":                  
+                             "nkucY5mYjUFr6mgtd2cQnD"\n  },\n                   
+                             "model": "gemma-4-e4b-it",\n                       
+                             "max_tokens": 3072,\n  "seed": 0,\n                
+                             "temperature": 1.0,\n  "top_p": 0.95,\n            
+                             "extra_body": {\n    "top_k": 64\n                 
+                             }\n}\n\nBadRequestError(\'Error code:              
+                             400 - {\\\'error\\\': {\\\'message\\\':            
+                             "This model\\\'s maximum context length            
+                             is 4096 tokens. However, you requested             
+                             3072 output tokens and your prompt                 
+                             contains at least 1025 input tokens,               
+                             for a total of at least 4097 tokens.               
+                             Please reduce the length of the input              
+                             prompt or the number of requested                  
+                             output tokens. (parameter=input_tokens,            
+                             value=1025)", \\\'type\\\':                        
+                             \\\'BadRequestError\\\', \\\'param\\\':            
+                             \\\'input_tokens\\\', \\\'code\\\':                
+                             400}}\')')). Sample will be retried.               
+[06/20/26 16:10:02] WARNING  sample=recnTTKdBzfuoZ7w7                run.py:1128
+                             Sample error (id: recnTTKdBzfuoZ7w7,               
+                             epoch: 1):                                         
+                             RuntimeError('\nRequest:\n{\n                      
+                             "messages": [\n    {\n      "role":                
+                             "user",\n      "content": "Answer the              
+                             following multiple choice question. The            
+                             last line of your response should be of            
+                             the following format: \'ANSWER:                    
+                             $LETTER\' (without quotes) where LETTER            
+                             is one of A,B,C,D. Think step by step              
+                             before answering.\\n\\nCongratulations,            
+                             you just landed your dream job at one              
+                             of the top structural biology labs at              
+                             Stanford University in California.                 
+                             Without further ado, the Principal                 
+                             Investigator explains that the priority            
+                             of the moment is to produce in E. coli             
+                             BL21 then purify as quickly as possible            
+                             the Human P53 protein.\\n\\nThe amino              
+                             acid sequence of this protein is as                
+                             follows:\\nMEEPQSDPSVEPPLSQETFSDLWKLLPE            
+                             NNVLSPLPSQAMDDLMLSPDDIEQWFTEDPGPDEAPRMP            
+                             EAAPPVAPAPAAPTPAAPAPAPSWPLSSSVPSQKTYQGS            
+                             YGFRLGFLHSGTAKSVTCTYSPALNKMFCQLAKTCPVQL            
+                             WVDSTPPPGTRVRAMAIYKQSQHMTEVVRRCPHHERCSD            
+                             SDGLAPPQHLIRVEGNLRVEYLDDRNTFRHSVVVPYEPP            
+                             EVGSDCTTIHYNYMCNSSCMGGMNRRPILTIITLEDSSG            
+                             NLLGRNSFEVRVCACPGRDRRTEEENLRKKGEPHHELPP            
+                             GSTKRALPNNTSSSPQPKKKPLDGEYFTLQIRGRERFEM            
+                             FRELNEALELKDAQAGKEPGGSRAHSSHLKSKKGQSTSR            
+                             HKKLMFKTEGPDSD\\n\\nYou are given 4                
+                             plasmids containing 4 different                    
+                             sequences, which one are you going to              
+                             use?\\n\\n\\nA)                                    
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCG            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nB)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCCCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGA\\nAACTA            
+                             CTTCCTGAAAACAACGTTCTGTCCCCCTTGCCGTCCCAA            
+                             GCAATGGATGATTTGATGCTGTCCCC\\nGGACGATATT            
+                             GAACAATGGTTCACTGAAGACCCAGGTCCAGATGAAGCT            
+                             CCCAGAATGCCAGAGGCTGCT\\nCCCCCCGTGGCCCCT            
+                             GCACCAGCAGCTCCTACACCGGCGGCCCCTGCACCAGCC            
+                             CCCTCCTGGCCCCTGT\\nCATCTTCTGTCCCTTCCCAG            
+                             AAAACCTACCAGGGCAGCTACGGTTTCCGTCTGGGCTTC            
+                             TTGCATTCTGG\\nGACAGCCAAGTCTGTGACTTGCACG            
+                             TACTCCCCTGCCCTCAACAAGATGTTTTGCCAACTGGCC            
+                             AAGACC\\nTGCCCTGTGCAGCTGTGGGTTGATTCCACA            
+                             CCCCCGCCCGGCACCCGCGTCCGCGCCATGGCCATCTAC            
+                             A\\nAGCAGTCACAGCACATGACGGAGGTTGTGAGGCGC            
+                             TGCCCCCACCATGAGCGCTGCTCAGATAGCGATGG\\nT            
+                             CTGGCCCCTCCTCAGCATCTTATCCGAGTGGAAGGAAAT            
+                             TTGCGTGTGGAGTATTTGGATGACAGAAAC\\nACTTTT            
+                             CGACATAGTGTGGTGGTGCCCTATGAGCCGCCTGAGGTT            
+                             GGCTCTGACTGTACCACCATCCACT\\nACAACTACATG            
+                             TGTAACAGTTCCTGCATGGGCGGCATGAACCGGAGGCCC            
+                             ATCCTCACCATCATCACACT\\nGGAAGACTCCAGTGGT            
+                             AATCTACTGGGACGGAACAGCTTTGAGGTGCGTGTTTGT            
+                             GCCTGTCCTGGGAGA\\nGACCGGCGCACAGAGGAAGAG            
+                             AATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTGCCC            
+                             CCAGGGAGCA\\nCTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATA\\nTTTCACCCTTCAGATCCGTGGGCGTGAGCGC            
+                             TTCGAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTC            
+                             \\nAAGGATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGC            
+                             AGGGCTCACTCCAGCCACCTGAAGTCCAAAAAGG\\nGT            
+                             CAGTCTACCTCCCGCCATAAAAAACTCATGTTCAAGACA            
+                             GAAGGGCCTGACTCAGACTGA\\nC)                         
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCCGC            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGCCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGCGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGCGCGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA\\nD)                                  
+                             ATGGAGGAGCCGCAGTCAGATCCTAGCGTCGAGCCGCCT            
+                             CTGAGTCAGGAAACATTTTCAGACCTATGGAAACTACTT            
+                             CCTGAAAACAACGTTCTGTCCCCGTTGCCGTCCCAAGCA            
+                             ATGGATGATTTGATGCTGTCCCCGGACGATATTGAACAA            
+                             TGGTTCACTGAAGACCCAGGTCCAGATGAAGCTCCCAGA            
+                             ATGCCAGAGGCTGCTCCCCCCGTGGCCCCTGCACCAGCA            
+                             GCTCCTACACCGGCGGCCCCTGCACCAGCCCCCTCCTGG            
+                             CCCCTGTCATCTTCTGTCCCTTCCCAGAAAACCTACCAG            
+                             GGCAGCTACGGTTTCCGTCTGGGCTTCTTGCATTCTGGG            
+                             ACAGCCAAGTCTGTGACTTGCACGTACTCCCCTGCCCTC            
+                             AACAAGATGTTTTGCCAACTGGCCAAGACCTGCCCTGTG            
+                             CAGCTGTGGGTTGATTCCACACCCCCGTCCGGCACCCGC            
+                             GTCCGCGCCATGGCCATCTACAAGCAGTCACAGCACATG            
+                             ACGGAGGTTGTGAGGCGCTGCCCCCACCATGAGCGCTGC            
+                             TCAGATAGCGATGGTCTGGCCCCTCCTCAGCATCTTATC            
+                             CGAGTGGAAGGAAATTTGCGTGTGGAGTATTTGGATGAC            
+                             AGAAACACTTTTCGACATAGTGTGGTGGTGCCCTATGAG            
+                             CCGCCTGAGGTTGGCTCTGACTGTACCACCATCCACTAC            
+                             AACTACATGTGTAACAGTTCCTGCATGGGCGGCATGAAC            
+                             CGGAGGCCCATCCTCACCATCATCACACTGGAAGACTCC            
+                             AGTGGTAATCTACTGGGACGGAACAGCTTTGAGGTGCGT            
+                             GTTTGTGCCTGTCCTGGGAGAGACCGGCGCACAGAGGAA            
+                             GAGAATCTCCGCAAGAAAGGGGAGCCTCACCACGAGCTG            
+                             CCGCCAGGGAGCACTAAGCGAGCACTGCCCAACAACACC            
+                             AGCTCCTCTCCCCAGCCAAAGAAGAAACCACTGGATGGA            
+                             GAATATTTCACCCTTCAGATCCGTGGGCGTGAGCGCTTC            
+                             GAGATGTTCCGAGAGCTGAATGAGGCCTTGGAACTCAAG            
+                             GATGCCCAGGCTGGGAAGGAGCCAGGGGGGAGCAGGGCT            
+                             CACTCCAGCCACCTGAAGTCCAAAAAGGGTCAGTCTACC            
+                             TCCCGCCATAAAAAACTCATGTTCAAGACAGAAGGGCCT            
+                             GACTCAGACTGA"\n    }\n  ],\n  "tools":             
+                             null,\n  "tool_choice": null,\n                    
+                             "extra_headers": {\n    "x-irid":                  
+                             "ZPZZGVQVCPBMwrbYvM3fM9"\n  },\n                   
+                             "model": "gemma-4-e4b-it",\n                       
+                             "max_tokens": 3072,\n  "seed": 0,\n                
+                             "temperature": 1.0,\n  "top_p": 0.95,\n            
+                             "extra_body": {\n    "top_k": 64\n                 
+                             }\n}\n\nBadRequestError(\'Error code:              
+                             400 - {\\\'error\\\': {\\\'message\\\':            
+                             "This model\\\'s maximum context length            
+                             is 4096 tokens. However, you requested             
+                             3072 output tokens and your prompt                 
+                             contains at least 1025 input tokens,               
+                             for a total of at least 4097 tokens.               
+                             Please reduce the length of the input              
+                             prompt or the number of requested                  
+                             output tokens. (parameter=input_tokens,            
+                             value=1025)", \\\'type\\\':                        
+                             \\\'BadRequestError\\\', \\\'param\\\':            
+                             \\\'input_tokens\\\', \\\'code\\\':                
+                             400}}\')')). Sample will be scored.                
+multiple_... | Steps: 184/198  92% | Samples: 183/198 | accuracy: 0.51 | openai-api: 14/16 | HTTP retries: 0
+multiple_... | Steps: 185/198  93% | Samples: 183/198 | accuracy: 0.51 | openai-api: 13/16 | HTTP retries: 0
+multiple_... | Steps: 186/198  93% | Samples: 184/198 | accuracy: 0.52 | openai-api: 12/16 | HTTP retries: 0
+multiple_... | Steps: 187/198  94% | Samples: 186/198 | accuracy: 0.52 | openai-api: 11/16 | HTTP retries: 0
+multiple_... | Steps: 188/198  94% | Samples: 187/198 | accuracy: 0.52 | openai-api: 10/16 | HTTP retries: 0
+multiple_... | Steps: 189/198  95% | Samples: 187/198 | accuracy: 0.52 | openai-api:  9/16 | HTTP retries: 0
+multiple_... | Steps: 190/198  95% | Samples: 189/198 | accuracy: 0.52 | openai-api:  8/16 | HTTP retries: 0
+multiple_... | Steps: 191/198  96% | Samples: 189/198 | accuracy: 0.52 | openai-api:  7/16 | HTTP retries: 0
+multiple_... | Steps: 192/198  96% | Samples: 191/198 | accuracy: 0.52 | openai-api:  6/16 | HTTP retries: 0
+multiple_... | Steps: 193/198  97% | Samples: 191/198 | accuracy: 0.52 | openai-api:  5/16 | HTTP retries: 0
+multiple_... | Steps: 194/198  97% | Samples: 193/198 | accuracy: 0.52 | openai-api:  4/16 | HTTP retries: 0
+multiple_... | Steps: 195/198  98% | Samples: 193/198 | accuracy: 0.52 | openai-api:  3/16 | HTTP retries: 0
+multiple_... | Steps: 196/198  98% | Samples: 195/198 | accuracy: 0.51 | openai-api:  2/16 | HTTP retries: 0
+multiple_... | Steps: 197/198  99% | Samples: 196/198 | accuracy: 0.52 | openai-api:  1/16 | HTTP retries: 0
+multiple_... | Steps: 198/198 100% | Samples: 196/198 | accuracy: 0.52 | openai-api:  0/16 | HTTP retries: 0
+
+---------------------------------------------------------                       
+task (198 samples): openai-api/local/gemma-4-e4b-it                             
+fail_on_error: 0.1, retry_on_error: 2, score_on_error: True, dataset:           
+gpqa_diamond                                                                    
+                                                                                
+total time:                          0:37:33                                    
+openai-api/local/gemma-4-e4b-it      422,358 tokens [I: 49,465, O: 372,893]     
+choice                                                                          
+accuracy  0.513                                                                 
+stderr    0.036                                                                 
+                                                                                
+WARNING: 1 of 198 executed samples (0%) had errors.                             
+Log:                                                                            
+research/validity/bi0_surgattn_3d_qualregate/runs/_inspect_logs/2026-06-20T15-3…
+---------------------------------------------------------                       
+                                                                                
+[run_eval] task=gpqa_diamond arm=int4_mtp_bi0_surgattn acc=0.5101 scored=198 correct=101 err=1 empty=0 empty_rate=0.0000 len_trunc=23 (max_tok=23 model_len=0) len_stop_rate=0.1162 ctok_mean=1893 ctok_p95=3072 len@2048=0.4010 -> /workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_control_s12345_t3072.json
+[control/gpqa] OK wall=2258s
+
+========== PANEL SUMMARY ==========
+{
+  "variant": {
+    "arm": "variant",
+    "extra_env": {
+      "VLLM_SURGATTN": "0"
+    },
+    "tasks": {
+      "gsm8k": {
+        "accuracy": 0.8933333333333333,
+        "n": 300,
+        "n_correct": 268,
+        "trunc": 0.08333333333333333,
+        "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gsm8k_variant_sampled_s0.json"
+      },
+      "gpqa_diamond": {
+        "accuracy": 0.46464646464646464,
+        "n": 198,
+        "n_correct": 92,
+        "n_error": 1,
+        "trunc": 0.15656565656565657,
+        "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_variant_s12345_t3072.json"
+      },
+      "aime": {
+        "maj_k_accuracy": 0.3,
+        "n": 30,
+        "n_correct_maj": 9,
+        "k": 8,
+        "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/aime_variant_2024_k8.json"
+      }
+    },
+    "toggle_proven": true
+  },
+  "control": {
+    "arm": "control",
+    "extra_env": {},
+    "tasks": {
+      "gsm8k": {
+        "accuracy": 0.9,
+        "n": 300,
+        "n_correct": 270,
+        "trunc": 0.07666666666666666,
+        "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gsm8k_control_sampled_s0.json"
+      },
+      "gpqa_diamond": {
+        "accuracy": 0.51010101010101,
+        "n": 198,
+        "n_correct": 101,
+        "n_error": 1,
+        "trunc": 0.11616161616161616,
+        "out": "/workspace/senpai/target/research/validity/bi0_surgattn_3d_qualregate/runs/gpqa_control_s12345_t3072.json"
+      }
+    },
+    "toggle_proven": true
+  }
+}

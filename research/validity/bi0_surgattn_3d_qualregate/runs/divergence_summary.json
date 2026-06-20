@@ -1,0 +1,53 @@
+{
+  "note": "Paired divergent-prompt check on byte-identical prompts (same seed). Both arms use the IDENTICAL answer-extraction harness; 'one_arm_empty' flips are max_tokens truncation, not parse failures. Tests whether the 3D-on-M=1 divergences are answer-immaterial near-tie flips.",
+  "mmlu_pro": {
+    "axis": "mmlu_pro",
+    "n_paired": 100,
+    "prompt_sha_mismatch": 0,
+    "variant_acc": 0.64,
+    "control_acc": 0.62,
+    "delta_variant_minus_control": 0.02,
+    "answer_flips": 12,
+    "flips_both_valid_letter": 6,
+    "flips_one_arm_empty": 6,
+    "flips_one_arm_empty_truncation_driven": 6,
+    "variant_right_control_wrong": 3,
+    "control_right_variant_wrong": 1,
+    "net_variant_minus_control": 2,
+    "mcnemar": {
+      "discordant": 4,
+      "chi2_cc": 0.25,
+      "p_approx": 0.617
+    },
+    "variant_truncated": 12,
+    "control_truncated": 16,
+    "control_right_variant_wrong_variant_truncated_only": 1,
+    "net_excl_variant_truncation_losses": 3,
+    "extraction_code_changed": false
+  },
+  "gpqa_diamond": {
+    "axis": "gpqa_diamond",
+    "n_paired": 198,
+    "prompt_sha_mismatch": 0,
+    "variant_acc": 0.4646,
+    "control_acc": 0.5101,
+    "delta_variant_minus_control": -0.0455,
+    "answer_flips": 63,
+    "flips_both_valid_letter": 43,
+    "flips_one_arm_empty": 20,
+    "flips_one_arm_empty_truncation_driven": 20,
+    "variant_right_control_wrong": 16,
+    "control_right_variant_wrong": 25,
+    "net_variant_minus_control": -9,
+    "mcnemar": {
+      "discordant": 41,
+      "chi2_cc": 1.561,
+      "p_approx": 0.212
+    },
+    "variant_truncated": 31,
+    "control_truncated": 23,
+    "control_right_variant_wrong_variant_truncated_only": 7,
+    "net_excl_variant_truncation_losses": -2,
+    "extraction_code_changed": false
+  }
+}
