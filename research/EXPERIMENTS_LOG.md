@@ -2,6 +2,27 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 12:35Z — PR #786 (stark): MTP drafter GEMM format (is the bf16 drafter BW-inefficient?) — CLOSED (terminal NULL; drafter-weight-quant axis dead two ways)
+
+- **Student:** stark / branch `stark/drafter-gemm-format`
+- **Hypothesis:** The bi0 MTP drafter (`…q4_0-unquantized-assistant`) is served dense bf16 (2 B/param); quantizing it to W4A16 Marlin would cut per-draft-pass BW and raise effective TPS.
+
+| metric | value | note |
+|---|---|---|
+| control local decode TPS | 210.1 | reproduces bi0 |
+| best-variant local TPS | **210.61** | ≈ control (run-to-run noise) — NO gain |
+| verify_gpu_ms (M=7) p50 | 11.752 | the budget (82.8%) |
+| drafter_gpu_ms (6× M=1) p50 | 2.434 | of which ~0.17ms is weight read |
+| drafter frac of GPU-busy | **17.2%** | latency-bound, NOT BW-bound |
+| accept rate / E_accept | 0.3856 / 3.314 | byte-identical across all 4 runs |
+| greedy vs control | GREEDY_IDENTICAL (16/16) | all 3 variants |
+| fire-worthy variant | **0** | TPS gate fails |
+
+- **Primary:** local_decode_tps_best_variant 210.61 (no gain). **Test:** drafter_frac_of_gpu_busy 0.172. W&B group `bi0-drafter-gemm`: control [`h1nsfad1`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/h1nsfad1), gptq_marlin [`hfm6qflx`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/hfm6qflx), awq_marlin [`ify0thuk`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ify0thuk), fp8 [`bmfwaw2j`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/bmfwaw2j).
+- **Verdict — drafter-weight-quant PERMANENTLY CLOSED, dead two ways:** (1) PREMISE REFUTED — the drafter is only 17.2% of GPU-busy and **latency-bound at M=1** (weight read ~0.17ms / 2.434ms ≈ 7%; the rest is kernel-launch + tiny-GEMM latency over 6 sequential micro-launches). No "disproportionate bf16 BW share" exists to recover; the int4 W4A16 **verifier (82.8%)** is the budget. (2) LEVER ABSENT — vLLM 0.22.0 silently ignores `--speculative-config quantization=` for `gemma4_mtp` (proven 3 ways: byte-identical accept 3054/7920 across all runs, unchanged drafter_gpu_ms 2.41±.01, server-log kernel census shows ONLY the int4 target's `MarlinLinearKernel` — no Fp8/AWQ/2nd-Marlin). The `…-unquantized-assistant` ckpt is dense bf16 with no packed weights; the centroid head has no packed-Linear branch.
+- **bi0 byte-pristine** (diagnostic hooks reverted → `research/drafter_gemm_format/bi0_diagnostic_hooks.patch`); CLOSED not merged, so nothing touches the shipped submission. Logging gotcha flagged for siblings: serve venv `vllm022` has no wandb + a local `./wandb/` dir shadows the import → split logging into a uv-venv script.
+- **★ Follow-on:** CENTROID_TOP_K (stark's #2 suggestion) folded into **denken #783**'s axis (same drafter-proposal knob — avoid 2 students on it). The drafter's ~2.26ms **LAUNCH-latency** (the OTHER #786 finding) → new **stark #789** (drafter CUDA-graph capture: are the 6× M=1 proposer passes eager? capturing recovers ~16% of GPU-busy at byte-identical outputs). Distinct from lawine #787 (verifier M=7 graph) + kanna #771 (fa2sw flag port).
+
 ## 2026-06-20 11:55Z — PR #781 (ubel): int4 Marlin W4A16 GEMM kernel swap — CLOSED (terminal negative; kernel-swap lever does NOT exist on sm_86; the 58% M=1 BW is a spec-amortized red herring)
 
 - **Student:** ubel / branch `ubel/bi0-marlin-gemm`

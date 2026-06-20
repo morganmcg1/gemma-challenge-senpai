@@ -1,6 +1,6 @@
 # SENPAI Research State — Fast Gemma Challenge
 
-## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~12:15Z) — BI0 SHIPPED @218 + QUALITY PANEL COMPLETE; #784 LOOSENS THE GATE (byte-identity NOT sacred → quality-in-5%-band); MARLIN-KERNEL/PRECACHE/FP8/FLASHINFER/LOCUS-REVERT KILLED; 2-pod GPU leak RESOLVED → fern+wirbel RUNNING; all 8 zero-idle — authoritative (historical cycles 56–59 pruned 12:15Z)
+## ★★★★★★ CYCLE 60 — CURRENT STATE (2026-06-20 ~12:35Z) — BI0 SHIPPED @218 + QUALITY PANEL COMPLETE; #784 LOOSENS THE GATE (byte-identity NOT sacred → quality-in-5%-band); MARLIN-KERNEL/PRECACHE/FP8/FLASHINFER/LOCUS-REVERT KILLED; 2-pod GPU leak RESOLVED → fern+wirbel RUNNING; all 8 zero-idle — authoritative (historical cycles 56–59 pruned 12:15Z)
 
 ### ★ NEW GOVERNING HUMAN DIRECTIVE — Issue #784 (2026-06-20 11:24Z, morganmcg1)
 **"Push hard on faster TPS within quality guardrails."** Operating target: optimize TPS aggressively; **maintain quality within 5% of the base model on AIME/MMLU/GPQA**; **byte-identical outputs are NOT sacred for this phase** — a non-byte-identical variant that keeps quality inside the 5% band is **worth testing and escalating**. Cadence: pick 2–4 variants, local speed smoke each, cheap quality evidence, keep winners + discard losers fast, **cap analysis per lane** (don't over-analyze a small hypothesis). Prefer local A10G profiling. **Do NOT launch HF benchmark/submission jobs without explicit human approval** (open an Approval-request issue first). → **I have relaxed every in-flight card's "greedy-token-identical MUST match" hard gate to "quality-in-5%-band"** (PPL ≤ 2.42 + 128/128 + all-4-modalities + AIME/MMLU/GPQA within 5%). ACK posted on #784.
@@ -24,6 +24,7 @@ Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submi
 - fp8-KV (#777 ubel, CLOSED): three-layer hardware wall on sm_86. Permanent.
 - precache (#775/#778, CLOSED): prompt-replay gaming, fails program.md:325 + private-Δ gate. Permanent.
 - osoi5-baked (#772 land, CLOSED): body-level quality collapse. Permanent.
+- **drafter-weight-quant (#786 stark, CLOSED 12:35Z):** the bf16 MTP drafter is only **17.2% of GPU-busy + latency-bound at M=1** (weight read ~0.17ms/2.434ms, NOT BW-bound) — no "disproportionate bf16 BW share" to recover; AND vLLM 0.22.0 **silently no-ops** `--speculative-config quantization=` for `gemma4_mtp` (no packed weights to attach; proven 3 ways). Dead two ways. The int4 verifier (82.8%) is the budget. W&B group `bi0-drafter-gemm`.
 
 #### Private-stable lever decomposition (Cycle 60 — all LOCAL-only, all greedy-identity/quality-gated):
 | lever | profiler ceiling | quality risk | assigned | status |
@@ -34,9 +35,9 @@ Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submi
 | MTP K-depth sweep {0,2,4,6,8} (draft depth) | med | low | fern #774 | **RUNNING** (GPU self-cleared >4min → green-lit guarded launch 12:05Z) |
 | LOOPGRAPH + fused-argmax (drafter dispatch ~0.5%) | low | none | kanna #771 | port in-flight (capture-first gate) |
 | surgattn 2D vs 3D attn overhead | low | low (5%-band; 3D now allowed if faster) | wirbel #785 | **RUNNING** (GPU self-cleared ~7min → green-lit 12:15Z; target fwds forced-2D both arms → identity expected, drafter-M=1-only delta) |
-| MTP drafter GEMM format probe | low | none | stark #786 | in-flight (co-tenant 19.6 GiB) |
+| **drafter CUDA-graph capture** (6× M=1 proposer passes — eager→capture recovers ~16% GPU-busy launch latency) | **med–high** | none (byte-identical — capture is numerics-neutral) | stark #789 | **NEW** (from #786: drafter latency-bound at M=1, NOT BW) |
 | CUDA graph coverage audit (verify-pass M=7 shape) | low | none | lawine #787 | in-flight |
-| ~~Marlin kernel-swap~~ / ~~locus-revert~~ / ~~FlashInfer~~ / ~~fp8-KV~~ / ~~precache~~ / ~~osoi5~~ | — | killed/dead | #781, #776, #779, #777, #775/#778, #772 | CLOSED |
+| ~~Marlin kernel-swap~~ / ~~locus-revert~~ / ~~FlashInfer~~ / ~~fp8-KV~~ / ~~precache~~ / ~~osoi5~~ / ~~drafter-weight-quant~~ | — | killed/dead | #781, #776, #779, #777, #775/#778, #772, #786 | CLOSED |
 
 ### Key constraints
 - **Quality gate (Morgan):** MMLU-Pro ≥ 0.572, GPQA ≥ 0.471, GSM8K ≥ 0.807, AIME ≥ 0.090. Greedy-identity to the bi0 control is the quality proof for numerics-neutral levers.
@@ -45,11 +46,11 @@ Morgan's question (board 08:19Z): "≤10% degradation vs base for any 300+ submi
 - **No autonomous HF launch.** Open approval issue; fire only after human approves.
 - **Private-stable mandate:** any fire MUST be prompt-agnostic — Δ TPS ≤ 5% private re-run gate. Precache / prompt-replay is permanently OFF (program.md:325).
 
-### Fleet status (2026-06-20 ~12:15Z) — all 8 assigned, zero-idle
-- **In-flight (healthy GPU):** kanna #771 (loopgraph port), ubel #788 (lm_head fewer-weight-bytes — NEW from #781 diagnostic; pod healthy), land #782 (ngram), denken #783 (MTP-accept — NOT picked up @12:25Z, pod still on old branch, nudged for re-pull+proof-of-life), stark #786 (drafter GEMM format — co-tenant 19.6 GiB, check nvidia-smi first), lawine #787 (CUDA graph audit).
+### Fleet status (2026-06-20 ~12:35Z) — all 8 assigned, zero-idle
+- **In-flight (healthy GPU):** kanna #771 (loopgraph port), ubel #788 (lm_head fewer-weight-bytes — NEW from #781 diagnostic; pod healthy), land #782 (ngram), denken #783 (MTP-accept — NOT picked up @12:25Z, pod still on old branch, nudged for re-pull+proof-of-life), stark #789 (drafter CUDA-graph capture — NEW from #786 close; check nvidia-smi for co-tenant first), lawine #787 (CUDA graph audit — VERIFIER M=7 path; stark #789 owns the complementary DRAFTER M=1 path).
 - **★ 2-pod orphaned-context leak RESOLVED (GPU side) — #780:** fern #774 + wirbel #785 both hit the identical `20437 MiB @ 0% util` orphaned-`EngineCore` context (prior serve session, cross-namespace, no in-namespace PID). BOTH GPUs have since self-cleared/been-reaped and held `0 MiB stable >3 min` (fern 4min01s/25 samples 11:55–11:59Z; wirbel ~7min/3 samples 11:54–12:02Z) → I GREEN-LIT both with a guarded-launch protocol (final pre-serve `nvidia-smi` abort-on-resurface; init-OOM → clean up + hold + report, no retry-loop). **Root-cause still OPEN for operator:** student `serve.py` likely leaves `setsid`-detached vLLM engines alive across sessions → recurs fleet-wide; asked for an entrypoint teardown fix on #780.
-- **CLOSED (dead-ends confirmed):** #781 (ubel Marlin kernel-swap — no servable alt kernel on sm_86; 58% M=1 BW is spec-amortized red herring), #776 (lawine locus-revert — attention locus necessary-but-insufficient in served CUDA graphs; 211<218), #779 (stark FlashInfer — head_dim=512 permanent), #773 (GPQA panel MERGED), #777 (fp8-KV hw-dead), #775/#778 (precache mirage), #772 (osoi5 collapse).
-- **Next:** watch all 8 for results — fern #774 + wirbel #785 now RUNNING (guarded launches 12:05/12:15Z); land #782 / denken #783 / kanna #771 / lawine #787 / stark #786 / ubel #788 in-flight (★ denken #783 NOT picked up @12:25Z — no W&B run, 0 comments, pod still on old branch `denken/fire-bi0-surgattn-guarded`; PR routing is correct so the harness just hasn't switched branches. NUDGED for re-pull + proof-of-life. **If still dark next cycle → escalate pod to operator #780-style; advisor has no kubectl/reap access**). **Gate per #784: quality-in-5%-band, NOT byte-identity.** Run the full quality panel before proposing any fire; no HF launch without an explicit human approval issue.
+- **CLOSED (dead-ends confirmed):** #781 (ubel Marlin kernel-swap — no servable alt kernel on sm_86; 58% M=1 BW is spec-amortized red herring), #776 (lawine locus-revert — attention locus necessary-but-insufficient in served CUDA graphs; 211<218), #779 (stark FlashInfer — head_dim=512 permanent), #786 (stark drafter-weight-quant — drafter latency-bound at M=1, NOT BW-bound + vLLM 0.22.0 silently no-ops the quant key, dead two ways), #773 (GPQA panel MERGED), #777 (fp8-KV hw-dead), #775/#778 (precache mirage), #772 (osoi5 collapse).
+- **Next:** watch all 8 for results — fern #774 + wirbel #785 now RUNNING (guarded launches 12:05/12:15Z); land #782 / denken #783 / kanna #771 / lawine #787 / stark #789 / ubel #788 in-flight (★ denken #783 NOT picked up @12:25Z — no W&B run, 0 comments, pod still on old branch `denken/fire-bi0-surgattn-guarded`; PR routing is correct so the harness just hasn't switched branches. NUDGED for re-pull + proof-of-life. **If still dark next cycle → escalate pod to operator #780-style; advisor has no kubectl/reap access**). **Gate per #784: quality-in-5%-band, NOT byte-identity.** Run the full quality panel before proposing any fire; no HF launch without an explicit human approval issue.
 
 ---
 
