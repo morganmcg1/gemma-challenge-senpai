@@ -1,0 +1,204 @@
+{
+  "model": "/workspace/gemma_build/int4_g32_lmhead",
+  "gpu_busy_ms": 412.39137200000135,
+  "category_ms": {
+    "matmul_gemm": 315.1177170000023,
+    "attention": 49.288337999998404,
+    "elementwise_copy": 18.041171999998852,
+    "norm": 11.904590000000585,
+    "sampling_lmhead": 6.652432000000074,
+    "other": 9.905129000000363,
+    "activation": 1.4819940000007046
+  },
+  "category_pct": {
+    "matmul_gemm": 76.4122962785946,
+    "attention": 11.951835403578288,
+    "elementwise_copy": 4.374769508999037,
+    "norm": 2.8867214030851613,
+    "sampling_lmhead": 1.6131355919832513,
+    "other": 2.401875905396083,
+    "activation": 0.3593659083635483
+  },
+  "ampere_bf16_ms": 2.088167999999496,
+  "ampere_bf16_pct": 0.5063558895212504,
+  "marlin_ms": 290.18683900000246,
+  "marlin_pct": 70.36685505631809,
+  "aten_mm_ms": 0.1315829999999696,
+  "top_kernels": [
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 135.10366700000066,
+      "count": 2839,
+      "pct": 32.761031431084405,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, true, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 99.51939900000129,
+      "count": 5544,
+      "pct": 24.132269915676353,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "kernel_unified_attention",
+      "ms": 34.662230999998364,
+      "count": 2244,
+      "pct": 8.405178515713041,
+      "category": "attention"
+    },
+    {
+      "kernel": "_C::marlin_gemm",
+      "ms": 32.1703190000003,
+      "count": 287,
+      "pct": 7.800919510993112,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "vllm::unified_attention_with_output",
+      "ms": 13.260758999999693,
+      "count": 858,
+      "pct": 3.215576246342915,
+      "category": "attention"
+    },
+    {
+      "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_128x2_tn_align8::Params)",
+      "ms": 8.599108999999764,
+      "count": 1227,
+      "pct": 2.085181597834141,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_red_fused_add_marlin_gemm_mul_rms_norm_4",
+      "ms": 4.990884000000495,
+      "count": 1394,
+      "pct": 1.2102299754225891,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_16x16_64x1_tn_align8::Params)",
+      "ms": 4.981361000000623,
+      "count": 1020,
+      "pct": 1.207920761252155,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "aten::copy_",
+      "ms": 4.868985000000633,
+      "count": 2805,
+      "pct": 1.1806709185954105,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "triton_red_fused_add_marlin_gemm_rms_norm_0",
+      "ms": 4.789420999999607,
+      "count": 1428,
+      "pct": 1.161377595455511,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "ampere_s16816gemm_bf16_64x128_ldg8_stages_32x6_tn",
+      "ms": 3.934980999999687,
+      "count": 612,
+      "pct": 0.9541860638150483,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "triton_red_fused_add_rms_norm_2",
+      "ms": 3.803311000000691,
+      "count": 1428,
+      "pct": 0.9222576557689665,
+      "category": "norm"
+    },
+    {
+      "kernel": "triton_poi_fused_gelu_marlin_gemm_mul_slice_1",
+      "ms": 3.6528039999994273,
+      "count": 1428,
+      "pct": 0.8857614993941761,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 256, 1, 8, 8, false, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 3.4834909999999746,
+      "count": 85,
+      "pct": 0.8447051118227477,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void marlin::Marlin<1125899906909960l, 1125899907892224l, 1125899906909960l, 1125899906909960l, 128, 1, 4, 8, false, 4, 2, false>(int4 const*, int4 const*, int4*, int4*, int4 const*, float const*, int4 const*, float const*, int4 const*, int const*, int, int, int, int, int, int*, bool, bool, bool, int)",
+      "ms": 3.1498709999999845,
+      "count": 168,
+      "pct": 0.7638062321051601,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void cutlass::Kernel2<cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_64x1_tn_align8>(cutlass_80_wmma_tensorop_bf16_s161616gemm_bf16_32x32_64x1_tn_align8::Params)",
+      "ms": 3.1482170000000624,
+      "count": 609,
+      "pct": 0.7634051567887924,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void at::native::sbtopk::gatherTopK<c10::BFloat16, unsigned int, 1, false>(at::cuda::detail::TensorInfo<c10::BFloat16 const, unsigned int>, unsigned int, unsigned int, bool, unsigned int, unsigned int, at::cuda::detail::TensorInfo<c10::BFloat16, unsigned int>, unsigned int, at::cuda::detail::TensorInfo<long, unsigned int>, unsigned int, c10::BFloat16*)",
+      "ms": 2.815179999999862,
+      "count": 204,
+      "pct": 0.6826476476330966,
+      "category": "sampling_lmhead"
+    },
+    {
+      "kernel": "triton_poi_fused_gelu_marlin_gemm_mul_3",
+      "ms": 2.7098890000006324,
+      "count": 1428,
+      "pct": 0.6571158331606956,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "Memcpy DtoD (Device -> Device)",
+      "ms": 2.4307370000007342,
+      "count": 1087,
+      "pct": 0.5894247952405576,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "void at::native::vectorized_gather_kernel<16, long>(char*, char*, long*, int, long, long, long, long, bool)",
+      "ms": 2.1437230000003766,
+      "count": 508,
+      "pct": 0.5198273158829253,
+      "category": "elementwise_copy"
+    },
+    {
+      "kernel": "ampere_bf16_s16816gemm_bf16_64x64_ldg8_f2f_stages_64x5_tn",
+      "ms": 2.088167999999496,
+      "count": 204,
+      "pct": 0.5063558895212504,
+      "category": "matmul_gemm"
+    },
+    {
+      "kernel": "void cublasLt::splitKreduce_kernel<32, 16, int, __nv_bfloat16, __nv_bfloat16, float, __nv_bfloat16, false, __nv_bfloat16, __nv_bfloat16, __nv_bfloat16, true, false, false, false>(cublasLt::cublasSplitKParams<float>, __nv_bfloat16 const*, __nv_bfloat16 const*, __nv_bfloat16*, __nv_bfloat16*, float const*, float const*, __nv_bfloat16 const*, __nv_bfloat16 const*, __nv_bfloat16*, void*, long, float*, int*, float*, float*, float const*, float const*, float const*, float const*, float const*)",
+      "ms": 2.0540610000003943,
+      "count": 1224,
+      "pct": 0.4980853479156658,
+      "category": "other"
+    },
+    {
+      "kernel": "triton_poi_fused_6",
+      "ms": 1.4766819999991985,
+      "count": 782,
+      "pct": 0.3580778115792378,
+      "category": "other"
+    },
+    {
+      "kernel": "triton_poi_fused_gelu_mul_slice_1",
+      "ms": 1.4742500000007057,
+      "count": 816,
+      "pct": 0.3574880805218934,
+      "category": "activation"
+    },
+    {
+      "kernel": "aten::index",
+      "ms": 1.4191679999995412,
+      "count": 368,
+      "pct": 0.3441313510311599,
+      "category": "elementwise_copy"
+    }
+  ]
+}
