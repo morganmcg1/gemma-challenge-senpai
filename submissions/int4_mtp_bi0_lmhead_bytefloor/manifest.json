@@ -1,0 +1,25 @@
+{
+  "name": "int4-mtp-bi0-lmhead-bytefloor",
+  "description": "bi0 (int4 W4A16 body + QAT-matched gemma4_assistant MTP drafter, VLLM_BATCH_INVARIANT=0, surgical force-2D TRITON_ATTN patch) with ONE delta vs merged #788: the int4 W4A16 lm_head is pushed to its physical byte-floor. Two levers explored locally: (1) channelwise (--head-group-size -1) drops per-group scales (g32 scales (262144,80) bf16 ~42MB/tok -> channelwise (262144,1) ~0.5MB), ~11% fewer lm_head bytes (3.99x vs g32 3.56x reduction); (2) MSE/clip-aware scales (--observer mse, per-row clip-ratio grid {1.0..0.80} minimising dequant MSE) vs minmax. The int4 body is byte-identical to google/gemma-4-E4B-it-qat-w4a16-ct; embed_tokens stays bf16. Both group_size=-1 and 32 dispatch to Marlin W4A16 on Ampere sm_86 (MARLIN_SUPPORTED_GROUP_SIZES=[-1,32,64,128]). model_id is a LOCAL build path (submissions/int4_mtp_bi0_lmhead_bytefloor/build_lmhead_quant.py); arms are driven per-run via the MODEL_ID env override. Publish to a Hub repo before any HF Job.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "/workspace/gemma_build/lawine_bf_chan_mm",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "VLLM_BATCH_INVARIANT": "0",
+    "DRAFTER_MODEL": "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant",
+    "NUM_SPECULATIVE_TOKENS": "6",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}
