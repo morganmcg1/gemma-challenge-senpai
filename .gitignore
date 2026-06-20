@@ -97,3 +97,10 @@ research/validity/bi0_gpqa_panel/results/_inspect_logs/
 research/validity/bi0_gpqa_panel/*.out
 research/validity/bi0_gpqa_panel/*.pid
 research/validity/bi0_gpqa_panel/*.nohup
+
+# bi0 M=7 CUDA-graph coverage audit (PR #787, analysis-only): keep log_wandb.py
+# (the logger embeds the audit verdict) + the computed *summary.json, drop the
+# bulky raw decode token streams and per-token PPL logprob dumps (TPS/PPL live in
+# the summary JSONs + W&B runs); the serve metrics log is covered by research/**/*.log.
+research/cudagraph_audit/**/decode_outputs.jsonl
+research/cudagraph_audit/**/ppl_results.jsonl
