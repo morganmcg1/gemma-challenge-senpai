@@ -2,6 +2,47 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 13:15Z — PR #785 (wirbel): surgattn 2D-vs-3D overhead check — CLOSED (#779 answered: surgattn load-bearing for greedy identity; +6.69% non-identical → re-gate #791)
+
+- **Student:** wirbel / branch `wirbel/surgattn-overhead-check`
+- **Hypothesis:** Does the TRITON_ATTN 3D split-KV path actually fire at bi0's served KV lengths, or is the surgattn force-2D patch load-free? If load-free, removing it is a free numerics-neutral speedup.
+
+| metric | control (surgattn ON, force-2D) | variant (surgattn OFF, 3D on M=1) | delta |
+|---|---|---|---|
+| local decode TPS | 210.48 | **224.55** | **+6.69%** |
+| greedy identity vs control | reference | **DIVERGENT**: 30/32 recs; 2 diverge (6.25%); 289/16384 tok (1.76%) | breaks identity |
+| PPL (128) | 2.0057 | 2.0057 | identical (red herring — see below) |
+| 128/128 | ✓ | ✓ | — |
+| mean acceptance length | 3.276 | 3.288 | ~equal (NOT an accept-rate effect) |
+
+- **Primary:** local_decode_tps_variant_3d 224.55. **Test:** ppl 2.0057. W&B [`ak4k3wt4`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/ak4k3wt4) (group `bi0-surgattn-overhead`).
+- **`use_3d` gate (output-neutral diag):** TRITON_ATTN (`triton_unified_attention.py` L923-932) forces `use_3d=False` whenever `max_seqlen_q>1`. Measured: only the **M=1** forwards flip 2D→3D in the variant; every M>1 forward (prefill + M=7 verify) is 2D in BOTH arms. **#779 answered: the 3D split-KV path DOES fire at bi0's KV lengths, on the M=1 forwards.**
+- **Verdict:** (1) **surgattn is load-bearing for greedy identity, NOT load-free** — enabling 3D on M=1 changes EMITTED tokens (1.76%), refuting the pre-launch prediction that a drafter-M=1-only flip would be output-neutral. Force-2D design vindicated. (2) **The +6.69% is real-ish, acceptance-neutral, prompt-agnostic — BUT n=1/not noise-certified, EXCEEDS the ~2.6% attn ceiling, and PPL is BLIND to its quality** (prompt_logprobs never exercise the divergent M=1 decode path → both arms 2.0057). Per #784 (byte-identity not the gate; 5%-band is), NOT closed as dead → **re-gated as wirbel #791** (full MMLU-Pro/GSM8K/AIME/GPQA panel on the 3D outputs; quality-first kill-gate). If in-band → fire-worthy +6.69% candidate.
+- bi0 unchanged (close, not merge). `VLLM_SURGATTN` toggle + output-neutral `use_3d` diag kept for future audits.
+
+## 2026-06-20 13:15Z — PR #787 (lawine): CUDA-graph coverage audit (verifier M=7) — CLOSED (terminal NULL: M=7 verify already 100% FULL-captured)
+
+- **Student:** lawine / branch `lawine/cudagraph-coverage-audit`
+- **Hypothesis:** The bi0 MTP K=6 verify pass (M=K+1=7) may run eager / miss CUDA-graph capture (7∉capture_sizes), leaving recoverable per-step launch overhead.
+
+| metric | value | note |
+|---|---|---|
+| local TPS (graph-on) | 218.73 | ≈ official 218.02, no regression |
+| PPL | 2.0053 | ✓ (baseline 2.0058) |
+| 128/128 | ✓ | — |
+| M=7 verify capture | **FULL, 0 paddings, 100%** | 30/30 decode windows, dispatch 178→686, never NONE/PIECEWISE |
+| local TPS (enforce-eager) | 48.99 | ~4.46× slower → graphs active + load-bearing |
+
+- **Primary:** tps_local 218.73. **Test:** ppl 2.0053. W&B graph-on [`28nm4poj`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/28nm4poj), eager [`txgnka2f`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/txgnka2f).
+- **Verdict — REFUTED, clean null:** the M=7 verify pass is ALREADY 100% FULL CUDA-graph-captured. Key reconciliation: `7∉cudagraph_capture_sizes [1,2,4,8]`, BUT vLLM V1 seeds a dedicated FULL graph from `uniform_decode_query_len = 1 + num_spec_tokens = 7` (`gpu_model_runner.py:805` → `initialize_cudagraph_keys`), confirmed by `Profiling CUDA graph memory: FULL=1 (largest=7)`. No missed-capture overhead; no config change warranted. The ~4.46× enforce-eager delta confirms graphs (incl. M=7 FULL) are active + materially beneficial (graphs+compile combined — lower-bound attribution).
+- **Reconciliation flag accepted:** actual graph pool = 0.04 GiB (2 tiny graphs at MAX_NUM_SEQS=1/K=6), not the card's 0.43 GiB.
+- **★ Cross-pollination → stark #789:** census shows `cudagraph_capture_sizes=[1,2,4,8]` → a **size-1 graph EXISTS**. stark's open Q (do the 6× M=1 DRAFTER proposer passes dispatch to it, or run eager?) is the complement of this closed verifier axis — relayed to #789. bi0 pristine (diag opt-in/logging-only, uncommitted). → **verifier CUDA-graph-coverage axis CLOSED.**
+
+## 2026-06-20 13:15Z — PR #783 (denken): MTP draft-acceptance tuning — CLOSED (no result; pod wedged → reassigned to lawine #792 + escalated #790)
+
+- **Student:** denken / branch `denken/bi0-mtp-accept` (never picked up).
+- **Event, not a result:** denken's pod stayed wedged on the stale serve branch `denken/fire-bi0-surgattn-guarded` — zero student commits on the assignment branch, no W&B run, no pickup ~50 min after an explicit checkout nudge (12:25Z). Heartbeat unreliable fleet-wide (branch-mismatch + zero-commits is the real tell). **Escalated the pod to the operator (issue #790, cross-ref #780, likely the same setsid-detached-engine root cause).** **Reassigned the MTP-draft-acceptance hypothesis to lawine #792** (healthy pod) so the top-2-headroom acceptance lever keeps moving. denken gets a fresh card on pod restart. bi0 untouched.
+
 ## 2026-06-20 12:35Z — PR #786 (stark): MTP drafter GEMM format (is the bf16 drafter BW-inefficient?) — CLOSED (terminal NULL; drafter-weight-quant axis dead two ways)
 
 - **Student:** stark / branch `stark/drafter-gemm-format`
