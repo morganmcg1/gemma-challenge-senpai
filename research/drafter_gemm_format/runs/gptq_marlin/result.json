@@ -1,0 +1,119 @@
+{
+  "label": "gptq_marlin",
+  "submission": "/workspace/senpai/target/submissions/int4_mtp_bi0_surgattn",
+  "spec_quant": "gptq_marlin",
+  "num_prompts": 16,
+  "output_len": 256,
+  "utc": "2026-06-20T11:54:38Z",
+  "extra_env": {
+    "STEPTIME": "1",
+    "STEPTIME_WARMUP_SKIP": "32",
+    "STEPTIME_RAW_START": "32",
+    "STEPTIME_RAW_COUNT": "2000",
+    "STEPTIME_REPORT_EVERY": "100000",
+    "DISABLE_LOG_STATS": "0",
+    "VLLM_USE_FLASHINFER_SAMPLER": "0",
+    "SPECULATIVE_QUANTIZATION": "gptq_marlin"
+  },
+  "startup_s": 115.04886865615845,
+  "served_model_name": "gemma-4-e4b-it",
+  "tps_probe": {
+    "decode_tps_single_stream": 505.14928044812,
+    "naive_tps": 464.04446908802845,
+    "ttft_s_approx": 0.04686999320983887,
+    "decode_tokens": 256,
+    "wall_1tok_s": 0.04686999320983887,
+    "wall_ntok_s": 0.5516712665557861,
+    "note": "exploratory A10G single-stream probe; not the official a10g-small TPS"
+  },
+  "decode_summary": {
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/eval_prompts_sharegpt.json",
+    "duration_s": 19.452351331710815,
+    "num_completion_tokens": 4096,
+    "num_prompt_tokens": 3863,
+    "num_records": 16,
+    "output_file": "/workspace/senpai/target/research/drafter_gemm_format/runs/gptq_marlin/decode_outputs.jsonl",
+    "output_len": 256,
+    "request_timeout_s": 180,
+    "required_request_field": "return_token_ids: true",
+    "required_response_field": "choices[0].token_ids",
+    "seed": 1,
+    "token_id_sources": {
+      "choices[0].token_ids": 16
+    },
+    "token_ids_required": true,
+    "tokenizer": "google/gemma-4-E4B-it"
+  },
+  "decode_wall_s": 28.758964776992798,
+  "spec_metrics": {
+    "num_drafts": 1320.0,
+    "num_accepted_tokens": 3054.0,
+    "num_draft_tokens": 7920.0,
+    "e_accept_mean_acceptance_length": 3.3136363636363635,
+    "draft_acceptance_rate": 0.3856060606060606
+  },
+  "server_started": true,
+  "steptime": {
+    "raw_exec_steps": 1343,
+    "raw_draft_steps": 1325,
+    "exec": {
+      "gap": {
+        "n": 1343,
+        "mean": 13.042180193596426,
+        "p50": 6.644,
+        "p90": 6.801
+      },
+      "cpu": {
+        "n": 1343,
+        "mean": 7.771619508562919,
+        "p50": 7.581,
+        "p90": 8.68
+      },
+      "gpu": {
+        "n": 1343,
+        "mean": 12.04564705882353,
+        "p50": 11.746,
+        "p90": 12.405
+      },
+      "dgpu": {
+        "n": 1343,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p90": 0.0
+      }
+    },
+    "draft": {
+      "cpu": {
+        "n": 1325,
+        "mean": 5.563540377358491,
+        "p50": 5.517,
+        "p90": 5.631
+      },
+      "gpu": {
+        "n": 1325,
+        "mean": 2.42163320754717,
+        "p50": 2.409,
+        "p90": 2.791
+      }
+    },
+    "stat": "p50_steady_state",
+    "verify_gpu_ms": 11.746,
+    "drafter_gpu_ms": 2.409,
+    "host_gap_ms": 6.644,
+    "exec_cpu_ms": 7.581,
+    "verify_gpu_ms_mean": 12.04564705882353,
+    "drafter_gpu_ms_mean": 2.42163320754717,
+    "host_gap_ms_mean": 13.042180193596426,
+    "exec_cpu_ms_mean": 7.771619508562919,
+    "host_gap_outliers_gt3x": 6
+  },
+  "verify_gpu_ms": 11.746,
+  "drafter_gpu_ms": 2.409,
+  "drafter_over_verify_ratio": 0.20509109484079685,
+  "drafter_frac_of_gpu_busy": 0.17018721299894027,
+  "greedy_verdict": "GREEDY_IDENTICAL",
+  "greedy_num_identical": 16,
+  "greedy_num_divergent": 0,
+  "greedy_total_divergent_tokens": 0,
+  "wandb_run_id": null
+}

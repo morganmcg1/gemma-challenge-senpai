@@ -1,0 +1,54 @@
+diff --git a/submissions/int4_mtp_bi0_surgattn/serve.py b/submissions/int4_mtp_bi0_surgattn/serve.py
+index cc96073..d780cd6 100644
+--- a/submissions/int4_mtp_bi0_surgattn/serve.py
++++ b/submissions/int4_mtp_bi0_surgattn/serve.py
+@@ -85,6 +85,12 @@ def main() -> None:
+     num_spec = int(os.environ.get("NUM_SPECULATIVE_TOKENS", "6") or "0")
+     num_spec = reference_mode_num_spec(num_spec)
+     spec_method = os.environ.get("SPECULATIVE_METHOD")  # optional override
++    # Optional drafter quantization (PR #786 diagnostic). Unset for the shipped
++    # submission, so vLLM infers the drafter format from its checkpoint (the
++    # q4_0-unquantized-assistant is dense bf16). Set e.g.
++    # SPECULATIVE_QUANTIZATION=fp8 to dynamically quantize the bf16 drafter body,
++    # or gptq_marlin/awq_marlin to attempt loading a pre-quantized drafter.
++    spec_quant = os.environ.get("SPECULATIVE_QUANTIZATION") or None
+ 
+     args = [
+         sys.executable,
+@@ -126,6 +132,8 @@ def main() -> None:
+         }
+         if spec_method:
+             spec_config["method"] = spec_method
++        if spec_quant:
++            spec_config["quantization"] = spec_quant
+         args += ["--speculative-config", json.dumps(spec_config)]
+ 
+     if os.environ.get("ENFORCE_EAGER", "0") == "1":
+diff --git a/submissions/int4_mtp_bi0_surgattn/sitecustomize.py b/submissions/int4_mtp_bi0_surgattn/sitecustomize.py
+index f251aa7..97f76b8 100644
+--- a/submissions/int4_mtp_bi0_surgattn/sitecustomize.py
++++ b/submissions/int4_mtp_bi0_surgattn/sitecustomize.py
+@@ -99,6 +99,23 @@ _install_hook(
+     _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
+ )
+ 
++# PR #786 diagnostic: env-gated per-step timeline probe (drafter propose vs verify
++# execute_model GPU time). Self-registers its own meta-path finders on import and
++# is a byte-verbatim no-op unless STEPTIME=1, so the shipped serving path is
++# untouched. Imported here (not via PYTHONPATH sitecustomize) because serve.py
++# prepends this submission dir first, so this is the sitecustomize that loads.
++if os.environ.get("STEPTIME") == "1":
++    try:
++        if _HERE not in sys.path:
++            sys.path.insert(0, _HERE)
++        import steptime_patch  # noqa: F401  (self-registers on import)
++    except Exception:
++        import logging
++
++        logging.getLogger("int4_mtp_drafter.steptime").exception(
++            "failed to load STEPTIME probe"
++        )
++
+ # --- Output-neutral prometheus _IncludedRouter / missing-`.path` startup-500 guard ---
+ # vLLM 0.22.0 floors ``fastapi>=0.115`` and ``prometheus-fastapi-instrumentator>=7.0.0``
+ # by lower bound only. A fresh runner resolve pulls ``fastapi>=0.118`` / ``starlette>=1``,
