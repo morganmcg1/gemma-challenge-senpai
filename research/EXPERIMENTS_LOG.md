@@ -2,6 +2,45 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 16:02Z — PR #802 (ubel): int4head FIRE BLOCKER — publish int4 g32 → private Hub + repoint MODEL_ID + serve-verify-from-Hub — MERGED (✅ pre-fire packaging GREEN; fire now 1 step from ready)
+
+- **Student:** ubel / branch `ubel/int4head-publish-hub-repoint`
+- **Task (not an experiment — the single fire blocker):** `manifest.model_id` was a LOCAL build path and `serve.py:67` defaults `MODEL_ID` to the **bf16-head body** `google/gemma-4-E4B-it-qat-w4a16-ct` → a fire today would silently serve the WRONG model. Publish the int4head g32 build to a (private) Hub repo, repoint the manifest, and prove a clean-env serve-from-Hub reproduces the validity contract.
+- **Result — GREEN, all gates pass:**
+
+| check | result |
+|---|---|
+| Hub repo (PRIVATE) | `gemma-challenge/gemma-4-e4b-it-int4-mtp-bi0-int4head` @ rev `ad42984507e18772c79457853f3dbf308b1dcbce` |
+| manifest repoint | `env.MODEL_ID` + top-level `model_id` → Hub repo (no longer bf16-head default); all other env unchanged |
+| serve-FROM-HUB (local build deleted) | loads from Hub snapshot; Marlin W4A16 g32 head + MTP K=6 drafter; ready 170s |
+| PPL | **2.00267** (≤ 2.42 ✓) |
+| completed | **128/128** ✓ |
+| modalities | **all-4 loaded** (text/image/audio/video) ✓ |
+| prometheus guard | **ACTIVE** (0× HTTP 500, 262× HTTP 200) ✓ |
+| `official_gate` | **PASS** ✓ |
+
+- **Primary:** `official_gate = PASS`, PPL 2.00267. W&B [`nidx5trn`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/nidx5trn) (group `bi0-int4head-firestage`). **Independently verified all 7 axes via wandb-query — zero discrepancies.** Diff is manifest-only.
+- **Verdict — MERGED (5abc889).** The repointed manifest is on the advisor branch; a fire now serves the correct int4head model from the Hub. `greedy_verdict=NO_REFERENCE` is expected (no reference for the new Hub model_id; greedy-identity is land #801 scope + NOT an official gate). **xet deduped the byte-identical int4 body (only ~378 MB new uploaded) → confirms the body is byte-identical to the official w4a16-ct.** Pre-fire technical gate is now **1 of 2 GREEN** (publish ✅; remaining = land #801 greedy-identity + private-gap). Posted publish-half-GREEN progress on **#800** (issuecomment-4758908039). Fire still held for human `approved` per #784. ubel reassigned to **#805** (PLE-input-gate de-quant — productionize stark's +5.3% lever).
+
+## 2026-06-20 16:01Z — PR #798 (stark): post-int4head decode RE-PROFILE — MERGED as evidence (body-MLP is the kernel WALL; ★ fresh PLE-dequant +5.3% lever surfaced; acceptance path confirmed exhausted)
+
+- **Student:** stark / branch `stark/post-int4head-reprofile`
+- **Hypothesis:** with lm_head now 0.378 GB/tok (int4head), re-run the #781 per-token attribution — what is the new dominant cost, and does a rung-3 kernel lever exist or is the decode now acceptance-bound?
+- **Result — body-MLP verify-GEMM is the new wall + ONE fresh lever:**
+
+| component | pre-int4head ms (%) | int4head ms (%) |
+|---|--:|--:|
+| MTP drafter (propose K=6) | 2.48 (17.3) | 2.48 (20.0) |
+| **body verify-GEMM** | 5.92 (41.2) | **5.92 (47.6) ← dominant** |
+| lm_head GEMV | 2.68 (18.7) | **0.75 (6.0)** |
+| verify non-GEMM (attn/norms/RoPE/KV/sampling) | 3.28 (22.8) | 3.28 (26.4) |
+| **cycle (GPU)** | **14.35 (TPS 219.34)** | **12.42 (TPS 256.74)** |
+
+- **Body MLP is the Marlin 1-wave wall:** gate_up+down = 68% of body @ 74–79% HBM BW (~95% of achievable), **M-flat (M=7 = 0.993× M=1)** → no kernel headroom; fewer body bytes is quality-dead (#710). lm_head saving **~100% realized** (+15.5–16.4% reconstructed vs +17.0% measured — none hidden, as expected for a serial conc=1 cycle).
+- **★ FRESH LEVER (the valuable surprise):** `per_layer_input_gate` (2560→256, ×42) runs **int4-Marlin 3.6× SLOWER than bf16** (20.8 µs vs 5.8 µs — tiny-N=256 tile starvation, 3% peak BW). De-quant JUST that layer to bf16 → **+5.3% (256.74→270.4 local), quality-NEUTRAL** (bf16 ⊃ int4). The ONLY 1 of 11 body shapes where int4 loses (sibling `per_layer_projection` N=2560 still wins, int4/bf16=0.90×). W&B [`tgdo0imp`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/tgdo0imp).
+- **Method:** value-independent synthetic-weight Marlin microbench (exact serving kernel path `apply_gptq_marlin_linear → ops.marlin_gemm`, shapes from cached safetensors header reproducing the 2.234 GB/forward body budget exactly) — stark's pod is disk-constrained (~7.4 GB free, can't stage the 11.5 GB model), so a served re-profile wasn't possible; the microbench is faithful for conc=1 timing. W&B [`dpc36210`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/dpc36210).
+- **Verdict — MERGED as evidence archive** (banks `research/bi0_int4head_reprofile/` harness). Rung-3 picture: **kernel side is nearly exhausted** — body MLP is walled, lm_head done, acceptance frontier CLOSED (depth #774 + runtime #792 + topology #799 — stark's suggested acceptance follow-up referenced #799, which closed RED). The two remaining kernel slivers: **PLE-dequant (+5.3%, → ubel #805 productionizes)** + the unattributed non-GEMM 3.28 ms (→ stark #806 splits it). stark reassigned to **#806** (non-GEMM verify attribution).
+
 ## 2026-06-20 15:44Z — PR #771 (kanna): loopgraph + fused-sparse-argmax drafter micro-levers — CLOSED (stale pod + loopgraph NULL; fused-argmax +1.95% @ ~1.8σ byte-EXACT but marginal/unconfirmed, PRESERVED as a free post-fire micro-lever)
 
 - **Student:** kanna / branch `kanna/bi0-loopgraph-sparseargmax`
