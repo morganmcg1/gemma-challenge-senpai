@@ -94,10 +94,31 @@ _install_hook(
     "vllm.v1.worker.gpu_model_runner",
     _make_applier("vllm_attn_group_patch", "attention-group num_heads patch"),
 )
-_install_hook(
-    "vllm.v1.attention.backends.triton_attn",
-    _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
-)
+# surgattn force-2D toggle (PR #785 overhead check). Default ON: force the 2D
+# single-pass path so the M=1 decode and M=K verify forwards stay byte-exact
+# (greedy identity). Set VLLM_SURGATTN=0 to NOT install the patch and let the
+# TRITON_ATTN kernel's own launch gate pick 3D split-KV vs 2D single-pass at the
+# served KV lengths -- the one variable this experiment toggles.
+if os.environ.get("VLLM_SURGATTN", "1") != "0":
+    _install_hook(
+        "vllm.v1.attention.backends.triton_attn",
+        _make_applier("vllm_force2d_attn_patch", "force-2D attention patch"),
+    )
+else:
+    print(
+        "[int4_mtp_force2d] VLLM_SURGATTN=0: force-2D patch DISABLED; "
+        "TRITON_ATTN launch gate selects 3D split-KV vs 2D single-pass",
+        file=sys.stderr,
+        flush=True,
+    )
+    # PR #785: opt-in, output-neutral confirmation that the 3D branch actually
+    # fires at bi0's served KV lengths. Only meaningful with the force-2D patch
+    # off (above). Pass-through wrapper -> does not change numerics or TPS.
+    if os.environ.get("VLLM_SURGATTN_DIAG", "0") == "1":
+        _install_hook(
+            "vllm.v1.attention.backends.triton_attn",
+            _make_applier("vllm_force2d_attn_diag", "use_3d confirmation diag"),
+        )
 
 # --- Output-neutral prometheus _IncludedRouter / missing-`.path` startup-500 guard ---
 # vLLM 0.22.0 floors ``fastapi>=0.115`` and ``prometheus-fastapi-instrumentator>=7.0.0``
