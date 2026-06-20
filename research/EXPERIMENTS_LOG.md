@@ -2,6 +2,35 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 15:10Z — PR #799 (land): Tree/EAGLE multi-candidate drafter feasibility — CLOSED RED (vLLM 0.22 spec-decode is single-linear-chain only for gemma4_mtp; ★ acceptance frontier DEFINITIVELY CLOSED: depth #774 + runtime #792 + topology #799 all dead)
+
+- **Student:** land / branch `land/tree-eagle-drafter-feasibility`
+- **Hypothesis:** Tree/EAGLE-style multi-candidate (branching) drafting could raise per-step acceptance beyond the linear-chain K=6 frontier (#774's knee) by verifying several candidate continuations in parallel — the only remaining acceptance lever after depth (#774) and runtime knob (#792) were tuned out.
+- **Result: RED — not servable on vLLM 0.22 for `gemma4_mtp`.** Four independent code-level blockers (exact citations):
+  - `SpeculativeConfig.num_speculative_tokens` is a scalar `int` (`vllm/config/speculative.py:80`) — no `tree_choices`/topology field exists to express a branch structure.
+  - `rejection_sample()` hard-asserts `draft_token_ids.ndim == 1` (`rejection_sampler.py:413`) — verify path is linear-chain by construction.
+  - Gemma4Proposer / EagleProposer / MedusaProposer all emit a linear `[batch, K]` chain; no tree-attention verify kernel exists in the wheel.
+  - EAGLE is separate-weight, not the shared-KV `gemma4_mtp` head we ship — even the AMBER fork is a retrain epic, not a config flip.
+- **Proof:** CPU static dry-run confirms config-validation rejects both a non-scalar `num_speculative_tokens` and a `tree_choices` kwarg. W&B [`x76anf6u`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/x76anf6u).
+- **Verdict — RED, lane closed (AMBER-only-if-forked, gated behind a from-scratch tree-attention kernel + drafter retrain, far below current ROI).** ★ **STRATEGIC:** with acceptance DEPTH (#774 K-sweep null), acceptance RUNTIME (#792 CENTROID_TOP_K null), and now acceptance TOPOLOGY (#799 tree RED) all dead, **the entire speculative-acceptance frontier is closed on vLLM 0.22.** Team redirects fully to **weight-byte levers** (int4head lineage #788/#795/#797, lm_head byte-floor #796, body group-size) + the surgattn quality-gate (#791). land reassigned to **#801** (int4head fire-validity pre-flight — within-job greedy-identity + private-gap, on the critical path to the >250 submission). bi0 unchanged. Closed without merge — RED feasibility, lower-value than banking; the four citations + dry-run are preserved in this log + PR #799.
+
+## 2026-06-20 14:58Z — PR #795 (ubel): int4head fire-prep quality panel — PASS / FIRE-WORTHY ALL AXES (merged as evidence archive; → opened HF approval issue #800)
+
+- **Student:** ubel / branch `ubel/bi0-int4head-firegate-panel`
+- **Hypothesis:** Before requesting HF quota for the int4head fire, prove int4head clears every Morgan quality floor at fire-worthy statistical confidence (not just GSM8K + PPL) — GPQA-Diamond, MMLU-Pro, AIME greedy + sampled — and at parity-or-above the shipped bi0.
+
+| axis | int4head | floor (Morgan) | shipped bi0 | verdict |
+|---|---|---|---|---|
+| GPQA-Diamond (pooled 990) | **0.5030** (498/990, Wilson95 [0.4719,0.5341]) | ≥ 0.471 | 0.4970 | PASS (≥ floor AND ≥ bi0; thinnest margin +0.006) |
+| MMLU-Pro (n=250 @4096) | **0.6920** (@2048 like-for-like 0.6040) | ≥ 0.572 | 0.644 | PASS |
+| AIME greedy maj@1 (n=30) | **9/30 = 0.300** | ≥ 0.090 | 10/30 | PASS (3.3× floor) |
+| AIME sampled maj@8 (n=30) | **12/30 = 0.400** | — | 10/30 | ≥ bi0 |
+| GSM8K | **0.9150** | ≥ 0.807 | 0.867 | PASS |
+
+- **Primary:** `fire_worthy = true`, `all_axes_present = true`. W&B [`57izwrp6`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/57izwrp6) (group `bi0-int4head-firegate`). int4head model W&B [`9tcygwjf`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/9tcygwjf), local 256.74 TPS / PPL 2.0029.
+- **Self-correction credited:** ubel caught the aggregator's over-strict per-seed-min clause (would have failed the shipped bi0 control itself, min seed 0.4697) and corrected to a pooled-Wilson decision — the right statistical call.
+- **Verdict — int4head is FIRE-WORTHY on every axis, at parity-or-above shipped bi0.** Squash-merged as a reusable **evidence archive** (`research/validity/int4head_firegate_panel/`: aggregator, run scripts, `firegate_summary.json`, per-seed results) — the fire-prep panel every future candidate needs; precedent #773. Opened HF approval issue **#800** (the path to the >250 submission). Fire gated on: #800 human `approved` + ubel #802 (publish/repoint — serve.py:67 defaults to bf16-head body) + land #801 (within-job greedy-identity + private-gap). ubel reassigned to **#802**.
+
 ## 2026-06-20 14:52Z — PR #794 (stark): Byte-identical split-KV — CLOSED (clean null: the surgattn +5.35% IS the parallel KV-reduction reassociation; no precision/order knob keeps the speedup; → wirbel #791 sole decider)
 
 - **Student:** stark / branch `stark/bi0-surgattn-attrib-combine`
