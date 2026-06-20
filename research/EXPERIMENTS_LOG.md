@@ -2,6 +2,31 @@
 
 > **★★ 2026-06-15 ~11:00Z — GOVERNING REVERSAL (human, issue #319, 10:56:17Z):** *"No, ignore #124, we want to ensure we stick with the strict greedy token matching."* → **STRICT byte-exact greedy-token-identity is the LIVE LAUNCH CONTRACT; PPL-only is DEAD as a launch premise.** All entries below dated before this that frame >500 as a "PPL-only coverage retrain" (#343/#346/#347 and the cycle-52z lineage) are SUPERSEDED. The strict frontier today is 165.44 (lawine #196); EAGLE-3 spec is strict-capped 473.5<500 (#332, kernel-independent per #349); strict >500 is a ~3× genuinely-new-method gap whose only live levers are (a) sub-int4 body quant + (b) sub-saturation verify. See CURRENT_RESEARCH_STATE.md Cycle-53.
 
+## 2026-06-20 15:44Z — PR #771 (kanna): loopgraph + fused-sparse-argmax drafter micro-levers — CLOSED (stale pod + loopgraph NULL; fused-argmax +1.95% @ ~1.8σ byte-EXACT but marginal/unconfirmed, PRESERVED as a free post-fire micro-lever)
+
+- **Student:** kanna / branch `kanna/bi0-loopgraph-sparseargmax`
+- **Hypothesis:** Two cheap drafter-side micro-optimizations on the bi0 MTP K=6 loop: (a) capture the whole proposer loop in one CUDA graph (loopgraph) to cut per-step launch overhead, and (b) replace the dense top-1 argmax in the drafter head with a fused sparse-argmax kernel.
+- **Result — split:** **loopgraph half = confirmed NULL** (+0.037%, inside noise) — whole-loop graph capture is **hard-disabled** at `llm_base_proposer.py:380`, so the path silently no-ops; not recoverable without a vLLM-internal change. **fused-sparse-argmax half = +1.95% @ ~1.8σ, byte-EXACT** (greedy-identity preserved) — a real but **marginal/unconfirmed** signal (N=3, needs N≥5 to clear 2σ) and **dwarfed** by int4head (+17%) / stack (+24%).
+- **Proof:** W&B [`wjeykst8`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/wjeykst8) (loopgraph) + [`xn7opsy8`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/xn7opsy8) (fused-argmax).
+- **Verdict — CLOSED (stale + low-ROI), finding PRESERVED.** kanna's pod is stuck (last commit 13:04Z predates my 13:23Z send-back; tree CONFLICTING/dirty; no response — known kanna liveness pattern, [[project-kanna-pod-liveness]]; stays DOWN per #784, not reassigned). loopgraph is structurally dead; fused-sparse-argmax's **+1.95% byte-exact is logged here as a free micro-lever to revisit *after* the primary int4head/stack fire lands** (if a tiny quality-free top-up is ever wanted). Not merged (marginal + unconfirmed + the loopgraph half is dead surface). bi0/int4head/stack candidates unchanged.
+
+## 2026-06-20 15:43Z — PR #796 (lawine): lm_head byte-floor → TPS — CLOSED (clean NULL: byte-floor does NOT buy TPS; channelwise W4 DOES serve on Ampere; weight-MSE ≠ logit-MSE)
+
+- **Student:** lawine / branch `lawine/bi0-lmhead-bytefloor`
+- **Hypothesis:** int4head's win is bandwidth (lm_head GEMV 1.342→0.378 GB/tok); pushing the lm_head to its byte-floor — channelwise W4 (group_size = −1, dropping ~41 MB of per-group scale tensors) or a tighter g32 calibration — should squeeze further TPS beyond int4head's 256.74.
+- **Result — byte-floor → TPS REFUTED (clean NULL).** All 4 arms speed-neutral (255.5–256.3 TPS, all ≤ the int4head control 256.74):
+
+| arm | lm_head quant | TPS | vs control 256.74 | PPL |
+|---|---|---|---|---|
+| A | channelwise minmax (g=−1) | 256.3 | −0.2% | 2.0030 |
+| B | channelwise + outlier-clip | 255.9 | −0.3% | 2.0031 |
+| C | g32 MSE-optimal calib | 255.5 | −0.5% | **2.0044 (RAISED)** |
+| D | g64 | 256.1 | −0.2% | 2.0033 |
+
+- **Why null:** the ~41 MB scale-tensor saving is **< 2% of per-token traffic** and is **amortized across the M=7 MTP verify batch** (the lm_head fires once per accepted token, not per draft) → no measurable decode-TPS movement. **Two durable insights:** (1) **channelwise W4 (g=−1) DOES serve on Ampere** (Marlin `CompressedTensorsWNA16` accepts it — earlier "g=−1 unservable" worry RETIRED); (2) **weight-MSE ≠ logit-MSE** — arm C had the best *weight* fidelity yet *raised* PPL, because logit error is what matters, not Frobenius weight error.
+- **Proof:** W&B [`kxkdixob`](https://wandb.ai/wandb-applied-ai-team/gemma-challenge-senpai/runs/kxkdixob) (group `bi0-lmhead-bytefloor`, `analysis_only=1, fires=0`).
+- **Verdict — CLOSED, lever DEAD, insights PRESERVED.** Not merged (4 dead config surfaces; no submission worth banking — none beat int4head). The lm_head byte-floor is exhausted: g32 (#788) is the quality/speed sweet spot, finer/coarser both no-op or hurt. Best arm A (channelwise) = −11% lm_head bytes at quality-equal, but **only matters if VRAM-bound — we're not** (18.4 of 20.7 GiB used). lawine reassigned to **#804** (STACK private-stability pre-flight — is surgattn-3D's +5.98% prompt-agnostic?). int4head/stack candidates unchanged.
+
 ## 2026-06-20 15:40Z — PR #797 (fern): int4head × surgattn-3D STACK — MERGED (rung-2 candidate; the two biggest levers COMPOUND, 89.4% retention; 272.78 local, gated on wirbel #791 quality)
 
 - **Student:** fern / branch `fern/bi0-int4head-surgattn-stack`
