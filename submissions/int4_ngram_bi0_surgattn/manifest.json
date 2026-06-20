@@ -1,0 +1,27 @@
+{
+  "name": "int4-ngram-bi0-surgattn",
+  "description": "bi0 (int4_mtp_bi0_surgattn) serving stack with the MTP draft model swapped for vLLM's ngram / prompt-lookup speculative proposer. int4 W4A16 Gemma-4-E4B target + VLLM_BATCH_INVARIANT=0 fast kernels + surgical force-2D verify-attention patch are copied verbatim from bi0, so the only isolated variable vs the bi0 control is the drafter (PR #782). The ngram cache is rebuilt per request from that request's own decoded text (no model forward, no public-prompt hardcoding), so it is private-prompt-stable.",
+  "dependencies": [
+    "vllm==0.22.0",
+    "transformers==5.9.0"
+  ],
+  "model_id": "google/gemma-4-E4B-it-qat-w4a16-ct",
+  "served_model_name": "gemma-4-e4b-it",
+  "port": 8000,
+  "serve": [
+    "python",
+    "serve.py"
+  ],
+  "env": {
+    "VLLM_BATCH_INVARIANT": "0",
+    "SPECULATIVE_METHOD": "ngram",
+    "NUM_SPECULATIVE_TOKENS": "5",
+    "PROMPT_LOOKUP_MAX": "3",
+    "PROMPT_LOOKUP_MIN": "2",
+    "MAX_MODEL_LEN": "4096",
+    "GPU_MEMORY_UTILIZATION": "0.90",
+    "MAX_NUM_BATCHED_TOKENS": "512",
+    "MAX_NUM_SEQS": "1",
+    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"
+  }
+}
