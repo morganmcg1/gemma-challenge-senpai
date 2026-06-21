@@ -106,3 +106,14 @@ research/validity/bi0_gpqa_panel/*.nohup
 research/validity/int4head_firegate_panel/results/_inspect_logs/
 research/validity/int4head_firegate_panel/*.out
 research/validity/int4head_firegate_panel/*.pid
+
+# ctk CENTROID_TOP_K DOWN-sweep (PR #824, config-only profiling): keep the sweep
+# orchestrator + wandb logger, the per-arm arm.json, sweep_partial.json,
+# ctk_sweep_results.json, and smoke_result.json; drop the bulky raw decode/PPL
+# jsonl, the serve log (covered by research/**/*.log), and transient pid/start markers.
+research/ctk_down_draftcost/sweep/**/decode_rep*.jsonl
+research/ctk_down_draftcost/sweep/**/ppl.jsonl
+research/ctk_down_draftcost/smoke/**/decode.jsonl
+research/ctk_down_draftcost/smoke/**/ppl.jsonl
+research/ctk_down_draftcost/*.pid
+research/ctk_down_draftcost/*.start
