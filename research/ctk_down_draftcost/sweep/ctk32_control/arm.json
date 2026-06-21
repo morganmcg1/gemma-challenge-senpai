@@ -1,0 +1,156 @@
+{
+  "label": "ctk32_control",
+  "ctk_requested": 32,
+  "num_prompts": 128,
+  "output_len": 512,
+  "K": 6,
+  "reps": [
+    {
+      "rep": 1,
+      "num_records": 128,
+      "num_completion_tokens": 65536,
+      "duration_s": 256.1216928958893,
+      "wall_s_outer": 264.3189959526062,
+      "wall_tps": 255.87836492490965
+    },
+    {
+      "rep": 2,
+      "num_records": 128,
+      "num_completion_tokens": 65536,
+      "duration_s": 254.50833225250244,
+      "wall_s_outer": 262.8262529373169,
+      "wall_tps": 257.5004103794155
+    },
+    {
+      "rep": 3,
+      "num_records": 128,
+      "num_completion_tokens": 65536,
+      "duration_s": 254.85187435150146,
+      "wall_s_outer": 263.2173590660095,
+      "wall_tps": 257.15329803543153
+    }
+  ],
+  "centroid_top_k_logged": 32,
+  "active_tokens_logged": 4096,
+  "spec_metrics": {
+    "num_drafts": 58112.0,
+    "num_accepted_tokens": 138821.0,
+    "num_draft_tokens": 348672.0,
+    "e_accept_mean_acceptance_length": 3.3888525605726874,
+    "draft_acceptance_rate": 0.3981420934287812
+  },
+  "per_position_accepted": {
+    "0": 41018.0,
+    "1": 29936.0,
+    "2": 23081.0,
+    "3": 18149.0,
+    "4": 14764.0,
+    "5": 11873.0
+  },
+  "ppl": {
+    "base_url": "http://127.0.0.1:8000",
+    "dataset_path": "/workspace/senpai/target/official/main_bucket/shared_resources/speed_benchmark/data/ppl_ground_truth_tokens.jsonl",
+    "mean_record_ppl": 2.1563245118958765,
+    "model": "gemma-4-e4b-it",
+    "neg_log_likelihood": 42915.2194420109,
+    "num_records": 128,
+    "num_tokens": 61797,
+    "output_file": "/workspace/senpai/target/research/ctk_down_draftcost/sweep/ctk32_control/ppl.jsonl",
+    "ppl": 2.0026168252615046,
+    "prompt_logprobs": 1
+  },
+  "steptime": {
+    "raw_exec_steps": 4000,
+    "raw_draft_steps": 3968,
+    "exec": {
+      "gap": {
+        "n": 4000,
+        "mean": 6.47927825,
+        "p50": 6.412,
+        "p90": 6.489
+      },
+      "cpu": {
+        "n": 4000,
+        "mean": 6.381275,
+        "p50": 6.575,
+        "p90": 7.075
+      },
+      "gpu": {
+        "n": 4000,
+        "mean": 10.15696325,
+        "p50": 10.184,
+        "p90": 10.48
+      },
+      "dgpu": {
+        "n": 4000,
+        "mean": 0.0,
+        "p50": 0.0,
+        "p90": 0.0
+      }
+    },
+    "draft": {
+      "cpu": {
+        "n": 3968,
+        "mean": 5.32128125,
+        "p50": 5.303,
+        "p90": 5.362
+      },
+      "gpu": {
+        "n": 3968,
+        "mean": 2.591024445564516,
+        "p50": 2.682,
+        "p90": 2.885
+      }
+    },
+    "stat": "p50_steady_state",
+    "verify_gpu_ms": 10.184,
+    "drafter_gpu_ms": 2.682,
+    "host_gap_ms": 6.412,
+    "exec_cpu_ms": 6.575,
+    "verify_gpu_ms_mean": 10.15696325,
+    "drafter_gpu_ms_mean": 2.591024445564516,
+    "host_gap_ms_mean": 6.47927825,
+    "exec_cpu_ms_mean": 6.381275,
+    "host_gap_outliers_gt3x": 5
+  },
+  "spec_log": {
+    "intervals": 80,
+    "num_speculative_tokens": 6,
+    "total_accepted_tokens": 138821,
+    "total_drafted_tokens": 348672,
+    "e_accept_interval_mean": 3.4105,
+    "steady_gen_tps_mean": 242.78148148148148,
+    "steady_gen_tps_n": 81,
+    "e_accept_exact": 3.3888525605726874,
+    "draft_acceptance_rate": 0.3981420934287812
+  },
+  "steady_gen_tps_stats": {
+    "n": 81,
+    "mean": 242.78148148148148,
+    "std": 52.88474799641877,
+    "min": 4.6,
+    "max": 295.6,
+    "cv_pct": 21.78285908534281
+  },
+  "drafter_gpu_ms": 2.682,
+  "verify_gpu_ms": 10.184,
+  "e_accept": 3.3888525605726874,
+  "steady_gen_tps_mean": 242.78148148148148,
+  "wall_tps_stats": {
+    "n": 3,
+    "mean": 256.84402444658554,
+    "std": 0.6973738732745945,
+    "min": 255.87836492490965,
+    "max": 257.5004103794155,
+    "cv_pct": 0.27151648740016676
+  },
+  "per_position_accept_rate": {
+    "pos1": 0.7058438876651982,
+    "pos2": 0.5151431718061674,
+    "pos3": 0.3971813050660793,
+    "pos4": 0.3123107103524229,
+    "pos5": 0.2540611233480176,
+    "pos6": 0.20431236233480177
+  },
+  "num_drafts": 58112.0
+}

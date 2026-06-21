@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -147,6 +148,61 @@ def maybe_quant_lmhead_at_startup(model_id: str) -> str:
     return out_dir
 
 
+def maybe_override_centroid_top_k(drafter_model: str) -> str:
+    """Config-only drafter override: rewrite the MTP drafter's
+    ``centroid_intermediate_top_k`` (ctk) WITHOUT touching weights or kernels.
+
+    ctk controls the masked-embedding draft head's per-step candidate gather. The
+    proposer scores ``num_centroids`` (2048) centroids, keeps the top ``ctk``, and
+    gathers only ``ctk * vocab_size_per_centroid`` (= ctk*128) token rows from the
+    bf16 draft lm_head per draft step (``Gemma4MTPMaskedEmbedder``). Lowering ctk
+    cuts that per-step gather/GEMV cost (the drafter is ~20% of the int4head decode
+    cycle) at the risk of a weaker draft -> lower E_accept. This is the lever the
+    ctk DOWN-sweep (#824) probes; ctk is read once at MTP construction and baked
+    into the centroids CUDA graphs, so a config rewrite is the whole mechanism.
+
+    Unset ``CENTROID_TOP_K`` -> NO-OP: returns ``drafter_model`` unchanged, i.e. the
+    stock drafter, byte-identical to the shipped submission (mirrors the
+    OFF-by-default contract of the other knobs in this file). When set, we
+    materialize a lightweight *overlay* drafter dir: every file in the drafter
+    snapshot is symlinked through (no weight copy -> negligible disk) and only
+    ``config.json`` is rewritten with the new ctk. vLLM loads the overlay as a
+    local model dir. ``CENTROID_TOP_K_OUT`` overrides the overlay location
+    (default ``/tmp/drafter_ctk<ctk>``).
+    """
+    ctk_env = os.environ.get("CENTROID_TOP_K")
+    if not ctk_env:
+        return drafter_model
+    ctk = int(ctk_env)
+    if os.path.isdir(drafter_model):
+        src = drafter_model
+    else:
+        from huggingface_hub import snapshot_download
+
+        src = snapshot_download(drafter_model)
+    out_dir = os.environ.get("CENTROID_TOP_K_OUT", f"/tmp/drafter_ctk{ctk}")
+    os.makedirs(out_dir, exist_ok=True)
+    for fn in sorted(os.listdir(src)):
+        real = os.path.realpath(os.path.join(src, fn))
+        dst = os.path.join(out_dir, fn)
+        if os.path.islink(dst) or os.path.isfile(dst):
+            os.remove(dst)
+        elif os.path.isdir(dst):
+            shutil.rmtree(dst)
+        if fn == "config.json":
+            cfg = json.loads(Path(real).read_text())
+            cfg["centroid_intermediate_top_k"] = ctk
+            Path(dst).write_text(json.dumps(cfg, indent=2))
+        else:
+            os.symlink(real, dst)
+    print(
+        f"[serve] CENTROID_TOP_K={ctk}: overlay drafter -> {out_dir} "
+        f"(num_selected={ctk * 128} rows/step; unset -> stock shipped drafter)",
+        flush=True,
+    )
+    return out_dir
+
+
 def main() -> None:
     model_id = os.environ.get("MODEL_ID", "google/gemma-4-E4B-it-qat-w4a16-ct")
     model_id = maybe_quant_lmhead_at_startup(model_id)
@@ -167,6 +223,7 @@ def main() -> None:
     drafter_model = os.environ.get(
         "DRAFTER_MODEL", "google/gemma-4-E4B-it-qat-q4_0-unquantized-assistant"
     )
+    drafter_model = maybe_override_centroid_top_k(drafter_model)
     num_spec = int(os.environ.get("NUM_SPECULATIVE_TOKENS", "6") or "0")
     num_spec = reference_mode_num_spec(num_spec)
     spec_method = os.environ.get("SPECULATIVE_METHOD")  # optional override

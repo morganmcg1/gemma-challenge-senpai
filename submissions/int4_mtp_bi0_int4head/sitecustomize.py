@@ -146,3 +146,18 @@ except Exception:
     _logging.getLogger("int4_mtp_drafter.prometheus_guard").exception(
         "failed to apply prometheus _IncludedRouter route-name guard"
     )
+
+# --- PROFILING-ONLY per-step timeline probe (STEPTIME=1) ---
+# Gated by STEPTIME=1. Default OFF -> not imported -> the shipped serving path is
+# byte-for-byte unchanged (same OFF-by-default contract as the REJECTRANK_ENABLE
+# probe above). When ON, steptime_patch installs its own composing meta-path
+# finders that wrap GPUModelRunner.execute_model (verify, kind=exec) and
+# Gemma4Proposer.propose (drafter, kind=draft) with CUDA-event pairs, emitting
+# `[steptime] raw ...` lines to stdout. It writes no files and alters no served
+# output (events bracket the python call boundary, outside any CUDA-graph
+# capture). This isolates drafter_gpu_ms vs verify_gpu_ms the way #786/#798 did —
+# the per-step quantity the ctk DOWN-sweep (#824) measures.
+if os.environ.get("STEPTIME", "0") == "1":
+    if _HERE not in sys.path:
+        sys.path.insert(0, _HERE)
+    import steptime_patch  # noqa: E402,F401
